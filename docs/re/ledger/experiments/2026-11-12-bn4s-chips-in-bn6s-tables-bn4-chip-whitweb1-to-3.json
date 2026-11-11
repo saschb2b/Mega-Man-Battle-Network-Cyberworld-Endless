@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_whitweb1 to 3: BN4's WhitWeb moved, three chips on one block",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the webs (the third kind's 0x3D, moved) in play in the fight's frames throughout, a 140 HP Mettaur on each row left 100 in both. Five mutations caught (a row's power, WhitWeb2 given WhitWeb1's routine, WhitWeb3's entry's row, the web's dispatch number, its sound).",
+  "meaning": "A moved object that lives across fight frames compares field for field; several chips can share one moved block by their own entries."
+}

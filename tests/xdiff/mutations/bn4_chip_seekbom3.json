@@ -1,0 +1,10 @@
+[
+ {
+  "name": "SeekBom3's row's subfamily another",
+  "spec": "bn4_chip_seekbom3",
+  "poke": [
+   "08C0672C:03:1"
+  ],
+  "what": "the registry's record of BN4's SeekBom3 (600) with subfamily 3, Binder's, whose entry of the unit's copy of the bombs' table is BN6's null routine: no bomb thrown"
+ }
+]

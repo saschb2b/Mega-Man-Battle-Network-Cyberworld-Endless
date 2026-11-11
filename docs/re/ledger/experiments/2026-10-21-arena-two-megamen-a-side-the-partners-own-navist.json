@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-21",
+  "name": "Two MegaMen a side: the partners' own NaviStats and hands",
+  "result": "With BN6's battle NaviStats routine (0x08013682) and hand routine (0x08010018) answered by object for asks that pass the object in r5, each partner reads and writes his own record and hand, kept in two effect slots taken in BN6's pool (0x02036710): given 150 max HP both partners are set up with 150 while their leads keep 100, hits take each from his own; each partner uses the Cannon of his own hand (his chip up next 0 to 1, his lead's staying at 0, the icon leaving him alone), side 1's taking side 0's from 84 to 43; both GBAs agree at all 2,399 iterations, with 221 rollbacks and without them all 44 hashes the same, arenaroll=8 335 of 335 the same; the records on one GBA alone part them from iteration 1.",
+  "meaning": "BN6's one NaviStats and one hand a side are answered by object without touching its code, the room taken from BN6's own object pool, since the RAM the project has free holds one record.",
+  "link": "../online/arena/two-a-side/navistats.md"
+}

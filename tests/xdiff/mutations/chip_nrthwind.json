@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a moved chip's subfamily in its record",
+  "spec": "chip_nrthwind",
+  "poke": [
+   "08C04E98:3E:1"
+  ],
+  "what": "NrthWind's record (457) naming support entry 0x3E (the stub) where the install gives it 0x3F"
+ },
+ {
+  "name": "a moved support routine's object type, NrthWind's",
+  "spec": "chip_nrthwind",
+  "what": "NrthWind's wind spawned as BN5's fourth kind's 0x38 (movs r0,#0x39 at BN5's 0x080E4940, written at its copy) where BN5's own 0x39 runs, moved",
+  "poke5": [
+   "080E4940:2038"
+  ]
+ }
+]

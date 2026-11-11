@@ -1,0 +1,10 @@
+[
+ {
+  "name": "RockCube's cube of another kind",
+  "spec": "bn4_chip_rockcube",
+  "poke": [
+   "08C018A4:00:1"
+  ],
+  "what": "BN6's RockCube's record (143) with its first parameter 0 where it holds 1, the cube's kind: a cube of 1 HP where BN4's RockCube sets one of 200"
+ }
+]

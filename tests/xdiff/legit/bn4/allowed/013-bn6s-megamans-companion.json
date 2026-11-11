@@ -1,0 +1,7 @@
+{
+ "name": "BN6's MegaMan's companion",
+ "whose": "megaman",
+ "kind": "T4",
+ "type": "0x08",
+ "why": "BN6's player init spawns a fourth-kind 0x08 for MegaMan and keeps it at his AI data +0x58 (0x080173CA-0x080173CE: r7 his AI data + 0x58, bl 0x080E223E: movs r0,#8; the fourth kind's spawn; its +0x4C him; str r0,[r7]); BN4's twin of that spawner (0x080E28EC: movs r0,#8, the same spawn and owner, no AI data store) has no BL calling it, and BN4's MegaMan's AI data +0x58 stays 0: the object, its place in the run order and the pointer to it are BN6's alone"
+}

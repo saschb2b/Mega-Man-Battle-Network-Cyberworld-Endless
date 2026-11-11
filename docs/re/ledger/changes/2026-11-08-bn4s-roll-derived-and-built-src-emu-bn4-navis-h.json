@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "BN4's Roll derived and built (src/emu/bn4_navis.h: BN4_ROLL to BN4_T3_02_KINDS; docs/rom/bn4.md, Roll derived): her summon's shim (src/emu/xnavi_init.c, xvirus_shim_summon), her flash moved, her player-22 sounds on BN6's player 9."
+}

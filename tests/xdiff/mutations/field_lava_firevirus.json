@@ -1,0 +1,10 @@
+[
+ {
+  "name": "lava's count not hooked",
+  "spec": "field_lava_firevirus",
+  "poke": [
+   "0800C3B8:2809"
+  ],
+  "what": "BN6's own cmp r0,#9 back over the hook in the per-panel update (BN6_PANEL_UPDATE_CONVEYOR): lava's timer written 0x708 each frame, never counted down, never running out"
+ }
+]

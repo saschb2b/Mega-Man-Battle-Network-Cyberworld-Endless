@@ -1,0 +1,9 @@
+{
+ "name": "the family's object +0 bit 0x04, which BN6's generic state 1 keeps",
+ "whose": "family",
+ "part": "obj",
+ "offset": "0x00",
+ "bit": "0x04",
+ "direction": "BN6 has it, BN4 not",
+ "why": "The bit the object runner runs a paused object by (BN4 0x0800314C at 0x08003174, BN6 0x080031AC at 0x080031D8: tst r4,#4 while the pause byte is set), set on every first-kind object as it spawns (both games' kind 1 descriptors' flags byte 0x19, BN4 0x08003268, BN6 0x080032D0, then 0x17 once it appears). BN4's generic state 1 clears it (0x0801013A: ldrb r0,[r5]; movs r1,#4; bics r0,r1; strb r0,[r5]), as it hands a virus its first own state during the paused opening, so the virus waits for the fight; BN6's (0x080165B8) does not, BN6's state runner never running a state while paused (0x0801B21A, the family's timeline above). The same engine difference as the lag: BN6's own Mettaur keeps 0x04 too (0x17 at t1 against BN4's Mettaur's 0x13, game=bn4:bn6, foes=01@52)"
+}

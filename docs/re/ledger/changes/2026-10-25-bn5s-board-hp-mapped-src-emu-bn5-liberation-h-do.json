@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "BN5's board HP mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the units' HP +0x14, max +0x16 and shown +0x18 (stepped 4 a frame toward it, 0x080533D8), the digits under the team (0x080533A0, not the Navi in play) and the enemies (0x0805341A) drawn by 0x08053482 (OBJ tile 664 + 2d, palette 14, centred, 8 apart, their top at the unit's place); a fought unit's HP and max for its battle's marked enemy (0x08053B9E from 0x08006862) and its HP back as the battle ends (0x08009050, 0x08053BF4); the Darkloid's heal 0x080560AC / 0x08053D04 (max / 10 per dark panel round him by 0x08050334's weights, 20 frames' wait), its effect list 7's 120 in palette 2 (0x08300268); a rest's heal 0x08053CBE (max / 10 times 2-5 by flags 0x300-0x308)"
+}

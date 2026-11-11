@@ -1,0 +1,7 @@
+{
+ "bn4": "0xBF",
+ "bn6": "0x1DB",
+ "clock": "state",
+ "what": "PanlSht's shot's sound 0xBF, its copy",
+ "why": "Played by the panel shot's object as it flies off (BN4's third-kind 0x7B, moved with PanlSht's unit: movs r0,#0xbf at 0x080DCBEA, its bl to PlaySoundEffect at 0x080DCBEC; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DB and goes on to BN6's), a state's: BN4's song 0xBF copied into slot 0x1DB of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS), on BN4's player 9. JunkMan's 0xBF (above, his battles' alone) is the same BN4 song in his pool's slot. bn4_chip_panlsht1 at t34 in BN4's and t35 in BN6's"
+}

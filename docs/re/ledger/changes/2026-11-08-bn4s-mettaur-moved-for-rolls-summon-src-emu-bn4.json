@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "BN4's Mettaur moved for Roll's summon (src/emu/bn4_battle.h BN4_QUEUE_*, bn6_families.h BN6_QUEUE_*; docs/rom/bn4.md, Mettaur moved for Roll's summon): mettaur4_v1 PASSes, Roll's summon map points at its ids, roll_v1 still FAIL at t1008 on the summoned appear."
+}

@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Counter2's row's power another",
+  "spec": "bn4_chip_counter2",
+  "poke": [
+   "08C061BA:0046"
+  ],
+  "what": "the registry's record of BN4's Counter2 (568) with power 70, Counter1's, where BN4's record holds 110: the Mettaur left 70 HP where BN4's hit leaves it 30"
+ }
+]

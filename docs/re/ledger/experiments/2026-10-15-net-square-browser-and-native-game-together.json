@@ -1,0 +1,8 @@
+{
+  "feature": "Net Square",
+  "date": "2026-10-15",
+  "name": "Browser and native game together",
+  "result": "Both built the same room; 578 browser and 592 native peer positions matched.",
+  "meaning": "The browser build can share a Square with the native ones.",
+  "link": "../online/overview.md"
+}

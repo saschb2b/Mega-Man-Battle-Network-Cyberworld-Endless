@@ -1,0 +1,18 @@
+{
+ "name": "Roll SP's flash's spawn's r4 where her turn began hidden, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x17",
+  "word": "0x04",
+  "bn4": [
+   "raw",
+   17
+  ],
+  "bn6": [
+   "T1:0x383#0",
+   "ai",
+   0
+  ]
+ },
+ "why": "As Roll's flash's spawn's r4 where her turn began hidden, each game's leftover (above), her SP's (BN6's NameID 0x383): the same spawner and states copied with her, whatever her version, so +4 holds what r4 held as each game's state runner called the state, BN4's 0x11 and BN6's her AI data's address; no code of the flash reads its +4 to +7 (above)"
+}

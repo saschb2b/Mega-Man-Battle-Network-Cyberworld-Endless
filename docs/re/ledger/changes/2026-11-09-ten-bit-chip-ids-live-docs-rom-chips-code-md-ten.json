@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "Ten-bit chip ids live (docs/rom/chips-code.md, Ten-bit chip ids: BN6_CHIP_NAME_OF, BN6_CHIP_DESC_OF, BN6_PACK_MARK_STORE, BN6_PACK_MARK_TEST in bn6_chips.h; docs/engine/saves.md: RUN_MAGIC CWED)."
+}

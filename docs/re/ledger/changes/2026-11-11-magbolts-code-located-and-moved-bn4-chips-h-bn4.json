@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "MagBolt's code located and moved (bn4_chips.h BN4_MAGBOLT_STATE 0x080EE012, BN4_T3_BOLT 0x75 with BN4_BOLT_SPAWN 0x080DBD72 and BN4_BOLT_HIT_BITS 0x080DBCD2; docs/rom/bn4.md), and a pushed object in a virus's runner read in both games: BN4 runs its slide before it takes a struck-and-pushed status (BN4_RUNNER_SLIDE 0x08013E3C, BN4_RUNNER_STRUCK 0x08013E68), BN6 the status first, past the slide's step (BN6_RUNNER_STRUCK 0x0801B2A8, BN6_RUNNER_SLIDE 0x0801B2EC); state 5's step stored at +0x0B (BN4_STRUCK_STEP 0x08010610)."
+}

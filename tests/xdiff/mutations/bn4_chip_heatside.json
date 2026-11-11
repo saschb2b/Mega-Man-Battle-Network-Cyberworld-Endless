@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the heat arm's kind another",
+  "spec": "bn4_chip_heatside",
+  "poke": [
+   "080EC815:0E:1"
+  ],
+  "what": "the spread state's copy's arm kinds by subfamily (BN4 0x080EC814) with subfamily 1's 0x0E, the bubble arm, where BN4's holds 6: his arm another kind's"
+ }
+]

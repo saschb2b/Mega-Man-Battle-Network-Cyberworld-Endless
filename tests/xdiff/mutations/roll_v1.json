@@ -1,0 +1,82 @@
+[
+ {
+  "name": "Roll's CurAction off by one",
+  "spec": "roll_v1",
+  "poke": [
+   "080BC210:200C"
+  ],
+  "what": "her decision's set of CurAction 9 (BN4 0x080BC210: movs r0,#9 before BN4_SET_ACTION, the recipe's BN6's 0xB) written 0xC: her warp (MegaMan's state 46) left for another state (caught at t1, her CurAction)"
+ },
+ {
+  "name": "Roll's AI block at BN4's place",
+  "spec": "roll_v1",
+  "poke": [
+   "080BC1C8:3664"
+  ],
+  "what": "her decision's pointer to her own block (BN4 0x080BC1C8: adds r6,#0x64, the recipe's BN6's +0x80, AI_BLOCKS) left at BN4's +0x64: her decision's sub-states written into BN6's AI data where no Navi's block is (caught at t1, her AI data's +0x6C)"
+ },
+ {
+  "name": "Roll's flash's sound at another pool slot",
+  "spec": "roll_v1",
+  "poke": [
+   "080EFC7E:2033"
+  ],
+  "what": "her warp's sound 0x96 (BN4 0x080EFC7E: movs r0,#0x96, the recipe's pool slot 0x32) made the pool's second slot, 0x33: her summon's sound where BN4 plays her flash's (caught at t67, the family's sounds)"
+ },
+ {
+  "name": "Roll's flash's effect another",
+  "spec": "roll_v1",
+  "poke": [
+   "080E3ABE:349B"
+  ],
+  "what": "her flash's effect (the fourth kind's 0x17 moved with her, BN4 0x080E3ABE: adds r4,#0x2e after lsls #8, the recipe's moved effect 0x9E) made BN6's 0x9B: another effect where her flash sparkles (caught at t66, the flash's effect)"
+ },
+ {
+  "name": "Roll's attack's sprite at BN4's list",
+  "spec": "roll_v1",
+  "poke": [
+   "080CD540:0C:1"
+  ],
+  "what": "the third kind's 0x02's kinds' table (BN4 0x080CD524, bn4_twins.TABLES) at her kind 7: its sprite's list offset (BN4 0x080CD540, 0x0C, list 3, the recipe's list 4, tools/xnavirecipe_bn4_objects.py list_tables) left at BN4's: her MegaMan's state 44's object drawn from BN6's list 3 at the copy's number (caught at t195, its object's sprite)"
+ },
+ {
+  "name": "Roll's player-22 sound on BN6's hit player",
+  "spec": "roll_v1",
+  "poke": [
+   "0815A264:00160016:4"
+  ],
+  "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its music players, ms and me), where her install put her sound 0x131 on BN6's player 9 (tools/xnavirecipe_bn4.py song_player, XvSong.player), made BN4's player 22, which BN6 keeps for its hit sound 0x6B alone: her attack's sound cut where MegaMan is struck (caught at t204, the family's sounds)"
+ },
+ {
+  "name": "Roll's shot of another kind",
+  "spec": "roll_v1",
+  "poke": [
+   "080BC300:07:1"
+  ],
+  "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9, copied with her as raw data; tools/xnavirecipe_bn4_objects.py KINDS_BY_VERSION) V1's made 7: her decision gives MegaMan's state 45 V2's shot (caught at t385, her AI data's +0xAC)"
+ },
+ {
+  "name": "Roll's summoned Mettaur arriving as BN6's",
+  "spec": "roll_v1",
+  "poke": [
+   "0800FCCE:2802"
+  ],
+  "what": "the summoned Mettaur's copied generic state 0's test of +5 (BN4 0x0800FCCE: cmp r0,#1 before 0x0801002A's bl) made cmp r0,#2: the summon's +5 2 sent to BN4's 0x0800FF26, paired with BN6's own appear of an enemy spawned into a fight (0x080164A0) where BN4's summoned appear runs (caught at t1008, its +0, +0xA and +0x20)"
+ },
+ {
+  "name": "Roll's summoned Mettaur falling another way",
+  "spec": "roll_v1",
+  "poke": [
+   "080100B4:3804"
+  ],
+  "what": "BN4's summoned appear's fall (0x080100B4: subs r0,#8 on its +0x3E, copied with Mettaur) made 4 a frame: the summoned Mettaur drawn higher as it falls in (caught at t1008, its +0x3E)"
+ },
+ {
+  "name": "Roll's summoned Mettaur never its turn",
+  "spec": "roll_v1",
+  "call": [
+   "0800AA06:0810A952"
+  ],
+  "what": "the summoned Mettaur's test of the appear queue's head (BN6_QUEUE_HEAD through its r0 shim) aimed at BN6's family nullsub: once it has appeared it never heads the queue (caught at t1060, its +7, CurAction and +0x20)"
+ }
+]

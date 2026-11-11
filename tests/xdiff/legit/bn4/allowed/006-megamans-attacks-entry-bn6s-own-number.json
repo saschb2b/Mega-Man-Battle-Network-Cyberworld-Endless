@@ -1,0 +1,13 @@
+{
+ "name": "MegaMan's attack's entry, BN6's own number",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0xBC",
+  "0xBC"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's setAttack has six entries (0x08011680 to 0x08011694, each movs r2,#n for n 0 to 5) that fall into one body (0x08011698), which sets the object's CurAction and phase word, zeroes the attack variables' first halfword and stores the entry's number at their +0x1C (strb r2,[r1,#0x1c] at 0x080116A6, r1 the AI data + 0xA0: AI data +0xBC). BN4's is one entry (0x0800C9AC: the same stores at the object's +9 and +0xA and the variables' first halfword, its AI data + 0x70, then mov pc,lr) and keeps no number. A chip's attack is BN6's entry 2 (0x08011688): 2 in BN6 from t33 as Cannon begins, 0 in BN4 (bn4_chip_cannon; the other 35 bytes of the variables the same in both through the chip). BN6's own; where BN4's byte there held anything it is compared as ever."
+}

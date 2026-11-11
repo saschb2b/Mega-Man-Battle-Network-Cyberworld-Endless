@@ -1,9 +1,9 @@
 ---
 type: Process
 title: "Reverse-engineering work"
-description: "How the reverse-engineering work is tracked: `ledger.json` written out by `tools/re_status.py` as STATUS.md and the dashboard, where ROM facts and claims live instead, the BN6 Gregar target's SHA-1, and the skill's provenance."
+description: "How the reverse-engineering work is tracked: the ledger (`ledger/`, a file an entry) written out by `tools/re_status.py` as STATUS.md and the dashboard, where ROM facts and claims live instead, the BN6 Gregar target's SHA-1, and the skill's provenance."
 tags: [re]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 ---
 # Reverse-engineering work
 
@@ -16,8 +16,22 @@ experiment with what it means.
 
 ## Updating the status
 
-[ledger.json](ledger.json) is the one source: a branch edits it and
-nothing else here. `tools/re_status.py` checks it and writes
+The ledger, [ledger/](ledger/ledger.json), is the one source, and a
+branch edits nothing else here. It is a folder with a file an entry
+([Merging in parallel](../project/merging.md#registries)), so that two
+branches' entries never meet:
+
+| In `docs/re/ledger/` | What | A new one |
+| --- | --- | --- |
+| `features/NNN-name.json` | A feature: `name`, `state`, `now`, `left`, `updated`, `link`; the page's rows in the files' order | The next number and its name |
+| `changes/DATE-words.json` | A change: `date`, `what` | A new file, named by its date and a few of its words |
+| `experiments/DATE-feature-name.json` | An experiment: `feature`, `date`, `name`, `result`, `meaning`, `link` | A new file, named by its date, feature and name |
+| `ledger.json` | The rest: the project, decisions, the method, the glossary | Edited in place |
+
+A feature that moved is edited in its own file. The page's "updated" is
+the newest date any entry carries and its "since the last update" the
+latest day's changes: no file holds a date every branch would write.
+`tools/re_status.py` checks the ledger and writes
 [state.json](state.json) (what the dashboard reads), STATUS.md, and the
 dashboard itself: the skill's page
 (`.claude/skills/reverse-engineering/assets/dashboard.html`) with the

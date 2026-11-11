@@ -1,0 +1,21 @@
+{
+ "name": "a chip's muzzle flash's place",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T1"
+ ],
+ "types": [
+  "0x00"
+ ],
+ "offsets": [
+  "0x34-0x4B"
+ ],
+ "why": "A chip's muzzle flash (the first kind's type 5, BN5's own code in both: the chips' helper's copy, tools/xchiprecipe.py, HELPERS) stands at MegaMan's arm, at the point its table's entry names (its byte 4: MrkCan's 0x12), an offset each game takes from its own arm-point records by his NameID (BN5 0x08015140, BN6 0x08018810: the pair's audit, tools/bn5_twins.py), his frames each game's own (the mask 'MegaMan's own sprite'): his presentation, the flash's code BN5's.",
+ "evidence": [
+  "its point: BN5 0x080B9C02-0x080B9C1A (its entry's byte 4, then 0x08015140 by his +0x28, into its +0x40 and +0x48); each frame 0x080B9C26-0x080B9C44 its place his +0x34-0x3F plus those",
+  "chip_mrkcan1: the flash 0x2C's place 7 pixels apart from t76, its point's offset (+0x40, +0x48) apart with it"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-22",
+  "name": "Two MegaMen a side: a partner's own Custom screen, BN6's own",
+  "result": "A lone core loaded from his side's GBA at a Custom screen shows Lan's 'Communication error' within frames; a plain copy of the pair (both GBAs on their own cable, no hook) copied in each turn, his deck written into BN6_BATTLE_DECK and BN6_BATTLE_STEP put back to 0, has BN6 set its Custom screen up anew with his chips (BusterUp, Sword, Cannon, Atk+10, MiniBomb where his lead's offers a Cannon A first) and take his keys by its own rules; OK takes BN6_CUSTOM_MODE to 0x08 with his picks read (3 and 4). His picks crossed as pick messages in his stream and went into his hand on both GBAs at the same iteration: 1,315 iterations 0 apart with 135 rollbacks and with none, all 26 hashes the same; arenaroll=8 200 of 200 the same, its 26 hashes the delay alone's; his hand a chip short on the second GBA alone parts them from iteration 201. A frame of his screen 1.37 to 1.41 ms, a turn's copy 0.12 to 0.15 ms, making it once 160 ms. The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
+  "meaning": "A partner needs no GBA of his own in the pair: BN6's own Custom screen runs on his client alone, and the battle stays deterministic because only his picks cross.",
+  "link": "../online/arena/two-a-side/custom-screen.md"
+}

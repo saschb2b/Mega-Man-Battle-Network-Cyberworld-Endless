@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-22",
+  "name": "Two MegaMen a side: a partner's Beast Out, its turns as a lead's",
+  "result": "Gregar's emblem commits a Beast Out into the same record as CROSSSELECT (0x08029344: form 0xB), so a partner's crosses as his Cross does. BN6 counts a form's turns for each side's player alone (0x08015A16 as each screen opens, 0x08015A38 as the crossing controller is done) and asks a Beast Out's end for the controller's records alone (0x080159C6, 0x08015994, mode 8's wait 0x08014A00): the two counts' ends hooked and their bodies entered again with his object, the end asked from the turn check's end by calling BN6's routines back to the hook. Control: the leads taking Beast Out by the same keys, each lead and his partner in form 0xB with the same BeastOutCounter at every turn's check (3, 2 at iteration 1084, 1 at 1897). 2,173 iterations 0 apart, 52 hashes the same with 261 rollbacks and with none; arenaroll=8 396 of 396 the same; none on the second GBA parts them from iteration 1; the leads too: 2,902 iterations 0 apart, 104 hashes the same with 524 rollbacks and without. With all four in Beast Out under the delay alone (arenawindow=0, and arenaroll=8 over it) the GBAs part at iteration 2305 of 2,375, the partners' keys 46 iterations late: the same with the partners' turn hooks off, so the GBAs drift past the rings' delay.",
+  "meaning": "A partner's Beast Out is BN6's own, his turns counted by BN6's routines run for him; the rings' delay meets its first limit in a lead's Beast Out under the stall.",
+  "link": "../online/arena/two-a-side/cross.md"
+}

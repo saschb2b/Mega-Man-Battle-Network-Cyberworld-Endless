@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "Each Liberation Mission's own look mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): group 0x86's GFXAnim lists while a mission is on 0x08073E70 (BN5_LIB_MISSION_ANIMS), the board's colours each loads over its map's to 0x03003980, 0x180 bytes (missions 1-5 0x08614DD4 by script 0x08073AA0, 6-9 0x08615100 by 0x08073D10), the BGAnimData records while a mission is on 0x0807416C (BN5_LIB_MISSION_BACKDROPS: five backdrops); BN5_LIB_PALETTE's 0x08614DB4 replaced by the loader's own source; the nine maps' shared tile set 0x085A7DE4"
+}

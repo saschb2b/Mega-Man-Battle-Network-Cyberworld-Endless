@@ -1,0 +1,13 @@
+{
+ "name": "BN6's Elec tally of a hit, its freeze's",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "coll",
+ "offsets": [
+  "0x78",
+  "0x79"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's own bookkeeping for its freeze, which BN4 has none of: BN6's hit pass (its image 0x081D78F6-0x081D7904) adds the attack's damage (+0x2E) to the struck's +0x78 where the attack's element (+2) is 3, Elec, before its damage by element (BN6_COLL_HIT_DAMAGES, +0x82 + 2 * element: 0x081D7906-0x081D7910), and the frame's step adds +0x78 to the Elec hit damage (+0x88) while the struck's +6 is 8 (0x0801A8E0-0x0801A8F6: an Elec hit on a frozen one counts twice). BN4's hit pass (0x08012C74-0x08012C82) has the damage by element alone (BN4_COLL_HIT_DAMAGES, +0x2A + 2 * element), no test of the element 3 and no store of a tally. thunderman_v1 at t278 (BN4) and t279 (BN6): his 0x70's Elec hit, 0x32 at BN6's +0x78 alone, the damage by element the same in both (+0x88 and +0x9A, BN4's +0x30 and +0x42); MegaMan's HP the same in all 1200 fight frames. Guarded: those two bytes, BN6's side holding something and BN4's 0, every other field compared"
+}

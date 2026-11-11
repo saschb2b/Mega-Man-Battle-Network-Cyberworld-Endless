@@ -1,0 +1,18 @@
+[
+ {
+  "name": "Roll V2's summon list's first id another",
+  "spec": "roll_v2",
+  "poke": [
+   "080BC3EB:01:1"
+  ],
+  "what": "her V2's summon list (BN4_ROLL_SUMMONS' second pointer, BN4 0x080BC3EA: 2, then 0x02 and 0x0E, copied with her as raw data) its first id 0x02 made 0x01: her decision picks Mettaur V1 where BN4's picks Mettaur2 (caught at t963, her AI data's +0xAC, the id picked)"
+ },
+ {
+  "name": "Roll V2's shot of V1's kind",
+  "spec": "roll_v2",
+  "poke": [
+   "080BC301:06:1"
+  ],
+  "what": "her shot's kind by version (BN4 0x080BC300, BN4_ROLL_SHOT_KINDS: 6, 7, 8, 9) V2's 7 made 6: her decision gives MegaMan's state 45 V1's shot (caught at t380, her AI data's +0xAC)"
+ }
+]

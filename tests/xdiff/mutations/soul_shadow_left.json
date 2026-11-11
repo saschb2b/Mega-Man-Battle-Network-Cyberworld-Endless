@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a counter's first frame left to the next",
+  "spec": "soul_shadow_left",
+  "poke": [
+   "08C81A54:46C046C0:4"
+  ],
+  "what": "the Souls' Thumb for BN5's counter start (SOUL_STUB_COUNTER) calls BN6's twin and not the family's first frame (its second bl two nops), as BN6's twin alone does: the counter a frame later than BN5's"
+ }
+]

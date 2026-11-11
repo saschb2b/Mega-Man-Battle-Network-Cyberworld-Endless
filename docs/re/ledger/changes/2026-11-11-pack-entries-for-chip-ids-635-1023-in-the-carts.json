@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "Pack entries for chip ids 635-1023 in the cart's save RAM (docs/rom/chips-code.md, The pack in the save RAM: BN6_PACK_SAVE_FIRST, BN6_PACK_SAVE_END, BN6_PACK_SAVE_MARK, BN6_PACK_SAVE_MARKED, BN6_PACK_SAVE, BN6_SAVE_RAM, BN6_SAVE_MAIN, BN6_SAVE_BLOCK_1-3, BN6_SAVE_READ, BN6_SAVE_WRITE, BN6_SAVE_VERIFY, BN6_PACK_STAMP_SET, _GET, _CLEAR, BN6_PACK_STAMP_NEXT, bn6_pack_holds in bn6_chips.h; SRAM_PACK in free_space.plan's save zone); src/emu/xchips_pack.c; CYBERWORLD_RAM_WATCH and tools/ram_survey.py --watch (docs/devtools/ram-survey.md)."
+}

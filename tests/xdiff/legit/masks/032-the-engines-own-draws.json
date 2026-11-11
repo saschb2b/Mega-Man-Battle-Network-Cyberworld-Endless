@@ -1,0 +1,9 @@
+{
+ "name": "the engine's own draws",
+ "part": "draw",
+ "when": "engine draw",
+ "why": "Under rng=replay a draw one game's engine makes and the other's does not has no twin to be replayed from: each is named in legit.json's rng, only, by its game and its caller's range, with both games' routines; neither is the family's (a draw its code led to is never masked). The next draw the replay matches writes the words alike again.",
+ "evidence": [
+  "legit.json, rng, only: each draw's routines in both games"
+ ]
+}

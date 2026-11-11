@@ -1,0 +1,10 @@
+{
+ "name": "the engine's draws while the battle's clock holds",
+ "part": "rng",
+ "when": "held clock",
+ "why": "Both games draw three random numbers each frame whatever the battle does (rng, per_frame: the game state's GetRNG and GetRNGSecondary, the main loop's GetRNGSecondary), the battle's clock (its timer) still or not. Where it holds for a number of frames each game's own, each game's words step as many times more as it had frames more, and the first traced frame after shows them apart; rng=follow writes BN6's from BN5's after it. Two holds differ: a turn's change opened with L takes BN6 four frames more than BN5 (three as it begins: BN6 runs its turn's form check before its Custom screen, 0x0800840C calling 0x0801483C, which BN5 skips in a battle not linked, 0x0800773C through 0x0802D510; one more as the turn starts after it, 52 frames against 53); and a Soul's unison is BN5's own crossing, longer than the proxy's (the summon behind it HeatMan's, src/emu/soulproxy.c) by 6 frames, until the Souls track's S3 brings BN5's image. The engine's, not the Soul's: held only where every other draw since the last traced frame is the same in number in both and each word is the other's stepped by exactly the per-frame draws one game made more.",
+ "evidence": [
+  "soul_knight, the frames of each hold (src/dev/xdiff.c's trace and the cores' frames): at t523 BN5 2 frames of the fight's phase then 52 of the Custom screen's closed window, BN6 5 and 53 (the Custom screen itself the same, 37 frames); at t0 BN5 194 frames, BN6 188 (the unison against the proxy's crossing)",
+  "BN6 0x0800840C (the turn's step before the Custom screen): the packets copied (0x080147E4), the form check (0x0801483C: a pending form or Beast Out's end, 0x0801486C), Beast Out's counter (0x08015A38); BN5 0x0800773C: bl 0x0802D510, bne past its check, in a battle that is not linked"
+ ]
+}

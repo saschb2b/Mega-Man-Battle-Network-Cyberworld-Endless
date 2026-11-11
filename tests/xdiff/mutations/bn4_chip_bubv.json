@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the bubble shot's height another",
+  "spec": "bn4_chip_bubv",
+  "poke": [
+   "080EC81E:10:1"
+  ],
+  "what": "the spread state's copy's shot heights by subfamily (BN4 0x080EC81C) with subfamily 2's 0x10 where BN4's holds 0: the bubble shot made 16 higher"
+ }
+]
