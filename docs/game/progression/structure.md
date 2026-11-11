@@ -3,7 +3,7 @@ type: Design
 title: "The structure"
 description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, the battle floor, growth, risk the player chooses, the Cybeast, later cycles."
 tags: [game, progression]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
 ---
 
 # The structure
@@ -200,7 +200,10 @@ What scaling means here, measured on both games' data:
   battle in four takes a virus of the other net at the highest version
   that keeps the battle's HP to the band's top and its hit to the cap;
   the deep's acts take each battle by a coin from BN6's area's own or the
-  older net's late areas', each held to the band as above.
+  older net's late areas', each held to the band as above. Both are to
+  be replaced by [encounter groups](encounter-groups.md), approved on 11
+  November 2026 and not built yet: constellations beside the area's own
+  battles, an arc per act around a signature family.
 
 `build.py pacing` measures it: every act's territory battles as BN6's
 engine fights them (native, opening and challenge rows, with how many of

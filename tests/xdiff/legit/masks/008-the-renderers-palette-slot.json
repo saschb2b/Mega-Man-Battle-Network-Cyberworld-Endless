@@ -1,0 +1,23 @@
+{
+ "name": "the renderer's palette slot",
+ "part": "obj",
+ "sprite_offsets": [
+  "0x15"
+ ],
+ "bits": "0xF0",
+ "why": "The same renderer gives each object drawn a palette slot, the high nibble of its sprite state's +0x15, from the slots taken before it this frame: the same code in both, other things drawn before it. For what is not the family's; the family's slots are read as their rank among the family's own (maps, renderer). The lava's spark (whose panels: the code under test, as a family's), the spark the family's attack strikes with (whose spark) and an effect the engine's code gives for it (whose effect) likewise: its place there is the count of what was drawn before it, MegaMan's own sprite among it.",
+ "evidence": [
+  "BN5 0x081C803A-0x081C8048 / BN6 0x081D65D2-0x081D65E0: the slot's number shifted into +0x15's high nibble"
+ ],
+ "whose": [
+  "megaman",
+  "megaman's",
+  "native",
+  "native's",
+  "engine",
+  "panels",
+  "spark",
+  "effect",
+  "chip's"
+ ]
+}

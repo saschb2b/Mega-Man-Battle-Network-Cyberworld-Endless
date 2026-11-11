@@ -217,7 +217,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES', 'CYBERWORLD_BATTLE_PROBE'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -2671,6 +2671,15 @@ def lint_generated():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'generated.py'), 'check']) == 0
 
 
+def lint_shards():
+    """The registries kept a file an entry (tools/shards.py: docs/re/ledger,
+    tests/xdiff/mutations, tests/xdiff/legit; docs/project/merging.md,
+    Registries): each reads whole, is written as the tool writes it, and
+    none of the old single files is back."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'shards.py'), 'check']) == 0
+
+
 def lint_free_space():
     """src/emu/free_space.h and docs/engine/emulation/memory.md's and
     free-space.md's tables as tools/free_space.py writes them from the free
@@ -2935,6 +2944,7 @@ def lint(update=False):
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
     ok = lint_generated() and ok
+    ok = lint_shards() and ok
     ok = lint_free_space() and ok
     ok = lint_dispatch_numbers() and ok
     ok = lint_docs() and ok

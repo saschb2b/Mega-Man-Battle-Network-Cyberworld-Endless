@@ -1,0 +1,7 @@
+{
+ "bn4": "0xFC",
+ "bn6": "0x35",
+ "clock": "state",
+ "what": "Elmperor's sound 0xFC, its copy",
+ "why": "Played by Elmperor's code (BN4: movs r0,#0xfc at 0x080C2A7C, its bl to PlaySoundEffect at 0x080C2A7E; BN6: its copy's movs r0,#0x35 at 0x08B7EA6C, the recipe's immediate, its bl at 0x08B7EA6E through its veneer to BN6's), a state's: BN4's song 0xFC copied into BN6's empty slot 0x35 on BN4's player 19 (src/emu/xvirus_bn4.c, src/audio/xsong.c XSOUNDS; docs/multirom/bn4.md, Its sounds); begun in none of its specs' fights. BN6's own song 0xFC is another (xrecipe.song_sig), so the copy is told by its slot (src/dev/xdiff_events.c xd_song_copy)"
+}

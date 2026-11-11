@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "BN4's Navis mapped (src/emu/bn4.h, docs/rom/bn4.md's two rows, docs/multirom/bn4-navis.md, tools/bn4_navis.py): the eighteen's first-kind types, the Navi pre-step 0x080135A8 (Duo's 0x0801374A), runner 0x08013DB4, dying 0x08010F61 and generic states 0x08010D31-0x08010FAF, MegaMan's routine 0x080EAEA8 and state table 0x080EAEFC (116), the AI data taken 0x0800C09A by side 0x0800BFF4 (+0x64 the Navi's own block), the state set 0x0800C9AC and attack's end 0x0800CA28, the three spawns 0x080032B8/0x080032F0/0x08003344, an enemy's record 0x08011878 and spawn 0x080F00F4, the panel crack 0x08009AEC; tools/bn6f_match.py locates bn6f's functions in BN4 too (bn6f-bn4.csv)."
+}

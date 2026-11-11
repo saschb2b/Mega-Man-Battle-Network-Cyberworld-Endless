@@ -1,0 +1,8 @@
+[
+ {
+  "name": "no obstacle strike",
+  "spec": "soul_colonel_strike",
+  "soulbreak": 4096,
+  "what": "the strike's test (src/emu/xstrike.c's strike_test) finds no enemy where BN5's 0x080CABEA finds CanGard behind the RockCube: the cube stays a cube, no soldier, CanGard keeps his 60"
+ }
+]

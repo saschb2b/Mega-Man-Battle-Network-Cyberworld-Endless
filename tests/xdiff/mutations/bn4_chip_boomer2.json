@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Boomer2's row's subfamily another",
+  "spec": "bn4_chip_boomer2",
+  "poke": [
+   "08C06498:83:1"
+  ],
+  "what": "the registry's record of BN4's Boomer2 (585) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x82: no boomerang"
+ }
+]

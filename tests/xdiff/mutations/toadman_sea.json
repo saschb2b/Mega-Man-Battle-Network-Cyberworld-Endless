@@ -1,0 +1,11 @@
+[
+ {
+  "name": "the submerged hit by any attack",
+  "spec": "toadman_sea",
+  "poke": [
+   "08D900CE:2400",
+   "08D90102:2400"
+  ],
+  "what": "the hit gate's tests of the submerged (src/emu/xsea.c's GATE and GATE2, at XN_SEA + 0x10 + 0x1E and + 0x40 + 0x22) let every attack through (movs r4,#1 made #0): MegaMan's buster shot hits ToadMan under the sea at t317 where BN5's passes over him"
+ }
+]

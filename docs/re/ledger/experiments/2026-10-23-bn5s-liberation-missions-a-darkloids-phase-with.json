@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-23",
+  "name": "A Darkloids' phase with MegaMan in reach",
+  "result": "In romlab on mission 1, both Navis' Pass taken, MegaMan's unit's world place (+0x1C, +0x20) poked beside a BigBrute and, in a second run, beside BlizzardMan: the guardian warps beside him (puff and lines out, the camera's pan, lines and puff in, 46 frames between its two 0xB4 sounds), its reach lit red (blinking twice, 0x91 each), its line (\"Grrrowl! BeastBreath!\", no face), its strike pose, the flame over MegaMan (0x6B), a yellow 20 over him and his HP 100 to 80, the red out 123 frames after the line closed; BlizzardMan heals at once after DARKLOID PHASE (effect 0x78, 0x8A), his reach lit, his line with his mugshot, his attack (33 frames), a Snowball falling on MegaMan, 40 harm. Guardians out of reach did not move.",
+  "meaning": "BN5 moves a guardian as one warp, not a walk, and shows a strike in five beats (the reach, the line, the pose, the effect, the harm's number): the board's Darkloids' phase is built on them, the Darkloid first (liberation_turn.c).",
+  "link": "../game/liberation/bn5/darkloids-phase.md"
+}

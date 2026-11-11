@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a hit's stat parameter",
+  "spec": "chip_moonbld1",
+  "poke5": [
+   "080D33B4:01180003:4"
+  ],
+  "what": "MoonBld's hit words (its literal at BN5's 0x080D33B4, the stat effect 0x18's parameter given by BN6's rule, HIT_STATS) left as BN5's: BN6's rule bugs the foe's AI data"
+ }
+]

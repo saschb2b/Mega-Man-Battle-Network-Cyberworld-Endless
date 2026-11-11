@@ -1,0 +1,14 @@
+{
+ "name": "the blink",
+ "part": "obj",
+ "offsets": [
+  "0x00"
+ ],
+ "bits": "0x02",
+ "when": "flashing",
+ "why": "An object flashing after a hit (its collision data's flash timer counting down, the same in both) is hidden on every other pair of frames by its header's visible bit; BN6 hides it on the pairs BN5 shows it. Where the blink step runs on the object itself, BN5's bit is read in BN6's phase (tools/xdiff_events.py, from BN5's own blink events: no mask); this mask is left for an object whose bit follows the flashing one that owns it (MegaMan's buster flashes, their +0x4C his), on the frames he flashes. The family's code never touches the bit: it is the engine's step every object runs.",
+ "evidence": [
+  "BN5 0x080137AA-0x080137B6: the timer (+0x26) shifted right twice, the bit cleared unless the carry is set (bhs past the bics)",
+  "BN6 0x08016956-0x08016962: the timer (+0x24) the same, the bit cleared unless the carry is clear (blo past the bics)"
+ ]
+}

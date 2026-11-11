@@ -140,6 +140,10 @@ int navi_chip(int navi, int version);
 /* The ROM's HP and attack damage of enemy `id` (bn6f enemy_getStruct2);
  * false when unknown. */
 bool enemy_stats(int id, int *hp, int *damage);
+/* Enemy `id`'s records as the ROM (or its move) has them, for the dev
+ * listings: its stats' six bytes into `s`, its traits' eight into `t`;
+ * false when unknown. */
+bool enemy_raw(int id, uint8_t s[6], uint8_t t[8]);
 /* Enemy `id`'s triple in the ids table (RomLayout.enemy_ids): its version,
  * actor type (0 a virus, 1 a Navi) and AI index; NULL when unknown. */
 const uint8_t *enemy_triple(int id);

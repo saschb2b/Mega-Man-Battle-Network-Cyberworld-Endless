@@ -1,0 +1,10 @@
+[
+ {
+  "name": "FlmLine3's row's family another",
+  "spec": "bn4_chip_flmline3",
+  "poke": [
+   "08C066A7:D7:1"
+  ],
+  "what": "the registry's record of BN4's FlmLine3 (597) naming BN6's grown attack family 0xD7, which holds the grown table's stub, where the row gives it the unit's 0xD1: his attack ended at once, no flames"
+ }
+]

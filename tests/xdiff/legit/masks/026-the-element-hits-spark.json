@@ -1,0 +1,31 @@
+{
+ "name": "the element hit's spark",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "spark"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x04"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "sprite_offsets": [
+  "0x01-0x07",
+  "0x0A-0x14",
+  "0x16-0x37"
+ ],
+ "why": "Where an attack with an element strikes (an element in its collision data's +9), the engine spawns a spark of that element over the place it struck (object_spawnCollisionEffect, the fourth kind's type 4, its kind the element): what the attack decides (that it spawns one, where, its kind) is compared, the family's; its look is each engine's own: BN6's init runs its sprite one step on as it spawns it, which BN5's does not, so its animation stands a frame apart for its life, and BN6's ends a frame sooner (as the shot's spark, the hit spark's life). First met with ToadMan's notes (Elec) striking MegaMan.",
+ "evidence": [
+  "the spark's init: BN5 0x080E096C-0x080E0994, BN6 0x080E1BB4-0x080E1BE0, the same but for BN6's bl 0x080026C4 (sprite_update, BN5's twin 0x08002630) at 0x080E1BD0",
+  "its spawner: BN5 0x080E09B4 from 0x08016C04, BN6 0x080E1C00 from 0x0801A0D4 (the hit's flags at BN5's +0x68, BN6's +0x70: bn5_twins.AUDITS), its return addresses 0x080E09BF and 0x080E1C0B (tools/xdiff_masks.py, HIT_SPARK_CALLERS)",
+  "in toadman_v1 the note's spark at t222: its sprite state +1 BN5 1, BN6 0, its frames' pointers 18420 and 17840 bytes into each game's sprite list 5's 5"
+ ]
+}

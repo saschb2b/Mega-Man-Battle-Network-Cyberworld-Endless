@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "A team's turns on mission 2",
+  "result": "In romlab from mission 2's board (MegaMan, Colonel, KnightMan): R moved the liberation state's +6 0, 1, 2, the camera panning to each and the top left box showing his HP (100, 200, 400), every other Navi's HP under him in white; MegaMan's Pass asked \"End without doing anything?\", and on Yes his unit's +2 went from 1 to 0, MegaMan drawn darker, and +6 to 1 by itself, Colonel in play; Colonel walked freely on the pad, through MegaMan's panel. HP poked to 32 came back 52 of 100 (MegaMan) and 72 of 200 (Colonel) after a Pass. Colonel's menu Liberation, ScrenDiv, Save, Pass; KnightMan's Liberation, Pass.",
+  "meaning": "BN5's team plays each Navi once a phase, the Navi in play chosen by R and moved on by each action, his HP his own, his rest a fifth of it: the engine's team (liberation_team.c) plays the same, the Navi in play BN6's player in his own body; the players' guides' half a max HP for Pass is refuted.",
+  "link": "../game/liberation/building/stage-3-team.md"
+}

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "a Navi's state number not moved (KnightMan)",
+  "spec": "knightman_v1",
+  "poke": [
+   "08DA121E:2009"
+  ],
+  "what": "KnightMan's decision's CurAction (BN5 0x080FB982, BN6's copy at XN_CODE + 0xF000 + 0x21E) left at BN5's 9 (BN6's his own first, his idle) where the recipe makes it 11"
+ },
+ {
+  "name": "a Navi's overlay of BN6's kind",
+  "spec": "knightman_v1",
+  "poke": [
+   "08DA1C04:2401"
+  ],
+  "what": "KnightMan's companion's overlay spawned as kind 1 (BN5 0x0800EE74, its copy at XN_CODE + 0xFC02 + 0x2): BN6's own kind 1, another Navi's masks and sprite, where the recipe makes it 23, BN5's kind 1 copied"
+ },
+ {
+  "name": "a Navi's sound left at BN6's number",
+  "spec": "knightman_v1",
+  "poke": [
+   "08DA16A4:20C0"
+  ],
+  "what": "KnightMan's sound (BN5 0x080FBE08: movs r0,#0xC0, its copy at XN_CODE + 0xF000 + 0x6A4) left at 0xC0, BN6's another song, where the install makes it the slot BN5's 0xC0 is copied to (0x62, src/audio/xsong.c): BN6's own song of the number told from the copy (xsong_sound_slot)"
+ }
+]

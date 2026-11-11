@@ -1,0 +1,36 @@
+{
+ "name": "ShadowSoul's afterimages' sprites",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x28"
+ ],
+ "cells": [
+  [
+   "0x05",
+   "0x08",
+   "0x46"
+  ],
+  [
+   "0x04",
+   "0x0C",
+   "0x10"
+  ],
+  [
+   "0x05",
+   "0x00",
+   "0xB5"
+  ]
+ ],
+ "why": "ShadowSoul's charged sword, its slash before an enemy, spawns BN5's fourth kind's 0x28 (moved: tools/bn5_twins.py's MOVE_TYPES) with a sprite as its parameters, +4 its list (x 4) and +5 its number, which the object loads (BN5 0x080E3644-0x080E3648, bl 0x08002650): first his own, list 0 and the number his form names (BN5 0x080EBE4E: 0x0800DA6A, whose 0x0800DA32 reads it from the form's byte at 0x0800DA50, 8 for ShadowSoul; BN6's twin 0x0800FCE4 reads it through the sprite selector the Souls answer, 0x0800FC9E's BN6_FORM_SPRITE_READ, the Souls' sprites in the grown list 0 at 0x45 on: ShadowSoul's 0x46), then the slash's flash, the arm flash kind's sprite (BN5's kinds table at 0x080B9A5C: list 3's 0x00, which tools/xsoul.py copies by its bytes to list 4's 0xB5, the Navis' number for it: tools/bn5_objects.py's IMAGE_COPIED). Each the same sprite, BN5's bytes, by each game's number.",
+ "evidence": [
+  "BN5: 0x080E3644 ldrb r1,[r5,#4], 0x080E3646 ldrb r2,[r5,#5], bl 0x08002650; 0x0800DA32's table at 0x0800DA50 gives form 8 the number 8",
+  "BN6: soullook.c's hook at 0x0800FCA4 answers SOUL_LIST0_FIRST (0x45) + Soul - 7; soulcode_bn5.c's sprites: the flash kinds' list 3 0x00 as list 4 0xB5",
+  "soul_shadow_slash: the objects' sprites the same bytes in both games"
+ ]
+}

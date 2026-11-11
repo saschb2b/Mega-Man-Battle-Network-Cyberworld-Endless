@@ -1,0 +1,13 @@
+{
+ "name": "BN6's MegaMan's Beast chip charge",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x11",
+  "0x11"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's loadout (0x080144C0) writes +0x11 0xFF, the power attack its chip charge takes for a chip whose record +6 is 0xA in place of +5's (the chip charge's dispatcher 0x0800FB54 at 0x0800FB96, the charge time 0x08012F62 at 0x08012F8E: r7 0x11). BN4's chip charge (0x0800B72C, its flag 8) branches by his form alone (0x0800B770: form 5 0x0800D638, else 0x0800D4B4) and caches only +0xE's and +0xF's charge times (0x0800BCF4): no byte like it"
+}

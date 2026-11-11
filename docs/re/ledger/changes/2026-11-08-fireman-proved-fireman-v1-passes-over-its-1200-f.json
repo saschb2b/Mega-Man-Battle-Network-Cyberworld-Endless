@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "FireMan proved: fireman_v1 PASSes over its 1200 frames, its recorded verdict removed. His companion's opening count read by the fight's frames (its mode 0's tail 0x080CC5D0 runs the after-step 0x080143FC, BN6's twin 0x0801BBAC: legit.json's bn4 companion_opening_count); his flame's palette (the third kind's 0x09, BN4's +0xE, its spawner's store 0x080CE4BC) moved to BN6's +0xF so its element stays at BN6's +0xE (tools/xrecipe_bn4.py palette_imms, BN4_T3_PALETTE, BN6_T3_PALETTE); his pool sounds (0xA8, 0x8F, 0xA9, 0xC0) paired; the family's renderer ranks read without a hit's spark (spark_ranks). Six mutations of his port caught (193 of 193). Held from the tournament's pool: his plate on BN4's bracket is not named."
+}

@@ -1,0 +1,10 @@
+[
+ {
+  "name": "DarkInvs's end a frame long",
+  "spec": "chip_darkinvs_end",
+  "poke5": [
+   "080EF288:2018"
+  ],
+  "what": "BN5's family 0x49, which ends DarkInvs where its time runs out (its movs r0,#0x17 at 0x080EF288, its frames), 0x18 at its moved copy (BN6's 0x99): MegaMan given back a frame after BN5's"
+ }
+]

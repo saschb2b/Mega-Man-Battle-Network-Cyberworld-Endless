@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "GutsMan built: src/emu/xnavi_bn4.c (tools/xnavirecipe_bn4.py's whole recipe), xnavi_install.c's BN4 game, BN4's Navis' room (FREE_BN4_NAVIS), the pool of their sounds (xnavi_bn4_sounds.c: 0x32, 0x33, 0x63, 0xD0, 0xE0 and eleven past 0xFF; the themes' range to 0x31), list 2 0x40 on for their battle sprites (XNAVI_SPRITE_BN4); the comparator reads the Navis' recipes, BN6_AI_NAVI_STATE (+0x80) for a Navi's own block; tests/xdiff/gutsman_v1.json FAIL at t1, recorded."
+}

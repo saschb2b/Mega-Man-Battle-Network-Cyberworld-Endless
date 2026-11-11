@@ -1,0 +1,13 @@
+{
+ "bn4": "0xAD",
+ "bn6": "0x32",
+ "clock": "state",
+ "foes": [
+  "0x94",
+  "0x95",
+  "0x96",
+  "0x97"
+ ],
+ "what": "ThunderMan's 0x70's sound 0xAD, its copy",
+ "why": "Played by his 0x70 (BN4's third-kind 0x70, spawned by his state 87, MegaMan's in BN4: movs r0,#0xad at 0x080DB4A8, its bl to PlaySoundEffect at 0x080DB4AA; BN6: its copy's movs r0,#0x32, the recipe's immediate, its bl through its veneer to BN6's), a state's: BN4's song 0xAD copied into the pool's slot 0x32 on BN4's player 26 (src/emu/xnavi_bn4_sounds.c), the slot GutsMan's 0xA2 takes in his battle. The same BN4 number as the thunder's launch above (Billy's thunder, BN6's own 0xBA): this row holds in his battles alone (his ids, \"foes\"); BN4's at t279 and BN6's at t280 in thunderman_v1"
+}

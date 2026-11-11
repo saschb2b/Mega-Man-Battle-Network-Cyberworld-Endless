@@ -1,0 +1,6 @@
+{
+ "bn6": "0x173",
+ "subject": "megaman",
+ "what": "BN6's sound as a support chip's name is shown, BN4's engine none",
+ "why": "The engine's generic state of a support chip's object (the fourth kind's, shared by every support subfamily's object: BN4 0x08008C2A, BN6 0x0800B9B0) shows the chip's name (BN4 0x08016454 or 0x080164B4, BN6 0x0801E792 with r0 0x4C or 0x50) and sets its +0xB to 4; BN6's plays sound 0x173 between the two (movs r0,#0x74; adds r0,#0xff; bl PlaySoundEffect at 0x0800BA1A), BN4's goes straight on (0x08008C7E: movs r0,#4; strb r0,[r5,#0xb]). BN6's own chips play it alike. Held to a chip's spec (its subject megaman): a family's spec compares BN6's 0x173 as any sound. bn4_chip_areagrab at t34"
+}

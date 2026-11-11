@@ -1,0 +1,13 @@
+{
+ "name": "a foe struck on its slide's last step, each runner's order",
+ "whose": "family",
+ "kind": "T1",
+ "part": "obj",
+ "foe_slide": [
+  "0x1B",
+  "0x1E",
+  "0x1F"
+ ],
+ "fields": "the same object's slide's phase and counts (+0x1B, +0x1E, +0x1F) alone, only where BN4's record is a slide ended (5, 0, 0) and BN6's the slide with one step left (+0x1B 6, +0x1E 1); its panels, its state and its timers compared as ever",
+ "why": "A virus's runner runs a pushed object's slide and then takes a struck-and-pushed hit in BN4, and the other way round in BN6. BN4's (0x08013E3C on): the pushed status 0x10 or the slide's flag 0x1000 runs the slide's step (bl 0x08010F00 at 0x08013E4C and 0x08013E5E), then status 0x100 makes its state 5 (0x08013E68 on). BN6's: status 0x100 makes its state 5 (0x0801B2A8-0x0801B2D2) and branches past the slide's step (b 0x0801B338 at 0x0801B2D4; the step, bl 0x080166B6, at 0x0801B2FC and 0x0801B30E). So a hit that strikes and pushes on the frame of a slide's last step finds the step run in BN4 (its phase 5, its counts 0) and not in BN6 (6, one step left of four frames), the object on its new panel in both, which the step before set. Nothing reads the leftover: the state clears the slide's flag itself (BN4 0x080105F6-0x080105F8, 0x1000) and the next slide begun stores all of them. bn4_chip_magbolt3: the Mettaur pulled from (5,2) to (4,2), the bolt's hit with the pull's on the slide's fourth frame, t44; HP 10, state 5 and its end at t69 the same in both"
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-22",
+  "what": "--dev arena2v2: each partner's own deck and picks in the pair (src/online/arena_team_custom.c, RAM_TEAM_CUSTOM), BN6's own Custom screen on a plain copy of the pair on his own client (arena_team_screen.c, arena_pair_open_plain), the stand-in clients (arena_team_client.c), his HP box and the marks (arena_team_view.c); teamseat=N and teampick=-1 for their proof."
+}

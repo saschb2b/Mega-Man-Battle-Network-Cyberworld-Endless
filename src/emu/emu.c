@@ -582,3 +582,34 @@ bool emu_state_load(const void *state) {
 	sound_quiet_loaded();
 	return true;
 }
+
+/* The core's whole state in memory with the cart's flash save in it, as a
+ * checkpoint's file holds it: a test battle's snapshot (lab_battle.h),
+ * which must put back the pack's entries in the save RAM too */
+void *emu_snapshot(size_t *size) {
+	wait_frame();
+	if (!core) return NULL;
+	size_t want = core->stateSize(core) + STATE_EXTRA;
+	uint8_t *bytes = calloc(1, want);
+	struct VFile *vf = bytes ? VFileFromMemory(bytes, want) : NULL;
+	bool ok = vf && mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	off_t n = ok ? vf->seek(vf, 0, SEEK_CUR) : 0;
+	if (vf) vf->close(vf);
+	if (!ok || n <= 0 || (size_t)n >= want) { free(bytes); return NULL; }
+	*size = (size_t)n;
+	return bytes;
+}
+
+bool emu_snapshot_load(void *bytes, size_t size) {
+	wait_frame();
+	struct VFile *vf = core && bytes ? VFileFromMemory(bytes, size) : NULL;
+	if (!vf) return false;
+	bool ok = mCoreLoadStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	vf->close(vf);
+	if (ok) {
+		hook_reapply();
+		keep_put(false);
+		sound_quiet_loaded();
+	}
+	return ok;
+}

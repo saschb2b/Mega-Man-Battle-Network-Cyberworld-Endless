@@ -1,0 +1,20 @@
+{
+ "why": "BN5's sea's submerge (bn5.h: BN5_SEA_TEST, BN5_SEA_SUBMERGE, BN5_HIDE_STEP): BN5 keeps it in the object's collision data, its +0x2C 0xFFFF while it stands on sea with its traits' bit 0x20, its flag 0x80000000, and the marker that follows it at +0x50. BN6's engine has no submerge (its bubble took the flag and the timer, +0x50 its invisibility's marker), and the port keeps it apart (src/emu/xsea.c, RAM_SEA: the mask of the submerged collision data's own bits, BN6_COLL_INDEX_BIT, then their markers by that bit's index; the trace's apart bytes). BN5's read as the port keeps it: the timer and the flag out of the record, the flag compared with the mask, the marker with the port's by what each names.",
+ "evidence": [
+  "BN5 0x08017048-0x0801704A: ldr r0,=0xFFFF; strh r0,[r7,#0x2C] on sea (type 0xA) with [AIData +0x48] & 0x20 (0x0800E0B0), else 0 (0x0801704E); from 0x0800DF54, which sets flag 0x80000000 (0x0800DF7C-0x0800DF7E, object_setFlag) where +0x2C holds 0xFFFF and none of 0x00500C00, else clears it",
+  "BN5 0x0800DEB0-0x0800DED0: flags & 0x80000004 clear the object's visible bit and spawn the marker (0x080E4D1E) into +0x50 (str r0,[r4,r7], r7 0x50) where none, else end it (0x080E4D36) and clear +0x50",
+  "BN6 0x0800E820-0x0800E832: +0x2C its bubble's timer, counted down, flag 0x80000000 cleared with it at 0 (0x0801A15C); its hide step 0x0801012C (+0x50 its marker) called by nothing",
+  "toadman_sp at t657: ToadMan SP under on the sea his own attack made, BN5's +0x2C 0xFFFF, flag 0x80000000 and its marker at +0x50, the port's mask and marker the same"
+ ],
+ "bn5": {
+  "timer": "0x2C",
+  "flags": "0x3C",
+  "flag": "0x80000000",
+  "marker": "0x50"
+ },
+ "bn6": {
+  "index_bit": "0x44",
+  "mask": "0x00",
+  "markers": "0x04"
+ }
+}

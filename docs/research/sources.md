@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:20:00Z }
 ---
 
 # Sources
@@ -392,6 +392,17 @@ For [the Battle Lab](../game/battle-lab.md):
   for a practice or training mode in the series found BN3's Virus Breeder
   (SciLab's Virus Lab: found families kept and fed) and nothing else; the
   games themselves were not searched.
+- **Names.** BN6 writes a comp as one word of twelve letters at most
+  (bn6f's text: MonitorComp, ObservtnComp, TeachrRmComp, WaterMchComp,
+  VendngMcComp, StfToySpComp). Its text has no "Battle Lab", no "Echo"
+  as a name (the words "echo" and "echoed" once each in talk), "CopyBot"
+  in 67 scripts, and no "simulat". **From a web search's excerpts**: the
+  Rockman EXE Zone's Undernet 6 (MMBN4) page lists "ghost Navi" among
+  BN4's random encounters, and its Bosses in Mega Man Battle Network 4
+  page BN4's Mirror of Truth, so "Ghost" and "Mirror" already mean
+  something in the series. **Assumed**: that no game of the series uses
+  "Echo" or "Trace" as a name (nothing found; the other games' texts
+  were not searched).
 - **Warframe's Simulacrum**, from the Warframe wiki's Simulacrum and
   Sanctuary pages through a web search's excerpts: an arena that spawns
   copies of enemies whose Codex research is complete, its key bought from

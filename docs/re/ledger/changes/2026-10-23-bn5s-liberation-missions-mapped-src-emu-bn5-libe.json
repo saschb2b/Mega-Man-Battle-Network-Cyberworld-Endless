@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-23",
+  "what": "BN5's Liberation Missions mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the liberation state 0x020022F0 and its fields, the board's sub-mode 0x18 chosen by EnterMap (0x08004DE2, 0x0805198A), the nine records 0x0804F628 and their pointers, the team Navis' HP 0x0804F968, the item kinds 0x08051924, Order Points' cap of 8 (0x080519D0), a liberation battle's type 1 and its three turns (0x08009190)"
+}

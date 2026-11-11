@@ -1,0 +1,18 @@
+{
+ "name": "Roll's flash's spawn's r4, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x17",
+  "word": "0x04",
+  "bn4": [
+   "raw",
+   19
+  ],
+  "bn6": [
+   "T1:0x380#0",
+   "ai",
+   0
+  ]
+ },
+ "why": "The fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC, through 0x08003210 / 0x08003278) stores the caller's r4 at the object's +4, as the third kind's does (ThunderMan's 0x70's spawn's r4, above). Roll's flash, the fourth kind's 0x17 moved with her, is spawned by its own spawner (0x080E3AD8: push {lr}; push {r5}; movs r0,#0x17; the spawn) from MegaMan's states 46 and 47 of BN4 (her warp and her summon), copied with her (their bls at 0x080EFC74, 0x080EFDD2 and 0x080EFE8C, each after r1-r3 from her +0x34 and an adds to r3, r4 untouched), so +4 holds what r4 held as each game's state runner called the state: in BN4 0x13, in BN6 her AI data's address (as ThunderMan's 0x70's). No code of the flash reads its +4 to +7: its routine (0x080E3A98-0x080E3AD6) loads +0xB, +0x20 and +0x34 to +0x3C alone, and the routines it calls take their registers alone (0x08014620, a jitter of r1 and r3 by a draw; BN4_SPAWN_EFFECT 0x080E18EE, BN6's twin 0x080E1932, r4 its effect; the object's free 0x080033D4). roll_v1 at t66 (BN4) and t67 (BN6)"
+}

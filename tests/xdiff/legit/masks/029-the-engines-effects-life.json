@@ -1,0 +1,25 @@
+{
+ "name": "the engine's effect's life",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "effect"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x00"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "why": "An effect object ends as its sprite's animation does: the engine's effect for a family's attack (the engine's effect's sprite, above), drawn from each game's own sprite, lives as long as that sprite's frames last in each game, a frame or more apart. Its spawn, its id and its place are compared. Only an object both games had in play (its role, its id among it, in both traces: an effect of another id is another role, in play in one game alone, and fails: the sea's splash's mutation).",
+ "evidence": [
+  "bugtank_v1: effect 0x50's object gone from BN5's at t197, BN6's a frame on (in play), its state (+0x08) 8 against 4 at t196"
+ ],
+ "when": "in both"
+}

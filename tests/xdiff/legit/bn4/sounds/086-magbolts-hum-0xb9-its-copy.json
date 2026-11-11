@@ -1,0 +1,12 @@
+{
+ "bn4": "0xB9",
+ "bn6": "0x203",
+ "clock": "state",
+ "chips": [
+  "0x23",
+  "0x24",
+  "0x25"
+ ],
+ "what": "MagBolt's hum 0xB9, its copy",
+ "why": "Played by MegaMan's state 0x59 (BN4: movs r0,#0xb9 at 0x080EE0DE and 0x080EE0FE, each with its bl to PlaySoundEffect after it (as the bolt is made, then every 16 frames it holds); BN6: the state's copy, MagBolt's unit's, each bl aimed at a shim of the unit's home that makes r0 0x203 and goes on to BN6's PlaySoundEffect, XvSoundCall), a state's: BN4's song 0xB9 copied into the grown song table's slot 0x203 (src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). In the specs of BN4's chips 35-37 alone (\"chips\"), over any other row of the same BN4 number"
+}

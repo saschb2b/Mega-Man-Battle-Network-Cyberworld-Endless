@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "The owner's call for BN4 Navis' sounds past 0xFF built for a movs: the generator's wide_sounds writes XvSoundCall rows, the installer aims the call at a shim of the Navi's home (xvirus_shim_sound: movs, lsls #8, adds, b the PlaySound veneer), XvSong's slot a u16; the Navi's collision argument's shim moved past the most its code's shims take (xvirus_shims_room), where it had shared XV_HOME_SHIMS with the first. Proved by GutsMan's pool reordered (0x104 first): his 0xA2 played at 0x104 through the shim, gutsman_v1 PASS with the pair at 0x104 (not kept)."
+}

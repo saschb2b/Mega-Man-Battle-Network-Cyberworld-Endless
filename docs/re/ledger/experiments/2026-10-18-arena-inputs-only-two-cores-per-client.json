@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-18",
+  "name": "Inputs only, two cores per client",
+  "result": "Completes at 0, 50, 100 and 150 ms one-way delay, every battle timer as the original; a flipped input and a killed peer both stop the fight.",
+  "meaning": "The Arena's design: each client runs both games, only inputs travel.",
+  "link": "../online/link.md"
+}
