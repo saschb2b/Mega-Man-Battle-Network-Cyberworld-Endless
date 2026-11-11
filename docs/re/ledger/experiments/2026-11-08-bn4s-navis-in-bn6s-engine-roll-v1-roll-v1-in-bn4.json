@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "roll_v1: Roll V1 in BN4's battle against her move into BN6's",
+  "result": "python3 tools/xdiff.py roll_v1 (rng replay, lag 1): t1-t1007 the same (her decision, MegaMan's states 44-48, her shots and their hits, her flash and its effects, her pool sounds, 201 draws replayed), after her flash's +4 read as a spawn leftover, a moved fourth-kind type read back as BN4's, her pool sounds paired and her player-22 sounds put on BN6's player 9 (BN6's hit sound 0x6B, alone on its player 22, had cut her 0x131 at t204). At t1008 her summon's Mettaur is on the same panel with the same id, HP and side, but each engine's own Mettaur (its type, +5, +0xB, +0xF, +0x20, sprite, collision +0x28, its panel's reservation): FAIL, recorded. Seven mutations caught (t1, t1, t66, t67, t195, t204, t385).",
+  "meaning": "Her port holds to her summon; the summoned enemy needs BN4's Mettaur mapped onto BN6's or moved before she is proved.",
+  "link": "../multirom/bn4-navis.md"
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's virus families in BN6's engine",
+  "date": "2026-11-09",
+  "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
+  "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
+  "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
+  "link": "../multirom/families.md"
+}

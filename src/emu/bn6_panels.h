@@ -220,6 +220,8 @@
 #define BN6_SIDES_OF          0x0802D26Au /* the battle's pattern (bn6f GetBattlePanelColumnPattern): bit (column - 1) set, the enemy's column, */
 #define BN6_SIDES_SET         0x0800C4BCu /* ... as the field is made (bn6f sub_800C4BC, from 0x080079F0): each column's owner, every row */
 #define BN6_SIDES_PLAIN       0x38        /* ... columns 1-3 MegaMan's, 4-6 the enemy's (every random battle's and boss's) */
+#define BN6_ESCAPE_WEIGHT     0x36        /* a random battle's BattleSettings +1, as Central Area's have it: what the escape roll (bn6f sub_8026F1A, 0x08026F1A) weighs (MaxHP + 4) / 5 against;
+                                             * where that is more, the escape is sure, so 0 never refuses (a test battle's, lab_battle.h) */
 #define BN6_SIDES_WIDE        0x30        /* ... MegaMan's four, 1-4 */
 #define BN6_SIDES_NARROW      0x3C        /* ... MegaMan's two, 1-2 */
 #define BN6_SIDES_SURROUNDED  0x33        /* ... the enemy's 1-2 and 5-6, MegaMan's 3-4 between (BN5's liberation battles' Surrounded; */

@@ -1,0 +1,107 @@
+{
+ "why": "A sprite is compared by what it is, not by where each game keeps it: a sprite state's data pointer (+0x18, the sprite's start + 4) named by the registry's pair, the same list and entry of each game's sprite lists (BN6's RomLayout.sprite_lists 0x08031CC4, BN5's XRomLayout's 0x0803272C: a word per list, a word per entry). Where either game's pointer is one of a pair's, both must be that pair's: MegaMan drawn from another sprite, his flash or a spark another, is a difference. A sprite of no pair (a moved family's, BN5's from its battle's cache in EWRAM) is compared as before, its frames from its own data; where a spec says \"sprites\": \"bytes\" (every moved family's), one of no pair in both games' ROMs, or a family's copy (tests/xdiff/families.json's art), is compared by its bytes, the same picture where the same bytes (tools/xdiff_snap.py, sprite_sha), as the generator's twins are: a type of BN6's drawing other art than BN5's is a difference.",
+ "bn5_lists": "0x0803272C",
+ "bn6_lists": "0x08031CC4",
+ "pairs": [
+  [
+   0,
+   0,
+   0,
+   0,
+   "MegaMan"
+  ],
+  [
+   3,
+   1,
+   3,
+   1,
+   "a chip's muzzle flash (the Cannon's)"
+  ],
+  [
+   3,
+   3,
+   3,
+   3,
+   "his buster's first flash"
+  ],
+  [
+   3,
+   6,
+   3,
+   6,
+   "his buster's second flash"
+  ],
+  [
+   5,
+   1,
+   5,
+   1,
+   "a hit's spark, 7 (a chip's)"
+  ],
+  [
+   5,
+   5,
+   5,
+   5,
+   "a hit's spark, 0 (a shot's)"
+  ],
+  [
+   5,
+   8,
+   5,
+   8,
+   "his buster's charge glow"
+  ],
+  [
+   5,
+   11,
+   5,
+   11,
+   "a status's effect over its object, confusion's (the fourth kind's type 6, kind 0)"
+  ],
+  [
+   3,
+   42,
+   3,
+   89,
+   "WideSht's muzzle flash (the same 1216 bytes in both)"
+  ],
+  [
+   3,
+   25,
+   3,
+   25,
+   "Spreader's muzzle flash (each game's own picture)"
+  ],
+  [
+   5,
+   2,
+   5,
+   2,
+   "the puff of the chip of nothing (the fourth kind's 0x14, BN5 0x080E1EF4 / BN6 0x080E3038 the same instructions, its sprite list 5's 2 in both, each game's own art): a chip BN5's dark gate refuses, BN5's misc subfamily 3 and BN6's twin"
+  ],
+  [
+   4,
+   2,
+   4,
+   0,
+   "a RockCube's cube (the third kind's 0x59: BN5's set-up 0x080D10C4 loads list 4's number 2, BN6's 0x080D1200 list 4's number 0: r1 the list's offset 0x10, r2 the number), each game's own picture"
+  ]
+ ],
+ "evidence": [
+  "MegaMan's object's sprite state in both traces from t1: BN5 0x081C9804, BN6 0x081D8004 (list 0 entry 0's + 4)",
+  "megaman_plain's traces: his buster's flashes (the first kind's type 5, +4 BN5 0x23 and 0x0D, BN6 6 and 5) drawn from list 3's entries 3 and 6 in both, the Cannon's (+4 0x... ) from entry 1; the sparks (the fourth kind's type 4) of a shot from list 5's 5 and of the Cannon from list 5's 1 in both; the charge glow (type 8) from list 5's 8 in both",
+  "batty_v2 t340 and batty_ex t594: the confusion's effect over MegaMan (the fourth kind's type 6, kind 0: rom_tables' status effect's kinds, entry 0 14 0B in both) drawn from list 5's 0x0B in both, BN5's 0x08388B3C and BN6's 0x083AC4C0, not the same bytes (each game's own art: by its bytes BN5's eb827365979a, BN6's 456608f57b2d)",
+  "the chips' flashes (maps, flash): list 3's 0x2A in BN5 and 0x59 in BN6 the same bytes; list 3's 0x19 in each its own picture (7716 bytes in BN5, 4876 in BN6), drawn for Spreader's flash by the same entry of both tables",
+  "chip_numbrmnds, chip_colonelds: the dud's puff at t33, its sprite state's data BN5's list 5 entry 2 and BN6's (sprite_load(0x80, 0x14, 2) at BN5 0x080E1F1E / BN6's twin), apart by their bytes"
+ ],
+ "copies": {
+  "why": "A sprite of BN5's that the install copies into BN6's ROM copy by its bytes (a recipe's sprites BN6 has none of the same bytes of: the Souls', tools/xsoul.py) is that sprite: BN6's pointer at the copy is named as BN5's entry where the registry names it (MegaMan's buster's first flash in a Soul: BN5's list 3 entry 3, its bytes copied to list 5's 0xA6, the Navis' number for it, where BN6's own entry 3 is a redrawn one).",
+  "recipes": [
+   "src/emu/soulcode_bn5.c"
+  ],
+  "evidence": [
+   "soulcode_bn5.c's sprites (BN5's list and number, BN6's, the copy's place in the Souls' room: soul_room.h's SOULS_ART, free_space.h's FREE_SOULS), each copied whole from BN5's ROM by src/emu/soulcode.c's art_move; soul_buster: BN5's 'his buster's first flash' and BN6's copy at 0x08C87400"
+  ]
+ }
+}

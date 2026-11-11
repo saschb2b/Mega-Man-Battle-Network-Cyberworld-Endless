@@ -1,0 +1,8 @@
+{
+  "name": "BN5's last chips in BN6's tables",
+  "state": "building",
+  "now": "The Navi chips of all seven of BN5's Darkloids and Nebula's Navis play: ShadeMan's and BlizzardMan's at 505-510, CloudMan's, CosmoMan's, LarkMan's, GridMan's and Django's V1, SP and DS at 512-526 (BN5's Navi routines 0x0F to 0x13 moved as units; CloudMan's, LarkMan's and GridMan's Navis are not moved, each unit copies its Navi's sprite). CosmoMan's gate throws the obstacles beside him through BN6's own twins; Django[SP]'s power is by the battle's turn, moved as a helper. 20 specs PASS, 20 mutations caught. The five Program Advances made with them are units too: BigNoise (365), CsmoPris (366), WildBird (367), Football (603) and PileDrvr (604), the two past nine bits with the engine's own per-battle bit; five pa_* specs PASS, six mutations caught.",
+  "left": "PileDrvr forms only with every chip in * (BN6's GunDelS3 shares no code with Django): the owner's call. The Gigas (FinalGun, Bass, DeltaRay, BugCurse, MetrKnuk, OmegaRkt, BugCharg, Phoenix, DethPhnx: how Team Colonel hands each out not traced), Team ProtoMan's Navi chips with their Navis. Not reached by a spec: an obstacle beside CosmoMan; a sprite's identity where BN5 keeps it LZ77; a recipe's DS part; a Program Advance formed twice in a battle.",
+  "updated": "2026-11-09",
+  "link": "../multirom/chips-code.md"
+}

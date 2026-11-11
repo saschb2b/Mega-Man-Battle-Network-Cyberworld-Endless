@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the fang's speed across another",
+  "spec": "bn4_chip_twnfng1_miss",
+  "poke": [
+   "080D7B62:0002"
+  ],
+  "what": "the fang's copy's speed across the rows (the word at BN4 0x080D7B60, 0x00040000) made 0x00020000: each fang reaches its row later"
+ }
+]

@@ -1,0 +1,18 @@
+{
+ "name": "ThunderMan's 0x70's spawn's r4, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T3",
+  "type": "0x70",
+  "word": "0x04",
+  "bn4": [
+   "raw",
+   19
+  ],
+  "bn6": [
+   "T1:0x394#0",
+   "ai",
+   0
+  ]
+ },
+ "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4, as BN6's twin through the dispatch's spawner does; ThunderMan's spawner of his 0x70 (0x080DB524: push {r0,r1,r2,r5}; movs r0,#0x70; the spawn) sets r0 alone, and its one caller, his state 87 (MegaMan's in BN4, copied with him: 0x080F23DC, its bl at 0x080F23EE) sets r0 to r2 before it, so +4 holds what r4 held as each game's state runner called the state: in BN4 0x13, in BN6 his AI data's address. No code 0x70 runs reads its +4 to +7: its type routine (0x080DB3F8), init (0x080DB41C), update (0x080DB464) and dying (0x08010560) and the 21 routines they call, walked (tools/xrecipe_thumb.py) for a load of +4 to +7 from any register, find one alone, the object free's (0x080033FA), which reads its list node's link (r0 its record less 0x10). thunderman_v1 at t277 (BN4) and t278 (BN6)"
+}

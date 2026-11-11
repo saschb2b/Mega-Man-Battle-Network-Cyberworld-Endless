@@ -1,0 +1,25 @@
+{
+ "name": "BN6's hit flag on a chip's objects",
+ "part": [
+  "obj",
+  "coll"
+ ],
+ "whose": [
+  "megaman's"
+ ],
+ "offsets": [
+  "0x0E",
+  "0x19",
+  "0x38"
+ ],
+ "bits": "0xF0",
+ "direction": "bn6",
+ "bn5_none": 0,
+ "when": "icon flag",
+ "why": "The hit flag BN6's chip use ORs into the chip's attack element by its icon element (the mask above) goes on with the element: the chip's objects take it as their element (+0x0E, from the family's r2), and BN6's collision setup keeps the element's high nibble apart at its +0x19 (0x08019FC4-0x08019FC8: ands #0xF0; strb [r7,#0x19]), a place BN5's layout has none of. Only the chip in use's flag, only where BN6 has it and BN5 not. An object of the fourth kind a support routine spawns keeps r2, the element, at +0x38 (the common spawn's words: r1-r4 at +0x34, +0x38, +0x3C, +4).",
+ "evidence": [
+  "BN6's collision setup 0x08019FBA-0x08019FC8: the object's +0x0E, its low nibble to +2 and its high to +0x19",
+  "chip_airhoc: the puck's +0x0E and its collision data's +0x19 0x10 (Break, AirHoc's icon element) in BN6's battle alone, from its spawn (t35)",
+  "chip_nrthwind: NrthWind's wind (the fourth kind's type 0x39) +0x38 0x20 (Wind, its icon element) in BN6's battle alone"
+ ]
+}

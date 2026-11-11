@@ -1,0 +1,16 @@
+{
+ "why": "A word of a moved Navi's object that keeps a CurAction he writes back to +9 later: his recipe gives each store of it BN6's number (tools/xrecipe_bn4.py saved_actions: every store a movs of a CurAction, BN4's own states from 6, BN6's from 8), so BN6's holds BN4's + 2 (tools/xdiff_bn4.py kept_action)",
+ "kept": [
+  {
+   "names": [
+    "0x3C0",
+    "0x3C1",
+    "0x3C2",
+    "0x3C3"
+   ],
+   "offset": "0x60",
+   "what": "SparkMan's +0x60, his CurAction kept",
+   "why": "His +0x60 is stored only from movs of his own CurActions (0x080B784A, 0x080B7860, 0x080B7888 8; 0x080B78FE 7; 0x080B79B6 9; 0x080B7A00 11; 0x080B7A0A 10) and written back to +9 at 0x080B7A62-0x080B7A64 (ldr r0,[r5,#0x60]; strb r0,[r5,#9]) as his state 7 ends; each store given BN6's number by his recipe"
+  }
+ ]
+}

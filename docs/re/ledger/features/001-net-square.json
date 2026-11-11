@@ -1,0 +1,8 @@
+{
+  "name": "Net Square",
+  "state": "reworking",
+  "now": "Presence works: the server, the transports on every system, and a prototype Square where other players walk as NPCs.",
+  "left": "Move the way in to a gate in Lan's HP, rebuild the Square from BN6's own pieces, and make the people in it talkable.",
+  "updated": "2026-10-18",
+  "link": "../online/overview.md"
+}

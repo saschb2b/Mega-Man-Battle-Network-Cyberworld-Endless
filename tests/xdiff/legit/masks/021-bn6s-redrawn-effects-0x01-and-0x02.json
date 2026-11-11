@@ -1,0 +1,23 @@
+{
+ "name": "BN6's redrawn effects 0x01 and 0x02",
+ "part": "obj",
+ "whose": [
+  "engine"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "effects": [
+  "0x01",
+  "0x02"
+ ],
+ "offsets": [
+  "0xA0-0xA3",
+  "0xA8-0xAB"
+ ],
+ "why": "Effects 0x01 and 0x02 as BN6's engine spawns its own (a RockCube's placement, BN6's own chip, 0x02; a hit's spark by the hit pass, 0x01): the same record in both games (its list, number, animation and palette), its sprite BN6's redrawn bytes (tools/xsoul.py's redrawn test, the reason the Souls' code spawns BN5's copy of 0x02 at 0xC7): its frames' sprite data read from each game's own sprite.",
+ "evidence": [
+  "the effects' tables: BN5 0x080DFD7C and BN6 0x080E16D4, entries 0x01 and 0x02 the same four bytes in both",
+  "tools/xsoul.py --report: effect 0x02 copied as BN6 redrew it (0xC7)"
+ ]
+}

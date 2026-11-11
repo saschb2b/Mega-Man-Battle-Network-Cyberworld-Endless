@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-23",
+  "name": "A mission opened by its number and its map",
+  "result": "In romlab on the plain BN5 ROM, from a state after its intro: poke8 020022F4 N and BN5's own warp (0x0800552E) to map 0x86:(N-1) at the team record's place. The game state's sub-mode turned 0x18 and the board started for missions 1, 2, 3, 5, 7 and 9 (camera tour, tutorial or briefing, Order Points 3; mission 1: PHASE 1, TRGT PHASE 7 under L). Mission 1's 100 panels in RAM (0x02030000) are the ROM's list, kind for kind; its units (0x0203E000) MegaMan 100 HP, Colonel 200, BlizzardMan 400 at (0x87, 0x7B), two guardians 120 each at their holes.",
+  "meaning": "The records are the missions: a generated board in the same records would run on BN5's own board code, and the generator's numbers stand on BN5's.",
+  "link": "../game/liberation/bn5/overview.md#where-they-live"
+}

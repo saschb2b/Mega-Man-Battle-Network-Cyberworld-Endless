@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the second fang's kind another",
+  "spec": "bn4_chip_twnfng1",
+  "poke": [
+   "080ED540:46C0"
+  ],
+  "what": "TwnFng's state's copy's adds r4,#1 (BN4 0x080ED540, the second fang's kind, the one to the row above) made a nop: both fangs to the row below, the Mettaur on the row above untouched"
+ }
+]

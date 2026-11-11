@@ -1,0 +1,7 @@
+{
+ "bn4": "0xB0",
+ "bn6": "0x94",
+ "clock": "state",
+ "what": "an invisibility's end",
+ "why": "Played by the object's invisibility's count-down, twins (BN4 0x0800C0DA, BN6 0x08010162: the collision data's timer, BN4's +0x1A and BN6's +0x26, less one a frame unless 0xFFFF, and at 0 the sound, then the flag's test, BN4 0x08012F96 and BN6 0x0801A166, with 0x400000): movs r0,#0xb0 and the bl at BN4 0x0800C0F0, movs r0,#0x94 and the bl at BN6 0x08010178. bn4_chip_invis at t394, 360 frames after the chip's object set the timer"
+}

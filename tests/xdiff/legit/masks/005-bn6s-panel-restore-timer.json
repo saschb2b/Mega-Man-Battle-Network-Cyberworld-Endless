@@ -1,0 +1,21 @@
+{
+ "name": "BN6's panel restore timer",
+ "part": "panel",
+ "cells": [
+  [
+   "0x12",
+   null,
+   "0x08"
+  ],
+  [
+   "0x13",
+   null,
+   "0x07"
+  ]
+ ],
+ "why": "BN6's panel update writes a plain panel's restore timer every frame, 0x708 at +0x12, a place BN5's panel layout has no twin for (BN5's +0x12 is BN6's +0x10, the alliance timer, compared). Exact: those two bytes, that value; the alliance timer (+0x10) and the panel's flags (+0x14) stay compared.",
+ "evidence": [
+  "BN6's update of a plain panel: 0x0800C3C8-0x0800C3D0 writes 0x708 to +0x12 (and +0x0E at 0x0800C488)",
+  "the alliance timer's setter: BN5 0x0800B2D6 (strh at +0x12) / BN6 0x0800CC14 (strh at +0x10)"
+ ]
+}

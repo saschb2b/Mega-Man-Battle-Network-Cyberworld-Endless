@@ -1,0 +1,26 @@
+[
+ {
+  "name": "Invis's row's frames another",
+  "spec": "bn4_chip_invis",
+  "poke": [
+   "08C05FF8:0100"
+  ],
+  "what": "the registry's record of BN4's Invis (558 at CHIPS_RECORDS) with its first parameters 0x100 where BN4's record holds 0x168: MegaMan seen again 104 frames before BN4's"
+ },
+ {
+  "name": "Invis's row's subfamily another",
+  "spec": "bn4_chip_invis",
+  "poke": [
+   "08C05FF4:00:1"
+  ],
+  "what": "the registry's record of BN4's Invis naming BN6's support subfamily 0, the panel grab's, where the row's twin gives it Invisibl's 1: a panel stolen and MegaMan seen"
+ },
+ {
+  "name": "Invis's row's family another",
+  "spec": "bn4_chip_invis",
+  "poke": [
+   "08C05FF3:20:1"
+  ],
+  "what": "the registry's record of BN4's Invis naming BN6's recovery family 0x20 where the twin gives it the support family 0x15: no invisibility"
+ }
+]

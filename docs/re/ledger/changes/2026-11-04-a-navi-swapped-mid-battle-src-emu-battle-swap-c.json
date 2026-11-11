@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "A Navi swapped mid-battle (src/emu/battle_swap.c, the dev step swap): BN6's enemy counts (BattleState +5 and +0x13), the spawn's two entries and AIData +2, the Navi dying's phases 0 and 4, the destroy, the HP plates and the sprite mosaic mapped (docs/rom/navis.md's row, src/emu/bn6_navis.h)."
+}

@@ -1,0 +1,18 @@
+[
+ {
+  "name": "BN6's Program Advances' list alone",
+  "spec": "pa_suprspr1",
+  "poke": [
+   "080295B4:0802BCB0:4"
+  ],
+  "what": "the Custom screen's word of the Program Advances' list (BN6_PA_LIST_REF) BN6's own list again where src/emu/xchips_code.c's pas_stage points it at the list grown with BN5's recipes: the three WideSht1 picked form nothing, used one by one where BN5 forms SuprSpr1"
+ },
+ {
+  "name": "a Program Advance's id",
+  "spec": "pa_suprspr1",
+  "poke": [
+   "08801370:0165:2"
+  ],
+  "what": "SuprSpr1's recipe in the grown list (FREE_CHIP_PAS + 0x6E, src/core/xchips_pas.c: after the eleven of ten bytes before it, the ten whose parts are Navi chips and BN6's CrosOver) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
+ }
+]

@@ -32,6 +32,7 @@ import xrecipe_family as F  # noqa: E402
 from xrecipe_pairs import Pairs  # noqa: E402
 import bn5_objects as OB  # noqa: E402
 import bn5_twins  # noqa: E402
+import shards  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_C = os.path.join(ROOT, 'src', 'emu', 'xchips_bn5.c')
@@ -1183,10 +1184,9 @@ def bn5_twins_same_panels():
 
 def panel_to6(off):
     """BN5's offset in a panel as BN6's (tests/xdiff/legit.json, layouts, panel: BN5's, BN6's, bytes), None where BN6 has none"""
-    with open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'), encoding='utf-8') as fh:
-        for a, b, n in json.load(fh)['layouts']['panel']['segments']:
-            if a <= off < a + n:
-                return b + off - a
+    for a, b, n in shards.load('legit')['layouts']['panel']['segments']:
+        if a <= off < a + n:
+            return b + off - a
     return None
 
 

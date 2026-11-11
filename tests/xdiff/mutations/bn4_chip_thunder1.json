@@ -1,0 +1,19 @@
+[
+ {
+  "name": "the thunder's height another",
+  "spec": "bn4_chip_thunder1",
+  "poke": [
+   "080ECE76:2305"
+  ],
+  "what": "Thunder's state's copy's movs r3,#0xa (BN4 0x080ECE76, the ball's height as it is made) made movs r3,#5: the ball made five lower"
+ },
+ {
+  "name": "the thunder's sound not played",
+  "spec": "bn4_chip_thunder1",
+  "poke": [
+   "080D20B0:46C0",
+   "080D20B2:46C0"
+  ],
+  "what": "the thunder's init's copy's call that plays its launch (BN4 0x080D20B0, the recipe's call to its shim for the grown table's slot 0x201) made two nops: the ball made without its sound"
+ }
+]

@@ -1,0 +1,19 @@
+[
+ {
+  "name": "the bomb's HP another",
+  "spec": "bn4_chip_propbom1_struck",
+  "poke": [
+   "080DEBBC:2064"
+  ],
+  "what": "the bomb's copy's HP (movs r0,#0xa at BN4 0x080DEBBC) made 100: the Mettaur's wave does not end it at t73"
+ },
+ {
+  "name": "the struck bomb's sound not played",
+  "spec": "bn4_chip_propbom1_struck",
+  "poke": [
+   "080DEC6E:46C0",
+   "080DEC70:46C0"
+  ],
+  "what": "the bomb's copy's call that plays its burst's sound as it is struck (BN4 0x080DEC6E, sound 0xC8 through its shim) made two nops: no sound 0x205 as the wave ends it"
+ }
+]

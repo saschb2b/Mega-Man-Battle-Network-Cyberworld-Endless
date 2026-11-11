@@ -1,0 +1,18 @@
+{
+ "name": "a chip's own art",
+ "part": "obj",
+ "sprite_offsets": [
+  "0x01-0x03",
+  "0x05-0x07",
+  "0x0A-0x14",
+  "0x16-0x17",
+  "0x1C-0x37"
+ ],
+ "why": "A chip a moved Navi uses (the Dark Soul's chip AI: setAttack2 with the chip's family from its record, the Dark Soul's record of BN6's chip id with BN6's family, src/emu/xnavi_dark.c, as MegaMan's chips run: src/emu/xnavi_bn5.c, CURACTIONS) runs that family's code of each game's own, which draws the chip's art of each game's own (the Cannon's image, BN5's and BN6's sprite lists' own): its objects' sprite states compared as MegaMan's chips' are, their places, damage and timing as the family's.",
+ "evidence": [
+  "darksoul_cannon: the Dark Soul's Cannon (family 0x14 in both) at t78, its image (the first kind's type 5, kind 0) drawn from BN5's sprite at 0x082EE71C and BN6's at 0x082F2F3C, BN6's spawned by BN6's own type 5 (its family's code, 0x080EC2xx, no moved code on the stack)"
+ ],
+ "whose": [
+  "chip's"
+ ]
+}

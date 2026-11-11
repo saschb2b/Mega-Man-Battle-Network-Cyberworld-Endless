@@ -1,0 +1,18 @@
+[
+ {
+  "name": "an immediate, Shakey's",
+  "spec": "shakey_v1",
+  "poke": [
+   "08107242:2007"
+  ],
+  "what": "the CurAction it gives setAttack0 left at BN5's 0x7 where the recipe makes it 0x9 (BN6's two status states before a family's own)"
+ },
+ {
+  "name": "a rebased call, Shakey's",
+  "spec": "shakey_v1",
+  "call": [
+   "08011680:0810A953"
+  ],
+  "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+ }
+]

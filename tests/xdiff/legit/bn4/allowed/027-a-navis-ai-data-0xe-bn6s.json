@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's AI data +0xE, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x0E",
+  "0x0E"
+ ],
+ "why": "BN6's battle actor setup writes 0xFF at AI data +0xE (0x08007764-0x08007766). BN4's +0xE (a player's loadout's chip charge, BN4_AI_LOADOUT + 2) is 0 on a Navi's side and never read by GutsMan's code: BN6's own"
+}

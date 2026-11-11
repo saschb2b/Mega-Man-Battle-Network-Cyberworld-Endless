@@ -1,0 +1,26 @@
+[
+ {
+  "name": "WhitWeb2's row's subfamily WhitWeb1's",
+  "spec": "bn4_chip_whitweb2",
+  "poke": [
+   "08C062E0:88:1"
+  ],
+  "what": "the registry's record of BN4's WhitWeb2 (575) naming BN6's grown misc routine 0x88, WhitWeb1's entry of the unit's block, where its row gives it 0x89, its own: the webs on the top row, the Mettaur in the middle untouched"
+ },
+ {
+  "name": "the web's type another",
+  "spec": "bn4_chip_whitweb2",
+  "poke": [
+   "080D4EA0:20CB"
+  ],
+  "what": "the web's spawner's copy (its movs r0,#0x3d at BN4 0x080D4EA0, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no web"
+ },
+ {
+  "name": "the web's sound another",
+  "spec": "bn4_chip_whitweb2",
+  "poke": [
+   "088F0304:01DA"
+  ],
+  "what": "the shim of WhitWeb's unit's home that plays the web's sound (its first, at XC4_HOMES + 0x1000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1DE"
+ }
+]

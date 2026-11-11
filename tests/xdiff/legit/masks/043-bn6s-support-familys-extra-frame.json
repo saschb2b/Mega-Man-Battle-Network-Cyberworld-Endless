@@ -1,0 +1,17 @@
+{
+ "name": "BN6's support family's extra frame",
+ "part": [
+  "obj",
+  "ai"
+ ],
+ "whose": [
+  "megaman"
+ ],
+ "when": "support lag",
+ "why": "BN6's support family (0x15, 0x080ED0DC) runs the chip's routine, marks its AttackVars +1 and ends the attack at its next frame (0x080ED130: object_exitAttackState), where BN5's (0x080EC400) ends it in the frame it runs the routine (0x080EC448): MegaMan stands in CurAction 0x15 a frame longer in BN6's engine and goes through his after-chip wait (his +0x20 counted down from 9, his +0x0A/+0x0B, his AI data +0x48) a frame behind BN5's, the same values a frame later. BN6's engine's own family for every support chip, BN5's included (docs/multirom/one-net.md: the chips' finer calls); each such byte must be the one BN5's MegaMan had the frame before.",
+ "evidence": [
+  "BN6 0x080ED0DC-0x080ED134: phase 0 runs the routine (0x080ED102) and sets AttackVars +1 (0x080ED12C); phase 1 ends the attack (0x080ED130)",
+  "BN5 0x080EC400-0x080EC44C: runs the routine (0x080EC420), then ends the attack (0x080EC448), one phase",
+  "chip_areagrab: MegaMan's CurAction 0x15 at t32 in both, his ready state's from t33 in BN5's and t34 in BN6's, every byte of it a frame behind until t44"
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "why": "BN5's green flash (DarkPlus's power stored in the next chip of the hand: BN5's misc family's subfamily 3 sets 24 frames, 0x0800E1D0-0x0800E1D4) is a u16 in its user's AI data (+0x3C, counted down by the player's 0x0800E532, read by the tint 0x080136B0), where BN6's AI data keeps MegaMan's resting height (0x0801A2B0 puts it in his Z after a flinching hit): BN6's engine keeps it apart, a u16 a side (XC_FLASH, the RAM plan's moved state, src/emu/xchips_flash.c), and the trace's state kept apart holds BN5's of each side's player (src/dev/xdiff.c). So BN5's MegaMan's AI data reads 0 there, and each side's flash is compared apart.",
+ "bn5_ai": "0x3C",
+ "size": 2,
+ "evidence": [
+  "BN5: the store's two sites 0x0800E1D4 and 0x0800E228 (strh r0,[r1,#0x3c], r1 his AIData), its count-down 0x0800E53E-0x0800E54C (ldrh, subs #1, strh) and tint 0x080136B4 (ldrh r0,[r4,#0x3c]): no other code of BN5's writes it (a scan for strh to +0x3C of an AIData, R1's research)",
+  "BN6: AIData +0x3C read at 0x0801A2B0 into the object's Z (+0x3E); no count-down or tint of a flash (sub_80107D4 counts +0x19 and +0x15 alone)"
+ ]
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "BN5's Navi chips past nine bits (docs/rom/chips-code.md, new row: 23 addresses of BN5's, BN6's turn read 0x0800A84E and its obstacle refusal 0x0800F486); tools/xchiprecipe.py's STACK_LOADS and PowerDjangoSP."
+}

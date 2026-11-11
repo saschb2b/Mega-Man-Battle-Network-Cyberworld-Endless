@@ -1,0 +1,26 @@
+[
+ {
+  "name": "SoulT+1's routine adds none",
+  "spec": "soul_soult",
+  "poke": [
+   "0880180C:1C02"
+  ],
+  "what": "program 48's effect (FREE_NCP + 0x0C, src/emu/xncp.c: adds r2,r0,#1) made adds r2,r0,#0: BN6's compile leaves the extra turns 0, KnightSoul's turns 3 at t1 where BN5's with its SoulT+1 are 4, its end a turn early"
+ },
+ {
+  "name": "SoulT+1's routine adds two",
+  "spec": "soul_soult",
+  "poke": [
+   "0880180C:1C82"
+  ],
+  "what": "program 48's effect made adds r2,r0,#2: the extra turns 2, KnightSoul's turns 5 at t1 where BN5's are 4"
+ },
+ {
+  "name": "program 48's entry another's",
+  "spec": "soul_soult",
+  "poke": [
+   "088019A0:0813E5E9:4"
+  ],
+  "what": "the grown effects' table's entry 48 (FREE_NCP + 0xE0 + 4 x 48) naming program 0's routine, which sets nothing: SoulT+1 placed and compiled to no effect, KnightSoul's turns 3"
+ }
+]

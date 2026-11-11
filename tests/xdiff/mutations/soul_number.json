@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a Soul's palette",
+  "spec": "soul_number",
+  "soulbreak": 2,
+  "what": "the palette hooks give a Soul its sprite's palette 1 where BN5's 0x0800DD8C gives 0 (2 in Chaos Unison): NumberSoul's sprite state's palette 1"
+ }
+]

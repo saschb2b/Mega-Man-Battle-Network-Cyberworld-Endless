@@ -1,0 +1,12 @@
+{
+ "name": "BN6's buster sound on a busy player",
+ "part": "sounds",
+ "songs": [
+  "0x6A"
+ ],
+ "why": "MegaMan's buster sound (song 0x6A) plays on BN6's music player 0, which a hit's sound (0x8F, priority 192 against its 128) shares and holds: a shot fired while 0x8F still plays starts no sound in BN6; BN5 plays 0x6A on its player 22, free. A song missing from BN6's frame alone, 0x6A alone. The song tables and the sound engine's start, not the family's code (its reticle's 0xAE is compared).",
+ "evidence": [
+  "the song tables' entries for 0x6A: BN5 0x08155F44 (player 22), BN6 0x0815A298 (player 0); for 0x8F: player 0 in both, priority 192 (its header's +2)",
+  "the start of a song: BN6 0x08150C90-0x08150C98 (the sound engine's start of a song, 0x08150C54) keeps a playing song of higher priority (its info +9) and starts none"
+ ]
+}

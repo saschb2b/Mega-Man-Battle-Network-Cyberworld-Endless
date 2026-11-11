@@ -1,0 +1,26 @@
+[
+ {
+  "name": "the image object's kind left at BN5's sprite",
+  "spec": "colonel_v1",
+  "poke": [
+   "08D90210:00:1"
+  ],
+  "what": "the moved image object's kind 3 (BN5's kinds table 0x080B9A5C + 0x10, its copy at XN_OBJECTS + 0x0 + 0x10) left naming list 4's number 0, BN6's another sprite, where tools/bn5_objects.py's copy makes it 0xB5 (BN5's sprite 3:0x00, Colonel's image at t254): the sprite's bytes compared, never its number"
+ },
+ {
+  "name": "the image object's twin kind at another sprite",
+  "spec": "colonel_v1",
+  "poke": [
+   "08D902BA:09:1"
+  ],
+  "what": "the moved image object's kind 0x25 (its copy's entry at XN_OBJECTS + 0x0 + 0xBA) naming BN6's list 3 number 9 where tools/bn5_objects.py's twin is number 8, the same bytes as BN5's 3:0x08: the sprite's bytes compared"
+ },
+ {
+  "name": "Colonel's side's bit not kept",
+  "spec": "colonel_v1",
+  "poke": [
+   "08D90044:46C0"
+  ],
+  "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in his field (BN6_COLONEL_SIDES): BN5's bit 0x20 set as he is spawned, at t1, where BN6's field stays 0"
+ }
+]

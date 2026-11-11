@@ -1,0 +1,14 @@
+{
+ "name": "a summoned Mettaur3's +0xF, BN4's appear queue's number",
+ "spawn_leftover": {
+  "kind": "T1",
+  "type": "0x2E6",
+  "bytes": {
+   "0x0f": [
+    "0x01",
+    "0x00"
+   ]
+  }
+ },
+ "why": "As a summoned Mettaur's +0xF (above): Roll V3's summon number 1 of her battle, BN4's 1 against BN6's 0 at +0xF"
+}

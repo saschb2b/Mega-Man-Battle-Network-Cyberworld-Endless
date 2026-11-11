@@ -1,0 +1,18 @@
+[
+ {
+  "name": "SidBmbo's wait counted as BN6's run counts",
+  "spec": "bn4_chip_sidbmbo3",
+  "poke": [
+   "088F17E4:DA01"
+  ],
+  "what": "the wrapper's count-down (its bgt at +0x24, BN4's run's test, ending the attack at 0) made bge, BN6's run's test, which ends it below 0: the attack a frame longer than BN4's"
+ },
+ {
+  "name": "the bamboo's sound another",
+  "spec": "bn4_chip_sidbmbo3",
+  "poke": [
+   "088F1704:01DA"
+  ],
+  "what": "the shim of SidBmbo's unit's home that plays the bamboo's sound (its first, at XC4_HOMES + 0x2400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E1"
+ }
+]
