@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -100,6 +100,20 @@ frame, as BN6's field update writes them. Its three mutations break
 BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
 specs record where a chip parts, each with its verdict and why:
 `bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
+
+A panel of BN4's is read in BN6's numbers where the two games number a
+type apart: BN4's holy 9 is BN6's 5 and its Hole 0xB the engine's 15
+(`src/emu/xpanels.h`), in the type, the drawn type, the flags' low
+nibble (each game's flags update ORs the type in) and the blink's type.
+BN4 keeps a panel changer's blink in tables of its own
+(`BN4_PANEL_BLINKS`, `BN4_PANEL_BLINK_SIDES`: the type and side in the
+low nibbles, kept after the draw clears the mark), BN6 in the panel
+(+8, +9): the trace carries BN4's two nibbles into those fields. And
+BN4's set type leaves +0x12 at 0xBE, which its panel step counts on a
+holding panel alone: on any other type it is BN4's idle, read as BN6's
+0x708. `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage`
+pass by these, their five mutations caught (the kinds' table's types
+in the copy, the poison's sound, BN6's blink mark storing the side).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every

@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602: the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -342,7 +342,7 @@ moved yet; why each waits:
 | Chips | What they are in BN4's code | Waits on |
 | --- | --- | --- |
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
-| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other; 708 and 728 bytes with their own objects, one call unpaired (the blink's mark, BN6's `0x0800CC52` by reading), three sounds | the owner's call 8 (the Hole panel in BN6's engine); then the generator's kinds' tables, which copy bytes as they are where the changer's rows hold BN4's panel types (asked of its session) |
+| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | the owner's call 7: its record is Marking's kind (no Library number, the blank picture), and not dark |
 | DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | a unit kind for those families: the generator moves support and misc routines only; DrkCanon also BN4's computed powers (unit 6) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | the same: a unit kind for a family BN6 has none of |
@@ -384,7 +384,8 @@ and is not taken. BN4's count of a type's panels is BN6's own routine
 (`BN6_PANEL_COUNT`), so a DS Navi chip's moved power counts Holes by
 calling it with 15. Seen by the `status panel` dev step: four panels
 made Holes draw as BN4's on both sides. The three chips that make them
-come next, through the generator.
+are moved (the table above): each PASSes against BN4's battle, the Holes
+on the same panels at the same frame.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
