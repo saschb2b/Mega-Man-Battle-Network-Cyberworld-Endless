@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T00:44:27Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:39:20Z }
 ---
 
 # The differential: a moved family against its own game
@@ -52,7 +52,14 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do.
+where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+a dark karma parts the two from the first frame on one byte: MegaMan's
+palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
+0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
+palette, BN4's, names that pair alone (an entry's `cells`).
+`bn4_chip_invis_dark` is the control: Invis, which plays for any karma,
+used by a dark MegaMan, nothing else of him apart; its mutation (BN6's
+init handing him palette 3) is caught.
 A chip whose code is BN4's moved (a unit of `tools/xchiprecipe_bn4.py`,
 its rows `XREG_MOVED`: `bn4_chip_panlsht1` to `3`) is compared the same
 way, with what `legit.json`'s `bn4` section adds for it: his attack's
@@ -1203,6 +1210,10 @@ format, its game 4: the trace's header names it):
   waits (`megaman_misc_wait`: BN4's run's mark 4 against the wrapper's,
   in BN4's misc state and for a waiting unit's subfamily alone; the
   count beside it is compared as ever);
+  a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
+  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  makes from the unit's own code is given BN4's of that place; a draw
+  made while MegaMan runs stays the engine's (the shuffle's twin above);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

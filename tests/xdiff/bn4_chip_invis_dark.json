@@ -1,0 +1,82 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 500,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Invis * (its chip 133, alignment 0: it plays for any karma) used by a dark MegaMan (karma4 0: BN4's battle gives him his dark palette, legit.json's bn4 allowed, MegaMan's dark palette, BN4's) against the registry's row for it (id 558, on BN6's Invisibl): the control of a dark MegaMan before any dark chip's spec, his palette the only difference of him, everything else as bn4_chip_invis.",
+ "folder4": [
+  "3485"
+ ],
+ "folder6": [
+  "22E:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "karma4": 0
+}

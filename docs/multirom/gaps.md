@@ -234,7 +234,7 @@ The plan; [BN4's Navis](bn4-navis.md); [BN4's Souls](bn4-souls.md)):
 | --- | --- | --- |
 | Phase 4, its chips (174 folder chips and 19 Program Advances a run has none of; [BN4's chips in a run](bn4-chips.md)) | Registered (unit 2, 10 November 2026): ids 527-733, records, names, descriptions and art from BN4's ROM, each sitting out until its code plays, Invis the first that does (on BN6's Invisibl's code, proved against BN4's battle, 10 November 2026); the generator's BN4 path and the moved units next; only 527-602 have a pack entry | **L** |
 | Its remaining Navis: LaserMan (opens the second build), MetalMan, JunkMan, SparkMan, TopMan, ColdMan, BurnerMan, VideoMan, KendoMan, Duo | 8 of 18 moved (GutsMan, ThunderMan, WindMan, FireMan, SearchMan, AquaMan, WoodMan, Roll) | **M** each, LaserMan and Duo more; **L** together |
-| Its moved Navis as guardians of its own areas | The eight fight only in the tournament (past the Nest, act 3 in half the runs); a BN4-dressed act ends at a BN6 guardian ([Status](status.md): no `xguard`) | **S-M**: where its records set each, the band's HP, a BN6 Navi chip as his Guardian Data until Phase 4 |
+| Its moved Navis as guardians of its own areas | **Built 12 November 2026**: the nine proved guard the areas its records set them in, in half the runs, at the band's HP, a BN6 kin's Navi chip as his Guardian Data until his own plays ([BN4's Navis as guardians](../game/bosses/bn4-navis.md)); no Soul until the owner's call | done |
 | Its remaining families: VolGear, Gaia, Boomer, MagTect, Dharma, Kilby, Weather, Spidy, Moloko, and Black Earth's NavBlack and NavShado | 7 moved (Billy, Spikey, Shrimpy, Walla, Elmperor, CirKill visiting; Melody and Mettaur for Roll's summon) | **M** each; its areas' own random battles wait on them (call 10) |
 | Its Souls, all twelve | None built; ThunSoul first, then AquaSoul and GutsSoul | **M** for ThunSoul, **L** for all; which a run gives is the owner's call there |
 | Its areas: a layout kit of its own (one-wide ways ending in studs, squares four by four, hubs on spurs, conveyors, exit arrows), Black Earth not drawn, its bystanders BN6's | [Status](status.md), BN4 Red Sun's areas | **M** |
@@ -260,10 +260,10 @@ proposed").
    CloudMan 12 November 2026). The three decisions taken, both moved and
    proved; acts 4 and on get their own Darkloids instead of repeating the
    first two, and their boards pay their own chips.
-3. **BN4's Navis guard BN4's areas** (**S-M**). Eight Navis already
-   proved meet a player only in a tournament past the Nest; a
-   BN4-dressed act ends at a BN6 guardian. Depends on placing each by
-   BN4's records; no new transplant.
+3. **BN4's Navis guard BN4's areas** (**S-M**, built 12 November 2026:
+   [BN4's Navis as guardians](../game/bosses/bn4-navis.md)). Eight Navis
+   already proved met a player only in a tournament past the Nest; a
+   BN4-dressed act ended at a BN6 guardian.
 4. **LarkMan and GridMan as BN5 guardians** (**M** each). A second
    guardian for BN5's areas, which now hold one each (End Area two);
    lack 5's "the same guardian four runs running". Depends on their
