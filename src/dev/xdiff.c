@@ -53,7 +53,6 @@
 #include "xdiff_spec.h"   /* (and xdiff_events.h, its twins'; xdiff_ncp.h, its ncp items') */
 #include "xfields.h"
 #include "xinstall.h"
-#include "xnavi_bn5.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
 
@@ -633,19 +632,9 @@ static void call_aim(uint32_t at, uint32_t v) {
  * not his unless the spec fights him (toadman_sea_elec's BN6 0x080C64EB lies in Meddy's copy of BN5's 0x080C6000-0x080C665C,
  * which took the poke from ToadMan's battle once Meddy was moved; BN4's WoodMan's 0x080F50E4 in SearchMan's) */
 static bool another_navis(const Spec *s, uint32_t to) {
-	for (int i = 0; i < xnavi_bn5_count; ++i) {
-		const XNavi *nv = xnavi_bn5[i];
-		const XVirusFamily *f = &nv->code;
-		bool in = false;
-		for (int b = 0; b < f->nblocks && !in; ++b)
-			in = to >= f->blocks[b].at && to < f->blocks[b].at + (f->blocks[b].end - f->blocks[b].start);
-		if (!in) continue;
-		for (int k = 0; k < s->nfoes; ++k)
-			for (int v = 0; v < nv->versions; ++v)
-				if (!s->bn4 && s->foes[k].id == f->names[v]) return false;
-		return true;
-	}
-	return false;
+	int ids[MAX_FOES], n = 0;
+	for (int k = 0; !s->bn4 && k < s->nfoes; ++k) ids[n++] = s->foes[k].id;
+	return xd_navi_copy_apart(ids, n, to);
 }
 
 /* the moved range a poke's address is in, -1 none: the family's own ranges, moved last, first (BN6's tables grown are
