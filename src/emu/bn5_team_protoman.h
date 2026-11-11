@@ -17,4 +17,10 @@
 #define BN5_NAPALM_PANEL_FLAMES  0x080CC2A2u /* his third kind's 0x38's flames over a pattern of panels: movs r2,#0x4B, handed to
                                                 BN5's effects-over-panels routine 0x08018838 (BN6's twin 0x0801BD3C) at 0x080CC2AA */
 
+/* GyroMan (AI 2, ids 0x107-0x10A; BN6's Navi AI 27, ids 0x1F4-0x1F7) */
+#define BN5_GYRO_COMPANION       0x0800EE46u /* his companion's start: BN5's overlay spawner with kind 0 (movs r4,#0 at 0x0800EE48,
+                                                the form of Colonel's 0x0800EE56), a kind BN6 lacks: copied with him, the kind his
+                                                own (XN_KIND_OF, 31; its sprite BN5's 4:0x0A, list 2's 0x84 in BN6) */
+#define BN5_GYRO_COMPANION_END   0x0800EFD6u /* ... and its end, the body of Colonel's (0x0800EFE4), copied with him */
+
 #endif

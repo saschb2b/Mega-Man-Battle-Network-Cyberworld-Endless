@@ -477,6 +477,7 @@
 0800ED80 BN6_AI_LET_GO
 0800ED90 chip_object_uses
 0800EDB4 bn5_navi_companion
+0800EE46 bn5_overlay_spawner
 0800EE82 bn5_overlay_spawner_with_kind_4
 0800EEB6 _END_REF_2
 0800EECC bn5_chips_code_3
@@ -1181,8 +1182,11 @@
 080C6C81 souls_code_bn6_4
 080C6E0E by_spawner
 080C7448 shockwave_kinds
+080C791C team_protoman_gyroman
+080C7D54 team_protoman_gyroman_2
 080C8204 navis_engine_twins.rock_fragments_fourth_kind_9
 080C825C three_falling_rocks_third_kind_0x1d
+080C827C team_protoman_gyroman_3
 080C834A spawns_bn6_0x12
 080CA91D souls_code_bn6_5
 080CABCA spawned_by
