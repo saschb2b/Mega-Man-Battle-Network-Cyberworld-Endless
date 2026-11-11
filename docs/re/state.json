@@ -251,6 +251,10 @@
     {
       "date": "2026-11-10",
       "what": "The spread chips' code located and moved, the first attack family (bn4_chips.h BN4_SPREAD_STATE 0x080EC760, BN4_T3_SPREAD_SHOT 0x12 with BN4_SPREAD_SHOT_KINDS 0x080CF3DC, BN4_T3_ARM 0x02 with BN4_ARM_SPAWN 0x080CD6E0, BN4_COUNTER_WINDOW 0x0800BA66, BN4_ELEMENT_SET 0x0801288C; bn6_chips.h BN6_SPREAD_FAMILY 0x080EDEF0 and its twins; docs/rom/bn4.md): BN6 keeps the family with its own arm, so the state moves."
+    },
+    {
+      "date": "2026-11-10",
+      "what": "FlmLine's, Thunder's and TwnFng's code located and moved (bn4_chips.h BN4_FLMLINE_STATE 0x080ECAAE with BN4_T3_FLAME 0x19, BN4_THUNDER_STATE 0x080ECE14, BN4_TWNFNG_STATE 0x080ED4C6 with BN4_T3_FANG 0x51; docs/rom/bn4.md). MegaMan's animations numbered by each game's art (BN4's 0x0D, 0x11, 0x12 are BN6's 0x0A, 0x0D, 0x0E)."
     }
   ],
   "experiments": [
@@ -316,6 +320,13 @@
       "name": "bn4_chip_heatshot and seven more: BN4's spread chips moved, an attack family",
       "result": "BN4's records on BN6's own spreader family (0x25) tried first: each parts at t33, the arm each engine's own object. Moved as an attack unit (the state 0x1E, the third kind's 0x02 and 0x12, two kinds' tables), python3 build.py xdiff with the eight specs: each PASS over 300 frames, a 140 HP Mettaur left 100, 70, 40, 90, 60 and 30 by HeatShot, Heat-V, HeatSide, Bubbler, Bub-V and BublSide, a miss, and MegaMan struck with his arm out (the arm let go in both). Eleven mutations caught (a burst's shape and effect, the shot's wait, height, type and sound, the arm's kind and slot, a row's power and family, the attack's variables' place).",
       "meaning": "A state of BN4's MegaMan's runs as a BN6 attack family once its attack's variables' place and his animation's number are BN6's; the arm must be BN4's own, and can be shared by the families to come."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-10",
+      "name": "bn4_chip_flmline1 to 3, thunder1 to 3, twnfng1 to 3 and two misses: three more attack families",
+      "result": "python3 build.py xdiff with the eleven specs: each PASS (FlmLine3 to the frame of the hit, t41), a 140 HP Mettaur left 70, 20 and 0 by the flames, 100, 80 and 60 by the thunder at t123, 70, 40 and 10 by a fang at t28. With BN6's own thunder (Billy's pair) Thunder parted at t34 on the ball's art; with BN4's moved it passes, billy_v1 and thunderman_v1 as before. Thirteen mutations caught.",
+      "meaning": "The arm moves once and is shared; a state BN6 has no twin of takes MegaMan's animation numbers from the two arts' frames."
     },
     {
       "feature": "BN4's Navis in BN6's engine",
