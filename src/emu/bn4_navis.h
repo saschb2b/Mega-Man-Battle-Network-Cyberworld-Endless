@@ -35,6 +35,8 @@
 #define BN4_OW_SEARCHMAN  0x59
 #define BN4_OW_JUNKMAN    0x5A
 #define BN4_OW_TOPMAN     0x53 /* (named as he joined the proved; the others the row names wait for theirs) */
+#define BN4_OW_SPARKMAN   0x52 /* (named as he joined the proved, as TopMan) */
+#define BN4_OW_BURNERMAN  0x57 /* (named as he joined the proved, as TopMan) */
 #define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
 #define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
 #define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
@@ -307,5 +309,32 @@
                                        * battle sprite (movs r1,#8; movs r2,#0x12 at 0x080D031E) */
 #define BN4_TOPMAN_DAMAGE 0x080B69BCu /* his decision's first step: his +0x2C (his attack's damage) against his collision data's +0x1E
                                        * (BN4_COLL_DAMAGE), copied there with his +0x2E into its +5 (BN4_COLL_OBJ_2E) where they differ */
+
+/* SparkMan, derived after TopMan, the second of the other build (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md, SparkMan
+ * built): found by his type, each checked by the generator against his ROM */
+#define BN4_SPARKMAN      0x080B7734u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_SPARKMAN]): jump table 0x080B774C (init
+                                       * 0x080B7759, update 0x080B77AF, dying BN4_NAVI_DYING), then the after-step; his block to 0x080B7DB4 */
+#define BN4_SPARKMAN_STATES 0x080B77C4u /* his state table: BN4's generic Navi 0-5, his own 6-11 (0x080B77F5 his decision by his +0x78
+                                         * sub-state, 0x080B7A29 to 0x080B7CC1) */
+#define BN4_SPARKMAN_KEPT 0x080B7A62u /* his state 7's end: ldr r0,[r5,#0x60]; strb r0,[r5,#9], the CurAction he kept at his +0x60,
+                                       * which only movs of his own CurActions store (tools/xrecipe_bn4.py saved_actions) */
+#define BN4_SPARK_EFFECTS 0x080D191Cu /* his object's effects by his version (0x19, 0x17, 0x18, 0x18), read at 0x080D18B6 and spawned
+                                       * with the other side in r4's second byte at 0x080D18CE */
+
+/* BurnerMan, derived after SparkMan, the third of the other build (tools/xnavirecipe_bn4.py; docs/multirom/bn4-navis.md,
+ * BurnerMan built): found by his type, each checked by the generator against his ROM */
+#define BN4_BURNERMAN     0x080BD9C0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_BURNERMAN]): jump table 0x080BD9D8 (init
+                                       * 0x080BD9E5, update 0x080BDA99, dying BN4_NAVI_DYING), then the after-step; his block to 0x080BE168 */
+#define BN4_BURNERMAN_STATES 0x080BDABCu /* his state table: BN4's generic Navi 1, 2, 4 and 5, his own 0 and 3, his own 6-10 */
+#define BN4_BURNERMAN_TAIL 0x080BDA30u /* his init past his collision's set-up: his two flames set out (0x080BDA5A, r0 0 and 1, r1 his
+                                        * +0x60 and +0x68), each word ORed with 8, +8 4, his update (XnInit.tail) */
+#define BN4_BURNERMAN_FLAMES 0x080BDD5Cu /* his update's keeper of a flame's word (r0 its offset in him): counted up while 0 and time
+                                          * runs, a flame set out again at 0x5A0, its bit 4 by his statuses */
+#define BN4_FLAME         0x080D4158u /* the third kind's 0x39 (his flame): its init 0x080D418A (+0x20 its version * 0x50 + 0x3C),
+                                       * its update 0x080D4264, which waits on the time-stop test (0x08007948) */
+#define BN4_PANEL_PATTERN 0x08009EF6u /* a pattern of panels highlighted: r0, r1 a panel, r2 its pattern, r3 its side (0 forward);
+                                       * each by 0x08009DA0. BN6's 0x0800CCD4 takes its side packed with a direction routine */
+#define BN4_PANEL_PATTERNS 0x080125B0u /* its 24 patterns: pointers to signed (column, row) offsets, 0x7F ending each (BN6's
+                                        * 0x08019B78 the same 24) */
 
 #endif
