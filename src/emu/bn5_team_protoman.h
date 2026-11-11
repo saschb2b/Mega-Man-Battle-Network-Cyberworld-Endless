@@ -35,4 +35,14 @@
                                                 (movs r4,#0 at 0x080C6354) with this table's byte by its kind (+4) in bits 16-23
                                                 (lsls #16; orrs r4,r0), a byte a kind: 0, 4, 1, 2, 3, 3, 0, 0 */
 
+/* MagnetMan (AI 5, ids 0x119-0x11C): his magnet panel, BN5's own (none in BN6; docs/rom/bn5-world.md, BN5's magnet panel) */
+#define BN5_PANEL_MAGNET  5           /* its panel type: magnet (its flags 0x10210, BN5_PANEL_FLAGS_OF's, BN6's conveyors' word; BN6's 5 its holy) */
+#define BN5_MAGNET_ARRIVED 0x0801720Eu /* what a magnet panel does to an object coming onto it (from BN5_PANEL_ARRIVED at 0x080171AC): none
+                                       * where its collision data's +0x38 is not 0, its flags (+0x3C) hold 0x24, or it is the player (+0 2) whose
+                                       * NaviStats byte 0x2C (0x08010DEE) is 5; else its +0x40 ORed with 0x10 (0x08016C5C; BN6's BN6_STRUCK_SLIDE)
+                                       * and the object's +0x0F made 3 (the push's kind) */
+#define BN5_MAGNET_LAID   0x080E24CEu /* MagnetMan's state that lays them: sound 0xFC, then type 5 (movs r2,#5 at 0x080E24EE) by
+                                       * setPanelType (0x080E24F0) on each of eight panels, */
+#define BN5_MAGNET_PANELS 0x080E2518u /* ... a byte pair (column, row) each: columns 1, 3, 4, 6 of rows 1 and 3 */
+
 #endif

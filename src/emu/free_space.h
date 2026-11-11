@@ -130,6 +130,8 @@
 /* ---- art: +0x7A0000-+0x800000, art copied whole, a place each ---- */
 #define FREE_LIB_TEAM        (EMU_FREE + 0x7A0000u)  /* a liberation's teammates: BN5's Navis' overworld sprites and mugshots, a place each (xnavi.c) */
 #define FREE_LIB_TEAM_END    (EMU_FREE + 0x7FA000u)
+#define FREE_TEAM_SHARED_LAST (EMU_FREE + 0x7FA000u) /* the Navis' shared art's fourth room (a sprite of any Navi's once FREE_TEAM_SHARED_MORE is full: MagnetMan's child's first) (xnavi_install.c) */
+#define FREE_TEAM_SHARED_LAST_END (EMU_FREE + 0x800000u)
 
 /* ---- persistent: 0x02010CE0-0x02011800, persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) ---- */
 #define RAM_PACK_EXT         0x02010CE0u             /* the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry) (xchips_install.c) */
@@ -236,7 +238,8 @@
 	X("FREE_BN4_NAVI_SPRITE", (EMU_FREE + 0x77C000u), (EMU_FREE + 0x78C000u), "", "code") \
 	X("FREE_BRACKET_FACES", (EMU_FREE + 0x78C000u), (EMU_FREE + 0x790000u), "", "code") \
 	X("FREE_BRACKET", (EMU_FREE + 0x790000u), (EMU_FREE + 0x7A0000u), "", "code") \
-	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art")
+	X("FREE_LIB_TEAM", (EMU_FREE + 0x7A0000u), (EMU_FREE + 0x7FA000u), "", "art") \
+	X("FREE_TEAM_SHARED_LAST", (EMU_FREE + 0x7FA000u), (EMU_FREE + 0x800000u), "", "art")
 #define FREE_SPACE_ROM_ZONES(X) \
 	X("engine", (EMU_FREE + 0x000000u), (EMU_FREE + 0x002F00u)) \
 	X("layers", (EMU_FREE + 0x002F00u), (EMU_FREE + 0x090000u)) \

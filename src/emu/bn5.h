@@ -144,15 +144,6 @@
 #define BN5_IMMOBILIZE    0x0800CDA2u /* r0 frames at the collision data's +0x24, flag 0x4000 */
 #define BN5_SEA_MARKER_SPAWN 0x080E4D1Eu /* the marker, the fourth kind's 0x3E (a ripple, list 3's 0x2D), spawned: r5 the object, r0 it */
 #define BN5_PANEL_SEA     0x0A        /* its panel type: sea (none in BN6: a Fire object on it hurt as on poison, BN5_PANEL_STEP at 0x08016C9E; a Wood hit dries it) */
-/* Its magnet panel (none in BN6: MagnetMan's, docs/game/team-protoman.md, MagnetMan; not in BN6's engine yet) */
-#define BN5_PANEL_MAGNET  5           /* its panel type: magnet (its flags 0x10210, BN5_PANEL_FLAGS_OF's, BN6's conveyors' word; BN6's 5 its holy) */
-#define BN5_MAGNET_ARRIVED 0x0801720Eu /* what a magnet panel does to an object coming onto it (from BN5_PANEL_ARRIVED at 0x080171AC): none
-                                       * where its collision data's +0x38 is not 0, its flags (+0x3C) hold 0x24, or it is the player (+0 2) whose
-                                       * NaviStats byte 0x2C (0x08010DEE) is 5; else its +0x40 ORed with 0x10 (0x08016C5C; BN6's BN6_STRUCK_SLIDE)
-                                       * and the object's +0x0F made 3 (the push's kind) */
-#define BN5_MAGNET_LAID   0x080E24CEu /* MagnetMan's state that lays them: sound 0xFC, then type 5 (movs r2,#5 at 0x080E24EE) by
-                                       * setPanelType (0x080E24F0) on each of eight panels, */
-#define BN5_MAGNET_PANELS 0x080E2518u /* ... a byte pair (column, row) each: columns 1, 3, 4, 6 of rows 1 and 3 */
 #define BN5_FIELD_PANELS  0x0203A100u /* its field's panels, 8 a row from column 0, rows 0-4, each */
 #define BN5_PANEL_SIZE    0x24        /* ... this long (BN6's 0x20): type and alliance at BN6_PANEL_TYPE and BN6_PANEL_ALLIANCE, */
 #define BN5_PANEL_FLAGS   0x18        /* ... and its flags here, u32 (BN6's at +0x14), BN6_PANEL_STRUCK while an enemy's attack is on it */

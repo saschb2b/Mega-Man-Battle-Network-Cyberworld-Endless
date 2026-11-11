@@ -4173,7 +4173,8 @@ static void test_xnavi_static(void) {
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
 		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
-		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES),
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES) &&
+		XN_TEAM_LAST < XN_TEAM_LAST_END && XN_TEAM_LAST >= FREE_LIB_TEAM_END,
 		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third room apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */

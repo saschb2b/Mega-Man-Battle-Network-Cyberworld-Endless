@@ -444,6 +444,8 @@ TYPES = {
     (3, 0x64): ('moved', None, 'navis', "MagnetMan's: " + NO_TWIN),
     (3, 0x66): ('moved', None, 'navis', "MagnetMan's: " + NO_TWIN),
     (4, 0x19): ('moved', None, 'navis', "MagnetMan's: " + NO_TWIN),
+    (1, 0x55): ('moved', None, 'navis', "MagnetMan's child at his place: BN6's 0x55 runs the same code on another "
+                                        "sprite (list 4's 0x3C, each game's own)"),
     (3, 0x00): ('moved', None, 'navis', "Guard's: no BN6 type runs its code; NapalmMan's 0x33 spawns it too (kind 0x11, BN5 "
                                         "0x080CB4FC): the Navis' copy, installed before the chips', fixes its kinds' rows (its "
                                         "sprites by xchiprecipe.py's TABLE_SPRITES, its panels by TABLE_PANELS), so the chips "

@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "bn5_team_protoman.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "claims.h"
@@ -257,6 +258,26 @@ static void bonus_make(uint8_t out[BN6_PANEL_BONUS_SPAN]) {
 	for (int i = 0; i < BN6_PANEL_BONUS_SPAN / 2; ++i) put16(out + 2 * i, code[i]);
 }
 
+/* ---- a magnet panel pushes what comes onto it (BN5_MAGNET_ARRIVED) ----
+ * BN5's rules at BN6's twin of its arrival test, its fields at the same
+ * places in both games: none where the AI data's countdown (+0x38, which
+ * the arrival counts down before) is not 0 or the object floats or flies,
+ * else a push along the panel (BN6_STRUCK_SLIDE, its kind 3 at +0x0F).
+ * BN5 spares the player in its Soul form 5 (NaviStats byte 0x2C), MagnetSoul,
+ * which BN6's engine has none of yet (docs/game/team-protoman.md, unit 8). */
+#define MAGNET_SPARED  0x24u     /* the object's flags (BN6_COLL_FLAGS) that spare it: BN5's 0x0801721C */
+#define AI_PANEL_WAIT  0x38      /* u16 an AI data's frames before a panel acts on it again (BN5 0x08017164, BN6 0x0801A37A) */
+#define PUSH_KIND      0x0F      /* the object's push's kind, */
+#define PUSH_MAGNET    3         /* ... a magnet's (BN5 0x08017238) */
+
+void xpanels_magnet_arrived(uint32_t obj, uint32_t coll) {
+	uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
+	if (ai < BN6_EWRAM || ai >= BN6_EWRAM_END || hook_read16(ai + AI_PANEL_WAIT)) return;
+	if (hook_read32(coll + BN6_COLL_FLAGS) & MAGNET_SPARED) return;
+	hook_write32(coll + BN6_COLL_STRUCK, hook_read32(coll + BN6_COLL_STRUCK) | BN6_STRUCK_SLIDE);
+	hook_write8(obj + PUSH_KIND, PUSH_MAGNET);
+}
+
 /* ---- the install ---- */
 
 typedef struct {
@@ -299,14 +320,14 @@ static bool free_at(uint32_t at, uint32_t end) {
 	return true;
 }
 
-/* The flags table grown (BN6's 13 words, BN5's lava's and sea's, BN6's
- * type 0's for 15), and the IWRAM literal checked to be BN6's */
+/* The flags table grown (BN6's 13 words, BN5's lava's, sea's and magnet
+ * panel's), and the IWRAM literal checked to be BN6's */
 static bool flags_make(uint8_t out[16 * 4]) {
 	const uint8_t *bn5 = XR[XROM_BN5_COLONEL_US].data;
 	for (int t = 0; t < BN6_PANEL_TYPES; ++t) put32(out + 4 * t, rom32(BN6_PANEL_FLAGS_OF + 4u * (uint32_t)t));
 	put32(out + 4 * XPANEL_LAVA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_LAVA));
 	put32(out + 4 * XPANEL_SEA, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_SEA));
-	put32(out + 4 * 15, rom32(BN6_PANEL_FLAGS_OF));
+	put32(out + 4 * XPANEL_MAGNET, get32(bn5 + (BN5_PANEL_FLAGS_OF - BUS) + 4 * BN5_PANEL_MAGNET));
 	return rom32(FLAGS_IMAGE) == BN6_PANEL_FLAGS_IW && emu_read32(FLAGS_IMAGE) == BN6_PANEL_FLAGS_IW;
 }
 

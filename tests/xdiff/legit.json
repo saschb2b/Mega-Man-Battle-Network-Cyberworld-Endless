@@ -2,7 +2,7 @@
   "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and replays BN6's draws from BN5's by the twins of its rng, the engine's own draws one game alone makes named there too (rng), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/multirom/families.md; docs/devtools/differential.md). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF GyroMan's 0x107-0x10A as 0x1F4-0x1F7, SearchMan's 0x10D-0x110 as 0x1F8-0x1FB and Meddy's 0x11F-0x122 as 0x3E8-0x3EB; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF GyroMan's 0x107-0x10A as 0x1F4-0x1F7, SearchMan's 0x10D-0x110 as 0x1F8-0x1FB, Meddy's 0x11F-0x122 as 0x3E8-0x3EB and MagnetMan's 0x119-0x11C as 0x3E4-0x3E7; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
         "0x4F": "0x200",
         "0x50": "0x201",
@@ -69,7 +69,11 @@
         "0x11F": "0x3E8",
         "0x120": "0x3E9",
         "0x121": "0x3EA",
-        "0x122": "0x3EB"
+        "0x122": "0x3EB",
+        "0x119": "0x3E4",
+        "0x11A": "0x3E5",
+        "0x11B": "0x3E6",
+        "0x11C": "0x3E7"
       },
       "megaman": {
         "0x180": "0x1A0"
@@ -388,13 +392,14 @@
       ]
     },
     "panel_type": {
-      "why": "A panel's type (+2), the type it is drawn as (+6, the one-frame override's at +8) and the low nibble of its flags (BN5's +0x18, BN6's +0x14, the type ORed into its table's word): BN5's lava (8) and sea (0xA) are BN6's free types 13 and 14 where src/emu/xpanels.c brings them in, BN5's holy (9) BN6's 5 (src/emu/xfields.c), the rest the same numbers.",
+      "why": "A panel's type (+2), the type it is drawn as (+6, the one-frame override's at +8) and the low nibble of its flags (BN5's +0x18, BN6's +0x14, the type ORed into its table's word): BN5's lava (8), sea (0xA) and magnet panel (5) are BN6's free types 13, 14 and 15 where src/emu/xpanels.c brings them in, BN5's holy (9) BN6's 5 (src/emu/xfields.c), the rest the same numbers.",
       "evidence": [
         "the flags: _object_updatePanelParameters ORs the type into its word, BN5 0x0800AFE0 / BN6 IWRAM 0x030078DC (ldrb r1,[r0,#2]; ... orrs r1,r3)",
         "the drawn type: the same routines copy +2 to +6; BN5's per-panel update writes lava's 8 or 2 there as it blinks (0x0800AA68), BN6's its conveyors' own type or 2 (0x0800C478), the path lava and sea take in BN6 (xpanels.c, panel_ages)",
         "the flags' words: lava's 0x11010 and the sea's 0x30010 are BN5's (BN5_PANEL_FLAGS_OF), copied into BN6's grown table (xpanels.c, flags_make)"
       ],
       "bn5_to_bn6": {
+        "0x5": "0xF",
         "0x8": "0xD",
         "0xA": "0xE",
         "0x9": "0x5"
@@ -847,7 +852,7 @@
       ]
     },
     "navi_ai_index": {
-      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27, SearchMan's 3 as 28 and Meddy's 6 as 31.",
+      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27, SearchMan's 3 as 28, Meddy's 6 as 31 and MagnetMan's 5 as 30.",
       "bn5_to_bn6": {
         "12": "37",
         "11": "36",
@@ -862,7 +867,8 @@
         "4": "29",
         "2": "27",
         "3": "28",
-        "6": "31"
+        "6": "31",
+        "5": "30"
       }
     },
     "overlay_kind": {

@@ -116,7 +116,8 @@ static bool art_ok(const XVirusFamily *f, char *why, size_t len) {
 		const XvSprite *s = &f->sprites[i];
 		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
 			span_in(s->at, s->room, XN_TEAM_SHARED, XN_TEAM_END) ||
-			span_in(s->at, s->room, XN_TEAM_MORE, XN_TEAM_MORE_END) || span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END) || in_sprite_room(s, i)))
+			span_in(s->at, s->room, XN_TEAM_MORE, XN_TEAM_MORE_END) || span_in(s->at, s->room, XN_TEAM_LAST, XN_TEAM_LAST_END) ||
+			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END) || in_sprite_room(s, i)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k)
 			if (spans_meet(s->at, s->room, f->sprites[k].at, f->sprites[k].room)) return no(why, len, "sprites %d and %d meet", k, i);
@@ -233,7 +234,8 @@ static bool objects_refs_ok(const XVirusFamily *f, char *why, size_t len) {
 		const XvSprite *s = &f->sprites[i];
 		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
 			span_in(s->at, s->room, XN_TEAM_SHARED, XN_TEAM_END) ||
-			span_in(s->at, s->room, XN_TEAM_MORE, XN_TEAM_MORE_END) || span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END)))
+			span_in(s->at, s->room, XN_TEAM_MORE, XN_TEAM_MORE_END) || span_in(s->at, s->room, XN_TEAM_LAST, XN_TEAM_LAST_END) ||
+			span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 	}
 	for (int i = 0; i < f->ntypes; ++i)

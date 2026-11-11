@@ -53,9 +53,9 @@ STUBS = {0x080EA08C: 'XN_STUB_ZERO', 0x080EA0BA: 'XN_STUB_ZERO', 0x0802C10A: 'XN
 STUB_ARGS = {0x0800F350: 0x3E}
 
 # BN5's panel types as BN6's (tests/xdiff/legit.json, maps, panel_type): its lava and sea BN6's 13 and 14 where
-# src/emu/xpanels.c brings them in, its holy BN6's 5; a Navi's code that sets a panel's type or compares one read from a
+# src/emu/xpanels.c brings them in, its magnet panel BN6's 15 (MagnetMan's), its holy BN6's 5; a Navi's code that sets a panel's type or compares one read from a
 # panel (its +2) takes BN6's number
-PANEL_TYPES = {0x8: 0xD, 0x9: 0x5, 0xA: 0xE}
+PANEL_TYPES = {0x5: 0xF, 0x8: 0xD, 0x9: 0x5, 0xA: 0xE}
 # setPanelType's sites whose type (r2) the back walk does not reach, read by hand: site: (the type, why)
 PANEL_SITES = {
     0x080C9AA8: (7, "BlizzardMan's ice: movs r2,#7 at 0x080C9A8C, kept over two calls by push {r0-r2} / pop (ice, 7 in both games)"),
@@ -111,6 +111,10 @@ SPAWNS_OTHER = {
     # NumberMan's companion, the first kind's 0x54 (from his companion's start, 0x0800EE66): BN6's twin of the spawner
     # (0x080C5A48, the same steps) spawns its 0x55, which runs otherwise (no deep twin of BN5's 0x080C33AD)
     0x080C34A6: "NumberMan's companion",
+    # MagnetMan's first kind's 0x55, a child at his place (0x080C35E2, from his state at 0x080F6A5C): BN6's 0x55
+    # (0x080C5948) runs the same code, but its init loads list 4's 0x3C, which each game holds a sprite of its own at
+    # (BN5's 3169 bytes, BN6's 7352): magnetman_v1 told them apart at t4, its animation's counter and frame
+    0x080C35E2: "MagnetMan's 0x55",
 }
 
 # Writes of an object's +9 (CurAction for an enemy) that are no Navi's state: a moved object of the third kind copying its

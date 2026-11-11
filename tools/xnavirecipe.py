@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (5, 'MagnetMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -103,6 +103,9 @@ XN_TEAM_SHARED, XN_TEAM_END = XN_TEAM_ART + 6 * XN_SLOT_ART, EMU_FREE + 0x0AB000
 # ... and its third room, code-low's tail (src/emu/free_space.plan FREE_TEAM_SHARED_MORE, xnavi_recipe.h XN_TEAM_MORE: GyroMan's
 # overlay first), where a sprite goes once the second is full
 XN_TEAM_MORE, XN_TEAM_MORE_END = EMU_FREE + 0x141000, EMU_FREE + 0x150000
+# ... and its fourth, the art zone's free tail (free_space.plan FREE_TEAM_SHARED_LAST, xnavi_recipe.h XN_TEAM_LAST: MagnetMan's
+# child's sprite first), where a sprite goes once the third is full
+XN_TEAM_LAST, XN_TEAM_LAST_END = EMU_FREE + 0x7FA000, EMU_FREE + 0x800000
 
 
 def slot_code(slot):
@@ -168,7 +171,7 @@ NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1, 6: 1, 5: 2}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
@@ -1421,7 +1424,7 @@ class Alloc(X.Alloc):
         for lst, num, track in OB.IMAGE_COPIED.values():
             if track == 'navis' and num in self.lists.get(lst, ()):
                 self.lists[lst].remove(num)
-        self.shared_at, self.team_at, self.more_at = XN_SHARED_ART, XN_TEAM_SHARED, XN_TEAM_MORE
+        self.shared_at, self.team_at, self.more_at, self.last_at = XN_SHARED_ART, XN_TEAM_SHARED, XN_TEAM_MORE, XN_TEAM_LAST
         self.effect = NAVI_FIRST_EFFECT
 
     def shared(self, b5, lst, idx, fixed=None):
@@ -1439,13 +1442,15 @@ class Alloc(X.Alloc):
                 return None, None
             room = X.rounded(len(b), X.ROOM['load'])
             # (the first room while it holds the sprite, else the second, Team ProtoMan's: XN_TEAM_SHARED, else the third,
-            # XN_TEAM_MORE)
+            # XN_TEAM_MORE, else the fourth, XN_TEAM_LAST)
             if self.shared_at + room <= XN_END:
                 at, self.shared_at = self.shared_at, self.shared_at + room
             elif self.team_at + room <= XN_TEAM_END:
                 at, self.team_at = self.team_at, self.team_at + room
             elif self.more_at + room <= XN_TEAM_MORE_END:
                 at, self.more_at = self.more_at, self.more_at + room
+            elif self.last_at + room <= XN_TEAM_LAST_END:
+                at, self.last_at = self.last_at, self.last_at + room
             else:
                 return None, None
             self.memo[key] = dict(list=lst, index=idx, to_list=to_list, to_index=fixed[1] if fixed else self.lists[to_list].pop(0),
@@ -1523,7 +1528,8 @@ def c_art(r, n):
         L.append(f'static const XvSprite {n}_sprites[] = {{')
         for x in r.sprites:
             base, name = (XN_TEAM_SHARED, 'XN_TEAM_SHARED') if XN_TEAM_SHARED <= x['at'] < XN_TEAM_END else \
-                (XN_TEAM_MORE, 'XN_TEAM_MORE') if XN_TEAM_MORE <= x['at'] < XN_TEAM_MORE_END else (XN_SHARED_ART, 'XN_SHARED_ART')
+                (XN_TEAM_MORE, 'XN_TEAM_MORE') if XN_TEAM_MORE <= x['at'] < XN_TEAM_MORE_END else \
+                (XN_TEAM_LAST, 'XN_TEAM_LAST') if XN_TEAM_LAST <= x['at'] < XN_TEAM_LAST_END else (XN_SHARED_ART, 'XN_SHARED_ART')
             L.append(f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {name} + 0x{x["at"] - base:X}, '
                      f'0x{x["room"]:X} }},' + ('   /* (LZ77 in BN5) */' if x['lz'] else ''))
         L.append('};')
