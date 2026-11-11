@@ -1,0 +1,7 @@
+{
+ "bn4": "0x81",
+ "bn6": "0x8F",
+ "clock": "timer",
+ "what": "the Custom gauge full",
+ "why": "Played by the Custom gauge's fill, twins instruction for instruction (BN4 0x080147D4: its +0x24 += +0x26, at 0x4000 flag 2 (0x08007A74) and movs r0,#0x81 at 0x080147F2; BN6 0x0801C488: its +0x20 += +0x22, at 0x4000 flag 2 (0x0800A2D8) and movs r0,#0x8f at 0x0801C4A6), run by the main loop each fight frame (the events' outermost caller 0x08000300 in BN4, 0x0800031C in BN6), no object's state: the battle's timer's clock, both at t512 in billy_v1 (begun t513). Their songs share no sample, so they are paired by the routines that play them"
+}

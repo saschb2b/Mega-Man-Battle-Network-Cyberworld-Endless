@@ -1,0 +1,10 @@
+[
+ {
+  "name": "WhitWeb3's entry's row another",
+  "spec": "bn4_chip_whitweb3",
+  "poke": [
+   "080D4F36:2101"
+  ],
+  "what": "WhitWeb3's entry's copy (BN4 0x080D4F34, a routine of the unit's block that shares WhitWeb1's code) handing row 1 on (movs r1,#3 at 0x080D4F36 made #1): the webs on the top row, the Mettaur on the bottom untouched"
+ }
+]

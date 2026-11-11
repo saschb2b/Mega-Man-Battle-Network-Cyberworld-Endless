@@ -1,0 +1,14 @@
+[
+ {
+  "name": "KnightSoul's front column unguarded",
+  "spec": "soul_knight_front",
+  "soulbreak": 524288,
+  "what": "a chip used from KnightSoul's front column leaves him no unharmed frames where BN5's 0x0801038A gives 50"
+ },
+ {
+  "name": "a landed hit's mood left out",
+  "spec": "soul_knight_front",
+  "soulbreak": 16777216,
+  "what": "the hit's mood step (src/emu/soulmood.c, BN6_MOOD_HIT) raises the attacker's mood by nothing where BN5's 0x080127FA adds the hit's gain: KnightSoul's JustcOne lands and his mood stays 0x80 where BN5's goes to 0x9E"
+ }
+]

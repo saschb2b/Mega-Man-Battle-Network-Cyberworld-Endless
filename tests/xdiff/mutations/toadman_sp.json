@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the sea's marker not kept",
+  "spec": "toadman_sp",
+  "poke": [
+   "08D900AA:46C0"
+  ],
+  "what": "the marker's spawn (xsea.c's stub, its str r0,[r2] at XN_SEA + 0x0A) keeps no marker: a new one spawned each frame ToadMan is under, where BN5's one follows him"
+ }
+]

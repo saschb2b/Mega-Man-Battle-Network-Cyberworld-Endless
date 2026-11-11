@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a Navi's state number not moved (NumberMan)",
+  "spec": "numberman_v1",
+  "poke": [
+   "08D9991A:2009"
+  ],
+  "what": "NumberMan's decision's CurAction (BN5 0x080F9F86, BN6's copy at XN_CODE + 0x7800 + 0x11A) left at BN5's 9 where the recipe makes it 11"
+ },
+ {
+  "name": "a sprite table's entry not renumbered",
+  "spec": "numberman_v1",
+  "poke": [
+   "08D9A701:06:1"
+  ],
+  "what": "NumberMan's companion's sprite table (BN5 0x080C33A8, its kind 0's number at +1, its copy at XN_CODE + 0x8700 + 0x1) left at BN5's list 4 number 6, BN6's another sprite, where the recipe makes it 0xAC, BN5's copied (XvByte)"
+ }
+]

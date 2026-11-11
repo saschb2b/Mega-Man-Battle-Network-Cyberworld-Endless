@@ -1,0 +1,13 @@
+{
+ "name": "BN6's AI data's unused HP mark",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x0E",
+  "0x0E"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's AI data +0xE reads 0xFF from its setup; its two readers keep nothing of it: 0x0800A86E walks the eight alive actors and loads the HP of one whose +0xE is not 0xFF, then returns without using it, and the common delete state 0x08016C4E (MegaMan's too, his routine's table 0x080EB7B8) loads his HP into r1 and drops it as it writes 0xFF there (0x08016C66-0x08016C70). BN4 has no such mark (its +0xE the chip charge's power attack, BN6's +5, mapped)"
+}

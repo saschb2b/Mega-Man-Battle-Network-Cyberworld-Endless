@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "BN4's chips designed and scoped (docs/multirom/bn4-chips.md): the census, ids past 511 by ten bits for both older games, BN4's Program Advance list (docs/rom/bn4.md, Its Program Advances: BN4_PA_LIST, BN4_PA_LIST_REF, BN4_PA_COUNT, BN4_PA_RECIPES, BN4_PA_KIND_LISTED in bn4_battle.h)."
+}

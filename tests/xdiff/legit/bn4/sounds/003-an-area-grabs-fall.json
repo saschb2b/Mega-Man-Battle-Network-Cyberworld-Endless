@@ -1,0 +1,7 @@
+{
+ "bn4": "0x93",
+ "bn6": "0xA1",
+ "clock": "state",
+ "what": "an area grab's fall",
+ "why": "Played by the grab's third-kind object, type 0x0F in both games (BN4 0x080CEFD4, BN6 0x080C7C84), in its first state: movs r0,#0x93 and the bl to PlaySoundEffect at BN4 0x080CF02E (in 0x080CEFF8), movs r0,#0xA1 and its bl at BN6 0x080C7CDE (in 0x080C7CA8), each after the same ldr r0,[pc]; str r0,[r5,#0x3c]. bn4_chip_areagrab at t34"
+}

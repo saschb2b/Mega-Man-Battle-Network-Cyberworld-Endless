@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_propbom1, its struck, 2 and 3: BN4's PropBom moved",
+  "result": "python3 build.py xdiff with the four specs: each PASS over 300 frames (the blast at t102, a Mettaur's 140 HP to 20 and 250 to 90; the bomb ended by a wave at t73 and by a Mettaur's step at t66), eleven mutations caught. On the way: with the blast handed BN4's effect number BN6's routine drew BN6's own explosion (the effects' sprite state at t102); the copy hands it BN4's effect's copy.",
+  "meaning": "An object with HP that takes an obstacle slot moves as any other where the slots' routines are the engines' twins; an engine routine that spawns an effect by a number it is handed needs the number the unit's copy of the effect has."
+}

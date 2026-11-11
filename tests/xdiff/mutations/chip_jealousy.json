@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a moved support routine's entry",
+  "spec": "chip_jealousy",
+  "poke": [
+   "08E004F4:08E00C01:4"
+  ],
+  "what": "the grown support routines' entry 0x3D (XC_SUPPORT + 0xF4) left at their stub (XC_STUBS) where the install points it at Jealousy's moved routine"
+ },
+ {
+  "name": "a moved support routine's object type",
+  "spec": "chip_jealousy",
+  "what": "Jealousy's object spawned as BN5's fourth kind's 0x35 (movs r0,#0x36 at BN5's 0x080E462C, written at its copy) where BN6's twin 0x36 runs",
+  "poke5": [
+   "080E462C:2035"
+  ]
+ }
+]

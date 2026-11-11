@@ -1,0 +1,7 @@
+{
+ "bn4": "0x109",
+ "bn6": "0x93",
+ "clock": "state",
+ "what": "the invisibility's",
+ "why": "Played by the routine that makes an object invisible, twins the invisibility's support object calls from its own state (BN4 0x0800C6BC from 0x080E8AAC, BN6 0x08010474 from 0x080E8858): its timer stored, its collision flag set (BN4 0x08012F82, BN6 0x0801A152), then movs r0,#0xa; adds r0,#0xff and the bl to PlaySoundEffect at BN4 0x0800C6CC, movs r0,#0x93 and the bl at BN6 0x08010482. bn4_chip_invis at t34"
+}

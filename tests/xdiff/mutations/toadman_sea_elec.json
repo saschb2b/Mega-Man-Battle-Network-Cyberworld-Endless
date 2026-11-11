@@ -1,0 +1,11 @@
+[
+ {
+  "name": "Elec stopped by the submerged",
+  "spec": "toadman_sea_elec",
+  "poke": [
+   "08D900C4:2C07",
+   "08D900F6:2C07"
+  ],
+  "what": "the hit gate's tests of the submerged take Elec for another element (cmp r4,#3 made #7, at XN_SEA + 0x10 + 0x14 and + 0x40 + 0x16): MegaMan's Elec shot passes over ToadMan under the sea at t317 where BN5's hits him"
+ }
+]

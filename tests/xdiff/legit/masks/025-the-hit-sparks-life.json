@@ -1,0 +1,35 @@
+{
+ "name": "the hit spark's life",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "megaman's",
+  "spark",
+  "engine"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x04"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "why": "Where MegaMan's shot strikes, or a chip's attack through the engine's hit area (the third kind's 0x03, the spark at its +0x4C: the engine's, tools/xdiff_masks.py), the engine spawns a spark (the fourth kind's type 4, the shot at its +0x4C) drawn from sprite list 5's 5, each game's own sprite with its own frames: BN5's runs a frame longer, so it is still there (and its state not yet its end) the frame BN6's is gone. Its place (from the RNG, followed) is compared, what its sprite makes of its frames is not (as the lava's spark's). The same spark where a family's attack strikes (whose spark: the attack calls the engine's object_spawnCollisionEffect, which spawns it with the attack's hit effect as its kind) lives as long as its sprite's frames do, each game's own.",
+ "evidence": [
+  "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128), their frames' pointers apart (its sprite state's +0x20: 18420 bytes into BN5's, 17840 into BN6's)",
+  "in cangard_v1_keys each of the 17 sparks lives one frame more in BN5's",
+  "marina_v1: the spark of Marina's attack (kind 2, owner the third kind's type 0x8F in both) gone from BN6's at t528, from BN5's a frame on",
+  "chip_mrkcan1: a spark of MrkCan's shot a frame apart in its sprite (its sprite state's +1, 2 against 1) at t92",
+  "chip_geyser: the spark of Geyser's hit (the hit area BN6's own, spawned by the moved geyser) a frame apart, its sprite state's +1 3 against 2, at t82"
+ ],
+ "sprite_offsets": [
+  "0x01-0x07",
+  "0x0A-0x14",
+  "0x16-0x37"
+ ]
+}

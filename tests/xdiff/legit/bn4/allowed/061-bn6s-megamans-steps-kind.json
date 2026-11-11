@@ -1,0 +1,13 @@
+{
+ "name": "BN6's MegaMan's step's kind",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "offsets": [
+  "0x0F",
+  "0x0F"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6 keeps the kind of a step an object takes at its +0x0F: its step onto a panel begun (BN6_STEP_BEGIN 0x0801AD12: collision flags 0x100 and 4, then movs r0,#1; strb r0,[r5,#0xf] at 0x0801AD5C; four more steps alike, 0x0801AC2E, 0x0801ADEE, 0x0801AE4A, 0x0801AEF2) sets it, its slide's end clears it (0x08016804-0x08016806), and its slide's step reads it as the row of its table (0x0800E468: ldrb r0,[r5,#0xf] at 0x0800E46C, into 0x0800E498's table at 0x0800E4AC). BN4's twin of the step (BN4_STEP_BEGIN 0x0801393E, the symbol map's pair) sets the same collision flags (0x08013988-0x08013992) and no byte of the object's, and BN4's slide's step (0x0800ACAA) takes its row from the collision data's push bits (+0xD, 0x0800ACB2) instead. BN4's +0x0F is its enemy id's byte, read as BN6's NameID by the trace, so BN4's side holds 0 there. windman_v1: MegaMan's +0x0F 1 in BN6 alone while the gust pushes him a column (t4-t7) and while his wind pulls him two (t882-t889), his place, panels and every other byte the same in both. His alone, BN6's side only where BN4's holds 0"
+}

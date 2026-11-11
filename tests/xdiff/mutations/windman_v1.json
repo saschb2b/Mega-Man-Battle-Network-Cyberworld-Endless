@@ -1,0 +1,34 @@
+[
+ {
+  "name": "WindMan's sound at another pool slot",
+  "spec": "windman_v1",
+  "poke": [
+   "080D9CC0:2033"
+  ],
+  "what": "his air shot's sound 0xB2 (BN4 0x080D9CC0: movs r0,#0xb2 in the third kind's 0x63, the recipe's pool slot 0x32, its copy at XN_BN4_CODE + 0x36A8) made the pool's second slot, 0x33: another of his sounds where BN4 plays the shot's (caught at t105, the family's sounds)"
+ },
+ {
+  "name": "WindMan's wind spawned with another r4",
+  "spec": "windman_v1",
+  "poke": [
+   "080C3372:2401"
+  ],
+  "what": "his decision's spawn of his wind (BN4 0x080C3372: movs r4,#0 before bl BN4_WIND_SPAWN, the call aimed at BN6_WIND_SPAWN) given r4 1, which the fourth kind's spawn keeps at the wind's +4: an argument of a paired call passed wrong (caught at t1, his companions' animation, which follows his wind)"
+ },
+ {
+  "name": "WindMan's air shot's collision word at BN4's place",
+  "spec": "windman_v1",
+  "poke": [
+   "080D9D1A:6D40"
+  ],
+  "what": "his air shot's read of its collision data's flags (BN4 0x080D9D1A: ldr r0,[r0,#0x54], the recipe's BN6's +0x70, collision data +0x54 in BN4) left at BN4's +0x54: the layout's fix-up undone (caught at t179, the shot's state)"
+ },
+ {
+  "name": "WindMan's air shot's speed shifted",
+  "spec": "windman_v1",
+  "poke": [
+   "080D9CCC:0349"
+  ],
+  "what": "his air shot's speed (BN4 0x080D9CCC: lsls r1,r1,#12, its version << 12 times its step, into +0x40) made a shift of 13: an immediate of the moved code copied wrong (caught at t104, the shot's place)"
+ }
+]

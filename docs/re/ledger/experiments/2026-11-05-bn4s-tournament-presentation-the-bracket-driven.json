@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's tournament presentation",
+  "date": "2026-11-05",
+  "name": "The bracket driven from Lan's room",
+  "result": "tools/romlab on tools/bn4_lab.py boot's state: the game state's +0 written 0x10-0x2C in turn showed the jack-in, the PET, the city map, The Den Battle Tournament's bracket (0x1C; 0x2C the same screen through mode 0x34) and the Chip Trader (0x20 and 0x24 drawn wrong without their set-up). Eight entrants poked at 0x02001460 + t * 0x20 and 0x0200ACC5 = t: each of the four tournaments' brackets drawn with the plates by id (colour with 0x40, grey without, MegaMan's for 0x1E in the final with bits 1 and 2; 0x81 left 0x01 as the screen left), lines lit by the rounds' bits. Probes: setup f12441, start f12442, lines f12443, state 4 from f12444; A at f12840, state 8 f12863, the map again after. Mode 0x24 written from the title screen draws the plates and lines over broken backgrounds.",
+  "meaning": "BN4's bracket is driven by six writes on a booted game in its map mode: the screen needs no story state, only the tournament's 32 bytes and the screen's three. Its frames are the oracle a moved copy would be proved against. What it cannot show: an entrant BN4 has no plate for.",
+  "link": "../multirom/bn4-tournament.md"
+}

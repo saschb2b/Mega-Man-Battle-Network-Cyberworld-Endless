@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
+}

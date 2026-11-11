@@ -1,0 +1,24 @@
+{
+ "name": "the renderer's slots",
+ "part": "obj",
+ "sprite_offsets": [
+  "0x08-0x09",
+  "0x24-0x27"
+ ],
+ "why": "Each frame the sprite renderer gives each object drawn a place for its tiles in OBJ VRAM (its sprite state's +0x08, u16) from a running count over all it draws before it, and keeps the frame it last copied there (+0x24), cleared when the place moves. The code is the same in both, but what each game draws (MegaMan's own sprite, the HUD, BN6's own effects) differs, so the places do. Drawing resources, not anyone's logic: an object's animation is compared by its sprite state's animation (+0x00) and the pointers to its current frame (+0x1C, +0x20, relative to its sprite's data). This mask is for what is not the family's (MegaMan's side, a native's, the engine's); the family's places are read as their rank among the family's own (maps, renderer) and its cache (+0x24) is compared. The lava's spark (whose panels: the code under test, as a family's), the spark the family's attack strikes with (whose spark) and an effect the engine's code gives for it (whose effect) likewise: its place there is the count of what was drawn before it, MegaMan's own sprite among it.",
+ "evidence": [
+  "the tile place: BN5 0x081C7FF4-0x081C7FFC / BN6 0x081D658C-0x081D6594 (the IWRAM renderer's ROM copies), the frame copied to 0x06010000 + place x 32 (BN5 0x081C800E / BN6 0x081D65A6), its cache cleared where the place moved (BN5 0x081C7FD4 / BN6 0x081D656C)",
+  "a sprite's data pointer +0x18 is its data's start + 4 (the sprite's set-up stores it so), so +0x1C-0x24 are compared from it"
+ ],
+ "whose": [
+  "megaman",
+  "megaman's",
+  "native",
+  "native's",
+  "engine",
+  "panels",
+  "spark",
+  "effect",
+  "chip's"
+ ]
+}

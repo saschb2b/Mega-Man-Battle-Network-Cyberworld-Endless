@@ -1,0 +1,13 @@
+{
+ "bn4": "0x132",
+ "bn6": "0xD0",
+ "clock": "state",
+ "foes": [
+  "0x80",
+  "0x81",
+  "0x82",
+  "0x83"
+ ],
+ "what": "Roll's sound 0x132, its copy",
+ "why": "Played by her copied MegaMan state 45 as it spawns her shot, the third kind's 0x0B (BN4: movs r0,#0x33 and adds r0,#0xff at 0x080EFB24, its bl to PlaySoundEffect at 0x080EFB28; BN6: its copy's movs r0,#0xd0 and adds r0,#0, the recipe's immediates), a state's: BN4's song 0x132 copied into the pool's fourth slot, BN6's empty 0xD0 (the owner's call 11). In her battles alone (foes)"
+}

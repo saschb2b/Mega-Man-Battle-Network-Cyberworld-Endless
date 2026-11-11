@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a Soul's buster flash BN6's object",
+  "spec": "soul_buster",
+  "soulbreak": 8,
+  "what": "MegaMan's arm flash in a Soul (BN5's kind 0x23, its frame the Soul) spawned by BN6's spawner as BN6's object (src/emu/soullook.c's redirect to BN5's moved spawner left out): BN6's own kind 0x23 of its own table, another sprite and object where BN5 runs its image object"
+ }
+]

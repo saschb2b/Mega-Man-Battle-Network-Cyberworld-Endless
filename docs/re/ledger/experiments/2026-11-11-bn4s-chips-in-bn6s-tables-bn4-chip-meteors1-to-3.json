@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_meteors1 to 3 and _miss: BN4's Meteors moved",
+  "result": "python3 build.py xdiff with the four specs: each PASS; a 140 HP Mettaur on the aimed panel (4,2) left 90 at t81 and 40 at t102 (Meteors1), 80 and 20 (Meteors2), 70 (Meteors3) in both, BN6's a frame later; off the panel, 300 frames with the five meteors on the empty panel and the Mettaur untouched. Seven mutations caught (the count, the pace, the star's kind, the controller's dispatch number, a row's power and subfamily, the aim's row).",
+  "meaning": "A unit can run a type an earlier unit moved by a copy of its spawner alone (SHARED3), the type's code in the engine once."
+}

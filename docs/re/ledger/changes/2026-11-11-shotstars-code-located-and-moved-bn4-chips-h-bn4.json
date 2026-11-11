@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "ShotStar's code located and moved (bn4_chips.h BN4_SHOTSTAR 0x080E5D78, BN4_T4_SHOTSTAR 0x34, BN4_STAR_SPAWN 0x080D879A, BN4_T3_STAR 0x56, BN4_STAR_KINDS 0x080D8580, BN4_T4_STAR_MARK 0x35; docs/rom/bn4.md, ShotStar's code): the star's spawner is BN6's by body, its type not, so it moves with the unit; its sprite, effect and sounds copied at numbers of the chips'."
+}

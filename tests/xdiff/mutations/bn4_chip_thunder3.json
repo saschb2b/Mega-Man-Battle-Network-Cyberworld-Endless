@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the thunder's type another",
+  "spec": "bn4_chip_thunder3",
+  "poke": [
+   "080D215A:20CB"
+  ],
+  "what": "the thunder's spawner's copy (its movs r0,#0x2a at BN4 0x080D215A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no ball"
+ }
+]

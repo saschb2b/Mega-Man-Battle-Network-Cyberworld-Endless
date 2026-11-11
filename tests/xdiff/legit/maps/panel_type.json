@@ -1,0 +1,13 @@
+{
+ "why": "A panel's type (+2), the type it is drawn as (+6, the one-frame override's at +8) and the low nibble of its flags (BN5's +0x18, BN6's +0x14, the type ORed into its table's word): BN5's lava (8) and sea (0xA) are BN6's free types 13 and 14 where src/emu/xpanels.c brings them in, BN5's holy (9) BN6's 5 (src/emu/xfields.c), the rest the same numbers.",
+ "evidence": [
+  "the flags: _object_updatePanelParameters ORs the type into its word, BN5 0x0800AFE0 / BN6 IWRAM 0x030078DC (ldrb r1,[r0,#2]; ... orrs r1,r3)",
+  "the drawn type: the same routines copy +2 to +6; BN5's per-panel update writes lava's 8 or 2 there as it blinks (0x0800AA68), BN6's its conveyors' own type or 2 (0x0800C478), the path lava and sea take in BN6 (xpanels.c, panel_ages)",
+  "the flags' words: lava's 0x11010 and the sea's 0x30010 are BN5's (BN5_PANEL_FLAGS_OF), copied into BN6's grown table (xpanels.c, flags_make)"
+ ],
+ "bn5_to_bn6": {
+  "0x8": "0xD",
+  "0xA": "0xE",
+  "0x9": "0x5"
+ }
+}

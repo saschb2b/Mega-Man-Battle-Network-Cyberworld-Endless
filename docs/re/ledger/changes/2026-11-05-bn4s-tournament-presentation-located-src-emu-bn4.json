@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "BN4's tournament presentation located (src/emu/bn4_tournament.h: the main modes 0x0800032C, the bracket screen 0x0804395C and its opener 0x08005792, the tournaments at 0x02001460, the cutscene commands 0x52-0x55 and the text command FC 01; docs/rom/bn4.md, The tournaments) and driven in romlab; the two ways into a run measured and the move into BN6 recommended (docs/multirom/bn4-tournament.md)."
+}

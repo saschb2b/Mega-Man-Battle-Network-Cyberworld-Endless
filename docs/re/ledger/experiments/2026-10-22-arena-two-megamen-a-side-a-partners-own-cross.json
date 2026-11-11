@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-22",
+  "name": "Two MegaMen a side: a partner's own Cross",
+  "result": "BN6's crossing controller (0x020367F0) crosses its two records' objects alone; with its turn check sent to the crossing where a partner has a Cross (0x080148C0), his object asked to cross at its step's first frame and waited for (0x08014944: 0x4000 into his AI data's +0x44, the wait on +0x48's 0x80) and the pending form answered his own where the crossing object is his (0x0801595E), both partners cross into HeatCross at the first turn while their leads stay, on both GBAs. 3,854 iterations 0 apart, 88 hashes the same with 430 rollbacks and with none; arenaroll=8 666 of 666 the same, its 88 hashes the delay alone's; his Cross none on the second GBA alone parts them from iteration 1. The step's wait first returned with HOOK_RETURN into a caller that reached it by mov lr,pc; bx r1 (lr's Thumb bit clear): the game ran ARM and stopped on the black crossing screen; a jump to lr | 1 mends it. His pending form is taken as the controller's mode 8 begins, as BN6 takes its records'; kept to his next turn, the check as a turn's change begins met it again and crossed him anew.",
+  "meaning": "BN6's own crossing runs for a third and fourth MegaMan from three hooks; his choice is a message of his stream.",
+  "link": "../online/arena/two-a-side/cross.md"
+}

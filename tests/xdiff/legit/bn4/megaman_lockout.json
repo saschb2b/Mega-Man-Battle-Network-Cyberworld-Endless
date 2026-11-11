@@ -1,0 +1,5 @@
+{
+ "why": "As a chip's attack ends each game keeps the chip's lock-out (the record's +0x14, MegaMan's AttackVars +5) in his AI data, the frames he cannot act: BN4's end stores it as a halfword at +0x3A (0x0800C9FC: ldrb r0,[r7,#5]; strh r0,[r1,#0x3a] at 0x0800CA0A-0x0800CA0C), BN6's as a byte at +0x19 (0x08011714: ldrb r0,[r7,#5]; strb r0,[r1,#0x19] at 0x08011732-0x08011734, for an attack of kind 2), each counted down a frame at a time. BN4's is read at BN6's place where BN6's place holds 0 in BN4's AI data and the halfword's high byte is 0. bn4_chip_counter1 t58: 0x1D at BN4's +0x3A and at BN6's +0x19 (Counter1's 30 frames, one counted).",
+ "bn4": "0x3A",
+ "bn6": "0x19"
+}

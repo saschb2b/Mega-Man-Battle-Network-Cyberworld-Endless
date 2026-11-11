@@ -1,0 +1,8 @@
+[
+ {
+  "name": "UNITE stands while worried",
+  "spec": "soul_mood_unite",
+  "soulbreak": 134217728,
+  "what": "UNITE's rule (src/emu/soulunite.c's calm_enough) reads no worry where BN5_UNITE_STAND refuses it: KnightSoul's Break chip lights UNITE and he unites while worried"
+ }
+]

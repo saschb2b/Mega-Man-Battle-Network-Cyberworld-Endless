@@ -1,0 +1,8 @@
+{
+  "name": "Arena",
+  "state": "proven",
+  "now": "NetBattles from the Net Square between two games, each running both linked cores, only keys crossing the server, the pair hashed every 60 frames. Full rules for two games with BN5's ROM: BN5's installs written down as the game's core makes them and made again in both pair cores, BN5's chips and Souls carried; UNITE's Soul carried to the other GBA by the pair. Proven on two clients: MrkCan1 and KnightSoul on both screens with every hash agreeing.",
+  "left": "The other five Souls, Chaos Unison, ColonelSoul's button and BN5's mood in a NetBattle seen on both GBAs; a marker that wanders against a moving target checked against BN5; rollback.",
+  "updated": "2026-10-18",
+  "link": "../online/arena/overview.md"
+}

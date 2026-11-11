@@ -1,0 +1,8 @@
+{
+  "feature": "Trade",
+  "date": null,
+  "name": "Spare chips read from the Pack",
+  "result": "Six folder scenarios through BN6's own folder editor agreed with the reader; six planted faults caught.",
+  "meaning": "Which copies are spare (the Pack less every folder's copies) can be read exactly; the rule is kept at commit 7b4b8ef.",
+  "link": null
+}

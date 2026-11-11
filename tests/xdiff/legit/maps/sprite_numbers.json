@@ -1,0 +1,18 @@
+{
+ "why": "An object that keeps the sprite it loads by its list and number in its own bytes (the afterimage, the fourth kind's 0x28: +4 its list x 4 and +5 its number, as its spawner's caller packs them into r4, loaded at BN5 0x080E3648, its moved copy's the same) keeps BN6's numbers where an install copied BN5's sprite to a number of its own (a recipe's sprites: BN5's list and number, BN6's, tools/xchiprecipe.py's AFTERIMAGE_SPAWN for the packed word): BN5's read as BN6's. The sprite itself is compared at its sprite state's +0x18 by its bytes (sprites).",
+ "objects": {
+  "T4:0x28": {
+   "list": "0x04",
+   "number": "0x05"
+  }
+ },
+ "recipes": [
+  "src/emu/xchips_bn5.c",
+  "src/emu/xvirus_bn5.c",
+  "src/emu/xnavi_bn5.c",
+  "src/emu/soulcode_bn5.c"
+ ],
+ "evidence": [
+  "chip_darkwide t47: DarkWide's wave's afterimage, +4 0x10 in both, +5 BN5's 0x1D and BN6's 0xF0 (xchips_bn5.c's spreads_sprites: BN5's 4:0x1D copied to BN6's 4:0xF0), its sprite the same bytes in both"
+ ]
+}

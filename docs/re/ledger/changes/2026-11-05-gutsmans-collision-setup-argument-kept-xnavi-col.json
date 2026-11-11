@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "GutsMan's collision setup argument kept (XNavi.coll_arg, a spawn-end shim returning by mov pc,lr); BN4's Navis' sound pool pointed by battle (emu_before_frame); the BN4 comparator's Navi rules (navi_ai, a Navi's opening count, his code's room keyed for the draws, spawn_leftover, leftovers); gutsman_v1 recorded FAIL at t266."
+}

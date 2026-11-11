@@ -1,0 +1,7 @@
+{
+ "bn4": "0x121",
+ "bn6": "0xAD",
+ "clock": "state",
+ "what": "a wind's start",
+ "why": "Played by the init of the engine's wind in each game (the fourth kind's 0x41, spawned by WindMan's decision and attack through BN4_WIND_SPAWN and its twin BN6_WIND_SPAWN): BN4's at 0x080E6840 (movs r0,#0x22 and adds r0,#0xff at 0x080E6846, its bl to PlaySoundEffect at 0x080E684A), BN6's twin at 0x080E65A4 (movs r0,#0xad at 0x080E65AA, its bl at 0x080E65AC), the same steps (+0x6C 3, the sound, state 4, its update), a state's: the hooks' sound events from 0x080E684F in BN4 at t1 and 0x080E65B1 in BN6 at t2 in windman_v1 (begun a frame after each). Each game's own song for its own wind, paired by the routines that play them"
+}

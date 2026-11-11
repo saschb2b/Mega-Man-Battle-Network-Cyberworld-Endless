@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the Navis' buster another family",
+  "spec": "darksoul_v1",
+  "poke": [
+   "08D90038:2010"
+  ],
+  "what": "the Navis' buster's setup (XN_STUB_BUSTER, its movs r0 at + 0x18) answering family 0x10 (the step) where BN5's 0x16 is BN6's 0x66 (XN_FAMILY_OF): the Dark Soul's first shot at t16"
+ }
+]
