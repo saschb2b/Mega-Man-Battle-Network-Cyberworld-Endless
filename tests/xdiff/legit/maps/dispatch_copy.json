@@ -1,0 +1,8 @@
+{
+ "why": "BN6's virus dispatcher (each virus each frame, the first kind's type 0 for enemies) writes the virus object's +0x3E into its AI's data +0x3C after its state has run, but while it is bubbled (its CurAction 7, a state BN5 lacks); BN5's dispatcher writes nothing there. So a moved family's AI data reads BN6's dispatcher's copy at +0x3C where BN5's keeps whatever its own code left (nothing, for every family moved so far). The snapshot reads BN5's +0x3C as BN6's dispatcher writes it, its object's own +0x3E, where BN5's +0x3C is 0 (its code wrote none): a translation of the family's record, not a mask; where BN5's own code wrote a value there it is compared as it is.",
+ "evidence": [
+  "BN6 0x0810A362-0x0810A36C: ldrb r0,[r5,#9]; cmp r0,#7; beq; ldr r1,[r5,#0x58]; ldrh r0,[r5,#0x3e]; strh r0,[r1,#0x3c]",
+  "BN5 0x08104550-0x081045CA: the dispatcher's whole code (its pre-step, the state, the per-frame hook, the collision data presented) stores to no AI data",
+  "tinhawk_v1, batty_v1, cactikil_v1: BN6's +0x3C its object's +0x3E (0x28, 2, 0xC) at the first frame the object's +0x3E is set, BN5's 0"
+ ]
+}

@@ -1,0 +1,12 @@
+{
+ "name": "the cube's kind's row, each game's own table",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x59",
+ "part": "obj",
+ "offsets": [
+  "0x60",
+  "0x63"
+ ],
+ "why": "Each init keeps the address of its kind's row at +0x60 (BN4 0x080D8A42: str r7,[r5,#0x60], r7 0x080D89C0 + 6 x its kind; BN6 0x080D11F0, 0x080D11A4 + 8 x its kind): each game's own table's address, the rows' numbers the same but for BN6's NameID (the entry above) and its broken sound (0x97 where BN4's row holds 0x95, the pair legit.json's bn4 sounds has)."
+}

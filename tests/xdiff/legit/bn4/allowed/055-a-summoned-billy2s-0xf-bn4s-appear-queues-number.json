@@ -1,0 +1,14 @@
+{
+ "name": "a summoned Billy2's +0xF, BN4's appear queue's number",
+ "spawn_leftover": {
+  "kind": "T1",
+  "type": "0x2C1",
+  "word": "0x0C",
+  "bn4": [
+   "raw",
+   33751040
+  ],
+  "bn6": "0x30000"
+ },
+ "why": "As a summoned Mettaur's +0xF (above): Roll V2's summon number 2 of her battle, the word at +0xC, BN4's 0x02030000 against BN6's 0x30000 (read whole, as it looks like a pointer into EWRAM: its +0xE the element, 3 in both, Billy's electricity, and its +0xF BN4's 2 against 0)"
+}

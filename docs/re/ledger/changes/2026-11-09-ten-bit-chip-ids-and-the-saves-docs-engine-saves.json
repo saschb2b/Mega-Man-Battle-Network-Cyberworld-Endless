@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "Ten-bit chip ids and the saves (docs/engine/saves.md): RUN_MAGIC \"CWEC\" at ten bits, a run saved with nine-bit folders converted once after its state loads (BN6_FOLDERS in bn6_chips.h)."
+}

@@ -1,0 +1,19 @@
+{
+ "why": "Effects (the fourth kind's type 0) name no object that spawned them; those of the effect ids the family's code spawns are the family's, compared as such: its muzzle's blast (BN5's 0x57, BN6's 0x6C: BN5 0x08108FB6) and its reticle's strike (0x0E: BN5 0x080C9660-0x080C9662); a Navi's, its own (effect, navis: 0xA0 on). Any other effect is the engine's or another enemy's (in the smoke spec the Mettaur's 0x14), which stops a spec as MegaMan's own state does.",
+ "bn6": [
+  "0x6C",
+  "0x0E",
+  "0xA0",
+  "0xA1",
+  "0xA2",
+  "0xA3",
+  "0xA4",
+  "0xA5",
+  "0xA6",
+  "0xA7",
+  "0xA8",
+  "0xA9",
+  "0xAA",
+  "0xAB"
+ ]
+}

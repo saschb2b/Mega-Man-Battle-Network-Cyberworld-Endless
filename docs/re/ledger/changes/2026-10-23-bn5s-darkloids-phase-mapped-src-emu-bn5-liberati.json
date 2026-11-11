@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-23",
+  "what": "BN5's Darkloids' phase mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): a guardian's warp 0x080AF3F8 (sprite list 7's 59, sound 0xB4 out and in, 0x94 as it shows), the Darkloid's heal 0x08055208 (sound 0x8A), the reach's blink 0x080529F0 (look 0x0D, sound 0x91), a blow on a Navi 0x08053EBA (0x6B, 0x6E), BigBrute's flame list 7's 56, the HP digits 0x086F7DEC in white 0x086CCD24 and a harm's yellow 0x087E4678, the guardians' standing and strike animations, the units' world place +0x1C/+0x20"
+}

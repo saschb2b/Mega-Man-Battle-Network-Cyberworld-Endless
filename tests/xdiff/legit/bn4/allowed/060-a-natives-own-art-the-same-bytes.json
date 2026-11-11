@@ -1,0 +1,6 @@
+{
+ "name": "a native's own art, the same bytes",
+ "whose": "engine",
+ "fields": "a world's object of a type each engine runs as its own (not moved: the gust above), its sprite state's words into its sprite (+0x18 to +0x27 of its state: the sprite + 4, its frame's records) alone, only where each game's last sprite set-up of it (the hooks' sprite events) has the same bytes (CRC32) and the same list and number, each word read by its offset from its sprite's start and alike where the offsets are (tools/xdiff_bn4.py own_art); every other byte of its sprite state compared as ever",
+ "why": "Each engine draws its own object from its own ROM's sprite lists (sprite_load, BN4 0x0800287C, BN6 0x080026E4: the list's entry + 4 at the state's +0x18, 0x080028C4 / 0x0800272C, its frames' records found from there), so a pointer into the art is each game's own address of the same bytes: the wind's gust's (list 0xC, number 0x2E: CRC32 0xE0F284B6 in both, the hooks' sprite events from BN4 0x080D6761 and BN6 0x080CEB9B) at BN4 0x0837FBC8 and BN6 0x08324390, windman_v1 at t1. Read by the offset into the same bytes, it is the same frame of the same art; a different picture, list or number, or another frame of it, still parts"
+}

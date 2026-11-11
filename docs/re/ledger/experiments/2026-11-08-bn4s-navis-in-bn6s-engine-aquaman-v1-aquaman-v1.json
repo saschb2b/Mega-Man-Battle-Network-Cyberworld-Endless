@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "aquaman_v1: AquaMan V1 in BN4's battle against his move into BN6's",
+  "result": "python3 tools/xdiff.py aquaman_v1 (rng replay, lag 1): PASS over 1200 fight frames, after five root causes: his install refused (an effect's sprite WindMan copied, which the installer finds only among the families: the row shared); his +6 and +7 at t1 (his init keeps his panel there, 0x080B8264: kept at his spawn's end); his companion's sprite count and frame a fight frame ahead at t2-t10 (its after-step runs by the fight's frames until its kind 1 sets its animation up again from his state at BN4's t11: compared at the same fight frame, companion_clock); his pool sounds (0x9E, 0x90, 0xA0, 0xA1) paired in his battles alone; his effect 0x25 handed 0x0801457E in r2 at t51 (moved to 0x95); his third kind 0x24's sprite FireMan's copy of list 3's 0x02 at t525 (shared). Six mutations caught: his panel's store a nop (t1), his companion's kind 1 sprite another's (t1), his panels' effect BN4's 0x25 (t51), his side's effect BN4's 0x23 (t31), his sound 0x9E at 0x32 (t32), his CurAction 7 written 10 (t125).",
+  "meaning": "AquaMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
+  "link": "../multirom/bn4-navis.md#aquaman-built"
+}

@@ -1,0 +1,43 @@
+[
+ {
+  "name": "MagTect's sound 0xF8 at its other sound's slot",
+  "spec": "magtect_v1",
+  "poke": [
+   "08B5D148:2003:2",
+   "08B5D14C:3081:2"
+  ],
+  "what": "its sound 0xF8's shim (the sound call's, in its home at XV_HOMES + 0x15000 + 0x148: movs r0,#2, lsls r0,#8, adds r0,#2, the grown song table's slot 0x202, the chips' slot for it) made to name 0x381, the slot of its 0xB8: BN6's copy begins its other sound where BN4 begins 0xF8 (caught at t239, the family's sounds)"
+ },
+ {
+  "name": "MagTect's CurAction 6 written as BN4's",
+  "spec": "magtect_v1",
+  "poke": [
+   "080BED72:2006:2"
+  ],
+  "what": "the CurAction its state writes (BN4 0x080BED72: movs r0,#6, the recipe's 8, BN6's numbering past its generic states) left at BN4's 6: BN6's state runner runs another state for it (caught at t39, its +0x09)"
+ },
+ {
+  "name": "MagTect's shake every other frame",
+  "spec": "magtect_v1",
+  "poke": [
+   "080BF076:2101:2"
+  ],
+  "what": "its shake's gate (BN4 0x080BF076: movs r1,#3, its +0x20 a multiple of 4, in its update's tail entered as hook 3) made movs r1,#1: BN6's copy shakes, and draws, every other frame of its +0x20 where BN4's shakes every fourth (caught at t1, its +0x36, +0x64 and +0x9C: its opening's draws more than BN4's, some without a twin, so no pairing from the opening's end holds)"
+ },
+ {
+  "name": "MagTect's battle sprite drawn from Kilby's copy",
+  "spec": "magtect_v1",
+  "poke": [
+   "08B34328:08CD5000:4"
+  ],
+  "what": "BN6's grown list 1's 0xCA (XV_LISTS + 4 * 0xCA), MagTect's copy of BN4's 1:0x09 in the late families' art room (XV_LATE_ART + 0x9340), aimed at Kilby's (XV_LATE_ART + 0x5000, BN4's 1:0x0C): its idle animation's frames read from another sprite (caught at t1, its +0x91 and its sprite's data)"
+ },
+ {
+  "name": "MagTect's opening one shake short",
+  "spec": "magtect_v1",
+  "poke": [
+   "080E19F4:2112:2"
+  ],
+  "what": "BN6's opening fade begun with 0x12 where it begins with 0x10 (BN6 0x080E19F4: movs r1,#0x10 before bl 0x08006270, the fade the appear's bit 0 waits on): BN6's wait before bit 0 a frame shorter for its family, so MagTect's copy shakes, and draws, 15 times in the opening (frames 72-86) where it shakes 16, BN4's 18. The gap of the counts is then 3, not the 2 draws BN4's trace makes in the frames BN6's opening has no twin of (its init's frame and the frame before bit 0): no pairing from the opening's end holds (legit.json's bn4 opening_draws), where a pairing by the gap alone would pair BN6's 15 with BN4's last 15 and pass (caught at t1: the run prints the pairing refused, BN4's 18 against BN6's 15 with 2 in the twinless frames, then its +0x36 and +0x64, its last shake BN6's own, and +0x91, the opening a frame shorter)"
+ }
+]

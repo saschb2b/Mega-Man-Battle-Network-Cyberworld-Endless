@@ -1,0 +1,12 @@
+{
+ "name": "BN6's MegaMan's fourth power attack",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x04",
+  "0x04"
+ ],
+ "why": "BN6's attack state calls four power-attack dispatchers (0x080F17CA +6, 0x080F17F2 +7, 0x080F182E +8, 0x080F185A +4: 0x0801177A), BN4's three (0x080EEC1E +0xD, 0x080EEC3E +0xF, 0x080EEC5E +0, then on as BN6's after its fourth: BN4 bl 0x0800B72C; cmp r0,r3, BN6 bl 0x0800FB54; cmp r0,r3): BN6's +4, set by its loadout (0x080144C0, 0xFF none), has no BN4 twin"
+}

@@ -1,0 +1,127 @@
+{
+ "why": "rng=replay (src/dev/xdiff_events.c): each of BN6's draws is keyed by the family's own code that led to it (its BN5 address, through what the install moved) or else by its caller, a BN6 routine's place read as the same place in its BN5 twin (twins), and the k-th draw of a key in a frame (by the battle's timer before it) is given the word the reference's k-th of that key drew from, written into the RNG word it reads, before it reads it: the family's code draws BN5's numbers whatever the engine drew around it. A draw of either game with no twin in the other's frame is reported, never forced: the engine's own draws one game alone makes (only) are explained there, each with both games' routines; any other is a difference (the family's where its code led to it).",
+ "twins": [
+  {
+   "bn6": "0x080050EC",
+   "bn5": "0x08004C98",
+   "len": "0x1A",
+   "what": "the game state's routine (bn6f cbGameState): GetRNG and GetRNGSecondary once a frame",
+   "evidence": "BN5 0x08004C98-0x08004CB1 / BN6 0x080050EC-0x08005105: the same instructions but for the literal (its state's jump table) and the BLs' targets, GetRNG (BN5 0x08001490 / BN6 0x0800151C) and GetRNGSecondary (0x080014C0 / 0x0800154C) at +0x10 and +0x14"
+  },
+  {
+   "bn6": "0x08000300",
+   "bn5": "0x08000300",
+   "len": "0x2A",
+   "what": "the main loop's frame: GetRNGSecondary once a frame after the game's routine",
+   "evidence": "BN5 / BN6 0x08000300-0x08000329: the same instructions at the same addresses but for the BLs' targets, GetRNGSecondary at 0x0800031C in both"
+  },
+  {
+   "bn6": "0x08013D5E",
+   "bn5": "0x080113AE",
+   "len": "0x42",
+   "what": "a pick by GetRNG from a table the battle's NaviStats bytes 0x14 and 0x15 fill (MegaMan's buster, as a shot is made)",
+   "evidence": "BN5 0x080113AE-0x080113EF / BN6 0x08013D5E-0x08013D9F: the same instructions but for the BLs' targets (GetBattleNaviStatsByte_AllianceFromBattleObject BN5 0x08010DEE / BN6 0x08013774, GetRNG); seen in cangard_v1_keys at each shot in both"
+  },
+  {
+   "bn6": "0x0801BDDE",
+   "bn5": "0x080188DA",
+   "len": "0x26",
+   "what": "AddRandomVarianceToTwoCoords: a hit's spark set off its place by GetRNG",
+   "evidence": "BN5 0x080188DA-0x080188FF / BN6 0x0801BDDE-0x0801BE03: the same instructions but for the BL's target (GetRNG)"
+  },
+  {
+   "bn6": "0x08000C72",
+   "bn5": "0x08000B92",
+   "len": "0x34",
+   "what": "ShuffleByteList_PrimaryRNG: a list shuffled by GetPositiveSignedRNG",
+   "evidence": "BN5 0x08000B92-0x08000BC5 / BN6 0x08000C72-0x08000CA5: the same instructions but for the BLs' targets (GetPositiveSignedRNG BN5 0x080014A6 / BN6 0x08001532)"
+  },
+  {
+   "bn6": "0x08030226",
+   "bn5": "0x08030D9E",
+   "len": "0x6",
+   "word": 0,
+   "what": "the camera's shake, its x: BN6's from its second word, BN5's from its first",
+   "evidence": "BN6 0x080301E8 (bn6f camera_doShakeEffect) draws twice a shaking frame by GetRNGSecondary (0x08030226, 0x0803024C), BN5's twin 0x08030D7C twice by GetRNG (0x08030D9E, 0x08030DC4); each draw masked by the same table (BN6 0x08030284, BN5 0x08030DF8, 8 bytes a strength), shifted and centred alike into the camera's x (BN6 +0x3C, BN5 +0x38) and then y (+0x40, +0x3C): the same numbers make the same shake"
+  },
+  {
+   "bn6": "0x0803024C",
+   "bn5": "0x08030DC4",
+   "len": "0x6",
+   "word": 0,
+   "what": "the camera's shake, its y",
+   "evidence": "as its x"
+  },
+  {
+   "bn6": "0x080D1518",
+   "bn5": "0x080D13B4",
+   "len": "0x2E",
+   "what": "NrthWind's wind (BN5's T3 0x5A, its state routine BN5 0x080D136A / BN6 0x080D14CE) puts a gust (T4 0x3A) at a place GetRNG picks every eight frames",
+   "evidence": "BN5 0x080D13B4-0x080D13E1 / BN6 0x080D1518-0x080D1545: the same instructions but for the BLs' targets (GetRNG BN5 0x08001490 / BN6 0x0800151C, the gust's spawner BN5 0x080E4A10 / BN6 0x080E5C38); its one caller each (BN5 0x080D1378, BN6 0x080D14DC) at the same place in the same routine"
+  },
+  {
+   "bn6": "0x080E5A4C",
+   "bn5": "0x080E4824",
+   "len": "0x4E",
+   "what": "a RockCube's rubble as its cube breaks (the fourth kind's 0x37, its set-up BN5 0x080E4810 / BN6 0x080E5A38): GetRNG twice, its side's bit and each piece's three speeds",
+   "evidence": "BN5 0x080E4824-0x080E4871 / BN6 0x080E5A4C-0x080E5A99: the same instructions but for the BLs' targets, GetRNG (BN5 0x08001490 / BN6 0x0800151C) at +0 and +0x1E; the routines before them differ in the sprite's number alone (BN5 0x080E481E movs r2,#9, BN6 0x080E5A46 movs r2,#1: tools/xrecipe_thumb.py compare); chip_poltrgst at t74, the cube Poltrgst throws breaking"
+  }
+ ],
+ "only": {
+  "why": "A draw one game's engine makes and the other's does not (neither routine is the family's): reported where it falls and explained here, by game and the range its caller lies in. Where the other game makes none, the words part for the rest of that frame, and the next draw the replay matches writes them alike again.",
+  "draws": [
+   {
+    "game": 5,
+    "from": "0x0800F560",
+    "to": "0x0800F566",
+    "what": "BN5's buster: one more draw as a shot begins",
+    "evidence": [
+     "BN5 0x0800F560: the shot's setup draws a positive random number (BN5 0x080014A6) and tests bit 3 of it (0x0800F564)",
+     "BN6's buster damage 0x0801265C-0x08012698 (Attack, the table at 0x080126A4, the Cross's bonus at 0x080126B0) draws none"
+    ]
+   },
+   {
+    "game": 5,
+    "from": "0x080197AC",
+    "to": "0x080197B2",
+    "what": "BN5's emotion window's glitch, at its own frames: the emotion window's glitch (its step after the face, BN5 0x08019778 from 0x08019606 / BN6 0x0801CC94 from 0x0801CB32, the same instructions but for the BLs' targets): while the window's side has a NaviCust bug (BN5 0x0800DC0C / BN6 0x0800FE52 test the same fields of the battle NaviStats: +0x31, +0x13, +0x14, +0x16, +0x54, +0x24, +0x18, +0x19), each time its 20-frame wait (+0x38) runs out with no glitch on it draws from the second word (BN5 0x080014D6 / BN6 0x08001562, the same routine on each game's word) the glitch's length, 12 or 24 frames (+0x1D 1 or 2, +0x0F 12), a palette copied into the window: a picture of the HUD's alone. The wait's phase is the window's own since the battle began (it counts every frame its glitch is off), a frame apart in the two engines, so each game draws at its own frames, neither before the other's: a BN5 DarkChip's after-effect (BN5 0x0802C938, src/emu/soulmood.c) sets a bug in both",
+    "evidence": [
+     "chip_darkcirc: BN5's first such draw at f404, the 13th frame of its t33 (f392 on), BN6's at f331, the 12th of its (f320 on), then each every 32 or 44 frames by its own glitch's length",
+     "the second word is drawn again every frame by the twins of rng (BN5 0x08004CB0 / BN6 0x08005104, and 0x08000320 / 0x08000324), the replay writing BN5's word into BN6's at each: the glitch's draw parts nothing past its frame"
+    ]
+   },
+   {
+    "game": 6,
+    "from": "0x0801CCC8",
+    "to": "0x0801CCCE",
+    "what": "BN6's emotion window's glitch, at its own frames (BN5's, above)",
+    "evidence": [
+     "chip_darkcirc: BN5's first such draw at f404, the 13th frame of its t33 (f392 on), BN6's at f331, the 12th of its (f320 on), then each every 32 or 44 frames by its own glitch's length",
+     "the second word is drawn again every frame by the twins of rng (BN5 0x08004CB0 / BN6 0x08005104, and 0x08000320 / 0x08000324), the replay writing BN5's word into BN6's at each: the glitch's draw parts nothing past its frame"
+    ]
+   }
+  ]
+ },
+ "per_frame": [
+  {
+   "bn6": "0x080050EC",
+   "bn5": "0x08004C98",
+   "len": "0x1A",
+   "what": "the game state's routine: GetRNG and GetRNGSecondary once a frame (rng, twins)"
+  },
+  {
+   "bn6": "0x08000300",
+   "bn5": "0x08000300",
+   "len": "0x2A",
+   "what": "the main loop's frame: GetRNGSecondary once a frame (rng, twins)"
+  }
+ ],
+ "shake": [
+  {
+   "bn6": "0x080301E8",
+   "bn5": "0x08030D7C",
+   "len": "0x7E",
+   "what": "the camera's shake (bn6f camera_doShakeEffect_80301e8): two draws a frame while the camera shakes (its frames and strength set by camera_initShakeEffect, BN5 0x08030E1C / BN6 0x080302A8), whatever the battle does: BN5's from the first word (GetRNG at 0x08030D9E and 0x08030DC4), BN6's from the second (GetRNGSecondary at 0x08030226 and 0x0803024C), the shake's offsets the screen's alone. TomahawkSoul's unison shakes it for 30 frames in both (BN5's phase 2 0x0801211E; BN6's through src/emu/soullook.c's hook on the crossing's phase 2), while the battle's clock holds; counted as the per-frame draws are where the battle's clock holds, the number of them the same in both games (the camera shaken as long), each game's from its own word (tools/xdiff_masks.py, held_clock)"
+  }
+ ]
+}

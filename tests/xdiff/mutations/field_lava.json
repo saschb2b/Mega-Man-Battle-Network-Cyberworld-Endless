@@ -1,0 +1,26 @@
+[
+ {
+  "name": "lava's flags",
+  "spec": "field_lava",
+  "poke": [
+   "08CC0034:00010010:4"
+  ],
+  "what": "lava's word in BN6's grown flags table (xpanels.c, EMU_FREE + 0x4C0000 + 13 x 4) a plain panel's 0x10010 where BN5's lava gives 0x11010"
+ },
+ {
+  "name": "the cooling's panel",
+  "spec": "field_lava",
+  "poke": [
+   "08CC0048:2203"
+  ],
+  "what": "the stub's movs r2,#2 (the panel made plain as lava cools under MegaMan) made #3: a cracked panel"
+ },
+ {
+  "name": "the spark's place unmoved",
+  "spec": "field_lava",
+  "poke": [
+   "08CC0090:0810A953:4"
+  ],
+  "what": "the stub's veneer to the routine that moves the spark's place by a random amount (BN6_PLACE_JITTER) aimed at the families' empty hook: no random number drawn as lava cools"
+ }
+]

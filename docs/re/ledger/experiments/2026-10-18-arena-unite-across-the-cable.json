@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-18",
+  "name": "UNITE across the cable",
+  "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
+  "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
+  "link": "../online/arena/from-square/full-rules.md"
+}

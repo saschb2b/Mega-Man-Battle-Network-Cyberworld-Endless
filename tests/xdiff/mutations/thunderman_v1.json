@@ -1,0 +1,34 @@
+[
+ {
+  "name": "ThunderMan's clouds a fight frame early",
+  "spec": "thunderman_v1",
+  "poke": [
+   "08B46146:2800"
+  ],
+  "what": "the dispatch's XV_FIGHT_FLAGS (src/emu/xvirus_dispatch.c fight_flags, his companion's and cloud's gate on the battle's flags, BN4's 0x08007A8C) its cmp r0,#1 made cmp r0,#0: bit 0 from the fight's first frame, his clouds a step ahead of his states as before the gate (caught at t1, his cloud's +7)"
+ },
+ {
+  "name": "ThunderMan's clouds' strength by another version",
+  "spec": "thunderman_v1",
+  "poke": [
+   "080C3888:28:1"
+  ],
+  "what": "his companion's strength by version (BN4 0x080C3888, BN4_THUNDERMAN_DAMAGE: 20, 40, 60, 80, read by his init's spawn of it) V1's byte made V2's 40: his companion and his cloud given 40 (caught at t1, the companion's +0x2C and the cloud's)"
+ },
+ {
+  "name": "ThunderMan's bolt's sound at another pool slot",
+  "spec": "thunderman_v1",
+  "poke": [
+   "080DB3B0:2032"
+  ],
+  "what": "his bolt's sound 0xB8 (BN4 0x080DB3B0: movs r0,#0xb8, the recipe's pool slot 0x33) made the pool's 0x32, his 0x70's 0xAD: the bolt's last sound another (caught at t54, the family's sounds)"
+ },
+ {
+  "name": "ThunderMan's cloud's animation another",
+  "spec": "thunderman_v1",
+  "poke": [
+   "080DAAC8:2001"
+  ],
+  "what": "his cloud's init's animation (BN4 0x080DAAC8: movs r0,#0 into +0x10 and +0x11 before the animation setter) made 1: the cloud on another animation from its spawn, which legit.json's bn4 opening_animation (by the openings' lengths) must not explain (caught at t1, its sprite state)"
+ }
+]

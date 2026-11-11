@@ -4,12 +4,12 @@ twin of) in blocks, each block's bytes classed (code, literal pool, jump table, 
 calls out paired with BN6's twins, its literals and jump tables' entries that name BN5's routines or memory, the
 immediates BN6 numbers otherwise (CurAction, effects, sprites, sounds, collision data offsets, held chips), its states and
 hooks in BN6's layout, its records, what it draws and spawns, and apart what still needs a decision. Numbers only."""
-import json
 import os
 import re
 import struct
 
 import bn5_objects as OB
+import shards
 import bn5_twins
 import xrecipe_thumb as T
 
@@ -62,8 +62,7 @@ CODE_FROM = 0x8 + 0x24 + 0xC0      # its code after struct1, struct2 and those l
 
 def coll_map():
     """BN5's collision data offsets as BN6's (tests/xdiff/legit.json, layouts, collision: BN5's, BN6's, bytes)"""
-    with open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'), encoding='utf-8') as f:
-        return json.load(f)['layouts']['collision']['segments']
+    return shards.load('legit')['layouts']['collision']['segments']
 
 
 SEGMENTS = coll_map()

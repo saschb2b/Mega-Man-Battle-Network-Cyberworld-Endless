@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "BN4's virus after-state (BN4_VIRUS_PRESENT 0x08010736, no pause test) against BN6's (BN6_VIRUS_PRESENT 0x08016E64, its pause test at 0x08016E84-0x08016E90), BN4's sprite update (BN4_SPRITE_UPDATE 0x0800285C), Spikey's init and its moves' draw (BN4_SPIKEY_INIT 0x080BA428, BN4_SPIKEY_MOVES 0x080BA5BC) and CirKill's shot's table literal (BN4_SHOT_KINDS_LIT 0x080CE83C) mapped (docs/rom/bn4.md's row): the BN4 differential replays the families' draws before the fight, holds the opening's idle animation to BN4's lead and reads a diagonal step's direction and a pointer into BN4's moved code as BN6's"
+}

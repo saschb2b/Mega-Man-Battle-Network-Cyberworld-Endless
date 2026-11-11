@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN4's chips' art's room: BN6's sprite load's entry read (BN6_SPRITE_LOAD_IN 0x080026E6, an object's sprite state's +0x18 BN6_SPRITE_DATA) and the object runner (BN6_OBJECT_RUNNER 0x080031AC), the two places the room hooks (docs/rom/chips-code.md)."
+}

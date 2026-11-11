@@ -1,0 +1,83 @@
+{
+ "why": "A Soul's state: BN5 keeps it in MegaMan's AI data (its turns +0x0F, its chaos +0x12, the chaos charge's cycle +0x1C and phase +0x1F, ColonelSoul's chip +0x32, 0xFFFF none, the chaos level +0x6C) and names the Soul by his form byte; BN6's engine keeps it in the Souls' block (BN6_SOULS, a side's 0x20 bytes: +0 the Soul, +1 chaos, +2 turns, +3 phase, +4 the chip, 0 none, +6 level, +0x16 the cycle, +0x10 the Souls used this battle, +0x14 ColonelSoul's chip committed at OK, 0 none), as BN6's AI data has its own fields at those places (+0x0F a turn guard, +0x12 the HP bug's level, +0x32 tired). So BN5's AI data reads 0 at those places (its Soul's state compared here instead), its used word (BN5_SOULS_USED) against the block's, and BN6's Crosses' used word must be 0 (BN5 has no Cross). BN5's battle mood (his battle NaviStats' +0x0E) is compared with the block's +0x0E, BN5's mood as BN6's engine keeps it by BN5's rules beside its own (the Souls track's S7, src/emu/soulmood.c), from the battle's first Custom screen; BN6's own mood is compared as before (maps, the mood less BN5's gains). The block's other bytes are BN6's engine's own bookkeeping (+7 the opening's mood set, +0x0F the dark latch, +8-+0xA the Soul committed and not yet entered, +0xB element 0xB's role, +0xC what stands under OK): not compared. Element 0xB (UNITE, BN5_CUSTOM_UNITE and BN6_CUSTOM_UNITE) is compared byte for byte as each game's last Custom screen left it. ColonelSoul's chip committed at OK (his button's, BN5's Custom record's +6 copied into his pending record's +6, 0xFFFF none) is compared with the block's +0x14 (0 none), both in BN6's chip numbers by the spec's folders.",
+ "bn6_side": {
+  "soul": [
+   "0x00",
+   1
+  ],
+  "mood": [
+   "0x0E",
+   1
+  ],
+  "chaos": [
+   "0x01",
+   1
+  ],
+  "turns": [
+   "0x02",
+   1
+  ],
+  "phase": [
+   "0x03",
+   1
+  ],
+  "chip": [
+   "0x04",
+   2
+  ],
+  "level": [
+   "0x06",
+   1
+  ],
+  "used": [
+   "0x10",
+   4
+  ],
+  "next chip": [
+   "0x14",
+   2
+  ],
+  "cycle": [
+   "0x16",
+   1
+  ]
+ },
+ "bn5_ai": {
+  "turns": [
+   "0x0F",
+   1
+  ],
+  "chaos": [
+   "0x12",
+   1
+  ],
+  "phase": [
+   "0x1F",
+   1
+  ],
+  "chip": [
+   "0x32",
+   2
+  ],
+  "level": [
+   "0x6C",
+   1
+  ],
+  "cycle": [
+   "0x1C",
+   1
+  ]
+ },
+ "evidence": [
+  "BN5: AIData +0x0F set to the record's turns as he unites (0x080120FC) and counted down as each Custom screen opens (0x080124A2); +0x12 1 for Chaos Unison (0x08012164); +0x32 the record's +6 (0x080124A6, from the sequencer 0x08011DD4); the used word 0x02034E10 ORed at OK (0x08025042)",
+  "BN6: BN6_SOULS written by src/emu/soullife.c (entering and leaving form 8, the countdown at 0x08008472/0x0800847C) and soulunite.c (OK's commit: the used bit); BN6's own AIData +0x0F (0x08015A16, 0x080159C6), +0x12 (0x0801026A), +0x32 (0x0801443C)",
+  "BN5: OK writes the Custom record's +6 (0x08024EC4 -> 0x08025046 -> 0x080123F4, 0x0203C940 +6) with the chip element 8 took, the record reset to 0xFFFF as each screen opens (0x080123CC -> 0x080123F4); the turn's start reads the side's pending +6 (0x08012406) into AIData +0x32 (0x080124B8)",
+  "BN6: the block's +0x14 written at OK's end (src/emu/soulcolonel.c, BN6_OK_END: the chip element 8 took, else 0), read at the turn's start into +4 (BN6_TURN_FORMS)"
+ ],
+ "bn5_pending": {
+  "next chip": [
+   "0x06",
+   2
+  ]
+ }
+}

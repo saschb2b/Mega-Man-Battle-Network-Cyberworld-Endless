@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-21",
+  "name": "Two MegaMen a side: the partners as streams",
+  "result": "--dev arena,arenaboth,arena2v2=1 at delay 1: with 107 rollbacks (lag 4, window 8) and with none (lag 0) the battle ends at frame 2690 with all 44 hashes the same; the GBAs agree at all 2,399 iterations, 0 of the partners' takes late; arenaroll=8 rolls back 335 times, the game's state the same each time, its 44 hashes the delay alone's; a key flipped on the second GBA at iteration 300 parts the GBAs at 2,100 iterations. A NetBattle without the flag ends as before (frame 2690, 86d2f837337a1494).",
+  "meaning": "A partner's keys can cross a network as a stream of their own and enter BN6 at the battle's iteration on both GBAs; rollback covers them since the rings are core RAM.",
+  "link": "../online/arena/two-a-side/four-streams.md"
+}

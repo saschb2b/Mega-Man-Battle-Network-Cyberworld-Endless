@@ -1,0 +1,10 @@
+[
+ {
+  "name": "FlmLine's flames' column another",
+  "spec": "bn4_chip_flmline1",
+  "poke": [
+   "080ECB1E:46C0"
+  ],
+  "what": "FlmLine's state's copy's doubling of his facing (BN4 0x080ECB1E: adds r0,r0,r0, the flames two columns ahead) made a nop: the flames on the column next to him, the Mettaur two columns ahead untouched"
+ }
+]

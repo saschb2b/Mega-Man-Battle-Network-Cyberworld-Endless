@@ -1,0 +1,18 @@
+[
+ {
+  "name": "MokoRus3's row's subfamily another",
+  "spec": "bn4_chip_mokorus3",
+  "poke": [
+   "08C06390:83:1"
+  ],
+  "what": "the registry's record of BN4's MokoRus3 (579) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x81: no Moko"
+ },
+ {
+  "name": "the Moko's sound another",
+  "spec": "bn4_chip_mokorus3",
+  "poke": [
+   "088F1304:01DA"
+  ],
+  "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
+ }
+]

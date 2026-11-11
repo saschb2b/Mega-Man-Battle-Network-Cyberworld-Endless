@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "A virus's appear and the engines' appear bits mapped (BN4_STATE_GENERIC_0 0x0800FCAC, BN4_APPEAR 0x0800FE00, BN4_APPEAR_BITS 0x080019C0, BN4_APPEAR_BITS_SET 0x080019A8; BN6_NAVI_SPAWN_STATE 0x08016380, BN6_APPEAR 0x08016396, BN6_APPEAR_BITS 0x0800139A, BN6_APPEAR_BITS_SET 0x08001382; docs/rom/bn4.md's row): the owner's call 7 (BN4's appear moved with the families) measured before it was built: a plain battle's virus takes BN4's plain appear, BN6's twin's steps but for BN4's battle kind 0x44 and its sound, and the one update shrimpy_v3 parts on is the engines' openings' (bit 0 set 18 frames after a virus's init in BN4, 17 in BN6), not the appear's code; the port not built, the opening's allowance kept, the owner's to decide how a visitor's opening meets it"
+}

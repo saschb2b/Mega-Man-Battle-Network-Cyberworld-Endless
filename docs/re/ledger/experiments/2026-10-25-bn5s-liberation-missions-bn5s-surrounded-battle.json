@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "BN5's Surrounded battle, and the same field in BN6's engine",
+  "result": "In romlab, the board's record getter 0x08008EEA patched in the loaded copy to hand out record 24: the field blue, red, blue two columns each, MegaMan at column 3, Lan's \"Surrounded! Press L or R Button to turn around!\", L turning MegaMan, the Mettaur on the left striking right, TURN 1 START!, the Custom screen opening at a full gauge. In BN6 (the foes step's sides@33): the same field, the left Mettaur facing MegaMan, L turning him, his buster hitting it; on seed 1's act 2 board a dark panel faced from 25,29: dark level 3, sides 33.",
+  "meaning": "BN6 kept BN5's Surrounded code whole; a liberation battle needs only its record's +6 and its foes set out as BN5's records set theirs.",
+  "link": "../game/liberation/building/battle-field.md"
+}

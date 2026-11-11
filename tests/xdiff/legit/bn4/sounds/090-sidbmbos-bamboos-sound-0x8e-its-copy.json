@@ -1,0 +1,7 @@
+{
+ "bn4": "0x8E",
+ "bn6": "0x1E1",
+ "clock": "state",
+ "what": "SidBmbo's bamboo's sound 0x8E, its copy",
+ "why": "Played by the bamboo's code as it comes up (BN4's third-kind 0x44, moved with SidBmbo's unit: movs r0,#0x8e at 0x080D5D34, its bl to PlaySoundEffect at 0x080D5D36; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1E1 and goes on to BN6's), a state's: BN4's song 0x8E copied into slot 0x1E1 of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0x8E is another (xrecipe.song_sig). bn4_chip_sidbmbo1 at t35 in BN4's and t36 in BN6's"
+}

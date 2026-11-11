@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "Counter's code and MegaMan's lock-out located (bn4_chips.h BN4_COUNTER 0x080CFE02, BN4_T3_COUNTER_HIT 0x17, BN4_CHIP_ATTACK_END 0x0800C9FC, BN4_AI_LOCKOUT 0x3A; bn6_chips.h BN6_CHIP_ATTACK_END 0x08011714, BN6_AI_LOCKOUT 0x19; docs/rom/bn4.md): the counter walks the other side's players by BN4's battle state's layout and reads the counter byte at BN4's place, three immediates of the recipe."
+}

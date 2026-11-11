@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's tournament presentation",
+  "date": "2026-11-05",
+  "name": "Other games' faces on BN4's bracket",
+  "result": "tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8 6@0x0d on tools/bn4_lab.py boot's state: BN6's HeatMan (mugshot 0x47), BN5's NumberMan (list 8's 71), BN4's GutsMan's mugshot (the control) and BN6's SpoutMan (a head window of his battle sprite) converted into plates and written over plates 0x01, 0x05, 0x08 and 0x0D in romlab's ROM copy (384 bytes of tiles and four palettes each). The Den Battle Tournament opened with them: all eight in colour with every entrant in; after the first round HeatMan and the control grey, NumberMan and SpoutMan a step up in colour. tools/bn4_faces.py report: both sheets' 23 plates 12 tiles in the two objects, the frame in 14 and 15 but plates 0x04 and 0x05; all 22 entrants' faces found and converted (13 colours kept).",
+  "meaning": "BN4's bracket shows another game's Navi by data alone: a plate's tiles and palettes, no code. Every entrant the design allows has a face from his own game; a moved screen needs only its plate tables grown and the faces' sheets, about 13 KB, installed beside BN4's own.",
+  "link": "../multirom/bn4-tournament.md"
+}

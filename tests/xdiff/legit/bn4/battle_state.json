@@ -1,0 +1,9 @@
+[
+ {
+  "name": "a side's wind and its level",
+  "bn4": "0x88",
+  "bn6": "0xC0",
+  "size": "0x10",
+  "why": "Each side's wind (the fourth kind's 0x41) is kept in the battle state at +0x88 + 4 x side in BN4 and +0xC0 + 4 x side in BN6, its level 8 bytes past it: the slot's setter (BN4 0x080E69C6, BN6 0x080E675A: [r10 +0x18] + 4 x r1 + 0x88 | 0xC0, an old wind there told to end, the new one stored at +0 and r2 at +8) and its reader (BN4 0x080E69E8, BN6 0x080E677C: the same address left in r2, +0 in r0 and +8 in r1) are the same steps but for that constant. The wind's spawn (BN4 0x080E68F8, BN6 0x080E666C) calls the reader and then the fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC), which keeps the caller's r1 to r3 at the object's +0x34 to +0x3C, so the wind's +0x38 points at its side's slot in each game's own place (windman_v1 at t1: +0x8C | +0xC4, WindMan's side 1). A pointer into BN4's battle state between +0x88 and +0x97 is read as BN6's of the same place from +0xC0 (tools/xdiff_snap.py state_off); every other offset of it as it is"
+ }
+]

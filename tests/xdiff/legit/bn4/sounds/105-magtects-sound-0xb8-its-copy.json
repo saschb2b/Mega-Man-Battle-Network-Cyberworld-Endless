@@ -1,0 +1,15 @@
+{
+ "bn4": "0xB8",
+ "bn6": "0x381",
+ "clock": "state",
+ "foes": [
+  "0x31",
+  "0x32",
+  "0x33",
+  "0x34",
+  "0x35",
+  "0x36"
+ ],
+ "what": "MagTect's sound 0xB8, its copy",
+ "why": "Played by MagTect's code (BN4: movs r0,#0xb8 at 0x080BEFAA, its bl to PlaySoundEffect after it; BN6: its copy's movs left as it is at 0x08F11F32 in the late families' code room, its bl made a call to a shim of its home that makes r0 0x381, XvSoundCall), a state's. MagTect is a late family (tools/xrecipe_bn4.py LATE_FROM), whose sounds BN6 has no song of take fixed slots of BN6's grown song table (the encounter groups' call 3, 11 November 2026, over the per-battle pool of call 13; tools/xrecipe_bn4.py LATE_SOUND_SLOTS; docs/rom/sound.md, The song table grown): 0x381, BN4's song 0xB8 copied into its art at install on BN4's player 17 and listed there once (src/emu/xvirus_songs.c). ThunderMan plays the same song at his pool's 0x33 in his battles (the row above without foes, which holds wherever this one does not), SparkMan at his pool's 0x63. In its battles alone (foes); BN6's own song 0xB8 is another (docs/multirom/bn4.md, Its sounds)"
+}

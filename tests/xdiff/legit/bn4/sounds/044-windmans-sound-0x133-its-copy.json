@@ -1,0 +1,7 @@
+{
+ "bn4": "0x133",
+ "bn6": "0xD0",
+ "clock": "state",
+ "what": "WindMan's sound 0x133, its copy",
+ "why": "Played by the code of his third-kind 0x65 (0x080D9FA0, moved): movs r0,#0x34 and adds r0,#0xff at 0x080DA0D4, its bl to PlaySoundEffect at 0x080DA0D8; BN6: its copy's movs r0,#0xd0 and adds r0,#0 at 0x08F334F4, the recipe's immediates (wide_movs), its bl through its veneer to BN6's, the hooks' sound event from 0x08F334FD), a state's: BN4's song 0x133 copied into the pool's fourth slot, BN6's empty 0xD0 (src/emu/xnavi_bn4_sounds.c, a BN4 Navi's k-th sound the pool's k-th slot); windman_v1's at t496 in BN4 and t497 in BN6 (begun a frame after each). BN6's own song 0xD0 is empty, so the copy is told by its slot"
+}

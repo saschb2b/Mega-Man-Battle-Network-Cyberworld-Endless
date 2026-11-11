@@ -1,0 +1,7 @@
+{
+ "bn4": "0x95",
+ "bn6": "0x97",
+ "clock": "state",
+ "what": "a panel cracked or broken",
+ "why": "Played by the panel crack, twins but for BN4's test of flag 0x20000 (BN4_PANEL_CRACK 0x08009AEC; BN6's 0x0800C938, BN6_PANEL_CRACKED's, the pair tools/bn4_twins.py audits): movs r0,#0x95 at 0x08009B1A and 0x08009B36, each its bl to 0x08000560 (BN4_PLAY_SOUND); movs r0,#0x97 at 0x0800C960 and 0x0800C97E, each its bl to 0x080005CC. Called by GutsMan's attack's object (BN4's third-kind 0x1C, its code moved), a state's: gutsman_v1's crack of panel 1,1 at t266 in BN4 and t267 in BN6 (begun a frame after each). Paired by the routines that play them, not by their samples"
+}

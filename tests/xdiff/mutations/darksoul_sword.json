@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the Dark Soul's record of a chip BN6's region",
+  "spec": "darksoul_sword",
+  "poke": [
+   "08DFAC4B:02:1"
+  ],
+  "what": "the Dark Soul's record of the Sword (XN_DARK_RECORDS + 71 * 0x2C + 0x17, src/emu/xnavi_dark.c) holding BN6's byte 2 (its lock-on type) where BN5's region 6 is kept: its approach goes elsewhere at t77"
+ }
+]

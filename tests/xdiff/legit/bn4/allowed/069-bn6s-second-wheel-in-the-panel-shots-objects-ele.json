@@ -1,0 +1,11 @@
+{
+ "name": "BN6's second wheel in the panel shot's object's element",
+ "whose": "engine",
+ "kind": "T4",
+ "type": "0x4F",
+ "part": "obj",
+ "offset": "0x0E",
+ "bit": "0x40",
+ "direction": "BN6 has it, BN4 not",
+ "why": "The support routine's spawner writes the attack's element (r3 as the routine has it, MegaMan's AttackVars +2 from each game's support run) at the object's element (BN4's +0x17, BN6's +0x0E, read at BN6's place: support_objects): BN6's holds the Cursor's hit flag there, which BN6's use ORs into the attack's element and BN4's does not (\"BN6's second wheel in MegaMan's chip's attack, the Cursor's\"). That bit alone. bn4_chip_panlsht1 at t33"
+}

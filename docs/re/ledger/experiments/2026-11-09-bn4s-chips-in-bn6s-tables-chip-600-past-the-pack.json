@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-09",
+  "name": "Chip 600 past the pack, the editor, names and rewards",
+  "result": "--dev alias=600 (chip 600 a copy of Cannon): the chip step gives it (its counts 2, the entry of id 408), the folder editor's pack lists it with its name and description, a swap into the folder and the editor left count it again (4 at the next step); --dev reward=600: the results screen reads Cannon A with its picture, the run log's reward a058; a green Mystery Data made to hold it (a scratch change) says MegaMan got: \"Cannon A\", and another archive's text with the chat's hook left out. The autopilot's seeds 1-12: the base build's run logs (66 battles) and pictures at frames 5000, 10000 and 14990. python3 tools/ram_survey.py: 54 runs, no stretch of 1 KB that stayed zero without a symbol of bn6f's but the persistent zone; --canary 0x02010CE0:0x444: 1092 bytes changed once a run, the power-on clear's (frames 14-15).",
+  "meaning": "An id from 512 can be found, held, edited into a folder, named and rewarded: BN5's remaining chips and BN4's first units have ids. 91 pack entries; the ids from 603 wait for RAM.",
+  "link": "../rom/chips-code.md"
+}

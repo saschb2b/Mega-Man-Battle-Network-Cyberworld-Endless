@@ -1,0 +1,26 @@
+[
+ {
+  "name": "DarkPlus's parameter",
+  "spec": "chip_darkplus",
+  "poke": [
+   "08C031E9:0:1"
+  ],
+  "what": "BN6's record of DarkPlus (290, the core's copy at CHIPS_RECORDS) with its second parameter 0 where BN5's record's is 1 (src/core/chips.c, xrec_same_moved): the moved subfamily 3 puffs (BN5 0x0800E19C), no bonus, the Cannon strikes for 40 against BN5's 90"
+ },
+ {
+  "name": "DarkPlus's store left out",
+  "spec": "chip_darkplus",
+  "poke5": [
+   "0800E1CE:46C0"
+  ],
+  "what": "the moved subfamily 3's strh r2,[r0,r1] (BN5 0x0800E1CE: the power into the hand's next chip's bonus) a nop at its copy: the hand's +0x1A 0 against BN5's 50 from t32, the Cannon's 40 against 90"
+ },
+ {
+  "name": "DarkPlus's flash none",
+  "spec": "chip_darkplus",
+  "poke5": [
+   "0800E1D2:2000"
+  ],
+  "what": "the moved subfamily 3's movs r0,#0x18 (BN5 0x0800E1D2, the green flash's frames) movs r0,#0 at its copy: the flash kept apart (XC_FLASH, src/emu/xchips_flash.c) 0 against BN5's AIData +0x3C 0x17 at t32"
+ }
+]

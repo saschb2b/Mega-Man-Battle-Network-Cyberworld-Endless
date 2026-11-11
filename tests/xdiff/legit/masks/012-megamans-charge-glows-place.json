@@ -1,0 +1,21 @@
+{
+ "name": "MegaMan's charge glow's place",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x08"
+ ],
+ "offsets": [
+  "0x34-0x3F"
+ ],
+ "why": "MegaMan's buster charge glow (the fourth kind's type 8, spawned for him) follows him at his buster arm, an offset each game takes from its own table by his NameID: BN6's puts it 2 pixels further right. His presentation, not the family's code.",
+ "evidence": [
+  "its place from the arm's: BN5 0x080E0F22-0x080E0F3A calls 0x08015140 / BN6 0x080E2218-0x080E2230 calls 0x08018810, each by the object's +0x28 (MegaMan's 0x180, 0x1A0)",
+  "its spawn: BN5 0x080E0F64 / BN6 0x080E2242 (type 8)"
+ ]
+}

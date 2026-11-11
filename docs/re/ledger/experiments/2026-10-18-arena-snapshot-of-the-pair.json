@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-18",
+  "name": "Snapshot of the pair",
+  "result": "Restored at six points and replayed 1, 4 and 8 frames, twice each: every replay exact; 863,016 bytes, 1.2 ms a restore on the desktop.",
+  "meaning": "Rollback is possible, but only with more than mGBA's own state save.",
+  "link": "../online/link.md"
+}

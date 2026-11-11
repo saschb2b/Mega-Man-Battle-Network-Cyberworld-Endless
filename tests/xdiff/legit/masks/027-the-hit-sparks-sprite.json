@@ -1,0 +1,25 @@
+{
+ "name": "the hit spark's sprite",
+ "part": "obj",
+ "whose": [
+  "spark"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x04"
+ ],
+ "sprite_offsets": [
+  "0x01-0x03",
+  "0x05-0x07",
+  "0x0A-0x14",
+  "0x16-0x17",
+  "0x1C-0x37"
+ ],
+ "why": "Where a family's attack strikes, its code calls the engine's object_spawnCollisionEffect (BN5 0x08016C04 / BN6 0x0801A0D4, twins: each reads the attack's collision data, its flags from the hit and its hit effect, in its own game's layout), which calls the engine's spark spawner (BN5 0x080E09B4 / BN6 0x080E1C00, BN6_SPAWN_SPARK) with the hit effect as the spark's kind, its place the attack's moved by a draw (followed) and the attack at its +0x4C. The spark is the engine's: the fourth kind's type 4, never moved, run by each game's own code and drawn from each game's own sprite list 5's 5, whose frames and their durations differ. Its kind (the animation, sprite +0x00), its palette (+0x04), its sprite (+0x18), its place and its owner are the family's and compared (tools/xdiff_masks.py's whose 'spark': a difference there fails the spec); what its sprite makes of them is the engine's art, the same as MegaMan's own sprite.",
+ "evidence": [
+  "the spawners: BN5 0x080E09B4-0x080E09CB and BN6 0x080E1C00-0x080E1C17 the same instructions but the allocator's call (BN5 0x080031CC, BN6 0x080033AC); the spawn's caller in both traces BN5 0x080E09BE / BN6 0x080E1C0A",
+  "the spark's sprite: BN5 0x0837D994 (named at 0x08032B20), BN6 0x083A0320 (named at 0x08032128); in marina_v1 at t516 the spark's kind 2 and owner (the third kind's type 0x8F) the same in both, its frame (+0x01) 3 in BN5's and 2 in BN6's, its frames' pointers (+0x1C, +0x20) 396 and 18624 bytes into BN5's sprite, 336 and 18008 into BN6's"
+ ]
+}

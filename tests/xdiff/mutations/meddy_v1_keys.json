@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Meddy's object's collision offset not moved",
+  "spec": "meddy_v1_keys",
+  "poke": [
+   "088A0D36:6E80"
+  ],
+  "what": "her object's read of its hit flags (BN5 0x080C6136: ldr r0,[r0,#0x68], its copy at XN_TEAM_CODE + 0xDC00 + 0x136) left at BN5's +0x68 where BN6 keeps them at +0x70"
+ }
+]
