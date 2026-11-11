@@ -45,6 +45,9 @@ int loot_paying_id(const Encounter *e);
  * enemy id (its name the act's card's: story_words.c), where the arcs
  * are on and the act has one; -1 none */
 int loot_arc_signature(int depth, int biome);
+/* ... and whether that family is one of the area's own (false where the
+ * act has no arc) */
+bool loot_arc_home(int depth, int biome);
 /* The area (NET_AREAS + k, rom.h) whose own game's battle records a
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */

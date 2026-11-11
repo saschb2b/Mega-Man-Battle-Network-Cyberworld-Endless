@@ -592,6 +592,11 @@ int loot_arc_signature(int depth, int biome) {
 	return pool[arc.signature].ver[0].id;
 }
 
+bool loot_arc_home(int depth, int biome) {
+	GroupArc arc;
+	return loot_arc && !(run.helpers & HELP_GENTLE) && group_arc_at(run.seed, depth, biome, &arc) && arc.home;
+}
+
 int loot_paying_id(const Encounter *e) {
 	if (e->signature <= 0 || e->signature > e->nfoes) return 0;
 	int best = 0, most = 0;

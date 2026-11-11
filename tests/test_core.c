@@ -6881,13 +6881,30 @@ static void test_analytics(void) {
 		"statistics: run-choices counts what the run chose, the seconds on the map and in battle (%s)", stats_sent[6]);
 	analytics_run_choices(true, 0, NULL);
 	CHECK(stats_posts == 7, "statistics: no counts, no run-choices");
-	for (int i = 0; i < 7; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
+	/* (an act's random battles: the area's own and a group's apart; none fought, none sent) */
+	AnalyticsAct fought = { .act = 8, .whole = 1, .beats = 3, .templates = 1 << 3 | 1 << 11, .signature = 43, .home = 0,
+		.own = { 4, 3, 1, 21, 90 }, .group = { 2, 1, 0, 6, 110 } };
+	analytics_act(&fought, true);
+	CHECK(stats_posts == 8 && strstr(stats_sent[7], "\"name\":\"act-battles\",\"data\":{\"act\":2,\"cycle\":2,\"cleared\":true,\"whole\":true,\"net\":\"short\","
+		"\"threat\":2,\"own\":4,\"ownwon\":3,\"ownleft\":1,\"ownhp\":22,\"ownbust\":70,\"groups\":2,\"groupswon\":1,\"groupsleft\":0,\"groupshp\":55,"
+		"\"groupsbust\":60,\"signature\":43,\"home\":false,\"beats\":3,\"templates\":2056}"),
+		"statistics: act-battles counts an act's own battles and its groups' apart (%s)", stats_sent[7]);
+	AnalyticsAct plain = { .act = 0, .own = { 2, 2, 0, 0, 30 } };
+	analytics_act(&plain, false);
+	CHECK(stats_posts == 9 && strstr(stats_sent[8], "\"act\":1,\"cycle\":1,\"cleared\":false,\"whole\":false,") &&
+		strstr(stats_sent[8], "\"own\":2,\"ownwon\":2,\"ownleft\":0,\"ownhp\":15,\"ownbust\":0,\"groups\":0}"),
+		"statistics: ... with no group fought, no arc's fields (%s)", stats_sent[8]);
+	AnalyticsAct none = { .act = 3 }, unset = { .act = -1, .own = { 1, 1, 0, 0, 0 } };
+	analytics_act(&none, true);
+	analytics_act(&unset, true);
+	CHECK(stats_posts == 9, "statistics: an act with no battle fought, or none begun, sends nothing");
+	for (int i = 0; i < 9; ++i) CHECK(strlen(stats_sent[i]) < ANALYTICS_PAYLOAD - 200, "statistics: payload %d well within its size", i);
 	/* no: kept, what waits dropped, nothing more sent */
 	analytics_answer(false);
 	stats_line(settings, line, sizeof line);
 	CHECK(!strcmp(line, "statistics = off\n") && stats_drops == 1, "statistics: a no is kept (%s) and drops what waits", line);
 	analytics_run_start();
-	CHECK(stats_posts == 7, "statistics: after a no, nothing is sent");
+	CHECK(stats_posts == 9, "statistics: after a no, nothing is sent");
 	/* the next start reads the answer: off asks nothing; on sends its view */
 	stats_begin(settings, true, "0.10.0");
 	CHECK(analytics_here() && !analytics_unasked() && analytics_consent() == ANALYTICS_OFF && stats_posts == 0, "statistics: a no is remembered");
