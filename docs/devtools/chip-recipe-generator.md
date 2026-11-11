@@ -257,7 +257,13 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   byte in the copy set. An effect BN6 draws otherwise is moved to an id
   of the chips' (0xCF down to 0xB0) with its sprite (list 5's 0xEF down,
   list 4's 0x9F down). A sprite of list 1, the viruses' list, takes a
-  number from 0x7F down to 0x40 (MokoRus's Moko the first). A type spawned through a wrapper of its code is
+  number from 0x7F down to 0x40 (MokoRus's Moko the first). A sprite
+  has no place of its own: its row is written as `XC4_ROOM_ROW(k)`, k
+  counted over every unit's sprites in `UNITS`' order (512 at most),
+  and the art's room holds it only while an object draws it
+  ([BN4's chips](../multirom/bn4-chips.md), The art's room). The bottoms
+  of the effects', list 5's and list 4's ranges are BN4's Navis'
+  (0xB1, with 0xB0 BN5's Meddy's; 0xB0-0xBF; 0x70-0x7F). A type spawned through a wrapper of its code is
   moved as one spawned outright (`moved3`).
 - **Its numbers.** The element's place (BN4's +0x17, BN6's +0x0E), the
   collision data's offsets, a panel's type and side after `getPanel`, a
@@ -269,8 +275,9 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   shim of the unit's home that names it, a number past a byte; one
   without a slot is a decision, the next slot its answer.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
-  (veneers, then shims), then code (48 KB), then art (from + 0x24000,
-  176 KB: the scarce one, [BN4's chips](../multirom/bn4-chips.md)). Its entry is the spawner's copy at
+  (veneers, then shims), then code (96 KB), then the art's room (from
+  + 0x30000, 126 KB: [BN4's chips](../multirom/bn4-chips.md), The art's
+  room). Its entry is the spawner's copy at
   BN6's grown support routines' 0x80 + BN4's subfamily (BN6's own are
   0-0x29, BN5's from 0x2A). `xchips_bn4_code_install` stages it where
   BN4's ROM is read; the stubs and the two grown tables are staged by

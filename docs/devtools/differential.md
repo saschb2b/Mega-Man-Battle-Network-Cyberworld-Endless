@@ -52,7 +52,17 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. A BN4 spec takes `film` as BN5's do. Against BN6
+where the dud plays. `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
+its Soul n): each one's event flag read from BN4's own table
+(`BN4_SOUL_FLAGS`; Blue Moon's six have none in Red Sun), Double Soul's,
+and its pseudo-chip's byte written past the chip gate as the game writes
+it giving the Soul (`xd4_souls_put`), and his form is said as it changes
+(`xd4_form_watch`, the battle NaviStats' `BN4_NAVI_FORM`). BN4's UNITE
+is keyed as BN5's: the chip picked, five right and down to UNITE, A,
+then up and A on the Soul (four other paths tried, none united).
+`bn4_soul_thun_control` is ThunSoul so, form 6 at the same frame in both
+runs, its charged shot held and the Custom screens that count its turns
+opened. A BN4 spec takes `film` as BN5's do. Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark
@@ -1261,6 +1271,9 @@ format, its game 4: the trace's header names it):
   thunder, which Billy's battle runs where BN6's runs its own), so a draw one of its objects
   makes from the unit's own code is given BN4's of that place; a draw
   made while MegaMan runs stays the engine's (the shuffle's twin above);
+  a pointer into a chip unit's sprite is named by its row of the art's
+  room, read from the frame's objects (`room_rows`: the place a row is
+  at changes from one load to the next);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

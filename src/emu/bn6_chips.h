@@ -320,6 +320,15 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
                                            * (bn4_chips.h BN4_SHUFFLE, the same instructions) */
+#define BN6_OBJECT_RUNNER     0x080031ACu /* RunBattleObjectLogic: each object of the run list called in turn (BN6_OBJECT_RUNNER_RET its
+                                           * calls' return address; BN4_OBJECT_RUNNER) */
+#define BN6_OBJECT_RUNNER_IN  0x080031AEu /* ... its second instruction (add sp,#-16), before any object runs: where the chips' art's room
+                                           * is put right each time (xchips_bn4_art.c) */
+#define BN6_SPRITE_LOAD_IN    0x080026E6u /* BN6_SPRITE_LOAD's second instruction (ldrb r3,[r5]): r1 the list's offset (the list x 4) and
+                                           * r2 the number as its caller gave them, r5 the object, before the list's entry is read
+                                           * (0x0800270A-0x0800270E). Its first is the differential's hook's */
+#define BN6_SPRITE_DATA       0x18        /* an object's sprite state's +0x18: its sprite's address + 4, stored as the sprite is loaded
+                                           * (0x0800272C: adds r0,#4; str r0,[r5,#0x18]) */
 /* What an attack family of BN4's moved calls of BN6's (bn4_chips.h, Its attack families; tools/xchiprecipe_bn4.py TWINS) */
 #define BN6_COUNTER_WINDOW    0x0800FDB6u /* MegaMan's counter window opened as a chip's attack begins: 0x10 to his collision data's counter byte
                                            * (BN6_COLL_COUNTER, through 0x0800E9DC) unless his AI data's kind is 2 and the link's bit 8 is clear */

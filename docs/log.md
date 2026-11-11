@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
+* **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
+* **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers, a new section: BN5's numbers reserved in one place, the guard in the generator and lint, five units renumbered; the numbers run short).
 * **Update**: multirom/bn4-chips.md (the owner's call 7 reversed: Marking, the four Plus chips and BlakWeap are moved, not cut; what was misread).
 * **Update**: rom/chips-code.md (The pack in the save RAM, new row: ids 635-1023's pack entries in the cart's save RAM, BN6's save blocks and library, the order stamps' routines; its description and index line), multirom/bn4-chips.md (every BN4 folder chip has a pack entry; its description and index line), engine/emulation/memory.md (the save RAM's table), engine/emulation/free-space.md (the `save` zone), devtools/ram-survey.md (`--watch`, `CYBERWORLD_RAM_WATCH`; its description and index line), devtools/battle-on-demand.md (`chip ID` alone), engine/saves.md, online/arena/rollback/overview.md, code/emu.md, code/tests.md, code/tools.md.
