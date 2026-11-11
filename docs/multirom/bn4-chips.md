@@ -329,7 +329,9 @@ and ShadeMan's DS the registry's rows of BN5's, ProtoMan's DS and
 BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
 object's +0x94, his dark sprite, what else his karma changes); a dark
 chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
-and the comparison explains his look from both games' code.
+and the comparison explains his look from both games' code: his
+palette, BN4's dark 2 against BN6's 0, the one difference of him
+(`bn4_chip_invis_dark`, [The differential](../devtools/differential.md)).
 
 **The dark units, read** (10 November 2026; [BN4 Red Sun's
 tables](../rom/bn4.md), The panel changer and the Hole panel). With the
