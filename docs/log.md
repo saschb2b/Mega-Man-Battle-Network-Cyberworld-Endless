@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: multirom/bn4-chips.md (PropBom1-3 moved), rom/bn4.md (PropBom's code and the obstacle slots given up, new row), devtools/chip-recipe-generator.md (an effect over a pattern of panels).
 * **Update**: multirom/bn4-chips.md (MagBolt1-3 moved; what differs under a pulled foe), rom/bn4.md (MagBolt's code and a pushed object in a virus's runner, new row), devtools/chip-recipe-generator.md (a unit's own copy of an engine routine), devtools/differential.md (a chip's foe under a slide).
 * **Update**: devtools/differential.md (a poke redirects only to the spec's own Navi's copy: toadman_sea_elec PASS again, mutation 92 caught).
