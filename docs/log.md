@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (the name asked again and kept, over EchoComp, CopyComp and TraceComp), research/sources.md (The Battle Lab: the names checked against the series).
 * **Update**: game/battle-lab.md (Built: the deletions counted, step 1), rom/virus-families.md (`BN6_FOE_DYING`, new row), engine/emulation/hooks.md (its hook), engine/saves.md (`run.data`), code/core.md (`battle_data.c`), code/director.md and code/analytics.md (the event, the run-end's count), GUIDE.md (what a run's end sends), re/ledger.json.
 * **Update**: multirom/bn4-chips.md (SeekBom1-3 moved; a family's unit by subfamily), rom/bn4.md (the bombs' family, SeekBom's bomb and the explosions' maker, new row), devtools/chip-recipe-generator.md (a unit by subfamily).
 * **Create**: game/battle-lab.md (the Battle Lab designed: battle data per family across runs, the builder's screen, the battle inside a snapshot, the owner's eight calls of 11 November 2026); **Update**: research/sources.md (The Battle Lab: BN6's delete counts as a gate, no free battle in BN6, Warframe's Simulacrum).

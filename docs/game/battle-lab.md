@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:20:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -359,7 +359,13 @@ second screen and a second kind of state.
 ## The owner's calls (11 November 2026)
 
 1. **The name: Battle Lab**, its key item the LabPass (chosen over Test
-   Comp, Copy Lab and Mirror Net).
+   Comp, Copy Lab and Mirror Net). Asked again the same day, with names
+   tied to the gauge and checked against the series
+   ([Sources](../research/sources.md), The Battle Lab): kept, over
+   EchoComp (a deleted virus leaves an echo, eight rebuild a copy),
+   CopyComp and TraceComp. Not offered: a name with "Ghost" (BN4's ghost
+   Navis), with "Mirror" (BN4's Mirror of Truth) or with "Sim" (no word
+   of BN6's).
 2. **In Lan's HP, open at every visit**: before the first portal and
    after each act (over before a run alone, the PET anywhere, and the
    Academy's blackboard).
