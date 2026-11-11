@@ -66,6 +66,7 @@ commits, issues and old notes) are mapped section by section in
 | Online play (epic #120): the gate in Lan's HP, the Net Square, Trade Central, the Arena, the server and the wire | [docs/online/](docs/online/index.md); the gate in [docs/world/home/square-gate.md](docs/world/home/square-gate.md); hosting in [server/README.md](server/README.md); the wire in [shared/online/README.md](shared/online/README.md); the link cable and the Arena's engine in [docs/online/link.md](docs/online/link.md) and [docs/online/arena/](docs/online/arena/index.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md); the players' notes in [docs/releases/](docs/releases/index.md) |
 | How parallel PRs stay out of each other's way: the files `dev`'s workflow writes, what a branch does when it meets one, what conflicted and how often | [docs/project/merging.md](docs/project/merging.md) |
+| The numbers each branch in flight may take (ids, slots, free-space spans, units, `Run`): a claim a branch, held apart by lint | [docs/project/claims.md](docs/project/claims.md) |
 | The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
@@ -286,6 +287,17 @@ commits and docs. Its pictures (whole frames of the game or pages of the
 site, never a sprite cropped out) go on the orphan branch `pr-media`
 under `prs/<branch>/`, embedded by their raw URL at that branch's commit;
 motion as a GIF, which GitHub plays inline.
+
+### Claims
+
+A session that starts others writes each one's claim before it starts
+them: `docs/project/claims/BRANCH.json`, the numbers that branch may take
+(chip ids, enemy ids, AI numbers, the dispatch's types, list numbers, song
+slots, spans of the free space), the units of work it takes by name, and
+whether it changes `Run`, which one branch at a time may. One small PR
+for the batch, the file named in each brief; a session takes numbers only
+from its claim, and its PR removes the file. `build.py lint` fails where
+two claims meet (`tools/claims.py`; docs/project/claims.md).
 
 ### Merging
 
