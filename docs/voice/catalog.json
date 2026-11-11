@@ -698,6 +698,44 @@
   "jukebox_text:jukebox_songs": {
    "line": 10
   },
+  "lab_text:lab_go": {
+   "line": 10
+  },
+  "lab_text:lab_info_empty": {
+   "line": 52
+  },
+  "lab_text:lab_info_family": {
+   "header": "The information box: a family's row (complete: its HP and deletions; not yet: its gauge), a family lifted, a panel, the button with nothing set, and how the last battle ended",
+   "line": 38
+  },
+  "lab_text:lab_info_gauge": {
+   "line": 40
+  },
+  "lab_text:lab_info_lifted": {
+   "line": 42
+  },
+  "lab_text:lab_info_panel": {
+   "line": 47
+  },
+  "lab_text:lab_info_result": {
+   "line": 54
+  },
+  "lab_text:lab_own_song": {
+   "line": 16
+  },
+  "lab_text:lab_panel_name.names": {
+   "line": 20
+  },
+  "lab_text:lab_preset_words": {
+   "header": "BN6's field `field` as the preset's value",
+   "line": 36
+  },
+  "lab_text:lab_row_preset": {
+   "line": 13
+  },
+  "lab_text:lab_title": {
+   "line": 9
+  },
   "launcher_text:hint_words": {
    "header": "The key hints: \"J: choose Return: play\", from the device's words; `brief` the last alone",
    "line": 200
@@ -2182,6 +2220,15 @@
    "speaker": "MegaMan",
    "stem": "home_words"
   },
+  "src/director/lab_text.c": {
+   "comment": "The Battle Lab's builder's words (lab_text.h).",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 19,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "lab_text"
+  },
   "src/director/lesson_words.c": {
    "comment": "MegaMan's word on R pressed in the town away from its port (docs/voice/rules.md): where the port is, never how to jack in, BN6's own (Rush's bone panels' lesson went in the voice sweep of 19 October 2026: BN6's RushFood, and A named on every layer; docs/voice/sweep/net.md).",
    "domain": "Lessons",
@@ -2740,7 +2787,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2319,
+  "boxes": 2333,
   "domains": {
    "Arena": {
     "files": [
@@ -2884,6 +2931,7 @@
    "Other": {
     "files": [
      "src/core/extras_text.c",
+     "src/director/lab_text.c",
      "src/director/liberation_battle_words.c",
      "src/director/liberation_pick_text.c",
      "src/director/liberation_team_words.c",
@@ -2895,8 +2943,8 @@
      "src/online/emote_strip_text.c"
     ],
     "flagged": 16,
-    "lines": 280,
-    "speech": 265
+    "lines": 299,
+    "speech": 279
    },
    "Powers": {
     "files": [
@@ -3095,10 +3143,10 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 819,
+    "boxes": 829,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
-    "end_bang": 0.57,
+    "end_bang": 0.56,
     "end_dots": 0.1,
     "openers": [
      "The",
@@ -3108,13 +3156,13 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 136",
+    "stutters": "1 box in 138",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 215,
+    "boxes": 216,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
     "end_bang": 0.91,
@@ -3128,7 +3176,7 @@
      "THIS"
     ],
     "stutters": "never",
-    "words_per_box": 5.5
+    "words_per_box": 5.4
    },
    "Navis (bosses, bystanders)": {
     "bangs_per_box": 0.02,
@@ -3150,7 +3198,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2032,
+  "lines": 2051,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3393,10 +3441,10 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 819,
+    "boxes": 829,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
-    "end_bang": 0.57,
+    "end_bang": 0.56,
     "end_dots": 0.1,
     "openers": [
      "The",
@@ -3406,13 +3454,13 @@
      "A",
      "Let's"
     ],
-    "stutters": "1 box in 136",
+    "stutters": "1 box in 138",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 215,
+    "boxes": 216,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
     "end_bang": 0.91,
@@ -3426,7 +3474,7 @@
      "THIS"
     ],
     "stutters": "never",
-    "words_per_box": 5.5
+    "words_per_box": 5.4
    },
    "Narration": {
     "bangs_per_box": 0.37,
@@ -3589,7 +3637,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1461
+  "speech": 1475
  },
  "version": 1,
  "conversations": [
@@ -4125,6 +4173,18 @@
   {"container":"jukebox_text:jukebox_now_label","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_now_label","line":128,"lines":["jukebox_text:jukebox_now_label:0"],"speakers":["MegaMan"],"title":"Jukebox now label","when":""},
   {"container":"jukebox_text:jukebox_number_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_number_words","line":131,"lines":["jukebox_text:jukebox_number_words:0"],"speakers":["MegaMan"],"title":"Jukebox number words","when":"\"No. 13\" as the card shows a song's number"},
   {"container":"jukebox_text:jukebox_loops_words","domain":"Other","file":"src/jukebox/jukebox_text.c","id":"jukebox_text:jukebox_loops_words","line":135,"lines":["jukebox_text:jukebox_loops_words:0","jukebox_text:jukebox_loops_words:1"],"speakers":["MegaMan"],"title":"How often it has gone round","when":"how often it has gone round (\"Once round\", \"3 times round\"), \"\" for none"},
+  {"container":"lab_text:lab_title","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_title","line":9,"lines":["lab_text:lab_title:0"],"speakers":["MegaMan"],"title":"Lab title","when":""},
+  {"container":"lab_text:lab_go","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_go","line":10,"lines":["lab_text:lab_go:0"],"speakers":["Mr.Prog"],"title":"Lab go","when":""},
+  {"container":"lab_text:lab_row_preset","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_row_preset","line":13,"lines":["lab_text:lab_row_preset:0"],"speakers":["MegaMan"],"title":"Lab row preset","when":""},
+  {"container":"lab_text:lab_own_song","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_own_song","line":16,"lines":["lab_text:lab_own_song:0"],"speakers":["MegaMan"],"title":"Lab own song","when":""},
+  {"container":"lab_text:lab_panel_name.names","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_panel_name.names","line":23,"lines":["lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_UP","lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_DOWN","lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_LEFT","lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_RIGHT"],"speakers":["MegaMan"],"title":"Lab panel name: names","when":""},
+  {"container":"lab_text:lab_preset_words","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_preset_words","line":36,"lines":["lab_text:lab_preset_words:0"],"speakers":["MegaMan"],"title":"BN6's field `field` as the preset's value","when":"BN6's field `field` as the preset's value"},
+  {"container":"lab_text:lab_info_family","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_family","line":38,"lines":["lab_text:lab_info_family:0"],"speakers":["MegaMan"],"title":"The information box","when":"The information box: a family's row (complete: its HP and deletions; not yet: its gauge), a family lifted, a panel, the button with nothing set, and how the last battle ended"},
+  {"container":"lab_text:lab_info_gauge","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_gauge","line":40,"lines":["lab_text:lab_info_gauge:0"],"speakers":["MegaMan"],"title":"Lab info gauge","when":""},
+  {"container":"lab_text:lab_info_lifted","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_lifted","line":43,"lines":["lab_text:lab_info_lifted:0","lab_text:lab_info_lifted:1"],"speakers":["MegaMan"],"title":"Lab info lifted","when":""},
+  {"container":"lab_text:lab_info_panel","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_panel","line":48,"lines":["lab_text:lab_info_panel:0"],"speakers":["MegaMan"],"title":"Lab info panel","when":""},
+  {"container":"lab_text:lab_info_empty","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_empty","line":52,"lines":["lab_text:lab_info_empty:0"],"speakers":["MegaMan"],"title":"Lab info empty","when":""},
+  {"container":"lab_text:lab_info_result","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_result","line":57,"lines":["lab_text:lab_info_result:0","lab_text:lab_info_result:1","lab_text:lab_info_result:2","lab_text:lab_info_result:3"],"speakers":["MegaMan"],"title":"Lab info result","when":""},
   {"container":"liberation_battle_words:lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_stakes_words","line":10,"lines":["liberation_battle_words:lib_stakes_words:0","liberation_battle_words:lib_stakes_words:1","liberation_battle_words:lib_stakes_words:2","liberation_battle_words:lib_stakes_words:3","liberation_battle_words:lib_stakes_words:4","liberation_battle_words:lib_stakes_words:5"],"speakers":["Mr.Prog","MegaMan"],"title":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds","when":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)"},
   {"container":"liberation_battle_words:lib_surrounded_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_surrounded_words","line":25,"lines":["liberation_battle_words:lib_surrounded_words:0"],"speakers":["Mr.Prog"],"title":"Into `c` the battle's field where BN5 surrounds the Navi","when":"Into `c` the battle's field where BN5 surrounds the Navi (\"\" else)"},
   {"container":"liberation_team_words:colonel","domain":"Other","file":"src/director/liberation_team_words.c","id":"liberation_team_words:colonel","line":18,"lines":["liberation_team_words:colonel:0","liberation_team_words:colonel:1","liberation_team_words:colonel:2","liberation_team_words:colonel:3","liberation_team_words:colonel:4"],"speakers":["Colonel"],"title":"Colonel","when":""},
@@ -4722,6 +4782,25 @@
   {"boxes":[{"pages":[["AN UNLOCKER"]],"speaker":"Mr.Prog","text":"AN UNLOCKER"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:5","kind":"speech","line":214,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AN UNLOCKER","text_hash":"ec5a018f8091"},
   {"boxes":[{"pages":[["A WWW-ID"]],"speaker":"Mr.Prog","text":"A WWW-ID"}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:6","kind":"speech","line":216,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"A WWW-ID","text_hash":"74d37e848e02"},
   {"boxes":[{"pages":[["{k}ASTERLAND","HAS"]],"speaker":"Mr.Prog","text":"{k}ASTERLAND HAS "}],"container":"home_courier_words","domain":"Lan's HP and the gate","file":"src/director/home_words.c","flags":[],"fragment":true,"id":"home_words:home_courier_words:7","kind":"speech","line":218,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{k}ASTERLAND HAS ","text_hash":"e89021ffad33"},
+  {"boxes":[{"pages":[["BATTLE LAB"]],"speaker":"MegaMan","text":"BATTLE LAB"}],"container":"lab_title","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_title:0","kind":"screen","line":9,"speaker":"MegaMan","speakers":["MegaMan"],"text":"BATTLE LAB","text_hash":"630dc8c3857a"},
+  {"boxes":[{"pages":[["BATTLE!"]],"speaker":"Mr.Prog","text":"BATTLE!"}],"container":"lab_go","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_go:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"BATTLE!","text_hash":"d5a73634e967"},
+  {"boxes":[{"pages":[["Start from"]],"speaker":"MegaMan","text":"Start from"}],"container":"lab_row_preset","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_row_preset:0","kind":"speech","line":13,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Start from","text_hash":"62a53f0baa7a"},
+  {"boxes":[{"pages":[["The battle's own"]],"speaker":"MegaMan","text":"The battle's own"}],"container":"lab_own_song","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_own_song:0","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The battle's own","text_hash":"b2273488ccdf"},
+  {"boxes":[{"pages":[["Conveyor up"]],"speaker":"MegaMan","text":"Conveyor up"}],"container":"lab_panel_name.names","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_UP","kind":"screen","line":23,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Conveyor up","text_hash":"6817a62a3760"},
+  {"boxes":[{"pages":[["Conveyor down"]],"speaker":"MegaMan","text":"Conveyor down"}],"container":"lab_panel_name.names","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_DOWN","kind":"screen","line":23,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Conveyor down","text_hash":"1a7dd25316b2"},
+  {"boxes":[{"pages":[["Conveyor left"]],"speaker":"MegaMan","text":"Conveyor left"}],"container":"lab_panel_name.names","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_LEFT","kind":"screen","line":24,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Conveyor left","text_hash":"ec9e7b106de6"},
+  {"boxes":[{"pages":[["Conveyor right"]],"speaker":"MegaMan","text":"Conveyor right"}],"container":"lab_panel_name.names","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_panel_name.names:BN6_PANEL_CONVEYOR_RIGHT","kind":"screen","line":24,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Conveyor right","text_hash":"a85f68d84020"},
+  {"boxes":[{"pages":[["Field {field}"]],"speaker":"MegaMan","text":"Field {field}"}],"container":"lab_preset_words","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_preset_words:0","kind":"speech","line":36,"placeholders":[{"name":"field","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Field {field}","text_hash":"8163cf28500a"},
+  {"boxes":[{"pages":[["HP {hp}. Deleted {deleted}."]],"speaker":"MegaMan","text":"HP {hp}. Deleted {deleted}."}],"container":"lab_info_family","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_family:0","kind":"speech","line":38,"placeholders":[{"name":"hp","spec":"%d"},{"name":"deleted","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"HP {hp}. Deleted {deleted}.","text_hash":"3a1b52ed472d"},
+  {"boxes":[{"pages":[["Battle data {deleted} of","{complete}."]],"speaker":"MegaMan","text":"Battle data {deleted} of {complete}."}],"container":"lab_info_gauge","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_gauge:0","kind":"speech","line":40,"placeholders":[{"name":"deleted","spec":"%d"},{"name":"complete","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Battle data {deleted} of {complete}.","text_hash":"8f462ed22dcc"},
+  {"boxes":[{"pages":[["{most} foes are set.","Take one off first."]],"speaker":"MegaMan","text":"{most} foes are set. Take one off first."}],"container":"lab_info_lifted","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_lifted:0","kind":"speech","line":43,"placeholders":[{"name":"most","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{most} foes are set. Take one off first.","text_hash":"343809f4c0c0"},
+  {"boxes":[{"pages":[["{name}: set it on","a panel."]],"speaker":"MegaMan","text":"{name}: set it on a panel."}],"container":"lab_info_lifted","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_lifted:1","kind":"speech","line":44,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name}: set it on a panel.","text_hash":"b16da401e9c2"},
+  {"boxes":[{"pages":[["{panel}. {foe}","stands here."]],"speaker":"MegaMan","text":"{panel}. {foe} stands here."}],"container":"lab_info_panel","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_panel:0","kind":"speech","line":48,"placeholders":[{"name":"panel","spec":"%s"},{"name":"foe","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{panel}. {foe} stands here.","text_hash":"ca60bb526245"},
+  {"boxes":[{"pages":[["No foes are set."]],"speaker":"MegaMan","text":"No foes are set."}],"container":"lab_info_empty","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_empty:0","kind":"speech","line":52,"speaker":"MegaMan","speakers":["MegaMan"],"text":"No foes are set.","text_hash":"ba6e01d73e50"},
+  {"boxes":[{"pages":[["Time {m}:{sec}:{cs}.","Level S. HP lost","{hp_lost}."]],"speaker":"MegaMan","text":"Time {m}:{sec}:{cs}. Level S. HP lost {hp_lost}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:0","kind":"speech","line":57,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Time {m}:{sec}:{cs}. Level S. HP lost {hp_lost}.","text_hash":"4f5e5616cc07"},
+  {"boxes":[{"pages":[["Time {m}:{sec}:{cs}.","Level {bust}. HP lost","{hp_lost}."]],"speaker":"MegaMan","text":"Time {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:1","kind":"speech","line":58,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"bust","spec":"%d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Time {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}.","text_hash":"8d5f3f86b999"},
+  {"boxes":[{"pages":[["MegaMan fell at","{m}:{sec}:{cs}."]],"speaker":"MegaMan","text":"MegaMan fell at {m}:{sec}:{cs}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:2","kind":"speech","line":59,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"MegaMan fell at {m}:{sec}:{cs}.","text_hash":"6a2801c50868"},
+  {"boxes":[{"pages":[["Left at {m}:{sec}:{cs}.","HP lost {hp_lost}."]],"speaker":"MegaMan","text":"Left at {m}:{sec}:{cs}. HP lost {hp_lost}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:3","kind":"speech","line":60,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Left at {m}:{sec}:{cs}. HP lost {hp_lost}.","text_hash":"56c70a153f6f"},
   {"boxes":[{"pages":[["The PC's","{way},Lan!"]],"speaker":"MegaMan","text":"The PC's {way},Lan!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:0","kind":"speech","line":17,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M The PC's {way},Lan!","text_hash":"6cb408c207ed"},
   {"boxes":[{"pages":[["Your room's","{way},Lan!"]],"speaker":"MegaMan","text":"Your room's {way},Lan!"},{"pages":[["The PC's up there!"]],"speaker":"MegaMan","text":"The PC's up there!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:1","kind":"speech","line":19,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Your room's {way},Lan!|@M The PC's up there!","text_hash":"8ddf140263b5"},
   {"boxes":[{"pages":[["Home's {way},Lan!"]],"speaker":"MegaMan","text":"Home's {way},Lan!"},{"pages":[["The PC's up in your","room!"]],"speaker":"MegaMan","text":"The PC's up in your room!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:2","kind":"speech","line":21,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Home's {way},Lan!|@M The PC's up in your room!","text_hash":"8227a47c0f7e"},

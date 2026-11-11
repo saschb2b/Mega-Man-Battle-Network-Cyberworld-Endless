@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built: the builder's screen, step 3; the encounter groups' page linked), devtools/battle-on-demand.md (`lab open` and `lab all`), engine/ui.md (the builder among ours), code/director.md (`lab.c`, `lab_draw.c`, `lab_text.c`), rom/battle.md (conveyors 9 and 10 push up and down).
+* **Update**: devtools/differential.md (a moved Navi's copy of a type a used chip unit shares keyed as the unit's code, `navi_shared`; a spec's `shared_effects`: pa_football's ball, GridMan's copy, its burst's effect; mutation 164 caught again).
 * **Create**: project/claims.md (a claim a branch for the numbers branches share, tools/claims.py and its lint; its index line); **Update**: project/overview.md (the new page), code/tools.md (tools/claims.py).
 * **Update**: game/progression/encounter-groups.md (the pairs' pass done: 1,830 pairs, 27 tagged with their excess, the caps unmoved; the limits are an act's, not a layer's: a group on a first layer deleted the autopilot), game/progression/encounter-groups-measured.md (The pairs' pass; the fill counts with the tagged pairs), devtools/encounter-tags.md (`pairs`, the engine's pairs), code/tools.md (`pairs.tsv`).
 * **Update**: project/merging.md (Counters, new section: LAYER_MAKE counted from a file a bump, its hash recorded on dev), code/tools.md (tools/layer_make.py), code/net-and-map.md (layer_make.h and its bumps' folder, new row), code/tests.md (the recorded hash, new row).
