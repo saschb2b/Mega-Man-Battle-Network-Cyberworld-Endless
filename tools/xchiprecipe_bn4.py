@@ -135,7 +135,9 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
                 0x9A: 0x39}                 # (Repair's: Walla's)
 # The kinds' tables a moved object reads (as tools/bn4_twins.py TABLES: its size, a row's size, the kinds the unit spawns,
 # where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
-# kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set)
+# kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set); and, where a row
+# holds one of BN4's numbers BN6 numbers otherwise, bytes: a row's offset -> {BN4's value: BN6's}, each set in the copy
+# (table_bytes; bytes_why says what the values are and where each pair was read)
 TABLES = {
     0x080D8580: dict(size=42, entry=6, kinds=(1,), sprite=(None, 0), list=3, loads={0x080D85E4},
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
@@ -329,6 +331,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         X4.words_of(f, pairs)
         sprites_of(b4, b6, f, alloc)
         table_sprites(b4, b6, f, alloc)
+        table_bytes(b4, f)
         X4.effects_of(b4, b6, f, alloc)
     finally:
         bn4_twins.TABLES.clear()
@@ -588,6 +591,23 @@ def table_sprites(b4, b6, f, alloc):
             f.notes.append(f'its table {v:08X}\'s kind {k}: sprite {t["list"]}:{num:#x} in BN4, {tw:#x} in BN6 ({how})')
             if tw != num:
                 f.bytes.append((at, num, tw, f'its table\'s kind {k}: list {t["list"]} {num:#x} in BN4, {tw:#x} in BN6 ({how})'))
+
+
+def table_bytes(b4, f):
+    """the bytes of a kinds' table read in BN6's terms (TABLES' bytes: a row's offset -> BN4's value -> BN6's, each pair read in
+    both ROMs), set in the table's copy; a value the map has none of left as BN4's and noted, its row a kind no moved chip
+    names (the map's why says which)"""
+    named = {v for w in f.walks.values() for v in w.lits.values() if v in TABLES}
+    for v in sorted(named):
+        t = TABLES[v]
+        for off, m in sorted(t.get('bytes', {}).items()):
+            for row in range(t['size'] // t['entry']):
+                at = v + t['entry'] * row + off
+                was = b4.u8(at)
+                if was not in m:
+                    f.notes.append(f'its table {v:08X}\'s row {row:#x}: +{off:#x} {was:#x}, none of BN6\'s, left as BN4\'s ({t["bytes_why"]})')
+                elif m[was] != was:
+                    f.bytes.append((at, was, m[was], f'its table\'s row {row:#x}: +{off:#x} {was:#x} in BN4, {m[was]:#x} in BN6'))
 
 
 def report_unit(f):
