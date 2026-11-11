@@ -1,11 +1,11 @@
 [
  {
-  "name": "Kilby's sound at the pool's second slot",
+  "name": "Kilby's sound at another slot of the grown table",
   "spec": "kilby_v1",
   "poke": [
-   "080BC90C:2033:2"
+   "08B5C944:3081:2"
   ],
-  "what": "its sound 0xCD (BN4 0x080BC90C: movs r0,#0xcd, the recipe's immediate the pool's first slot 0x32, tools/xrecipe_bn4.py pool_song) made 0x33, the pool's second, which holds no song of its: BN6's copy begins another slot's song where BN4 begins 0xCD (caught at t163, the family's sounds)"
+  "what": "its sound 0xCD's shim (the sound call's, in its home at XV_HOMES + 0x14800 + 0x140: movs r0,#3, lsls r0,#8, adds r0,#0x80, the grown song table's slot 0x380, tools/xrecipe_bn4.py LATE_SOUND_SLOTS) made to name 0x381, MagTect's 0xB8's slot: BN6's copy begins another slot's song where BN4 begins 0xCD (caught at t163, the family's sounds)"
  },
  {
   "name": "Kilby's effect 0x2D left at BN4's number",
