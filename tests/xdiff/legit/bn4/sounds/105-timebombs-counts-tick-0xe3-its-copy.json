@@ -1,0 +1,7 @@
+{
+ "bn4": "0xE3",
+ "bn6": "0x1E3",
+ "clock": "state",
+ "what": "TimeBomb's count's tick 0xE3, its copy",
+ "why": "Played by the bomb's own state as its count goes on (BN4: movs r0,#0xe3 at 0x080D6D90 and 0x080D6DB4, the bls at 0x080D6D92 and 0x080D6DB6, each after its 60 frames are set; BN6: the copies' bls aimed at a shim that makes r0 0x1E3): BN4's song 0xE3 copied into slot 0x1E3. BN6's own song 0xE3 is another (xrecipe.song_sig)"
+}

@@ -642,16 +642,13 @@ static bool another_navis(const Spec *s, uint32_t to) {
  * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
  * FireMan's, moved after it), nor BN4's chips' units' (PanlSht's shot's block, 0x080DCAA4-0x080DCC5C, holds BN5's
  * BlizzardMan's and CloudMan's chips' spawns' addresses); and never a BN5 Navi's copy but the spec's own foes'
- * (another_navis) */
+ * (another_navis), nor a BN5 virus family's in a spec of BN4's (xd_bn5_family_copy) */
 static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
-	/* (a BN4 spec's poke of an address one of BN4's chips' units moved: that unit's copy, whatever block of BN5's holds the
-	 * same number, the two games' addresses overlapping: the bolt's 0x080DF050 lies in a BN5 family's block too) */
-	for (int k = n - 1; s->bn4 && !p->bn5 && k >= 0; --k)
-		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) return k;
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
-		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !another_navis(s, m[k].to))
+		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !another_navis(s, m[k].to) &&
+		    !(s->bn4 && xd_bn5_family_copy(m[k].to)))
 			return k;
 	return -1;
 }

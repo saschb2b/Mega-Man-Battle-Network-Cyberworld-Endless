@@ -106,6 +106,10 @@ void xd_log_navis(const int *ids5, int n);
 /* Whether `to`, a moved range's copy, is in the code of a BN5 Navi none of the BN5 ids `ids5` (`n` of them, a spec's foes)
  * names: a poke goes to no other Navi's copy (src/dev/xdiff.c, poke_range) */
 bool xd_navi_copy_apart(const int *ids5, int n, uint32_t to);
+/* Whether `to`, a moved range's copy, is in a BN5 virus family's code: a poke of a BN4 spec never goes there, its address
+ * BN4's and BN5's families' blocks at the same numbers as BN4's code (a BN5 family's 0x080D6C90-0x080D6EB0 over BN4's
+ * TimeBomb's bomb's, 0x080D6BF8-0x080D6ED4, whose pokes it took: six mutations of the bomb's copy passed unbroken) */
+bool xd_bn5_family_copy(uint32_t to);
 /* The chips' units whose moved code is the family's in the logs started after: those BN6's folder `folder` (its `n`
  * chips, as the spec gives them: code << 9 | id) plays */
 void xd_log_units(const uint16_t *folder, int n);

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -185,10 +185,7 @@ instructions. A pointer a BN4 object keeps into a chip unit's moved
 blocks (the star's kind's row at its +0x60, seen in the fight's frames
 since Meteors) reads as moved data in both traces: a BN4 reference takes
 BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it
-names, a BN5 reference none of it. A mutation's poke in a BN4 spec
-looks in BN4's chips' room first: the two games' addresses overlap, and
-Ligtnin's bolt's `0x080DF050` lies in a block a BN5 family moved too
-(`src/dev/xdiff.c` `poke_range`).
+names, a BN5 reference none of it.
 
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
@@ -985,7 +982,11 @@ code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
 so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
 `0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
 took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
-uncaught, until this).
+uncaught, until this). Nor does a BN5 virus family's copy take a poke of a
+BN4 spec (`xd_bn5_family_copy`, `src/dev/xdiff_events.c`): BN5's families' blocks lie at the same numbers as
+BN4's code, and one of them, `0x080D6C90`-`0x080D6EB0`, lay over BN4's
+TimeBomb's bomb's (`0x080D6BF8`-`0x080D6ED4`), so six mutations of the
+bomb's copy broke a BN5 virus instead and passed.
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3

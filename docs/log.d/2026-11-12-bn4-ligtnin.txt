@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
 at: 2026-11-11T19:38:24Z
-* **Update**: multirom/bn4-chips.md (Ligtnin1-3 moved; AquaUp and GreenWd wait in its unit), rom/bn4.md (the sweep's code, new row), devtools/chip-recipe-generator.md (a table's sound, `ROWS_WAIT`), devtools/differential.md (a BN4 spec's poke goes to a BN4 chip unit's copy first), devtools/differential.md (a BN4 spec's poke).
+* **Update**: multirom/bn4-chips.md (Ligtnin1-3 moved; AquaUp and GreenWd wait in its unit), rom/bn4.md (the sweep's code, new row), devtools/chip-recipe-generator.md (a table's sound, `ROWS_WAIT`).

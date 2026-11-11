@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the bomb's HP another",
+  "spec": "bn4_chip_timebomb_struck",
+  "poke": [
+   "080E4E38:24FA"
+  ],
+  "what": "the placer's copy's ldr r4,[r5,#4] (BN4 0x080E4E38, the bomb's HP from the chip's parameter, 50) made movs r4,#0xfa: the Mettaur's wave does not end the bomb at t73"
+ },
+ {
+  "name": "the struck bomb's burst BN6's own",
+  "spec": "bn4_chip_timebomb_struck",
+  "poke": [
+   "080D6E88:2400"
+  ],
+  "what": "the bomb's copy's end handed effect 0, BN4's number (movs r4,#0 at BN4 0x080D6E88), where the recipe gives 0xC8, BN4's explosion's copy: BN6's own effect 0 as the wave ends it"
+ }
+]

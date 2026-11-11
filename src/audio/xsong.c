@@ -492,6 +492,9 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xC7, SONG_GROWN_FIRST + 6 },
 	/* ... SidBmbo's bamboo */
 	{ XROM_BN4_RED_SUN_US, 0x8E, SONG_GROWN_FIRST + 7 },
+	/* ... TimeBomb's bomb set down, its count's tick and its last ticks */
+	{ XROM_BN4_RED_SUN_US, 0xB0, SONG_GROWN_FIRST + 8 }, { XROM_BN4_RED_SUN_US, 0xE3, SONG_GROWN_FIRST + 9 },
+	{ XROM_BN4_RED_SUN_US, 0xE4, SONG_GROWN_FIRST + 10 },
 	/* ... the attack families' units', from 0x200 up (a block of their own, as several units are moved side by side): the
 	 * spread chips' shot (its bursts' 0x9F and 0xBC the families' slots 0x3D and 0x3F above) */
 	{ XROM_BN4_RED_SUN_US, 0x8D, SONG_GROWN_FIRST + 0x26 },   /* (0x200) */
