@@ -467,6 +467,27 @@ the room holds what is alive at a moment and the remaining units need
 no art's room of their own. Every chip spec passes with it, their
 mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
 
+**Meteors1-3 are moved** (10 November 2026: ids 674-676, misc 0x11), the
+first unit of the parallel sweep's third line and the first whose chips
+sit past id 602. Its routine lies after its controller, the fourth
+kind's last type (0x81), which moves with it, 178 bytes: the chip aims
+at a panel of MegaMan's row on the other side and the controller lets
+five meteors fall there, one every twenty frames. The aim is a routine
+BN6 holds too, instruction for instruction with the same words of panel
+flags, though nothing in BN6 calls it. The meteors are ShotStar's star,
+which ShotStar's unit moved already: the star is shared as the spread
+chips' arm is (`tools/xchiprecipe_bn4.py` `SHARED3`), its spawner
+copied with Meteors' unit and spawning ShotStar's copy by its number,
+so the star's code is in the engine once and Meteors takes no
+third-kind dispatch number of its own. `bn4_chip_meteors1`, `2`
+and `3` pass with a 140 HP Mettaur on the aimed panel (90 then 40 HP
+left, 80 then 20, and 70; each ends before the meteor that deletes it)
+and `bn4_chip_meteors1_miss` over 300 frames with the Mettaur off it,
+the five meteors bursting on the empty panel; seven mutations caught.
+**Not seen in play yet:** ids from 603 have no pack entry, so the chip
+step cannot hand one out until the pack's RAM for them lands; the
+differential fights with a folder alone.
+
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread

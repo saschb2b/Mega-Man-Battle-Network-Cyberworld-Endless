@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Meteors3's row's subfamily another",
+  "spec": "bn4_chip_meteors3",
+  "poke": [
+   "08C0743C:8B:1"
+  ],
+  "what": "the registry's record of BN4's Meteors3 (676) naming BN6's grown misc routine 0x8B, Repair's, where its row gives it 0x91: no meteor falls, the Mettaur untouched"
+ }
+]
