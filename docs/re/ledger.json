@@ -568,6 +568,7 @@
       "what": "MagnetMan moved, Team ProtoMan's fifth, with BN5's magnet panel as BN6's panel 15 (docs/multirom/navis.md, MagnetMan; docs/multirom/one-net.md, The magnet panel in BN6's engine; docs/rom/bn5-world.md, BN5's magnet panel; docs/rom/navis.md, Team ProtoMan's MagnetMan): its flags, its push, BN5's pull in BN6's movement step (BN5_STEP_PULL 0x0800C8D2, dropped by BN6's twin; BN6's kind 3 its conveyors'), BN5's direction numbers made BN6's, its row speed 8 (BN6's conveyors' 6), its look (54 tiles, colours 10-13 of palettes 4 and 8); his child the first kind's 0x55 moved (SPAWNS_OTHER); the generator's PANEL_COUNTERS (BN5_PANEL_COUNT 0x0800B3E4), which also made the Dark Soul's lava and sea counts BN6's. magnetman_v1, _v1_keys and _sp PASS, five mutations caught."
     },
     {
+      "date": "2026-11-11",
       "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
     },
     {
