@@ -36,7 +36,7 @@
 #include "duel_words.h"
 #include "encounter.h"
 #include "events.h"
-#include "game.h"
+#include "lab_battle.h"
 #include "gamecall.h"
 #include "guardians.h"
 #include "loot.h"
@@ -581,6 +581,10 @@ static bool astray_update(void) {
 }
 
 void director_update(void) {
+	/* (a test battle's frames are its own: nothing of the director's runs
+	 * in them, and the frame it ends on is the one it was asked on, put
+	 * back: lab_battle.h) */
+	if (lab_battle_frame()) return;
 	/* (the run's time, a game frame at a time, so fast forward leaves the
 	 * statistics' minutes and the week's Board as they were: save.h) */
 	profile_played_frame();
