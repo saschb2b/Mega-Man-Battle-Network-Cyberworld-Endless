@@ -1170,6 +1170,7 @@
 080C4216 before_code
 080C4800 third_kind_0x00_kinds
 080C4ABC team_protoman_napalmman.spawner
+080C5386 team_protoman_searchman.with
 080C5B44 navis_moved_into_3
 080C5B90 navis_moved_into_4
 080C5C2C BN6_OVERLAY_SPRITES_REF
@@ -1208,6 +1209,8 @@
 080DA27C dead_code
 080DA5FA BN6_STEP_OBJECT
 080DAE74 bn5_chips_code.effect_tables
+080DB6BC team_protoman_searchman
+080DC0F8 team_protoman_searchman_2
 080DD3F0 bn5_darkloids_navi
 080E0ADE bn5_chips_code.status_mark_spawned
 080E10F8 navis_engine_twins.rock_fragments_fourth_kind_9_2
@@ -1236,6 +1239,10 @@
 080E6584 BN6_WIND_TYPE
 080E65BA BN6_WIND_HOLD
 080E666C BN6_WIND_SPAWN
+080E6F84 team_protoman_searchman_3
+080E7014 bn5_search_parent_state
+080E70E0 team_protoman_searchman_4
+080E7764 team_protoman_searchman_5
 080E93BC BN6_FX_BURST_CODE
 080E9464 BN6_FX_BURST_SPAWN
 080EA08C what_bn6_lacks_panel_claim_spawners

@@ -23,4 +23,10 @@
                                                 own (XN_KIND_OF, 31; its sprite BN5's 4:0x0A, list 2's 0x84 in BN6) */
 #define BN5_GYRO_COMPANION_END   0x0800EFD6u /* ... and its end, the body of Colonel's (0x0800EFE4), copied with him */
 
+/* SearchMan (AI 3, ids 0x10D-0x110; BN6's Navi AI 28, ids 0x1F8-0x1FB): no companion of his own (BN5's empty one, BN6's
+ * twin 0x080114D5); his pre-step hook and status hooks his own code */
+#define BN5_SEARCH_CODE          0x080F4EC0u /* his state table, struct2 and code, to 0x080F5C80 */
+#define BN5_SEARCH_PARENT_STATE  0x080E7014u /* his fourth kind's 0x5A compares its parent's CurAction with 10 (movs r1,#0xA),
+                                                BN6's 12; and with 11 at 0x080E70E0, BN6's 13 */
+
 #endif

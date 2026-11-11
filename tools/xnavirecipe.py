@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -168,7 +168,7 @@ NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
 NAVI_LIST_MOVES = {3: 4}
 # its ice block's size (BN6_ICE_SIZES' 0-2): BN5 freezes none, so each takes BN6's of a Navi its size (BN6's TomahawkMan
 # 1, its Colonel 2, its big Navis 2, MegaMan's 1)
-ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1}
+ICE = {7: 2, 8: 1, 9: 1, 10: 1, 11: 2, 12: 1, DARK_SOUL: 1, 13: 1, 14: 2, 15: 2, 16: 2, 4: 2, 2: 1, 3: 1}
 
 # each game's Navi tables: their first, step, entries, BN6's table k at its game's index (None: BN6's alone)
 NAVI5 = dict(tables=0x080F2374, step=0x5C, count=23, of=(0, 1, None, 2, 3, 4, 5, 6, 7, None, None, 8, 9), held=0x08113C78,
