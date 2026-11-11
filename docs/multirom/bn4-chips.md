@@ -624,8 +624,18 @@ turns and max HP to dig Holes, and his DS chips hit up to twice as hard
 for them.
 
 **The Hole panel in BN6's engine, built** (11 November 2026; the
-owner's call 8): BN6's type 15, `XPANEL_HOLE`, beside BN5's lava and sea
-([one Net](one-net.md); `src/emu/xpanels.h`), installed wherever BN4's
+owner's call 8): BN6's type 16, `XPANEL_HOLE`, after BN5's lava, sea and
+magnet panel ([one Net](one-net.md); `src/emu/xpanels.h`). Call 8 asked
+for a panel type of its own, and it has one, past BN6's sixteen: 15, the
+last of them, went to BN5's magnet panel with MagnetMan (#391), and BN6's
+flags update ORs a panel's type into its flags' bits 0-4, where bit 4 is
+also its words' own floor bit, so a type of 16 to 31 always gives that
+bit. The Hole's word, plain's, holds it anyway, so at 16 its flags are
+plain's as in BN4 and nothing BN6 runs knows the number
+([BN6's panel types and who holds each](../rom/battle.md)). A Hole on
+BN6's own hole type (1) was weighed and refused: BN4's Hole is stood on
+as plain is, BN6's hole is not, and nothing BN6 runs for type 1 is
+BN4's. Installed wherever BN4's
 ROM is read, with BN5's or without. Its flags are plain's (BN4's word for
 it, checked to be BN6's plain one), its tiles BN4's 54, its colours BN4's
 plain panel's rims and its hole's three dark colours, which pulse as
@@ -635,7 +645,7 @@ in BN6's engine). It does nothing to what stands on it, as in BN4; BN4's
 one rule for it, a light Navi cleansing it, has no karma to read in BN6
 and is not taken. BN4's count of a type's panels is BN6's own routine
 (`BN6_PANEL_COUNT`), so a DS Navi chip's moved power counts Holes by
-calling it with 15. Seen by the `status panel` dev step: four panels
+calling it with 16. Seen by the `status panel` dev step: four panels
 made Holes draw as BN4's on both sides. The three chips that make them
 are moved (the table above): each PASSes against BN4's battle, the Holes
 on the same panels at the same frame.

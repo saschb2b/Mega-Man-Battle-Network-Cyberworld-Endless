@@ -5,7 +5,15 @@
   "poke": [
    "080E42F0:02:1"
   ],
-  "what": "the copy of the panel changer's kinds' table (BN4_PANEL_CHANGER_KINDS, moved with the dark panels' unit) with row 9's type 2, plain, where the table's bytes read in BN6's terms give 15, the Hole: the panel ahead of MegaMan stays plain"
+  "what": "the copy of the panel changer's kinds' table (BN4_PANEL_CHANGER_KINDS, moved with the dark panels' unit) with row 9's type 2, plain, where the table's bytes read in BN6's terms give 16, the Hole: the panel ahead of MegaMan stays plain"
+ },
+ {
+  "name": "the Hole read as the magnet panel",
+  "spec": "bn4_chip_hole",
+  "poke": [
+   "080E42F0:0F:1"
+  ],
+  "what": "the kinds' table's copy with row 9's type 15, BN5's magnet panel's number in BN6 (XPANEL_MAGNET), where the table's bytes give 16, the Hole: the panel ahead of MegaMan takes the magnet's flags word (0x10210, plain's 0x10010 in BN4) and its look"
  },
  {
   "name": "BN6's blink's type another",

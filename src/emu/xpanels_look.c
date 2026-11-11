@@ -90,7 +90,8 @@ static Kind kinds[KINDS] = {
 
 _Static_assert(TYPES * ENTRIES * ENTRY == XP_TILES_SIZE && XP_TILES + XP_TILES_SIZE <= XP_END, "the grown tile table past its room");
 _Static_assert(XPANEL_HOLE < TYPES, "the Hole past the grown table");
-_Static_assert(BN6_TILE_PANELS + BN6_TILES_N + 90 + 90 + 54 + 54 <= 0x400, "the kinds' tiles past a battle's free ones (0x295-0x3FF)");
+#define TILES_ALL  (2 * TILES_MAX + 2 * 54)   /* lava's and the sea's 90, the magnet panel's and the Hole's 54 */
+_Static_assert(BN6_TILE_PANELS + BN6_TILES_N + TILES_ALL <= 0x400, "the kinds' tiles past a battle's free ones (0x295-0x3FF)");
 
 static struct {
 	uint8_t table[TYPES * ENTRIES * ENTRY];

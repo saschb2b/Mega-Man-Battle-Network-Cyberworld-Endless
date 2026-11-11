@@ -409,7 +409,7 @@ them has a twin in BN6 that knows neither: hooks where BN5 tests or
 calls for them run BN5's rules in C, and the panel's cooling, which must
 call the game's own routines (the panel set, the spark and the random
 number its place draws), runs as a few instructions of the project's own
-Thumb; BN6's panel flags table grows to 16 words and its element hit's
+Thumb; BN6's panel flags table grows to 17 words (with the magnet panel and BN4's Hole) and its element hit's
 tests take lava beside the volcano, both in IWRAM's routines, patched in
 their image and kept so in RAM (`emu_keep`), out of the states saved.
 They look as BN5's: its tiles of them, put in VRAM after BN6's panels'

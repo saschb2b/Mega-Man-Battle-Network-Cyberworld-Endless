@@ -26,7 +26,6 @@
 #include "lab_battle.h"
 #include "talk.h"
 #include "trader.h"
-#include "xpanels.h"
 
 const char *director_dev_talks;
 
@@ -274,10 +273,11 @@ static const DevStatus dev_statuses[] = {
 /* "panel C R TYPE": the field's panel at column C, row R made BN6's TYPE
  * (its type and the type it is drawn as; the engine's types past 12
  * among them, xpanels.h) */
+#define PANEL_TYPE_LAST 16   /* BN6's 12 and the engine's past them: lava, sea, the magnet panel, BN4's Hole (src/emu/xpanels.h XPANEL_TYPES) */
 static int dev_panel(const char *spec) {
 	int c = 0, r = 0, t = -1;
-	if (sscanf(spec, "panel %d %d %i", &c, &r, &t) != 3 || c < 1 || c > 6 || r < 1 || r > 3 || t < 1 || t >= XPANEL_TYPES || !D.in_battle) {
-		printf("status: %s is no panel (panel C R TYPE: column 1-6, row 1-3, a type 1-%d), or no battle is on\n", spec, XPANEL_TYPES - 1);
+	if (sscanf(spec, "panel %d %d %i", &c, &r, &t) != 3 || c < 1 || c > 6 || r < 1 || r > 3 || t < 1 || t > PANEL_TYPE_LAST || !D.in_battle) {
+		printf("status: %s is no panel (panel C R TYPE: column 1-6, row 1-3, a type 1-%d), or no battle is on\n", spec, PANEL_TYPE_LAST);
 		return 0;
 	}
 	uint32_t p = BN6_FIELD_PANELS + (uint32_t)(r * 8 + c) * BN6_PANEL_SIZE;

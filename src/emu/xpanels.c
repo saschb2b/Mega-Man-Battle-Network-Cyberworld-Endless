@@ -490,8 +490,10 @@ static bool hooks_set(void) {
 static bool tables_free(void) { return flags_pointed || (free_at(XP_FLAGS, XP_FLAGS + sizeof flags) && free_at(XP_TILES, XP_TILES + XP_TILES_SIZE)); }
 
 /* The grown tables written, with every game's kinds staged so far: the
- * flags (the IWRAM literal pointed at them once) and the look */
+ * flags (the IWRAM literal pointed at them once) and the look; one
+ * claim for every game's write of them, each writing the whole again */
 static void tables_write(void) {
+	claims_begin("the panels' grown tables (xpanels.c)");
 	emu_write(XP_FLAGS, flags, sizeof flags);
 	if (!flags_pointed) {
 		uint8_t ref_was[4], ref_now[4];
@@ -501,6 +503,7 @@ static void tables_write(void) {
 		flags_pointed = true;
 	}
 	xpanels_look_write();
+	claims_end();
 }
 
 /* an IWRAM routine's bytes in its image, BN6's own (their CRC32) in the ROM and the core's copy: into `was` */

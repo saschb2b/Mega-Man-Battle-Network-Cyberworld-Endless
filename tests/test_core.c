@@ -4398,10 +4398,14 @@ static void test_free_space(void) {
 	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
 	regions_apart("the chip registry", chips, (int)(sizeof chips / sizeof *chips), FREE_CHIPS, FREE_SOULS);
 	const Region panels[] = {
-		{ "the panels' flags", XP_FLAGS, XP_FLAGS + 16 * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
-		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE },
+		{ "the panels' flags", XP_FLAGS, XP_FLAGS + XPANEL_TYPES * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
+		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE }, { "the magnet's pull", XP_PULL, XP_PULL + 0x100 },
 	};
-	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
+	/* (BN6's 13 types, lava 13, sea 14, the magnet panel 15, BN4's Hole 16; a type past 31 would reach the flags' side bits,
+	 * docs/rom/battle.md, BN6's panel types and who holds each) */
+	CHECK(XP_AT == FREE_PANELS && XPANEL_LAVA == 13 && XPANEL_SEA == 14 && XPANEL_MAGNET == 15 && XPANEL_HOLE == 16 &&
+		XPANEL_TYPES == XPANEL_HOLE + 1 && XPANEL_TYPES <= 32 && XP_TILES_SIZE == XPANEL_TYPES * 6 * 32,
+		"free space: the panels at %08x, %d types", (unsigned)XP_AT, XPANEL_TYPES);
 	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
 	/* (the Navis' room's battle sprites first, one copy for every track: the Navis' track's xnavi_sprites.c) */
 	const Region navis[] = { { "the Navis' battle sprites", FREE_NAVI_SPRITES, FREE_NAVI_SPRITES_END } };
