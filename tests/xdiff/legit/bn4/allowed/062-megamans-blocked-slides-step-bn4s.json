@@ -1,0 +1,13 @@
+{
+ "name": "MegaMan's blocked slide's step, BN4's",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "offsets": [
+  "0x1B",
+  "0x1D"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "why": "A slide begun (BN4 0x08010294, BN6 0x080166D0, twins) stores its step's panels to go, column and row (+0x1B, +0x1C, +0x1D: strb r2, r0, r1 at BN4 0x080102B6-0x080102BA, BN6 0x080166F2-0x080166F6) from each game's step routine. BN6's (0x0800E468) tests the panel the step leads to inside it (bl 0x0800E5AC at 0x0800E480) and returns zeros where it cannot be entered (0x0800E486-0x0800E48A); BN4's (0x0800ACAA) returns the step its collision's push bits name whatever the panel, and its slide tests the panel after (bl 0x0800ACF4 at 0x080102CC), its blocked slide ending with the step kept. So where the wind pushes MegaMan against the field's edge BN4 holds the step and BN6 zeros: windman_v1 from t9 (BN4 6, 0xFF, 0 against 0, 0, 0, MegaMan on column 1 pushed left) and from t891 (6, 1, 0: on column 3 pulled right); a slide that moves him stores the same step in both (t4, t882). His alone, BN4's side only where BN6's holds 0"
+}

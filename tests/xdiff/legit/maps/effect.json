@@ -1,0 +1,170 @@
+{
+ "why": "An effect object's id (+4 of the fourth kind's type 0): CanGard's muzzle blast is BN5's 0x57, copied as BN6's 0x6C (the immediate at BN5 0x08108FB6). The Navis' own effects take numbers from 0xA0, the Navis' range, one a BN5 effect whichever Navi (or the sea's marker, tools/bn5_objects.py) spawns it (src/emu/xnavi_bn5.c, its effects: tools/xnavirecipe.py), and an effect BN6 draws alike is BN6's (Colonel's 0x47, his strike's: BN6's 0x60, list 4's 0x0A the same bytes as BN5's list 4's 0x2C, its animation and palette 0, tools/xrecipe.py's effect_twin), read so only where a spec's foes hold one of its ids (navis): BN5's engine and its other enemies spawn those BN5 ids for effects of their own (the Mettaur's 0x14), each compared as BN6's of its number. BN5's sea's splash (0x63, a non-Aqua object stepping onto sea: BN5_PANEL_ARRIVED) is BN6's 0xAC wherever it is spawned, the moved objects' copy (tools/bn5_objects.py, ENGINE_EFFECTS; src/emu/xsea.c spawns it). The Souls' (the Souls track's S4, tools/xsoul.py) share the other tracks' copies: ColonelSoul's ScreenDivide's three, BN5's 0x48-0x4A (its family 0x43's base 0x48 + its sub-family, BN5 0x080EEE18), are the Navis' 0xA8-0xAA, TomahawkSoul's swing 0x45 the Navis' 0xA6, ShadowSoul's slash 0x17 (its sword family's sub-family 2, BN5's table 0x080EC112) the Navis' 0xA3: BN6 has an effect of the same record (0x17, and 0x33 for 0x45: its list, number, animation and palette) whose sprite, redrawn, animates for other frames, and an effect lives as long as its animation (copies).",
+ "bn5_to_bn6": {
+  "0x57": "0x6C",
+  "0x63": "0xAC"
+ },
+ "navis": [
+  {
+   "ids": [
+    "0x143",
+    "0x144",
+    "0x145",
+    "0x146"
+   ],
+   "name": "ToadMan",
+   "bn5_to_bn6": {
+    "0x14": "0xA0",
+    "0x5D": "0xA1"
+   }
+  },
+  {
+   "ids": [
+    "0x13D",
+    "0x13E",
+    "0x13F",
+    "0x140"
+   ],
+   "name": "KnightMan",
+   "bn5_to_bn6": {
+    "0x02": "0xA2",
+    "0x14": "0xA0"
+   }
+  },
+  {
+   "ids": [
+    "0x12B",
+    "0x12C",
+    "0x12D",
+    "0x12E"
+   ],
+   "name": "ShadowMan",
+   "bn5_to_bn6": {
+    "0x02": "0xA2",
+    "0x17": "0xA3",
+    "0x18": "0xA4"
+   }
+  },
+  {
+   "ids": [
+    "0x131",
+    "0x132",
+    "0x133",
+    "0x134"
+   ],
+   "name": "NumberMan",
+   "bn5_to_bn6": {
+    "0x02": "0xA2",
+    "0x14": "0xA0"
+   }
+  },
+  {
+   "ids": [
+    "0x137",
+    "0x138",
+    "0x139",
+    "0x13A"
+   ],
+   "name": "TomahawkMan",
+   "bn5_to_bn6": {
+    "0x05": "0xA5",
+    "0x45": "0xA6",
+    "0x46": "0xA7"
+   }
+  },
+  {
+   "ids": [
+    "0x125",
+    "0x126",
+    "0x127",
+    "0x128"
+   ],
+   "name": "Colonel",
+   "bn5_to_bn6": {
+    "0x47": "0x60",
+    "0x48": "0xA8",
+    "0x49": "0xA9",
+    "0x4A": "0xAA",
+    "0x01": "0xAB",
+    "0x02": "0xA2",
+    "0x14": "0xA0"
+   }
+  },
+  {
+   "ids": [
+    "0x149",
+    "0x14A",
+    "0x14B",
+    "0x14C"
+   ],
+   "name": "ShadeMan",
+   "bn5_to_bn6": {
+    "0x02": "0xA2"
+   }
+  },
+  {
+   "ids": [
+    "0x113",
+    "0x114",
+    "0x115",
+    "0x116"
+   ],
+   "name": "NapalmMan",
+   "bn5_to_bn6": {
+    "0x14": "0xA0",
+    "0x4B": "0xAD",
+    "0x4C": "0xAE",
+    "0x08": "0xAF"
+   }
+  },
+  {
+   "ids": [
+    "0x10D",
+    "0x10E",
+    "0x10F",
+    "0x110"
+   ],
+   "name": "SearchMan",
+   "bn5_to_bn6": {
+    "0x14": "0xA0"
+   }
+  },
+  {
+   "ids": [
+    "0x11F",
+    "0x120",
+    "0x121",
+    "0x122"
+   ],
+   "name": "Meddy",
+   "bn5_to_bn6": {
+    "0x44": "0xB0"
+   }
+  },
+  {
+   "ids": [
+    "0x167",
+    "0x168",
+    "0x169",
+    "0x16A"
+   ],
+   "name": "GridMan",
+   "bn5_to_bn6": {
+    "0x02": "0xA2",
+    "0x14": "0xA0",
+    "0x5F": "0xB1"
+   }
+  }
+ ],
+ "copies": {
+  "why": "In a spec with the Souls installed (souls6), or whose spec asks (effect_copies: the obstacle strike's, colonel_strike): BN5's effects the Souls' code spawns that BN6's engine spawns of its own too (0x14 and 0x02, BN6's redrawn: 0x02 by a counter's family 0x47, BN6's twin of BN5's 0x2C), and ShadowSoul's slash 0x17 (BN6's of the same record redrawn, another animation), run as the Navis' copies of BN5's (one BN6 number a BN5 effect, issue #82's allocations: 0xA0, 0xA2, 0xA3, src/emu/xnavi_bn5.c), and the Souls' own copies, 0x03 (the unison's phase 0 spawns BN6's own) at 0xC0 and the obstacle strike's shot's hit 0x20 (its table 0x080C6C08, row 12, fixed in the chips' copy: tools/bn5_twins.py's SHARED_ROWS) at 0xC1, each drawn with BN5's sprite: a BN6 copy is read as the BN5 effect it copies, BN5's id as itself in both (which of the two a spawn is, the code that spawned it says). ColonelSoul's ScreenDivide's three (0x48-0x4A) and TomahawkSoul's swing (0x45) are the Navis' 0xA8-0xAA and 0xA6, read as such in every spec (tools/xdiff_snap.py's chip_effects, the chips' units naming them). The Navis' 0xAB, Colonel's copy of BN5's 0x01, the same: in colonel_strike BN6's engine spawns its own 0x01 where BN5's spawns 0x01, and Colonel's code the copy.",
+  "bn6_to_bn5": {
+   "0xA0": "0x14",
+   "0xA2": "0x02",
+   "0xA3": "0x17",
+   "0xC0": "0x03",
+   "0xC1": "0x20",
+   "0xAB": "0x01"
+  }
+ }
+}

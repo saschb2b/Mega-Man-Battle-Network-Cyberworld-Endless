@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Thunder2's row's power another",
+  "spec": "bn4_chip_thunder2",
+  "poke": [
+   "08C06F7A:0028"
+  ],
+  "what": "the registry's record of BN4's Thunder2 (648) with power 40 where BN4's record holds 60: the Mettaur left 100 HP where BN4's leaves it 80"
+ }
+]

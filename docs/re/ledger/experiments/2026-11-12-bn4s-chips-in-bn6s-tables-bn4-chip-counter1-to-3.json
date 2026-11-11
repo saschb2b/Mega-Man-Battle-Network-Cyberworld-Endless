@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_counter1 to 3 and _idle: BN4's Counter moved, to the frame of its hit",
+  "result": "python3 build.py xdiff with the four specs: each PASS over 58 frames (used at t55 inside a MettaurSP's counter window: 70, 30 and 0 HP left in both; at t30 outside it: untouched). Six mutations caught. Past t58 the battles part on what the counter starts, each engine's own first-kind object of name 0 (BN4's AI data points at it from +0x60, BN6's from +0x5C): not compared.",
+  "meaning": "A misc routine that lives in its object's code moves with that object; a chip's proof can end where the engines' own aftermath begins, said in the spec."
+}

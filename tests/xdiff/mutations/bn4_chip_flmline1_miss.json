@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the flame's type another",
+  "spec": "bn4_chip_flmline1_miss",
+  "poke": [
+   "080D00BC:20CB"
+  ],
+  "what": "the flame's spawner's copy (its movs r0,#0x19 at BN4 0x080D00BC, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no flames"
+ }
+]

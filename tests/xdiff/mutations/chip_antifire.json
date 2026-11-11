@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a collision data's offset added",
+  "spec": "chip_antifire",
+  "poke5": [
+   "080CF6CC:307C"
+  ],
+  "what": "the Anti trap's damage by element read at BN5's +0x7C (adds r0,#0x7C at BN5's 0x080CF6CC, written at its copy) where the install gives it BN6's +0x84 (COLL_SUMS): the trap never springs"
+ }
+]

@@ -1,0 +1,26 @@
+{
+ "name": "BN6's spread shot's region",
+ "part": "coll",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T3"
+ ],
+ "types": [
+  "0x12"
+ ],
+ "cells": [
+  [
+   "0x30",
+   "0x00",
+   "0x80"
+  ]
+ ],
+ "why": "The spread shot (the third kind's type 0x12, Spreader's) sets up its collision with region 61 for what it is in BN6 (0x080C8202: movs r1,#0x3d) where BN5's sets region 0 (0x080C6CCE: movs r1,#0): BN6's table gives region 61 the word 0x80 (BN6's bit by which its second pass lets an object whose +0x3C has 0x20 touch it, 0x081D7BAE), BN5's region 0 none. BN6's shot is one such objects may touch; nothing in the spec's battle does. Its other byte the same.",
+ "evidence": [
+  "BN5 0x080C6CCE-0x080C6CD4 / BN6 0x080C8202-0x080C8208: the shot's collision setup (BN5 0x08016760 / BN6 0x08019FB4) with r1 0 / 0x3D, r2 5",
+  "the alliance tables at region 61 (entries 122, 123): BN5 0x80000080, 0x40000080; BN6 0x80, 0x80; at region 0 both 0",
+  "chip_spreader: the shot's +0x30 0 in BN5's and 0x80 in BN6's while it flies (t34-t36), its explosion's (region 15, then 0) as legit.json's alliance map reads it"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's last chips in BN6's tables",
+  "date": "2026-11-09",
+  "name": "chip_cloudman to chip_djangods_dark: BN5's five Navi chips past nine bits against their move into BN6's",
+  "result": "python3 build.py xdiff with the twenty specs (each Navi's V1, SP, DS and DS dark; rng replay): each PASS over 300 fight frames. First run: the chips' units not installed (more writes than 512: TX_WRITES 1024 since), then chip_djangosp FAIL at t32, its power 0 where BN5's is 150 (BN5's power 1022 its own routine, 0x0800E982, by the battle's turn: moved as PowerDjangoSP). --mutations with the same specs: 20 of 20 caught (each Navi routine's grown entry, each attack's object type, each SP's deletion time or Django[SP]'s turn, each DS let through undark). A break of CosmoMan's thrown object's sprite number passed: BN5's sprite is LZ77, the comparison holds no bytes of it; dropped from the file, the chips watched in the game.",
+  "meaning": "Every Navi chip of BN5's Darkloids and Nebula's Navis plays in BN6's engine; a Navi chip needs its Navi's sprite and attack objects, not the Navi moved.",
+  "link": "../rom/chips-code.md"
+}

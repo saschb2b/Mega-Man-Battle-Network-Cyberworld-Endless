@@ -1,0 +1,26 @@
+{
+ "why": "MegaMan's AI data +4 to +8 and +0x11 name his power attacks (his charged shot's at +7, BPwrAtk), each an entry of each game's table (BN5 0x0800F368, 108 entries; Gregar 0x080117D4, 148, grown by the Souls track's S4 to 159 in the Souls' room and by S6 to 165, soul_room.h's SOULS_POWERS, the word 0x080117D0 pointed at the copy): BN5's number read as BN6's. In both games his plain loadout is ff ff 00 01 ff ff (no Cross, no Soul: the normal charged shot, entry 1 of each, BN5 0x0800F5B4 and Gregar 0x08011A7E, 10 x (Attack + 1)), and 0xFF none: the same numbers. A Soul's are BN6's from SOUL_POWER_FIRST (0x94) in the recipe's order (tools/xsoul.py's POWERS: ColonelSoul's charged shot 0x14 and chip shot 0x13, ShadowSoul's charged shot 0x17 and B+Left 0x45, NumberSoul's 0x07, TomahawkSoul's 0x1A, KnightSoul's 0x11, ToadSoul's 0x2D), then the three whose BN5 routine is the empty one, their charge times alone read (the A button's chip charge: 0x12, 0x18, 0x1B); then a Soul's Chaos Unison attack (+0x11, every Soul's loadout's sixth: the Souls track's S6, src/emu/soulchaos.c), in soulpower.c's chaos_powers order: ColonelSoul's 0x3A (DrkSonic), ShadowSoul's 0x31 (DarkInvs), NumberSoul's 0x32 (DarkPlus), TomahawkSoul's 0x33 (DrkLance), KnightSoul's 0x38 (DarkDril), ToadSoul's 0x34 (DarkWide), their routines Chaos Unison's Thumb, each the chip writer of the Soul's DarkChip in BN6's ids (BN5's 0x0800FA36-0x0800FA98), their charge times BN5's rows (40, 60, 90, 120, 150 by the level).",
+ "bn5_to_bn6": {
+  "0x14": "0x94",
+  "0x13": "0x95",
+  "0x17": "0x96",
+  "0x45": "0x97",
+  "0x07": "0x98",
+  "0x1A": "0x99",
+  "0x11": "0x9A",
+  "0x2D": "0x9B",
+  "0x12": "0x9C",
+  "0x18": "0x9D",
+  "0x1B": "0x9E",
+  "0x3A": "0x9F",
+  "0x31": "0xA0",
+  "0x32": "0xA1",
+  "0x33": "0xA2",
+  "0x38": "0xA3",
+  "0x34": "0xA4"
+ },
+ "evidence": [
+  "src/emu/soulpower.c's tables(): the grown table, BN5's rows of 0x0801CA18 by the Soul written in BN6's ids into SOULS_LOADOUTS, the loadout's read (0x0800FEEC) hooked to them for the proxy form with a Soul; soulcode_bn5.c's powers",
+  "soul_chaos_* (tests/xdiff): KnightSoul's loadout ff 12 00 11 ff 38 in BN5, ff 9c 00 9a ff a3 in BN6, its +0x11 the chaos attack in both"
+ ]
+}

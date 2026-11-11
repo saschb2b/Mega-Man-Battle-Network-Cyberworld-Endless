@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "TinHawk's and Bladia's strikes and a guardian's return",
+  "result": "In romlab, missions 2 and 4 started by setting the mission byte and warping into their maps (0x86:01, 0x86:03), every Navi's Pass taken: a TinHawk two from MegaMan warps out (sprite list 7's 59, animations 4 and 5, as every unit's warp), lands 20 world units beside him in its strike (0x080AFFD0's two places by the RNG), BN5's blow (event list 0x08051904: list 7's 58 16 up, 0x6B, the board shaken 10 frames) and 0x10A, then warps home; a Bladia beside Colonel strikes in its pose 25-28 with the same blow and 0x10A, the red out 123 frames after the line, as BigBrute's. A BigBrute poked deleted beside its DarkHole rises on the hole at the phase's end (OBJ mosaic 15 to 0, sound 0x94) and warps to the free dark panel beside it nearest the Navi; the rule read in 0x0804E700-0x0804E858.",
+  "meaning": "Each strike and the return are BN5's, frame for frame, on the board; BN6's Darkloids strike with BN5's own blow, as two of BN5's Darkloids do.",
+  "link": "../game/liberation/overview.md"
+}

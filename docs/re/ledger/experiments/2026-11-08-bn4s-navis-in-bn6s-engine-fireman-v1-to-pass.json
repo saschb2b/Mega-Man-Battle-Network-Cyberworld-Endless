@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "fireman_v1 to PASS",
+  "result": "python3 tools/xdiff.py fireman_v1: FAIL at t1 (his companion's +0x91 BN4 2 | BN6 1; BN6's t1 2, the same fight frame), at t237 with the companion's count read by the fight's frames (his flame's +0x0E and its collision's hit kind BN4 1 | BN6 0), at t238 with his flame's palette at BN6's +0xF (the family's sounds, BN4 0xA8 | BN6 0x33), at t271 with his sounds paired (his companion's renderer rank BN4 3 | BN6 2, BN4's spark drawn at place 0x40 where BN6's had ended), PASS with the spark unranked. Every spec run: the 18 BN4 family specs, gutsman_v1, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; thunderman_v1 and windman_v1 hold their recorded verdicts; --mutations 193 of 193 caught.",
+  "meaning": "FireMan's port matches BN4's battle over 1200 frames once his flame keeps its element: the opening count and the spark's rank were each game's clock and art, the palette store the port's.",
+  "link": "../multirom/bn4-navis.md"
+}

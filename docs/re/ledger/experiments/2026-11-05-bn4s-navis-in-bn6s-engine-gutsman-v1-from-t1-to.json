@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "gutsman_v1 from t1 to t265",
+  "result": "python3 tools/xdiff.py gutsman_v1: the same from t1 to t265 with his collision's own setup argument (0x21) ported and the comparator's Navi rules (navi_ai, the opening count by the frame's clock, his draws keyed by his code's room: 73 replayed, a spawn's leftover register, a slot's left sprite state); FAIL at t266, his sprite's screen place under the screen's shake (BN4 0xB3, BN6 0xB5 at +0x9C). The BN4 family specs, the controls, cangard_v1 and handi_v1 PASS; 181 of 181 mutations caught.",
+  "meaning": "GutsMan's step, decision, machine gun and his first attack's object run frame for frame as BN4's; what parts next is each engine's screen shake applied to sprites, the next unit.",
+  "link": "../multirom/bn4-navis.md"
+}

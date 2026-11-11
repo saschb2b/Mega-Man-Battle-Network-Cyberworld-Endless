@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-22",
+  "what": "Issue #182 and the full-rules audit made right (src/emu/darkinvs.c, darkinvs_room.h, bn6_ai.h, soullife.c, soulchaos.c, soulchips.c, soullook.c, soulmood.c, src/online/arena_team_rules.c): BN5's chip AI's rooms, the Souls and the mood by object; BN6's AI data's pool and its side-player getter named (docs/rom/), docs/symbols written again."
+}

@@ -1,0 +1,15 @@
+{
+ "bn4": "0xB8",
+ "bn6": "0x32",
+ "clock": "state",
+ "foes": [
+  "0x31",
+  "0x32",
+  "0x33",
+  "0x34",
+  "0x35",
+  "0x36"
+ ],
+ "what": "MagTect's sound 0xB8, the pool's",
+ "why": "Played by MagTect's code (BN4: movs r0,#0xb8 at 0x080BEFAA, its bl to PlaySoundEffect after it; BN6: its copy's movs r0,#0x32 at 0x08F11F32 in the late families' code room, the recipe's immediate), a state's. MagTect is a late family (tools/xrecipe_bn4.py LATE_FROM), whose sounds BN6 has no song of take the per-battle pool's slots in order as a BN4 Navi's do (the owner's call 13; tools/xrecipe_bn4.py pool_song): its first, 0x32, BN4's song 0xB8 copied into its art at install on BN4's player 17 and the pool pointed at it in its battles (src/emu/xvirus_songs.c, src/emu/xnavi_bn4_sounds.c). ThunderMan plays the same song at the pool's 0x33 in his battles (the row above without foes, which holds wherever this one does not): each battle points the pool at its own owner's songs. In its battles alone (foes); BN6's own song 0xB8 is another, and the pool's slots are told by their numbers (docs/multirom/bn4.md, Its sounds)"
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "BN4's reward rows located (BN4_REWARD_ROWS 0x080F5F50, BN4_REWARD_CHOOSER 0x080F57DC, BN4_REWARD_PICK 0x080F580C, BN4_REWARD_ROW_OF 0x080F5EC4, BN4_BUSTING_TABLE 0x0801881D; docs/rom/bn4.md, Its rewards) by BN6's chooser's bytes and read with the Thumb decoder; proved in romlab by Billy's row recoded (0x4123 paid) and the next id's (Thunder1 L as before). The six moved BN4 families' rows are BN4's now (src/emu/xvirus.c drops_set, src/core/xchips.c xchips_reward_bn4): zenny and HP as they are, chips BN6 lacks 200 zenny; the owner's call 6's condition met."
+}

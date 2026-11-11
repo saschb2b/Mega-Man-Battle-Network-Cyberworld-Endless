@@ -1,0 +1,14 @@
+[
+ {
+  "name": "the button's chip left in the deck",
+  "spec": "soul_colonel_chip",
+  "soulbreak": 16384,
+  "what": "OK's picks spent (src/emu/soulcolonel.c's spent) leave the button's Cannon in the deck where BN5's 0x080250CC spends it: the third hand's first chip the Cannon again where BN5's is a RockCube"
+ },
+ {
+  "name": "his charged shot ScreenDivide with a chip",
+  "spec": "soul_colonel_chip",
+  "soulbreak": 32768,
+  "what": "the turn's start (src/emu/soulcolonel.c's turn) keeps his charged shot ScreenDivide (BN6's 0x94) with the Cannon in the button where BN5's 0x080124A6 makes it the chip shot (0x13): ScreenDivide at t952 where BN5 fires the Cannon"
+ }
+]

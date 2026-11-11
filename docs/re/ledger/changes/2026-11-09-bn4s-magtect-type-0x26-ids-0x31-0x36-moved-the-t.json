@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "BN4's MagTect (type 0x26, ids 0x31-0x36) moved, the third late family (AI 74, ids 0x2FC-0x301): its update's shake entered as hook 3, the can-move check's third form copied, its sounds 0xB8 and 0xF8 the pool's 0x32 and 0x33; bn4_battle.h BN4_MAGTECT_*, BN4_CAN_MOVE_THIRD (docs/rom/bn4.md, MagTect moved). The differential pairs a family's draws in the opening from its end where BN4's opening made more (legit.json's bn4 opening_draws; tools/xdiff_bn4.py opening_skips, the spec item setupskip)."
+}

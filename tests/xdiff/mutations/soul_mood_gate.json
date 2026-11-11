@@ -1,0 +1,8 @@
+[
+ {
+  "name": "BN5's dark gate left out",
+  "spec": "soul_mood_gate",
+  "soulbreak": 268435456,
+  "what": "the chip use's end (soulmood_chip_refused) lets BlakWing through while MegaMan is not dark where BN5's 0x08010110 refuses it: the attack's chip BlakWing (0x125) where BN5's is the chip of nothing (0x185)"
+ }
+]

@@ -20,15 +20,39 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
-  # a newer push replaces a running check, but main finishes what it deploys
-  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+  # a pull request's newer push replaces its running check; every push to dev is checked to its end,
+  # each on its own (the platform jobs a pull request left out run there, and a break is the merge's that made it),
+  # and main finishes what it deploys
+  group: ci-${{ github.ref == 'refs/heads/dev' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' && github.ref != 'refs/heads/dev' }}
 
 env:
   DOCKER_CONTEXT_NAME: ""   # build.py: the runner's own Docker, not Docker Desktop
   CYBERWORLD_TEST_PUBLIC_WSS: ${{ inputs.public_wss && 'true' || 'false' }}
 
 jobs:
+  # A pull request runs every check below but eight platform builds, which it runs only where its change
+  # can reach them (tools/ci_changes.py: their own folder, what every build shares, a source file with a
+  # system's own code); a push and a run started by hand run them all (docs/code/platforms.md, CI on a
+  # pull request). All of them on a branch: gh workflow run CI --ref BRANCH.
+  changes:
+    name: Which platforms
+    runs-on: ubuntu-latest
+    outputs:
+      switch: ${{ steps.pick.outputs.switch }}
+      vita: ${{ steps.pick.outputs.vita }}
+      ps4: ${{ steps.pick.outputs.ps4 }}
+      ps5: ${{ steps.pick.outputs.ps5 }}
+      android: ${{ steps.pick.outputs.android }}
+      macos: ${{ steps.pick.outputs.macos }}
+      ios: ${{ steps.pick.outputs.ios }}
+      web: ${{ steps.pick.outputs.web }}
+    steps:
+      - uses: actions/checkout@v7
+        with: { fetch-depth: 2 }   # a pull request's merge and dev's tip under it
+      - id: pick
+        run: python3 tools/ci_changes.py >> "$GITHUB_OUTPUT"
+
   lint:
     name: Lint scripts
     runs-on: ubuntu-latest
@@ -221,6 +245,8 @@ jobs:
 
   switch:
     name: Nintendo Switch
+    needs: changes
+    if: needs.changes.outputs.switch == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -247,6 +273,8 @@ jobs:
 
   vita:
     name: PlayStation Vita
+    needs: changes
+    if: needs.changes.outputs.vita == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -272,6 +300,8 @@ jobs:
 
   ps4:
     name: PS4 and PS5
+    needs: changes
+    if: needs.changes.outputs.ps4 == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -292,6 +322,8 @@ jobs:
 
   ps5:
     name: PS5
+    needs: changes
+    if: needs.changes.outputs.ps5 == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -320,6 +352,8 @@ jobs:
 
   android:
     name: Android
+    needs: changes
+    if: needs.changes.outputs.android == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -348,6 +382,8 @@ jobs:
 
   macos:
     name: macOS
+    needs: changes
+    if: needs.changes.outputs.macos == 'true'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
@@ -388,6 +424,8 @@ jobs:
 
   ios:
     name: iOS
+    needs: changes
+    if: needs.changes.outputs.ios == 'true'
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
@@ -437,6 +475,8 @@ jobs:
 
   web:
     name: Browser
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

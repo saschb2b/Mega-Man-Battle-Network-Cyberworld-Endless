@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-18",
+  "name": "BN5 in both pair cores, two clients",
+  "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
+  "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
+  "link": "../online/arena/from-square/full-rules.md"
+}

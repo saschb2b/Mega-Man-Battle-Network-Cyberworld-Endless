@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "CosmoMan moved (docs/multirom/navis.md, The Darkloids; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_COSMO_SPAWN_6C, _6D, _79 and BN5_COSMO_HALF_HP, and CloudMan's BN5_CLOUD_FIND_37, BN5_CLOUD_PANEL, BN5_CLOUD_KINDS_0B): cosmoman_v1, cosmoman_v1_keys and cosmoman_sp PASS; the comparator's spawn_leftovers learn a word part of which the spawner writes (compares), and the engine's spark takes its struck attack's rule for its Z."
+}

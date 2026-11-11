@@ -1,0 +1,13 @@
+{
+ "name": "BN6's MegaMan's Beast Out gate",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x0F",
+  "0x0F"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's battle start writes 1 into both sides' players' AI data +0xF (0x08009338: 0x0800936E, 0x0800937E); it is read only by Beast Out's: its end (0x080159C6, BN6_TURN_END's call: 0 there sets 2, then the Beast Out counter, NaviStats +0x29) and its count-down (0x08015A16 for both sides, while NaviStats +0x29 is 0: one less to 0, 0xFF left). BN4 has no Beast Out, and no byte of its MegaMan's AI data its code reads so"
+}

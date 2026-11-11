@@ -1,0 +1,8 @@
+[
+ {
+  "name": "TomahawkSoul of no element",
+  "spec": "soul_tomahawk_heal",
+  "soulbreak": 64,
+  "what": "the element's hook gives TomahawkSoul none where BN5's table gives Wood: no heal on grass (BN6's grass step heals a Wood actor)"
+ }
+]

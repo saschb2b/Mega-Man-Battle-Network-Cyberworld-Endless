@@ -1,0 +1,13 @@
+{
+ "name": "the cube's name, BN6's",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x59",
+ "part": "obj",
+ "offsets": [
+  "0x28",
+  "0x29"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "RockCube's cube is each engine's own third-kind 0x59, the same object of each (its init BN4 0x080D89F8 and BN6 0x080D11E4, its update BN4 0x080D8A8C and BN6 0x080D1288, call for call the same). BN6's kinds' rows are 8 bytes where BN4's are 6 (BN6 0x080D11A4, BN4 0x080D89C0: the same sprite's animation, HP and sound in each), the two more a NameID its init stores at +0x28 (ldrh r0,[r7,#6]; strh r0,[r5,#0x28] at 0x080D1248: 0xD0 for the cube), which BN4's object has none of. bn4_chip_rockcube at t34"
+}

@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's actor type and AI index, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x00",
+  "0x01"
+ ],
+ "why": "BN6's battle actor setup writes the enemy id's triple +1, its actor type (1 a Navi), at AI data +0 and its +2, the AI index, at +1 (0x08007720-0x08007726, r4 the AI data), which BN6 reads to pick a triple's word (its spawn hooks, 0x0800F420: ldr r3,[r5,#0x58]; ldrb r1,[r3,#0]; ldrb r1,[r3,#1]) and its palette (0x0800F334), and its Navi frame reads its thirteen tables by (BN6_NAVI_FRAME, AIData +1: GutsMan's 49, src/emu/xnavi_recipe.h XN_BN4_FIRST_AI). BN4 has no triples and no Navi tables (a Navi its own first-kind type, BN4_T1_TYPES); its Navi's AI data is its side's (BN4_AI_OF_SIDE), whose +0 and +1 GutsMan's code and the engine's routines his states call never read (tools/xnavirecipe_bn4.py's AI tracker: his reads are his blocks, +0x64 on): BN6's own bookkeeping"
+}

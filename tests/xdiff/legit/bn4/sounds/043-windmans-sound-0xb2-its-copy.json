@@ -1,0 +1,7 @@
+{
+ "bn4": "0xB2",
+ "bn6": "0x32",
+ "clock": "state",
+ "what": "WindMan's sound 0xB2, its copy",
+ "why": "Played by his air shot's code (BN4's third-kind 0x63, 0x080D9C58, moved: movs r0,#0xb2 at 0x080D9CC0, its bl to PlaySoundEffect at 0x080D9CC2; BN6: its copy's movs r0,#0x32 at 0x08F336A8, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F336AF), a state's: BN4's song 0xB2 copied into the pool's first slot, BN6's empty 0x32 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot, as GutsMan's 0xA2); windman_v1's at t104 in BN4 and t105 in BN6 (begun a frame after each). BN6's own song 0x32 is empty, so the copy is told by its slot"
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-10",
+  "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
+}

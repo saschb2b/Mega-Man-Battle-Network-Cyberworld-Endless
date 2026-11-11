@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "A BonusPanel liberated, each slot forced",
+  "result": "In the BN5 lab on mission 1, the faced dark panel (0x7C,0x80) made kind 9 in RAM and the first BonusPanel record's place moved to it in the ROM copy: Liberation runs no battle; 'A BonusPanel!', the panel's dissolve and shine, three white flashes (0xD7), the band, the icon in from the right (0xD6), PRESS A BUTTON, the slot every 4 frames (0x80), A (0x92), the name 88 frames, out, shut; the slot's byte (0x0200ABB6) forced to 0-4 before A: 0 sets 0x80 on both Navis' units (sound 0x93, 'Team becomes invincible for 1 phase!!'), 1 MegaMan 30 to 100 HP (Colonel's 50 untouched), 2 Order Points 3 to 8, 3 a chip find (Boomer V), 4 the nearer BigBrute deleted, and with both guardians cleared BlizzardMan 400 to 320 (1000 to 800, 300 of 400 to 220). The Navi's actions left (+2) stayed 1 each time; his menu opened again.",
+  "meaning": "The guides' five outcomes are BN5's, in the records' order; the stop is the player's A, the icon shown the slot given; Major Hit deletes a guardian outright and takes a fifth of a Darkloid's max HP; the BonusPanel costs no action. Built in liberation_bonus.c and liberation_roulette.c.",
+  "link": "../game/liberation/bn5/bonus-panels.md"
+}

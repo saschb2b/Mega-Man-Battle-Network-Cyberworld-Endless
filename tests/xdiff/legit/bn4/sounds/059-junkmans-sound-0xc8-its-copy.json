@@ -1,0 +1,13 @@
+{
+ "bn4": "0xC8",
+ "bn6": "0xE0",
+ "clock": "state",
+ "foes": [
+  "0xA4",
+  "0xA5",
+  "0xA6",
+  "0xA7"
+ ],
+ "what": "JunkMan's sound 0xC8, its copy",
+ "why": "Played by his junk, the third kind's 0x96 moved with him (spawned by his update's call before his state runner, 0x080C94AE): movs r0,#0xc8 at 0x080DFE18 and 0x080DFE90, their bls to PlaySoundEffect at 0x080DFE1A and 0x080DFE92; BN6: its copy's movs r0,#0xe0, the recipe's immediates, their bls through their veneers to BN6's, a state's: BN4's song 0xC8 copied into the pool's fifth slot, 0xE0 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11). His ids alone (\"foes\"): the pool's slots are another Navi's sounds in his battles, so the copy is told by its slot"
+}

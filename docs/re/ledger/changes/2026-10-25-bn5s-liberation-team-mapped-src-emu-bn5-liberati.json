@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "BN5's Liberation team mapped (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the Navi in play at the liberation state's +6, a team unit's +2 its turn yet to come, the HP box's cap 0x086D5964, digits 0x086D59A4 and blank 0x086D5C64 on palette 12, the others' HP under them, Pass a fifth of max HP; BN6's player spawn's sprite load 0x0809E7EA and OK's hand 0x08029110 named (src/emu/bn6.h, bn6_forms.h), Gregar's list-6 numbers 0x07, 0x28, 0x29, 0x31 and 0x35 found empty in both versions"
+}

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "ColonelSoul's button lit for any pick",
+  "spec": "soul_colonel_grey",
+  "soulbreak": 2048,
+  "what": "the button's rule (src/emu/soulcolonel.c's lit) takes any chip where BN5's 0x08024C04 refuses a chip of a kind: the RockCube lights it, A loads it, and his charged shot is the chip shot (BN6's 0x95) where BN5's stays ScreenDivide"
+ }
+]

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-10",
+  "what": "The spread chips' code located and moved, the first attack family (bn4_chips.h BN4_SPREAD_STATE 0x080EC760, BN4_T3_SPREAD_SHOT 0x12 with BN4_SPREAD_SHOT_KINDS 0x080CF3DC, BN4_T3_ARM 0x02 with BN4_ARM_SPAWN 0x080CD6E0, BN4_COUNTER_WINDOW 0x0800BA66, BN4_ELEMENT_SET 0x0801288C; bn6_chips.h BN6_SPREAD_FAMILY 0x080EDEF0 and its twins; docs/rom/bn4.md): BN6 keeps the family with its own arm, so the state moves."
+}

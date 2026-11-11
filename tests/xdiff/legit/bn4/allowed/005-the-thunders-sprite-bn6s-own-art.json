@@ -1,0 +1,12 @@
+{
+ "name": "the thunder's sprite, BN6's own art",
+ "whose": "family",
+ "kind": "T3",
+ "type": "0x2A",
+ "part": "obj",
+ "offsets": [
+  "0xA8",
+  "0xBB"
+ ],
+ "why": "Billy's thunder is BN6's own third-kind 0x2A run for Billy's parameters (the recipe's audit, tools/bn4_twins.py AUDITS (0x080D2156, 0x080CADBC): BN6's object, not BN4's moved), so it draws BN6's own art: its init sets up sprite list 0x10, number 0x11 in BN4 (0x080D2044, its sprite_load 0x0800287C) and number 0x16 in BN6 (0x080CAC80, sprite_load 0x080026E4), two sprites of other bytes (the hooks' CRC32s 0x030B3B0A and 0xAF2AFC99). What the sprite state holds of it is its own: +0xA8 to +0xB7 its frames' pointers into it (sprite_load's +0x18 on, its state at the object's +0x90) and +0xB8's word (its top byte 0x80 in BN4, 0xC0 in BN6) copied from the sprite's own data (BN6 0x0800210E-0x08002120, byte by byte as the art has it): Billy's sprite, a copy of BN4's bytes, holds the same there in both games (+0xBB 0xFC), MegaMan's too (0xF0). The thunder's place, timing, damage and hit are compared as ever"
+}

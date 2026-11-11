@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a charged shot's family",
+  "spec": "soul_knight_shot",
+  "soulbreak": 32,
+  "what": "each Soul's loadout names the next Soul's power attack for its charged shot (SOULS_LOADOUTS' +7): KnightSoul fires ToadSoul's"
+ }
+]

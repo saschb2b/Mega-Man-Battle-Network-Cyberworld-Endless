@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a ring's hit effect aimed elsewhere",
+  "spec": "walla_v1",
+  "call": [
+   "0801A0D4:0810A952"
+  ],
+  "what": "Walla's rings' call to the effect their hits make (BN4 0x080D4BEA: bl 0x08012F44, its copy's veneer to BN6's twin 0x0801A0D4) aimed at BN6's family nullsub: no hit's spark where BN4's spawns one; the spark counted the family's, whose sprite state and life are each engine's own (legit.json's bn4, the hit's spark), its being in play before both had it compared as ever (caught at t68, the spark in play in BN4's alone; the spec PASSes unmutated)"
+ },
+ {
+  "name": "a copied sound aimed at BN6's own song of its number",
+  "spec": "walla_v1",
+  "poke": [
+   "080BEAE8:20B7"
+  ],
+  "what": "Walla's sound 0xB7 (BN4 0x080BEAE8: movs r0,#0xb7, its copy's immediate the recipe gives BN6's empty slot 0x37, where xsong.c's XSOUNDS puts BN4's song) written as BN4's number again: BN6 begins its own song 0xB7 on its player 18 where BN4 begins its 0xB7 on its player 9, which legit.json's bn4 sounds pair with the copy's 0x37 by the routines that play them; the line is the family's, its code having played the sound (tools/xdiff_bn4.py family_sounds), where unmutated they read alike (caught at t3, BN4 [0x37] | BN6 [0xB7]; the spec PASSes unmutated)"
+ }
+]

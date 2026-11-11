@@ -1,0 +1,28 @@
+{
+ "name": "the engine's effect's sprite",
+ "part": "obj",
+ "whose": [
+  "effect"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x00"
+ ],
+ "offsets": [
+  "0x10-0x11"
+ ],
+ "sprite_offsets": [
+  "0x00-0x07",
+  "0x0A-0x14",
+  "0x16-0x37"
+ ],
+ "why": "Where a family's attack runs a routine of its game's engine that BN6 has as its twin (the same bytes, called through the recipe's calls or a jump table's entry), or is a type of BN6's own the family's code spawns as its twin, that routine gives the effect it spawns (the fourth kind's type 0) by its own number: the same number in both, each game's own effect by it (its row of each game's effects table: the sprite, its animation and its palette), drawn from each game's own sprite (tools/xdiff_masks.py's whose 'effect': the effect spawner's caller is the engine's code, not the family's). Its id (its role), its place and its owner are compared, and fail the spec where they differ; its sprite's state (the sprite its game's row names, its animation, palette, frames and their durations) and the animation the object keeps of its row (+0x10, +0x11) are each game's art, as MegaMan's own sprite is.",
+ "evidence": [
+  "bugtank_v1 t178: the thrown bomb's burst (BN5 0x080C943C / BN6 0x080CA238, the same bytes; its ids by its kind at BN5 0x080C94D0 / BN6 0x080CA2CC, 50 51 52 53 in both), run as the twin of 0x080C92F2 (BN6 0x080CA102), spawns effect 0x50 through 0x08018838 / 0x0801BD3C: BN5's effect 0x50 is sprite list 5's 0x18 (its row at 0x080DFD7C + 4 x 0x50), BN6's list 4's 0x48 (0x080E16D4 + 4 x 0x50); their frames' pointers (+0x1C) 4 and 12 bytes into each",
+  "the effect object's set-up, the same in both: BN5 0x080DFF4C-0x080DFF80 / BN6 0x080E18A4-0x080E18D8, its row the effects table (BN5 0x080DFD7C, BN6 0x080E16D4) + 4 x its +4: the sprite of row[0] and row[1], +0x10 and +0x11 row[2] (its animation), its palette row[3] + its +6",
+  "bugtank_v3 t133: the burst's effect 0x53, BN5's row 14 18 00 03, BN6's 14 05 01 06: its +0x10 and +0x11 0 in BN5's, 1 in BN6's",
+  "bugtank_v2 t151: the same burst for Bugtank V2's kind 2 spawns effect 0x52: BN5's row 14 18 00 02 (list 5's 0x18, its +3 2), BN6's 10 41 00 00 (list 4's 0x41): its sprite's state +0x04 2 in BN5's, 0 in BN6's"
+ ]
+}

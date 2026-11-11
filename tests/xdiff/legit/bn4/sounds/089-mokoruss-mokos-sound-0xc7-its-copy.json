@@ -1,0 +1,7 @@
+{
+ "bn4": "0xC7",
+ "bn6": "0x1E0",
+ "clock": "state",
+ "what": "MokoRus's Moko's sound 0xC7, its copy",
+ "why": "Played by the Moko's code as it sets off (BN4's third-kind 0x2C, moved with MokoRus's unit: movs r0,#0xc7 at 0x080D245C, its bl to PlaySoundEffect at 0x080D245E; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1E0 and goes on to BN6's), a state's: BN4's song 0xC7 copied into slot 0x1E0 of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xC7 is another (xrecipe.song_sig). bn4_chip_mokorus1 at t34 in BN4's and t35 in BN6's, and again at t44 and t54 as the second and third set off"
+}

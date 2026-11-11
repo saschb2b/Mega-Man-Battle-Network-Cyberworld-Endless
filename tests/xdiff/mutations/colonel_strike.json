@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a Navi Colonel's side not arming the obstacle strike",
+  "spec": "colonel_strike",
+  "poke": [
+   "08D90044:46C0"
+  ],
+  "what": "the stub Colonel's write of BattleState +0x5C's bits goes to (XN_STUB_SIDES, its orrs at + 4) keeps none in BN6_COLONEL_SIDES, the one field the obstacle strike reads (src/emu/xstrike.c): his side unarmed from t1 where BN5's bit 0x20 is set, the cube no soldier, MegaMan none of the three shots BN5's takes from t50"
+ }
+]

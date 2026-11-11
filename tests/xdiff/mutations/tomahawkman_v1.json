@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a Navi's state number not moved (TomahawkMan)",
+  "spec": "tomahawkman_v1",
+  "poke": [
+   "08D9D636:2009"
+  ],
+  "what": "TomahawkMan's decision's CurAction (BN5 0x080FADAA, BN6's copy at XN_CODE + 0xB400 + 0x236) left at BN5's 9 where the recipe makes it 11"
+ },
+ {
+  "name": "a sprite left at BN5's number where BN6 has it at another",
+  "spec": "tomahawkman_v1",
+  "poke": [
+   "08D9E570:2229"
+  ],
+  "what": "TomahawkMan's swing's sprite (BN5 0x080C8860: movs r2,#0x29, list 4, its copy at XN_CODE + 0xC100 + 0x470) left at 0x29, BN6's another sprite, where the recipe makes it 0x2B, BN6's of the same bytes"
+ }
+]

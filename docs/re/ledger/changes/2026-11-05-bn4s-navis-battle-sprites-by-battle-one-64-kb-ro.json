@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "BN4's Navis' battle sprites by battle: one 64 KB room (FREE_BN4_NAVI_SPRITE) filled for the battle's BN4 Navi as its record is written, his list 2 entry pointed at it at install, his BN4 sprite number in a seat table (XN_BN4_SPRITES); the generator's battle_sprite_place puts every Navi's there; GutsMan's art 75 KB to 15 KB. GutsMan in the tournament's pool through xguardian_bn4.c's list of proved BN4 Navis (navi 35, his BN4 plate 0x00, BN4's HP ladder held to a round's top)."
+}

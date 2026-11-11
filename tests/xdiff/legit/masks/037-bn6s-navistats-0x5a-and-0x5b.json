@@ -1,0 +1,23 @@
+{
+ "name": "BN6's NaviStats +0x5A and +0x5B",
+ "part": "player",
+ "whose": [
+  "megaman"
+ ],
+ "cells": [
+  [
+   "0x5A",
+   "0x00",
+   "0xFF"
+  ],
+  [
+   "0x5B",
+   "0x00",
+   "0xFF"
+  ]
+ ],
+ "why": "Two bytes past BN6's TagChips its save holds 0xFF and BN5's 0: no getter of either game names them; constant through the battle.",
+ "evidence": [
+  "no NaviStats getter of BN5's (0x08010D48-0x08010E30) or Gregar's (0x080136B0-0x08013796) is called with r1 0x5A or 0x5B (searched)"
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "bn4": "0xF7",
+ "bn6": "0x1DE",
+ "clock": "state",
+ "what": "WhitWeb's web's sound 0xF7, its copy",
+ "why": "Played by WhitWeb's web's code (BN4's third-kind 0x3D, moved with WhitWeb's unit: its bl to PlaySoundEffect at 0x080D4DF0 with r0 0xF7; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DE and goes on to BN6's), a state's: BN4's song 0xF7 copied into slot 0x1DE of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xF7 is another (xrecipe.song_sig). bn4_chip_whitweb1 at t34 in BN4's and t35 in BN6's"
+}

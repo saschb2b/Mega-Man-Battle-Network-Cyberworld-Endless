@@ -1,0 +1,7 @@
+{
+ "bn4": "0x6B",
+ "bn6": "0x6B",
+ "clock": "state",
+ "what": "MegaMan struck",
+ "why": "Played as the thunder's hit strikes him (BN4's bl at 0x08013A9C under his type's routine 0x080B34D8; BN6's at 0x0801BA5A under his 0x080B9A5C), a state's: BN4's at t431, BN6's at t432 in billy_v1; the same number in both"
+}

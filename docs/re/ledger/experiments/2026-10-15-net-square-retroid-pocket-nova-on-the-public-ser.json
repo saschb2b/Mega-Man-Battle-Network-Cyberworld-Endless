@@ -1,0 +1,8 @@
+{
+  "feature": "Net Square",
+  "date": "2026-10-15",
+  "name": "Retroid Pocket Nova on the public server",
+  "result": "Same room as a desktop peer; 189 handheld positions matched; round trips 40 to 47 ms; a 1,000 HP checkpoint back unchanged.",
+  "meaning": "The PortMaster build visits as the desktop does; the only physical handheld tried.",
+  "link": "../online/overview.md"
+}

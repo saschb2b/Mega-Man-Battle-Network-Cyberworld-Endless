@@ -1,0 +1,34 @@
+[
+ {
+  "name": "Meddy's object's sprite not renumbered",
+  "spec": "meddy_v1",
+  "poke": [
+   "088A063C:2215"
+  ],
+  "what": "her object's sprite (BN5 0x080C5820: movs r2,#0x15, list 4's 0x15, its copy at XN_TEAM_CODE + 0xD600 + 0x3C) left at BN5's number where the recipe makes it list 2's 0x8D, BN5's copied there"
+ },
+ {
+  "name": "Meddy's first object's sprite's list not moved",
+  "spec": "meddy_v1",
+  "poke": [
+   "088A063A:2110"
+  ],
+  "what": "her object's sprite's list (BN5 0x080C581E: movs r1,#0x10, list 4's offset, its copy at XN_TEAM_CODE + 0xD600 + 0x3A) left at list 4 where the recipe makes it list 2's (0x08), its number 0x8D then list 4's 0x8D, another sprite (her effect 0x44's site, 0x080C5B3E, and her object's compare of its parent's state, 0x080C64DE, are reached by no spec)"
+ },
+ {
+  "name": "Meddy's object's sprite's list not moved",
+  "spec": "meddy_v1",
+  "poke": [
+   "088A0C3E:2110"
+  ],
+  "what": "her object's sprite's list (BN5 0x080C603E: movs r1,#0x10, list 4's offset, its copy at XN_TEAM_CODE + 0xDC00 + 0x3E) left at list 4 where the recipe makes it list 2's (0x08), its number 0x8C then list 4's 0x8C, another sprite"
+ },
+ {
+  "name": "Meddy's state number not moved",
+  "spec": "meddy_v1",
+  "poke": [
+   "0889F910:2008"
+  ],
+  "what": "her attack's state (BN5 0x080F74F8: movs r0,#8, CurAction 8, its copy at XN_TEAM_CODE + 0xC800 + 0x110) left at BN5's 8, BN6's another status state, where the recipe makes it 10"
+ }
+]

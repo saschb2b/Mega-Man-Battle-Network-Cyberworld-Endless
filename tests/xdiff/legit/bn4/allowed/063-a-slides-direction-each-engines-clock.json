@@ -1,0 +1,10 @@
+{
+ "name": "a slide's direction, each engine's clock",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "coll",
+ "slide_direction": "0x0C",
+ "fields": "MegaMan's collision data's last move's direction (+0x0C, BN6_COLL_PANEL_BYTE; BN4's +0x0A read as BN6's, tools/xdiff_bn4.py direction_as_bn6) alone, only where one game holds 0 and the other the direction of his last move read as BN6's from BN4's own trace (MOVES; slide_direction); every other value of it compared as ever",
+ "why": "Both games write the direction of an object's move from its old panel to its new at the collision data's panel byte, by different clocks for a slide: BN4's collision panels' update (0x08012D9A, BN4_DIRECTION at 0x08012DAE), called by the slide at its start and end (0x080102A6, 0x08010390) and each frame, writes it on the frame his panel changes and 0 on the next; BN6's slide writes it once at its end from its step (0x080167E6-0x080167F6: bl 0x0801683C with +0x1C, +0x1D and his side, strb r0,[r1,#0xc]) and keeps it until another move or hit writes it (its collision panels' update, 0x0801A04C, is not run by the slide's steps). windman_v1: BN4 3 at t7 only, BN6 3 from t8 to t657 (MegaMan pushed from column 2 to 1); BN4 4 at t884 and t888, BN6 4 from t890 to t1014 (pulled from 1 to 3). The value is the same move's in both, read by BN6's rule; only when it is held differs"
+}
