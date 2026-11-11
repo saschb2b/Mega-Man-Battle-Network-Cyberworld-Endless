@@ -43,7 +43,9 @@ layer's catalogue (`loot_older_net`) by the area's game, the deep's the
 whole, and every find goes through it: the Net Dealers' stock, Mystery
 Data, the vaults', Servers' and gift's picks (`loot_pool_pick`), a held
 Soul's kind (`loot_souls.c`), a Chip or BugFrag Trader's list, half each
-rarity's (`trader.c`). Nothing names a chip: a unit that comes to play
+rarity's (`trader.c`). To hold out once their unit plays, by the owner's
+call 12: AquaPowr, WoodPowr and ThunPlus (ids 565, 566 and 564), chips
+that do nothing but mark the HUD; not built. Nothing names a chip: a unit that comes to play
 joins the catalogue the next time the game starts (Boomer1-3 did, merged
 while this was built). With all three ROMs the catalogue holds 130 chips,
 15 of them BN4's own; with BN6 and BN4, 93 and the same 15.
@@ -1335,6 +1337,42 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
    timers moved with them, a spec where the buff shows, its mutations.
    How they show where BN4 gives them no number and no picture (the
    Library's page, a reward's card) is the one thing left to choose.
+12. **AquaPowr, WoodPowr and ThunPlus are moved as BN4 has them:** "Move
+    as BN4 has them" (the owner, 11 November 2026). Asked because the
+    three do less than call 7 took them for. **Verified** in BN4 Red Sun
+    (USA, `B4WE`), two ways. By experiment, BN4's own battle run alone
+    by the differential (control specs, the guest core): the Plus chip
+    used at fight frame 30, a chip of its element at frame 200, inside
+    its 480 frames, against a Mettaur of 250 HP, and the same chip with
+    no Plus chip before it. AquaPowr then Bubbler takes 50 and Bubbler
+    alone 50; WoodPowr then Boomer1 60 and 60; ThunPlus then Thunder1 40
+    and 40. FirePlus then HeatShot takes 80 where HeatShot alone takes
+    40, and that is the grass FirePlus lays (every panel of the field;
+    fire on grass adds its damage again, `0x08012CF2`), no rule of the
+    timer. By the code: the chips' object (the fourth kind's 0x7F,
+    `0x080EACDC`) sets its element's word of four in the user's battle
+    data (+0x3C to +0x42) to 480 and clears the other three; the
+    player's tick (`0x08022E3C`) counts them down; and the one reader
+    found is the HUD's (`0x08014CC0`: the first word not 0 picks an
+    icon's tiles for OBJ VRAM `0x06017480`). Searched: every caller of
+    the routine that finds that data by side (`0x0800BFF4`, 26), every
+    halfword read or written at those offsets after a load of the
+    object's +0x58, every indexed access from 0x3C in
+    `0x08007000`-`0x08030000`. Not tried: the buster and the charge shot
+    under a timer, a foe's attack against MegaMan under one, a
+    NetBattle. So the three play as BN4 US plays them, the HUD's icon
+    for 8 seconds and no chip's damage changed, proved by the
+    differential like any unit, and FirePlus lays grass as BN4 has it.
+    **And the recommendation he accepted with that answer** (the
+    coordinating session's, not his own words): the three stay out of
+    the reward pools (drops, Mystery Data, the dealers' stock), so
+    nobody is handed a chip that does nothing, while they still fill
+    their Library entries. Not built; where the pools are made is
+    `src/core/chip_pool.c` (Unit 7, above). One thing this leaves to
+    settle with call 7's last question: BN4's Library has no entry for
+    any of the six (their records' +0x1C is 0), so a chip kept out of
+    every pool has, today, no page to fill and no way into a folder but
+    a trade or the Arena.
 
 Open:
 
