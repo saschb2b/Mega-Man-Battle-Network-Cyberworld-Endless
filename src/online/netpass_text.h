@@ -29,6 +29,7 @@ extern const char netpass_cart_open[];
  * title) stamps; every game in; every game in on a system whose NetBattles
  * are not offered (the New 3DS: square_arena_offered) */
 const char *netpass_missing_words(const char *name);
+extern const char netpass_key_hint[];
 extern const char netpass_complete[];
 extern const char netpass_complete_no_ring[];
 

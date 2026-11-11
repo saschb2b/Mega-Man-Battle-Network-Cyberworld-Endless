@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""encounter_danger.py families|battles FILE [--jobs N] [--seeds 3,5] [--out FILE]:
+"""encounter_danger.py families|pairs|battles FILE [--jobs N] [--seeds 3,5] [--out FILE]:
 what a battle costs MegaMan, measured in BN6's engine (the encounter groups'
 measuring, docs/game/progression/encounter-groups.md; docs/devtools/encounter-tags.md).
 
@@ -14,7 +14,11 @@ Each battle is fought twice, headless, MegaMan at 2000 HP so none ends him
          loses, whether it wins inside 50 seconds, and how long that takes.
 
 `families` fights every family of tools/encounter_data/tags.tsv alone at V1
-(its tricks and its pressure); `battles FILE` the battles of a file of lines
+(its tricks and its pressure); `pairs` every two families of the pool
+together at V1, standing where their leans put them, idle alone (the pairs'
+pass: which two press harder together than their own pressures add up to;
+rows already in --out are not fought again, so a run stopped goes on);
+`battles FILE` the battles of a file of lines
 "label<TAB>ID@CR/ID@CR..." (enemy ids in hex at column and row, as the foes
 step takes them). Rows are appended to --out (tab separated, numbers and
 our own labels alone). Needs the ROMs (local only) and the host build
@@ -89,17 +93,45 @@ def family_battles():
     return out
 
 
+def pair_battles(done):
+    """Every two families of the pool (measured alone, not summoned, not bound to special panels) at V1, as a group of
+    two stands (tools/encounter_tags.py place), but those `done` holds."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import encounter_tags as tags
+    fams = tags.load()[0]
+    tags.measured(fams)
+    pool = sorted((f for f in fams.values() if not f.summoned and not f.bound and f.pressure is not None and 0 in f.ver), key=lambda f: (f.net, f.ai))
+    out = []
+    for i, a in enumerate(pool):
+        for b in pool[i + 1:]:
+            label = f'{a.key}+{b.key}'
+            if label not in done:
+                out.append((label, tags.spec_of(tags.place([a, b], [0, 0]))))
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('what', choices=['families', 'battles'])
+    ap.add_argument('what', choices=['families', 'pairs', 'battles'])
     ap.add_argument('file', nargs='?', help='battles: lines of label<TAB>spec')
     ap.add_argument('--jobs', type=int, default=2, help='runs side by side')
     ap.add_argument('--seeds', default='3', help='the fights\' seeds, comma separated (the idle run takes the first)')
     ap.add_argument('--modes', default='idle,fight')
     ap.add_argument('--out', default=os.path.join(WORK, 'danger.tsv'))
+    ap.add_argument('--most', type=int, default=0, help='pairs: as many this run at most (0: all that are left)')
     a = ap.parse_args()
     if a.what == 'families':
         battles = family_battles()
+    elif a.what == 'pairs':
+        done = set()
+        if os.path.exists(a.out):
+            with open(a.out) as f:
+                done = {line.split('\t')[0] for line in f}
+        battles = pair_battles(done)
+        if a.most:
+            print(f'{len(battles)} pairs left, {min(a.most, len(battles))} this run')
+            battles = battles[:a.most]
+        a.modes = 'idle'
     else:
         with open(a.file) as f:
             battles = [tuple(x.rstrip('\n').split('\t')[:2]) for x in f if x.strip() and not x.startswith('#')]

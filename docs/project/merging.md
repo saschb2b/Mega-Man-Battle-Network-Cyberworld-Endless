@@ -1,9 +1,9 @@
 ---
 type: Process
 title: "Merging in parallel"
-description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); what a branch does when it meets either."
+description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them; when a branch brings `dev` in, what that saves and what still conflicts."
 tags: [project, process, git, ci]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:09:35Z }
 sources:
   - { id: merges, title: "origin/dev's last 600 merge commits (6 October to 11 November 2026), each merge of dev into a branch redone with git merge-tree", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/commits/dev" }
   - { id: pr387, title: "Pull request #387 at 62c907ac against dev at dbecd569: GitHub's CONFLICTING, docs/log.md the only file", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/387" }
@@ -55,7 +55,8 @@ also conflicted in a file a person writes, 82 of them only in pages of
 GitHub does not read `.gitattributes`' `merge=union`: pull request #387
 [^pr387] differed from `dev` in `docs/log.md` alone, merged cleanly here
 with the union driver, and GitHub called it conflicting. So the line
-`docs/log.md merge=union` helps a merge made on a machine and nothing else.
+`docs/log.md merge=union` helped a merge made on a machine and nothing else
+([The log](#the-log)).
 
 ## Files a tool writes
 
@@ -70,6 +71,8 @@ did anything to the other. These are therefore **written on `dev` alone**:
 | `docs/symbols/*` | `tools/symbols.py` | `src/emu/bn6.h`, `bn5.h`, `bn4.h`, `src/core/rom.c`, `docs/rom/` |
 | [Symbols](../rom/symbols.md)' numbers under What is mapped | `tools/symbols.py` | the same |
 | `docs/voice/catalog.json` | `tools/voice_catalog.py` | the words files, `docs/voice/sweep/` |
+| `docs/log.md`, and each concept's `generated` line | `tools/log_fold.py` | the entries' files in `docs/log.d/` ([The log](#the-log)) |
+| `tests/layer_make_hash.txt` | `tools/layer_make.py` | the unit tests, after a merge that added a bump ([Counters](#counters)) |
 
 All three tools need no ROM and nothing outside git, so a workflow can run
 them: `.github/workflows/generated.yml` runs `python3 tools/generated.py
@@ -103,6 +106,64 @@ tables outside git.
   written file, merges the Symbols page with its numbers set to `dev`'s,
   and stages them; resolve what is left by hand and commit. After that the
   branch conflicts there no more.
+
+## The log
+
+`docs/log.md` took a line per change at its top, under the day's heading,
+so it conflicted in 158 of the 261 merges, in 47 of them alone. The
+`merge=union` attribute joined both sides' lines on a machine, and GitHub
+ignores it (above), so the attribute is gone and the log is a file a tool
+writes:
+
+- A branch logs a change as a file of its own,
+  `docs/log.d/DATE-WORDS.txt` (`2026-11-12-merging-in-parallel.txt`): the
+  day it is logged under and a few words that name it, holding `by:` and
+  `at:` (who writes, and when), then the log's line as it is to stand
+  (`* **Update**: ...`; more than one line where one change has more than
+  one entry).
+- `dev`'s workflow runs `tools/log_fold.py` with the other tools: each
+  file's lines go into `docs/log.md` under its day's heading, above the
+  lines the day has, a new day's heading where the days stay newest first,
+  and the file is removed.
+- `build.py lint` holds the files well formed (`tools/log_fold.py --lint`)
+  and fails a branch that changes `docs/log.md` itself; on `main` it fails
+  while an entry waits unfolded.
+
+### A concept's `generated` line
+
+Every concept opens with `generated: { by, at }`, and every branch that
+changed a concept rewrote that line. So two branches that changed one
+page conflicted there whatever else they changed: of 235 conflicts in
+pages of `docs/` among the 261 merges, 114 were that line and nothing
+else (`docs/devtools/differential.md` in 27 of its 30, `docs/rom/bn4.md`
+in 25 of 35), and 45 of the merges had no other conflict left once the
+log, the written files and the registries were out of the way. A coarser
+time would not have helped: no two sides stamped the same day as the
+same writer.
+
+The fold therefore writes the line too. An entry's log lines name the
+concepts changed, each by its path before what changed in parentheses
+(`project/merging.md (what changed), code/tools.md (its row)`); the fold
+writes the entry's `by` and `at` into the `generated` line of each (the
+later time where the line holds one: a concept's time never goes back)
+and drops a `verified` line there.
+A path inside parentheses or code is a mention and stamps nothing;
+`python3 tools/log_fold.py --lint` prints what each waiting entry will
+stamp. A branch leaves the line of a concept that exists alone, and
+`build.py lint` fails one that changes it; a new concept is written with
+its own line.
+
+This is the okf skill's rule (refresh `generated`, append a `log.md`
+entry, never edit a past one) by another road: the skill's own files are signed and stay as they
+came, and `AGENTS.md` says what this bundle does instead.
+
+A branch that still added its lines to `docs/log.md` and stamped its
+concepts loses nothing: `python3 tools/generated.py restore`, in its merge
+of `dev` or outside one, writes the lines the branch had added as a file
+in `docs/log.d/`, with the `by` and `at` the branch had stamped, before it
+puts the log and the concepts' `generated` lines back as `dev` has them
+(in a merge, a page whose only conflict was that line comes out
+resolved).
 
 ## Registries
 
@@ -151,3 +212,78 @@ python3 tools/shards.py absorb    # the branch's entries carried into the folder
 since the commit it left `dev` at, put onto `dev`'s folder. An entry or a
 value both changed keeps `dev`'s and is printed with the branch's, to
 merge by hand.
+
+## Counters
+
+A value several branches raise is a line they all edit. The first of
+them, built on the owner's word of 11 November 2026:
+
+**`LAYER_MAKE`** (`src/net/layer_make.h`) was a number with its whole
+history in a comment on the same line, and `LAYER_MAKE_HASH` below it:
+every branch that changed what a seed makes rewrote both lines, and after
+two such merges the hash was neither branch's. It conflicted in 13 of the
+261 merges. Now:
+
+- A bump is a file, `src/net/layer_make.d/NNN-WORDS.txt`: the number that
+  bump makes it and a few words, holding the clause the comment held. The
+  build counts the files (the Makefile's and Android's CMake's
+  `layer_make_count.h`): `LAYER_MAKE` is 100 and their count. Two
+  branches that each bump add two files, and the merge counts both; two
+  files may carry the same number.
+- The hash is recorded with the make it was taken at in
+  `tests/layer_make_hash.txt`, which only `dev`'s workflow writes
+  (`tools/layer_make.py`, with the other [files a tool writes](#files-a-tool-writes)):
+  after a merge that added a bump it builds the unit tests and asks them
+  (`build/host/test_core --layer-make-hash`).
+- The unit tests pass where the hash is the recorded one, or where the
+  make is past the recorded one (a bump was added: the record follows
+  after the merge). They fail where generation changed and no bump was
+  added, and name the file to add. `build.py lint` holds the files well
+  formed and, on `main`, the record at the tree's make.
+
+Between a merge that bumps and the workflow's commit after it, `dev`'s
+make is past its record, and a change to generation without a bump would
+pass there; the workflow's run is a few minutes, and a red one is fixed
+before anything else merges.
+
+Not built, and still as [What it saves, and what is left](#what-it-saves-and-what-is-left)
+has them: the counts `tests/test_core.c` asserts, the free space's regions
+and the ids and slots branches take, `RUN_MAGIC`.
+
+## When a branch brings dev in
+
+The rule is `AGENTS.md`'s (Pull requests, Merging). A branch brings `dev`
+in when GitHub calls its pull request conflicting, which now means a
+conflict in a file a person writes, or when it needs what merged since (a
+function another branch changed, a counted value another took). It does
+not because `dev` moved: GitHub merges a pull request without conflict
+however old its base, and `dev`'s own CI on the merge checks the two
+together.
+
+## What it saves, and what is left
+
+Against the 261 merges measured above:
+
+| Merges of `dev` into a branch | Of 261 | Now |
+| --- | ---: | --- |
+| With no conflict at all | 39 | Not needed: `dev` having moved is no reason |
+| With conflicts only in the log, the written files, the registries, the catalog | 81 | Not needed: none of those can conflict |
+| With, beyond those, only a concept's `generated` line | 45 | Not needed: `dev`'s workflow writes the line |
+| With a conflict in what a person wrote in `docs/`, and no code | 37 | Still needed, with fewer files to resolve |
+| With a conflict in code, a tool, a test or the build | 59 | Still needed |
+
+So 165 of the 261 (63%) would not have happened. What still conflicts, by
+how often it did once the lines above are set aside:
+
+| File | Of 261 | Why | What would end it |
+| --- | ---: | --- | --- |
+| `CHANGELOG.md` | 25 | A line per change under the coming version | Entries as files, folded as the log is |
+| `docs/code/emu.md`, `tools.md`, `gfx-and-audio.md` | 18, 6, 4 | A row per new file, added at the end or beside the last one added | Rows in the files' order |
+| `docs/multirom/index.md`, `docs/rom/index.md` and the other `index.md` | 15, 4 | A concept's line repeats its description | Written from the concepts' frontmatter, as the other generated files |
+| `tests/test_core.c` | 11 | Counts and asserts added in the same functions | Counts read off the tables |
+| `docs/rom/bn4.md` | 10 | A row per find, at the table's end | Rows in address order, not at the end |
+| `AGENTS.md` | 7 | The table of tasks, the rules, the checks: rows added side by side | None: a person's page, merged by hand |
+| `src/emu/free_space.h`, `docs/engine/emulation/memory.md` | 4, 4 | Written from `free_space.plan`, but the build needs them | Regions claimed before the work starts |
+
+None of these is built but `src/net/layer_make.h` (13), which no longer
+conflicts ([Counters](#counters)).

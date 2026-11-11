@@ -1,0 +1,18 @@
+[
+ {
+  "name": "Meteors' pace another",
+  "spec": "bn4_chip_meteors1",
+  "poke": [
+   "080EAE4C:200A"
+  ],
+  "what": "Meteors' controller's copy waiting 10 frames between meteors where BN4's waits 20 (movs r0,#0x14 at BN4 0x080EAE4C, its timer at +0x20): the second meteor on the Mettaur ten frames early"
+ },
+ {
+  "name": "Meteors' controller's type another",
+  "spec": "bn4_chip_meteors1",
+  "poke": [
+   "080EAE70:20DF"
+  ],
+  "what": "Meteors' controller's spawner's copy (its movs r0,#0x81 at BN4 0x080EAE70, the recipe's dispatch number) naming the dispatch's fourth-kind 0xDF, a number no recipe moved a type to: no controller, no meteor"
+ }
+]

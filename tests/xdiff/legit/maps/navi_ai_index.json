@@ -1,5 +1,5 @@
 {
- "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42 and CloudMan's 15 as 41, Nebula's GridMan's 18 as 44, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27, SearchMan's 3 as 28 and Meddy's 6 as 31.",
+ "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42 and CloudMan's 15 as 41, Nebula's GridMan's 18 as 44, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27, SearchMan's 3 as 28, Meddy's 6 as 31 and MagnetMan's 5 as 30.",
  "bn5_to_bn6": {
   "12": "37",
   "11": "36",
@@ -16,6 +16,7 @@
   "4": "29",
   "2": "27",
   "3": "28",
-  "6": "31"
+  "6": "31",
+  "5": "30"
  }
 }

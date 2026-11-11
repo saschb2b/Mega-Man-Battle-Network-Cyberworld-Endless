@@ -18,6 +18,7 @@
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "layer_make.h"
+#include "layer_make_record.h"   /* LAYER_MAKE_RECORD and its hash, from the build (tests/layer_make_hash.txt) */
 #include "letters.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -33,6 +34,7 @@
 #include "area_src.h"
 #include "backup.h"
 #include "battle_data.h"
+#include "lab_text.h"
 #include "test_backup.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -102,6 +104,7 @@
 #include "xpanels.h"
 #include "visitor_families.h"
 #include "visitors.h"
+#include "groups.h"
 #include "xpanels_look.h"
 #include "xsea.h"
 #include "xvirus_bn4.h"
@@ -1019,9 +1022,10 @@ static void test_mouths(void) {
 }
 
 /* The golden hash (issue #19): layer_generate's output over fixed seeds,
- * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
- * (layer_make.h). The determinism check above builds a seed twice in one
- * build; this one fails when a build makes a seed's layer otherwise. */
+ * in every area and kind, against the hash dev recorded with the make it
+ * was taken at (tests/layer_make_hash.txt, layer_make.h). The determinism
+ * check above builds a seed twice in one build; this one fails when a
+ * build makes a seed's layer otherwise and no bump's file says so. */
 static uint32_t fnv(uint32_t h, const void *p, size_t n) {
 	const uint8_t *b = p;
 	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
@@ -1264,7 +1268,7 @@ static void test_extras(void) {
 	run = before;
 }
 
-static void test_layer_make(void) {
+static uint32_t layer_make_hash(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
 	run.seed = 0x5EED;
@@ -1301,9 +1305,18 @@ static void test_layer_make(void) {
 		}
 		h = set_pieces_hash(h);
 	}
-	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
-		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
 	run = before;
+	return h;
+}
+
+/* (generation as dev recorded it; or changed with a bump's file beside it, the record dev's workflow's to set after the merge) */
+static void test_layer_make(void) {
+	uint32_t h = layer_make_hash();
+	CHECK(h == LAYER_MAKE_RECORD_HASH || LAYER_MAKE > LAYER_MAKE_RECORD,
+		"layer generation changed (hash 0x%08x, recorded 0x%08x at make %d): add a bump's file to src/net/layer_make.d/, "
+		"%d-WORDS.txt, saying what changed (layer_make.h)", h, LAYER_MAKE_RECORD_HASH, LAYER_MAKE_RECORD, LAYER_MAKE + 1);
+	if (h != LAYER_MAKE_RECORD_HASH && LAYER_MAKE > LAYER_MAKE_RECORD)
+		printf("layer generation changed with its bump (make %d, hash 0x%08x): dev's workflow records it after the merge\n", LAYER_MAKE, h);
 }
 
 
@@ -3990,9 +4003,6 @@ static void test_xvirus_cangard(void) {
  * or an attack's type */
 static bool spans_meet(uint32_t a, uint32_t alen, uint32_t b, uint32_t blen) { return a < b + blen && b < a + alen; }
 
-/* whether `slot` is the per-battle pool's in a BN4 family's songs, pointed in its battles alone (xvirus_recipe.h xv_bn4_pool) */
-static bool pooled(const XVirusFamily *f, int slot) { return f->game == XROM_BN4_RED_SUN_US && xv_bn4_pool_slot(slot); }
-
 static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 	int bad = f->ai == g->ai || spans_meet((uint32_t)f->first_id, XV_VERSIONS, (uint32_t)g->first_id, XV_VERSIONS) ||
 		spans_meet(f->home, XV_HOME_SIZE, g->home, XV_HOME_SIZE);
@@ -4015,11 +4025,10 @@ static int static_clashes(const XVirusFamily *f, const XVirusFamily *g) {
 			bool shared = (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_MOVED) || (a->to == XV_TYPE_SHARED && b->to == XV_TYPE_SHARED);
 			bad += !shared && (a->to == XV_TYPE_MOVED || a->to != b->to);
 		}
-	/* (a song slot, but the per-battle pool's two late BN4 families each take in their own battles, the owner's call 13; or a
-	 * song's bytes over the other's art) */
+	/* (a song slot, or a song's bytes over the other's art) */
 	for (int i = 0; i < f->nsongs; ++i) {
 		for (int k = 0; k < g->nsongs; ++k)
-			bad += (f->songs[i].slot == g->songs[k].slot && !(pooled(f, f->songs[i].slot) && pooled(g, g->songs[k].slot))) ||
+			bad += f->songs[i].slot == g->songs[k].slot ||
 				spans_meet(f->songs[i].at, f->songs[i].room, g->songs[k].at, g->songs[k].room);
 		for (int k = 0; k < g->nsprites; ++k) bad += spans_meet(f->songs[i].at, f->songs[i].room, g->sprites[k].at, g->sprites[k].room);
 	}
@@ -4253,7 +4262,9 @@ static void test_xnavi_static(void) {
 		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 16, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy and GridMan)", xnavi_bn5_count);
+	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
+	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
+	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5389,6 +5400,32 @@ static void test_chip_art_room(void) {
 	CHECK(rows > 0 && rows <= (int)XC4_ROWS, "art's room: %d rows", rows);
 }
 
+/* A BN4 chip unit whose moved object is an actor (its code's `states`, the object the actors' runner runs: TimeBomb's
+ * bomb): its table in BN6's layout, the engine's eight then its own, at its home's XC4_HOME_STATES clear of its shims and
+ * of a wait's wrapper, and named by a number row of its code; a table with none of its own past the engine's is refused */
+static void test_chip_actor_states(void) {
+	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	char why[160] = "";
+	int actors = 0;
+	CHECK(XC4_HOME_VENEERS <= XC4_HOME_STATES && XC4_HOME_STATES + 4u * XV_STATES_MAX <= XC4_HOME_WAIT, "chips' actors: the table's place in a unit's home");
+	for (int u = 0; u < xchips_bn4_count; ++u) {
+		const XChipUnit *c = &xchips_bn4[u];
+		const XVirusFamily *f = &c->code;
+		if (!f->nstates) continue;
+		++actors;
+		bool own = f->nstates > 8 && f->nstates <= XV_STATES_MAX, named = false;
+		for (int i = 8; i < f->nstates; ++i) own = own && f->states[i].own;
+		for (int i = 0; i < f->nnumbers; ++i) named = named || f->numbers[i].now == c->home + XC4_HOME_STATES;
+		CHECK(own && named, "chips' actors: %s's %d states, its own from 8, its table named by a number row", f->name, f->nstates);
+		CHECK(XC4_HOME_VENEERS + xvirus_shims_room(f) <= XC4_HOME_STATES, "chips' actors: %s's shims end before its table", f->name);
+		XVirusFamily bad = *f;
+		bad.nstates = 8;
+		CHECK(xvirus_code_ok(f, &region, why, sizeof why) && !xvirus_code_ok(&bad, &region, why, sizeof why),
+			"chips' actors: %s's table taken, and refused with the engine's eight alone", f->name);
+	}
+	CHECK(actors >= 1, "chips' actors: %d units", actors);
+}
+
 static void test_chip_entry(void) {
 	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
 	 * gives it, id 511 *, none, empty) */
@@ -5480,8 +5517,8 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays == 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, 8 playing now, "
-		"7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
@@ -7100,7 +7137,7 @@ static void test_visitors(void) {
 	rng_seed(7);
 	Encounter e = test_battle(3, 4);
 	CHECK(visitor_apply(&e, 5) && e.visitor >= 1 && e.foes[e.visitor - 1].family == 40 && e.foes[e.visitor - 1].id == 0x311 &&
-		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && (e.from_families >> 40 & 1),
+		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && family_mask_has(e.from_families, 40),
 		"visitors: one of the older net's, at its highest version under the band, on the replaced one's panel");
 	CHECK(!visitor_apply(&e, 5), "visitors: one a battle");
 	/* (the band's top: three of 90 HP, 270, where V1EX's 60 for one of
@@ -7161,8 +7198,8 @@ static void test_visitors(void) {
 	for (int v = 0; v < 6; ++v) test_id[VISIT_BN4][64][v] = 0x310 + v;
 	CHECK(visitors_here(8, BIOME_CENTRAL), "visitors: BN4's families alone bring them");
 	e = test_battle(3, 4);
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && !e.from_families,
-		"visitors: one of BN4's in a battle of BN6's, by tier, no bit for its family");
+	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && family_mask_has(e.from_families, 64),
+		"visitors: one of BN4's in a battle of BN6's, by tier, its family's bit past the 64th");
 	e = test_battle(3, 4);
 	e.xrecord = 0x08100000u;
 	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64, "visitors: one of BN4's in a battle of BN5's");
@@ -7639,9 +7676,170 @@ static void test_battle_data(void) {
 	profile = keep;
 }
 
-int main(void) {
+/* The Battle Lab's builder's words (docs/game/battle-lab.md): how a test
+ * battle ended, its time as BN6's RESULT sets one, in the information
+ * box's three lines. */
+static void test_lab_text(void) {
+	char s[96];
+	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
+	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
+	lab_info_result(s, sizeof s, &won);
+	CHECK(!strcmp(s, "Time 0:12:66. Level 9. HP lost 20."), "lab: a win's time, level and HP lost (%s)", s);
+	lab_info_result(s, sizeof s, &best);
+	CHECK(!strcmp(s, "Time 1:00:50. Level S. HP lost 0."), "lab: level 11 is S (%s)", s);
+	lab_info_result(s, sizeof s, &fell);
+	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	lab_info_result(s, sizeof s, &left);
+	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
+		"lab: the panels' and versions' names");
+}
+
+/* The encounter groups' templates and their filling (groups.h;
+ * docs/game/progression/encounter-groups.md): a pool of five families
+ * made up here, no ROM */
+typedef struct { int n; GroupFill g[8]; } Fills;
+static void fills_keep(const GroupFill *g, void *ctx) {
+	Fills *f = ctx;
+	if (f->n < 8) f->g[f->n] = *g;
+	++f->n;
+}
+
+static void test_groups(void) {
+	CHECK(group_lean(0, 0, 0) == GROUP_FREE && group_lean(1, 0, 4) == GROUP_BACK && group_lean(3, 1, 1) == GROUP_FRONT &&
+		group_lean(1, 3, 1) == GROUP_FREE && group_lean(2, 0, 2) == GROUP_BACK && group_lean(2, 2, 1) == GROUP_FRONT,
+		"groups: a family's lean from its placements");
+	FamilyMask m = FAMILY_MASK_NONE, o = FAMILY_MASK_NONE;
+	family_mask_add(&m, 0);
+	family_mask_add(&m, 128);
+	CHECK(!family_mask_any(m), "groups: no family 0 nor one past the mask");
+	family_mask_add(&m, 5);
+	family_mask_add(&m, 64);
+	family_mask_add(&o, 127);
+	CHECK(family_mask_has(m, 5) && family_mask_has(m, 64) && !family_mask_has(m, 63) && !family_mask_meet(m, o), "groups: a family's bit past the 64th");
+	family_mask_add(&o, 64);
+	family_mask_join(&m, o);
+	CHECK(family_mask_meet(m, o) && family_mask_has(m, 127), "groups: masks that meet, and joined");
+
+	/* (a front-row fire one, a back-row aqua one, a roamer of BN5's that breaks panels, one of BN4's never measured, a late one) */
+	const GroupVer none = { -1, 0, 0, 0 };
+	GroupFam pool[5] = {
+		{ 1, 0, GROUP_FRONT, 0, 0, 60, { { 10, 40, 10, ELEM_FIRE }, { 11, 80, 20, ELEM_FIRE }, none, none, none, none } },
+		{ 2, 0, GROUP_BACK, 0, 0, 40, { { 20, 50, 10, ELEM_AQUA }, { 21, 90, 30, ELEM_AQUA }, none, none, none, none } },
+		{ 33, 1, GROUP_FREE, 0, GROUP_BREAKS, 100, { { 0x230, 60, 30, 0 }, { 0x231, 70, 40, 0 }, none, none, none, none } },
+		{ 64, 2, GROUP_FREE, 0, 0, -1, { { 0x310, 50, 10, 0 }, none, none, none, none, none } },
+		{ 3, 0, GROUP_FREE, 2, 0, 10, { { 30, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	GroupLimits l = { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220 };
+	CHECK(group_in_pool(&pool[0], &l) && group_in_pool(&pool[2], &l) && group_in_pool(&pool[3], &l) && !group_in_pool(&pool[4], &l),
+		"groups: the pool keeps to the stage reached");
+	l.nets = 1;
+	CHECK(group_in_pool(&pool[0], &l) && !group_in_pool(&pool[2], &l) && !group_in_pool(&pool[3], &l), "groups: ... and to the nets present");
+	l.nets = GROUP_NETS_ALL;
+
+	Fills f = { 0, { { 0 } } };
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.n == 1 && f.g[0].n == 2 && f.g[0].fam[0] == 0 && f.g[0].fam[1] == 1 &&
+		f.g[0].ver[0] == 0 && f.g[0].ver[1] == 0 && f.g[0].hp == 90 && f.g[0].pressure == 100,
+		"groups: the wall and its artillery at the act's version (HP %d, pressure %d)", f.g[0].hp, f.g[0].pressure);
+	/* (a version higher: the most HP inside the band, 130 two ways, the first kept; its pressure by its hit) */
+	l.top[0] = 1;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].ver[0] == 0 && f.g[0].ver[1] == 1 && f.g[0].hp == 130 && f.g[0].pressure == 180,
+		"groups: the versions that fill the band (versions %d %d, HP %d, pressure %d)", f.g[0].ver[0], f.g[0].ver[1], f.g[0].hp, f.g[0].pressure);
+	/* (the third limit: under a cap of 150 both ways to 130 press too hard, the group falls back to 90) */
+	l.pressure = 150;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 90 && f.g[0].pressure == 100,
+		"groups: the pressure cap holds a group under the band's top (HP %d, pressure %d)", f.g[0].hp, f.g[0].pressure);
+	l.pressure = 90;
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, NULL, NULL) == 0, "groups: ... and leaves none where every version presses past it");
+	l.pressure = 220;
+	l.top[0] = 0;
+
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_CLASH, fills_keep, &f) == 1 && f.g[0].fam[0] == 0 && f.g[0].fam[1] == 1,
+		"groups: fire beside aqua clash, the pair once");
+	CHECK(group_fillings(pool, 5, &l, GROUP_ONE_ELEMENT, NULL, NULL) == 0 && group_fillings(pool, 5, &l, GROUP_SUMMONER, NULL, NULL) == 0,
+		"groups: no two of one element here, and no summoner");
+	/* (three of one: 120 and 150 in the band, the roamer's 180 past it) */
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_SWARM, fills_keep, &f) == 2 && f.g[0].n == 3 && f.g[0].fam[2] == 0 && f.g[0].hp == 120 && f.g[0].pressure == 180 &&
+		f.g[1].fam[0] == 1 && f.g[1].hp == 150, "groups: a swarm is three of one family");
+	/* (a family never measured stands in no group: the nets meet once it is) */
+	CHECK(group_fillings(pool, 5, &l, GROUP_NETS_MEET, NULL, NULL) == 0, "groups: an unmeasured family fills nothing");
+	pool[3].pressure = 20;
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_NETS_MEET, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 120 &&
+		pool[f.g[0].fam[0]].net != pool[f.g[0].fam[1]].net, "groups: a roamer of each of two nets");
+	CHECK(group_fillings(pool, 5, &l, GROUP_PANEL_WAR, NULL, NULL) == 1, "groups: the panel breaker and a roamer");
+	/* (the front, the back and a roamer: 40 + 50 + 50 with BN4's roamer, 150 with BN5's) */
+	f.n = 0;
+	CHECK(group_fillings(pool, 5, &l, GROUP_PINCER, fills_keep, &f) == 2 && f.g[0].n == 3 && f.g[0].hp == 150 && f.g[1].hp == 140, "groups: a pincer's three roles");
+
+	GroupFill a, b;
+	CHECK(group_pick(pool, 5, &l, GROUP_SWARM, 7, &a) && group_pick(pool, 5, &l, GROUP_SWARM, 7, &b) && a.fam[0] == b.fam[0] && a.hp == b.hp &&
+		!group_pick(pool, 5, &l, GROUP_SUMMONER, 7, &a), "groups: one roll, one group; none of a template nothing fills");
+	int seen = 0;
+	for (uint32_t roll = 0; roll < 64; ++roll) {
+		CHECK(group_pick(pool, 5, &l, GROUP_SWARM, roll, &a), "groups: a swarm picked on roll %u", (unsigned)roll);
+		seen |= 1 << a.fam[0];
+	}
+	CHECK(seen == (1 | 2 | 8), "groups: every filling is picked by some roll (%d)", seen);   /* (BN4's roamer too, since measured) */
+	seen = 0;
+	for (uint32_t roll = 0; roll < 256; ++roll)
+		if (group_pick_any(pool, 5, &l, roll, &a)) seen |= 1 << a.template;
+	CHECK(seen == (1 << GROUP_WALL | 1 << GROUP_PANEL_WAR | 1 << GROUP_CLASH | 1 << GROUP_PINCER | 1 << GROUP_SWARM | 1 << GROUP_NETS_MEET),
+		"groups: any template the pool fills, and no other (%#x)", (unsigned)seen);
+
+	Encounter e = { 0 };
+	CHECK(group_fillings(pool, 5, &l, GROUP_WALL, fills_keep, &(Fills){ 0, { { 0 } } }) == 1 && group_pick(pool, 5, &l, GROUP_WALL, 1, &a), "groups: the wall again");
+	group_place(pool, &a, &e);
+	CHECK(e.nfoes == 2 && e.foes[0].col == 3 && e.foes[0].row == 1 && e.foes[0].id == 10 && e.foes[1].col == 5 && e.foes[1].row == 0 && e.foes[1].id == 20 &&
+		family_mask_has(e.from_families, 1) && family_mask_has(e.from_families, 2), "groups: the front in the first column, the back in the last");
+	CHECK(group_pick(pool, 5, &l, GROUP_SWARM, 0, &a), "groups: a swarm to place");
+	group_place(pool, &a, &e);
+	CHECK(e.nfoes == 3 && e.foes[0].col == 3 && e.foes[1].col == 4 && e.foes[2].col == 5 && e.foes[0].row != e.foes[1].row && e.foes[1].row != e.foes[2].row,
+		"groups: a swarm one a column");
+
+	/* (the limits of an act: its band, the older nets a tier up, the pressure cap; a later cycle's by the band's growth) */
+	GroupLimits first = group_limits(2, 0, GROUP_NETS_ALL), later = group_limits(CYCLE_LAYERS + 2, 0, GROUP_NETS_ALL);
+	PacingBand band = pacing_band(2, false, false);
+	CHECK(first.band.lo == band.lo && first.band.hi == band.hi && first.band.cap == band.cap && first.pressure == group_pressure_cap(0) &&
+		first.top[1] == 2 * first.top[0] + 1 && first.top[2] == first.top[1], "groups: an act's limits");
+	CHECK(later.pressure == first.pressure * later.band.cap / first.band.cap && later.pressure >= first.pressure, "groups: a later cycle's pressure cap by its band's");
+	for (int act = 1; act < 6; ++act) CHECK(group_pressure_cap(act) > group_pressure_cap(act - 1), "groups: the pressure cap rises by act (%d)", act);
+	CHECK(group_tags_count > 0 && group_tag(group_tags[0].net, group_tags[0].family) == &group_tags[0] && !group_tag(2, 1), "groups: the measured tags by net and family");
+	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
+
+	/* (the pairs' pass: two families that press harder together are predicted that much harder, by the larger of their
+	 * hits over their V1's; the table's first pair, made a wall and its artillery here) */
+	CHECK(group_pairs_count > 0, "groups: the pairs' pass has its pairs");
+	const GroupPair *gp = &group_pairs[0];
+	int extra = group_pair_extra(gp->net_a, gp->family_a, gp->net_b, gp->family_b);
+	CHECK(extra == gp->extra && extra > 0 && group_pair_extra(gp->net_b, gp->family_b, gp->net_a, gp->family_a) == extra &&
+		!group_pair_extra(gp->net_a, gp->family_a, gp->net_a, gp->family_a), "groups: a pair's excess either way round, none with itself");
+	GroupFam two[2] = {
+		{ gp->family_a, gp->net_a, GROUP_FRONT, 0, 0, 20, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none } },
+		{ gp->family_b, gp->net_b, GROUP_BACK, 0, 0, 30, { { 20, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	GroupLimits wide = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000 };
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 20 * 2 + 30 + extra * 2,
+		"groups: a tagged pair's pressure with its excess (%d, the excess %d)", f.g[0].pressure, extra);
+	wide.pressure = 20 * 2 + 30 + extra * 2 - 1;
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 100 && f.g[0].pressure == 50 + extra,
+		"groups: ... which the cap holds a version down for (%d)", f.g[0].pressure);
+}
+
+int main(int argc, char **argv) {
+	if (argc == 2 && !strcmp(argv[1], "--layer-make-hash")) {   /* (tools/layer_make.py: the record dev's workflow writes) */
+		printf("%d 0x%08x\n", LAYER_MAKE, layer_make_hash());
+		return 0;
+	}
 	test_sha1();
 	test_battle_data();
+	test_lab_text();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
@@ -7723,6 +7921,7 @@ int main(void) {
 	test_xtext();
 	test_chip_code();
 	test_chip_art_room();
+	test_chip_actor_states();
 	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();
@@ -7734,6 +7933,7 @@ int main(void) {
 	test_analytics();
 	test_analytics_online();
 	test_visitors();
+	test_groups();
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

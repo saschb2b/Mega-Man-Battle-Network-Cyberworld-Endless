@@ -1,0 +1,1 @@
+a Virus Battler Mr.Prog at a side path's end on an act's first layer, in about half the acts from the second, net_pieces.c's layer_battler

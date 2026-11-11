@@ -3,7 +3,7 @@ type: Design
 title: "Encounter groups"
 description: "The encounter rework, approved 11 November 2026: one pool of virus families across every ROM tagged by what they do, authored constellations beside each area's own battles, an arc per act around a signature family, rewards from the group fought; what replaces the visitors and the deep's coin, what was measured, and the phases."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: owner
     resource: "The owner's calls of 11 November 2026, given in the project's sessions and written down here"
@@ -186,7 +186,11 @@ is the limit for foreign families too, with one exception.
   with BN4's Billy and Spikey; a BN5 family with Kilby and two more of
   BN4's): captured, the sprites and palettes of each as in its own
   battles.
-- **Sounds set the one limit**: BN4's late families share a pool of song
+- **Sounds set the one limit** (lifted on 11 November 2026 by the third
+  of the five calls: the late families' sounds now have fixed slots,
+  [Transplanted families](../../multirom/families.md), BN4's late
+  families, so any two share a battle; what follows is what was
+  measured): BN4's late families share a pool of song
   slots a battle (`xv_bn4_pool`, pointed each frame at the first pool
   owner in play: `src/emu/xnavi_bn4_sounds.c`), so **one pooled BN4 family
   a battle**. Today that is Kilby or MagTect; the six families still to
@@ -328,19 +332,18 @@ So the build adds a third limit, and `build.py pacing` holds it:
   pass stays local, as everything that needs the game does.
 - **Pressure is measured at V1 and scaled by the hit.** That a family's
   pressure grows with its hit alone is assumed, not measured: a later
-  version may also act faster. The pairs' pass measures the versions the
-  acts take for the families it flags.
+  version may also act faster. The pairs' pass was fought at V1 too.
 
-## The build phase, proposed
+## The build phase
 
 In three steps, each behind a dev switch until the last, measured before
 the next.
 
 1. **The pool and the templates** (`--dev groups`): the tags in the
    engine (the lean, the element, the tricks' table, the pressure, each
-   family's stage), the templates and their filling by the act's band, the
-   one-pooled-family rule, the repeat rule's wider memory, the pacing
-   report's danger band. No player sees it.
+   family's stage), the templates and their filling by the act's band,
+   the repeat rule's wider memory, the pacing report's danger band. No
+   player sees it. **Built** (below).
 2. **The arc, the rewards and the card**: an act's signature by the run's
    seed, the three beats on its layers, the Server's challenge as the
    act's hardest constellation, the reward pick reading the signature's
@@ -350,7 +353,7 @@ the next.
    words that named them gone, the report's bands at zero, an autopilot
    tally over seeds 1 to 12 against today's.
 
-Where each beat goes (proposed; the shares are the owner's to set):
+Where each beat goes (the shares as the owner set them, below):
 
 - **One group battle a layer**, its first random battle that is not one of
   the run's two openers: on an act's first layer the signature alone (one
@@ -368,28 +371,119 @@ Where each beat goes (proposed; the shares are the owner's to set):
   act, a layer's group battle from its layer seed and the battle's index,
   as the visitors' gate is, so a checkpoint rebuilds the same.
 
-## Open calls
+### Step 1, built
 
-Each is the owner's, with this page's recommendation.
+The pool, the templates and their filling are in the engine since 11
+November 2026, behind a dev switch: no run of a player's holds a group.
 
-1. **The shares by act** (above): three quarters, half, a third and a
-   quarter of acts with a signature of the area's own, the deep free.
-   Recommended as written; the statistics' event then says whether act 1
-   should open further.
-2. **A constellation on the field of the area's own records**, or on a
-   plain field. Recommended: the area's own field where the group's
-   panels are plain or cracked there (the visitors' rule), else plain,
-   so an area's panels stay part of its battles.
-3. **The pooled BN4 families' sounds**: fixed slots in the grown song
-   table before the build (so any two share a battle), or the limit of
-   one a battle kept. Recommended: the fixed slots, with the families
-   still to move, since each new one is pooled.
-4. **BN6 alone**: the rework with the templates it fills, or left as today
-   without another ROM. Recommended: the rework; BN6's own 29 families in
-   new groups is the same variety, and one in ten release runs has no
-   BN5.
-5. **The reward where a signature's row pays less than the battle's
-   own** (a moved family whose chips are not in the engine yet pays the
-   stand-in's zenny). Recommended: the signature pays wherever its row
-   holds a chip that plays, else the group's best row, so the rule never
-   costs a player a chip.
+- **The module** is `src/core/groups.c`, numbers alone and no ROM: a
+  family's lean from its placements, the eleven templates (what a family
+  must be to take each slot, what the group must be at its versions), the
+  filling under three limits (the act's band, its cap on one hit, the
+  pressure cap), a pick by the layer's seed and the battle's index with
+  no random number drawn, and the group on the enemy's panels.
+  `src/core/group_pool.c` reads the pool from the ROMs (each family's
+  versions, where its own game sets it, its stage) and the measured
+  tags, `src/core/group_tags.c`, which `tools/encounter_tags.py engine`
+  writes from the measuring's files
+  ([Encounter tags and danger](../../devtools/encounter-tags.md)).
+- **It reproduces the measuring**: `build.py pacing` counts how many ways
+  each template fills in every act for each ROM set, and all 308 counts
+  (four sets, eleven templates, seven acts) equal the tagging tool's
+  ([measured](encounter-groups-measured.md), A cap on pressure). The
+  pool by act is the measured one: 33, 39, 53, 53 and 60 families with
+  every ROM, 11, 15, 22, 22 and 27 with BN6 alone.
+- **The third limit holds**: the pressure cap by act is 220, 360, 620,
+  720, 880 and 1040, the Nest 945 (`group_pressure_cap`). The report
+  rolls 300 group battles for each layer of each act's areas, 30,000 in
+  all, and reads each one's HP, hit and pressure again from the ROM's
+  records: none past a limit, none on a shared or special panel. On a
+  later cycle the cap grows as the band's cap on one hit does; that is
+  assumed from how the prediction is made, not measured.
+- **A constellation's field** follows the owner's second call: one of the
+  area's own battles' fields on which every panel the group stands on is
+  plain or cracked, else the plain field. Two group battles in three
+  stand on a field of their area's (four in five in the median area and
+  layer); the areas whose own fields are special panels where enemies
+  stand give the fewest (the Robot Control Comp none, the Park Area one
+  in twenty). An older net's area takes the plain field until step 2
+  reads its records' fields.
+- **The repeat rule sees BN4's families**: a battle's families are a mask
+  of 128 bits (`FamilyMask`, `src/core/foes.h`) where 64 held BN6's and
+  BN5's alone, and a group battle is kept in mind as an area's own is.
+  The memory is its own file beside the run (`battle.sav`), so its
+  version changed and the run's did not: an older file is forgotten as a
+  first battle's is, and no save is lost.
+- **BN6 alone** has its pool: its families' places are tallied without
+  another ROM (`src/core/visitor_families.c`), the fourth call.
+- **To see one**: `--dev groups` makes every plain random battle a
+  group's, `--dev group=N` one of template N (1 the wall and its
+  artillery to 11 the nets meeting;
+  [Developer tools in the game](../../devtools/dev-menu.md)).
+
+Left of step 1, each measured before step 2 rests on it:
+
+- **The pairs' pass, done** (`tools/encounter_danger.py pairs`, 11
+  November 2026): every two families of the pool fought once at V1,
+  1,830 pairs ([measured](encounter-groups-measured.md), The pairs'
+  pass). Pressure adds up to less than its parts: the median pair presses
+  0.72 of the sum of its two families' own. 28 pairs press past 1.25 of
+  it, most where the sum is small, and the most any pair presses past its
+  sum is 120 HP in 20 seconds. The 27 pairs 40 HP or more past their sum
+  are in the tags (`group_pairs`, `src/core/group_tags.c`): a group that
+  holds one is predicted that much harder, by the larger of the two
+  families' hits at the version fought over their V1's, in the engine
+  and in the tool alike. That holds back 165 of 54,617 fillings with
+  every ROM, and the caps stay as they are (the acts' own battles'
+  three-quarter marks did not move). One family, BN6's 21, is in 11 of
+  the 27: alone it presses a standing MegaMan little, beside another it
+  does. The pairs were fought at V1; that a pair's excess grows with its
+  hit as a family's own pressure does is assumed.
+- **The limits are an act's, not a layer's.** An autopilot run with every
+  plain battle a group's (`--dev groups`, seed 4) won a swarm on its
+  first layer and was deleted from full HP by the next group: BN5's 43
+  beside BN4's 64 at V1, 140 HP together, inside the band, the hit cap
+  and the pressure cap of act 1. A cap of 220 HP in 20 seconds is the
+  harder quarter of act 1's own battles, against a MegaMan of 100 HP, and
+  the run's first layers ease their own battles to the band's lower half.
+  So step 2 keeps what the arc already asks: on an act's first layer the
+  signature alone under the easing rule, a pair on the second, the
+  constellation on the third; and act 1's constellation may want the
+  median of its own battles' predicted pressure (160) for its cap, which is the
+  owner's with the shares.
+- **Seven of BN5's families roam from the first act** with no role: no
+  record of the areas BN5 lends sets them, and BN5's other maps' battle
+  tables are not read yet. The band still holds their HP and hit.
+- **Each template is as likely as any that fills.** In act 1 one template
+  fills one way, so a share by fillings, or by the arc, is step 2's to
+  set with the shares by act.
+
+## The five calls, decided
+
+The measuring phase left five calls to the owner, each with this page's
+recommendation. The owner took all five as recommended on 11 November
+2026 ("Yes, all five"):
+
+1. **The shares by act** (above): the signature is one of the area's own
+   families in three quarters of act 1's runs, half of act 2's, a third of
+   act 3's and a quarter of act 4's, the deep free; one group battle a
+   layer. The statistics' event then says whether act 1 should open
+   further.
+2. **A constellation's field**: the area's own records' field where the
+   group's panels are plain or cracked there (the visitors' rule), else a
+   plain field, so an area's panels stay part of its battles.
+3. **The pooled BN4 families' sounds** go onto fixed slots of the grown
+   song table before the build, so any two share a battle; the families
+   still to move take theirs there too, since each new one is pooled.
+4. **BN6 alone** gets the rework with the templates it fills: BN6's own 29
+   families in new groups is the same variety, and one in ten release
+   runs has no BN5.
+5. **The reward where a signature's row holds no chip that plays** (a
+   moved family whose chips are not in the engine yet pays the stand-in's
+   zenny): the group's best row pays instead, so the rule never costs a
+   player a chip.
+
+The build's order, the owner's too: call 3 first, then the build phase's
+step 1, each a change of its own; steps 2 and 3 wait for a report after
+step 1, since the reward rows are still filling with BN4's chips, and go
+through the game-design skill and `build.py economy` first.

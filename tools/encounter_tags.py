@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""encounter_tags.py dump|sample|report [--write]: the encounter groups' tags
+"""encounter_tags.py dump|sample|report|engine [--write|--check]: the encounter groups' tags
 (docs/game/progression/encounter-groups.md; docs/devtools/encounter-tags.md).
 
 Every virus family a run's engine holds, of every ROM read (BN6's own, BN5's
@@ -15,6 +15,9 @@ and BN4's moved in), tagged by what it does, and what the tags can build:
   report  the families' tags, each ROM set's pool by act, the templates and
           how many ways each fills, and the danger measured, as Markdown
           (--write: into docs/game/progression/encounter-groups-measured.md).
+  engine  src/core/group_tags.c, the measured tags the engine's groups read
+          (src/core/groups.h): each family's pressure and tricks, numbers
+          alone (--check: fail where the file is not what it would write).
 
 Numbers and our own tags alone: a family is its net and BN6's AI index
 (6:01, 5:33, 4:64), never a name, text or picture of the games'."""
@@ -41,9 +44,9 @@ WHEEL2 = {0x80: 'sword', 0x40: 'cursor', 0x20: 'wind', 0x10: 'breaker'}
 ROLES = ['free', 'back', 'front']
 PANELS = {'b': 'hole', 'c': 'plain', 'd': 'cracked', 'e': 'poison', 'f': 'holy', 'g': 'grass', 'h': 'ice', 'i': 'volcano'}
 ACTS = ['1', '2', '3', '4', '5', '6', 'Nest']
-# (the engine's room, docs/game/progression/encounter-groups.md: the families whose sounds share one pool a battle,
-# src/emu/xnavi_bn4_sounds.c: one of them a battle until their sounds have slots of their own)
-POOLED = {'4:73', '4:74'}
+# (the engine's room, docs/game/progression/encounter-groups.md: BN4's late families' sounds shared one pool a battle
+# until 11 November 2026, one of them a battle; they have slots of their own since, so no family is held apart)
+POOLED = set()
 SAMPLE_SEED = 20261111
 
 
@@ -131,6 +134,7 @@ def measured(fams, path=None):
         # (tough: the autopilot's starting folder does not delete its V1, alone, in 50 seconds)
         if fam.fight and not fam.fight[0]:
             fam.tricks.append('tough')
+    pairs_load(fams)
     return True
 
 
@@ -155,12 +159,46 @@ def pool(fams, nets, band):
     return [f for f in fams.values() if f.net in nets and not f.summoned and not f.bound and f.stage <= band['stage'] and versions(f, band)]
 
 
+# The pairs' pass (tools/encounter_danger.py pairs, tools/encounter_data/pairs.tsv): two families that press a standing
+# MegaMan harder together than their own pressures add up to, by PAIR_EXTRA HP in 20 seconds or more at V1: the pair
+# (its two keys, sorted) -> that excess. A group that holds such a pair is predicted that much harder.
+PAIR_EXTRA = 40
+PAIRS = {}
+
+
+def pairs_load(fams, path=None):
+    """PAIRS from the pairs' pass; every pair's row (label, measured, predicted) for the report. False where the pass
+    was not run."""
+    path = path or os.path.join(DATA, 'pairs.tsv')
+    PAIRS.clear()
+    if not os.path.exists(path):
+        return []
+    rows = []
+    for r in read_tsv(path):
+        a, b = r['label'].split('+')
+        if a not in fams or b not in fams or fams[a].pressure is None or fams[b].pressure is None:
+            continue
+        own, got = fams[a].pressure + fams[b].pressure, int(r['pressure20'])
+        rows.append((a, b, got, own))
+        if got - own >= PAIR_EXTRA:
+            PAIRS[tuple(sorted((a, b)))] = got - own
+    return rows
+
+
 def pressure_of(group, vs):
     """A battle's pressure as its families' own add up: each one's measured alone at V1, by its hit at the version
-    fought over its V1's; None where a family's was not measured."""
+    fought over its V1's, and for each two of them the pairs' pass found pressing harder together (PAIRS) that
+    excess, by the larger of the two's hits over their V1's; None where a family's was not measured."""
     if any(f.pressure is None for f in group):
         return None
-    return round(sum(f.pressure * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)))
+    scale = [f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)]
+    total = sum(f.pressure * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs))
+    for i in range(len(group)):
+        for k in range(i + 1, len(group)):
+            extra = PAIRS.get(tuple(sorted((group[i].key, group[k].key))))
+            if extra:
+                total += extra * max(scale[i], scale[k])
+    return round(total)
 
 
 def fit(group, band, test=None, cap=None):
@@ -250,7 +288,8 @@ def fillings(template, fams_in, band, cap=None):
     if name == 'swarm':
         for f in fams_in:
             for v in reversed(versions(f, band)):
-                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (pressure_of((f, f, f), (v, v, v)) or cap + 1) <= cap):
+                p = pressure_of((f, f, f), (v, v, v))
+                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (p is not None and p <= cap)):
                     out.append(((f, f, f), (v, v, v), 3 * f.ver[v]['hp']))
                     break
         return out
@@ -523,6 +562,25 @@ def report_danger(fams, bands):
     return table(head, summary), table(head2, detail)
 
 
+def report_pairs(fams):
+    """The pairs' pass: every two families of the pool fought together at V1, against what their own pressures add
+    up to."""
+    rows = pairs_load(fams)
+    if not rows:
+        return ['The pairs\' pass was not run (`tools/encounter_danger.py pairs`).', '']
+    ratios = sorted(got / own for _, _, got, own in rows if own)
+    excess = sorted(got - own for _, _, got, own in rows)
+    lines = [f'{len(rows)} pairs, every two families of the pool once, each at V1 where its lean puts it, MegaMan standing: the HP he '
+             f'loses in 20 seconds against the sum of the two families\' own pressures. The median pair presses '
+             f'{statistics.median(ratios):.2f} of its sum ({statistics.median(excess):+.0f} HP); {sum(r > 1.25 for r in ratios)} press past 1.25 of it, '
+             f'and the most any presses past it is {excess[-1]} HP. A pair {PAIR_EXTRA} HP or more past its sum is tagged '
+             f'({len(PAIRS)} pairs): a group that holds it is predicted that much harder, by the larger of the two families\' '
+             f'hits at the version fought over their V1\'s.', '']
+    flagged = sorted(((got - own, a, b, got, own) for a, b, got, own in rows if got - own >= PAIR_EXTRA), reverse=True)
+    lines += table(['Pair', 'Together', 'Their own, added', 'Past the sum'], [[f'{a} + {b}', got, own, f'+{d}'] for d, a, b, got, own in flagged])
+    return lines + ['']
+
+
 def cmd_report(a):
     fams, bands, pools, forms, xareas, xforms, shared = load()
     have = measured(fams)
@@ -536,6 +594,7 @@ def cmd_report(a):
     lines += ['## Families that can carry an act', ''] + report_signatures(fams, bands) + ['']
     summary, detail = report_danger(fams, bands)
     lines += ['## Danger', ''] + summary + ['']
+    lines += ['### The pairs\' pass', ''] + report_pairs(fams)
     lines += ['### A cap on pressure', ''] + report_capped(fams, bands, pools, forms)
     if detail:
         lines += ['### Every battle sampled', ''] + detail + ['']
@@ -554,14 +613,57 @@ def cmd_report(a):
     return 0
 
 
+ENGINE = os.path.join(ROOT, 'src', 'core', 'group_tags.c')
+TRICK_BITS = (('GROUP_BREAKS', lambda f: any(t.startswith('panels:') for t in f.tricks)),
+              ('GROUP_SHAPES', lambda f: 'area' in f.tricks or any(t.startswith('field:') for t in f.tricks)),
+              ('GROUP_SUMMONS', lambda f: 'summons' in f.tricks), ('GROUP_TOUGH', lambda f: 'tough' in f.tricks))
+
+
+def cmd_engine(a):
+    """The measured tags as the engine reads them: a row a family measured, its net, BN6's AI index, its pressure and
+    its tricks."""
+    fams = load()[0]
+    if not measured(fams):
+        sys.exit('no tools/encounter_data/families.tsv: tools/encounter_danger.py families first')
+    rows = []
+    for f in sorted(fams.values(), key=lambda f: (f.net, f.ai)):
+        if f.pressure is None:
+            continue
+        tricks = ' | '.join(name for name, has in TRICK_BITS if has(f)) or '0'
+        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks} }},')
+    pairs = []
+    for (one, two), extra in sorted(PAIRS.items(), key=lambda kv: (fams[kv[0][0]].net, fams[kv[0][0]].ai, fams[kv[0][1]].net, fams[kv[0][1]].ai)):
+        pairs.append(f'\t{{ {fams[one].net}, {fams[one].ai}, {fams[two].net}, {fams[two].ai}, {extra} }},')
+    text = '\n'.join([
+        '/* groups.h: the families\' measured tags, a row each: its net (0 BN6\'s, 1 BN5\'s, 2 BN4\'s), BN6\'s AI index, its',
+        ' * pressure (the HP a standing MegaMan loses in 20 seconds to its V1 alone) and its tricks.',
+        ' * Written by tools/encounter_tags.py engine from tools/encounter_data/ (docs/devtools/encounter-tags.md); do not',
+        ' * edit: measure again and write it again (--check says whether this is what it writes). */',
+        '#include "groups.h"', '',
+        'const GroupTag group_tags[] = {'] + rows + ['};', 'const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);', '',
+        '/* The pairs that press harder together than their own pressures add up to (the pairs\' pass: tools/encounter_danger.py',
+        f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1: each family\'s net and BN6\'s AI index, and that excess. */',
+        'const GroupPair group_pairs[] = {'] + pairs + ['};', 'const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);', ''])
+    if a.check:
+        if not os.path.exists(ENGINE) or open(ENGINE).read() != text:
+            sys.exit(f'{os.path.relpath(ENGINE, ROOT)} is not what tools/encounter_tags.py engine writes')
+        print(f'{os.path.relpath(ENGINE, ROOT)} is what the tool writes ({len(rows)} families)')
+        return 0
+    with open(ENGINE, 'w') as f:
+        f.write(text)
+    print(f'written: {os.path.relpath(ENGINE, ROOT)} ({len(rows)} families)')
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
-    ap.add_argument('what', choices=['dump', 'sample', 'report'])
+    ap.add_argument('what', choices=['dump', 'sample', 'report', 'engine'])
     ap.add_argument('--write', action='store_true', help='report: into the concept, after its mark')
+    ap.add_argument('--check', action='store_true', help='engine: write nothing, fail where the file differs')
     ap.add_argument('--natives', type=int, default=8, help="sample: each act's own battles")
     ap.add_argument('--fillings', type=int, default=2, help="sample: each template's fillings an act")
     a = ap.parse_args()
-    return {'dump': cmd_dump, 'sample': cmd_sample, 'report': cmd_report}[a.what](a)
+    return {'dump': cmd_dump, 'sample': cmd_sample, 'report': cmd_report, 'engine': cmd_engine}[a.what](a)
 
 
 if __name__ == '__main__':

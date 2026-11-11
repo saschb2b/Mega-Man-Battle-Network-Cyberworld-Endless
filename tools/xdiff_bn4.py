@@ -440,41 +440,6 @@ def support_spawners(roms, game, kind):
     return out
 
 
-MISC_TABLE4, MISC_COUNT4 = 0x080EC9CC, 0x12   # (BN4_MISC_ROUTINES, BN4_MISC_ROUTINE_COUNT)
-MISC_SPAWNERS = {}
-
-
-def misc_spawners(roms, kind):
-    """{subfamily: its routine} of BN4's misc subfamilies whose routine is a spawner of the fourth kind's type `kind` that
-    stores the element from r2 at the object's +0x17 (movs r0,#kind; its one call the spawn; strb r2,[r0,#0x17]): PitRng's
-    launcher's (legit.json's bn4 support_objects)"""
-    if kind in MISC_SPAWNERS:
-        return MISC_SPAWNERS[kind]
-    import xrecipe_thumb as T
-    rom = T.Rom(roms[4], 'bn4')
-    w32 = lambda a: int.from_bytes(roms[4][a - 0x08000000:a - 0x08000000 + 4], 'little')
-    out = {}
-    for sub in range(MISC_COUNT4):
-        a = w32(MISC_TABLE4 + 4 * sub) & ~1
-        wk = T.walk(rom, a, 0x40)
-        text = [i.text for _, i in sorted(wk.insns.items())]
-        calls = [i.target for _, i in sorted(wk.insns.items()) if i.form == 'bl']
-        if calls == [SUPPORT_TABLES[4][2]] and f'movs r0, #{kind:#x}' in text and f'strb r2, [r0, #{OBJ_ELEMENT4:#x}]' in text:
-            out[sub] = a
-    MISC_SPAWNERS[kind] = out
-    return out
-
-
-def misc_object_as_bn6(rec, canon):
-    """a BN4 fourth-kind object's record with its element at BN6's place, where its type is the object a misc routine of
-    BN4's spawns (misc_spawners) and that routine is a moved unit's (a row of the registry names BN6's grown misc routine of
-    its subfamily): the spawner's store, BN4's +0x17, is the recipe's immediate BN6's +0x0E, read there where BN4's +0x0E
-    holds 0"""
-    subs = misc_spawners(canon.roms, rec[NODE + OBJ_TYPE])
-    if subs and rec[NODE + OBJ_ELEMENT6] == 0 and any(TWINS.get(to) == (None, XC4_FIRST_SUPPORT + sub) for sub in subs for to in canon.chips.values()):
-        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
-
-
 def support_object_as_bn6(rec, canon):
     """a BN4 fourth-kind object's record with its spawn's copies as BN6's engine would hold them, where its type is a support
     chip's object in both games (support_spawners) and its +0x3C is BN4's spawner's own address: the chip (+0x30) as the
@@ -508,6 +473,20 @@ def support_object_as_bn6(rec, canon):
     for at, rat, n in ((OBJ_SPAWN_R4, 0x10, 4), (OBJ_SPAWN_R6, 0x1A, 2), (OBJ_SPAWN_R6 + 2, 0x0A, 1)) if to < BN6_CHIPS else ():
         if rec[NODE + at:NODE + at + n] == roms[4][r4 + rat:r4 + rat + n]:
             rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
+
+
+ELEMENT_OBJECTS = {}
+
+
+def object_element_as_bn6(rec):
+    """a BN4 fourth-kind object's element read at BN6's place (+0x17 as +0x0E), for the types legit.json's bn4 object_element
+    names, each a chip unit's object whose own spawner stores it and whose recipe gives the store BN6's offset; where BN4's
+    +0x0E holds 0 (the trace lays a first- and a third-kind object's out so itself, src/dev/xdiff_bn4_trace.c obj_segs; a
+    support chip's object's is support_object_as_bn6's)"""
+    if not ELEMENT_OBJECTS:
+        ELEMENT_OBJECTS.update({int(k, 0): v for k, v in bn4_rule('object_element').get('T4', {}).items()} or {-1: None})
+    if rec[NODE + OBJ_TYPE] in ELEMENT_OBJECTS and rec[NODE + OBJ_ELEMENT6] == 0:
+        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
 
 
 OBJ_DAMAGE, OBJ_DAMAGE_KIND, COLL_DAMAGE_KIND, CHIP_POWER, CHIP_DAMAGE_KIND = 0x2C, 0x2E, 0x07, 0x1A, 0x0A
@@ -774,7 +753,8 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
         support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
-        misc_object_as_bn6(rec, canon)      # (... and a moved misc routine's object's element)
+    if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
+        object_element_as_bn6(rec)   # (a chip unit's own object's element at BN6's place: legit.json's bn4 object_element)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)

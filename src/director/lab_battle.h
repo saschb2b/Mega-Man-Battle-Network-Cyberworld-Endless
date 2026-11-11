@@ -26,9 +26,18 @@ typedef struct {
 	uint32_t before, after;   /* the game's work RAM hashed as the battle began, and as it was put back */
 } LabResult;
 
-/* The battle `e` asked for, on background `backdrop` (-1 the map's own):
+/* The battle `e` asked for, on background `backdrop` (BN6's number; -1 its
+ * area's own, as BN6 rolls it):
  * the caller has MegaMan free on a map. It begins with the next frame. */
 void lab_battle_ask(const Encounter *e, int backdrop);
+/* ... on a field of these eighteen panels (BN6_PANEL_TYPE each, row by row
+ * from the top left; NULL: the battle's own field): written over BN6's
+ * last field in the core's copy while the battle is on, and put back */
+void lab_battle_panels(const uint8_t *panels);
+/* Whether one is asked for or on */
+bool lab_battle_on(void);
+/* How the last one ended (LAB_NONE: none ended yet) */
+const LabResult *lab_battle_result(void);
 /* The director's update, first thing: true while a test battle has the
  * frame (it began, is fought, or is not yet back on the map); false where
  * none is on, and on the frame it ended, the game put back. */

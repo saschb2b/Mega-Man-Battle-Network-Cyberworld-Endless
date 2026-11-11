@@ -68,17 +68,18 @@ ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x
 # (ATTACK_NUMBERS by the family and the unit's name): 288 bytes, and no unit's table is another's to write.
 # The unit's name -> (the state's table, its entries, the subfamilies)
 ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
-# A third-kind type several attack units spawn, moved once, by the first of them in UNITS: MegaMan's arm (BN4_T3_ARM, the
-# third kind's 0x02, with its kinds' table, TABLES). A unit after its owner copies the type's spawner alone (a routine of
+# A third-kind type several units spawn, moved once, by the first of them in UNITS: MegaMan's arm (BN4_T3_ARM, the
+# third kind's 0x02, with its kinds' table, TABLES), every attack unit's; ShotStar's star (BN4_T3_STAR), Meteors'. A unit
+# after its owner copies the type's spawner alone (a routine of
 # 0x26 bytes in the type's code, a block of its own), its spawn given the owner's number of the dispatch and listed as
 # shared (XV_TYPE_SHARED: the dispatch runs the owner's copy for it too); the kinds it spawns are rows of the owner's copy
 # of the table (TABLES' kinds: every unit's): BN4's type -> (its spawner, why)
 SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm itself, the third kind's 0x02, is the first attack "
-                              "unit's copy, shared", None),
-           # (... and one a named unit alone shares with its owner: PitRng's launcher throws Boomer's boomerangs, the third
-           # kind's 0x32, by the boomerang's own spawner)
-           0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): the boomerang itself, the third kind's 0x32, is Boomer's "
-                              "copy, shared", ('PitRng',))}
+                              "unit's copy, shared"),
+           0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
+                              "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)"),
+           0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): Boomer's unit moved the boomerang; PitRng's launcher "
+                              "throws three (0x080E9A24)")}
 # A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
@@ -108,6 +109,7 @@ TWINS = {
     0x08008C2A: (0x0800B9B0, 'chips'),   # its step 4 (+9): the chip's name shown
     0x08008EB8: (0x0800BC88, 'chips'),   # its step 12 (+9): its own work done, its state 8
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
+    0x0800FC48: (0x08016168, 'chips'),   # a panel of the other side's found in the object's row (Meteors' aim)
     # ... and what an attack state of MegaMan's calls (the 'attack' units):
     0x0800BA66: (0x0800FDB6, 'chips'),   # his counter window opened as his attack begins
     0x0800C9FC: (0x08011714, 'chips'),   # a chip's attack ended (BN4_CHIP_ATTACK_END, BN6_CHIP_ATTACK_END)
@@ -116,8 +118,36 @@ TWINS = {
     # ... and an object that stands as its side's obstacle (PropBom's bomb):
     0x0800B230: (0x0800F614, 'chips'),   # its side's obstacle slot taken (BN4_OBSTACLE_ADD, BN6_OBSTACLE_ADD)
     0x0800B272: (0x0800F656, 'chips'),   # ... and given up (BN4_OBSTACLE_REMOVE, BN6_OBSTACLE_REMOVE)
+    # ... and what a moved object the actors' runner runs calls and names (TimeBomb's bomb, ACTOR_RUN4):
+    0x0801393E: (0x0801AD12, 'chips'),   # an actor's step begun: its statuses (BN4_ACTOR_STEP, BN6_ACTOR_STEP)
+    0x08013F3E: (0x0801B394, 'chips'),   # its state run from its table (BN4_ACTOR_RUN, BN6_ACTOR_RUN)
+    0x08010276: (0x080166AE, 'chips'),   # the engine's generic state 3 (bn4_twins.GENERIC4, GENERIC6)
+    0x080112C4: (0x08017CC0, 'chips'),   # an obstacle's state 5, pushed (BN6's own bomb's table's 0x080CE928 + 0x14)
 }
+# A moved third-kind object that is an actor: its update hands its state table to the actors' runner in r0 (TimeBomb's
+# bomb, 0x080D6CB6). BN6's runner numbers the engine's states 0-7 and an object's own from 8 where BN4's numbers 0-5 and
+# from 6 (bn4_twins.GENERIC4, as a family's: tools/xrecipe_bn4.py), so the unit brings the table in BN6's layout
+# (XVirusFamily.states, written at its home's XC4_HOME_STATES, which the update's pool word names: a number row), and
+# its code's CurAction written or compared from 6 becomes 8 on
+ACTOR_RUN4 = 0x08013F3E
+HOME_STATES = 0x380   # (XC4_HOME_STATES)
 AUDITS = {
+    (0x0801393E, 0x0801AD12): ('ok', "an actor's step begun, each engine's own: its statuses' timers and what they end, read from "
+                                     "its collision data; BN6's own bomb's update calls BN6's (0x080CE90A) where BN4's bomb's "
+                                     "calls BN4's (0x080D6CB2). A moved actor runs BN6's, as every moved family does: the "
+                                     "statuses are the engine's rules, not the object's"),
+    (0x08013F3E, 0x0801B394): ('ok', "the actors' runner, each engine's own: r0 the object's state table, its CurAction (+9) the "
+                                     "entry run, after the engine's own tests of a time freeze and its statuses; BN4's numbers "
+                                     "its generic states 0-5 and an object's own from 6, BN6's 0-7 and from 8, so the table "
+                                     "handed in is the unit's in BN6's layout (ACTOR_RUN4) and its own states' numbers shift"),
+    (0x08010276, 0x080166AE): ('ok', "the engine's generic state 3 (struck), each game's own body: the entry of the bomb's BN4 "
+                                     "table, which no code reads once the unit's table in BN6's layout is the one handed to "
+                                     "the runner; BN6's generic 3 there, as in every moved family's states"),
+    (0x080112C4, 0x08017CC0): ('ok', "an obstacle's state 5, pushed (a dispatcher of three steps on +0xA): step 0 the same but "
+                                     "the slide's speed (0x80000 in BN4, 0x60000 in BN6), step 1 BN6's counts its moves, step 2 "
+                                     "the same; the slot 5 of BN6's own bomb's table (0x080CE928) and its cube's kin "
+                                     "(0x08017E26, BN4 0x0801143C). A pushed bomb slides by BN6's rule: the engine's, as a "
+                                     "pushed foe's (bn4_chip_magbolt's notes); no TimeBomb spec pushes one"),
     (0x0800B230, 0x0800F614): ('ok', "an object put in its side's obstacle slots (r0 it, r1 the side, r2 which pair): the same "
                                      "instructions but the slots' place in the battle state, +0x68 in BN4 and +0xA0 in BN6, each "
                                      "engine's own state; the one a new object pushes out has its HP zeroed in both"),
@@ -139,6 +169,12 @@ AUDITS = {
                                      "type +2 and its drawn type +6) and its own sound, but BN4's test of flag 0x20000 first, "
                                      "which only BN4's type 5 gives (BN4_PANEL_FLAGS_OF 0x30010; BN6's occupants' mask lacks that "
                                      "bit likewise): no BN6 panel type's word has it, so the test never holds in BN6"),
+    (0x0800FC48, 0x08016168): ('ok', "a panel found in the object's row for the side across (its side ^ 1, its row, a required and a "
+                                     "refused word of panel flags by its side, eight bytes a side, handed to BN4's 0x0800A1AE, BN6's "
+                                     "0x0800D086; where none, again with a second pair of words): BN6's the same instruction for "
+                                     "instruction, a routine no code of BN6's calls, and its two tables (0x080161A4, 0x080161B4) the "
+                                     "same eight words as BN4's (0x0800FC84, 0x0800FC94), read in both ROMs; the search pairs only "
+                                     "routines BN6 calls"),
     (0x0800BA66, 0x0800FDB6): ('ok', "MegaMan's counter window as a chip's attack begins, each game's own rule for one flag: BN4 writes "
                                      "0x10 to his collision data's counter byte (+0xB, BN4_COLL_COUNTER) through 0x0800AFBC where the "
                                      "battle's kind (the battle state's +0xF) is 0x46 or over; BN6 writes 0x10 to its counter byte "
@@ -196,6 +232,8 @@ UNITS = (
     ('attack', 0x62, 'PropBom'),
     ('attack', 0x47, 'ThunSoul'),
     ('attack', 0x09, 'SeekBom'),
+    ('misc', 0x11, 'Meteors'),
+    ('support', 0x11, 'TimeBomb'),
     ('misc', 0x0D, 'PitRng'),
 )
 CANDIDATES = ()
@@ -214,6 +252,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xAB: 0x1DF,                 # (Boomer's boomerang)
                0xC7: 0x1E0,                 # (MokoRus's Moko)
                0x8E: 0x1E1,                 # (SidBmbo's bamboo)
+               0xB0: 0x1E2, 0xE3: 0x1E3, 0xE4: 0x1E4,   # (TimeBomb's bomb set down, its count's tick and its last ticks)
                # (the attack families' units' from 0x200 up to 0x23F, a block of their own: the units are moved side by side,
                # each session a block)
                0x8D: 0x200,                 # (the spread chips' shot)
@@ -234,13 +273,18 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
 # where a row keeps its sprite's number, the sprite's list and the load that reads it): copied with the unit, each spawned
 # kind's sprite BN6's of the same bytes or copied at a number of the chips' (its byte in the copy set)
 TABLES = {
-    0x080D8580: dict(size=42, entry=6, kinds=(1,), sprite=(None, 0), list=3, loads={0x080D85E4},
+    0x080D8580: dict(size=42, entry=6, kinds=(1, 6), sprite=(None, 0), list=3, loads={0x080D85E4},
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
                          "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
-                         "(0x080E5D3E: movs r4,#1)"),
+                         "(0x080E5D3E: movs r4,#1), Meteors' controller kind 6 (0x080EAE56: movs r4,#6; SHARED3)"),
     0x080D31EC: dict(size=0x48, entry=12, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the boomerang's flights (the third kind's 0x32: six rows of three words, numbers alone, no sprite), in the "
                          "bytes before its routine"),
+    0x08012618: dict(size=0x18, entry=8, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     why="the panels' patterns (rows of two words, a mask of the field's panels each: numbers alone), which the "
+                         "blasts' spawner (0x080E4ABC) reads by its argument's low seven bits; the bomb asks rows 1 and 2, a "
+                         "side's whole area (its words at 0x080D6E64). BN6 holds the same bytes for 0x50 at 0x08019C34; "
+                         "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
     0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F), sprite=(0, 1), list=None, loads={0x080CD628},
@@ -254,6 +298,11 @@ TABLES = {
 # at (a family's slot, FAMILY_SLOTS, or BN6's own number); the kinds are the parameters of the unit's chips that play; the
 # sites that spawn an effect or play a sound by a row's byte (effect_sites, sound_sites: no immediate there to change)
 ROW_TABLES = {
+    0x080E4A00: dict(size=0x0A, entry=2, kinds=(1,), effect=0, sound=1,
+                     effect_sites={0x080E4A78}, sound_sites={0x080E4A84},
+                     why="the blasts' kinds (the fourth kind's 0x24: five of 2 bytes, the effect it draws on each panel of its "
+                         "list and its sound, 0 none), read each time it draws one (0x080E4A70, by +4); TimeBomb's bomb spawns "
+                         "kind 1 (0x080D6E2E: movs r4,#1), the burst 0x00 and no sound; 0, 2, 3 and 4 are other chips', left BN4's"),
     0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B), effect=2, sound=3,
                      effect_sites={0x080CF55E}, sound_sites={0x080CF56A},
                      why="the spread shot's kinds (the third kind's 0x12: 17 of 4 bytes, its burst's shape, its collision's "
@@ -356,6 +405,9 @@ UNIT_MOVES = {
 # A routine of BN4's engine a unit copies where the project pairs it with BN6's (as tools/bn4_twins.py COPIED, for the unit
 # alone): the unit's name -> BN4's routine -> why
 UNIT_COPIED = {
+    'TimeBomb': {0x08111888: "a remainder (swi 6; adds r0,r1,#0; bx lr: r0 mod r1), which its placement draws a panel by "
+                             "(0x080E4D54); BN6 has the three instructions only inline (0x08010C00, searched), so copied: no "
+                             "word of it names a place"},
     'MagBolt': {0x08012D9A: "the collision data's panels set from its place, with the direction it moved by (BN4's 0x0800AF90, "
                             "copied too): BN6's twin 0x0801A04C asks 0x0800E994, which answers a neighbouring panel alone (5 "
                             "else), where BN4's answers every panel; the bolt is put on its panel from none (4 in BN4, 5 in BN6)"},
@@ -459,31 +511,6 @@ def shape_of(b4, b6, f, entry):
     return ty
 
 
-def spawned4_of(b4, f, entry):
-    """the fourth-kind type a misc routine spawns, its one call BN4's spawner with the type an immediate (PitRng's: the
-    object places itself, so its routine is shorter than the support routines' common spawner)"""
-    w = T.walk(b4, entry)
-    if [t for _, t in sorted(w.bls.items())] != [SPAWN4_4]:
-        f.decide('entry', f'its routine ({entry:08X}) is not one call of the fourth kind\'s spawner: another kind of unit')
-        return None
-    ty, chain = T.back_value(w, next(iter(w.bls)), 0)
-    if ty is None or len(chain) != 1 or chain[0][1] != 'movs':
-        f.decide('entry', f'its routine ({entry:08X}) spawns a type made otherwise')
-        return None
-    return ty
-
-
-def share3(b4, f, alloc):
-    """a type an earlier unit moved that this one spawns too (SHARED3: every attack unit's, or the units' it names): its
-    spawner copied, its spawn the owner's number"""
-    for ty, (spawner, why, users) in sorted(SHARED3.items()):
-        if ty in alloc.shared3 and (f.kind == 'attack' if users is None else f.name in users):
-            bn4_twins.COPIED[spawner] = why
-            lo, hi = X4.t3_of(b4, spawner)[1:]
-            f.moved3[ty] = {'lo': lo, 'hi': hi, 'routine': lo, 'as': alloc.shared3[ty][0]}
-            f.shared.append((3, alloc.shared3[ty][0], ty, alloc.shared3[ty][1]))
-
-
 def type_number(f, alloc, kind, ty=None):
     """the dispatch's number of a kind for a chip's moved type: the third kind's BN4's own, on the chips' page (one unit's:
     a second unit that moves it a decision, SHARED3 its answer); the fourth kind's next"""
@@ -559,7 +586,6 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
                 f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
                 f.notes.append(f'its subfamily {x:#x}\'s entry ({entries[x]:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}): moved')
             f.unreached = {e: x for x, e in enumerate(entries) if e not in [entries[y] for y in mine]}
-        share3(b4, f, alloc)
         for pid, soul in SOUL_POWERS.get(sub, ()):
             p = b4.u32(POWERS4 + 4 * pid) & ~1 if pid < NPOWERS4 else 0
             bn4_twins.COPIED[p] = f'{soul}\'s power attack {pid:#x}, which returns the family'
@@ -589,20 +615,14 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.regions, f.roots = [(lo, hi, ty)], f.entries + [lo]
             f.moved3[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its routine ({f.entry:08X}) lies in the third-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
-        elif hit is None and C.t4_of(b4, f.entry) is not None:
-            # (a routine in a fourth-kind type's code, the support routines' common spawner reached by the misc run, PitRng's:
-            # the type moved as a support unit's is, the entry the spawner's copy in BN6's grown misc routines)
-            hit4 = C.t4_of(b4, f.entry)
-            ty = spawned4_of(b4, f, f.entry)
-            if ty is None or hit4[0] != ty:
-                f.decide('entry', f'its routine ({f.entry:08X}) does not lie in the region of the fourth-kind type it spawns')
-                return f
-            f.ty, (f.lo, f.hi) = ty, hit4[1:]
-            f.regions, f.roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo]
-            f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
-            f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
-            share3(b4, f, alloc)
-        elif hit is not None:
+        elif t4_with(b4, f.entry) is not None and t4_with(b4, f.entry)[0] is not None:
+            # (a routine in a fourth-kind type's code, Meteors' after its controller's spawner: the type moved, its region to
+            # the routine's end the unit's block)
+            ty, lo, hi = t4_with(b4, f.entry)
+            f.regions, f.roots = [(lo, hi, ('4', ty))], [f.entry, lo]
+            f.moved4 = {ty: dict(lo=lo, hi=hi, routine=lo)}
+            f.notes.append(f'its routine ({f.entry:08X}) lies in the fourth-kind {ty:#x}\'s code ({lo:08X}-{hi:08X}), which it spawns: moved')
+        elif hit is not None or C.t4_of(b4, f.entry) is not None:
             f.decide('entry', f'its routine ({f.entry:08X}) lies in an object type\'s code this tool does not move with a misc unit yet')
             return f
         else:
@@ -610,6 +630,14 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
             f.roots = [f.entry]
             f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+    # (a type an earlier unit moved, SHARED3: its spawner copied, its spawn the owner's number; one the unit does not spawn is
+    # dropped after the walk)
+    for ty, (spawner, why) in sorted(SHARED3.items()):
+        if ty in alloc.shared3:
+            bn4_twins.COPIED[spawner] = why
+            lo, hi = X4.t3_of(b4, spawner)[1:]
+            f.moved3[ty] = {'lo': lo, 'hi': hi, 'routine': lo, 'as': alloc.shared3[ty][0]}
+            f.shared.append((3, alloc.shared3[ty][0], ty, alloc.shared3[ty][1]))
     try:
         roots = list(f.roots)
         while roots:
@@ -633,6 +661,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         power_returns(f)
     X4.side_sites(f)
     X4.scan(f)
+    actors(b4, f, pairs)
     X4.battle_players(f)
     saved = X4.type_number
     X4.type_number = type_number
@@ -679,6 +708,15 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     # entry written by the first, and the installer finds a row's sprite in the unit's own rows or a family's, never in
     # another unit's (xvirus.c sprite_of); its code's immediate names the id all the same)
     f.effects = [(e4, e6) for e4, e6 in f.effects if alloc.effect_owner.get(e4) == f.name]
+    # (... and an effect it is the first to move whose sprite an earlier unit listed: the installer finds a row's sprite in
+    # the unit's own rows, so it lists the sprite too, at the same number of BN6's list, a row of the room of its own)
+    for e4, e6 in f.effects:
+        row = b4.bytes(X4.BN4['effects'] + 4 * e4, 2)
+        have = alloc.effect_sprites.get((row[0] // 4, row[1]))
+        if have is not None and have[1] != f.name and have[0] not in f.attack_sprites:
+            f.attack_sprites.append(dict(have[0]))
+            f.notes.append(f'its effect {e4:#x}\'s sprite {row[0] // 4}:{row[1]:#x}, which {have[1]} lists: listed by it too, the same number '
+                           f'({have[0]["to_list"]}:{have[0]["to_index"]:#x}), as its effect\'s row needs its sprite among its own')
     sounds_of(b4, b6, f)
     if f.ranges:
         f.decide('unit', 'it needs a shim the chips\' emitter writes none of yet (a NameID range)')
@@ -692,6 +730,22 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             out.append(i)
     f.imms = out
     return f
+
+
+def t4_with(b4, t):
+    """the fourth-kind type whose code holds `t`, as tools/xnavirecipe_bn4_objects.py's t4_of, and for the table's last type,
+    whose region no next type ends: (type, its routine, the end of the routine at `t`), `t` within 0x100 bytes of the type's"""
+    hit = C.t4_of(b4, t)
+    if hit is not None:
+        return hit
+    types = [b4.u32(C.T4_TYPES + 4 * i) & ~1 for i in range(C.NT4)]
+    lo = max(a for a in types if T.is_code_ptr(a | 1, b4))
+    if not lo <= t < lo + 0x100:
+        return None
+    w = T.walk(b4, t)
+    hi = max(max(a + i.size for a, i in w.insns.items()), max((x + 4 for x in w.lits), default=0))
+    tys = [k for k, a in enumerate(types) if a == lo]
+    return (tys[0] if len(tys) == 1 else None), lo, hi
 
 
 def moved3(b4, f, pairs):
@@ -1206,6 +1260,12 @@ def c_unit(f):
         L.append(f'static const XvNumber {n}_numbers[] = {{')
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
         L.append('};')
+    if f.states:
+        # (its moved actor's state table, BN6's layout: { address, its own, no clone, not entered })
+        L.append(f'static const XvRef {n}_states[] = {{')
+        L += [f'\t{{ 0x{x:08X}, {"true" if who == "OWN" else "false"}, 0, false }},   /* {k}: {"its own" if who == "OWN" else "BN6\'s"} */'
+              for k, (who, x) in enumerate(f.states)]
+        L.append('};')
     L.append(f'static const XvType {n}_types[] = {{')
     # (the third kind's by BN4's own number on the chips' page, XV_TYPE_MOVED4; the fourth kind's at a number of the tables)
     for k, a, t in f.types:
@@ -1248,7 +1308,7 @@ def c_unit(f):
         L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
-                                                                   ('imms', True), ('numbers', f.numbers), ('types', True), ('sides', f.sides),
+                                                                   ('imms', True), ('numbers', f.numbers), ('states', f.states), ('types', True), ('sides', f.sides),
                                                                    ('sound_calls', f.queue_calls), ('effect_calls', getattr(f, 'effect_calls', None)),
                                                                    ('sprites', f.attack_sprites),
                                                                    ('effects', f.effects), ('bytes', f.bytes)) if have]
@@ -1278,6 +1338,49 @@ def c_file(units):
     parts.append('const XChipUnit xchips_bn4[] = {\n' + '\n'.join(rows) + '\n};\n'
                  'const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);\n')
     return '\n'.join(parts)
+
+
+def actors(b4, f, pairs):
+    """its moved objects that are actors (ACTOR_RUN4): each one's state table in BN6's layout (f.states: the engine's
+    generic 0-7 BN6's, a slot the object fills with a routine of the engine's its twin, its own from 8), the pool word that
+    names BN4's table aimed at the unit's (a number row), and its own code's CurAction from 6 shifted (X4.curaction, which
+    X4.scan runs on a family's own region alone)"""
+    f.states = []
+    for e, w in sorted(f.walks.items()):
+        for site in sorted(s for s, t in w.bls.items() if t == ACTOR_RUN4):
+            reg = X4.own_region(f, e)
+            tab, chain = T.back_value(w, site, 0)
+            if f.states or reg is None or reg[2] is None or tab is None or len(chain) != 1 or chain[0][1] != 'ldr_lit' or tab not in f.tables:
+                f.decide('actor', f'{site:08X}: the actors\' runner called with a table this tool does not rebuild '
+                                  f'({"a second actor" if f.states else "no table of its region read from its pool"})')
+                continue
+            ents = f.tables[tab]
+            states = [('BN6', X4.GENERIC6[k] | 1) for k in range(8)]
+            for k, x in enumerate(ents):
+                if X4.own_region(f, x & ~1):
+                    ref = ('OWN', x | 1)
+                else:
+                    tw = pairs.twin(x & ~1)[0]
+                    if tw is None or (k < 6 and x & ~1 == bn4_twins.GENERIC4[k] and tw != X4.GENERIC6[k]):
+                        f.decide('actor', f'{x:08X}: its state {k} is no routine of its own and has no twin that serves')
+                        continue
+                    ref = ('BN6', tw | 1)
+                if k < 6:
+                    states[k] = ref
+                else:
+                    states.append(ref)
+            if len(states) > 16 or any(r[0] != 'OWN' for r in states[8:]):
+                f.decide('actor', f'{tab:08X}: its state table has {len(states)} states in BN6\'s layout, or one past the generic not its own')
+            f.states = states
+            lit = w.insns[chain[0][0]].lit
+            f.numbers.append((lit, tab, f.home + HOME_STATES, 'its state table: the unit\'s in BN6\'s layout, at its home\'s XC4_HOME_STATES'))
+            f.notes.append(f'its third-kind {reg[2]:#x} is an actor ({site:08X}: the actors\' runner with its table {tab:08X}, '
+                           f'{len(ents)} states): its table in BN6\'s layout, {len(states)} states, its own from 8')
+            for e2, w2 in sorted(f.walks.items()):
+                if X4.own_region(f, e2) == reg:
+                    addrs = sorted(w2.insns)
+                    for k, a in enumerate(addrs):
+                        X4.curaction(f, w2, addrs, k, w2.insns[a])
 
 
 def numbers_reserved():

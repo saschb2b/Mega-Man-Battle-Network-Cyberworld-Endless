@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T09:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -187,6 +187,17 @@ never sprung there). `bn4_chip_lifeaura` records where the aura stands
 (`xdiff_bn4_trace.c`), and the kind's number, where MegaMan keeps the
 aura's object, and that object, each game's own code, are open.
 
+A chip unit's own fourth-kind object (no support chip's: Meteors'
+controller) keeps its element where its own spawner stores it, BN4's
++0x17 and BN6's +0x0E by the recipe's immediates; the trace writes a
+fourth-kind object raw, so the comparison reads BN4's at BN6's place for
+the types `legit.json`'s `bn4` `object_element` names, each with the two
+instructions. A pointer a BN4 object keeps into a chip unit's moved
+blocks (the star's kind's row at its +0x60, seen in the fight's frames
+since Meteors) reads as moved data in both traces: a BN4 reference takes
+BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it
+names, a BN5 reference none of it.
+
 [The BN4 trace](#the-bn4-trace) below traces that battle and compares it
 frame by frame: `game=bn4:trace` traces BN4's battle alone (`OUT.bn4`) and
 `game=bn4:bn6` traces it against BN6's (`OUT.bn4` and `OUT.bn6`), and a
@@ -368,10 +379,9 @@ and traces both:
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy, to each copy where more than one family copies the block, as
-  Mettaur and Melody both copy BN4's summoned appear, and to each of
-  BN4's chip units' copies that hold the address, as Boomer's unit copies
-  the boomerang's spawner within its type and PitRng's copies it alone;
-  one in RAM once the
+  Mettaur and Melody both copy BN4's summoned appear, and to each BN4
+  chip unit's copy that holds the address, as Meteors' unit copies the
+  star's spawner alone from inside ShotStar's block; one in RAM once the
   game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's
@@ -433,7 +443,10 @@ binary, runs each spec of `tests/xdiff` (`*.json`: the foes, MegaMan's
 panel and HP, the frames, the seed, the keys, `rng`, `natives` with
 their `native_attacks` and `native_effects`, `"sprites": "bytes"` (every
 moved family's spec: a sprite no pair of the registry names compared by
-its bytes, as the generator's twins are), and what BN5's battle is known
+its bytes, as the generator's twins are), `shared_effects` (BN5's effect
+ids as BN6's where the spec's chips run a Navi's copy of a type their
+unit shares: pa_football's ball, GridMan's, draws BN5's 0x5F as his 0xB1),
+and what BN5's battle is known
 to do) and compares the two traces (`tools/xdiff_snap.py` the
 snapshot and its differences, `tools/xdiff_masks.py` whose each is and
 the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
@@ -671,7 +684,9 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   copy of a type the spec's families run as theirs (`xd_log_shared`:
   Marina's water, MetFire's fire column, BomBoy's bomb, the chips' copies
   since the chips' code installs first), as a family's that moved a type
-  another shares is; the hits' spark (the
+  another shares is, and a moved Navi's copy of a type a used unit runs as
+  shared (`navi_shared`: since GridMan's move, Football's ball is his
+  copy, its burst's effect the Program Advance's call); the hits' spark (the
   fourth kind's 4) the engine's hit area spawns is the engine's. A
   Program Advance or a DarkChip waiting for its rule is dealt straight
   into the deck (`deck5`, `deck6`: a code it has, else BN5's custom
@@ -966,13 +981,28 @@ own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
 
+BN5's sprite state's +5 on its object's first frame is read as BN6's
+animation set writes it (`xdiff_snap.set_nibble`): BN6's set, in its IWRAM
+code (image `0x081D6C30`-`0x081D6C90`), ends by storing its frame's byte 4,
+its upper nibble, there, where BN5's (`0x081C8698`-`0x081C86E0`) waits for
+its first advance, which writes it alike in both (MagnetMan's child,
+`magnetman_v1` at t4). And an object spawned this frame is a new role though
+it takes the slot one of its kind left the frame before
+(`assign_roles`): an engine spark BN6 ends a frame sooner than BN5, whose
+next spark took its slot in BN6 and another in BN5 (`magnetman_v1_keys` at
+t272).
+
 A poke's address redirects to a moved range's copy only where that copy is
 the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
 code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
 so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
 `0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
 took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
-uncaught, until this).
+uncaught, until this). Nor does a BN5 virus family's copy take a poke of a
+BN4 spec (`xd_bn5_family_copy`, `src/dev/xdiff_events.c`): BN5's families' blocks lie at the same numbers as
+BN4's code, and one of them, `0x080D6C90`-`0x080D6EB0`, lay over BN4's
+TimeBomb's bomb's (`0x080D6BF8`-`0x080D6ED4`), so six mutations of the
+bomb's copy broke a BN5 virus instead and passed.
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
@@ -1914,6 +1944,17 @@ format, its game 4: the trace's header names it):
   (t163), its effect's id left at BN4's 0x2D (t129, the objects in play),
   a CurAction left at BN4's (t42) and its list 1 entry aimed at VolGear's
   copy (t1).
+  Since 11 November 2026 a late family's sounds have fixed slots of BN6's
+  grown song table in place of the pool ([Transplanted
+  families](../multirom/families.md), BN4's late families): Kilby's row
+  names 0x380, MagTect's 0x381 and, for its 0xF8, the chips' 0x202, each
+  played through a shim of its home that names the slot. `kilby_v1`-`v3`
+  and `magtect_v1`-`v3` PASS as before, with `volgear_v1`, `walla_v1`,
+  `billy_v1`, `bn4_chip_magbolt1` (the slot MagTect shares), and
+  `thunderman_v1`, `sparkman_v1`, `roll_v1` and `roll_v2_summons` (the
+  Navis' pool, unchanged); the two sound mutations now poke the shim
+  (Kilby's made to name 0x381, caught at t163; MagTect's 0xF8 made to
+  name its 0xB8's slot, t239), nine of nine caught.
 - **MagTect's readings** (`magtect_v1`-`magtect_v3`: MagTect V1-V3, BN4's
   0x31, 0x33 and 0x35, BN6's 0x2FC, 0x2FE and 0x300, 9 November 2026;
   [Transplanted families](../multirom/families.md), BN4's late families):

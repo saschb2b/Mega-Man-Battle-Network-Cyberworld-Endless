@@ -356,6 +356,22 @@ bool xchips_code_install(void) {
 	return true;
 }
 
+/* A unit whose moved object the actors' runner runs (its code's `states`: TimeBomb's bomb): its state table, BN6's
+ * layout, written at its home's XC4_HOME_STATES after its code is moved */
+static void states_stage(const XChipUnit *u) {
+	const XVirusFamily *f = &u->code;
+	if (XC4_HOME_VENEERS + xvirus_shims_room(f) > XC4_HOME_STATES) {
+		xv_fail("its shims reach its state table");
+		return;
+	}
+	uint8_t *st = xv_put(u->home + XC4_HOME_STATES, 4u * (uint32_t)f->nstates, true);
+	for (int i = 0; st && i < f->nstates; ++i) {
+		uint32_t to = f->states[i].own ? xvirus_code_at(f, f->states[i].addr | 1u) : f->states[i].addr | 1u;
+		if (!to) xv_fail("its state %d (%08x) is no code of its own", i, (unsigned)f->states[i].addr);
+		put32(st + 4 * i, to);
+	}
+}
+
 /* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
  * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
@@ -375,7 +391,10 @@ static void unit4_stage(int i, bool fresh) {
 	} else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
 	else {
 		songs_in(u);
-		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, &u->code, fresh);
+		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) {
+			entry_stage(u, &u->code, fresh);
+			if (u->code.nstates) states_stage(u);
+		}
 	}
 }
 

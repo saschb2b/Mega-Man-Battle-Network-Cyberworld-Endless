@@ -3,7 +3,7 @@ type: ROM Map
 title: "The chip registry and BN5's chips' code"
 description: "Addresses for the chip registry (BN6's chip tables grown and moved, BN5's read), where BN6's code takes a chip's id in nine bits (the census for ten-bit ids), the pack past 511 and in the cart's save RAM (BN6's save blocks and its pack's order stamps), and BN5's chips' code in BN6's engine: the routines the chips' differential read, Program Advances, DarkPlus, support chips and BN6's own DarkChips."
 tags: [rom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T09:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:07:23Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

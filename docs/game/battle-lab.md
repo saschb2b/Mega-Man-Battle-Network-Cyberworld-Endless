@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T12:30:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -302,9 +302,9 @@ The builder opens on the last set fought.
 
 ### Limits
 
-From the encounter groups' measuring (its concept,
-`game/progression/encounter-groups` under The engine's room, not merged
-as this is written; this page links it once it is) and the dev step:
+From the encounter groups' measuring ([Encounter
+groups](progression/encounter-groups.md), The engine's room) and the dev
+step:
 
 - **Four foes a battle**: BN6's spawn takes the first four of a record.
 - **Any mix of games** among them: every moved family's art is installed
@@ -370,6 +370,28 @@ is used.
     autopilot presses by the real frame's count.
   - The reward's box on BN6's RESULT is not emptied yet: what it shows
     is given and then put back with the rest.
+
+- **The builder's screen** (step 3), behind the dev steps `lab open` and
+  `lab all` (`src/director/lab.c`, its picture `lab_draw.c`, its words
+  `lab_text.c`). Three pages as Options' tabs, L and R between them:
+  - *FOES*: the families MegaMan has battle data on, a complete one in a
+    version Left and Right turn, the rest with their gauge ("5/8"). A
+    lifts the family onto the foes' nine panels, A sets it down, A on a
+    foe set takes it off, B goes back to the list. Four at most; the
+    count stands in the band.
+  - *FIELD*: the cursor walks the eighteen panels and A turns one
+    through BN6's types (plain, cracked, hole, poison, holy, grass, ice,
+    volcano, the four conveyors); the row under them takes one of BN6's
+    237 fields whole as a start. No hole under MegaMan.
+  - *STAGE*: the background, an area of the net's, and the song, BN6's
+    from the Jukebox's list or the battle's own.
+  - BATTLE! at the foot (Down past the list, or START) fights the set
+    as step 2's test battle: its panels written over BN6's last field in
+    the core's copy while it is on, then put back. The screen returns
+    with the result in the information box (time, busting level, HP
+    lost).
+  - Not yet: Navis, the foes' sprites on the field (a number marks each),
+    BN5's and BN4's panels, backgrounds and songs, the saved sets.
 
 ## Build order
 

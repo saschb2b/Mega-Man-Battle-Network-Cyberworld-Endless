@@ -20,6 +20,10 @@ Encounter make_encounter(int depth, int biome, int kind);
 Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed, int index);
 /* (dev: every battle the visitors' rules allow takes one, --dev visitors) */
 extern bool loot_visitors_always;
+/* (dev: every plain random battle an encounter group's, group_pool.h:
+ * --dev groups; 0 none, 1 of any template, 1 + N of template N from 1,
+ * --dev group=N. The build's step 1: no run of a player's sets it) */
+extern int loot_groups_always;
 /* The area (NET_AREAS + k, rom.h) whose own game's battle records a
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */
@@ -107,7 +111,8 @@ int loot_folder_copies(int id);
 /* What the random battles remember of the last one (none of its virus
  * families next), kept beside the run's save: a CONTINUE had forgotten it
  * and brought the last session's pair back first thing. */
-typedef struct { int32_t biome, pick; uint64_t families; uint32_t viruses; uint64_t families_before; } LootMemory;
+typedef struct { int32_t biome, pick; FamilyMask families; uint32_t viruses; FamilyMask families_before; } LootMemory;
+#define LOOT_MEMORY_NONE ((LootMemory){ -1, -1, FAMILY_MASK_NONE, 0, FAMILY_MASK_NONE })
 void loot_memory(LootMemory *out);
 /* The battle MegaMan fights: the next random battle keeps clear of it. */
 void loot_battle_fought(const Encounter *e);
@@ -117,7 +122,7 @@ void loot_last_fought(int *biome, int *pick);
 /* A battle a random roll may pick, as the repeats are weighed: its own
  * weight (0: none it may pick), its virus families (a bit each) and its
  * viruses (a hash of their ids, whatever their panels) */
-typedef struct { int weight; uint64_t families; uint32_t viruses; } LootCand;
+typedef struct { int weight; FamilyMask families; uint32_t viruses; } LootCand;
 /* The weights of `n` such battles of area `biome` against the last two
  * fought: none of either one's virus families where another fits, then
  * none of the last one's, then not its very viruses again, then anything;

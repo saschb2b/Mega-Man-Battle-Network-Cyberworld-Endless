@@ -112,6 +112,7 @@ static void after_frame(void) {
 	director_see();
 	director_update();
 	director_pick_watch();
+	director_lab_watch();
 	director_hold_watch();
 	pet_update();
 	devtools_update();
@@ -156,6 +157,11 @@ static void update(void) {
 	/* (a reward pick up, docs/game/reward-pick.md: the game's core holds still under it, its keys the screen's) */
 	if (director_pick_shown()) {
 		director_pick_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+		return;
+	}
+	/* (the Battle Lab's builder up, docs/game/battle-lab.md: the same) */
+	if (director_lab_shown()) {
+		director_lab_keys(keys_from_buttons());
 		return;
 	}
 	/* (the PET's Jukebox or Library up: the game's core, its music with it, holds still under it) */
@@ -220,6 +226,7 @@ static void draw(void) {
 	online_visit_draw();
 	pet_draw();
 	director_draw_pick();
+	director_draw_lab();
 }
 
 const Scene scene_emu = { "emu", enter, update, draw, leave };

@@ -642,22 +642,22 @@ static bool another_navis(const Spec *s, uint32_t to) {
  * code; never BN4's Navis' for a poke5, BN4's addresses of their blocks lying among BN5's (ThunderMan's, WindMan's and
  * FireMan's, moved after it), nor BN4's chips' units' (PanlSht's shot's block, 0x080DCAA4-0x080DCC5C, holds BN5's
  * BlizzardMan's and CloudMan's chips' spawns' addresses); and never a BN5 Navi's copy but the spec's own foes'
- * (another_navis) */
+ * (another_navis), nor a BN5 virus family's in a spec of BN4's (xd_bn5_family_copy) */
 static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
+	int other = -1;   /* (a poke5's) another Navi's copy holding it */
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
-		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !another_navis(s, m[k].to))
-			return k;
-	return -1;
+		    !(p->bn5 && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !(s->bn4 && xd_bn5_family_copy(m[k].to))) {
+			if (!another_navis(s, m[k].to)) return k;
+			if (p->bn5 && other < 0) other = k;
+		}
+	return other;
 }
 
-static bool same_block(const XvMoved *a, const XvMoved *b) { return a->from == b->from && a->len == b->len; }
-
-/* (both ranges copies in BN4's chips' units' room, `a` holding `at` as `b` does) */
-static bool units4_both(const XvMoved *a, const XvMoved *b, uint32_t at) {
-	return at >= a->from && at < a->from + a->len && a->to >= FREE_BN4_CHIPS && a->to < FREE_BN4_CHIPS_END &&
-		b->to >= FREE_BN4_CHIPS && b->to < FREE_BN4_CHIPS_END;
+/* whether `to`, a moved range's copy, is in BN4's chips' code (FREE_BN4_CHIPS) */
+static bool bn4_chips_code(uint32_t to) {
+	return to >= FREE_BN4_CHIPS && to < FREE_BN4_CHIPS_END;
 }
 
 /* the comparator's own test: bytes written into BN6's copy after the
@@ -685,10 +685,12 @@ static void pokes_put(const Spec *s, bool ram) {
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
-		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's; and a routine of
-		 * BN4's two chip units copy, one within its type's block and one alone: the boomerang's spawner, Boomer's and PitRng's) */
+		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's; and each BN4 chip
+		 * unit's copy holding the address, a block of one unit inside another's: ShotStar's star's spawner, which
+		 * Meteors' unit copies alone, in ShotStar's own) */
 		for (int j = 0; k >= 0 && j < k; ++j)
-			if (m[j].to != m[k].to && (same_block(&m[j], &m[k]) || units4_both(&m[j], &m[k], p->at))) {
+			if (((m[j].from == m[k].from && m[j].len == m[k].len) || (bn4_chips_code(m[j].to) && bn4_chips_code(m[k].to) &&
+			     p->at >= m[j].from && p->at < m[j].from + m[j].len)) && m[j].to != m[k].to) {
 				emu_write(p->at - m[j].from + m[j].to, b, (size_t)p->size);
 				printf("xdiff: poke %08x (%08x, a copy) = %0*x\n", (unsigned)p->at, (unsigned)(p->at - m[j].from + m[j].to), 2 * p->size, (unsigned)p->v);
 			}

@@ -7,6 +7,9 @@ tools write from other files of the tree, kept out of pull requests' way
   docs/symbols/*                                  tools/symbols.py, from the headers, rom.c and docs/rom/
   docs/rom/symbols.md's "holdings" part           the same
   docs/voice/catalog.json                         tools/voice_catalog.py, from the words files
+  docs/log.md                                     tools/log_fold.py, from the entries' files in docs/log.d/
+  each concept's `generated: { by, at }` line     the same, from the entry that names the concept
+  tests/layer_make_hash.txt                       tools/layer_make.py, from the unit tests, where a bump was added
 
 Every pull request that names a ROM fact, moves a feature's status or
 changes a line changes what these hold, so two of them always conflicted
@@ -27,8 +30,11 @@ them as its base has them.
                                         their sources instead
   python3 tools/generated.py restore    put them back as that commit has them. With a
                                         merge of dev under way: take dev's, staged,
-                                        which resolves every conflict in them
-Standard library only; needs no ROM and nothing outside git.
+                                        which resolves every conflict in them. Lines
+                                        the branch had added to docs/log.md are kept,
+                                        as an entry's file in docs/log.d/
+Standard library only; needs no ROM and nothing outside git (the layers'
+make's record needs the build image, and only where a bump was added).
 """
 import glob
 import os
@@ -36,8 +42,9 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TOOLS = ('re_status.py', 'symbols.py', 'voice_catalog.py')
-FILES = ('docs/re/state.json', 'docs/re/STATUS.md', 'docs/re/dashboard.html', 'docs/voice/catalog.json')
+TOOLS = ('re_status.py', 'symbols.py', 'voice_catalog.py', 'log_fold.py', 'layer_make.py')
+FILES = ('docs/re/state.json', 'docs/re/STATUS.md', 'docs/re/dashboard.html', 'docs/voice/catalog.json', 'docs/log.md',
+         'tests/layer_make_hash.txt')
 FOLDERS = ('docs/symbols/',)
 # Each tool: its own files (a branch that changes one changes what the tool writes, and so
 # writes it), and where what it writes lies.
@@ -45,7 +52,10 @@ OWN = {
     're_status.py': (('tools/re_status.py', '.claude/skills/reverse-engineering/assets/dashboard.html'), ('docs/re/',)),
     'symbols.py': (('tools/symbols.py',), ('docs/symbols/', 'docs/rom/symbols.md')),
     'voice_catalog.py': (('tools/voice_catalog.py',), ('docs/voice/',)),
+    'log_fold.py': ((), ('docs/log.md',)),   # (it folds entries in and never writes the log anew: no branch's to write)
+    'layer_make.py': (('tools/layer_make.py',), ('tests/layer_make_hash.txt',)),
 }
+LOG = 'docs/log.md'
 # A page a person writes with parts a tool writes: the page, the marks around each part.
 PARTS = {'docs/rom/symbols.md': (('<!-- tools/symbols.py writes this part: holdings -->',
                                   '<!-- end of what tools/symbols.py writes -->'),)}
@@ -136,10 +146,17 @@ def reworked(ref):
     return [tool for tool, (own, _) in OWN.items() if any(here(path) != at(ref, path) for path in own)]
 
 
+def fold():
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    import log_fold
+    return log_fold
+
+
 def touched(ref, but=()):
     """The generated files and parts that differ here from the commit's, but those of the tools named."""
     free = tuple(prefix for tool in but for prefix in OWN[tool][1])
     out = [path for path in whole(ref) if here(path) != at(ref, path) and not path.startswith(free)]
+    out += [f'{path} (its `generated` line)' for path in fold().stamps(ref) if not path.startswith(free) and path not in out]
     for path, marks in PARTS.items():
         mine, theirs = here(path), at(ref, path)
         if mine is None or theirs is None or path.startswith(free):
@@ -185,6 +202,33 @@ def check(strict):
     return 1 if bad else 0
 
 
+def three_way(path, fix):
+    """A conflicted page's own three-way merge, each side passed through
+    `fix` first (the parts a tool writes set to dev's): what a person wrote
+    merges as git merges it, what the tool wrote cannot conflict. Written to
+    the page; whether it came out clean. None where the page is not in
+    conflict."""
+    sides = []
+    for stage in (2, 1, 3):
+        text = git('show', f':{stage}:{path}', check=False)
+        if text is None:
+            return None
+        sides.append(fix(text))
+    names = [os.path.join(ROOT, '.git-generated-' + n) for n in ('ours', 'base', 'theirs')]
+    try:
+        for name, text in zip(names, sides):
+            with open(name, 'w', encoding='utf-8', newline='\n') as f:
+                f.write(text)
+        r = subprocess.run(['git', 'merge-file', '-p', '-L', 'ours', '-L', 'base', '-L', 'dev', *names],
+                           cwd=ROOT, capture_output=True, text=True, encoding='utf-8')
+    finally:
+        for name in names:
+            if os.path.exists(name):
+                os.remove(name)
+    put(path, r.stdout)
+    return r.returncode == 0
+
+
 def restore(ref):
     merging = git('rev-parse', '--verify', '--quiet', 'MERGE_HEAD', check=False)
     if ref is None:
@@ -192,7 +236,14 @@ def restore(ref):
     if ref is None:
         sys.exit(f'generated: {DEV} is not known here: git fetch origin dev, or name the commit')
     ref = ref.strip()
-    done = []
+    done, left = [], []
+    log_fold = fold()
+    # what the branch logged the old way, in the log itself, kept as an entry's file before the log is dev's again
+    mine = git('show', f':2:{LOG}', check=False) if merging else None
+    for path in log_fold.carry(ref, mine, 'HEAD' if merging else None):
+        print(f'generated: {path}: the lines this branch had added to {LOG}')
+        if merging:
+            git('add', '--', path)
     for path in whole(ref):
         if here(path) != at(ref, path) or merging:
             put(path, at(ref, path))
@@ -202,42 +253,43 @@ def restore(ref):
         new = parts(theirs, marks) if theirs is not None else None
         if new is None:
             continue
-        if merging:
-            # the page's own three-way merge, each side's generated parts set to dev's first:
-            # what a person wrote merges as git merges it, what the tool wrote cannot conflict
-            sides = []
-            for stage in (2, 1, 3):
-                text = git('show', f':{stage}:{path}', check=False)
-                if text is None:   # no conflict in it: git merged it already
-                    break
-                sides.append(with_parts(text, marks, new) if parts(text, marks) is not None else text)
-            else:
-                names = [os.path.join(ROOT, '.git-generated-' + n) for n in ('ours', 'base', 'theirs')]
-                try:
-                    for name, text in zip(names, sides):
-                        with open(name, 'w', encoding='utf-8', newline='\n') as f:
-                            f.write(text)
-                    r = subprocess.run(['git', 'merge-file', '-p', '-L', 'ours', '-L', 'base', '-L', 'dev', *names],
-                                       cwd=ROOT, capture_output=True, text=True, encoding='utf-8')
-                finally:
-                    for name in names:
-                        if os.path.exists(name):
-                            os.remove(name)
-                put(path, r.stdout)
-                if r.returncode == 0:
-                    done.append(path)
-                else:
-                    print(f'generated: {path}: a conflict is left in what a person wrote; resolve it by hand')
-                continue
+        clean = three_way(path, lambda text, m=marks, n=new: with_parts(text, m, n) if parts(text, m) is not None else text) if merging else None
+        if clean is False:
+            left.append(path)
+            continue
         mine = here(path)
         if mine is not None and parts(mine, marks) not in (None, new):
             put(path, with_parts(mine, marks, new))
+            clean = True
+        if clean:
+            done.append(path)
+    # each concept's `generated` line as dev has it: dev's workflow writes it, from the log's entry
+    conflicted = set((git('diff', '--name-only', '--diff-filter=U', '--', 'docs', check=False) or '').split()) if merging else set()
+    for path in sorted(conflicted | set(log_fold.stamps(ref))):
+        theirs = at(ref, path)
+        line = log_fold.STAMP.search(theirs) if theirs and path.endswith('.md') else None
+        if not line or path in PARTS and path in left:
+            continue
+        fix = lambda text, to=line.group(0): log_fold.STAMP.sub(lambda _: to, text, count=1)   # noqa: E731
+        clean = three_way(path, fix) if path in conflicted else None
+        if clean is False:
+            if path not in left:
+                left.append(path)
+            continue
+        mine = here(path)
+        if mine is not None and fix(mine) != mine:
+            put(path, fix(mine))
+            clean = True
+        if clean and path not in done:
             done.append(path)
     if merging and done:
         git('add', '-A', '--', *done)
     for path in done:
         print(f'generated: {path} as {ref[:9]} has it')
-    print(f'generated: {len(done)} files put back' + (', staged for the merge' if merging and done else ''))
+    for path in left:
+        print(f'generated: {path}: a conflict is left in what a person wrote; resolve it by hand')
+    print(f'generated: {len(done)} files put back' + (', staged for the merge' if merging and done else '')
+          + (f'; {len(left)} left to resolve by hand' if left else ''))
     return 0
 
 
