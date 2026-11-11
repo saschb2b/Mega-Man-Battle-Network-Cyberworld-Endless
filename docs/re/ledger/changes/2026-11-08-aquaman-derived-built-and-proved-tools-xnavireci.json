@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "AquaMan derived, built and proved (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 58, ids 0x3A8-0x3AB; BN4_AQUAMAN 0x080B820C, BN4_AQUAMAN_STATES 0x080B82A8, BN4_AQUAMAN_TABLES 0x080B81F8, BN4_AQUAMAN_PANEL +6, BN4_AQUAMAN_COMPANION +0x74, BN4_COMPANION_UPDATE 0x080CCD3C, BN4_COMPANION_MODE8 0x080CCE8C, BN4_COMPANION_KIND1 0x080CCECC, BN4_EFFECT_PATTERN 0x0801457E and BN4_EFFECT_PATTERNS 0x080125B0, BN6_EFFECT_PATTERN 0x0801BD3C; the spawn word 0x04050201; docs/rom/bn4.md, AquaMan derived): aquaman_v1 PASS, six mutations caught; in the tournament's proved list on BN4_PLATE_AQUAMAN."
+}

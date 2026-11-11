@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Django[SP]'s power a turn on",
+  "spec": "chip_djangosp",
+  "poke5": [
+   "0800E99A:3009"
+  ],
+  "what": "the moved power of Django[SP] (BN5's 0x0800E982, by the battle's turn) taking its table's entry 9 at the first turn (adds r0,#9 at BN5's 0x0800E99A, written at its copy) where BN5's takes its tenth: 160 where BN5's is 150"
+ }
+]

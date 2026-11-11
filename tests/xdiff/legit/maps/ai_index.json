@@ -1,0 +1,7 @@
+{
+ "why": "AIData +1, the AI index the engine finds a family's tables by: CanGard's 14 in BN5, 32 in BN6's grown tables; Handi's 4, 33 (xvirus_cangard and xvirus_handi .src_ai, .ai).",
+ "bn5_to_bn6": {
+  "14": "32",
+  "4": "33"
+ }
+}

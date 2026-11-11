@@ -1,0 +1,7 @@
+{
+ "bn4": "0x94",
+ "bn6": "0xA2",
+ "clock": "state",
+ "what": "an area grab's landing",
+ "why": "The same object's (type 0x0F): movs r0,#1; strb r0,[r5,#0x10]; movs r0,#0x94 and the bl at BN4 0x080CF0EC (in 0x080CF0E4), movs r0,#0xA2 and its bl at BN6 0x080C7D9C (in 0x080C7D94). bn4_chip_areagrab at t34"
+}

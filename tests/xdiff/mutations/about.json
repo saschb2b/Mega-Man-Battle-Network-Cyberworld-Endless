@@ -1,0 +1,3 @@
+{
+ "about": "The comparator's own test (tools/xdiff.py --mutations): each mutation breaks BN6's copy of the family after the install the way a transplant bug would (or, for the Souls, the rule UNITE runs by in BN6's engine: unitebreak, src/emu/soulunite.h's SOULUNITE_BREAK_*, or a Soul's look, abilities and passives: soulbreak, SOULBREAK_*), and the spec named must FAIL on it. BN5 addresses are written to their copy (a virus family's by poke; a chip's moved code by poke5, as its BN5 addresses lie among BN6's own code), BN6's records' to where the game reads them; nothing of the ROMs here."
+}

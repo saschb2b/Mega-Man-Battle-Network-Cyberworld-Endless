@@ -1,0 +1,20 @@
+{
+ "name": "BN6's hit flag by a chip's icon element",
+ "part": "ai",
+ "whose": [
+  "megaman"
+ ],
+ "offsets": [
+  "0xA2"
+ ],
+ "bits": "0xF0",
+ "direction": "bn6",
+ "when": "icon flag",
+ "why": "As a chip is used BN6's engine ORs into its attack element (MegaMan's AttackVars +2, his AI data +0xA2) a hit flag by its record's icon element (Sword 0x80, Cursor 0x40, Wind 0x20, Break 0x10: the table at 0x080129E4), which BN6's hit pass acts on (a Break breaks a guard, a Sword is a sword); BN5's chip use writes the element alone. BN6's engine rule for every chip, BN5's among them (docs/multirom/one-net.md: the chips' finer calls); the flag is the one the chip in use (his AttackVars +0x14) has by its icon element, BN6's record's or, for a chip of the registry's own, its BN5 record's as BN6's (src/core/xchips_record.c).",
+ "evidence": [
+  "BN6 0x0801271E-0x08012728 (the chip's numbers written for its attack, 0x080126E4): ldrb r1,[r6,#4]; ldrb r2,[r6,#6]; ldr r0,=0x080129E4; ldrb r0,[r0,r2]; orrs r1,r0; strb r1,[r7,#2]",
+  "BN5 0x0800FEA4-0x0800FEA6 (its twin, 0x0800FE6A): ldrb r1,[r6,#4]; strb r1,[r7,#2]",
+  "the table's 16 bytes: 00 00 00 00 00 80 40 00 20 10 00 00 00 00 00 00 (icon element 5 Sword, 6 Cursor, 8 Wind, 9 Break)",
+  "chip_sword: MegaMan's +0xA2 0 in BN5's and 0x80 in BN6's from the Sword's use (t32) on"
+ ]
+}

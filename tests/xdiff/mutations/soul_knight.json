@@ -1,0 +1,14 @@
+[
+ {
+  "name": "a Soul's turns four",
+  "spec": "soul_knight",
+  "unitebreak": 1,
+  "what": "OK's commit of UNITE in BN6's engine gives a Soul 4 turns where BN5's gives 3 (0x08024FFA): KnightSoul's turns 4 at t1, its end a turn late"
+ },
+ {
+  "name": "its used bit not set",
+  "spec": "soul_knight",
+  "unitebreak": 2,
+  "what": "the commit leaves the Souls' used word alone (BN5 ORs bit 11 in at 0x08025042): the same Soul could unite again in the battle; the used word 0 against BN5's 0x800"
+ }
+]

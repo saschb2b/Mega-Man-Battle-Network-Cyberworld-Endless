@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a moved chip's effect's id",
+  "spec": "chip_rainyday",
+  "poke5": [
+   "080D996E:2461"
+  ],
+  "what": "RainyDay's effect 0x61 (given an id of the chips', movs r4 at BN5's 0x080D996E, written at its copy) spawned as BN6's own 0x61, another picture"
+ }
+]

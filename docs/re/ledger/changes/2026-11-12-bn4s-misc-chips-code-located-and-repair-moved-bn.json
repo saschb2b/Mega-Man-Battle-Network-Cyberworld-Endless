@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "BN4's misc chips' code located and Repair moved (bn4_chips.h BN4_MISC_RUN 0x080EC972, BN4_MISC_ROUTINES 0x080EC9CC of 0x12, BN4_BATTLE_OBSTACLES 0x68, BN4_OBSTACLE_ADD 0x0800B230, BN4_REPAIR 0x0800C720; bn6_chips.h BN6_MISC_RUN 0x080ED6DC, BN6_MISC_ROUTINES 0x080ED730 of 7, its one word 0x080ED72C, BN6_BATTLE_OBSTACLES 0xA0, BN6_OBSTACLE_ADD 0x0800F614; docs/rom/bn4.md, docs/rom/chips-code.md): the two misc runs are one routine, the side's obstacles' list at another offset of the battle state."
+}

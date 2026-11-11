@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's virus families in BN6's engine",
+  "date": "2026-11-09",
+  "name": "kilby_v1-v3: BN4's Kilby V1, V2 and V3 in BN4's battle against its move into BN6's",
+  "result": "python3 build.py xdiff kilby_v1 kilby_v2 kilby_v3 (rng replay, lag 1): each PASS over 1200 fight frames once its sound's row named the pool's slot (FAIL at t163 before it: BN4's 0xCD against BN6's 0x32, legit.json's bn4 sounds, a row for its battles alone); its effects 0x8F, 0x92 and 0x93 spawned from t129. Four mutations each FAIL kilby_v1: its sound at the pool's second slot (t163), its effect 0x2D left at BN4's number (t129), a CurAction left at BN4's (t42), its battle sprite's list entry aimed at VolGear's (t1).",
+  "meaning": "Kilby joins the visitors (BN4's eighth), the first late family with a sound in the pool and code in the late code room.",
+  "link": "../multirom/families.md"
+}

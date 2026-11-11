@@ -1,0 +1,10 @@
+[
+ {
+  "name": "an effect id not moved, beside a native",
+  "spec": "cangard_mettaur",
+  "poke": [
+   "08108FB6:3457"
+  ],
+  "what": "the same break in the smoke spec: the family's world is still the same at its first blast (the Mettaur's own differences compared on), so it must fail there"
+ }
+]

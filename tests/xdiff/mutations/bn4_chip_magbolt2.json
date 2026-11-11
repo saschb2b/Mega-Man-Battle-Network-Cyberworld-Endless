@@ -1,0 +1,10 @@
+[
+ {
+  "name": "MagBolt2's row's family another",
+  "spec": "bn4_chip_magbolt2",
+  "poke": [
+   "08C06E8F:D0:1"
+  ],
+  "what": "the registry's record of BN4's MagBolt2 (643) with family 0xD0, the spread chips' unit, where the row gives MagBolt's 0xD5: another attack"
+ }
+]

@@ -1,0 +1,34 @@
+[
+ {
+  "name": "BurnerMan's two flames in one slot",
+  "spec": "burnerman_v1",
+  "poke": [
+   "080BDA42:2160"
+  ],
+  "what": "his init's tail's second flame (BN4 0x080BDA42: movs r1,#0x68, its slot's word, run at his spawn's end: XnInit.tail) made 0x60, the first's: the two flames' words one (caught at t1)"
+ },
+ {
+  "name": "BurnerMan's 0x38's Navi CurAction compare BN4's",
+  "spec": "burnerman_v1",
+  "poke": [
+   "080D40BE:280A"
+  ],
+  "what": "his 0x38's test of his CurAction through its +0x4C (BN4 0x080D40BE: cmp r0,#0xa, the recipe's 0xC: NAVI_WORDS) left at BN4's 10: the object ends at once in BN6 (caught at t1154)"
+ },
+ {
+  "name": "BurnerMan's flames' region's element at BN4's +0x17",
+  "spec": "burnerman_v1",
+  "poke": [
+   "080D401E:75C1"
+  ],
+  "what": "his flames' collision region's element (BN4 0x080D401E: strb r1,[r0,#0x17], the recipe's +0x0E: SPAWN_WRAPPERS) left at BN4's +0x17: BN6's +0x17 another field, the region's element 0 (caught at t121)"
+ },
+ {
+  "name": "BurnerMan's sound 0xA8 at the pool's second slot",
+  "spec": "burnerman_v1",
+  "poke": [
+   "080D44BA:2033"
+  ],
+  "what": "his flame's sound 0xA8 (BN4 0x080D44BA: movs r0,#0xa8, the recipe's pool slot 0x32) made the pool's second slot, 0x33: his 0x14C where BN4 plays 0xA8 (caught at t123, the family's sounds)"
+ }
+]

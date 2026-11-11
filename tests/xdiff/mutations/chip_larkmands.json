@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a DS chip let through while not dark",
+  "spec": "chip_larkmands",
+  "soulbreak": 268435456,
+  "what": "the chip use's end (soulmood_chip_refused) lets LarkManDS through while MegaMan is not dark where BN5's dark gate refuses it: LarkMan's attack where BN5's is the chip of nothing (0x185)"
+ }
+]

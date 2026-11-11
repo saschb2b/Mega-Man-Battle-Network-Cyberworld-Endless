@@ -1,0 +1,13 @@
+{
+ "name": "the hit's spark, each engine's own",
+ "whose": "engine",
+ "kind": "T4",
+ "type": "0x04",
+ "part": "obj",
+ "offsets": [
+  "0x80",
+  "0xBB"
+ ],
+ "fields": "the fourth kind's 0x04 alone: its sprite state (+0x80 to +0xBB), its end where one game's animation ends first (+0's 0x02 cleared and +8 its state 8, the update's twins' stores) and its being in play, and so its place in the run order, where one game's has ended and the other's not; its place, its spawn, its first frame and every other byte compared as ever (tools/xdiff_bn4.py spark_own)",
+ "why": "A hit's spark is each engine's own effect, the same object of each: spawned by the hit's spark routine, twins (BN4 0x08012F44, BN6 from 0x0801A0D8: the striker's place moved by a draw, BN4 0x08014620 / BN6 0x0801BDDE, replayed from BN4's: legit.json's bn4 rng_twins) through twin spawners of the fourth kind's 0x04 (BN4 0x080E2140, BN6 0x080E1C00), its init setting up the same sprite list and number in each game's own art (the hooks' sprite events, BN4 from 0x080E20D0 and BN6 from 0x080E1B8C, b 0x1405 in both; other bytes, CRC32 0x70A851CA and 0x25A05EF3) and its update twins (BN4 0x080E2122, BN6 0x080E1BE2) ending it as its animation ends (the sprite's end bit 0x80: +0's 0x02 cleared, its state 8). So its sprite state (frames, their pointers into its art, +0x80 to +0xBB) and how long it lives are its art's: in billy_v1 BN6's lives 3 frames less (to t443 against BN4's t446, under the battle's offset). The thunder's sprite is allowed so too (\"the thunder's sprite, BN6's own art\"). The same object where a family's own code makes the hit's effect: Walla's ring (walla_v1-v3, the third kind's 0x3C, moved: BN4_T3_WALLA_RING) calls the engine's routine for the effect its hits make each frame (BN4 0x080D4BEA: bl 0x08012F44; its copy's veneer to BN6's twin 0x0801A0D4, tools/bn4_twins.py AUDITS: BN6's, the same steps in BN6's layout), which draws the place (0x08014620 / 0x0801BDDE, replayed) and spawns the spark through the twin spawners (BN4 0x080E2140, BN6 0x080E1C00; the spawn events' family Walla's, BN4's call at 0x080D4BEA and its copy's), so the spark is counted the family's (its spawn passed through the family's code) and is still each engine's own effect: its sprite state and life allowed so on the family's records too, that object alone (tools/xdiff_bn4.py compare), its spawn, place, first frame and being in play before both had it compared as ever (BN6's spark ends 2 frames before BN4's, t72 against t74 in walla_v1)"
+}

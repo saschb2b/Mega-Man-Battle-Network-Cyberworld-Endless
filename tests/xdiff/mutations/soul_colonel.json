@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a Soul's sprite another's",
+  "spec": "soul_colonel",
+  "soulbreak": 1,
+  "what": "the sprite selector's hook (src/emu/soullook.c, BN6_FORM_SPRITE_READ) gives each Soul the next Soul's sprite of the grown list 0: ColonelSoul drawn as ShadowSoul (BN5's list 0 8), its frames another sprite's"
+ }
+]

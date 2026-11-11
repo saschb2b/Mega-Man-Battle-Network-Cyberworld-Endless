@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "A mission's opening, its L view and its clear",
+  "result": "In romlab: missions 1-9 opened from a state after the intro with the chats' starts logged: mission 1's tour passes BlizzardMan in silence and its only chat is the tutorial; missions 2-9 open on the team's words. BlizzardMan's line (his archive's entry 0, through a once-only flag to entry 15) comes at his first turn of the first DARKLOID PHASE, after the banner. The L view over a BigBrute with A, R and SELECT pressed shows nothing new: no reach; its keys' help is eight OBJs of one uncompressed block (0x087E4294) on the band's fill in WIN0. The board's routine 6 set from a board state: PlayMusic 0x18 at once, the band 22 frames on with SUCCESS! (the phases' words' tiles, PLAYER PHASE's palette) and 0xD6 18 frames into it, 104 frames, then 20, then the leader's tally from the common archive's entry 0x20 + the tier, its numbers 0xFA 3 0 n.",
+  "meaning": "The board's words around a mission are BN5's to read at run time (the tally, its numbers ours), its SUCCESS! the same banner engine as the phases', and the Darkloid speaks once at his first turn, not at the tour; BN5 has no reach in its L view, so the telegraph there is ours in BN5's red.",
+  "link": "../game/liberation/building/words-and-banners.md"
+}

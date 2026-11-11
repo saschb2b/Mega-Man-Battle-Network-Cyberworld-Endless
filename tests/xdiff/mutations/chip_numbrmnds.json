@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a DS chip let through while not dark",
+  "spec": "chip_numbrmnds",
+  "soulbreak": 268435456,
+  "what": "the chip use's end (soulmood_chip_refused) lets NumbrMnDS through while MegaMan is not dark where BN5's dark gate (0x08010110, the record's +0x15 2) refuses it: NumberMan's attack where BN5's is the chip of nothing (0x185)"
+ }
+]

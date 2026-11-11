@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-04",
+  "name": "GutsMan's states in romlab",
+  "result": "GutsMan V1 (enemy 132) alone against MegaMan, his HP held, 1500 fight frames read each frame: CurAction 6 (his decision) and 7 in turn, 10 at frames 398-481 and 849-922 (a machine gun's burst on screen), 8 at 1237 (a dash); his AI data side 1's (0x02035BE0), +0x64/+0x65 his decision's sub-states and +0x70/+0x71 the attack's changing with them.",
+  "meaning": "A Soul Navi's attacks are MegaMan's own states run on the Navi's object: GutsMan's 7, 8 and 10 are MegaMan's 67, 68 and 70, so moving him moves those states of MegaMan's with him.",
+  "link": "../rom/bn4.md"
+}

@@ -11,8 +11,9 @@ same frames, each game's frames run of it as far apart as the frames each ran si
 frames to the record), modulo the animation's frames; exactly from an animation set in the fight on.
 
 Imported by tools/xdiff_bn4.py alone. Numbers only."""
-import json
 import os
+
+import shards
 
 from xdiff_snap import ROOT, SPAWN, SPRITE, T1_MOVED, obj_cells
 
@@ -23,7 +24,7 @@ SPRITE_STATE = 0x2C   # (the sprite state's bytes from SPRITE: its animation to 
 
 def rule():
     """legit.json's bn4 opening_animation: its name and the (kind, BN4's type) of the objects it holds for; None where none"""
-    r = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('opening_animation')
+    r = shards.load('legit').get('bn4', {}).get('opening_animation')
     return (r['name'], {(o['kind'], int(o['type'], 0)) for o in r['objects']}) if r else None
 
 
@@ -105,7 +106,7 @@ class Opening:
 
 def clock_rule():
     """legit.json's bn4 companion_clock: its name and the BN4 first-kind types of the companions it holds for; None where none"""
-    r = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('companion_clock')
+    r = shards.load('legit').get('bn4', {}).get('companion_clock')
     return (r['name'], {int(o['type'], 0) for o in r['objects'] if o['kind'] == 'T1'}) if r else None
 
 

@@ -1,0 +1,12 @@
+{
+ "name": "the Moko's hit's bits, struck and pushed in each engine's own",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x2C",
+ "part": "coll",
+ "offsets": [
+  "0x0E",
+  "0x0E"
+ ],
+ "why": "MokoRus's Moko (BN4's third-kind 0x2C, moved with MokoRus's unit) sets up its collision with r3 0x21 (movs r3,#0x21 at 0x080D23E0, bl 0x080129AC), the hit's bits the hit pass ORs into the struck's (BN4 0x08012C40-0x08012C46, BN6 0x081D7830 on). BN4's struck pass of the first kind makes a hit struck and pushed of bit 0x01 with a push bit, 0xFC (0x0801360C-0x08013622: status 0x100 set, the flinch's 0x4 cleared); BN6's of bit 0x40 with a push bit, 0x3C (0x0801AC06-0x0801AC2E: the same two stores), and of a push bit without 0x40 it pushes alone (status 0x10, 0x0801AC32-0x0801AC3E). So the copy's init passes 0x61 (tools/xchiprecipe_bn4.py IMMS), BN6's bits for the same hit: with BN4's 0x21 there BN6's Mettaur is pushed back and goes on with its attack where BN4's is struck (bn4_chip_mokorus1 at t93, its state 5 in BN4's and 0xB in BN6's). The struck's own records, its HP, its panel and its states, are compared as ever."
+}

@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_seekbom1 to 3: BN4's SeekBom moved, a family's unit by subfamily",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (the bomb's hit at t82: a 140 HP Mettaur left 60 and 30, 250 left 110), ten mutations caught. On the way: with the explosions' maker's id left BN4's 0, BN6's own explosion was drawn (the effects' sprite state at t84); a byte row on its load was refused by the installer (raw data alone); the effect call's shim gives r4 the copy's id.",
+  "meaning": "One family's subfamilies move as units of their own, each with a copy of the state; an id an object loads from a byte of its own is given BN6's number by a shim at the call, its values read from the object's spawns."
+}

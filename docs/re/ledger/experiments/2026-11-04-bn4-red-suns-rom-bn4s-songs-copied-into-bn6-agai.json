@@ -1,0 +1,8 @@
+{
+  "feature": "BN4 Red Sun's ROM",
+  "date": "2026-11-04",
+  "name": "BN4's songs copied into BN6, against BN4 playing them",
+  "result": "Each of BN4's 34 songs copied by xsong.c (--xsong-pack) and played by BN6's own sound engine in romlab, its title's entry pointed at the copy, beside BN4 playing the song from its title (frame 198), every part of MP2K's state compared for 900 frames with BN4's pointers moved to the copy's: 31 the same in every part once BN6 was given BN4's master volume (12, set by BN4's m4aSoundInit; BN6's 15); 0x0F and 0x1A differ only in a let-go PSG channel's echo count, their PSG registers the same every frame; 0x15's opening swell (two squares from volume 0, frames 20-216) stays silent in BN6, whose CgbSound lets go a channel the hardware stopped (NR52's bit, 0x0815122E), BN4's keeping it (0x08113532). BN4's drum kit was copied for the keys played (37-73), BN5's 308 copies byte for byte as before.",
+  "meaning": "BN4's music is ready for a run: it travels as BN5's did, and BN6's engine plays it as BN4's does but for one swell and the level. The library is another build of BN6's MP2K (its tables the same), so a BN4 song is proved frame by frame, not assumed from BN5's.",
+  "link": "../rom/bn4.md"
+}

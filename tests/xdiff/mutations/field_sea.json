@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the sea underfoot not hooked",
+  "spec": "field_sea",
+  "poke": [
+   "0801A1AA:2804"
+  ],
+  "what": "BN6's own cmp r0,#4 back over the hook in what a panel does to an actor (BN6_PANEL_STEP_POISON): the Fire CanGard on sea unhurt"
+ }
+]

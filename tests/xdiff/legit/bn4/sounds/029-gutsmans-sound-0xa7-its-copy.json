@@ -1,0 +1,7 @@
+{
+ "bn4": "0xA7",
+ "bn6": "0xE0",
+ "clock": "state",
+ "what": "GutsMan's sound 0xA7, its copy",
+ "why": "Played by his machine gun's state (MegaMan's state 70 in BN4, copied with him: movs r0,#0xa7 at 0x080F0712, its bl to PlaySoundEffect at 0x080F0714; BN6: its copy's movs r0,#0xe0, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F31555), a state's: BN4's song 0xA7 copied into the pool's fifth slot, BN6's empty 0xE0 (src/emu/xnavi_bn4_sounds.c); gutsman_v1's at t461 in BN4 and t462 in BN6 (begun a frame after each). BN6's own song 0xE0 is empty, so the copy is told by its slot"
+}

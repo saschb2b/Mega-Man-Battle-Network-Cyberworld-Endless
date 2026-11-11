@@ -1,0 +1,17 @@
+{
+ "name": "BN6's second wheel in a chip's attack",
+ "part": "ai",
+ "whose": [
+  "megaman"
+ ],
+ "offsets": [
+  "0xA2"
+ ],
+ "bits": "0xF0",
+ "direction": "bn6",
+ "why": "As a chip is used BN6 writes his AttackVars +2 (AI data +0xA2) as the chip record's attack element ORed with its icon's second-wheel element's hit flag (Sword 0x80, Cursor 0x40, Wind 0x20, Break 0x10: BN6's table 0x080129E4 by the record's +6); BN5 has no second wheel and writes the attack element alone. Its hit's own flags, which BN6's engine reads for its second wheel's weaknesses: the bits BN6 has and BN5 not.",
+ "evidence": [
+  "BN6 0x0801271E-0x08012728 (0x080126E4, the chip's numbers for its attack): ldrb r1,[r6,#4]; ldrb r2,[r6,#6]; the table's byte ORed in; strb r1,[r7,#2]. BN5's twin 0x0800FE6A writes +4 alone (tools/bn5_twins.py's audit of the pair)",
+  "soul_shadow_sword: BN6's 0x80 (the Sword's) where BN5 holds 0 from t162"
+ ]
+}

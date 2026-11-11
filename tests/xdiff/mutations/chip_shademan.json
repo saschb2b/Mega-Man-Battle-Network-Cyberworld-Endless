@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a moved Navi routine's entry",
+  "spec": "chip_shademan",
+  "poke": [
+   "08E00878:08E00C05:4"
+  ],
+  "what": "the grown Navi routines' entry 0x1E (XC_NAVI + 0x78) left at their stub (XC_STUBS + 4) where the install points it at ShadeMan's moved routine (BN5's Navi routine 0x01): no ShadeMan, the foe keeps its 280"
+ },
+ {
+  "name": "the Navi chip ShadeMan's attack's type",
+  "spec": "chip_shademan",
+  "poke5": [
+   "080CB668:2033"
+  ],
+  "what": "ShadeMan's attack spawned as BN5's third kind's 0x33 (movs r0,#0x34 at BN5's 0x080CB668, written at its copy) where its own moved 0x34 runs"
+ }
+]

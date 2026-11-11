@@ -1,0 +1,10 @@
+[
+ {
+  "name": "GyroMan's object's collision offset not moved",
+  "spec": "gyroman_v1_keys",
+  "poke": [
+   "0889689C:6E81"
+  ],
+  "what": "the third kind's 0x19's read of its hit flags (BN5 0x080C79B8: ldr r1,[r0,#0x68], its copy at XN_TEAM_CODE + 0x3800 + 0x9C) left at BN5's +0x68 where BN6 keeps them at +0x70"
+ }
+]

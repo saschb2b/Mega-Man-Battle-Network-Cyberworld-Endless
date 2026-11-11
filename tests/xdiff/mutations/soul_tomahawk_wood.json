@@ -1,0 +1,8 @@
+[
+ {
+  "name": "TomahawkSoul's Wood chip not doubled on grass",
+  "spec": "soul_tomahawk_wood",
+  "soulbreak": 262144,
+  "what": "the chip's modifier (BN6_CHIP_MODIFIED) leaves TomahawkSoul's Wood chip on grass alone where BN5's 0x08010322 doubles it and makes the panel plain"
+ }
+]

@@ -1,0 +1,8 @@
+{
+  "feature": "BN6's Virus Battler",
+  "date": "2026-10-25",
+  "name": "A Battler's record played on the plain ROM",
+  "result": "romlab from an engine boot state on SeasideArea1, its random battles all made list 0's record 0x1A and the card's flags set: the VIRUS LIST, two placed, Fight with this set?, BATTLE START!; ErthDrgn + Mettaur won (result 1, ~6 s), Mettaur + Piranha lost (2), WindBox alone lost (2), the gauge poked full gave TIME UP! DRAW! (7); the gauge rose 0x30C in 60 frames; A, B, L, R, SELECT and the D-pad pressed through a fight left all 60 pictures the same, START paused it.",
+  "meaning": "The Virus Battle is one BattleSettings record of mode 6 and needs nothing of its Battler's map: started from anywhere it runs whole. romlab's own save and load broke input in the list (a fresh session each run).",
+  "link": "../rom/virus-battler.md"
+}

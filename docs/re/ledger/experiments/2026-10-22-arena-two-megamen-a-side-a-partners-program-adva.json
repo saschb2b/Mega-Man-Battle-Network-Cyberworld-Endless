@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-22",
+  "name": "Two MegaMen a side: a partner's Program Advance",
+  "result": "Cannon A, B and C picked in order on his own screen: BN6's OK (0x08029110) makes Z-Canon1 (0x140) through its check (0x08029520), its next mode 0x10, the hand it builds at 0x020366C0 chips 0x140, 0xFFFF, 0x0001, powers 300, 0, 40. His client finds the place and count the pair's own build gives that hand from (picks 0 to 2) and crosses them before his picks; both GBAs write his hand Z-Canon1, power 300; his Z-Canon1 takes side 1's partner from 421 to 121 and side 1's player from 78 to 0. 1,284 iterations 0 apart, 33 hashes the same with 163 rollbacks and with none; arenaroll=8 254 of 254 the same; the PA left out on the second GBA alone parts them at iteration 4.",
+  "meaning": "BN6's OK decides his Program Advance on his screen; what crosses is where it joined his picks.",
+  "link": "../online/arena/two-a-side/program-advance.md"
+}

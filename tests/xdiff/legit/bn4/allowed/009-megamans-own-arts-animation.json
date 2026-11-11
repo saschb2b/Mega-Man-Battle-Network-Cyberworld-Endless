@@ -1,0 +1,9 @@
+{
+ "name": "MegaMan's own art's animation",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "fields": "his sprite's count (+0x91) and its last frame's bit (+0x92's 0x80), only where each game's are what its own art gives at the same place of the same animation: the animation (+0x90) the same, and the frames run of it the same in both, each read from its own game's art by his frame's record (+0xAC) and his count (tools/xdiff_bn4.py own_animation, anim_place); his animation and its place compared as ever, so a state that starts it a frame apart, or an animation run longer or shorter, still parts",
+ "why": "His art is each game's own (\"MegaMan's own sprite\": BN4's sprite list 0's entry 0, 0x08214000; BN6's 0x081D8000), and each cuts an animation into its own frames: a frame's record is 20 bytes, its duration at +16 and +18's 0x80 its last (tools/xsoul.py anim_life's reading), and the sprite update (BN4 0x0800285C, BN6 0x080026C4) loads a frame's duration less 1 into the count and counts it down a frame each fight frame, the next frame's record (+0xAC) at 0, +0x92's 0x80 set as the last begins. His struck animation (1, set by his state 3 at the hit: walla_v1, t68) runs 24 frames in both, as 4,2,2,2,2,2,4,4,2 in BN4's art and 4,2,2,2,2,4,5,3 in BN6's (both ROMs read by the anim_place walk), so from its sixth frame (t80) the count reads otherwise (BN4's 1, BN6's 3) and BN6's last frame begins a frame sooner (t89, BN4's t90) at the same frames run, and his state ends it at t91 in both. Each game's sprite art, not the port's subject"
+}

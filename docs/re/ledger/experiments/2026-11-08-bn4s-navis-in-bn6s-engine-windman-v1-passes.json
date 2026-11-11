@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "windman_v1 PASSES",
+  "result": "python3 tools/xdiff.py windman_v1: the family's first difference moved from t1 (his wind's +0x38 and +0x4C) through t103 (his second wind's +0x3C), t105 (sound 0xB2), t183 (his companions' renderer ranks, a spark drawn in BN4 alone) and t497 (sound 0x133) to none; the world's from t1 (the gust's +0x93, alike with --poke 080CEB90:2000:2, and its frames' pointers into list 0xC's 0x2E, one CRC32 0xE0F284B6) through t4 (MegaMan's +0x0F, BN6's step's kind), t7 (his collision's direction, by each engine's clock), t9 (his blocked slide's step, BN4's), t181 and t498 (the gusts' renderer places) and t446 (a gust's pointer to a let-go slot) to none: PASS. Mutations caught: his air shot's sound at slot 0x33 (t105), his wind's r4 1 (t1), the shot's collision word at BN4's +0x54 (t179), its speed shifted (t104); his companions' first state made 0 (--poke 080CCD0E:2200) still PASSes. Every spec exits as recorded, every mutation caught. A colour match of BN4's bracket plates against the Navis' battle sprites failed its controls (GutsMan, Roll, KendoMan not their best match).",
+  "meaning": "His port is BN4's own over the whole battle; the engines' differences around it (BN6's wind keeping its spawner, the gust's sprite flag, MegaMan's slide bookkeeping) are allowed with both code paths, and the comparator reads the battle state, natives' art and ranks, and let-go slots by what they name. He joins the tournament's proved[] once his plate is named (BN4_OPPONENT_BATTLES' battles read, or by sight).",
+  "link": "../multirom/bn4-navis.md"
+}

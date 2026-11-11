@@ -1,0 +1,10 @@
+[
+ {
+  "name": "an SP's deletion time",
+  "spec": "chip_blizmansp",
+  "poke": [
+   "08E00C4C:0100:2"
+  ],
+  "what": "BlizzardMan's SP's best deletion time in the table the moved SP power reads (XC_SP_TIMES + 2 x 14, BlizMan[SP]'s record's power less 1001) 256 frames where BN6 keeps none: its power by that time where BN5's is its power for none"
+ }
+]

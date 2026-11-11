@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-23",
+  "what": "The NaviCust's compressed shapes compared with their full ones in the program records (0x13B22C, +0xC against +8): each of the 64 colour variants with one is a subset, cell for cell; BN6's compression flags (0x2660 + variant) set as a run begins for the codes the profile knows (codes_bring, docs/rom/navicust.md's NaviCust compression row, docs/game/meta/)"
+}

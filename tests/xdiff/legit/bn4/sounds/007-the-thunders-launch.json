@@ -1,0 +1,7 @@
+{
+ "bn4": "0xAD",
+ "bn6": "0xBA",
+ "clock": "state",
+ "what": "the thunder's launch",
+ "why": "Played by the thunder's init in each game (BN4's third-kind 0x2A, 0x080D2040: movs r0,#0xad at 0x080D20AE, its bl at 0x080D20B0; BN6's 0x080CAC7C, the audit's twin: movs r0,#0xba at 0x080CAD12, its bl at 0x080CAD14, run from its copy at 0x08B7C0DA), a state's: BN4's at t341, BN6's at t342 in billy_v1. Their songs share no sample (xrecipe.song_sig, and by samples alone: each game's own recording), so they are paired by the routines that play them"
+}

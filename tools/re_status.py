@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """The research status, written from one hand-edited ledger.
 
-docs/re/ledger.json is the source of truth. This writes from it:
+docs/re/ledger/ is the source of truth, a file an entry so that two
+branches' entries never meet (tools/shards.py; docs/re/README.md): its
+features/, changes/ and experiments/, and ledger.json for the rest. This
+writes from it:
   docs/re/state.json      what the dashboard reads
   docs/re/STATUS.md       the same, readable on GitHub
   docs/re/dashboard.html  the skill's page (.claude/skills/reverse-engineering/
@@ -22,6 +25,9 @@ import json
 from pathlib import Path
 import re
 import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import shards  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ROOT / 'docs' / 're'
@@ -74,8 +80,8 @@ def date_or_none(record, key, where):
 
 def check(ledger):
     """The ledger's shape; the page and STATUS.md read nothing else."""
-    if ledger.get('schema') != 're-ledger/1':
-        raise LedgerError('schema is not re-ledger/1')
+    if ledger.get('schema') != 're-ledger/2':
+        raise LedgerError('schema is not re-ledger/2')
     need(ledger, 'project', 'ledger')
     if not date_or_none(ledger, 'updated', 'ledger'):
         raise LedgerError('ledger: "updated" is needed')
@@ -116,7 +122,7 @@ def state_of(ledger):
     experiments = sorted(ledger['experiments'], key=lambda e: e.get('date') or '', reverse=True)
     return {
         'schema': 're-status/1',
-        'written_by': 'tools/re_status.py from docs/re/ledger.json',
+        'written_by': 'tools/re_status.py from docs/re/ledger/',
         'project': ledger['project'],
         'updated': ledger['updated'],
         'previous': previous,
@@ -142,12 +148,12 @@ def markdown(state):
     title = f'Research status: {state["project"]}'
     out = ['---', 'type: Status', f'title: {json.dumps(title, ensure_ascii=False)}',
            'description: "Where each reverse-engineering feature stands, written by tools/re_status.py from '
-           'docs/re/ledger.json: its state, what is done and left, the changes since, experiments and decisions '
+           'docs/re/ledger/: its state, what is done and left, the changes since, experiments and decisions '
            'needed."',
            'tags: [re]', f'generated: {{ by: process:re_status, at: {state["updated"]}T00:00:00Z }}', '---', '',
            f'# {title}', '',
            f'Updated {human(state["updated"])}. Written by `tools/re_status.py` from '
-           '[ledger.json](ledger.json); the [dashboard](dashboard.html) shows the same.', '',
+           '[the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.', '',
            '| Feature | Status | Now | What is left | Updated |', '| --- | --- | --- | --- | --- |']
     for f in state['features']:
         out.append(f'| {link(f["name"], f.get("link"))} | {f["state_text"]} | {cell(f["now"])} | '
@@ -190,8 +196,24 @@ def page(state, template):
     return STATE_BLOCK.sub(lambda m: m.group(1) + embedded(state) + m.group(3), template, count=1)
 
 
-def outputs(ledger_path=DOCS / 'ledger.json', template_path=TEMPLATE):
-    ledger = json.loads(ledger_path.read_text(encoding='utf-8'))
+def dated(ledger):
+    """The ledger with the two dates no file holds: `updated`, the newest
+    date any entry carries, and `previous`, the newest before it, so the page's
+    "since the last update" is the latest day's changes. No branch writes a
+    date every other branch writes too."""
+    days = sorted({d for d in [f.get('updated') for f in ledger.get('features', [])]
+                   + [e.get('date') for e in ledger.get('changes', []) + ledger.get('experiments', [])]
+                   if isinstance(d, str)})
+    if not days:
+        raise LedgerError('ledger: no entry carries a date')
+    return dict(ledger, updated=days[-1], previous=days[-2] if len(days) > 1 else None)
+
+
+def outputs(template_path=TEMPLATE):
+    try:
+        ledger = dated(shards.load('ledger', fresh=True))
+    except shards.ShardError as error:
+        raise LedgerError(str(error)) from None
     check(ledger)
     state = state_of(ledger)
     return {
@@ -224,7 +246,7 @@ def main():
             path.write_text(text, encoding='utf-8')
             print(f'wrote {path.relative_to(ROOT)}')
     if stale:
-        sys.exit('re_status: out of step with docs/re/ledger.json (run python3 tools/re_status.py): ' + ', '.join(stale))
+        sys.exit('re_status: out of step with docs/re/ledger/ (run python3 tools/re_status.py): ' + ', '.join(stale))
 
 
 if __name__ == '__main__':

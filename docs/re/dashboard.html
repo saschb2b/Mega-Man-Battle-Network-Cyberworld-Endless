@@ -79,10 +79,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
 <script type="application/json" id="re-state">
 {
   "schema": "re-status/1",
-  "written_by": "tools/re_status.py from docs/re/ledger.json",
+  "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
   "updated": "2026-11-12",
-  "previous": "2026-11-09",
+  "previous": "2026-11-11",
   "features": [
     {
       "name": "Net Square",
@@ -273,14 +273,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-11-12",
-      "what": "Counter's code and MegaMan's lock-out located (bn4_chips.h BN4_COUNTER 0x080CFE02, BN4_T3_COUNTER_HIT 0x17, BN4_CHIP_ATTACK_END 0x0800C9FC, BN4_AI_LOCKOUT 0x3A; bn6_chips.h BN6_CHIP_ATTACK_END 0x08011714, BN6_AI_LOCKOUT 0x19; docs/rom/bn4.md): the counter walks the other side's players by BN4's battle state's layout and reads the counter byte at BN4's place, three immediates of the recipe."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "WhitWeb's code located and moved (bn4_chips.h BN4_WHITWEB 0x080D4F20 with 0x080D4F2A and 0x080D4F34, BN4_T3_WEB 0x3D; docs/rom/bn4.md): three subfamilies' routines in one object's code, one unit with rows that share its block."
-    },
-    {
-      "date": "2026-11-12",
       "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
     },
     {
@@ -289,96 +281,28 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-11-12",
-      "what": "ThunSoul moved into BN6's engine (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine; docs/rom/bn4.md, SandRing's family and ThunSoul's charged shot: src/emu/bn4_chips.h's BN4_CHIP_RING_FAMILY, BN4_RING_STATE, BN4_POWER_THUN, BN4_T3_RING, BN4_RING_KINDS): BN4's family 0x47 an attack unit at BN6's grown 0xD7 with its power attack copied, BN6's Soul 13 on the proxy form; soul_thun PASS held to BN4's trace, three mutations caught; bn4_soul_thun's FAIL at t1 recorded (the Soul's form, the look)."
+      "what": "Counter's code and MegaMan's lock-out located (bn4_chips.h BN4_COUNTER 0x080CFE02, BN4_T3_COUNTER_HIT 0x17, BN4_CHIP_ATTACK_END 0x0800C9FC, BN4_AI_LOCKOUT 0x3A; bn6_chips.h BN6_CHIP_ATTACK_END 0x08011714, BN6_AI_LOCKOUT 0x19; docs/rom/bn4.md): the counter walks the other side's players by BN4's battle state's layout and reads the counter byte at BN4's place, three immediates of the recipe."
     },
     {
       "date": "2026-11-12",
       "what": "GridMan moved (docs/multirom/navis.md, GridMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_GRID_SPAWN_C6, BN5_GRID_ATTACK_POOL, BN5_GRID_EFFECT_5F): seats 17-18 for Nebula's two (AI 43-44, ids 0x3EC-0x3F3, FREE_NEBULA_NAVIS in code-low's new front); gridman_v1, gridman_v1_keys and gridman_sp PASS, five mutations caught; the third kind's 0x95 and the fourth's 0x58 his copy (his 0xC6 and 0xC8 freed of BN4's chips by their reservation, PR #376); an effect drawing its Navi's own battle sprite named at its place (own_sprite); the comparator knows the new room (XN_NEBULA_ROOM) and the 0xC6's Z leftover."
     },
     {
-      "date": "2026-11-11",
-      "what": "BN6's song table grown (src/emu/song_table.c; bn6_sound.h BN6_SONG_COUNT 0x1DA, BN6_SONG_TABLE_REF_START/CHANGE/CONTINUE/STOP/RESUME 0x0815049C, 0x081504D0, 0x0815051C, 0x08150570, 0x081505A4; docs/rom/sound.md): the sound engine names the table by five words and bounds no number, so a copy in the free space with 550 more slots, the words pointed at it where BN4's ROM is read, gives every other game's sound a slot. PanlSht's two play from 0x1DA and 0x1DB through a shim (bn4_chip_panlsht1 to 3 PASS, their ten mutations caught)."
+      "date": "2026-11-12",
+      "what": "ThunSoul moved into BN6's engine (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine; docs/rom/bn4.md, SandRing's family and ThunSoul's charged shot: src/emu/bn4_chips.h's BN4_CHIP_RING_FAMILY, BN4_RING_STATE, BN4_POWER_THUN, BN4_T3_RING, BN4_RING_KINDS): BN4's family 0x47 an attack unit at BN6's grown 0xD7 with its power attack copied, BN6's Soul 13 on the proxy form; soul_thun PASS held to BN4's trace, three mutations caught; bn4_soul_thun's FAIL at t1 recorded (the Soul's form, the look)."
     },
     {
-      "date": "2026-11-11",
-      "what": "ShotStar's code located and moved (bn4_chips.h BN4_SHOTSTAR 0x080E5D78, BN4_T4_SHOTSTAR 0x34, BN4_STAR_SPAWN 0x080D879A, BN4_T3_STAR 0x56, BN4_STAR_KINDS 0x080D8580, BN4_T4_STAR_MARK 0x35; docs/rom/bn4.md, ShotStar's code): the star's spawner is BN6's by body, its type not, so it moves with the unit; its sprite, effect and sounds copied at numbers of the chips'."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "GyroMan moved, Team ProtoMan's second (docs/multirom/navis.md, GyroMan; docs/rom/navis.md, Team ProtoMan's GyroMan: src/emu/bn5_team_protoman.h's BN5_GYRO_COMPANION, _COMPANION_END): gyroman_v1, gyroman_v1_keys and gyroman_sp PASS, five mutations caught; his companion BN5's overlay kind 0 (his own 31); the Navis' sprites spill into list 2's 0x80-0x9F past list 4's 0xA0-0xBA, the shared art's third room FREE_TEAM_SHARED_MORE; his sounds 0x103, 0x104, 0x14C at BN6's empty slots 0x43-0x45; the comparator reads Team ProtoMan's art rooms as moved."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "SearchMan moved, Team ProtoMan's third (docs/multirom/navis.md, SearchMan; docs/rom/navis.md, Team ProtoMan's SearchMan: src/emu/bn5_team_protoman.h's BN5_SEARCH_CODE, BN5_SEARCH_PARENT_STATE): bn5_searchman_v1, bn5_searchman_v1_keys and bn5_searchman_sp PASS, five mutations caught; his seven object types moved (TYPES), his sprites in list 2's spill (0x85-0x8A)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "Meddy moved, Team ProtoMan's fourth (docs/multirom/navis.md, Meddy; docs/rom/navis.md, Team ProtoMan's Meddy: src/emu/bn5_team_protoman.h's BN5_MEDDY_CODE, BN5_MEDDY_EFFECT_KINDS): meddy_v1, meddy_v1_keys and meddy_sp PASS, five mutations caught; her seven object types moved (TYPES); an effect's id put beside a parameter (movs r4,#id; orrs r4,rX) read by the generator; her sound 0xE0 at BN6's slot 0x46."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "BN4's chips' art's room: BN6's sprite load's entry read (BN6_SPRITE_LOAD_IN 0x080026E6, an object's sprite state's +0x18 BN6_SPRITE_DATA) and the object runner (BN6_OBJECT_RUNNER 0x080031AC), the two places the room hooks (docs/rom/chips-code.md)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "Pack entries for chip ids 635-1023 in the cart's save RAM (docs/rom/chips-code.md, The pack in the save RAM: BN6_PACK_SAVE_FIRST, BN6_PACK_SAVE_END, BN6_PACK_SAVE_MARK, BN6_PACK_SAVE_MARKED, BN6_PACK_SAVE, BN6_SAVE_RAM, BN6_SAVE_MAIN, BN6_SAVE_BLOCK_1-3, BN6_SAVE_READ, BN6_SAVE_WRITE, BN6_SAVE_VERIFY, BN6_PACK_STAMP_SET, _GET, _CLEAR, BN6_PACK_STAMP_NEXT, bn6_pack_holds in bn6_chips.h; SRAM_PACK in free_space.plan's save zone); src/emu/xchips_pack.c; CYBERWORLD_RAM_WATCH and tools/ram_survey.py --watch (docs/devtools/ram-survey.md)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "BN6 Gregar's own gaps audited (docs/multirom/bn6-gaps.md): BN6's Program Advances proved forming in a run's engine by thirteen engine specs (tests/xdiff/pa_bn6_*, the timeline's chip read; docs/rom/chips.md); SneakRun and NumbrOpn traced in Gregar (src/emu/bn6_navicust.h's BN6_NCP_NUMBROPN, BN6_NCP_SNEAKRUN, BN6_NAVI_*, BN6_NUMBROPN_CHECK, BN6_SNEAKRUN_CHECK; docs/rom/navicust.md); GBeast, GBeast SP and the RV six's records and starts read (docs/rom/battle.md); every map-music list dumped (docs/rom/net-maps.md)"
-    },
-    {
-      "date": "2026-11-11",
-      "what": "MagBolt's code located and moved (bn4_chips.h BN4_MAGBOLT_STATE 0x080EE012, BN4_T3_BOLT 0x75 with BN4_BOLT_SPAWN 0x080DBD72 and BN4_BOLT_HIT_BITS 0x080DBCD2; docs/rom/bn4.md), and a pushed object in a virus's runner read in both games: BN4 runs its slide before it takes a struck-and-pushed status (BN4_RUNNER_SLIDE 0x08013E3C, BN4_RUNNER_STRUCK 0x08013E68), BN6 the status first, past the slide's step (BN6_RUNNER_STRUCK 0x0801B2A8, BN6_RUNNER_SLIDE 0x0801B2EC); state 5's step stored at +0x0B (BN4_STRUCK_STEP 0x08010610)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "The bombs' family read and SeekBom's code moved (bn4_chips.h BN4_BOMBS_STATE 0x080EB3FE with BN4_BOMBS_SPAWNERS 0x080EB4C4 and BN4_BOMBS_ARMS 0x080EB4EC, BN4_T3_SEEKBOM 0x8D with BN4_SEEKBOM_THROW 0x080DEEF2, BN4_T4_EXPLOSIONS 0x11 with BN4_EXPLOSIONS_SPAWN 0x080E33D4 and BN4_EXPLOSIONS_EFFECT 0x080E33B4; docs/rom/bn4.md)."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "BN4's support chips' code located and its first unit moved (src/emu/bn4_chips.h: BN4_SUPPORT_RUN 0x080EB9EA, BN4_CHIP_ROUTINES 0x080220E0 of 0x4E words, BN4_SUPPORT_OBJECT_BEGIN/WAIT/NAME/DONE/END 0x08008BD8, 0x08008BF8, 0x08008C2A, 0x08008EB8, 0x08008EEE, BN4_PANEL_BREAK_FREE 0x08009BAC, BN4_PANLSHT 0x080E7A58, BN4_T4_PANLSHT 0x4F, BN4_PANLSHT_SHOT 0x080DCC2A, BN4_T3_PANLSHT_SHOT 0x7B; src/emu/bn6_chips.h: BN6_SUPPORT_OBJECT_* 0x0800B916, 0x0800B94C, 0x0800B9B0, 0x0800BC88, 0x0800BD34, BN6_PANEL_BREAK_FREE 0x0800C9F8, BN6_CHIP_WHEEL_FLAGS 0x080129E4; docs/rom/bn4.md, Its support chips' code; docs/rom/chips-code.md): a BN4 support routine is BN6's support routines' spawner shape with the element at BN4's +0x17, its object's generic states BN6's own at the same places of its types' tables; PanlSht's unit derived by tools/xchiprecipe_bn4.py with no decision open but its two sounds' slots (0xBF and 0x1C6, no song of BN6's)."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "BN4's panel changer and its Hole panel located and read (bn4_panels.h BN4_PANEL_CHANGER 0x080E4354, BN4_PANEL_CHANGER_KINDS 0x080E423C, BN4_PANEL_HOLE 0x0B and its six readers, BN4_PANEL_STEP 0x08009740, BN4_PANEL_BLINK_SET 0x08009E38; docs/rom/bn4.md). The Hole panel is what a DS Navi chip's power counts (BN4_DS_POWER 0x08019518, BN4_DS_POWERS 0x08018B48, BN4_PANEL_COUNT 0x08009F40). BN4's dark chips' price is in code (xreg4_dark_ids, the hook's test); the dark units derived, none moved yet."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "MokoRus's code located and moved (bn4_chips.h BN4_MOKORUS 0x080D252A, BN4_T3_MOKO 0x2C, BN4_MOKO_HIT_BITS 0x080D23E0), the bytes' shuffle paired (BN4_SHUFFLE 0x08000AAA, BN6_SHUFFLE 0x08000C72) and the struck pass's push read in both (BN4_STRUCK_PUSHED 0x0801360C: bit 0x01 with a push bit; BN6_STRUCK_PUSHED 0x0801AC06: bit 0x40 with one; docs/rom/bn4.md)."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "The spread chips' code located and moved, the first attack family (bn4_chips.h BN4_SPREAD_STATE 0x080EC760, BN4_T3_SPREAD_SHOT 0x12 with BN4_SPREAD_SHOT_KINDS 0x080CF3DC, BN4_T3_ARM 0x02 with BN4_ARM_SPAWN 0x080CD6E0, BN4_COUNTER_WINDOW 0x0800BA66, BN4_ELEMENT_SET 0x0801288C; bn6_chips.h BN6_SPREAD_FAMILY 0x080EDEF0 and its twins; docs/rom/bn4.md): BN6 keeps the family with its own arm, so the state moves."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "FlmLine's, Thunder's and TwnFng's code located and moved (bn4_chips.h BN4_FLMLINE_STATE 0x080ECAAE with BN4_T3_FLAME 0x19, BN4_THUNDER_STATE 0x080ECE14, BN4_TWNFNG_STATE 0x080ED4C6 with BN4_T3_FANG 0x51; docs/rom/bn4.md). MegaMan's animations numbered by each game's art (BN4's 0x0D, 0x11, 0x12 are BN6's 0x0A, 0x0D, 0x0E)."
+      "date": "2026-11-12",
+      "what": "WhitWeb's code located and moved (bn4_chips.h BN4_WHITWEB 0x080D4F20 with 0x080D4F2A and 0x080D4F34, BN4_T3_WEB 0x3D; docs/rom/bn4.md): three subfamilies' routines in one object's code, one unit with rows that share its block."
     }
   ],
   "experiments": [
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-12",
-      "name": "bn4_chip_rockcube and bn4_chip_repair: an obstacle's control, then BN4's Repair moved",
-      "result": "python3 build.py xdiff bn4_chip_rockcube bn4_chip_repair: both PASS over 300 frames. RockCube (both games' own): the cube set at t34, struck at t99 (200 to 190 HP). Repair: the cube repaired to 200 at t154 in both, effect and sound, struck again at t237. Six mutations caught (Repair's row's subfamily and family, the obstacles read at BN4's +0x68, the HP's source, the sound; RockCube's kind).",
-      "meaning": "A misc routine moves by the generator; a chip that needs an obstacle is proved over a same-name control whose object is each engine's own."
+      "name": "bn4_chip_boomer1 to 3: BN4's Boomer moved",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the boomerang in play from t33 to t96, a 140 HP Mettaur at (6,3) left 80, 60 and 40 in both at t61. Five mutations caught (a row's power and subfamily, the flights' speeds, the dispatch number, the sound). PanlSht's, ShotStar's, WhitWeb's, Counter's and Repair's specs PASS again with their sprites copied.",
+      "meaning": "A unit with a data table of its object's moves by the generator; copied sprites keep an in-play object comparable."
     },
     {
       "feature": "BN4's chips in BN6's tables",
@@ -390,16 +314,37 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-12",
+      "name": "bn4_chip_rockcube and bn4_chip_repair: an obstacle's control, then BN4's Repair moved",
+      "result": "python3 build.py xdiff bn4_chip_rockcube bn4_chip_repair: both PASS over 300 frames. RockCube (both games' own): the cube set at t34, struck at t99 (200 to 190 HP). Repair: the cube repaired to 200 at t154 in both, effect and sound, struck again at t237. Six mutations caught (Repair's row's subfamily and family, the obstacles read at BN4's +0x68, the HP's source, the sound; RockCube's kind).",
+      "meaning": "A misc routine moves by the generator; a chip that needs an obstacle is proved over a same-name control whose object is each engine's own."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
       "name": "bn4_chip_whitweb1 to 3: BN4's WhitWeb moved, three chips on one block",
       "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the webs (the third kind's 0x3D, moved) in play in the fight's frames throughout, a 140 HP Mettaur on each row left 100 in both. Five mutations caught (a row's power, WhitWeb2 given WhitWeb1's routine, WhitWeb3's entry's row, the web's dispatch number, its sound).",
       "meaning": "A moved object that lives across fight frames compares field for field; several chips can share one moved block by their own entries."
     },
     {
       "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-12",
-      "name": "bn4_chip_boomer1 to 3: BN4's Boomer moved",
-      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the boomerang in play from t33 to t96, a 140 HP Mettaur at (6,3) left 80, 60 and 40 in both at t61. Five mutations caught (a row's power and subfamily, the flights' speeds, the dispatch number, the sound). PanlSht's, ShotStar's, WhitWeb's, Counter's and Repair's specs PASS again with their sprites copied.",
-      "meaning": "A unit with a data table of its object's moves by the generator; copied sprites keep an in-play object comparable."
+      "date": "2026-11-11",
+      "name": "bn4_chip_magbolt1 to 3: BN4's MagBolt moved, a pulled foe",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (a Mettaur pulled and not hit; hit for 110 with the pull blocked; pulled beside MegaMan and hit for 130, struck from t44 to t68 in both), eleven mutations caught. On the way: with BN4's hit bits 3 the bolt's hit with the pull's pushed alone in BN6 (state 0xB against BN4's 5 at t44), 0x43 the answer; the foe's record then differed in +0x0B and +0x1B, +0x1E, +0x1F alone.",
+      "meaning": "A foe a chip slides meets the engines' slide differences MegaMan's entries named, and one more: the runners' order of a pushed object's slide and a struck-and-pushed hit. Each is a leftover no code reads; panels, HP, states and timers agree."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_propbom1, its struck, 2 and 3: BN4's PropBom moved",
+      "result": "python3 build.py xdiff with the four specs: each PASS over 300 frames (the blast at t102, a Mettaur's 140 HP to 20 and 250 to 90; the bomb ended by a wave at t73 and by a Mettaur's step at t66), eleven mutations caught. On the way: with the blast handed BN4's effect number BN6's routine drew BN6's own explosion (the effects' sprite state at t102); the copy hands it BN4's effect's copy.",
+      "meaning": "An object with HP that takes an obstacle slot moves as any other where the slots' routines are the engines' twins; an engine routine that spawns an effect by a number it is handed needs the number the unit's copy of the effect has."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_seekbom1 to 3: BN4's SeekBom moved, a family's unit by subfamily",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (the bomb's hit at t82: a 140 HP Mettaur left 60 and 30, 250 left 110), ten mutations caught. On the way: with the explosions' maker's id left BN4's 0, BN6's own explosion was drawn (the effects' sprite state at t84); a byte row on its load was refused by the installer (raw data alone); the effect call's shim gives r4 the copy's id.",
+      "meaning": "One family's subfamilies move as units of their own, each with a copy of the state; an id an object loads from a byte of its own is given BN6's number by a shim at the call, its values read from the object's spawns."
     },
     {
       "feature": "BN4's chips in BN6's tables",
@@ -425,27 +370,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-11",
-      "name": "The pack's entries of ids 635-1023 in the cart's save RAM",
-      "result": "Gregar's save library has three readers, five writers and four verifies, each address and size a literal: BN6's blocks are 0x0E000100-0x0E00680F and 0x0E007E00-0x0E007FFF; 0x0E006810-0x0E007DFF is addressed by none. Under CYBERWORLD_RAM_WATCH (every load, store, DMA and BIOS copy into the stretch): the survey's 54 runs read the save RAM 1,431,216 times, all the library's boot read, and touched the free span only by the pack's clear; the PET's seven screens, a shop bought from, a Chip Trader fed (BN6's own save ran four times, inside its blocks) and a NetBattle rolled back 872 times (the state the same after each) the same; no access wider than a byte. tests/test_emu_pack.c runs the routines on mGBA (every id's entry, a chip given in all three ranges, the stamps by bytes, the clear with and without its hook, states). Chip 700 (--dev alias=700, chip 700 A 5): its counts 6, listed in the folder editor's Pack, swapped, through a battle, the PET's Save, CONTINUE and the files moved to a fresh folder all kept 6; a run dev's build saved read 0 there. The autopilot's seeds 1-12: dev's run logs (78 lines) and pictures at 5000, 10000, 14990. The differential: 494 PASS, the 5 recorded FAILs held, 363 of 363 mutations caught.",
-      "meaning": "Every BN4 folder chip, and any id to 1023, can be held in the Pack; no chip waits for RAM again."
-    },
-    {
-      "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-11",
-      "name": "bn4_chip_magbolt1 to 3: BN4's MagBolt moved, a pulled foe",
-      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (a Mettaur pulled and not hit; hit for 110 with the pull blocked; pulled beside MegaMan and hit for 130, struck from t44 to t68 in both), eleven mutations caught. On the way: with BN4's hit bits 3 the bolt's hit with the pull's pushed alone in BN6 (state 0xB against BN4's 5 at t44), 0x43 the answer; the foe's record then differed in +0x0B and +0x1B, +0x1E, +0x1F alone.",
-      "meaning": "A foe a chip slides meets the engines' slide differences MegaMan's entries named, and one more: the runners' order of a pushed object's slide and a struck-and-pushed hit. Each is a leftover no code reads; panels, HP, states and timers agree."
-    },
-    {
-      "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-11",
-      "name": "bn4_chip_propbom1, its struck, 2 and 3: BN4's PropBom moved",
-      "result": "python3 build.py xdiff with the four specs: each PASS over 300 frames (the blast at t102, a Mettaur's 140 HP to 20 and 250 to 90; the bomb ended by a wave at t73 and by a Mettaur's step at t66), eleven mutations caught. On the way: with the blast handed BN4's effect number BN6's routine drew BN6's own explosion (the effects' sprite state at t102); the copy hands it BN4's effect's copy.",
-      "meaning": "An object with HP that takes an obstacle slot moves as any other where the slots' routines are the engines' twins; an engine routine that spawns an effect by a number it is handed needs the number the unit's copy of the effect has."
-    },
-    {
-      "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-11",
       "name": "the chips' page of the dispatch: every chip spec again",
       "result": "With every unit regenerated onto the page (twelve units, their third-kind types at BN4's own numbers, 13 immediates fewer): the 55 bn4_chip* specs at their verdicts (52 PASS, the three recorded FAILs), bn4_chips_thirty among them; the whole differential and every mutation run again (the installer's type and call checks are every recipe's).",
       "meaning": "A chip unit's objects need no number of the tables': BN5's Navis and chips moved later cannot meet them, and the count of units is no limit."
@@ -453,23 +377,16 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-11",
-      "name": "bn4_chip_seekbom1 to 3: BN4's SeekBom moved, a family's unit by subfamily",
-      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (the bomb's hit at t82: a 140 HP Mettaur left 60 and 30, 250 left 110), ten mutations caught. On the way: with the explosions' maker's id left BN4's 0, BN6's own explosion was drawn (the effects' sprite state at t84); a byte row on its load was refused by the installer (raw data alone); the effect call's shim gives r4 the copy's id.",
-      "meaning": "One family's subfamilies move as units of their own, each with a copy of the state; an id an object loads from a byte of its own is given BN6's number by a shim at the call, its values read from the object's spawns."
+      "name": "The pack's entries of ids 635-1023 in the cart's save RAM",
+      "result": "Gregar's save library has three readers, five writers and four verifies, each address and size a literal: BN6's blocks are 0x0E000100-0x0E00680F and 0x0E007E00-0x0E007FFF; 0x0E006810-0x0E007DFF is addressed by none. Under CYBERWORLD_RAM_WATCH (every load, store, DMA and BIOS copy into the stretch): the survey's 54 runs read the save RAM 1,431,216 times, all the library's boot read, and touched the free span only by the pack's clear; the PET's seven screens, a shop bought from, a Chip Trader fed (BN6's own save ran four times, inside its blocks) and a NetBattle rolled back 872 times (the state the same after each) the same; no access wider than a byte. tests/test_emu_pack.c runs the routines on mGBA (every id's entry, a chip given in all three ranges, the stamps by bytes, the clear with and without its hook, states). Chip 700 (--dev alias=700, chip 700 A 5): its counts 6, listed in the folder editor's Pack, swapped, through a battle, the PET's Save, CONTINUE and the files moved to a fresh folder all kept 6; a run dev's build saved read 0 there. The autopilot's seeds 1-12: dev's run logs (78 lines) and pictures at 5000, 10000, 14990. The differential: 494 PASS, the 5 recorded FAILs held, 363 of 363 mutations caught.",
+      "meaning": "Every BN4 folder chip, and any id to 1023, can be held in the Pack; no chip waits for RAM again."
     },
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-10",
-      "name": "bn4_chip_panlsht1 to 3: BN4's PanlSht moved by the generator, against BN4's own battle",
-      "result": "python3 build.py xdiff bn4_chip_panlsht1 bn4_chip_panlsht1_miss bn4_chip_panlsht2 bn4_chip_panlsht3: each PASS over 300 frames (MegaMan the subject, a BN4 MettaurSP of 140 HP the foe: one shot leaves it 40, a shot past it 140, two shots 20, four with one in its row 60; the panels broken and the sounds the same). Ten mutations caught (the rows' power, subfamily and pattern, the shot's dispatch number, its hit read at BN4's place, its panel, its sound). The chip's whole flight runs inside the support chip's time freeze, between two fight frames: the traces meet at its outcome. A foe the shot deletes parts at the deletion's own effect (effect 0, each engine's art), the families' known difference, so the specs' foe survives.",
-      "meaning": "BN4's chips' code can be moved by the generator: a support routine, its object and its shot run in BN6's engine as in BN4's."
-    },
-    {
-      "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-10",
-      "name": "bn4_chip_mokorus1 to 3: BN4's MokoRus moved",
-      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the Mokos in play from t33 to t147 on rows 2, 1, 3 (BN6's shuffle given BN4's six draws), a 140 HP Mettaur at (5,2) left 80, 50 and 20 at t93 in both, struck out of its attack and pushed to (6,2). Five mutations caught (a row's power and subfamily, the hit's bits as BN4 has them, the delay between Mokos, the sound).",
-      "meaning": "A hit's bits are not the same in both engines: struck and pushed is 0x01 with a push bit in BN4 and 0x40 with one in BN6, found at the hit's frame; a unit that pushes passes BN6's."
+      "name": "bn4_chip_flmline1 to 3, thunder1 to 3, twnfng1 to 3 and two misses: three more attack families",
+      "result": "python3 build.py xdiff with the eleven specs: each PASS (FlmLine3 to the frame of the hit, t41), a 140 HP Mettaur left 70, 20 and 0 by the flames, 100, 80 and 60 by the thunder at t123, 70, 40 and 10 by a fang at t28. With BN6's own thunder (Billy's pair) Thunder parted at t34 on the ball's art; with BN4's moved it passes, billy_v1 and thunderman_v1 as before. Thirteen mutations caught.",
+      "meaning": "The arm moves once and is shared; a state BN6 has no twin of takes MegaMan's animation numbers from the two arts' frames."
     },
     {
       "feature": "BN4's chips in BN6's tables",
@@ -481,9 +398,32 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-10",
-      "name": "bn4_chip_flmline1 to 3, thunder1 to 3, twnfng1 to 3 and two misses: three more attack families",
-      "result": "python3 build.py xdiff with the eleven specs: each PASS (FlmLine3 to the frame of the hit, t41), a 140 HP Mettaur left 70, 20 and 0 by the flames, 100, 80 and 60 by the thunder at t123, 70, 40 and 10 by a fang at t28. With BN6's own thunder (Billy's pair) Thunder parted at t34 on the ball's art; with BN4's moved it passes, billy_v1 and thunderman_v1 as before. Thirteen mutations caught.",
-      "meaning": "The arm moves once and is shared; a state BN6 has no twin of takes MegaMan's animation numbers from the two arts' frames."
+      "name": "bn4_chip_mokorus1 to 3: BN4's MokoRus moved",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the Mokos in play from t33 to t147 on rows 2, 1, 3 (BN6's shuffle given BN4's six draws), a 140 HP Mettaur at (5,2) left 80, 50 and 20 at t93 in both, struck out of its attack and pushed to (6,2). Five mutations caught (a row's power and subfamily, the hit's bits as BN4 has them, the delay between Mokos, the sound).",
+      "meaning": "A hit's bits are not the same in both engines: struck and pushed is 0x01 with a push bit in BN4 and 0x40 with one in BN6, found at the hit's frame; a unit that pushes passes BN6's."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-10",
+      "name": "bn4_chip_panlsht1 to 3: BN4's PanlSht moved by the generator, against BN4's own battle",
+      "result": "python3 build.py xdiff bn4_chip_panlsht1 bn4_chip_panlsht1_miss bn4_chip_panlsht2 bn4_chip_panlsht3: each PASS over 300 frames (MegaMan the subject, a BN4 MettaurSP of 140 HP the foe: one shot leaves it 40, a shot past it 140, two shots 20, four with one in its row 60; the panels broken and the sounds the same). Ten mutations caught (the rows' power, subfamily and pattern, the shot's dispatch number, its hit read at BN4's place, its panel, its sound). The chip's whole flight runs inside the support chip's time freeze, between two fight frames: the traces meet at its outcome. A foe the shot deletes parts at the deletion's own effect (effect 0, each engine's art), the families' known difference, so the specs' foe survives.",
+      "meaning": "BN4's chips' code can be moved by the generator: a support routine, its object and its shot run in BN6's engine as in BN4's."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-09",
+      "name": "Chip 600 past the pack, the editor, names and rewards",
+      "result": "--dev alias=600 (chip 600 a copy of Cannon): the chip step gives it (its counts 2, the entry of id 408), the folder editor's pack lists it with its name and description, a swap into the folder and the editor left count it again (4 at the next step); --dev reward=600: the results screen reads Cannon A with its picture, the run log's reward a058; a green Mystery Data made to hold it (a scratch change) says MegaMan got: \"Cannon A\", and another archive's text with the chat's hook left out. The autopilot's seeds 1-12: the base build's run logs (66 battles) and pictures at frames 5000, 10000 and 14990. python3 tools/ram_survey.py: 54 runs, no stretch of 1 KB that stayed zero without a symbol of bn6f's but the persistent zone; --canary 0x02010CE0:0x444: 1092 bytes changed once a run, the power-on clear's (frames 14-15).",
+      "meaning": "An id from 512 can be found, held, edited into a folder, named and rewarded: BN5's remaining chips and BN4's first units have ids. 91 pack entries; the ids from 603 wait for RAM.",
+      "link": "../rom/chips-code.md"
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-09",
+      "name": "Ten bits against nine",
+      "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
+      "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
+      "link": "../multirom/bn4-chips.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",
@@ -492,21 +432,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "python3 tools/xdiff.py junkman_v1 (rng replay, lag 1): PASS over 1200 fight frames. Settled before it: his install refused (the Navis' registry, past 16); his state 1's draw, made in BN4's paused opening and in BN6's fight before its timer's first tick, replayed from BN4's setup draws; his junk's +4 the spawn's r4 (BN4 0x13, BN6 his AI index times four), read by no code of it; his pool sounds paired; at t347 his 0x97's +4 to +7, the r4 his MegaMan state 110 ran with (BN4's runner's 0x00020013, BN6's state caller's AI data 0x02023A80): his states run through stubs loading his +0 byte without BN6's bits 0x24 (with them kept, t347 on +4 alone, 0x13 against 0x37). Four mutations caught: his CurAction 7 written 10 (t1), his variables at BN4's +0x70 (t1), his junk spawned as his 0x97 (t1), his 0xC0 at the pool's 0x32 (t348); his junk's hits test at BN4's +0x54 not caught (unreached: MegaMan never strikes it).",
       "meaning": "JunkMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
       "link": "../multirom/bn4-navis.md#junkman-built"
-    },
-    {
-      "feature": "BN4's virus families in BN6's engine",
-      "date": "2026-11-09",
-      "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
-      "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
-      "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
-      "link": "../multirom/families.md"
-    },
-    {
-      "feature": "BN5's Darkloids",
-      "date": "2026-11-09",
-      "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
-      "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
-      "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
     },
     {
       "feature": "BN4's virus families in BN6's engine",
@@ -525,20 +450,19 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "link": "../multirom/families.md"
     },
     {
-      "feature": "BN4's chips in BN6's tables",
+      "feature": "BN4's virus families in BN6's engine",
       "date": "2026-11-09",
-      "name": "Ten bits against nine",
-      "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
-      "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
-      "link": "../multirom/bn4-chips.md"
+      "name": "volgear_v1-v3: BN4's VolGear V1, V2 and V3 in BN4's battle against its move into BN6's",
+      "result": "python3 build.py xdiff volgear_v1 volgear_v2 volgear_v3 (rng replay, lag 1): each PASS over 1200 fight frames, its flame (the third kind's 0x1A) spawned from t214. First the install refused its NameID range's call (BN4_BY_NAME_RANGE walked as its own, lying in its region), then FAIL at t214 on the flame's +0x4C (its aim read at BN4's players' +0x44 in BN6's battle state), each settled in the generator. Four mutations caught (t214, t214, t214, t1). Not reached: its fire on a list of panels (the third kind's 0x19, from its state 0x080B66E3's step 0x080B67A0), MegaMan idle in row 2 or row 1, 1200 to 3600 frames.",
+      "meaning": "VolGear joins the visitors (BN4's seventh), the first family past the first eight's rooms and numbers.",
+      "link": "../multirom/families.md"
     },
     {
-      "feature": "BN4's chips in BN6's tables",
+      "feature": "BN5's Darkloids",
       "date": "2026-11-09",
-      "name": "Chip 600 past the pack, the editor, names and rewards",
-      "result": "--dev alias=600 (chip 600 a copy of Cannon): the chip step gives it (its counts 2, the entry of id 408), the folder editor's pack lists it with its name and description, a swap into the folder and the editor left count it again (4 at the next step); --dev reward=600: the results screen reads Cannon A with its picture, the run log's reward a058; a green Mystery Data made to hold it (a scratch change) says MegaMan got: \"Cannon A\", and another archive's text with the chat's hook left out. The autopilot's seeds 1-12: the base build's run logs (66 battles) and pictures at frames 5000, 10000 and 14990. python3 tools/ram_survey.py: 54 runs, no stretch of 1 KB that stayed zero without a symbol of bn6f's but the persistent zone; --canary 0x02010CE0:0x444: 1092 bytes changed once a run, the power-on clear's (frames 14-15).",
-      "meaning": "An id from 512 can be found, held, edited into a folder, named and rewarded: BN5's remaining chips and BN4's first units have ids. 91 pack entries; the ids from 603 wait for RAM.",
-      "link": "../rom/chips-code.md"
+      "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
+      "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
+      "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
     },
     {
       "feature": "BN5's last chips in BN6's tables",
@@ -559,42 +483,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-08",
-      "name": "thunderman_v1 PASSes",
-      "result": "python3 tools/xdiff.py thunderman_v1: PASS over 1200 fight frames. His cloud (the third kind's 0x6A) had run a step ahead at the battle's offset (t1 +7 2 | 1): its update and his companion's run no state, gated on the battle's flags' bit 0, which BN6 sets at the fight's first frame while its state runner starts his first own state a frame later; a probe of hooks (temporary) showed the cloud the same in both at the same fight frame. With his two gate calls aimed at XV_FIGHT_FLAGS (bit 0 once the battle timer is past 1) his whole battle keeps the one offset: the world matched from t1 (panel 5,1's +0x17 too). Then, each from both games' code: the cloud's opening animation (227 frames from its spawn in BN4, 206 in BN6, a place 3 apart in its 18-frame loop) compared by the openings' lengths; his sounds 0x148, 0xB8, 0x143 and his 0x70's 0xAD paired; his 0x70's +4 and 0x71's +5, +6 spawn leftovers (r4 his state runner's); sparks out of the renderer's ranks; the hit damages by element mapped in the BN4 trace (BN4 +0x2A, +0x3C; BN6 +0x82, +0x94); BN6's Elec tally (+0x78) allowed. MegaMan's HP the same throughout. Four mutations caught (the gate a frame early at t1, the clouds' strength at t1, the bolt's sound at t54, the cloud's animation at t1): 191 of 191. gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1, handi_v1 PASS; windman_v1 and fireman_v1 hold FAIL at t1",
-      "meaning": "A moved Navi's object that runs no state (a companion, its cloud) starts with his first own state in BN6 as in BN4 through XV_FIGHT_FLAGS, so his battle keeps the one offset every BN4 spec allows; the comparator's new rules each name both games' code. His port is proved; his place in the tournament waits on his plate",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-08",
-      "name": "windman_v1 PASSES",
-      "result": "python3 tools/xdiff.py windman_v1: the family's first difference moved from t1 (his wind's +0x38 and +0x4C) through t103 (his second wind's +0x3C), t105 (sound 0xB2), t183 (his companions' renderer ranks, a spark drawn in BN4 alone) and t497 (sound 0x133) to none; the world's from t1 (the gust's +0x93, alike with --poke 080CEB90:2000:2, and its frames' pointers into list 0xC's 0x2E, one CRC32 0xE0F284B6) through t4 (MegaMan's +0x0F, BN6's step's kind), t7 (his collision's direction, by each engine's clock), t9 (his blocked slide's step, BN4's), t181 and t498 (the gusts' renderer places) and t446 (a gust's pointer to a let-go slot) to none: PASS. Mutations caught: his air shot's sound at slot 0x33 (t105), his wind's r4 1 (t1), the shot's collision word at BN4's +0x54 (t179), its speed shifted (t104); his companions' first state made 0 (--poke 080CCD0E:2200) still PASSes. Every spec exits as recorded, every mutation caught. A colour match of BN4's bracket plates against the Navis' battle sprites failed its controls (GutsMan, Roll, KendoMan not their best match).",
-      "meaning": "His port is BN4's own over the whole battle; the engines' differences around it (BN6's wind keeping its spawner, the gust's sprite flag, MegaMan's slide bookkeeping) are allowed with both code paths, and the comparator reads the battle state, natives' art and ranks, and let-go slots by what they name. He joins the tournament's proved[] once his plate is named (BN4_OPPONENT_BATTLES' battles read, or by sight).",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-08",
-      "name": "fireman_v1 to PASS",
-      "result": "python3 tools/xdiff.py fireman_v1: FAIL at t1 (his companion's +0x91 BN4 2 | BN6 1; BN6's t1 2, the same fight frame), at t237 with the companion's count read by the fight's frames (his flame's +0x0E and its collision's hit kind BN4 1 | BN6 0), at t238 with his flame's palette at BN6's +0xF (the family's sounds, BN4 0xA8 | BN6 0x33), at t271 with his sounds paired (his companion's renderer rank BN4 3 | BN6 2, BN4's spark drawn at place 0x40 where BN6's had ended), PASS with the spark unranked. Every spec run: the 18 BN4 family specs, gutsman_v1, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; thunderman_v1 and windman_v1 hold their recorded verdicts; --mutations 193 of 193 caught.",
-      "meaning": "FireMan's port matches BN4's battle over 1200 frames once his flame keeps its element: the opening count and the spark's rank were each game's clock and art, the palette store the port's.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's tournament presentation",
-      "date": "2026-11-08",
-      "name": "Each plate's battle index and story bytes",
-      "result": "tools/romlab on tools/bn4_lab.py boot's state, each id 0x00-0x16 but 0x12 and 0x13: MegaMan and the id The Den Battle Tournament's first pair, the bracket opened (its set-up calls BN4_NEXT_OPPONENT), a probe on 0x080447CC reading the battle index (BN4_OPPONENT_BATTLES[id]: 0x04, 0x08, 0x0C, 0x10, 0x1C, 0x20, 0x24, 0x28, 0x34, 0x3C, 0x40, 0x44, 0x14, 0x18, 0x38, 0x2C, 0x30, 0x48, 0x4C, 0x50, 0x54); then the Den round's cutscene from its 55 00 (0x08087689, started by a stub through 0x0802BD10), probes on command 0x55's stores 0x0802CE94 and 0x0802CE98 reading the story bytes each id leads to (0x30 GutsMan's to 0x7B ProtoMan's). The record each progress's opponent starts read from the story scripts (the first 51 r 01 of the block the map list's person opens), not run.",
-      "meaning": "Every plate's Navi named from BN4's data: the five named by sight and the owner's three readings held (FireMan 0x01, ThunderMan 0x08, WindMan 0x05); the last step derived.",
-      "link": "../multirom/bn4-tournament.md#each-plates-navi"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-08",
-      "name": "searchman_v1: SearchMan V1 in BN4's battle against his move into BN6's",
-      "result": "python3 tools/xdiff.py bn4_searchman_control searchman_v1 (SearchMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): the control PASS; searchman_v1 PASS over its 1200 frames (his hiding from t216, his shots, bursts and trails, his sounds; his state 61 and its scope not reached, MegaMan idle). --mutations: his seven caught.",
-      "meaning": "His move matches BN4's battle frame for frame; the differences allowed are the engine's (his pool sounds paired by slot, his trail's begun byte each game's PlaySound's leftover r0).",
-      "link": "../multirom/bn4-navis.md#searchman-built"
+      "name": "aquaman_v1: AquaMan V1 in BN4's battle against his move into BN6's",
+      "result": "python3 tools/xdiff.py aquaman_v1 (rng replay, lag 1): PASS over 1200 fight frames, after five root causes: his install refused (an effect's sprite WindMan copied, which the installer finds only among the families: the row shared); his +6 and +7 at t1 (his init keeps his panel there, 0x080B8264: kept at his spawn's end); his companion's sprite count and frame a fight frame ahead at t2-t10 (its after-step runs by the fight's frames until its kind 1 sets its animation up again from his state at BN4's t11: compared at the same fight frame, companion_clock); his pool sounds (0x9E, 0x90, 0xA0, 0xA1) paired in his battles alone; his effect 0x25 handed 0x0801457E in r2 at t51 (moved to 0x95); his third kind 0x24's sprite FireMan's copy of list 3's 0x02 at t525 (shared). Six mutations caught: his panel's store a nop (t1), his companion's kind 1 sprite another's (t1), his panels' effect BN4's 0x25 (t51), his side's effect BN4's 0x23 (t31), his sound 0x9E at 0x32 (t32), his CurAction 7 written 10 (t125).",
+      "meaning": "AquaMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
+      "link": "../multirom/bn4-navis.md#aquaman-built"
     },
     {
       "feature": "BN4's Navis in BN6's engine",
@@ -615,10 +507,18 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-08",
-      "name": "aquaman_v1: AquaMan V1 in BN4's battle against his move into BN6's",
-      "result": "python3 tools/xdiff.py aquaman_v1 (rng replay, lag 1): PASS over 1200 fight frames, after five root causes: his install refused (an effect's sprite WindMan copied, which the installer finds only among the families: the row shared); his +6 and +7 at t1 (his init keeps his panel there, 0x080B8264: kept at his spawn's end); his companion's sprite count and frame a fight frame ahead at t2-t10 (its after-step runs by the fight's frames until its kind 1 sets its animation up again from his state at BN4's t11: compared at the same fight frame, companion_clock); his pool sounds (0x9E, 0x90, 0xA0, 0xA1) paired in his battles alone; his effect 0x25 handed 0x0801457E in r2 at t51 (moved to 0x95); his third kind 0x24's sprite FireMan's copy of list 3's 0x02 at t525 (shared). Six mutations caught: his panel's store a nop (t1), his companion's kind 1 sprite another's (t1), his panels' effect BN4's 0x25 (t51), his side's effect BN4's 0x23 (t31), his sound 0x9E at 0x32 (t32), his CurAction 7 written 10 (t125).",
-      "meaning": "AquaMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
-      "link": "../multirom/bn4-navis.md#aquaman-built"
+      "name": "BN4's battle with JunkMan V1 fought twice",
+      "result": "python3 build.py xdiff bn4_junkman_control: JunkMan V1 (BN4's enemy 0xA4) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS (masks none).",
+      "meaning": "The BN4 pipeline holds for JunkMan and his junk before his move is compared.",
+      "link": "../multirom/bn4-navis.md#junkman-built"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-08",
+      "name": "fireman_v1 to PASS",
+      "result": "python3 tools/xdiff.py fireman_v1: FAIL at t1 (his companion's +0x91 BN4 2 | BN6 1; BN6's t1 2, the same fight frame), at t237 with the companion's count read by the fight's frames (his flame's +0x0E and its collision's hit kind BN4 1 | BN6 0), at t238 with his flame's palette at BN6's +0xF (the family's sounds, BN4 0xA8 | BN6 0x33), at t271 with his sounds paired (his companion's renderer rank BN4 3 | BN6 2, BN4's spark drawn at place 0x40 where BN6's had ended), PASS with the spark unranked. Every spec run: the 18 BN4 family specs, gutsman_v1, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; thunderman_v1 and windman_v1 hold their recorded verdicts; --mutations 193 of 193 caught.",
+      "meaning": "FireMan's port matches BN4's battle over 1200 frames once his flame keeps its element: the opening count and the spark's rank were each game's clock and art, the palette store the port's.",
+      "link": "../multirom/bn4-navis.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",
@@ -629,75 +529,43 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "link": "../multirom/bn4-navis.md"
     },
     {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-08",
+      "name": "searchman_v1: SearchMan V1 in BN4's battle against his move into BN6's",
+      "result": "python3 tools/xdiff.py bn4_searchman_control searchman_v1 (SearchMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): the control PASS; searchman_v1 PASS over its 1200 frames (his hiding from t216, his shots, bursts and trails, his sounds; his state 61 and its scope not reached, MegaMan idle). --mutations: his seven caught.",
+      "meaning": "His move matches BN4's battle frame for frame; the differences allowed are the engine's (his pool sounds paired by slot, his trail's begun byte each game's PlaySound's leftover r0).",
+      "link": "../multirom/bn4-navis.md#searchman-built"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-08",
+      "name": "thunderman_v1 PASSes",
+      "result": "python3 tools/xdiff.py thunderman_v1: PASS over 1200 fight frames. His cloud (the third kind's 0x6A) had run a step ahead at the battle's offset (t1 +7 2 | 1): its update and his companion's run no state, gated on the battle's flags' bit 0, which BN6 sets at the fight's first frame while its state runner starts his first own state a frame later; a probe of hooks (temporary) showed the cloud the same in both at the same fight frame. With his two gate calls aimed at XV_FIGHT_FLAGS (bit 0 once the battle timer is past 1) his whole battle keeps the one offset: the world matched from t1 (panel 5,1's +0x17 too). Then, each from both games' code: the cloud's opening animation (227 frames from its spawn in BN4, 206 in BN6, a place 3 apart in its 18-frame loop) compared by the openings' lengths; his sounds 0x148, 0xB8, 0x143 and his 0x70's 0xAD paired; his 0x70's +4 and 0x71's +5, +6 spawn leftovers (r4 his state runner's); sparks out of the renderer's ranks; the hit damages by element mapped in the BN4 trace (BN4 +0x2A, +0x3C; BN6 +0x82, +0x94); BN6's Elec tally (+0x78) allowed. MegaMan's HP the same throughout. Four mutations caught (the gate a frame early at t1, the clouds' strength at t1, the bolt's sound at t54, the cloud's animation at t1): 191 of 191. gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1, handi_v1 PASS; windman_v1 and fireman_v1 hold FAIL at t1",
+      "meaning": "A moved Navi's object that runs no state (a companion, its cloud) starts with his first own state in BN6 as in BN4 through XV_FIGHT_FLAGS, so his battle keeps the one offset every BN4 spec allows; the comparator's new rules each name both games' code. His port is proved; his place in the tournament waits on his plate",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-08",
+      "name": "windman_v1 PASSES",
+      "result": "python3 tools/xdiff.py windman_v1: the family's first difference moved from t1 (his wind's +0x38 and +0x4C) through t103 (his second wind's +0x3C), t105 (sound 0xB2), t183 (his companions' renderer ranks, a spark drawn in BN4 alone) and t497 (sound 0x133) to none; the world's from t1 (the gust's +0x93, alike with --poke 080CEB90:2000:2, and its frames' pointers into list 0xC's 0x2E, one CRC32 0xE0F284B6) through t4 (MegaMan's +0x0F, BN6's step's kind), t7 (his collision's direction, by each engine's clock), t9 (his blocked slide's step, BN4's), t181 and t498 (the gusts' renderer places) and t446 (a gust's pointer to a let-go slot) to none: PASS. Mutations caught: his air shot's sound at slot 0x33 (t105), his wind's r4 1 (t1), the shot's collision word at BN4's +0x54 (t179), its speed shifted (t104); his companions' first state made 0 (--poke 080CCD0E:2200) still PASSes. Every spec exits as recorded, every mutation caught. A colour match of BN4's bracket plates against the Navis' battle sprites failed its controls (GutsMan, Roll, KendoMan not their best match).",
+      "meaning": "His port is BN4's own over the whole battle; the engines' differences around it (BN6's wind keeping its spawner, the gust's sprite flag, MegaMan's slide bookkeeping) are allowed with both code paths, and the comparator reads the battle state, natives' art and ranks, and let-go slots by what they name. He joins the tournament's proved[] once his plate is named (BN4_OPPONENT_BATTLES' battles read, or by sight).",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-08",
+      "name": "Each plate's battle index and story bytes",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state, each id 0x00-0x16 but 0x12 and 0x13: MegaMan and the id The Den Battle Tournament's first pair, the bracket opened (its set-up calls BN4_NEXT_OPPONENT), a probe on 0x080447CC reading the battle index (BN4_OPPONENT_BATTLES[id]: 0x04, 0x08, 0x0C, 0x10, 0x1C, 0x20, 0x24, 0x28, 0x34, 0x3C, 0x40, 0x44, 0x14, 0x18, 0x38, 0x2C, 0x30, 0x48, 0x4C, 0x50, 0x54); then the Den round's cutscene from its 55 00 (0x08087689, started by a stub through 0x0802BD10), probes on command 0x55's stores 0x0802CE94 and 0x0802CE98 reading the story bytes each id leads to (0x30 GutsMan's to 0x7B ProtoMan's). The record each progress's opponent starts read from the story scripts (the first 51 r 01 of the block the map list's person opens), not run.",
+      "meaning": "Every plate's Navi named from BN4's data: the five named by sight and the owner's three readings held (FireMan 0x01, ThunderMan 0x08, WindMan 0x05); the last step derived.",
+      "link": "../multirom/bn4-tournament.md#each-plates-navi"
+    },
+    {
       "feature": "BN4's virus families in BN6's engine",
       "date": "2026-11-08",
       "name": "melody4_v1: BN4's Melody V1 (Roll V3's summon's family) in BN4's battle against its move into BN6's",
       "result": "python3 tools/xdiff.py melody4_v1 (rng replay, lag 1): PASS over 1200 fight frames, its two sounds (0xC2 from t20, 0xC3 from t226) paired with Roll's pool's 0x104 and 0x117. First FAIL at t1 on its +0x2E (BN4 0x1E, BN6 0xA: its init's own step before its set-up), settled by its init run again from that step at its spawn's end (bn4_twins.INIT_AGAIN). Four mutations caught (t1, t1, t1, t20).",
       "meaning": "Roll V3's third summon has a proved family to spawn (her summon map's 0x39 as 0x2EC); her V3 spec can prove it in her battle.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-08",
-      "name": "BN4's battle with JunkMan V1 fought twice",
-      "result": "python3 build.py xdiff bn4_junkman_control: JunkMan V1 (BN4's enemy 0xA4) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS (masks none).",
-      "meaning": "The BN4 pipeline holds for JunkMan and his junk before his move is compared.",
-      "link": "../multirom/bn4-navis.md#junkman-built"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-05",
-      "name": "BN4's battle with GutsMan V1 fought twice",
-      "result": "python3 tools/xdiff.py bn4_gutsman_control: GutsMan V1 (BN4's enemy 0x84) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS, the traces the same at every frame (masks none). His objects appear from t265 (third-kind types in the trace's numbers 0xB2, 0xC0, 0xC2, 0x7F; the machine gun's every 11 frames from t461 and t912).",
-      "meaning": "The BN4 pipeline holds for a Navi as it does for a virus: a Soul Navi's AI data (his side's) and his objects are traced the same in two runs, so gutsman_v1's BN4 side is a sound reference once his move is built.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-05",
-      "name": "gutsman_v1: GutsMan V1 in BN4's battle against his move into BN6's",
-      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 0x84 BN6's 0x384), FAIL at t1. With the trace's Navi block (BN4's +0x64 at BN6's +0x80), a pointer to his own AI data and his moved code read as such, the first differences: his collision's +0x0E (BN4 0x21, BN6 3), his AI data's +0x00 (0, 1), +0x0C (0, 0xA), +0x0E (0, 0xFF), +0x50 (BN4's control block pointer, 0), +0x78 (0, MegaMan's object), +0x7F (0, 0x40), his obj +0x91 (1, 0). The eighteen BN4 family specs, the controls, cangard_v1 and handi_v1 PASS with the comparator's changes.",
-      "meaning": "GutsMan's code runs in BN6's engine as a Navi and the comparator matches him; what parts first is what BN6's Navi actor gives every Navi at its spawn (the collision setup's argument, the AI data's fields) against BN4's init's, the next unit of the port.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-05",
-      "name": "gutsman_v1 from t1 to t265",
-      "result": "python3 tools/xdiff.py gutsman_v1: the same from t1 to t265 with his collision's own setup argument (0x21) ported and the comparator's Navi rules (navi_ai, the opening count by the frame's clock, his draws keyed by his code's room: 73 replayed, a spawn's leftover register, a slot's left sprite state); FAIL at t266, his sprite's screen place under the screen's shake (BN4 0xB3, BN6 0xB5 at +0x9C). The BN4 family specs, the controls, cangard_v1 and handi_v1 PASS; 181 of 181 mutations caught.",
-      "meaning": "GutsMan's step, decision, machine gun and his first attack's object run frame for frame as BN4's; what parts next is each engine's screen shake applied to sprites, the next unit.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's tournament presentation",
-      "date": "2026-11-05",
-      "name": "The bracket driven from Lan's room",
-      "result": "tools/romlab on tools/bn4_lab.py boot's state: the game state's +0 written 0x10-0x2C in turn showed the jack-in, the PET, the city map, The Den Battle Tournament's bracket (0x1C; 0x2C the same screen through mode 0x34) and the Chip Trader (0x20 and 0x24 drawn wrong without their set-up). Eight entrants poked at 0x02001460 + t * 0x20 and 0x0200ACC5 = t: each of the four tournaments' brackets drawn with the plates by id (colour with 0x40, grey without, MegaMan's for 0x1E in the final with bits 1 and 2; 0x81 left 0x01 as the screen left), lines lit by the rounds' bits. Probes: setup f12441, start f12442, lines f12443, state 4 from f12444; A at f12840, state 8 f12863, the map again after. Mode 0x24 written from the title screen draws the plates and lines over broken backgrounds.",
-      "meaning": "BN4's bracket is driven by six writes on a booted game in its map mode: the screen needs no story state, only the tournament's 32 bytes and the screen's three. Its frames are the oracle a moved copy would be proved against. What it cannot show: an entrant BN4 has no plate for.",
-      "link": "../multirom/bn4-tournament.md"
-    },
-    {
-      "feature": "BN4's tournament presentation",
-      "date": "2026-11-05",
-      "name": "Other games' faces on BN4's bracket",
-      "result": "tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8 6@0x0d on tools/bn4_lab.py boot's state: BN6's HeatMan (mugshot 0x47), BN5's NumberMan (list 8's 71), BN4's GutsMan's mugshot (the control) and BN6's SpoutMan (a head window of his battle sprite) converted into plates and written over plates 0x01, 0x05, 0x08 and 0x0D in romlab's ROM copy (384 bytes of tiles and four palettes each). The Den Battle Tournament opened with them: all eight in colour with every entrant in; after the first round HeatMan and the control grey, NumberMan and SpoutMan a step up in colour. tools/bn4_faces.py report: both sheets' 23 plates 12 tiles in the two objects, the frame in 14 and 15 but plates 0x04 and 0x05; all 22 entrants' faces found and converted (13 colours kept).",
-      "meaning": "BN4's bracket shows another game's Navi by data alone: a plate's tiles and palettes, no code. Every entrant the design allows has a face from his own game; a moved screen needs only its plate tables grown and the faces' sheets, about 13 KB, installed beside BN4's own.",
-      "link": "../multirom/bn4-tournament.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-05",
-      "name": "gutsman_v1 PASS",
-      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): PASS over every frame, its recorded verdict removed. Root causes one at a time: t266 the camera's shake (each game's draws from its own RNG word: paired as BN5's, legit.json's bn4 rng_twins with their word), then a cracked panel's flags of the last frame (BN4 +8, BN6 +0x18: mapped in the trace's layout; romlab's store watch on BN4's panels showed 0x0800927E the one writer), then the panel crack's sound and his pool's (paired), t295 his rocks' read of the other side's player (BN4's battle state +0x44, BN6's +0xD0 a side: the generator's battle_players, the port's), a moved sprite's pointer read by the nearest start (list 4's 0x0D's room reaching 0x0E), t361 the rocks' debris (the fourth kind's 0x09, each engine's own art: allowed on its sprite state). The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS; python3 tools/xdiff.py --mutations: 186 of 186 caught, five of GutsMan's new (a CurAction t1, his AI block t1, a sound slot t267, the collision argument t1, the rocks' player read t295).",
-      "meaning": "GutsMan V1's whole battle runs frame for frame as BN4's in BN6's engine; the BN4 Navi pipeline (recipe, install, sound pool, comparator) is proven on its first Navi, the base for the other seventeen.",
-      "link": "../multirom/bn4-navis.md"
-    },
-    {
-      "feature": "BN4's Navis in BN6's engine",
-      "date": "2026-11-05",
-      "name": "gutsman_v1 PASS from the sprite room",
-      "result": "python3 tools/xdiff.py gutsman_v1 with GutsMan's battle sprite in the shared room (filled at emu_battle_force's record): PASS over 1200 fight frames; --poke 08F2C801:03:1 (his seat's byte of XN_BN4_SPRITES made BN4's list 2 number 3, another Navi's sprite) FAIL at t1 (his sprite's frame pointers +0xB0, +0xB4 and +0x92), kept as a mutation. The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS.",
-      "meaning": "A BN4 Navi's battle sprite need not be resident: the room filled from the battle's record serves his whole battle frame for frame, and the comparator catches the wrong sprite in it.",
       "link": "../multirom/bn4-navis.md"
     },
     {
@@ -711,9 +579,49 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN4's Navis in BN6's engine",
       "date": "2026-11-05",
+      "name": "BN4's battle with GutsMan V1 fought twice",
+      "result": "python3 tools/xdiff.py bn4_gutsman_control: GutsMan V1 (BN4's enemy 0x84) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS, the traces the same at every frame (masks none). His objects appear from t265 (third-kind types in the trace's numbers 0xB2, 0xC0, 0xC2, 0x7F; the machine gun's every 11 frames from t461 and t912).",
+      "meaning": "The BN4 pipeline holds for a Navi as it does for a virus: a Soul Navi's AI data (his side's) and his objects are traced the same in two runs, so gutsman_v1's BN4 side is a sound reference once his move is built.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
       "name": "fireman_v1: FireMan V1 in BN4's battle against his move into BN6's",
       "result": "python3 tools/xdiff.py fireman_v1 (FireMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 1200, BN6's 1201); FAIL at t1, recorded: FireMan's own record, AI data and collision the same, his companion's sprite count (+0x91) BN4 2, BN6 1.",
       "meaning": "His move runs in BN6's engine to his battle's end; the first difference left is his companion's sprite count, not yet explained (GutsMan's own opening count, legit.json's opening_count, is a lead to verify, not an allowance).",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1 from t1 to t265",
+      "result": "python3 tools/xdiff.py gutsman_v1: the same from t1 to t265 with his collision's own setup argument (0x21) ported and the comparator's Navi rules (navi_ai, the opening count by the frame's clock, his draws keyed by his code's room: 73 replayed, a spawn's leftover register, a slot's left sprite state); FAIL at t266, his sprite's screen place under the screen's shake (BN4 0xB3, BN6 0xB5 at +0x9C). The BN4 family specs, the controls, cangard_v1 and handi_v1 PASS; 181 of 181 mutations caught.",
+      "meaning": "GutsMan's step, decision, machine gun and his first attack's object run frame for frame as BN4's; what parts next is each engine's screen shake applied to sprites, the next unit.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1: GutsMan V1 in BN4's battle against his move into BN6's",
+      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 0x84 BN6's 0x384), FAIL at t1. With the trace's Navi block (BN4's +0x64 at BN6's +0x80), a pointer to his own AI data and his moved code read as such, the first differences: his collision's +0x0E (BN4 0x21, BN6 3), his AI data's +0x00 (0, 1), +0x0C (0, 0xA), +0x0E (0, 0xFF), +0x50 (BN4's control block pointer, 0), +0x78 (0, MegaMan's object), +0x7F (0, 0x40), his obj +0x91 (1, 0). The eighteen BN4 family specs, the controls, cangard_v1 and handi_v1 PASS with the comparator's changes.",
+      "meaning": "GutsMan's code runs in BN6's engine as a Navi and the comparator matches him; what parts first is what BN6's Navi actor gives every Navi at its spawn (the collision setup's argument, the AI data's fields) against BN4's init's, the next unit of the port.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1 PASS from the sprite room",
+      "result": "python3 tools/xdiff.py gutsman_v1 with GutsMan's battle sprite in the shared room (filled at emu_battle_force's record): PASS over 1200 fight frames; --poke 08F2C801:03:1 (his seat's byte of XN_BN4_SPRITES made BN4's list 2 number 3, another Navi's sprite) FAIL at t1 (his sprite's frame pointers +0xB0, +0xB4 and +0x92), kept as a mutation. The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS.",
+      "meaning": "A BN4 Navi's battle sprite need not be resident: the room filled from the battle's record serves his whole battle frame for frame, and the comparator catches the wrong sprite in it.",
+      "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-05",
+      "name": "gutsman_v1 PASS",
+      "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): PASS over every frame, its recorded verdict removed. Root causes one at a time: t266 the camera's shake (each game's draws from its own RNG word: paired as BN5's, legit.json's bn4 rng_twins with their word), then a cracked panel's flags of the last frame (BN4 +8, BN6 +0x18: mapped in the trace's layout; romlab's store watch on BN4's panels showed 0x0800927E the one writer), then the panel crack's sound and his pool's (paired), t295 his rocks' read of the other side's player (BN4's battle state +0x44, BN6's +0xD0 a side: the generator's battle_players, the port's), a moved sprite's pointer read by the nearest start (list 4's 0x0D's room reaching 0x0E), t361 the rocks' debris (the fourth kind's 0x09, each engine's own art: allowed on its sprite state). The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS; python3 tools/xdiff.py --mutations: 186 of 186 caught, five of GutsMan's new (a CurAction t1, his AI block t1, a sound slot t267, the collision argument t1, the rocks' player read t295).",
+      "meaning": "GutsMan V1's whole battle runs frame for frame as BN4's in BN6's engine; the BN4 Navi pipeline (recipe, install, sound pool, comparator) is proven on its first Navi, the base for the other seventeen.",
       "link": "../multirom/bn4-navis.md"
     },
     {
@@ -723,6 +631,38 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "python3 tools/xdiff.py windman_v1 with his companions spawned at his spawn's end: still no fight (game state 0x0C, phase 0, 7800 frames) while the 0x5C's state 4 is BN4's raw bytes; with its movs r2,#4 at 0x080CCD2E made 0 (state 0, as FireMan's companion's mode 4) both battles run to their end and FAIL at t1 on his wind's +0x38 (BattleState +0x8C | +0xC4) and +0x4C (0 | WindMan). thunderman_v1 FAIL at t1 on his cloud (0x6A a step ahead), the same with or without BN6's Navi frame at his spawn's end; fireman_v1 FAIL at t1 unchanged (+0x91). gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; 187 of 187 mutations caught.",
       "meaning": "The companions' state 4 (their appear through BN4's tile buffer) is taken in BN6's battle and hangs it: the interim that runs it as state 0 lets WindMan fight, and his wind's two fields are what is left at t1.",
       "link": "../multirom/bn4-navis.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-05",
+      "name": "Other games' faces on BN4's bracket",
+      "result": "tools/bn4_faces.py show 1@1 26@5 bn4:0x42@8 6@0x0d on tools/bn4_lab.py boot's state: BN6's HeatMan (mugshot 0x47), BN5's NumberMan (list 8's 71), BN4's GutsMan's mugshot (the control) and BN6's SpoutMan (a head window of his battle sprite) converted into plates and written over plates 0x01, 0x05, 0x08 and 0x0D in romlab's ROM copy (384 bytes of tiles and four palettes each). The Den Battle Tournament opened with them: all eight in colour with every entrant in; after the first round HeatMan and the control grey, NumberMan and SpoutMan a step up in colour. tools/bn4_faces.py report: both sheets' 23 plates 12 tiles in the two objects, the frame in 14 and 15 but plates 0x04 and 0x05; all 22 entrants' faces found and converted (13 colours kept).",
+      "meaning": "BN4's bracket shows another game's Navi by data alone: a plate's tiles and palettes, no code. Every entrant the design allows has a face from his own game; a moved screen needs only its plate tables grown and the faces' sheets, about 13 KB, installed beside BN4's own.",
+      "link": "../multirom/bn4-tournament.md"
+    },
+    {
+      "feature": "BN4's tournament presentation",
+      "date": "2026-11-05",
+      "name": "The bracket driven from Lan's room",
+      "result": "tools/romlab on tools/bn4_lab.py boot's state: the game state's +0 written 0x10-0x2C in turn showed the jack-in, the PET, the city map, The Den Battle Tournament's bracket (0x1C; 0x2C the same screen through mode 0x34) and the Chip Trader (0x20 and 0x24 drawn wrong without their set-up). Eight entrants poked at 0x02001460 + t * 0x20 and 0x0200ACC5 = t: each of the four tournaments' brackets drawn with the plates by id (colour with 0x40, grey without, MegaMan's for 0x1E in the final with bits 1 and 2; 0x81 left 0x01 as the screen left), lines lit by the rounds' bits. Probes: setup f12441, start f12442, lines f12443, state 4 from f12444; A at f12840, state 8 f12863, the map again after. Mode 0x24 written from the title screen draws the plates and lines over broken backgrounds.",
+      "meaning": "BN4's bracket is driven by six writes on a booted game in its map mode: the screen needs no story state, only the tournament's 32 bytes and the screen's three. Its frames are the oracle a moved copy would be proved against. What it cannot show: an entrant BN4 has no plate for.",
+      "link": "../multirom/bn4-tournament.md"
+    },
+    {
+      "feature": "A Navi swapped mid-battle",
+      "date": "2026-11-04",
+      "name": "Three forms in one battle, and two mutations",
+      "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
+      "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
+      "link": "../rom/navis.md"
+    },
+    {
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-04",
+      "name": "BN4's songs copied into BN6, against BN4 playing them",
+      "result": "Each of BN4's 34 songs copied by xsong.c (--xsong-pack) and played by BN6's own sound engine in romlab, its title's entry pointed at the copy, beside BN4 playing the song from its title (frame 198), every part of MP2K's state compared for 900 frames with BN4's pointers moved to the copy's: 31 the same in every part once BN6 was given BN4's master volume (12, set by BN4's m4aSoundInit; BN6's 15); 0x0F and 0x1A differ only in a let-go PSG channel's echo count, their PSG registers the same every frame; 0x15's opening swell (two squares from volume 0, frames 20-216) stays silent in BN6, whose CgbSound lets go a channel the hardware stopped (NR52's bit, 0x0815122E), BN4's keeping it (0x08113532). BN4's drum kit was copied for the keys played (37-73), BN5's 308 copies byte for byte as before.",
+      "meaning": "BN4's music is ready for a run: it travels as BN5's did, and BN6's engine plays it as BN4's does but for one swell and the level. The library is another build of BN6's MP2K (its tables the same), so a BN4 song is proved frame by frame, not assumed from BN5's.",
+      "link": "../rom/bn4.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",
@@ -741,20 +681,12 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "link": "../multirom/bn4-souls.md"
     },
     {
-      "feature": "BN4 Red Sun's ROM",
+      "feature": "BN4's virus families in BN6's engine",
       "date": "2026-11-04",
-      "name": "BN4's songs copied into BN6, against BN4 playing them",
-      "result": "Each of BN4's 34 songs copied by xsong.c (--xsong-pack) and played by BN6's own sound engine in romlab, its title's entry pointed at the copy, beside BN4 playing the song from its title (frame 198), every part of MP2K's state compared for 900 frames with BN4's pointers moved to the copy's: 31 the same in every part once BN6 was given BN4's master volume (12, set by BN4's m4aSoundInit; BN6's 15); 0x0F and 0x1A differ only in a let-go PSG channel's echo count, their PSG registers the same every frame; 0x15's opening swell (two squares from volume 0, frames 20-216) stays silent in BN6, whose CgbSound lets go a channel the hardware stopped (NR52's bit, 0x0815122E), BN4's keeping it (0x08113532). BN4's drum kit was copied for the keys played (37-73), BN5's 308 copies byte for byte as before.",
-      "meaning": "BN4's music is ready for a run: it travels as BN5's did, and BN6's engine plays it as BN4's does but for one swell and the level. The library is another build of BN6's MP2K (its tables the same), so a BN4 song is proved frame by frame, not assumed from BN5's.",
-      "link": "../rom/bn4.md"
-    },
-    {
-      "feature": "A Navi swapped mid-battle",
-      "date": "2026-11-04",
-      "name": "Three forms in one battle, and two mutations",
-      "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
-      "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
-      "link": "../rom/navis.md"
+      "name": "BN6's opening a frame longer, the allowance gone",
+      "result": "python3 tools/xdiff.py over billy, spikey, shrimpy, walla, elmperor and cirkill v1-v3, cangard_v1, handi_v1, bn4_mettaur_control and bn4_mettaur_broken, with legit.json's bn4 align (each BN4-against-BN6 run printing xdiff: poke 080163fc (080163fc) = 2003, unrelocated) and no opening allowance: all 22 PASS, bn4_mettaur_broken at t202. Without the alignment (--poke 080163FC:2002:2) spikey_v1 and shrimpy_v3 FAIL at t1 (+0x91 BN4 5 | BN6 6); with it two frames (the new mutation, 2004) shrimpy_v3 FAILS at t1 (+0x91 BN4 5 | BN6 4). python3 tools/xdiff.py --mutations: 181 of 181 caught, the two the allowance's checks caught before caught still (the idle animation's first frame from the next one's data at t12 on its +0xB0, the paused after-state's sprite update aimed elsewhere at t1).",
+      "meaning": "The one paused update the openings left apart was the whole of the opening's difference: with BN6's opening a frame longer a moved BN4 family's sprite place is BN4's at every frame and no allowance is needed there; the alignment is exactly one frame (none and two both fail at t1). Its limit, unreached by any spec: a battle of two or more foes, where BN6's queue would put the frame on each foe's blink in turn.",
+      "link": "../devtools/differential.md"
     },
     {
       "feature": "BN4's virus families in BN6's engine",
@@ -773,12 +705,12 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "link": "../devtools/differential.md"
     },
     {
-      "feature": "BN4's virus families in BN6's engine",
-      "date": "2026-11-04",
-      "name": "BN6's opening a frame longer, the allowance gone",
-      "result": "python3 tools/xdiff.py over billy, spikey, shrimpy, walla, elmperor and cirkill v1-v3, cangard_v1, handi_v1, bn4_mettaur_control and bn4_mettaur_broken, with legit.json's bn4 align (each BN4-against-BN6 run printing xdiff: poke 080163fc (080163fc) = 2003, unrelocated) and no opening allowance: all 22 PASS, bn4_mettaur_broken at t202. Without the alignment (--poke 080163FC:2002:2) spikey_v1 and shrimpy_v3 FAIL at t1 (+0x91 BN4 5 | BN6 6); with it two frames (the new mutation, 2004) shrimpy_v3 FAILS at t1 (+0x91 BN4 5 | BN6 4). python3 tools/xdiff.py --mutations: 181 of 181 caught, the two the allowance's checks caught before caught still (the idle animation's first frame from the next one's data at t12 on its +0xB0, the paused after-state's sprite update aimed elsewhere at t1).",
-      "meaning": "The one paused update the openings left apart was the whole of the opening's difference: with BN6's opening a frame longer a moved BN4 family's sprite place is BN4's at every frame and no allowance is needed there; the alignment is exactly one frame (none and two both fail at t1). Its limit, unreached by any spec: a battle of two or more foes, where BN6's queue would put the frame on each foe's blink in turn.",
-      "link": "../devtools/differential.md"
+      "feature": "BN4 Red Sun's ROM",
+      "date": "2026-11-03",
+      "name": "A BN4 battle started from Lan's room",
+      "result": "In romlab from power-on (title, NEW GAME, the opening paged), BN4's encounter check patched to return a record started its battle in Lan's room: ACDC Area's first record two Mettaurs at (5,2) and (6,3), 40 HP each; a written record VolGear (80) and Billy (50) at the panels given; enemy 1 with kind 5 a rock. Battles with enemy 1, 3, 5 and 13 alone held 40, 100, 180 and 50 HP, which found the enemy records. The map loader's two literals (0x08028304, 0x0802831C) corrected the first reading of the net's groups (0x80 from 0x02834C), and with it ACDC Area at 0x90.",
+      "meaning": "BN4's battles can be started and watched at will: the harness the differential's reference will build on. Its group numbering is BN5's (net 0x80-0x94, the large areas 0x90-0x94).",
+      "link": "../rom/bn4.md"
     },
     {
       "feature": "BN4 Red Sun's ROM",
@@ -786,14 +718,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "BN4's tables by the shapes BN5's were found by",
       "result": "tools/rom_tables.py found its map and coordinate tables; a song-header scan found its song table and, as the control, BN5's at its known 0x155BF4; Cannon's codes at a 0x2C stride found its chip records and, as the control, BN5's record 1 (0x01E23C); its text spells letters as BN6's (Cannon, Mettaur found); every map of groups 0x80-0x88 drew whole in a Python copy of area_src.c's reader; tools/bn6f_match.py with BN4 in BN5's place located 1,650 functions and none of bn6f's RAM labels at Falzar's addresses.",
       "meaning": "BN4's data travels into BN6 as BN5's did (maps, songs, names, chip records in BN6's size); its code is further from BN6's than BN5's, so each transplant pairs more of its engine first.",
-      "link": "../rom/bn4.md"
-    },
-    {
-      "feature": "BN4 Red Sun's ROM",
-      "date": "2026-11-03",
-      "name": "A BN4 battle started from Lan's room",
-      "result": "In romlab from power-on (title, NEW GAME, the opening paged), BN4's encounter check patched to return a record started its battle in Lan's room: ACDC Area's first record two Mettaurs at (5,2) and (6,3), 40 HP each; a written record VolGear (80) and Billy (50) at the panels given; enemy 1 with kind 5 a rock. Battles with enemy 1, 3, 5 and 13 alone held 40, 100, 180 and 50 HP, which found the enemy records. The map loader's two literals (0x08028304, 0x0802831C) corrected the first reading of the net's groups (0x80 from 0x02834C), and with it ACDC Area at 0x90.",
-      "meaning": "BN4's battles can be started and watched at will: the harness the differential's reference will build on. Its group numbering is BN5's (net 0x80-0x94, the large areas 0x90-0x94).",
       "link": "../rom/bn4.md"
     },
     {
@@ -815,10 +739,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-25",
-      "name": "All nine missions' boards opened in romlab",
-      "result": "Each mission set (poke8 020022F4 n) and BN5's warp 0x0800552E into map 0x86:n-1 from a state after the intro, A tapped until BN5_LIB_STATE +0 read 8: all nine boards in the same framed panels and looks; five backdrops (ACDC 3's purple diamonds, Oran 3's with green specks, SciLab's purple binary digits, End's magenta diamonds for 4 and 5, the Undernet's and Nebula's purple static for 6-9); the BGM's song header 0x08175178 (song 0x22) at 0x02011470 on missions 2, 3, 5, 7 and 9, 0x1C (0x0816EB50) during the openings.",
-      "meaning": "A mission's look is its map, its backdrop and its board's colours; the overlay, the looks and the music are the same in all nine, so a dark layer takes its mission's map as one of BN5's net areas and nothing else changes (liberation_look.c, lib_look_mission).",
-      "link": "../game/liberation/building/mission-look.md"
+      "name": "A liberation turn's gauge left to fill",
+      "result": "In romlab, mission 1's first liberation battle, OK on the Custom screen and no key after: the gauge rose 0x3C0 a 30-frame step to 0x4000 and the next frame the Custom screen's phase (BattleState +1 8), +7 from 1 to 2.",
+      "meaning": "BN5 opens a liberation turn's Custom screen by itself as the gauge fills (its ask 0x08008BD2 tests the gauge-full flag 2, the other battles' 0x08008BB0 the L or R request 0x10); ours does the same through BN6's own way to the screen (liberation_battle.c).",
+      "link": "../game/liberation/building/battle-field.md"
     },
     {
       "feature": "BN5's Liberation Missions",
@@ -831,34 +755,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-25",
-      "name": "TinHawk's and Bladia's strikes and a guardian's return",
-      "result": "In romlab, missions 2 and 4 started by setting the mission byte and warping into their maps (0x86:01, 0x86:03), every Navi's Pass taken: a TinHawk two from MegaMan warps out (sprite list 7's 59, animations 4 and 5, as every unit's warp), lands 20 world units beside him in its strike (0x080AFFD0's two places by the RNG), BN5's blow (event list 0x08051904: list 7's 58 16 up, 0x6B, the board shaken 10 frames) and 0x10A, then warps home; a Bladia beside Colonel strikes in its pose 25-28 with the same blow and 0x10A, the red out 123 frames after the line, as BigBrute's. A BigBrute poked deleted beside its DarkHole rises on the hole at the phase's end (OBJ mosaic 15 to 0, sound 0x94) and warps to the free dark panel beside it nearest the Navi; the rule read in 0x0804E700-0x0804E858.",
-      "meaning": "Each strike and the return are BN5's, frame for frame, on the board; BN6's Darkloids strike with BN5's own blow, as two of BN5's Darkloids do.",
-      "link": "../game/liberation/overview.md"
-    },
-    {
-      "feature": "BN5's Liberation Missions",
-      "date": "2026-10-25",
-      "name": "A liberation turn's gauge left to fill",
-      "result": "In romlab, mission 1's first liberation battle, OK on the Custom screen and no key after: the gauge rose 0x3C0 a 30-frame step to 0x4000 and the next frame the Custom screen's phase (BattleState +1 8), +7 from 1 to 2.",
-      "meaning": "BN5 opens a liberation turn's Custom screen by itself as the gauge fills (its ask 0x08008BD2 tests the gauge-full flag 2, the other battles' 0x08008BB0 the L or R request 0x10); ours does the same through BN6's own way to the screen (liberation_battle.c).",
-      "link": "../game/liberation/building/battle-field.md"
-    },
-    {
-      "feature": "BN5's Liberation Missions",
-      "date": "2026-10-25",
-      "name": "BN5's Surrounded battle, and the same field in BN6's engine",
-      "result": "In romlab, the board's record getter 0x08008EEA patched in the loaded copy to hand out record 24: the field blue, red, blue two columns each, MegaMan at column 3, Lan's \"Surrounded! Press L or R Button to turn around!\", L turning MegaMan, the Mettaur on the left striking right, TURN 1 START!, the Custom screen opening at a full gauge. In BN6 (the foes step's sides@33): the same field, the left Mettaur facing MegaMan, L turning him, his buster hitting it; on seed 1's act 2 board a dark panel faced from 25,29: dark level 3, sides 33.",
-      "meaning": "BN6 kept BN5's Surrounded code whole; a liberation battle needs only its record's +6 and its foes set out as BN5's records set theirs.",
-      "link": "../game/liberation/building/battle-field.md"
-    },
-    {
-      "feature": "BN5's Liberation Missions",
-      "date": "2026-10-25",
-      "name": "The Darkloid's battle past three turns",
-      "result": "In romlab, record 40 (BlizzardMan's, mission 1) handed out by the patched getter, MegaMan held at 9999 HP (0x0203B224 each 20 frames): turns 1 and 2 opened their Custom screens, the gauge full in turn 3 ended the battle (loop phase 0x14), the board said \"Oh, no! Liberation failed!\". The battle reads the board only through 0x08053B9E and 0x08053BF4 (a unit's HP in and out).",
-      "meaning": "Every liberation battle runs three turns, the Darkloid's included; the stage 2 assumption (untimed, hits doubled from turn 11) is refuted: that double is a type 1 battle's, and liberation records are type 6.",
-      "link": "../game/liberation/building/battle-field.md"
+      "name": "A teammate's battle as MegaMan in his Soul",
+      "result": "On a dark board in the engine (--dev dark,souls=1 and 0x2B, BN5's ROM): the teammate's battle, his Soul's record written at OK's start (0x08029110) as UNITE's commit writes it with turns 0xFF, crossed MegaMan into ColonelSoul, ShadowSoul and ToadSoul as TURN 1 START! showed, his HP the teammate's (200, 350, 300) and kept after the battle; with --dev matehp=81 Colonel's deleting blow left 1 HP and ended the battle, Colonel off the board and MegaMan in play, the run going on.",
+      "meaning": "BN6's own cross at a turn's start carries a teammate's Soul from the first turn with no chip given; the Soul's life (soullife.c) keeps it for the whole battle where its turns are 0xFF.",
+      "link": "../game/liberation/building/stage-3-team.md"
     },
     {
       "feature": "BN5's Liberation Missions",
@@ -871,10 +771,42 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-25",
-      "name": "A teammate's battle as MegaMan in his Soul",
-      "result": "On a dark board in the engine (--dev dark,souls=1 and 0x2B, BN5's ROM): the teammate's battle, his Soul's record written at OK's start (0x08029110) as UNITE's commit writes it with turns 0xFF, crossed MegaMan into ColonelSoul, ShadowSoul and ToadSoul as TURN 1 START! showed, his HP the teammate's (200, 350, 300) and kept after the battle; with --dev matehp=81 Colonel's deleting blow left 1 HP and ended the battle, Colonel off the board and MegaMan in play, the run going on.",
-      "meaning": "BN6's own cross at a turn's start carries a teammate's Soul from the first turn with no chip given; the Soul's life (soullife.c) keeps it for the whole battle where its turns are 0xFF.",
-      "link": "../game/liberation/building/stage-3-team.md"
+      "name": "All nine missions' boards opened in romlab",
+      "result": "Each mission set (poke8 020022F4 n) and BN5's warp 0x0800552E into map 0x86:n-1 from a state after the intro, A tapped until BN5_LIB_STATE +0 read 8: all nine boards in the same framed panels and looks; five backdrops (ACDC 3's purple diamonds, Oran 3's with green specks, SciLab's purple binary digits, End's magenta diamonds for 4 and 5, the Undernet's and Nebula's purple static for 6-9); the BGM's song header 0x08175178 (song 0x22) at 0x02011470 on missions 2, 3, 5, 7 and 9, 0x1C (0x0816EB50) during the openings.",
+      "meaning": "A mission's look is its map, its backdrop and its board's colours; the overlay, the looks and the music are the same in all nine, so a dark layer takes its mission's map as one of BN5's net areas and nothing else changes (liberation_look.c, lib_look_mission).",
+      "link": "../game/liberation/building/mission-look.md"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "BN5's Surrounded battle, and the same field in BN6's engine",
+      "result": "In romlab, the board's record getter 0x08008EEA patched in the loaded copy to hand out record 24: the field blue, red, blue two columns each, MegaMan at column 3, Lan's \"Surrounded! Press L or R Button to turn around!\", L turning MegaMan, the Mettaur on the left striking right, TURN 1 START!, the Custom screen opening at a full gauge. In BN6 (the foes step's sides@33): the same field, the left Mettaur facing MegaMan, L turning him, his buster hitting it; on seed 1's act 2 board a dark panel faced from 25,29: dark level 3, sides 33.",
+      "meaning": "BN6 kept BN5's Surrounded code whole; a liberation battle needs only its record's +6 and its foes set out as BN5's records set theirs.",
+      "link": "../game/liberation/building/battle-field.md"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "Team ProtoMan's commands on Team Colonel's board",
+      "result": "Mission 1's board in romlab (the plain ROM; MegaMan walked to panel 0x7B,0x80 facing 0x7B,0x7F; a unit's Navi id, +1, poked; panels made dark in the RAM list, kept sorted): the window's mask each Navi id's from 0x08050048 (ProtoMan 0xD001, GyroMan 0x8011, SearchMan 0x8041, NapalmMan 0x8101, MagnetMan 0x8401, Meddy 0xC003); each command's panels as predicted from its shape (Napalm six: four ahead, the third's two sides; WideSwrd three across, as ScrenDiv; PanelSearch a line of four dark panels); GyroMan on a dark panel bombed it clean with no battle; MagnetBarrier put 0x40 in both teammates' flags, kept through the Darkloids' phase and cleared at the next PLAYER PHASE; PanelSearch over an item panel cut its line to it and went into a battle, over none ended with no battle; Napalm went into one battle on a dark panel. Each Navi's confirming line came from his own archive.",
+      "meaning": "BN5 runs both teams' commands from one code and table set; Team Colonel's ROM can lend Team ProtoMan's commands as they are. Static reading, not played: the harm MagnetBarrier makes 0 (0x08053D32) and the panels a won battle frees (0x0804C57C).",
+      "link": "../game/liberation/bn5/navis.md"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "The Darkloid's battle past three turns",
+      "result": "In romlab, record 40 (BlizzardMan's, mission 1) handed out by the patched getter, MegaMan held at 9999 HP (0x0203B224 each 20 frames): turns 1 and 2 opened their Custom screens, the gauge full in turn 3 ended the battle (loop phase 0x14), the board said \"Oh, no! Liberation failed!\". The battle reads the board only through 0x08053B9E and 0x08053BF4 (a unit's HP in and out).",
+      "meaning": "Every liberation battle runs three turns, the Darkloid's included; the stage 2 assumption (untimed, hits doubled from turn 11) is refuted: that double is a type 1 battle's, and liberation records are type 6.",
+      "link": "../game/liberation/building/battle-field.md"
+    },
+    {
+      "feature": "BN5's Liberation Missions",
+      "date": "2026-10-25",
+      "name": "TinHawk's and Bladia's strikes and a guardian's return",
+      "result": "In romlab, missions 2 and 4 started by setting the mission byte and warping into their maps (0x86:01, 0x86:03), every Navi's Pass taken: a TinHawk two from MegaMan warps out (sprite list 7's 59, animations 4 and 5, as every unit's warp), lands 20 world units beside him in its strike (0x080AFFD0's two places by the RNG), BN5's blow (event list 0x08051904: list 7's 58 16 up, 0x6B, the board shaken 10 frames) and 0x10A, then warps home; a Bladia beside Colonel strikes in its pose 25-28 with the same blow and 0x10A, the red out 123 frames after the line, as BigBrute's. A BigBrute poked deleted beside its DarkHole rises on the hole at the phase's end (OBJ mosaic 15 to 0, sound 0x94) and warps to the free dark panel beside it nearest the Navi; the rule read in 0x0804E700-0x0804E858.",
+      "meaning": "Each strike and the return are BN5's, frame for frame, on the board; BN6's Darkloids strike with BN5's own blow, as two of BN5's Darkloids do.",
+      "link": "../game/liberation/overview.md"
     },
     {
       "feature": "BN6's Virus Battler",
@@ -894,27 +826,11 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "feature": "BN5's Liberation Missions",
-      "date": "2026-10-25",
-      "name": "Team ProtoMan's commands on Team Colonel's board",
-      "result": "Mission 1's board in romlab (the plain ROM; MegaMan walked to panel 0x7B,0x80 facing 0x7B,0x7F; a unit's Navi id, +1, poked; panels made dark in the RAM list, kept sorted): the window's mask each Navi id's from 0x08050048 (ProtoMan 0xD001, GyroMan 0x8011, SearchMan 0x8041, NapalmMan 0x8101, MagnetMan 0x8401, Meddy 0xC003); each command's panels as predicted from its shape (Napalm six: four ahead, the third's two sides; WideSwrd three across, as ScrenDiv; PanelSearch a line of four dark panels); GyroMan on a dark panel bombed it clean with no battle; MagnetBarrier put 0x40 in both teammates' flags, kept through the Darkloids' phase and cleared at the next PLAYER PHASE; PanelSearch over an item panel cut its line to it and went into a battle, over none ended with no battle; Napalm went into one battle on a dark panel. Each Navi's confirming line came from his own archive.",
-      "meaning": "BN5 runs both teams' commands from one code and table set; Team Colonel's ROM can lend Team ProtoMan's commands as they are. Static reading, not played: the harm MagnetBarrier makes 0 (0x08053D32) and the panels a won battle frees (0x0804C57C).",
-      "link": "../game/liberation/bn5/navis.md"
-    },
-    {
-      "feature": "BN6's sound engine",
       "date": "2026-10-23",
-      "name": "BN5's MP2K library against BN6's",
-      "result": "From SoundMain (BN5 0x0814C9FC, BN6 0x0814F754) the next 0x2104 bytes differ in 24 literal words (the seven tables', the jump template's, the player and song tables', one RAM address) and 35 pointers moved by the block's move, 0x2D58; the tables (BN5 0x081BC74C-0x081BC930) equal BN6's; the m4aSoundMode word is 0x0093040D in both (BN5 0x08000568). BN5's title through the engine against the plain BN5 ROM in romlab, 20 s: envelopes at 0.90, octave bands within 0.7 dB to 12 kHz; BN6's title against it, 0.42 and 2.9 dB. BN6's 0x01, 0x13 and 0x66 still byte for byte the game's after the engine read songs per ROM.",
-      "meaning": "BN5's songs play as BN5 plays them on BN6's code and tables, their data from BN5's ROM.",
-      "link": "../research/sources.md#the-jukeboxs-songs"
-    },
-    {
-      "feature": "BN5's Liberation Missions",
-      "date": "2026-10-23",
-      "name": "A mission opened by its number and its map",
-      "result": "In romlab on the plain BN5 ROM, from a state after its intro: poke8 020022F4 N and BN5's own warp (0x0800552E) to map 0x86:(N-1) at the team record's place. The game state's sub-mode turned 0x18 and the board started for missions 1, 2, 3, 5, 7 and 9 (camera tour, tutorial or briefing, Order Points 3; mission 1: PHASE 1, TRGT PHASE 7 under L). Mission 1's 100 panels in RAM (0x02030000) are the ROM's list, kind for kind; its units (0x0203E000) MegaMan 100 HP, Colonel 200, BlizzardMan 400 at (0x87, 0x7B), two guardians 120 each at their holes.",
-      "meaning": "The records are the missions: a generated board in the same records would run on BN5's own board code, and the generator's numbers stand on BN5's.",
-      "link": "../game/liberation/bn5/overview.md#where-they-live"
+      "name": "A Darkloids' phase with MegaMan in reach",
+      "result": "In romlab on mission 1, both Navis' Pass taken, MegaMan's unit's world place (+0x1C, +0x20) poked beside a BigBrute and, in a second run, beside BlizzardMan: the guardian warps beside him (puff and lines out, the camera's pan, lines and puff in, 46 frames between its two 0xB4 sounds), its reach lit red (blinking twice, 0x91 each), its line (\"Grrrowl! BeastBreath!\", no face), its strike pose, the flame over MegaMan (0x6B), a yellow 20 over him and his HP 100 to 80, the red out 123 frames after the line closed; BlizzardMan heals at once after DARKLOID PHASE (effect 0x78, 0x8A), his reach lit, his line with his mugshot, his attack (33 frames), a Snowball falling on MegaMan, 40 harm. Guardians out of reach did not move.",
+      "meaning": "BN5 moves a guardian as one warp, not a walk, and shows a strike in five beats (the reach, the line, the pose, the effect, the harm's number): the board's Darkloids' phase is built on them, the Darkloid first (liberation_turn.c).",
+      "link": "../game/liberation/bn5/darkloids-phase.md"
     },
     {
       "feature": "BN5's Liberation Missions",
@@ -926,26 +842,26 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "BN5's Liberation Missions",
       "date": "2026-10-23",
-      "name": "A Darkloids' phase with MegaMan in reach",
-      "result": "In romlab on mission 1, both Navis' Pass taken, MegaMan's unit's world place (+0x1C, +0x20) poked beside a BigBrute and, in a second run, beside BlizzardMan: the guardian warps beside him (puff and lines out, the camera's pan, lines and puff in, 46 frames between its two 0xB4 sounds), its reach lit red (blinking twice, 0x91 each), its line (\"Grrrowl! BeastBreath!\", no face), its strike pose, the flame over MegaMan (0x6B), a yellow 20 over him and his HP 100 to 80, the red out 123 frames after the line closed; BlizzardMan heals at once after DARKLOID PHASE (effect 0x78, 0x8A), his reach lit, his line with his mugshot, his attack (33 frames), a Snowball falling on MegaMan, 40 harm. Guardians out of reach did not move.",
-      "meaning": "BN5 moves a guardian as one warp, not a walk, and shows a strike in five beats (the reach, the line, the pose, the effect, the harm's number): the board's Darkloids' phase is built on them, the Darkloid first (liberation_turn.c).",
-      "link": "../game/liberation/bn5/darkloids-phase.md"
+      "name": "A mission opened by its number and its map",
+      "result": "In romlab on the plain BN5 ROM, from a state after its intro: poke8 020022F4 N and BN5's own warp (0x0800552E) to map 0x86:(N-1) at the team record's place. The game state's sub-mode turned 0x18 and the board started for missions 1, 2, 3, 5, 7 and 9 (camera tour, tutorial or briefing, Order Points 3; mission 1: PHASE 1, TRGT PHASE 7 under L). Mission 1's 100 panels in RAM (0x02030000) are the ROM's list, kind for kind; its units (0x0203E000) MegaMan 100 HP, Colonel 200, BlizzardMan 400 at (0x87, 0x7B), two guardians 120 each at their holes.",
+      "meaning": "The records are the missions: a generated board in the same records would run on BN5's own board code, and the generator's numbers stand on BN5's.",
+      "link": "../game/liberation/bn5/overview.md#where-they-live"
+    },
+    {
+      "feature": "BN6's sound engine",
+      "date": "2026-10-23",
+      "name": "BN5's MP2K library against BN6's",
+      "result": "From SoundMain (BN5 0x0814C9FC, BN6 0x0814F754) the next 0x2104 bytes differ in 24 literal words (the seven tables', the jump template's, the player and song tables', one RAM address) and 35 pointers moved by the block's move, 0x2D58; the tables (BN5 0x081BC74C-0x081BC930) equal BN6's; the m4aSoundMode word is 0x0093040D in both (BN5 0x08000568). BN5's title through the engine against the plain BN5 ROM in romlab, 20 s: envelopes at 0.90, octave bands within 0.7 dB to 12 kHz; BN6's title against it, 0.42 and 2.9 dB. BN6's 0x01, 0x13 and 0x66 still byte for byte the game's after the engine read songs per ROM.",
+      "meaning": "BN5's songs play as BN5 plays them on BN6's code and tables, their data from BN5's ROM.",
+      "link": "../research/sources.md#the-jukeboxs-songs"
     },
     {
       "feature": "Arena",
       "date": "2026-10-22",
-      "name": "Two MegaMen a side: a partner's own Custom screen, BN6's own",
-      "result": "A lone core loaded from his side's GBA at a Custom screen shows Lan's 'Communication error' within frames; a plain copy of the pair (both GBAs on their own cable, no hook) copied in each turn, his deck written into BN6_BATTLE_DECK and BN6_BATTLE_STEP put back to 0, has BN6 set its Custom screen up anew with his chips (BusterUp, Sword, Cannon, Atk+10, MiniBomb where his lead's offers a Cannon A first) and take his keys by its own rules; OK takes BN6_CUSTOM_MODE to 0x08 with his picks read (3 and 4). His picks crossed as pick messages in his stream and went into his hand on both GBAs at the same iteration: 1,315 iterations 0 apart with 135 rollbacks and with none, all 26 hashes the same; arenaroll=8 200 of 200 the same, its 26 hashes the delay alone's; his hand a chip short on the second GBA alone parts them from iteration 201. A frame of his screen 1.37 to 1.41 ms, a turn's copy 0.12 to 0.15 ms, making it once 160 ms. The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
-      "meaning": "A partner needs no GBA of his own in the pair: BN6's own Custom screen runs on his client alone, and the battle stays deterministic because only his picks cross.",
-      "link": "../online/arena/two-a-side/custom-screen.md"
-    },
-    {
-      "feature": "Arena",
-      "date": "2026-10-22",
-      "name": "Two MegaMen a side: the leads wait for their partners",
-      "result": "BN6's link battle closes its Custom screen once both GBAs' packets (bn6f sub_800B3A2, 0x0800B3A2: the mark 0x56789123, the hand, the NaviStats, the Cross's record) have come over the cable, checked each frame of mode 0x14 at 0x08026DEC; holding a side's packet back until its partner's picks are in makes both GBAs wait by BN6's own cable (the other shows BN6's Cstmzing... over the held side). A partner 10 s slow each turn: 3,035 iterations 0 apart, 91 hashes the same with 482 rollbacks and with none, arenaroll=8 683 of 683; a partner who never picks is ended by his client's send at 3,480 frames held, a client gone quiet by the pair's own limit at 3,600 (216 hashes the same with and without rollbacks). The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
-      "meaning": "A partner can be waited for without any clock: the hold is read in the side's GBA's RAM and crosses by BN6's own link, so every client and spectator agrees on the moment the screen closes.",
-      "link": "../online/arena/two-a-side/leads-wait.md"
+      "name": "Two MegaMen a side: a partner's Beast Out, its turns as a lead's",
+      "result": "Gregar's emblem commits a Beast Out into the same record as CROSSSELECT (0x08029344: form 0xB), so a partner's crosses as his Cross does. BN6 counts a form's turns for each side's player alone (0x08015A16 as each screen opens, 0x08015A38 as the crossing controller is done) and asks a Beast Out's end for the controller's records alone (0x080159C6, 0x08015994, mode 8's wait 0x08014A00): the two counts' ends hooked and their bodies entered again with his object, the end asked from the turn check's end by calling BN6's routines back to the hook. Control: the leads taking Beast Out by the same keys, each lead and his partner in form 0xB with the same BeastOutCounter at every turn's check (3, 2 at iteration 1084, 1 at 1897). 2,173 iterations 0 apart, 52 hashes the same with 261 rollbacks and with none; arenaroll=8 396 of 396 the same; none on the second GBA parts them from iteration 1; the leads too: 2,902 iterations 0 apart, 104 hashes the same with 524 rollbacks and without. With all four in Beast Out under the delay alone (arenawindow=0, and arenaroll=8 over it) the GBAs part at iteration 2305 of 2,375, the partners' keys 46 iterations late: the same with the partners' turn hooks off, so the GBAs drift past the rings' delay.",
+      "meaning": "A partner's Beast Out is BN6's own, his turns counted by BN6's routines run for him; the rings' delay meets its first limit in a lead's Beast Out under the stall.",
+      "link": "../online/arena/two-a-side/cross.md"
     },
     {
       "feature": "Arena",
@@ -966,6 +882,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "Arena",
       "date": "2026-10-22",
+      "name": "Two MegaMen a side: a partner's own Custom screen, BN6's own",
+      "result": "A lone core loaded from his side's GBA at a Custom screen shows Lan's 'Communication error' within frames; a plain copy of the pair (both GBAs on their own cable, no hook) copied in each turn, his deck written into BN6_BATTLE_DECK and BN6_BATTLE_STEP put back to 0, has BN6 set its Custom screen up anew with his chips (BusterUp, Sword, Cannon, Atk+10, MiniBomb where his lead's offers a Cannon A first) and take his keys by its own rules; OK takes BN6_CUSTOM_MODE to 0x08 with his picks read (3 and 4). His picks crossed as pick messages in his stream and went into his hand on both GBAs at the same iteration: 1,315 iterations 0 apart with 135 rollbacks and with none, all 26 hashes the same; arenaroll=8 200 of 200 the same, its 26 hashes the delay alone's; his hand a chip short on the second GBA alone parts them from iteration 201. A frame of his screen 1.37 to 1.41 ms, a turn's copy 0.12 to 0.15 ms, making it once 160 ms. The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
+      "meaning": "A partner needs no GBA of his own in the pair: BN6's own Custom screen runs on his client alone, and the battle stays deterministic because only his picks cross.",
+      "link": "../online/arena/two-a-side/custom-screen.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-22",
       "name": "Two MegaMen a side: a partner's Program Advance",
       "result": "Cannon A, B and C picked in order on his own screen: BN6's OK (0x08029110) makes Z-Canon1 (0x140) through its check (0x08029520), its next mode 0x10, the hand it builds at 0x020366C0 chips 0x140, 0xFFFF, 0x0001, powers 300, 0, 40. His client finds the place and count the pair's own build gives that hand from (picks 0 to 2) and crosses them before his picks; both GBAs write his hand Z-Canon1, power 300; his Z-Canon1 takes side 1's partner from 421 to 121 and side 1's player from 78 to 0. 1,284 iterations 0 apart, 33 hashes the same with 163 rollbacks and with none; arenaroll=8 254 of 254 the same; the PA left out on the second GBA alone parts them at iteration 4.",
       "meaning": "BN6's OK decides his Program Advance on his screen; what crosses is where it joined his picks.",
@@ -974,10 +898,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "Arena",
       "date": "2026-10-22",
-      "name": "Two MegaMen a side: a partner's Beast Out, its turns as a lead's",
-      "result": "Gregar's emblem commits a Beast Out into the same record as CROSSSELECT (0x08029344: form 0xB), so a partner's crosses as his Cross does. BN6 counts a form's turns for each side's player alone (0x08015A16 as each screen opens, 0x08015A38 as the crossing controller is done) and asks a Beast Out's end for the controller's records alone (0x080159C6, 0x08015994, mode 8's wait 0x08014A00): the two counts' ends hooked and their bodies entered again with his object, the end asked from the turn check's end by calling BN6's routines back to the hook. Control: the leads taking Beast Out by the same keys, each lead and his partner in form 0xB with the same BeastOutCounter at every turn's check (3, 2 at iteration 1084, 1 at 1897). 2,173 iterations 0 apart, 52 hashes the same with 261 rollbacks and with none; arenaroll=8 396 of 396 the same; none on the second GBA parts them from iteration 1; the leads too: 2,902 iterations 0 apart, 104 hashes the same with 524 rollbacks and without. With all four in Beast Out under the delay alone (arenawindow=0, and arenaroll=8 over it) the GBAs part at iteration 2305 of 2,375, the partners' keys 46 iterations late: the same with the partners' turn hooks off, so the GBAs drift past the rings' delay.",
-      "meaning": "A partner's Beast Out is BN6's own, his turns counted by BN6's routines run for him; the rings' delay meets its first limit in a lead's Beast Out under the stall.",
-      "link": "../online/arena/two-a-side/cross.md"
+      "name": "Two MegaMen a side: the leads wait for their partners",
+      "result": "BN6's link battle closes its Custom screen once both GBAs' packets (bn6f sub_800B3A2, 0x0800B3A2: the mark 0x56789123, the hand, the NaviStats, the Cross's record) have come over the cable, checked each frame of mode 0x14 at 0x08026DEC; holding a side's packet back until its partner's picks are in makes both GBAs wait by BN6's own cable (the other shows BN6's Cstmzing... over the held side). A partner 10 s slow each turn: 3,035 iterations 0 apart, 91 hashes the same with 482 rollbacks and with none, arenaroll=8 683 of 683; a partner who never picks is ended by his client's send at 3,480 frames held, a client gone quiet by the pair's own limit at 3,600 (216 hashes the same with and without rollbacks). The normal NetBattle unchanged (frame 2690, 86d2f837337a1494).",
+      "meaning": "A partner can be waited for without any clock: the hold is read in the side's GBA's RAM and crosses by BN6's own link, so every client and spectator agrees on the moment the screen closes.",
+      "link": "../online/arena/two-a-side/leads-wait.md"
     },
     {
       "feature": "Net Square",
@@ -1006,6 +930,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "Arena",
       "date": "2026-10-21",
+      "name": "A rematch in a second: BN6's random numbers at a link battle's start",
+      "result": "Both random words (0x020013F0, 0x02001120) read on both GBAs of the pair a frame at a time through the way in's last two steps: alike on the two GBAs all the way, stepped as on a map until Practice's last confirm; 19 frames after that press the battle draws the first word once and keeps it, 71 frames on puts it back as its opening ends, and the folders are shuffled from the second the frame after. Both words written from a seed at the start of that step change both GBAs' first hands (seed 7: 1636 2448 2448 0201 0605; seed 8: 0236 3459 34af 009a 0236; none: 0001 34c0 0236 0201 2447) and every one of the battle's 44 hashes; the pair kept at that step and gone into again with seed 8 deals seed 8's hands and gives its 44 hashes byte for byte, 244 frames of the pair instead of 1,817.",
+      "meaning": "A rematch needs no new way in: the pair kept where the bout's seed goes in, and the seed (the battle's ID, known to both players and every spectator) makes each bout its own.",
+      "link": "../online/arena/from-square/rematch-in-a-second.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-21",
       "name": "Two MegaMen a side (epic #167's spike)",
       "result": "With a side's second MegaMan's keys written at the battle loop's key copy (0x08012DFC) by the loop's iteration, both GBAs' battles agree at every iteration: the research harness over a whole battle (every T1, T3 and T4 object, AI data, NaviStats, hand and random number compared; nothing apart beyond BN6's own 1v1's fields) and the pair under --dev rollbench,arena2v2 (489 iterations, 0 apart, 11 rollbacks the same); one key flipped on one GBA parts them (325 apart). The feasibility study's one-frame skew was its harness: every mode it ran was mode 1, which scheduled the partner by each core's own frame counter, a frame or two apart at the same iteration.",
       "meaning": "BN6's engine runs two MegaMen a side alike on both GBAs; a partner's keys must enter by the battle's iteration. Under full rules BN5's chip AI gave both of side 0's MegaMen one AI data block, which the flag keeps to the first.",
@@ -1029,11 +961,19 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "feature": "Arena",
-      "date": "2026-10-21",
-      "name": "A rematch in a second: BN6's random numbers at a link battle's start",
-      "result": "Both random words (0x020013F0, 0x02001120) read on both GBAs of the pair a frame at a time through the way in's last two steps: alike on the two GBAs all the way, stepped as on a map until Practice's last confirm; 19 frames after that press the battle draws the first word once and keeps it, 71 frames on puts it back as its opening ends, and the folders are shuffled from the second the frame after. Both words written from a seed at the start of that step change both GBAs' first hands (seed 7: 1636 2448 2448 0201 0605; seed 8: 0236 3459 34af 009a 0236; none: 0001 34c0 0236 0201 2447) and every one of the battle's 44 hashes; the pair kept at that step and gone into again with seed 8 deals seed 8's hands and gives its 44 hashes byte for byte, 244 frames of the pair instead of 1,817.",
-      "meaning": "A rematch needs no new way in: the pair kept where the bout's seed goes in, and the seed (the battle's ID, known to both players and every spectator) makes each bout its own.",
-      "link": "../online/arena/from-square/rematch-in-a-second.md"
+      "date": "2026-10-18",
+      "name": "A carried chip in the pair",
+      "result": "Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice.",
+      "meaning": "A run's chip fights natively; the installer for a whole loadout is still to build.",
+      "link": "../online/link.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-18",
+      "name": "BN5 in both pair cores, two clients",
+      "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
+      "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
+      "link": "../online/arena/from-square/full-rules.md"
     },
     {
       "feature": "Arena",
@@ -1054,42 +994,34 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "Arena",
       "date": "2026-10-18",
-      "name": "A carried chip in the pair",
-      "result": "Cannon A, given by BN6's own routine, chosen and hitting for 40 in Practice.",
-      "meaning": "A run's chip fights natively; the installer for a whole loadout is still to build.",
-      "link": "../online/link.md"
-    },
-    {
-      "feature": "Arena",
-      "date": "2026-10-18",
-      "name": "BN5 in both pair cores, two clients",
-      "result": "The same installs' record on both (1,913,709 bytes, 132 hooks) and the same ready hash; Alpha's MrkCan1 took Beta from 100 to 30 on both screens, every hash agreeing to the end; a desync and two records apart each stopped both.",
-      "meaning": "Two games with BN5's ROM make byte-identical pairs from their own ROMs; a difference in the installs is caught at the ready.",
-      "link": "../online/arena/from-square/full-rules.md"
-    },
-    {
-      "feature": "Arena",
-      "date": "2026-10-18",
       "name": "UNITE across the cable",
       "result": "Both GBAs number the sides alike (BN6_BATTLE_SIDE 0 on the challenger's core, 1 on the other's); with the committed Soul carried at the frame's end both cores read side 0 in form 8 with Soul 11 from the same frame, and both screens drew KnightMan's summon and KnightSoul, 36 hashes agreeing.",
       "meaning": "BN6's link carries the form and not the Soul; the pair carries the Soul, and the look is drawn by the side the sprite selector's caller draws.",
       "link": "../online/arena/from-square/full-rules.md"
     },
     {
-      "feature": "Net Square",
+      "feature": "Arena",
       "date": "2026-10-15",
-      "name": "Two games through the hosted server",
-      "result": "The same room built from seed 120 on both; 211 peer positions matched; round trips 33 to 49 ms; both MegaMen back unchanged, all 24 checkpoint files unchanged.",
-      "meaning": "Presence over the public internet works, and a visit leaves the save alone.",
-      "link": "../online/overview.md"
+      "name": "Practice on one pair of cores",
+      "result": "BN6's Practice unpatched: 18,855 serial transfers, 100 to 0, both back at the menu, all 1,433 battle frames agreeing.",
+      "meaning": "BN6's own NetBattle runs on two linked cores without help.",
+      "link": "../online/link.md"
     },
     {
-      "feature": "Net Square",
+      "feature": "Arena",
       "date": "2026-10-15",
-      "name": "Sixteen games, two full channels",
-      "result": "10,248 peer positions matched; every game's loadout back after a disconnect; 192 checkpoint files unchanged.",
-      "meaning": "A full room holds on one machine; not a measure of handhelds or a busy network.",
-      "link": "../online/overview.md"
+      "name": "ROM-free cable on every desktop and the Nova",
+      "result": "256 transfers and all 1,024 received words right on Linux, Windows x64, macOS ARM64 and the Nova.",
+      "meaning": "mGBA's lockstep cable links two cores on every system tried.",
+      "link": "../online/link.md"
+    },
+    {
+      "feature": "Arena",
+      "date": "2026-10-15",
+      "name": "Serial words sent over a socket",
+      "result": "Completes at no delay; at 50, 100 and 150 ms only 95, 48 and 35 battle frames in a minute.",
+      "meaning": "The cable cannot be split across the network.",
+      "link": "../online/link.md"
     },
     {
       "feature": "Net Square",
@@ -1108,28 +1040,20 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "link": "../online/overview.md"
     },
     {
-      "feature": "Arena",
+      "feature": "Net Square",
       "date": "2026-10-15",
-      "name": "ROM-free cable on every desktop and the Nova",
-      "result": "256 transfers and all 1,024 received words right on Linux, Windows x64, macOS ARM64 and the Nova.",
-      "meaning": "mGBA's lockstep cable links two cores on every system tried.",
-      "link": "../online/link.md"
+      "name": "Sixteen games, two full channels",
+      "result": "10,248 peer positions matched; every game's loadout back after a disconnect; 192 checkpoint files unchanged.",
+      "meaning": "A full room holds on one machine; not a measure of handhelds or a busy network.",
+      "link": "../online/overview.md"
     },
     {
-      "feature": "Arena",
+      "feature": "Net Square",
       "date": "2026-10-15",
-      "name": "Practice on one pair of cores",
-      "result": "BN6's Practice unpatched: 18,855 serial transfers, 100 to 0, both back at the menu, all 1,433 battle frames agreeing.",
-      "meaning": "BN6's own NetBattle runs on two linked cores without help.",
-      "link": "../online/link.md"
-    },
-    {
-      "feature": "Arena",
-      "date": "2026-10-15",
-      "name": "Serial words sent over a socket",
-      "result": "Completes at no delay; at 50, 100 and 150 ms only 95, 48 and 35 battle frames in a minute.",
-      "meaning": "The cable cannot be split across the network.",
-      "link": "../online/link.md"
+      "name": "Two games through the hosted server",
+      "result": "The same room built from seed 120 on both; 211 peer positions matched; round trips 33 to 49 ms; both MegaMen back unchanged, all 24 checkpoint files unchanged.",
+      "meaning": "Presence over the public internet works, and a visit leaves the save alone.",
+      "link": "../online/overview.md"
     },
     {
       "feature": "Trade",

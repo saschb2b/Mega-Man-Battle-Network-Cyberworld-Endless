@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a panel grab that takes the column",
+  "spec": "bn4_chip_panlgrab",
+  "poke": [
+   "08023990:01:1"
+  ],
+  "what": "BN6's PanlGrab's record (162) with its first parameter 1, AreaGrab's, where it holds 0: a column stolen where BN4's PanlGrab steals a panel"
+ }
+]

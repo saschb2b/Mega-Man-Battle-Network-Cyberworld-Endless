@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the struck arm's slot another",
+  "spec": "bn4_chip_heatshot_struck",
+  "poke": [
+   "080CD6B8:6DE8"
+  ],
+  "what": "the arm's copy's read of its slot (BN4 0x080CD6B8: ldr r0,[r5,#0x60], the place of MegaMan's +0x4C it was given) made ldr r0,[r5,#0x5c]: the arm does not see its slot cleared as he is struck"
+ }
+]
