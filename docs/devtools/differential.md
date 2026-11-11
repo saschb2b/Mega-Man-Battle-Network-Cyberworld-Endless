@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T12:47:54Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T13:53:55Z }
 ---
 
 # The differential: a moved family against its own game
@@ -935,6 +935,14 @@ it takes the slot one of its kind left the frame before
 (`assign_roles`): an engine spark BN6 ends a frame sooner than BN5, whose
 next spark took its slot in BN6 and another in BN5 (`magnetman_v1_keys` at
 t272).
+
+A poke's address redirects to a moved range's copy only where that copy is
+the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
+code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
+so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
+`0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
+took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
+uncaught, until this).
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
