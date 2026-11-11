@@ -6,11 +6,12 @@
 # what is free; build.py lint fails while they differ. How a region is
 # placed: docs/engine/emulation/free-space.md.
 #
-# zone KEY  rom|ram  START  END  [start=NAME,end=NAME]  title
+# zone KEY  rom|ram|save  START  END  [start=NAME,end=NAME]  title
 #   a span of one kind; its regions follow it, in address order.
 # NAME  START  END  FLAGS  OWNER  CONCEPT  what it holds
 #   START and END: +0x... from EMU_FREE in the ROM copy, 0x... a RAM
-#   address; [START, END) is the region's own.
+#   address (the work RAM's, or in a save zone the cart's save RAM's);
+#   [START, END) is the region's own.
 #   FLAGS (comma-joined, - for none): end (NAME_END is defined too),
 #   in=PARENT (a part of PARENT, laid out inside it), free (a named span
 #   nothing writes yet).
@@ -136,3 +137,6 @@ RAM_TEAM_TICK          0x0203FFF0  0x0203FFF4  -    arena_team.c            rom/
 RAM_CHIP_AI_ROOMS      0x0203FFF4  0x0203FFF8  -    darkinvs.c              engine/emulation/memory.md  u32 the entries of BN6's AI data's pool BN5's chip AI took for its rooms (BN6_AI_POOL_USED's bits; darkinvs_room.h, issue #182)
 RAM_TEAM_CLOCK         0x0203FFF8  0x0203FFFC  -    arena_team_custom.c     rom/online.md               u16 two MegaMen a side's turn's clock: frames since the first OK of the turn this core has seen, then u8 1 once seen (team_hurry.h)
 RAM_PA_WIDE            0x0203FFFC  0x02040000  -    xchips_wide.c           rom/chips-code.md           u32 the Program Advances past nine bits formed this battle, a bit an id from BN6_PA_WIDE_FIRST (side 0's: BN6's own bits end at id 383)
+
+zone save  save  0x0E006810  0x0E007E00  -  the cart's save RAM between BN6's save (0x0E000100-0x0E00680F) and its three small blocks (from 0x0E007E00): BN6's save library addresses none of it, and every state the engine writes holds it
+SRAM_PACK              0x0E006A00  0x0E007C50  end  xchips_pack.c           rom/chips-code.md           the chip pack's entries of ids 635-1023: 16 bytes that say they are made, then 12 bytes an id (BN6_PACK_SAVE, bn6_pack_entry)
