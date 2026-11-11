@@ -45,6 +45,7 @@ BIN := $(BIN_$(TARGET))
 
 SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
 SRCS := $(wildcard src/*/*.c)
+LAYER_MAKE_BUMPS := $(words $(wildcard src/net/layer_make.d/*.txt))
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 
 # The version the title shows: build.py passes its own (the tag, or the tag
@@ -52,6 +53,7 @@ OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
 # only when it changes, so only what shows it is built again.
 VERSION ?= $(shell git describe --tags --match 'v*' 2>/dev/null | sed 's/^v//' | grep . || echo dev)
 GEN := $(OUT)/gen
+LAYER_MAKE_GEN := $(GEN)/layer_make_count.h $(GEN)/layer_make_record.h
 # (the consoles' packages' version, two numbers of two digits: the
 # version's major and minor)
 APP_VER = $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' | xargs printf '%02d.%02d')
@@ -357,9 +359,24 @@ $(OUT)/obj/%.o: src/%.m | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC) $(filter-out -std=c11,$(CFLAGS)) -fobjc-arc -I$(GEN) -c -o $@ $<
 
-$(GEN)/version.h: FORCE
+$(GEN)/version.h: FORCE | $(LAYER_MAKE_GEN)
 	@mkdir -p $(GEN)
 	@printf '#define CW_VERSION "%s"\n' '$(VERSION)' > $@.new.$$$$; \
+	if cmp -s $@.new.$$$$ $@; then rm -f $@.new.$$$$; else mv $@.new.$$$$ $@; fi
+
+# The layers' make: how many bumps src/net/layer_make.d/ holds (layer_make.h's LAYER_MAKE), and for the unit
+# tests the make and hash dev recorded (tests/layer_make_hash.txt). Each is written anew only where it changed,
+# by a rule of its own, so that what includes one is rebuilt in the same run: the tests by naming it, the
+# game's objects by their .d files; and each is there before version.h, which everything waits for.
+$(GEN)/layer_make_count.h: FORCE
+	@mkdir -p $(GEN)
+	@printf '#define LAYER_MAKE_BUMPS %s\n' '$(LAYER_MAKE_BUMPS)' > $@.new.$$$$; \
+	if cmp -s $@.new.$$$$ $@; then rm -f $@.new.$$$$; else mv $@.new.$$$$ $@; fi
+
+$(GEN)/layer_make_record.h: FORCE
+	@mkdir -p $(GEN)
+	@read made hash < tests/layer_make_hash.txt; \
+	printf '#define LAYER_MAKE_RECORD %s\n#define LAYER_MAKE_RECORD_HASH %su\n' "$$made" "$$hash" > $@.new.$$$$; \
 	if cmp -s $@.new.$$$$ $@; then rm -f $@.new.$$$$; else mv $@.new.$$$$ $@; fi
 
 FORCE:
@@ -385,7 +402,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
-$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h | $(GEN)/version.h
+$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/backup_fixture.h tests/backup_fixture_v2.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
 # (a map's views, tests/test_core.c's test_area_views: area_src.c reads gfx.h's colours, and gfx.h includes SDL's header)
@@ -408,21 +425,21 @@ build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/sound
 
 TEST_TRANSFER_SRCS := tests/test_transfer.c src/launcher/mirror.c src/launcher/pick_saves.c src/launcher/pick_none.c src/launcher/pick_text.c \
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
-build/host/test_transfer: $(TEST_TRANSFER_SRCS) src/*/*.h | $(GEN)/version.h
+build/host/test_transfer: $(TEST_TRANSFER_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_TRANSFER_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_DISCOVERY_SRCS := tests/test_discovery.c src/launcher/mirror.c src/launcher/pick_saves.c \
 	src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
-build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h | $(GEN)/version.h
+build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE -DCW_DESKTOP $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
 	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
-build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h | $(GEN)/version.h
+build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_SAVES_SRCS) $(shell pkg-config --libs sdl2) -lm

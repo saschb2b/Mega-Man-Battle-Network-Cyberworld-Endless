@@ -199,10 +199,13 @@ part of the tree; a new file gets its line there.
   old saves: bump `RUN_MAGIC` in `save.c` (a `_Static_assert` on its size
   there fails the build until someone does, and sets the new size). Changing
   what a layer seed makes (layouts, object placement, loot and stock rolls):
-  bump `LAYER_MAKE` in `src/net/layer_make.h`, so a run saved by an older
-  build continues its layer afresh; where generation changed, the unit tests
-  fail on `LAYER_MAKE_HASH` beside it and name the new hash to set with
-  it. Emulator states (`boot-3.state`, `run.state`) are made on the device
+  bump `LAYER_MAKE` by adding a file to `src/net/layer_make.d/`,
+  `NNN-WORDS.txt` (the number it makes, a few words) with a clause on what
+  changed, so a run saved by an older build continues its layer afresh;
+  the build counts the files (`src/net/layer_make.h`). Where generation
+  changed and no file was added, the unit tests fail and name the file to
+  add; the hash they compare is `dev`'s workflow's to record
+  (`tests/layer_make_hash.txt`, never a branch's). Emulator states (`boot-3.state`, `run.state`) are made on the device
   and never committed.
 
 ## Code structure
@@ -318,10 +321,10 @@ It must, when:
   it, and wait for green on the new commit.
 - **It needs what merged since:** it calls, reads or tests something
   another PR changed, or takes a counted value another PR took too
-  (`LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`, an id, a slot, a
-  free-space region, the economy's bands): bring `dev` in and set the
-  value anew (the hash the unit tests name; two `LAYER_MAKE` bumps
-  become one) rather than merging it by hand.
+  (`RUN_MAGIC`, an id, a slot, a free-space region, the economy's
+  bands): bring `dev` in and set the value anew rather than merging it
+  by hand. `LAYER_MAKE` is no such value any more: a bump is a file, and
+  two branches' bumps both count.
 
 It does not, when:
 
@@ -331,8 +334,8 @@ It does not, when:
 - **The file is one no branch writes or shares:** the generated files
   (`docs/re/STATUS.md` and its dashboard, `docs/symbols/`, the counts on
   `docs/rom/symbols.md`, `docs/voice/catalog.json`, `docs/log.md`, each
-  concept's `generated` line) are written by `dev`'s workflow after each
-  merge, and the registries
+  concept's `generated` line, `tests/layer_make_hash.txt`) are written by
+  `dev`'s workflow after each merge, and the registries
   (`docs/re/ledger/`, `tests/xdiff/mutations/`, `tests/xdiff/legit/`,
   `docs/log.d/`) take a file an entry. A conflict in one of them means
   the branch still carries an old copy:

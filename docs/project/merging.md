@@ -3,7 +3,7 @@ type: Process
 title: "Merging in parallel"
 description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them; when a branch brings `dev` in, what that saves and what still conflicts."
 tags: [project, process, git, ci]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:09:35Z }
 sources:
   - { id: merges, title: "origin/dev's last 600 merge commits (6 October to 11 November 2026), each merge of dev into a branch redone with git merge-tree", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/commits/dev" }
   - { id: pr387, title: "Pull request #387 at 62c907ac against dev at dbecd569: GitHub's CONFLICTING, docs/log.md the only file", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/387" }
@@ -72,6 +72,7 @@ did anything to the other. These are therefore **written on `dev` alone**:
 | [Symbols](../rom/symbols.md)' numbers under What is mapped | `tools/symbols.py` | the same |
 | `docs/voice/catalog.json` | `tools/voice_catalog.py` | the words files, `docs/voice/sweep/` |
 | `docs/log.md`, and each concept's `generated` line | `tools/log_fold.py` | the entries' files in `docs/log.d/` ([The log](#the-log)) |
+| `tests/layer_make_hash.txt` | `tools/layer_make.py` | the unit tests, after a merge that added a bump ([Counters](#counters)) |
 
 All three tools need no ROM and nothing outside git, so a workflow can run
 them: `.github/workflows/generated.yml` runs `python3 tools/generated.py
@@ -212,6 +213,43 @@ since the commit it left `dev` at, put onto `dev`'s folder. An entry or a
 value both changed keeps `dev`'s and is printed with the branch's, to
 merge by hand.
 
+## Counters
+
+A value several branches raise is a line they all edit. The first of
+them, built on the owner's word of 11 November 2026:
+
+**`LAYER_MAKE`** (`src/net/layer_make.h`) was a number with its whole
+history in a comment on the same line, and `LAYER_MAKE_HASH` below it:
+every branch that changed what a seed makes rewrote both lines, and after
+two such merges the hash was neither branch's. It conflicted in 13 of the
+261 merges. Now:
+
+- A bump is a file, `src/net/layer_make.d/NNN-WORDS.txt`: the number that
+  bump makes it and a few words, holding the clause the comment held. The
+  build counts the files (the Makefile's and Android's CMake's
+  `layer_make_count.h`): `LAYER_MAKE` is 100 and their count. Two
+  branches that each bump add two files, and the merge counts both; two
+  files may carry the same number.
+- The hash is recorded with the make it was taken at in
+  `tests/layer_make_hash.txt`, which only `dev`'s workflow writes
+  (`tools/layer_make.py`, with the other [files a tool writes](#files-a-tool-writes)):
+  after a merge that added a bump it builds the unit tests and asks them
+  (`build/host/test_core --layer-make-hash`).
+- The unit tests pass where the hash is the recorded one, or where the
+  make is past the recorded one (a bump was added: the record follows
+  after the merge). They fail where generation changed and no bump was
+  added, and name the file to add. `build.py lint` holds the files well
+  formed and, on `main`, the record at the tree's make.
+
+Between a merge that bumps and the workflow's commit after it, `dev`'s
+make is past its record, and a change to generation without a bump would
+pass there; the workflow's run is a few minutes, and a red one is fixed
+before anything else merges.
+
+Not built, and still as [What it saves, and what is left](#what-it-saves-and-what-is-left)
+has them: the counts `tests/test_core.c` asserts, the free space's regions
+and the ids and slots branches take, `RUN_MAGIC`.
+
 ## When a branch brings dev in
 
 The rule is `AGENTS.md`'s (Pull requests, Merging). A branch brings `dev`
@@ -242,11 +280,10 @@ how often it did once the lines above are set aside:
 | `CHANGELOG.md` | 25 | A line per change under the coming version | Entries as files, folded as the log is |
 | `docs/code/emu.md`, `tools.md`, `gfx-and-audio.md` | 18, 6, 4 | A row per new file, added at the end or beside the last one added | Rows in the files' order |
 | `docs/multirom/index.md`, `docs/rom/index.md` and the other `index.md` | 15, 4 | A concept's line repeats its description | Written from the concepts' frontmatter, as the other generated files |
-| `src/net/layer_make.h` | 13 | A counter and its history on one line | Counted from a file a bump |
 | `tests/test_core.c` | 11 | Counts and asserts added in the same functions | Counts read off the tables |
 | `docs/rom/bn4.md` | 10 | A row per find, at the table's end | Rows in address order, not at the end |
 | `AGENTS.md` | 7 | The table of tasks, the rules, the checks: rows added side by side | None: a person's page, merged by hand |
 | `src/emu/free_space.h`, `docs/engine/emulation/memory.md` | 4, 4 | Written from `free_space.plan`, but the build needs them | Regions claimed before the work starts |
 
-None of these is built. The counters among them (`layer_make.h`, the
-tests' counts, the free space's regions) wait on the owner's word.
+None of these is built but `src/net/layer_make.h` (13), which no longer
+conflicts ([Counters](#counters)).

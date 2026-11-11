@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, release, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:09:35Z }
 ---
 
 # Tools and skills
@@ -48,4 +48,5 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 | `.claude/skills/course-check/` | The course check as a skill: the whole game's course reviewed (the players' statistics read first with `scripts/umami_summary.js`, a time-boxed team of six whose briefs are in `roles.md`, a devil's advocate, the owner's calls), written into [The core loop, reviewed](../game/core-loop.md), and the log of the checks run (`lessons.md`) |
 | `.claude/skills/agent-browser/` | The agent-browser skill: a real Chrome driven from the shell (`npm i -g agent-browser`), to look over the site at desktop and phone widths |
 | `tools/ci_changes.py` | Which of CI's eight conditional platform jobs a pull request runs ([Platforms](platforms.md#ci-on-a-pull-request)): by the platform's own folder, what every build shares, and source files that hold a system's own code; everything on a push or a run started by hand |
+| `tools/layer_make.py` | The layers' make ([Merging in parallel](../project/merging.md#counters)): `--lint` holds the bumps' files in `src/net/layer_make.d/` well formed, and with no argument it records the make and its hash in `tests/layer_make_hash.txt` from the unit tests, where a bump was added (`dev`'s workflow, through `tools/generated.py`) |
 | `tools/claims.py` | The claims of the branches in flight ([Claims](../project/claims.md)): lists them, and `--lint` (`build.py lint`) fails where a file is malformed, two claims meet in a space or a unit, or more than one changes `Run` |
