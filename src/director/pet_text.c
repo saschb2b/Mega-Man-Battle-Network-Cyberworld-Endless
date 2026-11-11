@@ -220,7 +220,7 @@ static void item_set(int id, int count) {
 /* a guardian's mail: its id is the navi's (BN6's own mails 1-18 are the
  * story's, which a run never delivers); then the lab's two */
 static bool mail_of(int navi) { return guardian_mailed(navi); }
-enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22 };
+enum { MAIL_REPORT = 19, MAIL_RECORDS = 20, MAIL_CODES = 21, MAIL_BBS = 22, MAIL_LAB = 23, MAIL_LAST = MAIL_LAB };
 
 /* `s` into a mail's pages: lines of twenty letters at most, three a page,
  * a page's end waiting and clearing (E7 00 F2) as BN6's mails do, '\f'
@@ -457,21 +457,31 @@ static int mail_body(int navi, uint8_t *out, int max) {
 	return k;
 }
 
+/* Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned):
+ * what the lab made and where it waits, then what it holds so far */
+static void lab_mail_text(char *out, size_t n) {
+	snprintf(out, n, "Lan,the lab built\nsomething from your\nbattle data.\f"
+		"A place to fight\ncopies of viruses\nMegaMan knows well.\f"
+		"Our Mr.Prog waits\nin your HP. A copy\ncan't delete him.\f"
+		"So far the data is\ncomplete on %d\nvirus families.", battle_data_families_complete());
+}
+
 static void install_mails(void) {
 	int slen = 0, blen = 0;
 	uint8_t *senders = unpack(BN6_MAIL_TEXT, &slen), *bodies = unpack(BN6_MAIL_BODIES, &blen);
 	if (!senders || !bodies) { free(senders); free(bodies); return; }
 	int ns = u16at(senders, 0) / 2, nb = u16at(bodies, 0) / 2;
-	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[MAIL_BBS + 1][16], about[MAIL_BBS + 1][24], body[MAIL_BBS + 1][2000];
+	static uint8_t sout[MAILS_MAX], bout[BODIES_MAX], from[MAIL_LAST + 1][16], about[MAIL_LAST + 1][24], body[MAIL_LAST + 1][2000];
 	Script srep[512] = { 0 }, brep[256] = { 0 };
-	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_BBS + 1) || nb < MAIL_BBS + 1) { free(senders); free(bodies); return; }
+	if (ns > 512 || nb > 256 || ns < 2 * (MAIL_LAST + 1) || nb < MAIL_LAST + 1) { free(senders); free(bodies); return; }
 	static const uint8_t tail[] = { 0xE7, 0x00, 0xE6 };
-	for (int m = 1; m <= MAIL_BBS; ++m) {
+	for (int m = 1; m <= MAIL_LAST; ++m) {
 		if (m >= MAIL_REPORT) {
 			static char text[2000];
-			static const char *const subjects[] = { "Dive report", "Records", "Compression", "Endless Net" };
+			static const char *const subjects[] = { "Dive report", "Records", "Compression", "Endless Net", "Battle Lab" };
 			if (m == MAIL_REPORT) report_text(text, sizeof text);
 			else if (m == MAIL_RECORDS) records_text(text, sizeof text);
+			else if (m == MAIL_LAB) lab_mail_text(text, sizeof text);
 			else codes_text(text, sizeof text);
 			srep[2 * m] = (Script){ from[m], words(m == MAIL_BBS ? "NetBBS" : "Dad", tail, 3, from[m], sizeof from[m]) };
 			srep[2 * m + 1] = (Script){ about[m], words(subjects[m - MAIL_REPORT], tail, 3, about[m], sizeof about[m]) };
@@ -501,7 +511,7 @@ static void install_mails(void) {
 
 int pet_mail_face(int m) {
 	if (m == MAIL_BBS) return FACE_NONE;
-	return (m >= MAIL_REPORT && m <= MAIL_CODES) || mail_of(m) ? FACE_DAD : FACE_NONE;
+	return (m >= MAIL_REPORT && m <= MAIL_CODES) || m == MAIL_LAB || mail_of(m) ? FACE_DAD : FACE_NONE;
 }
 
 /* The game's own giving of mail `m` (bn6f addMail_802f238), done here:
@@ -589,9 +599,13 @@ int pet_text_refresh(void) {
 	int posts = bbs_posts(post);
 	bool bbs_news = posts > profile.bbs_seen;
 	if (bbs_news) { profile.bbs_seen = (uint8_t)posts; profile_save(); }
-	for (int m = MAIL_BBS; m >= MAIL_REPORT; --m) {
-		if (m == MAIL_CODES && !entered) continue;
-		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : bbs_news;
+	/* (and the Battle Lab's, once the lab has sent it: NEW with each family whose data is complete since) */
+	int data = battle_data_families_complete();
+	bool lab_news = lab_there() && (data > profile.lab_mailed || !profile.lab_mailed);
+	if (lab_news) { profile.lab_mailed = (uint8_t)(data ? data : 1); profile_save(); }
+	for (int m = MAIL_LAST; m >= MAIL_REPORT; --m) {
+		if ((m == MAIL_CODES && !entered) || (m == MAIL_LAB && !lab_there())) continue;
+		bool news = m == MAIL_REPORT ? report_news : m == MAIL_RECORDS ? records_news : m == MAIL_CODES ? codes_news : m == MAIL_LAB ? lab_news : bbs_news;
 		mail_deliver(m);
 		if (news) { flag_set(BN6_FLAG_MAIL_NEW + m); flag_clear(BN6_FLAG_MAIL_READ + m); }
 		mail_first(m);

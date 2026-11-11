@@ -18,7 +18,7 @@
 #include "talk.h"
 #include "text.h"
 
-bool lab_there(void) { return dev.lab; }
+bool lab_there(void) { return dev.lab || profile.lab_sent; }
 
 /* his words: the first meeting's boxes once a profile, one box after;
  * then the flag that opens the builder */

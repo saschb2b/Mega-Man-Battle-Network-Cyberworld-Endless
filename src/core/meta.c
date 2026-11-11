@@ -327,6 +327,8 @@ void meta_run_begun(void) {
 	was_open = profile.run_open == RUN_OPEN;
 	profile.run_open = RUN_OPEN;
 	battle_data_begin(run.seed);
+	/* (the Battle Lab, by a run left without its end: sent with no word but Dad's mail) */
+	if (battle_data_families_complete() >= DATA_LAB_OPENS) profile.lab_sent = 1;
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
 	for (int n = 1; n <= 5; ++n)
@@ -415,8 +417,15 @@ static void earn_marks(bool won) {
 void meta_run_over(bool won) {
 	nsaid = 0;
 	marks_new = 0;
-	/* (the run's battle data on the families it deleted: battle_data.h) */
-	battle_data_run_end();
+	/* (the run's battle data on the families it deleted, battle_data.h; and
+	 * the Battle Lab, which Dad's lab sends once it holds enough:
+	 * docs/game/battle-lab.md, How it is earned) */
+	int data = battle_data_run_end();
+	if (!profile.lab_sent && battle_data_families_complete() >= DATA_LAB_OPENS) {
+		profile.lab_sent = 1;
+		say("%s", "the Battle Lab");
+	} else if (profile.lab_sent && data == 1) say("%s", "battle data on 1 family");
+	else if (profile.lab_sent && data) say("battle data on %d families", data);
 	/* the endless net, once a short one is won */
 	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
 	if (won) profile.short_wins += run.mode == RUN_SHORT;

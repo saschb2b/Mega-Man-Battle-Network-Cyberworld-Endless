@@ -405,6 +405,36 @@ is used.
   the count of families whose data is complete. Still to come: what
   makes him appear for a player (three complete families and Dad's mail).
 
+- **Turned on** (step 5).
+  - *The condition.* The Lab is sent (`Profile.lab_sent`) as a run ends
+    with the data on three families complete, and the summary says "the
+    Battle Lab" among what the run opened; a run left without its end
+    sends it as the next begins. The keeper stands in Lan's HP from then
+    on. A later run's complete families show on the summary by their
+    count.
+  - *Dad's mail* ("Battle Lab", `pet_text.c`) comes with the run's other
+    mails on its first layer, not in Lan's room as first designed: a
+    run's mails are made as a layer begins. It is NEW again with each
+    family whose data is complete since, so E-Mail shows the gauge's
+    progress in a run.
+  - *The sets* (`Profile.lab_sets`, `src/core/lab_set.h`): a fourth
+    page, SETS, lists four; A takes one in hand, the one in hand kept as
+    a battle starts and as the screen leaves. A win that beats a set's
+    best (a higher busting level, or the same in less time) is its best;
+    a set changed has none.
+  - *The statistics*: the run's choices count the test battles fought
+    (`labs`).
+  - *Seen headless*, with no dev switch: a run that deleted eight each
+    of three families, then a new run begun on the setup screen: the
+    left run's data in the profile, the keeper in Lan's HP, his talk,
+    the builder listing the three families in the version met, a battle
+    won (the result in the information box, the set's best in the
+    profile), the SETS page, and Dad's mail in BN6's E-Mail on the first
+    layer.
+  - A run started by a dev scene named no seed for its tally, so its
+    data was lost to the next run; the tally now follows the run's seed
+    on every path.
+
 ## Build order
 
 Each a PR to `dev`, the next begun when the last is merged:

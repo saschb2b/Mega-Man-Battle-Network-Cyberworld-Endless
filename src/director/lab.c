@@ -14,8 +14,11 @@
 #include "encounter.h"
 #include "jukebox_text.h"
 #include "lab_state.h"
+#include "analytics.h"
 #include "rom.h"
 #include "run.h"
+#include "runlog.h"
+#include "save.h"
 
 LabState LS;
 
@@ -66,7 +69,9 @@ static int lab_song(int i) {
 	return 0;
 }
 
-int lab_rows(void) { return LS.page == LAB_PAGE_FOES ? LS.nroster : LS.page == LAB_PAGE_FIELD ? 1 : LAB_STAGE_ROWS; }
+int lab_rows(void) {
+	return LS.page == LAB_PAGE_FOES ? LS.nroster : LS.page == LAB_PAGE_FIELD ? 1 : LS.page == LAB_PAGE_STAGE ? LAB_STAGE_ROWS : LAB_SETS;
+}
 
 int lab_foe_at(int col, int line) {
 	for (int i = 0; i < LS.set.nfoes; ++i)
@@ -107,15 +112,39 @@ static void preset_take(int field) {
 	if (LS.set.panels[LAB_COLS + 1] == BN6_PANEL_HOLE) LS.set.panels[LAB_COLS + 1] = BN6_PANEL_PLAIN;
 }
 
+/* ---- the sets kept ---- */
+
+/* whether a win of `bust` and `frames` beats a set's best: a higher
+ * busting level, or the same in less time */
+static bool lab_better(const LabSaved *best, int bust, int frames) {
+	return !best->bust || bust > best->bust || (bust == best->bust && frames < best->frames);
+}
+
+/* the set in hand into its place in the profile: a set changed since it
+ * was kept has no best yet */
+static void set_keep(void) {
+	LabSaved *k = &profile.lab_sets[profile.lab_slot % LAB_SETS];
+	if (!memcmp(&k->set, &LS.set, sizeof LS.set)) return;
+	memset(k, 0, sizeof *k);
+	k->set = LS.set;
+	profile_save();
+}
+
+/* the set kept in place `slot` in hand: a place never used a plain field */
+static void set_take(int slot) {
+	profile.lab_slot = (uint8_t)(slot % LAB_SETS);
+	const LabSaved *k = &profile.lab_sets[profile.lab_slot];
+	static const LabSet none;
+	if (memcmp(&k->set, &none, sizeof none)) LS.set = k->set;
+	else set_plain(&LS.set);
+	LS.preset = 0;
+}
+
 void director_lab_open(bool all) {
-	LabSet keep = LS.set;
-	bool had = LS.nroster > 0;
 	memset(&LS, 0, sizeof LS);
 	LS.up = true;
 	LS.all = all;
-	/* (the last set fought, this session's; its foes those still listed) */
-	if (had) LS.set = keep;
-	else set_plain(&LS.set);
+	set_take(profile.lab_slot);
 	roster_make();
 }
 
@@ -144,6 +173,8 @@ static void row_turn(int by) {
 	} else if (LS.page == LAB_PAGE_FIELD) {
 		turn(&LS.preset, BN6_FIELD_COUNT - 1, by);
 		preset_take(LS.preset);
+	} else if (LS.page == LAB_PAGE_SETS) {
+		return;
 	} else if (row == 0) {
 		int i = index_of(lab_area, lab_areas(), LS.set.area);
 		turn(&i, lab_areas(), by);
@@ -216,6 +247,8 @@ static void page_turn(int by) {
 
 static void battle(void) {
 	if (!LS.set.nfoes) return;
+	set_keep();
+	runlog_choice(CHOICE_LAB);   /* (the run's choices: a test battle fought) */
 	Encounter e;
 	lab_set_encounter(&LS.set, &e);
 	lab_battle_panels(LS.set.panels);
@@ -229,12 +262,17 @@ static void take(uint32_t now) {
 	if (now & KEY_B) {
 		if (LS.lifted) { LS.lifted = false; LS.at = LAB_AT_LIST; }
 		else if (LS.at == LAB_AT_GO) LS.at = lab_rows() ? LAB_AT_LIST : LAB_AT_FIELD;
-		else LS.up = false;
+		else { set_keep(); LS.up = false; }
 		return;
 	}
 	if (!(now & KEY_A)) return;
 	if (LS.at == LAB_AT_GO) battle();
 	else if (LS.at == LAB_AT_FIELD) panel_take();
+	else if (LS.page == LAB_PAGE_SETS) {
+		/* (the set in hand kept first, then the one of the row taken) */
+		set_keep();
+		set_take(LS.row[LAB_PAGE_SETS]);
+	}
 	else if (LS.page == LAB_PAGE_FOES && LS.row[LAB_PAGE_FOES] < LS.nroster && LS.roster[LS.row[LAB_PAGE_FOES]].versions) {
 		LS.lifted = true;
 		LS.at = LAB_AT_FIELD;
@@ -278,4 +316,12 @@ void director_lab_watch(void) {
 	LS.was = ~0u;
 	LS.at = LAB_AT_GO;
 	LS.last = *lab_battle_result();
+	/* (a win that beats the set's best is its best) */
+	LabSaved *k = &profile.lab_sets[profile.lab_slot % LAB_SETS];
+	if (LS.last.end == LAB_WON && lab_better(k, LS.last.bust, LS.last.frames)) {
+		k->bust = (uint8_t)LS.last.bust;
+		k->frames = (uint16_t)(LS.last.frames > 0xFFFF ? 0xFFFF : LS.last.frames);
+		k->hp_lost = (uint16_t)LS.last.hp_lost;
+		profile_save();
+	}
 }
