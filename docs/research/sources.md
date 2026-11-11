@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T14:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T15:35:00Z }
 ---
 
 # Sources
@@ -372,6 +372,30 @@ Advance list), against the ROM:
   (USA) `B4BE` assumed by the pattern (the same page lists the USA Blue
   Moon as B4WE, a copy of Red Sun's; no other source found); Europe's
   not found.
+
+## Test battles (11 November 2026)
+
+For [Test battles](../game/test-battles.md):
+
+- **BN6 opens content by a family's deletions.** Verified in the ROM
+  ([Virus families](../rom/virus-families.md), the delete count; [BN6's
+  battles](../rom/battle.md), Random battles): a byte per AI index at
+  `0x02000070`, raised for versions 0 to 3, read by the rare battles'
+  check, which waits for 16 or 32.
+- **BN6 has no free or simulated battle.** A negative claim, by the
+  search that came up empty: bn6f's `data/textscript` holds no "simulat"
+  and no "virtual"; "practice" stands in a classmate's request (a virus
+  brought from home and plugged into the blackboard), Mr. Mach's Virus
+  Busting class and talk of NetBattles; "virus data" once, the BtlrCard's
+  seller. The Comm menu's Practice NetBattle is a link battle.
+- **Assumed**: that no other Battle Network game has one. A web search
+  for a practice or training mode in the series found BN3's Virus Breeder
+  (SciLab's Virus Lab: found families kept and fed) and nothing else; the
+  games themselves were not searched.
+- **Warframe's Simulacrum**, from the Warframe wiki's Simulacrum and
+  Sanctuary pages through a web search's excerpts: an arena that spawns
+  copies of enemies whose Codex research is complete, its key bought from
+  Cephalon Simaris for standing earned by scanning.
 
 ## The trailers' music
 

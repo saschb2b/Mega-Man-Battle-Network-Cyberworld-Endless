@@ -1,0 +1,361 @@
+---
+type: Design
+title: "Test battles"
+description: "A place to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs, a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill, with the owner's calls still open."
+tags: [game, design, meta]
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T15:30:00Z }
+sources:
+  - id: owner
+    resource: "The owner's request of 11 November 2026, given in the project's sessions"
+    title: "The owner's request for a test-battle builder"
+    author: human:saschb2b
+  - id: rom
+    resource: "docs/rom/virus-families.md (BN6_DELETE_COUNTS 0x02000070, BN6_DELETE_COUNT 0x0802D644, the rare check at 0x080ABFA6), docs/rom/battle.md (Random battles, byte 7), docs/rom/virus-battler.md"
+    title: "BN6's delete counts and its Virus Battler, as the ROM map has them"
+  - id: bn6f
+    resource: "~/.cache/mmbn-ref/bn6f, data/textscript: every script searched for simulat, virtual, practice, training, virus data"
+    title: "bn6f, BN6's text scripts"
+  - id: warframe
+    resource: "https://wiki.warframe.com/w/Simulacrum and https://wiki.warframe.com/w/Sanctuary_(Cephalon_Simaris), read through a web search's excerpts on 11 November 2026"
+    title: "The Warframe wiki on the Simulacrum"
+  - id: runlogs
+    resource: "1150 local runs that reached layer 9 with ten battles or more, from the run logs under .build/ of the main checkout (autopilot, persona and dev runs; not players')"
+    title: "Deletions per run, counted from local run logs"
+  - id: groups
+    resource: "docs/game/progression/encounter-groups.md as its session had written it on 11 November 2026 (not yet merged): The engine's room"
+    title: "The encounter groups' measured limits"
+---
+
+# Test battles
+
+The owner's request (11 November 2026): with 29 families of BN6's, 25 of
+BN5's and BN4's growing share in one battle engine, a place to set up any
+battle and test yourself against it. A good menu for the enemies, their
+versions and positions, the field, the background and the music. Each
+enemy opened by deleting it often enough, a gauge that fills across runs.
+Inside, a test only: no real death, no rewards. Access earned in the
+fiction, and a name of the game's own in place of the working one,
+Warframe's "Simulacrum".
+
+Nothing here is built. The owner's calls are at the end, each with this
+page's recommendation; until they are answered the text says "the lab"
+for the place.
+
+## What the games have
+
+- **Warframe's Simulacrum** (the wiki, read through search excerpts): an
+  arena that spawns copies of enemies whose Codex research is complete,
+  bought from Cephalon Simaris for standing earned by scanning enemies in
+  missions. The pattern is a bestiary that completes by play and then
+  lends its entries to a sandbox.
+- **BN6 counts deletions per family.** Verified in the ROM
+  ([Virus families](../rom/virus-families.md)): a byte per AI index at
+  `0x02000070`, raised by `0x0802D644` as a virus of versions 0 to 3 is
+  deleted, to 255. Its one reader is the rare battles' check: a record of
+  kind 1 waits for the BtlrCard's flag and 16 or 32 of the family deleted
+  ([BN6's battles](../rom/battle.md), Random battles). So BN6 itself opens
+  content by a family's deletions, at 16 and 32. The count lives in the
+  game's save RAM, which a run starts afresh; ours must live in the
+  profile.
+- **BN6 stores virus data on a card.** Verified in bn6f's scripts: the
+  BtlrCard's seller says "you can store virus data inside", and a Rare
+  deleted with the card held ends its results with "You got new Virus
+  Data" ([The Virus Battler](../world/level-design/virus-battler.md)). The
+  card's viruses fight on their own, MegaMan off the field: not a test of
+  the folder.
+- **BN6 has no free battle.** Verified by a search that came up empty:
+  none of bn6f's text scripts holds "simulat" or "virtual"; "practice" is
+  a classmate's virus on a blackboard, Mr. Mach's Virus Busting class and
+  the Comm menu's Practice NetBattle (a link battle, which
+  [the Arena](../devtools/arena.md) runs). **Assumed**: that no other
+  game of the series has one either (a web search for a practice or
+  training mode found BN3's Virus Breeder in SciLab's Virus Lab, where
+  found families are kept and fed, and nothing else).
+- **The project already has the parts.** The profile keeps the Library's
+  marks, the BtlrCard's families and the guardians' records
+  ([What MegaMan knows](meta/what-megaman-knows.md), `rivals.sav`); the
+  dev step `foes` starts a battle of named enemies at their panels on a
+  chosen field ([A battle on demand](../devtools/battle-on-demand.md));
+  ProtoMan's netbattle already ends at the blow that would delete MegaMan
+  ([The rival](rival.md), `battle_spare.c`); the core's state can be kept
+  and put back in memory (`emu_state_save`, `emu_state_load`).
+
+## Through the game-design skill
+
+- **The dialectic** is the meta layer's, what you bring against what you
+  find ([The meta layer's design](meta/design.md)), turned round: here the
+  player sets what is found, to learn what to bring.
+- **The loop layer** is the meta loop. A run feeds it (deletions become
+  battle data), and it feeds the run with nothing but the player's own
+  skill and a folder's measure: no chip, zenny, HP or flag leaves it.
+- **The patterns**: meta as variety, never power; a bestiary that
+  completes by play and lends its entries to a sandbox (Warframe's Codex
+  and Simulacrum, Hollow Knight's Hunter's Journal); a training room at
+  home (Hades' Skelly); memory as the pull (the lab keeps count, as the
+  guardians and Chaud's record do).
+- **Against [the core loop](core-loop.md).** It serves lack 5, variety a
+  veteran feels, and gives lack 2's "I got better" a test the player sets
+  himself. It stands off the main path: no walk (it is at home, beside
+  the arrival pad), no words on a layer, nothing a first run must learn.
+  The page's rule "no gathering, no crafting gates, no meta currency" is
+  the one it brushes: a gauge of deletions is a gate. It stays on the
+  right side of it where the gauge fills by playing runs as they are
+  played, no run needs what it opens, and nothing is spent.
+- **The smells it must survive.** A treadmill: the gauge opens options,
+  never numbers. Farming (the ethics test: would the player have more fun
+  filling the gauge than not): the threshold is low enough that a family
+  met in two or three runs opens by itself, so walking in circles on layer
+  1 buys little. A dominant strategy: rehearsing the next guardian at
+  home before every act costs only time, so an optimizing player might
+  make a chore of it; only foes whose data is complete can be set, which
+  are foes he has beaten before, and the statistics' guardian event will
+  show whether win rates move. Complexity over depth: one rule for the
+  gauge, one screen, BN6's own battle.
+- **Resonance.** Knowledge here is data ([What MegaMan
+  knows](meta/what-megaman-knows.md)): the PET's battle data on a virus
+  exists once it has been fought, and Dad's lab already answers a first
+  win over a guardian with a mail of battle data. A room that builds
+  copies from complete battle data is that fiction's next step, and the
+  run's guardians are copies already.
+
+## The design
+
+### The gauge: battle data
+
+Weighed:
+
+| Shape | For | Against |
+| --- | --- | --- |
+| **A family's gauge, the versions those met** (recommended) | One number to learn; a version never fought cannot be copied, as the fiction says; BN6 counts by family | A Rare opens with one deletion once the family is complete |
+| A gauge per version | "Delete it N times" said of each virus as BN names them | 390 gauges for 65 families; Rares at 3% of battles take dozens of runs each |
+| A family's gauge with marks that open V1, V2, V3 in order | The gauge itself shows the way | Fields a version MegaMan never met; four numbers to learn |
+
+Recommended: **a family's battle data is complete at 8 deletions, of any
+version, in any run. Complete, the lab can set every version of it
+MegaMan has deleted at least once.** Higher versions need more only as
+the run makes them: V2 and V3 come in later acts, Rares at 3% of battles
+from act 3.
+
+The number, from the local run logs (1150 runs that reached layer 9; a
+floor, not players): such a run deletes a median 38 viruses of 11
+families, 3 of a family, 9 of the one met most.
+
+| Threshold | Families complete after one such run (median) | A family met in every run opens after |
+| --- | --- | --- |
+| 4 | 5 | 1 to 2 runs |
+| **8** | **1** | **2 to 3 runs** |
+| 16 (BN6's own) | 0 | about 5 runs |
+
+BN6's own 16 would ground the number in the game, but no player knows
+it: the rare battles' gate is nowhere said. At 8 the first family
+completes in a first long run, most families a player keeps meeting in
+his first five, and 65 families remain a long tail (520 deletions at the
+least, a dozen full runs if every one counted evenly, far more as the
+late areas' and the Rares come).
+
+What counts: a virus deleted in a run's own battle (random, the layer's
+floor, a Server's challenge, an encounter group's), whether the battle is
+then won or lost. Not the Virus Battler's rounds, a NetBattle, a test
+battle, nor the week's net (`meta_run_quiet`). Helpers count, as for
+every unlock ([Decisions](meta/decisions.md)).
+
+Where it is kept: the profile, a byte per family (to 255) and a byte of
+versions met, by the engine's AI index (BN6's 1 to 31, the moved
+families' from 32), appended as the Library's later pages were, so an
+older profile reads zeros. A run's own deletions wait in the run's tally
+beside its checkpoint and join the profile as the run ends, so a
+CONTINUE from an older save counts no battle twice.
+
+How a run shows it: not at all on a layer. The run's summary lists the
+families whose data the run completed among what it opened (RECORDS,
+marked NEW as the setup's options are), the key item's INFORMATION gives
+the count ("Battle data on 12 virus families."), and the builder's list
+shows every gauge.
+
+### Navis
+
+Recommended: **yes, by the records the profile already keeps, with no
+new count.** A guardian is open once his NaviCode is held (deleted twice
+as a guardian, [Phase two](meta/phase-two.md)), in each version MegaMan
+has beaten; BN5's and BN4's Navis the same way by `rivals.sav`; Bass,
+the Cybeast and ProtoMan after a first win. One Navi a battle and no
+virus beside him at first: BN6's records never set a guardian beside
+viruses, so whether its engine carries that is a thing to measure in the
+build, not to promise here.
+
+### Where it lives, and when it opens
+
+Weighed:
+
+| Place | For | Against |
+| --- | --- | --- |
+| **A keeper in Lan's HP** (recommended) | MegaMan's own home, reached at every run's start and after every act with no walk; the Square's gate already stands there with a keeper, so the HP is where the run's standing services grow | One more thing in a small room |
+| A key item that opens it from the PET, anywhere | No place to build | A rehearsal at the arena's door, on any layer; a battle started from inside BN6's menu |
+| Class 6-1's blackboard at the Academy | BN6's own place for practice: Mr. Mach's class, the classmate's practice virus | The longest walk at home, the core loop's first lack |
+| The title's menu | Outside every run: nothing to protect | Outside the fiction, which the request rules out |
+
+Recommended: **open whenever MegaMan stands in Lan's HP**, before the
+first portal and after each act. Mid-run it tests the run's real folder,
+which is the point of a benchmark; home is where nothing is at stake
+(BN6 heals at the jack-in), so it takes no tension from a layer. What it
+adds to a run is time the player chooses, and the chance to try the
+run's folder on a guardian already known. The stricter alternative,
+before the first portal alone, keeps a run sealed and leaves only the
+starting folder to test.
+
+### How it is earned
+
+Weighed: Dad's lab, Chaud (training data for a rival who has earned his
+respect), the Academy's NetBattle club (the blackboard's practice
+viruses).
+
+Recommended: **Dad's lab, once battle data on three families is
+complete** (a second or third run at a threshold of 8). The lab already
+reads MegaMan's battles: every guardian first beaten brings Dad's mail
+with the battle data. At the next run's start the mail comes ("Lan,mail
+from Dad!"), and a Mr.Prog of the lab stands in Lan's HP beside a
+terminal. Who knows what: Dad knows what the PET sent him; the Mr.Prog
+knows the lab's data and nothing of the Net ahead; MegaMan says only
+what he can sense in his own HP, that the copies are data and cannot
+delete him. A key item (LabPass, beside NetPass and DarkPass) says what
+the lab holds. First meeting three or four boxes, each later talk one
+line and the screen, as a shop's.
+
+### The builder's screen
+
+BN6 has no screen for this. Its nearest is the Virus Battler's VIRUS
+LIST: a list of held families with their HP and attack, one picked, then
+set down on a panel by a cursor, then "Fight with this set?". The
+builder takes that flow and the PET's parts ([The PET's
+screens](../engine/ui.md), `pet_look.c`); the VIRUS LIST itself cannot
+be driven for it (27 of BN6's families, V1 alone, two at most, on
+MegaMan's side).
+
+Three pages as Options' tabs, L and R between them, the field always in
+sight:
+
+```
++--------------------------------------------------+
+| <NAME>                              [ 2/4 ]      |  band, the count in its pill
+| L [ FOES ] [ FIELD ] [ STAGE ] R                 |  Options' tabs
+| +-- the field, 6 x 3, in STATUS's slot ---------+ |
+| |  MegaMan's 3 x 3      |   the foes' 3 x 3     | |  BN6's own panels and
+| +-----------------------------------------------+ |  sprites, from the ROM
+| +-- window: the page's list ------------------+   |
+| | > Mettaur      < V2 >      HP  80           |   |  FOES: the families,
+| |   Swordy       < V1 >      HP  90           |   |  an unfinished gauge
+| |   CanGard      5/8                          |   |  as a count, a family
+| |   ??                                        |   |  never met as ??
+| +---------------------------------------------+   |
+| INFORMATION: Elec. Deleted 23. Best 0:12.40      |  KeyItem's box
+|                                    [> BATTLE! ]  |  NaviCust's RUN!
++--------------------------------------------------+
+```
+
+- **FOES.** Left and Right turn the version among those met. A lifts the
+  foe onto the field, the cursor moves over the foes' nine panels, A
+  sets it down, B puts it back; A on a foe set down lifts it again. Four
+  at most (below).
+- **FIELD.** The cursor walks all eighteen panels; A turns a panel
+  through BN6's types (plain, cracked, broken, grass, ice, poison, holy,
+  hole, volcano, the conveyors; BN5's lava and sea and BN4's with their
+  ROMs), START takes one of the games' own fields whole as a start.
+- **STAGE.** The background (BN6's areas', and the older nets' with
+  their ROMs) and the song (the Jukebox's list), each a line turned by
+  Left and Right.
+- **BATTLE!** the one action. No A or B hints; `START` named on the
+  band only where it does something unguessed.
+
+The builder opens on the last set fought.
+
+### The battle
+
+- **Inside a snapshot.** As BATTLE! is taken the engine keeps the core's
+  whole state in memory; the battle is BN6's own, started as a guardian's
+  is forced; when it ends, the state is put back. The run's game is then
+  byte for byte what it was: HP, the folder, zenny, flags, BN6's own
+  delete counts, the Library, everything. Nothing is counted for it (the
+  run log, the tally, the requests, the rival's record), as for a Virus
+  Battler's round. The build proves it with hashes of the run's files
+  and of the game's RAM before and after.
+- **The folder and the NaviCust** are the ones MegaMan holds: the
+  starting folder before the first portal, the run's own later, with his
+  Cross, Souls and HP as they stand.
+- **MegaMan deleted.** The blow that would delete him ends the battle as
+  ProtoMan's netbattle ends (`battle_spare.c`); the result names it and
+  the builder is back, the same set ready.
+- **Leaving.** BN6's own way out: L on the Custom screen, which in a
+  test never fails.
+- **The result.** BN6's RESULT gives the delete time and the busting
+  level; the reward's box stays empty (how BN6's RESULT is shown without
+  a reward is a reverse-engineering step of the build). Back in the
+  builder the information box holds the set's last and best: time, level,
+  HP lost.
+- **Records.** Kept for four saved sets in the profile (a set is its
+  foes, panels, background and song; the folder is not part of it), so a
+  player can come back to "three Swordy3 on ice" and beat his time. No
+  online board.
+
+### Limits
+
+From the encounter groups' measuring (its concept,
+`game/progression/encounter-groups` under The engine's room, not merged
+as this is written; this page links it once it is) and the dev step:
+
+- **Four foes a battle**: BN6's spawn takes the first four of a record.
+- **Any mix of games** among them: every moved family's art is installed
+  as a core starts, and four families of three nets were fought in one
+  battle and drawn whole. **One of BN4's pooled families a battle**
+  (Kilby or MagTect today) until they take fixed song slots, which that
+  page's open call 3 proposes; the builder greys the second.
+- **A family bound to special panels** is set only on a field that has
+  them; the builder says so in the information box.
+- **The ROM must be read**: a family of a game whose ROM is absent shows
+  as locked by its game, its data kept. A New 3DS reads one extra ROM.
+- **A Navi fights alone** until the build has measured otherwise.
+
+### The statistics
+
+One event as a run ends, with the choices: families complete, test
+battles fought, sets saved. A course check can then see whether the lab
+is used.
+
+## Build order
+
+Each a PR to `dev`, the next begun when the last is merged:
+
+1. The deletions counted: the hook's events, the run's tally, the
+   profile's bytes, the summary's line, the statistics' count, the tests.
+2. A test battle from a fixed set behind a dev switch: the snapshot, the
+   spared blow, the way out, the hashes.
+3. The builder's screen.
+4. The keeper, the mail, the key item and their lines
+   ([Voice](../voice/rules.md)).
+5. Turned on; the records and the saved sets.
+
+A sandbox folder from the Library (every chip a profile has held, in
+BN6's own folder editor) is the step after, not this build's: it is a
+second screen and a second kind of state.
+
+## The owner's calls
+
+Open, each with the recommendation above:
+
+1. **The name.** Battle Lab (recommended: Dad's lab built it, and the
+   key item is the LabPass), Test Comp, Copy Lab, or another.
+2. **Where and when it opens.** In Lan's HP at every visit
+   (recommended), before the first portal alone, or from the PET.
+3. **Who gives it.** Dad's lab by mail at three complete families
+   (recommended), Chaud, or the NetBattle club.
+4. **The gauge.** A family's, complete at 8, the versions those met
+   (recommended); BN6's own 16; or a gauge per version.
+5. **Navis.** By the NaviCode and the wins on record (recommended), a
+   count of their own, or viruses alone at first.
+6. **The folder.** The one MegaMan holds, a sandbox folder later
+   (recommended); the sandbox from the start; or the held folder for
+   good.
+7. **Records.** Four saved sets with their best (recommended), the last
+   result alone, or none.
+8. **The field.** Panels painted one by one with the games' own fields
+   as a start (recommended), the games' own fields alone, or painting
+   alone.
