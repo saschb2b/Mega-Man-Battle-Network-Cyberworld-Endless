@@ -15,7 +15,7 @@
 #include "platform.h"
 #include "rom.h"
 
-#define SECTIONS_MOST 12
+#define SECTIONS_MOST (JUKE_GAMES * JUKE_KINDS)
 #define ROUNDS 2        /* a looping song's times round before the next, in order or shuffled */
 #define FADE_SPEED 10   /* ... then its fade: 16 steps of 10 frames */
 #define GAP 45          /* frames of quiet between two songs */
@@ -44,7 +44,7 @@ static bool game_there(int game) {
 /* the sections of the games there, each with a song, by game then kind */
 static void sections_find(void) {
 	J.nsec = 0;
-	for (int g = 0; g < 2; ++g) {
+	for (int g = 0; g < JUKE_GAMES; ++g) {
 		if (!game_there(g)) continue;
 		for (int k = 0; k < JUKE_KINDS && J.nsec < SECTIONS_MOST; ++k)
 			for (int i = 0; i < jukebox_song_count; ++i)
@@ -104,7 +104,7 @@ static void kept_write(void) {
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "w");
 	if (!f) return;
-	fprintf(f, "# The Jukebox's last song (its game: 0 BN6, 1 BN5; its number) and play mode (docs/game/pet.md, The Jukebox).\n"
+	fprintf(f, "# The Jukebox's last song (its game: 0 BN6, 1 BN5, 2 BN4; its number) and play mode (docs/game/pet.md, The Jukebox).\n"
 		"song = %d %02X\nmode = %d\n", s->game, s->song, J.mode);
 	bool ok = !ferror(f) && cw_fsync_file(f);
 	if (fclose(f)) ok = false;

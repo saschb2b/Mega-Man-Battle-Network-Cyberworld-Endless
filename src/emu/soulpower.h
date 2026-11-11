@@ -31,5 +31,8 @@ bool soulpower_install(int breaks);
 /* Whether BN6's power attack `id` is a Soul's A button's (BN5's empty routines 0x12, 0x18, 0x1B, their charge times alone
  * read): a chip charged with it is used charged on its release, as BN5's chip use does (0x0800D9E8) */
 bool soulpower_chip_charge(int id);
+/* Whether BN6's k-th BN4 Soul (soulbn4.h) is placed: BN4's ROM read, its code moved and its rows in the tables (UNITE lights
+ * it only then) */
+bool soulpower_bn4(int k);
 
 #endif
