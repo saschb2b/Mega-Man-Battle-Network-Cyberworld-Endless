@@ -344,12 +344,12 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
-                         "its high byte from NaviStats +0x23)"),
+                         "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "
@@ -366,12 +366,13 @@ ROW_TABLES = {
                      why="the blasts' kinds (the fourth kind's 0x24: five of 2 bytes, the effect it draws on each panel of its "
                          "list and its sound, 0 none), read each time it draws one (0x080E4A70, by +4); TimeBomb's bomb spawns "
                          "kind 1 (0x080D6E2E: movs r4,#1), the burst 0x00 and no sound; 0, 2, 3 and 4 are other chips', left BN4's"),
-    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B), effect=2, sound=3,
+    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E), effect=2, sound=3,
                      effect_sites={0x080CF55E}, sound_sites={0x080CF56A},
                      why="the spread shot's kinds (the third kind's 0x12: 17 of 4 bytes, its burst's shape, its collision's "
                          "argument, its burst's effect, its sound), read by its init (0x080CF452, by +4, the chip's first "
                          "parameter): 4-6 Bubbler, Bub-V and BublSide, 7 BubSprd, 8-0xA HeatShot, Heat-V and HeatSide, 0xB HeatSprd; "
-                         "0-3 are Spreader's (a run's by BN6's own) and 0xC-0x10 other families' and DrkSpred's, left BN4's"),
+                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910); 0-3 are Spreader's (a run's by BN6's own) and "
+                         "0xC, 0xD, 0xF and 0x10 other families' and DrkSpred's, left BN4's"),
     # (a table whose rows name a sound alone, `effect` None; `queue` where that sound's slot is past a byte (SOUND_SLOTS): the
     # sites that play it by the row's byte called through the unit's shim that gives r0 the slot, every kind moved its one sound)
     0x080DAFB0: dict(size=12, entry=3, kinds=(0,), effect=None, sound=2, effect_sites=set(), sound_sites={0x080DB05C}, queue=True,
@@ -436,6 +437,18 @@ IMMS = {
     0x080EE044: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
                      why="MegaMan's animation as he holds MagBolt out: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of "
                          "2 in each art)"),
+    # The vulcans' state (0x1F, DrkVulcn's unit): whose arm, and MegaMan's animation (BN4's 0x0D, BN6's 0x0A)
+    0x080EC87A: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
+                     why="the battle NaviStats' Navi, 0 MegaMan (his arm's kind's high byte by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 "
+                         "+0x29 (BN6_NAVI_SIDE_NAVI)"),
+    0x080EC86C: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
+                     why="MegaMan's animation as he fires DrkVulcn: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of 2 in "
+                         "each art)"),
+    0x080EC8D4: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x11, now=0x0D,
+                     why="MegaMan's animation as each of DrkVulcn's shots leaves: BN4's 0x11, BN6's 0x0D of its own sprite of him "
+                         "(FlmLine's fire: frames of 3 and 2 in each art)"),
+    0x080EC950: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
+                     why="MegaMan's animation between DrkVulcn's shots: BN4's 0x0D, BN6's 0x0A (one frame of 2 in each art)"),
     # The Elem chips' state (0x60): whose arm, and MegaMan's animation (BN4's 0x0D, BN6's 0x0A: FlmLine's ready pose)
     0x080EE34E: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
                      why="the battle NaviStats' Navi, 0 MegaMan (his arm's kind's high byte by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 "
