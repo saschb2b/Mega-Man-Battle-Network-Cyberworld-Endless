@@ -10,6 +10,7 @@
 #include "economy.h"
 #include "formations.h"
 #include "game.h"
+#include "group_pool.h"
 #include "loot_souls.h"
 #include "net.h"
 #include "pacing.h"
@@ -207,9 +208,9 @@ int counter_element(int depth, int biome, int navi) {
  * rolled again every few seconds, and those rolls had pushed a Server's
  * battle out of mind before the fight after it (loot_battle_fought) */
 static int last_biome = -1, last_pick = -1;   /* no formation twice in a row */
-static uint64_t last_families;                  /* the virus families of the last battle (a bit each) */
+static FamilyMask last_families;                /* the virus families of the last battle (a bit each) */
 static uint32_t last_viruses;                   /* ... and its viruses (viruses_of) */
-static uint64_t before_families;                /* the battle's before it, its families */
+static FamilyMask before_families;              /* the battle's before it, its families */
 
 void loot_battle_fought(const Encounter *e) {
 	if (e->from_pick < 0) return;
@@ -233,7 +234,7 @@ int loot_repeat_weights(const LootCand *c, int n, int biome, int *weight) {
 	int total = 0;
 	for (int again = 0; again < 4 && !total; ++again)
 		for (int i = 0; i < n; ++i) {
-			bool shares = c[i].families & last_families, before = c[i].families & before_families;
+			bool shares = family_mask_meet(c[i].families, last_families), before = family_mask_meet(c[i].families, before_families);
 			bool same = biome == last_biome && c[i].viruses == last_viruses;
 			weight[i] = !c[i].weight || (again == 0 && (shares || before)) || (again == 1 && shares) || (again == 2 && same)
 				? 0 : c[i].weight * (shares ? 1 : 3);
@@ -285,11 +286,11 @@ static int first_family(const Formation *f) {
 }
 
 /* The virus families formation `f` brings, a bit each. */
-static uint64_t families_of(const Formation *f) {
-	uint64_t in = 0;
+static FamilyMask families_of(const Formation *f) {
+	FamilyMask in = FAMILY_MASK_NONE;
 	for (int k = 0; k < f->n; ++k) {
 		const uint8_t *row = triple_of(f->ent[k].id);
-		if (row[1] == 0 && row[2] > 0 && row[2] < 32) in |= (uint64_t)1 << row[2];
+		if (row[1] == 0 && row[2] < 32) family_mask_add(&in, row[2]);
 	}
 	return in;
 }
@@ -381,6 +382,7 @@ int loot_territory = -1;
 int loot_deep[2] = { -1, -1 };
 int loot_older_share, loot_older_net = CHIP_NET_BN5;
 bool loot_visitors_always;
+int loot_groups_always;
 
 /* What each virus family the area's plain random battles can hold at
  * `depth` is weak to, as they field it (a bit per ELEM_* in weak[family]):
@@ -563,6 +565,7 @@ bool loot_layer_nets(int biome, int tiles) {
 
 Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed, int index) {
 	Encounter e = make_encounter(depth, biome, kind);
+	if (loot_groups_always && kind == ENC_NORMAL && group_battle(depth, biome, layer_seed, index, loot_groups_always - 2, &e)) return e;
 	if (visitor_due(layer_seed, index, depth, biome, kind)) visitor_apply(&e, depth);
 	return e;
 }

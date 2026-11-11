@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A layer"
 description: "How a layer is built into the game (`net_gen.c`, `netmap.c`, `layer_objs.c`, `mapslot.c`), its exit pad's warp, what `director.c` watches, checkpoints and CONTINUE, the engine's event flags and `talk.c`'s conversations."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T22:00:00Z }
 ---
 
 # A layer
@@ -61,7 +61,7 @@ keeping its stock there, and `run.make` records the build's `LAYER_MAKE`: a run 
 build that makes layers otherwise continues its layer from the start, with
 the layer's flags and Mystery Data picks cleared (its RAM would not match
 this build's objects). `battle.sav` keeps what the random battles
-remember of the last two (their virus families, loot.h), so the first after
+remember of the last two (their virus families, 128 bits a battle so BN4's families from 64 are among them, loot.h), so the first after
 a CONTINUE brings none of them either. `run.seen` beside it keeps the map's panels seen so
 far, and event flag `0x144E` in the state that L has told where they are,
 which CONTINUE clears so that L starts over (`0x144F`: that the Net

@@ -3,7 +3,7 @@ type: Tool
 title: "Pacing report: every act's battles and guardians"
 description: "`python3 build.py pacing` rolls every area's random battles in every act and draws 500 runs' guardians into `.build/pacing.txt`, marking OVER or OUTSIDE past the act's band, BN5's territories and visitors included, then plays seeds 1-12 for the battles per layer and act, NONE marking a layer without one."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T22:00:00Z }
 ---
 
 # Pacing report: every act's battles and guardians
@@ -36,7 +36,19 @@ the older net's); where it is not (an install that failed) a line says
 so, its layers fighting the BN6 area's own battles above. The deep's acts
 (the Undernet's, the Graveyard's, the Nest) say "the deep" and count the
 older net's battles among their rolls (about half: One net, the deep).
-Last, the visitors: each net's families as their own records set them
+After the visitors, the encounter groups
+([Encounter groups](../game/progression/encounter-groups.md), behind
+`--dev groups`): for each ROM set the ROMs read make up (BN6 alone, with
+BN5, with BN4, with both), the pool's families by act and how many ways
+each of the eleven templates fills under the act's band, its cap on one
+hit and its pressure cap; then 300 group battles rolled for every layer
+of every act's areas, and one layer of three acts on the second cycle,
+each one's HP, hit and predicted pressure read again from the ROM's
+records: lowest, median and highest HP, the hardest hit, the most
+pressure, the share standing on a field of the area's own, each
+template's count, OVER past a limit or on a shared or special panel.
+
+Before them, the visitors: each net's families as their own records set them
 (their role, stage and placements; `*` those that may visit, `!` those
 set on special panels alone), then acts 2 to 4's areas and territories,
 300 battles each given a visitor where one fits: how many took one, the
