@@ -83,7 +83,7 @@ What `build.py lint` held before is still held:
 | Check | Where now |
 | --- | --- |
 | Every name in `bn6.h`, `bn5.h` and `bn4.h` described; the ledger's shape; the words files readable | `build.py lint` and `build.py test` on every branch (`--lint` of each tool) |
-| The written files in step with their sources | The workflow, right after writing (`tools/generated.py check --strict`); `build.py lint` on `main` and on a tag |
+| The written files in step with their sources | The workflow, right after writing (`tools/generated.py check --strict`); `build.py lint` on `main`, on a tag and on a pull request to anything but `dev` (a release's) |
 | No branch changes a written file | `build.py lint` on every branch, new: against the commit the branch left `dev` at (in CI, against `dev`'s tip under the pull request's merge) |
 
 The counts of bn6f's functions on the Symbols page (its second marked

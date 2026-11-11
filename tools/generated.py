@@ -19,8 +19,9 @@ them as its base has them.
   python3 tools/generated.py check      build.py lint: their sources are sound (each
                                         tool's --lint) and this branch leaves the
                                         files as the commit it left dev at has them.
-                                        --strict (and on main, and a tag): the files
-                                        in step with their sources too
+                                        --strict (and on main, a tag and a pull
+                                        request to main): the files in step with
+                                        their sources instead
   python3 tools/generated.py restore    put them back as that commit has them. With a
                                         merge of dev under way: take dev's, staged,
                                         which resolves every conflict in them
@@ -139,15 +140,18 @@ def write():
 
 
 def check(strict):
-    strict = strict or (os.environ.get('GITHUB_EVENT_NAME') == 'push'
-                        and (os.environ.get('GITHUB_REF', '') == 'refs/heads/main'
-                             or os.environ.get('GITHUB_REF', '').startswith('refs/tags/')))
+    env = os.environ
+    # main and a tag hold the files in step, and so does a pull request to anything but dev (a release's)
+    strict = strict or (env.get('GITHUB_EVENT_NAME') == 'push'
+                        and (env.get('GITHUB_REF', '') == 'refs/heads/main' or env.get('GITHUB_REF', '').startswith('refs/tags/')))
+    strict = strict or (env.get('GITHUB_EVENT_NAME') == 'pull_request' and env.get('GITHUB_BASE_REF') != 'dev')
     bad = max(run(tool, '--check' if strict else '--lint') for tool in TOOLS)
     ref = None if strict else base()
     if strict:
         print('generated: in step with their sources' if not bad else 'generated: out of step: python3 tools/generated.py write')
     elif ref is None:
-        print(f'generated: {DEV} is not known here, so whether this branch changes a generated file was not checked')
+        print('generated: no branch to check (a push to dev)' if env.get('GITHUB_ACTIONS') else
+              f'generated: {DEV} is not known here, so whether this branch changes a generated file was not checked')
     else:
         changed = touched(ref.strip())
         for path in changed:
