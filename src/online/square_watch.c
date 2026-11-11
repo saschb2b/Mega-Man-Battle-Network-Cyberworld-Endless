@@ -99,10 +99,11 @@ static bool can_watch(const StandsEntry *e) {
 	return CW_ARENA && e && !mine(e) && e->match != W.refused && W.stage == W_IDLE && netpass_has(STAMP_ARENA);
 }
 
-/* a chip's name where this game can name it (a BN5 chip only with BN5's ROM), else NULL */
+/* a chip's name where this game can name it (a BN5 chip only with BN5's ROM, a BN4 chip's own with BN4's), else NULL */
 static const char *chip_name(unsigned id, char *out, size_t n) {
-	bool bn5 = id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id);
-	if (!id || (bn5 && !(online_transport_roms() & ONLINE_ROMS_BN5))) return NULL;
+	bool bn5 = id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id), bn4 = id >= ONLINE_BN4_CHIP_FIRST;
+	uint8_t roms = online_transport_roms();
+	if (!id || (bn5 && !(roms & ONLINE_ROMS_BN5)) || (bn4 && !(roms & ONLINE_ROMS_BN4))) return NULL;
 	chips_name((int)id, out, n);
 	return out[0] ? out : NULL;
 }

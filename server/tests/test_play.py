@@ -45,11 +45,12 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, full=True):
-        """A game in the channel: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
+    async def connect(self, name, full=True, bn4=None):
+        """A game in the channel: with the full set (BN6's, BN5's and BN4's ROMs), or BN6's alone; `bn4` False
+        the full set less BN4's (v17)."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=full)
+        welcome = await client.open(self.port, name, bn5=full, bn4=full if bn4 is None else bn4)
         return client, struct.unpack("!I", welcome[5:9])[0]
 
     async def trade_state(self, client):
@@ -232,7 +233,7 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         a, a_id = await self.connect("Alpha")
         b, b_id = await self.connect("Beta")
         c, _ = await self.connect("Gamma")
-        bn5 = SPEC["roms_bn5"]
+        bn5 = SPEC["roms_full"]   # (a game of the full set: BN5's bit and BN4's, v17)
         # (a round trip said in PING: Beta's link three bars, then one)
         await b.send(bytes((SPEC["ping"],)) + b"\0\0\0\1" + struct.pack("!H", 60))
         await self.snapshot_byte(c, b_id, bn5 | 3 << SPEC["link_shift"])
@@ -341,6 +342,28 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await a.message(SPEC["error"]))[:3], struct.pack("!BH", SPEC["error"], 1))
         self.assertEqual(await self.board(b, 0), [])
         self.assertFalse(self.server.trades.offers)
+
+    async def test_bn4_joins_the_full_set(self):
+        """v17: a game with BN5's ROM and not BN4's lacks the full set: no challenge, trade or post, and the board's
+        BN4 chips are left out of its BOARD as BN5's are of a game without BN5."""
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta", bn4=False)
+        c, _ = await self.connect("Gamma")
+        await b.send(arena(1, a_id, 0))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await a.send(arena(1, b_id, 0))
+        self.assertEqual(await self.notice(a), SPEC["notice_pass"])
+        await b.send(offer((411, 12), 3))
+        self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        await a.send(trade(1, b_id, (700, 2)))
+        self.assertEqual(await self.notice(a), SPEC["notice_pass"])
+        await a.send(offer((700, 2), 3))
+        self.assertEqual(await self.board(c, 1), [(a_id, 700, 2, 3)])
+        self.assertEqual(await self.board(b, 0), [])     # (BN4's chip left out for a game without its ROM)
+        await asyncio.sleep(1.05)
+        await a.send(offer((411, 12), 3))
+        self.assertEqual(await self.board(b, 1), [(a_id, 411, 12, 3)])   # (BN5's it holds)
+        self.assertFalse(self.server.arena.matches)
 
     async def test_the_arena_needs_the_full_set(self):
         a, a_id = await self.connect("Alpha")

@@ -1083,12 +1083,16 @@ The NetPass says what your games open online, as four stamps:
 | **DeepNet** | The week's DeepNet dive | The full set |
 
 The full set is every game this version supports online: BN6 Cybeast
-Gregar (USA) and BN5 Team Colonel (USA). With BN5's ROM beside BN6's,
-all four stamps are yours, and the greeter Mr.Prog stamps them on your
-next visit. With BN6's alone you hold the Square stamp: the whole Square
-but NetBattles, trades and the dive. If a later version supports another
-game online, the stamps that need it open again until you add that game;
-the release notes and the project's site say so ahead of time.
+Gregar (USA), BN5 Team Colonel (USA) and BN4 Red Sun (USA). With BN5's
+and BN4's ROMs beside BN6's, all four stamps are yours, and the greeter
+Mr.Prog stamps them on your next visit. With fewer you hold the Square
+stamp: the whole Square but NetBattles, trades and the dive. If a later
+version supports another game online, the stamps that need it open again
+until you add that game; the release notes and the project's site say so
+ahead of time. BN4 Red Sun joined the set this way: a pass that was full
+before shows a new open slot, the greeter tells you once, and the stamps
+land again when you add BN4's ROM. BN4's chips go into NetBattles and
+trades as each is proved; one not yet proved stays out.
 
 It is a key item: **KeyItem** in the PET, then A on **NetPass**; A or B
 closes it. In the Square, where the PET stays shut, **START** opens it.
