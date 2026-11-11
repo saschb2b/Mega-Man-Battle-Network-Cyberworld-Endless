@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan and GyroMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T01:40:00Z }
 ---
@@ -208,9 +208,16 @@ into the battle engine).
   second room (`XN_TEAM_SHARED`, 0x7800 bytes to `FREE_TEAM_SPRITES`): a
   sprite of any Navi's goes there once `XN_SHARED_ART`'s is full, as it was
   for NapalmMan's 5:0x05; the Navis' numbers grew with him to list 4's
-  0xA0-0xBF and list 5's 0xA0-0xAF, the moved objects' still taken before
-  Team ProtoMan's (the sea's splash 0xAC).
-  The five after him need more art room than is left (open).
+  0xA0-0xBA (BN4's late families keep 0xBB-0xBF, `LATE_LIST4`, which
+  reached down into his before) and list 5's 0xA0-0xAF, the moved
+  objects' still taken before Team ProtoMan's (the sea's splash 0xAC).
+  The shared art's third room is code-low's free tail
+  (`FREE_TEAM_SHARED_MORE`, `XN_TEAM_MORE`, 60 KB), which GyroMan,
+  SearchMan, MagnetMan and Meddy fill; a sprite past the Navis' numbers
+  of its list goes to list 2's 0x80-0x9F (`NAVI_LIST_SPILL`, skipped by
+  the families' `LIST_NUMBERS`), its load's list offset made list 2's.
+  DarkProto's art (some 290 KB, lists 0-2 and 5) fits no room left
+  (open).
 - **NapalmMan** (AI 4, Navi AI 29, ids 0x1FC-0x1FF; `napalmman_v1`,
   `napalmman_v1_keys`, `napalmman_sp`: PASS): his five object types moved
   (the third kind's 0x33, 0x38, 0x39, 0x3A, the fourth's 0x12), his
@@ -229,6 +236,17 @@ into the battle engine).
   CurAction 9 are reached by no spec. No spec of his sets a lava
   panel: his flames are the 0x00's kind 0x11, which sets none; the table's
   lava row (26) is BN6's 13 in the copy, as the chips' was.
+- **GyroMan** (AI 2, Navi AI 27, ids 0x1F4-0x1F7; `gyroman_v1`,
+  `gyroman_v1_keys`, `gyroman_sp`: PASS): his four object types moved (the
+  third kind's 0x19, 0x1B, 0x1C, 0x1E), his companion's start and end
+  copied (`COMPANIONS`: BN5's overlay kind 0, his own 31; the end the body
+  of Colonel's), each fact in `src/emu/bn5_team_protoman.h`. His sprites
+  are the first in list 2's spill (0x80-0x84), his overlay's 4:0x0A
+  (0x6000 bytes) the first in the third room; his three sounds BN6
+  numbers otherwise (BN5's 0x103, 0x104, 0x14C) take BN6's empty slots
+  0x43-0x45 (`xsong.c`, Team ProtoMan's from 0x43 up). Five mutations
+  break his copy and FAIL (his overlay's kind, a sprite's number, a
+  sprite's list, a hit's offset, a state's number).
 - **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
   `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object
   types* (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F)
@@ -272,6 +290,10 @@ into the battle engine).
     leave the dispatch running one of them. It flags Team ProtoMan's
     ProtoMan (AI 1) today: the third kind's 0x2B and 0x69 and the fourth's
     0x28 are the chips' copies.
-  Five mutations break his copy
+  His five sprites take Navi numbers before NapalmMan's and GyroMan's (he
+  installs first, a Darkloid's seat): list 4 to 0xBA, then list 2's spill
+  (0x80-0x89 with theirs), so BN4's late families keep 0xBB-0xBF. Before
+  that split (PR #356) his numbers reached 0xBE and 0xBF and VolGear and
+  Kilby refused to install. Five mutations break his copy
   (the 0x5F's second compare, the cloud spawned as his 0x36, its sprite's
   number, the 0x0B's row 2's sprite, the search's type) and FAIL.

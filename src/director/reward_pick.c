@@ -120,7 +120,7 @@ void director_pick_keys(uint32_t keys) {
 	int rested = RP.rest;
 	RP.rest = keys & KEY_A ? 0 : RP.rest + 1;
 	if (RP.t < PICK_LOCK) return;
-	int rows = reward_pick_rows();
+	int rows = reward_pick_rows(), was = RP.cursor;
 	if (now & KEY_UP) RP.cursor = (RP.cursor + rows - 1) % rows;
 	else if (now & KEY_DOWN) RP.cursor = (RP.cursor + 1) % rows;
 	else if ((now & KEY_A) && rested >= PICK_REST) {
@@ -132,6 +132,7 @@ void director_pick_keys(uint32_t keys) {
 		else if (RP.o.skip == PICK_B_LEAVES) choose(-1);
 		else if (RP.o.skip >= 0) choose(RP.o.skip);
 	}
+	if (RP.cursor != was) RP.moved = RP.t;
 }
 
 bool director_pick_shown(void) { return RP.up; }
