@@ -120,7 +120,7 @@ typedef struct Side_ {
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	uint32_t still;                 /* the core's frames run since its timer last read otherwise (a hold's: a Navi chip's, a turn's change) */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
-	bool seeded, fought, done, decked, held;
+	bool seeded, fought, done, decked, held, paneled;
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
 } Side;
 
@@ -418,6 +418,20 @@ static void hold_step(Side *g, const Spec *s) {
 	g->held = true;
 }
 
+/* (panels=) the spec's panels given their types as the fight begins, before its first fight frame, in each game's own place (BN4's
+ * type at +0, BN5's and BN6's at +2): each game makes a panel's flags from its type every frame (BN4_PANEL_FIELD_STEP, BN6's
+ * _object_updatePanelParameters), so the panel acts as one of its type from that frame on in both */
+static void panels_step(Side *g, const Spec *s) {
+	if (!s->npanels || g->paneled) return;
+	g->paneled = true;
+	if (g->v.game == 4) {
+		xd4_panels_put(s);
+		return;
+	}
+	for (int i = 0; i < s->npanels; ++i)
+		wr8(&g->v, g->v.panels + (uint32_t)(s->panels[i].row * 8 + s->panels[i].col) * g->v.panel_size + BN6_PANEL_TYPE, s->panels[i].type);
+}
+
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
 static void keep_safe(const View *v) {
 	uint32_t coll = v->rd32(v->t1 + BN6_T1_COLLISION);
@@ -521,6 +535,7 @@ static bool step(Side *g, const Spec *s) {
 	if (battle && phase == BN6_PHASE_FIGHT) {
 		keys |= t >= (uint32_t)g->behind ? keys_at(s, t - (uint32_t)g->behind) : 0;
 		hold_step(g, s);
+		panels_step(g, s);
 	}
 	if (battle && s->safe) keep_safe(v);
 	if (custom && !g->decked) deck_put(g, s);
