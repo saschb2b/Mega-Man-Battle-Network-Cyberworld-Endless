@@ -1,0 +1,26 @@
+{
+  "branch": "bn4-navi-chips",
+  "what": "BN4's Navi chips of the moved Navis, GutsMan's V1 first (#403)",
+  "takes": {
+    "dispatch4": [
+      [
+        "0xA0",
+        "0xA0"
+      ]
+    ],
+    "free_rom": [
+      [
+        "0x320000",
+        "0x32EFFF"
+      ],
+      [
+        "0x766000",
+        "0x77BFFF"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip GutsMan"
+  ],
+  "run": false
+}

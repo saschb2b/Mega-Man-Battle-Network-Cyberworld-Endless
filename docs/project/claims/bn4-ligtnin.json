@@ -1,0 +1,18 @@
+{
+  "branch": "bn4-ligtnin",
+  "what": "BN4's Ligtnin1-3 moved, AquaUp and GreenWd in its unit (#409)",
+  "takes": {
+    "song_slots": [
+      [
+        "0x240",
+        "0x242"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip Ligtnin1",
+    "BN4 chip Ligtnin2",
+    "BN4 chip Ligtnin3"
+  ],
+  "run": false
+}
