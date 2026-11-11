@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's MagBolt1 B (35) against the registry's row 642 (the unit of BN4's family 0x59, BN6's attack family 0xD5, power 90): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2), MegaMan at (2,2). The arm (kind 0x23) from t33, the bolt (the third kind's 0x75) on (3,2) from t39 with sounds 0xF8 and 0xB9, and the state's pull over the row ahead for 0x1E frames: the Mettaur slides from (5,2) to (4,2) at t43 in both and is pulled against MegaMan's panels to the end, a column from him: no hit, 140 HP left. A foe's slide differs by each engine's leftovers (legit.json's bn4 allowed, a slid foe's).",
+ "folder4": [
+  "0223"
+ ],
+ "folder6": [
+  "282:01"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

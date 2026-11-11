@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@61",
+ "mm": "33",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's PropBom3 H (159) against the registry's row 673: used at fight frame 8 from (3,3) against BN4's Mettaur of 250 HP at (6,1), which comes down its column and steps onto the bomb's panel, (6,3), at t66: the bomb ends in its burst (sound 0xC8 at t67), no blast, 250 HP left in both.",
+ "folder4": [
+  "0E9F"
+ ],
+ "folder6": [
+  "2A1:07"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   8,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

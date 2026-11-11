@@ -303,6 +303,7 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_MISC_ROUTINES_REF 0x080ED72Cu /* the one word that names them (BN6_MISC_RUN's literal) */
 #define BN6_BATTLE_OBSTACLES  0xA0        /* the battle state's obstacles by side, three words a side (two, then one): BN6_OBSTACLE_ADD's */
 #define BN6_OBSTACLE_ADD      0x0800F614u /* r0 an object, r1 its side, r2 which list: entered there, the oldest's HP zeroed where it is full */
+#define BN6_OBSTACLE_REMOVE   0x0800F656u /* the object in r5 taken out of them (BN4_OBSTACLE_REMOVE's twin) */
 #define BN6_CHIP_ATTACK_END   0x08011714u /* a chip's attack ended (BN4_CHIP_ATTACK_END's twin by its work): an attack of kind 2 keeps its lock-out, */
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
@@ -329,5 +330,9 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_T3_SPREAD_SHOT    0x12        /* ... its shot, the third kind's (0x080C81B6 to 0x080C83B0), BN4_T3_SPREAD_SHOT's twin with rows of 6 bytes */
 #define BN6_SPREAD_SHOT_KINDS 0x080C8144u /* ... its kinds, 19 rows of 6 bytes: the shape, the argument, the effect, a status, the sound (u16);
                                            * BN4's 17 kinds' shapes at the same numbers, BN6's own effects and sounds */
+
+#define BN6_RUNNER_STRUCK     0x0801B2A8u /* a virus's runner: status 0x100 made its state 5 (to 0x0801B2D2), then b 0x0801B338 past: */
+#define BN6_RUNNER_SLIDE      0x0801B2ECu /* ... a pushed object's slide run (status 0x10, or the slide's flag 0x1000: bl 0x080166B6 at
+                                           * 0x0801B2FC and 0x0801B30E). BN4's runs the slide first (BN4_RUNNER_SLIDE, BN4_RUNNER_STRUCK) */
 
 #endif
