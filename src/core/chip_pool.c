@@ -116,9 +116,7 @@ static void load(void) {
 	for (int x = 1; loaded_bn4 && x < BN4_CHIP_COUNT; ++x) {
 		int id = xchips_bn4_paid(x);
 		/* (never a dark chip of its own, xreg4_dark: one costs 20 max HP a battle it is used in, and a find tells no
-		 * price; a flame does. The owner's call 10 of docs/multirom/bn4-chips.md. To hold out here too once their unit
-		 * plays, by his call 12: AquaPowr, WoodPowr and ThunPlus, ids 565, 566 and 564, which mark BN4's HUD for 8
-		 * seconds and change no damage; not built) */
+		 * price; a flame does. The owner's call 10 of docs/multirom/bn4-chips.md) */
 		add(CHIP_NET_BN4, id, id > 0 && !xreg4_dark(id) ? chip_pool_tier(id) : -1);
 	}
 	for (int net = CHIP_NET_BN5; net <= CHIP_NET_BN4; ++net)

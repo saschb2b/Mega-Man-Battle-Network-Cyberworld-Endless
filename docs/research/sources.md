@@ -383,7 +383,8 @@ Advance list), against the ROM:
   The four timers in the user's battle data (+0x3C to +0x42) have one
   reader found, the HUD's icon (`0x08014CC0`); what was searched, and
   what was not tried (the buster, a foe's attack, a NetBattle), is in
-  [BN4's chips in a run](../multirom/bn4-chips.md), the owner's call 12.
+  [BN4's chips in a run](../multirom/bn4-chips.md), the owner's call 12,
+  which leaves the three out of a run for it.
   These chips have no Library number in BN4 (their records' +0x1C is 0);
   where BN4 hands them out was not searched: **assumed** unlisted.
 

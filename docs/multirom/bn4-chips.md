@@ -43,9 +43,7 @@ layer's catalogue (`loot_older_net`) by the area's game, the deep's the
 whole, and every find goes through it: the Net Dealers' stock, Mystery
 Data, the vaults', Servers' and gift's picks (`loot_pool_pick`), a held
 Soul's kind (`loot_souls.c`), a Chip or BugFrag Trader's list, half each
-rarity's (`trader.c`). To hold out once their unit plays, by the owner's
-call 12: AquaPowr, WoodPowr and ThunPlus (ids 565, 566 and 564), chips
-that do nothing but mark the HUD; not built. Nothing names a chip: a unit that comes to play
+rarity's (`trader.c`). Nothing names a chip: a unit that comes to play
 joins the catalogue the next time the game starts (Boomer1-3 did, merged
 while this was built). With all three ROMs the catalogue holds 130 chips,
 15 of them BN4's own; with BN6 and BN4, 93 and the same 15.
@@ -517,8 +515,8 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Next:** Marking, the four Plus chips and BlakWeap (call 7,
-reversed), then BlakBarr's barrier; Binder,
+**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
+three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
@@ -1337,9 +1335,10 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
    timers moved with them, a spec where the buff shows, its mutations.
    How they show where BN4 gives them no number and no picture (the
    Library's page, a reward's card) is the one thing left to choose.
-12. **AquaPowr, WoodPowr and ThunPlus are moved as BN4 has them:** "Move
-    as BN4 has them" (the owner, 11 November 2026). Asked because the
-    three do less than call 7 took them for. **Verified** in BN4 Red Sun
+12. **AquaPowr, WoodPowr and ThunPlus are left out; FirePlus is moved:**
+    "Leave them out" (the owner, 11 November 2026, to the session that
+    measured them). Asked because the three do less than call 7 took
+    them for. **Verified** in BN4 Red Sun
     (USA, `B4WE`), two ways. By experiment, BN4's own battle run alone
     by the differential (control specs, the guest core): the Plus chip
     used at fight frame 30, a chip of its element at frame 200, inside
@@ -1360,19 +1359,17 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     object's +0x58, every indexed access from 0x3C in
     `0x08007000`-`0x08030000`. Not tried: the buster and the charge shot
     under a timer, a foe's attack against MegaMan under one, a
-    NetBattle. So the three play as BN4 US plays them, the HUD's icon
-    for 8 seconds and no chip's damage changed, proved by the
-    differential like any unit, and FirePlus lays grass as BN4 has it.
-    **And the recommendation he accepted with that answer** (the
-    coordinating session's, not his own words): the three stay out of
-    the reward pools (drops, Mystery Data, the dealers' stock), so
-    nobody is handed a chip that does nothing, while they still fill
-    their Library entries. Not built; where the pools are made is
-    `src/core/chip_pool.c` (Unit 7, above). One thing this leaves to
-    settle with call 7's last question: BN4's Library has no entry for
-    any of the six (their records' +0x1C is 0), so a chip kept out of
-    every pool has, today, no page to fill and no way into a folder but
-    a trade or the Arena.
+    NetBattle. So the three are not moved: no unit, their rows left
+    out of play and their ids (564 to 566) kept retired, as BugChain's
+    is until its call, and nothing of a run hands them out or lists
+    them. FirePlus (563) is moved as BN4 has it, the grass and its
+    timer. Call 7 stands for the other three of its six: FirePlus,
+    Marking and BlakWeap. **Two answers were given the same evening.**
+    Through the coordinating session the owner was first quoted with
+    "Move as BN4 has them", on a recommendation to move the three and
+    keep them out of the reward pools; asked directly afterwards, with
+    the measurement before him, he answered "Leave them out". The later,
+    direct answer is the one recorded here.
 
 Open:
 
