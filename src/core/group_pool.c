@@ -6,9 +6,11 @@
 #include "data.h"
 #include "formations.h"
 #include "loot.h"
+#include "pacing.h"
 #include "rom.h"
 #include "run.h"
 #include "visitor_families.h"
+#include "xbattles.h"
 #include "xvirus.h"
 #include "xvirus_bn4.h"
 
@@ -147,6 +149,35 @@ static const int *counts_under(const GroupFam *pool, int n, const GroupLimits *l
 	return counts;
 }
 
+/* Battle `e` made the group `g`'s: its foes on the panels, the area's own
+ * battle's objects and record let go, its field (field_of), and what the
+ * repeat rule keeps of it once fought (loot_battle_fought: no formation's
+ * number, its families and its viruses) */
+static void battle_of(const GroupFam *pool, const GroupFill *g, int biome, uint32_t roll, Encounter *e) {
+	Encounter out = *e;
+	out.xrecord = 0;
+	out.visitor = 0;
+	out.nobj = 0;
+	out.gem_own = false;
+	out.player = 0;
+	out.sides = 0;
+	out.arc_beat = out.signature = 0;
+	for (int i = 0; i < MAX_FOES; ++i) out.foes[i] = (Foe){ FOE_VIRUS, 0, 0, 0, 0, -1 };
+	group_place(pool, g, &out);
+	uint32_t ids = 2166136261u;
+	for (int i = 0; i < out.nfoes; ++i) {
+		const uint8_t *row = enemy_triple(out.foes[i].id);
+		if (row) out.foes[i].version = row[0];
+		ids = (ids ^ (uint32_t)out.foes[i].id) * 16777619u;
+	}
+	out.group = 1 + g->template;
+	out.from_biome = biome;
+	out.from_pick = GROUP_FROM_PICK + g->template;
+	out.from_viruses = ids;
+	field_of(&out, biome < BIOME_COUNT ? biome : -1, roll);
+	*e = out;
+}
+
 bool group_battle(int depth, int biome, uint32_t layer_seed, int index, int only, Encounter *e) {
 	const GroupFam *pool;
 	int n = group_pool(&pool);
@@ -156,27 +187,76 @@ bool group_battle(int depth, int biome, uint32_t layer_seed, int index, int only
 	const int *counts = counts_under(pool, n, &l);
 	int t = only < 0 ? group_template_roll(counts, roll) : only;
 	if (t < 0 || t >= GROUP_TEMPLATES || !group_pick_counted(pool, n, &l, t, counts[t], roll, &g)) return false;
-	Encounter out = *e;
-	out.xrecord = 0;
-	out.visitor = 0;
-	out.nobj = 0;
-	out.gem_own = false;
-	out.player = 0;
-	out.sides = 0;
-	for (int i = 0; i < MAX_FOES; ++i) out.foes[i] = (Foe){ FOE_VIRUS, 0, 0, 0, 0, -1 };
-	group_place(pool, &g, &out);
-	uint32_t ids = 2166136261u;
-	for (int i = 0; i < out.nfoes; ++i) {
-		const uint8_t *row = enemy_triple(out.foes[i].id);
-		if (row) out.foes[i].version = row[0];
-		ids = (ids ^ (uint32_t)out.foes[i].id) * 16777619u;
+	battle_of(pool, &g, biome, roll, e);
+	return true;
+}
+
+/* ---- an act's arc (group_arc.h) ---- */
+
+/* The area's own virus families: a BN6 area's from its random battles'
+ * formations; an older net's area's (loot.h's loot_territory, outside the
+ * deep) from its records as BN6's engine fights them at `depth` */
+static FamilyMask home_of(int depth, int biome) {
+	FamilyMask in = FAMILY_MASK_NONE;
+	if (loot_deep[0] < 0 && loot_territory >= 0) return xterritory_families(depth, loot_territory, NULL);
+	const Formation *list;
+	int n = formations_of(biome, &list);
+	for (int i = 0; i < n; ++i)
+		for (int k = 0; k < list[i].n; ++k) {
+			const uint8_t *row = enemy_triple(list[i].ent[k].id);
+			if (row && row[1] == 0 && row[2] >= 1 && row[2] <= 29) family_mask_add(&in, row[2]);
+		}
+	return in;
+}
+
+/* The arc's rules at `depth` in area `biome`: the limits of the act's
+ * layers (one band an act), the area's own families, the share by act.
+ * Act 1 of the first cycle holds every beat to the eased pressure cap:
+ * its MegaMan has 100 HP, and a group at the cap deleted the autopilot
+ * from full HP on a first layer (docs/game/progression/encounter-groups.md,
+ * Step 1, built). */
+static ArcRules rules_at(int depth, int biome) {
+	int act = pacing_act(depth), stage = loot_stage_allowed(depth);
+	unsigned nets = group_nets();
+	ArcRules r = { group_limits_kind(depth, stage, nets, GROUP_EASED), group_limits_kind(depth, stage, nets, GROUP_PLAIN),
+		group_limits_kind(depth, stage, nets, GROUP_CHALLENGE), home_of(depth, biome), arc_home_share(act), act >= 2 };
+	if (act == 0 && pacing_loop(depth) == 0) r.plain.pressure = r.eased.pressure;
+	return r;
+}
+
+bool group_arc_at(uint32_t run_seed, int depth, int biome, GroupArc *out) {
+	static struct { uint32_t seed; int act, biome, made_n, territory; bool ok; GroupArc arc; } kept = { 0, -1, 0, 0, 0, false, { 0 } };
+	const GroupFam *pool;
+	int n = group_pool(&pool), act = pacing_loop(depth) * PACING_ACTS + pacing_act(depth);
+	if (kept.act != act || kept.seed != run_seed || kept.biome != biome || kept.made_n != P.made_n || kept.territory != loot_territory) {
+		ArcRules r = rules_at(depth, biome);
+		kept.seed = run_seed;
+		kept.act = act;
+		kept.biome = biome;
+		kept.made_n = P.made_n;
+		kept.territory = loot_territory;
+		kept.ok = group_arc_make(pool, n, &r, mix(run_seed ^ 0x41524353u ^ (uint32_t)act * 0x9E3779B9u), &kept.arc);   /* ("ARCS") */
 	}
-	/* (kept in mind once fought as a battle of the area's is, loot_battle_fought: no formation's number, its families
-	 * and its viruses) */
-	out.from_biome = biome;
-	out.from_pick = GROUP_FROM_PICK + g.template;
-	out.from_viruses = ids;
-	field_of(&out, biome < BIOME_COUNT ? biome : -1, roll);
-	*e = out;
+	*out = kept.arc;
+	return kept.ok;
+}
+
+/* (the first of `e`'s foes of the arc's signature family, 1 + its index) */
+static int signature_foe(const GroupFam *pool, const GroupArc *arc, const Encounter *e) {
+	for (int i = 0; i < e->nfoes; ++i)
+		if (e->foes[i].family == pool[arc->signature].family) return i + 1;
+	return 0;
+}
+
+bool group_arc_battle(uint32_t run_seed, int depth, int biome, bool challenge, Encounter *e) {
+	const GroupFam *pool;
+	GroupArc arc;
+	group_pool(&pool);
+	if (!group_arc_at(run_seed, depth, biome, &arc) || (challenge && !arc.has_challenge)) return false;
+	/* (the Nest's one layer is its constellation's) */
+	int beat = pacing_act(depth) == 6 ? ARC_CONSTELLATION : ((depth - 1) % CYCLE_LAYERS) % 3;
+	battle_of(pool, challenge ? &arc.challenge : &arc.beat[beat], biome, mix(run_seed ^ (uint32_t)depth * 0x9E3779B9u), e);
+	e->arc_beat = 1 + (challenge ? ARC_BEATS : beat);
+	e->signature = signature_foe(pool, &arc, e);
 	return true;
 }

@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 ---
 
 # The chip recipe generator
@@ -281,7 +281,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
 - **Its copies.** A kinds' table an object reads out of its region
   (`TABLES`: the star's) is a block of the unit, each spawned kind's
   sprite copied (list 3 from 0x70 up), its
-  byte in the copy set. An effect BN6 draws otherwise is moved to an id
+  byte in the copy set. A table whose rows hold one of BN4's numbers BN6
+  numbers otherwise names it in `bytes` (a row's offset, then BN4's
+  value and BN6's, each pair read in both ROMs): the panel changer's
+  kinds' table's panel types, BN4's holy 9 BN6's 5 and its Hole 0xB the
+  engine's 15 (`table_bytes`; a value the map has none of stays BN4's,
+  noted with the row). An effect BN6 draws otherwise is moved to an id
   of the chips' (0xCF down to 0xB0) with its sprite (list 5's 0xEF down,
   list 4's 0x9F down). A sprite of list 1, the viruses' list, takes a
   number from 0x7F down to 0x40 (MokoRus's Moko the first). A sprite
@@ -300,7 +305,12 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   (`SOUND_SLOTS`, from 0x1DA up, the same numbers as
   `src/audio/xsong.c`'s; `src/emu/song_table.h`) and played through a
   shim of the unit's home that names it, a number past a byte; one
-  without a slot is a decision, the next slot its answer.
+  without a slot is a decision, the next slot its answer. A call that
+  several sounds reach, each by a branch that makes r0 one (the read
+  back follows one path), is read by hand (`SOUND_ADDS`: the panel
+  changer's, 0x107 or 0x124 by its kind): each sound's slot its number
+  plus the call's add, which the call's shim adds to r0
+  (`XvSoundCall.add`).
   An effect an object spawns by a byte of its own (`ldrb r4,[r5,#4 to 7]`
   before BN4's effect spawn: a byte of the word its spawn kept of its
   caller's r4) has no immediate to change: `effect_calls` reads the ids
@@ -337,7 +347,10 @@ unit's code names BN4's address, which the runner pokes at its copy.
 A unit of several subfamilies (`UNITS`' tuple: WhitWeb's 8, 9 and 0xA)
 is one block with a routine each: the first is the unit's entry, each
 other a row of the units' table that shares its code (`XChipUnit.share`),
-its entry alone.
+its entry alone. A support unit of several (the dark panels', 0x0B and
+0x3B) moves the fourth-kind type each routine spawns and walks them
+together, so what they share is moved once: Hole's object and
+DrkStage's both spawn the panel changer.
 
 A misc routine that lies after a fourth-kind type's code moves that type
 with it as Counter's moves its third-kind one (`t4_with`: the table's
@@ -348,12 +361,22 @@ as an attack unit's state spawns the Spreads unit's arm): the type's
 spawner is copied with the unit and spawns the owner's copy by its
 number, and the kind it spawns joins the kinds' table's `kinds`.
 
+A kinds' table's row may name its sprite's list beside its number
+(`TABLES`' `sprite`, held to the list it says) and a sound, a u16 its
+object loads and plays (`sound`, with the sites that play it): the
+sound's two bytes in the table's copy take its slot of the grown song
+table, no shim (`table_sounds`; the geyser's rows). `ROWS_WAIT` names a
+written unit's chips that still sit out, each its reason: their rows
+stay `XREG_PENDING` (AquaUp and GreenWd, whose strike no spec has run).
+
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2),
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
 (0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
-(0x62), SeekBom (0x09, its subfamily 9) and Meteors (misc 0x11), with
-GutsMan's chip (navi 5).
+(0x62), SeekBom (0x09, its subfamily 9), Meteors (misc 0x11), Ligtnin
+(misc 0x0C) and Hole (support 0x0B and 0x3B: Hole, DrkLine and DrkStage,
+the panel changer once), with GutsMan's chip (navi
+5).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it

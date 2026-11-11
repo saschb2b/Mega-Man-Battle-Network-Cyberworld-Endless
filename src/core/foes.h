@@ -65,6 +65,11 @@ typedef struct {
 	 * other net into it (1 + its index, 0 none: docs/multirom/one-net.md) */
 	uint32_t xrecord;
 	int visitor;
+	/* an encounter group's battle (groups.h; docs/game/progression/encounter-groups.md):
+	 * its template (1 + GROUP_*, 0 none), and of an act's arc (group_arc.h)
+	 * its beat (1 + ARC_*, 1 + ARC_BEATS the Server's challenge; 0 none) and
+	 * the first foe of the act's signature family (1 + its index, 0 none) */
+	int group, arc_beat, signature;
 	/* its Mystery Data's finds its own (its game's rows, as BN6's names
 	 * them: xbattles.c), not the run's roll (loot_gem_rewards): the eight
 	 * entries the battle draws one of (bits 14-15: 0 a chip, its id and

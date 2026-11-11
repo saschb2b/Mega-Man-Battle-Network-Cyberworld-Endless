@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_ligtnin1 to 3 and _none: BN4's Ligtnin moved",
+  "result": "python3 build.py xdiff with the four specs: each PASS; RockCube set at t34 on (3,2), Ligtnin used at t150, its sweep at t153 and its bolt on the cube's panel at t164 in both (BN6's a frame later), a 140 HP Mettaur at (4,2) left 10 by Ligtnin2; with no obstacle the sweep ends with no bolt over 300 frames. Six mutations caught (the sweep's wait and obstacle mask, the bolt's reach and dispatch number, a row's power and kind). A mutation of the bolt first passed: the runner had poked a BN5 family's block of the same address; fixed (xdiff.c poke_range).",
+  "meaning": "The sweep's kind 2 is proved; kinds 0 and 1 (AquaUp, GreenWd) need a panel's type set in BN4's battle, which the harness cannot do yet."
+}

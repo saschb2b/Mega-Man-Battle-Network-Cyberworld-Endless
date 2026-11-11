@@ -18,6 +18,7 @@
 #include <stdint.h>
 
 #include "foes.h"
+#include "group_arc.h"
 #include "groups.h"
 
 /* A group battle's Encounter.from_pick: past any formation's number, the
@@ -39,5 +40,20 @@ unsigned group_nets(void);
  * (the owner's call 2). `only` a template (groups.h's GROUP_*), or -1
  * any. False, `e` as it was, where the pool fills none. */
 bool group_battle(int depth, int biome, uint32_t layer_seed, int index, int only, Encounter *e);
+
+/* The arc of the act `depth` lies in, in area `biome`, of the run of seed
+ * `run_seed` (group_arc.h): its signature, its beats, its challenge, by
+ * the seed and the act alone, so every layer of the act and a CONTINUE
+ * have the same; kept for the act once made. Act 1 of the first cycle
+ * holds every beat to the eased pressure cap. False where no family of
+ * the pool can be a signature there. */
+bool group_arc_at(uint32_t run_seed, int depth, int biome, GroupArc *out);
+/* Battle `e` (as the area rolled it) made the arc's beat of the layer at
+ * `depth` (its first layer the signature alone, its second the pair, its
+ * third the constellation; the Nest's one layer its constellation), or
+ * where `challenge` the Server's; Encounter.arc_beat and .signature say
+ * which. False, `e` as it was, where the act has no arc (or no
+ * challenge). */
+bool group_arc_battle(uint32_t run_seed, int depth, int biome, bool challenge, Encounter *e);
 
 #endif

@@ -602,7 +602,7 @@ int pacing_report_run(const char *path) {
 
 	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out) + pacing_bracket_report(out);
 	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
-	flagged += pacing_groups_report(out);
+	flagged += pacing_groups_report(out) + pacing_arcs_report(out);
 	super_report(out);
 	clock_report(out);
 	jobs_report(out);

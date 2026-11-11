@@ -1,0 +1,82 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Hole * by a dark MegaMan (karma4 0) against a Mettaur at (5,2), his row: the Hole made at (3,2) at t34, then the Mettaur's shockwave along row 2 over it and on to MegaMan: an enemy's attack across a Hole (BN4's 0xB, plain's flags; BN6's 16 with the same) against BN6's engine, the wave, the panel and MegaMan's HP compared each frame.",
+ "folder4": [
+  "3452"
+ ],
+ "folder6": [
+  "20F:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "karma4": 0
+}

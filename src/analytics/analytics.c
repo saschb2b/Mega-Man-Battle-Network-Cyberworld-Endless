@@ -377,6 +377,41 @@ void analytics_run_choices(bool won, int trips, const AnalyticsEconomy *e) {
 	payload_send(&j, true, false);
 }
 
+/* (a kind of battle's counts: how many, won and left, the HP each cost on average in percent of MegaMan's max, and the
+ * mean busting level of those won, ten times over) */
+static void battles_json(Json *j, const char *const k[5], const AnalyticsBattles *b) {
+	json_int(j, k[0], b->fought);
+	if (!b->fought) return;
+	json_int(j, k[1], b->won);
+	json_int(j, k[2], b->left);
+	json_int(j, k[3], (int)(b->hp_lost / b->fought));
+	if (b->won) json_int(j, k[4], b->bust * 10 / b->won);
+}
+
+void analytics_act(const AnalyticsAct *a, bool cleared) {
+	if (!sends() || !a || a->act < 0 || !(a->own.fought + a->group.fought)) return;
+	static const char *const own[5] = { "own", "ownwon", "ownleft", "ownhp", "ownbust" };
+	static const char *const group[5] = { "groups", "groupswon", "groupsleft", "groupshp", "groupsbust" };
+	char out[ANALYTICS_PAYLOAD];
+	Json j;
+	payload_begin(&j, out, sizeof out, A.path, "act-battles");
+	json_int(&j, "act", a->act % 7 + 1);
+	json_int(&j, "cycle", a->act / 7 + 1);
+	json_bool(&j, "cleared", cleared);
+	json_bool(&j, "whole", a->whole != 0);
+	json_member(&j, "net", net_name());
+	json_int(&j, "threat", run.threat);
+	battles_json(&j, own, &a->own);
+	battles_json(&j, group, &a->group);
+	if (a->signature > 0) {
+		json_int(&j, "signature", a->signature);
+		json_bool(&j, "home", a->home != 0);
+		json_int(&j, "beats", a->beats);
+		json_int(&j, "templates", a->templates);
+	}
+	payload_send(&j, true, false);
+}
+
 /* ---- the systems' queue (under their lock) ---- */
 
 bool analytics_queue_put(AnalyticsQueue *q, const char *json) {

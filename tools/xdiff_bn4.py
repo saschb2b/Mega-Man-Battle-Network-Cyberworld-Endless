@@ -699,6 +699,15 @@ PANEL_TYPE, PANEL_SIDE, PANEL_IN_FIELD, PANEL_SIDE_COPY, PANEL_ANIM, PANEL_SIDE_
 PANEL_COLUMN, PANEL_ROW, PANEL_SPOT, PANEL_SIDE_TIMER, PANEL_TIMER = 0x0A, 0x0B, 0x0C, 0x10, 0x12
 BN6_IN_FIELD_TABLE, BN6_SPOT_TABLE, BN4_SIDES = 0x0800C590, 0x0800C5B8, 0x08009218
 BN4_TIMERS_IDLE, BN6_TIMERS_IDLE = (0x3C0, 0x80BE), (0, 0x708)
+# BN4's panel types BN6 numbers otherwise (its type byte, the flags' low nibble, which BN4's flags update ORs the type into,
+# 0x0800A376, as BN6's does, and its blink's type, xd4_panel_blinks): BN4's holy 9 BN6's 5 (BN4_PANEL_HOLY, the same word
+# 0x12010) and its Hole 0xB the engine's 16 (src/emu/xpanels.h XPANEL_HOLE: plain's word in both, its flags' low byte 0x10 in BN6, the type's
+# bit 4 plain's own); a moved chip's kinds' table
+# holds BN6's numbers for them (tools/xchiprecipe_bn4.py TABLES' bytes). And BN4's set type's timer: BN4_SET_PANEL_TYPE gives
+# +0x12 0xBE, which BN4's panel step (BN4_PANEL_STEP) counts on a holding panel (0xA) alone, as it counts 0x80BE nowhere: on
+# any other type both are BN4's idle, BN6's 0x708 (BN6_PANEL_TIMER, written every frame on most types)
+PANEL_TYPES4 = {9: 5, 0xB: 16}
+PANEL_FLAGS, PANEL_BLINK_TYPE, BN4_PANEL_HOLDING, BN4_SET_TIMER = 0x14, 0x08, 0x0A, 0xBE
 
 
 def panel_tables(rom4, rom6):
@@ -722,7 +731,15 @@ def panel_as_bn6(i, p, tabs, panels, start=None):
     border = col in (0, 7) or row in (0, 4)
     out[PANEL_ANIM], out[PANEL_SIDE_DRAWN] = out[PANEL_TYPE], out[PANEL_SIDE]
     out[PANEL_SIDE_COPY] = out[PANEL_SIDE] if border or start is None else start[i][PANEL_SIDE]
+    t = out[PANEL_TYPE]
+    if t in PANEL_TYPES4:
+        out[PANEL_TYPE] = out[PANEL_ANIM] = PANEL_TYPES4[t]
+        if out[PANEL_FLAGS] & 0xF == t:
+            out[PANEL_FLAGS] = out[PANEL_FLAGS] & 0xF0 | PANEL_TYPES4[t]
+    out[PANEL_BLINK_TYPE] = PANEL_TYPES4.get(out[PANEL_BLINK_TYPE], out[PANEL_BLINK_TYPE])
     timers = u16(out, PANEL_SIDE_TIMER), u16(out, PANEL_TIMER)
+    if timers == (BN4_TIMERS_IDLE[0], BN4_SET_TIMER) and t != BN4_PANEL_HOLDING:
+        timers = BN4_TIMERS_IDLE
     if timers == BN4_TIMERS_IDLE:
         out[PANEL_SIDE_TIMER:PANEL_SIDE_TIMER + 2] = BN6_TIMERS_IDLE[0].to_bytes(2, 'little')
         out[PANEL_TIMER:PANEL_TIMER + 2] = BN6_TIMERS_IDLE[1].to_bytes(2, 'little')

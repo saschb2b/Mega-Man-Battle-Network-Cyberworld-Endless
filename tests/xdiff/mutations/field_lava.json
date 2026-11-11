@@ -11,16 +11,16 @@
   "name": "the cooling's panel",
   "spec": "field_lava",
   "poke": [
-   "08CC0048:2203"
+   "08CC0088:2203"
   ],
-  "what": "the stub's movs r2,#2 (the panel made plain as lava cools under MegaMan) made #3: a cracked panel"
+  "what": "the stub's movs r2,#2 (XP_STUB, EMU_FREE + 0x4C0080, + 8) (the panel made plain as lava cools under MegaMan) made #3: a cracked panel"
  },
  {
   "name": "the spark's place unmoved",
   "spec": "field_lava",
   "poke": [
-   "08CC0090:0810A953:4"
+   "08CC00D0:0810A953:4"
   ],
-  "what": "the stub's veneer to the routine that moves the spark's place by a random amount (BN6_PLACE_JITTER) aimed at the families' empty hook: no random number drawn as lava cools"
+  "what": "the stub's veneer (XP_STUB + 0x50) to the routine that moves the spark's place by a random amount (BN6_PLACE_JITTER) aimed at the families' empty hook: no random number drawn as lava cools"
  }
 ]

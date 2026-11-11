@@ -31,7 +31,7 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Ten more have no menu entry: `fragile` (MegaMan keeps 1 HP in battle, so the
+Eleven more have no menu entry: `lab` (the Battle Lab's keeper stands in Lan's HP and lists every family the engine holds, whatever the profile's battle data: [the Battle Lab](../game/battle-lab.md)), `fragile` (MegaMan keeps 1 HP in battle, so the
 first hit ends the run), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: 0.3.0's trailer,
 `tools/trailers/v0_3_0.py`, plays one),
@@ -47,7 +47,12 @@ alone, 1 the wall and its artillery, 2 the panel war, 3 the summoner and
 its guard, 4 clashing answers, 5 one element, 6 the pincer, 7 the swarm,
 8 held ground, 9 glass cannons, 10 the bulwark, 11 the nets meeting:
 [Encounter groups](../game/progression/encounter-groups.md), Step 1,
-built), `dark`
+built), `arc` (the acts' arcs as a run will have them: a layer's first
+random battle its act's beat, the signature alone, a pair, its
+constellation, and the Server's challenge the signature's hardest
+constellation; `CYBERWORLD_EMU_DEBUG` prints each beat once:
+[Encounter groups](../game/progression/encounter-groups.md), Step 2),
+`dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, [Liberation Missions](../game/liberation/overview.md); `CYBERWORLD_EMU_DEBUG` prints the board as
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is

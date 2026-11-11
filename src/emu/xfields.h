@@ -14,7 +14,9 @@
 /* BN5's fields into the core's copy, once a core (xvirus_install calls it
  * where BN5's ROM is read), its lava and sea first (xpanels_install): each
  * checked first (BN6's own the same panels, or the field written over
- * still BN6's), the log names any that fails. */
+ * still BN6's), the log names any that fails. For BN4's ROM (xvirus_install
+ * calls it after BN4's families), none of its fields: BN4's Hole panel alone
+ * (xpanels_install). */
 void xfields_install(int xrom);
 /* BN6's number for field `field` of game `xrom`, as installed: -1 where
  * it is none (not installed, or a panel BN6 has no type for) */

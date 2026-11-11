@@ -1,0 +1,132 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 215,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Ligtnin1 * (its chip 166) against the registry's row for it (id 677), BN4's code moved by tools/xchiprecipe_bn4.py as a misc unit (misc 0x0C as BN6's grown misc routine 0x8C: its routine in its sweep's code, the third kind's 0x93, with the bolt, the third kind's 0x8E, and AquaUp's and GreenWd's strike, the third kind's 0x92; docs/multirom/bn4-chips.md): RockCube and Ligtnin1 picked on the first Custom screen (BN4's hand holds Ligtnin1 first, so its keys pick the second chip first; BN6's deck is given), the cube set at fight frame 30 on (3,2), Ligtnin1 used at t150: its sweep (kind 2) goes column by column from MegaMan's edge and lets a bolt fall on the cube's panel at t164, the bolt's sound and sparks the same; BN4's MettaurSP at (5,2), out of its reach, untouched. Compared to t215, before the Mettaur's wave breaks the cube (its debris each engine's own).",
+ "folder4": [
+  "3463",
+  "34A6"
+ ],
+ "folder6": [
+  "348F",
+  "2A5:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "LEFT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   150,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "348F",
+  "2A5:1A"
+ ]
+}

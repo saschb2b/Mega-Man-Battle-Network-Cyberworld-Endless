@@ -291,5 +291,21 @@
 #define BN4_EXPLOSIONS_SPAWN  0x080E33D4u /* ... its spawner, in its code (r4 its +4 to +7: SeekBom's bomb's movs r4,#2) */
 #define BN4_EXPLOSIONS_EFFECT 0x080E33B4u /* ... its ldrb r4,[r5,#5] before BN4_SPAWN_EFFECT (0x080E33B6): no immediate names the id; the
                                            * copy's call goes through a shim that gives r4 BN6's (XvEffectCall, xvirus_shim.h) */
+/* Ligtnin1-3, AquaUp1-3 and GreenWd1-3 (its chips 166-168 and 181-186, misc subfamily 0x0C), moved as one unit */
+#define BN4_SWEEP             0x080DF98Cu /* their routine, in the sweep's code: the sweep spawned with the record's first parameter its
+                                           * kind (0 AquaUp, 1 GreenWd, 2 Ligtnin), its element and its damage */
+#define BN4_T3_SWEEP          0x93        /* the sweep, the third kind's (0x080DF7F8 to 0x080DF9B0): from its side's edge a column every so
+                                           * many frames (BN4_SWEEP_WAITS by kind), each row's panel tried by its kind's routine (0x080DF898:
+                                           * a cracked panel, type 3, of the other side's with a foe on it; a grass one, type 6, likewise; any
+                                           * panel that holds an obstacle, its flags' 0x03800000); a column that answered ends its turn */
+#define BN4_SWEEP_WAITS       0x080DF7F4u /* ... the frames it waits before each turn, a byte a kind (10, 10, 10) */
+#define BN4_T3_GEYSER         0x92        /* AquaUp's geyser and GreenWd's tower, the third kind's (0x080DF68C to 0x080DF7F8, its spawner
+                                           * 0x080DF7D0): its kind's row of BN4_GEYSER_KINDS, three animations by its frames */
+#define BN4_GEYSER_KINDS      0x080DF674u /* ... its two kinds, 12 bytes each: its sprite's list's offset and number (list 3's 0x25, 0x0B), its
+                                           * animations and their frames, its collision's argument, and its sound, a u16 (0x120, 0x13E) */
+#define BN4_T3_LIGTNIN_BOLT   0x8E        /* Ligtnin's bolt, the third kind's (0x080DEFEC to 0x080DF128, its spawner 0x080DF108): it strikes
+                                           * its panel and the eight around it in its first frame (its collision's +1 0x10), a spark (effect
+                                           * 0x6B) on each of the eight in turn; sprite list 5's 0x14, sound 0x143 */
+#define BN4_T3_SPRITE_STEP    0x08014446u /* a third-kind object's sprite each frame (BN6's 0x0801BBF4; the first kind's 0x080143FC) */
 
 #endif

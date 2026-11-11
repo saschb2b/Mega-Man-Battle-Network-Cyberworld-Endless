@@ -64,6 +64,14 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define KEEPER_SPRITE 61
 #define KEEPER_TEXT 1536
 
+/* The Battle Lab's keeper (docs/game/battle-lab.md): a Mr.Prog of Dad's lab
+ * across the room's front from the gate's, facing the room, his words an
+ * archive of their own, which the director writes */
+#define LAB_X 68
+#define LAB_Y 76
+#define LAB_FACE 7
+#define LAB_TEXT 768
+
 /* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
  * whose map objects 0xCB-0xCE show each link square its town's emblem
  * (animations 1-4), in its plain animation 0 instead, a ring on a cyan
@@ -105,6 +113,7 @@ static struct {
 	uint8_t jack_out[16];                 /* BN6's blue pad's entry: its jack-out */
 	uint32_t courier_text;                /* the courier's words' room, 0 none */
 	uint32_t keeper_text;                 /* the gate keeper's */
+	uint32_t lab_text;                    /* the Battle Lab's keeper's */
 	uint32_t gate_anim;                   /* the gate's animation byte, 0 none */
 } H;
 
@@ -170,6 +179,15 @@ static void gate(NpcList *npcs) {
 	if (keeper) npcs->script[npcs->n++] = keeper;
 }
 
+/* the Battle Lab's keeper into `npcs`, his words' room cleared */
+static void lab(NpcList *npcs) {
+	static const uint8_t empty[LAB_TEXT] = { 2, 0, 0xE6 };
+	H.lab_text = mapslot_alloc(empty, sizeof empty);
+	if (!H.lab_text || !npc_need_sprite(npcs, 6, KEEPER_SPRITE)) return;
+	uint32_t prog = npc_talker(6, KEEPER_SPRITE, LAB_X, LAB_Y, 0, LAB_FACE, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false);
+	if (prog) npcs->script[npcs->n++] = prog;
+}
+
 /* the ways back's marks into `npcs` */
 static void back_marks(NpcList *npcs) {
 	if (!npc_need_sprite(npcs, 7, LINK_MARKER)) return;
@@ -191,6 +209,7 @@ bool lanhp_install(void) {
 	mapslot_hp(true);
 	courier(&npcs);
 	gate(&npcs);
+	lab(&npcs);
 	back_marks(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
@@ -209,6 +228,12 @@ bool lanhp_courier_say(const uint8_t *archive, int n) {
 bool lanhp_keeper_say(const uint8_t *archive, int n) {
 	if (!H.keeper_text || n <= 0 || n > KEEPER_TEXT) return false;
 	emu_write(H.keeper_text, archive, (size_t)n);
+	return true;
+}
+
+bool lanhp_lab_say(const uint8_t *archive, int n) {
+	if (!H.lab_text || n <= 0 || n > LAB_TEXT) return false;
+	emu_write(H.lab_text, archive, (size_t)n);
 	return true;
 }
 

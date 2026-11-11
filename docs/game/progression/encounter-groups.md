@@ -458,6 +458,86 @@ Left of step 1, each measured before step 2 rests on it:
   fills one way, so a share by fillings, or by the arc, is step 2's to
   set with the shares by act.
 
+### Step 2, the arc and the rewards, built
+
+In the engine since 12 November 2026, behind `--dev arc`: no run of a
+player's has an arc.
+
+- **The arc** (`src/core/group_arc.c`, no ROM; its rules by act in
+  `src/core/group_pool.c`): an act's signature by the run's seed and the
+  act alone, so every layer of the act and a CONTINUE have the same. A
+  family can be a signature where it stands alone inside the eased
+  limits and some template pairs it. The signature is one of the area's
+  own in the share the owner set: of 200 runs' arcs an act's area, 75%
+  in act 1, 51% in act 2, 34% in act 3, 25% in act 4; the deep takes any
+  family. Every act of every area has an arc with every ROM read, from
+  13 families in act 1 to 58 in the deep.
+- **The three beats**: on the act's first layer the signature alone, two
+  of it or one, whichever holds more HP inside the eased limits (the
+  band's lower half, two thirds of the pressure cap, about the median of
+  the act's own battles); on the second a pair, one of the two-family
+  fillings that hold it; on the third its constellation, three families
+  (with the partner too from act 3), else three of it, else the hardest
+  pair with another partner. The Nest's one layer is its constellation.
+- **Which battle**: a layer's first random battle; on the run's first
+  layer its second, after the run's very first battle. The proposal had
+  the first layer's beat after both openers; players fight 1.3 battles a
+  layer, so a third battle is seldom met, and the beat alone is an eased
+  battle as the second opener is. Never with the Gentle helper, on a side
+  layer or a Glitch layer.
+- **Act 1 holds every beat to the eased cap** (146 in place of 220):
+  MegaMan has 100 HP there, and a group at the cap deleted the autopilot
+  on a first layer (Step 1, built). The owner's to confirm or lift.
+- **The Server's challenge** is the filling of most predicted pressure
+  that holds the signature, inside a challenge's limits (the next act's
+  band, its versions, the cap grown as the band's cap on one hit is).
+  Every arc has one. Where the area's own challenge rolls a Navi, the
+  Navi stays: the Server's rare Navi is no constellation's to take.
+- **The rewards** (`src/director/encounter.c`, `loot_paying_id`): the
+  reward pick is handed the signature's enemy alone, at the version
+  fought, so a beat pays from its row and the busting level picks the
+  entry as ever; nothing of the battle's state is written. A signature
+  whose row holds no chip leaves the pay to the group's row with the most
+  (the fifth call). Played on three seeds: in four of six group battles
+  the reward was in the signature's row and not the partner's, in two in
+  both.
+- **The act card names the signature** (`src/director/story_words.c`):
+  "Act 2 - BombCorn signal", in the place "Nets meet" has, a label as
+  "Guardian:" is one, the family's name the ROM's own. A signal is what
+  MegaMan senses of what waits ("a strong virus signal" is the Server's
+  word). It names the family whether or not MegaMan has met it, where the
+  guardian's line keeps "???" until he has: the owner's to confirm
+  ([What MegaMan knows](../meta/what-megaman-knows.md)). With the arc on
+  it also stands where the deep's "Both Nets" and a territory's "Older
+  Net" do.
+- **The statistics' event** (`act-battles`, `src/analytics/analytics.c`;
+  counted in `src/director/runlog.c`, kept with the run's other counts
+  in `run.tally`): as an act ends, its random battles on the main path,
+  the area's own and the groups' apart: how many were fought, won and
+  run from, the HP each cost on average in percent of MegaMan's max, the
+  mean busting level of those won; and of the act's arc its signature
+  family's number, whether it is one of the area's own, the beats fought
+  and the templates. It is sent today too, with the area's own battles
+  alone: the measure the groups are held against once they are on
+  ([The player's guide](../../GUIDE.md#anonymous-statistics) lists it).
+  Checked against a local stand-in for the statistics' server: an act
+  played with `--dev arc` sent 2 own battles and 2 group battles, the
+  signature and its two beats.
+- **What the rows pay** (`build.py pacing`, the acts' arcs: each beat's
+  paying row against the rows of the area's own battles, their healthy
+  halves): about as many chip entries (3.8 of ten against 3.2 in act 1,
+  3.1 against 2.6 in act 4), a fifth to a quarter less zenny a row (0.72
+  of the area's own in act 1, 0.76 to 0.88 after), and many more kinds of
+  chip: 13 against 3 in act 1, 32 against 4 in act 2, 80 against 12 in
+  act 3, about 120 against 26 to 32 in the deep. The variety is the
+  point; the zenny is what `build.py economy` must weigh before the arc
+  is turned on, since a layer's one group battle is most of the 1.3 a
+  layer that players fight.
+- **Checked**: `build.py pacing` rolls 200 runs' arcs for every act's
+  area and reads each beat again from the ROM's records: none past its
+  limits, a signature in each. A unit test holds the arc's rules on a
+  made-up pool.
+
 ## The five calls, decided
 
 The measuring phase left five calls to the owner, each with this page's
