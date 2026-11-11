@@ -3913,5 +3913,347 @@ static const XNavi bn5_searchman = {
 	.sprite_of = 3,
 	.sounds = searchman_sounds, .nsounds = (int)(sizeof searchman_sounds / sizeof *searchman_sounds),
 };
-const XNavi *const xnavi_bn5[] = { &bn5_toadman, &bn5_knightman, &bn5_shadowman, &bn5_numberman, &bn5_tomahawkman, &bn5_colonel, &bn5_thedarksoul, &bn5_blizzardman, &bn5_shademan, &bn5_cosmoman, &bn5_napalmman, &bn5_gyroman, &bn5_searchman };
+/* ---- Meddy (BN5's: AI 6 there, its ids 0x11f, 0x120, 0x121, 0x122), as Navi AI 31 with ids 0x3e8-0x3eb ---- */
+
+static const XvBlock meddy_blocks[] = {
+	{ 0x080F73E8, 0x080F7FF8, XN_TEAM_CODE + 0xC800, 0x2277A18Au },
+	{ 0x080C5386, 0x080C53DE, XN_TEAM_CODE + 0xD502, 0x4A1B50AFu },
+	{ 0x080C57E4, 0x080C5D1A, XN_TEAM_CODE + 0xD600, 0xD0362A11u },
+	{ 0x080C6000, 0x080C665C, XN_TEAM_CODE + 0xDC00, 0x0AF177EBu },
+	{ 0x080E125C, 0x080E1354, XN_TEAM_CODE + 0xE300, 0x32363378u },
+	{ 0x080E179C, 0x080E197C, XN_TEAM_CODE + 0xE400, 0xB3893E35u },
+	{ 0x080E4B10, 0x080E4BBE, XN_TEAM_CODE + 0xE600, 0xEF7BA781u },
+};
+static const XvData meddy_data[] = {
+	{ 0x080F73E8, 0x080F7414, XV_ZERO },
+	{ 0x080F742A, 0x080F742C, XV_RAW },
+	{ 0x080F742C, 0x080F7430, XV_POOL },
+	{ 0x080F7444, 0x080F7448, XV_POOL },
+	{ 0x080F7448, 0x080F7454, XV_TABLE },
+	{ 0x080F7592, 0x080F7594, XV_RAW },
+	{ 0x080F7594, 0x080F7598, XV_POOL },
+	{ 0x080F7598, 0x080F759C, XV_RAW },
+	{ 0x080F75A6, 0x080F75A8, XV_RAW },
+	{ 0x080F75A8, 0x080F75AC, XV_POOL },
+	{ 0x080F75AC, 0x080F75B0, XV_RAW },
+	{ 0x080F75D2, 0x080F75D4, XV_RAW },
+	{ 0x080F75D4, 0x080F75DC, XV_POOL },
+	{ 0x080F75DC, 0x080F75E6, XV_RAW },
+	{ 0x080F75E6, 0x080F75F0, XV_RAW },
+	{ 0x080F75F0, 0x080F75F4, XV_POOL },
+	{ 0x080F75F4, 0x080F75F8, XV_RAW },
+	{ 0x080F75F8, 0x080F760C, XV_POOL },
+	{ 0x080F761A, 0x080F761C, XV_RAW },
+	{ 0x080F761C, 0x080F7620, XV_POOL },
+	{ 0x080F7620, 0x080F762C, XV_TABLE },
+	{ 0x080F7674, 0x080F7678, XV_POOL },
+	{ 0x080F7678, 0x080F7688, XV_RAW },
+	{ 0x080F76FC, 0x080F7700, XV_POOL },
+	{ 0x080F7700, 0x080F770C, XV_TABLE },
+	{ 0x080F7792, 0x080F7794, XV_RAW },
+	{ 0x080F7794, 0x080F7798, XV_POOL },
+	{ 0x080F7798, 0x080F77B4, XV_TABLE },
+	{ 0x080F78A4, 0x080F78A8, XV_POOL },
+	{ 0x080F795A, 0x080F795C, XV_RAW },
+	{ 0x080F795C, 0x080F7960, XV_POOL },
+	{ 0x080F7960, 0x080F7978, XV_TABLE },
+	{ 0x080F79C2, 0x080F79C4, XV_RAW },
+	{ 0x080F79C4, 0x080F79C8, XV_POOL },
+	{ 0x080F79C8, 0x080F79D8, XV_RAW },
+	{ 0x080F7ABC, 0x080F7AC0, XV_POOL },
+	{ 0x080F7B6C, 0x080F7B70, XV_POOL },
+	{ 0x080F7B70, 0x080F7B74, XV_RAW },
+	{ 0x080F7BD0, 0x080F7BD4, XV_POOL },
+	{ 0x080F7BD4, 0x080F7BD8, XV_RAW },
+	{ 0x080F7C8C, 0x080F7C90, XV_POOL },
+	{ 0x080F7C90, 0x080F7C9C, XV_RAW },
+	{ 0x080F7C9C, 0x080F7CA0, XV_POOL },
+	{ 0x080F7CA0, 0x080F7CA8, XV_RAW },
+	{ 0x080F7CA8, 0x080F7CAC, XV_POOL },
+	{ 0x080F7CAC, 0x080F7CBC, XV_RAW },
+	{ 0x080F7CBC, 0x080F7CC0, XV_POOL },
+	{ 0x080F7CC0, 0x080F7CC4, XV_RAW },
+	{ 0x080F7CC4, 0x080F7CC8, XV_POOL },
+	{ 0x080F7CC8, 0x080F7CD8, XV_RAW },
+	{ 0x080F7D26, 0x080F7D28, XV_RAW },
+	{ 0x080F7D28, 0x080F7D2C, XV_POOL },
+	{ 0x080F7E1C, 0x080F7E20, XV_POOL },
+	{ 0x080F7E20, 0x080F7E30, XV_RAW },
+	{ 0x080F7EA6, 0x080F7EA8, XV_RAW },
+	{ 0x080F7EA8, 0x080F7EAC, XV_POOL },
+	{ 0x080F7EAC, 0x080F7EBC, XV_RAW },
+	{ 0x080F7EBC, 0x080F7EC0, XV_POOL },
+	{ 0x080F7EC0, 0x080F7EC4, XV_RAW },
+	{ 0x080F7F46, 0x080F7F48, XV_RAW },
+	{ 0x080F7F48, 0x080F7F4C, XV_POOL },
+	{ 0x080F7F4C, 0x080F7F5C, XV_RAW },
+	{ 0x080F7FDE, 0x080F7FE0, XV_RAW },
+	{ 0x080F7FE0, 0x080F7FE4, XV_POOL },
+	{ 0x080F7FE4, 0x080F7FF4, XV_RAW },
+	{ 0x080F7FF4, 0x080F7FF8, XV_POOL },
+	{ 0x080C57F6, 0x080C57F8, XV_RAW },
+	{ 0x080C57F8, 0x080C57FC, XV_POOL },
+	{ 0x080C57FC, 0x080C580C, XV_TABLE },
+	{ 0x080C58A4, 0x080C58A8, XV_POOL },
+	{ 0x080C58A8, 0x080C58B0, XV_RAW },
+	{ 0x080C593C, 0x080C5940, XV_POOL },
+	{ 0x080C5940, 0x080C5950, XV_TABLE },
+	{ 0x080C59D4, 0x080C59D8, XV_POOL },
+	{ 0x080C59D8, 0x080C59E8, XV_TABLE },
+	{ 0x080C5B54, 0x080C5B58, XV_POOL },
+	{ 0x080C5B58, 0x080C5B60, XV_RAW },
+	{ 0x080C5B60, 0x080C5B64, XV_POOL },
+	{ 0x080C5B64, 0x080C5B6C, XV_RAW },
+	{ 0x080C5C90, 0x080C5C98, XV_POOL },
+	{ 0x080C5C98, 0x080C5CA8, XV_RAW },
+	{ 0x080C5CEE, 0x080C5CF0, XV_RAW },
+	{ 0x080C5CF0, 0x080C5CF4, XV_POOL },
+	{ 0x080C5CF4, 0x080C5CFC, XV_RAW },
+	{ 0x080C6024, 0x080C6028, XV_POOL },
+	{ 0x080C6028, 0x080C6034, XV_TABLE },
+	{ 0x080C60CA, 0x080C60CC, XV_RAW },
+	{ 0x080C60CC, 0x080C60D0, XV_POOL },
+	{ 0x080C60D0, 0x080C60D8, XV_RAW },
+	{ 0x080C60D8, 0x080C60DC, XV_POOL },
+	{ 0x080C60DC, 0x080C60F4, XV_RAW },
+	{ 0x080C60F4, 0x080C60F8, XV_POOL },
+	{ 0x080C60F8, 0x080C6110, XV_RAW },
+	{ 0x080C617A, 0x080C617C, XV_RAW },
+	{ 0x080C617C, 0x080C6180, XV_POOL },
+	{ 0x080C6180, 0x080C618C, XV_TABLE },
+	{ 0x080C618C, 0x080C6190, XV_POOL },
+	{ 0x080C6190, 0x080C6198, XV_RAW },
+	{ 0x080C6294, 0x080C6298, XV_POOL },
+	{ 0x080C6298, 0x080C62A0, XV_RAW },
+	{ 0x080C62E0, 0x080C62E4, XV_POOL },
+	{ 0x080C62E4, 0x080C62EC, XV_RAW },
+	{ 0x080C636E, 0x080C6370, XV_RAW },
+	{ 0x080C6370, 0x080C6374, XV_POOL },
+	{ 0x080C6374, 0x080C637C, XV_RAW },
+	{ 0x080C637C, 0x080C6380, XV_POOL },
+	{ 0x080C6380, 0x080C638C, XV_RAW },
+	{ 0x080C638C, 0x080C6390, XV_POOL },
+	{ 0x080C6390, 0x080C63A8, XV_RAW },
+	{ 0x080C63A8, 0x080C63AC, XV_POOL },
+	{ 0x080C63AC, 0x080C63B4, XV_RAW },
+	{ 0x080C6420, 0x080C6424, XV_POOL },
+	{ 0x080C6424, 0x080C6428, XV_RAW },
+	{ 0x080C6428, 0x080C6434, XV_POOL },
+	{ 0x080C6446, 0x080C6448, XV_RAW },
+	{ 0x080C6448, 0x080C644C, XV_POOL },
+	{ 0x080C644C, 0x080C6458, XV_TABLE },
+	{ 0x080C6566, 0x080C6568, XV_RAW },
+	{ 0x080C6568, 0x080C656C, XV_POOL },
+	{ 0x080C656C, 0x080C6578, XV_TABLE },
+	{ 0x080C6578, 0x080C657C, XV_POOL },
+	{ 0x080C657C, 0x080C6588, XV_RAW },
+	{ 0x080C6588, 0x080C658C, XV_POOL },
+	{ 0x080C658C, 0x080C6590, XV_RAW },
+	{ 0x080C6608, 0x080C660C, XV_POOL },
+	{ 0x080C660C, 0x080C661C, XV_RAW },
+	{ 0x080E126A, 0x080E126C, XV_RAW },
+	{ 0x080E126C, 0x080E1270, XV_POOL },
+	{ 0x080E1270, 0x080E127C, XV_TABLE },
+	{ 0x080E128A, 0x080E128C, XV_RAW },
+	{ 0x080E128C, 0x080E1290, XV_POOL },
+	{ 0x080E1290, 0x080E12A0, XV_TABLE },
+	{ 0x080E12AE, 0x080E12B0, XV_RAW },
+	{ 0x080E12B0, 0x080E12B4, XV_POOL },
+	{ 0x080E12B4, 0x080E12BC, XV_TABLE },
+	{ 0x080E12E6, 0x080E12E8, XV_RAW },
+	{ 0x080E12E8, 0x080E12EC, XV_POOL },
+	{ 0x080E12EC, 0x080E12F0, XV_RAW },
+	{ 0x080E17AA, 0x080E17AC, XV_RAW },
+	{ 0x080E17AC, 0x080E17B0, XV_POOL },
+	{ 0x080E17B0, 0x080E17BC, XV_TABLE },
+	{ 0x080E17D6, 0x080E17D8, XV_RAW },
+	{ 0x080E17D8, 0x080E17DC, XV_POOL },
+	{ 0x080E17DC, 0x080E17E4, XV_TABLE },
+	{ 0x080E1802, 0x080E1804, XV_RAW },
+	{ 0x080E1804, 0x080E1808, XV_POOL },
+	{ 0x080E1808, 0x080E180C, XV_RAW },
+	{ 0x080E186E, 0x080E1870, XV_RAW },
+	{ 0x080E1870, 0x080E1874, XV_POOL },
+	{ 0x080E1874, 0x080E1880, XV_TABLE },
+	{ 0x080E18EC, 0x080E18F0, XV_POOL },
+	{ 0x080E18F0, 0x080E1900, XV_RAW },
+	{ 0x080E1970, 0x080E197C, XV_POOL },
+	{ 0x080E4B22, 0x080E4B24, XV_RAW },
+	{ 0x080E4B24, 0x080E4B28, XV_POOL },
+	{ 0x080E4B28, 0x080E4B34, XV_TABLE },
+};
+static const XvPair meddy_calls[] = {
+	{ 0x0800CE1E, 0x0800EB9E },   /* map:calls, LAYOUT */
+	{ 0x0800C7CC, 0x0800E3BE },   /* map:calls, DIFF (audited) */
+	{ 0x08002C44, 0x08002DD8 },   /* map:bytes, SAME */
+	{ 0x08002C1C, 0x08002DB0 },   /* map:bytes, SAME */
+	{ 0x08000598, 0x080005CC },   /* project:cangard, SAME */
+	{ 0x080187A2, 0x0801BCA6 },   /* map:bytes, SAME */
+	{ 0x0800C69C, 0x0800E29C },   /* project:cangard, SAME */
+	{ 0x08002650, 0x080026E4 },   /* project:cangard, SAME */
+	{ 0x08002CA8, 0x08002E3C },   /* map:bytes, SAME */
+	{ 0x08002C10, 0x08002DA4 },   /* project:cangard, SAME */
+	{ 0x08002610, 0x080026A4 },   /* project:cangard, SAME */
+	{ 0x08002BEC, 0x08002D80 },   /* project:cangard, SAME */
+	{ 0x0800C88E, 0x0800E456 },   /* project:cangard, SAME */
+	{ 0x08002DC0, 0x08002F5C },   /* project:cangard, SAME */
+	{ 0x08016126, 0x08019892 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016760, 0x08019FB4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C34, 0x0801A140 },   /* project:cangard, SAME */
+	{ 0x08016B1A, 0x0801A018 },   /* project:cangard, DIFF (audited) */
+	{ 0x0800325C, 0x08003458 },   /* project:cangard, SAME */
+	{ 0x080167B0, 0x0801A00E },   /* project:cangard, DIFF (audited) */
+	{ 0x08016C04, 0x0801A0D4 },   /* project:cangard, DIFF (audited) */
+	{ 0x08008B6E, 0x0800A18E },   /* project:cangard, SAME */
+	{ 0x08016B88, 0x0801A074 },   /* project:cangard, SAME */
+	{ 0x08008A78, 0x0800A098 },   /* project:cangard, SAME */
+	{ 0x08016B90, 0x0801A07C },   /* project:cangard, SAME */
+	{ 0x080DFFD2, 0x080E1932 },   /* project:cangard, SAME */
+	{ 0x0800C676, 0x0800E276 },   /* project:cangard, SAME */
+	{ 0x0800CB20, 0x0800E708 },   /* map:bytes, SAME */
+	{ 0x0800C6AC, 0x0800E2AC },   /* project:cangard, SAME */
+	{ 0x08016B60, 0x0801A04C },   /* project:cangard, SAME */
+	{ 0x080C4E72, 0x080C6BDA },   /* map:bytes, SAME */
+	{ 0x08018838, 0x0801BD3C },   /* map:bytes, SAME */
+	{ 0x080138EA, 0x08016C8A },   /* project:cangard, DIFF (audited) */
+	{ BN5_SPAWN_3, XV_SPAWN_3 },   /* the dispatch's spawner */
+	{ 0x0800AFB0, 0x0800C8F8 },   /* map:calls, LAYOUT */
+	{ 0x08008EC6, 0x0800A704 },   /* map:bytes, SAME */
+	{ 0x08002D34, 0x08002ED0 },   /* map:bytes, SAME */
+	{ 0x08006BC2, 0x080077B4 },   /* map:bytes, SAME */
+	{ 0x0802EFFE, 0x0802EF5C },   /* map:bytes, SAME */
+	{ 0x080186A8, 0x0801BBAC },   /* project:cangard, SAME */
+	{ 0x080186F0, 0x0801BBF4 },   /* map:bytes, SAME */
+	{ 0x08017054, 0x0801A258 },   /* map:bytes, SAME */
+	{ 0x080012CC, 0x08001330 },   /* map:bytes, SAME */
+	{ 0x0800B290, 0x0800CBD8 },   /* map:bytes, SAME */
+	{ 0x080C4EAE, 0x080C6C16 },   /* map:calls+bytes, SAME */
+	{ 0x0800B334, 0x0800CC72 },   /* map:bytes, SAME */
+	{ 0x080090E8, 0x0800A8F8 },   /* map:bytes, SAME */
+	{ 0x080EA08C, XN_STUB_ZERO },   /* a stub: what BN6's engine lacks */
+	{ 0x080EA0BA, XN_STUB_ZERO },   /* a stub: what BN6's engine lacks */
+	{ 0x08002DF4, 0x08002F90 },   /* project:cangard, SAME */
+	{ 0x080C665C, 0x080D1014 },   /* map:bytes, SAME */
+	{ 0x0800C6C0, 0x0800E2C0 },   /* map:calls+bytes, SAME */
+	{ 0x0800B328, 0x0800CC66 },   /* project:cangard, SAME */
+	{ 0x0800C6D8, 0x0800E2D8 },   /* map:calls, DIFF (audited) */
+	{ 0x0800C758, 0x0800E2EC },   /* map:bytes, SAME */
+	{ BN5_SPAWN_4, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080014A6, 0x08001532 },   /* project:handi, SAME */
+	{ 0x08001224, 0x08001288 },   /* map:bytes, SAME */
+	{ 0x08002630, 0x080026C4 },   /* map:calls+bytes, SAME */
+	{ 0x0800DD5E, 0x0800FFFE },   /* map:calls+bytes, SAME */
+	{ 0x0800E2C2, 0x0801056A },   /* map:calls, DIFF (audited) */
+	{ 0x0800F210, 0x08011690 },   /* map:calls+bytes, DIFF (audited) */
+	{ 0x0802C114, XN_STUB_DS },   /* a stub: what BN6's engine lacks */
+	{ 0x0800E140, 0x080103BC },   /* project:cangard, SAME */
+	{ 0x0800DBBC, 0x0800FE36 },   /* map:bytes, SAME */
+	{ 0x0800F200, 0x08011680 },   /* project:cangard, DIFF (audited) */
+	{ 0x0802C10A, XN_STUB_ZERO },   /* a stub: what BN6's engine lacks */
+	{ 0x0802B804, XN_STUB_DS },   /* a stub: what BN6's engine lacks */
+	{ 0x0800DBAE, 0x0800FE28 },   /* map:bytes, SAME */
+	{ 0x08016C56, 0x0801A166 },   /* project:cangard, SAME */
+	{ 0x0800DB98, 0x0800FE12 },   /* map:bytes, SAME */
+	{ 0x0800CA62, 0x0800E5E2 },   /* map:bytes, SAME */
+	{ 0x08018654, 0x0801BB1C },   /* map:calls, DIFF (audited) */
+	{ 0x08016C42, 0x0801A152 },   /* project:cangard, SAME */
+	{ 0x0800F29E, 0x08011714 },   /* project:cangard, DIFF (audited) */
+	{ 0x08018676, 0x0801BB46 },   /* map:calls, LAYOUT */
+	{ 0x08016C4C, 0x0801A15C },   /* project:cangard, SAME */
+	{ 0x0800CCD2, 0x0800E9DC },   /* project:cangard, DIFF (audited) */
+	{ 0x0800CEE6, 0x0800EC66 },   /* map:bytes, SAME */
+	{ 0x0800A50A, 0x0800BF16 },   /* map:bytes, SAME */
+	{ 0x0800B544, 0x0800CF14 },   /* map:bytes, SAME */
+	{ 0x0800B348, 0x0800CC86 },   /* map:bytes, SAME */
+	{ 0x0800B5A8, 0x0800CFA6 },   /* map:bytes, SAME */
+	{ 0x0800B614, 0x0800D012 },   /* map:bytes, SAME */
+	{ 0x0800B5DE, 0x0800CFDC },   /* map:bytes, SAME */
+	{ 0x0800B494, 0x0800CE64 },   /* map:bytes, SAME */
+};
+static const XvPair meddy_words[] = {
+	{ 0x08009FB3, 0x0800B917 },
+	{ 0x08009FE9, 0x0800B94D },
+	{ 0x0800A01B, 0x0800B9B1 },
+	{ 0x0800A2F1, 0x0800BC89 },
+	{ 0x0800A327, 0x0800BD35 },
+};
+static const XvImm meddy_imms[] = {
+	{ 0x080C581E, THUMB_MOVS, 1, 0, 0x10, 0x8 },   /* its sprite: list 4 0x15 in BN5, list 2 0x8d in BN6 (its list's offset) */
+	{ 0x080C5820, THUMB_MOVS, 2, 0, 0x15, 0x8D },   /* its sprite: list 4 0x15 in BN5, list 2 0x8d in BN6 */
+	{ 0x080C58D0, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C5974, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C59FC, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C5A3E, THUMB_LDR, 0, 1, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C5B3E, THUMB_MOVS, 2, 0, 0x44, 0xB0 },   /* its effect: 0x44 in BN5, 0xb0 in BN6 */
+	{ 0x080C603E, THUMB_MOVS, 1, 0, 0x10, 0x8 },   /* its sprite: list 4 0x13 in BN5, list 2 0x8c in BN6 (its list's offset) */
+	{ 0x080C6040, THUMB_MOVS, 2, 0, 0x13, 0x8C },   /* its sprite: list 4 0x13 in BN5, list 2 0x8c in BN6 */
+	{ 0x080C6136, THUMB_LDR, 0, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080C645E, THUMB_MOVS, 1, 0, 0x10, 0x8 },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 (its list's offset) */
+	{ 0x080C6460, THUMB_MOVS, 2, 0, 0x10, 0x8B },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 */
+	{ 0x080C64DE, THUMB_MOVS, 1, 0, 0xA, 0xC },   /* its parent's CurAction 10 compared: BN6's 12 */
+	{ 0x080C64E6, THUMB_LDR, 1, 0, 0x68, 0x70 },   /* collision data +0x68 in BN5, +0x70 in BN6 */
+	{ 0x080E1886, THUMB_MOVS, 1, 0, 0x10, 0x8 },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 (its list's offset) */
+	{ 0x080E1888, THUMB_MOVS, 2, 0, 0x10, 0x8B },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 */
+	{ 0x080E4B3A, THUMB_MOVS, 1, 0, 0x10, 0x8 },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 (its list's offset) */
+	{ 0x080E4B3C, THUMB_MOVS, 2, 0, 0x10, 0x8B },   /* its sprite: list 4 0x10 in BN5, list 2 0x8b in BN6 */
+	{ 0x080F7480, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 (setAttack4): BN6's two status states before the family's own */
+	{ 0x080F74F8, THUMB_MOVS, 0, 0, 0x8, 0xA },   /* CurAction 8 (setAttack0): BN6's two status states before the family's own */
+	{ 0x080F751E, THUMB_MOVS, 0, 0, 0x9, 0xB },   /* CurAction 9 (setAttack0): BN6's two status states before the family's own */
+	{ 0x080F7552, THUMB_MOVS, 0, 0, 0xA, 0xC },   /* CurAction 10 (setAttack0): BN6's two status states before the family's own */
+};
+static const XvNumber meddy_numbers[] = {
+	{ 0x080C5C90, 0x03880080, 0x03880080 },
+};
+static const XvRef meddy_states[] = {
+	BN6(0x08016381), BN6(0x08017889), BN6(0x080170C5), BN6(0x080174FF), BN6(0x080175B9), BN6(0x080178B7), BN6(0x08017689), BN6(0x08017769), OWN(0x080F7415), OWN(0x080F760D), OWN(0x080F76EF), OWN(0x080F7785), OWN(0x080F794D),
+};
+static const XvSprite meddy_sprites[] = {
+	{ 4, 0x10, 2, 0x8B, XN_TEAM_MORE + 0xA000, 0x800 },
+	{ 4, 0x13, 2, 0x8C, XN_TEAM_MORE + 0xA800, 0x800 },
+	{ 4, 0x15, 2, 0x8D, XN_TEAM_MORE + 0xB000, 0x1000 },
+	{ 5, 0x19, 5, 0xA8, XN_TEAM_MORE + 0xC000, 0x1000 },
+};
+static const XvId meddy_effects[] = { { 0x44, 0xB0 } };
+static const XvType meddy_types[] = { { 3, 0x09, XV_TYPE_MOVED }, { 3, 0x0C, XV_TYPE_MOVED }, { 3, 0x0D, XV_TYPE_MOVED }, { 4, 0x0B, XV_TYPE_MOVED }, { 4, 0x0E, XV_TYPE_MOVED }, { 4, 0x0F, XV_TYPE_MOVED }, { 4, 0x3C, XV_TYPE_MOVED } };
+static const XnSound meddy_sounds[] = {
+	{ 0x080C59AC, 0x00000000, 0x070 },   /* BN6's song 0x70 another */
+	{ 0x080C615E, 0x00000000, 0x070 },   /* BN6's song 0x70 another */
+	{ 0x080C6240, 0x00000000, 0x070 },   /* BN6's song 0x70 another */
+	{ 0x080C62F2, 0x00000000, 0x070 },   /* BN6's song 0x70 another */
+	{ 0x080C6534, 0x00000000, 0x0C6 },   /* BN6's song 0xc6 another */
+	{ 0x080C65A8, 0x00000000, 0x0BA },   /* BN6's song 0xba another */
+	{ 0x080E17EE, 0x00000000, 0x0E0 },   /* BN6's song 0xe0 another */
+};
+
+static const XNavi bn5_meddy = {
+	.code = {
+		.name = "Meddy (BN5's)",
+		.game = XROM_BN5_COLONEL_US,
+		.src_ai = 6,
+		.ai = 31,
+		.first_id = XN_MORE_IDS + 0x4,
+		.home = XN_TEAM_HOMES + 0x2800,
+		.blocks = meddy_blocks, .nblocks = (int)(sizeof meddy_blocks / sizeof *meddy_blocks),
+		.data = meddy_data, .ndata = (int)(sizeof meddy_data / sizeof *meddy_data),
+		.calls = meddy_calls, .ncalls = (int)(sizeof meddy_calls / sizeof *meddy_calls),
+		.words = meddy_words, .nwords = (int)(sizeof meddy_words / sizeof *meddy_words),
+		.imms = meddy_imms, .nimms = (int)(sizeof meddy_imms / sizeof *meddy_imms),
+		.numbers = meddy_numbers, .nnumbers = (int)(sizeof meddy_numbers / sizeof *meddy_numbers),
+		.states = meddy_states, .nstates = (int)(sizeof meddy_states / sizeof *meddy_states),
+		.hooks = { BN6(0x080F3BE9), BN6(0x080F3BE9), OWN(0x080F7575), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9), BN6(0x080F3BE9) },
+		.struct1 = 0x080F72FC, .struct2 = 0x080F7304,
+		.names = { 0x11F, 0x120, 0x121, 0x122, 0x123, 0x124 },
+		.ice = 1,
+		.traits = { .laid = true, .mode = 0x06, .element = 0, .weakness = 0, .shadow = true },
+		.sprites = meddy_sprites, .nsprites = (int)(sizeof meddy_sprites / sizeof *meddy_sprites),
+		.effects = meddy_effects, .neffects = (int)(sizeof meddy_effects / sizeof *meddy_effects),
+		.types = meddy_types, .ntypes = (int)(sizeof meddy_types / sizeof *meddy_types),
+	},
+	.versions = 4,
+	.prestep = BN6(0x0801A9B9), .hook_a = BN6(0x080F3BE9),
+	.companion = BN6(0x080114D5), .companion_end = BN6(0x080114D5), .hide = BN6(0x080114D5),
+	.sprite_of = 6,
+	.sounds = meddy_sounds, .nsounds = (int)(sizeof meddy_sounds / sizeof *meddy_sounds),
+};
+const XNavi *const xnavi_bn5[] = { &bn5_toadman, &bn5_knightman, &bn5_shadowman, &bn5_numberman, &bn5_tomahawkman, &bn5_colonel, &bn5_thedarksoul, &bn5_blizzardman, &bn5_shademan, &bn5_cosmoman, &bn5_napalmman, &bn5_gyroman, &bn5_searchman, &bn5_meddy };
 const int xnavi_bn5_count = (int)(sizeof xnavi_bn5 / sizeof *xnavi_bn5);
