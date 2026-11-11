@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-11T23:00:00Z
-* **Update**: multirom/bn4-chips.md (the owner's call 12: AquaPowr, WoodPowr and ThunPlus left out, a HUD icon and no damage changed in BN4 itself, measured; FirePlus moved; the two answers of the evening), research/sources.md (Battle Network 4: the Plus chips' damage, verified in Red Sun).

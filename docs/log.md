@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (the owner's call 12: AquaPowr, WoodPowr and ThunPlus left out, a HUD icon and no damage changed in BN4 itself, measured; FirePlus moved; the two answers of the evening), research/sources.md (Battle Network 4: the Plus chips' damage, verified in Red Sun).
 * **Update**: multirom/bn4-chips.md (TimeBomb moved: its bomb an actor, the first among the chips' objects; what no spec reaches), devtools/chip-recipe-generator.md (A moved actor: the unit's state table in BN6's layout, in its home), devtools/differential.md (a BN4 spec's poke never goes to a BN5 virus family's copy), rom/bn4.md (TimeBomb's code, the actors' runner, the blasts and the panels' patterns: a new row).
 * **Update**: devtools/differential.md (a poke into BN4's chips' code reaches every unit's copy that holds it: mutation 353 caught beside Meteors' copy of the star's spawner).
 * **Update**: multirom/bn4-chips.md (Meteors1-3 moved, its meteors ShotStar's star; ids past 602 not seen in play yet), rom/bn4.md (Meteors' code, new row), devtools/chip-recipe-generator.md (a misc routine after a fourth-kind type's code; `SHARED3` for a unit of any kind: Meteors' star ShotStar's copy), devtools/differential.md (a chip unit's own object's element, a pointer into a chip unit's blocks).
