@@ -24,7 +24,14 @@
  * Its code is the project's own Thumb, made here (xvirus_dispatch_code)
  * and written past EMU_FREE as BN6's tables are grown (xvirus_grow.c), with
  * MOVED (every entry the routine that lets a stray object go) and TWIN
- * (every entry XV_TYPE_MOVED) blank until a family names its types. */
+ * (every entry XV_TYPE_MOVED) blank until a family names its types.
+ *
+ * BN4's chips' page (docs/devtools/chip-recipe-generator.md, The dispatch's numbers): MOVED is one table for every game, a
+ * moved type of BN5's at BN5's own number, and BN4's chips' units bring more third-kind types than the numbers BN5 leaves.
+ * So the third kind's other dead type (XV_T3_DISPATCH4) is theirs alone: its routine reads the same side table and goes on
+ * to a MOVED table of its own (xchips_bn4.h XC4_PAGE_MOVED), by BN4's own type number; a unit's calls to BN4's third-kind
+ * spawners go to the page's (XV_SPAWN4_*), which spawn that type with no twin to read (a chip unit moves every type it
+ * spawns). A unit names such a type XV_TYPE_MOVED4, or XV_TYPE_SHARED4 where a unit before it moved it. */
 #ifndef CW_XVIRUS_DISPATCH_H
 #define CW_XVIRUS_DISPATCH_H
 
@@ -60,5 +67,18 @@ bool xvirus_dispatch_is_spawner(uint32_t to, int *kind, uint32_t *bn6);
 /* The dispatch's code as it stands at XV_STUBS, XV_STUBS_SIZE bytes: the
  * project's own Thumb (its literals the addresses above). */
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]);
+/* Whether `type` is a dispatch type of the kind's, the tables' or BN4's chips' page's: an object of it runs as the number
+ * its side table holds. */
+bool xvirus_dispatch_runs(int kind, int type);
+/* Whether `at` lies in the dispatch's code, the tables' or the page's (a spawner's return address) */
+bool xvirus_dispatch_code_at(uint32_t at);
+
+/* BN4's chips' page: its MOVED entry for BN4's third-kind type n (0 past the table), its size in bytes and its code's
+ * place and size; the page's spawner a unit's call to BN4's third-kind spawner `from` goes to (0 for any other routine);
+ * its code as it stands at its place, the project's own Thumb. */
+uint32_t xvirus_dispatch4_moved_at(int n);
+uint32_t xvirus_dispatch4_code_at(uint32_t *size);
+uint32_t xvirus_dispatch4_spawner(uint32_t from);
+void xvirus_dispatch4_code(uint8_t *out);
 
 #endif
