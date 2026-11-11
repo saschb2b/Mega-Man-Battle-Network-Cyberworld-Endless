@@ -170,7 +170,9 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
 		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
-		if ((c->to & 1) || (spawner ? c->to != spawner : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
+		/* (a chip unit of BN4's: the page's spawner for a third-kind one, xvirus_dispatch.h) */
+		bool page = spawner && f->game == XROM_BN4_RED_SUN_US && c->to == xvirus_dispatch4_spawner(c->from);
+		if ((c->to & 1) || (spawner ? c->to != spawner && !page : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
 			!(r != &families && navis_routine(c->to | 1))))
 			return no(why, n, "call %08x goes to %08x%s", (unsigned)c->from, (unsigned)c->to, spawner ? ", not the dispatch's spawner" : "");
 		for (int k = 0; k < i; ++k)
@@ -227,14 +229,26 @@ static bool present_ok(const XVirusFamily *f) {
 	return !f->present || (f->game == XROM_BN4_RED_SUN_US && !(f->present & 1) && xvirus_is_code(f, f->present));
 }
 
-/* the bytes its shims take in its home (XV_HOME_SHIMS on): a pre-step's at most, its ranges', chip compares' and
+/* the bytes its shims take in its home (XV_HOME_SHIMS on): a pre-step's at most, its ranges', chip compares', effect calls' and
  * directions', two paused presents (its state 0's and its hook 5's) and its entries' */
 uint32_t xvirus_shims_room(const XVirusFamily *f) {
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE +
 	                (uint32_t)f->nsides * XV_SHIM_SIDE_SIZE + (uint32_t)f->nsound_calls * XV_SHIM_SOUND_SIZE;
 	room += 2u * XV_SHIM_PAUSED_SIZE * (f->present != 0);
+	for (int i = 0; i < f->neffect_calls; ++i) room += (uint32_t)xvirus_shim_effect_size(f->effect_calls[i].n);
 	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;
 	return room;
+}
+
+/* its effect calls (XvEffectCall): each a call of its code, with a count of pairs the shim has; that each id made is an
+ * effect's copy is the generator's to hold, which knows the unit that moved it */
+static bool effect_calls_ok(const XVirusFamily *f, char *why, size_t n) {
+	for (int i = 0; i < f->neffect_calls; ++i) {
+		const XvEffectCall *e = &f->effect_calls[i];
+		if ((e->at & 1) || !xvirus_is_code(f, e->at) || !xvirus_is_code(f, e->at + 2) || !xvirus_shim_effect_size(e->n))
+			return no(why, n, "effect call %d at %08x", i, (unsigned)e->at);
+	}
+	return true;
 }
 
 /* its shims' sites (each in its code) and room in its home, its pre-step one of the ports */
@@ -250,6 +264,7 @@ static bool shims_ok(const XVirusFamily *f, char *why, size_t n) {
 	}
 	for (int i = 0; i < f->nsides; ++i)
 		if ((f->sides[i] & 1) || !xvirus_is_code(f, f->sides[i])) return no(why, n, "direction %d at %08x", i, (unsigned)f->sides[i]);
+	if (!effect_calls_ok(f, why, n)) return false;
 	/* (BN5's a port of its dispatcher's case; BN4's its own code) */
 	if (f->prestep && (f->game == XROM_BN4_RED_SUN_US ? !xvirus_is_code(f, f->prestep) :
 		f->game != XROM_BN5_COLONEL_US || (f->prestep != BN5_PRESTEP_APPLEY && f->prestep != BN5_PRESTEP_DOMINERD)))
@@ -303,6 +318,8 @@ static bool art_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n
 		const XvType *t = &f->types[i];
 		if (xvirus_dispatch_slot(t->kind) < 0) return no(why, n, "object type %#x of kind %d, which the dispatch has none of", t->from, t->kind);
 		if (t->to == xvirus_dispatch_type(t->kind) && t->to != XV_TYPE_SHARED) return no(why, n, "object type %#x as the dispatch's own", t->from);
+		if ((t->to == XV_TYPE_MOVED4 || t->to == XV_TYPE_SHARED4) && (t->kind != 3 || f->game != XROM_BN4_RED_SUN_US))
+			return no(why, n, "object type %d:%#x for BN4's chips' page, which runs BN4's third kind alone", t->kind, t->from);
 		for (int k = 0; k < i; ++k)
 			if (f->types[k].kind == t->kind && f->types[k].from == t->from) return no(why, n, "object type %d:%#x twice", t->kind, t->from);
 	}

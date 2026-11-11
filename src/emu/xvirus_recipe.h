@@ -59,6 +59,9 @@ typedef struct { uint8_t from, to; } XvId;                  /* an id of its game
 typedef struct { uint8_t kind, from, to, of; } XvType;
 #define XV_TYPE_MOVED 0xFF
 #define XV_TYPE_SHARED 0xFE   /* moved by a family installed before it: its MOVED entry that family's copy, run for this one too */
+#define XV_TYPE_MOVED4 0xFD   /* a third-kind type of a BN4 chip unit's, moved: run by BN4's chips' page of the dispatch (xvirus_dispatch.h)
+                                 at BN4's own number `from`, which no other game's number shares */
+#define XV_TYPE_SHARED4 0xFC  /* ... moved by a unit installed before it: the page's entry that unit's copy, run for this one too */
 /* A word of a block's literal pool that is a number, not an address (a mask, a spawn's words, an enemy id's bound): its
  * game's `was`, BN6's `now` (the same where it is kept), each checked first */
 typedef struct { uint32_t at, was, now; } XvNumber;
@@ -73,6 +76,12 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
  * and goes on to BN6's (xvirus_shim.h); or a BN4 family's call to its appear queue (BN4_QUEUE_*), `slot` the number of
  * BN6's queue its twin takes in r0 (bn4_twins.QUEUED) */
 typedef struct { uint32_t at; uint16_t slot; } XvSoundCall;
+/* A call of its code to spawn an effect (its game's BN4_SPAWN_EFFECT, r4 the id) whose id no immediate names (a byte of
+ * the object's own, set as it was spawned): the call aimed at a shim of its home that gives r4 BN6's id (`to`, one of its
+ * effects rows': the effect's copy) where it holds one of its game's (`from`) and goes on to BN6's spawn; an id with no pair
+ * passes as it is. The generator reads which ids reach the call (the object's spawns' immediates): never a hand list */
+#define XV_EFFECT_PAIRS 4
+typedef struct { uint32_t at; uint8_t n; uint8_t pairs[XV_EFFECT_PAIRS][2]; } XvEffectCall;   /* (a pair: from, to) */
 /* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
  * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
  * on where the branch would (lr is on its routine's stack there: the generator checks the routine pushes it) */
@@ -156,6 +165,8 @@ typedef struct {
 	int ncmps;
 	const XvSoundCall *sound_calls;   /* its sounds whose slots are past a byte, each played through a shim */
 	int nsound_calls;
+	const XvEffectCall *effect_calls;   /* its effects whose ids no immediate names, each spawned through a shim */
+	int neffect_calls;
 	const uint32_t *sides;     /* its calls to its game's direction rule (BN4_DIRECTION, copied with it), each through a shim that
 	                              numbers left and right by the object's side, as BN6's rule does (xvirus_shim.h) */
 	int nsides;
@@ -181,6 +192,7 @@ typedef struct {
 #define XV_T1_DISPATCH 0x5C
 #define XV_T3_DISPATCH 0xD2
 #define XV_T4_DISPATCH 0x91
+#define XV_T3_DISPATCH4 0xD1  /* ... and BN4's chips' page's, the third kind's other dead type (BN6_T3_FREE) */
 #define XV_MODE_PAST 0   /* BN6_TRAITS_MODE given a family whose game's mode is past BN6's table: its byte 0, as most of BN6's families' */
 
 /* Where it all goes, at fixed addresses (pointers into them stay good in
