@@ -3,7 +3,7 @@ type: Symbol Files
 title: "Symbols"
 description: "The symbol files written from the project's map of BN6 Gregar and BN5 Colonel (`docs/symbols/`, `tools/symbols.py`): what they hold, how to load them in mGBA or no$gba, how each symbol is verified and what may be reused."
 tags: [rom, symbols]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:55:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
@@ -342,9 +342,15 @@ about the games is looked up first.
 ## Keeping them in step
 
 `python3 build.py symbols` (or `python3 tools/symbols.py`) writes the files
-and this page's numbers of them. `python3 build.py lint`, in CI too, fails
-where a name in bn6.h or bn5.h has no description, or where a file in
-`docs/symbols` differs from what the generator writes; it needs no bn6f.
+and this page's numbers of them. `dev`'s workflow runs it after each merge
+and commits what it wrote ([Merging](../project/merging.md)): every branch
+that named an address changed these files, so any two conflicted there. A
+branch changes the headers and `docs/rom/` alone;
+`python3 build.py lint`, in CI too, fails where a name in bn6.h or bn5.h
+has no description (`tools/symbols.py --lint`), or where a branch changes a
+file in `docs/symbols` or the numbers under What is mapped
+(`python3 tools/generated.py restore` puts them back); on `main` it fails
+where a file differs from what the generator writes. It needs no bn6f.
 A new define needs its comment: its own, or a "..." that continues the one
 above, or a define above it in the same group whose comment names it
 (`BN6_PLAYER_X`'s "X, Y and Z"). The counts of bn6f's functions are written
