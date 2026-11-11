@@ -548,6 +548,10 @@
       "what": "MokoRus's code located and moved (bn4_chips.h BN4_MOKORUS 0x080D252A, BN4_T3_MOKO 0x2C, BN4_MOKO_HIT_BITS 0x080D23E0), the bytes' shuffle paired (BN4_SHUFFLE 0x08000AAA, BN6_SHUFFLE 0x08000C72) and the struck pass's push read in both (BN4_STRUCK_PUSHED 0x0801360C: bit 0x01 with a push bit; BN6_STRUCK_PUSHED 0x0801AC06: bit 0x40 with one; docs/rom/bn4.md)."
     },
     {
+      "date": "2026-11-10",
+      "what": "The spread chips' code located and moved, the first attack family (bn4_chips.h BN4_SPREAD_STATE 0x080EC760, BN4_T3_SPREAD_SHOT 0x12 with BN4_SPREAD_SHOT_KINDS 0x080CF3DC, BN4_T3_ARM 0x02 with BN4_ARM_SPAWN 0x080CD6E0, BN4_COUNTER_WINDOW 0x0800BA66, BN4_ELEMENT_SET 0x0801288C; bn6_chips.h BN6_SPREAD_FAMILY 0x080EDEF0 and its twins; docs/rom/bn4.md): BN6 keeps the family with its own arm, so the state moves."
+    },
+    {
       "date": "2026-11-11",
       "what": "GyroMan moved, Team ProtoMan's second (docs/multirom/navis.md, GyroMan; docs/rom/navis.md, Team ProtoMan's GyroMan: src/emu/bn5_team_protoman.h's BN5_GYRO_COMPANION, _COMPANION_END): gyroman_v1, gyroman_v1_keys and gyroman_sp PASS, five mutations caught; his companion BN5's overlay kind 0 (his own 31); the Navis' sprites spill into list 2's 0x80-0x9F past list 4's 0xA0-0xBA, the shared art's third room FREE_TEAM_SHARED_MORE; his sounds 0x103, 0x104, 0x14C at BN6's empty slots 0x43-0x45; the comparator reads Team ProtoMan's art rooms as moved."
     },
@@ -1271,6 +1275,13 @@
       "name": "bn4_chip_mokorus1 to 3: BN4's MokoRus moved",
       "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the Mokos in play from t33 to t147 on rows 2, 1, 3 (BN6's shuffle given BN4's six draws), a 140 HP Mettaur at (5,2) left 80, 50 and 20 at t93 in both, struck out of its attack and pushed to (6,2). Five mutations caught (a row's power and subfamily, the hit's bits as BN4 has them, the delay between Mokos, the sound).",
       "meaning": "A hit's bits are not the same in both engines: struck and pushed is 0x01 with a push bit in BN4 and 0x40 with one in BN6, found at the hit's frame; a unit that pushes passes BN6's."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-10",
+      "name": "bn4_chip_heatshot and seven more: BN4's spread chips moved, an attack family",
+      "result": "BN4's records on BN6's own spreader family (0x25) tried first: each parts at t33, the arm each engine's own object. Moved as an attack unit (the state 0x1E, the third kind's 0x02 and 0x12, two kinds' tables), python3 build.py xdiff with the eight specs: each PASS over 300 frames, a 140 HP Mettaur left 100, 70, 40, 90, 60 and 30 by HeatShot, Heat-V, HeatSide, Bubbler, Bub-V and BublSide, a miss, and MegaMan struck with his arm out (the arm let go in both). Eleven mutations caught (a burst's shape and effect, the shot's wait, height, type and sound, the arm's kind and slot, a row's power and family, the attack's variables' place).",
+      "meaning": "A state of BN4's MegaMan's runs as a BN6 attack family once its attack's variables' place and his animation's number are BN6's; the arm must be BN4's own, and can be shared by the families to come."
     },
     {
       "feature": "BN4's chips in BN6's tables",

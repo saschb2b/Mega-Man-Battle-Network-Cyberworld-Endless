@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's HeatSide D (its chip 21) against the registry's row for it (id 590), its family 0x1E, a state of BN4's MegaMan's, moved whole by tools/xchiprecipe_bn4.py as an attack unit (BN6's grown attack family 0xD0: the state, its arm, the third kind's 0x02, and its shot, the third kind's 0x12, with the shot's kinds' table; docs/multirom/bn4-chips.md): each picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2), MegaMan's row. The Mettaur struck (40 HP left in both), the fire's burst on its panel and the ones above and below it (shape 4, the table's kind 0xA).",
+ "folder4": [
+  "0615"
+ ],
+ "folder6": [
+  "24E:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
