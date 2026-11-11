@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (18, 'GridMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -53,25 +53,27 @@ DARK_SOUL = 0x16
 DARKLOIDS = (13, 14, 15, 16)
 # Team ProtoMan's, the other version's (docs/game/team-protoman.md): ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy
 TEAM = (1, 2, 3, 4, 5, 6)
-MOVED = SIX + (DARK_SOUL,) + DARKLOIDS + TEAM
+# Nebula's two of the story's (docs/game/bosses/bn5-navis.md, LarkMan and GridMan): LarkMan, GridMan
+NEBULA = (17, 18)
+MOVED = SIX + (DARK_SOUL,) + DARKLOIDS + TEAM + NEBULA
 
 
 def seat(ai):
     """its seat among the moved Navis (src/emu/xnavi_recipe.h, XN_SEAT): the six 0-5, the Dark Soul 6, the Darkloids 7-10,
-    Team ProtoMan's 11-16"""
-    return 6 if ai == DARK_SOUL else ai - 6 if ai in DARKLOIDS else ai + 10 if ai in TEAM else ai - 7
+    Team ProtoMan's 11-16, Nebula's 17-18"""
+    return 6 if ai == DARK_SOUL else ai if ai in NEBULA else ai - 6 if ai in DARKLOIDS else ai + 10 if ai in TEAM else ai - 7
 
 
 def slot_of(ai):
     """its home's, code's and art's slot: its seat, past the control's 7 for the Darkloids and Team ProtoMan (slots 12-17,
     their own room's)"""
-    return seat(ai) + (1 if ai in DARKLOIDS or ai in TEAM else 0)
+    return seat(ai) + (1 if ai in DARKLOIDS or ai in TEAM or ai in NEBULA else 0)
 
 
 def ai_of(ai):
     """its Navi AI index in BN6 (xnavi_recipe.h, XN_AI_OF): Team ProtoMan's the control's 25 + its AI (26-31), every
     other's 32 + its seat"""
-    return XN_FIRST_AI + ai if ai in TEAM else 32 + seat(ai)
+    return XN_FIRST_AI + ai if ai in TEAM else XN_NEBULA_FIRST_AI + ai - NEBULA[0] if ai in NEBULA else 32 + seat(ai)
 
 
 def id_of(ai):
@@ -106,15 +108,23 @@ XN_TEAM_MORE, XN_TEAM_MORE_END = EMU_FREE + 0x141000, EMU_FREE + 0x150000
 # ... and its fourth, the art zone's tail (src/emu/free_space.plan FREE_NAVI_SHARED_FOUR, xnavi_recipe.h XN_SHARED_FOUR: Meddy's
 # last two sprites first, CloudMan's 16 KB before hers in the rooms before it)
 XN_SHARED_FOUR, XN_SHARED_FOUR_END = EMU_FREE + 0x7FA000, EMU_FREE + 0x800000
+# Nebula's room in code-low (slots 18-19: src/emu/free_space.plan FREE_NEBULA_NAVIS, xnavi_recipe.h XN_NEBULA_*): a home, a code
+# room (XN_NEBULA_SLOT_CODE: GridMan's walk, 8590 bytes) and an art room each; AI 43-44 (XN_NEBULA_FIRST_AI)
+NEBULA_SLOT = 18
+XN_NEBULA_HOMES, XN_NEBULA_CODE, XN_NEBULA_ART = EMU_FREE + 0x080000, EMU_FREE + 0x081000, EMU_FREE + 0x087000
+XN_NEBULA_SLOT_CODE, XN_NEBULA_FIRST_AI = 0x3000, 43
+NEBULA_SPRITES, NEBULA_SPRITES_END = EMU_FREE + 0x087800, EMU_FREE + 0x090000   # (FREE_NEBULA_SPRITES: GridMan's battle sprite)
 
 
 def slot_code(slot):
     """its slot's code room's size"""
-    return XN_TEAM_SLOT_CODE if slot >= TEAM_SLOT else XN_SLOT_CODE
+    return XN_NEBULA_SLOT_CODE if slot >= NEBULA_SLOT else XN_TEAM_SLOT_CODE if slot >= TEAM_SLOT else XN_SLOT_CODE
 
 
 def code_at(slot):
     """its slot's code room and the name the C file gives its base"""
+    if slot >= NEBULA_SLOT:
+        return XN_NEBULA_CODE + XN_NEBULA_SLOT_CODE * (slot - NEBULA_SLOT), XN_NEBULA_CODE, 'XN_NEBULA_CODE'
     if slot >= TEAM_SLOT:
         return XN_TEAM_CODE + XN_TEAM_SLOT_CODE * (slot - TEAM_SLOT), XN_TEAM_CODE, 'XN_TEAM_CODE'
     return (XN_CODE + XN_SLOT_CODE * slot, XN_CODE, 'XN_CODE') if slot < 8 else (XN_MORE + XN_SLOT_CODE * (slot - 8), XN_MORE, 'XN_MORE')
@@ -122,6 +132,8 @@ def code_at(slot):
 
 def art_at(slot):
     """its slot's art room and the name the C file gives its base"""
+    if slot >= NEBULA_SLOT:
+        return XN_NEBULA_ART + XN_SLOT_ART * (slot - NEBULA_SLOT), XN_NEBULA_ART, 'XN_NEBULA_ART'
     if slot >= TEAM_SLOT:
         return XN_TEAM_ART + XN_SLOT_ART * (slot - TEAM_SLOT), XN_TEAM_ART, 'XN_TEAM_ART'
     return (FREE_NAVI_ART + XN_SLOT_ART * slot, FREE_NAVI_ART, 'XN_ART') if slot < 8 else \
@@ -130,6 +142,8 @@ def art_at(slot):
 
 def home_at(slot):
     """its slot's home and the name the C file gives its base"""
+    if slot >= NEBULA_SLOT:
+        return XN_NEBULA_HOMES + XN_HOME_SIZE * (slot - NEBULA_SLOT), XN_NEBULA_HOMES, 'XN_NEBULA_HOMES'
     if slot >= TEAM_SLOT:
         return XN_TEAM_HOMES + XN_HOME_SIZE * (slot - TEAM_SLOT), XN_TEAM_HOMES, 'XN_TEAM_HOMES'
     return FREE_NAVI_HOMES + XN_HOME_SIZE * slot, FREE_NAVI_HOMES, 'XN_HOMES'
@@ -174,7 +188,10 @@ CHIP_OBJECT_USES = 0x0800D010
 EFFECT_CALLS = {0x08018838: 2}
 VIDEO_PAST = ((0x05000400, 0x06000000), (0x06018000, 0x07000000), (0x07000400, 0x08000000))
 NAVI_LIST = 2
-NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM}
+NAVI_SPRITES = {n: 0x20 + seat(n) for n in SIX + DARKLOIDS + TEAM + NEBULA}
+# a Navi's battle sprite's place where an effect of his draws it (src/emu/xnavi_sprites.c PLACES, whose install writes it; the
+# recipe names it, xnavi_recipe.c own_sprite, for the effect's entry): BN5's AI index -> (its place, its room)
+NAVI_SPRITE_PLACES = {18: (NEBULA_SPRITES, 0x8800)}   # GridMan: FREE_NEBULA_SPRITES, his effect 0x5F his afterimage
 # a sprite of a list the families' room does not grow, copied into one it does: its load's list offset made the other's
 # (a sprite's list is read as it is loaded, from the lists' table by the offset, and nowhere after)
 NAVI_LIST_MOVES = {3: 4}
@@ -1407,7 +1424,11 @@ def art_of(r, b5, b6, alloc):
                 r.effects.append((e, e6))
                 if (lst, idx) not in [(s['list'], s['index']) for s in r.sprites]:
                     same, _ = bn6_twin(b5, b6, lst, idx)
-                    if same is None:
+                    if (lst, idx) == (NAVI_LIST, r.ai5) and r.ai5 in NAVI_SPRITE_PLACES:
+                        # (his own battle sprite: at its place, its number his seat's, xnavi_recipe.c own_sprite)
+                        at, room = NAVI_SPRITE_PLACES[r.ai5]
+                        r.sprites.append(dict(list=lst, index=idx, to_list=lst, to_index=NAVI_SPRITES[r.ai5], at=at, room=room, lz=False))
+                    elif same is None:
                         place(lst, idx, 'effect')
                     else:
                         f.decide('effect', f'its effect {e:#x} draws BN6\'s sprite {lst}:{same:#x}: an entry naming BN6\'s wanted')
@@ -1556,7 +1577,8 @@ def c_art(r, n):
         for x in r.sprites:
             base, name = (XN_TEAM_SHARED, 'XN_TEAM_SHARED') if XN_TEAM_SHARED <= x['at'] < XN_TEAM_END else \
                 (XN_TEAM_MORE, 'XN_TEAM_MORE') if XN_TEAM_MORE <= x['at'] < XN_TEAM_MORE_END else \
-                (XN_SHARED_FOUR, 'XN_SHARED_FOUR') if XN_SHARED_FOUR <= x['at'] < XN_SHARED_FOUR_END else (XN_SHARED_ART, 'XN_SHARED_ART')
+                (XN_SHARED_FOUR, 'XN_SHARED_FOUR') if XN_SHARED_FOUR <= x['at'] < XN_SHARED_FOUR_END else \
+                (NEBULA_SPRITES, 'FREE_NEBULA_SPRITES') if NEBULA_SPRITES <= x['at'] < NEBULA_SPRITES_END else (XN_SHARED_ART, 'XN_SHARED_ART')
             L.append(f'\t{{ {x["list"]}, 0x{x["index"]:02X}, {x["to_list"]}, 0x{x["to_index"]:02X}, {name} + 0x{x["at"] - base:X}, '
                      f'0x{x["room"]:X} }},' + ('   /* (LZ77 in BN5) */' if x['lz'] else ''))
         L.append('};')
@@ -1750,12 +1772,16 @@ def main():
     alloc = Alloc()
     recipes = [(derive(b6, b6, pairs, CONTROL[0], CONTROL_SLOT, alloc, control=True), CONTROL[1])]
     for ai, label in NAVIS:
-        if ai not in TEAM:
+        if ai not in TEAM and ai not in NEBULA:
             recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
     # (the moved objects' numbers taken before Team ProtoMan's: theirs as they were before them, the sea's splash 0xAC)
     objects = derive_objects(b5, b6, pairs, alloc)
     for ai, label in NAVIS:
         if ai in TEAM:
+            recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
+    # (Nebula's after Team ProtoMan's: their numbers and places past every other Navi's, none of theirs moved)
+    for ai, label in NAVIS:
+        if ai in NEBULA:
             recipes.append((derive(b5, b6, pairs, ai, slot_of(ai), alloc), label))
     shared_rows([r for r, _ in recipes[1:]] + [objects], b5)
     if a.report:

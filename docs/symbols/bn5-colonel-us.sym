@@ -786,6 +786,7 @@
 080BA6A8 first_kind_0x09
 080BC21A bn5_darkloids_navi_2
 080BC58E cloudman_navi_chip_routine
+080BCDEA called_0x08101414
 080BD208 bn5_darkloids_navi_3
 080BD7EA bignoise_routine
 080BD834 set_up
@@ -864,6 +865,7 @@
 080DE198 django_chip_object_spawned
 080DE81C cosmoman_thrown_object_default_sprite_number
 080DE9BC cosmoman_gate_thrown_object_spawned
+080DF7B4 gridman_0xc6_spawner
 080DF8CA larkman_chip_second_object_spawned
 080DFD4C larkman_chip_third_object_spawned
 080DFD7C BN5_EFFECTS
@@ -950,6 +952,13 @@
 080FC2AC bn5_navis_5
 080FF87A BN5_COSMO_HALF_HP
 080FF8AC setattack0_with_curaction_11
+08100F54 stored_attackvars_0x28_called_by_bx
+081012A0 his_attack_routine_pointers_pool_words
+081012E6 nebula_larkman_gridman.0x08100f54_stored_attackvars_0x28_called_by
+08101414 nebula_larkman_gridman.called
+08101B60 nebula_larkman_gridman.routines
+08101C1C nebula_larkman_gridman.routines_2
+08102208 nebula_larkman_gridman.routines_3
 08103928 shademan_states_9_12
 08103D62 shademan_states_9_12_0x08103928
 0810436C chaos_unison_5

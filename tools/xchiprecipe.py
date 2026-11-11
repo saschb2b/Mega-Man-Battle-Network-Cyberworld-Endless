@@ -860,7 +860,9 @@ def moved_before_chips():
 XN_CODE, XN_ART = OB.OBJECTS_END, EMU_FREE + 0x5B0000
 XN_MORE, XN_MORE_ART = XN_ART + 0x38000, XN_ART + 0x38000 + 0xF000
 XN_TEAM_CODE, XN_TEAM_END = EMU_FREE + 0x093000, EMU_FREE + 0x093000 + 6 * 0x2800
-NAVI_ROOMS = (('XN_CODE', XN_CODE, XN_ART), ('XN_MORE', XN_MORE, XN_MORE_ART), ('XN_TEAM_CODE', XN_TEAM_CODE, XN_TEAM_END))
+XN_NEBULA_CODE, XN_NEBULA_ART = EMU_FREE + 0x081000, EMU_FREE + 0x087000
+NAVI_ROOMS = (('XN_CODE', XN_CODE, XN_ART), ('XN_MORE', XN_MORE, XN_MORE_ART), ('XN_TEAM_CODE', XN_TEAM_CODE, XN_TEAM_END),
+              ('XN_NEBULA_CODE', XN_NEBULA_CODE, XN_NEBULA_ART))
 _navi_modules = None
 
 
@@ -891,7 +893,7 @@ def navi_modules(b5, pairs):
         for name in re.findall(r'static const XvType (\w+)_types\[\]', text):
             bases = {n: at for n, at, _ in NAVI_ROOMS}
             blocks = [(int(a, 16), int(b, 16), bases[room] + int(o, 16)) for a, b, room, o in
-                      re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), (XN_CODE|XN_MORE|XN_TEAM_CODE) \+ 0x([0-9A-F]+), 0x[0-9A-F]+u \}',
+                      re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), (XN_CODE|XN_MORE|XN_TEAM_CODE|XN_NEBULA_CODE) \+ 0x([0-9A-F]+), 0x[0-9A-F]+u \}',
                                  text[text.index(f'static const XvBlock {name}_blocks[]'):text.index(f'static const XvType {name}_types[]')])]
             body = re.search(r'static const XvType ' + name + r'_types\[\] = \{(.*?)\};', text).group(1)
             for k, t5 in re.findall(r'\{ (\d), 0x([0-9A-F]{2}), XV_TYPE_MOVED \}', body):
