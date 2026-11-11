@@ -324,6 +324,18 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "BN6 Gregar's own gaps audited (docs/multirom/bn6-gaps.md): BN6's Program Advances proved forming in a run's engine by thirteen engine specs (tests/xdiff/pa_bn6_*, the timeline's chip read; docs/rom/chips.md); SneakRun and NumbrOpn traced in Gregar (src/emu/bn6_navicust.h's BN6_NCP_NUMBROPN, BN6_NCP_SNEAKRUN, BN6_NAVI_*, BN6_NUMBROPN_CHECK, BN6_SNEAKRUN_CHECK; docs/rom/navicust.md); GBeast, GBeast SP and the RV six's records and starts read (docs/rom/battle.md); every map-music list dumped (docs/rom/net-maps.md)"
     },
     {
+      "date": "2026-11-11",
+      "what": "MagBolt's code located and moved (bn4_chips.h BN4_MAGBOLT_STATE 0x080EE012, BN4_T3_BOLT 0x75 with BN4_BOLT_SPAWN 0x080DBD72 and BN4_BOLT_HIT_BITS 0x080DBCD2; docs/rom/bn4.md), and a pushed object in a virus's runner read in both games: BN4 runs its slide before it takes a struck-and-pushed status (BN4_RUNNER_SLIDE 0x08013E3C, BN4_RUNNER_STRUCK 0x08013E68), BN6 the status first, past the slide's step (BN6_RUNNER_STRUCK 0x0801B2A8, BN6_RUNNER_SLIDE 0x0801B2EC); state 5's step stored at +0x0B (BN4_STRUCK_STEP 0x08010610)."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "Meteors' code located and moved (bn4_chips.h BN4_METEORS 0x080EAE92, BN4_T4_METEORS 0x81, BN4_ROW_PANEL_ACROSS 0x0800FC48; bn6_chips.h BN6_ROW_PANEL_ACROSS 0x08016168, a routine BN6 never calls; docs/rom/bn4.md). Its meteors are ShotStar's unit's star, shared, not moved twice."
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },
@@ -346,10 +358,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-10",
       "what": "FlmLine's, Thunder's and TwnFng's code located and moved (bn4_chips.h BN4_FLMLINE_STATE 0x080ECAAE with BN4_T3_FLAME 0x19, BN4_THUNDER_STATE 0x080ECE14, BN4_TWNFNG_STATE 0x080ED4C6 with BN4_T3_FANG 0x51; docs/rom/bn4.md). MegaMan's animations numbered by each game's art (BN4's 0x0D, 0x11, 0x12 are BN6's 0x0A, 0x0D, 0x0E)."
-    },
-    {
-      "date": "2026-11-10",
-      "what": "Meteors' code located and moved (bn4_chips.h BN4_METEORS 0x080EAE92, BN4_T4_METEORS 0x81, BN4_ROW_PANEL_ACROSS 0x0800FC48; bn6_chips.h BN6_ROW_PANEL_ACROSS 0x08016168, a routine BN6 never calls; docs/rom/bn4.md). Its meteors are ShotStar's unit's star, shared, not moved twice."
     }
   ],
   "experiments": [
@@ -411,6 +419,27 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_magbolt1 to 3: BN4's MagBolt moved, a pulled foe",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (a Mettaur pulled and not hit; hit for 110 with the pull blocked; pulled beside MegaMan and hit for 130, struck from t44 to t68 in both), eleven mutations caught. On the way: with BN4's hit bits 3 the bolt's hit with the pull's pushed alone in BN6 (state 0xB against BN4's 5 at t44), 0x43 the answer; the foe's record then differed in +0x0B and +0x1B, +0x1E, +0x1F alone.",
+      "meaning": "A foe a chip slides meets the engines' slide differences MegaMan's entries named, and one more: the runners' order of a pushed object's slide and a struck-and-pushed hit. Each is a leftover no code reads; panels, HP, states and timers agree."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_propbom1, its struck, 2 and 3: BN4's PropBom moved",
+      "result": "python3 build.py xdiff with the four specs: each PASS over 300 frames (the blast at t102, a Mettaur's 140 HP to 20 and 250 to 90; the bomb ended by a wave at t73 and by a Mettaur's step at t66), eleven mutations caught. On the way: with the blast handed BN4's effect number BN6's routine drew BN6's own explosion (the effects' sprite state at t102); the copy hands it BN4's effect's copy.",
+      "meaning": "An object with HP that takes an obstacle slot moves as any other where the slots' routines are the engines' twins; an engine routine that spawns an effect by a number it is handed needs the number the unit's copy of the effect has."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_meteors1 to 3 and _miss: BN4's Meteors moved",
+      "result": "python3 build.py xdiff with the four specs: each PASS; a 140 HP Mettaur on the aimed panel (4,2) left 90 at t81 and 40 at t102 (Meteors1), 80 and 20 (Meteors2), 70 (Meteors3) in both, BN6's a frame later; off the panel, 300 frames with the five meteors on the empty panel and the Mettaur untouched. Seven mutations caught (the count, the pace, the star's kind, the controller's dispatch number, a row's power and subfamily, the aim's row).",
+      "meaning": "A unit can run a type an earlier unit moved by a call aimed at that unit's copy; the third kind's dispatch numbers, eleven left for some forty units, need a wider answer before the larger units."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-10",
       "name": "bn4_chip_panlsht1 to 3: BN4's PanlSht moved by the generator, against BN4's own battle",
       "result": "python3 build.py xdiff bn4_chip_panlsht1 bn4_chip_panlsht1_miss bn4_chip_panlsht2 bn4_chip_panlsht3: each PASS over 300 frames (MegaMan the subject, a BN4 MettaurSP of 140 HP the foe: one shot leaves it 40, a shot past it 140, two shots 20, four with one in its row 60; the panels broken and the sounds the same). Ten mutations caught (the rows' power, subfamily and pattern, the shot's dispatch number, its hit read at BN4's place, its panel, its sound). The chip's whole flight runs inside the support chip's time freeze, between two fight frames: the traces meet at its outcome. A foe the shot deletes parts at the deletion's own effect (effect 0, each engine's art), the families' known difference, so the specs' foe survives.",
@@ -436,13 +465,6 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "name": "bn4_chip_flmline1 to 3, thunder1 to 3, twnfng1 to 3 and two misses: three more attack families",
       "result": "python3 build.py xdiff with the eleven specs: each PASS (FlmLine3 to the frame of the hit, t41), a 140 HP Mettaur left 70, 20 and 0 by the flames, 100, 80 and 60 by the thunder at t123, 70, 40 and 10 by a fang at t28. With BN6's own thunder (Billy's pair) Thunder parted at t34 on the ball's art; with BN4's moved it passes, billy_v1 and thunderman_v1 as before. Thirteen mutations caught.",
       "meaning": "The arm moves once and is shared; a state BN6 has no twin of takes MegaMan's animation numbers from the two arts' frames."
-    },
-    {
-      "feature": "BN4's chips in BN6's tables",
-      "date": "2026-11-10",
-      "name": "bn4_chip_meteors1 to 3 and _miss: BN4's Meteors moved",
-      "result": "python3 build.py xdiff with the four specs: each PASS; a 140 HP Mettaur on the aimed panel (4,2) left 90 at t81 and 40 at t102 (Meteors1), 80 and 20 (Meteors2), 70 (Meteors3) in both, BN6's a frame later; off the panel, 300 frames with the five meteors on the empty panel and the Mettaur untouched. Seven mutations caught (the count, the pace, the star's kind, the controller's dispatch number, a row's power and subfamily, the aim's row).",
-      "meaning": "A unit can run a type an earlier unit moved by a call aimed at that unit's copy; the third kind's dispatch numbers, eleven left for some forty units, need a wider answer before the larger units."
     },
     {
       "feature": "BN4's Navis in BN6's engine",
