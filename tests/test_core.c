@@ -169,7 +169,7 @@ bool town_after_abandon;
 /* (the nets' meeting, issue #82: no ROMs, so the families the visitors
  * come from are the tests' own, test_visitors; the older net's chips'
  * share, home's requests' rolls; BN6's stages by depth) */
-int loot_older_share;
+int loot_older_share, loot_older_net;
 bool loot_visitors_always;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
 static VisitorKin test_kin[VISIT_NETS][4];
@@ -5422,6 +5422,12 @@ static void test_chip_records(void) {
 	/* (id 530 retired: BN4's LifeAura is BN6's LifeAur, the owner's call, xreg4_alias) */
 	CHECK(xreg4_count == 193 && folder4 == 174 && pas4 == 19 && packed4 == BN6_PACK_WIDE_END - XREG4_PACK_FIRST - 1, "registry: BN4's 193 rows, 174 folder chips "
 		"(75 with a pack entry) and 19 Program Advances (%d %d %d %d)", xreg4_count, folder4, pas4, packed4);
+	/* (its DarkChips by their MB, docs/multirom/bn4-chips.md's unit 7: the five a run's finds never hold, a flame's) */
+	int dark4 = 0;
+	static const uint16_t darks4[] = { 187, 189, 190, 192, 193 };   /* DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage */
+	for (int i = 0; i < xreg4_count; ++i) dark4 += xreg4_rows[i].mb == XREG4_DARKCHIP_MB;
+	for (unsigned i = 0; i < sizeof darks4 / sizeof *darks4; ++i) dark4 -= xreg4_of(darks4[i]) && xreg4_of(darks4[i])->mb == XREG4_DARKCHIP_MB;
+	CHECK(!dark4, "registry: BN4's five DarkChips, and no other row, hold the DarkChips' MB (%d off)", dark4);
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&
