@@ -5440,6 +5440,15 @@ static void test_chip_records(void) {
 	int saved4 = 0;
 	for (int i = 0; i < xreg4_count; ++i) saved4 += xreg4_rows[i].how != XREG_PA && bn6_pack_entry(0x02002230u, xreg4_rows[i].bn6) >= BN6_PACK_SAVE;
 	CHECK(saved4 == 99, "registry: BN4's folder chips from 635, 99, in the save RAM's entries (%d)", saved4);
+	/* (what a reward may name: an id with a pack entry, never 603-634, the Program Advances' and the gap's, which
+	 * xchips.c's reward_as pays as the stand-in's zenny; every BN4 row there a Program Advance, which no reward names) */
+	bool holds = !bn6_pack_holds(0) && bn6_pack_holds(1) && bn6_pack_holds(602) && bn6_pack_holds(635) && bn6_pack_holds(733) &&
+		bn6_pack_holds(1023) && !bn6_pack_holds(1024) && !bn6_pack_holds(320) && !bn6_pack_holds(410);
+	for (unsigned id = BN6_PACK_WIDE_END; id < BN6_PACK_SAVE_FIRST; ++id) holds = holds && !bn6_pack_holds(id);
+	for (int i = 0; i < xreg4_count; ++i)
+		if (xreg4_rows[i].bn6 >= BN6_PACK_WIDE_END && xreg4_rows[i].bn6 < BN6_PACK_SAVE_FIRST) holds = holds && xreg4_rows[i].how == XREG_PA;
+		else if (xreg4_rows[i].how != XREG_PA) holds = holds && bn6_pack_holds(xreg4_rows[i].bn6);
+	CHECK(holds, "pack: an entry for 1-319, 411-602 and 635-1023 alone; BN4's rows at 603-634 Program Advances, every folder row held");
 	CHECK(xreg4_alias_count == 1 && xreg4_alias[0][0] == 201 && xreg4_alias[0][1] == 182 && !xreg4_of(201) && !xreg4_at(530),
 		"registry: BN4's LifeAura is BN6's LifeAur, no row and id 530 no chip's");
 	CHECK(hole && hole->bn6 == 527 && xreg4_at(527) == hole && !xreg_at(527) && !xreg4_at(526) && !xreg4_of(310) && driver && driver->how == XREG_PA &&

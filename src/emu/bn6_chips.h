@@ -9,6 +9,8 @@
 #ifndef CW_BN6_CHIPS_H
 #define CW_BN6_CHIPS_H
 
+#include <stdbool.h>
+
 #include "chip_entry.h"   /* a folder entry's form: its id's bits */
 
 #define BN6_CHIP_TABLE_REF    0x08021AB0u /* getChip8021DA8's literal: the chip records (0x08021DA8, 411 of them), the one word that names them */
@@ -204,6 +206,10 @@ static inline uint32_t bn6_pack_entry(uint32_t pack, unsigned id) {
 	if (id >= BN6_PACK_SAVE_FIRST && id < BN6_PACK_SAVE_END) return BN6_PACK_SAVE + BN6_PACK_ENTRY * (id - BN6_PACK_SAVE_FIRST);
 	return 0;
 }
+
+/* Whether a chip `id` has a pack entry at all: a chip given, rewarded or bought of an id without one is lost (counted 0,
+ * a write into the ROM's zeros), so nothing hands one out (xchips.c's reward_as) */
+static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry(BN6_PACK_EXT, id) != 0; }
 
 /* What BN5's chips' moved code stands on in BN6's own (xchips_flash.c, xchips_code.c) */
 #define BN6_FLASH_COUNT       0x080107DCu /* sub_80107D4 (the player's timers, a frame each): ldr r4,[r5,#0x58] past its time stop's test (0x0800A098) */
