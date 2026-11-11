@@ -604,6 +604,10 @@
       "what": "The bombs' family read and SeekBom's code moved (bn4_chips.h BN4_BOMBS_STATE 0x080EB3FE with BN4_BOMBS_SPAWNERS 0x080EB4C4 and BN4_BOMBS_ARMS 0x080EB4EC, BN4_T3_SEEKBOM 0x8D with BN4_SEEKBOM_THROW 0x080DEEF2, BN4_T4_EXPLOSIONS 0x11 with BN4_EXPLOSIONS_SPAWN 0x080E33D4 and BN4_EXPLOSIONS_EFFECT 0x080E33B4; docs/rom/bn4.md)."
     },
     {
+      "date": "2026-11-11",
+      "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
+    },
+    {
       "date": "2026-11-12",
       "what": "GridMan moved (docs/multirom/navis.md, GridMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_GRID_SPAWN_C6, BN5_GRID_ATTACK_POOL, BN5_GRID_EFFECT_5F): seats 17-18 for Nebula's two (AI 43-44, ids 0x3EC-0x3F3, FREE_NEBULA_NAVIS in code-low's new front); gridman_v1, gridman_v1_keys and gridman_sp PASS, five mutations caught; the third kind's 0x95 and the fourth's 0x58 his copy (his 0xC6 and 0xC8 freed of BN4's chips by their reservation, PR #376); an effect drawing its Navi's own battle sprite named at its place (own_sprite); the comparator knows the new room (XN_NEBULA_ROOM) and the 0xC6's Z leftover."
     }
