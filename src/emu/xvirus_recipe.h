@@ -77,6 +77,12 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
  * BN6's queue its twin takes in r0 (bn4_twins.QUEUED). `add`: a call several of BN4's sounds reach, by branches that each
  * make r0 one: its shim adds `slot` to r0 instead, each sound's slot BN4's number plus it (xvirus_shim_sound_add) */
 typedef struct { uint32_t at; uint16_t slot; bool add; } XvSoundCall;
+/* A call of its code to spawn an effect (its game's BN4_SPAWN_EFFECT, r4 the id) whose id no immediate names (a byte of
+ * the object's own, set as it was spawned): the call aimed at a shim of its home that gives r4 BN6's id (`to`, one of its
+ * effects rows': the effect's copy) where it holds one of its game's (`from`) and goes on to BN6's spawn; an id with no pair
+ * passes as it is. The generator reads which ids reach the call (the object's spawns' immediates): never a hand list */
+#define XV_EFFECT_PAIRS 4
+typedef struct { uint32_t at; uint8_t n; uint8_t pairs[XV_EFFECT_PAIRS][2]; } XvEffectCall;   /* (a pair: from, to) */
 /* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
  * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
  * on where the branch would (lr is on its routine's stack there: the generator checks the routine pushes it) */
@@ -160,6 +166,8 @@ typedef struct {
 	int ncmps;
 	const XvSoundCall *sound_calls;   /* its sounds whose slots are past a byte, each played through a shim */
 	int nsound_calls;
+	const XvEffectCall *effect_calls;   /* its effects whose ids no immediate names, each spawned through a shim */
+	int neffect_calls;
 	const uint32_t *sides;     /* its calls to its game's direction rule (BN4_DIRECTION, copied with it), each through a shim that
 	                              numbers left and right by the object's side, as BN6's rule does (xvirus_shim.h) */
 	int nsides;

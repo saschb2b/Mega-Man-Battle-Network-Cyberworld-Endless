@@ -156,6 +156,29 @@ bool xvirus_shim_sound_add(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_
 	return done(&a) && a.n == XV_SHIM_SOUND_SIZE;
 }
 
+/* ---- an effect's id no immediate names ---- */
+
+uint32_t xvirus_shim_r4_to(uint32_t was) { return was == BN4_SPAWN_EFFECT ? BN6_SPAWN_EFFECT : 0; }
+
+int xvirus_shim_effect_size(int n) { return n < 1 || n > 4 ? 0 : (2 * (3 * n + 1) + 3) & ~3; }
+
+int xvirus_shim_effect(uint8_t out[XV_SHIM_EFFECT_MAX], uint32_t at, const uint8_t pairs[][2], int n, uint32_t veneer) {
+	int size = xvirus_shim_effect_size(n);
+	if (!size) return 0;
+	Asm a = { out, size, 0, at, (at & 1) != 0, { 0 }, { { 0 } }, 0 };
+	for (int i = 0; i < n; ++i) {
+		for (int k = 0; k < n; ++k) a.bad = a.bad || pairs[k][0] == pairs[i][1];   /* (an id made is never one looked for) */
+		half(&a, (uint16_t)(0x2C00 | pairs[i][0]));   /* cmp r4, #from */
+		half(&a, 0xD100);                             /* bne past the movs */
+		half(&a, MOVS(4, pairs[i][1]));
+	}
+	int32_t off = (int32_t)(veneer - (at + 6u * (uint32_t)n + 4));
+	if (off < -2048 || off > 2046 || (veneer & 1)) a.bad = true;
+	else half(&a, (uint16_t)(B_ | ((off >> 1) & 0x7FF)));
+	while (!a.bad && a.n < size) half(&a, NOP);
+	return done(&a) && a.n == size ? size : 0;
+}
+
 /* ---- a hook entered past its routine's push ---- */
 
 bool xvirus_shim_entry(uint8_t out[XV_SHIM_ENTRY_SIZE], uint32_t at, uint32_t to) {

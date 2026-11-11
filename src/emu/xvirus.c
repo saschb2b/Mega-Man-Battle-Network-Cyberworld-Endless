@@ -276,6 +276,12 @@ static uint32_t shim_room(Ctx *c, uint32_t n) {
 	return at;
 }
 
+static void shim_put(const XvBlock *b, uint8_t *code, uint32_t site, uint32_t at, const uint8_t *shim, uint32_t n) {   /* a shim staged, its call aimed at it */
+	uint8_t *p = xv_put(at, n, true);
+	if (p) memcpy(p, shim, n);
+	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its call at %08x aimed at its shim", (unsigned)site);
+}
+
 /* A call to look enemies up by a NameID range (XvRange): its game's to object_getEnemyByNameRange or to the shared virus
  * code's count by one, aimed at a shim that loads BN6's bounds and goes on to BN6's twin through the family's veneer for it,
  * the call's own target after the rebase */
@@ -291,9 +297,7 @@ static void range_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvRange *r)
 	}
 	uint8_t shim[XV_SHIM_RANGE_SIZE];
 	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_range(shim, at, r->lo, r->hi, t, bn4 ? 1 : -1)) { xv_fail("its NameID range's shim for %08x", (unsigned)r->at); return; }
-	uint8_t *p = xv_put(at, sizeof shim, true);
-	if (p) memcpy(p, shim, sizeof shim);
-	if (!thumb_bl_write(code, r->at - b->start, b->at, at)) xv_fail("its call at %08x aimed at its shim", (unsigned)r->at);
+	shim_put(b, code, r->at, at, shim, sizeof shim);
 }
 
 /* A held chip's compare past an immediate (XvCmp): `cmp rN,#was; beq/bne L` made a call to a shim that compares with BN6's
@@ -307,13 +311,8 @@ static void cmp_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvCmp *k) {
 		return;
 	}
 	uint8_t shim[XV_SHIM_CMP_SIZE];
-	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_cmp(shim, at, k->reg, k->now, (br & 0x0100) == 0, moved_to(c->f, to))) {
-		xv_fail("its chip compare's shim for %08x", (unsigned)k->at);
-		return;
-	}
-	uint8_t *p = xv_put(at, sizeof shim, true);
-	if (p) memcpy(p, shim, sizeof shim);
-	if (!thumb_bl_write(code, off, b->at, at)) xv_fail("its compare at %08x made a call to its shim", (unsigned)k->at);
+	if (!(at = shim_room(c, sizeof shim)) || !xvirus_shim_cmp(shim, at, k->reg, k->now, (br & 0x0100) == 0, moved_to(c->f, to))) { xv_fail("its chip compare's shim for %08x", (unsigned)k->at); return; }
+	shim_put(b, code, k->at, at, shim, sizeof shim);
 }
 
 /* A call to its game's direction rule (XVirusFamily.sides), the rule's copy its target: aimed at a shim that calls it and
@@ -327,25 +326,24 @@ static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
 		xv_fail("its direction's call at %08x", (unsigned)site);
 		return;
 	}
-	uint8_t *p = xv_put(at, sizeof shim, true);
-	if (p) memcpy(p, shim, sizeof shim);
-	if (!thumb_bl_write(code, site - b->start, b->at, at)) xv_fail("its direction's call at %08x aimed at its shim", (unsigned)site);
+	shim_put(b, code, site, at, shim, sizeof shim);
 }
 
-/* A call that takes r0 BN6's way (XvSoundCall: a sound past a byte, docs/multirom/bn4.md call 11; the appear queue's number): its
- * call aimed at a shim that makes r0 the slot (or adds it) and goes on to BN6's twin (xvirus_shim_r0_to) through the family's veneer */
-static void sound_set(Ctx *c, const XvBlock *b, uint8_t *code, const XvSoundCall *k) {
-	uint32_t was = 0, t = 0, at = 0, to = 0;
-	const uint8_t *orig = c->rom + (k->at - BUS);
-	uint8_t shim[XV_SHIM_SOUND_SIZE];
-	if (!thumb_bl_decode(k->at, get16(orig), get16(orig + 2), &was) || !(to = xvirus_shim_r0_to(was)) || !thumb_bl_read(code, k->at - b->start, b->at, &t) ||
-		t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, sizeof shim)) || !(k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t)) {
-		xv_fail("its sound's call at %08x", (unsigned)k->at);
+/* A call that takes a register BN6's way: r0 (XvSoundCall: a sound past a byte, the owner's call of 5 November 2026,
+ * docs/multirom/bn4.md call 11; the appear queue's number; added to, where several sounds reach the call) or r4
+ * (XvEffectCall: an effect's id no immediate names). Its game's call aimed at a shim that sets the register and goes on to
+ * BN6's twin through the family's veneer for it */
+static void reg_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site, const XvSoundCall *k, const uint8_t pairs[][2], int np) {
+	uint32_t was = 0, t = 0, at = 0, to = 0, n = pairs ? (uint32_t)xvirus_shim_effect_size(np) : XV_SHIM_SOUND_SIZE;
+	const uint8_t *orig = c->rom + (site - BUS);
+	uint8_t shim[XV_SHIM_EFFECT_MAX];
+	if (!n || !thumb_bl_decode(site, get16(orig), get16(orig + 2), &was) || !(to = pairs ? xvirus_shim_r4_to(was) : xvirus_shim_r0_to(was)) ||
+		!thumb_bl_read(code, site - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, n)) ||
+		!(pairs ? xvirus_shim_effect(shim, at, pairs, np, t) == (int)n : (k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t))) {
+		xv_fail("its %s's call at %08x", pairs ? "effect" : "sound", (unsigned)site);
 		return;
 	}
-	uint8_t *p = xv_put(at, sizeof shim, true);
-	if (p) memcpy(p, shim, sizeof shim);
-	if (!thumb_bl_write(code, k->at - b->start, b->at, at)) xv_fail("its sound's call at %08x aimed at its shim", (unsigned)k->at);
+	shim_put(b, code, site, at, shim, n);
 }
 
 static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
@@ -356,7 +354,9 @@ static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
 	for (int i = 0; i < c->f->ncmps && !xv_failed(); ++i)
 		if (xvirus_block_of(c->f, c->f->cmps[i].at) == b) cmp_set(c, b, code, &c->f->cmps[i]);
 	for (int i = 0; i < c->f->nsound_calls && !xv_failed(); ++i)
-		if (xvirus_block_of(c->f, c->f->sound_calls[i].at) == b) sound_set(c, b, code, &c->f->sound_calls[i]);
+		if (xvirus_block_of(c->f, c->f->sound_calls[i].at) == b) reg_set(c, b, code, c->f->sound_calls[i].at, &c->f->sound_calls[i], NULL, 0);
+	for (int i = 0; i < c->f->neffect_calls && !xv_failed(); ++i)
+		if (xvirus_block_of(c->f, c->f->effect_calls[i].at) == b) reg_set(c, b, code, c->f->effect_calls[i].at, NULL, c->f->effect_calls[i].pairs, c->f->effect_calls[i].n);
 }
 
 /* Its pre-step (xvirus_shim.h): the port of its game's dispatcher's case, whose source (BN5's dispatcher and the routines

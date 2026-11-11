@@ -32,6 +32,11 @@
  *    is past what its `movs r0` names (the owner's call of 5 November 2026,
  *    docs/multirom/bn4.md call 11): its call to PlaySoundEffect made a call
  *    to a shim that makes r0 the slot and goes on to BN6's routine;
+ *  - an effect's id no immediate names (XvEffectCall): an object that
+ *    spawns the effect a byte of its own names, set as it was spawned. Its
+ *    call to its game's effect spawn made a call to a shim that gives r4
+ *    BN6's id where it holds one of its game's the recipe pairs, and goes
+ *    on to BN6's spawn;
  *  - a pre-step (XVirusFamily.prestep): BN5's virus dispatcher acts for two
  *    families' NameIDs before their state each frame, as BN6's does for
  *    its own ids alone. A hook on BN6's dispatcher (BN6_VIRUS_NAMEID_CASES)
@@ -54,6 +59,7 @@
 #define XV_SHIM_SIDE_SIZE    24   /* a direction's (XVirusFamily.sides) */
 #define XV_SHIM_PAUSED_SIZE  28   /* a paused present's */
 #define XV_SHIM_SOUND_SIZE   8    /* a sound past a byte's (XvSoundCall) */
+#define XV_SHIM_EFFECT_MAX   28   /* an effect's id's (XvEffectCall), at most: xvirus_shim_effect_size */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
  * (and `side` into r3 where it is 0 or more: BN4's look-up takes its side
@@ -71,6 +77,16 @@ bool xvirus_shim_sound_add(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_
 /* The BN6 routine a BN4 call made through that shim goes on to (XvSoundCall): BN6_PLAY_SOUND for BN4_PLAY_SOUND, BN6's
  * appear queue's routines for BN4's (BN4_QUEUE_*: BN4's one queue, BN6's r0 its number); 0 any other */
 uint32_t xvirus_shim_r0_to(uint32_t was);
+
+/* The shim at `at` (even) that gives r4 each pair's `to` where it holds its `from` (cmp r4,#from; bne; movs r4,#to), then
+ * goes on to `veneer` (the family's veneer for BN6's effect spawn): its bytes, xvirus_shim_effect_size(n); 0 where there is
+ * no pair or more than four (XV_EFFECT_PAIRS, xvirus_recipe.h), a pair's `to` is a pair's `from` (an id given twice), or the veneer is out of a
+ * branch's reach. An id with no pair passes as it is */
+int xvirus_shim_effect(uint8_t out[XV_SHIM_EFFECT_MAX], uint32_t at, const uint8_t pairs[][2], int n, uint32_t veneer);
+/* ... the bytes it takes for n pairs (three instructions a pair and the branch, to a multiple of 4); 0 for a count it has none for */
+int xvirus_shim_effect_size(int n);
+/* ... and the BN6 routine it goes on to for a call to `was` (BN4's effect spawn: BN6's); 0 any other */
+uint32_t xvirus_shim_r4_to(uint32_t was);
 
 /* The shim at `at` (word-aligned) that pushes lr and calls `to` (Thumb,
  * within a call's reach: a tail of a routine past its push {lr}), then pops
