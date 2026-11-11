@@ -3481,6 +3481,26 @@
    "what": "the page's spawner (XV_SPAWN4_3) spawns BN6's 0xD2, the tables' dispatch type, where it spawns 0xD1, the page's (movs r0,#0xD1 made #0xD2): the boomerang runs as the tables' entry for 0x32, which no recipe set, and is let go where BN4's flies its round"
   },
   {
+   "name": "ThunSoul's charge 10 frames longer",
+   "spec": "soul_thun",
+   "soulbreak": 16,
+   "what": "the charge times' copy (src/emu/soulpower.c) 100 frames for BN6's grown power attack 0xA5 where BN4_CHARGE_TIMES' row of 0x58 holds 90 at every Charge: B held 92 frames fires the plain buster, not the charged shot"
+  },
+  {
+   "name": "ThunSoul's charged shot's damage another",
+   "spec": "soul_thun",
+   "poke": [
+    "0800D2AC:2028"
+   ],
+   "what": "the power attack's copy (BN4 0x0800D298, moved with the family's unit) with its movs r0,#0x14 (the attack's damage at its +8) made #0x28: the Mettaur deleted at t167, not left at 20"
+  },
+  {
+   "name": "ThunSoul's element none",
+   "spec": "soul_thun",
+   "soulbreak": 64,
+   "what": "the element's hook gives ThunSoul none where BN4_FORM_ELEMENTS gives form 6 Elec (3): his object's +0x0E 0"
+  },
+  {
    "name": "SparkMan's kept CurAction off by one",
    "spec": "sparkman_v1",
    "poke": [
