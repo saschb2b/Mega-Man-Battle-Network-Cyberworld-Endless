@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (The art's room, a new section: no unit's art installed, a sprite put into one room as an object loads it), rom/chips-code.md (the room's places in BN6, new row), devtools/chip-recipe-generator.md (a sprite's row; the ranges left to the Navis), devtools/differential.md (a room pointer named by its row), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
 * **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers, a new section: BN5's numbers reserved in one place, the guard in the generator and lint, five units renumbered; the numbers run short).

@@ -11,7 +11,7 @@
 #include "rom.h"
 #include "song_table.h"
 #include "xattack_grow.h"
-#include "xchips_bn4.h"
+#include "xchips_bn4_art.h"   /* (and xchips_bn4.h, which it is whole with) */
 #include "xchips_bn5.h"
 #include "xchips_flash.h"
 #include "xchips_moved.h"
@@ -346,7 +346,7 @@ bool xchips_code_install(void) {
 /* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
  * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
-static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
+static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
 
 /* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
  * that shares an earlier unit's code (XChipUnit.share), its entry alone */
@@ -411,5 +411,7 @@ bool xchips_bn4_code_install(void) {
 		}
 	installed4 = tables_grown = true;
 	printf("xchips_code: %d units of BN4's chips' code (%u bytes written)\n", xchips_bn4_count, (unsigned)used);
+	/* (their art: none installed, a room filled as an object loads a sprite, xchips_bn4_art.h) */
+	xchips_bn4_art_install();
 	return true;
 }

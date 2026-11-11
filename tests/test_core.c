@@ -75,6 +75,7 @@
 #include "xattack_grow.h"
 #include "xchips.h"
 #include "chip_entry.h"
+#include "xchips_bn4_art.h"
 #include "xchips_bn4.h"
 #include "xchips_bn5.h"
 #include "xchips_code.h"
@@ -5271,6 +5272,32 @@ static void test_chip_code(void) {
 /* A folder entry's form (src/core/chip_entry.h): nine bits as BN6 has
  * them, ten for ten-bit chip ids, and the converter a run saved with
  * nine-bit folders goes through once (docs/engine/saves.md) */
+/* BN4's chip units' art's room (xchips_bn4_art.h): a sprite's place names its row, so the placing is a function of the
+ * slots in play alone; and every unit's sprite is a row of it, each its own, none installed */
+static void test_chip_art_room(void) {
+	CHECK(XC4_SLOTS >= 32 && XC4_SLOTS <= 63 && XC4_ROOM_SLOT(XC4_SLOTS) <= XC4_END && 2u * XC4_SLOTS <= XC4_ROOM_TAGS,
+		"art's room: %u slots, their tags and the room's end", (unsigned)XC4_SLOTS);
+	CHECK(xchips_bn4_art_slots(0, XC4_SLOT) == 1 && xchips_bn4_art_slots(1, XC4_SLOT) == 2 && xchips_bn4_art_slots(511, 4) == 1 &&
+		xchips_bn4_art_slots(8, 0x3900) == 8, "art's room: the slots a row's sprite takes");
+	int slots = (int)XC4_SLOTS;
+	CHECK(xchips_bn4_art_place(0, 3, slots) == 0 && xchips_bn4_art_place(0x7, 2, slots) == 3 && xchips_bn4_art_place(0x65, 2, slots) == 3 &&
+		xchips_bn4_art_place(0x65, 3, slots) == 7, "art's room: the lowest run of slots free");
+	CHECK(xchips_bn4_art_place(~(uint64_t)0, 1, slots) == -1 && xchips_bn4_art_place(0, slots + 1, slots) == -1 &&
+		xchips_bn4_art_place(((uint64_t)1 << (slots - 1)) - 1, 1, slots) == slots - 1 && xchips_bn4_art_place(((uint64_t)1 << (slots - 1)) - 1, 2, slots) == -1,
+		"art's room: no run past its end");
+	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	char why[160] = "";
+	int rows = 0;
+	for (int u = 0; u < xchips_bn4_count; ++u) {
+		const XVirusFamily *f = &xchips_bn4[u].code;
+		CHECK(!f->nblocks || xvirus_code_ok(f, &region, why, sizeof why), "art's room: %s refused: %s", f->name, why);
+		for (int i = 0; i < f->nsprites; ++i, ++rows)
+			CHECK(f->sprites[i].at == XC4_ROOM_ROW(rows) && xchips_bn4_art_slots(rows, f->sprites[i].room) <= slots,
+				"art's room: %s's sprite %d is row %d of the room and fits it", f->name, i, rows);
+	}
+	CHECK(rows > 0 && rows <= (int)XC4_ROWS, "art's room: %d rows", rows);
+}
+
 static void test_chip_entry(void) {
 	/* (Cannon A, Cannon B, BN6's junk chip 389 in code 27 as its cheat test
 	 * gives it, id 511 *, none, empty) */
@@ -7488,6 +7515,7 @@ int main(void) {
 	test_xchips();
 	test_xtext();
 	test_chip_code();
+	test_chip_art_room();
 	test_chip_entry();
 	test_chip_registry();
 	test_chip_records();

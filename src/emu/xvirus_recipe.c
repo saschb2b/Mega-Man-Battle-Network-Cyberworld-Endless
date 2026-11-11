@@ -210,9 +210,12 @@ static bool sprites_ok(const XVirusFamily *f, const XvRegion *r, char *why, size
 		if (s->list >= SPRITE_LISTS || xvirus_list_slot(s->to_list) < 0) return no(why, n, "sprite %d's lists", i);
 		bool placed = span_in(s->at, s->room, r->art, r->art_end) || (r->art2 && span_in(s->at, s->room, r->art2, r->art2_end));
 		if ((s->at & 3) || !s->room || !placed) return no(why, n, "sprite %d placed at %08x", i, (unsigned)s->at);
+		/* (a row of a room filled on demand: its place its name, apart from every other's; its room no place of its own) */
+		bool row = r->rows && s->at >= r->rows && s->at < r->rows_end;
 		for (int k = 0; k < i; ++k) {
 			const XvSprite *o = &f->sprites[k];
-			if ((s->at < o->at + o->room && o->at < s->at + s->room) || (s->to_list == o->to_list && s->to_index == o->to_index))
+			bool meet = row ? s->at == o->at : s->at < o->at + o->room && o->at < s->at + s->room;
+			if (meet || (s->to_list == o->to_list && s->to_index == o->to_index))
 				return no(why, n, "sprites %d and %d in one place", k, i);
 		}
 	}
