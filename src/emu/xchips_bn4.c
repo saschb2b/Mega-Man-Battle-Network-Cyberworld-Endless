@@ -1176,12 +1176,12 @@ static const XvImm thunsoul_imms[] = {
 	{ 0x080DAFE6, THUMB_MOVS, 2, 0, 0x37, 0x77 },   /* its object's sprite on its other path: list 3 0x37 in BN4, 0x77 in BN6 (copied) */
 	{ 0x080DAFEE, THUMB_MOVS, 2, 0, 0x3A, 0x76 },   /* its object's sprite: list 3 0x3a in BN4, 0x76 in BN6 (copied) */
 	{ 0x080DB078, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
-	{ 0x080DB0D0, THUMB_MOVS, 0, 0, 0x6D, 0xB6 },   /* its object's type 0x6d: moved, the dispatch's 0xb6 */
+	{ 0x080DB0D0, THUMB_MOVS, 0, 0, 0x6D, 0xA2 },   /* its object's type 0x6d: moved, the dispatch's 0xa2 */
 	{ 0x080DB0E0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080EDC5E, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 };
 static const XvType thunsoul_types[] = {
-	{ 3, 0xB6, XV_TYPE_MOVED, 0x6D },   /* BN4's third-kind 0x6d, moved, the dispatch's 0xb6 */
+	{ 3, 0xA2, XV_TYPE_MOVED, 0x6D },   /* BN4's third-kind 0x6d, moved, the dispatch's 0xa2 */
 	{ 3, 0xC2, XV_TYPE_SHARED, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy: the dispatch's 0xc2 */
 };
 static const XvSprite thunsoul_sprites[] = {
