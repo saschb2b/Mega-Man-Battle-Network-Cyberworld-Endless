@@ -1,0 +1,8 @@
+[
+ {
+  "name": "MegaMan confused as the fight starts",
+  "spec": "bn4_chip_drkvulcn",
+  "confuse6": 1,
+  "what": "BN6's MegaMan given BN4's confusion at the fight's start (0x2D0 frames, confuse6), which the run does not give after an attack DarkChip (the owner's call of 12 November 2026): it must part from BN4's, whose confusion calm4 ends"
+ }
+]
