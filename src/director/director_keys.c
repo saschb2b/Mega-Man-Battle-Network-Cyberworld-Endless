@@ -412,6 +412,7 @@ static bool home_r(uint32_t *keys) {
 }
 
 uint32_t director_keys(uint32_t keys) {
+	keys = director_lab_after(keys);
 	talk_only_update();
 	/* (a field of the Net Square's gate open over the game) */
 	if (home_gate_holds()) return 0;

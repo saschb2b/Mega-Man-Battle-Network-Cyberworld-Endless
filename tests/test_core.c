@@ -33,6 +33,7 @@
 #include "area_src.h"
 #include "backup.h"
 #include "battle_data.h"
+#include "lab_text.h"
 #include "test_backup.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -7603,9 +7604,29 @@ static void test_battle_data(void) {
 	profile = keep;
 }
 
+/* The Battle Lab's builder's words (docs/game/battle-lab.md): how a test
+ * battle ended, its time as BN6's RESULT sets one, in the information
+ * box's three lines. */
+static void test_lab_text(void) {
+	char s[96];
+	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
+	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
+	lab_info_result(s, sizeof s, &won);
+	CHECK(!strcmp(s, "Time 0:12:66. Level 9. HP lost 20."), "lab: a win's time, level and HP lost (%s)", s);
+	lab_info_result(s, sizeof s, &best);
+	CHECK(!strcmp(s, "Time 1:00:50. Level S. HP lost 0."), "lab: level 11 is S (%s)", s);
+	lab_info_result(s, sizeof s, &fell);
+	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	lab_info_result(s, sizeof s, &left);
+	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
+		"lab: the panels' and versions' names");
+}
+
 int main(void) {
 	test_sha1();
 	test_battle_data();
+	test_lab_text();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
