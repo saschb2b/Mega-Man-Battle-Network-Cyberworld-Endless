@@ -537,6 +537,14 @@ static bool chip_used(uint32_t to) {
 	return false;
 }
 
+/* whether BN6's copy at `to` is a chip unit's code the log keys: a used unit's of BN5's (not the chips' helpers'), or any
+ * of BN4's (only the unit of the chip the spec plays runs, and its own draws are keyed by BN4's places as a family's are:
+ * TimeBomb's placement, the fourth kind's 0x27's, 0x080E4D4C) */
+static bool chip_code(uint32_t to) {
+	if (xchips_bn4_code_at(to)) return true;
+	return to >= FREE_CHIP_MOVED && to < FREE_TAIL && !(to >= XC_HELPERS && to < XC_HOMES) && chip_used(to);
+}
+
 /* a family that moved a type `of` runs as shared (XV_TYPE_SHARED): its copy is the one `of` runs */
 static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
 	for (int i = 0; i < of->ntypes; ++i)
@@ -594,7 +602,7 @@ static bool watched(const XvMoved *m, const XVirusFamily *const *fams, int nfams
 		return true;
 	if (navis && xn_code_at(m->to) && navi_code(m)) return true;
 	if (xd_navi4_code(m)) return true;   /* (a played BN4 Navi chip's unit and its Navi's code: xdiff_navi4.h) */
-	return m->to >= FREE_CHIP_MOVED && m->to < FREE_TAIL && !(m->to >= XC_HELPERS && m->to < XC_HOMES) && chip_used(m->to);
+	return chip_code(m->to);
 }
 
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {

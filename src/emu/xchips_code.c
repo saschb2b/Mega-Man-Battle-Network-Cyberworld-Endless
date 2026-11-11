@@ -127,12 +127,44 @@ static void helper_calls_check(const XChipUnit *u, int at) {
 	}
 }
 
+/* A waiting misc unit's wrapper (XChipUnit.wait), written at its home's end: the table's entry in its routine's place, its
+ * address (Thumb), 0 failed. BN6's misc run calls a routine and ends the attack in the same frame (BN6_MISC_RUN: phase 1
+ * stored, then mov lr,pc; bx r7 with the misc state pushed; only its own subfamily 0x14 waits, counting to below 0), BN4's
+ * waits BN4's frames for the unit's subfamily, counting to 0 (BN4_MISC_WAIT). So the wrapper is the run's routine every
+ * frame of the wait: the first time (the state's +1 is 0, cleared with the phase as an attack is set) it calls the routine
+ * the same way, marks +1 and sets the count (+0x10) to BN4's; then, every time, it counts as BN4's run does and either
+ * goes on into BN6's run where that ends the attack (BN6_MISC_END) or clears the phase, so the run calls it again the next
+ * frame, and leaves by the run's way out (BN6_MISC_EXIT). The count holds BN4's numbers each frame.
+ *   00 push {r0,r1}   02 ldr r1,[sp,#8]   04 ldrb r0,[r1,#1]   06 cmp r0,#0   08 pop {r0,r1}   0A bne 1C
+ *   0C ldr r7,=routine   0E mov lr,pc   10 bx r7   12 pop {r7}   14 movs r0,#1   16 strb r0,[r7,#1]   18 movs r0,#wait   1A b 20
+ *   1C pop {r7}   1E ldrh r0,[r7,#0x10]   20 subs r0,#1   22 strh r0,[r7,#0x10]   24 bgt 2A   26 ldr r0,=BN6_MISC_END   28 bx r0
+ *   2A movs r0,#0   2C strb r0,[r7,#0]   2E ldr r0,=BN6_MISC_EXIT   30 bx r0   32 nop   34 the three words */
+static uint32_t wait_stage(const XChipUnit *u, const XVirusFamily *code, uint32_t routine) {
+	static const uint16_t thumb[26] = {
+		0xB403, 0x9902, 0x7848, 0x2800, 0xBC03, 0xD107, 0x4F09, 0x46FE, 0x4738, 0xBC80, 0x2001, 0x7078, 0x2000, 0xE001,
+		0xBC80, 0x8A38, 0x3801, 0x8238, 0xDC01, 0x4804, 0x4700, 0x2000, 0x7038, 0x4803, 0x4700, 0x46C0,
+	};
+	uint32_t at = u->home + XC4_HOME_WAIT;
+	if (u->kind != XCHIP_MISC || XC4_HOME_VENEERS + xvirus_shims_room(code) > XC4_HOME_WAIT) {
+		xv_fail("its wait %d: no misc unit's, or its shims reach its wrapper", u->wait);
+		return 0;
+	}
+	uint8_t *p = xv_put(at, XC4_WAIT_SIZE, true);
+	if (!p) return 0;
+	for (int i = 0; i < 26; ++i) put16(p + 2 * i, i == 12 ? (uint32_t)(thumb[i] | u->wait) : thumb[i]);
+	put32(p + 0x34, routine | 1u);
+	put32(p + 0x38, BN6_MISC_END | 1u);
+	put32(p + 0x3C, BN6_MISC_EXIT | 1u);
+	return at | 1u;
+}
+
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
  * its stub first; `fresh` where the routines' tables are staged in this step (their stub there already), else grown by an
  * earlier one (the other game's units'); `code` the unit's own, or the unit's whose block holds its routine (XChipUnit.share) */
 static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh) {
 	uint32_t at = 0, stub = 0, to = xvirus_code_at(code, u->entry | 1u);
-	if (u->kind == XCHIP_ATTACK && u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) {
+	/* (BN5's attack families in the chips' range, BN4's in its own: unit4_stage holds each to its game's) */
+	if (u->kind == XCHIP_ATTACK && ((u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) || u->number >= XATTACK_BN4)) {
 		at = xattack_entry(u->number);
 		stub = XATTACK_STUB | 1u;
 	} else if (u->kind == XCHIP_MISC && u->number >= XC4_FIRST_SUPPORT) {
@@ -149,6 +181,8 @@ static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh
 		xv_fail("its number %#x or its entry %08x", u->number, (unsigned)u->entry);
 		return;
 	}
+	/* (a unit BN4's misc run waits for: its wrapper the entry) */
+	if (u->wait && !(to = wait_stage(u, code, to))) return;
 	/* (the grown routines are staged in this step: their stub there already; the attack families' grown before it) */
 	if (u->kind == XCHIP_ATTACK || !fresh) xv_word(at, stub, to);
 	else {
@@ -309,7 +343,8 @@ bool xchips_code_install(void) {
 	return true;
 }
 
-/* ---- BN4's units (xchips_bn4.h): support routines alone, each in its own region ---- */
+/* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
+ * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
 static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
 
@@ -318,7 +353,8 @@ static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS,
 static void unit4_stage(int i, bool fresh) {
 	const XChipUnit *u = &xchips_bn4[i];
 	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
-	else if ((u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC && u->kind != XCHIP_NAVI) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+	else if (u->kind == XCHIP_ATTACK ? u->number < XATTACK_BN4 || u->share
+	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC && u->kind != XCHIP_NAVI) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
 	else if (u->kind == XCHIP_NAVI && (u->share || !u->navis || !xnavi_bn4_seat(u->navis - 1))) xv_fail("its Navi's seat %d, no installed BN4 Navi's", u->navis - 1);
 	else if (u->share) {
 		/* (a routine of an earlier unit's block: its entry alone) */
@@ -330,6 +366,8 @@ static void unit4_stage(int i, bool fresh) {
 		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) entry_stage(u, &u->code, fresh);
 	}
 }
+
+bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
 static bool units4_install(bool navis);
@@ -351,7 +389,7 @@ static bool units4_install(bool navis) {
 	claims_begin(XV_CLAIMS);
 	bool room = xg_grow();
 	claims_end();
-	if (!room) {
+	if (!room || !xattack_grow()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
 		return false;
 	}

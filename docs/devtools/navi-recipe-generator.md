@@ -3,7 +3,7 @@ type: Tool
 title: "The Navis' recipe generator"
 description: "`tools/xnavirecipe.py` derives the Navis' recipes as `tools/xrecipe.py` derives a family's, writing the control HeatMan's, the moved objects' and BN5's Navis' into `src/emu/xnavi_bn5.c`, with `--check` and a `--report`."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-12T15:22:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:05:00Z }
 ---
 
 # The Navis' recipe generator
@@ -29,9 +29,15 @@ from BN6's ROM): its code walked from its states, hooks and companion
 routines; each object type its code spawns decided as
 `tools/bn5_twins.py`'s TYPES decides it (one decision a type, every
 track's; a type the table decides otherwise, or not at all, is a
-decision); its sprites given one number and one place in the shared art
-whichever Navi draws them, its effects numbers of its own, both in issue
-#82's ranges for the Navis; the image object's kinds it spawns each one
+decision, and so is a type it moves whose copy TYPES gives another track:
+the Navis install first, so a type their code moves is theirs, which the
+chips and the families then spawn); its sprites given one number and one
+place in the shared art whichever Navi draws them, its effects numbers of its own, both in issue #82's
+ranges for the Navis; a moved object's every compare of its parent's
+CurAction with one of the Navi's own states made BN6's number; a block
+whose code stores a byte of its own routines' addresses placed at its BN5
+address's low byte (`LOW_BYTE_KEPT`: CloudMan's clouds, [Transplanted
+Navis](../multirom/navis.md), CloudMan); the image object's kinds it spawns each one
 `tools/bn5_objects.py` fixes, and the moved objects' recipe itself
 (`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
 that table, each twin checked by its bytes). A recipe with a decision

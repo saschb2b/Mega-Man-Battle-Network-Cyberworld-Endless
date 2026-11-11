@@ -68,7 +68,7 @@ bool bracket_of(int depth, int final, RunBracket *b) {
 void bracket_draw(int depth, int final, RunBracket *b) {
 	BracketPool p;
 	pool_make(&p);
-	bool older = guardian_older(final);
+	bool older = guardian_moved(final);
 	int v = older ? xguardian_version(final, depth) : make_boss(depth, run.biome, final).foes[0].version;
 	int hp = older ? xguardian_hp_fought(final, v, depth) : navi_hp(final, v);
 	run_bracket_draw(depth, final, v, hp, &p, b);

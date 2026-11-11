@@ -71,4 +71,7 @@ bool xchips_bn4_code_install(void);
  * attack objects those units call and spawn. */
 bool xchips_bn4_navi_install(void);
 
+/* Whether `to` lies in BN4's units' code (XC4_CODE to XC4_ART: xchips_bn4.h), for a tool that tells whose a copy is. */
+bool xchips_bn4_code_at(uint32_t to);
+
 #endif

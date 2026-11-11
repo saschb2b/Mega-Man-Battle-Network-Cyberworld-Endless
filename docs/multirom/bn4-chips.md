@@ -279,11 +279,75 @@ BN6 has none. A BN4 record's kind 8 is BN6's Null since
 BN6's second wheel's Cursor flag in their attack. Their specs pass as
 before.
 
-**Next:** SidBmbo1-3 (misc 5: a sprite of list 1 too; BN4's misc run
-waits 0x28 frames for subfamily 5, which BN6's run does not for a grown
-routine), BugChain (support 0x1F: two calls of BN4's with no twin
-found), then Binder, SandRing and the spread chips. Marking and the
-four Plus chips wait on the owner's call 7.
+**SidBmbo1-3 are moved** (11 November 2026: ids 571-573, misc 5): the
+bamboo (the third kind's 0x44), 420 bytes, that comes up three columns
+ahead; its sprite of list 1 copied, its sound at the grown table's
+0x1E1. It is the one misc chip BN4's run waits for, 0x28 frames after
+its routine before the attack ends, where BN6's run ends a grown
+routine's attack in the same frame: the unit carries the wait
+(`XChipUnit.wait`, read from BN4's run by the generator) and its entry
+in BN6's grown misc routines is a wrapper the installer writes at the
+end of its home, which calls the routine once and counts as BN4's run
+does. `bn4_chip_sidbmbo1`, `2` and `3` pass over 300 frames, the bamboo
+in play from t33 to t95, MegaMan held in his misc state the same frames
+in both (a 140 HP Mettaur left 60 and 30; SidBmbo3's 140 against the
+family's 250 HP rank, left 110, since a deletion's effect is each
+engine's own art), six mutations caught. With it a unit names only the
+effects it moves itself: one an earlier unit moved is that unit's row,
+which the installer could otherwise resolve only where a family
+happened to hold the same sprite.
+
+**The spread chips are moved, the first attack family** (10 November
+2026: HeatShot, Heat-V, HeatSide, Bubbler, Bub-V and BublSide, ids
+588-593, BN4's family 0x1E). Most of BN4's chips are neither support nor
+misc chips: their record's family is a state of MegaMan's of its own, and
+the generator has a third kind of unit for one, `attack`: the state
+whole, every subfamily of it, at a number of BN6's grown attack families
+the chips of BN4 have for their own (0xD0 on, in the units' order), which
+its chips' records take as their family with BN4's own subfamily. BN6
+still has the spread family as its Spreadr1-3's (0x25, the same phases,
+waits and shapes by subfamily and kind), but with its own arm, a
+first-kind object where BN4's is a third-kind one, so BN4's records on
+BN6's family part from BN4's battle as the arm appears (tried first: t33,
+where Cannon's recorded verdict parts). So the state moves with its arm
+(the third kind's 0x02) and its shot (the third kind's 0x12, unseen, a
+panel a frame), 1218 bytes with the arm's and the shot's kinds' tables:
+38 calls paired, four of them new pairs read in both games (the counter
+window, the attack's end, a NaviStats byte, the element's set), the
+attack's variables' place and MegaMan's animation's number BN6's, three
+arm sprites and the bubbles' and fire's burst effects copied, the shot's
+sound at the grown table's 0x200 (the attack units' slots are a block
+from there, as units are moved side by side) and the bursts' at the
+families' slots for them. Eight specs pass over 300 frames, the arm and
+the shot in play in the fight's frames: each chip against a 140 HP
+Mettaur (left 100, 70, 40, 90, 60 and 30, the burst's effects on the
+panels of its shape), `bn4_chip_heatshot_miss` (the shot flown off the
+field) and `bn4_chip_heatshot_struck` (MegaMan struck by the Mettaur's
+wave with his arm out: the arm let go in both); eleven mutations caught.
+The comparison took a moved family's number, MegaMan's animation by each
+art's number, the chips' code room for a pointer a moved object keeps
+into its copied table, and one difference of the engines': BN4's struck
+state leaves the flag an interrupted attack had set, BN6's clears it
+(`tests/xdiff/legit.json`'s `bn4` `attack_families`,
+`megaman_animations`, `interrupted_attack`). **Not compared:** the
+burst's damage to a second foe (a BN4 spec holds one foe: the burst is
+seen by its effects' panels), and a spread chip after a support chip in
+one battle (BN6's support run holds MegaMan a frame, and his arm with
+him: a RockCube ahead of the shot parted there). **Waiting:** Spreader
+(18) is the run's by BN6's own and stays so; DrkSpred (192) is the dark
+chips' session's, its kind 0xF of the shot's table and its sound a byte
+cannot name among its work; HeatSprd and BubSprd, the family's Program
+Advances, play once BN4's recipes are listed (BN4's list read into BN6's
+grown one, as BN5's were: not built). Every attack unit to come that
+draws the arm shares this copy of it (not built: the second unit's work).
+
+**Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
+types, a placement that draws), then BlakBarr's barrier; Binder,
+SandRing and Ball are attack families, whose unit kind the spread
+chips brought; of those FlmLine, Thunder and TwnFng are next. BugChain
+waits on the owner's call 11 (it copies a side's NaviCust bugs to the
+other's record, a NetBattle chip). Marking and the four Plus chips are
+cut (call 7, answered).
 
 **The first chip of BN4's own plays: Invis** (10 November 2026). BN4's
 support 0x31 is BN6's subfamily 1, Invisibl's, the same by body down its
@@ -345,7 +409,9 @@ and ShadeMan's DS the registry's rows of BN5's, ProtoMan's DS and
 BugCharg none. **Not taken from BN4:** a dark MegaMan himself (his
 object's +0x94, his dark sprite, what else his karma changes); a dark
 chip's spec gives BN4's reference the karma that plays it (`karma4` 0)
-and the comparison explains his look from both games' code.
+and the comparison explains his look from both games' code: his
+palette, BN4's dark 2 against BN6's 0, the one difference of him
+(`bn4_chip_invis_dark`, [The differential](../devtools/differential.md)).
 
 **The dark units, read** (10 November 2026; [BN4 Red Sun's
 tables](../rom/bn4.md), The panel changer and the Hole panel). With the
@@ -1144,6 +1210,22 @@ Open:
    proved against BN4's battle with no Hole on the field and play at
    their floor, which (b) would make final. Until answered Hole, DrkLine
    and DrkStage sit out.
+11. **BugChain: cut, or its bugs mapped onto BN6's?** Asked 11 November
+    2026. By its code (read in the ROM: its object's routine `0x080E668E`)
+    BugChain copies seven bytes from one side's battle Navi stats to the
+    other's, the NaviCust bugs a side fights under (BN4's record, 0x40
+    bytes a side at `0x0203BEC0`, through `0x0800D742`): one side's bugs
+    become both sides'. Only a Navi a player steers reads that record, so
+    against viruses and the run's guardians the chip changes nothing that
+    was found (their code reads none of it: assumed from the readers met,
+    not searched to the end); it is a NetBattle chip. BN6 keeps the same
+    record in another layout (0x64 bytes a side at `0x0203CE00`,
+    `0x08013682`) and its own set of bugs, so moving it means pairing
+    each of the seven fields with BN6's by its reader in both games, and
+    deciding what a bug BN6 has none of becomes. Recommended: cut it from
+    runs' pools and rewards (its row left out of play, id 587 kept
+    retired) and take it up with the Arena, where a second player's
+    record exists. Until answered it sits out.
 
 Decided here by the data and the standing rules, not asked: no EXTRAS
 switch of BN4's own (call 5's one older Net); BN4's DarkChips by BN6's

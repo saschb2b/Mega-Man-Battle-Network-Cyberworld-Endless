@@ -490,6 +490,11 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xAB, SONG_GROWN_FIRST + 5 },
 	/* ... MokoRus's Moko */
 	{ XROM_BN4_RED_SUN_US, 0xC7, SONG_GROWN_FIRST + 6 },
+	/* ... SidBmbo's bamboo */
+	{ XROM_BN4_RED_SUN_US, 0x8E, SONG_GROWN_FIRST + 7 },
+	/* ... the attack families' units', from 0x200 up (a block of their own, as several units are moved side by side): the
+	 * spread chips' shot (its bursts' 0x9F and 0xBC the families' slots 0x3D and 0x3F above) */
+	{ XROM_BN4_RED_SUN_US, 0x8D, SONG_GROWN_FIRST + 0x26 },   /* (0x200) */
 	/* ... BN4's Navi chips' (their range from 0x2C0): a chip's Navi as he appears */
 	{ XROM_BN4_RED_SUN_US, 0xB0, 0x2C0 },
 };

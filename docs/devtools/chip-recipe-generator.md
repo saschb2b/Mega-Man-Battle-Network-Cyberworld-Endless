@@ -182,6 +182,27 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
+- **An attack unit.** A chip of neither state names a state of MegaMan's
+  of its own by its record's family (`BN4_PLAYER_STATES`: the spread
+  chips' 0x1E). A unit of kind `attack` is that state whole, its routine
+  to the next state's, every subfamily of it: its phases, its bytes by
+  subfamily, the arm and the shot it spawns moved with it. BN6 runs a
+  family with r7 the attack's variables, which BN4's state makes itself:
+  the immediate that does is given BN6's place (his AI data's +0x70,
+  BN6's +0xA0), and any other field of his AI data is a decision until
+  both games' use of it is read (`MEGAMAN_AI`). Its number is one of
+  BN6's grown attack families the chips of BN4 have for their own
+  (`ATTACK_NUMBERS`, 0xD0 on, `XATTACK_BN4`), fixed as the unit is
+  written; its chips' rows name it in `sub` (0xD0 or over is a family,
+  the record's subfamily BN4's own), a chip of the family another
+  session moves waits (`ROWS_WAIT`), and its Program Advances stay
+  `XREG_PA`. MegaMan's animation, each art's own number, and a place of
+  BN4's NaviStats are hand-read immediates (`IMMS`). A kinds' table
+  whose rows name an effect and a sound by a byte (`ROW_TABLES`: the
+  spread shot's) is copied with the unit, each row of a kind its chips
+  play given BN6's id of the effect (of the same look, or moved) and a
+  slot a byte can name for the sound (`FAMILY_SLOTS`); the arm's kinds'
+  table keeps a row's sprite list beside its number.
 - **A Navi chip's unit.** A Navi chip's routine of that table spawns an
   object of the Navi's own, which is BN6's one Navi chip object state
   for state, so a unit of kind `navi` moves the chip's Navi alone
@@ -262,7 +283,19 @@ its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
-MokoRus (misc 1), with GutsMan's chip (navi 5); SidBmbo is next.
+MokoRus (misc 1), SidBmbo (misc 5) and Spreads (attack 0x1E), with
+GutsMan's chip (navi 5); FlmLine is next of the attack families.
+
+A misc unit BN4's run waits for carries the frames (`misc_wait` reads
+BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
+sets; SidBmbo's 0x28), written as the unit's row's last number. The
+installer then puts a wrapper at the end of the unit's home
+(`xchips_code.c` `wait_stage`, 0x40 bytes of the project's own Thumb) as
+the table's entry: BN6's misc run calls it every frame of the wait, it
+calls the unit's routine the first time and counts as BN4's run does,
+going on into BN6's run where the attack ends. An effect an earlier
+unit moved is left to that unit's rows; the later unit's code names its
+id by an immediate alone.
 
 Several sessions add units side by side, so what a unit is given follows
 one rule. `UNITS` is append-only, one unit a line: a unit's home, its

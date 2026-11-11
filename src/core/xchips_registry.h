@@ -80,13 +80,16 @@ typedef struct {
 	                        chip whose family alone its record takes, 0 BN6's support or misc family (a Navi chip's: BN6's Roll, the Navi family) */
 	uint8_t sub;         /* ... and the subfamily, 0xFF the twin's; (XREG_MOVED) its unit's routine in BN6's grown support routines,
 	                        XC4_FIRST_SUPPORT + BN4's subfamily, its record's subfamily under BN6's support family (a Navi chip's: in BN6's
-	                        grown Navi routines, under its Navi family) */
+	                        grown Navi routines, under its Navi family); or, from
+	                        XREG4_FIRST_ATTACK, its unit's number in BN6's grown attack families (a state of BN4's MegaMan's moved),
+	                        its record's family, the subfamily BN4's own */
 	uint8_t codes[4];    /* its codes as BN4's record has them */
 	uint8_t type, mb;    /* its class (BN6's library type: 0 standard, 1 Mega, 2 Giga, 4 a Program Advance) and its MB */
 } XChipReg4;
 
 #define XREG4_DARKCHIP_MB 99   /* a DarkChip of BN4's (DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage): its record's MB, no other row's;
                                 * BN4's Library lists none (its +0x1C is 0), a run's finds hold none (chip_pool.h): a flame's */
+#define XREG4_FIRST_ATTACK 0xD0 /* a moved row's `sub` from here: an attack family's number (src/emu/xattack_grow.h XATTACK_BN4; test_core holds the two alike) */
 #define XREG4_PACK_FIRST 527   /* its first id: 527-602, the ids with a pack entry (bn6_pack_entry), its chips that play first; */
 #define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
 #define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips */

@@ -61,7 +61,14 @@ MOVED = {
     72: 0x88, 73: 0x89, 74: 0x8A,      # WhitWeb1-3: BN4's misc 8, 9 and 0xA, one unit's three routines (bn4_chip_whitweb1-3)
     75: 0x82, 76: 0x82, 77: 0x82,      # Boomer1-3: BN4's misc 2 (bn4_chip_boomer1-3)
     130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
+    78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
 }
+# ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
+# unit's number in BN6's grown attack families (tools/xchiprecipe_bn4.py ATTACK_NUMBERS, 0xD0 on: past every support and misc
+# number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
+MOVED.update({
+    19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+})
 # BN4's Navi chips whose Navi is moved into BN6's engine as a unit of kind 'navi' (tools/xchiprecipe_bn4_navi.py: the chip's own
 # first-kind Navi, run by BN6's Navi object), each proved by its bn4_chip_* spec: BN4's id -> the unit's number in BN6's grown
 # Navi routines (XC_NAVI: 0x80 + BN4's subfamily), its record's subfamily under BN6's Navi family, which the row takes from

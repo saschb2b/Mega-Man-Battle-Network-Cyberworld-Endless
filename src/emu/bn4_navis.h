@@ -10,7 +10,30 @@
  * Blue Moon's Soul Navis) take their side's AI data at their init and name MegaMan's states in their table (their
  * attacks); the others keep their variables in the object, as the families do */
 #define BN4_NAVI_FIRST_ID 128         /* Roll's V1: a Navi's four enemy ids in a row from here (V1, V2, V3, SP; BN4_ENEMY_VERSION 0-3) */
+/* ... each proved Navi's V1 (his seat (id - BN4_NAVI_FIRST_ID) / 4; docs/multirom/bn4-navis.md, Navi by Navi), the names an area
+ * of BN4's gives its guardians by (NetAreaDef.xguard) */
+#define BN4_V1_ROLL       0x80
+#define BN4_V1_GUTSMAN    0x84
+#define BN4_V1_WINDMAN    0x88
+#define BN4_V1_SEARCHMAN  0x8C
+#define BN4_V1_FIREMAN    0x90
+#define BN4_V1_THUNDERMAN 0x94
+#define BN4_V1_JUNKMAN    0xA4
+#define BN4_V1_AQUAMAN    0xA8
+#define BN4_V1_WOODMAN    0xAC
 #define BN4_NAVI_SPRITES  8           /* a Navi's BN4_ENEMY_KIND: its battle sprite in list 2, its BN4_ENEMY_FAMILY the number (GutsMan 2) */
+/* Their overworld sprites in list 6 (XRomLayout.sprite_lists), each at his mugshot's number in list 8 as BN5's and BN6's are:
+ * found by each one's colours against his battle sprite's (list 2, his record's BN4_ENEMY_FAMILY), the four mugshots named in
+ * docs/rom/bn4.md agreeing (docs/rom/bn4.md, Sprite lists) */
+#define BN4_OW_ROLL       0x41
+#define BN4_OW_GUTSMAN    0x42
+#define BN4_OW_WOODMAN    0x47
+#define BN4_OW_FIREMAN    0x4F
+#define BN4_OW_AQUAMAN    0x51
+#define BN4_OW_WINDMAN    0x54
+#define BN4_OW_THUNDERMAN 0x58
+#define BN4_OW_SEARCHMAN  0x59
+#define BN4_OW_JUNKMAN    0x5A
 #define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
 #define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
 #define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
