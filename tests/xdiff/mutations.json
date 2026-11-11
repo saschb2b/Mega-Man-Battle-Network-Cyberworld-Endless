@@ -2302,6 +2302,46 @@
    "what": "the Navis' stub for BN5_CLOUD_FIND_37 (XN_STUB_CLOUDS + 0x14: cmp r7,#0x37 against the dispatch's side table) made 0x36: no cloud found, a new cloud's panel chosen as if he had none (BN5_CLOUD_PANEL)"
   },
   {
+   "name": "GridMan's effect left at BN5's number",
+   "spec": "gridman_v1_keys",
+   "poke": [
+    "088853AC:2402"
+   ],
+   "what": "his copied routine's effect (BN5 0x080BCE70: movs r4,#2, its copy at XN_NEBULA_CODE + 0x43AC) left at BN5's 2 where the recipe makes it the Navis' 0xA2: BN6's own effect 2 is another sprite (gridman_v1_keys at t234)"
+  },
+  {
+   "name": "GridMan's object spawned as another of his",
+   "spec": "gridman_v1",
+   "poke": [
+    "088862A4:20C8"
+   ],
+   "what": "the 0xC6's spawner (BN5 0x080DF7B8: movs r0,#0xC6, its copy at XN_NEBULA_CODE + 0x52A4) made 0xC8: the dispatch runs his 0xC8's copy for it (gridman_v1 at t162)"
+  },
+  {
+   "name": "GridMan's attack's routine left at BN5's address",
+   "spec": "gridman_v1",
+   "poke": [
+    "088843E0:08101B61:4"
+   ],
+   "what": "the pool word his state stores in AttackVars +0x28 and later calls by bx (BN5 0x081012A0, 0x08101B61, its copy at XN_NEBULA_CODE + 0x33E0) left at BN5's address where the install aims it at his copy: BN6's own code there runs (gridman_v1 at t2)"
+  },
+  {
+   "name": "GridMan's object's sprite not renumbered",
+   "spec": "gridman_v1",
+   "poke": [
+    "08885930:2212"
+   ],
+   "what": "an object's sprite (BN5 0x080D8F4C: movs r2,#0x12, list 2's 0x12, his battle sprite, its copy at XN_NEBULA_CODE + 0x4930) left at BN5's number where the recipe makes it list 2's 0x32: list 2's 0x12 is BN6's own"
+  },
+  {
+   "name": "GridMan's object's parent's CurAction compare not renumbered",
+   "spec": "gridman_v1",
+   "poke": [
+    "088862E4:2108"
+   ],
+   "what": "the 0xC6's compare of its parent's CurAction (BN5 0x080DF7F8: movs r1,#8, BN6's 10, its copy at XN_NEBULA_CODE + 0x52E4) left at BN5's 8"
+  },
+  {
    "name": "Kilby's sound at the pool's second slot",
    "spec": "kilby_v1",
    "poke": [
@@ -3580,6 +3620,62 @@
     "080EB402:3770"
    ],
    "what": "the state's copy's adds r7,#0x70 (BN4 0x080EB402), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
+   "name": "SparkMan's kept CurAction off by one",
+   "spec": "sparkman_v1",
+   "poke": [
+    "080B784A:200B"
+   ],
+   "what": "a store of his +0x60 (BN4 0x080B784A: movs r0,#8, the recipe's CurAction 10, saved_actions), the CurAction his state 7 writes back at 0x080B7A62, made 11: his own state 9 run where BN4 runs his 8 (caught at t226)"
+  },
+  {
+   "name": "SparkMan's 0x22 spawned at his 0x20's number",
+   "spec": "sparkman_v1",
+   "poke": [
+    "080D1256:20D5"
+   ],
+   "what": "the spawn of his third kind 0x22 (BN4 0x080D1256: movs r0,#0x22, the recipe's dispatch number 0xD6) made 0xD5, his 0x20's: the dispatch runs another of his objects for it (caught at t727)"
+  },
+  {
+   "name": "SparkMan's sound 0x8C at the pool's fourth slot",
+   "spec": "sparkman_v1",
+   "poke": [
+    "080D0E04:20D0"
+   ],
+   "what": "his object's sound 0x8C (BN4 0x080D0E04: movs r0,#0x8c, the recipe's pool slot 0x32) made the pool's fourth slot, 0xD0: his 0xB9 where BN4 plays 0x8C (caught at t55, the family's sounds)"
+  },
+  {
+   "name": "BurnerMan's two flames in one slot",
+   "spec": "burnerman_v1",
+   "poke": [
+    "080BDA42:2160"
+   ],
+   "what": "his init's tail's second flame (BN4 0x080BDA42: movs r1,#0x68, its slot's word, run at his spawn's end: XnInit.tail) made 0x60, the first's: the two flames' words one (caught at t1)"
+  },
+  {
+   "name": "BurnerMan's 0x38's Navi CurAction compare BN4's",
+   "spec": "burnerman_v1",
+   "poke": [
+    "080D40BE:280A"
+   ],
+   "what": "his 0x38's test of his CurAction through its +0x4C (BN4 0x080D40BE: cmp r0,#0xa, the recipe's 0xC: NAVI_WORDS) left at BN4's 10: the object ends at once in BN6 (caught at t1154)"
+  },
+  {
+   "name": "BurnerMan's flames' region's element at BN4's +0x17",
+   "spec": "burnerman_v1",
+   "poke": [
+    "080D401E:75C1"
+   ],
+   "what": "his flames' collision region's element (BN4 0x080D401E: strb r1,[r0,#0x17], the recipe's +0x0E: SPAWN_WRAPPERS) left at BN4's +0x17: BN6's +0x17 another field, the region's element 0 (caught at t121)"
+  },
+  {
+   "name": "BurnerMan's sound 0xA8 at the pool's second slot",
+   "spec": "burnerman_v1",
+   "poke": [
+    "080D44BA:2033"
+   ],
+   "what": "his flame's sound 0xA8 (BN4 0x080D44BA: movs r0,#0xa8, the recipe's pool slot 0x32) made the pool's second slot, 0x33: his 0x14C where BN4 plays 0xA8 (caught at t123, the family's sounds)"
   }
  ]
 }

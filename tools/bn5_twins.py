@@ -412,6 +412,10 @@ TYPES = {
                                         "another object's); the Navis' copy, the first installed of those that spawn it (the "
                                         "Navi chips CloudMan's and SideBub's, Marina's water's records, ID_TABLES), fixes every "
                                         "kind's row by xchiprecipe.py's TABLE_SPRITES, so the chips and the families spawn it"),
+    (1, 0x18): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
+    (3, 0x94): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
+    (3, 0xC6): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
+    (3, 0xC8): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0x36): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x37): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x3D): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
@@ -542,7 +546,8 @@ TYPES = {
     (3, 0xB7): ('moved', None, 'chips', "the Navi chip BlizMan's snowball's trail: " + NO_TWIN),
     (1, 0x1F): ('moved', None, 'chips', "the Navi chip GridMan's GridMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
                                         "at a number of the chips' in list 2 (his Navi is not moved)"),
-    (4, 0x58): ('moved', None, 'chips', "the Navi chip GridMan's tackle's effect: " + NO_TWIN),
+    (4, 0x58): ('moved', None, 'navis', "GridMan's tackle's effect, and his Navi chip's: " + NO_TWIN + " (the Navis' copy, GridMan "
+                                        "installing before the chips: the chip spawns it)"),
     (1, 0x1D): ('moved', None, 'chips', "the Navi chip CosmoMan's CosmoMan: " + NO_TWIN + "; his battle sprite the Navis' "
                                         "(list 2's 0x2A)"),
     (4, 0x86): ('moved', None, 'chips', "the Navi chip CosmoMan's gate (spawned at 0x080EA3F2): " + NO_TWIN),
@@ -553,7 +558,8 @@ TYPES = {
     (1, 0x26): ('moved', None, 'chips', "the Program Advance CsmoPris's CosmoMan: " + NO_TWIN + "; his battle sprite the Navis' "
                                         "(list 2's 0x2A)"),
     (1, 0x25): ('moved', None, 'chips', "the Program Advance Football's GridMan: " + NO_TWIN + "; his battle sprite BN5's, copied"),
-    (3, 0x95): ('moved', None, 'chips', "the Program Advance Football's ball: " + NO_TWIN),
+    (3, 0x95): ('moved', None, 'navis', "GridMan's ball, and the Program Advance Football's: " + NO_TWIN + " (the Navis' copy, "
+                                        "GridMan installing before the chips: Football spawns it)"),
     (3, 0x99): ('moved', None, 'chips', "the Program Advance PileDrvr's object: " + NO_TWIN),
     (3, 0x9A): ('moved', None, 'chips', "the Program Advance PileDrvr's second object: " + NO_TWIN),
     (4, 0x6F): ('moved', None, 'chips', "the Program Advance PileDrvr's effect: BN6's twin of its spawner would spawn BN6's own 0x6F, "
