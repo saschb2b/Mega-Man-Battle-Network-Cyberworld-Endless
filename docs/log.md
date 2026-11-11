@@ -10,6 +10,7 @@
 * **Update**: multirom/bn4-chips.md (Repair moved, the first misc unit; RockCube a control; Counter and Marking next), rom/bn4.md (Its misc chips' code, new row), rom/chips-code.md (BN6's misc family and its routines grown, new row), devtools/chip-recipe-generator.md (a misc unit, `IMMS`), devtools/differential.md (two chips in one hand, a control spec).
 
 ## 2026-11-11
+* **Update**: multirom/navis.md (SearchMan moved, Team ProtoMan's third; his battle sprite's place), devtools/differential.md (a fourth-kind spawn's leftover), rom/navis.md (Team ProtoMan's SearchMan, new row), game/team-protoman.md (unit 4 built; its description and index line), multirom/index.md (navis.md's line).
 * **Update**: multirom/navis.md (GyroMan moved, Team ProtoMan's second; the shared art's third room and list 2's spill), rom/navis.md (Team ProtoMan's GyroMan, new row), game/team-protoman.md (unit 3 built; its description and index line), multirom/index.md (navis.md's line), devtools/differential.md (Team ProtoMan's art rooms read as moved), engine/emulation/memory.md and free-space.md (`FREE_TEAM_SHARED_MORE`).
 * **Update**: multirom/gaps.md (BN5's NaviCust programs: MegaVirs, GigaVirs and AutoRun stay cut, the owner's call).
 * **Update**: multirom/bn4-chips.md (ShotStar moved; the misc family's units next), rom/bn4.md (ShotStar's code, new row), devtools/chip-recipe-generator.md (a unit's copies: kinds' tables, sprites, effects, a type through a wrapper), devtools/differential.md (the trace's room for a freeze's songs).
