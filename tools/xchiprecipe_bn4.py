@@ -62,7 +62,7 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   # (the dark chips' units from the top down, 0xFF on, so the lines climbing from 0xD0 never meet them)
-                  0x1F: 0xFF}
+                  0x1F: 0xFF, 0x60: 0xFE}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -258,6 +258,7 @@ UNITS = (
     ('misc', 0x0C, 'Ligtnin'),
     ('support', (0x0B, 0x3B), 'Hole'),
     ('attack', 0x1F, 'DrkVulcn'),
+    ('attack', 0x60, 'Elem'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -290,6 +291,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x143: 0x242,                # (Ligtnin's bolt)
                # (the dark chips' from 0x283 up, after the panel changer's 0x280-0x282: docs/project/claims/bn4-dark-units.json)
                0xBB: 0x283,                 # (DrkVulcn's shots)
+               0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
@@ -300,6 +302,10 @@ SOUND_ADDS = {
                      why="the panel changer's sound as it sets its panels (0x080E4460-0x080E447A): none for its kinds 9 and 0xA "
                          "(Hole's, DrkLine's: beq past the call), 0x124 for 8 and 0xD (poison: movs r0,#0x25; adds r0,#0xff at "
                          "0x080E4476), 0x107 for the rest (movs r0,#8; adds r0,#0xff at 0x080E446A), DrkStage's Holes 0xC"),
+    0x080EE394: dict(sounds=(0xA8, 0x14C), add=0x1DD,
+                     why="the Elem chips' shot's sound (0x080EE386-0x080EE394): 0xA8 (movs r0,#0xa8 at 0x080EE386) where the "
+                         "state's +0xF lacks 4, 0x14C (movs r0,#0x4d; adds r0,#0xff at 0x080EE390) where it holds it; neither "
+                         "BN6's song, each copied at its number plus 0x1DD: 0x285 in the dark chips' range, 0x329 claimed beside it"),
 }
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
@@ -338,11 +344,12 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
-                         "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068)"),
+                         "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
+                         "its high byte from NaviStats +0x23)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "

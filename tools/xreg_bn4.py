@@ -81,6 +81,7 @@ MOVED.update({
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
     190: 0xFF,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
+    25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
 })
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
 
