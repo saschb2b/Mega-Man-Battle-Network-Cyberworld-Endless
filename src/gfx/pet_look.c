@@ -521,27 +521,50 @@ void look_text(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int al
 
 void look_text_cells(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int cell) { chat_text(x, y, s, c, shade, cell); }
 
-int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade) {
-	const int line = LOOK_LINE;
+/* the lines of `s` no wider than `at`'s width, up to its line `most`,
+ * those from its line `skip` drawn where `draw`: how many */
+static int wrap(const char *s, const LookLines *at, bool draw) {
+	const int line = LOOK_LINE, x = at->x, w = at->w, skip = at->skip, most = at->most;
+	const SDL_Color c = at->c, shade = at->shade;
 	char cur[96] = "";
-	int n = 0;
-	most = most < 6 ? most : 6;
+	int n = 0, y = at->y - skip * line;
+	draw = draw && skip < most;
 	for (const char *p = s; n < most;) {
 		while (*p == ' ') ++p;
 		size_t k = strcspn(p, " |");
 		char next[192];
 		snprintf(next, sizeof next, "%s%s%.*s", cur, *cur && k ? " " : "", (int)(k < 95 ? k : 95), p);
 		if (*cur && k && look_text_width(next) > w) {
-			look_text(x, y + n++ * line, cur, c, shade, TEXT_LEFT);
+			if (draw && n >= skip) look_text(x, y + n * line, cur, c, shade, TEXT_LEFT);
+			++n;
 			snprintf(cur, sizeof cur, "%.*s", (int)(k < 95 ? k : 95), p);
 		} else snprintf(cur, sizeof cur, "%.95s", next);
 		p += k;
 		if (*p == '|' || !*p) {
-			if ((*cur || *p == '|') && n < most) look_text(x, y + n++ * line, cur, c, shade, TEXT_LEFT);
+			if ((*cur || *p == '|') && n < most) {
+				if (draw && n >= skip) look_text(x, y + n * line, cur, c, shade, TEXT_LEFT);
+				++n;
+			}
 			*cur = 0;
 			if (!*p) break;
 			++p;
 		}
 	}
-	return y + n * line;
+	return n;
+}
+
+int look_wrapped(const char *s, int x, int y, int w, int most, SDL_Color c, SDL_Color shade) {
+	LookLines at = { x, y, w, 0, most < 6 ? most : 6, c, shade };
+	return y + wrap(s, &at, true) * LOOK_LINE;
+}
+
+int look_wrapped_lines(const char *s, int w) {
+	LookLines at = { 0, 0, w, 0, 64, LOOK_PAGE, LOOK_PAGE };
+	return wrap(s, &at, false);
+}
+
+void look_wrapped_from(const char *s, const LookLines *at) {
+	LookLines from = *at;
+	from.most = at->skip + at->most;
+	wrap(s, &from, true);
 }
