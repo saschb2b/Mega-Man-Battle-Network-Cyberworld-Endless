@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T09:00:00Z
-* **Update**: game/progression/encounter-groups.md (the statistics' event, `act-battles`: an act's own battles and its groups' apart), GUIDE.md (Anonymous statistics: the act's row).
