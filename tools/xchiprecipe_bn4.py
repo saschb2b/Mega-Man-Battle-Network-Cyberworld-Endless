@@ -290,16 +290,23 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     f.regions, f.regions_roots, f.moved4 = [], [], {}
     saved_copied = dict(bn4_twins.COPIED)
     if kind == 'support':
-        f.entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
-        hit = C.t4_of(b4, f.entry)
-        ty = shape_of(b4, b6, f, f.entry)
-        if ty is None or hit is None or hit[0] != ty:
-            f.decide('entry', f'its routine ({f.entry:08X}) does not lie in the region of the type it spawns')
-            return f
-        f.ty, (f.lo, f.hi) = ty, hit[1:]
-        f.regions, f.roots = [(f.lo, f.hi, ('4', ty))], [f.entry, f.lo]
-        f.moved4 = {ty: dict(lo=f.lo, hi=f.hi, routine=f.lo)}
-        f.notes.append(f'its fourth-kind {ty:#x} ({f.lo:08X}-{f.hi:08X}), which its routine ({f.entry:08X}) spawns: moved')
+        # (each subfamily's routine the common spawner of a fourth-kind type of its own, each type moved, what they share
+        # once: DrkStage's and Hole's objects both spawn the panel changer)
+        f.entries = [b4.u32(ROUTINES4 + 4 * x) & ~1 for x in subs]
+        f.entry, f.roots = f.entries[0], []
+        for e in f.entries:
+            hit = C.t4_of(b4, e)
+            ty = shape_of(b4, b6, f, e)
+            if ty is None or hit is None or hit[0] != ty:
+                f.decide('entry', f'its routine ({e:08X}) does not lie in the region of the type it spawns')
+                return f
+            lo, hi = hit[1:]
+            if e == f.entry:
+                f.ty, f.lo, f.hi = ty, lo, hi
+            f.regions.append((lo, hi, ('4', ty)))
+            f.roots += [e, lo]
+            f.moved4[ty] = dict(lo=lo, hi=hi, routine=lo)
+            f.notes.append(f'its fourth-kind {ty:#x} ({lo:08X}-{hi:08X}), which its routine ({e:08X}) spawns: moved')
     else:
         f.entry = b4.u32(MISC4 + 4 * sub) & ~1
         hit = X4.t3_of(b4, f.entry)
