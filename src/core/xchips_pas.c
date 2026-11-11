@@ -1,6 +1,6 @@
 /* xchips_pas.c: BN5's Program Advances of the chip registry (XREG_PA), their recipes as BN5's list has them (0x08028020),
- * in BN6's chip ids, written by tools/xchiprecipe.py from BN5's ROM and the registry (src/core/xchips_registry.c), for BN6's
- * list grown with them (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
+ * and BN6's own CrosOver from the registry's Django chips (BN6_PA_BORROWED), in BN6's chip ids, written by
+ * tools/xchiprecipe.py from BN5's ROM and the registry (src/core/xchips_registry.c), for BN6's list grown with them (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
 #include "xchips_pas.h"
 
 const XChipPa xchips_pas[] = {
@@ -14,6 +14,7 @@ const XChipPa xchips_pas[] = {
 	{ 0x08027E5C, 3, 4, 604, { 17, 17, 526, 0 } },   /* PileDrvr: GunDelS3 + GunDelS3 + Django{9f}; never formed: two GunDelS3 and Django's SP or DS: BN6's GunDelS3 is in N, Q and W, Django in D, so the Custom screen never lets the three be picked together; formed only where every chip is in * (the All * helper) */
 	{ 0x08027E66, 3, 4, 365, { 416, 416, 506, 0 } },   /* BigNoise: Pulsar3 + Pulsar3 + ShadeMn{9e} */
 	{ 0x08027E70, 3, 4, 365, { 416, 416, 507, 0 } },   /* BigNoise: Pulsar3 + Pulsar3 + ShadeMn{9f} */
+	{ 0x0802BAD0, 3, 4, 349, { 524, 525, 526, 0 } },   /* CrosOver: Django + Django{9e} + Django{9f}; BN6's own recipe, its parts a run's (BN6's Django 1-3 cut) */
 	{ 0x08027E8C, 3, 0, 356, { 204, 0, 0, 0 } },   /* SuprSpr1: 3 WideSht1 of codes in a row */
 	{ 0x08027E92, 3, 0, 357, { 205, 0, 0, 0 } },   /* SuprSpr2: 3 WideSht2 of codes in a row */
 	{ 0x08027E98, 3, 0, 358, { 206, 0, 0, 0 } },   /* SuprSpr3: 3 WideSht3 of codes in a row */
