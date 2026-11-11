@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "GutsMan's attack against BN6's engine located and named (src/emu/bn4_battle.h: BN4_CAMERA_SHAKE 0x08025FE0, its draws 0x0802600C and 0x08026032, BN4_SHAKE_TABLE 0x08026068, BN4_CAMERA_SHAKE_SET 0x0802608C, BN4_BATTLE_PLAYERS +0x44, BN4_SPAWN_DEBRIS 0x080E29F8, BN4_DEBRIS_INIT 0x080E2934, BN4_PANEL_FLAGS_LAST +8 and BN4_PANEL_FIELD_STEP 0x08009240; src/emu/bn6_panels.h: BN6_SPAWN_DEBRIS 0x080E23C0, BN6_DEBRIS_SPRITE 0x080E230A, BN6_PANEL_FIELD_STEP 0x0800BFC4, BN6_PANEL_FLAGS_LAST +0x18; docs/rom/bn4.md, GutsMan's attack against BN6's engine); the comparator's shake twins by word, the panel's field, sounds and the debris's own art; his rocks' player read made BN6's by the generator (battle_players); the attack's end's clear read (MegaMan's buster charge, inert on a Navi's AI data in BN6); five mutations of his port; the owner's call for sounds past 0xFF recorded."
+}

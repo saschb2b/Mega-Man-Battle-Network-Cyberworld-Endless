@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a Navi's state number not moved (ShadowMan)",
+  "spec": "shadowman_v1",
+  "poke": [
+   "08D95E8E:2007"
+  ],
+  "what": "ShadowMan's first decision's CurAction (BN5 0x080F94B6, BN6's copy at XN_CODE + 0x3C00 + 0x28E) left at BN5's 7 (BN6's bubbled state) where the recipe makes it 9"
+ },
+ {
+  "name": "a Navi's own battle sprite not renumbered",
+  "spec": "shadowman_v1",
+  "poke": [
+   "08D9682C:2208"
+  ],
+  "what": "ShadowMan's decoys' sprite (BN5 0x080B9498: movs r2,#8, list 2's ShadowMan in BN5, its copy at XN_CODE + 0x4800 + 0x2C) left at 8, BN6's list 2 number 8 another Navi, where the recipe makes it 0x21, his battle sprite's number in BN6's list 2 (xnavi_sprites.c)"
+ }
+]

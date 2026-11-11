@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's Liberation Missions",
+  "date": "2026-10-25",
+  "name": "A teammate's battle as MegaMan in his Soul",
+  "result": "On a dark board in the engine (--dev dark,souls=1 and 0x2B, BN5's ROM): the teammate's battle, his Soul's record written at OK's start (0x08029110) as UNITE's commit writes it with turns 0xFF, crossed MegaMan into ColonelSoul, ShadowSoul and ToadSoul as TURN 1 START! showed, his HP the teammate's (200, 350, 300) and kept after the battle; with --dev matehp=81 Colonel's deleting blow left 1 HP and ended the battle, Colonel off the board and MegaMan in play, the run going on.",
+  "meaning": "BN6's own cross at a turn's start carries a teammate's Soul from the first turn with no chip given; the Soul's life (soullife.c) keeps it for the whole battle where its turns are 0xFF.",
+  "link": "../game/liberation/building/stage-3-team.md"
+}

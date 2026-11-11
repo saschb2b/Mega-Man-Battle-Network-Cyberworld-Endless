@@ -1,0 +1,14 @@
+[
+ {
+  "name": "a charged shot's charge",
+  "spec": "soul_shadow",
+  "soulbreak": 16,
+  "what": "the grown charge times (SOULS_CHARGES) 10 frames longer than BN5's for each Soul's power attack: ShadowSoul's slash fires later"
+ },
+ {
+  "name": "ShadowSoul's passives left out",
+  "spec": "soul_shadow",
+  "soulbreak": 1024,
+  "what": "the proxy's passives' entry (BN6_FORM_PASSIVES' 8, soulpassive.c) runs none for a Soul where BN5's ready table 0x08011BA4 runs ShadowSoul's FloatShoe (0x08011C78): his collision's flags without it"
+ }
+]

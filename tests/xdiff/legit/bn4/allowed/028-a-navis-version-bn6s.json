@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's version, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x16",
+  "0x17"
+ ],
+ "why": "BN6's battle actor setup writes its enemy id's triple +0 (0x080182B4, r0 the id) at AI data +0x16 and +0x17 (0x0800771A-0x0800771E), which for a moved Navi's ids is its version (src/emu/xnavi_install.c ids_set: { v, 1, ai }): 0 for V1, so no V1 spec saw it; roll_v2 shows 1, roll_v3 2, roll_sp 3. BN6's code that reads it for a Navi: the actor init's palette (0x0800F334: BN6_NAVI_PALETTE_VERSIONS, 0x0800F354, its byte by the version times the step, 0 for versions 0-3, so V1's palette for every one) and the per-version table reads 0x0800FE12 and 0x0800FE36, which BN6's own Navis call and no call of a BN4 Navi's recipe names (src/emu/xnavi_bn4.c); a scan of BN6's ROM for ldrb at +0x16 or +0x17 within eight halfwords of a load from the object's +0x58 found those three engine routines and per-Navi and per-virus code past 0x0809E000 alone. BN4's +0x16 and +0x17 of a Navi's side's AI data (BN4_AI_OF_SIDE) stay 0, and Roll's code reads her AI data out of its blocks at +0x9-+0xB, +0x30 and +0x32 alone (tools/xnavirecipe_bn4.py's AI tracker), its blocks from +0x64: BN6's own"
+}

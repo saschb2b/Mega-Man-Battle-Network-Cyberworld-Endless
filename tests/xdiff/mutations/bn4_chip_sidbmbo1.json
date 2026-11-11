@@ -1,0 +1,18 @@
+[
+ {
+  "name": "SidBmbo1's row's power another",
+  "spec": "bn4_chip_sidbmbo1",
+  "poke": [
+   "08C0623E:0028"
+  ],
+  "what": "the registry's record of BN4's SidBmbo1 (571 at CHIPS_RECORDS) with power 40 where BN4's record holds 80: the Mettaur over the bamboo left 100 HP where BN4's leaves it 60"
+ },
+ {
+  "name": "SidBmbo's wait another",
+  "spec": "bn4_chip_sidbmbo1",
+  "poke": [
+   "088F17D8:2014"
+  ],
+  "what": "the wrapper of SidBmbo's unit's home (XC4_HOMES + 0x2400 + XC4_HOME_WAIT: its movs r0,#0x28 at +0x18, the frames BN4's misc run waits) with 0x14: MegaMan out of his misc state 20 frames before BN4's"
+ }
+]

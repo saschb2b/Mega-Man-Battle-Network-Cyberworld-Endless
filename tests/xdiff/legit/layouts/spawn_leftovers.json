@@ -1,0 +1,58 @@
+{
+ "why": "A word of an object of a moved type that the third kind's spawner takes from a register its caller never set (BN5's spawn keeps r1-r3 as +0x34, +0x38, +0x3C and r4 as +4, 0x080030DC-0x080030E6; BN6's the same): each game's engine leaves its own value there as it runs the Navi's state, BN5's its AI data's address, BN6's a small number. Neither the object's code nor the engine's routines it runs read the word, so the two are the same object: read as the rule names them, BN5's an AI data's start and BN6's the number `bn6`, and nothing else let through.",
+ "rules": [
+  {
+   "kind": "T3",
+   "type": "0x2F",
+   "word": "0x3C",
+   "bn6": "0x3",
+   "evidence": "BlizzardMan's slide's hit (the third kind's 0x2F, moved): his state at BN5 0x080FE646-0x080FE68C hands its spawner (0x080CA8FE: push {r0-r2,r5}; movs r0,#0x2F; bl 0x08003178) r3 untouched since his state began (0x0800D1C6 and 0x0800C6CA, called between, keep it), so its +0x3C is what each game's state dispatch left in r3 (BN5's 0x08017BD0 by 0x080F2348, BN6's 0x0801AF44 by 0x080F36A4): BN5's his AI data, BN6's 3 (blizzardman_v1 at t784). Its routines (0x080CA838-0x080CA91C) read and write no +0x3C-0x3F, nor do the engine's it calls (0x0800C69C, 0x08016126, 0x0800325C, 0x08016760, 0x08016C34, 0x08016B1A, 0x080167B0, 0x08016C04, 0x08008B6E, 0x08008A78, 0x0800C6CA, 0x0800B334, 0x08016B60, 0x08016B88, 0x080138EA, walked four calls deep); it draws no sprite."
+  },
+  {
+   "kind": "T3",
+   "type": "0x79",
+   "word": "0x4",
+   "compares": [
+    0
+   ],
+   "evidence": "CosmoMan's (the third kind's 0x79, moved): its spawner (0x080D56E0: push {r0,r1,r5}; movs r0,#0x79; bl 0x08003178; then strb r2,[r0,#4], its count of frames) is called from his routine 0x080FF9C0 (at 0x080FF9F4), which sets no r4 and calls only routines that keep it (0x080014A6, 0x0800DBAE, 0x08016C56), so the spawn's +4 word is what each game's state dispatch left in r4, a place in MegaMan's AI data (BN5's +0x74 region, BN6's +0x84: cosmoman_v1 at t39), its low byte then the count. Its routine (0x080D5634-0x080D56CC) reads and writes +4 alone, a byte (ldrb, subs, strb at 0x080D568C-0x080D5690), and no +5-+7; the engine's it calls (0x08016126, 0x0800325C, 0x08016760, 0x08016B90, 0x08016B1A, 0x080167B0, 0x08008B6E, 0x08016B88, walked four calls deep) read +4 and +5 only of its collision data (0x080167B4, 0x08016642), never of the object; it draws no sprite. The low byte is compared (compares: byte 0), the upper three are each engine's leftover."
+  },
+  {
+   "kind": "T3",
+   "type": "0x6C",
+   "word": "0x3C",
+   "compares": [
+    2,
+    3
+   ],
+   "evidence": "CosmoMan's (the third kind's 0x6C, moved): his routine at BN5 0x080FFE30-0x080FFE86 hands its spawner (0x080D3828: push {r0-r2,r5}; movs r0,#0x6C; bl 0x08003178) an r3 it never sets, the last writer an engine routine it calls (0x080090E8 at 0x080FFE44, or 0x08016C56 at 0x080FFE54; then 0x0800C6CA, his own 0x081002E0 and 0x0800C676, none writing r3), so the spawn's Z (+0x3C) is that leftover; the spawner then writes Z's upper half itself (movs r2,#0x10; strh r2,[r0,#0x3E]), 16 in both, and its low half stays each engine's (BN5 0x41D0, BN6 3: cosmoman_v1 at t438). Its code (0x080D3648-0x080D3962, its states 0x080D366C, 0x080D36EA and 0x080D3820 from its table 0x080D3660) reads no +0x3C-0x3F, and the engine's it calls read Z only at 0x0800C6B4 (0x0800C6AC: its place from X, Y and Z, whose panel routine 0x0800C658 reads X and Y alone, r2 unread), walked four calls deep. Z's upper half (bytes 2 and 3, the height a draw takes) is compared; its low half is each engine's leftover."
+  },
+  {
+   "kind": "T4",
+   "type": "0x5A",
+   "word": "0x3C",
+   "compares": [
+    2,
+    3
+   ],
+   "evidence": "SearchMan's (the fourth kind's 0x5A, moved): his state at BN5 0x080F5748-0x080F5752 loads r3 with his AI data's +0x2C (ldr r3,[r7,#0x2C], an object's address in each game's RAM) to read its row and column (+0x12, +0x13), then calls the 0x5A's spawner (0x080E7020: push {r0-r2,r5}; movs r0,#0x5A; bl 0x080031CC), the fourth kind's spawner, the third's (0x08003178) with kind 4: r1-r3 kept as +0x34, +0x38, +0x3C. So the 0x5A's Z (+0x3C) is that address; its init (0x080E6FA8) writes its upper half 0x10 (strh r0,[r5,#0x3E] at 0x080E6FB0) and its code counts it down (0x080E6FB4-0x080E6FB8), reading no +0x3C or its low half (its states 0x080E6FA9, 0x080E6FF9 from its table 0x080E6F98; the engine's routines it runs draw by Z's upper half). Its low half is each game's address's: seen in bn5_searchman_v1, _v1_keys and _sp at the 0x5A's first frame, BN5 0xB200, BN6 0xA9B0, its upper half 0x10 in both."
+  },
+  {
+   "kind": "T3",
+   "type": "0x6D",
+   "word": "0x3C",
+   "compares": [
+    2,
+    3
+   ],
+   "evidence": "CosmoMan's (the third kind's 0x6D, moved): its spawner (0x080D3964, spawned by the 0x6C) copies its parent's X, Y and Z (ldr r1,[r5,#0x3C]; str r1,[r0,#0x3C] at 0x080D397C-0x080D397E), so its Z is the 0x6C's, each engine's leftover in its low half as the 0x6C's rule above says. Its code (0x080D3898-0x080D3962, its states 0x080D38BC, 0x080D38F6 and 0x080D395C from its table 0x080D38B0) reads no +0x3C-0x3F, the engine's it calls only 0x0800C6AC's, as the 0x6C's (cosmoman_v1 at t438). Z's upper half is compared; its low half is each engine's leftover."
+  },
+  {
+   "kind": "T3",
+   "type": "0xC6",
+   "word": "0x3C",
+   "bn6": "0x3",
+   "evidence": "GridMan's (the third kind's 0xC6, moved): its spawner (0x080DF7B4: push {r0-r2,r5}; movs r0,#0xC6; bl 0x08003178) is called by his state at 0x08101414 and his copied routine at 0x080BCDEA, each setting r0-r2 and r4 alone before it (0x0810140C-0x08101412, 0x080BCDE2-0x080BCDE8; the engine's 0x08016B88 on the path not taken), so the spawn's +0x3C is what each game's state dispatch left in r3, as BlizzardMan's slide's hit's: BN5's his AI data, BN6's 3 (gridman_v1 at t162). Its routines (0x080DF714-0x080DF7B2 and its own 0x080DF7D2-0x080DF812) read and write no +0x3C-0x3F, nor do the engine's it calls (0x080186A8, 0x0800C69C, 0x08016126, 0x0800325C, 0x08016760, 0x08016C34, 0x08016B1A, 0x080167B0, 0x08016C04, 0x08008B6E, 0x08008A78, 0x0800C6CA, 0x08016B60, 0x08016B88, 0x0800B334, the set the 0x2F's rule walked four calls deep); it loads no sprite."
+  }
+ ]
+}

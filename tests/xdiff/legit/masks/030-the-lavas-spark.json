@@ -1,0 +1,31 @@
+{
+ "name": "the lava's spark",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "panels"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x04"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "sprite_offsets": [
+  "0x01-0x07",
+  "0x0A-0x14",
+  "0x16-0x37"
+ ],
+ "why": "Where lava cools under an object, the engine puts a spark over it (the fourth kind's type 4, the object at its +0x4C), the spark MegaMan's shots strike with: drawn from each game's own sprite list 5's 5, whose frames and their durations differ, and BN5's lives a frame longer. tools/xdiff_masks.py reads a spark over an actor as the panels' (BN6's engine's port of the lava, src/emu/xpanels.c, under test as a family is: its other differences fail the spec); its place (moved by a random number, the RNG compared) and its first frame are compared, what its sprite makes of them is not.",
+ "evidence": [
+  "the cooling: BN5 0x08016DE6-0x08016E06 (BN5_LAVA_STEP's end: the panel plain, its place, 0x080188DA, the spark, 0x080E09B4) / BN6 xpanels.c's stub at EMU_FREE + 0x4C0040 (BN6_SET_PANEL_TYPE, BN6_PANEL_COORDS, BN6_PLACE_JITTER, BN6_SPAWN_SPARK: 0x080E1C00, the same bytes as BN5's)",
+  "field_lava_76: CanGard on lava as the battle opens, its spark's sprite state (+0x80 on) apart from t1 (its frames' pointers 18540 bytes into BN5's sprite, 17936 into BN6's) and gone from BN6's at t17, from BN5's at t18",
+  "the spark's sprite: BN5 0x0837D994, BN6 0x083A0320 (the hit spark's life, above)"
+ ]
+}

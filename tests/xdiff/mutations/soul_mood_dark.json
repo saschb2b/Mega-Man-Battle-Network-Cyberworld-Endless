@@ -1,0 +1,14 @@
+[
+ {
+  "name": "no DarkChip dealt into a worried hand",
+  "spec": "soul_mood_dark",
+  "soulbreak": 33554432,
+  "what": "BN5's worried rule (0x08025118) left out of the compaction's hook: DarkCirc stays shelved, the second hand all Cannon, the cursor on the first"
+ },
+ {
+  "name": "a BN5 DarkChip used leaves him as he was",
+  "spec": "soul_mood_dark",
+  "soulbreak": 67108864,
+  "what": "the chip's use (soulmood_chip_used) leaves the mood where BN5's 0x0801007C sets it 0: DarkCirc used, his mood still worried"
+ }
+]

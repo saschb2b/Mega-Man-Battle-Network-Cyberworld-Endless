@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the Dark Soul's record of a chip another approach",
+  "spec": "darksoul_cannon",
+  "poke": [
+   "08DFA039:01:1"
+  ],
+  "what": "the Dark Soul's record of the Cannon (XN_DARK_RECORDS + 1 * 0x2C + 0xD) naming approach 1 (Thunder's) where BN5's 0: its approach's state at t264"
+ }
+]

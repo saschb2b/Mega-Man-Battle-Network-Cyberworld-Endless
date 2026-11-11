@@ -1,0 +1,8 @@
+{
+ "bn4": "0xB0",
+ "bn6": "0x2C0",
+ "clock": "state",
+ "navi_chips": true,
+ "what": "a Navi chip's Navi as he appears",
+ "why": "Played by the chip's own Navi's first state (GutsMan's, BN4's first kind 0x14: movs r0,#0xb0 at 0x080B9A3C, its bl to PlaySoundEffect at 0x080B9A3E), moved as a unit of kind navi (src/emu/xchips_bn4.c): BN6 has no song of BN4's 0xB0 (tools/xrecipe_bn4.py song_sig over BN6's 474), so it is copied into the grown song table's slot 0x2C0, the first of the Navi chips' range (tools/xchiprecipe_bn4.py SOUND_SLOTS, src/audio/xsong.c XSOUNDS), and the copy's call goes through a shim that names the slot (the hooks' sound event from the unit's home, BN4's place 0x080B9A42). In a spec whose folder plays a moved Navi chip alone, over the invisibility's row above (BN4's 0xB0 there BN6's own 0x94, another routine's). bn4_chip_gutsman at t34"
+}

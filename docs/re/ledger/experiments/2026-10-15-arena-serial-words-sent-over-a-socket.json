@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-15",
+  "name": "Serial words sent over a socket",
+  "result": "Completes at no delay; at 50, 100 and 150 ms only 95, 48 and 35 battle frames in a minute.",
+  "meaning": "The cable cannot be split across the network.",
+  "link": "../online/link.md"
+}

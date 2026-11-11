@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's virus families in BN6's engine",
+  "date": "2026-11-04",
+  "name": "The families' sounds as BN4's own",
+  "result": "python3 tools/mp2k_verify.py x1/BC ... x1/F9: each of the 12 copies (xsong_pack) played by BN6's sound engine in romlab beside BN4 playing its song, both on the music player, 900 frames: every part of the engine's state the same every frame and the PSG's registers the same, PASS for all 12 (each heard: its track playing 13 to 61 frames in both, 0xF9's two). The BN4 specs' traces: every copied sound begun on BN4's player at BN4's frame (the spec's lag 1), elmperor_v2's 0x9D at t515 on player 9 beside the gauge's 0x8F on player 0; billy_v1-v3 and walla_v1-v3 PASS, no sound line left in Shrimpy's, Walla's, Elmperor's or CirKill's v1-v3 but cirkill_v3's 0x82/0x84 at t1107 (no family's). Mutation: Walla's 0xB7 aimed back at BN6's own number, caught at t3 (174 of 174).",
+  "meaning": "A family's sound plays as BN4 plays it, on BN4's player, so the Custom gauge's sound on player 0 no longer silences Elmperor's strike; the copies' bytes come from the player's ROM at install, none in the repository.",
+  "link": "../multirom/bn4.md"
+}

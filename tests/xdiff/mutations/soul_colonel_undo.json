@@ -1,0 +1,8 @@
+[
+ {
+  "name": "B leaves the button's chip in it",
+  "spec": "soul_colonel_undo",
+  "soulbreak": 8192,
+  "what": "B on the chips (src/emu/soulcolonel.c's undo) runs BN6's B alone where BN5's 0x08024CEA gives the button's chip back first: the Cannon stays in the button, OK commits it (the block's +0x14 1 where BN5's is none) and MegaMan holds no chip at t700"
+ }
+]

@@ -1,0 +1,18 @@
+[
+ {
+  "name": "an immediate, BomBoy's",
+  "spec": "bomboy_v1",
+  "poke": [
+   "081085CC:2009"
+  ],
+  "what": "the CurAction it gives setAttack0 left at BN5's 0x9 where the recipe makes it 0xb (BN6's two status states before a family's own)"
+ },
+ {
+  "name": "a rebased call, BomBoy's",
+  "spec": "bomboy_v1",
+  "call": [
+   "08011680:0810A953"
+  ],
+  "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+ }
+]

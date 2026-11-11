@@ -1,0 +1,92 @@
+{
+ "why": "A chip id: BN5's by the chip registry's rows (src/core/xchips_registry.c: a chip both games name alike BN6's id, BN5's other chips the ids of their own), read from the source the game is built from, as BN6's engine has them in its tables (docs/multirom/chip-registry.md). Translated where an object keeps one: a battle object's chip (+0x2A, BN6_T1_CHIP, the chip it uses next, u16, 0xFFFF none: written as the hand deals it to MegaMan and as a virus picks its own) (a virus's held chip picked, or its own code's: Zomon's AreaGrab), and the AI data's places below (its AttackVars +0x14, the chip used, written by the chip's use, BN5 0x0800FF68 / BN6 0x08012824, and by a virus's chip writer, BN5 0x0800FE7C / BN6 0x080126F6: strh r0,[r7,#0x14], r7 the AI data + 0xA0). A virus's CurAction from 0x10 that is the family the chip writer returned for its chip (the record's +0x0B, BN5 0x0800FEBA / BN6 0x0801273A, for setAttack0) is read as BN6's family of BN6's chip (tools/xdiff_snap.py, chip_action): the same chip in each game's own numbers. And where a support chip's routine keeps it: its object's +0x30 (r7 as the support family calls the routine: the chip used, its AttackVars +6 above it; BN5 0x080EC416 / BN6 0x080ED0F8), by the object's type (t4: the fourth kind's). The support chips' objects keep it so: each spawned by its support routine with r7 the chip (and AttackVars +6 above it), stored at +0x30 (MetaGel's 0x21, Blinder's 0x23, Jealousy's 0x36, NrthWind's 0x39, BoyBomb's 0x67, RainyDay's 0x75, BlakWing's 0x54, HolyDrem's 0x59, HotBody's 0x57, the Anti chips' setter 0x2A and its counter 0x2B (spawned by BN5 0x080E38E2 as its trap springs), DarkCirc's 0x5E and DrkSonic's 0x4A (chip_darkcirc, chip_drksonic: 0xBB and 0xC6 there in BN5's, BN6's ids 0xD6 and 0xDC), RockCube's 0x37 (BN5's chip 99, BN6's 143: BN5 0x080E47CE / BN6 0x080E59F6, twins) and Poltrgst's 0x72 (BN5 0x080E8DC2, moved: chip_poltrgst, 213 in BN5's, the registry's 292 in BN6's): their routines BN5 0x080E2F84, 0x080E3228, 0x080E4628, 0x080E493C, 0x080E816E, 0x080E91EE, 0x080E6AB4, 0x080E6F60 HotBody's family 0x080F0222 and the Anti chips' 0x080E380A (0x080E3828), each str r7,[r0,#0x30]); and the third kind's: the Anti chips' trap 0x4D, its setter's chip passed on (BN5 0x080CF7F4: str r7,[r0,#0x30]). A virus's support chip (its held chip's family 0x15 by the chip writer, Zomon's AreaGrab) runs BN5's support family's timing in BN6's engine as family 0x65 (src/emu/xvirus_dispatch.c's XV_SUPPORT: BN6's 0x15 run twice in one frame, the attack ending in its routine's frame as BN5's 0x080EC448 ends it; the families' calls to BN5's chip writer, 0x0800FE6A, aimed at XV_CHIP_WRITER, which gives 0x65 for 0x15): its CurAction BN5's 0x15 read as 0x65 (virus_support), MegaMan's and a Navi's own 0x15 BN6's (tools/xdiff_snap.py, chip_action).",
+ "registry": "src/core/xchips_registry.c",
+ "evidence": [
+  "DarkInvs's object (BN5's fourth kind's 0x18, spawned by its support routine 0x080E2420: str r7,[r0,#0x30], the chip used) keeps its chip at +0x30 as the support objects of BN6's do (chip_darkinvs: BN5's 189, BN6's 289)",
+  "zomon_v1 t1: Zomon's +0x2A 0x75 in BN5's (its set-up's movs r0,#0x75; strh r0,[r5,#0x2A], BN5 0x08108932-0x08108934: chip 117, AreaGrab) and 0xA3 in BN6's (163, AreaGrab: the registry's row 117 to 163, SAME); t390 its AttackVars +0x14 the same chip, its CurAction the chip's family 0x15 by each game's record (BN5 0x0801E210 + 0x2C x 117, BN6 0x08021DA8 + 0x2C x 163, +0x0B 0x15 in both)",
+  "PileDrvr's object (BN5's fourth kind's 0x6F, spawned by its support routine 0x080E8994: str r7,[r0,#0x30] at 0x080E89B2, the chip used) keeps its chip at +0x30 as DarkInvs's does (pa_piledrvr t33: BN5's 349, the registry's 604)",
+  "zomon_v1: setAttack 0x15 in BN5 and 0x65 in BN6 at t390, Zomon's state back in both at t391 (BN6's 0x15 alone ended it at t392); BN5 0x080EC400-0x080EC448, BN6 0x080ED0DC-0x080ED130 (phase 1: 0x08011714)"
+ ],
+ "places": {
+  "ai": [
+   "0xB4"
+  ],
+  "t4": {
+   "0x18": [
+    "0x30"
+   ],
+   "0x6F": [
+    "0x30"
+   ],
+   "0x03": [
+    "0x30"
+   ],
+   "0x1D": [
+    "0x30"
+   ],
+   "0x21": [
+    "0x30"
+   ],
+   "0x23": [
+    "0x30"
+   ],
+   "0x36": [
+    "0x30"
+   ],
+   "0x39": [
+    "0x30"
+   ],
+   "0x67": [
+    "0x30"
+   ],
+   "0x75": [
+    "0x30"
+   ],
+   "0x54": [
+    "0x30"
+   ],
+   "0x59": [
+    "0x30"
+   ],
+   "0x57": [
+    "0x30"
+   ],
+   "0x2A": [
+    "0x30"
+   ],
+   "0x2B": [
+    "0x30"
+   ],
+   "0x5E": [
+    "0x30"
+   ],
+   "0x4A": [
+    "0x30"
+   ],
+   "0x10": [
+    "0x30"
+   ],
+   "0x37": [
+    "0x30"
+   ],
+   "0x72": [
+    "0x30"
+   ]
+  },
+  "t3": {
+   "0x4D": [
+    "0x30"
+   ]
+  }
+ },
+ "subs": {
+  "t4": {
+   "0x10": [
+    "0x19",
+    "0x3C"
+   ]
+  }
+ },
+ "subs_why": "Where an object keeps its chip's subfamily beside the chip (subs, by the object's type: the bytes, a word's low byte, that hold it), BN5's is read as BN6's of BN6's chip (behaviour6: its record's, or the moved code's entry), where it is BN5's record's (+0x0C). The Navi chip's object, the fourth kind's 0x10, spawned by the Navi family's routine (BN5's family 0x41 at 0x080EC458, BN6's 0x1B at 0x080ED690, the same steps) through its spawner (BN5 0x080E1AC0, BN6 0x080E2C6C): the AttackVars' subfamily (+3) its +0x3C, the spawner's ldr r1,[r0,#0x3c]; strb r1,[r0,#0x19] (BN5 0x080E1AEC-0x080E1AEE) its +0x19 too, and the chip (+0x14, +6 above it) its +0x30; a Navi chip moved as BN5's Navi routine S runs as BN6's 0x1D + S (chip_numbrman: 0 as 0x1D, chip_shadoman 0xB as 0x28, at t33)",
+ "virus_support": "0x65"
+}

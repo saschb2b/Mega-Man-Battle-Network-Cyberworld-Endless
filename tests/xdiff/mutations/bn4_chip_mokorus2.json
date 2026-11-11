@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the Moko's hit's bits BN4's",
+  "spec": "bn4_chip_mokorus2",
+  "poke": [
+   "080D23E0:2321"
+  ],
+  "what": "the Moko's init's copy (its movs r3 before the collision setup at BN4 0x080D23E0) with BN4's own bits 0x21 where the recipe gives BN6's 0x61: BN6's struck pass pushes the Mettaur back without striking it, which goes on with its attack where BN4's is struck out of it"
+ },
+ {
+  "name": "the Mokos' delay another",
+  "spec": "bn4_chip_mokorus2",
+  "poke": [
+   "080D2554:2205"
+  ],
+  "what": "the chip's routine's copy (its movs r2,#0xa at BN4 0x080D2554, the frames between one Moko and the next) with 5: the second and third Mokos set off 5 and 10 frames after the first where BN4's set off 10 and 20 after"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "SparkMan's kept CurAction off by one",
+  "spec": "sparkman_v1",
+  "poke": [
+   "080B784A:200B"
+  ],
+  "what": "a store of his +0x60 (BN4 0x080B784A: movs r0,#8, the recipe's CurAction 10, saved_actions), the CurAction his state 7 writes back at 0x080B7A62, made 11: his own state 9 run where BN4 runs his 8 (caught at t226)"
+ },
+ {
+  "name": "SparkMan's 0x22 spawned at his 0x20's number",
+  "spec": "sparkman_v1",
+  "poke": [
+   "080D1256:20D5"
+  ],
+  "what": "the spawn of his third kind 0x22 (BN4 0x080D1256: movs r0,#0x22, the recipe's dispatch number 0xD6) made 0xD5, his 0x20's: the dispatch runs another of his objects for it (caught at t727)"
+ },
+ {
+  "name": "SparkMan's sound 0x8C at the pool's fourth slot",
+  "spec": "sparkman_v1",
+  "poke": [
+   "080D0E04:20D0"
+  ],
+  "what": "his object's sound 0x8C (BN4 0x080D0E04: movs r0,#0x8c, the recipe's pool slot 0x32) made the pool's fourth slot, 0xD0: his 0xB9 where BN4 plays 0x8C (caught at t55, the family's sounds)"
+ }
+]

@@ -1,0 +1,13 @@
+{
+ "name": "WindMan's wind's spawn's r3, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x41",
+  "word": "0x3C",
+  "bn4": [
+   "battle state"
+  ],
+  "bn6": "0x3"
+ },
+ "why": "The fourth kind's spawn (BN4 0x08003344, BN6 0x080033AC, through 0x08003210 / 0x08003278) keeps the caller's r1 to r3 at the object's +0x34 to +0x3C, as the third kind's does (GutsMan's attack's spawn's r3, above). WindMan's wind is spawned by BN4_WIND_SPAWN (0x080E68F8; BN6's twin 0x080E666C, the port's call) from his decision (0x080C336C) and from his attack, MegaMan's state 64 of BN4 (0x080F0BF4-0x080F0C08: the old wind ended through 0x080E69BC, which writes r1 alone, then r4 0 and the spawn); the slot's reader before the spawn (0x080E69E8 / 0x080E677C) sets r0 to r2, so +0x3C holds the r3 the state was run with: in BN4 the battle state's pointer, in BN6 3 (windman_v1's second wind, t103 in BN4 and t104 in BN6, as GutsMan's attack's). No code of the wind reads its own +0x3C: its routine and states (BN4 0x080E6820-0x080E6A20, BN6 0x080E6584-0x080E67A0) and the routines they call, two calls deep, hold no load of [r5,#0x3c] (BN6's 0x080E65C8 reads its spawner's collision data's +0x3C)"
+}

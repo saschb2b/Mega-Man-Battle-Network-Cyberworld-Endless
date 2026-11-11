@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a Program Advance's moved routine's entry",
+  "spec": "pa_bignoise",
+  "poke": [
+   "08E008C4:08E00C05:4"
+  ],
+  "what": "the grown Navi routines' entry 0X31 (XC_NAVI + 0xc4) left at their stub (XC_STUBS + 4) where the install points it at BigNoise's moved routine (BN5's Navi routine 0X14): the Program Advance formed, nothing played"
+ }
+]

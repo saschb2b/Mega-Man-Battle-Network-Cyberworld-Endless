@@ -1,0 +1,13 @@
+{
+ "bn4": "0x14D",
+ "bn6": "0x63",
+ "clock": "state",
+ "foes": [
+  "0xB8",
+  "0xB9",
+  "0xBA",
+  "0xBB"
+ ],
+ "what": "BurnerMan's sound 0x14D, its copy",
+ "why": "Played by his own state: movs r0,#0x4e and adds r0,#0xff at 0x080BE028, its bl at 0x080BE02C; BN6: the recipe's movs r0,#0x63 and adds r0,#0 there, its bl through its veneer to BN6's, a state's: BN4's song 0x14D copied into the pool's third slot, 0x63 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11). His ids alone (\"foes\"): the pool's slots are another Navi's sounds in his battles, so the copy is told by its slot"
+}

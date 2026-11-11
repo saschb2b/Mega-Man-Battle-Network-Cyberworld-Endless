@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Poltrgst's wait",
+  "spec": "chip_poltrgst",
+  "poke5": [
+   "080E8F18:201F"
+  ],
+  "what": "the moved Poltrgst's movs r0,#0x1E (BN5's 0x080E8F18, its object's wait) 0x1F at its copy: the obstacles thrown a frame after BN5's"
+ }
+]

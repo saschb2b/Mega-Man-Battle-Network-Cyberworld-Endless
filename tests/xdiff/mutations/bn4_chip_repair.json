@@ -1,0 +1,42 @@
+[
+ {
+  "name": "Repair's row's subfamily another",
+  "spec": "bn4_chip_repair",
+  "poke": [
+   "08C05FC8:8C:1"
+  ],
+  "what": "the registry's record of BN4's Repair (557 at CHIPS_RECORDS) naming BN6's grown misc routine 0x8C, a routine that does nothing, where the row gives it the unit's 0x8B: the cube left at 190 HP"
+ },
+ {
+  "name": "Repair's row's family another",
+  "spec": "bn4_chip_repair",
+  "poke": [
+   "08C05FC7:15:1"
+  ],
+  "what": "the registry's record of BN4's Repair naming BN6's support family 0x15 where a chip of BN4's misc family takes BN6's 0x1C: MegaMan in the support family's pose, its routine 0x8B a stub, the cube not repaired"
+ },
+ {
+  "name": "Repair's obstacles read at BN4's place",
+  "spec": "bn4_chip_repair",
+  "poke": [
+   "0800C728:3068"
+  ],
+  "what": "Repair's routine's copy reading the side's obstacles at the battle state's +0x68, BN4's place (adds r0,#0x68 at BN4 0x0800C728), where the recipe gives BN6's +0xA0"
+ },
+ {
+  "name": "Repair's HP from the HP itself",
+  "spec": "bn4_chip_repair",
+  "poke": [
+   "0800C73E:8C81"
+  ],
+  "what": "Repair's routine's copy storing the obstacle's HP back into itself (ldrh r1,[r0,#0x26] at BN4 0x0800C73E made #0x24) where BN4's gives it its full HP: the cube left at 190"
+ },
+ {
+  "name": "Repair's sound another",
+  "spec": "bn4_chip_repair",
+  "poke": [
+   "0800C74C:203A"
+  ],
+  "what": "Repair's routine's copy playing slot 0x3A, BN4's 0x70, where the recipe gives its 0x9A's slot 0x39"
+ }
+]

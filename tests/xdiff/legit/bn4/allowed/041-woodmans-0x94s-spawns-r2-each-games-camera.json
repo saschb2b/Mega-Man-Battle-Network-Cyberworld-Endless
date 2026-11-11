@@ -1,0 +1,17 @@
+{
+ "name": "WoodMan's 0x94's spawn's r2, each game's camera",
+ "spawn_leftover": {
+  "kind": "T3",
+  "type": "0x94",
+  "word": "0x38",
+  "bn4": [
+   "raw",
+   33596288
+  ],
+  "bn6": [
+   "raw",
+   33593728
+  ]
+ },
+ "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r1, r2 and r3 at the object's +0x34, +0x38 and +0x3C, as BN6's twin through the dispatch's spawner does; WoodMan's spawner of his 0x94 (0x080DFA38: push {lr}; push {r5}; movs r0,#0x94; the spawn) sets r0 alone, and its one caller, his state 106 (MegaMan's in BN4, copied with him: its bl at 0x080F4D3C), calls the camera's shake set just before it (0x080F4D2A, BN4_CAMERA_SHAKE_SET 0x0802608C, BN6's 0x080302A8 the same body: mov r2,r10; ldr r2,[r2,#0xc], its stores), so +0x38 holds each game's camera, [r10 +0xC]: 0x02009B80 in BN4, 0x02009180 in BN6. No code 0x94 runs reads its +0x34 to +0x3F: its block (0x080DF9B0-0x080DFA78, its type routine, states and spawner of 0x95) walked for a load of them finds none, and its calls (GetRNG 0x08001B16, the pause test 0x08007A12, the after-step 0x080143FC, 0x080DFA64 and the 0x95 spawner 0x080DFCA4) read its +4, +0x16, +0x17, +0x2C and +0x4C alone (the loads of +0x34 and +0x38 at 0x080DFBC6-0x080DFD18 are 0x95's own states', on a 0x95). This word alone, on that object; woodman_v1 at t43"
+}

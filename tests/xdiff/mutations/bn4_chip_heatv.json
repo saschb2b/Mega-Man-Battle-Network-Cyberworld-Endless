@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the heat shot's wait another",
+  "spec": "bn4_chip_heatv",
+  "poke": [
+   "080EC819:14:1"
+  ],
+  "what": "the spread state's copy's waits by subfamily (BN4 0x080EC818) with subfamily 1's 20 frames where BN4's holds 10: the shot made ten frames later"
+ },
+ {
+  "name": "Heat-V's row's family another",
+  "spec": "bn4_chip_heatv",
+  "poke": [
+   "08C06547:D1:1"
+  ],
+  "what": "the registry's record of BN4's Heat-V (589) naming BN6's grown attack family 0xD1, which holds the grown table's stub, where the row gives it the unit's 0xD0: his attack ended at once, no shot"
+ }
+]

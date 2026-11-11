@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a charged chip not doubled",
+  "spec": "soul_toad_charge",
+  "soulbreak": 131072,
+  "what": "the charged chip's bonus (BN6_CHARGE_BONUS) none for ToadSoul where BN5's 0x080103C8 doubles it: its damage the record's"
+ }
+]

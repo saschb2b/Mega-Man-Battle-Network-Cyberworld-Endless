@@ -1,0 +1,9 @@
+{
+ "why": "The companion overlay's kind (+4 of the first kind's type 0x56, BN6_OVERLAY_*: its masks and sprite by it): BN5's kinds BN6 lacks as their Navi's own past BN6's 19 (src/emu/xnavi_recipe.h, XN_KIND_OF): KnightMan's 1 as 23, Colonel's 3 as 19, Team ProtoMan's NapalmMan's 4 as 33 (his seat's, 0x21) and GyroMan's 0 as 31 (0x1F; no Navi of Team Colonel's spawns kind 0: BN5's 0x0800EE46 alone of the companions calls the spawner with it).",
+ "bn5_to_bn6": {
+  "1": "23",
+  "3": "19",
+  "4": "33",
+  "0": "31"
+ }
+}

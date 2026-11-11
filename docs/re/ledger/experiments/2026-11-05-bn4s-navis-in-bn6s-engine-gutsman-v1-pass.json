@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "gutsman_v1 PASS",
+  "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): PASS over every frame, its recorded verdict removed. Root causes one at a time: t266 the camera's shake (each game's draws from its own RNG word: paired as BN5's, legit.json's bn4 rng_twins with their word), then a cracked panel's flags of the last frame (BN4 +8, BN6 +0x18: mapped in the trace's layout; romlab's store watch on BN4's panels showed 0x0800927E the one writer), then the panel crack's sound and his pool's (paired), t295 his rocks' read of the other side's player (BN4's battle state +0x44, BN6's +0xD0 a side: the generator's battle_players, the port's), a moved sprite's pointer read by the nearest start (list 4's 0x0D's room reaching 0x0E), t361 the rocks' debris (the fourth kind's 0x09, each engine's own art: allowed on its sprite state). The 18 BN4 family specs, the three BN4 controls, cangard_v1 and handi_v1 PASS; python3 tools/xdiff.py --mutations: 186 of 186 caught, five of GutsMan's new (a CurAction t1, his AI block t1, a sound slot t267, the collision argument t1, the rocks' player read t295).",
+  "meaning": "GutsMan V1's whole battle runs frame for frame as BN4's in BN6's engine; the BN4 Navi pipeline (recipe, install, sound pool, comparator) is proven on its first Navi, the base for the other seventeen.",
+  "link": "../multirom/bn4-navis.md"
+}

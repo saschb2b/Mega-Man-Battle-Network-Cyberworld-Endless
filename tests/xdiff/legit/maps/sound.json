@@ -1,0 +1,9 @@
+{
+ "why": "A sound is compared by its song number: the music player it plays on is its song table entry's, each game's own (song 0x6A, MegaMan's buster's, is BN5's player 22 and BN6's player 0; the reticle's 0xAE player 4 in both). A song each game plays on another player (players_apart: 0x6A, the buster's, which BN5 plays for MegaMan's buster and the Navis' alike and BN6 for MegaMan's, the Dark Soul's taking BN6's: tools/bn5_navi_twins.py, SOUNDS_AS_BN6) begins or not as its own player there is free (BN5's player 22 busy with MegaMan's charged shot's 0x6B, BN6's player 0 free): asked for in both games in a frame (their sound events, which are compared as the family's calls), it is left out of the songs begun. A copy of BN5's sound in one of BN6's empty slots (src/audio/xsong.c: the families' packed into their own room and noted, the Navis' copied there, one slot a sound whichever track copies it) is read by BN5's number in BN6's trace (xsong_copy_of), so the copy is BN5's song; in a spec whose foe is a moved Navi, BN6's own song of a number a copied sound of BN5's has (0x70, 0xB7, ...) carries bit 16 and is never read as BN5's (a Navi's code plays every sound of its from the copy); in a family's, BN6's own song of the number is the engine's, a twin of BN5's routine playing each game's own by its number (0x70, which Bugtank's thrown bomb and MetFire's fire column play from their state routines' twins, BN5 0x080C93B8 / BN6 0x080CA1B6 and BN5 0x080D0DB0 / BN6 0x080D0D88, called through their jump tables: bugtank_v1 t178, metfire_v1 t169; each game's song of the number differs). The Souls' sounds go the same way (tools/xsoul.py's SONG_SLOTS: BN5's 0x70 at 0x5F, 0x117 at 0x5E, 0x115 at 0x5A, src/emu/soulpower.c through xsong_install_at), read by BN5's number.",
+ "evidence": [
+  "the song tables: BN5 0x08155BF4, BN6 0x08159F48 (RomLayout.song_table), 8 bytes a song: its header, its player"
+ ],
+ "players_apart": [
+  "0x6A"
+ ]
+}

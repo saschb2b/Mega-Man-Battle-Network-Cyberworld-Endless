@@ -1,0 +1,22 @@
+{
+ "name": "a chip's object at MegaMan's centre",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T3"
+ ],
+ "types": [
+  "0xB8"
+ ],
+ "offsets": [
+  "0x34-0x37"
+ ],
+ "why": "CusVolt's volt (the third kind's 0xB8, BN5's code in both) stands each frame 40 pixels ahead of MegaMan at his centre, the point of his sprite BN5 numbers 0x1A and BN6 0x1B (tools/xchiprecipe.py, POINTS: BN6's 0x1A another): an offset each game takes from its own rows by his NameID (BN5 0x08015140, BN6 0x08018810), BN6's 2 pixels further right, as every point of his (the mask 'MegaMan's charge glow's place'). Its height (+0x38-0x3F) and its panel (+0x12, +0x13), which its strike reads, stay compared.",
+ "evidence": [
+  "its place: BN5 0x080DD56A-0x080DD5A0 (MegaMan's +0x34-0x3F, 40 pixels ahead, then point 0x1A's offset by his +0x28 added to x and z)",
+  "MegaMan's first row: BN5 0x080151C4 point 0x1A (0, 18), BN6 0x080188C0 point 0x1B (2, 18), point 0x00 (0, 0) against (2, 0)",
+  "chip_cusvolt1: the volt's x -20 in BN5's, -18 in BN6's from t38, its panel 3 in both"
+ ]
+}

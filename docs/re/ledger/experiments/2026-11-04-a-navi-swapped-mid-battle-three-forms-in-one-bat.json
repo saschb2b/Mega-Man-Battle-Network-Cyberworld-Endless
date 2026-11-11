@@ -1,0 +1,8 @@
+{
+  "feature": "A Navi swapped mid-battle",
+  "date": "2026-11-04",
+  "name": "Three forms in one battle, and two mutations",
+  "result": "build.py shot --scene emu --dev god,onehit,quiet with the autopilot and the swap step: HeatMan V1, ElecMan V1, SlashMan V1 over seeds 15, 3, 7 and 21; EraseMan, SpoutMan, BlastMan (seed 40); ProtoMan, CircusMan, ElementMan (seed 9); and 30 HP a form without onehit (seed 15): every run reached the third form and was won (the battle loop's phase 0x0C), the counts 1 and 1 through each swap, each new form moving over the panels in its own states (from 9 to 13) and its attacks drawn; the run went on to later layers and battles. Mutations: the form taken off left counted ended the battle won as the second form arrived; no count handed to the arrival left the battle going with no enemy after the last deletion. Unarmed, a foes battle and a random battle drew the same frames as the build before (tools/cw.py shot --ref HEAD at frames 1101, 1801, 2801 and 3301).",
+  "meaning": "BN6's engine takes a mid-battle swap with its own spawn, deletion and win; the swap needs only the counts kept on the first form and the explosion passed by. The hooks are set only once armed, so no other battle meets them.",
+  "link": "../rom/navis.md"
+}

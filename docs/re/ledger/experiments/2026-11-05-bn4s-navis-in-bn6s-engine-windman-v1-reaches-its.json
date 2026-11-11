@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "windman_v1 reaches its fight",
+  "result": "python3 tools/xdiff.py windman_v1 with his companions spawned at his spawn's end: still no fight (game state 0x0C, phase 0, 7800 frames) while the 0x5C's state 4 is BN4's raw bytes; with its movs r2,#4 at 0x080CCD2E made 0 (state 0, as FireMan's companion's mode 4) both battles run to their end and FAIL at t1 on his wind's +0x38 (BattleState +0x8C | +0xC4) and +0x4C (0 | WindMan). thunderman_v1 FAIL at t1 on his cloud (0x6A a step ahead), the same with or without BN6's Navi frame at his spawn's end; fireman_v1 FAIL at t1 unchanged (+0x91). gutsman_v1, the 18 BN4 family specs, the five BN4 controls, bn4_mettaur_broken, cangard_v1 and handi_v1 PASS; 187 of 187 mutations caught.",
+  "meaning": "The companions' state 4 (their appear through BN4's tile buffer) is taken in BN6's battle and hangs it: the interim that runs it as state 0 lets WindMan fight, and his wind's two fields are what is left at t1.",
+  "link": "../multirom/bn4-navis.md"
+}

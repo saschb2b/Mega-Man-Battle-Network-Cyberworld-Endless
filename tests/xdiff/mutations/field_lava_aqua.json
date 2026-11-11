@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Aqua cools no lava",
+  "spec": "field_lava_aqua",
+  "poke": [
+   "03007768:280F"
+  ],
+  "what": "the element hit's lava test in IWRAM (xpanels.c, BN6_PANEL_HIT_COOL + 0x26, written after the boot over the routine the game copied) made cmp r0,#15: an Aqua hit on lava leaves it, where BN5's cools it plain"
+ }
+]

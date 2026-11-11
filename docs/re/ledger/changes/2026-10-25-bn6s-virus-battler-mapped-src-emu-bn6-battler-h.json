@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "BN6's Virus Battler mapped (src/emu/bn6_battler.h, docs/rom/virus-battler.md's three rows, docs/research/sources.md, tools/virus_battler.py): the card's flags 0x1D8 and 0x196 + AI and their one writer 0x08736058, battle mode 6's loop 0x0800961C, VIRUS LIST state 0x020364C0, family data 0x0802B5FC, spawn 0x0802AEEA, the 50 MB check, the time limit on the Custom gauge, results 1/2/7, the Battlers' records 0x080B06E0's 0x1A-0x3A and their start cutscene 0x0809A5F0"
+}

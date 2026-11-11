@@ -1,0 +1,28 @@
+{
+ "why": "A routine's address an object keeps (a Thumb pointer into each game's own code) is the same routine where both games' routines are twins: the same instructions but for the calls' targets, each game's own twin. Listed by pair, each pair's bodies compared (pairs). And a moved family's code may keep a routine of BN5's engine as a callback (its attack's variables +0x28, a jump table of its own): the install names BN6's twin there (the recipe's words). The snapshot reads such a word of BN5's as the twin the family's recipe gives it, where BN6's word is that twin: a translation by the recipe's pairs, each pair's bodies compared by tools/xrecipe.py (the same, the same but for the offsets of loads and stores, or a differing pair its audit takes, bn5_twins.AUDITS); a word aimed elsewhere in BN6 stays a difference.",
+ "evidence": [
+  "tests/xdiff/families.json, code_twins: each family's pairs, written by tools/xrecipe.py with src/emu/xvirus_bn5.c",
+  "flashy_v1, powie_v1: the attack's callback BN5 0x08012A21 / BN6 0x08015C49 and BN5 0x08012A6D / BN6 0x08015C95, each family's recipe's pair"
+ ],
+ "pairs": [
+  [
+   "0x080E08D9",
+   "0x080E1B1D",
+   "AreaGrab's and PanlGrab's support routine (subfamily 0 in both: BN5's table 0x080297BC, BN6's 0x0802CCB4): its spawn of the fourth kind's type 3 leaves the routine's address, the support family's r3, in its object's +0x3C (the spawner keeps r1-r4 as the object's words)",
+   "BN5 0x080E08D8-0x080E08F9 / BN6 0x080E1B1C-0x080E1B3D: the same 17 instructions but for the spawner's call (BN5 0x080031CC / BN6 0x080033AC, the fourth kind's)",
+   "tools/xrecipe_thumb.py compare: SAME"
+  ],
+  [
+   "0x080E286F",
+   "0x080E38A7",
+   "Geddon's support routine (BN5's subfamily 4, BN6's 3): its spawn of the fourth kind's type 0x1D leaves the routine's address in its +0x3C as AreaGrab's does",
+   "BN5 0x080E286E / BN6 0x080E38A6: the same instructions but for the calls' targets (tools/xrecipe_thumb.py compare: SAME)"
+  ],
+  [
+   "0x080E47CF",
+   "0x080E59F7",
+   "RockCube's support routine: its spawn of the fourth kind's type 0x37 leaves the routine's address in its object's +0x3C as AreaGrab's does",
+   "BN5 0x080E47CE-0x080E47EF / BN6 0x080E59F6-0x080E5A17: the same 17 instructions but for the spawner's call (BN5 0x080031CC / BN6 0x080033AC, the fourth kind's)"
+  ]
+ ]
+}

@@ -1,0 +1,9 @@
+{
+ "name": "the struck's push's kind, BN6's own byte",
+ "whose": "family",
+ "part": "obj",
+ "offset": "0x0F",
+ "bit": "0x01",
+ "direction": "BN6 has it, BN4 not",
+ "why": "BN6 keeps the kind of a step an object takes at its +0x0F (the entry \"BN6's MegaMan's step's kind\", the same byte): its struck pass of the first kind stores 1 there as it gives a hit's push (0x0801AC2C-0x0801AC2E with the struck-and-pushed status 0x100, 0x0801AC42-0x0801AC44 with the push alone's 0x10; BN6_STEP_BEGIN's four more stores alike), and its slide's step reads it as the row of its table (0x0800E468: ldrb r0,[r5,#0xf] at 0x0800E46C, into 0x0800E498's table at 0x0800E4AC). BN4's pass sets the statuses alone (0x08013618-0x08013622, 0x08013632-0x08013634) and no byte of the object's, its slide's step (0x0800ACAA) taking its row from the collision data's push bits (+0xD, 0x0800ACB2). BN4's +0x0F is its enemy id's byte, read as BN6's NameID by the trace, so BN4's side holds 0 there. A family's object struck and pushed keeps BN6's 1 from the hit on (bn4_chip_mokorus1's Mettaur from t93 to the trace's end: its struck state is the family's own, which never runs BN6's pushed state's end, 0x08016804-0x08016806, where BN6 clears it). The push itself, the struck's panels, states and timers, is compared as ever: that Mettaur pushed from (5,2) to (6,2) two frames after the hit in both, its state 5 from the hit's frame"
+}

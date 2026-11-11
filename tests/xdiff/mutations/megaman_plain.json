@@ -1,0 +1,18 @@
+[
+ {
+  "name": "MegaMan's buster flash",
+  "spec": "megaman_plain",
+  "poke": [
+   "080EC8D6:2407"
+  ],
+  "what": "BN6's first flash of his buster spawned as its effect 7 where 6 (the arm flash's routine 0x080EC8B2: movs r4,#6 at 0x080EC8D6): MegaMan's own state, which a family spec reads as inconclusive (cangard_v1_keys stops there) and a MegaMan spec fails"
+ },
+ {
+  "name": "a chip's damage",
+  "spec": "megaman_plain",
+  "poke": [
+   "08C00046:0029"
+  ],
+  "what": "BN6's Cannon strikes for 41 where 40 (its chip record's +0x1A in the registry's copy the game reads, CHIPS_RECORDS + 0x2C + 0x1A, BN6's own table at 0x08021DA8 moved there): CanGard's HP after the Cannon"
+ }
+]

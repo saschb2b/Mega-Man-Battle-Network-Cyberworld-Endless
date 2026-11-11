@@ -1,0 +1,5 @@
+{
+ "name": "MegaMan's clock rejoining the battle's at a state the world gives him",
+ "subject": "megaman",
+ "why": "A hit lands at the battle's frame in both games (the hit's state, the engine's generic 3, set by each game's hit pass on the frame the attack's collision meets his), not by his own clock: so BN6's record of his own clock, read a frame later (above), shows the state a frame before BN4's does, and BN4's one frame between, his last in his own state, has no twin in BN6's (where he was a frame behind and the hit cut that frame). Held to exactly that: BN6's later record in a generic state (0 to 5, numbered alike), BN4's not in it now and in it at its next frame; his records are not compared on that frame alone and are read with the battle's offset again from the next. bn4_chip_areagrab at t122: the Mettaur's wave hits him at t123 in both"
+}

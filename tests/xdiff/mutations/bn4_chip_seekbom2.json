@@ -1,0 +1,10 @@
+[
+ {
+  "name": "SeekBom2's row's family another",
+  "spec": "bn4_chip_seekbom2",
+  "poke": [
+   "08C066FF:D0:1"
+  ],
+  "what": "the registry's record of BN4's SeekBom2 (599) with family 0xD0, the spread chips' unit, where the row gives SeekBom's 0xD2: another attack"
+ }
+]
