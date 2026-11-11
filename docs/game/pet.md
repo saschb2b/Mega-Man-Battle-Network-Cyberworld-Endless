@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T03:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T15:20:00Z }
 ---
 
 # The PET
@@ -172,7 +172,8 @@ on the way home); START opens the same pass there.
 
 The Jukebox (`0x4B`) is a music player: every song of the music player
 of the games in use, BN6's 37 and, with BN5's ROM beside it, BN5's 35,
-played as the cartridge plays them. A on it opens a PET screen over the
+and with BN4's, BN4's 34, played as the cartridge plays them (each game's
+own song table, on the engine's MP2K). A on it opens a PET screen over the
 KeyItem screen in the look of the NetPass and Trade Central (our own
 drawing: BN6 has no screen of the kind). Under it the game holds still,
 its core's frames not run (`pet_holds` in `scene_emu.c`), so its music
@@ -181,7 +182,11 @@ songs play on the engine's own MP2K, BN6's code ([The engine's own sound](../eng
 engine's own sound).
 
 The songs are in sections by game, then by where they play: Towns, The
-Net, Battles, Story, Screens, and BN5's More. On the left the song
+Net, Battles, Story, Screens, and More (BN5's and BN4's songs nothing in
+their game starts). A unit test (`tests/test_core.c`, test_jukebox_songs)
+holds the list to each game's music player: every song of each range
+once, the ones left out each with its reason, and a game for each ROM the
+engine reads, so the next ROM's songs cannot be left out. On the left the song
 playing: its game's label, its name, its number in its game's song table,
 how long it has played, a light a track for its eight tracks, lit by
 their loudness, and how often it has gone round. On the right the
@@ -254,7 +259,35 @@ version: the game's own music is the run's).
   Liberated 0x18 as the mission is won and the Colonel tallies its
   phases (the board's routine 6); One-Turn Win 0x24, where a
   liberation's battle is won in its first turn, in place of the win's
-  usual song.
+  usual song. BN4's ([BN4 Red Sun's tables](../rom/bn4.md), Where BN4
+  plays its songs; `tools/bn4_songs.py`), each where its game starts it,
+  its map groups seen in romlab: its map-music lists (`0x0802AFD0`) for
+  ACDC Town 0x02 (group 0x00's streets), Indoors 0x03 (its houses),
+  0x04 (group 0x01's street of shops), 0x05 (group 0x02, the tournament's
+  stadium, in one of the lists), Space Center 0x08 (group 0x05: a control
+  room over space and its tower), The Net 0x12 (the net's areas and
+  comps), Rusted Comp 0x0F (group 0x80's two rusted maps), Undernet 0x13
+  (the Undernet and Black Earth), and Emergency 0x0B (the second list,
+  ACDC Town and the city as trouble strikes); its battles' records for
+  Tutorial 0x21 (the first lessons' Mettaurs), Virus Busting 0x14, Boss
+  Battle 0x15 (the Navis), Tournament Bout 0x17 (the tournaments'
+  opponents) and Final Battle 0x16 (Duo); its code for Title 0x00 (the
+  title's start), Jack In 0x0E (the jack-in's tunnel, main mode 0x0C),
+  NaviCust 0x1D (its screen's opening), Game Over 0x1A, Credits 0x1C (the
+  staff roll), Defeat 0x19 (a battle lost), Victory 0x18 and Fanfare 0x1E
+  (a battle's win, by its options, as BN6's and BN5's), Champion 0x1F (the
+  Free Tournament won, and the tournaments' stages) and Tournament 0x09
+  (the bracket's start, the link's Operation Battle menu, and the
+  matches announced in its scenes). Its scripts' music commands, every
+  script of every map walked, for the rest: Nebula 0x01 (the syndicate
+  shows itself), Something's Up 0x0A (a dark chip explained, a shop
+  threatened, a curse spoken of), Emergency 0x0B (attacks, kidnappings,
+  fires and hostages), Sorrow 0x0C (farewells), Hope 0x0D (friends calling
+  MegaMan on, a foe turned), Homeward 0x06 (MegaMan unhurt on the way
+  home), Abroad 0x07 (the countries' scenes, group 0x04), Before the Boss
+  0x1B (Nebula's Navis showing themselves before a fight). *Assumed:* the
+  two place names, Den City 0x04 (the Metroline map's title) and Den Dome
+  0x05 (the stadium as its scenes name it), the places themselves seen.
 - *Assumed from bn6f's names* (`constants/enums/SoundOffsets.inc`, the
   community disassembly's, read as leads, never copied as a list) where
   no map list or code reached them: The Expo 0x25, Pavilion 0x18,
@@ -264,7 +297,8 @@ version: the game's own music is the run's).
   0x19, Fanfare 0x1F: BN6's alone now, BN5's each named for its own
   place above.
 - *Never started:* BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21,
-  which nothing in Team Colonel starts (the search, [Sources](../research/sources.md#the-jukeboxs-songs), The
+  which nothing in Team Colonel starts, and BN4's 0x10, 0x11 and 0x20,
+  which nothing in Red Sun starts (the searches, [Sources](../research/sources.md#the-jukeboxs-songs), The
   Jukebox's songs): they carry their number ("Song 07") in More.
 
 **In a run**, three of BN5's songs play where BN5 plays them
