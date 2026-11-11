@@ -105,7 +105,7 @@
 #define FREE_FAMILIES        (EMU_FREE + 0x348000u)  /* the families: their homes, code and art (xvirus.c, xvirus_families.c) */
 #define FREE_CHIPS           (EMU_FREE + 0x400000u)  /* the chip registry: records, names, routines, art (chips.c, xchips_install.c) */
 #define FREE_SOULS           (EMU_FREE + 0x480000u)  /* BN5's Souls in BN6's engine (soul_room.h lays it out) (soulproxy.c, soulunite.c, soullife.c, ...) */
-#define FREE_PANELS          (EMU_FREE + 0x4C0000u)  /* BN5's lava and sea and BN4's Hole as BN6's panels (xpanels.c, xpanels_look.c) */
+#define FREE_PANELS          (EMU_FREE + 0x4C0000u)  /* BN5's lava, sea and magnet panel and BN4's Hole as BN6's panel types 13-16: the flags (17 words in 32's room), the tiles, the pull (xpanels.c, xpanels_look.c) */
 #define FREE_PANELS_END      (EMU_FREE + 0x4D0000u)
 #define FREE_LATE_FAMILIES   (EMU_FREE + 0x4D0000u)  /* the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds (xvirus.c) */
 #define FREE_LATE_FAMILIES_END (EMU_FREE + 0x500000u)
