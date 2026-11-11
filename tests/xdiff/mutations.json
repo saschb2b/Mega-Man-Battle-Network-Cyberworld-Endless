@@ -2302,6 +2302,46 @@
    "what": "the Navis' stub for BN5_CLOUD_FIND_37 (XN_STUB_CLOUDS + 0x14: cmp r7,#0x37 against the dispatch's side table) made 0x36: no cloud found, a new cloud's panel chosen as if he had none (BN5_CLOUD_PANEL)"
   },
   {
+   "name": "GridMan's effect left at BN5's number",
+   "spec": "gridman_v1_keys",
+   "poke": [
+    "088853AC:2402"
+   ],
+   "what": "his copied routine's effect (BN5 0x080BCE70: movs r4,#2, its copy at XN_NEBULA_CODE + 0x43AC) left at BN5's 2 where the recipe makes it the Navis' 0xA2: BN6's own effect 2 is another sprite (gridman_v1_keys at t234)"
+  },
+  {
+   "name": "GridMan's object spawned as another of his",
+   "spec": "gridman_v1",
+   "poke": [
+    "088862A4:20C8"
+   ],
+   "what": "the 0xC6's spawner (BN5 0x080DF7B8: movs r0,#0xC6, its copy at XN_NEBULA_CODE + 0x52A4) made 0xC8: the dispatch runs his 0xC8's copy for it (gridman_v1 at t162)"
+  },
+  {
+   "name": "GridMan's attack's routine left at BN5's address",
+   "spec": "gridman_v1",
+   "poke": [
+    "088843E0:08101B61:4"
+   ],
+   "what": "the pool word his state stores in AttackVars +0x28 and later calls by bx (BN5 0x081012A0, 0x08101B61, its copy at XN_NEBULA_CODE + 0x33E0) left at BN5's address where the install aims it at his copy: BN6's own code there runs (gridman_v1 at t2)"
+  },
+  {
+   "name": "GridMan's object's sprite not renumbered",
+   "spec": "gridman_v1",
+   "poke": [
+    "08885930:2212"
+   ],
+   "what": "an object's sprite (BN5 0x080D8F4C: movs r2,#0x12, list 2's 0x12, his battle sprite, its copy at XN_NEBULA_CODE + 0x4930) left at BN5's number where the recipe makes it list 2's 0x32: list 2's 0x12 is BN6's own"
+  },
+  {
+   "name": "GridMan's object's parent's CurAction compare not renumbered",
+   "spec": "gridman_v1",
+   "poke": [
+    "088862E4:2108"
+   ],
+   "what": "the 0xC6's compare of its parent's CurAction (BN5 0x080DF7F8: movs r1,#8, BN6's 10, its copy at XN_NEBULA_CODE + 0x52E4) left at BN5's 8"
+  },
+  {
    "name": "Kilby's sound at the pool's second slot",
    "spec": "kilby_v1",
    "poke": [

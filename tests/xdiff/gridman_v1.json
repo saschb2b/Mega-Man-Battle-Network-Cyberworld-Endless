@@ -1,0 +1,11 @@
+{
+ "about": "GridMan V1 (BN5's 0x167, BN6's 0x3F0) alone at (5,2), MegaMan idle at (2,2) and kept from harm (safe), every draw of BN6's replayed from BN5's (rng=replay): Nebula's Navi in BN6's engine, his own states (BN6's from 8) and his objects (the first kind's 0x18, the third kind's 0x94, 0x95, 0xC6, 0xC8 and the fourth kind's 0x58) through the dispatch, his afterimage effect 0x5F drawing his own battle sprite",
+ "kind": "differential",
+ "foes": "167@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 1200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "safe": 1
+}

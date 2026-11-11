@@ -10,6 +10,7 @@
 
 #include <SDL.h>
 
+#include "bn6_sound.h"
 #include "gba_sound.h"
 #include "intro_chime.h"
 #include "mp2k.h"
@@ -152,6 +153,7 @@ static const int music_ids[MUS_COUNT] = {
 	[MUS_NONE] = 0, [MUS_TITLE] = 0x01, [MUS_NET] = 0x13, [MUS_BATTLE] = 0x15, [MUS_BOSS] = 0x16,
 	[MUS_WIN] = 0x19, [MUS_UNDERNET] = 0x14, [MUS_SHOP] = 0x1E, [MUS_GAMEOVER] = 0x1B,
 	[MUS_CREDITS] = 0x1D,   /* (bn6f SONG_CREDITS, the staff roll's) */
+	[MUS_SORROW] = BN6_SONG_SORROW,   /* (a lost run's summary: BN6's sad scenes' theme, docs/multirom/bn6-gaps.md, Music) */
 };
 
 bool audio_init(void) {
