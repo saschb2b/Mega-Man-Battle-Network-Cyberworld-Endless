@@ -3278,6 +3278,185 @@
    "what": "the registry's record of BN4's TwnFng2 (657) with power 50 where BN4's record holds 100: the Mettaur left 90 HP where BN4's leaves it 40"
   },
   {
+   "name": "the bolt's hit's bits BN4's own",
+   "spec": "bn4_chip_magbolt3",
+   "poke": [
+    "080DBCD2:2303"
+   ],
+   "what": "the bolt's copy's collision set up with r3 3, BN4's bits, where the recipe gives 0x43: with the pull's push bit BN6's struck pass pushes alone, so the Mettaur pulled beside MegaMan and hit goes on with its own state where BN4's is struck"
+  },
+  {
+   "name": "the pull's bits another",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE140:04:1"
+   ],
+   "what": "the state's copy's hit word (BN4 0x080EE140, 0x1E05FF08) with bits 0x04 where BN4's holds 0x08: another push bit, the Mettaur not pulled toward MegaMan"
+  },
+  {
+   "name": "the bolt's life shorter",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080DBD3C:2010"
+   ],
+   "what": "the bolt's copy's count (movs r0,#0x1e at BN4 0x080DBD3C) made 0x10: the bolt leaves the field 14 frames before BN4's"
+  },
+  {
+   "name": "the wait before the bolt longer",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE076:200A"
+   ],
+   "what": "the state's copy's wait before the bolt (movs r0,#6 at BN4 0x080EE076) made 10: the bolt, its sounds and the pull four frames late"
+  },
+  {
+   "name": "the pull shorter",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE088:200A"
+   ],
+   "what": "the state's copy's count of the pull's frames (movs r0,#0x1e at BN4 0x080EE088) made 10: MegaMan's attack ends 20 frames before BN4's"
+  },
+  {
+   "name": "the bolt's sound not played",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE0DA:46C0",
+    "080EE0DC:46C0"
+   ],
+   "what": "the state's copy's call that plays the bolt's sound (BN4 0x080EE0DA, sound 0xF8 through its shim) made two nops: no sound 0x202 as the bolt appears"
+  },
+  {
+   "name": "the arm's kind another",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE05E:2424"
+   ],
+   "what": "the state's copy's arm kind (movs r4,#0x23 at BN4 0x080EE05E) made 0x24, MagBolt2's: another row of the arm's kinds, another sprite on MegaMan's arm"
+  },
+  {
+   "name": "MegaMan's animation BN4's number",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE044:200D"
+   ],
+   "what": "the state's copy's animation of MegaMan (BN4 0x080EE044) given BN4's number 0x0D where the recipe gives BN6's 0x0A: another animation of BN6's art"
+  },
+  {
+   "name": "the attack's variables at BN4's place",
+   "spec": "bn4_chip_magbolt1",
+   "poke": [
+    "080EE016:3770"
+   ],
+   "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE016), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
+   "name": "MagBolt3's row's power another",
+   "spec": "bn4_chip_magbolt3",
+   "poke": [
+    "08C06ECA:0028"
+   ],
+   "what": "the registry's record of BN4's MagBolt3 (644) with power 40 where BN4's record holds 130: the Mettaur left 100 HP where BN4's leaves it 10"
+  },
+  {
+   "name": "MagBolt2's row's family another",
+   "spec": "bn4_chip_magbolt2",
+   "poke": [
+    "08C06E8F:D0:1"
+   ],
+   "what": "the registry's record of BN4's MagBolt2 (643) with family 0xD0, the spread chips' unit, where the row gives MagBolt's 0xD5: another attack"
+  },
+  {
+   "name": "the bomb's HP another",
+   "spec": "bn4_chip_propbom1_struck",
+   "poke": [
+    "080DEBBC:2064"
+   ],
+   "what": "the bomb's copy's HP (movs r0,#0xa at BN4 0x080DEBBC) made 100: the Mettaur's wave does not end it at t73"
+  },
+  {
+   "name": "the bomb's speed another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE5BC:28:1"
+   ],
+   "what": "the state's copy's table of the bomb's speed by the Navi (BN4 0x080EE5BC, 0x14 for MegaMan) with 0x28: the bomb crosses the field in half the frames"
+  },
+  {
+   "name": "the blast's column another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DED00:3004"
+   ],
+   "what": "the bomb's copy's blast's column (adds r0,#5 at BN4 0x080DED00, 5 less three times its side) made 4: the hit area and its explosions a column nearer MegaMan"
+  },
+  {
+   "name": "the blast's explosions BN6's own",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DED16:2200"
+   ],
+   "what": "the bomb's copy's blast handed effect 0, BN4's number, where the recipe gives 0xC8, BN4's explosion's copy: BN6's own effect 0 over the six panels"
+  },
+  {
+   "name": "the wait before the bomb longer",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE56C:2008"
+   ],
+   "what": "the state's copy's wait before the bomb (movs r0,#4 at BN4 0x080EE56C) made 8: the bomb and its sounds four frames late"
+  },
+  {
+   "name": "the propeller's sound not played",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080DEC08:46C0",
+    "080DEC0A:46C0"
+   ],
+   "what": "the bomb's copy's call that plays the propeller's sound (BN4 0x080DEC08, sound 0x133 through its shim) made two nops: no sound 0x204 as the bomb appears"
+  },
+  {
+   "name": "the struck bomb's sound not played",
+   "spec": "bn4_chip_propbom1_struck",
+   "poke": [
+    "080DEC6E:46C0",
+    "080DEC70:46C0"
+   ],
+   "what": "the bomb's copy's call that plays its burst's sound as it is struck (BN4 0x080DEC6E, sound 0xC8 through its shim) made two nops: no sound 0x205 as the wave ends it"
+  },
+  {
+   "name": "MegaMan's throw BN4's number",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE55C:2012"
+   ],
+   "what": "the state's copy's animation of MegaMan (BN4 0x080EE55C) given BN4's number 0x12 where the recipe gives BN6's 0x0E: another animation of BN6's art"
+  },
+  {
+   "name": "PropBom's variables at BN4's place",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "080EE536:3770"
+   ],
+   "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE536), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+  },
+  {
+   "name": "PropBom1's row's power another",
+   "spec": "bn4_chip_propbom1",
+   "poke": [
+    "08C0736E:0032"
+   ],
+   "what": "the registry's record of BN4's PropBom1 (671) with power 50 where BN4's record holds 120: the Mettaur left 90 HP where BN4's leaves it 20"
+  },
+  {
+   "name": "PropBom2's row's family another",
+   "spec": "bn4_chip_propbom2",
+   "poke": [
+    "08C0738B:D0:1"
+   ],
+   "what": "the registry's record of BN4's PropBom2 (672) with family 0xD0, the spread chips' unit, where the row gives PropBom's 0xD4: another attack"
+  },
+  {
    "name": "the Hole's panel type another",
    "spec": "bn4_chip_hole",
    "poke": [

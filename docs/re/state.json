@@ -246,6 +246,14 @@
     },
     {
       "date": "2026-11-11",
+      "what": "MagBolt's code located and moved (bn4_chips.h BN4_MAGBOLT_STATE 0x080EE012, BN4_T3_BOLT 0x75 with BN4_BOLT_SPAWN 0x080DBD72 and BN4_BOLT_HIT_BITS 0x080DBCD2; docs/rom/bn4.md), and a pushed object in a virus's runner read in both games: BN4 runs its slide before it takes a struck-and-pushed status (BN4_RUNNER_SLIDE 0x08013E3C, BN4_RUNNER_STRUCK 0x08013E68), BN6 the status first, past the slide's step (BN6_RUNNER_STRUCK 0x0801B2A8, BN6_RUNNER_SLIDE 0x0801B2EC); state 5's step stored at +0x0B (BN4_STRUCK_STEP 0x08010610)."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
+    },
+    {
+      "date": "2026-11-11",
       "what": "BN4's Hole panel in BN6's engine at type 15 (XPANEL_HOLE; docs/rom/bn4.md, The Hole panel in BN6's engine: src/emu/bn4_panels.h's BN4_PANEL_TILES, BN4_PANEL_TILESET, BN4_PANEL_PALETTES, BN4_PANEL_ANIMATE, BN4_PANEL_ANIM_1 and _5; src/emu/bn6_panels.h's BN6_PANEL_COUNT, BN4_PANEL_COUNT's twin): BN4's tiles and pulsing colours drawn, plain's flags, installed with BN5's lava and sea or without; seen by the new `status panel` dev step."
     },
     {
@@ -333,6 +341,20 @@
       "name": "The pack's entries of ids 635-1023 in the cart's save RAM",
       "result": "Gregar's save library has three readers, five writers and four verifies, each address and size a literal: BN6's blocks are 0x0E000100-0x0E00680F and 0x0E007E00-0x0E007FFF; 0x0E006810-0x0E007DFF is addressed by none. Under CYBERWORLD_RAM_WATCH (every load, store, DMA and BIOS copy into the stretch): the survey's 54 runs read the save RAM 1,431,216 times, all the library's boot read, and touched the free span only by the pack's clear; the PET's seven screens, a shop bought from, a Chip Trader fed (BN6's own save ran four times, inside its blocks) and a NetBattle rolled back 872 times (the state the same after each) the same; no access wider than a byte. tests/test_emu_pack.c runs the routines on mGBA (every id's entry, a chip given in all three ranges, the stamps by bytes, the clear with and without its hook, states). Chip 700 (--dev alias=700, chip 700 A 5): its counts 6, listed in the folder editor's Pack, swapped, through a battle, the PET's Save, CONTINUE and the files moved to a fresh folder all kept 6; a run dev's build saved read 0 there. The autopilot's seeds 1-12: dev's run logs (78 lines) and pictures at 5000, 10000, 14990. The differential: 494 PASS, the 5 recorded FAILs held, 363 of 363 mutations caught.",
       "meaning": "Every BN4 folder chip, and any id to 1023, can be held in the Pack; no chip waits for RAM again."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_magbolt1 to 3: BN4's MagBolt moved, a pulled foe",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (a Mettaur pulled and not hit; hit for 110 with the pull blocked; pulled beside MegaMan and hit for 130, struck from t44 to t68 in both), eleven mutations caught. On the way: with BN4's hit bits 3 the bolt's hit with the pull's pushed alone in BN6 (state 0xB against BN4's 5 at t44), 0x43 the answer; the foe's record then differed in +0x0B and +0x1B, +0x1E, +0x1F alone.",
+      "meaning": "A foe a chip slides meets the engines' slide differences MegaMan's entries named, and one more: the runners' order of a pushed object's slide and a struck-and-pushed hit. Each is a leftover no code reads; panels, HP, states and timers agree."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_propbom1, its struck, 2 and 3: BN4's PropBom moved",
+      "result": "python3 build.py xdiff with the four specs: each PASS over 300 frames (the blast at t102, a Mettaur's 140 HP to 20 and 250 to 90; the bomb ended by a wave at t73 and by a Mettaur's step at t66), eleven mutations caught. On the way: with the blast handed BN4's effect number BN6's routine drew BN6's own explosion (the effects' sprite state at t102); the copy hands it BN4's effect's copy.",
+      "meaning": "An object with HP that takes an obstacle slot moves as any other where the slots' routines are the engines' twins; an engine routine that spawns an effect by a number it is handed needs the number the unit's copy of the effect has."
     },
     {
       "feature": "BN4's chips in BN6's tables",
