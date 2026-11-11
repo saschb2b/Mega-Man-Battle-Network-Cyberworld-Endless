@@ -558,6 +558,10 @@
     {
       "date": "2026-11-11",
       "what": "Meddy moved, Team ProtoMan's fourth (docs/multirom/navis.md, Meddy; docs/rom/navis.md, Team ProtoMan's Meddy: src/emu/bn5_team_protoman.h's BN5_MEDDY_CODE, BN5_MEDDY_EFFECT_KINDS): meddy_v1, meddy_v1_keys and meddy_sp PASS, five mutations caught; her seven object types moved (TYPES); an effect's id put beside a parameter (movs r4,#id; orrs r4,rX) read by the generator; her sound 0xE0 at BN6's slot 0x46."
+    },
+    {
+      "date": "2026-11-11",
+      "what": "BN5's magnet panel read for MagnetMan (docs/rom/bn5-world.md, BN5's magnet panel: src/emu/bn5.h's BN5_PANEL_MAGNET, BN5_MAGNET_ARRIVED 0x0801720E, BN5_MAGNET_LAID 0x080E24CE, BN5_MAGNET_PANELS 0x080E2518): type 5, flags 0x10210, an object coming onto it pushed (+0x40 bit 0x10, BN6's BN6_STRUCK_SLIDE; +0x0F 3) but where floating or the player in form 5; it never runs out. His seven types recorded (TYPES); his recipe waits for the panel as BN6's 15."
     }
   ],
   "experiments": [

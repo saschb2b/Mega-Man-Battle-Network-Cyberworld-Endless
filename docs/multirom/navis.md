@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Navis"
 description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:10:00Z }
 ---
 
 # Transplanted Navis
@@ -275,6 +275,13 @@ into the battle engine).
   copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
   state's number); her effect 0x44's site and one object's compare of
   its parent's state are reached by no spec.
+- **MagnetMan** (AI 5) is derived (`--report --ai 5`), not moved: his
+  object types (the third kind's 0x60, 0x62, 0x63, 0x64, 0x66, the
+  fourth's 0x19) are recorded in TYPES; his one decision is the panel he
+  lays, BN5's magnet panel (type 5, which BN6 lacks: its 5 is holy),
+  read in BN5's code ([BN5's maps, songs, text and objects](../rom/bn5-world.md),
+  BN5's magnet panel). It comes into BN6's engine as panel 15 before him,
+  as the lava and sea did (One net, above).
 - **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
   his three decisions are built, one left. *His object types* (the third
   kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES
