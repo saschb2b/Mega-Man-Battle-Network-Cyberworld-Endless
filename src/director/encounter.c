@@ -175,7 +175,10 @@ void emu_encounter_set(const Encounter *e) {
 	 * as his story record has them, docs/game/bosses/) */
 	if (e->map_backdrop) bg = BG_MAP_OWN;
 	int song = e->song ? e->song : encounter_song[e->boss];
-	uint8_t s[16] = { (uint8_t)e->field, 0x36, (uint8_t)song, 0x00, (uint8_t)bg, 0x00, (uint8_t)(e->sides ? e->sides : BN6_SIDES_PLAIN), 0x00 };
+	/* (byte 1 is what BN6's escape roll weighs MegaMan's max HP against,
+	 * bn6f sub_8026F1A: where (max HP + 4) / 5 is more the escape is sure,
+	 * so 0 lets him leave at the first try) */
+	uint8_t s[16] = { (uint8_t)e->field, (uint8_t)(e->leave ? 0 : BN6_ESCAPE_WEIGHT), (uint8_t)song, 0x00, (uint8_t)bg, 0x00, (uint8_t)(e->sides ? e->sides : BN6_SIDES_PLAIN), 0x00 };
 	/* (bit 0x20 of the options lets MegaMan run, bn6f 0x08026EC8: the
 	 * story's bosses clear it, the random battles and BN6's roaming SP
 	 * Navis set it; docs/rom/) */

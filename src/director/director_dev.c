@@ -23,7 +23,7 @@
 #include "gamecall.h"
 #include "netmap.h"
 #include "rumor_lines.h"
-#include "save.h"
+#include "lab_battle.h"
 #include "talk.h"
 #include "trader.h"
 
@@ -208,7 +208,7 @@ static void dev_talks(void) {
 /* The foes step's battle, due at the first free moment as the battle
  * step's (director.h) */
 static Encounter dev_foes;
-static bool foes_due;
+static bool foes_due, lab_due;
 
 /* a foe of the step's: its kind, family and version as its id's triple
  * gives them (a family moved into the engine's as it was installed) */
@@ -224,7 +224,21 @@ void director_dev_due(const Encounter *e) {
 	foes_due = true;
 }
 
+static bool foes_parse(const char *spec);
+
 bool director_dev_foes(const char *spec) {
+	lab_due = false;
+	return foes_parse(spec);
+}
+
+/* ... and the same battle as the Battle Lab's test (lab_battle.h): fought
+ * inside a snapshot of the game, its result printed */
+bool director_dev_lab(const char *spec) {
+	lab_due = foes_parse(spec);
+	return lab_due;
+}
+
+static bool foes_parse(const char *spec) {
 	Encounter e = D.next;
 	e.nfoes = e.nobj = 0;
 	e.field = e.player = e.song = e.sides = 0;
@@ -350,6 +364,11 @@ static void dev_battle(void) {
 	if ((!D.battle_due && !foes_due) || !on_map() || emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping ||
 		emu_read8(BN6_WARP_PENDING) || !boss_idle() || D.challenge || emu_battle_forcing())
 		return;
+	if (foes_due && lab_due) {
+		foes_due = lab_due = false;
+		lab_battle_ask(&dev_foes, -1);
+		return;
+	}
 	if (foes_due) {
 		foes_due = false;
 		if (emu_debug_on()) fprintf(stderr, "foes: the step's battle, %d foes%s\n", dev_foes.nfoes, dev_foes.xrecord ? " (an older net's record)" : "");

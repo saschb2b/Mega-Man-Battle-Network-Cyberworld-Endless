@@ -111,6 +111,11 @@ bool emu_load_state(const char *path);
 size_t emu_state_size(void);
 bool emu_state_save(void *state);
 bool emu_state_load(const void *state);
+/* The core's whole state in memory with the cart's flash save in it, as a
+ * checkpoint's file holds it (malloc'd, `size` its bytes; NULL where the
+ * core gave none), and put back: a test battle's snapshot (lab_battle.h) */
+void *emu_snapshot(size_t *size);
+bool emu_snapshot_load(void *bytes, size_t size);
 
 /* RAM the engine keeps patched, where the game copies code into it from a
  * ROM image the engine patched the same way (IWRAM's routines, copied as

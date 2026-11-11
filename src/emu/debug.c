@@ -84,8 +84,37 @@ FILE *emu_debug_file(const char *name) {
 	return fopen(path, "wb");
 }
 
+/* CYBERWORLD_BATTLE_PROBE: every 30th frame of a battle a line of what the
+ * encounter groups' measuring reads (tools/encounter_danger.py;
+ * docs/devtools/encounter-tags.md): the battle's phase, MegaMan's HP, the
+ * enemies in play and their HP together, and the field's 18 panels, a
+ * letter each from the top left (its type from 'a'; upper case the
+ * enemies' side). */
+static void battle_probe(void) {
+	static int on = -1, t;
+	if (on < 0) on = getenv("CYBERWORLD_BATTLE_PROBE") != NULL;
+	if (!on || emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) { t = 0; return; }
+	if (t++ % 30) return;
+	int hp = -1, foes = 0, foehp = 0;
+	for (uint32_t i = 0; i < BN6_T1_COUNT; ++i) {
+		uint32_t o = BN6_T1_OBJECTS + i * BN6_T1_SIZE;
+		if (!(emu_read8(o + BN6_T1_IN_PLAY) & 1)) continue;
+		int h = emu_read16(o + BN6_T1_HP);
+		if (emu_read8(o + BN6_T1_ALLIANCE) == 0) hp = hp < 0 ? h : hp;
+		else if (h > 0) { ++foes; foehp += h; }
+	}
+	char panels[19];
+	for (uint32_t k = 0; k < 18; ++k) {
+		uint32_t p = BN6_FIELD_PANELS + ((k / 6 + 1) * BN6_FIELD_COLUMNS + k % 6 + 1) * BN6_PANEL_SIZE;
+		panels[k] = (char)((emu_read8(p + BN6_PANEL_ALLIANCE) ? 'A' : 'a') + (emu_read8(p + BN6_PANEL_TYPE) & 15));
+	}
+	panels[18] = 0;
+	fprintf(stderr, "probe t%d phase %02x hp %d foes %d foehp %d panels %s\n", t - 1, emu_read8(BN6_BATTLE_PHASE), hp, foes, foehp, panels);
+}
+
 void emu_debug_frame(void) {
 	battle_trace_frame();   /* (CYBERWORLD_BTRACE) */
+	battle_probe();         /* (CYBERWORLD_BATTLE_PROBE) */
 	static int t;
 	static int watching = -1;
 	if (watching < 0) watching = getenv("CYBERWORLD_WATCH") != NULL;
