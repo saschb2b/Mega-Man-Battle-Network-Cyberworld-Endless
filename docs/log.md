@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
 * **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
 * **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).

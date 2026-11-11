@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T01:03:40Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -167,7 +167,10 @@ These come before the first BN4 Soul, whichever it is:
   grow as BN5's did.
 - **The generator's BN4 path** described above, and the differential's
   BN4 Souls on the guest core: the flag, the gate's byte, and a BN4
-  battle with a held B.
+  battle with a held B. The differential's part is built (12 November
+  2026): `souls4=` gives the Souls and `bn4_soul_thun_control` unites
+  ThunSoul in BN4's own battle, the same twice ([the
+  differential](../devtools/differential.md), BN4).
 - **The unison's picture** is the Soul Navi's own in BN4's list 8 (1-12,
   about 1.7 KB each, 20 KB for twelve), apart from the battle sprites the
   BN4 Navis track copies from list 2 ([BN4's Navis in BN6's engine](bn4-navis.md)).
