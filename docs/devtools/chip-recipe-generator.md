@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T22:40:06Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T23:13:17Z }
 ---
 
 # The chip recipe generator
@@ -241,7 +241,18 @@ its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
-MokoRus (misc 1); SidBmbo is next.
+MokoRus (misc 1) and SidBmbo (misc 5).
+
+A misc unit BN4's run waits for carries the frames (`misc_wait` reads
+BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
+sets; SidBmbo's 0x28), written as the unit's row's last number. The
+installer then puts a wrapper at the end of the unit's home
+(`xchips_code.c` `wait_stage`, 0x40 bytes of the project's own Thumb) as
+the table's entry: BN6's misc run calls it every frame of the wait, it
+calls the unit's routine the first time and counts as BN4's run does,
+going on into BN6's run where the attack ends. An effect an earlier
+unit moved is left to that unit's rows; the later unit's code names its
+id by an immediate alone.
 
 Several sessions add units side by side, so what a unit is given follows
 one rule. `UNITS` is append-only, one unit a line: a unit's home, its
