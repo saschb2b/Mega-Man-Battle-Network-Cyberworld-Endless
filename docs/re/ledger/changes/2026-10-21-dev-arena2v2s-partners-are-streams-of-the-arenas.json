@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-21",
+  "what": "--dev arena2v2's partners are streams of the Arena's input (src/online/arena_input.c, arena_link_local.c, arena_pair.c), queued by the battle's iteration in core RAM (RAM_TEAM_RING, src/online/arena_team.c)."
+}

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "no chip charged in a Soul",
+  "spec": "soul_knight_charge",
+  "soulbreak": 65536,
+  "what": "the chip charge's test (BN6_CHARGE_TEST, src/emu/soulchips.c) answers no for a Soul where BN5's 0x08010902 charges a chip of its kind: KnightSoul's JustcOne used as A is pressed, uncharged"
+ }
+]

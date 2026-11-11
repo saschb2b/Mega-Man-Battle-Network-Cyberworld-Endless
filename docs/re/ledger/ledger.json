@@ -1,0 +1,87 @@
+{
+  "schema": "re-ledger/2",
+  "project": "Cyberworld Endless: online Net Squares (epic #120)",
+  "decisions": [],
+  "method": {
+    "target": "BN6 Gregar USA, SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, on mGBA 0.10.5 (docker/mgba.sh pins its source)",
+    "oracle": "The unpatched game on a fresh pair of cores from the same boot-3.state, run again for each experiment",
+    "rules": [
+      "The player's ROM is only read; saves, states and traces stay under .build/.",
+      "Network work runs against the project's own server and the developer's own games, never anyone else's service or account.",
+      "No masks: a difference between the original and ours is explained or it fails.",
+      "No Tango code is read or used."
+    ],
+    "records": [
+      {
+        "what": "ROM offsets and how to re-check them",
+        "where": "docs/rom/, src/emu/bn6*.h"
+      },
+      {
+        "what": "Claims about the games and their sources",
+        "where": "docs/research/sources.md"
+      },
+      {
+        "what": "What is original, generated or adapted",
+        "where": "docs/game/fidelity.md"
+      },
+      {
+        "what": "The link cable and the Arena",
+        "where": "docs/online/link.md"
+      },
+      {
+        "what": "The Net Square, its server and transports",
+        "where": "docs/online/, server/README.md"
+      }
+    ]
+  },
+  "glossary": [
+    {
+      "term": "Net Square",
+      "meaning": "The online place players visit between acts; other players walk in it as NPCs."
+    },
+    {
+      "term": "Lan's HP",
+      "meaning": "BN6's own homepage map, where MegaMan arrives after every act; the Square's gate is to stand there."
+    },
+    {
+      "term": "Trade Central",
+      "meaning": "The Square's counters where two players are to swap chips."
+    },
+    {
+      "term": "Arena",
+      "meaning": "NetBattles between players, BN6's own fights over the network."
+    },
+    {
+      "term": "Pair",
+      "meaning": "Two mGBA cores joined by an emulated link cable, both games running on one client."
+    },
+    {
+      "term": "Practice",
+      "meaning": "BN6's NetBattle choice that costs no chip; the fight every experiment scripts."
+    },
+    {
+      "term": "Delay-based",
+      "meaning": "Each frame waits until both players' inputs for it have arrived."
+    },
+    {
+      "term": "Rollback",
+      "meaning": "Run ahead on a guessed input, then rewind to a snapshot and replay when the real one arrives."
+    },
+    {
+      "term": "Snapshot",
+      "meaning": "Everything needed to resume the pair exactly: both cores, both flash saves, the cable."
+    },
+    {
+      "term": "Oracle",
+      "meaning": "The unchanged original, run the same way, that ours is compared against."
+    },
+    {
+      "term": "Planted fault",
+      "meaning": "A deliberate break, to show the comparison catches it."
+    },
+    {
+      "term": "boot-3.state",
+      "meaning": "The game's own state after boot, before a run changes anything; made on each machine, never committed."
+    }
+  ]
+}

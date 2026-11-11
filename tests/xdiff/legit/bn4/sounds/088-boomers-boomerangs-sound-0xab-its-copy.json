@@ -1,0 +1,7 @@
+{
+ "bn4": "0xAB",
+ "bn6": "0x1DF",
+ "clock": "state",
+ "what": "Boomer's boomerang's sound 0xAB, its copy",
+ "why": "Played by the boomerang's init (BN4's third-kind 0x32, moved with Boomer's unit: movs r0,#0xab at 0x080D32F2, its bl to PlaySoundEffect at 0x080D32F4; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x1DF and goes on to BN6's), a state's: BN4's song 0xAB copied into slot 0x1DF of BN6's grown song table (src/emu/song_table.h, src/emu/xchips_bn4.c, src/audio/xsong.c XSOUNDS). BN6's own song 0xAB is another (xrecipe.song_sig). bn4_chip_boomer3 at t34 in BN4's and t35 in BN6's"
+}

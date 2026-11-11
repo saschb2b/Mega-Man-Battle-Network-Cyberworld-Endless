@@ -1,0 +1,13 @@
+{
+ "bn4": "0x14A",
+ "bn6": "0x104",
+ "clock": "state",
+ "foes": [
+  "0xA4",
+  "0xA5",
+  "0xA6",
+  "0xA7"
+ ],
+ "what": "JunkMan's sound 0x14A, its copy",
+ "why": "Played by his copied MegaMan state (BN4: movs r0,#0x4b and adds r0,#0xff at 0x080F42C4, its bl at 0x080F42C8; BN6: that bl aimed at his home's shim making r0 the pool's 0x104, XvSoundCall), a state's: BN4's song 0x14A copied into the pool's sixth slot, 0x104 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11). His ids alone (\"foes\"): the pool's slots are another Navi's sounds in his battles, so the copy is told by its slot"
+}

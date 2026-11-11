@@ -1,0 +1,13 @@
+{
+ "name": "BN4's MegaMan's loadout's unread first byte",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x0C",
+  "0x0C"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "why": "BN4's loadout setter (0x0800BD48, from the form's state 0x0800E05C) writes his AI data +0xC as the loadout's first byte: 0xFF for form 0 (0x0800BD74) or the form's loadout word (0x0800BD5E, 0x080184F0, whose +0 is 0xFF in every form); no code of BN4's reads it through an AI data pointer (every load at +0xC whose base came from an object's +0x58 in the ROM's first 2 MB: none). BN6's loadout (0x080144C0) keeps no such byte, its +0xC no field of his; BN4's power attacks his loadout does keep are mapped (+0xD, +0xE, +0xF, +0 at BN6's +6, +5, +7, +8, xdiff_bn4_trace.c)"
+}

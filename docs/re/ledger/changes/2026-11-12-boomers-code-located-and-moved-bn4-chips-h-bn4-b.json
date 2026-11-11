@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
+}

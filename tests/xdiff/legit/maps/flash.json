@@ -1,0 +1,12 @@
+{
+ "why": "A muzzle flash (the first kind's type 5, spawned by BN5 0x080B9CAE / BN6 0x080BA6A0 with its number in r4, kept at +4) is drawn by the entry of that number in each game's table of flashes, 5 bytes each (BN5 0x080B9A5C, BN6 0x080BA444, read at BN5 0x080B9BA8 / BN6 0x080BA570: its list, sprite, animation and palette): BN6 numbers the same flash otherwise. Each pair here names the same entry, or the same picture (the sprites byte for byte) at another number of list 3. The image object's own kinds, BN5's object moved once for every track (tools/bn5_objects.py: the Navis' images, the chips' muzzle flashes, the Souls' arm flashes and MegaMan's buster's in a Soul, src/emu/soullook.c), keep BN5's numbers in both games, the one copy run through the second-level dispatch: compared as they are (ob.moved).",
+ "bn5_to_bn6": {
+  "0x09": "0x15",
+  "0x11": "0x23"
+ },
+ "evidence": [
+  "BN5's entry 0x09 and BN6's 0x15: 0C 19 00 00 0B (list 3's 0x19, animation 0): Spreader's flash (BN5 0x080EC5B4's family, BN6 Spreadr1's 0x25)",
+  "BN5's entry 0x11 (0C 2A 00 00 0C) and BN6's 0x23 (0C 59 00 00 0C): list 3's 0x2A in BN5 (0x08314EBC) and 0x59 in BN6 (0x08348D44), the same 1216 bytes: WideSht's flash (BN5 0x080ED0BE movs r4,#0x11; BN6 0x080EE8CA movs r4,#0x23, the same family routine but for it)",
+  "soulcode_bn5.c's types (1, 0x05 moved, BN5 0x080B9B81) and bytes (the kinds 0x03, 0x0A, 0x23, 0x31, 0x32 and 0x33 their sprites as BN6 lists them); soul_colonel's t203: ColonelSoul's flash kind 3 in both"
+ ]
+}

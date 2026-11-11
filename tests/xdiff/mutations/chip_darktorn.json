@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Tornado's frames",
+  "spec": "chip_darktorn",
+  "poke5": [
+   "080ECE88:202B"
+  ],
+  "what": "the moved Tornado family's movs r0,#0x2A (BN5's 0x080ECE88) 0x2B at its copy: DarkTorn's attack a frame apart from BN5's"
+ }
+]

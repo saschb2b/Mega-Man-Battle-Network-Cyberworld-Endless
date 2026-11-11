@@ -45,7 +45,8 @@ tools/xdiff_events.py. This compares the two:
   terms       BN5's own events as BN6 would have written them; a sprite
               state no sprite was set up in left uncompared
 
-Each difference must be explained: by a mask in tests/xdiff/legit.json
+Each difference must be explained: by a mask in tests/xdiff/legit/ (the
+folder tools/shards.py reads as the one legit.json it is called here)
 (an engine difference that is not the family's code, each with why and
 the evidence, both games' routines by address; never on the family's own
 records, where any difference fails) or it fails the spec, at the first
@@ -81,7 +82,7 @@ battle is known to do; its "both" writes into both games' copies alike
 gives MegaMan one as the fight begins. --poke and --call break BN6's copy after the install (an
 immediate, a call's veneer; a poke in RAM after the boot, over the code
 the game copied there): the comparator's own test, which --mutations
-runs from tests/xdiff/mutations.json, each break required to FAIL its
+runs from tests/xdiff/mutations/ (a file a spec), each break required to FAIL its
 spec. A spec may record the verdict the differential gave it ("verdict":
 {"is", "at", "why"}: the chips' differential's on a chip BN6's code plays
 otherwise than BN5's, docs/multirom/chips-code.md), which holds
@@ -110,10 +111,9 @@ from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, S
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 import xdiff_bn4  # noqa: E402
+import shards  # noqa: E402
 
 SPECS = os.path.join(ROOT, 'tests', 'xdiff')
-LEGIT = os.path.join(SPECS, 'legit.json')
-MUTATIONS = os.path.join(SPECS, 'mutations.json')
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39'}
 SHA1_BN4 = {'bn4.gba': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}   # (BN4 Red Sun, USA: its specs' alone, xdiff_bn4.py; tools/bn4_lab.py's)
@@ -777,19 +777,17 @@ def main():
     ap.add_argument('--show', type=int, default=12, help='differences shown at the first unexplained frame')
     ap.add_argument('--quiet', action='store_true')
     ap.add_argument('--survey', action='store_true', help='every difference over every frame, counted by where (masks applied), no stop')
-    ap.add_argument('--mutations', action='store_true', help='tests/xdiff/mutations.json: each must FAIL its spec (with specs named, theirs alone)')
+    ap.add_argument('--mutations', action='store_true', help='tests/xdiff/mutations/: each must FAIL its spec (with specs named, theirs alone)')
     ap.add_argument('-j', '--jobs', type=int, default=max(1, (os.cpu_count() or 2) - 2),
                     help='specs run side by side (default: the CPUs but two; 1 one at a time)')
     a = ap.parse_args()
-    with open(LEGIT) as f:
-        legit = json.load(f)
+    legit = shards.load('legit')   # (tests/xdiff/legit/, a file an entry, read as the one legit.json it was)
     canon = Canon(legit)
     if not a.no_run:
         find_roms()
         subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
     if a.mutations:
-        with open(MUTATIONS) as f:
-            muts = json.load(f)['mutations']
+        muts = shards.load('mutations')['mutations']   # (tests/xdiff/mutations/, a file a spec; numbered in the files' order)
         items = [(k, m['spec'], m.get('poke', []), m.get('call', []), f'mutation{k + 1}',
                   {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None) for k, m in enumerate(muts)]
         # (with specs named, their mutations alone, by their numbers in the file)
@@ -801,11 +799,11 @@ def main():
 
         verdicts = run_all(items, a, legit, canon, head)
         for item, (verdict, _) in zip(items, verdicts):
-            print(f'mutation {item[0] + 1}: {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
+            print(f'mutation {item[0] + 1} ({item[1]}, {muts[item[0]]["name"]}): {"caught" if verdict == "FAIL" else "NOT CAUGHT"} ({verdict})')
         caught = sum(v == 'FAIL' for v, _ in verdicts)
         print(f'{caught} of {len(items)} mutations caught')
         sys.exit(0 if caught == len(items) else 1)
-    names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n not in ('legit.json', 'mutations.json', 'families.json'))
+    names = a.specs or sorted(n[:-5] for n in os.listdir(SPECS) if n.endswith('.json') and n != 'families.json')
     def head(item):
         with open(os.path.join(SPECS, f'{item[1]}.json')) as f:
             return f'== {item[1]}: {json.load(f).get("about", "")}\n'

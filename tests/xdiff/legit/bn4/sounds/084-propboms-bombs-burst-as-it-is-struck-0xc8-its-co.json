@@ -1,0 +1,12 @@
+{
+ "bn4": "0xC8",
+ "bn6": "0x205",
+ "clock": "state",
+ "chips": [
+  "0x9D",
+  "0x9E",
+  "0x9F"
+ ],
+ "what": "PropBom's bomb's burst as it is struck 0xC8, its copy",
+ "why": "Played by the bomb's update where a hit ends it (BN4: movs r0,#0xc8 at 0x080DEC6C, its bl at 0x080DEC6E; BN6: the copy's bl aimed at a shim that makes r0 0x205): the same sound, BN4's song copied into slot 0x205. In these chips' specs alone: BN4's engine plays 0xC8 of its own too (its runner's, 0x08013F54), where BN6's plays its own"
+}

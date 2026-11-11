@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "A Navi swapped mid-battle: a later form's battle sprite put in the battle's sprite cache by BN6's sprite_decompress (0x08002A64, BN6_SPRITE_DECOMPRESS) before its spawn; a compressed one drew as BN6's white dot (docs/rom/navis.md's row)."
+}

@@ -1,0 +1,13 @@
+{
+ "bn4": "0x14B",
+ "bn6": "0xE0",
+ "clock": "state",
+ "foes": [
+  "0xAC",
+  "0xAD",
+  "0xAE",
+  "0xAF"
+ ],
+ "what": "WoodMan's sound 0x14B, its copy",
+ "why": "Played by his third kind's 0x95 (BN4: movs r0,#0x4c and adds r0,#0xff at 0x080DFC52, its bl to PlaySoundEffect after them; BN6: its copy's movs r0,#0xe0 and adds r0,#0, the recipe's immediates), a state's: BN4's song 0x14B copied into the pool's fifth slot, BN6's empty 0xE0 (the owner's call 11). In his battles alone (foes)"
+}

@@ -1,0 +1,26 @@
+{
+ "name": "the spark effect's last frames",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "effects": [
+  "0x11"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "why": "Effect 0x11 (the fourth kind's type 0) draws the hit spark's sprite, list 5's 5, its animation 1 (both games' effect tables alike), each game its own sprite: BN5's animation 1 has five frames of 2, BN6's four, so BN5's effect is still drawn (in play, its state 4) the two frames after BN6's ends (its state 8, then gone), as the hit spark's own life ('the hit spark's life'). Its place and first frames are compared.",
+ "evidence": [
+  "the effects' tables: BN5 0x080DFD7C + 0x11 x 4, BN6 0x080E16D4 + 0x11 x 4: 14 05 01 00 in both",
+  "the sprites: BN5 0x0837D994, BN6 0x083A0320 (list 5's 5), their animation 1's frames 2, 2, 2, 2, 2 and 2, 2, 2, 2",
+  "chip_cannball: CannBall's burst (effect 0x11, from its moved code) ended in BN6's at t100 (its state 8) while BN5's is still drawn"
+ ]
+}

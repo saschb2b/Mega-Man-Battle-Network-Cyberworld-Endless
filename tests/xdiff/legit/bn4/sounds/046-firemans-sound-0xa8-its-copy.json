@@ -1,0 +1,7 @@
+{
+ "bn4": "0xA8",
+ "bn6": "0x33",
+ "clock": "state",
+ "what": "FireMan's sound 0xA8, its copy",
+ "why": "Played by his flame's state (MegaMan's code in BN4, copied with him: movs r0,#0xa8 at 0x080F198E, its bl to PlaySoundEffect at 0x080F1990, as it spawns the third kind's 0x09; BN6: its copy's movs r0,#0x33, the recipe's immediate, its bl through its veneer to BN6's, the hooks' sound event from 0x08F35A3D), a state's: BN4's song 0xA8 copied into the pool's second slot, BN6's empty 0x33 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); fireman_v1's first at t237 in BN4 and t238 in BN6, 12 in each. BN6's own song 0x33 is empty, so the copy is told by its slot"
+}

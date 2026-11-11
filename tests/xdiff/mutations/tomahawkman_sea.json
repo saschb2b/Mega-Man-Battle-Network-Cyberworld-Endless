@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the sea's splash another effect",
+  "spec": "tomahawkman_sea",
+  "poke": [
+   "08D9011A:2414"
+  ],
+  "what": "the splash of a non-Aqua object held on sea (xsea.c's SPLASH, its movs r4 at + 6) spawns effect 0x14 where BN5's 0x63 (BN6's 0xAC, the moved objects'): TomahawkMan coming to a sea panel at t10"
+ }
+]

@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-22",
+  "what": "--dev arena2v2: a partner's record takes his loadout's HP and buster (teambuster=N); the full-rules audit of what a partner meets (docs/online/arena/), DarkInvs left out for a MegaMan without BN5's AI block (src/emu/darkinvs.c) and BN5's green flash counted by a side's player alone (src/emu/xchips_flash.c)."
+}

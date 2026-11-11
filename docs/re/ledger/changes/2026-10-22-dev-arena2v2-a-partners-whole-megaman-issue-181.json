@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-22",
+  "what": "--dev arena2v2: a partner's whole MegaMan (issue #181): his NaviCust compiled by BN6's reload on a core of his client (src/online/arena_team_navicust.c, teamcust=N), his Cross by BN6's crossing controller run for his object (src/online/arena_team_cross.c, teamcross=N), a Program Advance from his own screen joined in his hand (arena_team_screen.c, arena_team_custom.c, teampa=N); docs/rom/'s three rows."
+}

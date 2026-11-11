@@ -1,0 +1,26 @@
+[
+ {
+  "name": "a moved object's type",
+  "spec": "chip_hotbody1",
+  "what": "HotBody's aura spawned as BN5's fourth kind's 0x56 (movs r0,#0x57 at BN5's 0x080E6CF8, written at its copy), a type the dispatch was given none of",
+  "poke5": [
+   "080E6CF8:2056"
+  ]
+ },
+ {
+  "name": "a moved family's sound",
+  "spec": "chip_hotbody1",
+  "what": "HotBody's sound 0xF7 (movs r0,#0xF7 at BN5's 0x080DA4B6, written at its copy) played as 0xF6",
+  "poke5": [
+   "080DA4B6:20F6"
+  ]
+ },
+ {
+  "name": "a moved chip's family, HotBody's",
+  "spec": "chip_hotbody1",
+  "poke": [
+   "08C04F73:A7:1"
+  ],
+  "what": "HotBody1's record (462) naming family 0xA7 (the stub) where the install gives it 0xA8"
+ }
+]

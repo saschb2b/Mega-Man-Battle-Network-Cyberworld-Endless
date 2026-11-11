@@ -1,0 +1,8 @@
+{
+  "feature": "Net Square",
+  "date": "2026-10-22",
+  "name": "What BN6 has to show a mood, for the Square's emotes",
+  "result": "BN6 has no emotion-bubble set: frame 0 of every sprite of lists 4-9 and the first frame of 452 icon-sized animations of lists 0-5, 7 and 9 drawn from Gregar show no ?, note, sweat, anger or sleep mark; its one heart is Roll's (list 3's 0x50), its one burst the battle's counter-hit \"!!\" (list 5's 0x07: \"!!\", a bat, a skull). MegaMan's overworld sprite (list 6's 0x37) has 73 animations: the item-get pose 0x18 (Gregar's text F8 01 18 41 times, 20 followed by sound 0x73), the arrival 0x2D (cutscene 47 00 FF 2D then sound 0x76), arms raised 0x40, sparks 0x38, panting 0x42, a leap 0x43, the buster aimed 0x33-0x36. BN6's hop in place (NPC bytes 22 11 60 DC 21) is in Gregar 157 times. A chat box face has three animations (still, blinking, talking; Lan's a fourth, eyes shut), set by text F5 03 n (31 times in Gregar's plain text), and no second face for a mood. BN5 adds a heart (list 4's 0x26) and a music note (list 4's 0x44).",
+  "meaning": "An emote can be a pose of the peer's own MegaMan puppet (an animation number, no NPC slot) or a hop, in step for everyone from the emote's index; a mark over a head needs one of the Square's 16 NPC slots, all taken, or (not yet tried) a map object, 56 slots, drawn through an OverworldMapObjects id left unused.",
+  "link": "../rom/overview.md"
+}

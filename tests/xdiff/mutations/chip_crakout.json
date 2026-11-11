@@ -1,0 +1,26 @@
+[
+ {
+  "name": "a moved chip's family in its record",
+  "spec": "chip_crakout",
+  "poke": [
+   "08C03343:6C:1"
+  ],
+  "what": "CrakOut's record (the registry's 298 at CHIPS_RECORDS) naming family 0x6C, whose grown entry is the stub, where the install gives it 0x6B: MegaMan's attack ends at once"
+ },
+ {
+  "name": "a moved family's entry",
+  "spec": "chip_crakout",
+  "poke": [
+   "08E0016C:08E003C1:4"
+  ],
+  "what": "the grown attack families' entry 0x6B (FREE_ATTACK_FAMILIES + 0x16C) left at the stub (XATTACK_STUB) where the install points it at CrakOut's moved code"
+ },
+ {
+  "name": "a number in a moved family's code",
+  "spec": "chip_crakout",
+  "what": "CrakOut's wait (movs r0,#0xF at BN5's 0x080EC8BA, written at its copy) one frame shorter: the crack a frame early",
+  "poke5": [
+   "080EC8BA:200E"
+  ]
+ }
+]

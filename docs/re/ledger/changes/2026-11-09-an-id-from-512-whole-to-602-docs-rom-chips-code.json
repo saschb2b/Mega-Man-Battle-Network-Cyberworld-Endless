@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "An id from 512 whole to 602 (docs/rom/chips-code.md, The pack past 511: BN6_PACK_EXT_FIRST, BN6_PACK_WIDE_FIRST, BN6_PACK_WIDE_END, BN6_CHIP_NAMES_REF_RESULTS and its five fellows, BN6_CHIP_NAMES_NONE, BN6_CHIP_DESC_READ, BN6_CHAT_NAME_ARCHIVE, BN6_GIVE_CHIPS_LIBRARY, BN6_GIVE_FOLDER_LIBRARY, BN6_REWARD_SPLIT_HP in bn6_chips.h); tools/ram_survey.py (docs/devtools/ram-survey.md)."
+}

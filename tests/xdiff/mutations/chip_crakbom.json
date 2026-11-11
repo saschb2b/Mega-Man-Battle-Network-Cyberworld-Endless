@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a table's effect id",
+  "spec": "chip_crakbom",
+  "poke5": [
+   "080C94D1:51:1"
+  ],
+  "what": "CrakBom's crack effect (its kind's row of the crack bombs' table, BN5's 0x080C94D1, given an id of the chips') left at 0x51: BN6's own effect 0x51, another picture"
+ }
+]

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "UNITE lit for a wrong kind",
+  "spec": "soul_grey",
+  "unitebreak": 4,
+  "what": "the check of the last pick lights a Soul for the kind after its own (BN5's table 0x08024BE4 read one off): KnightSoul (Break, 0xB) lit by a Cannon (no kind, 0xC), which BN5 leaves grey: BN6 unites"
+ }
+]

@@ -1,0 +1,13 @@
+{
+ "name": "BN6's AI data's pool bit",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x7C",
+  "0x7F"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6 hands its actors' AI data from a pool of eight (BN6_AI_POOL): the take (0x0800ED2C) sets the entry's own bit into its +0x7C (MegaMan's entry 0, bit 31: +0x7F 0x80), which the let-go (0x0800ED80) reads to free it. BN4 keeps one AI data a side at a fixed place (0x0800BFF4: movs r1,#0xc0; muls, from BN4_AI_DATA) and no pool, so no such bit (its +0x7C one of its attack's variables, at BN6's +0xAC in the trace)"
+}

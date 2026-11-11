@@ -1,0 +1,18 @@
+[
+ {
+  "name": "SidBmbo2's row's subfamily another",
+  "spec": "bn4_chip_sidbmbo2",
+  "poke": [
+   "08C0625C:83:1"
+  ],
+  "what": "the registry's record of BN4's SidBmbo2 (572) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x85: no bamboo, and no wait"
+ },
+ {
+  "name": "the bamboo's type another",
+  "spec": "bn4_chip_sidbmbo2",
+  "poke": [
+   "080D5DBE:20CB"
+  ],
+  "what": "the bamboo's spawner's copy (its movs r0,#0x44 at BN4 0x080D5DBE, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no bamboo"
+ }
+]

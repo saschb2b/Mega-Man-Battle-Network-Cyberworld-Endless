@@ -214,7 +214,7 @@ part of the tree; a new file gets its line there.
 Use `.claude/skills/reverse-engineering/SKILL.md` before investigating a
 new ROM behavior, offset, hook, transplant, save format or emulated link.
 Addresses stay in `docs/rom/` and claims in `docs/research/sources.md`;
-`docs/re/` holds where the work stands (`ledger.json`, written out by
+`docs/re/` holds where the work stands (`ledger/`, a file an entry, written out by
 `tools/re_status.py` as `STATUS.md` and the dashboard), not a second
 address map. Every ROM fact a piece of work finds, research included, ends
 in the project's map: a name in a `src/emu/bn6*.h` header, its

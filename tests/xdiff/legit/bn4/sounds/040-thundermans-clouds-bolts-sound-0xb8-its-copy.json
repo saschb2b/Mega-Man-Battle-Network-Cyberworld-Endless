@@ -1,0 +1,7 @@
+{
+ "bn4": "0xB8",
+ "bn6": "0x33",
+ "clock": "state",
+ "what": "ThunderMan's cloud's bolt's sound 0xB8, its copy",
+ "why": "Played by his cloud's bolt (BN4's third-kind 0x6F) as its count (+5) runs out (movs r0,#0xb8 at 0x080DB3B0, its bl to PlaySoundEffect at 0x080DB3B2; BN6: its copy's movs r0,#0x33, the recipe's immediate), at the battle's offset as the 0x148 above: BN4's song 0xB8 copied into the pool's slot 0x33 on BN4's player 17 (src/emu/xnavi_bn4_sounds.c), the slot GutsMan's 0xA3 takes in his battle (one Navi's sounds a battle)"
+}

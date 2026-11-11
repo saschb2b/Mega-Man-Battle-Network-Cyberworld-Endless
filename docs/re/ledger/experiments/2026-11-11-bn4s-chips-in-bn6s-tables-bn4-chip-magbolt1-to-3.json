@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_magbolt1 to 3: BN4's MagBolt moved, a pulled foe",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (a Mettaur pulled and not hit; hit for 110 with the pull blocked; pulled beside MegaMan and hit for 130, struck from t44 to t68 in both), eleven mutations caught. On the way: with BN4's hit bits 3 the bolt's hit with the pull's pushed alone in BN6 (state 0xB against BN4's 5 at t44), 0x43 the answer; the foe's record then differed in +0x0B and +0x1B, +0x1E, +0x1F alone.",
+  "meaning": "A foe a chip slides meets the engines' slide differences MegaMan's entries named, and one more: the runners' order of a pushed object's slide and a struck-and-pushed hit. Each is a leftover no code reads; panels, HP, states and timers agree."
+}

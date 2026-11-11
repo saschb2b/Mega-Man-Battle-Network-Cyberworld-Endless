@@ -1,0 +1,11 @@
+{
+ "name": "BN6's MegaMan's paralysis state's flag 0x400000",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "coll",
+ "offset": "0x3C",
+ "bit": "0x400000",
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6's own bookkeeping in its own MegaMan's paralysis state, not the port's subject (the lead's call, 2026-11-04, the owner's to overturn). Its writer: BN6's paralysis state (his state 4, entry 4 of his table 0x080EB86C: 0x080175B8) sets 0x400000 in his collision flags as it begins (0x080175C4: ldr r0,=0x400000; bl 0x0801A152); its clearer: 0x08017828 (in 0x08017768, his state 7, entry 7 of that table: bl 0x0801A15C); its reader: 0x08010162, run for him each frame from 0x0801B12E, which clears the flags' 0x04 while 0x400000 stands and sets it else (0x08010182-0x08010192). BN4's paralysis state (0x080109FA, entry 4 of his table 0x080EAEFC) sets no 0x400000: as it begins it clears 0x100441 as BN6's does (0x08010A0A / 0x080175CA), and no load of 0x400000 is in its code. Both set and clear 0x800 alike (the status routines 0x0800AEB4 / 0x0800E798, the ends 0x0800AE6C / 0x0800E74C). BN6's struck state (his state 3, entry 3 of 0x080EB86C: 0x080174FE) sets it too, with 0x400, as it begins (0x0801750A: ldr r0,=0x400400; bl 0x0801A152) and clears both as it ends (0x0801758A: bl 0x0801A15C), where BN4's (0x08010960, entry 3 of 0x080EAEFC) sets and clears 0x400 alone (0x0801096C-0x08010970: movs r0,#1; lsls r0,#10; bl 0x08012F82; 0x080109DE-0x080109E2, bl 0x08012F8C): walla_v1-v3, MegaMan struck by Walla's rings, 23 frames a hit. Guarded: that bit alone, BN6's side holding it and BN4's not, every other bit of the word compared as ever, the 0x04 it acts on among them, so any effect it had on him would still fail the spec or keep it INCONCLUSIVE (tools/xdiff_bn4.py allowed_world)"
+}

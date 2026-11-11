@@ -1,0 +1,11 @@
+{
+ "name": "BN5's buster draw",
+ "part": "rng",
+ "when": "buster draw",
+ "why": "BN5's buster draws one more random number as a shot begins than BN6's (whether it takes the NaviStats' byte 0x4D), so on the frame MegaMan's CurAction turns to his buster's (0x11) BN5's first RNG word is one step further than BN6's, the second the same. The spec runs with rng=follow (BN6's words written from BN5's after each frame), so they agree again from the next frame and nothing that draws later (a hit's spark) is moved by it. The family draws none (issue #82's research: no path from its code to the RNG but the reticle's collision spark, gated off by its hit effect 0xFF); were it to, its behaviour would differ and show as such.",
+ "evidence": [
+  "BN5 0x0800F560: the shot's setup draws a positive random number (BN5 0x080014A6) and tests bit 3 of it (0x0800F564)",
+  "BN6's buster damage 0x0801265C-0x08012698 (Attack, the table at 0x080126A4, the Cross's bonus at 0x080126B0) draws none",
+  "the mask holds only where BN5's first word is BN6's stepped once (x rotl 1 + 1, XOR 0x873CA9E5) and the second the same"
+ ]
+}

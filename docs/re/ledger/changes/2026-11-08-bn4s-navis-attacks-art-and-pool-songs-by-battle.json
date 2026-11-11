@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "BN4's Navis' attacks' art and pool songs by battle (src/emu/xnavi_bn4_art.c; src/emu/xnavi_recipe.h XN_BN4_ARTS; src/emu/free_space.h FREE_BN4_NAVI_ART at +0x750000 again; tools/xnavirecipe_bn4_art.py; docs/multirom/bn4-navis.md, Art and songs by battle): one room filled for the coming battle's Navi as its record is written, his sprites' list entries pointed at his places; the mutation of his seat's art byte (another Navi's art loaded) caught by searchman_v1 at t216."
+}

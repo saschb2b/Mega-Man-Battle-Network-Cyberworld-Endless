@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
+}

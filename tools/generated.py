@@ -3,7 +3,7 @@
 tools write from other files of the tree, kept out of pull requests' way
 (docs/project/merging.md).
 
-  docs/re/state.json, STATUS.md, dashboard.html   tools/re_status.py, from docs/re/ledger.json
+  docs/re/state.json, STATUS.md, dashboard.html   tools/re_status.py, from docs/re/ledger/
   docs/symbols/*                                  tools/symbols.py, from the headers, rom.c and docs/rom/
   docs/rom/symbols.md's "holdings" part           the same
   docs/voice/catalog.json                         tools/voice_catalog.py, from the words files
@@ -19,6 +19,9 @@ them as its base has them.
   python3 tools/generated.py check      build.py lint: their sources are sound (each
                                         tool's --lint) and this branch leaves the
                                         files as the commit it left dev at has them.
+                                        A branch that changes a tool itself writes
+                                        that tool's files, and is held to their
+                                        being in step instead.
                                         --strict (and on main, a tag and a pull
                                         request to main): the files in step with
                                         their sources instead
@@ -36,6 +39,13 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TOOLS = ('re_status.py', 'symbols.py', 'voice_catalog.py')
 FILES = ('docs/re/state.json', 'docs/re/STATUS.md', 'docs/re/dashboard.html', 'docs/voice/catalog.json')
 FOLDERS = ('docs/symbols/',)
+# Each tool: its own files (a branch that changes one changes what the tool writes, and so
+# writes it), and where what it writes lies.
+OWN = {
+    're_status.py': (('tools/re_status.py', '.claude/skills/reverse-engineering/assets/dashboard.html'), ('docs/re/',)),
+    'symbols.py': (('tools/symbols.py',), ('docs/symbols/', 'docs/rom/symbols.md')),
+    'voice_catalog.py': (('tools/voice_catalog.py',), ('docs/voice/',)),
+}
 # A page a person writes with parts a tool writes: the page, the marks around each part.
 PARTS = {'docs/rom/symbols.md': (('<!-- tools/symbols.py writes this part: holdings -->',
                                   '<!-- end of what tools/symbols.py writes -->'),)}
@@ -118,12 +128,18 @@ def base():
     return found.strip() if found else None
 
 
-def touched(ref):
-    """The generated files and parts that differ here from the commit's."""
-    out = [path for path in whole(ref) if here(path) != at(ref, path)]
+def reworked(ref):
+    """The tools this branch changes: theirs to write, in step."""
+    return [tool for tool, (own, _) in OWN.items() if any(here(path) != at(ref, path) for path in own)]
+
+
+def touched(ref, but=()):
+    """The generated files and parts that differ here from the commit's, but those of the tools named."""
+    free = tuple(prefix for tool in but for prefix in OWN[tool][1])
+    out = [path for path in whole(ref) if here(path) != at(ref, path) and not path.startswith(free)]
     for path, marks in PARTS.items():
         mine, theirs = here(path), at(ref, path)
-        if mine is None or theirs is None:
+        if mine is None or theirs is None or path.startswith(free):
             continue
         if parts(mine, marks) != parts(theirs, marks):
             out.append(f'{path} (the part a tool writes)')
@@ -145,15 +161,19 @@ def check(strict):
     strict = strict or (env.get('GITHUB_EVENT_NAME') == 'push'
                         and (env.get('GITHUB_REF', '') == 'refs/heads/main' or env.get('GITHUB_REF', '').startswith('refs/tags/')))
     strict = strict or (env.get('GITHUB_EVENT_NAME') == 'pull_request' and env.get('GITHUB_BASE_REF') != 'dev')
-    bad = max(run(tool, '--check' if strict else '--lint') for tool in TOOLS)
     ref = None if strict else base()
+    ref = ref.strip() if ref else None
+    own = reworked(ref) if ref else []
+    bad = max(run(tool, '--check' if strict or tool in own else '--lint') for tool in TOOLS)
+    for tool in own:
+        print(f'generated: tools/{tool} is changed by this branch, which so writes its files: held to their being in step')
     if strict:
         print('generated: in step with their sources' if not bad else 'generated: out of step: python3 tools/generated.py write')
     elif ref is None:
         print('generated: no branch to check (a push to dev)' if env.get('GITHUB_ACTIONS') else
               f'generated: {DEV} is not known here, so whether this branch changes a generated file was not checked')
     else:
-        changed = touched(ref.strip())
+        changed = touched(ref, own)
         for path in changed:
             print(f'generated: {path} differs from dev\'s: dev\'s workflow writes it, a branch leaves it '
                   f'(docs/project/merging.md): python3 tools/generated.py restore')

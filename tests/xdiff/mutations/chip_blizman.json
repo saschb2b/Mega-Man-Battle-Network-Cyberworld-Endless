@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a moved Navi routine's entry",
+  "spec": "chip_blizman",
+  "poke": [
+   "08E008AC:08E00C05:4"
+  ],
+  "what": "the grown Navi routines' entry 0x2B (XC_NAVI + 0xAC) left at their stub (XC_STUBS + 4) where the install points it at BlizzardMan's moved routine (BN5's Navi routine 0x0E): no BlizzardMan, the foe keeps its 280"
+ },
+ {
+  "name": "the Navi chip BlizMan's snowball's type",
+  "spec": "chip_blizman",
+  "poke5": [
+   "080DCAC8:20B1"
+  ],
+  "what": "BlizzardMan's snowball spawned as BN5's third kind's 0xB1 (movs r0,#0xB2 at BN5's 0x080DCAC8, written at its copy) where its own moved 0xB2 runs"
+ }
+]
