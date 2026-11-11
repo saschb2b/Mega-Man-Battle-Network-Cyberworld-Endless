@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T09:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:40:16Z }
 ---
 
 # The chip recipe generator
@@ -202,7 +202,17 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   spread shot's) is copied with the unit, each row of a kind its chips
   play given BN6's id of the effect (of the same look, or moved) and a
   slot a byte can name for the sound (`FAMILY_SLOTS`); the arm's kinds'
-  table keeps a row's sprite list beside its number.
+  table keeps a row's sprite list beside its number. A third-kind type
+  several attack units spawn is moved once, by the first of them in
+  `UNITS` (`SHARED3`: MegaMan's arm, the Spreads unit's): a unit after
+  it copies the type's spawner alone, a block of its own, its spawn the
+  owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
+  table's kinds are every unit's. A routine the families pair with BN6's
+  own that a chip's unit moves instead, with its type, is named in
+  `UNIT_MOVES` (the thunder's spawner); a literal that is a number, not
+  an address, in `NUMBERS`; and a call noted before its target's type
+  was moved with the unit is walked as its own code (FlmCros's cross, in
+  the flame's code).
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -238,7 +248,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   shim of the unit's home that names it, a number past a byte; one
   without a slot is a decision, the next slot its answer.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
-  (veneers, then shims), then code, then art. Its entry is the spawner's copy at
+  (veneers, then shims), then code (48 KB), then art (from + 0x24000,
+  176 KB: the scarce one, [BN4's chips](../multirom/bn4-chips.md)). Its entry is the spawner's copy at
   BN6's grown support routines' 0x80 + BN4's subfamily (BN6's own are
   0-0x29, BN5's from 0x2A). `xchips_bn4_code_install` stages it where
   BN4's ROM is read; the stubs and the two grown tables are staged by
@@ -262,8 +273,9 @@ its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
-MokoRus (misc 1), SidBmbo (misc 5) and Spreads (attack 0x1E); FlmLine
-is next of the attack families.
+MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
+(0x22), Thunder (0x26) and TwnFng (0x34); MagBolt is next of the attack
+families.
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it

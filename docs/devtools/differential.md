@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T11:55:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:40:16Z }
 ---
 
 # The differential: a moved family against its own game
@@ -119,7 +119,11 @@ while his CurAction is a generic state's in both
 foe (the opening's alignment is the appear queue's first object's), so a
 burst's reach is seen by its effects' panels, and a chip used after a
 support chip follows BN6's support run's held frame, its objects with
-it: such a spec is not written yet.
+it: such a spec is not written yet. A sound row may name `chips`, BN4's
+ids: it holds in the specs whose `folder4` holds one of them alone, over
+the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
+where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
+ThunderMan's battles with the pool's slot).
 
 A support chip's object is read by one rule (`legit.json`'s `bn4`
 `support_objects`, `tools/xdiff_bn4.py` `support_spawners`): every

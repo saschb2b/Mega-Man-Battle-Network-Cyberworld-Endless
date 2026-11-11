@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (FlmLine1-3, Thunder1-3 and TwnFng1-3 moved; the arm shared; the units' art room, its start moved, and what it does not hold), rom/bn4.md (their code, new row), devtools/chip-recipe-generator.md (a shared type, a unit's own move of a paired type), devtools/differential.md (a sound row by a spec's chips).
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
 * **Update**: multirom/navis.md (CloudMan moved and proved; the 0x0B the Navis' copy; three generator rules), game/liberation/building/stage-4-darkloids.md and par-prize.md (CloudMan on the board, his chips at par), rom/liberation.md (CloudMan's clouds' row facts), multirom/gaps.md, multirom/chips-code.md (the Bubbles helper gone), game/bosses/bn5-navis.md, devtools/navi-recipe-generator.md (LOW_BYTE_KEPT, every parent compare, the type's track), engine/emulation/free-space.md (the Navis' shared art's fourth room, FREE_NAVI_SHARED_FOUR).
 * **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
@@ -27,6 +28,7 @@
 * **Update**: devtools/differential.md (one rule for every support chip's object; a paired chip's record copies) and multirom/bn4-chips.md (the pairings by name asked of the differential).
 
 ## 2026-11-10
+* **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
 * **Update**: devtools/differential.md and multirom/bn4-chips.md (a dark MegaMan's palette, BN4's own, the comparator's one allowance for a dark karma; `bn4_chip_invis_dark`).
 * **Update**: game/reward-pick.md (what MegaMan holds, as BN6's shops' ITEMS box shows it; codes in their own column, in heavy capitals), engine/ui.md (the ITEMS box measured).
 * **Create**: game/reward-pick.md (the run's reward picks on a screen of ours: what each choice shows, the keys, how a pick's script opens it); **Update**: engine/ui.md (Ours: the reward pick), code/director.md (`reward_pick*.c`), game/index.md.
