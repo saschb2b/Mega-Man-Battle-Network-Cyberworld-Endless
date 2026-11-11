@@ -1197,9 +1197,9 @@
    "name": "a Program Advance's id",
    "spec": "pa_suprspr1",
    "poke": [
-    "08801366:0165:2"
+    "08801370:0165:2"
    ],
-   "what": "SuprSpr1's recipe in the grown list (FREE_CHIP_PAS + 0x64, src/core/xchips_pas.c: after the ten of ten bytes whose parts are Navi chips) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
+   "what": "SuprSpr1's recipe in the grown list (FREE_CHIP_PAS + 0x6E, src/core/xchips_pas.c: after the eleven of ten bytes whose parts are Navi chips, CrosOver's the eleventh) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
   },
   {
    "name": "a Program Advance's moved routine's entry",
