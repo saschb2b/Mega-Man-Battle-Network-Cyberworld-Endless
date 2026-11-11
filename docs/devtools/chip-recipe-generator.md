@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T10:19:41Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T11:37:49Z }
 ---
 
 # The chip recipe generator
@@ -182,6 +182,27 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
+- **An attack unit.** A chip of neither state names a state of MegaMan's
+  of its own by its record's family (`BN4_PLAYER_STATES`: the spread
+  chips' 0x1E). A unit of kind `attack` is that state whole, its routine
+  to the next state's, every subfamily of it: its phases, its bytes by
+  subfamily, the arm and the shot it spawns moved with it. BN6 runs a
+  family with r7 the attack's variables, which BN4's state makes itself:
+  the immediate that does is given BN6's place (his AI data's +0x70,
+  BN6's +0xA0), and any other field of his AI data is a decision until
+  both games' use of it is read (`MEGAMAN_AI`). Its number is one of
+  BN6's grown attack families the chips of BN4 have for their own
+  (`ATTACK_NUMBERS`, 0xD0 on, `XATTACK_BN4`), fixed as the unit is
+  written; its chips' rows name it in `sub` (0xD0 or over is a family,
+  the record's subfamily BN4's own), a chip of the family another
+  session moves waits (`ROWS_WAIT`), and its Program Advances stay
+  `XREG_PA`. MegaMan's animation, each art's own number, and a place of
+  BN4's NaviStats are hand-read immediates (`IMMS`). A kinds' table
+  whose rows name an effect and a sound by a byte (`ROW_TABLES`: the
+  spread shot's) is copied with the unit, each row of a kind its chips
+  play given BN6's id of the effect (of the same look, or moved) and a
+  slot a byte can name for the sound (`FAMILY_SLOTS`); the arm's kinds'
+  table keeps a row's sprite list beside its number.
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -247,7 +268,8 @@ its entry alone.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
-MokoRus (misc 1) and SidBmbo (misc 5).
+MokoRus (misc 1), SidBmbo (misc 5) and Spreads (attack 0x1E); FlmLine
+is next of the attack families.
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it

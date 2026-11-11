@@ -10,7 +10,31 @@
  * Blue Moon's Soul Navis) take their side's AI data at their init and name MegaMan's states in their table (their
  * attacks); the others keep their variables in the object, as the families do */
 #define BN4_NAVI_FIRST_ID 128         /* Roll's V1: a Navi's four enemy ids in a row from here (V1, V2, V3, SP; BN4_ENEMY_VERSION 0-3) */
+/* ... each proved Navi's V1 (his seat (id - BN4_NAVI_FIRST_ID) / 4; docs/multirom/bn4-navis.md, Navi by Navi), the names an area
+ * of BN4's gives its guardians by (NetAreaDef.xguard) */
+#define BN4_V1_ROLL       0x80
+#define BN4_V1_GUTSMAN    0x84
+#define BN4_V1_WINDMAN    0x88
+#define BN4_V1_SEARCHMAN  0x8C
+#define BN4_V1_FIREMAN    0x90
+#define BN4_V1_THUNDERMAN 0x94
+#define BN4_V1_JUNKMAN    0xA4
+#define BN4_V1_AQUAMAN    0xA8
+#define BN4_V1_WOODMAN    0xAC
 #define BN4_NAVI_SPRITES  8           /* a Navi's BN4_ENEMY_KIND: its battle sprite in list 2, its BN4_ENEMY_FAMILY the number (GutsMan 2) */
+/* Their overworld sprites in list 6 (XRomLayout.sprite_lists), each at his mugshot's number in list 8 as BN5's and BN6's are:
+ * found by each one's colours against his battle sprite's (list 2, his record's BN4_ENEMY_FAMILY), the four mugshots named in
+ * docs/rom/bn4.md agreeing (docs/rom/bn4.md, Sprite lists) */
+#define BN4_OW_ROLL       0x41
+#define BN4_OW_GUTSMAN    0x42
+#define BN4_OW_WOODMAN    0x47
+#define BN4_OW_FIREMAN    0x4F
+#define BN4_OW_AQUAMAN    0x51
+#define BN4_OW_WINDMAN    0x54
+#define BN4_OW_THUNDERMAN 0x58
+#define BN4_OW_SEARCHMAN  0x59
+#define BN4_OW_JUNKMAN    0x5A
+#define BN4_OW_TOPMAN     0x53 /* (named as he joined the proved; the others the row names wait for theirs) */
 #define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
 #define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
 #define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */
@@ -269,5 +293,19 @@
 #define BN4_JUNK_SPAWN2   0x080E0170u /* the third kind's 0x97's spawner, from his copied MegaMan state 110 (0x080F41B4) */
 /* (his records name list 1's 0x0A, raw, where his init loads list 2's: BN4_SPRITE_PRELOAD, their sprite's one reader (0x08002B0E),
  * unpacks an LZ77'd one alone, its bit 31 tested at 0x08002B44, and passes a raw one over) */
+
+/* TopMan, derived after JunkMan, the first of the other build (no AI data, every state his own; tools/xnavirecipe_bn4.py;
+ * docs/multirom/bn4-navis.md, TopMan built): found by his type, each checked by the generator against his ROM */
+#define BN4_TOPMAN        0x080B68B0u /* his type's routine (BN4_T1_TYPES[BN4_NAVI_TYPE_TOPMAN]): jump table 0x080B68C8 (init
+                                       * 0x080B68D5, update 0x080B6935, dying BN4_NAVI_DYING), then the after-step; his block to 0x080B73C8 */
+#define BN4_TOPMAN_STATES 0x080B694Cu /* his state table: BN4's generic Navi 0-2, 4 and 5, his own 3 (0x080B697D: his flinch, ending in
+                                       * BN4's generic 3, 0x08010E88), his own 6-11 (0x080B6995 his decision, 0x080B6D33 to 0x080B71F9) */
+#define BN4_TOPMAN_PALETTE 0x080B68F2u /* his init's palette: movs r0,#0, his version (+4) compared with 3, movs r0,#3, then BN4's
+                                        * palette set (0x08002DEC): 0 for V1-V3, 3 for his SP (the other build's form, as SparkMan's
+                                        * 0x080B7776 and BurnerMan's 0x080BDA02, which gives 2) */
+#define BN4_TOP           0x080D02F8u /* the third kind's 0x1B's block (his top) to 0x080D055C: its init loads list 2's 0x12, his own
+                                       * battle sprite (movs r1,#8; movs r2,#0x12 at 0x080D031E) */
+#define BN4_TOPMAN_DAMAGE 0x080B69BCu /* his decision's first step: his +0x2C (his attack's damage) against his collision data's +0x1E
+                                       * (BN4_COLL_DAMAGE), copied there with his +0x2E into its +5 (BN4_COLL_OBJ_2E) where they differ */
 
 #endif

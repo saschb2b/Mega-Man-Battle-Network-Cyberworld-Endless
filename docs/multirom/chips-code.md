@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The chips' code"
 description: "Issue #82's C2 and C3: BN5's chips proved against BN5's own battle frame by frame, and BN5's code for those BN6 lacks moved in as units (`tools/xchiprecipe.py`, `src/emu/xchips_code.c`), DarkInvs and Program Advances among them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-09T22:27:28Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:00:00Z }
 ---
 
 # The chips' code
@@ -286,9 +286,13 @@ of. The registry's ids, records and art stay C1's (above).
   kinds 2-5), spawned by its own spawner: his unit first copied that
   object's block again, and Marina's bubbles, the families', ran the later
   copy (`marina_v1_keys` FAIL at t408, found by the whole suite, not his
-  specs); the spawner, the object and its kinds' table are a helper now
+  specs); the spawner, the object and its kinds' table were a helper
   (`Bubbles`, `HELPER_TYPES`), one copy for both units, and the helpers'
-  room, the powers and the homes moved 0x400 up for it (80 homes). BN5's
+  room, the powers and the homes moved 0x400 up for it (80 homes). Since
+  CloudMan the Navi is moved (12 November 2026) the object is his copy, the
+  Navis installing first: the helper is gone and both units' calls to its
+  spawner go to his copy (`NAVI_SPAWNERS`; [Transplanted Navis](navis.md),
+  CloudMan). BN5's
   last five Program Advances, each made of two of a chip and one of
   those Navi chips' SP or DS, have routines of their own and are units
   too ([The chip registry and BN5's chips' code](../rom/chips-code.md),

@@ -371,7 +371,7 @@ static void extras_log(int tiles) {
 	}
 	fprintf(stderr, "layer extras: off %d dark %d bracket %d glitch %d battler %d flame %d older area %d guardian %d\n", run.extras_off, layer.dark,
 		run.side_kind == LAYER_NORMAL && run_bracket_at(run.depth), glitch, battler, D.dark_kind >= 0, tiles >= NET_AREAS,
-		guardian_older(run_layer_guardian()));
+		guardian_moved(run_layer_guardian()));
 }
 
 static bool build_layer(void) {
