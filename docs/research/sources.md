@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T15:35:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:40:00Z }
 ---
 
 # Sources
@@ -424,9 +424,11 @@ What the Jukebox ([The PET](../game/pet.md#the-jukebox), The Jukebox) says of th
 how it is known:
 
 - **Which songs are music.** BN6's music player plays 0x01-0x25 on player
-  31; BN5's 0x01-0x24, its 0x0A an empty header on player 0. Verified by
-  reading each game's song table (BN6 `0x08159F48`, BN5 `0x08155BF4`):
-  every entry's player and its header's track count ([ROM data](../rom/overview.md)).
+  31; BN5's 0x01-0x24, its 0x0A an empty header on player 0; BN4's
+  0x00-0x21, its 0x00 its title (seven tracks, begun by the title's start),
+  0x22 on empty headers on player 0. Verified by reading each game's song
+  table (BN6 `0x08159F48`, BN5 `0x08155BF4`, BN4 `0x08155FF8`): every
+  entry's player and its header's track count ([ROM data](../rom/overview.md)).
 - **BN5's songs play on BN6's code.** Verified: BN5's MP2K library
   (`0x0814C9FC`, 0x2104 bytes from SoundMain) is BN6's (`0x0814F754`)
   byte for byte but for 24 literals (its tables', its player table's, its
@@ -454,7 +456,17 @@ how it is known:
   Final Battle 0x17, Victory 0x19 and Fanfare 0x1F are verified so; 0x0B
   plays as a stranger shows himself (A Stranger), 0x0E as friends come to
   help (Hope); and 0x05, which an earlier reading named School, plays in
-  SciLab and at Higsby's (seen in romlab).
+  SciLab and at Higsby's (seen in romlab). BN4's the same way
+  ([BN4 Red Sun's tables](../rom/bn4.md), Where BN4 plays its songs; `tools/bn4_songs.py`), its
+  interpreters' tables found by their handlers that start a song, every
+  script decoded (60108 commands), its map groups and screens seen in
+  romlab (a warp to each group, the main modes set), its scenes read for
+  what happens there (BN4's text read for research, none of it kept). Its
+  songs follow BN6's order a place earlier from 0x0A on (Something's Up,
+  Crisis as Emergency, Sorrow, Victory, Defeat, Game Over, Credits,
+  NaviCust, Fanfare), each verified where BN4 plays it, not by the order.
+  Assumed: the place names Den City (group 0x01, by the Metroline map's
+  title) and Den Dome (group 0x02, by its scenes).
 - **Never started:** BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21.
   Searched: every call of its song starters (PlayMusic `0x080005A0`, its
   forced and faded-in forms, PlaySoundEffect with a song's number), its
@@ -465,7 +477,14 @@ how it is known:
   these songs over the cutscenes' whole region: none (`tools/bn5_songs.py`
   runs the search again). Read in part: the
   cutscenes' camera scripts (whose 0x10 plays a song: none of these at
-  their starts). Not here: Team ProtoMan's version. A player who knows where one plays is the lead to verify
+  their starts). BN4's 0x10, 0x11 and 0x20: the same searches over Red
+  Sun (its four starters, its four map-music lists, every record of its
+  encounters' and story's battle tables, 60108 script commands from its
+  map groups' tables and the cutscenes they start, the object scripts
+  and 662 text archives found by their shape, the bytes of each map
+  script's and cutscene's music command with these songs over the
+  scripts' whole region: one, in a table of triples, no script), none
+  (`tools/bn4_songs.py`). Not here: Team ProtoMan's version. A player who knows where one plays is the lead to verify
   (Learned from players, below).
 
 ## Sound settings (2 November 2026)
