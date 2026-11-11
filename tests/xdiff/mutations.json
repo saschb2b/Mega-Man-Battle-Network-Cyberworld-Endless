@@ -3676,6 +3676,215 @@
     "080D44BA:2033"
    ],
    "what": "his flame's sound 0xA8 (BN4 0x080D44BA: movs r0,#0xa8, the recipe's pool slot 0x32) made the pool's second slot, 0x33: his 0x14C where BN4 plays 0xA8 (caught at t123, the family's sounds)"
+  },
+  {
+   "name": "BN6's Program Advances' list alone, BN4's recipes out",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "080295B4:0802BCB0:4"
+   ],
+   "what": "the Custom screen's word of the Program Advances' list (BN6_PA_LIST_REF) BN6's own list again where pas_stage points it at the list grown with BN5's and BN4's recipes: HeatShot, Heat-V and HeatSide picked form nothing in BN6's, used one by one where BN4 forms HeatSprd"
+  },
+  {
+   "name": "a BN4 recipe's Program Advance another",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "088013CA:025F:2"
+   ],
+   "what": "HeatSprd's listed recipe in the grown list (FREE_CHIP_PAS + 0xC8, src/core/xchips_pas_bn4.c's first, after BN5's) names 607 (BubSprd) where the registry's HeatSprd is 606: BubSprd formed, its arm, its element and its burst another"
+  },
+  {
+   "name": "a BN4 recipe's part another",
+   "spec": "bn4_pa_heatsprd_shot",
+   "poke": [
+    "088013D6:024D:2"
+   ],
+   "what": "the recipe of three HeatShot in a row (FREE_CHIP_PAS + 0xD2) names Heat-V (589) as its chip: the three HeatShot picked form nothing in BN6's"
+  },
+  {
+   "name": "a BN4 recipe's kind another",
+   "spec": "bn4_pa_flmcros1",
+   "poke": [
+    "088013F7:04:1"
+   ],
+   "what": "FlmCros1's recipe (FREE_CHIP_PAS + 0xF6) read as BN6's kind 4, three ids listed, where it is kind 0, three of one chip: the ids after FlmLine1's are the next recipe's bytes, nothing formed"
+  },
+  {
+   "name": "PitRng1's recipe forms PitRng2",
+   "spec": "bn4_pa_pitrng1",
+   "poke": [
+    "0880140A:0264:2"
+   ],
+   "what": "PitRng1's recipe (FREE_CHIP_PAS + 0x108) names 612: the boomerangs' power 250, the Mettaur's 250 HP gone at the hit where BN4's leaves 50"
+  },
+  {
+   "name": "BstFang1's recipe forms BstFang2",
+   "spec": "bn4_pa_bstfang1",
+   "poke": [
+    "0880141C:0267:2"
+   ],
+   "what": "BstFang1's recipe (FREE_CHIP_PAS + 0x11A) names 615: a fang's hit 60 where BN4's is 50"
+  },
+  {
+   "name": "MagShok1's recipe forms MagShok2",
+   "spec": "bn4_pa_magshok1",
+   "poke": [
+    "0880142E:026D:2"
+   ],
+   "what": "MagShok1's recipe (FREE_CHIP_PAS + 0x12C) names 621: the bolts' hit 250, the Mettaur deleted where BN4's leaves 50"
+  },
+  {
+   "name": "HeatSprd's power another",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "08C06842:00C8:2"
+   ],
+   "what": "the registry's record 606's power (the grown chip table, +0x1A) 200 where BN4's HeatSprd has 300: the Spikey left 130"
+  },
+  {
+   "name": "HeatSprd's burst HeatShot's",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "08C06838:08:1"
+   ],
+   "what": "record 606's first parameter, the shot's kind, 8 (HeatShot's row of BN4_SPREAD_SHOT_KINDS, the panel behind) where HeatSprd's is 0xB (the nine panels round the hit)"
+  },
+  {
+   "name": "HeatSprd's subfamily the bubble's",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "08C06834:02:1"
+   ],
+   "what": "record 606's subfamily 2 where BN4's HeatSprd is the family's 1: the bubble's arm (BN4_SPREAD_ARMS) and the shot's element"
+  },
+  {
+   "name": "the shot's kind 0xB's shape another",
+   "spec": "bn4_pa_heatsprd",
+   "poke": [
+    "080CF408:02:1"
+   ],
+   "what": "the shot's copy's kinds' row 0xB (BN4_SPREAD_SHOT_KINDS + 0x2C) with the burst's shape 2, the panel behind, where BN4's row holds 0x0F"
+  },
+  {
+   "name": "BubSprd's power another",
+   "spec": "bn4_pa_bubsprd",
+   "poke": [
+    "08C0686E:00C8:2"
+   ],
+   "what": "record 607's power 200 where BN4's BubSprd has 300: the Mettaur left 50 at the hit's frame where BN4's is deleted"
+  },
+  {
+   "name": "BubSprd's subfamily the heat's",
+   "spec": "bn4_pa_bubsprd_v",
+   "poke": [
+    "08C06860:01:1"
+   ],
+   "what": "record 607's subfamily 1 where BN4's BubSprd is the family's 2: the heat's arm and wait"
+  },
+  {
+   "name": "FlmCros1 a line",
+   "spec": "bn4_pa_flmcros1",
+   "poke": [
+    "08C0688C:00:1"
+   ],
+   "what": "record 608's subfamily 0 where BN4's FlmCros1 is 1: three flames in a line (BN4_FLAME_LINE) where BN4 lays five in a cross (BN4_FLAME_CROSS)"
+  },
+  {
+   "name": "the cross's third flame misplaced",
+   "spec": "bn4_pa_flmcros1",
+   "poke": [
+    "080D0116:3101"
+   ],
+   "what": "the cross's copy's step to the panel below (adds r1,#2 at BN4 0x080D0116) made adds r1,#1: its third flame on the middle panel again"
+  },
+  {
+   "name": "FlmCros3's power another",
+   "spec": "bn4_pa_flmcros3",
+   "poke": [
+    "08C068F2:00C8:2"
+   ],
+   "what": "record 610's power 200 where BN4's FlmCros3 has 500: the Mettaur left 50 at the hit's frame"
+  },
+  {
+   "name": "BstFang1 one volley",
+   "spec": "bn4_pa_bstfang1_miss",
+   "poke": [
+    "08C06994:00:1"
+   ],
+   "what": "record 614's subfamily 0 where BN4's BstFang1 is 1: one volley (7 x the subfamily + 1) where BN4 flies eight"
+  },
+  {
+   "name": "the volleys fewer",
+   "spec": "bn4_pa_bstfang1_miss",
+   "poke": [
+    "080ED500:2103"
+   ],
+   "what": "the state's copy's volleys a subfamily (movs r1,#7 at BN4 0x080ED500) made 3: four volleys where BN4 flies eight"
+  },
+  {
+   "name": "BstFang1's power another",
+   "spec": "bn4_pa_bstfang1",
+   "poke": [
+    "08C069A2:0028:2"
+   ],
+   "what": "record 614's power 40 where BN4's BstFang1 has 50: the Elmperor left 60 by six fangs where BN4's deletes it"
+  },
+  {
+   "name": "MagShok1 a MagBolt",
+   "spec": "bn4_pa_magshok1",
+   "poke": [
+    "08C06A9C:00:1"
+   ],
+   "what": "record 620's subfamily 0 where BN4's MagShok1 is 3: one bolt and MagBolt1's arm where BN4 puts three"
+  },
+  {
+   "name": "MagShok's pull the other side's",
+   "spec": "bn4_pa_magshok1",
+   "poke": [
+    "080EE148:81:1",
+    "080EE14C:82:1"
+   ],
+   "what": "the state's copy's two hit words for MagShok's pull, one a side (BN4 0x080EE148 0x1E05FF82 and 0x080EE14C 0x1E05FF81), swapped: the Mettaur pushed away where BN4 pulls it beside MegaMan"
+  },
+  {
+   "name": "MagShok2's power another",
+   "spec": "bn4_pa_magshok2",
+   "poke": [
+    "08C06AD6:0064:2"
+   ],
+   "what": "record 621's power 100 where BN4's MagShok2 has 250: the Spikey left 230"
+  },
+  {
+   "name": "PitRng1 a Boomer",
+   "spec": "bn4_pa_pitrng1",
+   "poke": [
+    "08C06910:82:1"
+   ],
+   "what": "record 611's subfamily 0x82, Boomer's entry of BN6's grown misc routines, where PitRng's is 0x8D: one boomerang from MegaMan's panel where BN4's launcher throws three"
+  },
+  {
+   "name": "PitRng's boomerangs fewer",
+   "spec": "bn4_pa_pitrng1",
+   "poke": [
+    "080E99E4:2002"
+   ],
+   "what": "the launcher's copy's count (movs r0,#3 at BN4 0x080E99E4, BN4_PITRNG_COUNT) made 2: two boomerangs"
+  },
+  {
+   "name": "PitRng's boomerangs sooner",
+   "spec": "bn4_pa_pitrng1",
+   "poke": [
+    "080E99F8:2007"
+   ],
+   "what": "the launcher's copy's wait (movs r0,#0xf at BN4 0x080E99F8, BN4_PITRNG_EVERY) made 7: a boomerang each eight frames"
+  },
+  {
+   "name": "PitRng3's power another",
+   "spec": "bn4_pa_pitrng3",
+   "poke": [
+    "08C06976:00C8:2"
+   ],
+   "what": "record 613's power 200 where BN4's PitRng3 has 300: the Elmperor left 100 at the hit's frame"
   }
  ]
 }
