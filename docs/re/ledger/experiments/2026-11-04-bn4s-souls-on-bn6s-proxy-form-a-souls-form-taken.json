@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Souls on BN6's proxy form",
+  "date": "2026-11-04",
+  "name": "A Soul's form taken in BN4, then all twelve",
+  "result": "romlab, from bn4_lab's room with a Mettaur: a probe after the pick's gate read 0x3784 for WindSoul's pseudo-chip (its key 0xA3 XOR 0x64 against the save's 0x5C); with the save's byte written as the key XOR 0x64, WindSoul united, its unison played, turns 3, 2, 1, 0 under his face at three screens, plain the turn after (a writes watch: AI data +0x18 1, 2, 3 by 0x0800BA20). Each of the twelve, given Wind's kind and flag in the ROM's tables, united, drew its sprite and name, and fired its charged shot after B held 300 frames against a Mettaur with its update stubbed (probes on its power attack and family; GutsSoul's too, JunkSoul's family the battle's chip).",
+  "meaning": "BN4's Soul code is whole in Red Sun for all twelve: a run can lend Blue Moon's six from one ROM; the guest core's BN4 Souls need the gate's byte beside the flag.",
+  "link": "../multirom/bn4-souls.md"
+}

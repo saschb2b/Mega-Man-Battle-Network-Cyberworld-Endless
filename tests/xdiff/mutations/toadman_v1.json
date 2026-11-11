@@ -1,0 +1,18 @@
+[
+ {
+  "name": "a Navi's state number not moved",
+  "spec": "toadman_v1",
+  "poke": [
+   "08DA4CC8:200B"
+  ],
+  "what": "ToadMan's first decision's CurAction (BN5 0x080FC460, BN6's copy at XN_CODE + 0x12C00 + 0xC8) left at BN5's 11 (BN6's his third own state) where the recipe makes it 13"
+ },
+ {
+  "name": "a Navi's effect not renumbered",
+  "spec": "toadman_v1",
+  "poke": [
+   "08DA51E6:245D"
+  ],
+  "what": "ToadMan's teleport's effect (BN5 0x080FC97E: movs r4,#0x5D, its copy at XN_CODE + 0x12C00 + 0x5E6) left at BN5's 0x5D, which BN6 numbers another, where the recipe makes it BN6's 0xA1, the copy of BN5's"
+ }
+]

@@ -1,0 +1,14 @@
+[
+ {
+  "name": "NumberSoul's hand of nine",
+  "spec": "soul_number_plus",
+  "soulbreak": 256,
+  "what": "the hand size's hook (BN6_HAND_SIZE_SET) deals NumberSoul 9 where BN5's 0x08025C24 deals 10: the second screen's elements laid out for nine"
+ },
+ {
+  "name": "NumberSoul's bonus left out",
+  "spec": "soul_number_plus",
+  "soulbreak": 512,
+  "what": "the bonus by form (BN6's 0x0800EF34, soulproxy.c's hook) gives NumberSoul's Cannon no +10 (BN5's 0x0800D0CA): CanGard struck for 40 where BN5's for 50"
+ }
+]

@@ -1,0 +1,12 @@
+{
+ "name": "BN6's MegaMan's routine index",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x00",
+  "0x00"
+ ],
+ "why": "BN6's MegaMan runs as the first kind's type 0, whose routine picks his by his AI data +0 (0x080B9A5C: ldr r4,[r5,#0x58]; ldrb r0,[r4]; the table at 0x080B9A74: 0 the virus dispatcher 0x0810A279, 2 his own 0x080EB7A1, his +0 2); BN4's MegaMan's type routine calls his own straight (0x080B34D8: bl 0x080EAEA8) and reads no such index; BN4's AI data +0 is his third power attack (0x0800C9E8), read as BN6's +8"
+}

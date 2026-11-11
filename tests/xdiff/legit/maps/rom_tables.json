@@ -1,0 +1,101 @@
+{
+ "why": "A pointer into each game's own ROM is read by the data there (32 bytes the same: a table both games have). Where a table's end is followed by other bytes in each game, the 32 bytes from its last entries run past it: such a table is named here, by its place in both and its entries' size and count, and a pointer into it is read as its place in it, the entry there the same bytes in both (else the entry differs, and so does the pointer).",
+ "tables": [
+  {
+   "name": "Handi's bomb's kinds",
+   "bn5": "0x080CEFCC",
+   "bn6": "0x080CF11C",
+   "entry": 8,
+   "count": 8,
+   "why": "the third kind's type 0x4B (the obstacle Handi drops) keeps at +0x60 the entry of its kind (its +4) in this table: its sprite's animation, HP and collision's region and alliance; Handi's kinds are 2-7 (its version's pair, BN5 0x08106330-0x08106336)",
+   "evidence": [
+    "the obstacle's spawner BN5 0x080CF37E / BN6 0x080CF4EC: +0x60 = the table + 8 x +4 (BN5 0x080CF396-0x080CF3A0, the table's one literal 0x080CF43C / BN6 0x080CF504-0x080CF50E, 0x080CF5B0)",
+    "the tables' 64 bytes the same in both but entry 1's HP (BN5 300, BN6 200, +2): the bytes after them are each game's own code and pools"
+   ]
+  },
+  {
+   "name": "the projectile kinds",
+   "bn5": "0x080C4800",
+   "bn6": "0x080C64E8",
+   "entry": 12,
+   "count": 15,
+   "why": "the third kind's type 0 (a shot: 0x0800D928 / 0x0800FAAC spawn it, 0x080C4ABC / 0x080C686E) keeps at +0x4C its kind's entry in this table (its kind its spawner's r0: the Navis' buster's 3, BN5's family 0x16): kinds 0-14 the same in both, each entry the same bytes but 4, 5 and 12 (BN6's own flags, +3), from 15 on each game's own kinds",
+   "evidence": [
+    "the table's word: BN5 0x080C4AD4, BN6 0x080C68F4; its element of kind 0 at +3, the differential's each= item in toadman_sea_elec (BN5 0x080C4803 / BN6 0x080C64EB)",
+    "the Dark Soul's buster's shot (darksoul_v1) points at kind 3: BN5 0x080C4824, BN6 0x080C650C, the entry's 12 bytes the same (0405000005ffff01ff000000)"
+   ]
+  },
+  {
+   "name": "the status effect's kinds",
+   "bn5": "0x080E09D4",
+   "bn6": "0x080E1C20",
+   "entry": 8,
+   "count": 2,
+   "why": "the fourth kind's type 6 (the effect a status shows over an object: confusion's, kind 0) keeps at +0x60 the entry of its kind (its +4) in this table, its sprite's list and number and the flag its status sets; entries 0 and 1 the same bytes in both, entry 2 not (BN5's sprite 0x2D of list 4, BN6's 0), each game's code after them",
+   "evidence": [
+    "the type's set-up BN5 0x080E0A0C-0x080E0A16 / BN6 0x080E1C58-0x080E1C62: +0x60 = the table + 8 x +4 (its literals BN5 0x080E0B00 / BN6 0x080E1D4C); entries 0 and 1 14 0B 00 00 00 80 00 00 and 14 09 00 00 00 20 00 00 in both",
+    "batty_v2 t340: the confusion's effect over MegaMan, kind 0, its +0x60 0x080E09D4 in BN5's, 0x080E1C20 in BN6's"
+   ]
+  },
+  {
+   "name": "the thrown bombs' kinds",
+   "bn5": "0x080C5594",
+   "bn6": "0x080C7410",
+   "entry": 4,
+   "count": 3,
+   "why": "the third kind's type 8 (a thrown bomb: MiniBomb's) keeps at +0x60 the entry of its kind (its +4) in this table: its collision's region and alliance and its sprite's animation; MiniBomb's kind 0",
+   "evidence": [
+    "the bomb's spawn BN5 0x080C5600-0x080C5608 / BN6 0x080C7470-0x080C7478: +0x60 = the table + 4 x +4 (its one literal BN5 0x080C563C / BN6 0x080C74AC), the same code in both",
+    "the tables' first three entries the same in both (0A 05 00 00, 04 05 03 01, 0A 05 01 00); BN5's has seven entries, BN6's four (its fourth BN5's seventh)"
+   ]
+  },
+  {
+   "name": "the spread shot's kinds",
+   "bn5": "0x080C6C08",
+   "bn6": "0x080C8144",
+   "entry": 6,
+   "count": 7,
+   "why": "the third kind's type 0x12 (Spreader's shot and the spread chips') keeps at +0x60 the entry of its kind in this table, three u16 each (its collision's words); Spreader's the fourth (+0x12)",
+   "evidence": [
+    "the shot's spawn, BN5 0x080C6E0E / BN6's twin, its table's literal BN5 0x080C6E24 / BN6 0x080C8360; read at BN5 0x080C6DFA (ldr r3,[r5,#0x60]; ldrb r3,[r3,#1])",
+    "the tables' first 43 bytes the same in both (seven entries; BN6's eighth carries 3 where BN5's 0)"
+   ]
+  },
+  {
+   "name": "the pucks' kinds",
+   "bn5": "0x080CA48C",
+   "bn6": "0x080CB088",
+   "entry": 3,
+   "count": 4,
+   "why": "the third kind's type 0x2E (a puck: AirHoc's, AirHocky's) keeps at +0x60 the entry of its kind in this table, three bytes each (its collision's region and alliance, its sprite's animation); AirHoc's the third (+6)",
+   "evidence": [
+    "the puck's setup reads +0x60 from the table's one literal, BN5 0x080CA54C / BN6 0x080CB148",
+    "the tables' 12 bytes the same in both (06 01 06, 0A 01 06, 0A 01 06, 12 01 06); code follows them, each game's own"
+   ]
+  },
+  {
+   "name": "the guards' kinds",
+   "bn5": "0x080CA2D8",
+   "bn6": "0x080CAED4",
+   "entry": 6,
+   "count": 3,
+   "why": "the third kind's type 0x2B (the shield a Guard chip raises before MegaMan: BN5's 0x080CA454 spawns it, BN6's twin 0x080CB050) keeps at +0x64 the entry of its kind in this table, six bytes each (its sprite list 3's 0x1B, two animations, its palette); Guard1-3's the first three (their subfamilies)",
+   "evidence": [
+    "the shield's table: its one literal BN5 0x080CA478 / BN6 0x080CB074",
+    "the tables' first three entries the same in both (0C 1B 00 01 0E 00, 0C 1B 02 03 0E 00, 0C 1B 04 05 0E 00); the fourth BN5's 08 01 03 04 04 07 where BN6's 08 00 03 04 04 07"
+   ]
+  },
+  {
+   "name": "the obstacles' kinds (a RockCube's)",
+   "bn5": "0x080D1068",
+   "bn6": "0x080D11A4",
+   "entry": 8,
+   "count": 4,
+   "why": "the cube a RockCube stands, the third kind's type 0x59, keeps at +0x60 the entry of its kind (its +4) in this table: its sprite's animation, HP and collision's region and alliance; a RockCube's kind is 1",
+   "evidence": [
+    "the cube's set-up BN5 0x080D10A8 / BN6 0x080D11E4: +0x60 = the table + 8 x +4 (BN5 0x080D10AA-0x080D10B4, the table's literal 0x080D1148 / BN6 0x080D11E6, 0x080D1284)",
+    "the tables' 32 bytes the same in both but entry 3's HP (BN5 306, BN6 356, +2): the bytes after them are each game's own code (BN5 0x080D1088, BN6 0x080D11C4)"
+   ]
+  }
+ ]
+}

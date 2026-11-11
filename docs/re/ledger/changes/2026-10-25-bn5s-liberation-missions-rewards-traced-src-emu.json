@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "BN5's Liberation Missions' rewards traced (src/emu/bn5_liberation.h, docs/rom/liberation.md's row): the reward's row by the phase 0x08052DD0 (the records' [19], from-to holding the phase; none: zenny 100), the phase and par 0x080519EE, the mission's end's steps 0x0804E9BC (mode 0x18; step 2 0x0804EA2E the reward, the script's four values 0x080459B4), its text 0x087E866C messages 0x20 + the tier, on to 0x23 + it in Team Colonel (Colonel's words, the chip by F4, the Zennys by EF 0E); played in romlab at 5, 7 and 8 phases on mission 1 (par 7): BlizMan SP B, BlizMan B, 1000 Zennys (0x0200299C)"
+}

@@ -1,0 +1,12 @@
+{
+ "name": "MegaMan's own sprite",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "offsets": [
+  "0xA8",
+  "0xBB"
+ ],
+ "why": "MegaMan is drawn from each game's own art: his sprite state's frame pointers (+0xA8 to +0xB7, sprite_load's +0x18 on, his state at +0x90) point into BN4's sprite list 0's entry 0 (0x08214000, BN4's lists 0x0802793C) and BN6's own MegaMan (0x081D8000, as BN5's differential has it: legit.json's masks, MegaMan's own sprite), and +0xB8's word is copied from that art's data (BN6 0x0800210E-0x08002120): his place, his CurAction and what he does are compared as ever"
+}

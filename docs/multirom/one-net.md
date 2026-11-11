@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:30:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -440,6 +440,21 @@ writes 0x3C0 where the panel is one), but no chip of BN6's makes them,
 so no battle has made one; BN5's LavaSeed and SeaSeed (chips 43 and 47
 by its ROM's names) are assumed by their names to make them, and what
 else its chips and Souls do with lava and sea is not looked up yet.
+
+**The magnet panel in BN6's engine (MagnetMan's):** BN5's panel type 5,
+which BN6 lacks (its 5 is holy), is BN6's free type 15 where BN5's ROM is
+read (`src/emu/xpanels.c`, `src/emu/xpanels_look.c`; [BN5's maps, songs, text and objects](../rom/bn5-world.md),
+BN5's magnet panel): its flags BN5's; an object coming onto it, neither
+floating nor flying, asks for a push of kind 3 (BN5's rule at BN6's
+arrival test, beside the sea's hold); and BN6's movement step, which kept
+kind 3 for its conveyors alone, takes BN5's pull on a magnet panel: the
+first of four directions by the object's collision byte +0xC whose panel
+takes it, BN5's direction numbers made BN6's, 8 pixels a frame down a row
+where BN6's conveyors move 6. It looks as in BN5: its 54 tiles after the
+sea's, its own colours 10-13 of the holy panel's palettes 4 and 8 by BN5's
+animation, shown where no holy panel is. No field of BN5's is translated
+with it yet (`xfields.c`); MagnetSoul's exemption (BN5's NaviStats byte
+0x2C 5) waits for the Souls ([Team ProtoMan: foes and Souls](../game/team-protoman.md)).
 
 **The sea's submerge and hold (in place):** BN5's sea does two more
 things, which BN6's engine dropped with it (`src/emu/xsea.c`;

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "GutsMan's recipe derived from both ROMs (tools/xnavirecipe_bn4.py, its report .build/xnavirecipe/bn4_report.md): 7 decisions open, none of them a missing pair. Located and named in src/emu/bn4_navis.h (docs/rom/bn4.md, GutsMan derived): BN4_GUTSMAN, BN4_GUTSMAN_STATES, BN4_GUTSMAN_TABLES, BN4_NAVI_PALETTE, BN4_ATTACK_END_CLEAR, BN4_AI_REQUESTS_CLEAR, BN4_SET_STATUS_GIVEN, BN4_ON_FLOOR, BN4_FREE_PANELS, BN4_RANDOM_FREE_PANEL, BN4_RANDOM_PANEL, BN4_RANDOM_PANEL_MASKS, BN4_T3_1E_KINDS; five pairs in tools/bn4_twins.py (GetRNG, the status given, a side's player, the floor test, the panel crack: BN4's and BN6's panel flags' 0x10 and 0x40 the same, read from both games' tables)."
+}

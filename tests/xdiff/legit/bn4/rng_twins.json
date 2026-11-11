@@ -1,0 +1,32 @@
+[
+ {
+  "bn6": "0x0801BDDE",
+  "bn4": "0x08014620",
+  "len": "0x26",
+  "what": "a hit's spark's place (the fourth kind's 0x04): GetRNG once, the spark moved from the striker's place by its low nibble less 7 in x and its third nibble less 7 in z",
+  "evidence": "BN4 0x08014620-0x08014645 / BN6 0x0801BDDE-0x0801BE03: the same instructions but for the BL's target, GetRNG (BN4 0x08001B00 / BN6 0x0800151C) at +4; each called with r0 0xF by the hit's spark, twins (BN4 0x08012F44, its bl at 0x08012F66, then the spawner 0x080E2140; BN6's from 0x0801A0D8, its bl at 0x0801A0F6, then 0x080E1C00): the thunder's spark in billy_v1, BN4's draw at t431, BN6's at t432 (a probe of hooks on both spawners: the same striker's place, x 0xFFD7FFE2 and 0xFFD5FFE2, z 0x100000 and 0x50000 from the two words)"
+ },
+ {
+  "bn6": "0x08030226",
+  "bn4": "0x0802600C",
+  "len": "0x6",
+  "word": 0,
+  "what": "the camera's shake, its x: BN6's from its second word, BN4's from its first (as BN5's, legit.json's rng twins)",
+  "evidence": "BN6 0x080301E8 (bn6f camera_doShakeEffect) draws twice a shaking frame by GetRNGSecondary (BN6_RNG_DRAW_SECOND 0x0800154C, at 0x08030226 and 0x0803024C), BN4's twin 0x08025FE0 (the symbol map's, by calls) twice by GetRNG (0x08001B00, BN4_RNG_PRIMARY's, at 0x0802600C and 0x08026032); each draw masked by the same table (BN6 0x08030284, BN4 0x08026068, 8 bytes a strength, the same 32 bytes), shifted and centred alike into the camera's x (BN6 +0x3C, BN4 +0x38) and then y (+0x40, +0x3C): the same numbers make the same shake. Its frames and strength set by the same routine (camera_initShakeEffect, BN6 0x080302A8, BN4 0x0802608C): GutsMan's attack's shake in gutsman_v1, BN4's from t265, his sprite's screen place (+0x9C, +0x9E) each engine's pattern from its own word until the draws were paired"
+ },
+ {
+  "bn6": "0x0803024C",
+  "bn4": "0x08026032",
+  "len": "0x6",
+  "word": 0,
+  "what": "the camera's shake, its y",
+  "evidence": "as its x"
+ },
+ {
+  "bn6": "0x08000C72",
+  "bn4": "0x08000AAA",
+  "len": "0x34",
+  "what": "the bytes' shuffle (r0 the bytes, r1 how many, r2 the swaps): GetPositiveSignedRNG twice a swap, each taken modulo the count, the two bytes swapped",
+  "evidence": "BN4 0x08000AAA-0x08000ADD / BN6 0x08000C72-0x08000CA5: the same instructions but for the two BLs' targets, GetPositiveSignedRNG (BN4 0x08001B16 / BN6 0x08001532), the first word's in both. MokoRus's routine shuffles its three rows with it (BN4 0x080D253E: r1 3, r2 3; its copy's veneer to BN6's): six draws in bn4_chip_mokorus1, BN4's at t33 and BN6's at t34, the Mokos' rows and their delays (+0x20: 0, 10, 20) the same order once paired, each engine's own order before (the first object's row 2 in BN4 and 1 in BN6)"
+ }
+]

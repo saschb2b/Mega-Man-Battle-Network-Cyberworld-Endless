@@ -1,0 +1,30 @@
+{
+ "name": "MegaMan's buster flash",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T1"
+ ],
+ "types": [
+  "0x00"
+ ],
+ "why": "As his buster fires the engine spawns two flashes for MegaMan (objects of the first kind, type 5, his object at their +0x4C), by its spawner of such effects with the number of the one wanted in its own list: BN5's numbers them 0x23 and 0x0D, BN6's 6 and 5, each drawn from its own sprite (the mask 'MegaMan's own sprite'). His presentation.",
+ "evidence": [
+  "the spawner of the first kind's type 5: BN5 0x080B9CAE / BN6 0x080BA6A0 (the first kind's spawner, BN5 0x08003140 / BN6 0x08003320, with r0 5), its number in +4",
+  "their sprites: BN5 0x082F261C (named at 0x08032864), BN6 0x082F6444 (named at 0x08031E0C)"
+ ],
+ "cells": [
+  [
+   "0x04",
+   "0x23",
+   "0x06"
+  ],
+  [
+   "0x04",
+   "0x0D",
+   "0x05"
+  ]
+ ]
+}

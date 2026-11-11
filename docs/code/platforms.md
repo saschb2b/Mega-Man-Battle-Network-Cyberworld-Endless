@@ -3,7 +3,7 @@ type: Code Map
 title: "The platforms and their packaging"
 description: "What each platform's folder holds: the PortMaster port, the Linux, Windows, macOS, iOS and Android releases, the New 3DS, Switch, PS Vita, PS4 and PS5 builds, the Docker build images and the CI and release workflows."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:47:07Z }
 ---
 
 # The platforms and their packaging
@@ -22,4 +22,34 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
 | `ps4/` | The PS4 build, a PS5's too (`build.py ps4`): its README (playing, building, testing on a PS4), the home screen's icon (`icon0.png`, `tools/app_icon.py`) and the fake PKG's project (`pkg.gp4`), which `PkgTool.Core` packs with the eboot and its `param.sfo`. It builds against the OpenOrbis toolchain's SDL 2.0.9 (`src/core/sdl_old.h` stands in for what it lacks); `src/core/start_ps4.c` sets its folders and ROM places; online play goes over BSD sockets and mbedTLS (`src/online/online_stream_tls.c`), the SDK having no libcurl |
 | `ps5/` | The PS5's own build (`build.py ps5`): its README (playing, building, submitting to Prospero Store, testing on a PS5) and the icon; `sce_sys/param.json` at the repository's root (title ID `CWEN00001`, its contentVersion raised with each release and held to the CHANGELOG by `build.py lint`), where Prospero Store's catalog reads it (`icon0.png`, `tools/app_icon.py`). drakmor's ps5-native-app-boilerplate (GPL-3.0, pinned) gives the CRT, linker script, ELF converter, FSELF signer and clean-room `libc.prx`; the Makefile lays out `CWEN00001/` and zips it, links only against modules a game's process gets (`PS5_LOADED`) and sends the allocations to `src/core/ps5_heap.c`'s heap on flexible memory, which `param.json`'s `kernel.flexibleMemorySize` gives. `src/core/ps5_libc.c` gives what the native runtime lacks of the C library; online play and the statistics go over PacBrew's libcurl (`src/online/online_stream_curl.c`) |
 | `docker/` | Build images: `Dockerfile` (host, Debian trixie), `Dockerfile.portmaster` (the PortMaster port's aarch64 binary: Debian bullseye's glibc 2.31 and SDL2 2.0.14, older than any firmware PortMaster serves; `debian/eol` from its snapshot), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads), `Dockerfile.3ds` (devkitPro's devkitARM, SDL2 and mGBA's library for the 3DS, makerom and bannertool from their sources for the CIA: `ctrtools.sh`), `Dockerfile.switch` (devkitPro's devkitA64 with libnx, its SDL2 and libcurl, and mGBA's library for the Switch), `Dockerfile.vita` (VitaSDK with its SDL2 and libcurl, and mGBA's library for the Vita), `Dockerfile.ps4` (the OpenOrbis toolchain, and mbedTLS and mGBA's library built for it through `ps4.cmake`: `mbedtls.sh`), `Dockerfile.ps5` (the native-app template's pipeline, its converter's RELRO placement corrected, the PS5 payload SDK and PacBrew's SDL2 and libcurl, and mGBA's library through `ps5.cmake`), `Dockerfile.music` (the trailers' music when a piece plays a soundfont: Debian's FluidR3 GM, MIT, never in git; `tools/trailer_soundfont.py` reads it, `tools/trailer_music.py`'s render_any runs a piece there) |
-| `.github/` | CI (`ci.yml`: checks, every target, Pages from `main`), the files tools write, committed after each push to `dev` (`generated.yml`, [Merging in parallel](../project/merging.md)), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot (`dependabot.yml`: the actions and the build images' bases monthly, its PRs to `dev`) |
+| `.github/` | CI (`ci.yml`: checks, every target on a push and a pull request's share of them, [below](#ci-on-a-pull-request), Pages from `main`), the files tools write, committed after each push to `dev` (`generated.yml`, [Merging in parallel](../project/merging.md)), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot (`dependabot.yml`: the actions and the build images' bases monthly, its PRs to `dev`) |
+
+## CI on a pull request
+
+A pull request's run took about ten minutes, and its slowest job set that:
+iOS, 7.8 minutes at the median, five of them starting the app in the
+Simulator, on macOS runners that also wait longest for a machine. Measured
+on 11 November 2026 over recent runs: a run is 16 jobs and 41
+runner-minutes; of 400 pull request runs 20 failed, 8 of them in the code
+checks and 8 in one platform's job alone (iOS 4, macOS, Windows, Vita and
+PS5 one each); the unit tests never failed there alone.
+
+So a pull request always runs the scripts' lint, the code checks, the
+unit tests, the Linux desktop, PortMaster and Windows builds and the 3DS's
+(the 32-bit console), and each of the other eight (Switch, Vita, PS4,
+PS5, Android, macOS, iOS, the browser) only where its change can reach
+it. `tools/ci_changes.py`, the workflow's first job, decides:
+
+| The pull request changes | Runs |
+| --- | --- |
+| A platform's own folder (`ios/`, `vita/`, `web/` ...; `macos/` for iOS too, `ps4/` for the PS5 too) | That platform's job |
+| The Makefile, `build.py`, `docker/`, `.github/`, `shared/` | All eight |
+| A source file that tests a system's macro (`__3DS__`, `__APPLE__`, `_WIN32` ...) or is Objective-C, or one removed | All eight |
+| Anything else | None of the eight |
+
+Of the last 146 merged pull requests this would have run all eight for
+58, some for 5 and none for 83. A push to `dev` or `main`, and a run
+started by hand, run everything, and every push to `dev` is checked to
+its end on its own (a later push no longer cancels it), so a target a
+pull request left out is built on its merge and a break is that merge's.
+To build every target on a branch first: `gh workflow run CI --ref BRANCH`.

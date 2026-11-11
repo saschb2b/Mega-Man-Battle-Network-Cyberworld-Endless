@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "BN4's MegaMan's control block's pointer",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x50",
+  "0x53"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "why": "BN4's AI data's clear (0x0800B7CE) points each side's +0x50 at its control block (side 0's 0x02035A70, side 1's 0x02035AB0, 0x40 bytes each, cleared by 0x0800E8FE), which his ready routine (0x080EED48) sets up (+0: 0x0800EB86 tests it; 0x0800EAC6 then fills its 0x40 bytes, 0x0800EB8E sets +0) and runs his ready's sub-state from (+1: 0x0800E4F8's table). BN6's ready (0x080F1694, by his object's +0xA) keeps no such block and no pointer: his AI data +0x50 is 0. The ready's phases both games keep in his object (+0xA, +0xB, +0x20) are compared as ever"
+}

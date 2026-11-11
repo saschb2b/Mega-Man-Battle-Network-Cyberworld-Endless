@@ -1,0 +1,34 @@
+[
+ {
+  "name": "an immediate, Zomon's",
+  "spec": "zomon_v1",
+  "poke": [
+   "08108A96:2008"
+  ],
+  "what": "the CurAction it gives setAttack0 left at BN5's 0x8 where the recipe makes it 0xa (BN6's two status states before a family's own)"
+ },
+ {
+  "name": "a rebased call, Zomon's",
+  "spec": "zomon_v1",
+  "call": [
+   "08011680:0810A953"
+  ],
+  "what": "its veneer to BN6's setAttack0 (0x08011680) aimed at the families' empty hook (0x0810A953): its attack never set"
+ },
+ {
+  "name": "a virus's support chip in BN6's timing",
+  "spec": "zomon_v1",
+  "call": [
+   "08B46120:080126E4"
+  ],
+  "what": "Zomon's family's call to the chip writer (XV_CHIP_WRITER, src/emu/xvirus_dispatch.c) aimed at BN6's own (0x080126E4): its AreaGrab's family BN6's support family 0x15, which ends its user's attack a frame after BN5's (0x080ED12A-0x080ED130 against BN5's 0x080EC448): Zomon's states a frame behind BN5's from its first AreaGrab"
+ },
+ {
+  "name": "BN5's support family's frame left out",
+  "spec": "zomon_v1",
+  "poke": [
+   "08E00154:080ED0DD:4"
+  ],
+  "what": "the grown attack families' entry 0x65 (XV_SUPPORT_FAMILY, src/emu/xattack_grow.h) BN6's support family's routine (0x080ED0DC) where XV_SUPPORT runs it twice in its first frame: the AreaGrab's attack ends a frame later than BN5's 0x080EC400"
+ }
+]

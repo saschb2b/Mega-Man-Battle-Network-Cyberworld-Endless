@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_sidbmbo1 to 3: BN4's SidBmbo moved, its wait kept",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the bamboo in play from t33 to t95, MegaMan in his misc state from t32 to t71 in BN4's and t33 to t72 in BN6's with the count 0x27 down to 1 in both; a 140 HP Mettaur left 60 and 30, the family's 250 HP rank left 110. Six mutations caught (a row's power and subfamily, the wait's length, its count-down made BN6's, the dispatch number, the sound).",
+  "meaning": "A wait of BN4's run that BN6's run has none of is carried by the unit and counted by a wrapper as its table entry; a first try that joined BN6's own count-down held the attack the same frames but left the count one below BN4's and 0xFFFF after, so it was dropped."
+}

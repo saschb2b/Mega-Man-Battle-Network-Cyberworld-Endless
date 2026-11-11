@@ -37,4 +37,8 @@ void netpass_stamp_begin(void);
 bool netpass_grew_due(void);
 void netpass_grew_begin(void);
 
+/* The PET menu's key hint in the Net Square, at its band's right end, which BN6 leaves empty: R:NETPASS, as
+ * E-Mail names START:SORT (square_pet.h; docs/engine/ui.md, Keys) */
+void netpass_screen_key_hint(void);
+
 #endif

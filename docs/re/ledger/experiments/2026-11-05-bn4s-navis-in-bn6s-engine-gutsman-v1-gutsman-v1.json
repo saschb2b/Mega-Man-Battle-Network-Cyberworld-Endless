@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "gutsman_v1: GutsMan V1 in BN4's battle against his move into BN6's",
+  "result": "python3 tools/xdiff.py gutsman_v1 (GutsMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): both battles traced to the end (BN4's 0x84 BN6's 0x384), FAIL at t1. With the trace's Navi block (BN4's +0x64 at BN6's +0x80), a pointer to his own AI data and his moved code read as such, the first differences: his collision's +0x0E (BN4 0x21, BN6 3), his AI data's +0x00 (0, 1), +0x0C (0, 0xA), +0x0E (0, 0xFF), +0x50 (BN4's control block pointer, 0), +0x78 (0, MegaMan's object), +0x7F (0, 0x40), his obj +0x91 (1, 0). The eighteen BN4 family specs, the controls, cangard_v1 and handi_v1 PASS with the comparator's changes.",
+  "meaning": "GutsMan's code runs in BN6's engine as a Navi and the comparator matches him; what parts first is what BN6's Navi actor gives every Navi at its spawn (the collision setup's argument, the AI data's fields) against BN4's init's, the next unit of the port.",
+  "link": "../multirom/bn4-navis.md"
+}

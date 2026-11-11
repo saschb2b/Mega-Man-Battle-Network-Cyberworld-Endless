@@ -1,0 +1,10 @@
+[
+ {
+  "name": "AntiNavi's record's parameter another",
+  "spec": "bn4_chip_antinavi",
+  "poke": [
+   "08023DB0:03:1"
+  ],
+  "what": "BN6's AntiNavi's record (186) with its first parameter 3 where it holds 2: MegaMan's attack's copy of it and the trap's object's are no longer BN6's record's, which BN4's are read as (legit.json's bn4 chip_id, record)"
+ }
+]

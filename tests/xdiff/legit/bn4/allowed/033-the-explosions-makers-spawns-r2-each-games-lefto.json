@@ -1,0 +1,14 @@
+{
+ "name": "the explosions' maker's spawn's r2, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x11",
+  "bytes": {
+   "0x38": [
+    "0x08",
+    "0x88"
+   ]
+  }
+ },
+ "why": "The fourth kind's spawn stores the caller's r2 at the object's +0x38 (with r1 at +0x34 and r3 at +0x3C). SeekBom's bomb (BN4's third kind's 0x8D, moved with its unit) spawns the explosions' maker (the fourth kind's 0x11) as a hit ends it, through the maker's spawner with r4 alone set (movs r4,#2; bl 0x080E33D4 at 0x080DEE20), after its update loaded r1 and r0 (0x080DEDFA-0x080DEDFC) and nothing r2: r2 is what the collision step before it left (BN4 0x080129FC, BN6's own 0x0801A00E, neither the bomb's code), 8 in BN4's and 0x88 in BN6's. No code of the maker loads its +0x38 (its init copies its parent's place to its +0x60 on, 0x080E3352-0x080E335C, and its step reads +0x60: 0x080E33A2). bn4_chip_seekbom1 at t83"
+}

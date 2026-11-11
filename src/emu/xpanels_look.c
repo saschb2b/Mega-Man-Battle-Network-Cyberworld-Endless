@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "bn5.h"
+#include "bn5_team_protoman.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "lz.h"
@@ -37,10 +38,12 @@
 #define ENTRIES    6                      /* a type's entries: the two sides' three rows */
 #define BN6_TILES_N 498                   /* BN6's panel tiles (BN6_PANEL_TILESET) */
 #define BN5_TILES_N 842                   /* BN5's (BN5_PANEL_TILESET) */
-#define KIND_TILES 90                     /* lava's, and the sea's: 15 a panel, its three rows on its two sides */
-#define TYPES      (XPANEL_SEA + 1)       /* the grown table's types */
-#define KIND_TILE(i) (BN6_TILE_PANELS + BN6_TILES_N + (unsigned)(i) * KIND_TILES)   /* lava's first tile, the sea's */
+#define KIND_TILES 90                     /* lava's, and the sea's: 15 a panel, its three rows on its two sides (the magnet panel's 54) */
+#define KINDS      3                      /* lava, sea, magnet panel: each after the one before in VRAM, lava's and the sea's 90 tiles */
+#define TYPES      (XPANEL_MAGNET + 1)    /* the grown table's types */
+#define KIND_TILE(i) (BN6_TILE_PANELS + BN6_TILES_N + (unsigned)(i) * KIND_TILES)   /* a kind's first tile: lava's, the sea's, the magnet's */
 #define KIND_VRAM(i) (BN6_VRAM_PANELS + (uint32_t)(BN6_TILES_N + (i) * KIND_TILES) * TILE)
+_Static_assert(BN6_TILE_PANELS + BN6_TILES_N + 2 * KIND_TILES + 54 <= 0x400, "the panels' tiles past a battle's free ones (0x295-0x3FF)");
 #define LZ77_HEAD(n) (0x10u | (uint32_t)(n) << 8)   /* an LZ77 stream's first word: its type, its length */
 #define FRAMES_MAX 16                     /* an animation's frames */
 #define COLOURS    5                      /* lava's colours, then the sea's four */
@@ -52,6 +55,7 @@ typedef struct {
 	int from, to, n;           /* its own colours: BN5's [from, from + n) where BN6 keeps [to, to + n) */
 	int other_lo, other_hi;    /* BN6's types those colours are theirs (shown where none is on the field) */
 	uint8_t remap[16];         /* each pixel's colour as BN6's (0xFF: none of its tiles' own) */
+	int tiles;                 /* its tiles in BN5's set, one run (lava's and the sea's 90, the magnet's 54) */
 	/* from BN5's ROM */
 	uint16_t first;            /* its first tile in BN5's set */
 	int frames;
@@ -60,18 +64,22 @@ typedef struct {
 	uint32_t period;
 } Kind;
 
-static Kind kinds[2] = {
+/* (the magnet panel, MagnetMan's, in its holy's palettes 4 and 8 as in BN5, its own colours 10-13 at BN6's 10-13: BN6's
+ * holy draws 1-10, 14 and 15 of them, BN5's magnet 1-5 and 10-13, so its four over BN6's where no holy panel is shown) */
+static Kind kinds[KINDS] = {
 	{ BN5_PANEL_LAVA, XPANEL_LAVA, { 2, 6 }, 6, 7, 5, BN6_PANEL_VOLCANO, BN6_PANEL_VOLCANO,
-		{ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, 0, 0, { 0 }, { { { 0 } } }, 0 },
+		{ 0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF }, KIND_TILES, 0, 0, { 0 }, { { { 0 } } }, 0 },
 	{ BN5_PANEL_SEA, XPANEL_SEA, { 3, 7 }, 11, 12, 4, BN6_PANEL_CONVEYOR, BN6_PANEL_CONVEYOR_END,
-		{ 0, 1, 2, 3, 4, 5, 0xFF, 7, 8, 9, 0xFF, 12, 13, 14, 15, 0xFF }, 0, 0, { 0 }, { { { 0 } } }, 0 },
+		{ 0, 1, 2, 3, 4, 5, 0xFF, 7, 8, 9, 0xFF, 12, 13, 14, 15, 0xFF }, KIND_TILES, 0, 0, { 0 }, { { { 0 } } }, 0 },
+	{ BN5_PANEL_MAGNET, XPANEL_MAGNET, { 4, 8 }, 10, 10, 4, BN6_PANEL_HOLY, BN6_PANEL_HOLY,
+		{ 0, 1, 2, 3, 4, 5, 0xFF, 0xFF, 0xFF, 0xFF, 10, 11, 12, 13, 0xFF, 0xFF }, 54, 0, 0, { 0 }, { { { 0 } } }, 0 },
 };
 
 _Static_assert(TYPES * ENTRIES * ENTRY == XP_TILES_SIZE && XP_TILES + XP_TILES_SIZE <= XP_END, "the grown tile table past its room");
 
 static struct {
 	uint8_t table[TYPES * ENTRIES * ENTRY];
-	uint8_t tiles[2][KIND_TILES * TILE];   /* lava's and the sea's, their colours BN6's */
+	uint8_t tiles[KINDS][KIND_TILES * TILE];   /* lava's, the sea's and the magnet's, their colours BN6's */
 	bool staged;
 } L;
 
@@ -87,13 +95,13 @@ static bool kind_tiles(const uint8_t *bn5, Kind *k) {
 		hi = t > hi ? t : hi;
 	}
 	k->first = (uint16_t)lo;
-	return lo >= BN6_TILE_PANELS && hi - lo + 1 == KIND_TILES && hi - BN6_TILE_PANELS < BN5_TILES_N;
+	return lo >= BN6_TILE_PANELS && hi - lo + 1 == (unsigned)k->tiles && hi - BN6_TILE_PANELS < BN5_TILES_N;
 }
 
 /* its tiles out of BN5's set, each pixel's colour moved to BN6's; false where one is none of the kind's */
 static bool kind_pixels(const Kind *k, const uint8_t *bn5_set, uint8_t *out) {
 	const uint8_t *in = bn5_set + (size_t)(k->first - BN6_TILE_PANELS) * TILE;
-	for (int i = 0; i < KIND_TILES * TILE; ++i) {
+	for (int i = 0; i < k->tiles * TILE; ++i) {
 		uint8_t lo = k->remap[in[i] & 15], hi = k->remap[in[i] >> 4];
 		if (lo == 0xFF || hi == 0xFF) return false;
 		out[i] = (uint8_t)(lo | hi << 4);
@@ -120,7 +128,7 @@ static bool tiles_stage(const uint8_t *bn5) {
 	uint8_t *set5 = lz77_decompress(bn5 + (BN5_PANEL_TILESET - BUS), ROM_SIZE - (BN5_PANEL_TILESET - BUS), &n5);
 	bool ok = set5 && n5 == BN5_TILES_N * TILE && rom_u32(BN6_PANEL_TILESET - BUS) == LZ77_HEAD(BN6_TILES_N * TILE);
 	memcpy(L.table, R.data + (BN6_PANEL_TILES - BUS), BN6_PANEL_TYPES * ENTRIES * ENTRY);
-	for (int i = 0; ok && i < 2; ++i) {
+	for (int i = 0; ok && i < KINDS; ++i) {
 		ok = kind_tiles(bn5, &kinds[i]) && kind_pixels(&kinds[i], set5, L.tiles[i]);
 		if (ok) kind_entries(bn5, &kinds[i], KIND_TILE(i));
 	}
@@ -134,14 +142,14 @@ static bool tiles_stage(const uint8_t *bn5) {
 static void kind_load(int i) {
 	uint32_t at = KIND_VRAM(i);
 	const uint8_t *t = L.tiles[i];
-	int n = 0;
-	while (n < KIND_TILES) {
+	int n = 0, tiles = kinds[i].tiles;
+	while (n < tiles) {
 		uint32_t w = (uint32_t)n * TILE + (uint32_t)(n % 8) * 4;   /* a row of each, in turn */
 		if (hook_read32(at + w) != get32(t + w)) break;
 		++n;
 	}
-	if (n == KIND_TILES) return;
-	for (uint32_t b = 0; b < KIND_TILES * TILE; b += 4) hook_write32(at + b, get32(t + b));
+	if (n == tiles) return;
+	for (uint32_t b = 0; b < (uint32_t)tiles * TILE; b += 4) hook_write32(at + b, get32(t + b));
 }
 
 /* ---- the colours ---- */
@@ -186,17 +194,17 @@ static void kind_colours(const Kind *k, uint32_t clock) {
 static HookAct drawn(HookRegs *r, void *user) {
 	(void)r;
 	(void)user;
-	bool on[2] = { false, false }, theirs[2] = { false, false };
+	bool on[KINDS] = { false }, theirs[KINDS] = { false };
 	for (uint32_t y = 1; y <= 3; ++y)
 		for (uint32_t x = 1; x <= 6; ++x) {
 			int t = hook_read8(BN6_FIELD_PANELS + (y * 8 + x) * BN6_PANEL_SIZE + BN6_PANEL_TYPE);
-			for (int i = 0; i < 2; ++i) {
+			for (int i = 0; i < KINDS; ++i) {
 				on[i] |= t == kinds[i].bn6;
 				theirs[i] |= t >= kinds[i].other_lo && t <= kinds[i].other_hi;
 			}
 		}
 	uint32_t clock = hook_read16(BN6_FRAME_COUNT);
-	for (int i = 0; i < 2; ++i) {
+	for (int i = 0; i < KINDS; ++i) {
 		if (on[i]) kind_load(i);
 		if (on[i] && !theirs[i]) kind_colours(&kinds[i], clock);
 	}
@@ -214,7 +222,7 @@ bool xpanels_look_stage(void) {
 		rom_u32(BN6_PANEL_TILESET_REF - BUS) == BN6_PANEL_TILESET && emu_read32(BN6_PANEL_TILESET_REF) == BN6_PANEL_TILESET &&
 		rom_u16(BN6_PANEL_DRAW_ANIMATED - BUS) == DRAWN_OP && emu_read16(BN6_PANEL_DRAW_ANIMATED) == DRAWN_OP;
 	ok = ok && tiles_stage(bn5);
-	for (int i = 0; ok && i < 2; ++i) ok = kind_anim(bn5, &kinds[i], 0) && kind_anim(bn5, &kinds[i], 1);
+	for (int i = 0; ok && i < KINDS; ++i) ok = kind_anim(bn5, &kinds[i], 0) && kind_anim(bn5, &kinds[i], 1);
 	L.staged = ok;
 	return ok;
 }

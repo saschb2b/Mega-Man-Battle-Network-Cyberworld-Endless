@@ -1,0 +1,15 @@
+{
+ "why": "MegaMan's form, his battle NaviStats' +0x2C and his pending form's +0 (the player block, src/dev/xdiff.c): BN5 numbers a Soul by its Navi's AI index (7-12 Team Colonel's), BN6 a Cross 1-10, Beast Out 0xB-0x18. BN5's Souls stand behind BN6's form 8, the proxy (src/emu/soulproxy.c, the Souls track's S1), and which Soul it is lives in the Souls' block (BN6_SOULS, its +0: compared with BN5's form byte through maps, souls); 0 (none) and 0xFF (none pending) are the same in both.",
+ "bn5_to_bn6": {
+  "0x07": "0x08",
+  "0x08": "0x08",
+  "0x09": "0x08",
+  "0x0A": "0x08",
+  "0x0B": "0x08",
+  "0x0C": "0x08"
+ },
+ "evidence": [
+  "BN5: the form byte written as he unites (0x08010DDA from 0x08012106), the Soul's AI index (KnightSoul 11 in soul_knight's trace from t1)",
+  "BN6: OK's commit of UNITE writes the record's form 8 (src/emu/soulunite.c, the hook at 0x08029150), which the turn's crossing writes into his NaviStats (0x08014C5C); the Soul into BN6_SOULS as the proxy's overlay entry runs (src/emu/soullife.c)"
+ ]
+}

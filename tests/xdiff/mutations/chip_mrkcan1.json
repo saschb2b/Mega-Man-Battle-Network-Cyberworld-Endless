@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a packed sprite word",
+  "spec": "chip_mrkcan1",
+  "poke5": [
+   "080E5794:00001024:4"
+  ],
+  "what": "MrkCan's mark's packed sprite word (its literal at BN5's 0x080E5794, given the number of the chips' where BN5's list 4 0x24 was copied, for the second packed setup 0x08018926) left at 0x1024: BN6's list 4 0x24 drawn, another picture"
+ }
+]

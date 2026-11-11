@@ -1,0 +1,26 @@
+[
+ {
+  "name": "the fire's burst's shape another",
+  "spec": "bn4_chip_heatshot",
+  "poke": [
+   "080CF3FC:0D:1"
+  ],
+  "what": "the spread shot's kinds' table's copy (BN4 0x080CF3DC) with kind 8's shape 0x0D, Heat-V's, where BN4's holds 2: the burst on the two panels behind a row up and down, not the one behind"
+ },
+ {
+  "name": "the spread shot's type another",
+  "spec": "bn4_chip_heatshot",
+  "poke": [
+   "080CF59A:20CB"
+  ],
+  "what": "the spread shot's spawner's copy (its movs r0,#0x12 at BN4 0x080CF59A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no shot"
+ },
+ {
+  "name": "HeatShot's row's power another",
+  "spec": "bn4_chip_heatshot",
+  "poke": [
+   "08C0652A:0014"
+  ],
+  "what": "the registry's record of BN4's HeatShot (588 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur left 120 HP where BN4's leaves it 100"
+ }
+]

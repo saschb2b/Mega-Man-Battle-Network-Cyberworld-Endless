@@ -1,0 +1,26 @@
+[
+ {
+  "name": "Ligtnin's sweep's wait another",
+  "spec": "bn4_chip_ligtnin1",
+  "poke": [
+   "080DF7F6:14:1"
+  ],
+  "what": "the sweep's waits by kind (three bytes at BN4 0x080DF7F4, in the unit's blocks) holding 20 frames for kind 2, Ligtnin's, where BN4's holds 10: the bolt on the cube ten frames late"
+ },
+ {
+  "name": "Ligtnin's obstacle mask none",
+  "spec": "bn4_chip_ligtnin1",
+  "poke": [
+   "080DF9AC:00000000:4"
+  ],
+  "what": "the sweep's copy's word of panel flags for kind 2 (0x03800000 at BN4 0x080DF9AC, what holds an obstacle) made 0: no panel answers, no bolt on the cube"
+ },
+ {
+  "name": "the bolt's type another",
+  "spec": "bn4_chip_ligtnin1",
+  "poke": [
+   "080DF10C:20CB"
+  ],
+  "what": "the bolt's spawner's copy (its movs r0,#0x8e at BN4 0x080DF10C, BN4's own number on the chips' page) naming 0xCB, a type no unit moved: no bolt"
+ }
+]

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "Ten-bit chip ids, unit 1's first part (docs/multirom/bn4-chips.md): the census of BN6's nine-bit sites read and kept by tools/chip_ids.py (docs/rom/chips-code.md, Ten-bit chip ids: BN6_ENTRY_SPLIT, BN6_ENTRY_SPLIT_MASK, BN6_ENTRY_CHEAT, BN6_REWARD_SPLIT, BN6_LINK_CHIP_BOUND, BN6_EDITOR_LIST_OUT, BN6_EDITOR_LIST_IN in bn6_chips.h; BN6_FLAG_LIBRARY_IDS in bn6.h); src/core/chip_entry.h; the profile's Library to 1023; protocol v16."
+}

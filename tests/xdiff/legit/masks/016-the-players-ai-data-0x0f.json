@@ -1,0 +1,19 @@
+{
+ "name": "the player's AI data +0x0F",
+ "part": "ai",
+ "whose": [
+  "megaman"
+ ],
+ "why": "As the Custom screen closes BN6 sets each side's player's AI data +0x0F to 1; BN5 sets none. The player's own data, which the family never reads (its code reads MegaMan through his object: his panel and coordinates).",
+ "evidence": [
+  "BN6 0x08009338 (the Custom screen's end): 0x08009360-0x0800937E finds each side's player (0x080103BC) and writes 1 to its AIData +0x0F before the fight's phase",
+  "BN5's twin 0x0800879A (the same calls: 0x080091C8, 0x08022C58, 0x08022D6C, 0x080092BC) goes on to the fight's phase at 0x080087C2 with no such write"
+ ],
+ "cells": [
+  [
+   "0x0F",
+   "0x00",
+   "0x01"
+  ]
+ ]
+}

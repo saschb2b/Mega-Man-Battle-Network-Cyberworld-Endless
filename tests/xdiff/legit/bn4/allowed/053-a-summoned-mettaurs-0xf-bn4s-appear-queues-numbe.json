@@ -1,0 +1,14 @@
+{
+ "name": "a summoned Mettaur's +0xF, BN4's appear queue's number",
+ "spawn_leftover": {
+  "kind": "T1",
+  "type": "0x2E4",
+  "bytes": {
+   "0x0f": [
+    "0x01",
+    "0x00"
+   ]
+  }
+ },
+ "why": "BN4's spawn of an enemy into a fight under way (BN4_SPAWN_ENEMY, Roll's summon) writes its enemy id at its +0xF (0x080F0158), which the BN4 trace moves to BN6's NameID (+0x28, src/dev/xdiff_bn4_trace.c obj_segs), and its appear queue's number at its +0xE (0x080F015A-0x080F0164: the battle state's +9, then that counter one up; BN4_QUEUE_ENTER keeps objects' +0xE bytes), which the trace moves to the first place its layout leaves, +0xF (xd4_translate's second pass: BN6's element takes +0xE, BN4's +0x17). So BN4's side reads the summon's number in the battle there: 1 for her first summon, 2 for her second (roll_v2_summons: Mettaur2 1 at t998, Billy2 2 at t2050; not the enemy id, which roll_v1's Mettaur V1, id 1, read as 1 by chance). BN6's spawn of one (BN6_SPAWN_ENEMY_1, the summon's shim's) keeps its appear queue as object pointers (BN6_QUEUE_*) and leaves +0xF 0, a byte BN6's own generic states keep a count in (0x08016716). No code of BN4's Mettaur or Billy, moved, reads its +0xE (their appear queue calls go through the queue shims to BN6's queues of pointers, bn4_twins.QUEUED) nor +0xF: this pair alone, so a write of either engine's after the spawn still parts"
+}

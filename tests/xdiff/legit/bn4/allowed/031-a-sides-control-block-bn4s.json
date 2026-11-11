@@ -1,0 +1,9 @@
+{
+ "name": "a side's control block, BN4's",
+ "part": "ai",
+ "navi_ai": [
+  "0x50",
+  "0x53"
+ ],
+ "why": "BN4's AI data +0x50 points at its side's control block (BN4_AI_CONTROL, set as the battle clears each side's AI data, 0x0800B7CE), a Navi's side's as MegaMan's; BN6's AI pool entry for a Navi holds none (its take zeroes +0 to +0x7B, 0x0800ED2C), and GutsMan's code never reads it (his AI tracker's reads): BN4's own"
+}

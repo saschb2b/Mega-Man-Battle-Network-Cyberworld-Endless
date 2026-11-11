@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "WhitWeb's code located and moved (bn4_chips.h BN4_WHITWEB 0x080D4F20 with 0x080D4F2A and 0x080D4F34, BN4_T3_WEB 0x3D; docs/rom/bn4.md): three subfamilies' routines in one object's code, one unit with rows that share its block."
+}

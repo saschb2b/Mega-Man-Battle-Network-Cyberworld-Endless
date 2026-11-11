@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "BN4's direction rule (BN4_DIRECTION 0x0800AF90: left and right by the screen) against BN6's (BN6_DIRECTION 0x0800E994: by the object's side, r4 its +0x16) and the HP gauge's low-HP step in both (BN4_HP_LOW_STEP 0x0801472C, its sound 0x82; BN6_HP_LOW_STEP 0x0801C840, its 0x84) mapped (docs/rom/bn4.md's row): a moved family's calls to BN4's rule go through a shim that numbers its answer BN6's way (bn4_twins.SIDED, src/emu/xvirus_shim.h), and cirkill_v1-v3 PASS"
+}

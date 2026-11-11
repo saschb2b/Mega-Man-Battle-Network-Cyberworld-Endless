@@ -1,0 +1,19 @@
+{
+ "name": "MegaMan's own sprite, what he owns",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "sprite_offsets": [
+  "0x01-0x03",
+  "0x05-0x07",
+  "0x0A-0x14",
+  "0x16-0x17",
+  "0x1C-0x37"
+ ],
+ "why": "MegaMan is drawn from each game's own sprite (BN5's at 0x081C9800, BN6's at 0x081D8000, his sprite state's +0x18 less 4 in each trace), whose frames, their order and their durations differ; the same for what he owns (his buster's charge glow, sprite list 5's 8 in each game). The animation his code picks (+0x00), his palette (+0x04) and the sprite itself (+0x18, by maps' sprites registry) are compared; what his sprite makes of it is not his logic nor the family's.",
+ "evidence": [
+  "his sprite state's data pointer: BN5 0x081C9804, BN6 0x081D8004 at t1; his frame (+0x01) runs 1 against 4 from t101 in spec cangard_v1",
+  "the charge glow's sprite: BN5's list 5 entry at 0x08032B2C, BN6's at 0x08032134 (each naming its own data)"
+ ]
+}

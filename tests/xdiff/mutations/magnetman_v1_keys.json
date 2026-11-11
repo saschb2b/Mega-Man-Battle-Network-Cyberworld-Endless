@@ -1,0 +1,10 @@
+[
+ {
+  "name": "MagnetMan's object's collision offset not moved",
+  "spec": "magnetman_v1_keys",
+  "poke": [
+   "0889E6B0:6E81"
+  ],
+  "what": "his third kind's 0x62's read of its hit flags (BN5 0x080D241C: ldr r1,[r0,#0x68], its copy at XN_TEAM_CODE + 0xB600 + 0xB0) left at BN5's +0x68 where BN6 keeps them at +0x70"
+ }
+]

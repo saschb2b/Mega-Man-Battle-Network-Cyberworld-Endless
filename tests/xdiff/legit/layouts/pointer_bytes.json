@@ -1,0 +1,30 @@
+{
+ "why": "Bytes an object's own code writes from a pointer's low bytes (an AI data's byte, a moved object's coordinate), read by it only as such: compared as the pointer they came from (byte k of the word at `pointer` in the same record, read as what it names), each game's objects at their own addresses. part: 'ai' an enemy's AI data by its BN5 ids; 'obj' an object of a kind and type (BN5's number, a moved type's in both records).",
+ "rules": [
+  {
+   "part": "ai",
+   "ids": [
+    "0x13D",
+    "0x13E",
+    "0x13F",
+    "0x140"
+   ],
+   "bytes": [
+    "0xA1"
+   ],
+   "pointer": "0xC8",
+   "evidence": "KnightMan's state 11 (BN5's 9), its sub-state 0x10 (BN5 0x080FC08C): ldr r0,[r7,#0x28] (AttackVars +0x28: his companion's overlay, the first kind's 0x56); bl 0x080C386C (BN6 0x080C5D80, the same bytes: its +0xB cleared, r0 returned as it came); strb r0,[r7,#1] (BN5 0x080FC0AA): the phase's flag the overlay's address's low byte, tested only as nonzero (0x080FC090). The overlay in T1 slot 2 in both traces: 0xB0 in BN5, 0x60 in BN6 (0x0203A9B0 + 2 x 0xD8)."
+  },
+  {
+   "part": "obj",
+   "kind": "T3",
+   "type": "0x8B",
+   "bytes": [
+    "0x3C",
+    "0x3D"
+   ],
+   "pointer": "0x60",
+   "evidence": "NumberMan's number box (the third kind's 0x8B, moved, its type BN5's number in both records): his state at BN5 0x080FA5A0 hands its spawner (0x080D7B54) AttackVars +0x28, a pointer to his own object's +0x68 (written at 0x080F9F64), in r3, which the third kind's spawner stores as Z (+0x3C) and the box keeps at +0x60; its init (0x080D78F2) clears Z's upper half: Z's lower half the pointer's, his object's place in each game's T1 table (numberman_v1 at t157: BN5 0xB340, BN6 0xAAF0)"
+  }
+ ]
+}

@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "Team ProtoMan: foes and Souls"
-description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill, its room built (seats, ids, free space, rivals.sav, Soul bits) and NapalmMan, GyroMan, SearchMan and Meddy moved: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
+description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill, its room built (seats, ids, free space, rivals.sav, Soul bits) and NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
 tags: [game, design, bosses, bn5, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:40:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -266,7 +266,7 @@ and own states); each Navi is M, as each of Team Colonel's was:
 | 3. GyroMan (built) | His recipe and `gyroman_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), GyroMan). His two hooks were his companion's start and end (BN5's overlay kind 0, his own 31). The Navis' list 4 numbers spent (BN4's late families keep 0xBB-0xBF), his sprites take list 2's spill (0x80-0x9F); the shared art's third room, code-low's tail (`FREE_TEAM_SHARED_MORE`, 60 KB), holds his overlay and the next three's art, DarkProto's (some 290 KB) fitting no room left; his three sounds BN6's empty slots 0x43-0x45 | M |
 | 4. SearchMan (built) | His recipe and `bn5_searchman_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), SearchMan). His seven types recorded as moved, his sprites in list 2's spill and the second and third rooms | M |
 | 5. Meddy (built) | Her recipe and `meddy_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), Meddy). Her seven types recorded as moved; the raw pointers were her effect's id beside a parameter (`movs r4,#0; orrs r4,rX`), read by the generator now; her sound 0xE0 at BN6's slot 0x46 | M |
-| 6. MagnetMan | The same; three raw pointers | M |
+| 6. MagnetMan (built) | His recipe and `magnetman_v1`, `_v1_keys`, `_sp`: PASS; five mutations FAIL ([Transplanted Navis](../multirom/navis.md), MagnetMan). His magnet panels are BN5's panel type 5 in BN6's engine as its 15 ([One net](../multirom/one-net.md), The magnet panel in BN6's engine): its flags, its push, BN5's pull in BN6's movement step on a magnet panel, its look; his child at his place moved; his sound 0x100 at BN6's slot 0x47; MagnetSoul's exemption waits for unit 8 | M |
 | 7. Guardians | The partner coin in `xguardian.c` (from act 2), the deep pool of eleven, their bodies and faces copied as the six's, Guardian Data (his Soul and a chip of his Soul's kind, below), their intro lines in a words file through [the voice rules](../voice/rules.md) | S-M |
 | 8. Their Souls | `tools/xsoul.py` over forms 2-6, a Soul at a time with its specs as S2-S5 held the six: NapalmSoul, GyroSoul, MagnetSoul (M each), then SearchSoul and MeddySoul (L each, their Custom-screen code traced first) | L |
 | 9. ProtoSoul | Form 1 by the same walk (M), given at the rival's netbattle won with BN5's ROM read, Chaud's box | M |

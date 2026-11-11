@@ -95,7 +95,22 @@ bool online_trade_answer(TradeChip give) {
 	return T.stage == TRADE_OFFERED && chip_ok(give) && send(2, T.id, give, T.theirs);
 }
 
-bool online_trade_accept(void) { return T.stage == TRADE_ANSWERED && send(3, T.id, T.mine, T.theirs); }
+static int pack_count(TradeChip c);
+static int in_folders(TradeChip c);
+
+bool online_trade_spare(TradeChip c) { return trade_list_spare(pack_count(c), in_folders(c)) > 0; }
+
+/* (the chip promised still a spare: BN6's PET in the Square can put it in a
+ * folder between the offer and the deal, and then the trade is called off) */
+bool online_trade_accept(void) {
+	if (T.stage != TRADE_ANSWERED) return false;
+	if (!online_trade_spare(T.mine)) {
+		fprintf(stderr, "online: trade %u's chip %u %u is no spare any more: called off\n", T.id, T.mine.id, T.mine.code);
+		online_trade_cancel();
+		return false;
+	}
+	return send(3, T.id, T.mine, T.theirs);
+}
 
 bool online_trade_cancel(void) {
 	bool open = T.stage && T.stage != TRADE_DONE && T.stage != TRADE_CANCELLED;
@@ -195,9 +210,25 @@ static void chip_words(TradeChip c, char *out, size_t n) {
 	snprintf(out, n, "%s %c", name, c.code == 26 ? '*' : 'A' + c.code);
 }
 
-const char *online_trade_settle(void) {
+bool online_trade_here(const TradeView *done) {
+	if (!online_trade_spare(done->mine) || pack_count(done->theirs) < 0) return false;
+	game_call_ret(BN6_TAKE_CHIPS, done->mine.id, done->mine.code, 1, NULL);
+	game_call_ret(BN6_GIVE_CHIPS, done->theirs.id, done->theirs.code, 1, NULL);
+	return true;
+}
+
+bool online_trade_settle(bool made, const char **words) {
 	TradeChip give, get;
-	if (!online_trade_pending(&give, &get)) return NULL;
+	*words = NULL;
+	if (!online_trade_pending(&give, &get)) return false;
+	/* (made in the Square already, where MegaMan said so, and carried home with what its PET changed: square_pet.h) */
+	if (made) {
+		fprintf(stderr, "online: trade settled as the Square made it: %u %u given, %u %u got\n", give.id, give.code, get.id, get.code);
+		return true;
+	}
+	char gave[32], got[32];
+	chip_words(give, gave, sizeof gave);
+	chip_words(get, got, sizeof got);
 	int had = pack_count(give);
 	/* (the checkpoint before the visit always holds the spare it offered,
 	 * a copy past its folders'; where it does not, the run keeps its own
@@ -205,7 +236,7 @@ const char *online_trade_settle(void) {
 	if (had - in_folders(give) <= 0 || pack_count(get) < 0) {
 		fprintf(stderr, "online: trade %u %u for %u %u not settled: the Pack holds %d\n", give.id, give.code, get.id, get.code, had);
 		online_trade_settled();
-		return NULL;
+		return false;
 	}
 	int got_had = pack_count(get);
 	game_call_ret(BN6_TAKE_CHIPS, give.id, give.code, 1, NULL);
@@ -213,10 +244,8 @@ const char *online_trade_settle(void) {
 	/* (ids from 320 count in the pack's extension: BN6's routines patched to, docs/engine/emulation/) */
 	fprintf(stderr, "online: trade settled: %u %u given, %u %u got (the Pack's %d to %d of the one, %d to %d of the other)\n",
 		give.id, give.code, get.id, get.code, had, pack_count(give), got_had, pack_count(get));
-	char gave[32], got[32];
-	chip_words(give, gave, sizeof gave);
-	chip_words(get, got, sizeof got);
-	return trade_settled(gave, got);
+	*words = trade_settled(gave, got);
+	return true;
 }
 
 void online_trade_settled(void) {

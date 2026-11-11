@@ -1,0 +1,8 @@
+{
+  "feature": "BN5's last chips in BN6's tables",
+  "date": "2026-11-09",
+  "name": "pa_bignoise to pa_piledrvr: BN5's last five Program Advances formed and played in BN6's",
+  "result": "python3 build.py xdiff with the five specs: each PASS (BigNoise, CsmoPris, Football and PileDrvr to t64, the foe's deletion at t65 the families' known difference; WildBird 300 frames). On the way: PileDrvr's sound 0x148 had no slot (0x4B in xsong.c's table), pa_piledrvr held BN6's junk chip 389 until its GunDelS3's first code was made D for the run (a spec's own poke, read for BN5 specs since), then its object's +0x30, the chip, 349 against 604 (legit.json's chip_id place). --mutations: 6 of 6 caught. marina_v1_keys FAIL at t408 with CloudMan's unit copying the bubbles' block (the suite's find): the Bubbles helper.",
+  "meaning": "Every Program Advance of BN5's forms in BN6's engine; an id past 383 forms with the engine's own per-battle bit.",
+  "link": "../rom/chips-code.md"
+}

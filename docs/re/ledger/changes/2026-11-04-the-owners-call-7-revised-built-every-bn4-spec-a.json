@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "The owner's call 7, revised, built: every BN4 spec against BN6's (game=bn4:bn6) runs BN6's opening a frame longer, a named alignment beside the lag (tests/xdiff/legit.json's bn4 align, \"BN6's battle opening a frame longer\"): BN6's first blink step (BN6_APPEAR_BLINK_FIRST 0x080163FC, movs r0,#2, named in src/emu/bn6_families.h and docs/rom/bn4.md's row) written as movs r0,#3 into BN6's copy by tools/xdiff_bn4.py alignments, checked against BN6's ROM first; BN4's side, the controls and BN5's specs untouched, a spec of more than one foe refused. The opening's allowance (\"the opening's idle animation, BN4's appear a run longer\": opening_animation, OPENING_LEAD, anim_steps, bn4_sprite_data) removed with its code. All 18 BN4 specs PASS, cangard_v1 and handi_v1 PASS, bn4_mettaur_control PASS and bn4_mettaur_broken PASS at t202; a mutation added (shrimpy_v3, the step made movs r0,#4: caught at t1), 181 of 181 caught"
+}

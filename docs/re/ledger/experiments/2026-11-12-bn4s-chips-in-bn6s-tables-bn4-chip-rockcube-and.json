@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_rockcube and bn4_chip_repair: an obstacle's control, then BN4's Repair moved",
+  "result": "python3 build.py xdiff bn4_chip_rockcube bn4_chip_repair: both PASS over 300 frames. RockCube (both games' own): the cube set at t34, struck at t99 (200 to 190 HP). Repair: the cube repaired to 200 at t154 in both, effect and sound, struck again at t237. Six mutations caught (Repair's row's subfamily and family, the obstacles read at BN4's +0x68, the HP's source, the sound; RockCube's kind).",
+  "meaning": "A misc routine moves by the generator; a chip that needs an obstacle is proved over a same-name control whose object is each engine's own."
+}

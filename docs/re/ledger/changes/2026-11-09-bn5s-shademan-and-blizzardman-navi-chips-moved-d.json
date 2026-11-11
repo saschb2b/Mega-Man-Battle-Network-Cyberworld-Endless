@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "BN5's ShadeMan and BlizzardMan Navi chips moved (docs/multirom/chips-code.md; docs/rom/chips-code.md, the Darkloids' Navi chips): BN5's LZ77 sprite queue 0x080029B8 stubbed, the struck setter 0x0800D7B8 copied, the SP and DS powers' table 0x0801D27A copied to row 14; BN4's chips paired by three rules (docs/multirom/bn4-chips.md, Where things stand), its names' punctuation 0x40, 0x46, 0x4E read as BN6's."
+}

@@ -1,0 +1,12 @@
+{
+ "name": "the cube's sprite, each engine's own art",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x59",
+ "part": "obj",
+ "offsets": [
+  "0x80",
+  "0xBB"
+ ],
+ "why": "The cube is drawn from each game's own art: BN4's init loads list 4's 2 (0x080D8A02-0x080D8A08: movs r1,#0x10; movs r2,#2), BN6's list 4's 0 (0x080D11FA-0x080D1200), other bytes; its sprite state (+0x80 to +0xBB: the frames' pointers, the animation's count and its timer) is each art's. Its place, its panel, its HP and its states are compared as ever."
+}
