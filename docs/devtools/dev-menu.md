@@ -40,7 +40,14 @@ check it and its reward; BN5's battles too, with BN5's own find),
 `visitors` (every random battle the visitors' rules allow takes a visitor
 of the other net, not one in four: from act 2, where BN5's ROM is read,
 [One net: the design](../multirom/one-net.md); `CYBERWORLD_EMU_DEBUG` prints each roll's foes,
-the visitor's family among them, and the run log marks it `+`), `dark`
+the visitor's family among them, and the run log marks it `+`), `groups`
+(every plain random battle an encounter group's, a template and a
+filling by the layer's seed and the battle's index; `group=N` template N
+alone, 1 the wall and its artillery, 2 the panel war, 3 the summoner and
+its guard, 4 clashing answers, 5 one element, 6 the pincer, 7 the swarm,
+8 held ground, 9 glass cannons, 10 the bulwark, 11 the nets meeting:
+[Encounter groups](../game/progression/encounter-groups.md), Step 1,
+built), `dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, [Liberation Missions](../game/liberation/overview.md); `CYBERWORLD_EMU_DEBUG` prints the board as
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is

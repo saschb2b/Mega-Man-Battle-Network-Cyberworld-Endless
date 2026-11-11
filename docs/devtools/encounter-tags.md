@@ -20,6 +20,7 @@ python3 tools/encounter_danger.py families --out tools/encounter_data/families.t
 python3 tools/encounter_tags.py sample    # .build/encounter/battles.tsv: each act's own battles and the templates' fillings
 python3 tools/encounter_danger.py battles .build/encounter/battles.tsv --out tools/encounter_data/danger.tsv
 python3 tools/encounter_tags.py report [--write]   # the tables (--write: into the measured concept, after its mark)
+python3 tools/encounter_tags.py engine [--check]   # src/core/group_tags.c: each family's pressure and tricks, for the engine's groups
 ```
 
 ## The tags' dump
@@ -82,3 +83,21 @@ area of the act holds one of its own families in); how many families fill
 three templates or more; and the danger sampled, each battle's pressure
 against the sum its families' own predict. `--write` puts the tables into
 the measured concept after its mark.
+
+## The engine's table and its check
+
+`tools/encounter_tags.py engine` writes `src/core/group_tags.c` from
+`families.tsv`: a row a family measured, its net, BN6's AI index, its
+pressure and its tricks as the engine's bits (`GROUP_BREAKS`,
+`GROUP_SHAPES`, `GROUP_SUMMONS`, `GROUP_TOUGH`, `src/core/groups.h`);
+`--check` fails where the file is not what it would write. After a
+family is moved in: `dump`, `encounter_danger.py families` for the new
+one, `engine`, `report --write`.
+
+The engine's groups (`src/core/groups.c`, behind `--dev groups`) and
+this tool fill the templates by the same rule, each from its own
+reading: the tool from the dump, the engine from the ROMs. `build.py
+pacing` prints the engine's counts ([the pacing
+report](pacing-report.md), the encounter groups), and they are compared
+by hand with `fillings` here, per ROM set, act and template: all 308
+agreed on 11 November 2026.
