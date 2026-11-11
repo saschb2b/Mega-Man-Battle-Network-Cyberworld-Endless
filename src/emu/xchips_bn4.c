@@ -1893,6 +1893,106 @@ static const XcSong ligtnin_songs[] = { { 0x120, 0x240 }, { 0x13E, 0x241 }, { 0x
 	.sprites = ligtnin_sprites, .nsprites = (int)(sizeof ligtnin_sprites / sizeof *ligtnin_sprites), \
 	.effects = ligtnin_effects, .neffects = (int)(sizeof ligtnin_effects / sizeof *ligtnin_effects), \
 	.bytes = ligtnin_bytes, .nbytes = (int)(sizeof ligtnin_bytes / sizeof *ligtnin_bytes) }
+/* ---- Hole: BN4's support 0xb (080E45F7) as BN6's 0x8b; its chips 82 (527), 216 (528), 193 (562) ---- */
+/* its fourth-kind 0x20 (080E4584-080E4618), which its routine (080E45F6) spawns: moved */
+/* its fourth-kind 0x6a (080E9838-080E98E0), which its routine (080E98BC) spawns: moved */
+/* its fourth-kind 0x1f (080E4354-080E4584): no BN6 type of its body, moved with him */
+/* its table 080E423C's row 0x1: +0x0 0x8, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x4: +0x0 0xa, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x5: +0x0 0x5, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its sound 0x105 (080E4394): BN4's song copied into the grown song table's slot 0x280, on BN4's player 15 */
+/* its sound 0x106 (080E43E8): BN4's song copied into the grown song table's slot 0x281, on BN4's player 14 */
+/* its sound 0x107 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x282, on BN4's player 22 */
+/* its sound 0x124 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x29f, on BN4's player 18 */
+/* its chip 82 is a dark chip of BN4's (row 527): a battle it is used in costs 20 max HP */
+/* its chip 122 has no row of the registry (the run's by name, or none) */
+/* its chip 139 has no row of the registry (the run's by name, or none) */
+/* its chip 208 has no row of the registry (the run's by name, or none) */
+/* its chip 216 is a dark chip of BN4's (row 528): a battle it is used in costs 20 max HP */
+/* its chip 193 is a dark chip of BN4's (row 562): a battle it is used in costs 20 max HP */
+
+static const XvBlock hole_blocks[] = {
+	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x38C0, 0x4B619B7Eu },
+	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x3960, 0xD3ADC8B1u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3A10, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3C40, 0x77CB1EA6u },
+};
+static const XvData hole_data[] = {
+	{ 0x080E4592, 0x080E4594, XV_RAW },
+	{ 0x080E4594, 0x080E4598, XV_POOL },
+	{ 0x080E4598, 0x080E45A4, XV_TABLE },
+	{ 0x080E45B2, 0x080E45B4, XV_RAW },
+	{ 0x080E45B4, 0x080E45B8, XV_POOL },
+	{ 0x080E45B8, 0x080E45C8, XV_TABLE },
+	{ 0x080E9846, 0x080E9848, XV_RAW },
+	{ 0x080E9848, 0x080E984C, XV_POOL },
+	{ 0x080E984C, 0x080E9858, XV_TABLE },
+	{ 0x080E9866, 0x080E9868, XV_RAW },
+	{ 0x080E9868, 0x080E986C, XV_POOL },
+	{ 0x080E986C, 0x080E987C, XV_TABLE },
+	{ 0x080E98DE, 0x080E98E0, XV_RAW },
+	{ 0x080E4362, 0x080E4364, XV_RAW },
+	{ 0x080E4364, 0x080E4368, XV_POOL },
+	{ 0x080E4368, 0x080E4374, XV_TABLE },
+	{ 0x080E43B0, 0x080E43B8, XV_POOL },
+	{ 0x080E43B8, 0x080E43C8, XV_TABLE },
+	{ 0x080E423C, 0x080E4354, XV_RAW },
+};
+static const XvPair hole_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009DC4, 0x0800CC0A },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E38, 0x0800CC52 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+};
+static const XvPair hole_words[] = {
+	{ 0x08008BD9, 0x0800B917 },   /* project:project:chips, DIFF */
+	{ 0x08008BF9, 0x0800B94D },   /* project:project:chips, SAME */
+	{ 0x08008C2B, 0x0800B9B1 },   /* project:project:chips, DIFF */
+	{ 0x08008EB9, 0x0800BC89 },   /* project:project:chips, SAME */
+	{ 0x08008EEF, 0x0800BD35 },   /* project:project:chips, DIFF */
+};
+static const XvImm hole_imms[] = {
+	{ 0x080E441C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E444C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x98 },   /* its object's type 0x1f: moved, the dispatch's 0x98 */
+	{ 0x080E45FA, THUMB_MOVS, 0, 0, 0x20, 0x99 },   /* its object's type 0x20: moved, the dispatch's 0x99 */
+	{ 0x080E460A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E98C0, THUMB_MOVS, 0, 0, 0x6A, 0x9A },   /* its object's type 0x6a: moved, the dispatch's 0x9a */
+	{ 0x080E98D0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType hole_types[] = {
+	{ 4, 0x98, XV_TYPE_MOVED, 0x1F },   /* BN4's fourth-kind 0x1f, moved, the dispatch's 0x98 */
+	{ 4, 0x99, XV_TYPE_MOVED, 0x20 },   /* BN4's fourth-kind 0x20, moved, the dispatch's 0x99 */
+	{ 4, 0x9A, XV_TYPE_MOVED, 0x6A },   /* BN4's fourth-kind 0x6a, moved, the dispatch's 0x9a */
+};
+static const XvByte hole_bytes[] = {
+	{ 0x080E42B4, 0x09, 0x05 },   /* its table's row 0x6: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42C8, 0x09, 0x05 },   /* its table's row 0x7: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42F0, 0x0B, 0x10 },   /* its table's row 0x9: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E4304, 0x0B, 0x10 },   /* its table's row 0xa: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E432C, 0x0B, 0x10 },   /* its table's row 0xc: +0x0 0xb in BN4, 0x10 in BN6 */
+};
+static const XvSoundCall hole_sound_calls[] = {
+	{ 0x080E4394, 0x280 },   /* its sound 0x105: BN4's song at the grown table's slot 0x280 */
+	{ 0x080E43E8, 0x281 },   /* its sound 0x106: BN4's song at the grown table's slot 0x281 */
+	{ 0x080E447A, 0x17B, true },   /* its sounds 0x107, 0x124: BN4's numbers plus 0x17b, their slots of the grown table (the panel changer's sound as it sets its panels (0x080E4460-0x080E447A): none for its kinds 9 and 0xA (Hole's, DrkLine's: beq past the call), 0x124 for 8 and 0xD (poison: movs r0,#0x25; adds r0,#0xff at 0x080E4476), 0x107 for the rest (movs r0,#8; adds r0,#0xff at 0x080E446A), DrkStage's Holes 0xC) */
+};
+static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F } };
+
+#define HOLE_CODE { .name = "Hole (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5400), \
+	.blocks = hole_blocks, .nblocks = (int)(sizeof hole_blocks / sizeof *hole_blocks), \
+	.data = hole_data, .ndata = (int)(sizeof hole_data / sizeof *hole_data), \
+	.calls = hole_calls, .ncalls = (int)(sizeof hole_calls / sizeof *hole_calls), \
+	.words = hole_words, .nwords = (int)(sizeof hole_words / sizeof *hole_words), \
+	.imms = hole_imms, .nimms = (int)(sizeof hole_imms / sizeof *hole_imms), \
+	.types = hole_types, .ntypes = (int)(sizeof hole_types / sizeof *hole_types), \
+	.sound_calls = hole_sound_calls, .nsound_calls = (int)(sizeof hole_sound_calls / sizeof *hole_sound_calls), \
+	.bytes = hole_bytes, .nbytes = (int)(sizeof hole_bytes / sizeof *hole_bytes) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -1915,5 +2015,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x11, 0x91, 0x080EAE93, XC4_HOMES + 0x4800, METEORS_CODE, NULL, 0, 0, 0 },
 	{ XCHIP_SUPPORT, 0x11, 0x91, 0x080E4CA7, XC4_HOMES + 0x4C00, TIMEBOMB_CODE, timebomb_songs, (int)(sizeof timebomb_songs / sizeof *timebomb_songs), 0, 0 },
 	{ XCHIP_MISC, 0x0C, 0x8C, 0x080DF98D, XC4_HOMES + 0x5000, LIGTNIN_CODE, ligtnin_songs, (int)(sizeof ligtnin_songs / sizeof *ligtnin_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x5400, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x5800, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 22 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

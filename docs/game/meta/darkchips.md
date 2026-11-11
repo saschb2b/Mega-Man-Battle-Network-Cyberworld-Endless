@@ -131,7 +131,11 @@ engine's, and all twelve kinds play there, each by its own net's rule
   lists a dark chip as playing since. The autopilot never picks one, as
   it picks no DarkChip. BN4's dark chips BN6 has by name (Static,
   Muramasa, Anubis, BlakWing) stay BN6's own chips, one chip a name, at
-  no price; its light chips, 63, play for any MegaMan at no price.
+  no price; its light chips, 63, play for any MegaMan at no price. The
+  first dark units of BN4's code are moved (11 November 2026): Hole,
+  DrkLine and DrkStage, which dig the Hole panels a DS Navi chip's power
+  counts, BN4's Hole now a panel of BN6's engine ([BN4's chips in a
+  run](../../multirom/bn4-chips.md), The dark units).
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
   a battle a DarkChip was used in, the darkness fighting with his body
   a while (session 68), and MegaMan said so; BN6's engine has its own

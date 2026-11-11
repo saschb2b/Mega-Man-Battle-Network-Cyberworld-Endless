@@ -1,0 +1,7 @@
+{
+ "bn4": "0x105",
+ "bn6": "0x280",
+ "clock": "state",
+ "what": "the panel changer's sound 0x105, its copy",
+ "why": "Played by the panel changer as it begins (BN4's fourth-kind 0x1F, moved once with the dark panels' unit, Hole's, DrkLine's and DrkStage's: movs r0,#6; adds r0,#0xff at 0x080E4390, its bl to PlaySoundEffect at 0x080E4394; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x280 and goes on to BN6's), a state's: BN4's song 0x105 copied into slot 0x280 of BN6's grown song table (tools/xchiprecipe_bn4.py SOUND_SLOTS, the dark chips' range). bn4_chip_hole at t34"
+}

@@ -1,4 +1,4 @@
-/* BN5's lava and sea in BN6's own battle engine (xpanels.c; issue #82,
+/* BN5's lava and sea, and BN4's Hole, in BN6's own battle engine (xpanels.c; issue #82,
  * docs/multirom/one-net.md; docs/rom/bn5-world.md, BN5's lava and sea in
  * BN6's engine), at panel types BN6 leaves free, so that BN5's
  * battlefields with them translate (xfields.c):
@@ -12,8 +12,13 @@
  * - an Aqua hit cools lava, an Elec hit on what stands on sea deals its
  *   damage twice, and a chip's lava or sea runs out after BN5's frames;
  * - how they look (xpanels_look.c): BN5's tiles and colours.
- * Numbers alone here: BN5's tiles and colours come from the player's ROM
- * as the core starts. */
+ * BN5's magnet panel (MagnetMan's) at 15, and BN4's Hole (BN4_PANEL_HOLE;
+ * docs/multirom/bn4-chips.md, call 8) at the type after it: plain's flags, BN4's tiles and colours, and nothing it
+ * does to what stands on it (BN4's one rule for it, an object of a side
+ * whose karma is light making it plain, has no karma to read in BN6).
+ * Whichever of the two ROMs comes first grows the tables; the other adds
+ * its own. Numbers alone here: their tiles and colours come from the
+ * player's ROMs as the core starts. */
 #ifndef CW_XPANELS_H
 #define CW_XPANELS_H
 
@@ -22,12 +27,17 @@
 
 #define XPANEL_LAVA 13   /* BN6_PANEL_TYPE: BN5's lava (BN5_PANEL_LAVA), at BN6's first free type (BN6_PANEL_TYPES) */
 #define XPANEL_SEA  14   /* ... BN5's sea (BN5_PANEL_SEA) */
-#define XPANEL_MAGNET 15 /* ... BN5's magnet panel (BN5_PANEL_MAGNET), MagnetMan's: its flags and its push, not its look yet
-                          * (xpanels_look.c draws 13 and 14; no field of BN5's is translated with it, xfields.c) */
+#define XPANEL_MAGNET 15 /* ... BN5's magnet panel (BN5_PANEL_MAGNET), MagnetMan's: its flags, its push and its look (no field
+                          * of BN5's is translated with it, xfields.c) */
+#define XPANEL_HOLE 16   /* ... BN4's Hole (BN4_PANEL_HOLE), which a DS Navi chip's power counts (BN6_PANEL_COUNT with it): past
+                          * BN6's 0-15, its flags update ORing the type into bits 0-4, so 16-31 always give bit 4, which plain's
+                          * word, the Hole's, holds anyway (docs/rom/battle.md, BN6's panel types and who holds each) */
+#define XPANEL_TYPES 17  /* the grown tables' types (flags, tiles): BN6's 13 and the four after */
 
 /* Into the core's copy as it starts, where BN5's ROM is read (xfields.c
- * calls it before it translates a field): each patch site checked to be
- * BN6's own first; all or nothing, the log saying why not. */
+ * calls it before it translates a field) and where BN4's is (xvirus.c):
+ * each patch site checked to be BN6's own first; all or nothing for each
+ * game, the log saying why not. */
 void xpanels_install(int xrom);
 /* Whether BN6's engine has lava and sea now */
 bool xpanels_ready(void);

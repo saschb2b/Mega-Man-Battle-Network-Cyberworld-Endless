@@ -145,6 +145,20 @@ the rows of the same BN4 number (Thunder's ball's 0xAD at its own slot,
 where Billy's thunder, BN6's object, pairs it with BN6's 0xBA and
 ThunderMan's battles with the pool's slot).
 
+A panel of BN4's is read in BN6's numbers where the two games number a
+type apart: BN4's holy 9 is BN6's 5 and its Hole 0xB the engine's 15
+(`src/emu/xpanels.h`), in the type, the drawn type, the flags' low
+nibble (each game's flags update ORs the type in) and the blink's type.
+BN4 keeps a panel changer's blink in tables of its own
+(`BN4_PANEL_BLINKS`, `BN4_PANEL_BLINK_SIDES`: the type and side in the
+low nibbles, kept after the draw clears the mark), BN6 in the panel
+(+8, +9): the trace carries BN4's two nibbles into those fields. And
+BN4's set type leaves +0x12 at 0xBE, which its panel step counts on a
+holding panel alone: on any other type it is BN4's idle, read as BN6's
+0x708. `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage`
+pass by these, their five mutations caught (the kinds' table's types
+in the copy, the poison's sound, BN6's blink mark storing the side).
+
 A chip's foe under a slide (a pull or a push the chip's hit gave it, in a
 spec whose subject is MegaMan) differs between the engines in four
 leftovers of its record, each an entry of `legit.json`'s `bn4` allowed

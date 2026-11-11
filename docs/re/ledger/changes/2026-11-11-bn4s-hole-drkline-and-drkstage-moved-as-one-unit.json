@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN4's Hole, DrkLine and DrkStage moved as one unit, the panel changer once (docs/rom/bn4.md, The panel changer and the Hole panel: the blink read to depth, BN4_PANEL_BLINK_SIDES; src/emu/bn6_panels.h's BN6_PANEL_BLINK_TYPE, _SIDE, BN6_PANEL_BLINKING): bn4_chip_hole, bn4_chip_drkline and bn4_chip_drkstage PASS by a dark MegaMan, five mutations caught; the differential reads BN4's panel types, blink and set type's timer in BN6's terms."
+}

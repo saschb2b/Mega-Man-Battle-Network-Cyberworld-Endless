@@ -66,6 +66,8 @@ MOVED = {
     166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3); AquaUp1-3
                                        # and GreenWd1-3 (181-186), the same routine, wait: tools/xchiprecipe_bn4.py ROWS_WAIT
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
+    82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
+    193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
 }
 # ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
 # unit's number in BN6's grown attack families (tools/xchiprecipe_bn4.py ATTACK_NUMBERS, 0xD0 on: past every support and misc

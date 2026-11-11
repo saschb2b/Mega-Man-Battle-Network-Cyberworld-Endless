@@ -1,0 +1,7 @@
+{
+ "bn4": "0x124",
+ "bn6": "0x29F",
+ "clock": "state",
+ "what": "the panel changer's poison's sound 0x124, its copy",
+ "why": "Played by the panel changer as it sets its panels when its kind is 8 or 0xD, poison (the same call: cmp r1,#0xd, then movs r0,#0x25; adds r0,#0xff at 0x080E4476, its bl at 0x080E447A; BN6: the shim adds 0x17B), a state's: BN4's song 0x124 copied into slot 0x29F. bn4_chip_drkstage at t34, the other side's poison (kind 0xD)"
+}

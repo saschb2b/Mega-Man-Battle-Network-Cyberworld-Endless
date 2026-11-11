@@ -1,0 +1,7 @@
+{
+ "bn4": "0x107",
+ "bn6": "0x282",
+ "clock": "state",
+ "what": "the panel changer's sound 0x107, its copy",
+ "why": "Played by the panel changer as it sets its panels when its kind is none of 8, 9, 0xA and 0xD (the same object: movs r0,#8; adds r0,#0xff at 0x080E446A, its bl to PlaySoundEffect at 0x080E447A; BN6: the copy's bl aimed at a shim of the unit's home that adds 0x17B to r0, XvSoundCall's add, as the call plays 0x124 too), a state's: BN4's song 0x107 copied into slot 0x282 of BN6's grown song table (BN6's own 0x107 another song, of two tracks). bn4_chip_drkstage at t34, its Holes' changer (kind 0xC)"
+}

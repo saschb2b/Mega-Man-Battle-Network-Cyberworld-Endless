@@ -1,0 +1,4 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-12T21:00:00Z
+* **Update**: multirom/bn4-chips.md (Hole, DrkLine and DrkStage moved, one unit, the panel changer once), rom/bn4.md (the changer's blink read to depth, its sounds), devtools/differential.md (BN4's panel types in BN6's numbers, its blink and set type's timer), devtools/chip-recipe-generator.md (a table's bytes, a support unit of several subfamilies, a call several sounds reach), game/meta/darkchips.md (the first dark units moved).
+* **Update**: multirom/bn4-chips.md (BN4's Hole panel in BN6's engine built, type 16, the owner's call 8), rom/bn4.md (the Hole panel's look, colours and count, new row), code/emu.md (`xpanels.c` brings BN4's Hole too), devtools/battle-on-demand.md (the `status panel` step).

@@ -13,6 +13,9 @@
 #define BN6_PANEL_IN_FIELD_TABLE 0x0800C590u /* ... 40 bytes (0x0800C516's literal) */
 #define BN6_PANEL_SIDE_COPY   0x04        /* u8 its side again (0x0800C54A) */
 #define BN6_PANEL_SIDE_DRAWN  0x07        /* u8 its side a third time (0x0800C54C) */
+#define BN6_PANEL_BLINK_TYPE  0x08        /* u8 the type a panel changer's blink last drew it as (BN6_PANEL_BLINK_SET's r2), kept after */
+#define BN6_PANEL_BLINK_SIDE  0x09        /* u8 ... and the side (its r3) */
+#define BN6_PANEL_BLINKING    0x0D        /* u8 1 while the blink is to be drawn (BN6_PANEL_BLINK_SET), cleared as it is */
 #define BN6_PANEL_COLUMN      0x0A        /* u8 its column (0x0800C55A) */
 #define BN6_PANEL_ROW         0x0B        /* u8 its row (0x0800C55C) */
 #define BN6_PANEL_SPOT        0x0C        /* u8 from BN6_PANEL_SPOT_TABLE by row * 8 + column (0x0800C558) */
@@ -51,6 +54,8 @@
 #define BN6_SET_PANEL_TYPE    0x0800CC0Au /* ... its ROM entry, every chip's and attack's: push {r4,r5,r6,lr}, then BN6_SET_PANEL_TYPE_IW */
 #define BN6_PANEL_BLINK_SET   0x0800CC52u /* a panel (r0 column, r1 row) drawn as type r2 on side r3 while a chip's panels blink: its +8, +9 and +0xD 1
                                            * (seven calls from BN6's own panel changer's code, 0x080E31DC on); BN4_PANEL_BLINK_SET's twin by reading */
+#define BN6_PANEL_COUNT       0x0800CDB4u /* how many panels of type r0 (BN6_PANEL_TYPE) the side r1 (BN6_PANEL_ALLIANCE) holds, rows 1-3, columns 1-6:
+                                           * BN4_PANEL_COUNT's twin, instruction for instruction but for the fields each game reads */
 #define BN6_WEAKNESS          0x03007440u /* IWRAM: a byte by element x 5 + the attacker's element (0-4), the damage's shift: 1 where it is weak (0x0300742E) */
 /* What a hit adds for the panel its victim stands on (IWRAM 0x03007668,
  * from the hit pass at 0x03007416 and 0x030076F6, each result added to the
