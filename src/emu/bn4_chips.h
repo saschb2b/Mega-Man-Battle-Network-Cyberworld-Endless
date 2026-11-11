@@ -82,6 +82,8 @@
  * (subfamily 5 after 0x28 frames), BN6_MISC_RUN's twin instruction for instruction */
 #define BN4_CHIP_MISC_FAMILY  0x20
 #define BN4_MISC_RUN          0x080EC972u
+#define BN4_MISC_WAIT         0x080EC9ACu /* ... its wait: cmp r0,#5 on the subfamily, then movs r0,#0x28 into the misc state's +0x10
+                                           * (0x080EC9B0), counted down a frame each to 0 before the attack's end (SidBmbo's alone) */
 #define BN4_MISC_ROUTINES     0x080EC9CCu /* its routines by subfamily, BN4_MISC_ROUTINE_COUNT words */
 #define BN4_MISC_ROUTINE_COUNT 0x12
 #define BN4_BATTLE_OBSTACLES  0x68        /* the battle state's obstacles by side, three words a side (BN6's +0xA0) */
@@ -122,5 +124,8 @@
                                            * a push bit (0xFC) with bit 0x01 gives the status 0x100 and clears the flinch's 4 (to 0x08013622),
                                            * one without it the push alone's 0x10 (0x08013628-0x08013634). BN6_STRUCK_PUSHED: bit 0x40 where
                                            * BN4 reads bit 0x01 */
+/* SidBmbo1-3 (its chips 78-80, misc subfamily 5), moved as a unit (src/emu/xchips_bn4.c), the one BN4's misc run waits for */
+#define BN4_SIDBMBO           0x080D5DDAu /* its routine, in the bamboo's code: the bamboo spawned (0x080D5DBA) */
+#define BN4_T3_SIDBMBO        0x44        /* the bamboo, the third kind's (0x080D5C50 to 0x080D5DF4); sprite list 1's 0xC, sound 0x8E */
 
 #endif

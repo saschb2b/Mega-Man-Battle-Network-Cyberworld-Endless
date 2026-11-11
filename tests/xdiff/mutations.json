@@ -2986,6 +2986,54 @@
     "088F1304:01DA"
    ],
    "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
+  },
+  {
+   "name": "SidBmbo1's row's power another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "08C0623E:0028"
+   ],
+   "what": "the registry's record of BN4's SidBmbo1 (571 at CHIPS_RECORDS) with power 40 where BN4's record holds 80: the Mettaur over the bamboo left 100 HP where BN4's leaves it 60"
+  },
+  {
+   "name": "SidBmbo2's row's subfamily another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "08C0625C:83:1"
+   ],
+   "what": "the registry's record of BN4's SidBmbo2 (572) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x85: no bamboo, and no wait"
+  },
+  {
+   "name": "SidBmbo's wait another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "088F17D8:2014"
+   ],
+   "what": "the wrapper of SidBmbo's unit's home (XC4_HOMES + 0x2400 + XC4_HOME_WAIT: its movs r0,#0x28 at +0x18, the frames BN4's misc run waits) with 0x14: MegaMan out of his misc state 20 frames before BN4's"
+  },
+  {
+   "name": "SidBmbo's wait counted as BN6's run counts",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F17E4:DA01"
+   ],
+   "what": "the wrapper's count-down (its bgt at +0x24, BN4's run's test, ending the attack at 0) made bge, BN6's run's test, which ends it below 0: the attack a frame longer than BN4's"
+  },
+  {
+   "name": "the bamboo's type another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "080D5DBE:20CB"
+   ],
+   "what": "the bamboo's spawner's copy (its movs r0,#0x44 at BN4 0x080D5DBE, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no bamboo"
+  },
+  {
+   "name": "the bamboo's sound another",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F1704:01DA"
+   ],
+   "what": "the shim of SidBmbo's unit's home that plays the bamboo's sound (its first, at XC4_HOMES + 0x2400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E1"
   }
  ]
 }
