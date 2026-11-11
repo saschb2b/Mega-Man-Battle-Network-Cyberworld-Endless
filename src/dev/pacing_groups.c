@@ -47,20 +47,29 @@ static void set_report(FILE *out, const GroupFam *pool, int n, const char *name,
  * together, its hardest hit and the pressure its families' tags predict
  * (-1 where one has none) */
 static void measure(const Encounter *e, int *hp, int *hit, int *pressure) {
-	double sum = 0;
+	double sum = 0, scale[MAX_FOES] = { 0 };
+	int net[MAX_FOES] = { 0 };
 	*hp = *hit = 0;
 	*pressure = 0;
 	for (int i = 0; i < e->nfoes; ++i) {
-		int h, d, h1, d1, net = visitor_net(e->foes[i].family), v1 = visitor_id(net, e->foes[i].family, 0);
-		const GroupTag *tag = group_tag(net, e->foes[i].family);
-		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(v1, &h1, &d1) || !tag || tag->pressure < 0) {
+		int h, d, h1, d1;
+		net[i] = visitor_net(e->foes[i].family);
+		const GroupTag *tag = group_tag(net[i], e->foes[i].family);
+		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(visitor_id(net[i], e->foes[i].family, 0), &h1, &d1) || !tag || tag->pressure < 0) {
 			*pressure = -1;
 			return;
 		}
 		*hp += h;
 		if (d > *hit) *hit = d;
+		scale[i] = (double)d / (double)(d1 > 1 ? d1 : 1);
 		sum += (double)(tag->pressure * d) / (double)(d1 > 1 ? d1 : 1);
 	}
+	/* (two the pairs' pass found pressing harder together: their excess, by the larger scale) */
+	for (int i = 0; i < e->nfoes; ++i)
+		for (int k = i + 1; k < e->nfoes; ++k) {
+			int extra = e->foes[i].family == e->foes[k].family ? 0 : group_pair_extra(net[i], e->foes[i].family, net[k], e->foes[k].family);
+			if (extra) sum += extra * (scale[i] > scale[k] ? scale[i] : scale[k]);
+		}
 	*pressure = (int)lrint(sum);
 }
 

@@ -75,6 +75,19 @@ bool director_pick_shown(void);
 void director_pick_keys(uint32_t keys);
 void director_draw_pick(void);
 void director_pick_shut(void);
+/* The Battle Lab's builder (lab.h; docs/game/battle-lab.md): whether its
+ * screen is up over the held game, its keys a frame, its picture, and the
+ * watch after each frame of the game that brings it back as its battle
+ * ends */
+/* ... opened over the game held on its map, with every family the engine
+ * holds where `all` (a dev step's), else those MegaMan has battle data on */
+void director_lab_open(bool all);
+bool director_lab_shown(void);
+void director_lab_keys(uint32_t keys);
+void director_draw_lab(void);
+void director_lab_watch(void);
+/* ... and the keys the game gets after it: none held as it left, until let go */
+uint32_t director_lab_after(uint32_t keys);
 /* The NaviCust's bug named over the PET as its RUN leaves it, a few seconds. */
 void director_draw_bug_note(void);
 /* The layer's map in w x h from (x, y), for the second screen (issue #73),

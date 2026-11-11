@@ -18,6 +18,16 @@ const GroupTag *group_tag(int net, int family) {
 	return NULL;
 }
 
+int group_pair_extra(int net_a, int family_a, int net_b, int family_b) {
+	for (int i = 0; i < group_pairs_count; ++i) {
+		const GroupPair *p = &group_pairs[i];
+		if ((p->net_a == net_a && p->family_a == family_a && p->net_b == net_b && p->family_b == family_b) ||
+			(p->net_a == net_b && p->family_a == family_b && p->net_b == net_a && p->family_b == family_a))
+			return p->extra;
+	}
+	return 0;
+}
+
 /* ---- the templates: what a family must be to take each slot, and what
  * the group must be at the versions fought ---- */
 
@@ -79,16 +89,23 @@ static bool test_passes(int test, const At *a, const GroupLimits *l) {
 }
 
 /* its pressure as its families' own add up (each one's alone at V1, by
- * its hit at the version fought over its V1's), -1 where one was not
- * measured */
+ * its hit at the version fought over its V1's), and with two the pairs'
+ * pass found pressing harder together, that excess by the larger of
+ * their two scales; -1 where one was not measured */
 static int pressure_of(const At *a) {
-	double sum = 0;
+	double sum = 0, scale[GROUP_SIZE];
 	for (int i = 0; i < a->n; ++i) {
 		const GroupFam *f = a->f[i];
 		if (f->pressure < 0) return -1;
 		int v1 = f->ver[0].hit > 1 ? f->ver[0].hit : 1;
+		scale[i] = (double)ver(a, i)->hit / (double)v1;
 		sum += (double)(f->pressure * ver(a, i)->hit) / (double)v1;
 	}
+	for (int i = 0; i < a->n; ++i)
+		for (int k = i + 1; k < a->n; ++k) {
+			int extra = a->f[i] == a->f[k] ? 0 : group_pair_extra(a->f[i]->net, a->f[i]->family, a->f[k]->net, a->f[k]->family);
+			if (extra) sum += extra * (scale[i] > scale[k] ? scale[i] : scale[k]);
+		}
 	return (int)lrint(sum);
 }
 

@@ -66,6 +66,7 @@ commits, issues and old notes) are mapped section by section in
 | Online play (epic #120): the gate in Lan's HP, the Net Square, Trade Central, the Arena, the server and the wire | [docs/online/](docs/online/index.md); the gate in [docs/world/home/square-gate.md](docs/world/home/square-gate.md); hosting in [server/README.md](server/README.md); the wire in [shared/online/README.md](shared/online/README.md); the link cable and the Arena's engine in [docs/online/link.md](docs/online/link.md) and [docs/online/arena/](docs/online/arena/index.md) |
 | Shipped changes | [CHANGELOG.md](CHANGELOG.md); the players' notes in [docs/releases/](docs/releases/index.md) |
 | How parallel PRs stay out of each other's way: the files `dev`'s workflow writes, what a branch does when it meets one, what conflicted and how often | [docs/project/merging.md](docs/project/merging.md) |
+| The numbers each branch in flight may take (ids, slots, free-space spans, units, `Run`): a claim a branch, held apart by lint | [docs/project/claims.md](docs/project/claims.md) |
 | The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
@@ -198,10 +199,13 @@ part of the tree; a new file gets its line there.
   old saves: bump `RUN_MAGIC` in `save.c` (a `_Static_assert` on its size
   there fails the build until someone does, and sets the new size). Changing
   what a layer seed makes (layouts, object placement, loot and stock rolls):
-  bump `LAYER_MAKE` in `src/net/layer_make.h`, so a run saved by an older
-  build continues its layer afresh; where generation changed, the unit tests
-  fail on `LAYER_MAKE_HASH` beside it and name the new hash to set with
-  it. Emulator states (`boot-3.state`, `run.state`) are made on the device
+  bump `LAYER_MAKE` by adding a file to `src/net/layer_make.d/`,
+  `NNN-WORDS.txt` (the number it makes, a few words) with a clause on what
+  changed, so a run saved by an older build continues its layer afresh;
+  the build counts the files (`src/net/layer_make.h`). Where generation
+  changed and no file was added, the unit tests fail and name the file to
+  add; the hash they compare is `dev`'s workflow's to record
+  (`tests/layer_make_hash.txt`, never a branch's). Emulator states (`boot-3.state`, `run.state`) are made on the device
   and never committed.
 
 ## Code structure
@@ -284,6 +288,17 @@ site, never a sprite cropped out) go on the orphan branch `pr-media`
 under `prs/<branch>/`, embedded by their raw URL at that branch's commit;
 motion as a GIF, which GitHub plays inline.
 
+### Claims
+
+A session that starts others writes each one's claim before it starts
+them: `docs/project/claims/BRANCH.json`, the numbers that branch may take
+(chip ids, enemy ids, AI numbers, the dispatch's types, list numbers, song
+slots, spans of the free space), the units of work it takes by name, and
+whether it changes `Run`, which one branch at a time may. One small PR
+for the batch, the file named in each brief; a session takes numbers only
+from its claim, and its PR removes the file. `build.py lint` fails where
+two claims meet (`tools/claims.py`; docs/project/claims.md).
+
 ### Merging
 
 The owner does not merge. The session that opened a PR, or the one that
@@ -306,10 +321,10 @@ It must, when:
   it, and wait for green on the new commit.
 - **It needs what merged since:** it calls, reads or tests something
   another PR changed, or takes a counted value another PR took too
-  (`LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`, an id, a slot, a
-  free-space region, the economy's bands): bring `dev` in and set the
-  value anew (the hash the unit tests name; two `LAYER_MAKE` bumps
-  become one) rather than merging it by hand.
+  (`RUN_MAGIC`, an id, a slot, a free-space region, the economy's
+  bands): bring `dev` in and set the value anew rather than merging it
+  by hand. `LAYER_MAKE` is no such value any more: a bump is a file, and
+  two branches' bumps both count.
 
 It does not, when:
 
@@ -319,8 +334,8 @@ It does not, when:
 - **The file is one no branch writes or shares:** the generated files
   (`docs/re/STATUS.md` and its dashboard, `docs/symbols/`, the counts on
   `docs/rom/symbols.md`, `docs/voice/catalog.json`, `docs/log.md`, each
-  concept's `generated` line) are written by `dev`'s workflow after each
-  merge, and the registries
+  concept's `generated` line, `tests/layer_make_hash.txt`) are written by
+  `dev`'s workflow after each merge, and the registries
   (`docs/re/ledger/`, `tests/xdiff/mutations/`, `tests/xdiff/legit/`,
   `docs/log.d/`) take a file an entry. A conflict in one of them means
   the branch still carries an old copy:

@@ -118,6 +118,7 @@ def main():
     ap.add_argument('--seeds', default='3', help='the fights\' seeds, comma separated (the idle run takes the first)')
     ap.add_argument('--modes', default='idle,fight')
     ap.add_argument('--out', default=os.path.join(WORK, 'danger.tsv'))
+    ap.add_argument('--most', type=int, default=0, help='pairs: as many this run at most (0: all that are left)')
     a = ap.parse_args()
     if a.what == 'families':
         battles = family_battles()
@@ -127,6 +128,9 @@ def main():
             with open(a.out) as f:
                 done = {line.split('\t')[0] for line in f}
         battles = pair_battles(done)
+        if a.most:
+            print(f'{len(battles)} pairs left, {min(a.most, len(battles))} this run')
+            battles = battles[:a.most]
         a.modes = 'idle'
     else:
         with open(a.file) as f:
