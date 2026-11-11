@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:40:46Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # Transplanted families
