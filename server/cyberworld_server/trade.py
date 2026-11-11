@@ -197,10 +197,12 @@ class Trades:
         self.board(player.channel)
 
     def board_for(self, player):
-        """The offers of his channel he may see: BN5's chips only where his game has BN5 (any game reads the board)."""
-        players, bn5 = self.server.players, player.roms & protocol.SPEC["roms_bn5"]
+        """The offers of his channel he may see: BN5's chips only where his game has BN5, BN4's where it has BN4 (v17;
+        any game reads the board)."""
+        players, bn5, bn4 = self.server.players, player.roms & protocol.SPEC["roms_bn5"], player.roms & protocol.SPEC["roms_bn4"]
         return [(pid, chip, want) for pid, (chip, want) in sorted(self.offers.items())
-                if pid in players and players[pid].channel == player.channel and (bn5 or not protocol.chip_bn5(chip[0]))]
+                if pid in players and players[pid].channel == player.channel and (bn5 or not protocol.chip_bn5(chip[0]))
+                and (bn4 or not protocol.chip_bn4(chip[0]))]
 
     def board(self, channel):
         for player in list(self.server.players.values()):

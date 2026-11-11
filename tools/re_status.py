@@ -10,6 +10,10 @@ docs/re/ledger.json is the source of truth. This writes from it:
 
   python3 tools/re_status.py           write them
   python3 tools/re_status.py --check   fail if any is out of step with the ledger
+  python3 tools/re_status.py --lint    fail if the ledger is not sound; write nothing
+
+dev's workflow writes them after each push (tools/generated.py; docs/project/merging.md):
+a branch changes the ledger alone.
 Standard library only.
 """
 import argparse
@@ -200,11 +204,15 @@ def outputs(ledger_path=DOCS / 'ledger.json', template_path=TEMPLATE):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--check', action='store_true', help='fail if a written file is out of step with the ledger')
+    ap.add_argument('--lint', action='store_true', help='fail if the ledger is not sound; write and compare nothing')
     args = ap.parse_args()
     try:
         files = outputs()
     except (LedgerError, OSError, json.JSONDecodeError) as error:
         sys.exit(f're_status: {error}')
+    if args.lint:
+        print(f're_status: the ledger is sound ({len(files)} files to write from it)')
+        return
     stale = []
     for path, text in files.items():
         current = path.read_text(encoding='utf-8') if path.exists() else None

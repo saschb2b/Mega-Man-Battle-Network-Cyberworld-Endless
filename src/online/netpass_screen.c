@@ -27,25 +27,37 @@ static struct {
 	NetPassView view;
 } N;
 
-/* the most stamps seen in the Square, from the data folder's netpass.ini (0 none) */
-static int seen_read(void) {
+#define SET_BEFORE_BN4 2   /* the set's games a netpass.ini without `games=` was written for: BN6's and BN5's (protocol v16) */
+
+/* what the Square has seen of the pass, from the data folder's netpass.ini:
+ * the most stamps stamped (0 none), and how many games the set held then */
+typedef struct { int stamps, games; } Seen;
+
+static Seen seen_read(void) {
 	char path[600], line[64];
 	snprintf(path, sizeof path, "%s/netpass.ini", g_data_dir);
 	FILE *f = fopen(path, "r");
-	int seen = 0;
-	while (f && fgets(line, sizeof line, f))
-		if (sscanf(line, "stamps=%d", &seen) == 1) break;
+	Seen seen = { 0, 0 };
+	int games = -1;
+	while (f && fgets(line, sizeof line, f)) {
+		(void)sscanf(line, "stamps=%d", &seen.stamps);
+		(void)sscanf(line, "games=%d", &games);
+	}
 	if (f) fclose(f);
-	return seen < 0 ? 0 : seen > STAMP_COUNT ? STAMP_COUNT : seen;
+	seen.stamps = seen.stamps < 0 ? 0 : seen.stamps > STAMP_COUNT ? STAMP_COUNT : seen.stamps;
+	seen.games = games >= 0 ? games : seen.stamps ? SET_BEFORE_BN4 : 0;
+	return seen;
 }
 
+/* (written with the set's games as they are now) */
 static void seen_write(int seen) {
 	char path[600], tmp[610];
 	snprintf(path, sizeof path, "%s/netpass.ini", g_data_dir);
 	snprintf(tmp, sizeof tmp, "%s.tmp", path);
 	FILE *f = fopen(tmp, "w");
 	if (!f) return;
-	fprintf(f, "# The NetPass's stamps the greeter has stamped in the Net Square (docs/online/netpass.md).\nstamps=%d\n", seen);
+	fprintf(f, "# The NetPass's stamps the greeter has stamped in the Net Square, and the set's games then (docs/online/netpass.md).\n"
+		"stamps=%d\ngames=%d\n", seen, netpass_games());
 	bool ok = !ferror(f) && cw_fsync_file(f);
 	if (fclose(f)) ok = false;
 	if (ok) ok = cw_rename(tmp, path);
@@ -62,10 +74,28 @@ void netpass_screen_open(void) {
 
 bool netpass_screen_shown(void) { return N.shown; }
 
-bool netpass_stamp_due(void) { return netpass_full() && seen_read() < STAMP_COUNT; }
+/* (a set grown since, a game more in it: the stamps it took away land again) */
+static bool grown(Seen seen) { return seen.games < netpass_games(); }
+
+bool netpass_stamp_due(void) {
+	Seen seen = seen_read();
+	return netpass_full() && (seen.stamps < STAMP_COUNT || grown(seen));
+}
+
+bool netpass_grew_due(void) {
+	Seen seen = seen_read();
+	return !netpass_full() && seen.stamps == STAMP_COUNT && grown(seen);
+}
+
+void netpass_grew_begin(void) {
+	netpass_screen_open();
+	seen_write(1);
+	printf("netpass: the set grew to %d games, its stamps gone till the pass is full\n", netpass_games());
+}
 
 void netpass_stamp_begin(void) {
-	int seen = seen_read();
+	Seen was = seen_read();
+	int seen = grown(was) ? 1 : was.stamps;
 	netpass_screen_open();
 	N.stamping = true;
 	N.from = seen < 1 ? 1 : seen;
