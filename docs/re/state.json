@@ -2,7 +2,7 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-11",
+  "updated": "2026-11-12",
   "previous": "2026-11-09",
   "features": [
     {
@@ -62,10 +62,10 @@
     {
       "name": "BN5's Darkloids",
       "state": "works",
-      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan and CosmoMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CosmoMan the later acts' own.",
-      "left": "CloudMan (his three decisions settled in writing, not built: his object types recorded as CosmoMan's were; his search for his clouds, 0x080CBFBC, a stub of the Navis' that reads the dispatch's side table for type 0x37; the third kind's 0x0B he spawns, the chips' copy, owned by the Navis' track as the first to install, its rows' sprites as xchiprecipe.py's TABLE_SPRITES give them), CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan, CosmoMan and CloudMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CloudMan act 4's own and CosmoMan the later acts', each board paying its Darkloid's own chips at par.",
+      "left": "CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
       "link": "../game/liberation/overview.md",
-      "updated": "2026-11-09",
+      "updated": "2026-11-12",
       "state_text": "Works"
     },
     {
@@ -203,6 +203,10 @@
     {
       "date": "2026-11-12",
       "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
+    },
+    {
+      "date": "2026-11-12",
+      "what": "CloudMan moved (docs/multirom/navis.md, CloudMan; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_CLOUD_SPAWN_37, BN5_CLOUD_5F_PARENT, BN5_CLOUD_STATES_37, BN5_CLOUD_ROW_LEFTOVER): cloudman_v1, cloudman_v1_keys and cloudman_sp PASS, five mutations caught; the third kind's 0x0B the Navis' copy (the chips' Bubbles helper gone); the generator renumbers every compare of a parent's CurAction and keeps a block's low byte where its code stores one of its own addresses (LOW_BYTE_KEPT); the Navis' shared art's fourth room (FREE_NAVI_SHARED_FOUR)."
     },
     {
       "date": "2026-11-11",
