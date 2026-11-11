@@ -435,6 +435,13 @@ TYPES = {
     (4, 0x5B): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
     (4, 0x61): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
     (4, 0x62): ('moved', None, 'navis', "SearchMan's: " + NO_TWIN),
+    (3, 0x09): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (3, 0x0C): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (3, 0x0D): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0B): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0E): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x0F): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
+    (4, 0x3C): ('moved', None, 'navis', "Meddy's: " + NO_TWIN),
     (3, 0x00): ('moved', None, 'navis', "Guard's: no BN6 type runs its code; NapalmMan's 0x33 spawns it too (kind 0x11, BN5 "
                                         "0x080CB4FC): the Navis' copy, installed before the chips', fixes its kinds' rows (its "
                                         "sprites by xchiprecipe.py's TABLE_SPRITES, its panels by TABLE_PANELS), so the chips "

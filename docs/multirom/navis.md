@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan, GyroMan and SearchMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T01:40:00Z }
 ---
@@ -262,6 +262,19 @@ into the battle engine).
   third's with kind 4). Five mutations break his copy and FAIL (a
   sprite's number, a sprite's list, a parent's state, a hit's offset, a
   state's number); his effect 0x14's two sites are reached by no spec.
+- **Meddy** (AI 6, Navi AI 31, ids 0x3E8-0x3EB; `meddy_v1`,
+  `meddy_v1_keys`, `meddy_sp`: PASS): her seven object types moved (the
+  third kind's 0x09, 0x0C, 0x0D, the fourth's 0x0B, 0x0E, 0x0F, 0x3C), no
+  companion of her own. One rule the generator learned from her: an effect
+  whose id is put beside a parameter (`movs r4,#id; orrs r4,rX`, rX shifted
+  up past the id's byte: her 0x0C's and 0x0D's spawn of the fourth kind's
+  0x00, the parameter a byte of `BN5_MEDDY_EFFECT_KINDS` by its kind) is
+  read by the movs's id, effect 0, BN6's own. Her sprites take list 2's
+  spill (0x8B-0x8D) and the third room, her effect 0x44 the Navis' 0xB0,
+  her sound BN5's 0xE0 BN6's empty slot 0x46. Five mutations break her
+  copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
+  state's number); her effect 0x44's site and one object's compare of
+  its parent's state are reached by no spec.
 - **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
   `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object
   types* (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F)
@@ -308,7 +321,11 @@ into the battle engine).
   His five sprites take Navi numbers before Team ProtoMan's (he installs
   first, a Darkloid's seat): list 4 to 0xBA, then list 2's spill (0x80-
   0x8F with NapalmMan's, GyroMan's and SearchMan's, theirs moved up by
-  his), so BN4's late families keep 0xBB-0xBF. Before
+  his), so BN4's late families keep 0xBB-0xBF. His 16 KB in the first
+  room moved Team ProtoMan's later sprites on, past the third room's end:
+  the shared art has a fourth room, the art zone's tail
+  (`FREE_NAVI_SHARED_FOUR`, `XN_SHARED_FOUR`, 24 KB at +0x7FA000), where
+  Meddy's last two sprites go. Before
   that split (PR #356) his numbers reached 0xBE and 0xBF and VolGear and
   Kilby refused to install. Five mutations break his copy
   (the 0x5F's second compare, the cloud spawned as his 0x36, its sprite's

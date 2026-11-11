@@ -1171,6 +1171,7 @@
 080C4800 third_kind_0x00_kinds
 080C4ABC team_protoman_napalmman.spawner
 080C5386 team_protoman_searchman.with
+080C57E4 team_protoman_meddy
 080C5B44 navis_moved_into_3
 080C5B90 navis_moved_into_4
 080C5C2C BN6_OVERLAY_SPRITES_REF
@@ -1179,6 +1180,7 @@
 080C5D38 navis_engine_twins_7
 080C5D42 BN6_OVERLAY_HIDE
 080C5DF4 bubbles_kinds
+080C6000 team_protoman_meddy_2
 080C643C BN6_CHILD_HIDDEN
 080C6C81 souls_code_bn6_4
 080C6E0E by_spawner
@@ -1214,7 +1216,9 @@
 080DD3F0 bn5_darkloids_navi
 080E0ADE bn5_chips_code.status_mark_spawned
 080E10F8 navis_engine_twins.rock_fragments_fourth_kind_9_2
+080E125C team_protoman_meddy_3
 080E16D4 BN6_EFFECTS
+080E179C team_protoman_meddy_4
 080E1932 BN6_SPAWN_EFFECT
 080E1970 BN6_EFFECTS_REF
 080E19CA bn6_battle_bits_0x10_set
@@ -1235,6 +1239,7 @@
 080E2728 BN6_SHOW_AFTER_HIDDEN
 080E2CF0 BN6_NAVI_ROUTINES_REF
 080E48BC fourth_kind_0x38_colonel_strike
+080E4B10 team_protoman_meddy_5
 080E5FF8 own_0x3e
 080E6584 BN6_WIND_TYPE
 080E65BA BN6_WIND_HOLD
