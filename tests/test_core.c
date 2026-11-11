@@ -4195,12 +4195,24 @@ static void test_xnavi_static(void) {
 			"xnavi: Team ProtoMan's AI %d off its seat", n);
 		CHECK(id >= BN6_ENEMY_IDS_COUNT && ((id >= XN_FIRST_ID && id + 4 <= XN_IDS_END) ||
 			(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END)), "xnavi: Team ProtoMan's AI %d's ids from %#x", n, id);
-		for (int m = 1; m <= 16; ++m)
+		for (int m = 1; m <= 18; ++m)
 			CHECK(m == n || (XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m)), "xnavi: AI %d's ids meet AI %d's", n, m);
 	}
+	/* (LarkMan's and GridMan's seats, BN5's AI 17-18: seats 17-18, AI 43-44 between the Darkloids' and BN4's, ids past
+	 * Team ProtoMan's last two, apart from every other seat's) */
+	for (int n = 17; n <= 18; ++n) {
+		int id = XN_ID_OF(n);
+		CHECK(XN_SEAT(n) == n && XN_AI_OF(n) == XN_NEBULA_FIRST_AI + n - 17 && XN_AI_OF(n) > XN_AI_OF(BN5_NAVI_COSMOMAN) &&
+			XN_AI_OF(n) < XN_BN4_FIRST_AI && XN_KIND_OF(n) < 64, "xnavi: AI %d off its seat", n);
+		CHECK(id >= XN_BN4_FIRST_ID + 4 * XN_BN4_SEATS && id + 4 <= XN_MORE_IDS_END, "xnavi: AI %d's ids from %#x", n, id);
+		for (int m = 1; m <= 16; ++m)
+			CHECK(XN_ID_OF(m) + 4 <= id || id + 4 <= XN_ID_OF(m), "xnavi: AI %d's ids meet AI %d's", n, m);
+	}
+	CHECK(XN_NEBULA_HOMES + XN_NEBULA_SEATS * XV_HOME_SIZE <= XN_NEBULA_CODE && XN_NEBULA_CODE + XN_NEBULA_SEATS * XN_NEBULA_SLOT_CODE <= XN_NEBULA_ART &&
+		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 16, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy and GridMan)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;

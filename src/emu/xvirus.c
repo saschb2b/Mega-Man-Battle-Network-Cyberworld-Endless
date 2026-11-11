@@ -112,10 +112,10 @@ static bool pointer_ok(const XVirusFamily *f, uint32_t v) {
 	return d && (d->kind == XV_RAW || d->start == v);
 }
 
-/* (the Navis' code rooms: BN5's, the Darkloids' past their art before the chips' (XN_MORE), Team ProtoMan's, BN4's) */
+/* (the Navis' code rooms: BN5's, the Darkloids' past their art before the chips' (XN_MORE), Team ProtoMan's, BN4's, Nebula's) */
 static bool navi_room(uint32_t to) {
 	return (to >= FREE_NAVI_CODE && to < FREE_CHIP_CODE) || (to >= FREE_TEAM_NAVI_CODE && to < FREE_TEAM_NAVI_ART) ||
-		(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART);
+		(to >= FREE_BN4_NAVI_CODE && to < FREE_BN4_NAVI_ART) || (to >= FREE_NEBULA_NAVI_CODE && to < FREE_NEBULA_NAVI_ART);
 }
 
 static uint32_t resolve(uint32_t target, void *user) {
