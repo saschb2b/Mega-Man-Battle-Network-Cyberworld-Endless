@@ -2866,6 +2866,46 @@
     "088F1304:01DA"
    ],
    "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
+  },
+  {
+   "name": "TopMan's decision's CurAction off by one",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69E0:200C"
+   ],
+   "what": "his decision's movs r0,#9 (BN4 0x080B69E0, the recipe's CurAction 11, his own state 9 as BN6's 11) made 12: his state 10 run where BN4 runs his 9 (caught at t273)"
+  },
+  {
+   "name": "TopMan's damage kept at BN4's +0x1E",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69C8:83D8"
+   ],
+   "what": "his decision's store of his +0x2C into his collision data (BN4 0x080B69C8: strh r0,[r3,#0x1e], the recipe's BN6 +0x2E, BN4_COLL_DAMAGE) left at +0x1E: BN6's confusion's frames written, his damage not (caught at t828)"
+  },
+  {
+   "name": "TopMan's top spawned as JunkMan's 0x97",
+   "spec": "topman_v1",
+   "poke": [
+    "080D052C:20D0"
+   ],
+   "what": "the spawn of his top, the third kind's 0x1B (BN4 0x080D052C: movs r0,#0x1b, the recipe's dispatch number 0xD7) made 0xD0, JunkMan's 0x97's: the dispatch runs another object for it (caught at t497)"
+  },
+  {
+   "name": "TopMan's sound 0xAC at the pool's first slot",
+   "spec": "topman_v1",
+   "poke": [
+    "080B6F26:2032"
+   ],
+   "what": "his state's sound 0xAC (BN4 0x080B6F26: movs r0,#0xac, the recipe's pool slot 0xD0) made the pool's first slot, 0x32: his top's 0xA0 where BN4 plays 0xAC (caught at t298, the family's sounds)"
+  },
+  {
+   "name": "TopMan's top drawn with BN4's number of his sprite",
+   "spec": "topman_v1",
+   "poke": [
+    "080D0320:2212"
+   ],
+   "what": "his top's load of his own battle sprite (BN4 0x080D0320: movs r2,#0x12, list 2, the recipe's BN6 0x4C, XNAVI_SPRITE_BN4 + his seat) left at BN4's 0x12: another Navi's sprite in BN6's list 2 (caught at t497)"
   }
  ]
 }

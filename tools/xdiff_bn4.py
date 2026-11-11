@@ -607,6 +607,8 @@ BN4_LACKS = [
 # too (his side's, BN4_AI_DATA), so the virus masks of BN4_LACKS, which explain a virus's AI data BN4 has none of, never
 # hold for his
 NAVI_NAMES = set()
+# ... and the BN4_LACKS masks that may explain a Navi's: his AI data whole and its pointer, BN4 holding none (lacks)
+NAVI_NO_AI = ('bn4 no ai data', 'bn4 no ai data pointer')
 
 
 def navi_role(role):
@@ -622,9 +624,15 @@ def lacks(d, ta, tb):
     """the BN4_LACKS mask that explains d (BN4's side a, BN6's b), None where none does"""
     if ta['game'] != 4 or tb['game'] != 6:
         return None
-    if navi_role(d.role) and (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
-        return None
+    navi = navi_role(d.role)
+    if navi and not (d.part == 'ai' or (d.part == 'obj' and d.off == 0x58)):
+        navi = False
     for m in BN4_LACKS:
+        # (a Navi of the other build, TopMan's on: his BN4 object holds no AI data at all, +0x58 0, as a virus's, where BN6's
+        # Navi object gives every Navi one of its pool. Only the whole AI data and its pointer may be explained so, which hold
+        # only where BN4's has none: a Soul Navi's is BN4's own, BN4_AI_DATA, and never masked)
+        if navi and m['name'] not in NAVI_NO_AI:
+            continue
         if d.part != m['part']:
             continue
         if m.get('present') and d.off == 0 and d.a is False and d.b is True:

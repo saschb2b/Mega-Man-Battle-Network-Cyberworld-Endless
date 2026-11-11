@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
+  Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
+  fights him: his spinning top, his dashes and his sounds, each proved
+  frame by frame against BN4's own battle.
 - **BN4 Red Sun's chips in the finds.** With BN4's ROM beside BN6's, half
   of what a layer of BN4's areas hands out comes from BN4's own
   catalogue: the Net Dealer's stock, Mystery Data, the vaults', Servers'

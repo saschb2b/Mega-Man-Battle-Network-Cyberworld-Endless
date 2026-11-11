@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T01:01:32Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -25,7 +25,7 @@ below), ThunderMan, WindMan, FireMan, SearchMan and AquaMan too
 ([ThunderMan built](#thunderman-built), [WindMan built](#windman-built),
 [FireMan built](#fireman-built), [SearchMan built](#searchman-built),
 [AquaMan built](#aquaman-built)), and WoodMan ([WoodMan built](#woodman-built)), in
-the tournament's pool on their plates, JunkMan too ([JunkMan built](#junkman-built)); their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
+the tournament's pool on their plates, JunkMan too ([JunkMan built](#junkman-built)), and TopMan, the first of the other build ([TopMan built](#topman-built)); their companions made by one mechanism ([Companions](#companions)). Roll is built and proved to her summon
 ([Roll built](#roll-built)): the enemy she summons is BN6's own Mettaur,
 not yet compared with BN4's. BN5's Navis moved as
 [Transplanted Navis](navis.md) tells, through BN6's Navi tables; BN4's
@@ -1634,6 +1634,57 @@ Not reached by `woodman_v1`, MegaMan idle: his MegaMan's 77 (his CurAction
 7, where `0x08012F96`'s flags have 0x4000) and his 0x95's hits read, the
 far load's shim among it. His sound 0x8F plays one of its two tracks
 (BN6's player 30 has one), as FireMan's.
+
+## TopMan built
+
+The tenth proved and the first of the other build (no AI data, every
+state his own), by `topman_v1` on 11 November 2026: his type 0x09, Navi AI
+60, ids 0x3B0-0x3B3 (`foes B0@52`), his seat 12 by his BN4 id (176), in the
+tournament's pool on his plate 0x0D (`BN4_PLATE_TOPMAN`). He was taken
+before MetalMan, whom [The order, by cost](#the-order-by-cost) puts first of
+the rest: measured with all eight in `NAVIS`, TopMan left 8 decisions and one
+moved object, MetalMan 18 and an obstacle no unit had moved (his MetalGears,
+BN4 actor objects with HP and their own runner). His addresses and how each
+was read are in [BN4 Red Sun's tables](../rom/bn4.md) (TopMan derived).
+What the other build asked:
+
+- **Nothing of a Soul Navi's.** His update is BN4's plain three calls and
+  his init takes no AI data, so the generator's path for a Soul Navi
+  (MegaMan's states, the AI data's blocks) finds nothing to do: his states
+  run on BN6's Navi object, which still gives him an AI data of its pool
+  that his code never reads.
+- **His palette by version** (`navi_palette_set`, `PALETTE_BY_ONE`): `movs
+  r0,#0`, his version compared with 3, `movs r0,#3`, then BN4's palette set
+  (`0x08002DEC`) itself, not `BN4_NAVI_PALETTE`; V1's 0 as BN6's step 0,
+  his SP's 3 at his spawn's end (`XNavi.palettes`). SparkMan and BurnerMan
+  set theirs the same way (BurnerMan's SP 2).
+- **Two collision fields** his decision keeps where his damage changes
+  (`BN4_TOPMAN_DAMAGE`): +0x1E (`BN4_COLL_DAMAGE`) and +5 (`BN4_COLL_OBJ_2E`),
+  BN6's +0x2E and +7, the setups' stores side by side
+  (`tools/xrecipe_bn4.py` `COLL4TO6`).
+- **His top drawn as he is** (`own_sprite`): its init loads list 2's 0x12,
+  his own battle sprite, which BN6 holds at list 2 0x4C
+  (`XNAVI_SPRITE_BN4` + his seat, loaded for his battle).
+- **The comparator** (`tools/xdiff_bn4.py` `lacks`): BN4's object holds no
+  AI data (+0x58 0), BN6's a pool entry; for a Navi only the two masks that
+  say so may explain it (`NAVI_NO_AI`), which hold only where BN4's has
+  none: a Soul Navi's AI data stays compared. His pool sounds (0xA0 at
+  0x32, 0xA2 at 0x33, 0xAB at 0x63, 0xAC at 0xD0, 0xB5 at 0xE0, 0xB6 at
+  0x104 through the shim) in his battles alone (legit.json's bn4 sounds).
+
+`bn4_topman_control` PASSes. **`topman_v1` PASSes** over its 1200 fight
+frames: his decision, his own states, his top, its hits and his sounds.
+Five mutations break his port and each is caught: his decision's
+CurAction off by one (t273), his damage kept at BN4's +0x1E (t828), his top
+spawned at JunkMan's 0x97's number (t497), his sound 0xAC at the pool's
+first slot (t298) and his top's sprite left at BN4's number (t497). His
+SP's palette (3) is not reached by `topman_v1`, a V1.
+
+**The third kind's dispatch numbers** are nearly spent for the Navis: his
+top took 0xD7, and about seven are left of the range the Navis take
+(`TYPE_MORE`, below the late families' lowest), where the seven still to
+move need about thirty. The chips' generator lists BN5's numbers no recipe
+names (`tools/xchiprecipe_bn4.py` `TYPES3`); a share of them is asked for.
 
 ## What tools/xnavirecipe.py needs for BN4
 
