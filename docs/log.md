@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine built: its numbers, the family SandRing's too and so an attack unit, the proof, what is left; its description and index line), rom/bn4.md (SandRing's family and ThunSoul's charged shot, new row), devtools/differential.md (`soul_thun` and `bn4_soul_thun`; an engine spec's `foe_hp`), code/emu.md (`soulbn4.c`).
 * **Update**: devtools/chip-recipe-generator.md (an effect's id no immediate names: the effect call's shim and how its pairs are read).
 * **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers rewritten: BN4's chips' page of the dispatch, a type at BN4's own number; the guard now the Navis' tuple's and the fourth kind's run's), multirom/families.md and multirom/bn4-chips.md (the page), engine/emulation/memory.md (the plan's line).
 * **Update**: multirom/bn4-chips.md (PropBom1-3 moved), rom/bn4.md (PropBom's code and the obstacle slots given up, new row), devtools/chip-recipe-generator.md (an effect over a pattern of panels).
