@@ -14,6 +14,7 @@
 #define CW_XCHIPS_BN4_H
 
 #include "free_space.h"
+#include "xattack_grow.h"
 #include "xchips_bn5.h"
 
 /* Their places, FREE_BN4_CHIPS (free_space.plan): */
@@ -32,6 +33,12 @@
 #define XC4_END       (FREE_BN4_CHIPS_END - 0x400u)
 #define XC4_MISC      XC4_END              /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
+/* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)
+ * is a unit too, XCHIP_ATTACK: the state's code whole, every subfamily of it, at a number of BN6's grown attack families
+ * the chips of BN4 have for their own (xattack_grow.h XATTACK_BN4 on, in the units' order: tools/xchiprecipe_bn4.py
+ * ATTACK_NUMBERS), `bn5` BN4's family. Its chips' records take that number as their family and keep BN4's subfamily; a
+ * registry row names it in `sub` (XC4_FIRST_ATTACK on: past every support and misc routine's number) */
+#define XC4_FIRST_ATTACK XATTACK_BN4
 
 /* The units (XChipUnit, xchips_bn5.h: `bn5` BN4's subfamily, `navis` 0) */
 extern const XChipUnit xchips_bn4[];
