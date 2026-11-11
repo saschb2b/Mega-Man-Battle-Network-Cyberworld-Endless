@@ -6,6 +6,7 @@
 #include "free_space_watch.h"
 #include "platform.h"
 #include "ram_survey.h"
+#include "xchips_pack.h"
 #include "save_queue.h"
 #include "sound_quiet.h"
 #include "xinstall_log.h"
@@ -111,12 +112,15 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	if (!layout_ok) fprintf(stderr, "emu: the core's layout was not the one expected; every frame draws its picture\n");
 	/* the game's flash save lives in memory; runs keep their own saves */
 	core->loadSave(core, VFileMemChunk(NULL, 0));
+	/* (the chip pack's entries in that save's RAM, which every state carries: xchips_pack.h) */
+	xchips_pack_ready(core);
 	core->setAudioBufferSize(core, 1024);
 	emu_audio_rate(out_rate);
 	emu_audio_open();
 	start_worker();
 	if (getenv("CYBERWORLD_FREE_SPACE")) atexit(usage_at_exit);
 	surveying = ram_survey_open();
+	ram_survey_watch(core);
 #ifndef MINIMAL_CORE
 	/* (with the core on a thread of its own, its picture is drawn on one
 	 * more, mGBA's threaded video, which runs beside the emulation: on the
@@ -553,6 +557,7 @@ bool emu_load_state(const char *path) {
 		hook_reapply();
 		keep_put(false);
 		sound_quiet_loaded();
+		xchips_pack_ready(core);   /* (a state from before the pack's entries in the save RAM: xchips_pack.h) */
 	}
 	return ok;
 }

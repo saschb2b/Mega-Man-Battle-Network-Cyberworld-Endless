@@ -3,7 +3,7 @@ type: Tool
 title: "A battle on demand"
 description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T03:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T21:45:00Z }
 ---
 
 # A battle on demand
@@ -201,6 +201,10 @@ its four counts in the pack (an id from 320 counts in the pack's
 extension: `0:chip 411 M 1`, MrkCan1, reads "its counts 2 0 0 0"). A
 battle then deals the folder as BN6 does, with the chips that sit out
 taken out of the deck (`CYBERWORLD_EMU_DEBUG=1` prints how many).
+`chip ID` alone changes nothing and prints what the game holds of it:
+the pack's four counts and order stamps, the folder's copies and whether
+the profile's Library has it (`chip 700`: "held: the pack's counts 6 0 0
+0, its stamps 7fff 0000 0000 0000, 5 in the folder"), an id to 1023.
 
 ```bash
 CYBERWORLD_EMU_DEBUG=1 python3 build.py shot --scene emu --net-biome 0 --seed 15 --frames 1700 --dev quiet \
