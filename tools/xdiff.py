@@ -669,6 +669,8 @@ def one(name, a, legit, canon, pokes=(), calls=(), run_name=None, extra=None):
     canon.sprite_bytes = spec.get('sprites') == 'bytes'
     canon.native_attacks = {int(x, 0) for x in spec.get('native_attacks', [])}
     canon.native_effects = {int(x, 0) for x in spec.get('native_effects', [])}
+    # (the effects a Navi's copy draws for the spec's chips, a type their unit shares, BN5's ids as BN6's: Football's ball, GridMan's)
+    canon.effect.update({int(k, 0): int(v, 0) for k, v in spec.get('shared_effects', {}).items()})
     canon.megaman_types = {f'{x.split(":")[0]}:{int(x.split(":")[1], 0):#04x}' for x in spec.get('megaman_types', [])}
     canon.sprite_bytes = spec.get('sprites') == 'bytes'
     canon.chips = folder_chips(spec)
