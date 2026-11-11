@@ -78,15 +78,10 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
                               "unit's copy, shared"),
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
                               "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
-# A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
-_PANELS = ('the same routine as Ligtnin\'s by its record\'s first parameter, its strike (the third kind\'s 0x92) moved with the unit '
-           'but never run in a spec: it rises only from a {} panel of the other side\'s with a foe on it, and the differential\'s '
-           'BN4 battle sets no panel\'s type yet')
+# A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
-                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)',
-             **{i: 'AquaUp, ' + _PANELS.format('cracked') for i in (181, 182, 183)},
-             **{i: 'GreenWd, ' + _PANELS.format('grass') for i in (184, 185, 186)}}
+                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
 # returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
@@ -196,13 +191,6 @@ AUDITS = {
     (0x0801288C, 0x08019F8C): ('ok', "an object's element set (r0): BN4 writes it to the object's +0x17 and its collision data's +2; BN6 "
                                      "to the object's +0xE, its low four bits to the collision data's +2 and its high four (BN6's second "
                                      "wheel's flags, none in a BN4 chip's element byte but the icon's the comparison names) to its +0x19"),
-    (0x08014446, 0x0801BBF4): ('ok', "a third-kind object's sprite each frame (none while the battle is paused, 0x080078EC and BN6's "
-                                     "0x0800A03C, or the object is hidden or held: its +0 without 1 or with 8; its animation set where "
-                                     "its +0x10 is not its +0x11, 0x08002E10 and the sprite's step 0x0800283C, else the sprite's update "
-                                     "0x0800285C): BN6's the same steps with BN6's twins, its pause's test a call that sets the flags "
-                                     "where BN4's returns r0, and the update run after the animation's set too, which BN4's skips for "
-                                     "that frame (the pair tools/bn4_twins.py audits for the first kind, 0x080143FC and 0x0801BBAC, "
-                                     "differs the same way)"),
 }
 # The dispatch's numbers the chips' moved types take, by kind. The fourth kind's from 0x91 up, past BN5's 145 types (its own
 # numbers in the tables) and below BN4's families' and Navis' (0xE0 on), each checked against every other recipe
@@ -429,6 +417,11 @@ UNIT_COPIED = {
     'MagBolt': {0x08012D9A: "the collision data's panels set from its place, with the direction it moved by (BN4's 0x0800AF90, "
                             "copied too): BN6's twin 0x0801A04C asks 0x0800E994, which answers a neighbouring panel alone (5 "
                             "else), where BN4's answers every panel; the bolt is put on its panel from none (4 in BN4, 5 in BN6)"},
+    'Ligtnin': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP: unless paused, a new animation set up where "
+                            "its +0x10 is not its +0x11, else the sprite updated): BN6's nearest (0x0801BBF4) also updates the sprite "
+                            "in the frame its animation is set up, a frame ahead of BN4's (AquaUp's geyser's count at its +0x91, "
+                            "bn4_chip_aquaup1 at t44); copied, as BN4's Navis copy it (tools/xnavirecipe_bn4.py), its pause test "
+                            "BN6's"},
 }
 # BN4's misc run's wait (bn4_chips.h BN4_MISC_WAIT): after a subfamily's routine, cmp r0,#SUB; bne; movs r0,#FRAMES; strh into
 # the misc state's count, where every other subfamily's attack ends at once. BN6's run waits for its own 0x14 alone, so a unit

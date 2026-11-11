@@ -63,8 +63,9 @@ MOVED = {
     163: 0x91, 164: 0x91, 165: 0x91,   # Meteors1-3: BN4's misc 0x11, BN6's grown misc routine 0x91 (bn4_chip_meteors1-3)
     130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
     78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
-    166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3); AquaUp1-3
-                                       # and GreenWd1-3 (181-186), the same routine, wait: tools/xchiprecipe_bn4.py ROWS_WAIT
+    166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3)
+    181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
+    184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
 }
 # ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
