@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -323,6 +323,21 @@ as this is written; this page links it once it is) and the dev step:
 One event as a run ends, with the choices: families complete, test
 battles fought, sets saved. A course check can then see whether the lab
 is used.
+
+## Built
+
+- **The deletions counted** (step 1). A hook on BN6's dying state
+  (`BN6_FOE_DYING`, [Virus families](../rom/virus-families.md)) tells the
+  director each virus deleted, by AI index, version and side
+  (`src/director/events.c`); one of the enemies' in a run's own battle
+  joins the run's tally (`src/core/battle_data.c`, `run.data` beside the
+  checkpoint), which joins the profile's `data_count` and `data_versions`
+  as the run ends (`meta_run_over`), or as the next run begins where a
+  run was left without its end. Not counted: a Virus Battler's round, a
+  dive of the week's net. The statistics' run-end event carries the
+  families complete (`data`). No player sees it yet. An autopilot run
+  (seed 3, 15000 frames) counted the eight viruses its run log names,
+  BN5's moved families among them.
 
 ## Build order
 

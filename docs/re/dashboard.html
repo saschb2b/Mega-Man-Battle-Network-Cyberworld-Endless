@@ -348,6 +348,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "The bombs' family read and SeekBom's code moved (bn4_chips.h BN4_BOMBS_STATE 0x080EB3FE with BN4_BOMBS_SPAWNERS 0x080EB4C4 and BN4_BOMBS_ARMS 0x080EB4EC, BN4_T3_SEEKBOM 0x8D with BN4_SEEKBOM_THROW 0x080DEEF2, BN4_T4_EXPLOSIONS 0x11 with BN4_EXPLOSIONS_SPAWN 0x080E33D4 and BN4_EXPLOSIONS_EFFECT 0x080E33B4; docs/rom/bn4.md)."
     },
     {
+      "date": "2026-11-11",
+      "what": "BN6's dying state named where it holds a dying object's triple (bn6_families.h BN6_FOE_DYING 0x08016620, its instruction BN6_FOE_DYING_OP; docs/rom/virus-families.md): a hook there tells the engine each virus deleted, by AI index, version and side, for the Battle Lab's battle data (src/director/events.c, src/core/battle_data.c)."
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },
