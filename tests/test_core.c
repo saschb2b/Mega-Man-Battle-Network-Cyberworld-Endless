@@ -4593,6 +4593,35 @@ static void test_xvirus_dispatch(void) {
 			stub_literal(code, s + 0x1E) == xvirus_dispatch_side(spawners[i].kind) && get16(code + (s + 0x2A - XV_STUBS)) == 0xBD00,
 			"dispatch: the spawner at %08x", (unsigned)s);
 	}
+	/* BN4's chips' page (xvirus_dispatch.h): the third kind's other dead type, a MOVED table and spawners of its own in the
+	 * chips' region, clear of the art's room and of the misc routines' table */
+	static uint8_t page[XC4_PAGE_CODE_SIZE];
+	uint32_t psize = 0, pat = xvirus_dispatch4_code_at(&psize);
+	xvirus_dispatch4_code(page);
+	CHECK(pat == XC4_PAGE_CODE && psize == sizeof page && XC4_ROOM_SLOT(XC4_SLOTS) <= XC4_PAGE && XC4_PAGE_CODE + psize <= XC4_MISC &&
+		xvirus_dispatch4_moved_at(0) == XC4_PAGE_MOVED && xvirus_dispatch4_moved_at(0xFF) + 4 == XC4_PAGE_CODE && !xvirus_dispatch4_moved_at(0x100),
+		"dispatch: the page's room");
+	CHECK(xvirus_dispatch_runs(3, XV_T3_DISPATCH) && xvirus_dispatch_runs(3, XV_T3_DISPATCH4) && !xvirus_dispatch_runs(1, XV_T3_DISPATCH4) &&
+		!xvirus_dispatch_runs(4, XV_T3_DISPATCH4) && xvirus_dispatch_runs(4, XV_T4_DISPATCH) && !xvirus_dispatch_runs(3, 0x25) &&
+		xvirus_dispatch_code_at(XV_STUBS) && xvirus_dispatch_code_at(XV_SPAWN4_3_FIRST + 2) && !xvirus_dispatch_code_at(XC4_PAGE_MOVED),
+		"dispatch: the types that run by the side table, and its code's places");
+	CHECK(get16(page) == 0x78E8 && get32(page + 0x10) == xvirus_dispatch_side(3) && get32(page + 0x14) == XC4_PAGE_MOVED &&
+		get16(page + 0xC) == 0x4700, "dispatch: the page's routine");
+	const struct { uint32_t at, bn4, bn6; } page_spawners[3] = {
+		{ XV_SPAWN4_3, BN4_SPAWN_3, BN6_SPAWN_3 }, { XV_SPAWN4_3_LAST, BN4_SPAWN_3_LAST, BN6_SPAWN_3_LAST },
+		{ XV_SPAWN4_3_FIRST, BN4_SPAWN_3_FIRST, BN6_SPAWN_3_FIRST },
+	};
+	for (int i = 0; i < 3; ++i) {
+		const uint8_t *c = page + (page_spawners[i].at - XC4_PAGE_CODE);
+		int kind = 0;
+		uint32_t bn6 = 0;
+		CHECK(xvirus_dispatch4_spawner(page_spawners[i].bn4) == page_spawners[i].at && xvirus_dispatch_is_spawner(page_spawners[i].at | 1, &kind, &bn6) &&
+			kind == 3 && bn6 == page_spawners[i].bn6, "dispatch: the page's spawner for BN4's %08x", (unsigned)page_spawners[i].bn4);
+		CHECK(get16(c) == 0xB501 && get16(c + 2) == (0x2000 | XV_T3_DISPATCH4) && get16(c + 6) == 0x46FE && get32(c + 0x20) == (page_spawners[i].bn6 | 1) &&
+			get32(c + 0x24) == xvirus_dispatch_side(3) && get16(c + 0x1E) == 0xBD00, "dispatch: the page's spawner at %08x", (unsigned)page_spawners[i].at);
+	}
+	CHECK(!xvirus_dispatch4_spawner(BN4_SPAWN_4) && !xvirus_dispatch4_spawner(BN4_SPAWN_1) && !xvirus_dispatch4_spawner(BN6_SPAWN_3),
+		"dispatch: the page's spawner for a routine of no third-kind spawn of BN4's");
 }
 
 /* The recipes tools/xrecipe.py writes (src/emu/xvirus_bn5.c, from the two
@@ -4739,6 +4768,22 @@ static void test_xvirus_shims(void) {
 		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
 	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
 		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
+	/* (an effect's id no immediate names: cmp r4,#0; bne; movs r4,#0xC8; b the veneer, for one pair; two pairs pad to 16
+	 * bytes with a nop after the branch) */
+	uint8_t fx[XV_SHIM_EFFECT_MAX];
+	const uint8_t one[][2] = { { 0x00, 0xC8 } }, two[][2] = { { 0x00, 0xC8 }, { 0x15, 0xCB } }, loop[][2] = { { 0x00, 0xC8 }, { 0xC8, 0xC9 } };
+	CHECK(xvirus_shim_effect_size(1) == 8 && xvirus_shim_effect_size(2) == 16 && xvirus_shim_effect_size(3) == 20 && xvirus_shim_effect_size(4) == 28 &&
+		!xvirus_shim_effect_size(0) && !xvirus_shim_effect_size(5), "shims: an effect call's sizes");
+	CHECK(xvirus_shim_effect(fx, home, one, 1, veneer) == 8 && get16(fx) == 0x2C00 && get16(fx + 2) == 0xD100 && get16(fx + 4) == 0x24C8 &&
+		(get16(fx + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(fx + 6) & 0x7FFu) == veneer,
+		"shims: an effect call %04x %04x %04x %04x", get16(fx), get16(fx + 2), get16(fx + 4), get16(fx + 6));
+	CHECK(xvirus_shim_effect(fx, home, two, 2, veneer) == 16 && get16(fx + 6) == 0x2C15 && get16(fx + 8) == 0xD100 && get16(fx + 10) == 0x24CB &&
+		(get16(fx + 12) & 0xF800) == 0xE000 && home + 16 + 2 * (get16(fx + 12) & 0x7FFu) == veneer && get16(fx + 14) == 0x46C0,
+		"shims: an effect call of two pairs %04x %04x %04x", get16(fx + 6), get16(fx + 12), get16(fx + 14));
+	CHECK(!xvirus_shim_effect(fx, home + 1, one, 1, veneer) && !xvirus_shim_effect(fx, home, one, 1, home + 0x1000) && !xvirus_shim_effect(fx, home, one, 0, veneer) &&
+		!xvirus_shim_effect(fx, home, loop, 2, veneer),
+		"shims: an effect call off its halfword, its veneer out of reach, with no pair, or making an id it looks for, taken");
+	CHECK(xvirus_shim_r4_to(BN4_SPAWN_EFFECT) == BN6_SPAWN_EFFECT && !xvirus_shim_r4_to(BN4_PLAY_SOUND), "shims: an effect call's twin");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;
 	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");

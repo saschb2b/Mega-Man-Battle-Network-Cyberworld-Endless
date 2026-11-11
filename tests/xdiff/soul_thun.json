@@ -1,0 +1,181 @@
+{
+ "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6) in BN6's engine alone, held to BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 battle, the reference; docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): the Souls installed holding it (souls6 bit 6: BN6's Soul 13 over the proxy form, src/emu/soulbn4.c), a folder of BN6's chip 30 B (Elec, ThunSoul's kind); the first Custom screen picks the chip, UNITE (five right, down, A) and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90 (BN4_CHARGE_TIMES' row of power attack 0x58, the same at every Charge), its release the charged shot: BN4's family 0x47 moved as BN6's grown 0xD7 (an attack unit of tools/xchiprecipe_bn4.py), from its power attack 0x58 copied with it (BN6's grown 0xA5). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "folder6": [
+  "021E"
+ ],
+ "deck6": [
+  "021E"
+ ],
+ "souls6": "40",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   92
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x0D"
+    ],
+    [
+     300,
+     "0x0D"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x2000"
+    ]
+   ],
+   "loadout": [
+    [
+     1,
+     "ffff00a5ffff"
+    ]
+   ],
+   "element": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     300,
+     "0x03"
+    ]
+   ],
+   "action": [
+    [
+     153,
+     "0x08"
+    ],
+    [
+     154,
+     "0xD7"
+    ],
+    [
+     176,
+     "0xD7"
+    ],
+    [
+     177,
+     "0x08"
+    ]
+   ],
+   "hp": [
+    [
+     300,
+     "0x7D0"
+    ]
+   ]
+  },
+  "foe_hp": [
+   [
+    166,
+    40
+   ],
+   [
+    167,
+    20
+   ]
+  ],
+  "sounds": [
+   "0x300"
+  ]
+ },
+ "expect_why": "BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 trace, the reference, the same keys; its BN4 numbers in BN6's): ThunSoul united from t1 (BN6's Soul 13, its used bit 0x2000 for the battle), its loadout BN4's form 6 row (ff 00 ff 58) as BN6's six bytes, its charged shot BN6's grown power attack 0xA5 (BN4's 0x58), his element Elec (3, BN4_FORM_ELEMENTS' form 6); the charged shot's state from t154 (BN4's 0x47 at t154, BN6's grown 0xD7) to his ready state again at t177 (BN4's 6 at t177), the Mettaur's HP 40 before its hit and 20 at t167 (BN4's 40 to 20 at t167: the power attack's 20); the ring's sound, BN4's 0x91 at t162, BN6's grown slot 0x300 (BN6 has another song at 0x91). B held 88 frames gives the plain buster in both games (its 1 at t155 in BN4's battle, t156 in BN6's with the reference's lag of 1): the charge is 90 in both."
+}
