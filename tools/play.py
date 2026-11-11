@@ -76,7 +76,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -120,8 +120,8 @@ def steps(commands):
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
             elif op == 'battle':
                 out.append(('battle',))
-            elif op == 'foes':
-                out.append(('foes', '/'.join([args[0]] + args[1:])))
+            elif op in ('foes', 'lab'):
+                out.append((op, '/'.join([args[0]] + args[1:])))
             elif op == 'swap':
                 out.append(('swap', '/'.join([args[0]] + args[1:])))
             elif op == 'status':
@@ -140,7 +140,7 @@ def steps(commands):
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, swap, status, xrecord, chip, cross, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -338,7 +338,7 @@ def send(h, seq, record=None):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'swap', 'status', 'xrecord', 'chip', 'cross'):
+        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross'):
             items.append(f'{s[0]} {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
