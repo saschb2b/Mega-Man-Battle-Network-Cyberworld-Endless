@@ -1225,6 +1225,27 @@ static void test_extras(void) {
 	}
 	CHECK(brackets * 100 >= shorts * 30 && brackets * 100 <= shorts * 55, "brackets in %d short nets of %d, not about five in twelve", brackets, shorts);
 	CHECK(glitches > 0 && dropped == 12, "%d Glitch layers, %d Battlers' layers made without him", glitches, dropped);
+	/* (Older nets off with BN4's ROM read: no visitor of BN4's, whose rewards are BN4's chips; on, they come,
+	 * docs/multirom/bn4-chips.md, EXTRAS; BN4's kin alone, as a game with BN6's and BN4's ROMs has them) */
+	memset(&run, 0, sizeof run);
+	run.seed = 0xB4;
+	int kin5 = test_nkin[VISIT_BN5], kin4 = test_nkin[VISIT_BN4], here = 0;
+	test_nkin[VISIT_BN5] = 0;
+	test_nkin[VISIT_BN4] = 1;
+	for (int off = 0; off < 2; ++off) {
+		run.extras_off = off ? 1 << EXTRA_OLDER : 0;
+		for (int d = 4; d <= 13; ++d)
+			for (int b = 0; b < BIOME_COUNT; ++b) {
+				bool deep = b == BIOME_UNDERNET || b == BIOME_GRAVEYARD || b == BIOME_NEST;
+				here += !off && visitors_here(d, b);
+				CHECK(!off || !visitors_here(d, b), "a BN4 visitor on layer %d, area %d, with Older nets off", d, b);
+				for (int i = 0; off && !deep && i < 8; ++i)
+					CHECK(!visitor_due((uint32_t)(d * 31 + b), i, d, b, ENC_NORMAL), "a BN4 visitor due on layer %d with Older nets off", d);
+			}
+	}
+	CHECK(here > 0, "no BN4 visitor anywhere with Older nets on and BN4's kin");
+	test_nkin[VISIT_BN5] = kin5;
+	test_nkin[VISIT_BN4] = kin4;
 	profile.best_depth = best;
 	run = before;
 }

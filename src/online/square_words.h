@@ -14,6 +14,8 @@ const char *square_strip_hint(void);
 /* The greeter's word before he stamps a NetPass just come full (the
  * stamp moment, netpass_screen.h) */
 const char *square_greeter_stamp_words(void);
+/* ... the set grown since the pass was full: once, before the pass opens with its new open slot (netpass_grew_due) */
+const char *square_greeter_grew_words(void);
 /* ... a box of options goes on with this (a peer's card's). */
 const char *square_more(void);
 /* ... L's option to hide everyone else's phrases and emotes, or, where
