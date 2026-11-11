@@ -2,7 +2,7 @@
   "about": "What may differ between BN5's battle (the reference) and BN6's with a family moved in (the subject), and why: tools/xdiff.py reads each game's numbers as BN6's (maps), each game's structures through their own layouts (layouts), and replays BN6's draws from BN5's by the twins of its rng, the engine's own draws one game alone makes named there too (rng), and lets a difference pass only where a mask names it (masks), each an engine difference that is not the family's code, with the evidence: both games' routines by address. No mask applies to the family's own records (its objects, what they own, its attacks and effects): what the engine writes there in its own numbers is read as BN6's in the snapshot, as an enemy id is (maps: alliance, renderer, slot), and any other difference there fails the spec (docs/multirom/families.md; docs/devtools/differential.md). No game code here: addresses and numbers only.",
   "maps": {
     "name_id": {
-      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF and GyroMan's 0x107-0x10A as 0x1F4-0x1F7; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
+      "why": "An object's NameID (+0x28) is its enemy id: BN5's CanGard family is 0x4F-0x54, moved as BN6's ids 0x200-0x205, and its Handi family 0x13-0x18 as 0x206-0x20B, the families' (src/emu/xvirus_families.c, .first_id; xvirus_recipe.h, XV_FIRST_ID); BN5's Navis by their recipes (src/emu/xnavi_bn5.c, .first_id; src/emu/xnavi_recipe.h, XN_ID_OF): ToadMan's V1-SP 0x143-0x146 as 0x1D8-0x1DB, KnightMan's 0x13D-0x140 as 0x1D4-0x1D7, ShadowMan's 0x12B-0x12E as 0x1C8-0x1CB, NumberMan's 0x131-0x134 as 0x1CC-0x1CF, TomahawkMan's 0x137-0x13A as 0x1D0-0x1D3, Colonel's 0x125-0x128 as 0x1C4-0x1C7, the Dark Soul's 0x18D as 0x1DC, the Darkloids ShadeMan's 0x149-0x14C as 0x1E0-0x1E3 and BlizzardMan's 0x14F-0x152 as 0x1E4-0x1E7, CosmoMan's 0x15B-0x15E as 0x1EC-0x1EF, Team ProtoMan's NapalmMan's 0x113-0x116 as 0x1FC-0x1FF GyroMan's 0x107-0x10A as 0x1F4-0x1F7 and SearchMan's 0x10D-0x110 as 0x1F8-0x1FB; MegaMan is 0x180 in BN5 and 0x1A0 in BN6 (his battle object's NameID in both traces from their first frame).",
       "bn5_to_bn6": {
         "0x4F": "0x200",
         "0x50": "0x201",
@@ -61,7 +61,11 @@
         "0x107": "0x1F4",
         "0x108": "0x1F5",
         "0x109": "0x1F6",
-        "0x10A": "0x1F7"
+        "0x10A": "0x1F7",
+        "0x10D": "0x1F8",
+        "0x10E": "0x1F9",
+        "0x10F": "0x1FA",
+        "0x110": "0x1FB"
       },
       "megaman": {
         "0x180": "0x1A0"
@@ -328,6 +332,18 @@
             "0x4B": "0xAD",
             "0x4C": "0xAE",
             "0x08": "0xAF"
+          }
+        },
+        {
+          "ids": [
+            "0x10D",
+            "0x10E",
+            "0x10F",
+            "0x110"
+          ],
+          "name": "SearchMan",
+          "bn5_to_bn6": {
+            "0x14": "0xA0"
           }
         }
       ],
@@ -815,7 +831,7 @@
       ]
     },
     "navi_ai_index": {
-      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29 and GyroMan's 2 as 27.",
+      "why": "AIData +1 of a Navi (an object whose NameID is a Navi's: BN5's 0x100-0x17F and the Dark Soul's 0x18D), the AI index the engine finds its Navi tables by (not a virus family's: the two count apart): BN5's Navi n as BN6's XN_AI_OF(n) in the grown Navi tables (src/emu/xnavi_recipe.h): ToadMan's 12 as 37, KnightMan's 11 as 36, ShadowMan's 8 as 33, NumberMan's 9 as 34, TomahawkMan's 10 as 35, Colonel's 7 as 32, the Dark Soul's 22 (0x16) as 38, the Darkloids ShadeMan's 13 as 39, BlizzardMan's 14 as 40 and CosmoMan's 16 as 42, Team ProtoMan's NapalmMan's 4 as 29, GyroMan's 2 as 27 and SearchMan's 3 as 28.",
       "bn5_to_bn6": {
         "12": "37",
         "11": "36",
@@ -828,7 +844,8 @@
         "13": "39",
         "16": "42",
         "4": "29",
-        "2": "27"
+        "2": "27",
+        "3": "28"
       }
     },
     "overlay_kind": {
@@ -1140,6 +1157,13 @@
           "word": "0x3C",
           "compares": [2, 3],
           "evidence": "CosmoMan's (the third kind's 0x6C, moved): his routine at BN5 0x080FFE30-0x080FFE86 hands its spawner (0x080D3828: push {r0-r2,r5}; movs r0,#0x6C; bl 0x08003178) an r3 it never sets, the last writer an engine routine it calls (0x080090E8 at 0x080FFE44, or 0x08016C56 at 0x080FFE54; then 0x0800C6CA, his own 0x081002E0 and 0x0800C676, none writing r3), so the spawn's Z (+0x3C) is that leftover; the spawner then writes Z's upper half itself (movs r2,#0x10; strh r2,[r0,#0x3E]), 16 in both, and its low half stays each engine's (BN5 0x41D0, BN6 3: cosmoman_v1 at t438). Its code (0x080D3648-0x080D3962, its states 0x080D366C, 0x080D36EA and 0x080D3820 from its table 0x080D3660) reads no +0x3C-0x3F, and the engine's it calls read Z only at 0x0800C6B4 (0x0800C6AC: its place from X, Y and Z, whose panel routine 0x0800C658 reads X and Y alone, r2 unread), walked four calls deep. Z's upper half (bytes 2 and 3, the height a draw takes) is compared; its low half is each engine's leftover."
+        },
+        {
+          "kind": "T4",
+          "type": "0x5A",
+          "word": "0x3C",
+          "compares": [2, 3],
+          "evidence": "SearchMan's (the fourth kind's 0x5A, moved): his state at BN5 0x080F5748-0x080F5752 loads r3 with his AI data's +0x2C (ldr r3,[r7,#0x2C], an object's address in each game's RAM) to read its row and column (+0x12, +0x13), then calls the 0x5A's spawner (0x080E7020: push {r0-r2,r5}; movs r0,#0x5A; bl 0x080031CC), the fourth kind's spawner, the third's (0x08003178) with kind 4: r1-r3 kept as +0x34, +0x38, +0x3C. So the 0x5A's Z (+0x3C) is that address; its init (0x080E6FA8) writes its upper half 0x10 (strh r0,[r5,#0x3E] at 0x080E6FB0) and its code counts it down (0x080E6FB4-0x080E6FB8), reading no +0x3C or its low half (its states 0x080E6FA9, 0x080E6FF9 from its table 0x080E6F98; the engine's routines it runs draw by Z's upper half). Its low half is each game's address's: seen in bn5_searchman_v1, _v1_keys and _sp at the 0x5A's first frame, BN5 0xB200, BN6 0xA9B0, its upper half 0x10 in both."
         },
         {
           "kind": "T3",
