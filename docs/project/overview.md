@@ -3,7 +3,7 @@ type: Overview
 title: "The project"
 description: "The project beside the game: the roadmap, the itch.io page and how releases reach it, and the map of where the old flat docs and their sections went."
 tags: [project]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:31:59Z }
 ---
 
 # The project

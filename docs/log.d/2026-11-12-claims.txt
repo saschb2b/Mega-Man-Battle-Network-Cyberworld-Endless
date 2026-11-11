@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-11T21:31:59Z
-* **Create**: project/claims.md (a claim a branch for the numbers branches share, tools/claims.py and its lint; its index line); **Update**: project/overview.md (the new page), code/tools.md (tools/claims.py).
