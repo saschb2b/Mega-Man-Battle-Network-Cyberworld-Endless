@@ -2146,6 +2146,8 @@ static const XvImm elem_imms[] = {
 	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x9B },   /* its object's type 0x1f: moved, the dispatch's 0x9b */
 	{ 0x080EE2B2, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 	{ 0x080EE2E0, THUMB_LDRB, 0, 0, 0x0, 0x2 },   /* a panel's type: BN4 +0, BN6 +2 */
+	{ 0x080EE344, THUMB_MOVS, 0, 0, 0xD, 0xA },   /* MegaMan's animation as he fires an Elem chip: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of 2 in each art) */
+	{ 0x080EE34E, THUMB_MOVS, 1, 0, 0x23, 0x29 },   /* the battle NaviStats' Navi, 0 MegaMan (his arm's kind's high byte by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI) */
 };
 static const XvType elem_types[] = {
 	{ 3, 0x09, XV_TYPE_MOVED4, 0x09 },   /* BN4's third-kind 0x9, moved, the chips' page */

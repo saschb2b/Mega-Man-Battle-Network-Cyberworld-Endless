@@ -436,6 +436,13 @@ IMMS = {
     0x080EE044: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
                      why="MegaMan's animation as he holds MagBolt out: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of "
                          "2 in each art)"),
+    # The Elem chips' state (0x60): whose arm, and MegaMan's animation (BN4's 0x0D, BN6's 0x0A: FlmLine's ready pose)
+    0x080EE34E: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
+                     why="the battle NaviStats' Navi, 0 MegaMan (his arm's kind's high byte by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 "
+                         "+0x29 (BN6_NAVI_SIDE_NAVI)"),
+    0x080EE344: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
+                     why="MegaMan's animation as he fires an Elem chip: BN4's 0x0D, BN6's 0x0A of its own sprite of him (one frame of "
+                         "2 in each art)"),
     # Thunder's state (0x26) and TwnFng's (0x34): MegaMan's animation, BN4's 0x12 (frames of 1, 2, 2 and 3), BN6's 0x0E of the
     # same frames in its own art of him
     0x080ECE3C: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x12, now=0x0E,
