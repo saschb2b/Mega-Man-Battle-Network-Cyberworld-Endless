@@ -404,8 +404,8 @@ def declared(text):
     for block in re.findall(r'\benum\b[^{;]*\{([^}]*)\}', body):
         names |= set(re.findall(r'(?:^|,)\s*(\w+)\s*(?:=[^,]*)?(?=,|$)', block.strip()))
     flat = body
-    while True:                                   # struct and enum bodies give no names of their own
-        smaller = re.sub(r'\{[^{}]*\}', ' ', flat)
+    while True:                                   # bodies give no names of their own, and end a statement
+        smaller = re.sub(r'\{[^{}]*\}', ';', flat)
         if smaller == flat:
             break
         flat = smaller

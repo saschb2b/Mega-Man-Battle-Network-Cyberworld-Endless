@@ -270,16 +270,16 @@ commits in the month), so each claim rebuilds 239 files.
 `rom_u32`, `rom_find`), the other games' (`XR`, `XROM_*`, `xrom_*`) and
 the net areas' table (`NetAreaDef`, `NET_AREAS`, `net_area_def`,
 `XLOOK_*`).
-1. The areas' table to a header of its own: 27 includers use it, 8 of
+1. The areas' table to a header of its own: 24 includers use it, 6 of
    them nothing else. It also ends `rom.c`'s include of `net.h` upward.
 2. `xrom.h` for the other games' ROMs: 31 includers use only those names,
-   48 only BN6's, 59 both. `rom.h`: 170 to 131.
+   52 only BN6's, 60 both. `rom.h`: 170 to 133.
 
 **`platform.h`** (97, 99). 73 includers use the global `P`, and 43 of
 those for `P.core_x` and `P.core_y`, where the picture sits; 21 use
 `btn_pressed`, 18 `platform_persist`.
 1. The picture's place, `CORE_W`, `btn_pressed`, `back` and
-   `platform_tap` in a small header (`screen.h`): 34 includers use
+   `platform_tap` in a small header (`screen.h`): 30 includers use
    nothing else. 8 use only `platform_persist`, which is the saves'
    business (`save_queue.h`).
 2. `P`'s fields are written by `core.base` (28 of them) and, a few each,
@@ -381,7 +381,7 @@ other. None is started.
 | 5 | `order_sort.c` calls `director_pack_now`: the sorter takes the pack's reader as a function the director gives it at its start. Ends `world` and `director` | 1 | `world/order_sort.c`, `order_sort.h`, the director's start | Low |
 | 6 | `launcher.c` calls `saves_import` and `saves_tick`: the launcher owns two hooks, SAVES registers at its start. Ends `launcher` and `saves` | 1 | `launcher/launcher.c`, `launcher.h`, `saves/saves.c` | Low to medium: a dropped `.cwsave` and the automatic copy tried again (`tests/test_transfer.c`, a capture) |
 | 7 | The statistics are handed names: `analytics.c` no longer includes `guardians.h` and `powers.h`, `analytics_online.c` not `online_visit.h`; `meta.c`'s `analytics_run_start()` moves to the director, which starts the run. Ends `analytics` with `director`, `layer`, `online`, and `core` with `analytics` | 4 | `analytics/analytics.c`, `analytics.h`, `analytics_online.c`, `director/runlog.c`, `core/meta.c` | Medium: the payloads must stay byte for byte (`build.py test` holds them) |
-| 8 | `lz.[ch]` (14 lines, the game's LZ77) from `src/map/` to `src/core/`, in `formats`' neighbour `core.base`. Ends `gfx` and `map`, and `emu`'s include of `map` | 3 | Two files moved, the Makefile's `TEST_MAPSLOT_SRCS`, two rows in the concepts | Low; a move, so after a look at the open pull requests |
+| 8 | `lz.[ch]` (29 lines: data packed for the game's LZ77) from `src/map/` to `src/core/`, in `formats`' neighbour `core.base`. Ends `gfx` and `map`, and `emu`'s include of `map` | 3 | Two files moved, the Makefile's `TEST_MAPSLOT_SRCS`, two rows in the concepts | Low; a move, so after a look at the open pull requests |
 | 9 | `xsong.*` from `src/audio/` to `src/emu/`: it installs songs into the game's table, and seven installers include it. `audio` then needs nothing of the emulator's but `formats` | 7 | Two files moved, rows in the concepts; `audio`'s line in `layers.txt` loses `emu` | Low to medium; a move, and the BN4 music sessions touch it: after they merge |
 | 10 | `second_art.*` (a chip's icon and art from the ROM) from `src/second/` to `src/gfx/`. Ends `library` and `second` | 3 | Two files moved, rows in the concepts | Low; a move |
 
