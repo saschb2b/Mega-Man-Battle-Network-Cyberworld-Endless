@@ -2,6 +2,7 @@
 
 ## 2026-11-12
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
+* **Update**: devtools/differential.md (a BN4 chip unit's own code keyed for its draws).
 * **Update**: multirom/bn4-chips.md (the owner's call 11 asked: BugChain, cut or its bugs mapped onto BN6's; what is next).
 * **Update**: multirom/bn4-chips.md (SidBmbo1-3 moved; the misc run's wait; a unit names the effects it moves alone), rom/bn4.md (SidBmbo's code and the misc run's wait, new row), devtools/chip-recipe-generator.md (a waiting unit's wrapper), devtools/differential.md (the misc state's phase during a wait).
 * **Update**: multirom/bn4-chips.md (unit 7 built: BN4's catalogue the older Net's half of the finds on BN4's areas, the deep's every game's, what the economy measured, the Library's BN4 chips held, the menus' colours on BN4's areas fixed; the owner's calls 9 and 10, asked and answered), multirom/one-net.md (the half the area's own game's), game/economy/measuring.md (the report's older Net's table), game/meta/library.md (a BN4 chip held reaches the profile's Library), rom/net-maps.md and rom/bn4.md (the 256-colour bit on the map alone, BN6's menus their 16 colours).
