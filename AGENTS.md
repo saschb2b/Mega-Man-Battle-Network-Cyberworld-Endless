@@ -295,32 +295,67 @@ commit checked: `gh pr merge N --merge --match-head-commit SHA`; never
 `--auto`, which merges at once here (`dev` has no required checks). A
 check that cannot be made green goes back to the owner with why, unmerged.
 
-Several PRs open at once are merged so that the least waits and the
-least is done twice:
+**A PR brings `dev` in only when it must.** Every time costs a commit, a
+run of CI and a wait, and in a month 261 of `dev`'s 600 merge commits
+were one (docs/project/merging.md has the count and what conflicted).
+
+It must, when:
+
+- **GitHub calls it conflicting** (`gh pr view N --json mergeable`): git
+  found a conflict in a file a person writes. Bring `dev` in, resolve
+  it, and wait for green on the new commit.
+- **It needs what merged since:** it calls, reads or tests something
+  another PR changed, or takes a counted value another PR took too
+  (`LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`, an id, a slot, a
+  free-space region, the economy's bands): bring `dev` in and set the
+  value anew (the hash the unit tests name; two `LAYER_MAKE` bumps
+  become one) rather than merging it by hand.
+
+It does not, when:
+
+- **`dev` moved.** GitHub merges a PR that has no conflict however old
+  its base, and "out of date" is no conflict. `dev`'s own CI on the
+  merge is the check of the two together.
+- **The file is one no branch writes or shares:** the generated files
+  (`docs/re/STATUS.md` and its dashboard, `docs/symbols/`, the counts on
+  `docs/rom/symbols.md`, `docs/voice/catalog.json`, `docs/log.md`, each
+  concept's `generated` line) are written by `dev`'s workflow after each
+  merge, and the registries
+  (`docs/re/ledger/`, `tests/xdiff/mutations/`, `tests/xdiff/legit/`,
+  `docs/log.d/`) take a file an entry. A conflict in one of them means
+  the branch still carries an old copy:
+  `python3 tools/generated.py restore` and
+  `python3 tools/shards.py absorb` in the merge put that right, and
+  `build.py lint` fails a branch that commits one.
+
+After each merge `dev`'s workflow commits what the tools write
+("Generated files, written from ...", by `github-actions[bot]`), so
+`dev`'s tip is often that commit; it changes no file a branch changes.
+Where the workflow fails, `dev`'s commit shows it, and it is fixed
+before anything else merges. `dev`'s CI on the merge also builds the
+platform targets the pull request's own run left out
+(docs/code/platforms.md, CI on a pull request): the session that merged
+watches that run, and a red there is its to fix at once.
+
+Several PRs open at once, in one session's hands, are merged so that the
+least waits and the least is done twice:
 
 1. **Merge them all together first, locally**, on a scratch branch from
    `origin/dev` (in `.build/`), in the order below; resolve each
    conflict there once, and run `CI=1 build.py test` and `CI=1 build.py
    lint` on the whole. That finds every conflict and every clash between
    them before anything lands.
-2. **The order:** first the PRs no other open PR shares a file with,
-   then the rest from the fewest shared files to the most; between two
-   that tighten the run (prices, heals, sinks, battles), the one the
-   statistics measure first.
-3. **Merge the first** as soon as its checks are green. For each next
-   one: bring `dev` in where git reports a conflict or the PRs share a
-   counted file (`LAYER_MAKE` and `LAYER_MAKE_HASH`, `RUN_MAGIC`,
-   `tests/lint/` baselines, the economy's bands), set those anew
-   rather than merging them by hand (the hash the unit tests name; two
-   `LAYER_MAKE` bumps become one), and reuse step 1's resolution for the
-   rest. The generated files (`docs/symbols/`, `docs/re/STATUS.md`,
-   `docs/voice/catalog.json` and the rest of `tools/generated.py`'s) are
-   in no PR: `dev`'s workflow writes them after each merge, and a
-   conflict in one is `python3 tools/generated.py restore`
-   (docs/project/merging.md). A PR
-   whose only change since its green checks is `dev` brought in, its
-   resolution step 1 tested, merges at once without waiting on CI again;
-   any other change waits for green.
+2. **The order:** first the PRs no other open PR shares a hand-written
+   file with, then the rest from the fewest shared files to the most;
+   between two that tighten the run (prices, heals, sinks, battles), the
+   one the statistics measure first.
+3. **Merge the first** as soon as its checks are green. Each next one
+   merges as it stands where GitHub calls it mergeable and step 1 showed
+   no clash with what went before; otherwise bring `dev` in, reuse step
+   1's resolution, and set counted values anew. A PR whose only change
+   since its green checks is `dev` brought in, its resolution step 1
+   tested, merges at once without waiting on CI again; any other change
+   waits for green.
 4. **After the last**, `dev`'s own CI on the merge is the check of the
    whole: a red there is fixed before anything else merges.
 

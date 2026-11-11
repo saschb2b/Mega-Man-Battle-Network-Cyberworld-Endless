@@ -888,7 +888,6 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	uint32_t used = xv_used();
 	xv_commit();
 	xv_tx_end();
-	xvirus_songs_staged(f);
 	for (int i = 0; i < f->nblocks; ++i) xv_moved_add(f->blocks[i].start, f->blocks[i].at, f->blocks[i].end - f->blocks[i].start);
 	for (int i = 0; i < f->nclones; ++i) xv_moved_add(f->clones[i].start, f->clones[i].at, f->clones[i].end - f->clones[i].start);
 	xv_moved_add(f->struct1, f->home + XV_HOME_STRUCT1, BN6_TRAITS_SIZE);

@@ -47,6 +47,8 @@ bool online_trade_propose(uint32_t other, TradeChip give);
 bool online_trade_take(uint32_t poster, TradeChip give, TradeChip get);
 bool online_trade_answer(TradeChip give);
 bool online_trade_accept(void);
+/* Whether the Pack holds a copy of `c` past the folders', one to trade */
+bool online_trade_spare(TradeChip c);
 bool online_trade_cancel(void);
 
 /* MegaMan's spare chips in the running game: the Pack's copies past those
@@ -57,14 +59,21 @@ int online_trade_spares(TradeChip *out, uint8_t *count, int cap);
 
 /* A swap the server committed, written at once to the data folder
  * (trade.pending: what MegaMan gives and gets), there until the run has
- * it; online_trade_settle gives it to the run: its chip taken from the
- * Pack and the other's given, BN6's own TakeChips and GiveChips, on the
- * checkpoint just loaded, which the caller then saves. True where a swap
- * was settled (the caller saves, then online_trade_settled). */
+ * it. online_trade_here makes it in the Square's own game at once, whose
+ * RAM goes on the way home: BN6's PET there shows the Pack as home will
+ * have it, the chip given gone and the one got there for a folder; noted
+ * with what the PET changes (square_pet.h), it comes home with that
+ * (true where it was made). online_trade_settle gives the run a swap
+ * still kept, on the checkpoint just loaded, which the caller then
+ * saves: `made`, it came home made, and only the file is left to go; else
+ * (a record lost) its chip is taken from the Pack and the other's given,
+ * BN6's own TakeChips and GiveChips, with MegaMan's word on it in
+ * `words`. True where a swap was settled (the caller saves, then
+ * online_trade_settled). */
 bool online_trade_keep(const TradeView *done);
+bool online_trade_here(const TradeView *done);
 bool online_trade_pending(TradeChip *give, TradeChip *get);
-/* ... MegaMan's word on it where it was settled, else NULL */
-const char *online_trade_settle(void);
+bool online_trade_settle(bool made, const char **words);
 void online_trade_settled(void);
 
 #endif

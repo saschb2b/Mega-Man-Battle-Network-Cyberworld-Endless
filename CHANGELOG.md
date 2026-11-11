@@ -15,6 +15,13 @@
 - **SparkMan in the tournament.** With BN4's ROM beside BN6's, SparkMan
   of Red Sun joins BN4's tournament as a round, fought in BN6's battle as
   BN4 fights him, proved frame by frame against BN4's own battle.
+- **The PET in the Net Square.** START opens the PET in the Net Square as
+  anywhere: edit a folder before a NetBattle, run the NaviCust, use a
+  SubChip, play the Jukebox. What you change there comes home with you,
+  also if you close the game in the Square. The NetPass, which START
+  used to open there, is on R in the PET's menu (it says so) and in
+  KeyItem as everywhere. A chip you trade is in your Pack on the spot,
+  ready for a folder.
 - **TopMan in the tournament.** With BN4's ROM beside BN6's, TopMan of Red
   Sun joins BN4's tournament as a round, fought in BN6's battle as BN4
   fights him: his spinning top, his dashes and his sounds, each proved
@@ -100,10 +107,11 @@
   He stands on the board in his own sprite and speaks with his own face,
   at the version the act's band takes. CloudMan is not in yet. A run
   saved on a layer starts that layer again.
-- **GyroMan, SearchMan and Meddy join NapalmMan.** Three more of Team
-  ProtoMan, BN5's GyroMan, SearchMan and Meddy, now fight in BN6's battle
-  too, moved from BN5's own and checked against it frame by frame. Like
-  NapalmMan they don't guard a run yet.
+- **GyroMan, SearchMan, Meddy and MagnetMan join NapalmMan.** Four more
+  of Team ProtoMan, BN5's GyroMan, SearchMan, Meddy and MagnetMan, now
+  fight in BN6's battle too, moved from BN5's own and checked against it
+  frame by frame. MagnetMan brings BN5's magnet panels, which pull MegaMan
+  along as they did in BN5. Like NapalmMan they don't guard a run yet.
 - **NapalmMan, the first of Team ProtoMan.** With BN5 Team Colonel's
   ROM beside BN6's, Team ProtoMan's NapalmMan now fights in BN6's
   battle, moved from BN5's own and checked against it frame by frame

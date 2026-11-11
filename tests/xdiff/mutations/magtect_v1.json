@@ -1,11 +1,12 @@
 [
  {
-  "name": "MagTect's sound 0xF8 at the pool's first slot",
+  "name": "MagTect's sound 0xF8 at its other sound's slot",
   "spec": "magtect_v1",
   "poke": [
-   "080BEF34:2032:2"
+   "08B5D148:2003:2",
+   "08B5D14C:3081:2"
   ],
-  "what": "its sound 0xF8 (BN4 0x080BEF34: movs r0,#0xf8, the recipe's immediate the pool's second slot 0x33, tools/xrecipe_bn4.py pool_song) made 0x32, the pool's first, which holds its 0xB8: BN6's copy begins its other sound where BN4 begins 0xF8 (caught at t239, the family's sounds)"
+  "what": "its sound 0xF8's shim (the sound call's, in its home at XV_HOMES + 0x15000 + 0x148: movs r0,#2, lsls r0,#8, adds r0,#2, the grown song table's slot 0x202, the chips' slot for it) made to name 0x381, the slot of its 0xB8: BN6's copy begins its other sound where BN4 begins 0xF8 (caught at t239, the family's sounds)"
  },
  {
   "name": "MagTect's CurAction 6 written as BN4's",

@@ -11,10 +11,12 @@
 #include "jukebox.h"
 #include "library.h"
 #include "netpass_screen.h"
+#include "online_visit.h"
 #include "pet_options.h"
 #include "pet_text.h"
 #include "platform.h"
 #include "rom.h"
+#include "square_pet.h"
 
 /* A Save under way: the PET closing, then the checkpoint. */
 static int saving;
@@ -79,7 +81,9 @@ void pet_update(void) {
 	 * layer's arrival takes one (it waits for MegaMan free to move) */
 	if (saving && !(emu_read8(BN6_PET_MENU_OPEN) & 1)) {
 		saving = 0;
-		director_save_here();
+		/* (in the Net Square the run was saved at the gate, and a note says so: square_pet.h) */
+		if (online_visit_away()) square_pet_saved();
+		else director_save_here();
 	}
 }
 

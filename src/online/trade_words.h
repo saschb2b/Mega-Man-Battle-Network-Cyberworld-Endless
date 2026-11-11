@@ -55,6 +55,8 @@ const char *trade_take_none(const char *name, int want);
 const char *trade_post_want(void);
 const char *trade_posted(const char *chip, int want);
 const char *trade_post_down(void);
+/* MegaMan's: the chip up on the board went into a folder in the PET, the offer taken down */
+const char *trade_post_foldered(void);
 /* ... one trade a visit: MegaMan has his, to take home first. */
 const char *trade_traded(void);
 /* ... and to a Navi on the week's dive: no trades till it ends. */

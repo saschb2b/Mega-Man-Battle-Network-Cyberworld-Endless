@@ -157,7 +157,7 @@ static void area_report(FILE *out, int area, Tally *all) {
 static int layer_rolls(int depth, int area, uint32_t *picks, int *hps) {
 	PacingBand b = pacing_band(depth, false, false);
 	int over = 0;
-	LootMemory none = { -1, -1, 0, 0, 0 };
+	LootMemory none = LOOT_MEMORY_NONE;
 	loot_memory_set(&none);
 	rng_seed(0xC0FFEEu ^ (uint32_t)(depth * 2654435761u) ^ (uint32_t)area);
 	for (int r = 0; r < ROLLS; ++r) {

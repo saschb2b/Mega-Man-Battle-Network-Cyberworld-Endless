@@ -378,7 +378,7 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_moved.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_bn4.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xchips_bn5.c src/emu/xchips_bn4.c src/emu/song_table.c src/emu/soulcode_bn5.c \
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_registry_bn4.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_text.c src/emu/claims.c src/emu/free_space_watch.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/layer/fork_words.c src/core/jobs.c \
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
-	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
+	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c \
 	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
@@ -444,9 +444,9 @@ build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h src/onl
 
 ONLINE_TEST_SRCS := tests/test_online.c src/online/online_wire.c src/online/online_motion.c src/online/online_people.c src/online/square_plan.c src/core/compat.c \
 	src/online/square_life_words.c src/online/trade_words.c src/online/online_week.c src/online/square_week_words.c \
-	src/online/netpass.c src/online/netpass_text.c src/online/square_words.c src/online/trade_list.c src/online/trade_screen_text.c
+	src/online/netpass.c src/online/netpass_text.c src/online/square_words.c src/online/trade_list.c src/online/trade_screen_text.c src/online/pet_carry.c
 build/host/test_online: $(ONLINE_TEST_SRCS) src/online/online_types.h src/online/square_plan.h src/online/square_life_words.h src/online/netpass.h \
-	src/online/trade_list.h src/online/trade_screen_text.h
+	src/online/trade_list.h src/online/trade_screen_text.h src/online/pet_carry.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -Ishared/online -o $@ $(ONLINE_TEST_SRCS)

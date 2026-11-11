@@ -21,6 +21,22 @@ typedef struct {
 /* A field object's kind, the entity list's high nibble (docs/rom/) */
 enum { FIELD_GEM = 2, FIELD_ROCK = 3, FIELD_CUBE = 8, FIELD_STATUE = 9, FIELD_METAL = 10 };
 
+/* A set of virus families, a bit each by BN6's AI index: BN6's own to 31,
+ * BN5's moved into the engine from 32, BN4's from 64 (the encounter
+ * groups' step 1: 64 bits held BN6's and BN5's alone) */
+#define FAMILY_MASK_BITS 128
+typedef struct { uint64_t w[FAMILY_MASK_BITS / 64]; } FamilyMask;
+#define FAMILY_MASK_NONE ((FamilyMask){ { 0, 0 } })
+static inline void family_mask_add(FamilyMask *m, int family) {
+	if (family > 0 && family < FAMILY_MASK_BITS) m->w[family >> 6] |= (uint64_t)1 << (family & 63);
+}
+static inline bool family_mask_has(FamilyMask m, int family) {
+	return family > 0 && family < FAMILY_MASK_BITS && (m.w[family >> 6] >> (family & 63) & 1);
+}
+static inline bool family_mask_meet(FamilyMask a, FamilyMask b) { return (a.w[0] & b.w[0]) || (a.w[1] & b.w[1]); }
+static inline bool family_mask_any(FamilyMask m) { return m.w[0] || m.w[1]; }
+static inline void family_mask_join(FamilyMask *m, FamilyMask o) { m->w[0] |= o.w[0]; m->w[1] |= o.w[1]; }
+
 typedef struct {
 	Foe foes[MAX_FOES];
 	int nfoes;
@@ -40,10 +56,9 @@ typedef struct {
 	int nobj;
 	/* the area's battle it was rolled from, kept in mind once fought
 	 * (loot_battle_fought): the area, the battle (-1 none), its virus
-	 * families (a bit each, by BN6's AI index: the families moved into the
-	 * engine from 32) and its viruses */
+	 * families and its viruses */
 	int from_biome, from_pick;
-	uint64_t from_families;
+	FamilyMask from_families;
 	unsigned from_viruses;
 	/* another game's battle fought in BN6's engine (xbattles.h, issue #82):
 	 * its record there (0: BN6's own), and the foe that came from the

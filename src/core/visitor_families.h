@@ -9,8 +9,9 @@
  * (the depth it first meets MegaMan in its own net), whether its game
  * sets it on special panels alone, and whether it may visit the other
  * nets' battles. Read from the ROM files and the families installed in
- * the core, once; none where neither BN5's nor BN4's ROM is read, or
- * neither's families are in the engine. */
+ * the core, once: BN6's with its ROM alone too (the encounter groups'
+ * pool takes its families' places from it, group_pool.h), BN5's and
+ * BN4's where their ROM is read and their families are in the engine. */
 #ifndef CW_VISITOR_FAMILIES_H
 #define CW_VISITOR_FAMILIES_H
 
@@ -37,10 +38,9 @@ typedef struct {
  * AI indexes: BN6's own to 31, BN5's moved from 32, BN4's from 64) */
 #define VISITOR_KIN_MAX 128
 
-/* Net `net`'s families as its records set them (into *out), how many; 0
- * where BN5's ROM is not read or none of its families is installed, and
- * BN4's where its ROM is not read or none of its is; BN6's where
- * neither other ROM is read */
+/* Net `net`'s families as its records set them (into *out), how many;
+ * BN5's 0 where its ROM is not read or none of its families is
+ * installed, and BN4's likewise */
 int visitor_kin(int net, const VisitorKin **out);
 /* The net family `family` (BN6's AI index) is of: BN5's or BN4's for a
  * family of theirs moved into the engine, BN6's else */
