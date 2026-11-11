@@ -391,6 +391,7 @@ bool xchips_bn4_code_install(void) {
 	xv_tx_begin();
 	bool fresh = tables_stage();
 	if (!xv_failed()) routines_stage(&misc_table);
+	if (!xv_failed()) xg_page4_stage();
 	const char *at = "BN6's routines' tables";
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
 		at = xchips_bn4[i].code.name;
