@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T11:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -908,6 +908,14 @@ and Team ProtoMan's `XN_TEAM_ROOM`, `FREE_TEAM_NAVI_CODE` to
 own copied code (the fourth kind's 0x12's +0x34, NapalmMan's data) or data
 (GyroMan's overlay's masks, its +0x54) is read as BN6's word naming the
 copy only where the copy's room is one of them.
+
+A poke's address redirects to a moved range's copy only where that copy is
+the spec's own (`src/dev/xdiff.c`, `poke_range`): a BN5 Navi's copy of BN5's
+code is his alone, and its BN5 addresses lie among BN6's own code and BN4's,
+so another Navi's range never takes a poke (`toadman_sea_elec`'s BN6
+`0x080C64EB` lies in Meddy's copy of BN5's `0x080C6000`-`0x080C665C`, which
+took the poke from ToadMan's battle, the spec INCONCLUSIVE and mutation 92
+uncaught, until this).
 
 A `spawn_leftovers` rule may name the fourth kind's objects too (`T4`):
 its spawner, BN5's `0x080031CC`, is the third kind's with kind 4, r1-r3
