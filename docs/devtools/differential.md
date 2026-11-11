@@ -368,7 +368,10 @@ and traces both:
 - **Breaking it on purpose**: `poke=A:V[:N]` writes into BN6's copy after
   the install (an address of BN5's in a moved block is written to its
   copy, to each copy where more than one family copies the block, as
-  Mettaur and Melody both copy BN4's summoned appear; one in RAM once the
+  Mettaur and Melody both copy BN4's summoned appear, and to each of
+  BN4's chip units' copies that hold the address, as Boomer's unit copies
+  the boomerang's spawner within its type and PitRng's copies it alone;
+  one in RAM once the
   game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's

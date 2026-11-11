@@ -652,6 +652,14 @@ static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	return -1;
 }
 
+static bool same_block(const XvMoved *a, const XvMoved *b) { return a->from == b->from && a->len == b->len; }
+
+/* (both ranges copies in BN4's chips' units' room, `a` holding `at` as `b` does) */
+static bool units4_both(const XvMoved *a, const XvMoved *b, uint32_t at) {
+	return at >= a->from && at < a->from + a->len && a->to >= FREE_BN4_CHIPS && a->to < FREE_BN4_CHIPS_END &&
+		b->to >= FREE_BN4_CHIPS && b->to < FREE_BN4_CHIPS_END;
+}
+
 /* the comparator's own test: bytes written into BN6's copy after the
  * install (an address of BN5's moved, to its copy; each copy of a block more than one family copies), or a call's veneer
  * aimed at another routine; those in RAM (`ram`) once the game has booted,
@@ -677,9 +685,10 @@ static void pokes_put(const Spec *s, bool ram) {
 		put32(b, p->v);
 		emu_write(at, b, (size_t)p->size);
 		printf("xdiff: poke %08x (%08x) = %0*x\n", (unsigned)p->at, (unsigned)at, 2 * p->size, (unsigned)p->v);
-		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's) */
+		/* (a block more than one family copies, each copy: BN4's summoned appear, Mettaur's and Melody's; and a routine of
+		 * BN4's two chip units copy, one within its type's block and one alone: the boomerang's spawner, Boomer's and PitRng's) */
 		for (int j = 0; k >= 0 && j < k; ++j)
-			if (m[j].from == m[k].from && m[j].len == m[k].len && m[j].to != m[k].to) {
+			if (m[j].to != m[k].to && (same_block(&m[j], &m[k]) || units4_both(&m[j], &m[k], p->at))) {
 				emu_write(p->at - m[j].from + m[j].to, b, (size_t)p->size);
 				printf("xdiff: poke %08x (%08x, a copy) = %0*x\n", (unsigned)p->at, (unsigned)(p->at - m[j].from + m[j].to), 2 * p->size, (unsigned)p->v);
 			}
