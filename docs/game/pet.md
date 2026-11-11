@@ -125,7 +125,7 @@ three open the golden gate) and five of the profile's, in the ids
 | NaviCode | once a guardian has been deleted twice (the Navi gates' code, [The meta layer](meta/overview.md)) | whose codes MegaMan holds, two by name, and that each opens its gate |
 | DarkPass | once the Secret Area has been cleared in any run | that the dark way to the Undernet is open |
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
-| NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square START opens it, the PET staying shut there) |
+| NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square R on the PET's menu opens it too) |
 | Jukebox | always | every song of the town and the Net; A opens the Jukebox |
 | BtlrCard | once the first Virus Battler has given it ([The Virus Battler](../world/level-design/virus-battler.md)) | BN6's own words; A opens BN6's own VIRUS LIST of the card: the families on it, their V1's data and descriptions |
 
@@ -164,9 +164,15 @@ column, +0x20 the row, +0x24 the scroll, and the list of held items at
 `0x0201BF00`, two bytes an entry, the entry under the cursor at
 (scroll + row) * 2 + column ([ROM data](../rom/overview.md), the KeyItem
 screen's cursor). A on any item but `0x40` does nothing in BN6, so the A
-that opens the pass is also kept from the game. In the Net Square BN6's
-PET stays shut (its screens would change the Square's RAM, thrown away
-on the way home); START opens the same pass there.
+that opens the pass is also kept from the game.
+
+In the Net Square the PET opens as everywhere, and what it changes there
+comes home onto the gate's checkpoint
+([The PET in the Square](../online/square/pet.md)): it was shut there
+until 11 November 2026, START the NetPass's, since the Square's RAM goes
+on the way home. The pass opens from KeyItem there too, and by R on the
+PET's menu, named on its band (`R:NETPASS`). Save there saves nothing,
+the run saved at the gate, and a note says so.
 
 ### The Jukebox
 

@@ -998,8 +998,8 @@ server: up to eight in a channel, who walk, say a phrase, read each
 other's cards, trade a spare chip, NetBattle and watch each other's
 NetBattles, and dive the same net each week. Every system goes online,
 the browser too. Nothing there changes your run: no battles of the net,
-no heal, no shop, no saves. The one thing that comes home is a chip you
-traded.
+no heal, no shop, no saves. What comes home is a chip you traded and
+what you changed in the PET there: a folder, the NaviCust.
 
 <p align="center">
 <img src="screenshots/online-square.png" width="240" alt="Eight players' MegaMen round the Net Square's landmark, their names over them, Hello! and Nice build! in bubbles">
@@ -1022,6 +1022,11 @@ and B calls it off.
 home. MegaMan is back on the
 gate exactly as he left it; if the game was closed in the Square, the
 next CONTINUE puts him there.
+
+**START** opens the PET in the Square as anywhere: edit a folder before
+a NetBattle, run the NaviCust, use a SubChip. What you change there
+comes home with you (also if the game is closed in the Square). Save
+there saves nothing new: the run was saved at the gate.
 
 The keeper changes your name or the server: the official Square (he
 asks first, the cursor on **No**), or another one's address (`host` or
@@ -1095,7 +1100,8 @@ land again when you add BN4's ROM. BN4's chips go into NetBattles and
 trades as each is proved; one not yet proved stays out.
 
 It is a key item: **KeyItem** in the PET, then A on **NetPass**; A or B
-closes it. In the Square, where the PET stays shut, **START** opens it.
+closes it. In the Square **R** on the PET's menu opens it too (the menu
+says so: R:NETPASS).
 It also shows across the top of the screen while MegaMan asks about
 going, and on a second screen (the 3DS's bottom screen, an Android
 handheld's second display) while you are in the Square.
@@ -1151,9 +1157,11 @@ DeepNet.
 spare chips (copies beyond those in your folders) for another player's.
 Pick the player, then your chip on the spares list, each chip's card
 beside it; he picks one back, and the chip trade shows both. When you
-both say **Deal!**, the cards swap, and the chips change hands as you
-come home. BN5's chips trade like BN6's. One trade a visit: the chip
-comes home with you before the next.
+both say **Deal!**, the cards swap and the chip is in your Pack: put it
+in a folder right there, in the PET, if you like. BN5's chips trade like
+BN6's. One trade a visit: the chip comes home with you before the next.
+A chip you offered and then put in a folder is no spare any more: the
+offer comes down.
 
 **The trade board**, at the same desk: put one spare up with what you
 want for it (anything, a chip of an element, a Sword, Wind, Break or

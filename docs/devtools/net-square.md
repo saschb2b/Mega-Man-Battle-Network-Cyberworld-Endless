@@ -101,6 +101,13 @@ python3 build.py shot --scene emu --run-depth 2 --frames 700 --input "300:,0:rec
 python3 build.py shot --scene emu --run-depth 2 --frames 700 --touch --size 1080x1920 --dpi 420 --input "300:,0:reconnect 12,300:" --screen-shot "560:/src/.build/rc/phone.bmp"
 ```
 
+BN6's PET in the Square ([The PET in the Square](../online/square/pet.md)) is tried with one game on a local server:
+START, an edit, R and Yes for home, the PET again there. `--dev nocarry`
+leaves what the PET changed behind on the way home, as before it was
+carried (a mutation: the edit must then be gone), and with
+`CYBERWORLD_EMU_DEBUG=1` the log names each byte a PET session changed
+("square pet: 02002178 9b to 14").
+
 The gate's strip shows while MegaMan asks "To the Net Square,Lan?": a
 data folder whose `network.ini` names a server and its consent (above),
 the arrival's chats paged, `0:place 16 72 3` and a step off and on.

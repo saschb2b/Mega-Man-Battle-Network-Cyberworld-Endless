@@ -64,6 +64,7 @@ typedef struct {
 	int soulbreak;  /* soulbreak=N: a Soul's look, abilities or passives broken, the differential's own test (soulunite.h, SOULBREAK_*) */
 	bool rollbench; /* the start is the rollback's measurement: the game's core, then the Arena's pair (src/dev/rollbench.h, issue #128) */
 	bool arena;     /* the start is the Arena's: a Practice NetBattle on two linked cores, the second player a script (arena.h, issue #120) */
+	bool no_carry;  /* nocarry: what BN6's PET changed in the Net Square is left behind on the way home, as before it was carried (a mutation: square_pet.h) */
 	bool arena_busy; /* arenabusy: --dev arena's second player steps, shoots and OKs the Custom screen by the frame's number alone (the rollback's guesses tried) */
 	bool arena_both; /* arenaboth: its first player a script too, the Custom screen's OK and charged shots; in the Net Square, Lan's Yes to a challenge at once and his keys the same script (a battle that plays itself, arena.h) */
 	bool bn4families; /* bn4families: the differential's BN4 families counted (xdiff_bn4.h); they install wherever BN4's ROM is read (xvirus_bn4.h) */

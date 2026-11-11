@@ -17,6 +17,9 @@ void netpass_count_words(char *out, int n, int held, int all) { snprintf(out, (s
 const char *const netpass_stamp_names[STAMP_COUNT] = { "Square", "Arena", "Trade", "DeepNet" };
 const char *const netpass_stamp_captions[STAMP_COUNT] = { "meet,cheer", "NetBattle", "chip swap", "the Board" };
 
+/* (the PET menu's key hint in the Net Square, as E-Mail's START:SORT: square_pet.c) */
+const char netpass_key_hint[] = "NETPASS";
+
 const char netpass_cart_in[] = "IN";
 const char netpass_cart_open[] = "OPEN";
 

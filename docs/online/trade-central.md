@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Trade Central"
-description: "Trade Central (`trade_central.c`): one spare chip for another player's, kept in `trade.pending` and settled at home, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board."
+description: "Trade Central (`trade_central.c`): one spare chip for another player's, swapped in the Square at once and kept in `trade.pending` until home has it, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board."
 tags: [online]
 generated: { by: claude-code/unrecorded, at: 2026-10-23T14:26:53Z }
 ---
@@ -30,14 +30,26 @@ trade, a post and an answer (NOTICE 28).
    stale or mismatched step, a player gone, or five minutes without a
    step calls it off.
 4. Each game keeps the done trade in `trade.pending` the moment the
-   server says it is done, wherever MegaMan stands, and applies it at
-   home: on the way back from the Square, or at the next CONTINUE if the
-   game was closed there. It runs BN6's own TakeChips and GiveChips on
-   the gate's checkpoint (`online_trade_settle`), refuses a swap whose
-   chip is no longer spare or one this game cannot hold, deletes the file
-   before it saves, and MegaMan says what came and went. BN6's own
+   server says it is done, wherever MegaMan stands, and makes the swap
+   in the Square's own game at once (`online_trade_here`, BN6's own
+   TakeChips and GiveChips), so the Pack in the Square's PET is the Pack
+   home will have and the chip got can go into a folder there; MegaMan
+   says it is in the Pack. The swap is noted with what the PET changes
+   and comes home with it onto the gate's checkpoint
+   ([The PET in the Square](square/pet.md)): on the way back, or at the
+   next CONTINUE if the game was closed there, the file deleted before
+   the save. Where that record is lost, home makes the swap itself
+   (`online_trade_settle`), refusing one whose chip is no longer spare
+   or one this game cannot hold, and MegaMan says what came and went.
+   Until 11 November 2026 the swap was made at home alone. BN6's own
    routines count a chip past 319 in the pack's extension (docs/
    [Running the game's own logic](../engine/emulation/overview.md)), so a BN5 chip comes and goes as BN6's do.
+
+A chip promised stays a spare: a deal is accepted only while its chip
+is one (`online_trade_accept`; the server commits on both accepts
+alone), and a chip up on the board, or offered in a trade under way,
+that goes into a folder in the Square's PET takes the offer down or
+calls the trade off, MegaMan saying so of the board's.
 
 One trade a visit: a game keeps one swap until it is home
 (`trade.pending` holds one), so after a trade is done the clerk says

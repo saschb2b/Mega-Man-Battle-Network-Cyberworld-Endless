@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include "emu.h"
+#include "navicust.h"
+#include "run.h"
 
 static uint8_t main_read8(void *context, uint32_t address) {
 	(void)context;
@@ -69,4 +71,31 @@ bool online_snapshot_read_from(const OnlineMemory *m, OnlineLoadout *out, unsign
 	out->souls = (uint8_t)souls;
 	out->beast = snapshot_flag(m, BN6_FLAG_BEAST_OUT);
 	return true;
+}
+
+static uint16_t bounded_depth(int depth) { return (uint16_t)(depth < 0 ? 0 : depth > UINT16_MAX ? UINT16_MAX : depth); }
+
+void online_snapshot_card(const OnlineLoadout *navi, int depth, bool short_net, int best_depth, unsigned marks, OnlineProfile *out) {
+	memset(out, 0, sizeof *out);
+	out->hp = navi->hp; out->max_hp = navi->max_hp;
+	/* NaviStats stores each level less one; the public card shows 1-5. */
+	out->attack = navi->attack < 5 ? (uint8_t)(navi->attack + 1u) : 5;
+	out->speed = navi->speed < 5 ? (uint8_t)(navi->speed + 1u) : 5;
+	out->charge = navi->charge < 5 ? (uint8_t)(navi->charge + 1u) : 5;
+	out->souls = navi->souls; out->crosses = navi->crosses;
+	out->depth = bounded_depth(depth);
+	unsigned act = out->depth ? ((out->depth - 1u) % CYCLE_LAYERS) / 3u + 1u : 0;
+	/* The short net's second Nest at threat ten remains its fourth act. */
+	if (short_net && out->depth >= SHORT_LAYERS) act = (SHORT_LAYERS - 1u) / 3u + 1u;
+	out->act = (uint8_t)act;
+	out->best_depth = bounded_depth(best_depth);
+	out->marks = marks;
+	for (unsigned i = 0; i < ONLINE_BOARD_CELLS; ++i) {
+		unsigned slot = navi->grid[i];
+		if (!slot || slot > BN6_NAVICUST_SLOTS) continue;
+		const uint8_t *record = navi->board + (slot - 1u) * 8u;
+		unsigned variant = record[0] | (unsigned)record[1] << 8;
+		NaviShape shape;
+		if (variant && variant < 47 * 4 && navicust_shape((int)variant, &shape)) out->board[i] = shape.color;
+	}
 }

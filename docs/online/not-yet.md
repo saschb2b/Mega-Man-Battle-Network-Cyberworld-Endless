@@ -51,7 +51,7 @@ generated: { by: claude-code/unrecorded, at: 2026-10-22T12:28:49Z }
   A diver's game calls off an offer made to it, but the other game
   hears only "The trade's off": the snapshot does not say who is diving.
 - **The NetPass, what is left:** seen headless on the host and Linux
-  builds only (the KeyItem's A in a run, START in the Square, the gate's
+  builds only (the KeyItem's A in a run, R on the PET's menu in the Square, the gate's
   strip, the second screen's panel, the stamp moment, the referee, the
   clerk, the greeter); on the 3DS, Android, iOS, the browser and the
   handhelds it is built, untried. A pass's stamp moment plays on the
