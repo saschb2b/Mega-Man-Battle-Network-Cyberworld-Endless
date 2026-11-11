@@ -16,6 +16,7 @@
 #include "xchips_flash.h"
 #include "xchips_moved.h"
 #include "xchips_pas.h"
+#include "xchips_registry.h"
 #include "xnavi_recipe.h"
 #include "xnavi_sprites.h"
 #include "xvirus.h"
@@ -366,6 +367,11 @@ static void unit4_stage(int i, bool fresh) {
 }
 
 bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
+
+bool xchips_bn4_moved(int id) {
+	const XChipReg4 *r = xreg4_at(id);
+	return r && r->how == XREG_MOVED;
+}
 
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;

@@ -21,6 +21,11 @@ PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'mail', 'keyitem', 'optio
 # (a layer: the arrival's words paged; quiet keeps random battles off)
 NET = ['--scene', 'emu', '--dev', 'quiet']
 LAYER = 'wait 150; mash A 300; wait 20'
+# (a BN5 Darkloid in BN6's engine, at V1 (BN5's ROM beside BN6's): the run's opening gift picked, then the foes step
+# (docs/devtools/battle-on-demand.md) with his moved id at column 5, row 2; ids by xnavi_recipe.h's XN_ID_OF, their seats
+# 7-10: docs/multirom/navis.md, The Darkloids)
+DARKLOIDS = {'shademan': 0x1E0, 'blizzardman': 0x1E4, 'cloudman': 0x1E8, 'cosmoman': 0x1EC}
+GIFT = 'press A; wait 60; press A; wait 60'
 # (Lan's HP after act 2, its arrival's words paged)
 HP = ['--scene', 'home', '--run-depth', '7', '--seed', '3']
 
@@ -47,6 +52,7 @@ ROUTES = {
     'jukebox': (TOWN, pet_entry(5) + '; press DOWN; press RIGHT; wait 14; press A; wait 40', 'jukebox'),
     'layer': (NET, LAYER, 'map'),
     'battle': (NET, LAYER + '; battle; wait 240', 'battle'),
+    **{f'darkloid/{name}': (NET, LAYER + f'; {GIFT}; foes {v1:X}@52; wait 200', 'battle') for name, v1 in DARKLOIDS.items()},
     'hp': (HP, 'wait 600' + '; press A; wait 88' * 6, 'town'),
 }
 
