@@ -418,18 +418,10 @@ static void hold_step(Side *g, const Spec *s) {
 	g->held = true;
 }
 
-/* (panels=) the spec's panels given their types as the fight begins, before its first fight frame, in each game's own place (BN4's
- * type at +0, BN5's and BN6's at +2): each game makes a panel's flags from its type every frame (BN4_PANEL_FIELD_STEP, BN6's
- * _object_updatePanelParameters), so the panel acts as one of its type from that frame on in both */
+/* (panels=) a BN4 spec's panels' types written in each game before its first fight frame (xdiff_bn4.c's xd4_panels_put) */
 static void panels_step(Side *g, const Spec *s) {
-	if (!s->npanels || g->paneled) return;
+	if (!g->paneled) xd4_panels_put(s, g->v.game);
 	g->paneled = true;
-	if (g->v.game == 4) {
-		xd4_panels_put(s);
-		return;
-	}
-	for (int i = 0; i < s->npanels; ++i)
-		wr8(&g->v, g->v.panels + (uint32_t)(s->panels[i].row * 8 + s->panels[i].col) * g->v.panel_size + BN6_PANEL_TYPE, s->panels[i].type);
 }
 
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */

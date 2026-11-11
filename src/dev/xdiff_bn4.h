@@ -48,8 +48,9 @@ void xd4_folder_put(const Spec *s);
  * the game writes it giving the Soul, so BN4_CHIP_GATE lets UNITE's pick through at OK (docs/multirom/bn4-souls.md, How BN4
  * takes a form) */
 void xd4_souls_put(const Spec *s);
-/* (panels=) the spec's panels given their types in BN4's battle, BN4's type at a panel's +0 (BN4_PANEL_TYPE) */
-void xd4_panels_put(const Spec *s);
+/* (panels=) a BN4 spec's panels given their types in the battle of `game` (4 BN4's, its type at a panel's +0, BN4_PANEL_TYPE; 6
+ * BN6's, at +2, BN6_PANEL_TYPE) before its first fight frame: each game makes a panel's flags from its type every frame */
+void xd4_panels_put(const Spec *s, int game);
 /* ... and BN4's MegaMan's form (its battle NaviStats' BN4_NAVI_FORM) said as it changes, once a frame where souls4 gave a Soul:
  * a Soul's unison and its turns' end, as the trace's numbers have them */
 void xd4_form_watch(void);
