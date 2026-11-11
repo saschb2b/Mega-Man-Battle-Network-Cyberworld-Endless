@@ -3,7 +3,7 @@ type: Feature
 title: "A visit"
 description: "A visit to the Net Square: the gate in Lan's HP and its first questions (`director_gate.c`, `online_field.c`), the checkpoint at the gate, the Square built on the game's own core (`online_visit.c`), how visits end."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-24T07:19:34Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # A visit

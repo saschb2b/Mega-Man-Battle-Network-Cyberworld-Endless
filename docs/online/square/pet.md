@@ -3,7 +3,7 @@ type: Feature
 title: "The PET in the Square"
 description: "BN6's PET in the Net Square (`square_pet.c`): START opens it there as everywhere, what each of its screens writes, the record that carries those bytes home onto the gate's checkpoint (`pet_carry.c`, `run.pet`), Save's note, R:NETPASS on its menu, and what a folder made there means for a NetBattle and a trade."
 tags: [online, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:05:51Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # The PET in the Square

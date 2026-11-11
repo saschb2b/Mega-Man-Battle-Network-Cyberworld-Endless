@@ -3,7 +3,7 @@ type: Feature
 title: "Trade Central"
 description: "Trade Central (`trade_central.c`): one spare chip for another player's, swapped in the Square at once and kept in `trade.pending` until home has it, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:26:53Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # Trade Central

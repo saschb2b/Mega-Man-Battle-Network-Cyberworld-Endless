@@ -3,7 +3,7 @@ type: ROM Map
 title: "The NaviCust"
 description: "Addresses of the NaviCust: its programs, compression and compression codes, the board, Reg memory and RegUps, the TagChip system and the Spins found in the net; BN5's seven programs BN6 has none of, and what each sets; program 48, BN5's SoulT+1 in BN6's tables grown by one."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

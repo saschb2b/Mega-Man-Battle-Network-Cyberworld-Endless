@@ -3,7 +3,7 @@ type: Status
 title: "What has been shown"
 description: "The dated record of what online play has been shown doing: visits, trades, the trade board, NetBattles across networks and systems, full rules and Souls, rematches, the stands, the NetPass, dropped links, emotes, crowds."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:25:12Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
 ---
 
 # What has been shown
