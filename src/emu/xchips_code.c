@@ -392,6 +392,14 @@ bool xchips_bn4_moved(int id) {
 	return r && r->how == XREG_MOVED;
 }
 
+uint32_t xchips_bn4_moved_at(uint32_t bn4) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i) {
+		uint32_t at = xchips_bn4[i].share ? 0 : xvirus_code_at(&xchips_bn4[i].code, bn4);
+		if (at) return at;
+	}
+	return 0;
+}
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;

@@ -1304,11 +1304,103 @@ static const XcSong propbom_songs[] = { { 0x8D, 0x200 }, { 0xC8, 0x205 }, { 0x13
 	.sound_calls = propbom_sound_calls, .nsound_calls = (int)(sizeof propbom_sound_calls / sizeof *propbom_sound_calls), \
 	.sprites = propbom_sprites, .nsprites = (int)(sizeof propbom_sprites / sizeof *propbom_sprites), \
 	.effects = propbom_effects, .neffects = (int)(sizeof propbom_effects / sizeof *propbom_effects) }
+/* ---- ThunSoul: BN4's attack 0x47 (080EDC5B) as BN6's 0xd7; its chips  ---- */
+/* MegaMan's state 0x47 (080EDC5A-080EDD2E), the family of its chips' records: moved */
+/* ThunSoul's power attack 0x58 (0800D298), which returns the family: copied with it */
+/* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
+/* its sprite 3:0x3a (080DAFF4): BN6's 3:0x77, copied */
+/* its sprite 3:0x37 (080DAFF4, by 080DAFE6): BN6's 3:0x78, copied */
+/* its sound 0x91 (its table 080DAFB0's kind 0x0): BN4's song at the grown table's slot 0x300, played through the unit's shim */
+/* its chip 47 (id 583) sits out: SandRing, the generator line's (its records' kinds, the ring's rows 1-3 of table 080DAFB0 and its spec): the family is moved for ThunSoul's charged shot, whose ring is kind 0 (the attack's +0xC, which its power attack zeroes) */
+
+static const XvBlock thunsoul_blocks[] = {
+	{ 0x080EDC5A, 0x080EDD2E, XC4_CODE + 0x2522, 0xD47325F6u },
+	{ 0x080DAFBC, 0x080DB0EC, XC4_CODE + 0x2600, 0x351F2B25u },
+	{ 0x080DAFB0, 0x080DAFBC, XC4_CODE + 0x2730, 0xEF4D0545u },
+	{ 0x0800D298, 0x0800D2B4, XC4_CODE + 0x2740, 0x92FC0667u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x2760, 0x6FFE1431u },
+};
+static const XvData thunsoul_data[] = {
+	{ 0x080EDC6C, 0x080EDC70, XV_POOL },
+	{ 0x080EDC70, 0x080EDC78, XV_TABLE },
+	{ 0x080DAFCA, 0x080DAFCC, XV_RAW },
+	{ 0x080DAFCC, 0x080DAFD0, XV_POOL },
+	{ 0x080DAFD0, 0x080DAFDC, XV_TABLE },
+	{ 0x080DB066, 0x080DB068, XV_RAW },
+	{ 0x080DB068, 0x080DB06C, XV_POOL },
+	{ 0x080DB0EA, 0x080DB0EC, XV_RAW },
+	{ 0x080DAFB0, 0x080DAFBC, XV_RAW },
+};
+static const XvPair thunsoul_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800285C, 0x080026C4 },   /* project:after-state, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08007A12, 0x0800A18E },   /* project:research, SAME */
+	{ 0x08009DC4, 0x0800CC0A },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E8C, 0x0800CC66 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB74, 0x0800E2AC },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BA66, 0x0800FDB6 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800C9FC, 0x08011714 },   /* project:project:chips, DIFF (audited) */
+	{ 0x0800D7CA, 0x08013774 },   /* project:project:chips, SAME */
+	{ 0x08012496, 0x08019892 },   /* project:research, DIFF (audited) */
+	{ 0x080129AC, 0x08019FB4 },   /* project:research, DIFF (audited) */
+	{ 0x080129FC, 0x0801A00E },   /* project:thunder, DIFF (audited) */
+	{ 0x08012D62, 0x0801A018 },   /* project:research, DIFF (audited) */
+	{ 0x08012D9A, 0x0801A04C },   /* project:research, DIFF (audited) */
+	{ 0x08012DC0, 0x0801A074 },   /* project:research, SAME */
+	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
+	{ 0x08012F7A, 0x0801A146 },   /* project:fireman, DIFF (audited) */
+	{ 0x08012F82, 0x0801A152 },   /* project:research, LAYOUT */
+	{ 0x08012F8C, 0x0801A15C },   /* project:research, LAYOUT */
+	{ 0x08013212, 0x0801A258 },   /* project:gutsman, LAYOUT */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+};
+static const XvPair thunsoul_words[] = {
+	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
+};
+static const XvImm thunsoul_imms[] = {
+	{ 0x0800D2B0, THUMB_MOVS, 0, 0, 0x47, 0xD7 },   /* ThunSoul's power attack 0x58: the family it returns, BN4's 0x47, BN6's grown 0xd7 */
+	{ 0x080DAFE6, THUMB_MOVS, 2, 0, 0x37, 0x78 },   /* its object's sprite on its other path: list 3 0x37 in BN4, 0x78 in BN6 (copied) */
+	{ 0x080DAFEE, THUMB_MOVS, 2, 0, 0x3A, 0x77 },   /* its object's sprite: list 3 0x3a in BN4, 0x77 in BN6 (copied) */
+	{ 0x080DB078, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
+	{ 0x080DB0E0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080EDC5E, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
+};
+static const XvType thunsoul_types[] = {
+	{ 3, 0x6D, XV_TYPE_MOVED4, 0x6D },   /* BN4's third-kind 0x6d, moved, the chips' page */
+	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
+};
+static const XvSprite thunsoul_sprites[] = {
+	{ 3, 0x3A, 3, 0x77, XC4_ROOM_ROW(24), 0x500 },   /* BN4's 3:0x3a, the room's row 24 */
+	{ 3, 0x37, 3, 0x78, XC4_ROOM_ROW(25), 0xD00 },   /* BN4's 3:0x37, the room's row 25 */
+};
+static const XvSoundCall thunsoul_sound_calls[] = {
+	{ 0x080DB05C, 0x300 },   /* its table 080DAFB0's kind 0x0's sound 0x91: BN4's song at the grown table's slot 0x300 */
+};
+static const XcSong thunsoul_songs[] = { { 0x91, 0x300 } };
+
+#define THUNSOUL_CODE { .name = "ThunSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x4000), \
+	.blocks = thunsoul_blocks, .nblocks = (int)(sizeof thunsoul_blocks / sizeof *thunsoul_blocks), \
+	.data = thunsoul_data, .ndata = (int)(sizeof thunsoul_data / sizeof *thunsoul_data), \
+	.calls = thunsoul_calls, .ncalls = (int)(sizeof thunsoul_calls / sizeof *thunsoul_calls), \
+	.words = thunsoul_words, .nwords = (int)(sizeof thunsoul_words / sizeof *thunsoul_words), \
+	.imms = thunsoul_imms, .nimms = (int)(sizeof thunsoul_imms / sizeof *thunsoul_imms), \
+	.types = thunsoul_types, .ntypes = (int)(sizeof thunsoul_types / sizeof *thunsoul_types), \
+	.sound_calls = thunsoul_sound_calls, .nsound_calls = (int)(sizeof thunsoul_sound_calls / sizeof *thunsoul_sound_calls), \
+	.sprites = thunsoul_sprites, .nsprites = (int)(sizeof thunsoul_sprites / sizeof *thunsoul_sprites) }
 /* ---- TimeBomb: BN4's support 0x11 (080E4CA7) as BN6's 0x91; its chips 97 (529) ---- */
 /* its fourth-kind 0x27 (080E4C3C-080E4F5C), which its routine (080E4CA6) spawns: moved */
 /* its fourth-kind 0x24 (080E4A0A-080E4AD4): no BN6 type of its body, moved with him */
 /* its third-kind 0x4b is an actor (080D6CB8: the actors' runner with its table 080D6CCC, 7 states): its table in BN6's layout, 9 states, its own from 8 */
-/* its sprite 3:0x23 (080D6C28): BN6's 3:0x77, copied */
+/* its sprite 3:0x23 (080D6C28): BN6's 3:0x79, copied */
 /* its effect 0x0: 0xc8, as PropBom moved it */
 /* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe9): installed with it */
 /* its effect 0x0 (its table 080E4A00's): BN6's 0xc8, moved (no effect of BN6's draws its sprite's bytes) */
@@ -1329,12 +1421,12 @@ static const XcSong propbom_songs[] = { { 0x8D, 0x200 }, { 0xC8, 0x205 }, { 0x13
 /* its chip 346 has no row of the registry (the run's by name, or none) */
 
 static const XvBlock timebomb_blocks[] = {
-	{ 0x080E4C3C, 0x080E4F5C, XC4_CODE + 0x2520, 0x12C9A5CFu },
-	{ 0x080D6BF8, 0x080D6ED4, XC4_CODE + 0x2840, 0xF7AE8E1Du },
-	{ 0x080E4A0A, 0x080E4AD4, XC4_CODE + 0x2B22, 0xB899F21Fu },
-	{ 0x08012618, 0x08012630, XC4_CODE + 0x2BF0, 0x4286738Eu },
-	{ 0x080E4A00, 0x080E4A0A, XC4_CODE + 0x2C10, 0xF8D9D3A5u },
-	{ 0x08111888, 0x0811188E, XC4_CODE + 0x2C20, 0x7B317508u },
+	{ 0x080E4C3C, 0x080E4F5C, XC4_CODE + 0x2790, 0x12C9A5CFu },
+	{ 0x080D6BF8, 0x080D6ED4, XC4_CODE + 0x2AB0, 0xF7AE8E1Du },
+	{ 0x080E4A0A, 0x080E4AD4, XC4_CODE + 0x2D92, 0xB899F21Fu },
+	{ 0x08012618, 0x08012630, XC4_CODE + 0x2E60, 0x4286738Eu },
+	{ 0x080E4A00, 0x080E4A0A, XC4_CODE + 0x2E80, 0xF8D9D3A5u },
+	{ 0x08111888, 0x0811188E, XC4_CODE + 0x2E90, 0x7B317508u },
 };
 static const XvData timebomb_data[] = {
 	{ 0x080E4C4A, 0x080E4C4C, XV_RAW },
@@ -1425,7 +1517,7 @@ static const XvPair timebomb_words[] = {
 	{ 0x080112C5, 0x08017CC1 },   /* project:project:chips, SAME */
 };
 static const XvImm timebomb_imms[] = {
-	{ 0x080D6C26, THUMB_MOVS, 2, 0, 0x23, 0x77 },   /* its object's sprite: list 3 0x23 in BN4, 0x77 in BN6 (copied) */
+	{ 0x080D6C26, THUMB_MOVS, 2, 0, 0x23, 0x79 },   /* its object's sprite: list 3 0x23 in BN4, 0x79 in BN6 (copied) */
 	{ 0x080D6D10, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
 	{ 0x080D6D46, THUMB_MOVS, 0, 0, 0x6, 0x8 },   /* CurAction 6 written */
 	{ 0x080D6E06, THUMB_LDRB, 0, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
@@ -1439,7 +1531,7 @@ static const XvImm timebomb_imms[] = {
 	{ 0x080E4E56, THUMB_MOVS, 4, 0, 0x2, 0xC7 },   /* its effect: 0x2 in BN4, 0xc7 in BN6 (moved) */
 };
 static const XvNumber timebomb_numbers[] = {
-	{ 0x080D6CC8, 0x080D6CCC, 0x088F3380 },   /* its state table: the unit's in BN6's layout, at its home's XC4_HOME_STATES */
+	{ 0x080D6CC8, 0x080D6CCC, 0x088F3780 },   /* its state table: the unit's in BN6's layout, at its home's XC4_HOME_STATES */
 };
 static const XvRef timebomb_states[] = {
 	{ 0x080D6CE9, true, 0, false },   /* 0: its own */
@@ -1458,8 +1550,8 @@ static const XvType timebomb_types[] = {
 	{ 4, 0x95, XV_TYPE_MOVED, 0x27 },   /* BN4's fourth-kind 0x27, moved, the dispatch's 0x95 */
 };
 static const XvSprite timebomb_sprites[] = {
-	{ 3, 0x23, 3, 0x77, XC4_ROOM_ROW(24), 0xC00 },   /* BN4's 3:0x23, the room's row 24 */
-	{ 5, 0x02, 5, 0xEC, XC4_ROOM_ROW(25), 0x1300 },   /* BN4's 5:0x2, the room's row 25 */
+	{ 3, 0x23, 3, 0x79, XC4_ROOM_ROW(26), 0xC00 },   /* BN4's 3:0x23, the room's row 26 */
+	{ 5, 0x02, 5, 0xEC, XC4_ROOM_ROW(27), 0x1300 },   /* BN4's 5:0x2, the room's row 27 */
 };
 static const XvId timebomb_effects[] = { { 0x02, 0xC7 } };
 static const XvByte timebomb_bytes[] = {
@@ -1474,7 +1566,7 @@ static const XvSoundCall timebomb_sound_calls[] = {
 static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC, 0x3F }, { 0xE3, 0x1E3 }, { 0xE4, 0x1E4 } };
 
 #define TIMEBOMB_CODE { .name = "TimeBomb (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x4000), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x4400), \
 	.blocks = timebomb_blocks, .nblocks = (int)(sizeof timebomb_blocks / sizeof *timebomb_blocks), \
 	.data = timebomb_data, .ndata = (int)(sizeof timebomb_data / sizeof *timebomb_data), \
 	.calls = timebomb_calls, .ncalls = (int)(sizeof timebomb_calls / sizeof *timebomb_calls), \
@@ -1504,6 +1596,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_ATTACK, 0x34, 0xD3, 0x080ED4C7, XC4_HOMES + 0x3400, TWNFNG_CODE, twnfng_songs, (int)(sizeof twnfng_songs / sizeof *twnfng_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x59, 0xD5, 0x080EE013, XC4_HOMES + 0x3800, MAGBOLT_CODE, magbolt_songs, (int)(sizeof magbolt_songs / sizeof *magbolt_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x62, 0xD4, 0x080EE533, XC4_HOMES + 0x3C00, PROPBOM_CODE, propbom_songs, (int)(sizeof propbom_songs / sizeof *propbom_songs), 0, 0 },
-	{ XCHIP_SUPPORT, 0x11, 0x91, 0x080E4CA7, XC4_HOMES + 0x4000, TIMEBOMB_CODE, timebomb_songs, (int)(sizeof timebomb_songs / sizeof *timebomb_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x47, 0xD7, 0x080EDC5B, XC4_HOMES + 0x4000, THUNSOUL_CODE, thunsoul_songs, (int)(sizeof thunsoul_songs / sizeof *thunsoul_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x11, 0x91, 0x080E4CA7, XC4_HOMES + 0x4400, TIMEBOMB_CODE, timebomb_songs, (int)(sizeof timebomb_songs / sizeof *timebomb_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

@@ -4768,6 +4768,22 @@ static void test_xvirus_shims(void) {
 		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
 	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
 		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
+	/* (an effect's id no immediate names: cmp r4,#0; bne; movs r4,#0xC8; b the veneer, for one pair; two pairs pad to 16
+	 * bytes with a nop after the branch) */
+	uint8_t fx[XV_SHIM_EFFECT_MAX];
+	const uint8_t one[][2] = { { 0x00, 0xC8 } }, two[][2] = { { 0x00, 0xC8 }, { 0x15, 0xCB } }, loop[][2] = { { 0x00, 0xC8 }, { 0xC8, 0xC9 } };
+	CHECK(xvirus_shim_effect_size(1) == 8 && xvirus_shim_effect_size(2) == 16 && xvirus_shim_effect_size(3) == 20 && xvirus_shim_effect_size(4) == 28 &&
+		!xvirus_shim_effect_size(0) && !xvirus_shim_effect_size(5), "shims: an effect call's sizes");
+	CHECK(xvirus_shim_effect(fx, home, one, 1, veneer) == 8 && get16(fx) == 0x2C00 && get16(fx + 2) == 0xD100 && get16(fx + 4) == 0x24C8 &&
+		(get16(fx + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(fx + 6) & 0x7FFu) == veneer,
+		"shims: an effect call %04x %04x %04x %04x", get16(fx), get16(fx + 2), get16(fx + 4), get16(fx + 6));
+	CHECK(xvirus_shim_effect(fx, home, two, 2, veneer) == 16 && get16(fx + 6) == 0x2C15 && get16(fx + 8) == 0xD100 && get16(fx + 10) == 0x24CB &&
+		(get16(fx + 12) & 0xF800) == 0xE000 && home + 16 + 2 * (get16(fx + 12) & 0x7FFu) == veneer && get16(fx + 14) == 0x46C0,
+		"shims: an effect call of two pairs %04x %04x %04x", get16(fx + 6), get16(fx + 12), get16(fx + 14));
+	CHECK(!xvirus_shim_effect(fx, home + 1, one, 1, veneer) && !xvirus_shim_effect(fx, home, one, 1, home + 0x1000) && !xvirus_shim_effect(fx, home, one, 0, veneer) &&
+		!xvirus_shim_effect(fx, home, loop, 2, veneer),
+		"shims: an effect call off its halfword, its veneer out of reach, with no pair, or making an id it looks for, taken");
+	CHECK(xvirus_shim_r4_to(BN4_SPAWN_EFFECT) == BN6_SPAWN_EFFECT && !xvirus_shim_r4_to(BN4_PLAY_SOUND), "shims: an effect call's twin");
 	uint8_t k[XV_SHIM_CMP_SIZE];
 	const uint32_t to = XV_CODE + 0x1234;
 	CHECK(xvirus_shim_cmp(k, home, 4, 0x1C8, true, to), "shims: a chip compare refused");
@@ -6015,22 +6031,50 @@ static void test_library_pages(void) {
 	profile = kept;
 }
 
+/* Every song of every game's music player is in the Jukebox, once
+ * (docs/game/pet.md, The Jukebox): each game's songs on its music player
+ * (player 31), read from its song table (docs/research/sources.md, The
+ * Jukebox's songs), and the ones left out on purpose, each with why. A
+ * game the engine reads (1 + XRomId) without its range here fails, so the
+ * next ROM's songs cannot be forgotten. */
+static const struct { const char *name; int first, last; } juke_music[] = {
+	{ "BN6", 0x01, 0x25 },   /* (its 0x00 no song) */
+	{ "BN5", 0x01, 0x24 },   /* (its 0x00 no song) */
+	{ "BN4", 0x00, 0x21 },   /* its title is 0x00 */
+};
+static const struct { int game, song; const char *why; } juke_left_out[] = {
+	{ 1, 0x0A, "an empty header on player 0, no music" },
+};
+
 static void test_jukebox_songs(void) {
-	int seen[2][0x26] = { { 0 } }, per[2][JUKE_KINDS] = { { 0 } };
+	enum { SONGS = 0x40 };
+	_Static_assert(sizeof juke_music / sizeof *juke_music == JUKE_GAMES, "a music range for each of the Jukebox's games");
+	_Static_assert(JUKE_GAMES == 1 + XROM_COUNT, "the Jukebox takes BN6's songs and every other ROM's: a new ROM's songs go in jukebox_songs[]");
+	int seen[JUKE_GAMES][SONGS] = { { 0 } }, per[JUKE_GAMES][JUKE_KINDS] = { { 0 } }, want = 0;
 	for (int i = 0; i < jukebox_song_count; ++i) {
 		const JukeSong *s = &jukebox_songs[i];
-		CHECK(s->game < 2 && s->song < 0x26 && s->kind < JUKE_KINDS, "jukebox: song %d is game %d, song %#x, kind %d", i, s->game, s->song, s->kind);
-		if (s->game >= 2 || s->song >= 0x26 || s->kind >= JUKE_KINDS) continue;
+		bool ok = s->game < JUKE_GAMES && s->song < SONGS && s->kind < JUKE_KINDS;
+		CHECK(ok, "jukebox: song %d is game %d, song %#x, kind %d", i, s->game, s->song, s->kind);
+		if (!ok) continue;
+		CHECK(s->song >= juke_music[s->game].first && s->song <= juke_music[s->game].last, "jukebox: %s's song %#x is past its music player's %#x-%#x",
+			juke_music[s->game].name, s->song, juke_music[s->game].first, juke_music[s->game].last);
 		++seen[s->game][s->song];
 		++per[s->game][s->kind];
 		CHECK(s->title && strlen(s->title) > 0 && strlen(s->title) <= JUKE_TITLE_MOST, "jukebox: song %d's name \"%s\" past a row", i, s->title ? s->title : "");
 	}
-	for (int song = 0x01; song <= 0x25; ++song) CHECK(seen[0][song] == 1, "jukebox: BN6's song %#x listed %d times", song, seen[0][song]);
-	for (int song = 0x01; song <= 0x24; ++song) CHECK(seen[1][song] == (song == 0x0A ? 0 : 1), "jukebox: BN5's song %#x listed %d times", song, seen[1][song]);
-	CHECK(seen[1][0x25] == 0 && seen[0][0] == 0 && seen[1][0] == 0, "jukebox: a song past the music player's");
-	for (int g = 0; g < 2; ++g)
-		for (int k = 0; k < JUKE_KINDS; ++k) CHECK(per[g][k] <= JUKE_SECTION_MOST, "jukebox: section %d of game %d holds %d", k, g, per[g][k]);
-	CHECK(jukebox_song_count == 37 + 35, "jukebox: %d songs", jukebox_song_count);
+	for (int g = 0; g < JUKE_GAMES; ++g) {
+		CHECK(jukebox_game_tags[g] && strlen(jukebox_game_tags[g]) > 0, "jukebox: game %d has no tag", g);
+		for (int song = juke_music[g].first; song <= juke_music[g].last && song < SONGS; ++song) {
+			const char *why = NULL;
+			for (size_t k = 0; k < sizeof juke_left_out / sizeof *juke_left_out; ++k)
+				if (juke_left_out[k].game == g && juke_left_out[k].song == song) why = juke_left_out[k].why;
+			want += why ? 0 : 1;
+			CHECK(seen[g][song] == (why ? 0 : 1), "jukebox: %s's song %#x listed %d times%s%s", juke_music[g].name, song, seen[g][song],
+				why ? ", left out: " : "", why ? why : "");
+		}
+		for (int k = 0; k < JUKE_KINDS; ++k) CHECK(per[g][k] <= JUKE_SECTION_MOST, "jukebox: section %d of %s holds %d", k, juke_music[g].name, per[g][k]);
+	}
+	CHECK(jukebox_song_count == want && want == 37 + 35 + 34, "jukebox: %d songs, %d wanted", jukebox_song_count, want);
 }
 
 static void test_sound_filter(void) {

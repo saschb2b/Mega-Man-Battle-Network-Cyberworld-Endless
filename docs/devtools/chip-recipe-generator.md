@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:05:00Z }
 ---
 
 # The chip recipe generator
@@ -276,6 +276,18 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `src/audio/xsong.c`'s; `src/emu/song_table.h`) and played through a
   shim of the unit's home that names it, a number past a byte; one
   without a slot is a decision, the next slot its answer.
+  An effect an object spawns by a byte of its own (`ldrb r4,[r5,#4 to 7]`
+  before BN4's effect spawn: a byte of the word its spawn kept of its
+  caller's r4) has no immediate to change: `effect_calls` reads the ids
+  that reach the load where they are made, that byte of r4 at each call
+  of the type's spawner in the unit's own code, each an immediate, and
+  where BN6 has another id for one (its twin of the same look, else the
+  copy a unit moved) the call goes through a shim of the unit's home that
+  gives r4 BN6's id (`XvEffectCall`, `src/emu/xvirus_shim.h`: `cmp r4,#from;
+  bne; movs r4,#to` a pair, four at most, then on to BN6's spawn). A spawn
+  whose r4 is no immediate, or a type no call of the unit spawns, stays a
+  decision: an id nobody read never passes to BN6's own effect of that
+  number.
 - **Where it goes.** `FREE_BN4_CHIPS` (`src/emu/xchips_bn4.h`): 96 homes
   (veneers, then shims), then code (96 KB), then the art's room (from
   + 0x30000, 126 KB: [BN4's chips](../multirom/bn4-chips.md), The art's
@@ -360,7 +372,7 @@ third-kind types and the page 256 entries. The differential reads a
 page object's type as it reads a dispatched one's, from the side table
 (`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
 own. The fourth kind stays in the tables (BN5's own end at 0x90, the
-chips' run from 0x91; three taken by fourteen units).
+chips' run from 0x91; five taken by sixteen units).
 
 **BN5's numbers are still guarded for BN4's Navis.** Their track takes
 third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF
