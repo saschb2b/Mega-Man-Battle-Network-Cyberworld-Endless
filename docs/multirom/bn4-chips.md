@@ -515,8 +515,28 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Next:** Marking, the four Plus chips and BlakWeap (call 7,
-reversed), then BlakBarr's barrier; Binder,
+**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
+unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
+one routine, a sweep (the third kind's 0x93) that goes column by column
+from the user's edge and does one of three things by the record's first
+parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
+from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
+striking the eight panels around it (Ligtnin). The unit is the sweep,
+the strike both panel chips share (0x92) and the bolt (0x8E), each at
+BN4's own number on the chips' page of the dispatch, 1144 bytes
+with the strike's rows, its sprites copied, its three sounds at the
+grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
+so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
+pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
+Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
+no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
+rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
+moved but has never run in a spec, as the differential's BN4 battle
+cannot yet be given a cracked or a grass panel (BN5's `field=` has no
+BN4 twin). They play once a spec proves them.
+
+**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
+three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
@@ -1362,6 +1382,42 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
    timers moved with them, a spec where the buff shows, its mutations.
    How they show where BN4 gives them no number and no picture (the
    Library's page, a reward's card) is the one thing left to choose.
+12. **AquaPowr, WoodPowr and ThunPlus are left out; FirePlus is moved:**
+    "Leave them out" (the owner, 11 November 2026, to the session that
+    measured them). Asked because the three do less than call 7 took
+    them for. **Verified** in BN4 Red Sun
+    (USA, `B4WE`), two ways. By experiment, BN4's own battle run alone
+    by the differential (control specs, the guest core): the Plus chip
+    used at fight frame 30, a chip of its element at frame 200, inside
+    its 480 frames, against a Mettaur of 250 HP, and the same chip with
+    no Plus chip before it. AquaPowr then Bubbler takes 50 and Bubbler
+    alone 50; WoodPowr then Boomer1 60 and 60; ThunPlus then Thunder1 40
+    and 40. FirePlus then HeatShot takes 80 where HeatShot alone takes
+    40, and that is the grass FirePlus lays (every panel of the field;
+    fire on grass adds its damage again, `0x08012CF2`), no rule of the
+    timer. By the code: the chips' object (the fourth kind's 0x7F,
+    `0x080EACDC`) sets its element's word of four in the user's battle
+    data (+0x3C to +0x42) to 480 and clears the other three; the
+    player's tick (`0x08022E3C`) counts them down; and the one reader
+    found is the HUD's (`0x08014CC0`: the first word not 0 picks an
+    icon's tiles for OBJ VRAM `0x06017480`). Searched: every caller of
+    the routine that finds that data by side (`0x0800BFF4`, 26), every
+    halfword read or written at those offsets after a load of the
+    object's +0x58, every indexed access from 0x3C in
+    `0x08007000`-`0x08030000`. Not tried: the buster and the charge shot
+    under a timer, a foe's attack against MegaMan under one, a
+    NetBattle. So the three are not moved: no unit, their rows left
+    out of play and their ids (564 to 566) kept retired, as BugChain's
+    is until its call, and nothing of a run hands them out or lists
+    them. FirePlus (563) is moved as BN4 has it, the grass and its
+    timer. Call 7 stands for the other three of its six: FirePlus,
+    Marking and BlakWeap. **Two answers were given the same evening.**
+    Through the coordinating session the owner was first quoted with
+    "Move as BN4 has them", on a recommendation to move the three and
+    keep them out of the reward pools; asked directly afterwards, with
+    the measurement before him, he answered "Leave them out", and
+    confirmed it the same day (11 November 2026) when asked which of
+    the two stands.
 
 Open:
 

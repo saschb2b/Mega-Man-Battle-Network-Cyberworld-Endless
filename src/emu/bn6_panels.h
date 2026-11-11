@@ -26,7 +26,11 @@
 #define BN6_PANEL_TIMER       0x12      /* Timer, u16: a conveyor's frames left (0x708 as one is made); 0x708 written every frame on most others */
 #define BN6_PANEL_TIMER_IDLE  0x708       /* BN6_PANEL_TIMER: what it holds where it is not counting (a field's start writes it, 0x0800C564) */
 #define BN6_PANEL_VOLCANO     8           /* BN6_PANEL_TYPE: a volcano (an eruption every 140 frames, 0x0800C438; an Aqua hit cools it plain) */
-#define BN6_PANEL_CONVEYOR    9           /* BN6_PANEL_TYPE: the first conveyor, ... */
+#define BN6_PANEL_CONVEYOR    9           /* BN6_PANEL_TYPE: the first conveyor (9 pushes up, 10 down, 0x0B left, 0x0C right: seen headless, lab.h), ... */
+#define BN6_PANEL_CONVEYOR_UP 9          /* ... each by where it pushes: up, */
+#define BN6_PANEL_CONVEYOR_DOWN 10       /* ... down, */
+#define BN6_PANEL_CONVEYOR_LEFT 11       /* ... left */
+#define BN6_PANEL_CONVEYOR_RIGHT 12      /* ... and right */
 #define BN6_PANEL_CONVEYOR_END 12         /* ... to the last (9-12: they push what stands on them, 0x0801A39C, and run out to plain) */
 #define BN6_PANEL_TYPES       13          /* BN6_PANEL_TYPE: past its last, how many it has (0-12); none of its fields or code names 13-15, which the engine gives BN5's lava and sea */
 

@@ -234,6 +234,8 @@ bool director_dev_foes(const char *spec) {
 /* ... and the same battle as the Battle Lab's test (lab_battle.h): fought
  * inside a snapshot of the game, its result printed */
 bool director_dev_lab(const char *spec) {
+	/* ("open": the builder's screen on what MegaMan has battle data on; "all": on every family the engine holds) */
+	if (!strcmp(spec, "open") || !strcmp(spec, "all")) { director_lab_open(spec[0] == 'a'); return true; }
 	lab_due = foes_parse(spec);
 	return lab_due;
 }
@@ -384,7 +386,8 @@ static void dev_battle(void) {
 		return;
 	if (foes_due && lab_due) {
 		foes_due = lab_due = false;
-		lab_battle_ask(&dev_foes, -1);
+		lab_battle_panels(NULL);
+		lab_battle_ask(&dev_foes, encounter_backdrop);
 		return;
 	}
 	if (foes_due) {

@@ -1,0 +1,1 @@
+BN5's End Area draws every room as its pads and keeps the way one wide, TILES_ONE_WIDE, issue #164

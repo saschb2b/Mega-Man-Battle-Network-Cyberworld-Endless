@@ -1,6 +1,7 @@
 # After each push to dev: the files tools write from the tree (docs/re's
 # status, docs/symbols and docs/rom/symbols.md's numbers, the voice catalog,
-# the knowledge base's log folded from its entries; tools/generated.py)
+# the knowledge base's log folded from its entries, the layers' make's
+# recorded hash; tools/generated.py)
 # written anew and committed, so no pull request carries
 # them and no two conflict there (docs/project/merging.md). Needs no ROM. Its
 # own push starts no workflow, as GitHub's token's pushes never do.
@@ -22,9 +23,18 @@ jobs:
   write:
     name: Write and commit
     runs-on: ubuntu-latest
+    env:
+      DOCKER_CONTEXT_NAME: ""   # build.py: the runner's own Docker
     steps:
       - uses: actions/checkout@v7
         with: { ref: dev }
+      # (a merge that bumped the layers' make: its hash is asked of the unit tests, which need the build image)
+      - name: Whether the layers' make moved
+        id: make
+        run: python3 tools/layer_make.py --stale || echo "moved=true" >> "$GITHUB_OUTPUT"
+      - uses: ./.github/actions/image
+        if: steps.make.outputs.moved == 'true'
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
       - name: Write, commit, push
         run: |
           git config user.name 'github-actions[bot]'
@@ -36,7 +46,7 @@ jobs:
             git reset --quiet --hard FETCH_HEAD
             python3 tools/generated.py write
             python3 tools/generated.py check --strict
-            git add -A docs   # (all the tools write lies there)
+            git add -A docs tests/layer_make_hash.txt   # (all the tools write)
             if git diff --cached --quiet; then
               echo "in step already"
               exit 0

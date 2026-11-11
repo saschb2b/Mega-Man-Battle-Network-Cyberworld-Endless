@@ -1,0 +1,1 @@
+a layer's services and gates rolled on their own numbers from its seed and area, apart from its floor, so a fork reads the layer behind a way before it is built, net_services.c, docs/world/level-design/fork-read.md

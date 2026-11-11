@@ -3,7 +3,7 @@ type: Tool
 title: "A battle on demand"
 description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T18:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T12:30:00Z }
 ---
 
 # A battle on demand
@@ -78,6 +78,12 @@ before and after ("lab: won in 96 frames, busting level 9, 0 HP lost;
 nothing is left of it: the same run without the step, stopped that many
 frames earlier, ends with the same picture and the same save files (the
 Battle Lab's page, Built).
+
+`0:lab open` opens the Battle Lab's builder instead (its screen over the
+held game: FOES, FIELD, STAGE and BATTLE!), listing the families the
+profile has battle data on; `0:lab all` lists every family the engine
+holds, each in every version, for a look at the screen without a
+profile's history.
 
 The `swap` step (`--input`'s `0:swap 101:300/107:300/10D:300`, play.py's
 `swap 101:300 107:300 10D:300`; `src/dev/swap_dev.c`) fights one Navi

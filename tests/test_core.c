@@ -18,6 +18,7 @@
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "layer_make.h"
+#include "layer_make_record.h"   /* LAYER_MAKE_RECORD and its hash, from the build (tests/layer_make_hash.txt) */
 #include "letters.h"
 #include "navicust.h"
 #include "pacing.h"
@@ -33,6 +34,7 @@
 #include "area_src.h"
 #include "backup.h"
 #include "battle_data.h"
+#include "lab_text.h"
 #include "test_backup.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -1019,9 +1021,10 @@ static void test_mouths(void) {
 }
 
 /* The golden hash (issue #19): layer_generate's output over fixed seeds,
- * in every area and kind, against LAYER_MAKE_HASH beside LAYER_MAKE
- * (layer_make.h). The determinism check above builds a seed twice in one
- * build; this one fails when a build makes a seed's layer otherwise. */
+ * in every area and kind, against the hash dev recorded with the make it
+ * was taken at (tests/layer_make_hash.txt, layer_make.h). The determinism
+ * check above builds a seed twice in one build; this one fails when a
+ * build makes a seed's layer otherwise and no bump's file says so. */
 static uint32_t fnv(uint32_t h, const void *p, size_t n) {
 	const uint8_t *b = p;
 	for (size_t i = 0; i < n; ++i) h = (h ^ b[i]) * 16777619u;
@@ -1264,7 +1267,7 @@ static void test_extras(void) {
 	run = before;
 }
 
-static void test_layer_make(void) {
+static uint32_t layer_make_hash(void) {
 	Run before = run;   /* (the tests after it see the run as it was) */
 	memset(&run, 0, sizeof run);
 	run.seed = 0x5EED;
@@ -1301,9 +1304,18 @@ static void test_layer_make(void) {
 		}
 		h = set_pieces_hash(h);
 	}
-	CHECK(h == LAYER_MAKE_HASH, "layer generation changed (hash 0x%08x, LAYER_MAKE_HASH 0x%08x): bump LAYER_MAKE and set LAYER_MAKE_HASH "
-		"in src/net/layer_make.h together", h, LAYER_MAKE_HASH);
 	run = before;
+	return h;
+}
+
+/* (generation as dev recorded it; or changed with a bump's file beside it, the record dev's workflow's to set after the merge) */
+static void test_layer_make(void) {
+	uint32_t h = layer_make_hash();
+	CHECK(h == LAYER_MAKE_RECORD_HASH || LAYER_MAKE > LAYER_MAKE_RECORD,
+		"layer generation changed (hash 0x%08x, recorded 0x%08x at make %d): add a bump's file to src/net/layer_make.d/, "
+		"%d-WORDS.txt, saying what changed (layer_make.h)", h, LAYER_MAKE_RECORD_HASH, LAYER_MAKE_RECORD, LAYER_MAKE + 1);
+	if (h != LAYER_MAKE_RECORD_HASH && LAYER_MAKE > LAYER_MAKE_RECORD)
+		printf("layer generation changed with its bump (make %d, hash 0x%08x): dev's workflow records it after the merge\n", LAYER_MAKE, h);
 }
 
 
@@ -4249,7 +4261,9 @@ static void test_xnavi_static(void) {
 		XN_NEBULA_ART + XN_NEBULA_SEATS * XN_SLOT_ART <= FREE_NEBULA_SPRITES, "xnavi: LarkMan's and GridMan's room out of order (homes, code, art, the sprite)");
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 17, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan, Meddy, GridMan and MagnetMan)", xnavi_bn5_count);
+	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
+	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
+	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -5512,8 +5526,8 @@ static void test_chip_registry(void) {
 		pas += xreg_rows[i].how == XREG_PA;
 		high += xreg_own(&xreg_rows[i]) && xreg_rows[i].bn6 >= 320;
 	}
-	CHECK(xreg_count == 283 && own == 164 && plays == 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, 8 playing now, "
-		"7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
+	CHECK(xreg_count == 283 && own == 164 && plays >= 8 && dark == 7 && pas == 20, "registry: 283 chips, 164 of ids of their own, "
+		"no fewer than 8 playing, 7 DarkChips, 20 Program Advances (%d %d %d %d %d)", xreg_count, own, plays, dark, pas);
 	CHECK(high == 20 + 100 + 15, "registry: the Program Advances and 115 chips past 319, in the pack's extension (%d)", high);
 	/* (BN5's last Program Advances: three in the spare ids below BN6's per-battle bits' end, two past nine bits, whose bit
 	 * is the engine's, xchips_wide.c) */
@@ -7636,6 +7650,25 @@ static void test_battle_data(void) {
 	profile = keep;
 }
 
+/* The Battle Lab's builder's words (docs/game/battle-lab.md): how a test
+ * battle ended, its time as BN6's RESULT sets one, in the information
+ * box's three lines. */
+static void test_lab_text(void) {
+	char s[96];
+	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
+	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
+	lab_info_result(s, sizeof s, &won);
+	CHECK(!strcmp(s, "Time 0:12:66. Level 9. HP lost 20."), "lab: a win's time, level and HP lost (%s)", s);
+	lab_info_result(s, sizeof s, &best);
+	CHECK(!strcmp(s, "Time 1:00:50. Level S. HP lost 0."), "lab: level 11 is S (%s)", s);
+	lab_info_result(s, sizeof s, &fell);
+	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	lab_info_result(s, sizeof s, &left);
+	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
+		"lab: the panels' and versions' names");
+}
+
 /* The encounter groups' templates and their filling (groups.h;
  * docs/game/progression/encounter-groups.md): a pool of five families
  * made up here, no ROM */
@@ -7751,11 +7784,36 @@ static void test_groups(void) {
 	for (int act = 1; act < 6; ++act) CHECK(group_pressure_cap(act) > group_pressure_cap(act - 1), "groups: the pressure cap rises by act (%d)", act);
 	CHECK(group_tags_count > 0 && group_tag(group_tags[0].net, group_tags[0].family) == &group_tags[0] && !group_tag(2, 1), "groups: the measured tags by net and family");
 	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
+
+	/* (the pairs' pass: two families that press harder together are predicted that much harder, by the larger of their
+	 * hits over their V1's; the table's first pair, made a wall and its artillery here) */
+	CHECK(group_pairs_count > 0, "groups: the pairs' pass has its pairs");
+	const GroupPair *gp = &group_pairs[0];
+	int extra = group_pair_extra(gp->net_a, gp->family_a, gp->net_b, gp->family_b);
+	CHECK(extra == gp->extra && extra > 0 && group_pair_extra(gp->net_b, gp->family_b, gp->net_a, gp->family_a) == extra &&
+		!group_pair_extra(gp->net_a, gp->family_a, gp->net_a, gp->family_a), "groups: a pair's excess either way round, none with itself");
+	GroupFam two[2] = {
+		{ gp->family_a, gp->net_a, GROUP_FRONT, 0, 0, 20, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none } },
+		{ gp->family_b, gp->net_b, GROUP_BACK, 0, 0, 30, { { 20, 50, 10, 0 }, none, none, none, none, none } },
+	};
+	GroupLimits wide = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000 };
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 20 * 2 + 30 + extra * 2,
+		"groups: a tagged pair's pressure with its excess (%d, the excess %d)", f.g[0].pressure, extra);
+	wide.pressure = 20 * 2 + 30 + extra * 2 - 1;
+	f.n = 0;
+	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 100 && f.g[0].pressure == 50 + extra,
+		"groups: ... which the cap holds a version down for (%d)", f.g[0].pressure);
 }
 
-int main(void) {
+int main(int argc, char **argv) {
+	if (argc == 2 && !strcmp(argv[1], "--layer-make-hash")) {   /* (tools/layer_make.py: the record dev's workflow writes) */
+		printf("%d 0x%08x\n", LAYER_MAKE, layer_make_hash());
+		return 0;
+	}
 	test_sha1();
 	test_battle_data();
+	test_lab_text();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
