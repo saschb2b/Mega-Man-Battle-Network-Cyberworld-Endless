@@ -2,7 +2,7 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger.json",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-10",
+  "updated": "2026-11-12",
   "previous": "2026-11-09",
   "features": [
     {
@@ -62,10 +62,10 @@
     {
       "name": "BN5's Darkloids",
       "state": "works",
-      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan and CosmoMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CosmoMan the later acts' own.",
-      "left": "CloudMan (his three decisions settled in writing, not built: his object types recorded as CosmoMan's were; his search for his clouds, 0x080CBFBC, a stub of the Navis' that reads the dispatch's side table for type 0x37; the third kind's 0x0B he spawns, the chips' copy, owned by the Navis' track as the first to install, its rows' sprites as xchiprecipe.py's TABLE_SPRITES give them), CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
+      "now": "The missions' Darkloids read from BN5's records (BlizzardMan, ShadeMan, CloudMan, DarkMegaMan, CosmoMan, DarkColonel, then ShadeMan, CloudMan and CosmoMan again); BlizzardMan, ShadeMan, CosmoMan and CloudMan moved into BN6's engine by the Navis' generator and proven against BN5's own battles frame by frame; on the dark boards in BN5's own sprites and faces, their battles at the act's version, CloudMan act 4's own and CosmoMan the later acts', each board paying its Darkloid's own chips at par.",
+      "left": "CosmoMan's attack below half his HP (no spec reaches it), DarkMegaMan (a MegaMan on BN5's chip AI), the Darkloids' strike poses and effects on the board.",
       "link": "../game/liberation/overview.md",
-      "updated": "2026-11-09",
+      "updated": "2026-11-12",
       "state_text": "Works"
     },
     {
@@ -161,9 +161,9 @@
     {
       "name": "BN4's chips in BN6's tables",
       "state": "building",
-      "now": "Unit 0 (pairings) and unit 1 (ten-bit chip ids) built, and an id from 512 whole to 602: the pack counts ids 512-602 in its extension's entries of ids 320-410, which no pack counted (bn6_pack_entry; a survey of the work RAM over 54 runs found no other room, a canary over the entries met the power-on clear alone), the folder editor's items hold ten bits (id << 6 | code, 35 halfwords), every reader of a name or a description takes one of four archives (six tables' literals, two readers rewritten, the chat box's buffer command hooked), a chip from 512 given enters the Library by an event, and a reward names one in a wide form (kind 2 or 3 with bit 13) that a hook at BN6's split reads. BN4's 194 rows are registered (unit 2: 175 folder chips at 527-602 and 635-733, 19 Program Advances at 605-623, tools/xreg_bn4.py from the three ROMs), each record made from BN4's in BN6's layout, its name and description in BN6's codes (BN4's punctuation 0x58 below BN6's, measured over 64 shared descriptions), its icon, picture and palette copied; a placeholder without BN4's ROM. Seen in BN6's folder editor (GutsMan, Hole, the placeholder). None plays: each sits out. Unit 3 under way: BN4's battle takes a folder, a chip and MegaMan's karma (folder4, cust4, karma4; controls with twins broken on purpose), and the comparator reads MegaMan's numbers as BN6's (subject megaman: his action, the chip's id, his attack's subfamily; BN6's own count of chips held, attack entry number and support run's extra frame explained from both games' code). No BN4 chip passes against BN6 yet: bn4_chip_cannon, bn4_chip_timebomb and bn4_chip_areagrab record where each parts. BN4's light and dark chips read (record +0x15 against the karma at 470). The generator's BN4 path is built (tools/xchiprecipe_bn4.py, src/emu/xchips_bn4.c, installed by src/emu/xchips_code.c into FREE_BN4_CHIPS): a unit is one routine of BN4's support state's table with its object's type and what it reaches, at BN6's grown support routines' 0x80 + BN4's subfamily. The first unit moved is PanlSht1-3 (support 0x26: the fourth kind's 0x4F and its shot, the third kind's 0x7B), its three rows XREG_MOVED, proved against BN4's own battle. Its sounds, and every BN4 chip's after it, go into BN6's song table grown (the owner's call 6: src/emu/song_table.c, 550 slots from 0x1DA). ShotStar (support 0x19: its object, its star, the star's kinds and mark) is the second unit, proved the same way. Repair is the first misc unit (BN4's state 0x20 as BN6's family 0x1C, its routines' table grown), proved with a RockCube on the field. Counter1-3 (misc 0, its routine in its hit's code) follow, proved to the frame of the hit. WhitWeb1-3 (misc 8, 9, 0xA) are one unit, three routines on one moved block. Boomer1-3 (misc 2) follow, the boomerang with its flights' table. MokoRus1-3 (misc 1) follow: three Mokos on shuffled rows, the first sprite of list 1 the chips copy, the hit's bits for struck and pushed given as BN6 reads them.",
-      "left": "Unit 5's units by the generator, SidBmbo and BugChain next, then Binder, SandRing and the spread chips; a counter's aftermath, each engine's Full Synchro object, has no rule; Marking and the Plus chips wait on the owner's call 7 (Repair, Counter, Marking: BN4's state 0x20, a table to grow), the Program Advances with their parts, the Navi chips on the Navis' copies, the dark chips' price, a pack entry past id 602, into runs and online.",
-      "updated": "2026-11-10",
+      "now": "Unit 0 (pairings) and unit 1 (ten-bit chip ids) built, and an id from 512 whole to 602: the pack counts ids 512-602 in its extension's entries of ids 320-410, which no pack counted (bn6_pack_entry; a survey of the work RAM over 54 runs found no other room, a canary over the entries met the power-on clear alone), the folder editor's items hold ten bits (id << 6 | code, 35 halfwords), every reader of a name or a description takes one of four archives (six tables' literals, two readers rewritten, the chat box's buffer command hooked), a chip from 512 given enters the Library by an event, and a reward names one in a wide form (kind 2 or 3 with bit 13) that a hook at BN6's split reads. BN4's 194 rows are registered (unit 2: 175 folder chips at 527-602 and 635-733, 19 Program Advances at 605-623, tools/xreg_bn4.py from the three ROMs), each record made from BN4's in BN6's layout, its name and description in BN6's codes (BN4's punctuation 0x58 below BN6's, measured over 64 shared descriptions), its icon, picture and palette copied; a placeholder without BN4's ROM. Seen in BN6's folder editor (GutsMan, Hole, the placeholder). None plays: each sits out. Unit 3 under way: BN4's battle takes a folder, a chip and MegaMan's karma (folder4, cust4, karma4; controls with twins broken on purpose), and the comparator reads MegaMan's numbers as BN6's (subject megaman: his action, the chip's id, his attack's subfamily; BN6's own count of chips held, attack entry number and support run's extra frame explained from both games' code). No BN4 chip passes against BN6 yet: bn4_chip_cannon, bn4_chip_timebomb and bn4_chip_areagrab record where each parts. BN4's light and dark chips read (record +0x15 against the karma at 470). The generator's BN4 path is built (tools/xchiprecipe_bn4.py, src/emu/xchips_bn4.c, installed by src/emu/xchips_code.c into FREE_BN4_CHIPS): a unit is one routine of BN4's support state's table with its object's type and what it reaches, at BN6's grown support routines' 0x80 + BN4's subfamily. The first unit moved is PanlSht1-3 (support 0x26: the fourth kind's 0x4F and its shot, the third kind's 0x7B), its three rows XREG_MOVED, proved against BN4's own battle. Its sounds, and every BN4 chip's after it, go into BN6's song table grown (the owner's call 6: src/emu/song_table.c, 550 slots from 0x1DA). ShotStar (support 0x19: its object, its star, the star's kinds and mark) is the second unit, proved the same way. Repair is the first misc unit (BN4's state 0x20 as BN6's family 0x1C, its routines' table grown), proved with a RockCube on the field. Counter1-3 (misc 0, its routine in its hit's code) follow, proved to the frame of the hit. WhitWeb1-3 (misc 8, 9, 0xA) are one unit, three routines on one moved block. Boomer1-3 (misc 2) follow, the boomerang with its flights' table. MokoRus1-3 (misc 1) follow: three Mokos on shuffled rows, the first sprite of list 1 the chips copy, the hit's bits for struck and pushed given as BN6 reads them. SidBmbo1-3 (misc 5) follow, the one misc chip BN4's run waits for: the unit carries the 0x28 frames and its entry is a wrapper that counts them as BN4's run does.",
+      "left": "Unit 5's units by the generator, BugChain next (BN4's records of a side's bugs), then Binder, SandRing, Ball, TimeBomb and BlakBarr; the other units are other sessions' (the claims file); a counter's aftermath, each engine's Full Synchro object, has no rule; Marking and the Plus chips wait on the owner's call 7 (Repair, Counter, Marking: BN4's state 0x20, a table to grow), the Program Advances with their parts, the Navi chips on the Navis' copies, the dark chips' price, a pack entry past id 602, into runs and online.",
+      "updated": "2026-11-11",
       "link": "../multirom/bn4-chips.md",
       "state_text": "Being built"
     },
@@ -205,6 +205,10 @@
       "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
     },
     {
+      "date": "2026-11-12",
+      "what": "CloudMan moved (docs/multirom/navis.md, CloudMan; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_CLOUD_SPAWN_37, BN5_CLOUD_5F_PARENT, BN5_CLOUD_STATES_37, BN5_CLOUD_ROW_LEFTOVER): cloudman_v1, cloudman_v1_keys and cloudman_sp PASS, five mutations caught; the third kind's 0x0B the Navis' copy (the chips' Bubbles helper gone); the generator renumbers every compare of a parent's CurAction and keeps a block's low byte where its code stores one of its own addresses (LOW_BYTE_KEPT); the Navis' shared art's fourth room (FREE_NAVI_SHARED_FOUR)."
+    },
+    {
       "date": "2026-11-11",
       "what": "BN6's song table grown (src/emu/song_table.c; bn6_sound.h BN6_SONG_COUNT 0x1DA, BN6_SONG_TABLE_REF_START/CHANGE/CONTINUE/STOP/RESUME 0x0815049C, 0x081504D0, 0x0815051C, 0x08150570, 0x081505A4; docs/rom/sound.md): the sound engine names the table by five words and bounds no number, so a copy in the free space with 550 more slots, the words pointed at it where BN4's ROM is read, gives every other game's sound a slot. PanlSht's two play from 0x1DA and 0x1DB through a shim (bn4_chip_panlsht1 to 3 PASS, their ten mutations caught)."
     },
@@ -226,11 +230,7 @@
     },
     {
       "date": "2026-11-11",
-      "what": "BN5's magnet panel read for MagnetMan (docs/rom/bn5-world.md, BN5's magnet panel: src/emu/bn5_team_protoman.h's BN5_PANEL_MAGNET, BN5_MAGNET_ARRIVED 0x0801720E, BN5_MAGNET_LAID 0x080E24CE, BN5_MAGNET_PANELS 0x080E2518): type 5, flags 0x10210, an object coming onto it pushed (+0x40 bit 0x10, BN6's BN6_STRUCK_SLIDE; +0x0F 3) but where floating or the player in form 5; it never runs out. His seven types recorded (TYPES); his recipe waits for the panel as BN6's 15."
-    },
-    {
-      "date": "2026-11-11",
-      "what": "MagnetMan moved, Team ProtoMan's fifth, with BN5's magnet panel as BN6's panel 15 (docs/multirom/navis.md, MagnetMan; docs/multirom/one-net.md, The magnet panel in BN6's engine; docs/rom/bn5-world.md, BN5's magnet panel; docs/rom/navis.md, Team ProtoMan's MagnetMan): its flags, its push, BN5's pull in BN6's movement step (BN5_STEP_PULL 0x0800C8D2, dropped by BN6's twin; BN6's kind 3 its conveyors'), BN5's direction numbers made BN6's, its row speed 8 (BN6's conveyors' 6), its look (54 tiles, colours 10-13 of palettes 4 and 8); his child the first kind's 0x55 moved (SPAWNS_OTHER); the generator's PANEL_COUNTERS (BN5_PANEL_COUNT 0x0800B3E4), which also made the Dark Soul's lava and sea counts BN6's. magnetman_v1, _v1_keys and _sp PASS, five mutations caught."
+      "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
     },
     {
       "date": "2026-11-10",
@@ -284,6 +284,13 @@
       "name": "bn4_chip_shotstar: BN4's ShotStar moved by the generator, against BN4's own battle",
       "result": "python3 build.py xdiff bn4_chip_shotstar: PASS over 400 frames (thirty stars inside the freeze, a 140 HP Mettaur left 20 in both, the same sixty-three sound calls in the same order); six mutations caught. The trace's songs begun ran past its 32 a frame (BN6's one more, the name's 0x173, pushed a fall out): its room is 128 since.",
       "meaning": "A unit of three object types with a table, a copied sprite, a moved effect and copied sounds moves by the generator as PanlSht's did."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_sidbmbo1 to 3: BN4's SidBmbo moved, its wait kept",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the bamboo in play from t33 to t95, MegaMan in his misc state from t32 to t71 in BN4's and t33 to t72 in BN6's with the count 0x27 down to 1 in both; a 140 HP Mettaur left 60 and 30, the family's 250 HP rank left 110. Six mutations caught (a row's power and subfamily, the wait's length, its count-down made BN6's, the dispatch number, the sound).",
+      "meaning": "A wait of BN4's run that BN6's run has none of is carried by the unit and counted by a wrapper as its table entry; a first try that joined BN6's own count-down held the attack the same frames but left the count one below BN4's and 0xFFFF after, so it was dropped."
     },
     {
       "feature": "BN4's chips in BN6's tables",

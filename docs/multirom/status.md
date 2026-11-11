@@ -318,9 +318,13 @@ The owner's calls). Their tables in [BN4 Red Sun's tables](../rom/bn4.md).
   theme is 8: copying the keys played is the music's work, [Music](music.md));
   its battle themes (0x14, 0x15) named once an area is admitted, as a
   game that lends areas has its battle themes copied as a run starts.
-- [ ] Their battles, guardians and bystanders: BN6's (no `xbattles`,
-  `xguard` or `xnavi`), until BN4's families, Navis and Navis' sprites come
-  (Phases 1 and 2 of [Battle Network 4 in a run](bn4.md)).
+- [x] Their guardians (12 November 2026): in half the runs the Navis its
+  net's records set in each area (`xguard`), BN4's nine proved Navis in
+  their own sprites and faces, at the act's band, their Guardian Data their
+  Navi chip or a BN6 kin's ([BN4's Navis as guardians](../game/bosses/bn4-navis.md)).
+- [ ] Their battles and bystanders: BN6's (no `xbattles` or `xnavi`),
+  until BN4's families and Navis' sprites come (Phases 1 and 2 of
+  [Battle Network 4 in a run](bn4.md)).
 - [ ] Admitted: each area's walk measured against the core loop's gate
   (its review, Phase 3) and the owner's call on sharing BN6's areas
   between three games; `run_dress` gives each area of another game a coin

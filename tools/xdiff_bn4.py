@@ -434,6 +434,24 @@ def bn4_rule(name):
     return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get(name) or {}
 
 
+WAIT_UNIT = re.compile(r'\{ XCHIP_MISC, 0x[0-9A-Fa-f]{2}, 0x([0-9A-Fa-f]{2}), .*, 0, 0, 0x[0-9A-Fa-f]{2} \},')
+
+
+def megaman_wait_as_bn6(ai, rec):
+    """MegaMan's AI data of BN4's with his misc state's phase as BN6's while a waiting unit's wrapper counts (legit.json's bn4
+    megaman_misc_wait): BN4's own state alone (its CurAction), the phase BN4's run's own mark, and his attack's subfamily a
+    unit's that waits (src/emu/xchips_bn4.c's rows with a wait, as megaman_chip_as_bn6 left it); every other byte as it is"""
+    rule = bn4_rule('megaman_misc_wait')
+    if not rule or ai is None or rec is None:
+        return ai
+    at, sub = int(rule['phase'], 0), int(rule['subfamily'], 0)
+    waits = {int(n, 16) for n in WAIT_UNIT.findall(open(os.path.join(ROOT, 'src', 'emu', 'xchips_bn4.c')).read())}
+    if rec[NODE + OBJ_ACTION] == int(rule['action4'], 0) and ai[at] == int(rule['bn4'], 0) and not ai[at + 1] and ai[sub] in waits:
+        ai = bytearray(ai)
+        ai[at:at + 2] = int(rule['bn6'], 0).to_bytes(2, 'little')
+    return ai
+
+
 ACTOR_OBJECTS = {}
 
 
@@ -809,6 +827,11 @@ def allowed_world(d, fb):
                 bit = bit0 if k == 0 and max(va, vb) > 0xFF else (bit0 >> (8 * k)) & 0xFF
                 if bit and va ^ vb == bit and vb & bit:
                     return a['name']
+        elif 'cells' in a:
+            # (a pair of numbers at an offset, BN4's and BN6's, exactly: MegaMan's dark palette)
+            va, vb = raw_int(d.a), raw_int(d.b)
+            if d.part == a['part'] and any(int(o, 0) == d.off and (va, vb) == (int(x, 0), int(y, 0)) for o, x, y in a['cells']):
+                return a['name']
         elif role_name(d.role) in companions(fb) and d.part == 'in play' and d.a is False and d.b is True:
             return a['name']
     return None
@@ -1028,6 +1051,8 @@ def frame_diffs(fa, fb, fbt=None):
             ca = bytearray(ca)
             ca[COLL_DAMAGE_KIND] = na[NODE + OBJ_DAMAGE_KIND]
         aa = megaman_chip_as_bn6(oa.ai, fa.canon) if fb.game == 6 and isinstance(role, tuple) and role[:2] == ('T1', MEGAMAN_ID) else oa.ai
+        if aa is not oa.ai:   # (his misc state's phase while a unit's wrapper waits)
+            aa = megaman_wait_as_bn6(aa, oa.rec)
         for part, xa, xb in (('ai', aa, ob.ai), ('coll', ca, ob.coll)):
             if (xa is None) != (xb is None):
                 found.append((part, 0, xa is not None, xb is not None))

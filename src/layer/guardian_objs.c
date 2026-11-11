@@ -51,19 +51,20 @@ static int facing(int d) {
 }
 
 /* Guardian `navi`, a face made for him first where Gregar has none of
- * him (portrait.c), or BN5's own copied in with his sprite (xguardian.c),
- * before any of his words name it */
+ * him (portrait.c), or BN5's or BN4's own copied in with his sprite
+ * (xguardian.c), before any of his words name it */
 static const Guardian *guardian_faced(int navi) {
-	guardian_set_face(navi, guardian_older(navi) ? xguardian_slot(navi) : portrait_face(navi));
+	guardian_set_face(navi, guardian_moved(navi) ? xguardian_slot(navi) : portrait_face(navi));
 	return guardian(navi);
 }
 
 /* The chip his Guardian Data gives: his Navi chip at the version fought,
- * BN5's his own registered (V1, or SP from the fourth act: docs/game/bosses/bn5-navis.md,
- * BN5's Navis); its code into *code, 0 none */
+ * BN5's and BN4's his own registered (V1, or SP from the fourth act:
+ * docs/game/bosses/bn5-navis.md, BN5's Navis; BN4's a BN6 kin's while his
+ * own sits out, docs/game/bosses/bn4-navis.md); its code into *code, 0 none */
 static int guardian_chip(const GuardianStage *g, int *code) {
 	*code = 26;
-	if (guardian_older(g->navi)) return xguardian_chip(g->navi, run.depth, code);
+	if (guardian_moved(g->navi)) return xguardian_chip(g->navi, run.depth, code);
 	/* (a super boss's GigaChip, in its one code: super_boss.h) */
 	int chip = super_boss(g->navi) ? super_chip(g->navi, g->version) : navi_chip(g->navi, g->version);
 	if (chip <= 0) return chip;
@@ -82,8 +83,9 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 
 /* What his Guardian Data says of the power it gives: a Cross's words
  * (powers.c), or BN5's guardian's Soul, for every battle of the run
- * (docs/game/meta/souls.md) */
+ * (docs/game/meta/souls.md); BN4's gives none yet (docs/game/bosses/bn4-navis.md) */
 static const char *reward_power(int navi) {
+	if (guardian_bn4(navi)) return NULL;
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 
@@ -115,7 +117,7 @@ static const char *data_says(const GuardianStage *g) {
 /* The Cross his data gives the run, said in BN6's own box beside his chip
  * (a BN5 guardian's power is his Soul, a super boss's his own) */
 static const char *data_cross(const GuardianStage *g) {
-	return super_boss(g->navi) || guardian_older(g->navi) ? NULL : powers_reward_cross(g->navi, run.depth);
+	return super_boss(g->navi) || guardian_moved(g->navi) ? NULL : powers_reward_cross(g->navi, run.depth);
 }
 
 /* A super boss's staging (docs/game/bosses/super-bosses.md; boss_grand.c):
@@ -184,8 +186,8 @@ static void bracket_scripts(TextArchive *text, GuardianStage *g) {
 void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz, GuardianStage *g) {
 	const Guardian *gd = guardian_faced(o->param);
 	g->navi = o->param;
-	/* (BN5's at the version his act's band takes: xguardian.c) */
-	g->version = guardian_older(g->navi) ? xguardian_version(g->navi, run.depth) : make_boss(run.depth, run.biome, o->param).foes[0].version;
+	/* (BN5's and BN4's at the version his act's band takes: xguardian.c) */
+	g->version = guardian_moved(g->navi) ? xguardian_version(g->navi, run.depth) : make_boss(run.depth, run.biome, o->param).foes[0].version;
 	g->x = wx; g->y = wy; g->z = wz;
 	meeting(g);
 	g->intro = ta_talk(text, guardian_intro(g->navi, g->version, layer.biome), guardian_face(g->navi));

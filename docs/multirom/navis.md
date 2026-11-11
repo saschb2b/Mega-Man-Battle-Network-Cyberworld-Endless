@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, three Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:00:00Z }
 ---
 
 # Transplanted Navis
@@ -291,32 +291,58 @@ into the battle engine).
   offset); the pull's own breaks show in MegaMan's state alone, where the
   comparator stops without a verdict, and his count and check of his
   magnet panels decide in no spec.
-- **CloudMan** (AI 15) is derived (`--report --ai 15`), not moved: two of
-  his three decisions are built, one left. *His object types* (the third
-  kind's 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F) are recorded in TYPES
-  as CosmoMan's were, each moved as the generator derives it. *His RAM
-  table at 0x0203CA30* is no table but BN5's third kind's objects less
-  0x10, read by his search for his clouds (`BN5_CLOUD_FIND_37`: type 0x37
-  on a side but a slot), which BN6's engine cannot answer by the same
-  bytes: a moved type's object holds the dispatch's type (0xD2) and BN5's
-  number in the dispatch's side table, so the search is the Navis' stub
-  `XN_STUB_CLOUDS` (`bn5_navi_twins.py`'s STUBS; `src/emu/xnavi_room.c`):
-  BN6's 32 objects, the type at +1 the dispatch's and the side table's
-  number by the slot 0x37, the list and count BN5's, never a wider
-  literal. The stubs' room grew to 0xA0 bytes for it, the sea's code and
-  the moved objects one 0x100 on (`XN_OBJECTS` at `FREE_NAVI_CODE` +
-  0x200, `tools/bn5_objects.py`). *Left: the sprite loaded by a number
-  made otherwise (0x080C5EEC)*, the third kind's 0x0B's, whose record by
-  its kind gives the sprite (kinds 2-5 his, `BN5_CLOUD_KINDS_0B`): its one
-  copy goes to the Navis' track, which installs first of those that spawn
-  it (the rule of TYPES), its rows' sprites given BN6's numbers as
-  `xchiprecipe.py`'s TABLE_SPRITES gives them now, and the chips spawn the
-  Navis' copy. Tried on 9 November (the Navis' `kind_table_art`, built
-  for NapalmMan's 0x00, fixes its twelve rows; the chips' copy and its
-  five sprites leave `xchips_bn5.c`): `chip_sidebub1`, `chip_darkinvs*`,
-  `marina_*` and NapalmMan's specs PASS with it, but CloudMan's own three
-  FAIL at t9 (a cloud, the 0x37, at CurAction 8 in BN5 and 4 in BN6; the
-  0x5F's +0x64 0x32 and 0), so neither he nor the 0x0B's new owner is in
-  yet: the cloud's states (its routine 0x080CBB68, through 0x080186A8's
-  tables) and the panel pick that calls the search (`BN5_CLOUD_PANEL`)
-  are the next to trace.
+- **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
+  `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object
+  types* (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F)
+  are recorded in TYPES as CosmoMan's were, each moved. *His RAM table at
+  0x0203CA30* is no table but BN5's third kind's objects less 0x10, read
+  by his search for his clouds (`BN5_CLOUD_FIND_37`: type 0x37 on a side
+  but a slot), which BN6's engine cannot answer by the same bytes: a moved
+  type's object holds the dispatch's type (0xD2) and BN5's number in the
+  dispatch's side table, so the search is the Navis' stub `XN_STUB_CLOUDS`
+  (`bn5_navi_twins.py`'s STUBS; `src/emu/xnavi_room.c`): BN6's 32 objects,
+  the type at +1 the dispatch's and the side table's number by the slot
+  0x37, the list and count BN5's, never a wider literal. The stubs' room
+  grew to 0xA0 bytes for it, the sea's code and the moved objects one
+  0x100 on (`XN_OBJECTS` at `FREE_NAVI_CODE` + 0x200,
+  `tools/bn5_objects.py`). *The sprite loaded by a number made otherwise
+  (0x080C5EEC)* is the third kind's 0x0B's, whose record by its kind gives
+  the sprite (kinds 2-5 his, `BN5_CLOUD_KINDS_0B`): its one copy is the
+  Navis' (TYPES: the Navis install first of those that spawn it), its twelve
+  rows' sprites given BN6's numbers by the Navis' `kind_table_art` from
+  `xchiprecipe.py`'s TABLE_SPRITES. The chips' `Bubbles` helper, which held
+  that copy until then, is gone: SideBub's and the Navi chip CloudMan's
+  calls to its spawner (0x080C5FCE, 0x080C5FE8) go to his copy
+  (`xchiprecipe.py`'s NAVI_SPAWNERS, its `navi_modules` reading the
+  Darkloids' room `XN_MORE` and Team ProtoMan's too), and the code mover
+  takes a call into any Navi code room (`xvirus.c`'s `navi_room`). Three
+  rules the generator learned from him, each found by his specs' FAIL at
+  t9 and t51 (tried first on 9 November, which stopped there):
+  - a moved object's every compare of its parent's CurAction is BN6's
+    number, not the first alone: his 0x5F compares it with 8 and then 9
+    (0x080D1EEA, 0x080D1EF0: `BN5_CLOUD_5F_PARENT`), its second left at
+    BN5's 9 kept its countdown (+0x64) from running;
+  - a block whose code stores a byte of its own routines' addresses keeps
+    its low byte in the copy (`LOW_BYTE_KEPT`): two of his clouds'
+    sub-states (`BN5_CLOUD_ROW_LEFTOVER`, 0x080CBD9A and 0x080CBDE4) write
+    r1, which they never set, as the cloud's panel row (+0x13), r1 the
+    sub-state's own address its state machine branched through
+    (0x080CBC54), so a cloud parks on an off-field row its routine's low
+    byte names (0x7D in BN5, 0x9D in a copy placed otherwise);
+  - a type a Navi's code moves is the Navis' copy in TYPES or a decision
+    (`types_decided`): the chips' or the families' copy as well would
+    leave the dispatch running one of them. It flags Team ProtoMan's
+    ProtoMan (AI 1) today: the third kind's 0x2B and 0x69 and the fourth's
+    0x28 are the chips' copies.
+  His five sprites take Navi numbers before Team ProtoMan's (he installs
+  first, a Darkloid's seat): list 4 to 0xBA, then list 2's spill (0x80-
+  0x8F with NapalmMan's, GyroMan's and SearchMan's, theirs moved up by
+  his), so BN4's late families keep 0xBB-0xBF. His 16 KB in the first
+  room moved Team ProtoMan's later sprites on, past the third room's end:
+  the shared art has a fourth room, the art zone's tail
+  (`FREE_NAVI_SHARED_FOUR`, `XN_SHARED_FOUR`, 24 KB at +0x7FA000), where
+  Meddy's last two sprites go. Before
+  that split (PR #356) his numbers reached 0xBE and 0xBF and VolGear and
+  Kilby refused to install. Five mutations break his copy
+  (the 0x5F's second compare, the cloud spawned as his 0x36, its sprite's
+  number, the 0x0B's row 2's sprite, the search's type) and FAIL.

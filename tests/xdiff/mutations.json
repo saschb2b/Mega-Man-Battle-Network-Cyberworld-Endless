@@ -2262,6 +2262,46 @@
    "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   },
   {
+   "name": "CloudMan's object's parent's second CurAction compare not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF1888:2109"
+   ],
+   "what": "the third kind's 0x5F's second compare of its parent's CurAction (BN5 0x080D1EF0: movs r1,#9, its copy at XN_MORE + 0x9888, BN6's 11) left at BN5's 9: it skips its countdown in BN6's state 9 and runs it in 11 (the generator's rule took the first compare alone before CloudMan; caught at t9)"
+  },
+  {
+   "name": "CloudMan's cloud spawned as another of his",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0AB8:2036"
+   ],
+   "what": "the clouds' spawner (BN5 0x080CBEB8: movs r0,#0x37, its copy at XN_MORE + 0x8AB8) made 0x36: the dispatch runs the 0x36's copy for each cloud"
+  },
+  {
+   "name": "CloudMan's cloud's sprite not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF07A4:220F"
+   ],
+   "what": "the cloud's sprite (BN5 0x080CBBA4: movs r2,#0xF, list 2's 0x0F, its copy at XN_MORE + 0x87A4) left at BN5's number where the recipe makes it list 2's 0x29, his battle sprite in BN6"
+  },
+  {
+   "name": "CloudMan's bubbles' kind row's sprite left at BN5's",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0126:11:1"
+   ],
+   "what": "the third kind's 0x0B's row 2 (BN5 0x080C5E1A, his kinds 2-5, BN5_CLOUD_KINDS_0B; its copy at XN_MORE + 0x8126), the list 4 sprite 0x11 the recipe copies at a number of the Navis', its number left at BN5's 0x11: another sprite in BN6"
+  },
+  {
+   "name": "CloudMan's search for his clouds finding none",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08D90074:2F36"
+   ],
+   "what": "the Navis' stub for BN5_CLOUD_FIND_37 (XN_STUB_CLOUDS + 0x14: cmp r7,#0x37 against the dispatch's side table) made 0x36: no cloud found, a new cloud's panel chosen as if he had none (BN5_CLOUD_PANEL)"
+  },
+  {
    "name": "Kilby's sound at the pool's second slot",
    "spec": "kilby_v1",
    "poke": [
@@ -2531,7 +2571,7 @@
    "poke": [
     "0889E028:223C"
    ],
-   "what": "his child's sprite, the first kind's 0x55 moved (BN5 0x080C3508: movs r2,#0x3C, list 4's 0x3C, its copy at XN_TEAM_CODE + 0xB000 + 0x28) left at BN5's number where the recipe makes it list 2's 0x91, BN5's copied there (the pull's own breaks show in MegaMan's state alone, where the comparator stops without a verdict; his check of a magnet panel, 0x080F6838, and his count, 0x080F67C8, decide in no spec)"
+   "what": "his child's sprite, the first kind's 0x55 moved (BN5 0x080C3508: movs r2,#0x3C, list 4's 0x3C, its copy at XN_TEAM_CODE + 0xB000 + 0x28) left at BN5's number where the recipe makes it list 2's 0x95, BN5's copied there (the pull's own breaks show in MegaMan's state alone, where the comparator stops without a verdict; his check of a magnet panel, 0x080F6838, and his count, 0x080F67C8, decide in no spec)"
   },
   {
    "name": "an area grab that takes a panel",
@@ -2986,6 +3026,62 @@
     "088F1304:01DA"
    ],
    "what": "the shim of MokoRus's unit's home that plays the Moko's sound (its first, at XC4_HOMES + 0x2000 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E0"
+  },
+  {
+   "name": "SidBmbo1's row's power another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "08C0623E:0028"
+   ],
+   "what": "the registry's record of BN4's SidBmbo1 (571 at CHIPS_RECORDS) with power 40 where BN4's record holds 80: the Mettaur over the bamboo left 100 HP where BN4's leaves it 60"
+  },
+  {
+   "name": "SidBmbo2's row's subfamily another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "08C0625C:83:1"
+   ],
+   "what": "the registry's record of BN4's SidBmbo2 (572) naming BN6's grown misc routine 0x83, a routine that does nothing, where the row gives it the unit's 0x85: no bamboo, and no wait"
+  },
+  {
+   "name": "SidBmbo's wait another",
+   "spec": "bn4_chip_sidbmbo1",
+   "poke": [
+    "088F17D8:2014"
+   ],
+   "what": "the wrapper of SidBmbo's unit's home (XC4_HOMES + 0x2400 + XC4_HOME_WAIT: its movs r0,#0x28 at +0x18, the frames BN4's misc run waits) with 0x14: MegaMan out of his misc state 20 frames before BN4's"
+  },
+  {
+   "name": "SidBmbo's wait counted as BN6's run counts",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F17E4:DA01"
+   ],
+   "what": "the wrapper's count-down (its bgt at +0x24, BN4's run's test, ending the attack at 0) made bge, BN6's run's test, which ends it below 0: the attack a frame longer than BN4's"
+  },
+  {
+   "name": "the bamboo's type another",
+   "spec": "bn4_chip_sidbmbo2",
+   "poke": [
+    "080D5DBE:20CB"
+   ],
+   "what": "the bamboo's spawner's copy (its movs r0,#0x44 at BN4 0x080D5DBE, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no bamboo"
+  },
+  {
+   "name": "the bamboo's sound another",
+   "spec": "bn4_chip_sidbmbo3",
+   "poke": [
+    "088F1704:01DA"
+   ],
+   "what": "the shim of SidBmbo's unit's home that plays the bamboo's sound (its first, at XC4_HOMES + 0x2400 + 0x300: its slot's word) naming the grown table's slot 0x1DA, PanlSht's shot's lift, where the recipe gives 0x1E1"
+  },
+  {
+   "name": "a dark MegaMan's palette another in BN6",
+   "spec": "bn4_chip_invis_dark",
+   "poke": [
+    "08017338:46C02003"
+   ],
+   "what": "BN6's MegaMan's init handing his palette setter 3 where his palette routine gives 0 (its bl 0x0801002C at 0x08017338 made movs r0,#3 and a nop; the routine itself lies at an address the harness reads as a moved family's): BN4's dark 2 against BN6's 3, which legit.json's bn4 allowed (MegaMan's dark palette, BN4's: 2 against 0 alone) does not explain"
   }
  ]
 }
