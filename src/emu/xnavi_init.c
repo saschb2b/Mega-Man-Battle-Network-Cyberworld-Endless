@@ -85,6 +85,16 @@ static void spawn(Shim *s, const XNavi *n, const XnSpawn *c) {
 	if (c->keep_at) op(s, 0x6028u | (c->keep_at / 4u) << 6);
 }
 
+/* its init's tail entered (XnInit.tail): ldr r1,=tail; mov r0,pc; adds r0,#4 (the instruction past the bx); push {r0}; push
+ * {its prologue's low registers}; bx r1, whose own pop {..., pc} comes back here (a pop of pc stays in Thumb on the GBA's
+ * ARMv4T, its bit 0 not read) */
+static void tail_call(Shim *s, const XnInit *in) {
+	lit(s, 1, xv_move_ref(in->tail) | 1u);
+	op(s, 0x4678), op(s, 0x3004), op(s, 0xB401);
+	if (in->tail_push) op(s, 0xB400u | in->tail_push);
+	op(s, 0x4708);
+}
+
 /* its code and pool written at s->at, `room` bytes at most, their size into *size; its address with the Thumb bit, 0 where
  * it failed */
 static uint32_t shim_put(Shim *s, uint32_t room, const char *what, uint32_t *size_out) {
@@ -124,6 +134,7 @@ static void end_build(const XNavi *n, Shim *s) {
 	if (in->home) op(s, 0x8A68), op(s, 0x80E8);   /* ldrh r0,[r5,#0x12]; strh r0,[r5,#6] */
 	if (n->palettes) palette(s, n->palettes);   /* (after them: their places in the shim as before it, a mutation's poke) */
 	for (int i = 0; in->at_end && i < in->nspawns; ++i) spawn(s, n, &in->spawns[i]);
+	if (in->tail.addr) tail_call(s, in);
 	if (in->sprite) far_call(s, BN6_SPRITE_UPDATE);
 	if (in->frame) far_call(s, BN6_NAVI_FRAME);
 	op(s, 0xBD10);   /* pop {r4, pc} */
@@ -260,7 +271,7 @@ static bool summon_set(const XNavi *n) {
 static bool end_wanted(const XNavi *n) {
 	const XnInit *in = n->init;
 	if (n->palettes) return true;
-	return in ? in->at_end || in->anim || in->sprite || in->frame || in->home : n->coll_arg != 0;
+	return in ? in->at_end || in->anim || in->sprite || in->frame || in->home || in->tail.addr : n->coll_arg != 0;
 }
 
 /* its loads of a field past an immediate's reach (XNavi.fars): each site's `ldrh rd,[rb,#was]; cmp rd,#0` in its game made a

@@ -325,6 +325,34 @@ static void fight_flags(uint8_t *out) {
 	op(&a, 0x46F7u);   /* mov pc,lr */
 }
 
+/* XV_FIGHT_STOP (BN4's 0x08007948, the battle's time-stop test: its flags' bit 4, from a moved Navi's object no state runs:
+ * BurnerMan's flames' update, his update's calls before his runner, which wait while it is set, the paused opening's whole
+ * length in both games' counts, not their moves): bit 4 of BN6's battle flags (0x0800A098's, the same body), or 4 at the
+ * fight's first frame (the battle timer 1; 0 through the paused opening, where the object runs as in BN4), so what it gates
+ * starts with the Navi's first own state, a frame into the fight in BN6's engine, as XV_FIGHT_FLAGS does for bit 0; its
+ * flags the ands's, as BN4's callers branch on them:
+ *   mov r1,r10; ldr r1,[r1,#0x18]; ldr r0,[r1,#0x40]; cmp r0,#1; ldrh r0,[r1,#0x32]; bne 1f; movs r0,#4; 1: movs r1,#4;
+ *   ands r0,r1; mov pc,lr (r0 and r1 alone, as BN4's routine) */
+static void fight_stop(uint8_t *out) {
+	Asm a = { out, XV_FIGHT_STOP - XV_STUBS };
+	op(&a, 0x4651u);   /* mov r1,r10 */
+	op(&a, 0x6989u);   /* ldr r1,[r1,#0x18] */
+	op(&a, 0x6800u | (BN6_BATTLE_TIMER - BN6_BATTLE_STATE) / 4 << 6 | 1 << 3);   /* ldr r0,[r1,#0x40] */
+	op(&a, 0x2801u);   /* cmp r0,#1 */
+	op(&a, 0x8800u | (BN6_BATTLE_FLAGS - BN6_BATTLE_STATE) / 2 << 6 | 1 << 3);   /* ldrh r0,[r1,#0x32] */
+	uint32_t bne = a.at;
+	op(&a, 0);
+	op(&a, 0x2004u);   /* movs r0,#4 */
+	put16(out + bne, b_cond(NE, bne, a.at));
+	op(&a, 0x2104u);   /* movs r1,#4 */
+	op(&a, 0x4008u);   /* ands r0,r1 */
+	op(&a, 0x46F7u);   /* mov pc,lr */
+}
+
+bool xvirus_dispatch_is_gate(uint32_t to) {
+	return to == XV_FIGHT_FLAGS || to == XV_FIGHT_STOP;
+}
+
 void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	memset(out, 0, XV_STUBS_SIZE);
 	none(out);
@@ -333,4 +361,5 @@ void xvirus_dispatch_code(uint8_t out[XV_STUBS_SIZE]) {
 	support(out);
 	chip_writer(out);
 	fight_flags(out);
+	fight_stop(out);
 }
