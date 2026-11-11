@@ -1,0 +1,12 @@
+{
+ "bn4": "0x13E",
+ "bn6": "0x241",
+ "clock": "state",
+ "chips": [
+  "0xB8",
+  "0xB9",
+  "0xBA"
+ ],
+ "what": "GreenWd's tower's sound 0x13E, its copy",
+ "why": "As AquaUp's geyser's (above): kind 1's row of 0x080DF674, its +0xA 0x13E in BN4 and 0x241 in the table's copy; BN4's song 0x13E copied into slot 0x241 of BN6's grown song table. BN6's own song 0x13E is another (xrecipe.song_sig)"
+}

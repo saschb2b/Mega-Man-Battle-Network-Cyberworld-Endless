@@ -515,6 +515,26 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
+**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
+unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
+one routine, a sweep (the third kind's 0x93) that goes column by column
+from the user's edge and does one of three things by the record's first
+parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
+from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
+striking the eight panels around it (Ligtnin). The unit is the sweep,
+the strike both panel chips share (0x92) and the bolt (0x8E), each at
+BN4's own number on the chips' page of the dispatch, 1144 bytes
+with the strike's rows, its sprites copied, its three sounds at the
+grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
+so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
+pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
+Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
+no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
+rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
+moved but has never run in a spec, as the differential's BN4 battle
+cannot yet be given a cracked or a grass panel (BN5's `field=` has no
+BN4 twin). They play once a spec proves them.
+
 **Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
 three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread

@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Ligtnin3's row's kind AquaUp's",
+  "spec": "bn4_chip_ligtnin3",
+  "poke": [
+   "08C074C4:00:1"
+  ],
+  "what": "the registry's record of BN4's Ligtnin3 (679) with its first parameter 0, AquaUp's kind of the sweep, where BN4's record holds 2: the sweep looks for cracked panels under a foe, finds none, and no bolt falls on the cube"
+ }
+]

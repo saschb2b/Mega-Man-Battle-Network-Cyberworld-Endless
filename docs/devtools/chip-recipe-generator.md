@@ -327,11 +327,20 @@ as an attack unit's state spawns the Spreads unit's arm): the type's
 spawner is copied with the unit and spawns the owner's copy by its
 number, and the kind it spawns joins the kinds' table's `kinds`.
 
+A kinds' table's row may name its sprite's list beside its number
+(`TABLES`' `sprite`, held to the list it says) and a sound, a u16 its
+object loads and plays (`sound`, with the sites that play it): the
+sound's two bytes in the table's copy take its slot of the grown song
+table, no shim (`table_sounds`; the geyser's rows). `ROWS_WAIT` names a
+written unit's chips that still sit out, each its reason: their rows
+stay `XREG_PENDING` (AquaUp and GreenWd, whose strike no spec has run).
+
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2),
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
 (0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
-(0x62), SeekBom (0x09, its subfamily 9) and Meteors (misc 0x11).
+(0x62), SeekBom (0x09, its subfamily 9), Meteors (misc 0x11) and Ligtnin
+(misc 0x0C).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it

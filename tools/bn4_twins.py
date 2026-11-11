@@ -376,6 +376,10 @@ PANEL4TO6 = {
     # can-move refused while it stands there, 0x0800AD42): no type of BN6's holds, and BN6's can-move (0x0800E5E2, the same
     # flags test, 0x5040) has no panel test at all; its flags word 0x10210 BN6's conveyors' (9-12), which push instead
     0xA: None,
+    # BN4's cracked (3) and grass (6): BN6's numbers and flags words (src/emu/bn4.h, Its panel types: 1 hole, 2 plain, 3
+    # cracked, 4 poison, 6 grass and 7 ice are BN6's, by the word each gives in BN4_PANEL_FLAGS_OF and BN6_PANEL_FLAGS_OF),
+    # compared by AquaUp's and GreenWd's sweep (0x080DF8B0, 0x080DF914: tools/xchiprecipe_bn4.py's Ligtnin)
+    3: 3, 6: 6,
 }
 
 # A family's update that does work of its own between BN4's pre-step and its state runner: the update run as its pre-step
