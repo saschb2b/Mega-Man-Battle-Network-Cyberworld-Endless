@@ -9,6 +9,7 @@
 #include "rom.h"
 #include "xattack_grow.h"
 #include "xnavi_room.h"
+#include "xnavi_sprites.h"
 #include "xvirus_dispatch.h"
 
 #define BUS 0x08000000u
@@ -64,7 +65,7 @@ static bool code_ok(const XVirusFamily *f, char *why, size_t len) {
 		piece_of(f, i, &start, &end, &at);
 		if (start >= end || start < BUS || ((start | end) & 1) || ((at ^ start) & 3) || !(span_in(at, end - start, XN_CODE, XN_ART) ||
 			span_in(at, end - start, XN_MORE, XN_MORE_ART) || span_in(at, end - start, XN_TEAM_CODE, XN_TEAM_ART) ||
-			span_in(at, end - start, XN_BN4_CODE, XN_BN4_ART)))
+			span_in(at, end - start, XN_NEBULA_CODE, XN_NEBULA_ART) || span_in(at, end - start, XN_BN4_CODE, XN_BN4_ART)))
 			return no(why, len, "%s %d at %08x", block ? "block" : "clone", block ? i : i - f->nblocks, (unsigned)at);
 		for (int k = 0; k < i; ++k) {
 			uint32_t ks, ke, ka;
@@ -91,7 +92,7 @@ static bool refs_ok(const XNavi *n, char *why, size_t len) {
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
-		bool stub = span_in(c->to, 2, XN_STUBS, XN_OBJECTS_END) || c->to == XV_FIGHT_FLAGS ||   /* (or the dispatch's, its gates') */
+		bool stub = span_in(c->to, 2, XN_STUBS, XN_OBJECTS_END) || xvirus_dispatch_is_gate(c->to) ||   /* (or the dispatch's, its gates') */
 		            (n->summon && c->to == n->summon->at && span_in(c->to, 2, XN_BN4_CODE, XN_BN4_ART));   /* (or its summon's shim) */
 		/* (a routine its blocks hold as code is its own; one whose bytes a block holds as dead data goes to its twin, as the
 		 * mover resolves it: xvirus.c, resolve) */
@@ -109,6 +110,13 @@ static bool in_sprite_room(const XvSprite *s, int i) {
 	return i == 0 && s->to_list == 2 && s->at == XN_BN4_SPRITE && s->room == XN_BN4_SPRITE_SIZE;
 }
 
+/* (BN5's Navi's own battle sprite, list 2's his AI index, where an effect of his draws it: at its place in the Navis'
+ * sprites' rooms, list 2's number his seat's, xnavi_sprites.c writing it; the recipe names it so the effect finds it) */
+static bool own_sprite(const XVirusFamily *f, const XvSprite *s) {
+	return s->list == 2 && s->index == f->src_ai && s->to_list == 2 && s->to_index == XNAVI_SPRITE_FIRST + XN_SEAT(f->src_ai) &&
+		(span_in(s->at, s->room, FREE_NAVI_SPRITES, XNAVI_ARMS) || span_in(s->at, s->room, FREE_NEBULA_SPRITES, FREE_NEBULA_SPRITES_END));
+}
+
 /* what its attacks draw: each sprite at its place in the shared art (a BN4 Navi's battle sprite in its room), its effects past
  * BN6's, its types the dispatch's kinds */
 static bool art_ok(const XVirusFamily *f, char *why, size_t len) {
@@ -117,7 +125,8 @@ static bool art_ok(const XVirusFamily *f, char *why, size_t len) {
 		if (xvirus_list_slot(s->to_list) < 0 || (s->at & 3) || !s->room || !(span_in(s->at, s->room, XN_SHARED_ART, XN_END) ||
 			span_in(s->at, s->room, XN_TEAM_SHARED, XN_TEAM_END) ||
 			span_in(s->at, s->room, XN_TEAM_MORE, XN_TEAM_MORE_END) ||
-			span_in(s->at, s->room, XN_SHARED_FOUR, XN_SHARED_FOUR_END) || span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END) || in_sprite_room(s, i)))
+			span_in(s->at, s->room, XN_SHARED_FOUR, XN_SHARED_FOUR_END) || span_in(s->at, s->room, XN_BN4_ART, XN_BN4_END) || in_sprite_room(s, i) ||
+			own_sprite(f, s)))
 			return no(why, len, "sprite %d at %08x", i, (unsigned)s->at);
 		for (int k = 0; k < i; ++k)
 			if (spans_meet(s->at, s->room, f->sprites[k].at, f->sprites[k].room)) return no(why, len, "sprites %d and %d meet", k, i);
@@ -176,9 +185,11 @@ static bool numbers_ok(const XNavi *n, char *why, size_t len) {
 	if (n->versions < 1 || n->versions > XN_VERSIONS_MAX || !ids)
 		return no(why, len, "ids from %#x, %d versions (the Navis' are %#x-%#x and %#x-%#x)", f->first_id, n->versions, XN_FIRST_ID,
 			XN_IDS_END - 1, XN_MORE_IDS, XN_MORE_IDS_END - 1);
-	/* (a home of the Navis' room's, or of Team ProtoMan's) */
+	/* (a home of the Navis' room's, of Team ProtoMan's or of LarkMan's and GridMan's) */
 	bool home = (f->home >= XN_HOMES && (f->home - XN_HOMES) % XV_HOME_SIZE == 0 && (f->home - XN_HOMES) / XV_HOME_SIZE < XN_HOMES_MAX) ||
-		(f->home >= XN_TEAM_HOMES && (f->home - XN_TEAM_HOMES) % XV_HOME_SIZE == 0 && (f->home - XN_TEAM_HOMES) / XV_HOME_SIZE < XN_TEAM_SEATS);
+		(f->home >= XN_TEAM_HOMES && (f->home - XN_TEAM_HOMES) % XV_HOME_SIZE == 0 && (f->home - XN_TEAM_HOMES) / XV_HOME_SIZE < XN_TEAM_SEATS) ||
+		(f->home >= XN_NEBULA_HOMES && (f->home - XN_NEBULA_HOMES) % XV_HOME_SIZE == 0 &&
+		 (f->home - XN_NEBULA_HOMES) / XV_HOME_SIZE < XN_NEBULA_SEATS);
 	if (!home) return no(why, len, "home %08x", (unsigned)f->home);
 	return true;
 }

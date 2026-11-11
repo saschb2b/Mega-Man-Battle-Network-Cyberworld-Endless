@@ -23,17 +23,19 @@
  * rebuilt (xnavi_room.h). BN5's Navi n (Team Colonel's 7-12, the Dark
  * Soul's 0x16, the Darkloids 13-16: ShadeMan, BlizzardMan, CloudMan,
  * CosmoMan; Team ProtoMan's 1-6: ProtoMan, GyroMan, SearchMan, NapalmMan,
- * MagnetMan, Meddy) has its seat XN_SEAT(n) (0-5, 6, 7-10, 11-16): AI
+ * MagnetMan, Meddy; Nebula's LarkMan 17 and GridMan 18) has its seat
+ * XN_SEAT(n) (0-5, 6, 7-10, 11-16, 17-18): AI
  * XN_AI_OF(n), its V1 id XN_ID_OF(n), its versions' after it */
-#define XN_SEAT(n)    ((n) == 0x16 ? 6 : (n) >= 13 ? (n) - 6 : (n) >= 7 ? (n) - 7 : (n) + 10)
+#define XN_SEAT(n)    ((n) == 0x16 ? 6 : (n) >= 17 ? (n) : (n) >= 13 ? (n) - 6 : (n) >= 7 ? (n) - 7 : (n) + 10)
 #define XN_FIRST_AI   25                  /* the first AI index past BN6's (the control's) */
 /* Team ProtoMan's AI indexes the control's 25 + n, 26-31, between it and
  * Team Colonel's 32 (no track's: BN5's from 32, BN4's from XN_BN4_FIRST_AI,
  * the families' a namespace of their own); every other's 32 + its seat */
-#define XN_AI_OF(n)   ((n) >= 1 && (n) <= 6 ? XN_FIRST_AI + (n) : 32 + XN_SEAT(n))
+#define XN_AI_OF(n)   ((n) >= 1 && (n) <= 6 ? XN_FIRST_AI + (n) : (n) >= 17 && (n) <= 18 ? XN_NEBULA_FIRST_AI + (n) - 17 : 32 + XN_SEAT(n))
+#define XN_NEBULA_FIRST_AI 43             /* LarkMan's and GridMan's AI indexes 43-44: free between the Darkloids' 42 and BN4's 48 */
 #define XN_FIRST_ID   0x1C4               /* the Navis' ids, from here (the control's first), */
 #define XN_IDS_END    XV_FIRST_ID         /* ... to here: seats 0-14, */
-/* ... and seats 15-16 (MagnetMan, Meddy) past BN4's 25 seats, named by the
+/* ... and seats 15-18 (MagnetMan, Meddy, LarkMan, GridMan) past BN4's 25 seats, named by the
  * families' archive as BN4's are (xnavi_install.c ids_set): the formula's
  * ids for Team ProtoMan, 0x1B0-0x1C3, are BN6's player's forms (its ids
  * table's type 2, 0x1A0-0x1C3), and 0x1F0-0x1FF hold four seats */
@@ -91,6 +93,14 @@
  * tools/xnavirecipe.py XN_SHARED_FOUR) */
 #define XN_SHARED_FOUR     FREE_NAVI_SHARED_FOUR
 #define XN_SHARED_FOUR_END FREE_NAVI_SHARED_FOUR_END
+/* LarkMan's and GridMan's (seats 17-18, slots 18-19: tools/xnavirecipe.py NEBULA) in a room of their own in code-low
+ * (FREE_NEBULA_NAVIS): a home, a code room (XN_NEBULA_SLOT_CODE: GridMan's walk, 8590 bytes) and an art room each, then
+ * GridMan's battle sprite (LarkMan's in FREE_NAVI_SPRITES' tail, xnavi_sprites.c) */
+#define XN_NEBULA_SEATS   2
+#define XN_NEBULA_SLOT_CODE 0x3000u
+#define XN_NEBULA_HOMES   FREE_NEBULA_HOMES
+#define XN_NEBULA_CODE    FREE_NEBULA_NAVI_CODE
+#define XN_NEBULA_ART     FREE_NEBULA_NAVI_ART
 #define XN_DARK_IDS     512u   /* the ids the Dark Soul's chip AI reads, to 511: its records' room, 0x2C each */
 #define XN_DARK_RECORDS (FREE_CHIP_CODE - 0x6000u)   /* the Dark Soul's chip records (xnavi_dark.c): BN6's 512, each with the four bytes
                                                         its chip AI reads BN5's (XN_DARK_FIELDS), 0x2C each, to FREE_CHIP_CODE */
@@ -131,15 +141,16 @@
 #define XN_BN4_HELD_CHIP   1
 #define XN_BN4_HELD_WITH   2
 
-/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's, XN_TEAM_CODE's or BN4's Navis') */
+/* Whether `a` is in a Navi's code room (XN_CODE's, XN_MORE's, XN_TEAM_CODE's, XN_NEBULA_CODE's or BN4's Navis') */
 static inline bool xn_code_at(uint32_t a) {
 	return (a >= XN_CODE && a < XN_ART) || (a >= XN_MORE && a < XN_MORE_ART) || (a >= XN_TEAM_CODE && a < XN_TEAM_ART) ||
-		(a >= XN_BN4_CODE && a < XN_BN4_ART);
+		(a >= XN_NEBULA_CODE && a < XN_NEBULA_ART) || (a >= XN_BN4_CODE && a < XN_BN4_ART);
 }
-/* ... or in one of their art's rooms (XN_ART's, XN_MORE_ART's or XN_TEAM_ART's) */
+/* ... or in one of their art's rooms (XN_ART's, XN_MORE_ART's, XN_TEAM_ART's, BN4's or XN_NEBULA_ART's) */
 static inline bool xn_art_room(uint32_t a, uint32_t n) {
 	return (a >= XN_ART && a <= XN_SHARED_ART && n <= XN_SHARED_ART - a) || (a >= XN_MORE_ART && a <= XN_MORE_END && n <= XN_MORE_END - a) ||
-		(a >= XN_TEAM_ART && a <= XN_TEAM_SHARED && n <= XN_TEAM_SHARED - a) || (a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a);
+		(a >= XN_TEAM_ART && a <= XN_TEAM_SHARED && n <= XN_TEAM_SHARED - a) || (a >= XN_BN4_ART && a <= XN_BN4_END && n <= XN_BN4_END - a) ||
+		(a >= XN_NEBULA_ART && a <= FREE_NEBULA_SPRITES && n <= FREE_NEBULA_SPRITES - a);
 }
 
 /* BN5's attack family F as BN6's grown table holds it (xattack_grow.h): at
@@ -180,7 +191,13 @@ typedef struct { XvRef spawner; uint32_t r4, table; uint8_t hi, link_from, link_
  * init's 0 where BN6's actor init writes 0xFF), then its spawns where `at_end`, its sprite updated (`sprite`, BN6's
  * BN6_SPRITE_UPDATE) and its update run (`frame`, BN6_NAVI_FRAME), in that order; its panel (+0x12) kept at its +6
  * before its spawns (`home`: AquaMan's, his decision's last panel, which BN6's spawn leaves 0) */
-typedef struct { const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home; } XnInit;
+typedef struct {
+	const XnSpawn *spawns; int nspawns; bool at_end, anim, sprite, frame, home;
+	XvRef tail;         /* its init's own work past BN6's actor init's (BN4's BurnerMan's flames, from 0x080BDA30), entered at its
+	                       spawn's end after its spawns: the shim pushes `tail_push`'s registers and a return its own pop takes
+	                       (tools/xnavirecipe_bn4_init.py init_tail); addr 0 none */
+	uint8_t tail_push;  /* the low registers its init's prologue pushes with lr (BurnerMan's none, MetalMan's r4 and r7) */
+} XnInit;
 
 /* A summon its game's code makes (BN4's Roll: her MegaMan's state 47 calls BN4_SPAWN_ENEMY, an enemy by its id on a free panel
  * of her side; docs/multirom/bn4-navis.md, Roll built): that call aimed at a shim at `at` (its code room) that picks the panel

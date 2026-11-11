@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "BN4's chips in a run"
-description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602 and every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
+description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:15:04Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T17:33:02Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -120,6 +120,22 @@ no pack entry (603-634, the Program Advances') stays out of the
 catalogue, and a visitor's reward of one pays the stand-in's zenny
 (`reward_as` asks `bn6_pack_holds`, since the pack's entries from 635:
 the next paragraph).
+
+**Unit 8, online, built: BN4 Red Sun is in the NetPass's full set**
+(protocol v17; [The NetPass](../online/netpass.md), A game joins the
+set), the owner's call 1. HELLO carries BN4's identity, the server
+keeps its bit (`roms_bn4`) and `roms_full` takes it, so a game without
+BN4's ROM keeps the Square and loses the Arena, Trade and DeepNet stamps
+until it adds it; the greeter says so once to a pass that was full
+before, and the stamp moment plays again when the larger set fills. A
+NetBattle's folder may hold any chip the game has a record of to id
+1023 (`online_chips.h`, both games' `arena_loadout_check`), where it
+refused every id past 511 before: a chip of BN4's whose code is not
+moved yet sits out of the deck on both cores, as in a run. A trade, an
+answer, a board offer and the spares list take only a chip that plays
+(`online_chip_plays`), so a pending one never shows. The board leaves
+BN4's own chips (from `bn4_chip_first`, 527) out of a game without
+BN4's ROM, as BN5's are left out of one without BN5's.
 
 **Every BN4 folder chip has a pack entry** (10 November 2026; [The chip
 registry and BN5's chips' code](../rom/chips-code.md), The pack in the
@@ -1179,6 +1195,9 @@ is one entry there", its stamps open again until a player has it in. BN4
 is not in the set: its viruses, areas and Navis touch no collection, so
 nothing of BN4's crossed. Its chips will.
 
+**Built** (unit 8, above): the owner chose the first way, BN4 in the
+full set now, with protocol v17. What follows is the choice as it was put.
+
 Two ways keep a pair whole. BN4 joins the full set (the NetPass's way: no
 rule to learn, but every player without BN4's ROM loses the Arena and
 trades until he adds it), or **BN4's chips stay home**: they sit out of
@@ -1281,7 +1300,7 @@ of one agent.
    and with all three, fresh data folders, the run logs read; captures of
    a BN4 chip in a dealer's stock, on a results screen and as a round's
    prize.
-8. **Online and EXTRAS (1 day, after 7).** The rule the owner chooses
+8. **Online and EXTRAS: built** (Where things stand; 1 day, after 7). The rule the owner chooses
    (call 1): the sit-out on both pair cores, the spares list's and the
    board's filter, the Arena desk's one line (a words file), or BN4's
    entry in `netpass.c` with the protocol's bump; `test_extras` with

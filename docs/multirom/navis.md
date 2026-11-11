@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids and Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's NapalmMan, GyroMan, SearchMan and Meddy and Nebula's GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T01:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:00:00Z }
 ---
 
 # Transplanted Navis
@@ -275,6 +275,45 @@ into the battle engine).
   copy and FAIL (a sprite's number, two sprites' lists, a hit's offset, a
   state's number); her effect 0x44's site and one object's compare of
   its parent's state are reached by no spec.
+- **GridMan** (AI 18, Navi AI 44, ids 0x3F0-0x3F3; `gridman_v1`,
+  `gridman_v1_keys`, `gridman_sp`: PASS since 12 November), the first of
+  Nebula's two of the story. *Their seats:* LarkMan's and GridMan's AI 17
+  and 18 met Team ProtoMan's seats 11-12 by `XN_SEAT`'s old formula; they
+  are seats 17-18 now, AI 43-44 (`XN_NEBULA_FIRST_AI`, between the
+  Darkloids' 42 and BN4's 48), ids past MagnetMan's and Meddy's
+  (`XN_MORE_IDS` + 4 (seat - 15): 0x3EC, 0x3F0), overlay kinds past
+  BN6's by their seat, battle sprites list 2's 0x31 and 0x32, and a room of
+  their own (`FREE_NEBULA_NAVIS`, `XN_NEBULA_*`: homes, code rooms of
+  0x3000, art rooms, GridMan's battle sprite; LarkMan's in
+  `FREE_NAVI_SPRITES`' tail), placed after the layers' headroom gave
+  `code-low` its back ([Free space](../engine/emulation/free-space.md),
+  Moving regions). They install after Team ProtoMan's (`NEBULA` in
+  `tools/xnavirecipe.py`), so no other Navi's numbers or places moved.
+  *His types:* the first kind's 0x18, the third's 0x94, 0xC6 and 0xC8 moved
+  as his; the third's 0x95 (Football's ball) and the fourth's 0x58 (his
+  Navi chip's tackle's effect), the chips' copies until then, are his copy
+  now, the chips' GridMan and Football units calling into it (the chips'
+  `navi_modules` reading `XN_NEBULA_CODE`). BN4's chips had taken
+  third-kind dispatch numbers from BN5's own that no BN5 track had moved
+  (`tools/xchiprecipe_bn4.py`, `TYPES3`): his 0xC8 and 0xC6 were
+  Counter's and WhitWeb's, until the BN4 chips' reservation (PR #376)
+  kept every BN5 Navi's numbers apart (`tools/bn5_twins.py`,
+  `dispatch_reserved`) and moved those units off them. *His
+  afterimage:* his effect 0x5F draws his own battle sprite (BN5's list 2
+  0x12); the recipe names that sprite at its place, list 2's 0x32
+  (`NAVI_SPRITE_PLACES`; `xnavi_recipe.c` `own_sprite`), where the effects'
+  table finds it, `xnavi_sprites.c` writing it and the install only
+  checking its bytes. His attack's routines are pool words his states store
+  in AttackVars +0x28 and call by `bx` (`BN5_GRID_ATTACK_POOL`), moved with
+  his blocks; the comparator reads a pointer into the new room as the
+  code it came from (`tools/xdiff_snap.py`, `XN_NEBULA_ROOM`), and the
+  third kind's 0xC6's Z is each engine's leftover r3 (`spawn_leftovers`,
+  `BN5_GRID_SPAWN_C6`), as BlizzardMan's slide's hit's. Five mutations
+  break his copy (an effect's number, the 0xC6 spawned as his 0xC8, his
+  attack's routine left at BN5's address, a sprite's number, a parent's
+  compare) and FAIL. Not yet a guardian: Oran Area's second, as BN5's
+  record sets his SP on Oran Area 2, comes next ([BN5's
+  Navis](../game/bosses/bn5-navis.md)).
 - **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
   `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object
   types* (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F)

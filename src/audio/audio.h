@@ -18,7 +18,7 @@ typedef enum {
 	SFX_COUNT
 } Sfx;
 
-typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_CREDITS, MUS_COUNT } Music;
+typedef enum { MUS_NONE, MUS_TITLE, MUS_NET, MUS_BATTLE, MUS_BOSS, MUS_WIN, MUS_UNDERNET, MUS_SHOP, MUS_GAMEOVER, MUS_CREDITS, MUS_SORROW, MUS_COUNT } Music;
 
 bool audio_init(void);
 /* The frame CYBERWORLD_SFX_LOG's lines name, set by the main loop. */

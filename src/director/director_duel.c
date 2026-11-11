@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 
+#include "bn6_sound.h"
 #include "data.h"
 #include "debug.h"
 #include "director_folder.h"
@@ -114,6 +115,9 @@ void duel_roll(void) {
 	 * test, not its strength; one above the band deleted a playtester at
 	 * 100 of 140 HP on layer 2, his run over) */
 	D.duel_enc = layer_objs_duel_rung == 2 ? make_boss(run.depth, run.biome, 11) : make_encounter(run.depth, run.biome, ENC_NORMAL);
+	/* (the netbattle to BN6's Showdown, a battle theme no other battle of a run plays: the rivalry's top rung
+	 * sounds like none of its races, docs/multirom/bn6-gaps.md, Music) */
+	if (layer_objs_duel_rung == 2) D.duel_enc.song = BN6_SONG_SHOWDOWN;
 	/* (and none a race can't hurry: a Quaker is out of reach in the air
 	 * until it lands, so the clock times its hops, not the player; three of
 	 * a playtester's four duels were Quakers, "a Quaker lottery") */

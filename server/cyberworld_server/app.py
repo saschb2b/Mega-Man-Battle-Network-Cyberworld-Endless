@@ -39,7 +39,7 @@ class Player:
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
-    roms: int = 0             # protocol.json's roms_bn5 bit: the ROMs the game has besides BN6's (protocol.full_set)
+    roms: int = 0             # protocol.json's roms_bn5 and roms_bn4 bits: the ROMs the game has besides BN6's (protocol.full_set)
     round_trip: int = 0       # its round trip to here in ms as its PING says it (v13), 0 unknown: its link's bars
     refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
     resumed: bool = False     # a place held taken back by this session (holds.py)

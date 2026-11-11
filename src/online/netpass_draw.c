@@ -54,12 +54,13 @@ static void word(int x, int y, const char *s, SDL_Color c, SDL_Color shade, int 
 
 /* a label's colours by the game's slot: its top and foot and its light stripe (launcher_art.c's) */
 static SDL_Color label_color(int game, int part) {
-	static const SDL_Color c[2][3] = {
+	static const SDL_Color c[3][3] = {
 		{ { 8, 189, 115, 255 }, { 0, 140, 82, 255 }, { 74, 231, 115, 255 } },
 		{ { 49, 156, 222, 255 }, { 16, 99, 165, 255 }, { 107, 222, 255, 255 } },
+		{ { 222, 74, 49, 255 }, { 156, 33, 16, 255 }, { 255, 140, 99, 255 } },   /* (BN4 Red Sun's: a red) */
 	};
 	static const SDL_Color other[3] = { { 165, 140, 222, 255 }, { 107, 82, 165, 255 }, { 206, 189, 255, 255 } };
-	return game >= 0 && game < 2 ? c[game][part] : other[part];
+	return game >= 0 && game < 3 ? c[game][part] : other[part];
 }
 
 /* (the old panels' dark fills, the screens' lit and unlit: BN6's navy
@@ -281,11 +282,12 @@ static void tray(int x, int y, const NetPassView *v) {
 		if (in) check(wx + 3, f.y + 32, c);
 		minifont_draw(wx + (in ? 8 : 0), f.y + 30, word, c, 1);
 	}
-	/* (the PET's line in the engine's smaller letters: the lists' would take three lines and more here) */
+	/* (the PET's line in the engine's smaller letters: the lists' would take three lines and more here; four with
+	 * three games' slots beside it, protocol v17's set) */
 	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
 	int tx = cx + 1, tw = f.x + f.w - 2 - tx;
-	char lines[3][96];
-	int n = pixfont_wrap(line, tw, 1, lines, 3);
+	char lines[4][96];
+	int n = pixfont_wrap(line, tw, 1, lines, 4);
 	for (int i = 0; i < n; ++i) word(tx, f.y + 2 + i * PIXFONT_LINE, lines[i], missing ? LOOK_TEXT : LOOK_GOLD, INK, PIXFONT_LEFT);
 }
 
