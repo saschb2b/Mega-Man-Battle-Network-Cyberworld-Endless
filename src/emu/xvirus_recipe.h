@@ -71,8 +71,9 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
 /* A BN4 Navi's call to play a sound whose pool slot is past what its `movs r0` names (the owner's call of 5 November 2026,
  * docs/multirom/bn4.md call 11): the call (its game's BN4_PLAY_SOUND) aimed at a shim of its home that makes r0 the slot
  * and goes on to BN6's (xvirus_shim.h); or a BN4 family's call to its appear queue (BN4_QUEUE_*), `slot` the number of
- * BN6's queue its twin takes in r0 (bn4_twins.QUEUED) */
-typedef struct { uint32_t at; uint16_t slot; } XvSoundCall;
+ * BN6's queue its twin takes in r0 (bn4_twins.QUEUED). `add`: a call several of BN4's sounds reach, by branches that each
+ * make r0 one: its shim adds `slot` to r0 instead, each sound's slot BN4's number plus it (xvirus_shim_sound_add) */
+typedef struct { uint32_t at; uint16_t slot; bool add; } XvSoundCall;
 /* A compare of a held chip's id with a number (cmp rN,#was, then beq or bne) where the chip registry gives that chip an id
  * past an immediate's 255: the two instructions made a call to a shim of its home that compares rN with `now` and goes
  * on where the branch would (lr is on its routine's stack there: the generator checks the routine pushes it) */
