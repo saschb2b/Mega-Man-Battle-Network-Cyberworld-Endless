@@ -4184,8 +4184,9 @@ static void test_xnavi_static(void) {
 		"xnavi: the Navis' room out of order (the stubs, the sea's code, the moved objects, ..., the Darkloids' code, the Dark Soul's records)");
 	CHECK(XN_TEAM_HOMES + XN_TEAM_SEATS * XV_HOME_SIZE <= XN_TEAM_CODE && XN_TEAM_CODE + XN_TEAM_SEATS * XN_TEAM_SLOT_CODE <= XN_TEAM_ART &&
 		XN_TEAM_ART + XN_TEAM_SEATS * XN_SLOT_ART <= XN_TEAM_SHARED && XN_TEAM_SHARED < XN_TEAM_END && XN_TEAM_END <= FREE_TEAM_SPRITES &&
-		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES),
-		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third room apart)");
+		XN_TEAM_MORE < XN_TEAM_MORE_END && (XN_TEAM_MORE >= FREE_TEAM_SPRITES_END || XN_TEAM_MORE_END <= XN_TEAM_HOMES) &&
+		XN_SHARED_FOUR < XN_SHARED_FOUR_END,
+		"xnavi: Team ProtoMan's room out of order (homes, code, art, the shared art's second room, then their sprites; the third and fourth rooms apart)");
 	/* (Team ProtoMan's seats, BN5's AI 1-6: AI 26-31, apart from the control's 25 and every other's; ids apart from BN6's,
 	 * which end at 0x1C3, the families' and BN4's Navis', and from every other seat's) */
 	for (int n = 1; n <= 6; ++n) {
@@ -4199,7 +4200,7 @@ static void test_xnavi_static(void) {
 	}
 	CHECK(xnavi_objects_ok(o, why, sizeof why), "xnavi: the moved objects' recipe refused: %s", why);
 	CHECK(xnavi_recipe_ok(&xnavi_control, why, sizeof why), "xnavi: the control's recipe refused: %s", why);
-	CHECK(xnavi_bn5_count == 14, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count == 15, "xnavi: BN5's Navis listed (%d: the six, the Dark Soul, BlizzardMan, ShadeMan, CosmoMan, CloudMan, NapalmMan, GyroMan, SearchMan and Meddy)", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;

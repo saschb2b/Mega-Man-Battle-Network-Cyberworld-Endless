@@ -3,7 +3,7 @@ type: Status
 title: "What is not ported yet"
 description: "The audit of 9 November 2026: what BN5 Team Colonel's ROM holds that a run does not use yet, kind by kind (areas, families, Navis, Souls, DarkChips, chips and Program Advances, NaviCust programs, Liberation, songs, bystanders and towns, finds), each verified and sized, BN4 Red Sun's open phases beside them, and a ranked list for a content-filler version."
 tags: [multirom, bn5, bn4, status]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T02:00:00Z }
 sources:
   - id: bn5-rom
     resource: "Mega Man Battle Network 5: Team Colonel (USA), SHA-1 5f472f78d8de2df01d5039e045c043cb40969a39, read through tools/xrecipe.py's readers by scratch scripts (not in git)"
@@ -71,7 +71,7 @@ presence is what counts) for each Navi's ids.
 | 1-6 | Team ProtoMan's six: ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy | V1, V2 and DS of each | No | **L**: six recipes by `tools/xnavirecipe.py`'s walk (M each, their objects to sort as the six's were); the owner's call (below) |
 | 7-12 | Team Colonel's six | V1, V2, V3 and DS | Guardians of BN5's areas, V1 to SP by band | DS left out by design ([Transplanted Navis](navis.md)) |
 | 13-14 | ShadeMan, BlizzardMan | V2, V3 | Dark layers' Darkloids ([Stage 4](../game/liberation/building/stage-4-darkloids.md)) | Their chips (Chips, below) |
-| 15-16 | CloudMan, CosmoMan | V2, V3 | No: derived, not moved | **M**: three generator decisions open (their object types, CloudMan's RAM table at `0x0203CA30`, a sprite loaded by a number made otherwise); then proved as BlizzardMan was |
+| 15-16 | CloudMan, CosmoMan | V2, V3 | Dark layers' Darkloids, both moved and proved (CosmoMan 9 November, CloudMan 12 November 2026: [Transplanted Navis](navis.md)) | None |
 | 17-18 | LarkMan, GridMan | V1, V2, V3 | No | **M** each: recipes for AI 17 and 18; where BN5's net records set their SP versions is the first step, as it placed the six ([BN5's Navis](../game/bosses/bn5-navis.md)) |
 | 19 | Bass (V1-V3, SP, DS, BassXX) | V1-V3 | No (BN6's own Bass is the super boss) | **M-L**: left for later where BN5 dresses the Graveyard ([Super bosses](../game/bosses/super-bosses.md)) |
 | 20 | Nebula Grey | Its two records, music 0x17 | No | **L**: BN5's final boss; weighed and left out with its theme ([BN5's music in a run](music.md)) |
@@ -100,8 +100,8 @@ None left: all twelve kinds one chip each, BN5's own seven by its rule
 ([Status](status.md); [The chips' code](chips-code.md), Their rules in
 place). The DS Navi chips of the six play behind BN5's dark gate. The
 Darkloids' DS chips are dark-gated too: ShadeMan's and BlizzardMan's play
-since 9 November 2026 (Chips, below), CloudMan's and CosmoMan's wait with
-their chips.
+since 9 November 2026 (Chips, below), CloudMan's and CosmoMan's with
+their chips (512-517), and both Navis are moved now.
 
 ## Chips and Program Advances
 
@@ -164,8 +164,8 @@ look. Left, from the stages' own "Left for later":
 
 | Gap | Where it is recorded | Size |
 | --- | --- | --- |
-| CloudMan and CosmoMan as Darkloids (acts 4 and on now take BlizzardMan or ShadeMan) | Stage 4 | **M** (Navis, above) |
-| The par's chips as BN5's for CloudMan and CosmoMan: ShadeMan's and BlizzardMan's boards pay his SP two under par and his V1 at par since 9 November 2026; a BN6 Darkloid's pays a Server's chip and one a tier lower | [The par's prize](../game/liberation/building/par-prize.md) | With their chips (Chips, above) |
+| CloudMan and CosmoMan as Darkloids | Stage 4 | **Built** (12 November 2026: CloudMan act 4's own, CosmoMan the later acts') |
+| The par's chips as BN5's for CloudMan and CosmoMan | [The par's prize](../game/liberation/building/par-prize.md) | **Built**: every moved Darkloid's board pays his SP two under par and his V1 at par (CloudMan's since 12 November 2026); a BN6 Darkloid's a Server's chip and one a tier lower |
 | Each teammate's own chip on his Custom screen (Colonel's C-Cannon and the rest, BN5's ids 401-422) and his own folder | [Stage 3](../game/liberation/building/stage-3-team.md) | **M**: pseudo-chips traced and moved; ids (above) |
 | Colonel's Save and TwinLiberation not traced; SneakAttack on the Darkloid; BombLiberation onto BonusPanels | Stage 3; [The Cross Navis](../game/liberation/building/cross-navis-team.md) | **S** each to trace, **S-M** to build |
 | DarkMegaMan, mission 4's Darkloid | Stage 4 | **M** |
@@ -256,9 +256,10 @@ proposed").
    two under par and his V1 at par as BN5's did. Depends on nothing
    open. With BN5, two forks in three hold a dark layer: today its win
    pays a stand-in chosen when the Darkloid was a BN6 Navi.
-2. **CloudMan and CosmoMan** (**M**). The three decisions taken, both
-   moved and proved; acts 4 and on get their own Darkloids instead of
-   repeating the first two. Their chips follow the id decision.
+2. **CloudMan and CosmoMan** (**M**, built: CosmoMan 9 November,
+   CloudMan 12 November 2026). The three decisions taken, both moved and
+   proved; acts 4 and on get their own Darkloids instead of repeating the
+   first two, and their boards pay their own chips.
 3. **BN4's Navis guard BN4's areas** (**S-M**, built 12 November 2026:
    [BN4's Navis as guardians](../game/bosses/bn4-navis.md)). Eight Navis
    already proved met a player only in a tournament past the Nest; a
