@@ -140,6 +140,11 @@ static HookAct sea_hidden(HookRegs *r, void *user) {
 
 static HookAct sea_arrived(HookRegs *r, void *user) {
 	(void)user;
+	if (r->r[1] == XPANEL_MAGNET && xpanels_ready()) {
+		/* (BN5's arrival tests its magnet panel here too, BN5_PANEL_ARRIVED: xpanels.c) */
+		xpanels_magnet_arrived(r->r[5], r->r[7]);
+		return HOOK_CONTINUE;
+	}
 	if (r->r[1] != XPANEL_SEA) return HOOK_CONTINUE;
 	uint32_t obj = r->r[5], coll = r->r[7], ai = hook_read32(obj + BN6_T1_AI_DATA), flags = hook_read32(coll + BN6_COLL_FLAGS);
 	bool submerges = ai >= BN6_EWRAM && ai < BN6_EWRAM_END && (hook_read32(ai + BN6_AI_TRAITS) & BN6_TRAIT_SUBMERGES);
