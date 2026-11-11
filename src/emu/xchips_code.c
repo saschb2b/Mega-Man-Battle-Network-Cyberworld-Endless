@@ -377,6 +377,14 @@ bool xchips_bn4_moved(int id) {
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
 static bool units4_install(bool navis);
 
+uint32_t xchips_bn4_moved_at(uint32_t bn4) {
+	for (int i = 0; installed4 && i < xchips_bn4_count; ++i) {
+		uint32_t at = xchips_bn4[i].share ? 0 : xvirus_code_at(&xchips_bn4[i].code, bn4);
+		if (at) return at;
+	}
+	return 0;
+}
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	installed4 = units4_install(false);

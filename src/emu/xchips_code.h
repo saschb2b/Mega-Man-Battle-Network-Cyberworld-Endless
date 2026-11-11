@@ -75,5 +75,8 @@ bool xchips_bn4_navi_install(void);
 bool xchips_bn4_code_at(uint32_t to);
 /* Whether chip `id` (BN6's tables') is one of BN4's whose code is a unit's (the registry's XREG_MOVED row) */
 bool xchips_bn4_moved(int id);
+/* (after xchips_bn4_code_install) Where BN4's address `bn4` is in its units' moved code (its Thumb bit kept), 0 where none
+ * moved it: a BN4 Soul's charged shot (its power attack copied with its family's unit: tools/xchiprecipe_bn4.py SOUL_POWERS) */
+uint32_t xchips_bn4_moved_at(uint32_t bn4);
 
 #endif

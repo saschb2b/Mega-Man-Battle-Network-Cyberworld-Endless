@@ -1,7 +1,7 @@
 /* The Jukebox (docs/game/pet.md, The Jukebox): a PET screen over the held game,
  * opened from its key item, that plays every song of the music player of
- * the games in use (BN6's, BN5's where its ROM is beside it), by game and
- * section, on the engine's own MP2K (mp2k.h), BN6's code. The game holds
+ * the games in use (BN6's, BN5's and BN4's where their ROMs are beside it),
+ * by game and section, on the engine's own MP2K (mp2k.h), BN6's code. The game holds
  * still under it, its music with it, and goes on where it was once the
  * Jukebox closes. L and R turn the sections, Up and Down pick, A plays,
  * START turns the play mode, B closes; a tap does each. The last section,

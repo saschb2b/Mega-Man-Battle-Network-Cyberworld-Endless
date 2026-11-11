@@ -501,6 +501,10 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xF8, SONG_GROWN_FIRST + 0x28 }, { XROM_BN4_RED_SUN_US, 0xB9, SONG_GROWN_FIRST + 0x29 },   /* (0x202, 0x203) */
 	/* ... PropBom's bomb's propeller and its burst as it is struck */
 	{ XROM_BN4_RED_SUN_US, 0x133, SONG_GROWN_FIRST + 0x2A }, { XROM_BN4_RED_SUN_US, 0xC8, SONG_GROWN_FIRST + 0x2B },   /* (0x204, 0x205) */
+	/* ... the bombs' state's throw (SeekBom's unit) */
+	{ XROM_BN4_RED_SUN_US, 0x90, SONG_GROWN_FIRST + 0x2C },   /* (0x206) */
+	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
+	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
 	/* ... BN4's Navi chips' (their range from 0x2C0): a chip's Navi as he appears */
 	{ XROM_BN4_RED_SUN_US, 0xB0, 0x2C0 },
 };
