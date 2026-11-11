@@ -1,0 +1,198 @@
+{
+ "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6: Elec, its charged shot power attack 0x58 and family 0x47, 90 frames) in BN4's own battle on the guest core against BN6's with ThunSoul moved (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): BN4's family 0x47 an attack unit of tools/xchiprecipe_bn4.py at BN6's grown 0xD7, its power attack copied with it at BN6's grown power attacks' 0xA5, its loadout, charge times and element read from BN4's tables (src/emu/soulbn4.c). BN4 holds the Soul (souls4: its flag 0x1C, Double Soul's, its pseudo-chip past the chip gate) and a folder of MagBolt1 B (BN4's chip 35, kind Elec); BN6 holds it (souls6 bit 6: BN6's Soul 13 over the proxy form) and a folder of BN6's chip 30 B (Elec). The first Custom screen picks the chip, moves to UNITE (five right, down), takes it and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90, its release the charged shot (88 gives the plain buster in both games). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "01@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "20",
+ "souls6": "40",
+ "folder4": [
+  "0223"
+ ],
+ "folder6": [
+  "021E"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "B",
+   92
+  ]
+ ],
+ "verdict": {
+  "is": "FAIL",
+  "at": 1,
+  "why": "BN4's battle against BN6's parts at t1 on ThunSoul's form, which the comparator's BN4 path has no rules for yet: BN4's MegaMan in its unison's state (0x0D) at t1 where BN6's crossing ends before the fight, BN6's proxy's companion overlay (the first kind's 0x56) and his link to it (+0x50), his palette and charged shot's power attack by each game's number (BN4's 0x58, BN6's grown 0xA5); and on his look, the next unit's (BN4's list 0 number 6, the unison's picture, the face). The charged shot itself is the same to the frame: BN4's family 0x47 at t154, BN6's 0xD7 at t155 (the spec's lag of 1), the Mettaur's HP 40 to 20 at t167 and t168, MegaMan ready again at t177 and t178; soul_thun holds BN6's battle to it."
+ }
+}

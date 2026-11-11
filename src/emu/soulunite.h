@@ -56,10 +56,11 @@ bool soulunite_ready(void);
 #define SOULBREAK_PASSIVE(b) ((b) >> 8 & 0xFF)
 #define SOULBREAK_CHIPS(b)   ((b) >> 16 & 0xFF)
 #define SOULBREAK_MOOD(b)    ((b) >> 24 & 0xFF)
-/* The run's Souls, bit k BN5's Soul 7 + k (souls.h), for the battles from
- * the next Custom screen on: the director's as each battle begins, the
- * differential's from its spec. None (0) leaves BN6's Custom screen as it
- * is, byte for byte. */
+/* The run's Souls, bit k BN5's Soul 7 + k (souls.h), then BN4's from bit
+ * SOULS_HELD_BN4 (soulbn4.h: bit 6 ThunSoul, which no run gives yet), for
+ * the battles from the next Custom screen on: the director's as each
+ * battle begins, the differential's from its spec. None (0) leaves BN6's
+ * Custom screen as it is, byte for byte. */
 void soulunite_held(unsigned souls);
 /* ... a core of its own's (hook_core's: an Arena pair core, its player's
  * Souls), UNITE standing there in a link battle too (the Soul carried to
