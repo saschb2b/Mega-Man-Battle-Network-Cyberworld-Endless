@@ -1,0 +1,8 @@
+[
+ {
+  "name": "a Soul kept past a Cross",
+  "spec": "soul_cross",
+  "unitebreak": 16,
+  "what": "leaving the proxy for a Cross keeps the Soul in the Souls' block (the proxy's removal entry not clearing it): KnightSoul still named in HeatCross where the spec holds none"
+ }
+]

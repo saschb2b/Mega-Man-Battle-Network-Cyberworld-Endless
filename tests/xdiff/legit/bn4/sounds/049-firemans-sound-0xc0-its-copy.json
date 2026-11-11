@@ -1,0 +1,7 @@
+{
+ "bn4": "0xC0",
+ "bn6": "0xD0",
+ "clock": "state",
+ "what": "FireMan's sound 0xC0, its copy",
+ "why": "Played by his copied MegaMan state (BN4: movs r0,#0xc0 at 0x080F1B02, its bl to PlaySoundEffect at 0x080F1B04; BN6: its copy's movs r0,#0xd0, the recipe's immediate, its bl through its veneer to BN6's), a state's: BN4's song 0xC0 copied into the pool's fourth slot, BN6's empty 0xD0 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11); begun in none of fireman_v1's 1200 frames. BN6's own song 0xD0 is empty, so the copy is told by its slot"
+}

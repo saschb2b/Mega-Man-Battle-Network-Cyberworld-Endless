@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-09",
+  "name": "Ten bits against nine",
+  "result": "The autopilot's seeds 1-12 from fresh data folders: the same run log (66 battles) and the same pictures at frames 5000, 10000 and 14990; the differential: every spec its nine-bit verdict, 246 of 246 mutations caught; chip 600 (Cannon's alias) dealt, fired, saved and continued.",
+  "meaning": "Ten-bit chip ids change nothing for ids under 512, and an id past 511 plays in battle.",
+  "link": "../multirom/bn4-chips.md"
+}

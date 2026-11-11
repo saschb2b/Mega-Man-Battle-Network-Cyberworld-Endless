@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-08",
+  "name": "searchman_v1: SearchMan V1 in BN4's battle against his move into BN6's",
+  "result": "python3 tools/xdiff.py bn4_searchman_control searchman_v1 (SearchMan V1 alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, rng replay, lag 1): the control PASS; searchman_v1 PASS over its 1200 frames (his hiding from t216, his shots, bursts and trails, his sounds; his state 61 and its scope not reached, MegaMan idle). --mutations: his seven caught.",
+  "meaning": "His move matches BN4's battle frame for frame; the differences allowed are the engine's (his pool sounds paired by slot, his trail's begun byte each game's PlaySound's leftover r0).",
+  "link": "../multirom/bn4-navis.md#searchman-built"
+}

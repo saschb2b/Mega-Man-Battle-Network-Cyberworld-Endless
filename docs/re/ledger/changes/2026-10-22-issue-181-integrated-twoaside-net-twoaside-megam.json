@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-22",
+  "what": "Issue #181 integrated (twoaside-net, twoaside-megaman, twoaside-rules): a partner's words carried in his side's GBA's own link packets (src/online/arena_team_link.c, RAM_TEAM_LINK; BN6_LINK_OUT, BN6_LINK_IN and the pad's stores in src/emu/bn6_link.h, docs/rom/online.md's row), his turn worked out on each GBA from them; the GBAs' drift past the rings' delay ended by construction; a partner's whole MegaMan over the network (src/online/arena_seats.c, arena_team_client.c); docs/symbols written again."
+}

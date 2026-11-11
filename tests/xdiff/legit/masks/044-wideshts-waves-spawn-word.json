@@ -1,0 +1,26 @@
+{
+ "name": "WideSht's wave's spawn word",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T3"
+ ],
+ "types": [
+  "0x3B"
+ ],
+ "cells": [
+  [
+   "0x3E",
+   "0x00",
+   "0x10"
+  ]
+ ],
+ "why": "BN6's WideSht family (0x30) hands its wave's spawner r3 = 0x100000 where BN5's (0x25) hands 0, and the common spawn keeps the caller's r1-r4 as the object's words (r3 at +0x3C): the wave's +0x3E reads 0x10 in BN6's battle alone. No code of the wave's reads its +0x3C (its routines, BN5 0x080CC878 / BN6 0x080CCD0C, walked), and the battle goes on the same.",
+ "evidence": [
+  "BN5 0x080ED132: movs r3,#0, then bl 0x080CCA62 (the wave's spawner); BN6 0x080EE93C-0x080EE93E: movs r3,#0x10; lsls r3,r3,#0x10, then bl 0x080CCEF6",
+  "the common spawn BN6 0x080032BC-0x080032C6: ldm r7!,{r0-r4} (the caller's r0-r4, pushed by its spawner); strb r0,[r5,#1]; str r1,[r5,#0x34]; str r2,[r5,#0x38]; str r3,[r5,#0x3c]; str r4,[r5,#4]",
+  "chip_widesht1-3: the wave's +0x3E 0 in BN5's and 0x10 in BN6's from its spawn, every other byte of it the same"
+ ]
+}

@@ -1,0 +1,26 @@
+{
+ "name": "a paralysing hit's modifier",
+ "part": "coll",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T3"
+ ],
+ "types": [
+  "0x12"
+ ],
+ "cells": [
+  [
+   "0x0E",
+   "0x00",
+   "0x01"
+  ]
+ ],
+ "why": "A collision data's +0x0E (its hit's modifier, bn6f's HitModifierBase) as the engine sets it where the object's damage word (+0x2E, from its +0x2C) has bit 0x4000 (its +0x10 0x10, a paralysis): BN5's registration writes 0 there (0x08016600-0x08016606), BN6's 1 (0x08019F60-0x08019F66), each as its set-up (BN5 0x08016760, BN6 0x08019FB4) and its update (0x08016B96, 0x0801A082) end. The engine's, not the object's code, which writes the same in both (the obstacle strike's shot, BN5's third kind's 0x12 moved, its table's +1 through the update, 0x080C6DF8).",
+ "evidence": [
+  "BN5 0x080165FC-0x08016606: lsls r4,#1; blo; movs r0,#0x10; strb r0,[r7,#0x10]; movs r0,#0; strb r0,[r7,#0xe]",
+  "BN6 0x08019F5C-0x08019F66: the same, movs r0,#1",
+  "soul_colonel_strike: the shot's +0x0E 0 in BN5 and 1 in BN6 from its first frame, after the set-up (a trace of BN6's moved code, 12 October 2026)"
+ ]
+}

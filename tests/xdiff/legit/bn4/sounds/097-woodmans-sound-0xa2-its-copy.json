@@ -1,0 +1,13 @@
+{
+ "bn4": "0xA2",
+ "bn6": "0x33",
+ "clock": "state",
+ "foes": [
+  "0xAC",
+  "0xAD",
+  "0xAE",
+  "0xAF"
+ ],
+ "what": "WoodMan's sound 0xA2, its copy",
+ "why": "Played by his copied MegaMan states 106 and 107 (BN4: movs r0,#0xa2 at 0x080F4D42 and 0x080F4EE0, each with its bl to PlaySoundEffect after it; BN6: their copies' movs r0,#0x33, the recipe's immediates), a state's: BN4's song 0xA2 copied into the pool's second slot, BN6's empty 0x33 (the owner's call 11). GutsMan's 0xA2 is the pool's first slot in his battles (a row of no foes); in WoodMan's battles alone (foes) this row holds over it"
+}

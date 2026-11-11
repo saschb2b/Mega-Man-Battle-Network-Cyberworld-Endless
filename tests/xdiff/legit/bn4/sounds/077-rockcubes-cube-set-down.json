@@ -1,0 +1,7 @@
+{
+ "bn4": "0xAA",
+ "bn6": "0x112",
+ "clock": "state",
+ "what": "RockCube's cube set down",
+ "why": "Played by RockCube's support object after it spawns the cube, twins by their place (BN4's fourth-kind's code at 0x080E6108: bl 0x080D8B9E, the cube's spawner; movs r0,#0xaa at 0x080E610C, its bl to PlaySoundEffect; BN6's at 0x080E59D0: bl 0x080D1434; movs r0,#0x13; adds r0,#0xff at 0x080E59D4, its bl to 0x080005CC), each from its support subfamily's routine (BN4 0x080E612C, subfamily 0x1B; BN6 0x080E59F6, subfamily 6). Paired by the routines that play them, not by their samples. bn4_chip_rockcube at t34"
+}

@@ -1,0 +1,11 @@
+{
+ "name": "an animation run through the paused opening, by the openings' lengths",
+ "objects": [
+  {
+   "kind": "T3",
+   "type": "0x6A",
+   "what": "ThunderMan's cloud (BN4_THUNDERCLOUD)"
+  }
+ ],
+ "why": "A moved object's sprite state (its sprite's +0 to +0x2B: the animation, its count, flags, art and frame) while no animation was set in the fight (its +0x90 and +0x11 as at its first fight frame in both games). ThunderMan's cloud (the third kind's 0x6A, spawned by his companion's init, 0x080C3B26) sets its animation in its init, in the battle's set-up (0x080DAACE, the animation setter BN4 0x08002E10, BN6 0x08002DA4), and its type routine (0x080DAA90) runs the third kind's after-state after its update every frame it runs (BN4 0x080144FE, BN6 0x0801BCA6, the same body: the sprite update, BN4 0x0800285C, BN6 0x080026C4, with no pause test), which both object runners do through the paused opening, its +0 having 0x04 (0x17 from its spawn in both: BN4 0x0800314C at 0x08003174, BN6 0x080031AC at 0x080031D8; its update clears it only once the fight runs, 0x080DAB36). The openings are not the same length: a probe of hooks on both cores (temporary, not kept) in thunderman_v1 saw the cloud spawned at the set-up's last frame and animated every frame to the fight, BN4's 227 frames to its first fight frame (the appear 52, phase 4 one, the Custom screen 122, BATTLE START! 51) and BN6's 206 (52, one, 87, 65): each engine's banner its own length, each game's Custom screen passed by the harness's keys as its window opens (src/dev/xdiff.c). So each game's cloud enters the fight at its own place in its animation (an 18-frame loop of six frames, 4, 2, 4, 2, 4, 2), BN4's 21 frames further on. Compared by that place (tools/xdiff_bn4_opening.py, Opening.phase): the same animation, of the same frames in all, each game's frames run of it as far apart as the frames each ran since its spawn (its spawn event's core frame to its first fight record's, and the fight's frames to the record compared, BN6's at the battle's offset), modulo the animation's frames, read from BN4's bytes of its sprite (BN6's copy the same bytes); any other place fails the spec, and from an animation set in the fight on (the cloud's at t12 in BN4, t13 in BN6) its sprite state is compared exactly"
+}

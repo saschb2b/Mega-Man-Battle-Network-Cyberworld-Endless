@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Counter's counter byte read at BN4's place",
+  "spec": "bn4_chip_counter1_idle",
+  "poke": [
+   "080CFE38:7AC9"
+  ],
+  "what": "Counter's routine's copy reading a player's collision data's +0xB, BN4's counter byte's place and BN6's panel's row (ldrb r1,[r1,#0xb] at BN4 0x080CFE38), where the recipe gives BN6's +0xD: a Mettaur that is not swinging struck all the same"
+ }
+]

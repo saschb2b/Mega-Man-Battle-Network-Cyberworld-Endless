@@ -1,0 +1,18 @@
+{
+ "name": "ThunderMan's 0x71's spawn's r4, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T3",
+  "type": "0x71",
+  "bytes": {
+   "0x05": [
+    "0x00",
+    "0x41"
+   ],
+   "0x06": [
+    "0x00",
+    "0x03"
+   ]
+  }
+ },
+ "why": "BN4's third-kind spawn (0x080032F0 through 0x08003210) stores the caller's r4 at the object's +4 as a word; ThunderMan's spawner of his 0x71 (0x080DB6CE: push {r4,lr}; push {r0-r3,r5}; movs r0,#0x71; the spawn) then writes +4's byte alone from the caller's r3 (0x080DB6E0, strb r4,[r0,#4] after pop {r1-r5}), and its one caller, his state 85 (MegaMan's in BN4, copied with him: its bl at 0x080F22B2, r3 0 at 0x080F22B0) leaves r4 what the state runner held (its pop {r4} at 0x080F22A6), so +5 to +7 hold its upper bytes: in BN4 0 (0x13), in BN6 his AI data's address's (0x41, 0x03 at +5 and +6). No code 0x71 runs reads its +5 to +7: its type routine (0x080DB540), init (0x080DB564), update (0x080DB5CE) and dying (0x08010560) and the 61 routines they call, walked (tools/xrecipe_thumb.py) for a load of +4 to +7 from any register, find only other records' (its collision data's +5 and +7, a panel's +4, a list node's +4, the spawn's descriptor's +4). thunderman_v1 from t740 (BN4) and t741 (BN6)"
+}

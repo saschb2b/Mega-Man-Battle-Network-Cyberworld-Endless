@@ -1,0 +1,4 @@
+{
+  "date": "2026-10-25",
+  "what": "A liberation battle's field mapped and built (src/emu/bn5_liberation.h, src/emu/bn6_panels.h, docs/rom/liberation.md's row, src/director/liberation_field.c): BN5's level of the dark round the faced panel 0x08051D9E (weights 0x08051E58, kinds 0x080502F4) picking its battle 0x08051F7A from 0x0811488C's 860 records, whose +6 sets the field (0x30, 0x38, 0x3C, Surrounded 0x33; the Darkloid's never Surrounded); BN6 keeps BN5's Surrounded whole (0x0802D26A, 0x0800C4BC, 0x0800F46E, 0x080141F4, 0x08013044); the liberation's Custom screen opening on a full gauge (0x08008BD2; ours through 0x0800819A); every liberation battle three turns, the Darkloid's too (the type is 6, the late double 0x0800901E a type 1 battle's); the mission record's +9 the Darkloid's kind"
+}

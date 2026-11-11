@@ -1,0 +1,57 @@
+{
+ "why": "A panel is 0x24 bytes in BN5 and 0x20 in BN6: +0x00-0x0F the same (type +2, alliance +3, the state the panel's update keeps at +0x0E), BN5's alliance timer +0x12 BN6's +0x10 (the alliance's setter, BN5 0x0800B2D6 / BN6 0x0800CC14: strh at +0x12 / +0x10), the flags BN5 +0x18 / BN6 +0x14 (BN5_PANEL_FLAGS, BN6_PANEL_FLAGS; the panel's parameters read there, BN5 0x0800AFB0 / BN6 0x0800C8F8), +0x1C / +0x18, and the object holding it BN5 +0x20 / BN6 +0x1C (the panel's reservation, BN5 0x08018654 / BN6 0x0801BB1C)",
+ "segments": [
+  [
+   0,
+   0,
+   16
+  ],
+  [
+   18,
+   16,
+   2
+  ],
+  [
+   24,
+   20,
+   4
+  ],
+  [
+   28,
+   24,
+   4
+  ],
+  [
+   32,
+   28,
+   4
+  ]
+ ],
+ "types": [
+  2,
+  6,
+  8
+ ],
+ "flags": [
+  24,
+  20
+ ],
+ "timers": {
+  "why": "BN5 keeps a timer for lava (+0x10) and one for the sea (+0x14), each 0x3C0 while its panel is another (written every frame, and as the field is made), counted down while it is lava or sea; BN6 keeps one (+0x12), 0x708 on most panels, counted down on a conveyor, and on lava and sea as BN6's engine runs them (src/emu/xpanels.c: from 0x3C0, BN5's, as each is made). So where one of BN5's two is not 0x3C0 it is that panel's timer, compared with BN6's +0x12 (on the frame lava cools under an object both still hold the count the update left); where neither is, the masks for their idle values hold. On the frame lava or the sea runs out BN5's reads 0 (its update ends the count, plain, and writes 0x3C0 the next frame) where BN6's reads 0x708 again (its conveyors' count writes it as it ends): the same.",
+  "evidence": [
+   "BN5: the field made, 0x0800AB66-0x0800AB70 writes 0x258 to +0x0E, 0x3C0 to +0x10 and +0x14; the update counts lava's +0x10 (0x0800AA4C) and the sea's +0x14 (0x0800AA78) down to plain, each other branch writing 0x3C0 to the other",
+   "BN6: the field made, 0x0800C564 writes 0x708 to +0x12; the update counts it down for 9-12 (0x0800C45C) and for 13 and 14 by xpanels.c's hook at 0x0800C3B8, which sets it to 0x3C0 where it still holds 0x708; object_setPanelType's hook (0x0800CC0A) gives a chip's lava or sea 0x3C0, as BN5's 0x0800B2A6 does",
+   "the count's end: BN5 0x0800AA56-0x0800AA64 (lava) and 0x0800AA82-0x0800AA90 (sea) set the type plain and +0x0E, the timer left at 0; BN6 0x0800C466-0x0800C474 sets it plain and writes 0x708 to +0x12"
+  ],
+  "bn5": [
+   "0x10",
+   "0x14"
+  ],
+  "bn6": "0x12",
+  "idle": "0x3C0",
+  "out": [
+   "0x0",
+   "0x708"
+  ]
+ }
+}

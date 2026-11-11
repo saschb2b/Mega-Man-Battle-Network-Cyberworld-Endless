@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-05",
+  "what": "BN4's Navis' companions by one mechanism: the ThunderMan, WindMan and FireMan branches merged, their three companion mechanisms (XnCompanion4, XnCompanion, XnSpawned) made one (XnSpawn and XnInit, src/emu/xnavi_init.c; tools/xnavirecipe_bn4_init.py reads every init: a spawn's r4 constant or r0 by a table of its version, the words kept after, the spawns at the companion start where the init makes them after its collision's set-up, else at the spawn's end with its +0x11, sprite and update); the moved first-kind types numbered in NAVIS' order by cost (ThunderMan's 0x33 0xE0, WindMan's 0x5C 0xE1, FireMan's 0x57 0xE2); WindMan installed (his companions' state 4 run as 0, 0x080CCD2E); the four battle sprites in the shared room."
+}

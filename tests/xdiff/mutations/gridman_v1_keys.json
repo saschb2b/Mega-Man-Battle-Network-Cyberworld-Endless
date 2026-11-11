@@ -1,0 +1,10 @@
+[
+ {
+  "name": "GridMan's effect left at BN5's number",
+  "spec": "gridman_v1_keys",
+  "poke": [
+   "088853AC:2402"
+  ],
+  "what": "his copied routine's effect (BN5 0x080BCE70: movs r4,#2, its copy at XN_NEBULA_CODE + 0x43AC) left at BN5's 2 where the recipe makes it the Navis' 0xA2: BN6's own effect 2 is another sprite (gridman_v1_keys at t234)"
+ }
+]

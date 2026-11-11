@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the bolt's hit's bits BN4's own",
+  "spec": "bn4_chip_magbolt3",
+  "poke": [
+   "080DBCD2:2303"
+  ],
+  "what": "the bolt's copy's collision set up with r3 3, BN4's bits, where the recipe gives 0x43: with the pull's push bit BN6's struck pass pushes alone, so the Mettaur pulled beside MegaMan and hit goes on with its own state where BN4's is struck"
+ },
+ {
+  "name": "MagBolt3's row's power another",
+  "spec": "bn4_chip_magbolt3",
+  "poke": [
+   "08C06ECA:0028"
+  ],
+  "what": "the registry's record of BN4's MagBolt3 (644) with power 40 where BN4's record holds 130: the Mettaur left 100 HP where BN4's leaves it 10"
+ }
+]

@@ -1,0 +1,141 @@
+{
+ "why": "A collision data is 0xA0 bytes in BN5 and 0xA8 in BN6, laid out otherwise from +0x14: each segment is (BN5's offset, BN6's, bytes), found by pairing the two games' routines (the symbol map's pairs whose instructions agree but for an offset on a register loaded from an object's +0x54) and checked against both traces. Where one game keeps in two bytes or words what the other keeps in one, BN5's parts are checked by their rule (bn5_or: the word BN5 ORs them into, which is compared with BN6's); a byte of either outside the segments and the rules must be zero in both. The flag words (flag_words, BN6's offsets) hold bits, never addresses, so they are compared as bytes even where they look like a ROM address.",
+ "evidence": [
+  "+0x00-0x13 the same: the paired routines' accesses at +1, +2, +6, +9, +0xA, +0xB, +0xC, +0xD, +0xE, +0xF, +0x10, +0x11 agree (e.g. BN5 0x08016B64 / BN6 0x0801A050, the collision panels' update); the setup BN5 0x08016760 / BN6 0x08019FB4 writes +1, +2, +4, +7, +0xA, +0xE alike",
+  "BN5 +0x14 is BN6 +0x64: BN5 0x080C4BC4 / BN6 0x080C6A08, the same attack's routine storing a word from its table; the hit pass adds the hitter's word there into BN5 +0x98 / BN6 +0xA0 (0x08016AE2 / 0x081D7922)",
+  "BN5 +0x1A is BN6 +0x16: BN5 0x080EAB64 / BN6 0x080EB550, a u16 read after the barrier (+6)",
+  "BN5 +0x1E and +0x20 are BN6 +0x1C and +0x1E, two statuses' times: the twin handlers BN5 0x0800CB48 / BN6 0x0800E730 count the paralysis's down (BN5 0x0800CB5C, BN6 0x0800E744: ldrh, sub #1, strh, bgt) and clear flag 0x800 and flag2 8 at its end, and the next's (BN5 0x0800CBC2, BN6 0x0800E894: the same instructions, flag 0x8000 and flag2 0x80 cleared at its end, +0x48 zeroed); the paralysis's clear BN5 0x0801707C / BN6 0x0801A284 the same flags and a store of 0 at the first alone; as the paralysis takes an object both clear the second (BN5 0x0800CB98, BN6 0x0800E780); flashy_v1: MegaMan's +0x1E / +0x1C 0x59 in both games the frame Flashy's flash paralyzes him; batty_v2: his +0x20 / +0x1E 0xDF in both the frame Batty's wave strikes him",
+  "+0x2E, +0x30, +0x34, +0x38 (its object), +0x3C, +0x40 and +0x44 (its flags) and +0x48 the same: the setup writes +0x2E, +0x30, +0x34, +0x38 alike (BN5 0x08016780-0x080167A6 / BN6 0x08019FDE-0x0801A004); the routines that set an object's flags read +0x3C and +0x40 (BN5 0x08016C44, 0x08016C5E / BN6 0x0801A154, 0x0801A16E); the pool's start writes 0x80000000 to each one's +0x44 (BN5 0x08016118, its stride 0xA0 / BN6 0x08019884, its stride 0xA8); BN5 0x080173B4 / BN6 0x0801A5E6 +0x48",
+  "what a hit leaves starts at BN5 +0x60 / BN6 +0x68: the present step clears 0x40 bytes from there (BN5 0x08016B4E-0x08016B54 / BN6 0x0801A038-0x0801A03E). BN5 +0x60-0x6B is BN6 +0x68-0x73: the pair's flags (+0x60 / +0x68, each one's +0x44 ORed into the other's, BN5 0x0801687E-0x08016890 / BN6 0x081D7B1E-0x081D7B30), what touched it (+0x64 / +0x6C, the second pass BN5 0x080174AA-0x080174B0 / BN6 0x081D7BD2-0x081D7BD8), what hit it (+0x68 / +0x70, in ten paired routines, e.g. BN5 0x0800CE28 / BN6 0x0800EBA8)",
+  "BN5 +0x74-0x9F is BN6 +0x7C-0xA7: the hitter's +0x44 ORed into +0x74 / +0x7C (BN5 0x08016A20-0x08016A26 / BN6 0x081D7832-0x081D7838), the damage by element +0x7A / +0x82 (BN5 0x08016AC6-0x08016AD0 / BN6 0x081D7906-0x081D7910, the final damage BN5 +0x78 / BN6 +0x80), the hit counts +0x86, +0x88, +0x8A / +0x8E, +0x90, +0x92 (BN5 0x08016A78-0x08016A9C / BN6 0x081D788C-0x081D78B0), the hitter's +0x12 into +0x9C / +0xA4 (BN5 0x08016AB4 / BN6 0x081D78C4); the reticle's bytes at BN5 +0x63, +0x66, +0x67, +0x6A, +0x6B, +0x77 sit at BN6 +0x6B, +0x6E, +0x6F, +0x72, +0x73, +0x7F in the traces",
+  "BN5 +0x6C and +0x70 are BN5's own: what hit it, by the side of the hitter (+0x6C + 4 x the hitter's +5: BN5 0x080169C0-0x080169CA, 0x080169E8-0x080169F2, 0x08016A28-0x08016A34), ORed into +0x68 after each pair (BN5 0x080168C6-0x080168D4: the rule bn5_or); BN6's hit pass ORs into +0x70 itself (0x081D77DE-0x081D77E2, 0x081D7800-0x081D7804, 0x081D783A-0x081D7840)",
+  "BN5 +0x18 and +0x19 are BN5's own: the hitter's +0x0E ORed into +0x18 + the hitter's +5 (BN5 0x08016A9E-0x08016AA8), both ORed into +0x0F after each pair (BN5 0x080168D6-0x080168E4: the rule bn5_or); BN6's hit pass ORs the hitter's +0x0E into +0x0F itself (0x081D78B2-0x081D78B8)",
+  "BN6 +0x74-0x7B and +0x18, +0x19 are BN6's own, zero unless an element is in play: the hit's multiplier less one at +0x74 and +0x75 (0x081D78C8-0x081D78F4), the hitter's +0x19 ORed into +0x76 and +0x77 (0x081D7844-0x081D784C, 0x081D7BDA-0x081D7BE2), element 3's damage at +0x78 (0x081D78F6-0x081D7904); +0x19 is the high nibble of the object's element byte (the setup, 0x08019FC4-0x08019FC8), +0x18 read against it (0x081D78D4)",
+  "BN5 +0x1E is BN6 +0x1C, the paralysis' frames left (BN6_COLL_PARALYSIS): the flinch's status cleared, BN5 0x0801707C (strh r0,[r3,#0x1E]) / BN6 0x0801A284 (strh r0,[r3,#0x1C]), a LAYOUT pair (tools/bn5_navi_twins.py); in toadman_v1 MegaMan paralysed by ToadMan's note at t223, 0x59 in both",
+  "BN5 +0x22 and +0x24 are BN6 +0x20 and +0x22: the timers of the blind (flag 0x2000) and the held (0x4000, bn6f's OBJECT_FLAGS_IMMOBILIZED), counted down and their flags cleared at 0 by the same steps, BN5 0x0800CC0C-0x0800CC1C and 0x0800CC32 / BN6 0x0800E8E2-0x0800E8F2 and 0x0800E908; BN5's sea holds a non-Aqua object stepping onto it there (BN5 0x0800CDA2: strh r0,[r1,#0x24], xsea.c's BN6_COLL_IMMOBILE): toadman_sea at t211",
+  "BN5 +0x1E is BN6 +0x1C, the paralysis timer (BN5_COLL_PARALYSIS, BN6_COLL_PARALYSIS): each game's status step counts it down as its first act, BN5 0x0800CB5C-0x0800CB60 (ldrh r0,[r6,#0x1e]; subs; strh) / BN6 0x0800E744-0x0800E748 (the same at #0x1c), the same routine in both (its paralysis bit 8 of the struck word +0x40 at the same place, BN5 0x0800CB76 / BN6 0x0800E75E); the chips' specs hold their target paralysed (tests/xdiff, hold)",
+  "BN5 +0x20, +0x22, +0x24 are BN6 +0x1E, +0x20, +0x22, the statuses' timers after the paralysis's: the clear BN5 0x08017060 / BN6 0x0801A264 zeroes BN5 +0x1E-+0x24 / BN6 +0x1C-+0x22 in that order after the same flags; the status step counts the blindness down at BN5 +0x22 / BN6 +0x20 (BN5 0x0800CC32-0x0800CC42 / BN6 0x0800E908-0x0800E918) and keeps its mark (the fourth kind's 0x06, spawned by BN5 0x080E0ADE / BN6 0x080E1D2A) at +0x4C in both (BN5 0x0800CC44-0x0800CC68 / BN6 0x0800E91A-0x0800E93E), the status before it its time at BN5 +0x24 / BN6 +0x22 and its mark at +0x48 (BN5 0x0800CBFC-0x0800CC10 / BN6 0x0800E8D2-0x0800E8E6); chip_blinder: CanladEX blinded 478 frames from t34 at BN5 +0x22 / BN6 +0x20, its mark at +0x4C",
+  "BN5 +0x1E, +0x20, +0x22, +0x24, +0x26, +0x28, +0x2A are BN6 +0x1C, +0x1E, +0x20, +0x22, +0x24, +0x26, +0x28: the status timers each frame counts down (BN5 0x0800CB48 / BN6 0x0800E730, the same routine): paralysis, its flag 0x800 (BN5 0x0800CB5C / BN6 0x0800E744), confusion, 0x8000 (0x0800CBC2 / 0x0800E894), blindness, 0x2000 (0x0800CC32 / 0x0800E908), immobility, 0x4000 (0x0800CC0C / 0x0800E8E2); the flash timer (BN5 0x0800E180 / BN6 0x08010478, the blink BN5 0x080137AA / BN6 0x08016956), BN5 0x0800DF30 / BN6 0x080101B2, the invulnerable time (BN5 0x0800CD88 / BN6 0x0800EAFE). ToadSoul's charged shot paralyzes (0x59 frames) and KnightSoul's confuses (0x1DF) in both traces (soul_toad, soul_knight_shot)"
+ ],
+ "segments": [
+  [
+   0,
+   0,
+   20
+  ],
+  [
+   20,
+   100,
+   4
+  ],
+  [
+   26,
+   22,
+   2
+  ],
+  [
+   30,
+   28,
+   4
+  ],
+  [
+   34,
+   32,
+   4
+  ],
+  [
+   38,
+   36,
+   6
+  ],
+  [
+   46,
+   46,
+   2
+  ],
+  [
+   48,
+   48,
+   32
+  ],
+  [
+   96,
+   104,
+   12
+  ],
+  [
+   116,
+   124,
+   44
+  ]
+ ],
+ "flash_timer": [
+  38,
+  36
+ ],
+ "bn5_or": [
+  {
+   "word": "0x68",
+   "of": [
+    "0x6C",
+    "0x70"
+   ],
+   "size": 4
+  },
+  {
+   "word": "0x0F",
+   "of": [
+    "0x18",
+    "0x19"
+   ],
+   "size": 1
+  }
+ ],
+ "flag_words": [
+  "0x30",
+  "0x34",
+  "0x3C",
+  "0x40",
+  "0x44",
+  "0x68",
+  "0x6C",
+  "0x70",
+  "0x7C"
+ ],
+ "alliance_masks": {
+  "why": "The words the setup stores at +0x30 and +0x34 come from this table, by the object's alliance and its region (two words a region): BN5's 160 words (80 regions; BN5_COLL_MASKS, BN5_COLL_MASK_WORDS) against the first 160 of BN6's 178 (89 regions; BN6_COLL_MASKS, BN6_COLL_MASK_WORDS). Each BN6 word is its BN5 twin with bit 0x80 or as it is, but region 61's (entries 122 and 123: BN5 0x80000080 and 0x40000080, BN6 0x80 and 0x80); tools/xdiff_snap.py checks this as it reads them. table_words are the collision data's words set from the table (with the time stop's bit), or_words those ORed of other objects' table words (a hit's, a touch's), at BN6's offsets: each read as BN6's (maps, alliance).",
+  "bn5": "0x08016364",
+  "bn6": "0x08019C7C",
+  "words": 160,
+  "unpaired": [
+   122,
+   123
+  ],
+  "time_stop": "0x10000",
+  "table_words": [
+   "0x30",
+   "0x34"
+  ],
+  "or_words": [
+   "0x6C",
+   "0x70"
+  ],
+  "evidence": [
+   "the readers: BN5 0x08016BBC / BN6 0x0801A0BA (alliance x 4 + region x 8 into the table, its one literal at BN5 0x08016C00 / BN6 0x0801A0D0); the setup's stores BN5 0x0801678A, 0x080167A6 / BN6 0x08019FE8, 0x0801A004",
+   "the tables' ends: code follows at BN5 0x080165E4 and BN6 0x08019F44 (the same routine in both, push {r4,r6,r7,lr})",
+   "a word ORed of them holds the hit pass's own flags too, bits no table word of either game has (their 160 and 178 words together 0xFFFDFFBE: 0x1, 0x40 and 0x20000 none's), kept as they are: bit 0 ORed into what hit an object (BN5 0x080169BE-0x080169CA into +0x6C or +0x70 by the hitter's side / BN6 0x081D77DC-0x081D77E2 into +0x70), 0x20000 with the hitter's word (BN5 0x080169E4 / BN6 0x081D77FC); bladia_v1_keys t516: MegaMan's shot struck by Bladia, its word 0x04310001 in BN5's (+0x68 and +0x6C) and 0x04310081 in BN6's (+0x70), Bladia's table word 0x04310000 / 0x04310080 and bit 0"
+  ]
+ },
+ "bn6_slips": [
+  {
+   "offset": "0x54",
+   "size": 4,
+   "why": "BN6's hit-clear (0x0801A018, a frame's hits taken from an object's collision data) means to keep the hits of a time stop at +0x54 (it ORs +0x54 and +0x70 into r0) but stores r1, its caller's leftover (0x0801A022: str r1,[r4,#0x54]), and clears it once time runs again: a slip of BN6's engine, in a word no moved code names (BN5's twin keeps its own there, the hits ORed, 0x08016B30). Compared nowhere: as a support chip is used, the battle stands still a frame (the support family's 0x0800BF16, BN5's 0x0800A50A) and every object's +0x54 holds that leftover for it.",
+   "evidence": [
+    "BN6 0x0801A01C-0x0801A022: ldr r2,[r4,#0x70]; ldr r0,[r4,#0x54]; orrs r0,r2; str r1,[r4,#0x54]; then 0x0801A032 clears it where the time stop's test (0x0800A098) is clear",
+    "BN5 0x08016B26-0x08016B30: ldr r2,[r4,#0x70]; ldr r1,[r4,#0x5c]; orrs r1,r2; str r1,[r4,#0x5c]; orrs r1,r2; str r1,[r4,#0x54]",
+    "chip_areagrab: CanladEX's +0x54 4 in BN6's alone at t33, the frame AreaGrab's support routine runs"
+   ]
+  }
+ ]
+}

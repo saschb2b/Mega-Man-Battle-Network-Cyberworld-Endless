@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-09",
+  "name": "junkman_v1: JunkMan V1 in BN4's battle against his move into BN6's",
+  "result": "python3 tools/xdiff.py junkman_v1 (rng replay, lag 1): PASS over 1200 fight frames. Settled before it: his install refused (the Navis' registry, past 16); his state 1's draw, made in BN4's paused opening and in BN6's fight before its timer's first tick, replayed from BN4's setup draws; his junk's +4 the spawn's r4 (BN4 0x13, BN6 his AI index times four), read by no code of it; his pool sounds paired; at t347 his 0x97's +4 to +7, the r4 his MegaMan state 110 ran with (BN4's runner's 0x00020013, BN6's state caller's AI data 0x02023A80): his states run through stubs loading his +0 byte without BN6's bits 0x24 (with them kept, t347 on +4 alone, 0x13 against 0x37). Four mutations caught: his CurAction 7 written 10 (t1), his variables at BN4's +0x70 (t1), his junk spawned as his 0x97 (t1), his 0xC0 at the pool's 0x32 (t348); his junk's hits test at BN4's +0x54 not caught (unreached: MegaMan never strikes it).",
+  "meaning": "JunkMan's move into BN6's engine is proved for his V1 alone against MegaMan idle; he joins the tournament's pool.",
+  "link": "../multirom/bn4-navis.md#junkman-built"
+}

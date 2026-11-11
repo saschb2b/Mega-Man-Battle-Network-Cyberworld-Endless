@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a Program Advance's moved routine's entry",
+  "spec": "pa_piledrvr",
+  "poke": [
+   "08E00564:08E00C01:4"
+  ],
+  "what": "the grown support routines' entry 0X59 (XC_SUPPORT + 0x164) left at their stub (XC_STUBS) where the install points it at PileDrvr's moved routine (BN5's support routine 0X2F): the Program Advance formed, nothing played"
+ }
+]

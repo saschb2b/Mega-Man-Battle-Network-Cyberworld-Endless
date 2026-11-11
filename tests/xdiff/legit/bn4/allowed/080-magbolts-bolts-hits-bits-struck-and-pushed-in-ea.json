@@ -1,0 +1,12 @@
+{
+ "name": "MagBolt's bolt's hit's bits, struck and pushed in each engine's own",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x75",
+ "part": "coll",
+ "offsets": [
+  "0x0E",
+  "0x0E"
+ ],
+ "why": "MagBolt's bolt (BN4's third-kind 0x75, moved with MagBolt's unit) sets up its collision with r3 3 (movs r3,#3 at 0x080DBCD2, bl 0x080129AC), and its hit lands with the pull's, the state's hit of bits 0x08 each frame (0x080EE10C's word 0x1E05FF08 through 0x080CD7E2): the struck holds 0x0B. BN4's struck pass makes that struck and pushed by bit 0x01 with a push bit (0x0801360C-0x08013622), BN6's by bit 0x40 with one (0x0801AC06-0x0801AC2E), the entry \"the Moko's hit's bits, struck and pushed in each engine's own\". So the copy's init passes 0x43 (tools/xchiprecipe_bn4.py IMMS): with BN4's 3 there BN6's Mettaur, pulled beside MegaMan and hit, goes on with its own state where BN4's is struck (bn4_chip_magbolt3 at t44, its state 5 in BN4's and 0xB in BN6's). The struck's own records are compared as ever."
+}

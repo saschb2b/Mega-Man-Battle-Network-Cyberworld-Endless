@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "JunkMan derived, built and proved (tools/xnavirecipe_bn4.py, src/emu/xnavi_bn4.c: BN6's Navi AI 57, ids 0x3A4-0x3A7; BN4_JUNKMAN 0x080C91A8, BN4_JUNKMAN_STATES 0x080C9248, BN4_JUNKMAN_CLEAR 0x080C9498, BN4_JUNKMAN_JUNK 0x080C94AE, BN4_JUNK_SPAWN 0x080DFF60, BN4_JUNK_HITS 0x080DFF44, BN4_JUNK_SPAWN2 0x080E0170; BN4's object runner's r4 0x08003166, BN6's state caller 0x0801B9E6; docs/rom/bn4.md, JunkMan derived): junkman_v1 PASS, four mutations caught; in the tournament's proved list on BN4_PLATE_JUNKMAN."
+}

@@ -1,0 +1,13 @@
+{
+ "bn4": "0xB6",
+ "bn6": "0x104",
+ "clock": "state",
+ "foes": [
+  "0xB0",
+  "0xB1",
+  "0xB2",
+  "0xB3"
+ ],
+ "what": "TopMan's sound 0xB6, its copy",
+ "why": "Played by his own state: movs r0,#0xb6 at 0x080B7290, its bl at 0x080B7292; BN6: that bl aimed at his home's shim making r0 the pool's 0x104, XvSoundCall, the slot past a byte, a state's: BN4's song 0xB6 copied into the pool's sixth slot, 0x104 (src/emu/xnavi_bn4.c, src/emu/xnavi_bn4_sounds.c: a BN4 Navi's k-th sound the pool's k-th slot; docs/multirom/bn4.md, the owner's call 11). His ids alone (\"foes\"): the pool's slots are another Navi's sounds in his battles, so the copy is told by its slot"
+}

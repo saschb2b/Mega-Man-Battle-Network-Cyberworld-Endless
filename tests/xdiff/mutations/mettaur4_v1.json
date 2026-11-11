@@ -1,0 +1,34 @@
+[
+ {
+  "name": "Mettaur's CurAction off by one",
+  "spec": "mettaur4_v1",
+  "poke": [
+   "080B370E:200A"
+  ],
+  "what": "its state 6's set of CurAction 7 where it heads the appear queue (BN4 0x080B370E: movs r0,#7, the recipe's BN6's 9) written 0xA: its turn's next state left for another (caught at t1, its CurAction)"
+ },
+ {
+  "name": "Mettaur's queue's head aimed elsewhere",
+  "spec": "mettaur4_v1",
+  "call": [
+   "0800AA06:0810A952"
+  ],
+  "what": "its test of the appear queue's head (BN4_QUEUE_HEAD, made BN6_QUEUE_HEAD of queue 0 through its r0 shim) aimed at BN6's family nullsub, which returns the shim's 0: never its turn, it waits (caught at t1, its +7, CurAction and +0x20)"
+ },
+ {
+  "name": "Mettaur's shockwave's sprite at BN4's number",
+  "spec": "mettaur4_v1",
+  "poke": [
+   "080CFB8C:04:1"
+  ],
+  "what": "the third kind's 0x16's kinds' table (BN4 0x080CFB8C, bn4_twins.TABLES, copied with Mettaur) at its kind 0: its sprite's number left at BN4's list 4 0x04 where the recipe gives its copy's: the shockwave drawn from BN6's own list 4 0x04 (caught at t72, its sprite)"
+ },
+ {
+  "name": "Mettaur's shockwave's sound another",
+  "spec": "mettaur4_v1",
+  "poke": [
+   "080CFC6C:20D0"
+  ],
+  "what": "its shockwave's sound 0x8B (BN4 0x080CFC6C: movs r0,#0x8b, the recipe's Roll's pool slot 0xE0) made her pool's fourth slot, 0xD0 (her 0x132's): another of her sounds where the shockwave sets out (caught at t73, the family's sounds)"
+ }
+]

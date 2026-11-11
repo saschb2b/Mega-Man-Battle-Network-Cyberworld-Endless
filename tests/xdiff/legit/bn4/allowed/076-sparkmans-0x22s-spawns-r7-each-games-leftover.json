@@ -1,0 +1,18 @@
+{
+ "name": "SparkMan's 0x22's spawn's r7, each game's leftover",
+ "spawn_leftover": {
+  "kind": "T3",
+  "type": "0x22",
+  "word": "0x4C",
+  "bn4": [
+   "raw",
+   0
+  ],
+  "bn6": [
+   "T1:0x3c0#0",
+   "ai",
+   160
+  ]
+ },
+ "why": "SparkMan's spawner of his third kind 0x22 (0x080D1252: push {r0,r1,r2,r5}; movs r0,#0x22; the spawn) stores its caller's r7 at the object's +0x4C (0x080D126E), and its callers pass what they hold: his state as each game's Navi runner called it, and a 0x22 its own +0x4C again (0x080D1220). BN4's runner gives a state r7 from his object's +0x58, his AI data's pointer, which the other build never takes (no BN4_AI_TAKE in his init): 0. BN6's Navi object gives every Navi an AI data of its pool, its attack's variables' place (+0xA0) in r7. The object's kind 4 counts a word at its +0x4C down at its end and up at its start (0x080D10FC-0x080D1102, 0x080D111A-0x080D1120): in BN4 a write to address 0, the BIOS, which keeps nothing; in BN6 a word of his AI data, which his code never reads (the other build's, tools/xnavirecipe_bn4.py) and which BN4's side holds none of (bn4 no ai data). So the object and his own state are the same in both games; the pointer alone differs"
+}

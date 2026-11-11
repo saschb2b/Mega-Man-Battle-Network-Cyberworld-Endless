@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's target, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x78",
+  "0x7B"
+ ],
+ "why": "BN6 keeps an actor's target object at AI data +0x78 (0x0800F318: str r0,[r1,#0x78], r1 its AI data), MegaMan's for GutsMan. BN4's +0x78 is in his attack's variables (BN4_AI_ATTACK_VARS + 8), traced at BN6's +0xA8 (src/dev/xdiff_bn4_trace.c's ai_segs), so BN4's trace holds nothing at BN6's +0x78: BN6's own"
+}

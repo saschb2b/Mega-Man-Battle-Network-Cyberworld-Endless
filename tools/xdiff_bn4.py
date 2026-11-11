@@ -26,6 +26,7 @@ import json
 import os
 import re
 
+import shards
 from xdiff_bn4_opening import CompanionClock, Opening
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, KEPT, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
@@ -341,7 +342,7 @@ XC4_FIRST_ATTACK = 0xD0    # (... and XC4_FIRST_ATTACK: a moved row's `sub` from
 def chip_ids(spec):
     """{BN4's chip id: the run's}: the registry's rows (legit.json's bn4 chip_id, registry), then each pair the spec's folders
     name in the same place (folder4[i], folder6[i]), a chip both games name being BN6's own"""
-    rule = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('chip_id')
+    rule = shards.load('legit').get('bn4', {}).get('chip_id')
     if not rule:
         return {}
     rows = open(os.path.join(ROOT, rule['registry'])).read()
@@ -476,7 +477,7 @@ ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's fr
 
 
 def bn4_rule(name):
-    return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get(name) or {}
+    return shards.load('legit').get('bn4', {}).get(name) or {}
 
 
 WAIT_UNIT = re.compile(r'\{ XCHIP_MISC, 0x[0-9A-Fa-f]{2}, 0x([0-9A-Fa-f]{2}), .*, 0, 0, 0x[0-9A-Fa-f]{2} \},')
@@ -918,7 +919,7 @@ def bn4_sounds():
     a BN4 sound not there is compared as its own number, by the state's clock. A row naming "foes" (a moved Navi's copy of
     a number another row pairs otherwise: ThunderMan's 0xAD, the thunder's launch's in BN4's own code) holds only in a battle
     of one of them, over the other"""
-    rows = [r for r in json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', []) if 'bn4' in r]
+    rows = [r for r in shards.load('legit').get('bn4', {}).get('sounds', []) if 'bn4' in r]
     # (... and a row naming "chips", BN4's ids: a chip unit's copy of a number another row pairs otherwise, Thunder's ball's
     # 0xAD, in the specs whose folder holds one of them alone, over the others)
     scoped = lambda r: 2 if 'chips' in r else 1 if 'foes' in r else 0
@@ -930,7 +931,7 @@ def bn4_sounds():
 def bn6_sounds_alone():
     """legit.json's bn4 sounds, the rows of BN6's alone (no "bn4"): a sound BN6's engine plays where BN4's twin routine plays
     none, each for the specs of its subject alone ("subject": "megaman", a chip's spec: SPEC_SUBJECT)"""
-    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('sounds', [])
+    rows = shards.load('legit').get('bn4', {}).get('sounds', [])
     return {int(r['bn6'], 0) for r in rows if 'bn4' not in r and r.get('subject') in SPEC_SUBJECT}
 
 
@@ -1386,7 +1387,7 @@ def alignments(spec):
     into BN6's copy before the spec's own pokes (so a mutation's of the same place is the one that stands). BN6's opening a
     frame longer is its first blink step's (BN6_APPEAR_BLINK_FIRST), the appear queue's first object's: the queue blinks its
     objects one after another, so a spec of more than one foe is refused rather than aligned wrong"""
-    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('align', [])
+    rows = shards.load('legit').get('bn4', {}).get('align', [])
     if not rows:
         return []
     foes = [x for x in spec.get('foes', '').split(',') if x]
@@ -1407,7 +1408,7 @@ def alignments(spec):
 
 def bn4_allowed():
     """legit.json's bn4 allowed differences (each with its reason and both games' code)"""
-    return json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('allowed', [])
+    return shards.load('legit').get('bn4', {}).get('allowed', [])
 
 
 def allowed_bit(d, fam):
@@ -1791,7 +1792,7 @@ def compare(spec, ta, tb, canon, show=6):
 def rng_twins():
     """legit.json's bn4 rng twins as the spec's twin= items (src/dev/xdiff_spec.c): each BN6's and BN4's bytes the same over
     its length but where both hold a BL (each to its own game's routine), checked against both ROMs (.build/xdiff/rom)"""
-    rows = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('rng_twins', [])
+    rows = shards.load('legit').get('bn4', {}).get('rng_twins', [])
     roms = {g: open(os.path.join(ROOT, '.build', 'xdiff', 'rom', f'bn{g}.gba'), 'rb').read() for g in (4, 6)} if rows else {}
     items = []
     for t in rows:
@@ -1897,7 +1898,7 @@ def opening_skips(ta, tb):
     opening_draws): KEY:N, BN4's first N of the key with no twin of BN6's, N exactly BN4's draws of it in the two frames BN6's
     opening has no twin of (twinless_draws); [] none, the rule not in legit.json, or a key whose gap is not those draws (a
     draw of BN6's dropped or added: the spec runs as it is and fails where the family's state parts)"""
-    if not json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('opening_draws'):
+    if not shards.load('legit').get('bn4', {}).get('opening_draws'):
         return []
     out = []
     for k, (n4, n6) in sorted((opening_draws(ta, tb) or {}).items()):
@@ -1963,7 +1964,7 @@ def one(name, spec, a, canon, run_xdiff, work):
         canon.roms = {4: rom4b, 6: rom6b}
         canon.chips = chip_ids(spec)   # (legit.json's bn4 chip_id: megaman_chip_as_bn6)
         canon.spawner_read = set()
-        canon.chip_rule = json.load(open(os.path.join(ROOT, 'tests', 'xdiff', 'legit.json'))).get('bn4', {}).get('chip_id')
+        canon.chip_rule = shards.load('legit').get('bn4', {}).get('chip_id')
         if canon.chip_rule:
             rule = canon.chip_rule
             canon.chip_rule = dict({k: [int(x, 0) for x in rule[k]] for k in ('places', 'subfamily')},

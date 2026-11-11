@@ -1,0 +1,8 @@
+{
+  "feature": "Two MegaMen a side",
+  "date": "2026-10-22",
+  "name": "Issue #182: DarkInvs on side 1 of a 1v1 NetBattle",
+  "result": "Real: on both GBAs side 1's DarkInvs moved his AI data into the one block of BN5's size side 0's player holds (\"side 0 020115e0 side 1 020115e0\"), side 0 turned grey and the battle stood still. An actor's AI data is not its object slot's: BN6 keeps a pool of eight (0x02034080, its bits at 0x0203F6A0, taken by 0x0800ED2C, let go by 0x0800ED80 through the entry's own bit at +0x7C). With a room of its own for each MegaMan at the pool's end (side 1's player 0x02034740), side 1 fights under the chip AI and side 0 as himself (over at frame 1179), both sides at once too; 147 rollbacks of 8 the same; two a side with all four under it 2,372 iterations 0 apart, 319 rollbacks the same, chipaibreak=2 apart from iteration 340; the ordinary NetBattle over at 2690, last hash 86d2f837337a1494.",
+  "meaning": "BN5's chip AI is safe for any MegaMan of a NetBattle; a room is refused (he is left out) only where actors hold the pool's last entries.",
+  "link": "../online/arena/two-a-side/full-rules.md"
+}

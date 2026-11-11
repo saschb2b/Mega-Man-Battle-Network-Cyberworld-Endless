@@ -1,0 +1,7 @@
+{
+ "bn4": "0x143",
+ "bn6": "0x63",
+ "clock": "state",
+ "what": "ThunderMan's 0x71's sound 0x143, its copy",
+ "why": "Played by his 0x71 (BN4's third-kind 0x71, spawned by his state 85, MegaMan's in BN4) as it strikes its panel (movs r0,#0x44; adds r0,#0xff at 0x080DB672, its bl to PlaySoundEffect at 0x080DB676; BN6: its copy's movs r0,#0x63 and adds r0,#0, the recipe's immediates, its bl through its veneer to BN6's), a state's: BN4's song 0x143 copied into BN6's empty slot 0x63 on BN4's player 23 (src/emu/xnavi_bn4_sounds.c); BN4's at t775 and BN6's at t776 in thunderman_v1"
+}

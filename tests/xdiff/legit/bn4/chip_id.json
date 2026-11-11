@@ -1,0 +1,37 @@
+{
+ "why": "A chip id where MegaMan's AI data keeps one, BN4's read as the run's: the chip registry's rows for BN4 (a chip of a name of BN4's own takes an id of its own, docs/multirom/chip-registry.md), then the pairs the spec's folders name in the same place (folder4[i], folder6[i]: a chip both games name is BN6's own, paired by name as pair_bn4 pairs it). The place: his AttackVars +0x14, the chip used, written by the chip's use in both (BN4 0x0800D4D2 and BN6 0x08012824 / 0x080126F6: strh r0,[r7,#0x14], r7 the AI data + 0xA0). And his attack's subfamily (AttackVars +3), which each game's use copies from the chip's record +0x0C (BN4 0x0800D510-0x0800D512 and BN6 0x0801271A-0x0801271C: ldrb r1,[rec,#0xc]; strb r1,[r7,#3]): the two games number their support family's subfamilies apart (BN4's 0x0C/0x11 the time bomb's, BN6's 0x15/0x0A; BN4's table 0x080220E0, BN6's 0x0802CCB4), so where the run's chip is one of BN6's own and BN4's byte is its chip's record's, it is read as BN6's record's. A support chip's object keeps the chip too (support_objects, below). Not a mask: a subfamily that is not the record's, or a chip no row and no folder pairs, is compared as it is.",
+ "registry": "src/core/xchips_registry_bn4.c",
+ "places": [
+  "0xB4"
+ ],
+ "subfamily": [
+  "0xA3"
+ ],
+ "record": [
+  [
+   "0xA5",
+   "0x14",
+   1
+  ],
+  [
+   "0xAA",
+   "0x0A",
+   1
+  ],
+  [
+   "0xAC",
+   "0x10",
+   4
+  ],
+  [
+   "0xA8",
+   "0x1A",
+   2
+  ]
+ ],
+ "record_why": "What each game's use copies of the chip's record into MegaMan's AttackVars beside the subfamily (BN4 0x0800D508-0x0800D51A: the record's +0x0A to +0xA, its +0x10 word to +0xC, its +0x14 to +5; BN6 0x080126FE-0x08012714: the +0x10 word to +0xC, +0x0A above the power in the word at +8, +0x14 to +5), and the power at +8 where it is the record's own (+0x1A, no boost on it): for a chip both games name, which a run plays as BN6's with BN6's record, the two records are not one (HolyPanl's first parameter 6 in BN4's and 4 in BN6's, Barrier's 0 and 1, LifeAura's 5 and LifeAur's 9: BN4's routines map theirs through tables of its own; a chip that deals no damage holds 0x28 at BN4's power and 0 at BN6's), so each copy that is BN4's record's bytes is read as BN6's record's. Only for a pair whose BN6 chip is BN6's own (an id under 411): a registry row's record is made from BN4's and is compared as it is. The record's +0x0A goes on from there: the support run hands it above the power (r6), the support object's spawn keeps it at +0x2E, a third-kind object it spawns takes the same word, and that object's collision set-up copies its byte (BN6 0x08019FD8-0x08019FDA: ldrh r3,[r5,#0x2e]; strb r3,[r7,#7]; BN4 0x080129C6-0x080129C8 to its +5, the trace's layout BN6's). So a third-kind object whose damage word is BN4's record's power and +0x0A reads its +0x2E, and its collision data's copy, as BN6's record's (RockCube's cube: 0x32 in BN4's record 99, 0x9E in BN6's 143; bn4_chip_rockcube t34).",
+ "evidence": [
+  "bn4_chip_timebomb t32: MegaMan's AttackVars +0x14 0x61 in BN4's (its TimeBomb, 97) and 0x90 in BN6's (TimeBom1, 144, the spec's folders' pair); +3 0x11 in BN4's (record 97's +0x0C) and 0x0A in BN6's (record 144's +0x0C)",
+  "bn4_chip_areagrab t33: the area grab's object's +0x30 0x75 in BN4's (AreaGrab, 117) and 0xA3 in BN6's (163)"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "Net Square",
+  "date": "2026-10-15",
+  "name": "Two games through the hosted server",
+  "result": "The same room built from seed 120 on both; 211 peer positions matched; round trips 33 to 49 ms; both MegaMen back unchanged, all 24 checkpoint files unchanged.",
+  "meaning": "Presence over the public internet works, and a visit leaves the save alone.",
+  "link": "../online/overview.md"
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-04",
+  "what": "BN4's battle sprite cache mapped (BN4_SPRITE_CACHE 0x0200F720, its look-up 0x08002ACA and the battle's preload 0x08002AEC, docs/rom/bn4.md's row): the BN4 differential maps a pointer into a sprite BN4 keeps LZ77'd by the cache's entry for its list and number, carried in the trace (src/dev/xdiff.c apart4_out)."
+}

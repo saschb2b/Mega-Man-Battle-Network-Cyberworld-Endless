@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Navis in BN6's engine",
+  "date": "2026-11-05",
+  "name": "BN4's battle with GutsMan V1 fought twice",
+  "result": "python3 tools/xdiff.py bn4_gutsman_control: GutsMan V1 (BN4's enemy 0x84) alone at (5,2), MegaMan idle at (2,2) with 2000 HP, 1200 fight frames, BN4's own battle on the guest core in two processes: PASS, the traces the same at every frame (masks none). His objects appear from t265 (third-kind types in the trace's numbers 0xB2, 0xC0, 0xC2, 0x7F; the machine gun's every 11 frames from t461 and t912).",
+  "meaning": "The BN4 pipeline holds for a Navi as it does for a virus: a Soul Navi's AI data (his side's) and his objects are traced the same in two runs, so gutsman_v1's BN4 side is a sound reference once his move is built.",
+  "link": "../multirom/bn4-navis.md"
+}

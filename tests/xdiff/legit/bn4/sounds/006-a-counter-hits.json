@@ -1,0 +1,7 @@
+{
+ "bn4": "0x10A",
+ "bn6": "0x86",
+ "clock": "state",
+ "what": "a counter hit's",
+ "why": "Played as a hit counters, by each engine's collision code where it zeroes the struck object's collision data's counter byte (BN4_COLL_COUNTER, BN6_COLL_COUNTER: BN4's strb r0,[r4,#0xb] at 0x0801341E, BN6's strb r0,[r4,#0xd] at 0x0801A48C): BN4's routine at 0x08013410 plays 0x10A (movs r0,#0xb and adds r0,#0xff at 0x08013426, its bl at 0x0801342A), BN6's plays 0x86 (movs r0,#0x86 at 0x0801A49C, its bl at 0x0801A49E). Each is the one place its game loads that number before a call of its sound's routine (a scan of both ROMs' code: BN4 0x08000560 with 0x10A once, BN6 0x080005CC with 0x86 once). Seen in bn4_chip_cannon: MegaMan's Cannon counters the Mettaur's swing at t53."
+}

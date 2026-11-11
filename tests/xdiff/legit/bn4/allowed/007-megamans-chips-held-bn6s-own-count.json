@@ -1,0 +1,13 @@
+{
+ "name": "MegaMan's chips held, BN6's own count",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "obj",
+ "offsets": [
+  "0x1A",
+  "0x1A"
+ ],
+ "direction": "BN6 has, BN4 not",
+ "why": "BN6 counts the chips its MegaMan holds in his object's +0x1A (bn6f's ChipsHeld): set as the hand is given him (the store at 0x0800FE0C, in the routine at 0x0800FDEA, with the next chip at +0x2A) and one less as a chip is used (0x0800F322 to 0x0800F32A); two more routines write it (0x080165F8, 0x08016EE0). None of the four is located in BN4 by its bytes (tools/bn6f_match.py's map of bn6f's functions in BN4), and BN4's MegaMan's +0x1A reads 0 through a battle in which he holds and uses a chip (bn4_chip_cannon's trace: 1 in BN6 from the first frame, 0 from t33 as Cannon is used, 0 in BN4 throughout): BN4 keeps its hand's count elsewhere. BN6's own; where BN4's byte there held anything it is compared as ever."
+}
