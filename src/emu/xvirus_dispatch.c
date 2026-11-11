@@ -12,6 +12,7 @@
 #include "bn6_panels.h"
 #include "bytes.h"
 #include "rom.h"
+#include "xchips_bn4.h"
 
 static const int KINDS[XV_DISPATCH_KINDS] = { 1, 3, 4 };
 static const int TYPES[XV_DISPATCH_KINDS] = { XV_T1_DISPATCH, XV_T3_DISPATCH, XV_T4_DISPATCH };
@@ -67,8 +68,43 @@ uint32_t xvirus_dispatch_spawner(int game, uint32_t from) {
 	return 0;
 }
 
+/* BN4's chips' page's spawners, in their order at XV_SPAWN4_3 on: BN6's spawner and BN4's that goes to it */
+static const struct { uint32_t at, bn6, bn4; } SPAWNERS4[3] = {
+	{ XV_SPAWN4_3, BN6_SPAWN_3, BN4_SPAWN_3 },
+	{ XV_SPAWN4_3_LAST, BN6_SPAWN_3_LAST, BN4_SPAWN_3_LAST },
+	{ XV_SPAWN4_3_FIRST, BN6_SPAWN_3_FIRST, BN4_SPAWN_3_FIRST },
+};
+_Static_assert(XV_T3_DISPATCH4 == BN6_T3_FREE && XV_SPAWN4_3_FIRST + 0x40u <= XC4_PAGE_CODE + XC4_PAGE_CODE_SIZE &&
+	XC4_PAGE_MOVED + 4u * XV_TYPES_MAX == XC4_PAGE_CODE && XC4_PAGE_CODE + XC4_PAGE_CODE_SIZE <= XC4_MISC,
+	"BN4's chips' page: its type BN6's free one, its table and code in its room");
+
+uint32_t xvirus_dispatch4_moved_at(int n) { return n < 0 || n >= XV_TYPES_MAX ? 0 : XC4_PAGE_MOVED + 4u * (uint32_t)n; }
+
+uint32_t xvirus_dispatch4_code_at(uint32_t *size) {
+	if (size) *size = XC4_PAGE_CODE_SIZE;
+	return XC4_PAGE_CODE;
+}
+
+uint32_t xvirus_dispatch4_spawner(uint32_t from) {
+	for (int i = 0; i < 3; ++i)
+		if (from == SPAWNERS4[i].bn4) return SPAWNERS4[i].at;
+	return 0;
+}
+
+bool xvirus_dispatch_runs(int kind, int type) { return type >= 0 && (type == xvirus_dispatch_type(kind) || (kind == 3 && type == XV_T3_DISPATCH4)); }
+
+bool xvirus_dispatch_code_at(uint32_t at) {
+	return (at >= XV_STUBS && at < XV_STUBS_END) || (at >= XC4_PAGE_CODE && at < XC4_PAGE_CODE + XC4_PAGE_CODE_SIZE);
+}
+
 bool xvirus_dispatch_is_spawner(uint32_t to, int *kind, uint32_t *bn6) {
 	uint32_t at = to & ~1u;
+	for (int i = 0; i < 3; ++i)
+		if (at == SPAWNERS4[i].at) {
+			if (kind) *kind = 3;
+			if (bn6) *bn6 = SPAWNERS4[i].bn6;
+			return true;
+		}
 	if (at < XV_SPAWN_1 || (at - XV_SPAWN_1) % XV_SPAWN_STEP || (at - XV_SPAWN_1) / XV_SPAWN_STEP >= XV_SPAWNERS) return false;
 	int i = (int)((at - XV_SPAWN_1) / XV_SPAWN_STEP);
 	if (kind) *kind = SPAWNERS[i].kind;
@@ -79,8 +115,9 @@ bool xvirus_dispatch_is_spawner(uint32_t to, int *kind, uint32_t *bn6) {
 /* ---- the code: Thumb encoded from its fields ---- */
 
 typedef struct {
-	uint8_t *out;   /* the stubs' bytes, XV_STUBS at out[0] */
-	uint32_t at;    /* the next instruction's offset */
+	uint8_t *out;   /* the code's bytes, */
+	uint32_t at;    /* the next instruction's offset, */
+	uint32_t org;   /* out[0]'s address (XV_STUBS, or the page's code's) */
 } Asm;
 
 static void op(Asm *a, uint32_t v) {
@@ -92,8 +129,8 @@ static void word(uint8_t *out, uint32_t off, uint32_t v) { put32(out + off, v); 
 
 /* ldr rd,[pc,#..]: the word at offset `lit` (word-aligned, after the instruction) */
 static void ldr_pc(Asm *a, int rd, uint32_t lit) {
-	uint32_t pc = (XV_STUBS + a->at + 4) & ~3u;
-	op(a, 0x4800u | (uint32_t)rd << 8 | ((XV_STUBS + lit - pc) / 4 & 0xFF));
+	uint32_t pc = (a->org + a->at + 4) & ~3u;
+	op(a, 0x4800u | (uint32_t)rd << 8 | ((a->org + lit - pc) / 4 & 0xFF));
 }
 
 static uint32_t ldrb_imm(int rd, int rn, int imm) { return 0x7800u | (uint32_t)imm << 6 | (uint32_t)rn << 3 | (uint32_t)rd; }
@@ -120,7 +157,7 @@ static uint32_t b_cond(int cond, uint32_t from, uint32_t to) { return 0xD000u | 
  * type spawned as none of the moved: let go as it first runs (a tail call:
  * object_freeMemory returns to the runner) */
 static void none(uint8_t *out) {
-	Asm a = { out, XV_STUB_NONE - XV_STUBS };
+	Asm a = { out, XV_STUB_NONE - XV_STUBS, XV_STUBS };
 	ldr_pc(&a, 0, a.at + 4);
 	op(&a, bx(0));
 	word(out, a.at, BN6_OBJECT_FREE | 1);
@@ -134,9 +171,9 @@ static void none(uint8_t *out) {
  *   ldr  r0,=moved    the kind's MOVED
  *   ldr  r0,[r0,r1]   the routine
  *   bx   r0           on to it, r1 its type times four as its game's runner leaves it */
-static void dispatch(uint8_t *out, int k) {
-	uint32_t base = XV_STUB_DISPATCH - XV_STUBS + XV_STUB_DISPATCH_STEP * (uint32_t)k, lit = base + 0x10;
-	Asm a = { out, base };
+static void dispatch_at(Asm a, uint32_t side, uint32_t moved) {
+	uint8_t *out = a.out;
+	uint32_t lit = a.at + 0x10;
 	op(&a, ldrb_imm(0, 5, BN6_T1_SLOT));
 	ldr_pc(&a, 1, lit);
 	op(&a, ldrb_reg(1, 1, 0));
@@ -145,8 +182,13 @@ static void dispatch(uint8_t *out, int k) {
 	op(&a, ldr_reg(0, 0, 1));
 	op(&a, bx(0));
 	op(&a, NOP);
-	word(out, lit, xvirus_dispatch_side(KINDS[k]));
-	word(out, lit + 4, XV_MOVED_TABLES + XV_STEP * (uint32_t)k);
+	word(out, lit, side);
+	word(out, lit + 4, moved);
+}
+
+static void dispatch(uint8_t *out, int k) {
+	Asm a = { out, XV_STUB_DISPATCH - XV_STUBS + XV_STUB_DISPATCH_STEP * (uint32_t)k, XV_STUBS };
+	dispatch_at(a, xvirus_dispatch_side(KINDS[k]), XV_MOVED_TABLES + XV_STEP * (uint32_t)k);
 }
 
 /* a spawner (r0 its game's type, r1-r4 the object's words, called by BL
@@ -164,10 +206,31 @@ static void dispatch(uint8_t *out, int k) {
  *   ldr  r0,[sp,#8]    its game's type; strb r0,[r1]   the side table by its slot
  *   pop  {r0,r1}
  * 2:add  sp,#4; pop {pc} */
+/* ... a spawner from its call of BN6's on (a->at there): `lit` the offset of BN6's spawner's word, the side table's after it */
+static void spawn_tail(Asm *a, uint32_t lit) {
+	uint8_t *out = a->out;
+	ldr_pc(a, 5, lit);
+	op(a, MOV_LR_PC);
+	op(a, bx(5));
+	op(a, 0x2D00u);   /* cmp r5,#0 */
+	uint32_t beq = a->at;
+	op(a, 0);
+	op(a, PUSH_R0_R1);
+	op(a, ldrb_imm(1, 5, BN6_T1_SLOT));
+	ldr_pc(a, 0, lit + 4);
+	op(a, 0x1809u);   /* adds r1,r1,r0 */
+	op(a, 0x9802u);   /* ldr r0,[sp,#8] */
+	op(a, 0x7008u);   /* strb r0,[r1] */
+	op(a, POP_R0_R1);
+	put16(out + beq, b_cond(EQ, beq, a->at));
+	op(a, ADD_SP_4);
+	op(a, POP_PC);
+}
+
 static void spawner(uint8_t *out, int i) {
 	int kind = SPAWNERS[i].kind, k = xvirus_dispatch_slot(kind);
 	uint32_t base = XV_SPAWN_1 - XV_STUBS + XV_SPAWN_STEP * (uint32_t)i, lit = base + 0x2C;
-	Asm a = { out, base };
+	Asm a = { out, base, XV_STUBS };
 	op(&a, PUSH_R0_LR);
 	ldr_pc(&a, 5, lit);
 	op(&a, lsls(0, 0, 24));
@@ -178,26 +241,29 @@ static void spawner(uint8_t *out, int i) {
 	op(&a, 0);
 	op(&a, 0x2000u | (uint32_t)TYPES[k]);
 	put16(out + bne, b_cond(NE, bne, a.at));
-	ldr_pc(&a, 5, lit + 4);
-	op(&a, MOV_LR_PC);
-	op(&a, bx(5));
-	op(&a, 0x2D00u);   /* cmp r5,#0 */
-	uint32_t beq = a.at;
-	op(&a, 0);
-	op(&a, PUSH_R0_R1);
-	op(&a, ldrb_imm(1, 5, BN6_T1_SLOT));
-	ldr_pc(&a, 0, lit + 8);
-	op(&a, 0x1809u);   /* adds r1,r1,r0 */
-	op(&a, 0x9802u);   /* ldr r0,[sp,#8] */
-	op(&a, 0x7008u);   /* strb r0,[r1] */
-	op(&a, POP_R0_R1);
-	put16(out + beq, b_cond(EQ, beq, a.at));
-	op(&a, ADD_SP_4);
-	op(&a, POP_PC);
+	spawn_tail(&a, lit + 4);
 	word(out, lit, XV_TWIN_TABLES + 0x100u * (uint32_t)k);
 	word(out, lit + 4, SPAWNERS[i].bn6 | 1);
 	word(out, lit + 8, xvirus_dispatch_side(kind));
 }
+
+/* BN4's chips' page's code at XC4_PAGE_CODE: its dispatch type's routine, as dispatch()'s with its own MOVED, and its
+ * spawners (r0 BN4's type, as spawner()'s with no twin to read):
+ *   push {r0,lr}; movs r0,#XV_T3_DISPATCH4; then as spawner()'s from its call of BN6's on */
+void xvirus_dispatch4_code(uint8_t *out) {
+	memset(out, 0, XC4_PAGE_CODE_SIZE);
+	dispatch_at((Asm){ out, 0, XC4_PAGE_CODE }, xvirus_dispatch_side(3), XC4_PAGE_MOVED);
+	for (int i = 0; i < 3; ++i) {
+		uint32_t base = SPAWNERS4[i].at - XC4_PAGE_CODE, lit = base + 0x20;
+		Asm a = { out, base, XC4_PAGE_CODE };
+		op(&a, PUSH_R0_LR);
+		op(&a, 0x2000u | XV_T3_DISPATCH4);
+		spawn_tail(&a, lit);
+		word(out, lit, SPAWNERS4[i].bn6 | 1);
+		word(out, lit + 4, xvirus_dispatch_side(3));
+	}
+}
+
 
 /* XV_SUPPORT (r5 the virus, r7 its attack's variables): BN5's support family (0x080EC400) ends a virus's support chip in the
  * frame its routine runs, BN6's (0x080ED0DC) a frame later (phase 1): BN6's run twice in the one frame, +1 back to 0 as BN5's
@@ -205,7 +271,7 @@ static void spawner(uint8_t *out, int i) {
  *   push {lr}; ldr r3,=family; mov lr,pc; bx r3; ldr r3,=family; mov lr,pc; bx r3; movs r0,#0; strb r0,[r7,#1]; pop {pc} */
 static void support(uint8_t *out) {
 	uint32_t base = XV_SUPPORT - XV_STUBS, lit = base + 0x14;
-	Asm a = { out, base };
+	Asm a = { out, base, XV_STUBS };
 	op(&a, 0xB500u);   /* push {lr} */
 	for (int k = 0; k < 2; ++k) {
 		ldr_pc(&a, 3, lit);
@@ -223,7 +289,7 @@ static void support(uint8_t *out) {
  *   push {lr}; ldr r3,=writer; mov lr,pc; bx r3; cmp r0,#0x15; bne 1f; movs r0,#XV_SUPPORT_FAMILY; 1: pop {pc} */
 static void chip_writer(uint8_t *out) {
 	uint32_t base = XV_CHIP_WRITER - XV_STUBS, lit = base + 0x10;
-	Asm a = { out, base };
+	Asm a = { out, base, XV_STUBS };
 	op(&a, 0xB500u);
 	ldr_pc(&a, 3, lit);
 	op(&a, MOV_LR_PC);
@@ -245,7 +311,7 @@ static void chip_writer(uint8_t *out) {
  *   mov r1,r10; ldr r1,[r1,#0x18]; ldr r0,[r1,#0x40]; cmp r0,#1; ldrh r0,[r1,#0x32]; bhi 1f; lsrs r0,#1; lsls r0,#1; 1: mov pc,lr
  * (r0 and r1 alone, as BN4's routine) */
 static void fight_flags(uint8_t *out) {
-	Asm a = { out, XV_FIGHT_FLAGS - XV_STUBS };
+	Asm a = { out, XV_FIGHT_FLAGS - XV_STUBS, XV_STUBS };
 	op(&a, 0x4651u);   /* mov r1,r10 */
 	op(&a, 0x6989u);   /* ldr r1,[r1,#0x18] */
 	op(&a, 0x6800u | (BN6_BATTLE_TIMER - BN6_BATTLE_STATE) / 4 << 6 | 1 << 3);   /* ldr r0,[r1,#0x40] */

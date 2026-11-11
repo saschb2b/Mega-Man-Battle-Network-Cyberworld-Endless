@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T13:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T12:40:46Z }
 ---
 
 # Transplanted families
@@ -115,6 +115,11 @@ and its calls aimed again (`src/emu/xvirus.c`):
   moved block that reads its object's type is refused, so the moved code
   never sees the dispatch's. BN6's own battles are the same at every byte
   with it made (`tools/xcontrol.py`, `tools/xfamily.py --spec native`).
+  BN4's chips' units run their third-kind objects by the kind's other
+  dead type, 0xD1, with a MOVED table and spawners of their own in the
+  chips' region ([the chips' generator](../devtools/chip-recipe-generator.md),
+  The dispatch's numbers): the tables above are one for every game, and
+  BN5's own numbers were all they had left.
 - **The control** (`--dev xcontrol`): BN6's own Mettaur, AI 1, moved
   through the same steps as AI 32 with ids 0x200-0x205. It must play frame
   for frame as BN6's: `tools/xcontrol.py` fights it and BN6's own under

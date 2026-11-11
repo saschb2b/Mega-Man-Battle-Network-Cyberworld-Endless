@@ -340,8 +340,8 @@ static HookAct on_spawn(HookRegs *r, void *user) {
 	e->a = hook_read8(r->r[1]);
 	/* (called by the second-level dispatch's spawner for a moved family's code: its caller that code, its type its game's where
 	 * the dispatch runs it, as BN5's spawn of it has them) */
-	if (log->game == 6 && (lr & ~1u) >= XV_STUBS && (lr & ~1u) < XV_STUBS_END) {
-		if ((int)e->a == xvirus_dispatch_type(e->sub)) e->a = hook_read8(r->r[1] + DISPATCH_FRAME);
+	if (log->game == 6 && xvirus_dispatch_code_at(lr & ~1u)) {
+		if (xvirus_dispatch_runs(e->sub, (int)e->a)) e->a = hook_read8(r->r[1] + DISPATCH_FRAME);
 		lr = hook_read32(r->r[1] + DISPATCH_FRAME + 4);
 		above = r->r[1] + DISPATCH_FRAME + 8;
 	}

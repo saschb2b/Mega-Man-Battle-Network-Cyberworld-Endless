@@ -662,15 +662,13 @@ static void types_set(const XVirusFamily *f, const Game *g) {
 		const XvType *t = &f->types[i];
 		int k = xvirus_dispatch_slot(t->kind);
 		uint32_t routine = 0;
-		if (t->to == XV_TYPE_SHARED) {
-			/* (moved by a family installed before it, or a unit before it in this step, xv_read32: its MOVED entry must name
-			 * that one's copy, its TWIN entry moved) */
-			uint32_t moved = xvirus_dispatch_moved_at(t->kind, t->from), twin = xvirus_dispatch_twin_at(t->kind, t->from);
-			if (!moved || xv_read32(moved) == (XV_STUB_NONE | 1) || xv_read8(twin) != XV_TYPE_MOVED)
-				xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
+		if (t->to == XV_TYPE_SHARED || t->to == XV_TYPE_SHARED4) {
+			/* (moved by a family installed before it, or a unit before it in this step: its MOVED entry must name that one's
+			 * copy, its TWIN entry moved; the page's entry, a chip unit of BN4's: xg_type_shared) */
+			if (!xg_type_shared(t->kind, t->from, t->to)) xv_fail("its object %d:%#x is moved by no family installed before it", t->kind, t->from);
 			continue;
 		}
-		if (k >= 0 && t->to == XV_TYPE_MOVED) {
+		if (k >= 0 && (t->to == XV_TYPE_MOVED || t->to == XV_TYPE_MOVED4)) {
 			uint32_t of = t->of ? t->of : t->from;   /* (its number in its game, where its code spawns it by another) */
 			uint32_t own = of < g->ntypes[k] ? rom32(g->rom, g->types[k] + 4u * of) : 0;
 			routine = (own & 1) && xvirus_is_code(f, own & ~1u) ? moved_to(f, own) : 0;

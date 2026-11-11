@@ -406,6 +406,8 @@ static bool units4_install(bool navis) {
 	xv_tx_begin();
 	bool fresh = !navis && tables_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
+	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
+	if (!navis && !xv_failed()) xg_page4_stage();
 	const char *at = "BN6's routines' tables";
 	int units = 0;
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {

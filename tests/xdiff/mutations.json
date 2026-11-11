@@ -1197,9 +1197,9 @@
    "name": "a Program Advance's id",
    "spec": "pa_suprspr1",
    "poke": [
-    "08801366:0165:2"
+    "08801370:0165:2"
    ],
-   "what": "SuprSpr1's recipe in the grown list (FREE_CHIP_PAS + 0x64, src/core/xchips_pas.c: after the ten of ten bytes whose parts are Navi chips) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
+   "what": "SuprSpr1's recipe in the grown list (FREE_CHIP_PAS + 0x6E, src/core/xchips_pas.c: after the eleven of ten bytes before it, the ten whose parts are Navi chips and BN6's CrosOver) names 357 (SuprSpr2) where the registry's SuprSpr1 is 356: the P.A. formed is SuprSpr2, its power and its attack another"
   },
   {
    "name": "a Program Advance's moved routine's entry",
@@ -3455,6 +3455,30 @@
     "08C0738B:D0:1"
    ],
    "what": "the registry's record of BN4's PropBom2 (672) with family 0xD0, the spread chips' unit, where the row gives PropBom's 0xD4: another attack"
+  },
+  {
+   "name": "The chips' page's entry of MokoRus's Moko blank",
+   "spec": "bn4_chip_mokorus1",
+   "poke": [
+    "0893E6B0:08B45F01"
+   ],
+   "what": "BN4's chips' page of the dispatch (XC4_PAGE_MOVED, by BN4's own type) holds the stray's routine (XV_STUB_NONE) for the third kind's 0x2C where MokoRus's unit set its copy: each Moko is let go as it first runs, and the Mettaurs keep the HP BN4's Mokos take"
+  },
+  {
+   "name": "The chips' page's entry of WhitWeb's web blank",
+   "spec": "bn4_chip_whitweb1",
+   "poke": [
+    "0893E6F4:08B45F01"
+   ],
+   "what": "the page's entry for the third kind's 0x3D the stray's routine where WhitWeb's unit set its copy: the web is let go as it first runs, no web lies on the row and the Mettaur keeps its 140 HP"
+  },
+  {
+   "name": "The chips' page's spawner spawns the tables' dispatch type",
+   "spec": "bn4_chip_boomer1",
+   "poke": [
+    "0893EA22:20D2"
+   ],
+   "what": "the page's spawner (XV_SPAWN4_3) spawns BN6's 0xD2, the tables' dispatch type, where it spawns 0xD1, the page's (movs r0,#0xD1 made #0xD2): the boomerang runs as the tables' entry for 0x32, which no recipe set, and is let go where BN4's flies its round"
   },
   {
    "name": "GutsMan's chip's row's power another",

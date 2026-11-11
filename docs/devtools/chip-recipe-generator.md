@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:51:55Z }
 ---
 
 # The chip recipe generator
@@ -251,11 +251,13 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   compared to its depth (`TYPE_TWINS`), the census's lesson ([BN4's chips
   in a run](../multirom/bn4-chips.md), The six "on BN6's code" are not).
 - **Its objects.** A third- or fourth-kind type it spawns that BN6 has
-  no twin of is moved with it, at a number of the second-level
-  dispatch's: the fourth kind's from 0x91 up, the third kind's from
-  `TYPES3` in the units' order (The dispatch's numbers, below). The
-  generator refuses a unit while any other recipe names a number it
-  takes (`numbers_clear`).
+  no twin of is moved with it. A fourth-kind one takes a number of the
+  second-level dispatch's from 0x91 up, its spawn's immediate changed,
+  and the generator refuses a unit while any other recipe names that
+  number (`numbers_clear`). A third-kind one keeps BN4's own number on
+  the chips' page of the dispatch (The dispatch's numbers, below): no
+  immediate changes, its call goes to the page's spawner, and a type is
+  one unit's unless every unit of a kind shares it (`SHARED3`: the arm).
 - **Its copies.** A kinds' table an object reads out of its region
   (`TABLES`: the star's) is a block of the unit, each spawned kind's
   sprite copied (list 3 from 0x70 up), its
@@ -346,34 +348,50 @@ by the number an object was spawned as
 ([Virus families moved into BN6's battle engine](../multirom/families.md)).
 A type of BN5's moved takes BN5's own number there (0 to 0xCB for the
 third kind), and BN4's families and Navis have spent what lies above
-(0xCC to 0xFF). So BN4's chips take numbers of BN5's range, and the
-only safe ones are those no track of BN5's will ever need.
+(0xCC to 0xFF). BN4's chips bring some hundred units more, and the only
+numbers left were BN5's own that no BN5 track would ever need.
 
-`tools/bn5_twins.py` holds that in one place, `dispatch_reserved`:
-every type a BN5 track moves (`TYPES`, the one decision a type that
-every BN5 generator already requires) and every type a BN5 Navi not
-yet moved will (`NAVI_TYPES_AHEAD`: ProtoMan, MagnetMan, LarkMan,
-GridMan, Bass, Nebula Grey and ShadeMan's last form, read by
-`tools/xnavirecipe.py --report --ai 1 5 17 18 19 20 21` on 11 November
-2026, each Navi's code walked from its state table; DarkMegaMan is no
-Navi of the table). 144 of the third kind's 204 numbers are in it.
+**BN4's chips have a page of their own** (11 November 2026;
+`src/emu/xvirus_dispatch.h`). BN6's third kind has two dead types, 0xD1
+and 0xD2: 0xD2 is the dispatch's, and 0xD1 (`XV_T3_DISPATCH4`) now runs
+a chip unit's objects. Its routine reads the same side table by the
+object's slot and goes on to a MOVED table of its own
+(`XC4_PAGE_MOVED`, 256 words at the end of the chips' region), indexed
+by BN4's own type number. A unit's calls to BN4's third-kind spawners
+go to the page's three (`XV_SPAWN4_3`, `_LAST`, `_FIRST`), which spawn
+0xD1 with no twin to read, since a chip unit moves every type it
+spawns. In a recipe such a type is `XV_TYPE_MOVED4`, or
+`XV_TYPE_SHARED4` where a unit before it moved it. So the chips
+allocate nothing and share no number with any game: BN4 has 165
+third-kind types and the page 256 entries. The differential reads a
+page object's type as it reads a dispatched one's, from the side table
+(`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
+own. The fourth kind stays in the tables (BN5's own end at 0x90, the
+chips' run from 0x91; three taken by fourteen units).
 
-`TYPES3` (the chips') and `TYPES3_NAVIS` (BN4's Navis', the lowest of
-the same numbers) may name none of them: the generator stops before it
-reads a ROM (`numbers_reserved`), and `build.py lint` makes the same
-check without one, so a BN5 change that moves a type whose number BN4
-lists fails CI and says which. The mend is in `TYPES3`: the number is
-replaced in its place by one from the tuple's end, so the unit that
-held it moves alone and every other keeps its number; that unit's specs
-and mutations run again. It was done once, on 11 November 2026: the
-first list had taken the numbers no BN5 recipe named that day, and five
-units held numbers of GridMan's, LarkMan's and Nebula Grey's (Counter
-0xC8 to 0xB4, WhitWeb 0xC6 to 0xAE, the spread shot 0xBE to 0xAD,
-FlmLine's flame 0xBD to 0xA9, Thunder 0xBB to 0xA3).
+**BN5's numbers are still guarded for BN4's Navis.** Their track takes
+third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF
+are spent). `tools/bn5_twins.py` holds what it may not take in one
+place, `dispatch_reserved`: every type a BN5 track moves (`TYPES`, the
+one decision a type that every BN5 generator already requires) and
+every type a BN5 Navi not yet moved will (`NAVI_TYPES_AHEAD`: ProtoMan,
+MagnetMan, LarkMan, GridMan, Bass, Nebula Grey and ShadeMan's last
+form, read by `tools/xnavirecipe.py --report --ai 1 5 17 18 19 20 21`
+on 11 November 2026, each Navi's code walked from its state table;
+DarkMegaMan is no Navi of the table). 144 of the third kind's 204
+numbers are in it. The generator stops before it reads a ROM where the
+tuple names one (`numbers_reserved`), and `build.py lint` makes the
+same check without a ROM, so a BN5 change that moves a type BN4 lists
+fails CI and says which. The fourth kind's run (`TYPES4`, 0x91 to 0xDF)
+is held to `dispatch_reserved(4)` the same way: 55 numbers on
+11 November, GridMan's 0x58 among them, the highest 0x90.
 
-**The numbers run short.** 29 are left for the chips and 18 for BN4's
-Navis, with about a hundred units to move, and BN5's chips not yet
-moved will ask for more of the same range. Not built: a dispatch type
-of BN4's own (a second dead type of BN6's third kind with a MOVED table
-of its own, 1 KB), after which BN4 shares no number with BN5.
+**How it came about.** The chips' first fourteen units took numbers of
+the tables: those no BN5 recipe named on 10 November. A day later five
+of them were GridMan's, LarkMan's and Nebula Grey's, and were replaced
+in their places (Counter 0xC8 to 0xB4, WhitWeb 0xC6 to 0xAE, the spread
+shot 0xBE to 0xAD, FlmLine's flame 0xBD to 0xA9, Thunder 0xBB to 0xA3);
+29 numbers were left for a hundred units. The page ended that the same
+day, and the 41 numbers the chips held or had ahead went to the Navis'
+tuple (59 in all; BN4's five Navis still to move need 15 to 20).
 
