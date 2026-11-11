@@ -117,7 +117,7 @@ static int megaman_parse(Spec *s, const char *name, char *v) {
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->folder[k][i] = (uint16_t)got[i % n];
 		return (s->nfolder[k] = n) > 0;
 	}
-	if (item_of(name, "deck", false)) {
+	if (item_of(name, "deck", true)) {
 		int n = entry_list(v, got, BN6_FOLDER_ENTRIES, k == 1);
 		for (int i = 0; n > 0 && i < BN6_FOLDER_ENTRIES; ++i) s->deck[k][i] = (uint16_t)got[i % n];
 		return (s->ndeck[k] = n > 0 ? BN6_FOLDER_ENTRIES : 0) > 0;

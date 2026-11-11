@@ -330,7 +330,7 @@ def bn4_as_bn6(rec, fams):
 CHIP_RECORDS, CHIP_RECORD_SIZE, CHIP_SUBFAMILY, BN6_CHIPS = {4: 0x197EC, 6: 0x21DA8}, 0x2C, 0x0C, 411
 XREG4_ROW = re.compile(r'\{\s*(\d+),\s*(\d+),\s*XREG_\w+,')
 XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-Fa-f]{2}),')
-XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
+XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_(?:MOVED|PA),\s*\d+,\s*0x([0-9A-Fa-f]{2}),')   # (a Program Advance's row too, once it names its unit)
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
 OBJ_ELEMENT4, OBJ_ELEMENT6 = 0x17, 0x0E   # (a fourth-kind object's element: bn4.h BN4_T1_ELEMENT, BN6's BN6_T1_ELEMENT)
@@ -351,7 +351,10 @@ def chip_ids(spec):
     TWINS.update({int(to): (int(twin), None if sub.upper() == 'FF' else int(sub, 16)) for to, twin, sub in XREG4_TWIN.findall(rows)})
     # (a row whose code is moved, XREG_MOVED: no twin, its subfamily its unit's number in BN6's grown support routines)
     # (... or, from XC4_FIRST_ATTACK, its family's number in BN6's grown attack families: its subfamily BN4's own, attack_families)
-    TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)})
+    # (a Program Advance whose code is moved, XREG_PA with its unit's number, tools/xreg_bn4.py PAS: read as a moved chip's; one
+    # that names none, 0xFF, is unformed and no row here)
+    TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)
+                  if sub.upper() != 'FF'})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
@@ -434,6 +437,41 @@ def support_spawners(roms, game, kind):
                 todo.append(v)
     SUPPORT_SPAWNERS[game, kind] = out
     return out
+
+
+MISC_TABLE4, MISC_COUNT4 = 0x080EC9CC, 0x12   # (BN4_MISC_ROUTINES, BN4_MISC_ROUTINE_COUNT)
+MISC_SPAWNERS = {}
+
+
+def misc_spawners(roms, kind):
+    """{subfamily: its routine} of BN4's misc subfamilies whose routine is a spawner of the fourth kind's type `kind` that
+    stores the element from r2 at the object's +0x17 (movs r0,#kind; its one call the spawn; strb r2,[r0,#0x17]): PitRng's
+    launcher's (legit.json's bn4 support_objects)"""
+    if kind in MISC_SPAWNERS:
+        return MISC_SPAWNERS[kind]
+    import xrecipe_thumb as T
+    rom = T.Rom(roms[4], 'bn4')
+    w32 = lambda a: int.from_bytes(roms[4][a - 0x08000000:a - 0x08000000 + 4], 'little')
+    out = {}
+    for sub in range(MISC_COUNT4):
+        a = w32(MISC_TABLE4 + 4 * sub) & ~1
+        wk = T.walk(rom, a, 0x40)
+        text = [i.text for _, i in sorted(wk.insns.items())]
+        calls = [i.target for _, i in sorted(wk.insns.items()) if i.form == 'bl']
+        if calls == [SUPPORT_TABLES[4][2]] and f'movs r0, #{kind:#x}' in text and f'strb r2, [r0, #{OBJ_ELEMENT4:#x}]' in text:
+            out[sub] = a
+    MISC_SPAWNERS[kind] = out
+    return out
+
+
+def misc_object_as_bn6(rec, canon):
+    """a BN4 fourth-kind object's record with its element at BN6's place, where its type is the object a misc routine of
+    BN4's spawns (misc_spawners) and that routine is a moved unit's (a row of the registry names BN6's grown misc routine of
+    its subfamily): the spawner's store, BN4's +0x17, is the recipe's immediate BN6's +0x0E, read there where BN4's +0x0E
+    holds 0"""
+    subs = misc_spawners(canon.roms, rec[NODE + OBJ_TYPE])
+    if subs and rec[NODE + OBJ_ELEMENT6] == 0 and any(TWINS.get(to) == (None, XC4_FIRST_SUPPORT + sub) for sub in subs for to in canon.chips.values()):
+        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
 
 
 def support_object_as_bn6(rec, canon):
@@ -735,6 +773,7 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
         support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
+        misc_object_as_bn6(rec, canon)      # (... and a moved misc routine's object's element)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)
@@ -1804,6 +1843,8 @@ def megaman_items(spec, game):
             parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
         for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    if spec.get('deck4'):   # (BN4's battle deck in the spec's order, BN4_BATTLE_DECK: a Program Advance's parts in one hand)
+        parts.append('deck4=' + ','.join(spec['deck4']))
     if game == 'bn4:bn6' and spec.get('deck6'):   # (BN6's battle deck in the spec's order, as a BN5 spec's: two chips in one hand)
         parts.append('deck6=' + ','.join(spec['deck6']))
     if spec.get('karma4') is not None:   # (MegaMan's karma in BN4's battle: a dark chip's spec, bn4_chips.h's BN4_CHIP_ALIGN)
