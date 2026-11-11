@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/agents-tools.md (the `darkloid/NAME` routes: a BN5 Darkloid's battle in BN6's engine, for a look at each).
 * **Update**: multirom/bn4-chips.md (the spread chips moved, the first attack family; what waits), rom/bn4.md (the spread chips' code and a chip's attack family, new row), rom/chips-code.md (BN4's chips' attack families' numbers), devtools/chip-recipe-generator.md (an attack unit), devtools/differential.md (a moved attack family's chip's spec).
 * **Update**: multirom/navis.md (CloudMan moved and proved; the 0x0B the Navis' copy; three generator rules), game/liberation/building/stage-4-darkloids.md and par-prize.md (CloudMan on the board, his chips at par), rom/liberation.md (CloudMan's clouds' row facts), multirom/gaps.md, multirom/chips-code.md (the Bubbles helper gone), game/bosses/bn5-navis.md, devtools/navi-recipe-generator.md (LOW_BYTE_KEPT, every parent compare, the type's track), engine/emulation/free-space.md (the Navis' shared art's fourth room, FREE_NAVI_SHARED_FOUR).
 * **Create**: game/bosses/bn4-navis.md (BN4's nine proved Navis guard BN4's areas: where its records set them, the band, the staging, the Guardian Data's chip or a BN6 kin's); **Update**: rom/bn4.md (its Navis' overworld sprites in list 6), multirom/status.md and multirom/gaps.md (BN4's guardians built).
