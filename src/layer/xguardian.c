@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "chips.h"
@@ -30,6 +31,7 @@ static int xguardian_id(int navi, int version) {
 }
 
 bool xguardian_fightable(int navi) {
+	if (guardian_bn4(navi)) return xguardian_bn4_fightable(navi);
 	/* (V1 to SP: the story's versions and the net's, every one a run takes) */
 	for (int v = 0; v < 4; ++v)
 		if (xguardian_id(navi, v) < 0) return false;
@@ -53,7 +55,9 @@ static Encounter moved_encounter(int id, int version) {
 	return e;
 }
 
-Encounter xguardian_encounter(int navi, int version) { return moved_encounter(xguardian_id(navi, version), version); }
+Encounter xguardian_encounter(int navi, int version) {
+	return guardian_bn4(navi) ? xguardian_bn4_encounter(navi, version) : moved_encounter(xguardian_id(navi, version), version);
+}
 
 bool xguardian_bn4_fightable(int navi) {
 	int v1 = xguardian_bn4_v1(navi);
@@ -67,7 +71,13 @@ Encounter xguardian_bn4_encounter(int navi, int version) {
 	return moved_encounter(v1 >= 0 && version >= 0 && version <= 3 ? xnavi_bn4_id(v1 + version) : -1, version);
 }
 
+int xguardian_named(int xrom, int id) {
+	if (xrom == XROM_BN4_RED_SUN_US) return id >= BN4_NAVI_FIRST_ID ? GUARDIAN_BN4_FIRST + (id - BN4_NAVI_FIRST_ID) / 4 : 0;
+	return xrom == XROM && id ? guardian_of_older(id) : 0;
+}
+
 int xguardian_hp(int navi, int version) {
+	if (guardian_bn4(navi)) return xguardian_bn4_hp(navi, version);
 	return guardian_bn5_ai(navi) >= 0 ? xrecords_navi_hp(XROM, guardian_bn5_ai(navi), version, NULL) : -1;
 }
 
@@ -86,13 +96,14 @@ int xguardian_hp_fought(int navi, int version, int depth) {
 int guardian_element(int navi) {
 	int e = 0;
 	if (guardian_older(navi)) xrecords_navi_hp(XROM, guardian_older_ai(navi), 0, &e);
+	else if (guardian_bn4(navi)) e = xguardian_bn4_element(navi);
 	else e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
 	return e > 0 ? e : 0;
 }
 
 int guardian_weakness(int navi) {
 	static const int beats[ELEM_WOOD + 1] = { 0, ELEM_AQUA, ELEM_ELEC, ELEM_WOOD, ELEM_FIRE };
-	if (!guardian_older(navi)) return navi > 0 ? enemy_weakness(enemy_id(1, navi, 0)) : -1;
+	if (!guardian_moved(navi)) return navi > 0 ? enemy_weakness(enemy_id(1, navi, 0)) : -1;
 	int e = guardian_element(navi);
 	return e > 0 && e <= ELEM_WOOD ? beats[e] : 0;
 }
@@ -112,13 +123,33 @@ static int navi_chip_of(int navi, int v) {
 	return r && !chips_sits_out(r->bn6) && chips_record(r->bn6) ? r->bn6 : 0;
 }
 
+/* BN4's Navi `navi`'s own chip `v` (0 V1, 1 SP), BN6's id, where the registry has it and it plays in BN6's battles here: BN4's
+ * Navi chips three a seat from Roll's (BN4_NAVI_CHIPS: V1, SP, DS); 0 none */
+static int bn4_chip_of(int navi, int v) {
+	int seat = navi - GUARDIAN_BN4_FIRST;
+	const XChipReg4 *r = guardian_bn4(navi) ? xreg4_of(BN4_NAVI_CHIPS + 3 * seat + v) : NULL;
+	return r && !chips_sits_out(r->bn6) && chips_record(r->bn6) ? r->bn6 : 0;
+}
+
+/* (his chip, the version his act gives: his own game's V1 in the first three acts, his SP from the fourth (where BN6's
+ * guardians give EX: BN5 and BN4 have none between), his V1 where his SP sits out; BN4's where his own sits out, his BN6 kin's
+ * at the version he is fought at, V2 and V3 as EX: xguardian_bn4_kin) */
+static int chip_at(int navi, int depth) {
+	bool late = pacing_act(depth) >= 3 || pacing_loop(depth) > 0;
+	if (guardian_bn4(navi)) {
+		int id = late ? bn4_chip_of(navi, 1) : 0;
+		if (!id) id = bn4_chip_of(navi, 0);
+		int v = xguardian_version(navi, depth), kin = xguardian_bn4_kin(navi);
+		return id ? id : kin ? navi_chip(kin, v <= 0 ? 0 : v >= 3 ? 2 : 1) : 0;
+	}
+	int id = late ? navi_chip_of(navi, 1) : 0;
+	return id ? id : navi_chip_of(navi, 0);
+}
+
 int xguardian_chip(int navi, int depth, int *code) {
 	*code = 26;
-	/* (his SP from the fourth act, where BN6's guardians give EX: BN5 has
-	 * none between V1 and SP; his V1 where his SP sits out) */
-	int id = pacing_act(depth) >= 3 || pacing_loop(depth) > 0 ? navi_chip_of(navi, 1) : 0;
-	if (!id) id = navi_chip_of(navi, 0);
-	if (!id) return 0;
+	int id = chip_at(navi, depth);
+	if (id <= 0) return 0;
 	/* (its letter where the folder holds it, else its *, else its first: a
 	 * guardian's Navi chip comes so, guardian_objs.c) */
 	ChipInfo ci;
@@ -135,6 +166,12 @@ bool xguardian_navi_chip(int chip) {
 	for (int k = 0; chip > 0 && k < 6; ++k)
 		for (int v = 0; v < 3; ++v) {
 			const XChipReg *r = xreg_of_bn5(navi_chips[k] + v);
+			if (r && r->bn6 == chip) return true;
+		}
+	/* (BN4's of the Navis a run meets: BN4_NAVI_CHIPS' three a seat) */
+	for (int k = 0; chip > 0 && k < xguardian_bn4_count(); ++k)
+		for (int v = 0; v < 3; ++v) {
+			const XChipReg4 *r = xreg4_of(BN4_NAVI_CHIPS + 3 * (xguardian_bn4_navi(k) - GUARDIAN_BN4_FIRST) + v);
 			if (r && r->bn6 == chip) return true;
 		}
 	return false;
@@ -155,6 +192,7 @@ const char *xguardian_soul_words(int navi) {
 }
 
 int xguardian_slot(int navi) {
+	if (guardian_bn4(navi)) return xguardian_bn4_ow(navi) ? xnavi_guardian(XROM_BN4_RED_SUN_US, xguardian_bn4_ow(navi)) : -1;
 	int sprite = guardian_older_sprite(navi);
 	return sprite ? xnavi_guardian(XROM, sprite) : -1;
 }

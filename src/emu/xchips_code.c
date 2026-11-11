@@ -162,7 +162,8 @@ static uint32_t wait_stage(const XChipUnit *u, const XVirusFamily *code, uint32_
  * earlier one (the other game's units'); `code` the unit's own, or the unit's whose block holds its routine (XChipUnit.share) */
 static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh) {
 	uint32_t at = 0, stub = 0, to = xvirus_code_at(code, u->entry | 1u);
-	if (u->kind == XCHIP_ATTACK && u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) {
+	/* (BN5's attack families in the chips' range, BN4's in its own: unit4_stage holds each to its game's) */
+	if (u->kind == XCHIP_ATTACK && ((u->number >= XATTACK_CHIPS && u->number < XATTACK_CHIPS_END) || u->number >= XATTACK_BN4)) {
 		at = xattack_entry(u->number);
 		stub = XATTACK_STUB | 1u;
 	} else if (u->kind == XCHIP_MISC && u->number >= XC4_FIRST_SUPPORT) {
@@ -341,7 +342,8 @@ bool xchips_code_install(void) {
 	return true;
 }
 
-/* ---- BN4's units (xchips_bn4.h): support routines alone, each in its own region ---- */
+/* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
+ * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
 static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END };
 
@@ -350,7 +352,8 @@ static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS,
 static void unit4_stage(int i, bool fresh) {
 	const XChipUnit *u = &xchips_bn4[i];
 	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
-	else if ((u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+	else if (u->kind == XCHIP_ATTACK ? u->number < XATTACK_BN4 || u->share
+	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
 	else if (u->share) {
 		/* (a routine of an earlier unit's block: its entry alone) */
 		if (u->share > i || xchips_bn4[u->share - 1].share || u->code.nblocks) xv_fail("its code's unit %d", u->share - 1);
@@ -362,13 +365,15 @@ static void unit4_stage(int i, bool fresh) {
 	}
 }
 
+bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
+
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
 	claims_begin(XV_CLAIMS);
 	bool room = xg_grow();
 	claims_end();
-	if (!room) {
+	if (!room || !xattack_grow()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
 		return false;
 	}

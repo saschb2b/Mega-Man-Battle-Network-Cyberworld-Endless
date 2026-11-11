@@ -2262,6 +2262,46 @@
    "what": "the third kind's 0x79's count (BN5 0x080D568E: subs r0,#1 on its +4 byte, its copy at XN_MORE + 0xCE00 + 0x5A) made subs r0,#2: the byte the leftover rule still compares (legit.json's spawn_leftovers, 0x79's compares 0)"
   },
   {
+   "name": "CloudMan's object's parent's second CurAction compare not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF1888:2109"
+   ],
+   "what": "the third kind's 0x5F's second compare of its parent's CurAction (BN5 0x080D1EF0: movs r1,#9, its copy at XN_MORE + 0x9888, BN6's 11) left at BN5's 9: it skips its countdown in BN6's state 9 and runs it in 11 (the generator's rule took the first compare alone before CloudMan; caught at t9)"
+  },
+  {
+   "name": "CloudMan's cloud spawned as another of his",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0AB8:2036"
+   ],
+   "what": "the clouds' spawner (BN5 0x080CBEB8: movs r0,#0x37, its copy at XN_MORE + 0x8AB8) made 0x36: the dispatch runs the 0x36's copy for each cloud"
+  },
+  {
+   "name": "CloudMan's cloud's sprite not renumbered",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF07A4:220F"
+   ],
+   "what": "the cloud's sprite (BN5 0x080CBBA4: movs r2,#0xF, list 2's 0x0F, its copy at XN_MORE + 0x87A4) left at BN5's number where the recipe makes it list 2's 0x29, his battle sprite in BN6"
+  },
+  {
+   "name": "CloudMan's bubbles' kind row's sprite left at BN5's",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08DF0126:11:1"
+   ],
+   "what": "the third kind's 0x0B's row 2 (BN5 0x080C5E1A, his kinds 2-5, BN5_CLOUD_KINDS_0B; its copy at XN_MORE + 0x8126), the list 4 sprite 0x11 the recipe copies at a number of the Navis', its number left at BN5's 0x11: another sprite in BN6"
+  },
+  {
+   "name": "CloudMan's search for his clouds finding none",
+   "spec": "cloudman_v1",
+   "poke": [
+    "08D90074:2F36"
+   ],
+   "what": "the Navis' stub for BN5_CLOUD_FIND_37 (XN_STUB_CLOUDS + 0x14: cmp r7,#0x37 against the dispatch's side table) made 0x36: no cloud found, a new cloud's panel chosen as if he had none (BN5_CLOUD_PANEL)"
+  },
+  {
    "name": "Kilby's sound at the pool's second slot",
    "spec": "kilby_v1",
    "poke": [
@@ -3002,6 +3042,135 @@
     "08017338:46C02003"
    ],
    "what": "BN6's MegaMan's init handing his palette setter 3 where his palette routine gives 0 (its bl 0x0801002C at 0x08017338 made movs r0,#3 and a nop; the routine itself lies at an address the harness reads as a moved family's): BN4's dark 2 against BN6's 3, which legit.json's bn4 allowed (MegaMan's dark palette, BN4's: 2 against 0 alone) does not explain"
+  },
+  {
+   "name": "the fire's burst's shape another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "080CF3FC:0D:1"
+   ],
+   "what": "the spread shot's kinds' table's copy (BN4 0x080CF3DC) with kind 8's shape 0x0D, Heat-V's, where BN4's holds 2: the burst on the two panels behind a row up and down, not the one behind"
+  },
+  {
+   "name": "the bubbles' burst's effect another",
+   "spec": "bn4_chip_bubbler",
+   "poke": [
+    "080CF3EE:CB:1"
+   ],
+   "what": "the spread shot's kinds' table's copy with kind 4's effect 0xCB, the fire's burst's id of the chips', where the recipe gives the bubbles' 0xCC (BN4's 0x25): the burst drawn as fire"
+  },
+  {
+   "name": "the heat shot's wait another",
+   "spec": "bn4_chip_heatv",
+   "poke": [
+    "080EC819:14:1"
+   ],
+   "what": "the spread state's copy's waits by subfamily (BN4 0x080EC818) with subfamily 1's 20 frames where BN4's holds 10: the shot made ten frames later"
+  },
+  {
+   "name": "the bubble shot's height another",
+   "spec": "bn4_chip_bubv",
+   "poke": [
+    "080EC81E:10:1"
+   ],
+   "what": "the spread state's copy's shot heights by subfamily (BN4 0x080EC81C) with subfamily 2's 0x10 where BN4's holds 0: the bubble shot made 16 higher"
+  },
+  {
+   "name": "the heat arm's kind another",
+   "spec": "bn4_chip_heatside",
+   "poke": [
+    "080EC815:0E:1"
+   ],
+   "what": "the spread state's copy's arm kinds by subfamily (BN4 0x080EC814) with subfamily 1's 0x0E, the bubble arm, where BN4's holds 6: his arm another kind's"
+  },
+  {
+   "name": "the spread shot's type another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "080CF59A:20CB"
+   ],
+   "what": "the spread shot's spawner's copy (its movs r0,#0x12 at BN4 0x080CF59A, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no shot"
+  },
+  {
+   "name": "the spread shot's sound not played",
+   "spec": "bn4_chip_bublside",
+   "poke": [
+    "080EC7DE:46C0",
+    "080EC7E0:46C0"
+   ],
+   "what": "the spread state's copy's call that plays the shot's sound (BN4 0x080EC7DE, the recipe's call to its shim for the grown table's slot 0x200) made two nops: the shot leaves without its sound"
+  },
+  {
+   "name": "HeatShot's row's power another",
+   "spec": "bn4_chip_heatshot",
+   "poke": [
+    "08C0652A:0014"
+   ],
+   "what": "the registry's record of BN4's HeatShot (588 at CHIPS_RECORDS) with power 20 where BN4's record holds 40: the Mettaur left 120 HP where BN4's leaves it 100"
+  },
+  {
+   "name": "Heat-V's row's family another",
+   "spec": "bn4_chip_heatv",
+   "poke": [
+    "08C06547:D1:1"
+   ],
+   "what": "the registry's record of BN4's Heat-V (589) naming BN6's grown attack family 0xD1, which holds the grown table's stub, where the row gives it the unit's 0xD0: his attack ended at once, no shot"
+  },
+  {
+   "name": "the spread state's attack variables another",
+   "spec": "bn4_chip_bublside",
+   "poke": [
+    "080EC764:3770"
+   ],
+   "what": "the spread state's copy's adds r7,#0xA0 (BN4 0x080EC764, the recipe's immediate: BN6's attack's variables in his AI data) made BN4's own adds r7,#0x70: the state reads another part of BN6's AI data as its variables"
+  },
+  {
+   "name": "the struck arm's slot another",
+   "spec": "bn4_chip_heatshot_struck",
+   "poke": [
+    "080CD6B8:6DE8"
+   ],
+   "what": "the arm's copy's read of its slot (BN4 0x080CD6B8: ldr r0,[r5,#0x60], the place of MegaMan's +0x4C it was given) made ldr r0,[r5,#0x5c]: the arm does not see its slot cleared as he is struck"
+  },
+  {
+   "name": "TopMan's decision's CurAction off by one",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69E0:200C"
+   ],
+   "what": "his decision's movs r0,#9 (BN4 0x080B69E0, the recipe's CurAction 11, his own state 9 as BN6's 11) made 12: his state 10 run where BN4 runs his 9 (caught at t273)"
+  },
+  {
+   "name": "TopMan's damage kept at BN4's +0x1E",
+   "spec": "topman_v1",
+   "poke": [
+    "080B69C8:83D8"
+   ],
+   "what": "his decision's store of his +0x2C into his collision data (BN4 0x080B69C8: strh r0,[r3,#0x1e], the recipe's BN6 +0x2E, BN4_COLL_DAMAGE) left at +0x1E: BN6's confusion's frames written, his damage not (caught at t828)"
+  },
+  {
+   "name": "TopMan's top spawned as JunkMan's 0x97",
+   "spec": "topman_v1",
+   "poke": [
+    "080D052C:20D0"
+   ],
+   "what": "the spawn of his top, the third kind's 0x1B (BN4 0x080D052C: movs r0,#0x1b, the recipe's dispatch number 0xD3) made 0xD0, JunkMan's 0x97's: the dispatch runs another object for it (caught at t497)"
+  },
+  {
+   "name": "TopMan's sound 0xAC at the pool's first slot",
+   "spec": "topman_v1",
+   "poke": [
+    "080B6F26:2032"
+   ],
+   "what": "his state's sound 0xAC (BN4 0x080B6F26: movs r0,#0xac, the recipe's pool slot 0xD0) made the pool's first slot, 0x32: his top's 0xA0 where BN4 plays 0xAC (caught at t298, the family's sounds)"
+  },
+  {
+   "name": "TopMan's top drawn with BN4's number of his sprite",
+   "spec": "topman_v1",
+   "poke": [
+    "080D0320:2212"
+   ],
+   "what": "his top's load of his own battle sprite (BN4 0x080D0320: movs r2,#0x12, list 2, the recipe's BN6 0x4C, XNAVI_SPRITE_BN4 + his seat) left at BN4's 0x12: another Navi's sprite in BN6's list 2 (caught at t497)"
   },
   {
    "name": "the Hole's panel type another",

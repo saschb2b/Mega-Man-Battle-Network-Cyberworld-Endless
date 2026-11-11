@@ -41,11 +41,14 @@ static inline int guardian_of_older(int ai) { return ai - BN5_NAVI_COLONEL + GUA
 #define GUARDIAN_DARKLOID_LAST  33
 static inline bool guardian_darkloid(int navi) { return navi >= GUARDIAN_DARKLOID_FIRST && navi <= GUARDIAN_DARKLOID_LAST; }
 /* BN4 Red Sun's Navis (docs/game/tournament.md, The entrants; docs/multirom/bn4-navis.md): the Navi of seat s in BN6's
- * engine (xnavi_recipe.h XN_BN4_*: BN4's V1 id 128 + 4s) as navi GUARDIAN_BN4_FIRST + s here, met as a tournament's round
- * once proved (xguardian_bn4.h), no territory's guardian yet */
+ * engine (xnavi_recipe.h XN_BN4_*: BN4's V1 id 128 + 4s) as navi GUARDIAN_BN4_FIRST + s here, met once proved
+ * (xguardian_bn4.h) as a tournament's round and as the guardian of an area of BN4's (docs/game/bosses/bn4-navis.md) */
 #define GUARDIAN_BN4_FIRST 34
 #define GUARDIAN_BN4_LAST  58
 static inline bool guardian_bn4(int navi) { return navi >= GUARDIAN_BN4_FIRST && navi <= GUARDIAN_BN4_LAST; }
+/* ... an older net's Navi a territory's guardian may be, BN5's six or BN4's (xguardian.h: fought at his moved ids, at the
+ * version his act's band takes) */
+static inline bool guardian_moved(int navi) { return guardian_older(navi) || guardian_bn4(navi); }
 /* BN5's Team ProtoMan (docs/game/team-protoman.md): BN5's AI 1-6 (bn5.h BN5_NAVI_PROTOMAN .. BN5_NAVI_MEDDY) as navis 59-64
  * here, a rival record each (rivals.sav's fourth version), each Soul held by its form (souls.h, souls_team_held); none met
  * until each is moved and wired as a guardian */

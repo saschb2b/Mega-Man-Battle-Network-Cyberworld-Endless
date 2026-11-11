@@ -101,6 +101,26 @@ BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
 specs record where a chip parts, each with its verdict and why:
 `bn4_chip_cannon` (t33) and `bn4_chip_timebomb` (t32).
 
+A chip of an attack family of BN4's moved (an `attack` unit of
+`tools/xchiprecipe_bn4.py`: the spread chips', `bn4_chip_heatshot` and
+its seven kin) is compared as MegaMan's own state, its arm and its shot
+in play in the fight's frames. What `legit.json`'s `bn4` section adds:
+BN4's family in his CurAction read as the unit's number in BN6's grown
+attack families (`attack_families`, by the units' rows), his subfamily
+left as it is; his animation's number while he is in that state, each
+art's own, by the pairs listed with both games' sites
+(`megaman_animations`: the frames run of it compared as ever); BN4's
+chips' code room among the rooms a reference's pointer into moved code
+is read by (`tools/xdiff_snap.py` `XC4_CODE`: the shot keeps a pointer
+to its kinds' row); and the flag an attack sets, 0x400000, where a hit
+ended the attack, which BN4's struck state leaves and BN6's clears, only
+while his CurAction is a generic state's in both
+(`interrupted_attack`, `bn4_chip_heatshot_struck`). A BN4 spec holds one
+foe (the opening's alignment is the appear queue's first object's), so a
+burst's reach is seen by its effects' panels, and a chip used after a
+support chip follows BN6's support run's held frame, its objects with
+it: such a spec is not written yet.
+
 A panel of BN4's is read in BN6's numbers where the two games number a
 type apart: BN4's holy 9 is BN6's 5 and its Hole 0xB the engine's 15
 (`src/emu/xpanels.h`), in the type, the drawn type, the flags' low
@@ -1224,6 +1244,10 @@ format, its game 4: the trace's header names it):
   waits (`megaman_misc_wait`: BN4's run's mark 4 against the wrapper's,
   in BN4's misc state and for a waiting unit's subfamily alone; the
   count beside it is compared as ever);
+  a BN4 chip unit's own code is keyed as a family's is (`xd_log_start`:
+  every block of `FREE_BN4_CHIPS`' code), so a draw one of its objects
+  makes from the unit's own code is given BN4's of that place; a draw
+  made while MegaMan runs stays the engine's (the shuffle's twin above);
   a cracked panel's flags of the last frame mapped (BN4's +8, BN6's
   +0x18: `BN4_PANEL_FLAGS_LAST`, `BN6_PANEL_FLAGS_LAST` in the trace's
   panel layout); the panel crack's sound and his copies at the pool's

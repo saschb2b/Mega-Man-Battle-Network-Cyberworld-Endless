@@ -523,6 +523,7 @@
 0800FCA4 BN6_FORM_SPRITE_READ
 0800FCA6 BN6_FORM_SPRITE_BACK
 0800FCBC BN6_FORM_SPRITES
+0800FDB6 BN6_COUNTER_WINDOW
 0800FE6A written_by
 0800FF3E BN6_FORM_LOADOUT_READ
 0800FFE4 set_by_0x0801596e_through
@@ -742,6 +743,7 @@
 08019B78 panel_patterns_twin
 08019C7C BN6_COLL_MASKS
 08019F44 collision_data_tail
+08019F8C BN6_ELEMENT_SET
 08019FB4 collision_data_set_up
 0801A00E object_presence_on_panels
 0801A018 what_hit_object_cleared
@@ -1159,7 +1161,7 @@
 080BA549 bn5_engine_objects
 080BA5A2 BN6_FLASH_HEIGHT
 080BA5A8 BN6_FLASH_HEIGHT_NEXT
-080BA6A0 muzzle_flash_spawner
+080BA6A0 BN6_ARM_SPAWN
 080BA6F8 bn5_engine_objects.named
 080BA70C named_0x080ba6f8
 080BF518 BN6_FORM_PALETTE_READ2
@@ -1192,6 +1194,8 @@
 080C7448 shockwave_kinds
 080C791C team_protoman_gyroman
 080C7D54 team_protoman_gyroman_2
+080C8144 BN6_SPREAD_SHOT_KINDS
+080C81B6 third_kind_0x12_with_kinds
 080C8204 navis_engine_twins.rock_fragments_fourth_kind_9
 080C825C three_falling_rocks_third_kind_0x1d
 080C827C team_protoman_gyroman_3
@@ -1297,6 +1301,7 @@
 080ED7B0 BN6_COUNTER_TEST_1D
 080ED90E BN6_COUNTER_TEST_1E
 080EDBB0 BN6_RECOVERY_AMOUNTS
+080EDEF0 BN6_SPREAD_FAMILY
 080EE3D8 bn5_chips_code_6
 080EEE32 BN6_COUNTER_TEST_37
 080EFCC8 bn5_chips_code.effect_tables_2

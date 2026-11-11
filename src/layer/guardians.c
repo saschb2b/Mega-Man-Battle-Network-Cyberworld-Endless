@@ -73,7 +73,7 @@ const Guardian *guardian(int navi) {
  * for them where the layer made one, else without a face: the HeelNavi's
  * is the bystanders' (a playtester read SpoutMan's lines as a
  * bystander's); BN5's with their own, copied in (xnavi_guardian) */
-static int set_face[NGUARDIANS];   /* the face + 1, 0 for none */
+static int set_face[GUARDIAN_BN4_LAST + 1];   /* the face + 1, 0 for none */
 
 int guardian_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
@@ -85,7 +85,7 @@ int guardian_sprite(int navi) {
 	for (unsigned i = 0; i < sizeof sprites / sizeof *sprites; ++i)
 		if (sprites[i].navi == navi) return sprites[i].sprite;
 	/* (BN5's: his own, copied in at the face's number, guardian_set_face) */
-	if ((guardian_older(navi) || guardian_darkloid(navi)) && set_face[navi]) return set_face[navi] - 1;
+	if ((guardian_moved(navi) || guardian_darkloid(navi)) && set_face[navi]) return set_face[navi] - 1;
 	return GUARDIAN_HEEL_SPRITE;
 }
 
@@ -167,13 +167,13 @@ int guardian_stand(int arena_dir, int gx, int gy, int spread, int *sx, int *sy) 
 }
 
 void guardian_set_face(int navi, int face) {
-	if (navi > 0 && navi < NGUARDIANS) set_face[navi] = face < 0 ? 0 : face + 1;
+	if (navi > 0 && navi <= GUARDIAN_BN4_LAST) set_face[navi] = face < 0 ? 0 : face + 1;
 }
 
 int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
 	if (g->mugshot != GUARDIAN_NO_MUGSHOT) return g->mugshot;
-	return navi > 0 && navi < NGUARDIANS && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
+	return navi > 0 && navi <= GUARDIAN_BN4_LAST && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
 }
 
 /* Another game's area where it draws `biome` in this run (run_dress). */

@@ -262,9 +262,54 @@ effects it moves itself: one an earlier unit moved is that unit's row,
 which the installer could otherwise resolve only where a family
 happened to hold the same sprite.
 
+**The spread chips are moved, the first attack family** (10 November
+2026: HeatShot, Heat-V, HeatSide, Bubbler, Bub-V and BublSide, ids
+588-593, BN4's family 0x1E). Most of BN4's chips are neither support nor
+misc chips: their record's family is a state of MegaMan's of its own, and
+the generator has a third kind of unit for one, `attack`: the state
+whole, every subfamily of it, at a number of BN6's grown attack families
+the chips of BN4 have for their own (0xD0 on, in the units' order), which
+its chips' records take as their family with BN4's own subfamily. BN6
+still has the spread family as its Spreadr1-3's (0x25, the same phases,
+waits and shapes by subfamily and kind), but with its own arm, a
+first-kind object where BN4's is a third-kind one, so BN4's records on
+BN6's family part from BN4's battle as the arm appears (tried first: t33,
+where Cannon's recorded verdict parts). So the state moves with its arm
+(the third kind's 0x02) and its shot (the third kind's 0x12, unseen, a
+panel a frame), 1218 bytes with the arm's and the shot's kinds' tables:
+38 calls paired, four of them new pairs read in both games (the counter
+window, the attack's end, a NaviStats byte, the element's set), the
+attack's variables' place and MegaMan's animation's number BN6's, three
+arm sprites and the bubbles' and fire's burst effects copied, the shot's
+sound at the grown table's 0x200 (the attack units' slots are a block
+from there, as units are moved side by side) and the bursts' at the
+families' slots for them. Eight specs pass over 300 frames, the arm and
+the shot in play in the fight's frames: each chip against a 140 HP
+Mettaur (left 100, 70, 40, 90, 60 and 30, the burst's effects on the
+panels of its shape), `bn4_chip_heatshot_miss` (the shot flown off the
+field) and `bn4_chip_heatshot_struck` (MegaMan struck by the Mettaur's
+wave with his arm out: the arm let go in both); eleven mutations caught.
+The comparison took a moved family's number, MegaMan's animation by each
+art's number, the chips' code room for a pointer a moved object keeps
+into its copied table, and one difference of the engines': BN4's struck
+state leaves the flag an interrupted attack had set, BN6's clears it
+(`tests/xdiff/legit.json`'s `bn4` `attack_families`,
+`megaman_animations`, `interrupted_attack`). **Not compared:** the
+burst's damage to a second foe (a BN4 spec holds one foe: the burst is
+seen by its effects' panels), and a spread chip after a support chip in
+one battle (BN6's support run holds MegaMan a frame, and his arm with
+him: a RockCube ahead of the shot parted there). **Waiting:** Spreader
+(18) is the run's by BN6's own and stays so; DrkSpred (192) is the dark
+chips' session's, its kind 0xF of the shot's table and its sound a byte
+cannot name among its work; HeatSprd and BubSprd, the family's Program
+Advances, play once BN4's recipes are listed (BN4's list read into BN6's
+grown one, as BN5's were: not built). Every attack unit to come that
+draws the arm shares this copy of it (not built: the second unit's work).
+
 **Next:** TimeBomb (support 0x11: its bomb an obstacle with HP, three
 types, a placement that draws), then BlakBarr's barrier; Binder,
-SandRing and Ball wait on the unit kind for attack families. BugChain
+SandRing and Ball are attack families, whose unit kind the spread
+chips brought; of those FlmLine, Thunder and TwnFng are next. BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
 other's record, a NetBattle chip). Marking and the four Plus chips are
 cut (call 7, answered).
