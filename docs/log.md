@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/progression/encounter-groups.md (the pairs' pass done: 1,830 pairs, 27 tagged with their excess, the caps unmoved; the limits are an act's, not a layer's: a group on a first layer deleted the autopilot), game/progression/encounter-groups-measured.md (The pairs' pass; the fill counts with the tagged pairs), devtools/encounter-tags.md (`pairs`, the engine's pairs), code/tools.md (`pairs.tsv`).
 * **Update**: project/merging.md (Counters, new section: LAYER_MAKE counted from a file a bump, its hash recorded on dev), code/tools.md (tools/layer_make.py), code/net-and-map.md (layer_make.h and its bumps' folder, new row), code/tests.md (the recorded hash, new row).
 * **Update**: multirom/bn4-chips.md (the owner's call 12: AquaPowr, WoodPowr and ThunPlus left out, a HUD icon and no damage changed in BN4 itself, measured; FirePlus moved; the two answers of the evening), research/sources.md (Battle Network 4: the Plus chips' damage, verified in Red Sun).
 * **Update**: multirom/bn4-chips.md (TimeBomb moved: its bomb an actor, the first among the chips' objects; what no spec reaches), devtools/chip-recipe-generator.md (A moved actor: the unit's state table in BN6's layout, in its home), devtools/differential.md (a BN4 spec's poke never goes to a BN5 virus family's copy), rom/bn4.md (TimeBomb's code, the actors' runner, the blasts and the panels' patterns: a new row).
