@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/progression/encounter-groups.md (Step 2, the arc and the rewards, built: the signature by seed, the three beats, the Server's challenge, the reward pick's one enemy, the act card's line, what the rows pay), devtools/dev-menu.md (`arc`), devtools/pacing-report.md (the acts' arcs), code/core.md (`group_arc.c`).
 * **Update**: multirom/bn4-chips.md (Ligtnin1-3 moved; AquaUp and GreenWd wait in its unit), rom/bn4.md (the sweep's code, new row), devtools/chip-recipe-generator.md (a table's sound, `ROWS_WAIT`).
 * **Update**: game/battle-lab.md (Built: the builder's screen, step 3; the encounter groups' page linked), devtools/battle-on-demand.md (`lab open` and `lab all`), engine/ui.md (the builder among ours), code/director.md (`lab.c`, `lab_draw.c`, `lab_text.c`), rom/battle.md (conveyors 9 and 10 push up and down).
 * **Update**: devtools/differential.md (a moved Navi's copy of a type a used chip unit shares keyed as the unit's code, `navi_shared`; a spec's `shared_effects`: pa_football's ball, GridMan's copy, its burst's effect; mutation 164 caught again).
