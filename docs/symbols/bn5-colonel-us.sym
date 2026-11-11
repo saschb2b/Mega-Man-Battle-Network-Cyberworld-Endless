@@ -76,7 +76,6 @@
 02036C94 BN5_CUSTOM_UNITE
 02036F00 BN5_T4_OBJECTS
 0203A100 BN5_FIELD_PANELS
-0203A105 BN5_PANEL_MAGNET
 0203A108 BN5_PANEL_LAVA
 0203A109 BN5_PANEL_HOLY
 0203A10A BN5_PANEL_SEA
@@ -200,16 +199,11 @@
 0800B050 navis_engine_twins.panel_cracked
 0800B2A6 BN5_SET_PANEL_TYPE
 0800B380 collision_panels_highlighted
-0800B3E4 bn5_panel_count_panels_type_r0
 0800BCE8 BN5_PANEL_FLAGS_OF
 0800BD64 BN5_FIELDS
 0800C6CE has_it
 0800C6D8 object_hp_lowered
 0800C7CC BN5_LIB_DOUBLE_HIT
-0800C8A6 bn5_magnet_panel.3
-0800C8D2 BN5_STEP_PULL
-0800C918 BN5_PULL_DIRECTIONS
-0800C9B8 BN5_DIRECTION_STEPS
 0800CCD2 object_counter_time
 0800CD1E BN5_PRESTEP_TAKE
 0800CD44 BN5_PRESTEP_TAKE_MIN
@@ -351,8 +345,6 @@
 080133C4 on_to_decide_state
 080133CE generic_state_2
 080134A0 generic_state_3
-08013612 bn5_magnet_panel.from
-08013630 BN5_PULL_ROWS
 080136B0 bn5_darkplus_green.drawn_by_2
 080136D0 colour_shader_by_table_eight
 08013738 bn6_own_subfamily_3
@@ -407,9 +399,7 @@
 08017060 status_words_bn5
 0801707C flinch_status_cleared
 08017156 BN5_PANEL_ARRIVED
-080171AC from_bn5_panel_arrived
 080171E0 under_effect_0x63_spawned
-0801720E BN5_MAGNET_ARRIVED
 080172F0 his_state_0
 080172F6 his_set_up_past_ai_data
 080178E4 bn5_darkinvs_bn6.twin
@@ -881,10 +871,6 @@
 080E23D4 support_0x3b_object_state
 080E2420 support_0x3b
 080E2444 time_literal
-080E24CE BN5_MAGNET_LAID
-080E24EE bn5_magnet_panel.5
-080E24F0 bn5_magnet_panel.at_080e24f0
-080E2518 BN5_MAGNET_PANELS
 080E2728 bn5_sea_submerge.bn6_child_hidden_2
 080E4C4C bn5_engine_objects.module
 080E4D1E BN5_SEA_MARKER_SPAWN
@@ -939,9 +925,6 @@
 080F50FD his_status_hooks
 080F5D6C team_protoman_napalmman.his_code
 080F5F22 BN5_NAPALM_HALF_HP_CHIP
-080F64EC team_protoman_magnetman.his_code
-080F67C6 his_check_one
-080F6838 his_count_his_magnet_panels_0x080f67c6
 080F73E8 BN5_MEDDY_CODE
 080F7575 team_protoman_meddy
 080F7FF8 bn5_navis.at_080f7ff8
