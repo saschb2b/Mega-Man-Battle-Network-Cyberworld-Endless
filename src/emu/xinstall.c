@@ -34,7 +34,7 @@ void xinstall_core(int families, int navis) {
 	 * installed once a core, xnavi_install's own) */
 	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data)
 		for (int i = 0; i < xnavi_bn4_count; ++i) xnavi_install(xnavi_bn4[i]);
-	/* (their sounds' pool pointed at the battle's Navi's, or its late family's, before each frame, xnavi_bn4_sounds.h) */
+	/* (their sounds' pool pointed at the battle's Navi's before each frame, xnavi_bn4_sounds.h) */
 	if (families == XVIRUS_FAMILIES && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) emu_before_frame(xnavi_bn4_sounds_frame);
 	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
 	/* (BN5's obstacle strike, a Navi Colonel's side's as ColonelSoul's: the Souls' moved code first, its soldier among it, which

@@ -186,7 +186,11 @@ is the limit for foreign families too, with one exception.
   with BN4's Billy and Spikey; a BN5 family with Kilby and two more of
   BN4's): captured, the sprites and palettes of each as in its own
   battles.
-- **Sounds set the one limit**: BN4's late families share a pool of song
+- **Sounds set the one limit** (lifted on 11 November 2026 by the third
+  of the five calls: the late families' sounds now have fixed slots,
+  [Transplanted families](../../multirom/families.md), BN4's late
+  families, so any two share a battle; what follows is what was
+  measured): BN4's late families share a pool of song
   slots a battle (`xv_bn4_pool`, pointed each frame at the first pool
   owner in play: `src/emu/xnavi_bn4_sounds.c`), so **one pooled BN4 family
   a battle**. Today that is Kilby or MagTect; the six families still to

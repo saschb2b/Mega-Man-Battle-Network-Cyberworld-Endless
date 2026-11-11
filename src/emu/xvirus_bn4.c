@@ -1771,7 +1771,6 @@ static const XvImm kilby_imms[] = {
 	{ 0x080BC89A, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
 	{ 0x080BC8BC, THUMB_ADDS, 4, 0, 0x2D, 0x8F },   /* its effect: 0x2d in BN4, 0x8f in BN6 (moved) */
 	{ 0x080BC8F4, THUMB_ADDS, 4, 0, 0x2D, 0x8F },   /* its effect: 0x2d in BN4, 0x8f in BN6 (moved) */
-	{ 0x080BC90C, THUMB_MOVS, 0, 0, 0xCD, 0x32 },   /* its sound 0xcd: BN4's copied into BN6's empty slot 0x32, on its player 9 */
 	{ 0x080BC9B0, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
 	{ 0x080BC9E4, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
 	{ 0x080BCA16, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
@@ -1781,6 +1780,9 @@ static const XvRange kilby_ranges[] = {
 };
 static const uint32_t kilby_sides[] = {
 	0x0800AFB2,   /* its call to 0800AF90 (bn4_twins.SIDED): its left and right by the object's side, BN6's way */
+};
+static const XvSoundCall kilby_sound_calls[] = {
+	{ 0x080BC90E, 0x380 },   /* its sound 0xcd at the grown song table's slot 0x380, past a byte */
 };
 static const XvNumber kilby_numbers[] = {
 	{ 0x080BC974, 0x04050401, 0x04050401 },   /* a collision region's spawn word (Kilby's: its ldr r4 at 0x080BC946, then bl 0x080CD7E2, object_spawnCollisionRegion, whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601 and 0x0405FF01; BN6's ROM holds the word too (0x080E4A4C) */
@@ -1794,7 +1796,7 @@ static const XvSprite kilby_sprites[] = {
 };
 static const XvId kilby_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 }, { 0x2D, 0x8F } };
 static const XvSong kilby_songs[] = {
-	{ 0xCD, 0x32, XV_LATE_ART + 0x9300, 0x40 },   /* its sound 0xcd, BN4's song copied (the pool's, by battle) */
+	{ 0xCD, 0x380, XV_LATE_ART + 0x9300, 0x40 },   /* its sound 0xcd, BN4's song copied (the grown song table's slot) */
 };
 
 static const XVirusFamily bn4_kilby = {
@@ -1810,6 +1812,7 @@ static const XVirusFamily bn4_kilby = {
 	.imms = kilby_imms, .nimms = (int)(sizeof kilby_imms / sizeof *kilby_imms),
 	.ranges = kilby_ranges, .nranges = (int)(sizeof kilby_ranges / sizeof *kilby_ranges),
 	.sides = kilby_sides, .nsides = (int)(sizeof kilby_sides / sizeof *kilby_sides),
+	.sound_calls = kilby_sound_calls, .nsound_calls = (int)(sizeof kilby_sound_calls / sizeof *kilby_sound_calls),
 	.numbers = kilby_numbers, .nnumbers = (int)(sizeof kilby_numbers / sizeof *kilby_numbers),
 	.states = kilby_states, .nstates = (int)(sizeof kilby_states / sizeof *kilby_states),
 	.hooks = { BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },
@@ -1910,14 +1913,16 @@ static const XvImm magtect_imms[] = {
 	{ 0x080BEE4E, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 	{ 0x080BEEE6, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
 	{ 0x080BEF16, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
-	{ 0x080BEF34, THUMB_MOVS, 0, 0, 0xF8, 0x33 },   /* its sound 0xf8: BN4's copied into BN6's empty slot 0x33, on its player 8 */
-	{ 0x080BEFAA, THUMB_MOVS, 0, 0, 0xB8, 0x32 },   /* its sound 0xb8: BN4's copied into BN6's empty slot 0x32, on its player 17 */
 	{ 0x080BEFCC, THUMB_MOVS, 4, 0, 0x14, 0x93 },   /* its effect: 0x14 in BN4, 0x93 in BN6 (moved) */
 	{ 0x080BF000, THUMB_MOVS, 4, 0, 0x13, 0x92 },   /* its effect: 0x13 in BN4, 0x92 in BN6 (moved) */
 	{ 0x080BF040, THUMB_MOVS, 0, 0, 0x7, 0x9 },   /* CurAction 7 written */
 };
 static const XvRange magtect_ranges[] = {
 	{ 0x080BEC6C, 0x2FC, 0x301 },   /* BN4's ids 0x31-0x36, its own */
+};
+static const XvSoundCall magtect_sound_calls[] = {
+	{ 0x080BEFAC, 0x381 },   /* its sound 0xb8 at the grown song table's slot 0x381, past a byte */
+	{ 0x080BEF36, 0x202 },   /* its sound 0xf8 at the grown song table's slot 0x202, past a byte */
 };
 static const XvNumber magtect_numbers[] = {
 	{ 0x080BEFDC, 0x04050301, 0x04050301 },   /* a collision region's spawn word (MagTect's: its ldr r4 at 0x080BEF94, then bl 0x080CD7E2, object_spawnCollisionRegion, whose twin BN6's 0x080C6BDA takes r4 the same), the form of 0x04050601; BN6's ROM holds the word too (0x080E4A44, 0x08101400) */
@@ -1931,8 +1936,8 @@ static const XvSprite magtect_sprites[] = {
 };
 static const XvId magtect_effects[] = { { 0x13, 0x92 }, { 0x14, 0x93 } };
 static const XvSong magtect_songs[] = {
-	{ 0xB8, 0x32, XV_LATE_ART + 0xC340, 0x840 },   /* its sound 0xb8, BN4's song copied (the pool's, by battle) */
-	{ 0xF8, 0x33, XV_LATE_ART + 0xCB80, 0x40 },   /* its sound 0xf8, BN4's song copied (the pool's, by battle) */
+	{ 0xB8, 0x381, XV_LATE_ART + 0xC340, 0x840 },   /* its sound 0xb8, BN4's song copied (the grown song table's slot) */
+	{ 0xF8, 0x202, XV_LATE_ART + 0xCB80, 0x40 },   /* its sound 0xf8, BN4's song copied (the grown song table's slot) */
 };
 
 static const XVirusFamily bn4_magtect = {
@@ -1947,6 +1952,7 @@ static const XVirusFamily bn4_magtect = {
 	.calls = magtect_calls, .ncalls = (int)(sizeof magtect_calls / sizeof *magtect_calls),
 	.imms = magtect_imms, .nimms = (int)(sizeof magtect_imms / sizeof *magtect_imms),
 	.ranges = magtect_ranges, .nranges = (int)(sizeof magtect_ranges / sizeof *magtect_ranges),
+	.sound_calls = magtect_sound_calls, .nsound_calls = (int)(sizeof magtect_sound_calls / sizeof *magtect_sound_calls),
 	.numbers = magtect_numbers, .nnumbers = (int)(sizeof magtect_numbers / sizeof *magtect_numbers),
 	.states = magtect_states, .nstates = (int)(sizeof magtect_states / sizeof *magtect_states),
 	.hooks = { ENTERED(0x080BEBF7), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB), BN6(BN6_FAMILY_NULLSUB) },

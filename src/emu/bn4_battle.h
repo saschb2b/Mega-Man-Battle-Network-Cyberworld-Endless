@@ -184,7 +184,7 @@
 #define BN4_KILBY_EFFECT  0x080BC8BAu /* its effect's id made by arithmetic: lsls r4,r0,#16 (its +4) then adds r4,#0x2D, the
                                        * effect's own byte past its parameter (again at 0x080BC8F2): the generator reads the adds */
 #define BN4_KILBY_SOUND   0x080BC90Cu /* its sound 0xCD (movs r0,#0xcd; bl BN4_PLAY_SOUND at 0x080BC90E), BN6 has no song of: the
-                                       * per-battle pool's first slot, 0x32 (xvirus_recipe.h xv_bn4_pool) */
+                                       * grown song table's slot 0x380 (xvirus_recipe.h XV_BN4_GROWN_SLOT_FIRST) */
 #define BN4_KILBY_REGION_WORD 0x080BC946u /* its ldr r4 of a collision region's spawn word, 0x04050401, before bl 0x080CD7E2
                                        * (the collision region's spawn, whose twin BN6's 0x080C6BDA takes r4 the same) */
 
@@ -201,6 +201,6 @@
                                        * offsets +0x36 and +0x3E, kept at +0x64 and +0x68: every unpaused frame of the opening too */
 #define BN4_CAN_MOVE_THIRD 0x0800AD7Eu /* BN4_CAN_MOVE's body with the flags' mask 0x105040 (its literal 0x0800B130): copied */
 #define BN4_MAGTECT_SOUNDS 0x080BEF34u /* its sounds BN6 has no song of: 0xF8 here (movs r0,#0xf8) and 0xB8 at 0x080BEFAA, each
-                                       * before bl BN4_PLAY_SOUND: the per-battle pool's 0x33 and 0x32 (xvirus_recipe.h xv_bn4_pool) */
+                                       * before bl BN4_PLAY_SOUND: the grown song table's 0x202 (the chips' slot for it) and 0x381 */
 
 #endif
