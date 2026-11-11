@@ -8,6 +8,7 @@
 #include "boss.h"
 #include "bracket.h"
 #include "cinema.h"
+#include "data.h"
 #include "director_folder.h"
 #include "director_layer.h"
 #include "director_state.h"
@@ -15,6 +16,7 @@
 #include "guardians.h"
 #include "liberation.h"
 #include "liberation_words.h"
+#include "loot.h"
 #include "meta.h"
 #include "nets_words.h"
 #include "powers.h"
@@ -129,6 +131,16 @@ void arrival_words(void) {
  * One net: the telegraph): an older net's area, the deep's both nets, and
  * from the second act a BN6 area its visitors come to */
 static const char *nets_card(int biome) {
+	/* (the acts' arcs, behind their dev switch: the act's signature family named in the nets' place, the one line the
+	 * design gives it: docs/game/progression/encounter-groups.md, the design's sixth point) */
+	int signature = loot_arc_signature(run.depth, biome);
+	if (signature >= 0) {
+		static char line[40];
+		char name[24];
+		enemy_name(signature, name, sizeof name);
+		snprintf(line, sizeof line, " - %s signal", name);
+		return line;
+	}
 	if (D.deep) return " - Both Nets";
 	if (D.territory_native) return " - Older Net";
 	return visitors_here(run.depth, biome) ? " - Nets meet" : "";

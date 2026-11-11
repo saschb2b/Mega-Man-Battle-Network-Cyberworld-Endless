@@ -90,7 +90,8 @@ enum {
 	GROUP_GLASS,         /* two that hit near the act's cap, their HP in the band's lower half */
 	GROUP_BULWARK,       /* one three fifths of the battle's HP hitting softly, one hitting near the cap */
 	GROUP_NETS_MEET,     /* a roamer of each of two nets */
-	GROUP_TEMPLATES
+	GROUP_TEMPLATES,
+	GROUP_ALONE = GROUP_TEMPLATES   /* (no template: one family alone, one or two of it, the arc's first beat: group_arc.h) */
 };
 const char *group_template_name(int t);
 
@@ -109,6 +110,13 @@ typedef struct {
 /* ... at `depth`, the run at stage `stage` (loot.h's loot_stage_allowed),
  * with nets `nets` */
 GroupLimits group_limits(int depth, int stage, unsigned nets);
+/* ... for a battle of kind `kind`: a plain one's as above; an eased one's
+ * (a run's first two battles, the first layer after a guardian) the
+ * band's lower half and two thirds of the pressure cap; a challenge's (a
+ * Server's) the next act's band, the versions a challenge rolls, and the
+ * cap grown as the band's cap on one hit is */
+enum { GROUP_PLAIN, GROUP_EASED, GROUP_CHALLENGE };
+GroupLimits group_limits_kind(int depth, int stage, unsigned nets, int kind);
 /* The pressure cap of act `act` (0-5, 6 the Nest) on the first cycle: the
  * three-quarter mark of the pressure predicted of the act's areas' own
  * battles (docs/game/progression/encounter-groups.md, Danger). On later
@@ -147,6 +155,12 @@ bool group_pick_any(const GroupFam *pool, int n, const GroupLimits *l, uint32_t 
 /* The template `roll` takes among those with a filling (counts[t] over
  * 0), -1 where none has */
 int group_template_roll(const int counts[GROUP_TEMPLATES], uint32_t roll);
+
+/* `count` (1 to 3) of pool family `i` alone, at its highest version that
+ * keeps them to the band's top (and from its floor, where `floor`), the
+ * cap on one hit and the pressure cap: three a swarm, fewer GROUP_ALONE.
+ * False where no version does. */
+bool group_same(const GroupFam *pool, int i, int count, bool floor, const GroupLimits *l, GroupFill *out);
 
 /* The group on the enemy's panels, as `e`'s foes (its field and the rest
  * left as they are): the front's in the first column, the back's in the

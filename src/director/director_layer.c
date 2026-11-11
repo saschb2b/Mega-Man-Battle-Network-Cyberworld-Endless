@@ -205,6 +205,13 @@ void roll_encounter(void) {
 	loot_groups_always = dev.group > 0 ? 1 + dev.group : dev.groups;
 	Encounter e = loot_random_battle(depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
 	if (dev.gem) loot_add_gem(&e);
+	if (e.arc_beat && emu_debug_on()) {
+		static int said = -1;
+		if (said != run.depth * 64 + D.battles)
+			fprintf(stderr, "arc beat %d at depth %d: template %d, the signature family %d (enemy %#x)\n", e.arc_beat, run.depth, e.group - 1,
+				e.signature ? e.foes[e.signature - 1].family : 0, e.signature ? (unsigned)e.foes[e.signature - 1].id : 0);
+		said = run.depth * 64 + D.battles;
+	}
 	set_encounter(&e, false);
 }
 
@@ -222,7 +229,7 @@ static void server_roll(void) {
 	loot_memory(&fought);
 	loot_memory_set(&none);
 	rng_seed(run.layer_seed ^ 0x5E4FE4C5u);
-	D.server_enc = make_encounter(run.depth, run.biome, ENC_CHALLENGE);
+	D.server_enc = loot_challenge_battle(run.depth, run.biome);
 	D.server_rolled = true;
 	loot_memory_set(&fought);
 	rng_restore(saved);
@@ -327,6 +334,7 @@ static void layer_host(int tiles, int *group, int *number) {
 	 * older net's share of its finds and stock, loot.h; else, an install
 	 * that failed, the BN6 area's it dresses) */
 	loot_layer_nets(run.biome, tiles);
+	loot_arc = dev.arc && run.side_kind == LAYER_NORMAL;   /* (the acts' arcs, behind the dev switch: group_arc.h) */
 	D.territory_native = loot_territory >= 0;
 	D.deep = loot_deep[0] >= 0;
 	if (emu_debug_on()) fprintf(stderr, "layer nets: territory %d deep %d %d, older chips %d%%\n", loot_territory, loot_deep[0], loot_deep[1],

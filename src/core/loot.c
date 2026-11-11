@@ -383,6 +383,7 @@ int loot_deep[2] = { -1, -1 };
 int loot_older_share, loot_older_net = CHIP_NET_BN5;
 bool loot_visitors_always;
 int loot_groups_always;
+bool loot_arc;
 
 /* What each virus family the area's plain random battles can hold at
  * `depth` is weak to, as they field it (a bit per ELEM_* in weak[family]):
@@ -566,8 +567,44 @@ bool loot_layer_nets(int biome, int tiles) {
 Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed, int index) {
 	Encounter e = make_encounter(depth, biome, kind);
 	if (loot_groups_always && kind == ENC_NORMAL && group_battle(depth, biome, layer_seed, index, loot_groups_always - 2, &e)) return e;
+	/* (the act's arc: the layer's one group battle, its first, on the run's first layer its second, after the run's very first
+	 * battle: players fight 1.3 battles a layer, so a later one is seldom met; never the Gentle helper's) */
+	if (loot_arc && index == (depth == 1 ? 1 : 0) && (kind == ENC_NORMAL || kind == ENC_EASY) && !(run.helpers & HELP_GENTLE) &&
+		group_arc_battle(run.seed, depth, biome, false, &e))
+		return e;
 	if (visitor_due(layer_seed, index, depth, biome, kind)) visitor_apply(&e, depth);
 	return e;
+}
+
+Encounter loot_challenge_battle(int depth, int biome) {
+	Encounter e = make_encounter(depth, biome, ENC_CHALLENGE);
+	bool navi = false;
+	for (int i = 0; i < e.nfoes; ++i) navi |= e.foes[i].kind == FOE_NAVI;
+	if (loot_arc && !navi && !(run.helpers & HELP_GENTLE)) group_arc_battle(run.seed, depth, biome, true, &e);
+	return e;
+}
+
+int loot_arc_signature(int depth, int biome) {
+	const GroupFam *pool;
+	GroupArc arc;
+	if (!loot_arc || (run.helpers & HELP_GENTLE) || !group_arc_at(run.seed, depth, biome, &arc)) return -1;
+	group_pool(&pool);
+	return pool[arc.signature].ver[0].id;
+}
+
+int loot_paying_id(const Encounter *e) {
+	if (e->signature <= 0 || e->signature > e->nfoes) return 0;
+	int best = 0, most = 0;
+	for (int i = 0; i < e->nfoes; ++i) {
+		int id = e->foes[i].id, chips = 0;
+		for (int k = 0; id > 0 && e->foes[i].kind == FOE_VIRUS && k < ENEMY_DROPS; ++k) chips += reward_is_chip(enemy_drop(id, k));
+		if (i == e->signature - 1 && chips) return id;
+		if (chips > most) {
+			most = chips;
+			best = id;
+		}
+	}
+	return best;
 }
 
 Encounter make_encounter(int depth, int biome, int kind) {

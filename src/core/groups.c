@@ -48,7 +48,7 @@ static const struct { const char *name; uint8_t n, slot[GROUP_SIZE], test; } TEM
 	[GROUP_NETS_MEET] = { "nets meet", 2, { SLOT_FREE, SLOT_FREE }, TEST_NETS },
 };
 
-const char *group_template_name(int t) { return t >= 0 && t < GROUP_TEMPLATES ? TEMPLATES[t].name : "?"; }
+const char *group_template_name(int t) { return t >= 0 && t < GROUP_TEMPLATES ? TEMPLATES[t].name : t == GROUP_ALONE ? "alone" : "?"; }
 
 static bool slot_takes(int slot, const GroupFam *f) {
 	switch (slot) {
@@ -183,20 +183,28 @@ static bool try_group(Walk *w, const int *idx, int n) {
 	return true;
 }
 
+bool group_same(const GroupFam *pool, int i, int count, bool floor, const GroupLimits *l, GroupFill *out) {
+	const GroupFam *f = &pool[i];
+	if (count < 1 || count > GROUP_SIZE || !group_in_pool(f, l)) return false;
+	for (int v = GROUP_VERSIONS - 1; v >= 0; --v) {
+		if (!version_fits(f, v, l)) continue;
+		At a = { { f, f, f }, { v, v, v }, count };
+		int hp = count * f->ver[v].hp, p = pressure_of(&a);
+		if ((floor && hp < l->band.lo) || hp > l->band.hi || p < 0 || p > l->pressure) continue;
+		*out = (GroupFill){ (int8_t)(count == 3 ? GROUP_SWARM : GROUP_ALONE), (int8_t)count, { (int16_t)i, (int16_t)i, (int16_t)i },
+			{ (int8_t)v, (int8_t)v, (int8_t)v }, hp, p };
+		return true;
+	}
+	return false;
+}
+
 /* (three of one family: its highest version whose three keep to the band
  * and the cap) */
 static void swarm(Walk *w, int i) {
-	const GroupFam *f = &w->pool[i];
-	for (int v = GROUP_VERSIONS - 1; v >= 0; --v) {
-		if (!version_fits(f, v, w->l)) continue;
-		At a = { { f, f, f }, { v, v, v }, 3 };
-		int hp = 3 * f->ver[v].hp, p = pressure_of(&a);
-		if (hp < w->l->band.lo || hp > w->l->band.hi || p < 0 || p > w->l->pressure) continue;
-		GroupFill g = { GROUP_SWARM, 3, { (int16_t)i, (int16_t)i, (int16_t)i }, { (int8_t)v, (int8_t)v, (int8_t)v }, hp, p };
-		++w->count;
-		if (w->each) w->each(&g, w->ctx);
-		return;
-	}
+	GroupFill g;
+	if (!group_same(w->pool, i, 3, true, w->l, &g)) return;
+	++w->count;
+	if (w->each) w->each(&g, w->ctx);
 }
 
 /* (the walk: every filling in its fixed order, to `w->most` of them) */
@@ -278,18 +286,26 @@ int group_pressure_cap(int act) {
 	return cap[act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act];
 }
 
-GroupLimits group_limits(int depth, int stage, unsigned nets) {
-	GroupLimits l = { pacing_band(depth, false, false), { 0 }, (int8_t)stage, (uint8_t)(nets & GROUP_NETS_ALL), 0 };
+GroupLimits group_limits(int depth, int stage, unsigned nets) { return group_limits_kind(depth, stage, nets, GROUP_PLAIN); }
+
+GroupLimits group_limits_kind(int depth, int stage, unsigned nets, int kind) {
+	bool challenge = kind == GROUP_CHALLENGE;
+	PacingBand plain = pacing_band(depth, false, false);
+	GroupLimits l = { pacing_band(depth, challenge, kind == GROUP_EASED), { 0 }, (int8_t)stage, (uint8_t)(nets & GROUP_NETS_ALL), 0 };
 	int vlo, vhi, act = pacing_act(depth);
-	pacing_virus_versions(depth, false, &vlo, &vhi);
+	pacing_virus_versions(depth, challenge, &vlo, &vhi);
 	l.top[0] = (int8_t)vhi;
 	l.top[1] = l.top[2] = (int8_t)(2 * vhi + 1 > 5 ? 5 : 2 * vhi + 1);
 	l.pressure = group_pressure_cap(act);
 	if (pacing_loop(depth) > 0) {
 		/* (a later cycle: by the band's cap on one hit there over the first cycle's, at the act's middle layer) */
 		int first = pacing_band(act < 6 ? act * 3 + 2 : 19, false, false).cap;
-		if (first > 0) l.pressure = l.pressure * l.band.cap / first;
+		if (first > 0) l.pressure = l.pressure * plain.cap / first;
 	}
+	/* (an eased battle: two thirds of the cap, about the median of the act's own battles as the cap is their three-quarter
+	 * mark; a challenge: by the next act's cap on one hit over this one's, as its band is the next act's) */
+	if (kind == GROUP_EASED) l.pressure = l.pressure * 2 / 3;
+	if (challenge && plain.cap > 0) l.pressure = l.pressure * l.band.cap / plain.cap;
 	return l;
 }
 

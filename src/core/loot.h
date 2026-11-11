@@ -24,6 +24,27 @@ extern bool loot_visitors_always;
  * --dev groups; 0 none, 1 of any template, 1 + N of template N from 1,
  * --dev group=N. The build's step 1: no run of a player's sets it) */
 extern int loot_groups_always;
+/* (dev: the acts' arcs, group_arc.h: each layer's one group battle, its
+ * first random battle but a run's two openers, and the Server's challenge
+ * the signature's hardest constellation, --dev arc. The build's step 2:
+ * no run of a player's sets it) */
+extern bool loot_arc;
+/* A layer's Server's battle at `depth` in area `biome`: a challenge of
+ * the area's own (make_encounter's ENC_CHALLENGE); with the arcs on, and
+ * where that roll holds no Navi, the act's signature's hardest
+ * constellation */
+Encounter loot_challenge_battle(int depth, int biome);
+/* The enemy a group's battle pays from (the reward pick's one enemy,
+ * src/director/encounter.c): the first foe of its act's signature family
+ * (Encounter.signature) where its row holds a chip, else the foe of the
+ * group whose row holds the most (the owner's call 5: the rule never
+ * costs a chip); 0 where the battle is no arc's, or no row of it holds
+ * one, and BN6's own pick among the enemies stands */
+int loot_paying_id(const Encounter *e);
+/* The act's signature family at `depth` in area `biome`, as its V1's
+ * enemy id (its name the act's card's: story_words.c), where the arcs
+ * are on and the act has one; -1 none */
+int loot_arc_signature(int depth, int biome);
 /* The area (NET_AREAS + k, rom.h) whose own game's battle records a
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */

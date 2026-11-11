@@ -47,7 +47,12 @@ alone, 1 the wall and its artillery, 2 the panel war, 3 the summoner and
 its guard, 4 clashing answers, 5 one element, 6 the pincer, 7 the swarm,
 8 held ground, 9 glass cannons, 10 the bulwark, 11 the nets meeting:
 [Encounter groups](../game/progression/encounter-groups.md), Step 1,
-built), `dark`
+built), `arc` (the acts' arcs as a run will have them: a layer's first
+random battle its act's beat, the signature alone, a pair, its
+constellation, and the Server's challenge the signature's hardest
+constellation; `CYBERWORLD_EMU_DEBUG` prints each beat once:
+[Encounter groups](../game/progression/encounter-groups.md), Step 2),
+`dark`
 (every act's second layer from the second a dark layer, a liberation's
 board, [Liberation Missions](../game/liberation/overview.md); `CYBERWORLD_EMU_DEBUG` prints the board as
 text, and `CYBERWORLD_AUTOPILOT=1` plays it; with `libpar=N` its par is
