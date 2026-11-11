@@ -1,7 +1,6 @@
 # The knowledge base's log
 
 ## 2026-11-12
-* **Update**: game/progression/encounter-groups.md (the five open calls decided by the owner on 11 November 2026, all as recommended: the shares by act, a constellation's field, BN4's pooled sounds onto fixed slots, BN6 alone, the reward where a row holds no chip; the build's order).
 * **Update**: code/platforms.md (CI on a pull request, new section: what a run cost and where it failed, the eight platform jobs run only where a change reaches them, every push to dev checked to its end), code/tools.md (tools/ci_changes.py).
 * **Update**: project/merging.md (The log, new section: a change logs itself as a file in docs/log.d/, which dev's workflow folds into log.md and stamps the concepts it names with; the union attribute gone; its description and index line), code/tools.md (tools/log_fold.py).
 * **Update**: game/battle-lab.md (Built: the test battle inside a snapshot, step 2, and its proofs), devtools/battle-on-demand.md (the `lab` step; its description and index line), rom/battle.md (the escape roll's weight, `BN6_ESCAPE_WEIGHT`), code/director.md (`lab_battle.c`).
