@@ -559,6 +559,22 @@ static bool moved_for(const XVirusFamily *f, const XVirusFamily *of) {
 	return false;
 }
 
+/* whether a moved range is a block or clone of a moved Navi's that moved a type a used chip unit runs as shared: its copy is
+ * the one the unit's objects run, keyed as the unit's own (Football's ball, the third kind's 0x95, runs GridMan's copy: its
+ * burst's effect at 0x080D952A is the Program Advance's call), as spec_code takes a family's sharer's */
+static bool navi_shared(const XvMoved *m) {
+	for (int k = 0; k < xnavi_bn5_count; ++k) {
+		const XVirusFamily *f = &xnavi_bn5[k]->code;
+		bool mine = false;
+		for (int u = 0; u < xchips_bn5_count && u < XC_UNITS && !mine; ++u) mine = unit_used[u] && moved_for(f, &xchips_bn5[u].code);
+		for (int i = 0; mine && i < f->nblocks; ++i)
+			if (f->blocks[i].start == m->from && f->blocks[i].at == m->to) return true;
+		for (int i = 0; mine && i < f->nclones; ++i)
+			if (f->clones[i].start == m->from && f->clones[i].at == m->to) return true;
+	}
+	return false;
+}
+
 /* whether a moved range is a block or clone of the spec's families (or of one that moved a type they share); all where none
  * and no foe is a Navi (a spec of MegaMan's, of the fields'), none in a Navi's (the families' copies of BN5's engine code are
  * its engine's there) */
@@ -633,7 +649,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XV_LATE_CODE && m[i].to < XV_LATE_CODE_END) ||
 		      (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
 		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
-		    chip_code(m[i].to))
+		    chip_code(m[i].to) || (xn_code_at(m[i].to) && navi_shared(&m[i])))
 			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */
