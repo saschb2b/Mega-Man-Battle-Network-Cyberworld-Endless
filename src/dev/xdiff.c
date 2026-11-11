@@ -524,6 +524,7 @@ static bool step(Side *g, const Spec *s) {
 		hold_step(g, s);
 	}
 	if (battle && s->safe) keep_safe(v);
+	if (battle) xd4_start_confusion(s, v->game);   /* (calm4, confuse6: xdiff_bn4.h) */
 	if (custom && !g->decked) deck_put(g, s);
 	if (g->log) {
 		xd_frame(g->log, g->frame, t, battle, g->seeded);

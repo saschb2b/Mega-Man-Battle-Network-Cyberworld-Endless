@@ -65,6 +65,9 @@ typedef struct {
 	                                              one's flag, Double Soul's and its pseudo-chip past BN4's gate (xd4_souls_put); 0 none */
 	int karma4;                                /* (a BN4 spec) MegaMan's karma as BN4's battle begins (BN4_NAVI_KARMA: under BN4_KARMA_DARK a dark
 	                                              chip plays, bn4_chips.h); -1 the guest's own */
+	bool calm4;                                /* (an attack DarkChip's BN4 spec) BN4's MegaMan's confusion at the fight's start ended by BN4's
+	                                              own step (xd4_start_confusion): the run gives none (the owner's call of 12 November 2026) */
+	bool confuse6;                             /* (a mutation of such a spec) BN6's MegaMan given that confusion instead, which must part */
 	bool dslist;                               /* BN6's chip AI's lists written from BN5's as its fight begins (xnavi_dark.h) */
 	uint16_t dschips[BN6_FOLDER_ENTRIES];      /* MegaMan's side's chip AI list in BN5, BN5's chip ids, written as its fight begins (dslist too) */
 	int ndschips;

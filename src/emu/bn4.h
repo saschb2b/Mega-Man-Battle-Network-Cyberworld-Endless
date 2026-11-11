@@ -157,6 +157,8 @@
 #define BN4_COLL_INDEX_BIT 0x78       /* ... u32, its own bit of the 32 (BN6_COLL_INDEX_BIT, +0x44): the pool's maker 0x08012488, BN6's 0x08019884 */
 #define BN4_COLL_PARALYSIS 0x10      /* ... u16: paralysis's frames (BN6's +0x1C); confusion +0x12, blindness +0x14, the hold +0x16 */
 #define BN4_COLL_CONFUSE  0x12        /* ... u16: confusion's frames (BN6_COLL_CONFUSE, +0x1E) */
+#define BN4_CONFUSE_STEP  0x0800AECAu /* MegaMan's confusion's countdown, a frame each status step (ldrh r0,[r6,#0x12]; subs #1; strh), its end (0x0800AED2) clearing its flags and mark */
+#define BN4_CONFUSED_START 0x02D0     /* the frames BN4's MegaMan starts a fight confused after an attack DarkChip is chosen (0x2CF at its first fight frame) */
 #define BN4_COLL_BLIND    0x14        /* ... u16: blindness's frames (BN6_COLL_BLIND, +0x20) */
 #define BN4_COLL_HOLD     0x16        /* ... u16: the hold's frames (BN6_COLL_IMMOBILE, +0x22) */
 #define BN4_COLL_FLASH    0x18       /* ... u16: the flashing after a hit (BN6's +0x24): 0x78, less 1 a frame, blinking by bit 2 */
