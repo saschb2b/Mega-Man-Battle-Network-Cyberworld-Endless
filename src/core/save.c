@@ -9,6 +9,7 @@
 
 #include "audio.h"
 #include "backup.h"
+#include "battle_data.h"
 #include "game.h"
 #include "loot.h"
 #include "platform.h"
@@ -126,6 +127,7 @@ bool save_run(void) {
 	LootMemory m;
 	loot_memory(&m);
 	save_write_blob("battle.sav", BATTLE_MAGIC, &m, sizeof m);
+	battle_data_save();
 	return save_write_blob("run.sav", RUN_MAGIC, &run, sizeof run);
 }
 
@@ -162,11 +164,12 @@ void save_state_nine_done(void) { state_nine = false; }
 bool load_run(void) {
 	Run tmp;
 	state_nine = false;
-	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); return true; }
+	if (save_read_blob("run.sav", RUN_MAGIC, &tmp, sizeof tmp) && tmp.active) { run = tmp; upgrade_run(); load_battle(); battle_data_load(run.seed); return true; }
 	if (!legacy_load_run()) return false;
 	state_nine = CHIP_ID_BITS != 9;
 	upgrade_run();
 	load_battle();
+	battle_data_load(run.seed);
 	return true;
 }
 

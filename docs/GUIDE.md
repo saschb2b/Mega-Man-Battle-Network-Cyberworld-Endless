@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T02:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
 ---
 
 # The player's guide
@@ -1448,7 +1448,7 @@ project page's:
 | The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, PS5, the browser...), the version and the screen's size |
 | A run begins | its setup (net, folder, Cross, threat, helpers, the extras switched off), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
-| A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act |
+| A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act; and of how many virus families your battle data is complete |
 | ... and beside it, what the run chose | won or lost, the layer, net and threat, the trips back home, how many requests were taken, kept and vowed, the orders made at AsterLand, the NaviCust drafts left for their BugFrags, the Undernet's and dark layers entered, ProtoMan's duels and netbattles taken and won, the folder's edits between layers, the Virus Battlers' series begun, rounds fought on after a win and pots taken, and the seconds on the net's maps against those in battle |
 
 ### Online
