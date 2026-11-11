@@ -248,9 +248,9 @@
 #define BN4_T4_BLASTS         0x24        /* blasts over a list of panels, the fourth kind's (0x080E4A0A to 0x080E4AD4): one every +0x22
                                            * frames from the list at its +0x60, each an effect and a sound by its kind (+4) */
 #define BN4_BLASTS_KINDS      0x080E4A00u /* ... its kinds, five of 2 bytes: the effect, the sound (0 none); TimeBomb's kind 1: 0x00, none */
-#define BN4_BLASTS_SPAWN      0x080E4A9Cu /* ... its spawner: r0 the pattern (its low seven bits a row of BN4_PANEL_PATTERNS, bit 7 set
+#define BN4_BLASTS_SPAWN      0x080E4A9Cu /* ... its spawner: r0 the pattern (its low seven bits a row of BN4_PANEL_MASKS, bit 7 set
                                            * for any), r1 the frames between two, r4 the kind */
-#define BN4_PANEL_PATTERNS    0x08012618u /* masks of the field's panels, rows of two words (BN6_PANEL_PATTERNS, the same 0x50 bytes) */
+#define BN4_PANEL_MASKS       0x08012618u /* masks of the field's panels, rows of two words (BN6_PANEL_MASKS, the same 0x50 bytes) */
 
 /* The bombs (its chips of family 9: MiniBomb, EnergBom, MegEnBom, Binder1-3, BugBomb, Ball, Geyser, BlkBomb, VDoll,
  * SeekBom1-3, DarkBomb): one state, a subfamily's spawner each. SeekBom1-3 (160-162, subfamily 9) moved as an attack unit

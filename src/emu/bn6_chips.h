@@ -311,7 +311,7 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_TIMEBOMB_STATES   0x080CE928u /* BN6's own TimeBomb's bomb's ten states (the third kind's 0x48, 0x080CE84C to 0x080CEB50; its
                                            * update 0x080CE8FC): its own the first, the third and from the ninth, another body than
                                            * BN4's bomb's (112 of 320 instructions alike), which is moved (xchips_bn4.c, TimeBomb) */
-#define BN6_PANEL_PATTERNS    0x08019C34u /* masks of the field's panels, rows of two words (BN4_PANEL_PATTERNS, the same 0x50 bytes) */
+#define BN6_PANEL_MASKS       0x08019C34u /* masks of the field's panels, rows of two words (BN4_PANEL_MASKS, the same 0x50 bytes) */
 #define BN6_CHIP_ATTACK_END   0x08011714u /* a chip's attack ended (BN4_CHIP_ATTACK_END's twin by its work): an attack of kind 2 keeps its lock-out, */
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap
