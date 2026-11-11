@@ -393,6 +393,18 @@ is used.
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
     BN5's and BN4's panels, backgrounds and songs, the saved sets.
 
+- **The keeper and the LabPass** (step 4), behind `--dev lab`
+  (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
+  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands across the front of
+  Lan's HP from the gate's keeper. His first talk is three boxes, once a
+  profile (`Profile.lab_met`); every later one a single box. As the chat
+  box closes the builder opens over the held game, and its battle is
+  fought there, in Lan's HP: seen headless from the town's jack-in, a
+  battle set, left by L, the builder back with the result, the work RAM's
+  hash the same before and after. KeyItem lists the LabPass (`0x4C`) with
+  the count of families whose data is complete. Still to come: what
+  makes him appear for a player (three complete families and Dad's mail).
+
 ## Build order
 
 Each a PR to `dev`, the next begun when the last is merged:

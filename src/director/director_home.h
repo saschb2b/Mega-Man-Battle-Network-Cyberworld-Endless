@@ -66,6 +66,11 @@ bool home_go_back(int k);
  * is in Lan's HP. */
 bool home_map(int group, int number);
 bool home_in_hp(void);
+/* The Battle Lab's keeper (lab_keeper.h): a visit of Lan's HP begins, his
+ * words written and his flag as the profile has him; and each frame at
+ * home, the builder opened where his script asked */
+void home_lab_visit(void);
+void home_lab_frame(void);
 /* The place's name for the map's label: Lan's HP, his house or room,
  * AsterLand, the Cyber Academy, or the town's. */
 const char *home_place_name(void);

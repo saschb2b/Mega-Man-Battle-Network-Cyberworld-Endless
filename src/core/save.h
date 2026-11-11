@@ -144,6 +144,8 @@ typedef struct {
 	uint8_t data_pad[2];
 	uint8_t data_count[256];
 	uint8_t data_versions[256];
+	/* the Battle Lab's keeper has said his first words (lab_keeper.h) */
+	uint8_t lab_met;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

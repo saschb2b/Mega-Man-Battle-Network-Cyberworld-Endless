@@ -14,6 +14,7 @@ typedef struct {
 	bool fragile;   /* MegaMan keeps 1 HP in battle: the run ends at the first hit */
 	int speed;      /* game frames per frame shown: 1, 2, 4, 8 */
 	bool powers;    /* the five Crosses and BeastOut open (a capture's: tools/trailer.py) */
+	bool lab;       /* the Battle Lab's keeper stands in Lan's HP, whatever the profile's battle data (docs/game/battle-lab.md) */
 	bool gem;       /* every random battle with a Mystery Data on the field */
 	bool visitors;  /* every random battle the visitors' rules allow with a visitor of the other net (visitors.h; issue #82) */
 	bool groups;    /* every plain random battle an encounter group's (group_pool.h; docs/game/progression/encounter-groups.md) */
