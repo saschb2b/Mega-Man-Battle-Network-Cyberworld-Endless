@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:45:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -62,7 +62,17 @@ is keyed as BN5's: the chip picked, five right and down to UNITE, A,
 then up and A on the Soul (four other paths tried, none united).
 `bn4_soul_thun_control` is ThunSoul so, form 6 at the same frame in both
 runs, its charged shot held and the Custom screens that count its turns
-opened. A BN4 spec takes `film` as BN5's do. Against BN6
+opened. ThunSoul moved into BN6's engine has two specs
+([BN4's Souls on BN6's proxy form](../multirom/bn4-souls.md), ThunSoul in
+BN6's engine). `bn4_soul_thun` fights BN4's battle against BN6's
+(`souls4` and `souls6` together). The shot is the same to the frame, but
+the spec parts at t1 on the Soul's form, which this comparator has no
+rules for yet, and its FAIL is recorded. `soul_thun` is BN6's battle
+alone (`kind: engine`), held to BN4's trace by its `expect`: MegaMan's
+action, loadout, element and used bit, and the foe's HP (`foe_hp`, which
+an engine spec now checks as a differential does). Its mutations break
+the charge time, the shot's damage (a poke at BN4's address in the
+unit's copy) and the element. A BN4 spec takes `film` as BN5's do. Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark

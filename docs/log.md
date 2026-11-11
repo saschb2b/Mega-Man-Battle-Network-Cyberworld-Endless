@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine built: its numbers, the family SandRing's too and so an attack unit, the proof, what is left; its description and index line), rom/bn4.md (SandRing's family and ThunSoul's charged shot, new row), devtools/differential.md (`soul_thun` and `bn4_soul_thun`; an engine spec's `foe_hp`), code/emu.md (`soulbn4.c`).
 * **Update**: multirom/bn4-souls.md (ThunSoul in BN6's engine: each place a BN4 Soul needs, measured, the numbers it would take, the order).
 * **Update**: devtools/differential.md (`souls4=`: a BN4 spec's Souls, their flags and pseudo-chips past BN4's gate, the form watched; `bn4_soul_thun_control`), multirom/bn4-souls.md (the differential's BN4 Souls built).
 * **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
