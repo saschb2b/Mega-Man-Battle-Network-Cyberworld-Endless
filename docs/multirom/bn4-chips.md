@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:20:49Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -493,6 +493,27 @@ room, below): a sprite is put into one room as an object loads it, so
 the room holds what is alive at a moment and the remaining units need
 no art's room of their own. Every chip spec passes with it, their
 mutations are caught, and `bn4_chips_thirty` plays a folder of thirty.
+
+**Meteors1-3 are moved** (10 November 2026: ids 674-676, misc 0x11), the
+first unit of the parallel sweep's third line and the first whose chips
+sit past id 602. Its routine lies after its controller, the fourth
+kind's last type (0x81), which moves with it, 178 bytes: the chip aims
+at a panel of MegaMan's row on the other side and the controller lets
+five meteors fall there, one every twenty frames. The aim is a routine
+BN6 holds too, instruction for instruction with the same words of panel
+flags, though nothing in BN6 calls it. The meteors are ShotStar's star,
+which ShotStar's unit moved already: the star is shared as the spread
+chips' arm is (`tools/xchiprecipe_bn4.py` `SHARED3`), its spawner
+copied with Meteors' unit and spawning ShotStar's copy by its number,
+so the star's code is in the engine once and Meteors takes no
+third-kind dispatch number of its own. `bn4_chip_meteors1`, `2`
+and `3` pass with a 140 HP Mettaur on the aimed panel (90 then 40 HP
+left, 80 then 20, and 70; each ends before the meteor that deletes it)
+and `bn4_chip_meteors1_miss` over 300 frames with the Mettaur off it,
+the five meteors bursting on the empty panel; seven mutations caught.
+**Not seen in play yet:** ids from 603 have no pack entry, so the chip
+step cannot hand one out until the pack's RAM for them lands; the
+differential fights with a folder alone.
 
 **Next:** Marking, the four Plus chips and BlakWeap (call 7,
 reversed), then BlakBarr's barrier; Binder,

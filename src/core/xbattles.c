@@ -100,7 +100,7 @@ static int foe_add(int xrom, int id, int panel, Encounter *e, int *what) {
 	const uint8_t *t = enemy_triple(bn6);
 	if (!t) return XB_FAMILY;
 	e->foes[e->nfoes++] = (Foe){ FOE_VIRUS, t[2], t[0], (panel & 15) - 1, (panel >> 4) - 1, bn6 };
-	if (t[2] < XB_AIS) e->from_families |= (uint64_t)1 << t[2];
+	if (t[2] < XB_AIS) family_mask_add(&e->from_families, t[2]);
 	return XB_FIGHTABLE;
 }
 
@@ -238,7 +238,7 @@ static void candidates(TPool *t) {
 		Encounter e;
 		int what;
 		bool ok = xbattle_translate(t->xrom, t->rec[i], (XScale){ t->ups[i], t->band.vcap }, &e, &what) == XB_FIGHTABLE;
-		t->c[i] = (LootCand){ ok, ok ? e.from_families : 0, ok ? e.from_viruses : 0 };
+		t->c[i] = (LootCand){ ok, ok ? e.from_families : FAMILY_MASK_NONE, ok ? e.from_viruses : 0 };
 		t->nv[i] = ok ? e.nfoes : MAX_FOES + 1;
 		t->again[i] = last_area == t->area && last_pick == (int)(t->rec[i] - BUS);
 	}
@@ -301,14 +301,14 @@ static int territory_pool(int depth, int area, int kind, TPool *t) {
 	return t->n = xrecords_pool(&p);
 }
 
-uint64_t xterritory_families(int depth, int area, uint16_t weak[64]) {
+FamilyMask xterritory_families(int depth, int area, uint16_t weak[64]) {
 	static TPool t;
-	uint64_t in = 0;
+	FamilyMask in = FAMILY_MASK_NONE;
 	for (int i = 0, n = territory_pool(depth, area, ENC_NORMAL, &t); i < n; ++i) {
 		Encounter e;
 		int what;
 		if (xbattle_translate(t.xrom, t.rec[i], (XScale){ t.ups[i], t.band.vcap }, &e, &what) != XB_FIGHTABLE) continue;
-		in |= e.from_families;
+		family_mask_join(&in, e.from_families);
 		for (int k = 0; weak && k < e.nfoes; ++k) {
 			int w = e.foes[k].family > 0 && e.foes[k].family < 64 ? enemy_weakness(e.foes[k].id) : -1;
 			if (w >= 0 && w < ELEM_COUNT) weak[e.foes[k].family] |= (uint16_t)(1u << w);

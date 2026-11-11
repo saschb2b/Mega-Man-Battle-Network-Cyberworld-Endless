@@ -91,6 +91,12 @@ void online_visit_profile(OnlineProfile *out);
 /* The MegaMan carried, as read at the gate (the Arena's loadout); NULL
  * where none was read */
 const OnlineLoadout *online_visit_loadout(void);
+/* ... read again from the game in the Square, where BN6's PET there or a
+ * trade has changed him (square_pet.h): the next NetBattle's MegaMan, and
+ * his card to the others */
+void online_visit_carried_again(void);
+/* In the Square on its own map and screens: away, and BN6's PET not up there (the second screen's pass) */
+bool online_visit_square(void);
 /* The name this game goes by in the Square (the visit's) */
 const char *online_visit_name(void);
 

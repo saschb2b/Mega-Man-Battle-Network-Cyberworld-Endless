@@ -1,0 +1,10 @@
+[
+ {
+  "name": "Meteors2's row's power another",
+  "spec": "bn4_chip_meteors2",
+  "poke": [
+   "08C0741E:0032"
+  ],
+  "what": "the registry's record of BN4's Meteors2 (675 at CHIPS_RECORDS) with power 50, Meteors1's, where BN4's record holds 60: the Mettaur left 90 and 40 HP where BN4's meteors leave it 80 and 20"
+ }
+]

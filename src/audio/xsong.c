@@ -508,6 +508,9 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x90, SONG_GROWN_FIRST + 0x2C },   /* (0x206) */
 	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
 	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
+	/* BN4's late families' (tools/xrecipe_bn4.py's LATE_SOUND_SLOTS), the grown table's 0x380 up (xvirus_recipe.h
+	 * XV_BN4_GROWN_SLOT_FIRST; docs/rom/sound.md, The song table grown): Kilby's, MagTect's (its 0xF8 the chips' 0x202 above) */
+	{ XROM_BN4_RED_SUN_US, 0xCD, SONG_GROWN_FIRST + 0x1A6 }, { XROM_BN4_RED_SUN_US, 0xB8, SONG_GROWN_FIRST + 0x1A7 },   /* (0x380, 0x381) */
 };
 
 int xsong_sound_slot(int xrom, int song) {
@@ -530,7 +533,7 @@ int xsong_install_sound(int xrom, int song, int fallback) {
 bool xsong_found(int xrom, int song, int slot) {
 	/* (the areas' songs and themes first, so each keeps its place) */
 	xsong_install(xrom, -1, -1);
-	if (!R.layout || !R.layout->song_table || !X.ready || slot < SOUND_FIRST || slot > SOUND_LAST || xsong_sound_slot(xrom, song) != slot)
+	if (!R.layout || !R.layout->song_table || !X.ready || !sound_slot(slot) || xsong_sound_slot(xrom, song) != slot)
 		return false;
 	if (slot_of(xrom, song) == slot) return true;
 	if (X.nsongs >= (int)(sizeof X.song / sizeof *X.song)) return false;

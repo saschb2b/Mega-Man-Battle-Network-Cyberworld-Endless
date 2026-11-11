@@ -3,9 +3,9 @@
   "name": "the bomb's count state BN6's generic 7",
   "spec": "bn4_chip_timebomb",
   "poke": [
-   "088F3BA0:08016B73"
+   "088F3FA0:08016B73"
   ],
-  "what": "the state table of TimeBomb's unit's home (XC4_HOMES + 0x4800 + XC4_HOME_STATES, BN6's layout) with BN6's generic state 7 at its entry 8, where the unit puts the bomb's own count state (BN4 0x080D6D58): the bomb set down never counts nor blasts"
+  "what": "the state table of TimeBomb's unit's home (XC4_HOMES + 0x4C00 + XC4_HOME_STATES, BN6's layout) with BN6's generic state 7 at its entry 8, where the unit puts the bomb's own count state (BN4 0x080D6D58): the bomb set down never counts nor blasts"
  },
  {
   "name": "the bomb's own state numbered as BN4's",

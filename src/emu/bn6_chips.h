@@ -303,6 +303,9 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_MISC_ROUTINES_REF 0x080ED72Cu /* the one word that names them (BN6_MISC_RUN's literal) */
 #define BN6_BATTLE_OBSTACLES  0xA0        /* the battle state's obstacles by side, three words a side (two, then one): BN6_OBSTACLE_ADD's */
 #define BN6_OBSTACLE_ADD      0x0800F614u /* r0 an object, r1 its side, r2 which list: entered there, the oldest's HP zeroed where it is full */
+#define BN6_ROW_PANEL_ACROSS  0x08016168u /* r5 an object: a panel of its row on the side across (BN6's 0x0800D086 with the words at 0x080161A4,
+                                           * then 0x080161B4); a routine no code of BN6's calls, BN4_ROW_PANEL_ACROSS's twin, which Meteors'
+                                           * moved unit calls */
 #define BN6_OBSTACLE_REMOVE   0x0800F656u /* the object in r5 taken out of them (BN4_OBSTACLE_REMOVE's twin) */
 #define BN6_ACTOR_RUN         0x0801B394u /* an actor's state run from the table in r0 by its CurAction (+9): the engine's states 0-7, an
                                            * object's own from 8 (BN4_ACTOR_RUN: 0-5 and from 6; BN5's 0x08017FCC) */

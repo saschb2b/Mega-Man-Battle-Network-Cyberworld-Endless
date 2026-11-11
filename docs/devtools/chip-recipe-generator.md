@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T14:52:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:20:49Z }
 ---
 
 # The chip recipe generator
@@ -318,11 +318,20 @@ is one block with a routine each: the first is the unit's entry, each
 other a row of the units' table that shares its code (`XChipUnit.share`),
 its entry alone.
 
+A misc routine that lies after a fourth-kind type's code moves that type
+with it as Counter's moves its third-kind one (`t4_with`: the table's
+last type, 0x81, has no next type to end its region, which ends with the
+routine). A unit that runs a type an earlier unit moved shares it by
+`SHARED3` whatever its kind (Meteors' controller spawns ShotStar's star,
+as an attack unit's state spawns the Spreads unit's arm): the type's
+spawner is copied with the unit and spawns the owner's copy by its
+number, and the kind it spawns joins the kinds' table's `kinds`.
+
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
-0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2) and
+0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2),
 MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
 (0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
-(0x62) and SeekBom (0x09, its subfamily 9).
+(0x62), SeekBom (0x09, its subfamily 9) and Meteors (misc 0x11).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it
@@ -377,7 +386,7 @@ third-kind types and the page 256 entries. The differential reads a
 page object's type as it reads a dispatched one's, from the side table
 (`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
 own. The fourth kind stays in the tables (BN5's own end at 0x90, the
-chips' run from 0x91; six taken by seventeen units).
+chips' run from 0x91; seven taken by eighteen units).
 
 **BN5's numbers are still guarded for BN4's Navis.** Their track takes
 third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF

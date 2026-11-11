@@ -57,10 +57,10 @@ static int battles(FILE *out, int depth, int biome, int kind, const char *label)
 		older += e.xrecord != 0;   /* (one of the older net's records, in BN6's engine) */
 		/* (the virus families a battle brings, each counted once: BN6's AI
 		 * indexes, the families moved into its engine from 32) */
-		uint64_t in = 0;
+		FamilyMask in = FAMILY_MASK_NONE;
 		for (int i = 0; i < e.nfoes; ++i)
-			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family > 0 && e.foes[i].family < 64) in |= (uint64_t)1 << e.foes[i].family;
-		for (int f = 1; f < 64; ++f) families[f] += (int)(in >> f & 1);
+			if (e.foes[i].kind == FOE_VIRUS && e.foes[i].family < 64) family_mask_add(&in, e.foes[i].family);
+		for (int f = 1; f < 64; ++f) families[f] += family_mask_has(in, f);
 		/* (the field's objects: a Mystery Data, and rocks or cubes) */
 		bool gem = false, block = false;
 		for (int i = 0; i < e.nobj; ++i) {
@@ -602,6 +602,7 @@ int pacing_report_run(const char *path) {
 
 	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out) + pacing_bracket_report(out);
 	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
+	flagged += pacing_groups_report(out);
 	super_report(out);
 	clock_report(out);
 	jobs_report(out);
