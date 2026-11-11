@@ -44,6 +44,10 @@ typedef struct {
 	                          its step) */
 	uint8_t share;         /* (BN4's units) where not 0, its routine is one of unit `share` - 1's code, a block that unit moved: no code
 	                          of its own, its entry alone (WhitWeb2 and 3 in WhitWeb1's object's code) */
+	uint8_t wait;          /* (BN4's misc units) where not 0, the frames BN4's misc run waits after its routine before it ends the
+	                          attack (bn4_chips.h BN4_MISC_WAIT: subfamily 5's 0x28, SidBmbo's), which BN6's run does for its own
+	                          0x14 alone: its entry in the grown table is a wrapper of the installer's in its home (XC4_HOME_WAIT),
+	                          the run's routine every frame of the wait */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];

@@ -66,7 +66,7 @@ static void film_take(const Spec *s, int f) {
 	for (int k = 0; k < EMU_W * EMU_H; ++k) px[k] = v[k] | 0xFF000000u;
 	char path[200];
 	snprintf(path, sizeof path, "%s_bn4_f%05d.bmp", m->prefix, f);
-	SDL_Surface *b = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ARGB8888);
+	SDL_Surface *b = SDL_CreateRGBSurfaceWithFormatFrom(px, EMU_W, EMU_H, 32, EMU_W * 4, SDL_PIXELFORMAT_ABGR8888);   /* (the core's pixels' order: emu_picture.c) */
 	if (!b || SDL_SaveBMP(b, path) != 0) fprintf(stderr, "xdiff: %s not saved\n", path);
 	SDL_FreeSurface(b);
 }
