@@ -1,0 +1,96 @@
+{
+ "about": "BN6's own Program Advance SunMoon (347, 0x15B) formed on BN6's Custom screen as a run has it: recipe 8 of BN6's list (0x0802BA60 on), Meteors R, Atk+30 *, Uninstll R picked in that order on the first Custom screen and OK; MegaMan's next chip is the Program Advance's id from the first fight frame (BN6's check 0x08029520), and he uses it at t30.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "frames": 40,
+ "folder6": [
+  "228B",
+  "34C3",
+  "22B9"
+ ],
+ "deck6": [
+  "228B",
+  "34C3",
+  "22B9"
+ ],
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "megaman": {
+   "chip": [
+    [
+     1,
+     "0x15B"
+    ]
+   ]
+  }
+ }
+}

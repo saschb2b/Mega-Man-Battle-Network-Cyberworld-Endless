@@ -11,8 +11,7 @@
 #include "rom.h"
 #include "song_table.h"
 #include "xattack_grow.h"
-#include "xchips_bn4.h"
-#include "xchips_bn4_art.h"
+#include "xchips_bn4_art.h"   /* (and xchips_bn4.h, which it is whole with) */
 #include "xchips_bn5.h"
 #include "xchips_flash.h"
 #include "xchips_moved.h"

@@ -3,7 +3,7 @@ type: Feature
 title: "5. Jobs (the Request BBS)"
 description: "Jobs on the Request BBS (`jobs.c`, `director_jobs.c`, `request_bbs.c`, issue #88): three townsfolk post a request each visit on BN6's own Request BBS at AsterLand, Lan takes one at most, the asker pays at the next visit, and how vows work."
 tags: [world, home]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:40:00Z }
 ---
 
 # 5. Jobs (the Request BBS)
@@ -111,7 +111,7 @@ can only pick one request at a time.", while one is held. Each visit the
 askers' requests are posted as BN6's requests 0 to 2, asker k's request k
 (the one held among them, marked taken), their titles and posts the run's
 (`job_words.c`: what it asks, the pay, where the poster waits) in place of
-BN6's 48, which a run never posts; BN6's taken flag for one is its
+BN6's own (35 requests, scripts 0-34, the rest of its 48 flag slots placeholders), which a run never posts; BN6's taken flag for one is its
 asker's Yes, which their script then follows. The askers and the Academy
 stay as places (decision 10): each still offers in person, settles where
 they stand, and hands a chip over there. The courier in Lan's HP names
