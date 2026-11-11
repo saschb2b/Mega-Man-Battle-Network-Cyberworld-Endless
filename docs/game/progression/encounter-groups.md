@@ -439,6 +439,18 @@ Left of step 1, each measured before step 2 rests on it:
   the 27: alone it presses a standing MegaMan little, beside another it
   does. The pairs were fought at V1; that a pair's excess grows with its
   hit as a family's own pressure does is assumed.
+- **The limits are an act's, not a layer's.** An autopilot run with every
+  plain battle a group's (`--dev groups`, seed 4) won a swarm on its
+  first layer and was deleted from full HP by the next group: BN5's 43
+  beside BN4's 64 at V1, 140 HP together, inside the band, the hit cap
+  and the pressure cap of act 1. A cap of 220 HP in 20 seconds is the
+  harder quarter of act 1's own battles, against a MegaMan of 100 HP, and
+  the run's first layers ease their own battles to the band's lower half.
+  So step 2 keeps what the arc already asks: on an act's first layer the
+  signature alone under the easing rule, a pair on the second, the
+  constellation on the third; and act 1's constellation may want the
+  median of its own battles' predicted pressure (160) for its cap, which is the
+  owner's with the shares.
 - **Seven of BN5's families roam from the first act** with no role: no
   record of the areas BN5 lends sets them, and BN5's other maps' battle
   tables are not read yet. The band still holds their HP and hit.
