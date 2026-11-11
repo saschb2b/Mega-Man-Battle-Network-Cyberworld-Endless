@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@51",
+ "mm": "33",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's PropBom1 E (157) against the registry's row 671 (the unit of BN4's family 0x62, BN6's attack family 0xD4, power 120): used at fight frame 8 from (3,3) against BN4's MettaurSP at (5,1). The bomb (the third kind's 0x8C) on (4,3) from t16 with sounds 0x8D and 0x133, a panel in 32 frames along the row; the Mettaur comes down its column behind it and stands on (5,3) as the bomb leaves the field: the blast over the two back columns at t102, BN4's explosions, 20 HP left in both.",
+ "folder4": [
+  "089D"
+ ],
+ "folder6": [
+  "29F:04"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   8,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
