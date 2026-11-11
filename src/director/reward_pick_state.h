@@ -23,6 +23,7 @@ typedef struct {
 	PickOffer o;         /* what it offers */
 	int cursor;          /* a choice's row, or o.n for the skip's */
 	int t;               /* frames since it opened */
+	int moved;           /* ... at the cursor's last move: the information's scroll starts over */
 	uint32_t was;        /* the keys of the frame before */
 	int rest;            /* frames since A was last held on it */
 	/* what MegaMan holds of each choice, counted as it opens, as BN6's
