@@ -312,6 +312,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "what": "SidBmbo's code located and moved (bn4_chips.h BN4_SIDBMBO 0x080D5DDA, BN4_T3_SIDBMBO 0x44) and the misc run's wait read in both games (BN4_MISC_WAIT 0x080EC9AC: subfamily 5, 0x28 frames, to 0; BN6_MISC_END 0x080ED722 and BN6_MISC_EXIT 0x080ED726: BN6's own 0x14, 8 frames, to below 0; docs/rom/bn4.md)."
     },
     {
+      "date": "2026-11-11",
+      "what": "BN6 Gregar's own gaps audited (docs/multirom/bn6-gaps.md): BN6's Program Advances proved forming in a run's engine by thirteen engine specs (tests/xdiff/pa_bn6_*, the timeline's chip read; docs/rom/chips.md); SneakRun and NumbrOpn traced in Gregar (src/emu/bn6_navicust.h's BN6_NCP_NUMBROPN, BN6_NCP_SNEAKRUN, BN6_NAVI_*, BN6_NUMBROPN_CHECK, BN6_SNEAKRUN_CHECK; docs/rom/navicust.md); GBeast, GBeast SP and the RV six's records and starts read (docs/rom/battle.md); every map-music list dumped (docs/rom/net-maps.md)"
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },
