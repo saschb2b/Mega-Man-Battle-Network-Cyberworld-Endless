@@ -320,6 +320,14 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
                                            * then 0x080161B4); a routine no code of BN6's calls, BN4_ROW_PANEL_ACROSS's twin, which Meteors'
                                            * moved unit calls */
 #define BN6_OBSTACLE_REMOVE   0x0800F656u /* the object in r5 taken out of them (BN4_OBSTACLE_REMOVE's twin) */
+#define BN6_ACTOR_RUN         0x0801B394u /* an actor's state run from the table in r0 by its CurAction (+9): the engine's states 0-7, an
+                                           * object's own from 8 (BN4_ACTOR_RUN: 0-5 and from 6; BN5's 0x08017FCC) */
+#define BN6_OBSTACLE_PUSHED   0x08017CC0u /* an obstacle's state 5, pushed (BN4_OBSTACLE_PUSHED's twin by place: its own bomb's and cube's
+                                           * tables' sixth word, BN6_TIMEBOMB_STATES) */
+#define BN6_TIMEBOMB_STATES   0x080CE928u /* BN6's own TimeBomb's bomb's ten states (the third kind's 0x48, 0x080CE84C to 0x080CEB50; its
+                                           * update 0x080CE8FC): its own the first, the third and from the ninth, another body than
+                                           * BN4's bomb's (112 of 320 instructions alike), which is moved (xchips_bn4.c, TimeBomb) */
+#define BN6_PANEL_MASKS       0x08019C34u /* masks of the field's panels, rows of two words (BN4_PANEL_MASKS, the same 0x50 bytes) */
 #define BN6_CHIP_ATTACK_END   0x08011714u /* a chip's attack ended (BN4_CHIP_ATTACK_END's twin by its work): an attack of kind 2 keeps its lock-out, */
 #define BN6_AI_LOCKOUT        0x19        /* ... MegaMan's AI data's byte, the frames he cannot act after a chip (strb r0,[r1,#0x19] at 0x08011734) */
 #define BN6_SHUFFLE           0x08000C72u /* bytes shuffled (r0 them, r1 how many, r2 the swaps): BN6_RNG_DRAW_POSITIVE twice a swap

@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T18:20:49Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # The chip recipe generator
@@ -263,6 +263,21 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   the chips' page of the dispatch (The dispatch's numbers, below): no
   immediate changes, its call goes to the page's spawner, and a type is
   one unit's unless every unit of a kind shares it (`SHARED3`: the arm).
+- **A moved actor.** A moved third-kind object whose update hands a
+  state table to the actors' runner (`ACTOR_RUN4`, `BN4_ACTOR_RUN`:
+  TimeBomb's bomb) is an actor. BN4's runner numbers the engine's
+  states 0-5 and an object's own from 6, BN6's 0-7 and from 8, as a
+  family's ([the BN4 families' tool](../multirom/bn4.md)). So `actors`
+  writes the unit's table in BN6's layout into the recipe's `states`:
+  the engine's eight BN6's own (a slot the object fills with another
+  routine of the engine's by its twin: an obstacle's pushed state),
+  then its own. The installer puts it at the unit's home's
+  `XC4_HOME_STATES` (`src/emu/xchips_code.c` `states_stage`), a number
+  row aims the update's pool word there, and the object's own code's
+  CurAction written or compared from 6 is shifted by 2. The engine's
+  status step and the runner are BN6's (`TWINS`, each audited): the
+  statuses are the engine's rules, as for every moved family. One
+  actor a unit; BN4's table stays in the copy, read by no code.
 - **Its copies.** A kinds' table an object reads out of its region
   (`TABLES`: the star's) is a block of the unit, each spawned kind's
   sprite copied (list 3 from 0x70 up), its
@@ -393,7 +408,7 @@ third-kind types and the page 256 entries. The differential reads a
 page object's type as it reads a dispatched one's, from the side table
 (`tools/xdiff_snap.py` `DISPATCH`), and the number it finds is BN4's
 own. The fourth kind stays in the tables (BN5's own end at 0x90, the
-chips' run from 0x91; three taken by fourteen units).
+chips' run from 0x91; seven taken by eighteen units).
 
 **BN5's numbers are still guarded for BN4's Navis.** Their track takes
 third-kind numbers of the tables (`TYPES3_NAVIS`, once its 0xCC to 0xFF

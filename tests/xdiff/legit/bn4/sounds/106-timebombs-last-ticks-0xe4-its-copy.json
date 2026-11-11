@@ -1,0 +1,7 @@
+{
+ "bn4": "0xE4",
+ "bn6": "0x1E4",
+ "clock": "state",
+ "what": "TimeBomb's last ticks 0xE4, its copy",
+ "why": "Played by the bomb's own state through its last frames (BN4: movs r0,#0xe4 at 0x080D6DD8, its bl at 0x080D6DDA, after its 30 frames are set; BN6: the copy's bl aimed at a shim that makes r0 0x1E4): BN4's song 0xE4 copied into slot 0x1E4. BN6's own song 0xE4 is another (xrecipe.song_sig)"
+}

@@ -4,19 +4,19 @@
  "dev": [
   "bn4families"
  ],
- "foes": "01@52",
+ "foes": "06@52",
  "mm": "22",
  "hp": 2000,
  "frames": 420,
  "seed": "12345678:9ABCDEF0",
  "rng": "replay",
  "lag": 1,
- "about": "BN4's TimeBomb J (its chip 97) against BN6's TimeBom1 F (144) by the comparator's MegaMan mode (docs/multirom/bn4-chips.md, unit 3): each picked on the first Custom screen and used at fight frame 30 against a Mettaur at (5,2). The census's question, whether BN4's support 0x11 is BN6's subfamily 10: the spawner and the object's states are the same by body, its placement is not (BN4 0x080E4DE4, BN6 0x080E45D0).",
+ "about": "BN4's TimeBomb J (its chip 97) against the registry's row 529 (the unit of BN4's support 0x11, power 150): picked on the first Custom screen and used at fight frame 30 against BN4's Mettaur of 250 HP at (5,2). The placer (the fourth kind's 0x27) at t33 draws a free panel of the foe's front column, BN6's draw BN4's: the bomb (the third kind's 0x4B, an actor with 50 HP, its own states from 6 in BN4 and from 8 in BN6) on (4,3) at t34 with sound 0xB0, its count's ticks 0xE3 at t93 and t153 and 0xE4 at t213, the blast over the foe's area at t242 (the blasts' object, the fourth kind's 0x24, to t269; sound 0xBC at t243): 100 HP left in both.",
  "folder4": [
   "1261"
  ],
  "folder6": [
-  "0A90"
+  "211:09"
  ],
  "cust4": {
   "1": [
@@ -77,10 +77,5 @@
    2
   ]
  ],
- "subject": "megaman",
- "verdict": {
-  "is": "FAIL",
-  "at": 34,
-  "why": "Through t33 the two differ only where legit.json's bn4 section explains (the chip's id, the record's copies read as BN6's, the bomb's support object, BN6's support attack's end). At t34 the bomb lands on another panel: BN4's placement (0x080E4DE4, 55 instructions) is not BN6's (0x080E45D0, 14), though the object's other routines are the same by body. So BN4's TimeBomb is BN4's code to move, not a chip on BN6's TimeBom1's (docs/multirom/bn4-chips.md, Where things stand)."
- }
+ "subject": "megaman"
 }
