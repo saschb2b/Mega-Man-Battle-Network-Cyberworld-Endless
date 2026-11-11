@@ -848,6 +848,7 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 /* MegaMan's state 0x47 (080EDC5A-080EDD2E), the family of its chips' records: moved */
 /* ThunSoul's power attack 0x58 (0800D298), which returns the family: copied with it */
 /* its sprite 3:0x3a (080DAFF4): BN6's 3:0x75, copied */
+/* its sprite 3:0x37 (080DAFF4, by 080DAFE6): BN6's 3:0x76, copied */
 /* its sprite 3:0x19: list 3 0x72, as Spreads copied it */
 /* its table 080CD524's kind 10: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
 /* its sprite 3:0xd: list 3 0x73, as Spreads copied it */
@@ -856,8 +857,8 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 /* its table 080CD524's kind 14: sprite 3:0x1c in BN4, 0x74 in BN6 (copied) */
 /* its sprite 3:0x19: list 3 0x72, as Spreads copied it */
 /* its table 080CD524's kind 50: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
-/* its sound 0x8d (its table 080DAFB0's kind 0x3): BN4's song at the grown table's slot 0x200, played through the unit's shim */
-/* its chip 47 (id 583) sits out: SandRing, its ring's kinds 0-2 (the table 080DAFB0: their sound 0x91, their sprite 3:0x37), the generator line's: the family is moved for ThunSoul's charged shot, its kind 3 alone */
+/* its sound 0x91 (its table 080DAFB0's kind 0x0): BN4's song at the grown table's slot 0x300, played through the unit's shim */
+/* its chip 47 (id 583) sits out: SandRing, the generator line's (its records' kinds, the ring's rows 1-3 of table 080DAFB0 and its spec): the family is moved for ThunSoul's charged shot, whose ring is kind 0 (the attack's +0xC, which its power attack zeroes) */
 
 static const XvBlock thunsoul_blocks[] = {
 	{ 0x080EDC5A, 0x080EDD2E, XC4_CODE + 0x1762, 0xD47325F6u },
@@ -932,6 +933,7 @@ static const XvPair thunsoul_words[] = {
 static const XvImm thunsoul_imms[] = {
 	{ 0x0800D2B0, THUMB_MOVS, 0, 0, 0x47, 0xD7 },   /* ThunSoul's power attack 0x58: the family it returns, BN4's 0x47, BN6's grown 0xd7 */
 	{ 0x080CD6E4, THUMB_MOVS, 0, 0, 0x2, 0xBD },   /* its object's type 0x2: moved, the dispatch's 0xbd */
+	{ 0x080DAFE6, THUMB_MOVS, 2, 0, 0x37, 0x76 },   /* its object's sprite on its other path: list 3 0x37 in BN4, 0x76 in BN6 (copied) */
 	{ 0x080DAFEE, THUMB_MOVS, 2, 0, 0x3A, 0x75 },   /* its object's sprite: list 3 0x3a in BN4, 0x75 in BN6 (copied) */
 	{ 0x080DB078, THUMB_LDR, 0, 1, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DB0D0, THUMB_MOVS, 0, 0, 0x6D, 0xBB },   /* its object's type 0x6d: moved, the dispatch's 0xbb */
@@ -944,6 +946,7 @@ static const XvType thunsoul_types[] = {
 };
 static const XvSprite thunsoul_sprites[] = {
 	{ 3, 0x3A, 3, 0x75, XC4_ART + 0x1C200, 0x500 },   /* BN4's 3:0x3a copied */
+	{ 3, 0x37, 3, 0x76, XC4_ART + 0x1C700, 0xD00 },   /* BN4's 3:0x37 copied */
 };
 static const XvByte thunsoul_bytes[] = {
 	{ 0x080CD54D, 0x19, 0x72 },   /* its table's kind 10: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
@@ -952,9 +955,9 @@ static const XvByte thunsoul_bytes[] = {
 	{ 0x080CD5ED, 0x19, 0x72 },   /* its table's kind 50: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
 };
 static const XvSoundCall thunsoul_sound_calls[] = {
-	{ 0x080DB05C, 0x200 },   /* its table 080DAFB0's kind 0x3's sound 0x8d: BN4's song at the grown table's slot 0x200 */
+	{ 0x080DB05C, 0x300 },   /* its table 080DAFB0's kind 0x0's sound 0x91: BN4's song at the grown table's slot 0x300 */
 };
-static const XcSong thunsoul_songs[] = { { 0x8D, 0x200 } };
+static const XcSong thunsoul_songs[] = { { 0x91, 0x300 } };
 
 #define THUNSOUL_CODE { .name = "ThunSoul (BN4's)", .game = XROM_BN4_RED_SUN_US, \
 	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x2C00), \
