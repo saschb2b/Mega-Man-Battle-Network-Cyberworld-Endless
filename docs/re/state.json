@@ -257,6 +257,10 @@
       "what": "PropBom's code located and moved (bn4_chips.h BN4_PROPBOM_STATE 0x080EE532, BN4_T3_PROPBOM 0x8C with BN4_PROPBOM_SPAWN 0x080DED30 and BN4_PROPBOM_BLAST 0x080DED2C; docs/rom/bn4.md), the obstacle slots' two routines paired with BN6's (BN4_OBSTACLE_REMOVE 0x0800B272, BN6_OBSTACLE_REMOVE 0x0800F656; BN4_COLL_DAMAGE read as BN6's +0x2E in the chips' tool)."
     },
     {
+      "date": "2026-11-11",
+      "what": "The bombs' family read and SeekBom's code moved (bn4_chips.h BN4_BOMBS_STATE 0x080EB3FE with BN4_BOMBS_SPAWNERS 0x080EB4C4 and BN4_BOMBS_ARMS 0x080EB4EC, BN4_T3_SEEKBOM 0x8D with BN4_SEEKBOM_THROW 0x080DEEF2, BN4_T4_EXPLOSIONS 0x11 with BN4_EXPLOSIONS_SPAWN 0x080E33D4 and BN4_EXPLOSIONS_EFFECT 0x080E33B4; docs/rom/bn4.md)."
+    },
+    {
       "date": "2026-11-10",
       "what": "BN5's and BN4's chip records carry their games' Library order at +0x1C (BN5_CHIP_LIBRARY_ORDER, BN4_CHIP_LIBRARY_ORDER): one run of numbers over the classes, the other version's Megas marked by bit 0 of +0x16. The Library's pages per entry are numbered from it (tools/library_pages.py; docs/game/meta/library.md)."
     },
@@ -358,6 +362,13 @@
       "name": "the chips' page of the dispatch: every chip spec again",
       "result": "With every unit regenerated onto the page (twelve units, their third-kind types at BN4's own numbers, 13 immediates fewer): the 55 bn4_chip* specs at their verdicts (52 PASS, the three recorded FAILs), bn4_chips_thirty among them; the whole differential and every mutation run again (the installer's type and call checks are every recipe's).",
       "meaning": "A chip unit's objects need no number of the tables': BN5's Navis and chips moved later cannot meet them, and the count of units is no limit."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-11",
+      "name": "bn4_chip_seekbom1 to 3: BN4's SeekBom moved, a family's unit by subfamily",
+      "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames (the bomb's hit at t82: a 140 HP Mettaur left 60 and 30, 250 left 110), ten mutations caught. On the way: with the explosions' maker's id left BN4's 0, BN6's own explosion was drawn (the effects' sprite state at t84); a byte row on its load was refused by the installer (raw data alone); the effect call's shim gives r4 the copy's id.",
+      "meaning": "One family's subfamilies move as units of their own, each with a copy of the state; an id an object loads from a byte of its own is given BN6's number by a shim at the call, its values read from the object's spawns."
     },
     {
       "feature": "BN4's chips in BN6's tables",
