@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-09",
+  "what": "BN4's VolGear (type 0x08, ids 7-12) moved, the first late family (AI 72, ids 0x2F0-0x2F5): its art in a room of its own (free_space.h FREE_LATE_FAMILIES, xvirus_recipe.h XV_LATE_ART), its numbers from the tops down (the third kind's 0xDF and 0xDE, list 4's 0xBF) so BN4's Navis' stay theirs; bn4_battle.h BN4_VOLGEAR_*, BN4_T3_VOLGEAR_*, BN4_*_HELD_*, BN4_HELD_CHIP_TEST (docs/rom/bn4.md, VolGear moved)."
+}

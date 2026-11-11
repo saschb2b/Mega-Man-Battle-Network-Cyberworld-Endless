@@ -1,0 +1,10 @@
+[
+ {
+  "name": "a BN4 recipe's part another",
+  "spec": "bn4_pa_heatsprd_shot",
+  "poke": [
+   "088013D6:024D:2"
+  ],
+  "what": "the recipe of three HeatShot in a row (FREE_CHIP_PAS + 0xD2) names Heat-V (589) as its chip: the three HeatShot picked form nothing in BN6's"
+ }
+]

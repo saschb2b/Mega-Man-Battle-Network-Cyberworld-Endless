@@ -1,0 +1,7 @@
+{
+ "why": "An object's header +3 is its slot in its kind's array, which the engine hands out to the first free one. Objects are matched by role (what they are, in the order they appeared), never by slot, so +3 is read as counted from the object's own slot: 0 where it is its own, as the engine writes it, so a slot taken in one game and not the other (an effect living a frame longer) is no difference of the object's.",
+ "evidence": [
+  "the slot is the first free bit of the kind's bitmap: BN5 0x080030B4-0x080030C2 / BN6 0x08003294-0x080032A2 (the same code); the spawn clears the object from +4 on (BN5 0x080030CC-0x080030D2 / BN6 0x080032AC-0x080032B2) and writes +0 and +1, leaving +3 as the slot holds it",
+  "in both traces of cangard_v1_keys every object's +3 equals its slot (5856 objects in BN5's, 5822 in BN6's)"
+ ]
+}

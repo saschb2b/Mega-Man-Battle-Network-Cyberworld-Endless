@@ -1,0 +1,8 @@
+{
+ "action4": "0x20",
+ "phase": "0xA0",
+ "subfamily": "0xA3",
+ "bn4": "0x04",
+ "bn6": "0x0100",
+ "why": "BN4's misc run waits after one subfamily's routine before it ends the attack (BN4_MISC_WAIT 0x080EC9AC: cmp r0,#5; movs r0,#0x28; strh r0,[r7,#0x10], counted down a frame each, bgt at 0x080EC9BA): SidBmbo's 0x28 frames. BN6's run waits for its own subfamily 0x14 alone (0x080ED712), so the unit's entry in BN6's grown misc routines is a wrapper of the installer's (src/emu/xchips_code.c wait_stage, XChipUnit.wait) that is the run's routine every frame of the wait: it calls the unit's routine once, sets the count to BN4's and counts it as BN4's run does, ending the attack through BN6's run (BN6_MISC_END 0x080ED722) at 0. The count (the state's +0x10) holds BN4's numbers each frame and is compared as ever. The state's phase halfword is each run's own bookkeeping while it waits: BN4's run marks its phase 4 (movs r0,#4; strb r0,[r7] at 0x080EC982-0x080EC984) and comes back to its count-down by it (bne at 0x080EC980); BN6's run marks 1 (0x080ED6E8-0x080ED6EA), which the wrapper clears each frame it goes on waiting so that the run calls it again (its strb at +0x2C), keeping a mark of its own in the halfword's second byte (its strb at +0x16: the routine called once), a byte an attack's set clears with the phase (BN6 0x080116A4: strh r0,[r1]). So BN4's 0x0004 there is read as BN6's 0x0100, only in BN4's misc state (his CurAction 0x20), only with BN4's phase 4 and a second byte of 0, and only where his attack's subfamily is a unit's that waits (src/emu/xchips_bn4.c's rows with a wait). bn4_chip_sidbmbo1: t33 to t71 in BN4's, the attack ended at t72 in BN4's and t73 in BN6's (the battle's offset), the count 0x27 down to 1 in both"
+}

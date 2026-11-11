@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-08",
+  "what": "BN4's Melody (type 0x11, ids 0x37-0x3C) moved as a summoned family for Roll V3's 0x39 (bn4_navis.h BN4_MELODY_*, bn4_battle.h BN4_COLL_REGION_SET, bn6_families.h BN6_COLL_REGION_SET, BN6_COLL_REGION_CLEAR, BN6_SPAWN_ENEMY_2E; docs/rom/bn4.md, Melody moved for Roll's summon)."
+}

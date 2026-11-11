@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "CloudMan moved (docs/multirom/navis.md, CloudMan; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_CLOUD_SPAWN_37, BN5_CLOUD_5F_PARENT, BN5_CLOUD_STATES_37, BN5_CLOUD_ROW_LEFTOVER): cloudman_v1, cloudman_v1_keys and cloudman_sp PASS, five mutations caught; the third kind's 0x0B the Navis' copy (the chips' Bubbles helper gone); the generator renumbers every compare of a parent's CurAction and keeps a block's low byte where its code stores one of its own addresses (LOW_BYTE_KEPT); the Navis' shared art's fourth room (FREE_NAVI_SHARED_FOUR)."
+}

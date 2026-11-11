@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_boomer1 to 3: BN4's Boomer moved",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the boomerang in play from t33 to t96, a 140 HP Mettaur at (6,3) left 80, 60 and 40 in both at t61. Five mutations caught (a row's power and subfamily, the flights' speeds, the dispatch number, the sound). PanlSht's, ShotStar's, WhitWeb's, Counter's and Repair's specs PASS again with their sprites copied.",
+  "meaning": "A unit with a data table of its object's moves by the generator; copied sprites keep an in-play object comparable."
+}

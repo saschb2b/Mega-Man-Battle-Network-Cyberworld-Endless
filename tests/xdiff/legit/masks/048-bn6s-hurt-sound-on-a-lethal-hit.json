@@ -1,0 +1,14 @@
+{
+ "name": "BN6's hurt sound on a lethal hit",
+ "part": "sounds",
+ "songs6": [
+  "0x6B",
+  "0x6D"
+ ],
+ "why": "A hit that takes its object's HP to 0: BN6's damage routine plays the hurt sound (0x6B MegaMan's, 0x6D another's) before it tests the HP left, BN5's skips it on a lethal hit (its test first): the engine's damage step, not the family's code, a song in BN6's frame alone, those two alone (the deletion that follows is compared).",
+ "evidence": [
+  "BN6 0x0801BA3C: bl 0x0800E2D8; push {r1}; movs r4,#0x6D ... movs r4,#0x6B; bl 0x080005CC; pop {r1}; tst r1,r1",
+  "BN5 0x080185C4: bl 0x0800C6D8; tst r1,r1; beq 0x080185FE, past its sound 0x080185D0-0x080185E8",
+  "zomon_v3 at t1084 and zomon_v3ex at t760: MegaMan's HP 0 in both at t1083 and t759, song 0x6B in BN6's frame alone, its event's caller the engine's (0x0801BA5F)"
+ ]
+}

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "no DarkChip dealt into the first worried hand",
+  "spec": "soul_mood_first",
+  "soulbreak": 33554432,
+  "what": "BN5's worried rule (0x08025118) left out of the compaction's hook on the battle's first Custom screen: DarkCirc stays shelved past the deck's place 5 (deck[5]), the second hand's fifth chip a Cannon where BN5's is DarkCirc"
+ }
+]

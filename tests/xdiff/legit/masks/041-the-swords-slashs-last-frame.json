@@ -1,0 +1,29 @@
+{
+ "name": "the sword's slash's last frame",
+ "part": [
+  "in play",
+  "obj"
+ ],
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "effects": [
+  "0x18",
+  "0x16",
+  "0x17"
+ ],
+ "offsets": [
+  "0x00",
+  "0x08"
+ ],
+ "why": "A sword's slash is an effect object (the fourth kind's type 0, effect 0x18: sprite list 3's 0x14, its animation 2, both games' effect tables alike; a Katana's 0x16 and 0x17 its animations 0 and 1), drawn from each game's own sprite: BN5's animation 2 has four frames (4, 3, 3 and 2 frames), BN6's three (4, 3, 3), so BN5's slash is still drawn (its frame's place on) the frame BN6's ends, and lives two frames longer. Its place and first frames are compared.",
+ "evidence": [
+  "the effects' tables: BN5 0x080DFD7C + 0x18 x 4, BN6 0x080E16D4 + 0x18 x 4: 0C 14 02 00 in both",
+  "the sprites: BN5 0x0830105C, BN6 0x0830E6BC (list 3's 0x14), their animation 2's frames 4, 3, 3, 2 and 4, 3, 3",
+  "chip_sword: the slash in play from t44 in both, to t54 in BN6's and t56 in BN5's, its flags and frame apart at t54",
+  "chip_katana1: Katana's second slash (effect 0x16, list 3's 0x14's animation 0, both tables 0C 14 00 00) ended in BN6's at t57 while BN5's is still drawn"
+ ]
+}

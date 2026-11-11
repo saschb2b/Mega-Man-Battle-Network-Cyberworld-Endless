@@ -1,0 +1,34 @@
+[
+ {
+  "name": "VolGear's target read at BN4's players' base",
+  "spec": "volgear_v1",
+  "poke": [
+   "080B6852:3044:2"
+  ],
+  "what": "its fire's aim, the other side's player read from the battle state (BN4 0x080B6850-0x080B6858: lsls r0,#2; adds r0,#0x44; ldr r2,[r0,r1] past [eToolkit +0x18], tools/xrecipe_bn4.py battle_players, its copy's adds made #0xD0) left at BN4's +0x44: BN6's copy reads a word of BN6's battle state that holds no player, its fire's +0x4C 0 where BN4's names MegaMan (caught at t214, the fire's +0x4C and +0x64)"
+ },
+ {
+  "name": "VolGear's fire drawn from BN6's own list 4 0x0A",
+  "spec": "volgear_v1",
+  "poke": [
+   "080D013C:500A:2"
+  ],
+  "what": "the third kind's 0x1A's kinds' table (BN4 0x080D013C, bn4_twins.FAMILY_TABLES), its kind 0's sprite number, given its copy's 0xBF by the recipe (XvByte), left at BN4's 0x0A: the fire VolGear V1 spawns draws BN6's own list 4 0x0A, another picture of other frames (caught at t214, the fire's sprite state)"
+ },
+ {
+  "name": "VolGear's fire spawned as its 0x19",
+  "spec": "volgear_v1",
+  "poke": [
+   "080D02DE:20DF:2"
+  ],
+  "what": "the spawn of the third kind's 0x1A (BN4 0x080D02DE: movs r0,#0x1a, the recipe's dispatch number 0xDE, the late families' from 0xDF down, xrecipe_bn4.LATE_TYPES) made 0xDF, its 0x19's: the dispatch runs its 0x19's copy for it (caught at t214, the objects in play and the run order)"
+ },
+ {
+  "name": "VolGear's battle sprite drawn from Billy's copy",
+  "spec": "volgear_v1",
+  "poke": [
+   "08B34320:08BE0000:4"
+  ],
+  "what": "BN6's grown list 1's 0xC8 (XV_LISTS + 4 * 0xC8), VolGear's copy of BN4's 1:0x02 in the late families' art room (XV_LATE_ART), aimed at Billy's (XV_ART + 0x60000, BN4's 1:0x03): its idle animation's frames read from another sprite (caught at t1, its +0x91 and +0x92)"
+ }
+]

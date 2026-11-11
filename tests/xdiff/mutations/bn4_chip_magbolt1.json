@@ -1,0 +1,67 @@
+[
+ {
+  "name": "the pull's bits another",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE140:04:1"
+  ],
+  "what": "the state's copy's hit word (BN4 0x080EE140, 0x1E05FF08) with bits 0x04 where BN4's holds 0x08: another push bit, the Mettaur not pulled toward MegaMan"
+ },
+ {
+  "name": "the bolt's life shorter",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080DBD3C:2010"
+  ],
+  "what": "the bolt's copy's count (movs r0,#0x1e at BN4 0x080DBD3C) made 0x10: the bolt leaves the field 14 frames before BN4's"
+ },
+ {
+  "name": "the wait before the bolt longer",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE076:200A"
+  ],
+  "what": "the state's copy's wait before the bolt (movs r0,#6 at BN4 0x080EE076) made 10: the bolt, its sounds and the pull four frames late"
+ },
+ {
+  "name": "the pull shorter",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE088:200A"
+  ],
+  "what": "the state's copy's count of the pull's frames (movs r0,#0x1e at BN4 0x080EE088) made 10: MegaMan's attack ends 20 frames before BN4's"
+ },
+ {
+  "name": "the bolt's sound not played",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE0DA:46C0",
+   "080EE0DC:46C0"
+  ],
+  "what": "the state's copy's call that plays the bolt's sound (BN4 0x080EE0DA, sound 0xF8 through its shim) made two nops: no sound 0x202 as the bolt appears"
+ },
+ {
+  "name": "the arm's kind another",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE05E:2424"
+  ],
+  "what": "the state's copy's arm kind (movs r4,#0x23 at BN4 0x080EE05E) made 0x24, MagBolt2's: another row of the arm's kinds, another sprite on MegaMan's arm"
+ },
+ {
+  "name": "MegaMan's animation BN4's number",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE044:200D"
+  ],
+  "what": "the state's copy's animation of MegaMan (BN4 0x080EE044) given BN4's number 0x0D where the recipe gives BN6's 0x0A: another animation of BN6's art"
+ },
+ {
+  "name": "the attack's variables at BN4's place",
+  "spec": "bn4_chip_magbolt1",
+  "poke": [
+   "080EE016:3770"
+  ],
+  "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE016), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+ }
+]

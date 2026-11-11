@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the muzzle flash's sprite",
+  "spec": "chip_drilarm1",
+  "poke5": [
+   "080B9B48:1E:1"
+  ],
+  "what": "the flash 0x2F's number byte in the helper's copy of its table (BN5's 0x080B9B48, set to the number of the chips' where BN5's list 3 0x1E was copied) left at 0x1E: BN6's list 3 0x1E drawn, another picture"
+ }
+]

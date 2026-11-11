@@ -1,0 +1,10 @@
+[
+ {
+  "name": "BN6's opening two frames longer",
+  "spec": "shrimpy_v3",
+  "poke": [
+   "080163FC:2004:2"
+  ],
+  "what": "BN6's plain appear's first blink step (BN6_APPEAR_BLINK_FIRST, 0x080163FC: movs r0,#2, which legit.json's bn4 align makes movs r0,#3 for every BN4 spec against BN6's) made movs r0,#4, written after the alignment's own: BN6's virus runs its appear and its paused present once more than BN4's, its sprite a step ahead of BN4's where the alignment has them the same (caught at t1)"
+ }
+]

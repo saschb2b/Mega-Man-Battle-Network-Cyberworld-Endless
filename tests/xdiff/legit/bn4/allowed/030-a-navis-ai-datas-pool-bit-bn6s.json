@@ -1,0 +1,9 @@
+{
+ "name": "a Navi's AI data's pool bit, BN6's",
+ "part": "ai",
+ "navi_ai": [
+  "0x7C",
+  "0x7F"
+ ],
+ "why": "BN6's AI data comes from a pool of eight, each entry's own bit at +0x7C (bn6_ai.h BN6_AI_POOL_BIT: entry i bit 31 - i, laid out by the take 0x0800ED2C; GutsMan's entry 1, 0x40000000, +0x7F 0x40), which its let-go clears (0x0800ED80). BN4 has no pool, one AI data a side (BN4_AI_DATA): BN6's own"
+}

@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN6's song table grown (src/emu/song_table.c; bn6_sound.h BN6_SONG_COUNT 0x1DA, BN6_SONG_TABLE_REF_START/CHANGE/CONTINUE/STOP/RESUME 0x0815049C, 0x081504D0, 0x0815051C, 0x08150570, 0x081505A4; docs/rom/sound.md): the sound engine names the table by five words and bounds no number, so a copy in the free space with 550 more slots, the words pointed at it where BN4's ROM is read, gives every other game's sound a slot. PanlSht's two play from 0x1DA and 0x1DB through a shim (bn4_chip_panlsht1 to 3 PASS, their ten mutations caught)."
+}

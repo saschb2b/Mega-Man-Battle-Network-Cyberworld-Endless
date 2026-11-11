@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the fang's type another",
+  "spec": "bn4_chip_twnfng3",
+  "poke": [
+   "080D7B3E:20CB"
+  ],
+  "what": "the fang's spawner's copy (its movs r0,#0x51 at BN4 0x080D7B3E, the recipe's dispatch number) naming the dispatch's 0xCB, a number no recipe moved a type to: no fangs"
+ }
+]

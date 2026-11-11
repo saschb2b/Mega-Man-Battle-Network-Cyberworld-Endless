@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "ThunSoul moved into BN6's engine (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine; docs/rom/bn4.md, SandRing's family and ThunSoul's charged shot: src/emu/bn4_chips.h's BN4_CHIP_RING_FAMILY, BN4_RING_STATE, BN4_POWER_THUN, BN4_T3_RING, BN4_RING_KINDS): BN4's family 0x47 an attack unit at BN6's grown 0xD7 with its power attack copied, BN6's Soul 13 on the proxy form; soul_thun PASS held to BN4's trace, three mutations caught; bn4_soul_thun's FAIL at t1 recorded (the Soul's form, the look)."
+}

@@ -1,0 +1,13 @@
+{
+ "name": "a slid foe's blocked slide's step, BN4's",
+ "whose": "family",
+ "kind": "T1",
+ "part": "obj",
+ "foe_slide": [
+  "0x1B",
+  "0x1D"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "fields": "a first-kind object of the family's in a chip's spec (subject megaman: the chip's foe), its slide's step (+0x1B, +0x1C, +0x1D) alone, only where BN6's holds 0 (tools/xdiff_bn4.py foe_slide); the slide's counts (+0x1E, +0x1F), its panels and its state compared as ever",
+ "why": "The entry \"MegaMan's blocked slide's step, BN4's\" on a foe: a slide is the engine's for any first-kind object, begun by the same routine (BN4 0x08010294, BN6 0x080166D0), and each engine's only stores to an object's +0x1B are that routine's and its steps' (a search of both engines' code for strb to [r5,#0x1b]: BN4 0x080102BA, 0x08010330, 0x0801034E, 0x08010354; BN6 0x080166F6, 0x08016764, 0x080167AE, 0x080167B6). BN6's step routine (0x0800E468) tests the panel the step leads to and returns zeros where it cannot be entered; BN4's (0x0800ACAA) returns the step whatever the panel and its slide tests the panel after (bl 0x0800ACF4 at 0x080102CC), ending with the step kept. MagBolt2's hit pulls a Mettaur on column 4 toward MegaMan's panels, which it cannot enter: BN4 holds 6, 0xFF, 0 from the hit's frame (bn4_chip_magbolt2, t40 on) and BN6 zeros, the Mettaur on (4,2) in both. A pull that moves the foe stores the same step in both (bn4_chip_magbolt1, the Mettaur from (5,2) to (4,2): 6, 0xFF, 0 and the counts 4, 4 down to 1 in both)"
+}

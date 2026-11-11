@@ -1,0 +1,13 @@
+{
+ "bn4": "0x128",
+ "bn6": "0x148",
+ "clock": "state",
+ "foes": [
+  "0x8C",
+  "0x8D",
+  "0x8E",
+  "0x8F"
+ ],
+ "what": "SearchMan's sound 0x128, its copy",
+ "why": "Played by his scope (the fourth kind's 0x2E) at each panel it steps to and his shots' trail (the fourth kind's 0x31), both moved with him (movs r0,#0x29 and adds r0,#0xff, their bls at 0x080E5678 and 0x080E5976; BN6: aimed at his home's shim making r0 the pool's 0x148), a state's: BN4's song 0x128 copied into the pool's eighth slot, 0x148 (src/emu/xnavi_bn4_sounds.c: a Navi's k-th sound the pool's k-th slot). His ids alone (\"foes\"): the pool's slots are another Navi's sounds in his battles, so the copy is told by its slot"
+}

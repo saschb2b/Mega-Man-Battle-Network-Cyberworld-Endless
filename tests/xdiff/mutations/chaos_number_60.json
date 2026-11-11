@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the Dark Soul a frame later",
+  "spec": "chaos_number_60",
+  "poke": [
+   "08C8325C:2019:2"
+  ],
+  "what": "the failure's phase 4 (CHAOS_FAIL_4, src/emu/soulchaos_thumb.c: BN5's 0x080EE782) counts 0x19 frames where BN5's counts 0x18 (its movs r0,#0x18 at SOULS_CHAOS + 0x15C): the Dark Soul spawned and MegaMan out of the Soul a frame after BN5's"
+ }
+]

@@ -1,0 +1,26 @@
+[
+ {
+  "name": "Roll V2's second summon Billy3",
+  "spec": "roll_v2_summons",
+  "poke": [
+   "080BC3EC:0F:1"
+  ],
+  "what": "her V2's summon list's second id (BN4 0x080BC3EC) 0x0E made 0x0F: her second summon Billy3 where BN4's is Billy2 (caught at t2015, her AI data's +0xAC as she picks it)"
+ },
+ {
+  "name": "Roll V2's summoned Billy arriving as BN6's",
+  "spec": "roll_v2_summons",
+  "poke": [
+   "08F395C4:00000000:4"
+  ],
+  "what": "the summon's word past her summon's shim (src/emu/xnavi_summoned.c; it stands for BN4's generic state 0's branch at 0x0800FCCE, +5 2 or more on to BN4_SUMMONED_APPEAR 0x0801002A) made 0: no table, each summoned enemy runs its own state 0; her Mettaur2's is BN4's, its arrival at t998 alike, her Billy2's BN6's generic one, BN6's own appear of an enemy spawned into a fight under way (0x080164A0): caught at t2050, its flash effects missing and its +0, +0xA, +0x20)"
+ },
+ {
+  "name": "Roll's pool song on her Mettaur's player",
+  "spec": "roll_v2_summons",
+  "poke": [
+   "0815A264:00090009:4"
+  ],
+  "what": "BN6's song table's entry for the pool's slot 0x63 (0x0815A264 + 4: its players), where her install put her 0x131 (BN4's player 22) on BN6's player 10, made 9, the player her summoned Mettaur's 0x8B (slot 0xE0) keeps from BN4: the two begun in one frame, the 0x8B cuts her 0x131 (caught at t1880, the family's sounds)"
+ }
+]

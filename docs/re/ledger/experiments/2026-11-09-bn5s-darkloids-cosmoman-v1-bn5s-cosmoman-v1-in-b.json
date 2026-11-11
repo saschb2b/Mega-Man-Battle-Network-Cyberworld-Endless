@@ -1,0 +1,7 @@
+{
+  "feature": "BN5's Darkloids",
+  "date": "2026-11-09",
+  "name": "cosmoman_v1: BN5's CosmoMan V1 in BN5's battle against his move into BN6's",
+  "result": "python3 build.py xdiff cosmoman_v1 cosmoman_v1_keys cosmoman_sp (rng replay): PASS over 1200 fight frames each. First FAIL at t1 (his ids and AI index unmapped in legit.json's maps), then t39 (the 0x79's +4: each engine's r4 under its count byte), t265-t438 (the 0x6C's and 0x6D's Z low half: each engine's r3) and t528 (the spark struck by them, its Z theirs): settled by spawn_leftovers rules naming the bytes compared, each read in the ROM. Five mutations caught (t438, t528, t438, t438, t39); a sixth, his half-HP attack's CurAction, reached by no spec.",
+  "meaning": "CosmoMan's code runs in BN6's engine as in BN5's over his V1 and SP; what differs is each engine's leftover registers under bytes his spawners write, which nothing reads."
+}

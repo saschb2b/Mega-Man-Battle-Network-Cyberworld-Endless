@@ -1,0 +1,13 @@
+{
+ "name": "BN4's MegaMan's charge times, cached",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0xFC",
+  "0xFF"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "why": "BN4 caches the charge times of his chip charge's and charged shot's power attacks (AI data +0xE and +0xF) as his loadout is set (0x0800BCF4: BN4_CHARGE_TIMES by power attack and his Charge, NaviStats +7; 0xFF none) into u16 +0x34 and +0x36, and its charge levels compare his two charge counters with them (0x0800BB56, 0x0800BB6C). BN6 caches none: its twin reads the same kind of table at each test (0x08012F62: r7 5 for A, 7 for B, 0x11 a Beast chip; BN6_CHARGE_TIMES read at 0x08012FA6 by his Charge, 0x08013774), the trace keeps BN4's cache in the spare's last word (BN6_AI_SPARE_LAST, xdiff_bn4_trace.c), BN6's +0x34 being his anger, BN4's +0x2E (BN4_AI_ANGER); the power attacks themselves are compared (mapped)"
+}

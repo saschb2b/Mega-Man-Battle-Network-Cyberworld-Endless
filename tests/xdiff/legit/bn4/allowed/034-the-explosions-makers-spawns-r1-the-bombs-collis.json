@@ -1,0 +1,14 @@
+{
+ "name": "the explosions' maker's spawn's r1, the bomb's collision data's address",
+ "spawn_leftover": {
+  "kind": "T4",
+  "type": "0x11",
+  "word": "0x34",
+  "bn4": [
+   "raw",
+   33790768
+  ],
+  "bn6": "0x2038640"
+ },
+ "why": "The fourth kind's spawn stores the caller's r1 at the object's +0x34. SeekBom's bomb spawns the explosions' maker right after its update loaded its own collision data's address into r1 (ldr r1,[r5,#0x54] at 0x080DEDFA, for the flags it tests at 0x080DEDFC-0x080DEE00), so +0x34 holds that address: while the bomb lives the comparison reads it as the bomb's collision data in both, and once the bomb is freed as each engine's own address of it (BN4 0x02039B30, BN6 0x02038640: each game's collision pool's entry for the bomb, the same in every spec of the unit). No code of the maker loads its +0x34 (its init takes its place from its parent, 0x080E3352-0x080E335C). bn4_chip_seekbom2 from t84"
+}

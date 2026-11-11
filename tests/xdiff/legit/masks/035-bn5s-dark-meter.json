@@ -1,0 +1,35 @@
+{
+ "name": "BN5's dark meter",
+ "part": "player",
+ "whose": [
+  "megaman"
+ ],
+ "cells": [
+  [
+   "0x44",
+   "0xF4",
+   "0x00"
+  ],
+  [
+   "0x45",
+   "0x01",
+   "0x00"
+  ],
+  [
+   "0x44",
+   "0x90",
+   "0x00"
+  ],
+  [
+   "0x45",
+   "0x01",
+   "0x00"
+  ]
+ ],
+ "why": "BN5 keeps MegaMan's dark meter at its NaviStats' +0x44 (a u16, 500 neutral, BN5_NAVI_METER), which its battle's opening reads for his mood; BN6 has no meter, its +0x44 a byte its loadout reads, 0 in its save. Read only as a battle opens (no DarkChip in the spec): the Souls track ports BN5's mood rule apart from it. A spec's dark item (dark: src/dev/xdiff.c) sets it to 400 in BN5 (0x90, 0x01: under 470, the battle opening dark, 0x08012832 giving mood 0), and BN6's engine the dark it stands for (src/emu/soulmood.c's soulmood_dev_dark: BN6_DARK_METER), no meter in BN6's NaviStats.",
+ "evidence": [
+  "BN5: the meter written and read as the battle opens, 0x08010EE0 (its NaviStats u16 setter with r1 0x44) and 0x08010F02 (the getter), the mood from it 0x08010EF6-0x08010F1C",
+  "BN6: its +0x44 read as a byte by the loadout routines 0x0800FEEC and 0x0800FF5E (getters at 0x0800FF04, 0x0800FF76)",
+  "chip_blakwing: BN5's +0x44 0x0190 from t1 (its check word, eToolkit +0x94's, written to match: else its battle's opening puts 500 back, 0x08009904-0x08009916), his mood 0 from t1 in both, his palette 2 (BN5 0x0800DDDC)"
+ ]
+}

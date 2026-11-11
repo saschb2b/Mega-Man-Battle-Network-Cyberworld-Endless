@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-11",
+  "name": "bn4_chip_shotstar: BN4's ShotStar moved by the generator, against BN4's own battle",
+  "result": "python3 build.py xdiff bn4_chip_shotstar: PASS over 400 frames (thirty stars inside the freeze, a 140 HP Mettaur left 20 in both, the same sixty-three sound calls in the same order); six mutations caught. The trace's songs begun ran past its 32 a frame (BN6's one more, the name's 0x173, pushed a fall out): its room is 128 since.",
+  "meaning": "A unit of three object types with a table, a copied sprite, a moved effect and copied sounds moves by the generator as PanlSht's did."
+}

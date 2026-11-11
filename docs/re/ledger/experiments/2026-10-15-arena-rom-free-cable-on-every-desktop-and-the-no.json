@@ -1,0 +1,8 @@
+{
+  "feature": "Arena",
+  "date": "2026-10-15",
+  "name": "ROM-free cable on every desktop and the Nova",
+  "result": "256 transfers and all 1,024 received words right on Linux, Windows x64, macOS ARM64 and the Nova.",
+  "meaning": "mGBA's lockstep cable links two cores on every system tried.",
+  "link": "../online/link.md"
+}

@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-10",
+  "name": "bn4_chip_mokorus1 to 3: BN4's MokoRus moved",
+  "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the Mokos in play from t33 to t147 on rows 2, 1, 3 (BN6's shuffle given BN4's six draws), a 140 HP Mettaur at (5,2) left 80, 50 and 20 at t93 in both, struck out of its attack and pushed to (6,2). Five mutations caught (a row's power and subfamily, the hit's bits as BN4 has them, the delay between Mokos, the sound).",
+  "meaning": "A hit's bits are not the same in both engines: struck and pushed is 0x01 with a push bit in BN4 and 0x40 with one in BN6, found at the hit's frame; a unit that pushes passes BN6's."
+}

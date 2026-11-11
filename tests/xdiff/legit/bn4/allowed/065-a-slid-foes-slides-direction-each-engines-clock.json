@@ -1,0 +1,9 @@
+{
+ "name": "a slid foe's slide's direction, each engine's clock",
+ "whose": "family",
+ "kind": "T1",
+ "part": "coll",
+ "foe_slide": "0x0C",
+ "fields": "the same object's collision data's last move's direction (+0x0C, BN6_COLL_PANEL_BYTE; BN4's +0x0A read as BN6's, direction_as_bn6) alone, only where one game holds 0 and the other the direction of its last move read as BN6's from BN4's own trace (MOVES; slide_direction with the foe's role); every other value of it compared as ever",
+ "why": "The entry \"a slide's direction, each engine's clock\" on a foe, the same code: BN4's collision panels' update (0x08012D9A), called by the slide at its start and end and each frame, writes the direction on the frame the object's panel changes and 0 on the next; BN6's slide writes it once at its end from its step (0x080167E6-0x080167F6) and keeps it. bn4_chip_magbolt1: the Mettaur pulled from (5,2) to (4,2), BN4's 4 (its 3 read by the side) at t43 alone, BN6's 4 from t44 on. The value is the same move's in both; only when it is held differs"
+}

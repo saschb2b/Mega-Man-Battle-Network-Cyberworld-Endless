@@ -1,0 +1,67 @@
+[
+ {
+  "name": "the bomb's speed another",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080EE5BC:28:1"
+  ],
+  "what": "the state's copy's table of the bomb's speed by the Navi (BN4 0x080EE5BC, 0x14 for MegaMan) with 0x28: the bomb crosses the field in half the frames"
+ },
+ {
+  "name": "the blast's column another",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080DED00:3004"
+  ],
+  "what": "the bomb's copy's blast's column (adds r0,#5 at BN4 0x080DED00, 5 less three times its side) made 4: the hit area and its explosions a column nearer MegaMan"
+ },
+ {
+  "name": "the blast's explosions BN6's own",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080DED16:2200"
+  ],
+  "what": "the bomb's copy's blast handed effect 0, BN4's number, where the recipe gives 0xC8, BN4's explosion's copy: BN6's own effect 0 over the six panels"
+ },
+ {
+  "name": "the wait before the bomb longer",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080EE56C:2008"
+  ],
+  "what": "the state's copy's wait before the bomb (movs r0,#4 at BN4 0x080EE56C) made 8: the bomb and its sounds four frames late"
+ },
+ {
+  "name": "the propeller's sound not played",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080DEC08:46C0",
+   "080DEC0A:46C0"
+  ],
+  "what": "the bomb's copy's call that plays the propeller's sound (BN4 0x080DEC08, sound 0x133 through its shim) made two nops: no sound 0x204 as the bomb appears"
+ },
+ {
+  "name": "MegaMan's throw BN4's number",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080EE55C:2012"
+  ],
+  "what": "the state's copy's animation of MegaMan (BN4 0x080EE55C) given BN4's number 0x12 where the recipe gives BN6's 0x0E: another animation of BN6's art"
+ },
+ {
+  "name": "PropBom's variables at BN4's place",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "080EE536:3770"
+  ],
+  "what": "the state's copy's adds r7,#0x70 (BN4 0x080EE536), BN4's place of the attack's variables in MegaMan's AI data, where the recipe gives BN6's 0xA0: the state reads and writes other bytes of his AI data"
+ },
+ {
+  "name": "PropBom1's row's power another",
+  "spec": "bn4_chip_propbom1",
+  "poke": [
+   "08C0736E:0032"
+  ],
+  "what": "the registry's record of BN4's PropBom1 (671) with power 50 where BN4's record holds 120: the Mettaur left 90 HP where BN4's leaves it 20"
+ }
+]

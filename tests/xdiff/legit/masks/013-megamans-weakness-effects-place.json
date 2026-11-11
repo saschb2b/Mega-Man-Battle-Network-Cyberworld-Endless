@@ -1,0 +1,22 @@
+{
+ "name": "MegaMan's weakness effect's place",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T4"
+ ],
+ "types": [
+  "0x6B"
+ ],
+ "offsets": [
+  "0x3C-0x3F",
+  "0x48-0x4B"
+ ],
+ "why": "A hit MegaMan is weak to (the hit's multiplier at his collision data's +0x74 / BN5's by his element) spawns the fourth kind's type 0x6B over him, which rises a pixel a frame from where it began: its height (+0x3C, kept at +0x48) is his place less an offset each game takes from its own table by his NameID, BN5's 2 pixels higher. His presentation, not the family's code: the family's own records stay compared.",
+ "evidence": [
+  "the spawn: BN6 0x0801A42E-0x0801A456 (its place from 0x08018810, by NameID) / BN5 0x0801724C-0x08017272 (from 0x08015140), each calling the effect's spawner (BN6 0x080E9464 / BN5 0x080E8640: movs r0,#0x6b and the kind's spawner)",
+  "its rise: BN6 0x080E943C-0x080E9440 / BN5 0x080E8618-0x080E861C, +0x3E one more each frame; field_lava_aqua: MegaMan made Fire, struck by CanGard's reticle made Aqua, BN5's +0x3E and +0x4A 0x33 and 0x32 where BN6's 0x31 and 0x30, every frame of its life"
+ ]
+}

@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's virus families in BN6's engine",
+  "date": "2026-11-08",
+  "name": "melody4_v1: BN4's Melody V1 (Roll V3's summon's family) in BN4's battle against its move into BN6's",
+  "result": "python3 tools/xdiff.py melody4_v1 (rng replay, lag 1): PASS over 1200 fight frames, its two sounds (0xC2 from t20, 0xC3 from t226) paired with Roll's pool's 0x104 and 0x117. First FAIL at t1 on its +0x2E (BN4 0x1E, BN6 0xA: its init's own step before its set-up), settled by its init run again from that step at its spawn's end (bn4_twins.INIT_AGAIN). Four mutations caught (t1, t1, t1, t20).",
+  "meaning": "Roll V3's third summon has a proved family to spawn (her summon map's 0x39 as 0x2EC); her V3 spec can prove it in her battle.",
+  "link": "../multirom/bn4-navis.md"
+}
