@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/chip-recipe-generator.md (The dispatch's numbers, a new section: BN5's numbers reserved in one place, the guard in the generator and lint, five units renumbered; the numbers run short).
 * **Update**: multirom/bn4-chips.md (FlmLine1-3, Thunder1-3 and TwnFng1-3 moved; the arm shared; the units' art room, its start moved, and what it does not hold), rom/bn4.md (their code, new row), devtools/chip-recipe-generator.md (a shared type, a unit's own move of a paired type), devtools/differential.md (a sound row by a spec's chips; BN4's chip units' code keyed in the specs that play a moved chip of BN4's alone).
 * **Update**: devtools/agents-tools.md (the `darkloid/NAME` routes: a BN5 Darkloid's battle in BN6's engine, for a look at each).
 * **Update**: game/bosses/bn4-navis.md (TopMan among the Town Area's guardians, his Guardian Data's kin ChargeMan), rom/bn4.md (`BN4_OW_TOPMAN` named).
