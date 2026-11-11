@@ -1,7 +1,7 @@
 ---
 type: Process
 title: "Merging in parallel"
-description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them."
+description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them; when a branch brings `dev` in, what that saves and what still conflicts."
 tags: [project, process, git, ci]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T19:30:00Z }
 sources:
@@ -211,3 +211,42 @@ python3 tools/shards.py absorb    # the branch's entries carried into the folder
 since the commit it left `dev` at, put onto `dev`'s folder. An entry or a
 value both changed keeps `dev`'s and is printed with the branch's, to
 merge by hand.
+
+## When a branch brings dev in
+
+The rule is `AGENTS.md`'s (Pull requests, Merging). A branch brings `dev`
+in when GitHub calls its pull request conflicting, which now means a
+conflict in a file a person writes, or when it needs what merged since (a
+function another branch changed, a counted value another took). It does
+not because `dev` moved: GitHub merges a pull request without conflict
+however old its base, and `dev`'s own CI on the merge checks the two
+together.
+
+## What it saves, and what is left
+
+Against the 261 merges measured above:
+
+| Merges of `dev` into a branch | Of 261 | Now |
+| --- | ---: | --- |
+| With no conflict at all | 39 | Not needed: `dev` having moved is no reason |
+| With conflicts only in the log, the written files, the registries, the catalog | 81 | Not needed: none of those can conflict |
+| With, beyond those, only a concept's `generated` line | 45 | Not needed: `dev`'s workflow writes the line |
+| With a conflict in what a person wrote in `docs/`, and no code | 37 | Still needed, with fewer files to resolve |
+| With a conflict in code, a tool, a test or the build | 59 | Still needed |
+
+So 165 of the 261 (63%) would not have happened. What still conflicts, by
+how often it did once the lines above are set aside:
+
+| File | Of 261 | Why | What would end it |
+| --- | ---: | --- | --- |
+| `CHANGELOG.md` | 25 | A line per change under the coming version | Entries as files, folded as the log is |
+| `docs/code/emu.md`, `tools.md`, `gfx-and-audio.md` | 18, 6, 4 | A row per new file, added at the end or beside the last one added | Rows in the files' order |
+| `docs/multirom/index.md`, `docs/rom/index.md` and the other `index.md` | 15, 4 | A concept's line repeats its description | Written from the concepts' frontmatter, as the other generated files |
+| `src/net/layer_make.h` | 13 | A counter and its history on one line | Counted from a file a bump |
+| `tests/test_core.c` | 11 | Counts and asserts added in the same functions | Counts read off the tables |
+| `docs/rom/bn4.md` | 10 | A row per find, at the table's end | Rows in address order, not at the end |
+| `AGENTS.md` | 7 | The table of tasks, the rules, the checks: rows added side by side | None: a person's page, merged by hand |
+| `src/emu/free_space.h`, `docs/engine/emulation/memory.md` | 4, 4 | Written from `free_space.plan`, but the build needs them | Regions claimed before the work starts |
+
+None of these is built. The counters among them (`layer_make.h`, the
+tests' counts, the free space's regions) wait on the owner's word.
