@@ -18,11 +18,18 @@
 #include "arena_text.h"
 #include "arena_wire.h"
 #include "bn6.h"
+#include "online_chips.h"
+#include "protocol.h"
 #include "stands_report.h"
 #include "stands_wire.h"
 #include "team_check.h"
 #include "team_outbox.h"
 #include "watch_keys.h"
+
+/* (the game's chip records, no ROM here: every id to chip_last known but one the test names, online_chips.h) */
+static unsigned unknown_chip;
+bool online_chip_known(unsigned id) { return id >= 1 && id <= ONLINE_CHIP_LAST && id != unknown_chip; }
+bool online_chip_plays(unsigned id) { return online_chip_known(id); }
 
 static void buffer(void) {
 	ArenaInput in;
@@ -234,6 +241,15 @@ static void check(void) {
 	l.folder[9] = 0xFFFF;
 	l.max_hp = 10000;
 	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "HP"));
+	/* (protocol v17: BN4's chips past 511 in the folder, ten-bit ids; a chip the game has no record of refused, by
+	 * the sender's game and the receiver's) */
+	l = starter();
+	l.folder[3] = CHIP_ENTRY(700, 2);
+	l.folder[4] = CHIP_ENTRY(ONLINE_CHIP_LAST, 26);
+	assert(arena_loadout_check(&l, why, sizeof why));
+	unknown_chip = 700;
+	assert(!arena_loadout_check(&l, why, sizeof why) && strstr(why, "chip 700") && strstr(why, "no record"));
+	unknown_chip = 0;
 }
 
 /* ---- a made-up core: EWRAM in an array ---- */

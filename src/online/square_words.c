@@ -13,6 +13,10 @@ const char *square_greeter_stamp_words(void) {
 	return "WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!";
 }
 
+const char *square_greeter_grew_words(void) {
+	return "OH! YOUR NETPASS\nGOT A NEW SLOT!|ARENA,TRADE AND\nDEEPNET STAY SHUT\nTILL IT'S FILLED!|HAVE A LOOK!";
+}
+
 const char *square_more(void) { return "More..."; }
 
 const char *square_quiet_option(bool quiet) { return quiet ? "Let them talk" : "Quiet please"; }

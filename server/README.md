@@ -316,7 +316,7 @@ The Net Square is open to every game: walking, phrases and emotes,
 Inspect cards, the trade board's offers, the Arena's stands and the
 week's Board. Trading, posting an offer, NetBattles, watching one and
 posting a week's dive need the full set: every game the build supports
-for online play, BN6 and BN5 Team Colonel today, as each HELLO's ROM
+for online play, BN6, BN5 Team Colonel and BN4 Red Sun (protocol v17), as each HELLO's ROM
 identities say (`roms_full` in `shared/online/protocol.json`). The
 server refuses those to a game without the full set, and a challenge or
 a trade aimed at one, with NOTICE 28 before anything changes; the game

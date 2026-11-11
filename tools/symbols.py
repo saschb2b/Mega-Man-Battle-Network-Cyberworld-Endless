@@ -25,6 +25,10 @@ into git (docs/rom/symbols.md).
                                      bn5.h has no description, or a file in
                                      docs/symbols differs from what it would write
                                      (build.py lint; needs no bn6f)
+  python3 tools/symbols.py --lint    as --check, but for the files' being in step:
+                                     dev's workflow writes them after each push
+                                     (tools/generated.py; docs/project/merging.md), a
+                                     branch changes the headers and docs/rom/ alone
   python3 tools/symbols.py --full    docs/symbols as above, and .build/symbols
                                      (build.py symbols --bn6f DIR runs the matcher first)
 """
@@ -1293,7 +1297,8 @@ def full_map(results, rows, files, problems):
 
 
 def main():
-    check, full = '--check' in sys.argv[1:], '--full' in sys.argv[1:]
+    lint = '--lint' in sys.argv[1:]
+    check, full = lint or '--check' in sys.argv[1:], '--full' in sys.argv[1:]
     rows = rom_data_rows()
     files, problems, results = {}, [], []
     for g in GAMES:
@@ -1317,12 +1322,12 @@ def main():
     for p in problems:
         print(f'  {p}')
     if check:
-        stale = [path for path, text in files.items()
-                 if not os.path.exists(os.path.join(ROOT, path)) or read(path) != text]
+        stale = [] if lint else [path for path, text in files.items()
+                                 if not os.path.exists(os.path.join(ROOT, path)) or read(path) != text]
         for path in stale:
             print(f'  {path} differs from what tools/symbols.py writes: python3 tools/symbols.py')
-        print(f'symbols: {sum(len(r[3]) for r in results)} in {len(files)} files, {len(problems)} problems, '
-              f'{len(stale)} stale')
+        print(f'symbols: {sum(len(r[3]) for r in results)} in {len(files)} files, {len(problems)} problems'
+              + ('' if lint else f', {len(stale)} stale'))
         return 1 if problems or stale else 0
     for path, text in files.items():
         os.makedirs(os.path.dirname(os.path.join(ROOT, path)), exist_ok=True)
