@@ -167,6 +167,10 @@
 #define BN4_METTAUR_HELD_OTHER 0x080B3C1Au /* Mettaur's held chip's other attack (0x080E8ADA), which VolGear calls for its chip 0x85
                                        * (0x080B63F0): dead while it holds none */
 #define BN4_HELD_CHIP_TEST 0x080B52E4u /* a held chip's test (+0x2A + 1): copied with the families that call it (bn4_twins.COPIED) */
+/* The battle's deck (docs/rom/bn4.md, The battle's deck) */
+#define BN4_BATTLE_DECK   0x0203BE80u /* the battle's folder as it is drawn, 30 u16 chip | code << 9 (BN6_BATTLE_DECK's twin): the Custom screen's
+                                       * hand its first entries (seen: a folder of one entry thirty times there on the first Custom
+                                       * screen, the save's own at 0x02002674; a spec's deck4 written there dealt in its order) */
 /* Its Program Advances (docs/rom/bn4.md, Its Program Advances; docs/multirom/bn4-chips.md): BN6's recipes' format, read for
  * Phase 4's grown list (BN6_PA_LIST's twin) */
 #define BN4_PA_LIST       0x080212B0u /* the recipes' addresses, BN4_PA_COUNT of them, then 0 (BN6_PA_LIST's shape) */

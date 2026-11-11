@@ -30,9 +30,6 @@
 #define BN4_BATTLE_REWARD 0x0203BD4Cu /* u16: the reward the results screen gives (a Mettaur's: 0x0058, Guard1 A), the Busting level at -7 */
 #define BN4_BATTLE_NAVI   0x0203BEC0u /* the battle's NaviStats, 0x40 a side (GetBattleNaviStatsAddr, 0x0800D742), HP at +0x30 */
 #define BN4_NAVI_SIZE     0x40        /* ... a side's (BN6_BATTLE_NAVI_SIZE's twin) */
-#define BN4_BATTLE_DECK   0x0203BE80u /* the battle's folder as it is drawn, 30 u16 chip | code << 9 (BN6_BATTLE_DECK's twin): the Custom screen's
-                                       * hand its first entries (seen: a folder of one entry thirty times there on the first Custom
-                                       * screen, the save's own at 0x02002674; a spec's deck4 written there dealt in its order) */
 #define BN4_CUSTOM_GAUGE 0x02036414u /* u16, full at 0x4000 (SetCustGauge, 0x08016810: its struct 0x020363F0 + 0x24) */
 #define BN4_OBJECT_KINDS  0x080031B8u /* the object runner's (0x0800314C) table by kind: the first kind's types BN4_T1_TYPES, the third's
                                        * 0x08003C40 (165), the fourth's 0x08003F78 (130); each type run with `mov lr,pc; bx` */
