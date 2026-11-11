@@ -60,7 +60,7 @@ FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
 STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUNT
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
-ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, (0x09, 'SeekBom'): 0xD2}
+ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -76,7 +76,15 @@ ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
 SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm itself, the third kind's 0x02, is the first attack "
                               "unit's copy, shared")}
 # A chip of a written attack unit's family that still sits out (its row XREG_PENDING), by BN4's id, each its reason
-ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)'}
+ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
+             47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
+                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
+# A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
+# returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
+# block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
+# attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
+POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
+SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),)}
 SPAWN4_4, SPAWN6_4 = 0x08003344, 0x080033AC   # BN4_SPAWN_4, BN6's fourth-kind spawner (r0 the type)
 # BN6's support routines' shape, Invisibl's (0x080E8886): the object spawned and its panel, element, parent, side, r6 and r7
 # written; BN4's the same instruction for instruction but for the element's place (ELEMENT4, ELEMENT6: the scan's immediate)
@@ -182,6 +190,7 @@ UNITS = (
     ('attack', 0x34, 'TwnFng'),
     ('attack', 0x59, 'MagBolt'),
     ('attack', 0x62, 'PropBom'),
+    ('attack', 0x47, 'ThunSoul'),
     ('attack', 0x09, 'SeekBom'),
 )
 CANDIDATES = ()
@@ -192,7 +201,7 @@ CANDIDATES = ()
 SOUND_SLOT0, SOUND_SLOT_END = 0x1DA, 0x400   # (src/emu/song_table.h SONG_GROWN_FIRST, SONG_GROWN_END)
 # (the sessions moving units side by side each take theirs from a range of their own, so no two give out one slot:
 # 0x1DA-0x1FF the generator's units, 0x200-0x23F the spreads' and lines', 0x240-0x27F the larger units', 0x280-0x2BF the
-# dark chips', 0x2C0-0x2FF the Navi chips')
+# dark chips', 0x2C0-0x2FF the Navi chips', 0x300-0x30F the BN4 Souls')
 SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x146: 0x1DC,                # (ShotStar's star's fall)
                0xBE: 0x1DD,                 # (Counter's hit)
@@ -206,7 +215,9 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xAD: 0x201,                 # (Thunder's ball's launch)
                0xF8: 0x202, 0xB9: 0x203,    # (MagBolt's bolt and its hum)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
-               0x90: 0x206}                 # (the bombs' state's throw)
+               0x90: 0x206,                 # (the bombs' state's throw)
+               # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
+               0x91: 0x300}
 # ... and a sound a BN4 family plays too, at the family's fixed slot (tools/xrecipe_bn4.py SOUND_SLOTS, xsong.c's XSOUNDS:
 # one slot a sound whichever track copies it), a byte a movs names
 FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
@@ -244,6 +255,12 @@ ROW_TABLES = {
                          "argument, its burst's effect, its sound), read by its init (0x080CF452, by +4, the chip's first "
                          "parameter): 4-6 Bubbler, Bub-V and BublSide, 7 BubSprd, 8-0xA HeatShot, Heat-V and HeatSide, 0xB HeatSprd; "
                          "0-3 are Spreader's (a run's by BN6's own) and 0xC-0x10 other families' and DrkSpred's, left BN4's"),
+    # (a table whose rows name a sound alone, `effect` None; `queue` where that sound's slot is past a byte (SOUND_SLOTS): the
+    # sites that play it by the row's byte called through the unit's shim that gives r0 the slot, every kind moved its one sound)
+    0x080DAFB0: dict(size=12, entry=3, kinds=(0,), effect=None, sound=2, effect_sites=set(), sound_sites={0x080DB05C}, queue=True,
+                     why="the ring's kinds (the third kind's 0x6D: 4 of 3 bytes, its speed, a flag, its sound), read by its init "
+                         "(0x080DB01A, by +4), the state passing the attack's +0xC (0x080EDCE2): ThunSoul's charged shot kind 0 "
+                         "(its power attack 0x58 zeroes +0xC; seen in both traces); the rest SandRing's (ROWS_WAIT)"),
 }
 for _v, _t in ROW_TABLES.items():
     TABLES[_v] = dict(size=_t['size'], entry=_t['entry'], kinds=(), sprite=(None, 0), list=3, loads=set(), why=_t['why'])
@@ -484,7 +501,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     elif kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines and the attack states alone are read')
         return f
-    f.regions, f.regions_roots, f.moved4 = [], [], {}
+    f.regions, f.regions_roots, f.moved4, f.powers = [], [], {}, []
     saved_copied = dict(bn4_twins.COPIED)
     bn4_twins.COPIED.update(UNIT_COPIED.get(name, {}))
     if kind == 'attack':
@@ -519,6 +536,12 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
                 lo, hi = X4.t3_of(b4, spawner)[1:]
                 f.moved3[ty] = {'lo': lo, 'hi': hi, 'routine': lo, 'as': alloc.shared3[ty][0]}
                 f.shared.append((3, alloc.shared3[ty][0], ty, alloc.shared3[ty][1]))
+        for pid, soul in SOUL_POWERS.get(sub, ()):
+            p = b4.u32(POWERS4 + 4 * pid) & ~1 if pid < NPOWERS4 else 0
+            bn4_twins.COPIED[p] = f'{soul}\'s power attack {pid:#x}, which returns the family'
+            f.roots.append(p)
+            f.powers.append((pid, p, soul))
+            f.notes.append(f'{soul}\'s power attack {pid:#x} ({p:08X}), which returns the family: copied with it')
     elif kind == 'support':
         f.entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
         hit = C.t4_of(b4, f.entry)
@@ -570,6 +593,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     site_imms(f)
     if kind == 'attack':
         megaman_ai(f)
+        power_returns(f)
     X4.side_sites(f)
     X4.scan(f)
     X4.battle_players(f)
@@ -660,6 +684,21 @@ def moved3(b4, f, pairs):
         del f.calls[t]
         roots |= {t, lo}
     return roots
+
+
+def power_returns(f):
+    """each Soul's power attack copied with the unit (SOUL_POWERS): BN6's power attacks' shape (the variables at r7 set, a
+    movs r0 of the family, its return), the family's number given its movs"""
+    for pid, p, soul in f.powers:
+        w = f.walks.get(p)
+        ins = [w.insns[a] for a in sorted(w.insns)] if w else []
+        last = ins[-2:] if len(ins) >= 2 else []
+        if len(last) != 2 or last[0].form != 'movs' or last[0].f[:2] != (0, f.sub) or not T.is_return(last[1]) or \
+                any(i.form == 'bl' for i in ins):
+            f.decide('power', f'{soul}\'s power attack {pid:#x} ({p:08X}) is not the shape read: its family\'s movs, then its return')
+            continue
+        f.imms.append(dict(at=sorted(w.insns)[-2], form='THUMB_MOVS', rd=0, rn=0, was=f.sub, now=f.number,
+                           why=f'{soul}\'s power attack {pid:#x}: the family it returns, BN4\'s {f.sub:#x}, BN6\'s grown {f.number:#x}'))
 
 
 def site_imms(f):
@@ -801,6 +840,11 @@ def rows_check(b4, f):
                             f'tools/xreg_bn4.py MOVED')
 
 
+# A sprite load whose number is made on more than one path (a movs on each, the walk's back_value seeing the last): the other
+# paths' movs, each copied and given the copy as the first is. BN4's load -> the other movs
+SPRITE_PATHS = {0x080DAFF4: (0x080DAFE6,)}   # (the ring's init: 3:0x37, its kinds but 3's; 3:0x3A kind 3's, 0x080DAFEE)
+
+
 def sprites_of(b4, b6, f, alloc):
     """the sprites its moved objects load (BN4's sprite load, r1 the list's offset, r2 the number, each a movs): BN4's copied
     at a number of the chips' in that list (the movs given it), one copy a sprite whichever unit draws it"""
@@ -824,6 +868,18 @@ def sprites_of(b4, b6, f, alloc):
             if tw != num:
                 f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=tw,
                                    why=f'its object\'s sprite: list {lst // 4} {num:#x} in BN4, {tw:#x} in BN6 ({how})'))
+            for at in SPRITE_PATHS.get(site, ()):
+                i = w.insns.get(at)
+                if i is None or i.form != 'movs' or i.f[0] != 2:
+                    f.decide('sprite', f'{at:08X}: SPRITE_PATHS names a movs r2 of {site:08X}\'s load there, the code holds {i.text if i else "none"}')
+                    continue
+                c = list3_copy(b4, f, alloc, i.f[1], lst // 4)
+                if c is None:
+                    f.decide('sprite', f'{at:08X}: its sprite {lst // 4}:{i.f[1]:#x}: no number of the chips\' is left for a copy')
+                    continue
+                f.notes.append(f'its sprite {lst // 4}:{i.f[1]:#x} ({site:08X}, by {at:08X}): BN6\'s {lst // 4}:{c["to_index"]:#x}, copied')
+                f.imms.append(dict(at=at, form='THUMB_MOVS', rd=2, rn=0, was=i.f[1], now=c['to_index'],
+                                   why=f'its object\'s sprite on its other path: list {lst // 4} {i.f[1]:#x} in BN4, {c["to_index"]:#x} in BN6 (copied)'))
 
 
 def list_number(alloc, lst):
@@ -967,6 +1023,9 @@ def row_tables(b4, b6, f, alloc):
         t = ROW_TABLES[v]
         for k in t['kinds']:
             row = v + t['entry'] * k
+            if t['effect'] is None:
+                row_sound(b4, b6, f, v, t, k)
+                continue
             e4 = b4.u8(row + t['effect'])
             if e4 not in made:
                 e6, how = X4.effect_twin(b4, b6, e4), 'the same look'
@@ -992,6 +1051,26 @@ def row_tables(b4, b6, f, alloc):
                 f.sounds.append((s4, slot))
                 f.notes.append(f'its sound {s4:#x} (its table {v:08X}\'s): BN4\'s song at slot {slot:#x}, the families\' slot for it (FAMILY_SLOTS)')
             f.bytes.append((row + t['sound'], s4, slot, f'its table\'s kind {k:#x}\'s sound: BN4\'s {s4:#x} at BN6\'s slot {slot:#x}'))
+
+
+def row_sound(b4, b6, f, v, t, k):
+    """a kinds' table's row that names a sound alone (ROW_TABLES' `effect` None): BN6's own where the same song, else its slot of
+    the grown song table (SOUND_SLOTS) played by the sites through the unit's shim (`queue`), its song copied with the unit"""
+    s4 = b4.u8(v + t['entry'] * k + t['sound'])
+    if not s4 or X4.song_sig(b4, X4.BN4['songs'], s4) == X4.song_sig(b6, X4.SONGS6, s4):
+        return
+    slot = SOUND_SLOTS.get(s4)
+    if slot is None or not t.get('queue') or any(b4.u8(v + t['entry'] * x + t['sound']) != s4 for x in t['kinds']):
+        f.decide('sound', f'its table {v:08X}\'s kind {k:#x}\'s sound {s4:#x}: no slot of the grown table, or its kinds\' sounds differ')
+        return
+    if (s4, slot) not in f.sounds:
+        f.sounds.append((s4, slot))
+    for site in sorted(t['sound_sites']):
+        if not any(x['at'] == site for x in f.queue_calls):
+            f.queue_calls.append(dict(at=site, slot=slot, why=f'its table {v:08X}\'s kind {k:#x}\'s sound {s4:#x}: BN4\'s song at the grown '
+                                                                f'table\'s slot {slot:#x}'))
+    f.notes.append(f'its sound {s4:#x} (its table {v:08X}\'s kind {k:#x}): BN4\'s song at the grown table\'s slot {slot:#x}, played '
+                   f'through the unit\'s shim')
 
 
 # MegaMan's AI data as an attack state of his names it: the attack's variables alone, BN4's +0x70 (0x50 bytes), BN6's +0xA0
