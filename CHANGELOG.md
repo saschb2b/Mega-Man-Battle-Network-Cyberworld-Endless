@@ -42,11 +42,10 @@
   trades the chips both games hold, and the week's DeepNet stays shut
   there, its dive not being the Board's without the other game. Online
   play speaks protocol v18: an older build and this one no longer meet.
-- **BurnerMan and SparkMan in BN6's engine.** With BN4's ROM beside
-  BN6's, BurnerMan and SparkMan of Red Sun now fight in BN6's battle as
-  BN4 fights them, each proved frame by frame against BN4's own battle.
-  The tournament does not draw them yet: its pool is full before their
-  turn, so they take their rounds in a later version.
+- **BurnerMan and SparkMan in the tournament.** With BN4's ROM beside
+  BN6's, BurnerMan and SparkMan of Red Sun join BN4's tournament as
+  rounds, fought in BN6's battle as BN4 fights them, each proved frame by
+  frame against BN4's own battle.
 - **The PET in the Net Square.** START opens the PET in the Net Square as
   anywhere: edit a folder before a NetBattle, run the NaviCust, use a
   SubChip, play the Jukebox. What you change there comes home with you,

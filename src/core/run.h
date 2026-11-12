@@ -181,7 +181,8 @@ extern bool run_debug_bracket;
  * final is the act's guardian as drawn (`final`, at `final_version` and
  * `final_hp`). The pool is the moved Navis of the games present, which
  * the caller reads from the ROMs (layer/bracket.c). */
-#define BRACKET_POOL 32
+#define BRACKET_POOL 48   /* (every Navi a pool can hold: BN6's 16, BN5's six, BN4's 25 seats, layer/bracket.c holds it so;
+                             32 dropped BN4's proved past the tenth, SparkMan and BurnerMan, without a word) */
 #define BRACKET_OTHERS 4
 typedef struct {
 	int n;
