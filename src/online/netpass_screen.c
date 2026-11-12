@@ -87,10 +87,11 @@ bool netpass_stamp_due(void) {
 }
 
 /* (stamps taken by the set's growth: all but the Square's from a game whose pass is no longer full, the Arena's and the
- * DeepNet's from a full pass on a system of one extra ROM) */
+ * DeepNet's from a full pass on a system of one extra ROM; on such a system with no game in, nothing is said until one is:
+ * its new slot could not bring back what the greeter's word names) */
 bool netpass_grew_due(void) {
 	Seen seen = seen_read();
-	return seen.stamps == STAMP_COUNT && seen.stamps > netpass_stamps() && grown(seen);
+	return seen.stamps == STAMP_COUNT && seen.stamps > netpass_stamps() && grown(seen) && (netpass_full() || !netpass_one_extra());
 }
 
 void netpass_grew_begin(void) {
@@ -129,7 +130,7 @@ static void stamping(void) {
 		if (N.view.landing == s) N.view.landing_t = N.t - at;
 	}
 	if (N.t == N.end) {
-		N.view.full = true;
+		N.view.full = netpass_stamps() == STAMP_COUNT;
 		N.view.landing = -1;
 		audio_sfx(SFX_GOT);
 	}

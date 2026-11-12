@@ -72,12 +72,13 @@ bool netpass_peer_has(uint8_t roms, NetStamp stamp) {
 	return stamp < STAMP_COUNT && (roms & ONLINE_ROMS_FULL) == ONLINE_ROMS_FULL;
 }
 
-uint8_t netpass_chip_game(unsigned id) {
+/* (the bit of the game whose ROM chip `id` takes, 0 for one of BN6's) */
+static uint8_t chip_game(unsigned id) {
 	if (id >= ONLINE_BN4_CHIP_FIRST) return ONLINE_ROMS_BN4;
 	return id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id) ? ONLINE_ROMS_BN5 : 0;
 }
 
 bool netpass_peer_holds(uint8_t roms, unsigned id) {
-	uint8_t game = netpass_chip_game(id);
+	uint8_t game = chip_game(id);
 	return !game || (roms & game);
 }

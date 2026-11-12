@@ -144,7 +144,7 @@ void netpass_ground(int x, int y, int w, int h) { fill_rect(x, y, w, h, LOOK_GRE
 
 /* the band's note: the pass's level, a star before it where it is full */
 static void level(int x, int y, const NetPassView *v) {
-	const char *lv = v->full ? netpass_level_full : netpass_level_square;
+	const char *lv = v->full ? netpass_level_full : v->held[STAMP_TRADE] ? netpass_level_trade : netpass_level_square;
 	look_band_note(x, y, NETPASS_W, lv, v->full ? LOOK_GOLD : LOOK_PAGE);
 	if (v->full) star(x + NETPASS_W - 10 - look_caps_width(lv) - 12, y + 10, PET_GOLD, GOLD_EDGE);
 }
@@ -302,7 +302,8 @@ static void tray(int x, int y, const NetPassView *v) {
 void netpass_view_now(NetPassView *v) {
 	memset(v, 0, sizeof *v);
 	for (int s = 0; s < STAMP_COUNT; ++s) v->held[s] = netpass_has((NetStamp)s);
-	v->full = netpass_full();
+	/* (the header's "Full pass": every stamp, which a full pass on a system of one extra ROM does not hold) */
+	v->full = netpass_stamps() == STAMP_COUNT;
 	v->landing = -1;
 }
 

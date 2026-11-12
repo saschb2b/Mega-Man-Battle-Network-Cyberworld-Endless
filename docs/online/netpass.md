@@ -265,9 +265,11 @@ give back, and it is the owner's to weigh: it opens again the day a New
 3DS reads both ROMs, or the day a dive is made the same whatever ROMs
 are read.
 
-**The pass on that system.** Its header says "★ Full pass" with one
-game in, its stamp bar "2 of 4", the Square's and Trade's stamps held
-and the Arena's and DeepNet's open. The tray shows the slots the system
+**The pass on that system.** Its header says "Trade pass" with one
+game in (`netpass_level_trade`: "★ Full pass" is every stamp's, which
+this pass is not, though the rule calls it full), its stamp bar "2 of
+4", the Square's and Trade's stamps held and the Arena's and DeepNet's
+open. The tray shows the slots the system
 has room for: BN6's and the game that is in, or, with none in, both
 games' open (either fits) and "Team Colonel's or Red Sun's ROM stamps
 Trade"; the second game's slot is not drawn once one is in. Its line
@@ -278,8 +280,12 @@ HAS ROOM FOR THE TRADE STAMP NOW!" and "HOLD STILL! STAMP!". A New 3DS
 whose pass was full in 0.20.0 (`netpass.ini`: every stamp, for the
 two-game set) hears him once, as every game whose stamps the set's
 growth took does: "OH! THE ARENA AND DEEPNET STAMPS NEED MORE NOW!",
-"THIS PET HAS NO ROOM FOR IT! SORRY!", "YOUR TRADE STAMP STAYS! HAVE A
-LOOK!" (`square_greeter_grew_words`), then the pass as it stands. The
+"MORE THAN THIS PET HAS ROOM FOR! SORRY!", "YOUR TRADE STAMP STAYS! HAVE
+A LOOK!" (`square_greeter_grew_words`), then the pass as it stands; the
+file then says its two stamps. He says it only where it is true: on
+such a system with no game in, `netpass_grew_due` waits until one is
+(the other games' line, of a slot to fill for three stamps, would
+promise what that system cannot hold). The
 referee there says "SORRY! NO NETBATTLES FROM THIS PET!" whatever the
 pass holds. To a full set, the card of such a Navi says "His NetPass has
 no Arena stamp." (Battle is not among its options), and Trade Central

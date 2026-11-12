@@ -8,8 +8,10 @@
 #include "netpass.h"
 
 extern const char netpass_title[];
-/* the pass's level: the Square's alone, or every stamp */
+/* the pass's level: the Square's alone, the Square's and Trade's (a
+ * system of one extra ROM, one game in: netpass.h), or every stamp */
 extern const char netpass_level_square[];
+extern const char netpass_level_trade[];
 extern const char netpass_level_full[];
 /* the operator card */
 extern const char netpass_operator_label[];

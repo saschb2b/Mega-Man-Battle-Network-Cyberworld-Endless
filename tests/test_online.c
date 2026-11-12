@@ -368,9 +368,9 @@ static void netpass(void) {
 	assert(netpass_peer_has(ONLINE_ROMS_FULL, STAMP_ARENA) && netpass_peer_has(ONLINE_ROMS_FULL, STAMP_TRADE) && netpass_peer_has(ONLINE_ROMS_FULL, STAMP_DEEPNET));
 	/* (whose game a chip is by the wire's numbers, as the server counts it, and a trade's common ground: BN6's own
 	 * every game holds, BN5's a game with BN5's ROM, BN4's own, from 527, one with BN4's) */
-	assert(!netpass_chip_game(5) && !netpass_chip_game(ONLINE_BN6_CHIP_LAST) && netpass_chip_game(210) == ONLINE_ROMS_BN5);
-	assert(netpass_chip_game(411) == ONLINE_ROMS_BN5 && netpass_chip_game(ONLINE_BN4_CHIP_FIRST - 1) == ONLINE_ROMS_BN5);
-	assert(netpass_chip_game(ONLINE_BN4_CHIP_FIRST) == ONLINE_ROMS_BN4 && netpass_chip_game(700) == ONLINE_ROMS_BN4);
+	assert(netpass_peer_holds(0, ONLINE_BN6_CHIP_LAST) && !netpass_peer_holds(0, 210) && netpass_peer_holds(ONLINE_ROMS_BN5, 210));
+	assert(netpass_peer_holds(ONLINE_ROMS_BN5, ONLINE_BN4_CHIP_FIRST - 1) && !netpass_peer_holds(ONLINE_ROMS_BN4, ONLINE_BN4_CHIP_FIRST - 1));
+	assert(netpass_peer_holds(ONLINE_ROMS_BN4, ONLINE_BN4_CHIP_FIRST) && !netpass_peer_holds(ONLINE_ROMS_BN5, ONLINE_BN4_CHIP_FIRST));
 	assert(netpass_peer_holds(0, 5) && netpass_peer_holds(one5, 5) && netpass_peer_holds(one5, 411) && !netpass_peer_holds(one5, 700));
 	assert(netpass_peer_holds(one4, 700) && !netpass_peer_holds(one4, 411) && !netpass_peer_holds(0, 411) && netpass_peer_holds(ONLINE_ROMS_FULL, 700));
 	assert(!strcmp(netpass_missing_either_words(netpass_game(1)->name, netpass_game(2)->name), "Team Colonel's or Red Sun's ROM stamps Trade"));
@@ -389,6 +389,8 @@ static void netpass(void) {
 	/* (a full pass without the Arena stamp, a PET of one extra ROM: why Battle is not offered with him) */
 	assert(strstr(square_peer_words("Alpha", &card, true, false), "no Arena stamp") && !strstr(square_peer_words("Alpha", &card, true, false), "just the Square"));
 	assert(strstr(square_greeter_stamp_words(false), "TRADE STAMP") && strstr(square_greeter_grew_words(true), "TRADE STAMP\nSTAYS"));
+	/* (the pass's level: the Square's, Trade's on a system of one extra ROM, the full pass's with every stamp) */
+	assert(!strcmp(netpass_level_trade, "Trade pass") && strcmp(netpass_level_trade, netpass_level_full));
 }
 
 /* a made-up want for the spares list's filter: 1 the even ids, 2 code A */

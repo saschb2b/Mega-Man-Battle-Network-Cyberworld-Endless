@@ -4,6 +4,7 @@
 
 const char netpass_title[] = "NetPass";
 const char netpass_level_square[] = "Square pass";
+const char netpass_level_trade[] = "Trade pass";
 const char netpass_level_full[] = "Full pass";
 
 const char netpass_operator_label[] = "OPERATOR";

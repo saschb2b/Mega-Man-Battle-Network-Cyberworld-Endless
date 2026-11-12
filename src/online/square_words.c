@@ -15,7 +15,7 @@ const char *square_greeter_stamp_words(bool every) {
 }
 
 const char *square_greeter_grew_words(bool trades) {
-	if (trades) return "OH! THE ARENA AND\nDEEPNET STAMPS\nNEED MORE NOW!|THIS PET HAS NO\nROOM FOR IT! SORRY!|YOUR TRADE STAMP\nSTAYS! HAVE A LOOK!";
+	if (trades) return "OH! THE ARENA AND\nDEEPNET STAMPS\nNEED MORE NOW!|MORE THAN THIS PET\nHAS ROOM FOR! SORRY!|YOUR TRADE STAMP\nSTAYS! HAVE A LOOK!";
 	return "OH! YOUR NETPASS\nGOT A NEW SLOT!|ARENA,TRADE AND\nDEEPNET STAY SHUT\nTILL IT'S FILLED!|HAVE A LOOK!";
 }
 

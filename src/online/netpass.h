@@ -55,16 +55,13 @@ int netpass_stamps(void);
 bool netpass_peer_full(uint8_t roms);
 bool netpass_peer_has(uint8_t roms, NetStamp stamp);
 
-/* The game whose ROM chip `id` takes, as its bit of a game's ROMs
- * (ONLINE_ROMS_BN4 from protocol.json's bn4_chip_first, else
- * ONLINE_ROMS_BN5 past BN6's own ids and on its blank records; 0 one of
- * BN6's, every game's): by the wire's numbers, as the server counts it
- * (protocol.py's chip_game) */
-uint8_t netpass_chip_game(unsigned id);
-/* ... and whether a game with `roms` holds it. Two full passes need not
- * hold the same games since protocol v18 (a system of one extra ROM), so
- * a trade keeps to the pair's common ground: a chip both hold. The server
- * refuses any other (NOTICE notice_ground) */
+/* Whether a game with `roms` holds chip `id`, by the game whose ROM the
+ * chip takes: BN4's from protocol.json's bn4_chip_first, else BN5's past
+ * BN6's own ids and on its blank records, else one of BN6's, every game's
+ * (the wire's numbers, as the server counts it: protocol.py's chip_game).
+ * Two full passes need not hold the same games since protocol v18 (a
+ * system of one extra ROM), so a trade keeps to the pair's common ground:
+ * a chip both hold. The server refuses any other (NOTICE notice_ground) */
 bool netpass_peer_holds(uint8_t roms, unsigned id);
 
 #endif

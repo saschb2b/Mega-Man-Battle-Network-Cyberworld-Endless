@@ -56,7 +56,12 @@ writes the data folder's `netpass.ini` as the greeter does. A set grown
 two: `netpass grew` the greeter's line, in BN6's chat box once no other
 box is open (page it with B where a Navi stands in front: A talks to
 him), and `netpass grown` the pass as it then opens, writing
-`netpass.ini`'s `stamps=1` and `games=`. A folder of BN6's ROM alone
+`netpass.ini`'s `stamps=1` and `games=`. `--dev xroms=1` makes the build
+act as a system that reads one extra ROM at most, the New 3DS
+([A system with room for one game](../online/netpass.md#a-system-with-room-for-one-game)):
+with a folder of BN6's ROM and one of BN5's or BN4's, the "Trade pass",
+and in a Square on a local server its trades with a game of all three,
+each one's spares list showing the chips the other's game holds. A folder of BN6's ROM alone
 (`CYBERWORLD_ROM_DIR` naming one) gives the Square pass, and one of
 BN6's and BN5's the pass with BN4's slot open:
 
