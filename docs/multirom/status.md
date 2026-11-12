@@ -3,7 +3,7 @@ type: Status
 title: "Status"
 description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun, offered to players, its five net areas dressing BN6's in runs since 5 November 2026 and nine of its Navis guarding them."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 ---
 
 # Status

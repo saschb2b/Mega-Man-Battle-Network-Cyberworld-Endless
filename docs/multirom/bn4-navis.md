@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"

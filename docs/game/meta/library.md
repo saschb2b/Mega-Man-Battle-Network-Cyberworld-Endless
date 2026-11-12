@@ -3,7 +3,7 @@ type: Design
 title: "The Library, a page per entry"
 description: "The chip Library as a dex over the entries: the PET's Library row opens a screen of ours, BN6's own Library to the pixel, with pages for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's calls, what each page lists today, what the vaults and the title's marks count, and what is left out."
 tags: [game, meta, pet, multirom]
-generated: { by: claude/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"

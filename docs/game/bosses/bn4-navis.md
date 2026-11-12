@@ -3,7 +3,7 @@ type: Design
 title: "BN4's Navis as guardians"
 description: "Nine of BN4 Red Sun's proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
 tags: [game, bosses, bn4, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:06:19Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 sources:
   - id: records
     resource: "BN4 Red Sun's net battle records, tallied by tools/bn4_lab.py (docs/rom/bn4.md, Battle records): which Navis each net group's lists hold"

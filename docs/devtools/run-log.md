@@ -3,7 +3,7 @@ type: Tool
 title: "Run log"
 description: "`runlog.txt` in the data folder (`src/director/runlog.c`) records every battle (seed, depth, area, kind, HP before and after, foes, busting level, reward), each layer left with its random battles, and each run's end with its economy's counts, on the handheld too."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T17:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 ---
 
 # Run log
