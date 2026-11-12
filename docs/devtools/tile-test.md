@@ -78,14 +78,23 @@ the water's wall), BN5's ACDC Area 318 to 142, BN4's ACDC Area 637 to
 
 Still far from clean, each a call of its own rather than the pick's:
 
-- **BN4's Park Area** (285): its one platform never touches a walkway
+- **BN4's Park Area** (304): its one platform never touches a walkway
   (a conveyor crosses it, and the wall rings count the larger half as a
   hole), and its upper edges carry a wall 8 pixels above the floor's
-  edge, which the pixel test takes for something drawn off the floor. A
-  room's upper rim is walkway floor in steps against its field. Drawn
-  apart, as BN4's ACDC squares are (`NET_APART_PLATFORMS`), its
-  rectangular rooms come out as the platform itself, whole, the walkways
-  ending at its rim; the owner's to choose.
+  edge, which the pixel test takes for something drawn off the floor. Its
+  platforms are drawn apart, as BN4's ACDC squares are
+  (`NET_APART_PLATFORMS`, the owner's call of 13 November 2026): a
+  rectangular room comes out as the platform itself, whole, the walkways
+  ending at its rim, where flush its rim was walkway floor in steps
+  against its field (285 breaks then: two tiles laid over each other at
+  every such end count more than the steps did, and read better). Not
+  clean: a room three panels wide has a field one panel wide, which the
+  platform never shows, and where the way runs two wide beside a room it
+  is walkway floor, a block's edge against the room's field (seed 6's
+  first room). Tried and dropped: its walls' inner rings as floor
+  (`TILES_INNER_WALLS`: the conveyor's pieces came along), a tile let draw
+  the wall's height over the floor's upper edges (the walkways' round
+  studs came along, and no wall).
 - **BN4's net countries** (195): its green floor is clean now, but a
   cream platform's frame gives way to plain cream in places: plain floor
   continues anything plain. Taking a tile's own neighbourhood first,
