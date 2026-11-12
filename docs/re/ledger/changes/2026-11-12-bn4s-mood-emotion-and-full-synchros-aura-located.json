@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "BN4's mood, emotion, its dark mood at an attack DarkChip's use and Full Synchro's aura located (bn4_battle.h BN4_MOOD_SET 0x0800F4DE, BN4_EMOTION 0x0800F49C, BN4_DARK_MOOD 0x0800D5C4, BN4_DARK_MOOD_PAST 0x0800D5D0, BN4_SYNCHRO_AURA 0x080CD276, BN4_AI_SYNCHRO 0x60; bn6_ai.h BN6_AI_SYNCHRO 0x5C; docs/rom/bn4.md). BN4's confusion after an attack DarkChip named (bn4_battle.h BN4_CONFUSE_STEP 0x0800AECA, BN4_CONFUSED_START), its source assumed, not traced."
+}

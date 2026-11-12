@@ -520,6 +520,10 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	 * numbers plus 0x17B, as one call plays both (SOUND_ADDS) */
 	{ XROM_BN4_RED_SUN_US, 0x105, 0x280 }, { XROM_BN4_RED_SUN_US, 0x106, 0x281 }, { XROM_BN4_RED_SUN_US, 0x107, 0x282 },
 	{ XROM_BN4_RED_SUN_US, 0x124, 0x29F },
+	/* ... DrkVulcn's shots (the dark chips' 0x283 up: docs/project/claims/bn4-dark-units.json) */
+	{ XROM_BN4_RED_SUN_US, 0xBB, 0x283 },
+	/* ... the Elem chips' shot, its two sounds by one call, each its number plus 0x1DD (SOUND_ADDS) */
+	{ XROM_BN4_RED_SUN_US, 0xA8, 0x285 }, { XROM_BN4_RED_SUN_US, 0x14C, 0x329 },
 };
 
 int xsong_sound_slot(int xrom, int song) {

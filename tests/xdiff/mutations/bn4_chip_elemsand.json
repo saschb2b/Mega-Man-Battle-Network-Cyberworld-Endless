@@ -1,0 +1,10 @@
+[
+ {
+  "name": "ElemSand's row's power another",
+  "spec": "bn4_chip_elemsand",
+  "poke": [
+   "08C0720E:003C"
+  ],
+  "what": "the registry's record of BN4's ElemSand (663 at CHIPS_RECORDS) with power 60 where BN4's record holds 120: the Mettaur left more HP than BN4's"
+ }
+]

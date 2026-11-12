@@ -677,6 +677,11 @@ def identity(game, o, canon):
         ty = moved(game, o) if moved else None
         if ty is not None:
             return T1_MOVED | ty
+        # (BN4's NameID 0 is MegaMan's on his own type, 0, alone: another first-kind object of NameID 0 is as BN6's of it,
+        # 0, Full Synchro's aura the type 0x5E in both, BN4 0x080CD276 / BN6 0x080C6482, no NameID set; legit.json's bn4
+        # allowed, Full Synchro's aura)
+        if game == 4 and o.o16(OBJ_NAME_ID) == 0 and o.o8(OBJ_TYPE) != 0:
+            return 0
         return canon.megaman_role(game, canon.nid(game, o.o16(OBJ_NAME_ID)))
     if o.kind == 'T3':
         return canon.t3(game, o.o8(OBJ_TYPE))
