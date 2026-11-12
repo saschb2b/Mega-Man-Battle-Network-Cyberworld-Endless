@@ -1,0 +1,12 @@
+{
+  "branch": "bn4-laserman",
+  "what": "BN4's LaserMan moved into BN6's engine as a foe (the other build), with the battle's attack-name banner the five remaining BN4 Navis share, and his sounds past 0xFF named by a literal",
+  "takes": {
+    "enemy_ids": [["0x3D0", "0x3D3"]],
+    "navi_ai": [["0x44", "0x44"]],
+    "list2": [["0x54", "0x54"]],
+    "dispatch3": [["0xDD", "0xDD"], ["0x01", "0x01"], ["0x03", "0x03"]]
+  },
+  "units": ["LaserMan", "BN4 Navis' attack-name banner"],
+  "run": false
+}
