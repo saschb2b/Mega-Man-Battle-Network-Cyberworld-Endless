@@ -3,7 +3,7 @@ type: Design
 title: "Team ProtoMan: foes and Souls"
 description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill, its room built (seats, ids, free space, rivals.sav, Soul bits) and NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
 tags: [game, design, bosses, bn5, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T14:00:00Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
@@ -131,7 +131,10 @@ beside him, and adds no guardian, no layer and no walk (lack 1 untouched).
 2. **The deep's pool takes the five too.** Acts 5 and 6 draw BN5's Navis
    from one pool by band ([BN5's Navis](bosses/bn5-navis.md), How often):
    it grows from six to eleven, none who already guarded a surface act of
-   the run.
+   the run, and to thirteen with Nebula's LarkMan and GridMan, the deep's
+   alone (the owner's call of 12 November 2026: a Soul-less guardian in
+   a surface coin is a worse roll for the same fight and lowers the
+   Souls' odds; [BN5's Navis](bosses/bn5-navis.md), Nebula's two).
 3. **Not in act 1.** The first run is the game for half the players (63 of
    119 started one run only, mostly on a phone), and KnightMan in act 1
    cost a run before he was tuned (the core loop's "a new system meets a

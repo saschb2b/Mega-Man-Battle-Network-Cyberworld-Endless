@@ -3141,8 +3141,11 @@ def main():
         rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
         os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
         runs = next((r for r in a.rest if r.isdigit()), '300')
+        # ("noarc" after the action: the acts' arcs off, into .build/economy-noarc.txt, to hold the arcs' drops against)
+        noarc = 'noarc' in a.rest
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
-                        '--economy', f'/src/.build/economy.txt:{runs}', mounts=[(rom_dir, '/rom:ro')]))
+                        '--economy', f'/src/.build/economy{"-noarc" if noarc else ""}.txt:{runs}{":noarc" if noarc else ""}',
+                        mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'town':
         build('host')
         sys.exit(town(*a.rest[:1]))

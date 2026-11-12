@@ -571,10 +571,11 @@ two things.
   most), by its hit at the version fought, added up; held to the
   three-quarter mark of what the act's areas' own battles are predicted
   to cost, as the pressure cap is: 0, 60, 145, 140, 180 and 678, the
-  Nest 447 (`group_cost_cap`; [measured](encounter-groups-measured.md),
-  A cap on pressure). Act 1's is nothing: its own battles cost the
-  autopilot nothing alone, so its groups are of families that do not
-  either.
+  Nest 447 when it was set (`group_cost_cap`;
+  [measured](encounter-groups-measured.md), A cap on pressure; 20, 60,
+  175 since several of a kind are measured, Step 3). Act 1's was
+  nothing: its own battles cost the autopilot nothing alone, so its
+  groups were of families that do not either.
 - **The field.** With both caps one run was still lost to a group: BN6's
   family 1 beside BN5's 51, 110 HP, which costs the autopilot 0 to 20 HP
   on the plain field in six fights. On one of that area's own fields the
@@ -603,6 +604,70 @@ area's own. From act 2 the signatures are 21, then 39 to 55.
 The area's own battles still delete the weak autopilot in act 1, with
 the arc off and on alike (two runs in twelve): that is the game as it
 was, and not this rule's to mend.
+
+### Step 3, turned on
+
+On for players since 12 November 2026, the owner's go ("Yes, ease then
+on"). Every act of the main path has its arc; `--dev noarc` plays a run
+without them.
+
+- **What went**: the one-in-four visitor (`visitor_gate`,
+  `visitor_apply`) and the deep's coin between the nets
+  (`nets_battle_area`). A layer's own battles are its area's, an older
+  net's area's its own records, in the deep too; the older nets' families
+  come as signatures and partners. "Nets meet" and "Both Nets" left the
+  card for the signature's line; an act without an arc in an older net's
+  area still says "Older Net". MegaMan names the first family of another
+  net a profile meets in a group's battle, once, in the words he had for
+  a visitor. A Glitch layer's battles from its second stage are groups
+  of any template, where each took a visitor. A run with the older nets
+  switched off draws its arcs from BN6's families alone.
+- **The first beat is one virus.** Step 2 let it be two of the family.
+  On act 2's first layer two of BN5's family 34, a panel breaker, at
+  V1EX deleted the autopilot from full HP: one of them costs it nothing
+  in six fights, two cost 40 to 280. One alone is the battle the tags
+  measured, and it is what the design says.
+- **Several of a kind are measured** (the multiples' pass, 366 battles:
+  two and three of each family at V1, standing and fought): together
+  they press less than one times their number (the median 120 less) and
+  cost more, by 40 HP or more in 57 of 122 cases, 290 at most. A swarm's
+  pressure and cost are the measured ones (`GroupMulti`), and so are the
+  acts' own battles' that hold two of a kind, which moves the marks the
+  caps are: pressure 180, 320, 530, 620, 880, 1040, the Nest 935 (220,
+  360, 620, 720, 880, 1040, 945 when one's numbers were added up); cost
+  20, 60, 175, 140, 180, 678, 447. The caps are written with the tags
+  now (`group_caps`, `src/core/group_tags.c`), so the rule and its
+  numbers cannot part. That a later version's cost grows with its hit
+  alone stays an assumption, and the breakers above show its limit.
+- **The Net Dealer's answer counts the signature**: where the guardian
+  is weak to nothing, the signature's weakness is one more kind among
+  the area's viruses' (`counter_element`).
+- **Layers**: `LAYER_MAKE` goes up by its file
+  (`src/net/layer_make.d/`): a layer's Server's challenge and its
+  dealer's answer are made otherwise, so a run saved by an older build
+  continues its layer afresh. `Run` is unchanged: the arc is the seed's.
+- **The economy** (`build.py economy`, the arcs off against on, 300
+  runs): an act's battles pay 8% less to 16% more zenny (act 2 +16%,
+  act 3 +12%, act 4 -8%) and as many chips to 0.3; an act's whole zenny
+  moves 5% at most (act 4 -4.9%, the Nest -4.0%), its chips 0.3 at most,
+  its good chips' share 3 points at most. Nothing left its band; the
+  centres were set to the report with the arcs on
+  ([The guard](../economy/guard.md), Re-centring, which says how a chip
+  moved into a reward row sets them again).
+- **The tally** (seeds 1 to 12, 45,000 frames): before, with the
+  visitors, 4 runs lost to viruses, 38 of 42 random battles won, 36
+  layers reached; now 1 run lost to viruses (an area's own battle), 55
+  of 56 won, 37 layers reached. No group's battle deleted the autopilot.
+- **Checked**: `build.py pacing` 0 past their band, every act's area
+  with its arc, the engine's fill counts equal to the tagging tool's in
+  308 of 308 cells; the 3DS's heap modelled over long runs with the arcs
+  on: 64.4 MB at most with BN6 alone, 85.9 of 96 with BN5's and BN4's ROMs beside it (85.8 before the arcs), nothing refused, no crash, seeds 1 to 6.
+- **What it leaves**: act 1 has three signature families with every ROM
+  (BN6 alone none: its act 1 stays the area's own); the cost of two
+  different families together is their own costs added up until the
+  pairs' cost pass is run (every pair fought, as their pressure was);
+  the statistics' `act-battles` event now says what the groups cost
+  players against the areas' own battles, act by act.
 
 ### Calls taken in the build
 

@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:00:00Z
-* **Update**: multirom/bn4-chips.md (The Program Advances are formed: fourteen of BN4's nineteen in BN6's grown list, PitRng's unit, what waits on its parts, what no spec reaches), rom/bn4.md (BN4's checker read, `BN4_PA_CHECK` and its two kinds; `BN4_BATTLE_DECK`, new row; PitRng's code, new row; the boomerang's spawner), rom/chips-code.md (BN4's recipes after BN5's in the same room), devtools/differential.md (`deck4=`, the `bn4_pa_*` specs' foes), devtools/chip-recipe-generator.md (a misc unit that moves a fourth-kind type, a shared type by unit, a Program Advance's row).

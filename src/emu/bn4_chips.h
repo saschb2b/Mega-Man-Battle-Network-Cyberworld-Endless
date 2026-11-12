@@ -329,5 +329,25 @@
                                            * its panel and the eight around it in its first frame (its collision's +1 0x10), a spark (effect
                                            * 0x6B) on each of the eight in turn; sprite list 5's 0x14, sound 0x143 */
 #define BN4_T3_SPRITE_STEP    0x08014446u /* a third-kind object's sprite each frame (BN6's 0x0801BBF4; the first kind's 0x080143FC) */
+/* ... and the Plus chips (support 0x4C, chips 285-288: FirePlus, ThunPlus, AquaPowr, WoodPowr) and Marking (misc 0x0F) */
+#define BN4_T4_PLUS           0x7F        /* their object, the fourth kind's (0x080EACDC to 0x080EAD2E; its spawner 0x080EAD2E, the
+                                           * subfamily's routine): lives a frame; BN4_AI_OF_SIDE's data's four timers written (its
+                                           * kind's, obj +4, 480, the rest 0) and, kind 0 alone, the stage's changer spawned with kind
+                                           * 3, grass (0x080EAD10, BN4_PANEL_CHANGER_SPAWN) */
+#define BN4_AI_PLUS_TIMERS    0x3C        /* the AI data's four element timers, u16 each to +0x42 (fire, the next three by the kind):
+                                           * counted down by BN4_PLAYER_TICK, read by BN4_HUD_PLUS_ICON alone (searched: every
+                                           * caller of BN4_AI_OF_SIDE, every halfword at these offsets after a load of an object's
+                                           * +0x58). No chip's damage changes by one (measured, docs/multirom/bn4-chips.md, call 12) */
+#define BN4_PLAYER_TICK       0x08022E3Cu /* the player's timers each frame: BN4_AI_PLUS_TIMERS; then, where the side's record's first
+                                           * byte is not 0 (0x08022E62), that record's +0x2E, +0x3A, +0x3C and +0x16; then the AI
+                                           * data's +0x3A and its byte +0x1A */
+#define BN4_HUD_PLUS_ICON     0x08014CC0u /* the HUD's icon for a running element timer: the first of the four not 0 picks its tiles
+                                           * (pointers at 0x08014CF8, 0x180 bytes) for OBJ VRAM 0x06017480; BN6 has no such icon */
+#define BN4_MARKING           0x08022F5Au /* Marking's routine (misc 0x0F, 16 bytes): BN4_SIDE_RECORD's +0x16 = 600, which
+                                           * BN4_PLAYER_TICK counts only in a mode that sets the record's first byte: nothing in a
+                                           * plain battle (measured, call 13). Where it counts, each frame 0x0800B018 with r0 2: the
+                                           * user's collision data +0x1C 2 and flag 8, the status whose tick (0x0800AF62) spawns the
+                                           * mark over an object's head, the fourth kind's 0x06 */
+#define BN4_SIDE_RECORD       0x08022D8Au /* r0 a side: 0x020374B0 + 0x1B0 a side, a record of a side's own (BN6's another layout) */
 
 #endif

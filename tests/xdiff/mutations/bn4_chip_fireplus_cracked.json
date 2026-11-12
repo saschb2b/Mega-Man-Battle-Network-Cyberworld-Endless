@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the cracked panel left as it is",
+  "spec": "bn4_chip_fireplus_cracked",
+  "poke": [
+   "080EAD10:2400"
+  ],
+  "what": "the object's copy's movs r4,#3 made 0: the changer is handed kind 0 and the Mettaur's cracked panel, with the rest, is not grass at t34"
+ }
+]

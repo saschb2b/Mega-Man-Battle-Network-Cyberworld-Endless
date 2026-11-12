@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_fireplus and its cracked: BN4's FirePlus moved, the grass without the timer",
+  "result": "python3 build.py xdiff with the two specs: each PASS over 300 frames (eighteen panels to grass at t34, sound 0x106 fifteen times and 0x107 once; a cracked panel under the Mettaur turned with the rest), five mutations caught. BN4's 480-frame timer in the user's battle data is explained as BN4's own (legit's allowed 082, only where BN6's bytes read 0). On the way: the three other Plus chips and Marking measured in BN4 alone and left out by the owner (calls 12 and 13).",
+  "meaning": "A chip whose BN4 code writes a field BN6 has no place for and no reader of can move with that store aimed nowhere, said plainly: here the HUD's icon is what is lost."
+}

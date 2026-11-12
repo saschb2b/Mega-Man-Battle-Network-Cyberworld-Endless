@@ -127,12 +127,12 @@ void arrival_words(void) {
 	nets_arrival_words();
 }
 
-/* What the act's card says of the nets, where they meet (docs/multirom/one-net.md,
- * One net: the telegraph): an older net's area, the deep's both nets, and
- * from the second act a BN6 area its visitors come to */
+/* What the act's card says beside its number: the act's signature family
+ * (docs/game/progression/encounter-groups.md, the design's sixth point: the
+ * one line the card gives it, where "Nets meet" stood); where the act has
+ * no arc, an older net's area named as one (docs/multirom/one-net.md, the
+ * telegraph) */
 static const char *nets_card(int biome) {
-	/* (the acts' arcs, behind their dev switch: the act's signature family named in the nets' place, the one line the
-	 * design gives it: docs/game/progression/encounter-groups.md, the design's sixth point) */
 	int signature = loot_arc_signature(run.depth, biome);
 	if (signature >= 0) {
 		static char line[40];
@@ -141,9 +141,7 @@ static const char *nets_card(int biome) {
 		snprintf(line, sizeof line, " - %s signal", name);
 		return line;
 	}
-	if (D.deep) return " - Both Nets";
-	if (D.territory_native) return " - Older Net";
-	return visitors_here(run.depth, biome) ? " - Nets meet" : "";
+	return D.territory_native ? " - Older Net" : "";
 }
 
 /* The act card's line under the area's name, its motto, and its colour;

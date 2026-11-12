@@ -21,9 +21,11 @@ void glitch_layer_begin(void);
  * the stage's words */
 void glitch_update(void);
 /* The next random battle on a Glitch layer: its depth (an act deeper from
- * stage 3) and whether it brings a visitor of another area or net (from
- * stage 2); nothing changed elsewhere */
-void glitch_battle(int *depth, bool *visitors);
+ * stage 3) and whether it is a group of any area's or net's families
+ * (from stage 2: an encounter group in the area's own battle's place,
+ * group_pool.h; the visitor it brought before them); nothing changed
+ * elsewhere */
+void glitch_battle(int *depth, bool *mixed);
 /* (glitch_copy.c) The copy's Yes: its fight begins */
 void glitch_copy_fight(void);
 /* Whether the battle under way is the copy's */

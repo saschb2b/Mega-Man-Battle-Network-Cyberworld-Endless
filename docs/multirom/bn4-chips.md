@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -469,6 +469,25 @@ the blast deletes is not compared yet: each engine's deletion draws its
 own explosions (the fourth kind's 0x11), which the differential has no
 rule for, so the specs' Mettaur outlives the blast.
 
+**FirePlus is moved** (12 November 2026: id 563, BN4's support 0x4C at
+BN6's grown support routine 0xCC; the owner's calls 7 and 12). Its
+object lives a frame and has the stage's changer turn every panel to
+grass, which is the whole of what it does to a battle: fire on grass
+adds its damage again by each engine's own rule. BN4 also starts a
+480-frame timer in the user's battle data, read by its HUD's icon
+alone. BN6 has no such icon and keeps other fields at those offsets, so
+the unit's call for that data is the chips' stub that returns 0 and the
+four stores go nowhere: **the timer is not kept and the HUD's icon is
+not moved**, the one thing of FirePlus a player of BN4 would miss. The
+unit's code holds the other three kinds' paths too (ThunPlus, AquaPowr,
+WoodPowr: the timers alone), which no chip of a run reaches (call 12:
+their rows wait, `ROWS_WAIT`). The changer's block is copied a third
+time with it (Hole's and Elem's units have it): the fourth kind has no
+shared type yet. `bn4_chip_fireplus` (used at fight frame 30: eighteen
+panels to grass at t34, the changer's sounds) and
+`bn4_chip_fireplus_cracked` (the Mettaur's panel cracked before it:
+grass with the rest) pass over 300 frames; five mutations caught.
+
 **SeekBom1-3 are moved, a family's unit by subfamily** (11 November
 2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
 BN4's bombs are one family: its state throws by the record's subfamily
@@ -633,8 +652,8 @@ lethal hit there would compare each engine's deletion (its sound, which
 in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
-**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
-three Plus chips are left out), then BlakBarr's barrier; Binder,
+**Next:** BlakBarr's barrier and BlakWeap (calls 7, 12 and 13: the
+other three Plus chips and Marking are left out); Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
@@ -1661,8 +1680,9 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     NetBattle. So the three are not moved: no unit, their rows left
     out of play and their ids (564 to 566) kept retired, as BugChain's
     is until its call, and nothing of a run hands them out or lists
-    them. FirePlus (563) is moved as BN4 has it, the grass and its
-    timer. Call 7 stands for the other three of its six: FirePlus,
+    them. FirePlus (563) is moved for what it does to a battle, the
+    grass; its timer is kept nowhere in BN6 and its HUD icon is not
+    moved (Where things stand, FirePlus). Call 7 stands for the other three of its six: FirePlus,
     Marking and BlakWeap. **Two answers were given the same evening.**
     Through the coordinating session the owner was first quoted with
     "Move as BN4 has them", on a recommendation to move the three and
@@ -1670,6 +1690,25 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     the measurement before him, he answered "Leave them out", and
     confirmed it the same day (11 November 2026) when asked which of
     the two stands.
+13. **Marking is left out:** "Leave it out" (the owner, 12 November
+    2026). Asked because it does nothing in a plain battle. **Verified**
+    in BN4 Red Sun (USA, `B4WE`), two ways. By experiment, BN4's own
+    battle run alone by the differential (control specs): Marking used
+    at fight frame 30 against a Mettaur of 250 HP, and the same battle
+    without it. MegaMan takes the same hits at the same frames (200 at
+    t89, t227 and t365), LEFT and UP move him as without it, and no
+    object appears; nothing in the trace differs but his misc state for
+    a frame. By the code: its routine (`0x08022F5A`, 16 bytes) sets 600
+    at the side's record's +0x16 (`0x020374B0` + 0x1B0 a side), and the
+    player's tick (`0x08022E3C`) counts that record's timers only where
+    its first byte is not 0 (`0x08022E62`), which it is in a plain
+    battle. Where it counts, each frame gives the user's collision data
+    a status (its +0x1C 2 and flag 8, `0x0800B018`) whose tick
+    (`0x0800AF62`) spawns the mark over an object's head, the fourth
+    kind's 0x06. What sets the record's first byte, which mode of BN4's,
+    was not searched. So Marking is not moved: no unit, its row out of
+    play and its id (556) kept, as the three Plus chips of call 12.
+    Call 7 stands for FirePlus and BlakWeap.
 
 Open:
 
