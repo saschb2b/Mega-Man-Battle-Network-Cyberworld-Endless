@@ -13,6 +13,7 @@ const char *const lab_tabs[4] = { "FOES", "FIELD", "STAGE", "SETS" };
 const char lab_row_preset[] = "Preset";
 const char lab_row_area[] = "Background";
 const char lab_row_song[] = "Song";
+const char lab_row_folder[] = "Folder";
 const char lab_own_song[] = "Battle's own";
 const char lab_plain_field[] = "Plain";
 
@@ -73,6 +74,8 @@ void lab_stage_words(char *out, size_t n, const char *tag, const char *name, boo
 	else if (second) snprintf(out, n, "%s 2", name);
 	else snprintf(out, n, "%s", name);
 }
+
+void lab_info_folder(char *out, size_t n, bool labs) { snprintf(out, n, labs ? "The Lab's. A edits it." : "MegaMan's own."); }
 
 void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lost) {
 	int cs = frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;

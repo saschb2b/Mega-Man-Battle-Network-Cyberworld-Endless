@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T23:10:00Z
+* **Update**: game/battle-lab.md (Built: the sandbox folder, the Lab's own thirty chips kept in the profile and changed in BN6's folder editor inside a snapshot, the pack filled from the Library in every code, the way in pressed for the player, the proof; what is not yet), code/director.md (`lab_folder.c`).

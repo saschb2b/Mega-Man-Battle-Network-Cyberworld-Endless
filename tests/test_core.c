@@ -7642,6 +7642,9 @@ static void test_lab_text(void) {
 	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
 	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
 	char a[32], b[32];
+	lab_info_folder(a, sizeof a, true);
+	lab_info_folder(b, sizeof b, false);
+	CHECK(!strcmp(a, "The Lab's. A edits it.") && !strcmp(b, "MegaMan's own."), "lab: whose folder a test battle is fought with (%s, %s)", a, b);
 	lab_stage_words(s, sizeof s, "BN5", "Oran Area", false);
 	lab_stage_words(a, sizeof a, "", "Central", true);
 	lab_stage_words(b, sizeof b, "", "Central", false);
