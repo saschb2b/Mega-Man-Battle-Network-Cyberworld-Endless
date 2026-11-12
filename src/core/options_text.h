@@ -37,6 +37,7 @@ typedef enum {
 	OW_BLEND, OW_SIMPLE, OW_SMART, OW_LCD, OW_LCD_FAST,   /* (LcdBlend's order from Simple; Off OW_OFF) */
 	OW_BLEND_OFF_NOTE, OW_SIMPLE_NOTE, OW_SMART_NOTE, OW_LCD_NOTE, OW_LCD_FAST_NOTE,   /* (LcdBlend's order) */
 	OW_LCD3X, OW_LCD3X_ON_NOTE, OW_LCD3X_OFF_NOTE,
+	OW_VOXEL, OW_VOXEL_ON_NOTE, OW_VOXEL_OFF_NOTE,
 	OW_DEFAULT,         /* START's hint on the band: the page's lines back */
 	OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME,   /* ... its question, a page each (PAGE_*'s order) */
 	OW_MGBA, OW_MGBA_NOTE,   /* the Sound line's third (SoundFilter's order after OW_SOFT) */
@@ -65,6 +66,7 @@ const char *options_fullscreen_note(void);
 const char *options_colour_note(void);
 const char *options_blend_note(void);
 const char *options_lcd3x_note(void);
+const char *options_voxel_note(void);
 /* ... before fast forward's */
 const char *options_fast_note(void);
 /* ... before the controller's vibration and trigger effects */

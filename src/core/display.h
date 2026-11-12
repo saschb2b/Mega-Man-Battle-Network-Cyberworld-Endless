@@ -54,6 +54,8 @@ bool display_has_voxel(void);
 float display_voxel_pitch(void);
 float display_voxel_zoom(void);
 float display_voxel_depth(void);
+/* ... set and kept in settings.ini (Options' Display) */
+void display_voxel_keep(bool on);
 
 /* The scale `dir` (+1 or -1) from the one in use, in the order this
  * system offers them (the 3DS's auto is its fill: it has no auto of its own) */

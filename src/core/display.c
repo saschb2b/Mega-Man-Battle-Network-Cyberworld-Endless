@@ -96,7 +96,7 @@ static bool lcd_setting(const char *key, const char *val) {
  * debug; the camera's angle, scale and depth the command line's alone,
  * while the look is being chosen */
 static int voxel;
-static float voxel_cam[3] = { 30.0f, 1.0f, 0.0f };
+static float voxel_cam[3] = { 25.0f, 1.0f, 0.0f };
 static unsigned voxel_forced;
 static int voxel_read(const char *val) { return !strcmp(val, "debug") ? DISPLAY_VOXEL_DEBUG : yes(val) ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF; }
 
@@ -230,6 +230,11 @@ LcdBlend display_blend_next(int dir) { return (LcdBlend)((lcd_blend() + LCD_BLEN
 void display_blend_keep(LcdBlend b) {
 	lcd_set_blend(b);
 	keep("interframe_blending", blends[lcd_blend()], options_blend_note());
+}
+
+void display_voxel_keep(bool on) {
+	voxel = on && display_has_voxel() ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
+	keep("voxel", voxel ? "on" : "off", options_voxel_note());
 }
 
 void display_lcd3x_keep(bool on) {

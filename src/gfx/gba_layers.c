@@ -46,47 +46,62 @@ static bool obj_pixel(const GbaVideo *v, unsigned a0, unsigned a2, int w, int tx
 	return ((ix & 1u) ? byte >> 4 : byte & 15u) != 0;
 }
 
+typedef struct { unsigned a0, a1, a2; int x0, y0, w, h, bw, bh, pa, pb, pc, pd; bool turned; } Obj;
+
+/* OAM's entry `n`: false where it is not shown (off, a window's, or off the screen) */
+static bool obj_read(const GbaVideo *v, int n, Obj *o) {
+	unsigned at = (unsigned)n * 8u;
+	*o = (Obj){ rd16(v->oam, at), rd16(v->oam, at + 2u), rd16(v->oam, at + 4u), 0, 0, 0, 0, 0, 0, 256, 0, 0, 256, false };
+	o->turned = (o->a0 & 0x100u) != 0;
+	unsigned shape = o->a0 >> 14;
+	if ((!o->turned && (o->a0 & 0x200u)) || (o->a0 >> 10 & 3u) == 2 || shape == 3) return false;
+	bool twice = o->turned && (o->a0 & 0x200u);
+	o->w = sizes[shape][o->a1 >> 14][0];
+	o->h = sizes[shape][o->a1 >> 14][1];
+	o->bw = twice ? o->w * 2 : o->w;
+	o->bh = twice ? o->h * 2 : o->h;
+	o->x0 = (int)(o->a1 & 0x1FFu);
+	o->y0 = (int)(o->a0 & 0xFFu);
+	if (o->x0 >= W) o->x0 -= 512;
+	if (o->y0 >= H) o->y0 -= 256;
+	if (o->turned) {
+		unsigned group = (o->a1 >> 9 & 31u) * 32u;
+		o->pa = (int16_t)rd16(v->oam, group + 6u); o->pb = (int16_t)rd16(v->oam, group + 14u);
+		o->pc = (int16_t)rd16(v->oam, group + 22u); o->pd = (int16_t)rd16(v->oam, group + 30u);
+	}
+	return o->x0 + o->bw > 0 && o->y0 + o->bh > 0;
+}
+
+/* The pixel of its tiles its box's (ix, iy) shows: false where none */
+static bool obj_texel(const Obj *o, int ix, int iy, int *tx, int *ty) {
+	if (!o->turned) {
+		*tx = (o->a1 & 0x1000u) ? o->w - 1 - ix : ix;
+		*ty = (o->a1 & 0x2000u) ? o->h - 1 - iy : iy;
+		return true;
+	}
+	int dx = ix - o->bw / 2, dy = iy - o->bh / 2;
+	*tx = ((o->pa * dx + o->pb * dy) >> 8) + o->w / 2;
+	*ty = ((o->pc * dx + o->pd * dy) >> 8) + o->h / 2;
+	return *tx >= 0 && *ty >= 0 && *tx < o->w && *ty < o->h;
+}
+
 static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 	bool flat = (rd16(v->io, 0) & 0x40u) != 0;
 	for (int n = 0; n < GBA_OBJS; ++n) {
-		unsigned a0 = rd16(v->oam, (unsigned)n * 8u), a1 = rd16(v->oam, (unsigned)n * 8u + 2u), a2 = rd16(v->oam, (unsigned)n * 8u + 4u);
-		bool turned = (a0 & 0x100u) != 0, twice = turned && (a0 & 0x200u);
-		unsigned mode = a0 >> 10 & 3u, shape = a0 >> 14;
+		Obj o;
 		out->w[n] = 0;
-		if ((!turned && (a0 & 0x200u)) || mode == 2 || shape == 3) continue;
-		int w = sizes[shape][a1 >> 14][0], h = sizes[shape][a1 >> 14][1], bw = twice ? w * 2 : w, bh = twice ? h * 2 : h;
-		int x0 = (int)(a1 & 0x1FFu), y0 = (int)(a0 & 0xFFu);
-		if (x0 >= W) x0 -= 512;
-		if (y0 >= H) y0 -= 256;
-		if (x0 + bw <= 0 || y0 + bh <= 0) continue;
-		int pa = 256, pb = 0, pc = 0, pd = 256;
-		if (turned) {
-			unsigned at = (a1 >> 9 & 31u) * 32u;
-			pa = (int16_t)rd16(v->oam, at + 6u); pb = (int16_t)rd16(v->oam, at + 14u);
-			pc = (int16_t)rd16(v->oam, at + 22u); pd = (int16_t)rd16(v->oam, at + 30u);
-		}
-		out->x[n] = (int16_t)x0; out->y[n] = (int16_t)y0;
-		out->w[n] = (uint8_t)bw; out->h[n] = (uint8_t)bh;
-		unsigned p = a2 >> 10 & 3u;
-		for (int iy = 0; iy < bh; ++iy)
-			for (int ix = 0; ix < bw; ++ix) {
-				int sx = x0 + ix, sy = y0 + iy, tx = ix, ty = iy;
+		if (!obj_read(v, n, &o)) continue;
+		out->x[n] = (int16_t)o.x0; out->y[n] = (int16_t)o.y0;
+		out->w[n] = (uint8_t)o.bw; out->h[n] = (uint8_t)o.bh;
+		unsigned p = o.a2 >> 10 & 3u;
+		for (int iy = 0; iy < o.bh; ++iy)
+			for (int ix = 0; ix < o.bw; ++ix) {
+				int sx = o.x0 + ix, sy = o.y0 + iy, tx, ty, i = sy * W + sx;
 				if (sx < 0 || sy < 0 || sx >= W || sy >= H) continue;
-				if (turned) {
-					int dx = ix - bw / 2, dy = iy - bh / 2;
-					tx = ((pa * dx + pb * dy) >> 8) + w / 2;
-					ty = ((pc * dx + pd * dy) >> 8) + h / 2;
-					if (tx < 0 || ty < 0 || tx >= w || ty >= h) continue;
-				} else {
-					if (a1 & 0x1000u) tx = w - 1 - tx;
-					if (a1 & 0x2000u) ty = h - 1 - ty;
-				}
-				int i = sy * W + sx;
 				/* (of two on a pixel the lower priority's, then the earlier entry's) */
-				if (out->obj[i] && prio[i] <= p) continue;
-				if (!obj_pixel(v, a0, a2, w, tx, ty, flat)) continue;
+				if ((out->obj[i] && prio[i] <= p) || !obj_texel(&o, ix, iy, &tx, &ty) || !obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat)) continue;
 				out->obj[i] = (uint8_t)(n + 1);
-				out->sheer[i] = mode == 1;
+				out->sheer[i] = (o.a0 >> 10 & 3u) == 1;
 				prio[i] = (uint8_t)p;
 			}
 	}

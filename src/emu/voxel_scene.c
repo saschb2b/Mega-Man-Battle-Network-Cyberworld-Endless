@@ -1,6 +1,5 @@
 #include "voxel_scene.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,7 +28,8 @@
 #define TILES_Y      21
 #define TILES_MOST   0xA000   /* the tile map's entries, both layers: what its buffer holds (BN6_MAP_TILEMAP to BN6_MAP_COORDS) */
 
-static struct {
+/* (made at the first frame it draws: a few megabytes no system pays for that leaves it off) */
+static struct Vox {
 	VoxGround ground;
 	VoxScene scene;
 	GbaLayers layers;
@@ -44,11 +44,14 @@ static struct {
 	SDL_Renderer *on;
 	int tex_scale, lost;
 	uint64_t live;        /* P.frame + 1 of the frame the picture is of */
-	bool hooked;
-} V;
+} *vox;
+#define V (*vox)
 
+/* The scroll `v` as the camera's place: the one nearest MegaMan's of
+ * those a 256-pixel background shows alike (a map's scroll is its
+ * camera's plus a multiple of 256 that differs from area to area) */
 static int unwrap(int v, int near) {
-	int d = ((v - near) % 512 + 512 + 256) % 512 - 256;
+	int d = ((v - near) % 256 + 256 + 128) % 256 - 128;
 	return near + d;
 }
 
@@ -116,7 +119,7 @@ static void ground_read(int cam_u, int cam_v) {
 /* ---- the picture, and its place under the canvas ---- */
 
 static bool under(SDL_Renderer *r, const SDL_Rect *canvas) {
-	if (!V.out || V.live != P.frame + 1) return false;
+	if (!vox || !V.out || V.live != P.frame + 1) return false;
 	SDL_Rect dst = { canvas->x + P.core_x * canvas->w / P.w, canvas->y + P.core_y * canvas->h / P.h, VOX_W * canvas->w / P.w, VOX_H * canvas->h / P.h };
 	if (!V.tex || V.on != r || V.tex_scale != V.scale || V.lost != P.textures_lost) {
 		if (V.tex && V.on == r && V.lost == P.textures_lost) SDL_DestroyTexture(V.tex);
@@ -148,10 +151,11 @@ static bool out_sized(void) {
 
 bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	if (!display_voxel() || !director_on_map() || director_in_town() || director_in_hp()) return false;
-	if (!V.hooked) { platform_set_under(under); V.hooked = true; }
-	uint64_t t[8]; int tn = 0;
-#define TICK t[tn++] = SDL_GetPerformanceCounter()
-	TICK;
+	if (!vox) {
+		vox = calloc(1, sizeof *vox);
+		if (!vox) return false;
+		platform_set_under(under);
+	}
 	int px = bn6_player_x(), py = bn6_player_y();
 	int cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	int cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
@@ -159,25 +163,17 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	emu_read_bytes(0x07000000u, V.oam, sizeof V.oam);
 	emu_read_bytes(0x04000000u, V.io, sizeof V.io);
 	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
-	TICK;
 	GbaWorld world;
 	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
-	TICK;
 	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.sky);
-	TICK;
 	ground_read(cam_u, cam_v);
-	TICK;
 	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) != 0, shown, &V.ground, &V.scene);
-	TICK;
 	VoxLook look = voxel_look_default();
 	look.debug = display_voxel() == DISPLAY_VOXEL_DEBUG;
 	voxel_light(&V.scene, &V.ground, &look, V.lit_map, V.lit_sprite);
-	TICK;
 	VoxCamera cam = { display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
 		(float)bn6_player_z() };
 	if (!voxel_draw(&V.scene, V.lit_map, V.lit_sprite, &look, &cam, V.scale, V.out)) return false;
-	TICK;
-	if (getenv("VOXTIME") && P.frame % 60 == 0) { fprintf(stderr, "voxtime"); for (int i = 1; i < tn; ++i) fprintf(stderr, " %.1f", (double)(t[i] - t[i - 1]) * 1000.0 / (double)SDL_GetPerformanceFrequency()); fprintf(stderr, " ms (read, layers+place, world, ground, lift, light, draw)\n"); }
 	V.live = P.frame + 1;
 	memcpy(hud, V.scene.hud, VOX_N);
 	return true;

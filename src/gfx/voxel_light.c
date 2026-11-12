@@ -11,7 +11,7 @@
 
 VoxLook voxel_look_default(void) {
 	return (VoxLook){ .sun_x = 0.40f, .sun_g = 0.46f, .sun_h = 0.95f, .ambient = 0.50f, .wall = 0.86f, .bloom = 0.20f,
-		.focus = 0.006f, .sky = 0.80f, .bevel = 0.045f, .debug = 0 };
+		.focus = 0.0045f, .sky = 0.80f, .bevel = 0.045f, .debug = 0 };
 }
 
 /* Whether the point (x, gy, h) sees the sun: no sprite and no slab's body

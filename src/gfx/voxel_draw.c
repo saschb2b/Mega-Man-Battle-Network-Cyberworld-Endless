@@ -17,6 +17,10 @@ enum { IS_SKY, IS_MAP, IS_SPRITE };
  * and what it shows */
 static struct { int scale, ow, oh; float *z; uint8_t *what; uint32_t *out; } T;
 
+/* The soft layers, on the frame's 240x160 (made with the picture: no
+ * system pays for them that leaves voxel mode off) */
+static float *low, *soft, *glow, *tmp, *cover;
+
 static bool target(int scale, uint32_t *out) {
 	if (T.scale != scale) {
 		free(T.z);
@@ -26,7 +30,11 @@ static bool target(int scale, uint32_t *out) {
 		T.oh = VOX_H * scale;
 		T.z = malloc((size_t)T.ow * (size_t)T.oh * sizeof *T.z);
 		T.what = malloc((size_t)T.ow * (size_t)T.oh);
-		if (!T.z || !T.what) { T.scale = 0; return false; }
+		if (!low) {
+			low = malloc(sizeof *low * VOX_N * 13);
+			if (low) { soft = low + VOX_N * 3; glow = soft + VOX_N * 3; tmp = glow + VOX_N * 3; cover = tmp + VOX_N * 3; }
+		}
+		if (!T.z || !T.what || !low) { T.scale = 0; return false; }
 	}
 	T.out = out;
 	for (int i = 0; i < T.ow * T.oh; ++i) T.z[i] = -1e9f;
@@ -130,7 +138,6 @@ static void sky_fill(const VoxScene *s, const uint32_t *map, const Lens *l) {
 
 /* ---- the soft layers, on the frame's 240x160 ---- */
 
-static float low[VOX_N * 3], soft[VOX_N * 3], glow[VOX_N * 3], tmp[VOX_N * 3], cover[VOX_N];
 
 static void box(float *v, int ch, int r) {
 	float norm = 1.0f / (float)(2 * r + 1);
@@ -180,13 +187,13 @@ static void layers(const VoxLook *k) {
 	for (int i = 0; i < VOX_N; ++i) {
 		const float *o = &low[i * 3];
 		float most = o[0] > o[1] ? (o[0] > o[2] ? o[0] : o[2]) : (o[1] > o[2] ? o[1] : o[2]);
-		float over = cover[i] * (most + (o[0] + o[1] + o[2]) / 3.0f - 1.62f) * 4.0f;
+		float over = cover[i] * (most - (o[0] < o[1] ? (o[0] < o[2] ? o[0] : o[2]) : (o[1] < o[2] ? o[1] : o[2])) * 0.75f - 0.62f) * 4.0f;
 		over = over < 0 ? 0 : over > 1 ? 1 : over;
 		for (int c = 0; c < 3; ++c) glow[i * 3 + c] = o[c] * over * k->bloom;
 	}
 	box(glow, 3, 3);
 	box(glow, 3, 3);
-	memcpy(soft, low, sizeof soft);
+	memcpy(soft, low, sizeof *soft * VOX_N * 3);
 	box(soft, 3, 2);
 	box(cover, 1, 5);
 }
