@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "AreaGrab's column search located and ended (bn6_panels.h BN6_GRAB_OWN_COLUMN 0x0800D5BA, BN6_GRAB_TURN 0x0800D5E4, BN6_GRAB_FOUND 0x0800D5E0; docs/rom/liberation.md): BN6's search for a column wholly the grabber's side's never returns where the field holds none, a Surrounded field after a Catack's drive; a hook ends it on the grabber's own column (src/emu/grab_search.c)."
+}

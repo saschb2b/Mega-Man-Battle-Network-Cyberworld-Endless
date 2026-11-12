@@ -30,6 +30,7 @@
 #include "debug.h"
 #include "director.h"
 #include "emu.h"
+#include "grab_search.h"
 #include "hook.h"
 #include "liberation.h"
 #include "liberation_battle_words.h"
@@ -178,6 +179,8 @@ void lib_battle_install(void) {
 		emu_hook(BN6_WIN_BANNER, win_banner, NULL) && emu_hook(BN6_DRAW_BANNER, draw_banner, NULL) &&
 		emu_hook(BN6_DRAW_SHOWN, draw_shown, NULL) && emu_hook(BN6_CUSTOM_OK_HAND, soul_ok, NULL);
 	if (!ok) fprintf(stderr, "liberation: the battle loop's hooks did not fit\n");
+	/* (AreaGrab on a Surrounded field: BN6's search for its column, ended where it ran on for good) */
+	grab_search_install();
 }
 
 /* ---- the director's ---- */
