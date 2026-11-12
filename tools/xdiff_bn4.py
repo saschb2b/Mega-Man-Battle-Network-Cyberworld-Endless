@@ -836,8 +836,9 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
             rec[k] = v
     moved1 = o.kind == 'T1' and getattr(canon, 't1_moved', None) is not None and canon.t1_moved(game, o) is not None
     if o.kind == 'T1' and not moved1:
-        at = NODE + OBJ_NAME_ID
-        rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
+        at, nid = NODE + OBJ_NAME_ID, rec[NODE + OBJ_NAME_ID] | rec[NODE + OBJ_NAME_ID + 1] << 8
+        if not (game == 4 and nid == 0 and rec[NODE + OBJ_TYPE] != 0):   # (BN4's NameID 0 MegaMan's on his type alone: xdiff_snap.identity)
+            rec[at:at + 2] = canon.nid(game, nid).to_bytes(2, 'little')
         if game == 4 and fams is not None:
             rec = bn4_as_bn6(rec, fams, navi_family(o, canon))
     elif moved1 and game == 4:
@@ -1286,6 +1287,48 @@ def spark_own(d):
     end = d.part == 'obj' and ((d.off == 0x08 and 8 in (d.a, d.b)) or (d.off == 0x00 and isinstance(d.a, int) and d.a ^ d.b == 0x02))
     # (in play in one game alone only once both had it in play: its life's end, never a spawn one game lacks)
     return (d.part == 'obj' and SPARK_SPRITE[0] <= d.off <= SPARK_SPRITE[1]) or (d.part == 'in play' and d.role in SPARKS_SEEN) or end
+
+
+# Full Synchro's aura, the first kind's 0x5E in both games, each engine's own object (legit.json's bn4 allowed, Full
+# Synchro's aura): BN6's spawn sets its +0's 0x04 where BN4's does not (0x080C64A0-0x080C64A6), the spawn's r4 at its +4 to +7
+# is each caller's leftover (BN4 0x0800D9C8, BN6 0x080139F0: neither sets r4), and its sprite state is its own art's; the word
+# of MegaMan's AI data that keeps it, its place at its +0x64, is BN4's +0x60 and BN6's +0x5C (bn4_battle.h BN4_AI_SYNCHRO,
+# bn6_ai.h BN6_AI_SYNCHRO), each the other's 0 there. Not laid out by the trace (src/dev/xdiff_bn4_trace.c ai_segs): BN4's
+# unmapped words fill BN6's spare whole, and its +0x5C would spill onto BN6's own fields
+SYNCHRO_AURA, AURA_FLAG, AURA_LEFTOVER, AURA_PLACE, AI_SYNCHRO = 0x5E, 0x04, (0x04, 0x07), 0x64, {4: 0x60, 6: 0x5C}
+
+
+def is_aura(frame, name):
+    """the object of that role name in that frame is Full Synchro's aura"""
+    return any(o.kind == 'T1' and role_name(o.role) == name and o.o8(OBJ_TYPE) == SYNCHRO_AURA for o in frame.fr['objs'])
+
+
+def aura_place(v, game):
+    """a value read as a pointer to the word of MegaMan's AI data that keeps the aura, in that game's place"""
+    return isinstance(v, tuple) and len(v) == 3 and v[1] == 'ai' and v[2] == AI_SYNCHRO[game] and \
+        isinstance(v[0], str) and v[0].startswith(f'T1:{MEGAMAN_ID:#x}#')
+
+
+def synchro_aura(d, fa, fb):
+    """legit.json's bn4 allowed, Full Synchro's aura: a difference of the aura's own (an object of the first kind's 0x5E in
+    both frames) in its +0's 0x04 bit in BN6's direction, its +4 to +7, its place or its sprite state; or MegaMan's AI data's
+    word that keeps it, each game's own, the other's 0; True where so"""
+    if not isinstance(d.role, tuple) or d.role[0] != 'T1':
+        return False
+    if d.part == 'ai' and d.role[1] == MEGAMAN_ID and d.off in AI_SYNCHRO.values():
+        own, other = (d.a, d.b) if d.off == AI_SYNCHRO[4] else (d.b, d.a)
+        frame = fa if d.off == AI_SYNCHRO[4] else fb
+        return isinstance(own, tuple) and own[1:] == ('obj', 0) and is_aura(frame, own[0]) and other == ('raw', 0)
+    if d.part != 'obj':
+        return False
+    oa, ob = fa.by_role.get(d.role), fb.by_role.get(d.role)
+    if oa is None or ob is None or oa.o8(OBJ_TYPE) != SYNCHRO_AURA or ob.o8(OBJ_TYPE) != SYNCHRO_AURA:
+        return False
+    if d.off == 0x00:
+        return isinstance(d.a, int) and isinstance(d.b, int) and d.a ^ d.b == AURA_FLAG and bool(d.b & AURA_FLAG)
+    if d.off == AURA_PLACE:
+        return aura_place(d.a, 4) and aura_place(d.b, 6)
+    return AURA_LEFTOVER[0] <= d.off <= AURA_LEFTOVER[1] or SPRITE['T1'] <= d.off < SIZE['T1'] - NODE
 
 
 def frame_diffs(fa, fb, fbt=None):
@@ -1828,6 +1871,7 @@ def compare(spec, ta, tb, canon, show=6):
         for d in world:   # (legit.json's bn4 clocks: what the fight's frames count, at the same fight frame)
             d.mask = ("the opening's animation count, by the fight's frames" if opening_count(d, fa, ft) else
                       "the hit's spark, each engine's own" if spark_own(d) else
+                      "Full Synchro's aura, each engine's own" if synchro_aura(d, fa, fb) else
                       "the paralysis's flash, its gate a state's and its phase the timer's" if paralysis_flash(d, fa, fb) else
                       "MegaMan's own art's animation" if own_animation(d, fa, fb) else
                       MEGAMAN_ANIMATION if megaman_animation(d, fa, fb) else
@@ -1937,6 +1981,9 @@ def megaman_items(spec, game):
         parts.append('deck4=' + ','.join(spec['deck4']))
     if game == 'bn4:bn6' and spec.get('deck6'):   # (BN6's battle deck in the spec's order, as a BN5 spec's: two chips in one hand)
         parts.append('deck6=' + ','.join(spec['deck6']))
+    for key in ('calm4', 'confuse6', 'mood4'):   # (an attack DarkChip's spec, and its mutation: src/dev/xdiff_spec.h)
+        if spec.get(key):
+            parts.append(f'{key}=1')
     if spec.get('panels'):   # (panels given a type in both games as the fight begins: a panel chip's spec, src/dev/xdiff.c panels_step)
         parts.append('panels=' + ','.join(spec['panels']))
     if spec.get('karma4') is not None:   # (MegaMan's karma in BN4's battle: a dark chip's spec, bn4_chips.h's BN4_CHIP_ALIGN)

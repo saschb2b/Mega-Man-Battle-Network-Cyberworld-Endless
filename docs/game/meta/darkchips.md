@@ -135,7 +135,16 @@ engine's, and all twelve kinds play there, each by its own net's rule
   first dark units of BN4's code are moved (11 November 2026): Hole,
   DrkLine and DrkStage, which dig the Hole panels a DS Navi chip's power
   counts, BN4's Hole now a panel of BN6's engine ([BN4's chips in a
-  run](../../multirom/bn4-chips.md), The dark units).
+  run](../../multirom/bn4-chips.md), The dark units). DrkVulcn followed
+  (12 November 2026), and with it two more of BN4's dark rules the run
+  does not take, each left to BN4's own battle in the differential:
+  the confusion BN4 gives MegaMan as a fight starts once an attack
+  DarkChip is chosen (the owner's call of 12 November 2026: left out
+  for now, its source not yet traced), and the dark mood an attack
+  DarkChip's use sets for the battle, which keeps Full Synchro from him
+  (and the mood 0 a dark MegaMan's battle begins at, by his karma)
+  ([BN4's chips in a run](../../multirom/bn4-chips.md), DrkVulcn and the
+  Elem chips).
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in
   a battle a DarkChip was used in, the darkness fighting with his body
   a while (session 68), and MegaMan said so; BN6's engine has its own

@@ -860,7 +860,9 @@
 080D56E0 BN5_COSMO_SPAWN_79
 080D951C football_burst_effect_id
 080DB608 find_kept_as_battle_is_won
+080DC4DE nebula_larkman_gridman.0xba_spawner
 080DCC5A cloudman_chip_attack_spawned
+080DDB48 nebula_larkman_gridman.0xba_spawner_2
 080DDB4C larkman_chip_first_object_spawned
 080DE198 django_chip_object_spawned
 080DE81C cosmoman_thrown_object_default_sprite_number
@@ -886,6 +888,8 @@
 080E24F0 bn5_magnet_panel.at_080e24f0
 080E2518 BN5_MAGNET_PANELS
 080E2728 bn5_sea_submerge.bn6_child_hidden_2
+080E3648 whose_object_loads_it
+080E36DC ored_into_r4_0x08100d72_for_spawner
 080E4C4C bn5_engine_objects.module
 080E4D1E BN5_SEA_MARKER_SPAWN
 080E6EBC gridman_chip_effect_spawned
@@ -952,10 +956,13 @@
 080FC2AC bn5_navis_5
 080FF87A BN5_COSMO_HALF_HP
 080FF8AC setattack0_with_curaction_11
+081008FA nebula_larkman_gridman.called
+08100D72 for_spawner
+08100DC8 his_afterimage_word_pool
 08100F54 stored_attackvars_0x28_called_by_bx
 081012A0 his_attack_routine_pointers_pool_words
 081012E6 nebula_larkman_gridman.0x08100f54_stored_attackvars_0x28_called_by
-08101414 nebula_larkman_gridman.called
+08101414 nebula_larkman_gridman.called_2
 08101B60 nebula_larkman_gridman.routines
 08101C1C nebula_larkman_gridman.routines_2
 08102208 nebula_larkman_gridman.routines_3

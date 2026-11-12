@@ -6,6 +6,8 @@
 #include <stdio.h>
 
 #include "bn4.h"
+#include "bn4_battle.h"
+#include "bn6.h"
 #include "bytes.h"
 #include "devtools.h"
 #include "emu.h"
@@ -249,4 +251,55 @@ int xdiff_bn4_run(const Spec *s) {
 	if (over == BN4_MODE_MAP) printf("back on the map, its NaviStats' HP %d\n", left);
 	else printf("%s\n", over == BN4_MODE_GAME_OVER ? "GAME OVER" : "its main mode another");
 	return 0;
+}
+
+static HookAct dark_mood_past(HookRegs *r, void *user) {
+	(void)user;
+	static bool said;
+	if (!said) printf("xdiff: BN4's MegaMan's mood kept at the DarkChip's use (mood4)\n");
+	said = true;
+	r->r[12] = BN4_DARK_MOOD_PAST | 1;
+	return HOOK_JUMP;
+}
+
+static void xd4_dark_mood(const Spec *s) {
+	static bool hooked, started;
+	if (!s->mood4) return;
+	/* (a dark MegaMan's battle begins at mood 0, his karma's dark emotion: given the NaviStats' start mood, once) */
+	uint16_t w = guest_read16(BN4_BATTLE_NAVI + BN4_NAVI_MOOD);
+	if (!started && !(w & 0xFF)) {
+		guest_write16(BN4_BATTLE_NAVI + BN4_NAVI_MOOD, (uint16_t)((w & 0xFF00) | BN4_MOOD_START));
+		started = true;
+		printf("xdiff: BN4's dark MegaMan's battle given the NaviStats' start mood (mood4)\n");
+	}
+	if (hooked) return;
+	hooked = guest_hook(BN4_DARK_MOOD, dark_mood_past, NULL);
+	if (!hooked) printf("xdiff: BN4's dark mood not hooked (mood4)\n");
+}
+
+void xd4_dark_rules(const Spec *s, int game, bool battle) {
+	if (!battle) return;
+	xd4_start_confusion(s, game);
+	if (game == 4) xd4_dark_mood(s);
+}
+
+void xd4_start_confusion(const Spec *s, int game) {
+	static bool done4, done6;
+	if (game == 4 && s->calm4 && !done4) {
+		uint32_t coll = guest_read32(BN4_T1_OBJECTS + BN4_T1_COLLISION);
+		if (coll >> 24 == 2 && guest_read16(coll + BN4_COLL_CONFUSE) > 1) {
+			guest_write16(coll + BN4_COLL_CONFUSE, 1);
+			done4 = true;
+			printf("xdiff: BN4's MegaMan's confusion at the fight's start ended by its own step (calm4)\n");
+		}
+	}
+	if (game == 6 && s->confuse6 && !done6) {
+		uint32_t coll = emu_read32(BN6_T1_OBJECTS + BN6_T1_COLLISION);
+		if (coll >> 24 == 2) {
+			uint8_t b[2] = { BN4_CONFUSED_START & 0xFF, BN4_CONFUSED_START >> 8 };
+			emu_write(coll + BN6_COLL_CONFUSE, b, 2);
+			done6 = true;
+			printf("xdiff: BN6's MegaMan given BN4's confusion at the fight's start (confuse6)\n");
+		}
+	}
 }

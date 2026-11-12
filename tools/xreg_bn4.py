@@ -81,6 +81,8 @@ MOVED.update({
     35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
+    190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
+    25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
 })
 # BN4's Navi chips whose Navi is moved into BN6's engine as a unit of kind 'navi' (tools/xchiprecipe_bn4_navi.py: the chip's own
 # first-kind Navi, run by BN6's Navi object), each proved by its bn4_chip_* spec: BN4's id -> the unit's number in BN6's grown

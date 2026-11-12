@@ -162,14 +162,18 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   on the card where the Library's words stand. A and B unnamed; the
   orange arrow on the window's edge.
 - The Battle Lab's builder ([the Battle Lab](../game/battle-lab.md), The
-  builder's screen) is Options' kin: its pages FOES, FIELD and STAGE as
-  Options' tabs, the count of foes set in the band's pill's place, the
-  field's panels in STATUS's slot with EQUIP's orange corners on the
-  panel under the cursor, KeyItem's INFORMATION box beside it, the
-  page's list in the window, a value Left and Right turn between Options'
-  small orange arrows, and BATTLE! as NaviCust's RUN! with the green
-  triangle. It takes BN6's Virus Battler's flow: a family picked from
-  the list, then set down on a panel by a cursor.
+  builder's screen) is Options' kin laid over BN6's own battle, held
+  still with its field up: the field, the foes and MegaMan are the
+  game's picture, not ours. Its pages FOES, FIELD, STAGE and SETS as
+  Options' tabs on a band across the top; on FOES, STAGE and SETS a
+  green panel over MegaMan's side, where BN6's Custom screen stands in a
+  battle (the page's list in a window, SubChip's flat panel for what the
+  cursor's item is, BATTLE! as NaviCust's RUN! with the green triangle,
+  the count of foes set after it); on FIELD a strip under the tabs
+  alone, all eighteen panels in sight. EQUIP's orange corners mark BN6's
+  own panel under the cursor, a value Left and Right turn stands between
+  Options' small orange arrows. It takes BN6's Virus Battler's flow: a
+  family picked from the list, then set down on a panel by a cursor.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - BN6's own PET menu in the Net Square carries the one hint of ours on a

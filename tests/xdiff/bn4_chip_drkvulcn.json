@@ -1,0 +1,83 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 104,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's DrkVulcn A (190, a dark chip) (a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan; a dark one's own turn effects are BN4's, not taken) against the registry's row 601 (BN4's vulcan state, its family 0x1F, moved as BN6's grown attack family 0xFD; its shot the spread chips' copy, shared): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the shots, their sound 0xBB at slot 0x283, the Mettaur's HP compared each frame to the frame of the seventh shot's hit, t104 (140 HP, 20 a shot, 0 in both): a deletion parts at its own effect, each engine's art (docs/devtools/differential.md, A BN4 chip's spec). The third shot counters the Mettaur (t60), Full Synchro in both, its aura each engine's own. calm4: BN4's MegaMan's confusion at the fight's start, which BN4 gives once an attack DarkChip is chosen, ended by BN4's own step (the owner's call of 12 November 2026: the run gives none; its source not yet traced, docs/game/meta/darkchips.md). mood4: BN4's MegaMan's mood kept at the DarkChip's use, which BN4 sets 0 for the battle (its dark emotion: no Full Synchro after, BN4_DARK_MOOD), so the counter at t60 gives Full Synchro in both, as the run takes none of BN4's dark rules.",
+ "folder4": [
+  "00BE"
+ ],
+ "folder6": [
+  "259:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "calm4": 1,
+ "mood4": 1
+}

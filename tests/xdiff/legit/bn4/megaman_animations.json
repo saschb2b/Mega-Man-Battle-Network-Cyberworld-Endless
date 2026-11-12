@@ -42,6 +42,24 @@
    "bn4": "0x12",
    "bn6": "0x0E",
    "what": "PropBom's throw: BN4's state 0x62 stores 0x12 (0x080EE55C-0x080EE55E), the animation Thunder's state runs, BN6's 0x0E"
+  },
+  {
+   "family": "0xFE",
+   "bn4": "0x0D",
+   "bn6": "0x0A",
+   "what": "the Elem chips' shot: BN4's state 0x60 stores 0x0D (0x080EE344-0x080EE346); BN6 has no twin family, so the number is the art's: FlmLine's ready pose, one frame of 2 in each art (BN4's 0x0D, BN6's 0x0A)"
+  },
+  {
+   "family": "0xFD",
+   "bn4": "0x0D",
+   "bn6": "0x0A",
+   "what": "DrkVulcn's shots: BN4's state 0x1F stores 0x0D (0x080EC86C-0x080EC86E); BN6's twin family is not the unit's, so the number is the art's: FlmLine's ready pose, one frame of 2 in each art (BN4's 0x0D, BN6's 0x0A)"
+  },
+  {
+   "family": "0xFD",
+   "bn4": "0x11",
+   "bn6": "0x0D",
+   "what": "DrkVulcn's shot leaving: BN4's state 0x1F stores 0x11 (0x080EC8D4-0x080EC8D6), back to 0x0D between shots (0x080EC950); FlmLine's fire, frames of 3 and 2 in each art (BN4's 0x11, BN6's 0x0D)"
   }
  ]
 }

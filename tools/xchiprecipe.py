@@ -1745,14 +1745,20 @@ def shifted_effects(f):
 # (xnavi_sprite_install), which a unit's install asks for first (its `navis`)
 NAVI_SIX = range(7, 13)
 NAVI_SPRITE_FIRST = 0x20
-# ... and the Darkloids whose Navis are moved (ShadeMan 13, BlizzardMan 14, CosmoMan 16): each Navi's seat (src/emu/xnavi_recipe.h, XN_SEAT:
-# the six 0-5, the Dark Soul 6, the Darkloids 7 on) numbers its sprite (0x20 + seat), its AI index in BN6 (32 + seat) and its
-# bit in a unit's `navis`
-NAVI_MOVED = tuple(NAVI_SIX) + (13, 14, 16)
+# ... and the Darkloids whose Navis are moved (ShadeMan 13, BlizzardMan 14, CosmoMan 16) and Nebula's (LarkMan 17, GridMan 18):
+# each Navi's seat (src/emu/xnavi_recipe.h, XN_SEAT: the six 0-5, the Dark Soul 6, the Darkloids 7 on, Nebula's 17-18) numbers
+# its sprite (0x20 + seat) and its bit in a unit's `navis`, its AI index in BN6 XN_AI_OF's (tools/xnavirecipe.py, ai_of)
+NAVI_MOVED = tuple(NAVI_SIX) + (13, 14, 16, 17, 18)
 
 
 def navi_seat(n):
-    return n - 6 if n >= 13 else n - 7
+    import xnavirecipe as XN
+    return XN.seat(n)
+
+
+def navi_ai(n):
+    import xnavirecipe as XN
+    return XN.ai_of(n)
 # Routines a Navi chip's object calls with a Navi's AI index, reading a table by it (BN5's routine: (the register holding the
 # table's kind, the kind the Navis' table is, the register holding the AI index, why)): BN5's Navi of AI n is BN6's
 # XN_AI_OF(n) = 32 + n - 7 there (src/emu/xnavi_recipe.h), whose entries the Navis' install grows the tables with
@@ -1794,7 +1800,7 @@ def navi_ai_calls(u, b5=None, b6=None):
             if v not in NAVI_MOVED:
                 f.decide('navi ai', f'{site:08X}: {why}, its AI index {v} made otherwise or none of the moved Navis\'')
                 continue
-            X.imm_for(u, chain, reg, v, 32 + navi_seat(v), f'{why}: BN5\'s AI index {v:#x}, BN6\'s {32 + navi_seat(v):#x}')
+            X.imm_for(u, chain, reg, v, navi_ai(v), f'{why}: BN5\'s AI index {v:#x}, BN6\'s {navi_ai(v):#x}')
             if also:
                 X.imm_for(u, kchain, kreg, k, kind, f'{why}: its table {k}, the same as {kind} in both games, {kind} in BN6 (the Navis\' '
                                                     f'grown, NAVI_TRIPLES)')

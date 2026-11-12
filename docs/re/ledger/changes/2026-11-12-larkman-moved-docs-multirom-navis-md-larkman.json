@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "LarkMan moved (docs/multirom/navis.md, LarkMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_LARK_SPAWN_B0, BN5_LARK_SPAWN_BA, BN5_LARK_AFTERIMAGE_WORD, BN5_AFTERIMAGE_SPAWN, BN5_AFTERIMAGE_LOAD): seat 17, Navi AI 43, ids 0x3EC-0x3EF; larkman_v1, larkman_v1_keys and larkman_sp PASS, five mutations caught; the third kind's 0xBA, 0xC7, 0xCB and the fourth's 0x28 (the swords' afterimage) his copy, the chips and the Souls calling into it; an afterimage spawn's word set to the sprite's BN6 place (xnavirecipe.py afterimage_sprites); the chips' LarkMan and GridMan units on the Navis' battle sprites; the comparator maps a moved Navi's battle sprite by xnavi_sprites.c's places."
+}

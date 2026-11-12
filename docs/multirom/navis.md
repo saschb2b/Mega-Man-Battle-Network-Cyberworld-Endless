@@ -1,9 +1,9 @@
 ---
 type: Engine Mechanism
 title: "Transplanted Navis"
-description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan and Nebula's GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
+description: "Issue #82's Navi track: BN5's Team Colonel Navis, the Dark Soul, all four Darkloids, Team ProtoMan's NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan and Nebula's LarkMan and GridMan moved into BN6's battle engine (`src/emu/xnavi_install.c`, `tools/xnavirecipe.py`), BN6's Navi tables grown, each proved frame by frame by `build.py xdiff`."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:49:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 ---
 
 # Transplanted Navis
@@ -329,6 +329,29 @@ into the battle engine).
   attack's routine left at BN5's address, a sprite's number, a parent's
   compare) and FAIL. Not yet a guardian: Oran Area's second, as BN5's
   record sets his SP on Oran Area 2, comes next ([BN5's
+  Navis](../game/bosses/bn5-navis.md)).
+- **LarkMan** (AI 17, Navi AI 43, ids 0x3EC-0x3EF; `larkman_v1`,
+  `larkman_v1_keys`, `larkman_sp`: PASS since 12 November), Nebula's
+  first seat. *His types:* the third kind's 0xB0 and 0xBB moved as his;
+  the third's 0xBA, 0xC7 and 0xCB (his Navi chip's, WildBird's) and the
+  fourth's 0x28, the swords' afterimage (Z Saver's, MoonBld's, Katana's,
+  ShadowSoul's), the chips' copies until then, are his copy now, the
+  chips and the Souls calling into it (the Souls' generator reading the
+  Navis' newer rooms). *His afterimage:* its object loads the sprite its
+  spawner hands it in r4 (`BN5_AFTERIMAGE_SPAWN`, `BN5_AFTERIMAGE_LOAD`);
+  his own spawn ORs a pool word into r4 (`BN5_LARK_AFTERIMAGE_WORD`,
+  list 2's 0x11), which the recipe sets to his place, list 2's 0x31
+  (`tools/xnavirecipe.py`, `afterimage_sprites`), the chips' and
+  ShadowSoul's spawns handing MegaMan's own. The chips' LarkMan and
+  GridMan units draw the Navis' one copy of each battle sprite now, as
+  CosmoMan's does (their `navis` a 32-bit mask). The comparator reads a
+  moved Navi's battle sprite where an object keeps its number (the
+  afterimage's +5) by `xnavi_sprites.c`'s places, and the third kind's
+  0xB0's and 0xBA's +0x3C low halves as each engine's leftover r3, their
+  heights compared (`spawn_leftovers`, `compares`). Five mutations break
+  his copy (the afterimage's word, both objects' heights, a wait, a
+  sound) and FAIL. Not yet a guardian: where BN5's record sets his SP,
+  the Undernet's second, waits on its design ([BN5's
   Navis](../game/bosses/bn5-navis.md)).
 - **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
   `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object

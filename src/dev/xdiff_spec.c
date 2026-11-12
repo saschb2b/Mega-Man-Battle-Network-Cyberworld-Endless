@@ -155,6 +155,9 @@ static int film_parse(Spec *s, const char *name, const char *v) {
 static int souls_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "souls4")) return (s->souls4 = (unsigned)strtoul(v, NULL, 16)) != 0 && s->souls4 < 1u << 12;
 	if (!strcmp(name, "karma4")) return (s->karma4 = atoi(v)) >= 0 && s->karma4 <= 0xFFFF;
+	if (!strcmp(name, "calm4")) return (s->calm4 = atoi(v) != 0), 1;
+	if (!strcmp(name, "confuse6")) return (s->confuse6 = atoi(v) != 0), 1;
+	if (!strcmp(name, "mood4")) return (s->mood4 = atoi(v) != 0), 1;
 	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
 	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
