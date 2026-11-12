@@ -1,0 +1,10 @@
+{
+ "bn4": "0x141",
+ "bn6": "0x288",
+ "clock": "state",
+ "chips": [
+  "0x12F"
+ ],
+ "what": "BugCurse's curse's sound 0x141, its copy",
+ "why": "Played by the curse's object (BN4's third kind's 0x80, moved with BugCurse's unit) as it spawns (BN4: movs r0,#0x42; adds r0,#0xff at 0x080DD408, its bl to PlaySoundEffect at 0x080DD40C; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x288 and goes on to BN6's PlaySoundEffect, XvSoundCall): the same sound, BN4's song copied into BN6's grown song table's slot 0x288 (src/audio/xsong.c XSOUNDS)"
+}

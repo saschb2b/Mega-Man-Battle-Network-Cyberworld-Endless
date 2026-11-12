@@ -189,7 +189,8 @@ part of the tree; a new file gets its line there.
   the game's structures as a bare offset outside `src/emu/bn6.h` (issue
   #34: `BN6_PLAYER_X`, not `BN6_PLAYER + 0x1C`), no new code smell and
   no header that is not whole on its own (Code structure, below), and no
-  ROM, save, state or large file in git outside `docs/`, and the itch.io
+  ROM, save, state or large file in git outside `docs/`, no conflict's
+  markers left in a tracked file, and the itch.io
   page in step with `docs/itch/` (docs/project/itch.md, Keeping it in step). A
   baseline only shrinks: after fixing one, `build.py lint --update`.
 - Keep a layer reproducible from `run.layer_seed`: a checkpoint rebuilds the

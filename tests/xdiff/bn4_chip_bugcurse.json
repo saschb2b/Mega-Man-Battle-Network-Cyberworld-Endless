@@ -1,0 +1,88 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's BugCurse C (303, a dark chip: BN4 plays it for a dark MegaMan, karma4 0) against the registry's row 730 (BN4's support routine 0x2A as BN6's grown support routine 0xAA, its target the other side's first actor by the run's own routine (XC4_FIRST_ACTOR): its curse the third kind's 0x80 and its effect the fourth kind's 0x56 moved with it, BN4's third-kind sprite step copied with it, its sound 0x141 at slot 0x288): BN6's folder BugCurse and Cannon by turns (a folder of 30 Gigas never deals: BN6's battle start holds in its phase 4, its own Gigas the same), its deck in that order, BugCurse picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the curse, its objects and the Mettaur compared each frame. mood4: the battle of BN4's dark MegaMan begins at mood 0 (his karma's dark emotion), given the NaviStats' start mood as the run takes no karma.",
+ "folder4": [
+  "052F"
+ ],
+ "folder6": [
+  "2DA:02",
+  "001:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "karma4": 0,
+ "mood4": 1,
+ "deck6": [
+  "2DA:02",
+  "001:00"
+ ]
+}

@@ -470,7 +470,8 @@ is used.
   chosen. Seen headless: BlastMan EX set and fought from `lab all`; Bass
   and the Cybeast listed and Bass fought for a profile with a win over
   each (`--dev bass=1,beast=1`); ElecMan V1 noted in the profile after a
-  guardian's battle won. Not listed: BN5's Darkloids and Team ProtoMan.
+  guardian's battle won. BN5's Darkloids and Team ProtoMan's Navis came
+  after (below).
 
 - **The field is the battle's own** (the owner's call, 12 November
   2026: "why not using the actual field and spawn them in? doing nothing
@@ -544,6 +545,41 @@ is used.
   untouched. Not here: BN5's and BN4's panels that BN6's engine has no
   type for (sand, metal, magnet, lava), which are a move of their own
   into BN6's battle engine.
+
+- **BN5's Darkloids and Team ProtoMan's Navis**
+  (`src/director/lab_navis.c`). The Lab lists every Navi of BN5's that
+  stands in BN6's engine, not its guardians alone: the four Darkloids
+  (ShadeMan, BlizzardMan, CloudMan, CosmoMan) and Team ProtoMan's five
+  moved (GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy; ProtoMan
+  himself is not moved, and BN6's ProtoMan stays the rival's), each V1
+  to SP, his battle his moved id's as a guardian's is.
+  - *A Darkloid opens at one dark board won over him*, in the version
+    beaten there (the act's): a board is a whole layer's work, so one
+    win is the feat, as with Bass and the Cybeast; two, as a guardian's
+    NaviCode asks, would be two dark layers with the same Darkloid by
+    the dice. His win has no rival's record (he guards no area, and a
+    record there would name him to the town, the Glitch layer's forms
+    and the milestones), so the board notes the version alone
+    (`lib_darkloid_beaten`, `Profile.navi_beaten`), from this build on:
+    a board won before it is not known.
+  - *Team ProtoMan's five open as guardians do*, at two wins, in the
+    versions beaten. No run meets them yet
+    ([Team ProtoMan](team-protoman.md), The build, unit 7), so until
+    they guard they stand on the dev list alone (`lab all`) and a
+    player sees no row of theirs.
+  - Seen headless (`0:lab all`, seed 15): the list's end reads the four
+    Darkloids, BN4's Navis, the five and Nebula's two with their own
+    HP (Meddy 900, CloudMan 700 at V1); Meddy V1 set, fought and won
+    (446 frames, level 7); CloudMan SP (1500 HP) set and fought with no
+    dev power: his clouds and thunder took MegaMan's 100 HP in 48
+    frames, the sparing blow ended it ("Deleted at 0:00:80."), the
+    builder back. The work RAM's hash after each the one before opening
+    (45e79931), the run untouched.
+  - The earning seen too: the autopilot through seed 1's act 2 board
+    (`--dev dark,god,onehit`, from layer 5) deleted CloudMan V1 there
+    ("darkloid 32 deleted at version 0, noted for the Battle Lab"); a
+    new run on that profile, the Lab opened with no dev list
+    (`0:lab open`): "CloudMan V1", HP 700, Beaten 1, set on the field.
 
 - **The result pays nothing** (`emu_battle_unpaid`,
   `src/director/encounter.c`). In a test battle BN6's reward pick is

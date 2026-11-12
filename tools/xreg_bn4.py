@@ -68,6 +68,7 @@ MOVED = {
     184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
     104: 0x90, 105: 0x90, 106: 0x90,   # BigHamr1-3: BN4's support 0x10 (bn4_chip_bighamr1-3); GodHammr (215) waits (ROWS_WAIT)
+    303: 0xAA,                         # BugCurse: BN4's support 0x2A
     285: 0xCC,                         # FirePlus: BN4's support 0x4C, its kind 0 (bn4_chip_fireplus); 286-288 left out (call 12)
     82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
     193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)

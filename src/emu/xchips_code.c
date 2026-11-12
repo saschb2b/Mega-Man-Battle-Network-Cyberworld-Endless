@@ -411,7 +411,7 @@ static void states_stage(const XChipUnit *u) {
 /* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
  * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
-static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+static const XvRegion region4 = XC4_REGION;
 
 /* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
  * that shares an earlier unit's code (XChipUnit.share), its entry alone */
@@ -440,6 +440,31 @@ bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
 bool xchips_bn4_moved(int id) {
 	const XChipReg4 *r = xreg4_at(id);
 	return r && r->how == XREG_MOVED;
+}
+
+/* XC4_FIRST_ACTOR (the project's own Thumb, xchips_bn4.h): r0 the side; its four actors' words from BN6's battle state
+ * (the toolkit's +0x18) at BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, the first that is one in r0, else 0;
+ * mov pc,lr as the stubs */
+static void first_actor_stage(void) {
+	static const uint16_t code[] = {
+		0x4651,   /* mov r1, r10 */
+		0x6989,   /* ldr r1, [r1, #0x18]: the battle state */
+		0x0100,   /* lsls r0, r0, #4: a side's four words */
+		0x1809,   /* adds r1, r1, r0 */
+		0x31D0,   /* adds r1, #0xd0: BN6_BATTLE_PLAYERS */
+		0x2204,   /* movs r2, #4 */
+		0x6808,   /* ldr r0, [r1] */
+		0x2800,   /* cmp r0, #0 */
+		0xD102,   /* bne past */
+		0x3104,   /* adds r1, #4 */
+		0x3A01,   /* subs r2, #1 */
+		0xD1F9,   /* bne back to the load */
+		0x46F7,   /* mov pc, lr */
+		0x46C0,   /* nop */
+	};
+	_Static_assert(sizeof code <= FREE_BN4_CHIP_STUBS_END - FREE_BN4_CHIP_STUBS, "the first actor's room");   /* (its numbers: tests/test_core.c) */
+	uint8_t *p = xv_put(XC4_FIRST_ACTOR, sizeof code, true);
+	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
 }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
@@ -481,6 +506,7 @@ static bool units4_install(bool navis) {
 	}
 	xv_tx_begin();
 	bool fresh = !navis && tables_stage();
+	if (!navis && !xv_failed()) first_actor_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
 	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
 	if (!navis && !xv_failed()) xg_page4_stage();

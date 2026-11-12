@@ -3,7 +3,7 @@ type: Process
 title: "Merging in parallel"
 description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them; when a branch brings `dev` in, what that saves and what still conflicts."
 tags: [project, process, git, ci]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:09:35Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T15:34:59Z }
 sources:
   - { id: merges, title: "origin/dev's last 600 merge commits (6 October to 11 November 2026), each merge of dev into a branch redone with git merge-tree", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/commits/dev" }
   - { id: pr387, title: "Pull request #387 at 62c907ac against dev at dbecd569: GitHub's CONFLICTING, docs/log.md the only file", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/387" }
@@ -92,6 +92,30 @@ What `build.py lint` held before is still held:
 The counts of bn6f's functions on the Symbols page (its second marked
 part) are not among them: only `tools/symbols.py --full` writes them, from
 tables outside git.
+
+### What restore leaves alone
+
+`python3 tools/generated.py restore` changes only what a tool writes. In a
+merge it also meets pages a person writes that carry a tool's part (a
+concept's `generated` line, the counts on the Symbols page), and there it
+keeps to this:
+
+- A page in conflict that nobody has touched since git wrote it, whose
+  conflict is the tool's part alone: merged anew with that part set to
+  `dev`'s, and staged.
+- A page someone has resolved, in the working tree or the index, wholly or
+  in part: its text stays as it is. Only the tool's part is set to `dev`'s,
+  and a conflict that is that part alone is taken out; nothing is staged
+  for them.
+- A real conflict in what a person wrote: left exactly as it stands, and
+  named.
+
+The first version merged every page in conflict anew from the merge's
+three sides, and so wrote a conflict back over a page already resolved by
+hand (pull request #446, 12 November 2026); `tests/test_generated.py`
+holds the cases now, on a repository of its own. And because that page
+then passed every check with the markers in it, `build.py lint` fails on
+a conflict's markers left in any file git tracks.
 
 ### What a branch does
 

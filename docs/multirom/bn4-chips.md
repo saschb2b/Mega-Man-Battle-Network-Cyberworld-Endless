@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -821,6 +821,27 @@ treats each as such:
   caller's leftover r4), its sprite state and the word that keeps it
   are allowed, its being in play and life compared (legit.json's bn4
   allowed, Full Synchro's aura; a mutation drops BN6's).
+
+**BugCurse is moved** (12 November 2026: id 730), BN4's support
+routine 0x2A as BN6's grown support routine 0xAA: its object (the
+fourth kind's 0x56) casts the curse (the third kind's 0x80, BN4's
+third-kind sprite step copied with it, its sound 0x141 at the grown
+table's 0x288) on the other side's object it finds. BN4 finds it by
+`0x0800C456`, the other side's first of its three objects, a virus
+too; BN6's twin of that routine (`0x080103BC`) answers a side's MegaMan
+alone, so against viruses it finds none and the curse is never cast.
+The call goes to a routine of the project's own instead,
+`XC4_FIRST_ACTOR` (`FREE_BN4_CHIP_STUBS`): a side's first of its four
+actors in BN6's battle state (`BN6_BATTLE_PLAYERS` + side x
+`BN6_BATTLE_PLAYER_STEP`), as BN4's takes its first; BN6's nearest
+(`0x080103F8`) was not taken, as it would curse another foe where
+several stand. `bn4_chip_bugcurse` passes over 300 frames by a dark
+MegaMan, four mutations caught; whether the first or the nearest is
+taken among several foes is read in both games' code, not compared, as
+the differential refuses a BN4 spec of more than one foe (its opening's
+alignment, legit.json's bn4 align). BN4's Gigas (729-733) need BN6's
+folder of a spec to hold another chip besides: a folder of 30 Gigas
+never deals in BN6.
 
 **DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
 594). DarkBomb is the bombs' state's subfamily 2, its own copy of the

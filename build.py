@@ -2689,6 +2689,38 @@ def lint_shards():
     return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'shards.py'), 'check']) == 0
 
 
+def lint_markers():
+    """No conflict marker left in a file git tracks: a `<<<<<<< ` line, a bare
+    `=======` after it and a `>>>>>>> ` line after that. A merge resolved in
+    part, or a tool that wrote a conflict back (tools/generated.py restore
+    did, into a page already resolved: tests/test_generated.py), passed every
+    other check with the markers committed."""
+    names = subprocess.run(['git', 'ls-files', '-z'], cwd=ROOT, capture_output=True, check=True).stdout.decode().split('\0')
+    bad = []
+    for n in filter(None, names):
+        path = os.path.join(ROOT, n)
+        try:
+            if not os.path.isfile(path) or os.path.getsize(path) > 8 << 20:
+                continue
+            with open(path, encoding='utf-8') as f:
+                lines = f.read().split('\n')
+        except (UnicodeDecodeError, OSError):
+            continue   # (not text)
+        state, at = 0, 0
+        for i, line in enumerate(lines, 1):
+            if line.startswith('<<<<<<< ') or line == '<<<<<<<':
+                state, at = 1, i
+            elif state == 1 and line == '=======':
+                state = 2
+            elif state == 2 and (line.startswith('>>>>>>> ') or line == '>>>>>>>'):
+                bad.append(f'{n}:{at}')
+                state = 0
+    for b in bad:
+        print(f'lint: {b}: a conflict\'s markers are left in the file: resolve it')
+    print(f'lint: conflict markers left in tracked files: {len(bad)}')
+    return not bad
+
+
 def lint_claims():
     """The claims of the branches in flight (tools/claims.py, docs/project/claims.md):
     each file well formed, no two meeting in a space or a unit, at most one
@@ -2964,6 +2996,7 @@ def lint(update=False):
     ok = lint_generated() and ok
     ok = lint_shards() and ok
     ok = lint_claims() and ok
+    ok = lint_markers() and ok
     ok = lint_free_space() and ok
     ok = lint_dispatch_numbers() and ok
     ok = lint_docs() and ok
@@ -3029,6 +3062,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 're_status.py'), '--lint'])
         if code == 0:   # the voice catalog's reading of C (tools/voice_catalog.py)
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_voice_catalog.py')])
+        if code == 0:   # tools/generated.py restore in a merge, on a repository of its own
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_generated.py')])
         if code == 0:   # the agents' tools (tools/cw.py and its MCP server)
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_cw.py')])
         if code == 0:

@@ -3,7 +3,10 @@
  * is open once his NaviCode is held (deleted twice as a guardian), Bass
  * and the Cybeast after a first win, each in the versions MegaMan has
  * beaten (Profile.navi_beaten; his first where none was noted, a win of
- * before the note was kept). One Navi a battle, alone. */
+ * before the note was kept). BN5's Darkloids after a dark board won over
+ * one, in the versions beaten there; Team ProtoMan's Navis moved into
+ * BN6's engine as guardians are, once they guard. One Navi a battle,
+ * alone. */
 #ifndef CW_LAB_NAVIS_H
 #define CW_LAB_NAVIS_H
 
@@ -16,7 +19,8 @@
 #define LAB_NAVI_MOST 66     /* navi numbers looked through: 1 to this */
 
 /* Whether navi `navi` is one the Lab lists at all here: a guardian of
- * BN6's, a super boss, or another game's guardian whose ROM is read */
+ * BN6's, a super boss, or another game's Navi in BN6's engine (a
+ * guardian, a Darkloid, one of Team ProtoMan's) whose ROM is read */
 bool lab_navi_known(int navi);
 /* MegaMan's wins over him, and how many open him */
 int lab_navi_wins(int navi);

@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -320,7 +320,10 @@ and traces both:
   `folder6=`: chip | code << 9, the list repeated to 30, each chip marked
   owned, no Regular chip, no TagChips; a BN6 chip past nine bits is
   written hex chip:code, `209:5` chip 521 in F, in `folder6=` and
-  `deck6=` alike), each game's battle deck in an
+  `deck6=` alike; a Giga's spec gives BN6's folder another chip by
+  turns, as BN6's battle never deals a folder of 30 Gigas, its setup
+  holding in its phase 4: BN6's own Giga 301 the same, the harness's
+  folder and no engine's limit, `bn4_chip_bugcurse`), each game's battle deck in an
   order (`deck5=`, `deck6=`, the list repeated to 30, written as the
   battle's phase first reads the Custom screen's: each game makes and
   shuffles its deck as the first turn begins, so without it each hand

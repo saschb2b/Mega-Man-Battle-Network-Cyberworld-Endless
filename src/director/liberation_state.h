@@ -157,6 +157,8 @@ void lib_pick_step(uint32_t pressed);
  * battle: BN5's at the act's version and band, else make_boss's */
 void lib_darkloid_dress(void);
 Encounter lib_darkloid_battle(void);
+/* ... and he deleted: the version beaten noted in the profile, where he is BN5's own */
+void lib_darkloid_beaten(void);
 /* ... and his HP on the board as it begins: his battle's, `hp` lowered by
  * --dev libhp=N */
 void lib_darkloid_hp(int *hp, int *max);
