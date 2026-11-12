@@ -49,6 +49,9 @@ uint32_t emu_battle_souls(void);
 void emu_battle_watch(int hp_cap, bool spare);
 /* ... and the watch ended: whether it spared MegaMan */
 bool emu_battle_unwatch(void);
+/* The battle watched pays nothing, until emu_battle_unwatch: BN6's reward pick gives no entry (0xFFFF, a row's empty
+ * one), so its results screen shows no reward and its exit gives none (a test battle's, docs/game/battle-lab.md) */
+void emu_battle_unpaid(void);
 /* The next enemy to spawn with `from` HP given `to` instead (a guardian's
  * own, raised by the Net's clock, docs/world/home/), until
  * emu_battle_unwatch; nothing where they are the same. */
