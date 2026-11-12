@@ -280,6 +280,7 @@ UNITS = (
     ('navi', 0x36, 'GutPnch'),
     ('support', 0x2A, 'BugCurse'),
     ('attack', 0x27, 'AirHoc'),
+    ('navi', 0x35, 'RollAro'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -308,6 +309,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
                0x90: 0x206,                 # (the bombs' state's throw)
                0xA4: 0x207,                 # (GutPnch's fist's punch)
+               0x132: 0x208,                # (RollAro's arrow)
                # (the sweep's third line, units-c's, its slots from 0x240 up)
                0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
                0x143: 0x242,                # (Ligtnin's bolt)
@@ -1632,9 +1634,10 @@ def c_unit(f):
     step_in = SOUND_SLOTS.get(getattr(f, 'step_in', 0), 0)
     if getattr(f, 'step_in', 0) and not step_in:
         sys.exit(f'xchiprecipe_bn4: {f.name}\'s step-in sound {f.step_in:#x} has no slot (SOUND_SLOTS)')
+    side = getattr(f, 'side', False)   # (a Navi chip's spawner that takes its side in r3: XChipUnit.side, its entry a wrapper)
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in else '') +
-            (f', 0x{step_in:X}' if step_in else '') + ' },']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in or side else '') +
+            (f', 0x{step_in:X}' if step_in or side else '') + (', 1' if side else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

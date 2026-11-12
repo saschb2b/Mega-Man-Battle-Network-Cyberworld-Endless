@@ -2733,7 +2733,7 @@ static const XcSong bugcurse_songs[] = { { 0x141, 0x288 } };
 	.types = bugcurse_types, .ntypes = (int)(sizeof bugcurse_types / sizeof *bugcurse_types), \
 	.sound_calls = bugcurse_sound_calls, .nsound_calls = (int)(sizeof bugcurse_sound_calls / sizeof *bugcurse_sound_calls), \
 	.sprites = bugcurse_sprites, .nsprites = (int)(sizeof bugcurse_sprites / sizeof *bugcurse_sprites) }
-/* ---- AirHoc: BN4's attack 0x27 (080ECEAF) as BN6's 0xfb; its chips 63 (650), 64 (651), 65 (652) ---- */
+/* ---- AirHoc: BN4's attack 0x27 (080ECEAF) as BN6's 0xfb; its chips 63 (650), 64 (651), 65 (652), 338 (617), 339 (618), 340 (619) ---- */
 /* MegaMan's state 0x27 (080ECEAE-080ECF44), the family of its chips' records: moved */
 /* its fourth-kind 0x28 (080E4F5C-080E503C): no BN6 type of its body, moved with him */
 /* its sprite 4:0x12 (080D27B4): BN6's 4:0x96, copied */
@@ -2743,9 +2743,9 @@ static const XcSong bugcurse_songs[] = { { 0x141, 0x288 } };
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0xc0 (080D282C): BN4's song copied into the grown song table's slot 0x289, on BN4's player 27 */
 /* its sound 0xcc (080D29CE, 080D29E6, 080D29F8, 080D2A20, 080D2A34, 080D2A80): BN4's song copied into the grown song table's slot 0x28a, on BN4's player 30 */
-/* its chip 338 (id 617) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 339 (id 618) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 340 (id 619) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 338 (id 617) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 339 (id 618) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 340 (id 619) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock airhoc_blocks[] = {
 	{ 0x080ECEAE, 0x080ECF44, XC4_CODE + 0x5892, 0x2A21B6B1u },
@@ -2874,6 +2874,86 @@ static const XcSong airhoc_songs[] = { { 0xC0, 0x289 }, { 0xCC, 0x28A } };
 	.types = airhoc_types, .ntypes = (int)(sizeof airhoc_types / sizeof *airhoc_types), \
 	.sound_calls = airhoc_sound_calls, .nsound_calls = (int)(sizeof airhoc_sound_calls / sizeof *airhoc_sound_calls), \
 	.sprites = airhoc_sprites, .nsprites = (int)(sizeof airhoc_sprites / sizeof *airhoc_sprites) }
+/* ---- RollAro: BN4's navi 0x35 (080C83D5) as BN6's 0xb5; its chips 151 (665), 152 (666), 153 (667) ---- */
+/* its object, the fourth kind's 0x63 (080E8FA0-080E90CC), not moved: BN6's Navi object in its place */
+/* his spawner (080C83D4) takes his side in r3, which BN6's Navi object does not hand: the unit's entry a wrapper that loads it */
+/* the chip's Navi, the first kind's 0x41 (080C8120-080C83F8), which his spawner (080C83D4) spawns: moved */
+/* his battle sprite 2:0x1 (080C8150): roll's, list 2's 0x40 (seat 0) */
+/* its effect 0x2e: BN6's 0xc2, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0xb0 (080C81F8): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
+/* its sound 0x132 (080C82DE): BN4's song copied into the grown song table's slot 0x208, on BN4's player 27 */
+
+static const XvBlock rollaro_blocks[] = {
+	{ 0x080C8120, 0x080C83F8, XC4_CODE + 0x5DD0, 0x0907F6F2u },
+};
+static const XvData rollaro_data[] = {
+	{ 0x080C812E, 0x080C8130, XV_RAW },
+	{ 0x080C8130, 0x080C813C, XV_TABLE },
+	{ 0x080C813C, 0x080C8140, XV_POOL },
+	{ 0x080C818E, 0x080C8190, XV_RAW },
+	{ 0x080C8190, 0x080C8194, XV_POOL },
+	{ 0x080C81AA, 0x080C81AC, XV_RAW },
+	{ 0x080C81AC, 0x080C81B8, XV_TABLE },
+	{ 0x080C81B8, 0x080C81BC, XV_POOL },
+	{ 0x080C81CA, 0x080C81CC, XV_RAW },
+	{ 0x080C81CC, 0x080C81D0, XV_POOL },
+	{ 0x080C81D0, 0x080C81D8, XV_TABLE },
+	{ 0x080C826C, 0x080C8270, XV_POOL },
+	{ 0x080C8270, 0x080C827C, XV_TABLE },
+	{ 0x080C8328, 0x080C832C, XV_POOL },
+	{ 0x080C832C, 0x080C8334, XV_TABLE },
+};
+static const XvPair rollaro_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002F22, 0x08002ED0 },   /* search, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032B8, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800B950, 0x0800FCFC },   /* search, SAME */
+	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
+	{ 0x08014620, 0x0801BDDE },   /* search, SAME */
+	{ 0x080CE80E, XN_BN4_CODE + 0x49E },   /* gutsman's copy of BN4's 080CE80E (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair rollaro_words[] = {
+};
+static const XvImm rollaro_imms[] = {
+	{ 0x080C814E, THUMB_MOVS, 2, 0, 0x1, 0x40 },   /* his battle sprite: BN4's list 2 0x1, the moved Navi's 0x40 in BN6 (roll's) */
+	{ 0x080C81EC, THUMB_MOVS, 4, 0, 0x2E, 0xC2 },   /* its effect: 0x2e in BN4, 0xc2 in BN6 (moved) */
+	{ 0x080C83CC, THUMB_MOVS, 4, 0, 0x2E, 0xC2 },   /* its effect: 0x2e in BN4, 0xc2 in BN6 (moved) */
+	{ 0x080C83D8, THUMB_MOVS, 0, 0, 0x41, 0xA2 },   /* the chip's Navi's type 0x41 (the first kind): moved, the dispatch's 0xa2 */
+};
+static const XvType rollaro_types[] = {
+	{ 1, 0xA2, XV_TYPE_MOVED, 0x41 },   /* BN4's first-kind 0x41, moved, the dispatch's 0xa2 */
+};
+static const XvSprite rollaro_sprites[] = {
+	{ 4, 0x17, 4, 0x95, XC4_ROOM_ROW(44), 0x800 },   /* BN4's 4:0x17, the room's row 44 */
+};
+static const XvId rollaro_effects[] = { { 0x2E, 0xC2 } };
+static const XvSoundCall rollaro_sound_calls[] = {
+	{ 0x080C81F8, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
+	{ 0x080C82DE, 0x208 },   /* its sound 0x132: BN4's song at the grown table's slot 0x208 */
+};
+static const XcSong rollaro_songs[] = { { 0xB0, 0x1E2 }, { 0x132, 0x208 } };
+
+#define ROLLARO_CODE { .name = "RollAro (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x8000), \
+	.blocks = rollaro_blocks, .nblocks = (int)(sizeof rollaro_blocks / sizeof *rollaro_blocks), \
+	.data = rollaro_data, .ndata = (int)(sizeof rollaro_data / sizeof *rollaro_data), \
+	.calls = rollaro_calls, .ncalls = (int)(sizeof rollaro_calls / sizeof *rollaro_calls), \
+	.words = rollaro_words, .nwords = (int)(sizeof rollaro_words / sizeof *rollaro_words), \
+	.imms = rollaro_imms, .nimms = (int)(sizeof rollaro_imms / sizeof *rollaro_imms), \
+	.types = rollaro_types, .ntypes = (int)(sizeof rollaro_types / sizeof *rollaro_types), \
+	.sound_calls = rollaro_sound_calls, .nsound_calls = (int)(sizeof rollaro_sound_calls / sizeof *rollaro_sound_calls), \
+	.sprites = rollaro_sprites, .nsprites = (int)(sizeof rollaro_sprites / sizeof *rollaro_sprites), \
+	.effects = rollaro_effects, .neffects = (int)(sizeof rollaro_effects / sizeof *rollaro_effects) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -2907,5 +2987,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_NAVI, 0x36, 0xB6, 0x080C85C3, XC4_HOMES + 0x7400, GUTPNCH_CODE, gutpnch_songs, (int)(sizeof gutpnch_songs / sizeof *gutpnch_songs), 2, 0, 0x00, 0x1E2 },
 	{ XCHIP_SUPPORT, 0x2A, 0xAA, 0x080E825F, XC4_HOMES + 0x7800, BUGCURSE_CODE, bugcurse_songs, (int)(sizeof bugcurse_songs / sizeof *bugcurse_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x27, 0xFB, 0x080ECEAF, XC4_HOMES + 0x7C00, AIRHOC_CODE, airhoc_songs, (int)(sizeof airhoc_songs / sizeof *airhoc_songs), 0, 0 },
+	{ XCHIP_NAVI, 0x35, 0xB5, 0x080C83D5, XC4_HOMES + 0x8000, ROLLARO_CODE, rollaro_songs, (int)(sizeof rollaro_songs / sizeof *rollaro_songs), 1, 0, 0x00, 0x0, 1 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

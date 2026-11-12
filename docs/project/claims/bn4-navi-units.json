@@ -1,0 +1,25 @@
+{
+  "branch": "bn4-navi-units",
+  "what": "BN4's RollAro1-3, HawkCut1-3, NumbrBl1-3 and PopUp as Navi chip units, a PR a family (branches bn4-rollaro, bn4-hawkcut, bn4-numbrbl, bn4-popup cut from it)",
+  "takes": {
+    "song_slots": [
+      [
+        "0x208",
+        "0x20F"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip RollAro1",
+    "BN4 chip RollAro2",
+    "BN4 chip RollAro3",
+    "BN4 chip HawkCut1",
+    "BN4 chip HawkCut2",
+    "BN4 chip HawkCut3",
+    "BN4 chip NumbrBl1",
+    "BN4 chip NumbrBl2",
+    "BN4 chip NumbrBl3",
+    "BN4 chip PopUp"
+  ],
+  "run": false
+}

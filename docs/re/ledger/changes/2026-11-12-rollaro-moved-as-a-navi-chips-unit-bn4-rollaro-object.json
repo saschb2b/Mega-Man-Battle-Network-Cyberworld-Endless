@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "RollAro1-3 moved as a Navi chip's unit (docs/multirom/bn4-chips.md, The Navi chips; docs/rom/bn4.md, RollAro's code: BN4_ROLLARO_OBJECT 0x080E8FA0, BN4_ROLLARO_NAVI 0x080C8120, BN4_ROLLARO_ARROW 0x080C82CE, BN4_ROLLARO_SPAWN 0x080C83D4): her spawner's side in r3 through a wrapper of the unit's home (XChipUnit.side); bn4_chip_rollaro1-3 PASS, five mutations caught."
+}
