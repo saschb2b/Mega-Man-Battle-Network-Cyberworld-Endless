@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/team-protoman.md (where it stands in 0.21.0: the five moved Navis are in the engine and not met in a run; their guardians, Souls, ProtoSoul, the board and DarkProto wait for 0.22.0; the New 3DS's heap modelled with them: 77.8 MB at most with BN5, 85.9 of 96 with BN4 too).
 * **Update**: game/battle-lab.md (Built, The sandbox folder: no family without a name is a row, the list printed as debug lines, its count with everything open).
 * **Update**: multirom/bn4-chips.md (BigHamr1-3 moved, GodHammr waits and why), devtools/differential.md (the held MegaMan's keys and sprite's screen place at the battle's frame), rom/bn4.md (BigHamr's hammer's row).
 * **Update**: game/battle-lab.md (Built: the sandbox folder, the Lab's own thirty chips kept in the profile and changed in BN6's folder editor inside a snapshot, the pack filled from the Library in every code, the way in pressed for the player, the proof; what is not yet), code/director.md (`lab_folder.c`).

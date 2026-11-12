@@ -3,7 +3,7 @@ type: Design
 title: "Team ProtoMan: foes and Souls"
 description: "Team ProtoMan's six from BN5 Team Colonel's ROM as foes whose defeat gives their Souls, designed with the game-design skill, its room built (seats, ids, free space, rivals.sav, Soul bits) and NapalmMan, GyroMan, SearchMan, Meddy and MagnetMan moved: the five as their partners' second guardian where BN5's own net records place them, their versions by act, their Souls' kinds beside Team Colonel's, ProtoSoul from the rival's netbattle rather than a second ProtoMan, the build order by the ROM's code and the owner's questions."
 tags: [game, design, bosses, bn5, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T14:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T17:50:27Z }
 sources:
   - id: owner
     resource: "The owner's call of 9 November 2026, recorded in the gap audit of 9 November 2026 (on the bn5-gaps branch: multirom/gaps.md, The owner's calls)"
