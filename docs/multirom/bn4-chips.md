@@ -578,6 +578,30 @@ lethal hit there would compare each engine's deletion (its sound, which
 in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
+**BigHamr1-3 are moved** (12 November 2026: ids 659-661, BN4's support
+0x10 at BN6's grown support routine 0x90). Its routine spawns a support
+object (the fourth kind's 0x26), which sets a hammer (the third kind's
+0x4A) on the panel before MegaMan: an actor of 100 HP, run by the
+actors' runner as TimeBomb's bomb is, its own states renumbered from 8
+the same way. It waits, then swings: the screen shakes for 30 frames
+and the panel before it is struck for the record's power. Three specs
+pass: `bn4_chip_bighamr1` and `bn4_chip_bighamr2` against BN4's Mettaur
+of 250 HP (to 90 and 30), `bn4_chip_bighamr3` against BN4's Billy of 300
+HP set at (4,1), which hops to (4,2) before the swing (to 20); seven
+mutations caught. Two things the differential reads of MegaMan as the
+battle's frame where his own record runs a frame behind after BN6's
+support family (the support attack's end): his sprite's screen place,
+which the camera's shake moves for every object alike, and his keys,
+which the key update writes whatever his state
+([the differential](../devtools/differential.md)). Not reached by a
+spec: a lethal swing, whose deletion each engine draws its own way (as
+TimeBomb's blast). **GodHammr waits** (`ROWS_WAIT` in
+`tools/xchiprecipe_bn4.py`): its hit strikes the whole field, its own
+hammer and MegaMan among them, and where BN4's actors' runner finds the
+hammer's final damage and plays its hurt sound (0xC8), BN6's finds none,
+both deleting the hammer by the hit's flag; BN6's hit pass on the
+struck actor is still to read (`bn4_chip_godhammr` at t57).
+
 **Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
 three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread

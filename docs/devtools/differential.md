@@ -152,6 +152,12 @@ first to pass, BN4's AreaGrab against BN6's: after BN6's support run has
 held MegaMan a frame his own record is read that frame later
 (`megaman_clock`), until the world gives him a state (a hit lands at the
 battle's frame in both) and he is read with the battle's offset again;
+what the battle's own steps write of him stays the battle frame's there
+too: his collision data, his visible bit, his keys (the key update's,
+whatever his state: a last foe's deletion stops them on that frame) and
+his sprite's screen place while his place is unchanged (his place with
+the camera's offset, which a shake moves for every object alike:
+`bn4_chip_bighamr1`);
 a panel's +4 is the side of the field's start and its +7 the side each
 frame, as BN6's field update writes them. Its three mutations break
 BN6's AreaGrab (one panel, two rows, another sound) and are caught. Two
