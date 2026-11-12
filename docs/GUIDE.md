@@ -45,8 +45,10 @@ statistics, troubleshooting and building the game yourself.
   (every Cross and chip of the run works there). In half the runs a Navi
   of BN5's guards such an area (KnightMan, ShadowMan, NumberMan,
   TomahawkMan, ToadMan, Colonel), and the Undernet's and the Graveyard's
-  acts draw their guardians from both games' Navis; beaten, he gives his
-  Soul, which MegaMan can UNITE with in every battle after. Each act of
+  acts draw their guardians from both games' Navis, BN5's LarkMan and
+  GridMan among them there; beaten, one of the six gives his
+  Soul, which MegaMan can UNITE with in every battle after (LarkMan and
+  GridMan have none: their Guardian Data holds their Navi chip). Each act of
   a run is about one virus family, named on the act's card ("BombCorn
   signal"): its first layer meets it alone, the second beside a partner,
   the third in a battle built around it, and that family can be BN5's
@@ -54,7 +56,7 @@ statistics, troubleshooting and building the game yourself.
   that family's own rewards. Half the chips their shops and
   Mystery Data hold are BN5's, which the Library lists on BN5's page, and its
   flames of darkness hold BN5's DarkChips. Its songs join the
-  [Jukebox](#the-jukebox). Online, it completes the
+  [Jukebox](#the-jukebox). Online, with BN4's ROM beside it too, it completes the
   [NetPass](#the-netpass): NetBattles, trades and the week's DeepNet. A note in
   the title's top right corner says "BN5 found" as the game starts. On
   Linux, macOS, Windows, the Steam Deck, PortMaster handhelds, Android,
@@ -69,16 +71,27 @@ statistics, troubleshooting and building the game yourself.
   resemble (ACDC Area, Town Area, Park Area, the net of far countries and
   its Undernet), each in about half the runs that come there (a quarter
   where BN5 has an area there too), in BN4's own tiles, music and battle
-  backgrounds; their battles and guardians are BN6's. Nine of its
+  backgrounds; their battles are BN6's. In half the runs a Navi of
+  BN4's guards such an area (GutsMan or AquaMan in ACDC Area, FireMan or
+  Roll in Town Area, WoodMan in Park Area, ThunderMan or WindMan in the
+  net of far countries, SearchMan and JunkMan in the Undernet's and the
+  Graveyard's acts), leaving Guardian Data as BN5's do. Nine of its
   virus families (Billy, Spikey, Shrimpy, Walla, Elmperor, CirKill,
   VolGear, Kilby and MagTect) join the ones an act can be about, or stand
   beside its virus, in BN6's areas and in BN5's where BN5 is there too,
   MegaMan naming them as the older Net's the first time. Each pays from
-  its own game's rewards (a chip BN6 has not got pays 200 zenny). Once a run has reached the Nest, it
+  its own game's rewards. 76 of BN4's own chips play in BN6's battles and
+  seventeen of its Program Advances form on the Custom screen: half the
+  chips a layer of BN4's areas hands out are BN4's, which the Library
+  lists on BN4's page. A chip of BN4's that does not play yet pays 200
+  zenny, and its dark chips stay out of a run. Its songs join the
+  [Jukebox](#the-jukebox), and online its ROM is part of the
+  [NetPass](#the-netpass)'s full set. Once a run has reached the Nest, it
   also brings a tournament to act 3's arena in half the runs: three Navis
   in a row on BN4's own bracket, BN4's among them ([A run](#a-run)). The
   title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
-  New 3DS reads one of them, BN5's where both are there.
+  New 3DS reads one of them, BN5's where both are there, so its
+  [NetPass](#the-netpass) holds the Square stamp alone.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -796,7 +809,8 @@ With BN4 Red Sun's ROM beside BN6's, once a run has reached the Nest, act
 the endless net, one of acts 3 to 5 each cycle): three Navis in a row,
 shown on BN4's own bracket screen, the act's card listing all three.
 They come from BN6's and BN5's Navis and BN4's own (GutsMan, ThunderMan,
-WindMan, FireMan, SearchMan, AquaMan, WoodMan, JunkMan and Roll). MegaMan's HP carries from
+WindMan, FireMan, SearchMan, AquaMan, WoodMan, JunkMan, Roll and TopMan).
+MegaMan's HP carries from
 round to round. Each round pays a Navi chip (its Navi's own, or for one
 of BN4's a BN6 Navi's) and the final his Guardian Data; a round lost
 ends the run.
@@ -964,13 +978,17 @@ Talk to the Navi to set up a test battle:
   each in the versions beaten. A Navi fights alone.
 - **FIELD:** A turns the panel under the cursor to its next type; the
   row below takes one of BN6's own fields whole.
-- **STAGE:** the background and the song.
+- **STAGE:** the background, the song and the folder: MegaMan's own or
+  the Lab's (Left and Right turn it).
 - **SETS:** four sets are kept with their best win. A takes one in hand.
 - **BATTLE!** at the foot, or START.
 
 It is a test: nothing in it can delete MegaMan, it pays nothing, and the
 run is afterwards exactly as it was, HP and all. L on the Custom screen
-leaves at once. MegaMan fights with the folder and NaviCust he holds.
+leaves at once. MegaMan fights with the NaviCust he holds, and with his
+folder or the Lab's own: A on STAGE's Folder, turned to the Lab's, opens
+BN6's folder editor with every chip your profile has held in any run, in
+each of its codes. The run's folder and Pack stay as they are.
 Back in the Lab you see the time, the busting level and the HP lost, and
 a set keeps its best.
 
@@ -1450,7 +1468,7 @@ what they run. Output and Sound are your own there too.
 
 ## The Jukebox
 
-Every song of the game, and of BN5 with its ROM beside BN6's, to listen
+Every song of the game, and of BN5 and BN4 with their ROMs beside BN6's, to listen
 to whenever you like: **KeyItem** in the PET, then A on **Jukebox**. The
 game holds still while it is open, its music too, and goes on where it
 was when you close it.
