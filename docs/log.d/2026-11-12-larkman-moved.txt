@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-12T23:00:00Z
+* **Update**: multirom/navis.md (LarkMan moved and proved: his types, his afterimage's word, the chips' Nebula units on the Navis' sprites; its description), multirom/index.md (its line), rom/navis.md (LarkMan's spawners and afterimage word), multirom/gaps.md (17-18 both moved), devtools/navi-recipe-generator.md (an afterimage spawn's word set to its sprite's place).
