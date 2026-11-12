@@ -3,7 +3,7 @@ type: ROM Map
 title: "BN6's battles"
 description: "Addresses of BN6's battles: enemy ids, stats and traits, the encounter roll and battle hooks, battlefields and panel types, rewards, DeleteTime, the battle loop and banners, Custom gauge, guardians and super bosses."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T12:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T12:30:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

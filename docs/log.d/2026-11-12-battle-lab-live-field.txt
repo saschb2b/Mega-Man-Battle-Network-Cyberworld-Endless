@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T11:42:00Z
-* **Update**: game/battle-lab.md (the builder's field is BN6's own battle of the set, begun in the snapshot and held before its Custom screen opens; the builder's pieces over it; the stage's background fixed; the proofs for the builder's path), engine/ui.md (the builder's line: an overlay on the held battle), devtools/battle-on-demand.md (`lab open`'s picture and its line on leaving), code/director.md (`lab_draw.c` and `lab_battle.c`'s rows), rom/battle.md (the Custom screen's first byte as a battle's field stands, `BN6_CUSTOM_OPENING`).

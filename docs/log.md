@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (the builder's field is BN6's own battle of the set, begun in the snapshot and held before its Custom screen opens; the builder's pieces over it; the stage's background fixed; the proofs for the builder's path), engine/ui.md (the builder's line: an overlay on the held battle), devtools/battle-on-demand.md (`lab open`'s picture and its line on leaving), code/director.md (`lab_draw.c` and `lab_battle.c`'s rows), rom/battle.md (the Custom screen's first byte as a battle's field stands, `BN6_CUSTOM_OPENING`).
 * **Update**: code/screens.md (the launcher's row gains `launcher_saves.h`, the two hooks the ROMs screen asks SAVES through and `saves.c` fills: the layers' sixth cut, the launcher includes nothing of SAVES).
 * **Update**: game/progression/encounter-groups.md (Easing act 1's pair: the tally of the options, what the pressure cap does not see, the cap on cost and the fair fields, the rule; the calls taken in the build, shown to the owner; his go for step 3), game/progression/encounter-groups-measured.md (the cost's marks, the fields, the fill counts under both caps), devtools/encounter-tags.md (the fields' pass, the cost and the fair fields in the engine's table), devtools/pacing-report.md (act 1's beats listed).
 * **Update**: code/core.md (`library_count` and `library_whole` take the held test as a parameter, and `data.c` asks `chips_all_star`, which `run.c` answers: the layers' second cut, `core.data` includes nothing of the run).
