@@ -76,13 +76,17 @@ void xrec_placeholder(const XChipReg *reg, uint16_t abc, const uint32_t blank[3]
  * not in BN6's engine (XREG_PENDING: it sits out): the inert family, no
  * lock-on and no parameters. One that runs on BN6's own code (XREG_RECORD,
  * its twin given): the twin's family, lock-on and lock-on type (and its
- * subfamily, but the row's), BN4's parameters, which that code reads. */
+ * subfamily, but the row's), BN4's parameters, which that code reads. One
+ * whose code is moved (XREG_MOVED): BN6's support family, or its misc
+ * family for a chip of BN4's, or `family` where the row names a twin for
+ * it (a Navi chip's, BN6's Navi family), the row's subfamily. */
 typedef struct {
 	const uint8_t *bn4;    /* BN4's record */
 	const uint8_t *twin;   /* (XREG_RECORD) BN6's record of the chip whose family it runs as, else NULL */
 	const XChipReg4 *reg;
 	uint16_t abc;          /* its place in the folder editor's ABC order */
 	uint32_t art[3];       /* its icon's, picture's and picture palette's bus addresses in the core's copy */
+	uint8_t family;        /* (XREG_MOVED with a twin) the twin's family, BN6's for its unit's routine; 0 the support or misc family */
 } XRecordFrom4;
 void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]);
 /* ... and its placeholder where BN4's ROM is not read, as BN5's: the row's

@@ -11,6 +11,7 @@
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xnavi_recipe.h"
 
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
 /* its fourth-kind 0x4f (080E79B8-080E7BF0), which its routine (080E7A58) spawns: moved */
@@ -2002,6 +2003,78 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 	.types = hole_types, .ntypes = (int)(sizeof hole_types / sizeof *hole_types), \
 	.sound_calls = hole_sound_calls, .nsound_calls = (int)(sizeof hole_sound_calls / sizeof *hole_sound_calls), \
 	.bytes = hole_bytes, .nbytes = (int)(sizeof hole_bytes / sizeof *hole_bytes) }
+/* ---- GutsManChip: BN4's navi 0x5 (080B9B1D) as BN6's 0x85; its chips 224 (535), 225 (536), 226 (537) ---- */
+/* its object, the fourth kind's 0x10 (080E31E8-080E3328), not moved: BN6's Navi object in its place */
+/* the chip's Navi, the first kind's 0x14 (080B999C-080B9B44), which his spawner (080B9B1C) spawns: moved */
+/* his battle sprite 2:0x2 (080B99C8): gutsman's, list 2's 0x41 (seat 1) */
+/* its sound 0xb0 (080B9A3E): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
+/* its chip 225 (id 536) waits: its row is XREG_PENDING */
+/* its chip 226 is a dark chip of BN4's (row 537): a battle it is used in costs 20 max HP */
+/* its chip 226 (id 537) waits: its row is XREG_PENDING */
+
+static const XvBlock gutsmanchip_blocks[] = {
+	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x3D60, 0x15E72429u },
+};
+static const XvData gutsmanchip_data[] = {
+	{ 0x080B99AE, 0x080B99B0, XV_RAW },
+	{ 0x080B99B0, 0x080B99B4, XV_POOL },
+	{ 0x080B99B4, 0x080B99C0, XV_TABLE },
+	{ 0x080B9A12, 0x080B9A14, XV_RAW },
+	{ 0x080B9A14, 0x080B9A18, XV_POOL },
+	{ 0x080B9A18, 0x080B9A28, XV_TABLE },
+	{ 0x080B9AEE, 0x080B9AF0, XV_RAW },
+	{ 0x080B9AF0, 0x080B9AF4, XV_POOL },
+	{ 0x080B9B42, 0x080B9B44, XV_RAW },
+};
+static const XvPair gutsmanchip_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032B8, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800B950, 0x0800FCFC },   /* search, SAME */
+	{ 0x08014446, XN_BN4_CODE + 0x5732 },   /* fireman's copy of BN4's 08014446 (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+	{ 0x080CD81E, 0x080C6C16 },   /* project:project:chips, SAME */
+	{ 0x080D0894, XN_BN4_CODE + 0x958 },   /* gutsman's copy of BN4's 080D0894 (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+};
+static const XvPair gutsmanchip_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+};
+static const XvImm gutsmanchip_imms[] = {
+	{ 0x080B99C4, THUMB_MOVS, 2, 0, 0x2, 0x41 },   /* his battle sprite: BN4's list 2 0x2, the moved Navi's 0x41 in BN6 (gutsman's) */
+	{ 0x080B9ABA, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080B9ACE, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080B9B20, THUMB_MOVS, 0, 0, 0x14, 0xA0 },   /* the chip's Navi's type 0x14 (the first kind): moved, the dispatch's 0xa0 */
+	{ 0x080B9B30, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvNumber gutsmanchip_numbers[] = {
+	{ 0x080B9AF0, 0x04050601, 0x04050601 },   /* a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same (five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606) */
+};
+static const XvType gutsmanchip_types[] = {
+	{ 1, 0xA0, XV_TYPE_MOVED, 0x14 },   /* BN4's first-kind 0x14, moved, the dispatch's 0xa0 */
+};
+static const XvSoundCall gutsmanchip_sound_calls[] = {
+	{ 0x080B9A3E, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
+};
+static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x1E2 } };
+
+#define GUTSMANCHIP_CODE { .name = "GutsManChip (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5C00), \
+	.blocks = gutsmanchip_blocks, .nblocks = (int)(sizeof gutsmanchip_blocks / sizeof *gutsmanchip_blocks), \
+	.data = gutsmanchip_data, .ndata = (int)(sizeof gutsmanchip_data / sizeof *gutsmanchip_data), \
+	.calls = gutsmanchip_calls, .ncalls = (int)(sizeof gutsmanchip_calls / sizeof *gutsmanchip_calls), \
+	.words = gutsmanchip_words, .nwords = (int)(sizeof gutsmanchip_words / sizeof *gutsmanchip_words), \
+	.imms = gutsmanchip_imms, .nimms = (int)(sizeof gutsmanchip_imms / sizeof *gutsmanchip_imms), \
+	.numbers = gutsmanchip_numbers, .nnumbers = (int)(sizeof gutsmanchip_numbers / sizeof *gutsmanchip_numbers), \
+	.types = gutsmanchip_types, .ntypes = (int)(sizeof gutsmanchip_types / sizeof *gutsmanchip_types), \
+	.sound_calls = gutsmanchip_sound_calls, .nsound_calls = (int)(sizeof gutsmanchip_sound_calls / sizeof *gutsmanchip_sound_calls) }
 /* ---- DrkVulcn: BN4's attack 0x1f (080EC843) as BN6's 0xfd; its chips 190 (601) ---- */
 /* MegaMan's state 0x1f (080EC842-080EC972), the family of its chips' records: moved */
 /* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
@@ -2014,9 +2087,9 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its chip 220 has no row of the registry (the run's by name, or none) */
 
 static const XvBlock drkvulcn_blocks[] = {
-	{ 0x080EC842, 0x080EC972, XC4_CODE + 0x3D62, 0x6C6AADB3u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x3EA0, 0x6FFE1431u },
-	{ 0x080CF596, 0x080CF5B4, XC4_CODE + 0x3ED2, 0x70AA170Eu },
+	{ 0x080EC842, 0x080EC972, XC4_CODE + 0x3F12, 0x6C6AADB3u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4050, 0x6FFE1431u },
+	{ 0x080CF596, 0x080CF5B4, XC4_CODE + 0x4082, 0x70AA170Eu },
 };
 static const XvData drkvulcn_data[] = {
 	{ 0x080EC854, 0x080EC858, XV_POOL },
@@ -2054,7 +2127,7 @@ static const XvSoundCall drkvulcn_sound_calls[] = {
 static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
 
 #define DRKVULCN_CODE { .name = "DrkVulcn (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5C00), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6000), \
 	.blocks = drkvulcn_blocks, .nblocks = (int)(sizeof drkvulcn_blocks / sizeof *drkvulcn_blocks), \
 	.data = drkvulcn_data, .ndata = (int)(sizeof drkvulcn_data / sizeof *drkvulcn_data), \
 	.calls = drkvulcn_calls, .ncalls = (int)(sizeof drkvulcn_calls / sizeof *drkvulcn_calls), \
@@ -2080,11 +2153,11 @@ static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
 /* its chip 213 (id 697) sits out: ElemDark, held: its shot (the third kind's 0x9, the unit's copy) animates a frame behind BN4's from its first frame, its sprite's frame count 2 at t33 against BN6's 1, untraced (docs/multirom/bn4-chips.md, DrkVulcn and the Elem chips) */
 
 static const XvBlock elem_blocks[] = {
-	{ 0x080EE2AE, 0x080EE426, XC4_CODE + 0x3EF2, 0xB0B60FB4u },
-	{ 0x080CE2D8, 0x080CE4D0, XC4_CODE + 0x4070, 0x00B1870Eu },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x4270, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x44A0, 0x77CB1EA6u },
-	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x45C0, 0x6FFE1431u },
+	{ 0x080EE2AE, 0x080EE426, XC4_CODE + 0x40A2, 0xB0B60FB4u },
+	{ 0x080CE2D8, 0x080CE4D0, XC4_CODE + 0x4220, 0x00B1870Eu },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x4420, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4650, 0x77CB1EA6u },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x4770, 0x6FFE1431u },
 };
 static const XvData elem_data[] = {
 	{ 0x080EE2C0, 0x080EE2C4, XV_POOL },
@@ -2184,7 +2257,7 @@ static const XvSoundCall elem_sound_calls[] = {
 static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F }, { 0xA8, 0x285 }, { 0x14C, 0x329 } };
 
 #define ELEM_CODE { .name = "Elem (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6000), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6400), \
 	.blocks = elem_blocks, .nblocks = (int)(sizeof elem_blocks / sizeof *elem_blocks), \
 	.data = elem_data, .ndata = (int)(sizeof elem_data / sizeof *elem_data), \
 	.calls = elem_calls, .ncalls = (int)(sizeof elem_calls / sizeof *elem_calls), \
@@ -2218,7 +2291,8 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x0C, 0x8C, 0x080DF98D, XC4_HOMES + 0x5000, LIGTNIN_CODE, ligtnin_songs, (int)(sizeof ligtnin_songs / sizeof *ligtnin_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x5400, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x5800, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 22 },
-	{ XCHIP_ATTACK, 0x1F, 0xFD, 0x080EC843, XC4_HOMES + 0x5C00, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
-	{ XCHIP_ATTACK, 0x60, 0xFE, 0x080EE2AF, XC4_HOMES + 0x6000, ELEM_CODE, elem_songs, (int)(sizeof elem_songs / sizeof *elem_songs), 0, 0 },
+	{ XCHIP_NAVI, 0x05, 0x85, 0x080B9B1D, XC4_HOMES + 0x5C00, GUTSMANCHIP_CODE, gutsmanchip_songs, (int)(sizeof gutsmanchip_songs / sizeof *gutsmanchip_songs), 2, 0 },
+	{ XCHIP_ATTACK, 0x1F, 0xFD, 0x080EC843, XC4_HOMES + 0x6000, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x60, 0xFE, 0x080EE2AF, XC4_HOMES + 0x6400, ELEM_CODE, elem_songs, (int)(sizeof elem_songs / sizeof *elem_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

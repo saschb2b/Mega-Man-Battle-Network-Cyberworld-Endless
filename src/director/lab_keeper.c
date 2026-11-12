@@ -18,7 +18,7 @@
 #include "talk.h"
 #include "text.h"
 
-bool lab_there(void) { return dev.lab; }
+bool lab_there(void) { return dev.lab || profile.lab_sent; }
 
 /* his words: the first meeting's boxes once a profile, one box after;
  * then the flag that opens the builder */
@@ -28,7 +28,7 @@ static void words(void) {
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
-	ta_pages(&t, profile.lab_met ? lab_keeper_hello() : lab_keeper_first(), FACE_PROG, &first);
+	ta_pages(&t, profile.lab_met ? lab_keeper_hello() : lab_keeper_first(), FACE_LAB, &first);
 	ta_flag_set(&t, LAB_OPEN_FLAG);
 	ta_end(&t);
 	if (!lanhp_lab_say(out, ta_build(&t, out)) && emu_debug_on()) fprintf(stderr, "lab: the keeper's words did not fit\n");

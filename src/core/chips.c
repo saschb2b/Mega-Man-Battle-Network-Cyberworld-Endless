@@ -307,6 +307,15 @@ static void abc_make(void) {
 	}
 }
 
+/* BN4's row `r4`'s record made from BN4's (BN6's chip table `table` for its twin) at chip `id`'s place */
+static void record4_make(int id, const XChipReg4 *r4, const uint8_t *table, uint8_t *out) {
+	XRecordFrom4 in = { bn4_record(r4->bn4), r4->how == XREG_RECORD && r4->twin ? table + XREC_SIZE * r4->twin : NULL, r4, 0, { 0 }, 0 };
+	memcpy(in.art, M.art[id], sizeof in.art);
+	/* (a moved row that names a twin takes its family alone: a Navi chip's, BN6's Navi family) */
+	if (r4->how == XREG_MOVED && r4->twin) in.family = table[XREC_SIZE * r4->twin + BN6_CHIP_FAMILY];
+	xrec_from_bn4(&in, out);
+}
+
 static void records_make(const uint32_t blank[3]) {
 	const uint8_t *table = R.data + R.layout->chip_data;
 	for (int id = 0; id < CHIPS_IDS; ++id) {
@@ -315,9 +324,7 @@ static void records_make(const uint32_t blank[3]) {
 		if (!r && M.alias && id == M.alias) { memcpy(out, table + XREC_SIZE * (uint32_t)M.alias_from, XREC_SIZE); continue; }
 		const XChipReg4 *r4 = r ? NULL : xreg4_at(id);
 		if (r4 && M.rom4) {
-			XRecordFrom4 in = { bn4_record(r4->bn4), r4->how == XREG_RECORD && r4->twin ? table + XREC_SIZE * r4->twin : NULL, r4, 0, { 0 } };
-			memcpy(in.art, M.art[id], sizeof in.art);
-			xrec_from_bn4(&in, out);
+			record4_make(id, r4, table, out);
 			continue;
 		}
 		if (r4) { xrec_placeholder4(r4, 0, blank, out); continue; }

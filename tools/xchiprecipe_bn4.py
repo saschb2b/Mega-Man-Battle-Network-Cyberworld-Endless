@@ -31,6 +31,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import bn4_twins  # noqa: E402
 import bn5_twins  # noqa: E402
 import xnavirecipe_bn4 as N  # noqa: E402
+import xchiprecipe_bn4_navi as NV  # noqa: E402
 import xnavirecipe_bn4_objects as C  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
@@ -51,7 +52,9 @@ FAMILY4_SUPPORT, FAMILY6_SUPPORT = 0x0C, 0x15
 # its shape, at BN6's grown misc routines' NUMBER0 + its subfamily (src/emu/xchips_bn4.h XC4_MISC)
 MISC4, NMISC4, MISC6, NMISC6 = 0x080EC9CC, 0x12, 0x080ED730, 7   # BN4_MISC_ROUTINES, BN6_MISC_ROUTINES
 FAMILY4_MISC, FAMILY6_MISC = 0x20, 0x1C
-FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC}
+# ... and its Navi chips, the support state's too: a 'navi' unit is the chip's Navi alone, run by BN6's Navi object at BN6's
+# grown Navi routines' NUMBER0 + its subfamily (tools/xchiprecipe_bn4_navi.py)
+FAMILY4 = {'support': FAMILY4_SUPPORT, 'misc': FAMILY4_MISC, 'navi': FAMILY4_SUPPORT}
 # ... and its attack families: a chip's family (its record's +0xB) is a state of MegaMan's (BN4_PLAYER_STATES by its number),
 # run with his object in r5 as BN6's RunAIAttack runs a family of its table (BN6_ATTACK_FAMILIES), but that BN4's state makes
 # r7 the attack's variables itself (his AI data's +0x70, BN6's +0xA0). An 'attack' unit is one of BN4's states whole, every
@@ -126,6 +129,9 @@ TWINS = {
     0x0800C9FC: (0x08011714, 'chips'),   # a chip's attack ended (BN4_CHIP_ATTACK_END, BN6_CHIP_ATTACK_END)
     0x0800D7CA: (0x08013774, 'chips'),   # a battle NaviStats byte of the object in r5 (BN4_NAVI_BYTE; BN6_NAVI_BY_OBJECT's get)
     0x0801288C: (0x08019F8C, 'chips'),   # an object's element set, its own and its collision data's
+    # a collision region spawned (BN4's 0x080CD7E2, BN6's 0x080C6BDA: the families' pair, audited) and its +0 given bit 0x10,
+    # which runs it inside a chip's time freeze: BN6's the same twenty bytes after its own spawner (a Navi chip's hit's)
+    0x080CD81E: (0x080C6C16, 'chips'),
     # ... and an object that stands as its side's obstacle (PropBom's bomb):
     0x0800B230: (0x0800F614, 'chips'),   # its side's obstacle slot taken (BN4_OBSTACLE_ADD, BN6_OBSTACLE_ADD)
     0x0800B272: (0x0800F656, 'chips'),   # ... and given up (BN4_OBSTACLE_REMOVE, BN6_OBSTACLE_REMOVE)
@@ -260,6 +266,8 @@ UNITS = (
     ('support', 0x11, 'TimeBomb'),
     ('misc', 0x0C, 'Ligtnin'),
     ('support', (0x0B, 0x3B), 'Hole'),
+    # (a Navi chip's unit, tools/xchiprecipe_bn4_navi.py: installed after BN4's Navis, src/emu/xchips_code.c)
+    ('navi', 0x05, 'GutsManChip'),
     ('attack', 0x1F, 'DrkVulcn'),
     ('attack', 0x60, 'Elem'),
 )
@@ -297,6 +305,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
+# (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
 # each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
 # each that number
@@ -540,6 +549,7 @@ class Alloc(X4.Alloc):
         self.late_effect, self.late_list5, self.late_list4, self.list3 = CHIP_EFFECTS[0], CHIP_LIST5[0], CHIP_LIST4[0], CHIP_LIST3[0]
         self.late_list1 = CHIP_LIST1[0]
         self.list3_sprites = {}   # (BN4's list 3 number copied: the copy)
+        self.types1 = NV.TYPES1[0]   # (the chips' Navis' first-kind dispatch numbers)
         self.shared3 = {}         # (a third-kind type of SHARED3 moved: its number of the dispatch, its owner)
 
 
@@ -641,7 +651,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         f.number = ATTACK_NUMBERS.get((sub, name), ATTACK_NUMBERS.get(sub, 0))
         if not ATTACK_FIRST <= f.number < ATTACK_END:
             f.decide('unit', f'its family {sub:#x} has no number of BN6\'s grown attack families (ATTACK_NUMBERS: the next from {ATTACK_FIRST:#x})')
-    elif kind not in FAMILY4 or not 0 <= sub < (NROUTINES4 if kind == 'support' else NMISC4):
+    elif kind not in FAMILY4 or not 0 <= sub < (NMISC4 if kind == 'misc' else NROUTINES4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines and the attack states alone are read')
         return f
     f.regions, f.regions_roots, f.moved4, f.powers = [], [], {}, []
@@ -696,6 +706,13 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.roots += [e, lo]
             f.moved4[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its fourth-kind {ty:#x} ({lo:08X}-{hi:08X}), which its routine ({e:08X}) spawns: moved')
+    elif kind == 'navi':
+        # (a Navi chip: its routine the common spawner of its object, which BN6's Navi object stands in for; the unit the chip's
+        # Navi's first-kind type, its entry his spawner)
+        f.object_entry = b4.u32(ROUTINES4 + 4 * sub) & ~1
+        ty = shape_of(b4, b6, f, f.object_entry)
+        if ty is None or not NV.begin(b4, b6, f, ty):
+            return f
     else:
         f.entry = b4.u32(MISC4 + 4 * sub) & ~1
         hit = X4.t3_of(b4, f.entry)
@@ -723,6 +740,9 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             bn4_twins.COPIED[f.entry] = 'a misc chip\'s routine, the unit\'s entry'
             f.roots = [f.entry]
             f.notes.append(f'its routine ({f.entry:08X}), a routine of BN4\'s by itself: copied')
+    # (a call into code a BN4 Navi's recipe moved goes to that copy: no type moved again for it, NV.aim_calls)
+    saved_moved3 = X4.moved3_of
+    X4.moved3_of = lambda b, g, t, p: None if NV.navi_block(g, t) else saved_moved3(b, g, t, p)
     # (a type an earlier unit moved, SHARED3: its spawner copied, its spawn the owner's number; one the unit does not spawn is
     # dropped after the walk)
     for ty, (spawner, why) in sorted(SHARED3.items()):
@@ -735,6 +755,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         roots = list(f.roots)
         while roots:
             X4.walk_code(b4, f, roots, set(), pairs)
+            NV.aim_calls(f)
             roots = sorted((C.moved4(b4, f, pairs) | moved3(b4, f, pairs)) - set(f.walks))
             # (a call noted before its target's type was moved with the unit: its own code now, walked)
             late = [t for t in f.calls if X4.own_region(f, t)]
@@ -742,6 +763,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
                 del f.calls[t]
             roots = sorted(set(roots) | set(late))
     finally:
+        X4.moved3_of = saved_moved3
         bn4_twins.COPIED.clear()
         bn4_twins.COPIED.update(saved_copied)
     # (a shared type the unit does not spawn after all: its spawner not among its calls)
@@ -761,6 +783,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     try:
         X4.spawns_of(f, alloc)
         C.spawns4(f, alloc)
+        NV.spawns1(f, alloc)
     finally:
         X4.type_number = saved
     f.spawn_calls = {t: PAGE_SPAWNERS.get(name, name) for t, name in f.spawn_calls.items()}
@@ -848,7 +871,7 @@ def moved3(b4, f, pairs):
     its region one of its blocks; the new roots"""
     roots = set()
     for t in sorted(f.calls):
-        hit = None if t in X4.SPAWNERS4 or t in pairs.twins or t in TYPE_TWINS else X4.t3_of(b4, t)
+        hit = None if t in X4.SPAWNERS4 or t in pairs.twins or t in TYPE_TWINS or t in f.aim else X4.t3_of(b4, t)
         if hit is None or hit[0] is None or hit[0] in f.moved3:
             continue
         ty, lo, hi = hit
@@ -1049,10 +1072,10 @@ def rows_check(b4, f):
     f.rows = []
     for i, r in f.chips:
         if (r[0x15] == 2 or r[9] & 0x20) and i in rows:
-            if rows[i][0] not in dark:
-                f.decide('row', f'its chip {i} is a dark chip and its row {rows[i][0]} is not among xreg4_dark_ids: no price (tools/xreg_bn4.py)')
-            else:
+            if rows[i][0] in dark:
                 f.notes.append(f'its chip {i} is a dark chip of BN4\'s (row {rows[i][0]}): a battle it is used in costs 20 max HP')
+            elif rows[i][1] != 'PENDING':   # (a Navi's DS whose row waits: no price asked yet, the unit serves his V1)
+                f.decide('row', f'its chip {i} is a dark chip and its row {rows[i][0]} is not among xreg4_dark_ids: no price (tools/xreg_bn4.py)')
         if i not in rows:
             f.notes.append(f'its chip {i} has no row of the registry (the run\'s by name, or none)')
             continue
@@ -1064,6 +1087,10 @@ def rows_check(b4, f):
             continue
         f.rows.append((i, bn6))
         want = NUMBER0 + r[0xC]   # (its own subfamily's routine: the unit's, or one of the rows that share its code)
+        if f.kind == 'navi' and how == 'PENDING':
+            # (a Navi's SP waits for BN4's computed powers, his DS for the dark chips' cost: the unit serves the V1 meanwhile)
+            f.notes.append(f'its chip {i} (id {bn6}) waits: its row is XREG_PENDING')
+            continue
         if f.kind == 'attack':
             # (an attack family's chips: the unit's number, its family; a Program Advance of it is formed, never dealt, its
             # row XREG_PA until BN4's recipes are listed; a chip of it another session moves waits, ROWS_WAIT)
@@ -1093,6 +1120,8 @@ def sprites_of(b4, b6, f, alloc):
             num, chain = T.back_value(w, site, 2)
             if lst is None or lst & 3 or num is None or len(chain) != 1 or chain[0][1] != 'movs':
                 f.decide('sprite', f'{site:08X}: a sprite loaded by numbers made otherwise ({lst}, {num})')
+                continue
+            if f.kind == 'navi' and lst // 4 == 2 and NV.battle_sprite(f, site, chain, num):
                 continue
             # (BN4's sprite copied, as the families' are, whether or not BN6 has one of its bytes: the differential names a
             # sprite by the recipe's rows, and an object in play in a fight's frame is compared by its sprite's frames)
@@ -1389,10 +1418,11 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xnavi_recipe.h"
 '''
 ROWS = [0]        # (the next row of the art's room, counted over the units as their rows are written: c_file)
 ROWS_MAX = 512    # (XC4_ROWS: the rows a slot's start can tell apart)
-KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC', 'attack': 'XCHIP_ATTACK'}
+KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC', 'attack': 'XCHIP_ATTACK', 'navi': 'XCHIP_NAVI'}
 
 
 def place(at, base, name):
@@ -1476,7 +1506,7 @@ def c_unit(f):
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, 0, 0' + (f', 0x{f.wait:02X}' if f.wait else '') + ' },']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

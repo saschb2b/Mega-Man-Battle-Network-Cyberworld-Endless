@@ -50,6 +50,18 @@
                                            * frame (BN6_SUPPORT_RUN ends it a frame later) */
 #define BN4_CHIP_ROUTINES     0x080220E0u /* its routines by subfamily, BN4_CHIP_ROUTINE_COUNT words (BN6_CHIP_ROUTINES' twin) */
 #define BN4_CHIP_ROUTINE_COUNT 0x4E
+/* A Navi chip (docs/rom/bn4.md, Its Navi chips): its routine there spawns a fourth-kind object of the Navi's own, BN6's
+ * one Navi chip object's twin state for state (BN6_CHIP_NAVI_OBJECT), which steps MegaMan out, spawns the Navi as his chip
+ * shows him (a first-kind type of his own, not the type he fights as), waits for his word and steps MegaMan in */
+#define BN4_CHIP_NAVI_STEP    0x080E2D26u /* MegaMan stepped out (r1 1) or in (r1 0): r0 his side; the fourth kind's 0x0C (0x080E2C24),
+                                             BN6_CHIP_NAVI_STEP's part */
+#define BN4_REGION_SPAWN_FROZEN 0x080CD81Eu /* a collision region spawned (0x080CD7E2) and its +0 given bit 0x10 (BN6_REGION_SPAWN_FROZEN) */
+#define BN4_GUTSMAN_CHIP_OBJECT 0x080E31E8u /* GutsMan's chip's object (the fourth kind's 0x10; its routine BN4_CHIP_ROUTINES' 5, 0x080E3304) */
+#define BN4_GUTSMAN_CHIP_NAVI 0x080B999Cu /* ... and the chip's GutsMan (the first kind's 0x14): he appears (sound 0xB0), strikes the
+                                             ground at frame 20 of 90 (his shockwave's spawner, 0x080D0894: the third kind's 0x0B, the
+                                             Navi's own; kind 1, or 2 for his SP and DS by his +4) and a hit before him, and is gone */
+#define BN4_GUTSMAN_CHIP_SPAWN 0x080B9B1Cu /* ... his spawner: r0, r1 his panel, r2 his element, r5 his user, r6 his power, r7 the byte he
+                                             sets to 1 and clears when he is done */
 /* A support chip's object's generic states, which every such type's tables name (BN6's the same places of its own types'
  * tables, BN6_SUPPORT_OBJECT_*: tools/xchiprecipe_bn4.py TWINS, each pair read in both ROMs) */
 #define BN4_SUPPORT_OBJECT_BEGIN 0x08008BD8u /* its state 0 (+8): its side's turn of the time freeze asked for */
