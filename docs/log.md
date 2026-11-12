@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/progression/encounter-groups.md (the pairs' cost measured: 290 pairs tagged, the cost caps with them), game/progression/encounter-groups-measured.md (The pairs' pass: the pairs' cost; the caps and the fill counts with it).
 * **Update**: game/battle-lab.md (Built: the other games' panels on FIELD, BN5's lava, sea and magnet panel and BN4's Hole as BN6's engine holds them, how a type past a field's nibble is set, the proof; BN4's types 5 and 0xA named as not in the engine).
 * **Update**: project/merging.md (What restore leaves alone, new section: a page resolved by hand is never merged anew; lint fails on conflict markers), code/tests.md (tests/test_generated.py, new row).
 * **Update**: multirom/bn4-chips.md (BugCurse moved on the project's first-actor routine; a BN6 folder of 30 Gigas never deals), rom/bn4.md (a side's first actor), devtools/differential.md (a Giga's spec's folder).

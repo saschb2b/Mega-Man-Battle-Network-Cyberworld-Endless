@@ -3,7 +3,7 @@ type: Research
 title: "Encounter groups, measured"
 description: "The encounter groups' measured numbers of 11 November 2026: every virus family in the engine tagged (versions, element, weakness, role, pressure, tricks, reward row), each ROM set's pool by act, how many ways each template fills, and what sampled battles cost a standing MegaMan and the autopilot."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:00:00Z }
 sources:
   - id: tools
     resource: "tools/encounter_tags.py report --write, from tools/encounter_data/ (tags.tsv, families.tsv, danger.tsv)"
