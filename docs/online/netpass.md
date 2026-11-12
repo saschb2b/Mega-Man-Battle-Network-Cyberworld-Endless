@@ -3,7 +3,7 @@ type: Feature
 title: "The NetPass"
 description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's, BN5's and BN4's (protocol v17), that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment, a game joining the set, the full pass of a system with room for one game (protocol v18: it trades on the pair's common ground) and protocol v9's NOTICE 28."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
 ---
 
 # The NetPass

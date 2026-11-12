@@ -3,7 +3,7 @@ type: Feature
 title: "The server and the wire"
 description: "Protocol v18, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
 tags: [online]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
 ---
 
 # The server and the wire
