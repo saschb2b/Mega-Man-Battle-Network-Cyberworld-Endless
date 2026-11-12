@@ -239,5 +239,12 @@
 #define BN6_SIDES_TURNER      0x080141F4u /* MegaMan given his turn (BN6_AI_MODES' BN6_AI_TURNS) where the pattern is none of them and the mode not 9 */
 #define BN6_AI_TURNS          0x400       /* ... the bit: L or R turns him round (0x08013072: BN6_AI_FLAGS 0x1000 or 0x2000 by his facing), */
 #define BN6_SIDES_KEYS        0x08013044u /* ... where else, the gauge full, L or R asks the Custom screen (0x0801306A: the battle's flags 0x10) */
+/* AreaGrab's column: the grabber's side's hindmost column wholly its own, then the first from there forward that holds a
+ * panel of the other side's (bn6f sub_800D58C, 0x0800D58C; AreaGrab's object, the fourth kind's type 3, its action 8 at
+ * 0x080E1A90, and four more callers) */
+#define BN6_GRAB_OWN_COLUMN   0x0800D5BAu /* ... the first search (bn6f sub_800D5BA): r6 the column from the object's, r4 the step, against its facing first */
+#define BN6_GRAB_TURN         0x0800D5E4u /* ... where the walk left the field (0x0800CC72 said so): ldrb r6,[r5,#0x12], the step made the facing's, and on; */
+                                          /* ... no test that it had turned already, so with no such column on the field it never ends (grab_search.h) */
+#define BN6_GRAB_FOUND        0x0800D5E0u /* ... its end: adds r0,r6,#0; pop {r4,r6,r7,pc} */
 
 #endif

@@ -91,6 +91,10 @@
 - **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
   Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
   they look as on any other layer again.
+- **Fixed: AreaGrab could stop the game on a dark layer.** In a
+  Surrounded battle, once a Catack had driven through a row of MegaMan's
+  two columns, AreaGrab dimmed the screen and the game stood still for
+  good. It now takes his column's panels back and the battle goes on.
 - **Fixed: Lan's HP before one of BN4's areas.** With BN4 Red Sun's ROM
   beside BN6's, a visit home drew Lan's HP as scrambled magenta tiles
   whenever the act ahead was one of BN4's areas, since 0.20.0. Home looks

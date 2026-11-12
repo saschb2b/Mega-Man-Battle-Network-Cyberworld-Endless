@@ -108,6 +108,7 @@
 #include "xpanels.h"
 #include "visitor_families.h"
 #include "visitors.h"
+#include "grab_search.h"
 #include "group_arc.h"
 #include "groups.h"
 #include "xpanels_look.h"
@@ -8037,6 +8038,12 @@ int main(int argc, char **argv) {
 	test_visitors();
 	test_groups();
 	test_group_arc();
+	/* AreaGrab's search (grab_search.h): BN6 walks against the grabber's facing first, then with it; lost where it leaves
+	 * the field walking with it, whichever side grabs and whichever way it is turned (a Surrounded field's L and R) */
+	CHECK(!grab_search_lost(-1, 0, 0) && grab_search_lost(1, 0, 0), "grab: MegaMan's search, lost once it has walked forward off the field");
+	CHECK(!grab_search_lost(1, 1, 0) && grab_search_lost(-1, 1, 0), "grab: an enemy's search, lost once it has walked its own way off the field");
+	CHECK(!grab_search_lost(1, 0, 1) && grab_search_lost(-1, 0, 1) && !grab_search_lost(-1, 1, 1) && grab_search_lost(1, 1, 1),
+		"grab: a search by one turned round (Surrounded's L or R)");
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;
