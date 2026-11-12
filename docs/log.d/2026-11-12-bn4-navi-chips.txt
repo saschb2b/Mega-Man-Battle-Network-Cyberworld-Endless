@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-12T21:00:00Z
-* **Update**: multirom/bn4-chips.md (the first Navi chip plays, GutsMan's; The Navi chips, new section; BN4's ground kind is Null, not the Cursor), multirom/bn4-navis.md (the battle's art room halved for the chips' rooms), rom/bn4.md (Its Navi chips, new row), rom/chips-code.md (BN6's Navi chip object, new row), devtools/chip-recipe-generator.md (a Navi chip's unit), devtools/differential.md (a Navi chip read as BN6 runs it), engine/emulation/memory.md and free-space.md (`FREE_BN4_CHIP_SPRITE`, `FREE_BN4_CHIP_ART`), code/emu.md and code/tools.md (`xnavi_bn4_chip.c`, `tools/xchiprecipe_bn4_navi.py`).
