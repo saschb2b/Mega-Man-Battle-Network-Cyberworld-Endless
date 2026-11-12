@@ -196,8 +196,15 @@ New 3DS builds the Arena but offers no NetBattle and no watching
 (`CW_ARENA`, `square_arena_offered`): a frame of the battle's two GBAs
 takes 25.8 ms there against a 60th of a second's 16.7, measured on the
 device ([The New 3DS](arena/rollback/new-3ds.md)). The pass is the
-same there: its stamps follow the ROMs, as the server's rule does, so
-with BN5's ROM it trades and dives, and the Arena stamp shows held.
+same there: its stamps follow the ROMs, as the server's rule does. Until
+protocol v17 that meant a New 3DS with BN5's ROM traded and dived,
+its Arena stamp shown held. Since v17 the set is three ROMs and a New 3DS
+reads one extra ROM beside BN6's, BN5's before BN4's
+(`src/core/start_3ds.c`, `XROMS_3DS`; [How it is built](../multirom/how-it-is-built.md)):
+its pass cannot fill, so it holds the Square stamp alone and neither
+trades nor dives, against the aim above. Nothing in `netpass.c` or the
+server excepts it; whether it should is the owner's to decide.
+Where a pass is full on a system that builds no NetBattle,
 Battle and Watch are not offered (the referee: "SORRY! NO NETBATTLES FROM
 THIS PET!"), and the pass's PET text says so in place of the whole Net's:
 "Every game in! No NetBattles on this PET." The second screen's
