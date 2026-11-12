@@ -88,7 +88,7 @@ LAB = ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'quiet,god
 LAB_FIRST = 1300
 SET = '4:A,30:,{}4:A,60:,4:B,30:,'
 # the builder's run, part by part (lab_at gives a part's frame): the list
-# opened; a Mettaur (BN6's) set top, Draggin (BN5's, 45 rows on) middle
+# opened; a Mettaur (BN6's) set top, Draggin (BN5's, 43 rows on) middle
 # right, VolGear (BN4's, 19 more) bottom; FIELD, three panels turned to
 # BN5 Lava (12 presses), BN5 Magnet (14) and BN4 Hole (15); STAGE, the
 # background turned back through BN4's and BN5's areas, the song through
@@ -96,7 +96,7 @@ SET = '4:A,30:,{}4:A,60:,4:B,30:,'
 LAB_PARTS = (
     ('open', PAGE + '0:lab all,120:,'),
     ('mettaur', SET.format('4:UP,12:,')),
-    ('to-draggin', '3:DOWN,3:,' * 45 + '30:,'),
+    ('to-draggin', '3:DOWN,3:,' * 43 + '30:,'),
     ('draggin', SET.format('4:DOWN,12:,4:RIGHT,12:,')),
     ('to-volgear', '3:DOWN,3:,' * 19 + '30:,'),
     ('volgear', SET.format('4:DOWN,12:,4:LEFT,12:,')),
@@ -145,7 +145,7 @@ def scenes():
         'vir-bn4': fight('x1', '2F0@42/2F6@53/2FC@63'),          # VolGear, Kilby, MagTect on a layer of BN5's
         'chip-meteor': chip('x15', 674), 'chip-flame': chip('x16', 595),   # Meteors1, FlmLine1 (BN4's)
         'chip-shade': chip('x5', 505),                                    # ShadeMan's (BN5's)
-        'lab-navi': (LAB, {}, PAGE + '0:lab all,120:,' + '3:DOWN,3:,' * 85 + '60:,4:A,30:,4:A,60:,4:B,30:,60:,'
+        'lab-navi': (LAB, {}, PAGE + '0:lab all,120:,' + '3:DOWN,3:,' * 83 + '60:,4:A,30:,4:A,60:,4:B,30:,60:,'
                      + '20:START,300:,4:START,30:,4:A,260:,' + '4:B,12:,' * 80, 1800, 3500),
         'library': (['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'quiet,library=1'], {}, LIB, 1200, 2300),
         'lab-hp': (['--scene', 'town', '--seed', '2', '--dev', 'lab'], {}, HP_IN, 1380, 2060),
@@ -358,7 +358,7 @@ C4 = {'6': 'ENGINE', '4': 'CHIP'}
 # tags light without theirs)
 COLD = Shot(0, None, beats(0, (('navi-burner', 250, 2, N4), ('navi-cloud', 330, 2, N5),
                                ('arc3', 332, 2, {'6': 'AREA', '5': 'VIRUS', '4': 'VIRUS'}),
-                               ('lab-navi', 422, 2, {'6': 'CYBEAST'}))))
+                               ('lab-navi', 424, 2, {'6': 'CYBEAST'}))))
 
 
 def segments():
@@ -401,7 +401,7 @@ def segments():
                 ('lab-build', lab_at('songs', 28), 2, {'4': 'SONG'})))),
             Shot(F(22), 'NO RISK, NO REWARD: A TEST BATTLE', beats(F(22), (
                 ('lab-build', lab_at('battle', 500), 2, {'6': 'FOE', '5': 'FOE', '4': 'FOE'}),
-                ('lab-navi', 400, 2, {'6': 'CYBEAST'})))),
+                ('lab-navi', 328, 2, {'6': 'CYBEAST'})))),
         ]),
     ]
 
