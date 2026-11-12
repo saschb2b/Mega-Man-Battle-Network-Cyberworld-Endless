@@ -1,0 +1,12 @@
+{
+ "bn4": "0xCC",
+ "bn6": "0x28A",
+ "clock": "state",
+ "chips": [
+  "0x3F",
+  "0x40",
+  "0x41"
+ ],
+ "what": "AirHoc's the puck's bounces' sound 0xCC, its copy",
+ "why": "Played by BN4's air hockey state (0x27, AirHoc's unit, BN6's grown attack family 0xFB), its bls to PlaySoundEffect with r0 0xCC at 0x080D29CE, 0x080D29E6, 0x080D29F8, 0x080D2A20, 0x080D2A34 and 0x080D2A80; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x28A and goes on to BN6's: BN4's song 0xCC copied into slot 0x28A of BN6's grown song table (src/audio/xsong.c XSOUNDS; the air units' slots, docs/project/claims/bn4-air-units.json). In AirHoc's specs alone, over the rows that pair 0xCC otherwise (a Navi's copy)."
+}

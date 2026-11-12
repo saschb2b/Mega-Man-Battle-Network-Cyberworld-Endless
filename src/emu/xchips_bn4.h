@@ -51,6 +51,10 @@
  * rows, the chips' stubs (xchips_code.h XC_STUBS) and BN4's own (XC4_FIRST_ACTOR) */
 #define XC4_REGION { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS), \
 	.stubs2 = FREE_BN4_CHIP_STUBS, .stubs2_end = FREE_BN4_CHIP_STUBS_END }
+#define XC4_COLL_PANEL_WORD (FREE_BN4_CHIP_STUBS + 0x20u) /* r5 an object: the word of its collision data that BN4 keeps at
+                                       * +8 to +0xB (its panel's column and row, BN4_COLL_PANEL_BYTE, its counter time), from BN6's
+                                       * +0xA to +0xD, the same fields in the same order but off a word's alignment: two halfwords
+                                       * joined in r0, r1 kept (AirHoc's puck's move test, 0x080D288C: XvCallIn) */
 #define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)

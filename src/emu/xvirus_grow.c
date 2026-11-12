@@ -153,6 +153,25 @@ static void hooks(void) {
 	if (!emu_hook(BN6_NAME_OF, name_of, NULL)) fprintf(stderr, "xvirus: no hook at %08x: the families' ids nameless\n", (unsigned)BN6_NAME_OF);
 }
 
+/* ---- the pre-steps' hook: BN6's dispatcher, as it reads a virus's NameID for its own cases, goes on to a family's pre-step
+ * by its AI index (XV_PRESTEP) where it has one (xvirus_shim.h); every other virus as before ---- */
+
+static HookAct prestep_run(HookRegs *r, void *user) {
+	(void)user;
+	uint32_t ai = hook_read8(hook_read32(r->r[5] + BN6_T1_AI_DATA) + BN6_AI_INDEX);
+	uint32_t to = ai >= BN6_FAMILIES && ai < XV_AIS ? hook_read32(XV_PRESTEP + 4u * ai) : 0;
+	if (!to) return HOOK_CONTINUE;
+	r->r[12] = to;
+	return HOOK_JUMP;
+}
+
+void xg_prestep_hook(void) {
+	static bool set;
+	if (set) return;
+	set = emu_hook(BN6_VIRUS_NAMEID_CASES, prestep_run, NULL);
+	if (!set) fprintf(stderr, "xvirus: no hook at %08x: the families' pre-steps do not run\n", (unsigned)BN6_VIRUS_NAMEID_CASES);
+}
+
 /* ---- grown ---- */
 
 static bool grown;   /* (set once committed: what xvirus_drop_row reads, from a hook too) */
