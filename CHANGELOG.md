@@ -62,15 +62,32 @@
   third mission has him, and a fourth choice in the other acts. His
   board pays his own Navi chips at par as the other Darkloids' do: his SP
   two under par, his V1 at par.
-- **BN4 Red Sun's chips in the finds.** With BN4's ROM beside BN6's, half
-  of what a layer of BN4's areas hands out comes from BN4's own
-  catalogue: the Net Dealer's stock, Mystery Data, the vaults', Servers'
-  and gift's picks, and a Chip Trader's list. Its chips that play today
-  come among them (PanlSht, ShotStar, Repair, Counter, WhitWeb, Boomer and
-  Invis), more as each is proved; never a dark chip, which only a flame
-  of darkness offers. In the deep the half draws on every game's chips you
-  have. A run without BN4's ROM finds what it always did. A BN4 chip you
-  hold now counts on the Library's BN4 page.
+- **LarkMan and GridMan in the deep.** With BN5's ROM beside BN6's, BN5's
+  Nebula Navis LarkMan and GridMan now fight in BN6's own engine, proven
+  against BN5's battles frame by frame, and can guard a deep act (5 or 6)
+  beside Team Colonel's six: LarkMan at V2, GridMan at V3, held to the
+  act's band, SP on later cycles. Neither has a Soul to give: his
+  Guardian Data hands over his Navi chip, its SP version in the deep.
+- **BN4's Navis guard BN4's areas.** With BN4's ROM beside BN6's, Red
+  Sun's nine Navis now guard the areas BN4 dresses in half the runs, as
+  BN5's six guard theirs: GutsMan or AquaMan in ACDC Area, FireMan or
+  Roll in Town Area, WoodMan in Park Area, ThunderMan or WindMan in the
+  countries' areas, SearchMan and JunkMan in the deep's pool. Each is held to the act's
+  band and leaves Guardian Data as BN5's do.
+- **BN4 Red Sun's chips in your folder.** With BN4's ROM beside BN6's, 84
+  of Red Sun's own chips now play in BN6's battles, each checked frame by
+  frame against BN4's own: the Heat and Bubble spreads, FlmLine, MagBolt,
+  Thunder, TwnFng, SidBmbo, SeekBom, PropBom, Meteors, Ligtnin, MokoRus,
+  BigHamr, AirHoc, GutPnch and RollAro, AquaUp and GreenWd, FirePlus,
+  TimeBomb and more, and GutsMan's chip. Half of what a layer of BN4's
+  areas hands out comes from BN4's own catalogue: the Net Dealer's stock,
+  Mystery Data, the vaults', Servers' and gift's picks, and a Chip
+  Trader's list; in the deep the half draws on every game's chips you
+  have. Seventeen of BN4's Program Advances form in the Custom screen as
+  in Red Sun: HeatSprd, BubSprd, FlmCros, BstFang, MagShok, PitRng and
+  PitHoky. BN4's dark chips stay out of a run for now, and the Library's
+  BN4 page counts only what a run can hand out. A run without BN4's ROM
+  finds what it always did.
 - **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
   Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
   they look as on any other layer again.
@@ -78,12 +95,31 @@
   beside BN6's, a visit home drew Lan's HP as scrambled magenta tiles
   whenever the act ahead was one of BN4's areas, since 0.20.0. Home looks
   as it should again.
+- **Fixed: New 3DS, layers with another game's ROM.** On a New 3DS with
+  BN5's or BN4's ROM beside BN6's, memory ran short while an area was
+  learned, and a layer could come out different from the same seed. An
+  area now takes about 20 MB less at its peak, and one crash on that
+  path is gone.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
   turns in place of three. It sits in BN6's own NaviCust list with BN5's
   name, shape and text, and while the run holds a Soul the later drafts
   and the workshop can bring it too. A Beast Out stays three turns.
+- **NumbrOpn in the NaviCust.** From act 5 a guardian's draft can offer
+  NumbrOpn: ten chips in the Custom screen's hand, for a 5x5 block that
+  fills the board. Custom1 and Custom2 are not offered beside it, and
+  the vendor sells it in later runs once it has been found.
+- **CrosOver forms.** With BN5's ROM beside BN6's, BN6's own Program
+  Advance CrosOver forms from a run's Django chips (Django, his SP and
+  his DS, in D): BN6's recipe names its own Django 1-3, which no run
+  hands out.
+- **Showdown and Sorrow.** ProtoMan's netbattle now plays Showdown, and
+  a lost run's summary plays Sorrow, as a won one plays the staff roll's
+  music.
+- **The Jukebox plays BN4's songs.** With BN4's ROM beside BN6's, the
+  PET's Jukebox lists Red Sun's 34 songs in sections of their own, each
+  named for the place in BN4 that starts it.
 - **The Library, a page per game.** PET > Library now opens the run's own
   Library, drawn as BN6's own to the pixel, with BN6, BN5 and BN4 named on
   its band: each game has its StdChip, MegaChip and GigaChip pages. The keys are BN6's Library's: Left
@@ -99,6 +135,12 @@
   belong. BN6's P.A. Memo is gone with its old screen for now; a page for
   Program Advances follows. On a second screen the Library's panel counts
   each game's page.
+- **Reward picks on a screen of their own.** A guardian's draft, a
+  vault's, a Server's and a Glitch copy's three chips, an official gate's
+  and Mr.Prog's gift are now picked on a screen in the PET's look, laid
+  out as the Library: each choice on its card with its picture and
+  details, what MegaMan already holds marked as BN6's shops mark it, a
+  long description scrolling as BN6's chat box does.
 - **Online: protocol v16.** The Net Square, Trade Central and the Arena
   now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
   last ones, which need ids past BN6's 511. Games of this version meet
@@ -139,20 +181,15 @@
   him as their own Darkloid, as BN5's fifth mission does; before them he
   is a third choice beside the first two, so a board repeats them less.
   He stands on the board in his own sprite and speaks with his own face,
-  at the version the act's band takes. CloudMan is not in yet. A run
-  saved on a layer starts that layer again.
-- **GyroMan, SearchMan, Meddy and MagnetMan join NapalmMan.** Four more
-  of Team ProtoMan, BN5's GyroMan, SearchMan, Meddy and MagnetMan, now
-  fight in BN6's battle too, moved from BN5's own and checked against it
-  frame by frame. MagnetMan brings BN5's magnet panels, which pull MegaMan
-  along as they did in BN5. Like NapalmMan they don't guard a run yet.
-- **NapalmMan, the first of Team ProtoMan.** With BN5 Team Colonel's
-  ROM beside BN6's, Team ProtoMan's NapalmMan now fights in BN6's
-  battle, moved from BN5's own and checked against it frame by frame
-  like Team Colonel's six before him. He doesn't guard a run yet; he
-  joins the guardians once more of his team are in. Their records and
-  Souls already have their room in the saves, and older saves read as
-  before.
+  at the version the act's band takes. A run saved on a layer starts
+  that layer again.
+- **Team ProtoMan in BN6's engine.** With BN5 Team Colonel's ROM beside
+  BN6's, five of Team ProtoMan (NapalmMan, GyroMan, SearchMan, Meddy and
+  MagnetMan, with BN5's magnet panels that pull MegaMan along) now fight
+  in BN6's battle, moved from BN5's own and checked against it frame by
+  frame. No run meets them yet: they join the guardians, with their
+  Souls, in a later version. Their records and Souls already have their
+  room in the saves, and older saves read as before.
 - **JunkMan joins the tournament.** BN4's JunkMan, moved into BN6's
   battle engine and checked against BN4's own battle frame by frame, now
   enters the tournament's first two rounds on his own plate of BN4's
