@@ -51,31 +51,43 @@ static void set_report(FILE *out, const GroupFam *pool, int n, const char *name,
 static void measure(const Encounter *e, int *hp, int *hit, int *pressure, int *cost) {
 	double sum = 0, spent = 0, scale[MAX_FOES] = { 0 };
 	int net[MAX_FOES] = { 0 };
+	const GroupTag *tag[MAX_FOES] = { NULL };
+	bool one = e->nfoes > 1;
 	*hp = *hit = 0;
 	*pressure = *cost = 0;
 	for (int i = 0; i < e->nfoes; ++i) {
 		int h, d, h1, d1;
 		net[i] = visitor_net(e->foes[i].family);
-		const GroupTag *tag = group_tag(net[i], e->foes[i].family);
-		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(visitor_id(net[i], e->foes[i].family, 0), &h1, &d1) || !tag || tag->pressure < 0 ||
-			tag->cost < 0) {
+		tag[i] = group_tag(net[i], e->foes[i].family);
+		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(visitor_id(net[i], e->foes[i].family, 0), &h1, &d1) || !tag[i] || tag[i]->pressure < 0 ||
+			tag[i]->cost < 0) {
 			*pressure = *cost = -1;
 			return;
 		}
 		*hp += h;
 		if (d > *hit) *hit = d;
+		one &= e->foes[i].family == e->foes[0].family;
 		scale[i] = (double)d / (double)(d1 > 1 ? d1 : 1);
-		sum += (double)(tag->pressure * d) / (double)(d1 > 1 ? d1 : 1);
-		spent += (double)(tag->cost * d) / (double)(d1 > 1 ? d1 : 1);
+		sum += (double)(tag[i]->pressure * d) / (double)(d1 > 1 ? d1 : 1);
+		spent += (double)(tag[i]->cost * d) / (double)(d1 > 1 ? d1 : 1);
 	}
-	*cost = (int)lrint(spent);
-	/* (two the pairs' pass found pressing harder together: their excess, by the larger scale) */
+	/* (several of one family: their measured numbers, where they were fought) */
+	const GroupMulti *m = one && e->nfoes <= 3 ? &tag[0]->multi[e->nfoes - 2] : NULL;
+	if (m && m->pressure1 && m->cost1) {
+		*pressure = (int)lrint((double)(m->pressure1 - 1) * scale[0]);
+		*cost = (int)lrint((double)(m->cost1 - 1) * scale[0]);
+		return;
+	}
+	/* (two the pairs' passes found pressing or costing more together: their excess, by the larger scale) */
 	for (int i = 0; i < e->nfoes; ++i)
 		for (int k = i + 1; k < e->nfoes; ++k) {
-			int extra = e->foes[i].family == e->foes[k].family ? 0 : group_pair_extra(net[i], e->foes[i].family, net[k], e->foes[k].family);
-			if (extra) sum += extra * (scale[i] > scale[k] ? scale[i] : scale[k]);
+			if (e->foes[i].family == e->foes[k].family) continue;
+			double larger = scale[i] > scale[k] ? scale[i] : scale[k];
+			sum += group_pair_extra(net[i], e->foes[i].family, net[k], e->foes[k].family) * larger;
+			spent += group_pair_cost(net[i], e->foes[i].family, net[k], e->foes[k].family) * larger;
 		}
 	*pressure = (int)lrint(sum);
+	*cost = (int)lrint(spent);
 }
 
 /* whether its field is not fair to a group, two of its foes share a

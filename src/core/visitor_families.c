@@ -256,11 +256,6 @@ int visitor_kin(int net, const VisitorKin **out) {
 	return ok ? K.n[net] : 0;
 }
 
-int visitor_role_in(int net, int family) {
-	ready();
-	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX ? K.role[net][family] : VISITOR_FREE;
-}
-
 int visitor_net(int family) {
 	ready();
 	return family > 0 && family < VISITOR_KIN_MAX ? K.net[family] : VISIT_BN6;

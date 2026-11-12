@@ -43,19 +43,23 @@ void nets_arrival_words(void) {
 }
 
 void nets_battle_note(const Encounter *e) {
-	if (!e->visitor || profile.visitor_taught || D.visitor_due) return;
-	/* (BN4's as BN5's, the older Net's: one of either in our battle
-	 * spends the once, and one of BN4's in BN5's says nothing,
-	 * docs/multirom/bn4.md, the owner's call 5) */
-	int family = e->foes[e->visitor - 1].family;
-	D.visitor_due = visitor_telegraph(e->xrecord ? VISIT_BN5 : VISIT_BN6, visitor_net(family));
-	D.visitor_family = family;
+	if (!e->group || profile.visitor_taught || D.visitor_due) return;
+	/* (a group's battle, docs/game/progression/encounter-groups.md: its first family of another net than the layer's
+	 * own, an older net's area's BN5's. BN4's as BN5's, the older Net's: one of either in our battle spends the once,
+	 * and one of BN4's in BN5's says nothing, docs/multirom/bn4.md, the owner's call 5) */
+	int home = D.territory_native ? VISIT_BN5 : VISIT_BN6;
+	for (int i = 0; i < e->nfoes && !D.visitor_due; ++i) {
+		int family = e->foes[i].family;
+		if (e->foes[i].kind != FOE_VIRUS || visitor_net(family) == home) continue;
+		D.visitor_due = visitor_telegraph(home, visitor_net(family));
+		D.visitor_family = family;
+	}
 }
 
 /* (MegaMan free on the map, nothing said or shown: a word can start) */
 static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
 
-/* MegaMan on the first visitor a profile met: one of the older Net's
+/* MegaMan on the first family of another net a profile met: one of the older Net's
  * (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's
  * (docs/multirom/one-net.md, One net: the telegraph), named by its family */
 static void visitor_words(void) {

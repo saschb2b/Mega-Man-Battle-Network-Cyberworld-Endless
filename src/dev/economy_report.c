@@ -145,7 +145,9 @@ static uint16_t reward_pick(const Encounter *e, int bust, bool guardian, int dep
 		if (f->kind != FOE_ROCK) ids[n++] = f->id >= 0 ? f->id : enemy_id(f->kind == FOE_NAVI ? 1 : 0, f->family, f->version);
 	}
 	if (!n) return 0xFFFF;
-	int id = ids[rng_range(0, n - 1)];
+	/* (an act's beat pays from its signature's row: loot_paying_id, as encounter.c hands the pick; the draw made all the same) */
+	int id = ids[rng_range(0, n - 1)], paying = guardian ? 0 : loot_paying_id(e);
+	if (paying) id = paying;
 	int pair = R.data[BUSTING_TABLE + (uint32_t)bust * 16u + (uint32_t)rng_range(0, 15)] / 4;
 	int k = pair * 2 + rng_range(0, 1) + (rng_range(0, 99) < LOW_HP_SHARE ? 10 : 0);
 	uint16_t v = enemy_drop(id, k);
@@ -788,6 +790,8 @@ int economy_report_run(const char *spec) {
 	char path[256] = "economy.txt";
 	runs = 300;
 	sscanf(spec, "%255[^:]:%d", path, &runs);
+	/* (":noarc" after the runs: the acts' arcs off, every battle the area's own, to hold the arcs' drops against) */
+	loot_arc = !strstr(spec, ":noarc");
 	if (runs < 1) runs = 1;
 	if (runs > RUNS_MAX) runs = RUNS_MAX;
 	if (!emu_init(R.data, ROM_SIZE)) return 1;

@@ -270,8 +270,8 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Act | Battles | Sampled | Pressure: least / median / most | Median, of the act's max HP | Median measured / predicted | Autopilot won in 50 s | Autopilot HP lost, median | ... most | Lost the act's max HP | Past the own battles' most |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | own | 5 | 60 / 80 / 120 | 80% | 0.50 | 4 of 5 | 0 | 90 | 0 | - |
-| 2 | own | 5 | 50 / 120 / 180 | 60% | 0.50 | 1 of 5 | 90 | 160 | 0 | - |
+| 1 | own | 5 | 60 / 80 / 120 | 80% | 0.80 | 4 of 5 | 0 | 90 | 0 | - |
+| 2 | own | 5 | 50 / 120 / 180 | 60% | 1.00 | 1 of 5 | 90 | 160 | 0 | - |
 | 2 | bulwark | 2 | 100 / 105 / 110 | 52% | 0.75 | 0 of 2 | 105 | 140 | 0 | 0 |
 | 2 | clashing answers | 2 | 140 / 225 / 310 | 112% | 0.92 | 0 of 2 | 115 | 130 | 0 | 1 |
 | 2 | glass cannons | 2 | 50 / 150 / 250 | 75% | 0.63 | 1 of 2 | 240 | 240 | 2 | 1 |
@@ -280,9 +280,9 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 2 | one element | 2 | 160 / 205 / 250 | 102% | 0.64 | 1 of 2 | 175 | 210 | 1 | 1 |
 | 2 | panel war | 2 | 180 / 185 / 190 | 92% | 0.97 | 1 of 2 | 45 | 60 | 0 | 1 |
 | 2 | pincer | 2 | 170 / 180 / 190 | 90% | 0.47 | 0 of 2 | 140 | 140 | 0 | 1 |
-| 2 | swarm | 2 | 120 / 180 / 240 | 90% | 0.56 | 0 of 2 | 220 | 360 | 1 | 1 |
+| 2 | swarm | 2 | 120 / 180 / 240 | 90% | 1.00 | 0 of 2 | 220 | 360 | 1 | 1 |
 | 2 | wall and artillery | 2 | 120 / 150 / 180 | 75% | 0.66 | 0 of 2 | 258 | 455 | 1 | 0 |
-| 3 | own | 5 | 80 / 120 / 230 | 40% | 0.36 | 2 of 5 | 90 | 140 | 0 | - |
+| 3 | own | 5 | 80 / 120 / 230 | 40% | 0.72 | 2 of 5 | 90 | 140 | 0 | - |
 | 3 | bulwark | 2 | 400 / 400 / 400 | 133% | 0.83 | 0 of 2 | 450 | 450 | 2 | 2 |
 | 3 | clashing answers | 2 | 60 / 240 / 420 | 80% | 0.67 | 0 of 2 | 450 | 540 | 2 | 1 |
 | 3 | glass cannons | 2 | 0 / 175 / 350 | 58% | 0.24 | 0 of 2 | 120 | 150 | 0 | 1 |
@@ -292,9 +292,9 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 3 | panel war | 2 | 290 / 365 / 440 | 122% | 0.94 | 0 of 2 | 255 | 330 | 1 | 2 |
 | 3 | pincer | 2 | 150 / 210 / 270 | 70% | 0.42 | 1 of 2 | 175 | 200 | 0 | 1 |
 | 3 | summoner and guard | 2 | 480 / 550 / 620 | 183% | 0.89 | 0 of 2 | 645 | 650 | 2 | 2 |
-| 3 | swarm | 2 | 80 / 100 / 120 | 33% | 0.43 | 1 of 2 | 65 | 80 | 0 | 0 |
+| 3 | swarm | 2 | 80 / 100 / 120 | 33% | 1.00 | 1 of 2 | 65 | 80 | 0 | 0 |
 | 3 | wall and artillery | 2 | 380 / 395 / 410 | 132% | 0.54 | 0 of 2 | 475 | 540 | 2 | 2 |
-| 4 | own | 5 | 140 / 230 / 720 | 58% | 0.61 | 0 of 5 | 250 | 340 | 0 | - |
+| 4 | own | 5 | 140 / 230 / 720 | 58% | 0.78 | 0 of 5 | 250 | 340 | 0 | - |
 | 4 | bulwark | 2 | 540 / 550 / 560 | 138% | 1.17 | 0 of 2 | 655 | 970 | 1 | 0 |
 | 4 | clashing answers | 2 | 360 / 480 / 600 | 120% | 1.02 | 0 of 2 | 630 | 830 | 2 | 0 |
 | 4 | glass cannons | 2 | 0 / 135 / 270 | 34% | 0.17 | 1 of 2 | 65 | 110 | 0 | 0 |
@@ -304,9 +304,9 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 4 | panel war | 2 | 240 / 450 / 660 | 112% | 1.55 | 0 of 2 | 220 | 280 | 0 | 0 |
 | 4 | pincer | 2 | 480 / 515 / 550 | 129% | 0.56 | 0 of 2 | 540 | 680 | 2 | 0 |
 | 4 | summoner and guard | 2 | 540 / 650 / 760 | 162% | 0.97 | 0 of 2 | 655 | 880 | 2 | 1 |
-| 4 | swarm | 2 | 155 / 252 / 350 | 63% | 0.41 | 0 of 2 | 238 | 240 | 0 | 0 |
+| 4 | swarm | 2 | 155 / 252 / 350 | 63% | 1.08 | 0 of 2 | 238 | 240 | 0 | 0 |
 | 4 | wall and artillery | 2 | 630 / 765 / 900 | 191% | 0.61 | 0 of 2 | 400 | 510 | 1 | 1 |
-| 5 | own | 5 | 210 / 840 / 1010 | 168% | 0.55 | 1 of 5 | 550 | 1080 | 3 | - |
+| 5 | own | 5 | 210 / 840 / 1010 | 168% | 0.59 | 1 of 5 | 550 | 1080 | 3 | - |
 | 5 | bulwark | 2 | 720 / 740 / 760 | 148% | 0.75 | 0 of 2 | 1100 | 1230 | 2 | 0 |
 | 5 | clashing answers | 2 | 1120 / 1260 / 1400 | 252% | 1.08 | 0 of 2 | 1875 | 2000 | 2 | 2 |
 | 5 | glass cannons | 2 | 600 / 600 / 600 | 120% | 0.65 | 0 of 2 | 740 | 1040 | 1 | 0 |
@@ -316,7 +316,7 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 5 | panel war | 2 | 430 / 535 / 640 | 107% | 0.59 | 0 of 2 | 1100 | 1130 | 2 | 0 |
 | 5 | pincer | 2 | 360 / 510 / 660 | 102% | 0.69 | 0 of 2 | 490 | 600 | 1 | 0 |
 | 5 | summoner and guard | 2 | 730 / 865 / 1000 | 173% | 0.86 | 0 of 2 | 1090 | 1250 | 2 | 0 |
-| 5 | swarm | 2 | 0 / 200 / 400 | 40% | 0.33 | 0 of 2 | 115 | 230 | 0 | 0 |
+| 5 | swarm | 2 | 0 / 200 / 400 | 40% | 1.00 | 0 of 2 | 115 | 230 | 0 | 0 |
 | 5 | wall and artillery | 2 | 800 / 1275 / 1750 | 255% | 1.27 | 0 of 2 | 1220 | 1300 | 2 | 1 |
 | 6 | own | 5 | 0 / 320 / 780 | 53% | 0.62 | 0 of 5 | 500 | 680 | 1 | - |
 
@@ -385,38 +385,38 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 
 | Act | Own battles of the act's areas | Predicted pressure: least | Median | Three-quarter mark (the cap) | Most | MegaMan's max HP there |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | 74 | 40 | 160 | 220 | 390 | 100 |
-| 2 | 220 | 60 | 240 | 360 | 960 | 200 |
-| 3 | 243 | 80 | 420 | 620 | 1920 | 300 |
-| 4 | 84 | 120 | 480 | 720 | 1420 | 400 |
+| 1 | 74 | 60 | 130 | 180 | 390 | 100 |
+| 2 | 220 | 60 | 190 | 320 | 760 | 200 |
+| 3 | 243 | 90 | 360 | 530 | 1520 | 300 |
+| 4 | 84 | 140 | 380 | 620 | 1420 | 400 |
 | 5 | 37 | 120 | 700 | 880 | 1720 | 500 |
 | 6 | 47 | 0 | 712 | 1040 | 3680 | 600 |
-| Nest | 18 | 535 | 840 | 945 | 1560 | 700 |
+| Nest | 18 | 240 | 773 | 935 | 1560 | 700 |
 
 The same battles by what they are predicted to cost the test autopilot (each family's HP lost deleting its V1 alone, added up): the second cap, on what the pressure cap does not see, how long a fight lasts and what lands on a MegaMan who lines up to shoot.
 
 | Act | Predicted cost: least | Median | Three-quarter mark (the cap) | Most |
 | --- | --- | --- | --- | --- |
-| 1 | 0 | 0 | 0 | 100 |
-| 2 | 0 | 20 | 60 | 300 |
-| 3 | 0 | 70 | 145 | 1100 |
-| 4 | 0 | 70 | 140 | 1100 |
+| 1 | 0 | 0 | 20 | 100 |
+| 2 | 0 | 20 | 60 | 410 |
+| 3 | 0 | 70 | 175 | 820 |
+| 4 | 0 | 80 | 140 | 810 |
 | 5 | 0 | 80 | 180 | 1650 |
-| 6 | 0 | 280 | 678 | 2313 |
-| Nest | 0 | 173 | 447 | 1326 |
+| 6 | 0 | 360 | 678 | 2313 |
+| Nest | 0 | 187 | 447 | 1343 |
 
 **BN6, under both caps**
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | **none** | 2 | 13 | 7 | 7 | 14 | **none** |
+| wall and artillery | **none** | 2 | 11 | 7 | 7 | 14 | **none** |
 | panel war | **none** | **none** | **none** | **none** | **none** | 6 | **none** |
 | summoner and guard | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
-| clashing answers | **none** | 5 | 23 | 10 | 23 | 22 | 2 |
-| one element | **none** | 1 | 10 | 4 | 8 | 11 | 1 |
-| pincer | **none** | 7 | 137 | 145 | 325 | 661 | 396 |
-| swarm | 1 | 5 | 12 | 13 | 16 | 13 | 12 |
-| held ground | **none** | 5 | 11 | 7 | 15 | 12 | 1 |
+| clashing answers | 1 | 5 | 22 | 9 | 23 | 22 | 2 |
+| one element | **none** | 1 | 9 | 4 | 8 | 11 | 1 |
+| pincer | **none** | 4 | 122 | 141 | 325 | 661 | 395 |
+| swarm | 1 | 5 | 11 | 11 | 13 | 16 | 15 |
+| held ground | **none** | 4 | 11 | 7 | 15 | 12 | 1 |
 | glass cannons | **none** | 1 | 6 | **none** | 6 | **none** | **none** |
 | bulwark | **none** | 2 | 14 | 6 | 4 | **none** | **none** |
 | nets meet | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
@@ -425,32 +425,32 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 2 | 17 | 137 | 64 | 92 | 179 | 61 |
-| panel war | 6 | 15 | 46 | 35 | 37 | 100 | 42 |
-| summoner and guard | **none** | **none** | 10 | 10 | 13 | 17 | 10 |
-| clashing answers | 2 | 26 | 122 | 69 | 95 | 148 | 68 |
-| one element | **none** | 10 | 55 | 28 | 41 | 68 | 32 |
-| pincer | **none** | 133 | 3115 | 3101 | 5448 | 11606 | 7708 |
-| swarm | 1 | 11 | 23 | 25 | 26 | 25 | 22 |
-| held ground | 1 | 16 | 47 | 20 | 37 | 38 | 12 |
-| glass cannons | **none** | 2 | 13 | 7 | 15 | 11 | **none** |
-| bulwark | **none** | 5 | 32 | 15 | 8 | 2 | **none** |
-| nets meet | 6 | 59 | 188 | 117 | 128 | 203 | 88 |
+| wall and artillery | 1 | 14 | 153 | 56 | 92 | 179 | 61 |
+| panel war | 8 | 15 | 49 | 35 | 37 | 100 | 41 |
+| summoner and guard | **none** | **none** | 11 | 10 | 13 | 17 | 10 |
+| clashing answers | 6 | 25 | 136 | 64 | 95 | 148 | 67 |
+| one element | 1 | 10 | 58 | 25 | 41 | 68 | 32 |
+| pincer | **none** | 96 | 3466 | 3038 | 5448 | 11606 | 7655 |
+| swarm | 1 | 9 | 24 | 21 | 23 | 42 | 32 |
+| held ground | **none** | 11 | 47 | 16 | 37 | 38 | 12 |
+| glass cannons | **none** | 2 | 11 | 5 | 15 | 11 | **none** |
+| bulwark | **none** | 5 | 35 | 14 | 8 | 2 | **none** |
+| nets meet | 15 | 53 | 196 | 108 | 128 | 203 | 86 |
 
 ### Every battle sampled
 
 | Act | Battles | Families (version index from 1) | HP | Hit | Pressure | Predicted | Ratio | Autopilot (per seed) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | own | 6:02 v1 + 6:02 v1 | 140 | 20 | 100 | 40 | 2.50 | won 15s -0 |
-| 1 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 240 | 0.50 | open 49s -90 |
+| 1 | own | 6:02 v1 + 6:02 v1 | 140 | 20 | 100 | 100 | 1.00 | won 15s -0 |
+| 1 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 120 | 1.00 | open 49s -90 |
 | 1 | own | 6:23 v1 + 6:23 v1 + 6:01 v1 | 160 | 10 | 70 | 230 | 0.30 | won 20s -0 |
 | 1 | own | 6:23 v1 + 6:11 v1 | 140 | 10 | 60 | 140 | 0.43 | won 14s -0 |
-| 1 | own | 6:02 v1 + 6:02 v1 | 140 | 20 | 80 | 40 | 2.00 | won 14s -0 |
-| 2 | own | 6:04 v1 + 6:04 v1 | 180 | 30 | 180 | 360 | 0.50 | won 39s -0 |
-| 2 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 240 | 0.50 | open 49s -20 |
+| 1 | own | 6:02 v1 + 6:02 v1 | 140 | 20 | 80 | 100 | 0.80 | won 14s -0 |
+| 2 | own | 6:04 v1 + 6:04 v1 | 180 | 30 | 180 | 210 | 0.86 | won 39s -0 |
+| 2 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 120 | 1.00 | open 49s -20 |
 | 2 | own | 6:22 v1 + 6:20 v1 | 270 | 20 | 180 | 180 | 1.00 | open 50s -125 |
 | 2 | own | 6:01 v1 + 6:01 v1 + 6:22 v1 | 210 | 10 | 50 | 140 | 0.36 | open 50s -160 |
-| 2 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 240 | 0.50 | open 49s -90 |
+| 2 | own | 6:06 v1 + 6:06 v1 | 160 | 10 | 120 | 120 | 1.00 | open 49s -90 |
 | 2 | bulwark | 5:56 v1 + 6:14 v1 | 280 | 80 | 100 | 200 | 0.50 | open 49s -140 |
 | 2 | bulwark | 4:64 v2 + 6:14 v1 | 200 | 80 | 110 | 110 | 1.00 | open 50s -70 |
 | 2 | clashing answers | 6:20 v1 + 5:37 v2 | 280 | 50 | 310 | 555 | 0.56 | open 49s -100 |
@@ -467,15 +467,15 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 | 2 | panel war | 5:53 v2 + 6:17 v1 | 280 | 80 | 180 | 150 | 1.20 | open 50s -30 |
 | 2 | pincer | 4:66 v1 + 5:47 v1 + 5:43 v2 | 280 | 60 | 190 | 450 | 0.42 | open 49s -140 |
 | 2 | pincer | 5:39 v1 + 5:47 v1 + 6:04 v1 | 280 | 30 | 170 | 330 | 0.52 | open 49s -140 |
-| 2 | swarm | 4:73 v1 + 4:73 v1 + 4:73 v1 | 270 | 20 | 240 | 360 | 0.67 | open 49s -360 |
-| 2 | swarm | 4:66 v1 + 4:66 v1 + 4:66 v1 | 180 | 20 | 120 | 270 | 0.44 | open 50s -80 |
+| 2 | swarm | 4:73 v1 + 4:73 v1 + 4:73 v1 | 270 | 20 | 240 | 240 | 1.00 | open 49s -360 |
+| 2 | swarm | 4:66 v1 + 4:66 v1 + 4:66 v1 | 180 | 20 | 120 | 120 | 1.00 | open 50s -80 |
 | 2 | wall and artillery | 5:53 v2 + 6:23 v1 | 240 | 60 | 120 | 140 | 0.86 | open 50s -60 |
 | 2 | wall and artillery | 5:39 v2 + 6:07 v1 | 270 | 60 | 180 | 390 | 0.46 | open 49s -455 |
 | 3 | own | 6:06 v2 + 6:02 v2 + 6:02 v2 | 350 | 40 | 230 | 320 | 0.72 | open 49s -140 |
-| 3 | own | 6:11 v2 + 6:11 v2 | 240 | 20 | 80 | 240 | 0.33 | won 49s -60 |
+| 3 | own | 6:11 v2 + 6:11 v2 | 240 | 20 | 80 | 120 | 0.67 | won 49s -60 |
 | 3 | own | 6:17 v1 + 6:17 v1 + 6:24 v1 | 340 | 80 | 100 | 280 | 0.36 | open 50s -120 |
 | 3 | own | 6:01 v2 + 6:01 v2 + 6:22 v2 | 330 | 20 | 210 | 280 | 0.75 | open 50s -90 |
-| 3 | own | 6:01 v2 + 6:01 v2 + 6:01 v2 | 240 | 20 | 120 | 420 | 0.29 | won 42s -50 |
+| 3 | own | 6:01 v2 + 6:01 v2 + 6:01 v2 | 240 | 20 | 120 | 140 | 0.86 | won 42s -50 |
 | 3 | bulwark | 5:50 v3 + 6:17 v2 | 350 | 120 | 400 | 405 | 0.99 | open 49s -450 |
 | 3 | bulwark | 5:50 v3 + 6:08 v2 | 330 | 100 | 400 | 590 | 0.68 | open 49s -450 |
 | 3 | clashing answers | 6:11 v1 + 5:53 v4 | 330 | 120 | 60 | 180 | 0.33 | open 48s -360 |
@@ -494,13 +494,13 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 | 3 | pincer | 5:56 v1 + 6:23 v1 + 6:17 v1 | 360 | 80 | 150 | 320 | 0.47 | open 49s -200 |
 | 3 | summoner and guard | 5:52 v3 + 4:72 v3 | 350 | 100 | 620 | 640 | 0.97 | open 49s -650 |
 | 3 | summoner and guard | 5:52 v2 + 6:25 v1 | 340 | 50 | 480 | 590 | 0.81 | open 49s -640 |
-| 3 | swarm | 5:54 v1 + 5:54 v1 + 5:54 v1 | 360 | 30 | 120 | 360 | 0.33 | open 50s -80 |
-| 3 | swarm | 6:14 v1 + 6:14 v1 + 6:14 v1 | 240 | 80 | 80 | 150 | 0.53 | won 36s -50 |
+| 3 | swarm | 5:54 v1 + 5:54 v1 + 5:54 v1 | 360 | 30 | 120 | 120 | 1.00 | open 50s -80 |
+| 3 | swarm | 6:14 v1 + 6:14 v1 + 6:14 v1 | 240 | 80 | 80 | 80 | 1.00 | won 36s -50 |
 | 3 | wall and artillery | 6:27 v2 + 5:34 v4 | 320 | 110 | 410 | 720 | 0.57 | open 49s -410 |
 | 3 | wall and artillery | 6:27 v2 + 5:47 v3 | 270 | 80 | 380 | 740 | 0.51 | open 50s -540 |
 | 4 | own | 6:18 v2 + 6:07 v2 | 320 | 100 | 720 | 600 | 1.20 | open 48s -270 |
 | 4 | own | 6:07 v2 + 6:01 v2 + 6:01 v2 | 320 | 100 | 430 | 700 | 0.61 | open 49s -340 |
-| 4 | own | 6:24 v1 + 6:24 v1 + 6:24 v1 | 420 | 20 | 140 | 300 | 0.47 | open 49s -150 |
+| 4 | own | 6:24 v1 + 6:24 v1 + 6:24 v1 | 420 | 20 | 140 | 140 | 1.00 | open 49s -150 |
 | 4 | own | 6:11 v2 + 6:14 v2 + 6:14 v2 | 360 | 140 | 230 | 295 | 0.78 | open 50s -250 |
 | 4 | own | 6:04 v1 + 6:07 v1 + 6:07 v1 | 350 | 50 | 180 | 600 | 0.30 | open 50s -125 |
 | 4 | bulwark | 5:50 v4 + 6:14 v2 | 370 | 140 | 540 | 448 | 1.21 | open 50s -340 |
@@ -521,14 +521,14 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 | 4 | pincer | 4:69 v1 + 5:37 v1 + 5:46 v3 | 410 | 100 | 550 | 1060 | 0.52 | open 49s -400 |
 | 4 | summoner and guard | 5:52 v2 + 6:25 v2 | 400 | 100 | 540 | 1030 | 0.52 | open 50s -880 |
 | 4 | summoner and guard | 5:52 v4 + 6:18 v2 | 380 | 120 | 760 | 540 | 1.41 | open 49s -430 |
-| 4 | swarm | 4:72 v2 + 4:72 v2 + 4:72 v2 | 360 | 50 | 350 | 600 | 0.58 | open 49s -240 |
-| 4 | swarm | 6:07 v1 + 6:07 v1 + 6:07 v1 | 390 | 50 | 155 | 630 | 0.25 | open 49s -235 |
+| 4 | swarm | 4:72 v2 + 4:72 v2 + 4:72 v2 | 360 | 50 | 350 | 300 | 1.17 | open 49s -240 |
+| 4 | swarm | 6:07 v1 + 6:07 v1 + 6:07 v1 | 390 | 50 | 155 | 155 | 1.00 | open 49s -235 |
 | 4 | wall and artillery | 4:69 v4 + 5:33 v4 | 370 | 120 | 630 | 1200 | 0.53 | open 50s -510 |
 | 4 | wall and artillery | 5:46 v3 + 4:73 v4 | 410 | 100 | 900 | 1300 | 0.69 | open 50s -290 |
 | 5 | own | 6:27 v3 + 6:08 v3 + 6:10 v3 | 470 | 150 | 840 | 1680 | 0.50 | open 49s -890 |
 | 5 | own | 6:06 v3 + 6:18 v3 | 400 | 120 | 950 | 720 | 1.32 | open 50s -1080 |
 | 5 | own | 6:26 v2 + 6:23 v2 + 6:23 v2 | 450 | 80 | 310 | 560 | 0.55 | open 50s -340 |
-| 5 | own | 6:23 v2 + 6:23 v2 + 6:23 v2 | 420 | 20 | 210 | 480 | 0.44 | won 42s -50 |
+| 5 | own | 6:23 v2 + 6:23 v2 + 6:23 v2 | 420 | 20 | 210 | 160 | 1.31 | won 42s -50 |
 | 5 | own | 6:01 v3 + 6:18 v3 + 6:27 v3 | 480 | 120 | 1010 | 1720 | 0.59 | open 50s -550 |
 | 5 | bulwark | 5:50 v5 + 6:08 v3 | 480 | 150 | 760 | 930 | 0.82 | open 49s -1230 |
 | 5 | bulwark | 5:50 v5 + 4:72 v4 | 500 | 150 | 720 | 1050 | 0.69 | open 49s -970 |
@@ -548,7 +548,7 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 | 5 | pincer | 5:53 v2 + 5:40 v3 + 6:11 v2 | 500 | 80 | 360 | 420 | 0.86 | open 48s -380 |
 | 5 | summoner and guard | 5:52 v4 + 6:25 v3 | 490 | 150 | 730 | 1680 | 0.43 | open 50s -930 |
 | 5 | summoner and guard | 5:52 v6 + 6:18 v2 | 490 | 200 | 1000 | 780 | 1.28 | open 49s -1250 |
-| 5 | swarm | 5:44 v3 + 5:44 v3 + 5:44 v3 | 420 | 80 | 400 | 1200 | 0.33 | open 49s -230 |
+| 5 | swarm | 5:44 v3 + 5:44 v3 + 5:44 v3 | 420 | 80 | 400 | 400 | 1.00 | open 49s -230 |
 | 5 | swarm | 6:21 v2 + 6:21 v2 + 6:21 v2 | 480 | 40 | 0 | 0 | - | open 50s -0 |
 | 5 | wall and artillery | 5:53 v2 + 4:69 v6 | 480 | 200 | 1750 | 1460 | 1.20 | open 49s -1300 |
 | 5 | wall and artillery | 5:52 v6 + 6:22 v2 | 500 | 200 | 800 | 600 | 1.33 | open 49s -1140 |

@@ -139,10 +139,8 @@ static int act_area(FILE *out, int act, int loop, int b, uint32_t seed) {
 	return flagged + territories(out, act, loop, b);
 }
 
-/* ---- visitors (visitors.h; docs/multirom/one-net.md): each net's
- * families as their own records set them, then every act's random battles
- * from the second on, each given a visitor where one fits, against the
- * act's band ---- */
+/* ---- each net's families as their own records set them (visitor_families.h;
+ * docs/multirom/one-net.md) ---- */
 
 static void kin_report(FILE *out) {
 	static const char *const roles[] = { "either", "back", "front" };
@@ -151,7 +149,7 @@ static void kin_report(FILE *out) {
 		const VisitorKin *k;
 		int n = visitor_kin(net, &k);
 		if (net == VISIT_BN4 && !n) continue;
-		fprintf(out, "%s's families (role, stage, placements; * may visit, ! special panels alone):", nets[net]);
+		fprintf(out, "%s's families (role, stage, placements; * its net's own, ! special panels alone):", nets[net]);
 		for (int i = 0; i < n; ++i) {
 			char name[24] = "?";
 			int id = visitor_id(net, k[i].family, 0);
@@ -163,62 +161,11 @@ static void kin_report(FILE *out) {
 	}
 }
 
-/* One area's battles at `depth` (its own, or a territory's where `tiles`
- * names one), each with a visitor where one fits: how many took one, how
- * many fit no visitor, the pairs (replaced -> visitor), HP against the
- * band; returns those past it */
-static int visitor_rolls(FILE *out, int depth, int biome, int tiles, const char *label) {
-	loot_layer_nets(biome, tiles);
-	PacingBand b = pacing_band(depth, false, false);
-	int took = 0, over = 0, hps[ROLLS];
-	static int pairs[64][VISITOR_KIN_MAX];
-	memset(pairs, 0, sizeof pairs);
-	for (int r = 0; r < ROLLS; ++r) {
-		Encounter e = make_encounter(depth, biome, ENC_NORMAL);
-		loot_battle_fought(&e);
-		int hp = 0, dmg = 0, top;
-		Encounter v = e;
-		bool ok = visitor_apply(&v, depth);
-		battle_stats(&v, &hp, &dmg, &top);
-		hps[r] = hp;
-		if (!ok) continue;
-		++took;
-		int from = e.foes[v.visitor - 1].family, to = v.foes[v.visitor - 1].family;
-		if (from > 0 && from < 64 && to > 0 && to < VISITOR_KIN_MAX) ++pairs[from][to];
-		over += hp > b.hi || dmg > b.cap;
-	}
-	loot_layer_nets(-1, -1);
-	qsort(hps, ROLLS, sizeof *hps, cmp_int);
-	fprintf(out, "  depth %2d %-24s band %3d-%3d cap %3d | a visitor in %3d of %d, hp %3d / %3d / %3d%s\n    pairs:", depth, label, b.lo, b.hi, b.cap,
-		took, ROLLS, hps[0], hps[ROLLS / 2], hps[ROLLS - 1], over ? "  OVER" : "");
-	for (int f = 1; f < 64; ++f)
-		for (int t = 1; t < VISITOR_KIN_MAX; ++t)
-			if (pairs[f][t]) fprintf(out, " %d>%d:%d", f, t, pairs[f][t]);
-	fprintf(out, "\n");
-	return over;
-}
-
-static int visitors_report(FILE *out) {
-	int flagged = 0;
-	fprintf(out, "\nVisitors (where BN5's ROM is read): each net's families as their own records set them, then each act's battles\n"
-		"(%d rolls a layer) each with a visitor where one fits, as one battle in four from act 2 takes one: how many fit,\n"
-		"the battles' HP with it, the pairs (replaced family > visitor family, BN6's AI indexes), OVER past the band.\n", ROLLS);
+/* Each net's families as their own records set them: what the encounter
+ * groups' pool takes their places from (group_pool.h) */
+static void families_report(FILE *out) {
+	fprintf(out, "\nEach net's families as their own game's records set them (the encounter groups' pool reads their places here):\n");
 	kin_report(out);
-	for (int act = 1; act < 4; ++act) {
-		uint8_t pool[PACING_AREA_POOL];
-		int n = pacing_area_pool(act, pool), depth = act * 3 + 2;
-		fprintf(out, "act %d:\n", act + 1);
-		rng_seed(0x56495349u + (uint32_t)act);
-		for (int i = 0; i < n; ++i) {
-			flagged += visitor_rolls(out, depth, pool[i], pool[i], guardian_area_name(pool[i]));
-			for (int k = 0; k < XAREAS_MAX; ++k) {
-				const NetAreaDef *x = net_area_def(NET_AREAS + k);
-				if (x && !x->held && x->xrom > 0 && x->like == pool[i] && xterritory_native(NET_AREAS + k))
-					flagged += visitor_rolls(out, depth, pool[i], NET_AREAS + k, x->name);
-			}
-		}
-	}
-	return flagged;
 }
 
 /* A variant of `program` in colour `color` (program * 4 + v), 0 for none. */
@@ -601,7 +548,7 @@ int pacing_report_run(const char *path) {
 				flagged += act_area(out, acts[a].act, loop, acts[a].biomes[k], 0xC0FFEEu + (uint32_t)(a * 97 + k));
 
 	flagged += first_cycle_guardians(out) + older_guardians(out) + routes_report(out) + pacing_bracket_report(out);
-	if (XR[XROM_BN5_COLONEL_US].data) flagged += visitors_report(out);
+	families_report(out);
 	flagged += pacing_groups_report(out) + pacing_arcs_report(out);
 	super_report(out);
 	clock_report(out);
