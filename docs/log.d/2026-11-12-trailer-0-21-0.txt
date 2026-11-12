@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T20:30:00Z
+* **Update**: the trailer for 0.21.0, THREE GAMES. ONE RUN. (`tools/trailers/v0_21_0.py`, its music `v0_21_0_music.py` in the manner of BN6's title theme, song 0x01, grown from the owner's pick of three sketches, `sketch_mix_a.py`, `_b.py` and `_c.py` on `sketch_mix_lib.py`), replaces 0.20.0's in `docs/clips/trailer.*`, on the home page and its Japanese one, in the README and as the 3DS banner's sound (`3ds/banner-0.21.0.wav`); the trailer skill's lessons take its devices.
