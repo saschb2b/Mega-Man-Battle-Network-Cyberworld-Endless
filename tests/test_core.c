@@ -4387,6 +4387,15 @@ static void test_free_space(void) {
 		CHECK(u->kind == XCHIP_NAVI && !u->wait && copied, "chips: %s's step-in sound is a Navi chip's unit's, a song it copies", u->code.name);
 	}
 	CHECK(step_ins >= 1, "chips: a BN4 Navi chip's unit carries its object's step-in sound (GutPnch's, %d)", step_ins);
+	/* (a unit whose spawner takes its side in r3, XChipUnit.side: a Navi chip's alone, its home's wrapper's place its own) */
+	int sides = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (!u->side) continue;
+		sides += u->kind == XCHIP_NAVI && !u->wait && !u->step_in;
+		CHECK(u->kind == XCHIP_NAVI && !u->wait && !u->step_in, "chips: %s's side's wrapper is a Navi chip's unit's, its place no other wrapper's", u->code.name);
+	}
+	CHECK(sides >= 1, "chips: a BN4 Navi chip's unit's spawner is handed its side (RollAro's, %d)", sides);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);

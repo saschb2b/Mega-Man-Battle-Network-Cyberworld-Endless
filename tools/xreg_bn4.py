@@ -95,6 +95,7 @@ MOVED.update({
 NAVI = {
     224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
     154: 0xB6, 155: 0xB6, 156: 0xB6,   # GutPnch1-3: BN4's support 0x36, its Navi the first kind's 0x42, a GutsMan who punches (bn4_chip_gutpnch1-3)
+    151: 0xB5, 152: 0xB5, 153: 0xB5,   # RollAro1-3: BN4's support 0x35, its Navi the first kind's 0x41, a Roll who shoots an arrow (bn4_chip_rollaro1-3)
 }
 NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
 MOVED.update(NAVI)
