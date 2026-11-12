@@ -19,7 +19,7 @@
   "name": "the SP powers' base BN4's own",
   "spec": "bn4_chip_gutsman_sp",
   "poke": [
-   "0890D328:000003E9:4"
+   "0890D9F8:000003E9:4"
   ],
   "what": "the SP routine's copy's pool word (BN4 0x080197C4) BN4's base 1001 where the install made it 1205: the row 205, past the table's twenty, read from the bytes after it"
  },
@@ -35,7 +35,7 @@
   "name": "the SP's first limit past every time",
   "spec": "bn4_chip_gutsman_sp",
   "poke": [
-   "0890D054:7FFFFFFF:4"
+   "0890D724:7FFFFFFF:4"
   ],
   "what": "the copy of the SP's ten limits (BN4 0x080194F0) its first the largest time: none passes it, the first column, 200, the Mettaur left 50 HP"
  },
@@ -43,7 +43,7 @@
   "name": "GutsMan's last column another",
   "spec": "bn4_chip_gutsman_sp",
   "poke": [
-   "0890CDFA:003C"
+   "0890D4CA:003C"
   ],
   "what": "the copy of BN4_DS_POWERS (BN4 0x08018B48) GutsMan's row's last column 60 where BN4's holds 100: the Mettaur left 190 HP"
  }
