@@ -1,0 +1,50 @@
+[
+ {
+  "name": "GutsMnSP's power computed from Roll's row",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "08C05C3A:04B5"
+  ],
+  "what": "the registry's record of BN4's GutsMnSP (536 at CHIPS_RECORDS + 0x1A) with BN6's computed power 1205, RollSP's, where its own is 1206: the routine reads Roll's row, 30 where GutsMan's is 100, the Mettaur left 220 HP"
+ },
+ {
+  "name": "GutsMnSP's entry of the grown powers the stub",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "08E02738:08E00C01:4"
+  ],
+  "what": "BN6's grown computed powers' entry 0xCE (XC_POWERS + 4 x 0xCE, BN4's 1002) the stub again, as before BN4's power unit's install: power 0, the Mettaur untouched"
+ },
+ {
+  "name": "the SP powers' base BN4's own",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "0890D9F8:000003E9:4"
+  ],
+  "what": "the SP routine's copy's pool word (BN4 0x080197C4) BN4's base 1001 where the install made it 1205: the row 205, past the table's twenty, read from the bytes after it"
+ },
+ {
+  "name": "GutsMan's deletion time 0",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "08E00C32:0000"
+  ],
+  "what": "XC_SP_TIMES' word of GutsMan's row on MegaMan's side (+2) 0 frames where none is 0xFFFF: under every limit, the first column, 200, the Mettaur left 50 HP"
+ },
+ {
+  "name": "the SP's first limit past every time",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "0890D724:7FFFFFFF:4"
+  ],
+  "what": "the copy of the SP's ten limits (BN4 0x080194F0) its first the largest time: none passes it, the first column, 200, the Mettaur left 50 HP"
+ },
+ {
+  "name": "GutsMan's last column another",
+  "spec": "bn4_chip_gutsman_sp",
+  "poke": [
+   "0890D4CA:003C"
+  ],
+  "what": "the copy of BN4_DS_POWERS (BN4 0x08018B48) GutsMan's row's last column 60 where BN4's holds 100: the Mettaur left 190 HP"
+ }
+]

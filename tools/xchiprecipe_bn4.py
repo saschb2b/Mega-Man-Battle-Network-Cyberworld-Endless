@@ -35,6 +35,7 @@ import xchiprecipe_bn4_navi as NV  # noqa: E402
 import xnavirecipe_bn4_objects as C  # noqa: E402
 import xrecipe_bn4 as X4  # noqa: E402
 import xrecipe_thumb as T  # noqa: E402
+from xchiprecipe import XC_SP_TIMES  # noqa: E402
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT_C = os.path.join(ROOT, 'src', 'emu', 'xchips_bn4.c')
@@ -96,6 +97,9 @@ UNIT_AIMS = {
                                                   "battle state (+0x48 on), a virus too; BN6's twin, its side's MegaMan alone (0x080103BC), "
                                                   "finds none against viruses, so the curse would not be cast: the project's own routine, "
                                                   "a side's first of its four in BN6's battle state (+0xD0 + side x 0x10)")},
+    'NaviPowers': {0x080406A4: ('XC_STUBS', "flag 0x1187 tested (BN4_FLAG_1187_TEST): set, an SP's column is 5 whatever the "
+                                            "time. A run never sets it, so the call is the stub that returns 0 (movs r0,#0: "
+                                            "its Z set, as BN4's clear flag leaves it for the bne after it)")},
     'FirePlus': {0x0800BFF4: ('XC_STUBS', "the user's battle data by his side (0x02035B20 + 0xC0 a side), where the object stores "
                                           "its four timers (+0x3C to +0x42: its element's 480, the rest 0). BN6 keeps other fields "
                                           "there and reads the timers nowhere (BN4's one reader is its HUD's icon, 0x08014CC0, "
@@ -117,6 +121,33 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
 SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),)}
+# BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
+# BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
+# 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
+# chip's record names BN6's entry (src/core/xchips_record.c). BN4's routine -> (its entries, why); an entry whose routine is
+# not here keeps the stub (power 0)
+POWERS4_TABLE, NPOWERS4_TABLE, POWER4_FIRST = 0x08019380, 51, 0xCC
+POWER4_ROUTINES = {
+    0x0801949E: (range(1, 23), "a Navi chip SP's power (1001-1022): his row of BN4_DS_POWERS (power - 1001), its column by "
+                               "BN4's best deletion time of the Navi (a u16 of the save's rows at 0x02037C80, 0x2C a side) as "
+                               "a BCD time (0x08000BBC) against ten limits (0x080194F0, 0x1000-0x2800), or 5 where flag 0x1187 "
+                               "is set (0x080406A4)"),
+    0x08019518: (range(23, 45), "a Navi chip DS's power (1023-1044): his row of BN4_DS_POWERS (power - 1023), its column 10 less "
+                                "the Hole panels on both sides (0x08009F40 with type 0xB, side 0 and 1), at most 10"),
+}
+# The bases a power's routine subtracts from its chip's record's power, each a word of its pool: BN4's 1000 + i is BN6's
+# 1000 + POWER4_FIRST + i in a moved record, so the base is that much further (BN4's literal: why)
+POWER4_BASES = {
+    0x080197C4: "the SP powers' base, 1001 (0x080194A8)",
+    0x080197D0: "the DS powers' base, 1023 (0x08019546)",
+}
+# A literal of a unit's code naming RAM BN6 keeps elsewhere or not at all (as bn4_twins.DATA_TWINS, for the unit alone): the
+# unit's name -> BN4's address -> (BN6's, why)
+UNIT_DATA = {
+    'NaviPowers': {0x02037C80: (XC_SP_TIMES, "BN4's best deletion times of its Navis (the save's rows, 0x2C a side, a u16 a "
+                                             "Navi), which BN6 keeps none of: XC_SP_TIMES, 0xFFFF each (none), past every "
+                                             "limit, so an SP's power is his row's last column, as BN5's SPs' are")},
+}
 SPAWN4_4, SPAWN6_4 = 0x08003344, 0x080033AC   # BN4_SPAWN_4, BN6's fourth-kind spawner (r0 the type)
 # BN6's support routines' shape, Invisibl's (0x080E8886): the object spawned and its panel, element, parent, side, r6 and r7
 # written; BN4's the same instruction for instruction but for the element's place (ELEMENT4, ELEMENT6: the scan's immediate)
@@ -155,6 +186,8 @@ TWINS = {
     0x08013F3E: (0x0801B394, 'chips'),   # its state run from its table (BN4_ACTOR_RUN, BN6_ACTOR_RUN)
     0x08010276: (0x080166AE, 'chips'),   # the engine's generic state 3 (bn4_twins.GENERIC4, GENERIC6)
     0x080112C4: (0x08017CC0, 'chips'),   # an obstacle's state 5, pushed (BN6's own bomb's table's 0x080CE928 + 0x14)
+    # ... and what a computed power's routine calls (NaviPowers):
+    0x08009F40: (0x0800CDB4, 'chips'),   # the panels of a type on a side counted (BN4_PANEL_COUNT, BN6_PANEL_COUNT: r0 type, r1 side)
 }
 # A moved third-kind object that is an actor: its update hands its state table to the actors' runner in r0 (TimeBomb's
 # bomb, 0x080D6CB6). BN6's runner numbers the engine's states 0-7 and an object's own from 8 where BN4's numbers 0-5 and
@@ -286,6 +319,7 @@ UNITS = (
     ('attack', 0x27, 'AirHoc'),
     ('navi', 0x35, 'RollAro'),
     ('support', 0x10, 'BigHamr'),
+    ('power', 0x00, 'NaviPowers'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -355,6 +389,9 @@ FAMILY_SLOTS = {0x70: 0x3A,                 # (ShotStar's star's burst: Walla's)
 # holds one of BN4's numbers BN6 numbers otherwise, bytes: a row's offset -> {BN4's value: BN6's}, each set in the copy
 # (table_bytes; bytes_why says what the values are and where each pair was read)
 TABLES = {
+    0x08018B48: dict(size=20 * 0x16, entry=0x16, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     why="the Navi chips' SP and DS powers (BN4_DS_POWERS: 20 rows of 11 u16s, a Navi's row, RollSP/DS to VideMnSP/DS, numbers alone), "
+                         "the SP's column by his time, the DS's by the Holes"),
     0x080D8580: dict(size=42, entry=6, kinds=(1, 6), sprite=(None, 0), list=3, loads={0x080D85E4},
                      why="the star's kinds (the third kind's 0x56: 6 bytes each, its sprite's number in list 3, its animation, its "
                          "collision's two arguments), read by its init (0x080D85D2, by +4); ShotStar's object spawns kind 1 "
@@ -446,6 +483,11 @@ IMMS = {
     0x080DD4D4: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
                      why="BugCurse's curse placed by the other side's battle NaviStats' Navi (its offsets by Navi at 0x080DD4FC): "
                          "BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI), 0 for a virus side in both"),
+    # (a DS's power counts the Hole panels: BN4's type 0xB, BN6's 16, XPANEL_HOLE in src/emu/xpanels.h)
+    0x0801951C: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0B, now=0x10,
+                     why="the Hole panel counted on side 0: BN4's type 0xB, BN6's 16 (XPANEL_HOLE)"),
+    0x08019526: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0B, now=0x10,
+                     why="... and on side 1"),
     0x0800C728: dict(form='THUMB_ADDS', rd=0, rn=0, was=0x68, now=0xA0,
                      why="the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD "
                          "0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both)"),
@@ -556,6 +598,9 @@ UNIT_CALLS_IN = {
 # A routine of BN4's engine a unit copies where the project pairs it with BN6's (as tools/bn4_twins.py COPIED, for the unit
 # alone): the unit's name -> BN4's routine -> why
 UNIT_COPIED = {
+    'NaviPowers': {0x08000BBC: "a frame count as a BCD time (hours to hundredths: six digits by the table at "
+                               "0x08000C00, the frames' remainder x 0x1AAAA >> 16 by 0x08000A38, BN6's 0x08000C00), 0x99595999 "
+                               "past 0x1499700 frames: BN6 keeps none (searched), so copied"},
     'TimeBomb': {0x08111888: "a remainder (swi 6; adds r0,r1,#0; bx lr: r0 mod r1), which its placement draws a panel by "
                              "(0x080E4D54); BN6 has the three instructions only inline (0x08010C00, searched), so copied: no "
                              "word of it names a place"},
@@ -574,6 +619,17 @@ UNIT_COPIED = {
                          "params' +7 is set (ElemDark's 8) takes it at 0x080CE2F0 where the others take 0x080143FC, and BN6's "
                          "nearest updates the sprite a frame ahead of BN4's (the shot's count at its +0x91 2 in BN4 and 1 in BN6 "
                          "at t33, bn4_chip_elemdark); copied, its pause test BN6's"},
+}
+# The data a routine a unit copies reads from the bytes after its code, copied with it as raw bytes (bn4_twins.COPIED_DATA's
+# way, for the unit alone; else zeroed as a copied routine's neighbours): the unit's name -> the routine -> (lo, hi, why)
+UNIT_COPIED_DATA = {
+    'NaviPowers': {
+        0x08000BBC: (0x08000C00, 0x08000C18, "the BCD time's divisors, the frames in ten hours, an hour, ten minutes, a minute, ten "
+                                             "seconds and a second, which it subtracts a digit at a time (numbers alone; zeroed, "
+                                             "its loop never ends)"),
+        0x0801949E: (0x080194F0, 0x08019518, "an SP's ten limits, BCD times 0x1000-0x2800 (10 to 28 seconds), the first his time "
+                                             "does not pass his column (numbers alone)"),
+    },
 }
 # BN4's misc run's wait (bn4_chips.h BN4_MISC_WAIT): after a subfamily's routine, cmp r0,#SUB; bne; movs r0,#FRAMES; strh into
 # the misc state's count, where every other subfamily's attack ends at once. BN6's run waits for its own 0x14 alone, so a unit
@@ -723,6 +779,8 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         f.number = ATTACK_NUMBERS.get((sub, name), ATTACK_NUMBERS.get(sub, 0))
         if not ATTACK_FIRST <= f.number < ATTACK_END:
             f.decide('unit', f'its family {sub:#x} has no number of BN6\'s grown attack families (ATTACK_NUMBERS: the next from {ATTACK_FIRST:#x})')
+    elif kind == 'power':
+        f.number = 0
     elif kind not in FAMILY4 or not 0 <= sub < (NMISC4 if kind == 'misc' else NROUTINES4):
         f.decide('unit', f'a {kind} unit {sub:#x}: the support and misc states\' routines and the attack states alone are read')
         return f
@@ -778,6 +836,17 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
             f.roots += [e, lo]
             f.moved4[ty] = dict(lo=lo, hi=hi, routine=lo)
             f.notes.append(f'its fourth-kind {ty:#x} ({lo:08X}-{hi:08X}), which its routine ({e:08X}) spawns: moved')
+    elif kind == 'power':
+        # (BN4's computed powers' routines, each copied, a block of its own: no dispatch entry, XC_POWERS names them)
+        f.entries = sorted(POWER4_ROUTINES)
+        f.entry, f.roots = f.entries[0], list(f.entries)
+        for e, (entries, why) in sorted(POWER4_ROUTINES.items()):
+            bad = [i for i in entries if not 0 < i < NPOWERS4_TABLE or b4.u32(POWERS4_TABLE + 4 * i) & ~1 != e]
+            if bad:
+                f.decide('entry', f'BN4\'s computed powers {", ".join(str(1000 + i) for i in bad)} do not name {e:08X}')
+            bn4_twins.COPIED[e] = why
+            f.notes.append(f'BN4\'s computed powers {1000 + entries[0]}-{1000 + entries[-1]} ({e:08X}): {why}; BN6\'s '
+                           f'{1000 + POWER4_FIRST + entries[0]}-{1000 + POWER4_FIRST + entries[-1]}')
     elif kind == 'navi':
         # (a Navi chip: its routine the common spawner of its object, which BN6's Navi object stands in for; the unit the chip's
         # Navi's first-kind type, its entry his spawner)
@@ -871,10 +940,18 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     saved_tables = dict(bn4_twins.TABLES)
     saved_late = X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4
     bn4_twins.TABLES.update(TABLES)
+    saved_data4 = dict(bn4_twins.COPIED_DATA)
+    bn4_twins.COPIED_DATA.update(UNIT_COPIED_DATA.get(name, {}))
     X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4
     try:
         X4.blocks_of(b4, f, alloc)
-        X4.words_of(f, pairs)
+        saved_data = dict(getattr(bn4_twins, 'DATA_TWINS', {}))
+        bn4_twins.DATA_TWINS = {**saved_data, **UNIT_DATA.get(name, {})}
+        try:
+            X4.words_of(f, pairs)
+        finally:
+            bn4_twins.DATA_TWINS = saved_data
+        power_bases(f)
         # (a jump table's entry no chip of the unit names, ATTACK_SUBS: BN6's null routine)
         for e, x in sorted(getattr(f, 'unreached', {}).items()):
             f.decisions = [d for d in f.decisions if not (d[0] == 'table' and d[1].startswith(f'{e | 1:08X} '))]
@@ -893,6 +970,8 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     finally:
         bn4_twins.TABLES.clear()
         bn4_twins.TABLES.update(saved_tables)
+        bn4_twins.COPIED_DATA.clear()
+        bn4_twins.COPIED_DATA.update(saved_data4)
         X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = saved_late
     # (an effect a unit before it moved is that unit's row alone: the units install in one step in UNITS' order, the effect's
     # entry written by the first, and the installer finds a row's sprite in the unit's own rows or a family's, never in
@@ -980,6 +1059,15 @@ def power_returns(f):
             continue
         f.imms.append(dict(at=sorted(w.insns)[-2], form='THUMB_MOVS', rd=0, rn=0, was=f.sub, now=f.number,
                            why=f'{soul}\'s power attack {pid:#x}: the family it returns, BN4\'s {f.sub:#x}, BN6\'s grown {f.number:#x}'))
+
+
+def power_bases(f):
+    """the bases its computed powers' routines subtract (POWER4_BASES), each BN6's that much further (POWER4_FIRST)"""
+    for w in f.walks.values():
+        for lit, v in w.lits.items():
+            if lit in POWER4_BASES and all(x[0] != lit for x in f.numbers):
+                f.numbers.append((lit, v, v + POWER4_FIRST, f'{POWER4_BASES[lit]}: BN6\'s records\' {v + POWER4_FIRST} (POWER4_BASES)'))
+    f.numbers.sort()
 
 
 def site_imms(f):
@@ -1546,7 +1634,7 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 '''
 ROWS = [0]        # (the next row of the art's room, counted over the units as their rows are written: c_file)
 ROWS_MAX = 512    # (XC4_ROWS: the rows a slot's start can tell apart)
-KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC', 'attack': 'XCHIP_ATTACK', 'navi': 'XCHIP_NAVI'}
+KIND_C = {'support': 'XCHIP_SUPPORT', 'misc': 'XCHIP_MISC', 'attack': 'XCHIP_ATTACK', 'navi': 'XCHIP_NAVI', 'power': 'XCHIP_HELPER'}
 
 
 def place(at, base, name):
@@ -1663,6 +1751,14 @@ def c_file(units):
         sys.exit(f'xchiprecipe_bn4: {ROWS[0]} rows of art, past the room\'s {ROWS_MAX}')
     parts.append('const XChipUnit xchips_bn4[] = {\n' + '\n'.join(rows) + '\n};\n'
                  'const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);\n')
+    # (BN4's computed powers by entry: the routine the power unit moved, read from BN4's table and checked there (derive), 0
+    # the rest)
+    moved = {i: e for f in units if f.kind == 'power' for e, (ents, _) in POWER4_ROUTINES.items() for i in ents}
+    words = [f'0x{moved[i] | 1:08X}' if i in moved else '0' for i in range(NPOWERS4_TABLE)]
+    parts.append('/* (BN4\'s computed powers by its table\'s entry: the routine the power unit moved, 0 the stub\'s) */\n'
+                 'const uint32_t xchips_bn4_powers[] = {\n' + '\n'.join('\t' + ', '.join(words[k:k + 8]) + ','
+                                                                   for k in range(0, len(words), 8)) + '\n};\n'
+                 'const int xchips_bn4_powers_count = (int)(sizeof xchips_bn4_powers / sizeof *xchips_bn4_powers);\n')
     return '\n'.join(parts)
 
 

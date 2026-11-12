@@ -28,6 +28,7 @@
 
 static bool installed, installed4, installed4n;
 static bool tables_grown;   /* (the stubs and BN6's two routines' tables grown: by whichever game's units install first) */
+static bool powers_grown;   /* (BN6's computed powers grown, XC_POWERS: likewise) */
 
 /* ---- BN6's support and Navi chips' routines grown ---- */
 
@@ -256,22 +257,50 @@ static void songs_in(const XChipUnit *u) {
 			xv_fail("its sound %#x not copied to slot %#x", u->songs[i].song, u->songs[i].slot);
 }
 
-/* BN6's computed powers grown (XC_POWERS): BN6's own entries as the player's ROM has them, BN5's routines the helpers moved at
- * their entries of the chips' (xchips_powers: XC_POWER_FIRST + BN5's), the rest the stub; its word pointed at the copy */
+/* BN6's computed powers grown (XC_POWERS) in this step where no earlier one grew them: BN6's own entries as the player's ROM
+ * has them, the rest the stub (power 0), its word pointed at the copy; the staged table, NULL where an earlier step grew it
+ * (an entry is then changed in the grown one: power_put) or on a failure */
+static uint8_t *powers_table_stage(void) {
+	if (powers_grown) return NULL;
+	uint8_t *p = xv_put(XC_POWERS, 4u * 256u, true);
+	if (!p) return NULL;
+	for (uint32_t i = 0; i < 256u; ++i) put32(p + 4 * i, i < BN6_CHIP_POWERS_COUNT ? rom_u32(BN6_CHIP_POWERS - BUS + 4 * i) : XC_STUBS | 1u);
+	xv_word(BN6_CHIP_POWERS_REF, BN6_CHIP_POWERS, XC_POWERS);
+	return p;
+}
+
+/* BN6's grown entry `i` pointed at the routine `to`: in the table staged in this step (`fresh`), or the grown one's stub changed */
+static void power_put(uint8_t *fresh, uint32_t i, uint32_t to) {
+	if (fresh) put32(fresh + 4u * i, to);
+	else xv_word(XC_POWERS + 4u * i, XC_STUBS | 1u, to);
+}
+
+/* BN5's computed powers: the routines the helpers moved at their entries of the chips' (xchips_powers: XC_POWER_FIRST + BN5's) */
 static void powers_stage(void) {
 	const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
-	uint8_t *p = xv_put(XC_POWERS, 4u * 256u, true);
-	if (!p) return;
-	for (uint32_t i = 0; i < 256u; ++i) put32(p + 4 * i, i < BN6_CHIP_POWERS_COUNT ? rom_u32(BN6_CHIP_POWERS - BUS + 4 * i) : XC_STUBS | 1u);
+	uint8_t *p = powers_table_stage();
 	for (int k = 0; k < xchips_powers_count && !xv_failed(); ++k) {
 		const XChipPower *w = &xchips_powers[k];
 		uint32_t routine = w->bn5 < BN5_CHIP_POWERS_COUNT ? get32(rom5 + (BN5_CHIP_POWERS - BUS) + 4u * w->bn5) : 0, to = 0;
 		for (int i = 0; i < xchips_bn5_count && !to; ++i)
 			if (xchips_bn5[i].kind == XCHIP_HELPER && xvirus_is_code(&xchips_bn5[i].code, routine & ~1u)) to = xvirus_code_at(&xchips_bn5[i].code, routine | 1u);
 		if (!to || w->bn6 < XC_POWER_FIRST) xv_fail("BN5's computed power %d (%08x) moved by no helper", 1000 + w->bn5, (unsigned)routine);
-		else put32(p + 4u * w->bn6, to);
+		else power_put(p, w->bn6, to);
 	}
-	if (!xv_failed()) xv_word(BN6_CHIP_POWERS_REF, BN6_CHIP_POWERS, XC_POWERS);
+}
+
+/* BN4's computed powers: each entry of BN4's table (BN4_CHIP_POWERS) whose routine its power unit moved (xchips_bn4_powers,
+ * the routine of an XCHIP_HELPER of xchips_bn4: tools/xchiprecipe_bn4.py POWER4_ROUTINES) at BN6's XREG4_POWER_FIRST + the
+ * entry, which a moved chip's record names (src/core/xchips_record.c); the rest the stub */
+static void powers4_stage(void) {
+	uint8_t *p = powers_table_stage();
+	for (int e = 0; e < xchips_bn4_powers_count && !xv_failed(); ++e) {
+		uint32_t routine = xchips_bn4_powers[e], to = 0;
+		for (int i = 0; routine && i < xchips_bn4_count && !to; ++i)
+			if (xchips_bn4[i].kind == XCHIP_HELPER && xvirus_is_code(&xchips_bn4[i].code, routine & ~1u)) to = xvirus_code_at(&xchips_bn4[i].code, routine | 1u);
+		if (routine && !to) xv_fail("BN4's computed power %d (%08x) moved by no unit", 1000 + e, (unsigned)routine);
+		else if (to) power_put(p, XREG4_POWER_FIRST + (uint32_t)e, to);
+	}
 }
 
 /* BN6's after-effects of its own DarkChips (BN6_DARK_AFTERS): DarkPlus's (its HP bug) the Navi stub's return where BN5's
@@ -407,7 +436,7 @@ bool xchips_code_install(void) {
 			const XvBlock *b = &xchips_bn5[i].code.blocks[k];
 			xv_moved_add(b->start, b->at, b->end - b->start);
 		}
-	installed = tables_grown = true;
+	installed = tables_grown = powers_grown = true;
 	printf("xchips_code: %d units of BN5's chips' code (%u bytes written)\n", xchips_bn5_count, (unsigned)used);
 	xchips_flash_install();
 	return true;
@@ -440,6 +469,7 @@ static void unit4_stage(int i, bool fresh) {
 	const XChipUnit *u = &xchips_bn4[i];
 	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
 	else if (u->kind == XCHIP_ATTACK ? u->number < XATTACK_BN4 || u->share
+	         : u->kind == XCHIP_HELPER ? u->number || u->share
 	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC && u->kind != XCHIP_NAVI) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
 	else if (u->kind == XCHIP_NAVI && (u->share || !u->navis || !xnavi_bn4_seat(u->navis - 1))) xv_fail("its Navi's seat %d, no installed BN4 Navi's", u->navis - 1);
 	else if (u->share) {
@@ -449,7 +479,8 @@ static void unit4_stage(int i, bool fresh) {
 	} else if (u->code.home != XC4_SHIMS_HOME(u->home)) xv_fail("its shims' place %08x", (unsigned)u->code.home);
 	else {
 		songs_in(u);
-		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12))) {
+		/* (a power unit's routines named by BN6's grown computed powers alone, powers4_stage: no entry of a table) */
+		if (!xv_failed() && xvirus_code_stage(&u->code, &region4, u->home, (int)(XC4_HOME_VENEERS / 12)) && u->kind != XCHIP_HELPER) {
 			entry_stage(u, &u->code, fresh);
 			if (u->code.nstates) states_stage(u);
 		}
@@ -535,8 +566,9 @@ bool xchips_bn4_navi_install(void) {
 	return installed4n;
 }
 
-static bool units4_install(bool navis) {
-	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
+/* BN6's tables BN4's units go into grown before a pass (their ids' and attack families' room, the song table's slots for
+ * their sounds BN6 has no song of): false, said, where one is not */
+static bool tables4_grown(void) {
 	claims_begin(XV_CLAIMS);
 	bool room = xg_grow();
 	claims_end();
@@ -544,29 +576,45 @@ static bool units4_install(bool navis) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
 		return false;
 	}
-	/* (their sounds BN6 has no song of go into the grown song table's slots, song_table.h: grown before the step) */
 	if (!song_table_grow()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's song table not grown\n");
 		return false;
 	}
-	xv_tx_begin();
+	return true;
+}
+
+/* one pass's units staged (its Navi chips', `navis`, or the rest with BN6's tables, the computed powers and the dispatch's
+ * page), then the Program Advances; the units it staged, `*at` what it staged last (a failure's place) */
+static int units4_stage_pass(bool navis, const char **at) {
 	bool fresh = !navis && tables_stage();
 	if (!navis && !xv_failed()) stubs4_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
 	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
 	if (!navis && !xv_failed()) xg_page4_stage();
-	const char *at = "BN6's routines' tables";
+	*at = "BN6's routines' tables";
 	int units = 0;
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
 		if ((xchips_bn4[i].kind == XCHIP_NAVI) != navis) continue;
-		at = xchips_bn4[i].code.name;
+		*at = xchips_bn4[i].code.name;
 		unit4_stage(i, fresh);
 		++units;
 	}
+	if (!navis && !xv_failed()) {
+		*at = "BN6's computed powers";
+		powers4_stage();
+	}
 	if (!xv_failed()) {
-		at = "BN6's Program Advances";
+		*at = "BN6's Program Advances";
 		pas_stage(installed, true);
 	}
+	return units;
+}
+
+static bool units4_install(bool navis) {
+	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data || !tables4_grown()) return false;
+	xv_tx_begin();
+	const char *at = "";
+	int units = units4_stage_pass(navis, &at);
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed (%s): %s\n", at, xv_why());
 		xv_tx_end();
@@ -581,6 +629,7 @@ static bool units4_install(bool navis) {
 			xv_moved_add(b->start, b->at, b->end - b->start);
 		}
 	tables_grown = true;
+	if (!navis) powers_grown = true;
 	printf("xchips_code: %d units of BN4's %s (%u bytes written)\n", units, navis ? "Navi chips' code" : "chips' code", (unsigned)used);
 	/* (their art: none installed, a room filled as an object loads a sprite, xchips_bn4_art.h; a Navi chip's Navi draws
 	 * the Navis' own copy, xnavi_bn4_chip.c) */

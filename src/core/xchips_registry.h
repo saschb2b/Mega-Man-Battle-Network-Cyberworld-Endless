@@ -91,6 +91,10 @@ typedef struct {
                                 * BN4's Library lists none (its +0x1C is 0), a run's finds and rewards hold none (chip_pool.h,
                                 * xchips_kept_out), and no flame offers one yet (docs/multirom/bn4-chips.md, unit 7) */
 #define XREG4_FIRST_ATTACK 0xD0 /* a moved row's `sub` from here: an attack family's number (src/emu/xattack_grow.h XATTACK_BN4; test_core holds the two alike) */
+#define XREG4_POWER_FIRST 0xCC /* BN4's computed power 1000 + i (an entry of its table, BN4_CHIP_POWERS) in a moved row's record: BN6's
+                                * 1000 + XREG4_POWER_FIRST + i, past BN5's in BN6's grown table (src/emu/xchips_code.h XC_POWERS); its
+                                * routine moved by BN4's power unit (tools/xchiprecipe_bn4.py POWER4_ROUTINES), else the stub's 0 */
+#define XREG4_POWERS 51        /* ... BN4's entries (BN4_CHIP_POWERS_COUNT; test_core holds the two alike and within the 256) */
 #define XREG4_PACK_FIRST 527   /* its first id: 527-602, the pack's entries in the work RAM (bn6_pack_entry), its chips that play first; */
 #define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
 #define XREG4_REST_FIRST 635   /* 635 on the rest of its folder chips, their pack entries in the cart's save RAM (BN6_PACK_SAVE_FIRST) */

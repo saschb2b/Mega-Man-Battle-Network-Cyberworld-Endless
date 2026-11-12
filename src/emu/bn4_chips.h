@@ -369,4 +369,18 @@
 #define BN4_T4_HAMMER         0x26        /* ... its support object, the fourth kind's (0x080E4B88 to 0x080E4C3C), which the chip's routine
                                            * spawns and which sets the hammer down */
 
+/* ---- the computed powers (docs/rom/bn4.md, Computed powers) ---- */
+#define BN4_CHIP_POWER    0x08019348u /* a chip's power (r0 its id, r1 the side): 1000 and up the routine of BN4_CHIP_POWERS by power less
+                                       * 1000, through mov lr,pc; bx (BN6_CHIP_POWERS' reader 0x080109A4 instruction for instruction) */
+#define BN4_CHIP_POWERS   0x08019380u /* the computed powers' routines (a record's power of 1000 and up: power - 1000 its entry; r0 the
+                                       * chip's id, r1 the side), BN6_CHIP_POWERS' kind: 1001-1022 BN4_SP_POWER, 1023-1044 BN4_DS_POWER */
+#define BN4_CHIP_POWERS_COUNT 51      /* ... 1000-1050 (the next word 0x0801944C, entry 1000's routine itself) */
+#define BN4_SP_POWER      0x0801949Eu /* a Navi chip SP's power: his row of BN4_DS_POWERS (power less 1001, its pool 0x080197C4), its column
+                                       * the first of ten BCD limits (0x080194F0, 0x1000-0x2800) his best deletion time does not pass, 5
+                                       * where BN4_FLAG_1187_TEST is set */
+#define BN4_SP_TIMES      0x02037C80u /* ... the best deletion times it reads (u16 frames by power less 1001, 0x2C a side) */
+#define BN4_BCD_TIME      0x08000BBCu /* frames (r0) as a BCD time, hours to hundredths: six digits by the frames in ten hours to a second
+                                       * (0x08000C00), the rest x 0x1AAAA >> 16 by 0x08000A38 (BN6's 0x08000C00); 0x99595999 from
+                                       * 0x1499700 frames on. BN6 has none (searched) */
+
 #endif

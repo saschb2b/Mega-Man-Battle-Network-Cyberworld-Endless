@@ -4485,6 +4485,9 @@ static void test_free_space(void) {
 	}
 	CHECK(XC_POWER_FIRST >= BN6_CHIP_POWERS_COUNT && XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT <= 256 && XC_POWERS + 4u * 256u <= XC_HOMES,
 		"free space: BN6's computed powers grown to 256, BN5's past BN6's own");
+	CHECK(XREG4_POWER_FIRST == XC_POWER_FIRST + BN5_CHIP_POWERS_COUNT && XREG4_POWERS == BN4_CHIP_POWERS_COUNT && XREG4_POWER_FIRST + XREG4_POWERS <= 256,
+		"free space: BN4's computed powers past BN5's in BN6's grown table, all of them within it");
+	CHECK(xchips_bn4_powers_count == XREG4_POWERS, "BN4's computed powers: the units' table has an entry for each of BN4's (%d)", xchips_bn4_powers_count);
 	CHECK(XC_FIRST_SUPPORT == BN6_CHIP_ROUTINE_COUNT && XC_FIRST_NAVI == BN6_NAVI_ROUTINE_COUNT && BN6_NAVI_ROUTINES == BN6_CHIP_ROUTINES + 4u * BN6_CHIP_ROUTINE_COUNT,
 		"free space: the units' routines past BN6's own, its Navi chips' right after its support chips'");
 	/* (the Souls' room, soul_room.h: each part of the Souls' install, the tracks' S2-S5) */
@@ -5728,6 +5731,14 @@ static void test_chip_records(void) {
 		get32(out + BN6_CHIP_IMAGE_PTR) == 0x08C21080u && out[BN6_CHIP_DARK_ID] == 0xFF,
 		"records: a BN4 record as BN6's: its MB, class and kind in BN6's places, a computed power unshown, inert (%d %d %d %02X)",
 		out[BN6_CHIP_MB], out[BN6_CHIP_LIBRARY_TYPE], out[BN6_CHIP_ELEMENT], out[BN6_CHIP_EFFECT_FLAGS]);
+	/* (... a moved row's computed power BN6's grown entry of BN4's, still computed and shown) */
+	const XChipReg4 sp4 = { 225, 536, XREG_MOVED, 221, 0x85, { 0x06, 0xFF, 0xFF, 0xFF }, 1, 68 };
+	XRecordFrom4 in_sp = { rec4, rec4, &sp4, 77, { 0x08C21000u, 0x08C21080u, 0x08C215C0u } };
+	put16(rec4 + BN6_CHIP_ATTACK_POWER, 1002);
+	xrec_from_bn4(&in_sp, out);
+	CHECK(get16(out + BN6_CHIP_ATTACK_POWER) == 1000 + XREG4_POWER_FIRST + 2 && (out[BN6_CHIP_EFFECT_FLAGS] & (BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER)) ==
+		(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER), "records: a moved BN4 chip's computed power (GutsMnSP's 1002) at BN6's grown entry of BN4's (%d, %02x)",
+		get16(out + BN6_CHIP_ATTACK_POWER), out[BN6_CHIP_EFFECT_FLAGS]);
 	rec4[BN4_CHIP_KIND] = 14;
 	put16(rec4 + BN6_CHIP_ATTACK_POWER, 300);
 	xrec_from_bn4(&in4, out);

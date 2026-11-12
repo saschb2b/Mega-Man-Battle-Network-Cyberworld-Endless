@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "BN4's computed powers located and moved (bn4.h BN4_CHIP_POWER 0x08019348, BN4_CHIP_POWERS 0x08019380 and its 51 entries, BN4_SP_POWER 0x0801949E, BN4_SP_TIMES 0x02037C80, BN4_BCD_TIME 0x08000BBC; docs/rom/bn4.md, Computed powers): BN4's reader is BN6's instruction for instruction, so its SP and DS routines move as a unit of their own into BN6's grown table past BN5's (0xCC on), the SP's deletion times none and its flag test the stub's, the DS's Hole BN6's panel 16. GutsMan's SP is the first chip on them (bn4_chip_gutsman_sp)."
+}
