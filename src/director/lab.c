@@ -2,12 +2,14 @@
  * keys, the set as a battle, and the battle's start and end. */
 #include "lab.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "battle_data.h"
 #include "bn6.h"
 #include "bn6_panels.h"
 #include "data.h"
+#include "debug.h"
 #include "director.h"
 #include "director_state.h"
 #include "emu.h"
@@ -47,12 +49,24 @@ static unsigned versions_held(int family) {
 	return m;
 }
 
+/* whether a family has a name to stand in the list by: its first version's in the engine's names (an AI index BN6 keeps
+ * enemy ids for and names none of, its story's own or unused, is no row) */
+static bool family_named(int family, unsigned held) {
+	char name[24] = "";
+	for (int v = 0; v < DATA_VERSIONS; ++v)
+		if (held >> v & 1) {
+			enemy_name(enemy_id(0, family, v), name, sizeof name);
+			break;
+		}
+	return name[0] && name[0] != '?';
+}
+
 static void roster_make(void) {
 	LS.nroster = 0;
 	for (int f = 1; f < DATA_FAMILIES && LS.nroster < LAB_ROSTER; ++f) {
 		unsigned held = versions_held(f);
 		int count = battle_data_count(f);
-		if (!held || (!LS.all && !count)) continue;
+		if (!held || (!LS.all && !count) || !family_named(f, held)) continue;
 		LabRow *r = &LS.roster[LS.nroster++];
 		r->family = (uint8_t)f;
 		r->count = (uint8_t)count;
@@ -67,6 +81,14 @@ static void roster_make(void) {
 		LabRow *r = &LS.roster[LS.nroster++];
 		*r = (LabRow){ (uint8_t)n, 1, (uint8_t)lab_navi_versions(n, LS.all), 0, (uint8_t)(wins > 255 ? 255 : wins) };
 		while (r->versions && !(r->versions >> r->version & 1)) ++r->version;
+	}
+	/* (the list in words, for a reader of the debug lines: each row's place, kind, number, name and versions) */
+	for (int i = 0; emu_debug_on() && i < LS.nroster; ++i) {
+		const LabRow *r = &LS.roster[i];
+		char name[24] = "";
+		if (r->navi) lab_navi_name(r->family, r->version, name, sizeof name);
+		else enemy_name(enemy_id(0, r->family, r->version), name, sizeof name);
+		fprintf(stderr, "lab: row %d %s %d \"%s\" versions %02x count %d\n", i + 1, r->navi ? "navi" : "family", r->family, name, r->versions, r->count);
 	}
 }
 

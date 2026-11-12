@@ -587,6 +587,13 @@ is used.
   - With it, the Navi list no longer shows a number BN6's engine has an
     enemy for and the run no guardian (a "???" row of 4000 HP on the
     dev list).
+  - And no family without a name is a row: BN6 keeps enemy ids for two
+    AI indexes it names none of (30 and 31, 80 HP), which the dev list
+    showed as two empty rows between Nightmare and CanGard; no run
+    fights them, so no player's list had them. `CYBERWORLD_EMU_DEBUG`
+    prints the list as it is made, a line a row ("lab: row 30 family 32
+    "CanGard" versions 3f count 0"): 113 rows with every family and Navi
+    open and both ROMs read, 65 families and 48 Navis, none unnamed.
   - Not yet: MegaMan's Regular chip is the run's still, whatever stands
     at its place in the Lab's folder; a chip of a game whose ROM is not
     read stays in a kept folder as its placeholder.
