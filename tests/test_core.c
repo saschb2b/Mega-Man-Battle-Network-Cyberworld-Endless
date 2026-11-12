@@ -36,6 +36,7 @@
 #include "battle_data.h"
 #include "lab_text.h"
 #include "test_backup.h"
+#include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
 #include "launcher_roms.h"
@@ -8028,6 +8029,7 @@ int main(int argc, char **argv) {
 	test_enemy_moved();
 	test_qr();
 	failures += test_backup();
+	failures += test_voxel();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();

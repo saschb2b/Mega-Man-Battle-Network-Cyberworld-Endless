@@ -108,6 +108,7 @@ static const char *value_word(int kind) {
 	case LINE_COLOUR: return options_word(colour_words[lcd_colour()]);
 	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
+	case LINE_VOXEL: return options_word(display_voxel() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_level_word(sound_heard_music());
 	case LINE_EFFECTS: return options_level_word(sound_heard_effects());
 	case LINE_OUTPUT: return options_word((OptionsWord)(OW_SPEAKERS + sound_output()));
@@ -124,7 +125,7 @@ static void line_draw(int x0, int y, int kind, bool on) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
 		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
 		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X,
-		[LINE_OUTPUT] = OW_OUTPUT };
+		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL };
 	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
@@ -151,6 +152,7 @@ static const char *display_note(int kind) {
 	case LINE_COLOUR: return options_word(colour_notes[lcd_colour()]);
 	case LINE_BLEND: return options_word((OptionsWord)(OW_BLEND_OFF_NOTE + lcd_blend()));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_LCD3X_ON_NOTE : OW_LCD3X_OFF_NOTE);
+	case LINE_VOXEL: return options_word(display_voxel() ? OW_VOXEL_ON_NOTE : OW_VOXEL_OFF_NOTE);
 	default: return "";
 	}
 }

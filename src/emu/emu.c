@@ -428,6 +428,11 @@ uint32_t emu_pictures(void) { return pictures; }
 uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
+void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
+	wait_frame();
+	for (uint32_t i = 0; i < len; ++i) out[i] = core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;
+}
+
 void emu_write8(uint32_t a, uint8_t v) {
 	wait_frame();
 	claims_note(a, 1);

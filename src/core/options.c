@@ -44,6 +44,7 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_COLOUR;
 		kinds[n++] = LINE_BLEND;
 		if (display_has_lcd3x()) kinds[n++] = LINE_LCD3X;
+		if (display_has_voxel()) kinds[n++] = LINE_VOXEL;
 	} else {
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
@@ -197,6 +198,7 @@ static void turn(int kind, int dir) {
 	case LINE_COLOUR: display_colour_keep(display_colour_next(dir)); break;
 	case LINE_BLEND: display_blend_keep(display_blend_next(dir)); break;
 	case LINE_LCD3X: display_lcd3x_keep(!lcd_grid()); break;
+	case LINE_VOXEL: display_voxel_keep(!display_voxel()); break;
 	case LINE_MUSIC:
 	case LINE_EFFECTS: heard_keep(kind, level_next(kind == LINE_MUSIC ? sound_heard_music() : sound_heard_effects(), dir)); break;
 	case LINE_OUTPUT: output_keep((SoundOutput)((sound_output() + SOUND_OUTPUT_COUNT + (dir < 0 ? -1 : 1)) % SOUND_OUTPUT_COUNT)); break;
@@ -218,6 +220,7 @@ static void defaults(void) {
 		display_colour_keep(LCD_COLOUR_OFF);
 		display_blend_keep(LCD_BLEND_OFF);
 		if (display_has_lcd3x() && lcd_grid()) display_lcd3x_keep(false);
+		if (display_voxel()) display_voxel_keep(false);
 	} else if (O.page == PAGE_AUDIO) {
 		if (sound_heard_music() != SOUND_LEVELS) heard_keep(LINE_MUSIC, SOUND_LEVELS);
 		if (sound_heard_effects() != SOUND_LEVELS) heard_keep(LINE_EFFECTS, SOUND_LEVELS);

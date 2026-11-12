@@ -11,6 +11,7 @@
 #include "lcd_frame.h"
 #include "online_visit.h"
 #include "platform.h"
+#include "voxel_scene.h"
 
 /* The town's hour on its picture (docs/world/home/time-of-day.md): each colour
  * channel of the map's layers and of the sprites over it times the hour's
@@ -59,12 +60,18 @@ void emu_picture_draw(int x, int y) {
 	uint32_t made = emu_pictures();
 	lcd_frame(px, EMU_W * EMU_H, made != seen);
 	seen = made;
+#ifndef __3DS__
+	/* (voxel mode, voxel_scene.h: the world drawn under the canvas, which
+	 * keeps the HUD's pixels and is clear at the rest; not the 3DS's) */
+	static uint8_t hud[EMU_W * EMU_H];
+	bool voxel = voxel_scene_frame(px, hud);
+#endif
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];
 #ifdef __3DS__
 		px[i] = 0xFF000000u | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
 #else
-		px[i] = c | 0xFF000000u;
+		px[i] = voxel && !hud[i] ? 0 : c | 0xFF000000u;
 #endif
 	}
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
