@@ -62,9 +62,9 @@ static inline bool guardian_moved(int navi) { return guardian_older(navi) || gua
 #define GUARDIAN_TEAM_FIRST 59
 #define GUARDIAN_TEAM_LAST  64
 static inline bool guardian_team(int navi) { return navi >= GUARDIAN_TEAM_FIRST && navi <= GUARDIAN_TEAM_LAST; }
-/* ... BN5's AI index of one of its Navis here (the six, a Darkloid or Nebula's two), -1 another's */
+/* ... BN5's AI index of one of its Navis here (the six, a Darkloid, Team ProtoMan's or Nebula's two), -1 another's */
 static inline int guardian_bn5_ai(int navi) {
-	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN
+	return guardian_team(navi) ? navi - GUARDIAN_TEAM_FIRST + BN5_NAVI_PROTOMAN : guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN
 		: guardian_nebula(navi) ? navi - GUARDIAN_NEBULA_FIRST + BN5_NAVI_LARKMAN : -1;
 }
 /* His overworld sprite and mugshot in his game's lists 6 and 8 (the same

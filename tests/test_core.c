@@ -7631,6 +7631,9 @@ static void test_lab_text(void) {
 		"lab: a Navi's row and his versions' words (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
+	/* (Navis: Team ProtoMan's are BN5's AI 1-6 and the Darkloids its 13-16, as a guardian's battle and HP are read) */
+	CHECK(guardian_bn5_ai(GUARDIAN_TEAM_FIRST + 3) == BN5_NAVI_NAPALMMAN && guardian_bn5_ai(GUARDIAN_DARKLOID_FIRST) == BN5_NAVI_SHADEMAN &&
+		guardian_bn5_ai(GUARDIAN_OLDER_FIRST) == BN5_NAVI_COLONEL && guardian_bn5_ai(1) == -1, "lab: BN5's AI index of its Navis here");
 	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
 	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
 	char a[32], b[32];
