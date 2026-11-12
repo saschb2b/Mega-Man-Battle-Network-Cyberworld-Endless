@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T15:40:00Z
-* **Update**: game/battle-lab.md (Built: the stage takes every game's, BN5's and BN4's areas' battle backgrounds and installed songs on STAGE, each BN6 area's second background, how a set keeps them, the proof; the panels BN6 has no type for named as a move of their own), code/director.md (`lab_stage.c`).
