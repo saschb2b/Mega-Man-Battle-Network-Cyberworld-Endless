@@ -17,6 +17,7 @@
 #include "gfx.h"
 #include "guardians.h"
 #include "jukebox_text.h"
+#include "lab_navis.h"
 #include "lab_state.h"
 #include "lab_text.h"
 #include "pet_look.h"
@@ -82,12 +83,15 @@ static void field_draw(int x0, int y0) {
 		}
 }
 
-/* a foe's name in its version */
+/* a foe's name in its version (a Navi's with LAB_NAVI in it) */
 static void foe_name(int family, int version, char *out, size_t n) {
-	int id = enemy_id(0, family, version);
 	out[0] = 0;
+	if (version & LAB_NAVI) { lab_navi_name(family, version & ~LAB_NAVI, out, n); return; }
+	int id = enemy_id(0, family, version);
 	if (id >= 0) enemy_name(id, out, n);
 }
+
+static int row_version(const LabRow *r) { return r->version | (r->navi ? LAB_NAVI : 0); }
 
 static void info_text(char *s, size_t n) {
 	s[0] = 0;
@@ -106,15 +110,19 @@ static void info_text(char *s, size_t n) {
 	if (LS.at == LAB_AT_FIELD) {
 		int foe = lab_foe_at(LS.col, LS.line);
 		if (foe >= 0) foe_name(LS.set.foes[foe].family, LS.set.foes[foe].version, name, sizeof name);
-		if (LS.lifted && foe < 0 && r) {
-			foe_name(r->family, r->version, name, sizeof name);
-			lab_info_lifted(s, n, name, LS.set.nfoes, LAB_FOES);
+		if (LS.lifted && foe < 0 && r && !r->navi && lab_set_navi()) lab_info_alone(s, n);
+		else if (LS.lifted && foe < 0 && r) {
+			foe_name(r->family, row_version(r), name, sizeof name);
+			lab_info_lifted(s, n, name, r->navi ? 0 : LS.set.nfoes, LAB_FOES);
 		} else lab_info_panel(s, n, lab_panel_name(LS.set.panels[LS.line * LAB_COLS + LS.col]), name);
 	} else if (LS.page == LAB_PAGE_FOES && r) {
 		int hp = 0, damage = 0;
-		enemy_stats(enemy_id(0, r->family, r->version), &hp, &damage);
-		if (r->versions) lab_info_family(s, n, hp, r->count);
-		else lab_info_gauge(s, n, r->count, DATA_COMPLETE);
+		if (r->navi && r->versions) lab_info_navi(s, n, lab_navi_hp(r->family, r->version), r->count);
+		else if (r->navi) lab_info_gauge(s, n, r->count, lab_navi_need(r->family));
+		else if (r->versions) {
+			enemy_stats(enemy_id(0, r->family, r->version), &hp, &damage);
+			lab_info_family(s, n, hp, r->count);
+		} else lab_info_gauge(s, n, r->count, DATA_COMPLETE);
 	}
 }
 
@@ -146,11 +154,11 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 	char v[24], name[24];
 	if (LS.page == LAB_PAGE_FOES) {
 		const LabRow *r = &LS.roster[i];
-		foe_name(r->family, r->version, name, sizeof name);
+		foe_name(r->family, row_version(r), name, sizeof name);
 		look_text(f.x + 14, y, name, r->versions ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
-		if (r->versions) value_draw(f, y, lab_version_word(r->version), under && LS.at == LAB_AT_LIST, LOOK_TEXT);
+		if (r->versions) value_draw(f, y, r->navi ? lab_navi_version_word(r->family, r->version) : lab_version_word(r->version), under && LS.at == LAB_AT_LIST, LOOK_TEXT);
 		else {
-			lab_count_words(v, sizeof v, r->count, DATA_COMPLETE);
+			lab_count_words(v, sizeof v, r->count, r->navi ? lab_navi_need(r->family) : DATA_COMPLETE);
 			value_draw(f, y, v, false, LOOK_DIM);
 		}
 	} else if (LS.page == LAB_PAGE_FIELD) {
