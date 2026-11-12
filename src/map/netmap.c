@@ -327,9 +327,12 @@ static int floor_cb(int A, int B, const void *ctx) {
 int netmap_rise(void) { return nm_cur ? nm_cur->rise : 0; }
 
 static bool in_256;   /* (the layer's tiles 256-colour: BN4's) */
+static int map_256;   /* (... and the map its layers take over, group and number as BN6's MapId reads them) */
 
 void netmap_colours(void) {
-	if (!in_256) return;
+	/* (on the layer's own map alone: at home the next layer is built already, and Lan's HP, an internet map with the
+	 * net's very controls, is BN6's own 16-colour tiles, which the bit drew as noise, docs/rom/bn4.md) */
+	if (!in_256 || emu_read16(BN6_MAP_ID) != map_256) return;
 	/* (the map's alone: BN6's menus, main modes of their own, set BG1 and BG2 to the net's very controls for their
 	 * 16-colour tiles, the folder's screens as they open, or leave them as the map had them, a shop's and the Chip
 	 * Trader's: there the bit comes off again) */
@@ -486,6 +489,7 @@ static bool write_tilemap(const Learned *L) {
 	emu_write32(0x08000000u + L->desc + 8, TILEMAP_AT);
 	if (L->other && !install_gfx(L)) { free(out); return false; }
 	in_256 = L->other && area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
+	map_256 = L->def->over[0] | L->def->over[1] << 8;
 	tiles_vram(L);
 	free(out);
 	free(nm_last.map);

@@ -69,6 +69,10 @@
 - **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
   Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
   they look as on any other layer again.
+- **Fixed: Lan's HP before one of BN4's areas.** With BN4 Red Sun's ROM
+  beside BN6's, a visit home drew Lan's HP as scrambled magenta tiles
+  whenever the act ahead was one of BN4's areas, since 0.20.0. Home looks
+  as it should again.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
