@@ -1,0 +1,18 @@
+[
+ {
+  "name": "BstFang1 one volley",
+  "spec": "bn4_pa_bstfang1_miss",
+  "poke": [
+   "08C06994:00:1"
+  ],
+  "what": "record 614's subfamily 0 where BN4's BstFang1 is 1: one volley (7 x the subfamily + 1) where BN4 flies eight"
+ },
+ {
+  "name": "the volleys fewer",
+  "spec": "bn4_pa_bstfang1_miss",
+  "poke": [
+   "080ED500:2103"
+  ],
+  "what": "the state's copy's volleys a subfamily (movs r1,#7 at BN4 0x080ED500) made 3: four volleys where BN4 flies eight"
+ }
+]

@@ -131,7 +131,7 @@ def main():
         if a.most:
             print(f'{len(battles)} pairs left, {min(a.most, len(battles))} this run')
             battles = battles[:a.most]
-        a.modes = 'idle'
+        a.modes = 'fight' if a.modes == 'fight' else 'idle'   # (standing, the pairs' pass; --modes fight: fought, the pairs' cost)
     else:
         with open(a.file) as f:
             battles = [tuple(x.rstrip('\n').split('\t')[:2]) for x in f if x.strip() and not x.startswith('#')]

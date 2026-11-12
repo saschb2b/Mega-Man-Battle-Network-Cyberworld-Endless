@@ -1,0 +1,26 @@
+[
+ {
+  "name": "a BN4 recipe's kind another",
+  "spec": "bn4_pa_flmcros1",
+  "poke": [
+   "088013F7:04:1"
+  ],
+  "what": "FlmCros1's recipe (FREE_CHIP_PAS + 0xF6) read as BN6's kind 4, three ids listed, where it is kind 0, three of one chip: the ids after FlmLine1's are the next recipe's bytes, nothing formed"
+ },
+ {
+  "name": "FlmCros1 a line",
+  "spec": "bn4_pa_flmcros1",
+  "poke": [
+   "08C0688C:00:1"
+  ],
+  "what": "record 608's subfamily 0 where BN4's FlmCros1 is 1: three flames in a line (BN4_FLAME_LINE) where BN4 lays five in a cross (BN4_FLAME_CROSS)"
+ },
+ {
+  "name": "the cross's third flame misplaced",
+  "spec": "bn4_pa_flmcros1",
+  "poke": [
+   "080D0116:3101"
+  ],
+  "what": "the cross's copy's step to the panel below (adds r1,#2 at BN4 0x080D0116) made adds r1,#1: its third flame on the middle panel again"
+ }
+]

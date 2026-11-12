@@ -169,7 +169,7 @@ void xd4_panel_blinks(uint32_t at, uint8_t *in) {
 const Xd4Places xd4_places = { BN4_BATTLE_STATE, BN4_CUSTOM_WINDOW, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_T1_OBJECTS, BN4_T3_OBJECTS,
 	BN4_T4_OBJECTS, BN4_T1_COUNT, BN4_FIELD_PANELS, BN4_OBJECT_LIST, BN4_OBJECT_LIST_END, BN4_MPLAYS, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,
 	BN4_BATTLE_SIDE, BN4_COLL_PARALYSIS, BN4_COLL_FLAGS, BN4_COLL_STRUCK, BN4_AI_DATA, BN4_AI_DATA_SIZE, BN4_SPRITE_CACHE,
-	BN4_SPRITE_CACHE_SIZE };
+	BN4_SPRITE_CACHE_SIZE, BN4_BATTLE_DECK };
 
 /* (bn4.h's names, each BN6's twin by its body: docs/rom/bn4.md, The differential's hooks. BN4's viruses keep no AI data, so
  * its setAttack, which writes an AI data's attack variables in BN5 and BN6, is not hooked; its blink hides on its flash

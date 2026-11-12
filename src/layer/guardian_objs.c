@@ -83,9 +83,10 @@ static int guardian_chip(const GuardianStage *g, int *code) {
 
 /* What his Guardian Data says of the power it gives: a Cross's words
  * (powers.c), or BN5's guardian's Soul, for every battle of the run
- * (docs/game/meta/souls.md); BN4's gives none yet (docs/game/bosses/bn4-navis.md) */
+ * (docs/game/meta/souls.md); BN4's gives none yet (docs/game/bosses/bn4-navis.md), nor do BN5's
+ * Nebula Navis, their Navi chips their pay (docs/game/bosses/bn5-navis.md) */
 static const char *reward_power(int navi) {
-	if (guardian_bn4(navi)) return NULL;
+	if (guardian_bn4(navi) || guardian_nebula(navi)) return NULL;
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
 

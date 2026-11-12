@@ -1,0 +1,159 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "72@63",
+ "mm": "23",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Program Advance PitRng2 (its 333, the registry's 612: BN4's misc routine 0x0D, a unit of its own at BN6's grown misc routine 0x8D: its launcher, the fourth kind's 0x6C, throws three boomerangs, Boomer's unit's copy of the third kind's 0x32, sixteen frames apart), from three Boomer2 of codes in a row (L, M, N), formed on each game's first Custom screen from the three dealt side by side (deck4, deck6) and picked left to right: BN4's own checker forms it there (BN4_PA_CHECK), BN6's from its list grown with BN4's recipes (src/core/xchips_pas_bn4.c, src/emu/xchips_code.c pas_stage), the P.A. shown in both; used at fight frame 30 from (2,3) against BN4's Elmperor (300 HP, its enemy 0x72, which never moves) at (6,3): struck at t89, 50 HP left in both. (Against a Fire virus the Wood boomerang's collision data keeps BN6's own multiplier byte, its +0x74, which BN4's has no twin of.)",
+ "folder4": [
+  "164C",
+  "184C",
+  "1A4C"
+ ],
+ "folder6": [
+  "249:0B",
+  "249:0C",
+  "249:0D"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck4": [
+  "164C",
+  "184C",
+  "1A4C"
+ ],
+ "deck6": [
+  "249:0B",
+  "249:0C",
+  "249:0D"
+ ]
+}

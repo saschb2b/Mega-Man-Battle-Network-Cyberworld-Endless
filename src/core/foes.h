@@ -61,10 +61,8 @@ typedef struct {
 	FamilyMask from_families;
 	unsigned from_viruses;
 	/* another game's battle fought in BN6's engine (xbattles.h, issue #82):
-	 * its record there (0: BN6's own), and the foe that came from the
-	 * other net into it (1 + its index, 0 none: docs/multirom/one-net.md) */
+	 * its record there (0: BN6's own) */
 	uint32_t xrecord;
-	int visitor;
 	/* an encounter group's battle (groups.h; docs/game/progression/encounter-groups.md):
 	 * its template (1 + GROUP_*, 0 none), and of an act's arc (group_arc.h)
 	 * its beat (1 + ARC_*, 1 + ARC_BEATS the Server's challenge; 0 none) and

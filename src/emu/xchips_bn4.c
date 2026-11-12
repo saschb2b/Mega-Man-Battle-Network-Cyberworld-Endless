@@ -687,7 +687,7 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 	.types = sidbmbo_types, .ntypes = (int)(sizeof sidbmbo_types / sizeof *sidbmbo_types), \
 	.sound_calls = sidbmbo_sound_calls, .nsound_calls = (int)(sizeof sidbmbo_sound_calls / sizeof *sidbmbo_sound_calls), \
 	.sprites = sidbmbo_sprites, .nsprites = (int)(sizeof sidbmbo_sprites / sizeof *sidbmbo_sprites) }
-/* ---- Spreads: BN4's attack 0x1e (080EC761) as BN6's 0xd0; its chips 19 (588), 20 (589), 21 (590), 22 (591), 23 (592), 24 (593) ---- */
+/* ---- Spreads: BN4's attack 0x1e (080EC761) as BN6's 0xd0; its chips 19 (588), 20 (589), 21 (590), 22 (591), 23 (592), 24 (593), 321 (606), 322 (607) ---- */
 /* MegaMan's state 0x1e (080EC760-080EC842), the family of its chips' records: moved */
 /* its table 080CD524's kind 10: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
 /* its table 080CD524's kind 6: sprite 3:0xd in BN4, 0x73 in BN6 (copied) */
@@ -709,8 +709,8 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 /* its chip 18 has no row of the registry (the run's by name, or none) */
 /* its chip 192 is a dark chip of BN4's (row 594): a battle it is used in costs 20 max HP */
 /* its chip 192 (id 594) sits out: DrkSpred, a DarkChip of BN4's (the dark chips' session's: its kind 0xF of the shot's table and its price) */
-/* its chip 321 (id 606) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 322 (id 607) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 321 (id 606) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 322 (id 607) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock spreads_blocks[] = {
 	{ 0x080EC760, 0x080EC842, XC4_CODE + 0x1270, 0x6A2FF2DDu },
@@ -862,15 +862,15 @@ static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 
 	.sprites = spreads_sprites, .nsprites = (int)(sizeof spreads_sprites / sizeof *spreads_sprites), \
 	.effects = spreads_effects, .neffects = (int)(sizeof spreads_effects / sizeof *spreads_effects), \
 	.bytes = spreads_bytes, .nbytes = (int)(sizeof spreads_bytes / sizeof *spreads_bytes) }
-/* ---- FlmLine: BN4's attack 0x22 (080ECAAF) as BN6's 0xd1; its chips 12 (595), 13 (596), 14 (597) ---- */
+/* ---- FlmLine: BN4's attack 0x22 (080ECAAF) as BN6's 0xd1; its chips 12 (595), 13 (596), 14 (597), 329 (608), 330 (609), 331 (610) ---- */
 /* MegaMan's state 0x22 (080ECAAE-080ECB74), the family of its chips' records: moved */
 /* its third-kind 0x19 (080CFF80-080D014E), spawned through 080D00D8: no BN6 type proved its twin, moved */
 /* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
 /* its sprite 4:0xa (080CFFB2): BN6's 4:0x9b, copied */
 /* its sound 0x9d: BN4's song at slot 0x36, the families' slot for it (FAMILY_SLOTS) */
-/* its chip 329 (id 608) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 330 (id 609) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 331 (id 610) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 329 (id 608) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 330 (id 609) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 331 (id 610) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock flmline_blocks[] = {
 	{ 0x080ECAAE, 0x080ECB74, XC4_CODE + 0x1762, 0xACD55EB9u },
@@ -1035,16 +1035,16 @@ static const XcSong thunder_songs[] = { { 0xAD, 0x201 } };
 	.types = thunder_types, .ntypes = (int)(sizeof thunder_types / sizeof *thunder_types), \
 	.sound_calls = thunder_sound_calls, .nsound_calls = (int)(sizeof thunder_sound_calls / sizeof *thunder_sound_calls), \
 	.sprites = thunder_sprites, .nsprites = (int)(sizeof thunder_sprites / sizeof *thunder_sprites) }
-/* ---- TwnFng: BN4's attack 0x34 (080ED4C7) as BN6's 0xd3; its chips 69 (656), 70 (657), 71 (658) ---- */
+/* ---- TwnFng: BN4's attack 0x34 (080ED4C7) as BN6's 0xd3; its chips 69 (656), 70 (657), 71 (658), 335 (614), 336 (615), 337 (616) ---- */
 /* MegaMan's state 0x34 (080ED4C6-080ED572), the family of its chips' records: moved */
 /* its sprite 4:0x27 (080D79EC): BN6's 4:0x99, copied */
 /* its effect 0x15: 0xcb, as MokoRus moved it */
 /* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0xa6: BN4's song at slot 0x38, the families' slot for it (FAMILY_SLOTS) */
-/* its chip 335 (id 614) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 336 (id 615) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 337 (id 616) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 335 (id 614) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 336 (id 615) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 337 (id 616) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock twnfng_blocks[] = {
 	{ 0x080ED4C6, 0x080ED572, XC4_CODE + 0x1D02, 0x5BDE5F2Cu },
@@ -1120,15 +1120,15 @@ static const XcSong twnfng_songs[] = { { 0xA6, 0x38 } };
 	.imms = twnfng_imms, .nimms = (int)(sizeof twnfng_imms / sizeof *twnfng_imms), \
 	.types = twnfng_types, .ntypes = (int)(sizeof twnfng_types / sizeof *twnfng_types), \
 	.sprites = twnfng_sprites, .nsprites = (int)(sizeof twnfng_sprites / sizeof *twnfng_sprites) }
-/* ---- MagBolt: BN4's attack 0x59 (080EE013) as BN6's 0xd5; its chips 35 (642), 36 (643), 37 (644) ---- */
+/* ---- MagBolt: BN4's attack 0x59 (080EE013) as BN6's 0xd5; its chips 35 (642), 36 (643), 37 (644), 341 (620), 342 (621), 343 (622) ---- */
 /* MegaMan's state 0x59 (080EE012-080EE1A2), the family of its chips' records: moved */
 /* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
 /* its sound 0xb9 (080EE0E0, 080EE100): BN4's song copied into the grown song table's slot 0x203, on BN4's player 16 */
 /* its sound 0xf8 (080EE0DA): BN4's song copied into the grown song table's slot 0x202, on BN4's player 8 */
 /* 08012DAA: its call to 0800AF90 (bn4_twins.SIDED): its left and right by the object's side, BN6's way */
-/* its chip 341 (id 620) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 342 (id 621) sits out: a Program Advance, unformed until BN4's recipes are listed */
-/* its chip 343 (id 622) sits out: a Program Advance, unformed until BN4's recipes are listed */
+/* its chip 341 (id 620) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 342 (id 621) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 343 (id 622) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock magbolt_blocks[] = {
 	{ 0x080EE012, 0x080EE1A2, XC4_CODE + 0x1F62, 0x29ED9811u },
@@ -2265,6 +2265,52 @@ static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 	.sound_calls = elem_sound_calls, .nsound_calls = (int)(sizeof elem_sound_calls / sizeof *elem_sound_calls), \
 	.sprites = elem_sprites, .nsprites = (int)(sizeof elem_sprites / sizeof *elem_sprites), \
 	.bytes = elem_bytes, .nbytes = (int)(sizeof elem_bytes / sizeof *elem_bytes) }
+/* ---- PitRng: BN4's misc 0xd (080E9A37) as BN6's 0x8d; its chips 332 (611), 333 (612), 334 (613) ---- */
+/* its routine (080E9A36) lies in the fourth-kind 0x6c's code (080E999C-080E9A50), which it spawns: moved */
+/* its third-kind 0x32: Boomer's copy, the dispatch's 0x32, shared (its spawner copied) */
+/* its chip 332 (id 611) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 333 (id 612) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+/* its chip 334 (id 613) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
+
+static const XvBlock pitrng_blocks[] = {
+	{ 0x080E999C, 0x080E9A50, XC4_CODE + 0x4820, 0xA5D50BFEu },
+	{ 0x080D3430, 0x080D344E, XC4_CODE + 0x48E0, 0x1CB27713u },
+};
+static const XvData pitrng_data[] = {
+	{ 0x080E99AA, 0x080E99AC, XV_RAW },
+	{ 0x080E99AC, 0x080E99B0, XV_POOL },
+	{ 0x080E99B0, 0x080E99BC, XV_TABLE },
+	{ 0x080E99D6, 0x080E99D8, XV_RAW },
+	{ 0x080E99D8, 0x080E99DC, XV_POOL },
+	{ 0x080E99DC, 0x080E99E4, XV_TABLE },
+};
+static const XvPair pitrng_calls[] = {
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+};
+static const XvPair pitrng_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+};
+static const XvImm pitrng_imms[] = {
+	{ 0x080D3444, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E9A12, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E9A3A, THUMB_MOVS, 0, 0, 0x6C, 0x9C },   /* its object's type 0x6c: moved, the dispatch's 0x9c */
+	{ 0x080E9A46, THUMB_STRB, 2, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType pitrng_types[] = {
+	{ 4, 0x9C, XV_TYPE_MOVED, 0x6C },   /* BN4's fourth-kind 0x6c, moved, the dispatch's 0x9c */
+	{ 3, 0x32, XV_TYPE_SHARED4, 0x32 },   /* BN4's third-kind 0x32, Boomer's copy */
+};
+
+#define PITRNG_CODE { .name = "PitRng (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6800), \
+	.blocks = pitrng_blocks, .nblocks = (int)(sizeof pitrng_blocks / sizeof *pitrng_blocks), \
+	.data = pitrng_data, .ndata = (int)(sizeof pitrng_data / sizeof *pitrng_data), \
+	.calls = pitrng_calls, .ncalls = (int)(sizeof pitrng_calls / sizeof *pitrng_calls), \
+	.words = pitrng_words, .nwords = (int)(sizeof pitrng_words / sizeof *pitrng_words), \
+	.imms = pitrng_imms, .nimms = (int)(sizeof pitrng_imms / sizeof *pitrng_imms), \
+	.types = pitrng_types, .ntypes = (int)(sizeof pitrng_types / sizeof *pitrng_types) }
 /* ---- FirePlus: BN4's support 0x4c (080EAD2F) as BN6's 0xcc; its chips 285 (563) ---- */
 /* its fourth-kind 0x7f (080EAC98-080EAD54), which its routine (080EAD2E) spawns: moved */
 /* its fourth-kind 0x1f (080E4354-080E4584): no BN6 type of its body, moved with him */
@@ -2280,9 +2326,9 @@ static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its chip 288 (id 566) sits out: WoodPowr, left out by the owner's call 12 */
 
 static const XvBlock fireplus_blocks[] = {
-	{ 0x080EAC98, 0x080EAD54, XC4_CODE + 0x4820, 0x4F5D5678u },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x48E0, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4B10, 0x77CB1EA6u },
+	{ 0x080EAC98, 0x080EAD54, XC4_CODE + 0x4900, 0x4F5D5678u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x49C0, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4BF0, 0x77CB1EA6u },
 };
 static const XvData fireplus_data[] = {
 	{ 0x080EACA6, 0x080EACA8, XV_RAW },
@@ -2320,13 +2366,13 @@ static const XvPair fireplus_words[] = {
 static const XvImm fireplus_imms[] = {
 	{ 0x080E441C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
 	{ 0x080E444C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
-	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x9C },   /* its object's type 0x1f: moved, the dispatch's 0x9c */
-	{ 0x080EAD32, THUMB_MOVS, 0, 0, 0x7F, 0x9D },   /* its object's type 0x7f: moved, the dispatch's 0x9d */
+	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x9D },   /* its object's type 0x1f: moved, the dispatch's 0x9d */
+	{ 0x080EAD32, THUMB_MOVS, 0, 0, 0x7F, 0x9E },   /* its object's type 0x7f: moved, the dispatch's 0x9e */
 	{ 0x080EAD42, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 };
 static const XvType fireplus_types[] = {
-	{ 4, 0x9C, XV_TYPE_MOVED, 0x1F },   /* BN4's fourth-kind 0x1f, moved, the dispatch's 0x9c */
-	{ 4, 0x9D, XV_TYPE_MOVED, 0x7F },   /* BN4's fourth-kind 0x7f, moved, the dispatch's 0x9d */
+	{ 4, 0x9D, XV_TYPE_MOVED, 0x1F },   /* BN4's fourth-kind 0x1f, moved, the dispatch's 0x9d */
+	{ 4, 0x9E, XV_TYPE_MOVED, 0x7F },   /* BN4's fourth-kind 0x7f, moved, the dispatch's 0x9e */
 };
 static const XvByte fireplus_bytes[] = {
 	{ 0x080E42B4, 0x09, 0x05 },   /* its table's row 0x6: +0x0 0x9 in BN4, 0x5 in BN6 */
@@ -2343,7 +2389,7 @@ static const XvSoundCall fireplus_sound_calls[] = {
 static const XcSong fireplus_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F } };
 
 #define FIREPLUS_CODE { .name = "FirePlus (BN4's)", .game = XROM_BN4_RED_SUN_US, \
-	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6800), \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6C00), \
 	.blocks = fireplus_blocks, .nblocks = (int)(sizeof fireplus_blocks / sizeof *fireplus_blocks), \
 	.data = fireplus_data, .ndata = (int)(sizeof fireplus_data / sizeof *fireplus_data), \
 	.calls = fireplus_calls, .ncalls = (int)(sizeof fireplus_calls / sizeof *fireplus_calls), \
@@ -2379,6 +2425,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_NAVI, 0x05, 0x85, 0x080B9B1D, XC4_HOMES + 0x5C00, GUTSMANCHIP_CODE, gutsmanchip_songs, (int)(sizeof gutsmanchip_songs / sizeof *gutsmanchip_songs), 2, 0 },
 	{ XCHIP_ATTACK, 0x1F, 0xFD, 0x080EC843, XC4_HOMES + 0x6000, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x60, 0xFE, 0x080EE2AF, XC4_HOMES + 0x6400, ELEM_CODE, elem_songs, (int)(sizeof elem_songs / sizeof *elem_songs), 0, 0 },
-	{ XCHIP_SUPPORT, 0x4C, 0xCC, 0x080EAD2F, XC4_HOMES + 0x6800, FIREPLUS_CODE, fireplus_songs, (int)(sizeof fireplus_songs / sizeof *fireplus_songs), 0, 0 },
+	{ XCHIP_MISC, 0x0D, 0x8D, 0x080E9A37, XC4_HOMES + 0x6800, PITRNG_CODE, NULL, 0, 0, 0 },
+	{ XCHIP_SUPPORT, 0x4C, 0xCC, 0x080EAD2F, XC4_HOMES + 0x6C00, FIREPLUS_CODE, fireplus_songs, (int)(sizeof fireplus_songs / sizeof *fireplus_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

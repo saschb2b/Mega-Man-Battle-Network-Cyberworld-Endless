@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T22:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -42,6 +42,11 @@ The calls:
    chip sitting out, no code read as another. It stays as the reference
    the differential compares with (`build.py xdiff`).
 2. **Territories keep their identity; the nets meet at their seams.**
+   (Since 12 November 2026 the seams are the acts' arcs: the visitors and
+   the deep's coin below are replaced by
+   [encounter groups](../game/progression/encounter-groups.md), a family
+   of another net coming as an act's signature or its partner. What
+   follows is the design as it stood, kept for what it measured.)
    - *Visitors:* from act 2 on, where BN5's ROM is read, one battle in four
      takes one virus of the other net in place of one of its own: on its
      panel, a family whose version keeps the battle in its band, standing

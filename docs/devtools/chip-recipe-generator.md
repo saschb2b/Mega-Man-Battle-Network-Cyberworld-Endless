@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---
 
 # The chip recipe generator
@@ -181,7 +181,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   own where it is a routine by itself (Repair's), its number 0x80 + the
   subfamily in BN6's misc routines grown (`XC4_MISC`). One that lies in
   a third-kind type's code moves that type with it (Counter's, in its
-  hit's). `IMMS` holds the
+  hit's), and one that lies in a fourth-kind type's code moves that
+  type (Meteors' controller, PitRng's launcher). `IMMS` holds the
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
@@ -210,7 +211,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `UNITS` (`SHARED3`: MegaMan's arm, the Spreads unit's): a unit after
   it copies the type's spawner alone, a block of its own, its spawn the
   owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
-  table's kinds are every unit's. A routine the families pair with BN6's
+  table's kinds are every unit's (the boomerang too, Boomer's copy,
+  which PitRng's launcher throws). A Program Advance's row (`XREG_PA`) that names the
+  unit (`tools/xreg_bn4.py` `PAS`) is one of its chips; one that names
+  none sits out. A routine the families pair with BN6's
   own that a chip's unit moves instead, with its type, is named in
   `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
   unit copies where the pair's answers differ, for that unit alone, in

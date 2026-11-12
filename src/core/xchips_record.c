@@ -120,9 +120,9 @@ void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
 		out[BN6_CHIP_SUBFAMILY] = in->reg->sub != 0xFF ? in->reg->sub : in->twin[BN6_CHIP_SUBFAMILY];
 		out[BN6_CHIP_LOCK_ON] = in->twin[BN6_CHIP_LOCK_ON];
 		out[BN6_CHIP_LOCK_ON_TYPE] = in->twin[BN6_CHIP_LOCK_ON_TYPE];
-	} else if (in->reg->how == XREG_MOVED) {
+	} else if (in->reg->how == XREG_MOVED || (in->reg->how == XREG_PA && in->reg->sub != 0xFF)) {
 		/* (its code moved, src/emu/xchips_bn4.h: BN6's support family, or its misc family for a chip of BN4's, the unit's routine its subfamily; its parameters,
-		 * lock-out and power BN4's own, no lock-on of BN6's) */
+		 * lock-out and power BN4's own, no lock-on of BN6's; a Program Advance whose row names its unit the same way) */
 		if (in->reg->sub >= XREG4_FIRST_ATTACK) {
 			/* (an attack family of BN4's moved, a state of its MegaMan's: the unit's number its family, its subfamily BN4's own) */
 			out[BN6_CHIP_FAMILY] = in->reg->sub;

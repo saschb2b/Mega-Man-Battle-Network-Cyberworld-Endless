@@ -8,10 +8,11 @@
 /* Every navi number a record is kept for: BN6's, the super bosses, BN5's
  * and its Darkloids, BN4's (guardians.h's GUARDIAN_BN4_FIRST, 34, and its
  * 25 seats, to 58), BN5's Team ProtoMan (GUARDIAN_TEAM_FIRST, 59, to 64:
- * DarkProto and the five, docs/game/team-protoman.md): rivals.sav's fourth
- * version, "CWR4", the third's 59 and the first two's 32 read into it
- * (rivals.c) */
-#define RIVAL_NAVIS 65
+ * DarkProto and the five, docs/game/team-protoman.md), BN5's Nebula Navis
+ * (GUARDIAN_NEBULA_FIRST, 65, and 66: LarkMan and GridMan):
+ * rivals.sav's fifth version, "CWR5", the fourth's 65, the third's 59 and
+ * the first two's 32 read into it (rivals.c) */
+#define RIVAL_NAVIS 67
 
 enum { RIVAL_NONE, RIVAL_MEGAMAN_WON, RIVAL_NAVI_WON };
 

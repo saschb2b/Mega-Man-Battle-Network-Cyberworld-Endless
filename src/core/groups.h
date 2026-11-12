@@ -46,6 +46,13 @@ enum {
 #define GROUP_POOL_MAX 128
 #define GROUP_SIZE 3         /* a group's families at most (a swarm: three of one) */
 
+/* Several of one family together, as measured at V1 (the multiples' pass,
+ * tools/encounter_data/multiples.tsv): their pressure and their cost,
+ * each one more than the number (0: not measured, the one's taken times
+ * their number). What two of a kind do together is not twice what one
+ * does: two panel breakers leave MegaMan no floor. */
+typedef struct { int16_t pressure1, cost1; } GroupMulti;
+
 /* One version of a family: its enemy id (-1: none), HP, hardest hit and
  * element (data.h's ELEM_*, 0 none) */
 typedef struct { int16_t id, hp, hit; int8_t elem; } GroupVer;
@@ -61,11 +68,12 @@ typedef struct {
 	GroupVer ver[GROUP_VERSIONS];
 	int16_t cost;        /* the HP the test autopilot loses deleting its V1 alone with the starting folder (50 seconds at most);
 	                      * -1 not measured */
+	GroupMulti multi[2]; /* two of it together, and three, as measured (GroupMulti) */
 } GroupFam;
 
 /* A family's measured tags (group_tags.c, written by tools/encounter_tags.py
  * engine from tools/encounter_data/families.tsv): numbers alone */
-typedef struct { int8_t net; int16_t family; int16_t pressure; uint8_t tricks; int16_t cost; } GroupTag;
+typedef struct { int8_t net; int16_t family; int16_t pressure; uint8_t tricks; int16_t cost; GroupMulti multi[2]; } GroupTag;
 extern const GroupTag group_tags[];
 extern const int group_tags_count;
 /* ... of net `net`'s family `family`, NULL where it was not measured */
@@ -73,11 +81,20 @@ const GroupTag *group_tag(int net, int family);
 /* Two families that press harder together than their own pressures add
  * up to (the pairs' pass, tools/encounter_danger.py pairs: every two of
  * the pool fought once at V1), and by how much in 20 seconds */
-typedef struct { int8_t net_a; int16_t family_a; int8_t net_b; int16_t family_b; int16_t extra; } GroupPair;
+typedef struct { int8_t net_a; int16_t family_a; int8_t net_b; int16_t family_b; int16_t extra, cost; } GroupPair;
 extern const GroupPair group_pairs[];
 extern const int group_pairs_count;
-/* ... of the two families (either way round), 0 where they do not */
+/* ... of the two families (either way round), 0 where they do not; and
+ * what the two cost the test autopilot together past their own costs
+ * added up (the pairs' cost pass: every pair fought once), 0 none */
 int group_pair_extra(int net_a, int family_a, int net_b, int family_b);
+int group_pair_cost(int net_a, int family_a, int net_b, int family_b);
+
+/* The caps by act (0-5, 6 the Nest) on a group's pressure and on its cost:
+ * the three-quarter marks of what the act's areas' own battles are
+ * predicted to press and to cost, written with the tags they are
+ * predicted from (group_tags.c), so the rule and its numbers stay one */
+extern const int16_t group_caps[2][PACING_ACTS];
 
 /* BN6's battlefields a group may stand on (group_tags.c, the fields' pass
  * of tools/encounter_danger.py: one pair that is harmless on the plain
@@ -167,6 +184,10 @@ bool group_in_pool(const GroupFam *f, const GroupLimits *l);
  * once a group and a pair of alike slots once: each handed to `each`
  * (NULL: counted alone) in a fixed order; how many. No random numbers. */
 int group_fillings(const GroupFam *pool, int n, const GroupLimits *l, int t, void (*each)(const GroupFill *g, void *ctx), void *ctx);
+/* ... those that hold pool family `with` alone (-1: all), in the same
+ * order: only they are fitted, so an act's arc costs a fraction of the
+ * whole walk (group_arc.h) */
+int group_fillings_with(const GroupFam *pool, int n, const GroupLimits *l, int t, int with, void (*each)(const GroupFill *g, void *ctx), void *ctx);
 /* One of them, each as likely as any, by `roll` (any 32 bits: a layer's
  * seed and the battle's index mixed, so a checkpoint rolls the same):
  * false where the pool fills the template in no way */

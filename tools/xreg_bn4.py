@@ -94,7 +94,23 @@ NAVI = {
 }
 NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
 MOVED.update(NAVI)
+# BN4's Program Advances whose code is moved, a subfamily of a moved unit's (the attack families' states hold theirs; a misc
+# routine of its own): BN4's id -> the unit's number, as MOVED's, which its record takes the same way. A row stays XREG_PA
+# (no folder chip, no pack entry); its recipes are listed (src/core/xchips_pas_bn4.c) once it is here and every part of
+# them plays, each proved by its bn4_pa_* spec against BN4's own battle first
+PAS = {
+    321: 0xD0, 322: 0xD0,   # HeatSprd, BubSprd: the spread family's state, its subfamilies 1 and 2 with the shot's kinds 0xB and 7 (bn4_pa_heatsprd, bn4_pa_bubsprd)
+    329: 0xD1, 330: 0xD1, 331: 0xD1,   # FlmCros1-3: FlmLine's state, its subfamily 1 (bn4_pa_flmcros1-3)
+    335: 0xD3, 336: 0xD3, 337: 0xD3,   # BstFang1-3: TwnFng's state, its subfamily 1 (bn4_pa_bstfang1-3)
+    341: 0xD5, 342: 0xD5, 343: 0xD5,   # MagShok1-3: MagBolt's state, its subfamily 3 (bn4_pa_magshok1-3)
+    332: 0x8D, 333: 0x8D, 334: 0x8D,   # PitRng1-3: BN4's misc 0x0D, a unit of its own (its launcher, the boomerangs Boomer's; bn4_pa_pitrng1-3)
+}
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
+# BN4's list of its Program Advances' recipes (src/emu/bn4_battle.h BN4_PA_LIST, its word BN4_PA_LIST_REF; docs/rom/bn4.md):
+# a recipe's count, its kind (0: that many of one chip, codes in a row; else BN4_PA_KIND_LISTED: these ids in this order,
+# BN6's kind 4 by its checker's body), the Program Advance, its part or parts
+BN4_PA_LIST, BN4_PA_LIST_REF, PA_KIND_SAME, PA_KIND_IDS = 0x080212B0, 0x0801F4E0, 0, 4
+OUT_PAS = os.path.join(ROOT, 'src', 'core', 'xchips_pas_bn4.c')
 
 # BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)
 FIRST = (
@@ -247,7 +263,7 @@ def text(rws):
     L = [HEAD]
     for x, to, how, rec, nm in rws:
         codes = ', '.join(f'0x{c:02X}' for c in rec[0:4])
-        twin, sub = ON_BN6.get(x, (NAVI_TWIN if x in NAVI else 0, MOVED.get(x)))
+        twin, sub = ON_BN6.get(x, (NAVI_TWIN if x in NAVI else 0, PAS.get(x) if how == 'XREG_PA' else MOVED.get(x)))
         L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
     L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
     L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')
@@ -260,20 +276,79 @@ def text(rws):
     return ''.join(L)
 
 
+HEAD_PAS = '''/* xchips_pas_bn4.c: BN4 Red Sun's Program Advances of the chip registry (XREG_PA, xchips_registry_bn4.c) whose code is
+ * moved (tools/xreg_bn4.py PAS), their recipes as BN4's list has them (BN4_PA_LIST), in BN6's chip ids and BN6's kinds
+ * (BN4's listed kind BN6's 4), every part a chip that plays; written by tools/xreg_bn4.py from BN4's ROM and its rows, for
+ * BN6's list grown with them after BN5's (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
+#include "xchips_pas.h"
+
+const XChipPa xchips_pas4[] = {
+'''
+
+
+def pa_recipes(r, rws):
+    """BN4's recipes, in its list's order: (its entry, n, BN6's kind, BN4's PA, BN4's parts)"""
+    b = r['bn4']
+    u8, u16, u32 = (lambda a: b[a - 0x08000000]), (lambda a: struct.unpack_from('<H', b, a - 0x08000000)[0]), \
+        (lambda a: struct.unpack_from('<I', b, a - 0x08000000)[0])
+    if u32(BN4_PA_LIST_REF) != BN4_PA_LIST:
+        sys.exit(f'xreg_bn4: BN4\'s Program Advances\' list is not at {BN4_PA_LIST:08X}')
+    out, k = [], 0
+    while u32(BN4_PA_LIST + 4 * k):
+        p = u32(BN4_PA_LIST + 4 * k)
+        n, kind = u8(p), PA_KIND_IDS if u8(p + 1) else PA_KIND_SAME
+        out.append((p, n, kind, u16(p + 2), [u16(p + 4 + 2 * j) for j in range(n if kind == PA_KIND_IDS else 1)]))
+        k += 1
+    return out
+
+
+def pas_text(r, rws):
+    """the recipes' file, and the registry's Program Advances that wait: {its name: why}"""
+    row = {x: (to, how, nm) for x, to, how, rec, nm in rws}
+    plays = lambda x: x in row and row[x][1] in ('XREG_RECORD', 'XREG_MOVED')   # noqa: E731
+    L, waits = [HEAD_PAS], {}
+    for x in PAS:
+        if row.get(x, (0, ''))[1] != 'XREG_PA':
+            sys.exit(f'xreg_bn4: PAS {x} is no Program Advance of the rows')
+    for p, n, kind, pa, parts in pa_recipes(r, rws):
+        if row.get(pa, (0, ''))[1] != 'XREG_PA':
+            continue   # (BN6's own by name, or the registry's of BN5's: the run's recipes)
+        out_of = [row[x][2] if x in row else f'BN4 {x}' for x in parts if not plays(x)]
+        if pa not in PAS or out_of:
+            waits.setdefault(row[pa][2], ('its parts ' + ', '.join(out_of)) if out_of else 'its own code')
+            continue
+        ids = ', '.join(str(row[x][0]) for x in parts) + ', 0' * (4 - len(parts))
+        how = f'{n} {row[parts[0]][2]} of codes in a row' if kind == PA_KIND_SAME else ' + '.join(row[x][2] for x in parts)
+        L.append(f'\t{{ 0x{p:08X}, {n}, {kind}, {row[pa][0]}, {{ {ids} }} }},   /* {row[pa][2]}: {how} */\n')
+    if len(L) == 1:
+        L.append('\t{ 0, 0, 0, 0, { 0, 0, 0, 0 } },   /* (none yet: no row read, the count 0) */\n')
+        L.append('};\nconst int xchips_pas4_count = 0;\n')
+    else:
+        L.append('};\nconst int xchips_pas4_count = (int)(sizeof xchips_pas4 / sizeof *xchips_pas4);\n')
+    return ''.join(L), waits
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--check', action='store_true')
     a = ap.parse_args()
-    rws = rows(roms())
+    r = roms()
+    rws = rows(r)
     t = text(rws)
+    tp, waits = pas_text(r, rws)
     if a.check:
-        with open(OUT, encoding='utf-8') as f:
-            if f.read() != t:
-                sys.exit('xreg_bn4: src/core/xchips_registry_bn4.c is not what the ROMs give (python3 tools/xreg_bn4.py)')
-        print('xreg_bn4: the file is what the ROMs give')
+        for path, want in ((OUT, t), (OUT_PAS, tp)):
+            with open(path, encoding='utf-8') as f:
+                if f.read() != want:
+                    sys.exit(f'xreg_bn4: {os.path.relpath(path, ROOT)} is not what the ROMs give (python3 tools/xreg_bn4.py)')
+        print('xreg_bn4: the files are what the ROMs give')
         return
     with open(OUT, 'w', encoding='utf-8') as f:
         f.write(t)
+    with open(OUT_PAS, 'w', encoding='utf-8') as f:
+        f.write(tp)
+    for nm, why in waits.items():
+        print(f'xreg_bn4: {nm} waits: {why}')
     folder = sum(1 for r in rws if r[2] != 'XREG_PA')
     print(f'xreg_bn4: {len(rws)} rows ({folder} folder chips, {len(rws) - folder} Program Advances), ids to {max(r[1] for r in rws)}')
 

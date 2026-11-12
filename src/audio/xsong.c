@@ -469,6 +469,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	/* (Team ProtoMan's from 0x43 up, the Darkloids needing none past 0xE3: GyroMan's three, Meddy's, MagnetMan's; docs/game/team-protoman.md) */
 	{ XROM_BN5_COLONEL_US, 0x103, 0x43 }, { XROM_BN5_COLONEL_US, 0x104, 0x44 }, { XROM_BN5_COLONEL_US, 0x14C, 0x45 },
 	{ XROM_BN5_COLONEL_US, 0xE0, 0x46 }, { XROM_BN5_COLONEL_US, 0x100, 0x47 },
+	/* (Nebula's LarkMan's after them: docs/multirom/navis.md, LarkMan) */
+	{ XROM_BN5_COLONEL_US, 0x13C, 0x48 },
 	/* (BN5's battles' win songs, its Victory and Fanfare, on its areas' layers: src/director/win_song.c; the Darkloids' next from 0x43) */
 	{ XROM_BN5_COLONEL_US, BN5_SONG_VICTORY, 0x41 }, { XROM_BN5_COLONEL_US, BN5_SONG_FANFARE, 0x42 },
 	/* BN4's families' (tools/xrecipe_bn4.py's SOUND_SLOTS, by install order from the themes' top down: Spikey's, Shrimpy's,
