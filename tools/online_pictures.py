@@ -48,6 +48,9 @@ SHOTS = {
     'online-trade': ('trade', 'deal', 30),      # the chip trade, MegaMan's question, the cursor on Yes
     'online-battle': ('battle', 'kei', 396),    # a NetBattle, Kei's side: Mira's charged shot, Kei's flash
     'online-stands': ('battle', 'dex', 474),    # Dex in the stands watching it (Kei's shot landing), the referee's keys under it
+    'online-pet': ('pet', 'kei', 130),          # 0.21.0: START in the Square opens BN6's PET there, the plaza behind it
+    'online-pet-folder': ('pet', 'kei', 330),   # ... and its Chip Folder, opened in the Square
+    'online-netpass-bn4': ('grown', 'kei', 255),   # 0.21.0: the pass after BN4's stamps landed, three games in
 }
 
 # docs/screenshots/NAME.png of the browser, by tools/online_browser_picture.py
@@ -60,8 +63,13 @@ CLIPS = {
     'online-netpass': ('gate', 'kei', 150, 430, 360),     # the greeter's STAMP,STAMP,STAMP!, the stamps landing
     'online-trade': ('trade', 'deal', 0, 185, 30),        # Yes, waiting on Beta, the cards crossing
     'online-battle': ('battle', 'kei', 296, 616, 396),    # charged shots both ways, from Kei's side
+    'online-pet': ('pet', 'kei', 40, 420, 130),           # 0.21.0: START in the Square, the PET's menu, its Chip Folder, a folder's chips
+    'online-netpass-bn4': ('grown', 'kei', 15, 290, 255),   # 0.21.0: the greeter on the grown set, the stamps landing again with BN4's ROM
 }
 
+
+# (a pass stamped full since BN4 joined the set: no greeter's ceremony; cut.STAMPED's, written before it, brings his word on the grown set)
+FULL_SET = {'netpass.ini': 'stamps=4\ngames=3\n'}
 
 # ---- the scenes: the Square of seed 120 (Central Area, the Undernet's
 # statue ringed by braziers), its panels from square_plan.c ----
@@ -162,6 +170,31 @@ def battle_scene():
     ]}
 
 
+def pet_scene():
+    """Kei in the Square with the full pass (0.21.0, the PET in the Net
+    Square): START opens BN6's PET there, A its Chip Folder, A a folder's
+    menu, A its chips."""
+    v = cut.Visit(0)
+    v.at(6, '6:START,')
+    v.at(9, '6:A,')
+    v.at(11, '6:A,')
+    v.at(13, '6:A,')
+    v.at(18)
+    return dict(name='kei', operator='Kei', script=v.s, files=FULL_SET, first=v.frame(4), last=v.t)
+
+
+def grown_scene():
+    """Kei's first visit since BN4 Red Sun joined the NetPass's full set
+    (0.21.0), every ROM in his folder and a pass stamped full before it
+    (netpass.ini without its games): the greeter's word, STAMP,STAMP,STAMP!,
+    the pass open and its stamps landing again, BN4's slot in."""
+    v = cut.Visit(0)
+    v.at(3.5, '6:A,')
+    v.at(6, '6:A,')
+    v.at(12)
+    return dict(name='kei', operator='Kei', script=v.s, files=cut.STAMPED, first=v.frame(1), last=v.t)
+
+
 def online_scenes():
     """The scenes the pictures come from (trailer_online.capture's); the
     chip trade is Trade Central's two screens as the trade dev step opens
@@ -169,6 +202,8 @@ def online_scenes():
     return {
         'gate': {'seed': SEED, 'weeks': cut.WEEK, 'games': [gate_scene()]},
         'meet': {'seed': SEED, 'games': [meet_game(i) for i in range(8)]},
+        'pet': {'seed': SEED, 'games': [pet_scene()]},
+        'grown': {'seed': SEED, 'games': [grown_scene()]},
         'battle': battle_scene(),
         'trade': cut.online_scenes()['trade'],
     }

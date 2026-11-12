@@ -143,7 +143,7 @@ int pacing_groups_report(FILE *out) {
 	const GroupFam *pool;
 	int n = group_pool(&pool), flagged = 0;
 	unsigned have = group_nets();
-	fprintf(out, "\nEncounter groups (docs/game/progression/encounter-groups.md; behind --dev groups, no run holds one): %d families\n"
+	fprintf(out, "\nEncounter groups (docs/game/progression/encounter-groups.md; the battles an act's arc is built from): %d families\n"
 		"in the pool. Each ROM set's pool by act (acts 1 to 6, the Nest) and how many ways each template fills, a group held\n"
 		"to the act's band, its cap on one hit, its pressure cap (%d %d %d %d %d %d, the Nest %d) and its cap on cost (%d %d %d %d %d %d, %d).\n", n,
 		group_pressure_cap(0), group_pressure_cap(1), group_pressure_cap(2), group_pressure_cap(3), group_pressure_cap(4), group_pressure_cap(5),
@@ -323,7 +323,7 @@ static int arcs_apart_report(FILE *out) {
 
 int pacing_arcs_report(FILE *out) {
 	int flagged = 0;
-	fprintf(out, "\nThe acts' arcs (group_arc.h; behind --dev arc, no run holds one): %d runs' arcs an act's area, by their seeds. How\n"
+	fprintf(out, "\nThe acts' arcs (group_arc.h; every run's, --dev noarc without): %d runs' arcs an act's area, by their seeds. How\n"
 		"many acts have one, the share whose signature is one of the area's own (three quarters of act 1's, half, a third, a\n"
 		"quarter; the deep any family), how many families were a signature, the most pressure of each beat against its cap, and\n"
 		"the Server's challenge (the share of arcs with one, its most pressure); OVER where a beat lies past a limit.\n", ARCS);

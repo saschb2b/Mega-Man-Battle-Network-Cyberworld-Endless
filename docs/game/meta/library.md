@@ -3,7 +3,7 @@ type: Design
 title: "The Library, a page per entry"
 description: "The chip Library as a dex over the entries: the PET's Library row opens a screen of ours, BN6's own Library to the pixel, with pages for BN6, BN5 and BN4, each game's own Library in its own order and numbers, counting what a run can hand out; the owner's calls, what each page lists today, what the vaults and the title's marks count, and what is left out."
 tags: [game, meta, pet, multirom]
-generated: { by: claude/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6"
@@ -120,6 +120,11 @@ Measured from the three ROMs and the registry by `tools/library_pages.py
 | BN6 | 200 | 39 | 10 | 249 | all |
 | BN5 (Team Colonel) | 180 of its 180 | 57 of its 60 | 4 of its 7 | 241 | 104 (85, 16, 3) |
 | BN4 (Red Sun) | 88 of its 186 | 23: 17 of its 60, 6 of Blue Moon's | 4: 2 of its 5, 2 of Blue Moon's | 115 | 78 (61, 14, 3) |
+
+The BN4 row is that day's, when none of BN4's own chips played. Each of
+its own that plays is listed since (below), so its page holds more than
+the row says; `--report` counts the table's slots (274 for BN4, its own
+160 among them), not which of them play.
 
 BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other
 36 are BN5's own of its name (26, 9, 1). BN4's own 160 chips (99, 56, 5)

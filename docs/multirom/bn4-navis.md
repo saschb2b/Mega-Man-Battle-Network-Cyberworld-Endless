@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -700,7 +700,9 @@ sound at another pool slot, and his cloud on another animation. He is
 not yet in the tournament's list of proved BN4 Navis. A line there takes
 his plate on BN4's bracket (`BN4_ENTRANT_ID`), and of ids 0x00-0x16 only
 GutsMan's, AquaMan's, Roll's, SearchMan's and KendoMan's are named
-([BN4's tournament screens](bn4-tournament.md)).
+([BN4's tournament screens](bn4-tournament.md)). (So it stood that day:
+his plate is named and he is in the list since 8 November 2026,
+[The tournament](../game/tournament.md), as built.)
 
 ## WindMan built
 
@@ -802,7 +804,9 @@ made 0 in BN6's copy (`--poke 080CCD0E:2200`) still PASSes, the state 0
 they begin in leading to the same 8 before the fight. The interim that runs
 4 as 0 stays as the Companions section says, unproved either way.
 
-**Not yet in the tournament's `proved[]`**: a line there needs his plate on
+**Not yet in the tournament's `proved[]`** (then; in it since 8 November
+2026, his plate named: [The tournament](../game/tournament.md), as
+built): a line there needs his plate on
 BN4's bracket (`BN4_ENTRANT_ID`), and [BN4's tournament
 screens](bn4-tournament.md) names five plates by sight, his not among them.
 A match of each plate's colours against the Navis' battle sprites' failed
@@ -918,7 +922,9 @@ legit.json and every mutation is kept: merged, every spec holds its
 verdict (the eighteen BN4 family specs, the four Navis' and every BN4
 control PASS) and `--mutations` catches 201 of 201.
 
-**Not yet in the tournament's pool**: `src/layer/xguardian_bn4.c`'s line
+**Not yet in the tournament's pool** (then; in it since 8 November 2026,
+his plate named: [The tournament](../game/tournament.md), as built):
+`src/layer/xguardian_bn4.c`'s line
 needs his plate on BN4's bracket (`BN4_ENTRANT_ID`), and his is not named.
 By sight only GutsMan's 0x00, AquaMan's 0x03, Roll's 0x04, SearchMan's
 0x09 and KendoMan's 0x11 are ([BN4's tournament screens](bn4-tournament.md));
