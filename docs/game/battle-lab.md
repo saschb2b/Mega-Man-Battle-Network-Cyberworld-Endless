@@ -584,6 +584,9 @@ is used.
     MegaMan's", BN6's Custom screen, L out. The work RAM's hash after
     the editor and after the battle the one before opening (45e79931),
     the run untouched.
+  - With it, the Navi list no longer shows a number BN6's engine has an
+    enemy for and the run no guardian (a "???" row of 4000 HP on the
+    dev list).
   - Not yet: MegaMan's Regular chip is the run's still, whatever stands
     at its place in the Lab's folder; a chip of a game whose ROM is not
     read stays in a kept folder as its placeholder.
