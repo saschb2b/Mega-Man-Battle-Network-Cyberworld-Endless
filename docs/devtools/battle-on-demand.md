@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "A battle on demand"
-description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status`, `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
+description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T12:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 ---
 
 # A battle on demand
@@ -150,6 +150,12 @@ id's (`0:status paralysis 60 BB`). It prints how many it struck, and
 names none outside a battle. It puts a family moved into the engine
 through BN6's generic states, which the fight alone never reaches
 ([BN6's battles](../rom/battle.md), Statuses as a hit leaves them).
+`status panel C R TYPE` (`0:status panel 2 2 15`) sets the field's
+panel at column C, row R to BN6's type TYPE instead, its type and the
+type it is drawn as: the engine's own types and those it is given past
+12, BN5's lava (13) and sea (14) and BN4's Hole (15), to see a panel
+drawn and stood on before a chip that makes it moves
+([BN4's chips](../multirom/bn4-chips.md), The dark units).
 
 `tools/xcontrol.py` copies BN6's ROM alone into `.build/xcontrol/rom`
 (no family, Navi or chip of BN5's in its battles) and runs its

@@ -11,6 +11,7 @@
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xnavi_recipe.h"
 
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
 /* its fourth-kind 0x4f (080E79B8-080E7BF0), which its routine (080E7A58) spawns: moved */
@@ -1888,6 +1889,178 @@ static const XcSong ligtnin_songs[] = { { 0x120, 0x240 }, { 0x13E, 0x241 }, { 0x
 	.sprites = ligtnin_sprites, .nsprites = (int)(sizeof ligtnin_sprites / sizeof *ligtnin_sprites), \
 	.effects = ligtnin_effects, .neffects = (int)(sizeof ligtnin_effects / sizeof *ligtnin_effects), \
 	.bytes = ligtnin_bytes, .nbytes = (int)(sizeof ligtnin_bytes / sizeof *ligtnin_bytes) }
+/* ---- Hole: BN4's support 0xb (080E45F7) as BN6's 0x8b; its chips 82 (527), 216 (528), 193 (562) ---- */
+/* its fourth-kind 0x20 (080E4584-080E4618), which its routine (080E45F6) spawns: moved */
+/* its fourth-kind 0x6a (080E9838-080E98E0), which its routine (080E98BC) spawns: moved */
+/* its fourth-kind 0x1f (080E4354-080E4584): no BN6 type of its body, moved with him */
+/* its table 080E423C's row 0x1: +0x0 0x8, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x4: +0x0 0xa, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x5: +0x0 0x5, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its sound 0x105 (080E4394): BN4's song copied into the grown song table's slot 0x280, on BN4's player 15 */
+/* its sound 0x106 (080E43E8): BN4's song copied into the grown song table's slot 0x281, on BN4's player 14 */
+/* its sound 0x107 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x282, on BN4's player 22 */
+/* its sound 0x124 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x29f, on BN4's player 18 */
+/* its chip 82 is a dark chip of BN4's (row 527): a battle it is used in costs 20 max HP */
+/* its chip 122 has no row of the registry (the run's by name, or none) */
+/* its chip 139 has no row of the registry (the run's by name, or none) */
+/* its chip 208 has no row of the registry (the run's by name, or none) */
+/* its chip 216 is a dark chip of BN4's (row 528): a battle it is used in costs 20 max HP */
+/* its chip 193 is a dark chip of BN4's (row 562): a battle it is used in costs 20 max HP */
+
+static const XvBlock hole_blocks[] = {
+	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x3900, 0x4B619B7Eu },
+	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x39A0, 0xD3ADC8B1u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3A50, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3C80, 0x77CB1EA6u },
+};
+static const XvData hole_data[] = {
+	{ 0x080E4592, 0x080E4594, XV_RAW },
+	{ 0x080E4594, 0x080E4598, XV_POOL },
+	{ 0x080E4598, 0x080E45A4, XV_TABLE },
+	{ 0x080E45B2, 0x080E45B4, XV_RAW },
+	{ 0x080E45B4, 0x080E45B8, XV_POOL },
+	{ 0x080E45B8, 0x080E45C8, XV_TABLE },
+	{ 0x080E9846, 0x080E9848, XV_RAW },
+	{ 0x080E9848, 0x080E984C, XV_POOL },
+	{ 0x080E984C, 0x080E9858, XV_TABLE },
+	{ 0x080E9866, 0x080E9868, XV_RAW },
+	{ 0x080E9868, 0x080E986C, XV_POOL },
+	{ 0x080E986C, 0x080E987C, XV_TABLE },
+	{ 0x080E98DE, 0x080E98E0, XV_RAW },
+	{ 0x080E4362, 0x080E4364, XV_RAW },
+	{ 0x080E4364, 0x080E4368, XV_POOL },
+	{ 0x080E4368, 0x080E4374, XV_TABLE },
+	{ 0x080E43B0, 0x080E43B8, XV_POOL },
+	{ 0x080E43B8, 0x080E43C8, XV_TABLE },
+	{ 0x080E423C, 0x080E4354, XV_RAW },
+};
+static const XvPair hole_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009DC4, 0x0800CC0A },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E38, 0x0800CC52 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+};
+static const XvPair hole_words[] = {
+	{ 0x08008BD9, 0x0800B917 },   /* project:project:chips, DIFF */
+	{ 0x08008BF9, 0x0800B94D },   /* project:project:chips, SAME */
+	{ 0x08008C2B, 0x0800B9B1 },   /* project:project:chips, DIFF */
+	{ 0x08008EB9, 0x0800BC89 },   /* project:project:chips, SAME */
+	{ 0x08008EEF, 0x0800BD35 },   /* project:project:chips, DIFF */
+};
+static const XvImm hole_imms[] = {
+	{ 0x080E441C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E444C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x98 },   /* its object's type 0x1f: moved, the dispatch's 0x98 */
+	{ 0x080E45FA, THUMB_MOVS, 0, 0, 0x20, 0x99 },   /* its object's type 0x20: moved, the dispatch's 0x99 */
+	{ 0x080E460A, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080E98C0, THUMB_MOVS, 0, 0, 0x6A, 0x9A },   /* its object's type 0x6a: moved, the dispatch's 0x9a */
+	{ 0x080E98D0, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType hole_types[] = {
+	{ 4, 0x98, XV_TYPE_MOVED, 0x1F },   /* BN4's fourth-kind 0x1f, moved, the dispatch's 0x98 */
+	{ 4, 0x99, XV_TYPE_MOVED, 0x20 },   /* BN4's fourth-kind 0x20, moved, the dispatch's 0x99 */
+	{ 4, 0x9A, XV_TYPE_MOVED, 0x6A },   /* BN4's fourth-kind 0x6a, moved, the dispatch's 0x9a */
+};
+static const XvByte hole_bytes[] = {
+	{ 0x080E42B4, 0x09, 0x05 },   /* its table's row 0x6: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42C8, 0x09, 0x05 },   /* its table's row 0x7: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42F0, 0x0B, 0x10 },   /* its table's row 0x9: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E4304, 0x0B, 0x10 },   /* its table's row 0xa: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E432C, 0x0B, 0x10 },   /* its table's row 0xc: +0x0 0xb in BN4, 0x10 in BN6 */
+};
+static const XvSoundCall hole_sound_calls[] = {
+	{ 0x080E4394, 0x280 },   /* its sound 0x105: BN4's song at the grown table's slot 0x280 */
+	{ 0x080E43E8, 0x281 },   /* its sound 0x106: BN4's song at the grown table's slot 0x281 */
+	{ 0x080E447A, 0x17B, true },   /* its sounds 0x107, 0x124: BN4's numbers plus 0x17b, their slots of the grown table (the panel changer's sound as it sets its panels (0x080E4460-0x080E447A): none for its kinds 9 and 0xA (Hole's, DrkLine's: beq past the call), 0x124 for 8 and 0xD (poison: movs r0,#0x25; adds r0,#0xff at 0x080E4476), 0x107 for the rest (movs r0,#8; adds r0,#0xff at 0x080E446A), DrkStage's Holes 0xC) */
+};
+static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F } };
+
+#define HOLE_CODE { .name = "Hole (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5400), \
+	.blocks = hole_blocks, .nblocks = (int)(sizeof hole_blocks / sizeof *hole_blocks), \
+	.data = hole_data, .ndata = (int)(sizeof hole_data / sizeof *hole_data), \
+	.calls = hole_calls, .ncalls = (int)(sizeof hole_calls / sizeof *hole_calls), \
+	.words = hole_words, .nwords = (int)(sizeof hole_words / sizeof *hole_words), \
+	.imms = hole_imms, .nimms = (int)(sizeof hole_imms / sizeof *hole_imms), \
+	.types = hole_types, .ntypes = (int)(sizeof hole_types / sizeof *hole_types), \
+	.sound_calls = hole_sound_calls, .nsound_calls = (int)(sizeof hole_sound_calls / sizeof *hole_sound_calls), \
+	.bytes = hole_bytes, .nbytes = (int)(sizeof hole_bytes / sizeof *hole_bytes) }
+/* ---- GutsManChip: BN4's navi 0x5 (080B9B1D) as BN6's 0x85; its chips 224 (535), 225 (536), 226 (537) ---- */
+/* its object, the fourth kind's 0x10 (080E31E8-080E3328), not moved: BN6's Navi object in its place */
+/* the chip's Navi, the first kind's 0x14 (080B999C-080B9B44), which his spawner (080B9B1C) spawns: moved */
+/* his battle sprite 2:0x2 (080B99C8): gutsman's, list 2's 0x41 (seat 1) */
+/* its sound 0xb0 (080B9A3E): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
+/* its chip 225 (id 536) waits: its row is XREG_PENDING */
+/* its chip 226 is a dark chip of BN4's (row 537): a battle it is used in costs 20 max HP */
+/* its chip 226 (id 537) waits: its row is XREG_PENDING */
+
+static const XvBlock gutsmanchip_blocks[] = {
+	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x3DA0, 0x15E72429u },
+};
+static const XvData gutsmanchip_data[] = {
+	{ 0x080B99AE, 0x080B99B0, XV_RAW },
+	{ 0x080B99B0, 0x080B99B4, XV_POOL },
+	{ 0x080B99B4, 0x080B99C0, XV_TABLE },
+	{ 0x080B9A12, 0x080B9A14, XV_RAW },
+	{ 0x080B9A14, 0x080B9A18, XV_POOL },
+	{ 0x080B9A18, 0x080B9A28, XV_TABLE },
+	{ 0x080B9AEE, 0x080B9AF0, XV_RAW },
+	{ 0x080B9AF0, 0x080B9AF4, XV_POOL },
+	{ 0x080B9B42, 0x080B9B44, XV_RAW },
+};
+static const XvPair gutsmanchip_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032B8, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800B950, 0x0800FCFC },   /* search, SAME */
+	{ 0x08014446, XN_BN4_CODE + 0x5732 },   /* fireman's copy of BN4's 08014446 (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+	{ 0x080CD81E, 0x080C6C16 },   /* project:project:chips, SAME */
+	{ 0x080D0894, XN_BN4_CODE + 0x958 },   /* gutsman's copy of BN4's 080D0894 (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+};
+static const XvPair gutsmanchip_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+};
+static const XvImm gutsmanchip_imms[] = {
+	{ 0x080B99C4, THUMB_MOVS, 2, 0, 0x2, 0x41 },   /* his battle sprite: BN4's list 2 0x2, the moved Navi's 0x41 in BN6 (gutsman's) */
+	{ 0x080B9ABA, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080B9ACE, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080B9B20, THUMB_MOVS, 0, 0, 0x14, 0xA0 },   /* the chip's Navi's type 0x14 (the first kind): moved, the dispatch's 0xa0 */
+	{ 0x080B9B30, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvNumber gutsmanchip_numbers[] = {
+	{ 0x080B9AF0, 0x04050601, 0x04050601 },   /* a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same (five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606) */
+};
+static const XvType gutsmanchip_types[] = {
+	{ 1, 0xA0, XV_TYPE_MOVED, 0x14 },   /* BN4's first-kind 0x14, moved, the dispatch's 0xa0 */
+};
+static const XvSoundCall gutsmanchip_sound_calls[] = {
+	{ 0x080B9A3E, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
+};
+static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x1E2 } };
+
+#define GUTSMANCHIP_CODE { .name = "GutsManChip (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x5C00), \
+	.blocks = gutsmanchip_blocks, .nblocks = (int)(sizeof gutsmanchip_blocks / sizeof *gutsmanchip_blocks), \
+	.data = gutsmanchip_data, .ndata = (int)(sizeof gutsmanchip_data / sizeof *gutsmanchip_data), \
+	.calls = gutsmanchip_calls, .ncalls = (int)(sizeof gutsmanchip_calls / sizeof *gutsmanchip_calls), \
+	.words = gutsmanchip_words, .nwords = (int)(sizeof gutsmanchip_words / sizeof *gutsmanchip_words), \
+	.imms = gutsmanchip_imms, .nimms = (int)(sizeof gutsmanchip_imms / sizeof *gutsmanchip_imms), \
+	.numbers = gutsmanchip_numbers, .nnumbers = (int)(sizeof gutsmanchip_numbers / sizeof *gutsmanchip_numbers), \
+	.types = gutsmanchip_types, .ntypes = (int)(sizeof gutsmanchip_types / sizeof *gutsmanchip_types), \
+	.sound_calls = gutsmanchip_sound_calls, .nsound_calls = (int)(sizeof gutsmanchip_sound_calls / sizeof *gutsmanchip_sound_calls) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -1910,5 +2083,8 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x11, 0x91, 0x080EAE93, XC4_HOMES + 0x4800, METEORS_CODE, NULL, 0, 0, 0 },
 	{ XCHIP_SUPPORT, 0x11, 0x91, 0x080E4CA7, XC4_HOMES + 0x4C00, TIMEBOMB_CODE, timebomb_songs, (int)(sizeof timebomb_songs / sizeof *timebomb_songs), 0, 0 },
 	{ XCHIP_MISC, 0x0C, 0x8C, 0x080DF98D, XC4_HOMES + 0x5000, LIGTNIN_CODE, ligtnin_songs, (int)(sizeof ligtnin_songs / sizeof *ligtnin_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x5400, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x5800, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 22 },
+	{ XCHIP_NAVI, 0x05, 0x85, 0x080B9B1D, XC4_HOMES + 0x5C00, GUTSMANCHIP_CODE, gutsmanchip_songs, (int)(sizeof gutsmanchip_songs / sizeof *gutsmanchip_songs), 2, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

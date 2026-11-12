@@ -8,6 +8,14 @@
   "what": "the panel type his fourth kind's 0x19 lays (BN5 0x080E24EE: movs r2,#5, its copy at XN_TEAM_CODE + 0xC100 + 0xA2) left at BN5's 5, BN6's holy panel, where the recipe makes it 15, the magnet panel"
  },
  {
+  "name": "MagnetMan's magnet panels laid as BN4's Hole",
+  "spec": "magnetman_v1",
+  "poke": [
+   "0889F1A2:2210"
+  ],
+  "what": "the panel type his fourth kind's 0x19 lays (BN5 0x080E24EE, its copy at XN_TEAM_CODE + 0xC100 + 0xA2) made 16, BN4's Hole in BN6 (XPANEL_HOLE), where the recipe makes it 15, the magnet panel: plain's flags and the Hole's look, no pull"
+ },
+ {
   "name": "MagnetMan's state number not moved",
   "spec": "magnetman_v1",
   "poke": [

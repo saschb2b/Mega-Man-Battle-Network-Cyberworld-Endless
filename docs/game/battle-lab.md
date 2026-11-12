@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T12:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -392,6 +392,63 @@ is used.
     lost).
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
     BN5's and BN4's panels, backgrounds and songs, the saved sets.
+
+- **The keeper and the LabPass** (step 4), behind `--dev lab`
+  (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
+  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
+  across the room's front from the gate's keeper; moved since, below). His first talk is three boxes, once a
+  profile (`Profile.lab_met`); every later one a single box. As the chat
+  box closes the builder opens over the held game, and its battle is
+  fought there, in Lan's HP: seen headless from the town's jack-in, a
+  battle set, left by L, the builder back with the result, the work RAM's
+  hash the same before and after. KeyItem lists the LabPass (`0x4C`) with
+  the count of families whose data is complete. Still to come: what
+  makes him appear for a player (three complete families and Dad's mail).
+
+- **Turned on** (step 5).
+  - *The condition.* The Lab is sent (`Profile.lab_sent`) as a run ends
+    with the data on three families complete, and the summary says "the
+    Battle Lab" among what the run opened; a run left without its end
+    sends it as the next begins. The keeper stands in Lan's HP from then
+    on. A later run's complete families show on the summary by their
+    count.
+  - *Dad's mail* ("Battle Lab", `pet_text.c`) comes with the run's other
+    mails on its first layer, not in Lan's room as first designed: a
+    run's mails are made as a layer begins. It is NEW again with each
+    family whose data is complete since, so E-Mail shows the gauge's
+    progress in a run.
+  - *The sets* (`Profile.lab_sets`, `src/core/lab_set.h`): a fourth
+    page, SETS, lists four; A takes one in hand, the one in hand kept as
+    a battle starts and as the screen leaves. A win that beats a set's
+    best (a higher busting level, or the same in less time) is its best;
+    a set changed has none.
+  - *The statistics*: the run's choices count the test battles fought
+    (`labs`).
+  - *Seen headless*, with no dev switch: a run that deleted eight each
+    of three families, then a new run begun on the setup screen: the
+    left run's data in the profile, the keeper in Lan's HP, his talk,
+    the builder listing the three families in the version met, a battle
+    won (the result in the information box, the set's best in the
+    profile), the SETS page, and Dad's mail in BN6's E-Mail on the first
+    layer.
+  - *The lab's station* (the owner, 12 November 2026: the keeper stood
+    behind a link square that becomes a portal, hard to reach once it is
+    one, and looked like any Mr.Prog). It stands in the room's back left
+    corner now, the first thing in sight on the way in from the blue pad,
+    across the walk from the courier and clear of every link square: the
+    keeper at its front, facing the room, behind him BN6's own glass
+    capsule (list 7's 61) and its orange monitor of green bars (149).
+    Each of the three opens the Lab.
+  - *The keeper is a Navi* (the owner's call, 12 November 2026): BN6's
+    teal Navi (list 6's `0x41`, by BN6's own variation of that sprite),
+    with that sprite's mugshot and lines in a Navi's voice. Chosen over
+    BN6's orange armoured Navi, its pink Navi and a Mr.Prog in one of the
+    Virus Battlers' colours. A Mr.Prog in the sprite's unused mint
+    palette was tried first and read as frozen ("what navi is that? is
+    he frozen?"). No one else in a run has this look.
+  - A run started by a dev scene named no seed for its tally, so its
+    data was lost to the next run; the tally now follows the run's seed
+    on every path.
 
 ## Build order
 

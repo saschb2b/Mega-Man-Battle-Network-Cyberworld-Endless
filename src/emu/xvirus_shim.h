@@ -71,6 +71,8 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
  * and branches on to `veneer` (BN6_PLAY_SOUND's, within a branch's reach):
  * false where it is not. */
 bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer);
+/* ... or that adds `add` (at most 0x1FE: two adds) to the r0 the call was given (XvSoundCall.add), the same size */
+bool xvirus_shim_sound_add(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t add, uint32_t veneer);
 
 /* The BN6 routine a BN4 call made through that shim goes on to (XvSoundCall): BN6_PLAY_SOUND for BN4_PLAY_SOUND, BN6's
  * appear queue's routines for BN4's (BN4_QUEUE_*: BN4's one queue, BN6's r0 its number); 0 any other */

@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
 ---
 
 # The player's guide
@@ -942,6 +942,32 @@ endless net's Nest, the S for the Secret Area, the green disc for a win on
 the top threat rung, STD, MEGA and GIGA COMP for a class of the Library
 complete.
 
+### The Battle Lab
+
+Every virus MegaMan deletes adds to his battle data on its family. At
+eight, of any version, in any run, the data on that family is complete.
+Once it is complete on three families, Dad's lab sends one of its Navis
+to Lan's HP, a teal one beside a glass capsule in the back left corner:
+there from the next run on, and Dad's mail on the first layer says so.
+
+Talk to the Navi to set up a test battle:
+
+- **FOES:** the families with complete data, each in a version MegaMan
+  has deleted (Left and Right turn it). A lifts one onto the foes'
+  panels and sets it down; A on a foe set takes it off. Four at most.
+  A family still short shows its count, "5/8".
+- **FIELD:** A turns the panel under the cursor to its next type; the
+  row below takes one of BN6's own fields whole.
+- **STAGE:** the background and the song.
+- **SETS:** four sets are kept with their best win. A takes one in hand.
+- **BATTLE!** at the foot, or START.
+
+It is a test: nothing in it can delete MegaMan, it pays nothing, and the
+run is afterwards exactly as it was, HP and all. L on the Custom screen
+leaves at once. MegaMan fights with the folder and NaviCust he holds.
+Back in the Lab you see the time, the busting level and the HP lost, and
+a set keeps its best.
+
 ### Saving and losing
 
 The run is saved each time you arrive on a layer and as a guardian's
@@ -1457,6 +1483,7 @@ project page's:
 | A run begins | its setup (net, folder, Cross, threat, helpers, the extras switched off), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act; and of how many virus families your battle data is complete |
+| An act ends (its guardian falls, or the run ends in it) | the act and cycle, net and threat, whether its guardian fell, and of its random battles how many were fought, won and run from, the HP they cost in percent and the busting levels of those won: the area's own battles, and apart from them those built around the act's signature virus family, with that family's number and which of its battles were fought |
 | ... and beside it, what the run chose | won or lost, the layer, net and threat, the trips back home, how many requests were taken, kept and vowed, the orders made at AsterLand, the NaviCust drafts left for their BugFrags, the Undernet's and dark layers entered, ProtoMan's duels and netbattles taken and won, the folder's edits between layers, the Virus Battlers' series begun, rounds fought on after a win and pots taken, and the seconds on the net's maps against those in battle |
 
 ### Online

@@ -16,6 +16,7 @@
 #include "emu.h"
 #include "game.h"
 #include "guardians.h"
+#include "loot.h"
 #include "net.h"
 #include "pacing.h"
 #include "platform.h"
@@ -51,6 +52,8 @@ static void append(const char *line) {
 	}
 }
 
+static void act_battle_start(const Encounter *e, const char *kind);
+
 void runlog_battle_start(const Encounter *e, const char *kind) {
 	/* (the zenny and BugFrags on hand: the economy's course over a run,
 	 * docs/game/economy/) */
@@ -58,6 +61,7 @@ void runlog_battle_start(const Encounter *e, const char *kind) {
 		run.biome, kind, megaman_hp(), megaman_max(), (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
 	L.guardian = 0;
 	L.duel = !strcmp(kind, "duel");
+	act_battle_start(e, kind);
 	/* (an older net's record fought in BN6's engine: "x" and its address
 	 * there, docs/multirom/; a visitor of the other net "+" before it) */
 	if (e && e->xrecord) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " x%07X", (unsigned)(e->xrecord & 0xFFFFFFFu));
@@ -98,12 +102,69 @@ static void guardian_over(int result, int frames) {
 	if (L.guardian) analytics_guardian(L.guardian, result, megaman_hp(), megaman_max(), frames);
 }
 
-#define TALLY_MAGIC 0x43544C32u   /* "CTL2": run.tally, the run's economy's counts and choices (CTL1's, without them, begin anew) */
+#define TALLY_MAGIC 0x43544C34u   /* "CTL4" (CTL3's, without the Battle Lab's count, begin anew): run.tally, the run's economy's counts, its choices and its act's battles (an older
+                                   * one's, without the last, begin anew) */
 static AnalyticsEconomy T;
 
 void runlog_tally_begin(uint32_t seed) {
 	memset(&T, 0, sizeof T);
 	T.seed = seed;
+	T.act.act = -1;
+}
+
+/* ---- an act's random battles (analytics.h's AnalyticsAct): the area's own
+ * and the encounter groups' apart, counted on the main path's layers and
+ * sent as the act ends ---- */
+
+/* the battle being fought: which of the two it counts as (NULL: neither,
+ * a guardian's, a duel's, a side layer's), and MegaMan's HP as it began */
+static AnalyticsBattles *counted;
+static int counted_hp;
+
+/* (the act of the layer MegaMan stands on; a new one's counts begun, whole
+ * where they begin with its first layer) */
+static AnalyticsAct *act_now(void) {
+	int act = pacing_loop(run.depth) * 7 + pacing_act(run.depth);
+	if (T.seed != run.seed) runlog_tally_begin(run.seed);
+	if (T.act.act != act) {
+		memset(&T.act, 0, sizeof T.act);
+		T.act.act = (int16_t)act;
+		T.act.whole = layer_in_act(run.depth) == 0;
+	}
+	return &T.act;
+}
+
+static void act_battle_start(const Encounter *e, const char *kind) {
+	counted = NULL;
+	if (!e || run.side_kind != LAYER_NORMAL || (strcmp(kind, "battle") && strcmp(kind, "challenge") && strcmp(kind, "floor"))) return;
+	AnalyticsAct *a = act_now();
+	counted = e->group ? &a->group : &a->own;
+	counted_hp = megaman_hp();
+	++counted->fought;
+	if (e->group && e->group <= 16) a->templates |= (uint16_t)(1u << (e->group - 1));
+	if (!e->arc_beat) return;
+	a->beats |= (uint8_t)(1u << (e->arc_beat - 1));
+	a->signature = e->signature ? (int16_t)e->foes[e->signature - 1].family : 0;
+	a->home = loot_arc_home(run.depth, run.biome);
+}
+
+/* (the battle over: won, left, or MegaMan deleted in it, neither) */
+static void act_battle_end(bool won, bool left) {
+	if (!counted) return;
+	int max = megaman_max(), lost = counted_hp - (won || left ? megaman_hp() : 0);
+	counted->won += won;
+	counted->left += left;
+	if (won) counted->bust += emu_read8(BN6_BATTLE_BUSTING);
+	if (max > 0 && lost > 0) counted->hp_lost += (uint32_t)(lost * 100 / max);
+	counted = NULL;
+}
+
+/* (the act's counts sent, and done with: its last layer left, or the run
+ * over in it) */
+static void act_over(bool cleared) {
+	if (T.seed != run.seed || T.act.act < 0) return;
+	analytics_act(&T.act, cleared);
+	T.act.act = -1;
 }
 
 /* (the counts of this run: begun again where they were another's) */
@@ -175,6 +236,7 @@ static void count_reward(bool guardian) {
 void runlog_battle_end(bool won, int frames) {
 	if (!L.open) return;
 	if (won) count_reward(L.guardian != 0);
+	act_battle_end(won, !won);
 	L.open = false;
 	/* (a win's busting level and the reward it picked, BN6's encoding:
 	 * the battle drops in docs/game/economy/) */
@@ -193,6 +255,8 @@ void runlog_layer_left(int battles, int guardian) {
 		pacing_act(run.depth) + 1, kind[run.side_kind & 3], layer.dark ? " dark" : "", battles);
 	if (guardian && n < (int)sizeof line) snprintf(line + n, sizeof line - (size_t)n, " guardian g%d", guardian);
 	append(line);
+	/* (the act's last layer of the main path: its battles' counts sent) */
+	if (run.side_kind == LAYER_NORMAL && (layer_in_act(run.depth) == 2 || pacing_act(run.depth) == 6)) act_over(true);
 }
 
 void runlog_run_end(bool won) {
@@ -203,7 +267,9 @@ void runlog_run_end(bool won) {
 		snprintf(L.line + L.len, sizeof L.line - (size_t)L.len, " -> deleted");
 		append(L.line);
 		if (!won) guardian_over(ANALYTICS_LOST, 0);
+		act_battle_end(false, false);
 	}
+	act_over(won);
 	char line[256];
 	bool act1;
 	const AnalyticsEconomy *e = tally(&act1);

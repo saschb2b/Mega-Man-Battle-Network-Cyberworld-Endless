@@ -52,6 +52,11 @@ static bool forcing, quiet;
  * battle's own reward gave a second, which no folder can hold (one Mega
  * chip of a kind), so zenny comes in its place. */
 static bool boss_record[2], boss_on;
+/* The enemy whose row each record's battle pays from, and the battle
+ * on's (0: BN6's own pick among the enemies spawned): an encounter
+ * group's pays as its act's signature family, at the version fought
+ * (docs/game/progression/encounter-groups.md, the design's fifth point). */
+static int pays_record[2], pays_on;
 
 /* The overworld's check (bn6f checkThenStartBattle) calls the roll once a
  * frame, then branches on the flags it leaves: on that branch, a battle the
@@ -162,6 +167,7 @@ void emu_encounter_set(const Encounter *e) {
 	}
 	*p++ = 0xF0;
 	boss_record[next] = e->boss;
+	pays_record[next] = loot_paying_id(e);
 	slot = next;
 	uint32_t settings = settings_of(slot);
 	emu_write(settings + 0x20, list, (size_t)(p - list));
@@ -199,6 +205,7 @@ uint32_t emu_battle_souls(void) { return soulunite_ready() ? emu_read32(BN6_SOUL
 void emu_encounter_started(uint32_t settings) {
 	int s = emu_encounter_record(settings);
 	boss_on = s >= 0 && boss_record[s];
+	pays_on = s >= 0 ? pays_record[s] : 0;
 	/* (the run's Souls for UNITE, where the Souls stand in BN6's engine:
 	 * soulunite.h; none in a liberation's teammate's battle, MegaMan in his
 	 * Soul already: liberation_battle.h) */
@@ -262,6 +269,14 @@ static void lean_row(int id) {
  * reader): the rows of the enemies it picks from, leaned just before. */
 static HookAct picking(HookRegs *r, void *user) {
 	(void)user;
+	/* (a group's battle: the pick handed its paying enemy alone, where it is among those spawned: the list from it, one
+	 * long; nothing of the battle's state written) */
+	for (uint32_t i = 0; pays_on && i < r->r[1] && i < 8; ++i)
+		if (hook_read16(r->r[0] + 2 * i) == pays_on) {
+			r->r[0] += 2 * i;
+			r->r[1] = 1;
+			break;
+		}
 	for (uint32_t i = 0; i < r->r[1] && i < 8; ++i) lean_row(hook_read16(r->r[0] + 2 * i));
 	return HOOK_CONTINUE;
 }

@@ -21,6 +21,7 @@
 #include "lab_text.h"
 #include "pet_look.h"
 #include "platform.h"
+#include "save.h"
 
 /* where it draws, from the picture's corner */
 #define TABS_X 7
@@ -95,6 +96,11 @@ static void info_text(char *s, size_t n) {
 		else if (LS.last.end != LAB_NONE) lab_info_result(s, n, &LS.last);
 		return;
 	}
+	if (LS.at == LAB_AT_LIST && LS.page == LAB_PAGE_SETS) {
+		const LabSaved *k = &profile.lab_sets[LS.row[LAB_PAGE_SETS] % LAB_SETS];
+		lab_info_set(s, n, k->set.nfoes, k->bust, k->frames, k->hp_lost);
+		return;
+	}
 	const LabRow *r = LS.nroster ? &LS.roster[LS.row[LAB_PAGE_FOES]] : NULL;
 	char name[24] = "";
 	if (LS.at == LAB_AT_FIELD) {
@@ -151,6 +157,13 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 		look_text(f.x + 14, y, lab_row_preset, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 		if (LS.preset) lab_preset_words(v, sizeof v, LS.preset);
 		value_draw(f, y, LS.preset ? v : lab_plain_field, under && LS.at == LAB_AT_LIST, LOOK_TEXT);
+	} else if (LS.page == LAB_PAGE_SETS) {
+		/* (the set in hand in gold, as what is one's own; its foes as they stand now) */
+		bool mine = i == profile.lab_slot % LAB_SETS;
+		lab_set_words(name, sizeof name, i);
+		look_text(f.x + 14, y, name, mine ? LOOK_GOLD : LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		lab_set_value(v, sizeof v, mine ? LS.set.nfoes : profile.lab_sets[i].set.nfoes);
+		value_draw(f, y, v, false, LOOK_TEXT);
 	} else {
 		look_text(f.x + 14, y, i ? lab_row_song : lab_row_area, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 		value_draw(f, y, i ? song_name(LS.set.song) : guardian_area_short(LS.set.area), under && LS.at == LAB_AT_LIST, LOOK_TEXT);
@@ -161,7 +174,7 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 static void list_draw(int x0, int y0) {
 	SDL_Rect win = { x0 + WIN_X, y0 + WIN_Y, WIN_W, WIN_H };
 	SDL_Rect f = look_window(win.x, win.y, win.w, win.h, 0, false);
-	int rows = lab_rows(), top = LS.page == LAB_PAGE_FOES ? LS.top : 0;
+	int rows = lab_rows(), top = LS.page == LAB_PAGE_FOES ? LS.top : LS.row[LS.page] >= LAB_ROWS_SHOWN ? LS.row[LS.page] - LAB_ROWS_SHOWN + 1 : 0;
 	for (int i = top; i < rows && i < top + LAB_ROWS_SHOWN; ++i) row_draw(f, i, f.y + 2 + (i - top) * ROW_H, i == LS.row[LS.page]);
 	if (rows > LAB_ROWS_SHOWN) look_scroll(win, 0, top, LAB_ROWS_SHOWN, rows);
 }

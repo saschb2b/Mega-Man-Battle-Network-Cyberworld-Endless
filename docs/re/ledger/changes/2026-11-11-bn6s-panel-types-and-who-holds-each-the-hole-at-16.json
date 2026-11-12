@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN6's panel types and who holds each (docs/rom/battle.md): the flags update (IWRAM 0x030078DC) ORs the type into bits 0-4, bit 4 also its words' floor bit, so types 16-31 always give it; no reader of the type from the flags (a scan of the ROM and the IWRAM image), the panel update's types by compares; BN5's magnet panel 15 (#391), BN4's Hole moved to 16 (src/emu/xpanels.h XPANEL_HOLE), plain's word, its specs PASS with MagnetMan's and GridMan's, a mutation each way caught."
+}
