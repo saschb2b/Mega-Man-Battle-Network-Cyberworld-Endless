@@ -111,7 +111,8 @@ tags predict them);
 family is moved in: `dump`, `encounter_danger.py families` for the new
 one, `engine`, `report --write`.
 
-The engine's groups (`src/core/groups.c`, behind `--dev groups`) and
+The engine's groups (`src/core/groups.c`; in players' runs since 12
+November 2026, `--dev groups` making every random battle one) and
 this tool fill the templates by the same rule, each from its own
 reading: the tool from the dump, the engine from the ROMs. `build.py
 pacing` prints the engine's counts ([the pacing

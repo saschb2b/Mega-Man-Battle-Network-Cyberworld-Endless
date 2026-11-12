@@ -111,7 +111,9 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   BN5's Navis off the short net's last act and off Nebula Area go; the
   Undernet's and the Graveyard's acts share one pool of both nets' Navis;
   the Nest stays the Cybeast's.
-- **Visitors:** a family's role is where its own game sets it (the back
+- **Visitors:** replaced by the encounter groups on 12 November 2026
+  (call 2 above), the role measured here now the groups' first tag. As
+  decided then: a family's role is where its own game sets it (the back
   when three of four of its placements are in the last column, the front
   when most are in the first enemy column, else either); random battles
   only (not a Server's, the duel's or the Gentle helper's eased ones);
@@ -119,7 +121,9 @@ The finer calls, made once the run's code was mapped (12 October 2026):
   special fields never visits.
 - **The deep's pools:** the Undernet with BN5's Undernet, the Graveyard
   with Nebula Area, the Nest with both; a coin each battle between the two
-  nets.
+  nets. (The coin went with the visitors on 12 November 2026: a deep
+  area's own battles are its area's records, an older net's area's its
+  own, and the other nets' families come as signatures and partners.)
 - **Green Mystery Data in BN5's records** by BN5's own rows; **Mystery
   Data in its areas** half BN5's chips, as its shops.
 - **A BN5 Navi's Guardian Data** is his own Navi chip, as BN6's guardians
@@ -198,14 +202,18 @@ run, meta as variety):
   at 2), at the highest version up to the act's (BN5's by tier) that
   keeps the battle's HP to the band's top and its hit to the cap. None
   fitting, no visitor: the act's battles are then their own net's.
-- **The gate**: from depth 4 (the run's second act) on, one battle of
+- **The gate**: gone with the visitor on 12 November 2026
+  ([Encounter groups](../game/progression/encounter-groups.md), Step 3,
+  turned on). As built then: from depth 4 (the run's second act) on, one battle of
   each four on a layer (by its battles fought so far), which one of the
   four by the layer's seed, so a reroll and a checkpoint's layer keep it;
   plain random battles alone (an opening battle, a Server's, the duel's,
   and every battle under the Gentle helper never). The deep's acts never
   take a visitor (the Undernet's and the Graveyard's areas, the Nest, the
   dark warp's Undernet layers and trips back to them).
-- **The deep takes the place of a territory**: where BN5's Undernet or
+- **The deep takes the place of a territory**: until 12 November 2026;
+  since, where BN5's Undernet or Nebula Area dresses the deep's area its
+  battles are that area's own records. As built then: where BN5's Undernet or
   Nebula Area dresses the deep's area, its battles are still the coin's,
   both nets'; without BN5's ROM, or where its area there could not be
   fought in BN6's engine, BN6's alone.

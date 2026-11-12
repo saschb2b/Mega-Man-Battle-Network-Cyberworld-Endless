@@ -41,9 +41,23 @@ Inside, a test only: no real death, no rewards. Access earned in the
 fiction, and a name of the game's own in place of the working one,
 Warframe's "Simulacrum".
 
-Nothing here is built yet. The owner decided its eight calls on 11
-November 2026, each as recommended below; they are at the end. Its name
-is the **Battle Lab**.
+The owner decided its eight calls on 11 November 2026, each as
+recommended below; they are at the end. Its name is the **Battle Lab**.
+
+## Where it stands in 0.21.0
+
+It is built and on for players, with no dev switch (Built, below, step by
+step as it came): the battle data counted in every run, the keeper in
+Lan's HP once the data on three families is complete, Dad's mail, the
+LabPass, the builder with its foes, field, background and song, Navis, a
+folder of the Lab's own and four kept sets. Left for later:
+
+- BN4's own panel types 5 and 0xA, which BN6's engine does not have (each
+  a move of its own; Built, the field's panels).
+- MegaMan's Regular chip with the Lab's folder: it is the run's still.
+- Team ProtoMan's five Navis stand in the engine and on the dev list
+  alone: a profile cannot earn them for the Lab until they guard runs
+  ([Team ProtoMan](team-protoman.md)).
 
 ## What the games have
 
@@ -338,11 +352,13 @@ is used.
   as the run ends (`meta_run_over`), or as the next run begins where a
   run was left without its end. Not counted: a Virus Battler's round, a
   dive of the week's net. The statistics' run-end event carries the
-  families complete (`data`). No player sees it yet. An autopilot run
+  families complete (`data`). No player saw it at this step (the gauge
+  shows since step 5). An autopilot run
   (seed 3, 15000 frames) counted the eight viruses its run log names,
   BN5's moved families among them.
 
-- **The test battle** (step 2), behind the dev step `lab`
+- **The test battle** (step 2), at this step behind the dev step `lab`
+  alone (a player's since step 5)
   ([A battle on demand](../devtools/battle-on-demand.md);
   `src/director/lab_battle.c`). Asked for, it begins with the next
   frame's update: the core's whole state with the cart's flash save in
@@ -375,8 +391,9 @@ is used.
     showed was given and then put back with the rest (emptied since,
     below).
 
-- **The builder's screen** (step 3), behind the dev steps `lab open` and
-  `lab all` (`src/director/lab.c`, its picture `lab_draw.c`, its words
+- **The builder's screen** (step 3), at this step behind the dev steps
+  `lab open` and `lab all` alone, the keeper's talk opening it since
+  step 4 (`src/director/lab.c`, its picture `lab_draw.c`, its words
   `lab_text.c`). Three pages as Options' tabs, L and R between them:
   - *FOES*: the families MegaMan has battle data on, a complete one in a
     version Left and Right turn, the rest with their gauge ("5/8"). A
@@ -398,17 +415,17 @@ is used.
     BN5's and BN4's panels, backgrounds and songs, the saved sets (all
     built since, below).
 
-- **The keeper and the LabPass** (step 4), behind `--dev lab`
-  (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
-  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
+- **The keeper and the LabPass** (step 4), at this step behind
+  `--dev lab` alone (`src/director/lab_keeper.c`, his lines
+  `lab_words.c`, his place `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
   across the room's front from the gate's keeper; moved since, below). His first talk is three boxes, once a
   profile (`Profile.lab_met`); every later one a single box. As the chat
   box closes the builder opens over the held game, and its battle is
   fought there, in Lan's HP: seen headless from the town's jack-in, a
   battle set, left by L, the builder back with the result, the work RAM's
   hash the same before and after. KeyItem lists the LabPass (`0x4C`) with
-  the count of families whose data is complete. Still to come: what
-  makes him appear for a player (three complete families and Dad's mail).
+  the count of families whose data is complete. What makes him appear
+  for a player (three complete families and Dad's mail) came with step 5.
 
 - **Turned on** (step 5).
   - *The condition.* The Lab is sent (`Profile.lab_sent`) as a run ends
@@ -686,8 +703,8 @@ Each a PR to `dev`, the next begun when the last is merged:
 5. Turned on; the records and the saved sets.
 
 A sandbox folder from the Library (every chip a profile has held, in
-BN6's own folder editor) is the step after, not this build's: it is a
-second screen and a second kind of state.
+BN6's own folder editor) was the step after, a second screen and a
+second kind of state: built since as the Lab's folder (Built, above).
 
 ## The owner's calls (11 November 2026)
 

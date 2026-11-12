@@ -121,6 +121,11 @@ Measured from the three ROMs and the registry by `tools/library_pages.py
 | BN5 (Team Colonel) | 180 of its 180 | 57 of its 60 | 4 of its 7 | 241 | 104 (85, 16, 3) |
 | BN4 (Red Sun) | 88 of its 186 | 23: 17 of its 60, 6 of Blue Moon's | 4: 2 of its 5, 2 of Blue Moon's | 115 | 78 (61, 14, 3) |
 
+The BN4 row is that day's, when none of BN4's own chips played. Each of
+its own that plays is listed since (below), so its page holds more than
+the row says; `--report` counts the table's slots (274 for BN4, its own
+160 among them), not which of them play.
+
 BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other
 36 are BN5's own of its name (26, 9, 1). BN4's own 160 chips (99, 56, 5)
 have their slots in the table by the registry's rows (ids 527 on), and

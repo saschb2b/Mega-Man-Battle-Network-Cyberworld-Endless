@@ -700,7 +700,9 @@ sound at another pool slot, and his cloud on another animation. He is
 not yet in the tournament's list of proved BN4 Navis. A line there takes
 his plate on BN4's bracket (`BN4_ENTRANT_ID`), and of ids 0x00-0x16 only
 GutsMan's, AquaMan's, Roll's, SearchMan's and KendoMan's are named
-([BN4's tournament screens](bn4-tournament.md)).
+([BN4's tournament screens](bn4-tournament.md)). (So it stood that day:
+his plate is named and he is in the list since 8 November 2026,
+[The tournament](../game/tournament.md), as built.)
 
 ## WindMan built
 
@@ -802,7 +804,9 @@ made 0 in BN6's copy (`--poke 080CCD0E:2200`) still PASSes, the state 0
 they begin in leading to the same 8 before the fight. The interim that runs
 4 as 0 stays as the Companions section says, unproved either way.
 
-**Not yet in the tournament's `proved[]`**: a line there needs his plate on
+**Not yet in the tournament's `proved[]`** (then; in it since 8 November
+2026, his plate named: [The tournament](../game/tournament.md), as
+built): a line there needs his plate on
 BN4's bracket (`BN4_ENTRANT_ID`), and [BN4's tournament
 screens](bn4-tournament.md) names five plates by sight, his not among them.
 A match of each plate's colours against the Navis' battle sprites' failed
@@ -918,7 +922,9 @@ legit.json and every mutation is kept: merged, every spec holds its
 verdict (the eighteen BN4 family specs, the four Navis' and every BN4
 control PASS) and `--mutations` catches 201 of 201.
 
-**Not yet in the tournament's pool**: `src/layer/xguardian_bn4.c`'s line
+**Not yet in the tournament's pool** (then; in it since 8 November 2026,
+his plate named: [The tournament](../game/tournament.md), as built):
+`src/layer/xguardian_bn4.c`'s line
 needs his plate on BN4's bracket (`BN4_ENTRANT_ID`), and his is not named.
 By sight only GutsMan's 0x00, AquaMan's 0x03, Roll's 0x04, SearchMan's
 0x09 and KendoMan's 0x11 are ([BN4's tournament screens](bn4-tournament.md));

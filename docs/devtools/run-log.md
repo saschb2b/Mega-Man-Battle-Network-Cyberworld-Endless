@@ -22,8 +22,11 @@ the economy report's battle drops are checked against. One of BN5's records foug
 the deep's: [One net: the design](../multirom/one-net.md)) has `x` and its address in BN5's
 ROM after MegaMan's HP (`... battle hp 300/300 x811DDD0 v35.0 v35.0 foehp
 160 -> won hp 220`: BN6's AI indexes, BN5's families moved into the
-engine from 32), and a visitor of the other net has `+` before it (`v8.0
-+v34.1 v11.0`). A guardian's line names him and his foe as the engine
+engine from 32), and in a battle of an act's arc the signature family's
+first foe has `+` before it (`v8.0 +v34.1 v11.0`;
+[Encounter groups](../game/progression/encounter-groups.md); until 12
+November 2026 the mark was a visitor's of the other net). A guardian's
+line names him and his foe as the engine
 has him: `g` and his navi number, `n` and his family there with its
 version, and the HP he spawns with (`... guardian hp 100/100 g28 n36.0
 foehp 600 -> won hp 100`: BN5's KnightMan, moved in as Navi AI 36, V1).

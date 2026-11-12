@@ -75,7 +75,8 @@ puts one in every act BN5 dresses and every deep act.
 2026). LarkMan and GridMan, BN5's Nebula Navis of the story, moved into
 BN6's engine ([Transplanted Navis](../../multirom/navis.md)), join the
 deep's pool beside the six, and no surface act's coin: Oran Area stays
-ShadowMan's (or his partner's, [Team ProtoMan](../team-protoman.md)). They
+ShadowMan's (Team ProtoMan's Navis, one of whom would share it, guard no
+run yet: [Team ProtoMan](../team-protoman.md)). They
 have no Soul to give: beating one pays his Navi chips, his Guardian Data's
 chip V1 in the first three acts and SP from the fourth, as the six's. The
 reason: a Soul-less guardian in a surface coin is a worse roll for the
