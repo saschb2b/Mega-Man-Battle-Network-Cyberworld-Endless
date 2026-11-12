@@ -42,7 +42,7 @@ around it, one layer at a time, keeps the run going, and links players' games in
 <tr>
 <td align="center"><img src="docs/screenshots/online-stands.png" width="250" alt="Watching Kei VS Mira from the stands: R the other side, L cheer, B leave"><br><b>Watch</b><br><sub>The referee calls every battle in the channel. Watch from the stands, and cheer.</sub></td>
 <td align="center"><img src="docs/screenshots/online-deepnet.png" width="250" alt="The Net Square's Board: the week's DeepNet, 1. Mira: 10!, 2. Dex: 9, 3. Rio: 8"><br><b>The week's DeepNet</b><br><sub>Every Monday each server opens one net for everyone. The Board ranks the deepest dives.</sub></td>
-<td align="center"><img src="docs/screenshots/online-netpass.png" width="250" alt="The NetPass, a full pass: Lan and MegaMan, the Square, Arena, Trade and DeepNet stamps, BN6 and BN5 in"><br><b>The NetPass</b><br><sub>The Square is everyone's. NetBattles, trades and the DeepNet take BN5 and BN4 beside BN6.</sub></td>
+<td align="center"><img src="docs/screenshots/online-netpass-bn4.png" width="250" alt="The NetPass, a full pass: Lan and MegaMan, the Square, Arena, Trade and DeepNet stamps, BN6, BN5 and BN4 in"><br><b>The NetPass</b><br><sub>The Square is everyone's. NetBattles, trades and the DeepNet take BN5 and BN4 beside BN6.</sub></td>
 </tr>
 </table>
 
