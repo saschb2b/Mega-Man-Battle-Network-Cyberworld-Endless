@@ -1,0 +1,13 @@
+{
+ "bn4": "0xB0",
+ "bn6": "0x1E2",
+ "clock": "state",
+ "chips": [
+  "0x68",
+  "0x69",
+  "0x6A",
+  "0xD7"
+ ],
+ "what": "BigHamr's hammer as it appears 0xB0, its copy",
+ "why": "Played by the hammer's init (BN4's third-kind 0x4A, moved with BigHamr's unit: movs r0,#0xb0 at 0x080D69AE, its bl to PlaySoundEffect at 0x080D69B0; BN6: the copy's bl aimed at a shim of the unit's home that makes r0 0x1E2 and goes on to BN6's): BN4's song 0xB0 copied into slot 0x1E2 of BN6's grown song table, TimeBomb's copy of the same song (tools/xchiprecipe_bn4.py SOUND_SLOTS, src/audio/xsong.c XSOUNDS), on BN4's player 23. In its chips' specs alone: BN4's engine plays 0xB0 as an invisibility ends too, where BN6's plays its own 0x94 (that row). bn4_chip_bighamr1 at t14 in BN4's and t15 in BN6's"
+}

@@ -1,0 +1,84 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "12@41",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's BigHamr3 C (its chip 106, power 280) against the registry's row for it (id 661), BigHamr's unit (BN4's support 0x10 as BN6's grown support routine 0x90; docs/multirom/bn4-chips.md): as BigHamr1's spec, against BN4's Billy of 300 HP (its family's sixth, enemy 0x12) set at (4,1), which hops to (4,2) before the swing: struck there, 20 HP left in both",
+ "folder4": [
+  "066A"
+ ],
+ "folder6": [
+  "295:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   10,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "295:03"
+ ]
+}

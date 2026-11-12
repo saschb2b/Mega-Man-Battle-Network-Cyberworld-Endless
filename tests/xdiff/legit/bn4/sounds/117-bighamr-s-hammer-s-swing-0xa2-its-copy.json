@@ -1,0 +1,13 @@
+{
+ "bn4": "0xA2",
+ "bn6": "0x243",
+ "clock": "state",
+ "chips": [
+  "0x68",
+  "0x69",
+  "0x6A",
+  "0xD7"
+ ],
+ "what": "BigHamr's hammer's swing 0xA2, its copy",
+ "why": "Played by the hammer's swing (BN4's third-kind 0x4A: movs r0,#0xa2 at 0x080D6ABC, its bl to PlaySoundEffect at 0x080D6ABE; BN6: the copy's movs, the recipe's, or a shim naming the slot past a byte): BN4's song 0xA2 copied into slot 0x243 of BN6's grown song table (src/audio/xsong.c XSOUNDS), on BN4's player 30. BN6's own song 0xA2 is another (xrecipe.song_sig); TopMan's rows give 0xA2 his pool's slot in his battles alone. bn4_chip_bighamr1 at t56"
+}

@@ -106,7 +106,11 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
              287: 'AquaPowr, left out by the owner\'s call 12',
              288: 'WoodPowr, left out by the owner\'s call 12',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
-                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
+                 'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)',
+             215: 'GodHammr, BigHamr\'s unit\'s Mega chip: its hit strikes its own hammer (an actor of 100 HP) and MegaMan too, and '
+                  'BN4\'s actor runner (0x08013F3E) finds the hammer\'s final damage (collision data +0x28) and plays its hurt '
+                  'sound 0xC8 where BN6\'s (0x0801B394) finds its +0x80 zero, both deleting it by the hit\'s flag 0x08000000 '
+                  '(bn4_chip_godhammr t57, BN6\'s hit flags with 0x80000000 more): BN6\'s hit pass on the struck actor to read'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
 # returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
@@ -281,6 +285,7 @@ UNITS = (
     ('support', 0x2A, 'BugCurse'),
     ('attack', 0x27, 'AirHoc'),
     ('navi', 0x35, 'RollAro'),
+    ('support', 0x10, 'BigHamr'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -313,6 +318,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                # (the sweep's third line, units-c's, its slots from 0x240 up)
                0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
                0x143: 0x242,                # (Ligtnin's bolt)
+               0xA2: 0x243, 0x122: 0x244,   # (BigHamr's swing and its quake)
                # (the dark chips' from 0x283 up, after the panel changer's 0x280-0x282: docs/project/claims/bn4-dark-units.json)
                0xBB: 0x283,                 # (DrkVulcn's shots)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)

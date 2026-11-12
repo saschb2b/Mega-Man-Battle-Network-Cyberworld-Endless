@@ -1,0 +1,11 @@
+{
+ "name": "BN6's second wheel in the hammer's support object's element",
+ "whose": "engine",
+ "kind": "T4",
+ "type": "0x26",
+ "part": "obj",
+ "offset": "0x0E",
+ "bit": "0x10",
+ "direction": "BN6 has it, BN4 not",
+ "why": "The support routine's spawner writes the attack's element (r3 as the routine has it, MegaMan's AttackVars +2 from each game's support run) at the object's element (BN4's +0x17, BN6's +0x0E, read at BN6's place: support_objects): BN6's holds the Break's hit flag there, which BN6's use ORs into the attack's element and BN4's does not (\"BN6's second wheel in MegaMan's chip's attack, the Break's\"). That bit alone. BigHamr's support object, BN4's fourth kind 0x26 (its block 0x080E4B88-0x080E4C3C), which reads it (0x080E4BEE) for the hammer it spawns. bn4_chip_bighamr1 at t33"
+}

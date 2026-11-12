@@ -1,0 +1,11 @@
+{
+ "name": "BN6's second wheel in the hammer's collision data",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x4A",
+ "part": "coll",
+ "offset": "0x19",
+ "bit": "0x10",
+ "direction": "BN6 has it, BN4 not",
+ "why": "The hammer's element is set through each engine's element setter (BN4 0x0801288C, BN6 0x08019F8C, a twin pair audited in tools/xchiprecipe_bn4.py): BN4 writes it to the object's +0x17 and its collision data's +2; BN6 to the object's +0xE, its low four bits to the collision data's +2 and its high four, BN6's second wheel's flags, to the collision data's +0x19. The element is the attack's as the support run handed it, which holds BN6's Break flag (\"BN6's second wheel in MegaMan's chip's attack, the Break's\"), so BN6's +0x19 holds 0x10 where BN4 keeps no such byte. That bit alone. bn4_chip_bighamr1 at t14"
+}

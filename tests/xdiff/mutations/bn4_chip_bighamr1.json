@@ -1,0 +1,52 @@
+[
+ {
+  "name": "the hammer's own state numbered as BN4's",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "080D69B4:2006"
+  ],
+  "what": "the copy of the hammer's set-down state (BN4 0x080D69AC, its own) with its next state's number BN4's 6 where the recipe made it 8, BN6's runner numbering an object's own states from 8: the hammer's CurAction 6 in BN6's runner, one of its engine states"
+ },
+ {
+  "name": "the hammer's swing state numbered as BN4's",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "080D69D6:2007"
+  ],
+  "what": "the copy of the hammer's wait (BN4 0x080D69BE) with its next state's number BN4's 7 where the recipe made it 9: the swing never begins as BN4's does"
+ },
+ {
+  "name": "the quake's shake not begun",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "080D6AB8:46C0",
+   "080D6ABA:46C0"
+  ],
+  "what": "the copy of the swing's strike with its call to the camera's shake (BN4 0x0802608C, camera_initShakeEffect's twin) made two nops: the screen does not shake, every object's sprite's screen place held"
+ },
+ {
+  "name": "the quake's shake shorter",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "080D6AB6:210F"
+  ],
+  "what": "the copy of the swing's strike giving the shake 15 frames (movs r1,#0x0F) where BN4's gives 30 (#0x1E): the shake ends early"
+ },
+ {
+  "name": "the swing's sound not played",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "080D6ABE:46C0",
+   "080D6AC0:46C0"
+  ],
+  "what": "the copy of the swing's strike with its call to PlaySoundEffect for 0xA2 (slot 0x243) made two nops: the swing silent"
+ },
+ {
+  "name": "BigHamr1's row's power another",
+  "spec": "bn4_chip_bighamr1",
+  "poke": [
+   "08C0715E:0064"
+  ],
+  "what": "the registry's record of BigHamr1 (659) with power 100 where BN4's record holds 160: the Mettaur keeps more HP"
+ }
+]

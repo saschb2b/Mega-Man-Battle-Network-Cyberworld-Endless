@@ -10,6 +10,7 @@
  "why": "As a chip is used BN6 writes his AttackVars +2 (AI data +0xA2) as the chip record's attack element ORed with its icon's second-wheel element's hit flag (Sword 0x80, Cursor 0x40, Wind 0x20, Break 0x10: BN6's table 0x080129E4 by the record's +6), where BN4's use writes the attack element alone (0x0800D4D2 on: its record's +4 into +2; BN4 has no second wheel). A BN4 chip's record in a run holds BN4's kind as BN6's icon element (src/core/xchips_record.c xrec_from_bn4, BN4 numbering its kinds as BN5 its icon elements: AirHoc's the Break, BN6's flag 0x10), as BN5's chips' do (masks, \"BN6's second wheel in a chip's attack\"): BN6's engine's own flag for its second wheel's weaknesses, the bit BN6 has and BN4 not, that bit alone. The Break's, AirHoc's kind; the Cursor's is PanlSht's entry, another kind's flag another entry, with its chip's spec.",
  "evidence": [
   "BN6 0x0801271E-0x08012728 (the chip's numbers written for its attack, 0x080126E4): ldrb r1,[r6,#4]; ldrb r2,[r6,#6]; ldr r0,=0x080129E4; ldrb r0,[r0,r2]; orrs r1,r0; strb r1,[r7,#2]",
-  "bn4_chip_airhoc1 t32: MegaMan's AttackVars +2 0 in BN4's and 0x10 in BN6's (AirHoc1's run record's icon element the Break's)"
+  "bn4_chip_airhoc1 t32: MegaMan's AttackVars +2 0 in BN4's and 0x10 in BN6's (AirHoc1's run record's icon element the Break's)",
+  "bn4_chip_bighamr1 t32: MegaMan's AttackVars +2 0 in BN4's and 0x10 in BN6's (BN4's record 104's +7 is 11, BN6's table 0x080129E4's ninth byte 0x10)"
  ]
 }

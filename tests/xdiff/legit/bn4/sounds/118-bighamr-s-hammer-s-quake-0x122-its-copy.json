@@ -1,0 +1,13 @@
+{
+ "bn4": "0x122",
+ "bn6": "0x244",
+ "clock": "state",
+ "chips": [
+  "0x68",
+  "0x69",
+  "0x6A",
+  "0xD7"
+ ],
+ "what": "BigHamr's hammer's quake 0x122, its copy",
+ "why": "Played by the hammer before its swing (BN4's third-kind 0x4A: its bl to PlaySoundEffect at 0x080D6A72 with r0 0x122; BN6: the copy's call aimed at a shim of the unit's home that makes r0 0x244, the slot past a byte): BN4's song 0x122 copied into slot 0x244 of BN6's grown song table (src/audio/xsong.c XSOUNDS), on BN4's player 9. BN6's own song 0x122 is another (xrecipe.song_sig). bn4_chip_bighamr1 at t51"
+}
