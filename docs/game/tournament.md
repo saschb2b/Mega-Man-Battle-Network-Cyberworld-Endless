@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (in runs where BN4's ROM is read, for a profile that has reached the Nest; BN6's and BN5's Navis and BN4's twelve proved ones its entrants)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:17:08Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"

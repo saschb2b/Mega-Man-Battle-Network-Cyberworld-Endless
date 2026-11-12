@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-12T19:17:08Z
-* **Update**: game/tournament.md (the pool's room: every proved Navi in it, SparkMan and BurnerMan no longer dropped past 32).
