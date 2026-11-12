@@ -48,24 +48,27 @@ static void set_report(FILE *out, const GroupFam *pool, int n, const char *name,
 /* A group battle's own numbers, read again from the ROM's records: its HP
  * together, its hardest hit and the pressure its families' tags predict
  * (-1 where one has none) */
-static void measure(const Encounter *e, int *hp, int *hit, int *pressure) {
-	double sum = 0, scale[MAX_FOES] = { 0 };
+static void measure(const Encounter *e, int *hp, int *hit, int *pressure, int *cost) {
+	double sum = 0, spent = 0, scale[MAX_FOES] = { 0 };
 	int net[MAX_FOES] = { 0 };
 	*hp = *hit = 0;
-	*pressure = 0;
+	*pressure = *cost = 0;
 	for (int i = 0; i < e->nfoes; ++i) {
 		int h, d, h1, d1;
 		net[i] = visitor_net(e->foes[i].family);
 		const GroupTag *tag = group_tag(net[i], e->foes[i].family);
-		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(visitor_id(net[i], e->foes[i].family, 0), &h1, &d1) || !tag || tag->pressure < 0) {
-			*pressure = -1;
+		if (!enemy_stats(e->foes[i].id, &h, &d) || !enemy_stats(visitor_id(net[i], e->foes[i].family, 0), &h1, &d1) || !tag || tag->pressure < 0 ||
+			tag->cost < 0) {
+			*pressure = *cost = -1;
 			return;
 		}
 		*hp += h;
 		if (d > *hit) *hit = d;
 		scale[i] = (double)d / (double)(d1 > 1 ? d1 : 1);
 		sum += (double)(tag->pressure * d) / (double)(d1 > 1 ? d1 : 1);
+		spent += (double)(tag->cost * d) / (double)(d1 > 1 ? d1 : 1);
 	}
+	*cost = (int)lrint(spent);
 	/* (two the pairs' pass found pressing harder together: their excess, by the larger scale) */
 	for (int i = 0; i < e->nfoes; ++i)
 		for (int k = i + 1; k < e->nfoes; ++k) {
@@ -75,9 +78,10 @@ static void measure(const Encounter *e, int *hp, int *hit, int *pressure) {
 	*pressure = (int)lrint(sum);
 }
 
-/* whether two of its foes share a panel, or one stands on a panel that
- * is neither plain nor cracked */
+/* whether its field is not fair to a group, two of its foes share a
+ * panel, or one stands on a panel that is neither plain nor cracked */
 static bool misplaced(const Encounter *e) {
+	if (!group_field_fair(e->field)) return true;
 	for (int i = 0; i < e->nfoes; ++i) {
 		int p = visitor_panel(e, e->foes[i].col, e->foes[i].row);
 		if (p != 2 && p != 3) return true;
@@ -97,11 +101,11 @@ static int rolls(FILE *out, int depth, int b, uint32_t seed) {
 	int n = 0, over = 0, top = 0, most = 0, by[GROUP_TEMPLATES] = { 0 }, fields = 0;
 	for (int k = 0; k < ROLLS; ++k) {
 		Encounter e = { 0 };
-		int hp, hit, pressure;
+		int hp, hit, pressure, cost;
 		e.biome = b;
 		if (!group_battle(depth, b, seed + (uint32_t)k / 8, k % 8, -1, &e)) continue;
-		measure(&e, &hp, &hit, &pressure);
-		bool bad = hp < l.band.lo || hp > l.band.hi || hit > l.band.cap || pressure < 0 || pressure > l.pressure || misplaced(&e);
+		measure(&e, &hp, &hit, &pressure, &cost);
+		bool bad = hp < l.band.lo || hp > l.band.hi || hit > l.band.cap || pressure < 0 || pressure > l.pressure || cost > l.cost || misplaced(&e);
 		over += bad;
 		hps[n++] = hp;
 		if (hit > top) top = hit;
@@ -127,9 +131,10 @@ int pacing_groups_report(FILE *out) {
 	unsigned have = group_nets();
 	fprintf(out, "\nEncounter groups (docs/game/progression/encounter-groups.md; behind --dev groups, no run holds one): %d families\n"
 		"in the pool. Each ROM set's pool by act (acts 1 to 6, the Nest) and how many ways each template fills, a group held\n"
-		"to the act's band, its cap on one hit and its pressure cap (%d %d %d %d %d %d, the Nest %d).\n", n,
+		"to the act's band, its cap on one hit, its pressure cap (%d %d %d %d %d %d, the Nest %d) and its cap on cost (%d %d %d %d %d %d, %d).\n", n,
 		group_pressure_cap(0), group_pressure_cap(1), group_pressure_cap(2), group_pressure_cap(3), group_pressure_cap(4), group_pressure_cap(5),
-		group_pressure_cap(6));
+		group_pressure_cap(6), group_cost_cap(0), group_cost_cap(1), group_cost_cap(2), group_cost_cap(3), group_cost_cap(4), group_cost_cap(5),
+		group_cost_cap(6));
 	for (unsigned s = 0; s < sizeof SETS / sizeof *SETS; ++s)
 		if ((SETS[s].nets & have) == SETS[s].nets) set_report(out, pool, n, SETS[s].name, SETS[s].nets);
 	fprintf(out, "\nGroup battles rolled with the ROMs read (%d a line: the layer's seed and the battle's index): HP lowest / median /\n"
@@ -178,17 +183,35 @@ static int pays_kinds(const Pays *p) {
 /* One beat of an arc as its battle, against limits `l`: 1 where it lies
  * past one (HP over the top, or under the floor where `floor`; the hit;
  * the pressure; a panel), its pressure into *most where it is more */
-typedef struct { uint32_t seed; int area; Pays *pays; } ArcRun;
+typedef struct { uint32_t seed; int area; Pays *pays; FILE *list; } ArcRun;
+
+/* (a beat's battle listed once, as the `foes` step takes it: enemy ids in hex at column and row from 1, for
+ * tools/encounter_danger.py battles; act 1's alone, whose beats are few enough to fight each) */
+static void beat_listed(FILE *out, const Encounter *e, int beat) {
+	static uint32_t seen[512];
+	static int nseen;
+	uint32_t h = 2166136261u;
+	for (int i = 0; i < e->nfoes; ++i) h = (h ^ (uint32_t)(e->foes[i].id << 8 | e->foes[i].col << 4 | e->foes[i].row)) * 16777619u;
+	for (int i = 0; i < nseen; ++i)
+		if (seen[i] == h) return;
+	if (nseen >= 512) return;
+	seen[nseen++] = h;
+	fprintf(out, "      beat %d:", beat);
+	for (int i = 0; i < e->nfoes; ++i) fprintf(out, "%s%X@%d%d", i ? "/" : " ", (unsigned)e->foes[i].id, e->foes[i].col + 1, e->foes[i].row + 1);
+	fprintf(out, "\n");
+}
 
 static int beat_over(const ArcRun *run_, int depth, bool challenge, const GroupLimits *l, bool floor, int *most) {
 	Encounter e = { 0 };
-	int hp, hit, pressure;
+	int hp, hit, pressure, cost;
 	e.biome = run_->area;
 	if (!group_arc_battle(run_->seed, depth, run_->area, challenge, &e)) return 1;
 	if (!challenge && loot_paying_id(&e)) pays_row(run_->pays, loot_paying_id(&e));
-	measure(&e, &hp, &hit, &pressure);
+	if (run_->list && !challenge) beat_listed(run_->list, &e, e.arc_beat);
+	measure(&e, &hp, &hit, &pressure, &cost);
 	if (pressure > *most) *most = pressure;
-	return (floor && hp < l->band.lo) || hp > l->band.hi || hit > l->band.cap || pressure < 0 || pressure > l->pressure || misplaced(&e) || !e.signature;
+	return (floor && hp < l->band.lo) || hp > l->band.hi || hit > l->band.cap || pressure < 0 || pressure > l->pressure || cost > l->cost ||
+		misplaced(&e) || !e.signature;
 }
 
 /* ARCS runs' arcs of act `act` (0-5, 6 the Nest; cycle `loop`) in area `b` */
@@ -206,7 +229,7 @@ static int arcs(FILE *out, int act, int loop, int b) {
 	unsigned nets = group_nets();
 	GroupLimits eased = group_limits_kind(first, stage, nets, GROUP_EASED), plain = group_limits_kind(first, stage, nets, GROUP_PLAIN),
 		challenge = group_limits_kind(first, stage, nets, GROUP_CHALLENGE);
-	if (act == 0 && loop == 0) plain.pressure = eased.pressure;   /* (act 1 holds every beat to the eased cap: group_pool.c rules_at) */
+	if (act == 0 && loop == 0) plain = eased;   /* (act 1 holds every beat to the eased limits: group_pool.c rules_at) */
 	for (int k = 0; k < ARCS; ++k) {
 		uint32_t seed = 0xA7C5u + (uint32_t)k * 2654435761u;
 		GroupArc arc;
@@ -214,14 +237,14 @@ static int arcs(FILE *out, int act, int loop, int b) {
 		++made;
 		home += arc.home;
 		kinds += !seen[arc.signature]++;
-		ArcRun of = { seed, b, &arc_pays };
+		ArcRun of = { seed, b, &arc_pays, act == 0 && loop == 0 ? out : NULL };
 		if (act == 6) {
 			over += beat_over(&of, first, false, &plain, true, &most[ARC_CONSTELLATION]);
 			continue;
 		}
 		over += beat_over(&of, first, false, &eased, false, &most[ARC_ALONE]);
-		over += beat_over(&of, first + 1, false, &plain, true, &most[ARC_PAIR]);
-		over += beat_over(&of, first + 2, false, &plain, true, &most[ARC_CONSTELLATION]);
+		over += beat_over(&of, first + 1, false, &plain, act > 0 || loop > 0, &most[ARC_PAIR]);
+		over += beat_over(&of, first + 2, false, &plain, act > 0 || loop > 0, &most[ARC_CONSTELLATION]);
 		if (arc.has_challenge) {
 			++challenges;
 			over += beat_over(&of, first + 1, true, &challenge, true, &most[ARC_BEATS]);
