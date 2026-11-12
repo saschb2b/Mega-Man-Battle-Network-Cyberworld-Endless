@@ -1,0 +1,42 @@
+[
+ {
+  "name": "LarkMan's afterimage drawn with BN5's sprite number",
+  "spec": "larkman_v1",
+  "poke": [
+   "08881984:00001108:4"
+  ],
+  "what": "the word his afterimage's spawner takes in r4 (BN5 0x08100DC8, ORed in at 0x08100D72, its copy at XN_NEBULA_CODE + 0x984) left at BN5's list 2 0x11 where the recipe makes it 0x31, his battle sprite's place: list 2's 0x11 is BN6's own (larkman_v1 at t3)"
+ },
+ {
+  "name": "LarkMan's 0xB0 spawned at another height",
+  "spec": "larkman_v1",
+  "poke": [
+   "08881B2A:2021"
+  ],
+  "what": "the height the third kind's 0xB0 sets at its init (BN5 0x080DC2DA: movs r0,#0x20, then strh +0x3E; its copy at XN_NEBULA_CODE + 0xB2A) made 0x21: the bytes the leftover rule compares differ (larkman_v1 at t163)"
+ },
+ {
+  "name": "LarkMan's 0xBA spawned at another height",
+  "spec": "larkman_v1",
+  "poke": [
+   "088823AE:2021"
+  ],
+  "what": "the height the third kind's 0xBA sets (BN5 0x080DDBCE: movs r0,#0x20, then strh +0x3E; its copy at XN_NEBULA_CODE + 0x13AE) made 0x21 (larkman_v1 at t505)"
+ },
+ {
+  "name": "LarkMan's wait a frame longer",
+  "spec": "larkman_v1",
+  "poke": [
+   "08881488:201C"
+  ],
+  "what": "the wait of his state before it spawns 0xB0 (BN5 0x081008CC: movs r0,#0x1B into its timer, the spawn at 0xC; its copy at XN_NEBULA_CODE + 0x488) made 0x1C: 0xB0 a frame late (larkman_v1 at t163)"
+ },
+ {
+  "name": "LarkMan's sound another",
+  "spec": "larkman_v1",
+  "poke": [
+   "088814A2:20FE"
+  ],
+  "what": "the sound his state plays before spawning 0xB0 (BN5 0x081008E6: movs r0,#0xFF, BN6's song of the same number; its copy at XN_NEBULA_CODE + 0x4A2) made 0xFE"
+ }
+]

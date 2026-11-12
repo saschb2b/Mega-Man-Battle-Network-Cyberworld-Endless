@@ -53,6 +53,26 @@
    "word": "0x3C",
    "bn6": "0x3",
    "evidence": "GridMan's (the third kind's 0xC6, moved): its spawner (0x080DF7B4: push {r0-r2,r5}; movs r0,#0xC6; bl 0x08003178) is called by his state at 0x08101414 and his copied routine at 0x080BCDEA, each setting r0-r2 and r4 alone before it (0x0810140C-0x08101412, 0x080BCDE2-0x080BCDE8; the engine's 0x08016B88 on the path not taken), so the spawn's +0x3C is what each game's state dispatch left in r3, as BlizzardMan's slide's hit's: BN5's his AI data, BN6's 3 (gridman_v1 at t162). Its routines (0x080DF714-0x080DF7B2 and its own 0x080DF7D2-0x080DF812) read and write no +0x3C-0x3F, nor do the engine's it calls (0x080186A8, 0x0800C69C, 0x08016126, 0x0800325C, 0x08016760, 0x08016C34, 0x08016B1A, 0x080167B0, 0x08016C04, 0x08008B6E, 0x08008A78, 0x0800C6CA, 0x08016B60, 0x08016B88, 0x0800B334, the set the 0x2F's rule walked four calls deep); it loads no sprite."
+  },
+  {
+   "kind": "T3",
+   "type": "0xB0",
+   "word": "0x3C",
+   "compares": [
+    2,
+    3
+   ],
+   "evidence": "LarkMan's (the third kind's 0xB0, moved): its spawner (0x080DC4DE: push {r0-r2,r5}; movs r0,#0xB0; bl 0x08003178; pop {r1-r3,r5}) hands the spawn its caller's r1-r3, kept as +0x34, +0x38 and +0x3C. Its one caller, LarkMan's state at 0x081008E6-0x081008FA, sets r0-r2, r4, r6 and r7 after its sound (0x08000598) and never r3, so +0x3C is what each engine left in r3: BN5's low half 0x41D0, BN6's 0x0003 (larkman_v1 at t163, larkman_sp at t145). The object's init writes the upper half (strh r0,[r5,#0x3E] at 0x080DC2DC, its height 0x20), and its code (0x080DC2B0-0x080DC504) reads and writes no other byte of +0x3C-0x3F: bytes 2 and 3 compared, the low half each engine's leftover, its fraction of Z."
+  },
+  {
+   "kind": "T3",
+   "type": "0xBA",
+   "word": "0x3C",
+   "compares": [
+    2,
+    3
+   ],
+   "evidence": "LarkMan's attack's object (the third kind's 0xBA, moved): its spawner (0x080DDB48: push {r0,r2,r3,r5}; movs r0,#0xBA; bl 0x08003178; pop {r1-r3,r5}; then str r3,[r0,#0x78] and str r0,[r3]) hands the spawn its caller's r3, a place in RAM it also keeps at +0x78, so +0x3C starts as each game's own address of it (BN5's 0x02038D30, BN6's 0x02038598: larkman_v1 at t505). Its init (0x080DD85E) calls 0x080DDB7C, which writes the upper half (strh r0,[r5,#0x3E] at 0x080DDBD0, its height 0x20); its code (0x080DD820-0x080DDE20) reads and writes no other byte of +0x3C-0x3F: bytes 2 and 3 compared, the low half each game's leftover (BN5's 0xB338, BN6's 0xAAE8 once the height is set; larkman_sp at t469)."
   }
  ]
 }

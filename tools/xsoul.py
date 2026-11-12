@@ -270,7 +270,7 @@ def before_tracks():
     for track, path in BEFORE:
         with open(path, encoding='utf-8') as f:
             text = f.read()
-        for lo, hi, base, off in re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), (XN_OBJECTS|XN_CODE|XC_CODE|XV_CODE) \+ 0x([0-9A-F]+), '
+        for lo, hi, base, off in re.findall(r'\{ 0x([0-9A-F]{8}), 0x([0-9A-F]{8}), (XN_OBJECTS|XN_CODE|XN_MORE|XN_TEAM_CODE|XN_NEBULA_CODE|XC_CODE|XV_CODE) \+ 0x([0-9A-F]+), '
                                             r'0x[0-9A-F]{8}u \}', text):
             blocks.append((int(lo, 16), int(hi, 16), base, int(off, 16), track))
         for body in re.findall(r'static const XvId \w+_effects\[\] = \{(.*?)\};', text, re.S):

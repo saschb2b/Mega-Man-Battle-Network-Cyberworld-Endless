@@ -75,7 +75,7 @@ presence is what counts) for each Navi's ids.
 | 7-12 | Team Colonel's six | V1, V2, V3 and DS | Guardians of BN5's areas, V1 to SP by band | DS left out by design ([Transplanted Navis](navis.md)) |
 | 13-14 | ShadeMan, BlizzardMan | V2, V3 | Dark layers' Darkloids ([Stage 4](../game/liberation/building/stage-4-darkloids.md)) | Their chips (Chips, below) |
 | 15-16 | CloudMan, CosmoMan | V2, V3 | Dark layers' Darkloids, both moved and proved (CosmoMan 9 November, CloudMan 12 November 2026: [Transplanted Navis](navis.md)) | None |
-| 17-18 | LarkMan, GridMan | V1, V2, V3 | GridMan moved and proved (12 November 2026, [Transplanted Navis](navis.md)), not yet met in a run | **M**: LarkMan's recipe; each as his area's second guardian where BN5's records set his SP (LarkMan's on Undernet 2, `0x08122488`; GridMan's on Oran Area 2, `0x08121650`: [BN5's Navis](../game/bosses/bn5-navis.md)) |
+| 17-18 | LarkMan, GridMan | V1, V2, V3 | Both moved and proved (12 November 2026, [Transplanted Navis](navis.md)), not yet met in a run | **M**: each as his area's second guardian where BN5's records set his SP (LarkMan's on Undernet 2, `0x08122488`; GridMan's on Oran Area 2, `0x08121650`: [BN5's Navis](../game/bosses/bn5-navis.md)) |
 | 19 | Bass (V1-V3, SP, DS, BassXX) | V1-V3 | No (BN6's own Bass is the super boss) | **M-L**: left for later where BN5 dresses the Graveyard ([Super bosses](../game/bosses/super-bosses.md)) |
 | 20 | Nebula Grey | Its two records, music 0x17 | No | **L**: BN5's final boss; weighed and left out with its theme ([BN5's music in a run](music.md)) |
 | 22 | The Dark Soul | | Chaos Unison's failure | None |

@@ -39,7 +39,10 @@ whose code stores a byte of its own routines' addresses placed at its BN5
 address's low byte (`LOW_BYTE_KEPT`: CloudMan's clouds, [Transplanted
 Navis](../multirom/navis.md), CloudMan); an effect of a Navi's that draws
 his own battle sprite given that sprite at its place (`NAVI_SPRITE_PLACES`:
-GridMan's afterimage); Nebula's two (`NEBULA`) installed after Team
+GridMan's afterimage); an afterimage's spawn's word (the fourth kind's 0x28's
+spawner's r4, loaded into r4 or ORed in from a literal) set to the
+sprite's BN6 place (`afterimage_sprites`: LarkMan's), the afterimage's own
+load the spawner's word; Nebula's two (`NEBULA`) installed after Team
 ProtoMan's, in a room of their own; the image object's kinds it spawns each one
 `tools/bn5_objects.py` fixes, and the moved objects' recipe itself
 (`xnavi_objects_bn5`: the image object's module, its kinds' sprites by
