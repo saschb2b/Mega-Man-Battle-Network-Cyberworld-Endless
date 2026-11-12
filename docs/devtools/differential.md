@@ -100,6 +100,24 @@ both games name is a control spec of its own first (`bn4_chip_rockcube`:
 its object each engine's own, by `actor_objects`, the record's copies
 and the cube's entries).
 
+A Navi chip whose Navi is moved (a unit of kind `navi`:
+`bn4_chip_gutsman`) is read as BN6 runs it (`legit.json`'s `bn4`
+`navi_chips`): BN4's support state as BN6's Navi family, by the family
+of the twin the chip's row names; BN4's object of the Navi's own (the
+type its routine spawns) as BN6's one Navi chip object, type 0x10, its
+element at BN6's place, its spawn's leftover r3 the unit's number where
+BN4's is its routine's address, and BN6's copy of that number at +0x19.
+The logs watch the chip's Navi's code and the code of the Navi whose
+attack objects he runs (`xd_log_units`), in both games, so a draw his
+attack makes is keyed by BN4's place and replayed: GutsMan's shockwave
+cracks the same three panels in both. A sound row that names
+`navi_chips` holds in such a spec alone, over another row of its number
+(BN4's 0xB0 is the chip's Navi appearing there, the grown table's 0x1E2,
+and an invisibility's end elsewhere). A Navi's pool sounds are his rows,
+whichever Navi the battle holds: the engine points the pool at his songs
+while his chip runs. What the freeze draws and how long it lasts is not
+compared.
+
 Against BN6 a chip's spec says `"subject": "megaman"`: a difference of
 MegaMan's or the world's no rule explains fails it, as in the BN5
 differential. `tools/xdiff_bn4.py` reads his numbers as BN6's: his

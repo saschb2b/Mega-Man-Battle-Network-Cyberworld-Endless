@@ -525,6 +525,19 @@ one sprite's unpacking at a time (the largest row's room 0x5500 bytes) and
 one song's packing (0x22C0 at most), each let go at once, and the room
 itself is the core's ROM copy, none of the heap.
 
+**The room is halved for the chips** (12 November 2026): the battle's
+art room is `+0x750000` to `+0x766000` (0x16000, 88 KB against the
+largest Navi's 0x11F00), and the 0x16000 after it is a Navi chip's
+Navi's (`FREE_BN4_CHIP_ART`), laid out as the battle's: a moved Navi's
+chip is used in any battle, his own included and another BN4 Navi's, so
+his sprite, art and songs are filled a second time, into rooms of the
+chips' own, as the chip is used ([BN4's chips in a run](bn4-chips.md),
+The Navi chips; `src/emu/xnavi_bn4_chip.c`). `tests/test_core.c` holds
+every installed Navi's layout to the half. A battle's fill records whose
+battle the rooms hold (`XN_BN4_HELD`, three bytes past the seats') and
+points its Navi's list 2 entry at the battle's room again, which a
+chip's run may have pointed at the chips'.
+
 ### Room for all eighteen, measured
 
 Measured by the generator's walk of all eighteen (their recipes mostly

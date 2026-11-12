@@ -10,11 +10,18 @@
 #include "xchips_install.h"
 #include "xinstall_log.h"
 #include "xnavi_bn4.h"
+#include "xnavi_bn4_chip.h"
 #include "xnavi_bn4_sounds.h"
 #include "xnavi_install.h"
 #include "xnavi_objects.h"
 #include "xsea.h"
 #include "xstrike.h"
+
+/* before each frame where BN4's ROM is read: a Navi chip's Navi's rooms (xnavi_bn4_chip.h), then the pool's pointing */
+static void bn4_frame(void) {
+	xnavi_bn4_chip_frame();
+	xnavi_bn4_sounds_frame();
+}
 
 void xinstall_core(int families, int navis) {
 	/* (written down for the Arena's cores as they are made: xinstall_log.h) */
@@ -34,8 +41,12 @@ void xinstall_core(int families, int navis) {
 	 * installed once a core, xnavi_install's own) */
 	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data)
 		for (int i = 0; i < xnavi_bn4_count; ++i) xnavi_install(xnavi_bn4[i]);
-	/* (their sounds' pool pointed at the battle's Navi's before each frame, xnavi_bn4_sounds.h) */
-	if (families == XVIRUS_FAMILIES && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) emu_before_frame(xnavi_bn4_sounds_frame);
+	/* (BN4's Navi chips' units after the Navis whose attack objects they run, xchips_code.h; without the Navis their entries
+	 * stay the grown table's stub, a Navi chip that brings nobody) */
+	if (families == XVIRUS_FAMILIES && navis != XNAVI_NONE && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) xchips_bn4_navi_install();
+	/* (their sounds' pool pointed at the battle's Navi's before each frame, xnavi_bn4_sounds.h; a Navi
+	 * chip's Navi's rooms filled before it, xnavi_bn4_chip.h) */
+	if (families == XVIRUS_FAMILIES && emu_ready() && XR[XROM_BN4_RED_SUN_US].data) emu_before_frame(bn4_frame);
 	xsea_install();   /* (BN5's sea's submerge, where its lava and sea came in with its families) */
 	/* (BN5's obstacle strike, a Navi Colonel's side's as ColonelSoul's: the Souls' moved code first, its soldier among it, which
 	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */

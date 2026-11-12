@@ -13,6 +13,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "xnavi_recipe.h"
 #include "xvirus_recipe.h"
 
 /* At a BN4 Navi's install, staged (xvirus_tx.h): where `s` is a row of the art's room, checked to fit its room in the
@@ -24,5 +25,7 @@ void xnavi_bn4_art_list(const XVirusFamily *f);
 /* A battle's BN4 Navi at `seat`: the room filled with the art and songs of the seat its byte of XN_BN4_ARTS names, that
  * Navi's sprites' entries pointed at them (the core's copy alone); true where it was. Between frames. */
 bool xnavi_bn4_art_for(int seat);
+/* The installed BN4 Navi at `seat`, NULL none */
+const XNavi *xnavi_bn4_seat(int seat);
 
 #endif

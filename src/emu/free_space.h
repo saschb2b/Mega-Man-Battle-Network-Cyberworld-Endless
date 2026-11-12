@@ -99,6 +99,8 @@
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
 #define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
+#define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x320000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left (xnavi_bn4_chip.c) */
+#define FREE_BN4_CHIP_SPRITE_END (EMU_FREE + 0x32F000u)
 
 /* ---- code: +0x330000-+0x7A0000, other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs ---- */
 #define FREE_VIRUS_ROOM      (EMU_FREE + 0x330000u)  /* BN6's tables grown for the families, the second-level dispatch (xvirus_grow.c) */
@@ -128,6 +130,8 @@
 #define FREE_BN4_NAVIS       (EMU_FREE + 0x720000u)  /* BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_CODE   (EMU_FREE + 0x730000u)  /* BN4's Navis' code and their objects', block by block (xnavi_bn4.c) */
 #define FREE_BN4_NAVI_ART    (EMU_FREE + 0x750000u)  /* the coming battle's BN4 Navi's attacks' art and songs, one room (xnavi_bn4_art.c) */
+#define FREE_BN4_CHIP_ART    (EMU_FREE + 0x766000u)  /* a BN4 Navi chip's Navi's attacks' art and songs as the chip is used, one room, laid out as the battle's Navi's (xnavi_bn4_chip.c) */
+#define FREE_BN4_CHIP_ART_END (EMU_FREE + 0x77C000u)
 #define FREE_BN4_NAVI_SPRITE (EMU_FREE + 0x77C000u)  /* the coming battle's BN4 Navi's battle sprite, one room (xnavi_bn4_room.c) */
 #define FREE_BRACKET_FACES   (EMU_FREE + 0x78C000u)  /* BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets (xbracket_faces.c) */
 #define FREE_BRACKET         (EMU_FREE + 0x790000u)  /* BN4's bracket screen moved: its stubs, veneers, code and art (xbracket.c) */
@@ -229,6 +233,7 @@
 	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
 	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
 	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
+	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x320000u), (EMU_FREE + 0x32F000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \
 	X("FREE_FAMILIES", (EMU_FREE + 0x348000u), (EMU_FREE + 0x400000u), "", "code") \
 	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
@@ -249,7 +254,8 @@
 	X("FREE_LATE_CODE", (EMU_FREE + 0x711000u), (EMU_FREE + 0x720000u), "", "code") \
 	X("FREE_BN4_NAVIS", (EMU_FREE + 0x720000u), (EMU_FREE + 0x730000u), "", "code") \
 	X("FREE_BN4_NAVI_CODE", (EMU_FREE + 0x730000u), (EMU_FREE + 0x750000u), "", "code") \
-	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x77C000u), "", "code") \
+	X("FREE_BN4_NAVI_ART", (EMU_FREE + 0x750000u), (EMU_FREE + 0x766000u), "", "code") \
+	X("FREE_BN4_CHIP_ART", (EMU_FREE + 0x766000u), (EMU_FREE + 0x77C000u), "", "code") \
 	X("FREE_BN4_NAVI_SPRITE", (EMU_FREE + 0x77C000u), (EMU_FREE + 0x78C000u), "", "code") \
 	X("FREE_BRACKET_FACES", (EMU_FREE + 0x78C000u), (EMU_FREE + 0x790000u), "", "code") \
 	X("FREE_BRACKET", (EMU_FREE + 0x790000u), (EMU_FREE + 0x7A0000u), "", "code") \

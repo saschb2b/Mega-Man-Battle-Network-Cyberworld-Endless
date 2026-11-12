@@ -66,6 +66,11 @@ bool xchips_code_install(void);
  * FREE_BN4_CHIPS; the stubs and the grown tables staged by whichever of the
  * two installs first. */
 bool xchips_bn4_code_install(void);
+/* ... and its Navi chips' units (XCHIP_NAVI: the chip's own Navi, at XC_NAVI's XC4_FIRST_SUPPORT + BN4's subfamily, run by
+ * BN6's Navi chip object), which the step above leaves out: after BN4's Navis' install (xinstall.c), whose copies of their
+ * attack objects those units call and spawn. */
+bool xchips_bn4_navi_install(void);
+
 /* Whether `to` lies in BN4's units' code (XC4_CODE to XC4_ART: xchips_bn4.h), for a tool that tells whose a copy is. */
 bool xchips_bn4_code_at(uint32_t to);
 /* Whether chip `id` (BN6's tables') is one of BN4's whose code is a unit's (the registry's XREG_MOVED row) */

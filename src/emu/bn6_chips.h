@@ -106,6 +106,19 @@
 #define BN6_CHIP_ROUTINES_REF2 0x08017BB8u /* ... a second (0x08017B0C: a chip a Navi or virus uses, its family 0x15 run so) */
 #define BN6_NAVI_ROUTINES_REF 0x080E2CF0u /* the Navi object's literal naming BN6_NAVI_ROUTINES (the fourth kind's type 0x10) */
 #define BN6_NAVI_ROUTINES_REF2 0x08017BBCu /* ... a second, beside BN6_CHIP_ROUTINES_REF2, which no instruction loads (pointed at the copy all the same) */
+#define BN6_CHIP_NAVI_OBJECT  0x080E2B28u /* the Navi chips' object (the fourth kind's BN6_T4_CHIP_NAVI), one for every Navi chip: its own states
+                                             (its +0xA: 0 MegaMan stepped out by BN6_CHIP_NAVI_STEP and 0x1E frames, 4 the chip's routine of
+                                             BN6_NAVI_ROUTINES called and its +0x18 waited for, 8 0x1E frames, 0xC MegaMan stepped in and
+                                             0x1E frames), to: */
+#define BN6_CHIP_NAVI_SPAWN   0x080E2C6Cu /* ... its spawner (r3 the subfamily; for subfamily 0, Roll's, the other side's trap tested first for AntiRecv, 0x080E2C6E-0x080E2C82) */
+#define BN6_T4_CHIP_NAVI      0x10        /* ... its type */
+#define BN6_CHIP_NAVI_OWN     0x0C        /* ... its step (+9) while its own states run (0x10 after them; 0, 4 and 8 its turn's wait and name) */
+#define BN6_CHIP_NAVI_BUSY    0x18        /* ... its +0x18: the byte the Navi sets to 1 as he is spawned and clears when he is done (r7) */
+#define BN6_CHIP_NAVI_SUB     0x19        /* ... its +0x19: the chip's subfamily, its routine of BN6_NAVI_ROUTINES (the spawn's r3, +0x3C) */
+#define BN6_CHIP_NAVI_STEP    0x080E266Eu /* MegaMan stepped out (r1 1) or in (r1 0) for a Navi chip: r0 his object; the first kind's 0x2D
+                                             (0x080C27C2), which knows his forms */
+#define BN6_REGION_SPAWN_FROZEN 0x080C6C16u /* a collision region spawned (0x080C6BDA) and its +0 given bit 0x10: a chip's Navi's hit, run in
+                                             the chip's time freeze; BN4's 0x080CD81E the same bytes */
 #define BN6_CHIP_SUPPORT_FAMILY 0x15      /* the support chips' family */
 #define BN6_CHIP_NAVI_FAMILY  0x1B        /* the Navi chips' family */
 
