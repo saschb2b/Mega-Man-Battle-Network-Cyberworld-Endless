@@ -7638,15 +7638,18 @@ static void test_lab_text(void) {
 	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
 	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
 	lab_info_result(s, sizeof s, &won);
-	CHECK(!strcmp(s, "0:12:66. Lv 9. HP -20."), "lab: a win's time, level and HP lost (%s)", s);
+	CHECK(!strcmp(s, "0:12:66 Lv 9|HP -20."), "lab: a win's time and level, then the HP lost, a line each (%s)", s);
 	lab_info_result(s, sizeof s, &best);
-	CHECK(!strcmp(s, "1:00:50. Lv S. HP -0."), "lab: level 11 is S (%s)", s);
+	CHECK(!strcmp(s, "1:00:50 Lv S|No HP lost."), "lab: level 11 is S, and no HP lost is said so (%s)", s);
 	lab_info_result(s, sizeof s, &fell);
-	CHECK(!strcmp(s, "Deleted at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	CHECK(!strcmp(s, "Deleted at|0:32:76."), "lab: a deletion names its time (%s)", s);
 	lab_info_result(s, sizeof s, &left);
-	CHECK(!strcmp(s, "Left at 0:00:98."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(s, "Left at|0:00:98."), "lab: a battle left (%s)", s);
 	lab_info_set(s, sizeof s, 2, 11, 760, 0);
-	CHECK(!strcmp(s, "Best 0:12:66. Lv S. HP -0."), "lab: a kept set's best (%s)", s);
+	CHECK(!strcmp(s, "0:12:66 Lv S|No HP lost."), "lab: a kept set's best, as a win reads (%s)", s);
+	/* (the information box holds 13 letters a line: the longest win's lines are within it) */
+	lab_info_set(s, sizeof s, 2, 10, 9 * 3600 + 59 * 60 + 59, 1200);
+	CHECK(strchr(s, '|') && strchr(s, '|') - s <= 13 && strlen(strchr(s, '|') + 1) <= 13, "lab: a win's lines fit the information box (%s)", s);
 	lab_info_set(s, sizeof s, 2, 0, 0, 0);
 	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
 	lab_set_value(s, sizeof s, 1);
