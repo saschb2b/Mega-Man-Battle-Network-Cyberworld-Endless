@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T18:20:00Z
+* **Update**: game/battle-lab.md (Built, The sandbox folder: no family without a name is a row, the list printed as debug lines, its count with everything open).
