@@ -92,6 +92,10 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
 UNIT_AIMS = {
+    'BugCurse': {0x0800C456: ('XC4_FIRST_ACTOR', "the other side's object (r0 the side): BN4's first of the other side's three in its "
+                                                  "battle state (+0x48 on), a virus too; BN6's twin, its side's MegaMan alone (0x080103BC), "
+                                                  "finds none against viruses, so the curse would not be cast: the project's own routine, "
+                                                  "a side's first of its four in BN6's battle state (+0xD0 + side x 0x10)")},
     'FirePlus': {0x0800BFF4: ('XC_STUBS', "the user's battle data by his side (0x02035B20 + 0xC0 a side), where the object stores "
                                           "its four timers (+0x3C to +0x42: its element's 480, the rest 0). BN6 keeps other fields "
                                           "there and reads the timers nowhere (BN4's one reader is its HUD's icon, 0x08014CC0, "
@@ -130,6 +134,7 @@ TWINS = {
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
     0x0800FC48: (0x08016168, 'chips'),   # a panel of the other side's found in the object's row (Meteors' aim)
     0x08009E38: (0x0800CC52, 'chips'),   # a panel drawn as another type and side this frame (the panel changer's blink)
+    0x0800D772: (0x080136CC, 'chips'),   # a side's battle NaviStats' byte (BN4 0x0800D742's, BN6 0x08013682's: ldrb r0,[r0,r6]), BugCurse's
     # ... and what an attack state of MegaMan's calls (the 'attack' units):
     0x0800BA66: (0x0800FDB6, 'chips'),   # his counter window opened as his attack begins
     0x0800C9FC: (0x08011714, 'chips'),   # a chip's attack ended (BN4_CHIP_ATTACK_END, BN6_CHIP_ATTACK_END)
@@ -272,6 +277,7 @@ UNITS = (
     ('misc', 0x0D, 'PitRng'),
     ('support', 0x4C, 'FirePlus'),
     ('attack', 0x09, 'DarkBomb'),
+    ('support', 0x2A, 'BugCurse'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -306,6 +312,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xBB: 0x283,                 # (DrkVulcn's shots)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
                0xA9: 0x286, 0xBD: 0x287,    # (DarkBomb's bomb)
+               0x141: 0x288,                # (BugCurse's curse)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
@@ -420,6 +427,9 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
+    0x080DD4D4: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
+                     why="BugCurse's curse placed by the other side's battle NaviStats' Navi (its offsets by Navi at 0x080DD4FC): "
+                         "BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI), 0 for a virus side in both"),
     0x0800C728: dict(form='THUMB_ADDS', rd=0, rn=0, was=0x68, now=0xA0,
                      why="the battle state's obstacles by side: BN4 +0x68, BN6 +0xA0 (BN4_OBSTACLE_ADD 0x0800B230 and BN6_OBSTACLE_ADD "
                          "0x0800F614, the same routine but for that adds; three words a side, 0xC apart in both)"),
@@ -524,6 +534,9 @@ UNIT_COPIED = {
                             "in the frame its animation is set up, a frame ahead of BN4's (AquaUp's geyser's count at its +0x91, "
                             "bn4_chip_aquaup1 at t44); copied, as BN4's Navis copy it (tools/xnavirecipe_bn4.py), its pause test "
                             "BN6's"},
+    'BugCurse': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': the "
+                             "curse's object (the third kind's 0x80) steps its sprite by it; BN6's nearest a frame ahead; copied, its "
+                             "pause test BN6's"},
     'Elem': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's: the shot of a chip whose "
                          "params' +7 is set (ElemDark's 8) takes it at 0x080CE2F0 where the others take 0x080143FC, and BN6's "
                          "nearest updates the sprite a frame ahead of BN4's (the shot's count at its +0x91 2 in BN4 and 1 in BN6 "
@@ -582,6 +595,8 @@ NUMBERS = {
     0x08000000: "... the other side's (BN4 0x080D2208; BN6's 0x080CAE66)",
     0x0A05FF01: "DarkBomb's bomb's blast's hit word (BN4 0x080CF38A, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as PropBom's",
+    0x0605FF01: "BugCurse's curse's hit word (BN4 0x080DD528, r4 of the hit area's spawn 0x080CD7E2): its bits, its reach "
+                "and its frames, bytes of a number as PropBom's",
     0x0405FF11: "PropBom's bomb's blast's hit word (BN4 0x080DED2C, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as MagBolt's pull's",
 }

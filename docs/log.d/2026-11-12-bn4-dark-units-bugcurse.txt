@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-12T23:30:00Z
+* **Update**: multirom/bn4-chips.md (BugCurse moved on the project's first-actor routine; a BN6 folder of 30 Gigas never deals), rom/bn4.md (a side's first actor), devtools/differential.md (a Giga's spec's folder).

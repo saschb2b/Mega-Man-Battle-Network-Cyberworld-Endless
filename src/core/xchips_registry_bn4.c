@@ -176,7 +176,7 @@ const XChipReg4 xreg4_rows[] = {
 	{ 288,  566, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* WoodPowr */
 	{ 289,  602, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 64 },   /* BlakWeap */
 	{ 290,  729, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 2, 80 },   /* FinalGun */
-	{ 303,  730, XREG_PENDING,   0, 0xFF, { 0x02, 0xFF, 0xFF, 0xFF }, 2, 73 },   /* BugCurse */
+	{ 303,  730, XREG_MOVED,   0, 0xAA, { 0x02, 0xFF, 0xFF, 0xFF }, 2, 73 },   /* BugCurse */
 	{ 304,  731, XREG_PENDING,   0, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 2, 90 },   /* RedSun */
 	{ 305,  732, XREG_PENDING,   0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 2, 61 },   /* SignlRed */
 	{ 308,  531, XREG_PENDING,   0, 0xFF, { 0x00, 0xFF, 0xFF, 0xFF }, 2, 87 },   /* BlakBarr */

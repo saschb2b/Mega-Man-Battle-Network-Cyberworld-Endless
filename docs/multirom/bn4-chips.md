@@ -798,6 +798,27 @@ treats each as such:
   are allowed, its being in play and life compared (legit.json's bn4
   allowed, Full Synchro's aura; a mutation drops BN6's).
 
+**BugCurse is moved** (12 November 2026: id 730), BN4's support
+routine 0x2A as BN6's grown support routine 0xAA: its object (the
+fourth kind's 0x56) casts the curse (the third kind's 0x80, BN4's
+third-kind sprite step copied with it, its sound 0x141 at the grown
+table's 0x288) on the other side's object it finds. BN4 finds it by
+`0x0800C456`, the other side's first of its three objects, a virus
+too; BN6's twin of that routine (`0x080103BC`) answers a side's MegaMan
+alone, so against viruses it finds none and the curse is never cast.
+The call goes to a routine of the project's own instead,
+`XC4_FIRST_ACTOR` (`FREE_BN4_CHIP_STUBS`): a side's first of its four
+actors in BN6's battle state (`BN6_BATTLE_PLAYERS` + side x
+`BN6_BATTLE_PLAYER_STEP`), as BN4's takes its first; BN6's nearest
+(`0x080103F8`) was not taken, as it would curse another foe where
+several stand. `bn4_chip_bugcurse` passes over 300 frames by a dark
+MegaMan, four mutations caught; whether the first or the nearest is
+taken among several foes is read in both games' code, not compared, as
+the differential refuses a BN4 spec of more than one foe (its opening's
+alignment, legit.json's bn4 align). BN4's Gigas (729-733) need BN6's
+folder of a spec to hold another chip besides: a folder of 30 Gigas
+never deals in BN6.
+
 **DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
 594). DarkBomb is the bombs' state's subfamily 2, its own copy of the
 state at attack family 0xFC (as SeekBom's subfamily 9 has its own,

@@ -129,7 +129,7 @@ static uint32_t resolve(uint32_t target, void *user) {
 			/* (one of BN6's routines, one of the second-level dispatch's spawners, one of the Navis' stubs in their code's room,
 			 * xnavi_install.c, or the moved objects'; a BN4 Navi's shim in its code's room, its summon's (xnavi_init.c); or a stub or a helper of the installer's region, xvirus_code_stage's: the
 			 * chips', xchips_code.h) */
-			bool own = c->region && to >= c->region->stubs && to < c->region->stubs_end;
+			bool own = c->region && ((to >= c->region->stubs && to < c->region->stubs_end) || (to >= c->region->stubs2 && to < c->region->stubs2_end));
 			if (!in_rom(to, 2) && !xvirus_dispatch_is_spawner(to, NULL, NULL) && to != XV_CHIP_WRITER && !xvirus_dispatch_is_gate(to) &&
 				!navi_room(to) && !own && !xvirus_bn4_copy_routine(to | 1)) break;
 			return thumb_veneer_get(&c->pool, to);

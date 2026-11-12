@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "A side's first actor (xchips_bn4.h XC4_FIRST_ACTOR at FREE_BN4_CHIP_STUBS; bn6_forms.h BN6_BATTLE_PLAYER_SLOTS; docs/rom/bn4.md): BN4 0x0800C456's place for BugCurse, the first of a side's four actors in BN6's battle state."
+}
