@@ -3,7 +3,7 @@ type: Feature
 title: "6. The home shop"
 description: "The home shop: AsterLand's clerk opens BN6's Order Service, one order a visit at twice a Net Dealer's price, sorted on START by BN6's seven keys (`order_sort.c`), beside the SubChip seller."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T19:17:54Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T01:05:00Z }
 ---
 
 # 6. The home shop

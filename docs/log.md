@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: code/core.md (`library_count` and `library_whole` take the held test as a parameter, and `data.c` asks `chips_all_star`, which `run.c` answers: the layers' second cut, `core.data` includes nothing of the run).
+* **Update**: world/home/home-shop.md (the Order Service's sort by No. reads the pack through a reader the director gives it, `order_sort_pack`: the layers' fifth cut, the real world includes nothing of the director).
 * **Update**: multirom/bn4-chips.md (AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit, proved on a cracked and a grass panel; BN4's sprite step copied with the unit), devtools/differential.md (`panels=`: a BN4 spec's panels given a type in both games as the fight begins), devtools/chip-recipe-generator.md (`ROWS_WAIT` without AquaUp and GreenWd; `UNIT_COPIED`'s sprite step).
 * **Update**: devtools/dev-menu.md (`library=N` fills the profile's Library at the start, not as the screen opens), game/meta/library.md (the same, in The code: the dev tools fill it, the screen reads no dev switch; the layers' fourth cut).
 * **Update**: game/battle-lab.md (Built: Navis in the builder, by the records and the versions beaten), GUIDE.md (the Battle Lab's Navis), code/director.md (`lab_navis.c`).

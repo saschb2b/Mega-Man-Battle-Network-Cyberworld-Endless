@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T00:25:00Z
-* **Update**: code/core.md (`library_count` and `library_whole` take the held test as a parameter, and `data.c` asks `chips_all_star`, which `run.c` answers: the layers' second cut, `core.data` includes nothing of the run).
