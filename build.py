@@ -1923,12 +1923,26 @@ SCREENSHOTS = [
     # (GutsMan guarding BN4's ACDC Area: his card, his fight)
     ('bn4-guardian', ['--scene', 'emu', '--net-biome', 'x15', '--run-depth', '3', '--guardian', '35', '--dev', 'god'],
      [(1550, 'bn4-guardian-card'), (2900, 'bn4-guardian-fight')], B_AP),
-    # (the tournament forced on act 3: seed 2's bracket and round 1's card,
-    # JunkMan; seed 28's, TopMan)
-    ('bn4-tourney-junkman', ['--scene', 'emu', '--run-depth', '9', '--seed', '2', '--dev', 'tourney,god,onehit,quiet'],
-     [(1360, 'bn4-bracket-junkman'), (1500, 'bn4-round-junkman')], B_AP),
-    ('bn4-tourney-topman', ['--scene', 'emu', '--run-depth', '9', '--seed', '28', '--dev', 'tourney,god,onehit,quiet'],
-     [(1240, 'bn4-bracket-topman'), (1400, 'bn4-round-topman')], B_AP),
+    # (the tournament forced on act 3, the pool at its 48 (#473, which
+    # changed every draw): seed 11's bracket and round 1's card, JunkMan;
+    # seed 3's, TopMan)
+    ('bn4-tourney-junkman', ['--scene', 'emu', '--run-depth', '9', '--seed', '11', '--dev', 'tourney,god,onehit,quiet'],
+     [(1038, 'bn4-bracket-junkman'), (1200, 'bn4-round-junkman')], B_AP),
+    ('bn4-tourney-topman', ['--scene', 'emu', '--run-depth', '9', '--seed', '3', '--dev', 'tourney,god,onehit,quiet'],
+     [(1402, 'bn4-bracket-topman'), (1570, 'bn4-round-topman')], B_AP),
+    # (seed 9's round 1, BurnerMan, and seed 22's, SparkMan, each fought in
+    # its tournament at the round's HP: the bracket, the card, the fight;
+    # then, the autopilot's folder spent, the onehit step ends it: BN6's
+    # RESULT, the round's chip, the bracket again with his plate grey and
+    # MegaMan's a step on)
+    ('bn4-tourney-burnerman', ['--scene', 'emu', '--run-depth', '9', '--seed', '9', '--dev', 'tourney,god,hp=999,quiet',
+                               '--input', '9000:,0:onehit'],
+     [(1336, 'bn4-bracket-burnerman'), (1500, 'bn4-round-burnerman'), (2300, 'bn4-round-burnerman-fight'),
+      (10190, 'bn4-round-burnerman-result'), (10294, 'bn4-round-burnerman-chip'), (10315, 'bn4-bracket-burnerman-after')], B_AP),
+    ('bn4-tourney-sparkman', ['--scene', 'emu', '--run-depth', '9', '--seed', '22', '--dev', 'tourney,god,hp=999,quiet',
+                              '--input', '5000:,0:onehit'],
+     [(840, 'bn4-bracket-sparkman'), (1060, 'bn4-round-sparkman'), (2500, 'bn4-round-sparkman-fight'),
+      (10160, 'bn4-round-sparkman-result'), (10258, 'bn4-round-sparkman-chip'), (10272, 'bn4-bracket-sparkman-after')], B_AP),
     # (the tournament's four new Navis, each in a BN6 battle on BN4's ACDC
     # Area by the foes step, at a frame of his attack)
     ('bn4-topman', BN4_NAVI + ['--input', '460:,0:foes 3B0@52'], [(1990, 'bn4-topman')], B_AP),
