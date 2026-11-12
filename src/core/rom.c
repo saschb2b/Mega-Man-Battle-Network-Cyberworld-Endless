@@ -445,6 +445,7 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 };
 
 XRom XR[XROM_COUNT];
+int xroms_most = XROMS_MOST;
 bool xrom_research;
 static int reviewed = -1;   /* (the area a dev tool reviews, XAREA_ALL every one; -1 none) */
 

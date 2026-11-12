@@ -48,11 +48,11 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, full=True):
-        """A game: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
+    async def connect(self, name, full=True, **identity):
+        """A game: with the full set (BN6's, BN5's and BN4's ROMs), or BN6's alone; `identity` what else its HELLO says."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, key=name.encode().ljust(16, b"k"), bn5=full)
+        welcome = await client.open(self.port, name, key=name.encode().ljust(16, b"k"), bn5=full, **identity)
         seed, number = struct.unpack("!IH", welcome[32:38])
         return client, seed, number
 
@@ -141,6 +141,14 @@ class WeekTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((await self.board(b))[3], [("Alpha", 5, 2, 0, 40)])
         await b.send(week.post(number, seed, 7, 3, False, 30, 0x99))
         self.assertEqual(await self.notice(b), SPEC["notice_pass"])
+        self.assertEqual(len(self.server.weeks.best), 1)
+        # (v18: a system of one extra ROM, its pass full with BN5's alone, posts none either: without BN4's ROM its dive
+        # is not the net the Board's others dived, docs/online/netpass.md)
+        c, _, _ = await self.connect("Gamma", bn4=False, one_extra=True)
+        await self.board(c)
+        self.assertTrue(protocol.pass_full(self.server.players[max(self.server.players)].roms))
+        await c.send(week.post(number, seed, 7, 3, False, 30, 0x99))
+        self.assertEqual(await self.notice(c), SPEC["notice_pass"])
         self.assertEqual(len(self.server.weeks.best), 1)
         # (a malformed post is malformed before it is refused)
         await b.send(bytes((SPEC["week_post"], 0)))

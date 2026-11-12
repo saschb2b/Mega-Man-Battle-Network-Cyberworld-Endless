@@ -39,7 +39,7 @@ class Player:
     social_time: float = dataclasses.field(default_factory=time.monotonic)
     profile_time: float = 0
     offer_time: float = -1e9  # the board's last post, monotonic
-    roms: int = 0             # protocol.json's roms_bn5 and roms_bn4 bits: the ROMs the game has besides BN6's (protocol.full_set)
+    roms: int = 0             # protocol.json's roms_bn5 and roms_bn4 bits: the ROMs the game has besides BN6's (protocol.full_set); roms_one_extra where its system reads one at most (v18, protocol.pass_full)
     round_trip: int = 0       # its round trip to here in ms as its PING says it (v13), 0 unknown: its link's bars
     refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
     resumed: bool = False     # a place held taken back by this session (holds.py)
@@ -372,13 +372,24 @@ class Server:
     async def notice(self, player, code, text):
         await websocket.send(player.writer, struct.pack("!BH", protocol.SPEC["notice"], code) + text.encode("ascii")[:96])
 
-    async def without_pass(self, player, *others):
-        """Whether the asker or a player his message aims at lacks the full set
-        (protocol.full_set), the asker told with NOTICE notice_pass: the
-        Arena, Trade Central and the week's posts need it, the Square not."""
-        if all(protocol.full_set(p.roms) for p in (player, *others)):
+    async def without_pass(self, player, *others, rule=protocol.full_set):
+        """Whether the asker or a player his message aims at lacks the pass
+        `rule` asks, the asker told with NOTICE notice_pass: the Arena, the
+        stands and the week's posts need the full set (protocol.full_set),
+        Trade Central a full pass (protocol.pass_full, v18: on a system of
+        one extra ROM at most, one game beside BN6's), the Square neither."""
+        if all(rule(p.roms) for p in (player, *others)):
             return False
         await self.notice(player, protocol.SPEC["notice_pass"], "That needs the full NetPass")
+        return True
+
+    async def off_ground(self, player, other, *chips):
+        """Whether a chip of a trade is outside the common ground of its two
+        games (v18: one of a game either lacks the ROM of, protocol.holds),
+        the asker told with NOTICE notice_ground."""
+        if all(protocol.holds(p.roms, chip[0]) for p in (player, other) for chip in chips):
+            return False
+        await self.notice(player, protocol.SPEC["notice_ground"], "Not a chip both PETs hold")
         return True
 
     async def switch_channel(self, player, requested):

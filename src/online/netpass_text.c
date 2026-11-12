@@ -29,5 +29,13 @@ const char *netpass_missing_words(const char *name) {
 	return s;
 }
 
+const char *netpass_missing_either_words(const char *name, const char *other) {
+	static char s[96];
+	if (other) snprintf(s, sizeof s, "%s's or %s's ROM stamps Trade", name, other);
+	else snprintf(s, sizeof s, "%s's ROM stamps Trade", name);
+	return s;
+}
+
 const char netpass_complete[] = "Every game in. The whole Net is yours.";
 const char netpass_complete_no_ring[] = "Every game in! No NetBattles on this PET.";
+const char netpass_complete_one_extra[] = "Every game this PET holds is in! It trades. No NetBattles or DeepNet here.";

@@ -24,6 +24,7 @@ static struct {
 	bool letting_go;     /* closed, its A or B still held: kept from the game (BN6 would take it as a new press) */
 	int t;
 	int from;            /* the stamping: the stamps already seen (the Square's at least) */
+	int lands[STAMP_COUNT], n;   /* ... those that land, in their order: the pass's own past the seen */
 	int end;             /* ... the frame the full pass shows */
 	NetPassView view;
 } N;
@@ -78,19 +79,23 @@ bool netpass_screen_shown(void) { return N.shown; }
 /* (a set grown since, a game more in it: the stamps it took away land again) */
 static bool grown(Seen seen) { return seen.games < netpass_games(); }
 
+/* (a full pass holds every stamp, or, on a system of one extra ROM, the Square's and Trade's: netpass_stamps) */
 bool netpass_stamp_due(void) {
 	Seen seen = seen_read();
-	return netpass_full() && (seen.stamps < STAMP_COUNT || grown(seen));
+	int held = netpass_stamps();
+	return netpass_full() && (seen.stamps < held || (grown(seen) && seen.stamps == held));
 }
 
+/* (stamps taken by the set's growth: all but the Square's from a game whose pass is no longer full, the Arena's and the
+ * DeepNet's from a full pass on a system of one extra ROM) */
 bool netpass_grew_due(void) {
 	Seen seen = seen_read();
-	return !netpass_full() && seen.stamps == STAMP_COUNT && grown(seen);
+	return seen.stamps == STAMP_COUNT && seen.stamps > netpass_stamps() && grown(seen);
 }
 
 void netpass_grew_begin(void) {
 	netpass_screen_open();
-	seen_write(1);
+	seen_write(netpass_stamps());
 	printf("netpass: the set grew to %d games, its stamps gone till the pass is full\n", netpass_games());
 }
 
@@ -100,17 +105,22 @@ void netpass_stamp_begin(void) {
 	netpass_screen_open();
 	N.stamping = true;
 	N.from = seen < 1 ? 1 : seen;
-	N.end = FIRST_LANDS + (STAMP_COUNT - N.from - 1) * LANDS_EVERY + FULL_AFTER;
-	for (int s = N.from; s < STAMP_COUNT; ++s) N.view.held[s] = false;
+	/* (the pass's stamps past those seen land: every one, or Trade's alone on a system of one extra ROM) */
+	for (int s = 0, k = 0; s < STAMP_COUNT; ++s) {
+		if (!N.view.held[s] || k++ < N.from) continue;
+		N.lands[N.n++] = s;
+		N.view.held[s] = false;
+	}
+	N.end = FIRST_LANDS + (N.n - 1) * LANDS_EVERY + FULL_AFTER;
 	N.view.full = false;
-	seen_write(STAMP_COUNT);
+	seen_write(netpass_stamps());
 	printf("netpass: the stamp moment, %d stamps seen before\n", seen);
 }
 
 /* the stamping's frame: a new stamp landing every so often, BN6's jingle with each, then the full pass */
 static void stamping(void) {
-	for (int s = N.from; s < STAMP_COUNT; ++s) {
-		int at = FIRST_LANDS + (s - N.from) * LANDS_EVERY;
+	for (int i = 0; i < N.n; ++i) {
+		int s = N.lands[i], at = FIRST_LANDS + i * LANDS_EVERY;
 		if (N.t == at) {
 			N.view.held[s] = true;
 			N.view.landing = s;
@@ -136,7 +146,7 @@ bool netpass_screen_update(void) {
 	if (N.stamping && N.t <= N.end) stamping();
 	/* (A or B while the stamps land: all of them at once, the full pass's sound, the time the player's) */
 	if (N.stamping && N.t > 1 && N.t < N.end && (btn_pressed(BTN_A) || btn_pressed(BTN_B))) {
-		for (int s = 0; s < STAMP_COUNT; ++s) N.view.held[s] = true;
+		for (int i = 0; i < N.n; ++i) N.view.held[N.lands[i]] = true;
 		N.t = N.end;
 		stamping();
 	}
