@@ -1,0 +1,1 @@
+The tournament's bracket draws from every proved Navi where BN4's ROM is read: its pool held 32 and dropped BN4's eleventh and twelfth proved, SparkMan and BurnerMan, so a seed's bracket there changes; without BN4's ROM the pool and its draw are as before, docs/game/tournament.md

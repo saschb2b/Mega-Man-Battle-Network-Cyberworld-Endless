@@ -3,7 +3,7 @@ type: Design
 title: "The tournament"
 description: "The tournament, an act's climax in BN4's manner: in some acts the arena holds three Navis in a row, two below the act's guardian band and the final at it, MegaMan's HP carried with the arena's heal before the first alone; where and how often, each round's band, a loss, the prize, the card, the entrants, the door's save, beside the rival and the Glitch layer, the owner's seven calls, and as built (in runs where BN4's ROM is read, for a profile that has reached the Nest; BN6's and BN5's Navis and BN4's twelve proved ones its entrants)."
 tags: [game, design, tournament, bn4]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T19:17:08Z }
 sources:
   - id: owner
     resource: "The owner's call 2 of 4 November 2026, docs/multirom/bn4.md, The owner's calls"
@@ -468,6 +468,13 @@ written ([Battle sprites by battle](../multirom/bn4-navis.md#battle-sprites-by-b
 He was never a final at first: the final is the act's guardian as drawn
 (`run_guardian`, by the act's area), and BN4's Navis guarded no area then
 (BN4's viruses came first, [Battle Network 4 in a run](../multirom/bn4.md)).
+
+**The pool's room** (`BRACKET_POOL`, `src/core/run.h`): every Navi a pool can
+hold, BN6's 16, BN5's six and BN4's 25 seats, so 48; `src/layer/bracket.c`
+fails the build where it is less. At 32 it dropped BN4's proved Navis past the
+tenth without a word: SparkMan and BurnerMan, proved and listed, were never
+drawn (0 of 500 runs' brackets, 12 November 2026). A run without BN4's ROM
+holds 22 at most and draws as before.
 Since 12 November 2026 nine of them guard the areas BN4 dresses in half
 the runs ([BN4's Navis as guardians](bosses/bn4-navis.md)), and one who
 guards a tournament's act is its final. Seven more joined on 8 November 2026,
