@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T23:10:00Z
-* **Update**: game/battle-lab.md (Built: Navis in the builder, by the records and the versions beaten), GUIDE.md (the Battle Lab's Navis), code/director.md (`lab_navis.c`).

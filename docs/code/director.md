@@ -3,7 +3,7 @@ type: Code Map
 title: "The director: the run on the game"
 description: "What `src/director/` holds, file by file: the frame's course and its shared state, layers, checkpoints, encounters, bosses, home and Lan's HP, the requests, a dark layer's liberation, and the words files."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T15:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:10:00Z }
 ---
 
 # The director: the run on the game
