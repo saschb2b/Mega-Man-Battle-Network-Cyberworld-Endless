@@ -13,6 +13,7 @@
 #endif
 
 #include "audio.h"
+#include "launcher_saves.h"
 #include "mirror.h"
 #include "pick.h"
 #include "platform.h"
@@ -219,6 +220,9 @@ void saves_tick(void) {
 	 * a look) */
 	if (scene != &scene_saves && mirror_incoming()) saves_compare_held();
 }
+
+/* (the ROMs screen's two hooks: launcher_saves.h) */
+const LauncherSaves launcher_saves = { saves_import, saves_tick };
 
 #ifdef __EMSCRIPTEN__
 /* The browser page's menu (web/play/app.js): SAVES over the title, 0 in a
