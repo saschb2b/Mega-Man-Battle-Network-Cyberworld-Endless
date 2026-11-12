@@ -45,12 +45,13 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, full=True, bn4=None):
+    async def connect(self, name, full=True, bn4=None, one_extra=False):
         """A game in the channel: with the full set (BN6's, BN5's and BN4's ROMs), or BN6's alone; `bn4` False
-        the full set less BN4's (v17)."""
+        the full set less BN4's (v17), True with `full` False BN4's alone; `one_extra` on a system that reads one
+        extra ROM at most (v18: the New 3DS)."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=full, bn4=full if bn4 is None else bn4)
+        welcome = await client.open(self.port, name, bn5=full, bn4=full if bn4 is None else bn4, one_extra=one_extra)
         return client, struct.unpack("!I", welcome[5:9])[0]
 
     async def trade_state(self, client):
@@ -364,6 +365,86 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         await a.send(offer((411, 12), 3))
         self.assertEqual(await self.board(b, 1), [(a_id, 411, 12, 3)])   # (BN5's it holds)
         self.assertFalse(self.server.arena.matches)
+
+    async def test_a_system_of_one_extra_rom_trades_on_common_ground(self):
+        """v18: a system that reads one extra ROM at most (HELLO's hello_one_extra) holds a full pass with one game
+        beside BN6's. It trades with a full set, a chip both games hold; a chip of the game it lacks is refused
+        (NOTICE notice_ground) from either side. It neither battles nor is battled. With no game beside BN6's it is
+        refused as ever, and so is an ordinary system with BN5's ROM alone."""
+        ground, no_pass = SPEC["notice_ground"], SPEC["notice_pass"]
+        a, a_id = await self.connect("Alpha")
+        b, b_id = await self.connect("Beta", bn4=False, one_extra=True)
+        self.assertEqual(self.server.players[b_id].roms, SPEC["roms_bn5"] | SPEC["roms_one_extra"])
+        # (SNAPSHOT tells the others: his game, and that his system reads one at most)
+        self.assertEqual(protocol.snapshot(self.server.players, a_id)[-1], SPEC["roms_bn5"] | SPEC["roms_one_extra"])
+        # (a BN4 chip to it, and one it could not hold from it: outside the common ground, nothing begun)
+        await a.send(trade(1, b_id, (700, 2)))
+        self.assertEqual(await self.notice(a), ground)
+        await b.send(trade(1, a_id, (700, 2)))
+        self.assertEqual(await self.notice(b), ground)
+        await b.send(offer((700, 2), 0))
+        self.assertEqual(await self.notice(b), ground)
+        self.assertFalse(self.server.trades.open or self.server.trades.offers)
+        # (the board: BN4's offer left out of its BOARD, and a take of it refused though it names the chip)
+        await a.send(offer((700, 2), 0))
+        self.assertEqual(await self.board(a, 1), [(a_id, 700, 2, 0)])
+        self.assertEqual(await self.board(b, 0), [])
+        await b.send(trade(5, a_id, (5, 2), (700, 2)))
+        self.assertEqual(await self.notice(b), ground)
+        self.assertFalse(self.server.trades.open)
+        # (an answer with a BN4 chip to its proposal: called off for both)
+        await b.send(trade(1, a_id, (411, 12)))
+        trade_id = (await self.trade_state(b))[2]
+        self.assertEqual((await self.trade_state(a))[5:], (0, 0, 411, 12))
+        await a.send(trade(2, trade_id, (700, 2), (411, 12)))
+        self.assertEqual(await self.notice(a), ground)
+        self.assertEqual(((await self.trade_state(a))[1], (await self.trade_state(b))[1]), (6, 6))
+        self.assertFalse(self.server.trades.open)
+        # (no NetBattle from it or with it: the two games' installs differ)
+        await b.send(arena(1, a_id, 0))
+        self.assertEqual(await self.notice(b), no_pass)
+        await a.send(arena(1, b_id, 0))
+        self.assertEqual(await self.notice(a), no_pass)
+        self.assertFalse(self.server.arena.matches)
+        # (within the common ground: its BN5 chip for one of BN6's, done)
+        await b.send(trade(1, a_id, (411, 12)))
+        trade_id = (await self.trade_state(b))[2]
+        await self.trade_state(a)
+        await a.send(trade(2, trade_id, (5, 2), (411, 12)))
+        self.assertEqual(((await self.trade_state(a))[1], (await self.trade_state(b))[1]), (3, 3))
+        await b.send(trade(3, trade_id, (411, 12), (5, 2)))
+        await self.trade_state(b)
+        await a.send(trade(3, trade_id, (5, 2), (411, 12)))
+        done = await self.trade_state(b)
+        self.assertEqual((done[1], done[5:]), (5, (411, 12, 5, 2)))
+
+    async def test_a_full_pass_takes_a_game_or_every_game(self):
+        """v18: on a system of one extra ROM, no game beside BN6's is no pass; on any other, one game is none
+        either: its full set is still all three. BN4's alone on a system of one trades BN4's chips, not BN5's."""
+        ground, no_pass = SPEC["notice_ground"], SPEC["notice_pass"]
+        a, a_id = await self.connect("Alpha")
+        c, c_id = await self.connect("Gamma", full=False, one_extra=True)
+        d, d_id = await self.connect("Delta", bn4=False)
+        e, e_id = await self.connect("Epsilon", full=False, bn4=True, one_extra=True)
+        for other, other_id in ((c, c_id), (d, d_id)):
+            await other.send(trade(1, a_id, (5, 2)))
+            self.assertEqual(await self.notice(other), no_pass)
+            await a.send(trade(1, other_id, (5, 2)))
+            self.assertEqual(await self.notice(a), no_pass)
+            await other.send(offer((5, 2), 0))
+            self.assertEqual(await self.notice(other), no_pass)
+        self.assertFalse(self.server.trades.open or self.server.trades.offers)
+        self.assertEqual([protocol.pass_full(self.server.players[i].roms) for i in (a_id, c_id, d_id, e_id)], [True, False, False, True])
+        self.assertEqual([protocol.full_set(self.server.players[i].roms) for i in (a_id, c_id, d_id, e_id)], [True, False, False, False])
+        # (BN4's alone: its offer of a BN4 chip up, read by the full set and not by BN5's game; a BN5 chip to it refused)
+        await e.send(offer((700, 2), 0))
+        self.assertEqual(await self.board(a, 1), [(e_id, 700, 2, 0)])
+        self.assertEqual(await self.board(d, 0), [])
+        await a.send(trade(1, e_id, (411, 12)))
+        self.assertEqual(await self.notice(a), ground)
+        await a.send(trade(5, e_id, (701, 0), (700, 2)))
+        self.assertEqual((await self.trade_state(a))[1], 3)
+        self.assertEqual((await self.trade_state(e))[5:], (700, 2, 701, 0))
 
     async def test_the_arena_needs_the_full_set(self):
         a, a_id = await self.connect("Alpha")

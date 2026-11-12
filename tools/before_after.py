@@ -150,6 +150,19 @@ SCENES = [
     # and BN4 Red Sun's ROMs in the folder, BN4's cartridge the third)
     ('setup-tabs', ['--scene', 'setup', '--input', '60:'], {}, 100),
     ('launcher-bn4', ['--scene', 'launcher'], {}, 90),
+    # 0.21.0 (A)
+    # (0.21.0's: the menus on BN4's areas, every ROM read: the Chip Folder
+    # on BN4's ACDC Area, a Net Dealer's stock there, and Lan's HP before
+    # one of BN4's areas, scrambled in 0.20.0; a guardian's draft, a chat
+    # box's list before and the pick's screen after; PET > Library, BN6's
+    # own Library before, the run's with a page per game after)
+    ('bn4-folder', build.BN4_FOLDER, {}, 760),
+    ('bn4-shop', build.BN4_SHOP, {}, 2200),
+    ('bn4-home', build.BN4_HOME, {}, 1300),
+    ('pick-draft', build.PICK_DRAFT, {}, (824, 640)),
+    ('library', ['--scene', 'town', '--seed', '2', '--dev', 'library=3', '--input', build.PET_ROOM + '6:DOWN,6:,6:DOWN,6:,6:A,60:,' +
+                 '100:'], {}, 700),
+    # 0.21.0 (A) ends
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 

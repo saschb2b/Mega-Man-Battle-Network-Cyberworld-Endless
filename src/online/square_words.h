@@ -12,10 +12,12 @@
 const char *square_look_option(void);
 const char *square_strip_hint(void);
 /* The greeter's word before he stamps a NetPass just come full (the
- * stamp moment, netpass_screen.h) */
-const char *square_greeter_stamp_words(void);
-/* ... the set grown since the pass was full: once, before the pass opens with its new open slot (netpass_grew_due) */
-const char *square_greeter_grew_words(void);
+ * stamp moment, netpass_screen.h): `every` stamp, or the Trade stamp alone
+ * (a full pass on a system of one extra ROM, netpass.h) */
+const char *square_greeter_stamp_words(bool every);
+/* ... the set grown since the pass was full: once, before the pass opens with its new open slot (netpass_grew_due);
+ * `trades`: the pass still full on a system with no room for the new game, its Trade stamp kept */
+const char *square_greeter_grew_words(bool trades);
 /* ... a box of options goes on with this (a peer's card's). */
 const char *square_more(void);
 /* ... L's option to hide everyone else's phrases and emotes, or, where
@@ -26,9 +28,10 @@ const char *square_back(void);
 const char *square_home_question(void);
 /* A facing another player's MegaMan: who he is and his card (`card`
  * NULL where it has not come), his NetPass where it is not full
- * (`pass_full`: netpass.h, by his ROMs), and the options for him, `muted`
- * naming the second Unmute. */
-const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full);
+ * (`pass_full`: netpass.h, by his ROMs) or full without the Arena stamp
+ * (`arena` false: a system of one extra ROM), and the options for him,
+ * `muted` naming the second Unmute. */
+const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full, bool arena);
 /* ... the card's facts alone, in pages (HP, act and layer, Crosses, Souls;
  * never the folder): empty where no card has come */
 const char *square_card_facts(const OnlineProfile *card);

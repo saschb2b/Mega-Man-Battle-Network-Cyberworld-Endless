@@ -101,9 +101,7 @@ static bool can_watch(const StandsEntry *e) {
 
 /* a chip's name where this game can name it (a BN5 chip only with BN5's ROM, a BN4 chip's own with BN4's), else NULL */
 static const char *chip_name(unsigned id, char *out, size_t n) {
-	bool bn5 = id > ONLINE_BN6_CHIP_LAST || BN6_CHIP_BLANK(id), bn4 = id >= ONLINE_BN4_CHIP_FIRST;
-	uint8_t roms = online_transport_roms();
-	if (!id || (bn5 && !(roms & ONLINE_ROMS_BN5)) || (bn4 && !(roms & ONLINE_ROMS_BN4))) return NULL;
+	if (!id || !netpass_peer_holds(online_transport_roms(), id)) return NULL;
 	chips_name((int)id, out, n);
 	return out[0] ? out : NULL;
 }

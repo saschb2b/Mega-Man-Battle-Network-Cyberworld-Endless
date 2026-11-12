@@ -52,13 +52,23 @@ void lab_info_panel(char *out, size_t n, const char *panel, const char *foe) { s
 
 void lab_info_empty(char *out, size_t n) { snprintf(out, n, "No foes are set."); }
 
+/* a win's two lines for the information box, 13 letters each at most (its 105 pixels): the time and the busting level,
+ * then the HP lost; '|' the line's break, which a box of one line reads as a space (lab_draw.c) */
+static void win_words(char *out, size_t n, int frames, int bust, int hp_lost) {
+	int cs = frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;
+	char level[12] = "S", hp[16] = "No HP lost.";
+	cs %= 100;
+	if (bust < 11) snprintf(level, sizeof level, "%d", bust);
+	if (hp_lost > 0) snprintf(hp, sizeof hp, "HP -%d.", hp_lost);
+	snprintf(out, n, "%d:%02d:%02d Lv %s|%s", m, sec, cs, level, hp);
+}
+
 void lab_info_result(char *out, size_t n, const LabResult *r) {
 	int cs = r->frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;
 	cs %= 100;
-	if (r->end == LAB_WON && r->bust >= 11) snprintf(out, n, "%d:%02d:%02d. Lv S. HP -%d.", m, sec, cs, r->hp_lost);
-	else if (r->end == LAB_WON) snprintf(out, n, "%d:%02d:%02d. Lv %d. HP -%d.", m, sec, cs, r->bust, r->hp_lost);
-	else if (r->end == LAB_DELETED) snprintf(out, n, "Deleted at %d:%02d:%02d.", m, sec, cs);
-	else snprintf(out, n, "Left at %d:%02d:%02d.", m, sec, cs);
+	if (r->end == LAB_WON) win_words(out, n, r->frames, r->bust, r->hp_lost);
+	else if (r->end == LAB_DELETED) snprintf(out, n, "Deleted at|%d:%02d:%02d.", m, sec, cs);
+	else snprintf(out, n, "Left at|%d:%02d:%02d.", m, sec, cs);
 }
 
 void lab_set_words(char *out, size_t n, int slot) { snprintf(out, n, "%d", slot + 1); }
@@ -78,12 +88,9 @@ void lab_stage_words(char *out, size_t n, const char *tag, const char *name, boo
 void lab_info_folder(char *out, size_t n, bool labs) { snprintf(out, n, labs ? "The Lab's. A edits it." : "MegaMan's own."); }
 
 void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lost) {
-	int cs = frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;
-	cs %= 100;
 	if (!foes) snprintf(out, n, "Nothing set here.");
 	else if (!bust) snprintf(out, n, "No win yet.");
-	else if (bust >= 11) snprintf(out, n, "Best %d:%02d:%02d. Lv S. HP -%d.", m, sec, cs, hp_lost);
-	else snprintf(out, n, "Best %d:%02d:%02d. Lv %d. HP -%d.", m, sec, cs, bust, hp_lost);
+	else win_words(out, n, frames, bust, hp_lost);
 }
 
 const char *lab_navi_word(int kind, int version) {

@@ -100,6 +100,9 @@ static void info_text(char *s, size_t n) {
 static void info_draw(int x, int y, int w, int lines) {
 	char s[96];
 	info_text(s, sizeof s);
+	/* (a line's break in the words, '|', is a space where the box has one line) */
+	for (char *c = s; lines == 1 && *c; ++c)
+		if (*c == '|') *c = ' ';
 	SDL_Rect r = look_panel(x, y, w, lines * LOOK_LINE + 2);
 	look_wrapped(s, r.x + 4, r.y - 1, r.w - 8, lines, LOOK_PAGE, LOOK_PANEL_SHADE);
 }

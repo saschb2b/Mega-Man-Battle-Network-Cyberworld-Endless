@@ -21,6 +21,12 @@ const char *trade_none_here(void) { return "HMM... NO OTHER\nNAVIS HERE RIGHT NO
 
 const char *trade_none_stamped(void) { return "HMM... NO NAVI HERE\nHAS A TRADE STAMP\nRIGHT NOW!"; }
 
+const char *trade_none_shared(const char *name) {
+	static char s[96];
+	snprintf(s, sizeof s, "HMM... %s'S\nPET CAN'T HOLD ANY\nSPARE OF YOURS!", name);
+	return s;
+}
+
 const char *trade_no_stamp(void) {
 	return "WELCOME TO\nTRADE CENTRAL!|HMM... NO TRADE\nSTAMP ON YOUR\nNETPASS!|SORRY! I CAN'T SWAP\nCHIPS WITHOUT ONE!";
 }

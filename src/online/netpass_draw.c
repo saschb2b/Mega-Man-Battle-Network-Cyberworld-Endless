@@ -144,7 +144,7 @@ void netpass_ground(int x, int y, int w, int h) { fill_rect(x, y, w, h, LOOK_GRE
 
 /* the band's note: the pass's level, a star before it where it is full */
 static void level(int x, int y, const NetPassView *v) {
-	const char *lv = v->full ? netpass_level_full : netpass_level_square;
+	const char *lv = v->full ? netpass_level_full : v->held[STAMP_TRADE] ? netpass_level_trade : netpass_level_square;
 	look_band_note(x, y, NETPASS_W, lv, v->full ? LOOK_GOLD : LOOK_PAGE);
 	if (v->full) star(x + NETPASS_W - 10 - look_caps_width(lv) - 12, y + 10, PET_GOLD, GOLD_EDGE);
 }
@@ -271,20 +271,28 @@ static void tray(int x, int y, const NetPassView *v) {
 	SDL_Rect f = look_panel(x, y, NETPASS_W - 2 * CARD_X, TRAY_H);
 	int games = netpass_games(), cx = f.x + 3;
 	const NetPassGame *missing = NULL;
-	for (int g = 0; g < games; ++g, cx += CART_W + 4) {
+	const NetPassGame *also = NULL;
+	for (int g = 0; g < games; ++g) {
+		/* (a game this system has no room for beside those in, a New 3DS's second: no slot) */
+		if (!netpass_game_fits(g)) continue;
 		bool in = netpass_game_in(g);
 		if (in) cartridge(cx, f.y + 1, g);
 		else open_slot(cx, f.y + 1, g, v->t);
+		if (!in && missing && !also) also = netpass_game(g);
 		if (!in && !missing) missing = netpass_game(g);
 		const char *word = in ? netpass_cart_in : netpass_cart_open;
 		SDL_Color c = in ? LOOK_GREEN_HI : LOOK_DIM;
 		int w = minifont_width(word, 1) + (in ? 8 : 0), wx = cx + (CART_W - w) / 2;
 		if (in) check(wx + 3, f.y + 32, c);
 		minifont_draw(wx + (in ? 8 : 0), f.y + 30, word, c, 1);
+		cx += CART_W + 4;
 	}
 	/* (the PET's line in the engine's smaller letters: the lists' would take three lines and more here; four with
 	 * three games' slots beside it, protocol v17's set) */
-	const char *line = missing ? netpass_missing_words(missing->name) : square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
+	const char *line = square_arena_offered() ? netpass_complete : netpass_complete_no_ring;
+	/* (a system of one extra ROM: either game stamps Trade, and with one in the pass is as full as it gets) */
+	if (netpass_one_extra() && !v->held[STAMP_ARENA]) line = missing ? netpass_missing_either_words(missing->name, also ? also->name : NULL) : netpass_complete_one_extra;
+	else if (missing) line = netpass_missing_words(missing->name);
 	int tx = cx + 1, tw = f.x + f.w - 2 - tx;
 	char lines[4][96];
 	int n = pixfont_wrap(line, tw, 1, lines, 4);
@@ -294,7 +302,8 @@ static void tray(int x, int y, const NetPassView *v) {
 void netpass_view_now(NetPassView *v) {
 	memset(v, 0, sizeof *v);
 	for (int s = 0; s < STAMP_COUNT; ++s) v->held[s] = netpass_has((NetStamp)s);
-	v->full = netpass_full();
+	/* (the header's "Full pass": every stamp, which a full pass on a system of one extra ROM does not hold) */
+	v->full = netpass_stamps() == STAMP_COUNT;
 	v->landing = -1;
 }
 
