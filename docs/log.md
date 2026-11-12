@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Add**: releases/v0.21.0.md (the players' notes of 0.21.0, "Three games. One run.": every act's virus, the Battle Lab, the Library a page per game, more of Red Sun and of Team Colonel, the PET in the Net Square). **Update**: releases/overview.md and releases/index.md (its line), game/meta/library.md (BN4's row as 0.21.0 ships it: 160, 25, 4, 189; a run hands out 76 of BN4's own, FirePlus without a slot).
 * **Update**: game/battle-lab.md (Built, The sandbox folder: a win's two lines in the information box, after a battle and as a set's best, and no "HP -0").
 * **Update**: GUIDE.md (What you need: the NetPass's full set takes BN4's ROM too, BN4's nine Navis as guardians, its 84 chips and seventeen Program Advances, 200 zenny only for a chip of BN4's that does not play yet, LarkMan and GridMan with no Soul, a New 3DS's pass the Square's alone; the tournament's twelve BN4 Navis; the Battle Lab's own folder; the Jukebox's BN4 songs).
 * **Update**: the itch.io page's description, `docs/itch/description.html` (BN4's viruses, chips and Navis in place of six visiting families; NetBattles, trades and the DeepNet need BN5's and BN4's ROMs), recorded in `docs/itch/state.json` for lint and still to be applied on itch (the steps in project/itch.md's Each release).

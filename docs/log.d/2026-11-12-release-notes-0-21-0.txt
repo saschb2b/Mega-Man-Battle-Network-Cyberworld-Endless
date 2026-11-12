@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T19:45:00Z
-* **Add**: releases/v0.21.0.md (the players' notes of 0.21.0, "Three games. One run.": every act's virus, the Battle Lab, the Library a page per game, more of Red Sun and of Team Colonel, the PET in the Net Square). **Update**: releases/overview.md and releases/index.md (its line), game/meta/library.md (BN4's row as 0.21.0 ships it: 160, 25, 4, 189; a run hands out 76 of BN4's own, FirePlus without a slot).
