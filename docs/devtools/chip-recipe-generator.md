@@ -215,7 +215,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `UNIT_MOVES` (the thunder's spawner); a routine of BN4's engine a
   unit copies where the pair's answers differ, for that unit alone, in
   `UNIT_COPIED` (MagBolt's collision panels' update, with BN4's rule for
-  a move's direction); a family whose state throws by its subfamily
+  a move's direction); a call a unit needs nothing of is aimed by hand
+  at a stub of the chips' in `UNIT_AIMS` (FirePlus's call for the user's
+  battle data, where BN4 keeps timers BN6 has no place for: the stub
+  that returns 0, so its stores go to addresses that take none); a family whose state throws by its subfamily
   through a jump table of spawners is a unit by subfamily (`ATTACK_SUBS`:
   the state copied, the named subfamilies' entries moved with their
   types, the rest BN6's null routine, the unit's chips those subfamilies'
