@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's GutsMnSP G (its chip 225) against the registry's row for it (id 536): GutsMan's chip's unit as the V1's (bn4_chip_gutsman), its power BN4's computed 1002 moved as BN6's 1206 (tools/xchiprecipe_bn4.py's NaviPowers: BN4's SP routine 0x0801949E copied, its entry of BN6's grown computed powers 0xCD; docs/multirom/bn4-chips.md). Picked on the first Custom screen and used at fight frame 30 against BN4's Mettaur of 250 HP at (5,2), MegaMan's row, so the hit is not lethal. Neither game holds a deletion time of GutsMan's SP (BN6 keeps none, XC_SP_TIMES), so the power is his row's last column, 100, and the Mettaur is left 150 HP in both.",
+ "folder4": [
+  "0CE1"
+ ],
+ "folder6": [
+  "218:06"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
