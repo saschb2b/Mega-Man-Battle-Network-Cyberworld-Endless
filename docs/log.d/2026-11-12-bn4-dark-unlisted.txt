@@ -1,3 +1,0 @@
-by: claude/claude-opus-5-5
-at: 2026-11-12T19:30:00Z
-* **Update**: game/meta/library.md (BN4's dark chips neither listed nor counted while no find, reward or flame hands one out; BN4's own listed as they play), multirom/bn4.md (Its viruses' rewards: a dark chip of BN4's never a reward, the rows that name one, ElemDark's row 114).

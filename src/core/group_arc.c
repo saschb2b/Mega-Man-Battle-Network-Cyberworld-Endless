@@ -8,6 +8,11 @@ int arc_home_share(int act) {
 	return act >= 0 && act < 4 ? share[act] : -1;
 }
 
+int group_arc_depth(int depth) {
+	while (depth > 1 && pacing_act(depth - 1) == pacing_act(depth) && pacing_loop(depth - 1) == pacing_loop(depth)) --depth;
+	return depth;
+}
+
 static uint32_t mix(uint32_t k) {
 	k ^= k >> 16;
 	k *= 0x7FEB352Du;

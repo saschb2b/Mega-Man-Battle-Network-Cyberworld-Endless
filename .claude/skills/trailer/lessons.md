@@ -563,3 +563,75 @@ The owner on the second round (8 November 2026): "A, the full cut". The
 piece grown from A and the cut as rendered went out with 0.20.0. What
 turned it: reading the source game's battle tracks, not only the theme
 the look comes from, and holding the busier numbers as the floor.
+
+## 0.21.0: Three games. One run. (2026-11-12), `tools/trailers/v0_21_0.py`
+
+The release: what BN5 and BN4 bring into BN6's run and the two places
+that hold it. Every act has its virus (the act card names a family of
+any game, met alone, beside a partner, then in a battle built around
+it); eight more Navis to fight (BurnerMan, SparkMan, TopMan and JunkMan
+in BN4's tournament, CloudMan and CosmoMan on the dark boards, GridMan
+and LarkMan in the deep) and Red Sun's chips in the finds; the Library,
+a page per game; the Battle Lab. The owner's brief: "a new cool trailer
+showcasing the huge amount of new content in the mix, the global library
+for collecting everything and battle lab".
+
+The look: the mix. Each game is a channel in the colour its cartridge
+already has on the ROMs screen (`src/launcher/launcher_art.c`: BN6's
+green, BN5's blue, BN4's red), and those three are a screen's own green,
+blue and red. The game's picture at 4x, nearly the whole frame (a first
+for a segment's shots: the caption is a plate on the picture's last
+eleven lines, which cost nothing of BN6's screens); a column of three
+tags beside it, one a game, each lit with one word for what the shot
+takes from that game (ENGINE, AREA, VIRUS, NAVI, CHIP, PAGE, FOE, PANEL,
+STAGE, SONG); every cut the new picture's red, green and blue arriving
+apart from three sides and closing into one over five frames (three
+inside a bar); words and the logo arriving as three coloured ghosts
+that add up to white; the stinger the three colours running in and
+meeting in the logo. Ubuntu, weight 760 (its file named `Ubuntu-B.ttf`
+is the variable font at Regular: set the axes). The tags made the
+release's claim checkable shot by shot: a shot of BN4's virus beside
+BN5's in BN6's area lights all three.
+
+The music: three sketches, one a game, each from one seed read with
+`song_habits.py` (`sketch_mix_lib.py`): A from BN6's title (0x01, a
+march, E minor, 144), B from BN5's boss battle (0x16, half-diminished
+chords, a one-note gallop, C minor, 150), C from BN4's title (0x00, the
+lead on both squares eight ticks apart, C major, 144), all on
+`sketch_red_lib.py`'s parts (0.20.0's approved palette) with a kit, a
+backing and a bass of each seed's own. The owner chose A. The piece
+(`v0_21_0_music.py`) takes its parts from the chosen sketch's `STYLE`
+and lays the sketch's four-bar A, its B and a lift of a tone on the
+cut's slots, so a preview with one sketch grown could go to the owner
+with the sketches, and the swap to his pick was one line and a render:
+the trailer stayed off the release's critical path. "busier than the
+source: none", every part on FluidR3 GM, 6.7% above 3 kHz, a punch of
+7.7 dB. The owner approved the cut and the piece at their first full
+render (12 November 2026).
+
+Footage: all by `tools/trailer.py`'s own runs (the release pictures had
+none for this release yet). The act's shots are seed 7's third act
+(`--run-depth 7`, `8`, `9` with the `battle` step: each layer's first
+battle is the arc's beat; `CYBERWORLD_EMU_DEBUG=1` prints "arc beat" and
+the families); the Navis and chips by `foes` and `--dev folder=ID` in
+their own games' areas; the Library on `--dev library=1` (with every
+second chip the cursor lands on `??` rows and the card is blank); the
+Battle Lab by the Lab session's routes, its run written as named parts
+(`LAB_PARTS`, `lab_at`) so a shot's sample follows the script when a row
+count changes.
+
+What went wrong on the way: the first Lab take set each foe on the last
+one's panel, which takes it off (move the cursor before A); A presses
+ten frames apart turn a panel only every second press (fourteen apart
+they all count: twelve to BN5 Lava); a Net Dealer's `--talk shop` never
+opened his stock and the PET's R shows the NetPass in the Square alone,
+so both stayed out; a twelve-frame sheet lands on the cuts' first frames
+when a bar is 48, and reads as mud (look at a tempo's sheet whose step
+does not divide the bar, or at `--frames`). Capturing found a bug before
+the tag: an act's signature family differed on its third layer when the
+game started there (seeds 5 and 9), sent to the lead at once.
+
+Devices now used up: the three channels in the cartridges' colours, the
+tags with their one word, the picture's colours closing as the cut,
+ghosts that add up to white, the picture at 4x with the caption on its
+last lines, the three colours meeting in the logo.

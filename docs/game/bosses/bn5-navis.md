@@ -3,7 +3,7 @@ type: Feature
 title: "BN5's Navis"
 description: "BN5's six Soul Navis guarding the areas BN5 dresses, fought in BN6's engine since issue #82: where and how often, version and HP band, Guardian Data with his Soul and Navi chip, and BN5's Darkloids."
 tags: [game, bosses]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T14:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 ---
 
 # BN5's Navis (4 October 2026, issue #69; in BN6's engine since issue #82)
@@ -75,7 +75,8 @@ puts one in every act BN5 dresses and every deep act.
 2026). LarkMan and GridMan, BN5's Nebula Navis of the story, moved into
 BN6's engine ([Transplanted Navis](../../multirom/navis.md)), join the
 deep's pool beside the six, and no surface act's coin: Oran Area stays
-ShadowMan's (or his partner's, [Team ProtoMan](../team-protoman.md)). They
+ShadowMan's (Team ProtoMan's Navis, one of whom would share it, guard no
+run yet: [Team ProtoMan](../team-protoman.md)). They
 have no Soul to give: beating one pays his Navi chips, his Guardian Data's
 chip V1 in the first three acts and SP from the fourth, as the six's. The
 reason: a Soul-less guardian in a surface coin is a worse roll for the

@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:55:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -19,8 +19,12 @@ sources:
 # BN4's chips in a run
 
 Phase 4 of [Battle Network 4 in a run](bn4.md): BN4 Red Sun's own chips
-in BN6's tables, designed and scoped so building can start. Built so far:
-the pairings (unit 0) and BN5's first batch in the free ids (Past 511). The census is read from both ROMs (scratch reads, not kept;
+in BN6's tables, designed and scoped, then built unit by unit (Where
+things stand, below). In 0.21.0, 84 of its chips play and 17 of its 19
+Program Advances form: 101 of the registry's 193 rows
+(`src/core/xchips_registry_bn4.c`: 83 on BN4's code moved, one on BN6's
+record, 19 Program Advances, 90 waiting). Its dark chips, moved or not,
+reach no run. The census is read from both ROMs (scratch reads, not kept;
 How the census was made, below), the design reasoned with the
 game-design skill and checked against [the core loop](../game/core-loop.md),
 the scoping by the reverse-engineering skill's Locate and Understand.
@@ -45,8 +49,10 @@ Data, the vaults', Servers' and gift's picks (`loot_pool_pick`), a held
 Soul's kind (`loot_souls.c`), a Chip or BugFrag Trader's list, half each
 rarity's (`trader.c`). Nothing names a chip: a unit that comes to play
 joins the catalogue the next time the game starts (Boomer1-3 did, merged
-while this was built). With all three ROMs the catalogue holds 130 chips,
-15 of them BN4's own; with BN6 and BN4, 93 and the same 15.
+while this was built). As this was built (15 of BN4's rows playing), with
+all three ROMs the catalogue held 130 chips, 15 of them BN4's own; with
+BN6 and BN4, 93 and the same 15. It has grown since by itself, as more of
+BN4's rows came to play (84 in 0.21.0, its dark chips left out).
 
 Two decisions the design left open, taken with the game-design skill.
 **The catalogue holds the chips BN6 names too**, as BN5's does: fifteen
@@ -1132,7 +1138,7 @@ BN6's letters, punctuation mapped: BN4 spells the dash and the plus with
 other codes than BN6 and BN5), then by Navi and version where the games
 spell a Navi chip otherwise:
 
-| Records | How many | What a run does with them today |
+| Records | How many | What a run did with them at the census (9 November 2026; since, a row that plays is paid as itself: Where things stand, above) |
 | --- | --- | --- |
 | Not chips: no codes or no name (copies of LifeAura, Bass and MegaSoul, blanks) | 21 | nothing |
 | BN4's pseudo-chips (class 3): the Souls' sixteen, DarkNeo's boss records, BN4's training tools | 30 | nothing; the Souls come by their own track ([BN4's Souls](bn4-souls.md)) |
@@ -1153,9 +1159,10 @@ and ShadeMan V1 have BN5's names but no registry row; the other 51 are
 the SP and DS of Roll, SearchMan and ShadeMan and all three of GutsMan,
 WindMan, FireMan, ThunderMan, MetalMan, JunkMan, AquaMan, WoodMan,
 TopMan, BurnerMan, ColdMan, SparkMan, LaserMan, KendoMan and VideoMan.
-Eight of those Navis are moved and in the tournament (GutsMan,
-ThunderMan, WindMan, FireMan, SearchMan, AquaMan, Roll and WoodMan:
-[BN4's Navis in BN6's engine](bn4-navis.md)): 23 chips.
+Eight of those Navis were moved and in the tournament at the census
+(GutsMan, ThunderMan, WindMan, FireMan, SearchMan, AquaMan, Roll and
+WoodMan: [BN4's Navis in BN6's engine](bn4-navis.md)): 23 chips. Twelve
+are since (JunkMan, TopMan, SparkMan and BurnerMan with them).
 
 The Program Advances: BN4's list (`BN4_PA_LIST`, [BN4 Red Sun's
 tables](../rom/bn4.md), Its Program Advances) holds 37 recipes of 30
@@ -1492,11 +1499,16 @@ placeholder kept) and never enters a run's pools.
 
 ### How they enter a run
 
-- **BN4's visitors' rewards:** `xchips_reward_bn4` gives the registry's
+- **BN4's families' rewards** (a visitor's as this was designed; since
+  12 November 2026 a battle of an act's signature family, which pays
+  from that family's own rows:
+  [Encounter groups](../game/progression/encounter-groups.md), The
+  rewards): `xchips_reward_bn4` gives the registry's
   id where BN4's chip plays, the stand-in's 200 zenny where it sits out,
-  as BN5's visitors' rewards do. In the six moved families' rows, 66 of
-  the 210 entries above 3/8 HP are chips (a scratch tally): about a third
-  of a visitor's picks become a chip where they paid 200 zenny.
+  as BN5's families' rewards do. In the six families' rows moved by
+  then, 66 of the 210 entries above 3/8 HP are chips (a scratch tally):
+  about a third of such a battle's picks become a chip where they paid
+  200 zenny.
 - **BN4's Navis:** a round of the tournament against a BN4 Navi pays his
   own Navi chip at the version fought, and his Guardian Data where he
   guards, replacing call 7's stand-in once his chip plays; a Navi beaten

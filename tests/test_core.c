@@ -7903,6 +7903,35 @@ static void test_group_arc(void) {
 	CHECK(seen == 15, "arc: every family that can carry the act is a signature by some roll (%d)", seen);
 	/* (a family with no pair carries no act) */
 	CHECK(!group_arc_make(pool, 1, &r, 1, &a), "arc: no signature where nothing pairs");
+	/* an act's arc is made at its first layer, whichever of its layers asks (a CONTINUE on its third): the same layer for
+	 * all three, in the same act and cycle, and the Nest's its own */
+	for (int d = 1; d <= 3 * CYCLE_LAYERS; ++d) {
+		int at = group_arc_depth(d), in = (d - 1) % CYCLE_LAYERS;
+		CHECK(at == d - (in < 18 ? in % 3 : 0) && pacing_act(at) == pacing_act(d) && pacing_loop(at) == pacing_loop(d),
+			"arc: the layer the act's arc is made at, from layer %d (%d)", d, at);
+	}
+	/* ... so rules that change inside an act, as an older net's area's own families do by the layer, cannot move the
+	 * signature: read at each layer they give other arcs (the fault of 0.21.0's first builds), read at group_arc_depth one */
+	int moved = 0, held = 0;
+	for (uint32_t seed = 1; seed <= 200; ++seed) {
+		GroupArc by_layer[3], by_act[3];
+		bool made = true;
+		for (int d = 0; d < 3; ++d) {
+			ArcRules at = r, first = r;
+			/* (the area's own families by the layer: family 1 on its first, 2 on its second, 33 on its third) */
+			static const int own[3] = { 1, 2, 33 };
+			at.home = first.home = FAMILY_MASK_NONE;
+			family_mask_add(&at.home, own[d]);
+			family_mask_add(&first.home, own[group_arc_depth(4 + d) - 4]);
+			at.home_share = first.home_share = 9;
+			made &= group_arc_make(pool, 5, &at, seed * 2654435761u, &by_layer[d]) && group_arc_make(pool, 5, &first, seed * 2654435761u, &by_act[d]);
+		}
+		if (!made) continue;
+		moved += by_layer[1].signature != by_layer[0].signature || by_layer[2].signature != by_layer[0].signature;
+		held += by_act[1].signature == by_act[0].signature && by_act[2].signature == by_act[0].signature;
+	}
+	CHECK(moved > 0 && held == 200, "arc: the signature the act's alone, whichever layer asks (%d of 200 moved by the layer's rules, %d held by the act's)",
+		moved, held);
 }
 
 int main(int argc, char **argv) {
