@@ -87,8 +87,7 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
                               "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
 # A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
-ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
-             47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
+ROWS_WAIT = {47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
                  'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
 # returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
@@ -371,13 +370,13 @@ ROW_TABLES = {
                      why="the blasts' kinds (the fourth kind's 0x24: five of 2 bytes, the effect it draws on each panel of its "
                          "list and its sound, 0 none), read each time it draws one (0x080E4A70, by +4); TimeBomb's bomb spawns "
                          "kind 1 (0x080D6E2E: movs r4,#1), the burst 0x00 and no sound; 0, 2, 3 and 4 are other chips', left BN4's"),
-    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E), effect=2, sound=3,
-                     effect_sites={0x080CF55E}, sound_sites={0x080CF56A},
+    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E, 0x0F), effect=2, sound=3,
+                     effect_sites={0x080CF55E}, sound_sites={0x080CF56A}, when=True,
                      why="the spread shot's kinds (the third kind's 0x12: 17 of 4 bytes, its burst's shape, its collision's "
                          "argument, its burst's effect, its sound), read by its init (0x080CF452, by +4, the chip's first "
                          "parameter): 4-6 Bubbler, Bub-V and BublSide, 7 BubSprd, 8-0xA HeatShot, Heat-V and HeatSide, 0xB HeatSprd; "
-                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910); 0-3 are Spreader's (a run's by BN6's own) and "
-                         "0xC, 0xD, 0xF and 0x10 other families' and DrkSpred's, left BN4's"),
+                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910), 0xF DrkSpred's (its record's first parameter); "
+                         "0-3 are Spreader's (a run's by BN6's own) and 0xC, 0xD and 0x10 other families', left BN4's"),
     0x080CE277: dict(size=7, entry=1, kinds=(6,), effect=0, sound=None,
                      effect_sites={0x080CE212}, sound_sites=set(),
                      why="the bombs' object's blast's effect by its kind (the third kind's 0x8: 7 bytes, its +4's), read as it "
@@ -1319,6 +1318,21 @@ def row_tables(b4, b6, f, alloc):
             if not s4 or X4.song_sig(b4, X4.BN4['songs'], s4) == X4.song_sig(b6, X4.SONGS6, s4):
                 continue
             slot = FAMILY_SLOTS.get(s4)
+            if slot is None and t.get('when') and SOUND_SLOTS.get(s4) is not None:
+                # (a sound past a byte: the site's shim makes r0 its slot where the row's byte is its own, BN4's left in the copy)
+                when = SOUND_SLOTS[s4]
+                sites = sorted(t['sound_sites'])
+                if any(x['at'] in sites for x in f.queue_calls):
+                    f.decide('sound', f'{row + t["sound"]:08X}: its table\'s kind {k:#x}\'s sound {s4:#x} past a byte, and its site\'s shim taken')
+                    continue
+                if (s4, when) not in f.sounds:
+                    f.sounds.append((s4, when))
+                for site in sites:
+                    f.queue_calls.append(dict(at=site, slot=when, when=s4, why=f'its table {v:08X}\'s kind {k:#x}\'s sound {s4:#x}: BN4\'s song at '
+                                                                           f'the grown table\'s slot {when:#x}, where r0 holds it'))
+                f.notes.append(f'its sound {s4:#x} (its table {v:08X}\'s kind {k:#x}): BN4\'s song at the grown table\'s slot {when:#x}, made '
+                               f'r0 by the site\'s shim where the row gives its own byte')
+                continue
             if slot is None or slot > 0xFF:
                 f.decide('sound', f'{row + t["sound"]:08X}: its table\'s kind {k:#x}\'s sound {s4:#x} is no song of BN6\'s and has no slot a byte names (FAMILY_SLOTS)')
                 continue
@@ -1495,7 +1509,8 @@ def c_unit(f):
         L.append('};')
     if f.queue_calls:
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
-        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X}{", true" if x.get("add") else ""} }},   /* {x["why"]} */' for x in f.queue_calls]
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X}{", true" if x.get("add") else ", false, 0x%X" % x["when"] if x.get("when") else ""} }},   /* {x["why"]} */'
+              for x in f.queue_calls]
         L.append('};')
     if getattr(f, 'effect_calls', None):
         L.append(f'static const XvEffectCall {n}_effect_calls[] = {{')
@@ -1503,7 +1518,7 @@ def c_unit(f):
               f' }} }},   /* {x["why"]} */' for x in f.effect_calls]
         L.append('};')
     if f.sounds:
-        L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')
+        L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in dict.fromkeys(f.sounds)) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
                                                                    ('imms', True), ('numbers', f.numbers), ('states', f.states), ('types', True), ('sides', f.sides),

@@ -686,7 +686,7 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 	.types = sidbmbo_types, .ntypes = (int)(sizeof sidbmbo_types / sizeof *sidbmbo_types), \
 	.sound_calls = sidbmbo_sound_calls, .nsound_calls = (int)(sizeof sidbmbo_sound_calls / sizeof *sidbmbo_sound_calls), \
 	.sprites = sidbmbo_sprites, .nsprites = (int)(sizeof sidbmbo_sprites / sizeof *sidbmbo_sprites) }
-/* ---- Spreads: BN4's attack 0x1e (080EC761) as BN6's 0xd0; its chips 19 (588), 20 (589), 21 (590), 22 (591), 23 (592), 24 (593) ---- */
+/* ---- Spreads: BN4's attack 0x1e (080EC761) as BN6's 0xd0; its chips 19 (588), 20 (589), 21 (590), 22 (591), 23 (592), 24 (593), 192 (594) ---- */
 /* MegaMan's state 0x1e (080EC760-080EC842), the family of its chips' records: moved */
 /* its table 080CD524's kind 10: sprite 3:0x19 in BN4, 0x72 in BN6 (copied) */
 /* its table 080CD524's kind 6: sprite 3:0xd in BN4, 0x73 in BN6 (copied) */
@@ -705,10 +705,11 @@ static const XcSong sidbmbo_songs[] = { { 0x8E, 0x1E1 } };
 /* its effect 0x29 (its table 080CF3DC's): BN6's 0xc9, moved (no effect of BN6's draws its sprite's bytes) */
 /* its sound 0xbc (its table 080CF3DC's): BN4's song at slot 0x3f, the families' slot for it (FAMILY_SLOTS) */
 /* its effect 0x6a (its table 080CF3DC's): BN6's 0xc8, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x64 (its table 080CF3DC's): BN6's 0xc7, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x8d (its table 080CF3DC's kind 0xf): BN4's song at the grown table's slot 0x200, made r0 by the site's shim where the row gives its own byte */
 /* its sound 0x8d (080EC7DE): BN4's song copied into the grown song table's slot 0x200, on BN4's player 17 */
 /* its chip 18 has no row of the registry (the run's by name, or none) */
 /* its chip 192 is a dark chip of BN4's (row 594): a battle it is used in costs 20 max HP */
-/* its chip 192 (id 594) sits out: DrkSpred, a DarkChip of BN4's (the dark chips' session's: its kind 0xF of the shot's table and its price) */
 /* its chip 321 (id 606) sits out: a Program Advance, unformed until BN4's recipes are listed */
 /* its chip 322 (id 607) sits out: a Program Advance, unformed until BN4's recipes are listed */
 
@@ -813,8 +814,9 @@ static const XvSprite spreads_sprites[] = {
 	{ 3, 0x1A, 4, 0x9C, XC4_ROOM_ROW(20), 0x1100 },   /* BN4's 3:0x1a, the room's row 20 */
 	{ 5, 0x11, 5, 0xEA, XC4_ROOM_ROW(21), 0x2F00 },   /* BN4's 5:0x11, the room's row 21 */
 	{ 5, 0x0F, 5, 0xE9, XC4_ROOM_ROW(22), 0xA00 },   /* BN4's 5:0xf, the room's row 22 */
+	{ 5, 0x04, 5, 0xE8, XC4_ROOM_ROW(23), 0xE00 },   /* BN4's 5:0x4, the room's row 23 */
 };
-static const XvId spreads_effects[] = { { 0x25, 0xCA }, { 0x29, 0xC9 }, { 0x6A, 0xC8 } };
+static const XvId spreads_effects[] = { { 0x25, 0xCA }, { 0x29, 0xC9 }, { 0x6A, 0xC8 }, { 0x64, 0xC7 } };
 static const XvByte spreads_bytes[] = {
 	{ 0x080CD54D, 0x19, 0x72 },   /* its table's kind 10: list 3 0x19 in BN4, 0x72 in BN6 (copied) */
 	{ 0x080CD53D, 0x0D, 0x73 },   /* its table's kind 6: list 3 0xd in BN4, 0x73 in BN6 (copied) */
@@ -845,8 +847,10 @@ static const XvByte spreads_bytes[] = {
 	{ 0x080CF40A, 0x29, 0xC9 },   /* its table's kind 0xb's effect: 0x29 in BN4, 0xc9 in BN6 (moved) */
 	{ 0x080CF40B, 0xBC, 0x3F },   /* its table's kind 0xb's sound: BN4's 0xbc at BN6's slot 0x3f */
 	{ 0x080CF416, 0x6A, 0xC8 },   /* its table's kind 0xe's effect: 0x6a in BN4, 0xc8 in BN6 (moved) */
+	{ 0x080CF41A, 0x64, 0xC7 },   /* its table's kind 0xf's effect: 0x64 in BN4, 0xc7 in BN6 (moved) */
 };
 static const XvSoundCall spreads_sound_calls[] = {
+	{ 0x080CF56A, 0x200, false, 0x8D },   /* its table 080CF3DC's kind 0xf's sound 0x8d: BN4's song at the grown table's slot 0x200, where r0 holds it */
 	{ 0x080EC7DE, 0x200 },   /* its sound 0x8d: BN4's song at the grown table's slot 0x200 */
 };
 static const XcSong spreads_songs[] = { { 0x9F, 0x3D }, { 0xBC, 0x3F }, { 0x8D, 0x200 } };
@@ -931,7 +935,7 @@ static const XvType flmline_types[] = {
 	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
 };
 static const XvSprite flmline_sprites[] = {
-	{ 4, 0x0A, 4, 0x9B, XC4_ROOM_ROW(23), 0x1F00 },   /* BN4's 4:0xa, the room's row 23 */
+	{ 4, 0x0A, 4, 0x9B, XC4_ROOM_ROW(24), 0x1F00 },   /* BN4's 4:0xa, the room's row 24 */
 };
 static const XcSong flmline_songs[] = { { 0x9D, 0x36 } };
 
@@ -1018,7 +1022,7 @@ static const XvType thunder_types[] = {
 	{ 3, 0x2A, XV_TYPE_MOVED4, 0x2A },   /* BN4's third-kind 0x2a, moved, the chips' page */
 };
 static const XvSprite thunder_sprites[] = {
-	{ 4, 0x11, 4, 0x9A, XC4_ROOM_ROW(24), 0xB00 },   /* BN4's 4:0x11, the room's row 24 */
+	{ 4, 0x11, 4, 0x9A, XC4_ROOM_ROW(25), 0xB00 },   /* BN4's 4:0x11, the room's row 25 */
 };
 static const XvSoundCall thunder_sound_calls[] = {
 	{ 0x080D20B0, 0x201 },   /* its sound 0xad: BN4's song at the grown table's slot 0x201 */
@@ -1108,7 +1112,7 @@ static const XvType twnfng_types[] = {
 	{ 3, 0x51, XV_TYPE_MOVED4, 0x51 },   /* BN4's third-kind 0x51, moved, the chips' page */
 };
 static const XvSprite twnfng_sprites[] = {
-	{ 4, 0x27, 4, 0x99, XC4_ROOM_ROW(25), 0x300 },   /* BN4's 4:0x27, the room's row 25 */
+	{ 4, 0x27, 4, 0x99, XC4_ROOM_ROW(26), 0x300 },   /* BN4's 4:0x27, the room's row 26 */
 };
 static const XcSong twnfng_songs[] = { { 0xA6, 0x38 } };
 
@@ -1214,7 +1218,7 @@ static const XcSong magbolt_songs[] = { { 0xB9, 0x203 }, { 0xF8, 0x202 } };
 /* ---- PropBom: BN4's attack 0x62 (080EE533) as BN6's 0xd4; its chips 157 (671), 158 (672), 159 (673) ---- */
 /* MegaMan's state 0x62 (080EE532-080EE5EA), the family of its chips' records: moved */
 /* its sprite 4:0x2b (080DEBA0): BN6's 4:0x98, copied */
-/* its effect 0x0: BN6's 0xc7, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x0: BN6's 0xc6, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x15: 0xcb, as MokoRus moved it */
 /* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
@@ -1283,9 +1287,9 @@ static const XvImm propbom_imms[] = {
 	{ 0x080DEBF8, THUMB_STRH, 1, 0, 0x1E, 0x2E },   /* collision data +0x1e in BN4, +0x2e in BN6 */
 	{ 0x080DEC2A, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DEC58, THUMB_MOVS, 4, 0, 0x15, 0xCB },   /* its effect: 0x15 in BN4, 0xcb in BN6 (moved) */
-	{ 0x080DEC66, THUMB_MOVS, 4, 0, 0x0, 0xC7 },   /* its effect: 0x0 in BN4, 0xc7 in BN6 (moved) */
+	{ 0x080DEC66, THUMB_MOVS, 4, 0, 0x0, 0xC6 },   /* its effect: 0x0 in BN4, 0xc6 in BN6 (moved) */
 	{ 0x080DED04, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080DED16, THUMB_MOVS, 2, 0, 0x0, 0xC7 },   /* its effect over a pattern of panels: 0x0 in BN4, 0xc7 in BN6 (as its own spawn of it) */
+	{ 0x080DED16, THUMB_MOVS, 2, 0, 0x0, 0xC6 },   /* its effect over a pattern of panels: 0x0 in BN4, 0xc6 in BN6 (as its own spawn of it) */
 	{ 0x080DED44, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080EE536, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
 	{ 0x080EE55C, THUMB_MOVS, 0, 0, 0x12, 0xE },   /* MegaMan's animation as he throws PropBom: BN4's 0x12, BN6's 0x0E of its own sprite of him (frames of 1, 2, 2 and 3 in each art) */
@@ -1298,10 +1302,10 @@ static const XvType propbom_types[] = {
 	{ 3, 0x8C, XV_TYPE_MOVED4, 0x8C },   /* BN4's third-kind 0x8c, moved, the chips' page */
 };
 static const XvSprite propbom_sprites[] = {
-	{ 4, 0x2B, 4, 0x98, XC4_ROOM_ROW(26), 0x700 },   /* BN4's 4:0x2b, the room's row 26 */
-	{ 5, 0x00, 5, 0xE8, XC4_ROOM_ROW(27), 0x1C00 },   /* BN4's 5:0x0, the room's row 27 */
+	{ 4, 0x2B, 4, 0x98, XC4_ROOM_ROW(27), 0x700 },   /* BN4's 4:0x2b, the room's row 27 */
+	{ 5, 0x00, 5, 0xE7, XC4_ROOM_ROW(28), 0x1C00 },   /* BN4's 5:0x0, the room's row 28 */
 };
-static const XvId propbom_effects[] = { { 0x00, 0xC7 } };
+static const XvId propbom_effects[] = { { 0x00, 0xC6 } };
 static const XvSoundCall propbom_sound_calls[] = {
 	{ 0x080EE586, 0x200 },   /* its sound 0x8d: BN4's song at the grown table's slot 0x200 */
 	{ 0x080DEC6E, 0x205 },   /* its sound 0xc8: BN4's song at the grown table's slot 0x205 */
@@ -1395,8 +1399,8 @@ static const XvType thunsoul_types[] = {
 	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
 };
 static const XvSprite thunsoul_sprites[] = {
-	{ 3, 0x3A, 3, 0x7A, XC4_ROOM_ROW(28), 0x500 },   /* BN4's 3:0x3a, the room's row 28 */
-	{ 3, 0x37, 3, 0x7B, XC4_ROOM_ROW(29), 0xD00 },   /* BN4's 3:0x37, the room's row 29 */
+	{ 3, 0x3A, 3, 0x7A, XC4_ROOM_ROW(29), 0x500 },   /* BN4's 3:0x3a, the room's row 29 */
+	{ 3, 0x37, 3, 0x7B, XC4_ROOM_ROW(30), 0xD00 },   /* BN4's 3:0x37, the room's row 30 */
 };
 static const XvSoundCall thunsoul_sound_calls[] = {
 	{ 0x080DB05C, 0x300 },   /* its table 080DAFB0's kind 0x0's sound 0x91: BN4's song at the grown table's slot 0x300 */
@@ -1422,9 +1426,9 @@ static const XcSong thunsoul_songs[] = { { 0x91, 0x300 } };
 /* its effect 0x15: 0xcb, as MokoRus moved it */
 /* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
-/* its effect 0x0: 0xc7, as PropBom moved it */
-/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe8): installed with it */
-/* its fourth-kind 0x11's effect, its +0x5: 0x0 from its spawns (2 in the unit's code): through a shim that gives r4 0xc7 for 0x0 */
+/* its effect 0x0: 0xc6, as PropBom moved it */
+/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe7): installed with it */
+/* its fourth-kind 0x11's effect, its +0x5: 0x0 from its spawns (2 in the unit's code): through a shim that gives r4 0xc6 for 0x0 */
 /* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
 /* its sound 0x90 (080EB454): BN4's song copied into the grown song table's slot 0x206, on BN4's player 8 */
 
@@ -1516,13 +1520,13 @@ static const XvType seekbom_types[] = {
 	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
 };
 static const XvSprite seekbom_sprites[] = {
-	{ 4, 0x24, 4, 0x97, XC4_ROOM_ROW(30), 0x600 },   /* BN4's 4:0x24, the room's row 30 */
+	{ 4, 0x24, 4, 0x97, XC4_ROOM_ROW(31), 0x600 },   /* BN4's 4:0x24, the room's row 31 */
 };
 static const XvSoundCall seekbom_sound_calls[] = {
 	{ 0x080EB454, 0x206 },   /* its sound 0x90: BN4's song at the grown table's slot 0x206 */
 };
 static const XvEffectCall seekbom_effect_calls[] = {
-	{ 0x080E33B6, 1, { { 0x00, 0xC7 } } },   /* its fourth-kind 0x11's effect, its +0x5: 0x0 from its spawns (2 in the unit's code): 0x0 BN6's 0xc7 */
+	{ 0x080E33B6, 1, { { 0x00, 0xC6 } } },   /* its fourth-kind 0x11's effect, its +0x5: 0x0 from its spawns (2 in the unit's code): 0x0 BN6's 0xc6 */
 };
 static const XcSong seekbom_songs[] = { { 0x70, 0x3A }, { 0x90, 0x206 } };
 
@@ -1584,14 +1588,14 @@ static const XvType meteors_types[] = {
 /* its fourth-kind 0x24 (080E4A0A-080E4AD4): no BN6 type of its body, moved with him */
 /* its third-kind 0x4b is an actor (080D6CB8: the actors' runner with its table 080D6CCC, 7 states): its table in BN6's layout, 9 states, its own from 8 */
 /* its sprite 3:0x23 (080D6C28): BN6's 3:0x7c, copied */
-/* its effect 0x0: 0xc7, as PropBom moved it */
-/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe8): installed with it */
-/* its effect 0x0 (its table 080E4A00's): BN6's 0xc7, moved (no effect of BN6's draws its sprite's bytes) */
-/* its effect 0x0: 0xc7, as PropBom moved it */
-/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe8): installed with it */
-/* its effect 0x0: BN6's 0xc7, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x0: 0xc6, as PropBom moved it */
+/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe7): installed with it */
+/* its effect 0x0 (its table 080E4A00's): BN6's 0xc6, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x0: 0xc6, as PropBom moved it */
+/* its effect 0x0's sprite 5:0x0 is listed by PropBom (5:0xe7): installed with it */
+/* its effect 0x0: BN6's 0xc6, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x2's sprite 5:0x2 is listed by MokoRus (5:0xec): installed with it */
-/* its effect 0x2: BN6's 0xc6, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x2: BN6's 0xc5, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x15: 0xcb, as MokoRus moved it */
 /* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
@@ -1707,11 +1711,11 @@ static const XvImm timebomb_imms[] = {
 	{ 0x080D6E18, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080D6E3C, THUMB_MOVS, 0, 0, 0xBC, 0x3F },   /* its sound 0xbc: BN4's copied into BN6's slot 0x3f, a BN4 family's too */
 	{ 0x080D6E7C, THUMB_MOVS, 0, 0, 0x70, 0x3A },   /* its sound 0x70: BN4's copied into BN6's slot 0x3a, a BN4 family's too */
-	{ 0x080D6E88, THUMB_MOVS, 4, 0, 0x0, 0xC7 },   /* its effect: 0x0 in BN4, 0xc7 in BN6 (moved) */
+	{ 0x080D6E88, THUMB_MOVS, 4, 0, 0x0, 0xC6 },   /* its effect: 0x0 in BN4, 0xc6 in BN6 (moved) */
 	{ 0x080E4AA0, THUMB_MOVS, 0, 0, 0x24, 0x96 },   /* its object's type 0x24: moved, the dispatch's 0x96 */
 	{ 0x080E4CAA, THUMB_MOVS, 0, 0, 0x27, 0x97 },   /* its object's type 0x27: moved, the dispatch's 0x97 */
 	{ 0x080E4CBA, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080E4E56, THUMB_MOVS, 4, 0, 0x2, 0xC6 },   /* its effect: 0x2 in BN4, 0xc6 in BN6 (moved) */
+	{ 0x080E4E56, THUMB_MOVS, 4, 0, 0x2, 0xC5 },   /* its effect: 0x2 in BN4, 0xc5 in BN6 (moved) */
 };
 static const XvNumber timebomb_numbers[] = {
 	{ 0x080D6CC8, 0x080D6CCC, 0x088F3F80 },   /* its state table: the unit's in BN6's layout, at its home's XC4_HOME_STATES */
@@ -1733,12 +1737,12 @@ static const XvType timebomb_types[] = {
 	{ 4, 0x97, XV_TYPE_MOVED, 0x27 },   /* BN4's fourth-kind 0x27, moved, the dispatch's 0x97 */
 };
 static const XvSprite timebomb_sprites[] = {
-	{ 3, 0x23, 3, 0x7C, XC4_ROOM_ROW(31), 0xC00 },   /* BN4's 3:0x23, the room's row 31 */
-	{ 5, 0x02, 5, 0xEC, XC4_ROOM_ROW(32), 0x1300 },   /* BN4's 5:0x2, the room's row 32 */
+	{ 3, 0x23, 3, 0x7C, XC4_ROOM_ROW(32), 0xC00 },   /* BN4's 3:0x23, the room's row 32 */
+	{ 5, 0x02, 5, 0xEC, XC4_ROOM_ROW(33), 0x1300 },   /* BN4's 5:0x2, the room's row 33 */
 };
-static const XvId timebomb_effects[] = { { 0x02, 0xC6 } };
+static const XvId timebomb_effects[] = { { 0x02, 0xC5 } };
 static const XvByte timebomb_bytes[] = {
-	{ 0x080E4A02, 0x00, 0xC7 },   /* its table's kind 0x1's effect: 0x0 in BN4, 0xc7 in BN6 (moved) */
+	{ 0x080E4A02, 0x00, 0xC6 },   /* its table's kind 0x1's effect: 0x0 in BN4, 0xc6 in BN6 (moved) */
 };
 static const XvSoundCall timebomb_sound_calls[] = {
 	{ 0x080D6C52, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
@@ -1764,10 +1768,10 @@ static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC
 	.bytes = timebomb_bytes, .nbytes = (int)(sizeof timebomb_bytes / sizeof *timebomb_bytes) }
 /* ---- Ligtnin: BN4's misc 0xc (080DF98D) as BN6's 0x8c; its chips 166 (677), 167 (678), 168 (679), 181 (689), 182 (690), 183 (691), 184 (692), 185 (693), 186 (694) ---- */
 /* its routine (080DF98C) lies in the third-kind 0x93's code (080DF7F8-080DF9B0), which it spawns: moved */
-/* its sprite 5:0x14 (080DF01C): BN6's 5:0xe7, copied */
+/* its sprite 5:0x14 (080DF01C): BN6's 5:0xe6, copied */
 /* its table 080DF674's kind 0: sprite 3:0x25 in BN4, 0x7d in BN6 (copied) */
 /* its table 080DF674's kind 1: sprite 3:0xb in BN4, 0x7e in BN6 (copied) */
-/* its effect 0x6b: BN6's 0xc5, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x6b: BN6's 0xc4, moved (no effect of BN6's draws its sprite's bytes) */
 /* its table 080DF674's kind 0: its sound 0x120, BN4's song copied into the grown song table's slot 0x240 */
 /* its table 080DF674's kind 1: its sound 0x13e, BN4's song copied into the grown song table's slot 0x241 */
 /* its sound 0x143 (080DF05E): BN4's song copied into the grown song table's slot 0x242, on BN4's player 23 */
@@ -1843,8 +1847,8 @@ static const XvPair ligtnin_words[] = {
 	{ 0x08010561, 0x080D0B95 },   /* project:spikey, SAME */
 };
 static const XvImm ligtnin_imms[] = {
-	{ 0x080DF01A, THUMB_MOVS, 2, 0, 0x14, 0xE7 },   /* its object's sprite: list 5 0x14 in BN4, 0xe7 in BN6 (copied) */
-	{ 0x080DF0DA, THUMB_MOVS, 4, 0, 0x6B, 0xC5 },   /* its effect: 0x6b in BN4, 0xc5 in BN6 (moved) */
+	{ 0x080DF01A, THUMB_MOVS, 2, 0, 0x14, 0xE6 },   /* its object's sprite: list 5 0x14 in BN4, 0xe6 in BN6 (copied) */
+	{ 0x080DF0DA, THUMB_MOVS, 4, 0, 0x6B, 0xC4 },   /* its effect: 0x6b in BN4, 0xc4 in BN6 (moved) */
 	{ 0x080DF11C, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080DF726, THUMB_LDR, 1, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080DF7E4, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
@@ -1868,12 +1872,12 @@ static const XvType ligtnin_types[] = {
 	{ 3, 0x93, XV_TYPE_MOVED4, 0x93 },   /* BN4's third-kind 0x93, moved, the chips' page */
 };
 static const XvSprite ligtnin_sprites[] = {
-	{ 5, 0x14, 5, 0xE7, XC4_ROOM_ROW(33), 0x700 },   /* BN4's 5:0x14, the room's row 33 */
-	{ 3, 0x25, 3, 0x7D, XC4_ROOM_ROW(34), 0x1900 },   /* BN4's 3:0x25, the room's row 34 */
-	{ 3, 0x0B, 3, 0x7E, XC4_ROOM_ROW(35), 0x1800 },   /* BN4's 3:0xb, the room's row 35 */
-	{ 5, 0x05, 5, 0xE6, XC4_ROOM_ROW(36), 0x5500 },   /* BN4's 5:0x5, the room's row 36 */
+	{ 5, 0x14, 5, 0xE6, XC4_ROOM_ROW(34), 0x700 },   /* BN4's 5:0x14, the room's row 34 */
+	{ 3, 0x25, 3, 0x7D, XC4_ROOM_ROW(35), 0x1900 },   /* BN4's 3:0x25, the room's row 35 */
+	{ 3, 0x0B, 3, 0x7E, XC4_ROOM_ROW(36), 0x1800 },   /* BN4's 3:0xb, the room's row 36 */
+	{ 5, 0x05, 5, 0xE5, XC4_ROOM_ROW(37), 0x5500 },   /* BN4's 5:0x5, the room's row 37 */
 };
-static const XvId ligtnin_effects[] = { { 0x6B, 0xC5 } };
+static const XvId ligtnin_effects[] = { { 0x6B, 0xC4 } };
 static const XvByte ligtnin_bytes[] = {
 	{ 0x080DF675, 0x25, 0x7D },   /* its table's kind 0: list 3 0x25 in BN4, 0x7d in BN6 (copied) */
 	{ 0x080DF681, 0x0B, 0x7E },   /* its table's kind 1: list 3 0xb in BN4, 0x7e in BN6 (copied) */
@@ -2238,7 +2242,7 @@ static const XvType elem_types[] = {
 	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
 };
 static const XvSprite elem_sprites[] = {
-	{ 3, 0x0E, 3, 0x7F, XC4_ROOM_ROW(37), 0x900 },   /* BN4's 3:0xe, the room's row 37 */
+	{ 3, 0x0E, 3, 0x7F, XC4_ROOM_ROW(38), 0x900 },   /* BN4's 3:0xe, the room's row 38 */
 };
 static const XvByte elem_bytes[] = {
 	{ 0x080E42B4, 0x09, 0x05 },   /* its table's row 0x6: +0x0 0x9 in BN4, 0x5 in BN6 */
@@ -2273,16 +2277,16 @@ static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its sprite 3:0x2: list 3 0x77, as Spreads copied it */
 /* its sprite 3:0x2 (080CE0D0): BN6's 3:0x77, copied */
 /* its sprite 3:0x11 (080CE4FC): BN6's 3:0x80, copied */
-/* its sprite 5:0x12 (080CF32C): BN6's 5:0xe5, copied */
-/* its effect 0x2b's sprite 5:0x0 is listed by PropBom (5:0xe8): installed with it */
-/* its effect 0x2b (its table 080CE277's): BN6's 0xc4, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sprite 5:0x12 (080CF32C): BN6's 5:0xe4, copied */
+/* its effect 0x2b's sprite 5:0x0 is listed by PropBom (5:0xe7): installed with it */
+/* its effect 0x2b (its table 080CE277's): BN6's 0xc3, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x1: 0xcc, as MokoRus moved it */
 /* its effect 0x1's sprite 5:0x2 is listed by MokoRus (5:0xec): installed with it */
 /* its effect 0x1: BN6's 0xcc, moved (no effect of BN6's draws its sprite's bytes) */
 /* its effect 0x15: 0xcb, as MokoRus moved it */
 /* its effect 0x15's sprite 5:0xd is listed by MokoRus (5:0xeb): installed with it */
 /* its effect 0x15: BN6's 0xcb, moved (no effect of BN6's draws its sprite's bytes) */
-/* its effect 0x2b's sprite 5:0x0, which PropBom lists: listed by it too, the same number (5:0xe8), as its effect's row needs its sprite among its own */
+/* its effect 0x2b's sprite 5:0x0, which PropBom lists: listed by it too, the same number (5:0xe7), as its effect's row needs its sprite among its own */
 /* its sound 0x70: BN4's song at slot 0x3a, the families' slot for it (FAMILY_SLOTS) */
 /* its sound 0x90 (080EB454): BN4's song copied into the grown song table's slot 0x206, on BN4's player 8 */
 /* its sound 0xa9 (080CE546): BN4's song copied into the grown song table's slot 0x286, on BN4's player 9 */
@@ -2387,7 +2391,7 @@ static const XvImm darkbomb_imms[] = {
 	{ 0x080CE4F8, THUMB_MOVS, 2, 0, 0x11, 0x80 },   /* its object's sprite: list 3 0x11 in BN4, 0x80 in BN6 (copied) */
 	{ 0x080CE570, THUMB_LDR, 0, 0, 0x54, 0x70 },   /* collision data +0x54 in BN4, +0x70 in BN6 */
 	{ 0x080CE5A2, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
-	{ 0x080CF328, THUMB_MOVS, 2, 0, 0x12, 0xE5 },   /* its object's sprite: list 5 0x12 in BN4, 0xe5 in BN6 (copied) */
+	{ 0x080CF328, THUMB_MOVS, 2, 0, 0x12, 0xE4 },   /* its object's sprite: list 5 0x12 in BN4, 0xe4 in BN6 (copied) */
 	{ 0x080CF386, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080CF3CC, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
 	{ 0x080EB402, THUMB_ADDS, 7, 0, 0x70, 0xA0 },   /* MegaMan's AI data's +0x70 in BN4, +0xa0 in BN6: the attack's variables */
@@ -2402,13 +2406,13 @@ static const XvType darkbomb_types[] = {
 	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
 };
 static const XvSprite darkbomb_sprites[] = {
-	{ 3, 0x11, 3, 0x80, XC4_ROOM_ROW(38), 0xD00 },   /* BN4's 3:0x11, the room's row 38 */
-	{ 5, 0x12, 5, 0xE5, XC4_ROOM_ROW(39), 0x1800 },   /* BN4's 5:0x12, the room's row 39 */
-	{ 5, 0x00, 5, 0xE8, XC4_ROOM_ROW(40), 0x1C00 },   /* BN4's 5:0x0, the room's row 40 */
+	{ 3, 0x11, 3, 0x80, XC4_ROOM_ROW(39), 0xD00 },   /* BN4's 3:0x11, the room's row 39 */
+	{ 5, 0x12, 5, 0xE4, XC4_ROOM_ROW(40), 0x1800 },   /* BN4's 5:0x12, the room's row 40 */
+	{ 5, 0x00, 5, 0xE7, XC4_ROOM_ROW(41), 0x1C00 },   /* BN4's 5:0x0, the room's row 41 */
 };
-static const XvId darkbomb_effects[] = { { 0x2B, 0xC4 } };
+static const XvId darkbomb_effects[] = { { 0x2B, 0xC3 } };
 static const XvByte darkbomb_bytes[] = {
-	{ 0x080CE27D, 0x2B, 0xC4 },   /* its table's kind 0x6's effect: 0x2b in BN4, 0xc4 in BN6 (moved) */
+	{ 0x080CE27D, 0x2B, 0xC3 },   /* its table's kind 0x6's effect: 0x2b in BN4, 0xc3 in BN6 (moved) */
 };
 static const XvSoundCall darkbomb_sound_calls[] = {
 	{ 0x080EB454, 0x206 },   /* its sound 0x90: BN4's song at the grown table's slot 0x206 */

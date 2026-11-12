@@ -1,0 +1,26 @@
+[
+ {
+  "name": "DrkSpred's row's power another",
+  "spec": "bn4_chip_drkspred",
+  "poke": [
+   "08C06632:0064"
+  ],
+  "what": "the registry's record of BN4's DrkSpred (594 at CHIPS_RECORDS) with power 100 where BN4's record holds 400: the MettaurSP left 40 HP where BN4's is deleted"
+ },
+ {
+  "name": "DrkSpred's row's family FlmLine's",
+  "spec": "bn4_chip_drkspred",
+  "poke": [
+   "08C06623:D1:1"
+  ],
+  "what": "the registry's record of BN4's DrkSpred naming BN6's grown attack family 0xD1 (FlmLine's state) where the row gives the Spreads unit's 0xD0: another attack"
+ },
+ {
+  "name": "DrkSpred's shot's burst's shape another",
+  "spec": "bn4_chip_drkspred",
+  "poke": [
+   "080CF418:02:1"
+  ],
+  "what": "the unit's copy of the spread shot's kinds (BN4 0x080CF3DC) with kind 0xF's burst shape 2 (a single panel's) where BN4's holds 0x0F: no burst on the panels around the hit"
+ }
+]

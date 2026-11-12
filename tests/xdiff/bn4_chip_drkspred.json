@@ -1,0 +1,83 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 37,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's DrkSpred A (192, a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan) against the registry's row 594 (BN4's spread state, its family 0x1E's subfamily 3, the Spreads unit's at BN6's grown attack family 0xD0; its shot the spread shot's kind 0xF, its burst's sound 0x8D made slot 0x200 at the site by the unit's shim): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the shot and its burst compared each frame to the frame of its hit, t37 (its 400 deletes any Mettaur, 0 HP in both): a deletion parts at its own effect, each engine's art (docs/devtools/differential.md, A BN4 chip's spec). calm4 and mood4: BN4's bug at the fight's start and its dark mood at the use left out of BN4's battle, the run taking none of BN4's dark rules (docs/game/meta/darkchips.md).",
+ "folder4": [
+  "00C0"
+ ],
+ "folder6": [
+  "252:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "calm4": 1,
+ "mood4": 1
+}
