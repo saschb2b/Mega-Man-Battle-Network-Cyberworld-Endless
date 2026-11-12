@@ -1322,6 +1322,27 @@ V1, settled for all of them.
   table, 0x1E2, whichever unit copies it. The Navi chips' range
   (0x2C0-0x2FF; each session that moves units takes its slots from a
   range of its own) holds the sounds no other unit plays: none yet.
+- **GutPnch1-3 are one of them** (12 November 2026: ids 668-670, BN4's
+  support 0x36 at BN6's grown Navi routine 0xB6). The chip is no Navi's
+  by its class, but its routine spawns a Navi chip's object (the fourth
+  kind's 0x64, GutsMan's object state for state) whose Navi is a GutsMan
+  of the chip's own (the first kind's 0x42: he appears on MegaMan's
+  panel and punches the panel ahead, 100, 140 or 180, the foe struck and
+  pushed back a panel). So it is a unit of kind `navi` with no code of
+  the tool's changed, where the support kind had left 19 decisions open
+  (MegaMan's stepping out, the HUD's pieces hidden and shown: each
+  engine's own, in BN6's object already). Two things were its own. BN4's
+  object plays 0xB0 as it steps MegaMan in, which BN6's one Navi object
+  does not: the unit carries the sound's slot (`XChipUnit.step_in`) and
+  the installer aims the word of BN6's object's states that names its
+  last state at a stub in the unit's home, which plays it for this
+  unit's number and is BN6's own state for every other chip. And the
+  punch's bits are BN6's for struck and pushed in the copy (0x61, as the
+  Moko's). `bn4_chip_gutpnch1` to `3` pass over 300 frames (a 140 HP
+  Mettaur left 40, one of 250 left 110 and 70, each pushed from (4,2) to
+  (5,2)), six mutations caught. Not reached: the frame of the punch
+  within the time freeze, which no fight frame counts (a mutation of it
+  passed and was replaced).
 - **What the differential sees.** The chip runs inside its time freeze,
   so the traces meet at what it leaves: the foe's HP, the panels, the
   frame's sounds, MegaMan's state. The comparator reads BN4's support

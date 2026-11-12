@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's GutPnch1 B (its chip 154) against the registry's row for it (id 668), moved by tools/xchiprecipe_bn4.py as a unit of kind navi (BN4's support 0x36 as BN6's grown Navi routine 0xB6, run by BN6's Navi chip object under its Navi family; docs/multirom/bn4-chips.md): the chip's Navi is the first kind's 0x42, a GutsMan who appears on MegaMan's panel and punches the panel ahead. Picked on the first Custom screen and used at fight frame 30 from (3,2) against BN4's MettaurSP (140 HP) at (4,2), beside him. The chip runs inside its time freeze: MegaMan steps out, GutsMan appears (sound 0xB0, BN6's slot 0x1E2) and punches (0xA4, slot 0x207), the Mettaur struck for 100 and pushed back a panel, 40 HP left at (5,2) in both; then MegaMan steps in, with 0xB0 again, which BN4's object of the chip plays and BN6's Navi object does not: the unit's stub in BN6's object's last state (XChipUnit.step_in). The punch's bits are BN6's for struck and pushed in the copy (0x61).",
+ "folder4": [
+  "029A"
+ ],
+ "folder6": [
+  "29C:01"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

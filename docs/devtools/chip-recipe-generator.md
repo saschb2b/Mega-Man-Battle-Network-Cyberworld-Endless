@@ -250,7 +250,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   a block a BN4 Navi's recipe moved (`src/emu/xnavi_bn4.c`) goes to the
   Navi's copy and moves no type again; the load of his battle sprite
   takes the Navi's list 2 number, and the unit's row carries his seat,
-  whose rooms the engine fills as the chip is used. A chip of the unit
+  whose rooms the engine fills as the chip is used. A sound BN4's object
+  plays as it steps MegaMan in (`STEP_IN`: GutPnch's 0xB0, held to the
+  instruction and its call) is the unit's `step_in`, its slot, which the
+  installer plays from a stub in BN6's object's last state. A chip of the unit
   whose row still waits (an SP's computed power, a DS's cost) is a note,
   not a decision.
 - **Its calls.** Each call out is paired with BN6's twin: the project's
