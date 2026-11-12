@@ -5,7 +5,6 @@
 #include <string.h>
 
 #include "bn5.h"
-#include "bn6_forms.h"
 #include "bytes.h"
 #include "claims.h"
 #include "emu.h"
@@ -376,8 +375,7 @@ static void states_stage(const XChipUnit *u) {
 /* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
  * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
-static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS),
-                                   .stubs2 = FREE_BN4_CHIP_STUBS, .stubs2_end = FREE_BN4_CHIP_STUBS_END };
+static const XvRegion region4 = XC4_REGION;
 
 /* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
  * that shares an earlier unit's code (XChipUnit.share), its entry alone */
@@ -428,8 +426,7 @@ static void first_actor_stage(void) {
 		0x46F7,   /* mov pc, lr */
 		0x46C0,   /* nop */
 	};
-	_Static_assert(BN6_BATTLE_PLAYERS - BN6_BATTLE_STATE == 0xD0 && BN6_BATTLE_PLAYER_STEP == 0x10 && BN6_BATTLE_PLAYER_SLOTS == 4 &&
-		sizeof code <= FREE_BN4_CHIP_STUBS_END - FREE_BN4_CHIP_STUBS, "the first actor's numbers and its room");
+	_Static_assert(sizeof code <= FREE_BN4_CHIP_STUBS_END - FREE_BN4_CHIP_STUBS, "the first actor's room");   /* (its numbers: tests/test_core.c) */
 	uint8_t *p = xv_put(XC4_FIRST_ACTOR, sizeof code, true);
 	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
 }
