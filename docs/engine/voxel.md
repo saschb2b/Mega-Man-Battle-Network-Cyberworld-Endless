@@ -73,11 +73,22 @@ level's panels), and `voxel_lift.c` sorts every map pixel:
 
 | Kind | Rule |
 | --- | --- |
-| A floor's top | its ground point lies on a panel (the raised level first) |
-| A slab's side | no floor there, but a top within 40 rows above: it hangs from that edge |
-| Scenery | map art over no floor of ours: shown flat with the sky |
+| A floor's top | its ground point lies on a panel the layer draws as floor (the raised level first; walled-off floor too) |
+| A stair | its ground point lies on a stair's two panels and the ramp stands there as high as the pixel shows it (`netmap_stair_height`: even from the foot to the rise) |
+| A slab's side | art the floor does not explain, a run of under 28 rows down its column right under a top, the void under it, and no scenery within 8 columns beside it |
+| Scenery | any other art the floor does not explain: the platforms pasted beside the way, lying flat on the ground |
 
-Sprites are joined into bodies (8-connected) standing on the ground row
+A first rule took every unexplained pixel within 40 rows under an edge
+for a side, and a second told floor art by its tiles; both left blocks
+of wrong light on the scenery's platforms (the owner, 2026-11-12, on a
+Sky Area layer with a stair), and stairs taken as floor of both levels
+broke in two under the lower camera.
+
+A sprite of the last priority (3) lies on the floor and is drawn as part
+of it, under whoever stands there: BN6 gives a warp pad that priority
+(measured on a Sky Area layer: the pad's two halves 3, MegaMan's parts
+2, the HP's 1; the owner saw the pad stand up and float before this).
+The others are joined into bodies (8-connected) standing on the ground row
 of their lowest pixel; one in the air stands over the floor found within
 28 rows under it. A blended sprite (BN6's shadow blob) is left out: the
 sun casts its own.
@@ -102,12 +113,23 @@ Measured on the development machine at 1440x960: about 15 ms a frame
 
 - Speed: threads or fixed-point for the draw; a handheld's cost is not
   measured.
-- Props and scenery standing on a floor are painted flat onto it (no
-  height known for them yet); stairs are floor of both levels.
+- Scenery that stands (a tower's art in the map's layers) is painted
+  flat; a stair's ramp is taken as even, and casts no shadow.
 - The world's colours skip what the picture's get: the GBA's screen's
   colour correction and blending, a liberation's panel tints, a Glitch
   layer's frame.
 - The engine's own marks over the world (the Net Square's visitors, a
   liberation's pieces) are placed for BN6's camera, not the lower one.
-- No ROM-free test of the readers yet; the wide-screen picture the
-  whole tile map allows.
+- The wide-screen picture the whole tile map allows.
+
+## Checked
+
+`tests/test_voxel.c` (in `build.py test`): the two readers on video
+memory of the test's own making (a tile, a sprite, priorities, a blended
+sprite, a fade, the map's place), the lift (a top, a side, the scenery, a
+stair's height, a body on its feet, the HUD), a shadow behind a body, and
+the camera (BN6's angle leaves every pixel in place; a lower one brings
+the floor's rows closer). On a layer the redrawn map equals the frame's
+own pixels wherever a map layer shows (26,538 of 26,538 on a Sky Area
+layer, 14,350 of 14,350 on RoboDog Comp, measured with a dev print since
+removed).

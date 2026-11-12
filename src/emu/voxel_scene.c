@@ -110,9 +110,12 @@ static void ground_read(int cam_u, int cam_v) {
 	for (int j = 0; j < VOX_GH; ++j)
 		for (int i = 0; i < VOX_GW; ++i) {
 			int u = i - VOX_LEFT - VOX_MARGIN - CAM_X + cam_u, v = j - VOX_UP - VOX_MARGIN - CAM_Y + cam_v;
-			unsigned bits = netmap_floor_at(u - 2 * v, u + 2 * v, 0) ? 1u : 0u;
-			if (V.ground.z[1] > 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 1)) bits |= 2u;
+			/* (a stair is its ramp, floor of neither level) */
+			int ramp = V.ground.z[1] > 0 ? netmap_stair_height(u - 2 * v, u + 2 * v) : -1;
+			unsigned bits = ramp < 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 0) ? 1u : 0u;
+			if (ramp < 0 && V.ground.z[1] > 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 1)) bits |= 2u;
 			V.ground.floor[j * VOX_GW + i] = (uint8_t)bits;
+			V.ground.ramp[j * VOX_GW + i] = (uint8_t)(ramp + 1);
 		}
 }
 
@@ -164,8 +167,8 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	emu_read_bytes(0x04000000u, V.io, sizeof V.io);
 	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
 	GbaWorld world;
-	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
-	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.tile, V.scene.sky);
+	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io, V.pal }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
+	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.sky);
 	ground_read(cam_u, cam_v);
 	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) != 0, shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();

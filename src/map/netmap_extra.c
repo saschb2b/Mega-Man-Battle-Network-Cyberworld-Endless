@@ -168,6 +168,18 @@ bool netmap_floor_at(int wx2, int wy2, int level) {
 	return floor_level(A, B, level) || (!level && nm_kind_at(A, B) == K_SOLID);
 }
 
+int netmap_stair_height(int wx2, int wy2) {
+	for (int i = 0; nm_cur && i < nm_cur->nstairs; ++i) {
+		int X0, Y0;
+		nm_stair_origin(&nm_cur->stairs[i], &X0, &Y0);
+		int dx = wx2 - 2 * X0, dy = wy2 - 2 * Y0;
+		if (dx < 0 || dy < 0 || dx >= 128 || dy >= 128) continue;
+		/* (towards grid -y the ramp climbs to world +X, towards grid -x to world -Y: stairs.h) */
+		return nm_cur->rise * (nm_cur->stairs[i].dir == STAIR_UP_NY ? dx : 127 - dy) / 127;
+	}
+	return -1;
+}
+
 bool netmap_stair_cell(int cx, int cy) {
 	int A = nm_floordiv(cx * 8 + 4 - nm_place.ex, 32), B = nm_floordiv(cy * 8 + 4 - nm_place.ey, 32);
 	return nm_kind_at(A, B) == K_STAIR;

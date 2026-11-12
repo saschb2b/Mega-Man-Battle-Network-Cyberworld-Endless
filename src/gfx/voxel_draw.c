@@ -10,6 +10,8 @@
 
 #define COS30  0.8660254f
 #define RAD    0.01745329f
+/* How many ground rows on the next row's top may lie to be the same floor going on */
+#define RAMP_STEP 4
 
 enum { IS_SKY, IS_MAP, IS_SPRITE };
 
@@ -91,11 +93,12 @@ static void face(const Lens *l, const float a[2], const float b[2], float near, 
 		}
 }
 
-/* A floor's top at (x, g) of height h: a ground row deep */
-static void top(const Lens *l, int x, float g, float h, uint32_t c) {
-	float a[2], b[2];
+/* A floor's top at (x, g) of height h, as far as (gn, hn): the next row's
+ * top where the floor goes on (a ramp's rows climb), else a ground row on */
+static void top(const Lens *l, int x, const float from[2], const float to[2], uint32_t c) {
+	float a[2], b[2], g = from[0], h = from[1];
 	project(l, (float)x, g, h, &a[0], &a[1]);
-	project(l, (float)(x + 1), g + 1.0f, h, &b[0], &b[1]);
+	project(l, (float)(x + 1), to[0], to[1], &b[0], &b[1]);
 	face(l, a, b, nearness(l, g + 0.5f, h), c, IS_MAP);
 }
 
@@ -112,8 +115,13 @@ static void faces(const VoxScene *s, const uint32_t *map, const uint32_t *sprite
 		for (int i = 0; i < VOX_WW; ++i) {
 			int at = j * VOX_WW + i;
 			if (!map[at] || s->kind[at] == VOX_SKY) continue;
-			if (s->kind[at] == VOX_TOP) top(l, i - VOX_LEFT, (float)s->gy[at], (float)(s->gy[at] - (j - VOX_UP)), map[at]);
-			else upright(l, i - VOX_LEFT, j - VOX_UP, (float)s->gy[at], map[at], IS_MAP);
+			if (s->kind[at] == VOX_TOP) {
+				int y = j - VOX_UP, under = at + VOX_WW;
+				bool on = j + 1 < VOX_WH && map[under] && s->kind[under] == VOX_TOP && s->gy[under] > s->gy[at] && s->gy[under] - s->gy[at] <= RAMP_STEP;
+				float from[2] = { (float)s->gy[at], (float)(s->gy[at] - y) }, to[2] = { from[0] + 1.0f, from[1] };
+				if (on) { to[0] = (float)s->gy[under]; to[1] = (float)(s->gy[under] - (y + 1)); }
+				top(l, i - VOX_LEFT, from, to, map[at]);
+			} else upright(l, i - VOX_LEFT, j - VOX_UP, (float)s->gy[at], map[at], IS_MAP);
 		}
 	for (int i = 0; i < VOX_N; ++i)
 		if (sprite[i]) upright(l, i % VOX_W, i / VOX_W, (float)s->bodies[s->body[i]].gy, sprite[i], IS_SPRITE);

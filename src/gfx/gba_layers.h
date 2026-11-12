@@ -19,6 +19,7 @@ typedef struct {
 	const uint8_t *vram;   /* 0x06000000, 0x18000 bytes */
 	const uint8_t *oam;    /* 0x07000000, 0x400 */
 	const uint8_t *io;     /* 0x04000000, 0x60 */
+	const uint8_t *pal;    /* 0x05000000, 0x400 (NULL: no colours asked for) */
 } GbaVideo;
 
 typedef struct {
@@ -26,6 +27,11 @@ typedef struct {
 	uint8_t under[240 * 160];   /* the background on top of the others, sprites aside (or GBA_LAYER_NONE) */
 	uint8_t obj[240 * 160];     /* the sprite on top of the others, its OAM entry + 1 (0 none), whatever covers it */
 	uint8_t sheer[240 * 160];   /* 1 where that sprite is a blended one (a shadow, a light) */
+	/* the sprites of the last priority (3), which BN6 lays on the floor
+	 * under everyone (a warp pad): the colour of the first of them at
+	 * each pixel, 0xFFBBGGRR (0 none), whatever stands on it; they are no
+	 * part of `top` and `obj` */
+	uint32_t lying[240 * 160];
 	/* each sprite's box on the screen (w 0: not shown) */
 	int16_t x[GBA_OBJS], y[GBA_OBJS];
 	uint8_t w[GBA_OBJS], h[GBA_OBJS];

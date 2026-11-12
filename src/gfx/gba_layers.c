@@ -35,15 +35,30 @@ static bool bg_pixel(const GbaVideo *v, const Bg *b, int x, int y) {
 static const uint8_t sizes[3][4][2] = { { { 8, 8 }, { 16, 16 }, { 32, 32 }, { 64, 64 } }, { { 16, 8 }, { 32, 8 }, { 32, 16 }, { 64, 32 } },
 	{ { 8, 16 }, { 8, 32 }, { 16, 32 }, { 32, 64 } } };
 
-static bool obj_pixel(const GbaVideo *v, unsigned a0, unsigned a2, int w, int tx, int ty, bool flat) {
+/* The sprites' palette entry (of their 256) a sprite's tiles show at
+ * (tx, ty) in it, 0 clear */
+static unsigned obj_pixel(const GbaVideo *v, unsigned a0, unsigned a2, int w, int tx, int ty, bool flat) {
 	unsigned tile = a2 & 0x3FFu, cx = (unsigned)tx >> 3, cy = (unsigned)ty >> 3, ix = (unsigned)tx & 7u, iy = (unsigned)ty & 7u;
 	if (a0 & 0x2000u) {
 		tile += flat ? (cy * (unsigned)(w >> 3) + cx) * 2u : cy * 32u + cx * 2u;
-		return v->vram[0x10000u + (tile & 0x3FFu) * 32u + iy * 8u + ix] != 0;
+		return v->vram[0x10000u + (tile & 0x3FFu) * 32u + iy * 8u + ix];
 	}
 	tile += flat ? cy * (unsigned)(w >> 3) + cx : cy * 32u + cx;
 	unsigned byte = v->vram[0x10000u + (tile & 0x3FFu) * 32u + iy * 4u + (ix >> 1)];
-	return ((ix & 1u) ? byte >> 4 : byte & 15u) != 0;
+	unsigned n = (ix & 1u) ? byte >> 4 : byte & 15u;
+	return n ? (a2 >> 12) * 16u + n : 0u;
+}
+
+/* A sprite's palette entry as mGBA shows it (5 bits a channel, its top
+ * bits again below) */
+static uint32_t obj_colour(const GbaVideo *v, unsigned n) {
+	unsigned c = rd16(v->pal, 0x200u + n * 2u);
+	uint32_t out = 0xFF000000u;
+	for (unsigned s = 0; s < 3; ++s) {
+		unsigned ch = c >> (5u * s) & 31u;
+		out |= (ch << 3 | ch >> 2) << (8u * s);
+	}
+	return out;
 }
 
 typedef struct { unsigned a0, a1, a2; int x0, y0, w, h, bw, bh, pa, pb, pc, pd; bool turned; } Obj;
@@ -98,8 +113,15 @@ static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 			for (int ix = 0; ix < o.bw; ++ix) {
 				int sx = o.x0 + ix, sy = o.y0 + iy, tx, ty, i = sy * W + sx;
 				if (sx < 0 || sy < 0 || sx >= W || sy >= H) continue;
+				unsigned c = obj_texel(&o, ix, iy, &tx, &ty) ? obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat) : 0;
+				if (!c) continue;
+				/* (one that lies on the floor: its colour kept, under whoever stands on it) */
+				if (p == 3 && (o.a0 >> 10 & 3u) == 0) {
+					if (!out->lying[i] && v->pal) out->lying[i] = obj_colour(v, c);
+					continue;
+				}
 				/* (of two on a pixel the lower priority's, then the earlier entry's) */
-				if ((out->obj[i] && prio[i] <= p) || !obj_texel(&o, ix, iy, &tx, &ty) || !obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat)) continue;
+				if (out->obj[i] && prio[i] <= p) continue;
 				out->obj[i] = (uint8_t)(n + 1);
 				out->sheer[i] = (o.a0 >> 10 & 3u) == 1;
 				prio[i] = (uint8_t)p;
@@ -112,6 +134,7 @@ bool gba_layers(const GbaVideo *v, GbaLayers *out) {
 	unsigned dispcnt = rd16(v->io, 0);
 	memset(out->obj, 0, sizeof out->obj);
 	memset(out->sheer, 0, sizeof out->sheer);
+	memset(out->lying, 0, sizeof out->lying);
 	if (dispcnt & 7u) return false;
 	if (dispcnt & 0x1000u) objs(v, out, prio);
 	else memset(out->w, 0, sizeof out->w);

@@ -43,6 +43,7 @@ typedef enum { VOX_SKY, VOX_TOP, VOX_WALL } VoxKind;
 #define VOX_LEVELS  2
 typedef struct {
 	uint8_t floor[VOX_GW * VOX_GH];   /* bit L: level L has floor at window (x, gy) + VOX_MARGIN */
+	uint8_t ramp[VOX_GW * VOX_GH];    /* a stair there: its height in rows, plus 1 (0 none) */
 	int z[VOX_LEVELS];                /* each level's height in rows */
 } VoxGround;
 
@@ -51,6 +52,12 @@ static inline unsigned vox_floor(const VoxGround *g, int x, int gy) {
 	x += VOX_LEFT + VOX_MARGIN;
 	gy += VOX_UP + VOX_MARGIN;
 	return x < 0 || gy < 0 || x >= VOX_GW || gy >= VOX_GH ? 0u : g->floor[gy * VOX_GW + x];
+}
+
+static inline int vox_ramp(const VoxGround *g, int x, int gy) {
+	x += VOX_LEFT + VOX_MARGIN;
+	gy += VOX_UP + VOX_MARGIN;
+	return x < 0 || gy < 0 || x >= VOX_GW || gy >= VOX_GH ? 0 : g->ramp[gy * VOX_GW + x];
 }
 
 /* A sprite as it stands: its pixels' box in the frame, the ground row of
@@ -63,7 +70,6 @@ typedef struct {
 	 * map pixel's kind and ground row (a top's own, a side's the edge it
 	 * hangs from) */
 	uint32_t map[VOX_WN], sky[VOX_WN];
-	uint16_t tile[VOX_WN];   /* the tile each map pixel is of, plus 1 */
 	uint8_t kind[VOX_WN];
 	int16_t gy[VOX_WN];
 	/* the frame: its sprites' colours (0 none), each one's body (0 none),

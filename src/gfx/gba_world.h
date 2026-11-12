@@ -19,8 +19,8 @@ typedef struct {
 } GbaWorld;
 
 /* The window w x h whose corner is the frame's (x0, y0): `map` the map's
- * colour where BG1 or BG2 has a pixel (0xFFBBGGRR, else 0), `tile` the
- * number of the tile it is of, plus 1 (0 none), `sky` what is behind it. */
-void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint16_t *tile, uint32_t *sky);
+ * colour where BG1 or BG2 has a pixel (0xFFBBGGRR, else 0), `sky` what is
+ * behind it. */
+void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint32_t *sky);
 
 #endif
