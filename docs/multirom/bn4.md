@@ -381,7 +381,10 @@ Checked that day:
   with other floors than they show, per 100 panels, ACDC Area 5.4, Town
   Area 24.5 (its pale squares' floor in a near shade), Park Area,
   Countries and Undernet 0. `build.py pacing`: 0 battles or guardians
-  past their band.
+  past their band. (That count read Park Area clean with blocks of
+  walkway floor over its platforms: the breaks in the picture are
+  counted since 12 November 2026, and Park Area's and Town Area's are
+  the roughest left, [the tile test](../devtools/tile-test.md), Breaks.)
 - **Saves**: a run saved at home and at an arena's door after three BN4
   visitors, continued without BN4: the arena's door again, the guardian
   fought, on to layer 12. A run quit in a battle of a BN4 visitor,

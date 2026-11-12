@@ -228,6 +228,30 @@ tile shows beats a plain-looking one that shows other floors: where a
 bridge plugs into a Graveyard slab, the originals' own join lightens the
 slab around it, and the plain slab's tile left a notch there.
 
+And each tile is held to the tiles beside it by their pictures. Across a
+tile's edge lie 8 pixels of each tile, a strip; the strips the area's maps
+show at their own tile edges are kept with the pairs of tiles they set
+side by side (`src/map/seams.c`), and a pair costs `BREAK_COST` for each
+neighbour already picked against which it shows a strip no map shows.
+Inside a floor, where every tile is drawn whole and the neighbourhood is
+the same everywhere, nothing else told two looks apart: each tile took
+its place's most common pair, and a field came out with a panel's light
+cut in half (Central), a frame's line stopping at a tile's edge, a block
+of the walkway's shade in a platform (BN4's areas, where the owner saw
+them). Against a tile that draws nothing no strip is asked after: the
+floor's outline is the pixel test's, and a rim's own tile, the wall above
+it cut off, lost to a block of plain walkway floor there. What the tile
+test counts of it is in [the tile test](../../devtools/tile-test.md),
+Breaks.
+
+BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
+(`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,
+and its squares' frames are drawn in teal lines of that hue: the upper
+rims of both squares lent no tiles, and a room's upper edges were steps
+of walkway floor. There a panel is left out only where a quarter of its
+top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
+yellow and red), and a room is the square whole.
+
 Some areas never set one floor flush with another. Green's planks reach
 its raised grass by stairs, CopyBot's walkways reach its plateaus, which
 stand on pods, by ladders, and the Aquarium's glass pads stand on legs

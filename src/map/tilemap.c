@@ -23,20 +23,46 @@ typedef struct {
 	TileFloor floor;
 	const void *ctx;
 	uint16_t *map;
-	uint32_t *look;
-	uint64_t *mask;
-	bool *on;       /* on the floor: has a pair */
-	uint8_t *off;   /* how far its pair was seen from its neighbourhood, why, and its colours (tiles_pick_off, _why, _other) */
+	TilePick *pick;   /* (look SEAM_ANY: not picked yet) */
+	bool *on;         /* on the floor: has a pair */
+	uint8_t *off;     /* how far its pair was seen from its neighbourhood, why, and its colours (tiles_pick_off, _why, _other) */
+	uint8_t *dirty;   /* to look at again: a neighbour has changed */
 } Picked;
+
+static void picked_close(Picked *p) {
+	free(p->pick);
+	free(p->on);
+	free(p->off);
+	free(p->dirty);
+}
+
+/* Their memory, none picked yet; false, and none held, where it ran out. */
+static bool picked_open(Picked *p, size_t cells) {
+	p->pick = calloc(cells, sizeof *p->pick);
+	p->on = calloc(cells, 1);
+	p->off = calloc(cells, 1);
+	p->dirty = malloc(cells);
+	if (!p->pick || !p->on || !p->off || !p->dirty) {
+		picked_close(p);
+		return false;
+	}
+	for (size_t i = 0; i < cells; ++i) p->pick[i].look = SEAM_ANY;
+	memset(p->dirty, 1, cells);
+	return true;
+}
 
 /* Tile (tx, ty)'s four neighbours: left, above, right, below. */
 static void neighbours(const Picked *p, int tx, int ty, TileNeighbours *n) {
 	static const int d[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+	n->known = 0;
 	for (int k = 0; k < 4; ++k) {
 		int x = tx + d[k][0], y = ty + d[k][1];
 		bool off = x < 0 || y < 0 || x >= p->g->tw || y >= p->g->th;
-		n->look[k] = off ? SEAM_VOID : p->look[y * p->g->tw + x];
-		n->mask[k] = off ? 0 : p->mask[y * p->g->tw + x];
+		const TilePick *t = off ? NULL : &p->pick[y * p->g->tw + x];
+		n->look[k] = t ? t->look : SEAM_VOID;
+		n->mask[k] = t ? t->mask : 0;
+		if ((t && t->side) || !n->mask[k]) n->known |= 1u << k;
+		n->side[k] = t && t->side ? t->side[k ^ 2] : 0;
 	}
 }
 
@@ -44,26 +70,31 @@ static bool pick_one(Picked *p, int tx, int ty) {
 	size_t i = (size_t)ty * p->g->tw + tx, cells = (size_t)p->g->tw * p->g->th;
 	TileNeighbours n;
 	neighbours(p, tx, ty, &n);
-	p->look[i] = SEAM_VOID;
-	p->mask[i] = 0;
-	bool on = tiles_pick(p->books, p->nbooks, p->g, tx, ty, p->floor, p->ctx, p->seams, &n,
-		&p->map[i], &p->map[cells + i], &p->look[i], &p->mask[i]);
+	p->pick[i] = (TilePick){ 0, 0, SEAM_VOID, 0, NULL };
+	bool on = tiles_pick(p->books, p->nbooks, p->g, tx, ty, p->floor, p->ctx, p->seams, &n, &p->pick[i]);
+	if (!on) p->pick[i] = (TilePick){ 0, 0, SEAM_VOID, 0, NULL };
+	p->map[i] = p->pick[i].e0;
+	p->map[cells + i] = p->pick[i].e1;
 	p->off[i] = (uint8_t)(tiles_pick_off | tiles_pick_why << 2 | tiles_pick_other << 5);
 	return on;
 }
 
 /* The sides (bit k: left, above, right, below) where tile (tx, ty) meets its
- * neighbour badly. */
-static unsigned trouble(const Picked *p, int tx, int ty) {
+ * neighbour badly; with `seams`, only where no original map sets the two
+ * side by side (the seams the tile test counts: the breaks in the picture
+ * it counts in the picture itself, breaks.h). */
+static unsigned trouble(const Picked *p, int tx, int ty, bool seams) {
 	size_t i = (size_t)ty * p->g->tw + tx;
-	TileNeighbours n;
+	TileNeighbours n = { { 0 }, { 0 }, { 0 }, 0 };
 	neighbours(p, tx, ty, &n);
 	unsigned sides = 0;
 	for (int k = 0; k < 4; ++k) {
-		TileNeighbours one = { { SEAM_ANY, SEAM_ANY, SEAM_ANY, SEAM_ANY }, { 0 } };
+		TileNeighbours one = { { SEAM_ANY, SEAM_ANY, SEAM_ANY, SEAM_ANY }, { 0 }, { 0 }, 0 };
 		one.look[k] = n.look[k];
 		one.mask[k] = n.mask[k];
-		if (tiles_trouble(p->seams, p->look[i], p->mask[i], &one)) sides |= 1u << k;
+		one.side[k] = n.side[k];
+		one.known = seams ? 0 : n.known & 1u << k;
+		if (tiles_trouble(p->seams, p->pick[i].look, p->pick[i].mask, p->pick[i].side, &one)) sides |= 1u << k;
 	}
 	return sides;
 }
@@ -72,39 +103,36 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	TileFloor floor, const void *ctx, uint16_t *map, uint8_t *left) {
 	int tw = g->tw, th = g->th;
 	size_t cells = (size_t)tw * th;
-	Picked p = { books, nbooks, seams, g, floor, ctx, map,
-		malloc(cells * sizeof *p.look), calloc(cells, sizeof *p.mask), calloc(cells, 1), calloc(cells, 1) };
+	Picked p = { books, nbooks, seams, g, floor, ctx, map, NULL, NULL, NULL, NULL };
 	memset(map, 0, cells * 2 * sizeof *map);   /* (off the floor a tile keeps nothing) */
-	for (size_t i = 0; i < cells; ++i) p.look[i] = SEAM_ANY;
+	memset(left, 0, cells);
+	if (!picked_open(&p, cells)) return;   /* (no memory: a map of nothing) */
 	tiles_keep_begin(g, floor, ctx);
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) p.on[ty * tw + tx] = pick_one(&p, tx, ty);
 	TileStats first = tiles_stats;   /* (the passes below would count twice) */
-	/* a tile is looked at again once a neighbour has changed */
-	uint8_t *dirty = malloc(cells);
-	memset(dirty, 1, cells);
 	static const int d[5][2] = { { 0, 0 }, { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
 	for (int pass = 0; pass < PASSES; ++pass) {
 		int changed = 0;
 		for (int ty = 0; ty < th; ++ty)
 			for (int tx = 0; tx < tw; ++tx) {
 				size_t i = (size_t)ty * tw + tx;
-				if (!dirty[i] || !p.on[i]) continue;
-				dirty[i] = 0;
-				unsigned sides = trouble(&p, tx, ty);
+				if (!p.dirty[i] || !p.on[i]) continue;
+				p.dirty[i] = 0;
+				unsigned sides = trouble(&p, tx, ty, false);
 				/* the tile, then the neighbours it meets badly */
 				for (int k = 0; sides && k < 5; ++k) {
 					if (k && !(sides >> (k - 1) & 1)) continue;
 					int x = tx + d[k][0], y = ty + d[k][1];
 					size_t j = (size_t)y * tw + x;
 					if (x < 0 || y < 0 || x >= tw || y >= th || !p.on[j]) continue;
-					uint32_t was = p.look[j];
+					uint32_t was = p.pick[j].look;
 					pick_one(&p, x, y);
-					if (p.look[j] == was) continue;
+					if (p.pick[j].look == was) continue;
 					++changed;
 					for (int m = 1; m < 5; ++m) {
 						int u = x + d[m][0], v = y + d[m][1];
-						if (u >= 0 && v >= 0 && u < tw && v < th) dirty[(size_t)v * tw + u] = 1;
+						if (u >= 0 && v >= 0 && u < tw && v < th) p.dirty[(size_t)v * tw + u] = 1;
 					}
 				}
 			}
@@ -113,14 +141,10 @@ static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, 
 	tiles_stats = first;
 	for (int ty = 0; ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
-			unsigned sides = trouble(&p, tx, ty);
+			unsigned sides = trouble(&p, tx, ty, true);
 			left[ty * tw + tx] = (uint8_t)((sides >> 2 & 1) | (sides >> 3 & 1) << 1 | p.off[ty * tw + tx] << 2);   /* (off: bits 2-3, why: 4-6, other: 7) */
 		}
-	free(dirty);
-	free(p.look);
-	free(p.mask);
-	free(p.on);
-	free(p.off);
+	picked_close(&p);
 	tiles_keep_end();
 }
 

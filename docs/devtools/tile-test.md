@@ -1,7 +1,7 @@
 ---
 type: Tool
 title: "Tile test: clean tiles in every area"
-description: "`python3 build.py tiles [SEEDS]` runs the atlas over every area and layout, lists each area's tiles drawn off and seams per 100 panels with reasons, and fails where a layer got worse than the baseline."
+description: "`python3 build.py tiles [SEEDS]` runs the atlas over every area and layout, lists each area's breaks in its picture, tiles drawn off and seams per 100 panels with reasons, and fails where a layer got worse than the baseline."
 tags: [devtools]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
 ---
@@ -14,9 +14,10 @@ python3 build.py tiles [SEEDS] [--baseline]
 
 The atlas of every area and layout (2 seeds each by default, about three
 minutes), and in the areas that have stairs (Sky, the Undernet) as many
-layers that climb one, then a table per area: its layers and panels, the tiles drawn
-with other floors than they show and the seams per 100 panels, and why the
-tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
+layers that climb one, then a table per area: its layers and panels, the
+breaks in its picture, the tiles drawn with other floors than they show and
+the seams per 100 panels, and why the tiles were drawn off
+(`src/map/tiles.h`, `TILE_WHY_*`):
 
 - `unseen`: no pair of the area's maps at that place in a panel shows what
   the tile shows. A shape its maps never draw: change the layout, or learn
@@ -37,16 +38,75 @@ whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`,
 `SKIP_PALE`), and two floors sharing a hue told apart by shape
 (`TILES_WALK_NARROW`).
 
+## Breaks: the picture itself
+
+The off tiles and the seams say how far a tile's pair was seen from its
+place. Neither says whether the picture holds together: BN4's Park Area
+read 0.0 tiles off with blocks of walkway floor all over its platforms (12
+November 2026, the owner's captures of seeds 3 and 6), each tile right for
+its panels and wrong beside its neighbour. So the finished picture, what
+is pasted over the picks with it, is held to the originals' edge by edge
+(`src/map/breaks.c`, kept only by the atlas): across every tile edge lie 8
+pixels on each side, a strip, and the area's maps show a set of them at
+their own tile edges, as drawn and as their first layer alone draws them.
+A strip of the layer's is held to the nearest of those with the same
+pixels on one side; the pixels of its other side that differ by more than
+a shade (3 steps of a 5-bit channel) are what breaks there.
+
+- **break**: half the edge or more (4 of 8 pixels). A block of another
+  floor or shade against this one, a rim cut off.
+- **nick**: fewer. A panel's line or light cut short.
+
+Both are listed per layer in the report and held by the baseline; the
+breaks are yellow in the `seams_*.png` pictures, and `breaks_*.txt` lists
+each tile's (x, y, bits: 1 right, 2 below, 4 and 8 a nick there). Strict
+equality of strips read 368 per 100 panels in Central, every one a pixel
+or two of its panels' lights, so the count takes the nearest strip and
+tells the two sizes apart.
+
+What they found, and what the pick does about it
+([the generator](../world/level-design/generator.md), Tile picking): inside
+a floor two whole tiles were never held to each other, so each took its
+place's most common look; the pick now pays for a strip no map shows.
+Over the atlas's 278 layers the breaks fell from 218 to 116 per 100
+panels and no area rose: Central 124 to 56 (its fields' lights no longer
+cut), Sky 228 to 107, the Graveyard 107 to 40, Robot Control 134 to 25,
+the Aquarium 235 to 56 (its glass pads stand on their legs again, not on
+the water's wall), BN5's ACDC Area 318 to 142, BN4's ACDC Area 637 to
+249. What is left is mostly where two floors join as no map joins them
+(a pasted pad's rim, a walkway's mouth) and the areas below.
+
+Still far from clean, each a call of its own rather than the pick's:
+
+- **BN4's Park Area** (285): its one platform never touches a walkway
+  (a conveyor crosses it, and the wall rings count the larger half as a
+  hole), and its upper edges carry a wall 8 pixels above the floor's
+  edge, which the pixel test takes for something drawn off the floor. A
+  room's upper rim is walkway floor in steps against its field. Drawn
+  apart, as BN4's ACDC squares are (`NET_APART_PLATFORMS`), its
+  rectangular rooms come out as the platform itself, whole, the walkways
+  ending at its rim; the owner's to choose.
+- **BN4's net countries** (195): its green floor is clean now, but a
+  cream platform's frame gives way to plain cream in places: plain floor
+  continues anything plain. Taking a tile's own neighbourhood first,
+  whatever it meets, kept the frames and cost more than it won (116 to
+  139 breaks per 100 panels over all areas, the seams 84 to 111).
+- **BN4's Town Area** (488), **BN5's Oran Area** (529), **CopyBot Comp**
+  (288), **Seaside** (279), **BN4's and BN5's Undernet** (303, 248),
+  **Nebula Area** (248): not looked into here.
+
+## The seams, and what was tried against them
+
 The seams are counted only where a tile is partly drawn: two whole tiles
-side by side never make one, so a floor's inside can mix two of the
-original's looks unseen by the count (the Undernet's bridges, a stripe
-from one panel beside a gem's corner from another). Tried against that
-and dropped, each over the count: taking a panel's tiles from one panel
+side by side never make one. Tried against a floor's inside mixing two of
+the original's looks and dropped, each over the seam count, before the
+breaks were measured: taking a panel's tiles from one panel
 of the original (its most typical for the neighbourhood: the bridges read
 whole, the seams doubled at every panel border, the original alternating
 two), the same by the panel's parity (no better), costing an unseen pair
 of whole tiles 1 (2570 seams to 6098 over three areas: the edges paid for
-the insides), laying straight walkway runs by their period (the
+the insides; the strips cost only what shows, and the seams stayed where
+they were, 81 to 84 per 100 panels), laying straight walkway runs by their period (the
 originals have too few runs five panels long to learn one), and for
 CopyBot Comp's plateaus a rim context (a walkway panel beside platform
 floor is a rim: its rims took the plateaus' stone, but the seams grew by

@@ -87,6 +87,7 @@ static void keep_cands(TileCand *c, size_t n, TileBook *out) {
 		size_t j = i;
 		while (j < n && c[j].key == c[i].key && c[j].e0 == c[i].e0 && c[j].e1 == c[i].e1 && c[j].pad == c[i].pad) ++j;
 		c[nu] = c[i];
+		tiles_sides(c[nu].px, c[nu].mask, c[nu].side);
 		c[nu++].count = (uint32_t)(j - i);
 		i = j;
 	}

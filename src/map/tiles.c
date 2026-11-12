@@ -630,7 +630,7 @@ bool tl_skipped(const Src *s, int A, int B) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	if (s->skip_styles & SKIP_PALE) return tl_src_panel(s, A, B) == TILE_A && !beside_walkway(s, A, B) &&
 		pale_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) >= PALE_PIXELS;
-	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= 8;
+	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= (s->skip_styles & SKIP_QUARTER ? 64 : 8);
 	return s->skip_styles >> tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
 

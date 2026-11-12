@@ -48,12 +48,14 @@ static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, Learned *
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);
+		breaks_add(&L->breaks, src);
 	}
 	AreaSrc m;
 	if (!area_src_mirror_in(src, &m)) return;
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, &m)) {
 		tiles_learn(&m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, &m, na->bg_in_map);
+		breaks_add(&L->breaks, &m);
 	}
 	area_src_mirror_end(src, &m);
 }

@@ -83,6 +83,7 @@ static bool area_forgotten[NET_AREAS + XAREAS_MAX];
 static void forget(Learned *L) {
 	for (int k = 0; k < MAX_BOOKS; ++k) tiles_free(&L->book[k]);
 	seams_free(&L->seams);
+	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
@@ -434,6 +435,13 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 		tiles_stats.other += nm_last.seams[i] >> 7;
 	}
 	nm_rebank_map(L, map, cells);
+	/* (measuring) the breaks in the floor's picture as it is drawn, what was
+	 * set whole over the picks with it, before the scenery beside it */
+	free(nm_last.breaks);
+	nm_last.breaks = NULL;
+	uint32_t *px = L->breaks && tiles_measure ? area_src_render(L->def->xrom, L->def->group, L->def->number, map, tw, th) : NULL;
+	if (px && (nm_last.breaks = calloc(cells, 1))) breaks_count(L->breaks, px, tw, th, nm_last.breaks, &tiles_stats.breaks, &tiles_stats.nicks);
+	free(px);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
 	return map;
 }
@@ -622,7 +630,7 @@ bool netmap_look(int area, NetmapLook *out) {
 	int scenery = netmap_scenery;
 	static uint8_t stripes[MAP_H][MAP_W];
 	memcpy(stripes, stripe, sizeof stripe);
-	nm_last.seams = nm_last.pasted = NULL;
+	nm_last.seams = nm_last.pasted = nm_last.breaks = NULL;
 	Learned *L = use_area(area);
 	bool ok = L && !area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
 	if (ok) {
@@ -634,6 +642,7 @@ bool netmap_look(int area, NetmapLook *out) {
 	}
 	free(nm_last.seams);
 	free(nm_last.pasted);
+	free(nm_last.breaks);
 	nm_last = last;
 	nm_cur = cur;
 	nm_place = place;
@@ -778,6 +787,8 @@ const uint16_t *netmap_last_tiles(int *tw, int *th) {
 const uint8_t *netmap_last_seams(void) { return nm_last.seams; }
 
 const uint8_t *netmap_last_pasted(void) { return nm_last.pasted; }
+
+const uint8_t *netmap_last_breaks(void) { return nm_last.breaks; }
 
 void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
 	for (int y = 0; y < MAP_H; ++y) {

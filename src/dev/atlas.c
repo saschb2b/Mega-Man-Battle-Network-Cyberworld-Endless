@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include "area_src.h"
+#include "breaks.h"
 #include "lineups.h"
 #include "emu.h"
 #include "net.h"
@@ -28,6 +29,7 @@
 
 #define VOID_ARGB 0xFF282830u
 #define SEAM_ARGB 0xFFFF2040u
+#define BREAK_ARGB 0xFFFFE000u   /* a tile edge across which the picture shows a strip no original map shows */
 #define OFF_NEAR_ARGB 0xFFFF40FFu   /* a tile whose pair was seen with other floors where it shows them */
 #define OFF_EDGE_ARGB 0xFFFFE040u   /* ... at a few pixels */
 
@@ -59,6 +61,31 @@ static bool save_bmp(const char *path, uint32_t *px, int W, int H) {
 	bool ok = SDL_SaveBMP(s, path) == 0;
 	SDL_FreeSurface(s);
 	return ok;
+}
+
+/* The layer `name`'s picture with its seams marked (`sp`, tw x th tiles),
+ * saved: the breaks in the picture (what no original map shows across a
+ * tile's edge, breaks.h) marked over them and listed, the nicks listed
+ * too, for build.py. */
+static void save_marked(const char *dir, const char *name, uint32_t *sp, int tw, int th) {
+	const uint8_t *breaks = netmap_last_breaks();
+	int W = tw * 8;
+	char path[1300];
+	snprintf(path, sizeof path, "%s/breaks_%s.txt", dir, name);
+	FILE *bf = fopen(path, "w");
+	for (int i = 0; breaks && i < tw * th; ++i) {
+		int tx = i % tw, ty = i / tw;
+		uint8_t b = breaks[i];
+		if (!b) continue;
+		if (bf) fprintf(bf, "%d %d %d\n", tx * 8, ty * 8, b);
+		for (int k = 0; k < 8; ++k) {
+			if (b & 1 && tx + 1 < tw) sp[(size_t)(ty * 8 + k) * W + tx * 8 + 7] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 8] = BREAK_ARGB;
+			if (b & 2 && ty + 1 < th) sp[(size_t)(ty * 8 + 7) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 8) * W + tx * 8 + k] = BREAK_ARGB;
+		}
+	}
+	if (bf) fclose(bf);
+	snprintf(path, sizeof path, "%s/seams_%s.bmp", dir, name);
+	save_bmp(path, sp, W, th * 8);
 }
 
 /* One layer: built, drawn, reported. */
@@ -224,8 +251,8 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	}
 	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, area, layout, depth, seed);
 	save_bmp(path, px, W, H);
-	snprintf(path, sizeof path, "%s/seams_b%02d_l%d_d%d_s%u.bmp", dir, area, layout, depth, seed);
-	save_bmp(path, sp, W, H);
+	snprintf(path, sizeof path, "b%02d_l%d_d%d_s%u", area, layout, depth, seed);
+	save_marked(dir, path, sp, tw, th);
 	write_cells(dir, area, layout, depth, seed);
 	free(sp);
 	free(px);
@@ -234,9 +261,9 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	int mouths = at_mouths();
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1, lineups, walked, junctions;
 	walk_counts(&lineups, &walked, &junctions);
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
 		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
-		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.off_near, tiles_stats.off_edge,
+		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.breaks, tiles_stats.nicks, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7],
 		lineups, junctions, walked);
@@ -478,6 +505,7 @@ int atlas_run(const char *spec) {
 	sscanf(spec, "%511[^:]:%255[^:]:%d", dir, biomes, &seeds);
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "atlas: no core\n"); return 1; }
 	tiles_measure = true;
+	breaks_measure = true;
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);

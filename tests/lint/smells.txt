@@ -36,7 +36,7 @@ params src/map/tilemap.c:tilemap_pick 8
 params src/map/tiles.c:tl_expect 9
 params src/map/tiles.c:tl_expect_look 8
 params src/map/tiles_pick.c:best 16
-params src/map/tiles_pick.c:tiles_pick 13
+params src/map/tiles_pick.c:tiles_pick 10
 params src/map/tiles_pick.c:why_off 14
 params src/scenes/scene_title.c:stamp 10
 params src/world/town.c:tile 8
