@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's RollAro1 A (its chip 151) against the registry's row for it (id 665), moved by tools/xchiprecipe_bn4.py as a unit of kind navi (BN4's support 0x35 as BN6's grown Navi routine 0xB5, run by BN6's Navi chip object under its Navi family; docs/multirom/bn4-chips.md): the chip's Navi is the first kind's 0x41, a Roll who appears on MegaMan's panel and looses an arrow down his row. Her spawner takes her side in r3, which BN4's object of the chip hands it and BN6's does not: the unit's entry is a wrapper that loads it (XChipUnit.side). Picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP (140 HP) at (5,2), MegaMan's row. The chip runs inside its time freeze: MegaMan steps out, Roll appears (sound 0xB0, BN6's slot 0x1E2) and shoots (0x132, slot 0x208), the Mettaur struck for 50, 90 HP left in both; then MegaMan steps in.",
+ "folder4": [
+  "0097"
+ ],
+ "folder6": [
+  "299:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
