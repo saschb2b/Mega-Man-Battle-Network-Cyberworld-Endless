@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "BN4's Navis as guardians"
-description: "BN4 Red Sun's twelve proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
+description: "Nine of BN4 Red Sun's proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
 tags: [game, bosses, bn4, design]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:06:19Z }
 sources:
@@ -49,9 +49,9 @@ him in (`NetAreaDef.xguard`, `src/core/rom.c`):
 
 | BN4's area (it dresses) | Its records hold | Guardian (by a coin of the seed where two) |
 | --- | --- | --- |
-| ACDC Area (Central Area) | AquaMan, GutsMan, SparkMan | GutsMan, AquaMan or SparkMan |
-| Town Area (Seaside Area) | FireMan, NumberMan, Roll, TopMan | FireMan, Roll or TopMan |
-| Park Area (Green Area) | BurnerMan, VideoMan, WoodMan | WoodMan or BurnerMan |
+| ACDC Area (Central Area) | AquaMan, GutsMan, SparkMan | GutsMan or AquaMan |
+| Town Area (Seaside Area) | FireMan, NumberMan, Roll, TopMan | FireMan or Roll |
+| Park Area (Green Area) | BurnerMan, VideoMan, WoodMan | WoodMan |
 | The countries (Sky Area) | ColdMan, KendoMan, ThunderMan, WindMan | ThunderMan or WindMan |
 | The Undernet (Undernet) | JunkMan, SearchMan, and others not moved | SearchMan or JunkMan, in the deep's pool |
 
@@ -63,9 +63,12 @@ its two join BN5's six and BN6's own in that pool, each as likely, none
 that already guards a surface act of the run. Without BN4's ROM, or on a 3DS
 whose heap leaves it unread, BN6's guardian stands; nothing is saved for
 him. `--guardian 34` on (34 plus his seat: GutsMan 35) puts one in every act
-another game's areas dress. The Navis BN4's records also set there but not
-yet moved (SparkMan, TopMan, NumberMan, BurnerMan, VideoMan, ColdMan,
-KendoMan, MetalMan, LaserMan) join their area's pair as each is proved.
+another game's areas dress. SparkMan, TopMan and BurnerMan, whom BN4's
+records also set there, are moved and proved since and fight in the
+tournament's rounds ([The tournament](../tournament.md)), but guard no
+area yet: an area names two guardians at most (`xguard`). Those not yet
+moved (NumberMan, VideoMan, ColdMan, KendoMan, MetalMan, LaserMan) can
+join as each is proved.
 
 ## His band
 

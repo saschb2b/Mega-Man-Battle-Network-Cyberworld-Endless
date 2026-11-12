@@ -1,7 +1,7 @@
 ---
 type: Tool
 title: "Pacing report: every act's battles and guardians"
-description: "`python3 build.py pacing` rolls every area's random battles in every act and draws 500 runs' guardians into `.build/pacing.txt`, marking OVER or OUTSIDE past the act's band, BN5's territories and visitors included, then plays seeds 1-12 for the battles per layer and act, NONE marking a layer without one."
+description: "`python3 build.py pacing` rolls every area's random battles in every act and draws 500 runs' guardians into `.build/pacing.txt`, marking OVER or OUTSIDE past the act's band, BN5's territories and the encounter groups included, then plays seeds 1-12 for the battles per layer and act, NONE marking a layer without one."
 tags: [devtools]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 ---

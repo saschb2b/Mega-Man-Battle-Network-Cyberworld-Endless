@@ -1,7 +1,7 @@
 ---
 type: Status
 title: "Status"
-description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun's five net areas, dressing BN6's for review, held out of runs."
+description: "Checklist of what BN5's ROM brings a run: done, its areas dressing BN6's, music, bystanders, battles, chips, Navis and Souls in BN6's engine, the 3DS; open, its towns, Team ProtoMan and Falzar; and BN4 Red Sun, offered to players, its five net areas dressing BN6's in runs since 5 November 2026 and nine of its Navis guarding them."
 tags: [multirom, bn5]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
 ---
@@ -162,8 +162,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
   second core at first ([Guest battles](guest-battles.md)), in BN6's engine since D1
   (One net: native territories); the second core left runs in the last
   round, the differential's reference alone.
-- [x] Its viruses and BN6's meet: from act 2 one battle in four takes a
-  visitor of the other net, and the deep's acts draw on both nets' late
+- [x] Its viruses and BN6's meet: a family of another net comes as an
+  act's signature or its partner, in battles built for it
+  ([Encounter groups](../game/progression/encounter-groups.md), on since
+  12 November 2026). Before that, from act 2 one battle in four took a
+  visitor of the other net, and the deep's acts drew on both nets' late
   areas (One net: D1).
 - [x] Its chips in runs: half the finds and stock on its areas and in the
   deep, its viruses' own rewards, the Library's count and the second
@@ -206,12 +209,17 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
   there ([The 3DS's memory](../engine/emulation/3ds-memory.md); `tools/heap3ds.py`). Built
   and modelled on a computer; a New 3DS's own run with both ROMs is
   3ds/README.md's checklist.
-- [ ] Battle Network 4: Red Sun: researched, its tables found and its
-  maps drawn, Billy moved into BN6's engine, and everything a player
-  needs to bring its ROM built on every platform behind its research
-  switch ([How it is built](how-it-is-built.md), Platforms); nothing
-  offered to players yet ([Battle Network 4 in a run](bn4.md), its plan
-  and the owner's open calls); its areas below, held.
+- [x] Battle Network 4: Red Sun: offered to players on every platform
+  since 5 November 2026 ([Battle Network 4 in a run](bn4.md), Turned on,
+  whole; [How it is built](how-it-is-built.md), Platforms). In 0.21.0:
+  its areas in runs (below), its moved families in the acts' encounter
+  groups, nine of its Navis guarding its areas and twelve in the
+  tournament, 84 of its chips and 17 of its 19 Program Advances
+  ([BN4's chips in a run](bn4-chips.md)), its 34 songs in the Jukebox,
+  and its place in the NetPass's full set (protocol v17).
+- [ ] Of BN4's still open: its own battle records and bystanders on its
+  areas, its Souls, its dark chips in a run, and the chips and Navis not
+  yet moved.
 - [ ] Team ProtoMan (the other version), BN4 Blue Moon, BN6 Falzar.
 
 ## BN4 Red Sun's areas
@@ -322,11 +330,14 @@ The owner's calls). Their tables in [BN4 Red Sun's tables](../rom/bn4.md).
   net's records set in each area (`xguard`), BN4's nine proved Navis in
   their own sprites and faces, at the act's band, their Guardian Data their
   Navi chip or a BN6 kin's ([BN4's Navis as guardians](../game/bosses/bn4-navis.md)).
-- [ ] Their battles and bystanders: BN6's (no `xbattles` or `xnavi`),
-  until BN4's families and Navis' sprites come (Phases 1 and 2 of
-  [Battle Network 4 in a run](bn4.md)).
-- [ ] Admitted: each area's walk measured against the core loop's gate
-  (its review, Phase 3) and the owner's call on sharing BN6's areas
-  between three games; `run_dress` gives each area of another game a coin
-  of the run's seed by its number (bits 16 on), which BN4's numbers (15-19)
-  run past, so admitting them asks a draw of its own.
+- [ ] Their battles and bystanders: BN6's (no `xbattles` or `xnavi`).
+  BN4's moved families come to them as to any area, as an act's
+  signature or its partner
+  ([Encounter groups](../game/progression/encounter-groups.md)); its own
+  battle records and its bystanders' sprites are still to come
+  ([Battle Network 4 in a run](bn4.md), The plan).
+- [x] Admitted (5 November 2026, the owner's call 10): all five at once,
+  over a review area by area against the core loop's gate; `run_dress`
+  gives BN4's areas a coin of a second word of the seed, BN5's first
+  where both dress one BN6 area ([Battle Network 4 in a run](bn4.md),
+  Turned on, whole).

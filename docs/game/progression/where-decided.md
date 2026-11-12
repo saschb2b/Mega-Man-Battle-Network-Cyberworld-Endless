@@ -1,7 +1,7 @@
 ---
 type: Code Map
 title: "Where it is decided"
-description: "Where progression is decided in code: acts, bands, versions and heals in `src/core/pacing.c`, area order and guardian pools in `src/core/run.c`, super bosses, formations, BN5's records, visitors, guardian versions, chip rarity and rewards."
+description: "Where progression is decided in code: acts, bands, versions and heals in `src/core/pacing.c`, area order and guardian pools in `src/core/run.c`, super bosses, formations, BN5's records, encounter groups, guardian versions, chip rarity and rewards."
 tags: [game, progression]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 ---

@@ -374,7 +374,8 @@ Where each beat goes (the shares as the owner set them, below):
 ### Step 1, built
 
 The pool, the templates and their filling are in the engine since 11
-November 2026, behind a dev switch: no run of a player's holds a group.
+November 2026, then behind a dev switch: no run of a player's held a
+group until Step 3 turned them on (below).
 
 - **The module** is `src/core/groups.c`, numbers alone and no ROM: a
   family's lean from its placements, the eleven templates (what a family
@@ -461,8 +462,8 @@ Left of step 1, each measured before step 2 rests on it:
 
 ### Step 2, the arc and the rewards, built
 
-In the engine since 12 November 2026, behind `--dev arc`: no run of a
-player's has an arc.
+In the engine since 12 November 2026, then behind `--dev arc`: no run of
+a player's had an arc until Step 3 turned them on (below).
 
 - **The arc** (`src/core/group_arc.c`, no ROM; its rules by act in
   `src/core/group_pool.c`): an act's signature by the run's seed and the
