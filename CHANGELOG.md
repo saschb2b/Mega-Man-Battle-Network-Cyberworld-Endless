@@ -41,12 +41,11 @@
   ROM beside BN6's, so for now it keeps the Square alone: its trades and
   dives come back in a later version. Online play speaks protocol v17:
   an older build and this one no longer meet.
-- **BurnerMan in the tournament.** With BN4's ROM beside BN6's, BurnerMan
-  of Red Sun joins BN4's tournament as a round, his flames burning in
-  BN6's battle as in BN4's, proved frame by frame against BN4's own battle.
-- **SparkMan in the tournament.** With BN4's ROM beside BN6's, SparkMan
-  of Red Sun joins BN4's tournament as a round, fought in BN6's battle as
-  BN4 fights him, proved frame by frame against BN4's own battle.
+- **BurnerMan and SparkMan in BN6's engine.** With BN4's ROM beside
+  BN6's, BurnerMan and SparkMan of Red Sun now fight in BN6's battle as
+  BN4 fights them, each proved frame by frame against BN4's own battle.
+  The tournament does not draw them yet: its pool is full before their
+  turn, so they take their rounds in a later version.
 - **The PET in the Net Square.** START opens the PET in the Net Square as
   anywhere: edit a folder before a NetBattle, run the NaviCust, use a
   SubChip, play the Jukebox. What you change there comes home with you,

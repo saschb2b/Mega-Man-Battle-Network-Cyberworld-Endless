@@ -809,8 +809,8 @@ With BN4 Red Sun's ROM beside BN6's, once a run has reached the Nest, act
 the endless net, one of acts 3 to 5 each cycle): three Navis in a row,
 shown on BN4's own bracket screen, the act's card listing all three.
 They come from BN6's and BN5's Navis and BN4's own (GutsMan, ThunderMan,
-WindMan, FireMan, SearchMan, AquaMan, WoodMan, JunkMan, Roll, BurnerMan,
-SparkMan and TopMan). MegaMan's HP carries from
+WindMan, FireMan, SearchMan, AquaMan, WoodMan, JunkMan, Roll and TopMan).
+MegaMan's HP carries from
 round to round. Each round pays a Navi chip (its Navi's own, or for one
 of BN4's a BN6 Navi's) and the final his Guardian Data; a round lost
 ends the run.
