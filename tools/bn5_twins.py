@@ -416,6 +416,8 @@ TYPES = {
     (3, 0x94): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xC6): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
     (3, 0xC8): ('moved', None, 'navis', "GridMan's: " + NO_TWIN),
+    (3, 0xB0): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
+    (3, 0xBB): ('moved', None, 'navis', "LarkMan's: " + NO_TWIN),
     (3, 0x36): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x37): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
     (3, 0x3D): ('moved', None, 'navis', "CloudMan's: " + NO_TWIN),
@@ -577,9 +579,12 @@ TYPES = {
     (3, 0xB3): ('moved', None, 'chips', "the Navi chip CloudMan's attack's object (spawned at 0x080DCC5A): " + NO_TWIN),
     (1, 0x1E): ('moved', None, 'chips', "the Navi chip LarkMan's LarkMan: " + NO_TWIN + "; his battle sprite BN5's, copied "
                                         "at a number of the chips' in list 2 (his Navi is not moved)"),
-    (3, 0xBA): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DDB4C): " + NO_TWIN),
-    (3, 0xC7): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DF8CA): " + NO_TWIN),
-    (3, 0xCB): ('moved', None, 'chips', "the Navi chip LarkMan's attack's object (spawned at 0x080DFD4C): " + NO_TWIN),
+    (3, 0xBA): ('moved', None, 'navis', "LarkMan's attack's object, and his Navi chip's (spawned at 0x080DDB4C): " + NO_TWIN +
+                                        " (the Navis' copy, LarkMan installing before the chips: the chip spawns it)"),
+    (3, 0xC7): ('moved', None, 'navis', "LarkMan's attack's object, and his Navi chip's (spawned at 0x080DF8CA): " + NO_TWIN +
+                                        " (the Navis' copy, as 0xBA's)"),
+    (3, 0xCB): ('moved', None, 'navis', "LarkMan's attack's object, and his Navi chip's and WildBird's (spawned at 0x080DFD4C): " +
+                                        NO_TWIN + " (the Navis' copy, as 0xBA's)"),
     (1, 0x24): ('moved', None, 'chips', "the Navi chip Django's Django: " + NO_TWIN + "; no Navi of BN5's id table his "
                                         "(his chip's code alone)"),
     (3, 0xBC): ('moved', None, 'chips', "the Navi chip Django's attack's object (spawned at 0x080DE198): " + NO_TWIN),
@@ -656,8 +661,9 @@ TYPES = {
     (4, 0x23): ('moved', None, 'chips', "Blinder's light: no BN6 type runs its code"),
     (4, 0x24): ('twin', 0x24, 'chips', "BoyBomb's explosion: BN6's 0x24 the same code to its depth, its sprites the same "
                                        "bytes"),
-    (4, 0x28): ('moved', None, 'chips', "the swords' afterimage (Z Saver's, MoonBld's, Katana's): no BN6 type runs its "
-                                        "code"),
+    (4, 0x28): ('moved', None, 'navis', "the swords' afterimage (LarkMan's, and Z Saver's, MoonBld's, Katana's, ShadowSoul's): no "
+                                        "BN6 type runs its code; the Navis' copy, LarkMan installing first: the chips and the "
+                                        "Souls spawn it, its sprite the spawner's word (0x080E36DC's r4)"),
     (4, 0x2A): ('moved', None, 'chips', "the Anti chips' setter: BN6's 0x2A sets its trap for its kind 0 alone "
                                         "(0x080E48B4: kinds 1-7 nothing, BN6's trap 0x080CF95C), BN5's for its kinds 0-3, "
                                         "Fire, Aqua, Elec and Wood (0x080E3840), the trap BN5's third kind's 0x4D"),

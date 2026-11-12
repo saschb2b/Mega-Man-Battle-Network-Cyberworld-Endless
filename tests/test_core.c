@@ -4088,11 +4088,13 @@ static bool soul_moves(int kind, int from) {
 
 /* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
  * chips' unit's */
+enum { NAVIS_SEEN = 64 };   /* (BN5's moved Navis looked through: every one, past XN_HOMES_MAX's room since MagnetMan) */
+
 static bool copied_before(uint32_t bn5, uint32_t bn6) {
-	const XVirusFamily *fs[1 + XN_HOMES_MAX + XC_UNITS];
+	const XVirusFamily *fs[1 + NAVIS_SEEN + XC_UNITS];
 	int n = 0;
 	fs[n++] = &xnavi_objects_bn5;
-	for (int k = 0; k < xnavi_bn5_count && k < XN_HOMES_MAX; ++k) fs[n++] = &xnavi_bn5[k]->code;
+	for (int k = 0; k < xnavi_bn5_count && k < NAVIS_SEEN; ++k) fs[n++] = &xnavi_bn5[k]->code;
 	for (int k = 0; k < xchips_bn5_count && k < XC_UNITS; ++k) fs[n++] = &xchips_bn5[k].code;
 	for (int i = 0; i < n; ++i)
 		for (int b = 0; b < fs[i]->nblocks; ++b)
@@ -4266,6 +4268,7 @@ static void test_xnavi_static(void) {
 	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
 	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
 	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count <= NAVIS_SEEN, "xnavi: BN5's Navis listed (%d) within the tests' NAVIS_SEEN", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
