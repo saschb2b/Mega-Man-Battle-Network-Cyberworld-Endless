@@ -466,4 +466,4 @@ static const uint8_t biome_bgs[BIOME_COUNT][2] = {
 
 int biome_bg(int b) { return b >= 0 && b < BIOME_COUNT ? biome_bgs[b][rng_range(0, 1)] : 0; }
 
-int biome_backdrop(int b) { return b >= 0 && b < BIOME_COUNT ? biome_bgs[b][0] : 0; }
+int biome_backdrop(int b, int which) { return b >= 0 && b < BIOME_COUNT ? biome_bgs[b][which & 1] : 0; }

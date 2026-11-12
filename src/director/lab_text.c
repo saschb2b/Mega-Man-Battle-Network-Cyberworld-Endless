@@ -65,6 +65,12 @@ void lab_set_value(char *out, size_t n, int foes) {
 	else snprintf(out, n, "%d foes", foes);
 }
 
+void lab_stage_words(char *out, size_t n, const char *tag, const char *name, bool second) {
+	if (tag && tag[0]) snprintf(out, n, "%s %s", tag, name);
+	else if (second) snprintf(out, n, "%s 2", name);
+	else snprintf(out, n, "%s", name);
+}
+
 void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lost) {
 	int cs = frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;
 	cs %= 100;
