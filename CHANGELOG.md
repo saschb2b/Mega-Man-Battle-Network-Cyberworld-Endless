@@ -4,8 +4,8 @@
 
 - **The Battle Lab.** Every virus MegaMan deletes adds to his battle
   data on its family, in every run. Once the data on three families is
-  complete (eight deletions each), a Mr.Prog of Dad's lab stands in
-  Lan's HP. He sets up test battles: the foes, their versions and
+  complete (eight deletions each), a Navi of Dad's lab stands in
+  Lan's HP and sets up test battles: the foes, their versions and
   panels, the field's eighteen panels, the background and the song.
   Nothing in one can delete MegaMan, it pays nothing, and the run is
   afterwards exactly as it was. Four sets are kept with their best time

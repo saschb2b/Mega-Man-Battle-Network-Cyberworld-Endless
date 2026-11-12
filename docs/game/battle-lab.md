@@ -438,13 +438,14 @@ is used.
     across the walk from the courier and clear of every link square: the
     keeper at its front, facing the room, behind him BN6's own glass
     capsule (list 7's 61) and its orange monitor of green bars (149).
-    Each of the three talks as he does. He wears mint, the Mr.Prog
-    sprite's palette 2, set by BN6's own palette command: BN6's
-    variations dress Mr.Progs green, gold and the Virus Battlers' red,
-    blue, yellow and orange, and none in this one
-    ([BN6's Virus Battler](../rom/virus-battler.md), each Battler's own
-    Mr.Prog). His mugshot stays the green Mr.Prog's: BN6 has none in
-    mint.
+    Each of the three opens the Lab.
+  - *The keeper is a Navi* (the owner's call, 12 November 2026): BN6's
+    teal Navi (list 6's `0x41`, by BN6's own variation of that sprite),
+    with that sprite's mugshot and lines in a Navi's voice. Chosen over
+    BN6's orange armoured Navi, its pink Navi and a Mr.Prog in one of the
+    Virus Battlers' colours. A Mr.Prog in the sprite's unused mint
+    palette was tried first and read as frozen ("what navi is that? is
+    he frozen?"). No one else in a run has this look.
   - A run started by a dev scene named no seed for its tally, so its
     data was lost to the next run; the tally now follows the run's seed
     on every path.

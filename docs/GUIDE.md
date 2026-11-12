@@ -946,11 +946,11 @@ complete.
 
 Every virus MegaMan deletes adds to his battle data on its family. At
 eight, of any version, in any run, the data on that family is complete.
-Once it is complete on three families, Dad's lab sends a Mr.Prog to
-Lan's HP: he stands there from the next run on, and Dad's mail on the
-first layer says so.
+Once it is complete on three families, Dad's lab sends one of its Navis
+to Lan's HP, a teal one beside a glass capsule in the back left corner:
+there from the next run on, and Dad's mail on the first layer says so.
 
-Talk to him to set up a test battle:
+Talk to the Navi to set up a test battle:
 
 - **FOES:** the families with complete data, each in a version MegaMan
   has deleted (Left and Right turn it). A lifts one onto the foes'

@@ -52,10 +52,6 @@ uint32_t npc_counter_talker(int category, int index, int x, int y, int z, int an
 typedef struct { int category, index, x, y, z; uint32_t archive; int script, gone_flag; } NpcTalk;
 typedef struct { uint32_t jump_at, loop, look, blur; } NpcLooks;
 uint32_t npc_talker_looks(const NpcTalk *t, NpcLooks *looks);
-/* The next talker made wears palette `palette` of its sprite's, by BN6's
- * own ns_set_npc_palette_index (a Mr.Prog in a colour no variation of
- * BN6's gives him: the Battle Lab's keeper) */
-void npc_next_palette(int palette);
 /* A list 6 talker's sprite (script `at`, npc_talker's) set by BN6's own
  * ns_set_sprite, which dresses it in its variation: the palette and hidden
  * pieces BN6's NPC sprite variations give that sprite (a Virus Battler's

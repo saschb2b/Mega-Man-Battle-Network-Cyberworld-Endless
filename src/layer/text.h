@@ -44,6 +44,7 @@ void ta_mugshot(TextArchive *t, int m);  /* F5 00 m */
 #define FACE_NAVI    0x3E   /* a Normal Navi, the Net Dealers' own */
 #define FACE_TECH    0x45   /* GirlNavi, the NaviCust vendor (shop 3's keeper, 0x42, is the Net Dealer's GreenNavi on the map) */
 #define FACE_HEEL    0x43   /* a HeelNavi */
+#define FACE_LAB     0x41   /* BN6's teal Navi, the Battle Lab's keeper (docs/game/battle-lab.md) */
 #define FACE_BEAST   0x58   /* MegaMan in Gregar's BeastOut */
 
 /* A page of a chat: `face`, then the box opened (first) or cleared, `s`

@@ -462,7 +462,7 @@ static int mail_body(int navi, uint8_t *out, int max) {
 static void lab_mail_text(char *out, size_t n) {
 	snprintf(out, n, "Lan,the lab built\nsomething from your\nbattle data.\f"
 		"A place to fight\ncopies of viruses\nMegaMan knows well.\f"
-		"Our Mr.Prog waits\nin your HP. A copy\ncan't delete him.\f"
+		"Our lab's Navi waits\nin your HP. No copy\ncan delete MegaMan.\f"
 		"So far the data is\ncomplete on %d\nvirus families.", battle_data_families_complete());
 }
 

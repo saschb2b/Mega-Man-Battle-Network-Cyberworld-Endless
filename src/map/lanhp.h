@@ -34,7 +34,7 @@ bool lanhp_courier_say(const uint8_t *archive, int n);
  * false where they do not fit. */
 bool lanhp_keeper_say(const uint8_t *archive, int n);
 /* The Battle Lab's keeper (docs/game/battle-lab.md, How it is earned): a
- * Mr.Prog of Dad's lab, there while LANHP_LAB_GONE_FLAG is clear, who
+ * Navi of Dad's lab, there while LANHP_LAB_GONE_FLAG is clear, who
  * says nothing until lanhp_lab_say */
 #define LANHP_LAB_GONE_FLAG 0x146E
 bool lanhp_lab_say(const uint8_t *archive, int n);
