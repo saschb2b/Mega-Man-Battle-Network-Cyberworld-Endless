@@ -842,6 +842,29 @@ strike is BN4's animation 0x10, BN6's 0x0C in its own art (frames of
 against the 250 HP Mettaur, three hits of 50 in both; AirHoc2 and 3
 to the frame before the Mettaur's deletion; five mutations caught.
 
+**Blizzard, ElecShok and WoodPwdr are moved** (12 November 2026: ids
+635, 645 and 646), with HeatBrth (636) held. The four are one state of
+BN4's, the breaths' (family 0x33, subfamily 0 each, told apart by their
+record's kind), moved as BN6's grown attack family 0xFA: MegaMan's arm
+(the third kind's 0x02, its kinds 0x18 to 0x1B, 0x17 plus the
+attack's element), the breath (the third kind's 0x36), and its trail's
+effects, which a routine of the unit spawns for its callers
+(`0x080D3EDC`): their ids made by two tables by kind (`0x080D3BF8`,
+`0x080D3DEC`) and two immediates, 0x38 to 0x3F, none of them with a
+BN6 twin, moved as 0xBB to 0xC2 (`EFFECT_HELPERS` in
+`tools/xchiprecipe_bn4.py`). Its sounds 0xE5, 0xE6 and 0x11F take the
+grown table's 0x28B to 0x28D. The breath also sets the panels it
+crosses to a type of its kind's (`0x080D3DF4`: 8, 7, 6 and 3) for 0xBE
+frames. Blizzard, ElecShok and WoodPwdr pass over 300 frames against
+the 250 HP Mettaur on (4,2), six mutations caught. **HeatBrth is
+held** (its row pending, `ROWS_WAIT`): its kind's panel type is 8, the
+word of BN6's volcano, and BN4's own reading of it is unread. With its
+row moved the copy plays it alike to t78. Then BN4's breath strikes the
+Mettaur on (4,2) for 50 at t93, where BN6's copy sets that panel to
+type 8 as well, its volcano striking him at t250. Open: BN4's type 8,
+and the breath's test of a panel a foe stands on (`bn4_chip_heatbrth`,
+its verdict recorded).
+
 **DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
 594). DarkBomb is the bombs' state's subfamily 2, its own copy of the
 state at attack family 0xFC (as SeekBom's subfamily 9 has its own,

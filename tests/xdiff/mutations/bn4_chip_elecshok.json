@@ -1,0 +1,11 @@
+[
+ {
+  "name": "ElecShok's spark sound not played",
+  "spec": "bn4_chip_elecshok",
+  "poke": [
+   "080D3ED2:46C0:2",
+   "080D3ED4:46C0:2"
+  ],
+  "what": "the breath's copy's call that plays its spark (BN4 0x080D3ED2, 0xAD at slot 0x201 through its shim), the elec kind's, made two nops"
+ }
+]

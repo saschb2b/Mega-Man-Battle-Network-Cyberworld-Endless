@@ -1,0 +1,10 @@
+[
+ {
+  "name": "WoodPwdr's trail's effect BN4's id",
+  "spec": "bn4_chip_woodpwdr",
+  "poke": [
+   "080D3D58:343D:2"
+  ],
+  "what": "the trail's adds r4,#id at 0x080D3D58 (the generator's 0xBD for BN4's 0x3D, by EFFECT_HELPERS), the wood kind's, given back BN4's 0x3D: BN6's own effect 0x3D, another (t55)"
+ }
+]

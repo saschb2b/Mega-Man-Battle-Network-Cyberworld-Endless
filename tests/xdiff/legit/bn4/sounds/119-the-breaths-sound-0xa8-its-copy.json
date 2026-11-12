@@ -1,0 +1,13 @@
+{
+ "bn4": "0xA8",
+ "bn6": "0x285",
+ "clock": "state",
+ "chips": [
+  "0x05",
+  "0x06",
+  "0x2A",
+  "0x2B"
+ ],
+ "what": "The breaths' sound 0xA8 (the breath's fire), its copy",
+ "why": "Played by BN4's breath object (the third kind's 0x36, moved with the breaths' unit, BN6's grown attack family 0xFA), its movs r0,#0xa8 and bl to PlaySoundEffect at 0x080D3E80, for the fire breath's kind (HeatBrth); BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x285, BN4's song 0xA8 already in that slot of BN6's grown song table (another unit's copy of the same song, src/audio/xsong.c XSOUNDS). In the specs of Blizzard, HeatBrth, ElecShok and WoodPwdr alone, over the rows that pair 0xA8 otherwise."
+}

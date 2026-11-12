@@ -531,6 +531,7 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x141, 0x288 },
 	/* ... AirHoc's puck, its launch and its bounce (the air line's 0x289 up: docs/project/claims/bn4-air-units.json) */
 	{ XROM_BN4_RED_SUN_US, 0xC0, 0x289 }, { XROM_BN4_RED_SUN_US, 0xCC, 0x28A },
+	{ XROM_BN4_RED_SUN_US, 0xE5, 0x28B }, { XROM_BN4_RED_SUN_US, 0xE6, 0x28C }, { XROM_BN4_RED_SUN_US, 0x11F, 0x28D },   /* the breaths (family 0x33): their trail's two, the breath */
 };
 
 int xsong_sound_slot(int xrom, int song) {

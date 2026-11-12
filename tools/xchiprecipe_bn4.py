@@ -66,7 +66,7 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
-                  0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
+                  0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB, 0x33: 0xFA}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -105,6 +105,8 @@ UNIT_AIMS = {
 ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4-chips.md): no chip\'s damage changes, a HUD icon alone',
              287: 'AquaPowr, left out by the owner\'s call 12',
              288: 'WoodPowr, left out by the owner\'s call 12',
+             6: 'HeatBrth, held: its breath sets BN4\'s panel type 8 (BN6\'s volcano word, BN4\'s own reading unread) and BN6\'s copy '
+                'sets it on the panel a foe stands on where BN4\'s strikes him (bn4_chip_heatbrth at t79 and t93): docs/multirom/bn4-chips.md',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
                  'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
@@ -280,6 +282,7 @@ UNITS = (
     ('navi', 0x36, 'GutPnch'),
     ('support', 0x2A, 'BugCurse'),
     ('attack', 0x27, 'AirHoc'),
+    ('attack', 0x33, 'Breath'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -318,6 +321,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0x141: 0x288,                # (BugCurse's curse)
                # (the air line's from 0x289: docs/project/claims/bn4-air-units.json)
                0xC0: 0x289, 0xCC: 0x28A,    # (AirHoc's puck)
+               0xE5: 0x28B, 0xE6: 0x28C, 0x11F: 0x28D,   # (the breaths: their trail's two, the breath)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
@@ -378,13 +382,14 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11, 0x18, 0x19, 0x1A, 0x1B), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
                          "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4), DarkBomb's 0x11 (the bombs' state's table "
-                         "by subfamily, 0x080EB4EC, its subfamily 2's)"),
+                         "by subfamily, 0x080EB4EC, its subfamily 2's), the breaths' 0x17 + the attack's element, 0x18 to 0x1B "
+                         "(0x080ED44E-0x080ED452: HeatBrth, Blizzard, ElecShok, WoodPwdr)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "
@@ -469,6 +474,13 @@ IMMS = {
     # PropBom's state (0x62): whose bomb's height (its table by the Navi), and MegaMan's animation (Thunder's throw)
     0x080EE58A: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
                      why="the battle NaviStats' Navi, 0 MegaMan (the bomb's height by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 "
+                         "(BN6_NAVI_SIDE_NAVI)"),
+    # the breaths' state (0x33): MegaMan's animation (BN4's 0x0D, BN6's 0x0A) and whose arm
+    0x080ED438: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0D, now=0x0A,
+                     why="MegaMan's animation as he readies a breath: BN4's 0x0D, BN6's 0x0A of its own sprite of him (FlmLine's ready "
+                         "pose, one frame of 2 in each art)"),
+    0x080ED442: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
+                     why="the battle NaviStats' Navi, 0 MegaMan (his arm's sprite by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 "
                          "(BN6_NAVI_SIDE_NAVI)"),
     # AirHoc's state (0x27): MegaMan's animation as he strikes the puck (BN4's 0x10, BN6's 0x0C)
     0x080ECED4: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x10, now=0x0C,
@@ -879,6 +891,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         X4.effects_of(b4, b6, f, alloc)
         pattern_effects(f)
         effect_calls(b4, b6, f, alloc)
+        helper_effects(b4, b6, f, alloc)
         # (an effect by a row's byte of a kinds' table: the row's byte is BN6's id, row_tables)
         by_row = [f'spawned at {s:08X} ' for t in ROW_TABLES.values() for s in t['effect_sites']]
         f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and any(x in d[1] for x in by_row))]
@@ -1330,6 +1343,52 @@ def pattern_effects(f):
             elif v in given:
                 f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=v, now=given[v],
                                    why=f'its effect over a pattern of panels: {v:#x} in BN4, {given[v]:#x} in BN6 (as its own spawn of it)'))
+
+
+# A routine of a unit's own that spawns the effect its callers make in r4 (BN4_SPAWN_EFFECT inside it, r4 untouched): its
+# address -> the tables of ids its callers read a byte of (a table's address, its entries); a caller's r4 made by an
+# immediate (movs r4,#1; lsls r4,r4,#8; adds r4,#id) is read where it is made (helper_effects)
+EFFECT_HELPERS = {
+    # (the breaths' spawner of their trail's effects, family 0x33: by the kind (+4) from 0x080D3BF8 at 0x080D3B92 and from
+    # 0x080D3DEC at 0x080D3DC6, by adds r4,#0x3b and #0x3d at 0x080D3CDA and 0x080D3D58)
+    0x080D3EDC: {0x080D3BF8: 4, 0x080D3DEC: 4},
+}
+
+
+def helper_effects(b4, b6, f, alloc):
+    """the effects an EFFECT_HELPERS routine spawns: each id its callers make, by an immediate or a byte of its tables, as
+    BN6's (of the same look, else moved: xnavirecipe_bn4_objects.effect_of), the adds or the table's byte given BN6's id;
+    the helper's own spawn's decision answered"""
+    for helper, tables in EFFECT_HELPERS.items():
+        if not any(lo <= helper < hi for lo, hi in f.spans):
+            continue
+        made = {}
+        for v, n in tables.items():
+            for k in range(n):
+                made.setdefault(b4.u8(v + k), []).append((v + k, None))
+        for w in f.walks.values():
+            for site, t in sorted(w.bls.items()):
+                if t != helper:
+                    continue
+                v, chain = T.back_value(w, site, 4)
+                if v is not None and len(chain) >= 2 and chain[0][1] == 'adds8' and chain[1][1:] == ('lsls', 8):
+                    made.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
+        for e4, at in sorted(made.items()):
+            got = C.effect_of(b4, b6, f, alloc, e4)
+            if got is None:
+                f.decide('effect', f'{helper:08X}: its effect {e4:#x} is none of BN6\'s, nor moved')
+                continue
+            e6, how = got
+            for a, form in at:
+                if e6 == e4:
+                    continue
+                if form:
+                    f.imms.append(dict(at=a, form=form, rd=4, rn=0, was=e4, now=e6, why=f'its effect (by {helper:08X}): {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+                else:
+                    f.bytes.append((a, e4, e6, f'its effect\'s id by a table of {helper:08X}\'s callers: {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
+            f.notes.append(f'its effect {e4:#x} (by {helper:08X}): BN6\'s {e6:#x} ({how})')
+        f.decisions = [d for d in f.decisions if not (d[0] == 'effect' and d[1].startswith('an effect spawned at ') and
+                                                       any(f'at {s:08X} ' in d[1] for s in range(helper, helper + 8, 2)))]
 
 
 EFFECT_PAIRS = 4   # (src/emu/xvirus_recipe.h XV_EFFECT_PAIRS: the pairs an effect call's shim holds)

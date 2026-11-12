@@ -1,0 +1,13 @@
+{
+ "bn4": "0x11F",
+ "bn6": "0x28D",
+ "clock": "state",
+ "chips": [
+  "0x05",
+  "0x06",
+  "0x2A",
+  "0x2B"
+ ],
+ "what": "The breaths' breath's sound 0x11F, its copy",
+ "why": "Played by BN4's breath object (the third kind's 0x36, moved with the breaths' unit, BN6's grown attack family 0xFA), its bl to PlaySoundEffect at 0x080D3AB8 with r0 0x11F; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x28D and goes on to BN6's: BN4's song 0x11F copied into slot 0x28D of BN6's grown song table (src/audio/xsong.c XSOUNDS; the air units' slots, docs/project/claims/bn4-air-units.json). In the specs of Blizzard, HeatBrth, ElecShok and WoodPwdr alone."
+}

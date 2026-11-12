@@ -78,6 +78,7 @@ MOVED = {
 MOVED.update({
     19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
     63: 0xFB, 64: 0xFB, 65: 0xFB,                                 # AirHoc1-3: BN4's family 0x27
+    5: 0xFA, 42: 0xFA, 43: 0xFA,                                 # Blizzard, ElecShok, WoodPwdr: BN4's family 0x33 (HeatBrth held, ROWS_WAIT)
     192: 0xD0,                                                    # DrkSpred: the same family, its subfamily 3 (its shot the table's kind 0xF)
     12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
     57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26

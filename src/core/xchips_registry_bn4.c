@@ -7,7 +7,7 @@
 #include "xchips_registry.h"
 
 const XChipReg4 xreg4_rows[] = {
-	{   5,  635, XREG_PENDING,   0, 0xFF, { 0x07, 0x09, 0x15, 0x1A }, 0, 26 },   /* Blizzard */
+	{   5,  635, XREG_MOVED,   0, 0xFA, { 0x07, 0x09, 0x15, 0x1A }, 0, 26 },   /* Blizzard */
 	{   6,  636, XREG_PENDING,   0, 0xFF, { 0x03, 0x0A, 0x0E, 0x1A }, 0, 30 },   /* HeatBrth */
 	{  12,  595, XREG_MOVED,   0, 0xD1, { 0x05, 0x06, 0x07, 0x1A }, 0, 18 },   /* FlmLine1 */
 	{  13,  596, XREG_MOVED,   0, 0xD1, { 0x03, 0x04, 0x05, 0xFF }, 0, 26 },   /* FlmLine2 */
@@ -29,8 +29,8 @@ const XChipReg4 xreg4_rows[] = {
 	{  38,  580, XREG_PENDING,   0, 0xFF, { 0x02, 0x0E, 0x12, 0x1A }, 0, 10 },   /* Binder1 */
 	{  39,  581, XREG_PENDING,   0, 0xFF, { 0x00, 0x13, 0x18, 0xFF }, 0, 17 },   /* Binder2 */
 	{  40,  582, XREG_PENDING,   0, 0xFF, { 0x04, 0x08, 0x0E, 0xFF }, 0, 24 },   /* Binder3 */
-	{  42,  645, XREG_PENDING,   0, 0xFF, { 0x09, 0x0B, 0x12, 0x1A }, 0, 40 },   /* ElecShok */
-	{  43,  646, XREG_PENDING,   0, 0xFF, { 0x05, 0x13, 0x16, 0x1A }, 0, 40 },   /* WoodPwdr */
+	{  42,  645, XREG_MOVED,   0, 0xFA, { 0x09, 0x0B, 0x12, 0x1A }, 0, 40 },   /* ElecShok */
+	{  43,  646, XREG_MOVED,   0, 0xFA, { 0x05, 0x13, 0x16, 0x1A }, 0, 40 },   /* WoodPwdr */
 	{  44,  532, XREG_PENDING,   0, 0xFF, { 0x01, 0x13, 0x15, 0x1A }, 0, 30 },   /* Ball */
 	{  47,  583, XREG_PENDING,   0, 0xFF, { 0x02, 0x11, 0x12, 0x1A }, 0,  8 },   /* SandRing */
 	{  57,  647, XREG_MOVED,   0, 0xD6, { 0x01, 0x0B, 0x0F, 0x1A }, 0,  7 },   /* Thunder1 */

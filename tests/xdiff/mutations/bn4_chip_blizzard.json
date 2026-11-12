@@ -1,0 +1,35 @@
+[
+ {
+  "name": "the breath's trail's effect BN4's id",
+  "spec": "bn4_chip_blizzard",
+  "poke": [
+   "080D3BF9:3A:1"
+  ],
+  "what": "the trail's effects' table by kind (0x080D3BF8, the generator's bytes), the aqua kind's given back BN4's 0x3A where the copy holds the moved 0xC0: BN6 spawns its own effect 0x3A, another"
+ },
+ {
+  "name": "the breath's sound not played",
+  "spec": "bn4_chip_blizzard",
+  "poke": [
+   "080D3AB8:46C0:2",
+   "080D3ABA:46C0:2"
+  ],
+  "what": "the breath's copy's call that plays its sound (BN4 0x080D3AB8, 0x11F at slot 0x28D through its shim) made two nops"
+ },
+ {
+  "name": "MegaMan's breath ready animation BN4's number",
+  "spec": "bn4_chip_blizzard",
+  "poke": [
+   "080ED438:200D:2"
+  ],
+  "what": "the state's store of MegaMan's animation (0x080ED438, the recipe's immediate 0x0A) given back BN4's 0x0D, another animation in BN6's art"
+ },
+ {
+  "name": "Blizzard's power halved",
+  "spec": "bn4_chip_blizzard",
+  "poke": [
+   "08C06D3E:32:1"
+  ],
+  "what": "the registry's record of Blizzard (635 at CHIPS_RECORDS) given a power of 50 for its 100: the Mettaur loses 50 where BN4's loses 100 (t53)"
+ }
+]
