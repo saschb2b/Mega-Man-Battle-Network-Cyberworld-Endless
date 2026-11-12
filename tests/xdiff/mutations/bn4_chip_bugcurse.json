@@ -1,0 +1,36 @@
+[
+ {
+  "name": "the first actor none",
+  "spec": "bn4_chip_bugcurse",
+  "poke": [
+   "08F10000:2000:2",
+   "08F10002:46F7:2"
+  ],
+  "what": "the run's own routine for a side's first actor (XC4_FIRST_ACTOR, FREE_BN4_CHIP_STUBS) made movs r0,#0; mov pc,lr: no target found, so no curse is cast where BN4's curses the Mettaur at t34"
+ },
+ {
+  "name": "the first actor read past the side's first",
+  "spec": "bn4_chip_bugcurse",
+  "poke": [
+   "08F10008:31D4"
+  ],
+  "what": "the routine's adds r1,#0xd0 made #0xd4: it reads the side's actors from the second on, missing the Mettaur, the side's first and only: no curse"
+ },
+ {
+  "name": "BugCurse's row's subfamily another",
+  "spec": "bn4_chip_bugcurse",
+  "poke": [
+   "08C07D84:91:1"
+  ],
+  "what": "the registry's record of BN4's BugCurse (730 at CHIPS_RECORDS) naming BN6's grown support routine 0x91 (TimeBomb's unit) where the row gives BugCurse's 0xAA: another chip's support object"
+ },
+ {
+  "name": "the curse's sound not played",
+  "spec": "bn4_chip_bugcurse",
+  "poke": [
+   "080DD40C:46C0",
+   "080DD40E:46C0"
+  ],
+  "what": "the curse's object's copy's call that plays its sound (BN4 0x080DD40C, 0x141 at slot 0x288 through its shim) made two nops: no sound as the curse is cast"
+ }
+]

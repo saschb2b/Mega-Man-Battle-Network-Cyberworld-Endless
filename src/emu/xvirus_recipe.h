@@ -330,6 +330,8 @@ typedef struct {
 	uint32_t code2, code2_end; /* ... and its code besides code to code_end (the families': the late ones'; 0 none) */
 	uint32_t rows, rows_end;   /* places that name a row of a room filled on demand (BN4's chips' art's, xchips_bn4_art.h; 0 none): a
 	                              sprite's `at` there is its row's own, and the rows' rooms lie over each other */
+	uint32_t stubs2, stubs2_end; /* ... and a second span of stubs its calls may go to (BN4's chips' own routines, xchips_bn4.h
+	                              XC4_FIRST_ACTOR; 0 none) */
 } XvRegion;
 /* Whether a recipe of code alone holds together (no states, records or held
  * chips: a chip's moved code, xchips_code.h), its blocks, clones and sprites

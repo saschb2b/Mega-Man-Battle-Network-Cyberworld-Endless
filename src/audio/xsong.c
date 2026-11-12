@@ -527,6 +527,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xA8, 0x285 }, { XROM_BN4_RED_SUN_US, 0x14C, 0x329 },
 	/* ... DarkBomb's bomb, its two sounds (the dark chips' 0x286 and 0x287) */
 	{ XROM_BN4_RED_SUN_US, 0xA9, 0x286 }, { XROM_BN4_RED_SUN_US, 0xBD, 0x287 },
+	/* ... BugCurse's curse (0x288) */
+	{ XROM_BN4_RED_SUN_US, 0x141, 0x288 },
 };
 
 int xsong_sound_slot(int xrom, int song) {

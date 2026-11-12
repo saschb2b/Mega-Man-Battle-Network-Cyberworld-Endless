@@ -170,7 +170,7 @@ static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t
 		/* (one of BN6's routines, of the moved objects' or its region's stubs, or the second-level dispatch's spawner where it
 		 * calls one of its game's; a chip's unit, a routine of a Navi's copy of a type it runs as theirs: never another) */
 		uint32_t spawner = xvirus_dispatch_spawner(f->game, c->from);
-		bool stub = c->to >= r->stubs && c->to < r->stubs_end;
+		bool stub = (c->to >= r->stubs && c->to < r->stubs_end) || (c->to >= r->stubs2 && c->to < r->stubs2_end);
 		/* (a chip unit of BN4's: the page's spawner for a third-kind one, xvirus_dispatch.h) */
 		bool page = spawner && f->game == XROM_BN4_RED_SUN_US && c->to == xvirus_dispatch4_spawner(c->from);
 		if ((c->to & 1) || (spawner ? c->to != spawner && !page : !stub && !bn6_routine(c->to | 1) && !objects_routine(c->to | 1) && !xvirus_bn4_copy_routine(c->to | 1) &&
