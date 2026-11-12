@@ -231,6 +231,10 @@ class Bn4Canon:
         self.chip_effects = {int(b, 16): int(a, 16) for row in re.findall(r'XvId \w+_effects\[\] = \{(.*?)\};', open(chips).read() if os.path.exists(chips) else '', flags=re.S)
                              for a, b in re.findall(r'\{ 0x([0-9A-F]{2}), 0x([0-9A-F]{2}) \}', row)}
         self.moved1_sprites = sprite_numbers_of([os.path.join('src', 'emu', 'xnavi_bn4.c')])
+        # (BN4's Navi chips' units, src/emu/xchips_bn4.c's XCHIP_NAVI rows: BN4's subfamily -> the unit's number in BN6's grown
+        # Navi routines; each one's object's type in BN4, read from its routine: navi_object_types)
+        self.navi_units = {int(a, 16): int(b, 16) for a, b in re.findall(r'\{ XCHIP_NAVI, 0x([0-9A-F]{2}), 0x([0-9A-F]{2}),', open(chips).read() if os.path.exists(chips) else '')}
+        self.navi_types, self.navi_rule = None, bool(bn4_rule('navi_chips'))
 
     def nid(self, game, v):
         return self.ids.get(v, self.canon.nid(game, v)) if game == 4 else self.canon.nid(game, v)
@@ -255,6 +259,8 @@ class Bn4Canon:
         """a fourth-kind type as BN4 numbers it: BN6's dispatched one, its side-table number, read back as BN4's own where a
         recipe moved it (bn4_moved_types' kind 4: SearchMan's scope 0x2E and his marker 0x3E, Roll's flash 0x17); BN4's as it is"""
         v = o.o8(OBJ_TYPE)
+        if game == 4 and self.navi_units and self.navi_rule and v in navi_object_types(self):
+            return NAVI_OBJECT6   # (a moved Navi chip's object, BN6's one Navi chip object's part: legit.json's bn4 navi_chips)
         return self.moved_types.get((4, v), v) if game == 6 and o.moved else v
 
     def t1_moved(self, game, o):
@@ -308,9 +314,10 @@ def moved_families():
     return MOVED_FAMILIES
 
 
-def bn4_as_bn6(rec, fams):
+def bn4_as_bn6(rec, fams, navi_family=None):
     """an object's record (a T1's, from its node) with BN4's numbers as BN6's: its type, its CurAction and the one its
-    saved state word keeps; MegaMan's action a chip's family where it is one both games pair (PLAYER_FAMILY)"""
+    saved state word keeps; MegaMan's action a chip's family where it is one both games pair (PLAYER_FAMILY), BN4's support
+    state BN6's Navi family where the chip he uses is a Navi chip's row (`navi_family`: legit.json's bn4 navi_chips)"""
     types = {f['type'] for f in fams}
     if rec[NODE + OBJ_TYPE] in types:
         rec[NODE + OBJ_TYPE] = 0
@@ -321,6 +328,8 @@ def bn4_as_bn6(rec, fams):
             rec[NODE + at] = moved[rec[NODE + at]]
         elif megaman and rec[NODE + at] in PLAYER_FAMILY:
             rec[NODE + at] = PLAYER_FAMILY[rec[NODE + at]]
+            if navi_family and rec[NODE + at] == PLAYER_FAMILY[SUPPORT_STATE4]:
+                rec[NODE + at] = navi_family
         elif rec[NODE + at] >= 6:
             rec[NODE + at] += 2
     return rec
@@ -332,6 +341,9 @@ CHIP_RECORDS, CHIP_RECORD_SIZE, CHIP_SUBFAMILY, BN6_CHIPS = {4: 0x197EC, 6: 0x21
 XREG4_ROW = re.compile(r'\{\s*(\d+),\s*(\d+),\s*XREG_\w+,')
 XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-Fa-f]{2}),')
 XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
+XREG4_MOVED_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*([1-9]\d*),')
+SUPPORT_STATE4, CHIP_FAMILY = 0x0C, 0x0B   # (BN4's support state, its Navi chips' too: bn4_chips.h; a record's family, +0xB)
+MOVED_FAMILY = {}   # (the run's id of a moved row that names a twin for its family, a Navi chip's: the twin, chip_ids)
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
 OBJ_ELEMENT4, OBJ_ELEMENT6 = 0x17, 0x0E   # (a fourth-kind object's element: bn4.h BN4_T1_ELEMENT, BN6's BN6_T1_ELEMENT)
@@ -353,9 +365,82 @@ def chip_ids(spec):
     # (a row whose code is moved, XREG_MOVED: no twin, its subfamily its unit's number in BN6's grown support routines)
     # (... or, from XC4_FIRST_ATTACK, its family's number in BN6's grown attack families: its subfamily BN4's own, attack_families)
     TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)})
+    # (... and one that names a twin for its family alone: a Navi chip's row, BN6's Navi family: legit.json's bn4 navi_chips)
+    MOVED_FAMILY.clear()
+    MOVED_FAMILY.update({int(to): int(twin) for to, twin in XREG4_MOVED_TWIN.findall(rows)})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
+
+
+NAVI_OBJECT6 = 0x10   # (BN6's Navi chip object, the fourth kind's: bn6_chips.h BN6_T4_CHIP_NAVI)
+OBJ_NAVI_SUB6 = 0x19  # (... its subfamily's copy, BN6_CHIP_NAVI_SUB)
+
+
+def navi_object_types(canon):
+    """{BN4's fourth-kind type: the unit's number} of the objects BN4's moved Navi chips' routines spawn (each routine of
+    BN4's support table the common spawner, support_spawners: the type its movs names), read from BN4's ROM once"""
+    if canon.navi_types is None:
+        table = SUPPORT_TABLES[4][0]
+        w32 = lambda a: int.from_bytes(canon.roms[4][a - 0x08000000:a - 0x08000000 + 4], 'little')
+        canon.navi_types = {}
+        for sub, number in canon.navi_units.items():
+            a = (w32(table + 4 * sub) & ~1) - 0x08000000
+            kind = canon.roms[4][a + 4]   # (push {lr}; push {r0,r1,r2,r5}; movs r0, #kind)
+            if sub in support_spawners_all(canon.roms, 4, kind):
+                canon.navi_types[kind] = number
+    return canon.navi_types
+
+
+def support_spawners_all(roms, game, kind):
+    """the support subfamilies whose routine is the spawner of the type `kind`, whether or not its code loads its +0x3C"""
+    import xrecipe_thumb as T
+    rom = T.Rom(roms[game], f'bn{game}')
+    table, count, spawn, _ = SUPPORT_TABLES[game]
+    w32 = lambda a: int.from_bytes(roms[game][a - 0x08000000:a - 0x08000000 + 4], 'little')
+    out = set()
+    for sub in range(count):
+        a = w32(table + 4 * sub) & ~1
+        ins = [i for _, i in sorted(T.walk(rom, a, 0x40).insns.items())]
+        if [i.text for i in ins[:3]] == ['push {lr}', 'push {r0, r1, r2, r5}', f'movs r0, #{kind:#x}'] and [i.target for i in ins if i.form == 'bl'][:1] == [spawn]:
+            out.add(sub)
+    return out
+
+
+def navi_object_as_bn6(rec, canon):
+    """a BN4 Navi chip's object's record (its type one of navi_object_types) as BN6's Navi chip object holds it: its type,
+    its element at BN6's place, the spawn's r3 the unit's number where BN4's is its routine's own address (bx r3), and that
+    number's copy at BN6's +0x19 (legit.json's bn4 navi_chips)"""
+    number = navi_object_types(canon).get(rec[NODE + OBJ_TYPE])
+    if number is None:
+        return
+    rec[NODE + OBJ_TYPE] = NAVI_OBJECT6
+    if rec[NODE + OBJ_ELEMENT6] == 0:
+        rec[NODE + OBJ_ELEMENT6], rec[NODE + OBJ_ELEMENT4] = rec[NODE + OBJ_ELEMENT4], 0
+    r3 = int.from_bytes(rec[NODE + OBJ_SPAWN_R3:NODE + OBJ_SPAWN_R3 + 4], 'little')
+    table = SUPPORT_TABLES[4][0]
+    w32 = lambda a: int.from_bytes(canon.roms[4][a - 0x08000000:a - 0x08000000 + 4], 'little')
+    if any(w32(table + 4 * sub) == r3 for sub, n in canon.navi_units.items() if n == number):
+        rec[NODE + OBJ_SPAWN_R3:NODE + OBJ_SPAWN_R3 + 4] = number.to_bytes(4, 'little')
+        if rec[NODE + OBJ_NAVI_SUB6] == 0:
+            rec[NODE + OBJ_NAVI_SUB6] = number
+    chip = rec[NODE + OBJ_SPAWN_CHIP] | rec[NODE + OBJ_SPAWN_CHIP + 1] << 8
+    if chip in canon.chips and canon.chips[chip] in MOVED_FAMILY:
+        rec[NODE + OBJ_SPAWN_CHIP:NODE + OBJ_SPAWN_CHIP + 2] = canon.chips[chip].to_bytes(2, 'little')
+
+
+def navi_family(o, canon):
+    """BN6's family of the chip MegaMan's attack uses where its row is a Navi chip's (a moved row that names a twin for its
+    family: legit.json's bn4 navi_chips), else None: his AI data's chip (chip_id's place), the twin's record's family"""
+    rule = getattr(canon, 'chip_rule', None)
+    ai = getattr(o, 'ai', None)
+    if not rule or ai is None or not MOVED_FAMILY or not canon.chip_rule.get('navi_chips'):
+        return None
+    for at in rule['places']:
+        twin = MOVED_FAMILY.get(canon.chips.get(ai[at] | ai[at + 1] << 8))
+        if twin:
+            return canon.roms[6][CHIP_RECORDS[6] + twin * CHIP_RECORD_SIZE + CHIP_FAMILY]
+    return None
 
 
 def megaman_chip_as_bn6(ai, canon):
@@ -751,7 +836,7 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         at = NODE + OBJ_NAME_ID
         rec[at:at + 2] = canon.nid(game, rec[at] | rec[at + 1] << 8).to_bytes(2, 'little')
         if game == 4 and fams is not None:
-            rec = bn4_as_bn6(rec, fams)
+            rec = bn4_as_bn6(rec, fams, navi_family(o, canon))
     elif moved1 and game == 4:
         # (a moved first-kind object's own code reads its record: no enemy id, no CurAction; its spawn's word at +4 its sprite's
         # list offset and number, BN4's list 4 number read as the recipe's copy: FireMan's companion, xnavi_bn4.c)
@@ -766,8 +851,10 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
     if game == 6 and moved and o.moved:   # (a dispatched object's type, its side-table number, as BN4's own: bn4_moved_types)
         rec[NODE + OBJ_TYPE] = moved.get((int(o.kind[1]), rec[NODE + OBJ_TYPE]), rec[NODE + OBJ_TYPE])
     if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
-        support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
-    if game == 4 and fams is not None and o.kind == 'T4' and getattr(canon, 'chip_rule', None):
+        if canon.chip_rule.get('navi_chips') and getattr(canon, 'navi_units', None) and rec[NODE + OBJ_TYPE] in navi_object_types(canon):
+            navi_object_as_bn6(rec, canon)   # (a moved Navi chip's object as BN6's Navi chip object: legit.json's bn4 navi_chips)
+        else:
+            support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
         object_element_as_bn6(rec)   # (a chip unit's own object's element at BN6's place: legit.json's bn4 object_element)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
@@ -929,6 +1016,7 @@ SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its 
 
 SPEC_SUBJECT = set()   # (the spec's subject, where it names one: bn6_sounds_alone)
 SPEC_CHIPS = set()     # (the spec's chips, BN4's ids of its folder4: a sound row of a chip unit's, its "chips", holds in their specs alone)
+SPEC_NAVI_CHIPS = set()   # (the run's ids of the moved Navi chips the spec's folder plays, MOVED_FAMILY's: bn4_sounds; compare sets it)
 
 
 def bn4_sounds():
@@ -939,10 +1027,11 @@ def bn4_sounds():
     rows = [r for r in shards.load('legit').get('bn4', {}).get('sounds', []) if 'bn4' in r]
     # (... and a row naming "chips", BN4's ids: a chip unit's copy of a number another row pairs otherwise, Thunder's ball's
     # 0xAD, in the specs whose folder holds one of them alone, over the others)
-    scoped = lambda r: 2 if 'chips' in r else 1 if 'foes' in r else 0
+    # (a row naming "navi_chips", a moved Navi chip's own Navi's sound: in a spec whose folder plays such a chip, over the rest)
+    scoped = lambda r: 4 if r.get('navi_chips') else 2 if 'chips' in r else 1 if 'foes' in r else 0
     mine = lambda r: bool(SPEC_CHIPS & {int(x, 0) for x in r['chips']}) if 'chips' in r else bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
     return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
-            for r in sorted(rows, key=scoped) if not scoped(r) or mine(r)}
+            for r in sorted(rows, key=scoped) if (bool(SPEC_NAVI_CHIPS) if r.get('navi_chips') else not scoped(r) or mine(r))}
 
 
 def bn6_sounds_alone():
@@ -1681,6 +1770,9 @@ def compare(spec, ta, tb, canon, show=6):
     lag = allowed_lag(spec) if against else 0
     SPEC_SUBJECT.clear()
     SPEC_SUBJECT.update({spec['subject']} if spec.get('subject') else ())
+    SPEC_NAVI_CHIPS.clear()
+    SPEC_NAVI_CHIPS.update(v for v in chip_ids(spec).values() if v in MOVED_FAMILY and
+                           any((int(e.split(':')[0], 16) if ':' in e else int(e, 16) & 0x1FF) == v for e in spec.get('folder6', [])))
     SPEC_FOES.clear()
     SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
     SPEC_CHIPS.clear()
@@ -1986,6 +2078,7 @@ def one(name, spec, a, canon, run_xdiff, work):
             rule = canon.chip_rule
             canon.chip_rule = dict({k: [int(x, 0) for x in rule[k]] for k in ('places', 'subfamily')},
                                    record=[(int(a, 0), int(r, 0), n) for a, r, n in rule.get('record', [])])   # (each game's own art read where a record follows it: own_animation)
+            canon.chip_rule['navi_chips'] = bool(bn4_rule('navi_chips'))   # (a Navi chip's row's family: navi_family)
     for tr in (ta, tb):
         assign_roles(tr, canon)
     if not control:

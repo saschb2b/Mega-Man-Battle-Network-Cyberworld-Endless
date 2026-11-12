@@ -96,6 +96,8 @@ src/emu/xchips_install.c -> dev/devtools.h
 src/emu/xinstall_log.c -> dev/devtools.h
 src/emu/xnavi_bn4_art.c -> audio/xsong.h
 src/emu/xnavi_bn4_art.c -> layer/xnavi.h
+src/emu/xnavi_bn4_chip.c -> audio/xsong.h
+src/emu/xnavi_bn4_chip.c -> layer/xnavi.h
 src/emu/xnavi_bn4_room.c -> layer/xnavi.h
 src/emu/xnavi_bn4_sounds.c -> audio/xsong.h
 src/emu/xnavi_install.c -> audio/xsong.h

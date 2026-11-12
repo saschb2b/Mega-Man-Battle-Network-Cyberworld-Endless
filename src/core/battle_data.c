@@ -4,6 +4,7 @@
 
 #include <string.h>
 
+#include "run.h"
 #include "save.h"
 #include "save_blob.h"
 
@@ -28,7 +29,18 @@ static int fold(const DataTally *t) {
 	return completed;
 }
 
-void battle_data_save(void) { save_write_blob("run.data", DATA_MAGIC, &T, sizeof T); }
+/* (the tally is the run's: begun again where it was another's, or none's:
+ * a start that names no new run, a dev scene's, still counts for its run) */
+static void mine(void) {
+	if (T.seed == run.seed) return;
+	memset(&T, 0, sizeof T);
+	T.seed = run.seed;
+}
+
+void battle_data_save(void) {
+	if (run.active) mine();
+	save_write_blob("run.data", DATA_MAGIC, &T, sizeof T);
+}
 
 void battle_data_begin(uint32_t seed) {
 	DataTally left;
@@ -52,6 +64,7 @@ void battle_data_load(uint32_t seed) {
 
 void battle_data_deleted(int family, int version) {
 	if (!known(family) || version < 0 || version >= DATA_VERSIONS) return;
+	mine();
 	T.count[family] = (uint8_t)sum255(T.count[family], 1);
 	T.versions[family] |= (uint8_t)(1u << version);
 }

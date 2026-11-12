@@ -1,9 +1,9 @@
 /* The Battle Lab's keeper in Lan's HP (docs/game/battle-lab.md, How it is
- * earned, Where it lives): a Mr.Prog of Dad's lab, there once the profile
- * has it (or --dev lab says so). Talked to, he says his lines (his first
- * once a profile, lab_words.c) and the builder opens over the held game
- * as the chat box closes (lab.h). His course at home, beside the gate's
- * (director_gate.h). */
+ * earned, Where it lives): a Navi of Dad's lab, there once the profile
+ * has it (or --dev lab says so). Talked to, the keeper says a few lines
+ * (the first talk's once a profile, lab_words.c) and the builder opens
+ * over the held game as the chat box closes (lab.h). The keeper's course
+ * at home, beside the gate's (director_gate.h). */
 #ifndef CW_LAB_KEEPER_H
 #define CW_LAB_KEEPER_H
 

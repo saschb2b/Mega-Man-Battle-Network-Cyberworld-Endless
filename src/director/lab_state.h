@@ -9,7 +9,7 @@
 #include "lab.h"
 #include "lab_battle.h"
 
-enum { LAB_PAGE_FOES, LAB_PAGE_FIELD, LAB_PAGE_STAGE, LAB_PAGES };
+enum { LAB_PAGE_FOES, LAB_PAGE_FIELD, LAB_PAGE_STAGE, LAB_PAGE_SETS, LAB_PAGES };
 /* where the cursor is: the page's list, the field's panels, the button */
 enum { LAB_AT_LIST, LAB_AT_FIELD, LAB_AT_GO };
 #define LAB_ROSTER 128       /* families listed at most */
