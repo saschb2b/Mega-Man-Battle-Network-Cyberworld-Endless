@@ -36,6 +36,8 @@
 #define BN6_AI_NAVI_STATE     0x80        /* 0x20 bytes a Navi's own state before its attack's variables, its decision's sub-state first
                                            * (BN6's HeatMan's decision reads it there; the take lays it out, BN6_AI_TAKE); BN4's Soul Navis'
                                            * BN4_AI_NAVI, 12 bytes (bn4_navis.h; docs/multirom/bn4-navis.md, GutsMan built) */
+#define BN6_AI_SYNCHRO        0x5C        /* u32 a player's AI data: Full Synchro's aura, the object kept while it shows (0x080139C4: where his
+                                           * emotion is 2 and it holds none, the aura spawned into it, the first kind's 0x5E, 0x080C6482) */
 #define BN6_AI_SPARE          0xF0        /* the 16 bytes past the attack's variables (+0xA0 to +0xEF), which the take never lays out (its
                                            * three spans, BN6_AI_TAKE): BN4's trace keeps there what BN6 has no place for (xdiff_bn4_trace.c) */
 #define BN6_AI_SPARE_LAST     0xFC        /* ... its last word, where BN4's trace keeps BN4's charge-time cache (BN4_AI_CHARGE_TIMES) */

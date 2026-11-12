@@ -791,7 +791,7 @@ def main():
     if a.mutations:
         muts = shards.load('mutations')['mutations']   # (tests/xdiff/mutations/, a file a spec; numbered in the files' order)
         items = [(k, m['spec'], m.get('poke', []), m.get('call', []), f'mutation{k + 1}',
-                  {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak') if key in m} or None) for k, m in enumerate(muts)]
+                  {key: m[key] for key in ('unitebreak', 'poke5', 'soulbreak', 'confuse6', 'mood4') if key in m} or None) for k, m in enumerate(muts)]
         # (with specs named, their mutations alone, by their numbers in the file)
         items = [it for it in items if not a.specs or it[1] in a.specs]
 

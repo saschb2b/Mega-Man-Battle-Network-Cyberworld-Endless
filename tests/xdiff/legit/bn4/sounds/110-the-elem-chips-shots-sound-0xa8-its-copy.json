@@ -1,0 +1,14 @@
+{
+ "bn4": "0xA8",
+ "bn6": "0x285",
+ "clock": "state",
+ "chips": [
+  "0x19",
+  "0x1A",
+  "0x7E",
+  "0x80",
+  "0xD5"
+ ],
+ "what": "the Elem chips' shot's sound 0xA8, its copy",
+ "why": "Played by BN4's Elem state (0x60) as its shot leaves, one call (0x080EE394) whose r0 is 0xA8 where the state's +0xF lacks 4 and 0x14C where it holds it: BN6's copy of the call aimed at a shim of the unit's home that adds 0x1DD to r0 (XvSoundCall.add, tools/xchiprecipe_bn4.py SOUND_ADDS), BN4's song 0xA8 copied into slot 0x285 of BN6's grown song table (src/audio/xsong.c XSOUNDS; the dark chips' slots, docs/project/claims/bn4-dark-units.json). Neither is BN6's own song (xrecipe.song_sig)."
+}

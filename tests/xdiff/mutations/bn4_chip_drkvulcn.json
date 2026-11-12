@@ -1,0 +1,56 @@
+[
+ {
+  "name": "MegaMan confused as the fight starts",
+  "spec": "bn4_chip_drkvulcn",
+  "confuse6": 1,
+  "what": "BN6's MegaMan given BN4's confusion at the fight's start (0x2D0 frames, confuse6), which the run does not give after an attack DarkChip (the owner's call of 12 November 2026): it must part from BN4's, whose confusion calm4 ends"
+ },
+ {
+  "name": "BN4's dark mood kept",
+  "spec": "bn4_chip_drkvulcn",
+  "mood4": 0,
+  "what": "the spec without mood4: BN4's MegaMan's mood set 0 at the DarkChip's use, as BN4's own dark rule does (BN4_DARK_MOOD), so its counter at t60 gives no Full Synchro where BN6's does: it must part (Full Synchro's aura in play in BN6's alone)"
+ },
+ {
+  "name": "BN6's Full Synchro aura not spawned",
+  "spec": "bn4_chip_drkvulcn",
+  "poke": [
+   "080139F0:46C0",
+   "080139F2:46C0"
+  ],
+  "what": "BN6's call that spawns Full Synchro's aura (bl 0x080C6482 at 0x080139F0, from 0x080139C4) made two nops: BN6's MegaMan in Full Synchro with no aura where BN4's has its own (legit.json's bn4 allowed, Full Synchro's aura, never its being in play)"
+ },
+ {
+  "name": "DrkVulcn's row's power another",
+  "spec": "bn4_chip_drkvulcn",
+  "poke": [
+   "08C0675E:000A"
+  ],
+  "what": "the registry's record of BN4's DrkVulcn (601 at CHIPS_RECORDS) with power 10 where BN4's record holds 20: each shot takes 10 HP from the Mettaur where BN4's takes 20"
+ },
+ {
+  "name": "DrkVulcn's row's family another",
+  "spec": "bn4_chip_drkvulcn",
+  "poke": [
+   "08C06750:FE:1"
+  ],
+  "what": "the registry's record of BN4's DrkVulcn naming BN6's grown attack family 0xFE (the Elem chips' state) where the row gives the vulcans' 0xFD: another attack"
+ },
+ {
+  "name": "the vulcan's sound not played",
+  "spec": "bn4_chip_drkvulcn",
+  "poke": [
+   "080EC918:46C0",
+   "080EC91A:46C0"
+  ],
+  "what": "the state's copy's call that plays each shot's sound (BN4 0x080EC918, sound 0xBB at slot 0x283) made two nops: no sound as he fires"
+ },
+ {
+  "name": "the vulcan's shots further apart",
+  "spec": "bn4_chip_drkvulcn",
+  "poke": [
+   "080EC8E8:200C"
+  ],
+  "what": "the state's copy's wait between the shots (movs r0,#0xa at BN4 0x080EC8E8) made 12: each shot after the first two frames later than BN4's"
+ }
+]

@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_drkvulcn and bn4_chip_elemflar to elemdark: DrkVulcn and the five Elem chips moved, BN4's dark rules left to its own battle",
+  "result": "python3 build.py xdiff bn4_chip_drkvulcn bn4_chip_elemflar bn4_chip_elemice bn4_chip_elemleaf bn4_chip_elemsand bn4_chip_elemdark: all PASS (DrkVulcn to its deleting hit at t104, the Elem chips over 300 frames, ElemDark by a dark MegaMan against a 250 HP Mettaur), nineteen mutations caught. Full Synchro's aura (the first kind's 0x5E) compared as each engine's own object; BN4's confusion at the fight's start ended by calm4 (assumed: its source not traced); its dark mood at the DarkChip's use skipped and a dark MegaMan's start mood of 0 given the NaviStats' 0x99 by mood4 (verified in the ROM, 0x0800D5A6-0x0800D5C8, 0x0800D718). ElemDark's shot takes BN4's third-kind sprite step, copied with the unit as Ligtnin's (BN6's nearest a frame ahead).",
+  "meaning": "An attack DarkChip proves against BN4 once BN4's own dark rules, which a run does not take, are left out of BN4's battle by the spec; a counter's Full Synchro compares across both engines."
+}

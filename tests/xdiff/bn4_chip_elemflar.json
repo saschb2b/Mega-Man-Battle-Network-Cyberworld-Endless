@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's ElemFlar K (its chip 25) against the registry's row 637 (BN4's state 0x60, the Elem chips' one unit as BN6's grown attack family 0xFE, its subfamily the chip's: the panel changer copied with it, the shot's sound 0x14C at slot 0x284): picked on the first Custom screen and used at fight frame 30 against BN4's MettaurSP at (5,2), MegaMan's row: the fire chip's shot, its panels and the Mettaur's HP compared each frame.",
+ "folder4": [
+  "1419"
+ ],
+ "folder6": [
+  "27D:0A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}
