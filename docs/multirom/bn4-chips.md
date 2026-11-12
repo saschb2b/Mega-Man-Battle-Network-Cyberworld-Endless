@@ -578,8 +578,8 @@ lethal hit there would compare each engine's deletion (its sound, which
 in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
-**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
-three Plus chips are left out), then BlakBarr's barrier; Binder,
+**Next:** FirePlus, BlakBarr's barrier and BlakWeap (calls 7, 12 and
+13: the other three Plus chips and Marking are left out); Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
@@ -1592,6 +1592,25 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     the measurement before him, he answered "Leave them out", and
     confirmed it the same day (11 November 2026) when asked which of
     the two stands.
+13. **Marking is left out:** "Leave it out" (the owner, 12 November
+    2026). Asked because it does nothing in a plain battle. **Verified**
+    in BN4 Red Sun (USA, `B4WE`), two ways. By experiment, BN4's own
+    battle run alone by the differential (control specs): Marking used
+    at fight frame 30 against a Mettaur of 250 HP, and the same battle
+    without it. MegaMan takes the same hits at the same frames (200 at
+    t89, t227 and t365), LEFT and UP move him as without it, and no
+    object appears; nothing in the trace differs but his misc state for
+    a frame. By the code: its routine (`0x08022F5A`, 16 bytes) sets 600
+    at the side's record's +0x16 (`0x020374B0` + 0x1B0 a side), and the
+    player's tick (`0x08022E3C`) counts that record's timers only where
+    its first byte is not 0 (`0x08022E62`), which it is in a plain
+    battle. Where it counts, each frame gives the user's collision data
+    a status (its +0x1C 2 and flag 8, `0x0800B018`) whose tick
+    (`0x0800AF62`) spawns the mark over an object's head, the fourth
+    kind's 0x06. What sets the record's first byte, which mode of BN4's,
+    was not searched. So Marking is not moved: no unit, its row out of
+    play and its id (556) kept, as the three Plus chips of call 12.
+    Call 7 stands for FirePlus and BlakWeap.
 
 Open:
 
