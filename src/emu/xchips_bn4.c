@@ -11,6 +11,7 @@
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xchips_code.h"
 #include "xnavi_recipe.h"
 
 /* ---- PanlSht: BN4's support 0x26 (080E7A59) as BN6's 0xa6; its chips 178 (559), 179 (560), 180 (561) ---- */
@@ -2264,6 +2265,93 @@ static const XcSong elem_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 	.sound_calls = elem_sound_calls, .nsound_calls = (int)(sizeof elem_sound_calls / sizeof *elem_sound_calls), \
 	.sprites = elem_sprites, .nsprites = (int)(sizeof elem_sprites / sizeof *elem_sprites), \
 	.bytes = elem_bytes, .nbytes = (int)(sizeof elem_bytes / sizeof *elem_bytes) }
+/* ---- FirePlus: BN4's support 0x4c (080EAD2F) as BN6's 0xcc; its chips 285 (563) ---- */
+/* its fourth-kind 0x7f (080EAC98-080EAD54), which its routine (080EAD2E) spawns: moved */
+/* its fourth-kind 0x1f (080E4354-080E4584): no BN6 type of its body, moved with him */
+/* its table 080E423C's row 0x1: +0x0 0x8, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x4: +0x0 0xa, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its table 080E423C's row 0x5: +0x0 0x5, none of BN6's, left as BN4's (+0 a row's panel type: BN4's plain 2, poison 4, grass 6 and ice 7 BN6's numbers too, its holy 9 BN6's 5 (BN4_PANEL_HOLY: BN6's 5's word), its Hole 0xB the engine's 16 (XPANEL_HOLE); its 5, 8 and 0xA (rows 5, 1 and 4) BN6 has none of, rows no moved chip's parameter names (docs/rom/bn4.md, The panel changer and the Hole panel)) */
+/* its sound 0x105 (080E4394): BN4's song copied into the grown song table's slot 0x280, on BN4's player 15 */
+/* its sound 0x106 (080E43E8): BN4's song copied into the grown song table's slot 0x281, on BN4's player 14 */
+/* its sound 0x107 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x282, on BN4's player 22 */
+/* its sound 0x124 (080E447A, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x29f, on BN4's player 18 */
+/* its chip 286 (id 564) sits out: ThunPlus, left out by the owner's call 12 (docs/multirom/bn4-chips.md): no chip's damage changes, a HUD icon alone */
+/* its chip 287 (id 565) sits out: AquaPowr, left out by the owner's call 12 */
+/* its chip 288 (id 566) sits out: WoodPowr, left out by the owner's call 12 */
+
+static const XvBlock fireplus_blocks[] = {
+	{ 0x080EAC98, 0x080EAD54, XC4_CODE + 0x4820, 0x4F5D5678u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x48E0, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x4B10, 0x77CB1EA6u },
+};
+static const XvData fireplus_data[] = {
+	{ 0x080EACA6, 0x080EACA8, XV_RAW },
+	{ 0x080EACA8, 0x080EACAC, XV_POOL },
+	{ 0x080EACAC, 0x080EACB8, XV_TABLE },
+	{ 0x080EACC6, 0x080EACC8, XV_RAW },
+	{ 0x080EACC8, 0x080EACCC, XV_POOL },
+	{ 0x080EACCC, 0x080EACDC, XV_TABLE },
+	{ 0x080EAD50, 0x080EAD54, XV_POOL },
+	{ 0x080E4362, 0x080E4364, XV_RAW },
+	{ 0x080E4364, 0x080E4368, XV_POOL },
+	{ 0x080E4368, 0x080E4374, XV_TABLE },
+	{ 0x080E43B0, 0x080E43B8, XV_POOL },
+	{ 0x080E43B8, 0x080E43C8, XV_TABLE },
+	{ 0x080E423C, 0x080E4354, XV_RAW },
+};
+static const XvPair fireplus_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x08003344, XV_SPAWN_4 },   /* the dispatch's spawner */
+	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
+	{ 0x08009DC4, 0x0800CC0A },   /* project:families-2, DIFF (audited) */
+	{ 0x08009E38, 0x0800CC52 },   /* project:project:chips, DIFF (audited) */
+	{ 0x08009EAC, 0x0800CC86 },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800BFF4, XC_STUBS },   /* the user's battle data by his side (0x02035B20 + 0xC0 a side), where the object stores its four timers (+0x3C to +0x42: its element's 480, the rest 0). BN6 keeps other fields there and reads the timers nowhere (BN4's one reader is its HUD's icon, 0x08014CC0, which BN6 has none of), so the call is the stub that returns 0 and the four stores go to 0x3C-0x42, the BIOS's addresses, which take no store: the timers are not kept */
+};
+static const XvPair fireplus_words[] = {
+	{ 0x08008BD9, 0x0800B917 },   /* project:project:chips, DIFF */
+	{ 0x08008BF9, 0x0800B94D },   /* project:project:chips, SAME */
+	{ 0x08008C2B, 0x0800B9B1 },   /* project:project:chips, DIFF */
+	{ 0x08008EB9, 0x0800BC89 },   /* project:project:chips, SAME */
+	{ 0x08008EEF, 0x0800BD35 },   /* project:project:chips, DIFF */
+};
+static const XvImm fireplus_imms[] = {
+	{ 0x080E441C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E444C, THUMB_LDRB, 3, 0, 0x1, 0x3 },   /* a panel's side: BN4 +0x1, BN6 +0x3 */
+	{ 0x080E456C, THUMB_MOVS, 0, 0, 0x1F, 0x9C },   /* its object's type 0x1f: moved, the dispatch's 0x9c */
+	{ 0x080EAD32, THUMB_MOVS, 0, 0, 0x7F, 0x9D },   /* its object's type 0x7f: moved, the dispatch's 0x9d */
+	{ 0x080EAD42, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvType fireplus_types[] = {
+	{ 4, 0x9C, XV_TYPE_MOVED, 0x1F },   /* BN4's fourth-kind 0x1f, moved, the dispatch's 0x9c */
+	{ 4, 0x9D, XV_TYPE_MOVED, 0x7F },   /* BN4's fourth-kind 0x7f, moved, the dispatch's 0x9d */
+};
+static const XvByte fireplus_bytes[] = {
+	{ 0x080E42B4, 0x09, 0x05 },   /* its table's row 0x6: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42C8, 0x09, 0x05 },   /* its table's row 0x7: +0x0 0x9 in BN4, 0x5 in BN6 */
+	{ 0x080E42F0, 0x0B, 0x10 },   /* its table's row 0x9: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E4304, 0x0B, 0x10 },   /* its table's row 0xa: +0x0 0xb in BN4, 0x10 in BN6 */
+	{ 0x080E432C, 0x0B, 0x10 },   /* its table's row 0xc: +0x0 0xb in BN4, 0x10 in BN6 */
+};
+static const XvSoundCall fireplus_sound_calls[] = {
+	{ 0x080E4394, 0x280 },   /* its sound 0x105: BN4's song at the grown table's slot 0x280 */
+	{ 0x080E43E8, 0x281 },   /* its sound 0x106: BN4's song at the grown table's slot 0x281 */
+	{ 0x080E447A, 0x17B, true },   /* its sounds 0x107, 0x124: BN4's numbers plus 0x17b, their slots of the grown table (the panel changer's sound as it sets its panels (0x080E4460-0x080E447A): none for its kinds 9 and 0xA (Hole's, DrkLine's: beq past the call), 0x124 for 8 and 0xD (poison: movs r0,#0x25; adds r0,#0xff at 0x080E4476), 0x107 for the rest (movs r0,#8; adds r0,#0xff at 0x080E446A), DrkStage's Holes 0xC) */
+};
+static const XcSong fireplus_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107, 0x282 }, { 0x124, 0x29F } };
+
+#define FIREPLUS_CODE { .name = "FirePlus (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x6800), \
+	.blocks = fireplus_blocks, .nblocks = (int)(sizeof fireplus_blocks / sizeof *fireplus_blocks), \
+	.data = fireplus_data, .ndata = (int)(sizeof fireplus_data / sizeof *fireplus_data), \
+	.calls = fireplus_calls, .ncalls = (int)(sizeof fireplus_calls / sizeof *fireplus_calls), \
+	.words = fireplus_words, .nwords = (int)(sizeof fireplus_words / sizeof *fireplus_words), \
+	.imms = fireplus_imms, .nimms = (int)(sizeof fireplus_imms / sizeof *fireplus_imms), \
+	.types = fireplus_types, .ntypes = (int)(sizeof fireplus_types / sizeof *fireplus_types), \
+	.sound_calls = fireplus_sound_calls, .nsound_calls = (int)(sizeof fireplus_sound_calls / sizeof *fireplus_sound_calls), \
+	.bytes = fireplus_bytes, .nbytes = (int)(sizeof fireplus_bytes / sizeof *fireplus_bytes) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -2291,5 +2379,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_NAVI, 0x05, 0x85, 0x080B9B1D, XC4_HOMES + 0x5C00, GUTSMANCHIP_CODE, gutsmanchip_songs, (int)(sizeof gutsmanchip_songs / sizeof *gutsmanchip_songs), 2, 0 },
 	{ XCHIP_ATTACK, 0x1F, 0xFD, 0x080EC843, XC4_HOMES + 0x6000, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x60, 0xFE, 0x080EE2AF, XC4_HOMES + 0x6400, ELEM_CODE, elem_songs, (int)(sizeof elem_songs / sizeof *elem_songs), 0, 0 },
+	{ XCHIP_SUPPORT, 0x4C, 0xCC, 0x080EAD2F, XC4_HOMES + 0x6800, FIREPLUS_CODE, fireplus_songs, (int)(sizeof fireplus_songs / sizeof *fireplus_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
