@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:00:00Z
-* **Update**: game/battle-lab.md (Built: the other games' panels on FIELD, BN5's lava, sea and magnet panel and BN4's Hole as BN6's engine holds them, how a type past a field's nibble is set, the proof; BN4's types 5 and 0xA named as not in the engine).
