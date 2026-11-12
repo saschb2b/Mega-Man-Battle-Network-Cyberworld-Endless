@@ -179,7 +179,7 @@ const XChipReg4 xreg4_rows[] = {
 	{ 303,  730, XREG_MOVED,   0, 0xAA, { 0x02, 0xFF, 0xFF, 0xFF }, 2, 73 },   /* BugCurse */
 	{ 304,  731, XREG_PENDING,   0, 0xFF, { 0x11, 0xFF, 0xFF, 0xFF }, 2, 90 },   /* RedSun */
 	{ 305,  732, XREG_PENDING,   0, 0xFF, { 0x12, 0xFF, 0xFF, 0xFF }, 2, 61 },   /* SignlRed */
-	{ 308,  531, XREG_PENDING,   0, 0xFF, { 0x00, 0xFF, 0xFF, 0xFF }, 2, 87 },   /* BlakBarr */
+	{ 308,  531, XREG_RECORD, 178, 0xFF, { 0x00, 0xFF, 0xFF, 0xFF }, 2, 87 },   /* BlakBarr */
 	{ 309,  733, XREG_PENDING,   0, 0xFF, { 0x01, 0xFF, 0xFF, 0xFF }, 2, 90 },   /* BlueMoon */
 	{ 320,  605, XREG_PA,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* DarkNeo */
 	{ 321,  606, XREG_PA,   0, 0xD0, { 0x00, 0x01, 0x02, 0x1A }, 4,  5 },   /* HeatSprd */
@@ -205,6 +205,9 @@ const int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);
 /* BN4's chips that are a chip of BN6's under another spelling: BN4's id, BN6's (pair_bn4) */
 const uint16_t xreg4_alias[][2] = { { 201, 182 } };
 const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);
+/* A row on BN6's code whose first parameter BN6's routine reads otherwise: BN4's id, the parameter its record takes */
+const uint16_t xreg4_params[][2] = { { 308, 6 } };
+const int xreg4_params_count = (int)(sizeof xreg4_params / sizeof *xreg4_params);
 /* BN4's dark chips among the rows, by their id in BN6's tables: a record whose alignment is dark or a DarkChip's (xreg4_dark) */
 const uint16_t xreg4_dark_ids[] = {
 	527, 695, 696, 601, 594, 562, 697, 528, 534, 537, 543, 549, 546, 540, 702, 705,

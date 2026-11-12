@@ -98,6 +98,10 @@ extern const int xreg4_count;
 /* BN4's chips that are a chip of BN6's under another spelling (LifeAura, BN6's LifeAur): BN4's id and BN6's, no row */
 extern const uint16_t xreg4_alias[][2];
 extern const int xreg4_alias_count;
+/* A row on BN6's code (XREG_RECORD) whose first parameter BN6's routine reads otherwise than BN4's: BN4's id and the
+ * parameter its record takes (BlakBarr's barrier's kind, BN6's number of BN4's 150 HP: tools/xreg_bn4.py ROW_PARAMS) */
+extern const uint16_t xreg4_params[][2];
+extern const int xreg4_params_count;
 /* BN4's dark chips among the rows, by their id in BN6's tables (docs/game/meta/darkchips.md, the owner's call of 10 November
  * 2026): a record BN4 marks dark (its alignment, BN4_CHIP_ALIGN: played only for a dark MegaMan there) or a DarkChip
  * (BN4_CHIP_DARK); a battle one is used in costs what every dark chip's does */

@@ -364,6 +364,9 @@ SUPPORT_STATE4, CHIP_FAMILY = 0x0C, 0x0B   # (BN4's support state, its Navi chip
 MOVED_FAMILY = {}   # (the run's id of a moved row that names a twin for its family, a Navi chip's: the twin, chip_ids)
 
 TWINS = {}   # (the run's id of a registry row on BN6's code: its twin and subfamily, chip_ids)
+ROW_PARAMS = {}   # (BN4's id of a row on BN6's code whose first parameter the row gives: xreg4_params, chip_ids)
+XREG4_PARAMS = re.compile(r'xreg4_params\[\]\[2\] = \{(.*?)\};', re.S)
+CHIP_PARAM0 = 0x10   # (a record's first parameter: bn6_chips.h BN6_CHIP_PARAMS, BN4's the same place)
 OBJ_ELEMENT4, OBJ_ELEMENT6 = 0x17, 0x0E   # (a fourth-kind object's element: bn4.h BN4_T1_ELEMENT, BN6's BN6_T1_ELEMENT)
 XC4_FIRST_SUPPORT = 0x80   # (src/emu/xchips_bn4.h: a moved BN4 unit's number in BN6's grown support routines, less BN4's subfamily)
 XC4_FIRST_ATTACK = 0xD0    # (... and XC4_FIRST_ATTACK: a moved row's `sub` from here its family's number in BN6's grown attack families)
@@ -389,6 +392,10 @@ def chip_ids(spec):
     # (... and one that names a twin for its family alone: a Navi chip's row, BN6's Navi family: legit.json's bn4 navi_chips)
     MOVED_FAMILY.clear()
     MOVED_FAMILY.update({int(to): int(twin) for to, twin in XREG4_MOVED_TWIN.findall(rows)})
+    # (... and a row on BN6's code whose first parameter is the row's own, where BN6's routine reads it otherwise than BN4's)
+    ROW_PARAMS.clear()
+    m = XREG4_PARAMS.search(rows)
+    ROW_PARAMS.update({int(x): int(v) for x, v in re.findall(r'\{\s*(\d+),\s*(\d+)\s*\}', m.group(1))} if m else {})
     for e4, e6 in zip(spec.get('folder4', []), spec.get('folder6', [])):
         ids[int(e4, 16) & 0x1FF] = int(e6.split(':')[0], 16) if ':' in e6 else int(e6, 16) & 0x1FF
     return ids
@@ -494,6 +501,11 @@ def megaman_chip_as_bn6(ai, canon):
         for aat, rat, n in rule.get('record', ()) if to < BN6_CHIPS else ():
             if ai[aat:aat + n] == roms[4][r4 + rat:r4 + rat + n]:
                 ai[aat:aat + n] = roms[6][r6 + rat:r6 + rat + n]
+        # (a row on BN6's code whose first parameter the registry gives, xreg4_params: BlakBarr's barrier's kind, BN4's 3
+        # through its own table and BN6's 6 read as it is. Only that byte, only where BN4's copy is its record's own)
+        for aat, rat, n in rule.get('record', ()) if chip in ROW_PARAMS and to >= BN6_CHIPS else ():
+            if rat == CHIP_PARAM0 and ai[aat] == roms[4][r4 + rat]:
+                ai[aat] = ROW_PARAMS[chip]
         ai[at:at + 2] = to.to_bytes(2, 'little')
     return ai
 
@@ -576,6 +588,10 @@ def support_object_as_bn6(rec, canon):
     for at, rat, n in ((OBJ_SPAWN_R4, 0x10, 4), (OBJ_SPAWN_R6, 0x1A, 2), (OBJ_SPAWN_R6 + 2, 0x0A, 1)) if to < BN6_CHIPS else ():
         if rec[NODE + at:NODE + at + n] == roms[4][r4 + rat:r4 + rat + n]:
             rec[NODE + at:NODE + at + n] = roms[6][r6 + rat:r6 + rat + n]
+    # (a row on BN6's code whose first parameter the registry gives, xreg4_params: the spawn's copy of it, +4's first byte,
+    # only where BN4's is its record's own)
+    if chip in ROW_PARAMS and to >= BN6_CHIPS and rec[NODE + OBJ_SPAWN_R4] == roms[4][r4 + CHIP_PARAM0]:
+        rec[NODE + OBJ_SPAWN_R4] = ROW_PARAMS[chip]
 
 
 ELEMENT_OBJECTS = {}

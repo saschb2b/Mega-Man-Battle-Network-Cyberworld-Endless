@@ -47,7 +47,12 @@ ALIGN, ALIGN_DARK, FLAGS, FLAG_DARK = 0x15, 2, 9, 0x20
 # family, lock-on and lock-on type its record takes, the subfamily or None for the twin's)
 ON_BN6 = {
     133: (177, None),   # Invis: BN4's support 0x31, BN6's subfamily 1 (Invisibl's), the same frames in its parameters (chip_invis)
+    308: (178, None),   # BlakBarr: BN4's support 0x15, BN6's subfamily 4 (Barrier's), its barrier's kind BN6's number (ROW_PARAMS)
 }
+# A row on BN6's code whose first parameter BN6's routine reads otherwise than BN4's: BN4's id -> the parameter its record
+# takes. BlakBarr's is its barrier's kind: BN4's routine maps its parameter 3 to its kind 4 (0x080E57D0), 150 HP for good,
+# which is BN6's kind 6 (BN4_BARRIER_KINDS, BN6_BARRIER_KINDS), and BN6's routine takes the parameter as the kind
+ROW_PARAMS = {308: 6}
 # BN4's chips whose code is moved into BN6's engine as a unit (tools/xchiprecipe_bn4.py UNITS, src/emu/xchips_bn4.c), each
 # proved by its bn4_chip_* spec against BN4's own battle before it is listed: BN4's id -> the unit's number in BN6's grown
 # support routines (XC_SUPPORT: 0x80 + BN4's subfamily), which its record takes under BN6's support family, or for a chip
@@ -273,6 +278,9 @@ def text(rws):
     L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')
     L.append('const uint16_t xreg4_alias[][2] = { ' + ', '.join(f'{{ {a}, {b} }}' for a, b in sorted(ALIAS.items())) + ' };\n')
     L.append('const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);\n')
+    L.append('/* A row on BN6\'s code whose first parameter BN6\'s routine reads otherwise: BN4\'s id, the parameter its record takes */\n')
+    L.append('const uint16_t xreg4_params[][2] = { ' + ', '.join(f'{{ {a}, {b} }}' for a, b in sorted(ROW_PARAMS.items())) + ' };\n')
+    L.append('const int xreg4_params_count = (int)(sizeof xreg4_params / sizeof *xreg4_params);\n')
     L.append('/* BN4\'s dark chips among the rows, by their id in BN6\'s tables: a record whose alignment is dark or a DarkChip\'s (xreg4_dark) */\n')
     dark = [to for x, to, how, rec, nm in rws if rec[ALIGN] == ALIGN_DARK or rec[FLAGS] & FLAG_DARK]
     L.append('const uint16_t xreg4_dark_ids[] = {\n' + ''.join('\t' + ', '.join(str(d) for d in dark[i:i + 16]) + ',\n' for i in range(0, len(dark), 16)) + '};\n')
