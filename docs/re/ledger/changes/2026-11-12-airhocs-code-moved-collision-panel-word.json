@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "AirHoc's code moved (BN4's air hockey state 0x27 as BN6's grown attack family 0xFB; docs/rom/bn4.md, the collision data's panel as one word): the puck's move test's unaligned word load given a call-in to XC4_COLL_PANEL_WORD, the bounce's panel side read through a copy of the panel, MegaMan's strike animation 0x10 as BN6's 0x0C."
+}

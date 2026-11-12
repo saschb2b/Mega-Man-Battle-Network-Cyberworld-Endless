@@ -442,6 +442,24 @@ bool xchips_bn4_moved(int id) {
 	return r && r->how == XREG_MOVED;
 }
 
+/* XC4_COLL_PANEL_WORD (the project's own Thumb, xchips_bn4.h): r0 the word BN4's collision data keeps at +8, from BN6's +0xA
+ * and +0xC; push and pop r1 around it */
+static void coll_panel_word_stage(void) {
+	static const uint16_t code[] = {
+		0xB402,   /* push {r1} */
+		0x6D68,   /* ldr r0, [r5, #0x54]: its collision data */
+		0x8941,   /* ldrh r1, [r0, #0xa]: its panel's column and row */
+		0x8980,   /* ldrh r0, [r0, #0xc]: its panel's byte and its counter time */
+		0x0400,   /* lsls r0, r0, #16 */
+		0x4308,   /* orrs r0, r1 */
+		0xBC02,   /* pop {r1} */
+		0x46F7,   /* mov pc, lr */
+	};
+	_Static_assert(XC4_COLL_PANEL_WORD + sizeof code <= FREE_BN4_CHIP_STUBS_END, "the panel word's room");   /* (its fields: tests/test_core.c) */
+	uint8_t *p = xv_put(XC4_COLL_PANEL_WORD, sizeof code, true);
+	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
+}
+
 /* XC4_FIRST_ACTOR (the project's own Thumb, xchips_bn4.h): r0 the side; its four actors' words from BN6's battle state
  * (the toolkit's +0x18) at BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, the first that is one in r0, else 0;
  * mov pc,lr as the stubs */
@@ -465,6 +483,12 @@ static void first_actor_stage(void) {
 	_Static_assert(sizeof code <= FREE_BN4_CHIP_STUBS_END - FREE_BN4_CHIP_STUBS, "the first actor's room");   /* (its numbers: tests/test_core.c) */
 	uint8_t *p = xv_put(XC4_FIRST_ACTOR, sizeof code, true);
 	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
+}
+
+/* the chips' own routines (FREE_BN4_CHIP_STUBS) staged */
+static void stubs4_stage(void) {
+	first_actor_stage();
+	if (!xv_failed()) coll_panel_word_stage();
 }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
@@ -506,7 +530,7 @@ static bool units4_install(bool navis) {
 	}
 	xv_tx_begin();
 	bool fresh = !navis && tables_stage();
-	if (!navis && !xv_failed()) first_actor_stage();
+	if (!navis && !xv_failed()) stubs4_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
 	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
 	if (!navis && !xv_failed()) xg_page4_stage();

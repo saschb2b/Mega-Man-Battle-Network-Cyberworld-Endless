@@ -102,6 +102,8 @@
 #include "xprograms.h"
 #include "bn6.h"
 #include "bn6_forms.h"
+#include "bn6_panels.h"
+#include "bn4.h"
 #include "darkinvs_room.h"
 #include "xpanels.h"
 #include "visitor_families.h"
@@ -5424,6 +5426,10 @@ static void test_chip_art_room(void) {
 	/* (XC4_FIRST_ACTOR's numbers, xchips_code.c first_actor_stage: a side's four words from the battle state's +0xD0, 0x10 a side) */
 	CHECK(BN6_BATTLE_PLAYERS - BN6_BATTLE_STATE == 0xD0 && BN6_BATTLE_PLAYER_STEP == 0x10 && BN6_BATTLE_PLAYER_SLOTS == 4 &&
 		XC4_FIRST_ACTOR == FREE_BN4_CHIP_STUBS, "chips' code: the first actor's routine reads BN6's battle state's actors as laid out");
+	/* (XC4_COLL_PANEL_WORD's: BN4's collision data's +8 to +0xB, BN6's +0xA to +0xD, field for field) */
+	CHECK(BN4_COLL_PANEL_X == 8 && BN6_COLL_PANEL_X == 0xA && BN6_COLL_PANEL_Y == 0xB && BN4_COLL_PANEL_BYTE == 0xA && BN6_COLL_PANEL_BYTE == 0xC &&
+		BN4_COLL_COUNTER == 0xB && BN6_COLL_COUNTER == 0xD && XC4_COLL_PANEL_WORD >= XC4_FIRST_ACTOR + 0x1C,
+		"chips' code: the panel word's routine reads BN6's collision data's fields as BN4's word lays them out");
 	char why[160] = "";
 	int rows = 0;
 	for (int u = 0; u < xchips_bn4_count; ++u) {

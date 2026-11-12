@@ -1,0 +1,6 @@
+{
+ "why": "A fourth-kind object of a chip unit's own whose sprite its spawn names, the spawn's r4 copied to its +4 (the sprite list's offset, list x 4) and +5 (the number), its own init loading that sprite: the recipe copies the sprite into BN6's art and gives the word that makes r4 the copy's number (tools/xchiprecipe_bn4.py SPAWN_WORD_SPRITES, a number of the unit's pools), so BN6's +5 holds the copy's number where BN4's holds its own. Read back as the copy's, by the unit's XvSprite rows (src/emu/xchips_bn4.c), for the types named here alone; +4, the list, is compared as it is. By type, each with its spawn and its load.",
+ "T4": {
+  "0x28": "AirHoc's puck's spark: the puck spawns it with r4 0x1210 (BN4 0x080D2AE6, the pool word 0x080D2B04: list 4, number 0x12), its init loads the sprite +4 and +5 name (0x080E4F8C); its copy's word 0x9610, the copy BN6's 4:0x96 (src/emu/xchips_bn4.c airhoc_numbers, airhoc_sprites). bn4_pa_pithoky1 at t37: +5 0x12 in BN4's, 0x96 in BN6's"
+ }
+}

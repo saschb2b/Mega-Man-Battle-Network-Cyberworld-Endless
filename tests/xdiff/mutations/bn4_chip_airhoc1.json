@@ -1,0 +1,44 @@
+[
+ {
+  "name": "the puck's move test reads BN4's collision word",
+  "spec": "bn4_chip_airhoc1",
+  "poke": [
+   "080D288C:6D68:2",
+   "080D288E:6880:2"
+  ],
+  "what": "the call-in at 0x080D288C (XvCallIn, to XC4_COLL_PANEL_WORD) given back BN4's ldr r0,[r5,#0x54]; ldr r0,[r0,#8]: BN6's collision data holds the panel at +0xA, so the word read is another and the puck's move test (0x080D2890) goes otherwise"
+ },
+ {
+  "name": "the collision word's routine reads BN4's offsets",
+  "spec": "bn4_chip_airhoc1",
+  "poke": [
+   "08F10024:8901:2"
+  ],
+  "what": "the run's own routine for the collision data's panel word (XC4_COLL_PANEL_WORD, FREE_BN4_CHIP_STUBS + 0x20) made ldrh r1,[r0,#8] where it reads BN6's +0xA: the puck's column taken from another field"
+ },
+ {
+  "name": "the bounce reads BN4's panel side",
+  "spec": "bn4_chip_airhoc1",
+  "poke": [
+   "080D2A54:7861:2"
+  ],
+  "what": "the bounce's side read through r4 (0x080D2A54, the generator's panel side patch, BN6's +3) given back BN4's +1, which BN6's panel holds as 0: the puck stops at its first bounce on the Mettaur's side where BN4's goes on (t40)"
+ },
+ {
+  "name": "MegaMan's strike animation BN4's number",
+  "spec": "bn4_chip_airhoc1",
+  "poke": [
+   "080ECED4:2010:2"
+  ],
+  "what": "the state's store of MegaMan's animation (0x080ECED4, the recipe's immediate 0x0C) given back BN4's 0x10, another animation in BN6's art (frames of 2, 1, 1 and 2, not 2, 2, 2 and 10)"
+ },
+ {
+  "name": "the puck's launch sound not played",
+  "spec": "bn4_chip_airhoc1",
+  "poke": [
+   "080D282C:46C0:2",
+   "080D282E:46C0:2"
+  ],
+  "what": "the puck's copy's call that plays its launch (BN4 0x080D282C, 0xC0 at slot 0x289 through its shim) made two nops: no sound as the puck sets off"
+ }
+]
