@@ -6887,7 +6887,7 @@ static void test_analytics(void) {
 	analytics_run_choices(false, 3, &econ);
 	CHECK(stats_posts == 7 && strstr(stats_sent[6], "\"name\":\"run-choices\",\"data\":{\"won\":false,\"layer\":7,\"net\":\"short\",\"threat\":2,\"trips\":3,"
 		"\"jobs\":2,\"kept\":1,\"vows\":1,\"orders\":1,\"skips\":1,\"undernet\":1,\"dark\":1,\"duels\":1,\"duelswon\":1,\"netbattles\":1,"
-		"\"netbattleswon\":1,\"edits\":1,\"battlers\":1,\"fighton\":1,\"cashed\":1,\"mapseconds\":754,\"battleseconds\":321}"),
+		"\"netbattleswon\":1,\"edits\":1,\"battlers\":1,\"fighton\":1,\"cashed\":1,\"labs\":1,\"mapseconds\":754,\"battleseconds\":321}"),
 		"statistics: run-choices counts what the run chose, the seconds on the map and in battle (%s)", stats_sent[6]);
 	analytics_run_choices(true, 0, NULL);
 	CHECK(stats_posts == 7, "statistics: no counts, no run-choices");
@@ -7623,7 +7623,9 @@ static void test_area_views(void) {
  * run left without its end is counted as the next begins. */
 static void test_battle_data(void) {
 	Profile keep = profile;
+	Run run_keep = run;
 	memset(&profile, 0, sizeof profile);
+	run.seed = 11;
 	battle_data_begin(11);
 	for (int i = 0; i < DATA_COMPLETE - 1; ++i) battle_data_deleted(1, 0);
 	battle_data_deleted(40, 4);
@@ -7640,6 +7642,7 @@ static void test_battle_data(void) {
 	battle_data_save();
 	battle_data_deleted(1, 1);
 	battle_data_deleted(1, 1);
+	run.seed = 11;
 	battle_data_load(11);
 	CHECK(battle_data_count(1) == DATA_COMPLETE && battle_data_versions(1) == 5, "battle data: a CONTINUE counts from its checkpoint (%d)", battle_data_count(1));
 	int completed = battle_data_run_end();
@@ -7647,23 +7650,58 @@ static void test_battle_data(void) {
 		"battle data: the run's end puts its tally in the profile, %d families completed", completed);
 	CHECK(battle_data_count(1) == DATA_COMPLETE && !battle_data_run_end() && profile.data_count[1] == DATA_COMPLETE, "battle data: counted once, the tally gone with the run");
 	/* (a run left without its end: its checkpoint's tally joins the profile as the next run begins, once) */
+	run.seed = 12;
 	battle_data_begin(12);
 	for (int i = 0; i < 3; ++i) battle_data_deleted(40, 0);
 	battle_data_save();
 	battle_data_deleted(40, 0);
+	run.seed = 13;
 	battle_data_begin(13);
 	CHECK(profile.data_count[40] == 4 && profile.data_versions[40] == 0x11 && battle_data_count(40) == 4, "battle data: a run left without its end, counted to its checkpoint (%d)", profile.data_count[40]);
+	run.seed = 14;
 	battle_data_begin(14);
 	CHECK(profile.data_count[40] == 4, "battle data: and once (%d)", profile.data_count[40]);
 	/* (a tally of another run is no CONTINUE's) */
 	battle_data_deleted(40, 0);
 	battle_data_save();
+	run.seed = 15;
 	battle_data_load(15);
 	CHECK(battle_data_count(40) == 4, "battle data: another run's tally is not this one's (%d)", battle_data_count(40));
 	profile.data_count[7] = 250;
+	run.seed = 16;
 	battle_data_begin(16);
 	for (int i = 0; i < 10; ++i) battle_data_deleted(7, 3);
 	CHECK(battle_data_count(7) == 255 && !battle_data_run_end() && profile.data_count[7] == 255, "battle data: a count stops at 255");
+	/* (the Battle Lab: sent as a run ends with the data on DATA_LAB_OPENS families complete, said once; a later run's
+	 * families said by their count) */
+	memset(&profile, 0, sizeof profile);
+	memset(&data_blob, 0, sizeof data_blob);
+	run.seed = 21;
+	battle_data_begin(21);
+	for (int f = 1; f < DATA_LAB_OPENS; ++f)
+		for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(f, 0);
+	meta_run_over(false);
+	const char *said_now[6];
+	int nsaid_now = meta_unlocked(said_now, 6);
+	bool lab_said = false;
+	for (int i = 0; i < nsaid_now; ++i) lab_said |= !strcmp(said_now[i], "the Battle Lab");
+	CHECK(!profile.lab_sent && !lab_said, "battle lab: not sent with %d families' data complete", DATA_LAB_OPENS - 1);
+	run.seed = 22;
+	battle_data_begin(22);
+	for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(DATA_LAB_OPENS, 0);
+	meta_run_over(false);
+	nsaid_now = meta_unlocked(said_now, 6);
+	for (int i = 0; i < nsaid_now; ++i) lab_said |= !strcmp(said_now[i], "the Battle Lab");
+	CHECK(profile.lab_sent == 1 && lab_said, "battle lab: sent and said as a run ends with %d families' data complete", DATA_LAB_OPENS);
+	run.seed = 23;
+	battle_data_begin(23);
+	for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(40, 1);
+	meta_run_over(false);
+	nsaid_now = meta_unlocked(said_now, 6);
+	bool again = false, counted = false;
+	for (int i = 0; i < nsaid_now; ++i) { again |= !strcmp(said_now[i], "the Battle Lab"); counted |= !strcmp(said_now[i], "battle data on 1 family"); }
+	CHECK(!again && counted, "battle lab: said once; a later run's complete family by its count");
+	run = run_keep;
 	memset(&data_blob, 0, sizeof data_blob);
 	profile = keep;
 }
@@ -7683,6 +7721,12 @@ static void test_lab_text(void) {
 	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
 	lab_info_result(s, sizeof s, &left);
 	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	lab_info_set(s, sizeof s, 2, 11, 760, 0);
+	CHECK(!strcmp(s, "Best 0:12:66. Level S. HP lost 0."), "lab: a kept set's best (%s)", s);
+	lab_info_set(s, sizeof s, 2, 0, 0, 0);
+	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
+	lab_set_value(s, sizeof s, 1);
+	CHECK(!strcmp(s, "1 foe"), "lab: a set's foes (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
 }

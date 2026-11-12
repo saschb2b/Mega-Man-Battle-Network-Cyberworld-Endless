@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "lab_set.h"
 #include "run.h"
 
 typedef struct {
@@ -146,6 +147,12 @@ typedef struct {
 	uint8_t data_versions[256];
 	/* the Battle Lab's keeper has said his first words (lab_keeper.h) */
 	uint8_t lab_met;
+	/* the Battle Lab (docs/game/battle-lab.md): Dad's lab has sent it (battle
+	 * data on DATA_LAB_OPENS families complete as a run ended or began),
+	 * the families complete when Dad's mail on it was last marked NEW, the
+	 * set the builder last had in hand, and the sets kept with their bests */
+	uint8_t lab_sent, lab_mailed, lab_slot;
+	LabSaved lab_sets[LAB_SETS];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

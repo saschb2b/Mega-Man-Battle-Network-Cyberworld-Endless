@@ -15,24 +15,7 @@
 #include <stdint.h>
 
 #include "foes.h"
-
-#define LAB_FOES 4       /* a battle's foes at most: BN6's spawn takes four */
-#define LAB_COLS 6
-#define LAB_ROWS 3
-#define LAB_PANELS (LAB_COLS * LAB_ROWS)
-
-/* A foe set down: its family (the engine's AI index), version and panel
- * (column 3-5 and row 0-2, from 0) */
-typedef struct { uint8_t family, version, col, row; } LabFoe;
-
-/* A set: what a test battle is made of */
-typedef struct {
-	uint8_t nfoes;
-	LabFoe foes[LAB_FOES];
-	uint8_t panels[LAB_PANELS];   /* BN6_PANEL_TYPE of each, row by row from the top left */
-	uint8_t area;                 /* its background: an area of the net (BIOME_*) */
-	uint8_t song;                 /* its song, BN6's number; 0 the battle's own */
-} LabSet;
+#include "lab_set.h"
 
 /* The set as a battle of BN6's */
 void lab_set_encounter(const LabSet *s, Encounter *e);

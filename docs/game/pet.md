@@ -18,7 +18,7 @@ a use of its own.
 | --- | --- |
 | ChipFolder, SubChip, MegaMan | BN6's own |
 | Library | The run's own over the PET: a page per entry (BN6, BN5, BN4) |
-| E-Mail | BN6's screen: Dad's mails, the dive and the records first, then the battle data on each guardian met |
+| E-Mail | BN6's screen: Dad's mails, the dive and the records first, the Battle Lab's once the lab has sent it ([the Battle Lab](battle-lab.md)), then the battle data on each guardian met |
 | KeyItem | BN6's screen: the profile's own items beside the run's; A on the NetPass opens the pass |
 | Options (BN6's Comm) | The game's Options over the PET |
 | Save | Saves the run where MegaMan stands |
