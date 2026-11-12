@@ -77,7 +77,7 @@ void bracket_draw(int depth, int final, RunBracket *b) {
 int bracket_chip(int navi, int version, int depth, int *code) {
 	*code = 26;
 	if (guardian_older(navi)) return xguardian_chip(navi, depth, code);
-	/* (BN4's own: none plays in BN6's battles yet; his round pays a stand-in's, RunBracket.prize) */
+	/* (BN4's own: his Navi chip is no prize yet, though GutsMan's plays; his round pays a stand-in's, RunBracket.prize) */
 	if (guardian_bn4(navi)) return 0;
 	int chip = navi_chip(navi, version);
 	if (chip <= 0) return 0;

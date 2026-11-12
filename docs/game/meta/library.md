@@ -71,7 +71,9 @@ Library that has a Cannon.
   is added: BN5's 001 Cannon and BN4's 001 Cannon are BN6's chip 1.
 - **A page counts only what a run can hand out** (call 2). A chip that
   sits out until its code is moved is not listed and not counted; a chip
-  cut from a release, a DarkChip and a Program Advance never are. The
+  cut from a release, a DarkChip and a Program Advance never are, nor a
+  dark chip of BN4's (Hole, DrkLine, ElemDark, BugCurse and the rest,
+  `xreg4_dark`) while no find, reward or flame hands one out. The
   numbers are the game's own, so a gap in them shows where chips are still
   to come, and every count shown can be reached. The count grows as chips
   come to play.
@@ -122,8 +124,10 @@ Measured from the three ROMs and the registry by `tools/library_pages.py
 BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other
 36 are BN5's own of its name (26, 9, 1). BN4's own 160 chips (99, 56, 5)
 have their slots in the table by the registry's rows (ids 527 on), and
-one is listed, Invis, the first that plays: each other sits out until its
-code is moved, and joins the page as it comes to play (since 12 November
+those that play are listed (Invis the first; 98 with the Program Advances
+at the 0.21.0 freeze, 12 November 2026), but for its dark chips, which no
+run can reach yet: each other sits out until its code is moved, and joins
+the page as it comes to play (since 12 November
 2026 one held reaches the profile's Library, as BN5's own always did:
 `chip_pool_older` takes BN4's rows; [BN4's chips in a
 run](../../multirom/bn4-chips.md), unit 7); LifeAura's slot is

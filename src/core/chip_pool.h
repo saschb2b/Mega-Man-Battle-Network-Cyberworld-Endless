@@ -15,7 +15,7 @@
  * chips that play, xchips_registry.h); BN4's (the run's chip of each of
  * BN4's, xchips_bn4_paid: BN6's or the registry's of its name, its own
  * rows that play, none of them a dark chip, xreg4_dark: a find tells no
- * price); and the older Net's whole, every catalogue read, BN5's
+ * price, and no flame offers one yet); and the older Net's whole, every catalogue read, BN5's
  * first, a chip once (the deep's: its half draws from the games present) */
 enum { CHIP_NET_BN6, CHIP_NET_BN5, CHIP_NET_BN4, CHIP_NET_OLDER, CHIP_NETS };
 

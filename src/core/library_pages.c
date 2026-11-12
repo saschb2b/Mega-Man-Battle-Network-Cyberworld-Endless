@@ -43,9 +43,11 @@ int library_rows_check(const LibSlot *rows, int n) {
 bool library_plays(int chip) {
 	const XChipReg *r = xreg_at(chip);
 	if (r) return r->type <= XCHIPS_GIGA && (r->how == XREG_RECORD || r->how == XREG_MOVED);
-	/* (BN4's own rows: each sits out until its code is moved) */
+	/* (BN4's own rows: each sits out until its code is moved; a dark chip of
+	 * BN4's, xreg4_dark, never, as no find, reward or flame hands one out
+	 * yet: docs/game/meta/library.md, What a page counts) */
 	const XChipReg4 *r4 = xreg4_at(chip);
-	if (r4) return r4->type <= XCHIPS_GIGA && (r4->how == XREG_RECORD || r4->how == XREG_MOVED);
+	if (r4) return r4->type <= XCHIPS_GIGA && (r4->how == XREG_RECORD || r4->how == XREG_MOVED) && !xreg4_dark(chip);
 	return chip > 0 && chip < XCHIPS_BN6 && chip_pool_tier(chip) >= 0;
 }
 

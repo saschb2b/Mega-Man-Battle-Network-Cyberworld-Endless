@@ -88,7 +88,8 @@ typedef struct {
 } XChipReg4;
 
 #define XREG4_DARKCHIP_MB 99   /* a DarkChip of BN4's (DrkCanon, DarkBomb, DrkVulcn, DrkSpred, DrkStage): its record's MB, no other row's;
-                                * BN4's Library lists none (its +0x1C is 0), a run's finds hold none (chip_pool.h): a flame's */
+                                * BN4's Library lists none (its +0x1C is 0), a run's finds and rewards hold none (chip_pool.h,
+                                * xchips_kept_out), and no flame offers one yet (docs/multirom/bn4-chips.md, unit 7) */
 #define XREG4_FIRST_ATTACK 0xD0 /* a moved row's `sub` from here: an attack family's number (src/emu/xattack_grow.h XATTACK_BN4; test_core holds the two alike) */
 #define XREG4_PACK_FIRST 527   /* its first id: 527-602, the pack's entries in the work RAM (bn6_pack_entry), its chips that play first; */
 #define XREG4_PA_FIRST 605     /* 605-634 its Program Advances, BN6's bits for one formed the engine's there (after BN5's two from BN6_PA_WIDE_FIRST); */
