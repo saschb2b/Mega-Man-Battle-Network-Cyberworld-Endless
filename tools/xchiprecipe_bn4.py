@@ -89,7 +89,19 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): Boomer's unit moved the boomerang; PitRng's launcher "
                               "throws three (0x080E9A24)")}
 # A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
+# A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
+# and the unit needs none of what it gives
+UNIT_AIMS = {
+    'FirePlus': {0x0800BFF4: ('XC_STUBS', "the user's battle data by his side (0x02035B20 + 0xC0 a side), where the object stores "
+                                          "its four timers (+0x3C to +0x42: its element's 480, the rest 0). BN6 keeps other fields "
+                                          "there and reads the timers nowhere (BN4's one reader is its HUD's icon, 0x08014CC0, "
+                                          "which BN6 has none of), so the call is the stub that returns 0 and the four stores go "
+                                          "to 0x3C-0x42, the BIOS's addresses, which take no store: the timers are not kept")},
+}
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
+             286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4-chips.md): no chip\'s damage changes, a HUD icon alone',
+             287: 'AquaPowr, left out by the owner\'s call 12',
+             288: 'WoodPowr, left out by the owner\'s call 12',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
                  'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
@@ -259,6 +271,7 @@ UNITS = (
     ('attack', 0x1F, 'DrkVulcn'),
     ('attack', 0x60, 'Elem'),
     ('misc', 0x0D, 'PitRng'),
+    ('support', 0x4C, 'FirePlus'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -789,6 +802,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         if k == 3 and t in SHARED3 and t not in alloc.shared3:
             alloc.shared3[t] = (a, f.name)
     f.notes += [f'its {X4.KIND_NAMES[k]}-kind {t:#x}: {who}\'s copy, the dispatch\'s {a:#x}, shared (its spawner copied)' for k, a, t, who in f.shared]
+    f.aim.update(UNIT_AIMS.get(name, {}))
     X4.pair_calls(f, pairs)
     shallow_twins(b4, f)
     panel_fields(f)
@@ -1420,6 +1434,7 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xchips_code.h"
 #include "xnavi_recipe.h"
 '''
 ROWS = [0]        # (the next row of the art's room, counted over the units as their rows are written: c_file)

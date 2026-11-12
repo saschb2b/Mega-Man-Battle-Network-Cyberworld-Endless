@@ -469,6 +469,25 @@ the blast deletes is not compared yet: each engine's deletion draws its
 own explosions (the fourth kind's 0x11), which the differential has no
 rule for, so the specs' Mettaur outlives the blast.
 
+**FirePlus is moved** (12 November 2026: id 563, BN4's support 0x4C at
+BN6's grown support routine 0xCC; the owner's calls 7 and 12). Its
+object lives a frame and has the stage's changer turn every panel to
+grass, which is the whole of what it does to a battle: fire on grass
+adds its damage again by each engine's own rule. BN4 also starts a
+480-frame timer in the user's battle data, read by its HUD's icon
+alone. BN6 has no such icon and keeps other fields at those offsets, so
+the unit's call for that data is the chips' stub that returns 0 and the
+four stores go nowhere: **the timer is not kept and the HUD's icon is
+not moved**, the one thing of FirePlus a player of BN4 would miss. The
+unit's code holds the other three kinds' paths too (ThunPlus, AquaPowr,
+WoodPowr: the timers alone), which no chip of a run reaches (call 12:
+their rows wait, `ROWS_WAIT`). The changer's block is copied a third
+time with it (Hole's and Elem's units have it): the fourth kind has no
+shared type yet. `bn4_chip_fireplus` (used at fight frame 30: eighteen
+panels to grass at t34, the changer's sounds) and
+`bn4_chip_fireplus_cracked` (the Mettaur's panel cracked before it:
+grass with the rest) pass over 300 frames; five mutations caught.
+
 **SeekBom1-3 are moved, a family's unit by subfamily** (11 November
 2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
 BN4's bombs are one family: its state throws by the record's subfamily
@@ -633,8 +652,8 @@ lethal hit there would compare each engine's deletion (its sound, which
 in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
-**Next:** FirePlus, BlakBarr's barrier and BlakWeap (calls 7, 12 and
-13: the other three Plus chips and Marking are left out); Binder,
+**Next:** BlakBarr's barrier and BlakWeap (calls 7, 12 and 13: the
+other three Plus chips and Marking are left out); Binder,
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
@@ -1640,8 +1659,9 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     NetBattle. So the three are not moved: no unit, their rows left
     out of play and their ids (564 to 566) kept retired, as BugChain's
     is until its call, and nothing of a run hands them out or lists
-    them. FirePlus (563) is moved as BN4 has it, the grass and its
-    timer. Call 7 stands for the other three of its six: FirePlus,
+    them. FirePlus (563) is moved for what it does to a battle, the
+    grass; its timer is kept nowhere in BN6 and its HUD icon is not
+    moved (Where things stand, FirePlus). Call 7 stands for the other three of its six: FirePlus,
     Marking and BlakWeap. **Two answers were given the same evening.**
     Through the coordinating session the owner was first quoted with
     "Move as BN4 has them", on a recommendation to move the three and

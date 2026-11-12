@@ -170,7 +170,7 @@ const XChipReg4 xreg4_rows[] = {
 	{ 281,  556, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 10 },   /* Marking */
 	{ 282,  727, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 30 },   /* CannMode */
 	{ 284,  728, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 0, 50 },   /* SwrdMode */
-	{ 285,  563, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* FirePlus */
+	{ 285,  563, XREG_MOVED,   0, 0xCC, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* FirePlus */
 	{ 286,  564, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* ThunPlus */
 	{ 287,  565, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* AquaPowr */
 	{ 288,  566, XREG_PENDING,   0, 0xFF, { 0x00, 0x01, 0x02, 0x1A }, 1, 80 },   /* WoodPowr */
