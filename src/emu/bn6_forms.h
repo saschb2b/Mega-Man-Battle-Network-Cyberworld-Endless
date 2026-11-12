@@ -88,6 +88,8 @@
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
 #define BN6_STANDS_BEAST      2           /* BN6_SOUL_STANDS: Beast Out stands (0x08029FB0) */
+#define BN6_CUSTOM_OPENING    4           /* BN6_CUSTOM_SCREEN's first byte from the frame before its window slides in at a battle's start, every foe in and
+                                             its HP shown (seen headless: 0x06014000 at the battle's start, then 4, the word's third byte 0x78 a frame on) */
 /* The Custom screen's elements (BN5's the same, BN5_CUSTOM_UNITE) */
 #define BN6_CUSTOM_ELEMENTS   (BN6_CUSTOM_SCREEN + 0x100) /* its 12 elements (0-9 the hand, 0xA OK, 0xB the emblem/UNITE), 12 bytes each (0x08027E1C): */
 #define BN6_ELEMENT_SIZE      0x0C        /* ... bytes an element's */

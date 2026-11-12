@@ -236,7 +236,9 @@ be driven for it (27 of BN6's families, V1 alone, two at most, on
 MegaMan's side).
 
 Three pages as Options' tabs, L and R between them, the field always in
-sight:
+sight. As built the field is not drawn at all: it is BN6's own battle of
+the set, held still with its field up (Built, The field is the battle's
+own), and the sketch below is the first plan's:
 
 ```
 +--------------------------------------------------+
@@ -467,6 +469,51 @@ is used.
   and the Cybeast listed and Bass fought for a profile with a win over
   each (`--dev bass=1,beast=1`); ElecMan V1 noted in the profile after a
   guardian's battle won. Not listed: BN5's Darkloids and Team ProtoMan.
+
+- **The field is the battle's own** (the owner's call, 12 November
+  2026: "why not using the actual field and spawn them in? doing nothing
+  until the battle starts. then we have the real thing"). The builder
+  draws no field. As it opens, and each time the set changes (a foe set
+  down or taken off, a panel painted, a
+  field taken whole, the background, a set loaded), BN6's own battle of
+  the set is begun inside the snapshot and run to the frame before its
+  Custom screen opens (`BN6_CUSTOM_OPENING`,
+  [The battle](../rom/battle.md)): every foe in at its panel with its
+  HP, the panels and the background BN6's, MegaMan on his side. There it
+  is held: the scene runs no frame of it (`lab_battle_show`,
+  `lab_battle_held`), and BN6's opening is run through at 24 of its
+  frames to one shown, so a change stands in about a sixth of a second.
+  A set with nobody on it is its field alone: a battle needs a foe, so
+  its record names a Mettaur, and it is held 104 frames in, before he
+  comes in. The builder's pieces lie over that picture
+  (`src/director/lab_draw.c`): the tabs across the top; on FOES, STAGE
+  and SETS a panel over MegaMan's side, where BN6's Custom screen will
+  stand (the list, five rows; what the cursor's item is, two lines;
+  BATTLE! and the count), the foes' side clear; on FIELD a strip under
+  the tabs alone, all eighteen panels in sight. The cursor's corners
+  mark BN6's own panel (40 by 24 on its screen, the first row's top at
+  72). BATTLE! lets the held battle run on (`lab_battle_go`): the next
+  thing seen is BN6's Custom screen sliding in over the foes just
+  placed. Leaving the builder puts the game back without a fight
+  (`lab_battle_leave`). The background is the area's first, not one of
+  its two by the dice, so the stage holds still while the set changes;
+  the engine's dice are put back as the game is. STAGE's rows name what
+  they turn and the information box holds the value, an area's or a
+  song's name being wider than a row. Seen headless (`0:lab all`, seed
+  15): an empty field; a Mettaur and a Piranha2 set down, each standing
+  with its HP at once; a poison panel painted under MegaMan's side; the
+  four pages; START into BN6's Custom screen with both foes; L out of
+  it, the builder back with "Left at 0:00:00."; B out to the layer. The
+  work RAM's hash after leaving is the one before opening (45e79931),
+  the run untouched, after the fight and after leaving without one.
+  Against the same run without the Lab, stopped at the same count of the
+  act's frames: `run.sav`, `run.act`, `run.data` and the layer's files
+  the same; `profile.sav` holds the set, `run.tally` the choice counted,
+  `run.state` differs in 21 bytes of the core's audio timing in its
+  header, its RAM, video and registers the same, and `battle.sav` in one
+  byte of its structure's padding, which no build sets. The drawn field with
+  the foes' sprites read from the ROM, tried the day before, was dropped
+  for this.
 
 ## Build order
 

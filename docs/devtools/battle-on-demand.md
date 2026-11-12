@@ -79,8 +79,10 @@ nothing is left of it: the same run without the step, stopped that many
 frames earlier, ends with the same picture and the same save files (the
 Battle Lab's page, Built).
 
-`0:lab open` opens the Battle Lab's builder instead (its screen over the
-held game: FOES, FIELD, STAGE and BATTLE!), listing the families the
+`0:lab open` opens the Battle Lab's builder instead (its pages over BN6's
+own battle of the set, held with its field up: FOES, FIELD, STAGE, SETS
+and BATTLE!; leaving it prints "lab: left with no fight; the game put
+back (RAM ..., then ...)" with `CYBERWORLD_EMU_DEBUG`), listing the families the
 profile has battle data on; `0:lab all` lists every family the engine
 holds, each in every version, for a look at the screen without a
 profile's history.
