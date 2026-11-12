@@ -16,6 +16,7 @@
 #include "encounter.h"
 #include "events.h"
 #include "game.h"
+#include "lab_folder.h"
 #include "run.h"
 
 static struct {
@@ -87,12 +88,12 @@ bool lab_battle_loading(void) { return L.show && !L.held && (L.due || D.lab) && 
 
 const LabResult *lab_battle_result(void) { return &L.last; }
 
-/* The battle begun: the game and the director kept first */
-static bool begin(void) {
+/* The game, the director and the run kept, to be put back (put_back) */
+static bool keep(void) {
 	free(L.state);
 	L.state = emu_snapshot(&L.size);
 	if (!L.state) {
-		fprintf(stderr, "lab: the game's state could not be kept, no test battle\n");
+		fprintf(stderr, "lab: the game's state could not be kept\n");
 		return false;
 	}
 	L.d = D;
@@ -104,6 +105,14 @@ static bool begin(void) {
 	L.in_battle = 0;
 	L.result = (LabResult){ .before = emu_debug_on() ? ram_hash() : 0 };
 	D.lab = true;
+	return true;
+}
+
+/* The battle begun: the game and the director kept first */
+static bool begin(void) {
+	if (!keep()) return false;
+	/* (with the Lab's own folder where the profile has it so: lab_folder.h) */
+	if (lab_folder_used()) lab_folder_into_game();
 	encounter_backdrop = L.ask_backdrop;
 	if (L.painted) {
 		for (uint32_t k = 0; k < BN6_FIELD_SIZE; ++k) L.was[k] = emu_read8(LAB_FIELD_AT + k);
@@ -158,6 +167,23 @@ static void over(bool deleted) {
 			L.result.took, back ? "put back" : "NOT put back", (unsigned)L.result.before, (unsigned)L.result.after, run_same ? "untouched" : "CHANGED, put back",
 			field_back ? "as it was" : "NOT put back");
 	L.last = L.result;
+}
+
+/* ---- the folder editor's (lab_folder.c): the game kept and put back with no battle ---- */
+
+bool lab_battle_keep(void) {
+	L.due = L.show = false;
+	return !D.lab && keep();
+}
+
+void lab_battle_put(const char *what) {
+	if (!D.lab) return;
+	bool run_same, field_back;
+	uint32_t before = L.result.before;
+	bool back = put_back(&run_same, &field_back);
+	if (emu_debug_on() || !back || !run_same)
+		fprintf(stderr, "lab: %s; the game %s (RAM %08x, then %08x), the run %s\n", what, back ? "put back" : "NOT put back", (unsigned)before,
+			(unsigned)(emu_debug_on() ? ram_hash() : 0), run_same ? "untouched" : "CHANGED, put back");
 }
 
 /* ---- the builder's: the battle shown, held with its field up ---- */
@@ -227,6 +253,8 @@ static bool field_up(void) {
 }
 
 bool lab_battle_frame(void) {
+	/* (the Lab's folder in BN6's editor: its frames in a battle's place, lab_folder.h) */
+	if (lab_folder_frame()) return true;
 	if (L.due) {
 		L.due = false;
 		if (!D.lab && begin()) return true;

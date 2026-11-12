@@ -13,8 +13,10 @@
 #include "loot.h"
 #include "pacing.h"
 #include "game.h"
+#include "rom.h"
 #include "run.h"
 #include "visitor_families.h"
+#include "xbattles.h"
 
 #define ROLLS 300   /* group battles rolled an act's area and layer */
 
@@ -141,7 +143,7 @@ int pacing_groups_report(FILE *out) {
 	const GroupFam *pool;
 	int n = group_pool(&pool), flagged = 0;
 	unsigned have = group_nets();
-	fprintf(out, "\nEncounter groups (docs/game/progression/encounter-groups.md; behind --dev groups, no run holds one): %d families\n"
+	fprintf(out, "\nEncounter groups (docs/game/progression/encounter-groups.md; the battles an act's arc is built from): %d families\n"
 		"in the pool. Each ROM set's pool by act (acts 1 to 6, the Nest) and how many ways each template fills, a group held\n"
 		"to the act's band, its cap on one hit, its pressure cap (%d %d %d %d %d %d, the Nest %d) and its cap on cost (%d %d %d %d %d %d, %d).\n", n,
 		group_pressure_cap(0), group_pressure_cap(1), group_pressure_cap(2), group_pressure_cap(3), group_pressure_cap(4), group_pressure_cap(5),
@@ -273,9 +275,55 @@ static int arcs(FILE *out, int act, int loop, int b) {
 	return over;
 }
 
+/* How many of APART runs' arcs of act `act` in area `b`, its layers wearing `tiles` (an older net's area, or `b` itself),
+ * have another signature, partner or home where a later layer of the act asks first, as a game started there does (a
+ * CONTINUE): none may. The arc kept is put out of mind between the asks by one of another seed. */
+#define APART 40
+static int arcs_apart(int act, int b, int tiles) {
+	int first = act * 3 + 1, apart = 0;
+	loot_layer_nets(b, tiles);
+	for (int k = 0; k < APART; ++k) {
+		uint32_t seed = 0xC0A7u + (uint32_t)k * 2654435761u;
+		GroupArc at[3], other;
+		bool ok[3];
+		for (int d = 0; d < 3; ++d) {
+			group_arc_at(~seed, first + d, b, &other);
+			ok[d] = group_arc_at(seed, first + d, b, &at[d]);
+		}
+		for (int d = 1; d < 3; ++d)
+			apart += ok[d] != ok[0] || (ok[0] && (at[d].signature != at[0].signature || at[d].partner != at[0].partner || at[d].home != at[0].home));
+	}
+	return apart;
+}
+
+/* ... over every act's areas and the older nets' areas that dress them (rom.h's NetAreaDef.like), their territories' records
+ * differing by the layer (xbattles.h) */
+static int arcs_apart_report(FILE *out) {
+	int apart = 0, asked = 0, old_territory = loot_territory;
+	for (int act = 0; act < 6; ++act) {
+		uint8_t areas[PACING_AREA_POOL] = { act == 4 ? BIOME_UNDERNET : BIOME_GRAVEYARD };
+		int na = act < 4 ? pacing_area_pool(act, areas) : 1;
+		for (int i = 0; i < na; ++i) {
+			apart += arcs_apart(act, areas[i], areas[i]);
+			asked += 2 * APART;
+			for (int k = 0; k < XAREAS_MAX; ++k) {
+				const NetAreaDef *a = net_area_def(NET_AREAS + k);
+				if (!a || a->like != areas[i] || !xterritory_native(NET_AREAS + k)) continue;
+				apart += arcs_apart(act, areas[i], NET_AREAS + k);
+				asked += 2 * APART;
+			}
+		}
+	}
+	loot_layer_nets(BIOME_CENTRAL, BIOME_CENTRAL);
+	loot_territory = old_territory;
+	fprintf(out, "  an act's arc asked first on its second or third layer, as a CONTINUE there asks: %d of %d another than its first layer's%s\n", apart,
+		asked, apart ? "  OVER" : "");
+	return apart;
+}
+
 int pacing_arcs_report(FILE *out) {
 	int flagged = 0;
-	fprintf(out, "\nThe acts' arcs (group_arc.h; behind --dev arc, no run holds one): %d runs' arcs an act's area, by their seeds. How\n"
+	fprintf(out, "\nThe acts' arcs (group_arc.h; every run's, --dev noarc without): %d runs' arcs an act's area, by their seeds. How\n"
 		"many acts have one, the share whose signature is one of the area's own (three quarters of act 1's, half, a third, a\n"
 		"quarter; the deep any family), how many families were a signature, the most pressure of each beat against its cap, and\n"
 		"the Server's challenge (the share of arcs with one, its most pressure); OVER where a beat lies past a limit.\n", ARCS);
@@ -285,5 +333,6 @@ int pacing_arcs_report(FILE *out) {
 		for (int i = 0; i < na; ++i) flagged += arcs(out, act, 0, areas[i]);
 	}
 	flagged += arcs(out, 0, 1, BIOME_CENTRAL) + arcs(out, 3, 1, BIOME_SKY);
+	flagged += arcs_apart_report(out);
 	return flagged;
 }

@@ -102,6 +102,8 @@ static uint32_t frame_keys(void) {
 	uint32_t keys = autopilot_on() ? autopilot_keys() : keys_from_buttons();
 	/* (in the Net Square the run's own keys rest: docs/online/) */
 	if (online_visit_away()) return online_visit_keys(keys);
+	/* (the Battle Lab's folder in BN6's own editor, docs/game/battle-lab.md: its keys alone, no screen of ours over it) */
+	if (director_lab_editing()) return director_lab_edit_keys(keys);
 	return director_keys(pet_keys(devtools_keys(online_visit_keys(keys))));
 }
 
@@ -205,6 +207,8 @@ static void update(void) {
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
 	if (!dev_fast) fast_forward_update();
 	for (int i = 0; frame_goes_on(i, speed); ++i) {
+		/* (the way into BN6's folder editor is pressed a frame at a time, run through at once: its keys each frame) */
+		if (i && director_lab_editing()) keys = frame_keys();
 		emu_frame_as(cinema_keys(keys), dev_fast ? 0 : fast_forward_how(i));
 		after_frame();
 	}

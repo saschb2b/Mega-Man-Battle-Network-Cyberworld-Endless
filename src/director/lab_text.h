@@ -10,7 +10,9 @@
 
 extern const char lab_title[], lab_go[];
 extern const char *const lab_tabs[4];
-extern const char lab_row_preset[], lab_row_area[], lab_row_song[], lab_own_song[], lab_plain_field[];
+extern const char lab_row_preset[], lab_row_area[], lab_row_song[], lab_row_folder[], lab_own_song[], lab_plain_field[];
+/* STAGE's folder row: whose folder the battle is fought with, and how the Lab's is changed */
+void lab_info_folder(char *out, size_t n, bool labs);
 /* A panel type's name (BN6_PANEL_TYPE), "" for none of BN6's */
 const char *lab_panel_name(int type);
 /* "V2", "SP", "Rare" as a row names a version (0-5) */

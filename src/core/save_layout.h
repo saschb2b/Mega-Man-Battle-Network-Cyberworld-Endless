@@ -16,9 +16,10 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
 
 /* (the profile grew at its end for issue #82, for the Virus Battler's
  * card, for the designed folders' milestones, for the extras the last
- * run left out and for the battle data on virus families, read up to its
- * size: an older profile reads whole, the new fields zero) */
-_Static_assert(sizeof(Profile) == 1048, "Profile save size changed");
+ * run left out, for the battle data on virus families and for the Battle
+ * Lab's own folder, read up to its size: an older profile reads whole, the
+ * new fields zero) */
+_Static_assert(sizeof(Profile) == 1108, "Profile save size changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");
@@ -101,6 +102,7 @@ _Static_assert(offsetof(Profile, data_versions) == 552, "Profile.data_versions s
 _Static_assert(offsetof(Profile, lab_met) == 808, "Profile.lab_met save offset changed");
 _Static_assert(offsetof(Profile, lab_sent) == 809 && offsetof(Profile, lab_slot) == 811, "Profile.lab_sent save offset changed");
 _Static_assert(offsetof(Profile, navi_beaten) == 980 && sizeof ((Profile *)0)->navi_beaten == RIVAL_NAVIS, "Profile.navi_beaten save layout changed");
+_Static_assert(offsetof(Profile, lab_folder_on) == 1047 && offsetof(Profile, lab_folder) == 1048 && sizeof(Profile) == 1108, "Profile.lab_folder save layout changed");
 _Static_assert(offsetof(Profile, lab_sets) == 812 && sizeof(LabSaved) == 42 && offsetof(LabSaved, frames) == 38, "Profile.lab_sets save layout changed");
 
 _Static_assert(sizeof(Run) == 116, "Run save size changed");

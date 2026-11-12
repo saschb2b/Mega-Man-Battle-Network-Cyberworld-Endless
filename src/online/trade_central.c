@@ -8,7 +8,9 @@
  * (netpass.h, issue #131): without it the clerk says so and offers
  * nothing; with it he lists the Navis whose pass has it too (each peer's
  * ROMs the server's word, which refuses the rest with NOTICE 28), and
- * every spare chip, BN5's too. Once both chips are known the chip trade's
+ * every spare chip the other's game holds too (the pair's common ground,
+ * netpass_peer_holds: two full passes differ where one's system reads one
+ * extra ROM, protocol v18). Once both chips are known the chip trade's
  * screen shows them, You and Them, the cursor on No deal; the server
  * commits when both said Deal!, the cards swap, and the swap is kept on
  * disk at once until the run has it at home (online_trade.c).
@@ -218,7 +220,7 @@ static void who(void) {
 	if (!online_trade_spares(spares, count, TRADE_LIST_MOST)) { talk_start(trade_no_spares(), FACE_PROG); return; }
 	C.nwho = 0;
 	for (size_t i = 0; i < C.s.peer_count; ++i)
-		if (netpass_peer_full(C.s.peers[i].roms)) C.who[C.nwho++] = C.s.peers[i].id;
+		if (netpass_peer_has(C.s.peers[i].roms, STAMP_TRADE)) C.who[C.nwho++] = C.s.peers[i].id;
 	if (!C.nwho) { talk_start(trade_none_stamped(), FACE_PROG); return; }
 	static TextArchive t;
 	const char *labels[SQUARE_PEERS] = { 0 };
@@ -256,12 +258,24 @@ int trade_central_spares(TradeRow *rows) {
 	return n;
 }
 
+/* (a Navi's ROMs as the server says them, 0 where he is gone: BN6's chips alone) */
+static uint8_t roms_of(uint32_t id) {
+	for (size_t i = 0; i < C.s.peer_count; ++i) if (C.s.peers[i].id == id) return C.s.peers[i].roms;
+	return 0;
+}
+
 /* the chip for `partner` (0: one to put up on the board), of the kind
- * `want` (-1 any): the spares list, those that meet it */
+ * `want` (-1 any): the spares list, those his game holds too (the pair's
+ * common ground) that meet it */
 static void pick(uint32_t partner, int want) {
 	static TradeRow all[TRADE_LIST_MOST], fit[TRADE_LIST_MOST];
-	int n = trade_central_spares(all), m = trade_list_filter(all, n, want, online_board_meets, fit);
+	int n = trade_central_spares(all), shared = 0;
 	if (!n) { talk_start(trade_no_spares(), FACE_PROG); return; }
+	for (int i = 0; i < n; ++i)
+		if (!partner || netpass_peer_holds(roms_of(partner), all[i].chip.id)) all[shared++] = all[i];
+	if (!shared) { talk_start(trade_none_shared(name_of(partner)), FACE_PROG); return; }
+	n = shared;
+	int m = trade_list_filter(all, n, want, online_board_meets, fit);
 	if (!m) { talk_start(trade_take_none(name_of(partner), want), FACE_PROG); return; }
 	TradeChip theirs = C.mode == TRADE_FOR_ANSWER ? online_trade_view()->theirs : (TradeChip){ 0, 0 };
 	trade_screen_list(fit, m, C.mode, partner ? name_of(partner) : NULL, want, theirs);

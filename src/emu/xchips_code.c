@@ -192,6 +192,25 @@ static void step_in_stage(const XChipUnit *u) {
 	xv_word(BN6_CHIP_NAVI_IN_REF, emu_read32(BN6_CHIP_NAVI_IN_REF), at | 1u);
 }
 
+/* A BN4 Navi chip's unit whose Navi's spawner takes his side in r3 (XChipUnit.side: RollAro's, BN4 0x080C83D4, which
+ * BN4's object of the chip hands it and BN6's Navi object does not, its r3 the routine's own address): a wrapper in the
+ * unit's home (XC4_HOME_WAIT) that loads it from the user BN6's object hands in r5 and goes on to `routine`, the wrapper's
+ * address the entry:
+ *   00 ldrb r3,[r5,#0x16]  02 push {r0}  04 ldr r0,=routine  06 mov r12,r0  08 pop {r0}  0A bx r12  0C the word */
+static uint32_t side_stage(const XChipUnit *u, uint32_t routine) {
+	static const uint16_t thumb[6] = { 0x7DAB, 0xB401, 0x4801, 0x4684, 0xBC01, 0x4760 };
+	uint32_t at = u->home + XC4_HOME_WAIT;
+	if (u->kind != XCHIP_NAVI || u->wait || u->step_in || XC4_HOME_VENEERS + xvirus_shims_room(&u->code) > XC4_HOME_WAIT) {
+		xv_fail("its side's wrapper: no Navi chip's unit, its home's place taken, or its shims reach it");
+		return 0;
+	}
+	uint8_t *p = xv_put(at, XC4_WAIT_SIZE, true);
+	if (!p) return 0;
+	for (int i = 0; i < 6; ++i) put16(p + 2 * i, thumb[i]);
+	put32(p + 0x0C, routine | 1u);
+	return at | 1u;
+}
+
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
  * its stub first; `fresh` where the routines' tables are staged in this step (their stub there already), else grown by an
  * earlier one (the other game's units'); `code` the unit's own, or the unit's whose block holds its routine (XChipUnit.share) */
@@ -217,6 +236,8 @@ static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh
 	}
 	/* (a unit BN4's misc run waits for: its wrapper the entry) */
 	if (u->wait && !(to = wait_stage(u, code, to))) return;
+	/* (a Navi chip's unit whose spawner takes its side in r3: its wrapper the entry) */
+	if (u->side && !(to = side_stage(u, to))) return;
 	/* (a Navi chip's unit whose object sounds as it steps MegaMan in: BN6's object's last state through its stub) */
 	if (u->step_in) step_in_stage(u);
 	if (xv_failed()) return;

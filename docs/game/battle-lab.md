@@ -41,9 +41,23 @@ Inside, a test only: no real death, no rewards. Access earned in the
 fiction, and a name of the game's own in place of the working one,
 Warframe's "Simulacrum".
 
-Nothing here is built yet. The owner decided its eight calls on 11
-November 2026, each as recommended below; they are at the end. Its name
-is the **Battle Lab**.
+The owner decided its eight calls on 11 November 2026, each as
+recommended below; they are at the end. Its name is the **Battle Lab**.
+
+## Where it stands in 0.21.0
+
+It is built and on for players, with no dev switch (Built, below, step by
+step as it came): the battle data counted in every run, the keeper in
+Lan's HP once the data on three families is complete, Dad's mail, the
+LabPass, the builder with its foes, field, background and song, Navis, a
+folder of the Lab's own and four kept sets. Left for later:
+
+- BN4's own panel types 5 and 0xA, which BN6's engine does not have (each
+  a move of its own; Built, the field's panels).
+- MegaMan's Regular chip with the Lab's folder: it is the run's still.
+- Team ProtoMan's five Navis stand in the engine and on the dev list
+  alone: a profile cannot earn them for the Lab until they guard runs
+  ([Team ProtoMan](team-protoman.md)).
 
 ## What the games have
 
@@ -286,7 +300,8 @@ The builder opens on the last set fought.
   and of the game's RAM before and after.
 - **The folder and the NaviCust** are the ones MegaMan holds: the
   starting folder before the first portal, the run's own later, with his
-  Cross, Souls and HP as they stand.
+  Cross, Souls and HP as they stand. (The Lab's own folder came after:
+  Built, The sandbox folder.)
 - **MegaMan deleted.** The blow that would delete him ends the battle as
   ProtoMan's netbattle ends (`battle_spare.c`); the result names it and
   the builder is back, the same set ready.
@@ -337,11 +352,13 @@ is used.
   as the run ends (`meta_run_over`), or as the next run begins where a
   run was left without its end. Not counted: a Virus Battler's round, a
   dive of the week's net. The statistics' run-end event carries the
-  families complete (`data`). No player sees it yet. An autopilot run
+  families complete (`data`). No player saw it at this step (the gauge
+  shows since step 5). An autopilot run
   (seed 3, 15000 frames) counted the eight viruses its run log names,
   BN5's moved families among them.
 
-- **The test battle** (step 2), behind the dev step `lab`
+- **The test battle** (step 2), at this step behind the dev step `lab`
+  alone (a player's since step 5)
   ([A battle on demand](../devtools/battle-on-demand.md);
   `src/director/lab_battle.c`). Asked for, it begins with the next
   frame's update: the core's whole state with the cart's flash save in
@@ -374,8 +391,9 @@ is used.
     showed was given and then put back with the rest (emptied since,
     below).
 
-- **The builder's screen** (step 3), behind the dev steps `lab open` and
-  `lab all` (`src/director/lab.c`, its picture `lab_draw.c`, its words
+- **The builder's screen** (step 3), at this step behind the dev steps
+  `lab open` and `lab all` alone, the keeper's talk opening it since
+  step 4 (`src/director/lab.c`, its picture `lab_draw.c`, its words
   `lab_text.c`). Three pages as Options' tabs, L and R between them:
   - *FOES*: the families MegaMan has battle data on, a complete one in a
     version Left and Right turn, the rest with their gauge ("5/8"). A
@@ -397,17 +415,17 @@ is used.
     BN5's and BN4's panels, backgrounds and songs, the saved sets (all
     built since, below).
 
-- **The keeper and the LabPass** (step 4), behind `--dev lab`
-  (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
-  `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
+- **The keeper and the LabPass** (step 4), at this step behind
+  `--dev lab` alone (`src/director/lab_keeper.c`, his lines
+  `lab_words.c`, his place `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
   across the room's front from the gate's keeper; moved since, below). His first talk is three boxes, once a
   profile (`Profile.lab_met`); every later one a single box. As the chat
   box closes the builder opens over the held game, and its battle is
   fought there, in Lan's HP: seen headless from the town's jack-in, a
   battle set, left by L, the builder back with the result, the work RAM's
   hash the same before and after. KeyItem lists the LabPass (`0x4C`) with
-  the count of families whose data is complete. Still to come: what
-  makes him appear for a player (three complete families and Dad's mail).
+  the count of families whose data is complete. What makes him appear
+  for a player (three complete families and Dad's mail) came with step 5.
 
 - **Turned on** (step 5).
   - *The condition.* The Lab is sent (`Profile.lab_sent`) as a run ends
@@ -544,6 +562,67 @@ is used.
   hash after leaving the one before opening (45e79931), the run
   untouched. The panels came after (below).
 
+- **The sandbox folder** (the owner's call 6, the step after the first
+  build; `src/director/lab_folder.c`). STAGE has a third row, Folder:
+  "MegaMan's own." or "The Lab's. A edits it.", turned by Left and
+  Right. It is the profile's choice, not a set's: a set's best is kept
+  whatever folder won it, as before.
+  - *The Lab's folder* is thirty chips kept in the profile
+    (`Profile.lab_folder`, as BN6's folders hold them), MegaMan's own
+    until it is first changed. A test battle with it writes it into the
+    game's first folder inside the battle's snapshot, its chips owned as
+    BN6 marks a chip it gives, so the run's folder is what it was
+    afterwards.
+  - *It is changed in BN6's own folder editor*, not a screen of ours. A
+    on the row puts the held battle back, keeps the game again as a test
+    battle does, fills the pack with every chip the profile has held in
+    any run and the run's own so far (the Library's bits), five of each
+    in each code its record has, writes the Lab's folder in, and presses
+    the way in for the player: START on the map, A on the PET's menu
+    (its cursor on ChipFolder as a PET opens), A on the folder and A on
+    EDIT, each by what the game's state says is up, run through at 24 of
+    BN6's frames to one shown. From there the keys are the player's.
+    BN6's own rules hold (thirty chips, its limits by MB, Mega and
+    Giga). As the editor is left for the folders' list, the folder is
+    read into the profile and the game put back: the PET's other
+    entries, Save among them, are never reached.
+  - *Why every code*: the Library keeps ids, not codes, and a chip's
+    record names the codes BN6 itself has it in; a Program Advance is a
+    matter of codes, and trying one before a run finds its chips is what
+    the sandbox is for. With the All * helper on, a record has * alone.
+    Nothing leaves the Lab: no chip, zenny or Library bit, as the
+    battle's own rule ("meta as variety, never power").
+  - Seen headless (`0:lab all`, seed 15): the row turned to the Lab's,
+    A: BN6's FOLDER EDIT up within ten shown frames, 30/30, the pack
+    listing the profile's chips in each code (Cannon A, B, C and *, five
+    less the folder's own); a Cannon A put back and a Cannon * taken;
+    B: "the Lab's folder kept", the builder back; BATTLE!: "the Lab's
+    folder in the game's first, 1 of its 30 entries other than
+    MegaMan's", BN6's Custom screen, L out. The work RAM's hash after
+    the editor and after the battle the one before opening (45e79931),
+    the run untouched.
+  - With it, the Navi list no longer shows a number BN6's engine has an
+    enemy for and the run no guardian (a "???" row of 4000 HP on the
+    dev list).
+  - And no family without a name is a row: BN6 keeps enemy ids for two
+    AI indexes it names none of (30 and 31, 80 HP), which the dev list
+    showed as two empty rows between Nightmare and CanGard; no run
+    fights them, so no player's list had them. `CYBERWORLD_EMU_DEBUG`
+    prints the list as it is made, a line a row ("lab: row 30 family 32
+    "CanGard" versions 3f count 0"): 113 rows with every family and Navi
+    open and both ROMs read, 65 families and 48 Navis, none unnamed.
+  - *A win's two lines* (0.21.0's pictures found them broken: "0:01:21.
+    Lv / S. HP -0." after a battle, and a set's best cut off after
+    "Lv"): the information box holds 13 letters a line, so a win reads
+    "0:01:21 Lv S" and under it "HP -20." or "No HP lost.", after a
+    battle and as a set's best alike (the word "Best" went: the page is
+    SETS); "Deleted at" and "Left at" break before their time. A box of
+    one line (FIELD's strip) reads the break as a space. The lines
+    quoted above as seen were the earlier wording.
+  - Not yet: MegaMan's Regular chip is the run's still, whatever stands
+    at its place in the Lab's folder; a chip of a game whose ROM is not
+    read stays in a kept folder as its placeholder.
+
 - **The other games' panels** (`src/director/lab.c`,
   `lab_battle.c`). FIELD's panels turn on past BN6's twelve through the
   four of the other games that stand in BN6's engine
@@ -632,8 +711,8 @@ Each a PR to `dev`, the next begun when the last is merged:
 5. Turned on; the records and the saved sets.
 
 A sandbox folder from the Library (every chip a profile has held, in
-BN6's own folder editor) is the step after, not this build's: it is a
-second screen and a second kind of state.
+BN6's own folder editor) was the step after, a second screen and a
+second kind of state: built since as the Lab's folder (Built, above).
 
 ## The owner's calls (11 November 2026)
 

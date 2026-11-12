@@ -345,6 +345,10 @@ NUMBERS = {
                 "(five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606)",
     0x04080080: "a panel's flags (its panel's, 0x08009A86, BN6's 0x0800C8F8) CirKill waits on: 0x04000000 the enemy's alliance, "
                 "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
+    0x0A050A01: "a collision region's spawn word (object_spawnCollisionRegion's r4, read by the third kind's 3's init, the same "
+                "code in both: +4 its region kind 1, +5 its hit kind 0x0A, +6 and +7 the collision set-up's 5 and 0x0A): BN6's own "
+                "attacks pass each byte the same, hit kind 0x0A in 0x06050A01 (six of its pools) and 0x15050A01 (two), which BN4 "
+                "passes too, and 0x0A at +7 in 0x0A050101, 0x0A050701 and 0x0A05FF01 (BigHamr's, 0x080D6B1C)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "
                 "pass the same (eight of its pools)",
     0x04050301: "a collision region's spawn word (MagTect's: its ldr r4 at 0x080BEF94, then bl 0x080CD7E2, object_spawnCollisionRegion, "

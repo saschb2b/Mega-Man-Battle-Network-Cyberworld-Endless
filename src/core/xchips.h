@@ -43,10 +43,17 @@ uint16_t xchips_reward_bn6(uint16_t v);
 /* ... and one of BN4 Red Sun's (its reward rows', BN4_REWARD_ROWS: BN6's
  * encoding) as BN6's: a chip as the run's chip it is (xchips_bn4_paid),
  * in its code where that record has it, else its *, else its first;
- * XCHIPS_STAND_IN zenny where the run has none (none of BN4's own chips
- * is in BN6's tables yet) or where it sits out; the others as they are
+ * XCHIPS_STAND_IN zenny where the run has none, where it is kept out (a
+ * dark chip of BN4's, xchips_kept_out) or where it sits out (its code not
+ * moved yet); the others as they are
  * (docs/multirom/bn4.md, Its viruses' rewards) */
 uint16_t xchips_reward_bn4(uint16_t v);
+/* Chip `id` never a reward, whatever plays: none, or a dark chip of BN4's
+ * (xreg4_dark). One costs 20 max HP a battle it is used in, a reward
+ * tells no price, and no flame offers BN4's yet (docs/multirom/bn4-chips.md,
+ * unit 7); BN4's reward rows name ElemDark (row 114) and others, so one
+ * pays the stand-in's zenny */
+bool xchips_kept_out(int id);
 /* The run's chip BN4's chip `x` is, 0 none (docs/multirom/bn4-chips.md,
  * the build plan's unit 0): BN6's own of its name, whatever their classes;
  * else the registry's own id of BN5's chip of its name (BN5's ROM read);

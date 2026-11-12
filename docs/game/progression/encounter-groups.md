@@ -374,7 +374,8 @@ Where each beat goes (the shares as the owner set them, below):
 ### Step 1, built
 
 The pool, the templates and their filling are in the engine since 11
-November 2026, behind a dev switch: no run of a player's holds a group.
+November 2026, then behind a dev switch: no run of a player's held a
+group until Step 3 turned them on (below).
 
 - **The module** is `src/core/groups.c`, numbers alone and no ROM: a
   family's lean from its placements, the eleven templates (what a family
@@ -461,8 +462,8 @@ Left of step 1, each measured before step 2 rests on it:
 
 ### Step 2, the arc and the rewards, built
 
-In the engine since 12 November 2026, behind `--dev arc`: no run of a
-player's has an arc.
+In the engine since 12 November 2026, then behind `--dev arc`: no run of
+a player's had an arc until Step 3 turned them on (below).
 
 - **The arc** (`src/core/group_arc.c`, no ROM; its rules by act in
   `src/core/group_pool.c`): an act's signature by the run's seed and the
@@ -473,6 +474,31 @@ player's has an arc.
   in act 1, 51% in act 2, 34% in act 3, 25% in act 4; the deep takes any
   family. Every act of every area has an arc with every ROM read, from
   13 families in act 1 to 58 in the deep.
+- **The arc is the act's, whichever layer asks** (12 November 2026,
+  found by the trailer's session with `--run-depth`). Two things it was
+  made from were a layer's, not the act's, in an older net's area:
+  - Its rules were read at the layer that asked first, and the area's
+    own families there are its records' of that layer
+    (`xterritory_families`). Played through, the arc was made on the
+    first layer and kept; a game started on a later layer (a CONTINUE)
+    made it anew. Seed 5's act 2 in BN5's Oran Area says Spikey on all
+    three layers played through, and its save continued on the third
+    said Armadill. Now the rules are the act's first layer's
+    (`group_arc_depth`).
+  - A dark layer wears a dark area, which is no territory, so on an
+    act's dark layer the area's own were the BN6 area's and the arc was
+    made anew for that one layer, in one session too (seed 17's act 2:
+    family 32 on its first and third layer, Armadill on its dark
+    second). Now the arc reads the area the act wears
+    (`loot_arc_territory`, set by the director on a dark layer).
+
+  Of 250 acts (seeds 1-50, acts 2 to 6, every ROM read, each layer
+  started on its own) 17 named another family on a later layer, all in
+  BN5's areas; none does now. `build.py pacing` asks every act's arc
+  first on its second and third layer, in the BN6 area and in each
+  older net's area that dresses it, and fails where one differs from
+  its first layer's; the unit tests hold `group_arc_depth` to the act's
+  first layer.
 - **The three beats**: on the act's first layer the signature alone, two
   of it or one, whichever holds more HP inside the eased limits (the
   band's lower half, two thirds of the pressure cap, about the median of

@@ -4389,6 +4389,15 @@ static void test_free_space(void) {
 		CHECK(u->kind == XCHIP_NAVI && !u->wait && copied, "chips: %s's step-in sound is a Navi chip's unit's, a song it copies", u->code.name);
 	}
 	CHECK(step_ins >= 1, "chips: a BN4 Navi chip's unit carries its object's step-in sound (GutPnch's, %d)", step_ins);
+	/* (a unit whose spawner takes its side in r3, XChipUnit.side: a Navi chip's alone, its home's wrapper's place its own) */
+	int sides = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (!u->side) continue;
+		sides += u->kind == XCHIP_NAVI && !u->wait && !u->step_in;
+		CHECK(u->kind == XCHIP_NAVI && !u->wait && !u->step_in, "chips: %s's side's wrapper is a Navi chip's unit's, its place no other wrapper's", u->code.name);
+	}
+	CHECK(sides >= 1, "chips: a BN4 Navi chip's unit's spawner is handed its side (RollAro's, %d)", sides);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -5293,6 +5302,9 @@ static void test_xchips(void) {
 	CHECK(xchips_sp_named("ProtoMn\x04") && !xchips_sp_named("ProtoMan") && !xchips_sp_named("ProtoMn\x03") && !xchips_sp_named(""),
 		"xchips: BN6's SP by its mark, its EX and V1 not");
 	CHECK(!xchips_bn4_paid(205) && xchips_reward_bn4(205 | 18 << 9) == (0x4000 | XCHIPS_STAND_IN), "xchips: no BN4 chip paired without the ROMs, the stand-in");
+	/* (a dark chip of BN4's never a reward, though it plays: BN4's row 114 names ElemDark; FlmLine1, GutsMan and Cannon not kept out) */
+	CHECK(xchips_kept_out(0) && xchips_kept_out(697) && xchips_kept_out(601) && xchips_kept_out(527) && xchips_kept_out(730) &&
+		!xchips_kept_out(595) && !xchips_kept_out(535) && !xchips_kept_out(1), "xchips: BN4's dark chips kept out of rewards, the rest not");
 	/* (a reward entry of BN5's as BN6's: no chip paired without the ROMs,
 	 * the stand-in's zenny; zenny, BugFrags and none as they are) */
 	CHECK(xchips_reward_bn6(0x0001) == (0x4000 | XCHIPS_STAND_IN) && xchips_reward_bn6(0x43E8) == 0x43E8 && xchips_reward_bn6(0xC003) == 0xC003 &&
@@ -6155,8 +6167,8 @@ static void test_library_pages(void) {
 		const XChipReg *r = xreg_at(s->chip);
 		const XChipReg4 *own = xreg4_of(s->own);
 		/* (its own row's id where it has one, sitting out until its code plays, on BN6's or moved; else the run's chip of its name: BN6's or BN5's) */
-		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && library_plays(s->chip) == (own->how == XREG_RECORD || own->how == XREG_MOVED),
-			"library: BN4's chip %d fills its slot with its own row's id, hidden until it plays", s->own);
+		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && library_plays(s->chip) == ((own->how == XREG_RECORD || own->how == XREG_MOVED) && !xreg4_dark(s->chip)),
+			"library: BN4's chip %d fills its slot with its own row's id, hidden until it plays and while it is dark", s->own);
 		else CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
 		hidden4 += own != NULL;
 	}
@@ -6176,6 +6188,9 @@ static void test_library_pages(void) {
 	CHECK(library_rows_check(back, 2) == 2 && library_rows_check(twice, 2) == 2 && library_rows_check(cls, 1) == 1 && library_rows_check(none, 1) == 1 && !library_rows_check(rows, 5),
 		"library: a number out of order, a chip twice, a fourth class and no chip refused");
 	/* (what plays: the registry's own over BN6's code or moved, no DarkChip, no Program Advance; BN6's by its pool, none without its ROM) */
+	/* (a dark chip of BN4's that plays, unlisted while nothing hands one out: Hole, DrkLine, ElemDark, BugCurse; FlmLine1 listed) */
+	CHECK(!library_plays(527) && !library_plays(528) && !library_plays(697) && !library_plays(730) && library_plays(595),
+		"library: BN4's dark chips that play are not listed, FlmLine1 is");
 	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
@@ -7634,15 +7649,18 @@ static void test_lab_text(void) {
 	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
 	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
 	lab_info_result(s, sizeof s, &won);
-	CHECK(!strcmp(s, "0:12:66. Lv 9. HP -20."), "lab: a win's time, level and HP lost (%s)", s);
+	CHECK(!strcmp(s, "0:12:66 Lv 9|HP -20."), "lab: a win's time and level, then the HP lost, a line each (%s)", s);
 	lab_info_result(s, sizeof s, &best);
-	CHECK(!strcmp(s, "1:00:50. Lv S. HP -0."), "lab: level 11 is S (%s)", s);
+	CHECK(!strcmp(s, "1:00:50 Lv S|No HP lost."), "lab: level 11 is S, and no HP lost is said so (%s)", s);
 	lab_info_result(s, sizeof s, &fell);
-	CHECK(!strcmp(s, "Deleted at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	CHECK(!strcmp(s, "Deleted at|0:32:76."), "lab: a deletion names its time (%s)", s);
 	lab_info_result(s, sizeof s, &left);
-	CHECK(!strcmp(s, "Left at 0:00:98."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(s, "Left at|0:00:98."), "lab: a battle left (%s)", s);
 	lab_info_set(s, sizeof s, 2, 11, 760, 0);
-	CHECK(!strcmp(s, "Best 0:12:66. Lv S. HP -0."), "lab: a kept set's best (%s)", s);
+	CHECK(!strcmp(s, "0:12:66 Lv S|No HP lost."), "lab: a kept set's best, as a win reads (%s)", s);
+	/* (the information box holds 13 letters a line: the longest win's lines are within it) */
+	lab_info_set(s, sizeof s, 2, 10, 9 * 3600 + 59 * 60 + 59, 1200);
+	CHECK(strchr(s, '|') && strchr(s, '|') - s <= 13 && strlen(strchr(s, '|') + 1) <= 13, "lab: a win's lines fit the information box (%s)", s);
 	lab_info_set(s, sizeof s, 2, 0, 0, 0);
 	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
 	lab_set_value(s, sizeof s, 1);
@@ -7659,6 +7677,9 @@ static void test_lab_text(void) {
 	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
 	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
 	char a[32], b[32];
+	lab_info_folder(a, sizeof a, true);
+	lab_info_folder(b, sizeof b, false);
+	CHECK(!strcmp(a, "The Lab's. A edits it.") && !strcmp(b, "MegaMan's own."), "lab: whose folder a test battle is fought with (%s, %s)", a, b);
 	lab_stage_words(s, sizeof s, "BN5", "Oran Area", false);
 	lab_stage_words(a, sizeof a, "", "Central", true);
 	lab_stage_words(b, sizeof b, "", "Central", false);
@@ -7896,6 +7917,35 @@ static void test_group_arc(void) {
 	CHECK(seen == 15, "arc: every family that can carry the act is a signature by some roll (%d)", seen);
 	/* (a family with no pair carries no act) */
 	CHECK(!group_arc_make(pool, 1, &r, 1, &a), "arc: no signature where nothing pairs");
+	/* an act's arc is made at its first layer, whichever of its layers asks (a CONTINUE on its third): the same layer for
+	 * all three, in the same act and cycle, and the Nest's its own */
+	for (int d = 1; d <= 3 * CYCLE_LAYERS; ++d) {
+		int at = group_arc_depth(d), in = (d - 1) % CYCLE_LAYERS;
+		CHECK(at == d - (in < 18 ? in % 3 : 0) && pacing_act(at) == pacing_act(d) && pacing_loop(at) == pacing_loop(d),
+			"arc: the layer the act's arc is made at, from layer %d (%d)", d, at);
+	}
+	/* ... so rules that change inside an act, as an older net's area's own families do by the layer, cannot move the
+	 * signature: read at each layer they give other arcs (the fault of 0.21.0's first builds), read at group_arc_depth one */
+	int moved = 0, held = 0;
+	for (uint32_t seed = 1; seed <= 200; ++seed) {
+		GroupArc by_layer[3], by_act[3];
+		bool made = true;
+		for (int d = 0; d < 3; ++d) {
+			ArcRules at = r, first = r;
+			/* (the area's own families by the layer: family 1 on its first, 2 on its second, 33 on its third) */
+			static const int own[3] = { 1, 2, 33 };
+			at.home = first.home = FAMILY_MASK_NONE;
+			family_mask_add(&at.home, own[d]);
+			family_mask_add(&first.home, own[group_arc_depth(4 + d) - 4]);
+			at.home_share = first.home_share = 9;
+			made &= group_arc_make(pool, 5, &at, seed * 2654435761u, &by_layer[d]) && group_arc_make(pool, 5, &first, seed * 2654435761u, &by_act[d]);
+		}
+		if (!made) continue;
+		moved += by_layer[1].signature != by_layer[0].signature || by_layer[2].signature != by_layer[0].signature;
+		held += by_act[1].signature == by_act[0].signature && by_act[2].signature == by_act[0].signature;
+	}
+	CHECK(moved > 0 && held == 200, "arc: the signature the act's alone, whichever layer asks (%d of 200 moved by the layer's rules, %d held by the act's)",
+		moved, held);
 }
 
 int main(int argc, char **argv) {

@@ -29,7 +29,7 @@ GBA core alone takes longer than a frame there.
   for it would leave it unread and play BN6's net alone, and say so (the
   PET's home and `log.txt`); a New 3DS has room (Memory, below).
 - Mega Man Battle Network 4: Red Sun (USA) goes there the same way, and
-  its net joins the runs too: BN4's areas and six of its virus families,
+  its net joins the runs too: BN4's areas, viruses, chips and Navis,
   the title saying "BN4 found". A New 3DS reads one extra ROM beside
   BN6's, BN5's where both are there; the other is left unread, and the
   PET's home says it was found with no room for it.
@@ -158,12 +158,18 @@ What differs from the other builds:
 - **NetBattles** are not offered on the 3DS: a NetBattle runs both
   players' GBAs on each system, and two GBAs on one ARM11 core take
   25.8 ms a frame with the picture (20.7 without) against a 60th of a
-  second's 16.7. The Net Square, its cards, the referee's calls of the
-  channel's battles, trades and the week's dive work as elsewhere, and
-  the NetPass says why the ring stays closed. The Arena's code is built
-  (its two cores share one ROM copy, 16 MB of the heap), so `--dev
-  rollbench` and `--dev arena` measure it on the device
-  (docs/online/arena/rollback/new-3ds.md).
+  second's 16.7. The Arena's code is built (its two cores share one ROM
+  copy, 16 MB of the heap), so `--dev rollbench` and `--dev arena`
+  measure it on the device (docs/online/arena/rollback/new-3ds.md). The
+  Net Square, its cards and the referee's calls of the channel's battles
+  work as elsewhere.
+- **Trades** work with one of BN5's or BN4's ROMs beside BN6's: a New
+  3DS reads one of the two, and with it its NetPass holds the Square and
+  Trade stamps (docs/GUIDE.md, The NetPass). A trade stays within the
+  chips both games hold. **The week's dive** stays shut: it takes both
+  ROMs, as a dive without one of them is another net than the Board's;
+  the week's ranking can still be read (docs/online/netpass.md, A system
+  with room for one game).
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.

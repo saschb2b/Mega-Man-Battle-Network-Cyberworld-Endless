@@ -27,13 +27,17 @@ void netpass_screen_strip(void);
 
 /* The stamp moment: due where the pass is full and fewer of its stamps
  * have been seen in the Square (netpass.ini), or seen for a smaller set; begun, the pass opens with
- * the new ones landing and the file says all of them seen */
+ * the new ones landing and the file says all of them seen (a full pass's
+ * stamps: every one, or the Square's and Trade's on a system of one extra
+ * ROM, netpass_stamps) */
 bool netpass_stamp_due(void);
 void netpass_stamp_begin(void);
 /* The set grown (a game joined it, protocol v17's BN4): due once where the
- * pass was full before and is not now; begun, the pass opens as it stands,
- * its new open slot naming the game, and the file says the Square's stamp
- * alone, so the stamp moment comes again once the pass is full */
+ * pass held every stamp before and holds fewer now; begun, the pass opens as it stands,
+ * its new open slot naming the game, and the file says the stamps it holds
+ * (the Square's alone, so the stamp moment comes again once the pass is
+ * full; the Square's and Trade's on a system of one extra ROM, whose pass
+ * is full with them) */
 bool netpass_grew_due(void);
 void netpass_grew_begin(void);
 

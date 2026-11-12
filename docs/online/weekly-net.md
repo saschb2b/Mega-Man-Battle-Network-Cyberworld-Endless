@@ -3,7 +3,7 @@ type: Feature
 title: "The week's net"
 description: "The week's net (issue #127): each server's weekly seed (`week.py`), a dive in a save slot of its own from a standard profile (`src/core/weekly.c`), the greeter's offer, WEEK_POST and the Board's reported depths."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:25:12Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
 ---
 
 # The week's net
@@ -17,9 +17,13 @@ likes, depths posted as "reported") and decided one thing while it was
 built: **a dive keeps a save slot of its own**, so the run in progress
 is never touched, and the player goes back to it when the dive ends.
 Diving takes the NetPass's DeepNet stamp (above); the Board's ranking
-reads on every game. Every diver has BN5's ROM, so the areas a game with
-it dresses in BN5's (`run_dress`, by the seed and the ROMs present) are
-the same on every dive.
+reads on every game. Every diver has every game of the set, BN5's ROM
+and BN4's, so what a seed makes by the ROMs read (the areas `run_dress`
+dresses in BN5's and BN4's, their guardians, the encounter groups'
+families, the chips found) is the same on every dive. That is why a
+system that reads one extra ROM at most, the New 3DS, holds no DeepNet
+stamp though its pass is full and trades
+([A system with room for one game](netpass.md#a-system-with-room-for-one-game)).
 
 ## Its design
 

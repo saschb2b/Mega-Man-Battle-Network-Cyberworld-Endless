@@ -1,20 +1,20 @@
-# Net Square protocol v17
+# Net Square protocol v18
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v17`. The server also
+`/presence` with subprotocol `cyberworld.presence.v18`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
-| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1, then BN4 Red Sun's (v17; each all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below), u8 name length, name bytes |
+| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1, then BN4 Red Sun's (v17; each all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below; v18: bit 14, `hello_one_extra` 16384, the game's system reads one extra ROM beside BN6's at most), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
-| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; no other bit) |
+| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; v18: bit 6, `roms_one_extra`, his system reads one extra ROM at most; no other bit) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
 | PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged (PONG: 5 bytes); since v13 PING is `ping_bytes` (7): the clock, then u16 the sender's round trip in ms as it measures it (0 unknown; a game on the server's own machine says 1), for its link's bars in the others' SNAPSHOT. A 5-byte PING is still answered, its round trip unknown |
 | PROFILE (8) | client → server | 69-byte public profile, described below |
@@ -93,14 +93,17 @@ HELLO names verified ROM identities, never supplies a ROM: BN6's must
 be `protocol.json`'s `rom_code` and `rom_sha1` (ERROR 4), BN5's either
 all zeros or `bn5_code` and `bn5_sha1` (ERROR 15), BN4's all zeros or
 `bn4_code` and `bn4_sha1` (ERROR 15, v17). The server keeps each
-session's ROMs as bits (`roms_bn5`, `roms_bn4`) and tells the others in
-SNAPSHOT. No
+session's ROMs as bits (`roms_bn5`, `roms_bn4`; `roms_one_extra` where
+HELLO said its system reads one at most and it named one game or none,
+v18) and tells the others in SNAPSHOT. No
 Capcom graphics, audio, text, code or save bytes cross the protocol.
 Compatibility metadata is not anti-cheat attestation: a modified client
 can forge it.
 
 The Net Square is every game's; the Arena, Trade Central and the week's
-posts need the full set (protocol v9; docs/online/netpass.md).
+posts need the full set (protocol v9; docs/online/netpass.md; from v18
+Trade Central a full pass, which a system of one extra ROM holds with
+one game: Protocol v18, below).
 Walking, phrases and emotes, Inspect, channels, STANDS, BOARD and
 WEEK_BOARD go to every session. A challenge or an answer (ARENA 1 and
 2), a WATCH, a proposal, an answer or a take (TRADE 1, 2 and 5), an
@@ -117,9 +120,38 @@ rules, so the server keeps no rules per battle and checks no chip
 against a pair. A game added to the set brings its identity to HELLO and
 its bit to `roms_full`, in a new protocol version. NOTICE 19 (a BN5 chip
 or full rules outside a mixed pair's common ground, protocols v4 to v8)
-is retired: nothing sends it. NOTICE 29 (`notice_team`, v12) refuses a
+was retired with them; v18 gives the number to `notice_ground`, a
+trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v18 (docs/online/netpass.md, A system with room for one game):
+**a full pass is every game the system can read.** A system that reads
+one extra ROM beside BN6's at most (the New 3DS) could never name both
+games of v17's full set, and says so: HELLO's channel word carries
+`hello_one_extra` (16384, beside the resume bit and clear of every
+channel), kept with the session's ROMs as `roms_one_extra` (64, bit 6 of
+SNAPSHOT's byte, which tells the others) unless the HELLO names both
+games after all. Such a session with one game's bit holds a full pass
+(`protocol.pass_full`), and **Trade Central takes a full pass** where it
+took the full set: TRADE 1, 2 and 5 and an OFFER post from it, and a
+proposal or a take aimed at it. The Arena, WATCH and WEEK_POST still
+take the full set (`protocol.full_set`, every bit of `roms_full`): two
+games of a NetBattle build the same installs, and what a seed makes of a
+dive goes by the ROMs read. Two full passes need not hold the same games
+now, so **the server checks a trade's chips against the pair**: a chip
+is BN4's from `bn4_chip_first`, else BN5's past `bn6_chip_last` or on
+`bn6_blank`, else BN6's and every game's (`protocol.chip_game`); a
+proposal's chip, an answer's, a take's two and a post's that a game of
+the pair lacks the ROM of (a post's: its own game) is answered NOTICE 19
+(`notice_ground`), nothing begun, an answer's ending the trade for both
+(TRADE_STATE cancelled). The BOARD sent to a game leaves out the offers
+of a chip it does not hold, by the same count (a game with BN4's ROM
+alone reads BN4's offers, which `chip_bn5`'s count of every id past
+BN6's kept from it). No message changed its size. A v17 game refuses a
+SNAPSHOT with bit 6 and a v17 server a HELLO with bit 14 (a channel it
+has not: ERROR 7), hence the version: client and server go out
+together, and either one older says so (ERROR 2 or 17).
 
 Protocol v17 (docs/online/netpass.md, A game joins the set): **BN4 Red
 Sun joins the full set.** HELLO grows by BN4's game code and SHA-1 after
@@ -259,7 +291,8 @@ local files when they change. `/health` reports configuration and occupancy with
 player names, public identities, private keys or IPs.
 
 Trade Central's trades are one chip for one chip between two players
-of a channel, both with the full set (NOTICE 28 otherwise), neither busy
+of a channel, both with a full pass (NOTICE 28 otherwise), each chip one
+both games hold (NOTICE 19 otherwise, v18), neither busy
 in another trade or a battle. The proposer names the chip given, the
 other answers with his, and the server commits only when both accepted
 the same pair as their TRADE_STATE showed it, sends done to both and

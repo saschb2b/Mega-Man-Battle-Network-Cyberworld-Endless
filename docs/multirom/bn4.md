@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "Battle Network 4 in a run"
-description: "What BN4 Red Sun's ROM could lend a run (measured), what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four, BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
+description: "What BN4 Red Sun's ROM lends a run (measured) and where that stands in 0.21.0, what players said of BN4 and what follows from it, the design checked against the core loop (BN4's Navis and viruses first, its tournament as an act's climax), its viruses as visitors in the nets' one-in-four (the encounter groups' signatures since 12 November 2026), BN4 whole in players' runs since 5 November 2026 (its viruses, areas and music: the owner's call 10), and a phased plan with the owner's calls (the tournament an act's climax, areas shared by the seed, BN4's net the older Net, its visitors out once six were proved)."
 tags: [multirom, bn4, design]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
 sources:
@@ -17,11 +17,29 @@ sources:
 
 Battle Network 4: Red Sun as a third, optional ROM beside BN6's, lending a
 run what its data holds as BN5's does ([Other games' ROMs](overview.md)).
-Researched, nothing built: its tables are in [BN4 Red Sun's tables](../rom/bn4.md),
+Researched first (3 November 2026), then built phase by phase (The plan,
+below): its tables are in [BN4 Red Sun's tables](../rom/bn4.md),
 what players said of it in [Sources](../research/sources.md) (Battle Network 4).
 Reasoned with the game-design skill and checked against
 [the core loop](../game/core-loop.md), as a new axis must be. The calls at the end
 are the owner's.
+
+**Where it stands in 0.21.0:** BN4 Red Sun is offered to players on every
+platform, its ROM read beside BN6's as BN5's is (a New 3DS reads one of
+the two, BN5's first). Its five areas dress
+BN6's by the seed since 5 November 2026 (Turned on, whole); its moved
+virus families come as the acts' signatures and their partners
+([Encounter groups](../game/progression/encounter-groups.md)); nine of
+its Navis guard its areas in half the runs
+([BN4's Navis as guardians](../game/bosses/bn4-navis.md)) and twelve enter
+[the tournament](../game/tournament.md); 84 of its chips play and 17 of
+its 19 Program Advances form, 101 of the registry's 193 rows
+([BN4's chips in a run](bn4-chips.md)), while its dark chips reach no
+run; the Jukebox plays its 34 songs (Its music); and it is in the
+NetPass's full set ([The NetPass](../online/netpass.md), protocol v17).
+Still BN6's on its areas: the random battles' records and the
+bystanders. Its Souls are mapped and not given
+([BN4's Souls on BN6's proxy form](bn4-souls.md)).
 
 ## What its ROM holds
 
@@ -325,7 +343,9 @@ quarter. Their themes (BN4's net and Undernet songs)
 and battle themes (`BN4_SONG_BATTLE`, `BN4_SONG_BOSS`, named in its
 layout now) are copied as BN5's are, their battle backgrounds BN4's own;
 their battles, guardians and bystanders stay BN6's (no records of BN4's
-in a run yet), a guardian's prelude BN6's. `--net-biome x15`-`x19`, the
+in a run yet), a guardian's prelude BN6's (so on that day: nine of BN4's
+Navis guard these areas since 12 November 2026,
+[BN4's Navis as guardians](../game/bosses/bn4-navis.md)). `--net-biome x15`-`x19`, the
 atlas's `x1` and `--dev showbn4` work as before. Its six families
 install wherever its ROM is read, after BN5's where BN5's is read and
 alone where it is not (`src/emu/xvirus.c`'s `xvirus_install`; before,
@@ -403,6 +423,16 @@ does not see visitors (its runs start no core with the families
 installed): with `--dev bn4families` its report was the same before and
 after, 0 numbers outside their bands.
 
+A dark chip of BN4's is never a reward (`xchips_kept_out`, 12 November
+2026): it costs 20 max HP a battle it is used in, a reward tells no
+price, and no flame offers BN4's yet ([BN4's chips in a
+run](bn4-chips.md), unit 7). The rows do name them: a scan of BN4's 253
+rows at `BN4_REWARD_ROWS` (a scratch script over the ROM, the chips'
+ids by the registry's `xreg4_dark_ids`) found 218 entries naming one,
+ElemDark (row 114, entries 9 and 19, a chip that plays since #423),
+BlakBarr and the Navis' DS chips (which sit out): each pays the
+stand-in's 200 zenny, as a chip that sits out does.
+
 An HP entry of 0 (`0x8000`) is in 23 of the six families' entries:
 ShrimpyV3EX's 7, WallaV3's and WallaV3EX's 8 each, all in a row's half
 for MegaMan's HP at 3/8 or less (82 in BN4's whole table, 108 in BN5's,
@@ -434,8 +464,9 @@ hand.
 Each phase ships on its own; each transplant proved against BN4's own
 battle frame by frame, as BN5's were.
 
-0. **The ROM and the harness.** Done, for research (3 November 2026):
-   BN4 an extra ROM's entry read only when a dev tool asks (the atlas's
+0. **The ROM and the harness.** Done, for research first (3 November
+   2026) and offered to players since 5 November 2026:
+   BN4 an extra ROM's entry, at first read only when a dev tool asked (the atlas's
    `x1` draws its maps), `src/emu/bn4.h` and BN4's symbol files, its
    battle records, encounter check, enemy and chip records, sprite lists,
    battle backgrounds, map routines, music, Souls and the battle in RAM
@@ -455,13 +486,18 @@ battle frame by frame, as BN5's were.
    paired first, each proved by `build.py xdiff`; visitors at the seams
    as BN5's, sharing their one battle in four from act 2 (Its viruses as
    visitors), in players' runs since 5 November 2026 (Turned on, whole),
-   with its areas.
+   with its areas; since 12 November 2026 as the acts' signatures and
+   partners in place of the visitors
+   ([Encounter groups](../game/progression/encounter-groups.md)).
 2. **Its Navis and the tournament.** The tournament on the Navis already
    moved; BN4's Navis moved, guarding and joining its bracket; BN4's
    Souls, Blue Moon's six with Red Sun's as the ROM runs them all
    (mapped in [BN4's Souls on BN6's proxy form](bn4-souls.md): ThunSoul
    first, then AquaSoul and GutsSoul, the dearest after the BN4 tracks
-   they lean on); DS chips for dark wins. The Navis are mapped Navi by Navi, nothing built
+   they lean on); DS chips for dark wins. In 0.21.0 twelve Navis are
+   moved, proved and in the tournament, nine of them guarding BN4's areas
+   ([BN4's Navis as guardians](../game/bosses/bn4-navis.md)); no Soul is
+   given yet. As planned, the Navis were mapped Navi by Navi before any was built
    ([BN4's Navis in BN6's engine](bn4-navis.md)): two builds (ten Soul Navis
    on their side's AI data and MegaMan's own states, eight on their own
    states and the object's variables), about 70 KB of code with their 64
@@ -473,11 +509,16 @@ battle frame by frame, as BN5's were.
    Prepared and held for review (4 November 2026), their 256-colour maps
    shown so, their backdrops and battle backgrounds BN4's own ([Status](status.md),
    BN4 Red Sun's areas); in runs, all five at once, since 5 November 2026
-   (call 10, over admitting them area by area after review). Its own
-   battle records, guardians and bystanders are still to come.
+   (call 10, over admitting them area by area after review). Its
+   guardians came on 12 November 2026
+   ([BN4's Navis as guardians](../game/bosses/bn4-navis.md)); its own
+   battle records and bystanders are still to come.
 4. **Its chips**: the registry past 512, those BN6 has the code for
    first, then its Program Advances and DarkChips by BN4's code moved.
-   Designed and scoped (9 November 2026), nothing built, in [BN4's chips
+   Designed and scoped (9 November 2026) and built unit by unit since
+   (in 0.21.0, 84 chips play and 17 of the 19 Program Advances form, in
+   the finds on its areas and in the deep; its dark chips reach no run),
+   in [BN4's chips
    in a run](bn4-chips.md): the census (191 new to a run, 6 on BN6's
    code), chip ids of ten bits for BN4's chips and BN5's alike, the
    online rule and the build plan in units.

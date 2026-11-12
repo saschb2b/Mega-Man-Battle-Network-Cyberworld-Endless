@@ -39,6 +39,13 @@ SPRITE_FIRST = 0x40          # list 2's numbers of BN4's Navis, a seat each (src
 # +0x18, r5 MegaMan), register for register
 SHAPE_XY = ('push', 'push', 'movs', 'bl', 'adds3', 'pop', 'bcc', 'strb', 'strb', 'strb', 'str', 'ldrb', 'strb', 'str', 'str',
             'movs', 'strb', 'pop')
+# ... and RollAro's (0x080C83D4): no element and no parent, its panel twice, and its side from r3 (strb r3,[r0,#0x16]), which
+# BN4's object hands it (ldrb r3,[r5,#0x16] before the call, 0x080E9048) and BN6's object does not: its r3 is the routine's
+# own address (0x080E2BCE). The unit's entry is then a wrapper of the installer's that loads r3 from the user BN6 hands in
+# r5 (XChipUnit.side: src/emu/xchips_code.c side_stage)
+SHAPE_SIDE = ('push', 'push', 'movs', 'bl', 'adds3', 'pop', 'bcc', 'strb', 'strb', 'strb', 'strb', 'strb', 'str', 'str',
+              'movs', 'strb', 'pop')
+SIDE_STORE = 'strb r3, [r0, #0x16]'
 # BN4's Navi chip objects read against BN6's Navi object (NAVI_OBJECT6), each by hand in both ROMs: BN4's fourth-kind type ->
 # why BN6's object serves in its place. One not here is a decision
 OBJECTS = {
@@ -55,6 +62,9 @@ OBJECTS = {
           "([r5,#4], as BN6's object does) and no bit 8 by the user's AI data, with r3 his side, which the spawner "
           "(0x080C85C2) overwrites before it reads it. And its last state plays sound 0xB0 as it steps MegaMan in "
           "(0x080E91BC: movs r0,#0xb0), which GutsMan's does not and BN6's object does not: STEP_IN",
+    0x63: "RollAro's (0x080E8FA0): GutPnch's object (0x64) state for state without its sound as MegaMan steps in, so "
+          "GutsMan's but that it hands its Navi the parameters whole, and his side in r3 (ldrb r3,[r5,#0x16] at 0x080E9048), "
+          "which his spawner stores: SHAPE_SIDE",
 }
 # A sound BN4's object plays as it steps MegaMan in, which BN6's Navi object does not: BN4's fourth-kind type -> (the movs that
 # names it, the sound), checked against the instruction and its call. The unit carries the sound's slot (XChipUnit.step_in):
@@ -184,8 +194,12 @@ def begin(b4, b6, f, ty4):
     t4 = timers(walks)
     if t4 != TIMERS6:
         f.decide('object', f'its object waits {tuple(hex(x) for x in t4)} frames, BN6\'s Navi object {tuple(hex(x) for x in TIMERS6)}')
-    forms = tuple(w.insns[a].form for w in [T.walk(b4, spawner)] for a in sorted(w.insns))
-    if forms != SHAPE_XY:
+    sw = T.walk(b4, spawner)
+    forms = tuple(sw.insns[a].form for a in sorted(sw.insns))
+    f.side = forms == SHAPE_SIDE and SIDE_STORE in [sw.insns[a].text for a in sw.insns]
+    if f.side:
+        f.notes.append(f'his spawner ({spawner:08X}) takes his side in r3, which BN6\'s Navi object does not hand: the unit\'s entry a wrapper that loads it')
+    elif forms != SHAPE_XY:
         f.decide('entry', f'his spawner ({spawner:08X}) is not the shape BN6\'s Navi object calls (GutsMan\'s, 0x080B9B1C): a shim to write')
     ty1, lo1, hi1 = hit
     f.entry, f.ty, f.lo, f.hi = spawner, ty1, lo1, hi1

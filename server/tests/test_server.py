@@ -199,7 +199,7 @@ class ContractTests(unittest.TestCase):
                      "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
                      "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
                      "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
-                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_bn4", "roms_full", "bn4_chip_first", "notice_pass",
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_bn4", "roms_full", "roms_one_extra", "hello_one_extra", "notice_ground", "bn4_chip_first", "notice_pass",
                      "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
                      "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
                      "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes",
@@ -246,6 +246,22 @@ class ContractTests(unittest.TestCase):
         self.assertGreaterEqual(protocol.SPEC["roms_bn4"], 1 << (protocol.SPEC["link_shift"] + 2))
         self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
         self.assertFalse(protocol.full_set(0))
+        # (v18: a system of one extra ROM at most. Its bit past the games', the busy and the link bits in SNAPSHOT's
+        # byte, its HELLO bit clear of the resume's and of every channel; its pass full with one game, never the
+        # full set; any other system's with every game alone)
+        bn5, bn4, one = protocol.SPEC["roms_bn5"], protocol.SPEC["roms_bn4"], protocol.SPEC["roms_one_extra"]
+        self.assertEqual(one, protocol.SPEC["roms_bn4"] << 1)
+        self.assertLess(one, 256)
+        self.assertFalse(protocol.SPEC["hello_one_extra"] & protocol.SPEC["hello_resume"])
+        self.assertGreater(protocol.SPEC["hello_one_extra"], 256)
+        self.assertEqual([protocol.pass_full(r) for r in (0, one, bn5, bn4, one | bn5, one | bn4, bn5 | bn4)],
+                         [False, False, False, False, True, True, True])
+        self.assertFalse(protocol.full_set(one | bn5) or protocol.full_set(one | bn4))
+        # (whose game a chip is, BN4's own first, and what a game holds)
+        self.assertEqual([protocol.chip_game(c) for c in (5, 214, 411, protocol.SPEC["bn4_chip_first"] - 1, protocol.SPEC["bn4_chip_first"], 700)],
+                         [0, bn5, bn5, bn5, bn4, bn4])
+        self.assertTrue(protocol.holds(0, 5) and protocol.holds(one | bn5, 411) and protocol.holds(bn4, 700))
+        self.assertFalse(protocol.holds(one | bn5, 700) or protocol.holds(bn4, 411) or protocol.holds(one, 214))
         # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
         rom = (ROOT / "src/core/rom.c").read_text()
         self.assertIn(f'"{protocol.SPEC["bn5_sha1"]}", "{protocol.SPEC["bn5_code"]}"', rom)
@@ -284,6 +300,14 @@ class ContractTests(unittest.TestCase):
         bn5, bn4 = protocol.SPEC["roms_bn5"], protocol.SPEC["roms_bn4"]
         for kw, roms in ((dict(), 0), (dict(bn5=True), bn5 | bn4), (dict(bn5=True, bn4=False), bn5), (dict(bn4=True), bn4)):
             self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
+        # (v18: a system of one extra ROM says so in the channel word, beside the channel and the resume bit; a
+        # HELLO naming both games reads both, whatever it says)
+        one = protocol.SPEC["roms_one_extra"]
+        for kw, roms in ((dict(one_extra=True), one), (dict(bn5=True, bn4=False, one_extra=True), bn5 | one),
+                         (dict(bn4=True, one_extra=True), bn4 | one), (dict(bn5=True, one_extra=True), bn5 | bn4)):
+            self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
+        self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=3, resume=True, bn5=True, bn4=False, one_extra=True))[2:],
+                         (3, bn5 | one, True))
 
 
 if __name__ == "__main__":

@@ -8,9 +8,10 @@
  * and under the act's pressure cap, the third limit, measured
  * (docs/game/progression/encounter-groups-measured.md).
  *
- * The build's step 1: behind `--dev groups` (group_pool.h), no run of a
- * player's holds one. Numbers only, no ROM: the pool reaches it through
- * its caller, so it builds and tests without one. */
+ * An act's arc builds its battles from these (group_arc.h), in every run;
+ * `--dev groups` makes every plain battle one (group_pool.h). Numbers
+ * only, no ROM: the pool reaches it through its caller, so it builds and
+ * tests without one. */
 #ifndef CW_GROUPS_H
 #define CW_GROUPS_H
 

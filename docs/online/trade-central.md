@@ -3,7 +3,7 @@ type: Feature
 title: "Trade Central"
 description: "Trade Central (`trade_central.c`): one spare chip for another player's, swapped in the Square at once and kept in `trade.pending` until home has it, one trade a visit, the spares list and chip trade screens (`trade_screen.c`, issue #145), and the trade board."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
 ---
 
 # Trade Central
@@ -14,7 +14,11 @@ player's (`trade_central.c`, words in `trade_words.c`). Both games hold
 the NetPass's Trade stamp (above), so every chip of either game's
 registry trades, BN5's too: its ids are the registry's, fixed in
 `src/core/xchips_registry.c`, so they name the same chip on every game
-with BN5's ROM. To a game without the stamp the clerk says it has none,
+with BN5's ROM. Since protocol v18 two games with the stamp need not
+hold the same ROMs (a New 3DS's pass is full with one game beside
+BN6's), so the spares list for a Navi shows the chips his game holds
+too and the server refuses any other (NOTICE 19):
+[A system with room for one game](netpass.md#a-system-with-room-for-one-game). To a game without the stamp the clerk says it has none,
 and the trade board's offers still read; the server refuses that game a
 trade, a post and an answer (NOTICE 28).
 

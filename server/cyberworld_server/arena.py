@@ -6,7 +6,9 @@ their latencies, and relays their loadouts, keys by frame and state hashes
 to each other. It never sees a battle: the games compare their hashes.
 Every battle is by full rules, between two games with the full set
 (protocol v9, protocol.full_set): a challenge from or to a game without
-it, or an answer from one, is refused with NOTICE notice_pass.
+it, or an answer from one, is refused with NOTICE notice_pass; a system of
+one extra ROM (v18, protocol.pass_full) among them, whose game builds
+other installs than a full set's.
 
 A Team NetBattle (protocol v12, teams.py) is a relay of these battles: a
 challenge between players of two teams is a team challenge, whose Yes

@@ -300,6 +300,7 @@ static int run_option(const char *a, const char *v, Options *o) {
 		 * is offered, its families installed wherever it is read, xvirus_bn4.h;
 		 * the differential still names the families' battles by the one) */
 		devtools_parse(v);
+		xroms_dev(v);
 	}
 	else if (!strcmp(a, "--tour")) { tour_parse(v); o->start_scene = "emu"; }
 	else if (!strcmp(a, "--launcher")) o->launcher = !strcmp(v, "open") ? LAUNCHER_OPEN : !strcmp(v, "off") ? LAUNCHER_OFF : LAUNCHER_AUTO;

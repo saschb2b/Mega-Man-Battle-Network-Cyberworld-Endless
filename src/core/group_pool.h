@@ -9,8 +9,9 @@
  * sets (seven of BN5's, whose maps' battle tables are not read) roams
  * from the first act.
  *
- * And a battle built from it: the build's step 1, behind `--dev groups`
- * (loot.h's loot_groups_always), which no run of a player's sets. */
+ * And a battle built from it: an act's arc's, in every run
+ * (group_arc_battle), or any template's where `--dev groups` asks
+ * (loot.h's loot_groups_always). */
 #ifndef CW_GROUP_POOL_H
 #define CW_GROUP_POOL_H
 

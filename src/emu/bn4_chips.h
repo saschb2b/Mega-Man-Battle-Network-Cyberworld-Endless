@@ -72,6 +72,15 @@
                                              BN4_REGION_SPAWN_FROZEN, its bits BN4_GUTPNCH_BITS) and is gone */
 #define BN4_GUTPNCH_BITS      0x080C855Au /* ... movs r7,#0x21: the punch's bits, struck and pushed (BN4_STRUCK_PUSHED) */
 #define BN4_GUTPNCH_SPAWN     0x080C85C2u /* ... his spawner, GutsMan's chip's shape (BN4_GUTSMAN_CHIP_SPAWN) */
+/* RollAro1-3 (its chips 151-153, support subfamily 0x35): a Navi chip by its shape, moved as a unit of kind navi */
+#define BN4_ROLLARO_OBJECT    0x080E8FA0u /* its object (the fourth kind's 0x63; its routine BN4_CHIP_ROUTINES' 0x35): GutPnch's object without its
+                                             sound, and it hands its Navi his side in r3 (ldrb r3,[r5,#0x16] at 0x080E9048) */
+#define BN4_ROLLARO_NAVI      0x080C8120u /* ... and the chip's Navi (the first kind's 0x41, to 0x080C83F8): Roll's sprite, she appears (sound
+                                             0xB0) and looses an arrow down her row (BN4_ROLLARO_ARROW; sound 0x132) and is gone */
+#define BN4_ROLLARO_ARROW     0x080C82CEu /* ... her arrow's spawn (bl 0x080CE80E: kind 0xF, height 0x24, her power), given the bit that runs
+                                             it while time is frozen (0x10 into its +0, 0x080C82D4) */
+#define BN4_ROLLARO_SPAWN     0x080C83D4u /* ... her spawner: r0, r1 her panel (stored twice), r3 her side, r6 her power, r7 the byte she sets
+                                             to 1 and clears when she is done; no element, no parent */
 /* A support chip's object's generic states, which every such type's tables name (BN6's the same places of its own types'
  * tables, BN6_SUPPORT_OBJECT_*: tools/xchiprecipe_bn4.py TWINS, each pair read in both ROMs) */
 #define BN4_SUPPORT_OBJECT_BEGIN 0x08008BD8u /* its state 0 (+8): its side's turn of the time freeze asked for */
@@ -350,6 +359,15 @@
                                            * mark over an object's head, the fourth kind's 0x06 */
 #define BN4_SIDE_RECORD       0x08022D8Au /* r0 a side: 0x020374B0 + 0x1B0 a side, a record of a side's own (BN6's another layout) */
 
+#define BN4_T3_HAMMER         0x4A        /* BigHamr's and GodHammr's hammer, the third kind's (0x080D68CC to 0x080D6BF8): an actor of 100 HP
+                                           * on the panel before MegaMan, run by BN4_ACTOR_RUN with BN4_HAMMER_STATES; set down with sound 0xB0
+                                           * (0x080D69AE), a wait, the swing: sound 0x122 (0x080D6A72), BN4_CAMERA_SHAKE_SET for 30 frames
+                                           * (0x080D6AB8), sound 0xA2 (0x080D6ABE) and its hit area (0x080CD7E2 at 0x080D6AD6) */
+#define BN4_HAMMER_STATES     0x080D698C  /* ... its eight states: its own the first, the third, the seventh and the eighth (0x080D69AC,
+                                           * 0x080D6B42, 0x080D69BE, 0x080D69E0), the engine's the rest; its set-down and wait store 6 and 7
+                                           * (0x080D69B4, 0x080D69D6), BN6's runner's 8 and 9 in the unit's copy */
+#define BN4_T4_HAMMER         0x26        /* ... its support object, the fourth kind's (0x080E4B88 to 0x080E4C3C), which the chip's routine
+                                           * spawns and which sets the hammer down */
 
 /* ---- the computed powers (docs/rom/bn4.md, Computed powers) ---- */
 #define BN4_CHIP_POWER    0x08019348u /* a chip's power (r0 its id, r1 the side): 1000 and up the routine of BN4_CHIP_POWERS by power less
