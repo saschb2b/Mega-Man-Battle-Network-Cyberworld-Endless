@@ -1,0 +1,34 @@
+[
+ {
+  "name": "PitRng1's recipe forms PitRng2",
+  "spec": "bn4_pa_pitrng1",
+  "poke": [
+   "0880140A:0264:2"
+  ],
+  "what": "PitRng1's recipe (FREE_CHIP_PAS + 0x108) names 612: the boomerangs' power 250, the Mettaur's 250 HP gone at the hit where BN4's leaves 50"
+ },
+ {
+  "name": "PitRng1 a Boomer",
+  "spec": "bn4_pa_pitrng1",
+  "poke": [
+   "08C06910:82:1"
+  ],
+  "what": "record 611's subfamily 0x82, Boomer's entry of BN6's grown misc routines, where PitRng's is 0x8D: one boomerang from MegaMan's panel where BN4's launcher throws three"
+ },
+ {
+  "name": "PitRng's boomerangs fewer",
+  "spec": "bn4_pa_pitrng1",
+  "poke": [
+   "080E99E4:2002"
+  ],
+  "what": "the launcher's copy's count (movs r0,#3 at BN4 0x080E99E4, BN4_PITRNG_COUNT) made 2: two boomerangs"
+ },
+ {
+  "name": "PitRng's boomerangs sooner",
+  "spec": "bn4_pa_pitrng1",
+  "poke": [
+   "080E99F8:2007"
+  ],
+  "what": "the launcher's copy's wait (movs r0,#0xf at BN4 0x080E99F8, BN4_PITRNG_EVERY) made 7: a boomerang each eight frames"
+ }
+]

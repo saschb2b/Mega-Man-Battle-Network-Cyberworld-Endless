@@ -1,0 +1,10 @@
+[
+ {
+  "name": "BubSprd's power another",
+  "spec": "bn4_pa_bubsprd",
+  "poke": [
+   "08C0686E:00C8:2"
+  ],
+  "what": "record 607's power 200 where BN4's BubSprd has 300: the Mettaur left 50 at the hit's frame where BN4's is deleted"
+ }
+]

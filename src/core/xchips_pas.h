@@ -25,5 +25,10 @@ typedef struct {
 
 extern const XChipPa xchips_pas[];
 extern const int xchips_pas_count;
+/* BN4 Red Sun's (docs/multirom/bn4-chips.md, The Program Advances): the recipes its Custom screen forms the registry's
+ * rows by (BN4_PA_LIST; `bn5` its entry there), those whose code is moved and whose parts all play, BN4's listed kind
+ * BN6's 4; listed after BN5's where BN4's chips' code is in. Written by tools/xreg_bn4.py (xchips_pas_bn4.c) */
+extern const XChipPa xchips_pas4[];
+extern const int xchips_pas4_count;
 
 #endif

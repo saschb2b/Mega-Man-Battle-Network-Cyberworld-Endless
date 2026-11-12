@@ -85,7 +85,9 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x12: (0x080CF596, "the spread shot's spawner (r0 0x12 to BN4's spawn, then its side, panel and power handed on): "
                               "Spreads moved the shot; DrkVulcn's vulcan state spawns it (bl at 0x080EC912)"),
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
-                              "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
+                              "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)"),
+           0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): Boomer's unit moved the boomerang; PitRng's launcher "
+                              "throws three (0x080E9A24)")}
 # A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
 ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
@@ -256,6 +258,7 @@ UNITS = (
     ('navi', 0x05, 'GutsManChip'),
     ('attack', 0x1F, 'DrkVulcn'),
     ('attack', 0x60, 'Elem'),
+    ('misc', 0x0D, 'PitRng'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -1090,10 +1093,14 @@ def rows_check(b4, f):
             # (an attack family's chips: the unit's number, its family; a Program Advance of it is formed, never dealt, its
             # row XREG_PA until BN4's recipes are listed; a chip of it another session moves waits, ROWS_WAIT)
             want = f.number
-            if how == 'PA' or i in ROWS_WAIT:
+            if (how == 'PA' and sub == 0xFF) or i in ROWS_WAIT:
                 f.notes.append(f'its chip {i} (id {bn6}) sits out: ' + ('a Program Advance, unformed until BN4\'s recipes are listed' if how == 'PA' else ROWS_WAIT[i]))
                 f.rows.pop()
                 continue
+        if how == 'PA' and sub == want:
+            # (a Program Advance whose row names the unit, tools/xreg_bn4.py PAS: formed by BN4's recipes in BN6's grown list)
+            f.notes.append(f'its chip {i} (id {bn6}) is a Program Advance, formed by BN4\'s recipes (src/core/xchips_pas_bn4.c)')
+            continue
         if how != 'MOVED' or sub != want:
             f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {want:#x}: '
                             f'tools/xreg_bn4.py MOVED')

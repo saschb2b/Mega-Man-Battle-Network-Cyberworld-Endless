@@ -1,0 +1,10 @@
+[
+ {
+  "name": "FlmCros3's power another",
+  "spec": "bn4_pa_flmcros3",
+  "poke": [
+   "08C068F2:00C8:2"
+  ],
+  "what": "record 610's power 200 where BN4's FlmCros3 has 500: the Mettaur left 50 at the hit's frame"
+ }
+]
