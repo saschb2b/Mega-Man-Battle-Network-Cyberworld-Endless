@@ -353,13 +353,16 @@ static void sounds_set(const XNavi *n) {
 			xv_fail("its sound %#x at %08x is not the one expected", x->song, (unsigned)x->at);
 			return;
 		}
-		if (slots[i] < 0 || slots[i] > 0xFF) {
+		/* (a slot past 0xFF by its two instructions alone, movs then adds #0xFF, as BN5's own makes a song past it: LarkMan's
+		 * 0x13C, a grown table's slot) */
+		bool wide = slots[i] > 0xFF;
+		if (slots[i] < 0 || (wide && (!x->at2 || slots[i] > 0x1FE))) {
 			fprintf(stderr, "xnavi: %s's sound %#x not copied in: BN6's of its number plays\n", f->name, x->song);
 			continue;
 		}
 		uint8_t *p = xv_put(b->at + (x->at - b->start), 2, false), *q = x->at2 ? xv_put(b2->at + (x->at2 - b2->start), 2, false) : NULL;
-		if (p) put16(p, (uint16_t)MOVS_IMM(0, slots[i]));
-		if (q) put16(q, (uint16_t)ADDS_IMM(0, 0));
+		if (p) put16(p, (uint16_t)MOVS_IMM(0, wide ? slots[i] - 0xFF : slots[i]));
+		if (q) put16(q, (uint16_t)ADDS_IMM(0, wide ? 0xFF : 0));
 	}
 }
 

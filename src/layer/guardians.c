@@ -52,10 +52,14 @@ static const Guardian guardians[] = {
 	[31] = { "BlizzardMan", "Darkloid of the Snow", GUARDIAN_NO_MUGSHOT, -1, 112, 184, 248 },
 	[32] = { "CloudMan", "Darkloid of the Storm", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 216 },
 	[33] = { "CosmoMan", "Darkloid of the Stars", GUARDIAN_NO_MUGSHOT, -1, 144, 112, 224 },
+	/* BN5's Nebula Navis, the deep's pool's (guardians.h GUARDIAN_NEBULA_*): no overworld sprite of theirs read yet */
+	[65] = { "LarkMan", "Talon of Nebula", GUARDIAN_NO_MUGSHOT, -1, 88, 104, 200 },
+	[66] = { "GridMan", "Bulldozer of Nebula", GUARDIAN_NO_MUGSHOT, -1, 232, 96, 72 },
 };
 #define NGUARDIANS ((int)(sizeof guardians / sizeof *guardians))
 /* (every navi a record is kept for, Team ProtoMan's the last: rivals.h) */
-_Static_assert(GUARDIAN_BN4_LAST + 1 == GUARDIAN_TEAM_FIRST && GUARDIAN_TEAM_LAST + 1 == RIVAL_NAVIS, "rivals.sav keeps every navi number");
+_Static_assert(GUARDIAN_BN4_LAST + 1 == GUARDIAN_TEAM_FIRST && GUARDIAN_TEAM_LAST + 1 == GUARDIAN_NEBULA_FIRST &&
+	GUARDIAN_NEBULA_LAST + 1 == RIVAL_NAVIS, "rivals.sav keeps every navi number");
 
 bool guardian_known(int navi) {
 	const Rival *rv = rival(navi);
@@ -73,7 +77,7 @@ const Guardian *guardian(int navi) {
  * for them where the layer made one, else without a face: the HeelNavi's
  * is the bystanders' (a playtester read SpoutMan's lines as a
  * bystander's); BN5's with their own, copied in (xnavi_guardian) */
-static int set_face[GUARDIAN_BN4_LAST + 1];   /* the face + 1, 0 for none */
+static int set_face[RIVAL_NAVIS];   /* the face + 1, 0 for none */
 
 int guardian_sprite(int navi) {
 	static const struct { uint8_t navi, sprite; } sprites[] = {
@@ -167,13 +171,13 @@ int guardian_stand(int arena_dir, int gx, int gy, int spread, int *sx, int *sy) 
 }
 
 void guardian_set_face(int navi, int face) {
-	if (navi > 0 && navi <= GUARDIAN_BN4_LAST) set_face[navi] = face < 0 ? 0 : face + 1;
+	if (navi > 0 && navi < RIVAL_NAVIS) set_face[navi] = face < 0 ? 0 : face + 1;
 }
 
 int guardian_face(int navi) {
 	const Guardian *g = guardian(navi);
 	if (g->mugshot != GUARDIAN_NO_MUGSHOT) return g->mugshot;
-	return navi > 0 && navi <= GUARDIAN_BN4_LAST && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
+	return navi > 0 && navi < RIVAL_NAVIS && set_face[navi] ? set_face[navi] - 1 : FACE_NONE;
 }
 
 /* Another game's area where it draws `biome` in this run (run_dress). */

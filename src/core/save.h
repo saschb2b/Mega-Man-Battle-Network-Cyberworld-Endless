@@ -156,7 +156,7 @@ typedef struct {
 	/* the versions of each Navi MegaMan has beaten as a guardian, a bit
 	 * each, by his navi number (rivals.h's): what the Battle Lab can set
 	 * of him (lab_navis.h); noted from the build that added it on */
-	uint8_t navi_beaten[65];
+	uint8_t navi_beaten[67];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
