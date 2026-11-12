@@ -76,3 +76,14 @@ void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lo
 	else if (bust >= 11) snprintf(out, n, "Best %d:%02d:%02d. Level S. HP lost %d.", m, sec, cs, hp_lost);
 	else snprintf(out, n, "Best %d:%02d:%02d. Level %d. HP lost %d.", m, sec, cs, bust, hp_lost);
 }
+
+const char *lab_navi_word(int kind, int version) {
+	static const char *const words[3][6] = { { "V1", "EX", "SP" }, { "V1", "V2", "V3", "SP" }, { "1", "2", "3", "4", "5", "6" } };
+	const char *w = kind >= 0 && kind < 3 && version >= 0 && version < 6 ? words[kind][version] : NULL;
+	return w ? w : "";
+}
+
+void lab_info_navi(char *out, size_t n, int hp, int wins) { snprintf(out, n, "HP %d. Beaten %d.", hp, wins); }
+
+void lab_info_alone(char *out, size_t n) { snprintf(out, n, "A Navi fights alone."); }
+

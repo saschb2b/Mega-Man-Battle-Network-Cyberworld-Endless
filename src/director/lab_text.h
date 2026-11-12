@@ -14,6 +14,12 @@ extern const char lab_row_preset[], lab_row_area[], lab_row_song[], lab_own_song
 const char *lab_panel_name(int type);
 /* "V2", "SP", "Rare" as a row names a version (0-5) */
 const char *lab_version_word(int version);
+/* A Navi's version as a row names it: BN6's guardians' (kind 0: V1, EX,
+ * SP), another game's (1: V1, V2, V3, SP), a super boss's form (2) */
+const char *lab_navi_word(int kind, int version);
+/* The information box of a Navi's row, and of a foe that cannot join a Navi */
+void lab_info_navi(char *out, size_t n, int hp, int wins);
+void lab_info_alone(char *out, size_t n);
 /* A count of the foes set, "2/4" */
 void lab_count_words(char *out, size_t n, int foes, int most);
 /* BN6's field `field` as the preset's value */

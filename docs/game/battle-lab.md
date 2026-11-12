@@ -450,6 +450,24 @@ is used.
     data was lost to the next run; the tally now follows the run's seed
     on every path.
 
+- **Navis** (`src/director/lab_navis.c`), after the virus families on
+  the FOES page. A guardian is listed once MegaMan has beaten him and
+  open at two wins, as the NaviCode; Bass and the Cybeast at one;
+  ProtoMan at a first netbattle won (every third duel won, `duel_won`).
+  A Navi not yet open shows his wins, "1/2". His versions are those
+  beaten as a guardian, noted from this build on
+  (`Profile.navi_beaten`, as a guardian falls); a Navi beaten before
+  that note was kept has his first. BN6's guardians come as V1, EX and
+  SP, BN5's and BN4's as V1 to SP where their ROM is read, a super boss
+  in his forms. One Navi a battle, alone: setting him takes the foes set
+  off the field, and no virus joins him ("A Navi fights alone."). His
+  battle is his own record's (`make_boss`, `xguardian_encounter`) on the
+  set's panels, background and song, the boss theme where none is
+  chosen. Seen headless: BlastMan EX set and fought from `lab all`; Bass
+  and the Cybeast listed and Bass fought for a profile with a win over
+  each (`--dev bass=1,beast=1`); ElecMan V1 noted in the profile after a
+  guardian's battle won. Not listed: BN5's Darkloids and Team ProtoMan.
+
 ## Build order
 
 Each a PR to `dev`, the next begun when the last is merged:
