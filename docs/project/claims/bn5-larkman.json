@@ -1,0 +1,14 @@
+{
+  "branch": "bn5-larkman",
+  "what": "BN5's LarkMan moved into BN6's engine, Nebula's first seat (17): his recipe, his four shared types the Navis' copy",
+  "takes": {
+    "navi_ai": [["43", "43"]],
+    "enemy_ids": [["0x3EC", "0x3EF"]],
+    "list2": [["0x31", "0x31"]],
+    "dispatch3": [["0xB0", "0xB0"], ["0xBA", "0xBB"], ["0xC7", "0xC7"], ["0xCB", "0xCB"]],
+    "dispatch4": [["0x28", "0x28"]],
+    "free_rom": [["0x80000", "0x807FF"], ["0x81000", "0x83FFF"], ["0x87000", "0x873FF"], ["0x576000", "0x57AFFF"]]
+  },
+  "units": ["BN5 Navi LarkMan"],
+  "run": false
+}
