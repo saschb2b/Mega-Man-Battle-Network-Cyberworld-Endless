@@ -2010,7 +2010,6 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* the chip's Navi, the first kind's 0x14 (080B999C-080B9B44), which his spawner (080B9B1C) spawns: moved */
 /* his battle sprite 2:0x2 (080B99C8): gutsman's, list 2's 0x41 (seat 1) */
 /* its sound 0xb0 (080B9A3E): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
-/* its chip 225 (id 536) waits: its row is XREG_PENDING */
 /* its chip 226 is a dark chip of BN4's (row 537): a battle it is used in costs 20 max HP */
 /* its chip 226 (id 537) waits: its row is XREG_PENDING */
 
@@ -2568,6 +2567,56 @@ static const XcSong darkbomb_songs[] = { { 0x70, 0x3A }, { 0x90, 0x206 }, { 0xA9
 	.sprites = darkbomb_sprites, .nsprites = (int)(sizeof darkbomb_sprites / sizeof *darkbomb_sprites), \
 	.effects = darkbomb_effects, .neffects = (int)(sizeof darkbomb_effects / sizeof *darkbomb_effects), \
 	.bytes = darkbomb_bytes, .nbytes = (int)(sizeof darkbomb_bytes / sizeof *darkbomb_bytes) }
+/* ---- NaviPowers: BN4's power 0x0 (0801949F) as BN6's 0x0; its chips  ---- */
+/* BN4's computed powers 1001-1022 (0801949E): a Navi chip SP's power (1001-1022): his row of BN4_DS_POWERS (power - 1001), its column by BN4's best deletion time of the Navi (a u16 of the save's rows at 0x02037C80, 0x2C a side) as a BCD time (0x08000BBC) against ten limits (0x080194F0, 0x1000-0x2800), or 5 where flag 0x1187 is set (0x080406A4); BN6's 1205-1226 */
+/* BN4's computed powers 1023-1044 (08019518): a Navi chip DS's power (1023-1044): his row of BN4_DS_POWERS (power - 1023), its column 10 less the Hole panels on both sides (0x08009F40 with type 0xB, side 0 and 1), at most 10; BN6's 1227-1248 */
+
+static const XvBlock navipowers_blocks[] = {
+	{ 0x08018B48, 0x08018D00, XC4_CODE + 0x5400, 0x8441048Du },
+	{ 0x08000BBC, 0x08000C2C, XC4_CODE + 0x55C0, 0xDEC1F412u },
+	{ 0x0801949E, 0x080197D8, XC4_CODE + 0x5632, 0xEC180435u },
+};
+static const XvData navipowers_data[] = {
+	{ 0x08018B48, 0x08018D00, XV_RAW },
+	{ 0x08000BFA, 0x08000BFC, XV_ZERO },
+	{ 0x08000BFC, 0x08000C00, XV_POOL },
+	{ 0x08000C00, 0x08000C18, XV_RAW },
+	{ 0x08000C18, 0x08000C20, XV_ZERO },
+	{ 0x08000C20, 0x08000C2C, XV_POOL },
+	{ 0x080194EC, 0x080194F0, XV_POOL },
+	{ 0x080194F0, 0x08019518, XV_RAW },
+	{ 0x0801955A, 0x080197C4, XV_ZERO },
+	{ 0x080197C4, 0x080197D8, XV_POOL },
+};
+static const XvPair navipowers_calls[] = {
+	{ 0x08000A38, 0x08000C00 },   /* search, SAME */
+	{ 0x08009F40, 0x0800CDB4 },   /* project:project:chips, LAYOUT */
+	{ 0x080190D0, 0x08021AA4 },   /* project:billy, SAME */
+	{ 0x080406A4, XC_STUBS },   /* flag 0x1187 tested (BN4_FLAG_1187_TEST): set, an SP's column is 5 whatever the time. A run never sets it, so the call is the stub that returns 0 (movs r0,#0: its Z set, as BN4's clear flag leaves it for the bne after it) */
+};
+static const XvPair navipowers_words[] = {
+	{ 0x02037C80, 0x08E00C30 },   /* BN4's best deletion times of its Navis (the save's rows, 0x2C a side, a u16 a Navi), which BN6 keeps none of: XC_SP_TIMES, 0xFFFF each (none), past every limit, so an SP's power is his row's last column, as BN5's SPs' are */
+};
+static const XvImm navipowers_imms[] = {
+	{ 0x0801951C, THUMB_MOVS, 0, 0, 0xB, 0x10 },   /* the Hole panel counted on side 0: BN4's type 0xB, BN6's 16 (XPANEL_HOLE) */
+	{ 0x08019526, THUMB_MOVS, 0, 0, 0xB, 0x10 },   /* ... and on side 1 */
+};
+static const XvNumber navipowers_numbers[] = {
+	{ 0x080197C4, 0x000003E9, 0x000004B5 },   /* the SP powers' base, 1001 (0x080194A8): BN6's records' 1205 (POWER4_BASES) */
+	{ 0x080197D0, 0x000003FF, 0x000004CB },   /* the DS powers' base, 1023 (0x08019546): BN6's records' 1227 (POWER4_BASES) */
+};
+static const XvType navipowers_types[] = {
+};
+
+#define NAVIPOWERS_CODE { .name = "NaviPowers (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x7400), \
+	.blocks = navipowers_blocks, .nblocks = (int)(sizeof navipowers_blocks / sizeof *navipowers_blocks), \
+	.data = navipowers_data, .ndata = (int)(sizeof navipowers_data / sizeof *navipowers_data), \
+	.calls = navipowers_calls, .ncalls = (int)(sizeof navipowers_calls / sizeof *navipowers_calls), \
+	.words = navipowers_words, .nwords = (int)(sizeof navipowers_words / sizeof *navipowers_words), \
+	.imms = navipowers_imms, .nimms = (int)(sizeof navipowers_imms / sizeof *navipowers_imms), \
+	.numbers = navipowers_numbers, .nnumbers = (int)(sizeof navipowers_numbers / sizeof *navipowers_numbers), \
+	.types = navipowers_types, .ntypes = (int)(sizeof navipowers_types / sizeof *navipowers_types) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -2598,5 +2647,18 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x0D, 0x8D, 0x080E9A37, XC4_HOMES + 0x6800, PITRNG_CODE, NULL, 0, 0, 0 },
 	{ XCHIP_SUPPORT, 0x4C, 0xCC, 0x080EAD2F, XC4_HOMES + 0x6C00, FIREPLUS_CODE, fireplus_songs, (int)(sizeof fireplus_songs / sizeof *fireplus_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x09, 0xFC, 0x080EB3FF, XC4_HOMES + 0x7000, DARKBOMB_CODE, darkbomb_songs, (int)(sizeof darkbomb_songs / sizeof *darkbomb_songs), 0, 0 },
+	{ XCHIP_HELPER, 0x00, 0x00, 0x0801949F, XC4_HOMES + 0x7400, NAVIPOWERS_CODE, NULL, 0, 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
+
+/* (BN4's computed powers by its table's entry: the routine the power unit moved, 0 the stub's) */
+const uint32_t xchips_bn4_powers[] = {
+	0, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F,
+	0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F,
+	0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x0801949F, 0x08019519,
+	0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519,
+	0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519,
+	0x08019519, 0x08019519, 0x08019519, 0x08019519, 0x08019519, 0, 0, 0,
+	0, 0, 0,
+};
+const int xchips_bn4_powers_count = (int)(sizeof xchips_bn4_powers / sizeof *xchips_bn4_powers);

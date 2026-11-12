@@ -296,9 +296,9 @@ his calls into the Navi's blocks aimed at the Navi's copy. His row is
 140 HP Mettaur left 60 in both, the same three panels cracked (the
 shockwave's draws replayed), the same sounds; six mutations caught. Seen
 in play against BN6's Mettaur and against BN4's ThunderMan, both Navis
-drawn at once. His SP (536) waits for BN4's computed powers and his DS
-(537) for its power by the Holes on the field (below): both rows stay
-`XREG_PENDING`.
+drawn at once. His SP (536) is **moved** too (12 November 2026, The
+Navi chips: SP and DS); his DS (537) waits for its proof by the Holes on
+the field (below), its row `XREG_PENDING`.
 
 **BN4's ground kind is no Cursor** (12 November 2026, read from the
 three ROMs' records): BN4 numbers its chips' kinds as BN5 numbers its
@@ -734,7 +734,7 @@ moved yet; why each waits:
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
 | DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
-| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn, DarkBomb and DrkSpred **moved** (12 November 2026, below); DrkCanon waits on BN4's computed powers (unit 6, bn4-navi-powers' claim) |
+| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn, DarkBomb and DrkSpred **moved** (12 November 2026, below); DrkCanon's power is BN4's 1046 (`0x080195AE`), a routine the powers' unit can take beside the SP's and DS's (`POWER4_ROUTINES`; 12 November 2026) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | **moved** (12 November 2026, below) |
 | DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
 
@@ -1334,14 +1334,27 @@ V1, settled for all of them.
   that waits otherwise (WoodMan's: 10 and 20 frames where BN6's waits 30)
   would differ there, which the tool says before its unit is written.
 - **SP and DS.** An SP's and a DS's power is one BN4 computes (1002 and
-  1024 for GutsMan's: BN4's table, to move as BN5's did). A DS's is read
-  from the Hole panels on the field (the dark chips' session's reading,
-  `0x08019518`: the Holes on both sides, ten at most, pick a column of a
-  row of the table `0x08018B48` by the power less 1023; none gives the
-  row's last value, GutsMnDS 100), which BN6 has no panel of yet, and a
-  DS is a dark chip, whose cost is in `dev` since PR #351. Until the
-  powers are moved both rows stay pending and the unit serves the V1
-  alone.
+  1024 for GutsMan's), by BN4's table of computed powers
+  (`BN4_CHIP_POWERS`, 51 entries, 1000-1050). Its SP and DS routines are
+  **moved** (12 November 2026) as a unit of their own,
+  `tools/xchiprecipe_bn4.py`'s `NaviPowers`, past BN5's in BN6's grown
+  table: BN4's 1001-1044 are BN6's 1205-1248 in a moved chip's record.
+  An SP's power is a column of his row of `0x08018B48` (20 rows of 11,
+  RollSP/DS to VideMnSP/DS) by BN4's best deletion time of that Navi:
+  ten limits from 10 to 28 seconds, the first his time does not pass,
+  or column 5 where BN4's flag 0x1187 is set. BN6 keeps no such time and
+  a run sets no such flag, so the copy reads none (`XC_SP_TIMES`, 0xFFFF,
+  as BN5's SPs do) and the flag's test is the stub's clear one: the
+  row's last column, GutsMnSP 100. BN4's own battle in the differential
+  holds none either. A DS's is read from the Hole panels on the field
+  (`0x08019518`: the Holes on both sides, ten at most, pick the column,
+  the same row; none gives the last value, GutsMnDS 100), BN4's Hole
+  BN6's panel 16 there. GutsMnSP (536) is moved: `bn4_chip_gutsman_sp`
+  passes against BN4's own battle (a 250 HP Mettaur left 150 in both),
+  six mutations caught (his row's entry, the base, the time, a limit,
+  the table's column, Roll's row). A DS is a dark chip, its cost in
+  `dev` since PR #351: the DS rows wait for their proof with Holes on
+  the field. The other Navis' SPs follow as their Navis' units do.
 - **Not done:** a NetBattle (BN4 is not in the NetPass's set yet, unit
   8): the pool's override and the rooms' record are one core's, as the
   battle's rooms are.

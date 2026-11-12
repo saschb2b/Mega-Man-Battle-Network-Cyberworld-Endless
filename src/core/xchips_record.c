@@ -110,9 +110,13 @@ void xrec_from_bn4(const XRecordFrom4 *in, uint8_t out[XREC_SIZE]) {
 	out[BN6_CHIP_LIBRARY_TYPE] = in->bn4[BN4_CHIP_CLASS];
 	out[BN6_CHIP_MB] = in->bn4[BN4_CHIP_MB];
 	uint8_t fx = in->bn4[BN6_CHIP_EFFECT_FLAGS] & (uint8_t)~BN6_CHIP_IN_LIBRARY;
-	if (get16(in->bn4 + BN6_CHIP_ATTACK_POWER) >= 1000) {
-		put16(out + BN6_CHIP_ATTACK_POWER, 0);
-		fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
+	int power = get16(in->bn4 + BN6_CHIP_ATTACK_POWER);
+	if (power >= 1000) {
+		/* (BN4's computed power, an entry of BN4's own table: a moved chip's at BN6's grown entry of it, XREG4_POWER_FIRST on,
+		 * whose routine BN4's power unit moved, src/emu/xchips_code.c powers4_stage; any other's none) */
+		int to = in->reg->how == XREG_MOVED && power - 1000 < XREG4_POWERS ? 1000 + XREG4_POWER_FIRST + (power - 1000) : 0;
+		put16(out + BN6_CHIP_ATTACK_POWER, (uint16_t)to);
+		if (!to) fx &= (uint8_t)~(BN6_CHIP_COMPUTED_POWER | BN6_CHIP_SHOWS_POWER);
 	}
 	out[BN6_CHIP_EFFECT_FLAGS] = fx;
 	if (in->twin) {

@@ -233,6 +233,21 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   an address, in `NUMBERS`; and a call noted before its target's type
   was moved with the unit is walked as its own code (FlmCros's cross, in
   the flame's code).
+- **BN4's computed powers.** A unit of kind `power` (`NaviPowers`)
+  copies the routines of BN4's table of computed powers
+  (`BN4_CHIP_POWERS`) that `POWER4_ROUTINES` names, each with the entries
+  that name it: the SP's (1001-1022) and the DS's (1023-1044). It has no
+  entry of a dispatch table; the installer points BN6's grown computed
+  powers at the copies, BN4's entry i at `XREG4_POWER_FIRST` (0xCC) + i
+  past BN5's (`src/emu/xchips_code.c`, `powers4_stage`), and a moved
+  chip's record names that entry (`src/core/xchips_record.c`). The bases
+  a routine subtracts from its record's power move with it
+  (`POWER4_BASES`), RAM BN6 keeps none of is named per unit
+  (`UNIT_DATA`: the SP's deletion times at `XC_SP_TIMES`, none, as
+  BN5's), and the tables a copied routine reads from the bytes after
+  its code are copied with it (`UNIT_COPIED_DATA`; a copied routine's
+  neighbours are otherwise zeroed). A chip of `MOVED` whose power is
+  computed by a routine not named there gets the stub's 0.
 - **A Navi chip's unit.** A Navi chip's routine of that table spawns an
   object of the Navi's own, which is BN6's one Navi chip object state
   for state, so a unit of kind `navi` moves the chip's Navi alone

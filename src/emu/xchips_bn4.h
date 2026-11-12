@@ -55,5 +55,9 @@
 /* The units (XChipUnit, xchips_bn5.h: `bn5` BN4's subfamily, `navis` 0) */
 extern const XChipUnit xchips_bn4[];
 extern const int xchips_bn4_count;
+/* BN4's computed powers by its table's entry (bn4_chips.h BN4_CHIP_POWERS, power less 1000): the routine its power unit
+ * moved (a block of an XCHIP_HELPER's), 0 for one it did not (BN6's stub, power 0); src/emu/xchips_code.c powers4_stage */
+extern const uint32_t xchips_bn4_powers[];
+extern const int xchips_bn4_powers_count;
 
 #endif
