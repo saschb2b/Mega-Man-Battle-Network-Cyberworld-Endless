@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T02:20:00Z
+* **Update**: multirom/bn4-chips.md (the owner's call 13: Marking left out, no effect in a plain battle of BN4's, measured and read in its code), research/sources.md (Battle Network 4: Marking, verified in Red Sun).
