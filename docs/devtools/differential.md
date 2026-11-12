@@ -52,7 +52,17 @@ BN4 plays a dark chip only for a dark MegaMan (`BN4_CHIP_ALIGN`,
 [BN4's chips in a run](../multirom/bn4-chips.md), BN4's light and dark
 chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
-where the dud plays. `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
+where the dud plays. Two keys leave out of BN4's battle what BN4's
+dark rules do and a run does not take (docs/game/meta/darkchips.md):
+`calm4=1` ends the confusion BN4 gives MegaMan as a fight starts once an
+attack DarkChip is chosen, through BN4's own countdown (its timer set to
+1 the first frame it holds more: `BN4_CONFUSE_STEP`), and `mood4=1`
+hooks BN4's code where an attack DarkChip's use sets his mood 0 for the
+battle (`BN4_DARK_MOOD`, on to `BN4_DARK_MOOD_PAST`), so a counter gives
+Full Synchro as in BN6's; `bn4_chip_drkvulcn` takes both, and its
+mutations `confuse6=1` (BN6's MegaMan given the confusion) and
+`mood4` 0 must part ([BN4's chips in a run](../multirom/bn4-chips.md),
+DrkVulcn and the Elem chips). `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
 its Soul n): each one's event flag read from BN4's own table
 (`BN4_SOUL_FLAGS`; Blue Moon's six have none in Red Sun), Double Soul's,
 and its pseudo-chip's byte written past the chip gate as the game writes

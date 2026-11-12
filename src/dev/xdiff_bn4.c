@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 #include "bn4.h"
+#include "bn4_battle.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "devtools.h"
@@ -237,6 +238,28 @@ int xdiff_bn4_run(const Spec *s) {
 	if (over == BN4_MODE_MAP) printf("back on the map, its NaviStats' HP %d\n", left);
 	else printf("%s\n", over == BN4_MODE_GAME_OVER ? "GAME OVER" : "its main mode another");
 	return 0;
+}
+
+static HookAct dark_mood_past(HookRegs *r, void *user) {
+	(void)user;
+	static bool said;
+	if (!said) printf("xdiff: BN4's MegaMan's mood kept at the DarkChip's use (mood4)\n");
+	said = true;
+	r->r[12] = BN4_DARK_MOOD_PAST | 1;
+	return HOOK_JUMP;
+}
+
+static void xd4_dark_mood(const Spec *s) {
+	static bool hooked;
+	if (!s->mood4 || hooked) return;
+	hooked = guest_hook(BN4_DARK_MOOD, dark_mood_past, NULL);
+	if (!hooked) printf("xdiff: BN4's dark mood not hooked (mood4)\n");
+}
+
+void xd4_dark_rules(const Spec *s, int game, bool battle) {
+	if (!battle) return;
+	xd4_start_confusion(s, game);
+	if (game == 4) xd4_dark_mood(s);
 }
 
 void xd4_start_confusion(const Spec *s, int game) {

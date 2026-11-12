@@ -57,6 +57,12 @@ void xd4_form_watch(void);
  * would; (confuse6) BN6's MegaMan given the timer BN4 gives instead, once, the comparator's own test. Before each frame of a
  * battle, `game` 4 or 6 */
 void xd4_start_confusion(const Spec *s, int game);
+/* Before each frame of `game`'s (4 or 6) battle side: BN4's dark rules a run does not take, left out by the spec's keys
+ * (xd4_start_confusion; and mood4, BN4's own dark rule at a DarkChip's use, its mood set 0 for the battle (BN4_DARK_MOOD: no Full
+ * Synchro after, its emotion its dark one) and its calm with it, skipped on the guest: a hook there goes on to the use's next
+ * step (BN4_DARK_MOOD_PAST), set once as its battle runs, so BN4's MegaMan keeps his mood as BN6's does,
+ * docs/game/meta/darkchips.md); nothing outside a battle */
+void xd4_dark_rules(const Spec *s, int game, bool battle);
 /* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
  * mutation's call= aims their veneers as BN5's */
 int xd4_family_count(void);
