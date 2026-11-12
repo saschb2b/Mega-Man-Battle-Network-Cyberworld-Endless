@@ -222,6 +222,10 @@
 #define BN4_MOOD_SET      0x0800F4DEu /* a side's mood set (r0 the side, r1 the mood; its battle NaviStats +0, 0x99 at the start): never
                                        * where it is 0, BN4's dark emotion (BN4_EMOTION's 5), so nothing lifts it again in a battle (BN5's
                                        * 0x080127CE the same; BN6's BN6_MOOD_SET has no such test) */
+#define BN4_NAVI_BUG      0x0D        /* the battle NaviStats' NaviCust bug of type 1, u8 (written by its level's routine, 0x08042BDC-
+                                       * 0x08042C2E: 0xFF level 1, 0x10 level 2, 0x20 level 3; 0xFF read at the fight's start, 0x0800D8B0,
+                                       * as 0x2D0 frames of confusion): set once an attack DarkChip is chosen (0xFF after DrkVulcn, 0x20
+                                       * after DarkBomb, which walks MegaMan from his panel at t1), its source not traced */
 #define BN4_NAVI_MOOD     0x00        /* the battle NaviStats' (BN4_BATTLE_NAVI) mood, u8: BN4_MOOD_START as the NaviStats are set up
                                        * (0x0800D718), 0 as a battle of a dark MegaMan begins (karma4 0: his dark emotion from t1) */
 #define BN4_MOOD_START    0x99        /* ... the mood the NaviStats' set-up gives (0x0800D718: movs r0,#0x99; strb r0,[r4]) */

@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_darkbomb and bn4_chip_drkspred: DarkBomb and DrkSpred moved, BN4's DarkChip bug cleared by calm4",
+  "result": "python3 build.py xdiff bn4_chip_darkbomb bn4_chip_drkspred: both PASS (DarkBomb over 300 frames against a 250 HP Mettaur, DrkSpred to its deleting hit at t37), eight mutations caught. BN4 sets a NaviCust bug in the battle NaviStats' +0x0D once an attack DarkChip is chosen (0x20 after DarkBomb, walking MegaMan off his panel at t1); calm4 clears it. DrkSpred's burst's sound past a byte goes through a conditional shim (XvSoundCall.when), its bytes proved by the unit tests.",
+  "meaning": "A family split by subfamily moves as several units each with its own copy of the state; a byte-named sound past a byte needs a conditional shim at its site."
+}

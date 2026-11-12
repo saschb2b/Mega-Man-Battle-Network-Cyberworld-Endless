@@ -156,6 +156,21 @@ bool xvirus_shim_sound_add(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_
 	return done(&a) && a.n == XV_SHIM_SOUND_SIZE;
 }
 
+bool xvirus_shim_sound_when(uint8_t out[XV_SHIM_SOUND_WHEN_SIZE], uint32_t at, uint8_t when, uint16_t slot, uint32_t veneer) {
+	Asm a = { out, XV_SHIM_SOUND_WHEN_SIZE, 0, at, (at & 1) != 0 || !when, { 0 }, { { 0 } }, 0 };
+	half(&a, (uint16_t)(0x2800 | when));   /* cmp r0, #when */
+	half(&a, (uint16_t)(0xD100 | 2));      /* bne past the three that make the slot */
+	half(&a, MOVS(0, slot >> 8));
+	half(&a, (uint16_t)(8 << 6));          /* lsls r0, r0, #8 */
+	half(&a, ADDS_I(0, slot & 0xFF));
+	int32_t off = (int32_t)(veneer - (at + 10 + 4));
+	if (off < -2048 || off > 2046 || (veneer & 1)) a.bad = true;
+	else half(&a, (uint16_t)(B_ | ((off >> 1) & 0x7FF)));
+	return done(&a) && a.n == XV_SHIM_SOUND_WHEN_SIZE;
+}
+
+uint32_t xvirus_shim_sound_size(uint8_t when) { return when ? XV_SHIM_SOUND_WHEN_SIZE : XV_SHIM_SOUND_SIZE; }
+
 /* ---- an effect's id no immediate names ---- */
 
 uint32_t xvirus_shim_r4_to(uint32_t was) { return was == BN4_SPAWN_EFFECT ? BN6_SPAWN_EFFECT : 0; }

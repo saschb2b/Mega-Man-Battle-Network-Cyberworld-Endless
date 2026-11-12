@@ -234,7 +234,8 @@ static bool present_ok(const XVirusFamily *f) {
  * directions', two paused presents (its state 0's and its hook 5's) and its entries' */
 uint32_t xvirus_shims_room(const XVirusFamily *f) {
 	uint32_t room = (f->prestep ? XV_SHIM_PRESTEP_MAX : 0) + (uint32_t)f->nranges * XV_SHIM_RANGE_SIZE + (uint32_t)f->ncmps * XV_SHIM_CMP_SIZE +
-	                (uint32_t)f->nsides * XV_SHIM_SIDE_SIZE + (uint32_t)f->nsound_calls * XV_SHIM_SOUND_SIZE;
+	                (uint32_t)f->nsides * XV_SHIM_SIDE_SIZE;
+	for (int i = 0; i < f->nsound_calls; ++i) room += xvirus_shim_sound_size(f->sound_calls[i].when);
 	room += 2u * XV_SHIM_PAUSED_SIZE * (f->present != 0);
 	for (int i = 0; i < f->neffect_calls; ++i) room += (uint32_t)xvirus_shim_effect_size(f->effect_calls[i].n);
 	for (int i = 0; i < XV_HOOKS; ++i) room += f->hooks[i].entered ? XV_SHIM_ENTRY_SIZE : 0;

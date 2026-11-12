@@ -734,7 +734,7 @@ moved yet; why each waits:
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
 | DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
-| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn **moved** (12 November 2026, below); DrkCanon, DarkBomb and DrkSpred each its family as an attack unit, DrkCanon also BN4's computed powers (unit 6) |
+| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn, DarkBomb and DrkSpred **moved** (12 November 2026, below); DrkCanon waits on BN4's computed powers (unit 6, bn4-navi-powers' claim) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | **moved** (12 November 2026, below) |
 | DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
 
@@ -757,10 +757,14 @@ mutations caught.
 Three things of BN4's battle are not the run's, and the comparison
 treats each as such:
 
-- **BN4's confusion at the fight's start after an attack DarkChip**
-  (`calm4`, the owner's call of 12 November 2026: left out). Only
-  choosing DrkVulcn on BN4's Custom screen gives it: the same folder
-  with nothing chosen, or DrkStage chosen, gives none. BN4's MegaMan
+- **BN4's bug at the fight's start after an attack DarkChip**
+  (`calm4`, the owner's call of 12 November 2026: left out). Once an
+  attack DarkChip is chosen, BN4 sets a NaviCust bug of type 1 in the
+  battle NaviStats' +0x0D (`BN4_NAVI_BUG`, the byte its levels' routine
+  writes: 0xFF, 0x10 or 0x20): 0xFF after DrkVulcn, read at the fight's
+  start as confusion; 0x20 after DarkBomb, which walks MegaMan off his
+  panel at t1. The same folder with nothing chosen, or DrkStage chosen,
+  gives none; DrkSpred's gave none in its spec. BN4's MegaMan
   starts the fight confused for 0x2D0 frames (his collision +0x12,
   0x2CF at t1, counted down at `BN4_CONFUSE_STEP`) with its mark over
   him. Its source is **not yet traced**; ruled out, each hooked on the
@@ -768,7 +772,9 @@ treats each as such:
   NaviStats +0x0D writers 0x0800D756 and 0x0800D78A, the code's only
   literal 0x2D0 (its write at 0x0800D8BE), and every `strh` to +0x12
   from 0x08008000 to 0x08020000 but the countdown. The spec's `calm4`
-  sets the timer to 1 the first frame it holds more, so BN4's own step
+  clears the bug each battle frame it is set, and sets the confusion's
+  timer to 1 the first frame it holds more (the fight's start reads the
+  bug before the first frame the comparator steps), so BN4's own step
   ends it and takes its mark away; `confuse6`, its mutation, gives
   BN6's MegaMan the 0x2D0 instead.
 - **BN4's dark mood at an attack DarkChip's use** (`mood4`; the owner's
@@ -791,6 +797,25 @@ treats each as such:
   caller's leftover r4), its sprite state and the word that keeps it
   are allowed, its being in play and life compared (legit.json's bn4
   allowed, Full Synchro's aura; a mutation drops BN6's).
+
+**DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
+594). DarkBomb is the bombs' state's subfamily 2, its own copy of the
+state at attack family 0xFC (as SeekBom's subfamily 9 has its own,
+`ATTACK_SUBS`): its arm the third kind's 0x2's kind 0x11, its bomb the
+third kind's 0x8 with its kinds' table (`0x080CE088`), its blast's
+effect by kind (`0x080CE277`: kind 6's 0x2B, moved as BN6's 0xC4), its
+blast's hit word 0x0A05FF01 for the hit area's spawn, its sounds 0xA9
+and 0xBD at the grown table's 0x286 and 0x287. DrkSpred is the spread
+state's subfamily 3 in the Spreads unit (0xD0), its shot the spread
+shot's kind 0xF; its burst's sound, 0x8D, is past a byte at the
+grown table's 0x200 where the shot's table names a byte, so the site's
+call goes through a shim that makes r0 the slot only where the byte is
+0x8D (`XvSoundCall.when`, the other kinds' bytes BN6's numbers as
+their rows' copies give them). `bn4_chip_darkbomb` passes over 300
+frames against BN4's 250 HP Mettaur (its 200 deletes a MettaurSP), and
+`bn4_chip_drkspred` to its hit (t37: its 400 deletes any Mettaur, so
+its burst's sound comes after the deletion and is proved by the shim's
+unit test alone); eight mutations caught.
 
 BN4's Hole panel (its type 0xB) is a plain panel by its flags: nothing
 of BN4's damage, movement or panel code treats it otherwise, and a
