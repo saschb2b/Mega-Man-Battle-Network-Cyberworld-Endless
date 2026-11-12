@@ -3,7 +3,7 @@ type: Code Map
 title: "The tests"
 description: "What the ROM-free unit tests cover (`tests/test_core.c`, `test_backup.c`, `test_saves.c`, the transfer, discovery and map-slot tests, the Android saves and Steam scripts, the voice catalog) and the lint baselines."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T00:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T15:34:59Z }
 ---
 
 # The tests

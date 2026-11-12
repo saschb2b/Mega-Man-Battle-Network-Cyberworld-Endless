@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: project/merging.md (What restore leaves alone, new section: a page resolved by hand is never merged anew; lint fails on conflict markers), code/tests.md (tests/test_generated.py, new row).
 * **Update**: multirom/bn4-chips.md (BugCurse moved on the project's first-actor routine; a BN6 folder of 30 Gigas never deals), rom/bn4.md (a side's first actor), devtools/differential.md (a Giga's spec's folder).
 * **Update**: game/battle-lab.md (Built: BN5's Darkloids and Team ProtoMan's five moved Navis in the Lab, a Darkloid open at one dark board won and noted by its version, the five as guardians once they guard; the proof).
 * **Update**: game/battle-lab.md (Built: the result pays nothing, BN6's reward pick answered with no entry so its RESULT shows NO DATA; the design's line and the test battle's note), rom/battle.md (Battle rewards: the pick's first instruction, what RESULT shows for 0xFFFF, how to verify).

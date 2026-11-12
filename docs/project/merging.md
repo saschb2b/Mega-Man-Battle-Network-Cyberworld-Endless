@@ -3,7 +3,7 @@ type: Process
 title: "Merging in parallel"
 description: "How pull requests made side by side stay out of each other's way: what conflicted when `dev` was brought into a branch, measured; the files a tool writes, which `dev`'s workflow commits and no branch does (`tools/generated.py`); the registries kept a file an entry (`tools/shards.py`); the log folded from a file a change (`tools/log_fold.py`); what a branch does when it meets any of them; when a branch brings `dev` in, what that saves and what still conflicts."
 tags: [project, process, git, ci]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T21:09:35Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T15:34:59Z }
 sources:
   - { id: merges, title: "origin/dev's last 600 merge commits (6 October to 11 November 2026), each merge of dev into a branch redone with git merge-tree", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/commits/dev" }
   - { id: pr387, title: "Pull request #387 at 62c907ac against dev at dbecd569: GitHub's CONFLICTING, docs/log.md the only file", resource: "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/pull/387" }
