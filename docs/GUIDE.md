@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:10:00Z }
 ---
 
 # The player's guide
@@ -956,6 +956,9 @@ Talk to the Navi to set up a test battle:
   has deleted (Left and Right turn it). A lifts one onto the foes'
   panels and sets it down; A on a foe set takes it off. Four at most.
   A family still short shows its count, "5/8".
+  Navis follow the viruses: a guardian opens once MegaMan has beaten
+  him twice, Bass and the Cybeast once, ProtoMan with a netbattle won,
+  each in the versions beaten. A Navi fights alone.
 - **FIELD:** A turns the panel under the cursor to its next type; the
   row below takes one of BN6's own fields whole.
 - **STAGE:** the background and the song.

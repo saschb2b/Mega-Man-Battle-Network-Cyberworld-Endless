@@ -581,6 +581,7 @@ static bool astray_update(void) {
 }
 
 void director_update(void) {
+	emu_debug_depth(run.depth);   /* (CYBERWORLD_EMU_DEBUG's line: debug.h) */
 	/* (a test battle's frames are its own: nothing of the director's runs
 	 * in them, and the frame it ends on is the one it was asked on, put
 	 * back: lab_battle.h) */

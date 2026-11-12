@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-11T22:20:20Z
+* **Update**: multirom/bn4-chips.md (AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit, proved on a cracked and a grass panel; BN4's sprite step copied with the unit), devtools/differential.md (`panels=`: a BN4 spec's panels given a type in both games as the fight begins), devtools/chip-recipe-generator.md (`ROWS_WAIT` without AquaUp and GreenWd; `UNIT_COPIED`'s sprite step).

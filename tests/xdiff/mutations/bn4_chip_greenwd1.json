@@ -1,0 +1,10 @@
+[
+ {
+  "name": "GreenWd1's row's kind AquaUp's",
+  "spec": "bn4_chip_greenwd1",
+  "poke": [
+   "08C07700:00:1"
+  ],
+  "what": "the registry's record of BN4's GreenWd1 (692) with its first parameter 0, AquaUp's kind of the sweep, where BN4's record holds 1: the sweep looks for a cracked panel under a foe, finds the Mettaur on grass, and no tower rises"
+ }
+]

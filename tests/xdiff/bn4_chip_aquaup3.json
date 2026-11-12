@@ -1,0 +1,87 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's AquaUp3 F (its chip 183, id 691), Ligtnin's unit (misc 0x0C as BN6's grown misc routine 0x8C; docs/multirom/bn4-chips.md), as AquaUp2's spec with AquaUp3's power, against BN4's Mettaur of 250 HP (its family's sixth) so the hit is not lethal",
+ "folder4": [
+  "0AB7"
+ ],
+ "folder6": [
+  "2B3:05"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "2B3:05"
+ ],
+ "panels": [
+  "52:3"
+ ]
+}

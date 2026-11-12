@@ -13,6 +13,7 @@
 #include "emu.h"
 #include "encounter.h"
 #include "jukebox_text.h"
+#include "lab_navis.h"
 #include "lab_state.h"
 #include "analytics.h"
 #include "rom.h"
@@ -52,7 +53,17 @@ static void roster_make(void) {
 		r->version = 0;
 		while (r->versions && !(r->versions >> r->version & 1)) ++r->version;
 	}
+	/* (the Navis after them: those MegaMan has beaten, open or not yet) */
+	for (int n = 1; n <= LAB_NAVI_MOST && LS.nroster < LAB_ROSTER; ++n) {
+		int wins = lab_navi_known(n) ? lab_navi_wins(n) : 0;
+		if (!lab_navi_known(n) || (!LS.all && !wins)) continue;
+		LabRow *r = &LS.roster[LS.nroster++];
+		*r = (LabRow){ (uint8_t)n, 1, (uint8_t)lab_navi_versions(n, LS.all), 0, (uint8_t)(wins > 255 ? 255 : wins) };
+		while (r->versions && !(r->versions >> r->version & 1)) ++r->version;
+	}
 }
+
+bool lab_set_navi(void) { return LS.set.nfoes && (LS.set.foes[0].version & LAB_NAVI); }
 
 static int lab_areas(void) { return NET_AREAS; }
 static int lab_area(int i) { return i >= 0 && i < NET_AREAS ? i : 0; }
@@ -83,6 +94,14 @@ int lab_foe_at(int col, int line) {
 
 void lab_set_encounter(const LabSet *s, Encounter *e) {
 	memset(e, 0, sizeof *e);
+	/* (a Navi's battle is his own record's, alone, on the set's stage) */
+	if (s->nfoes && (s->foes[0].version & LAB_NAVI)) {
+		const LabFoe *f = &s->foes[0];
+		if (!lab_navi_encounter(f->family, f->version & ~LAB_NAVI, f->col, f->row, e)) memset(e, 0, sizeof *e);
+		e->biome = s->area;
+		if (s->song) e->song = s->song;
+		return;
+	}
 	e->biome = s->area;
 	e->song = s->song;
 	for (int i = 0; i < s->nfoes && i < LAB_FOES; ++i) {
@@ -155,7 +174,7 @@ static void turn(int *v, int n, int by) { *v = (*v + n + by) % n; }
 /* the row's version, on to the next it can be set in */
 static void version_turn(LabRow *r, int by) {
 	if (!r->versions) return;
-	do r->version = (uint8_t)((r->version + DATA_VERSIONS + by) % DATA_VERSIONS);
+	do r->version = (uint8_t)((r->version + 8 + by) % 8);
 	while (!(r->versions >> r->version & 1));
 }
 
@@ -193,9 +212,12 @@ static void panel_take(void) {
 	if (LS.page == LAB_PAGE_FOES) {
 		if (at >= 0) {
 			LS.set.foes[at] = LS.set.foes[--LS.set.nfoes];
-		} else if (LS.set.nfoes < LAB_FOES && LS.col >= LAB_COLS / 2) {
+		} else if (LS.col >= LAB_COLS / 2) {
+			/* (a Navi takes the field alone: the foes set make way for him, and none joins him) */
 			const LabRow *r = &LS.roster[LS.row[LAB_PAGE_FOES]];
-			LS.set.foes[LS.set.nfoes++] = (LabFoe){ r->family, r->version, (uint8_t)LS.col, (uint8_t)LS.line };
+			if (r->navi) LS.set.nfoes = 0;
+			else if (lab_set_navi() || LS.set.nfoes >= LAB_FOES) return;
+			LS.set.foes[LS.set.nfoes++] = (LabFoe){ r->family, (uint8_t)(r->version | (r->navi ? LAB_NAVI : 0)), (uint8_t)LS.col, (uint8_t)LS.line };
 		}
 		return;
 	}
@@ -251,6 +273,7 @@ static void battle(void) {
 	runlog_choice(CHOICE_LAB);   /* (the run's choices: a test battle fought) */
 	Encounter e;
 	lab_set_encounter(&LS.set, &e);
+	if (!e.nfoes) return;
 	lab_battle_panels(LS.set.panels);
 	lab_battle_ask(&e, -1);
 	LS.up = false;
