@@ -102,6 +102,7 @@ static bool begin(void) {
 		L.ours = true;
 	}
 	emu_battle_watch(0, true);
+	emu_battle_unpaid();
 	set_encounter(&L.e, true);
 	return true;
 }
