@@ -1,0 +1,7 @@
+{
+  "branch": "bn4-blakbarr",
+  "what": "BN4's BlakBarr (its chip 308, id 531) on BN6's own barrier routine, a 150 HP barrier by each game's table; the comparator's reading of a barrier's kind, place and object in both games",
+  "takes": {},
+  "units": ["BN4 chip BlakBarr"],
+  "run": false
+}
