@@ -69,12 +69,12 @@ statistics, troubleshooting and building the game yourself.
   resemble (ACDC Area, Town Area, Park Area, the net of far countries and
   its Undernet), each in about half the runs that come there (a quarter
   where BN5 has an area there too), in BN4's own tiles, music and battle
-  backgrounds; their battles and guardians are BN6's. From the second
-  act, six of its virus families (Billy, Spikey, Shrimpy, Walla, Elmperor
-  and CirKill) visit BN6's battles, and BN5's where BN5 is there too, in
-  the same one battle in four that BN5's viruses visit, MegaMan naming
-  them as the older Net's. Each pays from its own game's rewards (a chip
-  BN6 has not got pays 200 zenny). Once a run has reached the Nest, it
+  backgrounds; their battles and guardians are BN6's. Nine of its
+  virus families (Billy, Spikey, Shrimpy, Walla, Elmperor, CirKill,
+  VolGear, Kilby and MagTect) join the ones an act can be about, or stand
+  beside its virus, in BN6's areas and in BN5's where BN5 is there too,
+  MegaMan naming them as the older Net's the first time. Each pays from
+  its own game's rewards (a chip BN6 has not got pays 200 zenny). Once a run has reached the Nest, it
   also brings a tournament to act 3's arena in half the runs: three Navis
   in a row on BN4's own bracket, BN4's among them ([A run](#a-run)). The
   title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways; the

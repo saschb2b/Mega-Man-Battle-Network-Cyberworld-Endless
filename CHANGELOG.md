@@ -69,6 +69,10 @@
 - **Fixed: menus on BN4's areas.** On a layer of BN4 Red Sun's areas the
   Chip Folder, a dealer's shop and the Chip Trader drew as scrambled tiles;
   they look as on any other layer again.
+- **Fixed: Lan's HP before one of BN4's areas.** With BN4 Red Sun's ROM
+  beside BN6's, a visit home drew Lan's HP as scrambled magenta tiles
+  whenever the act ahead was one of BN4's areas, since 0.20.0. Home looks
+  as it should again.
 - **SoulT+1, a program of the older Net.** With BN5's ROM beside BN6's, a
   guardian who gives his Soul now puts BN5's NaviCust program SoulT+1 in
   his draft: a plus part of four cells that keeps a Soul united for four
@@ -158,16 +162,15 @@
 - **BN5's win music.** A battle won on one of BN5's areas, or on a dark
   layer, ends with BN5's own victory music where BN6's played, picked the
   way both games pick it.
-- **VolGear visits.** With BN4 Red Sun's ROM beside BN6's, VolGear and
-  its versions up to ValGearEX join Billy, Spikey and the rest in the
-  battles BN4's viruses visit, its flame running down MegaMan's row as
+- **VolGear joins.** With BN4 Red Sun's ROM beside BN6's, VolGear and
+  its versions up to ValGearEX join Billy, Spikey and the rest among the
+  viruses an act can be about, its flame running down MegaMan's row as
   in BN4. Moved into BN6's battle and checked against BN4's own frame by
   frame, it pays from BN4's own rewards.
-- **Kilby and MagTect visit.** Kilby and MagTect, with their versions,
-  join the BN4 viruses that turn up in BN6's and BN5's battles, each
-  checked against BN4's own battle frame by frame like the rest. Their
-  sounds are BN4's own, loaded for the battle they are in, the way BN4's
-  Navis bring theirs.
+- **Kilby and MagTect join.** Kilby and MagTect, with their versions,
+  join the BN4 viruses an act can be about or set beside its own, in
+  BN6's and BN5's areas, each checked against BN4's own battle frame by
+  frame like the rest. Their sounds are BN4's own.
 
 ## 0.20.0 (2026-11-09)
 
