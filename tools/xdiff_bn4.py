@@ -899,6 +899,13 @@ def reserved_roles(trace):
 # timer (walla_v1's MegaMan, struck at t68, shown at BN4's t68-t69 and hidden at t70-t71, hidden at BN6's of the same fight
 # frames and shown at the next two). Not a mask: the object's own record read as BN6 would have written it
 OBJ_VISIBLE = 0x02
+# An object's sprite: its block at the object's +0x02's high nibble times 16 (BN6 0x0800307C, sprite_setCoordinates's
+# `ldrb r3,[r5,#2]; lsrs #4; lsls #4; adds r3,r5`), its screen place at the block's +0x0A to +0x0F (the coordinates
+# stored at +0x0C and +0x0E): the object's place with the camera's offset, so the camera's shake moves every object's alike
+# on a frame (tests/xdiff/legit/bn4/rng_twins.json, camera_doShakeEffect's draws; bn4_chip_bighamr1 t55-t70, MegaMan's,
+# the Mettaur's and the hammer's each shifted by the same offset in each game). Its place: +0x34 to +0x3F (x, y, z, 16.16)
+OBJ_SPRITE_AT, SPRITE_SCREEN, OBJ_PLACE = 0x02, (0x0A, 0x10), (0x34, 0x40)
+AI_KEYS = (0x22, 0x32)   # a player's keys in his AI data, BN6's places (BN6_AI_HELD to BN6_AI_LAST and the second set; BN4_AI_KEYS)
 
 
 def blinked_roles(trace):
@@ -1845,9 +1852,20 @@ def compare(spec, ta, tb, canon, show=6):
                 if o.role in his:
                     own = copy.copy(his[o.role])
                     own.coll = o.coll
+                    # (his keys, AI data +0x22 to +0x31: the key update's of the battle's frame, BN4 0x0800BA78 and BN6
+                    # 0x08012DFC, run whatever his state; the input stopped at the battle's end, the last foe's deletion, on
+                    # that frame: bn4_chip_bighamr3 t55, BN6_KEYS_VALID cleared)
+                    if own.ai is not None and o.ai is not None:
+                        own.ai = own.ai[:AI_KEYS[0]] + o.ai[AI_KEYS[0]:AI_KEYS[1]] + own.ai[AI_KEYS[1]:]
                     # (his visible bit, the blink's: the status routines' by the collision data's timer, the battle's frame's)
                     own.rec = bytearray(own.rec)
                     own.rec[NODE] = (own.rec[NODE] & ~OBJ_VISIBLE) | (o.rec[NODE] & OBJ_VISIBLE)
+                    # (his sprite's screen place, the camera's offset over his place: the battle's frame's while his place
+                    # is the same in both frames, the camera's shake the battle's clock; a move of his own still his clock's)
+                    at = (o.rec[NODE + OBJ_SPRITE_AT] >> 4) << 4
+                    if at and own.rec[NODE + OBJ_PLACE[0]:NODE + OBJ_PLACE[1]] == o.rec[NODE + OBJ_PLACE[0]:NODE + OBJ_PLACE[1]]:
+                        lo, hi = NODE + at + SPRITE_SCREEN[0], NODE + at + SPRITE_SCREEN[1]
+                        own.rec[lo:hi] = o.rec[lo:hi]
                     o = own
                 objs.append(o)
             frb = dict(frb, objs=objs)
