@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: the trailer for 0.21.0, THREE GAMES. ONE RUN. (`tools/trailers/v0_21_0.py`, its music `v0_21_0_music.py` in the manner of BN6's title theme, song 0x01, grown from the owner's pick of three sketches, `sketch_mix_a.py`, `_b.py` and `_c.py` on `sketch_mix_lib.py`), replaces 0.20.0's in `docs/clips/trailer.*`, on the home page and its Japanese one, in the README and as the 3DS banner's sound (`3ds/banner-0.21.0.wav`); the trailer skill's lessons take its devices.
 * **Update**: game/progression/encounter-groups.md (Step 2: the arc made at the act's first layer whichever layer asks, a CONTINUE on a later layer and an act's dark layer named another signature in an older net's area), devtools/pacing-report.md (the arcs' last line: every act's arc asked first on its second and third layer).
 * **Update**: game/meta/library.md (BN4's dark chips neither listed nor counted while no find, reward or flame hands one out; BN4's own listed as they play), multirom/bn4.md (Its viruses' rewards: a dark chip of BN4's never a reward, the rows that name one, ElemDark's row 114).
 * **Update**: game/team-protoman.md (where it stands in 0.21.0: the five moved Navis are in the engine and not met in a run; their guardians, Souls, ProtoSoul, the board and DarkProto wait for 0.22.0; the New 3DS's heap modelled with them: 77.8 MB at most with BN5, 85.9 of 96 with BN4 too).
