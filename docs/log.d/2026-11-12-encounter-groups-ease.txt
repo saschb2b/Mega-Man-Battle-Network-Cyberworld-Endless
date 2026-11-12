@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T16:00:00Z
-* **Update**: game/progression/encounter-groups.md (Easing act 1's pair: the tally of the options, what the pressure cap does not see, the cap on cost and the fair fields, the rule; the calls taken in the build, shown to the owner; his go for step 3), game/progression/encounter-groups-measured.md (the cost's marks, the fields, the fill counts under both caps), devtools/encounter-tags.md (the fields' pass, the cost and the fair fields in the engine's table), devtools/pacing-report.md (act 1's beats listed).

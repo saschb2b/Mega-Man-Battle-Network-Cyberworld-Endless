@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/progression/encounter-groups.md (Easing act 1's pair: the tally of the options, what the pressure cap does not see, the cap on cost and the fair fields, the rule; the calls taken in the build, shown to the owner; his go for step 3), game/progression/encounter-groups-measured.md (the cost's marks, the fields, the fill counts under both caps), devtools/encounter-tags.md (the fields' pass, the cost and the fair fields in the engine's table), devtools/pacing-report.md (act 1's beats listed).
 * **Update**: code/core.md (`library_count` and `library_whole` take the held test as a parameter, and `data.c` asks `chips_all_star`, which `run.c` answers: the layers' second cut, `core.data` includes nothing of the run).
 * **Update**: world/home/home-shop.md (the Order Service's sort by No. reads the pack through a reader the director gives it, `order_sort_pack`: the layers' fifth cut, the real world includes nothing of the director).
 * **Update**: multirom/bn4-chips.md (AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit, proved on a cracked and a grass panel; BN4's sprite step copied with the unit), devtools/differential.md (`panels=`: a BN4 spec's panels given a type in both games as the fight begins), devtools/chip-recipe-generator.md (`ROWS_WAIT` without AquaUp and GreenWd; `UNIT_COPIED`'s sprite step).
