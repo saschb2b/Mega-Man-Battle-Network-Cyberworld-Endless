@@ -19,6 +19,8 @@ python3 tools/encounter_tags.py dump      # the ROMs' families into tools/encoun
 python3 tools/encounter_danger.py families --out tools/encounter_data/families.tsv   # each family alone: pressure and tricks
 python3 tools/encounter_danger.py pairs --out tools/encounter_data/pairs.tsv   # every two families together at V1 (1,830 runs; --most N a portion, a run stopped goes on)
 python3 tools/encounter_danger.py battles FIELDS.tsv --modes fight --seeds 1,2,3,4 --out tools/encounter_data/fields.tsv   # the fields' pass: one harmless pair on every field (lines "2C<TAB>1@52/272@51/field@2C")
+python3 tools/encounter_danger.py battles MULTIPLES.tsv --modes idle,fight --seeds 3,5 --out tools/encounter_data/multiples.tsv   # two and three of each family (lines "6:01x2<TAB>1@42/1@51")
+python3 tools/encounter_danger.py pairs --modes fight --out tools/encounter_data/pairs_cost.tsv   # the pairs' cost: every pair fought once by the autopilot (about three hours; stopped, it goes on)
 python3 tools/encounter_tags.py sample    # .build/encounter/battles.tsv: each act's own battles and the templates' fillings
 python3 tools/encounter_danger.py battles .build/encounter/battles.tsv --out tools/encounter_data/danger.tsv
 python3 tools/encounter_tags.py report [--write]   # the tables (--write: into the measured concept, after its mark)
@@ -99,7 +101,12 @@ prediction add for a group that holds the pair; each family's cost (the
 HP the test autopilot lost deleting its V1 alone, `families.tsv`'s fight
 rows), which a group's second cap adds up; and from `fields.tsv` the
 fields fair to a group (`group_fair_fields`: every fight won, 20 HP lost
-at most, `FIELD_FAIR`);
+at most, `FIELD_FAIR`); from `multiples.tsv` what two and three of a
+family press and cost together (`GroupMulti`, each one more than the
+number, 0 not fought), from `pairs_cost.tsv`, where it is there, what a
+pair costs past its two families' own; and the caps by act
+(`group_caps`: the three-quarter marks of the acts' own battles as the
+tags predict them);
 `--check` fails where the file is not what it would write. After a
 family is moved in: `dump`, `encounter_danger.py families` for the new
 one, `engine`, `report --write`.

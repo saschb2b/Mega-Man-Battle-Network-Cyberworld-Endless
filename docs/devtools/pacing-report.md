@@ -36,9 +36,8 @@ the older net's); where it is not (an install that failed) a line says
 so, its layers fighting the BN6 area's own battles above. The deep's acts
 (the Undernet's, the Graveyard's, the Nest) say "the deep" and count the
 older net's battles among their rolls (about half: One net, the deep).
-After the visitors, the encounter groups
-([Encounter groups](../game/progression/encounter-groups.md), behind
-`--dev groups`): for each ROM set the ROMs read make up (BN6 alone, with
+After the families, the encounter groups
+([Encounter groups](../game/progression/encounter-groups.md)): for each ROM set the ROMs read make up (BN6 alone, with
 BN5, with BN4, with both), the pool's families by act and how many ways
 each of the eleven templates fills under the act's band, its cap on one
 hit and its pressure cap; then 300 group battles rolled for every layer
@@ -47,7 +46,7 @@ each one's HP, hit and predicted pressure read again from the ROM's
 records: lowest, median and highest HP, the hardest hit, the most
 pressure, the share standing on a field of the area's own, each
 template's count, OVER past a limit or on a shared or special panel.
-Then the acts' arcs (behind `--dev arc`): 200 runs' arcs for every act's
+Then the acts' arcs: 200 runs' arcs for every act's
 area by their seeds, how many acts have one, the share whose signature
 is one of the area's own, how many families were a signature, the most
 pressure of each beat and of the Server's challenge against its cap,
@@ -57,12 +56,11 @@ a row, kinds of chip). Act 1's lines also list each distinct beat once
 as the `foes` step takes it (`beat 2: 1@52/200@51`), few enough to fight
 each one ([Encounter tags and danger](encounter-tags.md)).
 
-Before them, the visitors: each net's families as their own records set them
-(their role, stage and placements; `*` those that may visit, `!` those
-set on special panels alone), then acts 2 to 4's areas and territories,
-300 battles each given a visitor where one fits: how many took one, the
-battles' HP with it, the pairs (the replaced family's AI index > the
-visitor's), OVER past the band. The guardians of the older net follow
+Before them, each net's families as their own records set them (their
+role, stage and placements; `*` its net's own, `!` those set on special
+panels alone): what the groups' pool takes their places from. The
+visitors' rolls that stood here went with the visitors. The guardians of
+the older net follow
 the first cycle's own: each of BN5's six in every act its area can come
 in, and in the deep's acts where his HP reaches their band (those short
 of it are not in the pool: said so), at the version he is fought at, his

@@ -14,20 +14,19 @@
  * such battles (else as ENC_EASY) */
 enum { ENC_NORMAL, ENC_EASY, ENC_CHALLENGE, ENC_FIRST };
 Encounter make_encounter(int depth, int biome, int kind);
-/* A layer's random battle (the step counter's): make_encounter's, with a
- * visitor of the other net where one is due (visitors.h: the layer's
- * seed, its battles fought so far `index`) */
+/* A layer's random battle (the step counter's): make_encounter's, or the
+ * act's beat where the layer's battles fought so far (`index`) make it
+ * the one (loot_arc below) */
 Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed, int index);
-/* (dev: every battle the visitors' rules allow takes one, --dev visitors) */
-extern bool loot_visitors_always;
 /* (dev: every plain random battle an encounter group's, group_pool.h:
  * --dev groups; 0 none, 1 of any template, 1 + N of template N from 1,
  * --dev group=N. The build's step 1: no run of a player's sets it) */
 extern int loot_groups_always;
-/* (dev: the acts' arcs, group_arc.h: each layer's one group battle, its
- * first random battle but a run's two openers, and the Server's challenge
- * the signature's hardest constellation, --dev arc. The build's step 2:
- * no run of a player's sets it) */
+/* The acts' arcs (group_arc.h; docs/game/progression/encounter-groups.md):
+ * each layer of the main path has one group battle, its first random
+ * battle (on the run's first layer its second), and the Server's challenge
+ * is the signature's hardest constellation. On; a side layer has none, and
+ * --dev noarc turns them off (the director sets it as a layer is built) */
 extern bool loot_arc;
 /* A layer's Server's battle at `depth` in area `biome`: a challenge of
  * the area's own (make_encounter's ENC_CHALLENGE); with the arcs on, and

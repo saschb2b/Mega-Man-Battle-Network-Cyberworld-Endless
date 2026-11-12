@@ -188,27 +188,9 @@ int chip_pool_class_count(int cls) { (void)cls; return 0; }
 bool chip_pool_older(int rom_id) { (void)rom_id; return false; }
 int chip_pool_tier(int rom_id) { (void)rom_id; return -1; }
 bool town_after_abandon;
-/* (the nets' meeting, issue #82: no ROMs, so the families the visitors
- * come from are the tests' own, test_visitors; the older net's chips'
- * share, home's requests' rolls; BN6's stages by depth) */
+/* (the older net's chips' share, home's requests' rolls; BN6's stages by depth) */
 int loot_older_share, loot_older_net;
-bool loot_visitors_always;
 int loot_stage_allowed(int depth) { return depth > 12 ? 2 : depth > 6 ? 1 : 0; }
-static VisitorKin test_kin[VISIT_NETS][4];
-static int test_nkin[VISIT_NETS], test_role[VISIT_NETS][VISITOR_KIN_MAX], test_id[VISIT_NETS][VISITOR_KIN_MAX][6], test_panel = 2;
-int visitor_kin(int net, const VisitorKin **out) {
-	net = net >= 0 && net < VISIT_NETS ? net : VISIT_BN6;
-	*out = test_kin[net];
-	return test_nkin[net];
-}
-int visitor_role_in(int net, int family) {
-	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX ? test_role[net][family] : VISITOR_FREE;
-}
-int visitor_id(int net, int family, int version) {
-	return net >= 0 && net < VISIT_NETS && family > 0 && family < VISITOR_KIN_MAX && version >= 0 && version < 6 && test_id[net][family][version]
-		? test_id[net][family][version] : -1;
-}
-int visitor_panel(const Encounter *e, int col, int row) { (void)e; (void)col; (void)row; return test_panel; }
 
 static void test_sha1(void) {
 	char hex[41];
@@ -1246,27 +1228,6 @@ static void test_extras(void) {
 	}
 	CHECK(brackets * 100 >= shorts * 30 && brackets * 100 <= shorts * 55, "brackets in %d short nets of %d, not about five in twelve", brackets, shorts);
 	CHECK(glitches > 0 && dropped == 12, "%d Glitch layers, %d Battlers' layers made without him", glitches, dropped);
-	/* (Older nets off with BN4's ROM read: no visitor of BN4's, whose rewards are BN4's chips; on, they come,
-	 * docs/multirom/bn4-chips.md, EXTRAS; BN4's kin alone, as a game with BN6's and BN4's ROMs has them) */
-	memset(&run, 0, sizeof run);
-	run.seed = 0xB4;
-	int kin5 = test_nkin[VISIT_BN5], kin4 = test_nkin[VISIT_BN4], here = 0;
-	test_nkin[VISIT_BN5] = 0;
-	test_nkin[VISIT_BN4] = 1;
-	for (int off = 0; off < 2; ++off) {
-		run.extras_off = off ? 1 << EXTRA_OLDER : 0;
-		for (int d = 4; d <= 13; ++d)
-			for (int b = 0; b < BIOME_COUNT; ++b) {
-				bool deep = b == BIOME_UNDERNET || b == BIOME_GRAVEYARD || b == BIOME_NEST;
-				here += !off && visitors_here(d, b);
-				CHECK(!off || !visitors_here(d, b), "a BN4 visitor on layer %d, area %d, with Older nets off", d, b);
-				for (int i = 0; off && !deep && i < 8; ++i)
-					CHECK(!visitor_due((uint32_t)(d * 31 + b), i, d, b, ENC_NORMAL), "a BN4 visitor due on layer %d with Older nets off", d);
-			}
-	}
-	CHECK(here > 0, "no BN4 visitor anywhere with Older nets on and BN4's kin");
-	test_nkin[VISIT_BN5] = kin5;
-	test_nkin[VISIT_BN4] = kin4;
 	profile.best_depth = best;
 	run = before;
 }
@@ -7105,152 +7066,10 @@ static void test_analytics_online(void) {
 	rmdir(base);
 }
 
-/* The nets' meeting (issue #82, docs/multirom/one-net.md): a family's
- * role by its placements; the visitors' gate, one battle in each four, the
- * same at every reroll; the rules that keep visitors out; a visitor's
- * place, family and version against the band; the deep's coin between the
- * nets, reproducible from the run's random numbers */
-static EnemyMoved test_enemy(int family, int version, int hp, int dmg) {
-	EnemyMoved e;
-	memset(&e, 0, sizeof e);
-	e.triple[0] = (uint8_t)version;
-	e.triple[2] = (uint8_t)family;
-	e.stats[0] = (uint8_t)hp; e.stats[1] = (uint8_t)(hp >> 8);
-	e.stats[4] = (uint8_t)dmg; e.stats[5] = (uint8_t)(dmg >> 8);
-	return e;
-}
-
-static Encounter test_battle(int n, int col) {
-	Encounter e;
-	memset(&e, 0, sizeof e);
-	for (int i = 0; i < n; ++i) e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 2, 0, col, i, 0x300 };
-	return e;
-}
-
 static void test_visitors(void) {
 	CHECK(visitor_role(0, 0, 4) == VISITOR_BACK && visitor_role(0, 1, 3) == VISITOR_BACK && visitor_role(1, 1, 2) == VISITOR_FREE &&
 		visitor_role(3, 0, 1) == VISITOR_FRONT && visitor_role(2, 1, 1) == VISITOR_FREE && visitor_role(0, 0, 0) == VISITOR_FREE,
 		"visitors: a family's role by its placements");
-	/* (one in each four, and the same again) */
-	int blocks = 0, odd = 0, at[4] = { 0 };
-	for (uint32_t seed = 1; seed <= 64; ++seed)
-		for (int b = 0; b < 25; ++b) {
-			int n = 0;
-			for (int i = 4 * b; i < 4 * b + 4; ++i)
-				if (visitor_gate(seed * 2654435761u, i)) { ++n; ++at[i & 3]; odd += visitor_gate(seed * 2654435761u, i) != true; }
-			blocks += n == 1;
-		}
-	CHECK(blocks == 64 * 25 && !odd, "visitors: the gate takes one battle in each four (%d of %d blocks)", blocks, 64 * 25);
-	CHECK(at[0] && at[1] && at[2] && at[3], "visitors: the gate's battle not always the same of the four");
-	CHECK(!visitor_gate(1, -1), "visitors: no gate before a battle");
-	/* (the rules: none without the older net's families, before act 2,
-	 * past an opening, with the Gentle helper, in the deep) */
-	memset(test_kin, 0, sizeof test_kin);
-	test_nkin[VISIT_BN6] = test_nkin[VISIT_BN5] = 0;
-	loot_visitors_always = true;
-	run.helpers = 0;
-	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none without the older net's families");
-	test_nkin[VISIT_BN5] = 1;
-	test_kin[VISIT_BN5][0] = (VisitorKin){ 40, VISITOR_FREE, 0, false, true, 10 };
-	CHECK(visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL) && !visitor_due(1, 0, 3, BIOME_CENTRAL, ENC_NORMAL) &&
-		!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_EASY) && !visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_CHALLENGE) &&
-		!visitor_due(1, 0, 14, BIOME_UNDERNET, ENC_NORMAL) && !visitor_due(1, 0, 17, BIOME_GRAVEYARD, ENC_NORMAL) &&
-		!visitor_due(1, 0, 19, BIOME_NEST, ENC_NORMAL), "visitors: the rules that keep them out");
-	run.helpers = HELP_GENTLE;
-	CHECK(!visitor_due(1, 0, 8, BIOME_CENTRAL, ENC_NORMAL), "visitors: none with the Gentle helper");
-	run.helpers = 0;
-	loot_visitors_always = false;
-	/* (a battle of BN6's three viruses, 60 HP each, at act 2: band 150-280,
-	 * cap 80, BN6's V1, so BN5's V1EX at most) */
-	memset(test_id, 0, sizeof test_id);
-	memset(test_role, 0, sizeof test_role);
-	EnemyMoved foe = test_enemy(2, 0, 60, 10);
-	enemy_moved_set(0x300, &foe);
-	static const int hp5[6] = { 40, 60, 80, 100, 120, 140 };
-	for (int v = 0; v < 6; ++v) {
-		EnemyMoved x = test_enemy(40, v, hp5[v], 10 + 10 * v);
-		enemy_moved_set(0x310 + v, &x);
-		test_id[VISIT_BN5][40][v] = 0x310 + v;
-	}
-	run.threat = 0;
-	rng_seed(7);
-	Encounter e = test_battle(3, 4);
-	CHECK(visitor_apply(&e, 5) && e.visitor >= 1 && e.foes[e.visitor - 1].family == 40 && e.foes[e.visitor - 1].id == 0x311 &&
-		e.foes[e.visitor - 1].version == 1 && e.foes[e.visitor - 1].col == 4 && family_mask_has(e.from_families, 40),
-		"visitors: one of the older net's, at its highest version under the band, on the replaced one's panel");
-	CHECK(!visitor_apply(&e, 5), "visitors: one a battle");
-	/* (the band's top: three of 90 HP, 270, where V1EX's 60 for one of
-	 * them is 240 and fits, and five of them nothing fits) */
-	EnemyMoved heavy = test_enemy(2, 0, 90, 10);
-	enemy_moved_set(0x300, &heavy);
-	e = test_battle(3, 4);
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].id == 0x311, "visitors: the band kept with the replaced one's HP gone");
-	EnemyMoved huge = test_enemy(2, 0, 250, 10);
-	enemy_moved_set(0x300, &huge);
-	e = test_battle(2, 4);
-	Encounter was = e;
-	CHECK(!visitor_apply(&e, 5) && !memcmp(&e, &was, sizeof e), "visitors: none where no version keeps the band, the battle as it was");
-	enemy_moved_set(0x300, &foe);
-	/* (the role: a back family's place is the last column, and only a
-	 * back family takes it) */
-	test_role[VISIT_BN6][2] = VISITOR_BACK;
-	e = test_battle(2, 4);
-	CHECK(!visitor_apply(&e, 5), "visitors: none for a back family out of the back");
-	e = test_battle(2, 5);
-	CHECK(!visitor_apply(&e, 5), "visitors: a family of either role never takes a back family's place");
-	test_kin[VISIT_BN5][0].role = VISITOR_BACK;
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].col == 5, "visitors: a back family for a back family, at the back");
-	test_role[VISIT_BN6][2] = VISITOR_FREE;
-	test_kin[VISIT_BN5][0].role = VISITOR_FREE;
-	/* (a family the battle holds, a bound one, one not reached yet, a
-	 * panel neither plain nor cracked: none) */
-	e = test_battle(2, 4);
-	e.foes[1].family = 40;
-	e.foes[1].id = 0x310;
-	CHECK(!visitor_apply(&e, 5), "visitors: never a family the battle holds");
-	test_kin[VISIT_BN5][0].visits = false;
-	e = test_battle(2, 4);
-	CHECK(!visitor_apply(&e, 5), "visitors: none that may not visit");
-	test_kin[VISIT_BN5][0].visits = true;
-	test_kin[VISIT_BN5][0].stage = 2;
-	CHECK(!visitor_apply(&e, 5), "visitors: none its own net meets later");
-	test_kin[VISIT_BN5][0].stage = 0;
-	test_panel = 7;
-	CHECK(!visitor_apply(&e, 5), "visitors: none on a panel neither plain nor cracked");
-	test_panel = 2;
-	/* (the same seed, the same visitor) */
-	test_nkin[VISIT_BN5] = 2;
-	test_kin[VISIT_BN5][1] = (VisitorKin){ 41, VISITOR_FREE, 0, false, true, 10 };
-	for (int v = 0; v < 6; ++v) test_id[VISIT_BN5][41][v] = 0x310 + v;
-	Encounter a = test_battle(3, 4), b = test_battle(3, 4);
-	rng_seed(99);
-	visitor_apply(&a, 5);
-	rng_seed(99);
-	visitor_apply(&b, 5);
-	CHECK(!memcmp(&a, &b, sizeof a), "visitors: the same seed, the same visitor");
-	/* (BN4's, its ROM read for research: one of its families in BN6's
-	 * battles and BN5's, its version by tier, no bit in the repeat rule's
-	 * memory for its number past 63; beside BN5's, each family as likely) */
-	test_nkin[VISIT_BN5] = 0;
-	test_nkin[VISIT_BN4] = 1;
-	test_kin[VISIT_BN4][0] = (VisitorKin){ 64, VISITOR_FREE, 0, false, true, 10 };
-	for (int v = 0; v < 6; ++v) test_id[VISIT_BN4][64][v] = 0x310 + v;
-	CHECK(visitors_here(8, BIOME_CENTRAL), "visitors: BN4's families alone bring them");
-	e = test_battle(3, 4);
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64 && e.foes[e.visitor - 1].id == 0x311 && family_mask_has(e.from_families, 64),
-		"visitors: one of BN4's in a battle of BN6's, by tier, its family's bit past the 64th");
-	e = test_battle(3, 4);
-	e.xrecord = 0x08100000u;
-	CHECK(visitor_apply(&e, 5) && e.foes[e.visitor - 1].family == 64, "visitors: one of BN4's in a battle of BN5's");
-	test_nkin[VISIT_BN5] = 1;
-	int nets_drawn[2] = { 0 };
-	for (uint32_t s = 1; s <= 200; ++s) {
-		rng_seed(s);
-		e = test_battle(3, 4);
-		if (visitor_apply(&e, 5)) ++nets_drawn[e.foes[e.visitor - 1].family == 64];
-	}
-	CHECK(nets_drawn[0] + nets_drawn[1] == 200 && nets_drawn[0] > 70 && nets_drawn[1] > 70,
-		"visitors: BN5's and BN4's families share the battle, each as likely (%d, %d)", nets_drawn[0], nets_drawn[1]);
 	/* (the telegraph, the owner's call 5: BN4's families the older Net's as
 	 * BN5's, so either in a battle of BN6's has the same words and the
 	 * same once; BN6's in BN5's are ours; BN4's in BN5's of no other net) */
@@ -7259,34 +7078,6 @@ static void test_visitors(void) {
 	CHECK(visitor_telegraph(VISIT_BN5, VISIT_BN6) == VISITOR_OURS, "visitors: BN6's in a battle of BN5's ours");
 	CHECK(visitor_telegraph(VISIT_BN5, VISIT_BN4) == VISITOR_UNSAID && visitor_telegraph(VISIT_BN6, VISIT_BN6) == VISITOR_UNSAID &&
 		visitor_telegraph(VISIT_BN5, VISIT_BN5) == VISITOR_UNSAID, "visitors: none said of the older Net's in its own battle, nor a net's in its own");
-	test_nkin[VISIT_BN4] = 0;
-	for (int v = 0; v < 6; ++v) enemy_moved_set(0x310 + v, NULL);
-	enemy_moved_set(0x300, NULL);
-	test_nkin[VISIT_BN5] = 0;
-	/* (the deep: a coin a battle between the nets, the Nest's older half
-	 * between its two areas; a territory's always its own; nothing drawn
-	 * outside the deep) */
-	int none[2] = { -1, -1 }, one[2] = { 24, -1 }, two[2] = { 24, 22 }, seen[3] = { 0 };
-	rng_seed(5);
-	uint32_t s0 = rng_state();
-	CHECK(nets_battle_area(none, 21) == 21 && nets_battle_area(none, -1) == -1 && rng_state() == s0, "the deep: outside it a territory's own, nothing drawn");
-	int bn6 = 0, first[64];
-	for (int i = 0; i < 1000; ++i) {
-		int x = nets_battle_area(one, 21);
-		bn6 += x == -1;
-		if (i < 64) first[i] = x;
-		CHECK(x == -1 || x == 24, "the deep: BN6's or the older net's area");
-	}
-	CHECK(bn6 > 400 && bn6 < 600, "the deep: a coin between the nets (%d of 1000 BN6's)", bn6);
-	rng_seed(5);
-	bool same = true;
-	for (int i = 0; i < 64; ++i) same &= nets_battle_area(one, 21) == first[i];
-	CHECK(same, "the deep: the same seed, the same battles");
-	for (int i = 0; i < 1000; ++i) {
-		int x = nets_battle_area(two, -1);
-		++seen[x == -1 ? 0 : x == 24 ? 1 : 2];
-	}
-	CHECK(seen[0] > 400 && seen[1] > 150 && seen[2] > 150, "the deep: the Nest's both areas (%d %d %d)", seen[0], seen[1], seen[2]);
 }
 
 static void test_pad_art(void) {
@@ -7917,6 +7708,16 @@ static void test_groups(void) {
 	dear[1].cost = -1;
 	capped.cost = 1000;
 	CHECK(group_fillings(dear, 2, &capped, GROUP_WALL, NULL, NULL) == 0, "groups: a family never fought fills nothing under a cap on cost");
+	/* (several of one family: what they were measured to press and cost together, not one's numbers times theirs; three
+	 * never fought, the one's times three) */
+	GroupFam twin[1] = { { 1, 0, GROUP_FRONT, 0, 0, 10, { { 10, 40, 10, 0 }, none, none, none, none, none }, 0, { { 201, 91 }, { 0, 0 } } } };
+	GroupLimits open_ = { { 0, 1000, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000, 1000 };
+	GroupFill duo, trio;
+	CHECK(group_same(twin, 0, 2, false, &open_, &duo) && duo.pressure == 200 && duo.cost == 90, "groups: two of a kind by their own measure (pressure %d, cost %d)",
+		duo.pressure, duo.cost);
+	CHECK(group_same(twin, 0, 3, false, &open_, &trio) && trio.pressure == 30 && trio.cost == 0, "groups: three never fought, one's times three");
+	open_.cost = 80;
+	CHECK(!group_same(twin, 0, 2, false, &open_, &duo) && group_same(twin, 0, 1, false, &open_, &duo), "groups: the cap on cost keeps two of them out, one in");
 	GroupLimits act1 = group_limits_kind(2, 0, GROUP_NETS_ALL, GROUP_PLAIN), act3 = group_limits_kind(8, 0, GROUP_NETS_ALL, GROUP_EASED);
 	CHECK(act1.cost == group_cost_cap(0) && act3.cost == group_cost_cap(2) * 2 / 3 && group_cost_cap(1) > group_cost_cap(0),
 		"groups: an act's cap on cost, an eased battle's two thirds of it");
@@ -7961,10 +7762,10 @@ static void test_group_arc(void) {
 	GroupArc a, b;
 	CHECK(arc_home_share(0) == 9 && arc_home_share(1) == 6 && arc_home_share(2) == 4 && arc_home_share(3) == 3 && arc_home_share(4) < 0 && arc_home_share(6) < 0,
 		"arc: the share of the area's own by act");
-	/* (every run of the area's own: the one family of it; alone, two of it under the eased top; its pair the back-row one;
+	/* (every run of the area's own: the one family of it; alone, one of it; its pair the back-row one;
 	 * its constellation the pincer with both) */
-	CHECK(group_arc_make(pool, 5, &r, 1, &a) && a.signature == 0 && a.home && a.beat[ARC_ALONE].template == GROUP_ALONE && a.beat[ARC_ALONE].n == 2 &&
-		a.beat[ARC_ALONE].fam[0] == 0 && a.beat[ARC_ALONE].hp == 80 && a.beat[ARC_ALONE].pressure == 120, "arc: the signature alone, two of it eased (HP %d, pressure %d)",
+	CHECK(group_arc_make(pool, 5, &r, 1, &a) && a.signature == 0 && a.home && a.beat[ARC_ALONE].template == GROUP_ALONE && a.beat[ARC_ALONE].n == 1 &&
+		a.beat[ARC_ALONE].fam[0] == 0 && a.beat[ARC_ALONE].hp == 40 && a.beat[ARC_ALONE].pressure == 60, "arc: the signature alone, one of it (HP %d, pressure %d)",
 		a.beat[ARC_ALONE].hp, a.beat[ARC_ALONE].pressure);
 	CHECK(a.partner == 1 && a.beat[ARC_PAIR].n == 2 && a.beat[ARC_PAIR].hp == 90, "arc: its pair, and the partner (%d)", a.partner);
 	CHECK(a.beat[ARC_CONSTELLATION].n == 3 && a.beat[ARC_CONSTELLATION].template == GROUP_PINCER && a.beat[ARC_CONSTELLATION].fam[0] == 0 &&
@@ -7984,12 +7785,6 @@ static void test_group_arc(void) {
 	for (uint32_t roll = 0; roll < 200; ++roll)
 		if (group_arc_make(pool, 5, &r, roll, &a)) seen |= 1 << a.signature;
 	CHECK(seen == 15, "arc: every family that can carry the act is a signature by some roll (%d)", seen);
-	/* (a too-pressing family alone takes one of it: BN5's roamer, 100 a virus under a cap of 146) */
-	for (uint32_t roll = 0; roll < 200; ++roll)
-		if (group_arc_make(pool, 5, &r, roll, &a) && a.signature == 2) {
-			CHECK(a.beat[ARC_ALONE].n == 1 && a.beat[ARC_ALONE].pressure == 100, "arc: one alone where two press past the eased cap");
-			break;
-		}
 	/* (a family with no pair carries no act) */
 	CHECK(!group_arc_make(pool, 1, &r, 1, &a), "arc: no signature where nothing pairs");
 }

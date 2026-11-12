@@ -196,22 +196,23 @@ What scaling means here, measured on both games' data:
   first one virus), BN6's repeat rule and its random numbers; a family
   both games have is BN6's at the tier of its version, measured by BN6's
   stats.
-- **Visitors and the deep** ([One net: the design](../../multirom/one-net.md)): from act 2 one
-  battle in four takes a virus of the other net at the highest version
-  that keeps the battle's HP to the band's top and its hit to the cap;
-  the deep's acts take each battle by a coin from BN6's area's own or the
-  older net's late areas', each held to the band as above. Both are to
-  be replaced by [encounter groups](encounter-groups.md), approved on 11
-  November 2026 and not built yet: constellations beside the area's own
-  battles, an arc per act around a signature family.
+- **Encounter groups** ([Encounter groups](encounter-groups.md), on since
+  12 November 2026): each act has a signature family by the run's seed,
+  and one battle a layer is its beat, the family alone, in a pair, in its
+  constellation, built from every ROM's families inside the band, the cap
+  on one hit, a cap on pressure and one on cost; the Server's challenge is
+  the signature's hardest constellation. A layer's other battles are the
+  area's own. They replace the one-in-four visitor of the other net and
+  the deep's coin between the nets ([One net: the design](../../multirom/one-net.md)):
+  a layer's own battles are its area's, an older net's area's its own
+  records, in the deep too.
 
 `build.py pacing` measures it: every act's territory battles as BN6's
 engine fights them (native, opening and challenge rows, with how many of
 the older net's), the
-deep's acts with the older net's share of their battles, and every act's
-battles from the second with a visitor where one fits (the pairs, HP
-against the band): none past the band, at threat 0, over every territory
-and cycle.
+deep's acts, and every act's arcs and group battles against their limits
+([the pacing report](../../devtools/pacing-report.md)): none past the
+band, at threat 0, over every territory and cycle.
 
 ## Choosing areas
 

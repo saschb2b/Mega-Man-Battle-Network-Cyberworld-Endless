@@ -45,9 +45,6 @@ int visitor_kin(int net, const VisitorKin **out);
 /* The net family `family` (BN6's AI index) is of: BN5's or BN4's for a
  * family of theirs moved into the engine, BN6's else */
 int visitor_net(int family);
-/* The role of `family` in net `net`'s records (VISITOR_*), VISITOR_FREE
- * where they set it nowhere */
-int visitor_role_in(int net, int family);
 /* The enemy id of net `net`'s family `family` at `version` (BN6's 0-3,
  * V1 to SP; BN5's and BN4's 0-5, V1 to V3EX, as installed), -1 none */
 int visitor_id(int net, int family, int version);
