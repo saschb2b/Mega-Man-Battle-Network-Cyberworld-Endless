@@ -167,7 +167,10 @@ def pool(fams, nets, band):
 PAIR_EXTRA = 40
 PAIRS = {}
 # ... and the pairs' cost pass (tools/encounter_danger.py pairs --modes fight, tools/encounter_data/pairs_cost.tsv): two
-# families that cost the test autopilot more together than their own costs add up to, by PAIR_EXTRA HP or more
+# families that cost the test autopilot more together than their own costs add up to, by PAIR_COST_EXTRA HP or more. A
+# fight's cost swings more than a standing target's pressure (one pair cost 40 to 280 over six seeds) and each pair was
+# fought once, so the bar is higher than the pressure's.
+PAIR_COST_EXTRA = 100
 PAIRS_COST = {}
 
 
@@ -191,7 +194,7 @@ def pairs_load(fams, path=None):
     cost_path = os.path.join(os.path.dirname(path), 'pairs_cost.tsv')
     for r in read_tsv(cost_path) if os.path.exists(cost_path) else []:
         a, b = r['label'].split('+')
-        if a in fams and b in fams and fams[a].fight and fams[b].fight and int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2] >= PAIR_EXTRA:
+        if a in fams and b in fams and fams[a].fight and fams[b].fight and int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2] >= PAIR_COST_EXTRA:
             PAIRS_COST[tuple(sorted((a, b)))] = int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2]
     return rows
 
@@ -696,6 +699,17 @@ def report_pairs(fams):
              f'hits at the version fought over their V1\'s.', '']
     flagged = sorted(((got - own, a, b, got, own) for a, b, got, own in rows if got - own >= PAIR_EXTRA), reverse=True)
     lines += table(['Pair', 'Together', 'Their own, added', 'Past the sum'], [[f'{a} + {b}', got, own, f'+{d}'] for d, a, b, got, own in flagged])
+    cost_path = os.path.join(DATA, 'pairs_cost.tsv')
+    if os.path.exists(cost_path):
+        fought = [(int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2], int(r['won'])) for r in read_tsv(cost_path)
+                  for a, b in [r['label'].split('+')] if a in fams and b in fams and fams[a].fight and fams[b].fight]
+        past = sorted(d for d, _ in fought)
+        lines += ['', f'The pairs\' cost: the same {len(fought)} pairs fought once each by the test autopilot with the starting folder (50 seconds at most; '
+                  f'it deleted {sum(w for _, w in fought)} of them in that time), the HP it lost against its two families\' own costs added up. '
+                  f'The median pair costs {statistics.median(past):+.0f} past its sum, but {sum(d >= 40 for d in past)} cost 40 HP or more past it, '
+                  f'{sum(d >= 100 for d in past)} cost 100 or more, {sum(d >= 200 for d in past)} cost 200 or more, and the most is {past[-1]}: '
+                  f'cost adds up to more than its parts far more often than pressure does. A fight\'s cost swings with its seed, and each '
+                  f'pair was fought once, so a pair is tagged from {PAIR_COST_EXTRA} HP past its sum ({len(PAIRS_COST)} pairs).']
     return lines + ['']
 
 
@@ -769,8 +783,8 @@ def cmd_engine(a):
         '#include "groups.h"', '',
         'const GroupTag group_tags[] = {'] + rows + ['};', 'const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);', '',
         '/* The pairs that press harder together than their own pressures add up to (the pairs\' pass: tools/encounter_danger.py',
-        f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1, or cost the test autopilot as much more than their own costs',
-        ' * add up to (pairs --modes fight): each family\'s net and BN6\'s AI index, the pressure\'s excess and the cost\'s. */',
+        f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1, or cost the test autopilot {PAIR_COST_EXTRA} HP or more past their own',
+        ' * costs added up (pairs --modes fight): each family\'s net and BN6\'s AI index, the pressure\'s excess and the cost\'s. */',
         'const GroupPair group_pairs[] = {'] + pairs + ['};', 'const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);', '',
         '/* BN6\'s battlefields a group may stand on, a bit each by the field\'s number (the fields\' pass: a pair harmless on the',
         f' * plain field fought on each, fair where the test autopilot wins every fight and loses {FIELD_FAIR} HP at most). */',

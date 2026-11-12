@@ -347,6 +347,20 @@ static void reg_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site, cons
 	shim_put(b, code, site, at, shim, n);
 }
 
+/* its XvCallIn: the two instructions checked, then made a call to the stub through its veneer, written at the block's place */
+static void calls_in_set(Ctx *c, const XvBlock *b, uint8_t *code) {
+	for (int i = 0; i < c->f->ncalls_in && !xv_failed(); ++i) {
+		const XvCallIn *k = &c->f->calls_in[i];
+		if (k->at < b->start || k->at + 4 > b->end) continue;
+		uint32_t off = k->at - b->start, v = thumb_veneer_get(&c->pool, k->to);
+		bool stub = c->region && ((k->to >= c->region->stubs && k->to < c->region->stubs_end) || (k->to >= c->region->stubs2 && k->to < c->region->stubs2_end));
+		if (!stub || (k->at & 1) || get32(code + off) != k->was || !v || !thumb_bl_write(code, off, b->at, v)) {
+			xv_fail("its call in at %08x (to %08x)", (unsigned)k->at, (unsigned)k->to);
+			return;
+		}
+	}
+}
+
 static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
 	for (int i = 0; i < c->f->nsides && !xv_failed(); ++i)
 		if (xvirus_block_of(c->f, c->f->sides[i]) == b) side_set(c, b, code, c->f->sides[i]);
@@ -459,6 +473,7 @@ static void block_move(Ctx *c, const XvBlock *b) {
 		else xv_fail("a call out of %08x-%08x cannot be made (veneers full, or out of reach)", (unsigned)b->start, (unsigned)b->end);
 	}
 	if (!xv_failed()) shims_set(c, b, code);
+	if (!xv_failed()) calls_in_set(c, b, code);
 }
 
 /* A clone of a routine of its code (XvClone): copied once more, its call to `call` aimed at `to` and its immediate
@@ -814,25 +829,6 @@ static void enemies_tell(const XVirusFamily *f) {
 	}
 }
 
-/* ---- the pre-steps' hook: BN6's dispatcher, as it reads a virus's NameID for its own cases, goes on to a family's pre-step
- * by its AI index (XV_PRESTEP) where it has one (xvirus_shim.h); every other virus as before ---- */
-
-static HookAct prestep_run(HookRegs *r, void *user) {
-	(void)user;
-	uint32_t ai = hook_read8(hook_read32(r->r[5] + BN6_T1_AI_DATA) + BN6_AI_INDEX);
-	uint32_t to = ai >= BN6_FAMILIES && ai < XV_AIS ? hook_read32(XV_PRESTEP + 4u * ai) : 0;
-	if (!to) return HOOK_CONTINUE;
-	r->r[12] = to;
-	return HOOK_JUMP;
-}
-
-static void prestep_hook(void) {
-	static bool set;
-	if (set) return;
-	set = emu_hook(BN6_VIRUS_NAMEID_CASES, prestep_run, NULL);
-	if (!set) fprintf(stderr, "xvirus: no hook at %08x: the families' pre-steps do not run\n", (unsigned)BN6_VIRUS_NAMEID_CASES);
-}
-
 #define INSTALLED_MAX XV_FAMILIES
 
 /* its parts staged, each step only where all before it held */
@@ -897,7 +893,7 @@ bool xvirus_install_family(const XVirusFamily *f) {
 	if (g.tables) xv_moved_add(rom32(g.rom, g.tables + 4u * (uint32_t)f->src_ai), f->home + XV_HOME_STATES, 4u * (uint32_t)f->nstates);
 	for (int v = 0; v < XV_VERSIONS; ++v) xv_moved_add(names.moved[v].from, names.moved[v].to, names.moved[v].len);
 	installed[ninstalled++] = f;
-	if (f->prestep) prestep_hook();
+	if (f->prestep) xg_prestep_hook();
 	enemies_tell(f);
 	printf("xvirus: %s as AI %d, enemy ids %#x-%#x: %u bytes written, %d veneers\n", f->name, f->ai, f->first_id,
 		f->first_id + XV_VERSIONS - 1, (unsigned)used, c.pool.n);

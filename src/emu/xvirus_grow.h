@@ -50,6 +50,8 @@ enum {
  * the one expected, an entry of a table not as the player's ROM has it, an
  * instruction not BN6's, the room past EMU_FREE not free. */
 bool xg_grow(void);
+/* The pre-steps' hook on BN6's dispatcher (XV_PRESTEP; xvirus_shim.h), set once a core by the first family that has one */
+void xg_prestep_hook(void);
 /* Entry i of grown table t (XG_*) given a family's bytes (the table's
  * entry size), staged (xvirus_tx.h): the core's copy must still hold the
  * table's fill there, or BN6's own entry where BN6 has one (a placeholder

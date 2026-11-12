@@ -231,6 +231,7 @@ class Bn4Canon:
         self.chip_effects = {int(b, 16): int(a, 16) for row in re.findall(r'XvId \w+_effects\[\] = \{(.*?)\};', open(chips).read() if os.path.exists(chips) else '', flags=re.S)
                              for a, b in re.findall(r'\{ 0x([0-9A-F]{2}), 0x([0-9A-F]{2}) \}', row)}
         self.moved1_sprites = sprite_numbers_of([os.path.join('src', 'emu', 'xnavi_bn4.c')])
+        self.chip_sprites = sprite_numbers_of([os.path.join('src', 'emu', 'xchips_bn4.c')])   # (spawn_word_sprite_as_bn6)
         # (BN4's Navi chips' units, src/emu/xchips_bn4.c's XCHIP_NAVI rows: BN4's subfamily -> the unit's number in BN6's grown
         # Navi routines; each one's object's type in BN4, read from its routine: navi_object_types)
         self.navi_units = {int(a, 16): int(b, 16) for a, b in re.findall(r'\{ XCHIP_NAVI, 0x([0-9A-F]{2}), 0x([0-9A-F]{2}),', open(chips).read() if os.path.exists(chips) else '')}
@@ -596,6 +597,21 @@ OBJ_DAMAGE, OBJ_DAMAGE_KIND, COLL_DAMAGE_KIND, CHIP_POWER, CHIP_DAMAGE_KIND = 0x
 ACTOR_OWN4, ACTOR_OWN6 = 6, 8   # (an actor's own states: BN4's from 6, BN6's from 8, tools/bn4_twins.py GENERIC4)
 
 
+SPAWN_SPRITE_OBJECTS = {}   # (legit.json's bn4 spawn_word_sprites: its types, filled at the first read)
+
+
+def spawn_word_sprite_as_bn6(rec, canon):
+    """a BN4 fourth-kind object's sprite named by its spawn's word (+4 the list's offset, +5 the number) read as the copy's
+    number, for the types legit.json's bn4 spawn_word_sprites names, by the chips' units' XvSprite rows"""
+    if not SPAWN_SPRITE_OBJECTS:
+        SPAWN_SPRITE_OBJECTS.update({int(k, 0): v for k, v in bn4_rule('spawn_word_sprites').get('T4', {}).items()} or {-1: None})
+    if rec[NODE + OBJ_TYPE] not in SPAWN_SPRITE_OBJECTS or rec[NODE + 4] & 3:
+        return
+    copies = canon.chip_sprites.get((rec[NODE + 4] // 4, rec[NODE + 5]))
+    if copies:
+        rec[NODE + 5] = copies[0][1]
+
+
 def bn4_rule(name):
     return shards.load('legit').get('bn4', {}).get(name) or {}
 
@@ -878,6 +894,7 @@ def named(canon, game, o, fams=None, reserved=(), blinked=()):
         else:
             support_object_as_bn6(rec, canon)   # (a support chip's object's spawn's copies: legit.json's bn4 support_objects)
         object_element_as_bn6(rec)   # (a chip unit's own object's element at BN6's place: legit.json's bn4 object_element)
+        spawn_word_sprite_as_bn6(rec, canon)   # (its sprite named by its spawn's word, the copy's: legit.json's bn4 spawn_word_sprites)
     if game == 4 and fams is not None and o.kind == 'T3' and getattr(canon, 'chip_rule', None):
         attack_object_as_bn6(rec, canon)   # (a chip's attack's object: legit.json's bn4 chip_id record, actor_objects)
     if game == 4 and fams is not None and o.kind == 'T4' and rec[NODE + OBJ_TYPE] == 0:   # (an effect object's id: Bn4Canon.fx)

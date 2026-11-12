@@ -250,7 +250,11 @@ controller) keeps its element where its own spawner stores it, BN4's
 +0x17 and BN6's +0x0E by the recipe's immediates; the trace writes a
 fourth-kind object raw, so the comparison reads BN4's at BN6's place for
 the types `legit.json`'s `bn4` `object_element` names, each with the two
-instructions. A pointer a BN4 object keeps into a chip unit's moved
+instructions. Where such an object's sprite is named by its spawn's word
+(its +4 the list's offset, its +5 the number: AirHoc's puck's spark),
+the recipe gives the word the copy's number, so BN4's +5 is read as the
+copy's by the unit's sprite rows, for the types `spawn_word_sprites`
+names (`bn4_pa_pithoky1`, whose puck is the first to spawn it). A pointer a BN4 object keeps into a chip unit's moved
 blocks (the star's kind's row at its +0x60, seen in the fight's frames
 since Meteors) reads as moved data in both traces: a BN4 reference takes
 BN4's chips' room (`FREE_BN4_CHIPS`) among the rooms whose blocks it

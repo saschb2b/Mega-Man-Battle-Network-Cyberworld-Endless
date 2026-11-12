@@ -565,8 +565,10 @@ deletes (HP 0 in both), not past it; BubSprd's burst is HeatSprd's code
 with another row, FlmCros2 and 3 are FlmCros1's with another power.
 The comparison reads a Program Advance's row as a moved chip's, and
 the launcher's element at BN6's place (the registries' bn4
-object_element, by type). **Waiting on their parts:** PitHoky1-3 (AirHoc1-3,
-family 0x27), P.Driver (GunSol1-3) and DarkNeo (DrkLine, BugChain and
+object_element, by type). PitHoky1-3 (12 November 2026) are AirHoc's
+state with powers of 100, 150 and 200, three AirHoc of codes in a row:
+`bn4_pa_pithoky1`-`3` pass to the frame before the Mettaur's deletion,
+two mutations caught. **Waiting on their parts:** P.Driver (GunSol1-3) and DarkNeo (DrkLine, BugChain and
 Bass; a dark Program Advance, the dark chips' price its own question):
 `tools/xreg_bn4.py` says so for each as it writes. Seen on the way,
 none of it this unit's: the spread shot's collision data differs at the
@@ -842,6 +844,27 @@ the differential refuses a BN4 spec of more than one foe (its opening's
 alignment, legit.json's bn4 align). BN4's Gigas (729-733) need BN6's
 folder of a spec to hold another chip besides: a folder of 30 Gigas
 never deals in BN6.
+
+**AirHoc1-3 are moved** (12 November 2026: ids 650-652), BN4's air
+hockey state 0x27 as BN6's grown attack family 0xFB: MegaMan strikes
+a puck (the third kind's 0x2E with its kinds' table, `0x080D2768`)
+that bounces diagonally off the field's edges and the sides' border,
+its spark the fourth kind's 0x28 moved as 0xA0, the spark's sprite
+named by a word of the puck's spawn (`SPAWN_WORD_SPRITES`), its
+sounds 0xC0 and 0xCC at the grown table's 0x289 and 0x28A. Three
+things the copy needed. The puck's move test reads the collision
+data's panel as one word (`ldr r0,[r0,#8]`, column and row with the
+panel's byte and counter after them); BN6 keeps those at +0xA, where a
+word cannot be read, so a call-in (`XvCallIn`, the family's own call
+written over the two instructions) goes to `XC4_COLL_PANEL_WORD`
+(`FREE_BN4_CHIP_STUBS` + 0x20), which builds the same word from BN6's
+two halfwords. The bounce reads a panel's side through a copy of the
+panel's address after a pop (`adds r4,r0,#0`, then `ldrb r1,[r4,#1]`),
+which the generator's side patch now follows (BN6's +3). MegaMan's
+strike is BN4's animation 0x10, BN6's 0x0C in its own art (frames of
+2, 2, 2 and 10 in each). `bn4_chip_airhoc1` passes over 300 frames
+against the 250 HP Mettaur, three hits of 50 in both; AirHoc2 and 3
+to the frame before the Mettaur's deletion; five mutations caught.
 
 **DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
 594). DarkBomb is the bombs' state's subfamily 2, its own copy of the

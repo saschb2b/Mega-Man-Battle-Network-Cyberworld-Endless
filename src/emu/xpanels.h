@@ -41,6 +41,8 @@
 void xpanels_install(int xrom);
 /* Whether BN6's engine has lava and sea now */
 bool xpanels_ready(void);
+/* ... and panel type `type` of the four (XPANEL_LAVA to XPANEL_HOLE): its game's ROM read and its install whole */
+bool xpanels_has(int type);
 /* An object coming onto a magnet panel (BN5_MAGNET_ARRIVED), from BN6's arrival test (BN6_ARRIVED_TYPE, xsea.c's hook): `obj`
  * the object, `coll` its collision data; pushed as BN5 pushes it */
 void xpanels_magnet_arrived(uint32_t obj, uint32_t coll);

@@ -531,6 +531,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xA9, 0x286 }, { XROM_BN4_RED_SUN_US, 0xBD, 0x287 },
 	/* ... BugCurse's curse (0x288) */
 	{ XROM_BN4_RED_SUN_US, 0x141, 0x288 },
+	/* ... AirHoc's puck, its launch and its bounce (the air line's 0x289 up: docs/project/claims/bn4-air-units.json) */
+	{ XROM_BN4_RED_SUN_US, 0xC0, 0x289 }, { XROM_BN4_RED_SUN_US, 0xCC, 0x28A },
 };
 
 int xsong_sound_slot(int xrom, int song) {
