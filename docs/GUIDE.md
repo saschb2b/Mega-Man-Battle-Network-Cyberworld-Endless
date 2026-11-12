@@ -80,7 +80,7 @@ statistics, troubleshooting and building the game yourself.
   VolGear, Kilby and MagTect) join the ones an act can be about, or stand
   beside its virus, in BN6's areas and in BN5's where BN5 is there too,
   MegaMan naming them as the older Net's the first time. Each pays from
-  its own game's rewards. 84 of BN4's chips play in BN6's battles and
+  its own game's rewards. 76 of BN4's own chips play in BN6's battles and
   seventeen of its Program Advances form on the Custom screen: half the
   chips a layer of BN4's areas hands out are BN4's, which the Library
   lists on BN4's page. A chip of BN4's that does not play yet pays 200

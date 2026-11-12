@@ -75,7 +75,7 @@
   Roll in Town Area, WoodMan in Park Area, ThunderMan or WindMan in the
   countries' areas, SearchMan and JunkMan in the deep's pool. Each is held to the act's
   band and leaves Guardian Data as BN5's do.
-- **BN4 Red Sun's chips in your folder.** With BN4's ROM beside BN6's, 84
+- **BN4 Red Sun's chips in your folder.** With BN4's ROM beside BN6's, 76
   of Red Sun's own chips now play in BN6's battles, each checked frame by
   frame against BN4's own: the Heat and Bubble spreads, FlmLine, MagBolt,
   Thunder, TwnFng, SidBmbo, SeekBom, PropBom, Meteors, Ligtnin, MokoRus,
