@@ -165,7 +165,7 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
 	GbaWorld world;
 	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
-	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.sky);
+	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.tile, V.scene.sky);
 	ground_read(cam_u, cam_v);
 	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) != 0, shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();

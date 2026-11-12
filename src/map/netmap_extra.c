@@ -163,7 +163,9 @@ bool netmap_floor_cell(int cx, int cy, int level) {
 }
 
 bool netmap_floor_at(int wx2, int wy2, int level) {
-	return floor_level(nm_floordiv(wx2 - 2 * nm_place.ex, 64), nm_floordiv(wy2 - 2 * nm_place.ey, 64), level);
+	int A = nm_floordiv(wx2 - 2 * nm_place.ex, 64), B = nm_floordiv(wy2 - 2 * nm_place.ey, 64);
+	/* (floor drawn and walled off, a counter's aisle, is floor to the eye) */
+	return floor_level(A, B, level) || (!level && nm_kind_at(A, B) == K_SOLID);
 }
 
 bool netmap_stair_cell(int cx, int cy) {

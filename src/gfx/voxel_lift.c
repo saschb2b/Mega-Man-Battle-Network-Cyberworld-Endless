@@ -17,6 +17,8 @@
 #define SLAB_THICK  8
 /* ... and how far under a sprite in the air its floor is looked for */
 #define HOVER_REACH 28
+/* ... and how deep inside a floor a tile lies to be taken for its art, in rows */
+#define INSIDE      6
 
 /* The highest level whose floor's top shows at (x, y), -1 none */
 static int top_at(const VoxGround *g, int x, int y) {
@@ -25,22 +27,52 @@ static int top_at(const VoxGround *g, int x, int y) {
 	return -1;
 }
 
-static void lift_map(const VoxGround *g, int x, int y, uint8_t *kind, int16_t *gy) {
+/* A map pixel by the layer's own floor: a level's top, or a raised
+ * slab's side over the floor behind it; false where the floor explains
+ * neither */
+static bool lift_floor(const VoxGround *g, int x, int y, uint8_t *kind, int16_t *gy) {
 	int raised = VOX_LEVELS - 1;
 	int t = top_at(g, x, y);
-	if (t == raised) { *kind = VOX_TOP; *gy = (int16_t)(y + g->z[t]); return; }
-	/* (a raised slab's side over the floor behind it) */
-	if (g->z[raised] > SLAB_THICK)
+	if (t != raised && g->z[raised] > SLAB_THICK)
 		for (int k = 1; k <= SLAB_THICK; ++k)
-			if (vox_floor(g, x, y - k + g->z[raised]) >> raised & 1u) { *kind = VOX_WALL; *gy = (int16_t)(y - k + g->z[raised] + 1); return; }
-	if (t >= 0) { *kind = VOX_TOP; *gy = (int16_t)(y + g->z[t]); return; }
-	for (int k = 1; k <= WALL_REACH; ++k) {
-		int e = top_at(g, x, y - k);
-		if (e >= 0) { *kind = VOX_WALL; *gy = (int16_t)(y - k + g->z[e] + 1); return; }
+			if (vox_floor(g, x, y - k + g->z[raised]) >> raised & 1u) { *kind = VOX_WALL; *gy = (int16_t)(y - k + g->z[raised] + 1); return true; }
+	if (t < 0) return false;
+	*kind = VOX_TOP;
+	*gy = (int16_t)(y + g->z[t]);
+	return true;
+}
+
+/* The map's pixels sorted. The layer's floor says where its tops are; the
+ * tiles seen well inside them are the area's floor art, and the same
+ * tiles elsewhere are floor too, lying flat: the scenery's platforms
+ * beside the way, which the layer's floor knows nothing of. What is left
+ * under a top, down its column, is that top's side. */
+static void lift_window(const VoxGround *g, VoxScene *s) {
+	static bool known[VOX_WN], floor_art[0x402];
+	memset(floor_art, 0, sizeof floor_art);
+	for (int j = 0; j < VOX_WH; ++j)
+		for (int i = 0; i < VOX_WW; ++i) {
+			int at = j * VOX_WW + i;
+			s->kind[at] = VOX_SKY;
+			s->gy[at] = (int16_t)(j - VOX_UP);
+			known[at] = s->map[at] && lift_floor(g, i - VOX_LEFT, j - VOX_UP, &s->kind[at], &s->gy[at]);
+		}
+	for (int j = INSIDE; j < VOX_WH - INSIDE; ++j)
+		for (int i = 0; i < VOX_WW; ++i) {
+			int at = j * VOX_WW + i;
+			if (known[at] && s->kind[at] == VOX_TOP && known[at - INSIDE * VOX_WW] && s->kind[at - INSIDE * VOX_WW] == VOX_TOP &&
+			    known[at + INSIDE * VOX_WW] && s->kind[at + INSIDE * VOX_WW] == VOX_TOP) floor_art[s->tile[at]] = true;
+		}
+	for (int i = 0; i < VOX_WW; ++i) {
+		int edge = -WALL_REACH - 1, edge_gy = 0;
+		for (int j = 0; j < VOX_WH; ++j) {
+			int at = j * VOX_WW + i;
+			if (!s->map[at]) continue;
+			if (!known[at] && floor_art[s->tile[at]]) s->kind[at] = VOX_TOP;
+			else if (!known[at] && j - edge <= WALL_REACH) { s->kind[at] = VOX_WALL; s->gy[at] = (int16_t)(edge_gy + 1); }
+			if (s->kind[at] == VOX_TOP) { edge = j; edge_gy = s->gy[at]; }
+		}
 	}
-	/* (map art over no floor of ours: scenery in the distance) */
-	*kind = VOX_SKY;
-	*gy = (int16_t)y;
 }
 
 /* One body: the sprite pixels joined to (x, y), 8-connected */
@@ -101,13 +133,7 @@ static bool hud_obj(const GbaLayers *l, int n, bool chat) {
 }
 
 void voxel_lift(const GbaLayers *l, bool chat, const uint32_t *frame, const VoxGround *ground, VoxScene *s) {
-	for (int j = 0; j < VOX_WH; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
-			int at = j * VOX_WW + i;
-			s->kind[at] = VOX_SKY;
-			s->gy[at] = (int16_t)(j - VOX_UP);
-			if (s->map[at]) lift_map(ground, i - VOX_LEFT, j - VOX_UP, &s->kind[at], &s->gy[at]);
-		}
+	lift_window(ground, s);
 	bool hud[GBA_OBJS];
 	for (int n = 0; n < GBA_OBJS; ++n) hud[n] = hud_obj(l, n, chat);
 	for (int i = 0; i < VOX_N; ++i) {

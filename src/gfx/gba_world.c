@@ -58,10 +58,12 @@ static unsigned tile_pixel(const GbaWorld *g, const Bg *b, unsigned e, unsigned 
 }
 
 /* A map background's pixel at the frame's (x, y), from the whole tile map */
-static unsigned map_pixel(const GbaWorld *g, const Bg *b, int layer, int x, int y) {
+static unsigned map_pixel(const GbaWorld *g, const Bg *b, int layer, int x, int y, unsigned *tile) {
 	int px = x + g->ox, py = y + g->oy;
 	if (!b->on || !g->map[layer] || px < 0 || py < 0 || px >= g->tw * 8 || py >= g->th * 8) return 0;
-	return tile_pixel(g, b, g->map[layer][(py >> 3) * g->tw + (px >> 3)], (unsigned)px & 7u, (unsigned)py & 7u);
+	unsigned e = g->map[layer][(py >> 3) * g->tw + (px >> 3)], n = tile_pixel(g, b, e, (unsigned)px & 7u, (unsigned)py & 7u);
+	if (n) *tile = (e & 0x3FFu) + 1u;
+	return n;
 }
 
 /* ... and one of a background's own screen map, wrapped */
@@ -72,7 +74,7 @@ static unsigned screen_pixel(const GbaWorld *g, const Bg *b, int x, int y) {
 	return tile_pixel(g, b, rd16(g->vram, (b->screen + block * 0x800u + ((py >> 3 & 31u) * 32u + (px >> 3 & 31u)) * 2u) & 0xFFFEu), px & 7u, py & 7u);
 }
 
-void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint32_t *sky) {
+void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint16_t *tile, uint32_t *sky) {
 	Bg bg[4];
 	for (unsigned b = 0; b < 4; ++b) bg[b] = bg_read(g, b);
 	unsigned bld = rd16(g->io, 0x50), alpha = rd16(g->io, 0x52), evy = rd16(g->io, 0x54) & 31u;
@@ -92,7 +94,9 @@ void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, u
 			bool behind_under = n3 ? bg[3].under : back_under;
 			sky[at] = shown(behind);
 			map[at] = 0;
-			unsigned n1 = map_pixel(g, &bg[first], first - 1, x, y), n2 = map_pixel(g, &bg[second], second - 1, x, y);
+			unsigned of = 0;
+			unsigned n2 = map_pixel(g, &bg[second], second - 1, x, y, &of), n1 = map_pixel(g, &bg[first], first - 1, x, y, &of);
+			tile[at] = (uint16_t)of;
 			if (!n1 && !n2) continue;
 			/* (the lower of the two over what is behind, then the upper over that: each mixed where BLDCNT pairs them) */
 			unsigned c = behind;

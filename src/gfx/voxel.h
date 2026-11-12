@@ -63,6 +63,7 @@ typedef struct {
 	 * map pixel's kind and ground row (a top's own, a side's the edge it
 	 * hangs from) */
 	uint32_t map[VOX_WN], sky[VOX_WN];
+	uint16_t tile[VOX_WN];   /* the tile each map pixel is of, plus 1 */
 	uint8_t kind[VOX_WN];
 	int16_t gy[VOX_WN];
 	/* the frame: its sprites' colours (0 none), each one's body (0 none),
