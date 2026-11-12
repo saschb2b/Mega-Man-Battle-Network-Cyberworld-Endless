@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-12T13:35:30Z
-* **Update**: multirom/bn4-chips.md (BigHamr1-3 moved, GodHammr waits and why), devtools/differential.md (the held MegaMan's keys and sprite's screen place at the battle's frame), rom/bn4.md (BigHamr's hammer's row).

@@ -503,6 +503,8 @@
 080D5DDA BN4_SIDBMBO
 080D6748 BN4_GUST_INIT
 080D68AC BN4_GUST_SPAWN
+080D68CC bighamr_hammer
+080D698C BN4_HAMMER_STATES
 080D6BF8 timebomb_code_actors
 080D6CA0 timebomb_code_actors.update
 080D6CCC BN4_TIMEBOMB_STATES
@@ -564,6 +566,7 @@
 080E4A00 BN4_BLASTS_KINDS
 080E4A0A timebomb_code_actors_2
 080E4A9C BN4_BLASTS_SPAWN
+080E4B88 bighamr_hammer_2
 080E4C3C timebomb_code_actors_3
 080E4CA6 spawned_by
 080E4F8C spark_sprite_spawn_word
