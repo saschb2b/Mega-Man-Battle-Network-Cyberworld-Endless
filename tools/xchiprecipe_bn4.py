@@ -61,8 +61,9 @@ STATES4, NSTATES4 = 0x080EAEFC, 116   # BN4_PLAYER_STATES, BN4_PLAYER_STATE_COUN
 ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
-                  # (the dark chips' units from the top down, 0xFF on, so the lines climbing from 0xD0 never meet them)
-                  0x1F: 0xFF, 0x60: 0xFE}
+                  # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
+                  # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
+                  0x60: 0xFE, 0x1F: 0xFD}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -86,7 +87,9 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 _PANELS = ('the same routine as Ligtnin\'s by its record\'s first parameter, its strike (the third kind\'s 0x92) moved with the unit '
            'but never run in a spec: it rises only from a {} panel of the other side\'s with a foe on it, and the differential\'s '
            'BN4 battle sets no panel\'s type yet')
-ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
+ROWS_WAIT = {213: 'ElemDark, held: its shot (the third kind\'s 0x9, the unit\'s copy) animates a frame behind BN4\'s from its first frame, '
+                  'its sprite\'s frame count 2 at t33 against BN6\'s 1, untraced (docs/multirom/bn4-chips.md, DrkVulcn and the Elem chips)',
+             192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
                  'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)',
              **{i: 'AquaUp, ' + _PANELS.format('cracked') for i in (181, 182, 183)},

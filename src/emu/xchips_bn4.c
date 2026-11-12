@@ -2002,7 +2002,7 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 	.types = hole_types, .ntypes = (int)(sizeof hole_types / sizeof *hole_types), \
 	.sound_calls = hole_sound_calls, .nsound_calls = (int)(sizeof hole_sound_calls / sizeof *hole_sound_calls), \
 	.bytes = hole_bytes, .nbytes = (int)(sizeof hole_bytes / sizeof *hole_bytes) }
-/* ---- DrkVulcn: BN4's attack 0x1f (080EC843) as BN6's 0xff; its chips 190 (601) ---- */
+/* ---- DrkVulcn: BN4's attack 0x1f (080EC843) as BN6's 0xfd; its chips 190 (601) ---- */
 /* MegaMan's state 0x1f (080EC842-080EC972), the family of its chips' records: moved */
 /* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
 /* its third-kind 0x12: Spreads's copy, the dispatch's 0x12, shared (its spawner copied) */
@@ -2062,7 +2062,7 @@ static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
 	.imms = drkvulcn_imms, .nimms = (int)(sizeof drkvulcn_imms / sizeof *drkvulcn_imms), \
 	.types = drkvulcn_types, .ntypes = (int)(sizeof drkvulcn_types / sizeof *drkvulcn_types), \
 	.sound_calls = drkvulcn_sound_calls, .nsound_calls = (int)(sizeof drkvulcn_sound_calls / sizeof *drkvulcn_sound_calls) }
-/* ---- Elem: BN4's attack 0x60 (080EE2AF) as BN6's 0xfe; its chips 25 (637), 26 (638), 126 (662), 128 (663), 213 (697) ---- */
+/* ---- Elem: BN4's attack 0x60 (080EE2AF) as BN6's 0xfe; its chips 25 (637), 26 (638), 126 (662), 128 (663) ---- */
 /* MegaMan's state 0x60 (080EE2AE-080EE426), the family of its chips' records: moved */
 /* its fourth-kind 0x1f (080E4354-080E4584): no BN6 type of its body, moved with him */
 /* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
@@ -2077,6 +2077,7 @@ static const XcSong drkvulcn_songs[] = { { 0xBB, 0x283 } };
 /* its sound 0xa8 (080EE394, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x285, on BN4's player 9 */
 /* its sound 0x14c (080EE394, one of the call's: SOUND_ADDS): BN4's song copied into the grown song table's slot 0x329, on BN4's player 9 */
 /* its chip 213 is a dark chip of BN4's (row 697): a battle it is used in costs 20 max HP */
+/* its chip 213 (id 697) sits out: ElemDark, held: its shot (the third kind's 0x9, the unit's copy) animates a frame behind BN4's from its first frame, its sprite's frame count 2 at t33 against BN6's 1, untraced (docs/multirom/bn4-chips.md, DrkVulcn and the Elem chips) */
 
 static const XvBlock elem_blocks[] = {
 	{ 0x080EE2AE, 0x080EE426, XC4_CODE + 0x3EF2, 0xB0B60FB4u },
@@ -2217,7 +2218,7 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_MISC, 0x0C, 0x8C, 0x080DF98D, XC4_HOMES + 0x5000, LIGTNIN_CODE, ligtnin_songs, (int)(sizeof ligtnin_songs / sizeof *ligtnin_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x0B, 0x8B, 0x080E45F7, XC4_HOMES + 0x5400, HOLE_CODE, hole_songs, (int)(sizeof hole_songs / sizeof *hole_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x3B, 0xBB, 0x080E98BD, XC4_HOMES + 0x5800, { .name = "Hole (BN4's), its subfamily 0x3b", .game = XROM_BN4_RED_SUN_US }, NULL, 0, 0, 22 },
-	{ XCHIP_ATTACK, 0x1F, 0xFF, 0x080EC843, XC4_HOMES + 0x5C00, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
+	{ XCHIP_ATTACK, 0x1F, 0xFD, 0x080EC843, XC4_HOMES + 0x5C00, DRKVULCN_CODE, drkvulcn_songs, (int)(sizeof drkvulcn_songs / sizeof *drkvulcn_songs), 0, 0 },
 	{ XCHIP_ATTACK, 0x60, 0xFE, 0x080EE2AF, XC4_HOMES + 0x6000, ELEM_CODE, elem_songs, (int)(sizeof elem_songs / sizeof *elem_songs), 0, 0 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);

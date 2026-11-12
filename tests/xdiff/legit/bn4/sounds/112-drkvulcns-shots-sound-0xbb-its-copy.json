@@ -6,5 +6,5 @@
   "0xBE"
  ],
  "what": "DrkVulcn's shots' sound 0xBB, its copy",
- "why": "Played by BN4's vulcan state (0x1F, DrkVulcn's unit, BN6's grown attack family 0xFF) as each shot leaves, its bl to PlaySoundEffect with r0 0xBB; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x283 and goes on to BN6's: BN4's song 0xBB copied into slot 0x283 of BN6's grown song table (src/audio/xsong.c XSOUNDS; the dark chips' slots, docs/project/claims/bn4-dark-units.json). BN6's own song 0xBB is another (xrecipe.song_sig)."
+ "why": "Played by BN4's vulcan state (0x1F, DrkVulcn's unit, BN6's grown attack family 0xFD) as each shot leaves, its bl to PlaySoundEffect with r0 0xBB; BN6: its copy's bl aimed at a shim of the unit's home that makes r0 0x283 and goes on to BN6's: BN4's song 0xBB copied into slot 0x283 of BN6's grown song table (src/audio/xsong.c XSOUNDS; the dark chips' slots, docs/project/claims/bn4-dark-units.json). BN6's own song 0xBB is another (xrecipe.song_sig)."
 }
