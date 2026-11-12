@@ -31,7 +31,7 @@ static void add(int net, int family) {
 	int nk = visitor_kin(net, &kin);
 	if (P.n >= GROUP_POOL_MAX) return;
 	GroupFam *f = &P.fam[P.n];
-	*f = (GroupFam){ (int16_t)family, (int8_t)net, GROUP_FREE, 0, 0, -1, { { 0 } } };
+	*f = (GroupFam){ (int16_t)family, (int8_t)net, GROUP_FREE, 0, 0, -1, { { 0 } }, -1 };
 	for (int i = 0; i < nk; ++i) {
 		if (kin[i].family != family) continue;
 		if (kin[i].bound) return;
@@ -42,6 +42,7 @@ static void add(int net, int family) {
 	if (tag) {
 		f->pressure = tag->pressure;
 		f->tricks = tag->tricks;
+		f->cost = tag->cost;
 	}
 	bool any = false;
 	for (int v = 0; v < GROUP_VERSIONS; ++v) {
@@ -120,16 +121,17 @@ static bool stands_plain(Encounter *e, int field) {
 	return true;
 }
 
-/* The group's field: one of area `biome`'s own battles' fields its foes
- * all stand plain or cracked on, each such field as likely as any, by
- * `roll`; else the plain field */
+/* The group's field: one of area `biome`'s own battles' fields that is
+ * fair to a group (groups.h's group_field_fair) and its foes all stand
+ * plain or cracked on, each such field as likely as any, by `roll`; else
+ * the plain field */
 static void field_of(Encounter *e, int biome, uint32_t roll) {
 	const Formation *list;
 	int n = formations_of(biome, &list), fields[64], m = 0;
 	for (int i = 0; i < n && m < 64; ++i) {
 		bool again = false;
 		for (int k = 0; k < m && !again; ++k) again = fields[k] == list[i].battlefield;
-		if (!again && stands_plain(e, list[i].battlefield)) fields[m++] = list[i].battlefield;
+		if (!again && group_field_fair(list[i].battlefield) && stands_plain(e, list[i].battlefield)) fields[m++] = list[i].battlefield;
 	}
 	e->field = m ? fields[mix(roll ^ 0x4649454Cu) % (uint32_t)m] : 0;   /* ("FIEL") */
 }
@@ -211,16 +213,17 @@ static FamilyMask home_of(int depth, int biome) {
 
 /* The arc's rules at `depth` in area `biome`: the limits of the act's
  * layers (one band an act), the area's own families, the share by act.
- * Act 1 of the first cycle holds every beat to the eased pressure cap:
- * its MegaMan has 100 HP, and a group at the cap deleted the autopilot
- * from full HP on a first layer (docs/game/progression/encounter-groups.md,
- * Step 1, built). */
+ * Act 1 of the first cycle holds every beat to the eased limits (the
+ * band's lower half, two thirds of the caps): its MegaMan has 100 HP, and
+ * a pair inside the full band deleted the test autopilot from full HP in
+ * three runs of twelve; with the lower half no group battle did
+ * (docs/game/progression/encounter-groups.md, Easing act 1's pair). */
 static ArcRules rules_at(int depth, int biome) {
 	int act = pacing_act(depth), stage = loot_stage_allowed(depth);
 	unsigned nets = group_nets();
 	ArcRules r = { group_limits_kind(depth, stage, nets, GROUP_EASED), group_limits_kind(depth, stage, nets, GROUP_PLAIN),
 		group_limits_kind(depth, stage, nets, GROUP_CHALLENGE), home_of(depth, biome), arc_home_share(act), act >= 2 };
-	if (act == 0 && pacing_loop(depth) == 0) r.plain.pressure = r.eased.pressure;
+	if (act == 0 && pacing_loop(depth) == 0) r.plain = r.eased;
 	return r;
 }
 

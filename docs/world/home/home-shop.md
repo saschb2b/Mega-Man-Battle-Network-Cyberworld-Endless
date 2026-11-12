@@ -3,7 +3,7 @@ type: Feature
 title: "6. The home shop"
 description: "The home shop: AsterLand's clerk opens BN6's Order Service, one order a visit at twice a Net Dealer's price, sorted on START by BN6's seven keys (`order_sort.c`), beside the SubChip seller."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-20T19:17:54Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T01:05:00Z }
 ---
 
 # 6. The home shop
@@ -52,7 +52,10 @@ round, as BN6 does for a key picked twice; the cursor goes back to the
 top, BN6's select sound plays and his box says the sort over the buttons
 ("By Attack,high first!", `place_lines.c`), where BN6's prompt had L/R
 and B alone. No. counts the copies of the entry, its chip in its code,
-in the folder and the Pack, as the second screen does. The sort is the
+in the folder and the Pack, as the second screen does (read through a
+reader the director gives the sorter as its hooks are installed,
+`order_sort_pack`: the real world includes nothing of the director,
+[the layers](../../code/layers.md)). The sort is the
 session's: the list opens in it again, after a quit or at the next
 visit. Nothing about what the order costs or gives changes: one order a
 visit, at its price, the sure thing found sooner. As built

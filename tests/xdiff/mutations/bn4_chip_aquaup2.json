@@ -1,0 +1,10 @@
+[
+ {
+  "name": "AquaUp2's row's power another",
+  "spec": "bn4_chip_aquaup2",
+  "poke": [
+   "08C076B2:0064"
+  ],
+  "what": "the registry's record of BN4's AquaUp2 (690) with power 100 where BN4's record holds 140: the 250 HP Mettaur left 150 where BN4's geyser leaves it 110"
+ }
+]

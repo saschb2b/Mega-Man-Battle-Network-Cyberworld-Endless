@@ -18,6 +18,8 @@ const GroupTag *group_tag(int net, int family) {
 	return NULL;
 }
 
+bool group_field_fair(int field) { return field >= 0 && field < 256 && (group_fair_fields[field >> 3] >> (field & 7) & 1); }
+
 int group_pair_extra(int net_a, int family_a, int net_b, int family_b) {
 	for (int i = 0; i < group_pairs_count; ++i) {
 		const GroupPair *p = &group_pairs[i];
@@ -109,6 +111,24 @@ static int pressure_of(const At *a) {
 	return (int)lrint(sum);
 }
 
+/* what it costs, as its families' own costs add up (each one's alone at V1, by its hit at the version fought over its
+ * V1's); -1 where one was not measured */
+static int cost_of(const At *a) {
+	double sum = 0;
+	for (int i = 0; i < a->n; ++i) {
+		const GroupFam *f = a->f[i];
+		if (f->cost < 0) return -1;
+		sum += (double)(f->cost * ver(a, i)->hit) / (double)(f->ver[0].hit > 1 ? f->ver[0].hit : 1);
+	}
+	return (int)lrint(sum);
+}
+
+/* whether the group at its versions keeps to the cap on what it costs (none set: any) */
+static bool cost_fits(const At *a, const GroupLimits *l) {
+	int c = l->cost == GROUP_NO_COST ? 0 : cost_of(a);
+	return c >= 0 && c <= l->cost;
+}
+
 /* whether version `v` of `f` may stand in a battle under `l` */
 static bool version_fits(const GroupFam *f, int v, const GroupLimits *l) {
 	const GroupVer *x = &f->ver[v];
@@ -142,7 +162,7 @@ static bool fit(At *a, int test, const GroupLimits *l, GroupFill *out) {
 		}
 		if (hp >= l->band.lo && hp <= l->band.hi && hp > best && test_passes(test, a, l)) {
 			int p = pressure_of(a);
-			if (p >= 0 && p <= l->pressure) {
+			if (p >= 0 && p <= l->pressure && cost_fits(a, l)) {
 				best = hp;
 				kept = p;
 				for (int i = 0; i < a->n; ++i) keep[i] = a->v[i];
@@ -155,7 +175,11 @@ static bool fit(At *a, int test, const GroupLimits *l, GroupFill *out) {
 	if (best < 0) return false;
 	out->hp = best;
 	out->pressure = kept;
-	for (int i = 0; i < a->n; ++i) out->ver[i] = (int8_t)keep[i];
+	for (int i = 0; i < a->n; ++i) {
+		out->ver[i] = (int8_t)keep[i];
+		a->v[i] = keep[i];
+	}
+	out->cost = cost_of(a);
 	return true;
 }
 
@@ -172,7 +196,7 @@ typedef struct {
 /* (the group of pool families `idx`, tried and counted where it fits) */
 static bool try_group(Walk *w, const int *idx, int n) {
 	At a = { { NULL }, { 0 }, n };
-	GroupFill g = { (int8_t)w->t, (int8_t)n, { 0 }, { 0 }, 0, 0 };
+	GroupFill g = { (int8_t)w->t, (int8_t)n, { 0 }, { 0 }, 0, 0, 0 };
 	for (int i = 0; i < n; ++i) {
 		a.f[i] = &w->pool[idx[i]];
 		g.fam[i] = (int16_t)idx[i];
@@ -190,9 +214,9 @@ bool group_same(const GroupFam *pool, int i, int count, bool floor, const GroupL
 		if (!version_fits(f, v, l)) continue;
 		At a = { { f, f, f }, { v, v, v }, count };
 		int hp = count * f->ver[v].hp, p = pressure_of(&a);
-		if ((floor && hp < l->band.lo) || hp > l->band.hi || p < 0 || p > l->pressure) continue;
+		if ((floor && hp < l->band.lo) || hp > l->band.hi || p < 0 || p > l->pressure || !cost_fits(&a, l)) continue;
 		*out = (GroupFill){ (int8_t)(count == 3 ? GROUP_SWARM : GROUP_ALONE), (int8_t)count, { (int16_t)i, (int16_t)i, (int16_t)i },
-			{ (int8_t)v, (int8_t)v, (int8_t)v }, hp, p };
+			{ (int8_t)v, (int8_t)v, (int8_t)v }, hp, p, cost_of(&a) };
 		return true;
 	}
 	return false;
@@ -286,26 +310,41 @@ int group_pressure_cap(int act) {
 	return cap[act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act];
 }
 
+int group_cost_cap(int act) {
+	static const int16_t cap[PACING_ACTS] = { 0, 60, 145, 140, 180, 678, 447 };
+	return cap[act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act];
+}
+
 GroupLimits group_limits(int depth, int stage, unsigned nets) { return group_limits_kind(depth, stage, nets, GROUP_PLAIN); }
 
 GroupLimits group_limits_kind(int depth, int stage, unsigned nets, int kind) {
 	bool challenge = kind == GROUP_CHALLENGE;
 	PacingBand plain = pacing_band(depth, false, false);
-	GroupLimits l = { pacing_band(depth, challenge, kind == GROUP_EASED), { 0 }, (int8_t)stage, (uint8_t)(nets & GROUP_NETS_ALL), 0 };
+	GroupLimits l = { pacing_band(depth, challenge, kind == GROUP_EASED), { 0 }, (int8_t)stage, (uint8_t)(nets & GROUP_NETS_ALL), 0, GROUP_NO_COST };
 	int vlo, vhi, act = pacing_act(depth);
 	pacing_virus_versions(depth, challenge, &vlo, &vhi);
 	l.top[0] = (int8_t)vhi;
 	l.top[1] = l.top[2] = (int8_t)(2 * vhi + 1 > 5 ? 5 : 2 * vhi + 1);
 	l.pressure = group_pressure_cap(act);
+	l.cost = group_cost_cap(act);
 	if (pacing_loop(depth) > 0) {
 		/* (a later cycle: by the band's cap on one hit there over the first cycle's, at the act's middle layer) */
 		int first = pacing_band(act < 6 ? act * 3 + 2 : 19, false, false).cap;
-		if (first > 0) l.pressure = l.pressure * plain.cap / first;
+		if (first > 0) {
+			l.pressure = l.pressure * plain.cap / first;
+			l.cost = l.cost * plain.cap / first;
+		}
 	}
-	/* (an eased battle: two thirds of the cap, about the median of the act's own battles as the cap is their three-quarter
-	 * mark; a challenge: by the next act's cap on one hit over this one's, as its band is the next act's) */
-	if (kind == GROUP_EASED) l.pressure = l.pressure * 2 / 3;
-	if (challenge && plain.cap > 0) l.pressure = l.pressure * l.band.cap / plain.cap;
+	/* (an eased battle: two thirds of the caps, about the median of the act's own battles as the caps are their
+	 * three-quarter marks; a challenge: by the next act's cap on one hit over this one's, as its band is the next act's) */
+	if (kind == GROUP_EASED) {
+		l.pressure = l.pressure * 2 / 3;
+		l.cost = l.cost * 2 / 3;
+	}
+	if (challenge && plain.cap > 0) {
+		l.pressure = l.pressure * l.band.cap / plain.cap;
+		l.cost = l.cost * l.band.cap / plain.cap;
+	}
 	return l;
 }
 

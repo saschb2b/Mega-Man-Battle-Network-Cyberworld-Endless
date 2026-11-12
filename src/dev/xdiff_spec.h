@@ -37,6 +37,8 @@ typedef struct { int game, screen, nsteps; ScriptStep steps[MAX_SCRIPT_STEPS]; }
 typedef struct { int game, screen, frame; char path[160]; } Shot;
 /* Pictures of the fight (film=): each game's at the battle's timer values from `from` to `to`, `step` apart, into
  * PREFIX_bn5_tNNNN.bmp and PREFIX_bn6_tNNNN.bmp, side by side by the same clock the comparison keeps */
+#define MAX_PANELS 8   /* (panels=) the panels a spec may give a type */
+
 typedef struct { int from, to, step; char prefix[160]; } Film;
 
 typedef struct {
@@ -70,6 +72,10 @@ typedef struct {
 	int ndschips;
 	int hold;                                  /* (a chip's spec) the foes kept paralysed this many frames from each fight frame on, the chip's
 	                                              target holding still in both games; 0 none */
+	struct { uint8_t col, row, type; } panels[MAX_PANELS];   /* (panels=) panels given a type in each game as its fight begins: a
+	                                              panel chip's spec (AquaUp's cracked, GreenWd's grass), the type's number the same in BN4,
+	                                              BN5 and BN6 for the ones a spec names (bn4.h's panel types) */
+	int npanels;
 	CustomScript scripts[MAX_SCRIPTS];
 	int nscripts;
 	Shot shots[MAX_SHOTS];

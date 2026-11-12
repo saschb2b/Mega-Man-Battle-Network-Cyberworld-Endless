@@ -32,7 +32,6 @@
 #include "bn6.h"
 #include "bytes.h"
 #include "chips.h"
-#include "director.h"
 #include "emu.h"
 #include "hook.h"
 #include "place_lines.h"
@@ -141,6 +140,10 @@ static uint32_t attack(const uint8_t *rec) {
 static uint16_t pack[PACK_MOST];
 static uint8_t pack_count[PACK_MOST];
 static int npack;
+static OrderSortPack *pack_now;
+
+void order_sort_pack(OrderSortPack *reader) { pack_now = reader; }
+
 static uint32_t held(uint16_t entry) {
 	for (int i = 0; i < npack; ++i)
 		if (pack[i] == entry) return pack_count[i];
@@ -181,7 +184,7 @@ static void sort_list(void) {
 		for (uint32_t b = 0; b < BN6_SHOP_ENTRY; ++b) rows[n].e[b] = emu_read8(BN6_SHOP_SOURCE + BN6_SHOP_ENTRY * (uint32_t)n + b);
 		if (!rows[n].e[0]) break;
 	}
-	if (key == SORT_NO) npack = director_pack_now(pack, pack_count, PACK_MOST);
+	if (key == SORT_NO) npack = pack_now ? pack_now(pack, pack_count, PACK_MOST) : 0;
 	/* (a key newly picked BN6 sorts the way of its byte XOR BN6_SORT_DOWN,
 	 * SELECT the other; down, the key's values inverted as BN6 inverts
 	 * them, its ties by ID up either way) */

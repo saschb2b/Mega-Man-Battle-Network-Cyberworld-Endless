@@ -1932,6 +1932,8 @@ def megaman_items(spec, game):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
     if game == 'bn4:bn6' and spec.get('deck6'):   # (BN6's battle deck in the spec's order, as a BN5 spec's: two chips in one hand)
         parts.append('deck6=' + ','.join(spec['deck6']))
+    if spec.get('panels'):   # (panels given a type in both games as the fight begins: a panel chip's spec, src/dev/xdiff.c panels_step)
+        parts.append('panels=' + ','.join(spec['panels']))
     if spec.get('karma4') is not None:   # (MegaMan's karma in BN4's battle: a dark chip's spec, bn4_chips.h's BN4_CHIP_ALIGN)
         parts.append(f'karma4={spec["karma4"]}')
     if spec.get('souls4'):   # (the Souls BN4's MegaMan holds, each past BN4's gate: xd4_souls_put; a Soul's spec)

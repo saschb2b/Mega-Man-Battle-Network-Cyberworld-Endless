@@ -188,8 +188,9 @@ rows joined it, which the engine pays as the stand-in until they play).
   and labels (`library_text.c`). `pet.c`'s hook on the PET's input takes A
   on the Library row, as on Comm and Save; the game holds under the
   screen as under the Jukebox ([The PET](../pet.md), Library).
-- `--dev library=N` puts every Nth chip id in the profile's Library as the
-  screen opens, for its pictures.
+- `--dev library=N` puts every Nth chip id in the profile's Library at the
+  start (`devtools_veteran`), for its pictures: the screen itself reads no
+  dev switch ([the layers](../../code/layers.md)).
 
 ## What counts the Library afterwards
 

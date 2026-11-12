@@ -59,11 +59,13 @@ typedef struct {
 	uint8_t tricks;      /* GROUP_BREAKS ... */
 	int16_t pressure;    /* the HP a standing MegaMan loses in 20 seconds to its V1 alone; -1 not measured */
 	GroupVer ver[GROUP_VERSIONS];
+	int16_t cost;        /* the HP the test autopilot loses deleting its V1 alone with the starting folder (50 seconds at most);
+	                      * -1 not measured */
 } GroupFam;
 
 /* A family's measured tags (group_tags.c, written by tools/encounter_tags.py
  * engine from tools/encounter_data/families.tsv): numbers alone */
-typedef struct { int8_t net; int16_t family; int16_t pressure; uint8_t tricks; } GroupTag;
+typedef struct { int8_t net; int16_t family; int16_t pressure; uint8_t tricks; int16_t cost; } GroupTag;
 extern const GroupTag group_tags[];
 extern const int group_tags_count;
 /* ... of net `net`'s family `family`, NULL where it was not measured */
@@ -76,6 +78,16 @@ extern const GroupPair group_pairs[];
 extern const int group_pairs_count;
 /* ... of the two families (either way round), 0 where they do not */
 int group_pair_extra(int net_a, int family_a, int net_b, int family_b);
+
+/* BN6's battlefields a group may stand on (group_tags.c, the fields' pass
+ * of tools/encounter_danger.py: one pair that is harmless on the plain
+ * field, fought by the test autopilot on every field the areas' random
+ * battles use; fair where it wins every fight and loses no more than on
+ * the plain one). A field's holes, poison or ice on MegaMan's side are
+ * what no measure of the families sees: an area's records are authored
+ * for their field, a group is not. A bit each by the field's number. */
+extern const uint8_t group_fair_fields[32];
+bool group_field_fair(int field);
 
 /* The templates */
 enum {
@@ -106,7 +118,10 @@ typedef struct {
 	int8_t stage;
 	uint8_t nets;
 	int pressure;
+	int cost;            /* the most a group may cost (its families' own costs added up, each by its hit at the version fought
+	                      * over its V1's); GROUP_NO_COST none */
 } GroupLimits;
+#define GROUP_NO_COST 0x7FFFFFFF
 /* ... at `depth`, the run at stage `stage` (loot.h's loot_stage_allowed),
  * with nets `nets` */
 GroupLimits group_limits(int depth, int stage, unsigned nets);
@@ -123,6 +138,14 @@ GroupLimits group_limits_kind(int depth, int stage, unsigned nets, int kind);
  * cycles group_limits scales it with the band's cap on one hit, as the
  * prediction scales with the hit (assumed, not measured). */
 int group_pressure_cap(int act);
+/* The cap on what a group may cost in act `act` on the first cycle: the
+ * three-quarter mark of what the act's areas' own battles are predicted
+ * to cost the test autopilot (their families' own costs added up). The
+ * pressure cap sees what a standing MegaMan loses; this sees the fight:
+ * how long a family takes to delete and what it lands on a MegaMan who
+ * lines up to shoot (docs/game/progression/encounter-groups.md, Easing act
+ * 1's pair). Scaled as the pressure cap is by cycle and kind. */
+int group_cost_cap(int act);
 
 /* A template filled: the pool's families (their indexes, a swarm's the
  * same three times), the version of each, the group's HP together and its
@@ -134,7 +157,7 @@ typedef struct {
 	int8_t template, n;
 	int16_t fam[GROUP_SIZE];
 	int8_t ver[GROUP_SIZE];
-	int hp, pressure;
+	int hp, pressure, cost;
 } GroupFill;
 
 /* Whether pool family `f` may be in a battle under `l` at all: its net

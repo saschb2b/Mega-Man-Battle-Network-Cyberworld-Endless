@@ -1,0 +1,7 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-12",
+  "name": "bn4_chip_aquaup1 to 3, bn4_chip_greenwd1 to 3 and two negatives: the sweep's kinds 0 and 1",
+  "result": "python3 build.py xdiff with the eight specs: each PASS. With the foe's panel cracked (AquaUp) or grass (GreenWd) in both games by panels=, the geyser or the tower rises under the Mettaur at t44 in BN4 and t45 in BN6: 110, 140 and 170 off for AquaUp1-3, 120, 140 and 160 for GreenWd1-3; no cracked panel, or GreenWd on a cracked one, raises nothing over 300 frames. Six mutations caught. On the way: the geyser's frame count (its +0x91) one ahead in BN6 from the frame its animation was set, BN6's sprite step (0x0801BBF4) updating in that frame too; BN4's (0x08014446) copied with the unit, as the Navis' recipes do; and a lethal geyser's sound lost in BN4 to the deletion's on the same player 9, so the stronger chips fight the 250 HP Mettaur.",
+  "meaning": "The sweep's three kinds are proved; a third-kind object that sets new animations needs BN4's own sprite step, not BN6's twin. A spec's panels can now be any type BN4 and BN6 share."
+}

@@ -1,0 +1,87 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 200,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's AquaUp2 I (its chip 182, id 690), Ligtnin's unit (misc 0x0C as BN6's grown misc routine 0x8C; docs/multirom/bn4-chips.md), its record's first parameter 0 and its own power: BN4's Mettaur of 250 HP (its family's sixth, so the hit is not lethal) at (5,2), its panel cracked in both games as the fight begins (panels=), the geyser on it at the sweep's column",
+ "folder4": [
+  "10B6"
+ ],
+ "folder6": [
+  "2B2:08"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "2B2:08"
+ ],
+ "panels": [
+  "52:3"
+ ]
+}

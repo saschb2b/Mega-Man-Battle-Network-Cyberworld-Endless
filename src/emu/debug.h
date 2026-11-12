@@ -8,6 +8,10 @@
 #include <stdio.h>
 
 bool emu_debug_on(void);
+/* The run's depth for the frame's line ("depth N"), which the director
+ * says each frame (director_update): the emulator reads nothing of the
+ * run (docs/code/layers.md) */
+void emu_debug_depth(int depth);
 /* Once a frame: mode, map, position and music every 30-60 frames; the
  * watched bytes where they changed; a battle's frame traced. */
 void emu_debug_frame(void);
