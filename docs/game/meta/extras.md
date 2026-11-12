@@ -3,7 +3,7 @@ type: Feature
 title: "The extras"
 description: "The extras: what a run adds to BN6 that a player may leave out (Liberation Missions, the tournament, the Glitch layer, the Virus Battler, the DarkChips' flames, the older nets), each on or off on the JACK-IN SETUP's EXTRAS page, all on by default, kept for the run and named on its summary; the owner's calls of 5 November 2026."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief and calls, given in the project's sessions on 5 November 2026"

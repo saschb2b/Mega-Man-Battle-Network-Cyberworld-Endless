@@ -3,7 +3,7 @@ type: Feature
 title: "BN5's Navis"
 description: "BN5's six Soul Navis guarding the areas BN5 dresses, fought in BN6's engine since issue #82: where and how often, version and HP band, Guardian Data with his Soul and Navi chip, and BN5's Darkloids."
 tags: [game, bosses]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T01:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T14:00:00Z }
 ---
 
 # BN5's Navis (4 October 2026, issue #69; in BN6's engine since issue #82)

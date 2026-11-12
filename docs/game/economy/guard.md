@@ -3,7 +3,7 @@ type: Design
 title: "The guard"
 description: "The guard against economy drift: `build.py economy` holding the plan in play to bands a fifth either side (`econ_band`), `test_economy`'s curve tests, the run log's counts, the run-end statistics event and AGENTS.md's checks row."
 tags: [game, economy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 ---
 
 # The guard

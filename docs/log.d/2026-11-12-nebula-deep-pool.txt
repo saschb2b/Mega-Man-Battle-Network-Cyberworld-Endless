@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-12T14:00:00Z
-* **Update**: game/bosses/bn5-navis.md (Nebula's two, the deep's alone: LarkMan and GridMan in the deep's pool, their Navi chips their pay, the owner's call of 12 November 2026 and its reason), game/team-protoman.md (the deep's pool to thirteen with Nebula's two), multirom/navis.md (LarkMan's sound at slot 0x48; both guardians of the deep's pool).

@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"

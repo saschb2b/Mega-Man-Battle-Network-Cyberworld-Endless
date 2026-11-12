@@ -3,7 +3,7 @@ type: Design
 title: "The structure"
 description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, the battle floor, growth, risk the player chooses, the Cybeast, later cycles."
 tags: [game, progression]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 ---
 
 # The structure
