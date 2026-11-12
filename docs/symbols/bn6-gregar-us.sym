@@ -654,6 +654,7 @@
 0801379E BN6_NAVI_STAT_SET
 080137B6 BN6_NAVI_STAT_GET
 080137FE sneakrun_numbropn.by
+080139F0 full_synchro_aura.from
 08013AD8 twin_bn6_0x0801469c_from
 080141F4 BN6_SIDES_TURNER
 080142A4 soul_passives.same
@@ -1243,7 +1244,9 @@
 080C5D42 BN6_OVERLAY_HIDE
 080C5DF4 bubbles_kinds
 080C6000 team_protoman_meddy_2
+080C6388 megaman_ai_data_0x60_bn6_code
 080C643C BN6_CHILD_HIDDEN
+080C6482 megaman_ai_data_0x60_bn6
 080C6C16 BN6_REGION_SPAWN_FROZEN
 080C6C81 souls_code_bn6_4
 080C6E0E by_spawner
