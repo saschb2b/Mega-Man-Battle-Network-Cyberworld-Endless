@@ -3,7 +3,7 @@ type: ROM Map
 title: "Navis moved into BN6's battle engine"
 description: "Addresses for BN5's Navis moved into BN6's battle engine: the Navi tables, the control Navi, the engine twins, the companion overlay, battle sprites, the Dark Soul, DarkInvs, BN6's AI data's pool and Colonel's sides; and a Navi swapped for another mid-battle."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T16:49:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

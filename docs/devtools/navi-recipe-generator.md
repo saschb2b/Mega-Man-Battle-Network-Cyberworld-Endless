@@ -3,7 +3,7 @@ type: Tool
 title: "The Navis' recipe generator"
 description: "`tools/xnavirecipe.py` derives the Navis' recipes as `tools/xrecipe.py` derives a family's, writing the control HeatMan's, the moved objects' and BN5's Navis' into `src/emu/xnavi_bn5.c`, with `--check` and a `--report`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T09:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:00:00Z }
 ---
 
 # The Navis' recipe generator
