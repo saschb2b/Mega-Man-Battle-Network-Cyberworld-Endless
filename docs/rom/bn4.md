@@ -3,7 +3,7 @@ type: ROM Map
 title: "BN4 Red Sun's tables"
 description: "Addresses in BN4 Red Sun's ROM, read for its visitors and for research: its map, coordinate, song and sprite tables, its net's five large areas and their 256-colour maps as BN6 shows them, its sound engine against BN6's, battle records and the encounter check that starts one, enemy and chip records and names, its reward rows, its virus families' and Navis' code, its Souls in battle, how much of bn6f's code it shares, and the romlab tool that checks them."
 tags: [rom, bn4, multirom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), game code B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, 8 MB"

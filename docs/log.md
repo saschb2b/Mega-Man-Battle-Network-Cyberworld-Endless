@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (RollAro1-3 moved as a Navi chip's unit: her spawner's side in r3 through a wrapper), rom/bn4.md (RollAro's code, new row), devtools/chip-recipe-generator.md (a spawner that takes the side in r3, `SHAPE_SIDE`).
 * **Update**: multirom/bn4-chips.md (AirHoc1-3 moved: the puck, its call-in for the collision word, the bounce's side reads, MegaMan's strike animation; PitHoky1-3 play), rom/bn4.md (the collision data's panel as one word, XC4_COLL_PANEL_WORD), devtools/differential.md (a fourth-kind object's sprite named by its spawn's word, legit's bn4 spawn_word_sprites).
 * **Update**: game/progression/encounter-groups.md (the pairs' cost measured: 290 pairs tagged, the cost caps with them), game/progression/encounter-groups-measured.md (The pairs' pass: the pairs' cost; the caps and the fill counts with it).
 * **Update**: game/battle-lab.md (Built: the other games' panels on FIELD, BN5's lava, sea and magnet panel and BN4's Hole as BN6's engine holds them, how a type past a field's nibble is set, the proof; BN4's types 5 and 0xA named as not in the engine).

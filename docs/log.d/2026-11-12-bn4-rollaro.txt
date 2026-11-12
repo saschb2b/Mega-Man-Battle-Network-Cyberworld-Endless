@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T23:55:00Z
-* **Update**: multirom/bn4-chips.md (RollAro1-3 moved as a Navi chip's unit: her spawner's side in r3 through a wrapper), rom/bn4.md (RollAro's code, new row), devtools/chip-recipe-generator.md (a spawner that takes the side in r3, `SHAPE_SIDE`).
