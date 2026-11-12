@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 79,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's AirHoc3 U (65) against the registry's row 652 (BN4's air hockey state, its family 0x27, moved as BN6's grown attack family 0xFB: its puck the third kind's 0x2E with its kinds' table, its spark the fourth kind's 0x28 moved as 0xA0, the spark's sprite named by the puck's spawn word, its sounds 0xC0 and 0xCC at slots 0x289 and 0x28A): picked on the first Custom screen and used at fight frame 30 against BN4's 250 HP Mettaur (06) at (5,2), MegaMan's row: the puck, its bounces and the Mettaur's HP compared each frame, to the frame before his deletion (t80: a deletion parts at its own effect).",
+ "folder4": [
+  "2841"
+ ],
+ "folder6": [
+  "28C:14"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

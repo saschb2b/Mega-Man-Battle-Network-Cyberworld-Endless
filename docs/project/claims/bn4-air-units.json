@@ -1,0 +1,38 @@
+{
+  "branch": "bn4-air-units",
+  "what": "BN4's AirHoc1-3 with their Program Advance PitHoky1-3, Blizzard with HeatBrth, ElecShok and WoodPwdr (family 0x33, one unit), and the dark Program Advance DarkNeo (the dark-2 line)",
+  "takes": {
+    "song_slots": [
+      [
+        "0x283",
+        "0x2BF"
+      ]
+    ],
+    "attack_families": [
+      [
+        "0xF9",
+        "0xFB"
+      ]
+    ],
+    "dispatch4": [
+      [
+        "0xA0",
+        "0xA3"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip AirHoc1",
+    "BN4 chip AirHoc2",
+    "BN4 chip AirHoc3",
+    "BN4 PA PitHoky1",
+    "BN4 PA PitHoky2",
+    "BN4 PA PitHoky3",
+    "BN4 chip Blizzard",
+    "BN4 chip HeatBrth",
+    "BN4 chip ElecShok",
+    "BN4 chip WoodPwdr",
+    "BN4 PA DarkNeo"
+  ],
+  "run": false
+}

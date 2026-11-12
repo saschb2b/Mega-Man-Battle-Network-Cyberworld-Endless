@@ -77,6 +77,7 @@ MOVED = {
 # number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
 MOVED.update({
     19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+    63: 0xFB, 64: 0xFB, 65: 0xFB,                                 # AirHoc1-3: BN4's family 0x27
     192: 0xD0,                                                    # DrkSpred: the same family, its subfamily 3 (its shot the table's kind 0xF)
     12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
     57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26
@@ -108,6 +109,7 @@ PAS = {
     329: 0xD1, 330: 0xD1, 331: 0xD1,   # FlmCros1-3: FlmLine's state, its subfamily 1 (bn4_pa_flmcros1-3)
     335: 0xD3, 336: 0xD3, 337: 0xD3,   # BstFang1-3: TwnFng's state, its subfamily 1 (bn4_pa_bstfang1-3)
     341: 0xD5, 342: 0xD5, 343: 0xD5,   # MagShok1-3: MagBolt's state, its subfamily 3 (bn4_pa_magshok1-3)
+    338: 0xFB, 339: 0xFB, 340: 0xFB,   # PitHoky1-3: AirHoc's state, its subfamily 0, only its power AirHoc's apart (bn4_pa_pithoky1-3)
     332: 0x8D, 333: 0x8D, 334: 0x8D,   # PitRng1-3: BN4's misc 0x0D, a unit of its own (its launcher, the boomerangs Boomer's; bn4_pa_pitrng1-3)
 }
 PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635

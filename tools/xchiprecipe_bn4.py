@@ -66,7 +66,7 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
-                  0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC}
+                  0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
@@ -279,6 +279,7 @@ UNITS = (
     ('attack', 0x09, 'DarkBomb'),
     ('navi', 0x36, 'GutPnch'),
     ('support', 0x2A, 'BugCurse'),
+    ('attack', 0x27, 'AirHoc'),
     ('navi', 0x35, 'RollAro'),
 )
 CANDIDATES = ()
@@ -317,6 +318,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
                0xA9: 0x286, 0xBD: 0x287,    # (DarkBomb's bomb)
                0x141: 0x288,                # (BugCurse's curse)
+               # (the air line's from 0x289: docs/project/claims/bn4-air-units.json)
+               0xC0: 0x289, 0xCC: 0x28A,    # (AirHoc's puck)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
@@ -363,6 +366,9 @@ TABLES = {
     0x080D31EC: dict(size=0x48, entry=12, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the boomerang's flights (the third kind's 0x32: six rows of three words, numbers alone, no sprite), in the "
                          "bytes before its routine"),
+    0x080D2768: dict(size=0x1E, entry=3, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     why="the puck's kinds (the third kind's 0x2E: 10 of 3 bytes, read by its init by its +4, 0x080D27E0-0x080D27EA, "
+                         "the row kept at its +0x60): its moves, numbers alone, copied with AirHoc's unit as BN4 has them"),
     0x080CE088: dict(size=0x1C, entry=4, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the bombs' object's kinds (the third kind's 0x8: 7 of 4 bytes, read by its init by its +4, 0x080CE0F4-"
                          "0x080CE0FC, the row kept at its +0x60 and its +3 its palette, 0x080CE0FE): copied with DarkBomb's unit, "
@@ -466,6 +472,10 @@ IMMS = {
     0x080EE58A: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
                      why="the battle NaviStats' Navi, 0 MegaMan (the bomb's height by it): BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 "
                          "(BN6_NAVI_SIDE_NAVI)"),
+    # AirHoc's state (0x27): MegaMan's animation as he strikes the puck (BN4's 0x10, BN6's 0x0C)
+    0x080ECED4: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x10, now=0x0C,
+                     why="MegaMan's animation as he strikes AirHoc's puck: BN4's 0x10, BN6's 0x0C of its own sprite of him (frames "
+                         "of 2, 2, 2 and 10 in each art; BN6 has no twin family)"),
     0x080EE55C: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x12, now=0x0E,
                      why="MegaMan's animation as he throws PropBom: BN4's 0x12, BN6's 0x0E of its own sprite of him (frames of 1, 2, "
                          "2 and 3 in each art)"),
@@ -527,6 +537,15 @@ IMMS = {
 UNIT_MOVES = {
     0x080D2156: "the thunder's spawner (BN4_SPAWN_THUNDER): Billy's recipe runs BN6's own third kind's 0x2A for it, drawn from "
                 "BN6's art; Thunder1-3's unit moves BN4's, its sprite copied, so the chip's ball is BN4's in every battle",
+}
+# Two instructions of a unit's code made one call to a stub of the project's own (XvCallIn, src/emu/xvirus_recipe.h), where BN6
+# lays out what they read otherwise than one instruction can follow: the unit's name -> the first instruction's address ->
+# (the stub's C name, why); the immediates the generator gives those two instructions are dropped
+UNIT_CALLS_IN = {
+    'AirHoc': {0x080D288C: ('XC4_COLL_PANEL_WORD', "the puck's move test (0x080D2886-0x080D2894): ldr r0,[r5,#0x54]; ldr r0,[r0,#8], "
+                                                   "a word of its collision data (its panel's column and row, its panel's byte, its "
+                                                   "counter time) against the halfword of its panel last frame (0x080D285E); BN6 keeps "
+                                                   "the four bytes at +0xA to +0xD, off a word, so a stub joins its two halfwords")},
 }
 # A routine of BN4's engine a unit copies where the project pairs it with BN6's (as tools/bn4_twins.py COPIED, for the unit
 # alone): the unit's name -> BN4's routine -> why
@@ -993,13 +1012,18 @@ def panel_fields(f):
             i = w.insns[a]
             if i.form != 'bl' or i.target != bn4_twins.GET_PANEL:
                 continue
-            for b in addrs[k + 1:k + 6]:
+            # (the panel in r0, or in a register it was copied to before r0 is popped over: AirHoc's bounce, adds r4,r0,#0 at
+            # 0x080D2A4C, its side read through r4 after a pop, 0x080D2A54)
+            held = {0}
+            for b in addrs[k + 1:k + 8]:
                 j = w.insns[b]
-                if j.form in ('ldrb', 'strb') and j.f[1] == 0 and j.f[2] in PANEL4TO6_FIELDS:
+                if j.form in ('ldrb', 'strb') and j.f[1] in held and j.f[2] in PANEL4TO6_FIELDS:
                     to = PANEL4TO6_FIELDS[j.f[2]]
-                    f.imms.append(dict(at=b, form=X4.FORMS[j.form], rd=j.f[0], rn=0, was=j.f[2], now=to,
+                    f.imms.append(dict(at=b, form=X4.FORMS[j.form], rd=j.f[0], rn=j.f[1], was=j.f[2], now=to,
                                        why=f'a panel\'s side: BN4 +{j.f[2]:#x}, BN6 +{to:#x}'))
-                if j.form == 'bl' or T.writes(j, 0):
+                copy = j.form == 'adds3' and j.f[1] in held and j.f[2] == 0
+                held = {r for r in held if not T.writes(j, r)} | ({j.f[0]} if copy else set())
+                if j.form == 'bl' or not held:
                     break
 
 
@@ -1158,6 +1182,10 @@ def rows_check(b4, f):
 
 # A sprite load whose number is made on more than one path (a movs on each, the walk's back_value seeing the last): the other
 # paths' movs, each copied and given the copy as the first is. BN4's load -> the other movs
+# A sprite load whose list and number its object reads from its own +4 and +5 (the spawn's r4, its spawner's word): the
+# literal words that give it, each the word's address (its byte 0 the list's offset, its byte 1 the number), the word given
+# the sprite's copy's number in the copy (a number of the unit's pools, XvNumber)
+SPAWN_WORD_SPRITES = {0x080E4F8C: (0x080D2B04,)}   # (the fourth kind's 0x28 (0x080E4F7C): AirHoc's puck's spark, r4 0x1210 at 0x080D2AE6)
 SPRITE_PATHS = {0x080DAFF4: (0x080DAFE6,)}   # (the ring's init: 3:0x37, its kinds but 3's; 3:0x3A kind 3's, 0x080DAFEE)
 
 
@@ -1167,6 +1195,9 @@ def sprites_of(b4, b6, f, alloc):
     for e, w in sorted(f.walks.items()):
         for site, t in sorted(w.bls.items()):
             if t != X4.BN4['sprite_load'] or any(site in x['loads'] for x in TABLES.values()):
+                continue
+            if site in SPAWN_WORD_SPRITES:
+                spawn_word_sprites(b4, f, alloc, site)
                 continue
             lst, _ = T.back_value(w, site, 1)
             num, chain = T.back_value(w, site, 2)
@@ -1198,6 +1229,25 @@ def sprites_of(b4, b6, f, alloc):
                 f.notes.append(f'its sprite {lst // 4}:{i.f[1]:#x} ({site:08X}, by {at:08X}): BN6\'s {lst // 4}:{c["to_index"]:#x}, copied')
                 f.imms.append(dict(at=at, form='THUMB_MOVS', rd=2, rn=0, was=i.f[1], now=c['to_index'],
                                    why=f'its object\'s sprite on its other path: list {lst // 4} {i.f[1]:#x} in BN4, {c["to_index"]:#x} in BN6 (copied)'))
+
+
+def spawn_word_sprites(b4, f, alloc, site):
+    """a load SPAWN_WORD_SPRITES names: each word's sprite copied (list3_copy) and its number's byte set in the copy"""
+    for lit in SPAWN_WORD_SPRITES[site]:
+        if not any(lo <= lit < hi for lo, hi in f.spans):
+            f.decide('sprite', f'{site:08X}: SPAWN_WORD_SPRITES names the word at {lit:08X}, which the unit\'s blocks do not hold')
+            continue
+        off, num = b4.u8(lit), b4.u8(lit + 1)
+        c = list3_copy(b4, f, alloc, num, off // 4) if off & 3 == 0 else None
+        if c is None:
+            f.decide('sprite', f'{site:08X}: the word at {lit:08X} names {off:#x}:{num:#x}, no sprite to copy')
+            continue
+        f.notes.append(f'its sprite {off // 4}:{num:#x} ({site:08X}, by its spawn\'s word at {lit:08X}): BN6\'s {off // 4}:{c["to_index"]:#x}, copied')
+        if c['to_index'] != num:
+            was = b4.u32(lit)
+            f.numbers.append((lit, was, was & ~0xFF00 | c['to_index'] << 8,
+                              f'its spawn\'s word, its sprite {off // 4}:{num:#x} in BN4, {c["to_index"]:#x} in BN6 (copied)'))
+            f.numbers.sort()
 
 
 def list_number(alloc, lst):
@@ -1510,9 +1560,15 @@ def c_unit(f):
     L += [X4.pair_text(t, tw, how, cls, audited) for t, tw, how, cls, sites, audited in f.pairs]
     L += ['};', f'static const XvPair {n}_words[] = {{']
     L += [f'\t{{ 0x{a:08X}, 0x{b:08X} }},   /* {why} */' for a, b, why in f.words]
+    calls_in = sorted(UNIT_CALLS_IN.get(f.name, {}).items())
+    imms = [i for i in f.imms if not any(at <= i['at'] < at + 4 for at, _ in calls_in)]
     L += ['};', f'static const XvImm {n}_imms[] = {{']
-    L += [f'\t{{ 0x{i["at"]:08X}, {i["form"]}, {i["rd"]}, {i["rn"]}, 0x{i["was"]:X}, 0x{i["now"]:X} }},   /* {i["why"]} */' for i in f.imms]
+    L += [f'\t{{ 0x{i["at"]:08X}, {i["form"]}, {i["rd"]}, {i["rn"]}, 0x{i["was"]:X}, 0x{i["now"]:X} }},   /* {i["why"]} */' for i in imms]
     L.append('};')
+    if calls_in:
+        L.append(f'static const XvCallIn {n}_calls_in[] = {{')
+        L += [f'\t{{ 0x{at:08X}, 0x{f.b4.u32(at):08X}, {to} }},   /* {why} */' for at, (to, why) in calls_in]
+        L.append('};')
     if f.numbers:
         L.append(f'static const XvNumber {n}_numbers[] = {{')
         L += [f'\t{{ 0x{lit:08X}, 0x{was:08X}, 0x{now:08X} }},   /* {why} */' for lit, was, now, why in f.numbers]
@@ -1566,7 +1622,7 @@ def c_unit(f):
         L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in dict.fromkeys(f.sounds)) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
-                                                                   ('imms', True), ('numbers', f.numbers), ('states', f.states), ('types', True), ('sides', f.sides),
+                                                                   ('imms', True), ('calls_in', calls_in), ('numbers', f.numbers), ('states', f.states), ('types', True), ('sides', f.sides),
                                                                    ('sound_calls', f.queue_calls), ('effect_calls', getattr(f, 'effect_calls', None)),
                                                                    ('sprites', f.attack_sprites),
                                                                    ('effects', f.effects), ('bytes', f.bytes)) if have]

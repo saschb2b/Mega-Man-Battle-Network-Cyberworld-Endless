@@ -472,6 +472,10 @@
 080D235C mokorus_code_bytes
 080D23E0 BN4_MOKO_HIT_BITS
 080D252A BN4_MOKORUS
+080D2768 puck_kinds_table
+080D285E then_compared_with_word_read
+080D288C collision_data_panel
+080D2B04 collision_data_panel_2
 080D2B28 spikey_shrimpy_attacks
 080D2BEA BN4_SOUND_SHRIMPY_C9
 080D2C52 BN4_SOUND_SHRIMPY_9F
@@ -559,6 +563,7 @@
 080E4A9C BN4_BLASTS_SPAWN
 080E4C3C timebomb_code_actors_3
 080E4CA6 spawned_by
+080E4F8C spark_sprite_spawn_word
 080E50AE BN4_VOLGEAR_HELD_ATTACK
 080E5588 searchman_derived_his
 080E5728 BN4_SCOPE_SPAWN

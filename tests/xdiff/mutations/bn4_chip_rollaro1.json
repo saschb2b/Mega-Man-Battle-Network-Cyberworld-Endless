@@ -3,9 +3,9 @@
   "name": "Roll on the other side",
   "spec": "bn4_chip_rollaro1",
   "poke": [
-   "088F6FC0:2301"
+   "088F73C0:2301"
   ],
-  "what": "the unit's wrapper (its home, XC4_HOMES + 0x7C00, XC4_HOME_WAIT) with movs r3,#1 where it loads the user's side: the chip's Roll made the enemy's"
+  "what": "the unit's wrapper (its home, XC4_HOMES + 0x8000, XC4_HOME_WAIT) with movs r3,#1 where it loads the user's side: the chip's Roll made the enemy's"
  },
  {
   "name": "RollAro1's power another",

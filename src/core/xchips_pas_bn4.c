@@ -21,6 +21,9 @@ const XChipPa xchips_pas4[] = {
 	{ 0x0802126C, 3, 0, 614, { 656, 0, 0, 0 } },   /* BstFang1: 3 TwnFng1 of codes in a row */
 	{ 0x08021272, 3, 0, 615, { 657, 0, 0, 0 } },   /* BstFang2: 3 TwnFng2 of codes in a row */
 	{ 0x08021278, 3, 0, 616, { 658, 0, 0, 0 } },   /* BstFang3: 3 TwnFng3 of codes in a row */
+	{ 0x0802127E, 3, 0, 617, { 650, 0, 0, 0 } },   /* PitHoky1: 3 AirHoc1 of codes in a row */
+	{ 0x08021284, 3, 0, 618, { 651, 0, 0, 0 } },   /* PitHoky2: 3 AirHoc2 of codes in a row */
+	{ 0x0802128A, 3, 0, 619, { 652, 0, 0, 0 } },   /* PitHoky3: 3 AirHoc3 of codes in a row */
 	{ 0x08021290, 3, 0, 620, { 642, 0, 0, 0 } },   /* MagShok1: 3 MagBolt1 of codes in a row */
 	{ 0x08021296, 3, 0, 621, { 643, 0, 0, 0 } },   /* MagShok2: 3 MagBolt2 of codes in a row */
 	{ 0x0802129C, 3, 0, 622, { 644, 0, 0, 0 } },   /* MagShok3: 3 MagBolt3 of codes in a row */

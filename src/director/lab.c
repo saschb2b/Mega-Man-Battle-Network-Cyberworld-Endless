@@ -20,6 +20,7 @@
 #include "run.h"
 #include "runlog.h"
 #include "save.h"
+#include "xpanels.h"
 
 LabState LS;
 
@@ -27,8 +28,13 @@ LabState LS;
 const uint8_t lab_panel_types[] = {
 	BN6_PANEL_PLAIN, BN6_PANEL_CRACKED, BN6_PANEL_HOLE, BN6_PANEL_POISON, BN6_PANEL_HOLY, BN6_PANEL_GRASS, BN6_PANEL_ICE, BN6_PANEL_VOLCANO,
 	BN6_PANEL_CONVEYOR_UP, BN6_PANEL_CONVEYOR_DOWN, BN6_PANEL_CONVEYOR_LEFT, BN6_PANEL_CONVEYOR_RIGHT,
+	/* (the other games' in BN6's engine, each where its ROM is read: BN5's lava, sea and magnet panel, BN4's Hole) */
+	XPANEL_LAVA, XPANEL_SEA, XPANEL_MAGNET, XPANEL_HOLE,
 };
 const int lab_panel_type_count = (int)(sizeof lab_panel_types);
+
+/* whether a panel type can be set now: BN6's own, or another game's in BN6's engine with its ROM read (xpanels.h) */
+static bool lab_panel_offered(int type) { return (type >= BN6_PANEL_HOLE && type < BN6_PANEL_TYPES) || xpanels_has(type); }
 
 /* ---- what it lists ---- */
 
@@ -210,9 +216,10 @@ static void panel_take(void) {
 	uint8_t *p = &LS.set.panels[LS.line * LAB_COLS + LS.col];
 	int i = 0;
 	while (i < lab_panel_type_count && lab_panel_types[i] != *p) ++i;
-	/* (no hole under MegaMan, who stands on column 2, row 2) */
-	i = (i + 1) % lab_panel_type_count;
-	if (lab_panel_types[i] == BN6_PANEL_HOLE && LS.col == 1 && LS.line == 1) i = (i + 1) % lab_panel_type_count;
+	/* (no hole under MegaMan, who stands on column 2, row 2; none of a game whose ROM is not read) */
+	bool megaman = LS.col == 1 && LS.line == 1;
+	do i = (i + 1) % lab_panel_type_count;
+	while ((lab_panel_types[i] == BN6_PANEL_HOLE && megaman) || !lab_panel_offered(lab_panel_types[i]));
 	*p = lab_panel_types[i];
 }
 
@@ -267,7 +274,10 @@ static void show(void) {
 		e.song = lab_stage_song_slot(LS.set.song);
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 1, 0, LAB_COLS - 2, 1, enemy_id(0, 1, 0) };
 	}
-	lab_battle_panels(LS.set.panels);
+	/* (a panel of a game whose ROM is not read now is fought as plain, the set keeping it) */
+	uint8_t panels[LAB_PANELS];
+	for (int i = 0; i < LAB_PANELS; ++i) panels[i] = lab_panel_offered(LS.set.panels[i]) ? LS.set.panels[i] : BN6_PANEL_PLAIN;
+	lab_battle_panels(panels);
 	/* (the background the set names, not one of its area's two by the dice: the stage stays as it is while the set
 	 * changes; one of a game whose ROM is not read now, BN6's of the area's place) */
 	int backdrop = lab_stage_backdrop(LS.set.area);

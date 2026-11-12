@@ -35,6 +35,10 @@ typedef struct { uint32_t from, to; } XvPair;               /* an address of its
  * of it after the engine's work): run through a shim of its home that pushes lr and calls in, the tail's pop {pc}
  * returning from the shim (xvirus_shim.h) */
 typedef struct { uint32_t addr; bool own; uint8_t clone; bool entered; } XvRef;
+/* Two instructions of its code (`was`, their halfwords, the first low) made one call to `to`, a stub of its installer's
+ * region (XvRegion stubs or stubs2), through a veneer: where BN6 lays the fields they read out otherwise than one
+ * instruction can follow (BN4's word of a collision data's +8 to +0xB, BN6's +0xA to +0xD: XC4_COLL_PANEL_WORD) */
+typedef struct { uint32_t at, was, to; } XvCallIn;
 typedef struct {                                            /* an immediate changed in its instruction, checked first */
 	uint32_t at;
 	ThumbForm form;
@@ -140,6 +144,8 @@ typedef struct {
 	int nwords;
 	const XvImm *imms;
 	int nimms;
+	const XvCallIn *calls_in;   /* (two instructions made a call to a stub, XvCallIn) */
+	int ncalls_in;
 	const XvRef *states;       /* its state table, BN6's layout: generic states 0-7, its own from 8 */
 	int nstates;
 	XvRef hooks[XV_HOOKS];     /* its entries of tables 3-10 */

@@ -1,0 +1,11 @@
+{
+ "name": "BN6's second wheel in AirHoc's puck's element",
+ "whose": "engine",
+ "kind": "T3",
+ "type": "0x2E",
+ "part": "obj",
+ "offset": "0x0E",
+ "bit": "0x10",
+ "direction": "BN6 has it, BN4 not",
+ "why": "As MegaMan's attack's element (his AttackVars +2) carries BN6's Break flag 0x10, which BN6's use ORs in and BN4's does not (\"BN6's second wheel in MegaMan's chip's attack, the Break's\"), the puck AirHoc's state spawns (the third kind's 0x2E, moved with the unit) takes that element through the element set (BN4 0x0801288C, BN6's twin 0x08019F8C, tools/xchiprecipe_bn4.py AUDITS: BN6 writes the element's low four bits to the collision data's +2 and its high four, the second wheel's flags, to its +0x19): the object's element (BN6's +0x0E) holds the flag. That bit alone. bn4_chip_airhoc1 at t35"
+}

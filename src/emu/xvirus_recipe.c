@@ -163,7 +163,19 @@ static bool refs_ok(const XVirusFamily *f, char *why, size_t n) {
 
 /* its calls out (each to one of BN6's routines, one of its region's stubs, or the dispatch's spawner for one of its
  * game's) and its immediates */
+/* its XvCallIn: two instructions of its own code made a call, to a stub of its region alone */
+static bool calls_in_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
+	for (int i = 0; i < f->ncalls_in; ++i) {
+		const XvCallIn *k = &f->calls_in[i];
+		bool stub = (k->to >= r->stubs && k->to < r->stubs_end) || (k->to >= r->stubs2 && k->to < r->stubs2_end);
+		if (!stub || (k->at & 1) || !xvirus_is_code(f, k->at) || !xvirus_is_code(f, k->at + 2))
+			return no(why, n, "its call in at %08x goes to %08x, no stub of its region", (unsigned)k->at, (unsigned)k->to);
+	}
+	return true;
+}
+
 static bool calls_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t n) {
+	if (!calls_in_ok(f, r, why, n)) return false;
 	for (int i = 0; i < f->ncalls; ++i) {
 		const XvPair *c = &f->calls[i];
 		if (xvirus_is_code(f, c->from)) return no(why, n, "call %08x is to its own code", (unsigned)c->from);
