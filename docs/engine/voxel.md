@@ -75,7 +75,7 @@ level's panels), and `voxel_lift.c` sorts every map pixel:
 | --- | --- |
 | A floor's top | its ground point lies on a panel the layer draws as floor (the raised level first; walled-off floor too) |
 | A stair | its ground point lies on a stair's two panels and the ramp stands there as high as the pixel shows it (`netmap_stair_height`: even from the foot to the rise) |
-| A slab's side | art the floor does not explain, a run of under 28 rows down its column right under a top, the void under it, and no scenery within 8 columns beside it |
+| A slab's side | art the floor does not explain, a run of under 28 rows down its column right under a top, the void under it, no deeper than nine in ten of the window's such runs (plus 2 rows), and no scenery within 8 columns beside it |
 | Scenery | any other art the floor does not explain: the platforms pasted beside the way, lying flat on the ground |
 
 A first rule took every unexplained pixel within 40 rows under an edge

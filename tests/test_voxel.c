@@ -133,7 +133,8 @@ static void test_lift(void) {
 	layers.x[0] = 8; layers.y[0] = 0; layers.w[0] = 8; layers.h[0] = 16;
 	voxel_lift(&layers, false, frame, &ground, &scene);
 	CHECK(scene.kind[window(155, 65)] == VOX_TOP && scene.gy[window(155, 65)] == 65, "lift: art beside the floor lies flat");
-	CHECK(scene.kind[window(100, 105)] == VOX_TOP && scene.kind[window(101, 105)] == VOX_WALL, "lift: a long run under an edge is more floor, a short one its side");
+	CHECK(scene.kind[window(100, 105)] == VOX_TOP && scene.kind[window(104, 105)] == VOX_TOP && scene.kind[window(120, 105)] == VOX_WALL,
+		"lift: a long run under an edge is more floor, a short one beside it too, one apart from it a side");
 	CHECK(scene.hud[60 * VOX_W + 120] == 1 && scene.nbodies == 0, "lift: a sprite all in the HP's corner is the HUD's");
 	/* (a stair: a ramp 20 rows high where the floor was, at columns 100-119; the pixel 10 rows up its ground row shows it 10 high) */
 	for (int y = 60; y < 100; ++y)
