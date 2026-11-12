@@ -3,7 +3,7 @@ type: Feature
 title: "Voxel mode: the net in 3D"
 description: "Options' Display's Voxel (off by default, `voxel` in settings.ini) rebuilds a net layer's picture as columns under a sun and a camera a little lower than BN6's: how a frame is read (the GBA's layers, the map's whole tile map), lifted over the layer's own floor, lit and drawn at the screen's scale, where it runs, what it leaves alone, and what is still open."
 tags: [engine, display, options, voxel]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:32Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:47Z }
 sources:
   - id: reference-mod
     resource: "https://github.com/scottcandy34/DramaticShapeVoxelMod-latest"

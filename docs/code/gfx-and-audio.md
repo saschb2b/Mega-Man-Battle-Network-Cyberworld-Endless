@@ -3,7 +3,7 @@ type: Code Map
 title: "Graphics, sound and the Jukebox"
 description: "What `src/gfx/` (sprites, ROM tiles, fonts, BN6's PET look, the QR code, BN5's tiles), `src/audio/` (the engine's MP2K, the device, the sound filter) and `src/jukebox/` hold, file by file."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T16:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:47Z }
 ---
 
 # Graphics, sound and the Jukebox

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Creation**: engine/voxel.md (voxel mode: the net rebuilt as lit columns under a lower camera, off by default; how a frame is read, lifted, lit and drawn, and what is open), code/gfx-and-audio.md (the readers and the renderer), code/emu.md (`voxel_scene.c`), devtools/headless-shot.md (`--voxel` and its camera).
 * **Update**: releases/v0.21.0.md (what joined 0.21.0 late: GutsMan's SP and 77 of BN4's own chips, BurnerMan and SparkMan drawn into the tournament with their plates, the AreaGrab fix), game/meta/library.md (BN4's row with GutsMan's SP: 160, 26, 4, 190; a run hands out 77 of BN4's own), GUIDE.md (77 of BN4's own chips; the tournament's twelve BN4 Navis).
 * **Update**: game/tournament.md (the pool's room: every proved Navi in it, SparkMan and BurnerMan no longer dropped past 32).
 * **Update**: rom/liberation.md (a row: AreaGrab's column search, which never returns on a Surrounded field once each of MegaMan's two columns has lost a panel, and the hook that ends it), code/emu.md (grab_search.c).

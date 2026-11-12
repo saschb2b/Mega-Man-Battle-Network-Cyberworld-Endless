@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T21:50:47Z
-* **Creation**: engine/voxel.md (voxel mode: the net rebuilt as lit columns under a lower camera, off by default; how a frame is read, lifted, lit and drawn, and what is open), code/gfx-and-audio.md (the readers and the renderer), code/emu.md (`voxel_scene.c`), devtools/headless-shot.md (`--voxel` and its camera).
