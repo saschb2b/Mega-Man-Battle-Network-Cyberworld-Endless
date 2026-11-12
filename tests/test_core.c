@@ -4375,6 +4375,18 @@ static void test_free_space(void) {
 		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
 	}
 	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
+	/* (a unit whose object sounds as it steps MegaMan in, XChipUnit.step_in: a Navi chip's alone, no wrapper's place taken
+	 * twice, the slot one of the songs it copies) */
+	int step_ins = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (!u->step_in) continue;
+		bool copied = false;
+		for (int k = 0; k < u->nsongs; ++k) copied = copied || u->songs[k].slot == u->step_in;
+		step_ins += u->kind == XCHIP_NAVI && !u->wait && copied;
+		CHECK(u->kind == XCHIP_NAVI && !u->wait && copied, "chips: %s's step-in sound is a Navi chip's unit's, a song it copies", u->code.name);
+	}
+	CHECK(step_ins >= 1, "chips: a BN4 Navi chip's unit carries its object's step-in sound (GutPnch's, %d)", step_ins);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);

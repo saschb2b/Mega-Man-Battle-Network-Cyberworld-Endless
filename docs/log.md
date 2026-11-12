@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built: the result pays nothing, BN6's reward pick answered with no entry so its RESULT shows NO DATA; the design's line and the test battle's note), rom/battle.md (Battle rewards: the pick's first instruction, what RESULT shows for 0xFFFF, how to verify).
+* **Update**: multirom/bn4-chips.md (GutPnch1-3 moved as a Navi chip's unit: its object's sound as MegaMan steps in, the punch's bits), rom/bn4.md (GutPnch's code, new row, with BN6's Navi object's last state), devtools/chip-recipe-generator.md (a Navi chip's object's step-in sound, `STEP_IN`), devtools/differential.md (a poke of a spec not BN4's kept out of BN4's chip units' copies).
 * **Update**: multirom/bn4-chips.md (DarkBomb and DrkSpred moved, the bug an attack DarkChip gives cleared by calm4, DrkCanon waiting on BN4's computed powers), rom/bn4.md (the bug in the battle NaviStats), devtools/differential.md (calm4 widened).
 * **Update**: game/battle-lab.md (Built: the stage takes every game's, BN5's and BN4's areas' battle backgrounds and installed songs on STAGE, each BN6 area's second background, how a set keeps them, the proof; the panels BN6 has no type for named as a move of their own), code/director.md (`lab_stage.c`).
 * **Update**: multirom/bn4-chips.md (FirePlus moved: the grass; its timer kept nowhere and the HUD's icon not moved; call 12's wording), devtools/chip-recipe-generator.md (UNIT_AIMS: a call aimed by hand at a stub), rom/bn4.md (the Plus chips' object and timers, the player's tick, Marking: a new row).

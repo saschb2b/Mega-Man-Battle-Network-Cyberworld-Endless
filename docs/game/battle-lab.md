@@ -293,8 +293,8 @@ The builder opens on the last set fought.
 - **Leaving.** BN6's own way out: L on the Custom screen, which in a
   test never fails.
 - **The result.** BN6's RESULT gives the delete time and the busting
-  level; the reward's box stays empty (how BN6's RESULT is shown without
-  a reward is a reverse-engineering step of the build). Back in the
+  level; the reward's box stays empty (BN6's own NO DATA, below: Built,
+  The result pays nothing). Back in the
   builder the information box holds the set's last and best: time, level,
   HP lost.
 - **Records.** Kept for four saved sets in the profile (a set is its
@@ -370,8 +370,9 @@ is used.
   - *Not a proof*: an autopilot run with a test battle in it rolls the
     same battles in the same order, but fights them otherwise, since the
     autopilot presses by the real frame's count.
-  - The reward's box on BN6's RESULT is not emptied yet: what it shows
-    is given and then put back with the rest.
+  - The reward's box on BN6's RESULT was not emptied at first: what it
+    showed was given and then put back with the rest (emptied since,
+    below).
 
 - **The builder's screen** (step 3), behind the dev steps `lab open` and
   `lab all` (`src/director/lab.c`, its picture `lab_draw.c`, its words
@@ -543,6 +544,19 @@ is used.
   untouched. Not here: BN5's and BN4's panels that BN6's engine has no
   type for (sand, metal, magnet, lava), which are a move of their own
   into BN6's battle engine.
+
+- **The result pays nothing** (`emu_battle_unpaid`,
+  `src/director/encounter.c`). In a test battle BN6's reward pick is
+  answered at its first instruction with no entry (0xFFFF, as a row's
+  empty one is; [The battle](../rom/battle.md), Battle rewards), so
+  BN6's own RESULT shows its delete time and busting level, and under
+  GET DATA an empty name and NO DATA where a chip's picture stands;
+  nothing is given. Before, it showed a real reward (Rflectr1 C for a
+  Mettaur at level 9), which the snapshot then took back. Seen headless
+  (`0:lab all`, seed 15, `--dev god,onehit`): a Mettaur deleted in 122
+  frames at level 9, RESULT with NO DATA, the builder back with
+  "0:02:03. Lv 9. HP -0."; the work RAM's hash the one before opening
+  (45e79931), the run untouched.
 
 ## Build order
 

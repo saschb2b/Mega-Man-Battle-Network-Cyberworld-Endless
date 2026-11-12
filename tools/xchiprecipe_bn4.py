@@ -277,6 +277,7 @@ UNITS = (
     ('misc', 0x0D, 'PitRng'),
     ('support', 0x4C, 'FirePlus'),
     ('attack', 0x09, 'DarkBomb'),
+    ('navi', 0x36, 'GutPnch'),
     ('support', 0x2A, 'BugCurse'),
 )
 CANDIDATES = ()
@@ -305,6 +306,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xF8: 0x202, 0xB9: 0x203,    # (MagBolt's bolt and its hum)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
                0x90: 0x206,                 # (the bombs' state's throw)
+               0xA4: 0x207,                 # (GutPnch's fist's punch)
                # (the sweep's third line, units-c's, its slots from 0x240 up)
                0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
                0x143: 0x242,                # (Ligtnin's bolt)
@@ -512,6 +514,10 @@ IMMS = {
     0x080DBCD2: dict(form='THUMB_MOVS', rd=3, rn=0, was=0x03, now=0x43,
                      why="its hit's bits (the collision setup's r3): with the pull's push bit, struck and pushed is bit 0x01 in "
                          "BN4 (BN4_STRUCK_PUSHED), bit 0x40 in BN6 (BN6_STRUCK_PUSHED)"),
+    # GutPnch's punch, struck and pushed back a panel (the region's bits, r7 of BN4's 0x080CD81E): the Moko's row above
+    0x080C855A: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
+                     why="its punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
+                         "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED)"),
 }
 # A routine of BN4's the project pairs with BN6's own for the families (tools/bn4_twins.py TWINS) that a chip's unit moves
 # instead, with the object type it spawns: BN6's own object draws BN6's art, which a family's rule allows by its foe and a
@@ -1566,8 +1572,13 @@ def c_unit(f):
           f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
+    # (a Navi chip's object's sound as it steps MegaMan in, tools/xchiprecipe_bn4_navi.py STEP_IN: its slot, XChipUnit.step_in)
+    step_in = SOUND_SLOTS.get(getattr(f, 'step_in', 0), 0)
+    if getattr(f, 'step_in', 0) and not step_in:
+        sys.exit(f'xchiprecipe_bn4: {f.name}\'s step-in sound {f.step_in:#x} has no slot (SOUND_SLOTS)')
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait else '') + ' },']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in else '') +
+            (f', 0x{step_in:X}' if step_in else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

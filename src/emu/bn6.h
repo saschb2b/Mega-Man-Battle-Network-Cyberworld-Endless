@@ -345,7 +345,7 @@
 #define BN6_START_BATTLE      0x08005BC8u /* StartBattle: r0 the BattleSettings*, every battle's */
 #define BN6_SPAWN_HP          0x08007740u /* in an enemy's spawn (its entry sub_800768C branches to the body bn6f sub_80076A0 holds): strh r2,[r5,#0x24], r2 its HP and MaxHP, r5 its BattleObject */
 #define BN6_SUBTRACT_HP       0x0800E2D8u /* object_subtractHP: r5 the BattleObject, r0 the damage (every object's, every frame, mostly 0) */
-#define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count */
+#define BN6_REWARD_PICK       0x080AC180u /* bn6f sub_80AA910 (Falzar + 0x1870), as a battle ends: r0 the enemies' u16 ids, r1 their count; gives the row's entry in r0 (0xFFFF none: RESULT shows NO DATA) */
 #define BN6_PROTOMAN_CROSS_END 0x080FDFA0u /* ProtoMan landing from his cross (bn6f sub_80FCC4C + 0x2C; issue #55), his collision data just restored: strh r0,[r2,#0x2E], r2 his collision data */
 
 /* BN6's own DarkChips (docs/rom/chips-code.md, BN6's own DarkChips; docs/game/meta/;

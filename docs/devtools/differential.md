@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T22:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:30:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -436,7 +436,11 @@ and traces both:
   copy, to each copy where more than one family copies the block, as
   Mettaur and Melody both copy BN4's summoned appear, and to each BN4
   chip unit's copy that holds the address, as Meteors' unit copies the
-  star's spawner alone from inside ShotStar's block; one in RAM once the
+  star's spawner alone from inside ShotStar's block, and never to a BN4
+  chip unit's copy in a spec that is not BN4's: `megaman_plain`'s poke
+  of BN6's own arm flash, 0x080EC8D6, lies in BN4's addresses of
+  DrkVulcn's state's block (0x080EC842-0x080EC972) and went to that
+  copy, which a BN5 battle never runs, so its mutation passed; one in RAM once the
   game has booted, over what it copied there,
   such as IWRAM's routines), `call=F:T` aims each family's veneer to
   BN6's routine F at T, and `unitebreak=N` breaks UNITE's rule in BN6's

@@ -94,6 +94,7 @@ MOVED.update({
 # NAVI_TWIN (XREG_MOVED with a twin: the twin's family alone)
 NAVI = {
     224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
+    154: 0xB6, 155: 0xB6, 156: 0xB6,   # GutPnch1-3: BN4's support 0x36, its Navi the first kind's 0x42, a GutsMan who punches (bn4_chip_gutpnch1-3)
 }
 NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
 MOVED.update(NAVI)

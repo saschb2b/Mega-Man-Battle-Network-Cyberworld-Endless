@@ -62,6 +62,16 @@
                                              Navi's own; kind 1, or 2 for his SP and DS by his +4) and a hit before him, and is gone */
 #define BN4_GUTSMAN_CHIP_SPAWN 0x080B9B1Cu /* ... his spawner: r0, r1 his panel, r2 his element, r5 his user, r6 his power, r7 the byte he
                                              sets to 1 and clears when he is done */
+/* GutPnch1-3 (its chips 154-156, support subfamily 0x36): a Navi chip by its shape, moved as a unit of kind navi */
+#define BN4_GUTPNCH_OBJECT    0x080E90CCu /* its object (the fourth kind's 0x64; its routine BN4_CHIP_ROUTINES' 0x36, 0x080E91DC): GutsMan's
+                                             chip's object state for state, but that it hands its Navi the parameters whole and plays
+                                             BN4_GUTPNCH_IN_SOUND as it steps MegaMan in */
+#define BN4_GUTPNCH_IN_SOUND  0x080E91BCu /* ... movs r0,#0xb0 in its last state, after its step: a sound BN6's Navi object has none of */
+#define BN4_GUTPNCH_NAVI      0x080C83F8u /* ... and the chip's Navi (the first kind's 0x42, to 0x080C85E8): GutsMan's sprite and palette, he
+                                             appears (sound 0xB0), punches the panel ahead at frame 0xC of his state (sound 0xA4;
+                                             BN4_REGION_SPAWN_FROZEN, its bits BN4_GUTPNCH_BITS) and is gone */
+#define BN4_GUTPNCH_BITS      0x080C855Au /* ... movs r7,#0x21: the punch's bits, struck and pushed (BN4_STRUCK_PUSHED) */
+#define BN4_GUTPNCH_SPAWN     0x080C85C2u /* ... his spawner, GutsMan's chip's shape (BN4_GUTSMAN_CHIP_SPAWN) */
 /* A support chip's object's generic states, which every such type's tables name (BN6's the same places of its own types'
  * tables, BN6_SUPPORT_OBJECT_*: tools/xchiprecipe_bn4.py TWINS, each pair read in both ROMs) */
 #define BN4_SUPPORT_OBJECT_BEGIN 0x08008BD8u /* its state 0 (+8): its side's turn of the time freeze asked for */
