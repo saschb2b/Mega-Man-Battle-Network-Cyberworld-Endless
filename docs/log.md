@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/progression/encounter-groups.md (Step 2: the arc made at the act's first layer whichever layer asks, a CONTINUE on a later layer and an act's dark layer named another signature in an older net's area), devtools/pacing-report.md (the arcs' last line: every act's arc asked first on its second and third layer).
 * **Update**: game/meta/library.md (BN4's dark chips neither listed nor counted while no find, reward or flame hands one out; BN4's own listed as they play), multirom/bn4.md (Its viruses' rewards: a dark chip of BN4's never a reward, the rows that name one, ElemDark's row 114).
 * **Update**: game/team-protoman.md (where it stands in 0.21.0: the five moved Navis are in the engine and not met in a run; their guardians, Souls, ProtoSoul, the board and DarkProto wait for 0.22.0; the New 3DS's heap modelled with them: 77.8 MB at most with BN5, 85.9 of 96 with BN4 too).
 * **Update**: game/battle-lab.md (Built, The sandbox folder: no family without a name is a row, the list printed as debug lines, its count with everything open).

@@ -55,6 +55,11 @@ against the rows of the area's own battles (chip entries of ten, zenny
 a row, kinds of chip). Act 1's lines also list each distinct beat once
 as the `foes` step takes it (`beat 2: 1@52/200@51`), few enough to fight
 each one ([Encounter tags and danger](encounter-tags.md)).
+The arcs' last line asks every act's arc first on its second and its
+third layer, as a CONTINUE there does, in the BN6 area and in each older
+net's area that dresses it (40 seeds each): OVER where a signature,
+partner or home differs from its first layer's
+(docs/game/progression/encounter-groups.md, Step 2).
 
 Before them, each net's families as their own records set them (their
 role, stage and placements; `*` its net's own, `!` those set on special

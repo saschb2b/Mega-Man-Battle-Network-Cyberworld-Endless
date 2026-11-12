@@ -51,6 +51,13 @@ typedef struct {
 	GroupFill challenge;
 } GroupArc;
 
+/* The layer an act's arc is made at, whichever of its layers asks: the
+ * act's first. What an arc is made under must be the act's alone: an older
+ * net's area's own families are its records' of the layer (xbattles.h), so
+ * rules read at the layer asked made a game started on an act's third
+ * layer (a CONTINUE) name another signature than the act's card had. */
+int group_arc_depth(int depth);
+
 /* The arc `roll` (the run's seed and the act mixed) gives from `pool`
  * under `r`: the signature each candidate as likely as any of its side
  * (the area's own or not, by the share; the other side where its own has

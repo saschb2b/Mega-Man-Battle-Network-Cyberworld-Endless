@@ -388,6 +388,7 @@ static int fielded(int depth, int biome, int target, const Formation **list, int
 }
 
 int loot_territory = -1;
+int loot_arc_territory = -1;
 int loot_deep[2] = { -1, -1 };
 int loot_older_share, loot_older_net = CHIP_NET_BN5;
 int loot_groups_always;
@@ -552,8 +553,16 @@ static void first_alone(Encounter *e) {
 	e->nfoes = n;
 }
 
+/* (an older net's area whose own records the layers that wear it fight) */
+static int territory_of(int tiles) {
+	const NetAreaDef *a = tiles >= NET_AREAS ? net_area_def(tiles) : NULL;
+	return run_extra(EXTRA_OLDER) && a && a->xrom > 0 && xterritory_native(tiles) ? tiles : -1;
+}
+
+void loot_arc_area(int tiles) { loot_arc_territory = territory_of(tiles); }
+
 bool loot_layer_nets(int biome, int tiles) {
-	loot_territory = loot_deep[0] = loot_deep[1] = -1;
+	loot_territory = loot_arc_territory = loot_deep[0] = loot_deep[1] = -1;
 	loot_older_share = 0;
 	if (!run_extra(EXTRA_OLDER)) return false;   /* (a run without the older nets: BN6's own battles and finds, docs/game/meta/extras.md) */
 	if (biome == BIOME_UNDERNET || biome == BIOME_NEST) loot_deep[0] = xterritory_like(BIOME_UNDERNET);
@@ -562,7 +571,7 @@ bool loot_layer_nets(int biome, int tiles) {
 	/* (an older net's area's own records where the layer wears it, in the deep too: the deep's coin between the nets is
 	 * gone with the visitors, the older nets' families coming as the acts' signatures and their partners instead,
 	 * docs/game/progression/encounter-groups.md) */
-	if (a && a->xrom > 0 && xterritory_native(tiles)) loot_territory = tiles;
+	loot_territory = loot_arc_territory = territory_of(tiles);
 	/* (the older Net's half of the finds: the area's own game's catalogue, in the deep every game's read:
 	 * docs/multirom/one-net.md, the older net's half; docs/multirom/bn4-chips.md, unit 7) */
 	int net = loot_deep[0] >= 0 ? CHIP_NET_OLDER : a && a->xrom > 0 ? chip_pool_net_of(a->xrom - 1) : -1;

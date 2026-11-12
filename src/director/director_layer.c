@@ -333,6 +333,9 @@ static void layer_host(int tiles, int *group, int *number) {
 	 * older net's share of its finds and stock, loot.h; else, an install
 	 * that failed, the BN6 area's it dresses) */
 	loot_layer_nets(run.biome, tiles);
+	/* (the act's arc by the area the act wears, on its dark layer too: loot.h) */
+	int own = run.biome;
+	loot_arc_area(layer_area(&own));
 	loot_arc = !dev.noarc && run.side_kind == LAYER_NORMAL;   /* (the acts' arcs, the main path's: group_arc.h) */
 	D.territory_native = loot_territory >= 0;
 	D.deep = loot_deep[0] >= 0;
