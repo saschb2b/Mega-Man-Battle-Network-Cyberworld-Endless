@@ -1,3 +1,3 @@
 by: claude-code/claude-fable-5-2
-at: 2026-11-12T19:30:00Z
+at: 2026-11-12T19:16:00Z
 * **Update**: game/battle-lab.md (Built, The sandbox folder: a win's two lines in the information box, after a battle and as a set's best, and no "HP -0").
