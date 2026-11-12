@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:30:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -469,6 +469,25 @@ the blast deletes is not compared yet: each engine's deletion draws its
 own explosions (the fourth kind's 0x11), which the differential has no
 rule for, so the specs' Mettaur outlives the blast.
 
+**FirePlus is moved** (12 November 2026: id 563, BN4's support 0x4C at
+BN6's grown support routine 0xCC; the owner's calls 7 and 12). Its
+object lives a frame and has the stage's changer turn every panel to
+grass, which is the whole of what it does to a battle: fire on grass
+adds its damage again by each engine's own rule. BN4 also starts a
+480-frame timer in the user's battle data, read by its HUD's icon
+alone. BN6 has no such icon and keeps other fields at those offsets, so
+the unit's call for that data is the chips' stub that returns 0 and the
+four stores go nowhere: **the timer is not kept and the HUD's icon is
+not moved**, the one thing of FirePlus a player of BN4 would miss. The
+unit's code holds the other three kinds' paths too (ThunPlus, AquaPowr,
+WoodPowr: the timers alone), which no chip of a run reaches (call 12:
+their rows wait, `ROWS_WAIT`). The changer's block is copied a third
+time with it (Hole's and Elem's units have it): the fourth kind has no
+shared type yet. `bn4_chip_fireplus` (used at fight frame 30: eighteen
+panels to grass at t34, the changer's sounds) and
+`bn4_chip_fireplus_cracked` (the Mettaur's panel cracked before it:
+grass with the rest) pass over 300 frames; five mutations caught.
+
 **SeekBom1-3 are moved, a family's unit by subfamily** (11 November
 2026: ids 598-600, BN4's family 9 at BN6's grown attack family 0xD2).
 BN4's bombs are one family: its state throws by the record's subfamily
@@ -634,6 +653,7 @@ in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
 <<<<<<< ours
+<<<<<<< ours
 **BigHamr1-3 are moved** (12 November 2026: ids 659-661, BN4's support
 0x10 at BN6's grown support routine 0x90). Its routine spawns a support
 object (the fourth kind's 0x26), which sets a hammer (the third kind's
@@ -663,6 +683,10 @@ three Plus chips are left out), then BlakBarr's barrier; Binder,
 =======
 **Next:** FirePlus, BlakBarr's barrier and BlakWeap (calls 7, 12 and
 13: the other three Plus chips and Marking are left out); Binder,
+>>>>>>> dev
+=======
+**Next:** BlakBarr's barrier and BlakWeap (calls 7, 12 and 13: the
+other three Plus chips and Marking are left out); Binder,
 >>>>>>> dev
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
@@ -744,7 +768,7 @@ moved yet; why each waits:
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
 | DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
-| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn **moved** (12 November 2026, below); DrkCanon, DarkBomb and DrkSpred each its family as an attack unit, DrkCanon also BN4's computed powers (unit 6) |
+| DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn, DarkBomb and DrkSpred **moved** (12 November 2026, below); DrkCanon waits on BN4's computed powers (unit 6, bn4-navi-powers' claim) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | **moved** (12 November 2026, below) |
 | DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
 
@@ -767,10 +791,14 @@ mutations caught.
 Three things of BN4's battle are not the run's, and the comparison
 treats each as such:
 
-- **BN4's confusion at the fight's start after an attack DarkChip**
-  (`calm4`, the owner's call of 12 November 2026: left out). Only
-  choosing DrkVulcn on BN4's Custom screen gives it: the same folder
-  with nothing chosen, or DrkStage chosen, gives none. BN4's MegaMan
+- **BN4's bug at the fight's start after an attack DarkChip**
+  (`calm4`, the owner's call of 12 November 2026: left out). Once an
+  attack DarkChip is chosen, BN4 sets a NaviCust bug of type 1 in the
+  battle NaviStats' +0x0D (`BN4_NAVI_BUG`, the byte its levels' routine
+  writes: 0xFF, 0x10 or 0x20): 0xFF after DrkVulcn, read at the fight's
+  start as confusion; 0x20 after DarkBomb, which walks MegaMan off his
+  panel at t1. The same folder with nothing chosen, or DrkStage chosen,
+  gives none; DrkSpred's gave none in its spec. BN4's MegaMan
   starts the fight confused for 0x2D0 frames (his collision +0x12,
   0x2CF at t1, counted down at `BN4_CONFUSE_STEP`) with its mark over
   him. Its source is **not yet traced**; ruled out, each hooked on the
@@ -778,7 +806,9 @@ treats each as such:
   NaviStats +0x0D writers 0x0800D756 and 0x0800D78A, the code's only
   literal 0x2D0 (its write at 0x0800D8BE), and every `strh` to +0x12
   from 0x08008000 to 0x08020000 but the countdown. The spec's `calm4`
-  sets the timer to 1 the first frame it holds more, so BN4's own step
+  clears the bug each battle frame it is set, and sets the confusion's
+  timer to 1 the first frame it holds more (the fight's start reads the
+  bug before the first frame the comparator steps), so BN4's own step
   ends it and takes its mark away; `confuse6`, its mutation, gives
   BN6's MegaMan the 0x2D0 instead.
 - **BN4's dark mood at an attack DarkChip's use** (`mood4`; the owner's
@@ -801,6 +831,25 @@ treats each as such:
   caller's leftover r4), its sprite state and the word that keeps it
   are allowed, its being in play and life compared (legit.json's bn4
   allowed, Full Synchro's aura; a mutation drops BN6's).
+
+**DarkBomb and DrkSpred are moved** (12 November 2026: ids 696 and
+594). DarkBomb is the bombs' state's subfamily 2, its own copy of the
+state at attack family 0xFC (as SeekBom's subfamily 9 has its own,
+`ATTACK_SUBS`): its arm the third kind's 0x2's kind 0x11, its bomb the
+third kind's 0x8 with its kinds' table (`0x080CE088`), its blast's
+effect by kind (`0x080CE277`: kind 6's 0x2B, moved as BN6's 0xC4), its
+blast's hit word 0x0A05FF01 for the hit area's spawn, its sounds 0xA9
+and 0xBD at the grown table's 0x286 and 0x287. DrkSpred is the spread
+state's subfamily 3 in the Spreads unit (0xD0), its shot the spread
+shot's kind 0xF; its burst's sound, 0x8D, is past a byte at the
+grown table's 0x200 where the shot's table names a byte, so the site's
+call goes through a shim that makes r0 the slot only where the byte is
+0x8D (`XvSoundCall.when`, the other kinds' bytes BN6's numbers as
+their rows' copies give them). `bn4_chip_darkbomb` passes over 300
+frames against BN4's 250 HP Mettaur (its 200 deletes a MettaurSP), and
+`bn4_chip_drkspred` to its hit (t37: its 400 deletes any Mettaur, so
+its burst's sound comes after the deletion and is proved by the shim's
+unit test alone); eight mutations caught.
 
 BN4's Hole panel (its type 0xB) is a plain panel by its flags: nothing
 of BN4's damage, movement or panel code treats it otherwise, and a
@@ -1307,6 +1356,27 @@ V1, settled for all of them.
   table, 0x1E2, whichever unit copies it. The Navi chips' range
   (0x2C0-0x2FF; each session that moves units takes its slots from a
   range of its own) holds the sounds no other unit plays: none yet.
+- **GutPnch1-3 are one of them** (12 November 2026: ids 668-670, BN4's
+  support 0x36 at BN6's grown Navi routine 0xB6). The chip is no Navi's
+  by its class, but its routine spawns a Navi chip's object (the fourth
+  kind's 0x64, GutsMan's object state for state) whose Navi is a GutsMan
+  of the chip's own (the first kind's 0x42: he appears on MegaMan's
+  panel and punches the panel ahead, 100, 140 or 180, the foe struck and
+  pushed back a panel). So it is a unit of kind `navi` with no code of
+  the tool's changed, where the support kind had left 19 decisions open
+  (MegaMan's stepping out, the HUD's pieces hidden and shown: each
+  engine's own, in BN6's object already). Two things were its own. BN4's
+  object plays 0xB0 as it steps MegaMan in, which BN6's one Navi object
+  does not: the unit carries the sound's slot (`XChipUnit.step_in`) and
+  the installer aims the word of BN6's object's states that names its
+  last state at a stub in the unit's home, which plays it for this
+  unit's number and is BN6's own state for every other chip. And the
+  punch's bits are BN6's for struck and pushed in the copy (0x61, as the
+  Moko's). `bn4_chip_gutpnch1` to `3` pass over 300 frames (a 140 HP
+  Mettaur left 40, one of 250 left 110 and 70, each pushed from (4,2) to
+  (5,2)), six mutations caught. Not reached: the frame of the punch
+  within the time freeze, which no fight frame counts (a mutation of it
+  passed and was replaced).
 - **What the differential sees.** The chip runs inside its time freeze,
   so the traces meet at what it leaves: the foe's HP, the panels, the
   frame's sounds, MegaMan's state. The comparator reads BN4's support
@@ -1669,8 +1739,9 @@ Asked and answered on 12 November 2026 (unit 7, Where things stand):
     NetBattle. So the three are not moved: no unit, their rows left
     out of play and their ids (564 to 566) kept retired, as BugChain's
     is until its call, and nothing of a run hands them out or lists
-    them. FirePlus (563) is moved as BN4 has it, the grass and its
-    timer. Call 7 stands for the other three of its six: FirePlus,
+    them. FirePlus (563) is moved for what it does to a battle, the
+    grass; its timer is kept nowhere in BN6 and its HUD icon is not
+    moved (Where things stand, FirePlus). Call 7 stands for the other three of its six: FirePlus,
     Marking and BlakWeap. **Two answers were given the same evening.**
     Through the coordinating session the owner was first quoted with
     "Move as BN4 has them", on a recommendation to move the three and

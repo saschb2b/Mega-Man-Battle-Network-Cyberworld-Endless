@@ -334,12 +334,13 @@ static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
  * (XvEffectCall: an effect's id no immediate names). Its game's call aimed at a shim that sets the register and goes on to
  * BN6's twin through the family's veneer for it */
 static void reg_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site, const XvSoundCall *k, const uint8_t pairs[][2], int np) {
-	uint32_t was = 0, t = 0, at = 0, to = 0, n = pairs ? (uint32_t)xvirus_shim_effect_size(np) : XV_SHIM_SOUND_SIZE;
+	uint32_t was = 0, t = 0, at = 0, to = 0, n = pairs ? (uint32_t)xvirus_shim_effect_size(np) : xvirus_shim_sound_size(k->when);
 	const uint8_t *orig = c->rom + (site - BUS);
 	uint8_t shim[XV_SHIM_EFFECT_MAX];
 	if (!n || !thumb_bl_decode(site, get16(orig), get16(orig + 2), &was) || !(to = pairs ? xvirus_shim_r4_to(was) : xvirus_shim_r0_to(was)) ||
 		!thumb_bl_read(code, site - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, n)) ||
-		!(pairs ? xvirus_shim_effect(shim, at, pairs, np, t) == (int)n : (k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t))) {
+		!(pairs ? xvirus_shim_effect(shim, at, pairs, np, t) == (int)n :
+		  k->when ? xvirus_shim_sound_when(shim, at, k->when, k->slot, t) : (k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t))) {
 		xv_fail("its %s's call at %08x", pairs ? "effect" : "sound", (unsigned)site);
 		return;
 	}

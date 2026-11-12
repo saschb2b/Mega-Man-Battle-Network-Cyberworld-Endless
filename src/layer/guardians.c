@@ -208,9 +208,7 @@ const char *guardian_area_name(int biome) {
 	return x ? x->name : guardian_area_original_name(biome);
 }
 
-const char *guardian_area_short(int biome) {
-	const NetAreaDef *x = dressed(biome);
-	if (x) return x->short_name;
+const char *guardian_area_original_short(int biome) {
 	/* (nine letters at most: the PET's PLACE holds twelve, with the layer) */
 	static const char *const names[BIOME_COUNT] = {
 		[BIOME_CENTRAL] = "Central", [BIOME_SEASIDE] = "Seaside", [BIOME_SKY] = "Sky Area", [BIOME_GREEN] = "Green",
@@ -220,6 +218,11 @@ const char *guardian_area_short(int biome) {
 		[BIOME_COPYBOT_COMP] = "CopyBot", [BIOME_ACDC_HP] = "ACDC HP", [BIOME_GREEN_HP] = "Green HP", [BIOME_SKY_HP] = "Sky HP",
 	};
 	return biome >= 0 && biome < BIOME_COUNT && names[biome] ? names[biome] : "Net";
+}
+
+const char *guardian_area_short(int biome) {
+	const NetAreaDef *x = dressed(biome);
+	return x ? x->short_name : guardian_area_original_short(biome);
 }
 
 const char *guardian_area_in_text(int biome, int side) {

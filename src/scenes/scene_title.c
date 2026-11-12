@@ -273,7 +273,7 @@ static void show_next(void) {
 /* Starts the cycle at an area: its own place in it, or its backdrop first. */
 static void show_area(int b) {
 	if (b >= 0 && b < NCYCLE) { S.next = b; show_next(); }
-	else { show(biome_backdrop(b)); S.next = 0; }
+	else { show(biome_backdrop(b, 0)); S.next = 0; }
 }
 
 static void enter(void) {

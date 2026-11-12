@@ -67,8 +67,8 @@ MOVED = {
     181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
     184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
-    104: 0x90, 105: 0x90, 106: 0x90,   # BigHamr1-3: BN4's support 0x10 (bn4_chip_bighamr1-3)
-                         # GodHammr: the same routine, a Mega chip of it (bn4_chip_godhammr)
+    104: 0x90, 105: 0x90, 106: 0x90,   # BigHamr1-3: BN4's support 0x10 (bn4_chip_bighamr1-3); GodHammr (215) waits (ROWS_WAIT)
+    285: 0xCC,                         # FirePlus: BN4's support 0x4C, its kind 0 (bn4_chip_fireplus); 286-288 left out (call 12)
     82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
     193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
 }
@@ -77,11 +77,13 @@ MOVED = {
 # number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
 MOVED.update({
     19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+    192: 0xD0,                                                    # DrkSpred: the same family, its subfamily 3 (its shot the table's kind 0xF)
     12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
     57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26
     69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
     35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
+    189: 0xFC,                                                    # DarkBomb: BN4's family 0x09, its subfamily 2
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
     190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
     25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
@@ -92,6 +94,7 @@ MOVED.update({
 # NAVI_TWIN (XREG_MOVED with a twin: the twin's family alone)
 NAVI = {
     224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
+    154: 0xB6, 155: 0xB6, 156: 0xB6,   # GutPnch1-3: BN4's support 0x36, its Navi the first kind's 0x42, a GutsMan who punches (bn4_chip_gutpnch1-3)
 }
 NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
 MOVED.update(NAVI)

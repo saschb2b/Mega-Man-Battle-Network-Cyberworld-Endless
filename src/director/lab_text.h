@@ -3,6 +3,7 @@
 #ifndef CW_LAB_TEXT_H
 #define CW_LAB_TEXT_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 #include "lab_battle.h"
@@ -37,6 +38,9 @@ void lab_info_result(char *out, size_t n, const LabResult *r);
  * and what the information box says of it: its best win, or none yet */
 void lab_set_words(char *out, size_t n, int slot);
 void lab_set_value(char *out, size_t n, int foes);
+/* A background's or a song's name on STAGE: `name`, after its game's `tag` where it is another game's ("BN5 ACDC
+ * Area"), and numbered where it is the `second` of an area's two ("Central 2") */
+void lab_stage_words(char *out, size_t n, const char *tag, const char *name, bool second);
 void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lost);
 
 #endif

@@ -1,0 +1,40 @@
+[
+ {
+  "name": "DarkBomb's row's power another",
+  "spec": "bn4_chip_darkbomb",
+  "poke": [
+   "08C077BA:0064"
+  ],
+  "what": "the registry's record of BN4's DarkBomb (696 at CHIPS_RECORDS) with power 100 where BN4's record holds 200: the Mettaur left 100 HP more than BN4's"
+ },
+ {
+  "name": "DarkBomb's row's family SeekBom's",
+  "spec": "bn4_chip_darkbomb",
+  "poke": [
+   "08C077AB:D2:1"
+  ],
+  "what": "the registry's record of BN4's DarkBomb naming BN6's grown attack family 0xD2 (SeekBom's copy of the bombs' state, its subfamily 2's entry BN6's null routine) where the row gives 0xFC: no bomb"
+ },
+ {
+  "name": "the bomb's blast's effect none",
+  "spec": "bn4_chip_darkbomb",
+  "poke": [
+   "080CE27D:00:1"
+  ],
+  "what": "the unit's copy of the bombs' object's blast effects by kind (BN4 0x080CE277) with kind 6's, DarkBomb's, 0 where the row gives the moved effect: no blast drawn on the panels where BN4 draws its 0x2B"
+ },
+ {
+  "name": "the bombs' arm's kind another",
+  "spec": "bn4_chip_darkbomb",
+  "poke": [
+   "080EB4F0:2F:1"
+  ],
+  "what": "the state's copy's table of the arm's kind by subfamily (BN4 0x080EB4EC, u16 each) with 0x2F (SeekBom's) for subfamily 2 where BN4's holds 0x11: another arm"
+ },
+ {
+  "name": "BN4's DarkChip bug kept",
+  "spec": "bn4_chip_darkbomb",
+  "calm4": 0,
+  "what": "the spec without calm4: BN4's MegaMan given the bug BN4 sets once an attack DarkChip is chosen (its battle NaviStats' +0x0D, 0x20 here), which walks him off his panel at t1 where the run gives none: it must part"
+ }
+]

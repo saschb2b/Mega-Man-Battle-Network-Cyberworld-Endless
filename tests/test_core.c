@@ -4374,6 +4374,18 @@ static void test_free_space(void) {
 		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
 	}
 	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
+	/* (a unit whose object sounds as it steps MegaMan in, XChipUnit.step_in: a Navi chip's alone, no wrapper's place taken
+	 * twice, the slot one of the songs it copies) */
+	int step_ins = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (!u->step_in) continue;
+		bool copied = false;
+		for (int k = 0; k < u->nsongs; ++k) copied = copied || u->songs[k].slot == u->step_in;
+		step_ins += u->kind == XCHIP_NAVI && !u->wait && copied;
+		CHECK(u->kind == XCHIP_NAVI && !u->wait && copied, "chips: %s's step-in sound is a Navi chip's unit's, a song it copies", u->code.name);
+	}
+	CHECK(step_ins >= 1, "chips: a BN4 Navi chip's unit carries its object's step-in sound (GutPnch's, %d)", step_ins);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -4443,8 +4455,11 @@ static void test_free_space(void) {
 	for (int i = 0; i < xchips_bn4_count; ++i) {
 		const XChipUnit *u = &xchips_bn4[i];
 		if (u->kind != XCHIP_ATTACK) continue;
+		/* (a BN4 family split by its subfamilies, tools/xchiprecipe_bn4.py ATTACK_SUBS: SeekBom's and DarkBomb's of the bombs'
+		 * 0x09, each its state's copy in a home of its own at a number of its own) */
 		int twice = 0;
-		for (int k = 0; k < xchips_bn4_count; ++k) twice += xchips_bn4[k].kind == XCHIP_ATTACK && (xchips_bn4[k].number == u->number || xchips_bn4[k].bn5 == u->bn5);
+		for (int k = 0; k < xchips_bn4_count; ++k)
+			twice += xchips_bn4[k].kind == XCHIP_ATTACK && (xchips_bn4[k].number == u->number || (xchips_bn4[k].bn5 == u->bn5 && xchips_bn4[k].home == u->home));
 		CHECK(u->number >= XATTACK_BN4 && twice == 1 && !u->share && u->bn5 >= 6, "chips' code: %s a family of BN4's chips' own numbers, once (%#x)",
 			u->code.name, u->number);
 	}
@@ -4833,6 +4848,16 @@ static void test_xvirus_shims(void) {
 		"shims: a sound added to %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
 	CHECK(!xvirus_shim_sound_add(s, home, 0x1FF, veneer) && !xvirus_shim_sound_add(s, home + 1, 0x10, veneer),
 		"shims: a sound added past two adds, or off its halfword, taken");
+	/* (one of a table's sounds past a byte: cmp r0,#0x8d; bne past three; movs r0,#2; lsls r0,r0,#8; adds r0,#0; b the
+	 * veneer, r0 0x200 where it held 0x8D and as it was else; DrkSpred's burst, XvSoundCall.when) */
+	uint8_t sw[XV_SHIM_SOUND_WHEN_SIZE];
+	CHECK(xvirus_shim_sound_when(sw, home, 0x8D, 0x200, veneer) && get16(sw) == 0x288D && get16(sw + 2) == 0xD102 &&
+		get16(sw + 4) == 0x2002 && get16(sw + 6) == 0x0200 && get16(sw + 8) == 0x3000 && (get16(sw + 10) & 0xF800) == 0xE000 &&
+		home + 14 + 2 * (get16(sw + 10) & 0x7FFu) == veneer && xvirus_shim_sound_size(0x8D) == 12 && xvirus_shim_sound_size(0) == 8,
+		"shims: one of a table's sounds %04x %04x %04x %04x %04x %04x", get16(sw), get16(sw + 2), get16(sw + 4), get16(sw + 6),
+		get16(sw + 8), get16(sw + 10));
+	CHECK(!xvirus_shim_sound_when(sw, home, 0, 0x200, veneer) && !xvirus_shim_sound_when(sw, home + 1, 0x8D, 0x200, veneer) &&
+		!xvirus_shim_sound_when(sw, home, 0x8D, 0x200, home + 0x1000), "shims: one of a table's sounds with no byte, off its halfword, or out of reach, taken");
 	/* (an effect's id no immediate names: cmp r4,#0; bne; movs r4,#0xC8; b the veneer, for one pair; two pairs pad to 16
 	 * bytes with a nop after the branch) */
 	uint8_t fx[XV_SHIM_EFFECT_MAX];
@@ -7606,6 +7631,15 @@ static void test_lab_text(void) {
 		"lab: a Navi's row and his versions' words (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
+	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
+	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
+	char a[32], b[32];
+	lab_stage_words(s, sizeof s, "BN5", "Oran Area", false);
+	lab_stage_words(a, sizeof a, "", "Central", true);
+	lab_stage_words(b, sizeof b, "", "Central", false);
+	CHECK(!strcmp(s, "BN5 Oran Area") && !strcmp(a, "Central 2") && !strcmp(b, "Central"), "lab: the stage's names (%s, %s, %s)", s, a, b);
+	CHECK(LAB_SONG(0, 0x15) == 0x15 && LAB_SONG_GAME(LAB_SONG(2, 0x12)) == 2 && LAB_SONG_NUMBER(LAB_SONG(2, 0x12)) == 0x12 && LAB_SONG(2, LAB_SONG_MOST) <= 255 &&
+		!((NET_AREAS + XAREAS_MAX - 1) & LAB_AREA_SECOND), "lab: a set's song and area bytes hold every game's");
 }
 
 /* The encounter groups' templates and their filling (groups.h;

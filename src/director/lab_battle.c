@@ -102,6 +102,7 @@ static bool begin(void) {
 		L.ours = true;
 	}
 	emu_battle_watch(0, true);
+	emu_battle_unpaid();
 	set_encounter(&L.e, true);
 	return true;
 }
@@ -177,6 +178,7 @@ void lab_battle_show(const Encounter *e, int backdrop, bool bare) {
 void lab_battle_go(void) {
 	if (!lab_battle_held()) return;
 	L.held = L.show = false;
+	if (emu_debug_on()) fprintf(stderr, "lab: the battle held runs on, background %d, BN6's song %#x playing\n", encounter_backdrop, emu_read8(BN6_SONG_PLAYING));
 }
 
 void lab_battle_leave(void) {

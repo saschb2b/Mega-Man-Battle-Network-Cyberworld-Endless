@@ -12,8 +12,8 @@
 #include "director_state.h"
 #include "emu.h"
 #include "encounter.h"
-#include "jukebox_text.h"
 #include "lab_navis.h"
+#include "lab_stage.h"
 #include "lab_state.h"
 #include "analytics.h"
 #include "rom.h"
@@ -65,21 +65,6 @@ static void roster_make(void) {
 
 bool lab_set_navi(void) { return LS.set.nfoes && (LS.set.foes[0].version & LAB_NAVI); }
 
-static int lab_areas(void) { return NET_AREAS; }
-static int lab_area(int i) { return i >= 0 && i < NET_AREAS ? i : 0; }
-
-static int lab_songs(void) {
-	int n = 1;   /* (the battle's own first) */
-	for (int i = 0; i < jukebox_song_count; ++i) n += jukebox_songs[i].game == 0;
-	return n;
-}
-
-static int lab_song(int i) {
-	for (int k = 0; i > 0 && k < jukebox_song_count; ++k)
-		if (jukebox_songs[k].game == 0 && --i == 0) return jukebox_songs[k].song;
-	return 0;
-}
-
 int lab_rows(void) {
 	return LS.page == LAB_PAGE_FOES ? LS.nroster : LS.page == LAB_PAGE_FIELD ? 1 : LS.page == LAB_PAGE_STAGE ? LAB_STAGE_ROWS : LAB_SETS;
 }
@@ -98,12 +83,12 @@ void lab_set_encounter(const LabSet *s, Encounter *e) {
 	if (s->nfoes && (s->foes[0].version & LAB_NAVI)) {
 		const LabFoe *f = &s->foes[0];
 		if (!lab_navi_encounter(f->family, f->version & ~LAB_NAVI, f->col, f->row, e)) memset(e, 0, sizeof *e);
-		e->biome = s->area;
-		if (s->song) e->song = s->song;
+		e->biome = lab_stage_biome(s->area);
+		if (lab_stage_song_slot(s->song)) e->song = lab_stage_song_slot(s->song);
 		return;
 	}
-	e->biome = s->area;
-	e->song = s->song;
+	e->biome = lab_stage_biome(s->area);
+	e->song = lab_stage_song_slot(s->song);
 	for (int i = 0; i < s->nfoes && i < LAB_FOES; ++i) {
 		const LabFoe *f = &s->foes[i];
 		int id = enemy_id(0, f->family, f->version);
@@ -115,7 +100,7 @@ void lab_set_encounter(const LabSet *s, Encounter *e) {
 static void set_plain(LabSet *s) {
 	memset(s, 0, sizeof *s);
 	memset(s->panels, BN6_PANEL_PLAIN, sizeof s->panels);
-	s->area = (uint8_t)(run.biome >= 0 && run.biome < NET_AREAS ? run.biome : 0);
+	s->area = (uint8_t)lab_stage_area_like(run.biome >= 0 && run.biome < NET_AREAS ? run.biome : 0);
 }
 
 /* BN6's field `field` as the set's panels: a panel of no type of BN6's plain */
@@ -163,6 +148,7 @@ void director_lab_open(bool all) {
 	memset(&LS, 0, sizeof LS);
 	LS.up = LS.show_due = true;
 	LS.all = all;
+	lab_stage_make();
 	set_take(profile.lab_slot);
 	roster_make();
 }
@@ -195,13 +181,13 @@ static void row_turn(int by) {
 	} else if (LS.page == LAB_PAGE_SETS) {
 		return;
 	} else if (row == 0) {
-		int i = index_of(lab_area, lab_areas(), LS.set.area);
-		turn(&i, lab_areas(), by);
-		LS.set.area = (uint8_t)lab_area(i);
+		int i = index_of(lab_stage_area, lab_stage_areas(), lab_stage_area_like(LS.set.area));
+		turn(&i, lab_stage_areas(), by);
+		LS.set.area = (uint8_t)lab_stage_area(i);
 	} else {
-		int i = index_of(lab_song, lab_songs(), LS.set.song);
-		turn(&i, lab_songs(), by);
-		LS.set.song = (uint8_t)lab_song(i);
+		int i = index_of(lab_stage_song, lab_stage_songs(), LS.set.song);
+		turn(&i, lab_stage_songs(), by);
+		LS.set.song = (uint8_t)lab_stage_song(i);
 	}
 }
 
@@ -277,13 +263,15 @@ static void show(void) {
 	bool bare = !e.nfoes;
 	if (bare) {
 		memset(&e, 0, sizeof e);
-		e.biome = LS.set.area;
-		e.song = LS.set.song;
+		e.biome = lab_stage_biome(LS.set.area);
+		e.song = lab_stage_song_slot(LS.set.song);
 		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 1, 0, LAB_COLS - 2, 1, enemy_id(0, 1, 0) };
 	}
 	lab_battle_panels(LS.set.panels);
-	/* (the area's first background, not one of its two by the dice: the stage stays as it is while the set changes) */
-	lab_battle_show(&e, biome_backdrop(LS.set.area), bare);
+	/* (the background the set names, not one of its area's two by the dice: the stage stays as it is while the set
+	 * changes; one of a game whose ROM is not read now, BN6's of the area's place) */
+	int backdrop = lab_stage_backdrop(LS.set.area);
+	lab_battle_show(&e, backdrop >= 0 ? backdrop : biome_backdrop(lab_stage_biome(LS.set.area), 0), bare);
 	LS.shown = LS.set;
 }
 

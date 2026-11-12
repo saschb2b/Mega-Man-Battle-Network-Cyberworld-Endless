@@ -222,6 +222,10 @@
     },
     {
       "date": "2026-11-12",
+      "what": "GutPnch1-3 moved as a Navi chip's unit (docs/multirom/bn4-chips.md, The Navi chips; docs/rom/bn4.md, GutPnch's code: BN4_GUTPNCH_OBJECT 0x080E90CC, BN4_GUTPNCH_NAVI 0x080C83F8, BN4_GUTPNCH_SPAWN 0x080C85C2, BN4_GUTPNCH_IN_SOUND 0x080E91BC, BN4_GUTPNCH_BITS 0x080C855A; BN6_CHIP_NAVI_IN 0x080E2C38 with its word 0x080E2B90): BN6's Navi object's last state through a stub that plays the unit's step-in sound; bn4_chip_gutpnch1-3 PASS, six mutations caught."
+    },
+    {
+      "date": "2026-11-12",
       "what": "LarkMan moved (docs/multirom/navis.md, LarkMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_LARK_SPAWN_B0, BN5_LARK_SPAWN_BA, BN5_LARK_AFTERIMAGE_WORD, BN5_AFTERIMAGE_SPAWN, BN5_AFTERIMAGE_LOAD): seat 17, Navi AI 43, ids 0x3EC-0x3EF; larkman_v1, larkman_v1_keys and larkman_sp PASS, five mutations caught; the third kind's 0xBA, 0xC7, 0xCB and the fourth's 0x28 (the swords' afterimage) his copy, the chips and the Souls calling into it; an afterimage spawn's word set to the sprite's BN6 place (xnavirecipe.py afterimage_sprites); the chips' LarkMan and GridMan units on the Navis' battle sprites; the comparator maps a moved Navi's battle sprite by xnavi_sprites.c's places."
     },
     {
@@ -258,9 +262,23 @@
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-12",
+      "name": "bn4_chip_darkbomb and bn4_chip_drkspred: DarkBomb and DrkSpred moved, BN4's DarkChip bug cleared by calm4",
+      "result": "python3 build.py xdiff bn4_chip_darkbomb bn4_chip_drkspred: both PASS (DarkBomb over 300 frames against a 250 HP Mettaur, DrkSpred to its deleting hit at t37), eight mutations caught. BN4 sets a NaviCust bug in the battle NaviStats' +0x0D once an attack DarkChip is chosen (0x20 after DarkBomb, walking MegaMan off his panel at t1); calm4 clears it. DrkSpred's burst's sound past a byte goes through a conditional shim (XvSoundCall.when), its bytes proved by the unit tests.",
+      "meaning": "A family split by subfamily moves as several units each with its own copy of the state; a byte-named sound past a byte needs a conditional shim at its site."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
       "name": "bn4_chip_drkvulcn and bn4_chip_elemflar to elemdark: DrkVulcn and the five Elem chips moved, BN4's dark rules left to its own battle",
       "result": "python3 build.py xdiff bn4_chip_drkvulcn bn4_chip_elemflar bn4_chip_elemice bn4_chip_elemleaf bn4_chip_elemsand bn4_chip_elemdark: all PASS (DrkVulcn to its deleting hit at t104, the Elem chips over 300 frames, ElemDark by a dark MegaMan against a 250 HP Mettaur), nineteen mutations caught. Full Synchro's aura (the first kind's 0x5E) compared as each engine's own object; BN4's confusion at the fight's start ended by calm4 (assumed: its source not traced); its dark mood at the DarkChip's use skipped and a dark MegaMan's start mood of 0 given the NaviStats' 0x99 by mood4 (verified in the ROM, 0x0800D5A6-0x0800D5C8, 0x0800D718). ElemDark's shot takes BN4's third-kind sprite step, copied with the unit as Ligtnin's (BN6's nearest a frame ahead).",
       "meaning": "An attack DarkChip proves against BN4 once BN4's own dark rules, which a run does not take, are left out of BN4's battle by the spec; a counter's Full Synchro compares across both engines."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
+      "name": "bn4_chip_fireplus and its cracked: BN4's FirePlus moved, the grass without the timer",
+      "result": "python3 build.py xdiff with the two specs: each PASS over 300 frames (eighteen panels to grass at t34, sound 0x106 fifteen times and 0x107 once; a cracked panel under the Mettaur turned with the rest), five mutations caught. BN4's 480-frame timer in the user's battle data is explained as BN4's own (legit's allowed 082, only where BN6's bytes read 0). On the way: the three other Plus chips and Marking measured in BN4 alone and left out by the owner (calls 12 and 13).",
+      "meaning": "A chip whose BN4 code writes a field BN6 has no place for and no reader of can move with that store aimed nowhere, said plainly: here the HUD's icon is what is lost."
     },
     {
       "feature": "BN4's chips in BN6's tables",
@@ -275,6 +293,14 @@
       "name": "bn4_chip_whitweb1 to 3: BN4's WhitWeb moved, three chips on one block",
       "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the webs (the third kind's 0x3D, moved) in play in the fight's frames throughout, a 140 HP Mettaur on each row left 100 in both. Five mutations caught (a row's power, WhitWeb2 given WhitWeb1's routine, WhitWeb3's entry's row, the web's dispatch number, its sound).",
       "meaning": "A moved object that lives across fight frames compares field for field; several chips can share one moved block by their own entries."
+    },
+    {
+      "feature": "BN6's battle rewards",
+      "date": "2026-11-12",
+      "name": "The reward pick answered with no entry",
+      "result": "With the pick at 0x080AC180 answered 0xFFFF at its first instruction, BN6's RESULT showed GET DATA with an empty name and NO DATA and gave nothing; the same battle unanswered showed Rflectr1 C. Work RAM hash after the test battle the one before.",
+      "meaning": "A battle can pay nothing on BN6's own results screen without a patch to it: the Battle Lab's test battles do (emu_battle_unpaid).",
+      "link": "../rom/battle.md"
     },
     {
       "feature": "BN4's chips in BN6's tables",

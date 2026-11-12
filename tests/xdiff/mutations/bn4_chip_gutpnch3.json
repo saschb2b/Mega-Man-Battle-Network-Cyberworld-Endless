@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the punch on his own column",
+  "spec": "bn4_chip_gutpnch3",
+  "poke": [
+   "080C854E:1C08"
+  ],
+  "what": "the Navi's copy's panel of the punch (adds r0,r0,r1 at BN4 0x080C854E: the column ahead by his side's direction) made adds r0,r1,#0, his own column: the Mettaur beside him not struck"
+ }
+]

@@ -1,0 +1,12 @@
+{
+ "bn4": "0xB0",
+ "bn6": "0x1E2",
+ "clock": "state",
+ "chips": [
+  "0x9A",
+  "0x9B",
+  "0x9C"
+ ],
+ "what": "GutPnch's Navi's appear and MegaMan's step in 0xB0, its copy",
+ "why": "Played twice. By the chip's Navi as he appears (BN4's first kind's 0x42: movs r0,#0xb0 at 0x080C8498, its bl at 0x080C849A; BN6: the copy's bl through a shim that makes r0 0x1E2). And by the chip's object as it steps MegaMan in (BN4's fourth kind's 0x64, its last state: movs r0,#0xb0 at 0x080E91BC, its bl at 0x080E91BE), which BN6's one Navi object does not do: the unit's stub in BN6's object's last state plays slot 0x1E2 for this unit's number alone after BN6's step (src/emu/xchips_code.c step_in_stage, XChipUnit.step_in). BN4's song 0xB0 is in slot 0x1E2 of BN6's grown song table, TimeBomb's row's slot (one song one slot). In this chip's specs alone: BN4's engine plays 0xB0 as an invisibility ends too, where BN6's plays its own 0x94"
+}

@@ -156,6 +156,8 @@ bool guardian_area_older(int biome);
 /* Its name in nine letters at most, for the PET's PLACE beside the layer
  * ("JudgeTree 12"). */
 const char *guardian_area_short(int biome);
+/* ... BN6's own for the area, whatever draws it in this run */
+const char *guardian_area_original_short(int biome);
 /* A line under an area's name on its title card. */
 const char *guardian_area_motto(int biome);
 

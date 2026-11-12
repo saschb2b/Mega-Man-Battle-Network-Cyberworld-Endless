@@ -1,0 +1,36 @@
+[
+ {
+  "name": "the stage's kind another",
+  "spec": "bn4_chip_fireplus",
+  "poke": [
+   "080EAD10:2402"
+  ],
+  "what": "FirePlus's object's copy's movs r4,#3 (BN4 0x080EAD10, the kind it hands the stage's changer: grass) made 2: the eighteen panels turn to another type than BN4's grass"
+ },
+ {
+  "name": "the stage not changed",
+  "spec": "bn4_chip_fireplus",
+  "poke": [
+   "080EAD12:46C0",
+   "080EAD14:46C0"
+  ],
+  "what": "the object's copy's call to the stage's changer's spawner (BN4 0x080EAD12) made two nops: no panel turns to grass at t34 and no sound of the changer's"
+ },
+ {
+  "name": "FirePlus's kind taken for another's",
+  "spec": "bn4_chip_fireplus",
+  "poke": [
+   "080EAD04:2801"
+  ],
+  "what": "the object's copy's cmp r0,#0 (BN4 0x080EAD04, its kind: 0 is FirePlus, the one that lays grass) made #1: FirePlus ends as the other three do, the stage untouched"
+ },
+ {
+  "name": "the changer's panels' sound not played",
+  "spec": "bn4_chip_fireplus",
+  "poke": [
+   "080E43E8:46C0",
+   "080E43EA:46C0"
+  ],
+  "what": "the changer's copy's call that plays a panel's sound as it turns (BN4 0x080E43E8, sound 0x106 through its slot) made two nops: fifteen sounds missing at t34"
+ }
+]

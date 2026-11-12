@@ -284,7 +284,14 @@ void xd4_dark_rules(const Spec *s, int game, bool battle) {
 }
 
 void xd4_start_confusion(const Spec *s, int game) {
-	static bool done4, done6;
+	static bool done4, done6, bug4;
+	/* (the bug an attack DarkChip gives, cleared each battle frame it is set: before the fight reads it where it can be) */
+	uint16_t w = game == 4 && s->calm4 ? guest_read16(BN4_BATTLE_NAVI + (BN4_NAVI_BUG & ~1)) : 0;
+	if (w >> 8) {
+		guest_write16(BN4_BATTLE_NAVI + (BN4_NAVI_BUG & ~1), (uint16_t)(w & 0xFF));
+		if (!bug4) printf("xdiff: BN4's MegaMan's bug from the attack DarkChip, %#x, cleared (calm4)\n", w >> 8);
+		bug4 = true;
+	}
 	if (game == 4 && s->calm4 && !done4) {
 		uint32_t coll = guest_read32(BN4_T1_OBJECTS + BN4_T1_COLLISION);
 		if (coll >> 24 == 2 && guest_read16(coll + BN4_COLL_CONFUSE) > 1) {
