@@ -22,6 +22,11 @@
   Nothing in one can delete MegaMan, it pays nothing, and the run is
   afterwards exactly as it was. Four sets are kept with their best time
   and busting level.
+- **A folder of the Lab's own.** A test battle can be fought with a
+  folder built for it: on STAGE, Folder turns from MegaMan's own to the
+  Lab's, and A opens BN6's folder editor with every chip your profile
+  has held in any run, in each of its codes. The run's folder and pack
+  are untouched.
 - **Navis in the Battle Lab.** A guardian MegaMan has beaten twice can
   be set there, alone, in each version beaten from now on (his first for
   wins of before). Bass and the Cybeast open with one win, ProtoMan with

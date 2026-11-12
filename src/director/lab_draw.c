@@ -90,7 +90,8 @@ static void info_text(char *s, size_t n) {
 		lab_info_set(s, n, k->set.nfoes, k->bust, k->frames, k->hp_lost);
 	} else if (LS.page == LAB_PAGE_STAGE) {
 		/* (the row's value in full: an area's or a song's name is wider than its row) */
-		if (LS.row[LAB_PAGE_STAGE]) lab_stage_song_name(LS.set.song, s, n);
+		if (LS.row[LAB_PAGE_STAGE] == LAB_ROW_FOLDER) lab_info_folder(s, n, profile.lab_folder_on);
+		else if (LS.row[LAB_PAGE_STAGE]) lab_stage_song_name(LS.set.song, s, n);
 		else lab_stage_area_name(LS.set.area, s, n);
 	} else if (LS.page == LAB_PAGE_FOES && r) info_row(s, n, r);
 }
@@ -137,7 +138,7 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 		look_text(f.x + f.w - 4, y, v, LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
 	} else {
 		/* (what the row turns, its value in the information: a song's name is wider than the row) */
-		look_text(f.x + 14, y, i ? lab_row_song : lab_row_area, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+		look_text(f.x + 14, y, i == LAB_ROW_FOLDER ? lab_row_folder : i ? lab_row_song : lab_row_area, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 		if (under && LS.at == LAB_AT_LIST) {
 			look_pointer(f.x + f.w - 14, y + 3, 5, true, LOOK_ORANGE);
 			look_pointer(f.x + f.w - 7, y + 3, 5, false, LOOK_ORANGE);

@@ -286,7 +286,8 @@ The builder opens on the last set fought.
   and of the game's RAM before and after.
 - **The folder and the NaviCust** are the ones MegaMan holds: the
   starting folder before the first portal, the run's own later, with his
-  Cross, Souls and HP as they stand.
+  Cross, Souls and HP as they stand. (The Lab's own folder came after:
+  Built, The sandbox folder.)
 - **MegaMan deleted.** The blow that would delete him ends the battle as
   ProtoMan's netbattle ends (`battle_spare.c`); the result names it and
   the builder is back, the same set ready.
@@ -543,6 +544,52 @@ is used.
   0x28 playing, the slot BN4's song 0x12 was copied to; the work RAM's
   hash after leaving the one before opening (45e79931), the run
   untouched. The panels came after (below).
+
+- **The sandbox folder** (the owner's call 6, the step after the first
+  build; `src/director/lab_folder.c`). STAGE has a third row, Folder:
+  "MegaMan's own." or "The Lab's. A edits it.", turned by Left and
+  Right. It is the profile's choice, not a set's: a set's best is kept
+  whatever folder won it, as before.
+  - *The Lab's folder* is thirty chips kept in the profile
+    (`Profile.lab_folder`, as BN6's folders hold them), MegaMan's own
+    until it is first changed. A test battle with it writes it into the
+    game's first folder inside the battle's snapshot, its chips owned as
+    BN6 marks a chip it gives, so the run's folder is what it was
+    afterwards.
+  - *It is changed in BN6's own folder editor*, not a screen of ours. A
+    on the row puts the held battle back, keeps the game again as a test
+    battle does, fills the pack with every chip the profile has held in
+    any run and the run's own so far (the Library's bits), five of each
+    in each code its record has, writes the Lab's folder in, and presses
+    the way in for the player: START on the map, A on the PET's menu
+    (its cursor on ChipFolder as a PET opens), A on the folder and A on
+    EDIT, each by what the game's state says is up, run through at 24 of
+    BN6's frames to one shown. From there the keys are the player's.
+    BN6's own rules hold (thirty chips, its limits by MB, Mega and
+    Giga). As the editor is left for the folders' list, the folder is
+    read into the profile and the game put back: the PET's other
+    entries, Save among them, are never reached.
+  - *Why every code*: the Library keeps ids, not codes, and a chip's
+    record names the codes BN6 itself has it in; a Program Advance is a
+    matter of codes, and trying one before a run finds its chips is what
+    the sandbox is for. With the All * helper on, a record has * alone.
+    Nothing leaves the Lab: no chip, zenny or Library bit, as the
+    battle's own rule ("meta as variety, never power").
+  - Seen headless (`0:lab all`, seed 15): the row turned to the Lab's,
+    A: BN6's FOLDER EDIT up within ten shown frames, 30/30, the pack
+    listing the profile's chips in each code (Cannon A, B, C and *, five
+    less the folder's own); a Cannon A put back and a Cannon * taken;
+    B: "the Lab's folder kept", the builder back; BATTLE!: "the Lab's
+    folder in the game's first, 1 of its 30 entries other than
+    MegaMan's", BN6's Custom screen, L out. The work RAM's hash after
+    the editor and after the battle the one before opening (45e79931),
+    the run untouched.
+  - With it, the Navi list no longer shows a number BN6's engine has an
+    enemy for and the run no guardian (a "???" row of 4000 HP on the
+    dev list).
+  - Not yet: MegaMan's Regular chip is the run's still, whatever stands
+    at its place in the Lab's folder; a chip of a game whose ROM is not
+    read stays in a kept folder as its placeholder.
 
 - **The other games' panels** (`src/director/lab.c`,
   `lab_battle.c`). FIELD's panels turn on past BN6's twelve through the

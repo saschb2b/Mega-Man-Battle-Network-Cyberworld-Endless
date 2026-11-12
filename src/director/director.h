@@ -86,6 +86,9 @@ bool director_lab_shown(void);
 /* ... BN6 bringing the set's field up under it: the game's frames run, fast, its keys none */
 bool director_lab_loading(void);
 void director_lab_keys(uint32_t keys);
+/* ... the Lab's folder in BN6's own folder editor (lab_folder.h): whether it is up, and the keys BN6 gets there */
+bool director_lab_editing(void);
+uint32_t director_lab_edit_keys(uint32_t keys);
 void director_draw_lab(void);
 void director_lab_watch(void);
 /* ... and the keys the game gets after it: none held as it left, until let go */

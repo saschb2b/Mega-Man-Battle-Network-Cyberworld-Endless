@@ -57,4 +57,9 @@ const LabResult *lab_battle_result(void);
  * none is on, and on the frame it ended, the game put back. */
 bool lab_battle_frame(void);
 
+/* The game, the director and the run kept as a test battle keeps them, with no battle (the Lab's folder editor,
+ * lab_folder.h): false where one is kept already or the state could not be; and put back, `what` said in the debug line */
+bool lab_battle_keep(void);
+void lab_battle_put(const char *what);
+
 #endif

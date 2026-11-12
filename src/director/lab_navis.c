@@ -35,7 +35,8 @@ bool lab_navi_known(int navi) {
 	if (navi < 1 || navi > LAB_NAVI_MOST || navi >= RIVAL_NAVIS) return false;
 	if (moved(navi)) return xguardian_fightable(navi);
 	const Guardian *g = guardian(navi);
-	return (navi <= 18 || super_boss(navi)) && g && g->name && navi_id(navi, 0) >= 0;
+	/* (a number BN6's engine has an enemy for and the run no guardian, its name "???": not listed) */
+	return (navi <= 18 || super_boss(navi)) && g && g->name && g->name[0] != '?' && navi_id(navi, 0) >= 0;
 }
 
 /* (ProtoMan is the rival: his netbattle is every third duel won, docs/game/rival.md; a Darkloid has no rival's record:

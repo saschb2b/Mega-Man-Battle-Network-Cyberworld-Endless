@@ -12,6 +12,7 @@
 #include "director_state.h"
 #include "emu.h"
 #include "encounter.h"
+#include "lab_folder.h"
 #include "lab_navis.h"
 #include "lab_stage.h"
 #include "lab_state.h"
@@ -190,6 +191,11 @@ static void row_turn(int by) {
 		int i = index_of(lab_stage_area, lab_stage_areas(), lab_stage_area_like(LS.set.area));
 		turn(&i, lab_stage_areas(), by);
 		LS.set.area = (uint8_t)lab_stage_area(i);
+	} else if (row == LAB_ROW_FOLDER) {
+		/* (MegaMan's own, or the Lab's: the profile's, not the set's) */
+		profile.lab_folder_on = !profile.lab_folder_on;
+		profile_save();
+		LS.refold = true;
 	} else {
 		int i = index_of(lab_stage_song, lab_stage_songs(), LS.set.song);
 		turn(&i, lab_stage_songs(), by);
@@ -283,6 +289,7 @@ static void show(void) {
 	int backdrop = lab_stage_backdrop(LS.set.area);
 	lab_battle_show(&e, backdrop >= 0 ? backdrop : biome_backdrop(lab_stage_biome(LS.set.area), 0), bare);
 	LS.shown = LS.set;
+	LS.refold = false;
 }
 
 /* BATTLE!: the battle held runs on into its fight */
@@ -293,6 +300,17 @@ static void battle(void) {
 	lab_battle_go();
 	LS.up = false;
 	LS.fighting = true;
+}
+
+/* The Lab's folder into BN6's own folder editor: the battle held put back first, the screen away until the editor is
+ * left (director_lab_watch) */
+static void folder_edit(void) {
+	if (!profile.lab_folder_on) return;
+	set_keep();
+	lab_battle_leave();
+	if (!lab_folder_edit()) { show(); return; }
+	LS.up = false;
+	LS.editing = true;
 }
 
 /* A and B where the cursor is */
@@ -306,6 +324,9 @@ static void take(uint32_t now) {
 	if (!(now & KEY_A)) return;
 	if (LS.at == LAB_AT_GO) battle();
 	else if (LS.at == LAB_AT_FIELD) panel_take();
+	else if (LS.page == LAB_PAGE_STAGE) {
+		if (LS.row[LAB_PAGE_STAGE] == LAB_ROW_FOLDER) folder_edit();
+	}
 	else if (LS.page == LAB_PAGE_SETS) {
 		/* (the set in hand kept first, then the one of the row taken) */
 		set_keep();
@@ -336,13 +357,13 @@ void director_lab_keys(uint32_t keys) {
 	else if (now & KEY_UP) LS.at = lab_rows() ? LAB_AT_LIST : LAB_AT_FIELD;
 	take(now);
 	/* (left: all put back; the set changed: BN6's field of it in the last one's place) */
-	if (!LS.up && !LS.fighting) lab_battle_leave();
-	else if (LS.up && memcmp(&LS.set, &LS.shown, sizeof LS.set)) show();
+	if (!LS.up && !LS.fighting && !LS.editing) lab_battle_leave();
+	else if (LS.up && (LS.refold || memcmp(&LS.set, &LS.shown, sizeof LS.set))) show();
 }
 
 /* (while BN6 brings a set's field up, its frames run under the screen) */
 bool director_lab_shown(void) { return LS.up && !lab_battle_loading(); }
-bool director_lab_loading(void) { return LS.up && lab_battle_loading(); }
+bool director_lab_loading(void) { return (LS.up && lab_battle_loading()) || (LS.editing && lab_folder_opening()); }
 
 /* The keys the game gets once the screen has left: none of those held
  * as it did, until each is let go (the START that began its battle
@@ -353,7 +374,19 @@ uint32_t director_lab_after(uint32_t keys) {
 	return keys & ~held_after;
 }
 
+bool director_lab_editing(void) { return LS.editing && lab_folder_on(); }
+uint32_t director_lab_edit_keys(uint32_t keys) { return lab_folder_keys(keys); }
+
 void director_lab_watch(void) {
+	/* (BN6's folder editor left, the game put back: the screen again, the battle held with the folder as it is now) */
+	if (LS.editing && !lab_folder_on()) {
+		LS.editing = false;
+		LS.up = true;
+		LS.t = 0;
+		LS.was = ~0u;
+		show();
+		return;
+	}
 	if (!LS.fighting || lab_battle_on()) return;
 	/* (its battle over, the game put back: the screen again, with how it ended) */
 	LS.fighting = false;

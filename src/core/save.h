@@ -157,6 +157,11 @@ typedef struct {
 	 * each, by his navi number (rivals.h's): what the Battle Lab can set
 	 * of him (lab_navis.h); noted from the build that added it on */
 	uint8_t navi_beaten[67];
+	/* the Battle Lab's own folder (docs/game/battle-lab.md, The sandbox folder; lab_folder.h): whether its battles are
+	 * fought with it, and its thirty chips as BN6's folders hold them (chip_entry.h; the first 0: none made yet); a
+	 * profile saved before reads them 0 */
+	uint8_t lab_folder_on;
+	uint16_t lab_folder[30];
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
