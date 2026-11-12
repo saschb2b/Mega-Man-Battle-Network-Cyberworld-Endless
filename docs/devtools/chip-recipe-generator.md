@@ -181,10 +181,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   own where it is a routine by itself (Repair's), its number 0x80 + the
   subfamily in BN6's misc routines grown (`XC4_MISC`). One that lies in
   a third-kind type's code moves that type with it (Counter's, in its
-  hit's), and one that lies in a fourth-kind type's code and spawns it,
-  its one call the spawner with the type an immediate, moves that type
-  as a support unit's is (PitRng's launcher: a shorter spawner than the
-  support routines' common one, as the object takes no panel). `IMMS` holds the
+  hit's), and one that lies in a fourth-kind type's code moves that
+  type (Meteors' controller, PitRng's launcher). `IMMS` holds the
   immediates of a unit that name a place of BN4's engine BN6 keeps
   elsewhere, each read by hand in both games and checked against the
   instruction (the battle state's obstacles, +0x68 and +0xA0).
@@ -213,9 +211,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   `UNITS` (`SHARED3`: MegaMan's arm, the Spreads unit's): a unit after
   it copies the type's spawner alone, a block of its own, its spawn the
   owner's number of the dispatch and its row `XV_TYPE_SHARED`; the
-  table's kinds are every unit's. A `SHARED3` row may name the units
-  that share it instead (the boomerang, Boomer's copy, which PitRng's
-  launcher throws). A Program Advance's row (`XREG_PA`) that names the
+  table's kinds are every unit's (the boomerang too, Boomer's copy,
+  which PitRng's launcher throws). A Program Advance's row (`XREG_PA`) that names the
   unit (`tools/xreg_bn4.py` `PAS`) is one of its chips; one that names
   none sits out. A routine the families pair with BN6's
   own that a chip's unit moves instead, with its type, is named in

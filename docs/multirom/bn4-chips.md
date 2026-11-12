@@ -524,10 +524,10 @@ over the nine panels round the hit), FlmCros1-3 FlmLine's subfamily 1
 volleys), MagShok1-3 MagBolt's subfamily 3 (three bolts): all in the
 units already, no code moved for them. PitRng1-3 is BN4's misc routine
 0x0D, a unit of its own (`BN4_PITRNG`): a launcher, the fourth kind's
-0x6C, that throws three of Boomer's boomerangs sixteen frames apart, so
-a misc unit may now move a fourth-kind type, and a unit named for it
-shares a type an earlier unit moved (the boomerang, Boomer's copy:
-`SHARED3`). Twenty specs pass (`bn4_pa_*`), each Program Advance formed
+0x6C, that throws three of Boomer's boomerangs sixteen frames apart: a
+misc unit that moves a fourth-kind type and shares a type an earlier
+unit moved (the boomerang, Boomer's copy: `SHARED3`), as Meteors' unit
+does with ShotStar's star. Twenty specs pass (`bn4_pa_*`), each Program Advance formed
 by BN4's checker on BN4's Custom screen and by BN6's on its own from the
 same three picks, dealt in order by `deck4` (`BN4_BATTLE_DECK`, found
 for it), then used: HeatSprd by its listed recipe and by each of its
@@ -544,9 +544,9 @@ engine's own effect, so BubSprd, FlmCros2 and 3, PitRng3 and BstFang1-3
 against a foe in their way are compared to the frame of the hit that
 deletes (HP 0 in both), not past it; BubSprd's burst is HeatSprd's code
 with another row, FlmCros2 and 3 are FlmCros1's with another power.
-The comparison reads a Program Advance's row as a moved chip's, and a
-moved misc routine's object's element at BN6's place (legit.json's bn4
-support_objects). **Waiting on their parts:** PitHoky1-3 (AirHoc1-3,
+The comparison reads a Program Advance's row as a moved chip's, and
+the launcher's element at BN6's place (the registries' bn4
+object_element, by type). **Waiting on their parts:** PitHoky1-3 (AirHoc1-3,
 family 0x27), P.Driver (GunSol1-3) and DarkNeo (DrkLine, BugChain and
 Bass; a dark Program Advance, the dark chips' price its own question):
 `tools/xreg_bn4.py` says so for each as it writes. Seen on the way,
