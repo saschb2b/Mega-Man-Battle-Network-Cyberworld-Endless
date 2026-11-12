@@ -88,6 +88,7 @@
 #include "xchips_text.h"
 #include "soulkinds.h"
 #include "xnavi.h"
+#include "xnavi_bn4.h"
 #include "xnavi_bn5.h"
 #include "xsong.h"
 #include "debug.h"
@@ -4377,6 +4378,35 @@ static void test_free_space(void) {
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
 	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
+	/* (a BN4 Navi chip's Navi's own rooms, xnavi_bn4_chip.h: the sprite's holds the largest of the moved Navis', GutsMan's
+	 * 60,988 bytes; the art's holds every installed Navi's layout of the battle's room, at the same offsets) */
+	uint32_t art4 = 0;
+	for (int i = 0; i < xnavi_bn4_count; ++i) {
+		const XVirusFamily *f = &xnavi_bn4[i]->code;
+		for (int k = 0; k < f->nsprites; ++k)
+			if (f->sprites[k].at >= XN_BN4_ART && f->sprites[k].at < XN_BN4_END && f->sprites[k].at + f->sprites[k].room - XN_BN4_ART > art4)
+				art4 = f->sprites[k].at + f->sprites[k].room - XN_BN4_ART;
+		for (int k = 0; k < f->nsongs; ++k)
+			if (f->songs[k].at >= XN_BN4_ART && f->songs[k].at < XN_BN4_END && f->songs[k].at + f->songs[k].room - XN_BN4_ART > art4)
+				art4 = f->songs[k].at + f->songs[k].room - XN_BN4_ART;
+	}
+	CHECK(XN_BN4_CHIP_SPRITE_SIZE >= 60988u && art4 && art4 <= XN_BN4_CHIP_ART_END - XN_BN4_CHIP_ART && XN_BN4_END == XN_BN4_CHIP_ART &&
+		XN_BN4_HELD + XN_BN4_HELD_WITH < XN_BN4_CODE && XN_BN4_HELD >= XN_BN4_ARTS + XN_BN4_SEATS,
+		"free space: a BN4 Navi chip's Navi's rooms hold GutsMan's sprite and the largest Navi's art (%#x of %#x)", (unsigned)art4,
+		(unsigned)(XN_BN4_CHIP_ART_END - XN_BN4_CHIP_ART));
+	int navi4 = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (u->kind != XCHIP_NAVI) continue;
+		const XChipReg4 *row = NULL;
+		for (int k = 0; k < xreg4_count && !row; ++k)
+			if (xreg4_rows[k].how == XREG_MOVED && xreg4_rows[k].twin && xreg4_rows[k].sub == u->number) row = &xreg4_rows[k];
+		bool seat = false;
+		for (int k = 0; k < xnavi_bn4_count; ++k) seat = seat || xnavi_bn4[k]->code.first_id == (int)(XN_BN4_FIRST_ID + 4u * (unsigned)(u->navis - 1));
+		navi4 += row && seat && u->navis && u->number == XC4_FIRST_SUPPORT + u->bn5 && !u->share;
+		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
+	}
+	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -4413,10 +4443,14 @@ static void test_free_space(void) {
 	CHECK(CHIPS_FREE == FREE_CHIPS, "free space: the chip registry at %08x", (unsigned)CHIPS_FREE);
 	regions_apart("the chip registry", chips, (int)(sizeof chips / sizeof *chips), FREE_CHIPS, FREE_SOULS);
 	const Region panels[] = {
-		{ "the panels' flags", XP_FLAGS, XP_FLAGS + 16 * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
-		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE },
+		{ "the panels' flags", XP_FLAGS, XP_FLAGS + XPANEL_TYPES * 4 }, { "the lava's cooling", XP_STUB, XP_TILES },
+		{ "the tile table", XP_TILES, XP_TILES + XP_TILES_SIZE }, { "the magnet's pull", XP_PULL, XP_PULL + 0x100 },
 	};
-	CHECK(XP_AT == FREE_PANELS && XPANEL_SEA + 1 == 15, "free space: the lava and sea at %08x, %d types", (unsigned)XP_AT, XPANEL_SEA + 1);
+	/* (BN6's 13 types, lava 13, sea 14, the magnet panel 15, BN4's Hole 16; a type past 31 would reach the flags' side bits,
+	 * docs/rom/battle.md, BN6's panel types and who holds each) */
+	CHECK(XP_AT == FREE_PANELS && XPANEL_LAVA == 13 && XPANEL_SEA == 14 && XPANEL_MAGNET == 15 && XPANEL_HOLE == 16 &&
+		XPANEL_TYPES == XPANEL_HOLE + 1 && XPANEL_TYPES <= 32 && XP_TILES_SIZE == XPANEL_TYPES * 6 * 32,
+		"free space: the panels at %08x, %d types", (unsigned)XP_AT, XPANEL_TYPES);
 	regions_apart("the lava and sea", panels, (int)(sizeof panels / sizeof *panels), FREE_PANELS, FREE_PANELS_END);
 	/* (the Navis' room's battle sprites first, one copy for every track: the Navis' track's xnavi_sprites.c) */
 	const Region navis[] = { { "the Navis' battle sprites", FREE_NAVI_SPRITES, FREE_NAVI_SPRITES_END } };
@@ -4826,6 +4860,12 @@ static void test_xvirus_shims(void) {
 		"shims: a sound past a byte %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
 	CHECK(!xvirus_shim_sound(s, home + 1, 0x104, veneer) && !xvirus_shim_sound(s, home, 0x104, home + 0x1000),
 		"shims: a sound past a byte off its halfword, or its veneer out of a branch's reach, taken");
+	/* (a call several sounds reach: adds r0,#0xff; adds r0,#0x7c; nop; b the veneer, r0 BN4's number plus 0x17B) */
+	CHECK(xvirus_shim_sound_add(s, home, 0x17B, veneer) && get16(s) == 0x30FF && get16(s + 2) == 0x307C && get16(s + 4) == 0x46C0 &&
+		(get16(s + 6) & 0xF800) == 0xE000 && home + 10 + 2 * (get16(s + 6) & 0x7FFu) == veneer,
+		"shims: a sound added to %04x %04x %04x %04x", get16(s), get16(s + 2), get16(s + 4), get16(s + 6));
+	CHECK(!xvirus_shim_sound_add(s, home, 0x1FF, veneer) && !xvirus_shim_sound_add(s, home + 1, 0x10, veneer),
+		"shims: a sound added past two adds, or off its halfword, taken");
 	/* (an effect's id no immediate names: cmp r4,#0; bne; movs r4,#0xC8; b the veneer, for one pair; two pairs pad to 16
 	 * bytes with a nop after the branch) */
 	uint8_t fx[XV_SHIM_EFFECT_MAX];
@@ -5701,6 +5741,18 @@ static void test_chip_records(void) {
 	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
 	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");
+	/* (one whose code is moved, XREG_MOVED: BN6's support family and the row's subfamily; a Navi chip's, the family its row's
+	 * twin gives it; BN4's ground kind, 8, which BN5's icons number the Cursor's: Null) */
+	const XChipReg4 guts4 = { 224, 535, XREG_MOVED, 221, 0x85, { 6, 0xFF, 0xFF, 0xFF }, 1, 32 };
+	XRecordFrom4 navi4 = { rec4, NULL, &guts4, 0, { 0 }, 0 };
+	rec4[BN4_CHIP_KIND] = 8;
+	xrec_from_bn4(&navi4, out);
+	bool guts_support4 = out[BN6_CHIP_FAMILY] == BN6_CHIP_SUPPORT_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0x85 && out[BN6_CHIP_ELEMENT] == 10;
+	navi4.family = BN6_CHIP_NAVI_FAMILY;
+	xrec_from_bn4(&navi4, out);
+	CHECK(guts_support4 && out[BN6_CHIP_FAMILY] == BN6_CHIP_NAVI_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0x85 && out[BN6_CHIP_PARAMS] == 7 &&
+		!xreg4_check(&guts4, 1, xreg_rows, xreg_count, why, sizeof why),
+		"records: a moved BN4 chip's record takes BN6's support family, a Navi chip's its twin's, its unit's number; BN4's ground kind Null");
 	xrec_placeholder4(&sun, 9, blank, out);
 	CHECK(out[0] == 0x11 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
 		get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 731, "records: a BN4 chip's placeholder keeps its codes, class and MB");
@@ -6877,7 +6929,7 @@ static void test_analytics(void) {
 	analytics_run_choices(false, 3, &econ);
 	CHECK(stats_posts == 7 && strstr(stats_sent[6], "\"name\":\"run-choices\",\"data\":{\"won\":false,\"layer\":7,\"net\":\"short\",\"threat\":2,\"trips\":3,"
 		"\"jobs\":2,\"kept\":1,\"vows\":1,\"orders\":1,\"skips\":1,\"undernet\":1,\"dark\":1,\"duels\":1,\"duelswon\":1,\"netbattles\":1,"
-		"\"netbattleswon\":1,\"edits\":1,\"battlers\":1,\"fighton\":1,\"cashed\":1,\"mapseconds\":754,\"battleseconds\":321}"),
+		"\"netbattleswon\":1,\"edits\":1,\"battlers\":1,\"fighton\":1,\"cashed\":1,\"labs\":1,\"mapseconds\":754,\"battleseconds\":321}"),
 		"statistics: run-choices counts what the run chose, the seconds on the map and in battle (%s)", stats_sent[6]);
 	analytics_run_choices(true, 0, NULL);
 	CHECK(stats_posts == 7, "statistics: no counts, no run-choices");
@@ -7613,7 +7665,9 @@ static void test_area_views(void) {
  * run left without its end is counted as the next begins. */
 static void test_battle_data(void) {
 	Profile keep = profile;
+	Run run_keep = run;
 	memset(&profile, 0, sizeof profile);
+	run.seed = 11;
 	battle_data_begin(11);
 	for (int i = 0; i < DATA_COMPLETE - 1; ++i) battle_data_deleted(1, 0);
 	battle_data_deleted(40, 4);
@@ -7630,6 +7684,7 @@ static void test_battle_data(void) {
 	battle_data_save();
 	battle_data_deleted(1, 1);
 	battle_data_deleted(1, 1);
+	run.seed = 11;
 	battle_data_load(11);
 	CHECK(battle_data_count(1) == DATA_COMPLETE && battle_data_versions(1) == 5, "battle data: a CONTINUE counts from its checkpoint (%d)", battle_data_count(1));
 	int completed = battle_data_run_end();
@@ -7637,23 +7692,58 @@ static void test_battle_data(void) {
 		"battle data: the run's end puts its tally in the profile, %d families completed", completed);
 	CHECK(battle_data_count(1) == DATA_COMPLETE && !battle_data_run_end() && profile.data_count[1] == DATA_COMPLETE, "battle data: counted once, the tally gone with the run");
 	/* (a run left without its end: its checkpoint's tally joins the profile as the next run begins, once) */
+	run.seed = 12;
 	battle_data_begin(12);
 	for (int i = 0; i < 3; ++i) battle_data_deleted(40, 0);
 	battle_data_save();
 	battle_data_deleted(40, 0);
+	run.seed = 13;
 	battle_data_begin(13);
 	CHECK(profile.data_count[40] == 4 && profile.data_versions[40] == 0x11 && battle_data_count(40) == 4, "battle data: a run left without its end, counted to its checkpoint (%d)", profile.data_count[40]);
+	run.seed = 14;
 	battle_data_begin(14);
 	CHECK(profile.data_count[40] == 4, "battle data: and once (%d)", profile.data_count[40]);
 	/* (a tally of another run is no CONTINUE's) */
 	battle_data_deleted(40, 0);
 	battle_data_save();
+	run.seed = 15;
 	battle_data_load(15);
 	CHECK(battle_data_count(40) == 4, "battle data: another run's tally is not this one's (%d)", battle_data_count(40));
 	profile.data_count[7] = 250;
+	run.seed = 16;
 	battle_data_begin(16);
 	for (int i = 0; i < 10; ++i) battle_data_deleted(7, 3);
 	CHECK(battle_data_count(7) == 255 && !battle_data_run_end() && profile.data_count[7] == 255, "battle data: a count stops at 255");
+	/* (the Battle Lab: sent as a run ends with the data on DATA_LAB_OPENS families complete, said once; a later run's
+	 * families said by their count) */
+	memset(&profile, 0, sizeof profile);
+	memset(&data_blob, 0, sizeof data_blob);
+	run.seed = 21;
+	battle_data_begin(21);
+	for (int f = 1; f < DATA_LAB_OPENS; ++f)
+		for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(f, 0);
+	meta_run_over(false);
+	const char *said_now[6];
+	int nsaid_now = meta_unlocked(said_now, 6);
+	bool lab_said = false;
+	for (int i = 0; i < nsaid_now; ++i) lab_said |= !strcmp(said_now[i], "the Battle Lab");
+	CHECK(!profile.lab_sent && !lab_said, "battle lab: not sent with %d families' data complete", DATA_LAB_OPENS - 1);
+	run.seed = 22;
+	battle_data_begin(22);
+	for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(DATA_LAB_OPENS, 0);
+	meta_run_over(false);
+	nsaid_now = meta_unlocked(said_now, 6);
+	for (int i = 0; i < nsaid_now; ++i) lab_said |= !strcmp(said_now[i], "the Battle Lab");
+	CHECK(profile.lab_sent == 1 && lab_said, "battle lab: sent and said as a run ends with %d families' data complete", DATA_LAB_OPENS);
+	run.seed = 23;
+	battle_data_begin(23);
+	for (int i = 0; i < DATA_COMPLETE; ++i) battle_data_deleted(40, 1);
+	meta_run_over(false);
+	nsaid_now = meta_unlocked(said_now, 6);
+	bool again = false, counted = false;
+	for (int i = 0; i < nsaid_now; ++i) { again |= !strcmp(said_now[i], "the Battle Lab"); counted |= !strcmp(said_now[i], "battle data on 1 family"); }
+	CHECK(!again && counted, "battle lab: said once; a later run's complete family by its count");
+	run = run_keep;
 	memset(&data_blob, 0, sizeof data_blob);
 	profile = keep;
 }
@@ -7673,6 +7763,12 @@ static void test_lab_text(void) {
 	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
 	lab_info_result(s, sizeof s, &left);
 	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	lab_info_set(s, sizeof s, 2, 11, 760, 0);
+	CHECK(!strcmp(s, "Best 0:12:66. Level S. HP lost 0."), "lab: a kept set's best (%s)", s);
+	lab_info_set(s, sizeof s, 2, 0, 0, 0);
+	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
+	lab_set_value(s, sizeof s, 1);
+	CHECK(!strcmp(s, "1 foe"), "lab: a set's foes (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
 }

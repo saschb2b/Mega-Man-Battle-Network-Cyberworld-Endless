@@ -35,6 +35,11 @@ void xnavi_bn4_songs_noted(void);
  * objects, or where none is, of the Navi a family among them is summoned by alone (xnavi_bn4_summoner: Roll's Mettaur's
  * 0x8B at her 0xE0), where it points at another's */
 void xnavi_bn4_sounds_frame(void);
+/* A BN4 Navi chip's Navi's songs at the pool while his chip runs (xnavi_bn4_chip.h), whatever the battle holds: `first_id`
+ * his recipe's first id, `headers` his pool songs' headers in his recipe's order where the chips' room holds them (NULL:
+ * where his install named them, the battle's room holding him); -1 ends it, the pool the battle's again from the next
+ * frame's step */
+void xnavi_bn4_sounds_chip(int first_id, const uint32_t *headers);
 /* The pool pointed at once at the songs of the BN4 Navi enemy `id` (BN6's) is, or of the Navi it is summoned by, as the battle's
  * first frame would point it: the differential's BN6 run, before its pokes, so a poke of a pool slot's entry holds in the
  * battle (src/dev/xdiff_bn4.c) */

@@ -179,7 +179,9 @@ bool director_dev_xrecord(const char *spec);
  * next frame starts (docs/multirom/families.md): "freeze
  * 90", "paralysis 60 200" (only enemy id 0x200), "bubble", "drag", "slide";
  * the frames it lasts (60 where none) for the three that last. The
- * enemies struck, how many; 0 where it names none or no battle is on. */
+ * enemies struck, how many; 0 where it names none or no battle is on.
+ * "panel C R TYPE" sets a panel's type instead (the engine's 13-15 too:
+ * BN5's lava and sea, BN4's Hole), 1 where it did. */
 int director_dev_status(const char *spec);
 /* Dev (the chip step, issue #82): chip ID in code CODE (a letter or *) in
  * the folder's first N entries (one where none), owned as BN6 marks a chip

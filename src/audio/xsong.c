@@ -514,6 +514,10 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	/* BN4's late families' (tools/xrecipe_bn4.py's LATE_SOUND_SLOTS), the grown table's 0x380 up (xvirus_recipe.h
 	 * XV_BN4_GROWN_SLOT_FIRST; docs/rom/sound.md, The song table grown): Kilby's, MagTect's (its 0xF8 the chips' 0x202 above) */
 	{ XROM_BN4_RED_SUN_US, 0xCD, SONG_GROWN_FIRST + 0x1A6 }, { XROM_BN4_RED_SUN_US, 0xB8, SONG_GROWN_FIRST + 0x1A7 },   /* (0x380, 0x381) */
+	/* ... the dark chips' from 0x280 (the range tools/xchiprecipe_bn4.py gives them): the panel changer's, its last two its
+	 * numbers plus 0x17B, as one call plays both (SOUND_ADDS) */
+	{ XROM_BN4_RED_SUN_US, 0x105, 0x280 }, { XROM_BN4_RED_SUN_US, 0x106, 0x281 }, { XROM_BN4_RED_SUN_US, 0x107, 0x282 },
+	{ XROM_BN4_RED_SUN_US, 0x124, 0x29F },
 };
 
 int xsong_sound_slot(int xrom, int song) {

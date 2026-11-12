@@ -105,7 +105,8 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 the code's checks (issue #19): GCC's analyzer,
                                 the functions no build reaches, lizard's
                                 complexity, the ROM offsets docs/rom/
-                                names, the files git tracks, each against its
+                                names, the files git tracks, the layers'
+                                includes (tools/layers.py), each against its
                                 baseline in tests/lint (--update writes them
                                 anew), and the generated files' sources and
                                 that a branch leaves those files to dev
@@ -2660,6 +2661,14 @@ def lint_offsets(update):
                         'this list only shrinks: build.py lint --update after naming one', Counter(found), update)
 
 
+def lint_layers(update):
+    """The code's layers (tools/layers.py, docs/code/layers.md): no include of
+    src/ that tests/lint/layers.txt does not allow, but those in
+    tests/lint/layer_violations.txt, which only shrinks."""
+    sys.stdout.flush()
+    return subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'layers.py'), '--update' if update else '--lint']) == 0
+
+
 def lint_generated():
     """The files tools write from the tree (tools/generated.py: docs/symbols and
     docs/rom/symbols.md's numbers, docs/re's status, the voice catalog): their
@@ -2951,6 +2960,7 @@ def lint(update=False):
     ok = lint_files()
     ok = lint_rom_data(update) and ok
     ok = lint_offsets(update) and ok
+    ok = lint_layers(update) and ok
     ok = lint_generated() and ok
     ok = lint_shards() and ok
     ok = lint_claims() and ok

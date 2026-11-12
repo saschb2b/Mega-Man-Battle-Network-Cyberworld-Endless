@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Navis in BN6's engine"
 description: "What moving BN4 Red Sun's eighteen new Navis into BN6's battle engine takes, Navi by Navi: how each runs (two builds, the Soul Navis on MegaMan's own states), what it calls and spawns against BN6's twins, the order by cost, the engine routines to port once and what the Navi recipe generator needs for BN4."
 tags: [multirom, bn4, navis, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:03:51Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -524,6 +524,19 @@ with none refused; all three ROMs at 95.98 MB, 15 refused in 2 of 3 runs
 one sprite's unpacking at a time (the largest row's room 0x5500 bytes) and
 one song's packing (0x22C0 at most), each let go at once, and the room
 itself is the core's ROM copy, none of the heap.
+
+**The room is halved for the chips** (12 November 2026): the battle's
+art room is `+0x750000` to `+0x766000` (0x16000, 88 KB against the
+largest Navi's 0x11F00), and the 0x16000 after it is a Navi chip's
+Navi's (`FREE_BN4_CHIP_ART`), laid out as the battle's: a moved Navi's
+chip is used in any battle, his own included and another BN4 Navi's, so
+his sprite, art and songs are filled a second time, into rooms of the
+chips' own, as the chip is used ([BN4's chips in a run](bn4-chips.md),
+The Navi chips; `src/emu/xnavi_bn4_chip.c`). `tests/test_core.c` holds
+every installed Navi's layout to the half. A battle's fill records whose
+battle the rooms hold (`XN_BN4_HELD`, three bytes past the seats') and
+points its Navi's list 2 entry at the battle's room again, which a
+chip's run may have pointed at the chips'.
 
 ### Room for all eighteen, measured
 

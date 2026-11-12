@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T10:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T22:30:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -409,7 +409,7 @@ them has a twin in BN6 that knows neither: hooks where BN5 tests or
 calls for them run BN5's rules in C, and the panel's cooling, which must
 call the game's own routines (the panel set, the spark and the random
 number its place draws), runs as a few instructions of the project's own
-Thumb; BN6's panel flags table grows to 16 words and its element hit's
+Thumb; BN6's panel flags table grows to 17 words (with the magnet panel and BN4's Hole) and its element hit's
 tests take lava beside the volcano, both in IWRAM's routines, patched in
 their image and kept so in RAM (`emu_keep`), out of the states saved.
 They look as BN5's: its tiles of them, put in VRAM after BN6's panels'

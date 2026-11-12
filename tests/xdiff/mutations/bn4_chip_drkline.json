@@ -1,0 +1,10 @@
+[
+ {
+  "name": "DrkLine's panel type another",
+  "spec": "bn4_chip_drkline",
+  "poke": [
+   "080E4304:0B:1"
+  ],
+  "what": "the kinds' table's copy with row 0xA's type BN4's own 0xB, a conveyor's number in BN6, where the table's bytes give 15: his row's six panels conveyors"
+ }
+]

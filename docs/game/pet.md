@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
 ---
 
 # The PET
@@ -18,7 +18,7 @@ a use of its own.
 | --- | --- |
 | ChipFolder, SubChip, MegaMan | BN6's own |
 | Library | The run's own over the PET: a page per entry (BN6, BN5, BN4) |
-| E-Mail | BN6's screen: Dad's mails, the dive and the records first, then the battle data on each guardian met |
+| E-Mail | BN6's screen: Dad's mails, the dive and the records first, the Battle Lab's once the lab has sent it ([the Battle Lab](battle-lab.md)), then the battle data on each guardian met |
 | KeyItem | BN6's screen: the profile's own items beside the run's; A on the NetPass opens the pass |
 | Options (BN6's Comm) | The game's Options over the PET |
 | Save | Saves the run where MegaMan stands |
@@ -127,6 +127,7 @@ three open the golden gate) and five of the profile's, in the ids
 | LibCard | always | how many chips the Library holds, and at how many a vault on this layer opens |
 | NetPass | always | what the player's games open online, as stamps; A opens the pass (in the Net Square R on the PET's menu opens it too) |
 | Jukebox | always | every song of the town and the Net; A opens the Jukebox |
+| LabPass | once the Battle Lab is there ([the Battle Lab](battle-lab.md)) | that it is the lab's pass, and on how many virus families the battle data is complete |
 | BtlrCard | once the first Virus Battler has given it ([The Virus Battler](../world/level-design/virus-battler.md)) | BN6's own words; A opens BN6's own VIRUS LIST of the card: the families on it, their V1's data and descriptions |
 
 The BtlrCard (`0x40`) is BN6's own key item, and its screen BN6's: the

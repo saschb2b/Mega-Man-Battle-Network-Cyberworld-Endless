@@ -8,7 +8,7 @@
 #include "lab_battle.h"
 
 extern const char lab_title[], lab_go[], lab_info_label[];
-extern const char *const lab_tabs[3];
+extern const char *const lab_tabs[4];
 extern const char lab_row_preset[], lab_row_area[], lab_row_song[], lab_own_song[], lab_plain_field[];
 /* A panel type's name (BN6_PANEL_TYPE), "" for none of BN6's */
 const char *lab_panel_name(int type);
@@ -27,5 +27,10 @@ void lab_info_lifted(char *out, size_t n, const char *name, int foes, int most);
 void lab_info_panel(char *out, size_t n, const char *panel, const char *foe);
 void lab_info_empty(char *out, size_t n);
 void lab_info_result(char *out, size_t n, const LabResult *r);
+/* A kept set's row ("Set 2"), its value (its foes, or that it holds none)
+ * and what the information box says of it: its best win, or none yet */
+void lab_set_words(char *out, size_t n, int slot);
+void lab_set_value(char *out, size_t n, int foes);
+void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lost);
 
 #endif

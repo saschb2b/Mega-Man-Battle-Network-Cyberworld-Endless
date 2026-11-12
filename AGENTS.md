@@ -228,6 +228,16 @@ part of the tree; a new file gets its line there.
   repeated, and lines of speech outside a words file. Every header has its
   guard and compiles on its own, and a `.c` file includes its own header
   first. A change that touches a listed smell takes it down where it can.
+- The parts of `src/` stand in layers, lowest first in
+  `tests/lint/layers.txt`: a unit (a folder, or the part of `core` or `emu`
+  the file names) includes only the units its line names, and
+  `build.py lint` fails a new include that goes up or sideways
+  (`tools/layers.py`). The ones there were are in
+  `tests/lint/layer_violations.txt`, which only shrinks. Its message names
+  the way out: move what is needed down, pass it in, or have the upper
+  part register a callback; `python3 tools/layers.py --why A B` shows what
+  an include is used for (docs/code/layers.md, the map and Fixing a
+  violation). A new folder gets its line there.
 
 ## Reverse engineering
 

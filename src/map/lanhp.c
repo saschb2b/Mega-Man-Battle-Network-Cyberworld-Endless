@@ -64,6 +64,28 @@ static const int portal_entry[LANHP_PORTALS] = { 2, 5, 4, 3, 6 };
 #define KEEPER_SPRITE 61
 #define KEEPER_TEXT 1536
 
+/* The Battle Lab (docs/game/battle-lab.md, Where it lives): the lab's
+ * station in the room's back left corner, the first thing in sight on the
+ * way in from the blue pad and across the walk from the courier, clear of
+ * every link square (the nearest, entry 3's, 57 units along the back).
+ * Its keeper, a Navi of Dad's lab (BN6's teal Navi: the owner's call of
+ * 12 November 2026, over a Mr.Prog, whose mint read as frozen), stands
+ * at its front, facing the room; behind him BN6's own glass capsule (list 7's 61), where the copies
+ * are made, and its orange monitor of green bars (149), the gauge. Each
+ * talks as the keeper does, whose words are an archive of their own,
+ * which the director writes */
+#define LAB_X (-76)
+#define LAB_Y (-52)
+#define LAB_FACE 3         /* +y: towards the room and whoever walks up to him */
+#define LAB_SPRITE 0x41    /* list 6's teal Navi, by BN6's own variation of her sprite (npc_variation): no one else in a run has this look */
+#define LAB_CAPSULE 61
+#define LAB_CAPSULE_X (-98)
+#define LAB_CAPSULE_Y (-56)
+#define LAB_MONITOR 149
+#define LAB_MONITOR_X (-66)
+#define LAB_MONITOR_Y (-78)
+#define LAB_TEXT 768
+
 /* A way back's look (issue #110): BN6's own link marker (list 7's 0x88),
  * whose map objects 0xCB-0xCE show each link square its town's emblem
  * (animations 1-4), in its plain animation 0 instead, a ring on a cyan
@@ -105,6 +127,7 @@ static struct {
 	uint8_t jack_out[16];                 /* BN6's blue pad's entry: its jack-out */
 	uint32_t courier_text;                /* the courier's words' room, 0 none */
 	uint32_t keeper_text;                 /* the gate keeper's */
+	uint32_t lab_text;                    /* the Battle Lab's keeper's */
 	uint32_t gate_anim;                   /* the gate's animation byte, 0 none */
 } H;
 
@@ -170,6 +193,21 @@ static void gate(NpcList *npcs) {
 	if (keeper) npcs->script[npcs->n++] = keeper;
 }
 
+/* the Battle Lab's station into `npcs`: its keeper, capsule and monitor, the keeper's words' room cleared */
+static void lab(NpcList *npcs) {
+	static const uint8_t empty[LAB_TEXT] = { 2, 0, 0xE6 };
+	H.lab_text = mapslot_alloc(empty, sizeof empty);
+	if (!H.lab_text || !npc_need_sprite(npcs, 6, LAB_SPRITE) || !npc_need_sprite(npcs, 7, LAB_CAPSULE) || !npc_need_sprite(npcs, 7, LAB_MONITOR)) return;
+	uint32_t part[3] = {
+		npc_talker(7, LAB_CAPSULE, LAB_CAPSULE_X, LAB_CAPSULE_Y, 0, 0, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false),
+		npc_talker(7, LAB_MONITOR, LAB_MONITOR_X, LAB_MONITOR_Y, 0, 0, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false),
+	};
+	part[2] = npc_talker(6, LAB_SPRITE, LAB_X, LAB_Y, 0, LAB_FACE, H.lab_text, 0, LANHP_LAB_GONE_FLAG, false);
+	npc_variation(part[2]);
+	for (int i = 0; i < 3; ++i)
+		if (part[i]) npcs->script[npcs->n++] = part[i];
+}
+
 /* the ways back's marks into `npcs` */
 static void back_marks(NpcList *npcs) {
 	if (!npc_need_sprite(npcs, 7, LINK_MARKER)) return;
@@ -191,6 +229,7 @@ bool lanhp_install(void) {
 	mapslot_hp(true);
 	courier(&npcs);
 	gate(&npcs);
+	lab(&npcs);
 	back_marks(&npcs);
 	bool ok = mapslot_install(LANHP_GROUP, LANHP_NUMBER, &npcs, NULL, 0) &&
 		(H.warps = mapslot_own_warps(LANHP_GROUP, LANHP_NUMBER, H.arrive_x, H.arrive_y, 1)) != 0 &&
@@ -209,6 +248,12 @@ bool lanhp_courier_say(const uint8_t *archive, int n) {
 bool lanhp_keeper_say(const uint8_t *archive, int n) {
 	if (!H.keeper_text || n <= 0 || n > KEEPER_TEXT) return false;
 	emu_write(H.keeper_text, archive, (size_t)n);
+	return true;
+}
+
+bool lanhp_lab_say(const uint8_t *archive, int n) {
+	if (!H.lab_text || n <= 0 || n > LAB_TEXT) return false;
+	emu_write(H.lab_text, archive, (size_t)n);
 	return true;
 }
 

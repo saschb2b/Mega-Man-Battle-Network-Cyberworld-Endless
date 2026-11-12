@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T09:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
 ---
 
 # The player's guide
@@ -941,6 +941,32 @@ own marks on the title: Gregar's head for a won short net, Bass for the
 endless net's Nest, the S for the Secret Area, the green disc for a win on
 the top threat rung, STD, MEGA and GIGA COMP for a class of the Library
 complete.
+
+### The Battle Lab
+
+Every virus MegaMan deletes adds to his battle data on its family. At
+eight, of any version, in any run, the data on that family is complete.
+Once it is complete on three families, Dad's lab sends one of its Navis
+to Lan's HP, a teal one beside a glass capsule in the back left corner:
+there from the next run on, and Dad's mail on the first layer says so.
+
+Talk to the Navi to set up a test battle:
+
+- **FOES:** the families with complete data, each in a version MegaMan
+  has deleted (Left and Right turn it). A lifts one onto the foes'
+  panels and sets it down; A on a foe set takes it off. Four at most.
+  A family still short shows its count, "5/8".
+- **FIELD:** A turns the panel under the cursor to its next type; the
+  row below takes one of BN6's own fields whole.
+- **STAGE:** the background and the song.
+- **SETS:** four sets are kept with their best win. A takes one in hand.
+- **BATTLE!** at the foot, or START.
+
+It is a test: nothing in it can delete MegaMan, it pays nothing, and the
+run is afterwards exactly as it was, HP and all. L on the Custom screen
+leaves at once. MegaMan fights with the folder and NaviCust he holds.
+Back in the Lab you see the time, the busting level and the HP lost, and
+a set keeps its best.
 
 ### Saving and losing
 

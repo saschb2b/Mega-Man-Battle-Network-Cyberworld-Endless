@@ -1,5 +1,6 @@
 # The code
 
+* [The code's layers](layers.md) - Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 24 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records.
 * [The code](overview.md) - What each part of the tree holds, file by file: a concept per folder (server, client, core, emulator, director, maps, screens, tools, platforms, site), the rows AGENTS.md's Layout table had.
 * [The site, screenshots and clips](site-and-media.md) - What `web/` (the GitHub Pages site in BN6's PET look, its Japanese pages, the player and downloads), `docs/screenshots/` and `docs/clips/` (the trailer included) hold.
 * [The server, its deployment and the wire](server.md) - What `server/` (the ROM-free Python server: presence, Trade Central, the week, the Arena, teams, stands, retention, backups), `deploy/` (Coolify) and `shared/online/` (the versioned wire contract) hold, file by file.

@@ -33,6 +33,11 @@ bool lanhp_courier_say(const uint8_t *archive, int n);
  * text archive's bytes (his talk its script 0), written over his last;
  * false where they do not fit. */
 bool lanhp_keeper_say(const uint8_t *archive, int n);
+/* The Battle Lab's keeper (docs/game/battle-lab.md, How it is earned): a
+ * Navi of Dad's lab, there while LANHP_LAB_GONE_FLAG is clear, who
+ * says nothing until lanhp_lab_say */
+#define LANHP_LAB_GONE_FLAG 0x146E
+bool lanhp_lab_say(const uint8_t *archive, int n);
 /* The gate's core flickering while a call is under way (each frame), else
  * lit. */
 void lanhp_gate_calling(bool on);

@@ -102,7 +102,7 @@ static void guardian_over(int result, int frames) {
 	if (L.guardian) analytics_guardian(L.guardian, result, megaman_hp(), megaman_max(), frames);
 }
 
-#define TALLY_MAGIC 0x43544C33u   /* "CTL3": run.tally, the run's economy's counts, its choices and its act's battles (an older
+#define TALLY_MAGIC 0x43544C34u   /* "CTL4" (CTL3's, without the Battle Lab's count, begin anew): run.tally, the run's economy's counts, its choices and its act's battles (an older
                                    * one's, without the last, begin anew) */
 static AnalyticsEconomy T;
 
