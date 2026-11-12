@@ -16,9 +16,8 @@
 #include "data.h"
 #include "director.h"
 #include "gfx.h"
-#include "guardians.h"
-#include "jukebox_text.h"
 #include "lab_navis.h"
+#include "lab_stage.h"
 #include "lab_state.h"
 #include "lab_text.h"
 #include "pet_look.h"
@@ -56,12 +55,6 @@ static void foe_name(int family, int version, char *out, size_t n) {
 
 static int row_version(const LabRow *r) { return r->version | (r->navi ? LAB_NAVI : 0); }
 
-static const char *song_name(int song) {
-	for (int i = 0; i < jukebox_song_count; ++i)
-		if (jukebox_songs[i].game == 0 && jukebox_songs[i].song == song) return jukebox_songs[i].title;
-	return lab_own_song;
-}
-
 /* ... of the panel under the cursor: the foe on it, the one lifted over it, or its kind */
 static void info_field(char *s, size_t n, const LabRow *r) {
 	char name[24] = "";
@@ -97,7 +90,8 @@ static void info_text(char *s, size_t n) {
 		lab_info_set(s, n, k->set.nfoes, k->bust, k->frames, k->hp_lost);
 	} else if (LS.page == LAB_PAGE_STAGE) {
 		/* (the row's value in full: an area's or a song's name is wider than its row) */
-		snprintf(s, n, "%s", LS.row[LAB_PAGE_STAGE] ? song_name(LS.set.song) : guardian_area_short(LS.set.area));
+		if (LS.row[LAB_PAGE_STAGE]) lab_stage_song_name(LS.set.song, s, n);
+		else lab_stage_area_name(LS.set.area, s, n);
 	} else if (LS.page == LAB_PAGE_FOES && r) info_row(s, n, r);
 }
 

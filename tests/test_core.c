@@ -7606,6 +7606,15 @@ static void test_lab_text(void) {
 		"lab: a Navi's row and his versions' words (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
+	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
+	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
+	char a[32], b[32];
+	lab_stage_words(s, sizeof s, "BN5", "Oran Area", false);
+	lab_stage_words(a, sizeof a, "", "Central", true);
+	lab_stage_words(b, sizeof b, "", "Central", false);
+	CHECK(!strcmp(s, "BN5 Oran Area") && !strcmp(a, "Central 2") && !strcmp(b, "Central"), "lab: the stage's names (%s, %s, %s)", s, a, b);
+	CHECK(LAB_SONG(0, 0x15) == 0x15 && LAB_SONG_GAME(LAB_SONG(2, 0x12)) == 2 && LAB_SONG_NUMBER(LAB_SONG(2, 0x12)) == 0x12 && LAB_SONG(2, LAB_SONG_MOST) <= 255 &&
+		!((NET_AREAS + XAREAS_MAX - 1) & LAB_AREA_SECOND), "lab: a set's song and area bytes hold every game's");
 }
 
 /* The encounter groups' templates and their filling (groups.h;
