@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **New**: code/layers.md (the code's layers: `src/`'s folders' dependencies measured by `tools/layers.py`, 34 pairs including each other; the intended order as 24 units in `tests/lint/layers.txt`, `core` in five of them; the rule in `build.py lint` with its baseline of 147; how to fix a violation; the six widest headers' includers and a proposal for each; the 17 generated files and where they should stand; the first ten cuts; the numbers a release records), code/index.md (its line), code/overview.md (its line), code/tools.md (`tools/layers.py`'s row), code/tests.md (the two files' row).
 * **Update**: game/battle-lab.md (Built: the keeper in Lan's HP and the LabPass, step 4), game/pet.md (KeyItem's LabPass), code/director.md (`lab_keeper.c`, `lab_words.c`), devtools/dev-menu.md (`--dev lab`).
 * **Update**: game/progression/encounter-groups.md (the statistics' event, `act-battles`: an act's own battles and its groups' apart), GUIDE.md (Anonymous statistics: the act's row).
 * **Update**: game/progression/encounter-groups.md (Step 2, the arc and the rewards, built: the signature by seed, the three beats, the Server's challenge, the reward pick's one enemy, the act card's line, what the rows pay), devtools/dev-menu.md (`arc`), devtools/pacing-report.md (the acts' arcs), code/core.md (`group_arc.c`).

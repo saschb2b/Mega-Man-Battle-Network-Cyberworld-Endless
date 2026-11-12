@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T00:10:00Z
-* **New**: code/layers.md (the code's layers: `src/`'s folders' dependencies measured by `tools/layers.py`, 34 pairs including each other; the intended order as 24 units in `tests/lint/layers.txt`, `core` in five of them; the rule in `build.py lint` with its baseline of 147; how to fix a violation; the six widest headers' includers and a proposal for each; the 17 generated files and where they should stand; the first ten cuts; the numbers a release records), code/index.md (its line), code/overview.md (its line), code/tools.md (`tools/layers.py`'s row), code/tests.md (the two files' row).

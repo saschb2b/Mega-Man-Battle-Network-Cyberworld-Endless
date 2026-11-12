@@ -3,7 +3,7 @@ type: Overview
 title: "The code"
 description: "What each part of the tree holds, file by file: a concept per folder (server, client, core, emulator, director, maps, screens, tools, platforms, site), the rows AGENTS.md's Layout table had."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-25T00:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T00:10:00Z }
 ---
 
 # The code
