@@ -662,10 +662,23 @@ without them.
   with its arc, the engine's fill counts equal to the tagging tool's in
   308 of 308 cells; the 3DS's heap modelled over long runs with the arcs
   on: 64.4 MB at most with BN6 alone, 85.9 of 96 with BN5's and BN4's ROMs beside it (85.8 before the arcs), nothing refused, no crash, seeds 1 to 6.
+- **The pairs' cost, measured since** (the pairs' cost pass, 12 November
+  2026: all 1,830 pairs fought once by the test autopilot): the median
+  pair costs what its two families' own costs add up to, but 646 cost 40
+  HP or more past that, 290 cost 100 or more, 53 cost 200 or more, 400
+  at most. Cost adds up to more than its parts far more often than
+  pressure does (27 pairs of 1,830). A fight's cost swings with its seed
+  and each pair was fought once, so a pair is tagged from 100 HP past
+  its sum: 290 pairs (`group_pairs`' cost), added to a group's predicted
+  cost by the larger of its two families' hits over their V1's. The
+  acts' own battles hold such pairs too, so the cost caps moved with
+  them: 20, 70, 200, 160, 270, 888, the Nest 508. Every act's area keeps
+  its arc (3 signature families in act 1, 20 in act 2, 42 to 58 after),
+  `build.py pacing` and `build.py economy` stay at 0, and the tally is
+  one run in twelve lost to viruses, to an area's own battle
+  ([measured](encounter-groups-measured.md), The pairs' pass).
 - **What it leaves**: act 1 has three signature families with every ROM
-  (BN6 alone none: its act 1 stays the area's own); the cost of two
-  different families together is their own costs added up until the
-  pairs' cost pass is run (every pair fought, as their pressure was);
+  (BN6 alone none: its act 1 stays the area's own);
   the statistics' `act-battles` event now says what the groups cost
   players against the areas' own battles, act by act.
 

@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T23:00:00Z
+* **Update**: game/progression/encounter-groups.md (the pairs' cost measured: 290 pairs tagged, the cost caps with them), game/progression/encounter-groups-measured.md (The pairs' pass: the pairs' cost; the caps and the fill counts with it).

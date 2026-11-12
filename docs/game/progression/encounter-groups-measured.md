@@ -354,6 +354,8 @@ Read from the ROMs by `tools/encounter_tags.py dump`; pressure and tricks fought
 | 6:02 + 6:12 | 260 | 220 | +40 |
 | 6:02 + 5:34 | 100 | 60 | +40 |
 
+The pairs' cost: the same 1830 pairs fought once each by the test autopilot with the starting folder (50 seconds at most; it deleted 729 of them in that time), the HP it lost against its two families' own costs added up. The median pair costs +0 past its sum, but 646 cost 40 HP or more past it, 290 cost 100 or more, 53 cost 200 or more, and the most is 400: cost adds up to more than its parts far more often than pressure does. A fight's cost swings with its seed, and each pair was fought once, so a pair is tagged from 100 HP past its sum (290 pairs).
+
 ### The fields
 
 120 fields, every one a random battle of BN6's areas uses, each fought four times by the test autopilot against one pair that is harmless on the plain field (BN6's family 1 beside BN5's 51, 110 HP). 100 are fair: it wins every fight and loses 20 HP at most in any, as on the plain field. On the other 20 the same pair costs more or cannot be deleted in 50 seconds: what a field does to MegaMan's side (holes, poison, ice, panels he cannot stand on) no measure of the families sees. A group takes an area's field only where it is fair.
@@ -398,26 +400,26 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 | Act | Predicted cost: least | Median | Three-quarter mark (the cap) | Most |
 | --- | --- | --- | --- | --- |
 | 1 | 0 | 0 | 20 | 100 |
-| 2 | 0 | 20 | 60 | 410 |
-| 3 | 0 | 70 | 175 | 820 |
-| 4 | 0 | 80 | 140 | 810 |
-| 5 | 0 | 80 | 180 | 1650 |
-| 6 | 0 | 360 | 678 | 2313 |
-| Nest | 0 | 187 | 447 | 1343 |
+| 2 | 0 | 20 | 70 | 410 |
+| 3 | 0 | 70 | 200 | 820 |
+| 4 | 0 | 80 | 160 | 1445 |
+| 5 | 0 | 150 | 270 | 1650 |
+| 6 | 0 | 400 | 888 | 2313 |
+| Nest | 0 | 353 | 508 | 1343 |
 
 **BN6, under both caps**
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | **none** | 2 | 11 | 7 | 7 | 14 | **none** |
-| panel war | **none** | **none** | **none** | **none** | **none** | 6 | **none** |
+| wall and artillery | **none** | 2 | 9 | 3 | 4 | 15 | **none** |
+| panel war | **none** | **none** | **none** | **none** | 1 | 6 | 1 |
 | summoner and guard | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
-| clashing answers | 1 | 5 | 22 | 9 | 23 | 22 | 2 |
-| one element | **none** | 1 | 9 | 4 | 8 | 11 | 1 |
-| pincer | **none** | 4 | 122 | 141 | 325 | 661 | 395 |
-| swarm | 1 | 5 | 11 | 11 | 13 | 16 | 15 |
-| held ground | **none** | 4 | 11 | 7 | 15 | 12 | 1 |
-| glass cannons | **none** | 1 | 6 | **none** | 6 | **none** | **none** |
+| clashing answers | 1 | 6 | 19 | 8 | 21 | 25 | 1 |
+| one element | **none** | 1 | 9 | 4 | 10 | 10 | 1 |
+| pincer | **none** | 4 | 82 | 68 | 248 | 662 | 243 |
+| swarm | 1 | 5 | 11 | 11 | 18 | 17 | 16 |
+| held ground | **none** | 4 | 10 | 6 | 14 | 12 | 1 |
+| glass cannons | **none** | 1 | 5 | **none** | 6 | **none** | **none** |
 | bulwark | **none** | 2 | 14 | 6 | 4 | **none** | **none** |
 | nets meet | **none** | **none** | **none** | **none** | **none** | **none** | **none** |
 
@@ -425,17 +427,17 @@ The same battles by what they are predicted to cost the test autopilot (each fam
 
 | Template | Act 1 | Act 2 | Act 3 | Act 4 | Act 5 | Act 6 | Nest |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| wall and artillery | 1 | 14 | 153 | 56 | 92 | 179 | 61 |
-| panel war | 8 | 15 | 49 | 35 | 37 | 100 | 41 |
-| summoner and guard | **none** | **none** | 11 | 10 | 13 | 17 | 10 |
-| clashing answers | 6 | 25 | 136 | 64 | 95 | 148 | 67 |
-| one element | 1 | 10 | 58 | 25 | 41 | 68 | 32 |
-| pincer | **none** | 96 | 3466 | 3038 | 5448 | 11606 | 7655 |
-| swarm | 1 | 9 | 24 | 21 | 23 | 42 | 32 |
-| held ground | **none** | 11 | 47 | 16 | 37 | 38 | 12 |
-| glass cannons | **none** | 2 | 11 | 5 | 15 | 11 | **none** |
-| bulwark | **none** | 5 | 35 | 14 | 8 | 2 | **none** |
-| nets meet | 15 | 53 | 196 | 108 | 128 | 203 | 86 |
+| wall and artillery | 1 | 18 | 156 | 53 | 106 | 196 | 57 |
+| panel war | 8 | 15 | 61 | 34 | 65 | 105 | 44 |
+| summoner and guard | **none** | **none** | 11 | 7 | 10 | 13 | 7 |
+| clashing answers | 6 | 34 | 124 | 58 | 99 | 151 | 57 |
+| one element | 1 | 11 | 56 | 22 | 44 | 67 | 29 |
+| pincer | **none** | 145 | 2984 | 2229 | 6013 | 11471 | 6232 |
+| swarm | 1 | 9 | 28 | 22 | 34 | 45 | 37 |
+| held ground | **none** | 12 | 40 | 15 | 37 | 37 | 11 |
+| glass cannons | **none** | 2 | 11 | 4 | 16 | 15 | **none** |
+| bulwark | **none** | 5 | 35 | 14 | 8 | 4 | **none** |
+| nets meet | 15 | 51 | 206 | 113 | 158 | 215 | 85 |
 
 ### Every battle sampled
 

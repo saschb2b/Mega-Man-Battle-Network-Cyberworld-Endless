@@ -7803,10 +7803,24 @@ static void test_groups(void) {
 	/* (the pairs' pass: two families that press harder together are predicted that much harder, by the larger of their
 	 * hits over their V1's; the table's first pair, made a wall and its artillery here) */
 	CHECK(group_pairs_count > 0, "groups: the pairs' pass has its pairs");
-	const GroupPair *gp = &group_pairs[0];
+	/* (the first pair that presses harder, and the first that costs more: the table holds both kinds) */
+	const GroupPair *gp = &group_pairs[0], *gc = &group_pairs[0];
+	for (int i = 0; i < group_pairs_count && !gp->extra; ++i) gp = &group_pairs[i];
+	for (int i = 0; i < group_pairs_count && !gc->cost; ++i) gc = &group_pairs[i];
 	int extra = group_pair_extra(gp->net_a, gp->family_a, gp->net_b, gp->family_b);
 	CHECK(extra == gp->extra && extra > 0 && group_pair_extra(gp->net_b, gp->family_b, gp->net_a, gp->family_a) == extra &&
 		!group_pair_extra(gp->net_a, gp->family_a, gp->net_a, gp->family_a), "groups: a pair's excess either way round, none with itself");
+	CHECK(gc->cost > 0 && group_pair_cost(gc->net_a, gc->family_a, gc->net_b, gc->family_b) == gc->cost &&
+		group_pair_cost(gc->net_b, gc->family_b, gc->net_a, gc->family_a) == gc->cost, "groups: a pair's cost past its families' own, either way round");
+	/* (... which a group's predicted cost adds, by the larger of its two families' hits over their V1's) */
+	GroupFam costly[2] = {
+		{ gc->family_a, gc->net_a, GROUP_FRONT, 0, 0, 5, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none }, 10 },
+		{ gc->family_b, gc->net_b, GROUP_BACK, 0, 0, 5, { { 20, 50, 10, 0 }, none, none, none, none, none }, 10 },
+	};
+	GroupLimits any = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000, 100000 };
+	f.n = 0;
+	CHECK(group_fillings(costly, 2, &any, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].cost == 10 * 2 + 10 + gc->cost * 2,
+		"groups: a tagged pair's cost with its excess (%d, the excess %d)", f.g[0].cost, gc->cost);
 	GroupFam two[2] = {
 		{ gp->family_a, gp->net_a, GROUP_FRONT, 0, 0, 20, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none } },
 		{ gp->family_b, gp->net_b, GROUP_BACK, 0, 0, 30, { { 20, 50, 10, 0 }, none, none, none, none, none } },
