@@ -53,6 +53,8 @@
 #define BN4_AI_CHARGE_TIMES 0x34      /* u16 x 2 the charge times of BN4_AI_POWER_CHIP's and the charged shot's (0xFF none), cached as the
                                        * loadout is set (0x0800BCF4, from BN4_CHARGE_TIMES by his Charge) and read by the charge levels
                                        * (0x0800BB56, 0x0800BB6C); BN6 caches none, reading its table at each test (0x08012F62) */
+#define BN4_AI_SYNCHRO    0x60        /* u32 Full Synchro's aura, the object kept while it shows (0x0800D9BE: adds r7,#0x60, then
+                                       * BN4_SYNCHRO_AURA where it holds none); BN6's +0x5C (0x080139E4, BN6_AI_SYNCHRO) */
 #define BN4_AI_CONTROL    0x50        /* u32 his side's control block (BN4_CONTROL_BLOCKS): the AI data's clear (0x0800B7CE) points side 0's
                                        * at 0x02035A70 and side 1's at 0x02035AB0; his ready routine (0x080EED48) runs its state from it
                                        * (+0 set up, 0x0800EB86 / 0x0800EB8E; +1 its state, 0x0800E4F8) */
@@ -212,5 +214,25 @@
 #define BN4_CAN_MOVE_THIRD 0x0800AD7Eu /* BN4_CAN_MOVE's body with the flags' mask 0x105040 (its literal 0x0800B130): copied */
 #define BN4_MAGTECT_SOUNDS 0x080BEF34u /* its sounds BN6 has no song of: 0xF8 here (movs r0,#0xf8) and 0xB8 at 0x080BEFAA, each
                                        * before bl BN4_PLAY_SOUND: the grown song table's 0x202 (the chips' slot for it) and 0x381 */
+
+/* MegaMan's confusion as a fight starts after an attack DarkChip, his mood and emotion, the dark mood an attack DarkChip's
+ * use sets, and Full Synchro's aura (docs/rom/bn4.md; the differential's calm4 and mood4) */
+#define BN4_CONFUSE_STEP  0x0800AECAu /* MegaMan's confusion's countdown, a frame each status step (ldrh r0,[r6,#0x12]; subs #1; strh), its end (0x0800AED2) clearing its flags and mark */
+#define BN4_CONFUSED_START 0x02D0     /* the frames BN4's MegaMan starts a fight confused after an attack DarkChip is chosen (0x2CF at its first fight frame) */
+#define BN4_MOOD_SET      0x0800F4DEu /* a side's mood set (r0 the side, r1 the mood; its battle NaviStats +0, 0x99 at the start): never
+                                       * where it is 0, BN4's dark emotion (BN4_EMOTION's 5), so nothing lifts it again in a battle (BN5's
+                                       * 0x080127CE the same; BN6's BN6_MOOD_SET has no such test) */
+#define BN4_NAVI_MOOD     0x00        /* the battle NaviStats' (BN4_BATTLE_NAVI) mood, u8: BN4_MOOD_START as the NaviStats are set up
+                                       * (0x0800D718), 0 as a battle of a dark MegaMan begins (karma4 0: his dark emotion from t1) */
+#define BN4_MOOD_START    0x99        /* ... the mood the NaviStats' set-up gives (0x0800D718: movs r0,#0x99; strb r0,[r4]) */
+#define BN4_EMOTION       0x0800F49Cu /* a side's emotion (r0 the side) by its mood: 5 at 0, 2 (Full Synchro) at 0xFF, 1 under 0x41, else 0 */
+#define BN4_DARK_MOOD     0x0800D5C4u /* a chip's use: a chip whose record's +9 holds 0x20 (a DarkChip; 0x0800D5A6) sets the side's
+                                       * battle flag 2 (0x08008020) and here its mood 0 through BN4_MOOD_SET (bl at 0x0800D5C8), then
+                                       * calms him (0x0800C5EA: his anger's end, its mood 0x80 refused at 0); neither where the toolkit's
+                                       * game flags +6 hold 0x40 (0x0800D5BC). BN4's own dark rule, which a run does not take */
+#define BN4_DARK_MOOD_PAST 0x0800D5D0u /* ... the use's next step past both, where a chip that is none goes (0x0800D5AA) */
+#define BN4_SYNCHRO_AURA  0x080CD276u /* Full Synchro's aura spawned (the first kind's 0x5E, r7 where it is kept): BN6's 0x080C6482, the
+                                       * same steps but BN6's +0's 0x04 set (0x080C64A0) and its side read as a halfword; from
+                                       * 0x0800D9C8, where his emotion is 2, into his AI data +0x60 (BN4_AI_SYNCHRO) */
 
 #endif

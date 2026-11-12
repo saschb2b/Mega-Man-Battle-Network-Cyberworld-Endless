@@ -1,0 +1,52 @@
+[
+ {
+  "name": "BN6's Full Synchro aura not spawned",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "080139F0:46C0",
+   "080139F2:46C0"
+  ],
+  "what": "BN6's call that spawns Full Synchro's aura (bl 0x080C6482 at 0x080139F0) made two nops: after the counter at t52 BN6's MegaMan in Full Synchro with no aura where BN4's has its own"
+ },
+ {
+  "name": "ElemFlar's row's power another",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "08C06D96:0032"
+  ],
+  "what": "the registry's record of BN4's ElemFlar (637 at CHIPS_RECORDS) with power 50 where BN4's record holds 100: the Mettaur left 50 HP more than BN4's"
+ },
+ {
+  "name": "ElemFlar's row's family another",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "08C06D88:FD:1"
+  ],
+  "what": "the registry's record of BN4's ElemFlar naming BN6's grown attack family 0xFD (DrkVulcn's state) where the row gives the Elem chips' 0xFE: another attack"
+ },
+ {
+  "name": "the Elem shot's sound not played",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "080EE394:46C0",
+   "080EE396:46C0"
+  ],
+  "what": "the state's copy's call that plays the shot's sound (BN4 0x080EE394: 0xA8 or 0x14C by its subfamily, through the unit's add) made two nops: no sound as he fires"
+ },
+ {
+  "name": "the Elem shot later",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "080EE39A:2809"
+  ],
+  "what": "the state's copy's count at which the shot leaves (cmp r0,#6 at BN4 0x080EE39A) made 9: the shot three frames late"
+ },
+ {
+  "name": "the Elem state longer",
+  "spec": "bn4_chip_elemflar",
+  "poke": [
+   "080EE3AC:2828"
+  ],
+  "what": "the state's copy's count at which MegaMan's attack ends (cmp r0,#0x1e at BN4 0x080EE3AC) made 0x28: his attack ends ten frames after BN4's"
+ }
+]

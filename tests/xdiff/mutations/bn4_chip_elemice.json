@@ -1,0 +1,10 @@
+[
+ {
+  "name": "ElemIce's row's power another",
+  "spec": "bn4_chip_elemice",
+  "poke": [
+   "08C06DC2:0032"
+  ],
+  "what": "the registry's record of BN4's ElemIce (638 at CHIPS_RECORDS) with power 50 where BN4's record holds 100: the Mettaur left more HP than BN4's"
+ }
+]

@@ -1,5 +1,5 @@
 {
- "about": "BN5's DarkInvs's end in BN6's engine (issue #82): chip_darkinvs's battle, its time (the literal BN5's object hands BN5's 0x0802C114, 600 frames at 0x080E2444) made 240 in each game's (each: BN5's at 0x080E2444, BN6's in the unit's moved copy at XC_CODE + 0xC704, where tools/xchiprecipe.py places the block 0x080E2390-0x080E244C), so its end comes before the foe falls: BN5's time counted down at the player's frame's end (BN5 0x0800DBD8, BN6's hook at 0x0801AD10: src/emu/darkinvs.c), at 0 his request 0x80000, BN5's family 0x49 (BN6's 0x99) giving him back: the flag and the invisibility cleared, the time's end's afterimage and sound, MegaMan his own again (no button after it). Every difference of BN6's play from BN5's fails it.",
+ "about": "BN5's DarkInvs's end in BN6's engine (issue #82): chip_darkinvs's battle, its time (the literal BN5's object hands BN5's 0x0802C114, 600 frames at 0x080E2444) made 240 in each game's (each: BN5's at 0x080E2444, BN6's in the unit's moved copy at XC_CODE + 0xC344, where tools/xchiprecipe.py places the block 0x080E2390-0x080E244C), so its end comes before the foe falls: BN5's time counted down at the player's frame's end (BN5 0x0800DBD8, BN6's hook at 0x0801AD10: src/emu/darkinvs.c), at 0 his request 0x80000, BN5's family 0x49 (BN6's 0x99) giving him back: the flag and the invisibility cleared, the time's end's afterimage and sound, MegaMan his own again (no button after it). Every difference of BN6's play from BN5's fails it.",
  "kind": "differential",
  "subject": "megaman",
  "foes": "54@52",
@@ -92,6 +92,6 @@
  ],
  "dslist": 1,
  "each": [
-  "080E2444:08E22F04:F0:4"
+  "080E2444:08E22B44:F0:4"
  ]
 }

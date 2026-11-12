@@ -45,7 +45,7 @@ WORK = os.path.join(ROOT, '.build', 'xnavirecipe')
 # are fixed by its AI index (src/emu/xnavi_recipe.h: XN_AI_OF, XN_ID_OF; src/emu/xnavi_sprites.c's list 2 number); a
 # Navi joins this list once its code is proven against BN5's own (tools/xdiff.py)
 NAVIS = ((12, 'ToadMan'), (11, 'KnightMan'), (8, 'ShadowMan'), (9, 'NumberMan'), (10, 'TomahawkMan'), (7, 'Colonel'), (0x16, 'the Dark Soul'),
-         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (18, 'GridMan'))
+         (14, 'BlizzardMan'), (13, 'ShadeMan'), (16, 'CosmoMan'), (4, 'NapalmMan'), (2, 'GyroMan'), (3, 'SearchMan'), (6, 'Meddy'), (15, 'CloudMan'), (5, 'MagnetMan'), (17, 'LarkMan'), (18, 'GridMan'))
 CONTROL = (1, 'HeatMan')
 SIX = (7, 8, 9, 10, 11, 12)
 DARK_SOUL = 0x16
@@ -903,6 +903,43 @@ def packed_sprites(r):
     return out
 
 
+# The swords' afterimage (the fourth kind's 0x28, LarkMan's copy since his move: tools/bn5_twins.py): its init loads the sprite
+# its spawner wrote ([r5+4] its list x 4, [r5+5] its number, 0x080E3648), the spawner 0x080E36DC taking that word in r4
+# (xchiprecipe.py AFTERIMAGE_SPAWN), so the load is the spawner's word and each spawn's word is set to BN6's
+AFTERIMAGE_LOAD = 0x080E3648
+
+
+def afterimage_sprites(r):
+    """the sprites its code's spawns of the afterimage name: (its literal's address, the word) for each, the literal loaded
+    into r4 or ORed into it (LarkMan's 0x08100D72: his side's byte first, then list 2's 0x11); a word made otherwise a
+    decision"""
+    import xchiprecipe as XC
+    f, out = r.f, set()
+    for w in f.walks.values():
+        for a, t in w.bls.items():
+            if t != XC.AFTERIMAGE_SPAWN:
+                continue
+            lit = None
+            for b in sorted((x for x in w.insns if x < a), reverse=True)[:14]:
+                i = w.insns[b]
+                if i.form in ('b', 'bx') or T.is_return(i):
+                    break
+                if not T.writes(i, 4):
+                    continue
+                if i.form == 'ldr_lit':
+                    lit = i.lit
+                elif i.form == 'orrs':
+                    v, chain = T.back_value(w, b, i.f[1])
+                    lit = w.insns[chain[0][0]].lit if chain and chain[0][1] == 'ldr_lit' and len(chain) == 1 else None
+                break
+            v = w.lits.get(lit) if lit is not None else None
+            if v is None or v > 0xFFFF or v & 3:
+                f.decide('sprite', f'{a:08X}: the afterimage spawned with a word made otherwise')
+                continue
+            out.add((lit, v))
+    return out
+
+
 def navi_ai_cmps(r):
     """its copied code's compares of a Navi's AI index with BN5's number (tools/bn5_navi_twins.py, NAVI_AI_CMPS): BN6's
     number for it, the instruction checked"""
@@ -1375,10 +1412,22 @@ def art_of(r, b5, b6, alloc):
         if to is not None and to != (lst, idx):
             f.numbers[lit] = (v, v & ~0xFFFF | 4 * to[0] << 8 | to[1],
                               f'its sprite: list {lst} {idx:#x} in BN5, list {to[0]} {to[1]:#x} in BN6 (a packed word\'s number)')
+    afterimages = afterimage_sprites(r)
+    for lit, v in sorted(afterimages):
+        lst, idx = (v & 0xFF) // 4, v >> 8 & 0xFF
+        to = bn6_place(lst, idx, 'load')
+        if to is not None and to != (lst, idx):
+            f.numbers[lit] = (v, v & ~0xFFFF | to[1] << 8 | 4 * to[0],
+                              f'its afterimage\'s sprite: list {lst} {idx:#x} in BN5, list {to[0]} {to[1]:#x} in BN6 (the word '
+                              f'the afterimage loads, 0x080E36DC\'s r4)')
     tables = sprite_tables(r, f)
     kinds = chip_tables()[0]
     for (l, v), sites in sorted(f.loads.items(), key=lambda x: str(x[0])):
         if (l is None or v is None) and all(s in {site for _, _, site in tables} for s, _ in sites):
+            continue
+        if (l is None or v is None) and all(s == AFTERIMAGE_LOAD for s, _ in sites):
+            f.notes.append(f'{AFTERIMAGE_LOAD:08X}: the afterimage loads the word its spawner wrote ({len(afterimages)} of its '
+                           f'own spawns set to BN6\'s; the chips\' and the Souls\' spawns MegaMan\'s own)')
             continue
         if (l is None or v is None) and all(s in kinds for s, _ in sites):
             for site in sorted({s for s, _ in sites}):

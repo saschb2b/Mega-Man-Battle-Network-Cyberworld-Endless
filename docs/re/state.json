@@ -198,6 +198,10 @@
     },
     {
       "date": "2026-11-12",
+      "what": "BN4's mood, emotion, its dark mood at an attack DarkChip's use and Full Synchro's aura located (bn4_battle.h BN4_MOOD_SET 0x0800F4DE, BN4_EMOTION 0x0800F49C, BN4_DARK_MOOD 0x0800D5C4, BN4_DARK_MOOD_PAST 0x0800D5D0, BN4_SYNCHRO_AURA 0x080CD276, BN4_AI_SYNCHRO 0x60; bn6_ai.h BN6_AI_SYNCHRO 0x5C; docs/rom/bn4.md). BN4's confusion after an attack DarkChip named (bn4_battle.h BN4_CONFUSE_STEP 0x0800AECA, BN4_CONFUSED_START), its source assumed, not traced."
+    },
+    {
+      "date": "2026-11-12",
       "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
     },
     {
@@ -211,6 +215,10 @@
     {
       "date": "2026-11-12",
       "what": "GridMan moved (docs/multirom/navis.md, GridMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_GRID_SPAWN_C6, BN5_GRID_ATTACK_POOL, BN5_GRID_EFFECT_5F): seats 17-18 for Nebula's two (AI 43-44, ids 0x3EC-0x3F3, FREE_NEBULA_NAVIS in code-low's new front); gridman_v1, gridman_v1_keys and gridman_sp PASS, five mutations caught; the third kind's 0x95 and the fourth's 0x58 his copy (his 0xC6 and 0xC8 freed of BN4's chips by their reservation, PR #376); an effect drawing its Navi's own battle sprite named at its place (own_sprite); the comparator knows the new room (XN_NEBULA_ROOM) and the 0xC6's Z leftover."
+    },
+    {
+      "date": "2026-11-12",
+      "what": "LarkMan moved (docs/multirom/navis.md, LarkMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_LARK_SPAWN_B0, BN5_LARK_SPAWN_BA, BN5_LARK_AFTERIMAGE_WORD, BN5_AFTERIMAGE_SPAWN, BN5_AFTERIMAGE_LOAD): seat 17, Navi AI 43, ids 0x3EC-0x3EF; larkman_v1, larkman_v1_keys and larkman_sp PASS, five mutations caught; the third kind's 0xBA, 0xC7, 0xCB and the fourth's 0x28 (the swords' afterimage) his copy, the chips and the Souls calling into it; an afterimage spawn's word set to the sprite's BN6 place (xnavirecipe.py afterimage_sprites); the chips' LarkMan and GridMan units on the Navis' battle sprites; the comparator maps a moved Navi's battle sprite by xnavi_sprites.c's places."
     },
     {
       "date": "2026-11-12",
@@ -242,6 +250,13 @@
       "name": "bn4_chip_counter1 to 3 and _idle: BN4's Counter moved, to the frame of its hit",
       "result": "python3 build.py xdiff with the four specs: each PASS over 58 frames (used at t55 inside a MettaurSP's counter window: 70, 30 and 0 HP left in both; at t30 outside it: untouched). Six mutations caught. Past t58 the battles part on what the counter starts, each engine's own first-kind object of name 0 (BN4's AI data points at it from +0x60, BN6's from +0x5C): not compared.",
       "meaning": "A misc routine that lives in its object's code moves with that object; a chip's proof can end where the engines' own aftermath begins, said in the spec."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
+      "name": "bn4_chip_drkvulcn and bn4_chip_elemflar to elemdark: DrkVulcn and the five Elem chips moved, BN4's dark rules left to its own battle",
+      "result": "python3 build.py xdiff bn4_chip_drkvulcn bn4_chip_elemflar bn4_chip_elemice bn4_chip_elemleaf bn4_chip_elemsand bn4_chip_elemdark: all PASS (DrkVulcn to its deleting hit at t104, the Elem chips over 300 frames, ElemDark by a dark MegaMan against a 250 HP Mettaur), nineteen mutations caught. Full Synchro's aura (the first kind's 0x5E) compared as each engine's own object; BN4's confusion at the fight's start ended by calm4 (assumed: its source not traced); its dark mood at the DarkChip's use skipped and a dark MegaMan's start mood of 0 given the NaviStats' 0x99 by mood4 (verified in the ROM, 0x0800D5A6-0x0800D5C8, 0x0800D718). ElemDark's shot takes BN4's third-kind sprite step, copied with the unit as Ligtnin's (BN6's nearest a frame ahead).",
+      "meaning": "An attack DarkChip proves against BN4 once BN4's own dark rules, which a run does not take, are left out of BN4's battle by the spec; a counter's Full Synchro compares across both engines."
     },
     {
       "feature": "BN4's chips in BN6's tables",

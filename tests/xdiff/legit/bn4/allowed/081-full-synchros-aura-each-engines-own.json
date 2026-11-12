@@ -1,0 +1,16 @@
+{
+ "name": "Full Synchro's aura, each engine's own",
+ "whose": "engine",
+ "kind": "T1",
+ "type": "0x5E",
+ "part": "obj",
+ "fields": "the first kind's 0x5E alone, in both frames: its +0's 0x04 where BN6's has it and BN4's not, its +4 to +7, its sprite state (+0x90 to +0xC7) and its place at its +0x64, BN4's MegaMan's AI data +0x60 against BN6's +0x5C; and of MegaMan's AI data those two words, each game's the aura and the other's 0 (tools/xdiff_bn4.py synchro_aura). Its holder, its life and every other byte compared as ever. Its NameID is 0 in both, BN4's read as BN6's 0 (tools/xdiff_snap.py identity: BN4's NameID 0 is MegaMan's on his own type alone)",
+ "why": "Full Synchro's aura is each engine's own object, the same of each: where MegaMan's emotion is 2 (Full Synchro) and his AI data keeps no aura, both games spawn the first kind's 0x5E through twin spawners (BN4 0x080CD276 from 0x0800D9C8, BN6 0x080C6482 from 0x080139F0: movs r0,#0x5e; the first kind's spawn, BN4 0x080032B8 / BN6 0x08003320, twins storing r0-r4 alike; then its side, its holder at +0x4C, its place at +0x64, itself into its place, +0xC 1), and its code runs each frame (BN4 0x080CD180, the first kind's table's 0x5E at 0x08003B9C; BN6 0x080C6388) setting up its sprite from each game's own art. Three things of it are each engine's own: BN6's spawner alone sets its +0's 0x04 (0x080C64A0-0x080C64A6: ldrb; movs r2,#4; orrs; strb), BN4's not; the spawn's r4, stored at its +4, is each caller's leftover, as neither caller sets r4 (BN4 0x0800D9A6-0x0800D9C8, BN6 0x080139C4-0x080139F0), and no code of the aura reads its +4 to +7 (BN4 0x080CD180-0x080CD276 and BN6 0x080C6388-0x080C64AA searched: no ldr, ldrh or ldrb of [r5,#4] to [r5,#7]); its sprite state (its tiles' place, palette slot and frames' pointers into its art) is its own art's; and each game keeps it in its own word of MegaMan's AI data, BN4's +0x60 (BN4_AI_SYNCHRO) and BN6's +0x5C (BN6_AI_SYNCHRO), which the aura's +0x64 points at. The trace does not lay BN4's word at BN6's place (src/dev/xdiff_bn4_trace.c ai_segs): BN4's unmapped words fill BN6's spare whole already, and its +0x5C would spill onto BN6's own fields. bn4_chip_elemflar at t52: BN4 +0 0x13, +4 0x13, BN6 0x17 and 0",
+ "evidence": [
+  "BN4 0x0800D9AC-0x0800D9C8: its emotion (BN4_EMOTION 0x0800F49C) 2, NaviStats +0x22 set 1 (0x0800D7AA), ldr r7,[r5,#0x58]; adds r7,#0x60; ldr r0,[r7]; tst; bne; bl 0x080CD276",
+  "BN6 0x080139DC-0x080139F0: its emotion (0x08015B54) 2, adds r7,#0x5c; ldr r0,[r7]; tst; bne; movs r1,#4; movs r3,#0x10; bl 0x080C6482",
+  "BN4 0x080CD27A movs r0,#0x5e; bl 0x080032B8; ldrb/strb +0x16; str r5,[r0,#0x4c]; str r7,[r0,#0x64]; str r0,[r7]; movs r1,#1; strb r1,[r0,#0xc]",
+  "BN6 0x080C6486 movs r0,#0x5e; bl 0x08003320; ldrh/strh +0x16; str r5,[r0,#0x4c]; str r7,[r0,#0x64]; str r0,[r7]; +0xC 1; then +0 |= 4 (0x080C64A0-0x080C64A6)",
+  "bn4_chip_elemflar: the aura spawned at t52 in both; bn4_chip_drkvulcn (mood4) at t61 in both"
+ ]
+}

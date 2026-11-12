@@ -34,6 +34,20 @@ void lab_battle_ask(const Encounter *e, int backdrop);
  * from the top left; NULL: the battle's own field): written over BN6's
  * last field in the core's copy while the battle is on, and put back */
 void lab_battle_panels(const uint8_t *panels);
+/* The builder's (lab.h): the battle `e` begun and held with its field up,
+ * its foes in and BN6's Custom screen a frame from opening, so that the
+ * builder shows BN6's own field and not a picture of one; `bare`: held
+ * before the foe its record names comes in, a field with nobody set. One
+ * shown already is put back first, so each stands on the frame the first
+ * began on. Called between frames, after the director's update.
+ * lab_battle_go lets the one held run on into its fight; when that ends,
+ * all is put back and lab_battle_result has how. lab_battle_leave puts
+ * all back without a fight. */
+void lab_battle_show(const Encounter *e, int backdrop, bool bare);
+bool lab_battle_held(void);
+bool lab_battle_loading(void);
+void lab_battle_go(void);
+void lab_battle_leave(void);
 /* Whether one is asked for or on */
 bool lab_battle_on(void);
 /* How the last one ended (LAB_NONE: none ended yet) */

@@ -421,8 +421,7 @@ static void hold_step(Side *g, const Spec *s) {
 
 /* (panels=) a BN4 spec's panels' types written in each game before its first fight frame (xdiff_bn4.c's xd4_panels_put) */
 static void panels_step(Side *g, const Spec *s) {
-	if (!g->paneled) xd4_panels_put(s, g->v.game);
-	g->paneled = true;
+	if (!g->paneled) { xd4_panels_put(s, g->v.game); g->paneled = true; }
 }
 
 /* (safe=1) MegaMan's collision data invulnerable, before each frame of the battle */
@@ -531,6 +530,7 @@ static bool step(Side *g, const Spec *s) {
 		panels_step(g, s);
 	}
 	if (battle && s->safe) keep_safe(v);
+	xd4_dark_rules(s, v->game, battle);   /* (calm4, confuse6, mood4: xdiff_bn4.h) */
 	if (custom && !g->decked) deck_put(g, s);
 	if (g->log) {
 		xd_frame(g->log, g->frame, t, battle, g->seeded);

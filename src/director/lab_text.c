@@ -8,12 +8,11 @@
 
 const char lab_title[] = "BATTLE LAB";
 const char lab_go[] = "BATTLE!";
-const char lab_info_label[] = "INFORMATION";
 const char *const lab_tabs[4] = { "FOES", "FIELD", "STAGE", "SETS" };
-const char lab_row_preset[] = "Start from";
+const char lab_row_preset[] = "Preset";
 const char lab_row_area[] = "Background";
 const char lab_row_song[] = "Song";
-const char lab_own_song[] = "The battle's own";
+const char lab_own_song[] = "Battle's own";
 const char lab_plain_field[] = "Plain";
 
 const char *lab_panel_name(int type) {
@@ -40,27 +39,25 @@ void lab_info_family(char *out, size_t n, int hp, int deleted) { snprintf(out, n
 void lab_info_gauge(char *out, size_t n, int deleted, int complete) { snprintf(out, n, "Battle data %d of %d.", deleted, complete); }
 
 void lab_info_lifted(char *out, size_t n, const char *name, int foes, int most) {
-	if (foes >= most) snprintf(out, n, "%d foes are set. Take one off first.", most);
-	else snprintf(out, n, "%s: set it on a panel.", name);
+	(void)name;
+	if (foes >= most) snprintf(out, n, "Take one off first.");
+	else snprintf(out, n, "Set it on a panel.");
 }
 
-void lab_info_panel(char *out, size_t n, const char *panel, const char *foe) {
-	if (foe && foe[0]) snprintf(out, n, "%s. %s stands here.", panel, foe);
-	else snprintf(out, n, "%s.", panel);
-}
+void lab_info_panel(char *out, size_t n, const char *panel, const char *foe) { snprintf(out, n, "%s.", foe && foe[0] ? foe : panel); }
 
 void lab_info_empty(char *out, size_t n) { snprintf(out, n, "No foes are set."); }
 
 void lab_info_result(char *out, size_t n, const LabResult *r) {
 	int cs = r->frames * 100 / 60, m = cs / 6000, sec = cs / 100 % 60;
 	cs %= 100;
-	if (r->end == LAB_WON && r->bust >= 11) snprintf(out, n, "Time %d:%02d:%02d. Level S. HP lost %d.", m, sec, cs, r->hp_lost);
-	else if (r->end == LAB_WON) snprintf(out, n, "Time %d:%02d:%02d. Level %d. HP lost %d.", m, sec, cs, r->bust, r->hp_lost);
-	else if (r->end == LAB_DELETED) snprintf(out, n, "MegaMan fell at %d:%02d:%02d.", m, sec, cs);
-	else snprintf(out, n, "Left at %d:%02d:%02d. HP lost %d.", m, sec, cs, r->hp_lost);
+	if (r->end == LAB_WON && r->bust >= 11) snprintf(out, n, "%d:%02d:%02d. Lv S. HP -%d.", m, sec, cs, r->hp_lost);
+	else if (r->end == LAB_WON) snprintf(out, n, "%d:%02d:%02d. Lv %d. HP -%d.", m, sec, cs, r->bust, r->hp_lost);
+	else if (r->end == LAB_DELETED) snprintf(out, n, "Deleted at %d:%02d:%02d.", m, sec, cs);
+	else snprintf(out, n, "Left at %d:%02d:%02d.", m, sec, cs);
 }
 
-void lab_set_words(char *out, size_t n, int slot) { snprintf(out, n, "Set %d", slot + 1); }
+void lab_set_words(char *out, size_t n, int slot) { snprintf(out, n, "%d", slot + 1); }
 
 void lab_set_value(char *out, size_t n, int foes) {
 	if (!foes) snprintf(out, n, "Empty");
@@ -73,8 +70,8 @@ void lab_info_set(char *out, size_t n, int foes, int bust, int frames, int hp_lo
 	cs %= 100;
 	if (!foes) snprintf(out, n, "Nothing set here.");
 	else if (!bust) snprintf(out, n, "No win yet.");
-	else if (bust >= 11) snprintf(out, n, "Best %d:%02d:%02d. Level S. HP lost %d.", m, sec, cs, hp_lost);
-	else snprintf(out, n, "Best %d:%02d:%02d. Level %d. HP lost %d.", m, sec, cs, bust, hp_lost);
+	else if (bust >= 11) snprintf(out, n, "Best %d:%02d:%02d. Lv S. HP -%d.", m, sec, cs, hp_lost);
+	else snprintf(out, n, "Best %d:%02d:%02d. Lv %d. HP -%d.", m, sec, cs, bust, hp_lost);
 }
 
 const char *lab_navi_word(int kind, int version) {

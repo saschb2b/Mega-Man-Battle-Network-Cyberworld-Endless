@@ -39,9 +39,9 @@ typedef struct {
 	XVirusFamily code;     /* its code alone: blocks, data, calls, words, immediates, numbers, the objects it spawns, what it draws */
 	const XcSong *songs;   /* its sounds copied in (NULL none) */
 	int nsongs;
-	uint16_t navis;        /* the Navis whose battle sprites its code draws, bit XN_SEAT(n) BN5's Navi of AI n (xnavi_recipe.h: Team
-	                          Colonel's six n - 7, the Darkloids n - 6; xnavi_sprites.h: list 2's 0x20 + its seat, installed before
-	                          its step) */
+	uint32_t navis;        /* the Navis whose battle sprites its code draws, bit XN_SEAT(n) BN5's Navi of AI n (xnavi_recipe.h: Team
+	                          Colonel's six n - 7, the Darkloids n - 6, Nebula's LarkMan and GridMan n; xnavi_sprites.h: list 2's
+	                          0x20 + its seat, installed before its step) */
 	uint8_t share;         /* (BN4's units) where not 0, its routine is one of unit `share` - 1's code, a block that unit moved: no code
 	                          of its own, its entry alone (WhitWeb2 and 3 in WhitWeb1's object's code) */
 	uint8_t wait;          /* (BN4's misc units) where not 0, the frames BN4's misc run waits after its routine before it ends the

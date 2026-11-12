@@ -4091,11 +4091,13 @@ static bool soul_moves(int kind, int from) {
 
 /* BN5's address bn5 at bn6 in a block of a track installed before the Souls' code: the moved objects', a Navi's, a
  * chips' unit's */
+enum { NAVIS_SEEN = 64 };   /* (BN5's moved Navis looked through: every one, past XN_HOMES_MAX's room since MagnetMan) */
+
 static bool copied_before(uint32_t bn5, uint32_t bn6) {
-	const XVirusFamily *fs[1 + XN_HOMES_MAX + XC_UNITS];
+	const XVirusFamily *fs[1 + NAVIS_SEEN + XC_UNITS];
 	int n = 0;
 	fs[n++] = &xnavi_objects_bn5;
-	for (int k = 0; k < xnavi_bn5_count && k < XN_HOMES_MAX; ++k) fs[n++] = &xnavi_bn5[k]->code;
+	for (int k = 0; k < xnavi_bn5_count && k < NAVIS_SEEN; ++k) fs[n++] = &xnavi_bn5[k]->code;
 	for (int k = 0; k < xchips_bn5_count && k < XC_UNITS; ++k) fs[n++] = &xchips_bn5[k].code;
 	for (int i = 0; i < n; ++i)
 		for (int b = 0; b < fs[i]->nblocks; ++b)
@@ -4269,6 +4271,7 @@ static void test_xnavi_static(void) {
 	/* (a floor, as the registry's chips that play below: a Navi moved adds a row to the table and changes no line
 	 * here, which every branch that moved one rewrote, 11 times in a month; the rows are held one by one) */
 	CHECK(xnavi_bn5_count >= 17, "xnavi: BN5's Navis listed (%d, no fewer than 17)", xnavi_bn5_count);
+	CHECK(xnavi_bn5_count <= NAVIS_SEEN, "xnavi: BN5's Navis listed (%d) within the tests' NAVIS_SEEN", xnavi_bn5_count);
 	for (int i = 0; i < xnavi_bn5_count; ++i) {
 		const XNavi *n = xnavi_bn5[i];
 		const XVirusFamily *f = &n->code;
@@ -7806,15 +7809,15 @@ static void test_lab_text(void) {
 	LabResult won = { .end = LAB_WON, .frames = 760, .bust = 9, .hp_lost = 20 }, best = { .end = LAB_WON, .frames = 3600 + 30, .bust = 11 };
 	LabResult fell = { .end = LAB_DELETED, .frames = 1966 }, left = { .end = LAB_LEFT, .frames = 59, .hp_lost = 5 };
 	lab_info_result(s, sizeof s, &won);
-	CHECK(!strcmp(s, "Time 0:12:66. Level 9. HP lost 20."), "lab: a win's time, level and HP lost (%s)", s);
+	CHECK(!strcmp(s, "0:12:66. Lv 9. HP -20."), "lab: a win's time, level and HP lost (%s)", s);
 	lab_info_result(s, sizeof s, &best);
-	CHECK(!strcmp(s, "Time 1:00:50. Level S. HP lost 0."), "lab: level 11 is S (%s)", s);
+	CHECK(!strcmp(s, "1:00:50. Lv S. HP -0."), "lab: level 11 is S (%s)", s);
 	lab_info_result(s, sizeof s, &fell);
-	CHECK(!strcmp(s, "MegaMan fell at 0:32:76."), "lab: a deletion names its time (%s)", s);
+	CHECK(!strcmp(s, "Deleted at 0:32:76."), "lab: a deletion names its time (%s)", s);
 	lab_info_result(s, sizeof s, &left);
-	CHECK(!strcmp(s, "Left at 0:00:98. HP lost 5."), "lab: a battle left (%s)", s);
+	CHECK(!strcmp(s, "Left at 0:00:98."), "lab: a battle left (%s)", s);
 	lab_info_set(s, sizeof s, 2, 11, 760, 0);
-	CHECK(!strcmp(s, "Best 0:12:66. Level S. HP lost 0."), "lab: a kept set's best (%s)", s);
+	CHECK(!strcmp(s, "Best 0:12:66. Lv S. HP -0."), "lab: a kept set's best (%s)", s);
 	lab_info_set(s, sizeof s, 2, 0, 0, 0);
 	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
 	lab_set_value(s, sizeof s, 1);
