@@ -43,6 +43,14 @@ CLIMB = {
 VIOLIN = L.guide({b: CHORDS[b] for b in (5, 6, 7)}, 'C5', rhythm=((0, 48), (48, 24), (72, 24)))
 
 
+# what the piece grown from this sketch keeps (v0_21_0_music.py): the A's
+# and the B's parts, the lead's key in a plan (both squares, the late
+# twin), no counter-voice in the A, the drop's thin band, the last chord's
+# top note
+STYLE = dict(A=dict(arp2='blips', bass2='pedal', kit2='anthem'), B=dict(arp2='blips', bass2='pedal', kit2='anthem', arp='sweep'),
+             lead='lead2', counter=None, drop=dict(arp2='blips', kit='half'), intro=dict(arp2='blips', pad_vel=64),
+             violin='C5', top='G5', offset=12, source=('bn4', '0x00'))
+
 def plan():
     A = dict(arp2='blips', bass2='pedal', kit2='anthem')
     p = {0: dict(arp2='blips', pad_vel=64)}

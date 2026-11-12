@@ -46,6 +46,13 @@ BRASS = L.guide({b: CHORDS[b] for b in (1, 2, 3, 4)}, 'G4')
 VIOLIN = L.guide({b: CHORDS[b] for b in (5, 6, 7)}, 'B5', rhythm=((0, 36), (36, 12), (48, 24), (72, 24)))
 
 
+# what the piece grown from this sketch keeps (v0_21_0_music.py): the A's
+# and the B's parts, the lead's key in a plan, the A's counter-voice, the
+# drop's thin band, the last chord's top note
+STYLE = dict(A=dict(arp='pairs', bass='drive', kit2='march'), B=dict(arp='both', bass='walk', stabs=True, kit2='march'),
+             lead='lead', counter='horn', drop=dict(arp='pairs', kit='half'), intro=dict(arp='pairs', pad_vel=64),
+             violin='B5', top='B5', offset=84, source=('bn6', '0x01'))
+
 def plan():
     A = dict(arp='pairs', bass='drive', kit2='march')
     p = {0: dict(arp='pairs', pad_vel=64)}

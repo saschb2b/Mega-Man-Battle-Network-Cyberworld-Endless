@@ -358,7 +358,7 @@ C4 = {'6': 'ENGINE', '4': 'CHIP'}
 # tags light without theirs)
 COLD = Shot(0, None, beats(0, (('navi-burner', 250, 2, N4), ('navi-cloud', 330, 2, N5),
                                ('arc3', 332, 2, {'6': 'AREA', '5': 'VIRUS', '4': 'VIRUS'}),
-                               ('lab-navi', 432, 2, {'6': 'CYBEAST'}))))
+                               ('lab-navi', 422, 2, {'6': 'CYBEAST'}))))
 
 
 def segments():
@@ -387,7 +387,7 @@ def segments():
             Shot(F(16), 'COUNTED ACROSS EVERY RUN', beats(F(16), ((lib, 364, 4, {'4': 'PAGE'}),))),
         ]),
         Segment(SEG4, '4', ('THE', 'BATTLE LAB'), 'THE BATTLE LAB', [
-            Shot(F(18), "A NAVI OF DAD'S LAB, IN LAN'S HP", beats(F(18), (('lab-hp', 156, 4, {'6': "LAN'S HP"}),))),
+            Shot(F(18), "A NAVI OF DAD'S LAB, IN LAN'S HP", beats(F(18), (('lab-hp', 148, 4, {'6': "LAN'S HP"}),))),
             Shot(F(19), 'SET FOES OF ANY GAME, SIDE BY SIDE', beats(F(19), (
                 ('lab-build', lab_at('mettaur', 44), 1, {'6': 'FOE'}),
                 ('lab-build', lab_at('draggin', 68), 1, {'6': 'FOE', '5': 'FOE'}),
