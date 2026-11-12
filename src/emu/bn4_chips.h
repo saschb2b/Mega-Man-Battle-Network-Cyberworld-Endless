@@ -308,4 +308,14 @@
                                            * 0x6B) on each of the eight in turn; sprite list 5's 0x14, sound 0x143 */
 #define BN4_T3_SPRITE_STEP    0x08014446u /* a third-kind object's sprite each frame (BN6's 0x0801BBF4; the first kind's 0x080143FC) */
 
+#define BN4_T3_HAMMER         0x4A        /* BigHamr's and GodHammr's hammer, the third kind's (0x080D68CC to 0x080D6BF8): an actor of 100 HP
+                                           * on the panel before MegaMan, run by BN4_ACTOR_RUN with BN4_HAMMER_STATES; set down with sound 0xB0
+                                           * (0x080D69AE), a wait, the swing: sound 0x122 (0x080D6A72), BN4_CAMERA_SHAKE_SET for 30 frames
+                                           * (0x080D6AB8), sound 0xA2 (0x080D6ABE) and its hit area (0x080CD7E2 at 0x080D6AD6) */
+#define BN4_HAMMER_STATES     0x080D698C  /* ... its eight states: its own the first, the third, the seventh and the eighth (0x080D69AC,
+                                           * 0x080D6B42, 0x080D69BE, 0x080D69E0), the engine's the rest; its set-down and wait store 6 and 7
+                                           * (0x080D69B4, 0x080D69D6), BN6's runner's 8 and 9 in the unit's copy */
+#define BN4_T4_HAMMER         0x26        /* ... its support object, the fourth kind's (0x080E4B88 to 0x080E4C3C), which the chip's routine
+                                           * spawns and which sets the hammer down */
+
 #endif

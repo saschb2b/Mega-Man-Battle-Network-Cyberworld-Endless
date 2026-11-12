@@ -509,6 +509,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	/* ... the sweep's third line's units, from 0x240 up: AquaUp's geyser, GreenWd's tower, Ligtnin's bolt */
 	{ XROM_BN4_RED_SUN_US, 0x120, SONG_GROWN_FIRST + 0x66 }, { XROM_BN4_RED_SUN_US, 0x13E, SONG_GROWN_FIRST + 0x67 },   /* (0x240, 0x241) */
 	{ XROM_BN4_RED_SUN_US, 0x143, SONG_GROWN_FIRST + 0x68 },   /* (0x242) */
+	/* ... BigHamr's and GodHammr's */
+	{ XROM_BN4_RED_SUN_US, 0xA2, SONG_GROWN_FIRST + 0x69 }, { XROM_BN4_RED_SUN_US, 0x122, SONG_GROWN_FIRST + 0x6A },   /* (0x243, 0x244) */
 	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
 	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
 	/* BN4's late families' (tools/xrecipe_bn4.py's LATE_SOUND_SLOTS), the grown table's 0x380 up (xvirus_recipe.h

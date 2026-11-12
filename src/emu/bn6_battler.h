@@ -84,4 +84,8 @@
 #define BN6_VB_PRIZE_CHIP_5   0x08
 #define BN6_VB_PRIZE_CODE_5   21
 
+#define BN6_SPRITE_PLACE_SET  0x0800307Cu /* an object's sprite's screen place: r0 and r1 stored at its sprite block's +0x0C and +0x0E, the
+                                           * block at the object's +2's high nibble times 16 (MegaMan's +0x90); the place with the camera's
+                                           * offset, which its shake moves alike for every object (BN4_CAMERA_SHAKE_SET's twin's) */
+
 #endif

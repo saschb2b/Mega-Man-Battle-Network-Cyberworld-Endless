@@ -67,6 +67,8 @@ MOVED = {
     181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
     184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
+    104: 0x90, 105: 0x90, 106: 0x90,   # BigHamr1-3: BN4's support 0x10 (bn4_chip_bighamr1-3)
+                         # GodHammr: the same routine, a Mega chip of it (bn4_chip_godhammr)
     82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
     193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
 }
