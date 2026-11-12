@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T17:30:00Z
-* **Update**: rom/net-maps.md (the map's BG controls: the 256-colour bit set on the layers' own map alone, Lan's HP at home garbled before one of BN4's areas since 0.20.0, fixed), rom/bn4.md (Net maps in 256 colours: the same, in a clause), GUIDE.md (BN4's virus families: nine, among the acts' viruses, no longer visitors in one battle in four).
