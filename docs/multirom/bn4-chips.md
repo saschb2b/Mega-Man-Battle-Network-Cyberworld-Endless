@@ -652,8 +652,6 @@ lethal hit there would compare each engine's deletion (its sound, which
 in BN4 takes the geyser's player 9 in the same frame), not the chip.
 Twelve mutations caught across the nine.
 
-<<<<<<< ours
-<<<<<<< ours
 **BigHamr1-3 are moved** (12 November 2026: ids 659-661, BN4's support
 0x10 at BN6's grown support routine 0x90). Its routine spawns a support
 object (the fourth kind's 0x26), which sets a hammer (the third kind's
@@ -678,16 +676,8 @@ hammer's final damage and plays its hurt sound (0xC8), BN6's finds none,
 both deleting the hammer by the hit's flag; BN6's hit pass on the
 struck actor is still to read (`bn4_chip_godhammr` at t57).
 
-**Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
-three Plus chips are left out), then BlakBarr's barrier; Binder,
-=======
-**Next:** FirePlus, BlakBarr's barrier and BlakWeap (calls 7, 12 and
-13: the other three Plus chips and Marking are left out); Binder,
->>>>>>> dev
-=======
 **Next:** BlakBarr's barrier and BlakWeap (calls 7, 12 and 13: the
 other three Plus chips and Marking are left out); Binder,
->>>>>>> dev
 SandRing and Ball are attack families, whose unit kind the spread
 chips brought (the bombs' family by `ATTACK_SUBS`, as SeekBom's unit). BugChain
 waits on the owner's call 11 (it copies a side's NaviCust bugs to the
