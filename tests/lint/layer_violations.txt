@@ -80,7 +80,6 @@ src/director/pet.c -> online/square_pet.h
 src/director/reward_pick_draw.c -> second/second_art.h
 src/director/reward_pick_draw.c -> second/second_card.h
 src/emu/battle_trace.c -> dev/xdiff_events.h
-src/emu/debug.c -> core/run.h
 src/emu/fast_forward_game.c -> dev/devtools.h
 src/emu/game_hooks.c -> dev/devtools.h
 src/emu/scene_emu.c -> core/start_3ds.h
