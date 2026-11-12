@@ -159,6 +159,39 @@ static uint32_t wait_stage(const XChipUnit *u, const XVirusFamily *code, uint32_
 	return at | 1u;
 }
 
+/* A BN4 Navi chip's unit whose object plays a sound as it steps MegaMan in (XChipUnit.step_in: GutPnch's 0xB0, BN4
+ * 0x080E91BC), which BN6's one Navi object does not: the word of BN6's object's states that names its last state
+ * (BN6_CHIP_NAVI_IN_REF) aimed at a stub in the unit's home (XC4_HOME_WAIT). For this unit's number, on the state's first
+ * frame, the stub steps MegaMan in as BN6's state does, plays the slot and goes on in BN6's state after its step's call;
+ * for every other chip, and on the wait's frames, it is the routine the word named before (BN6's own, or another unit's
+ * stub):
+ *   00 ldrb r0,[r5,#0x19]  02 cmp r0,#number  04 bne 24  06 ldrb r0,[r5,#0xb]  08 cmp r0,#0  0A bne 24  0C push {lr}
+ *   0E ldr r0,[r5,#0x4c]  10 movs r1,#0  12 ldr r3,=step  14 mov lr,pc  16 bx r3  18 ldr r0,=slot  1A ldr r3,=play
+ *   1C mov lr,pc  1E bx r3  20 ldr r0,=the wait  22 bx r0  24 ldr r0,=before  26 bx r0  28 the five words */
+static void step_in_stage(const XChipUnit *u) {
+	static const uint16_t thumb[20] = {
+		0x7E68, 0x2800, 0xD10E, 0x7AE8, 0x2800, 0xD10B, 0xB500, 0x6CE8, 0x2100, 0x4B06,
+		0x46FE, 0x4718, 0x4805, 0x4B06, 0x46FE, 0x4718, 0x4805, 0x4700, 0x4800, 0x4700,
+	};
+	uint32_t at = u->home + XC4_HOME_WAIT, before = xv_read32(BN6_CHIP_NAVI_IN_REF);
+	bool ours = (before & ~1u) >= XC4_HOMES && (before & ~1u) < XC4_CODE;
+	if (u->kind != XCHIP_NAVI || u->wait || XC4_HOME_VENEERS + xvirus_shims_room(&u->code) > XC4_HOME_WAIT ||
+	    (before != (BN6_CHIP_NAVI_IN | 1u) && !ours)) {
+		xv_fail("its step-in sound %#x: no Navi chip's unit, its shims reach its stub, or BN6's Navi object's last state is not at %08x",
+			u->step_in, (unsigned)BN6_CHIP_NAVI_IN);
+		return;
+	}
+	uint8_t *p = xv_put(at, XC4_WAIT_SIZE, true);
+	if (!p) return;
+	for (int i = 0; i < 20; ++i) put16(p + 2 * i, i == 1 ? (uint32_t)(thumb[i] | u->number) : thumb[i]);
+	put32(p + 0x28, before);
+	put32(p + 0x2C, BN6_CHIP_NAVI_STEP | 1u);
+	put32(p + 0x30, u->step_in);
+	put32(p + 0x34, BN6_PLAY_SOUND | 1u);
+	put32(p + 0x38, BN6_CHIP_NAVI_IN_WAIT | 1u);
+	xv_word(BN6_CHIP_NAVI_IN_REF, emu_read32(BN6_CHIP_NAVI_IN_REF), at | 1u);
+}
+
 /* its entry in its table: the grown attack families' (its family), or the grown routines' (its subfamily), each holding
  * its stub first; `fresh` where the routines' tables are staged in this step (their stub there already), else grown by an
  * earlier one (the other game's units'); `code` the unit's own, or the unit's whose block holds its routine (XChipUnit.share) */
@@ -184,6 +217,9 @@ static void entry_stage(const XChipUnit *u, const XVirusFamily *code, bool fresh
 	}
 	/* (a unit BN4's misc run waits for: its wrapper the entry) */
 	if (u->wait && !(to = wait_stage(u, code, to))) return;
+	/* (a Navi chip's unit whose object sounds as it steps MegaMan in: BN6's object's last state through its stub) */
+	if (u->step_in) step_in_stage(u);
+	if (xv_failed()) return;
 	/* (the grown routines are staged in this step: their stub there already; the attack families' grown before it) */
 	if (u->kind == XCHIP_ATTACK || !fresh) xv_word(at, stub, to);
 	else {
@@ -404,7 +440,7 @@ static void states_stage(const XChipUnit *u) {
 /* ---- BN4's units (xchips_bn4.h): support and misc routines and attack families (a state of BN4's MegaMan's at a number
  * of the grown attack families' own, XATTACK_BN4 on), each in its own region ---- */
 
-static const XvRegion region4 = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+static const XvRegion region4 = XC4_REGION;
 
 /* BN4's unit `i` staged: its home and number checked, its sounds copied, its code moved and its entry put; or, for a row
  * that shares an earlier unit's code (XChipUnit.share), its entry alone */
@@ -435,6 +471,31 @@ bool xchips_bn4_code_at(uint32_t to) { return to >= XC4_CODE && to < XC4_ART; }
 bool xchips_bn4_moved(int id) {
 	const XChipReg4 *r = xreg4_at(id);
 	return r && r->how == XREG_MOVED;
+}
+
+/* XC4_FIRST_ACTOR (the project's own Thumb, xchips_bn4.h): r0 the side; its four actors' words from BN6's battle state
+ * (the toolkit's +0x18) at BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP, the first that is one in r0, else 0;
+ * mov pc,lr as the stubs */
+static void first_actor_stage(void) {
+	static const uint16_t code[] = {
+		0x4651,   /* mov r1, r10 */
+		0x6989,   /* ldr r1, [r1, #0x18]: the battle state */
+		0x0100,   /* lsls r0, r0, #4: a side's four words */
+		0x1809,   /* adds r1, r1, r0 */
+		0x31D0,   /* adds r1, #0xd0: BN6_BATTLE_PLAYERS */
+		0x2204,   /* movs r2, #4 */
+		0x6808,   /* ldr r0, [r1] */
+		0x2800,   /* cmp r0, #0 */
+		0xD102,   /* bne past */
+		0x3104,   /* adds r1, #4 */
+		0x3A01,   /* subs r2, #1 */
+		0xD1F9,   /* bne back to the load */
+		0x46F7,   /* mov pc, lr */
+		0x46C0,   /* nop */
+	};
+	_Static_assert(sizeof code <= FREE_BN4_CHIP_STUBS_END - FREE_BN4_CHIP_STUBS, "the first actor's room");   /* (its numbers: tests/test_core.c) */
+	uint8_t *p = xv_put(XC4_FIRST_ACTOR, sizeof code, true);
+	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
 }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
@@ -476,6 +537,7 @@ static bool units4_install(bool navis) {
 	}
 	xv_tx_begin();
 	bool fresh = !navis && tables_stage();
+	if (!navis && !xv_failed()) first_actor_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
 	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
 	if (!navis && !xv_failed()) xg_page4_stage();

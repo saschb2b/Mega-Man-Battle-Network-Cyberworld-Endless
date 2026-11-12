@@ -508,6 +508,7 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x133, SONG_GROWN_FIRST + 0x2A }, { XROM_BN4_RED_SUN_US, 0xC8, SONG_GROWN_FIRST + 0x2B },   /* (0x204, 0x205) */
 	/* ... the bombs' state's throw (SeekBom's unit) */
 	{ XROM_BN4_RED_SUN_US, 0x90, SONG_GROWN_FIRST + 0x2C },   /* (0x206) */
+	{ XROM_BN4_RED_SUN_US, 0xA4, SONG_GROWN_FIRST + 0x2D },   /* (0x207: GutPnch's fist's punch) */
 	/* ... the sweep's third line's units, from 0x240 up: AquaUp's geyser, GreenWd's tower, Ligtnin's bolt */
 	{ XROM_BN4_RED_SUN_US, 0x120, SONG_GROWN_FIRST + 0x66 }, { XROM_BN4_RED_SUN_US, 0x13E, SONG_GROWN_FIRST + 0x67 },   /* (0x240, 0x241) */
 	{ XROM_BN4_RED_SUN_US, 0x143, SONG_GROWN_FIRST + 0x68 },   /* (0x242) */
@@ -526,6 +527,8 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0xA8, 0x285 }, { XROM_BN4_RED_SUN_US, 0x14C, 0x329 },
 	/* ... DarkBomb's bomb, its two sounds (the dark chips' 0x286 and 0x287) */
 	{ XROM_BN4_RED_SUN_US, 0xA9, 0x286 }, { XROM_BN4_RED_SUN_US, 0xBD, 0x287 },
+	/* ... BugCurse's curse (0x288) */
+	{ XROM_BN4_RED_SUN_US, 0x141, 0x288 },
 };
 
 int xsong_sound_slot(int xrom, int song) {

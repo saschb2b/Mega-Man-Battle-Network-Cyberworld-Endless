@@ -67,6 +67,7 @@ MOVED = {
     181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
     184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
+    303: 0xAA,                         # BugCurse: BN4's support 0x2A
     285: 0xCC,                         # FirePlus: BN4's support 0x4C, its kind 0 (bn4_chip_fireplus); 286-288 left out (call 12)
     82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
     193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
@@ -93,6 +94,7 @@ MOVED.update({
 # NAVI_TWIN (XREG_MOVED with a twin: the twin's family alone)
 NAVI = {
     224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
+    154: 0xB6, 155: 0xB6, 156: 0xB6,   # GutPnch1-3: BN4's support 0x36, its Navi the first kind's 0x42, a GutsMan who punches (bn4_chip_gutpnch1-3)
     225: 0x85,                         # GutsMnSP: the same Navi, his power BN4's computed 1002, BN6's 1206 (NaviPowers; bn4_chip_gutsman_sp)
 }
 NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)

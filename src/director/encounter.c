@@ -267,8 +267,16 @@ static void lean_row(int id) {
 
 /* The reward pick, as a battle ends (bn6f sub_80AA910, the rows' one
  * reader): the rows of the enemies it picks from, leaned just before. */
+static bool unpaid;   /* the battle watched pays nothing (emu_battle_unpaid) */
+
 static HookAct picking(HookRegs *r, void *user) {
 	(void)user;
+	/* (a battle that pays nothing: the pick answered at its first instruction with no entry of any row, as a row's
+	 * empty entry is, so BN6's results screen has nothing to show or give) */
+	if (unpaid) {
+		r->r[0] = REWARD_NONE;
+		return HOOK_RETURN;
+	}
 	/* (a group's battle: the pick handed its paying enemy alone, where it is among those spawned: the list from it, one
 	 * long; nothing of the battle's state written) */
 	for (uint32_t i = 0; pays_on && i < r->r[1] && i < 8; ++i)
@@ -336,8 +344,11 @@ bool emu_battle_unwatch(void) {
 	bool spared = battle_spare_down();
 	battle_spare_arm(false);
 	cap = hp_from = 0;
+	unpaid = false;
 	return spared;
 }
+
+void emu_battle_unpaid(void) { unpaid = true; }
 
 void emu_battle_hp(int from, int to) {
 	if (from <= 0 || to <= 0 || to == from) return;

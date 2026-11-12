@@ -114,6 +114,8 @@
 #define BN6_T1_ANIM           0x10        /* an object's animation (CurAnim, u8: 0x0800F2B6 sets it) */
 #define BN6_T1_PARENT         0x4C        /* an object's parent (a charge glow's owner, BN5's the same: 0x080E0E46) */
 #define BN6_BATTLE_PLAYER_STEP 0x10       /* ... bytes from one side's to the next */
+#define BN6_BATTLE_PLAYER_SLOTS 4         /* ... a side's words: its actors, a virus too (Counter's walk strikes them; bn6f
+                                           * BATTLE_ACTORS_PER_SIDE), its MegaMan first on his side */
 #define BN6_BATTLE_SETTINGS   (BN6_BATTLE_STATE + 0x3C) /* u32 the battle's BattleSettings; its +3 the mode (0x0802D234), BN6_BATTLE_LINK a link */
 #define BN6_SETTINGS_MODE     0x03        /* a BattleSettings' +3: the battle's mode (0x0802D242), BN6_BATTLE_LINK a link */
 #define BN6_BATTLE_LINK       1           /* BN6_SETTINGS_MODE: a link battle (where neither game offers UNITE) */

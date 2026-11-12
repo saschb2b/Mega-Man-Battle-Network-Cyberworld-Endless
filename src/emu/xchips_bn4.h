@@ -43,6 +43,14 @@
 #define XV_SPAWN4_3   (XC4_PAGE_CODE + 0x20u)   /* ... its spawners, as XV_SPAWN_3, XV_SPAWN_3_LAST and XV_SPAWN_3_FIRST (BN4's 0x080032F0, */
 #define XV_SPAWN4_3_LAST (XC4_PAGE_CODE + 0x60u)   /* ... 0x0800330C, */
 #define XV_SPAWN4_3_FIRST (XC4_PAGE_CODE + 0xA0u)  /* ... 0x08003328) */
+#define XC4_FIRST_ACTOR FREE_BN4_CHIP_STUBS /* a side's first actor (r0 the side): the first of its four in BN6's battle state's
+                                       * actors (BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP) that is one, else 0; BN4's
+                                       * 0x0800C456 for the other side's three, which BN6's twin (0x080103BC) answers with its
+                                       * MegaMan alone: the project's own Thumb (xchips_code.c), BugCurse's target */
+/* Where a unit's code and art may go and its calls go besides BN6's routines (xvirus_recipe.h XvRegion): the code and the art's
+ * rows, the chips' stubs (xchips_code.h XC_STUBS) and BN4's own (XC4_FIRST_ACTOR) */
+#define XC4_REGION { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS), \
+	.stubs2 = FREE_BN4_CHIP_STUBS, .stubs2_end = FREE_BN4_CHIP_STUBS_END }
 #define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)

@@ -1,6 +1,12 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built: the other games' panels on FIELD, BN5's lava, sea and magnet panel and BN4's Hole as BN6's engine holds them, how a type past a field's nibble is set, the proof; BN4's types 5 and 0xA named as not in the engine).
+* **Update**: project/merging.md (What restore leaves alone, new section: a page resolved by hand is never merged anew; lint fails on conflict markers), code/tests.md (tests/test_generated.py, new row).
+* **Update**: multirom/bn4-chips.md (BugCurse moved on the project's first-actor routine; a BN6 folder of 30 Gigas never deals), rom/bn4.md (a side's first actor), devtools/differential.md (a Giga's spec's folder).
+* **Update**: game/battle-lab.md (Built: BN5's Darkloids and Team ProtoMan's five moved Navis in the Lab, a Darkloid open at one dark board won and noted by its version, the five as guardians once they guard; the proof).
+* **Update**: game/battle-lab.md (Built: the result pays nothing, BN6's reward pick answered with no entry so its RESULT shows NO DATA; the design's line and the test battle's note), rom/battle.md (Battle rewards: the pick's first instruction, what RESULT shows for 0xFFFF, how to verify).
+* **Update**: multirom/bn4-chips.md (GutPnch1-3 moved as a Navi chip's unit: its object's sound as MegaMan steps in, the punch's bits), rom/bn4.md (GutPnch's code, new row, with BN6's Navi object's last state), devtools/chip-recipe-generator.md (a Navi chip's object's step-in sound, `STEP_IN`), devtools/differential.md (a poke of a spec not BN4's kept out of BN4's chip units' copies).
 * **Update**: multirom/bn4-chips.md (DarkBomb and DrkSpred moved, the bug an attack DarkChip gives cleared by calm4, DrkCanon waiting on BN4's computed powers), rom/bn4.md (the bug in the battle NaviStats), devtools/differential.md (calm4 widened).
 * **Update**: game/battle-lab.md (Built: the stage takes every game's, BN5's and BN4's areas' battle backgrounds and installed songs on STAGE, each BN6 area's second background, how a set keeps them, the proof; the panels BN6 has no type for named as a move of their own), code/director.md (`lab_stage.c`).
 * **Update**: multirom/bn4-chips.md (FirePlus moved: the grass; its timer kept nowhere and the HUD's icon not moved; call 12's wording), devtools/chip-recipe-generator.md (UNIT_AIMS: a call aimed by hand at a stub), rom/bn4.md (the Plus chips' object and timers, the player's tick, Marking: a new row).

@@ -8,6 +8,7 @@
 
 #include "bn6.h"
 #include "bn6_forms.h"
+#include "bn6_panels.h"
 #include "debug.h"
 #include "director_layer.h"
 #include "director_state.h"
@@ -36,6 +37,9 @@ static struct {
 	uint32_t rng;        /* ... and the engine's own dice, so that a set shown again rolls its background the same */
 	bool painted;        /* its field is ours: BN6's last field's bytes in the core's copy, */
 	bool ours;           /* ... written there now */
+	uint8_t types[18];              /* ... its panels' types whole, row by row: one past a field's nibble (BN4's Hole, 16) is written
+	                                      * into the battle's own panels once BN6 has made them */
+	bool wide, wide_set; /* ... there is one, and it is written */
 	uint8_t field[BN6_FIELD_SIZE], was[BN6_FIELD_SIZE];   /* ... ours and BN6's */
 	LabResult result, last;   /* the battle under way's, and the last one fought to its end */
 } L;
@@ -62,11 +66,17 @@ void lab_battle_ask(const Encounter *e, int backdrop) {
 
 void lab_battle_panels(const uint8_t *panels) {
 	L.painted = panels != NULL;
+	L.wide = false;
 	if (!panels) return;
+	for (int i = 0; i < 18; ++i) {
+		L.types[i] = panels[i];
+		L.wide |= panels[i] > 15;
+	}
 	/* (a field's bytes: a u32 a row, a nibble a column from the left) */
 	for (int row = 0; row < 3; ++row) {
 		uint32_t w = 0;
-		for (int col = 0; col < 6; ++col) w |= (uint32_t)(panels[row * 6 + col] & 15) << (4 * col);
+		/* (a type past the nibble stands as plain until it is written, wide_write) */
+		for (int col = 0; col < 6; ++col) w |= (uint32_t)(panels[row * 6 + col] > 15 ? BN6_PANEL_PLAIN : panels[row * 6 + col]) << (4 * col);
 		for (int k = 0; k < 4; ++k) L.field[row * 4 + k] = (uint8_t)(w >> (8 * k));
 	}
 }
@@ -90,7 +100,7 @@ static bool begin(void) {
 	L.backdrop = encounter_backdrop;
 	L.hp = emu_read16(BN6_NAVI_HP);
 	L.rng = rng_state();
-	L.fought = L.held = false;
+	L.fought = L.held = L.wide_set = false;
 	L.in_battle = 0;
 	L.result = (LabResult){ .before = emu_debug_on() ? ram_hash() : 0 };
 	D.lab = true;
@@ -102,6 +112,7 @@ static bool begin(void) {
 		L.ours = true;
 	}
 	emu_battle_watch(0, true);
+	emu_battle_unpaid();
 	set_encounter(&L.e, true);
 	return true;
 }
@@ -192,6 +203,21 @@ void lab_battle_leave(void) {
 			(unsigned)before, (unsigned)(emu_debug_on() ? ram_hash() : 0), run_same ? "untouched" : "CHANGED, put back", field_back ? "as it was" : "NOT put back");
 }
 
+/* The painted field's types past a field's nibble into the battle's own panels (rows and columns from 1, 8 a row),
+ * once BN6 has made them plain from the field's bytes: the type and the type drawn, the flags BN6's own update's */
+static void wide_write(void) {
+	if (!L.painted || !L.wide || L.wide_set || emu_read8(BN6_FIELD_PANELS + (BN6_FIELD_COLUMNS + 1u) * BN6_PANEL_SIZE + BN6_PANEL_TYPE) == 0) return;
+	for (int row = 0; row < 3; ++row)
+		for (int col = 0; col < 6; ++col) {
+			uint8_t type = L.types[row * 6 + col];
+			uint32_t at = BN6_FIELD_PANELS + ((uint32_t)(row + 1) * BN6_FIELD_COLUMNS + (uint32_t)(col + 1)) * BN6_PANEL_SIZE;
+			if (type <= 15) continue;
+			emu_write(at + BN6_PANEL_TYPE, &type, 1);
+			emu_write(at + BN6_PANEL_ANIM, &type, 1);
+		}
+	L.wide_set = true;
+}
+
 /* whether the battle shown has its field up as the builder wants it: its foes all in and BN6's Custom screen about to
  * open (its state's first byte 4, a frame before its window slides in), or for a field with no foe the frame before
  * the first comes in */
@@ -219,6 +245,7 @@ bool lab_battle_frame(void) {
 	if (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE) {
 		L.fought = true;
 		++L.in_battle;
+		wide_write();
 		emu_battle_release();
 		if (L.show && sub == BN6_SUB_BATTLE && field_up()) L.held = true;
 		return true;

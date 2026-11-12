@@ -115,6 +115,10 @@
 #define BN6_CHIP_NAVI_OWN     0x0C        /* ... its step (+9) while its own states run (0x10 after them; 0, 4 and 8 its turn's wait and name) */
 #define BN6_CHIP_NAVI_BUSY    0x18        /* ... its +0x18: the byte the Navi sets to 1 as he is spawned and clears when he is done (r7) */
 #define BN6_CHIP_NAVI_SUB     0x19        /* ... its +0x19: the chip's subfamily, its routine of BN6_NAVI_ROUTINES (the spawn's r3, +0x3C) */
+#define BN6_CHIP_NAVI_IN      0x080E2C38u /* ... its last state (+0xA 0xC): unless its subfamily is 0 or 0x17, MegaMan stepped in
+                                             (BN6_CHIP_NAVI_STEP, at 0x080E2C4E), then 0x1E frames from BN6_CHIP_NAVI_IN_WAIT */
+#define BN6_CHIP_NAVI_IN_REF  0x080E2B90u /* ... the word of its states' table (0x080E2B84, four) that names that state */
+#define BN6_CHIP_NAVI_IN_WAIT 0x080E2C52u /* ... the state after its step's call: movs r0,#0x1e into +0x20, its lr still pushed */
 #define BN6_CHIP_NAVI_STEP    0x080E266Eu /* MegaMan stepped out (r1 1) or in (r1 0) for a Navi chip: r0 his object; the first kind's 0x2D
                                              (0x080C27C2), which knows his forms */
 #define BN6_REGION_SPAWN_FROZEN 0x080C6C16u /* a collision region spawned (0x080C6BDA) and its +0 given bit 0x10: a chip's Navi's hit, run in

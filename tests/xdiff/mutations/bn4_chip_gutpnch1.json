@@ -1,0 +1,42 @@
+[
+ {
+  "name": "BN6's Navi object's last state its own again",
+  "spec": "bn4_chip_gutpnch1",
+  "poke": [
+   "080E2B90:080E2C39:4"
+  ],
+  "what": "the word of BN6's Navi object's states that names its last state (BN6_CHIP_NAVI_IN_REF) BN6's own routine where the unit's install aims it at its stub: MegaMan steps in without BN4's object's 0xB0"
+ },
+ {
+  "name": "the step-in's sound another",
+  "spec": "bn4_chip_gutpnch1",
+  "poke": [
+   "088F67F0:0207:4"
+  ],
+  "what": "the stub's slot (the unit's home, XC4_HOMES + 0x7400, its XC4_HOME_WAIT + 0x30) 0x207, the punch's, where the unit carries 0x1E2: another song as MegaMan steps in"
+ },
+ {
+  "name": "the punch's bits BN4's own",
+  "spec": "bn4_chip_gutpnch1",
+  "poke": [
+   "080C855A:2721"
+  ],
+  "what": "the Navi's copy's hit's bits (movs r7,#0x21 at BN4 0x080C855A) BN4's again where the recipe gives 0x61: BN6's struck pass pushes alone, the Mettaur slid back and not struck"
+ },
+ {
+  "name": "GutPnch1's power another",
+  "spec": "bn4_chip_gutpnch1",
+  "poke": [
+   "08C072EA:0050:2"
+  ],
+  "what": "the registry's record 668's power (the grown chip table, +0x1A) 80 where BN4's GutPnch1 has 100: the Mettaur left 60"
+ },
+ {
+  "name": "GutPnch1's routine GutsMan's chip's",
+  "spec": "bn4_chip_gutpnch1",
+  "poke": [
+   "08C072DC:85:1"
+  ],
+  "what": "record 668's subfamily 0x85, GutsMan's chip's entry of BN6's grown Navi routines, where GutPnch's is 0xB6: his shockwave down the row, no punch"
+ }
+]

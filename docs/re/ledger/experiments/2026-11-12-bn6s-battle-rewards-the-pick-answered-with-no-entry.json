@@ -1,0 +1,8 @@
+{
+  "feature": "BN6's battle rewards",
+  "date": "2026-11-12",
+  "name": "The reward pick answered with no entry",
+  "result": "With the pick at 0x080AC180 answered 0xFFFF at its first instruction, BN6's RESULT showed GET DATA with an empty name and NO DATA and gave nothing; the same battle unanswered showed Rflectr1 C. Work RAM hash after the test battle the one before.",
+  "meaning": "A battle can pay nothing on BN6's own results screen without a patch to it: the Battle Lab's test battles do (emu_battle_unpaid).",
+  "link": "../rom/battle.md"
+}

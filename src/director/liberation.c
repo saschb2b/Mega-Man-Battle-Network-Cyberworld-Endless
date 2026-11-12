@@ -559,6 +559,7 @@ static void fight_won(bool one_turn) {
 	bool back = false;
 	if (LB.fight == LIB_FIGHT_DARKLOID) {
 		/* (his panel liberated with him: the exit shows on it) */
+		lib_darkloid_beaten();
 		LB.b.unit[0].gone = true;
 		LB.b.kind[LB.fy][LB.fx] = LIB_CLEAN;
 		lib_look_freed(LB.fx, LB.fy);

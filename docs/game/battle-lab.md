@@ -293,8 +293,8 @@ The builder opens on the last set fought.
 - **Leaving.** BN6's own way out: L on the Custom screen, which in a
   test never fails.
 - **The result.** BN6's RESULT gives the delete time and the busting
-  level; the reward's box stays empty (how BN6's RESULT is shown without
-  a reward is a reverse-engineering step of the build). Back in the
+  level; the reward's box stays empty (BN6's own NO DATA, below: Built,
+  The result pays nothing). Back in the
   builder the information box holds the set's last and best: time, level,
   HP lost.
 - **Records.** Kept for four saved sets in the profile (a set is its
@@ -370,8 +370,9 @@ is used.
   - *Not a proof*: an autopilot run with a test battle in it rolls the
     same battles in the same order, but fights them otherwise, since the
     autopilot presses by the real frame's count.
-  - The reward's box on BN6's RESULT is not emptied yet: what it shows
-    is given and then put back with the rest.
+  - The reward's box on BN6's RESULT was not emptied at first: what it
+    showed was given and then put back with the rest (emptied since,
+    below).
 
 - **The builder's screen** (step 3), behind the dev steps `lab open` and
   `lab all` (`src/director/lab.c`, its picture `lab_draw.c`, its words
@@ -393,8 +394,8 @@ is used.
     with the result in the information box (time, busting level, HP
     lost).
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
-    BN5's and BN4's panels, backgrounds and songs, the saved sets (all but
-    the panels built since, below).
+    BN5's and BN4's panels, backgrounds and songs, the saved sets (all
+    built since, below).
 
 - **The keeper and the LabPass** (step 4), behind `--dev lab`
   (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
@@ -469,7 +470,8 @@ is used.
   chosen. Seen headless: BlastMan EX set and fought from `lab all`; Bass
   and the Cybeast listed and Bass fought for a profile with a win over
   each (`--dev bass=1,beast=1`); ElecMan V1 noted in the profile after a
-  guardian's battle won. Not listed: BN5's Darkloids and Team ProtoMan.
+  guardian's battle won. BN5's Darkloids and Team ProtoMan's Navis came
+  after (below).
 
 - **The field is the battle's own** (the owner's call, 12 November
   2026: "why not using the actual field and spawn them in? doing nothing
@@ -540,9 +542,81 @@ is used.
   chosen, START: the battle ran on with background 9 and BN6's song
   0x28 playing, the slot BN4's song 0x12 was copied to; the work RAM's
   hash after leaving the one before opening (45e79931), the run
-  untouched. Not here: BN5's and BN4's panels that BN6's engine has no
-  type for (sand, metal, magnet, lava), which are a move of their own
-  into BN6's battle engine.
+  untouched. The panels came after (below).
+
+- **The other games' panels** (`src/director/lab.c`,
+  `lab_battle.c`). FIELD's panels turn on past BN6's twelve through the
+  four of the other games that stand in BN6's engine
+  ([One net](../multirom/one-net.md), Lava and sea, The magnet panel;
+  [BN4's chips](../multirom/bn4-chips.md), The Hole panel): "BN5 Lava",
+  "BN5 Sea", "BN5 Magnet" and "BN4 Hole", each where its game's ROM is
+  read and its install whole (`xpanels_has`), named after their game as
+  STAGE names theirs. They behave as moved: lava and sea run out to
+  plain after BN5's 960 frames, a field's start counting as their
+  making; the magnet panel pulls; the Hole is stood on as plain. A
+  field's bytes hold a nibble a panel, so lava, sea and the magnet panel
+  (13-15) go in the painted field as BN6's types do, and the Hole (16)
+  is written into the battle's own panels once BN6 has made them, its
+  type and the type drawn, before the field is held. A set keeps the
+  type; with its game's ROM away the panel is fought as plain. Seen
+  headless (`0:lab all`, seed 15, both ROMs read): lava, sea, a magnet
+  panel and a Hole painted on the foes' side and a sea under MegaMan,
+  each standing in the held battle at once in its own game's tiles and
+  colours; the fight run 1300 frames, lava and sea plain again, the
+  magnet panel and the Hole as they were; another with the four, won
+  (182 frames, level 8), the work RAM's hash after it the one before
+  opening (45e79931), the run untouched. Not in BN6's engine, so not
+  here: BN4's own types 5 and 0xA, the one that holds what stands on it
+  ([BN4 Red Sun's tables](../rom/bn4.md), Panel types and effects: 5's
+  code unread), each a move of its own.
+
+- **BN5's Darkloids and Team ProtoMan's Navis**
+  (`src/director/lab_navis.c`). The Lab lists every Navi of BN5's that
+  stands in BN6's engine, not its guardians alone: the four Darkloids
+  (ShadeMan, BlizzardMan, CloudMan, CosmoMan) and Team ProtoMan's five
+  moved (GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy; ProtoMan
+  himself is not moved, and BN6's ProtoMan stays the rival's), each V1
+  to SP, his battle his moved id's as a guardian's is.
+  - *A Darkloid opens at one dark board won over him*, in the version
+    beaten there (the act's): a board is a whole layer's work, so one
+    win is the feat, as with Bass and the Cybeast; two, as a guardian's
+    NaviCode asks, would be two dark layers with the same Darkloid by
+    the dice. His win has no rival's record (he guards no area, and a
+    record there would name him to the town, the Glitch layer's forms
+    and the milestones), so the board notes the version alone
+    (`lib_darkloid_beaten`, `Profile.navi_beaten`), from this build on:
+    a board won before it is not known.
+  - *Team ProtoMan's five open as guardians do*, at two wins, in the
+    versions beaten. No run meets them yet
+    ([Team ProtoMan](team-protoman.md), The build, unit 7), so until
+    they guard they stand on the dev list alone (`lab all`) and a
+    player sees no row of theirs.
+  - Seen headless (`0:lab all`, seed 15): the list's end reads the four
+    Darkloids, BN4's Navis, the five and Nebula's two with their own
+    HP (Meddy 900, CloudMan 700 at V1); Meddy V1 set, fought and won
+    (446 frames, level 7); CloudMan SP (1500 HP) set and fought with no
+    dev power: his clouds and thunder took MegaMan's 100 HP in 48
+    frames, the sparing blow ended it ("Deleted at 0:00:80."), the
+    builder back. The work RAM's hash after each the one before opening
+    (45e79931), the run untouched.
+  - The earning seen too: the autopilot through seed 1's act 2 board
+    (`--dev dark,god,onehit`, from layer 5) deleted CloudMan V1 there
+    ("darkloid 32 deleted at version 0, noted for the Battle Lab"); a
+    new run on that profile, the Lab opened with no dev list
+    (`0:lab open`): "CloudMan V1", HP 700, Beaten 1, set on the field.
+
+- **The result pays nothing** (`emu_battle_unpaid`,
+  `src/director/encounter.c`). In a test battle BN6's reward pick is
+  answered at its first instruction with no entry (0xFFFF, as a row's
+  empty one is; [The battle](../rom/battle.md), Battle rewards), so
+  BN6's own RESULT shows its delete time and busting level, and under
+  GET DATA an empty name and NO DATA where a chip's picture stands;
+  nothing is given. Before, it showed a real reward (Rflectr1 C for a
+  Mettaur at level 9), which the snapshot then took back. Seen headless
+  (`0:lab all`, seed 15, `--dev god,onehit`): a Mettaur deleted in 122
+  frames at level 9, RESULT with NO DATA, the builder back with
+  "0:02:03. Lv 9. HP -0."; the work RAM's hash the one before opening
+  (45e79931), the run untouched.
 
 ## Build order
 

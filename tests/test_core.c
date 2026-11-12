@@ -101,6 +101,7 @@
 #include "lz.h"
 #include "xprograms.h"
 #include "bn6.h"
+#include "bn6_forms.h"
 #include "darkinvs_room.h"
 #include "xpanels.h"
 #include "visitor_families.h"
@@ -4374,6 +4375,18 @@ static void test_free_space(void) {
 		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
 	}
 	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
+	/* (a unit whose object sounds as it steps MegaMan in, XChipUnit.step_in: a Navi chip's alone, no wrapper's place taken
+	 * twice, the slot one of the songs it copies) */
+	int step_ins = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (!u->step_in) continue;
+		bool copied = false;
+		for (int k = 0; k < u->nsongs; ++k) copied = copied || u->songs[k].slot == u->step_in;
+		step_ins += u->kind == XCHIP_NAVI && !u->wait && copied;
+		CHECK(u->kind == XCHIP_NAVI && !u->wait && copied, "chips: %s's step-in sound is a Navi chip's unit's, a song it copies", u->code.name);
+	}
+	CHECK(step_ins >= 1, "chips: a BN4 Navi chip's unit carries its object's step-in sound (GutPnch's, %d)", step_ins);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -5410,7 +5423,10 @@ static void test_chip_art_room(void) {
 	CHECK(xchips_bn4_art_place(~(uint64_t)0, 1, slots) == -1 && xchips_bn4_art_place(0, slots + 1, slots) == -1 &&
 		xchips_bn4_art_place(((uint64_t)1 << (slots - 1)) - 1, 1, slots) == slots - 1 && xchips_bn4_art_place(((uint64_t)1 << (slots - 1)) - 1, 2, slots) == -1,
 		"art's room: no run past its end");
-	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	static const XvRegion region = XC4_REGION;
+	/* (XC4_FIRST_ACTOR's numbers, xchips_code.c first_actor_stage: a side's four words from the battle state's +0xD0, 0x10 a side) */
+	CHECK(BN6_BATTLE_PLAYERS - BN6_BATTLE_STATE == 0xD0 && BN6_BATTLE_PLAYER_STEP == 0x10 && BN6_BATTLE_PLAYER_SLOTS == 4 &&
+		XC4_FIRST_ACTOR == FREE_BN4_CHIP_STUBS, "chips' code: the first actor's routine reads BN6's battle state's actors as laid out");
 	char why[160] = "";
 	int rows = 0;
 	for (int u = 0; u < xchips_bn4_count; ++u) {
@@ -5427,7 +5443,7 @@ static void test_chip_art_room(void) {
  * bomb): its table in BN6's layout, the engine's eight then its own, at its home's XC4_HOME_STATES clear of its shims and
  * of a wait's wrapper, and named by a number row of its code; a table with none of its own past the engine's is refused */
 static void test_chip_actor_states(void) {
-	static const XvRegion region = { XC4_CODE, XC4_ART, XC4_ART, XC4_END, XC_STUBS, XC_STUBS_END, .rows = XC4_ROOM_ROW(0), .rows_end = XC4_ROOM_ROW(XC4_ROWS) };
+	static const XvRegion region = XC4_REGION;
 	char why[160] = "";
 	int actors = 0;
 	CHECK(XC4_HOME_VENEERS <= XC4_HOME_STATES && XC4_HOME_STATES + 4u * XV_STATES_MAX <= XC4_HOME_WAIT, "chips' actors: the table's place in a unit's home");
@@ -7628,8 +7644,12 @@ static void test_lab_text(void) {
 	lab_info_navi(s, sizeof s, 800, 3);
 	CHECK(!strcmp(s, "HP 800. Beaten 3.") && !strcmp(lab_navi_word(0, 1), "EX") && !strcmp(lab_navi_word(1, 2), "V3") && !lab_navi_word(0, 3)[0],
 		"lab: a Navi's row and his versions' words (%s)", s);
-	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
+	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !strcmp(lab_panel_name(13), "BN5 Lava") &&
+		!strcmp(lab_panel_name(16), "BN4 Hole") && !lab_panel_name(17)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
+	/* (Navis: Team ProtoMan's are BN5's AI 1-6 and the Darkloids its 13-16, as a guardian's battle and HP are read) */
+	CHECK(guardian_bn5_ai(GUARDIAN_TEAM_FIRST + 3) == BN5_NAVI_NAPALMMAN && guardian_bn5_ai(GUARDIAN_DARKLOID_FIRST) == BN5_NAVI_SHADEMAN &&
+		guardian_bn5_ai(GUARDIAN_OLDER_FIRST) == BN5_NAVI_COLONEL && guardian_bn5_ai(1) == -1, "lab: BN5's AI index of its Navis here");
 	/* (STAGE: another game's background or song after its game's tag, an area's second background numbered; a song kept
 	 * as its game over its number, BN6's its number alone, as sets kept before the other games' songs hold them) */
 	char a[32], b[32];

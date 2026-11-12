@@ -10,6 +10,7 @@
 #include "guardians.h"
 #include "loot.h"
 #include "run.h"
+#include "save.h"
 #include "xguardian.h"
 
 void lib_darkloid_dress(void) {
@@ -27,6 +28,17 @@ Encounter lib_darkloid_battle(void) {
 	emu_battle_hp(xguardian_hp(LB.darkloid, v), xguardian_hp_fought(LB.darkloid, v, run.depth));
 	if (emu_debug_on()) fprintf(stderr, "liberation: darkloid %d, enemy id %#x, version %d\n", LB.darkloid, e.foes[0].id, v);
 	return e;
+}
+
+void lib_darkloid_beaten(void) {
+	/* (BN5's own, deleted on his board: the version beaten noted for the Battle Lab, as a guardian's is, boss.c;
+	 * lab_navis.h) */
+	if (!guardian_darkloid(LB.darkloid)) return;
+	int v = xguardian_version(LB.darkloid, run.depth);
+	if (v < 0 || v >= 8) return;
+	profile.navi_beaten[LB.darkloid] |= (uint8_t)(1u << v);
+	profile_save();
+	if (emu_debug_on()) fprintf(stderr, "liberation: darkloid %d deleted at version %d, noted for the Battle Lab\n", LB.darkloid, v);
 }
 
 void lib_darkloid_hp(int *hp, int *max) {

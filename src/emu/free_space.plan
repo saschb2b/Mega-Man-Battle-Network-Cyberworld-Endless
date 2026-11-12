@@ -107,7 +107,8 @@ FREE_CHIP_CODE         +0x600000  +0x700000  -    xattack_grow.c,xchips_code.c,x
 FREE_ATTACK_FAMILIES   +0x600000  +0x600400  end,in=FREE_CHIP_CODE  xattack_grow.c  multirom/chips-code.md  BN6's attack families grown to 240 (the chips' and the Souls' one copy)
 FREE_CHIP_MOVED        +0x600400  +0x700000  in=FREE_CHIP_CODE  xchips_code.c  multirom/chips-code.md      the chips' moved code, its tables and what it draws
 FREE_SOULS_ART         +0x700000  +0x710000  end  soulcode.c,soulcolonel.c  multirom/souls.md  the Souls' art past their room: BN5's effects BN6 redrew, copied
-FREE_TAIL              +0x710000  +0x711000  free  -                        engine/emulation/free-space.md  free to FREE_LATE_CODE
+FREE_BN4_CHIP_STUBS    +0x710000  +0x710040  end  xchips_code.c             multirom/bn4-chips.md       BN4's chips' own routines BN6 has no twin of: a side's first actor (BugCurse's target)
+FREE_TAIL              +0x710040  +0x711000  free  -                        engine/emulation/free-space.md  free to FREE_LATE_CODE
 FREE_LATE_CODE         +0x711000  +0x720000  end  xvirus.c                  multirom/families.md        the late families' code, block by block, past the families' own room
 FREE_BN4_NAVIS         +0x720000  +0x730000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes
 FREE_BN4_NAVI_CODE     +0x730000  +0x750000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis' code and their objects', block by block

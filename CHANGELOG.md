@@ -16,15 +16,17 @@
   data on its family, in every run. Once the data on three families is
   complete (eight deletions each), a Navi of Dad's lab stands in
   Lan's HP and sets up test battles: the foes, their versions and
-  panels, the field's eighteen panels, the background and the song,
-  BN5's and BN4's among them where their ROMs are read.
+  panels, the field's eighteen panels (BN5's lava, sea and magnet panel
+  and BN4's Hole among their types), the background and the song, BN5's
+  and BN4's among them where their ROMs are read.
   Nothing in one can delete MegaMan, it pays nothing, and the run is
   afterwards exactly as it was. Four sets are kept with their best time
   and busting level.
 - **Navis in the Battle Lab.** A guardian MegaMan has beaten twice can
   be set there, alone, in each version beaten from now on (his first for
   wins of before). Bass and the Cybeast open with one win, ProtoMan with
-  a netbattle won.
+  a netbattle won, and one of BN5's Darkloids with a dark layer's board
+  won over him from now on.
 - **BN4 Red Sun joins the NetPass's full set.** NetBattles, trades and
   the week's DeepNet now need BN4 Red Sun (USA) beside BN6 and BN5 Team
   Colonel. The Square stays open to every game. A pass that was full

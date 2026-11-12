@@ -93,6 +93,10 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
 # A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
 # and the unit needs none of what it gives
 UNIT_AIMS = {
+    'BugCurse': {0x0800C456: ('XC4_FIRST_ACTOR', "the other side's object (r0 the side): BN4's first of the other side's three in its "
+                                                  "battle state (+0x48 on), a virus too; BN6's twin, its side's MegaMan alone (0x080103BC), "
+                                                  "finds none against viruses, so the curse would not be cast: the project's own routine, "
+                                                  "a side's first of its four in BN6's battle state (+0xD0 + side x 0x10)")},
     'NaviPowers': {0x080406A4: ('XC_STUBS', "flag 0x1187 tested (BN4_FLAG_1187_TEST): set, an SP's column is 5 whatever the "
                                             "time. A run never sets it, so the call is the stub that returns 0 (movs r0,#0: "
                                             "its Z set, as BN4's clear flag leaves it for the bne after it)")},
@@ -161,6 +165,7 @@ TWINS = {
     0x08009BAC: (0x0800C9F8, 'chips'),   # a panel broken where it stands free (PanlSht's shot's own panel)
     0x0800FC48: (0x08016168, 'chips'),   # a panel of the other side's found in the object's row (Meteors' aim)
     0x08009E38: (0x0800CC52, 'chips'),   # a panel drawn as another type and side this frame (the panel changer's blink)
+    0x0800D772: (0x080136CC, 'chips'),   # a side's battle NaviStats' byte (BN4 0x0800D742's, BN6 0x08013682's: ldrb r0,[r0,r6]), BugCurse's
     # ... and what an attack state of MegaMan's calls (the 'attack' units):
     0x0800BA66: (0x0800FDB6, 'chips'),   # his counter window opened as his attack begins
     0x0800C9FC: (0x08011714, 'chips'),   # a chip's attack ended (BN4_CHIP_ATTACK_END, BN6_CHIP_ATTACK_END)
@@ -305,6 +310,8 @@ UNITS = (
     ('misc', 0x0D, 'PitRng'),
     ('support', 0x4C, 'FirePlus'),
     ('attack', 0x09, 'DarkBomb'),
+    ('navi', 0x36, 'GutPnch'),
+    ('support', 0x2A, 'BugCurse'),
     ('power', 0x00, 'NaviPowers'),
 )
 CANDIDATES = ()
@@ -333,6 +340,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xF8: 0x202, 0xB9: 0x203,    # (MagBolt's bolt and its hum)
                0x133: 0x204, 0xC8: 0x205,   # (PropBom's bomb's propeller and its burst as it is struck)
                0x90: 0x206,                 # (the bombs' state's throw)
+               0xA4: 0x207,                 # (GutPnch's fist's punch)
                # (the sweep's third line, units-c's, its slots from 0x240 up)
                0x120: 0x240, 0x13E: 0x241,  # (AquaUp's geyser, GreenWd's tower: the rows of 0x080DF674)
                0x143: 0x242,                # (Ligtnin's bolt)
@@ -340,6 +348,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xBB: 0x283,                 # (DrkVulcn's shots)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
                0xA9: 0x286, 0xBD: 0x287,    # (DarkBomb's bomb)
+               0x141: 0x288,                # (BugCurse's curse)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
@@ -457,6 +466,9 @@ ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
 IMMS = {
+    0x080DD4D4: dict(form='THUMB_MOVS', rd=1, rn=0, was=0x23, now=0x29,
+                     why="BugCurse's curse placed by the other side's battle NaviStats' Navi (its offsets by Navi at 0x080DD4FC): "
+                         "BN4 +0x23 (BN4_NAVI_NAVI), BN6 +0x29 (BN6_NAVI_SIDE_NAVI), 0 for a virus side in both"),
     # (a DS's power counts the Hole panels: BN4's type 0xB, BN6's 16, XPANEL_HOLE in src/emu/xpanels.h)
     0x0801951C: dict(form='THUMB_MOVS', rd=0, rn=0, was=0x0B, now=0x10,
                      why="the Hole panel counted on side 0: BN4's type 0xB, BN6's 16 (XPANEL_HOLE)"),
@@ -544,6 +556,10 @@ IMMS = {
     0x080DBCD2: dict(form='THUMB_MOVS', rd=3, rn=0, was=0x03, now=0x43,
                      why="its hit's bits (the collision setup's r3): with the pull's push bit, struck and pushed is bit 0x01 in "
                          "BN4 (BN4_STRUCK_PUSHED), bit 0x40 in BN6 (BN6_STRUCK_PUSHED)"),
+    # GutPnch's punch, struck and pushed back a panel (the region's bits, r7 of BN4's 0x080CD81E): the Moko's row above
+    0x080C855A: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
+                     why="its punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
+                         "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED)"),
 }
 # A routine of BN4's the project pairs with BN6's own for the families (tools/bn4_twins.py TWINS) that a chip's unit moves
 # instead, with the object type it spawns: BN6's own object draws BN6's art, which a family's rule allows by its foe and a
@@ -569,6 +585,9 @@ UNIT_COPIED = {
                             "in the frame its animation is set up, a frame ahead of BN4's (AquaUp's geyser's count at its +0x91, "
                             "bn4_chip_aquaup1 at t44); copied, as BN4's Navis copy it (tools/xnavirecipe_bn4.py), its pause test "
                             "BN6's"},
+    'BugCurse': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': the "
+                             "curse's object (the third kind's 0x80) steps its sprite by it; BN6's nearest a frame ahead; copied, its "
+                             "pause test BN6's"},
     'Elem': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's: the shot of a chip whose "
                          "params' +7 is set (ElemDark's 8) takes it at 0x080CE2F0 where the others take 0x080143FC, and BN6's "
                          "nearest updates the sprite a frame ahead of BN4's (the shot's count at its +0x91 2 in BN4 and 1 in BN6 "
@@ -638,6 +657,8 @@ NUMBERS = {
     0x08000000: "... the other side's (BN4 0x080D2208; BN6's 0x080CAE66)",
     0x0A05FF01: "DarkBomb's bomb's blast's hit word (BN4 0x080CF38A, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as PropBom's",
+    0x0605FF01: "BugCurse's curse's hit word (BN4 0x080DD528, r4 of the hit area's spawn 0x080CD7E2): its bits, its reach "
+                "and its frames, bytes of a number as PropBom's",
     0x0405FF11: "PropBom's bomb's blast's hit word (BN4 0x080DED2C, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as MagBolt's pull's",
 }
@@ -1639,8 +1660,13 @@ def c_unit(f):
           f'\t.home = XC4_SHIMS_HOME({place(f.home, X4C_HOMES, "XC4_HOMES")}), \\']
     L += [f'\t{x}, \\' for x in fields[:-1]] + [f'\t{fields[-1]} }}']
     songs = f'{n}_songs, {count("songs")}' if f.sounds else 'NULL, 0'
+    # (a Navi chip's object's sound as it steps MegaMan in, tools/xchiprecipe_bn4_navi.py STEP_IN: its slot, XChipUnit.step_in)
+    step_in = SOUND_SLOTS.get(getattr(f, 'step_in', 0), 0)
+    if getattr(f, 'step_in', 0) and not step_in:
+        sys.exit(f'xchiprecipe_bn4: {f.name}\'s step-in sound {f.step_in:#x} has no slot (SOUND_SLOTS)')
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait else '') + ' },']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in else '') +
+            (f', 0x{step_in:X}' if step_in else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '
