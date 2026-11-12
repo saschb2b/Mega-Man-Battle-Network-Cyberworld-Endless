@@ -1,0 +1,69 @@
+# The code's layers (build.py lint, tools/layers.py; docs/code/layers.md).
+#
+# A unit is a folder of src/, or the part of one a line "unit = folder/pattern ..."
+# names (the first line that matches a file takes it; what no line takes is its
+# folder's own unit). A line "unit: units" says what a unit's files may include
+# of src/ beside their own unit; "*" is every unit on the lines above. The lines
+# stand lowest first, and a unit names only units above its own line, so the
+# rules themselves hold no cycle.
+#
+# An include the rules do not allow fails lint, but those listed in
+# layer_violations.txt, which only shrinks. A new folder or a new unit needs
+# its line here, at its place in the order.
+
+# ---- the parts ----
+
+# the games' formats: addresses, record layouts, byte packing, the free space's plan; headers alone
+# (bn6_fields.h reads the core's memory: the emulator's)
+emu      = emu/bn6_fields.h
+formats  = emu/bn6.h emu/bn6_*.h emu/bn5.h emu/bn5_*.h emu/bn4.h emu/bn4_*.h
+formats  = emu/bytes.h emu/free_space.h core/chip_entry.h
+
+# the platform, input, settings, the ROM file and RomLayout, the scenes' switch
+core.base = core/platform* core/present_3ds.* core/second_android.* core/sdl_old.h core/app_icon.h
+core.base = core/buttons.h core/pads.* core/padmap.* core/keymap.* core/touch.* core/touch_layout.*
+core.base = core/feel.* core/feel_out.* core/fast_forward.* core/frame_log.* core/display.*
+core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.*
+core.base = core/desktop* core/ios* core/ps5_*
+core.base = core/rom.* core/rng.c core/game.h
+
+# the ROM's tables: chips, programs, foes, the other games' records and registry
+core.data = core/data.* core/chips.* core/chip_pool.* core/foes.h core/library_pages*
+core.data = core/xchips* core/xprograms.* core/xrecords.*
+
+# Options and its panels, drawn in the PET's look
+core.options = core/options* core/controls* core/touch_art.* core/pet_panel.h
+
+# the entry point and each system's start
+core.app = core/main.c core/startup.* core/start_*
+
+# the game's scene: the frame that runs the core, the director and the screens over it
+emu.game = emu/scene_emu.* emu/emu_picture.* emu/game_hooks.* emu/fast_forward_game.* emu/feel_game.*
+emu.game = emu/autopilot* emu/showcase.*
+
+# ---- the layers, lowest first ----
+
+formats:
+core.base:    formats
+core.data:    formats core.base
+emu:          formats core.base core.data
+core:         formats core.base core.data
+net:          formats core.base core.data core
+audio:        formats core.base emu
+gfx:          formats core.base core.data emu
+analytics:    formats core.base core.data core net audio gfx
+map:          formats core.base core.data core emu net gfx
+layer:        formats core.base core.data core emu net map
+world:        formats core.base core.data core emu net map layer
+jukebox:      formats core.base audio gfx
+library:      formats core.base core.data core audio gfx
+core.options: formats core.base emu audio gfx analytics
+director:     *
+online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director
+second:       *
+launcher:     formats core.base core audio gfx core.options
+saves:        formats core.base core audio gfx launcher
+scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves
+emu.game:     *
+dev:          *
+core.app:     *

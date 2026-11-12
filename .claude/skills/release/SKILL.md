@@ -53,6 +53,9 @@ the last trailer everywhere; the notes open with it.
 - CHANGELOG `## Unreleased` becomes `## X.Y.Z (date)`; commit "Release X.Y.Z".
 - `ps5/sce_sys/param.json`'s contentVersion set to the version (lint holds
   it to the CHANGELOG's).
+- `python3 tools/layers.py --record vX.Y.Z` adds the release's row to
+  docs/code/layers.md's numbers (hand-written lines, pairs of units that
+  include each other, the baseline's size), with its `docs/log.d/` entry.
 - `TAG=vX.Y.Z CI=1 python3 build.py`, then `TAG=vX.Y.Z python3 build.py
   screenshots title marks` (screenshots run `build/host/cyberworld` without
   rebuilding it; build first or the title shows the old version). Where
