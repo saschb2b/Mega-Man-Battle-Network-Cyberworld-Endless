@@ -307,11 +307,29 @@ MOVED_FAMILIES = {}
 
 def moved_families():
     """{BN4's attack family: its number in BN6's grown attack families}, where legit.json's bn4 attack_families names the
-    units' file"""
+    units' file; a family split into units by its subfamilies (tools/xchiprecipe_bn4.py ATTACK_SUBS: the bombs' 0x09, SeekBom's
+    0xD2 and DarkBomb's 0xFC) read as the unit the spec's chips' registry rows name (their `sub`, the unit's number)"""
     rule = bn4_rule('attack_families')
     if rule and not MOVED_FAMILIES:
-        MOVED_FAMILIES.update({int(a, 16): int(b, 16) for a, b in XCHIP_ATTACK_ROW.findall(open(os.path.join(ROOT, rule['units'])).read())})
-    return MOVED_FAMILIES
+        for a, b in XCHIP_ATTACK_ROW.findall(open(os.path.join(ROOT, rule['units'])).read()):
+            MOVED_FAMILIES.setdefault(int(a, 16), []).append(int(b, 16))
+    out = {}
+    for fam, numbers in MOVED_FAMILIES.items():
+        mine = [n for n in numbers if n in chip_units()] if len(numbers) > 1 else numbers
+        out[fam] = (mine or numbers)[0]
+    return out
+
+
+CHIP_UNITS = {}   # (BN4's chip id: its registry row's unit number, a moved row's `sub`)
+XREG4_MOVED_BN4 = re.compile(r'\{\s*(\d+),\s*\d+,\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
+
+
+def chip_units():
+    """the units the spec's chips (SPEC_CHIPS, BN4's ids) run as, by their registry rows (src/core/xchips_registry_bn4.c)"""
+    if not CHIP_UNITS:
+        text = open(os.path.join(ROOT, 'src', 'core', 'xchips_registry_bn4.c')).read()
+        CHIP_UNITS.update({int(a): int(b, 16) for a, b in XREG4_MOVED_BN4.findall(text)})
+    return {CHIP_UNITS[c] for c in SPEC_CHIPS if c in CHIP_UNITS}
 
 
 def bn4_as_bn6(rec, fams, navi_family=None):
