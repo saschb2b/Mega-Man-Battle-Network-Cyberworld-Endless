@@ -512,6 +512,8 @@ static int older_guardians(FILE *out) {
 		}
 	}
 	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi) flagged += deep_guardian(out, navi);
+	/* (and Nebula's two, the deep's alone: docs/game/bosses/bn5-navis.md) */
+	for (int navi = GUARDIAN_NEBULA_FIRST; navi <= GUARDIAN_NEBULA_LAST; ++navi) flagged += deep_guardian(out, navi);
 	return flagged;
 }
 

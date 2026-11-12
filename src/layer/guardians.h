@@ -48,16 +48,24 @@ static inline bool guardian_darkloid(int navi) { return navi >= GUARDIAN_DARKLOI
 static inline bool guardian_bn4(int navi) { return navi >= GUARDIAN_BN4_FIRST && navi <= GUARDIAN_BN4_LAST; }
 /* ... an older net's Navi a territory's guardian may be, BN5's six or BN4's (xguardian.h: fought at his moved ids, at the
  * version his act's band takes) */
-static inline bool guardian_moved(int navi) { return guardian_older(navi) || guardian_bn4(navi); }
+/* BN5's Nebula Navis of the story, LarkMan and GridMan (BN5's AI 17-18, bn5.h BN5_NAVI_LARKMAN and BN5_NAVI_GRIDMAN) as navis
+ * 65-66 here, moved into BN6's engine (seats 17-18, docs/multirom/navis.md), a rival record each (rivals.sav's fifth version):
+ * no Soul, met in the deep's pool of BN5's guardians alone (the owner's call of 12 November 2026, docs/game/bosses/bn5-navis.md,
+ * How often) */
+#define GUARDIAN_NEBULA_FIRST 65
+#define GUARDIAN_NEBULA_LAST  66
+static inline bool guardian_nebula(int navi) { return navi >= GUARDIAN_NEBULA_FIRST && navi <= GUARDIAN_NEBULA_LAST; }
+static inline bool guardian_moved(int navi) { return guardian_older(navi) || guardian_bn4(navi) || guardian_nebula(navi); }
 /* BN5's Team ProtoMan (docs/game/team-protoman.md): BN5's AI 1-6 (bn5.h BN5_NAVI_PROTOMAN .. BN5_NAVI_MEDDY) as navis 59-64
  * here, a rival record each (rivals.sav's fourth version), each Soul held by its form (souls.h, souls_team_held); none met
  * until each is moved and wired as a guardian */
 #define GUARDIAN_TEAM_FIRST 59
 #define GUARDIAN_TEAM_LAST  64
 static inline bool guardian_team(int navi) { return navi >= GUARDIAN_TEAM_FIRST && navi <= GUARDIAN_TEAM_LAST; }
-/* ... BN5's AI index of one of its Navis here (the six or a Darkloid), -1 another's */
+/* ... BN5's AI index of one of its Navis here (the six, a Darkloid or Nebula's two), -1 another's */
 static inline int guardian_bn5_ai(int navi) {
-	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN : -1;
+	return guardian_older(navi) ? guardian_older_ai(navi) : guardian_darkloid(navi) ? navi - GUARDIAN_DARKLOID_FIRST + BN5_NAVI_SHADEMAN
+		: guardian_nebula(navi) ? navi - GUARDIAN_NEBULA_FIRST + BN5_NAVI_LARKMAN : -1;
 }
 /* His overworld sprite and mugshot in his game's lists 6 and 8 (the same
  * number), 0 for none: BN5's six and its Darkloids */

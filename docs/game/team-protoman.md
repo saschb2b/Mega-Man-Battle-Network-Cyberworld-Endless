@@ -131,7 +131,10 @@ beside him, and adds no guardian, no layer and no walk (lack 1 untouched).
 2. **The deep's pool takes the five too.** Acts 5 and 6 draw BN5's Navis
    from one pool by band ([BN5's Navis](bosses/bn5-navis.md), How often):
    it grows from six to eleven, none who already guarded a surface act of
-   the run.
+   the run, and to thirteen with Nebula's LarkMan and GridMan, the deep's
+   alone (the owner's call of 12 November 2026: a Soul-less guardian in
+   a surface coin is a worse roll for the same fight and lowers the
+   Souls' odds; [BN5's Navis](bosses/bn5-navis.md), Nebula's two).
 3. **Not in act 1.** The first run is the game for half the players (63 of
    119 started one run only, mostly on a phone), and KnightMan in act 1
    cost a run before he was tuned (the core loop's "a new system meets a

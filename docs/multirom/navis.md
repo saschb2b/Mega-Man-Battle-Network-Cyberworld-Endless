@@ -327,9 +327,9 @@ into the battle engine).
   `BN5_GRID_SPAWN_C6`), as BlizzardMan's slide's hit's. Five mutations
   break his copy (an effect's number, the 0xC6 spawned as his 0xC8, his
   attack's routine left at BN5's address, a sprite's number, a parent's
-  compare) and FAIL. Not yet a guardian: Oran Area's second, as BN5's
-  record sets his SP on Oran Area 2, comes next ([BN5's
-  Navis](../game/bosses/bn5-navis.md)).
+  compare) and FAIL. A guardian of the deep's pool alone, no surface
+  act's, by the owner's call of 12 November ([BN5's
+  Navis](../game/bosses/bn5-navis.md), Nebula's two).
 - **LarkMan** (AI 17, Navi AI 43, ids 0x3EC-0x3EF; `larkman_v1`,
   `larkman_v1_keys`, `larkman_sp`: PASS since 12 November), Nebula's
   first seat. *His types:* the third kind's 0xB0 and 0xBB moved as his;
@@ -350,9 +350,11 @@ into the battle engine).
   0xB0's and 0xBA's +0x3C low halves as each engine's leftover r3, their
   heights compared (`spawn_leftovers`, `compares`). Five mutations break
   his copy (the afterimage's word, both objects' heights, a wait, a
-  sound) and FAIL. Not yet a guardian: where BN5's record sets his SP,
-  the Undernet's second, waits on its design ([BN5's
-  Navis](../game/bosses/bn5-navis.md)).
+  sound) and FAIL. His sound 0x13C, no song of BN6's, takes slot 0x48
+  after Team ProtoMan's (`src/audio/xsong.c`, `XSOUNDS`), named by his own
+  two instructions (`movs` then `adds #0xFF`) where a slot passes 0xFF. A
+  guardian of the deep's pool alone since 12 November, as GridMan is
+  ([BN5's Navis](../game/bosses/bn5-navis.md), Nebula's two).
 - **CloudMan** (AI 15, AI 41 in BN6, ids 0x1E8-0x1EB; `cloudman_v1`,
   `cloudman_v1_keys`, `cloudman_sp`: PASS since 12 November). *His object
   types* (the third kind's 0x0B, 0x36, 0x37, 0x3D, 0x40, 0x41, 0x44, 0x5F)

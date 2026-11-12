@@ -53,6 +53,7 @@ sets him in:
 | SciLab (Sky Area) | SciLab 4 | TomahawkMan | Wood chips |
 | Undernet (Undernet) | Undernet 3 | Colonel | Obstacle chips |
 | Nebula Area (Graveyard) | (Bass) | the deep's pool | |
+| (the deep's pool) | LarkMan on Undernet 2, GridMan on Oran Area 2 | LarkMan or GridMan, the deep's acts alone | (no Soul: his Navi chips) |
 
 **How often**: on the guardian layer of a surface act whose area BN5
 dresses, in half the runs (a coin of the run's seed for each area, of its
@@ -69,6 +70,23 @@ ROM meets BN6's guardian there, as its layers come in BN6's own tiles,
 and a New 3DS whose heap has no room for BN5's ROM, which then leaves it
 unread ([The 3DS's memory](../../engine/emulation/3ds-memory.md)), none of his. `--guardian 24`-`29`
 puts one in every act BN5 dresses and every deep act.
+
+**Nebula's two, the deep's alone** (the owner's call of 12 November
+2026). LarkMan and GridMan, BN5's Nebula Navis of the story, moved into
+BN6's engine ([Transplanted Navis](../../multirom/navis.md)), join the
+deep's pool beside the six, and no surface act's coin: Oran Area stays
+ShadowMan's (or his partner's, [Team ProtoMan](../team-protoman.md)). They
+have no Soul to give: beating one pays his Navi chips, his Guardian Data's
+chip V1 in the first three acts and SP from the fourth, as the six's. The
+reason: a Soul-less guardian in a surface coin is a worse roll for the
+same fight and lowers the Souls' odds; in the deep's acts, where few
+battles are left to serve a Soul, the pool is variety a veteran feels
+(the core loop's lack 5) and nothing more. Their versions follow the six's
+rule below, measured by `build.py pacing`. As guardian navis 65 and 66
+they keep a rival record each (rivals.sav's fifth version); their
+overworld sprites in BN5's list 6 are not read yet, so they stand on the
+arena in a HeelNavi's body until they are. `--guardian 65` or `66` puts
+one in every deep act.
 
 **His band**. BN5's story holds a record for each of them at
 V1, V2 and V3, its net one at SP ([Navis moved into BN6's battle engine](../../rom/navis.md), BN5's Navis). He is
