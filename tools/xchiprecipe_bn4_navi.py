@@ -50,7 +50,18 @@ OBJECTS = {
           "parameters alone): that byte is 0 for MegaMan (in every frame of bn4_chip_gutsman's BN4 trace; a Navi's AI data holds "
           "his version there), and the chip's GutsMan never reads his +5 (his region read whole). And its word for the Navi is its +5, BN6's its +0x18: "
           "the Navi keeps the address he is given",
+    0x64: "GutPnch's (0x080E90CC): GutsMan's object (0x10) state for state, its timers and its step out and in the same "
+          "calls (0x080E2D26), but for two things. Its state that calls the Navi's spawner hands him r4 the parameters whole "
+          "([r5,#4], as BN6's object does) and no bit 8 by the user's AI data, with r3 his side, which the spawner "
+          "(0x080C85C2) overwrites before it reads it. And its last state plays sound 0xB0 as it steps MegaMan in "
+          "(0x080E91BC: movs r0,#0xb0), which GutsMan's does not and BN6's object does not: STEP_IN",
 }
+# A sound BN4's object plays as it steps MegaMan in, which BN6's Navi object does not: BN4's fourth-kind type -> (the movs that
+# names it, the sound), checked against the instruction and its call. The unit carries the sound's slot (XChipUnit.step_in):
+# the installer aims BN6's object's last state at a stub of the unit's home that plays it for this unit's number alone
+# (src/emu/xchips_code.c step_in_stage)
+STEP_IN = {0x64: (0x080E91BC, 0xB0)}
+PLAY4 = 0x08000560   # BN4's PlaySoundEffect (r0 the song)
 # The frames a BN4 Navi chip object waits (each `movs r0, #N; strh r0, [r5, #0x20]` of its states, in address order), BN6's
 # Navi object's the control, read each run
 TIMERS6 = (0x1E, 0x1E, 0x1E)
@@ -158,6 +169,15 @@ def begin(b4, b6, f, ty4):
         f.decide('object', f'its object (the fourth kind\'s {ty4:#x}, {lo4:08X}-{hi4:08X}) is not read against BN6\'s Navi object yet (OBJECTS)')
     else:
         f.notes.append(f'its object, the fourth kind\'s {ty4:#x} ({lo4:08X}-{hi4:08X}), not moved: BN6\'s Navi object in its place')
+    f.step_in = 0
+    if ty4 in STEP_IN:
+        at, song = STEP_IN[ty4]
+        i, nxt = T.decode(b4, at), T.decode(b4, at + 2)
+        if not lo4 <= at < hi4 or i.text != f'movs r0, #{song:#x}' or nxt.form != 'bl' or nxt.target != PLAY4:
+            f.decide('object', f'its object\'s sound as it steps MegaMan in is not movs r0,#{song:#x} and its call at {at:08X} (STEP_IN)')
+        else:
+            f.step_in = song
+            f.notes.append(f'its object plays {song:#x} as it steps MegaMan in ({at:08X}), BN6\'s Navi object none: the unit\'s step_in')
     t6 = timers(region_walks(b6, NAVI_OBJECT6, NAVI_OBJECT6_END))
     if t6 != TIMERS6:
         sys.exit(f'xchiprecipe_bn4: BN6\'s Navi object at {NAVI_OBJECT6:08X} waits {t6}, not what this tool reads')

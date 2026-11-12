@@ -1,0 +1,18 @@
+{
+  "branch": "bn4-gutpnch",
+  "what": "BN4's GutPnch1-3 moved as a Navi chip's unit",
+  "takes": {
+    "song_slots": [
+      [
+        "0x207",
+        "0x207"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 chip GutPnch1",
+    "BN4 chip GutPnch2",
+    "BN4 chip GutPnch3"
+  ],
+  "run": false
+}

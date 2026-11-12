@@ -48,6 +48,9 @@ typedef struct {
 	                          attack (bn4_chips.h BN4_MISC_WAIT: subfamily 5's 0x28, SidBmbo's), which BN6's run does for its own
 	                          0x14 alone: its entry in the grown table is a wrapper of the installer's in its home (XC4_HOME_WAIT),
 	                          the run's routine every frame of the wait */
+	uint16_t step_in;      /* (BN4's Navi chips' units) where not 0, the slot of the sound BN4's object of the chip plays as it steps
+	                          MegaMan in, which BN6's Navi object does not (GutPnch's 0xB0): BN6's object's last state is aimed at a
+	                          stub of the installer's in its home (XC4_HOME_WAIT) that plays it for this unit's number alone */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];
