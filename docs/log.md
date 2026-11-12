@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: devtools/dev-menu.md (`library=N` fills the profile's Library at the start, not as the screen opens), game/meta/library.md (the same, in The code: the dev tools fill it, the screen reads no dev switch; the layers' fourth cut).
 * **Update**: game/battle-lab.md (Built: Navis in the builder, by the records and the versions beaten), GUIDE.md (the Battle Lab's Navis), code/director.md (`lab_navis.c`).
 * **Update**: code/layers.md (Fixing a violation: a branch cut before the rule whose include reaches `dev` joins the baseline as it would have stood; two did with pull request #403, `xnavi_bn4_chip.c`'s `xsong.h` and `xnavi.h`, 149).
 * **Update**: multirom/bn4-chips.md (the first Navi chip plays, GutsMan's; The Navi chips, new section; BN4's ground kind is Null, not the Cursor), multirom/bn4-navis.md (the battle's art room halved for the chips' rooms), rom/bn4.md (Its Navi chips, new row), rom/chips-code.md (BN6's Navi chip object, new row), devtools/chip-recipe-generator.md (a Navi chip's unit), devtools/differential.md (a Navi chip read as BN6 runs it), engine/emulation/memory.md and free-space.md (`FREE_BN4_CHIP_SPRITE`, `FREE_BN4_CHIP_ART`), code/emu.md and code/tools.md (`xnavi_bn4_chip.c`, `tools/xchiprecipe_bn4_navi.py`).
