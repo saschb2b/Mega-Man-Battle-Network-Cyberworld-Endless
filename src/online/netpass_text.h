@@ -8,8 +8,10 @@
 #include "netpass.h"
 
 extern const char netpass_title[];
-/* the pass's level: the Square's alone, or every stamp */
+/* the pass's level: the Square's alone, the Square's and Trade's (a
+ * system of one extra ROM, one game in: netpass.h), or every stamp */
 extern const char netpass_level_square[];
+extern const char netpass_level_trade[];
 extern const char netpass_level_full[];
 /* the operator card */
 extern const char netpass_operator_label[];
@@ -29,6 +31,11 @@ extern const char netpass_cart_open[];
  * title) stamps; every game in; every game in on a system whose NetBattles
  * are not offered (the New 3DS: square_arena_offered) */
 const char *netpass_missing_words(const char *name);
+/* ... on a system that reads one extra ROM at most (the New 3DS): what
+ * either game still out stamps (`other` NULL: the one alone), and the
+ * line once one is in, the pass as full as that system's gets */
+const char *netpass_missing_either_words(const char *name, const char *other);
+extern const char netpass_complete_one_extra[];
 extern const char netpass_key_hint[];
 extern const char netpass_complete[];
 extern const char netpass_complete_no_ring[];

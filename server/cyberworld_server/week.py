@@ -23,7 +23,11 @@ identity's posts for that week.
 
 The Board is every game's to read (a WEEK_BOARD after every WELCOME);
 posting a dive takes the full set (protocol v9, protocol.full_set), a
-post from a game without it refused with NOTICE notice_pass."""
+post from a game without it refused with NOTICE notice_pass. A system
+that reads one extra ROM at most (v18) trades with one game beside BN6's
+and still posts none: what a seed makes of a dive goes by the ROMs read
+(BN4's areas, Navis, viruses and chips), so its dive is not the net the
+Board's others dived (docs/online/netpass.md)."""
 
 import hashlib
 import hmac

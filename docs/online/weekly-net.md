@@ -17,9 +17,13 @@ likes, depths posted as "reported") and decided one thing while it was
 built: **a dive keeps a save slot of its own**, so the run in progress
 is never touched, and the player goes back to it when the dive ends.
 Diving takes the NetPass's DeepNet stamp (above); the Board's ranking
-reads on every game. Every diver has BN5's ROM, so the areas a game with
-it dresses in BN5's (`run_dress`, by the seed and the ROMs present) are
-the same on every dive.
+reads on every game. Every diver has every game of the set, BN5's ROM
+and BN4's, so what a seed makes by the ROMs read (the areas `run_dress`
+dresses in BN5's and BN4's, their guardians, the encounter groups'
+families, the chips found) is the same on every dive. That is why a
+system that reads one extra ROM at most, the New 3DS, holds no DeepNet
+stamp though its pass is full and trades
+([A system with room for one game](netpass.md#a-system-with-room-for-one-game)).
 
 ## Its design
 

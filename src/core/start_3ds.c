@@ -159,12 +159,11 @@ void console_start(bool data_dir_given) {
  * left: its 8 MB, the core's 16 MB copy still to come and what a run takes
  * beside them, 50 MB at most where a layer's area is learned
  * (tools/heap3ds.py), and some to spare. A New 3DS holds one extra ROM
- * at most: with BN5's and BN4's both read, a long run's play outgrows
+ * at most (rom.h's XROMS_MOST, which the NetPass's rule reads too): with BN5's and BN4's both read, a long run's play outgrows
  * the heap (tools/heap3ds.py, docs/engine/emulation/3ds-memory.md). One
  * found past that, or short of room, is left unread, the run going on
  * without it, said in the log and on the PET. */
 #define XROM_ROOM ((size_t)ROM_SIZE + EMU_ROM_SIZE + (56u << 20))
-#define XROMS_3DS 1
 static char unread[48];   /* (the tags of those found and left unread: "BN4") */
 
 /* Extra ROM `xrom`'s .gba in `dir`, told by its header's game code before
@@ -204,7 +203,7 @@ static void extras_3ds(const char *const *places, size_t count) {
 		char first[700] = "";
 		u64 t0 = osGetTime();
 		size_t room = heap_free();
-		bool fits = read < XROMS_3DS && room >= XROM_ROOM;
+		bool fits = read < XROMS_MOST && room >= XROM_ROOM;
 		for (size_t i = 0; i <= count && !XR[x].data; ++i) {
 			const char *dir = i ? places[i - 1] : beside;
 			if (i && !strcmp(dir, beside)) continue;
@@ -218,8 +217,8 @@ static void extras_3ds(const char *const *places, size_t count) {
 		} else if (first[0] && !fits) {
 			size_t m = strlen(unread);
 			snprintf(unread + m, sizeof unread - m, "%s%s", m ? " + " : "", tag);
-			if (read >= XROMS_3DS)
-				printf("3ds: %s's ROM (%s) left unread: a New 3DS holds %d extra ROM beside BN6's, read already\n", tag, first, XROMS_3DS);
+			if (read >= XROMS_MOST)
+				printf("3ds: %s's ROM (%s) left unread: a New 3DS holds %d extra ROM beside BN6's, read already\n", tag, first, XROMS_MOST);
 			else
 				printf("3ds: %s's ROM (%s) left unread: the heap has %lu KB free, %s asks %lu KB (its file, the core's copy and a run's"
 					" play); a run without it\n", tag, first, (unsigned long)(room / 1024), tag, (unsigned long)(XROM_ROOM / 1024));

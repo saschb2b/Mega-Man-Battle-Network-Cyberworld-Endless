@@ -89,8 +89,13 @@ static uint32_t retry_wait(unsigned tries) {
 
 /* HELLO as a resume: the channel MegaMan stood in, the resume bit set, so
  * the server gives back the place it held (protocol v10) */
+/* (HELLO's channel word's own bits: v18, a system that reads fewer extra
+ * ROMs than there are, rom.h's xroms_short, the New 3DS: the server's
+ * rule for its pass, protocol.py's pass_full) */
+static uint16_t hello_says(void) { return xroms_short() ? ONLINE_HELLO_ONE_EXTRA : 0; }
+
 static void hello_resume(uint16_t channel) {
-	online_put16(transport.hello + HELLO_CHANNEL, (uint16_t)(channel | ONLINE_HELLO_RESUME));
+	online_put16(transport.hello + HELLO_CHANNEL, (uint16_t)(channel | ONLINE_HELLO_RESUME | hello_says()));
 }
 
 /* the link ended without a word from the server (no ERROR, nothing
@@ -150,7 +155,7 @@ static bool build_hello(const char *name, const uint8_t identity[ONLINE_IDENTITY
 	}
 	size_t length = strlen(name);
 	memcpy(out + HELLO_KEY, identity, ONLINE_IDENTITY_BYTES);
-	online_put16(out + HELLO_CHANNEL, 0);
+	online_put16(out + HELLO_CHANNEL, hello_says());
 	out[HELLO_CHANNEL + 2] = (uint8_t)length;
 	memcpy(out + ONLINE_HELLO_BYTES, name, length);
 	transport.hello_size = ONLINE_HELLO_BYTES + length;

@@ -70,10 +70,13 @@ void online_visit_news_again(const char *words) { V.news = words; }
 
 VisitStage online_visit_stage(void) { return V.stage; }
 
-/* The statistics' visit over (analytics_online.h): how, the NetPass, the
- * time in the Square where MegaMan got there (below 0 none) */
+/* The statistics' visit over (analytics_online.h): how, the NetPass (the
+ * full set's, every stamp: a full pass of the Square's and Trade's on a
+ * system of one extra ROM counts with the Square's, as the server's daily
+ * totals count it), the time in the Square where MegaMan got there (below
+ * 0 none) */
 static void counted(VisitEnd why, bool away) {
-	analytics_visit((int)why, netpass_full(), away ? (int)((SDL_GetTicks() - V.arrived_at) / 1000) : -1, V.official);
+	analytics_visit((int)why, netpass_stamps() == STAMP_COUNT, away ? (int)((SDL_GetTicks() - V.arrived_at) / 1000) : -1, V.official);
 }
 
 bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES], bool official) {

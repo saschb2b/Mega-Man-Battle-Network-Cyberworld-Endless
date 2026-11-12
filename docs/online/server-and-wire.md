@@ -1,15 +1,15 @@
 ---
 type: Feature
 title: "The server and the wire"
-description: "Protocol v17, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
+description: "Protocol v18, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
 tags: [online]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:40:00Z }
 ---
 
 # The server and the wire
 
-Protocol v17 ([shared/online/README.md](../../shared/online/README.md))
-is binary over a WebSocket (`cyberworld.presence.v17`; v7 added the
+Protocol v18 ([shared/online/README.md](../../shared/online/README.md))
+is binary over a WebSocket (`cyberworld.presence.v18`; v7 added the
 stands, v8 the latency each game asks for with rollback on, v9 the
 NetPass's rule, above, v10 a dropped link's place held and taken back,
 BYE, maintenance and which side is behind: A dropped link, above; v11
@@ -22,14 +22,18 @@ a burst of three then one a second: [Emotes](square/emotes.md); v15 a team
 challenge's format and two MegaMen a side, four seats in one battle:
 [Team NetBattles](arena-in-brief.md#team-netbattles); v16 chip ids to 1023, for
 [ten-bit chip ids](../multirom/bn4-chips.md); v17 BN4 Red Sun in the
-NetPass's full set: [A game joins the set](netpass.md#a-game-joins-the-set)). The
+NetPass's full set: [A game joins the set](netpass.md#a-game-joins-the-set); v18
+a system of one extra ROM, its full pass and a trade's common ground:
+[A system with room for one game](netpass.md#a-system-with-room-for-one-game)). The
 server refuses
 another protocol version, another Square generator or hash, another ROM
 code or SHA-1 (BN6's, and BN5's and BN4's where one is named), a name out of
 bounds and a full Square; it refuses what needs the full set from a
 session without it (NOTICE 28: a challenge, an accept, a trade's steps,
 a board post, a WATCH, a WEEK_POST, and a challenge or a trade aimed at
-such a session); it bounds every
+such a session; a trade's steps and a board post ask a full pass, which
+a system of one extra ROM holds with one game) and a trade's chip
+outside the pair's common ground (NOTICE 19); it bounds every
 message, the players, pending handshakes, each client's traffic and its
 output, and relays the Arena's keys under a bucket of its own. Trading
 and the Arena each have their switch in its configuration

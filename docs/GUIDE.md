@@ -90,8 +90,8 @@ statistics, troubleshooting and building the game yourself.
   also brings a tournament to act 3's arena in half the runs: three Navis
   in a row on BN4's own bracket, BN4's among them ([A run](#a-run)). The
   title's note says "BN4 found" as the game starts. Wherever BN5 can be added, BN4 can, the same ways; the
-  New 3DS reads one of them, BN5's where both are there, so its
-  [NetPass](#the-netpass) holds the Square stamp alone.
+  New 3DS reads one of them, BN5's where both are there; with either, its
+  [NetPass](#the-netpass) holds the Square and Trade stamps.
 
 No download and no page contains Capcom data. Without the ROM there is no
 game.
@@ -1134,7 +1134,7 @@ The NetPass says what your games open online, as four stamps:
 | --- | --- | --- |
 | **Square** | Walking, phrases and emotes, cheering, cards, the referee's calls, the board and its posts, reading the trade offers, the week's ranking | BN6 Cybeast Gregar (USA): everyone has it |
 | **Arena** | NetBattles, and watching them | The full set |
-| **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set |
+| **Trade** | Trading at Trade Central, and posting or answering a trade offer | The full set; on a New 3DS, BN5 or BN4 beside BN6 |
 | **DeepNet** | The week's DeepNet dive | The full set |
 
 The full set is every game this version supports online: BN6 Cybeast
@@ -1148,6 +1148,16 @@ ahead of time. BN4 Red Sun joined the set this way: a pass that was full
 before shows a new open slot, the greeter tells you once, and the stamps
 land again when you add BN4's ROM. BN4's chips go into NetBattles and
 trades as each is proved; one not yet proved stays out.
+
+A New 3DS reads one ROM beside BN6's, so its pass goes as far as that
+allows: with BN5 Team Colonel's or BN4 Red Sun's it holds the Square and
+Trade stamps, a "Trade pass". It trades with everyone who holds the
+Trade stamp, and a trade with it stays within the chips both games
+hold: the list shows only those, so no BN4 chip goes to or from a game
+without BN4's ROM, and no BN5 chip without BN5's. NetBattles are not
+offered there, and the week's DeepNet dive stays shut: without the
+other game's ROM its dive would not be the same net as the Board's. The
+Board's ranking and the trade offers still read.
 
 It is a key item: **KeyItem** in the PET, then A on **NetPass**; A or B
 closes it. In the Square **R** on the PET's menu opens it too (the menu

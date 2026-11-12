@@ -62,11 +62,11 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, full=True):
-        """A game in the channel: with the full set (BN6's and BN5's ROMs), or BN6's alone."""
+    async def connect(self, name, full=True, **identity):
+        """A game in the channel: with the full set (BN6's, BN5's and BN4's ROMs), or BN6's alone; `identity` what else its HELLO says."""
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=full)
+        welcome = await client.open(self.port, name, bn5=full, **identity)
         return client, struct.unpack("!I", welcome[5:9])[0]
 
     async def battle(self):
@@ -158,6 +158,11 @@ class StandsTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual((entries[0][1:3], entries[0][5]), ((a_id, b_id), 1))
         await c.send(watch(1, match))
         self.assertEqual(struct.unpack("!H", (await c.message(SPEC["notice"]))[1:3])[0], SPEC["notice_pass"])
+        self.assertFalse(self.server.stands.watching)
+        # (v18: nor a system of one extra ROM, its pass full with one game: it could not build the battle's pair)
+        e, _ = await self.connect("Epsilon", bn4=False, one_extra=True)
+        await e.send(watch(1, match))
+        self.assertEqual(struct.unpack("!H", (await e.message(SPEC["notice"]))[1:3])[0], SPEC["notice_pass"])
         self.assertFalse(self.server.stands.watching)
         await c.send(watch(2, match))       # (a stop: never refused)
         await c.send(bytes((SPEC["ping"],)) + b"\0\0\0\1")

@@ -23,6 +23,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "game.h"
+#include "netpass.h"
 #include "netpass_screen.h"
 #include "online_chat.h"
 #include "padmap.h"
@@ -223,7 +224,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->onehit) devtools_parse("onehit");
 	if (s->netpass == 1) netpass_screen_open();
 	if (s->netpass == 2) netpass_stamp_begin();
-	if (s->netpass == 3) talk_start(square_greeter_grew_words(), FACE_PROG);
+	if (s->netpass == 3) talk_start(square_greeter_grew_words(netpass_full()), FACE_PROG);
 	if (s->netpass == 4) netpass_grew_begin();
 	if (s->trade[0]) trade_preview(s->trade);
 	if (s->reconnect[0]) reconnect_preview(s->reconnect);

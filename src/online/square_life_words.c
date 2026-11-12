@@ -51,8 +51,9 @@ static int tally(char *s, size_t n, const SquareFacts *f) {
 
 const char *square_referee_words(const SquareFacts *f) {
 	static char s[240];
-	if (!f->stamp) return "THIS IS THE ARENA!|NO ARENA STAMP ON\nYOUR NETPASS!|SORRY! THE RING'S\nCLOSED TO YOU!";
+	/* (a PET no NetBattle is offered from: that first, whatever its pass) */
 	if (!f->arena) return "THIS IS THE ARENA!|SORRY! NO NETBATTLES\nFROM THIS PET!";
+	if (!f->stamp) return "THIS IS THE ARENA!|NO ARENA STAMP ON\nYOUR NETPASS!|SORRY! THE RING'S\nCLOSED TO YOU!";
 	int n = snprintf(s, sizeof s, "THIS IS THE ARENA!");
 	/* (the ring's one tip until a bout; after one, the last bout and the count) */
 	if (!f->fought) {
