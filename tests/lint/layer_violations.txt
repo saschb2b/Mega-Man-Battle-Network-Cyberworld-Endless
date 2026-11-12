@@ -104,7 +104,6 @@ src/emu/xpanels_look.c -> map/lz.h
 src/emu/xvirus.c -> layer/xnavi.h
 src/emu/xvirus_songs.c -> audio/xsong.h
 src/gfx/xbackdrop.c -> map/lz.h
-src/launcher/launcher.c -> saves/saves.h
 src/launcher/launcher_art.c -> layer/text.h
 src/launcher/launcher_art.c -> second/second_frame.h
 src/launcher/launcher_draw.c -> core/startup.h
