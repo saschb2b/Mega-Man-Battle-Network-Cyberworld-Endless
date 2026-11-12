@@ -31,10 +31,20 @@ NapalmMan, MagnetMan, Meddy), whose battle code Team Colonel's ROM holds,
 come into runs as foes, and beating one gives his Soul, beyond what Team
 Colonel's MegaMan ever gets. This is the design, reasoned with the
 game-design skill and checked against [the core loop](core-loop.md);
-its first unit, the room, is built (The build, below); the Navis are not
-yet. Every number below was read from the owner's BN5
+its first unit, the room, is built, and five of the six Navis are moved
+(The build, below). Every number below was read from the owner's BN5
 ROM (its rows in [BN5's battles, records and rewards](../rom/bn5-battles.md), Team ProtoMan's six)
 unless it says otherwise.
+
+**Where it stands in 0.21.0:** NapalmMan, GyroMan, SearchMan, Meddy and
+MagnetMan are in BN6's battle engine, each proved against BN5's own
+battle frame by frame, but no run meets them: none guards a run yet, and
+beating one gives no Soul. Their guardian wiring, their Souls, ProtoSoul,
+the board and DarkProto wait for 0.22.0 (The build, units 7 to 10).
+Their copies cost the New 3DS no headroom: its heap modelled with them
+installed peaks at 77.8 MB with BN5's ROM beside BN6's and 85.9 of 96
+with BN4's too, nothing refused and no crash in 24 runs
+(`tools/heap3ds.py --cases bn5,all`, seeds 1 to 12, 12 November 2026).
 
 ## What the ROM holds
 
