@@ -403,6 +403,16 @@ does not see visitors (its runs start no core with the families
 installed): with `--dev bn4families` its report was the same before and
 after, 0 numbers outside their bands.
 
+A dark chip of BN4's is never a reward (`xchips_kept_out`, 12 November
+2026): it costs 20 max HP a battle it is used in, a reward tells no
+price, and no flame offers BN4's yet ([BN4's chips in a
+run](bn4-chips.md), unit 7). The rows do name them: a scan of BN4's 253
+rows at `BN4_REWARD_ROWS` (a scratch script over the ROM, the chips'
+ids by the registry's `xreg4_dark_ids`) found 218 entries naming one,
+ElemDark (row 114, entries 9 and 19, a chip that plays since #423),
+BlakBarr and the Navis' DS chips (which sit out): each pays the
+stand-in's 200 zenny, as a chip that sits out does.
+
 An HP entry of 0 (`0x8000`) is in 23 of the six families' entries:
 ShrimpyV3EX's 7, WallaV3's and WallaV3EX's 8 each, all in a row's half
 for MegaMan's HP at 3/8 or less (82 in BN4's whole table, 108 in BN5's,

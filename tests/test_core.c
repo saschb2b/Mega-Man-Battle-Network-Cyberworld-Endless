@@ -5299,6 +5299,9 @@ static void test_xchips(void) {
 	CHECK(xchips_sp_named("ProtoMn\x04") && !xchips_sp_named("ProtoMan") && !xchips_sp_named("ProtoMn\x03") && !xchips_sp_named(""),
 		"xchips: BN6's SP by its mark, its EX and V1 not");
 	CHECK(!xchips_bn4_paid(205) && xchips_reward_bn4(205 | 18 << 9) == (0x4000 | XCHIPS_STAND_IN), "xchips: no BN4 chip paired without the ROMs, the stand-in");
+	/* (a dark chip of BN4's never a reward, though it plays: BN4's row 114 names ElemDark; FlmLine1, GutsMan and Cannon not kept out) */
+	CHECK(xchips_kept_out(0) && xchips_kept_out(697) && xchips_kept_out(601) && xchips_kept_out(527) && xchips_kept_out(730) &&
+		!xchips_kept_out(595) && !xchips_kept_out(535) && !xchips_kept_out(1), "xchips: BN4's dark chips kept out of rewards, the rest not");
 	/* (a reward entry of BN5's as BN6's: no chip paired without the ROMs,
 	 * the stand-in's zenny; zenny, BugFrags and none as they are) */
 	CHECK(xchips_reward_bn6(0x0001) == (0x4000 | XCHIPS_STAND_IN) && xchips_reward_bn6(0x43E8) == 0x43E8 && xchips_reward_bn6(0xC003) == 0xC003 &&
@@ -6153,8 +6156,8 @@ static void test_library_pages(void) {
 		const XChipReg *r = xreg_at(s->chip);
 		const XChipReg4 *own = xreg4_of(s->own);
 		/* (its own row's id where it has one, sitting out until its code plays, on BN6's or moved; else the run's chip of its name: BN6's or BN5's) */
-		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && library_plays(s->chip) == (own->how == XREG_RECORD || own->how == XREG_MOVED),
-			"library: BN4's chip %d fills its slot with its own row's id, hidden until it plays", s->own);
+		if (own) CHECK(own->bn6 == s->chip && own->how != XREG_PA && library_plays(s->chip) == ((own->how == XREG_RECORD || own->how == XREG_MOVED) && !xreg4_dark(s->chip)),
+			"library: BN4's chip %d fills its slot with its own row's id, hidden until it plays and while it is dark", s->own);
 		else CHECK(r ? r->how != XREG_PA : s->chip < XCHIPS_BN6, "library: BN4's chip %d fills its slot with chip %d, none of BN6's folder chips nor the registry's", s->own, s->chip);
 		hidden4 += own != NULL;
 	}
@@ -6174,6 +6177,9 @@ static void test_library_pages(void) {
 	CHECK(library_rows_check(back, 2) == 2 && library_rows_check(twice, 2) == 2 && library_rows_check(cls, 1) == 1 && library_rows_check(none, 1) == 1 && !library_rows_check(rows, 5),
 		"library: a number out of order, a chip twice, a fourth class and no chip refused");
 	/* (what plays: the registry's own over BN6's code or moved, no DarkChip, no Program Advance; BN6's by its pool, none without its ROM) */
+	/* (a dark chip of BN4's that plays, unlisted while nothing hands one out: Hole, DrkLine, ElemDark, BugCurse; FlmLine1 listed) */
+	CHECK(!library_plays(527) && !library_plays(528) && !library_plays(697) && !library_plays(730) && library_plays(595),
+		"library: BN4's dark chips that play are not listed, FlmLine1 is");
 	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
