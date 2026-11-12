@@ -119,14 +119,14 @@ Measured from the three ROMs and the registry by `tools/library_pages.py
 | --- | ---: | ---: | ---: | ---: | ---: |
 | BN6 | 200 | 39 | 10 | 249 | all |
 | BN5 (Team Colonel) | 180 of its 180 | 57 of its 60 | 4 of its 7 | 241 | 104 (85, 16, 3) |
-| BN4 (Red Sun) | 160 of its 186 | 25 of its 79 | 4 of its 9 | 189 | 78 (61, 14, 3) |
+| BN4 (Red Sun) | 160 of its 186 | 26 of its 79 | 4 of its 9 | 190 | 78 (61, 14, 3) |
 
 The BN4 row is 12 November 2026's, read from the registry on dev as
 0.21.0 ships it: beside BN6's 78 by name it holds BN5's own 36 of its
-name (26, 9, 1) and 75 of BN4's own that play (73, 2, 0). BN4's dark
-chips are left out until a flame offers them, and FirePlus, which plays
-and a run hands out, has no number in BN4's Library and so no slot: a
-run can hand out 76 of BN4's own. `--report` counts the table's slots
+name (26, 9, 1) and 76 of BN4's own that play (73, 3, 0), GutsMan's SP
+the last to join. BN4's dark chips are left out until a flame offers
+them, and FirePlus, which plays and a run hands out, has no number in
+BN4's Library and so no slot: a run can hand out 77 of BN4's own. `--report` counts the table's slots
 (274 for BN4), not which of them play.
 
 BN5's other 137 are the registry's own that play (95, 41, 1). BN4's other

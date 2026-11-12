@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T21:20:00Z
+* **Update**: releases/v0.21.0.md (what joined 0.21.0 late: GutsMan's SP and 77 of BN4's own chips, BurnerMan and SparkMan drawn into the tournament with their plates, the AreaGrab fix), game/meta/library.md (BN4's row with GutsMan's SP: 160, 26, 4, 190; a run hands out 77 of BN4's own), GUIDE.md (77 of BN4's own chips; the tournament's twelve BN4 Navis).
