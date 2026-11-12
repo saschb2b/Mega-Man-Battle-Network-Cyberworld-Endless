@@ -60,10 +60,12 @@ void emu_picture_draw(int x, int y) {
 	uint32_t made = emu_pictures();
 	lcd_frame(px, EMU_W * EMU_H, made != seen);
 	seen = made;
+#ifndef __3DS__
 	/* (voxel mode, voxel_scene.h: the world drawn under the canvas, which
-	 * keeps the HUD's pixels and is clear at the rest) */
+	 * keeps the HUD's pixels and is clear at the rest; not the 3DS's) */
 	static uint8_t hud[EMU_W * EMU_H];
 	bool voxel = voxel_scene_frame(px, hud);
+#endif
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];
 #ifdef __3DS__
