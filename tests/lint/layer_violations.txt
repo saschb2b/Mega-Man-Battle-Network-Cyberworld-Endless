@@ -8,7 +8,6 @@ src/analytics/analytics_online.c -> online/online_visit.h
 src/core/backup_info.c -> net/layer_make.h
 src/core/backup_manifest.c -> net/layer_make.h
 src/core/chips.c -> layer/text.h
-src/core/chips.h -> emu/emu.h
 src/core/desktop.c -> core/backup.h
 src/core/desktop.c -> launcher/launcher_roms.h
 src/core/desktop_win.c -> core/backup.h
@@ -78,7 +77,6 @@ src/director/pet.c -> online/square_pet.h
 src/director/reward_pick_draw.c -> second/second_art.h
 src/director/reward_pick_draw.c -> second/second_card.h
 src/emu/battle_trace.c -> dev/xdiff_events.h
-src/emu/debug.c -> core/run.h
 src/emu/fast_forward_game.c -> dev/devtools.h
 src/emu/game_hooks.c -> dev/devtools.h
 src/emu/scene_emu.c -> core/start_3ds.h
@@ -118,7 +116,6 @@ src/layer/lib_prizes.c -> director/liberation_board.h
 src/layer/reward_words.c -> director/reward_pick.h
 src/layer/service_words.c -> director/darkchips.h
 src/layer/xguardian.c -> director/souls.h
-src/library/library.c -> dev/devtools.h
 src/library/library_draw.c -> second/second_art.h
 src/map/lanhp.c -> layer/npc.h
 src/online/arena_card.c -> second/second_frame.h

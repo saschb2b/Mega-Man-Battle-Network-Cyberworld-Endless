@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T00:50:00Z
+* **Update**: devtools/dev-menu.md (`library=N` fills the profile's Library at the start, not as the screen opens), game/meta/library.md (the same, in The code: the dev tools fill it, the screen reads no dev switch; the layers' fourth cut).

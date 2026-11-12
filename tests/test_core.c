@@ -7771,6 +7771,9 @@ static void test_lab_text(void) {
 	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
 	lab_set_value(s, sizeof s, 1);
 	CHECK(!strcmp(s, "1 foe"), "lab: a set's foes (%s)", s);
+	lab_info_navi(s, sizeof s, 800, 3);
+	CHECK(!strcmp(s, "HP 800. Beaten 3.") && !strcmp(lab_navi_word(0, 1), "EX") && !strcmp(lab_navi_word(1, 2), "V3") && !lab_navi_word(0, 3)[0],
+		"lab: a Navi's row and his versions' words (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
 }

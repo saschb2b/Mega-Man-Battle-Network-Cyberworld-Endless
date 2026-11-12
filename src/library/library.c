@@ -6,7 +6,6 @@
 
 #include "audio.h"
 #include "buttons.h"
-#include "devtools.h"
 #include "game.h"
 #include "library_draw.h"
 #include "library_text.h"
@@ -107,8 +106,6 @@ static void keys(void) {
 
 void library_open(void) {
 	memset(&L.v, 0, sizeof L.v);
-	/* (--dev library=N: every Nth chip id held, for the pages' pictures) */
-	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);
 	L.shown = true;
 	L.letting_go = false;
 	page_make();
