@@ -195,7 +195,7 @@ def whole_rom_folder(name):
     """A picture or clip that sees the whole ROM folder (docs_rom_mounts):
     one named for BN5 or BN4, whose areas, Navis or bracket it shows, and
     the Glitch layer's, whose flips were timed with every ROM beside BN6's."""
-    return 'bn5' in name or 'bn4' in name or name.startswith('glitch')
+    return 'bn5' in name or 'bn4' in name or name.startswith('glitch') or name in WHOLE_ROMS_A
 
 
 DOCKER_RUNS = [0]
@@ -1337,6 +1337,37 @@ GLITCH_WARP = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'gl
                '--input', '150:,' + '4:A,6:,' * 30 + '40:,0:glitch,400:']
 GLITCH_LAYER = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'glitch,side=4,glitchstage=5,quiet',
                 '--input', '150:,' + '4:A,6:,' * 30 + '40:,100:RIGHT,100:DOWN,100:LEFT,100:UP,400:']
+# 0.21.0 (A)
+# (the Battle Lab, docs/game/battle-lab.md: Central Area's first layer, seed
+# 15, its words paged, the builder opened with every family by the dev step
+# `lab all`, open by frame 700; every ROM read, so BN5's and BN4's panels,
+# backgrounds and songs are on its rows)
+LAB = ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'quiet']
+LAB_OPEN = '300:,' + '4:A,6:,' * 30 + '40:,0:lab all,60:,'
+# (FOES: Mettaur lifted and set down, B back to the list, down to Swordy,
+# its version turned to V2, set a panel on, by frame 1036; FIELD: the
+# cursor up from MegaMan's panel, A turning each panel through the types:
+# BN5's lava, sea and magnet panel, BN4's Hole, ice and grass, by 2006;
+# STAGE: the background turned back to BN4's ACDC Area, the song to BN4's
+# Virus Busting, Folder to the Lab's, by 2346)
+LAB_FOES = LAB_OPEN + '6:A,24:,6:A,24:,6:B,24:,' + '6:DOWN,14:,' * 3 + '6:RIGHT,14:,6:A,24:,6:RIGHT,14:,6:DOWN,14:,6:A,24:,6:B,60:,'
+LAB_FIELD = ('6:R,54:,6:UP,14:,' + '4:A,6:,' * 12 + '6:RIGHT,14:,' + '4:A,6:,' * 13 + '6:DOWN,14:,6:DOWN,14:,' + '4:A,6:,' * 14 +
+             '6:LEFT,14:,' + '4:A,6:,' * 15 + '6:RIGHT,14:,' * 3 + '4:A,6:,' * 6 + '6:UP,14:,6:UP,14:,' + '4:A,6:,' * 5 + '60:,')
+LAB_STAGE = '6:R,54:,' + '6:LEFT,34:,' * 2 + '6:DOWN,34:,' + '6:LEFT,34:,' * 2 + '6:DOWN,34:,6:RIGHT,34:,'
+LAB_BUILD = LAB + ['--input', LAB_FOES + LAB_FIELD + LAB_STAGE + '6:A,200:']
+# (BATTLE!: START from the builder, the first hand's first chip sent)
+LAB_GO = '6:START,90:,6:A,20:,6:START,20:,6:A,200:,6:A,60:,'
+# (a test battle won as it is played: two Mettaurs set in the enemy's front
+# column, BATTLE!, WideSwrd sent, a step forward and the slash through both;
+# BN6's RESULT, A, NO DATA, A, the builder with the time; L to SETS)
+LAB_METS = LAB_OPEN + '6:A,24:,6:LEFT,14:,6:UP,14:,6:A,24:,6:DOWN,14:,6:DOWN,14:,6:A,24:,6:B,40:,'
+LAB_WON = LAB_METS + '6:START,90:,6:A,20:,6:START,20:,6:A,130:,6:RIGHT,10:,6:A,260:,6:A,120:,6:A,200:,6:L,60:,200:'
+# (a new run in Lan's room, seed 2: Dad's call paged, the PET opened)
+PET_ROOM = '40:,' + '4:A,6:,' * 46 + '30:,6:START,40:,'
+LAYER_15 = '300:,' + '4:A,6:,' * 30 + '40:,'
+# (the names of this release's pictures that see the whole ROM folder
+# without BN5 or BN4 in their name: whole_rom_folder)
+WHOLE_ROMS_A = ('lab-build', 'lab-battle', 'lab-won', 'library-pages')
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1801,6 +1832,38 @@ SCREENSHOTS = [
      {'CYBERWORLD_AUTOPILOT': '1'}),
     # (the Glitch layer at its last stage, another area's look flipped in)
     ('glitch-layer', GLITCH_LAYER, [(950, 'glitch-flip')], {}),
+    # 0.21.0 (A)
+    ('lab-build', LAB_BUILD, [(1000, 'lab-foes'), (2000, 'lab-field'), (2140, 'lab-stage'), (2260, 'lab-stage-song'),
+                              (2340, 'lab-stage-folder'), (2460, 'lab-folder')], {}),
+    # (a test battle won: the slash through both Mettaurs, BN6's RESULT with
+    # NO DATA, the builder back with the time, SETS with the set's best)
+    ('lab-won', LAB + ['--input', LAB_WON], [(1250, 'lab-running'), (1600, 'lab-result'), (1800, 'lab-time'), (1880, 'lab-sets')], {}),
+    # (the keeper at the lab's station in Lan's HP (--dev lab: the Lab sent),
+    # MegaMan put before him, his three boxes)
+    ('lab-keeper', HP_2 + ['--dev', 'lab', '--input', HP_PAGED + '0:place -76 -34 7,20:,6:A,100:,6:A,100:,6:A,100:,100:'],
+     [(1218, 'lab-keeper'), (1330, 'lab-keeper-talk'), (1530, 'lab-keeper-offer')], {}),
+    # (Dad's mail on a run's first layer: E-Mail, down to Battle Lab, read)
+    ('lab-mail', LAB[:-1] + ['quiet,lab', '--input', LAYER_15 + '6:START,40:,' + '6:DOWN,10:,' * 4 + '6:A,60:,' + '6:DOWN,10:,' * 3 +
+                             '6:A,100:,' + '6:A,100:,' * 5],
+     [(900, 'lab-mail')], {}),
+    # (a profile with one win over Bass and the Cybeast, `lab open` listing
+    # what it has: Gregar set, alone; his battle; the blow that would delete
+    # MegaMan ending it, the builder back)
+    ('lab-navi', LAB[:-1] + ['quiet,bass=1,beast=1', '--input', LAYER_15 + '0:lab open,60:,6:DOWN,24:,6:A,24:,6:A,24:,6:B,100:,'
+                             '6:START,90:,6:A,20:,6:START,20:,6:A,400:'],
+     [(860, 'lab-navi'), (1210, 'lab-navi-battle'), (1460, 'lab-navi-deleted')], {}),
+    # (the Library, a page per game: every third chip in the profile's
+    # Library (--dev library=3), every ROM read; BN6's StdChip page, right
+    # to its MegaChip and GigaChip, BN5's three, BN4's three)
+    ('library-pages', ['--scene', 'town', '--seed', '2', '--dev', 'library=3', '--input', PET_ROOM + '6:DOWN,6:,6:DOWN,6:,6:A,60:,' +
+                       '6:RIGHT,34:,' * 3 + '6:R,34:,' + '6:RIGHT,34:,' * 3 + '6:R,34:,6:R,34:,6:DOWN,14:,' + '6:RIGHT,34:,' * 2 + '40:'],
+     [(640, 'library-bn6'), (680, 'library-bn6-mega'), (720, 'library-bn6-giga'), (800, 'library-bn5'), (840, 'library-bn5-mega'),
+      (1042, 'library-bn4'), (1076, 'library-bn4-mega'), (1120, 'library-bn4-giga')], {}),
+    # (the Jukebox with BN4's ROM read: R to its BN4 Towns section, a song played)
+    ('jukebox-bn4', ['--scene', 'town', '--seed', '2', '--input', PET_ROOM + '6:DOWN,6:,' * 5 + '6:A,60:,6:DOWN,6:,6:RIGHT,14:,6:A,40:,' +
+                     '6:R,34:,' * 11 + '6:DOWN,14:,6:DOWN,14:,6:A,200:'],
+     [(1390, 'jukebox-bn4')], {}),
+    # 0.21.0 (A) ends: stills
 ]
 
 # pictures of others side by side for a release's notes (made after the
@@ -2112,6 +2175,9 @@ CLIPS = [
     ('glitch-layer', GLITCH_LAYER, {}, None, 600, 1300),
     ('glitch-copy', ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'god,onehit,quiet'],
      {'CYBERWORLD_AUTOPILOT': '1'}, '300:,0:swap 101/107/10D', 1360, 1660),
+    # 0.21.0 (A)
+    ('lab-won', LAB, {}, LAB_WON, 700, 1800),
+    # 0.21.0 (A) ends: clips
 ]
 
 
