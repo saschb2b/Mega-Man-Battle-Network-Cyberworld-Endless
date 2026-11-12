@@ -1,0 +1,10 @@
+[
+ {
+  "name": "BigHamr3's row's power another",
+  "spec": "bn4_chip_bighamr3",
+  "poke": [
+   "08C071B6:0064"
+  ],
+  "what": "the registry's record of BigHamr3 (661) with power 100 where BN4's record holds 280: Billy keeps more HP"
+ }
+]
