@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: game/battle-lab.md (Built, The sandbox folder: no family without a name is a row, the list printed as debug lines, its count with everything open).
 * **Update**: multirom/bn4-chips.md (BigHamr1-3 moved, GodHammr waits and why), devtools/differential.md (the held MegaMan's keys and sprite's screen place at the battle's frame), rom/bn4.md (BigHamr's hammer's row).
 * **Update**: game/battle-lab.md (Built: the sandbox folder, the Lab's own thirty chips kept in the profile and changed in BN6's folder editor inside a snapshot, the pack filled from the Library in every code, the way in pressed for the player, the proof; what is not yet), code/director.md (`lab_folder.c`).
 * **Update**: rom/net-maps.md (the map's BG controls: the 256-colour bit set on the layers' own map alone, Lan's HP at home garbled before one of BN4's areas since 0.20.0, fixed), rom/bn4.md (Net maps in 256 colours: the same, in a clause), GUIDE.md (BN4's virus families: nine, among the acts' viruses, no longer visitors in one battle in four).
