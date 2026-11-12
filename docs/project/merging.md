@@ -93,6 +93,30 @@ The counts of bn6f's functions on the Symbols page (its second marked
 part) are not among them: only `tools/symbols.py --full` writes them, from
 tables outside git.
 
+### What restore leaves alone
+
+`python3 tools/generated.py restore` changes only what a tool writes. In a
+merge it also meets pages a person writes that carry a tool's part (a
+concept's `generated` line, the counts on the Symbols page), and there it
+keeps to this:
+
+- A page in conflict that nobody has touched since git wrote it, whose
+  conflict is the tool's part alone: merged anew with that part set to
+  `dev`'s, and staged.
+- A page someone has resolved, in the working tree or the index, wholly or
+  in part: its text stays as it is. Only the tool's part is set to `dev`'s,
+  and a conflict that is that part alone is taken out; nothing is staged
+  for them.
+- A real conflict in what a person wrote: left exactly as it stands, and
+  named.
+
+The first version merged every page in conflict anew from the merge's
+three sides, and so wrote a conflict back over a page already resolved by
+hand (pull request #446, 12 November 2026); `tests/test_generated.py`
+holds the cases now, on a repository of its own. And because that page
+then passed every check with the markers in it, `build.py lint` fails on
+a conflict's markers left in any file git tracks.
+
 ### What a branch does
 
 - **Changing a source** (a header's name, a `docs/rom/` row, a ledger

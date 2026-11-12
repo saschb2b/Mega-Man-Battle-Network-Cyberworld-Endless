@@ -38,6 +38,7 @@ make's record needs the build image, and only where a bump was added).
 """
 import glob
 import os
+import re
 import subprocess
 import sys
 
@@ -202,31 +203,82 @@ def check(strict):
     return 1 if bad else 0
 
 
-def three_way(path, fix):
-    """A conflicted page's own three-way merge, each side passed through
-    `fix` first (the parts a tool writes set to dev's): what a person wrote
-    merges as git merges it, what the tool wrote cannot conflict. Written to
-    the page; whether it came out clean. None where the page is not in
-    conflict."""
+MARKER = re.compile(r'^(<<<<<<<|>>>>>>>|\|\|\|\|\|\|\|)( [^\n]*)?$', re.M)
+# A conflict whose sides are `generated` lines and nothing else (with the base's between, where git shows it).
+STAMP_CONFLICT = re.compile(r'^<<<<<<<[^\n]*\n(?:generated:[^\n]*\n)*(?:\|\|\|\|\|\|\|[^\n]*\n(?:generated:[^\n]*\n)*)?'
+                            r'=======\n(?:generated:[^\n]*\n)*>>>>>>>[^\n]*\n', re.M)
+
+
+def marked(text):
+    """Whether a conflict's markers stand in the text."""
+    return bool(re.search(r'^<<<<<<<( |$)', text, re.M) and re.search(r'^>>>>>>>( |$)', text, re.M))
+
+
+def three_way(path, fix=None):
+    """A conflicted page's own three-way merge from the merge's three sides,
+    each passed through `fix` first (the parts a tool writes set to dev's, so
+    that they cannot conflict and what a person wrote merges as git merges
+    it): (the text, whether it came out clean). None where the page is not in
+    conflict in the index. Nothing is written."""
     sides = []
     for stage in (2, 1, 3):
         text = git('show', f':{stage}:{path}', check=False)
         if text is None:
             return None
-        sides.append(fix(text))
+        sides.append(fix(text) if fix else text)
+    style = (git('config', '--get', 'merge.conflictStyle', check=False) or '').strip()
     names = [os.path.join(ROOT, '.git-generated-' + n) for n in ('ours', 'base', 'theirs')]
     try:
         for name, text in zip(names, sides):
             with open(name, 'w', encoding='utf-8', newline='\n') as f:
                 f.write(text)
-        r = subprocess.run(['git', 'merge-file', '-p', '-L', 'ours', '-L', 'base', '-L', 'dev', *names],
-                           cwd=ROOT, capture_output=True, text=True, encoding='utf-8')
+        cmd = ['git', 'merge-file', '-p', '-L', 'ours', '-L', 'base', '-L', 'dev'] + ([f'--{style}'] if style in ('diff3', 'zdiff3') else [])
+        # (as git's own merge compares, where this git's merge-file can)
+        r = subprocess.run(cmd + ['--diff-algorithm=histogram'] + names, cwd=ROOT, capture_output=True, text=True, encoding='utf-8')
+        if r.returncode < 0 or r.returncode > 127:
+            r = subprocess.run(cmd + names, cwd=ROOT, capture_output=True, text=True, encoding='utf-8')
     finally:
         for name in names:
             if os.path.exists(name):
                 os.remove(name)
-    put(path, r.stdout)
-    return r.returncode == 0
+    return r.stdout, r.returncode == 0
+
+
+def untouched(path):
+    """Whether the conflicted page in the working tree is still as git's merge
+    wrote it: nobody has resolved any of it by hand. Only then may it be merged
+    anew; a page someone has worked on is theirs."""
+    mine, again = here(path), three_way(path)
+    plain = lambda text: MARKER.sub(lambda m: m.group(1), text)   # noqa: E731  (the markers without their labels)
+    return mine is not None and again is not None and plain(mine) == plain(again[0])
+
+
+def settle(path, fix, conflicted, mend=None):
+    """A page a person writes with a part a tool writes, in a merge or out of
+    one: the tool's part made dev's and nothing else of the page changed,
+    unless nobody has touched its conflict and setting that part aside
+    resolves all of it. `fix` makes a side's part dev's; `mend` resolves, in
+    the page as it stands, a conflict that is the tool's part alone. Returns
+    'done' (the tool resolved or restored it: to stage), 'kept' (a person's
+    resolution stands, the part set under it), 'left' (a conflict in what a
+    person wrote is still there) or None (nothing to do)."""
+    mine = here(path)
+    if mine is None:
+        return None
+    if path in conflicted and untouched(path):
+        merged = three_way(path, fix)
+        if merged and merged[1]:
+            put(path, merged[0])
+            return 'done'
+    was = marked(mine)
+    text = fix(mend(mine) if mend and was else mine)
+    if text != mine:
+        put(path, text)
+    if marked(text):
+        return 'left'
+    if path in conflicted and not was:
+        return 'kept'
+    return 'done' if text != mine or (path in conflicted and was) else None
 
 
 def restore(ref):
@@ -236,7 +288,7 @@ def restore(ref):
     if ref is None:
         sys.exit(f'generated: {DEV} is not known here: git fetch origin dev, or name the commit')
     ref = ref.strip()
-    done, left = [], []
+    done, left, kept = [], [], []
     log_fold = fold()
     # what the branch logged the old way, in the log itself, kept as an entry's file before the log is dev's again
     mine = git('show', f':2:{LOG}', check=False) if merging else None
@@ -245,51 +297,47 @@ def restore(ref):
         if merging:
             git('add', '--', path)
     for path in whole(ref):
-        if here(path) != at(ref, path) or merging:
-            put(path, at(ref, path))
+        theirs = at(ref, path)
+        if theirs is None and here(path) is None:
+            continue
+        if here(path) != theirs or merging:
+            put(path, theirs)
             done.append(path)
+    conflicted = set((git('diff', '--name-only', '--diff-filter=U', check=False) or '').split()) if merging else set()
+    sorts = {'done': done, 'left': left, 'kept': kept}
     for path, marks in PARTS.items():
         theirs = at(ref, path)
         new = parts(theirs, marks) if theirs is not None else None
         if new is None:
             continue
-        clean = three_way(path, lambda text, m=marks, n=new: with_parts(text, m, n) if parts(text, m) is not None else text) if merging else None
-        if clean is False:
-            left.append(path)
-            continue
-        mine = here(path)
-        if mine is not None and parts(mine, marks) not in (None, new):
-            put(path, with_parts(mine, marks, new))
-            clean = True
-        if clean:
-            done.append(path)
+        fix = lambda text, m=marks, n=new: with_parts(text, m, n) if parts(text, m) is not None else text   # noqa: E731
+        how = settle(path, fix, conflicted)
+        if how:
+            sorts[how].append(path)
     # each concept's `generated` line as dev has it: dev's workflow writes it, from the log's entry
-    conflicted = set((git('diff', '--name-only', '--diff-filter=U', '--', 'docs', check=False) or '').split()) if merging else set()
-    for path in sorted(conflicted | set(log_fold.stamps(ref))):
+    for path in sorted({p for p in conflicted if p.startswith('docs/')} | set(log_fold.stamps(ref))):
         theirs = at(ref, path)
         line = log_fold.STAMP.search(theirs) if theirs and path.endswith('.md') else None
-        if not line or path in PARTS and path in left:
+        if not line:
             continue
         fix = lambda text, to=line.group(0): log_fold.STAMP.sub(lambda _: to, text, count=1)   # noqa: E731
-        clean = three_way(path, fix) if path in conflicted else None
-        if clean is False:
-            if path not in left:
-                left.append(path)
-            continue
-        mine = here(path)
-        if mine is not None and fix(mine) != mine:
-            put(path, fix(mine))
-            clean = True
-        if clean and path not in done:
-            done.append(path)
+        mend = lambda text, to=line.group(0): STAMP_CONFLICT.sub(lambda _: to + '\n', text)   # noqa: E731
+        how = settle(path, fix, conflicted - set(done), mend)   # (a page the parts above already resolved is no longer in conflict)
+        if how and path not in sorts[how]:
+            for other in sorts.values():
+                if path in other:
+                    other.remove(path)
+            sorts[how].append(path)
     if merging and done:
         git('add', '-A', '--', *done)
     for path in done:
         print(f'generated: {path} as {ref[:9]} has it')
+    for path in kept:
+        print(f'generated: {path}: resolved by hand, and left so; only its part a tool writes is dev\'s (yours to stage)')
     for path in left:
         print(f'generated: {path}: a conflict is left in what a person wrote; resolve it by hand')
     print(f'generated: {len(done)} files put back' + (', staged for the merge' if merging and done else '')
-          + (f'; {len(left)} left to resolve by hand' if left else ''))
+          + (f'; {len(kept)} resolved by hand kept' if kept else '') + (f'; {len(left)} left to resolve by hand' if left else ''))
     return 0
 
 

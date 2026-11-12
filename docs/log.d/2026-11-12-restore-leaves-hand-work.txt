@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T15:34:59Z
+* **Update**: project/merging.md (What restore leaves alone, new section: a page resolved by hand is never merged anew; lint fails on conflict markers), code/tests.md (tests/test_generated.py, new row).
