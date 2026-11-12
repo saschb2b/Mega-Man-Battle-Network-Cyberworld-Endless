@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-12T15:13:13Z
-* **Update**: rom/bn4.md (Computed powers: BN4's reader, table, SP routine, deletion times and BCD time located), multirom/bn4-chips.md (BN4's computed powers moved, GutsMnSP moved, DrkCanon's routine named), devtools/chip-recipe-generator.md (a unit of kind power).

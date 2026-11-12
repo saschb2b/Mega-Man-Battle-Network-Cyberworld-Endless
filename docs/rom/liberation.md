@@ -3,7 +3,7 @@ type: ROM Map
 title: "BN5's Liberation Missions"
 description: "Addresses for BN5's Liberation Missions and their board drawn in BN6: the missions and rewards, each mission's look, banners and L view, the Darkloids' phase, BN5's Darkloids, teammates in another Navi's body and the battle's field."
 tags: [rom]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:11:22Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:30:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

@@ -3,7 +3,7 @@ type: Code Map
 title: "The emulator, its hooks and the moved code"
 description: "What `src/emu/` holds, file by file: the mGBA core, hooks and gamecalls, the moved virus families, Navis, chips and Souls, BN5's panels, free space and write claims, and the bn6*.h headers naming BN6's addresses."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:30:00Z }
 ---
 
 # The emulator, its hooks and the moved code
