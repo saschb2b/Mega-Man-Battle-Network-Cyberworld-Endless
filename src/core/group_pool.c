@@ -198,11 +198,11 @@ bool group_battle(int depth, int biome, uint32_t layer_seed, int index, int only
 /* ---- an act's arc (group_arc.h) ---- */
 
 /* The area's own virus families: a BN6 area's from its random battles'
- * formations; an older net's area's (loot.h's loot_territory, outside the
+ * formations; an older net's area's (loot.h's loot_arc_territory: the act's, outside the
  * deep) from its records as BN6's engine fights them at `depth` */
 static FamilyMask home_of(int depth, int biome) {
 	FamilyMask in = FAMILY_MASK_NONE;
-	if (loot_deep[0] < 0 && loot_territory >= 0) return xterritory_families(depth, loot_territory, NULL);
+	if (loot_deep[0] < 0 && loot_arc_territory >= 0) return xterritory_families(depth, loot_arc_territory, NULL);
 	const Formation *list;
 	int n = formations_of(biome, &list);
 	for (int i = 0; i < n; ++i)
@@ -233,13 +233,14 @@ bool group_arc_at(uint32_t run_seed, int depth, int biome, GroupArc *out) {
 	static struct { uint32_t seed; int act, biome, made_n, territory; bool ok; GroupArc arc; } kept = { 0, -1, 0, 0, 0, false, { 0 } };
 	const GroupFam *pool;
 	int n = group_pool(&pool), act = pacing_loop(depth) * PACING_ACTS + pacing_act(depth);
-	if (kept.act != act || kept.seed != run_seed || kept.biome != biome || kept.made_n != P.made_n || kept.territory != loot_territory) {
-		ArcRules r = rules_at(depth, biome);
+	if (kept.act != act || kept.seed != run_seed || kept.biome != biome || kept.made_n != P.made_n || kept.territory != loot_arc_territory) {
+		/* (under the rules of the act's first layer, whichever layer asks: group_arc.h's group_arc_depth) */
+		ArcRules r = rules_at(group_arc_depth(depth), biome);
 		kept.seed = run_seed;
 		kept.act = act;
 		kept.biome = biome;
 		kept.made_n = P.made_n;
-		kept.territory = loot_territory;
+		kept.territory = loot_arc_territory;
 		kept.ok = group_arc_make(pool, n, &r, mix(run_seed ^ 0x41524353u ^ (uint32_t)act * 0x9E3779B9u), &kept.arc);   /* ("ARCS") */
 	}
 	*out = kept.arc;

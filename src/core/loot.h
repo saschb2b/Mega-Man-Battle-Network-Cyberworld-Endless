@@ -51,6 +51,14 @@ bool loot_arc_home(int depth, int biome);
  * layer's random battles are, fought in BN6's engine (xbattles.h, issue
  * #82), as make_encounter rolls them; -1 none (BN6's area's own) */
 extern int loot_territory;
+/* ... and the act's area's, for the act's arc (group_pool.h): the layer's
+ * own (loot_layer_nets sets it so), but on a dark layer, which wears a
+ * dark area that is no territory, the area the act's other layers wear
+ * (loot_arc_area, the director's). The arc's home is the act's, never
+ * the layer's: a dark layer in an older net's area made another arc for
+ * its one layer, in one session too. */
+extern int loot_arc_territory;
+void loot_arc_area(int tiles);
 /* The deep (docs/multirom/one-net.md: the deep converges): the older
  * net's areas a deep act's random battles draw on beside BN6's own area's,
  * a coin a battle between the nets (and between the two where both are
