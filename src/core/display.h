@@ -45,6 +45,16 @@ bool display_has_smooth(void);
 /* ... and lcd3x (all but the 3DS, whose picture its own GPU shows) */
 bool display_has_lcd3x(void);
 
+/* Voxel mode (docs/engine/voxel.md; settings.ini's voxel, --voxel on|off|debug
+ * over it): off as it comes, and not on the 3DS or the Vita, too slow for
+ * it. Its camera (--voxel-pitch DEGREES, BN6's 30; --voxel-zoom; --voxel-depth) */
+enum { DISPLAY_VOXEL_OFF, DISPLAY_VOXEL_ON, DISPLAY_VOXEL_DEBUG };
+int display_voxel(void);
+bool display_has_voxel(void);
+float display_voxel_pitch(void);
+float display_voxel_zoom(void);
+float display_voxel_depth(void);
+
 /* The scale `dir` (+1 or -1) from the one in use, in the order this
  * system offers them (the 3DS's auto is its fill: it has no auto of its own) */
 DisplayScale display_scale_next(int dir);

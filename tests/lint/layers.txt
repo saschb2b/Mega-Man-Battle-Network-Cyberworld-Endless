@@ -40,6 +40,7 @@ core.app = core/main.c core/startup.* core/start_*
 # the game's scene: the frame that runs the core, the director and the screens over it
 emu.game = emu/scene_emu.* emu/emu_picture.* emu/game_hooks.* emu/fast_forward_game.* emu/feel_game.*
 emu.game = emu/autopilot* emu/showcase.*
+emu.game = emu/voxel_scene.*
 
 # ---- the layers, lowest first ----
 

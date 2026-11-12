@@ -127,6 +127,12 @@ extern bool platform_frame_log;
 void platform_frame_parts(uint64_t update, uint64_t draw);
 /* The canvas as drawn so far on the display at once, before a long wait
  * (no frame counted; none headless). */
+/* A picture under the canvas (voxel mode's, src/emu/voxel_scene.c): at
+ * each present `fn` draws onto the screen, `canvas` the canvas's place on
+ * it, and says whether it did; the canvas is then laid over it, clear
+ * where its pixels' alpha is 0. */
+typedef bool (*PlatformUnder)(SDL_Renderer *r, const SDL_Rect *canvas);
+void platform_set_under(PlatformUnder fn);
 void platform_present_now(void);
 /* Draws from here onto the canvas as last shown, not cleared: a word over
  * the still picture before a long wait (then platform_present_now). */

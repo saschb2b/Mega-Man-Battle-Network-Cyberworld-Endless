@@ -862,6 +862,9 @@ static void over_picture(void) {
 	screen_shot[0] = 0;
 }
 
+static PlatformUnder under_canvas;
+void platform_set_under(PlatformUnder fn) { under_canvas = fn; }
+
 /* Where the canvas lands on the screen. */
 static SDL_Rect canvas_rect(void) {
 	if (P.fill > 0) {
@@ -873,10 +876,10 @@ static SDL_Rect canvas_rect(void) {
 
 /* `older`, then `newer` at `alpha` over it (none: `older` alone), into
  * the target's rect `dst` (NULL: all of it). */
-static void copy_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha, const SDL_Rect *dst) {
+static void copy_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha, const SDL_Rect *dst, bool over) {
 	SDL_BlendMode was;
 	SDL_GetTextureBlendMode(older, &was);
-	SDL_SetTextureBlendMode(older, SDL_BLENDMODE_NONE);
+	SDL_SetTextureBlendMode(older, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	SDL_RenderCopy(P.renderer, older, NULL, dst);
 	SDL_SetTextureBlendMode(older, was);
 	if (!newer) return;
@@ -894,13 +897,16 @@ static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_Rect dst = canvas_rect();
 	if (P.fill > 0) {
 		SDL_SetRenderTarget(P.renderer, P.sharp);
-		copy_frames(older, newer, alpha, NULL);
+		copy_frames(older, newer, alpha, NULL, false);
 	}
 	SDL_SetRenderTarget(P.renderer, NULL);
 	SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 255);
 	SDL_RenderClear(P.renderer);
+	/* (a picture under the canvas, which is clear where it shows: platform_set_under) */
+	bool over = under_canvas && under_canvas(P.renderer, &dst);
+	if (P.fill > 0) SDL_SetTextureBlendMode(P.sharp, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
 	if (P.fill > 0) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
-	else copy_frames(older, newer, alpha, &dst);
+	else copy_frames(older, newer, alpha, &dst, over);
 	/* (the lcd3x shader at the screen's pixels, as its preset draws; not a menu's own screen) */
 	if (!own_taps) lcd_grid_draw(P.renderer, &dst, P.w, P.h);
 }

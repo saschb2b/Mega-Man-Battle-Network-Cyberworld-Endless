@@ -90,6 +90,10 @@ void netmap_grid(int wx, int wy, double *x, double *y);
 /* Whether wall cell (cx, cy) (8x8 world units) lies on the last layer's
  * floor at `level` (0 ground, 1 raised); stairs belong to both. */
 bool netmap_floor_cell(int cx, int cy, int level);
+/* Whether the point at half units (wx2, wy2), twice its world place, lies
+ * on a panel of the last layer's floor at `level` (voxel mode's ground,
+ * docs/engine/voxel.md). */
+bool netmap_floor_at(int wx2, int wy2, int level);
 /* Whether wall cell (cx, cy) lies on a stair. */
 bool netmap_stair_cell(int cx, int cy);
 /* Rush's gaps (issue #14): for the walls a walkway, whose panels count as

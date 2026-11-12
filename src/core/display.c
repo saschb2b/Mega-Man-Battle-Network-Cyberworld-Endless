@@ -6,6 +6,7 @@
 
 #include <ctype.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -91,14 +92,44 @@ static bool lcd_setting(const char *key, const char *val) {
 	return true;
 }
 
+/* settings.ini's voxel (docs/engine/voxel.md): on or off, and a dev's
+ * debug; the camera's angle, scale and depth the command line's alone,
+ * while the look is being chosen */
+static int voxel;
+static float voxel_cam[3] = { 30.0f, 1.0f, 0.0f };
+static unsigned voxel_forced;
+static int voxel_read(const char *val) { return !strcmp(val, "debug") ? DISPLAY_VOXEL_DEBUG : yes(val) ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF; }
+
+int display_voxel(void) { return display_has_voxel() ? voxel : DISPLAY_VOXEL_OFF; }
+float display_voxel_pitch(void) { return voxel_cam[0]; }
+float display_voxel_zoom(void) { return voxel_cam[1]; }
+float display_voxel_depth(void) { return voxel_cam[2]; }
+
+bool display_has_voxel(void) {
+#if defined(__3DS__) || defined(__vita__)
+	return false;
+#else
+	return true;
+#endif
+}
+
 bool display_setting(const char *key, const char *val) {
 	if (!strcmp(key, "smooth_motion")) P.blend = yes(val);
 	else if (!strcmp(key, "screen")) set(display_scale_read(val));
+	else if (!strcmp(key, "voxel")) { if (!(voxel_forced & 1u)) voxel = voxel_read(val); }
 	else return lcd_setting(key, val);
 	return true;
 }
 
 bool display_arg(const char *flag, const char *val) {
+	static const char *const cams[] = { "--voxel-pitch", "--voxel-zoom", "--voxel-depth" };
+	for (int k = 0; k < 3; ++k)
+		if (!strcmp(flag, cams[k])) { voxel_cam[k] = (float)atof(val); return true; }
+	if (!strcmp(flag, "--voxel")) {
+		voxel = voxel_read(val);
+		voxel_forced |= 1u;
+		return true;
+	}
 	static const char *const flags[] = { "--colour-correction", "--interframe-blending", "--lcd3x" };
 	for (int k = 0; k < 3; ++k)
 		if (!strcmp(flag, flags[k])) {

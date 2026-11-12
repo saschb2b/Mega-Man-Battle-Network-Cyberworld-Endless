@@ -162,6 +162,10 @@ bool netmap_floor_cell(int cx, int cy, int level) {
 	return true;
 }
 
+bool netmap_floor_at(int wx2, int wy2, int level) {
+	return floor_level(nm_floordiv(wx2 - 2 * nm_place.ex, 64), nm_floordiv(wy2 - 2 * nm_place.ey, 64), level);
+}
+
 bool netmap_stair_cell(int cx, int cy) {
 	int A = nm_floordiv(cx * 8 + 4 - nm_place.ex, 32), B = nm_floordiv(cy * 8 + 4 - nm_place.ey, 32);
 	return nm_kind_at(A, B) == K_STAIR;

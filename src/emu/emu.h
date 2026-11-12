@@ -82,6 +82,8 @@ int emu_audio_out_rate(void);
 void emu_audio_open(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */
+/* `len` bytes from `addr` on (the video memory, voxel_scene.c) */
+void emu_read_bytes(uint32_t addr, uint8_t *out, uint32_t len);
 uint8_t emu_read8(uint32_t addr);
 uint16_t emu_read16(uint32_t addr);
 uint32_t emu_read32(uint32_t addr);
