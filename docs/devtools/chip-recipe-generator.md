@@ -226,6 +226,26 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   an address, in `NUMBERS`; and a call noted before its target's type
   was moved with the unit is walked as its own code (FlmCros's cross, in
   the flame's code).
+- **A Navi chip's unit.** A Navi chip's routine of that table spawns an
+  object of the Navi's own, which is BN6's one Navi chip object state
+  for state, so a unit of kind `navi` moves the chip's Navi alone
+  (`tools/xchiprecipe_bn4_navi.py`; [BN4's chips in a run](../multirom/bn4-chips.md),
+  The Navi chips). The tool finds the spawner the object calls (a routine
+  in a first-kind type's region that spawns that type; where one object
+  serves several Navis, the entry of its table at the chips' third
+  parameter), holds BN4's object to an entry of `OBJECTS` (read by hand
+  against BN6's, with why) and to BN6's object's waits (the frames each
+  stores to its +0x20, read from both ROMs each run), and the spawner to
+  the registers BN6's object hands a Navi routine. The unit's block is
+  the first-kind type's region, its entry the spawner, at BN6's grown
+  Navi routines' 0x80 + BN4's subfamily (`XC_NAVI`), its type at a
+  first-kind number of the chips' in the dispatch (0xA0 on). A call into
+  a block a BN4 Navi's recipe moved (`src/emu/xnavi_bn4.c`) goes to the
+  Navi's copy and moves no type again; the load of his battle sprite
+  takes the Navi's list 2 number, and the unit's row carries his seat,
+  whose rooms the engine fills as the chip is used. A chip of the unit
+  whose row still waits (an SP's computed power, a DS's cost) is a note,
+  not a decision.
 - **Its calls.** Each call out is paired with BN6's twin: the project's
   pairs (the families', the Navis' and the tool's own `TWINS`, each with
   its audit where the bodies differ), else a BN6 routine of the same
@@ -313,7 +333,8 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   whichever game's units install first.
 - **Its chips.** The registry's rows of the unit's chips must be
   `XREG_MOVED` with the unit's number their subfamily
-  (`tools/xreg_bn4.py` `MOVED`), and a dark chip's row among the
+  (`tools/xreg_bn4.py` `MOVED`; a Navi chip's in `NAVI`, which names the
+  BN6 chip whose family the record takes), and a dark chip's row among the
   registry's dark rows (`xreg4_dark_ids`, which the price's hook reads:
   [DarkChips](../game/meta/darkchips.md)): the generator refuses to
   write otherwise. Such a row's record takes BN6's support
@@ -354,7 +375,8 @@ MokoRus (misc 1), SidBmbo (misc 5), Spreads (attack 0x1E), FlmLine
 (0x22), Thunder (0x26), TwnFng (0x34), MagBolt (0x59), PropBom
 (0x62), SeekBom (0x09, its subfamily 9), Meteors (misc 0x11), Ligtnin
 (misc 0x0C) and Hole (support 0x0B and 0x3B: Hole, DrkLine and DrkStage,
-the panel changer once).
+the panel changer once), with GutsMan's chip (navi
+5).
 
 A misc unit BN4's run waits for carries the frames (`misc_wait` reads
 BN4's run at `MISC_WAIT4`: the subfamily it compares and the count it

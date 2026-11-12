@@ -3,7 +3,7 @@ type: ROM Map
 title: "BN6's Virus Battler"
 description: "Addresses of BN6's Virus Battler (`src/emu/bn6_battler.h`, `tools/virus_battler.py`): the BtlrCard and its flags, battle mode 6 with its VIRUS LIST, placing and time limit, and the five Battlers' records and prizes."
 tags: [rom]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

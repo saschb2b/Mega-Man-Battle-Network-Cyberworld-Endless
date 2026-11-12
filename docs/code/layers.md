@@ -3,7 +3,7 @@ type: Measurement
 title: "The code's layers"
 description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 24 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
 tags: [code, lint, architecture, process]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T00:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T00:24:00Z }
 sources:
   - { id: measure, title: "python3 tools/layers.py and its --cuts, --uses and --generated on dev at 2744367e (12 November 2026)", resource: "tools/layers.py" }
   - { id: rule, title: "tests/lint/layers.txt, the units and what each may include; tests/lint/layer_violations.txt, the includes it does not allow as they stood", resource: "tests/lint/layers.txt, tests/lint/layer_violations.txt" }
@@ -206,6 +206,17 @@ in this order:
    with the reason in the commit. A unit never names one below its line.
 
 Do not add the include to the baseline by hand: the list only shrinks.
+
+One case adds to it. A branch cut before the rule came (12 November 2026)
+does not have it in its own lint, and its checks may have run before the
+rule reached `dev`: merged, its new include turns `dev`'s lint red for
+everyone. Where that include is used and belongs to a group the plan
+already ends by a move ([Where the code calls upward](#where-the-code-calls-upward)),
+it joins the list as it would have stood, in a pull request that says so.
+Two did: `src/emu/xnavi_bn4_chip.c`'s `xsong.h` and `xnavi.h` (pull request
+#403), which makes 149. `python3 tools/layers.py` on a pull request merged
+with `dev` shows such a one before it lands; a branch cut since has the
+rule in its own lint and cannot bring one.
 
 ## Where the code calls upward
 

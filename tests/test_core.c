@@ -88,6 +88,7 @@
 #include "xchips_text.h"
 #include "soulkinds.h"
 #include "xnavi.h"
+#include "xnavi_bn4.h"
 #include "xnavi_bn5.h"
 #include "xsong.h"
 #include "debug.h"
@@ -4377,6 +4378,35 @@ static void test_free_space(void) {
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
 	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
+	/* (a BN4 Navi chip's Navi's own rooms, xnavi_bn4_chip.h: the sprite's holds the largest of the moved Navis', GutsMan's
+	 * 60,988 bytes; the art's holds every installed Navi's layout of the battle's room, at the same offsets) */
+	uint32_t art4 = 0;
+	for (int i = 0; i < xnavi_bn4_count; ++i) {
+		const XVirusFamily *f = &xnavi_bn4[i]->code;
+		for (int k = 0; k < f->nsprites; ++k)
+			if (f->sprites[k].at >= XN_BN4_ART && f->sprites[k].at < XN_BN4_END && f->sprites[k].at + f->sprites[k].room - XN_BN4_ART > art4)
+				art4 = f->sprites[k].at + f->sprites[k].room - XN_BN4_ART;
+		for (int k = 0; k < f->nsongs; ++k)
+			if (f->songs[k].at >= XN_BN4_ART && f->songs[k].at < XN_BN4_END && f->songs[k].at + f->songs[k].room - XN_BN4_ART > art4)
+				art4 = f->songs[k].at + f->songs[k].room - XN_BN4_ART;
+	}
+	CHECK(XN_BN4_CHIP_SPRITE_SIZE >= 60988u && art4 && art4 <= XN_BN4_CHIP_ART_END - XN_BN4_CHIP_ART && XN_BN4_END == XN_BN4_CHIP_ART &&
+		XN_BN4_HELD + XN_BN4_HELD_WITH < XN_BN4_CODE && XN_BN4_HELD >= XN_BN4_ARTS + XN_BN4_SEATS,
+		"free space: a BN4 Navi chip's Navi's rooms hold GutsMan's sprite and the largest Navi's art (%#x of %#x)", (unsigned)art4,
+		(unsigned)(XN_BN4_CHIP_ART_END - XN_BN4_CHIP_ART));
+	int navi4 = 0;
+	for (int i = 0; i < xchips_bn4_count; ++i) {
+		const XChipUnit *u = &xchips_bn4[i];
+		if (u->kind != XCHIP_NAVI) continue;
+		const XChipReg4 *row = NULL;
+		for (int k = 0; k < xreg4_count && !row; ++k)
+			if (xreg4_rows[k].how == XREG_MOVED && xreg4_rows[k].twin && xreg4_rows[k].sub == u->number) row = &xreg4_rows[k];
+		bool seat = false;
+		for (int k = 0; k < xnavi_bn4_count; ++k) seat = seat || xnavi_bn4[k]->code.first_id == (int)(XN_BN4_FIRST_ID + 4u * (unsigned)(u->navis - 1));
+		navi4 += row && seat && u->navis && u->number == XC4_FIRST_SUPPORT + u->bn5 && !u->share;
+		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
+	}
+	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
 	CHECK(FREE_BN4_NAVI_ART < FREE_BRACKET_FACES && FREE_BRACKET_FACES < FREE_BRACKET && FREE_BRACKET_END <= FREE_LIB_TEAM,
 	      "free space: the bracket's faces and room after BN4's Navis' art, before the teammates'");
 	CHECK(FREE_END == 0x08000000u + EMU_ROM_SIZE, "free space: its end %08x, not the copy's", (unsigned)FREE_END);
@@ -5711,6 +5741,18 @@ static void test_chip_records(void) {
 	const XChipReg4 no_twin4[] = { { 82, 527, XREG_RECORD, 0, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } }, twin_pending[] = { { 82, 527, XREG_PENDING, 168, 0xFF, { 26, 0xFF, 0xFF, 0xFF }, 0, 23 } };
 	CHECK(xreg4_check(no_twin4, 1, xreg_rows, xreg_count, why, sizeof why) == 1 && xreg4_check(twin_pending, 1, xreg_rows, xreg_count, why, sizeof why) == 1 &&
 		!xreg4_check(&invis4, 1, xreg_rows, xreg_count, why, sizeof why), "registry: a BN4 row on BN6's code names its twin, a pending one none");
+	/* (one whose code is moved, XREG_MOVED: BN6's support family and the row's subfamily; a Navi chip's, the family its row's
+	 * twin gives it; BN4's ground kind, 8, which BN5's icons number the Cursor's: Null) */
+	const XChipReg4 guts4 = { 224, 535, XREG_MOVED, 221, 0x85, { 6, 0xFF, 0xFF, 0xFF }, 1, 32 };
+	XRecordFrom4 navi4 = { rec4, NULL, &guts4, 0, { 0 }, 0 };
+	rec4[BN4_CHIP_KIND] = 8;
+	xrec_from_bn4(&navi4, out);
+	bool guts_support4 = out[BN6_CHIP_FAMILY] == BN6_CHIP_SUPPORT_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0x85 && out[BN6_CHIP_ELEMENT] == 10;
+	navi4.family = BN6_CHIP_NAVI_FAMILY;
+	xrec_from_bn4(&navi4, out);
+	CHECK(guts_support4 && out[BN6_CHIP_FAMILY] == BN6_CHIP_NAVI_FAMILY && out[BN6_CHIP_SUBFAMILY] == 0x85 && out[BN6_CHIP_PARAMS] == 7 &&
+		!xreg4_check(&guts4, 1, xreg_rows, xreg_count, why, sizeof why),
+		"records: a moved BN4 chip's record takes BN6's support family, a Navi chip's its twin's, its unit's number; BN4's ground kind Null");
 	xrec_placeholder4(&sun, 9, blank, out);
 	CHECK(out[0] == 0x11 && out[BN6_CHIP_MB] == 90 && out[BN6_CHIP_LIBRARY_TYPE] == 2 && out[BN6_CHIP_FAMILY] == XREC_INERT_FAMILY &&
 		get32(out + BN6_CHIP_ICON_PTR) == 0x087237D0u && get16(out + BN6_CHIP_ID_SORT) == 731, "records: a BN4 chip's placeholder keeps its codes, class and MB");

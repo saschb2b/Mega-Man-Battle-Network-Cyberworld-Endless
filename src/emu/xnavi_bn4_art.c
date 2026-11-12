@@ -49,8 +49,7 @@ void xnavi_bn4_art_list(const XVirusFamily *f) {
 	else if (seat < 0) xv_fail("its ids are no BN4 Navi's seat's");
 }
 
-/* the installed BN4 Navi at `seat`, NULL none */
-static const XNavi *navi_at(int seat) {
+const XNavi *xnavi_bn4_seat(int seat) {
 	for (int i = 0; i < xnavi_bn4_count; ++i)
 		if (seat_of((uint32_t)xnavi_bn4[i]->code.first_id) == seat) return xnavi_bn4[i];
 	return NULL;
@@ -85,7 +84,7 @@ static bool song_in(int game, const XvSong *s) {
 bool xnavi_bn4_art_for(int seat) {
 	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
 	int which = seat >= 0 && seat < XN_BN4_SEATS ? emu_read8(XN_BN4_ARTS + (uint32_t)seat) : NONE;
-	const XNavi *n = which != NONE ? navi_at(which) : NULL;
+	const XNavi *n = which != NONE ? xnavi_bn4_seat(which) : NULL;
 	if (!n || !x->data || !x->layout || !x->layout->sprite_lists) return false;
 	const XVirusFamily *f = &n->code;
 	bool ok = true;
