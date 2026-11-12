@@ -46,6 +46,10 @@ SHAPE_XY = ('push', 'push', 'movs', 'bl', 'adds3', 'pop', 'bcc', 'strb', 'strb',
 SHAPE_SIDE = ('push', 'push', 'movs', 'bl', 'adds3', 'pop', 'bcc', 'strb', 'strb', 'strb', 'strb', 'strb', 'str', 'str',
               'movs', 'strb', 'pop')
 SIDE_STORE = 'strb r3, [r0, #0x16]'
+# A chip's Navi whose battle sprite is a Navi's BN4's battles have not moved into BN6's engine: BN4's list 2 number -> whose.
+# The unit carries the number (XChipUnit.sprite) and its seat (the number less one, as the moved Navis' seats are by their
+# ids), and the engine fills the chips' sprite room with it as the chip runs (src/emu/xnavi_bn4_chip.c)
+SPRITE_ONLY = {7: "ProtoMan's (HawkCut's Navi)"}
 # BN4's Navi chip objects read against BN6's Navi object (NAVI_OBJECT6), each by hand in both ROMs: BN4's fourth-kind type ->
 # why BN6's object serves in its place. One not here is a decision
 OBJECTS = {
@@ -65,6 +69,9 @@ OBJECTS = {
     0x63: "RollAro's (0x080E8FA0): GutPnch's object (0x64) state for state without its sound as MegaMan steps in, so "
           "GutsMan's but that it hands its Navi the parameters whole, and his side in r3 (ldrb r3,[r5,#0x16] at 0x080E9048), "
           "which his spawner stores: SHAPE_SIDE",
+    0x68: "HawkCut's (0x080E95E0): RollAro's object (0x63) but for the registers its state that calls the Navi's spawner "
+          "uses on the way (r7 for the power's low half where RollAro's uses r3; the side in r3 before them): the same "
+          "words handed, r3 his side, which his spawner (GutsMan's shape) overwrites before it reads it",
 }
 # A sound BN4's object plays as it steps MegaMan in, which BN6's Navi object does not: BN4's fourth-kind type -> (the movs that
 # names it, the sound), checked against the instruction and its call. The unit carries the sound's slot (XChipUnit.step_in):
@@ -252,9 +259,19 @@ def spawns1(f, alloc):
 def battle_sprite(f, site, chain, num):
     """his battle sprite (list 2): the moved Navi's own number there, which the Navis' rooms fill (src/emu/xnavi_bn4_room.h);
     True where answered"""
-    hit = navi_sprites().get(num)
+    moved = navi_sprites()
+    hit = moved.get(num)
     if hit is None:
-        f.decide('sprite', f'{site:08X}: his battle sprite 2:{num:#x} is no moved BN4 Navi\'s (src/emu/xnavi_bn4.c)')
+        # (a Navi BN4's battles have not moved: his sprite alone, at his seat's number of list 2, a seat a list 2 number
+        # (Roll's 1 seat 0); the chips' sprite room filled from BN4's ROM as his chip runs, XChipUnit.sprite)
+        seat = num - 1
+        if num not in SPRITE_ONLY or seat in [to - SPRITE_FIRST for to, _ in moved.values()]:
+            f.decide('sprite', f'{site:08X}: his battle sprite 2:{num:#x} is no moved BN4 Navi\'s (src/emu/xnavi_bn4.c) and none of SPRITE_ONLY')
+            return True
+        f.seat, f.sprite = seat, num
+        f.notes.append(f'his battle sprite 2:{num:#x} ({site:08X}): {SPRITE_ONLY[num]}, no moved Navi\'s: his sprite alone at list 2\'s {SPRITE_FIRST + seat:#x} (seat {seat})')
+        f.imms.append(dict(at=chain[0][0], form='THUMB_MOVS', rd=2, rn=0, was=num, now=SPRITE_FIRST + seat,
+                           why=f'his battle sprite: BN4\'s list 2 {num:#x}, his seat\'s {SPRITE_FIRST + seat:#x} in BN6 (the sprite alone)'))
         return True
     to, name = hit
     f.seat = to - SPRITE_FIRST

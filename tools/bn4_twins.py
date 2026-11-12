@@ -343,6 +343,10 @@ NUMBERS = {
                 "bits but 0x08000000 (GutsMan's objects, 0x080D07C4)",
     0x04050601: "a collision region's spawn word (object_spawnCollisionRegion's r4), as 0x0405FF01: BN6's own attacks pass the same "
                 "(five of its pools; GutsMan's states, MegaMan's 0x080F052C and 0x080F0606)",
+    0x0705FF04: "a collision region's spawn word (HawkCut's Navi's first slash: its ldr r4 at 0x080C8B96, then bl 0x080CD81E), "
+                "which BN6's own attacks pass the same (fifteen of its pools, its swords' among them: 0x080ECD5C)",
+    0x0705FF02: "a collision region's spawn word (HawkCut's Navi's second slash: its ldr r4 at 0x080C8C10, then bl 0x080CD81E), "
+                "which BN6's own attacks pass the same (four of its pools: 0x080ECD60)",
     0x04080080: "a panel's flags (its panel's, 0x08009A86, BN6's 0x0800C8F8) CirKill waits on: 0x04000000 the enemy's alliance, "
                 "0x00080000 and 0x80 as bn6f's PanelData flags have them (an occupant's, a panel struck)",
     0x0405FF01: "a collision region's spawn word (object_spawnCollisionRegion's r4: its hit's kinds), which BN6's own attacks "

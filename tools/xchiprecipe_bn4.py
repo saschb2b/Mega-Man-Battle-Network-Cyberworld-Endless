@@ -280,6 +280,7 @@ UNITS = (
     ('navi', 0x36, 'GutPnch'),
     ('support', 0x2A, 'BugCurse'),
     ('navi', 0x35, 'RollAro'),
+    ('navi', 0x39, 'HawkCut'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -1579,9 +1580,11 @@ def c_unit(f):
     if getattr(f, 'step_in', 0) and not step_in:
         sys.exit(f'xchiprecipe_bn4: {f.name}\'s step-in sound {f.step_in:#x} has no slot (SOUND_SLOTS)')
     side = getattr(f, 'side', False)   # (a Navi chip's spawner that takes its side in r3: XChipUnit.side, its entry a wrapper)
+    lone = getattr(f, 'sprite', 0)     # (a chip's Navi no battle moved: his sprite's number of BN4's list 2, XChipUnit.sprite)
     rows = [f'\t{{ {KIND_C[f.kind]}, 0x{f.sub:02X}, 0x{f.number:02X}, 0x{f.entry | 1:08X}, {place(f.home, X4C_HOMES, "XC4_HOMES")}, '
-            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in or side else '') +
-            (f', 0x{step_in:X}' if step_in or side else '') + (', 1' if side else '') + ' },']
+            f'{n.upper()}_CODE, {songs}, {getattr(f, "seat", -1) + 1}, 0' + (f', 0x{f.wait:02X}' if f.wait or step_in or side or lone else '') +
+            (f', 0x{step_in:X}' if step_in or side or lone else '') + (f', {int(side)}' if side or lone else '') +
+            (f', {lone}' if lone else '') + ' },']
     # (its other subfamilies: their routines in its block, each a row that shares its code, a home of its own unused)
     for k, x in enumerate(f.subs[1:], 1):
         rows.append(f'\t{{ {KIND_C[f.kind]}, 0x{x:02X}, 0x{NUMBER0 + x:02X}, 0x{f.entries[k] | 1:08X}, '

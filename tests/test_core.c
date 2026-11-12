@@ -4371,8 +4371,10 @@ static void test_free_space(void) {
 			if (xreg4_rows[k].how == XREG_MOVED && xreg4_rows[k].twin && xreg4_rows[k].sub == u->number) row = &xreg4_rows[k];
 		bool seat = false;
 		for (int k = 0; k < xnavi_bn4_count; ++k) seat = seat || xnavi_bn4[k]->code.first_id == (int)(XN_BN4_FIRST_ID + 4u * (unsigned)(u->navis - 1));
-		navi4 += row && seat && u->navis && u->number == XC4_FIRST_SUPPORT + u->bn5 && !u->share;
-		CHECK(row && seat, "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat", u->code.name);
+		/* (or a sprite alone, a Navi no battle moved: the seat no moved Navi's, its number BN4's list 2's of the sprite) */
+		bool lone = u->sprite && !seat && u->sprite == u->navis;
+		navi4 += row && (seat || lone) && u->navis && u->number == XC4_FIRST_SUPPORT + u->bn5 && !u->share;
+		CHECK(row && (seat || lone) && (!u->sprite || lone), "chips: BN4's Navi chip unit %s has a row that takes its number and an installed Navi at its seat, or a sprite alone at a seat no moved Navi has", u->code.name);
 	}
 	CHECK(navi4 >= 1, "chips: BN4's Navi chips' units, each with its row and its Navi (%d)", navi4);
 	/* (a unit whose object sounds as it steps MegaMan in, XChipUnit.step_in: a Navi chip's alone, no wrapper's place taken

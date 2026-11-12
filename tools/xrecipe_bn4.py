@@ -1053,10 +1053,11 @@ def effects_of(b4, b6, f, alloc):
                     ids.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
                     continue
                 # (... or a parameter of another register's shifted to the third byte, lsls r4,rN,#16 then adds #id: Kilby's
-                # version, 0x080BC8BA)
+                # version, 0x080BC8BA; or to the second, lsls r4,r0,#8: a side's flip a call returned, HawkCut's slashes',
+                # 0x080C8BAA)
                 sh = w.insns.get(chain[1][0]) if len(chain) == 2 else None
                 if v is None and sh is not None and chain[0][1] == 'adds8' and sh.form == 'lsls' and sh.f[0] == 4 and \
-                        sh.f[2] in (16, 24) and chain[0][2] < BN4['neffects']:
+                        sh.f[2] in (8, 16, 24) and chain[0][2] < BN4['neffects']:
                     ids.setdefault(chain[0][2], []).append((chain[0][0], 'THUMB_ADDS'))
                     continue
                 if v is None or len(chain) != 1 or chain[0][1] != 'movs' or v >= BN4['neffects']:

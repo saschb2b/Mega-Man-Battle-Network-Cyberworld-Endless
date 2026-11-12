@@ -32,6 +32,13 @@ static int chip_seat(int number) {
 	return -1;
 }
 
+/* BN4's list 2 number of the sprite a unit at `seat` takes alone (XChipUnit.sprite: a chip's Navi no battle moved), 0 none */
+static int lone_sprite(int seat) {
+	for (int i = 0; i < xchips_bn4_count; ++i)
+		if (xchips_bn4[i].kind == XCHIP_NAVI && xchips_bn4[i].navis - 1 == seat && xchips_bn4[i].sprite) return xchips_bn4[i].sprite;
+	return 0;
+}
+
 /* the seat of the BN4 Navi chip whose Navi object (BN6's, the fourth kind's BN6_T4_CHIP_NAVI) is past its turn's wait, in its
  * own states or done: -1 none. One at a time: a second side's object waits in its step 0 for the first's end */
 static int running(void) {
@@ -132,6 +139,24 @@ static bool fill(const XNavi *n, int seat, int foe, uint32_t headers[XNAVI_BN4_P
 	return ok;
 }
 
+/* the chips' sprite room made the sprite `sprite` of BN4's list 2 (a chip's Navi no battle moved, at seat `seat`), the
+ * battle's rooms holding seat `foe`'s: the sprite alone, no art and no pool's songs; his seat's entry of BN6's list 2 pointed
+ * at the room */
+static bool fill_lone(int seat, int sprite, int foe) {
+	bool held = emu_read8(XN_BN4_HELD + XN_BN4_HELD_CHIP) == seat && emu_read8(XN_BN4_HELD + XN_BN4_HELD_WITH) == foe;
+	claims_begin(XN_BN4_CHIP_CLAIMS);
+	bool ok = held || sprite_at(BN6_SPRITES_NAVIS, sprite, XN_BN4_CHIP_SPRITE, XN_BN4_CHIP_SPRITE_SIZE);
+	if (ok && !held) {
+		uint8_t now[2] = { (uint8_t)seat, (uint8_t)foe };
+		emu_write(XN_BN4_HELD + XN_BN4_HELD_CHIP, now, 2);
+	}
+	claims_end();
+	if (ok) entry_set(BN6_SPRITES_NAVIS, XNAVI_SPRITE_BN4 + seat, XN_BN4_CHIP_SPRITE);
+	if (!ok) fprintf(stderr, "xnavi: BN4's Navi sprite %d not put in the chips' sprite room\n", sprite);
+	else if (emu_debug_on() && !held) fprintf(stderr, "xnavi: the chips' sprite room holds BN4's Navi sprite %d alone\n", sprite);
+	return ok;
+}
+
 void xnavi_bn4_chip_frame(void) {
 	/* (the seat the pool's override names and the battle's it was set beside, -1 none: while both hold and the core's own
 	 * record of its rooms agrees, a frame of his chip's run does nothing more) */
@@ -144,8 +169,20 @@ void xnavi_bn4_chip_frame(void) {
 		return;
 	}
 	const XNavi *n = xnavi_bn4_seat(seat);
+	int foe = emu_read8(XN_BN4_HELD + XN_BN4_HELD_BATTLE), lone = n ? 0 : lone_sprite(seat);
+	if (lone) {
+		/* (a Navi no battle moved: his sprite alone, no pool's songs) */
+		uint32_t at = xvirus_list_entry(BN6_SPRITES_NAVIS, (uint32_t)(XNAVI_SPRITE_BN4 + seat));
+		bool there = at && emu_read32(at) == XN_BN4_CHIP_SPRITE && emu_read8(XN_BN4_HELD + XN_BN4_HELD_CHIP) == seat &&
+			emu_read8(XN_BN4_HELD + XN_BN4_HELD_WITH) == foe;
+		if (pointed == seat && beside == foe && there) return;
+		if (!at || !fill_lone(seat, lone, foe)) return;
+		xnavi_bn4_sounds_chip(-1, NULL);
+		pointed = seat;
+		beside = foe;
+		return;
+	}
 	if (!n || !n->code.nsprites) return;
-	int foe = emu_read8(XN_BN4_HELD + XN_BN4_HELD_BATTLE);
 	uint32_t entry = xvirus_list_entry(n->code.sprites[0].to_list, n->code.sprites[0].to_index);
 	bool rooms = foe == seat ? emu_read32(entry) == XN_BN4_SPRITE :
 		emu_read32(entry) == XN_BN4_CHIP_SPRITE && emu_read8(XN_BN4_HELD + XN_BN4_HELD_CHIP) == seat && emu_read8(XN_BN4_HELD + XN_BN4_HELD_WITH) == foe;

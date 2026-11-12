@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "WORK IN PROGRESS HawkCut1",
+ "folder4": [
+  "0EA9"
+ ],
+ "folder6": [
+  "2A8:07"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

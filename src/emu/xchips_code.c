@@ -441,7 +441,8 @@ static void unit4_stage(int i, bool fresh) {
 	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
 	else if (u->kind == XCHIP_ATTACK ? u->number < XATTACK_BN4 || u->share
 	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC && u->kind != XCHIP_NAVI) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
-	else if (u->kind == XCHIP_NAVI && (u->share || !u->navis || !xnavi_bn4_seat(u->navis - 1))) xv_fail("its Navi's seat %d, no installed BN4 Navi's", u->navis - 1);
+	else if (u->kind == XCHIP_NAVI && (u->share || !u->navis || (u->sprite ? xnavi_bn4_seat(u->navis - 1) != NULL || u->sprite != u->navis : !xnavi_bn4_seat(u->navis - 1))))
+		xv_fail("its Navi's seat %d, no installed BN4 Navi's (or a sprite alone at a moved Navi's seat)", u->navis - 1);
 	else if (u->share) {
 		/* (a routine of an earlier unit's block: its entry alone) */
 		if (u->share > i || xchips_bn4[u->share - 1].share || u->code.nblocks) xv_fail("its code's unit %d", u->share - 1);

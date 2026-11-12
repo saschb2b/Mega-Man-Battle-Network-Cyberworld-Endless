@@ -54,6 +54,9 @@ typedef struct {
 	uint8_t side;          /* (BN4's Navi chips' units) where not 0, the chip's Navi's spawner takes his side in r3 (RollAro's stores it:
 	                          BN4's object hands it, BN6's Navi object does not): its entry in the grown table is a wrapper of the
 	                          installer's in its home (XC4_HOME_WAIT) that loads it from the user in r5 */
+	uint8_t sprite;        /* (BN4's Navi chips' units) where not 0, the chip's Navi is one no battle of BN4's has moved (HawkCut's
+	                          ProtoMan): BN4's list 2 number of his battle sprite, which the chips' sprite room takes alone as the
+	                          chip runs, at his seat's number of BN6's list 2 (`navis` - 1; src/emu/xnavi_bn4_chip.c) */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];

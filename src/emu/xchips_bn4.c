@@ -2813,6 +2813,97 @@ static const XcSong rollaro_songs[] = { { 0xB0, 0x1E2 }, { 0x132, 0x208 } };
 	.sound_calls = rollaro_sound_calls, .nsound_calls = (int)(sizeof rollaro_sound_calls / sizeof *rollaro_sound_calls), \
 	.sprites = rollaro_sprites, .nsprites = (int)(sizeof rollaro_sprites / sizeof *rollaro_sprites), \
 	.effects = rollaro_effects, .neffects = (int)(sizeof rollaro_effects / sizeof *rollaro_effects) }
+/* ---- HawkCut: BN4's navi 0x39 (080C8C9F) as BN6's 0xb9; its chips 169 (680), 170 (681), 171 (682) ---- */
+/* its object, the fourth kind's 0x68 (080E95E0-080E970C), not moved: BN6's Navi object in its place */
+/* the chip's Navi, the first kind's 0x44 (080C8A28-080C8CC4), which his spawner (080C8C9E) spawns: moved */
+/* its third-kind 0x2: Spreads's copy, the dispatch's 0x2, shared (its spawner copied) */
+/* his battle sprite 2:0x7 (080C8A54): ProtoMan's (HawkCut's Navi), no moved Navi's: his sprite alone at list 2's 0x46 (seat 6) */
+/* its effect 0x17: BN6's 0xc1, moved (no effect of BN6's draws its sprite's bytes) */
+/* its effect 0x18: BN6's 0xc0, moved (no effect of BN6's draws its sprite's bytes) */
+/* its sound 0x8e (080C8B7A, 080C8BF4): BN4's song copied into the grown song table's slot 0x1e1, on BN4's player 9 */
+/* its sound 0xb0 (080C8ACE): BN4's song copied into the grown song table's slot 0x1e2, on BN4's player 23 */
+
+static const XvBlock hawkcut_blocks[] = {
+	{ 0x080C8A28, 0x080C8CC4, XC4_CODE + 0x5B70, 0x120FFD5Du },
+	{ 0x080CD6E0, 0x080CD708, XC4_CODE + 0x5E10, 0x6FFE1431u },
+};
+static const XvData hawkcut_data[] = {
+	{ 0x080C8A3A, 0x080C8A3C, XV_RAW },
+	{ 0x080C8A3C, 0x080C8A40, XV_POOL },
+	{ 0x080C8A40, 0x080C8A4C, XV_TABLE },
+	{ 0x080C8A9E, 0x080C8AA0, XV_RAW },
+	{ 0x080C8AA0, 0x080C8AA4, XV_POOL },
+	{ 0x080C8AA4, 0x080C8AB4, XV_TABLE },
+	{ 0x080C8B26, 0x080C8B28, XV_RAW },
+	{ 0x080C8B28, 0x080C8B2C, XV_POOL },
+	{ 0x080C8B2C, 0x080C8B3C, XV_TABLE },
+	{ 0x080C8BCE, 0x080C8BD0, XV_RAW },
+	{ 0x080C8BD0, 0x080C8BD8, XV_POOL },
+	{ 0x080C8C48, 0x080C8C4C, XV_POOL },
+};
+static const XvPair hawkcut_calls[] = {
+	{ 0x08000560, 0x080005CC },   /* project:research, SAME */
+	{ 0x0800283C, 0x080026A4 },   /* project:research, SAME */
+	{ 0x0800287C, 0x080026E4 },   /* project:research, SAME */
+	{ 0x08002DEC, 0x08002D80 },   /* project:research, SAME */
+	{ 0x08002E10, 0x08002DA4 },   /* project:research, SAME */
+	{ 0x08002E96, 0x08002E3C },   /* project:research, SAME */
+	{ 0x08002FAE, 0x08002F5C },   /* project:research, SAME */
+	{ 0x080032B8, XV_SPAWN_1 },   /* the dispatch's spawner */
+	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
+	{ 0x08009ECC, 0x0800CCA6 },   /* project:gutsman, SAME */
+	{ 0x0800AB3E, 0x0800E276 },   /* project:research, SAME */
+	{ 0x0800AB64, 0x0800E29C },   /* project:research, SAME */
+	{ 0x0800AB88, 0x0800E2C0 },   /* project:research, SAME */
+	{ 0x0800ACA6, 0x0800E456 },   /* project:research, DIFF (audited) */
+	{ 0x0800B950, 0x0800FCFC },   /* search, SAME */
+	{ 0x08014446, XN_BN4_CODE + 0x5732 },   /* fireman's copy of BN4's 08014446 (src/emu/xnavi_bn4.c): the Navi's own object's code, one copy run by both */
+	{ 0x080CD81E, 0x080C6C16 },   /* project:project:chips, SAME */
+	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
+};
+static const XvPair hawkcut_words[] = {
+	{ 0x080033D5, 0x08003459 },   /* project:research, SAME */
+};
+static const XvImm hawkcut_imms[] = {
+	{ 0x080C8A50, THUMB_MOVS, 2, 0, 0x7, 0x46 },   /* his battle sprite: BN4's list 2 0x7, his seat's 0x46 in BN6 (the sprite alone) */
+	{ 0x080C8B92, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080C8BAC, THUMB_ADDS, 4, 0, 0x17, 0xC1 },   /* its effect: 0x17 in BN4, 0xc1 in BN6 (moved) */
+	{ 0x080C8C0C, THUMB_LDRB, 2, 5, 0x17, 0xE },   /* its element: BN4 +0x17, BN6 +0x0E */
+	{ 0x080C8C26, THUMB_ADDS, 4, 0, 0x18, 0xC0 },   /* its effect: 0x18 in BN4, 0xc0 in BN6 (moved) */
+	{ 0x080C8CA2, THUMB_MOVS, 0, 0, 0x44, 0xA3 },   /* the chip's Navi's type 0x44 (the first kind): moved, the dispatch's 0xa3 */
+	{ 0x080C8CB2, THUMB_STRB, 3, 0, 0x17, 0xE },   /* the object it spawned: element: BN4 +0x17, BN6 +0x0E */
+};
+static const XvNumber hawkcut_numbers[] = {
+	{ 0x080C8BD4, 0x0705FF04, 0x0705FF04 },   /* a collision region's spawn word (HawkCut's Navi's first slash: its ldr r4 at 0x080C8B96, then bl 0x080CD81E), which BN6's own attacks pass the same (fifteen of its pools, its swords' among them: 0x080ECD5C) */
+	{ 0x080C8C48, 0x0705FF02, 0x0705FF02 },   /* a collision region's spawn word (HawkCut's Navi's second slash: its ldr r4 at 0x080C8C10, then bl 0x080CD81E), which BN6's own attacks pass the same (four of its pools: 0x080ECD60) */
+};
+static const XvType hawkcut_types[] = {
+	{ 1, 0xA3, XV_TYPE_MOVED, 0x44 },   /* BN4's first-kind 0x44, moved, the dispatch's 0xa3 */
+	{ 3, 0x02, XV_TYPE_SHARED4, 0x02 },   /* BN4's third-kind 0x2, Spreads's copy */
+};
+static const XvSprite hawkcut_sprites[] = {
+	{ 3, 0x14, 4, 0x95, XC4_ROOM_ROW(44), 0x2500 },   /* BN4's 3:0x14, the room's row 44 */
+};
+static const XvId hawkcut_effects[] = { { 0x17, 0xC1 }, { 0x18, 0xC0 } };
+static const XvSoundCall hawkcut_sound_calls[] = {
+	{ 0x080C8B7A, 0x1E1 },   /* its sound 0x8e: BN4's song at the grown table's slot 0x1e1 */
+	{ 0x080C8BF4, 0x1E1 },   /* its sound 0x8e: BN4's song at the grown table's slot 0x1e1 */
+	{ 0x080C8ACE, 0x1E2 },   /* its sound 0xb0: BN4's song at the grown table's slot 0x1e2 */
+};
+static const XcSong hawkcut_songs[] = { { 0x8E, 0x1E1 }, { 0xB0, 0x1E2 } };
+
+#define HAWKCUT_CODE { .name = "HawkCut (BN4's)", .game = XROM_BN4_RED_SUN_US, \
+	.home = XC4_SHIMS_HOME(XC4_HOMES + 0x8000), \
+	.blocks = hawkcut_blocks, .nblocks = (int)(sizeof hawkcut_blocks / sizeof *hawkcut_blocks), \
+	.data = hawkcut_data, .ndata = (int)(sizeof hawkcut_data / sizeof *hawkcut_data), \
+	.calls = hawkcut_calls, .ncalls = (int)(sizeof hawkcut_calls / sizeof *hawkcut_calls), \
+	.words = hawkcut_words, .nwords = (int)(sizeof hawkcut_words / sizeof *hawkcut_words), \
+	.imms = hawkcut_imms, .nimms = (int)(sizeof hawkcut_imms / sizeof *hawkcut_imms), \
+	.numbers = hawkcut_numbers, .nnumbers = (int)(sizeof hawkcut_numbers / sizeof *hawkcut_numbers), \
+	.types = hawkcut_types, .ntypes = (int)(sizeof hawkcut_types / sizeof *hawkcut_types), \
+	.sound_calls = hawkcut_sound_calls, .nsound_calls = (int)(sizeof hawkcut_sound_calls / sizeof *hawkcut_sound_calls), \
+	.sprites = hawkcut_sprites, .nsprites = (int)(sizeof hawkcut_sprites / sizeof *hawkcut_sprites), \
+	.effects = hawkcut_effects, .neffects = (int)(sizeof hawkcut_effects / sizeof *hawkcut_effects) }
 const XChipUnit xchips_bn4[] = {
 	{ XCHIP_SUPPORT, 0x26, 0xA6, 0x080E7A59, XC4_HOMES + 0x0, PANLSHT_CODE, panlsht_songs, (int)(sizeof panlsht_songs / sizeof *panlsht_songs), 0, 0 },
 	{ XCHIP_SUPPORT, 0x19, 0x99, 0x080E5D79, XC4_HOMES + 0x400, SHOTSTAR_CODE, shotstar_songs, (int)(sizeof shotstar_songs / sizeof *shotstar_songs), 0, 0 },
@@ -2846,5 +2937,6 @@ const XChipUnit xchips_bn4[] = {
 	{ XCHIP_NAVI, 0x36, 0xB6, 0x080C85C3, XC4_HOMES + 0x7400, GUTPNCH_CODE, gutpnch_songs, (int)(sizeof gutpnch_songs / sizeof *gutpnch_songs), 2, 0, 0x00, 0x1E2 },
 	{ XCHIP_SUPPORT, 0x2A, 0xAA, 0x080E825F, XC4_HOMES + 0x7800, BUGCURSE_CODE, bugcurse_songs, (int)(sizeof bugcurse_songs / sizeof *bugcurse_songs), 0, 0 },
 	{ XCHIP_NAVI, 0x35, 0xB5, 0x080C83D5, XC4_HOMES + 0x7C00, ROLLARO_CODE, rollaro_songs, (int)(sizeof rollaro_songs / sizeof *rollaro_songs), 1, 0, 0x00, 0x0, 1 },
+	{ XCHIP_NAVI, 0x39, 0xB9, 0x080C8C9F, XC4_HOMES + 0x8000, HAWKCUT_CODE, hawkcut_songs, (int)(sizeof hawkcut_songs / sizeof *hawkcut_songs), 7, 0, 0x00, 0x0, 0, 7 },
 };
 const int xchips_bn4_count = (int)(sizeof xchips_bn4 / sizeof *xchips_bn4);
