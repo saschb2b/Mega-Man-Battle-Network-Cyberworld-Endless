@@ -207,6 +207,17 @@ in this order:
 
 Do not add the include to the baseline by hand: the list only shrinks.
 
+One case adds to it. A branch cut before the rule came (12 November 2026)
+does not have it in its own lint, and its checks may have run before the
+rule reached `dev`: merged, its new include turns `dev`'s lint red for
+everyone. Where that include is used and belongs to a group the plan
+already ends by a move ([Where the code calls upward](#where-the-code-calls-upward)),
+it joins the list as it would have stood, in a pull request that says so.
+Two did: `src/emu/xnavi_bn4_chip.c`'s `xsong.h` and `xnavi.h` (pull request
+#403), which makes 149. `python3 tools/layers.py` on a pull request merged
+with `dev` shows such a one before it lands; a branch cut since has the
+rule in its own lint and cannot bring one.
+
 ## Where the code calls upward
 
 The 147 by what causes them (`python3 tools/layers.py --cuts` has every
