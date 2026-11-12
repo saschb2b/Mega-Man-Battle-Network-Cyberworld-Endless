@@ -18,27 +18,34 @@
 #define LAB_PROTOMAN 11          /* BN6's ProtoMan, the rival's Navi */
 #define SUPER_FORMS 6           /* a super boss's forms, his enemy ids' six */
 
-static int versions_most(int navi) { return guardian_moved(navi) ? MOVED_NAVI_VERSIONS : super_boss(navi) ? SUPER_FORMS : BN6_NAVI_VERSIONS; }
+/* BN5's or BN4's Navi in BN6's engine: a guardian of theirs, a dark board's Darkloid, one of Team ProtoMan's */
+static bool moved(int navi) { return guardian_moved(navi) || guardian_darkloid(navi) || guardian_team(navi); }
+
+static int versions_most(int navi) { return moved(navi) ? MOVED_NAVI_VERSIONS : super_boss(navi) ? SUPER_FORMS : BN6_NAVI_VERSIONS; }
 
 /* his enemy id in a version as the engine has it, -1 none */
 static int navi_id(int navi, int version) {
 	if (version < 0 || version >= versions_most(navi)) return -1;
-	if (!guardian_moved(navi)) return enemy_id(1, navi, version);
+	if (!moved(navi)) return enemy_id(1, navi, version);
 	Encounter e = xguardian_encounter(navi, version);
 	return e.nfoes ? e.foes[0].id : -1;
 }
 
 bool lab_navi_known(int navi) {
 	if (navi < 1 || navi > LAB_NAVI_MOST || navi >= RIVAL_NAVIS) return false;
-	if (guardian_moved(navi)) return xguardian_fightable(navi);
+	if (moved(navi)) return xguardian_fightable(navi);
 	const Guardian *g = guardian(navi);
 	return (navi <= 18 || super_boss(navi)) && g && g->name && navi_id(navi, 0) >= 0;
 }
 
-/* (ProtoMan is the rival: his netbattle is every third duel won, docs/game/rival.md) */
-int lab_navi_wins(int navi) { return navi == LAB_PROTOMAN ? profile.duel_won / 3 : rival(navi)->megaman_won; }
+/* (ProtoMan is the rival: his netbattle is every third duel won, docs/game/rival.md; a Darkloid has no rival's record:
+ * a dark board won over him is noted by its version alone, liberation_darkloid.c) */
+int lab_navi_wins(int navi) {
+	if (guardian_darkloid(navi)) return profile.navi_beaten[navi] ? 1 : 0;
+	return navi == LAB_PROTOMAN ? profile.duel_won / 3 : rival(navi)->megaman_won;
+}
 
-int lab_navi_need(int navi) { return super_boss(navi) || navi == LAB_PROTOMAN ? 1 : 2; }
+int lab_navi_need(int navi) { return super_boss(navi) || navi == LAB_PROTOMAN || guardian_darkloid(navi) ? 1 : 2; }
 
 unsigned lab_navi_versions(int navi, bool all) {
 	if (!lab_navi_known(navi)) return 0;
@@ -58,16 +65,16 @@ void lab_navi_name(int navi, int version, char *out, size_t n) {
 	if (!out[0] && guardian(navi) && guardian(navi)->name) snprintf(out, n, "%s", guardian(navi)->name);
 }
 
-int lab_navi_hp(int navi, int version) { return guardian_moved(navi) ? xguardian_hp(navi, version) : navi_hp(navi, version); }
+int lab_navi_hp(int navi, int version) { return moved(navi) ? xguardian_hp(navi, version) : navi_hp(navi, version); }
 
-const char *lab_navi_version_word(int navi, int version) { return lab_navi_word(guardian_moved(navi) ? 1 : super_boss(navi) ? 2 : 0, version); }
+const char *lab_navi_version_word(int navi, int version) { return lab_navi_word(moved(navi) ? 1 : super_boss(navi) ? 2 : 0, version); }
 
 bool lab_navi_encounter(int navi, int version, int col, int row, Encounter *e) {
 	if (navi_id(navi, version) < 0) return false;
-	*e = guardian_moved(navi) ? xguardian_encounter(navi, version) : make_boss(1, 0, navi);
+	*e = moved(navi) ? xguardian_encounter(navi, version) : make_boss(1, 0, navi);
 	if (!e->nfoes) return false;
 	e->foes[0].version = version;
-	if (!guardian_moved(navi)) e->foes[0].id = -1;
+	if (!moved(navi)) e->foes[0].id = -1;
 	e->foes[0].col = col;
 	e->foes[0].row = row;
 	e->map_backdrop = false;
