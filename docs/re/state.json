@@ -190,6 +190,10 @@
   "since": [
     {
       "date": "2026-11-12",
+      "what": "A side's first actor (xchips_bn4.h XC4_FIRST_ACTOR at FREE_BN4_CHIP_STUBS; bn6_forms.h BN6_BATTLE_PLAYER_SLOTS; docs/rom/bn4.md): BN4 0x0800C456's place for BugCurse, the first of a side's four actors in BN6's battle state."
+    },
+    {
+      "date": "2026-11-12",
       "what": "AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit (xreg_bn4 MOVED 181-186 as 0x8C, off ROWS_WAIT); BN4's third-kind sprite step (bn4_chips.h BN4_T3_SPRITE_STEP 0x08014446) copied with the unit (xchiprecipe_bn4 UNIT_COPIED), as BN4's Navis copy it; the differential's panels= gives a BN4 spec's panels a type in both games (src/dev/xdiff.c panels_step)."
     },
     {
@@ -251,6 +255,13 @@
       "name": "bn4_chip_boomer1 to 3: BN4's Boomer moved",
       "result": "python3 build.py xdiff with the three specs: each PASS over 300 frames, the boomerang in play from t33 to t96, a 140 HP Mettaur at (6,3) left 80, 60 and 40 in both at t61. Five mutations caught (a row's power and subfamily, the flights' speeds, the dispatch number, the sound). PanlSht's, ShotStar's, WhitWeb's, Counter's and Repair's specs PASS again with their sprites copied.",
       "meaning": "A unit with a data table of its object's moves by the generator; copied sprites keep an in-play object comparable."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
+      "name": "bn4_chip_bugcurse: BugCurse moved on the project's own first-actor routine",
+      "result": "python3 build.py xdiff bn4_chip_bugcurse: PASS over 300 frames, the curse cast at t34 in both, four mutations caught. Its BN6 folder holds Cannon by turns: a folder of 30 Gigas never deals in BN6 (BN6's own Giga 301 the same), which first looked like a limit at chip id 729.",
+      "meaning": "Where BN6's twin of a BN4 routine answers otherwise (a side's MegaMan alone against BN4's first object), a routine of the project's own in the free space stands in, read in both games' code."
     },
     {
       "feature": "BN4's chips in BN6's tables",
