@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T04:10:00Z
-* **Update**: multirom/bn4-chips.md (FirePlus moved: the grass; its timer kept nowhere and the HUD's icon not moved; call 12's wording), devtools/chip-recipe-generator.md (UNIT_AIMS: a call aimed by hand at a stub), rom/bn4.md (the Plus chips' object and timers, the player's tick, Marking: a new row).

@@ -265,6 +265,13 @@
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-12",
+      "name": "bn4_chip_fireplus and its cracked: BN4's FirePlus moved, the grass without the timer",
+      "result": "python3 build.py xdiff with the two specs: each PASS over 300 frames (eighteen panels to grass at t34, sound 0x106 fifteen times and 0x107 once; a cracked panel under the Mettaur turned with the rest), five mutations caught. BN4's 480-frame timer in the user's battle data is explained as BN4's own (legit's allowed 082, only where BN6's bytes read 0). On the way: the three other Plus chips and Marking measured in BN4 alone and left out by the owner (calls 12 and 13).",
+      "meaning": "A chip whose BN4 code writes a field BN6 has no place for and no reader of can move with that store aimed nowhere, said plainly: here the HUD's icon is what is lost."
+    },
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-12",
       "name": "bn4_chip_rockcube and bn4_chip_repair: an obstacle's control, then BN4's Repair moved",
       "result": "python3 build.py xdiff bn4_chip_rockcube bn4_chip_repair: both PASS over 300 frames. RockCube (both games' own): the cube set at t34, struck at t99 (200 to 190 HP). Repair: the cube repaired to 200 at t154 in both, effect and sound, struck again at t237. Six mutations caught (Repair's row's subfamily and family, the obstacles read at BN4's +0x68, the HP's source, the sound; RockCube's kind).",
       "meaning": "A misc routine moves by the generator; a chip that needs an obstacle is proved over a same-name control whose object is each engine's own."
