@@ -5,6 +5,7 @@
 
 #include "bn6.h"
 #include "bn6_panels.h"
+#include "xpanels.h"
 
 const char lab_title[] = "BATTLE LAB";
 const char lab_go[] = "BATTLE!";
@@ -16,13 +17,15 @@ const char lab_own_song[] = "Battle's own";
 const char lab_plain_field[] = "Plain";
 
 const char *lab_panel_name(int type) {
-	static const char *const names[BN6_PANEL_TYPES] = {
+	static const char *const names[XPANEL_TYPES] = {
 		[BN6_PANEL_HOLE] = "Hole", [BN6_PANEL_PLAIN] = "Plain", [BN6_PANEL_CRACKED] = "Cracked", [BN6_PANEL_POISON] = "Poison",
 		[BN6_PANEL_HOLY] = "Holy", [BN6_PANEL_GRASS] = "Grass", [BN6_PANEL_ICE] = "Ice", [BN6_PANEL_VOLCANO] = "Volcano",
 		[BN6_PANEL_CONVEYOR_UP] = "Conveyor up", [BN6_PANEL_CONVEYOR_DOWN] = "Conveyor down",
 		[BN6_PANEL_CONVEYOR_LEFT] = "Conveyor left", [BN6_PANEL_CONVEYOR_RIGHT] = "Conveyor right",
+		/* (the other games', after their game as STAGE names theirs) */
+		[XPANEL_LAVA] = "BN5 Lava", [XPANEL_SEA] = "BN5 Sea", [XPANEL_MAGNET] = "BN5 Magnet", [XPANEL_HOLE] = "BN4 Hole",
 	};
-	return type >= 0 && type < BN6_PANEL_TYPES && names[type] ? names[type] : "";
+	return type >= 0 && type < XPANEL_TYPES && names[type] ? names[type] : "";
 }
 
 const char *lab_version_word(int version) {

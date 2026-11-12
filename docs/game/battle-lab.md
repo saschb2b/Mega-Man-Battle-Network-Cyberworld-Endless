@@ -394,8 +394,8 @@ is used.
     with the result in the information box (time, busting level, HP
     lost).
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
-    BN5's and BN4's panels, backgrounds and songs, the saved sets (all but
-    the panels built since, below).
+    BN5's and BN4's panels, backgrounds and songs, the saved sets (all
+    built since, below).
 
 - **The keeper and the LabPass** (step 4), behind `--dev lab`
   (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
@@ -542,9 +542,33 @@ is used.
   chosen, START: the battle ran on with background 9 and BN6's song
   0x28 playing, the slot BN4's song 0x12 was copied to; the work RAM's
   hash after leaving the one before opening (45e79931), the run
-  untouched. Not here: BN5's and BN4's panels that BN6's engine has no
-  type for (sand, metal, magnet, lava), which are a move of their own
-  into BN6's battle engine.
+  untouched. The panels came after (below).
+
+- **The other games' panels** (`src/director/lab.c`,
+  `lab_battle.c`). FIELD's panels turn on past BN6's twelve through the
+  four of the other games that stand in BN6's engine
+  ([One net](../multirom/one-net.md), Lava and sea, The magnet panel;
+  [BN4's chips](../multirom/bn4-chips.md), The Hole panel): "BN5 Lava",
+  "BN5 Sea", "BN5 Magnet" and "BN4 Hole", each where its game's ROM is
+  read and its install whole (`xpanels_has`), named after their game as
+  STAGE names theirs. They behave as moved: lava and sea run out to
+  plain after BN5's 960 frames, a field's start counting as their
+  making; the magnet panel pulls; the Hole is stood on as plain. A
+  field's bytes hold a nibble a panel, so lava, sea and the magnet panel
+  (13-15) go in the painted field as BN6's types do, and the Hole (16)
+  is written into the battle's own panels once BN6 has made them, its
+  type and the type drawn, before the field is held. A set keeps the
+  type; with its game's ROM away the panel is fought as plain. Seen
+  headless (`0:lab all`, seed 15, both ROMs read): lava, sea, a magnet
+  panel and a Hole painted on the foes' side and a sea under MegaMan,
+  each standing in the held battle at once in its own game's tiles and
+  colours; the fight run 1300 frames, lava and sea plain again, the
+  magnet panel and the Hole as they were; another with the four, won
+  (182 frames, level 8), the work RAM's hash after it the one before
+  opening (45e79931), the run untouched. Not in BN6's engine, so not
+  here: BN4's own types 5 and 0xA, the one that holds what stands on it
+  ([BN4 Red Sun's tables](../rom/bn4.md), Panel types and effects: 5's
+  code unread), each a move of its own.
 
 - **BN5's Darkloids and Team ProtoMan's Navis**
   (`src/director/lab_navis.c`). The Lab lists every Navi of BN5's that
