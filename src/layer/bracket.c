@@ -40,10 +40,15 @@ static void pool_bn4(BracketPool *p) {
  * its ROM brings them into BN6's engine, the older nets on; BN4's as each
  * is moved and proved (pool_bn4, docs/multirom/bn4-navis.md). Never the
  * Darkloids or Duo. */
+static const uint8_t pool_bn6[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
+/* (the pool never drops a moved Navi: room for BN6's, every older guardian and every BN4 seat, whichever are proved) */
+_Static_assert(BRACKET_POOL >= sizeof pool_bn6 + (GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 1) + (GUARDIAN_BN4_LAST - GUARDIAN_BN4_FIRST + 1),
+               "BRACKET_POOL drops a moved Navi: raise it (src/core/run.h)");
+
 static void pool_make(BracketPool *p) {
-	static const uint8_t bn6[] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 16, 18 };
+	const uint8_t *bn6 = pool_bn6;
 	memset(p, 0, sizeof *p);
-	for (unsigned i = 0; i < sizeof bn6; ++i) {
+	for (unsigned i = 0; i < sizeof pool_bn6; ++i) {
 		p->navi[p->n] = bn6[i];
 		for (int v = 0; v < 4; ++v) p->hp[p->n][v] = (int16_t)(v < 3 ? navi_hp(bn6[i], v) : -1);
 		++p->n;
