@@ -720,6 +720,9 @@
   "lab_text:lab_info_result": {
    "line": 54
   },
+  "lab_text:lab_info_set": {
+   "line": 71
+  },
   "lab_text:lab_own_song": {
    "line": 16
   },
@@ -733,11 +736,18 @@
   "lab_text:lab_row_preset": {
    "line": 13
   },
+  "lab_text:lab_set_value": {
+   "line": 65
+  },
+  "lab_text:lab_set_words": {
+   "header": "A kept set's row (\"Set 2\"), its value (its foes, or that it holds none) and what the information box says of it: its best win, or none yet",
+   "line": 63
+  },
   "lab_text:lab_title": {
    "line": 9
   },
   "lab_words:lab_keeper_first": {
-   "header": "His first words to a profile, boxes parted by '|', and what he says at every talk after",
+   "header": "The keeper's first words to a profile, boxes parted by '|', and the words of every talk after",
    "line": 4
   },
   "lab_words:lab_keeper_hello": {
@@ -1208,7 +1218,11 @@
    "line": 148
   },
   "pet_text:install_mails.subjects": {
-   "line": 472
+   "line": 481
+  },
+  "pet_text:lab_mail_text": {
+   "comment": "Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned): what the lab made and where it waits, then what it holds so far",
+   "line": 462
   },
   "pet_text:mail_body": {
    "comment": "A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled).",
@@ -2231,7 +2245,7 @@
    "comment": "The Battle Lab's builder's words (lab_text.h).",
    "domain": "Other",
    "kind": "speech",
-   "lines": 19,
+   "lines": 26,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "lab_text"
@@ -2305,7 +2319,7 @@
    "comment": "The PET's KeyItem and E-Mail screens with the run's own words (docs/game/pet.md, docs/rom/).",
    "domain": "The PET",
    "kind": "speech",
-   "lines": 56,
+   "lines": 58,
    "shows": [
     "screenshots/pet-mail.png",
     "screenshots/bbs.png",
@@ -2803,7 +2817,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2337,
+  "boxes": 2348,
   "domains": {
    "Arena": {
     "files": [
@@ -2960,8 +2974,8 @@
      "src/online/emote_strip_text.c"
     ],
     "flagged": 16,
-    "lines": 301,
-    "speech": 281
+    "lines": 308,
+    "speech": 288
    },
    "Powers": {
     "files": [
@@ -3017,8 +3031,8 @@
      "src/director/pet_text.c"
     ],
     "flagged": 1,
-    "lines": 62,
-    "speech": 20
+    "lines": 64,
+    "speech": 21
    },
    "The ROMs screen": {
     "files": [
@@ -3160,7 +3174,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 829,
+    "boxes": 837,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.56,
@@ -3169,31 +3183,31 @@
      "The",
      "Lan",
      "His",
-     "He",
      "A",
+     "He",
      "Let's"
     ],
-    "stutters": "1 box in 138",
+    "stutters": "1 box in 140",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 220,
+    "boxes": 216,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
-    "end_bang": 0.9,
+    "end_bang": 0.91,
     "end_dots": 0.02,
     "openers": [
      "THE",
      "A",
      "HMM",
-     "HELLO",
      "NET",
-     "ONE"
+     "ONE",
+     "THIS"
     ],
     "stutters": "never",
-    "words_per_box": 5.5
+    "words_per_box": 5.4
    },
    "Navis (bosses, bystanders)": {
     "bangs_per_box": 0.02,
@@ -3215,7 +3229,7 @@
     "words_per_box": 5.6
    }
   },
-  "lines": 2055,
+  "lines": 2064,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3458,7 +3472,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 829,
+    "boxes": 837,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.56,
@@ -3467,31 +3481,31 @@
      "The",
      "Lan",
      "His",
-     "He",
      "A",
+     "He",
      "Let's"
     ],
-    "stutters": "1 box in 138",
+    "stutters": "1 box in 140",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
     "bangs_per_box": 0.02,
     "bn6": "Mr.Prog",
-    "boxes": 220,
+    "boxes": 216,
     "dots_per_box": 0.07,
     "end_ask": 0.06,
-    "end_bang": 0.9,
+    "end_bang": 0.91,
     "end_dots": 0.02,
     "openers": [
      "THE",
      "A",
      "HMM",
-     "HELLO",
      "NET",
-     "ONE"
+     "ONE",
+     "THIS"
     ],
     "stutters": "never",
-    "words_per_box": 5.5
+    "words_per_box": 5.4
    },
    "Narration": {
     "bangs_per_box": 0.37,
@@ -3530,6 +3544,23 @@
     ],
     "stutters": "never",
     "words_per_box": 5.0
+   },
+   "PET": {
+    "bangs_per_box": 0.0,
+    "bn6": null,
+    "boxes": 4,
+    "dots_per_box": 0.0,
+    "end_ask": 0.0,
+    "end_bang": 0.0,
+    "end_dots": 0.0,
+    "openers": [
+     "A",
+     "Lan",
+     "Our",
+     "So"
+    ],
+    "stutters": "never",
+    "words_per_box": 10.2
    },
    "Players": {
     "bangs_per_box": 0.0,
@@ -3654,7 +3685,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1477
+  "speech": 1485
  },
  "version": 1,
  "conversations": [
@@ -3905,7 +3936,8 @@
   {"container":"pet_text:codes_text","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:codes_text","line":359,"lines":["pet_text:codes_text:0"],"speakers":["Screen"],"title":"The compression codes entered in any run","when":"The compression codes entered in any run (issue #50), three a page: the programs Dad's lab compresses before every dive (docs/game/meta/), each as the NaviCust lists it (SuprArmr, as eight letters allow), its code five and five, a line of twenty. (Not how to enter one, nor that entered again it undoes itself: BN6's own, its button named, and the mail comes only after one was entered, docs/voice/rules.md, What nobody says)"},
   {"container":"pet_text:bbs_posts","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:bbs_posts","line":380,"lines":["pet_text:bbs_posts:0","pet_text:bbs_posts:1","pet_text:bbs_posts:2","pet_text:bbs_posts:3","pet_text:bbs_posts:4","pet_text:bbs_posts:5","pet_text:bbs_posts:6","pet_text:bbs_posts:7","pet_text:bbs_posts:8","pet_text:bbs_posts:9","pet_text:bbs_posts:10","pet_text:bbs_posts:11","pet_text:bbs_posts:12","pet_text:bbs_posts:13","pet_text:bbs_posts:14","pet_text:bbs_posts:15"],"speakers":["Bystander","Shop Navi","HeelNavi","Mr.Prog"],"title":"Bbs posts","when":""},
   {"container":"pet_text:mail_body","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:mail_body","line":441,"lines":["pet_text:mail_body:0"],"speakers":["Dad"],"title":"A guardian's mail","when":"A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled)."},
-  {"container":"pet_text:install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_mails.subjects","line":472,"lines":["pet_text:install_mails.subjects:0","pet_text:install_mails.subjects:3"],"speakers":["Screen"],"title":"Install mails: subjects","when":""},
+  {"container":"pet_text:lab_mail_text","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:lab_mail_text","line":463,"lines":["pet_text:lab_mail_text:0"],"speakers":["PET"],"title":"Dad's mail on the Battle Lab","when":"Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned): what the lab made and where it waits, then what it holds so far"},
+  {"container":"pet_text:install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_mails.subjects","line":481,"lines":["pet_text:install_mails.subjects:0","pet_text:install_mails.subjects:3","pet_text:install_mails.subjects:4"],"speakers":["Screen"],"title":"Install mails: subjects","when":""},
   {"container":"xchips_text:xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc","line":8,"lines":["xchips_text:xchips_text_desc:0","xchips_text:xchips_text_desc:1","xchips_text:xchips_text_desc:2"],"speakers":["Screen"],"title":"Xchips text desc: its description, three lines as the folder's box shows them","when":"Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)"},
   {"container":"xchips_text:xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc4","line":12,"lines":["xchips_text:xchips_text_desc4:0","xchips_text:xchips_text_desc4:1","xchips_text:xchips_text_desc4:2"],"speakers":["Screen"],"title":"Xchips text desc4","when":""},
   {"container":"square_words:square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_options","line":6,"lines":["square_words:square_keeper_options:0","square_words:square_keeper_options:1"],"speakers":["MegaMan"],"title":"Square keeper options","when":""},
@@ -4202,8 +4234,11 @@
   {"container":"lab_text:lab_info_panel","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_panel","line":48,"lines":["lab_text:lab_info_panel:0"],"speakers":["MegaMan"],"title":"Lab info panel","when":""},
   {"container":"lab_text:lab_info_empty","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_empty","line":52,"lines":["lab_text:lab_info_empty:0"],"speakers":["MegaMan"],"title":"Lab info empty","when":""},
   {"container":"lab_text:lab_info_result","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_result","line":57,"lines":["lab_text:lab_info_result:0","lab_text:lab_info_result:1","lab_text:lab_info_result:2","lab_text:lab_info_result:3"],"speakers":["MegaMan"],"title":"Lab info result","when":""},
-  {"container":"lab_words:lab_keeper_first","domain":"Other","file":"src/director/lab_words.c","id":"lab_words:lab_keeper_first","line":5,"lines":["lab_words:lab_keeper_first:0"],"speakers":["Mr.Prog"],"title":"Lab keeper first: his first words to a profile, boxes parted by '|', and what he says at every talk after","when":"His first words to a profile, boxes parted by '|', and what he says at every talk after"},
-  {"container":"lab_words:lab_keeper_hello","domain":"Other","file":"src/director/lab_words.c","id":"lab_words:lab_keeper_hello","line":10,"lines":["lab_words:lab_keeper_hello:0"],"speakers":["Mr.Prog"],"title":"Lab keeper hello","when":""},
+  {"container":"lab_text:lab_set_words","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_set_words","line":63,"lines":["lab_text:lab_set_words:0"],"speakers":["MegaMan"],"title":"A kept set's row","when":"A kept set's row (\"Set 2\"), its value (its foes, or that it holds none) and what the information box says of it: its best win, or none yet"},
+  {"container":"lab_text:lab_set_value","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_set_value","line":67,"lines":["lab_text:lab_set_value:0","lab_text:lab_set_value:1"],"speakers":["MegaMan"],"title":"Lab set value","when":""},
+  {"container":"lab_text:lab_info_set","domain":"Other","file":"src/director/lab_text.c","id":"lab_text:lab_info_set","line":74,"lines":["lab_text:lab_info_set:0","lab_text:lab_info_set:1","lab_text:lab_info_set:2","lab_text:lab_info_set:3"],"speakers":["MegaMan"],"title":"Lab info set","when":""},
+  {"container":"lab_words:lab_keeper_first","domain":"Other","file":"src/director/lab_words.c","id":"lab_words:lab_keeper_first","line":5,"lines":["lab_words:lab_keeper_first:0"],"speakers":["MegaMan"],"title":"Lab keeper first","when":"The keeper's first words to a profile, boxes parted by '|', and the words of every talk after"},
+  {"container":"lab_words:lab_keeper_hello","domain":"Other","file":"src/director/lab_words.c","id":"lab_words:lab_keeper_hello","line":10,"lines":["lab_words:lab_keeper_hello:0"],"speakers":["MegaMan"],"title":"Lab keeper hello","when":""},
   {"container":"liberation_battle_words:lib_stakes_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_stakes_words","line":10,"lines":["liberation_battle_words:lib_stakes_words:0","liberation_battle_words:lib_stakes_words:1","liberation_battle_words:lib_stakes_words:2","liberation_battle_words:lib_stakes_words:3","liberation_battle_words:lib_stakes_words:4","liberation_battle_words:lib_stakes_words:5"],"speakers":["Mr.Prog","MegaMan"],"title":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds","when":"Into `a` the turns and what a win does, into `b` what a win in the first turn adds (\"\" none)"},
   {"container":"liberation_battle_words:lib_surrounded_words","domain":"Other","file":"src/director/liberation_battle_words.c","id":"liberation_battle_words:lib_surrounded_words","line":25,"lines":["liberation_battle_words:lib_surrounded_words:0"],"speakers":["Mr.Prog"],"title":"Into `c` the battle's field where BN5 surrounds the Navi","when":"Into `c` the battle's field where BN5 surrounds the Navi (\"\" else)"},
   {"container":"liberation_team_words:colonel","domain":"Other","file":"src/director/liberation_team_words.c","id":"liberation_team_words:colonel","line":18,"lines":["liberation_team_words:colonel:0","liberation_team_words:colonel:1","liberation_team_words:colonel:2","liberation_team_words:colonel:3","liberation_team_words:colonel:4"],"speakers":["Colonel"],"title":"Colonel","when":""},
@@ -4820,8 +4855,15 @@
   {"boxes":[{"pages":[["Time {m}:{sec}:{cs}.","Level {bust}. HP lost","{hp_lost}."]],"speaker":"MegaMan","text":"Time {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:1","kind":"speech","line":58,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"bust","spec":"%d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Time {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}.","text_hash":"8d5f3f86b999"},
   {"boxes":[{"pages":[["MegaMan fell at","{m}:{sec}:{cs}."]],"speaker":"MegaMan","text":"MegaMan fell at {m}:{sec}:{cs}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:2","kind":"speech","line":59,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"MegaMan fell at {m}:{sec}:{cs}.","text_hash":"6a2801c50868"},
   {"boxes":[{"pages":[["Left at {m}:{sec}:{cs}.","HP lost {hp_lost}."]],"speaker":"MegaMan","text":"Left at {m}:{sec}:{cs}. HP lost {hp_lost}."}],"container":"lab_info_result","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_result:3","kind":"speech","line":60,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Left at {m}:{sec}:{cs}. HP lost {hp_lost}.","text_hash":"56c70a153f6f"},
-  {"boxes":[{"pages":[["HELLO! DR.HIKARI'S","LAB SENT ME!"]],"speaker":"Mr.Prog","text":"HELLO! DR.HIKARI'S\nLAB SENT ME!"},{"pages":[["YOUR BATTLE DATA","MAKES COPIES HERE!"]],"speaker":"Mr.Prog","text":"YOUR BATTLE DATA\nMAKES COPIES HERE!"},{"pages":[["A COPY CAN'T","DELETE YOU! TRY ONE!"]],"speaker":"Mr.Prog","text":"A COPY CAN'T\nDELETE YOU! TRY ONE!"}],"container":"lab_keeper_first","domain":"Other","file":"src/director/lab_words.c","flags":[],"id":"lab_words:lab_keeper_first:0","kind":"speech","line":5,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HELLO! DR.HIKARI'S\nLAB SENT ME!|YOUR BATTLE DATA\nMAKES COPIES HERE!|A COPY CAN'T\nDELETE YOU! TRY ONE!","text_hash":"0964d608b0d7"},
-  {"boxes":[{"pages":[["WELCOME BACK!","WHICH BATTLE TODAY?"]],"speaker":"Mr.Prog","text":"WELCOME BACK!\nWHICH BATTLE TODAY?"}],"container":"lab_keeper_hello","domain":"Other","file":"src/director/lab_words.c","flags":[],"id":"lab_words:lab_keeper_hello:0","kind":"speech","line":10,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"WELCOME BACK!\nWHICH BATTLE TODAY?","text_hash":"5dffdc363fae"},
+  {"boxes":[{"pages":[["Set {slot}"]],"speaker":"MegaMan","text":"Set {slot}"}],"container":"lab_set_words","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_set_words:0","kind":"speech","line":63,"placeholders":[{"name":"slot","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Set {slot}","text_hash":"57954c1cec13"},
+  {"boxes":[{"pages":[["1 foe"]],"speaker":"MegaMan","text":"1 foe"}],"container":"lab_set_value","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_set_value:0","kind":"speech","line":67,"speaker":"MegaMan","speakers":["MegaMan"],"text":"1 foe","text_hash":"636a0b6096b9"},
+  {"boxes":[{"pages":[["{foes} foes"]],"speaker":"MegaMan","text":"{foes} foes"}],"container":"lab_set_value","domain":"Other","file":"src/director/lab_text.c","flags":[],"fragment":true,"id":"lab_text:lab_set_value:1","kind":"speech","line":68,"placeholders":[{"name":"foes","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{foes} foes","text_hash":"1501aef6f69c"},
+  {"boxes":[{"pages":[["Nothing set here."]],"speaker":"MegaMan","text":"Nothing set here."}],"container":"lab_info_set","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_set:0","kind":"speech","line":74,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Nothing set here.","text_hash":"ee75fb4569c4"},
+  {"boxes":[{"pages":[["No win yet."]],"speaker":"MegaMan","text":"No win yet."}],"container":"lab_info_set","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_set:1","kind":"speech","line":75,"speaker":"MegaMan","speakers":["MegaMan"],"text":"No win yet.","text_hash":"f5797b70f7d1"},
+  {"boxes":[{"pages":[["Best {m}:{sec}:{cs}.","Level S. HP lost","{hp_lost}."]],"speaker":"MegaMan","text":"Best {m}:{sec}:{cs}. Level S. HP lost {hp_lost}."}],"container":"lab_info_set","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_set:2","kind":"speech","line":76,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Best {m}:{sec}:{cs}. Level S. HP lost {hp_lost}.","text_hash":"e09d879f69c4"},
+  {"boxes":[{"pages":[["Best {m}:{sec}:{cs}.","Level {bust}. HP lost","{hp_lost}."]],"speaker":"MegaMan","text":"Best {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}."}],"container":"lab_info_set","domain":"Other","file":"src/director/lab_text.c","flags":[],"id":"lab_text:lab_info_set:3","kind":"speech","line":77,"placeholders":[{"name":"m","spec":"%d"},{"name":"sec","spec":"%02d"},{"name":"cs","spec":"%02d"},{"name":"bust","spec":"%d"},{"name":"hp_lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Best {m}:{sec}:{cs}. Level {bust}. HP lost {hp_lost}.","text_hash":"82a28265a288"},
+  {"boxes":[{"pages":[["Hey,MegaMan! I work","at Dr.Hikari's lab!"]],"speaker":"MegaMan","text":"Hey,MegaMan! I work\nat Dr.Hikari's lab!"},{"pages":[["Your battle data","makes copies here."]],"speaker":"MegaMan","text":"Your battle data\nmakes copies here."},{"pages":[["A copy can't delete","you. Wanna try one?"]],"speaker":"MegaMan","text":"A copy can't delete\nyou. Wanna try one?"}],"container":"lab_keeper_first","domain":"Other","file":"src/director/lab_words.c","flags":[],"id":"lab_words:lab_keeper_first:0","kind":"speech","line":5,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Hey,MegaMan! I work\nat Dr.Hikari's lab!|Your battle data\nmakes copies here.|A copy can't delete\nyou. Wanna try one?","text_hash":"757e9757b6ee"},
+  {"boxes":[{"pages":[["Back again? Which","battle today?"]],"speaker":"MegaMan","text":"Back again? Which\nbattle today?"}],"container":"lab_keeper_hello","domain":"Other","file":"src/director/lab_words.c","flags":[],"id":"lab_words:lab_keeper_hello:0","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Back again? Which\nbattle today?","text_hash":"c71643a5f550"},
   {"boxes":[{"pages":[["The PC's","{way},Lan!"]],"speaker":"MegaMan","text":"The PC's {way},Lan!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:0","kind":"speech","line":17,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M The PC's {way},Lan!","text_hash":"6cb408c207ed"},
   {"boxes":[{"pages":[["Your room's","{way},Lan!"]],"speaker":"MegaMan","text":"Your room's {way},Lan!"},{"pages":[["The PC's up there!"]],"speaker":"MegaMan","text":"The PC's up there!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:1","kind":"speech","line":19,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Your room's {way},Lan!|@M The PC's up there!","text_hash":"8ddf140263b5"},
   {"boxes":[{"pages":[["Home's {way},Lan!"]],"speaker":"MegaMan","text":"Home's {way},Lan!"},{"pages":[["The PC's up in your","room!"]],"speaker":"MegaMan","text":"The PC's up in your room!"}],"container":"port_words","domain":"Lessons","file":"src/director/lesson_words.c","flags":[],"id":"lesson_words:port_words:2","kind":"speech","line":21,"placeholders":[{"name":"way","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Home's {way},Lan!|@M The PC's up in your room!","text_hash":"8227a47c0f7e"},
@@ -5052,8 +5094,10 @@
   {"boxes":[{"pages":[["I reached the Nest.","Something down there"],["copies everything...","Spooky."]],"speaker":"Shop Navi","text":"I reached the Nest. Something down there copies everything... Spooky."}],"container":"bbs_posts","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:bbs_posts:14","kind":"speech","line":396,"speaker":"Shop Navi","speakers":["Shop Navi"],"text":"I reached the Nest. Something down there copies everything... Spooky.","text_hash":"1f0427d05a2e"},
   {"boxes":[{"pages":[["A cloaked Navi in","the Secret Area! It","deleted a copy in"],["one blow... then","went still as stone."]],"speaker":"HeelNavi","text":"A cloaked Navi in the Secret Area! It deleted a copy in one blow... then went still as stone."}],"container":"bbs_posts","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:bbs_posts:15","kind":"speech","line":399,"note":"(Bass waits in the Secret Area once it has been cleared: docs/game/bosses/super-bosses.md, Super bosses)","speaker":"HeelNavi","speakers":["HeelNavi"],"text":"A cloaked Navi in the Secret Area! It deleted a copy in one blow... then went still as stone.","text_hash":"6fa271ff00dd"},
   {"boxes":[{"pages":[["Lan,I sorted out","MegaMan's data on","{name}'s copy."]],"speaker":"Dad","text":"Lan,I sorted out MegaMan's data on {name}'s copy."},{"pages":[["Here it is,just as","he logged it."]],"speaker":"Dad","text":"Here it is,just as he logged it."}],"container":"mail_body","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:mail_body:0","kind":"speech","line":441,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Dad","speakers":["Dad"],"text":"Lan,I sorted out MegaMan's data on {name}'s copy.\fHere it is,just as he logged it.","text_hash":"0d93bcd78540"},
-  {"boxes":[{"pages":[["Dive report"]],"speaker":"Screen","text":"Dive report"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:0","kind":"screen","line":472,"speaker":"Screen","speakers":["Screen"],"text":"Dive report","text_hash":"10723cf513aa"},
-  {"boxes":[{"pages":[["Endless Net"]],"speaker":"Screen","text":"Endless Net"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:3","kind":"screen","line":472,"speaker":"Screen","speakers":["Screen"],"text":"Endless Net","text_hash":"55f7c0f022a0"},
+  {"boxes":[{"pages":[["Lan,the lab built","something from your","battle data."]],"speaker":"PET","text":"Lan,the lab built\nsomething from your\nbattle data."},{"pages":[["A place to fight","copies of viruses","MegaMan knows well."]],"speaker":"PET","text":"A place to fight\ncopies of viruses\nMegaMan knows well."},{"pages":[["Our lab's Navi waits","in your HP. No copy","can delete MegaMan."]],"speaker":"PET","text":"Our lab's Navi waits\nin your HP. No copy\ncan delete MegaMan."},{"pages":[["So far the data is","complete on {battle_data_families_complete}","virus families."]],"speaker":"PET","text":"So far the data is\ncomplete on {battle_data_families_complete}\nvirus families."}],"container":"lab_mail_text","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:lab_mail_text:0","kind":"speech","line":463,"placeholders":[{"name":"battle_data_families_complete","spec":"%d"}],"speaker":"PET","speakers":["PET"],"text":"Lan,the lab built\nsomething from your\nbattle data.\fA place to fight\ncopies of viruses\nMegaMan knows well.\fOur lab's Navi waits\nin your HP. No copy\ncan delete MegaMan.\fSo far the data is\ncomplete on {battle_data_families_complete}\nvirus families.","text_hash":"c869e822921c"},
+  {"boxes":[{"pages":[["Dive report"]],"speaker":"Screen","text":"Dive report"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:0","kind":"screen","line":481,"speaker":"Screen","speakers":["Screen"],"text":"Dive report","text_hash":"10723cf513aa"},
+  {"boxes":[{"pages":[["Endless Net"]],"speaker":"Screen","text":"Endless Net"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:3","kind":"screen","line":481,"speaker":"Screen","speakers":["Screen"],"text":"Endless Net","text_hash":"55f7c0f022a0"},
+  {"boxes":[{"pages":[["Battle Lab"]],"speaker":"Screen","text":"Battle Lab"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:4","kind":"screen","line":481,"speaker":"Screen","speakers":["Screen"],"text":"Battle Lab","text_hash":"5147aeebc0eb"},
   {"boxes":[{"flags":[{"at":"4 lines","code":"pages"}],"pages":[["{k}{name}'s","Cross data... We"],["already brought his","Cross!"]],"speaker":"MegaMan","text":"{k}{name}'s Cross data... We already brought his Cross!"}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":["pages"],"id":"powers_words:powers_reward_words:0","kind":"speech","line":23,"placeholders":[{"name":"k","spec":"%s"},{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M {name}'s Cross data... We already brought his Cross!","text_hash":"f2e09e342630"},
   {"boxes":[{"pages":[["{k}{name}'s","Cross data... We","keep our {brought}."]],"speaker":"MegaMan","text":"{k}{name}'s Cross data... We keep our {brought}."}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":[],"id":"powers_words:powers_reward_words:1","kind":"speech","line":31,"note":"(said as the net's fact, not a rule's: \"One Cross a run!\" put the game's word in MegaMan's mouth; and said as settled, the brought one kept: \"It won't fit beside our SlashCross\" read to a playtester as an offer to swap, which never came, session 64. That a first win opens its start for the next dive is the setup's to show, never MegaMan's: the voice sweep, docs/voice/sweep/net.md; one box since the main path's words cut)","placeholders":[{"name":"k","spec":"%s"},{"name":"name","spec":"%s"},{"name":"brought","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M {name}'s Cross data... We keep our {brought}.","text_hash":"9fdea9f58057"},
   {"boxes":[{"pages":[["{k}Grrrr...!"]],"speaker":"MegaMan","text":"{k}Grrrr...!"},{"pages":[["L-Lan... The Nest is","calling to the","Cybeast in me!"]],"speaker":"MegaMan","text":"L-Lan... The Nest is calling to the Cybeast in me!"},{"pages":[["Easy,MegaMan! You've","kept it in check all","along!"]],"speaker":"Lan","text":"Easy,MegaMan! You've kept it in check all along!"},{"pages":[["...Right. I won't","let it take","over,Lan."]],"speaker":"MegaMan","text":"...Right. I won't let it take over,Lan."}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":[],"id":"powers_words:powers_reward_words:2","kind":"speech","line":37,"note":"(the Nest's call, and Lan's word, no unlocking: the beast stirs here, and its power comes once MegaMan has beaten it at the Nest, issue #109; a run that brought BeastOut hears the same)","placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|@L Easy,MegaMan! You've kept it in check all along!|@M ...Right. I won't let it take over,Lan.","text_hash":"2e845a68fd4f"},
