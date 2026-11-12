@@ -70,27 +70,36 @@ static uint32_t shaded(uint32_t c, float light, float sun) {
 
 static const uint32_t kinds[3] = { 0xFF4D1F1Au, 0xFF59D940u, 0xFF2673E6u };
 
-void voxel_light(const VoxScene *s, const VoxGround *g, const VoxLook *k, uint32_t *map, uint32_t *sprite) {
-	for (int j = 0; j < VOX_WH; ++j)
+typedef struct { const VoxScene *s; const VoxGround *g; const VoxLook *k; uint32_t *map; } Light;
+
+static void light_rows(int from, int to, void *ctx) {
+	const Light *c = ctx;
+	const VoxScene *s = c->s;
+	const VoxLook *k = c->k;
+	for (int j = from; j < to; ++j)
 		for (int i = 0; i < VOX_WW; ++i) {
 			int at = j * VOX_WW + i, kind = s->kind[at], x = i - VOX_LEFT, y = j - VOX_UP;
-			uint32_t c = s->map[at];
-			if (!c || kind == VOX_SKY) { map[at] = k->debug && c ? kinds[0] : c; continue; }
-			if (k->debug) { map[at] = shaded(kinds[kind], (float)(0.4 + 0.6 * ((c & 0xFF) + (c >> 8 & 0xFF)) / 510.0), 1.0f); continue; }
+			uint32_t px = s->map[at];
+			if (!px || kind == VOX_SKY) { c->map[at] = k->debug && px ? kinds[0] : px; continue; }
+			if (k->debug) { c->map[at] = shaded(kinds[kind], (float)(0.4 + 0.6 * ((px & 0xFF) + (px >> 8 & 0xFF)) / 510.0), 1.0f); continue; }
 			float h = (float)(s->gy[at] - y), face = 1.0f, sun;
 			if (kind == VOX_TOP) {
-				sun = sun_at(s, g, k, (float)x, (float)s->gy[at] + 0.5f, h + 0.5f, 0);
+				sun = sun_at(s, c->g, k, (float)x, (float)s->gy[at] + 0.5f, h + 0.5f, 0);
 				face = contact(s, x, (float)s->gy[at]);
 				/* (the edge that catches the light) */
 				if (j + 1 < VOX_WH && s->kind[at + VOX_WW] == VOX_WALL) face *= 1.10f;
 			} else {
 				/* (a side: less of the sun, and less of the sky's light the deeper under its edge) */
 				float under = h < 0 ? -h : 0;
-				sun = 0.9f * sun_at(s, g, k, (float)x, (float)s->gy[at], h + 0.5f, 0);
+				sun = 0.9f * sun_at(s, c->g, k, (float)x, (float)s->gy[at], h + 0.5f, 0);
 				face = k->wall * (1.0f - 0.011f * (under > 30.0f ? 30.0f : under));
 			}
-			map[at] = shaded(c, face * (k->ambient + (1.0f - k->ambient) * sun), sun);
+			c->map[at] = shaded(px, face * (k->ambient + (1.0f - k->ambient) * sun), sun);
 		}
+}
+
+void voxel_light(const VoxScene *s, const VoxGround *g, const VoxLook *k, uint32_t *map, uint32_t *sprite) {
+	voxel_in_bands(light_rows, VOX_WH, &(Light){ s, g, k, map });
 	for (int i = 0; i < VOX_N; ++i) {
 		uint32_t c = s->sprite[i];
 		if (!c) { sprite[i] = 0; continue; }

@@ -171,10 +171,19 @@ static void box(float *v, int ch, int r) {
 		}
 }
 
+static void (*bands)(VoxBand band, int rows, void *ctx);
+void voxel_bands(void (*run)(VoxBand band, int rows, void *ctx)) { bands = run; }
+
+void voxel_in_bands(VoxBand band, int rows, void *ctx) {
+	if (bands) bands(band, rows, ctx);
+	else band(0, rows, ctx);
+}
+
 /* The picture's blocks' mean colour, and how much of each the floor covers */
-static void lows(void) {
+static void lows(int from, int to, void *ctx) {
+	(void)ctx;
 	float norm = 1.0f / (float)(T.scale * T.scale * 255);
-	for (int y = 0; y < VOX_H; ++y)
+	for (int y = from; y < to; ++y)
 		for (int x = 0; x < VOX_W; ++x) {
 			unsigned sum[3] = { 0, 0, 0 }, covered = 0;
 			for (int sy = 0; sy < T.scale; ++sy)
@@ -190,7 +199,7 @@ static void lows(void) {
 }
 
 static void layers(const VoxLook *k) {
-	lows();
+	voxel_in_bands(lows, VOX_H, NULL);
 	/* (the glow: what is brighter than most, spread) */
 	for (int i = 0; i < VOX_N; ++i) {
 		const float *o = &low[i * 3];
@@ -236,9 +245,13 @@ static float sky_light(const VoxLook *k, float u, float v) {
 	return k->sky * (1.0f - 0.40f * under);
 }
 
-static void finish(const VoxLook *k, const Lens *l) {
+typedef struct { const VoxLook *k; const Lens *l; } Finish;
+
+static void finish(int from, int to, void *ctx) {
+	const VoxLook *k = ((const Finish *)ctx)->k;
+	const Lens *l = ((const Finish *)ctx)->l;
 	float inv = 1.0f / (float)T.scale;
-	for (int oy = 0; oy < T.oh; ++oy) {
+	for (int oy = from; oy < to; ++oy) {
 		float v = ((float)oy + 0.5f) * inv, vy = (v / (float)VOX_H - 0.5f) * 2.0f;
 		for (int ox = 0; ox < T.ow; ++ox) {
 			int i = oy * T.ow + ox;
@@ -269,6 +282,6 @@ bool voxel_draw(const VoxScene *scene, const uint32_t *map, const uint32_t *spri
 	sky_fill(scene, map, &l);
 	if (look->debug) return true;
 	layers(look);
-	finish(look, &l);
+	voxel_in_bands(finish, T.oh, &(Finish){ look, &l });
 	return true;
 }

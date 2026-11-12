@@ -109,6 +109,14 @@ void voxel_light(const VoxScene *scene, const VoxGround *ground, const VoxLook *
  * stays where BN6 shows it. */
 typedef struct { float pitch, zoom, depth; float x, gy, h; } VoxCamera;
 
+/* The picture's last passes run over bands of its rows: `run` calls
+ * `band(from, to, ctx)` for bands that together are rows 0 to `rows`, on
+ * as many threads as it likes (NULL: one band, here). */
+typedef void (*VoxBand)(int from, int to, void *ctx);
+void voxel_bands(void (*run)(VoxBand band, int rows, void *ctx));
+/* ... `band` over rows 0 to `rows` by it */
+void voxel_in_bands(VoxBand band, int rows, void *ctx);
+
 /* The lit scene through `cam` at `scale` (1-8) into `out`, VOX_W * scale
  * wide and VOX_H * scale high, 0xFFBBGGRR. False where it has no memory. */
 bool voxel_draw(const VoxScene *scene, const uint32_t *map, const uint32_t *sprite, const VoxLook *look, const VoxCamera *cam, int scale, uint32_t *out);

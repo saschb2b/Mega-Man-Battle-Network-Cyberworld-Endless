@@ -12,6 +12,7 @@
 #include "display.h"
 #include "emu.h"
 #include "gba_world.h"
+#include "lcd_frame.h"
 #include "netmap.h"
 #include "platform.h"
 #include "voxel.h"
@@ -23,6 +24,8 @@
 #define CAM_X        120
 #define CAM_Y        80
 #define SCALE_WHOLE  4
+/* What a frame of it may take before the picture is made smaller */
+#define BUDGET_MS    11.0
 /* The frame in tiles, a tile more where the scroll shows part of one */
 #define TILES_X      31
 #define TILES_Y      21
@@ -44,6 +47,7 @@ static struct Vox {
 	SDL_Renderer *on;
 	int tex_scale, lost;
 	uint64_t live;        /* P.frame + 1 of the frame the picture is of */
+	int slow, scale_most; /* frames in a row over the budget; the scale it then keeps to (0 none) */
 } *vox;
 #define V (*vox)
 
@@ -104,12 +108,13 @@ static bool world_read(GbaWorld *g, int cam_u, int cam_v) {
 }
 
 /* The floor over the window's lattice, each level's panels */
-static void ground_read(int cam_u, int cam_v) {
-	V.ground.z[0] = 0;
-	V.ground.z[1] = netmap_rise();
-	for (int j = 0; j < VOX_GH; ++j)
+typedef struct { int cam_u, cam_v; } Camera;
+
+static void ground_rows(int from, int to, void *ctx) {
+	const Camera *c = ctx;
+	for (int j = from; j < to; ++j)
 		for (int i = 0; i < VOX_GW; ++i) {
-			int u = i - VOX_LEFT - VOX_MARGIN - CAM_X + cam_u, v = j - VOX_UP - VOX_MARGIN - CAM_Y + cam_v;
+			int u = i - VOX_LEFT - VOX_MARGIN - CAM_X + c->cam_u, v = j - VOX_UP - VOX_MARGIN - CAM_Y + c->cam_v;
 			/* (a stair is its ramp, floor of neither level) */
 			int ramp = V.ground.z[1] > 0 ? netmap_stair_height(u - 2 * v, u + 2 * v) : -1;
 			unsigned bits = ramp < 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 0) ? 1u : 0u;
@@ -117,6 +122,66 @@ static void ground_read(int cam_u, int cam_v) {
 			V.ground.floor[j * VOX_GW + i] = (uint8_t)bits;
 			V.ground.ramp[j * VOX_GW + i] = (uint8_t)(ramp + 1);
 		}
+}
+
+/* The map's picture over the window */
+static void world_rows(int from, int to, void *ctx) {
+	gba_world(ctx, -VOX_LEFT, -VOX_UP + from, VOX_WW, to - from, V.scene.map + from * VOX_WW, V.scene.sky + from * VOX_WW);
+}
+
+/* ---- the draw's bands on threads ---- */
+
+#define WORKERS_MOST 3
+typedef struct { VoxBand band; int from, to; void *ctx; } Band;
+static struct { SDL_sem *go; Band job; } worker[WORKERS_MOST];
+static SDL_sem *done;
+static int workers = -1;
+
+static int work(void *p) {
+	int w = (int)(intptr_t)p;
+	for (;;) {
+		SDL_SemWait(worker[w].go);
+		worker[w].job.band(worker[w].job.from, worker[w].job.to, worker[w].job.ctx);
+		SDL_SemPost(done);
+	}
+	return 0;
+}
+
+/* (a worker a core but this one, three at most; none where a system has no threads) */
+static void workers_start(void) {
+	int want = SDL_GetCPUCount() - 1;
+	workers = 0;
+	done = SDL_CreateSemaphore(0);
+	for (int w = 0; done && w < want && w < WORKERS_MOST; ++w) {
+		worker[w].go = SDL_CreateSemaphore(0);
+		SDL_Thread *t = worker[w].go ? SDL_CreateThread(work, "voxel", (void *)(intptr_t)w) : NULL;
+		if (!t) break;
+		SDL_DetachThread(t);
+		++workers;
+	}
+}
+
+/* `band` over rows 0 to `rows`: a band a worker, the last one here */
+static void on_threads(VoxBand band, int rows, void *ctx) {
+	if (workers < 0) workers_start();
+	int n = workers + 1;
+	for (int w = 0; w < workers; ++w) {
+		worker[w].job = (Band){ band, rows * w / n, rows * (w + 1) / n, ctx };
+		SDL_SemPost(worker[w].go);
+	}
+	band(rows * workers / n, rows, ctx);
+	for (int w = 0; w < workers; ++w) SDL_SemWait(done);
+}
+
+/* The world's colours as the picture's are shown (the GBA's screen's
+ * colour correction, docs/engine/lcd.md), which the frame's sprites
+ * already are: lcd_frame's wants red at bit 16 */
+static void world_colours(uint32_t *px, int n) {
+	if (lcd_colour() == LCD_COLOUR_OFF) return;
+	for (int pass = 0; pass < 2; ++pass) {
+		for (int i = 0; i < n; ++i) px[i] = (px[i] & 0xFF00FF00u) | (px[i] & 0xFFu) << 16 | (px[i] >> 16 & 0xFFu);
+		if (!pass) lcd_correct_pixels(px, n);
+	}
 }
 
 /* ---- the picture, and its place under the canvas ---- */
@@ -144,6 +209,7 @@ static bool out_sized(void) {
 	 * side, a quarter of the work) */
 	int s = P.fill > 0 ? (int)(P.fill + 0.999f) : P.scale;
 	if (s > SCALE_WHOLE) s = (s + 1) / 2;
+	if (V.scale_most && s > V.scale_most) s = V.scale_most;
 	V.scale = s < 1 ? 1 : s > SCALE_WHOLE ? SCALE_WHOLE : s;
 	if (V.out && V.out_scale == V.scale) return true;
 	free(V.out);
@@ -158,7 +224,9 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 		vox = calloc(1, sizeof *vox);
 		if (!vox) return false;
 		platform_set_under(under);
+		voxel_bands(on_threads);
 	}
+	uint64_t t0 = SDL_GetPerformanceCounter();
 	int px = bn6_player_x(), py = bn6_player_y();
 	int cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
 	int cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
@@ -168,8 +236,15 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
 	GbaWorld world;
 	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io, V.pal }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
-	gba_world(&world, -VOX_LEFT, -VOX_UP, VOX_WW, VOX_WH, V.scene.map, V.scene.sky);
-	ground_read(cam_u, cam_v);
+	on_threads(world_rows, VOX_WH, &world);
+	world_colours(V.scene.map, VOX_WN);
+	world_colours(V.scene.sky, VOX_WN);
+	if (lcd_colour() != LCD_COLOUR_OFF)
+		for (int i = 0; i < VOX_N; ++i)
+			if (V.layers.lying[i]) world_colours(&V.layers.lying[i], 1);
+	V.ground.z[0] = 0;
+	V.ground.z[1] = netmap_rise();
+	on_threads(ground_rows, VOX_GH, &(Camera){ cam_u, cam_v });
 	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) != 0, shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();
 	look.debug = display_voxel() == DISPLAY_VOXEL_DEBUG;
@@ -177,6 +252,11 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	VoxCamera cam = { display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
 		(float)bn6_player_z() };
 	if (!voxel_draw(&V.scene, V.lit_map, V.lit_sprite, &look, &cam, V.scale, V.out)) return false;
+	/* (a system the frame takes too long on draws it smaller: a scale less
+	 * after a second of frames over the budget, and no more again) */
+	double ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	V.slow = ms > BUDGET_MS ? V.slow + 1 : 0;
+	if (V.slow >= 60 && V.scale > 1) { V.scale_most = V.scale - 1; V.slow = 0; }
 	V.live = P.frame + 1;
 	memcpy(hud, V.scene.hud, VOX_N);
 	return true;

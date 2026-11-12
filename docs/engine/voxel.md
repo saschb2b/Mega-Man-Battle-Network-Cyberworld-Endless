@@ -106,18 +106,27 @@ then the sky softened and dimmed under the floor, a glow off the bright
 panels, what is far from MegaMan out of focus, and a vignette. Past 4x
 the picture is made at half the screen's scale.
 
-Measured on the development machine at 1440x960: about 15 ms a frame
-(10 ms of it the draw), one thread.
+Its passes run in bands of rows on a small pool of threads (three
+workers and the game's own; none where a system has no threads): the
+floor's grid, the map's window, the light and the picture's last pass.
+Measured on the development machine at 1440x960: about 11 ms a frame.
+Where a frame takes over 11 ms for a second, the picture is made a scale
+smaller for the rest of the session and the screen scales it up
+(`voxel_scene.c`).
+
+The world's colours go through the GBA's screen's colour correction
+([the GBA's screen](lcd.md)) as the frame's sprites do; its frame
+blending is not applied to them.
 
 ## Open
 
-- Speed: threads or fixed-point for the draw; a handheld's cost is not
-  measured.
+- Speed on a handheld is not measured: the passes before the picture
+  (the readers, the floor, the lift, the light) cost about half a frame
+  here whatever the scale, and fixed-point for the last pass is not tried.
 - Scenery that stands (a tower's art in the map's layers) is painted
   flat; a stair's ramp is taken as even, and casts no shadow.
-- The world's colours skip what the picture's get: the GBA's screen's
-  colour correction and blending, a liberation's panel tints, a Glitch
-  layer's frame.
+- The world skips the frame blending, a liberation's panel tints and a
+  Glitch layer's frame.
 - The engine's own marks over the world (the Net Square's visitors, a
   liberation's pieces) are placed for BN6's camera, not the lower one.
 - The wide-screen picture the whole tile map allows.
