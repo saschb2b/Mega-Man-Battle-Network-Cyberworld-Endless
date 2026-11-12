@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "The NetPass"
-description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's, BN5's and BN4's (protocol v17), that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment, a game joining the set and protocol v9's NOTICE 28."
+description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's, BN5's and BN4's (protocol v17), that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment, a game joining the set, the full pass of a system with room for one game (protocol v18: it trades on the pair's common ground) and protocol v9's NOTICE 28."
 tags: [online]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 ---
@@ -22,7 +22,10 @@ from protocol v17, BN4 Red Sun's, defined once in a table
 (`src/online/netpass.c`). A future game is one entry there: the stamps
 that need it go back to open until a player has it in, which the release
 notes and the site announce ahead ([A game joins the set](#a-game-joins-the-set),
-below, as BN4 did).
+below, as BN4 did). A system that cannot read the whole set at once (the
+New 3DS, one game's ROM beside BN6's) holds a full pass with the games it
+can read, and that pass trades
+([A system with room for one game](#a-system-with-room-for-one-game)).
 
 The **NetPass** shows it, and is the one place that names which game
 earns which stamp: a key item in Lan's PET (R on the PET's menu in the Square), a strip
@@ -77,11 +80,12 @@ eight NetBattles and trades; that player keeps the Square.
 | --- | --- | --- | --- |
 | Square | meet,cheer | Walking, phrases and emotes, cheering, cards, the referee's report, the Board and its posts, the trade board's offers to read, the week's ranking | BN6's ROM, every game's |
 | Arena | NetBattle | Asking for and taking a Practice NetBattle, a rematch, watching one in the stands | The full set |
-| Trade | chip swap | A trade at Trade Central, posting or answering a trade board offer | The full set |
+| Trade | chip swap | A trade at Trade Central, posting or answering a trade board offer | A full pass: the full set, or one game beside BN6's on a system that reads one extra ROM at most |
 | DeepNet | the Board | The week's DeepNet dive: the greeter's offer, the dive's post to the Board | The full set |
 
-`netpass_has` answers for a stamp, `netpass_full` for the set
-(`netpass.h`). A pass holds 1 of 4 stamps or 4 of 4: the three that need
+`netpass_has` answers for a stamp, `netpass_full` for the pass
+(`netpass.h`). A pass holds 1 of 4 stamps or 4 of 4 (2 of 4, the Square's
+and Trade's, where a system reads one extra ROM at most): the three that need
 the set come together.
 
 ## The pass
@@ -189,31 +193,116 @@ entry for v17, and the site's line on the NetPass.
 
 ## Every system, and the New 3DS
 
-The owner's aim (20 October 2026): every stamp earnable on every system.
-The browser now battles as the desktops and phones do, its pass and its
-stamps theirs ([In the browser](arena/rollback/browser.md)). The
+The owner's aim (20 October 2026): every stamp a system can use, on every
+system. The browser now battles as the desktops and phones do, its pass
+and its stamps theirs ([In the browser](arena/rollback/browser.md)). The
 New 3DS builds the Arena but offers no NetBattle and no watching
 (`CW_ARENA`, `square_arena_offered`): a frame of the battle's two GBAs
 takes 25.8 ms there against a 60th of a second's 16.7, measured on the
-device ([The New 3DS](arena/rollback/new-3ds.md)). The pass is the
-same there: its stamps follow the ROMs, as the server's rule does.
-Since protocol v17 the full set asks BN5's and BN4's ROMs beside BN6's,
-and a New 3DS reads one extra ROM at most (`XROMS_3DS`,
-`src/core/start_3ds.c`: both together outgrow its heap,
-[The 3DS's memory](../engine/emulation/3ds-memory.md)). So its pass is
-never full there: it holds the Square stamp alone, one game's slot
-open, and it neither trades nor dives (`netpass_has`). Before v17, with
-BN5's ROM, it traded and dived and its Arena stamp showed held; the
-owner's aim above is open again on the New 3DS until it can read both.
-Battle and Watch are not offered (the referee: "SORRY! NO NETBATTLES FROM
-THIS PET!"), and a full pass's PET text says so in place of the whole Net's:
-"Every game in! No NetBattles on this PET.", which no New 3DS shows
-while it reads one extra ROM. The second screen's
-panel draws the pass's words in the engine's small font, its pixel
-letters being a texture's, which a picture drawn into memory (the 3DS's
-bottom screen) cannot use.
+device ([The New 3DS](arena/rollback/new-3ds.md)). And it reads one extra
+ROM beside BN6's at most (`XROMS_MOST`, `src/core/rom.h`, which
+`start_3ds.c` reads its ROMs by: both together outgrow its heap,
+[The 3DS's memory](../engine/emulation/3ds-memory.md)), where the full
+set asks two since protocol v17. For a while on `dev` its pass could
+never be full, and it had lost the trades and the dives 0.20.0 gave it
+with BN5's ROM; the owner's word of 12 November 2026 was to fix that in
+code, which the next section is. The second screen's panel draws the
+pass's words in the engine's small font, its pixel letters being a
+texture's, which a picture drawn into memory (the 3DS's bottom screen)
+cannot use.
+
+## A system with room for one game
+
+**A pass is full when every game of the set that the system can read is
+in** (protocol v18). On every system with room for all of them that is
+the full set as before, BN6's, BN5's and BN4's ROMs. On a system that
+reads one extra ROM at most (`netpass_one_extra`: today the New 3DS
+alone) it is BN6's and one of BN5 Team Colonel's or BN4 Red Sun's. What
+that pass opens goes stamp by stamp, by what the two games of a pair
+must share:
+
+| Stamp | On a system of one extra ROM, one game in | Why |
+| --- | --- | --- |
+| Square | Held | Every game's |
+| Trade | Held, on the pair's common ground | A trade is one chip for one chip, and a chip is a number both games can name or not |
+| Arena | Not held | A NetBattle's two games build the same installs, BN4's among them, which the installs' record's hash checks; and the New 3DS offers none in any case |
+| DeepNet | Not held | A dive without BN4's ROM is not the dive the Board's others dived (below) |
+
+**The common ground.** Before v18 both games of a trade held the same
+set; now a full set may trade with a New 3DS that has BN5's ROM and not
+BN4's. So a trade keeps to what both hold, the rule the pass replaced
+for the *whole* of online play in v9 and which comes back here for one
+chip at a time, where it costs the player no rule to learn: the spares
+list for a Navi shows only the chips his game holds too
+(`netpass_peer_holds`, by his ROMs as the server says them), the clerk
+says "HMM... Alpha'S PET CAN'T HOLD ANY SPARE OF YOURS!" where there is
+none, and an offer of BN4's on the board is left out of the BOARD of a
+game without BN4's ROM, as ever. The server holds the same line
+(`protocol.holds`): a proposal, an answer, a take or a post naming a
+chip of a game either side lacks is refused with NOTICE 19
+(`notice_ground`), an answer's ending the trade for both. Whose game a
+chip is goes by the wire's numbers on both sides: BN4's own from
+`bn4_chip_first` (527), BN5's past `bn6_chip_last` and on BN6's blank
+records, the rest BN6's and every game's.
+
+**Why the week's dive stays shut.** The dive is the same net only for
+games that read the same ROMs. What a seed makes goes by them:
+`run_dress` (`src/core/run.c`) dresses an act's area in one of BN5's or
+BN4's by a coin of the seed *where that game's areas exist*
+(`net_area_def`, `src/core/rom.c`, answers none for a ROM not read), and
+BN4's areas lay out otherwise (their pads and platforms); the surface
+acts' guardians (`dressed_xguardian`) and the deep's (`deep_xguardian`)
+draw on BN4's Navis; the encounter groups' pool
+(`src/core/group_pool.c`) counts BN4's families in; and BN4's chips are
+among the finds. A dive is made with the older nets on (`weekly_dive`:
+`run_new` on the week's seed, the standard setup, no extra off). So a
+New 3DS with BN5's ROM alone would dive another net than the Board's
+other entries on the same seed, and its depth would not compare. The
+DeepNet stamp stays shut there and the server refuses its WEEK_POST as
+before (NOTICE 28); no second Board, and the dive draws on what it drew
+on. This is the one thing 0.20.0 gave a New 3DS that 0.21.0 does not
+give back, and it is the owner's to weigh: it opens again the day a New
+3DS reads both ROMs, or the day a dive is made the same whatever ROMs
+are read.
+
+**The pass on that system.** Its header says "★ Full pass" with one
+game in, its stamp bar "2 of 4", the Square's and Trade's stamps held
+and the Arena's and DeepNet's open. The tray shows the slots the system
+has room for: BN6's and the game that is in, or, with none in, both
+games' open (either fits) and "Team Colonel's or Red Sun's ROM stamps
+Trade"; the second game's slot is not drawn once one is in. Its line
+then: "Every game this PET holds is in! It trades. No NetBattles or
+DeepNet here." (`netpass_complete_one_extra`). The stamp moment lands
+the Trade stamp alone, the greeter's word for it "WHOA! YOUR NETPASS
+HAS ROOM FOR THE TRADE STAMP NOW!" and "HOLD STILL! STAMP!". A New 3DS
+whose pass was full in 0.20.0 (`netpass.ini`: every stamp, for the
+two-game set) hears him once, as every game whose stamps the set's
+growth took does: "OH! THE ARENA AND DEEPNET STAMPS NEED MORE NOW!",
+"THIS PET HAS NO ROOM FOR IT! SORRY!", "YOUR TRADE STAMP STAYS! HAVE A
+LOOK!" (`square_greeter_grew_words`), then the pass as it stands. The
+referee there says "SORRY! NO NETBATTLES FROM THIS PET!" whatever the
+pass holds. To a full set, the card of such a Navi says "His NetPass has
+no Arena stamp." (Battle is not among its options), and Trade Central
+lists him.
+
+**On the wire** a system says it in HELLO (`hello_one_extra`, a bit of
+the channel word beside the resume's), the server keeps it with the
+session's ROMs and tells the others in SNAPSHOT (`roms_one_extra`, bit
+6). `--dev xroms=1` makes any build act as such a system (the tests and
+the captures; it reads its ROMs as ever).
 
 ## On the wire
+
+Protocol v18 adds the system of one extra ROM
+([above](#a-system-with-room-for-one-game)): `hello_one_extra` (16384)
+in HELLO's channel word, `roms_one_extra` (64, bit 6 of SNAPSHOT's byte)
+in a session's ROMs, `protocol.pass_full` for Trade Central where
+`full_set` stays the Arena's, the stands' and the week's, and NOTICE 19
+(`notice_ground`) for a chip outside a trade's common ground. A v17 game
+refuses a SNAPSHOT that carries bit 6 ("no other bit") and a v17 server
+a HELLO whose channel word carries the new one (a channel it has not),
+so the version moved: a game and a server of v17 and v18 tell each
+other which side is behind (ERROR 2 or 17), as any two versions do.
 
 Protocol v17 adds BN4 Red Sun: HELLO carries its game code and SHA-1
 after BN5's (all zeros without it, ERROR 15 for another), the server

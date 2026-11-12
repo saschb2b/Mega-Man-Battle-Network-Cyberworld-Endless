@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T19:10:00Z
+* **Update**: online/netpass.md (a pass is full with every game its system can read, protocol v18: a New 3DS's with one game beside BN6's trades on the pair's common ground, NOTICE 19, and neither battles nor dives; why the week's dive stays shut there; the New 3DS paragraph corrected), online/weekly-net.md (every diver has the full set, so a system of one extra ROM holds no DeepNet stamp), online/trade-central.md (the spares list by the other's ROMs), online/server-and-wire.md (protocol v18), engine/emulation/3ds-memory.md (`XROMS_MOST` in `rom.h`), devtools/dev-menu.md (`--dev xroms=N`); `shared/online/README.md` and `server/README.md` with them.

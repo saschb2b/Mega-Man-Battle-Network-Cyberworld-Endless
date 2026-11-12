@@ -169,6 +169,9 @@ extern XRom XR[XROM_COUNT];
 /* ... as this game goes by it: XROMS_MOST, or what --dev xroms=N and the
  * tests set (a host build acting as a system of one extra ROM) */
 extern int xroms_most;
+/* --dev's options (main.c, beside devtools_parse, as analytics_dev takes
+ * its own): xroms=N among them sets it */
+void xroms_dev(const char *spec);
 /* ... fewer than there are: a system that cannot read every game at once */
 static inline bool xroms_short(void) { return xroms_most < XROM_COUNT; }
 /* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */
