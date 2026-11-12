@@ -83,6 +83,8 @@ void director_pick_shut(void);
  * holds where `all` (a dev step's), else those MegaMan has battle data on */
 void director_lab_open(bool all);
 bool director_lab_shown(void);
+/* ... BN6 bringing the set's field up under it: the game's frames run, fast, its keys none */
+bool director_lab_loading(void);
 void director_lab_keys(uint32_t keys);
 void director_draw_lab(void);
 void director_lab_watch(void);

@@ -161,7 +161,7 @@ static void set_take(int slot) {
 
 void director_lab_open(bool all) {
 	memset(&LS, 0, sizeof LS);
-	LS.up = true;
+	LS.up = LS.show_due = true;
 	LS.all = all;
 	set_take(profile.lab_slot);
 	roster_make();
@@ -267,15 +267,32 @@ static void page_turn(int by) {
 	if (LS.page == LAB_PAGE_FIELD) LS.col = LS.line = 1;
 }
 
-static void battle(void) {
-	if (!LS.set.nfoes) return;
-	set_keep();
-	runlog_choice(CHOICE_LAB);   /* (the run's choices: a test battle fought) */
+/* The set shown: BN6's own battle of it begun and held with its field up
+ * (lab_battle.h), in place of the one shown before. A set with nobody on
+ * it is its field alone: a battle needs a foe, so its record names a
+ * Mettaur, and it is held before he comes in. */
+static void show(void) {
 	Encounter e;
 	lab_set_encounter(&LS.set, &e);
-	if (!e.nfoes) return;
+	bool bare = !e.nfoes;
+	if (bare) {
+		memset(&e, 0, sizeof e);
+		e.biome = LS.set.area;
+		e.song = LS.set.song;
+		e.foes[e.nfoes++] = (Foe){ FOE_VIRUS, 1, 0, LAB_COLS - 2, 1, enemy_id(0, 1, 0) };
+	}
 	lab_battle_panels(LS.set.panels);
-	lab_battle_ask(&e, -1);
+	/* (the area's first background, not one of its two by the dice: the stage stays as it is while the set changes) */
+	lab_battle_show(&e, biome_backdrop(LS.set.area), bare);
+	LS.shown = LS.set;
+}
+
+/* BATTLE!: the battle held runs on into its fight */
+static void battle(void) {
+	if (!LS.set.nfoes || !lab_battle_held()) return;
+	set_keep();
+	runlog_choice(CHOICE_LAB);   /* (the run's choices: a test battle fought) */
+	lab_battle_go();
 	LS.up = false;
 	LS.fighting = true;
 }
@@ -308,6 +325,8 @@ static uint32_t held_after;   /* the keys held as the screen left, each until le
 void director_lab_keys(uint32_t keys) {
 	if (!LS.up) return;
 	held_after = ~0u;
+	/* (opened inside the director's update: its set shown from here, between frames) */
+	if (LS.show_due) { LS.show_due = false; show(); return; }
 	++LS.t;
 	uint32_t now = keys & ~LS.was;
 	LS.was = keys;
@@ -318,14 +337,20 @@ void director_lab_keys(uint32_t keys) {
 	else if (LS.at == LAB_AT_LIST) list_move(now);
 	else if (now & KEY_UP) LS.at = lab_rows() ? LAB_AT_LIST : LAB_AT_FIELD;
 	take(now);
+	/* (left: all put back; the set changed: BN6's field of it in the last one's place) */
+	if (!LS.up && !LS.fighting) lab_battle_leave();
+	else if (LS.up && memcmp(&LS.set, &LS.shown, sizeof LS.set)) show();
 }
 
-bool director_lab_shown(void) { return LS.up; }
+/* (while BN6 brings a set's field up, its frames run under the screen) */
+bool director_lab_shown(void) { return LS.up && !lab_battle_loading(); }
+bool director_lab_loading(void) { return LS.up && lab_battle_loading(); }
 
 /* The keys the game gets once the screen has left: none of those held
  * as it did, until each is let go (the START that began its battle
  * opened BN6's PET) */
 uint32_t director_lab_after(uint32_t keys) {
+	if (LS.up) return 0;   /* (its field coming up: no key is the game's) */
 	held_after &= keys;
 	return keys & ~held_after;
 }
@@ -347,4 +372,5 @@ void director_lab_watch(void) {
 		k->hp_lost = (uint16_t)LS.last.hp_lost;
 		profile_save();
 	}
+	show();
 }

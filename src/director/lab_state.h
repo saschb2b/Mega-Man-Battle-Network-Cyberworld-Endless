@@ -13,7 +13,7 @@ enum { LAB_PAGE_FOES, LAB_PAGE_FIELD, LAB_PAGE_STAGE, LAB_PAGE_SETS, LAB_PAGES }
 /* where the cursor is: the page's list, the field's panels, the button */
 enum { LAB_AT_LIST, LAB_AT_FIELD, LAB_AT_GO };
 #define LAB_ROSTER 128       /* families listed at most */
-#define LAB_ROWS_SHOWN 3     /* the list's rows in sight */
+#define LAB_ROWS_SHOWN 5     /* the list's rows in sight */
 #define LAB_STAGE_ROWS 2     /* STAGE's rows: the background, the song */
 #define LAB_LOCK 20          /* frames before it takes a key: a press that opened it is not its first */
 
@@ -29,6 +29,8 @@ typedef struct {
 typedef struct {
 	bool up;
 	bool fighting;       /* its battle is on: the screen is away until it ends */
+	bool show_due;       /* the set is to be shown as the next frame's keys are read: opened inside the director's update */
+	LabSet shown;        /* the set BN6's field shows now (lab_battle_show) */
 	bool all;
 	int t;               /* frames since it opened or came back */
 	uint32_t was;        /* the keys of the frame before */

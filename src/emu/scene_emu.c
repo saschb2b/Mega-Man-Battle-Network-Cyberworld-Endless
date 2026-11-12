@@ -147,6 +147,12 @@ static bool soft_reset(void) {
 	return true;
 }
 
+#define LAB_LOAD_SPEED 24   /* the game's frames to one shown while a set's field comes up: about 200 of BN6's in a sixth of a second */
+static int frames_speed(void) { return director_lab_loading() ? LAB_LOAD_SPEED : dev.speed; }
+/* whether the i-th of the game's frames to the one shown runs: a speed's count of them (the Lab's ending as its field
+ * is up), or fast forward's */
+static bool frame_goes_on(int i, int speed) { return speed > 1 ? i < speed && !director_lab_shown() : fast_forward_goes_on(i); }
+
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
@@ -178,14 +184,16 @@ static void update(void) {
 	platform_second_screen_draw();
 	/* (several of the game's frames to one shown: the dev menu's speed, or
 	 * fast forward where it may run, fast_forward_game.h) */
-	bool dev_fast = dev.speed > 1;
+	/* (the Battle Lab's builder bringing a set's field up: BN6's battle opening run through at once, lab_battle.h) */
+	int speed = frames_speed();
+	bool dev_fast = speed > 1;
 	/* the core on a thread of its own (emu.c): the frame done taken in,
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */
 	if (emu_threaded()) {
 		if (devtools_open()) { frame_keys(); return; }
 		if (!dev_fast) fast_forward_update();
-		for (int i = 0; dev_fast ? i < dev.speed : fast_forward_goes_on(i); ++i) {
+		for (int i = 0; frame_goes_on(i, speed); ++i) {
 			if (started) after_frame();
 			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
 			started = true;
@@ -196,7 +204,7 @@ static void update(void) {
 	uint32_t keys = frame_keys();
 	if (devtools_open()) return;   /* the game holds still under the dev menu */
 	if (!dev_fast) fast_forward_update();
-	for (int i = 0; dev_fast ? i < dev.speed : fast_forward_goes_on(i); ++i) {
+	for (int i = 0; frame_goes_on(i, speed); ++i) {
 		emu_frame_as(cinema_keys(keys), dev_fast ? 0 : fast_forward_how(i));
 		after_frame();
 	}
