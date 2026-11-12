@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: releases/v0.21.0.md (what joined 0.21.0 late: GutsMan's SP and 77 of BN4's own chips, BurnerMan and SparkMan drawn into the tournament with their plates, the AreaGrab fix), game/meta/library.md (BN4's row with GutsMan's SP: 160, 26, 4, 190; a run hands out 77 of BN4's own), GUIDE.md (77 of BN4's own chips; the tournament's twelve BN4 Navis).
 * **Update**: game/tournament.md (the pool's room: every proved Navi in it, SparkMan and BurnerMan no longer dropped past 32).
 * **Update**: rom/liberation.md (a row: AreaGrab's column search, which never returns on a Surrounded field once each of MegaMan's two columns has lost a panel, and the hook that ends it), code/emu.md (grab_search.c).
 * **Update**: rom/bn4.md (Computed powers: BN4's reader, table, SP routine, deletion times and BCD time located), multirom/bn4-chips.md (BN4's computed powers moved, GutsMnSP moved, DrkCanon's routine named), devtools/chip-recipe-generator.md (a unit of kind power).
