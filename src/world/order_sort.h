@@ -3,6 +3,16 @@
 #ifndef CW_ORDER_SORT_H
 #define CW_ORDER_SORT_H
 
+#include <stdint.h>
+
+/* The pack's reader, for the sort by No.: up to `most` of the pack's chips
+ * (chip | code << 9) and their counts, how many. The director gives its
+ * own as its hooks are installed (director_pack_now, events_install), so
+ * the real world includes nothing of the director (docs/code/layers.md);
+ * none given, MegaMan holds no copies */
+typedef int OrderSortPack(uint16_t *entry, uint8_t *count, int most);
+void order_sort_pack(OrderSortPack *pack);
+
 /* The hook that has the clerk's box say the sort, once, with the game's
  * (game_hooks.c). */
 void order_sort_install(void);

@@ -147,4 +147,3 @@ src/online/trade_screen_draw.c -> second/second_art.h
 src/saves/saves_draw.c -> second/second_frame.h
 src/saves/saves_text.c -> layer/guardians.h
 src/second/second_home.c -> core/start_3ds.h
-src/world/order_sort.c -> director/director.h
