@@ -1,0 +1,83 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's DarkBomb A (189, a DarkChip, alignment 0: BN4 plays it at any karma, so a plain MegaMan) against the registry's row 696 (BN4's bombs' state, its family 0x09's subfamily 2, moved as BN6's grown attack family 0xFC, the state copied with that subfamily's entry alone, as SeekBom's; its bomb the third kind's 0x8 with its kinds' table, its sounds 0xA9 and 0xBD at slots 0x286 and 0x287): picked on the first Custom screen and used at fight frame 30 against BN4's Mettaur at (5,2) (250 HP, the family's sixth: its 200 would delete a MettaurSP, and a deletion's effect is each engine's own), MegaMan's row: the throw, the bomb, its blast and the Mettaur's HP compared each frame. calm4 and mood4: BN4's confusion at the fight's start and its dark mood at the use left out of BN4's battle, the run taking none of BN4's dark rules (docs/game/meta/darkchips.md).",
+ "folder4": [
+  "00BD"
+ ],
+ "folder6": [
+  "2B8:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "calm4": 1,
+ "mood4": 1
+}

@@ -66,14 +66,14 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
-                  0x60: 0xFE, 0x1F: 0xFD}
+                  0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC}
 # An attack family whose state throws by its subfamily through a jump table of spawners (the bombs', BN4's family 9, ten
 # subfamilies and the chips of three lines of work): a unit of it moves the state and the entries of the subfamilies it
 # names, each the spawner of a third-kind type moved with it, and takes those subfamilies' chips alone; an entry no chip of
 # the unit names returns (BN6's null routine). Another subfamily's unit copies the state again, at a number of its own
 # (ATTACK_NUMBERS by the family and the unit's name): 288 bytes, and no unit's table is another's to write.
 # The unit's name -> (the state's table, its entries, the subfamilies)
-ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,))}
+ATTACK_SUBS = {'SeekBom': (0x080EB4C4, 10, (9,)), 'DarkBomb': (0x080EB4C4, 10, (2,))}
 # A third-kind type several units spawn, moved once, by the first of them in UNITS: MegaMan's arm (BN4_T3_ARM, the
 # third kind's 0x02, with its kinds' table, TABLES), every attack unit's; ShotStar's star (BN4_T3_STAR), Meteors'. A unit
 # after its owner copies the type's spawner alone (a routine of
@@ -98,8 +98,7 @@ UNIT_AIMS = {
                                           "which BN6 has none of), so the call is the stub that returns 0 and the four stores go "
                                           "to 0x3C-0x42, the BIOS's addresses, which take no store: the timers are not kept")},
 }
-ROWS_WAIT = {192: 'DrkSpred, a DarkChip of BN4\'s (the dark chips\' session\'s: its kind 0xF of the shot\'s table and its price)',
-             286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4-chips.md): no chip\'s damage changes, a HUD icon alone',
+ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4-chips.md): no chip\'s damage changes, a HUD icon alone',
              287: 'AquaPowr, left out by the owner\'s call 12',
              288: 'WoodPowr, left out by the owner\'s call 12',
              47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
@@ -272,6 +271,7 @@ UNITS = (
     ('attack', 0x60, 'Elem'),
     ('misc', 0x0D, 'PitRng'),
     ('support', 0x4C, 'FirePlus'),
+    ('attack', 0x09, 'DarkBomb'),
     ('navi', 0x36, 'GutPnch'),
 )
 CANDIDATES = ()
@@ -307,6 +307,7 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                # (the dark chips' from 0x283 up, after the panel changer's 0x280-0x282: docs/project/claims/bn4-dark-units.json)
                0xBB: 0x283,                 # (DrkVulcn's shots)
                0xA8: 0x285, 0x14C: 0x329,   # (the Elem chips' shot, one call by the subfamily: SOUND_ADDS)
+               0xA9: 0x286, 0xBD: 0x287,    # (DarkBomb's bomb)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300}
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
@@ -353,6 +354,10 @@ TABLES = {
     0x080D31EC: dict(size=0x48, entry=12, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the boomerang's flights (the third kind's 0x32: six rows of three words, numbers alone, no sprite), in the "
                          "bytes before its routine"),
+    0x080CE088: dict(size=0x1C, entry=4, kinds=(), sprite=(None, 0), list=3, loads=set(),
+                     why="the bombs' object's kinds (the third kind's 0x8: 7 of 4 bytes, read by its init by its +4, 0x080CE0F4-"
+                         "0x080CE0FC, the row kept at its +0x60 and its +3 its palette, 0x080CE0FE): copied with DarkBomb's unit, "
+                         "every row as BN4's"),
     0x08012618: dict(size=0x18, entry=8, kinds=(), sprite=(None, 0), list=3, loads=set(),
                      why="the panels' patterns (rows of two words, a mask of the field's panels each: numbers alone), which the "
                          "blasts' spawner (0x080E4ABC) reads by its argument's low seven bits; the bomb asks rows 1 and 2, a "
@@ -360,12 +365,13 @@ TABLES = {
                          "copied with the unit, three rows"),
     # (the arm, BN4_T3_02_KINDS: tools/bn4_twins.py TABLES has it with Roll's kind; here the kinds the chips' states spawn,
     # each state's own bytes of them by subfamily read by hand, a row's sprite its list's offset and its number)
-    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31), sprite=(0, 1), list=None, loads={0x080CD628},
+    0x080CD524: dict(size=0xD4, entry=4, kinds=(0x0A, 0x06, 0x0E, 0x32, 0x0C, 0x23, 0x24, 0x25, 0x2F, 0x2C, 0x31, 0x11), sprite=(0, 1), list=None, loads={0x080CD628},
                      why="the arm's kinds (the third kind's 0x02: 53 of 4 bytes, its sprite's list offset and number, its "
                          "palette, its +0xC), read by its init (0x080CD61E, by +4); the spread state spawns 0x0A, 0x06, 0x0E "
                          "and 0x32 by subfamily (its bytes at 0x080EC814), FlmLine's 0x0C (0x080ECAF6), MagBolt's 0x23 + its "
                          "subfamily, 0x23 again for MagShok's 3 (0x080EE05E-0x080EE068), the Elem chips' 0x2C (0x080EE35A: movs r4,#0x2c, "
-                         "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4)"),
+                         "its high byte from NaviStats +0x23), DrkVulcn's 0x31 (0x080EC88E: movs r1,#0x31 for its subfamily 4), DarkBomb's 0x11 (the bombs' state's table "
+                         "by subfamily, 0x080EB4EC, its subfamily 2's)"),
     0x080DF674: dict(size=0x18, entry=12, kinds=(0, 1), sprite=(0, 1), list=3, loads={0x080DF6C4}, sound=(0x0A, {0x080DF762}),
                      why="the geyser's and the tower's rows (the third kind's 0x92, AquaUp's and GreenWd's strike: 12 bytes each, its "
                          "sprite's list's offset and number, three animations with their frames, its collision's argument, and at "
@@ -382,13 +388,18 @@ ROW_TABLES = {
                      why="the blasts' kinds (the fourth kind's 0x24: five of 2 bytes, the effect it draws on each panel of its "
                          "list and its sound, 0 none), read each time it draws one (0x080E4A70, by +4); TimeBomb's bomb spawns "
                          "kind 1 (0x080D6E2E: movs r4,#1), the burst 0x00 and no sound; 0, 2, 3 and 4 are other chips', left BN4's"),
-    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E), effect=2, sound=3,
-                     effect_sites={0x080CF55E}, sound_sites={0x080CF56A},
+    0x080CF3DC: dict(size=0x44, entry=4, kinds=(4, 5, 6, 7, 8, 9, 0x0A, 0x0B, 0x0E, 0x0F), effect=2, sound=3,
+                     effect_sites={0x080CF55E}, sound_sites={0x080CF56A}, when=True,
                      why="the spread shot's kinds (the third kind's 0x12: 17 of 4 bytes, its burst's shape, its collision's "
                          "argument, its burst's effect, its sound), read by its init (0x080CF452, by +4, the chip's first "
                          "parameter): 4-6 Bubbler, Bub-V and BublSide, 7 BubSprd, 8-0xA HeatShot, Heat-V and HeatSide, 0xB HeatSprd; "
-                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910); 0-3 are Spreader's (a run's by BN6's own) and "
-                         "0xC, 0xD, 0xF and 0x10 other families' and DrkSpred's, left BN4's"),
+                         "0xE DrkVulcn's shots (the vulcans' state passes it, 0x080EC910), 0xF DrkSpred's (its record's first parameter); "
+                         "0-3 are Spreader's (a run's by BN6's own) and 0xC, 0xD and 0x10 other families', left BN4's"),
+    0x080CE277: dict(size=7, entry=1, kinds=(6,), effect=0, sound=None,
+                     effect_sites={0x080CE212}, sound_sites=set(),
+                     why="the bombs' object's blast's effect by its kind (the third kind's 0x8: 7 bytes, its +4's), read as it "
+                         "bursts (0x080CE206-0x080CE208) for the panels' pattern's spawn (0x0801457E, its shape the byte of "
+                         "0x080CE270 by the same kind): DarkBomb's bomb is kind 6, 0x2B; the others' none (0), left BN4's"),
     # (a table whose rows name a sound alone, `effect` None; `queue` where that sound's slot is past a byte (SOUND_SLOTS): the
     # sites that play it by the row's byte called through the unit's shim that gives r0 the slot, every kind moved its one sound)
     0x080DAFB0: dict(size=12, entry=3, kinds=(0,), effect=None, sound=2, effect_sites=set(), sound_sites={0x080DB05C}, queue=True,
@@ -575,6 +586,8 @@ NUMBERS = {
     0x04000000: "a panel's flag, the thunder's search for its target by its side (BN4 0x080D21E8 after its panel's flags, "
                 "0x08009A86; BN6's own thunder tests the same bit, 0x080CAE60)",
     0x08000000: "... the other side's (BN4 0x080D2208; BN6's 0x080CAE66)",
+    0x0A05FF01: "DarkBomb's bomb's blast's hit word (BN4 0x080CF38A, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
+                "reach and its frames, bytes of a number as PropBom's",
     0x0405FF11: "PropBom's bomb's blast's hit word (BN4 0x080DED2C, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as MagBolt's pull's",
 }
@@ -1328,10 +1341,25 @@ def row_tables(b4, b6, f, alloc):
                 continue
             if e6 != e4:
                 f.bytes.append((row + t['effect'], e4, e6, f'its table\'s kind {k:#x}\'s effect: {e4:#x} in BN4, {e6:#x} in BN6 ({how})'))
-            s4 = b4.u8(row + t['sound'])
+            s4 = b4.u8(row + t['sound']) if t['sound'] is not None else 0
             if not s4 or X4.song_sig(b4, X4.BN4['songs'], s4) == X4.song_sig(b6, X4.SONGS6, s4):
                 continue
             slot = FAMILY_SLOTS.get(s4)
+            if slot is None and t.get('when') and SOUND_SLOTS.get(s4) is not None:
+                # (a sound past a byte: the site's shim makes r0 its slot where the row's byte is its own, BN4's left in the copy)
+                when = SOUND_SLOTS[s4]
+                sites = sorted(t['sound_sites'])
+                if any(x['at'] in sites for x in f.queue_calls):
+                    f.decide('sound', f'{row + t["sound"]:08X}: its table\'s kind {k:#x}\'s sound {s4:#x} past a byte, and its site\'s shim taken')
+                    continue
+                if (s4, when) not in f.sounds:
+                    f.sounds.append((s4, when))
+                for site in sites:
+                    f.queue_calls.append(dict(at=site, slot=when, when=s4, why=f'its table {v:08X}\'s kind {k:#x}\'s sound {s4:#x}: BN4\'s song at '
+                                                                           f'the grown table\'s slot {when:#x}, where r0 holds it'))
+                f.notes.append(f'its sound {s4:#x} (its table {v:08X}\'s kind {k:#x}): BN4\'s song at the grown table\'s slot {when:#x}, made '
+                               f'r0 by the site\'s shim where the row gives its own byte')
+                continue
             if slot is None or slot > 0xFF:
                 f.decide('sound', f'{row + t["sound"]:08X}: its table\'s kind {k:#x}\'s sound {s4:#x} is no song of BN6\'s and has no slot a byte names (FAMILY_SLOTS)')
                 continue
@@ -1509,7 +1537,8 @@ def c_unit(f):
         L.append('};')
     if f.queue_calls:
         L.append(f'static const XvSoundCall {n}_sound_calls[] = {{')
-        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X}{", true" if x.get("add") else ""} }},   /* {x["why"]} */' for x in f.queue_calls]
+        L += [f'\t{{ 0x{x["at"]:08X}, 0x{x["slot"]:X}{", true" if x.get("add") else ", false, 0x%X" % x["when"] if x.get("when") else ""} }},   /* {x["why"]} */'
+              for x in f.queue_calls]
         L.append('};')
     if getattr(f, 'effect_calls', None):
         L.append(f'static const XvEffectCall {n}_effect_calls[] = {{')
@@ -1517,7 +1546,7 @@ def c_unit(f):
               f' }} }},   /* {x["why"]} */' for x in f.effect_calls]
         L.append('};')
     if f.sounds:
-        L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in f.sounds) + ' };')
+        L.append(f'static const XcSong {n}_songs[] = {{ ' + ', '.join(f'{{ 0x{v:X}, 0x{slot:02X} }}' for v, slot in dict.fromkeys(f.sounds)) + ' };')
     count = lambda a: f'(int)(sizeof {n}_{a} / sizeof *{n}_{a})'
     fields = [f'.{a} = {n}_{a}, .n{a} = {count(a)}' for a, have in (('blocks', True), ('data', True), ('calls', True), ('words', True),
                                                                    ('imms', True), ('numbers', f.numbers), ('states', f.states), ('types', True), ('sides', f.sides),

@@ -11,9 +11,9 @@
   "name": "the step-in's sound another",
   "spec": "bn4_chip_gutpnch1",
   "poke": [
-   "088F63F0:0207:4"
+   "088F67F0:0207:4"
   ],
-  "what": "the stub's slot (the unit's home, XC4_HOMES + 0x7000, its XC4_HOME_WAIT + 0x30) 0x207, the punch's, where the unit carries 0x1E2: another song as MegaMan steps in"
+  "what": "the stub's slot (the unit's home, XC4_HOMES + 0x7400, its XC4_HOME_WAIT + 0x30) 0x207, the punch's, where the unit carries 0x1E2: another song as MegaMan steps in"
  },
  {
   "name": "the punch's bits BN4's own",

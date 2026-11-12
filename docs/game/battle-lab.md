@@ -393,7 +393,8 @@ is used.
     with the result in the information box (time, busting level, HP
     lost).
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
-    BN5's and BN4's panels, backgrounds and songs, the saved sets.
+    BN5's and BN4's panels, backgrounds and songs, the saved sets (all but
+    the panels built since, below).
 
 - **The keeper and the LabPass** (step 4), behind `--dev lab`
   (`src/director/lab_keeper.c`, his lines `lab_words.c`, his place
@@ -514,6 +515,34 @@ is used.
   byte of its structure's padding, which no build sets. The drawn field with
   the foes' sprites read from the ROM, tried the day before, was dropped
   for this.
+
+- **The stage takes every game's** (`src/director/lab_stage.c`). STAGE's
+  background row lists each background once: BN6's areas' first and
+  then their second ("Central", "Central 2"; 21 of BN6's 22, an area's
+  two were one by the dice before, and several areas share one), then
+  the areas of the other games read that a run draws, by their game
+  ("BN5 Oran Area", "BN4 Town Area"), their battle backgrounds the ones
+  a run's layers there bring into BN6
+  ([One net](../multirom/one-net.md)). The song row lists BN6's songs
+  and then those of the other games that stand in BN6's song table: the
+  themes of their areas, their virus and boss battles and BN5's
+  missions ([BN5's music in a run](../multirom/music.md)); a song of
+  theirs no run plays is not in the table, so not offered. A set keeps
+  the area by its number and the song as its game over its number
+  (`src/core/lab_set.h`), so a set kept reads the same whichever ROMs
+  are read; with its game's ROM away it is fought on BN6's background
+  of the area's place, to the battle's own song. BN6's names are BN6's
+  own here, whatever draws the area in the run (the row said "Oran
+  Area" for Central's background in a run that dressed Central so).
+  Seen headless (`0:lab all`, seed 15, BN5's and BN4's ROMs read): the
+  row turned through BN4's and BN5's areas, each background standing
+  behind the held field at once; Central's second and BN4's "The Net"
+  chosen, START: the battle ran on with background 9 and BN6's song
+  0x28 playing, the slot BN4's song 0x12 was copied to; the work RAM's
+  hash after leaving the one before opening (45e79931), the run
+  untouched. Not here: BN5's and BN4's panels that BN6's engine has no
+  type for (sand, metal, magnet, lava), which are a move of their own
+  into BN6's battle engine.
 
 ## Build order
 

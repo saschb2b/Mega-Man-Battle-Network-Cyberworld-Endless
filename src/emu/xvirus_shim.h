@@ -59,6 +59,7 @@
 #define XV_SHIM_SIDE_SIZE    24   /* a direction's (XVirusFamily.sides) */
 #define XV_SHIM_PAUSED_SIZE  28   /* a paused present's */
 #define XV_SHIM_SOUND_SIZE   8    /* a sound past a byte's (XvSoundCall) */
+#define XV_SHIM_SOUND_WHEN_SIZE 12  /* ... one of a table's sounds (XvSoundCall.when) */
 #define XV_SHIM_EFFECT_MAX   28   /* an effect's id's (XvEffectCall), at most: xvirus_shim_effect_size */
 
 /* The shim at `at` (word-aligned) that loads lo and hi into r1 and r2
@@ -73,6 +74,10 @@ bool xvirus_shim_range(uint8_t out[XV_SHIM_RANGE_SIZE], uint32_t at, uint16_t lo
 bool xvirus_shim_sound(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t slot, uint32_t veneer);
 /* ... or that adds `add` (at most 0x1FE: two adds) to the r0 the call was given (XvSoundCall.add), the same size */
 bool xvirus_shim_sound_add(uint8_t out[XV_SHIM_SOUND_SIZE], uint32_t at, uint16_t add, uint32_t veneer);
+/* ... or that makes r0 `slot` only where it holds `when` (cmp, bne past, then the slot as above), else leaves it (XvSoundCall.when) */
+bool xvirus_shim_sound_when(uint8_t out[XV_SHIM_SOUND_WHEN_SIZE], uint32_t at, uint8_t when, uint16_t slot, uint32_t veneer);
+/* the bytes a sound call's shim takes (XvSoundCall: by its `when`) */
+uint32_t xvirus_shim_sound_size(uint8_t when);
 
 /* The BN6 routine a BN4 call made through that shim goes on to (XvSoundCall): BN6_PLAY_SOUND for BN4_PLAY_SOUND, BN6's
  * appear queue's routines for BN4's (BN4_QUEUE_*: BN4's one queue, BN6's r0 its number); 0 any other */

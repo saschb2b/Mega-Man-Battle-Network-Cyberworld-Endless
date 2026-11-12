@@ -76,11 +76,13 @@ MOVED = {
 # number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
 MOVED.update({
     19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+    192: 0xD0,                                                    # DrkSpred: the same family, its subfamily 3 (its shot the table's kind 0xF)
     12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
     57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26
     69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
     35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
+    189: 0xFC,                                                    # DarkBomb: BN4's family 0x09, its subfamily 2
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
     190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
     25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4

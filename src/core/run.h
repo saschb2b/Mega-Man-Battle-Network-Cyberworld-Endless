@@ -262,7 +262,7 @@ int run_nest_second(void);
 int biome_bg(int b);
 /* A navi's HP at a version (0 V1, 1 EX, 2 SP) from the ROM; -1 unknown. */
 int navi_hp(int navi, int version);
-/* The area's first battle background, without a roll (the title's backdrop). */
-int biome_backdrop(int b);
+/* One of the area's two battle backgrounds (`which` 0 or 1), without a roll (the title's backdrop, the Battle Lab's). */
+int biome_backdrop(int b, int which);
 
 #endif

@@ -75,8 +75,10 @@ typedef struct { uint32_t at; uint16_t lo, hi; } XvRange;
  * docs/multirom/bn4.md call 11): the call (its game's BN4_PLAY_SOUND) aimed at a shim of its home that makes r0 the slot
  * and goes on to BN6's (xvirus_shim.h); or a BN4 family's call to its appear queue (BN4_QUEUE_*), `slot` the number of
  * BN6's queue its twin takes in r0 (bn4_twins.QUEUED). `add`: a call several of BN4's sounds reach, by branches that each
- * make r0 one: its shim adds `slot` to r0 instead, each sound's slot BN4's number plus it (xvirus_shim_sound_add) */
-typedef struct { uint32_t at; uint16_t slot; bool add; } XvSoundCall;
+ * make r0 one: its shim adds `slot` to r0 instead, each sound's slot BN4's number plus it (xvirus_shim_sound_add). `when`: a
+ * call several sounds reach by a byte of a table, one of them past a byte: its shim makes r0 `slot` only where it holds `when`,
+ * the others BN6's numbers as the table's copy gives them (xvirus_shim_sound_when); 0 none */
+typedef struct { uint32_t at; uint16_t slot; bool add; uint8_t when; } XvSoundCall;
 /* A call of its code to spawn an effect (its game's BN4_SPAWN_EFFECT, r4 the id) whose id no immediate names (a byte of
  * the object's own, set as it was spawned): the call aimed at a shim of its home that gives r4 BN6's id (`to`, one of its
  * effects rows': the effect's copy) where it holds one of its game's (`from`) and goes on to BN6's spawn; an id with no pair
