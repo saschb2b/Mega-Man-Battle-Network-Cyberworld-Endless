@@ -18,7 +18,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "emu.h"
+#include "free_space.h"
 #include "xchips_registry.h"
 
 #define CHIPS_IDS 1024                         /* the records: ids 0-1023 (ten-bit chip ids, chip_entry.h) */
