@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T00:24:00Z
+* **Update**: code/layers.md (Fixing a violation: a branch cut before the rule whose include reaches `dev` joins the baseline as it would have stood; two did with pull request #403, `xnavi_bn4_chip.c`'s `xsong.h` and `xnavi.h`, 149).
