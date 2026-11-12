@@ -1,7 +1,7 @@
 /* An act's arc of encounter groups (docs/game/progression/encounter-groups.md,
  * the design's third point; groups.h): each act of a run is about one
  * virus family, its signature, drawn by the run's seed. The act's first
- * layer meets it alone (one or two of it, eased), the second in a pair
+ * layer meets it alone (one of it, eased), the second in a pair
  * with a partner, the third in its constellation; the Server's challenge
  * is the hardest constellation the signature stands in. One group battle
  * a layer; the layer's other battles are the area's own.

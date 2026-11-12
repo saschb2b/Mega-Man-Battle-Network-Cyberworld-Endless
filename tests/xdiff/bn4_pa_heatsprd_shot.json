@@ -1,0 +1,159 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "1E@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Program Advance HeatSprd (its 321, the registry's 606: the spread family's state moved as BN6's grown attack family 0xD0, its subfamily 1 with the shot's kind 0xB), from three HeatShot of codes in a row (B, C, D: BN4's kind 0, BN6's the same), formed on each game's first Custom screen from the three dealt side by side (deck4, deck6) and picked left to right: BN4's own checker forms it there (BN4_PA_CHECK), BN6's from its list grown with BN4's recipes (src/core/xchips_pas_bn4.c, src/emu/xchips_code.c pas_stage), the P.A. shown in both; used at fight frame 120 against BN4's Spikey of 330 HP (its enemy 0x1E), which walks into MegaMan's row at t96 and stands at (4,2) to t202: struck at t135, 30 HP left in both.",
+ "folder4": [
+  "0213",
+  "0413",
+  "0613"
+ ],
+ "folder6": [
+  "24C:01",
+  "24C:02",
+  "24C:03"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   120,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck4": [
+  "0213",
+  "0413",
+  "0613"
+ ],
+ "deck6": [
+  "24C:01",
+  "24C:02",
+  "24C:03"
+ ]
+}

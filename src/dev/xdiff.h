@@ -47,7 +47,7 @@
  *   deck5=12D8,...     each game's battle deck in this order (hex chip |
  *   deck6=128C,...     code << 9, the list repeated to 30), written once its
  *                      battle runs and before its first Custom screen: each
- *                      hand its spec's
+ *                      hand its spec's; deck4= BN4's (BN4_BATTLE_DECK)
  *   souls4=20          (a BN4 spec) the Souls BN4's MegaMan holds (hex, bit
  *                      n - 1 its Soul n: ThunSoul 20), each one's flag,
  *                      Double Soul's and its pseudo-chip past BN4's chip

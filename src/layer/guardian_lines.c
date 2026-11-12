@@ -287,6 +287,17 @@ static const struct { const char *first, *rematch, *revenge, *stronger, *defeat;
 		"Ribbit ribbit! My song stunned you!|Shall I play it again?",
 		"A whole new symphony,ribbit!|Louder than ever!",
 		"The concert... is over... ribbit..." },
+	/* BN5's Nebula Navis, the deep's pool's (our words too) */
+	[65] = { "Target sighted from above.|You won't see me strike!",
+		"You clipped my wings once.|They grew back sharper.",
+		"I struck from the sky last time.|Look up,MegaMan!",
+		"My wings are faster now!|You can't follow me!",
+		"Grounded... at last..." },
+	[66] = { "Kickoff! This field is mine!|Try to get past me!",
+		"You broke my line once.|I've built a thicker one!",
+		"I flattened you last time!|Ready for another hit?",
+		"More power in every charge!|Nobody stops this drive!",
+		"Final whistle... I'm out..." },
 };
 #define NLINES ((int)(sizeof lines / sizeof *lines))
 

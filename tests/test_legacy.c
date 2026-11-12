@@ -20,14 +20,16 @@ static int failures;
 
 /* rivals.sav as its first version wrote it ("CWR1": four ints a navi),
  * as its second did ("CWR2": a Rival each), both for navis 0-31, as its
- * third did ("CWR3": navis 0-58, BN4's too), and what was written over
- * them */
+ * third did ("CWR3": navis 0-58, BN4's too), as its fourth did ("CWR4":
+ * navis 0-64, Team ProtoMan's too), and what was written over them */
 #define RIVALS_OLD 32
 #define RIVALS_THIRD 59
-#define RIVALS_NOW 0x43575234u   /* "CWR4" */
+#define RIVALS_FOURTH 65
+#define RIVALS_NOW 0x43575235u   /* "CWR5" */
 static int rivals_v1[RIVALS_OLD][4];
 static Rival rivals_v2[RIVALS_OLD];
 static Rival rivals_v3[RIVALS_THIRD];
+static Rival rivals_v4[RIVALS_FOURTH];
 static uint32_t rivals_magic;
 static Rival rivals_written[RIVAL_NAVIS];
 
@@ -44,6 +46,7 @@ bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) {
 		if (rivals_magic == 0x43575231u && n == sizeof rivals_v1) memcpy(data, rivals_v1, n);
 		else if (rivals_magic == 0x43575232u && n == sizeof rivals_v2) memcpy(data, rivals_v2, n);
 		else if (rivals_magic == 0x43575233u && n == sizeof rivals_v3) memcpy(data, rivals_v3, n);
+		else if (rivals_magic == 0x43575234u && n == sizeof rivals_v4) memcpy(data, rivals_v4, n);
 		else return false;
 		return true;
 	}
@@ -164,7 +167,7 @@ static void check_rivals_second(void) {
 }
 
 /* The third version's rivals.sav (navis 0-58, BN4's among them) loads
- * whole into the fourth's (Team ProtoMan's past them, from
+ * whole into today's (Team ProtoMan's and Nebula's past them, from
  * GUARDIAN_TEAM_FIRST, blank), written anew at its size, and a Team
  * ProtoMan Navi's battle is kept after it */
 static void check_rivals_third(void) {
@@ -183,6 +186,28 @@ static void check_rivals_third(void) {
 	rival_result(62, RIVAL_NAVI_WON, &(RivalEnd){ 0, 500, 1000 }, 14);
 	CHECK(rival(62)->met == 1 && rival(62)->navi_won == 1 && rival(62)->run == 14 && rivals_written[62].navi_won == 1,
 		"rivals: Team ProtoMan's NapalmMan (navi 62) not kept");
+}
+
+/* The fourth version's rivals.sav (navis 0-64, Team ProtoMan's among them)
+ * loads whole into the fifth's (Nebula's LarkMan and GridMan past them,
+ * from GUARDIAN_NEBULA_FIRST, blank), written anew at its size, and
+ * GridMan's battle is kept after it */
+static void check_rivals_fourth(void) {
+	for (int i = 0; i < RIVALS_FOURTH; ++i)
+		rivals_v4[i] = (Rival){ i + 3, i * 2, i % 5, i % 3, (uint8_t)(i % 7), (uint8_t)(i % RIVAL_LEFT_FULL + 1), (uint16_t)(300 + i) };
+	rivals_v4[17].met = 0;   /* (Colonel's old place met never: nothing moves) */
+	memset(rivals_written, 0xA5, sizeof rivals_written);
+	rivals_magic = 0x43575234u;
+	rivals_load();
+	CHECK(rivals_magic == RIVALS_NOW, "rivals: the fourth version was not written anew");
+	for (int i = 0; i < RIVAL_NAVIS; ++i) {
+		CHECK(!memcmp(rival(i), i < RIVALS_FOURTH ? &rivals_v4[i] : &(Rival){ 0 }, sizeof(Rival)), "rivals: a fourth version's record changed");
+		CHECK(!memcmp(&rivals_written[i], rival(i), sizeof(Rival)), "rivals: the fourth version written other than loaded");
+	}
+	rival_met(66);
+	rival_result(66, RIVAL_MEGAMAN_WON, &(RivalEnd){ 0, 700, 1000 }, 15);
+	CHECK(rival(66)->met == 1 && rival(66)->megaman_won == 1 && rival(66)->run == 15 && rivals_written[66].megaman_won == 1,
+		"rivals: Nebula's GridMan (navi 66) not kept");
 }
 
 /* Ten-bit chip ids (save_format.h): a run of "CWEB" or "CWEC", its state's
@@ -216,6 +241,7 @@ int main(void) {
 	check_rivals();
 	check_rivals_second();
 	check_rivals_third();
+	check_rivals_fourth();
 	if (!failures) puts("legacy: CWE2 and CWE3 route, progress, guardian bounds and RNG, CWR1's, CWR2's and CWR3's rivals, CWEB and CWEC as nine-bit runs passed");
 	return failures ? 1 : 0;
 }

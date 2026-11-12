@@ -246,7 +246,6 @@ static bool foes_parse(const char *spec) {
 	e.field = e.player = e.song = e.sides = 0;
 	e.boss = e.held = e.map_backdrop = e.gem_own = false;
 	e.xrecord = 0;
-	e.visitor = 0;
 	char buf[128];
 	snprintf(buf, sizeof buf, "%s", spec);
 	for (char *t = strtok(buf, " /,"); t; t = strtok(NULL, " /,")) {

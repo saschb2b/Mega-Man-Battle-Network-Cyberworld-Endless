@@ -31,7 +31,7 @@ static void add(int net, int family) {
 	int nk = visitor_kin(net, &kin);
 	if (P.n >= GROUP_POOL_MAX) return;
 	GroupFam *f = &P.fam[P.n];
-	*f = (GroupFam){ (int16_t)family, (int8_t)net, GROUP_FREE, 0, 0, -1, { { 0 } }, -1 };
+	*f = (GroupFam){ (int16_t)family, (int8_t)net, GROUP_FREE, 0, 0, -1, { { 0 } }, -1, { { 0, 0 }, { 0, 0 } } };
 	for (int i = 0; i < nk; ++i) {
 		if (kin[i].family != family) continue;
 		if (kin[i].bound) return;
@@ -43,6 +43,8 @@ static void add(int net, int family) {
 		f->pressure = tag->pressure;
 		f->tricks = tag->tricks;
 		f->cost = tag->cost;
+		f->multi[0] = tag->multi[0];
+		f->multi[1] = tag->multi[1];
 	}
 	bool any = false;
 	for (int v = 0; v < GROUP_VERSIONS; ++v) {
@@ -99,7 +101,8 @@ int group_pool(const GroupFam **out) {
 
 unsigned group_nets(void) {
 	ready();
-	return P.nets;
+	/* (a run without the older nets: BN6's families alone, as its finds are, docs/game/meta/extras.md) */
+	return run_extra(EXTRA_OLDER) ? P.nets : P.nets & 1u;
 }
 
 static uint32_t mix(uint32_t k) {
@@ -158,7 +161,6 @@ static const int *counts_under(const GroupFam *pool, int n, const GroupLimits *l
 static void battle_of(const GroupFam *pool, const GroupFill *g, int biome, uint32_t roll, Encounter *e) {
 	Encounter out = *e;
 	out.xrecord = 0;
-	out.visitor = 0;
 	out.nobj = 0;
 	out.gem_own = false;
 	out.player = 0;

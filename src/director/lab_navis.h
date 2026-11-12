@@ -13,7 +13,7 @@
 #include "foes.h"
 
 #define LAB_NAVI 0x80        /* a LabFoe's version with this bit: a Navi, its number in `family`, its version the rest */
-#define LAB_NAVI_MOST 64     /* navi numbers looked through: 1 to this */
+#define LAB_NAVI_MOST 66     /* navi numbers looked through: 1 to this */
 
 /* Whether navi `navi` is one the Lab lists at all here: a guardian of
  * BN6's, a super boss, or another game's guardian whose ROM is read */

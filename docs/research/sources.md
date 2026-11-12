@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T23:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:20:00Z }
 ---
 
 # Sources
@@ -387,6 +387,14 @@ Advance list), against the ROM:
   which leaves the three out of a run for it.
   These chips have no Library number in BN4 (their records' +0x1C is 0);
   where BN4 hands them out was not searched: **assumed** unlisted.
+- *BN4's Marking does nothing in a plain battle* (12 November 2026):
+  **verified** in Red Sun (USA) `B4WE`, by experiment (BN4's own battle
+  with and without it: the same hits taken at the same frames, the same
+  moves, no object) and by the code (its 600-frame timer on the side's
+  record counts only where the record's first byte is set, which a
+  plain battle leaves 0). Which mode sets it was not searched:
+  [BN4's chips in a run](../multirom/bn4-chips.md), the owner's call 13,
+  which leaves it out of a run.
 
 ## The Battle Lab (11 November 2026)
 

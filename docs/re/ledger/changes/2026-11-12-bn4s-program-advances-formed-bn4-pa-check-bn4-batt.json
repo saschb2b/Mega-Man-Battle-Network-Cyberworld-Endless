@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "BN4's Program Advances formed (docs/multirom/bn4-chips.md, The Program Advances are formed; docs/rom/bn4.md: BN4_PA_CHECK 0x0801F390 with its two kinds' routines 0x0801F46A and 0x0801F4B2, BN4_BATTLE_DECK 0x0203BE80, BN4_PITRNG 0x080E9A36 with its launcher BN4_T4_PITRNG 0x6C, BN4_BOOMER_SPAWN 0x080D3430): BN4's recipes in BN6's grown list after BN5's, fourteen of nineteen formed, PitRng a unit of its own; 20 bn4_pa_* specs PASS, 26 mutations caught; PitHoky, P.Driver and DarkNeo wait on their parts."
+}

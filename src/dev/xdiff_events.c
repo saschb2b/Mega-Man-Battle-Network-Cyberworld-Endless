@@ -506,6 +506,7 @@ void xd_log_units(const uint16_t *folder, int n) {
 		for (int j = 0; j < (xchips_pas[k].kind == 4 ? xchips_pas[k].n : 1) && all; ++j) all = in_folder(folder, n, xchips_pas[k].parts[j]);
 		if (all) units_of(xchips_pas[k].pa);
 	}
+	/* (BN4's recipes' parts are its moved chips: bn4_played above, which keys every unit of BN4's) */
 }
 
 static bool moved_for(const XVirusFamily *f, const XVirusFamily *of);

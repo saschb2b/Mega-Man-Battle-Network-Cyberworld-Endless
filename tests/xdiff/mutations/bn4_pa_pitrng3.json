@@ -1,0 +1,10 @@
+[
+ {
+  "name": "PitRng3's power another",
+  "spec": "bn4_pa_pitrng3",
+  "poke": [
+   "08C06976:00C8:2"
+  ],
+  "what": "record 613's power 200 where BN4's PitRng3 has 300: the Elmperor left 100 at the hit's frame"
+ }
+]
