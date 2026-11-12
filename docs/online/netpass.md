@@ -3,7 +3,7 @@ type: Feature
 title: "The NetPass"
 description: "The NetPass (issue #131, `src/online/netpass.c`): the full set of ROMs, BN6's, BN5's and BN4's (protocol v17), that opens the Arena, trades and the DeepNet dive, its four stamps, its screen, the stamp moment, a game joining the set and protocol v9's NOTICE 28."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
 ---
 
 # The NetPass
@@ -196,11 +196,19 @@ New 3DS builds the Arena but offers no NetBattle and no watching
 (`CW_ARENA`, `square_arena_offered`): a frame of the battle's two GBAs
 takes 25.8 ms there against a 60th of a second's 16.7, measured on the
 device ([The New 3DS](arena/rollback/new-3ds.md)). The pass is the
-same there: its stamps follow the ROMs, as the server's rule does, so
-with BN5's ROM it trades and dives, and the Arena stamp shows held.
+same there: its stamps follow the ROMs, as the server's rule does.
+Since protocol v17 the full set asks BN5's and BN4's ROMs beside BN6's,
+and a New 3DS reads one extra ROM at most (`XROMS_3DS`,
+`src/core/start_3ds.c`: both together outgrow its heap,
+[The 3DS's memory](../engine/emulation/3ds-memory.md)). So its pass is
+never full there: it holds the Square stamp alone, one game's slot
+open, and it neither trades nor dives (`netpass_has`). Before v17, with
+BN5's ROM, it traded and dived and its Arena stamp showed held; the
+owner's aim above is open again on the New 3DS until it can read both.
 Battle and Watch are not offered (the referee: "SORRY! NO NETBATTLES FROM
-THIS PET!"), and the pass's PET text says so in place of the whole Net's:
-"Every game in! No NetBattles on this PET." The second screen's
+THIS PET!"), and a full pass's PET text says so in place of the whole Net's:
+"Every game in! No NetBattles on this PET.", which no New 3DS shows
+while it reads one extra ROM. The second screen's
 panel draws the pass's words in the engine's small font, its pixel
 letters being a texture's, which a picture drawn into memory (the 3DS's
 bottom screen) cannot use.
