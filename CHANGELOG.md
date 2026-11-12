@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.21.0 (2026-11-12)
 
 - **Every act has its virus.** Each act of a run is now about one virus
   family, named on the act's card ("BombCorn signal"). Its first layer
