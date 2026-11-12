@@ -42,7 +42,7 @@ around it, one layer at a time, keeps the run going, and links players' games in
 <tr>
 <td align="center"><img src="docs/screenshots/online-stands.png" width="250" alt="Watching Kei VS Mira from the stands: R the other side, L cheer, B leave"><br><b>Watch</b><br><sub>The referee calls every battle in the channel. Watch from the stands, and cheer.</sub></td>
 <td align="center"><img src="docs/screenshots/online-deepnet.png" width="250" alt="The Net Square's Board: the week's DeepNet, 1. Mira: 10!, 2. Dex: 9, 3. Rio: 8"><br><b>The week's DeepNet</b><br><sub>Every Monday each server opens one net for everyone. The Board ranks the deepest dives.</sub></td>
-<td align="center"><img src="docs/screenshots/online-netpass.png" width="250" alt="The NetPass, a full pass: Lan and MegaMan, the Square, Arena, Trade and DeepNet stamps, BN6 and BN5 in"><br><b>The NetPass</b><br><sub>The Square is everyone's. NetBattles, trades and the DeepNet take BN5 beside BN6.</sub></td>
+<td align="center"><img src="docs/screenshots/online-netpass.png" width="250" alt="The NetPass, a full pass: Lan and MegaMan, the Square, Arena, Trade and DeepNet stamps, BN6 and BN5 in"><br><b>The NetPass</b><br><sub>The Square is everyone's. NetBattles, trades and the DeepNet take BN5 and BN4 beside BN6.</sub></td>
 </tr>
 </table>
 
@@ -108,13 +108,14 @@ purple data an Unlocker opens, security cubes and their P-Codes, arrow lanes, te
 <p align="center">
 Put <i>Team Colonel (USA)</i> beside your BN6 ROM, and BN5's areas, viruses, chips and Navis join the runs,
 in its own tiles, music and bystanders, fought in BN6's engine. Beat one of its Navis for his Soul,
-and UNITE with it in every battle after. Online, it fills your NetPass.
+and UNITE with it in every battle after.
 </p>
 
 <p align="center">
 Put <i>Red Sun (USA)</i> there too, and BN4's five areas join the runs in its own tiles, music and battle
-backgrounds; from the second act six of its virus families visit the battles. Once you have reached
+backgrounds, with its viruses, its chips and its Navis as guardians. Once you have reached
 the Nest, half the runs hold a tournament in act 3's arena: three Navis in a row on BN4's own bracket.
+Online, the two fill your NetPass.
 </p>
 
 <h2 align="center">Runs leave options, not power</h2>
@@ -159,7 +160,7 @@ the [download page](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworl
 > [!IMPORTANT]
 > **You need your own ROM:** *Mega Man Battle Network 6: Cybeast Gregar (USA)*, unmodified.
 > *Battle Network 5: Team Colonel (USA)* and *Battle Network 4: Red Sun (USA)* beside it are optional: their
-> areas and viruses join the runs, BN4's tournament too, and online BN5 fills the NetPass (NetBattles, trades, the week's DeepNet). No download and no page contains Capcom data; without the ROM there is
+> areas and viruses join the runs, BN4's tournament too, and online the two fill the NetPass (NetBattles, trades, the week's DeepNet). No download and no page contains Capcom data; without the ROM there is
 > no game. [What the game checks](docs/GUIDE.md#what-you-need).
 
 <p align="center">

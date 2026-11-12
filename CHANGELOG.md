@@ -37,14 +37,15 @@
   Colonel. The Square stays open to every game. A pass that was full
   shows a new open slot, the greeter tells you once, and the stamps land
   again when you add BN4's ROM. BN4's chips go into NetBattles and trades
-  as each is proved; one not yet proved stays out. Online play speaks
-  protocol v17: an older build and this one no longer meet.
-- **BurnerMan in the tournament.** With BN4's ROM beside BN6's, BurnerMan
-  of Red Sun joins BN4's tournament as a round, his flames burning in
-  BN6's battle as in BN4's, proved frame by frame against BN4's own battle.
-- **SparkMan in the tournament.** With BN4's ROM beside BN6's, SparkMan
-  of Red Sun joins BN4's tournament as a round, fought in BN6's battle as
-  BN4 fights him, proved frame by frame against BN4's own battle.
+  as each is proved; one not yet proved stays out. A New 3DS reads one
+  ROM beside BN6's, so for now it keeps the Square alone: its trades and
+  dives come back in a later version. Online play speaks protocol v17:
+  an older build and this one no longer meet.
+- **BurnerMan and SparkMan in BN6's engine.** With BN4's ROM beside
+  BN6's, BurnerMan and SparkMan of Red Sun now fight in BN6's battle as
+  BN4 fights them, each proved frame by frame against BN4's own battle.
+  The tournament does not draw them yet: its pool is full before their
+  turn, so they take their rounds in a later version.
 - **The PET in the Net Square.** START opens the PET in the Net Square as
   anywhere: edit a folder before a NetBattle, run the NaviCust, use a
   SubChip, play the Jukebox. What you change there comes home with you,
@@ -74,7 +75,7 @@
   Roll in Town Area, WoodMan in Park Area, ThunderMan or WindMan in the
   countries' areas, SearchMan and JunkMan in the deep's pool. Each is held to the act's
   band and leaves Guardian Data as BN5's do.
-- **BN4 Red Sun's chips in your folder.** With BN4's ROM beside BN6's, 84
+- **BN4 Red Sun's chips in your folder.** With BN4's ROM beside BN6's, 76
   of Red Sun's own chips now play in BN6's battles, each checked frame by
   frame against BN4's own: the Heat and Bubble spreads, FlmLine, MagBolt,
   Thunder, TwnFng, SidBmbo, SeekBom, PropBom, Meteors, Ligtnin, MokoRus,
