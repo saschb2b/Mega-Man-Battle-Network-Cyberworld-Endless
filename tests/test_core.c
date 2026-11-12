@@ -125,6 +125,8 @@ static int failures;
 char g_data_dir[512] = ".";
 Run run;
 Profile profile;
+/* (data.h's question, as run.c answers it) */
+bool chips_all_star(void) { return run_all_star(); }
 /* (no ROM, so no other game's areas: each BN6 area draws itself, and its
  * guardian is the run's pick) */
 int run_dress(int biome) { return biome; }
@@ -6131,13 +6133,13 @@ static void test_library_pages(void) {
 	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
-	library_count(LIB_BN5, LIB_STD, &held, &of);
-	CHECK(of == 95 && !library_whole(LIB_BN5, LIB_STD), "library: BN5's own standard chips, %d slots", of);
+	library_count(LIB_BN5, LIB_STD, meta_library_has, &held, &of);
+	CHECK(of == 95 && !library_whole(LIB_BN5, LIB_STD, meta_library_has), "library: BN5's own standard chips, %d slots", of);
 	meta_library_add(411);
-	library_count(LIB_BN5, -1, &held, &of);
+	library_count(LIB_BN5, -1, meta_library_has, &held, &of);
 	CHECK(held == 1 && of == 95 + 41 + 1, "library: %d of %d of BN5's own held", held, of);
 	for (int i = 0; i < library_bn5_count; ++i) meta_library_add(library_bn5_rows[i].chip);
-	CHECK(library_whole(LIB_BN5, LIB_STD) && library_whole(LIB_BN5, LIB_GIGA) && !library_whole(LIB_BN6, LIB_STD) && !library_entry_read(LIB_BN4), "library: a class whole once each slot is filled, none without slots");
+	CHECK(library_whole(LIB_BN5, LIB_STD, meta_library_has) && library_whole(LIB_BN5, LIB_GIGA, meta_library_has) && !library_whole(LIB_BN6, LIB_STD, meta_library_has) && !library_entry_read(LIB_BN4), "library: a class whole once each slot is filled, none without slots");
 	profile = kept;
 }
 

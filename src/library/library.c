@@ -32,8 +32,8 @@ static void page_make(void) {
 		v->seen[v->n++] = seen;
 	}
 	v->at = v->top = 0;
-	library_count(v->entry, v->cls, &v->held, &v->of);
-	library_count(v->entry, -1, &v->entry_held, &v->entry_of);
+	library_count(v->entry, v->cls, meta_library_has, &v->held, &v->of);
+	library_count(v->entry, -1, meta_library_has, &v->entry_held, &v->entry_of);
 }
 
 static void cursor_to(int at) {
