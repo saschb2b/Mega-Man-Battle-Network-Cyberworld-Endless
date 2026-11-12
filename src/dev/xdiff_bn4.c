@@ -182,6 +182,19 @@ void xd4_form_watch(void) {
 	form_was = now;
 }
 
+void xd4_panels_put(const Spec *s, int game) {
+	for (int i = 0; i < s->npanels; ++i) {
+		uint32_t p = (uint32_t)(s->panels[i].row * 8 + s->panels[i].col);
+		if (game == 6) {
+			emu_write8(BN6_FIELD_PANELS + p * BN6_PANEL_SIZE + BN6_PANEL_TYPE, s->panels[i].type);
+			continue;
+		}
+		/* (BN4's: the type's byte and its side's beside it, +1, a u16 kept but for the type) */
+		uint32_t at = BN4_FIELD_PANELS + p * BN4_PANEL_SIZE + BN4_PANEL_TYPE;
+		guest_write16(at, (uint16_t)((guest_read16(at) & 0xFF00u) | s->panels[i].type));
+	}
+}
+
 void xd4_souls_put(const Spec *s) {
 	souls_given = s->souls4 != 0;
 	form_was = frames_run = 0;

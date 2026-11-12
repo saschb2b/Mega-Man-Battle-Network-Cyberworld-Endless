@@ -367,7 +367,10 @@ object loads and plays (`sound`, with the sites that play it): the
 sound's two bytes in the table's copy take its slot of the grown song
 table, no shim (`table_sounds`; the geyser's rows). `ROWS_WAIT` names a
 written unit's chips that still sit out, each its reason: their rows
-stay `XREG_PENDING` (AquaUp and GreenWd, whose strike no spec has run).
+stay `XREG_PENDING` (DrkSpred, SandRing). `UNIT_COPIED` names an engine
+routine a unit copies rather than pairs with BN6's: Ligtnin's unit
+copies BN4's third-kind sprite step (`BN4_T3_SPRITE_STEP`), whose BN6
+twin updates the sprite in the frame its animation is set up too.
 
 `UNITS` holds PanlSht (support 0x26), ShotStar (0x19), Repair (misc
 0x0B), Counter (misc 0), WhitWeb (misc 8, 9, 0xA), Boomer (misc 2),

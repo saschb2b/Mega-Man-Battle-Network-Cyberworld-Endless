@@ -1,0 +1,87 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's GreenWd1 G (its chip 184, id 692), Ligtnin's unit (misc 0x0C as BN6's grown misc routine 0x8C; docs/multirom/bn4-chips.md), with the Mettaur's panel cracked, not grass: the sweep's kind 1 answers only a grass panel under a foe, so no tower rises, over 300 frames (the kinds kept apart by the record's first parameter)",
+ "folder4": [
+  "0CB8"
+ ],
+ "folder6": [
+  "2B4:06"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "2B4:06"
+ ],
+ "panels": [
+  "52:3"
+ ]
+}
