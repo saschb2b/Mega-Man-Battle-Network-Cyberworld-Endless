@@ -60,6 +60,12 @@
    "bn4": "0x11",
    "bn6": "0x0D",
    "what": "DrkVulcn's shot leaving: BN4's state 0x1F stores 0x11 (0x080EC8D4-0x080EC8D6), back to 0x0D between shots (0x080EC950); FlmLine's fire, frames of 3 and 2 in each art (BN4's 0x11, BN6's 0x0D)"
+  },
+  {
+   "family": "0xFB",
+   "bn4": "0x10",
+   "bn6": "0x0C",
+   "what": "AirHoc's strike: BN4's state 0x27 stores 0x10 (0x080ECED4-0x080ECED6); BN6 has no twin family, so the number is the art's: BN4's animation 0x10 of his sprite (0x08214000) is frames of 2, 2, 2 and 10, BN6's 0x0C of his (0x081D8000) the same (the arts' numbers apart by the same shift as FlmLine's fire, BN4's 0x11 BN6's 0x0D)"
   }
  ]
 }

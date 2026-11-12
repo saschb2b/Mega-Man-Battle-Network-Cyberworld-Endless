@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the spark's spawn word BN4's sprite number",
+  "spec": "bn4_pa_pithoky1",
+  "poke": [
+   "080D2B04:1210:2"
+  ],
+  "what": "the puck's spawn word for its spark (0x080D2B04, the unit's number 0x9610: the copy BN6's 4:0x96) given back BN4's 0x1210: the spark loads BN6's own 4:0x12, another sprite"
+ },
+ {
+  "name": "PitHoky1's power AirHoc1's",
+  "spec": "bn4_pa_pithoky1",
+  "poke": [
+   "08C06A26:32:1"
+  ],
+  "what": "the registry's record of PitHoky1 (617 at CHIPS_RECORDS) given AirHoc1's power 50 for its 100: each of the puck's hits takes 50 where BN4's takes 100 (t43)"
+ }
+]
