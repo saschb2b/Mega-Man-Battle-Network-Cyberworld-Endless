@@ -54,9 +54,10 @@ chips), so `bn4_chip_hole_control` fights Hole with karma 0, twice the
 same, and `bn4_chip_hole_light` is its check, the second battle at 600,
 where the dud plays. Two keys leave out of BN4's battle what BN4's
 dark rules do and a run does not take (docs/game/meta/darkchips.md):
-`calm4=1` ends the confusion BN4 gives MegaMan as a fight starts once an
-attack DarkChip is chosen, through BN4's own countdown (its timer set to
-1 the first frame it holds more: `BN4_CONFUSE_STEP`), and `mood4=1`
+`calm4=1` clears the bug BN4 gives MegaMan once an attack DarkChip is
+chosen (`BN4_NAVI_BUG`, each battle frame it is set) and ends the
+confusion it gives as a fight starts through BN4's own countdown (its
+timer set to 1 the first frame it holds more: `BN4_CONFUSE_STEP`), and `mood4=1`
 hooks BN4's code where an attack DarkChip's use sets his mood 0 for the
 battle (`BN4_DARK_MOOD`, on to `BN4_DARK_MOOD_PAST`), so a counter gives
 Full Synchro as in BN6's, and gives a dark MegaMan (karma4 0), whose
