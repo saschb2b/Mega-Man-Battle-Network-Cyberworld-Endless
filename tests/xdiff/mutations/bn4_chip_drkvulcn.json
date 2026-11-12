@@ -24,7 +24,7 @@
   "name": "DrkVulcn's row's power another",
   "spec": "bn4_chip_drkvulcn",
   "poke": [
-   "08C0675E:000A"
+   "08C06766:000A"
   ],
   "what": "the registry's record of BN4's DrkVulcn (601 at CHIPS_RECORDS) with power 10 where BN4's record holds 20: each shot takes 10 HP from the Mettaur where BN4's takes 20"
  },
@@ -32,7 +32,7 @@
   "name": "DrkVulcn's row's family another",
   "spec": "bn4_chip_drkvulcn",
   "poke": [
-   "08C06750:FE:1"
+   "08C06757:FE:1"
   ],
   "what": "the registry's record of BN4's DrkVulcn naming BN6's grown attack family 0xFE (the Elem chips' state) where the row gives the vulcans' 0xFD: another attack"
  },

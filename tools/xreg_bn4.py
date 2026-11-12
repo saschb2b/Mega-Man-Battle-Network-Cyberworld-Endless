@@ -80,6 +80,7 @@ MOVED.update({
     69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
     35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
+    189: 0xFC,                                                    # DarkBomb: BN4's family 0x09, its subfamily 2
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
     190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
     25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
