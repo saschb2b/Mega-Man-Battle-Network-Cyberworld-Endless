@@ -46,7 +46,11 @@
 #define BONUS_CRC     0xA63E1015u
 
 static bool ready;
+static bool hole_in;   /* BN4's Hole is in too */
+
 bool xpanels_ready(void) { return ready; }
+
+bool xpanels_has(int type) { return type == XPANEL_HOLE ? hole_in : type >= XPANEL_LAVA && type <= XPANEL_MAGNET && ready; }
 
 static uint32_t rom32(uint32_t a) { return get32(R.data + (a - BUS)); }
 static uint16_t rom16(uint32_t a) { return get16(R.data + (a - BUS)); }
@@ -552,9 +556,9 @@ static void install_bn4(void) {
 	}
 	claims_begin("the Hole (xpanels.c)");
 	tables_write();
-	bool hole_ready = xpanels_look_hook();
+	hole_in = xpanels_look_hook();
 	claims_end();
-	printf("xpanels: BN4's Hole %s BN6's engine, as its panel type %d\n", hole_ready ? "in" : "NOT in", XPANEL_HOLE);
+	printf("xpanels: BN4's Hole %s BN6's engine, as its panel type %d\n", hole_in ? "in" : "NOT in", XPANEL_HOLE);
 }
 
 void xpanels_install(int xrom) {
