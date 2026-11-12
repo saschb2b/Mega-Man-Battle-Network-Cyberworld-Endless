@@ -48,11 +48,12 @@ bool library_plays(int chip);
 /* Entry `entry`'s page of class `cls`: its slots a run can hand out, in
  * the game's order, into `out` (`most` at most; NULL to count): how many */
 int library_page(int entry, int cls, LibSlot *out, int most);
-/* ... counted against the profile's Library: `of` slots, `held` filled
- * (`cls` -1: the entry's three classes together) */
-void library_count(int entry, int cls, int *held, int *of);
-/* Whether a class of an entry is whole: it has slots, each filled */
-bool library_whole(int entry, int cls);
+/* ... counted: `of` slots, `held` those whose chip `has` takes (the
+ * profile's Library: meta_library_has; `cls` -1: the entry's three classes
+ * together) */
+void library_count(int entry, int cls, bool (*has)(int chip), int *held, int *of);
+/* Whether a class of an entry is whole: it has slots, `has` takes each */
+bool library_whole(int entry, int cls, bool (*has)(int chip));
 /* Whether entry `entry`'s ROM is read (BN6's: the game's own) */
 bool library_entry_read(int entry);
 

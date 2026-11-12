@@ -10,9 +10,11 @@
 #include "bn6.h"
 #include "bn6_bbs.h"
 #include "debug.h"
+#include "director.h"
 #include "emu.h"
 #include "job_words.h"
 #include "layer_objs.h"
+#include "order_sort.h"
 #include "weekly.h"
 #include "xchips_wide.h"
 
@@ -60,6 +62,8 @@ void events_install(void) {
 	emu_hook(BN6_SET_EVENT_FLAG, flag_set, NULL);
 	emu_hook_event(BN6_GIVE_ITEM, EV_ITEM_GIVEN);
 	xchips_wide_given(EV_CHIP_GIVEN_WIDE);
+	/* (AsterLand's Order Service sorts by MegaMan's copies: order_sort.h) */
+	order_sort_pack(director_pack_now);
 	/* (the instruction checked first: a ROM that reads otherwise there keeps its battles, and the battle data stays as it is) */
 	if (emu_read16(BN6_FOE_DYING) != BN6_FOE_DYING_OP || !emu_hook(BN6_FOE_DYING, foe_dying, NULL))
 		fprintf(stderr, "events: no hook at %08x: no battle data counted\n", (unsigned)BN6_FOE_DYING);

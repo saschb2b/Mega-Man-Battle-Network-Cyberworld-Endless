@@ -1751,7 +1751,7 @@ static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC
 	.sprites = timebomb_sprites, .nsprites = (int)(sizeof timebomb_sprites / sizeof *timebomb_sprites), \
 	.effects = timebomb_effects, .neffects = (int)(sizeof timebomb_effects / sizeof *timebomb_effects), \
 	.bytes = timebomb_bytes, .nbytes = (int)(sizeof timebomb_bytes / sizeof *timebomb_bytes) }
-/* ---- Ligtnin: BN4's misc 0xc (080DF98D) as BN6's 0x8c; its chips 166 (677), 167 (678), 168 (679) ---- */
+/* ---- Ligtnin: BN4's misc 0xc (080DF98D) as BN6's 0x8c; its chips 166 (677), 167 (678), 168 (679), 181 (689), 182 (690), 183 (691), 184 (692), 185 (693), 186 (694) ---- */
 /* its routine (080DF98C) lies in the third-kind 0x93's code (080DF7F8-080DF9B0), which it spawns: moved */
 /* its sprite 5:0x14 (080DF01C): BN6's 5:0xe8, copied */
 /* its table 080DF674's kind 0: sprite 3:0x25 in BN4, 0x7b in BN6 (copied) */
@@ -1760,18 +1760,13 @@ static const XcSong timebomb_songs[] = { { 0x70, 0x3A }, { 0xB0, 0x1E2 }, { 0xBC
 /* its table 080DF674's kind 0: its sound 0x120, BN4's song copied into the grown song table's slot 0x240 */
 /* its table 080DF674's kind 1: its sound 0x13e, BN4's song copied into the grown song table's slot 0x241 */
 /* its sound 0x143 (080DF05E): BN4's song copied into the grown song table's slot 0x242, on BN4's player 23 */
-/* its chip 181 (id 689) sits out: AquaUp, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a cracked panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
-/* its chip 182 (id 690) sits out: AquaUp, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a cracked panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
-/* its chip 183 (id 691) sits out: AquaUp, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a cracked panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
-/* its chip 184 (id 692) sits out: GreenWd, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a grass panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
-/* its chip 185 (id 693) sits out: GreenWd, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a grass panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
-/* its chip 186 (id 694) sits out: GreenWd, the same routine as Ligtnin's by its record's first parameter, its strike (the third kind's 0x92) moved with the unit but never run in a spec: it rises only from a grass panel of the other side's with a foe on it, and the differential's BN4 battle sets no panel's type yet */
 
 static const XvBlock ligtnin_blocks[] = {
 	{ 0x080DF7F8, 0x080DF9B0, XC4_CODE + 0x3430, 0xCD3C14E6u },
 	{ 0x080DEFEC, 0x080DF128, XC4_CODE + 0x35F0, 0xE3E47628u },
 	{ 0x080DF68C, 0x080DF7F8, XC4_CODE + 0x3730, 0xD07CF041u },
 	{ 0x080DF674, 0x080DF68C, XC4_CODE + 0x38A0, 0x38CC9DEFu },
+	{ 0x08014446, 0x0801447A, XC4_CODE + 0x38C2, 0x6AADAE25u },
 };
 static const XvData ligtnin_data[] = {
 	{ 0x080DF806, 0x080DF808, XV_RAW },
@@ -1812,6 +1807,7 @@ static const XvPair ligtnin_calls[] = {
 	{ 0x08002FE2, 0x08002F90 },   /* project:research, SAME */
 	{ 0x080032F0, XV_SPAWN4_3 },   /* the dispatch's spawner */
 	{ 0x080033D4, 0x08003458 },   /* project:research, SAME */
+	{ 0x080078EC, 0x0800A03C },   /* project:fireman, DIFF (audited) */
 	{ 0x08009A86, 0x0800C8F8 },   /* project:research, LAYOUT */
 	{ 0x08009ABC, 0x0800C90A },   /* project:billy, DIFF (audited) */
 	{ 0x08009BAC, 0x0800C9F8 },   /* project:project:chips, DIFF (audited) */
@@ -1829,7 +1825,6 @@ static const XvPair ligtnin_calls[] = {
 	{ 0x08012F44, 0x0801A0D4 },   /* project:research, DIFF (audited) */
 	{ 0x08012F7A, 0x0801A146 },   /* project:fireman, DIFF (audited) */
 	{ 0x080143FC, 0x0801BBAC },   /* project:thunder, DIFF (audited) */
-	{ 0x08014446, 0x0801BBF4 },   /* project:research, DIFF (audited) */
 	{ 0x080E18EE, 0x080E1932 },   /* project:research, SAME */
 };
 static const XvPair ligtnin_words[] = {
@@ -1913,10 +1908,10 @@ static const XcSong ligtnin_songs[] = { { 0x120, 0x240 }, { 0x13E, 0x241 }, { 0x
 /* its chip 193 is a dark chip of BN4's (row 562): a battle it is used in costs 20 max HP */
 
 static const XvBlock hole_blocks[] = {
-	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x38C0, 0x4B619B7Eu },
-	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x3960, 0xD3ADC8B1u },
-	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3A10, 0xCF968AD5u },
-	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3C40, 0x77CB1EA6u },
+	{ 0x080E4584, 0x080E4618, XC4_CODE + 0x3900, 0x4B619B7Eu },
+	{ 0x080E9838, 0x080E98E0, XC4_CODE + 0x39A0, 0xD3ADC8B1u },
+	{ 0x080E4354, 0x080E4584, XC4_CODE + 0x3A50, 0xCF968AD5u },
+	{ 0x080E423C, 0x080E4354, XC4_CODE + 0x3C80, 0x77CB1EA6u },
 };
 static const XvData hole_data[] = {
 	{ 0x080E4592, 0x080E4594, XV_RAW },
@@ -2004,7 +1999,7 @@ static const XcSong hole_songs[] = { { 0x105, 0x280 }, { 0x106, 0x281 }, { 0x107
 /* its chip 226 (id 537) waits: its row is XREG_PENDING */
 
 static const XvBlock gutsmanchip_blocks[] = {
-	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x3D60, 0x15E72429u },
+	{ 0x080B999C, 0x080B9B44, XC4_CODE + 0x3DA0, 0x15E72429u },
 };
 static const XvData gutsmanchip_data[] = {
 	{ 0x080B99AE, 0x080B99B0, XV_RAW },
@@ -2074,8 +2069,8 @@ static const XcSong gutsmanchip_songs[] = { { 0xB0, 0x1E2 } };
 /* its chip 334 (id 613) is a Program Advance, formed by BN4's recipes (src/core/xchips_pas_bn4.c) */
 
 static const XvBlock pitrng_blocks[] = {
-	{ 0x080E999C, 0x080E9A50, XC4_CODE + 0x3F10, 0xA5D50BFEu },
-	{ 0x080D3430, 0x080D344E, XC4_CODE + 0x3FD0, 0x1CB27713u },
+	{ 0x080E999C, 0x080E9A50, XC4_CODE + 0x3F50, 0xA5D50BFEu },
+	{ 0x080D3430, 0x080D344E, XC4_CODE + 0x4010, 0x1CB27713u },
 };
 static const XvData pitrng_data[] = {
 	{ 0x080E99AA, 0x080E99AC, XV_RAW },

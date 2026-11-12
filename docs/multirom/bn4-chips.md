@@ -605,25 +605,33 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
-unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
-one routine, a sweep (the third kind's 0x93) that goes column by column
-from the user's edge and does one of three things by the record's first
-parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
-from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
-striking the eight panels around it (Ligtnin). The unit is the sweep,
-the strike both panel chips share (0x92) and the bolt (0x8E), each at
-BN4's own number on the chips' page of the dispatch, 1144 bytes
-with the strike's rows, its sprites copied, its three sounds at the
-grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
-so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
-pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
-Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
-no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
-rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
-moved but has never run in a spec, as the differential's BN4 battle
-cannot yet be given a cracked or a grass panel (BN5's `field=` has no
-BN4 twin). They play once a spec proves them.
+**Ligtnin1-3, AquaUp1-3 and GreenWd1-3 are moved, one unit** (ids
+677-679 on 11 November 2026, 689-694 on 12 November; misc 0x0C). The
+nine chips are one routine, a sweep (the third kind's 0x93) that goes
+column by column from the user's edge and does one of three things by
+the record's first parameter: a geyser from a cracked panel under a foe
+(AquaUp, 0), a tower from a grass one (GreenWd, 1), or a bolt on a panel
+that holds an obstacle, striking the eight panels around it (Ligtnin,
+2). The unit is the sweep, the strike both panel chips share (0x92) and
+the bolt (0x8E), each at BN4's own number on the chips' page of the
+dispatch, 1144 bytes with the strike's rows, its sprites copied, its
+three sounds at the grown table's 0x240 to 0x242 (the third line takes
+its slots from 0x240 so the sweep's sessions number apart), and BN4's
+own sprite step for a third-kind object (`BN4_T3_SPRITE_STEP`), copied
+as BN4's Navis copy it: BN6's nearest updates a sprite in the frame its
+animation is set up too, so the geyser's frames ran one ahead of BN4's.
+`bn4_chip_ligtnin1`, `2` and `3` pass with a RockCube set first (the
+bolt on its panel at t164; a 140 HP Mettaur beside it left 10 by
+Ligtnin2) and `bn4_chip_ligtnin1_none` with no obstacle, no bolt. The
+differential's BN4 battle gives the foe's panel a type with `panels=`
+([the differential](../devtools/differential.md)): `bn4_chip_aquaup1` to
+`3` on a cracked panel (110, 140 and 170 off), `bn4_chip_greenwd1` to
+`3` on grass (120, 140 and 160), `bn4_chip_aquaup1_none` with no cracked
+panel and `bn4_chip_greenwd1_cracked` on a cracked one, neither raising
+anything; the stronger two of each fight BN4's Mettaur of 250 HP, as a
+lethal hit there would compare each engine's deletion (its sound, which
+in BN4 takes the geyser's player 9 in the same frame), not the chip.
+Twelve mutations caught across the nine.
 
 **Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
 three Plus chips are left out), then BlakBarr's barrier; Binder,

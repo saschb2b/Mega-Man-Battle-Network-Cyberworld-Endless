@@ -496,6 +496,12 @@ void boss_battle_over(bool won) {
 		return;
 	}
 	rival_result(B.foe, RIVAL_MEGAMAN_WON, &(RivalEnd){ B.form, B.hp, B.max }, profile.runs + 1);
+	/* (the version beaten, for the Battle Lab: lab_navis.h) */
+	int beaten = guardian_moved(B.foe) ? B.foe_version : B.fought.nfoes ? B.fought.foes[0].version : -1;
+	if (B.foe > 0 && B.foe < RIVAL_NAVIS && beaten >= 0 && beaten < 8) {
+		profile.navi_beaten[B.foe] |= (uint8_t)(1u << beaten);
+		profile_save();
+	}
 	/* (a bracket's round: its prize, then the next) */
 	if (B.g.bracket && B.round < 2) {
 		to(B_PRIZE);
