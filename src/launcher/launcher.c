@@ -22,13 +22,13 @@
 #include "game.h"
 #include "gfx.h"
 #include "launcher_roms.h"
+#include "launcher_saves.h"
 #include "mirror.h"
 #include "pick.h"
 #include "platform.h"
 #include "rivals.h"
 #include "rom.h"
 #include "save.h"
-#include "saves.h"
 
 #define LOOK_FRAMES 180   /* a ROM put in by hand looked for every three seconds */
 
@@ -155,7 +155,7 @@ static bool picked(void) {
 	bool came = (roms_shown_set(true) & ~had) != 0;
 	say(r.text, came ? NOTE_GOOD : roms_have(asked) ? NOTE_INFO : NOTE_BAD);
 	/* (a folder newly chosen: looked at for the saves' copy, which SAVES
-	 * compares where it holds saves not answered, saves.h) */
+	 * compares where it holds saves not answered, launcher_saves.h) */
 	char was[sizeof L.folder];
 	snprintf(was, sizeof was, "%s", L.folder);
 	if (!pick_folder(L.folder, sizeof L.folder)) snprintf(L.folder, sizeof L.folder, "%s", was);
@@ -170,7 +170,7 @@ static bool dropped(void) {
 	if (!platform_dropped(path, sizeof path)) return false;
 	size_t n = strlen(path);
 	if (n > 7 && !SDL_strcasecmp(path + n - 7, ".cwsave")) {
-		saves_import(path);
+		launcher_saves.import(path);
 		return true;
 	}
 	unsigned beside;
@@ -343,7 +343,7 @@ static void update(void) {
 	LauncherLayout lay;
 	launcher_layout(&lay);
 	if (picked() || dropped()) return;
-	saves_tick();
+	launcher_saves.tick();
 	if (!roms_have(SLOT_BN6) && !pick_busy() && L.t - L.looked_at >= LOOK_FRAMES) look_again(false);
 	fills();
 	/* (kept up: a copy refused shows at once) */

@@ -59,7 +59,9 @@ attack DarkChip is chosen, through BN4's own countdown (its timer set to
 1 the first frame it holds more: `BN4_CONFUSE_STEP`), and `mood4=1`
 hooks BN4's code where an attack DarkChip's use sets his mood 0 for the
 battle (`BN4_DARK_MOOD`, on to `BN4_DARK_MOOD_PAST`), so a counter gives
-Full Synchro as in BN6's; `bn4_chip_drkvulcn` takes both, and its
+Full Synchro as in BN6's, and gives a dark MegaMan (karma4 0), whose
+battle BN4 begins at mood 0, the NaviStats' start mood once
+(`BN4_MOOD_START`); `bn4_chip_drkvulcn` takes both, and its
 mutations `confuse6=1` (BN6's MegaMan given the confusion) and
 `mood4` 0 must part ([BN4's chips in a run](../multirom/bn4-chips.md),
 DrkVulcn and the Elem chips). `souls4=` gives BN4's MegaMan Souls (hex, bit n - 1
@@ -69,7 +71,14 @@ and its pseudo-chip's byte written past the chip gate as the game writes
 it giving the Soul (`xd4_souls_put`), and his form is said as it changes
 (`xd4_form_watch`, the battle NaviStats' `BN4_NAVI_FORM`). BN4's UNITE
 is keyed as BN5's: the chip picked, five right and down to UNITE, A,
-then up and A on the Soul (four other paths tried, none united).
+then up and A on the Soul (four other paths tried, none united). `panels=` (a spec's `panels`, `CR:T` each: column, row, type)
+gives panels a type in both games as the fight begins, before its first
+fight frame, each game's type byte at its own place (BN4's panel +0,
+BN5's and BN6's +2; `src/dev/xdiff.c` `panels_step`, `xd4_panels_put`):
+each game makes a panel's flags from its type every frame, so the panel
+is a cracked one or grass from then on in both. BN4's cracked (3) and
+grass (6) are BN6's numbers. AquaUp's and GreenWd's specs crack or grass
+the foe's panel this way.
 `bn4_soul_thun_control` is ThunSoul so, form 6 at the same frame in both
 runs, its charged shot held and the Custom screens that count its turns
 opened. ThunSoul moved into BN6's engine has two specs

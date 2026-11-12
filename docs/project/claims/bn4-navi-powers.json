@@ -1,0 +1,24 @@
+{
+  "branch": "bn4-navi-powers",
+  "what": "BN4's computed powers moved (its table 0x08019380: SP 1001-1022, DS 1023-1044) and the Navi chips' SP and DS on them, GutsMan's SP first",
+  "takes": {
+    "chip_powers": [
+      [
+        "0xCC",
+        "0xFE"
+      ]
+    ],
+    "song_slots": [
+      [
+        "0x2C0",
+        "0x2FF"
+      ]
+    ]
+  },
+  "units": [
+    "BN4 computed powers",
+    "BN4 chip GutsMan SP",
+    "BN4 chip GutsMan DS"
+  ],
+  "run": false
+}

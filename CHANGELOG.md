@@ -10,6 +10,10 @@
   Nothing in one can delete MegaMan, it pays nothing, and the run is
   afterwards exactly as it was. Four sets are kept with their best time
   and busting level.
+- **Navis in the Battle Lab.** A guardian MegaMan has beaten twice can
+  be set there, alone, in each version beaten from now on (his first for
+  wins of before). Bass and the Cybeast open with one win, ProtoMan with
+  a netbattle won.
 - **BN4 Red Sun joins the NetPass's full set.** NetBattles, trades and
   the week's DeepNet now need BN4 Red Sun (USA) beside BN6 and BN5 Team
   Colonel. The Square stays open to every game. A pass that was full

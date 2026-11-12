@@ -229,7 +229,7 @@ int second_library(SecondRow *out, int most) {
 	int k = 0;
 	for (int e = 0; e < LIB_ENTRIES && k < most; ++e) {
 		int held, of;
-		library_count(e, -1, &held, &of);
+		library_count(e, -1, meta_library_has, &held, &of);
 		if (!of) continue;
 		out[k].name = entries[e];
 		snprintf(out[k++].value, sizeof out[0].value, "%d/%d", held, of);

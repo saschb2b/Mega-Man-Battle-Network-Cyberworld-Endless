@@ -1,0 +1,26 @@
+[
+ {
+  "name": "the geyser's sprite step BN6's way",
+  "spec": "bn4_chip_aquaup1",
+  "poke": [
+   "08014472:46C0"
+  ],
+  "what": "the unit's copy of BN4's third-kind sprite step (BN4_T3_SPRITE_STEP, 0x08014446) with its pop {pc} after a new animation's set-up (0x08014472) made a nop, so the sprite's update runs in that frame too, as BN6's nearest step (0x0801BBF4) does: the geyser's frame count a frame ahead of BN4's from the frame its animation is set"
+ },
+ {
+  "name": "AquaUp1's row's kind Ligtnin's",
+  "spec": "bn4_chip_aquaup1",
+  "poke": [
+   "08C0767C:02:1"
+  ],
+  "what": "the registry's record of BN4's AquaUp1 (689) with its first parameter 2, Ligtnin's kind of the sweep, where BN4's record holds 0: the sweep looks for an obstacle under a foe, finds none on the cracked panel, and no geyser rises"
+ },
+ {
+  "name": "the geyser's sound another",
+  "spec": "bn4_chip_aquaup1",
+  "poke": [
+   "080DF67E:0241"
+  ],
+  "what": "the geyser's and the tower's rows' copy (BN4's 0x080DF674, 12 bytes a kind, its sound a u16 at +0xA) naming slot 0x241, GreenWd's tower's, for kind 0 where the recipe set 0x240: the geyser rises with the tower's sound"
+ }
+]

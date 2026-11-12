@@ -212,6 +212,9 @@
 #define BN4_MOOD_SET      0x0800F4DEu /* a side's mood set (r0 the side, r1 the mood; its battle NaviStats +0, 0x99 at the start): never
                                        * where it is 0, BN4's dark emotion (BN4_EMOTION's 5), so nothing lifts it again in a battle (BN5's
                                        * 0x080127CE the same; BN6's BN6_MOOD_SET has no such test) */
+#define BN4_NAVI_MOOD     0x00        /* the battle NaviStats' (BN4_BATTLE_NAVI) mood, u8: BN4_MOOD_START as the NaviStats are set up
+                                       * (0x0800D718), 0 as a battle of a dark MegaMan begins (karma4 0: his dark emotion from t1) */
+#define BN4_MOOD_START    0x99        /* ... the mood the NaviStats' set-up gives (0x0800D718: movs r0,#0x99; strb r0,[r4]) */
 #define BN4_EMOTION       0x0800F49Cu /* a side's emotion (r0 the side) by its mood: 5 at 0, 2 (Full Synchro) at 0xFF, 1 under 0x41, else 0 */
 #define BN4_DARK_MOOD     0x0800D5C4u /* a chip's use: a chip whose record's +9 holds 0x20 (a DarkChip; 0x0800D5A6) sets the side's
                                        * battle flag 2 (0x08008020) and here its mood 0 through BN4_MOOD_SET (bl at 0x0800D5C8), then

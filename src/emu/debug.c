@@ -9,7 +9,6 @@
 #include "emu.h"
 #include "game.h"
 #include "protoman_cross.h"
-#include "run.h"
 
 bool emu_debug_on(void) { return getenv("CYBERWORLD_EMU_DEBUG") != NULL; }
 
@@ -112,6 +111,10 @@ static void battle_probe(void) {
 	fprintf(stderr, "probe t%d phase %02x hp %d foes %d foehp %d panels %s\n", t - 1, emu_read8(BN6_BATTLE_PHASE), hp, foes, foehp, panels);
 }
 
+static int depth_said;
+
+void emu_debug_depth(int depth) { depth_said = depth; }
+
 void emu_debug_frame(void) {
 	battle_trace_frame();   /* (CYBERWORLD_BTRACE) */
 	battle_probe();         /* (CYBERWORLD_BATTLE_PROBE) */
@@ -125,7 +128,7 @@ void emu_debug_frame(void) {
 	}
 	++t;
 	if (t % 30 == 0)
-		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, run.depth,
+		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, depth_said,
 			emu_read8(emu_read32(BN6_TOOLKIT)), emu_read8(BN6_GAMESTATE), emu_read8(BN6_CHATBOX),
 			bn6_player_x(), bn6_player_y(), bn6_player_z(),
 			emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), (unsigned)hook_hits);

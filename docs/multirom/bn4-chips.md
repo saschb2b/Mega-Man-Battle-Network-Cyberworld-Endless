@@ -550,25 +550,33 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
-**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
-unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
-one routine, a sweep (the third kind's 0x93) that goes column by column
-from the user's edge and does one of three things by the record's first
-parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
-from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
-striking the eight panels around it (Ligtnin). The unit is the sweep,
-the strike both panel chips share (0x92) and the bolt (0x8E), each at
-BN4's own number on the chips' page of the dispatch, 1144 bytes
-with the strike's rows, its sprites copied, its three sounds at the
-grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
-so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
-pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
-Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
-no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
-rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
-moved but has never run in a spec, as the differential's BN4 battle
-cannot yet be given a cracked or a grass panel (BN5's `field=` has no
-BN4 twin). They play once a spec proves them.
+**Ligtnin1-3, AquaUp1-3 and GreenWd1-3 are moved, one unit** (ids
+677-679 on 11 November 2026, 689-694 on 12 November; misc 0x0C). The
+nine chips are one routine, a sweep (the third kind's 0x93) that goes
+column by column from the user's edge and does one of three things by
+the record's first parameter: a geyser from a cracked panel under a foe
+(AquaUp, 0), a tower from a grass one (GreenWd, 1), or a bolt on a panel
+that holds an obstacle, striking the eight panels around it (Ligtnin,
+2). The unit is the sweep, the strike both panel chips share (0x92) and
+the bolt (0x8E), each at BN4's own number on the chips' page of the
+dispatch, 1144 bytes with the strike's rows, its sprites copied, its
+three sounds at the grown table's 0x240 to 0x242 (the third line takes
+its slots from 0x240 so the sweep's sessions number apart), and BN4's
+own sprite step for a third-kind object (`BN4_T3_SPRITE_STEP`), copied
+as BN4's Navis copy it: BN6's nearest updates a sprite in the frame its
+animation is set up too, so the geyser's frames ran one ahead of BN4's.
+`bn4_chip_ligtnin1`, `2` and `3` pass with a RockCube set first (the
+bolt on its panel at t164; a 140 HP Mettaur beside it left 10 by
+Ligtnin2) and `bn4_chip_ligtnin1_none` with no obstacle, no bolt. The
+differential's BN4 battle gives the foe's panel a type with `panels=`
+([the differential](../devtools/differential.md)): `bn4_chip_aquaup1` to
+`3` on a cracked panel (110, 140 and 170 off), `bn4_chip_greenwd1` to
+`3` on grass (120, 140 and 160), `bn4_chip_aquaup1_none` with no cracked
+panel and `bn4_chip_greenwd1_cracked` on a cracked one, neither raising
+anything; the stronger two of each fight BN4's Mettaur of 250 HP, as a
+lethal hit there would compare each engine's deletion (its sound, which
+in BN4 takes the geyser's player 9 in the same frame), not the chip.
+Twelve mutations caught across the nine.
 
 **Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
 three Plus chips are left out), then BlakBarr's barrier; Binder,
@@ -653,19 +661,25 @@ moved yet; why each waits:
 | DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
 | DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | DrkVulcn **moved** (12 November 2026, below); DrkCanon, DarkBomb and DrkSpred each its family as an attack unit, DrkCanon also BN4's computed powers (unit 6) |
-| ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | ElemFlar to ElemSand **moved** (12 November 2026, below); ElemDark held, its shot's animation a frame behind BN4's, untraced |
+| ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | **moved** (12 November 2026, below) |
 | DarkNeo (605) | a Program Advance (DrkLine, BugChain, Bass), support 0x46: 1036 bytes, 20 decisions open | its parts: DrkLine above, BugChain (the generator's line) |
 
 **DrkVulcn and the Elem chips are moved** (12 November 2026: ids 601,
-637, 638, 662 and 663). DrkVulcn is BN4's vulcan state (its family
+637, 638, 662, 663 and 697). DrkVulcn is BN4's vulcan state (its family
 0x1F) as BN6's grown attack family 0xFD, its shot the spread chips'
 copy, shared, its sound 0xBB at the grown table's slot 0x283; the Elem
 chips are BN4's state 0x60 as attack family 0xFE, its subfamily the
 chip's, the panel changer copied with it (the fourth kind's 0x9B), its
 shot's two sounds (0xA8 and 0x14C) by one add at slots 0x285 and 0x329.
-`bn4_chip_drkvulcn` passes to the seventh shot's deleting hit (t104: 20
-a shot on a 140 HP MettaurSP) and `bn4_chip_elemflar`, `elemice`,
-`elemleaf` and `elemsand` over 300 frames, twelve mutations caught.
+ElemDark's shot (its params' +7 set) takes BN4's third-kind sprite
+step (`BN4_T3_SPRITE_STEP`), which the unit copies as Ligtnin's does:
+BN6's nearest updates the sprite in the frame its animation is set up,
+a frame ahead of BN4's. `bn4_chip_drkvulcn` passes to the seventh
+shot's deleting hit (t104: 20 a shot on a 140 HP MettaurSP),
+`bn4_chip_elemflar`, `elemice`, `elemleaf` and `elemsand` over 300
+frames, and `bn4_chip_elemdark` over 300 by a dark MegaMan against
+BN4's 250 HP Mettaur (its 220 would delete a MettaurSP); nineteen
+mutations caught.
 Three things of BN4's battle are not the run's, and the comparison
 treats each as such:
 
@@ -692,7 +706,10 @@ treats each as such:
   the battle. DrkVulcn's third shot counters the Mettaur at t60, Full
   Synchro in BN6's battle and none in BN4's. The spec's `mood4` hooks
   BN4's code there on the guest and goes on past it and the calm that
-  follows (`BN4_DARK_MOOD_PAST`); its mutation turns it off.
+  follows (`BN4_DARK_MOOD_PAST`); its mutation turns it off. A dark
+  MegaMan (karma4 0, which ElemDark needs in BN4's battle) begins the
+  battle at mood 0 by his karma; `mood4` gives him the NaviStats' start
+  mood once (`BN4_MOOD_START`, 0x99), as a run takes no karma.
 - **Full Synchro's aura**, the first kind's 0x5E, is each engine's own
   object, spawned through twin spawners where MegaMan's emotion is 2
   (BN4 `BN4_SYNCHRO_AURA` into his AI data +0x60, BN6 0x080C6482 into
@@ -700,14 +717,6 @@ treats each as such:
   caller's leftover r4), its sprite state and the word that keeps it
   are allowed, its being in play and life compared (legit.json's bn4
   allowed, Full Synchro's aura; a mutation drops BN6's).
-
-**ElemDark is held** (its row pending): its shot (the third kind's 0x9,
-the same copied code and art for the five) animates a frame behind in
-BN4's battle from its first frame (its sprite's frame count 2 at t33,
-BN6's 1), where ElemFlar's keeps time in both, by a dark MegaMan too. Not
-its sprite's set-up, spawn or run order, all alike; its record differs
-in its params (+7 8: the hit kind 0x25), element, palette and power. To
-trace: a store watch on the shot's sprite +1 at t33 in BN4.
 
 BN4's Hole panel (its type 0xB) is a plain panel by its flags: nothing
 of BN4's damage, movement or panel code treats it otherwise, and a

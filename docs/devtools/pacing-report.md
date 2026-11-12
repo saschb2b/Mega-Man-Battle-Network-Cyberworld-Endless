@@ -53,7 +53,9 @@ is one of the area's own, how many families were a signature, the most
 pressure of each beat and of the Server's challenge against its cap,
 OVER past a limit; and under each line what the beats' paying rows hold
 against the rows of the area's own battles (chip entries of ten, zenny
-a row, kinds of chip).
+a row, kinds of chip). Act 1's lines also list each distinct beat once
+as the `foes` step takes it (`beat 2: 1@52/200@51`), few enough to fight
+each one ([Encounter tags and danger](encounter-tags.md)).
 
 Before them, the visitors: each net's families as their own records set them
 (their role, stage and placements; `*` those that may visit, `!` those

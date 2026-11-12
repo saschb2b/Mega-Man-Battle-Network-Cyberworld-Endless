@@ -142,6 +142,7 @@ engine's, and all twelve kinds play there, each by its own net's rule
   DarkChip is chosen (the owner's call of 12 November 2026: left out
   for now, its source not yet traced), and the dark mood an attack
   DarkChip's use sets for the battle, which keeps Full Synchro from him
+  (and the mood 0 a dark MegaMan's battle begins at, by his karma)
   ([BN4's chips in a run](../../multirom/bn4-chips.md), DrkVulcn and the
   Elem chips).
 - **Gone with the guest core**: BN5 got MegaMan up at 1 HP after a fall in

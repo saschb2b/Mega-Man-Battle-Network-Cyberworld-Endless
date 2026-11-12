@@ -184,6 +184,19 @@ void xd4_form_watch(void) {
 	form_was = now;
 }
 
+void xd4_panels_put(const Spec *s, int game) {
+	for (int i = 0; i < s->npanels; ++i) {
+		uint32_t p = (uint32_t)(s->panels[i].row * 8 + s->panels[i].col);
+		if (game == 6) {
+			emu_write8(BN6_FIELD_PANELS + p * BN6_PANEL_SIZE + BN6_PANEL_TYPE, s->panels[i].type);
+			continue;
+		}
+		/* (BN4's: the type's byte and its side's beside it, +1, a u16 kept but for the type) */
+		uint32_t at = BN4_FIELD_PANELS + p * BN4_PANEL_SIZE + BN4_PANEL_TYPE;
+		guest_write16(at, (uint16_t)((guest_read16(at) & 0xFF00u) | s->panels[i].type));
+	}
+}
+
 void xd4_souls_put(const Spec *s) {
 	souls_given = s->souls4 != 0;
 	form_was = frames_run = 0;
@@ -250,8 +263,16 @@ static HookAct dark_mood_past(HookRegs *r, void *user) {
 }
 
 static void xd4_dark_mood(const Spec *s) {
-	static bool hooked;
-	if (!s->mood4 || hooked) return;
+	static bool hooked, started;
+	if (!s->mood4) return;
+	/* (a dark MegaMan's battle begins at mood 0, his karma's dark emotion: given the NaviStats' start mood, once) */
+	uint16_t w = guest_read16(BN4_BATTLE_NAVI + BN4_NAVI_MOOD);
+	if (!started && !(w & 0xFF)) {
+		guest_write16(BN4_BATTLE_NAVI + BN4_NAVI_MOOD, (uint16_t)((w & 0xFF00) | BN4_MOOD_START));
+		started = true;
+		printf("xdiff: BN4's dark MegaMan's battle given the NaviStats' start mood (mood4)\n");
+	}
+	if (hooked) return;
 	hooked = guest_hook(BN4_DARK_MOOD, dark_mood_past, NULL);
 	if (!hooked) printf("xdiff: BN4's dark mood not hooked (mood4)\n");
 }

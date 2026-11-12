@@ -201,7 +201,16 @@ def pressure_of(group, vs):
     return round(total)
 
 
-def fit(group, band, test=None, cap=None):
+def cost_of(group, vs):
+    """What a battle costs, as its families' own costs add up: the HP the test autopilot loses deleting each one's V1
+    alone with the starting folder (50 seconds at most), by its hit at the version fought over its V1's; None where a
+    family's was not fought."""
+    if any(f.fight is None for f in group):
+        return None
+    return round(sum(f.fight[2] * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)))
+
+
+def fit(group, band, test=None, cap=None, cost=None):
     """A group's versions inside the act's band: the most HP together from its floor to its top, each hit under its
     cap, the template's own test passed and, where `cap` is given, the pressure predicted at most that. The versions
     and the HP, None where no versions do."""
@@ -211,6 +220,8 @@ def fit(group, band, test=None, cap=None):
         if not band['lo'] <= hp <= band['hi'] or (best and hp <= best[1]) or (test and not test(group, band, vs)):
             continue
         if cap is not None and (pressure_of(group, vs) is None or pressure_of(group, vs) > cap):
+            continue
+        if cost is not None and (cost_of(group, vs) is None or cost_of(group, vs) > cost):
             continue
         best = (vs, hp)
     return best
@@ -280,7 +291,7 @@ TEMPLATES = [
 ]
 
 
-def fillings(template, fams_in, band, cap=None):
+def fillings(template, fams_in, band, cap=None, cost=None):
     """Every way the act's pool fills a template: (group, versions, HP), a family once a group; under `cap`, the
     pressure predicted at most that."""
     name, slots, test, _ = template
@@ -289,7 +300,9 @@ def fillings(template, fams_in, band, cap=None):
         for f in fams_in:
             for v in reversed(versions(f, band)):
                 p = pressure_of((f, f, f), (v, v, v))
-                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (p is not None and p <= cap)):
+                c = cost_of((f, f, f), (v, v, v))
+                if band['lo'] <= 3 * f.ver[v]['hp'] <= band['hi'] and (cap is None or (p is not None and p <= cap)) and \
+                        (cost is None or (c is not None and c <= cost)):
                     out.append(((f, f, f), (v, v, v), 3 * f.ver[v]['hp']))
                     break
         return out
@@ -300,7 +313,7 @@ def fillings(template, fams_in, band, cap=None):
             continue
         if len({s for s in slots}) == 1 and tuple(sorted(keys)) in seen:   # (alike slots: a pair once)
             continue
-        got = fit(group, band, test, cap)
+        got = fit(group, band, test, cap, cost)
         if not got:
             continue
         seen.add(tuple(sorted(keys)))
@@ -360,6 +373,17 @@ def predicted(placed):
 def own_pressures(fams, bands, pools, forms, act):
     """The pressure predicted of every own battle of the act's areas, sorted."""
     return sorted(p for b in act_areas(pools, act) for placed, _, _ in natives(forms, fams, bands[act], b) for p in [predicted(placed)] if p is not None)
+
+
+def own_costs(fams, bands, pools, forms, act):
+    """What every own battle of the act's areas is predicted to cost (cost_of), sorted."""
+    out = []
+    for b in act_areas(pools, act):
+        for placed, _, _ in natives(forms, fams, bands[act], b):
+            c = cost_of([p[0] for p in placed], [p[1] for p in placed])
+            if c is not None:
+                out.append(c)
+    return sorted(out)
 
 
 def quarter_mark(values):
@@ -484,15 +508,21 @@ def report_capped(fams, bands, pools, forms):
     own = [own_pressures(fams, bands, pools, forms, act) for act in range(len(bands))]
     rows = [[ACTS[act], len(o), o[0], o[len(o) // 2], quarter_mark(o), o[-1], 100 * (act + 1)] for act, o in enumerate(own)]
     out = table(['Act', "Own battles of the act's areas", 'Predicted pressure: least', 'Median', 'Three-quarter mark (the cap)', 'Most', "MegaMan's max HP there"], rows) + ['']
+    costs = [own_costs(fams, bands, pools, forms, act) for act in range(len(bands))]
+    out += ['The same battles by what they are predicted to cost the test autopilot (each family\'s HP lost deleting its V1 alone, '
+            'added up): the second cap, on what the pressure cap does not see, how long a fight lasts and what lands on a MegaMan '
+            'who lines up to shoot.', '']
+    out += table(['Act', 'Predicted cost: least', 'Median', 'Three-quarter mark (the cap)', 'Most'],
+                 [[ACTS[act], o[0], o[len(o) // 2], quarter_mark(o), o[-1]] for act, o in enumerate(costs)]) + ['']
     for name, nets in (SETS[0], SETS[3]):
         rows = []
         for t in TEMPLATES:
             row = [t[0]]
             for act, band in enumerate(bands):
-                n = len(fillings(t, pool(fams, nets, band), band, quarter_mark(own[act])))
+                n = len(fillings(t, pool(fams, nets, band), band, quarter_mark(own[act]), quarter_mark(costs[act])))
                 row.append(n or '**none**')
             rows.append(row)
-        out += [f'**{name}, under the cap**', ''] + table(['Template'] + ['Act ' + a if a != 'Nest' else a for a in ACTS], rows) + ['']
+        out += [f'**{name}, under both caps**', ''] + table(['Template'] + ['Act ' + a if a != 'Nest' else a for a in ACTS], rows) + ['']
     return out
 
 
@@ -562,6 +592,46 @@ def report_danger(fams, bands):
     return table(head, summary), table(head2, detail)
 
 
+# The fields (tools/encounter_danger.py battles, tools/encounter_data/fields.tsv): one pair that is harmless on the plain
+# field, fought by the test autopilot on every field BN6's areas' random battles use, four seeds each. A field is fair
+# where it wins every one and loses FIELD_FAIR HP at most in any (the plain field's own worst): a group stands on an
+# area's field only where it is fair, since a group is not authored for the field its area's records are.
+FIELD_FAIR = 20
+
+
+def fields_load(path=None):
+    """Each field fought: its number -> (fights, won, the most HP lost, the slowest win in seconds); empty where the
+    pass was not run."""
+    path = path or os.path.join(DATA, 'fields.tsv')
+    out = {}
+    if not os.path.exists(path):
+        return out
+    for r in read_tsv(path):
+        if r['mode'] != 'fight':
+            continue
+        n, won, lost, secs = out.get(int(r['label'], 16), (0, 0, 0, 0))
+        out[int(r['label'], 16)] = (n + 1, won + int(r['won']), max(lost, int(r['hp_lost'])), max(secs, int(r['frames']) // 60))
+    return out
+
+
+def fair_fields(fields):
+    return sorted(f for f, (n, won, lost, _) in fields.items() if won == n and lost <= FIELD_FAIR)
+
+
+def report_fields():
+    fields = fields_load()
+    if not fields:
+        return ['The fields were not fought (`tools/encounter_danger.py battles`).', '']
+    fair = set(fair_fields(fields))
+    lines = [f'{len(fields)} fields, every one a random battle of BN6\'s areas uses, each fought four times by the test autopilot against one pair '
+             f'that is harmless on the plain field (BN6\'s family 1 beside BN5\'s 51, 110 HP). {len(fair)} are fair: it wins every fight and '
+             f'loses {FIELD_FAIR} HP at most in any, as on the plain field. On the other {len(fields) - len(fair)} the same pair costs more or cannot '
+             f'be deleted in 50 seconds: what a field does to MegaMan\'s side (holes, poison, ice, panels he cannot stand on) no measure of '
+             f'the families sees. A group takes an area\'s field only where it is fair.', '']
+    rows = [[f'0x{f:02X}', f'{won}/{n}', lost, secs] for f, (n, won, lost, secs) in sorted(fields.items()) if f not in fair]
+    return lines + table(['Field, not fair', 'Won', 'Most HP lost', 'Slowest, seconds'], rows) + ['']
+
+
 def report_pairs(fams):
     """The pairs' pass: every two families of the pool fought together at V1, against what their own pressures add
     up to."""
@@ -595,6 +665,7 @@ def cmd_report(a):
     summary, detail = report_danger(fams, bands)
     lines += ['## Danger', ''] + summary + ['']
     lines += ['### The pairs\' pass', ''] + report_pairs(fams)
+    lines += ['### The fields', ''] + report_fields()
     lines += ['### A cap on pressure', ''] + report_capped(fams, bands, pools, forms)
     if detail:
         lines += ['### Every battle sampled', ''] + detail + ['']
@@ -630,20 +701,27 @@ def cmd_engine(a):
         if f.pressure is None:
             continue
         tricks = ' | '.join(name for name, has in TRICK_BITS if has(f)) or '0'
-        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks} }},')
+        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks}, {f.fight[2] if f.fight else -1} }},')
+    fair_bits = [0] * 32
+    for field in fair_fields(fields_load()) or [0]:
+        fair_bits[field >> 3] |= 1 << (field & 7)
     pairs = []
     for (one, two), extra in sorted(PAIRS.items(), key=lambda kv: (fams[kv[0][0]].net, fams[kv[0][0]].ai, fams[kv[0][1]].net, fams[kv[0][1]].ai)):
         pairs.append(f'\t{{ {fams[one].net}, {fams[one].ai}, {fams[two].net}, {fams[two].ai}, {extra} }},')
     text = '\n'.join([
         '/* groups.h: the families\' measured tags, a row each: its net (0 BN6\'s, 1 BN5\'s, 2 BN4\'s), BN6\'s AI index, its',
-        ' * pressure (the HP a standing MegaMan loses in 20 seconds to its V1 alone) and its tricks.',
+        ' * pressure (the HP a standing MegaMan loses in 20 seconds to its V1 alone), its tricks and its cost (the HP the test',
+        ' * autopilot loses deleting its V1 alone with the starting folder, 50 seconds at most; -1 not fought).',
         ' * Written by tools/encounter_tags.py engine from tools/encounter_data/ (docs/devtools/encounter-tags.md); do not',
         ' * edit: measure again and write it again (--check says whether this is what it writes). */',
         '#include "groups.h"', '',
         'const GroupTag group_tags[] = {'] + rows + ['};', 'const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);', '',
         '/* The pairs that press harder together than their own pressures add up to (the pairs\' pass: tools/encounter_danger.py',
         f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1: each family\'s net and BN6\'s AI index, and that excess. */',
-        'const GroupPair group_pairs[] = {'] + pairs + ['};', 'const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);', ''])
+        'const GroupPair group_pairs[] = {'] + pairs + ['};', 'const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);', '',
+        '/* BN6\'s battlefields a group may stand on, a bit each by the field\'s number (the fields\' pass: a pair harmless on the',
+        f' * plain field fought on each, fair where the test autopilot wins every fight and loses {FIELD_FAIR} HP at most). */',
+        'const uint8_t group_fair_fields[32] = {', '\t' + ', '.join(f'0x{b:02X}' for b in fair_bits) + ',', '};', ''])
     if a.check:
         if not os.path.exists(ENGINE) or open(ENGINE).read() != text:
             sys.exit(f'{os.path.relpath(ENGINE, ROOT)} is not what tools/encounter_tags.py engine writes')

@@ -125,6 +125,8 @@ static int failures;
 char g_data_dir[512] = ".";
 Run run;
 Profile profile;
+/* (data.h's question, as run.c answers it) */
+bool chips_all_star(void) { return run_all_star(); }
 /* (no ROM, so no other game's areas: each BN6 area draws itself, and its
  * guardian is the run's pick) */
 int run_dress(int biome) { return biome; }
@@ -6131,13 +6133,13 @@ static void test_library_pages(void) {
 	CHECK(library_plays(411) && !library_plays(214) && !library_plays(350) && !library_plays(1) && !library_plays(603), "library: MrkCan1 plays, a DarkChip, a Program Advance and an id of no chip do not");   /* (603: between BN4's pack ids and its Program Advances, XREG4_PACK_FIRST on) */
 	/* (BN5's page without BN6's ROM: its own chips' slots, filled from the profile's Library) */
 	Profile kept = profile;
-	library_count(LIB_BN5, LIB_STD, &held, &of);
-	CHECK(of == 95 && !library_whole(LIB_BN5, LIB_STD), "library: BN5's own standard chips, %d slots", of);
+	library_count(LIB_BN5, LIB_STD, meta_library_has, &held, &of);
+	CHECK(of == 95 && !library_whole(LIB_BN5, LIB_STD, meta_library_has), "library: BN5's own standard chips, %d slots", of);
 	meta_library_add(411);
-	library_count(LIB_BN5, -1, &held, &of);
+	library_count(LIB_BN5, -1, meta_library_has, &held, &of);
 	CHECK(held == 1 && of == 95 + 41 + 1, "library: %d of %d of BN5's own held", held, of);
 	for (int i = 0; i < library_bn5_count; ++i) meta_library_add(library_bn5_rows[i].chip);
-	CHECK(library_whole(LIB_BN5, LIB_STD) && library_whole(LIB_BN5, LIB_GIGA) && !library_whole(LIB_BN6, LIB_STD) && !library_entry_read(LIB_BN4), "library: a class whole once each slot is filled, none without slots");
+	CHECK(library_whole(LIB_BN5, LIB_STD, meta_library_has) && library_whole(LIB_BN5, LIB_GIGA, meta_library_has) && !library_whole(LIB_BN6, LIB_STD, meta_library_has) && !library_entry_read(LIB_BN4), "library: a class whole once each slot is filled, none without slots");
 	profile = kept;
 }
 
@@ -7769,6 +7771,9 @@ static void test_lab_text(void) {
 	CHECK(!strcmp(s, "No win yet."), "lab: a kept set without a win (%s)", s);
 	lab_set_value(s, sizeof s, 1);
 	CHECK(!strcmp(s, "1 foe"), "lab: a set's foes (%s)", s);
+	lab_info_navi(s, sizeof s, 800, 3);
+	CHECK(!strcmp(s, "HP 800. Beaten 3.") && !strcmp(lab_navi_word(0, 1), "EX") && !strcmp(lab_navi_word(1, 2), "V3") && !lab_navi_word(0, 3)[0],
+		"lab: a Navi's row and his versions' words (%s)", s);
 	CHECK(!strcmp(lab_panel_name(9), "Conveyor up") && !strcmp(lab_panel_name(12), "Conveyor right") && !lab_panel_name(13)[0] && !strcmp(lab_version_word(3), "SP"),
 		"lab: the panels' and versions' names");
 }
@@ -7808,7 +7813,7 @@ static void test_groups(void) {
 		{ 64, 2, GROUP_FREE, 0, 0, -1, { { 0x310, 50, 10, 0 }, none, none, none, none, none } },
 		{ 3, 0, GROUP_FREE, 2, 0, 10, { { 30, 50, 10, 0 }, none, none, none, none, none } },
 	};
-	GroupLimits l = { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220 };
+	GroupLimits l = { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220, GROUP_NO_COST };
 	CHECK(group_in_pool(&pool[0], &l) && group_in_pool(&pool[2], &l) && group_in_pool(&pool[3], &l) && !group_in_pool(&pool[4], &l),
 		"groups: the pool keeps to the stage reached");
 	l.nets = 1;
@@ -7888,6 +7893,30 @@ static void test_groups(void) {
 	for (int act = 1; act < 6; ++act) CHECK(group_pressure_cap(act) > group_pressure_cap(act - 1), "groups: the pressure cap rises by act (%d)", act);
 	CHECK(group_tags_count > 0 && group_tag(group_tags[0].net, group_tags[0].family) == &group_tags[0] && !group_tag(2, 1), "groups: the measured tags by net and family");
 	for (int t = 0; t < GROUP_TEMPLATES; ++t) CHECK(group_template_name(t)[0] != '?', "groups: template %d has a name", t);
+	CHECK(group_field_fair(0) && !group_field_fair(-1) && !group_field_fair(256), "groups: the plain field is fair to a group, no field past the table");
+
+	/* (the cap on cost: what the fight costs, as its families' own costs add up by their hits; a family never fought
+	 * stands in no group under it) */
+	GroupFam dear[2] = {
+		{ 1, 0, GROUP_FRONT, 0, 0, 10, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none }, 30 },
+		{ 2, 0, GROUP_BACK, 0, 0, 10, { { 20, 50, 10, 0 }, none, none, none, none, none }, 20 },
+	};
+	GroupLimits capped = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000, 80 };
+	f.n = 0;
+	CHECK(group_fillings(dear, 2, &capped, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].cost == 30 * 2 + 20,
+		"groups: a group's cost by its families' own and their hits (HP %d, cost %d)", f.g[0].hp, f.g[0].cost);
+	capped.cost = 79;
+	f.n = 0;
+	CHECK(group_fillings(dear, 2, &capped, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 100 && f.g[0].cost == 50,
+		"groups: the cap on cost holds a version down (HP %d, cost %d)", f.g[0].hp, f.g[0].cost);
+	capped.cost = 49;
+	CHECK(group_fillings(dear, 2, &capped, GROUP_WALL, NULL, NULL) == 0, "groups: ... and leaves none that costs past it");
+	dear[1].cost = -1;
+	capped.cost = 1000;
+	CHECK(group_fillings(dear, 2, &capped, GROUP_WALL, NULL, NULL) == 0, "groups: a family never fought fills nothing under a cap on cost");
+	GroupLimits act1 = group_limits_kind(2, 0, GROUP_NETS_ALL, GROUP_PLAIN), act3 = group_limits_kind(8, 0, GROUP_NETS_ALL, GROUP_EASED);
+	CHECK(act1.cost == group_cost_cap(0) && act3.cost == group_cost_cap(2) * 2 / 3 && group_cost_cap(1) > group_cost_cap(0),
+		"groups: an act's cap on cost, an eased battle's two thirds of it");
 
 	/* (the pairs' pass: two families that press harder together are predicted that much harder, by the larger of their
 	 * hits over their V1's; the table's first pair, made a wall and its artillery here) */
@@ -7900,7 +7929,7 @@ static void test_groups(void) {
 		{ gp->family_a, gp->net_a, GROUP_FRONT, 0, 0, 20, { { 10, 50, 10, 0 }, { 11, 60, 20, 0 }, none, none, none, none } },
 		{ gp->family_b, gp->net_b, GROUP_BACK, 0, 0, 30, { { 20, 50, 10, 0 }, none, none, none, none, none } },
 	};
-	GroupLimits wide = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000 };
+	GroupLimits wide = { { 90, 160, 30 }, { 1, 1, 1 }, 0, GROUP_NETS_ALL, 100000, GROUP_NO_COST };
 	f.n = 0;
 	CHECK(group_fillings(two, 2, &wide, GROUP_WALL, fills_keep, &f) == 1 && f.g[0].hp == 110 && f.g[0].pressure == 20 * 2 + 30 + extra * 2,
 		"groups: a tagged pair's pressure with its excess (%d, the excess %d)", f.g[0].pressure, extra);
@@ -7922,8 +7951,8 @@ static void test_group_arc(void) {
 		{ 3, 0, GROUP_FREE, 2, 0, 10, { { 30, 50, 10, 0 }, none, none, none, none, none } },
 	};
 	ArcRules r = {
-		{ { 90, 125, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 146 }, { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220 },
-		{ { 130, 220, 40 }, { 1, 2, 2 }, 0, GROUP_NETS_ALL, 330 }, FAMILY_MASK_NONE, ARC_SHARE_OF, true,
+		{ { 90, 125, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 146, GROUP_NO_COST }, { { 90, 160, 30 }, { 0, 1, 1 }, 0, GROUP_NETS_ALL, 220, GROUP_NO_COST },
+		{ { 130, 220, 40 }, { 1, 2, 2 }, 0, GROUP_NETS_ALL, 330, GROUP_NO_COST }, FAMILY_MASK_NONE, ARC_SHARE_OF, true,
 	};
 	family_mask_add(&r.home, 1);
 	GroupArc a, b;

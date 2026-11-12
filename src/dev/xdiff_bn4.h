@@ -48,6 +48,9 @@ void xd4_folder_put(const Spec *s);
  * the game writes it giving the Soul, so BN4_CHIP_GATE lets UNITE's pick through at OK (docs/multirom/bn4-souls.md, How BN4
  * takes a form) */
 void xd4_souls_put(const Spec *s);
+/* (panels=) a BN4 spec's panels given their types in the battle of `game` (4 BN4's, its type at a panel's +0, BN4_PANEL_TYPE; 6
+ * BN6's, at +2, BN6_PANEL_TYPE) before its first fight frame: each game makes a panel's flags from its type every frame */
+void xd4_panels_put(const Spec *s, int game);
 /* ... and BN4's MegaMan's form (its battle NaviStats' BN4_NAVI_FORM) said as it changes, once a frame where souls4 gave a Soul:
  * a Soul's unison and its turns' end, as the trace's numbers have them */
 void xd4_form_watch(void);
@@ -61,7 +64,8 @@ void xd4_start_confusion(const Spec *s, int game);
  * (xd4_start_confusion; and mood4, BN4's own dark rule at a DarkChip's use, its mood set 0 for the battle (BN4_DARK_MOOD: no Full
  * Synchro after, its emotion its dark one) and its calm with it, skipped on the guest: a hook there goes on to the use's next
  * step (BN4_DARK_MOOD_PAST), set once as its battle runs, so BN4's MegaMan keeps his mood as BN6's does,
- * docs/game/meta/darkchips.md); nothing outside a battle */
+ * docs/game/meta/darkchips.md; and a dark MegaMan's battle, which BN4 begins at mood 0 by his karma, given the
+ * NaviStats' start mood BN4_MOOD_START once); nothing outside a battle */
 void xd4_dark_rules(const Spec *s, int game, bool battle);
 /* BN4's families moved into BN6's engine as installed (--dev bn4families; 0 where they are not), and the k-th: a
  * mutation's call= aims their veneers as BN5's */

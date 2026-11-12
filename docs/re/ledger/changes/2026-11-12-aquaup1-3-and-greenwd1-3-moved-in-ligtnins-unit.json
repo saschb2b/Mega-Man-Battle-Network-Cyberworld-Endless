@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-12",
+  "what": "AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit (xreg_bn4 MOVED 181-186 as 0x8C, off ROWS_WAIT); BN4's third-kind sprite step (bn4_chips.h BN4_T3_SPRITE_STEP 0x08014446) copied with the unit (xchiprecipe_bn4 UNIT_COPIED), as BN4's Navis copy it; the differential's panels= gives a BN4 spec's panels a type in both games (src/dev/xdiff.c panels_step)."
+}

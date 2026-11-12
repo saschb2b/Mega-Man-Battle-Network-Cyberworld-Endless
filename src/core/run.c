@@ -15,6 +15,9 @@
 
 Run run;
 
+/* (data.h's question: chip_info's codes with the All * helper) */
+bool chips_all_star(void) { return run_all_star(); }
+
 /* Each area's guardian, drawn from navis that suit it; in the areas the
  * run visits, from those whose HP suits the act. */
 static const uint8_t pools[BIOME_COUNT][4] = {

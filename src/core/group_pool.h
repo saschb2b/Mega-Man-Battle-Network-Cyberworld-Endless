@@ -45,7 +45,7 @@ bool group_battle(int depth, int biome, uint32_t layer_seed, int index, int only
  * `run_seed` (group_arc.h): its signature, its beats, its challenge, by
  * the seed and the act alone, so every layer of the act and a CONTINUE
  * have the same; kept for the act once made. Act 1 of the first cycle
- * holds every beat to the eased pressure cap. False where no family of
+ * holds every beat to the eased limits (the band's lower half). False where no family of
  * the pool can be a signature there. */
 bool group_arc_at(uint32_t run_seed, int depth, int biome, GroupArc *out);
 /* Battle `e` (as the area rolled it) made the arc's beat of the layer at

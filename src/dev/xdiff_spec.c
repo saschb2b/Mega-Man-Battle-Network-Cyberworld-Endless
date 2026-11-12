@@ -193,11 +193,31 @@ static int skips_parse(Spec *s, const char *name, const char *v) {
 	return s->nskips > 0;
 }
 
+/* panels=CR:T[,CR:T...]: each panel (column C, row R, a hex digit each, the field's 1-6 and 1-3) given type T (hex) as the fight
+ * begins */
+static bool panels_parse(Spec *s, const char *v) {
+	for (const char *p = v; *p; ) {
+		unsigned cr, t;
+		int n = 0;
+		if (s->npanels >= MAX_PANELS || sscanf(p, "%2x:%x%n", &cr, &t, &n) != 2 || !n) return false;
+		unsigned col = cr >> 4, row = cr & 0xF;
+		if (col < 1 || col > 6 || row < 1 || row > 3 || !t || t > 0xF) return false;
+		s->panels[s->npanels].col = (uint8_t)col;
+		s->panels[s->npanels].row = (uint8_t)row;
+		s->panels[s->npanels++].type = (uint8_t)t;
+		p += n;
+		if (*p == ',') ++p;
+		else if (*p) return false;
+	}
+	return s->npanels > 0;
+}
+
 static int numbers_parse(Spec *s, const char *name, const char *v) {
 	unsigned a, b;
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
+	if (!strcmp(name, "panels")) return panels_parse(s, v);
 	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;
 	if (!strcmp(name, "sides")) return sscanf(v, "%x", &a) == 1 && a && a < 0x40 && (s->sides = (int)a) > 0;

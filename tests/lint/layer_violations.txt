@@ -8,8 +8,6 @@ src/analytics/analytics_online.c -> online/online_visit.h
 src/core/backup_info.c -> net/layer_make.h
 src/core/backup_manifest.c -> net/layer_make.h
 src/core/chips.c -> layer/text.h
-src/core/chips.h -> emu/emu.h
-src/core/data.c -> core/run.h
 src/core/desktop.c -> core/backup.h
 src/core/desktop.c -> launcher/launcher_roms.h
 src/core/desktop_win.c -> core/backup.h
@@ -23,7 +21,6 @@ src/core/group_pool.c -> emu/xvirus.h
 src/core/group_pool.c -> emu/xvirus_bn4.h
 src/core/ios.m -> core/backup.h
 src/core/ios_saves.m -> core/backup.h
-src/core/library_pages.c -> core/meta.h
 src/core/loot.c -> layer/xguardian.h
 src/core/loot.c -> net/net.h
 src/core/loot_souls.c -> emu/soulkinds.h
@@ -80,7 +77,6 @@ src/director/pet.c -> online/square_pet.h
 src/director/reward_pick_draw.c -> second/second_art.h
 src/director/reward_pick_draw.c -> second/second_card.h
 src/emu/battle_trace.c -> dev/xdiff_events.h
-src/emu/debug.c -> core/run.h
 src/emu/fast_forward_game.c -> dev/devtools.h
 src/emu/game_hooks.c -> dev/devtools.h
 src/emu/scene_emu.c -> core/start_3ds.h
@@ -108,7 +104,6 @@ src/emu/xpanels_look.c -> map/lz.h
 src/emu/xvirus.c -> layer/xnavi.h
 src/emu/xvirus_songs.c -> audio/xsong.h
 src/gfx/xbackdrop.c -> map/lz.h
-src/launcher/launcher.c -> saves/saves.h
 src/launcher/launcher_art.c -> layer/text.h
 src/launcher/launcher_art.c -> second/second_frame.h
 src/launcher/launcher_draw.c -> core/startup.h
@@ -120,7 +115,6 @@ src/layer/lib_prizes.c -> director/liberation_board.h
 src/layer/reward_words.c -> director/reward_pick.h
 src/layer/service_words.c -> director/darkchips.h
 src/layer/xguardian.c -> director/souls.h
-src/library/library.c -> dev/devtools.h
 src/library/library_draw.c -> second/second_art.h
 src/map/lanhp.c -> layer/npc.h
 src/online/arena_card.c -> second/second_frame.h
@@ -149,4 +143,3 @@ src/online/trade_screen_draw.c -> second/second_art.h
 src/saves/saves_draw.c -> second/second_frame.h
 src/saves/saves_text.c -> layer/guardians.h
 src/second/second_home.c -> core/start_3ds.h
-src/world/order_sort.c -> director/director.h

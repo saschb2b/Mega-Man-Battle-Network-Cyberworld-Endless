@@ -6,7 +6,6 @@
 
 #include "audio.h"
 #include "buttons.h"
-#include "devtools.h"
 #include "game.h"
 #include "library_draw.h"
 #include "library_text.h"
@@ -32,8 +31,8 @@ static void page_make(void) {
 		v->seen[v->n++] = seen;
 	}
 	v->at = v->top = 0;
-	library_count(v->entry, v->cls, &v->held, &v->of);
-	library_count(v->entry, -1, &v->entry_held, &v->entry_of);
+	library_count(v->entry, v->cls, meta_library_has, &v->held, &v->of);
+	library_count(v->entry, -1, meta_library_has, &v->entry_held, &v->entry_of);
 }
 
 static void cursor_to(int at) {
@@ -107,8 +106,6 @@ static void keys(void) {
 
 void library_open(void) {
 	memset(&L.v, 0, sizeof L.v);
-	/* (--dev library=N: every Nth chip id held, for the pages' pictures) */
-	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);
 	L.shown = true;
 	L.letting_go = false;
 	page_make();

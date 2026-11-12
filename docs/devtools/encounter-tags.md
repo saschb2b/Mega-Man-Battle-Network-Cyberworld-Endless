@@ -18,6 +18,7 @@ Neither changes what a player's run holds.
 python3 tools/encounter_tags.py dump      # the ROMs' families into tools/encounter_data/tags.tsv (every ROM beside BN6's)
 python3 tools/encounter_danger.py families --out tools/encounter_data/families.tsv   # each family alone: pressure and tricks
 python3 tools/encounter_danger.py pairs --out tools/encounter_data/pairs.tsv   # every two families together at V1 (1,830 runs; --most N a portion, a run stopped goes on)
+python3 tools/encounter_danger.py battles FIELDS.tsv --modes fight --seeds 1,2,3,4 --out tools/encounter_data/fields.tsv   # the fields' pass: one harmless pair on every field (lines "2C<TAB>1@52/272@51/field@2C")
 python3 tools/encounter_tags.py sample    # .build/encounter/battles.tsv: each act's own battles and the templates' fillings
 python3 tools/encounter_danger.py battles .build/encounter/battles.tsv --out tools/encounter_data/danger.tsv
 python3 tools/encounter_tags.py report [--write]   # the tables (--write: into the measured concept, after its mark)
@@ -94,7 +95,11 @@ pressure and its tricks as the engine's bits (`GROUP_BREAKS`,
 and from `pairs.tsv` the pairs that press a standing MegaMan 40 HP or
 more past the sum of their own pressures (`PAIR_EXTRA`), each with that
 excess (`group_pairs`), which both the tool's and the engine's
-prediction add for a group that holds the pair;
+prediction add for a group that holds the pair; each family's cost (the
+HP the test autopilot lost deleting its V1 alone, `families.tsv`'s fight
+rows), which a group's second cap adds up; and from `fields.tsv` the
+fields fair to a group (`group_fair_fields`: every fight won, 20 HP lost
+at most, `FIELD_FAIR`);
 `--check` fails where the file is not what it would write. After a
 family is moved in: `dump`, `encounter_danger.py families` for the new
 one, `engine`, `report --write`.

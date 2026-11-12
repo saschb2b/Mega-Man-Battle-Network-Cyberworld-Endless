@@ -63,8 +63,9 @@ MOVED = {
     163: 0x91, 164: 0x91, 165: 0x91,   # Meteors1-3: BN4's misc 0x11, BN6's grown misc routine 0x91 (bn4_chip_meteors1-3)
     130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
     78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
-    166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3); AquaUp1-3
-                                       # and GreenWd1-3 (181-186), the same routine, wait: tools/xchiprecipe_bn4.py ROWS_WAIT
+    166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3)
+    181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
+    184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
     97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
     82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
     193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
@@ -81,8 +82,7 @@ MOVED.update({
     157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
     160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
     190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
-    25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE,                      # ElemFlar, ElemIce, ElemLeaf, ElemSand: BN4's state 0x60, its subfamilies 0-3
-    # (ElemDark, 213, its subfamily 4, held: its shot animates a frame behind BN4's, untraced; docs/multirom/bn4-chips.md)
+    25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
 })
 # BN4's Navi chips whose Navi is moved into BN6's engine as a unit of kind 'navi' (tools/xchiprecipe_bn4_navi.py: the chip's own
 # first-kind Navi, run by BN6's Navi object), each proved by its bn4_chip_* spec: BN4's id -> the unit's number in BN6's grown

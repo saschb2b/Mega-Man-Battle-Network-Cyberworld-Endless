@@ -1,0 +1,24 @@
+[
+ {
+  "name": "the dark shot's sprite step BN6's way",
+  "spec": "bn4_chip_elemdark",
+  "poke": [
+   "08014472:46C0"
+  ],
+  "what": "the Elem unit's copy of BN4's third-kind sprite step (BN4_T3_SPRITE_STEP, 0x08014446, which ElemDark's shot takes by its params' +7) with its pop {pc} after a new animation's set-up (0x08014472) made a nop, so the sprite's update runs in that frame too, as BN6's nearest step (0x0801BBF4) does: the shot's frame count a frame ahead of BN4's from t33"
+ },
+ {
+  "name": "ElemDark's row's power another",
+  "spec": "bn4_chip_elemdark",
+  "poke": [
+   "08C077E6:006E"
+  ],
+  "what": "the registry's record of BN4's ElemDark (697 at CHIPS_RECORDS) with power 110 where BN4's record holds 220: the Mettaur left 110 HP more than BN4's"
+ },
+ {
+  "name": "BN4's dark MegaMan's mood kept at 0",
+  "spec": "bn4_chip_elemdark",
+  "mood4": 0,
+  "what": "the spec without mood4: BN4's dark MegaMan begins the battle at mood 0, his karma's dark emotion, so the counter of t54 gives no Full Synchro where BN6's does: it must part"
+ }
+]

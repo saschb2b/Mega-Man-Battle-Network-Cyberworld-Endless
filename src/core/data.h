@@ -69,8 +69,12 @@ extern const ChipDef chip_defs[];
 extern const int chip_def_count;
 const ChipDef *chip_def(int rom_id);
 
+/* Whether every chip comes in * alone (the All * helper): asked here and
+ * answered by the run (run.c, from run_all_star), so that the chips' data
+ * includes nothing of the run (docs/code/layers.md) */
+bool chips_all_star(void);
 /* Chip `rom_id`'s record: its name, power, elements and codes (with the All
- * * helper, run_all_star, its * alone, as the game's record then has it). */
+ * * helper, chips_all_star, its * alone, as the game's record then has it). */
 void chip_info(int rom_id, ChipInfo *out);
 /* Chip `rom_id`'s description in BN6's words ("Cannon to attack 1 enemy"). */
 void chip_desc(int rom_id, char *out, size_t outlen);
