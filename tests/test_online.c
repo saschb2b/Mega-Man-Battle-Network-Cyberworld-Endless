@@ -26,6 +26,7 @@
 char g_data_dir[512];
 /* (the extra ROMs read: none until the NetPass's test puts one in, rom.c's) */
 XRom XR[XROM_COUNT];
+int xroms_most = XROMS_MOST;
 static unsigned persists;
 void platform_persist(void) { ++persists; }
 /* (the week's post, online_week.c: what would go to the server) */
@@ -71,7 +72,9 @@ static void positions(void) {
 	/* (v17: BN4's bit, 0x20, beside BN5's; no bit past it) */
 	bytes[51] = (uint8_t)(ONLINE_ROMS_BN4 | ONLINE_ROMS_BN5 | 1 << ONLINE_LINK_SHIFT);
 	assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == ONLINE_ROMS_FULL && out.peers[0].link == 1);
-	bytes[51] = 0x40; assert(!online_wire_message(bytes, ONE, 100, &out));
+	/* (v18: bit 6, his system reads one extra ROM at most, beside the game it has; no bit past it) */
+	bytes[51] = (uint8_t)(ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN5 | ONLINE_BUSY_TRADE << ONLINE_BUSY_SHIFT);
+	assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == (ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN5) && out.peers[0].busy == ONLINE_BUSY_TRADE);
 	bytes[51] = 0x80; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[51] = 0;
 	for (size_t size = 0; size < ONE; ++size) assert(!online_wire_message(bytes, size, 100, &out));
 	bytes[34] = 8; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[34] = 7;
@@ -338,18 +341,56 @@ static void netpass(void) {
 	XR[XROM_BN5_COLONEL_US].data = NULL;
 	assert(!netpass_full() && !netpass_has(STAMP_TRADE));
 	XR[XROM_BN4_RED_SUN_US].data = NULL;
+	assert(!netpass_one_extra() && netpass_stamps() == 1 && netpass_game_fits(1) && netpass_game_fits(2));
+	/* (a system that reads one extra ROM at most, the New 3DS, protocol v18: no game beside BN6's, the Square's stamp,
+	 * either game's slot open; one of them, BN5's or BN4's, a full pass of the Square's and Trade's stamps, no room for
+	 * the other; the Arena and the DeepNet take every game, which it never holds) */
+	xroms_most = 1;
+	assert(netpass_one_extra() && !netpass_full() && netpass_stamps() == 1 && netpass_game_fits(1) && netpass_game_fits(2));
+	for (int x = 0; x < XROM_COUNT; ++x) {
+		XR[x].data = &bn5;
+		assert(netpass_full() && netpass_has(STAMP_SQUARE) && netpass_has(STAMP_TRADE) && !netpass_has(STAMP_ARENA) && !netpass_has(STAMP_DEEPNET));
+		assert(netpass_stamps() == 2 && netpass_game_fits(0) && netpass_game_fits(1 + x) && !netpass_game_fits(2 - x));
+		XR[x].data = NULL;
+	}
+	/* (... and were it to read both after all, every stamp) */
+	XR[XROM_BN5_COLONEL_US].data = &bn5; XR[XROM_BN4_RED_SUN_US].data = &bn4;
+	assert(netpass_full() && netpass_stamps() == STAMP_COUNT);
+	XR[XROM_BN5_COLONEL_US].data = XR[XROM_BN4_RED_SUN_US].data = NULL;
+	xroms_most = XROMS_MOST;
 	/* (another game's pass, by the bits every full set needs: protocol.json's roms_full) */
 	assert(!netpass_peer_full(0) && !netpass_peer_full(ONLINE_ROMS_BN5) && !netpass_peer_full(ONLINE_ROMS_BN4) && netpass_peer_full(ONLINE_ROMS_FULL));
+	/* (... or, his system reading one extra ROM at most, one game beside BN6's: he trades, and neither battles nor is watched with) */
+	const uint8_t one5 = ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN5, one4 = ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN4;
+	assert(!netpass_peer_full(ONLINE_ROMS_ONE_EXTRA) && netpass_peer_full(one5) && netpass_peer_full(one4));
+	assert(netpass_peer_has(one5, STAMP_TRADE) && netpass_peer_has(one4, STAMP_TRADE) && !netpass_peer_has(one5, STAMP_ARENA) && !netpass_peer_has(one4, STAMP_DEEPNET));
+	assert(!netpass_peer_has(ONLINE_ROMS_BN5, STAMP_TRADE) && !netpass_peer_has(ONLINE_ROMS_ONE_EXTRA, STAMP_TRADE) && netpass_peer_has(0, STAMP_SQUARE));
+	assert(netpass_peer_has(ONLINE_ROMS_FULL, STAMP_ARENA) && netpass_peer_has(ONLINE_ROMS_FULL, STAMP_TRADE) && netpass_peer_has(ONLINE_ROMS_FULL, STAMP_DEEPNET));
+	/* (whose game a chip is by the wire's numbers, as the server counts it, and a trade's common ground: BN6's own
+	 * every game holds, BN5's a game with BN5's ROM, BN4's own, from 527, one with BN4's) */
+	assert(netpass_peer_holds(0, ONLINE_BN6_CHIP_LAST) && !netpass_peer_holds(0, 210) && netpass_peer_holds(ONLINE_ROMS_BN5, 210));
+	assert(netpass_peer_holds(ONLINE_ROMS_BN5, ONLINE_BN4_CHIP_FIRST - 1) && !netpass_peer_holds(ONLINE_ROMS_BN4, ONLINE_BN4_CHIP_FIRST - 1));
+	assert(netpass_peer_holds(ONLINE_ROMS_BN4, ONLINE_BN4_CHIP_FIRST) && !netpass_peer_holds(ONLINE_ROMS_BN5, ONLINE_BN4_CHIP_FIRST));
+	assert(netpass_peer_holds(0, 5) && netpass_peer_holds(one5, 5) && netpass_peer_holds(one5, 411) && !netpass_peer_holds(one5, 700));
+	assert(netpass_peer_holds(one4, 700) && !netpass_peer_holds(one4, 411) && !netpass_peer_holds(0, 411) && netpass_peer_holds(ONLINE_ROMS_FULL, 700));
+	assert(!strcmp(netpass_missing_either_words(netpass_game(1)->name, netpass_game(2)->name), "Team Colonel's or Red Sun's ROM stamps Trade"));
+	assert(strstr(netpass_complete_one_extra, "this PET") && !strstr(netpass_complete_one_extra, "3DS"));
 	assert(!strcmp(netpass_missing_words(netpass_game(1)->name), "Team Colonel's ROM stamps Arena, Trade and DeepNet"));
 	assert(!strcmp(netpass_missing_words(netpass_game(2)->name), "Red Sun's ROM stamps Arena, Trade and DeepNet"));
 	/* (characters: stamps, never a game) */
-	const char *said[] = { trade_no_stamp(), trade_none_stamped(), square_greeter_stamp_words(), square_greeter_grew_words(),
-		square_peer_words("Alpha", NULL, false), square_week_post(WEEK_OFFER_STAMP, 2965, 0) };
+	const char *said[] = { trade_no_stamp(), trade_none_stamped(), square_greeter_stamp_words(true), square_greeter_grew_words(false),
+		square_greeter_stamp_words(false), square_greeter_grew_words(true), trade_none_shared("Alpha"),
+		square_peer_words("Alpha", NULL, false, false), square_week_post(WEEK_OFFER_STAMP, 2965, 0) };
 	for (size_t i = 0; i < sizeof said / sizeof *said; ++i) assert(!strstr(said[i], "BN5") && !strstr(said[i], "BN6") && !strstr(said[i], "BN4") &&
 		!strstr(said[i], "ROM") && !strstr(said[i], "Red Sun"));
 	assert(strstr(trade_no_stamp(), "NO TRADE\nSTAMP") && strstr(square_week_post(WEEK_OFFER_STAMP, 2965, 0), "NO DEEPNET\nSTAMP"));
 	OnlineProfile card = { .hp = 80, .max_hp = 100, .act = 1, .depth = 2 };
-	assert(!strstr(square_peer_words("Alpha", &card, true), "NetPass") && strstr(square_peer_words("Alpha", &card, false), "just the Square"));
+	assert(!strstr(square_peer_words("Alpha", &card, true, true), "NetPass") && strstr(square_peer_words("Alpha", &card, false, false), "just the Square"));
+	/* (a full pass without the Arena stamp, a PET of one extra ROM: why Battle is not offered with him) */
+	assert(strstr(square_peer_words("Alpha", &card, true, false), "no Arena stamp") && !strstr(square_peer_words("Alpha", &card, true, false), "just the Square"));
+	assert(strstr(square_greeter_stamp_words(false), "TRADE STAMP") && strstr(square_greeter_grew_words(true), "TRADE STAMP\nSTAYS"));
+	/* (the pass's level: the Square's, Trade's on a system of one extra ROM, the full pass's with every stamp) */
+	assert(!strcmp(netpass_level_trade, "Trade pass") && strcmp(netpass_level_trade, netpass_level_full));
 }
 
 /* a made-up want for the spares list's filter: 1 the even ids, 2 code A */

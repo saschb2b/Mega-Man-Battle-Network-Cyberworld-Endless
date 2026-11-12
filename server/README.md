@@ -324,6 +324,17 @@ tells its player through its NetPass (docs/online/netpass.md).
 Between two games of the full set there are no per-pair rules: every
 chip trades and every battle is by full rules.
 
+One kind of system cannot name the full set: a New 3DS reads one game's
+ROM beside BN6's at most. Its HELLO says so (protocol v18), and with one
+game named its pass is full for Trade Central: it trades, posts and
+answers offers, with any game whose pass is full. Its trades stay on the
+pair's common ground: a chip of a game either side lacks the ROM of is
+refused with NOTICE 19, and left out of the BOARD sent to the game that
+lacks it. NetBattles, watching and the week's posts stay with the full
+set, so such a session is refused those with NOTICE 28 as before. An
+ordinary system with one game beside BN6's is refused all of them, as
+before.
+
 A trade is one chip for one chip between two players of a channel (ids 1
 to 511, codes A to Z and \*, BN5's among them); one proposes with a
 chip, the other answers with one, and the server commits only once both
@@ -650,7 +661,7 @@ Each UTC day the server counts, with no personal data (`stats.py`):
 | `watched` | battles watched from the stands |
 | `dives` | the week's dives posted to the Board |
 | `versions` | HELLOs by the protocol version they carry, those of another version refused (16 versions apart, the rest as `other`) |
-| `passes` | joins by the NetPass: `full` (BN6's and BN5's ROMs) or `square` (BN6's alone) |
+| `passes` | joins by the NetPass: `full` (the full set: BN6's, BN5's and BN4's ROMs) or `square` (any less; a New 3DS's full pass with one game counts here, as it neither battles nor dives) |
 
 HELLO names no system, so the server counts none by system; the game's
 own statistics do, where the player said yes ([Anonymous

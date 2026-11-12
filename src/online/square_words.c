@@ -9,11 +9,13 @@ const char *square_look_option(void) { return "Look around"; }
 
 const char *square_strip_hint(void) { return "Lan,press SELECT\nand I'll strike a\npose or say hi!"; }
 
-const char *square_greeter_stamp_words(void) {
+const char *square_greeter_stamp_words(bool every) {
+	if (!every) return "WHOA! YOUR NETPASS\nHAS ROOM FOR THE\nTRADE STAMP NOW!|HOLD STILL! STAMP!";
 	return "WHOA! YOUR NETPASS\nHAS ROOM FOR EVERY\nSTAMP NOW!|HOLD STILL!\nSTAMP,STAMP,STAMP!";
 }
 
-const char *square_greeter_grew_words(void) {
+const char *square_greeter_grew_words(bool trades) {
+	if (trades) return "OH! THE ARENA AND\nDEEPNET STAMPS\nNEED MORE NOW!|MORE THAN THIS PET\nHAS ROOM FOR! SORRY!|YOUR TRADE STAMP\nSTAYS! HAVE A LOOK!";
 	return "OH! YOUR NETPASS\nGOT A NEW SLOT!|ARENA,TRADE AND\nDEEPNET STAY SHUT\nTILL IT'S FILLED!|HAVE A LOOK!";
 }
 
@@ -57,7 +59,7 @@ const char *square_card_facts(const OnlineProfile *card) {
 	return s;
 }
 
-const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full) {
+const char *square_peer_words(const char *name, const OnlineProfile *card, bool pass_full, bool arena) {
 	static char s[400];
 	int n = snprintf(s, sizeof s, "That's %s's\nMegaMan!", name);
 	const char *facts = square_card_facts(card);
@@ -65,6 +67,8 @@ const char *square_peer_words(const char *name, const OnlineProfile *card, bool 
 	n += snprintf(s + n, sizeof s - (size_t)n, "|%s", facts);
 	/* (why Battle and trades are not offered with him: his NetPass, in stamps) */
 	if (!pass_full) snprintf(s + n, sizeof s - (size_t)n, "|His NetPass has\njust the Square\nstamp.");
+	/* (a full pass of a PET with room for one game more: it trades, and Battle is not offered) */
+	else if (!arena) snprintf(s + n, sizeof s - (size_t)n, "|His NetPass has\nno Arena stamp.");
 	return s;
 }
 

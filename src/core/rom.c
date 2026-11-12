@@ -445,6 +445,12 @@ static const XRomLayout xlayouts[XROM_COUNT] = {
 };
 
 XRom XR[XROM_COUNT];
+int xroms_most = XROMS_MOST;
+
+void xroms_dev(const char *spec) {
+	const char *at = strstr(spec, "xroms=");
+	if (at && (at == spec || at[-1] == ',')) xroms_most = atoi(at + 6);
+}
 bool xrom_research;
 static int reviewed = -1;   /* (the area a dev tool reviews, XAREA_ALL every one; -1 none) */
 

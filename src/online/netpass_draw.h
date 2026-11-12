@@ -20,7 +20,7 @@
 
 typedef struct {
 	bool held[STAMP_COUNT];   /* the stamps drawn as held */
-	bool full;                /* the header's level */
+	bool full;                /* the header's level: every stamp held (else by the stamps: Trade's, or the Square's alone) */
 	int landing;              /* a stamp landing now (the stamp moment), -1 none */
 	int landing_t;            /* ... frames since it landed */
 	bool into;                /* drawn into memory (the second screen: gfx_draw_into) */

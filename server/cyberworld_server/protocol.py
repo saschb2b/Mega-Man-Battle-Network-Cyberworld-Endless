@@ -50,7 +50,9 @@ class ProtocolError(Exception):
 def read_hello(data):
     """HELLO checked: its name, guest key, channel, the ROMs its game has
     (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came,
-    roms_bn4 where BN4 Red Sun's did, v17)
+    roms_bn4 where BN4 Red Sun's did, v17; roms_one_extra where its system
+    reads one game's ROM beside BN6's at most, the channel's hello_one_extra
+    bit, v18: pass_full)
     and whether it takes back a place held (the channel's hello_resume bit,
     protocol v10: a game come back after its link dropped, holds.py)."""
     # (which side is behind, so the game can say where the newer one is: the
@@ -88,7 +90,10 @@ def read_hello(data):
         raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
     resume = bool(channel & SPEC["hello_resume"])
     roms = (SPEC["roms_bn5"] if bn5 else 0) | (SPEC["roms_bn4"] if bn4 else 0)
-    return name.decode("ascii").rstrip(), key, channel & ~SPEC["hello_resume"], roms, resume
+    # (v18: a system that reads one extra ROM at most says so; one that names both games' ROMs reads both)
+    if channel & SPEC["hello_one_extra"] and not (bn5 and bn4):
+        roms |= SPEC["roms_one_extra"]
+    return name.decode("ascii").rstrip(), key, channel & ~(SPEC["hello_resume"] | SPEC["hello_one_extra"]), roms, resume
 
 
 def hello_version(data):
@@ -109,7 +114,32 @@ def full_set(roms):
     return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
 
 
-def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, **overrides):
+def pass_full(roms):
+    """Whether a session's pass is full (v18): every game of the set its
+    system can read is in. The full set; or, on a system that reads one extra
+    ROM at most (roms_one_extra, HELLO's word: the New 3DS), one game of the
+    set beside BN6's. It opens Trade Central, within the pair's common ground
+    (holds); the Arena, the stands and the week's posts take full_set, the
+    same installs and the same dive on every game (docs/online/netpass.md,
+    A system with room for one game)."""
+    return full_set(roms) or bool(roms & SPEC["roms_one_extra"] and roms & SPEC["roms_full"])
+
+
+def chip_game(chip):
+    """The bit of the game whose ROM a chip takes (roms_bn4, roms_bn5), 0 for
+    one of BN6's own, every game's: BN4's own ids first, as chip_bn5 counts
+    every id past BN6's."""
+    return SPEC["roms_bn4"] if chip_bn4(chip) else SPEC["roms_bn5"] if chip_bn5(chip) else 0
+
+
+def holds(roms, chip):
+    """Whether a game with these ROMs holds a chip: the common ground of a
+    trade's two games is what both hold (v18)."""
+    game = chip_game(chip)
+    return not game or bool(roms & game)
+
+
+def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, one_extra=False, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
     rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
@@ -117,6 +147,7 @@ def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, **overri
     bn4 = bn5 if bn4 is None else bn4
     rom4 = (spec["bn4_code"].encode(), bytes.fromhex(spec["bn4_sha1"])) if bn4 else (bytes(4), bytes(20))
     channel |= spec["hello_resume"] if resume else 0
+    channel |= spec["hello_one_extra"] if one_extra else 0
     return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
                       spec["square_hash"], spec["rom_code"].encode(),
                       bytes.fromhex(spec["rom_sha1"]), *rom5, *rom4, key or secrets.token_bytes(16), channel, len(name)) + name
@@ -143,8 +174,9 @@ def read_state(data):
 
 def snapshot(players, recipient, flags=None):
     """SNAPSHOT: the recipient's channel's other players, each one's byte
-    his ROMs (bit 0) and, since v13, `flags` (peer_flags): what he is busy
-    with and his link's bars"""
+    his ROMs (bits 0 and 5; bit 6, v18, a system of one extra ROM at most)
+    and, since v13, `flags` (peer_flags): what he is busy with and his
+    link's bars"""
     room = players[recipient].channel
     peers = [player for player in players.values() if player.id != recipient and player.channel == room]
     data = bytes((SPEC["snapshot"], len(peers)))

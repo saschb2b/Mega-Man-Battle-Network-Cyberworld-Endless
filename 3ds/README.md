@@ -163,11 +163,13 @@ What differs from the other builds:
   measure it on the device (docs/online/arena/rollback/new-3ds.md). The
   Net Square, its cards and the referee's calls of the channel's battles
   work as elsewhere.
-- **Trades and the week's dive** need the NetPass's full set, BN5's and
-  BN4's ROMs beside BN6's (docs/GUIDE.md, The NetPass), and a New 3DS
-  reads one of the two. Its pass holds the Square stamp alone: the
-  trade board's offers and the week's ranking can be read there, and
-  it neither trades nor dives for the Board.
+- **Trades** work with one of BN5's or BN4's ROMs beside BN6's: a New
+  3DS reads one of the two, and with it its NetPass holds the Square and
+  Trade stamps (docs/GUIDE.md, The NetPass). A trade stays within the
+  chips both games hold. **The week's dive** stays shut: it takes both
+  ROMs, as a dive without one of them is another net than the Board's;
+  the week's ranking can still be read (docs/online/netpass.md, A system
+  with room for one game).
 - **Closing** from the HOME Menu: no frame is drawn once the system asks
   the game to close (the GPU is the HOME Menu's then; waiting on it hung
   the console), and the core's threads end before the game does.

@@ -92,8 +92,9 @@ are the next room to make: some 6 MB.
 
 BN4 Red Sun's ROM ([Battle Network 4 in a run](../../multirom/bn4.md)) is
 offered since 5 November 2026, its families and areas in runs. The 3DS
-reads one extra ROM at most, BN5's before BN4's (`start_3ds.c`'s
-`XROMS_3DS`), and leaves the second unread, said in `log.txt` ("a New
+reads one extra ROM at most, BN5's before BN4's (`start_3ds.c`, by
+`rom.h`'s `XROMS_MOST`, which the NetPass's rule reads too:
+[A system with room for one game](../../online/netpass.md#a-system-with-room-for-one-game)), and leaves the second unread, said in `log.txt` ("a New
 3DS holds 1 extra ROM beside BN6's, read already") and on the PET ("BN5
 found; BN4 too, but this 3DS has no room for it"). Modelled on 4
 November 2026 (`python3 tools/heap3ds.py --cases bn5,bn4,all --seeds

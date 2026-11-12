@@ -14,7 +14,11 @@ player's (`trade_central.c`, words in `trade_words.c`). Both games hold
 the NetPass's Trade stamp (above), so every chip of either game's
 registry trades, BN5's too: its ids are the registry's, fixed in
 `src/core/xchips_registry.c`, so they name the same chip on every game
-with BN5's ROM. To a game without the stamp the clerk says it has none,
+with BN5's ROM. Since protocol v18 two games with the stamp need not
+hold the same ROMs (a New 3DS's pass is full with one game beside
+BN6's), so the spares list for a Navi shows the chips his game holds
+too and the server refuses any other (NOTICE 19):
+[A system with room for one game](netpass.md#a-system-with-room-for-one-game). To a game without the stamp the clerk says it has none,
 and the trade board's offers still read; the server refuses that game a
 trade, a post and an answer (NOTICE 28).
 

@@ -38,9 +38,10 @@
   shows a new open slot, the greeter tells you once, and the stamps land
   again when you add BN4's ROM. BN4's chips go into NetBattles and trades
   as each is proved; one not yet proved stays out. A New 3DS reads one
-  ROM beside BN6's, so for now it keeps the Square alone: its trades and
-  dives come back in a later version. Online play speaks protocol v17:
-  an older build and this one no longer meet.
+  ROM beside BN6's, so BN5 or BN4 alone gives it the Trade stamp: it
+  trades the chips both games hold, and the week's DeepNet stays shut
+  there, its dive not being the Board's without the other game. Online
+  play speaks protocol v18: an older build and this one no longer meet.
 - **BurnerMan and SparkMan in BN6's engine.** With BN4's ROM beside
   BN6's, BurnerMan and SparkMan of Red Sun now fight in BN6's battle as
   BN4 fights them, each proved frame by frame against BN4's own battle.
@@ -145,7 +146,8 @@
 - **Online: protocol v16.** The Net Square, Trade Central and the Arena
   now take chip ids up to 1023, ground for BN4 Red Sun's chips and BN5's
   last ones, which need ids past BN6's 511. Games of this version meet
-  only games of this version and a server that speaks v16; an older game
+  only games of this version and a server that speaks its protocol (v18
+  by this release, the NetPass's entry above); an older game
   hears that it is behind, as with every new protocol. Someone hosting
   their own Square updates the server with the game.
 - **Chip ids past 511.** BN6's chip ids grew from nine bits to ten inside
