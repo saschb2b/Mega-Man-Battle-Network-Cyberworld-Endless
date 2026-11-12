@@ -1,0 +1,9 @@
+{
+  "branch": "bn4-fireplus",
+  "what": "BN4's FirePlus moved (support 0x4C's kind 0, its chip 285, id 563): the grass it lays; the other three Plus chips left out (the owner's call 12). Its two fourth-kind types take the generator's next numbers at its merge, two held here",
+  "takes": {
+    "dispatch4": [["0xA0", "0xA1"]]
+  },
+  "units": ["BN4 chip FirePlus"],
+  "run": false
+}
