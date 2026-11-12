@@ -6,7 +6,6 @@
 #include "bn6_chips.h"
 #include "chip_pool.h"
 #include "chips.h"
-#include "meta.h"
 #include "rom.h"
 #include "xchips.h"
 #include "xchips_registry.h"
@@ -90,15 +89,15 @@ int library_page(int entry, int cls, LibSlot *out, int most) {
 	return library_page_of(rows, n, cls, library_plays, out, most);
 }
 
-void library_count(int entry, int cls, int *held, int *of) {
+void library_count(int entry, int cls, bool (*has)(int chip), int *held, int *of) {
 	const LibSlot *rows;
 	int n = rows_of(entry, &rows);
-	library_tally(rows, n, cls, library_plays, meta_library_has, held, of);
+	library_tally(rows, n, cls, library_plays, has, held, of);
 }
 
-bool library_whole(int entry, int cls) {
+bool library_whole(int entry, int cls, bool (*has)(int chip)) {
 	int held, of;
-	library_count(entry, cls, &held, &of);
+	library_count(entry, cls, has, &held, &of);
 	return of > 0 && held >= of;
 }
 

@@ -9,7 +9,6 @@
 #include "bytes.h"
 #include "chips.h"
 #include "rom.h"
-#include "run.h"
 #include "xprograms.h"
 
 /* rom id, behaviour, parameter, tier (0 common - 4 legendary), price (x100 z) */
@@ -159,7 +158,7 @@ void chip_info(int rom_id, ChipInfo *out) {
 	}
 	/* (the All * helper: in * alone, as the game's record then has it, so
 	 * every reward, stock and prize the engine rolls comes in *) */
-	if (run_all_star() && out->ncodes) {
+	if (chips_all_star() && out->ncodes) {
 		out->codes[0] = '*';
 		out->ncodes = 1;
 	}

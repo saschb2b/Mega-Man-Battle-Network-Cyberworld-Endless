@@ -8,7 +8,6 @@ src/analytics/analytics_online.c -> online/online_visit.h
 src/core/backup_info.c -> net/layer_make.h
 src/core/backup_manifest.c -> net/layer_make.h
 src/core/chips.c -> layer/text.h
-src/core/data.c -> core/run.h
 src/core/desktop.c -> core/backup.h
 src/core/desktop.c -> launcher/launcher_roms.h
 src/core/desktop_win.c -> core/backup.h
@@ -22,7 +21,6 @@ src/core/group_pool.c -> emu/xvirus.h
 src/core/group_pool.c -> emu/xvirus_bn4.h
 src/core/ios.m -> core/backup.h
 src/core/ios_saves.m -> core/backup.h
-src/core/library_pages.c -> core/meta.h
 src/core/loot.c -> layer/xguardian.h
 src/core/loot.c -> net/net.h
 src/core/loot_souls.c -> emu/soulkinds.h
