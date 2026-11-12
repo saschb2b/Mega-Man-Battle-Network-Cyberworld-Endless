@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-12
+* **Update**: multirom/bn4-chips.md (DarkBomb and DrkSpred moved, the bug an attack DarkChip gives cleared by calm4, DrkCanon waiting on BN4's computed powers), rom/bn4.md (the bug in the battle NaviStats), devtools/differential.md (calm4 widened).
 * **Update**: game/battle-lab.md (Built: the stage takes every game's, BN5's and BN4's areas' battle backgrounds and installed songs on STAGE, each BN6 area's second background, how a set keeps them, the proof; the panels BN6 has no type for named as a move of their own), code/director.md (`lab_stage.c`).
 * **Update**: multirom/bn4-chips.md (FirePlus moved: the grass; its timer kept nowhere and the HUD's icon not moved; call 12's wording), devtools/chip-recipe-generator.md (UNIT_AIMS: a call aimed by hand at a stub), rom/bn4.md (the Plus chips' object and timers, the player's tick, Marking: a new row).
 * **Update**: multirom/bn4-chips.md (The Program Advances are formed: fourteen of BN4's nineteen in BN6's grown list, PitRng's unit, what waits on its parts, what no spec reaches), rom/bn4.md (BN4's checker read, `BN4_PA_CHECK` and its two kinds; `BN4_BATTLE_DECK`, new row; PitRng's code, new row; the boomerang's spawner), rom/chips-code.md (BN4's recipes after BN5's in the same room), devtools/differential.md (`deck4=`, the `bn4_pa_*` specs' foes), devtools/chip-recipe-generator.md (a misc unit that moves a fourth-kind type, a shared type by unit, a Program Advance's row).
