@@ -18,7 +18,7 @@
 #include "gamecall.h"
 #include "gfx.h"
 #include "guardians.h"
-#include "mapslot.h"
+#include "meta.h"
 #include "net.h"
 #include "platform.h"
 #include "rivals.h"
@@ -104,6 +104,9 @@ void devtools_veteran(void) {
 	if (dev.duels >= 0) { profile.duel_won = (uint16_t)dev.duels; profile_save(); }
 	/* (a bit a folder but the Standard's, every one meta.h has) */
 	if (dev.folders) { profile.folders_open |= 0xFFFEu; profile_save(); }
+	/* (library=N: every Nth chip id held, for the Library's pages' pictures;
+	 * not saved by this, as when the screen filled them as it opened) */
+	for (int id = dev.library; dev.library > 0 && id < META_LIBRARY_IDS; id += dev.library) meta_library_add(id);
 	/* (the card as the first Battler gives it, Mettaur's and Gunner's data
 	 * on it, and the mask's: btlr_card.h) */
 	if (dev.viruses) {

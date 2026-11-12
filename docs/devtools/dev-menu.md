@@ -143,7 +143,7 @@ record lacks blank, no picture, no code and no effect, its own JustcOne and
 FireBrn2 in * too, and the `chip` step says so where it is given one),
 `folder=ID/N` its first N
 entries alone; `library=N` puts every Nth chip id in the profile's Library
-as the PET's Library opens (1: every chip), for its pictures; `alias=ID` makes chip ID a copy of Cannon (an id past
+at the start (1: every chip), for its pictures; `alias=ID` makes chip ID a copy of Cannon (an id past
 BN6's records, the proof of chip ids past 511) and `reward=ID` makes every
 battle's reward chip ID in its first code (a chip on the results screen;
 past 511 a reward's wide form); `pack=N` puts a copy of each of the first N chips in the
