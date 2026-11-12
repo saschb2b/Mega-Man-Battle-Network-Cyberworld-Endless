@@ -403,8 +403,9 @@ November 2026, behind a dev switch: no run of a player's holds a group.
 - **A constellation's field** follows the owner's second call: one of the
   area's own battles' fields on which every panel the group stands on is
   plain or cracked, else the plain field. Two group battles in three
-  stand on a field of their area's (four in five in the median area and
-  layer); the areas whose own fields are special panels where enemies
+  stood on a field of their area's (four in five in the median area and
+  layer; since the fields' pass a field must be fair too, and it is 63%,
+  three in four in the median: Easing act 1's pair); the areas whose own fields are special panels where enemies
   stand give the fewest (the Robot Control Comp none, the Park Area one
   in twenty). An older net's area takes the plain field until step 2
   reads its records' fields.
@@ -485,9 +486,9 @@ player's has an arc.
   layer, so a third battle is seldom met, and the beat alone is an eased
   battle as the second opener is. Never with the Gentle helper, on a side
   layer or a Glitch layer.
-- **Act 1 holds every beat to the eased cap** (146 in place of 220):
-  MegaMan has 100 HP there, and a group at the cap deleted the autopilot
-  on a first layer (Step 1, built). The owner's to confirm or lift.
+- **Act 1 holds every beat to the eased limits**: the band's lower half
+  and two thirds of the caps, as its first beat (Easing act 1's pair,
+  below).
 - **The Server's challenge** is the filling of most predicted pressure
   that holds the signature, inside a challenge's limits (the next act's
   band, its versions, the cap grown as the band's cap on one hit is).
@@ -537,6 +538,90 @@ player's has an arc.
   area and reads each beat again from the ROM's records: none past its
   limits, a signature in each. A unit test holds the arc's rules on a
   made-up pool.
+
+### Easing act 1's pair
+
+Before the arc is turned on. The test autopilot on seeds 1 to 12, fresh
+data folders, 45,000 frames a run, deleted in act 1 by viruses:
+
+| The arc | Act 1 deletions | Of them a group's battle | Random battles won | Layers reached, all runs |
+| --- | ---: | ---: | --- | ---: |
+| Off | 2 | - | 38 of 42 | 36 |
+| On, as step 2 built it | 4 | 3 | 33 of 37 | 32 |
+| On, the pair in the band's lower half | 2 | 0 | 44 of 47 | 38 |
+| On, the pair's partner one of the area's own | 4 | 3 | 35 of 39 | 33 |
+| On, a cap on what a group costs | 2 | 0 | 38 of 41 | 35 |
+| On, the lower half and the cap on cost | 3 | 1 | 41 of 45 | 35 |
+| On, those and fair fields (the rule) | 2 | 0 | 40 of 43 | 35 |
+
+A partner of the area's own changes nothing: the pairs that deleted the
+autopilot were inside every limit whoever the partner was. The band's
+lower half took them out by their HP (130 and 160 against 125). What the
+tally found on the way is what the pressure cap does not see, and it is
+two things.
+
+- **The fight.** Pressure is what a standing MegaMan loses in 20 seconds.
+  It does not see how long a family takes to delete, nor what lands on a
+  MegaMan who lines up to shoot. The two partners that deleted the
+  autopilot press a standing MegaMan for 60 and 90, and each costs the
+  autopilot 50 HP in 42 seconds fought alone; one family of act 1's pool
+  presses for nothing and costs 215. So a group has a second cap, on its
+  **cost**: each family's HP lost by the test autopilot deleting its V1
+  alone with the starting folder (measured with the tags, 50 seconds at
+  most), by its hit at the version fought, added up; held to the
+  three-quarter mark of what the act's areas' own battles are predicted
+  to cost, as the pressure cap is: 0, 60, 145, 140, 180 and 678, the
+  Nest 447 (`group_cost_cap`; [measured](encounter-groups-measured.md),
+  A cap on pressure). Act 1's is nothing: its own battles cost the
+  autopilot nothing alone, so its groups are of families that do not
+  either.
+- **The field.** With both caps one run was still lost to a group: BN6's
+  family 1 beside BN5's 51, 110 HP, which costs the autopilot 0 to 20 HP
+  on the plain field in six fights. On one of that area's own fields the
+  same pair cost it 80 to 120 HP in four fights, and on three others it
+  could not be deleted in 50 seconds. The owner's second call checked a
+  field under the group's own panels; what a field does to MegaMan's
+  side (holes, poison, ice, panels he cannot stand on) no measure of the
+  families sees, and an area's records are authored for their field
+  where a group is not. So the fields are measured: that pair, harmless
+  on the plain field, fought four times on each of the 120 fields the
+  areas' random battles use. 100 are fair (every fight won, 20 HP lost
+  at most, as on the plain field), and a group takes an area's field
+  only where it is fair (`group_field_fair`; measured, The fields). The
+  second call stands with that added.
+
+The rule, then: act 1's pair and constellation in the band's lower half
+with the caps' two thirds, as its first beat; the cap on cost beside the
+pressure cap in every act; an area's field only where it is fair.
+
+What it costs is variety in act 1: with every ROM four families can be
+its signature (BN6's 1, BN5's 32, 34 and 51) where thirteen could, and
+its beats are eight battles in all. With BN6 alone act 1 has no arc: no
+two of its families pair inside the limits, and the act stays the
+area's own. From act 2 the signatures are 21, then 39 to 55.
+
+The area's own battles still delete the weak autopilot in act 1, with
+the arc off and on alike (two runs in twelve): that is the game as it
+was, and not this rule's to mend.
+
+### Calls taken in the build
+
+Four calls of the build were taken by the session that built it, not by
+the owner. They were shown to him with step 2's report on 11 November
+2026 and he raised no objection:
+
+- **Act 1's beats are eased** (first to two thirds of the pressure cap,
+  146 for 220; now the band's lower half too, above).
+- **The first layer's beat is the run's second battle**, not its third:
+  players fight 1.3 battles a layer.
+- **The card names the signature family whether or not MegaMan has met
+  it**, where the guardian's line keeps "???" until he has.
+- **A Navi in the Server's challenge stays**: where the area's own
+  challenge rolls a Navi, no constellation takes his place.
+
+The owner's go for step 3, 11 November 2026: "Yes, ease then on", the arc
+turned on for players once act 1's pair is eased, without waiting for
+BN4's remaining chips.
 
 ## The five calls, decided
 
