@@ -611,6 +611,14 @@ is used.
     prints the list as it is made, a line a row ("lab: row 30 family 32
     "CanGard" versions 3f count 0"): 113 rows with every family and Navi
     open and both ROMs read, 65 families and 48 Navis, none unnamed.
+  - *A win's two lines* (0.21.0's pictures found them broken: "0:01:21.
+    Lv / S. HP -0." after a battle, and a set's best cut off after
+    "Lv"): the information box holds 13 letters a line, so a win reads
+    "0:01:21 Lv S" and under it "HP -20." or "No HP lost.", after a
+    battle and as a set's best alike (the word "Best" went: the page is
+    SETS); "Deleted at" and "Left at" break before their time. A box of
+    one line (FIELD's strip) reads the break as a space. The lines
+    quoted above as seen were the earlier wording.
   - Not yet: MegaMan's Regular chip is the run's still, whatever stands
     at its place in the Lab's folder; a chip of a game whose ROM is not
     read stays in a kept folder as its placeholder.
