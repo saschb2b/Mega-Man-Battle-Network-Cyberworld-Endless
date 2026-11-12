@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **Every act has its virus.** Each act of a run is now about one virus
+  family, named on the act's card ("BombCorn signal"). Its first layer
+  meets that virus alone, the second beside a partner, the third in a
+  battle built around it, and a Server's challenge is the hardest battle
+  it stands in. The family can be any game's whose ROM you have: BN5's
+  and BN4's viruses come to BN6's areas, more often the deeper you go,
+  and act 1 stays close to the area's own. Such a battle pays from that
+  family's own rewards, so a run's chips change with its acts. This
+  replaces the one visiting virus in every fourth battle and the deep's
+  mix of both nets; a layer's other battles are the area's own as ever.
 - **The Battle Lab.** Every virus MegaMan deletes adds to his battle
   data on its family, in every run. Once the data on three families is
   complete (eight deletions each), a Navi of Dad's lab stands in

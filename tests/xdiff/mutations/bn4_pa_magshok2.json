@@ -1,0 +1,10 @@
+[
+ {
+  "name": "MagShok2's power another",
+  "spec": "bn4_pa_magshok2",
+  "poke": [
+   "08C06AD6:0064:2"
+  ],
+  "what": "record 621's power 100 where BN4's MagShok2 has 250: the Spikey left 230"
+ }
+]

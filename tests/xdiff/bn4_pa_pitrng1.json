@@ -1,0 +1,159 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@63",
+ "mm": "23",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Program Advance PitRng1 (its 332, the registry's 611: BN4's misc routine 0x0D, a unit of its own at BN6's grown misc routine 0x8D: its launcher, the fourth kind's 0x6C, throws three boomerangs, Boomer's unit's copy of the third kind's 0x32, sixteen frames apart), from three Boomer1 of codes in a row (L, M, N), formed on each game's first Custom screen from the three dealt side by side (deck4, deck6) and picked left to right: BN4's own checker forms it there (BN4_PA_CHECK), BN6's from its list grown with BN4's recipes (src/core/xchips_pas_bn4.c, src/emu/xchips_code.c pas_stage), the P.A. shown in both; used at fight frame 30 from (2,3) against BN4's Mettaur of 250 HP at (6,3), his row, in the boomerangs' way round the field's edge: struck at t89, 50 HP left in both, the Mettaur's own wave striking MegaMan at t97 and t235 in both. (From row 2 the Mettaur comes into his row and is struck as it attacks: a counter hit, whose Full Synchro each engine shows by an object of its own.)",
+ "folder4": [
+  "164B",
+  "184B",
+  "1A4B"
+ ],
+ "folder6": [
+  "248:0B",
+  "248:0C",
+  "248:0D"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck4": [
+  "164B",
+  "184B",
+  "1A4B"
+ ],
+ "deck6": [
+  "248:0B",
+  "248:0C",
+  "248:0D"
+ ]
+}

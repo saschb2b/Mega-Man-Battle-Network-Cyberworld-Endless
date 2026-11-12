@@ -95,7 +95,7 @@ int xguardian_hp_fought(int navi, int version, int depth) {
 
 int guardian_element(int navi) {
 	int e = 0;
-	if (guardian_older(navi)) xrecords_navi_hp(XROM, guardian_older_ai(navi), 0, &e);
+	if (guardian_older(navi) || guardian_nebula(navi)) xrecords_navi_hp(XROM, guardian_bn5_ai(navi), 0, &e);
 	else if (guardian_bn4(navi)) e = xguardian_bn4_element(navi);
 	else e = navi > 0 ? enemy_element(enemy_id(1, navi, 0)) : 0;
 	return e > 0 ? e : 0;
@@ -115,11 +115,19 @@ static int xguardian_kind(int navi) { return guardian_older(navi) ? xrecords_sou
  * Colonel (BN5's chip ids: its SP the next, its DS the one after; the
  * registry's rows of these names, xchips_registry.c) */
 static const uint16_t navi_chips[6] = { 245, 248, 242, 251, 254, 257 };
+/* ... and of Nebula's two, LarkMan's and GridMan's (guardians.h GUARDIAN_NEBULA_*): their Navi chips their only pay, no Soul */
+static const uint16_t nebula_chips[2] = { 272, 275 };
+
+/* (BN5's id of his Navi chip `v`, 0 none) */
+static int bn5_chip_of(int navi, int v) {
+	return guardian_older(navi) ? navi_chips[guardian_older_ai(navi) - BN5_NAVI_COLONEL] + v
+		: guardian_nebula(navi) ? nebula_chips[navi - GUARDIAN_NEBULA_FIRST] + v : 0;
+}
 
 /* BN6's id of his Navi chip `v` (0 V1, 1 SP) where the registry has it and
  * it plays in BN6's battles here; 0 none */
 static int navi_chip_of(int navi, int v) {
-	const XChipReg *r = guardian_older(navi) ? xreg_of_bn5(navi_chips[guardian_older_ai(navi) - BN5_NAVI_COLONEL] + v) : NULL;
+	const XChipReg *r = bn5_chip_of(navi, v) ? xreg_of_bn5(bn5_chip_of(navi, v)) : NULL;
 	return r && !chips_sits_out(r->bn6) && chips_record(r->bn6) ? r->bn6 : 0;
 }
 
@@ -163,9 +171,9 @@ int xguardian_chip(int navi, int depth, int *code) {
 }
 
 bool xguardian_navi_chip(int chip) {
-	for (int k = 0; chip > 0 && k < 6; ++k)
+	for (int k = 0; chip > 0 && k < 8; ++k)
 		for (int v = 0; v < 3; ++v) {
-			const XChipReg *r = xreg_of_bn5(navi_chips[k] + v);
+			const XChipReg *r = xreg_of_bn5((k < 6 ? navi_chips[k] : nebula_chips[k - 6]) + v);
 			if (r && r->bn6 == chip) return true;
 		}
 	/* (BN4's of the Navis a run meets: BN4_NAVI_CHIPS' three a seat) */

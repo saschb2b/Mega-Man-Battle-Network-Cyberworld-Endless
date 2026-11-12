@@ -199,6 +199,15 @@ int counter_element(int depth, int biome, int navi) {
 	for (int f = 1; f < 64; ++f)
 		for (int v = 1; v < ELEM_COUNT; ++v)
 			if (weak[f] >> v & 1) { ++count[v]; ++total; }
+	/* (the act's signature family, in a battle of each of its layers: one more kind, where the area's own battles
+	 * did not count it, docs/game/progression/encounter-groups.md) */
+	int sig = loot_arc_signature(depth, biome);
+	const uint8_t *row = sig >= 0 ? enemy_triple(sig) : NULL;
+	int sw = sig >= 0 ? enemy_weakness(sig) : -1;
+	if (sw > 0 && sw < ELEM_COUNT && !(row && row[2] < 64 && (weak[row[2]] >> sw & 1))) {
+		++count[sw];
+		++total;
+	}
 	int best = 0;
 	for (int v = 1; v < ELEM_COUNT; ++v) if (count[v] > count[best]) best = v;
 	return best && count[best] >= 2 && count[best] * 2 >= total ? best : 0;
@@ -381,9 +390,8 @@ static int fielded(int depth, int biome, int target, const Formation **list, int
 int loot_territory = -1;
 int loot_deep[2] = { -1, -1 };
 int loot_older_share, loot_older_net = CHIP_NET_BN5;
-bool loot_visitors_always;
 int loot_groups_always;
-bool loot_arc;
+bool loot_arc = true;
 
 /* What each virus family the area's plain random battles can hold at
  * `depth` is weak to, as they field it (a bit per ELEM_* in weak[family]):
@@ -416,8 +424,6 @@ static void weak_kinds_here(int depth, int biome, uint16_t weak[64]) {
 		return;
 	}
 	bn6_weak_kinds(depth, biome, weak);
-	for (int k = 0; k < 2; ++k)
-		if (loot_deep[k] >= 0) xterritory_families(depth, loot_deep[k], weak);
 }
 
 static bool original_encounter(int depth, int biome, int kind, Encounter *e) {
@@ -553,7 +559,10 @@ bool loot_layer_nets(int biome, int tiles) {
 	if (biome == BIOME_UNDERNET || biome == BIOME_NEST) loot_deep[0] = xterritory_like(BIOME_UNDERNET);
 	if (biome == BIOME_GRAVEYARD || biome == BIOME_NEST) loot_deep[loot_deep[0] >= 0] = xterritory_like(BIOME_GRAVEYARD);
 	const NetAreaDef *a = tiles >= NET_AREAS ? net_area_def(tiles) : NULL;
-	if (loot_deep[0] < 0 && a && a->xrom > 0 && xterritory_native(tiles)) loot_territory = tiles;
+	/* (an older net's area's own records where the layer wears it, in the deep too: the deep's coin between the nets is
+	 * gone with the visitors, the older nets' families coming as the acts' signatures and their partners instead,
+	 * docs/game/progression/encounter-groups.md) */
+	if (a && a->xrom > 0 && xterritory_native(tiles)) loot_territory = tiles;
 	/* (the older Net's half of the finds: the area's own game's catalogue, in the deep every game's read:
 	 * docs/multirom/one-net.md, the older net's half; docs/multirom/bn4-chips.md, unit 7) */
 	int net = loot_deep[0] >= 0 ? CHIP_NET_OLDER : a && a->xrom > 0 ? chip_pool_net_of(a->xrom - 1) : -1;
@@ -572,7 +581,6 @@ Encounter loot_random_battle(int depth, int biome, int kind, uint32_t layer_seed
 	if (loot_arc && index == (depth == 1 ? 1 : 0) && (kind == ENC_NORMAL || kind == ENC_EASY) && !(run.helpers & HELP_GENTLE) &&
 		group_arc_battle(run.seed, depth, biome, false, &e))
 		return e;
-	if (visitor_due(layer_seed, index, depth, biome, kind)) visitor_apply(&e, depth);
 	return e;
 }
 
@@ -620,8 +628,7 @@ Encounter make_encounter(int depth, int biome, int kind) {
 	for (int i = 0; i < MAX_FOES; ++i) e.foes[i].id = -1;
 	/* (an older net's area: its own game's records, fought in BN6's engine,
 	 * issue #82; else BN6's area's) */
-	int x = nets_battle_area(loot_deep, loot_territory);
-	if ((x >= 0 && xterritory_encounter(depth, x, kind, &e)) || original_encounter(depth, biome, kind, &e)) {
+	if ((loot_territory >= 0 && xterritory_encounter(depth, loot_territory, kind, &e)) || original_encounter(depth, biome, kind, &e)) {
 		if (kind == ENC_FIRST) first_alone(&e);
 		return e;
 	}

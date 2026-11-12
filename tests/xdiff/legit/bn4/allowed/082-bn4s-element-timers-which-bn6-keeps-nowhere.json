@@ -1,0 +1,16 @@
+{
+ "name": "BN4's element timers, which BN6 keeps nowhere",
+ "whose": "megaman",
+ "kind": "T1",
+ "type": "0x1A0",
+ "part": "ai",
+ "offsets": [
+  "0x3C",
+  "0x43"
+ ],
+ "direction": "BN4 has, BN6 not",
+ "why": "BN4's Plus chips' object (the fourth kind's 0x7F, 0x080EACDC) stores four halfwords in the user's battle data, +0x3C to +0x42, by 0x0800BFF4(side): its element's 480 and the other three 0 (0x080EACEA-0x080EAD00); the player's tick counts them down (0x08022E44-0x08022E58). Their one reader in BN4 is the HUD's icon (0x08014CC0: the first not 0 picks an icon's tiles); no caller of 0x0800BFF4 else touches them, and FirePlus's doubling of fire is the grass it lays, not the timer (docs/multirom/bn4-chips.md, the owner's call 12, measured). BN6 has no such icon and keeps other fields at those offsets, so FirePlus's unit aims the call at the chips' stub that returns 0 (tools/xchiprecipe_bn4.py UNIT_AIMS) and the timers are kept nowhere. Only where BN6's bytes there read 0 (the direction): a field of BN6's own that ever holds something is compared as ever.",
+ "evidence": [
+  "bn4_chip_fireplus t34: MegaMan's AI data +0x3C 0x01DF in BN4's (480 less the frame), 0 in BN6's, counting down a frame at a time; nothing else of the battle apart"
+ ]
+}

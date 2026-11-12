@@ -45,7 +45,7 @@ static void seek_each(const GroupFill *g, void *ctx) {
 static int seek(const GroupFam *pool, int n, const GroupLimits *l, Seek *s) {
 	s->count = 0;
 	for (int t = 0; t < GROUP_TEMPLATES; ++t)
-		if (t != GROUP_SWARM) group_fillings(pool, n, l, t, seek_each, s);
+		if (t != GROUP_SWARM) group_fillings_with(pool, n, l, t, s->with, seek_each, s);
 	return s->count;
 }
 
@@ -67,15 +67,12 @@ static void pairs_each(const GroupFill *g, void *ctx) {
 	++pairs[g->fam[1]];
 }
 
-/* The first beat: two of the family, or one, whichever holds more HP
- * inside the eased limits (two viruses at most, the easing rule) */
-static bool alone(const GroupFam *pool, int i, const GroupLimits *eased, GroupFill *out) {
-	GroupFill one, two;
-	bool has1 = group_same(pool, i, 1, false, eased, &one), has2 = group_same(pool, i, 2, false, eased, &two);
-	if (!has1 && !has2) return false;
-	*out = has2 && (!has1 || two.hp >= one.hp) ? two : one;
-	return true;
-}
+/* The first beat: one of the family, at its highest version inside the
+ * eased limits. One alone is the battle the tags measured; two of a kind
+ * were its first form, and two panel breakers at a version past their V1
+ * deleted the test autopilot where the V1's numbers said nothing would
+ * (docs/game/progression/encounter-groups.md, Step 3). */
+static bool alone(const GroupFam *pool, int i, const GroupLimits *eased, GroupFill *out) { return group_same(pool, i, 1, false, eased, out); }
 
 /* The signature: of the families that can carry the act (alone inside the
  * eased limits, and in a pair), one of the area's own or one that is not,
@@ -83,8 +80,9 @@ static bool alone(const GroupFam *pool, int i, const GroupLimits *eased, GroupFi
 static int signature(const GroupFam *pool, int n, const ArcRules *r, uint32_t roll, bool *home) {
 	int pairs[GROUP_POOL_MAX] = { 0 }, own[GROUP_POOL_MAX], away[GROUP_POOL_MAX], nown = 0, naway = 0;
 	GroupFill g;
+	/* (the two-family templates alone: the three-family one pairs nothing) */
 	for (int t = 0; t < GROUP_TEMPLATES; ++t)
-		if (t != GROUP_SWARM) group_fillings(pool, n, &r->plain, t, pairs_each, pairs);
+		if (t != GROUP_SWARM && t != GROUP_PINCER) group_fillings(pool, n, &r->plain, t, pairs_each, pairs);
 	for (int i = 0; i < n; ++i) {
 		if (!pairs[i] || !alone(pool, i, &r->eased, &g)) continue;
 		if (family_mask_has(r->home, pool[i].family)) own[nown++] = i;

@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"
@@ -180,7 +180,7 @@ reaching stage 2 to 4 without a detour; by the data taken it stays at 0.)
 | --- | --- | --- | --- |
 | 0 | the layer's own; now and then a band of rows torn sideways for a few frames | the layer's depth, as any layer's | on arrival, three boxes |
 | 1 | tears more often; blocks of the picture slipped by a tile | as 0 | |
-| 2 | **flips**: the whole layer shown in another area's look for a moment, under BN6's mosaic in and out, as the title changes its backdrops; colours turned in bands | a visitor of another area or net in each battle | "The floor turned into another area!" |
+| 2 | **flips**: the whole layer shown in another area's look for a moment, under BN6's mosaic in and out, as the title changes its backdrops; colours turned in bands | each battle a group of any area's or net's families ([Encounter groups](progression/encounter-groups.md); a visitor in each, before them) | "The floor turned into another area!" |
 | 3 | flips longer and more often | an act deeper | "The viruses here... They're getting stronger!" |
 | 4 | flips every second or two | as 3 | "Something's at the middle of all this!" |
 

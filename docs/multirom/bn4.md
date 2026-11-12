@@ -182,6 +182,13 @@ deep).
 
 ## Its viruses as visitors
 
+Since 12 November 2026 BN4's families come as the acts' signatures and
+their partners, in battles shaped for them, and the one-in-four visitor
+this section describes is gone
+([Encounter groups](../game/progression/encounter-groups.md), What it
+replaces). The roles and stages measured here are what the groups' pool
+reads. The section stands as it was written.
+
 Phase 1's way into runs, before BN4 has an area of its own: its moved
 families visit BN6's and BN5's battles as BN5's visit BN6's
 ([One net](one-net.md), the visitors' rule). Decided by this session on

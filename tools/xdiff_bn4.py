@@ -358,7 +358,7 @@ def bn4_as_bn6(rec, fams, navi_family=None):
 CHIP_RECORDS, CHIP_RECORD_SIZE, CHIP_SUBFAMILY, BN6_CHIPS = {4: 0x197EC, 6: 0x21DA8}, 0x2C, 0x0C, 411
 XREG4_ROW = re.compile(r'\{\s*(\d+),\s*(\d+),\s*XREG_\w+,')
 XREG4_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_RECORD,\s*(\d+),\s*0x([0-9A-Fa-f]{2}),')
-XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*\d+,\s*0x([0-9A-Fa-f]{2}),')
+XREG4_MOVED = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_(?:MOVED|PA),\s*\d+,\s*0x([0-9A-Fa-f]{2}),')   # (a Program Advance's row too, once it names its unit)
 XREG4_MOVED_TWIN = re.compile(r'\{\s*\d+,\s*(\d+),\s*XREG_MOVED,\s*([1-9]\d*),')
 SUPPORT_STATE4, CHIP_FAMILY = 0x0C, 0x0B   # (BN4's support state, its Navi chips' too: bn4_chips.h; a record's family, +0xB)
 MOVED_FAMILY = {}   # (the run's id of a moved row that names a twin for its family, a Navi chip's: the twin, chip_ids)
@@ -382,7 +382,10 @@ def chip_ids(spec):
     TWINS.update({int(to): (int(twin), None if sub.upper() == 'FF' else int(sub, 16)) for to, twin, sub in XREG4_TWIN.findall(rows)})
     # (a row whose code is moved, XREG_MOVED: no twin, its subfamily its unit's number in BN6's grown support routines)
     # (... or, from XC4_FIRST_ATTACK, its family's number in BN6's grown attack families: its subfamily BN4's own, attack_families)
-    TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)})
+    # (a Program Advance whose code is moved, XREG_PA with its unit's number, tools/xreg_bn4.py PAS: read as a moved chip's; one
+    # that names none, 0xFF, is unformed and no row here)
+    TWINS.update({int(to): (None, int(sub, 16) if int(sub, 16) < XC4_FIRST_ATTACK else None) for to, sub in XREG4_MOVED.findall(rows)
+                  if sub.upper() != 'FF'})
     # (... and one that names a twin for its family alone: a Navi chip's row, BN6's Navi family: legit.json's bn4 navi_chips)
     MOVED_FAMILY.clear()
     MOVED_FAMILY.update({int(to): int(twin) for to, twin in XREG4_MOVED_TWIN.findall(rows)})
@@ -1992,6 +1995,8 @@ def megaman_items(spec, game):
             parts.append(f'folder{g}=' + ','.join(spec[f'folder{g}']))
         for screen, steps in sorted(spec.get(f'cust{g}', {}).items(), key=lambda x: int(x[0])):
             parts.append(f'cust{g}={screen}:' + '/'.join(f'{k or "-"}.{n}' for k, n in steps))
+    if spec.get('deck4'):   # (BN4's battle deck in the spec's order, BN4_BATTLE_DECK: a Program Advance's parts in one hand)
+        parts.append('deck4=' + ','.join(spec['deck4']))
     if game == 'bn4:bn6' and spec.get('deck6'):   # (BN6's battle deck in the spec's order, as a BN5 spec's: two chips in one hand)
         parts.append('deck6=' + ','.join(spec['deck6']))
     for key in ('calm4', 'confuse6', 'mood4'):   # (an attack DarkChip's spec, and its mutation: src/dev/xdiff_spec.h)

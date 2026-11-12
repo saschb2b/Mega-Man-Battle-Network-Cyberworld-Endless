@@ -56,6 +56,7 @@ class Family:
         self.summoned, self.ver = False, {}
         self.role, self.cols, self.stage, self.bound, self.placed = 0, (0, 0, 0), 0, False, False
         self.pressure, self.tricks, self.fight = None, [], None
+        self.multi = {}   # (two and three of it together, measured: count -> (pressure, cost); the multiples' pass)
 
     @property
     def lean(self):
@@ -135,6 +136,7 @@ def measured(fams, path=None):
         if fam.fight and not fam.fight[0]:
             fam.tricks.append('tough')
     pairs_load(fams)
+    multiples_load(fams)
     return True
 
 
@@ -164,6 +166,9 @@ def pool(fams, nets, band):
 # (its two keys, sorted) -> that excess. A group that holds such a pair is predicted that much harder.
 PAIR_EXTRA = 40
 PAIRS = {}
+# ... and the pairs' cost pass (tools/encounter_danger.py pairs --modes fight, tools/encounter_data/pairs_cost.tsv): two
+# families that cost the test autopilot more together than their own costs add up to, by PAIR_EXTRA HP or more
+PAIRS_COST = {}
 
 
 def pairs_load(fams, path=None):
@@ -182,7 +187,39 @@ def pairs_load(fams, path=None):
         rows.append((a, b, got, own))
         if got - own >= PAIR_EXTRA:
             PAIRS[tuple(sorted((a, b)))] = got - own
+    PAIRS_COST.clear()
+    cost_path = os.path.join(os.path.dirname(path), 'pairs_cost.tsv')
+    for r in read_tsv(cost_path) if os.path.exists(cost_path) else []:
+        a, b = r['label'].split('+')
+        if a in fams and b in fams and fams[a].fight and fams[b].fight and int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2] >= PAIR_EXTRA:
+            PAIRS_COST[tuple(sorted((a, b)))] = int(r['hp_lost']) - fams[a].fight[2] - fams[b].fight[2]
     return rows
+
+
+def multiples_load(fams, path=None):
+    """The multiples' pass (tools/encounter_danger.py battles, tools/encounter_data/multiples.tsv): two and three of each
+    family together at V1, standing (the pressure) and fought by the test autopilot on two seeds (the cost, the worse of
+    the two). What several of one family do together is not what one does times their number: two panel breakers
+    leave MegaMan no floor."""
+    path = path or os.path.join(DATA, 'multiples.tsv')
+    if not os.path.exists(path):
+        return False
+    got = collections.defaultdict(lambda: [None, None])
+    for r in read_tsv(path):
+        key, n = r['label'].rsplit('x', 1)
+        if r['mode'] == 'idle':
+            got[(key, int(n))][0] = int(r['pressure20'])
+        else:
+            got[(key, int(n))][1] = max(got[(key, int(n))][1] or 0, int(r['hp_lost']))
+    for (key, n), (pressure, cost) in got.items():
+        if key in fams and pressure is not None and cost is not None:
+            fams[key].multi[n] = (pressure, cost)
+    return True
+
+
+def same(group):
+    """The measured numbers of a group that is several of one family (pressure, cost), None for any other."""
+    return group[0].multi.get(len(group)) if len(group) > 1 and len(set(group)) == 1 else None
 
 
 def pressure_of(group, vs):
@@ -192,6 +229,8 @@ def pressure_of(group, vs):
     if any(f.pressure is None for f in group):
         return None
     scale = [f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)]
+    if same(group):
+        return round(same(group)[0] * scale[0])
     total = sum(f.pressure * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs))
     for i in range(len(group)):
         for k in range(i + 1, len(group)):
@@ -207,7 +246,16 @@ def cost_of(group, vs):
     family's was not fought."""
     if any(f.fight is None for f in group):
         return None
-    return round(sum(f.fight[2] * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)))
+    scale = [f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs)]
+    if same(group):
+        return round(same(group)[1] * scale[0])
+    total = sum(f.fight[2] * f.ver[v]['hit'] / max(1, f.ver[0]['hit']) for f, v in zip(group, vs))
+    for i in range(len(group)):
+        for k in range(i + 1, len(group)):
+            extra = PAIRS_COST.get(tuple(sorted((group[i].key, group[k].key))))
+            if extra:
+                total += extra * max(scale[i], scale[k])
+    return round(total)
 
 
 def fit(group, band, test=None, cap=None, cost=None):
@@ -693,35 +741,44 @@ TRICK_BITS = (('GROUP_BREAKS', lambda f: any(t.startswith('panels:') for t in f.
 def cmd_engine(a):
     """The measured tags as the engine reads them: a row a family measured, its net, BN6's AI index, its pressure and
     its tricks."""
-    fams = load()[0]
+    fams, bands, pools, forms, _, _, _ = load()
     if not measured(fams):
         sys.exit('no tools/encounter_data/families.tsv: tools/encounter_danger.py families first')
+    caps = [[quarter_mark(own(fams, bands, pools, forms, act)) for act in range(len(bands))] for own in (own_pressures, own_costs)]
     rows = []
     for f in sorted(fams.values(), key=lambda f: (f.net, f.ai)):
         if f.pressure is None:
             continue
         tricks = ' | '.join(name for name, has in TRICK_BITS if has(f)) or '0'
-        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks}, {f.fight[2] if f.fight else -1} }},')
+        multi = ', '.join(f'{{ {f.multi[n][0] + 1}, {f.multi[n][1] + 1} }}' if n in f.multi else '{ 0, 0 }' for n in (2, 3))
+        rows.append(f'\t{{ {f.net}, {f.ai}, {f.pressure}, {tricks}, {f.fight[2] if f.fight else -1}, {{ {multi} }} }},')
     fair_bits = [0] * 32
     for field in fair_fields(fields_load()) or [0]:
         fair_bits[field >> 3] |= 1 << (field & 7)
     pairs = []
-    for (one, two), extra in sorted(PAIRS.items(), key=lambda kv: (fams[kv[0][0]].net, fams[kv[0][0]].ai, fams[kv[0][1]].net, fams[kv[0][1]].ai)):
-        pairs.append(f'\t{{ {fams[one].net}, {fams[one].ai}, {fams[two].net}, {fams[two].ai}, {extra} }},')
+    for one, two in sorted(set(PAIRS) | set(PAIRS_COST), key=lambda k: (fams[k[0]].net, fams[k[0]].ai, fams[k[1]].net, fams[k[1]].ai)):
+        pairs.append(f'\t{{ {fams[one].net}, {fams[one].ai}, {fams[two].net}, {fams[two].ai}, {PAIRS.get((one, two), 0)}, {PAIRS_COST.get((one, two), 0)} }},')
     text = '\n'.join([
         '/* groups.h: the families\' measured tags, a row each: its net (0 BN6\'s, 1 BN5\'s, 2 BN4\'s), BN6\'s AI index, its',
         ' * pressure (the HP a standing MegaMan loses in 20 seconds to its V1 alone), its tricks and its cost (the HP the test',
-        ' * autopilot loses deleting its V1 alone with the starting folder, 50 seconds at most; -1 not fought).',
+        ' * autopilot loses deleting its V1 alone with the starting folder, 50 seconds at most; -1 not fought), and of two and',
+        ' * of three of it together their pressure and cost as measured, each one more than the number (the multiples\' pass;',
+        ' * 0 not fought).',
         ' * Written by tools/encounter_tags.py engine from tools/encounter_data/ (docs/devtools/encounter-tags.md); do not',
         ' * edit: measure again and write it again (--check says whether this is what it writes). */',
         '#include "groups.h"', '',
         'const GroupTag group_tags[] = {'] + rows + ['};', 'const int group_tags_count = (int)(sizeof group_tags / sizeof *group_tags);', '',
         '/* The pairs that press harder together than their own pressures add up to (the pairs\' pass: tools/encounter_danger.py',
-        f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1: each family\'s net and BN6\'s AI index, and that excess. */',
+        f' * pairs), {PAIR_EXTRA} HP in 20 seconds or more at V1, or cost the test autopilot as much more than their own costs',
+        ' * add up to (pairs --modes fight): each family\'s net and BN6\'s AI index, the pressure\'s excess and the cost\'s. */',
         'const GroupPair group_pairs[] = {'] + pairs + ['};', 'const int group_pairs_count = (int)(sizeof group_pairs / sizeof *group_pairs);', '',
         '/* BN6\'s battlefields a group may stand on, a bit each by the field\'s number (the fields\' pass: a pair harmless on the',
         f' * plain field fought on each, fair where the test autopilot wins every fight and loses {FIELD_FAIR} HP at most). */',
-        'const uint8_t group_fair_fields[32] = {', '\t' + ', '.join(f'0x{b:02X}' for b in fair_bits) + ',', '};', ''])
+        'const uint8_t group_fair_fields[32] = {', '\t' + ', '.join(f'0x{b:02X}' for b in fair_bits) + ',', '};', '',
+        '/* The caps by act on a group\'s pressure and on its cost: the three-quarter marks of the acts\' areas\' own battles as',
+        ' * these tags predict them (acts 1 to 6, the Nest). */',
+        'const int16_t group_caps[2][PACING_ACTS] = {',
+        '\t{ ' + ', '.join(str(c) for c in caps[0]) + ' },', '\t{ ' + ', '.join(str(c) for c in caps[1]) + ' },', '};', ''])
     if a.check:
         if not os.path.exists(ENGINE) or open(ENGINE).read() != text:
             sys.exit(f'{os.path.relpath(ENGINE, ROOT)} is not what tools/encounter_tags.py engine writes')

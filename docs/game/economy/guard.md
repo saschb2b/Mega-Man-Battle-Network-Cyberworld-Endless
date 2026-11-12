@@ -3,7 +3,7 @@ type: Design
 title: "The guard"
 description: "The guard against economy drift: `build.py economy` holding the plan in play to bands a fifth either side (`econ_band`), `test_economy`'s curve tests, the run log's counts, the run-end statistics event and AGENTS.md's checks row."
 tags: [game, economy]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 ---
 
 # The guard
@@ -16,7 +16,10 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
    plan in play's (the opening one's) are outside: 0. Run it wherever
    drops, prices, Mystery Data, the dealers' stock or the levers change.
    A change that moves a number on purpose sets its band's centre in the
-   same commit, with the report's before and after in its message. A
+   same commit, with the report's before and after in its message:
+   `python3 tools/economy_centres.py` shows the centres the report gives
+   beside those in `economy.c`, `--write` sets them, and the report run
+   again says 0 outside (Re-centring, below). A
    run measured is a profile's past the Nest: the tournament's two rounds
    pay their results screens and Navi chips where its coin puts a bracket,
    and acts 3 to 5's chips and zenny were set with them on 5 November 2026
@@ -49,3 +52,28 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
    and the economy's curves: `build.py economy` with 0 outside the bands,
    `build.py test`, `build.py pacing` where battles' rewards change, and
    the game-design skill first.
+
+## Re-centring
+
+For a change that moves what a run hands out on purpose: a chip moved
+into a family's reward row (each of BN4's still to come does this, since
+the acts' arcs pay from the signature family's row), a price, a lever.
+
+1. `python3 build.py economy`: the report as the change left it. Read
+   which numbers stand outside (`!`) and that they are the ones the
+   change means to move. One that moved without a reason is a bug in the
+   change, not a centre to set.
+2. `python3 tools/economy_centres.py`: each centre the report measures
+   beside the one in `src/core/economy.c`. `--write` sets them all, both
+   plans and both nets, to the measured numbers.
+3. `python3 build.py economy` again: 0 of the plan in play outside its
+   bands.
+4. The commit names the numbers that moved, before and after, by act.
+   `python3 build.py economy noarc` writes `.build/economy-noarc.txt`,
+   the same report with the acts' arcs off, where the arcs' share of a
+   change is the question.
+
+When the encounter groups were turned on (12 November 2026) the arcs
+moved an act's battle zenny by -8% to +16% and its whole zenny by 5% at
+most, inside every band; the centres were set to the report with the
+arcs on, which also took in what the chips moved since the last setting.

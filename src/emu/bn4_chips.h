@@ -122,6 +122,18 @@
                                            * row of BN4_BOOMERANG_FLIGHTS, striking what it meets; sprite list 4's 0x14, sound 0xAB */
 #define BN4_BOOMERANG_FLIGHTS 0x080D31ECu /* ... its flights, six rows of three words before its routine: its timer's two bytes, its speed along
                                            * the rows, its speed across them (16.16) */
+#define BN4_BOOMER_SPAWN      0x080D3430u /* ... its spawner (r0 the column, r1 the row, r2 the element, r3 the height, r4 its parameters: the
+                                           * flight's row in the low byte, r6 the power word): Boomer's routine's call, and PitRng's launcher's,
+                                           * whose unit copies it alone and spawns Boomer's copy of the type (tools/xchiprecipe_bn4.py SHARED3) */
+/* PitRng1-3 (its Program Advances 332-334, misc subfamily 0x0D: three Boomer1, 2 or 3 of codes in a row), moved as a unit */
+#define BN4_PITRNG            0x080E9A36u /* its routine, in its launcher's code: the launcher spawned (movs r0,#0x6c; BN4_SPAWN_4), its element
+                                           * from r2 at +0x17, the power word from r6 at +0x2C, its side its user's; shorter than the support
+                                           * routines' common spawner, as the launcher takes no panel */
+#define BN4_T4_PITRNG         0x6C        /* the launcher, the fourth kind's (0x080E999C to 0x080E9A50), drawn by nothing: BN4_PITRNG_COUNT
+                                           * boomerangs (BN4_BOOMER_SPAWN), one each BN4_PITRNG_EVERY + 1 frames from its side's first column,
+                                           * the bottom row and the top row in turn, each on its own flight (its count less one), then gone */
+#define BN4_PITRNG_COUNT      0x080E99E4u /* ... movs r0,#3 into its +0x22: three boomerangs */
+#define BN4_PITRNG_EVERY      0x080E99F8u /* ... movs r0,#0xf into its +0x20, counted down a frame each: sixteen frames apart */
 /* Meteors1-3 (its chips 163-165, misc subfamily 0x11), moved as a unit (src/emu/xchips_bn4.c) */
 #define BN4_METEORS           0x080EAE92u /* its routine, after its controller's code: a panel aimed at (BN4_ROW_PANEL_ACROSS) and, where one
                                            * is found, the controller spawned on it (0x080EAE6C: its panel, element and damage) */
@@ -307,5 +319,25 @@
                                            * its panel and the eight around it in its first frame (its collision's +1 0x10), a spark (effect
                                            * 0x6B) on each of the eight in turn; sprite list 5's 0x14, sound 0x143 */
 #define BN4_T3_SPRITE_STEP    0x08014446u /* a third-kind object's sprite each frame (BN6's 0x0801BBF4; the first kind's 0x080143FC) */
+/* ... and the Plus chips (support 0x4C, chips 285-288: FirePlus, ThunPlus, AquaPowr, WoodPowr) and Marking (misc 0x0F) */
+#define BN4_T4_PLUS           0x7F        /* their object, the fourth kind's (0x080EACDC to 0x080EAD2E; its spawner 0x080EAD2E, the
+                                           * subfamily's routine): lives a frame; BN4_AI_OF_SIDE's data's four timers written (its
+                                           * kind's, obj +4, 480, the rest 0) and, kind 0 alone, the stage's changer spawned with kind
+                                           * 3, grass (0x080EAD10, BN4_PANEL_CHANGER_SPAWN) */
+#define BN4_AI_PLUS_TIMERS    0x3C        /* the AI data's four element timers, u16 each to +0x42 (fire, the next three by the kind):
+                                           * counted down by BN4_PLAYER_TICK, read by BN4_HUD_PLUS_ICON alone (searched: every
+                                           * caller of BN4_AI_OF_SIDE, every halfword at these offsets after a load of an object's
+                                           * +0x58). No chip's damage changes by one (measured, docs/multirom/bn4-chips.md, call 12) */
+#define BN4_PLAYER_TICK       0x08022E3Cu /* the player's timers each frame: BN4_AI_PLUS_TIMERS; then, where the side's record's first
+                                           * byte is not 0 (0x08022E62), that record's +0x2E, +0x3A, +0x3C and +0x16; then the AI
+                                           * data's +0x3A and its byte +0x1A */
+#define BN4_HUD_PLUS_ICON     0x08014CC0u /* the HUD's icon for a running element timer: the first of the four not 0 picks its tiles
+                                           * (pointers at 0x08014CF8, 0x180 bytes) for OBJ VRAM 0x06017480; BN6 has no such icon */
+#define BN4_MARKING           0x08022F5Au /* Marking's routine (misc 0x0F, 16 bytes): BN4_SIDE_RECORD's +0x16 = 600, which
+                                           * BN4_PLAYER_TICK counts only in a mode that sets the record's first byte: nothing in a
+                                           * plain battle (measured, call 13). Where it counts, each frame 0x0800B018 with r0 2: the
+                                           * user's collision data +0x1C 2 and flag 8, the status whose tick (0x0800AF62) spawns the
+                                           * mark over an object's head, the fourth kind's 0x06 */
+#define BN4_SIDE_RECORD       0x08022D8Au /* r0 a side: 0x020374B0 + 0x1B0 a side, a record of a side's own (BN6's another layout) */
 
 #endif

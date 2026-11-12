@@ -3,7 +3,7 @@ type: Feature
 title: "The extras"
 description: "The extras: what a run adds to BN6 that a player may leave out (Liberation Missions, the tournament, the Glitch layer, the Virus Battler, the DarkChips' flames, the older nets), each on or off on the JACK-IN SETUP's EXTRAS page, all on by default, kept for the run and named on its summary; the owner's calls of 5 November 2026."
 tags: [game, meta, setup]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
 sources:
   - id: owner
     resource: "The owner's brief and calls, given in the project's sessions on 5 November 2026"
@@ -31,7 +31,7 @@ page of their own, EXTRAS, beside the run's choices and the
 | Glitch | The rare glitching warp to a [Glitch layer](../glitch-layer.md) | `run_glitch_at` (`src/core/run_glitch.c`): the layer keeps the dark warp its seed rolled |
 | Virus Battler | BN6's [Virus Battler](../../world/level-design/virus-battler.md) at a side path's end | `fill_layer` (`src/net/net_gen.c`): placed as ever, then taken away, so every other object stands where it would (`test_extras`) |
 | DarkChips | The flame of darkness offering a DarkChip on each act's middle layer ([DarkChips](darkchips.md), [BN6's own](bn6-darkchips.md)) | `dark_flame_setup` (`src/director/director_dark.c`): no flame, BN5's or BN6's |
-| Older nets | Other games' areas, Navis and viruses in BN6's net ([other games' ROMs](../../multirom/overview.md)) | `run_dress`, `run_xguardian_at`, `run_darkloid` (`src/core/run.c`), `visitors_here` (`src/core/visitors.c`), `loot_layer_nets` (`src/core/loot.c`): BN6's own areas, guardians, Darkloids, battles and finds; no Soul, as no Navi of BN5's is met |
+| Older nets | Other games' areas, Navis and viruses in BN6's net ([other games' ROMs](../../multirom/overview.md)) | `run_dress`, `run_xguardian_at`, `run_darkloid` (`src/core/run.c`), `group_nets` (`src/core/group_pool.c`: the acts' arcs draw on BN6's families alone), `loot_layer_nets` (`src/core/loot.c`): BN6's own areas, guardians, Darkloids, battles and finds; no Soul, as no Navi of BN5's is met |
 
 Older nets is shown only where another game's ROM is read (`extra_shown`,
 `src/core/extras.c`): without one there is nothing of theirs to leave out.

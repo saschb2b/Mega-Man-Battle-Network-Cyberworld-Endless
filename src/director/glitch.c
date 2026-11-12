@@ -245,9 +245,9 @@ void glitch_update(void) {
 	G.shown = true;
 }
 
-void glitch_battle(int *depth, bool *visitors) {
+void glitch_battle(int *depth, bool *mixed) {
 	if (!G.on || G.settled) return;
-	if (G.stage >= 2) *visitors = true;
+	if (G.stage >= 2) *mixed = true;
 	if (G.stage >= 3) *depth += 3;
 }
 

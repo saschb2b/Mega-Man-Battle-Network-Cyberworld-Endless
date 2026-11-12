@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "06@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's FirePlus * (its chip 285) against the registry's row 563 (the unit of BN4's support 0x4C, its kind 0): picked on the first Custom screen and used at fight frame 30 against BN4's Mettaur of 250 HP at (5,2). Its object (the fourth kind's 0x7F) lives a frame and has the stage's changer (the fourth kind's 0x1F) turn all eighteen panels to grass at t34, sound 0x106 fifteen times and 0x107 once. BN4 also sets a 480-frame timer in the user's battle data, which BN6 keeps nowhere (legit's \"BN4's element timers\").",
+ "folder4": [
+  "351D"
+ ],
+ "folder6": [
+  "233:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

@@ -46,9 +46,12 @@ statistics, troubleshooting and building the game yourself.
   of BN5's guards such an area (KnightMan, ShadowMan, NumberMan,
   TomahawkMan, ToadMan, Colonel), and the Undernet's and the Graveyard's
   acts draw their guardians from both games' Navis; beaten, he gives his
-  Soul, which MegaMan can UNITE with in every battle after. From the
-  second act BN5's viruses and BN6's meet in battles, the Undernet's and
-  the Graveyard's acts draw on both, half the chips their shops and
+  Soul, which MegaMan can UNITE with in every battle after. Each act of
+  a run is about one virus family, named on the act's card ("BombCorn
+  signal"): its first layer meets it alone, the second beside a partner,
+  the third in a battle built around it, and that family can be BN5's
+  in a BN6 area, more often the deeper the run. Such a battle pays from
+  that family's own rewards. Half the chips their shops and
   Mystery Data hold are BN5's, which the Library lists on BN5's page, and its
   flames of darkness hold BN5's DarkChips. Its songs join the
   [Jukebox](#the-jukebox). Online, it completes the

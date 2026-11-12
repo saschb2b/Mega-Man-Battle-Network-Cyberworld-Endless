@@ -1,0 +1,159 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "72@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Program Advance BstFang1 (its 335, the registry's 614: TwnFng's state moved as BN6's grown attack family 0xD3, its subfamily 1, the fangs in volleys), from three TwnFng1 of codes in a row (A, B, C), formed on each game's first Custom screen from the three dealt side by side (deck4, deck6) and picked left to right: BN4's own checker forms it there (BN4_PA_CHECK), BN6's from its list grown with BN4's recipes (src/core/xchips_pas_bn4.c, src/emu/xchips_code.c pas_stage), the P.A. shown in both; used at fight frame 30 with BN4's Elmperor (300 HP, its enemy 0x72, which never moves) at (5,2), MegaMan's row, between the fangs: the eight volleys fly off the field, its 300 HP whole in both, MegaMan's state to its end, struck by the Elmperor at t131 and t251 in both, over 300 frames.",
+ "folder4": [
+  "0045",
+  "0245",
+  "0445"
+ ],
+ "folder6": [
+  "290:00",
+  "290:01",
+  "290:02"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck4": [
+  "0045",
+  "0245",
+  "0445"
+ ],
+ "deck6": [
+  "290:00",
+  "290:01",
+  "290:02"
+ ]
+}

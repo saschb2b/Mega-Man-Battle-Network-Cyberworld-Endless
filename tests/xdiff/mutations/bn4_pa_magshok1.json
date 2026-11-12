@@ -1,0 +1,27 @@
+[
+ {
+  "name": "MagShok1's recipe forms MagShok2",
+  "spec": "bn4_pa_magshok1",
+  "poke": [
+   "0880142E:026D:2"
+  ],
+  "what": "MagShok1's recipe (FREE_CHIP_PAS + 0x12C) names 621: the bolts' hit 250, the Mettaur deleted where BN4's leaves 50"
+ },
+ {
+  "name": "MagShok1 a MagBolt",
+  "spec": "bn4_pa_magshok1",
+  "poke": [
+   "08C06A9C:00:1"
+  ],
+  "what": "record 620's subfamily 0 where BN4's MagShok1 is 3: one bolt and MagBolt1's arm where BN4 puts three"
+ },
+ {
+  "name": "MagShok's pull the other side's",
+  "spec": "bn4_pa_magshok1",
+  "poke": [
+   "080EE148:81:1",
+   "080EE14C:82:1"
+  ],
+  "what": "the state's copy's two hit words for MagShok's pull, one a side (BN4 0x080EE148 0x1E05FF82 and 0x080EE14C 0x1E05FF81), swapped: the Mettaur pushed away where BN4 pulls it beside MegaMan"
+ }
+]

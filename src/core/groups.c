@@ -20,14 +20,24 @@ const GroupTag *group_tag(int net, int family) {
 
 bool group_field_fair(int field) { return field >= 0 && field < 256 && (group_fair_fields[field >> 3] >> (field & 7) & 1); }
 
-int group_pair_extra(int net_a, int family_a, int net_b, int family_b) {
+static const GroupPair *pair_of(int net_a, int family_a, int net_b, int family_b) {
 	for (int i = 0; i < group_pairs_count; ++i) {
 		const GroupPair *p = &group_pairs[i];
 		if ((p->net_a == net_a && p->family_a == family_a && p->net_b == net_b && p->family_b == family_b) ||
 			(p->net_a == net_b && p->family_a == family_b && p->net_b == net_a && p->family_b == family_a))
-			return p->extra;
+			return p;
 	}
-	return 0;
+	return NULL;
+}
+
+int group_pair_extra(int net_a, int family_a, int net_b, int family_b) {
+	const GroupPair *p = pair_of(net_a, family_a, net_b, family_b);
+	return p ? p->extra : 0;
+}
+
+int group_pair_cost(int net_a, int family_a, int net_b, int family_b) {
+	const GroupPair *p = pair_of(net_a, family_a, net_b, family_b);
+	return p ? p->cost : 0;
 }
 
 /* ---- the templates: what a family must be to take each slot, and what
@@ -90,38 +100,46 @@ static bool test_passes(int test, const At *a, const GroupLimits *l) {
 	}
 }
 
-/* its pressure as its families' own add up (each one's alone at V1, by
- * its hit at the version fought over its V1's), and with two the pairs'
- * pass found pressing harder together, that excess by the larger of
- * their two scales; -1 where one was not measured */
-static int pressure_of(const At *a) {
-	double sum = 0, scale[GROUP_SIZE];
+/* (a group that is several of one family: its measured numbers, NULL any other or where they were not measured) */
+static const GroupMulti *multi_of(const At *a) {
+	if (a->n < 2 || a->f[0] != a->f[1] || (a->n > 2 && a->f[0] != a->f[2])) return NULL;
+	const GroupMulti *m = &a->f[0]->multi[a->n - 2];
+	return m->pressure1 && m->cost1 ? m : NULL;
+}
+
+/* (family `i`'s hit at the version fought over its V1's) */
+static double scale_of(const At *a, int i) {
+	int v1 = a->f[i]->ver[0].hit > 1 ? a->f[i]->ver[0].hit : 1;
+	return (double)ver(a, i)->hit / (double)v1;
+}
+
+/* A group's pressure (`cost` false) or its cost, predicted: several of
+ * one family their measured number by the hit's scale; else each family's
+ * own alone at V1 by its hit at the version fought over its V1's, added
+ * up, and for each two of them the pairs' passes found pressing or
+ * costing more together, that excess by the larger of their two scales.
+ * -1 where one was not measured. */
+static int predicted(const At *a, bool cost) {
+	const GroupMulti *m = multi_of(a);
+	if (m) return (int)lrint((double)((cost ? m->cost1 : m->pressure1) - 1) * scale_of(a, 0));
+	double sum = 0;
 	for (int i = 0; i < a->n; ++i) {
-		const GroupFam *f = a->f[i];
-		if (f->pressure < 0) return -1;
-		int v1 = f->ver[0].hit > 1 ? f->ver[0].hit : 1;
-		scale[i] = (double)ver(a, i)->hit / (double)v1;
-		sum += (double)(f->pressure * ver(a, i)->hit) / (double)v1;
+		int own = cost ? a->f[i]->cost : a->f[i]->pressure, v1 = a->f[i]->ver[0].hit > 1 ? a->f[i]->ver[0].hit : 1;
+		if (own < 0) return -1;
+		sum += (double)(own * ver(a, i)->hit) / (double)v1;
 	}
 	for (int i = 0; i < a->n; ++i)
 		for (int k = i + 1; k < a->n; ++k) {
-			int extra = a->f[i] == a->f[k] ? 0 : group_pair_extra(a->f[i]->net, a->f[i]->family, a->f[k]->net, a->f[k]->family);
-			if (extra) sum += extra * (scale[i] > scale[k] ? scale[i] : scale[k]);
+			if (a->f[i] == a->f[k]) continue;
+			const GroupPair *p = pair_of(a->f[i]->net, a->f[i]->family, a->f[k]->net, a->f[k]->family);
+			int extra = p ? (cost ? p->cost : p->extra) : 0;
+			if (extra) sum += extra * (scale_of(a, i) > scale_of(a, k) ? scale_of(a, i) : scale_of(a, k));
 		}
 	return (int)lrint(sum);
 }
 
-/* what it costs, as its families' own costs add up (each one's alone at V1, by its hit at the version fought over its
- * V1's); -1 where one was not measured */
-static int cost_of(const At *a) {
-	double sum = 0;
-	for (int i = 0; i < a->n; ++i) {
-		const GroupFam *f = a->f[i];
-		if (f->cost < 0) return -1;
-		sum += (double)(f->cost * ver(a, i)->hit) / (double)(f->ver[0].hit > 1 ? f->ver[0].hit : 1);
-	}
-	return (int)lrint(sum);
-}
+static int pressure_of(const At *a) { return predicted(a, false); }
+static int cost_of(const At *a) { return predicted(a, true); }
 
 /* whether the group at its versions keeps to the cap on what it costs (none set: any) */
 static bool cost_fits(const At *a, const GroupLimits *l) {
@@ -189,12 +207,14 @@ typedef struct {
 	const GroupFam *pool;
 	const GroupLimits *l;
 	int t, count, most;   /* (most: the walk ends once it has counted as many) */
+	int with;             /* (0 or more: only the groups that hold this pool family are tried) */
 	void (*each)(const GroupFill *g, void *ctx);
 	void *ctx;
 } Walk;
 
 /* (the group of pool families `idx`, tried and counted where it fits) */
 static bool try_group(Walk *w, const int *idx, int n) {
+	if (w->with >= 0 && idx[0] != w->with && idx[1] != w->with && (n < 3 || idx[2] != w->with)) return false;
 	At a = { { NULL }, { 0 }, n };
 	GroupFill g = { (int8_t)w->t, (int8_t)n, { 0 }, { 0 }, 0, 0, 0 };
 	for (int i = 0; i < n; ++i) {
@@ -239,7 +259,8 @@ static void walk(Walk *w, int n) {
 	for (int i = 0; i < n; ++i)
 		if (group_in_pool(&pool[i], w->l)) in[m++] = i;
 	if (w->t == GROUP_SWARM) {
-		for (int a = 0; a < m && w->count < w->most; ++a) swarm(w, in[a]);
+		for (int a = 0; a < m && w->count < w->most; ++a)
+			if (w->with < 0 || in[a] == w->with) swarm(w, in[a]);
 		return;
 	}
 	bool alike = size == 2 && slot[0] == slot[1];
@@ -261,8 +282,12 @@ static void walk(Walk *w, int n) {
 }
 
 int group_fillings(const GroupFam *pool, int n, const GroupLimits *l, int t, void (*each)(const GroupFill *g, void *ctx), void *ctx) {
+	return group_fillings_with(pool, n, l, t, -1, each, ctx);
+}
+
+int group_fillings_with(const GroupFam *pool, int n, const GroupLimits *l, int t, int with, void (*each)(const GroupFill *g, void *ctx), void *ctx) {
 	if (t < 0 || t >= GROUP_TEMPLATES || n > GROUP_POOL_MAX) return 0;
-	Walk w = { pool, l, t, 0, 0x7FFFFFFF, each, ctx };
+	Walk w = { pool, l, t, 0, 0x7FFFFFFF, with, each, ctx };
 	walk(&w, n);
 	return w.count;
 }
@@ -280,7 +305,7 @@ static void last(const GroupFill *g, void *ctx) { *(GroupFill *)ctx = *g; }
 
 bool group_pick_counted(const GroupFam *pool, int n, const GroupLimits *l, int t, int count, uint32_t roll, GroupFill *out) {
 	if (t < 0 || t >= GROUP_TEMPLATES || n > GROUP_POOL_MAX || count <= 0) return false;
-	Walk w = { pool, l, t, 0, 1 + (int)(mix(roll ^ 0x47525550u) % (uint32_t)count), last, out };   /* ("GRUP") */
+	Walk w = { pool, l, t, 0, 1 + (int)(mix(roll ^ 0x47525550u) % (uint32_t)count), -1, last, out };   /* ("GRUP") */
 	walk(&w, n);
 	return w.count == w.most;
 }
@@ -305,15 +330,9 @@ bool group_pick_any(const GroupFam *pool, int n, const GroupLimits *l, uint32_t 
 
 /* ---- the act's limits ---- */
 
-int group_pressure_cap(int act) {
-	static const int16_t cap[PACING_ACTS] = { 220, 360, 620, 720, 880, 1040, 945 };
-	return cap[act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act];
-}
+int group_pressure_cap(int act) { return group_caps[0][act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act]; }
 
-int group_cost_cap(int act) {
-	static const int16_t cap[PACING_ACTS] = { 0, 60, 145, 140, 180, 678, 447 };
-	return cap[act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act];
-}
+int group_cost_cap(int act) { return group_caps[1][act < 0 ? 0 : act >= PACING_ACTS ? PACING_ACTS - 1 : act]; }
 
 GroupLimits group_limits(int depth, int stage, unsigned nets) { return group_limits_kind(depth, stage, nets, GROUP_PLAIN); }
 

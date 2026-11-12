@@ -4,13 +4,15 @@
 
 #include "save_blob.h"
 
-#define RIVALS_MAGIC 0x43575234u /* "CWR4": Team ProtoMan's records too (RIVAL_NAVIS) */
+#define RIVALS_MAGIC 0x43575235u /* "CWR5": Nebula's LarkMan's and GridMan's records too (RIVAL_NAVIS) */
+#define RIVALS_MAGIC_4 0x43575234u /* "CWR4": Team ProtoMan's records too, navis 0 to RIVAL_NAVIS_4 - 1 */
 #define RIVALS_MAGIC_3 0x43575233u /* "CWR3": BN4's Navis' records too, navis 0 to RIVAL_NAVIS_3 - 1 */
 #define RIVALS_MAGIC_2 0x43575232u /* "CWR2": a record with how the last battle ended, navis 0 to RIVAL_NAVIS_2 - 1 */
 #define RIVALS_MAGIC_1 0x43575231u /* "CWR1": who won and how often, alone, as many */
+#define RIVAL_NAVIS_4 65           /* the navis the fourth version kept */
 #define RIVAL_NAVIS_3 59           /* the navis the third version kept */
 #define RIVAL_NAVIS_2 32           /* the navis the first two versions kept */
-_Static_assert(RIVAL_NAVIS_2 <= RIVAL_NAVIS_3 && RIVAL_NAVIS_3 <= RIVAL_NAVIS, "each version's navis within the next's");
+_Static_assert(RIVAL_NAVIS_2 <= RIVAL_NAVIS_3 && RIVAL_NAVIS_3 <= RIVAL_NAVIS_4 && RIVAL_NAVIS_4 <= RIVAL_NAVIS, "each version's navis within the next's");
 
 static Rival rivals[RIVAL_NAVIS];
 static bool loaded;
@@ -29,11 +31,11 @@ static bool load_first(void) {
 	return true;
 }
 
-/* The second version's records, navis 0-31, or the third's, 0-58, each
- * kept whole, none yet of the navis past them (BN4's, Team ProtoMan's);
- * false where there is none */
+/* The second version's records, navis 0-31, the third's, 0-58, or the
+ * fourth's, 0-64, each kept whole, none yet of the navis past them (BN4's,
+ * Team ProtoMan's, Nebula's); false where there is none */
 static bool load_kept(uint32_t magic, int navis) {
-	Rival old[RIVAL_NAVIS_3];
+	Rival old[RIVAL_NAVIS_4];
 	size_t n = (size_t)navis * sizeof *old;
 	if (!save_read_blob("rivals.sav", magic, old, n)) return false;
 	memset(rivals, 0, sizeof rivals);
@@ -43,7 +45,8 @@ static bool load_kept(uint32_t magic, int navis) {
 }
 
 void rivals_load(void) {
-	if (!save_read_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals) && !load_kept(RIVALS_MAGIC_3, RIVAL_NAVIS_3) &&
+	if (!save_read_blob("rivals.sav", RIVALS_MAGIC, rivals, sizeof rivals) && !load_kept(RIVALS_MAGIC_4, RIVAL_NAVIS_4) &&
+		!load_kept(RIVALS_MAGIC_3, RIVAL_NAVIS_3) &&
 		!load_kept(RIVALS_MAGIC_2, RIVAL_NAVIS_2) && !load_first())
 		memset(rivals, 0, sizeof rivals);
 	loaded = true;

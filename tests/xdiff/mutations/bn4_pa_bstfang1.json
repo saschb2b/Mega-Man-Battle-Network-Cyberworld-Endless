@@ -1,0 +1,18 @@
+[
+ {
+  "name": "BstFang1's recipe forms BstFang2",
+  "spec": "bn4_pa_bstfang1",
+  "poke": [
+   "0880141C:0267:2"
+  ],
+  "what": "BstFang1's recipe (FREE_CHIP_PAS + 0x11A) names 615: a fang's hit 60 where BN4's is 50"
+ },
+ {
+  "name": "BstFang1's power another",
+  "spec": "bn4_pa_bstfang1",
+  "poke": [
+   "08C069A2:0028:2"
+  ],
+  "what": "record 614's power 40 where BN4's BstFang1 has 50: the Elmperor left 60 by six fangs where BN4's deletes it"
+ }
+]

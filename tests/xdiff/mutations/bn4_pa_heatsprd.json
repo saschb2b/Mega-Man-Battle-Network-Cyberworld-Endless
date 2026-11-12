@@ -1,0 +1,50 @@
+[
+ {
+  "name": "BN6's Program Advances' list alone, BN4's recipes out",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "080295B4:0802BCB0:4"
+  ],
+  "what": "the Custom screen's word of the Program Advances' list (BN6_PA_LIST_REF) BN6's own list again where pas_stage points it at the list grown with BN5's and BN4's recipes: HeatShot, Heat-V and HeatSide picked form nothing in BN6's, used one by one where BN4 forms HeatSprd"
+ },
+ {
+  "name": "a BN4 recipe's Program Advance another",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "088013CA:025F:2"
+  ],
+  "what": "HeatSprd's listed recipe in the grown list (FREE_CHIP_PAS + 0xC8, src/core/xchips_pas_bn4.c's first, after BN5's) names 607 (BubSprd) where the registry's HeatSprd is 606: BubSprd formed, its arm, its element and its burst another"
+ },
+ {
+  "name": "HeatSprd's power another",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "08C06842:00C8:2"
+  ],
+  "what": "the registry's record 606's power (the grown chip table, +0x1A) 200 where BN4's HeatSprd has 300: the Spikey left 130"
+ },
+ {
+  "name": "HeatSprd's burst HeatShot's",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "08C06838:08:1"
+  ],
+  "what": "record 606's first parameter, the shot's kind, 8 (HeatShot's row of BN4_SPREAD_SHOT_KINDS, the panel behind) where HeatSprd's is 0xB (the nine panels round the hit)"
+ },
+ {
+  "name": "HeatSprd's subfamily the bubble's",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "08C06834:02:1"
+  ],
+  "what": "record 606's subfamily 2 where BN4's HeatSprd is the family's 1: the bubble's arm (BN4_SPREAD_ARMS) and the shot's element"
+ },
+ {
+  "name": "the shot's kind 0xB's shape another",
+  "spec": "bn4_pa_heatsprd",
+  "poke": [
+   "080CF408:02:1"
+  ],
+  "what": "the shot's copy's kinds' row 0xB (BN4_SPREAD_SHOT_KINDS + 0x2C) with the burst's shape 2, the panel behind, where BN4's row holds 0x0F"
+ }
+]

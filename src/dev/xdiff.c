@@ -437,7 +437,7 @@ static void keep_safe(const View *v) {
  * whatever each game's shuffle drew (the hand's chips are its elements'
  * pointers into the deck, BN6_ELEMENT_DECK) */
 static void deck_put(Side *g, const Spec *s) {
-	int k = g->v.game == 5 ? 0 : 1;
+	int k = g->v.game == 6 ? 1 : 0;   /* (the reference's, BN5's or BN4's, the spec's first) */
 	g->decked = true;
 	for (int i = 0; g->v.deck && i < s->ndeck[k]; ++i) g->v.wr16(g->v.deck + 2 * (uint32_t)i, s->deck[k][i]);
 }
@@ -882,7 +882,7 @@ static bool reference4(Side *g, const Spec *s) {
 		.coll_size = BN6_COLL_SIZE, .mplays = p->mplays, .navi = p->navi, .navi_size = p->navi_size, .side = p->side,
 		.paralysis = p->paralysis, .coll_flags = p->coll_flags, .coll_struck = p->coll_struck, .rom = x->data,
 		.songs = x->layout->song_table, .sub = xd4_sub, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
-		.wr16 = guest_write16, .frame = bn4_frame };
+		.wr16 = guest_write16, .frame = bn4_frame, .deck = p->deck };
 	return open_out(g, s, "bn4");
 }
 

@@ -85,9 +85,23 @@ SHARED3 = {0x02: (0x080CD6E0, "MegaMan's arm's spawner (BN4_ARM_SPAWN): the arm 
            0x12: (0x080CF596, "the spread shot's spawner (r0 0x12 to BN4's spawn, then its side, panel and power handed on): "
                               "Spreads moved the shot; DrkVulcn's vulcan state spawns it (bl at 0x080EC912)"),
            0x56: (0x080D877C, "the star's spawner with its panel, element and power handed on (BN4_T3_STAR): ShotStar's unit "
-                              "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)")}
+                              "moved the star; Meteors' controller spawns its kind 6 (movs r4,#6 at 0x080EAE56)"),
+           0x32: (0x080D3430, "the boomerang's spawner (BN4_BOOMER_SPAWN): Boomer's unit moved the boomerang; PitRng's launcher "
+                              "throws three (0x080E9A24)")}
 # A chip of a written unit that still sits out (its row XREG_PENDING), by BN4's id, each its reason
-ROWS_WAIT = {47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
+# A call of a unit's code aimed by hand, at a stub of the chips' (XC_STUBS, src/emu/xchips_code.h): BN4's routine has no twin
+# and the unit needs none of what it gives
+UNIT_AIMS = {
+    'FirePlus': {0x0800BFF4: ('XC_STUBS', "the user's battle data by his side (0x02035B20 + 0xC0 a side), where the object stores "
+                                          "its four timers (+0x3C to +0x42: its element's 480, the rest 0). BN6 keeps other fields "
+                                          "there and reads the timers nowhere (BN4's one reader is its HUD's icon, 0x08014CC0, "
+                                          "which BN6 has none of), so the call is the stub that returns 0 and the four stores go "
+                                          "to 0x3C-0x42, the BIOS's addresses, which take no store: the timers are not kept")},
+}
+ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4-chips.md): no chip\'s damage changes, a HUD icon alone',
+             287: 'AquaPowr, left out by the owner\'s call 12',
+             288: 'WoodPowr, left out by the owner\'s call 12',
+             47: 'SandRing, the generator line\'s (its records\' kinds, the ring\'s rows 1-3 of table 080DAFB0 and its spec): the family '
                  'is moved for ThunSoul\'s charged shot, whose ring is kind 0 (the attack\'s +0xC, which its power attack zeroes)'}
 # A Soul's power attack (BN4_POWER_ATTACKS by its id, BN4_FORM_LOADOUTS' charged shot) that sets the attack's variables and
 # returns an attack unit's family, as BN6's power attacks do (r7 the variables, r0 the family back): copied with the unit, a
@@ -255,6 +269,8 @@ UNITS = (
     ('navi', 0x05, 'GutsManChip'),
     ('attack', 0x1F, 'DrkVulcn'),
     ('attack', 0x60, 'Elem'),
+    ('misc', 0x0D, 'PitRng'),
+    ('support', 0x4C, 'FirePlus'),
     ('attack', 0x09, 'DarkBomb'),
 )
 CANDIDATES = ()
@@ -799,6 +815,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         if k == 3 and t in SHARED3 and t not in alloc.shared3:
             alloc.shared3[t] = (a, f.name)
     f.notes += [f'its {X4.KIND_NAMES[k]}-kind {t:#x}: {who}\'s copy, the dispatch\'s {a:#x}, shared (its spawner copied)' for k, a, t, who in f.shared]
+    f.aim.update(UNIT_AIMS.get(name, {}))
     X4.pair_calls(f, pairs)
     shallow_twins(b4, f)
     panel_fields(f)
@@ -1103,10 +1120,14 @@ def rows_check(b4, f):
             # (an attack family's chips: the unit's number, its family; a Program Advance of it is formed, never dealt, its
             # row XREG_PA until BN4's recipes are listed; a chip of it another session moves waits, ROWS_WAIT)
             want = f.number
-            if how == 'PA' or i in ROWS_WAIT:
+            if (how == 'PA' and sub == 0xFF) or i in ROWS_WAIT:
                 f.notes.append(f'its chip {i} (id {bn6}) sits out: ' + ('a Program Advance, unformed until BN4\'s recipes are listed' if how == 'PA' else ROWS_WAIT[i]))
                 f.rows.pop()
                 continue
+        if how == 'PA' and sub == want:
+            # (a Program Advance whose row names the unit, tools/xreg_bn4.py PAS: formed by BN4's recipes in BN6's grown list)
+            f.notes.append(f'its chip {i} (id {bn6}) is a Program Advance, formed by BN4\'s recipes (src/core/xchips_pas_bn4.c)')
+            continue
         if how != 'MOVED' or sub != want:
             f.decide('row', f'its chip {i}\'s row (id {bn6}) is XREG_{how} with subfamily {sub:#x}, not XREG_MOVED with {want:#x}: '
                             f'tools/xreg_bn4.py MOVED')
@@ -1441,6 +1462,7 @@ HEADER = '''/* xchips_bn4.c: BN4's chips' code as units for BN6's battle engine,
 #include "bn6.h"
 #include "rom.h"
 #include "xchips_bn4_art.h"
+#include "xchips_code.h"
 #include "xnavi_recipe.h"
 '''
 ROWS = [0]        # (the next row of the art's room, counted over the units as their rows are written: c_file)

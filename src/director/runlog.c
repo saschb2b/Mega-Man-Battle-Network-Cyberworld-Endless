@@ -63,7 +63,7 @@ void runlog_battle_start(const Encounter *e, const char *kind) {
 	L.duel = !strcmp(kind, "duel");
 	act_battle_start(e, kind);
 	/* (an older net's record fought in BN6's engine: "x" and its address
-	 * there, docs/multirom/; a visitor of the other net "+" before it) */
+	 * there, docs/multirom/; an act's beat: its signature's first foe "+") */
 	if (e && e->xrecord) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " x%07X", (unsigned)(e->xrecord & 0xFFFFFFFu));
 	int total = 0;
 	for (int i = 0; e && i < e->nfoes && n < (int)sizeof L.line - 16; ++i) {
@@ -71,7 +71,7 @@ void runlog_battle_start(const Encounter *e, const char *kind) {
 		int hp, dmg;
 		if (f->kind == FOE_ROCK || !enemy_stats(f->id, &hp, &dmg)) continue;
 		total += hp;
-		n += snprintf(L.line + n, sizeof L.line - (size_t)n, " %s%c%d.%d", e->visitor == i + 1 ? "+" : "", f->kind == FOE_NAVI ? 'n' : 'v', f->family,
+		n += snprintf(L.line + n, sizeof L.line - (size_t)n, " %s%c%d.%d", e->signature == i + 1 ? "+" : "", f->kind == FOE_NAVI ? 'n' : 'v', f->family,
 			f->version);
 	}
 	if (e && n < (int)sizeof L.line - 16) n += snprintf(L.line + n, sizeof L.line - (size_t)n, " foehp %d", total);

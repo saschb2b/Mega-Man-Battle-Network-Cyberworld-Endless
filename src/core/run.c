@@ -107,9 +107,13 @@ static bool deep_candidate(int navi, int act, int biome) {
  * BN6's own pick standing (its area's own favoured, as ever:
  * run.boss_order). None that guards a surface act of the run already. */
 static int deep_xguardian(int act, int biome) {
-	int n6 = 0, n5 = 0, cand[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + 3];
+	int n6 = 0, n5 = 0, cand[GUARDIAN_OLDER_LAST - GUARDIAN_OLDER_FIRST + GUARDIAN_NEBULA_LAST - GUARDIAN_NEBULA_FIRST + 4];
 	for (unsigned i = 0; i < sizeof navis; ++i) n6 += pacing_guardian_miss(navis[i], act, 0, false, navi_hp) == 0;
 	for (int navi = GUARDIAN_OLDER_FIRST; navi <= GUARDIAN_OLDER_LAST; ++navi)
+		if (deep_candidate(navi, act, biome)) cand[n5++] = navi;
+	/* (and Nebula's two, LarkMan and GridMan, the deep's alone: no Soul, never a surface act's, the owner's call of 12 November
+	 * 2026, docs/game/bosses/bn5-navis.md) */
+	for (int navi = GUARDIAN_NEBULA_FIRST; navi <= GUARDIAN_NEBULA_LAST; ++navi)
 		if (deep_candidate(navi, act, biome)) cand[n5++] = navi;
 	int a = run_dress(biome);
 	const NetAreaDef *x = a >= NET_AREAS ? net_area_def(a) : NULL;
