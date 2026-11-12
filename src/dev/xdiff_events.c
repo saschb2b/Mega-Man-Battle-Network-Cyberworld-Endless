@@ -15,10 +15,8 @@
 #include <string.h>
 
 #include "bn5.h"
-#include "bn6.h"
 #include "bytes.h"
 #include "debug.h"
-#include "emu.h"
 #include "guest.h"
 #include "rom.h"
 #include "soulcode.h"
@@ -29,6 +27,7 @@
 #include "xvirus.h"
 #include "xvirus_bn5.h"
 #include "xvirus_dispatch.h"
+#include "xdiff_navi4.h"
 #include "xdiff_sprite.h"
 #include "xnavi_bn5.h"
 #include "xsong.h"
@@ -500,6 +499,7 @@ void xd_log_units(const uint16_t *folder, int n) {
 	bn4_played = false;
 	for (int i = 0; i < n; ++i) units_of((int)chip_entry_id(folder[i]));
 	for (int i = 0; i < n && !bn4_played; ++i) bn4_played = xchips_bn4_moved((int)chip_entry_id(folder[i]));
+	xd_navi4_units(folder, n);   /* (BN4's Navi chips' units too: xdiff_navi4.h) */
 	/* (and a Program Advance the folder's chips form, BN6's list grown with BN5's recipes: src/core/xchips_pas.c) */
 	for (int k = 0; k < xchips_pas_count; ++k) {
 		bool all = true;
@@ -641,6 +641,16 @@ static bool navi_code(const XvMoved *m) {
 	return false;
 }
 
+/* whether a log watches a moved range (log_make's list) */
+static bool watched(const XvMoved *m, const XVirusFamily *const *fams, int nfams, bool navis) {
+	if (((m->to >= XV_CODE && m->to < XV_ART) || (m->to >= XV_LATE_CODE && m->to < XV_LATE_CODE_END) ||
+	     (m->to >= XN_BN4_CODE && m->to < XN_BN4_ART)) && spec_code(m, fams, nfams, navis))
+		return true;
+	if (navis && xn_code_at(m->to) && navi_code(m)) return true;
+	if (xd_navi4_code(m)) return true;   /* (a played BN4 Navi chip's unit and its Navi's code: xdiff_navi4.h) */
+	return chip_code(m->to) || (xn_code_at(m->to) && navi_shared(m));
+}
+
 static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, int nfams, bool navis) {
 	int n;
 	const XvMoved *m = xvirus_moved(&n);   /* (every range moved, or no log: xvirus_moved.h) */
@@ -656,10 +666,7 @@ static XdLog *log_make(int game, bool alone, const XVirusFamily *const *fams, in
 	 * xd_log_units: its draws keyed by BN5's own places as a family's are; not the chips' helpers', BN5's code every chip and
 	 * MegaMan's own arm share, which BN6's own chips do not run: the muzzle flash) */
 	for (int i = 0; i < n; ++i)
-		if ((((m[i].to >= XV_CODE && m[i].to < XV_ART) || (m[i].to >= XV_LATE_CODE && m[i].to < XV_LATE_CODE_END) ||
-		      (m[i].to >= XN_BN4_CODE && m[i].to < XN_BN4_ART)) && spec_code(&m[i], fams, nfams, navis)) ||
-		    (navis && xn_code_at(m[i].to) && navi_code(&m[i])) ||
-		    chip_code(m[i].to) || (xn_code_at(m[i].to) && navi_shared(&m[i])))
+		if (watched(&m[i], fams, nfams, navis))
 			if (!xd_log_key(log, m[i].from, m[i].to, m[i].len)) return NULL;
 	/* (the control's code where BN6 has it: its own Mettaur's, and the control Navi's HeatMan's, which the moved copy's
 	 * places are keyed as) */

@@ -1,0 +1,132 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@42",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 205,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Ligtnin2 A (167) against the registry's row 678 (the same unit, its record's power 130): RockCube set at fight frame 30 on (3,2), BN4's MettaurSP (140 HP) beside it at (4,2); Ligtnin2 used at t150, its bolt on the cube at t164 striking the panels around it: the Mettaur left 10 HP in both. Compared to t205, before the cube breaks.",
+ "folder4": [
+  "3463",
+  "00A7"
+ ],
+ "folder6": [
+  "348F",
+  "2A6:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "LEFT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   150,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "deck6": [
+  "348F",
+  "2A6:00"
+ ]
+}

@@ -1,0 +1,18 @@
+[
+ {
+  "name": "the bolt's reach another",
+  "spec": "bn4_chip_ligtnin2",
+  "poke": [
+   "080DF050:2000"
+  ],
+  "what": "the bolt's copy (BN4's third-kind 0x8E) giving its collision no region where BN4's gives 0x10, the panels around its own (movs r0,#0x10 at BN4 0x080DF050, handed to BN4's 0x08012DC8, BN6's 0x0801A07C): the Mettaur beside the cube out of its reach"
+ },
+ {
+  "name": "Ligtnin2's row's power another",
+  "spec": "bn4_chip_ligtnin2",
+  "poke": [
+   "08C074A2:0064"
+  ],
+  "what": "the registry's record of BN4's Ligtnin2 (678 at CHIPS_RECORDS) with power 100, Ligtnin1's, where BN4's record holds 130: the Mettaur beside the cube left 40 HP where BN4's bolt leaves it 10"
+ }
+]

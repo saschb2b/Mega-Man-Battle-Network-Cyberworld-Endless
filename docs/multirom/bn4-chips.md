@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -275,6 +275,41 @@ BN6's, 0x61 for BN4's 0x21. `bn4_chip_mokorus1`, `2` and `3` pass over
 300 frames, the Mokos in play from t33 to t147 (a 140 HP Mettaur in the
 middle row left 80, 50 and 20, struck out of its attack and pushed back
 a column in both), five mutations caught.
+
+**The first Navi chip plays: GutsMan** (12 November 2026: id 535, unit
+6's first; [The Navi chips](#the-navi-chips), below). BN4 runs a Navi
+chip from its support state: its routine spawns an object of the Navi's
+own (GutsMan's is the fourth kind's 0x10), which steps MegaMan out,
+spawns the Navi as his chip shows him, waits for his word and steps
+MegaMan in. That Navi is a first-kind type of his own, not the type he
+fights as: GutsMan's is 0x14, 424 bytes. He appears, strikes the ground
+at frame 20 of 90 and is gone; his shockwave is the Navi's own object
+(the third kind's 0x0B), which the Navi's recipe moved already. BN6 has
+BN4's object once for every Navi chip, the same four states and waits,
+and steps MegaMan out by an object of its own that knows his Crosses. So
+the unit is the chip's GutsMan alone (`tools/xchiprecipe_bn4.py`, a unit
+of kind `navi`): his spawner at BN6's grown Navi routines' 0x85, run by
+BN6's Navi chip object under BN6's Navi family, as BN5's Navi chips are,
+his calls into the Navi's blocks aimed at the Navi's copy. His row is
+`XREG_MOVED` with BN6's Roll as the twin whose family it takes.
+`bn4_chip_gutsman` passes over 300 frames against BN4's own battle: a
+140 HP Mettaur left 60 in both, the same three panels cracked (the
+shockwave's draws replayed), the same sounds; six mutations caught. Seen
+in play against BN6's Mettaur and against BN4's ThunderMan, both Navis
+drawn at once. His SP (536) waits for BN4's computed powers and his DS
+(537) for its power by the Holes on the field (below): both rows stay
+`XREG_PENDING`.
+
+**BN4's ground kind is no Cursor** (12 November 2026, read from the
+three ROMs' records): BN4 numbers its chips' kinds as BN5 numbers its
+icon elements but for 8, BN4's ground chips' (CrakOut, DublCrak,
+TripCrak, Magnum, Geddon1 and 2, PanlSht1-3 and GutsMan's three: the
+chips its GutsSoul takes), where BN5's 8 is the Cursor's. BN5 holds Null
+for five of the six of those names it shares and has no such icon, as
+BN6 has none. A BN4 record's kind 8 is BN6's Null since
+(`xrec_from_bn4`); until then PanlSht1-3 carried the Cursor's icon and
+BN6's second wheel's Cursor flag in their attack. Their specs pass as
+before.
 
 **SidBmbo1-3 are moved** (11 November 2026: ids 571-573, misc 5): the
 bamboo (the third kind's 0x44), 420 bytes, that comes up three columns
@@ -570,6 +605,26 @@ the five meteors bursting on the empty panel; seven mutations caught.
 step cannot hand one out until the pack's RAM for them lands; the
 differential fights with a folder alone.
 
+**Ligtnin1-3 are moved; AquaUp1-3 and GreenWd1-3 wait in the same
+unit** (11 November 2026: ids 677-679; misc 0x0C). The nine chips are
+one routine, a sweep (the third kind's 0x93) that goes column by column
+from the user's edge and does one of three things by the record's first
+parameter: a geyser from a cracked panel under a foe (AquaUp), a tower
+from a grass one (GreenWd), or a bolt on a panel that holds an obstacle,
+striking the eight panels around it (Ligtnin). The unit is the sweep,
+the strike both panel chips share (0x92) and the bolt (0x8E), each at
+BN4's own number on the chips' page of the dispatch, 1144 bytes
+with the strike's rows, its sprites copied, its three sounds at the
+grown table's 0x240 to 0x242 (the third line takes its slots from 0x240
+so the sweep's sessions number apart). `bn4_chip_ligtnin1`, `2` and `3`
+pass with a RockCube set first (the bolt on its panel at t164; a 140 HP
+Mettaur beside it left 10 by Ligtnin2) and `bn4_chip_ligtnin1_none` with
+no obstacle, no bolt; six mutations caught. **AquaUp's and GreenWd's six
+rows sit out** (`tools/xchiprecipe_bn4.py` `ROWS_WAIT`): their strike is
+moved but has never run in a spec, as the differential's BN4 battle
+cannot yet be given a cracked or a grass panel (BN5's `field=` has no
+BN4 twin). They play once a spec proves them.
+
 **Next:** BlakWeap, Marking and FirePlus (calls 7 and 12: the other
 three Plus chips are left out), then BlakBarr's barrier; Binder,
 SandRing and Ball are attack families, whose unit kind the spread
@@ -650,7 +705,7 @@ moved yet; why each waits:
 | Chips | What they are in BN4's code | Waits on |
 | --- | --- | --- |
 | Static, Muramasa, Anubis, BlakWing | dark-aligned records of names BN6 has | nothing: a run's are BN6's own chips, one chip a name, no row |
-| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other; 708 and 728 bytes with their own objects, one call unpaired (the blink's mark, BN6's `0x0800CC52` by reading), three sounds | the owner's call 8 (the Hole panel in BN6's engine); then the generator's kinds' tables, which copy bytes as they are where the changer's rows hold BN4's panel types (asked of its session) |
+| DrkStage (562), Hole (527), DrkLine (528) | one object, the panel changer (the fourth kind's 0x1F), by a kind of its table: Hole a Hole panel ahead, DrkLine a row of them, DrkStage Holes on MegaMan's whole side and poison on the other | **moved** (11 November 2026): one unit of support 0x0B and 0x3B, the changer once, its kinds' table in BN6's numbers, its blink BN6's, its four sounds at 0x280-0x282 and 0x29F; `bn4_chip_hole`, `bn4_chip_drkline` and `bn4_chip_drkstage` PASS by a dark MegaMan, five mutations caught |
 | BlakWeap (602) | support 0x4B, 156 bytes: a third-kind object spawned by one call with no twin | its unit (call 7: moved with Marking and the Plus chips, not cut); its record is Marking's kind (no Library number, the blank picture), and not dark |
 | DrkCanon (695), DarkBomb (696), DrkVulcn (601), DrkSpred (594) | subfamilies of BN4's cannons (0x0B/3), bombs (0x09/2), vulcans (0x1F/4) and spreads (0x1E/3); DrkCanon's power computed (1046) | a unit kind for those families: the generator moves support and misc routines only; DrkCanon also BN4's computed powers (unit 6) |
 | ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark (637, 638, 662, 663, 697) | a state of MegaMan's of their own, 0x60, subfamilies 0-4 | the same: a unit kind for a family BN6 has none of |
@@ -677,6 +732,33 @@ one, one leaves it out, one attack turns a column of them plain. So the
 panel chips and the DS Navi chips are one design: a dark MegaMan gives
 turns and max HP to dig Holes, and his DS chips hit up to twice as hard
 for them.
+
+**The Hole panel in BN6's engine, built** (11 November 2026; the
+owner's call 8): BN6's type 16, `XPANEL_HOLE`, after BN5's lava, sea and
+magnet panel ([one Net](one-net.md); `src/emu/xpanels.h`). Call 8 asked
+for a panel type of its own, and it has one, past BN6's sixteen: 15, the
+last of them, went to BN5's magnet panel with MagnetMan (#391), and BN6's
+flags update ORs a panel's type into its flags' bits 0-4, where bit 4 is
+also its words' own floor bit, so a type of 16 to 31 always gives that
+bit. The Hole's word, plain's, holds it anyway, so at 16 its flags are
+plain's as in BN4 and nothing BN6 runs knows the number
+([BN6's panel types and who holds each](../rom/battle.md)). A Hole on
+BN6's own hole type (1) was weighed and refused: BN4's Hole is stood on
+as plain is, BN6's hole is not, and nothing BN6 runs for type 1 is
+BN4's. Installed wherever BN4's
+ROM is read, with BN5's or without. Its flags are plain's (BN4's word for
+it, checked to be BN6's plain one), its tiles BN4's 54, its colours BN4's
+plain panel's rims and its hole's three dark colours, which pulse as
+BN4's palettes 1 and 5 pulse them, written over grass's in a battle that
+shows a Hole and no grass ([BN4's ROM](../rom/bn4.md), The Hole panel
+in BN6's engine). It does nothing to what stands on it, as in BN4; BN4's
+one rule for it, a light Navi cleansing it, has no karma to read in BN6
+and is not taken. BN4's count of a type's panels is BN6's own routine
+(`BN6_PANEL_COUNT`), so a DS Navi chip's moved power counts Holes by
+calling it with 16. Seen by the `status panel` dev step: four panels
+made Holes draw as BN4's on both sides. The three chips that make them
+are moved (the table above): each PASSes against BN4's battle, the Holes
+on the same panels at the same frame.
 
 **Unit 2, BN4's registry rows, built** (10 November 2026; The build plan):
 194 rows, written by `tools/xreg_bn4.py` from the three ROMs into
@@ -1082,6 +1164,82 @@ Navi and version (unit 0 below) they pay those rows, so BN4 needs 195
 ids, not 198. No chip of BN4's own goes into the free ids: its six on
 BN6's code wait for ten bits, which they would otherwise use up.
 
+## The Navi chips
+
+Unit 6: the 23 chips of the eight moved Navis. What the first, GutsMan's
+V1, settled for all of them.
+
+- **The unit is the chip's Navi.** Each Navi chip's support routine
+  spawns a fourth-kind object of its own (GutsMan's 0x10, FireMan's 0x0F,
+  AquaMan's 0x16, WoodMan's 0x70; 0x42 serves six Navis by the record's
+  third parameter, ThunMan and SerchMan among them), and each of those
+  objects is BN6's one Navi chip object (`BN6_CHIP_NAVI_OBJECT`, the
+  fourth kind's 0x10) read side by side: MegaMan stepped out and 0x1E
+  frames, the Navi's spawner called and his word waited for, 0x1E frames,
+  MegaMan stepped in and 0x1E frames. BN4's object is not moved. BN6's
+  stands in for it (`tools/xchiprecipe_bn4_navi.py` `OBJECTS`, each BN4
+  object read against it before its unit is written, its waits checked
+  by the tool), because stepping MegaMan out is each engine's own work
+  with his forms (BN4's fourth-kind 0x0C reads its Souls, BN6's
+  first-kind 0x2D its Crosses), and because BN6's Navi family ends the
+  attack in the frame of the use, as BN4's support state does, where
+  BN6's support family holds MegaMan a frame more. What moves is the first-kind type the object's spawner names, the
+  Navi as his chip shows him, at a first-kind number of the chips' own in
+  the dispatch (0xA0 on).
+- **His attack is the Navi's own.** The chip's Navi spawns the objects
+  the Navi fights with, which the Navi's recipe moved
+  (`src/emu/xnavi_bn4.c`). The unit moves none of them again: each call
+  into a block of the Navi's goes to the Navi's copy, one copy run by
+  both, and a routine of BN4's engine a Navi copied (the sprite step,
+  FireMan's copy) likewise. So the Navi chips' units install after BN4's
+  Navis (`xchips_bn4_navi_install`), and in a core without them a Navi
+  chip brings nobody.
+- **His sprite, art and sounds are filled as the chip is used.** A BN4
+  Navi's battle sprite, his attacks' art and his pool's songs are in the
+  core's copy only for the battle he fights in ([BN4's Navis in BN6's
+  engine](bn4-navis.md), Battle sprites by battle). His chip is used in
+  any battle, against another BN4 Navi too, so the chips have rooms of
+  their own (`src/emu/xnavi_bn4_chip.c`): `FREE_BN4_CHIP_SPRITE` (60 KB,
+  GutsMan's 60,988 bytes the largest of the moved Navis') and
+  `FREE_BN4_CHIP_ART`, the upper half of the battle's art room, laid out
+  as the battle's is. Before each frame the engine looks for a BN4 Navi
+  chip's object past its turn's wait; thirty frames before BN6 spawns the
+  Navi it copies his sprite, the art the battle's Navi does not list
+  already and his songs from the player's ROM, points his list entries
+  there, and points the pool's slots at his songs while the object lives
+  (`xnavi_bn4_sounds_chip`), the battle's own after it. Where the
+  battle's rooms hold him already nothing is copied. What each room holds
+  is three bytes in the core's copy (`XN_BN4_HELD`), and a battle's fill
+  points its Navi's list 2 entry at the battle's room again.
+- **Its sound of its own**, a chip's Navi as he appears (BN4's 0xB0),
+  is TimeBomb's bomb set down too: one song, one slot of the grown song
+  table, 0x1E2, whichever unit copies it. The Navi chips' range
+  (0x2C0-0x2FF; each session that moves units takes its slots from a
+  range of its own) holds the sounds no other unit plays: none yet.
+- **What the differential sees.** The chip runs inside its time freeze,
+  so the traces meet at what it leaves: the foe's HP, the panels, the
+  frame's sounds, MegaMan's state. The comparator reads BN4's support
+  state as BN6's Navi family for such a chip, and BN4's object as BN6's
+  type 0x10 ([The differential](../devtools/differential.md), A BN4
+  chip's spec). The logs watch the chip's Navi's code and the Navi's
+  whose objects he runs, so a draw his attack makes is replayed from
+  BN4's. **Not compared:** the freeze's own length and what is drawn in
+  it. BN6's object gives every Navi BN4's GutsMan's waits; a BN4 object
+  that waits otherwise (WoodMan's: 10 and 20 frames where BN6's waits 30)
+  would differ there, which the tool says before its unit is written.
+- **SP and DS.** An SP's and a DS's power is one BN4 computes (1002 and
+  1024 for GutsMan's: BN4's table, to move as BN5's did). A DS's is read
+  from the Hole panels on the field (the dark chips' session's reading,
+  `0x08019518`: the Holes on both sides, ten at most, pick a column of a
+  row of the table `0x08018B48` by the power less 1023; none gives the
+  row's last value, GutsMnDS 100), which BN6 has no panel of yet, and a
+  DS is a dark chip, whose cost is in `dev` since PR #351. Until the
+  powers are moved both rows stay pending and the unit serves the V1
+  alone.
+- **Not done:** a NetBattle (BN4 is not in the NetPass's set yet, unit
+  8): the pool's override and the rooms' record are one core's, as the
+  battle's rooms are.
+
 ## The design
 
 - **The experience:** the old guard's arsenal. A veteran drafts the
@@ -1275,7 +1433,8 @@ of one agent.
    the same; `bn4_pa_*` specs; the per-battle bits past id 383 grown in
    1): **built for fourteen** (Where things stand, The Program Advances
    are formed), five waiting on their parts.
-6. **The Navi chips of the eight moved Navis (4 to 6 days, after 3).**
+6. **The Navi chips of the eight moved Navis (4 to 6 days, after 3).
+   Begun** (The Navi chips, above: GutsMan's V1 plays). As planned:
    Their 23 chips on the Navis' copies, SP and DS by BN4's computed
    powers (`chip_gutsman` and on). Then call 7's stand-in steps aside for
    a round whose Navi's chip plays. The other ten Navis' chips follow

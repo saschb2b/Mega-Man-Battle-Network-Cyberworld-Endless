@@ -1,0 +1,125 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Hole * then DrkStage A by a dark MegaMan (karma4 0): the Hole made at (3,2) at t34, then DrkStage's panel changer at t90 over his side, the Hole among them, and the other side's poison: BN4's changer setting panels over a Hole against BN6's engine (BN4's 0xB, BN6's 16), each panel's type, flags, blink and timers compared each frame.",
+ "folder4": [
+  "3452",
+  "00C1"
+ ],
+ "folder6": [
+  "20F:1A",
+  "232:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ],
+  [
+   120,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman",
+ "karma4": 0,
+ "deck6": [
+  "20F:1A",
+  "232:00"
+ ]
+}

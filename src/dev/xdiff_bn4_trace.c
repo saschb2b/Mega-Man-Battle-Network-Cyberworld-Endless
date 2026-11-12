@@ -102,6 +102,10 @@ static const Seg panel_segs[] = {
 	{ BN4_PANEL_TIMER_A, BN6_PANEL_SIDE_TIMER, 2 },
 	{ BN4_PANEL_TIMER_B, BN6_PANEL_TIMER, 2 },
 	{ BN4_PANEL_FLAGS_LAST, BN6_PANEL_FLAGS_LAST, 4 },
+	/* (BN4's blink's type and side, kept in its own tables, BN4_PANEL_BLINKS and BN4_PANEL_BLINK_SIDES: their low nibbles after
+	 * its panel's bytes, xd4_panel_blinks) */
+	{ BN4_PANEL_SIZE, BN6_PANEL_BLINK_TYPE, 1 },
+	{ BN4_PANEL_SIZE + 1, BN6_PANEL_BLINK_SIDE, 1 },
 };
 
 /* (spare: where BN4's bytes left over begin, BN6's places left taken from there on and then from 0. An AI data's from
@@ -115,11 +119,11 @@ static const Layout layouts[] = {
 	[XD4_OBJECT] = { obj_segs, 2, BN6_T1_SIZE, BN6_T1_SIZE, 0 },
 	[XD4_COLL] = { coll_segs, 40, BN4_COLL_SIZE, BN6_COLL_SIZE, 0 },
 	[XD4_AI] = { ai_segs, 14, BN4_AI_DATA_SIZE, BN6_AI_DATA_SIZE, BN6_AI_SPARE },
-	[XD4_PANEL] = { panel_segs, 8, BN4_PANEL_SIZE, BN6_PANEL_SIZE, 0 },
+	[XD4_PANEL] = { panel_segs, 10, BN4_PANEL_SIZE + 2, BN6_PANEL_SIZE, 0 },
 	[XD4_PENDING] = { pending_segs, 1, BN4_AI_DATA_SIZE, BN6_CROSS_PENDING_SIZE, NONE },
 };
 _Static_assert(sizeof obj_segs / sizeof *obj_segs == 2 && sizeof coll_segs / sizeof *coll_segs == 40 &&
-	sizeof ai_segs / sizeof *ai_segs == 14 && sizeof panel_segs / sizeof *panel_segs == 8, "the layouts' counts");
+	sizeof ai_segs / sizeof *ai_segs == 14 && sizeof panel_segs / sizeof *panel_segs == 10, "the layouts' counts");
 
 #define ROOM 0x100   /* the largest part, BN6's AI data */
 
@@ -155,6 +159,12 @@ uint32_t xd4_translate(int part, const uint8_t *in, uint8_t *out) {
 }
 
 uint32_t xd4_size(int part) { return layouts[part].in; }
+
+void xd4_panel_blinks(uint32_t at, uint8_t *in) {
+	uint32_t i = (at - BN4_FIELD_PANELS) / BN4_PANEL_SIZE;
+	in[BN4_PANEL_SIZE] = guest_read8(BN4_PANEL_BLINKS + i) & 0xF;
+	in[BN4_PANEL_SIZE + 1] = guest_read8(BN4_PANEL_BLINK_SIDES + i) & 0xF;
+}
 
 const Xd4Places xd4_places = { BN4_BATTLE_STATE, BN4_CUSTOM_WINDOW, { BN4_RNG_PRIMARY, BN4_RNG_SECONDARY }, BN4_T1_OBJECTS, BN4_T3_OBJECTS,
 	BN4_T4_OBJECTS, BN4_T1_COUNT, BN4_FIELD_PANELS, BN4_OBJECT_LIST, BN4_OBJECT_LIST_END, BN4_MPLAYS, BN4_BATTLE_NAVI, BN4_NAVI_SIZE,

@@ -1,0 +1,81 @@
+{
+ "game": "bn4",
+ "against": "bn6",
+ "dev": [
+  "bn4families"
+ ],
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "about": "BN4's Ligtnin1 * (166) against the registry's row 677, BN4's code moved by tools/xchiprecipe_bn4.py as a misc unit (misc 0x0C as BN6's grown misc routine 0x8C: its routine in its sweep's code, the third kind's 0x93, with the bolt, the third kind's 0x8E, and AquaUp's and GreenWd's strike, the third kind's 0x92; docs/multirom/bn4-chips.md): used at fight frame 30 with no obstacle on the field: its sweep goes over the six columns, finds no panel that holds one and ends, no bolt; the Mettaur's waves on MegaMan the same over the frames compared (300).",
+ "folder4": [
+  "34A6"
+ ],
+ "folder6": [
+  "2A5:1A"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    18
+   ],
+   [
+    "A",
+    2
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "START",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ],
+ "subject": "megaman"
+}

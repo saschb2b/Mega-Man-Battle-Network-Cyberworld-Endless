@@ -17,7 +17,7 @@
 #include "xchips_moved.h"
 #include "xchips_pas.h"
 #include "xchips_registry.h"
-#include "xnavi_recipe.h"
+#include "xnavi_bn4_art.h"
 #include "xnavi_sprites.h"
 #include "xvirus.h"
 #include "xvirus_grow.h"
@@ -26,7 +26,7 @@
 
 #define BUS 0x08000000u
 
-static bool installed, installed4;
+static bool installed, installed4, installed4n;
 static bool tables_grown;   /* (the stubs and BN6's two routines' tables grown: by whichever game's units install first) */
 
 /* ---- BN6's support and Navi chips' routines grown ---- */
@@ -383,7 +383,8 @@ static void unit4_stage(int i, bool fresh) {
 	const XChipUnit *u = &xchips_bn4[i];
 	if (u->home < XC4_HOMES || u->home + XC4_HOME_SIZE > XC4_CODE || (u->home - XC4_HOMES) % XC4_HOME_SIZE) xv_fail("its home %08x", (unsigned)u->home);
 	else if (u->kind == XCHIP_ATTACK ? u->number < XATTACK_BN4 || u->share
-	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+	         : (u->kind != XCHIP_SUPPORT && u->kind != XCHIP_MISC && u->kind != XCHIP_NAVI) || u->number != XC4_FIRST_SUPPORT + u->bn5) xv_fail("its kind %d or its number %#x", u->kind, u->number);
+	else if (u->kind == XCHIP_NAVI && (u->share || !u->navis || !xnavi_bn4_seat(u->navis - 1))) xv_fail("its Navi's seat %d, no installed BN4 Navi's", u->navis - 1);
 	else if (u->share) {
 		/* (a routine of an earlier unit's block: its entry alone) */
 		if (u->share > i || xchips_bn4[u->share - 1].share || u->code.nblocks) xv_fail("its code's unit %d", u->share - 1);
@@ -405,6 +406,9 @@ bool xchips_bn4_moved(int id) {
 	return r && r->how == XREG_MOVED;
 }
 
+/* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */
+static bool units4_install(bool navis);
+
 uint32_t xchips_bn4_moved_at(uint32_t bn4) {
 	for (int i = 0; installed4 && i < xchips_bn4_count; ++i) {
 		uint32_t at = xchips_bn4[i].share ? 0 : xvirus_code_at(&xchips_bn4[i].code, bn4);
@@ -415,6 +419,17 @@ uint32_t xchips_bn4_moved_at(uint32_t bn4) {
 
 bool xchips_bn4_code_install(void) {
 	if (installed4) return true;
+	installed4 = units4_install(false);
+	return installed4;
+}
+
+bool xchips_bn4_navi_install(void) {
+	if (installed4n) return true;
+	installed4n = installed4 && units4_install(true);
+	return installed4n;
+}
+
+static bool units4_install(bool navis) {
 	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
 	claims_begin(XV_CLAIMS);
 	bool room = xg_grow();
@@ -429,13 +444,17 @@ bool xchips_bn4_code_install(void) {
 		return false;
 	}
 	xv_tx_begin();
-	bool fresh = tables_stage();
-	if (!xv_failed()) routines_stage(&misc_table);
-	if (!xv_failed()) xg_page4_stage();
+	bool fresh = !navis && tables_stage();
+	if (!navis && !xv_failed()) routines_stage(&misc_table);
+	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
+	if (!navis && !xv_failed()) xg_page4_stage();
 	const char *at = "BN6's routines' tables";
+	int units = 0;
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
+		if ((xchips_bn4[i].kind == XCHIP_NAVI) != navis) continue;
 		at = xchips_bn4[i].code.name;
 		unit4_stage(i, fresh);
+		++units;
 	}
 	if (!xv_failed()) {
 		at = "BN6's Program Advances";
@@ -450,13 +469,14 @@ bool xchips_bn4_code_install(void) {
 	commit();
 	xv_tx_end();
 	for (int i = 0; i < xchips_bn4_count; ++i)
-		for (int k = 0; k < xchips_bn4[i].code.nblocks; ++k) {
+		for (int k = 0; (xchips_bn4[i].kind == XCHIP_NAVI) == navis && k < xchips_bn4[i].code.nblocks; ++k) {
 			const XvBlock *b = &xchips_bn4[i].code.blocks[k];
 			xv_moved_add(b->start, b->at, b->end - b->start);
 		}
-	installed4 = tables_grown = true;
-	printf("xchips_code: %d units of BN4's chips' code (%u bytes written)\n", xchips_bn4_count, (unsigned)used);
-	/* (their art: none installed, a room filled as an object loads a sprite, xchips_bn4_art.h) */
-	xchips_bn4_art_install();
+	tables_grown = true;
+	printf("xchips_code: %d units of BN4's %s (%u bytes written)\n", units, navis ? "Navi chips' code" : "chips' code", (unsigned)used);
+	/* (their art: none installed, a room filled as an object loads a sprite, xchips_bn4_art.h; a Navi chip's Navi draws
+	 * the Navis' own copy, xnavi_bn4_chip.c) */
+	if (!navis) xchips_bn4_art_install();
 	return true;
 }

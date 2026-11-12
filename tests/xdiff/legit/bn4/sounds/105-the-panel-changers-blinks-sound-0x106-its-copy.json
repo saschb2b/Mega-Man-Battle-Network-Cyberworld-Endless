@@ -1,0 +1,7 @@
+{
+ "bn4": "0x106",
+ "bn6": "0x281",
+ "clock": "state",
+ "what": "the panel changer's blink's sound 0x106, its copy",
+ "why": "Played by the panel changer for each panel it finds (the same object: movs r0,#7; adds r0,#0xff at 0x080E43E4, its bl at 0x080E43E8; BN6: the copy's shim makes r0 0x281), a state's: BN4's song 0x106 copied into slot 0x281. bn4_chip_drkline at t34, one a panel"
+}

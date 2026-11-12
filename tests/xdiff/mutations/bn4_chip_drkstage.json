@@ -1,0 +1,18 @@
+[
+ {
+  "name": "DrkStage's poison another",
+  "spec": "bn4_chip_drkstage",
+  "poke": [
+   "080E4340:06:1"
+  ],
+  "what": "the kinds' table's copy with row 0xD's type 6, grass, where BN4's 4 is BN6's poison: the other side's nine grass"
+ },
+ {
+  "name": "the changer's poison's sound another",
+  "spec": "bn4_chip_drkstage",
+  "poke": [
+   "080E4476:2026"
+  ],
+  "what": "the changer's copy making r0 0x125 on its poison's branch (movs r0,#0x26 at BN4 0x080E4476, before adds r0,#0xff) where BN4's makes 0x124: the call's shim adds 0x17B, slot 0x2A0, no copy of 0x124"
+ }
+]

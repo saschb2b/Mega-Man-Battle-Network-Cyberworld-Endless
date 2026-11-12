@@ -506,11 +506,18 @@ static const struct { uint8_t xrom; uint16_t song; uint16_t slot; } XSOUNDS[] = 
 	{ XROM_BN4_RED_SUN_US, 0x133, SONG_GROWN_FIRST + 0x2A }, { XROM_BN4_RED_SUN_US, 0xC8, SONG_GROWN_FIRST + 0x2B },   /* (0x204, 0x205) */
 	/* ... the bombs' state's throw (SeekBom's unit) */
 	{ XROM_BN4_RED_SUN_US, 0x90, SONG_GROWN_FIRST + 0x2C },   /* (0x206) */
+	/* ... the sweep's third line's units, from 0x240 up: AquaUp's geyser, GreenWd's tower, Ligtnin's bolt */
+	{ XROM_BN4_RED_SUN_US, 0x120, SONG_GROWN_FIRST + 0x66 }, { XROM_BN4_RED_SUN_US, 0x13E, SONG_GROWN_FIRST + 0x67 },   /* (0x240, 0x241) */
+	{ XROM_BN4_RED_SUN_US, 0x143, SONG_GROWN_FIRST + 0x68 },   /* (0x242) */
 	/* ... the BN4 Souls' line's, from 0x300 up: ThunSoul's ring (SandRing's ring's too) */
 	{ XROM_BN4_RED_SUN_US, 0x91, SONG_GROWN_FIRST + 0x126 },   /* (0x300) */
 	/* BN4's late families' (tools/xrecipe_bn4.py's LATE_SOUND_SLOTS), the grown table's 0x380 up (xvirus_recipe.h
 	 * XV_BN4_GROWN_SLOT_FIRST; docs/rom/sound.md, The song table grown): Kilby's, MagTect's (its 0xF8 the chips' 0x202 above) */
 	{ XROM_BN4_RED_SUN_US, 0xCD, SONG_GROWN_FIRST + 0x1A6 }, { XROM_BN4_RED_SUN_US, 0xB8, SONG_GROWN_FIRST + 0x1A7 },   /* (0x380, 0x381) */
+	/* ... the dark chips' from 0x280 (the range tools/xchiprecipe_bn4.py gives them): the panel changer's, its last two its
+	 * numbers plus 0x17B, as one call plays both (SOUND_ADDS) */
+	{ XROM_BN4_RED_SUN_US, 0x105, 0x280 }, { XROM_BN4_RED_SUN_US, 0x106, 0x281 }, { XROM_BN4_RED_SUN_US, 0x107, 0x282 },
+	{ XROM_BN4_RED_SUN_US, 0x124, 0x29F },
 };
 
 int xsong_sound_slot(int xrom, int song) {

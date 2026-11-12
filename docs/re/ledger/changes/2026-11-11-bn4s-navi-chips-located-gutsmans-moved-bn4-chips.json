@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-11",
+  "what": "BN4's Navi chips located, GutsMan's moved (bn4_chips.h BN4_GUTSMAN_CHIP_OBJECT 0x080E31E8, BN4_GUTSMAN_CHIP_NAVI 0x080B999C, BN4_GUTSMAN_CHIP_SPAWN 0x080B9B1C, BN4_CHIP_NAVI_STEP 0x080E2D26; bn6_chips.h BN6_CHIP_NAVI_OBJECT 0x080E2B28; docs/rom/bn4.md, docs/rom/chips-code.md): BN4's object of the Navi's own is BN6's one Navi chip object state for state, so the unit is the chip's own first-kind Navi, run by BN6's object, his attack the moved Navi's objects, his sprite, art and songs in rooms filled as the chip is used. BN4's chips' kind 8 is its ground chips', not BN5's Cursor: Null in a run."
+}

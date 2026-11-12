@@ -60,6 +60,10 @@ static bool translate(const uint8_t *d, int f, uint8_t out[BN6_FIELD_SIZE]) {
 }
 
 void xfields_install(int xrom) {
+	if (xrom == XROM_BN4_RED_SUN_US) {   /* (BN4's fields none of a run's yet: its Hole alone, xpanels.h) */
+		xpanels_install(xrom);
+		return;
+	}
 	if (done || xrom != XROM_BN5_COLONEL_US || !XR[xrom].data || !R.data || !emu_ready()) return;
 	done = true;
 	claims_begin("the battlefields (xfields.c)");

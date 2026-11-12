@@ -330,15 +330,16 @@ static void side_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site) {
 }
 
 /* A call that takes a register BN6's way: r0 (XvSoundCall: a sound past a byte, the owner's call of 5 November 2026,
- * docs/multirom/bn4.md call 11; the appear queue's number) or r4 (XvEffectCall: an effect's id no immediate names). Its
- * game's call aimed at a shim that sets the register and goes on to BN6's twin through the family's veneer for it */
-static void reg_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site, uint16_t slot, const uint8_t pairs[][2], int np) {
+ * docs/multirom/bn4.md call 11; the appear queue's number; added to, where several sounds reach the call) or r4
+ * (XvEffectCall: an effect's id no immediate names). Its game's call aimed at a shim that sets the register and goes on to
+ * BN6's twin through the family's veneer for it */
+static void reg_set(Ctx *c, const XvBlock *b, uint8_t *code, uint32_t site, const XvSoundCall *k, const uint8_t pairs[][2], int np) {
 	uint32_t was = 0, t = 0, at = 0, to = 0, n = pairs ? (uint32_t)xvirus_shim_effect_size(np) : XV_SHIM_SOUND_SIZE;
 	const uint8_t *orig = c->rom + (site - BUS);
 	uint8_t shim[XV_SHIM_EFFECT_MAX];
 	if (!n || !thumb_bl_decode(site, get16(orig), get16(orig + 2), &was) || !(to = pairs ? xvirus_shim_r4_to(was) : xvirus_shim_r0_to(was)) ||
 		!thumb_bl_read(code, site - b->start, b->at, &t) || t != thumb_veneer_get(&c->pool, to) || !(at = shim_room(c, n)) ||
-		!(pairs ? xvirus_shim_effect(shim, at, pairs, np, t) == (int)n : xvirus_shim_sound(shim, at, slot, t))) {
+		!(pairs ? xvirus_shim_effect(shim, at, pairs, np, t) == (int)n : (k->add ? xvirus_shim_sound_add : xvirus_shim_sound)(shim, at, k->slot, t))) {
 		xv_fail("its %s's call at %08x", pairs ? "effect" : "sound", (unsigned)site);
 		return;
 	}
@@ -353,9 +354,9 @@ static void shims_set(Ctx *c, const XvBlock *b, uint8_t *code) {
 	for (int i = 0; i < c->f->ncmps && !xv_failed(); ++i)
 		if (xvirus_block_of(c->f, c->f->cmps[i].at) == b) cmp_set(c, b, code, &c->f->cmps[i]);
 	for (int i = 0; i < c->f->nsound_calls && !xv_failed(); ++i)
-		if (xvirus_block_of(c->f, c->f->sound_calls[i].at) == b) reg_set(c, b, code, c->f->sound_calls[i].at, c->f->sound_calls[i].slot, NULL, 0);
+		if (xvirus_block_of(c->f, c->f->sound_calls[i].at) == b) reg_set(c, b, code, c->f->sound_calls[i].at, &c->f->sound_calls[i], NULL, 0);
 	for (int i = 0; i < c->f->neffect_calls && !xv_failed(); ++i)
-		if (xvirus_block_of(c->f, c->f->effect_calls[i].at) == b) reg_set(c, b, code, c->f->effect_calls[i].at, 0, c->f->effect_calls[i].pairs, c->f->effect_calls[i].n);
+		if (xvirus_block_of(c->f, c->f->effect_calls[i].at) == b) reg_set(c, b, code, c->f->effect_calls[i].at, NULL, c->f->effect_calls[i].pairs, c->f->effect_calls[i].n);
 }
 
 /* Its pre-step (xvirus_shim.h): the port of its game's dispatcher's case, whose source (BN5's dispatcher and the routines
@@ -988,6 +989,7 @@ void xvirus_install(int which) {
 		/* (BN4 Red Sun's, where its ROM is read, after BN5's: the visitors, docs/multirom/bn4.md) */
 		if (bn4 && xvirus_bn4_copy_install())
 			for (int i = 0; i < xvirus_bn4_count; ++i) xvirus_install_family(xvirus_bn4[i]);
+		if (bn4) xfields_install(XROM_BN4_RED_SUN_US);   /* (BN4's Hole, after BN5's lava and sea: xpanels.h) */
 	}
 	claims_end();
 	/* (outside the families' claims: xsong.c's own copies, the areas' songs, are no one's) */

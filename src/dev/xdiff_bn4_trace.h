@@ -33,6 +33,9 @@ uint8_t xd4_sub(void);
 uint32_t xd4_translate(int part, const uint8_t *in, uint8_t *out);
 /* ... how many bytes of BN4's a part is (the `in` xd4_translate reads) */
 uint32_t xd4_size(int part);
+/* A panel's `in` past its BN4_PANEL_SIZE bytes (the panel at `at`): its blink's type and side, the low nibbles of BN4's own
+ * tables (BN4_PANEL_BLINKS, BN4_PANEL_BLINK_SIDES), which BN6 keeps in the panel (BN6_PANEL_BLINK_TYPE, BN6_PANEL_BLINK_SIDE) */
+void xd4_panel_blinks(uint32_t at, uint8_t *in);
 
 /* Where xdiff.c's trace reads BN4's battle (bn4.h's names): its state, Custom window, RNG words, the three kinds'
  * tables, the panels, the run list, the music players, the battle NaviStats and side, a collision data's paralysis, flags

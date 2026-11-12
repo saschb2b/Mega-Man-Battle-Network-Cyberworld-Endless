@@ -88,13 +88,14 @@ FREE_XNAVIS            +0x260000  +0x2A0000  -    xnavi.c                   mult
 FREE_BACKDROPS         +0x2A0000  +0x2E0000  -    xbackdrop.c               multirom/overview.md        other games' battle backgrounds
 FREE_FLAME             +0x2E0000  +0x2E1000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
 FREE_MAP_BACKDROPS     +0x2F0000  +0x320000  end  xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
+FREE_BN4_CHIP_SPRITE   +0x320000  +0x32F000  end  xnavi_bn4_chip.c          multirom/bn4-chips.md       a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left
 
 zone code  rom  +0x330000  +0x7A0000  -  other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs
 FREE_VIRUS_ROOM        +0x330000  +0x348000  -    xvirus_grow.c             multirom/families.md        BN6's tables grown for the families, the second-level dispatch
 FREE_FAMILIES          +0x348000  +0x400000  -    xvirus.c,xvirus_families.c  multirom/families.md  the families: their homes, code and art
 FREE_CHIPS             +0x400000  +0x480000  -    chips.c,xchips_install.c  multirom/chip-registry.md   the chip registry: records, names, routines, art
 FREE_SOULS             +0x480000  +0x4C0000  -    soulproxy.c,soulunite.c,soullife.c,soulcode.c,soullook.c,soulpower.c,soulpassive.c,soulchips.c,soulcolonel.c,xstrike.c,soulchaos.c  multirom/souls.md  BN5's Souls in BN6's engine (soul_room.h lays it out)
-FREE_PANELS            +0x4C0000  +0x4D0000  end  xpanels.c,xpanels_look.c  multirom/one-net.md         BN5's lava and sea as BN6's panels
+FREE_PANELS            +0x4C0000  +0x4D0000  end  xpanels.c,xpanels_look.c  multirom/one-net.md         BN5's lava, sea and magnet panel and BN4's Hole as BN6's panel types 13-16: the flags (17 words in 32's room), the tiles, the pull
 FREE_LATE_FAMILIES     +0x4D0000  +0x500000  end  xvirus.c                  multirom/families.md        the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds
 FREE_NAVIS             +0x500000  +0x600000  -    xnavi_sprites.c,xnavi_room.c,xnavi_install.c,xnavi_objects.c,xsea.c,xnavi_dark.c  multirom/navis.md  BN5's Navis in BN6's engine
 FREE_NAVI_SPRITES      +0x500000  +0x580000  end,in=FREE_NAVIS  xnavi_sprites.c  multirom/navis.md  their battle sprites, a fixed place each, and the arm points grown (the Navi chips' and the Souls' one copy of each Navi's sprite there too)
@@ -110,7 +111,8 @@ FREE_TAIL              +0x710000  +0x711000  free  -                        engi
 FREE_LATE_CODE         +0x711000  +0x720000  end  xvirus.c                  multirom/families.md        the late families' code, block by block, past the families' own room
 FREE_BN4_NAVIS         +0x720000  +0x730000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis in BN6's engine (xnavi_recipe.h XN_BN4_*): their homes
 FREE_BN4_NAVI_CODE     +0x730000  +0x750000  -    xnavi_bn4.c               multirom/bn4-navis.md       BN4's Navis' code and their objects', block by block
-FREE_BN4_NAVI_ART      +0x750000  +0x77C000  -    xnavi_bn4_art.c           multirom/bn4-navis.md       the coming battle's BN4 Navi's attacks' art and songs, one room
+FREE_BN4_NAVI_ART      +0x750000  +0x766000  -    xnavi_bn4_art.c           multirom/bn4-navis.md       the coming battle's BN4 Navi's attacks' art and songs, one room
+FREE_BN4_CHIP_ART      +0x766000  +0x77C000  end  xnavi_bn4_chip.c          multirom/bn4-chips.md       a BN4 Navi chip's Navi's attacks' art and songs as the chip is used, one room, laid out as the battle's Navi's
 FREE_BN4_NAVI_SPRITE   +0x77C000  +0x78C000  -    xnavi_bn4_room.c          multirom/bn4-navis.md       the coming battle's BN4 Navi's battle sprite, one room
 FREE_BRACKET_FACES     +0x78C000  +0x790000  -    xbracket_faces.c          multirom/bn4-tournament.md  BN6's and BN5's Navis' plates on BN4's bracket: its grown tables, two sheets
 FREE_BRACKET           +0x790000  +0x7A0000  end  xbracket.c                multirom/bn4-tournament.md  BN4's bracket screen moved: its stubs, veneers, code and art
