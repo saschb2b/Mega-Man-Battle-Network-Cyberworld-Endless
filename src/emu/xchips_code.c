@@ -545,8 +545,9 @@ bool xchips_bn4_navi_install(void) {
 	return installed4n;
 }
 
-static bool units4_install(bool navis) {
-	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data) return false;
+/* BN6's tables BN4's units go into grown before a pass (their ids' and attack families' room, the song table's slots for
+ * their sounds BN6 has no song of): false, said, where one is not */
+static bool tables4_grown(void) {
 	claims_begin(XV_CLAIMS);
 	bool room = xg_grow();
 	claims_end();
@@ -554,33 +555,45 @@ static bool units4_install(bool navis) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's tables not grown\n");
 		return false;
 	}
-	/* (their sounds BN6 has no song of go into the grown song table's slots, song_table.h: grown before the step) */
 	if (!song_table_grow()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed: BN6's song table not grown\n");
 		return false;
 	}
-	xv_tx_begin();
+	return true;
+}
+
+/* one pass's units staged (its Navi chips', `navis`, or the rest with BN6's tables, the computed powers and the dispatch's
+ * page), then the Program Advances; the units it staged, `*at` what it staged last (a failure's place) */
+static int units4_stage_pass(bool navis, const char **at) {
 	bool fresh = !navis && tables_stage();
 	if (!navis && !xv_failed()) stubs4_stage();
 	if (!navis && !xv_failed()) routines_stage(&misc_table);
 	/* (the chips' own dispatch page staged once, by the first pass: staged again it would blank the types its units set) */
 	if (!navis && !xv_failed()) xg_page4_stage();
-	const char *at = "BN6's routines' tables";
+	*at = "BN6's routines' tables";
 	int units = 0;
 	for (int i = 0; i < xchips_bn4_count && !xv_failed(); ++i) {
 		if ((xchips_bn4[i].kind == XCHIP_NAVI) != navis) continue;
-		at = xchips_bn4[i].code.name;
+		*at = xchips_bn4[i].code.name;
 		unit4_stage(i, fresh);
 		++units;
 	}
 	if (!navis && !xv_failed()) {
-		at = "BN6's computed powers";
+		*at = "BN6's computed powers";
 		powers4_stage();
 	}
 	if (!xv_failed()) {
-		at = "BN6's Program Advances";
+		*at = "BN6's Program Advances";
 		pas_stage(installed, true);
 	}
+	return units;
+}
+
+static bool units4_install(bool navis) {
+	if (!XR[XROM_BN4_RED_SUN_US].data || !emu_ready() || !R.data || !tables4_grown()) return false;
+	xv_tx_begin();
+	const char *at = "";
+	int units = units4_stage_pass(navis, &at);
 	if (xv_failed()) {
 		fprintf(stderr, "xchips_code: BN4's chips' code not installed (%s): %s\n", at, xv_why());
 		xv_tx_end();
