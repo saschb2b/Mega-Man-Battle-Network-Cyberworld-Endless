@@ -1,7 +1,11 @@
 """Trade Central: one chip for one chip between two players in a channel,
-both with the full set (protocol v9, protocol.full_set): a proposal, an
-answer, a take or a post from a game without it, or a proposal or a take
-aimed at one, is refused with NOTICE notice_pass.
+both with a full pass (protocol.pass_full: the full set, protocol v9; or,
+v18, one game beside BN6's on a system that reads one extra ROM at most):
+a proposal, an answer, a take or a post from a game without it, or a
+proposal or a take aimed at one, is refused with NOTICE notice_pass. Two
+full passes need not hold the same games since v18, so a trade stays on
+the pair's common ground: a chip of a game either lacks the ROM of
+(protocol.holds) is refused with NOTICE notice_ground, and nothing begins.
 
 A trade is proposed with the proposer's chip, answered with the other's,
 and committed only when both have accepted the same pair as they saw it.
@@ -14,8 +18,8 @@ reads a chip's element), there while he is in the channel and until he
 trades. Taking one starts a trade with both chips named, the poster's
 the one on the board; his game checks the want before its Deal. A
 session trades once: its game keeps one swap until it is home. The board
-is every game's to read: a game without BN5's ROM is sent its offers but
-BN5's chips, which it could not name.
+is every game's to read: a game is sent its offers but those of a chip it
+lacks the ROM of (BN5's, BN4's), which it could not name.
 
 Each commit is a line of the state directory's `trades.jsonl` (the time,
 both public identities and the chips each gave), kept `trade_days` days
@@ -97,7 +101,7 @@ class Trades:
             await self.server.notice(player, 15, "Trading is off on this server")
             return
         # (an accept or a cancel goes on with, or ends, a trade between two full sets: never refused)
-        if action in (PROPOSE, ANSWER, TAKE) and await self.server.without_pass(player):
+        if action in (PROPOSE, ANSWER, TAKE) and await self.server.without_pass(player, rule=protocol.pass_full):
             return
         if action == PROPOSE:
             await self.propose(player, ref, give)
@@ -111,6 +115,10 @@ class Trades:
             return
         trade.time = time.monotonic()
         if action == CANCEL:
+            self.end(trade)
+        elif action == ANSWER and player.id == trade.b and trade.a in self.server.players and \
+                await self.server.off_ground(player, self.server.players[trade.a], give):
+            # (an answer with a chip the proposer's game lacks the ROM of: called off for both)
             self.end(trade)
         elif action == ANSWER and player.id == trade.b and trade.chips[trade.b] is None and get == trade.chips[trade.a]:
             trade.chips[trade.b] = give
@@ -132,15 +140,15 @@ class Trades:
         if not target or target.id == player.id or target.channel != player.channel:
             await self.server.notice(player, 17, "That Navi is no longer here")
             return
-        if not await self.free(player, target):
+        if not await self.free(player, target) or await self.server.off_ground(player, target, chip):
             return
         trade = self.begin(player, target, chip)
         self.send(player.id, trade, WAITING)
         self.send(target.id, trade, OFFERED)
 
     async def free(self, player, target):
-        """Whether the two may trade now: both with the full set, neither busy nor traded."""
-        if await self.server.without_pass(player, target):
+        """Whether the two may trade now: both with a full pass, neither busy nor traded."""
+        if await self.server.without_pass(player, target, rule=protocol.pass_full):
             return False
         # (a Navi whose link dropped, his place held: busy till he is back, holds.py)
         # (a player of a team match too, between his bouts: teams.py)
@@ -166,7 +174,7 @@ class Trades:
         if not poster or poster.id == player.id or poster.channel != player.channel or not offer or offer[0] != get:
             await self.server.notice(player, 20, "That offer is gone")
             return
-        if not await self.free(player, poster):
+        if not await self.free(player, poster) or await self.server.off_ground(player, poster, give, get):
             return
         trade = self.begin(player, poster, give)
         trade.chips[poster.id] = get
@@ -178,8 +186,8 @@ class Trades:
         if not self.server.trading:
             await self.server.notice(player, 15, "Trading is off on this server")
             return
-        # (a take-down is never refused: only a post takes the full set)
-        if chip[0] and await self.server.without_pass(player):
+        # (a take-down is never refused: only a post takes a full pass, and a chip its game holds)
+        if chip[0] and (await self.server.without_pass(player, rule=protocol.pass_full) or await self.server.off_ground(player, player, chip)):
             return
         now = time.monotonic()
         if now - player.offer_time < OFFER_WAIT:
@@ -197,12 +205,11 @@ class Trades:
         self.board(player.channel)
 
     def board_for(self, player):
-        """The offers of his channel he may see: BN5's chips only where his game has BN5, BN4's where it has BN4 (v17;
-        any game reads the board)."""
-        players, bn5, bn4 = self.server.players, player.roms & protocol.SPEC["roms_bn5"], player.roms & protocol.SPEC["roms_bn4"]
+        """The offers of his channel he may see: a chip of BN5's or BN4's only where his game has that ROM
+        (protocol.holds; any game reads the board)."""
+        players = self.server.players
         return [(pid, chip, want) for pid, (chip, want) in sorted(self.offers.items())
-                if pid in players and players[pid].channel == player.channel and (bn5 or not protocol.chip_bn5(chip[0]))
-                and (bn4 or not protocol.chip_bn4(chip[0]))]
+                if pid in players and players[pid].channel == player.channel and protocol.holds(player.roms, chip[0])]
 
     def board(self, channel):
         for player in list(self.server.players.values()):

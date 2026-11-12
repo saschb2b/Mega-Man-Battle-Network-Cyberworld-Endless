@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The 3DS's memory"
 description: "How the New 3DS's 96 MB heap holds BN6's ROM, the core's 16 MB copy and one extra ROM, BN5's first (`src/core/start_3ds.c`), mGBA's ROM buffer given back, one area's learned maps kept, its maps' mirror images and raised views made in place, measured by `tools/heap3ds.py`: the budget per part and the margin a new feature is checked against."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:35:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
 ---
 
 # The 3DS's memory
@@ -92,8 +92,9 @@ are the next room to make: some 6 MB.
 
 BN4 Red Sun's ROM ([Battle Network 4 in a run](../../multirom/bn4.md)) is
 offered since 5 November 2026, its families and areas in runs. The 3DS
-reads one extra ROM at most, BN5's before BN4's (`start_3ds.c`'s
-`XROMS_3DS`), and leaves the second unread, said in `log.txt` ("a New
+reads one extra ROM at most, BN5's before BN4's (`start_3ds.c`, by
+`rom.h`'s `XROMS_MOST`, which the NetPass's rule reads too:
+[A system with room for one game](../../online/netpass.md#a-system-with-room-for-one-game)), and leaves the second unread, said in `log.txt` ("a New
 3DS holds 1 extra ROM beside BN6's, read already") and on the PET ("BN5
 found; BN4 too, but this 3DS has no room for it"). Modelled on 4
 November 2026 (`python3 tools/heap3ds.py --cases bn5,bn4,all --seeds

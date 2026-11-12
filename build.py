@@ -191,11 +191,25 @@ def docs_rom_mounts(bn5=False):
     return [(rom_dir, '/rom:ro')]
 
 
+def rom_mounts_no_bn4():
+    """BN6's and BN5's ROMs alone, for a picture of the NetPass with BN4's
+    slot open (the ROM folder's files by their hashes)."""
+    import glob
+    import hashlib
+    out = []
+    for path in sorted(glob.glob(os.path.join(default_rom_dir(), '*.gba'))):
+        with open(path, 'rb') as f:
+            sha1 = hashlib.sha1(f.read()).hexdigest()
+        if sha1 in (BN6_SHA1, BN5_SHA1):
+            out.append((path, '/rom/bn6.gba:ro' if sha1 == BN6_SHA1 else '/rom/bn5.gba:ro'))
+    return out
+
+
 def whole_rom_folder(name):
     """A picture or clip that sees the whole ROM folder (docs_rom_mounts):
     one named for BN5 or BN4, whose areas, Navis or bracket it shows, and
     the Glitch layer's, whose flips were timed with every ROM beside BN6's."""
-    return 'bn5' in name or 'bn4' in name or name.startswith('glitch')
+    return 'bn5' in name or 'bn4' in name or name.startswith('glitch') or name in WHOLE_ROMS_A
 
 
 DOCKER_RUNS = [0]
@@ -1330,6 +1344,35 @@ TOURNEY = ['--scene', 'emu', '--run-depth', '9', '--seed', '6', '--dev', 'tourne
 BN4_NAVI = ['--scene', 'emu', '--net-biome', 'x15', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,god']
 # (BN4's areas' first layers, the weak autopilot walking past the words)
 BN4_AREA = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--seed', '4']
+# 0.21.0's Navis and chips (B). (a chip's battle: seed 4's layer 4 in Central
+# Area, three Mettaur3 set by the foes step, the autopilot playing a
+# folder of thirty of the chip in god mode; a Program Advance's: the same
+# battle by script, the arrival's words paged, the folder's three parts
+# put in ten each, the hand's three picked in the recipe's order, OK, A)
+B_AP = {'CYBERWORLD_AUTOPILOT': '1'}
+B_CHIP = ['--scene', 'emu', '--net-biome', '0', '--run-depth', '4', '--seed', '4']
+B_METT = '0:foes 03@52/03@41/03@63,'
+B_PAGE = '300:,' + '4:A,26:,' * 20
+B_R4, B_L4 = '6:RIGHT,10:,' * 4, '6:LEFT,10:,' * 4
+B_OK = '30:,6:START,14:,6:A,'
+B_HEATSPRD = (B_PAGE + '0:chip 590 D 30,0:chip 589 D 20,0:chip 588 D 10,' + B_METT + '270:,' + B_R4 + '6:A,14:,' + B_L4 +
+              '6:A,14:,6:RIGHT,10:,6:A,' + B_OK + '330:,6:A,400:')
+B_WILDBIRD = (B_PAGE + '0:chip 519 S 30,0:chip 435 S 20,' + B_METT + '270:,6:A,14:,6:RIGHT,10:,6:RIGHT,10:,6:A,14:,6:LEFT,10:,6:A,' +
+              B_OK + '400:,6:A,400:')
+B_CROSOVER = (B_PAGE + '0:chip 526 D 30,0:chip 525 D 20,0:chip 524 D 10,' + B_METT + '270:,' + B_R4 + '6:A,14:,' + B_L4 +
+              '6:A,14:,6:RIGHT,10:,6:A,' + B_OK + '400:,6:A,400:')
+# (a Navi of BN5's fought on BN5's ACDC Area's first layer by the foes
+# step, as BN4_NAVI fights BN4's; the deep's two guarding an Undernet act 5)
+B5_NAVI = ['--scene', 'emu', '--net-biome', 'x0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet,god']
+B_DEEP = ['--scene', 'emu', '--run-depth', '15', '--net-biome', '5', '--dev', 'god,onehit,hp=999']
+B_DEEP_FOES = ['--scene', 'emu', '--run-depth', '15', '--net-biome', '5', '--dev', 'quiet,god,hp=999']
+# (a Net Dealer on BN4's ACDC Area, seed 4's layer 2: Chaud's call and the
+# dealer's words paged, the cursor down to Ligtnin1, R for its card)
+B_DEALER = '100:,' + '6:A,54:,' * 22 + '80:,' + '6:A,54:,' * 15 + '150:,6:DOWN,20:,6:DOWN,40:,6:R,300:'
+# (Colonel's Guardian Data by its talk: the Soul, the chip, then the draft,
+# the cursor down to SoulT+1, A)
+B_SOULT = '420:,' + '6:A,34:,' * 23 + '40:,6:DOWN,10:,6:DOWN,60:,6:A,60:,6:A,200:'
+B_LANE = '60:,' + '4:A,6:,' * 60
 # (the Glitch layer forced: the warp on seed 2's layer 4, MegaMan put two
 # panels from it; a Glitch layer held at its last stage, MegaMan walked
 # round its floor as other areas' looks flip in)
@@ -1337,6 +1380,67 @@ GLITCH_WARP = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'gl
                '--input', '150:,' + '4:A,6:,' * 30 + '40:,0:glitch,400:']
 GLITCH_LAYER = ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--dev', 'glitch,side=4,glitchstage=5,quiet',
                 '--input', '150:,' + '4:A,6:,' * 30 + '40:,100:RIGHT,100:DOWN,100:LEFT,100:UP,400:']
+# 0.21.0 (A)
+# (the Battle Lab, docs/game/battle-lab.md: Central Area's first layer, seed
+# 15, its words paged, the builder opened with every family by the dev step
+# `lab all`, open by frame 700; every ROM read, so BN5's and BN4's panels,
+# backgrounds and songs are on its rows)
+LAB = ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'quiet']
+LAB_OPEN = '300:,' + '4:A,6:,' * 30 + '40:,0:lab all,60:,'
+# (FOES: Mettaur lifted and set down, B back to the list, down to Swordy,
+# its version turned to V2, set a panel on, by frame 1036; FIELD: the
+# cursor up from MegaMan's panel, A turning each panel through the types:
+# BN5's lava, sea and magnet panel, BN4's Hole, ice and grass, by 2006;
+# STAGE: the background turned back to BN4's ACDC Area, the song to BN4's
+# Virus Busting, Folder to the Lab's, by 2346)
+LAB_FOES = LAB_OPEN + '6:A,24:,6:A,24:,6:B,24:,' + '6:DOWN,14:,' * 3 + '6:RIGHT,14:,6:A,24:,6:RIGHT,14:,6:DOWN,14:,6:A,24:,6:B,60:,'
+LAB_FIELD = ('6:R,54:,6:UP,14:,' + '4:A,6:,' * 12 + '6:RIGHT,14:,' + '4:A,6:,' * 13 + '6:DOWN,14:,6:DOWN,14:,' + '4:A,6:,' * 14 +
+             '6:LEFT,14:,' + '4:A,6:,' * 15 + '6:RIGHT,14:,' * 3 + '4:A,6:,' * 6 + '6:UP,14:,6:UP,14:,' + '4:A,6:,' * 5 + '60:,')
+LAB_STAGE = '6:R,54:,' + '6:LEFT,34:,' * 2 + '6:DOWN,34:,' + '6:LEFT,34:,' * 2 + '6:DOWN,34:,6:RIGHT,34:,'
+LAB_BUILD = LAB + ['--input', LAB_FOES + LAB_FIELD + LAB_STAGE + '6:A,200:']
+# (BATTLE!: START from the builder, the first hand's first chip sent)
+LAB_GO = '6:START,90:,6:A,20:,6:START,20:,6:A,200:,6:A,60:,'
+# (a test battle won as it is played: two Mettaurs set in the enemy's front
+# column, BATTLE!, WideSwrd sent, a step forward and the slash through both;
+# BN6's RESULT, A, NO DATA, A, the builder with the time; L to SETS)
+LAB_METS = LAB_OPEN + '6:A,24:,6:LEFT,14:,6:UP,14:,6:A,24:,6:DOWN,14:,6:DOWN,14:,6:A,24:,6:B,40:,'
+LAB_WON = LAB_METS + '6:START,90:,6:A,20:,6:START,20:,6:A,130:,6:RIGHT,10:,6:A,260:,6:A,120:,6:A,200:,6:L,60:,200:'
+# (a new run in Lan's room, seed 2: Dad's call paged, the PET opened)
+PET_ROOM = '40:,' + '4:A,6:,' * 46 + '30:,6:START,40:,'
+LAYER_15 = '300:,' + '4:A,6:,' * 30 + '40:,'
+# (every act has its virus, docs/game/progression/encounter-groups.md: seed
+# 2's act 2 on BN6's ROM alone, Aquarium HP, its family Gunner: a layer's
+# words paged, then its first battle, the act's beat, to the Custom screen
+# and into its first turn)
+GROUPS = ['--scene', 'emu', '--seed', '2', '--dev', 'quiet']
+GROUPS_IN = '150:,' + '4:A,6:,' * 40 + '40:,0:battle,300:,6:A,20:,6:START,20:,6:A,300:'
+# (the fixed menus on BN4's areas, every ROM read: seed 4's BN4 ACDC Area;
+# its first layer's words paged, the PET's ChipFolder opened; its second
+# layer's Net Dealer, Chaud's call and his eight boxes paged to his stock,
+# down to BN4's Ligtnin1, R for its card; home before act 2 on seed 6, the
+# act ahead one of BN4's areas)
+BN4_MENU = ['--scene', 'emu', '--seed', '4', '--net-biome', 'x15']
+BN4_FOLDER = BN4_MENU + ['--run-depth', '1', '--dev', 'quiet', '--input', '300:,' + '4:A,6:,' * 30 + '40:,6:START,40:,6:A,60:,6:A,100:']
+BN4_SHOP = BN4_MENU + ['--run-depth', '2', '--dev', 'quiet,zenny=9000', '--talk', 'shop:430', '--input',
+                       '500:' + ',4:A,6:,96:' * 15 + ',60:,6:DOWN,20:,6:DOWN,20:,60:,6:R,200:']
+BN4_HOME = ['--scene', 'home', '--run-depth', '4', '--seed', '6', '--input', HP_PAGED + '200:']
+# (reward picks on their screen, docs/game/reward-pick.md: the run's opening
+# gift on seed 15, its HPMemory, down to the chip, down to the program; a
+# guardian's Guardian Data on seed 1's layer 6, its draft of programs)
+PICK_GIFT = ['--scene', 'emu', '--seed', '15', '--dev', 'quiet', '--input', '150:,' + '4:A,6:,' * 30 + '100:,6:DOWN,60:,6:DOWN,60:,6:UP,60:']
+PICK_DRAFT = ['--scene', 'emu', '--run-depth', '6', '--seed', '1', '--dev', 'quiet', '--talk', 'reward:300', '--input', '400:,' + '6:A,81:,' * 4 + '400:']
+# (the NetPass, docs/online/netpass.md: Central Area's first layer paged,
+# then the greeter's word on the set grown and the pass as it then opens)
+NETPASS_GREW = LAB + ['--input', LAYER_15 + '0:netpass grew,120:,6:B,100:,6:B,100:,6:B,100:,0:netpass grown,200:']
+# (ProtoMan's netbattle, the rivalry's top rung (duels=2), on seed 7's
+# layer 8: his terms opened, paged, Yes, the Custom screen, BATTLE START!)
+SHOWDOWN = ['--scene', 'emu', '--run-depth', '8', '--seed', '7', '--net-biome', '11', '--dev', 'quiet,duels=2', '--talk', 'duel:900',
+            '--input', '300:,' + '4:A,6:,' * 56 + '40:,' + '6:A,114:,' * 5 + '150:,6:LEFT,14:,6:A,400:,6:START,4:,6:A,600:']
+# (the names of this release's pictures that see the whole ROM folder
+# without BN5 or BN4 in their name: whole_rom_folder)
+WHOLE_ROMS_A = ('lab-build', 'lab-won', 'library-pages', 'library')
+# (and those that see BN6's and BN5's ROMs without BN4's: rom_mounts_no_bn4)
+NO_BN4_A = ('netpass-slot',)
 SCREENSHOTS = [
     ('title', ['--scene', 'title'], [(80, 'title')], {}),
     # (the setup after NEW GAME at its Folder row, and the title with the
@@ -1801,6 +1905,144 @@ SCREENSHOTS = [
      {'CYBERWORLD_AUTOPILOT': '1'}),
     # (the Glitch layer at its last stage, another area's look flipped in)
     ('glitch-layer', GLITCH_LAYER, [(950, 'glitch-flip')], {}),
+    # 0.21.0 (B)
+    # (BN4's chips in a BN6 battle: Meteors1's card on the Custom screen and
+    # a meteor falling, MagBolt1's pull, RollAro1's arrow, GutPnch1's punch)
+    ('bn4-chip-meteors', B_CHIP + ['--dev', 'quiet,god,folder=674', '--input', '460:,' + B_METT],
+     [(700, 'bn4-chip-meteors-card'), (940, 'bn4-chip-meteors')], B_AP),
+    ('bn4-chip-magbolt', B_CHIP + ['--dev', 'quiet,god,folder=642', '--input', '460:,' + B_METT], [(940, 'bn4-chip-magbolt')], B_AP),
+    ('bn4-chip-rollaro', B_CHIP + ['--dev', 'quiet,god,folder=665', '--input', '460:,' + B_METT], [(1040, 'bn4-chip-rollaro')], B_AP),
+    ('bn4-chip-gutpnch', B_CHIP + ['--dev', 'quiet,god,folder=668', '--input', '460:,' + B_METT], [(1020, 'bn4-chip-gutpnch')], B_AP),
+    # (BN4's HeatSprd: HeatShot, Heat-V and HeatSide D named as it forms,
+    # its name, its burst over the three Mettaur3)
+    ('bn4-pa-heatsprd', B_CHIP + ['--dev', 'quiet,god', '--input', B_HEATSPRD],
+     [(1485, 'bn4-pa-heatsprd-parts'), (1530, 'bn4-pa-heatsprd'), (1770, 'bn4-pa-heatsprd-burst')], {}),
+    # (a Net Dealer's stock on BN4's ACDC Area: Ligtnin1 W and its card)
+    ('bn4-dealer', ['--scene', 'emu', '--net-biome', 'x15', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--talk', 'shop:1500',
+                    '--input', B_DEALER], [(2700, 'bn4-dealer')], {}),
+    # (GutsMan guarding BN4's ACDC Area: his card, his fight)
+    ('bn4-guardian', ['--scene', 'emu', '--net-biome', 'x15', '--run-depth', '3', '--guardian', '35', '--dev', 'god'],
+     [(1550, 'bn4-guardian-card'), (2900, 'bn4-guardian-fight')], B_AP),
+    # (the tournament forced on act 3: seed 2's bracket and round 1's card,
+    # JunkMan; seed 28's, TopMan)
+    ('bn4-tourney-junkman', ['--scene', 'emu', '--run-depth', '9', '--seed', '2', '--dev', 'tourney,god,onehit,quiet'],
+     [(1360, 'bn4-bracket-junkman'), (1500, 'bn4-round-junkman')], B_AP),
+    ('bn4-tourney-topman', ['--scene', 'emu', '--run-depth', '9', '--seed', '28', '--dev', 'tourney,god,onehit,quiet'],
+     [(1240, 'bn4-bracket-topman'), (1400, 'bn4-round-topman')], B_AP),
+    # (the tournament's four new Navis, each in a BN6 battle on BN4's ACDC
+    # Area by the foes step, at a frame of his attack)
+    ('bn4-topman', BN4_NAVI + ['--input', '460:,0:foes 3B0@52'], [(1990, 'bn4-topman')], B_AP),
+    ('bn4-sparkman', BN4_NAVI + ['--input', '460:,0:foes 3C0@52'], [(1150, 'bn4-sparkman')], B_AP),
+    ('bn4-burnerman', BN4_NAVI + ['--input', '460:,0:foes 3B8@52'], [(1150, 'bn4-burnerman')], B_AP),
+    ('bn4-junkman', BN4_NAVI + ['--input', '460:,0:foes 3A4@52'], [(1120, 'bn4-junkman')], B_AP),
+    # (the dark boards' two: CloudMan on seed 9's act 4 board, CosmoMan on
+    # its act 5 board; each in a battle by the foes step)
+    ('bn5-cloudman-board', ['--scene', 'emu', '--run-depth', '11', '--seed', '9', '--dev', 'dark,god,onehit'],
+     [(120, 'bn5-cloudman-board')], B_AP),
+    ('bn5-cosmoman-board', ['--scene', 'emu', '--run-depth', '14', '--seed', '9', '--dev', 'dark,god,onehit'],
+     [(200, 'bn5-cosmoman-board')], B_AP),
+    ('bn5-cloudman', B5_NAVI + ['--input', '460:,0:foes 1E8@52'], [(2080, 'bn5-cloudman')], B_AP),
+    ('bn5-cosmoman', B5_NAVI + ['--input', '460:,0:foes 1EC@52'], [(1270, 'bn5-cosmoman')], B_AP),
+    # (the deep's two guarding an Undernet act 5: the card and his Guardian
+    # Data's SP chip, his fight won in one hit; LarkMan V2 and GridMan V3 at
+    # their HP in a battle on the Undernet by the foes step)
+    ('bn5-larkman-guard', B_DEEP + ['--guardian', '65'], [(3750, 'bn5-larkman-card'), (4980, 'bn5-larkman-chip')], B_AP),
+    ('bn5-gridman-guard', B_DEEP + ['--guardian', '66'], [(3750, 'bn5-gridman-card'), (5740, 'bn5-gridman-chip')], B_AP),
+    ('bn5-larkman', B_DEEP_FOES + ['--input', '460:,0:foes 3ED@52'], [(1000, 'bn5-larkman')], B_AP),
+    ('bn5-gridman', B_DEEP_FOES + ['--input', '460:,0:foes 3F2@52'], [(1110, 'bn5-gridman')], B_AP),
+    # (BN5's Navi chips: ShadeMan's, CosmoMan's; WildBird formed of two
+    # Katana1 and LarkMan SP, and fired; CrosOver of Django's three)
+    ('bn5-chip-shademan', B_CHIP + ['--dev', 'quiet,god,folder=505', '--input', '460:,' + B_METT], [(1060, 'bn5-chip-shademan')], B_AP),
+    ('bn5-chip-cosmoman', B_CHIP + ['--dev', 'quiet,god,folder=515', '--input', '460:,' + B_METT], [(1140, 'bn5-chip-cosmoman')], B_AP),
+    ('bn5-pa-wildbird', B_CHIP + ['--dev', 'quiet,god', '--input', B_WILDBIRD],
+     [(1395, 'bn5-pa-wildbird-parts'), (1440, 'bn5-pa-wildbird'), (1860, 'bn5-pa-wildbird-dive')], {}),
+    ('bn5-pa-crosover', B_CHIP + ['--dev', 'quiet,god', '--input', B_CROSOVER],
+     [(1485, 'bn5-pa-crosover-parts'), (1530, 'bn5-pa-crosover')], {}),
+    # (SoulT+1 in Colonel's draft, and taken)
+    ('bn5-soult', ['--scene', 'emu', '--run-depth', '3', '--net-biome', 'x0', '--guardian', '24', '--dev', 'quiet', '--talk', 'reward:400',
+                   '--input', B_SOULT], [(1440, 'bn5-soult-draft'), (1520, 'bn5-soult-got')], {}),
+    # (BN4's VolGear, and Kilby with MagTect, in a BN6 battle of Central
+    # Area by the foes step: named on the Custom screen, then at work)
+    ('bn4-volgear', B_CHIP + ['--dev', 'quiet,god', '--input', '460:,0:foes 2F0@52/2F0@63'],
+     [(680, 'bn4-volgear-names'), (1240, 'bn4-volgear')], B_AP),
+    ('bn4-kilby-magtect', B_CHIP + ['--dev', 'quiet,god', '--input', '460:,0:foes 2F6@52/2FC@63/2F6@41'],
+     [(740, 'bn4-kilby-magtect-names'), (1140, 'bn4-kilby-magtect')], B_AP),
+    # (BN5's arrow lanes, forced on seed 10's Oran Area and seed 2's
+    # Undernet, MegaMan put at the lane's foot; a battle won on BN5's ACDC
+    # Area, its results)
+    ('bn5-lane-oran', ['--scene', 'emu', '--run-depth', '4', '--net-biome', 'x4', '--seed', '10', '--dev', 'quiet,pieces=32',
+                       '--input', B_LANE + '0:place 164 -116 1,200:'], [(700, 'bn5-lane-oran')], {}),
+    ('bn5-lane-undernet', ['--scene', 'emu', '--run-depth', '4', '--net-biome', 'x5', '--seed', '2', '--dev', 'quiet,pieces=32',
+                           '--input', B_LANE + '0:place 68 -36 1,200:'], [(700, 'bn5-lane-undernet')], {}),
+    ('bn5-win', ['--scene', 'emu', '--run-depth', '3', '--net-biome', 'x0', '--guardian', '24', '--dev', 'god,onehit,hp=999'],
+     [(1670, 'bn5-win')], B_AP),
+    # (Team ProtoMan's MagnetMan, a test fight by the foes step: no run
+    # meets him yet)
+    ('bn5-magnetman', B5_NAVI + ['--input', '460:,0:foes 3E4@52'], [(1180, 'bn5-magnetman')], B_AP),
+    # 0.21.0 (A)
+    ('lab-build', LAB_BUILD, [(1000, 'lab-foes'), (2000, 'lab-field'), (2140, 'lab-stage'), (2260, 'lab-stage-song'),
+                              (2340, 'lab-stage-folder'), (2460, 'lab-folder')], {}),
+    # (a test battle won: the slash through both Mettaurs, BN6's RESULT with
+    # NO DATA, the builder back with the time, SETS with the set's best)
+    ('lab-won', LAB + ['--input', LAB_WON], [(1250, 'lab-running'), (1600, 'lab-result'), (1800, 'lab-time'), (1880, 'lab-sets')], {}),
+    # (the keeper at the lab's station in Lan's HP (--dev lab: the Lab sent),
+    # MegaMan put before him, his three boxes)
+    ('lab-keeper', HP_2 + ['--dev', 'lab', '--input', HP_PAGED + '0:place -76 -34 7,20:,6:A,100:,6:A,100:,6:A,100:,100:'],
+     [(1218, 'lab-keeper'), (1320, 'lab-keeper-talk'), (1425, 'lab-keeper-data'), (1530, 'lab-keeper-offer')], {}),
+    # (Dad's mail on a run's first layer: E-Mail, down to Battle Lab, read)
+    ('lab-mail', LAB[:-1] + ['quiet,lab', '--input', LAYER_15 + '6:START,40:,' + '6:DOWN,10:,' * 4 + '6:A,60:,' + '6:DOWN,10:,' * 3 +
+                             '6:A,100:,' + '6:A,100:,' * 5],
+     [(965, 'lab-mail'), (1175, 'lab-mail-2'), (1340, 'lab-mail-3')], {}),
+    # (a profile with one win over Bass and the Cybeast, `lab open` listing
+    # what it has: Gregar set, alone; his battle; the blow that would delete
+    # MegaMan ending it, the builder back)
+    ('lab-navi', LAB[:-1] + ['quiet,bass=1,beast=1', '--input', LAYER_15 + '0:lab open,60:,6:DOWN,24:,6:A,24:,6:A,24:,6:B,100:,'
+                             '6:START,90:,6:A,20:,6:START,20:,6:A,400:'],
+     [(860, 'lab-navi'), (1210, 'lab-navi-battle'), (1460, 'lab-navi-deleted')], {}),
+    # (the Library, a page per game: every third chip in the profile's
+    # Library (--dev library=3), every ROM read; BN6's StdChip page, right
+    # to its MegaChip and GigaChip, BN5's three, BN4's three)
+    ('library-pages', ['--scene', 'town', '--seed', '2', '--dev', 'library=3', '--input', PET_ROOM + '6:DOWN,6:,6:DOWN,6:,6:A,60:,' +
+                       '6:RIGHT,34:,' * 3 + '6:R,34:,' + '6:RIGHT,34:,' * 3 + '6:R,34:,6:R,34:,6:DOWN,14:,' + '6:RIGHT,34:,' * 2 + '40:'],
+     [(640, 'library-bn6'), (680, 'library-bn6-mega'), (720, 'library-bn6-giga'), (800, 'library-bn5'), (840, 'library-bn5-mega'),
+      (1042, 'library-bn4'), (1076, 'library-bn4-mega'), (1120, 'library-bn4-giga')], {}),
+    # (the Jukebox with BN4's ROM read: R to its BN4 Towns section, a song played)
+    ('jukebox-bn4', ['--scene', 'town', '--seed', '2', '--input', PET_ROOM + '6:DOWN,6:,' * 5 + '6:A,60:,6:DOWN,6:,6:RIGHT,14:,6:A,40:,' +
+                     '6:R,34:,' * 11 + '6:DOWN,14:,6:DOWN,14:,6:A,200:'],
+     [(1390, 'jukebox-bn4')], {}),
+    # (the act's card naming its family; the three beats, each layer's first
+    # battle on BN6's Custom screen: Gunner alone, beside Catack, in its
+    # constellation with Armadill and Piranha; side by side in a sheet)
+    ('groups-act', GROUPS + ['--run-depth', '4', '--input', GROUPS_IN], [(150, 'groups-act-card'), (880, 'groups-beat-1')], {}),
+    ('groups-second', GROUPS + ['--run-depth', '5', '--input', GROUPS_IN], [(880, 'groups-beat-2')], {}),
+    ('groups-third', GROUPS + ['--run-depth', '6', '--input', GROUPS_IN], [(880, 'groups-beat-3'), (1100, 'groups-beat-3-fight')], {}),
+    # (BN4's Walla the signature of act 3 in BN6's Sky Area, every ROM read:
+    # seed 6's layer 7, its card and its first battle)
+    ('groups-bn4-walla', ['--scene', 'emu', '--seed', '6', '--run-depth', '7', '--net-biome', '2', '--dev', 'quiet', '--input', GROUPS_IN],
+     [(150, 'groups-bn4-card'), (880, 'groups-bn4-battle'), (1100, 'groups-bn4-fight')], {}),
+    # (the Chip Folder and a Net Dealer's stock on a layer of BN4's ACDC
+    # Area, BN4's Ligtnin1 on his list and its card; Lan's HP before one of
+    # BN4's areas)
+    ('bn4-folder', BN4_FOLDER, [(760, 'bn4-folder')], {}),
+    ('bn4-shop', BN4_SHOP, [(2200, 'bn4-shop'), (2360, 'bn4-shop-card')], {}),
+    ('bn4-home', BN4_HOME, [(1300, 'bn4-home')], {}),
+    # (the opening gift's pick: HPMemory, the chip, the program; a
+    # guardian's draft)
+    ('pick-gift', PICK_GIFT, [(480, 'pick-gift'), (600, 'pick-gift-chip'), (660, 'pick-gift-program')], {}),
+    ('pick-draft', PICK_DRAFT, [(640, 'pick-draft')], {}),
+    # (the NetPass: with BN6's and BN5's ROMs alone, the greeter's word on
+    # the new slot and the pass with BN4's slot open; with BN4's too, full)
+    ('netpass-slot', NETPASS_GREW, [(750, 'netpass-slot-greeter'), (930, 'netpass-slot-shut'), (1155, 'netpass-slot')], {}),
+    ('netpass-bn4', LAB + ['--input', LAYER_15 + '0:netpass,200:'], [(760, 'netpass-bn4')], {}),
+    # (Showdown and Sorrow, heard, not seen: ProtoMan's netbattle as it
+    # starts, and a lost run's summary)
+    ('showdown', SHOWDOWN, [(2060, 'showdown-custom'), (2180, 'showdown-netbattle')], {}),
+    ('sorrow', ['--scene', 'summary', '--run-depth', '6', '--seed', '3'], [(300, 'sorrow-summary')], {}),
+    # (NumbrOpn's ten chips beside five: numbropn-ten.png and numbropn-five.png
+    # are the differential's own pictures of BN6's Custom screen, tests/xdiff's
+    # ncp_numbropn and ncp_numbropn_control with "shots": [[6, 1, 30, PATH]]
+    # added, by `build.py xdiff`; the sheet lays them side by side)
+    # 0.21.0 (A) ends: stills
 ]
 
 # pictures of others side by side for a release's notes (made after the
@@ -1813,6 +2055,10 @@ SCREENSHOT_SHEETS = {
     'bn4-navis': [[('bn4-gutsman', 'GutsMan'), ('bn4-thunderman', 'ThunderMan'), ('bn4-windman', 'WindMan'), ('bn4-fireman', 'FireMan')],
                   [('bn4-searchman', 'SearchMan'), ('bn4-aquaman', 'AquaMan'), ('bn4-roll', 'Roll')]],
     'bn4-areas': [[('bn4-acdc', 'ACDC Area'), ('bn4-town', 'Town Area'), ('bn4-countries', 'The countries')]],
+    # 0.21.0 (A)
+    'numbropn-hand': [[('numbropn-five', 'Five chips'), ('numbropn-ten', 'NumbrOpn: ten chips')]],
+    'groups-beats': [[('groups-beat-1', 'Layer 1: alone'), ('groups-beat-2', 'Layer 2: beside a partner'),
+                      ('groups-beat-3', 'Layer 3: its constellation')]],
 }
 SHEET_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -1949,7 +2195,7 @@ def screenshots(only=None):
         data = home + '/.local/share/cyberworld-endless' if rom_screen else '/src/.build/screenshots/data'
         # (SAVES: two devices' saves, this one's player's home a neutral one)
         saves = name == 'saves'
-        mounts = docs_rom_mounts(bn5=whole_rom_folder(name) or rom_screen)
+        mounts = rom_mounts_no_bn4() if name in NO_BN4_A else docs_rom_mounts(bn5=whole_rom_folder(name) or rom_screen)
         if saves:
             code = saves_devices(tmp)
             if code:
@@ -2112,6 +2358,18 @@ CLIPS = [
     ('glitch-layer', GLITCH_LAYER, {}, None, 600, 1300),
     ('glitch-copy', ['--scene', 'emu', '--net-biome', '0', '--seed', '15', '--dev', 'god,onehit,quiet'],
      {'CYBERWORLD_AUTOPILOT': '1'}, '300:,0:swap 101/107/10D', 1360, 1660),
+    # 0.21.0 (B)
+    # (BN4's HeatSprd from its forming to its burst; Meteors1's five
+    # meteors; TopMan's spinning top crossing the field)
+    ('bn4-heatsprd', B_CHIP + ['--dev', 'quiet,god'], {}, B_HEATSPRD, 1450, 1830),
+    ('bn4-meteors', B_CHIP + ['--dev', 'quiet,god,folder=674'], B_AP, '460:,' + B_METT, 880, 1140),
+    ('bn4-topman-top', BN4_NAVI, B_AP, '460:,0:foes 3B0@52', 1950, 2086),
+    # 0.21.0 (A)
+    ('lab-won', LAB, {}, LAB_WON, 700, 1800),
+    # (the constellation's battle, act 2's third layer: Armadill, Gunner and
+    # Piranha from the Custom screen into the first turn, the autopilot fighting)
+    ('groups-constellation', GROUPS + ['--run-depth', '6'], {'CYBERWORLD_AUTOPILOT': '1'}, '460:battle', 560, 1080),
+    # 0.21.0 (A) ends: clips
 ]
 
 
@@ -2129,7 +2387,11 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'bn5-lib-darkloid': (None, 15), 'vb-fight': (None, 15), 'bn5-lib-bomb': (None, 15), 'courier-offers': (None, 15),
                'floor-pad': (None, 15), 'options-live': (None, 15), 'gba-blend': (None, 15),
                'bn4-tourney': (None, 15), 'bn4-roll-summon': (None, 15), 'acdc-bn4': (4, 12), 'glitch-warp': (None, 15),
-               'glitch-layer': (None, 10), 'glitch-copy': (None, 15)}
+               'glitch-layer': (None, 10), 'glitch-copy': (None, 15),
+               # 0.21.0 (A)
+               'lab-won': (None, 12), 'groups-constellation': (None, 12), 'online-pet': (None, 12), 'online-netpass-bn4': (None, 15)}
+# 0.21.0 (B)
+README_GIFS.update({'bn4-heatsprd': (None, 15), 'bn4-meteors': (None, 15), 'bn4-topman-top': (None, 15)})
 
 
 def clips(only=None):

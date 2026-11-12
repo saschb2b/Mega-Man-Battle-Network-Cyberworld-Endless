@@ -106,7 +106,11 @@ AI 69, ids 0x2DE-0x2E3;
 [Transplanted families](../multirom/families.md)), `showbn4` (a ROM read for
 research alone offered as players would see it; BN4 Red Sun's, which it
 was made for, is offered to every player now, so it changes nothing today;
-[How it is built](../multirom/how-it-is-built.md), Platforms), and
+[How it is built](../multirom/how-it-is-built.md), Platforms),
+`xroms=N` (the build acts as a system that reads N extra ROMs beside
+BN6's at most, `rom.h`'s `xroms_most`: `xroms=1` a New 3DS's NetPass and
+its HELLO on any build, the ROMs read as ever;
+[A system with room for one game](../online/netpass.md#a-system-with-room-for-one-game)), and
 `xnavicontrol` (the control Navi installed instead of BN5's Navis: BN6's
 own HeatMan moved as Navi AI 25, ids 0x1C4-0x1C9, for the foes step and
 `tools/xcontrol.py --navi`; [Transplanted Navis](../multirom/navis.md)), and

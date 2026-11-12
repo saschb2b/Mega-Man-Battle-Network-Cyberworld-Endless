@@ -16,6 +16,8 @@ const char *trade_who(void);
 const char *trade_none_here(void);
 /* ... no other Navi here with the Trade stamp on his NetPass */
 const char *trade_none_stamped(void);
+/* ... none of MegaMan's spares a chip `name`'s PET holds (the pair's common ground, netpass_peer_holds) */
+const char *trade_none_shared(const char *name);
 /* ... MegaMan without a spare (the spares list's chips, trade_screen.h). */
 const char *trade_no_spares(void);
 const char *trade_sent(const char *name);

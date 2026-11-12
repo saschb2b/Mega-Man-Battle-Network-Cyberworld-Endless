@@ -156,6 +156,24 @@ typedef struct {
 	char path[1024];   /* the file it was read from */
 } XRom;
 extern XRom XR[XROM_COUNT];
+/* The extra ROMs a system reads beside BN6's at most: each of them, but
+ * on a New 3DS one (its heap: docs/engine/emulation/3ds-memory.md;
+ * start_3ds.c reads up to it, BN5's first). What a game can do online
+ * goes by it too: a NetPass is full with every game its system can read
+ * (docs/online/netpass.md, A system with room for one game). */
+#ifdef __3DS__
+#define XROMS_MOST 1
+#else
+#define XROMS_MOST XROM_COUNT
+#endif
+/* ... as this game goes by it: XROMS_MOST, or what --dev xroms=N and the
+ * tests set (a host build acting as a system of one extra ROM) */
+extern int xroms_most;
+/* --dev's options (main.c, beside devtools_parse, as analytics_dev takes
+ * its own): xroms=N among them sets it */
+void xroms_dev(const char *spec);
+/* ... fewer than there are: a system that cannot read every game at once */
+static inline bool xroms_short(void) { return xroms_most < XROM_COUNT; }
 /* Reads the extra ROMs in dir (any *.gba of theirs); how many are read now. */
 int xrom_find(const char *dir);
 /* ... the one in `path`, where it is one of them, unchanged, and not read

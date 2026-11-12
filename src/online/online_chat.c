@@ -145,7 +145,7 @@ static void peer_talk_arena(TextArchive *t, uint8_t *out, bool muted) {
 	ta_begin(t);
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms)), FACE_MEGAMAN, &first);
+	ta_pages(t, square_peer_words(C.peer.name, card_of(C.peer.id), true, true), FACE_MEGAMAN, &first);
 	ta_jump(t, 1);
 	/* (our challenge to him open: Call off in Battle's place, protocol v13) */
 	const char *battle = square_arena_option(C.peer.id);
@@ -183,11 +183,11 @@ static void peer_talk(void) {
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	bool muted = online_people_flags(C.peer.identity) & ONLINE_MUTED;
 	C.card_open = true;
-	if (square_arena_offered() && netpass_has(STAMP_ARENA) && netpass_peer_full(C.peer.roms)) { peer_talk_arena(&t, out, muted); return; }
+	if (square_arena_offered() && netpass_has(STAMP_ARENA) && netpass_peer_has(C.peer.roms, STAMP_ARENA)) { peer_talk_arena(&t, out, muted); return; }
 	ta_begin(&t);
 	ta_script(&t);
 	bool first = true;
-	ta_pages(&t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms)), FACE_MEGAMAN, &first);
+	ta_pages(&t, square_peer_words(C.peer.name, card_of(C.peer.id), netpass_peer_full(C.peer.roms), netpass_peer_has(C.peer.roms, STAMP_ARENA)), FACE_MEGAMAN, &first);
 	ta_mugshot(&t, FACE_MEGAMAN);
 	ta_clear(&t);
 	const char *labels[SQUARE_PEER_OPTIONS];
@@ -282,10 +282,10 @@ bool online_chat_update(const OnlineSnapshot *s) {
 	C.open = false;
 	/* (the stamp moment, once MegaMan is free: the greeter's word, then the pass with its new stamps landing) */
 	if (C.stamp == 1) { C.stamp = 2; netpass_stamp_begin(); return false; }
-	if (!C.stamp && netpass_stamp_due() && talk_start(square_greeter_stamp_words(), FACE_PROG)) { C.stamp = 1; return false; }
+	if (!C.stamp && netpass_stamp_due() && talk_start(square_greeter_stamp_words(netpass_stamps() == STAMP_COUNT), FACE_PROG)) { C.stamp = 1; return false; }
 	/* (the set grown since the pass was full: the greeter's word once, then the pass with its new open slot) */
 	if (C.stamp == 3) { C.stamp = 4; netpass_grew_begin(); return false; }
-	if (!C.stamp && netpass_grew_due() && talk_start(square_greeter_grew_words(), FACE_PROG)) { C.stamp = 3; return false; }
+	if (!C.stamp && netpass_grew_due() && talk_start(square_greeter_grew_words(netpass_full()), FACE_PROG)) { C.stamp = 3; return false; }
 	if (C.waiting && (card_of(C.peer.id) || --C.waiting <= 0)) { C.waiting = 0; peer_talk(); return false; }
 	bool on = online_square_on_exit(bn6_player_x(), bn6_player_y());
 	if (on && !C.on_exit && talk_ask("", FACE_MEGAMAN, square_home_question(), HOME_FLAG)) C.home = true;
