@@ -4298,12 +4298,9 @@ static const XvPair gridman_words[] = {
 	{ 0x0800325D, 0x08003459 },
 };
 static const XvImm gridman_imms[] = {
-	{ 0x080BDF7C, THUMB_MOVS, 2, 0, 0x12, 0xFE },   /* its sprite: list 2 0x12 in BN5, 0xfe in BN6 (BN5's copied there) */
+	{ 0x080BDF7C, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* BN5's Navi 18's battle sprite: list 2 0x12 in BN5, 0x32 in BN6 (the Navis') */
 	{ 0x080BE0D8, THUMB_MOVS, 0, 0, 0xE4, 0x53 },   /* its sound 0xe4: BN5's copied to BN6's slot 0x53 */
 	{ 0x080BE1B2, THUMB_MOVS, 0, 0, 0x70, 0x5F },   /* its sound 0x70: BN5's copied to BN6's slot 0x5f */
-};
-static const XvSprite gridman_sprites[] = {
-	{ 2, 0x12, 2, 0xFE, XC_ART + 0x39000, 0x7800 },
 };
 static const XvType gridman_types[] = { { 1, 0x1F, XV_TYPE_MOVED }, { 4, 0x58, XV_TYPE_SHARED } };
 static const XcSong gridman_songs[] = { { 0x70, 0x5F }, { 0xE4, 0x53 } };
@@ -4314,7 +4311,6 @@ static const XcSong gridman_songs[] = { { 0x70, 0x5F }, { 0xE4, 0x53 } };
 	.calls = gridman_calls, .ncalls = (int)(sizeof gridman_calls / sizeof *gridman_calls), \
 	.words = gridman_words, .nwords = (int)(sizeof gridman_words / sizeof *gridman_words), \
 	.imms = gridman_imms, .nimms = (int)(sizeof gridman_imms / sizeof *gridman_imms), \
-	.sprites = gridman_sprites, .nsprites = (int)(sizeof gridman_sprites / sizeof *gridman_sprites), \
 	.types = gridman_types, .ntypes = (int)(sizeof gridman_types / sizeof *gridman_types) }
 /* ---- CloudMan: BN5's navi 0xf (080BC58F) as BN6's 0x2c ---- */
 
@@ -4370,12 +4366,12 @@ static const XvPair cloudman_words[] = {
 	{ 0x080138EB, 0x08016C8B },
 };
 static const XvImm cloudman_imms[] = {
-	{ 0x080BC424, THUMB_MOVS, 2, 0, 0xF, 0xFD },   /* its sprite: list 2 0xf in BN5, 0xfd in BN6 (BN5's copied there) */
-	{ 0x080DCB28, THUMB_MOVS, 2, 0, 0xF, 0xFD },   /* its sprite: list 2 0xf in BN5, 0xfd in BN6 (BN5's copied there) */
+	{ 0x080BC424, THUMB_MOVS, 2, 0, 0xF, 0xFE },   /* its sprite: list 2 0xf in BN5, 0xfe in BN6 (BN5's copied there) */
+	{ 0x080DCB28, THUMB_MOVS, 2, 0, 0xF, 0xFE },   /* its sprite: list 2 0xf in BN5, 0xfe in BN6 (BN5's copied there) */
 	{ 0x080DCBF2, THUMB_MOVS, 0, 0, 0xBA, 0x60 },   /* its sound 0xba: BN5's copied to BN6's slot 0x60 */
 };
 static const XvSprite cloudman_sprites[] = {
-	{ 2, 0x0F, 2, 0xFD, XC_ART + 0x40800, 0xC800 },
+	{ 2, 0x0F, 2, 0xFE, XC_ART + 0x39000, 0xC800 },
 };
 static const XvType cloudman_types[] = { { 1, 0x15, XV_TYPE_MOVED }, { 3, 0xB3, XV_TYPE_MOVED } };
 static const XcSong cloudman_songs[] = { { 0xBA, 0x60 } };
@@ -4427,10 +4423,7 @@ static const XvPair larkman_words[] = {
 	{ 0x0800325D, 0x08003459 },
 };
 static const XvImm larkman_imms[] = {
-	{ 0x080BDD1C, THUMB_MOVS, 2, 0, 0x11, 0xFC },   /* its sprite: list 2 0x11 in BN5, 0xfc in BN6 (BN5's copied there) */
-};
-static const XvSprite larkman_sprites[] = {
-	{ 2, 0x11, 2, 0xFC, XC_ART + 0x4D000, 0x5000 },
+	{ 0x080BDD1C, THUMB_MOVS, 2, 0, 0x11, 0x31 },   /* BN5's Navi 17's battle sprite: list 2 0x11 in BN5, 0x31 in BN6 (the Navis') */
 };
 static const XvType larkman_types[] = { { 1, 0x1E, XV_TYPE_MOVED }, { 3, 0xBA, XV_TYPE_SHARED } };
 
@@ -4440,7 +4433,6 @@ static const XvType larkman_types[] = { { 1, 0x1E, XV_TYPE_MOVED }, { 3, 0xBA, X
 	.calls = larkman_calls, .ncalls = (int)(sizeof larkman_calls / sizeof *larkman_calls), \
 	.words = larkman_words, .nwords = (int)(sizeof larkman_words / sizeof *larkman_words), \
 	.imms = larkman_imms, .nimms = (int)(sizeof larkman_imms / sizeof *larkman_imms), \
-	.sprites = larkman_sprites, .nsprites = (int)(sizeof larkman_sprites / sizeof *larkman_sprites), \
 	.types = larkman_types, .ntypes = (int)(sizeof larkman_types / sizeof *larkman_types) }
 /* ---- Django: BN5's navi 0x13 (080BF605) as BN6's 0x30 ---- */
 
@@ -4533,9 +4525,9 @@ static const XvNumber django_numbers[] = {
 	{ 0x080EA1CC, 0x0101100E, 0x010110A4 },
 };
 static const XvSprite django_sprites[] = {
-	{ 3, 0x41, 3, 0xEF, XC_ART + 0x52000, 0x2000 },
-	{ 3, 0x44, 3, 0xE8, XC_ART + 0x54000, 0x1000 },
-	{ 3, 0x45, 3, 0xE7, XC_ART + 0x55000, 0x800 },
+	{ 3, 0x41, 3, 0xEF, XC_ART + 0x45800, 0x2000 },
+	{ 3, 0x44, 3, 0xE8, XC_ART + 0x47800, 0x1000 },
+	{ 3, 0x45, 3, 0xE7, XC_ART + 0x48800, 0x800 },
 };
 static const XvType django_types[] = { { 1, 0x24, XV_TYPE_MOVED }, { 3, 0xBC, XV_TYPE_MOVED }, { 4, 0x7B, XV_TYPE_MOVED }, { 4, 0x7D, XV_TYPE_MOVED }, { 4, 0x84, XV_TYPE_MOVED } };
 
@@ -4816,7 +4808,7 @@ static const XvPair football_words[] = {
 	{ 0x0800325D, 0x08003459 },
 };
 static const XvImm football_imms[] = {
-	{ 0x080BF748, THUMB_MOVS, 2, 0, 0x12, 0xFE },   /* its sprite: list 2 0x12 in BN5, 0xfe in BN6 (BN5's copied there) */
+	{ 0x080BF748, THUMB_MOVS, 2, 0, 0x12, 0x32 },   /* BN5's Navi 18's battle sprite: list 2 0x12 in BN5, 0x32 in BN6 (the Navis') */
 };
 static const XvType football_types[] = { { 1, 0x25, XV_TYPE_MOVED }, { 3, 0x95, XV_TYPE_SHARED } };
 
@@ -4888,8 +4880,8 @@ static const XvImm piledrvr_imms[] = {
 	{ 0x080D9EB0, THUMB_MOVS, 2, 0, 0x4A, 0xE5 },   /* its sprite: list 3 0x4a in BN5, 0xe5 in BN6 (BN5's copied there) */
 };
 static const XvSprite piledrvr_sprites[] = {
-	{ 3, 0x46, 3, 0xE6, XC_ART + 0x55800, 0x800 },
-	{ 3, 0x4A, 3, 0xE5, XC_ART + 0x56000, 0x1000 },
+	{ 3, 0x46, 3, 0xE6, XC_ART + 0x49000, 0x800 },
+	{ 3, 0x4A, 3, 0xE5, XC_ART + 0x49800, 0x1000 },
 };
 static const XvType piledrvr_types[] = { { 3, 0x99, XV_TYPE_MOVED }, { 3, 0x9A, XV_TYPE_MOVED }, { 4, 0x6F, XV_TYPE_MOVED } };
 static const XcSong piledrvr_songs[] = { { 0x148, 0x4B } };
@@ -4957,15 +4949,15 @@ const XChipUnit xchips_bn5[] = {
 	{ XCHIP_SUPPORT, 0x3B, 0x65, 0x080E2421, XC_HOMES + 0xCC00, DARKINVS_CODE, NULL, 0, 0x00 },
 	{ XCHIP_NAVI, 0x01, 0x1E, 0x080BD371, XC_HOMES + 0xD000, SHADEMAN_CODE, NULL, 0, 0x80 },
 	{ XCHIP_NAVI, 0x0E, 0x2B, 0x080BC39F, XC_HOMES + 0xD400, BLIZZARDMAN_CODE, NULL, 0, 0x100 },
-	{ XCHIP_NAVI, 0x12, 0x2F, 0x080BE23D, XC_HOMES + 0xD800, GRIDMAN_CODE, gridman_songs, (int)(sizeof gridman_songs / sizeof *gridman_songs), 0x00 },
+	{ XCHIP_NAVI, 0x12, 0x2F, 0x080BE23D, XC_HOMES + 0xD800, GRIDMAN_CODE, gridman_songs, (int)(sizeof gridman_songs / sizeof *gridman_songs), 0x40000 },
 	{ XCHIP_NAVI, 0x0F, 0x2C, 0x080BC58F, XC_HOMES + 0xDC00, CLOUDMAN_CODE, cloudman_songs, (int)(sizeof cloudman_songs / sizeof *cloudman_songs), 0x00 },
-	{ XCHIP_NAVI, 0x11, 0x2E, 0x080BDE89, XC_HOMES + 0xE000, LARKMAN_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x11, 0x2E, 0x080BDE89, XC_HOMES + 0xE000, LARKMAN_CODE, NULL, 0, 0x20000 },
 	{ XCHIP_NAVI, 0x13, 0x30, 0x080BF605, XC_HOMES + 0xE400, DJANGO_CODE, NULL, 0, 0x00 },
 	{ XCHIP_NAVI, 0x10, 0x2D, 0x080BDC5F, XC_HOMES + 0xE800, COSMOMAN_CODE, cosmoman_songs, (int)(sizeof cosmoman_songs / sizeof *cosmoman_songs), 0x400 },
 	{ XCHIP_NAVI, 0x14, 0x31, 0x080BD7EB, XC_HOMES + 0xEC00, BIGNOISE_CODE, NULL, 0, 0x80 },
 	{ XCHIP_NAVI, 0x16, 0x33, 0x080BFB33, XC_HOMES + 0xF000, CSMOPRIS_CODE, NULL, 0, 0x400 },
 	{ XCHIP_NAVI, 0x17, 0x34, 0x080BDEB3, XC_HOMES + 0xF400, WILDBIRD_CODE, NULL, 0, 0x00 },
-	{ XCHIP_NAVI, 0x18, 0x35, 0x080BF8D5, XC_HOMES + 0xF800, FOOTBALL_CODE, NULL, 0, 0x00 },
+	{ XCHIP_NAVI, 0x18, 0x35, 0x080BF8D5, XC_HOMES + 0xF800, FOOTBALL_CODE, NULL, 0, 0x40000 },
 	{ XCHIP_SUPPORT, 0x2F, 0x59, 0x080E8995, XC_HOMES + 0xFC00, PILEDRVR_CODE, piledrvr_songs, (int)(sizeof piledrvr_songs / sizeof *piledrvr_songs), 0x00 },
 };
 const int xchips_bn5_count = (int)(sizeof xchips_bn5 / sizeof *xchips_bn5);

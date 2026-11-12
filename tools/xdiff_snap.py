@@ -330,6 +330,8 @@ class Canon:
         self.sprite_number_objs = {(k.split(':')[0], int(k.split(':')[1], 0)): (int(v['list'], 0), int(v['number'], 0))
                                    for k, v in sn.get('objects', {}).items()}
         self.sprite_number_map = sprite_numbers_of(sn.get('recipes', []))
+        for k, v in navi_battle_sprites().items():   # (and the moved Navis' battle sprites, their one copy: xnavi_sprites.c)
+            self.sprite_number_map.setdefault(k, []).extend(x for x in v if x not in self.sprite_number_map.get(k, []))
         self._sprites = None
         self.sprite_bytes = False   # (a spec's "sprites": "bytes": a sprite of no pair compared by its bytes, both games' in their ROMs)
         self._sprite_sha = {5: None, 6: None}
@@ -775,6 +777,22 @@ def sprite_numbers_of(recipes):
                 if (int(m.group(3)), int(m.group(4), 16)) not in copies:
                     copies.append((int(m.group(3)), int(m.group(4), 16)))
     return out
+
+
+def navi_battle_sprites():
+    """(BN5's list 2, its Navi's AI index) -> [(list 2, BN6's number)] of every moved Navi's battle sprite (src/emu/xnavi_sprites.c,
+    PLACES: the one copy the Navis' install makes, at XNAVI_SPRITE_FIRST + its seat; BN5's Navi of AI n draws list 2's n): what
+    an object that keeps its sprite's number reads where it draws a moved Navi's (LarkMan's afterimage, the fourth kind's 0x28)"""
+    import re
+    with open(os.path.join(ROOT, 'src', 'emu', 'bn5.h'), encoding='utf-8') as f:
+        enum = re.search(r'enum \{ BN5_NAVI_PROTOMAN = 1, ([^}]*)\}', f.read())
+    names = ['BN5_NAVI_PROTOMAN'] + [x.strip() for x in enum.group(1).split(',') if x.strip()]
+    ai = {n: k + 1 for k, n in enumerate(names)}
+    with open(os.path.join(ROOT, 'src', 'emu', 'xnavi_sprites.c'), encoding='utf-8') as f:
+        text = f.read()
+    with open(os.path.join(ROOT, 'src', 'emu', 'xnavi_sprites.h'), encoding='utf-8') as f:
+        first = int(re.search(r'#define XNAVI_SPRITE_FIRST\s+(0x[0-9A-Fa-f]+)', f.read()).group(1), 16)
+    return {(2, ai[n]): [(2, first + int(k))] for n, k in re.findall(r'\{ (BN5_NAVI_\w+), XNAVI_SPRITE_FIRST \+ (\d+), ', text) if n in ai}
 
 
 def sprite_copies(recipes):
