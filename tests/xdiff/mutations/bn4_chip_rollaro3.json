@@ -1,0 +1,10 @@
+[
+ {
+  "name": "the arrow without its power",
+  "spec": "bn4_chip_rollaro3",
+  "poke": [
+   "080C82CC:2600"
+  ],
+  "what": "the Navi's copy's power handed to her arrow (ldr r6,[r5,#0x2c] at BN4 0x080C82CC) made movs r6,#0: the Mettaur's 140 HP whole"
+ }
+]

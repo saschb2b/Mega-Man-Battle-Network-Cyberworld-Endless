@@ -3,7 +3,7 @@ type: Design
 title: "BN4's chips in a run"
 description: "Phase 4 of BN4 Red Sun in a run, designed and scoped, its pairings (unit 0), its chips in the finds (unit 7), BN5's first batch and ten-bit chip ids (unit 1) built, an id past 511 whole to 602, every BN4 folder chip given a pack entry (ids 635-1023 in the cart's save RAM) and BN4 in the NetPass's full set (unit 8, protocol v17): the census of BN4's 388 chip records against BN6's and BN5's registry (191 new to a run, 6 on BN6's code, the rest in 66 units of BN4's code), chip ids past 511 by ten bits for BN4's chips and BN5's alike (BN5's ShadeMan and BlizzardMan chips at 505-510, 511 held), the design (BN4's own chips found on BN4's ground, by its own records), the online rule, the build plan in units with their proofs, and the owner's calls."
 tags: [multirom, bn4, chips, design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:55:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1"
@@ -1411,6 +1411,18 @@ V1, settled for all of them.
   (5,2)), six mutations caught. Not reached: the frame of the punch
   within the time freeze, which no fight frame counts (a mutation of it
   passed and was replaced).
+- **RollAro1-3 too** (12 November 2026: ids 665-667, BN4's support 0x35
+  at BN6's grown Navi routine 0xB5). Its object (the fourth kind's 0x63)
+  is GutPnch's without the sound, and its Navi is a Roll of the chip's
+  own (the first kind's 0x41, the moved Roll's sprite) who appears and
+  looses an arrow down MegaMan's row: 50, 70 or 90. Her spawner takes
+  her side in r3, which BN4's object hands it and BN6's Navi object does
+  not (its r3 is the routine's own address), so the unit's entry is a
+  wrapper in its home that loads it from the user BN6 hands in r5
+  (`XChipUnit.side`). `bn4_chip_rollaro1` to `3` pass over 300 frames (a
+  140 HP Mettaur left 90, 70 and 50), five mutations caught. Not
+  reached: the arrow's kind and height, which only show inside the time
+  freeze (two mutations of them passed and were replaced).
 - **What the differential sees.** The chip runs inside its time freeze,
   so the traces meet at what it leaves: the foe's HP, the panels, the
   frame's sounds, MegaMan's state. The comparator reads BN4's support

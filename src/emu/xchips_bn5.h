@@ -51,6 +51,9 @@ typedef struct {
 	uint16_t step_in;      /* (BN4's Navi chips' units) where not 0, the slot of the sound BN4's object of the chip plays as it steps
 	                          MegaMan in, which BN6's Navi object does not (GutPnch's 0xB0): BN6's object's last state is aimed at a
 	                          stub of the installer's in its home (XC4_HOME_WAIT) that plays it for this unit's number alone */
+	uint8_t side;          /* (BN4's Navi chips' units) where not 0, the chip's Navi's spawner takes his side in r3 (RollAro's stores it:
+	                          BN4's object hands it, BN6's Navi object does not): its entry in the grown table is a wrapper of the
+	                          installer's in its home (XC4_HOME_WAIT) that loads it from the user in r5 */
 } XChipUnit;
 
 extern const XChipUnit xchips_bn5[];

@@ -3,7 +3,7 @@ type: Tool
 title: "The chip recipe generator"
 description: "`tools/xchiprecipe.py` derives the code of BN5's chips from both ROMs and the symbol map, writing `src/emu/xchips_bn5.c`, `xchips_moved.c` and the Program Advances' `xchips_pas.c`, with `--check` and a `--report` of every unit; `tools/xchiprecipe_bn4.py` derives BN4's units into `src/emu/xchips_bn4.c`."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:55:00Z }
 ---
 
 # The chip recipe generator
@@ -253,7 +253,10 @@ installer takes (`XChipUnit`, `src/emu/xchips_code.c`).
   whose rooms the engine fills as the chip is used. A sound BN4's object
   plays as it steps MegaMan in (`STEP_IN`: GutPnch's 0xB0, held to the
   instruction and its call) is the unit's `step_in`, its slot, which the
-  installer plays from a stub in BN6's object's last state. A chip of the unit
+  installer plays from a stub in BN6's object's last state. A spawner
+  that takes the Navi's side in r3 (`SHAPE_SIDE`: RollAro's, which BN4's
+  object hands it and BN6's does not) makes the unit's `side`: its entry
+  a wrapper that loads r3 from the user. A chip of the unit
   whose row still waits (an SP's computed power, a DS's cost) is a note,
   not a decision.
 - **Its calls.** Each call out is paired with BN6's twin: the project's
