@@ -162,16 +162,15 @@
 - **BN5's win music.** A battle won on one of BN5's areas, or on a dark
   layer, ends with BN5's own victory music where BN6's played, picked the
   way both games pick it.
-- **VolGear visits.** With BN4 Red Sun's ROM beside BN6's, VolGear and
-  its versions up to ValGearEX join Billy, Spikey and the rest in the
-  battles BN4's viruses visit, its flame running down MegaMan's row as
+- **VolGear joins.** With BN4 Red Sun's ROM beside BN6's, VolGear and
+  its versions up to ValGearEX join Billy, Spikey and the rest among the
+  viruses an act can be about, its flame running down MegaMan's row as
   in BN4. Moved into BN6's battle and checked against BN4's own frame by
   frame, it pays from BN4's own rewards.
-- **Kilby and MagTect visit.** Kilby and MagTect, with their versions,
-  join the BN4 viruses that turn up in BN6's and BN5's battles, each
-  checked against BN4's own battle frame by frame like the rest. Their
-  sounds are BN4's own, loaded for the battle they are in, the way BN4's
-  Navis bring theirs.
+- **Kilby and MagTect join.** Kilby and MagTect, with their versions,
+  join the BN4 viruses an act can be about or set beside its own, in
+  BN6's and BN5's areas, each checked against BN4's own battle frame by
+  frame like the rest. Their sounds are BN4's own.
 
 ## 0.20.0 (2026-11-09)
 
