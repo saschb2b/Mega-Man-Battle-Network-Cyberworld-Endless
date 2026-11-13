@@ -532,6 +532,14 @@ Its breaks rise from 25 to 60 per 100 panels, counted along the pads'
 faces and at their joins, and its layers draw 1340 of its maps' tile
 pictures where they drew 1025.
 
+**BN5's ACDC Area's arena** was laid in its walkways' floor, as an arena is
+where an area's floors are told by hue, to read apart from its rooms. Its
+walkways are a green maze drawn two panels wide, and over a field of five
+by five the maze came out tiled over itself, the worst spot of its layers.
+Its arena takes its rooms' floor now (`TILES_ARENA_FLOOR`, as Mr. Weather
+Comp's and Robot Control's): 115 to 95 breaks per 100 panels. Every other
+area's arena was looked at with it and draws cleanly.
+
 **Rooms and the walkways beside them.** Two faults showed in the worst
 spots of BN4's areas, plain walkway tiles biting squares out of a square's
 rim:

@@ -11,6 +11,7 @@
 #define CW_SOULKINDS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 #define SOULKIND_NONE 12   /* BN5_CHIP_KIND: no kind (BN5's 12) */
 
@@ -29,5 +30,29 @@ bool soulkinds_make(void);
  * where none; and whether BN5 counts it a DarkChip */
 int soulkinds_of(int chip);
 bool soulkinds_dark(int chip);
+
+/* What UNITE's check reads of the Souls a core has (soulunite.c fills it
+ * from BN5's and BN4's ROMs) */
+typedef struct {
+	const uint8_t *kinds5;   /* BN5's twelve Souls' kinds by its number 1-12 (BN5_SOUL_KINDS) */
+	const int8_t *bits5;     /* ... each one's bit in the Souls held, -1 the other version's */
+	const uint8_t *kinds4;   /* BN4's moved Souls' kinds in BN5's numbering (soulbn4.h), 0xFF one not read */
+	int n4;                  /* ... how many */
+	int first4, held4;       /* BN6's Soul number of BN4's first, and its bit in the Souls held */
+	unsigned moved4;         /* bit k: BN4's k-th Soul's charged shot stands in this core */
+} SoulTables;
+#define SOULKINDS_BN5 12
+
+/* BN5's check of the last chip picked (BN5_UNITE_CHECK), over both games'
+ * Souls: BN6's number of the Soul a chip of `kind` lights, 0 none; *chaos
+ * 1 for a DarkChip (`dark`) of a BN5 Soul's kind. `held` the Souls held,
+ * `used` a side's used word (BN5_SOULS_USED's layout: a Soul's bit, its
+ * Chaos Unison's 16 higher). BN5's Soul of the kind comes first where it
+ * is this version's and held: lit unless united this battle already. Where
+ * it is the other version's or not held, BN4's Soul of the kind, held, its
+ * charged shot moved and not united this battle; a DarkChip lights none of
+ * BN4's (no Chaos Unison of theirs). A run holding both Souls of a kind
+ * unites BN5's alone until the owner's call (issue #499). */
+int soulkinds_lights(const SoulTables *t, int kind, bool dark, unsigned held, uint32_t used, int *chaos);
 
 #endif

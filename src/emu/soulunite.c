@@ -36,7 +36,7 @@
 #define PICTURES      14    /* by BN5's number: 0 none, 1-12 the Souls, 0xD Chaos Unison (mode 0x24 picks it) */
 #define PICTURE_SIZE  0x80
 #define PALETTE_SIZE  0x20
-#define SOULS_BN5     12    /* BN5_SOUL_KINDS' and BN5_SOUL_FLAGS' entries: Souls 1-12 */
+#define SOULS_BN5     SOULKINDS_BN5    /* BN5_SOUL_KINDS' and BN5_SOUL_FLAGS' entries: Souls 1-12 */
 #define TEAM_SOULS    6     /* the run's Souls (souls.h): bit k BN5's Soul 7 + k, its flag BN5_FLAG_SOUL + k */
 #define HELD_MASK     ((1u << (SOULS_HELD_BN4 + SOULS_BN4)) - 1)   /* ... then BN4's (soulbn4.h), the differential's alone yet */
 #define STATE_LIT     0     /* BN6_ELEMENT_STATE */
@@ -55,7 +55,8 @@ static int breaks;
  * set between frames; and whether UNITE stands in a link battle there (the Arena's) */
 static unsigned helds[HOOK_CORES];
 static bool linked[HOOK_CORES];
-static uint8_t kinds5[SOULS_BN5], flags5[SOULS_BN5];   /* BN5_SOUL_KINDS, BN5_SOUL_FLAGS, read from BN5's ROM */
+static uint8_t kinds5[SOULS_BN5];   /* BN5_SOUL_KINDS, read from BN5's ROM */
+static int8_t bits5[SOULS_BN5];     /* ... each Soul's bit in the Souls held by its flag (BN5_SOUL_FLAGS), -1 the other version's */
 static uint8_t kinds4[SOULS_BN4];   /* BN4's Souls' kinds (soulbn4.h), 0xFF where BN4's ROM is not read */
 static uint32_t emblem_tiles, emblem_pals;   /* the emblem's art, as Gregar's words name it */
 
@@ -114,15 +115,12 @@ static void slot_be(int side, int slot) {
 	if (hook_read32(BN6_EMBLEM_ART_PALS) != pals) hook_write32(BN6_EMBLEM_ART_PALS, pals);
 }
 
-/* BN5's check of the last chip picked (BN5_UNITE_CHECK): the Soul (1-12) it
- * unites, 0 none; *chaos 1 for a DarkChip of its kind. Its kind as BN5 has
- * it (soulkinds.h), the first Soul of that kind this version's and held,
- * not united this battle (its Chaos Unison apart). */
-int soulunite_held_bit(int soul) {
-	int k = soul >= 1 && soul <= SOULS_BN5 ? flags5[soul - 1] - BN5_FLAG_SOUL : -1;
-	return k >= 0 && k < TEAM_SOULS ? k : -1;
-}
+int soulunite_held_bit(int soul) { return soul >= 1 && soul <= SOULS_BN5 ? bits5[soul - 1] : -1; }
 
+/* BN5's check of the last chip picked (BN5_UNITE_CHECK): BN6's number of
+ * the Soul it unites, 0 none; *chaos 1 for a DarkChip of its kind. Its kind
+ * as BN5 has it, and which Soul of that kind among both games' (soulkinds.h,
+ * soulkinds_lights). */
 static int lights(int side, int *chaos) {
 	int n = hook_read8(BN6_CUSTOM_PICKED);
 	if (!n) return 0;
@@ -132,25 +130,10 @@ static int lights(int side, int *chaos) {
 	int chip = (int)chip_entry_id(hook_read16(hook_read32(el + BN6_ELEMENT_DECK))), kind = soulkinds_of(chip);
 	bool dark = soulkinds_dark(chip);
 	int shift = (breaks & SOULUNITE_BREAK_KIND) ? 1 : 0;
-	uint32_t used = hook_read32(soul_field(side, BN6_SOUL_USED));
-	for (int s = 1; s <= SOULS_BN5; ++s) {
-		if (kinds5[s - 1] + shift != kind) continue;
-		int k = flags5[s - 1] - BN5_FLAG_SOUL;
-		/* (a kind whose BN5 Soul is the other version's: a BN4 Soul of it, below) */
-		if (k < 0 || k >= TEAM_SOULS) break;
-		if (!(held_now() >> k & 1) || (used & (1u << s) << (dark ? 16 : 0))) return 0;
-		*chaos = dark;
-		return s;
-	}
-	/* (BN4's Souls, BN5's rule: held, not used this battle; no Chaos Unison of theirs, so a DarkChip of the kind lights none) */
-	for (int k = 0; k < SOULS_BN4; ++k) {
-		if (kinds4[k] + shift != kind) continue;
-		int s = SOUL_BN4_FIRST + k;
-		if (dark || !soulpower_bn4(k) || !(held_now() >> (SOULS_HELD_BN4 + k) & 1) || (used & 1u << s)) return 0;
-		*chaos = 0;
-		return s;
-	}
-	return 0;
+	unsigned moved4 = 0;
+	for (int k = 0; k < SOULS_BN4; ++k) moved4 |= (unsigned)soulpower_bn4(k) << k;
+	const SoulTables t = { kinds5, bits5, kinds4, SOULS_BN4, SOUL_BN4_FIRST, SOULS_HELD_BN4, moved4 };
+	return soulkinds_lights(&t, kind - shift, dark, held_now(), hook_read32(soul_field(side, BN6_SOUL_USED)), chaos);
 }
 
 /* ---- the hooks ---- */
@@ -340,6 +323,19 @@ static bool done;
 
 bool soulunite_ready(void) { return done; }
 
+/* what UNITE's check reads (soulkinds.h's SoulTables): BN5's Souls' kinds and each one's held bit by its flag, BN4's kinds */
+static void tables_read(const uint8_t *b5) {
+	memcpy(kinds5, b5 + (BN5_SOUL_KINDS - BUS), sizeof kinds5);
+	for (int s = 0; s < SOULS_BN5; ++s) {
+		int k = b5[BN5_SOUL_FLAGS - BUS + (uint32_t)s] - BN5_FLAG_SOUL;
+		bits5[s] = (int8_t)(k >= 0 && k < TEAM_SOULS ? k : -1);
+	}
+	for (int k = 0; k < SOULS_BN4; ++k) {
+		SoulBn4 r;
+		kinds4[k] = (uint8_t)(soulbn4_read(k, &r) ? r.kind : 0xFF);
+	}
+}
+
 bool soulunite_install(int brk, int soulbreak) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	if (done) return true;
@@ -355,12 +351,7 @@ bool soulunite_install(int brk, int soulbreak) {
 	if (!life) return false;
 	done = true;
 	breaks = brk;
-	memcpy(kinds5, b5 + (BN5_SOUL_KINDS - BUS), sizeof kinds5);
-	memcpy(flags5, b5 + (BN5_SOUL_FLAGS - BUS), sizeof flags5);
-	for (int k = 0; k < SOULS_BN4; ++k) {
-		SoulBn4 r;
-		kinds4[k] = (uint8_t)(soulbn4_read(k, &r) ? r.kind : 0xFF);
-	}
+	tables_read(b5);
 	emblem_tiles = rom6(BN6_EMBLEM_ART_TILES);
 	emblem_pals = rom6(BN6_EMBLEM_ART_PALS);
 	claims_begin(SOULS_CLAIMS);

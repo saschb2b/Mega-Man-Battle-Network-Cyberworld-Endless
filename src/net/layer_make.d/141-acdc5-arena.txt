@@ -1,0 +1,1 @@
+BN5's ACDC Area's guardian's arena is drawn in its rooms' floor, not its walkways' (TILES_ARENA_FLOOR): its guardian's layers draw other tiles.

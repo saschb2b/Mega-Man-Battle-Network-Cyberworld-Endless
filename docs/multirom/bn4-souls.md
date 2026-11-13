@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T11:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T20:32:00Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -238,7 +238,7 @@ Each place a BN4 Soul needs, and what ThunSoul took:
 | --- | --- | --- |
 | Its number | `src/emu/soulbn4.h`: BN6's Soul numbers past BN5's 1-12 | 13 (`SOUL_BN4_FIRST`); used bit 13 |
 | The Souls held | `soulunite_held`: BN5's six, then BN4's from bit `SOULS_HELD_BN4` | bit 6; the run's mask (`src/director/souls.h`) unchanged, no `RUN_MAGIC` bump |
-| UNITE's kind | `soulunite.c`'s check, BN4's kinds (`BN4_SOUL_KINDS`, BN5's numbering) | Elec (2); a kind whose BN5 Soul is the other version's falls through to BN4's; no Chaos Unison, so a DarkChip of its kind lights none |
+| UNITE's kind | `soulunite.c`'s check over `soulkinds.c`'s `soulkinds_lights`, BN4's kinds (`BN4_SOUL_KINDS`, BN5's numbering) | Elec (2); a kind whose BN5 Soul is the other version's or not held falls through to BN4's (Two Souls of one kind, below); no Chaos Unison, so a DarkChip of its kind lights none |
 | Its charged shot's family | an attack unit of `tools/xchiprecipe_bn4.py`, BN6's grown families from 0xD0 | 0xD7 (BN4's 0x47) |
 | Its power attack | copied with the family's unit (`SOUL_POWERS`), its return the unit's number | BN6's grown 0xA5, after the Chaos Unison ones (`soulpower.c`) |
 | Its charge times | BN4's row (`BN4_CHARGE_TIMES`) | 90 at every Charge |
@@ -269,6 +269,11 @@ trace. The charged shot's state runs from t154 to t177, and a 40 HP
 Mettaur is left at 20 at t167, as in BN4, and the ring's sound plays
 from slot 0x300. Its three mutations fail it: the
 charge 10 frames longer, the shot's damage changed, the element none.
+(The damage one went uncaught from 12 November 2026, when the differential
+began keeping a poke of a spec that is not BN4's out of BN4's chips'
+units: its poke fell on BN6's own code at that address. A spec whose
+MegaMan holds a BN4 Soul names BN4's addresses again, `xd_spec_bn4_code`,
+since 13 November.)
 B held 88 frames gives the plain buster in both games, so the charge is
 90 in both. `bn4_soul_thun` fights the two battles side by side. The shot
 is the same to the frame there (lag 1), but the spec parts at t1 on the
@@ -277,6 +282,48 @@ his unison's state at t1 where BN6's crossing ended before the fight.
 BN6's proxy keeps its companion overlay, and each game numbers his
 palette and power attack its own way. The comparator's BN4 path has no
 rules for a Soul yet, and his look is not moved.
+
+## Two Souls of one kind
+
+BN5's twelve Souls take twelve different kinds, so its check, "the first
+Soul of the chip's kind, this version's and held", never chooses
+([Team ProtoMan: foes and Souls](../game/team-protoman.md), His Soul). BN4's
+twelve take BN5's kinds again, but for GutsSoul's panel-cracking; BN5's
+SearchSoul's Cursor has no Soul of BN4's, so the two Search Souls never
+meet:
+
+| Kind | BN5's Soul | BN4's Soul |
+| --- | --- | --- |
+| Invisible | ShadowSoul | SrchSoul |
+| Recovery | MeddySoul | RollSoul |
+| Wind | GyroSoul | WindSoul |
+| Fire | NapalmSoul | FireSoul |
+| Elec | MagnetSoul | ThunSoul |
+| Sword | ProtoSoul | ProtSoul |
+| Plus | NumberSoul | NumSoul |
+| Break | KnightSoul | MetlSoul |
+| Obstacle | ColonelSoul | JunkSoul |
+| Aqua | ToadSoul | AquaSoul |
+| Wood | TomahawkSoul | WoodSoul |
+
+The check over both games' Souls is `soulkinds_lights` (`src/emu/soulkinds.c`),
+a rule of the run's, not of either game's:
+
+- BN5's Soul of the kind comes first where it is this version's and the
+  run holds it: lit unless it united this battle already.
+- Where BN5's is the other version's, or the run has not won it, BN4's
+  Soul of the kind lights: held, its charged shot moved, not united this
+  battle. Until 13 November 2026 a Team Colonel Soul's kind lit none of
+  BN4's even where the run held BN4's alone; no moved Soul met that
+  (ThunSoul's Elec is MagnetSoul's, the other version's), AquaSoul would
+  have, against ToadSoul.
+- **A run holding both Souls of a kind** unites BN5's alone: once it has
+  united, the kind lights nothing more that battle. Whether the second
+  lights then, or the player picks, is the owner's call (issue #499), to
+  be made before a run gives two of a kind.
+
+Held ROM-free by `tests/test_core.c`'s `test_soul_lights`, each case
+above over BN5's kinds as its ROM has them and two of BN4's.
 
 What is left, in order:
 

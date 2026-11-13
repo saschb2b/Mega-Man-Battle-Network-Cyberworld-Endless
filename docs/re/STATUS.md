@@ -36,6 +36,7 @@ Updated 13 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/le
 ## Since the last update (12 Nov 2026)
 
 - 13 Nov 2026: Park Area 1's coordinate data read (BN4 map 0x92:0; docs/rom/bn4.md): its orange and yellow paths carry no cell but their walls, no arrow panel's value in the map, a ramp of 208 slope cells climbs to its raised floor.
+- 13 Nov 2026: UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code).
 
 ## Experiments
 
