@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Creation**: world/level-design/roads.md (the way's walkways drawn as BN4's Park Area's orange roads: the owner's call, the design, how it is built, what is not mended). **Update**: devtools/map-use.md (What follows: the way chosen and built), research/sources.md (BN4's Park Area: its roads' width and ends, verified in the map).
 * **Update**: rom/bn4.md (Park Area 1's coordinate data: its paths plain floor, its triggers, its ramps), research/sources.md (BN4's Park Area: its orange and yellow paths, verified in the data, assumed in play, the searches that came up empty), devtools/map-use.md (what a layer could do with a road: three ways to choose which walkways, and how its tiles would be learned).
 * **Update**: devtools/tile-test.md (The art told apart by its floor: each pixel's floor panel, nearest first, another kind's own art, the shading rule on maps of one height; Park's right corner mended, the breaks, what was tried, the other height's floors not mended), world/level-design/generator.md (the learner's art and whose it is), devtools/map-use.md (the first step taken), code/net-and-map.md (`tiles_art.c`).
 * **Creation**: devtools/map-use.md (what the layers take from a map: the atlas's count per area and its tinted maps, 67% of the maps' tiles and 42% of their different pictures, what stays unused by kind). **Update**: devtools/tile-test.md (a line to it), code/dev.md (`lent.c`).
