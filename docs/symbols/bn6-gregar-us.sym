@@ -1147,8 +1147,15 @@
 080531D0 asterland_cyber_academy.2f_hallway
 08053230 asterland_cyber_academy.foyer
 08053508 academy_loader
+08068790 fish_scripts
+080687C0 fish_scripts_0x08068790
+08068A60 net_maps_own_4
+08068A74 net_maps_own.lists
 0806CE90 lan_hp_warp_list
 08072410 for_central
+0807DADC aquarium_comp
+0807DFFC net_maps_own.loadgfxanims
+0807E010 loadgfxanims_lists
 080804D4 bn6_post_game.starts
 080804F2 bn6_post_game.starts_2
 08080510 bn6_post_game.starts_3
@@ -1559,7 +1566,9 @@
 081D7E20 BN6_PANEL_FLAGS_OF
 084B9B54 bn6_own_darkchips
 084DC040 BN6_SPRITE_PLACEHOLDER
+0859A84C net_maps_own.sheet
 085D0FC4 surface_areas_tile_set
+08602154 net_maps_own.sheet_2
 086A280C RomLayout.title.arrow
 086A344C RomLayout.title.arrow_pal
 086AACAC BN6_CHAT_FONT
