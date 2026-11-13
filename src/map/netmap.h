@@ -69,6 +69,10 @@ const uint8_t *netmap_last_seams(void);
 /* ... and the tiles set whole over what the classes picked (a bit each). */
 enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4, NETMAP_PASTED_ARROW = 8 };
 const uint8_t *netmap_last_pasted(void);
+/* ... and, where they are measured (breaks_measure), the breaks in its
+ * picture (per tile: bit 0 across its right edge, bit 1 its lower edge,
+ * bits 2 and 3 a nick there; breaks.h); NULL none. */
+const uint8_t *netmap_last_breaks(void);
 /* (dev) The last layer's floor as text, a row per grid y: '.' void, 'a'
  * platform floor, 'b' walkway floor, 's' walkway floor across a platform
  * (TILES_CROSSING), 'p' a pad; upper case (a void panel '*') where a tile

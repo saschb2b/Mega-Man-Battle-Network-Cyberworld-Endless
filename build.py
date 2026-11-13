@@ -930,7 +930,7 @@ def atlas(biomes='all', seeds='1', baseline=False):
 
 BASELINE = os.path.join(ROOT, 'tests', 'atlas_baseline.txt')
 # how much worse a layer may get than the baseline before the atlas fails
-TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10, 'off': 1.10}
+TOLERANCE = {'near': 2.0, 'fallback': 0.15, 'seams': 1.10, 'inexact': 1.10, 'other': 1.10, 'off': 1.10, 'breaks': 1.10, 'nicks': 1.10}
 AREAS = ['Central', 'Seaside', 'Sky', 'Green', 'Graveyard', 'Undernet', 'Secret', 'Nest', 'Comp', 'Homepage', 'Comp B',
          'Robot Comp', 'Aquarium Comp', 'Judge Comp', 'Weather Comp', 'CopyBot Comp', 'ACDC HP', 'Green HP', 'Sky HP',   # src/core/run.h
          # (then another game's areas, where its ROM is beside BN6's: src/core/rom.c's bn5_areas, its Liberation
@@ -948,21 +948,24 @@ def tiles(seeds='2', baseline=False):
     report = os.path.join(ROOT, '.build', 'atlas', 'report.txt')
     if not os.path.exists(report):
         return code or 1
-    agg = collections.defaultdict(lambda: [0, 0, 0, 0])
+    agg = collections.defaultdict(lambda: [0, 0, 0, 0, 0])
     for l in open(report):
-        m = re.match(r'biome +(\d+) .*?: (\d+) panels.*seams (\d+), off near (\d+)', l)
+        m = re.match(r'biome +(\d+) .*?: (\d+) panels.*seams (\d+), breaks (\d+), nicks (\d+), off near (\d+)', l)
         if m:
             a = agg[int(m[1])]
-            a[0] += 1; a[1] += int(m[2]); a[2] += int(m[3]); a[3] += int(m[4])
+            a[0] += 1; a[1] += int(m[2]); a[2] += int(m[3]); a[3] += int(m[6]); a[4] += int(m[4])
     print()
-    print(f'{"area":16} {"layers":>6} {"panels":>7} {"off /100":>9} {"seams /100":>11}   why off')
-    total = [0, 0, 0]
-    for b, (n, panels, seams, off) in sorted(agg.items()):
+    print(f'{"area":16} {"layers":>6} {"panels":>7} {"breaks /100":>12} {"off /100":>9} {"seams /100":>11}   why off')
+    total = [0, 0, 0, 0]
+    for b, (n, panels, seams, off, breaks) in sorted(agg.items()):
         why = ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate((WHY or {}).get(b, [])) if v) if WHY else ''
-        print(f'{AREAS[b] if b < len(AREAS) else b:16} {n:6} {panels:7} {100 * off / panels:9.1f} {100 * seams / panels:11.1f}   {why}')
-        total[0] += panels; total[1] += off; total[2] += seams
-    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}')
-    print('off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
+        print(f'{AREAS[b] if b < len(AREAS) else b:16} {n:6} {panels:7} {100 * breaks / panels:12.1f} {100 * off / panels:9.1f} '
+              f'{100 * seams / panels:11.1f}   {why}')
+        total[0] += panels; total[1] += off; total[2] += seams; total[3] += breaks
+    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[3] / total[0]:12.1f} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}')
+    print('breaks: tile edges across which the picture shows a strip of pixels no original map shows at a tile\'s edge, a panel'
+          ' line cut off or a block of another shade (yellow in the seams pictures, listed in .build/atlas/breaks_*.txt);'
+          ' off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
           ' seams: tiles meeting as no original map sets them (red)')
     return code
 
@@ -1090,6 +1093,11 @@ def atlas_metrics(report):
             return float(f.group(1)) if f else 0.0
         out[m.groups()] = {'near': get('near'), 'fallback': get('fallback'), 'seams': get('seams'),
                            'inexact': get('not exact'), 'other': get('other colours'), 'off': get('off near')}
+        # (the breaks and nicks in a layer's picture, where the line has them: a baseline written before they
+        # were counted holds none, and none is compared)
+        for k in ('breaks', 'nicks'):
+            if re.search(k + r' \d', l):
+                out[m.groups()][k] = get(k)
     return out
 
 
@@ -1102,13 +1110,15 @@ def compare_baseline(report, write=False):
         with open(BASELINE, 'w') as f:
             f.write('# build.py atlas --baseline: per layer (biome layout depth seed) its near and\n'
                     '# fallback shares (%), seams, panels not exact, tiles in colours the area\'s own map never\n'
-                    '# shows on its floors and tiles drawn with other floors than they show; the atlas fails\n'
-                    '# when one gets worse\n')
+                    '# shows on its floors, tiles drawn with other floors than they show, and the breaks and nicks\n'
+                    '# in its picture (tile edges across which it shows what no original map shows there, half an\n'
+                    '# edge or more and less); the atlas fails when one gets worse\n')
             for k in sorted(old, key=lambda k: tuple(int(v) for v in k)):
                 v = old[k]
                 f.write(f'biome {k[0]} layout {k[1]} (x) depth {k[2]} seed {k[3]}: near {v["near"]}, '
                         f'fallback {v["fallback"]}, seams {v["seams"]:.0f}, not exact {v["inexact"]:.0f}, '
-                        f'other colours {v["other"]:.0f}, off near {v.get("off", 0):.0f}\n')
+                        f'other colours {v["other"]:.0f}, off near {v.get("off", 0):.0f}, '
+                        f'breaks {v.get("breaks", 0):.0f}, nicks {v.get("nicks", 0):.0f}\n')
         print(f'baseline: {len(now)} layers written to tests/atlas_baseline.txt')
         return 0
     if not os.path.exists(BASELINE):
@@ -1120,6 +1130,8 @@ def compare_baseline(report, write=False):
         if not b:
             continue
         for name, tol in TOLERANCE.items():
+            if name not in b or name not in v:
+                continue
             limit = b[name] + tol if name in ('near', 'fallback') else max(b[name] * tol, b[name] + 3)
             if v[name] > limit:
                 worse.append(f'biome {k[0]} layout {k[1]} depth {k[2]} seed {k[3]}: {name} {b[name]:g} -> {v[name]:g}')

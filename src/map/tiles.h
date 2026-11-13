@@ -34,6 +34,7 @@ typedef struct {
 	uint8_t other;        /* draws colours the area's own map never shows on its floors */
 	uint64_t mask;
 	uint16_t px[64];
+	uint32_t side[4];     /* its pixels along its left, top, right and bottom sides, as a strip takes them (seams_side) */
 } TileCand;
 
 /* A class's pairs: from its first to the next class's. */
@@ -92,6 +93,13 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * its middle: Seaside's arrow panels, orange chevrons in a pink frame,
  * whose pieces its boardwalks' joins took). */
 #define SKIP_ANY_PIXEL 0x8000
+/* ... and with SKIP_QUARTER beside it, only a panel showing them over a
+ * quarter of its top (64 pixels of some 270), not any 8: BN4's ACDC Area
+ * frames its squares in teal lines, 8 to 60 pixels a panel in its cyan
+ * roads' hue, and the squares' upper rims lent no tiles: a room's upper
+ * edges came out as steps of walkway floor cut into its field. (The bit is
+ * the grey bucket's where a panel is told by its middle's hue.) */
+#define SKIP_QUARTER 0x1000
 /* ... or with SKIP_PALE, a platform panel whose top is pale in places
  * (bright, weakly coloured): Mr. Weather Comp's fan belts and the clouds
  * lying on its fields, laid as pieces at its field's edges and middles,
@@ -200,8 +208,12 @@ void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
  * neighbour badly) or by falling back on the least bad tile; and netmap
  * counts over the map as drawn (not the tiles set whole over the picks):
  * the pairs of neighbouring tiles left meeting badly, the pairs in colours
- * the area's own map never shows on its floors and the tiles drawn off. */
-typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge; } TileStats;
+ * the area's own map never shows on its floors and the tiles drawn off;
+ * and, where the breaks are measured, those in its picture: the tile edges
+ * across which it shows what no original map shows there, half an edge or
+ * more a break (a block of another floor or shade), less a nick (a panel's
+ * line cut short; breaks.h). */
+typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge, breaks, nicks; } TileStats;
 extern TileStats tiles_stats;
 
 /* With tiles_measure (the dev atlas), how far the pair the last tiles_pick
@@ -224,19 +236,31 @@ extern int tiles_pick_why;
 extern int tiles_pick_other;
 
 /* The tiles beside one (left, above, right, below) as far as they are
- * picked: how they look to the seams (SEAM_ANY: not yet) and what they draw. */
-typedef struct { uint32_t look[4]; uint64_t mask[4]; } TileNeighbours;
+ * picked: how they look to the seams (SEAM_ANY: not yet), what they draw
+ * and their side towards the tile (a pair's `side`, or nothing's; `known`
+ * bit k where a pair draws neighbour k or nothing does: not where two are
+ * laid over each other, or none is picked yet). */
+typedef struct { uint32_t look[4]; uint64_t mask[4]; uint32_t side[4]; unsigned known; } TileNeighbours;
+/* The sides of a tile drawing `px` where `mask` says (seams_side of each:
+ * left, top, right, bottom). */
+void tiles_sides(const uint16_t *px, uint64_t mask, uint32_t side[4]);
 
-/* How badly a tile that looks like `look` and draws `mask` meets them:
- * SEAM_COST for each neighbour no original map sets beside it (where
- * either is not drawn whole: at the floor's edges), and a point
+/* How badly a tile that looks like `look` and draws `mask` with sides
+ * `side` (NULL: not known) meets them: SEAM_COST for each neighbour no original map sets beside it
+ * (where either is not drawn whole: at the floor's edges; inside the
+ * floor, where both are, the classes keep the look, and pairs the
+ * originals happen not to show are no seam), BREAK_COST more where the
+ * picture breaks across their edge, inside the floor too (the strip of
+ * pixels there is one no original map shows at a tile's edge, seams.h: a
+ * panel's line cut off, a block of another shade), and a point
  * for each pixel along its top and bottom where it draws and the tile over
  * or under it does not (or the other way round), past the few a diagonal
  * edge crossing there leaves: a floor that stops on a tile's edge instead
  * of its own shows as steps. */
 #define SEAM_COST 3
+#define BREAK_COST 4
 #define CUT_EDGE 3
-int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNeighbours *n);
+int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const uint32_t *side, const TileNeighbours *n);
 
 /* The layer entries for tile (tx, ty) of a map whose floor is `floor`: of
  * the pairs whose pixels cover the floor there, do not reach beyond it and
@@ -244,10 +268,11 @@ int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNe
  * neighbours. Where the two floors meet and the original never joins them,
  * the walkway's tile over the platform's. False off the floor.
  * With `seams`, each pair also costs its trouble with neighbours `n`
- * (tilemap.c); *look and *mask: the tile picked, as tiles_trouble takes it. */
+ * (tilemap.c); *out: the tile picked, its entries and how tiles_trouble
+ * takes it (side NULL where two pairs' tiles lie over each other). */
+typedef struct { uint16_t e0, e1; uint32_t look; uint64_t mask; const uint32_t *side; } TilePick;
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
-	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask);
+	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n, TilePick *out);
 /* Where floors `fa` and `fb`, drawn apart on the two tile layers, overlap
  * in tile (tx, ty): whether fa shows in front. A floor's top in front of the
  * other's side faces; where only faces meet, the floor lower on screen. */

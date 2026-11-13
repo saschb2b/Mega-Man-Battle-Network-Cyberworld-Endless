@@ -239,14 +239,38 @@ static int cut(uint64_t upper, uint64_t lower) {
 	return n > 0 ? n : 0;
 }
 
-int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const TileNeighbours *n) {
-	int t = 0;
-	/* (inside the floor, where both tiles are drawn whole, the classes keep
-	 * the look: pairs the originals happen not to show there are no seam) */
+void tiles_sides(const uint16_t *px, uint64_t mask, uint32_t side[4]) {
 	for (int k = 0; k < 4; ++k) {
-		if (mask == ~0ull && n->mask[k] == ~0ull) continue;
+		uint16_t row[8];
+		for (int i = 0; i < 8; ++i) {
+			int at = k == 0 ? i * 8 : k == 1 ? i : k == 2 ? i * 8 + 7 : 56 + i;
+			row[i] = px && mask >> at & 1 ? px[at] & 0x7FFF : STRIP_NONE;
+		}
+		side[k] = seams_side(row);
+	}
+}
+
+/* Whether the picture breaks between the tile and its neighbour on side k:
+ * the strip across their edge is one no original map shows. Not known
+ * (false) where a neighbour's pixels are not, and none against a tile that
+ * draws nothing: the floor's outline is the pixel test's and the cut's, and
+ * a rim's own tile, its wall cut off above it, lost to a block of plain
+ * walkway floor there. */
+static bool breaks(const TileSeams *s, uint64_t mask, const uint32_t *side, const TileNeighbours *n, int k) {
+	if (!side || !mask || !n->mask[k] || !(n->known >> k & 1)) return false;
+	return !(k < 2 ? seams_strip_seen(s, n->side[k], side[k], k & 1) : seams_strip_seen(s, side[k], n->side[k], k & 1));
+}
+
+int tiles_trouble(const TileSeams *s, uint32_t look, uint64_t mask, const uint32_t *side, const TileNeighbours *n) {
+	int t = 0;
+	for (int k = 0; k < 4; ++k) {
+		if (n->look[k] == SEAM_ANY) continue;
 		uint32_t first = k < 2 ? n->look[k] : look, second = k < 2 ? look : n->look[k];
-		if (!seams_seen(s, first, second, k & 1)) t += SEAM_COST;
+		if (seams_seen(s, first, second, k & 1)) continue;
+		/* (inside the floor, where both tiles are drawn whole, the classes keep
+		 * the look: pairs the originals happen not to show there are no seam) */
+		if (!(mask == ~0ull && n->mask[k] == ~0ull)) t += SEAM_COST;
+		if (breaks(s, mask, side, n, k)) t += BREAK_COST;
 	}
 	if (n->look[1] != SEAM_ANY) t += cut(n->mask[1], mask);
 	if (n->look[3] != SEAM_ANY) t += cut(mask, n->mask[3]);
@@ -360,7 +384,7 @@ static const TileCand *best(const TileBook *books, int nbooks, const TileGrid *g
 				 * is a rimmed floor's edge) */
 				int u = pad || (g->rimmed && (oa | ob) != 0x1FF) ? 0 : unplain_kept(b, cm - 1, phase, c, deep);
 				/* a neighbour it never meets in the originals: a seam */
-				if (seams) d += tiles_trouble(seams, look_of(c), c->mask, n);
+				if (seams) d += tiles_trouble(seams, look_of(c), c->mask, c->side, n);
 				/* what it shows otherwise (once per class: pairs come by class) */
 				if (c->key != pic_key) {
 					pic_key = c->key;
@@ -454,9 +478,11 @@ static const TileCand *middle_pick(const TileBook *b, int A, int B, int phase) {
 	return &b->vary[i];
 }
 
+/* A pair as the tile picked. */
+static TilePick pick_of(const TileCand *c) { return (TilePick){ c->e0, c->e1, look_of(c), c->mask, c->side }; }
+
 bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, int ty,
-	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n,
-	uint16_t *e0, uint16_t *e1, uint32_t *look, uint64_t *mask) {
+	TileFloor floor, const void *ctx, const TileSeams *seams, const TileNeighbours *n, TilePick *out) {
 	int phase, A, B, dist, off, off2;
 	tiles_pick_off = TILE_EXACT;
 	tiles_pick_why = TILE_WHY_NONE;
@@ -470,10 +496,7 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	const TileCand *mc = oa == 0x1FF && !ob && !pad && nbooks ? middle_pick(&books[0], A, B, phase) : NULL;
 	if (mc) {
 		count(0, mc);
-		*e0 = mc->e0;
-		*e1 = mc->e1;
-		*look = look_of(mc);
-		*mask = mc->mask;
+		*out = pick_of(mc);
 		return true;
 	}
 	if (apart(books, nbooks, oa, ob)) {
@@ -489,10 +512,8 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 			/* the one in front on the second layer, which the game shows so */
 			const TileCand *first = pa, *second = pb;
 			if (!pa || (pb && !tiles_in_front(g, tx, ty, only, &ob_only, only, &oa_only))) { first = pb; second = pa; }
-			*e0 = first->e0;
-			*e1 = second ? second->e0 : 0;
-			*look = SEAM_ANY;   /* two tiles over each other: no original to compare */
-			*mask = (pa ? pa->mask : 0) | (pb ? pb->mask : 0);
+			/* (two tiles over each other: no original to compare) */
+			*out = (TilePick){ first->e0, second ? second->e0 : 0, SEAM_ANY, (pa ? pa->mask : 0) | (pb ? pb->mask : 0), NULL };
 			return true;
 		}
 	}
@@ -500,9 +521,6 @@ bool tiles_pick(const TileBook *books, int nbooks, const TileGrid *g, int tx, in
 	count(dist, c);
 	if (!c) return false;
 	tiles_pick_off = off;
-	*e0 = c->e0;
-	*e1 = c->e1;
-	*look = look_of(c);
-	*mask = c->mask;
+	*out = pick_of(c);
 	return true;
 }

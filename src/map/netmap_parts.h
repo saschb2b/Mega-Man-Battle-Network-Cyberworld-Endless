@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "breaks.h"
 #include "decor.h"
 #include "netmap.h"
 #include "props.h"
@@ -19,6 +20,7 @@ typedef struct {
 	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
 	int nbooks;
 	TileSeams seams;          /* the tiles the maps set side by side */
+	Breaks *breaks;           /* (the tile test) the strips they show at their tiles' edges; NULL in a game */
 	DecorBook decor;          /* the scenery of the area's maps */
 	uint32_t desc, coord_slot;   /* the map its layers take over (net_area.host) */
 	uint32_t src_desc;        /* the learned map's, whose tile set and colours they draw in */
@@ -40,8 +42,8 @@ typedef struct {
 extern const int nm_ornament_tile[3];
 
 /* the last tile map written, both layers (for the dev tools) */
-typedef struct { uint16_t *map; uint8_t *seams; uint8_t *pasted; int tw, th; } LastMap;
-extern LastMap nm_last;   /* seams: bit 0 right, bit 1 below; pasted: NETMAP_PASTED_* */
+typedef struct { uint16_t *map; uint8_t *seams; uint8_t *pasted; uint8_t *breaks; int tw, th; } LastMap;
+extern LastMap nm_last;   /* seams: bit 0 right, bit 1 below; pasted: NETMAP_PASTED_*; breaks (where measured): breaks_count's */
 
 /* the current layer's placement */
 typedef struct { int gx0, gy0, ex, ey; } MapPlace;
