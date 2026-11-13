@@ -459,6 +459,20 @@ static void stack_road(const Stack *s, int tx, int ty) {
 	*e0 = mine;
 }
 
+/* Whether the rest's tile at (tx, ty) lies under a room, where the area's
+ * rooms stand over its walkways (LAY_ROOMS_OVER) and a walkway ends plainly
+ * at one (TileGrid.plain_ends): on or just beside a room's panel, or where
+ * its side faces reach. */
+static bool under_rim(const Stack *s, int tx, int ty) {
+	if (s->view->lo != REST || !s->g->plain_ends || !(s->g->rules & LAY_ROOMS_OVER)) return false;
+	int phase, A, B;
+	tile_class(s->g, tx, ty, &phase, &A, &B);
+	unsigned near = tl_tile_panels(s->g, tx, ty, TILE_OUT, s->g->face + s->g->hang + TILE_OUT, 0);
+	for (int k = 0; k < 9; ++k)
+		if (near >> k & 1 && room(s->all, piece(s->all, A + k % 3 - 1, B + k / 3 - 1))) return true;
+	return false;
+}
+
 /* The view's tile at (tx, ty) laid over what the map holds there: where two
  * draw a tile, the one whose top covers the other's side faces on the
  * second layer, which the game shows in front. */
@@ -484,10 +498,11 @@ static void stack_tile(const Stack *s, int tx, int ty) {
 	if (!drawn(*e0) && !drawn(*e1)) { *e0 = n0; *e1 = n1; return; }
 	/* (a tile holds two pieces: of three, the one found behind goes) */
 	uint16_t mine = front_of(n0, n1), theirs = front_of(*e0, *e1);
-	/* (which lies in front is the floors' own to say) */
+	/* (which lies in front is the floors' own to say, but where the
+	 * area's rooms stand over its walkways) */
 	Pieces own = *s->view;
 	own.joins = false;
-	if (tiles_in_front(s->g, tx, ty, pieces_floor, &own, pieces_floor, s->laid)) { *e0 = theirs; *e1 = mine; }
+	if (!under_rim(s, tx, ty) && tiles_in_front(s->g, tx, ty, pieces_floor, &own, pieces_floor, s->laid)) { *e0 = theirs; *e1 = mine; }
 	else if (!drawn(*e0) || !drawn(*e1)) { *e0 = mine; *e1 = theirs; }
 	s->stacked[i] = 1;
 }

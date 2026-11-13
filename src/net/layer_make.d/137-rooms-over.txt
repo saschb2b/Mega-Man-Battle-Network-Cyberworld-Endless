@@ -1,0 +1,1 @@
+Where floors are told by shape only floor with a middle is a room drawn apart (has_middle: floor two wide is the walkways'), and BN4's ACDC, Park and countries and BN5's Undernet set a room's tiles in front of the walkway beside it (LAY_ROOMS_OVER): layers of CopyBot, BN5's SciLab, Oran and Undernet and BN4's ACDC, Park, countries and Undernet draw other tiles.
