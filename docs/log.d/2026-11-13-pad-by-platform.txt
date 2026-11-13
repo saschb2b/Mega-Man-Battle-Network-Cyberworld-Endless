@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-13T23:36:00Z
+* **Update**: world/level-design/props.md (a pad's stamp set flush against a platform shares the tile with it on two layers at one height: the platform behind under the stamp, the one in front over it), devtools/tile-test.md (A pad against a platform: Robot Control's pad corner whole and the slab's side face closed, Sky's fields flush with its pads).

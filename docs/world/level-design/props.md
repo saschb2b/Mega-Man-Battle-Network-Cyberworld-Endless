@@ -171,7 +171,14 @@ boardwalk off their lower edge, and where the rim was left to the classes
 Central's showed tile-wide steps along its upper edges). `paste_pads` sets
 it on every 3x3 pad at ground level away from the stairs, each tile only
 where it covers the pad and the void alone (a catwalk's last panel came
-out cut where the stamp's edge lay over it), and the centrepieces go on it
+out cut where the stamp's edge lay over it) or a platform set flush
+against the pad, as no map sets one. There the two share the tile on its
+two layers at one height, as a pad stands at its walkways' height in the
+originals: a platform behind the pad stays on the first layer with the
+stamp in front of it; a platform in front of the pad is picked again as
+if no pad were there and goes in front of the stamp, its top hiding the
+pad's side faces ([the tile test](../../devtools/tile-test.md), A pad
+against a platform), and the centrepieces go on it
 (never art that draws mostly black: Sky's gem tile is the pit in one of
 its platforms). A pad itself is walkway floor in these areas, as the
 originals' are, so the tiles the stamp leaves at a catwalk's join are the

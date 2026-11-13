@@ -532,6 +532,28 @@ Its breaks rise from 25 to 60 per 100 panels, counted along the pads'
 faces and at their joins, and its layers draw 1340 of its maps' tile
 pictures where they drew 1025.
 
+**A pad against a platform.** The generator's legalizer can widen a pad's
+spur until a platform meets the pad along a whole side (Robot Control,
+seed 2's first layer: a white slab three panels wide). No map sets a pad
+so, and the stamp, kept off any tile that touched other floor, left that
+join to the classes: the pad's other look (white bumps) over its corner,
+and a tile it did stamp there cut the slab's side face off beside its
+corner knob, the void's grid in the gap. In the originals a pad stands at
+its walkways' height, its faces only over the void, so the two now share
+such a tile on its two layers (`paste_pad`, `pick_beside_pads`): a
+platform behind the pad stays as the classes picked it, under the stamp;
+a platform in front of it is picked again with the pad taken for void,
+its own rim along the pad's edge, and goes over the stamp, hiding the
+pad's faces (stamped in front of it, the pad stood raised above it, the
+owner saw). A tile under a platform's side face counts as beside it,
+looked up the screen past the pad's own panels: Robot Control's slab
+face runs 4 pixels past its panel's corner. Walkways' mouths are as
+before. Sky's fields met its pads so on four of the atlas's eight
+layers, drawn in ragged scraps of both: 88 to 81 breaks per 100 panels,
+its nicks up (the pad's rim against a field's, a strip no map shows).
+Robot Control's two such layers count 6 and 10 breaks more for the same
+reason, and draw the pads whole.
+
 **BN5's ACDC Area's arena** was laid in its walkways' floor, as an arena is
 where an area's floors are told by hue, to read apart from its rooms. Its
 walkways are a green maze drawn two panels wide, and over a field of five
