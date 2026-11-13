@@ -1147,8 +1147,8 @@
 080531D0 asterland_cyber_academy.2f_hallway
 08053230 asterland_cyber_academy.foyer
 08053508 academy_loader
-08068790 fish_scripts
-080687C0 fish_scripts_0x08068790
+08068790 bubbles_scripts
+080687C0 bubbles_scripts_0x08068790
 08068A60 net_maps_own_4
 08068A74 net_maps_own.lists
 0806CE90 lan_hp_warp_list

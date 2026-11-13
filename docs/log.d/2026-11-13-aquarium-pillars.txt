@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T22:42:13Z
-* **Update**: world/level-design/side-pieces.md (What stands under a raised floor: the Aquarium's pillars and their bubbles under its pads), rom/graphics.md (the Aquarium's animation is bubbles under its pillars' stubs, not fish: corrected, and set with the pillars).
