@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Hooks"
 description: "Hooks on BN6's code (`src/emu/hook.c`): a BKPT over an instruction that calls the engine's C mid-frame, event and answer hooks, one table per core, and every address hooked, from battles and maps to BN5's Souls."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:40:00Z }
 ---
 
 # Hooks
