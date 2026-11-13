@@ -33,6 +33,7 @@ typedef struct {
 	int nunder;
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
+	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
 } SidePiece;
 
 typedef struct {
@@ -48,5 +49,10 @@ void sides_learn(const AreaSrc *a, SideBook *out);
  * down to the ground) sets under that floor's lower edges, past its side
  * face: Aquarium Comp's pillars under its glass pads, the bubbles under them too. */
 void hangs_learn(const AreaSrc *r, SideBook *out);
+
+/* Adds what map `a` sets on its first layer behind its floor's upper edges,
+ * off the floor: the flames behind the catwalks of BN4's Undernet, where
+ * the ones in front lie on the second layer (sides_learn). */
+void behind_learn(const AreaSrc *a, SideBook *out);
 
 #endif

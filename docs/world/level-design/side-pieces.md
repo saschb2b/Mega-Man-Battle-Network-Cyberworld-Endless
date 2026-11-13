@@ -77,7 +77,7 @@ Taken per area as looked at, as every laying rule is
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
 | CopyBot Comp | its claws, 3 looks | yes |
-| BN4's Undernet | the flames beside its catwalks, 8 looks | yes |
+| BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
@@ -143,6 +143,29 @@ Undernet's bowls burn (captured: a pad on six pillars, the bubbles under
 its stubs changing from frame to frame; the fish there are the
 backdrop's). Nothing about walking changes: the panels under a
 pillar are void in the layer as in the map.
+
+## What stands behind a floor (`behind_learn`; verified on the maps and in the game)
+
+BN4's Undernet sets horns along both sides of its catwalks. The ones in
+front lie on the second layer and are side pieces; the ones behind, in rows
+along a catwalk's upper sides, lie on the first, where the floor's own art
+covers their feet (its maps 0x94:2 and 0x94:4: some two dozen, 10 or 11
+tiles each; the scenery rule refused every one as touching other art).
+
+They are cut as what stands under a raised floor is, the other way up: a
+group of first-layer tiles off the floor is such a piece where the floor
+lies straight below its bottom row within 16 pixels and none straight
+above it (a pad's corner knob over a walkway behind it is its pad's, and
+came along as a scrap until that was asked), 24 tiles at most (an exit's
+arrow is larger). It is kept with the panel under it, its neighbourhood and
+the panels it draws over.
+
+A layer sets them on free floor panels as it does side pieces, but in
+stretches: of the squares of four panels a side, one in three by the
+layer's seed takes a piece behind every panel of it that fits, as the maps
+set theirs in rows; the rest take none. 0 to 9 a layer in the
+[tile test](../../devtools/tile-test.md)'s pictures. Seen in the game: a row
+of five behind a catwalk, the horn in front of it as before.
 
 ## Not built
 

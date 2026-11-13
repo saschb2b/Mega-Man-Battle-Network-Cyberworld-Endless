@@ -164,7 +164,8 @@ static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
 }
 
 /* Group g, on panel (A, B), into the book unless it holds its look. */
-static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, bool hang, SideBook *out) {
+static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
+	bool hang = kind != 0;
 	int tw = a->tw, th = a->th;
 	SidePiece *p = &out->piece[out->n];
 	memset(p, 0, sizeof *p);
@@ -172,6 +173,7 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	if (!p->tiles) return;
 	p->ntiles = g->n;
 	p->hang = hang;
+	p->behind = kind == 2;
 	for (int k = 0; k < 9; ++k)
 		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
 	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
@@ -197,24 +199,25 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 		int A, B;
 		group_from(a, false, i % tw, i / tw, seen, queue, &g);
 		if (!grips(a, queue, &g, &A, &B)) continue;
-		keep(a, queue, &g, A, B, false, out);
+		keep(a, queue, &g, A, B, 0, out);
 	}
 	free(seen);
 	free(queue);
 }
 
-/* Whether group g stands under a floor: over none itself, a floor's panel
- * straight above its top row within HANG_UP, in (*A, *B) the one most of
- * that row's columns meet. */
-static bool hangs(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) {
-	if (g->edge || g->n < MIN_TILES || g->n > MAX_TILES || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
-	for (int k = 0; k < g->n; ++k) count_tile(a, true, queue[k] % a->tw, queue[k] / a->tw, g);
-	if (g->on || g->other * 10 > g->off) return false;
+#define BEHIND_DOWN  16   /* what stands behind a floor ends within this above it */
+#define BEHIND_TILES 24   /* ... and is no larger: an exit's arrow is */
+
+/* Whether a floor's panel lies straight above group g's top row within
+ * HANG_UP (`below`: straight below its bottom row within BEHIND_DOWN), in
+ * (*A, *B) the one most of that row's columns meet. */
+static bool meets(const AreaSrc *a, const int *queue, const Group *g, bool below, int *A, int *B) {
+	int row = below ? g->y1 : g->y0, from = below ? row * 8 + 8 : row * 8 - 1, step = below ? 1 : -1, reach = below ? BEHIND_DOWN : HANG_UP;
 	int PA[2 * MAX_W], PB[2 * MAX_W], votes[2 * MAX_W], n = 0, best = 0;
 	for (int k = 0; k < g->n; ++k) {
-		if (queue[k] / a->tw != g->y0) continue;
+		if (queue[k] / a->tw != row) continue;
 		for (int x = queue[k] % a->tw * 8 + 2; x < queue[k] % a->tw * 8 + 8 && n < 2 * MAX_W; x += 4)
-			for (int y = g->y0 * 8 - 1; y >= 0 && y >= g->y0 * 8 - HANG_UP; --y) {
+			for (int y = from; y >= 0 && y < a->th * 8 && abs(y - from) < reach; y += step) {
 				if (off_floor(a, x, y)) continue;
 				int j = 0;
 				panel_at(a, x, y, &PA[n], &PB[n]);
@@ -229,7 +232,19 @@ static bool hangs(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) 
 	return true;
 }
 
-void hangs_learn(const AreaSrc *r, SideBook *out) {
+/* Whether group g stands under a floor, over none itself; `behind`: whether
+ * it stands behind one and under none (a pad's knob over a walkway behind
+ * it is its pad's). */
+static bool hangs(const AreaSrc *a, const int *queue, Group *g, bool behind, int *A, int *B) {
+	if (g->edge || g->n < MIN_TILES || g->n > (behind ? BEHIND_TILES : MAX_TILES) || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
+	for (int k = 0; k < g->n; ++k) count_tile(a, true, queue[k] % a->tw, queue[k] / a->tw, g);
+	if (g->on || g->other * 10 > g->off) return false;
+	return behind ? !meets(a, queue, g, false, A, B) && meets(a, queue, g, true, A, B) : meets(a, queue, g, false, A, B);
+}
+
+/* The first layer's groups off the floor of map or view r that stand under
+ * a floor (kind 1) or behind one (kind 2), into the book. */
+static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 	if (!r->rings || !r->px0) return;
 	int tw = r->tw, th = r->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
@@ -239,8 +254,12 @@ void hangs_learn(const AreaSrc *r, SideBook *out) {
 		Group g;
 		int A, B;
 		group_from(r, true, i % tw, i / tw, seen, queue, &g);
-		if (hangs(r, queue, &g, &A, &B)) keep(r, queue, &g, A, B, true, out);
+		if (hangs(r, queue, &g, kind == 2, &A, &B)) keep(r, queue, &g, A, B, kind, out);
 	}
 	free(seen);
 	free(queue);
 }
+
+void hangs_learn(const AreaSrc *r, SideBook *out) { first_learn(r, 1, out); }
+
+void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }
