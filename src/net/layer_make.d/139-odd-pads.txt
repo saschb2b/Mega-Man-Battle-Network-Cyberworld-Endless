@@ -1,0 +1,1 @@
+Where an area's pads are cut whole from its maps (Central, Seaside, Sky), a pad that is not 3 x 3, a teleport's island, is drawn as a platform (mark_pads): layers with one draw other tiles.

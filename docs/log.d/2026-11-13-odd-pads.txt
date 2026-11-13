@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T20:04:23Z
+* **Update**: devtools/tile-test.md (A pad of another size is a platform: a teleport's 4 x 4 island where pads are cut whole).
