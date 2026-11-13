@@ -64,6 +64,9 @@ typedef struct {
 	bool *lend;               /* per book: whether its panels are laid here */
 } Laid;
 
+/* Whether a rule of the thin books' laying holds on grid g. */
+static bool rule(const TileGrid *g, unsigned r) { return g->thin || g->rules & r; }
+
 static uint32_t shape_at(const Laid *d, int A, int B) {
 	return A < d->A0 || B < d->B0 || A >= d->A0 + d->w || B >= d->B0 + d->h ? 0 : d->shape[(size_t)(B - d->B0) * d->w + A - d->A0];
 }
@@ -331,7 +334,7 @@ static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Lai
 				/* (thin books, a road's: its ends are arrows' heads, wider
 				 * than their panel; an end and the panels round it lend
 				 * nothing where the floor has no end) */
-				if (g->thin && ends_near(p, c) && !ends_here(d, A, B)) continue;
+				if (rule(g, LAY_NO_END_ART) && ends_near(p, c) && !ends_here(d, A, B)) continue;
 				int cont = suits(d, k, c, A, B, true, &alike), score = cont * 64 + __builtin_popcount(like) * MOST + alike;
 				/* (off the floor, only as a map lays it beside what is laid) */
 				if (!cont && !loose && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) continue;
@@ -559,7 +562,7 @@ static void lay_plain(const TileBook *books, int nbooks, const TileSeams *seams,
 	uint32_t shape[4];
 	Whole plain[4];
 	int n = 0;
-	for (size_t i = 0, cells = (size_t)d->w * d->h; seams && g->thin && i < cells; ++i) {
+	for (size_t i = 0, cells = (size_t)d->w * d->h; seams && rule(g, LAY_PLAIN_RUNS) && i < cells; ++i) {
 		if (d->pieced[i] >= 0 || d->book[i] < 0 || !in_run(d, i)) continue;
 		int m = 0;
 		while (m < n && shape[m] != d->shape[i]) ++m;
@@ -756,7 +759,7 @@ static void keep_slot(Laid *d, size_t i, int s) {
 }
 
 static void keep_to_whole(const TileGrid *g, Laid *d) {
-	for (size_t i = 0, n = (size_t)d->w * d->h; g->thin && i < n; ++i) {
+	for (size_t i = 0, n = (size_t)d->w * d->h; rule(g, LAY_KEEP_TO_WHOLE) && i < n; ++i) {
 		if (d->pieced[i] < 0 || (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10) continue;
 		for (int s = 0; s < PANEL_TILES; ++s) keep_slot(d, i, s);
 	}
@@ -779,7 +782,7 @@ static void lay_around(const TileBook *books, int nbooks, const TileGrid *g, Lai
  * panel or a piece suits, and left so; picked alone, a road's rim is a gap. */
 static void lay_thin(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g, Laid *d) {
 	size_t n = (size_t)d->w * d->h;
-	if (!seams || !g->thin) return;
+	if (!seams || !rule(g, LAY_AGAIN)) return;
 	lay_again(books, nbooks, seams, g, d);
 	for (size_t i = 0; i < n; ++i)
 		if ((d->pieced[i] >= 0 || d->book[i] < 0) && (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10) lay_pieces(books, nbooks, g, d, i, false);
@@ -825,7 +828,7 @@ int panels_lay(const TileBook *books, int nbooks, const TileSeams *seams, const 
 	lift_strays(books, g, floor, ctx, &d);
 	if (seams) take_up(books, seams, g, &d);
 	lay_thin(books, nbooks, seams, g, &d);
-	if (g->thin) lift_strays(books, g, floor, ctx, &d);
+	if (rule(g, LAY_AGAIN)) lift_strays(books, g, floor, ctx, &d);
 	follow_edges(&d);
 	lift_loose(&d);
 	keep_to_whole(g, &d);

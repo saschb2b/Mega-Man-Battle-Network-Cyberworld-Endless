@@ -5,6 +5,7 @@
  * says how the tile picks went. */
 #include "atlas.h"
 #include "layer_sizes.h"
+#include "break_places.h"
 #include "lent.h"
 #include "navstudy.h"
 #include "town.h"
@@ -448,12 +449,31 @@ static void hand_floor(const char *dir, int area) {
  * of the BN6 area it is like, docs/multirom/): every layout at depth 2,
  * its guardian's layer in the layout its act plans and layers that climb a
  * stair where it has one, its original maps beside them. */
+/* A layer drawn (one), and where its breaks lie: a line in DIR/places.txt
+ * (begun anew by lent_fresh), its breaks and its panels by place
+ * (break_places.c). */
+static void one_placed(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
+	one(dir, report, biome, area, layout, depth, seed);
+	char path[600];
+	snprintf(path, sizeof path, "%s/places.txt", dir);
+	FILE *f = fopen(path, "a");
+	if (!f) return;
+	BreakPlaces p;
+	break_places(&p);
+	fprintf(f, "places %2d layout %d depth %d seed %u:", area, layout, depth, seed);
+	for (int k = 0; k < BP_PLACES; ++k) fprintf(f, " %s %d/%d,", break_place_names[k], p.breaks[k], p.cells[k]);
+	fprintf(f, "\n");
+	fclose(f);
+}
+
 /* What the area's layers built since lent_begin took from each of its
  * maps: a line each in DIR/lent.txt (begun anew by lent_fresh), and the map
  * with the tiles no layer used tinted (lent.c). */
 static void lent_fresh(const char *dir) {
 	char path[600];
 	snprintf(path, sizeof path, "%s/lent.txt", dir);
+	remove(path);
+	snprintf(path, sizeof path, "%s/places.txt", dir);
 	remove(path);
 }
 
@@ -491,9 +511,9 @@ static void area_layers(const char *dir, FILE *report, int area, int seeds) {
 	lent_begin();
 	for (int l = 0; l < LAYOUT_COUNT; ++l) {
 		if (!layout_weight(b, l)) continue;
-		for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, l, 2, (uint32_t)(s * 7919 + area * 131));
+		for (int s = 1; s <= seeds; ++s) one_placed(dir, report, b, area, l, 2, (uint32_t)(s * 7919 + area * 131));
 	}
-	for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, -1, 3, (uint32_t)(s * 104729 + area));
+	for (int s = 1; s <= seeds; ++s) one_placed(dir, report, b, area, -1, 3, (uint32_t)(s * 104729 + area));
 	stair_layers(dir, report, b, area, seeds);
 	lent_maps(dir, area);
 }
@@ -614,6 +634,8 @@ int atlas_run(const char *spec) {
 	/* (CYBERWORLD_LEAD=N: every layer led by its area's map N, to measure a
 	 * map as the lead: docs/world/level-design/lead-map.md) */
 	netmap_lead_forced = env_int("CYBERWORLD_LEAD", -1);
+	netmap_whole_forced = env_int("CYBERWORLD_WHOLE", 0);
+	netmap_rules_forced = (unsigned)env_int("CYBERWORLD_RULES", 0);
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);

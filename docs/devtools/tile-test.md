@@ -399,6 +399,78 @@ Not mended:
   that are no square of three by three, which take a square's panels in
   pieces.
 
+## Where the breaks lie
+
+The count says how many breaks a layer has; `src/dev/break_places.c` says
+where on its floor they lie, by the layer's cells as they stand after the
+legalizer: a room's inside, edge, corner and notch, the panel where a
+walkway and a room meet, a walkway's run, bend, fork and end, a pad. The
+atlas writes a line a layer into `places.txt`. Over all 39 areas, two
+seeds a layout (13 November 2026, 48851 breaks on 51684 panels):
+
+| Place | Breaks | Share | Panels | Share | Breaks a panel |
+| --- | --- | --- | --- | --- | --- |
+| Where a walkway meets a room | 11370 | 23% | 5621 | 11% | 2.0 |
+| A room's edge | 9257 | 19% | 12702 | 25% | 0.7 |
+| A pad | 7717 | 16% | 7786 | 15% | 1.0 |
+| A walkway's straight run | 6190 | 13% | 4415 | 9% | 1.4 |
+| A room's corner | 5417 | 11% | 5367 | 10% | 1.0 |
+| A room's inside | 2271 | 5% | 11276 | 22% | 0.2 |
+| A room's notch | 2265 | 5% | 2693 | 5% | 0.8 |
+| A walkway's end | 1882 | 4% | 600 | 1% | 3.1 |
+| A walkway's fork | 1259 | 3% | 616 | 1% | 2.0 |
+| A walkway's bend | 1223 | 3% | 608 | 1% | 2.0 |
+
+The join of a walkway and a room is the first place in nearly every
+area: a ninth of the panels, a quarter of the breaks. Seaside's are its
+pads (2024 of its 3514 breaks, 8.6 a panel), CopyBot Comp's its rooms'
+edges (1929 of 3866).
+
+## Each area's laying
+
+Whole panels and the rules that mended the roads
+([Roads on the way](../world/level-design/roads.md), Thin books) are
+general, but not every area draws better with them. So each area was
+measured three ways over the atlas (two seeds a layout, 13 November 2026;
+the dev atlas with `CYBERWORLD_WHOLE=1` and `CYBERWORLD_RULES=15`): as it
+is, with its maps' panels laid whole, and with the rules beside them (an
+end's panels lend no other panel art; a straight run is laid from its
+shape's one plain panel; beside a panel laid whole, its map's own tiles; a
+panel taken up is laid again). An area takes a way of laying
+(`NetAreaDef.lay`, `LAY_*` in `src/map/tiles.h`) where its breaks fall by a
+twentieth or more and its layers, looked at, show nothing new that is
+wrong.
+
+| Area | As it is | Whole | Whole, rules | Taken |
+| --- | --- | --- | --- | --- |
+| Sky | 102 | 88 | 128 | **whole** |
+| Green | 73 | 67 | 67 | **whole, rules** |
+| Nest | 18 | 21 | 14 | not taken: tabs on its upper edges |
+| CopyBot Comp | 288 | 274 | 264 | **whole, rules** |
+| BN5 ACDC | 140 | 131 | 115 | **whole, rules** |
+| BN5 End | 173 | 167 | 152 | not taken: stray pieces of its ramps |
+| BN5 Nebula | 241 | 218 | 191 | **whole, rules** |
+| BN5 Undernet | 187 | (whole today) | 164 | **rules** |
+| BN5 dark 2 | 68 | 60 | 62 | not taken: a Liberation Mission's board, not measured as one |
+| BN5 dark 3 | 89 | 56 | 72 | not taken: a Liberation Mission's board, not measured as one |
+| BN5 dark 4 | 106 | 66 | 66 | not taken: a Liberation Mission's board, not measured as one |
+| BN5 dark 6 | 63 | 62 | 56 | not taken: a Liberation Mission's board, not measured as one |
+| BN5 dark 7 | 76 | 62 | 61 | not taken: a Liberation Mission's board, not measured as one |
+| BN5 dark 8 | 72 | 63 | 77 | not taken: a Liberation Mission's board, not measured as one |
+| BN4 ACDC | 259 | 234 | 274 | not taken: its rooms in pieces |
+| BN4 countries | 91 | (whole today) | 84 | **rules** |
+
+(Breaks per 100 panels. The areas left out moved by less than a twentieth,
+or rose: the Aquarium 56 to 156 whole, the Judge Tree 42 to 68, Robot
+Control 25 to 40, Seaside 270 to 324. The homepages and comps count two to
+four breaks in a hundred panels either way.) Over all areas 98.5 to 94.9.
+
+The count alone misled twice more here: BN5's End Area fell by an eighth
+and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a
+fifth and set its lower edges' tabs on its upper ones. Sky drew worse with
+the rules than without (88 against 128): a rule is taken per area as
+measured, none on trust.
+
 ## The seams, and what was tried against them
 
 The seams are counted only where a tile is partly drawn: two whole tiles
