@@ -42,19 +42,25 @@ typedef struct {
  * draws and its sides, as TileCand's); sorted by shape, and `at` by place.
  * A shape's panels mostly look alike; where a few differ (an edge with
  * something standing on it, a raised floor's face before it), those are
- * not laid: the Graveyard's slabs lost their upper rims to them. */
+ * not laid: the Graveyard's slabs lost their upper rims to them. After
+ * them the panels in part: those with floor of another kind beside them,
+ * or a tile that is none of the floor's, which lend the tiles they have
+ * where a tile shows nothing of what differs (panels.h). */
 #define PANEL_TILES 16
+#define PANEL_NO_TILE 0xFFFFu   /* a slot a panel in part has no tile for */
 typedef struct { uint16_t e0, e1; uint64_t mask; uint32_t side[4]; } PanelTile;
 typedef struct {
 	uint32_t shape;
 	int16_t A, B;
 	uint16_t tile[PANEL_TILES];
 	uint16_t rare;   /* its look is one its shape seldom has in its map (a third as often as the usual one, or less): not laid */
+	uint16_t has;    /* the slots it has a tile for */
+	uint16_t no;     /* the panels round it (bit k, as its shape's) that are floor of another kind: like no layer's */
 } TilePanel;
 typedef struct {
 	TilePanel *panel;
-	int n;
-	uint16_t *at;        /* the panels' indices by (B, A) */
+	int n, npart;        /* whole ones, then those in part */
+	uint16_t *at;        /* the panels' indices by (B, A), all of them */
 	PanelTile *tile;
 	int ntile;
 	uint16_t *px;        /* the tiles' colours while an area's books are learned (panels_settle) */
@@ -217,12 +223,23 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * out as plain floor cut off. */
 #define TILES_UNDER 0x10000000
 /* ... and with TILES_WHOLE, its maps' panels are laid whole where a
- * layer's floor has them (panels.h): BN4's Park Area's platform with its
- * frame, its corners' marks and the wall on its upper edges, which tile by
- * tile came out in pieces; BN5's Oran Area's circuits. Not everywhere: the
- * Graveyard's slabs lost their upper rims to it, BN4's ACDC Area's squares
- * gained breaks. */
+ * layer's floor has them, and piece by piece where it has not (panels.h):
+ * BN4's Park Area's platform with its frame, its corners' marks and the
+ * wall on its upper edges, which tile by tile came out in pieces; BN5's
+ * Oran Area's circuits; BN4's countries' cream platforms, its Undernet's
+ * cushions, BN5's Undernet's plates. Not everywhere, each looked at
+ * (docs/devtools/tile-test.md): Sky's glass catwalks came out as its
+ * fields' squares, BN5's ACDC Area's circuits lost their rims, BN4's ACDC
+ * and Town Areas' walkways took ends and joints at every panel, the
+ * Graveyard's slabs gained breaks where they join. */
 #define TILES_WHOLE 0x20000000
+/* ... and with TILES_OUTER_FLOOR, only what lies inside one ring of its
+ * walls is its floor: a floor ringed again inside a hole (three rings and
+ * more) is another level's. BN4's Town Area 3 runs pale blue paths under
+ * its roads, inside their walls' rings; read as its walkways, their tiles
+ * drew a layer's, and their edges set its side faces at 17 pixels where
+ * Town Area 1's walkways have 10. */
+#define TILES_OUTER_FLOOR 0x40000000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a

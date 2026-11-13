@@ -252,21 +252,45 @@ of walkway floor. There a panel is left out only where a quarter of its
 top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
 yellow and red), and a room is the square whole.
 
-Where an area asks for it (`TILES_WHOLE`: BN4's Park Area, BN5's Oran
-Area), its maps' panels are laid whole before any tile is picked
-(`src/map/panels.c`): a panel is the sixteen tiles whose centres lie in it,
-and a layer's panel with the very floors around it that a panel of a map
-has takes that panel's sixteen, the one beside it the one beside that where
-it fits too, so a room's rim, corners and walls come out as stretches of
-the original. Two laid side by side as no map lays them must still meet in
-strips a map shows, or the later is taken up; one whose tiles meet the
-tiles picked beside it badly is tried tile by tile and kept whichever way
-meets better; a look its shape seldom has in its map is not laid. The
-learner keeps for a panel a tile the pixel test turns down where it only
-draws up to 8 pixels over a floor's upper edge in the floor's colours (a
-wall standing on it). What this cannot mend, and where it made things
-worse, is in [the tile test](../../devtools/tile-test.md) (A floor drawn
-by hand).
+Where an area asks for it (`TILES_WHOLE`: BN4's Park Area, countries and
+Undernet, BN5's Oran Area and Undernet), its maps' panels are laid whole
+before any tile is picked (`src/map/panels.c` learns them,
+`src/map/panels_lay.c` lays them): a panel is the sixteen tiles whose
+centres lie in it, and a layer's panel with the very floors around it that
+a panel of a map has takes that panel's sixteen, the one beside it the one
+beside that where it fits too, so a room's rim, corners and walls come out
+as stretches of the original. Two laid side by side as no map lays them
+must still meet in strips a map shows, or the later is taken up; one whose
+tiles meet the tiles picked beside it badly is tried tile by tile and kept
+whichever way meets better; a look its shape seldom has in its map is not
+laid. The learner keeps for a panel a tile the pixel test turns down where
+it only draws up to 8 pixels over a floor's upper edge in the floor's
+colours (a wall standing on it), and takes a tile from both layers where
+the first draws nothing and the second the edge's rim (the Graveyard's
+upper edges: laid as nothing, they lost their rims).
+
+Where no map has a layer's panel, it is laid piece by piece. A tile shows
+only the panels it lies on or within 3 pixels of, and off the floor those
+within a tile of it and those whose side faces or walls could reach it; so
+it is taken from any panel of a map that is like the layer's in the panels
+that tile shows, whatever the rest of its neighbourhood. A room three
+panels wide takes the left half of its field from the left of BN4's wider
+one and the right half from the right; a square of three by three takes a
+quarter from each corner. For the same reason a map's panel with floor of
+another kind beside it (Park's platform's end, a conveyor one panel off),
+or with one tile that is none of the floor's (its corners' tips, 4 pixels
+past where a tile may draw), is no longer left out but kept in part: it
+lends the tiles that show nothing of what differs. The piece lying most as
+its map lays it beside what is laid already is taken first, then the one
+with the most tiles still missing. What lies round the floor (its faces,
+legs and walls) is laid after the floor and only so, as a map lays it
+beside what is laid there: a void panel's own neighbourhood does not say
+whether it lies under a platform's wall or a walkway's rim, and the
+platforms' upper edges came out scalloped with walkways' rims. Each
+piece's tile is still held to the floor's pixel test and to the strips
+across its edges, and taken up alone where it fails. What this cannot
+mend, and where it made things worse, is in
+[the tile test](../../devtools/tile-test.md) (A floor drawn by hand).
 
 Some areas never set one floor flush with another. Green's planks reach
 its raised grass by stairs, CopyBot's walkways reach its plateaus, which

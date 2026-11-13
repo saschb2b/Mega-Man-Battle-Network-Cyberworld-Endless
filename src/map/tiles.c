@@ -129,7 +129,7 @@ static bool under_crossing(const Src *s, int A, int B) {
 		int x = px + probe[k][0], y = py + probe[k][1];
 		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px0[(size_t)y * W + x] >> 24)) return false;
 	}
-	return (s->styles & 0x1FFFu) >> tl_style_at(a, px, py) & 1;
+	return ((s->styles | s->walk_styles) & 0x1FFFu) >> tl_style_at(a, px, py) & 1;
 }
 
 /* Whether panel (A, B) is floor of this view at all. */
@@ -146,6 +146,7 @@ static bool panel_drawn(const Src *s, int A, int B) {
 	 * (but for what the walls keep MegaMan off, on floor drawn whole) */
 	int rings = area_src_rings(a, X, Y);
 	if (rings >= 0 && !(rings & 1) && !(s->inner_walls && rings >= 2)) return 0;
+	if (rings > 1 && s->styles & TILES_OUTER_FLOOR) return 0;
 	int px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
 	int W = a->tw * 8, H = a->th * 8;
 	/* its middle and four points around it drawn: a panel, not the legs a
@@ -304,6 +305,18 @@ static void px_panel(const TileGrid *g, int px, int py, int *A, int *B) {
 	int X4 = u2 - 2 * v2, Y4 = u2 + 2 * v2;
 	*A = tl_floordiv(X4 - 4 * g->ex, 128);
 	*B = tl_floordiv(Y4 - 4 * g->ey, 128);
+}
+
+unsigned tl_tile_panels(const TileGrid *g, int tx, int ty, int out, int up, int down) {
+	int phase, A, B, a, b;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	unsigned m = 0;
+	for (int py = ty * 8 - out / 2 - up; py < ty * 8 + 8 + out / 2 + down; ++py)
+		for (int px = tx * 8 - out; px < tx * 8 + 8 + out; ++px) {
+			px_panel(g, px, py, &a, &b);
+			if (abs(a - A) <= 1 && abs(b - B) <= 1) m |= 1u << ((b - B + 1) * 3 + a - A + 1);
+		}
+	return m;
 }
 
 static int floor_px_raw(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
