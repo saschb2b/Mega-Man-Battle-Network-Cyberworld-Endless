@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: world/level-design/side-pieces.md (the Undernet's and Undernet Zero's fire bowls, which BN6 animates by itself; a piece set only where the panels it draws over are as in its map), rom/graphics.md (the flames set on layers).
 * **Update**: rom/graphics.md (Net maps' own tile animations: the Undernet's flames and the Aquarium's fish, the digit blocks their placeholders), code/tools.md (tools/map_anims.py).
 * **Update**: world/level-design/props.md (the Underground's teal emblems; none in an arena drawn in walkway floor).
 * **Update**: world/level-design/side-pieces.md (Who is in front: a piece's layer priorities cut and written with it, MegaMan behind a claw as in BN6).
