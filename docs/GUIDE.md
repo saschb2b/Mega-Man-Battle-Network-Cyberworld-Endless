@@ -1423,6 +1423,15 @@ matches mGBA's is in [The GBA's screen](engine/lcd.md). The battle beside
 Display's lines shows each as you turn it, Frame blending on a MegaMan
 flickering from a hit, as a still picture never could.
 
+**Depth lighting**, under those lines, lights the world in 3D as the
+game runs: a sun with soft shadows, shaded sides, a glow, and the far
+distance out of focus, on the net, in town and in battle. The picture
+is drawn anew at the screen's scale, on a net layer under a camera a
+little lower than BN6's. The HUD, chat boxes and BN6's menus stay the
+game's own pixels. It is off until you turn it on
+(`depth_lighting = on`), and not offered on the 3DS or the Vita. How it
+works is in [Depth lighting](engine/voxel.md).
+
 ## Sound
 
 The music and sounds are BN6's own, played by its own sound engine as a
