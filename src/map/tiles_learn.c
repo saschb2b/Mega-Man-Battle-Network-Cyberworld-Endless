@@ -7,9 +7,14 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "panels.h"
 #include "tiles_parts.h"
 
 static void learn_variety(TileBook *out);
+
+/* pixels over a floor's upper edge a wall on it may stand (a panel's tile
+ * the pixel test turned down for them is its own: panels.h) */
+#define WALL_BAND 8
 
 static void src_close(Src *s) {
 	free(s->state);
@@ -317,6 +322,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	TileCand *c = malloc(((size_t)a->tw * a->th + 1) * sizeof *c);
 	if (!c) { src_close(&src); free(pads); return; }   /* (a book of nothing) */
 	size_t n = 0;
+	PanelsLearn *whole = styles & TILES_WHOLE ? panels_begin() : NULL;
 	/* (the original map's pixels kept as its tiles are tested: learning an
 	 * area asked after each a thousand times, three quarters of the time) */
 	tiles_keep_begin(&g, tl_src_floor, &src);
@@ -332,12 +338,12 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 				if (st == TILE_A) oa |= 1u << k;
 				if (st == TILE_B) ob |= 1u << k;
 			}
-			if (mixed || !(oa | ob)) continue;
-			/* off the floor, filler would show as a hole */
-			if (!((oa | ob) & 0x10) && tl_flat_tile(a, tx, ty)) continue;
+			if (!(oa | ob)) continue;
+			if (mixed) { panels_bad(whole, A, B); continue; }
 			TileCand *t = &c[n];
 			uint64_t must, never, deep;
 			tl_expect(&g, tx, ty, tl_src_floor, &src, TILE_A, &must, &never, &deep);
+			if (!((oa | ob) & 0x10) && tl_flat_tile(a, tx, ty)) { panels_loose(whole, (PanelSpot){ A, B, phase }, tx, ty, must, never & ~tl_above_floor(&g, tx, ty, tl_src_floor, &src, WALL_BAND)); continue; }
 			/* The first layer alone where it draws the floor: what the
 			 * originals set in front of their floors on the second (bridges,
 			 * ornaments, spikes, floors overlapping others on screen) belongs
@@ -347,9 +353,10 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 			bool back = false;
 			t->mask = tl_drawn(a, true, tx, ty, t->px);
 			if (tl_misses(t->mask, must, never) > SLACK) {
-				if (a->layers < 2 || bg_in_map) continue;
-				t->mask = tl_drawn(a, false, tx, ty, t->px);
-				if (tl_misses(t->mask, must, never) > SLACK) continue;   /* made for something else here */
+				bool second = a->layers >= 2 && !bg_in_map;
+				if (second) t->mask = tl_drawn(a, false, tx, ty, t->px);
+				/* (made for something else here; a panel may keep it yet) */
+				if (!second || tl_misses(t->mask, must, never) > SLACK) { panels_loose(whole, (PanelSpot){ A, B, phase }, tx, ty, must, never & ~tl_above_floor(&g, tx, ty, tl_src_floor, &src, WALL_BAND)); continue; }
 				back = true;
 			}
 			size_t i = (size_t)ty * a->tw + tx;
@@ -359,6 +366,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 			t->count = 1;
 			t->other = 0;
 			t->pad = tl_pad_look(&src, pads, A, B);
+			panels_tile(whole, (PanelSpot){ A, B, phase }, t->e0, t->e1, t->mask, t->px);
 			++n;
 		}
 	tiles_keep_end();
@@ -367,6 +375,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	tl_find_plain(out);
 	learn_patch(a, &src, &g, pads, out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
+	panels_end(whole, &src, pads, out);
 	src_close(&src);
 	free(pads);
 }

@@ -12,6 +12,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "panels.h"
+
 #define PASSES 3
 
 /* The tiles picked so far: how each looks and what it draws. */
@@ -27,6 +29,7 @@ typedef struct {
 	bool *on;         /* on the floor: has a pair */
 	uint8_t *off;     /* how far its pair was seen from its neighbourhood, why, and its colours (tiles_pick_off, _why, _other) */
 	uint8_t *dirty;   /* to look at again: a neighbour has changed */
+	uint8_t *whole;   /* set with its panel, as an original map lays it (panels.h) */
 } Picked;
 
 static void picked_close(Picked *p) {
@@ -34,6 +37,7 @@ static void picked_close(Picked *p) {
 	free(p->on);
 	free(p->off);
 	free(p->dirty);
+	free(p->whole);
 }
 
 /* Their memory, none picked yet; false, and none held, where it ran out. */
@@ -42,7 +46,8 @@ static bool picked_open(Picked *p, size_t cells) {
 	p->on = calloc(cells, 1);
 	p->off = calloc(cells, 1);
 	p->dirty = malloc(cells);
-	if (!p->pick || !p->on || !p->off || !p->dirty) {
+	p->whole = calloc(cells, 1);
+	if (!p->pick || !p->on || !p->off || !p->dirty || !p->whole) {
 		picked_close(p);
 		return false;
 	}
@@ -99,17 +104,89 @@ static unsigned trouble(const Picked *p, int tx, int ty, bool seams) {
 	return sides;
 }
 
+/* How many sides the tiles `at` (n of them) meet a neighbour badly on. */
+static int troubles(const Picked *p, const size_t *at, int n) {
+	int sum = 0;
+	for (int k = 0; k < n; ++k) sum += __builtin_popcount(trouble(p, (int)(at[k] % (size_t)p->g->tw), (int)(at[k] / (size_t)p->g->tw), false));
+	return sum;
+}
+
+/* The whole panel tile (tx, ty) lies in, tried tile by tile: kept so where
+ * its tiles then meet their neighbours on fewer sides badly, else put back
+ * as it was; `up` is scratch (all 0). True where it was taken up. */
+#define PANEL_MOST 32
+static bool take_up(Picked *p, int tx, int ty, uint8_t *up) {
+	int tw = p->g->tw, n = 0;
+	size_t cells = (size_t)tw * p->g->th, at[PANEL_MOST];
+	TilePick was[PANEL_MOST];
+	panels_mark(p->g, tx, ty, up);
+	for (int y = ty - 4; y <= ty + 4; ++y)
+		for (int x = tx - 8; x <= tx + 8; ++x) {
+			if (x < 0 || y < 0 || x >= tw || y >= p->g->th || !up[(size_t)y * tw + x]) continue;
+			up[(size_t)y * tw + x] = 0;
+			if (n < PANEL_MOST && p->whole[(size_t)y * tw + x]) at[n++] = (size_t)y * tw + x;
+		}
+	int before = troubles(p, at, n);
+	for (int k = 0; k < n; ++k) {
+		was[k] = p->pick[at[k]];
+		p->pick[at[k]].look = SEAM_ANY;
+	}
+	TileStats stats = tiles_stats;
+	for (int k = 0; k < n; ++k) p->on[at[k]] = pick_one(p, (int)(at[k] % (size_t)tw), (int)(at[k] / (size_t)tw));
+	if (troubles(p, at, n) < before) {
+		for (int k = 0; k < n; ++k) p->whole[at[k]] = 0;
+		return true;
+	}
+	tiles_stats = stats;
+	for (int k = 0; k < n; ++k) {
+		p->pick[at[k]] = was[k];
+		p->on[at[k]] = false;
+		p->off[at[k]] = 0;
+		p->map[at[k]] = was[k].e0;
+		p->map[cells + at[k]] = was[k].e1;
+	}
+	return false;
+}
+
+/* The original's panels whole where the floor has them, then the rest
+ * tile by tile; then each panel whose tiles meet those picked beside them
+ * badly is tried tile by tile too (take_up). */
+static void lay_whole(Picked *p) {
+	int tw = p->g->tw, th = p->g->th;
+	size_t cells = (size_t)tw * th;
+	panels_lay(p->books, p->nbooks, p->seams, p->g, p->floor, p->ctx, p->pick);
+	for (size_t i = 0; i < cells; ++i) p->whole[i] = p->pick[i].look != SEAM_ANY;
+	for (int ty = 0; ty < th; ++ty)
+		for (int tx = 0; tx < tw; ++tx) {
+			size_t i = (size_t)ty * tw + tx;
+			if (!p->whole[i]) { p->on[i] = pick_one(p, tx, ty); continue; }
+			p->map[i] = p->pick[i].e0;
+			p->map[cells + i] = p->pick[i].e1;
+		}
+	uint8_t *up = calloc(cells, 1);
+	for (int ty = 0; up && ty < th; ++ty)
+		for (int tx = 0; tx < tw; ++tx)
+			if (p->whole[ty * tw + tx] && trouble(p, tx, ty, false)) take_up(p, tx, ty, up);
+	free(up);
+	int whole = 0;
+	for (size_t i = 0; i < cells; ++i) {
+		whole += p->whole[i];
+		p->dirty[i] = !p->whole[i];
+	}
+	tiles_stats.picks += whole;
+	tiles_stats.whole += whole;
+}
+
 static void pick_all(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g,
 	TileFloor floor, const void *ctx, uint16_t *map, uint8_t *left) {
 	int tw = g->tw, th = g->th;
 	size_t cells = (size_t)tw * th;
-	Picked p = { books, nbooks, seams, g, floor, ctx, map, NULL, NULL, NULL, NULL };
+	Picked p = { books, nbooks, seams, g, floor, ctx, map, NULL, NULL, NULL, NULL, NULL };
 	memset(map, 0, cells * 2 * sizeof *map);   /* (off the floor a tile keeps nothing) */
 	memset(left, 0, cells);
 	if (!picked_open(&p, cells)) return;   /* (no memory: a map of nothing) */
 	tiles_keep_begin(g, floor, ctx);
-	for (int ty = 0; ty < th; ++ty)
-		for (int tx = 0; tx < tw; ++tx) p.on[ty * tw + tx] = pick_one(&p, tx, ty);
+	lay_whole(&p);
 	TileStats first = tiles_stats;   /* (the passes below would count twice) */
 	static const int d[5][2] = { { 0, 0 }, { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
 	for (int pass = 0; pass < PASSES; ++pass) {

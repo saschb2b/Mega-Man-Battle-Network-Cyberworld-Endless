@@ -37,6 +37,30 @@ typedef struct {
 	uint32_t side[4];     /* its pixels along its left, top, right and bottom sides, as a strip takes them (seams_side) */
 } TileCand;
 
+/* The original's panels whole (panels.h): each with its sixteen tiles, by
+ * the slot of their phase, as indices into `tile` (a pair, the pixels it
+ * draws and its sides, as TileCand's); sorted by shape, and `at` by place.
+ * A shape's panels mostly look alike; where a few differ (an edge with
+ * something standing on it, a raised floor's face before it), those are
+ * not laid: the Graveyard's slabs lost their upper rims to them. */
+#define PANEL_TILES 16
+typedef struct { uint16_t e0, e1; uint64_t mask; uint32_t side[4]; } PanelTile;
+typedef struct {
+	uint32_t shape;
+	int16_t A, B;
+	uint16_t tile[PANEL_TILES];
+	uint16_t rare;   /* its look is one its shape seldom has in its map (a third as often as the usual one, or less): not laid */
+} TilePanel;
+typedef struct {
+	TilePanel *panel;
+	int n;
+	uint16_t *at;        /* the panels' indices by (B, A) */
+	PanelTile *tile;
+	int ntile;
+	uint16_t *px;        /* the tiles' colours while an area's books are learned (panels_settle) */
+	int8_t slot[64];     /* a phase's slot, -1 none */
+} TilePanels;
+
 /* A class's pairs: from its first to the next class's. */
 typedef struct { uint32_t key; int first; } TileClass;
 
@@ -65,6 +89,7 @@ typedef struct {
 	TileCand *vary;
 	uint32_t *vary_weight;
 	int vary_first[65];
+	TilePanels panels;                  /* its panels whole */
 } TileBook;
 
 /* A tile map's size, where its panel edges fall (world units mod 32), how
@@ -184,6 +209,20 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * BN4's countries lay their green walkways two and three wide, whose
  * middles stood in their cream platforms' middles as green blotches. */
 #define TILES_WALK_HUE 0x8000000
+/* ... and with TILES_UNDER, platform floor that passes under what its map
+ * sets over it on the second layer is floor, whatever the walls and heights
+ * there say, learned from the first layer: BN4's Park Area's conveyor
+ * crosses over the middle of its one platform, which the walls give as two
+ * halves, each ending under it in an edge that is none; rooms' ends came
+ * out as plain floor cut off. */
+#define TILES_UNDER 0x10000000
+/* ... and with TILES_WHOLE, its maps' panels are laid whole where a
+ * layer's floor has them (panels.h): BN4's Park Area's platform with its
+ * frame, its corners' marks and the wall on its upper edges, which tile by
+ * tile came out in pieces; BN5's Oran Area's circuits. Not everywhere: the
+ * Graveyard's slabs lost their upper rims to it, BN4's ACDC Area's squares
+ * gained breaks. */
+#define TILES_WHOLE 0x20000000
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a
@@ -213,7 +252,7 @@ void tile_class(const TileGrid *g, int tx, int ty, int *phase, int *A, int *B);
  * across which it shows what no original map shows there, half an edge or
  * more a break (a block of another floor or shade), less a nick (a panel's
  * line cut short; breaks.h). */
-typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge, breaks, nicks; } TileStats;
+typedef struct { int picks, near, fallbacks, seams, other, off_near, off_edge, breaks, nicks, whole; } TileStats;
 extern TileStats tiles_stats;
 
 /* With tiles_measure (the dev atlas), how far the pair the last tiles_pick

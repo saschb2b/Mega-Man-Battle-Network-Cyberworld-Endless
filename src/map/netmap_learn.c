@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "panels.h"
 
 /* ---- helpers ---- */
 
@@ -227,6 +228,7 @@ bool nm_learn(int area, Learned *L) {
 	 * joins and dead ends better than the area's own tiles and stand out
 	 * there, unless the area takes those colours too */
 	for (int k = own; k < L->nbooks; ++k) tiles_other_colours(&L->book[k], seen, !(na->styles & TILES_MORE_COLOURS));
+	for (int k = 0; k < L->nbooks; ++k) panels_settle(&L->book[k].panels);
 	L->pads_seen = false;
 	for (int k = 0; k < L->nbooks; ++k)
 		for (int i = 0; i < L->book[k].n && !L->pads_seen; ++i) L->pads_seen = L->book[k].cand[i].pad;

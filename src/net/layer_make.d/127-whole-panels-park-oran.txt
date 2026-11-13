@@ -1,0 +1,1 @@
+BN4's Park Area's and BN5's Oran Area's layers lay their maps' panels whole (TILES_WHOLE), and Park's platform is read as one under its conveyor (TILES_UNDER, TILES_INNER_WALLS): the neighbourhoods its maps show changed, so the cells the floor's legalizer changes did too; the other areas' layers as before.

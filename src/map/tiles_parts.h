@@ -78,6 +78,9 @@ void tl_expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const vo
 void tl_expect_for(const Look *l, int face, int hang, int map_face, uint64_t *must, uint64_t *never);
 void tl_expect(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, uint64_t *must, uint64_t *never, uint64_t *deep);
 int tl_misses(uint64_t mask, uint64_t must, uint64_t never);
+/* The tile's pixels up to `band` pixels straight above floor: where a wall
+ * stands on a floor's upper edge. */
+uint64_t tl_above_floor(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int band);
 bool tl_flat_tile(const AreaSrc *a, int tx, int ty);
 uint64_t tl_drawn(const AreaSrc *a, bool first, int tx, int ty, uint16_t px[64]);
 void tl_calibrate(const AreaSrc *a, const Src *src, TileGrid *g);

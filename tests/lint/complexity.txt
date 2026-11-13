@@ -20,7 +20,6 @@ src/map/props.c:floor_emblem_on 29 46
 src/map/props.c:learn_art 29 54
 src/map/props.c:props_learn_counter 27 71
 src/map/props.c:props_learn_pad 52 70
-src/map/tilemap.c:pick_all 27 47
 src/map/tiles_pick.c:best 56 72
 src/net/net_gen.c:ng_room_spot_in 33 17
 src/net/net_layouts.c:link 34 42

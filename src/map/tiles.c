@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "panels.h"
 #include "tiles_learn.h"
 #include "tiles_parts.h"
 
@@ -115,10 +116,27 @@ static int pale_pixels(const AreaSrc *a, int cx, int cy) { return panel_pixels(a
 #define PALE_PIXELS 40   /* SKIP_PALE: Mr. Weather Comp's fan belts 120 and more, its solar panels under 20 */
 #define JOINT_PIXELS 4   /* a walkway panel showing this many of its area's joint hues is a joint: the Undernet's gems */
 
+/* Whether panel (A, B) is platform floor passing under what the map sets
+ * over it on its second layer (TILES_UNDER): its middle and four points
+ * around it drawn on the first layer, the middle in the platforms' hues. */
+static bool under_crossing(const Src *s, int A, int B) {
+	if (!(s->styles & TILES_UNDER)) return false;
+	const AreaSrc *a = s->a;
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B, px = area_px(a->tw, X, Y), py = area_py(a->th, X, Y);
+	int W = a->tw * 8, H = a->th * 8;
+	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
+	for (int k = 0; k < 5; ++k) {
+		int x = px + probe[k][0], y = py + probe[k][1];
+		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px0[(size_t)y * W + x] >> 24)) return false;
+	}
+	return (s->styles & 0x1FFFu) >> tl_style_at(a, px, py) & 1;
+}
+
 /* Whether panel (A, B) is floor of this view at all. */
 static bool panel_drawn(const Src *s, int A, int B) {
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	if (under_crossing(s, A, B)) return 1;
 	/* (a Liberation map's board: its panels, area_src_board) */
 	int board = area_src_board(a, X, Y);
 	if (board >= 0) return board;
@@ -343,6 +361,16 @@ static inline int floor_px_k(const TileGrid *g, TileFloor floor, const void *ctx
 static int floor_px(const TileGrid *g, TileFloor floor, const void *ctx, int px, int py) {
 	return floor_px_k(g, floor, ctx, keeps(g, floor, ctx), px, py);
 }
+
+uint64_t tl_above_floor(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int band) {
+	bool k = keeps(g, floor, ctx);
+	uint64_t m = 0;
+	for (int i = 0; i < 64; ++i)
+		for (int d = 1; d <= band; ++d)
+			if (floor_px_k(g, floor, ctx, k, tx * 8 + i % 8, ty * 8 + i / 8 + d)) { m |= 1ull << i; break; }
+	return m;
+}
+
 PlainMemo *tl_plain_memo;
 
 void tiles_keep_begin(const TileGrid *g, TileFloor floor, const void *ctx) {
@@ -623,11 +651,12 @@ bool tl_pad_look(const Src *s, const uint8_t *pads, int A, int B) {
 
 /* Whether panel (A, B) is floor whose tiles are not learned. */
 bool tl_skipped(const Src *s, int A, int B) {
-	if (!s->skip_styles || !drawn_cached(s, A, B)) return false;
-	if (s->skip_styles & SKIP_OFF_PADS && s->pads && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 &&
-		s->pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) return false;
+	if (!s->skip_styles) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	if (!drawn_cached(s, A, B) || under_crossing(s, A, B)) return false;
+	if (s->skip_styles & SKIP_OFF_PADS && s->pads && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 &&
+		s->pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) return false;
 	if (s->skip_styles & SKIP_PALE) return tl_src_panel(s, A, B) == TILE_A && !beside_walkway(s, A, B) &&
 		pale_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) >= PALE_PIXELS;
 	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= (s->skip_styles & SKIP_QUARTER ? 64 : 8);
@@ -641,6 +670,10 @@ void tiles_free(TileBook *b) {
 	free(b->patch);
 	free(b->vary);
 	free(b->vary_weight);
+	free(b->panels.panel);
+	free(b->panels.at);
+	free(b->panels.tile);
+	free(b->panels.px);
 	memset(b, 0, sizeof *b);
 }
 
@@ -680,6 +713,7 @@ void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool dro
 	else { free(b->patch); b->patch = NULL; }
 	free(moved);
 	keep_first(b, n);
+	panels_other_colours(&b->panels, seen);
 }
 
 void tiles_drop_pads(TileBook *b) {
@@ -692,6 +726,7 @@ void tiles_drop_pads(TileBook *b) {
 	else { free(b->patch); b->patch = NULL; }
 	free(moved);
 	keep_first(b, n);
+	panels_drop_pads(&b->panels);
 }
 
 /* ---- picking ---- */
