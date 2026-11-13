@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-14
+* **Update**: world/level-design/side-pieces.md (CopyBot Comp's crystal spikes behind its plateaus; End Area and Oran Area tried and left).
+
 ## 2026-11-13
 * **Update**: world/level-design/side-pieces.md (What stands behind a floor: the rows of horns behind the catwalks of BN4's Undernet, set in stretches).
 * **Creation**: devtools/old-checkpoint.md (`tools/old_checkpoint.py`: the last releases' runs continued and played by this build, what a state carries of the engine's across builds, 0.20.0's and 0.21.0's measured). **Update**: devtools/agents-tools.md (the state's `gameframe` line), code/tools.md (its row).

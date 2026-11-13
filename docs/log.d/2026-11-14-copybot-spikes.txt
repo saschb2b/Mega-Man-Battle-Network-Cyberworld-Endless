@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T23:03:31Z
-* **Update**: world/level-design/side-pieces.md (CopyBot Comp's crystal spikes behind its plateaus; End Area and Oran Area tried and left).
