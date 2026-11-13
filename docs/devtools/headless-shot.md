@@ -21,7 +21,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--marks HEX` the title's marks, `--screen auto|whole|fill|stretch` the
 scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba|vba|nds|psp`,
 `--interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast` and
-`--voxel on|off|debug` [voxel mode](../engine/voxel.md) (debug: what each pixel was taken for, in flat colours; `--voxel-pitch DEGREES`, `--voxel-zoom` and `--voxel-depth` its camera; it shows only in a `--screen-shot`), `--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
+`--depth-lighting on|off|debug` (`--voxel` too) [depth lighting](../engine/voxel.md) (debug: what each pixel was taken for, in flat colours; `--voxel-pitch DEGREES`, `--voxel-zoom` and `--voxel-depth` its camera; it shows only in a `--screen-shot`), `--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
 shows only in a `--screen-shot`), `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,

@@ -116,7 +116,8 @@ bool display_has_voxel(void) {
 bool display_setting(const char *key, const char *val) {
 	if (!strcmp(key, "smooth_motion")) P.blend = yes(val);
 	else if (!strcmp(key, "screen")) set(display_scale_read(val));
-	else if (!strcmp(key, "voxel")) { if (!(voxel_forced & 1u)) voxel = voxel_read(val); }
+	/* (voxel: its name in the first builds that had it) */
+	else if (!strcmp(key, "depth_lighting") || !strcmp(key, "voxel")) { if (!(voxel_forced & 1u)) voxel = voxel_read(val); }
 	else return lcd_setting(key, val);
 	return true;
 }
@@ -125,7 +126,7 @@ bool display_arg(const char *flag, const char *val) {
 	static const char *const cams[] = { "--voxel-pitch", "--voxel-zoom", "--voxel-depth" };
 	for (int k = 0; k < 3; ++k)
 		if (!strcmp(flag, cams[k])) { voxel_cam[k] = (float)atof(val); return true; }
-	if (!strcmp(flag, "--voxel")) {
+	if (!strcmp(flag, "--depth-lighting") || !strcmp(flag, "--voxel")) {
 		voxel = voxel_read(val);
 		voxel_forced |= 1u;
 		return true;
@@ -234,7 +235,7 @@ void display_blend_keep(LcdBlend b) {
 
 void display_voxel_keep(bool on) {
 	voxel = on && display_has_voxel() ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
-	keep("voxel", voxel ? "on" : "off", options_voxel_note());
+	keep("depth_lighting", voxel ? "on" : "off", options_voxel_note());
 }
 
 void display_lcd3x_keep(bool on) {

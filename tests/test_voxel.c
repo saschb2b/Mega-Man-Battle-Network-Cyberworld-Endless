@@ -52,6 +52,12 @@ static void test_layers(void) {
 	gba_layers(&(GbaVideo){ vram, oam, io, pal }, &l);
 	CHECK(l.lying[4 * 240 + 4] == 0xFF00FF00u && !l.obj[4 * 240 + 4] && l.top[4 * 240 + 4] == 1, "layers: a sprite of priority 3 lies on the floor, green: %08x",
 		(unsigned)l.lying[4 * 240 + 4]);
+	/* (BG3 before the map's backgrounds by its priority is the HUD's; behind or level with them the sky) */
+	put16(io, 0x00, 0x1A40);
+	put16(io, 0x0E, 0x0001);
+	CHECK(gba_bg3_front(io), "layers: BG3 of priority 1 before BG1 of priority 2");
+	put16(io, 0x0E, 0x0002);
+	CHECK(!gba_bg3_front(io), "layers: BG3 level with BG1 is the sky");
 	put16(io, 0x00, 0x1241);
 	CHECK(!gba_layers(&(GbaVideo){ vram, oam, io, pal }, &l), "layers: mode 1 is refused");
 }
@@ -94,6 +100,7 @@ static void scene_make(void) {
 	memset(&ground, 0, sizeof ground);
 	memset(&layers, 0, sizeof layers);
 	memset(layers.top, GBA_LAYER_NONE, sizeof layers.top);
+	memset(layers.under, GBA_LAYER_NONE, sizeof layers.under);
 	for (int y = 60; y < 110; ++y)
 		for (int x = 100; x < 140; ++x) {
 			scene.map[window(x, y)] = 0xFF808080u;
@@ -107,11 +114,12 @@ static void scene_make(void) {
 		}
 	layers.x[0] = 118; layers.y[0] = 50; layers.w[0] = 8; layers.h[0] = 32;
 	layers.top[0] = 0;
+	layers.hud[0] = 1;
 }
 
 static void test_lift(void) {
 	scene_make();
-	voxel_lift(&layers, false, frame, &ground, &scene);
+	voxel_lift(&layers, 0, frame, &ground, &scene);
 	CHECK(scene.kind[window(110, 65)] == VOX_TOP && scene.gy[window(110, 65)] == 65, "lift: a top on its own ground row");
 	CHECK(scene.kind[window(110, 105)] == VOX_WALL && scene.gy[window(110, 105)] == 100, "lift: a side hangs from the edge above: row %d", scene.gy[window(110, 105)]);
 	CHECK(scene.kind[window(50, 65)] == VOX_SKY, "lift: the sky where the map has nothing");
@@ -121,7 +129,7 @@ static void test_lift(void) {
 	CHECK(scene.hud[0] == 1 && !scene.hud[60 * VOX_W + 120], "lift: BG0 is the HUD's, a sprite on the floor is not");
 	/* (a pad lying on the floor, and past its edge: the floor's colour there, floor where there was none) */
 	layers.lying[65 * VOX_W + 110] = layers.lying[65 * VOX_W + 90] = 0xFF00FF00u;
-	voxel_lift(&layers, false, frame, &ground, &scene);
+	voxel_lift(&layers, 0, frame, &ground, &scene);
 	CHECK(scene.map[window(110, 65)] == 0xFF00FF00u && scene.kind[window(110, 65)] == VOX_TOP && scene.nbodies == 1, "lift: what lies on the floor is the floor's");
 	CHECK(scene.map[window(90, 65)] == 0xFF00FF00u && scene.kind[window(90, 65)] == VOX_TOP && scene.gy[window(90, 65)] == 65, "lift: ... and floor where the map had none");
 	layers.lying[65 * VOX_W + 110] = layers.lying[65 * VOX_W + 90] = 0;
@@ -131,7 +139,7 @@ static void test_lift(void) {
 	for (int x = 150; x < 160; ++x) scene.map[window(x, 65)] = 0xFF808080u;
 	for (int y = 110; y < 150; ++y) scene.map[window(100, y)] = 0xFF808080u;
 	layers.x[0] = 8; layers.y[0] = 0; layers.w[0] = 8; layers.h[0] = 16;
-	voxel_lift(&layers, false, frame, &ground, &scene);
+	voxel_lift(&layers, 0, frame, &ground, &scene);
 	CHECK(scene.kind[window(155, 65)] == VOX_TOP && scene.gy[window(155, 65)] == 65, "lift: art beside the floor lies flat");
 	CHECK(scene.kind[window(100, 105)] == VOX_TOP && scene.kind[window(104, 105)] == VOX_TOP && scene.kind[window(120, 105)] == VOX_WALL,
 		"lift: a long run under an edge is more floor, a short one beside it too, one apart from it a side");
@@ -144,7 +152,7 @@ static void test_lift(void) {
 			ground.ramp[at] = (uint8_t)(1 + (99 - y) / 2);
 		}
 	ground.z[1] = 20;
-	voxel_lift(&layers, false, frame, &ground, &scene);
+	voxel_lift(&layers, 0, frame, &ground, &scene);
 	CHECK(scene.kind[window(110, 70)] == VOX_TOP && scene.gy[window(110, 70)] - 70 >= 9 && scene.gy[window(110, 70)] - 70 <= 11, "lift: a ramp's pixel stands as high as it shows: %d",
 		scene.gy[window(110, 70)] - 70);
 	CHECK(scene.kind[window(130, 70)] == VOX_TOP && scene.gy[window(130, 70)] == 70, "lift: ... and the floor beside it lies on the ground");
@@ -154,7 +162,7 @@ static unsigned red(uint32_t c) { return c & 0xFF; }
 
 static void test_light_and_draw(void) {
 	scene_make();
-	voxel_lift(&layers, false, frame, &ground, &scene);
+	voxel_lift(&layers, 0, frame, &ground, &scene);
 	VoxLook look = voxel_look_default();
 	voxel_light(&scene, &ground, &look, lit_map, lit_sprite);
 	/* (the sun from the front left: the shadow falls behind the body, to its right) */

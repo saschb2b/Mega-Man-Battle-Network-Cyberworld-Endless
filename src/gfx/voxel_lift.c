@@ -8,8 +8,7 @@
 /* Where BN6 keeps what is no part of the world: its HP in the corner, and
  * with a chat box open the box's rows (its frame, face and arrow) */
 #define HP_RIGHT   48
-#define HP_BOTTOM  16
-#define BOX_TOP    96
+#define HP_BOTTOM  24
 
 /* How long a run of art under an edge is still its side (the rim and what
  * holds the slab up), in rows */
@@ -173,15 +172,16 @@ static void lift_bodies(const VoxGround *g, VoxScene *s) {
 	}
 }
 
-/* A sprite of the HUD: all of it in the HP's corner, or in an open chat
- * box's rows */
-static bool hud_obj(const GbaLayers *l, int n, bool chat) {
+/* A sprite of the HUD: all of it in the HP's corner, or in the rows from
+ * `hud_rows` down (an open chat box's), or in the first -`hud_rows` (a
+ * battle's gauge and numbers along the top) */
+static bool hud_obj(const GbaLayers *l, int n, int hud_rows) {
 	if (!l->w[n]) return false;
 	if (l->x[n] + l->w[n] <= HP_RIGHT && l->y[n] + l->h[n] <= HP_BOTTOM) return true;
-	return chat && l->y[n] >= BOX_TOP;
+	return hud_rows > 0 ? l->y[n] >= hud_rows : hud_rows < 0 && l->y[n] + l->h[n] <= -hud_rows;
 }
 
-void voxel_lift(const GbaLayers *l, bool chat, const uint32_t *frame, const VoxGround *ground, VoxScene *s) {
+void voxel_lift(const GbaLayers *l, int hud_rows, const uint32_t *frame, const VoxGround *ground, VoxScene *s) {
 	lift_window(ground, s);
 	/* (what lies on the floor is the floor's: its colour there, and floor where the map has none) */
 	for (int i = 0; i < VOX_N; ++i) {
@@ -191,10 +191,11 @@ void voxel_lift(const GbaLayers *l, bool chat, const uint32_t *frame, const VoxG
 		s->map[at] = l->lying[i];
 	}
 	bool hud[GBA_OBJS];
-	for (int n = 0; n < GBA_OBJS; ++n) hud[n] = hud_obj(l, n, chat);
+	for (int n = 0; n < GBA_OBJS; ++n) hud[n] = hud_obj(l, n, hud_rows);
 	for (int i = 0; i < VOX_N; ++i) {
 		bool obj = l->top[i] == GBA_LAYER_OBJ;
-		s->hud[i] = obj ? hud[l->obj[i] - 1] : l->top[i] == 0;
+		/* (a sprite on BG0 sits on a window of the HUD) */
+		s->hud[i] = obj ? hud[l->obj[i] - 1] || l->hud[i] : l->hud[i];
 		/* (a blended sprite, a shadow or a light, is left out: the sun casts its own) */
 		s->sprite[i] = obj && !s->hud[i] && !l->sheer[i] ? frame[i] | 0xFF000000u : 0;
 	}

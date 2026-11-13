@@ -64,6 +64,8 @@ uint32_t emu_pictures(void);
  * town's hour, a liberation's panels and the GBA's screen on it
  * (emu_picture.c) */
 void emu_picture_draw(int x, int y);
+/* The town's hour on `n` colours of the world (0x..BBGGRR), as the picture takes it (voxel mode's, voxel_scene.c) */
+void emu_picture_tint_world(uint32_t *px, int n);
 /* Another core's sound (a struct mCore: the differential's, guest.c) into the
  * same ring BN6's plays from, and the rate it is played at. */
 void emu_audio_from(void *core);
