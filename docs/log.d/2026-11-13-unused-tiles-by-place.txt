@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T17:40:00Z
+* **Update**: devtools/map-use.md (Where the unused tiles lie, every area: 42% away from any floor, 26% on the layer's own floor, 25% beside it, 8% on or beside floor of another kind; the table by area).

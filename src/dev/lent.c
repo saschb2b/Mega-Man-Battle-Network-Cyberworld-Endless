@@ -9,6 +9,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "tiles.h"
+
 #define SLOTS (1u << 18)   /* (a map has a few thousand tile pictures) */
 #define TINT 0xFFFF2050u
 
@@ -70,7 +72,27 @@ bool lent_layer(int rom, int group, int number, const uint16_t *tiles, int tw, i
 	return true;
 }
 
-uint32_t *lent_map(const AreaSrc *a, Lent *n) {
+static int panel_at(const uint8_t *panels, int A, int B) {
+	int H = TILES_SRC_SPAN / 2;
+	return A < -H || B < -H || A >= H || B >= H ? 0 : panels[(B + H) * TILES_SRC_SPAN + A + H];
+}
+
+/* Where tile i of map a lies (LENT_*). */
+static int place(const AreaSrc *a, const uint8_t *panels, int i) {
+	TileGrid g = { .tw = a->tw, .th = a->th, .ex = a->ex, .ey = a->ey };
+	int phase, A, B, own = 0, other = 0;
+	tile_class(&g, i % a->tw, i / a->tw, &phase, &A, &B);
+	int p = panel_at(panels, A, B);
+	if (p) return p == TILE_A || p == TILE_B ? LENT_OWN : LENT_OTHER;
+	for (int k = 0; k < 9; ++k) {
+		int q = panel_at(panels, A + k % 3 - 1, B + k / 3 - 1);
+		own += q == TILE_A || q == TILE_B;
+		other += q && q != TILE_A && q != TILE_B;
+	}
+	return own ? LENT_BY_OWN : other ? LENT_BY_OTHER : LENT_AWAY;
+}
+
+uint32_t *lent_map(const AreaSrc *a, const uint8_t *panels, Lent *n) {
 	size_t cells = (size_t)a->tw * a->th;
 	uint16_t *tiles = calloc(cells * 2, sizeof *tiles);
 	uint64_t *kinds = calloc(SLOTS, sizeof *kinds);
@@ -89,6 +111,7 @@ uint32_t *lent_map(const AreaSrc *a, Lent *n) {
 			n->used += used;
 			n->kinds += !known;
 			n->kinds_used += !known && used;
+			if (panels && !known && !used) n->left[place(a, panels, i)]++;
 			/* (the tile's own pixels of this layer, where they show) */
 			for (int k = 0; !used && k < 64; ++k) {
 				size_t at = (size_t)(i / a->tw * 8 + k / 8) * a->tw * 8 + (size_t)(i % a->tw) * 8 + k % 8;

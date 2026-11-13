@@ -117,6 +117,86 @@ Read off the tinted maps of Park, Central, Sky and Town Area 3:
   past the line a tile may draw up to. The same cause as the notch under a
   Park platform's right corner.
 
+## Where the unused tiles lie, every area
+
+The owner's concern is variety across the whole board, not one map at a
+time (13 November 2026). So the measure also says where in its map each
+tile picture no layer drew lies, by the panel its middle is in as the
+area's tiles are learned (`lent.c`, `place`; `tiles_src_panels`): on the
+floor a layer is made of, on floor of another kind, off the floor within a
+panel of either, or further away. Over all 39 areas, two seeds a layout:
+
+| Where | Different pictures no layer drew | Share |
+| --- | --- | --- |
+| Away from any floor | 12470 | 42% |
+| On the layer's own floor | 7751 | 26% |
+| Beside its floor (a panel away at most) | 7447 | 25% |
+| On floor of another kind | 1790 | 6% |
+| Beside floor of another kind | 528 | 2% |
+
+Layers draw 40% of the 49974 different pictures. What the places mean, by
+the tinted maps:
+
+- **Away** is things, not floor: Aquarium Comp's glass tanks and stepping
+  stones, its ramps to its pads, its starfish; Sky's and the Undernet's
+  structures. A layer sets four to ten free-standing pieces of scenery
+  (`decor.c`), none larger than 20 tiles a side and none that touches the
+  floor. Raised floor is counted here too where it is drawn far from its
+  panels' place on the ground.
+- **On its own floor** is the floor's looks a layer does not reach: what
+  a map sets on a field (marks, lights, patterns), its joints and
+  crossings.
+- **Beside its floor** is rims, side faces, walls and what stands at an
+  edge.
+- **Other floor** is roads, pads of another look and other surfaces:
+  the least of the four. [Roads on the way](../world/level-design/roads.md)
+  took a part of Park's.
+
+| Area | Used | Left | On its floor | On other floor | Beside a floor | Away |
+| --- | --- | --- | --- | --- | --- | --- |
+| Judge Comp | 19% | 2947 | 884 | 565 | 1122 | 376 |
+| Weather Comp | 21% | 2284 | 1067 | 64 | 365 | 788 |
+| Aquarium Comp | 35% | 2081 | 87 | 0 | 181 | 1813 |
+| Sky | 37% | 1902 | 48 | 83 | 200 | 1571 |
+| BN5 End | 36% | 1867 | 480 | 66 | 604 | 717 |
+| Robot Comp | 38% | 1665 | 721 | 199 | 559 | 186 |
+| Undernet | 34% | 1439 | 147 | 44 | 456 | 792 |
+| Nest | 26% | 1432 | 172 | 111 | 402 | 747 |
+| BN4 ACDC | 34% | 1402 | 803 | 0 | 592 | 7 |
+| BN5 Oran | 36% | 1386 | 397 | 0 | 473 | 516 |
+| BN5 Nebula | 49% | 996 | 224 | 165 | 239 | 368 |
+| BN5 SciLab | 49% | 995 | 631 | 0 | 341 | 23 |
+| Seaside | 54% | 951 | 456 | 1 | 205 | 289 |
+| Central | 56% | 842 | 147 | 150 | 205 | 340 |
+| BN4 Town | 35% | 762 | 151 | 0 | 269 | 342 |
+| BN4 Undernet | 46% | 642 | 138 | 0 | 302 | 202 |
+| Green | 32% | 636 | 58 | 177 | 127 | 274 |
+| BN5 dark 1 | 28% | 507 | 37 | 0 | 56 | 414 |
+| BN5 ACDC | 63% | 490 | 322 | 12 | 149 | 7 |
+| BN4 Park | 44% | 472 | 91 | 39 | 153 | 189 |
+| BN5 dark 3 | 30% | 449 | 37 | 0 | 73 | 339 |
+| BN5 Undernet | 73% | 446 | 224 | 0 | 144 | 78 |
+| BN4 countries | 36% | 431 | 55 | 108 | 145 | 123 |
+| BN5 dark 2 | 32% | 409 | 34 | 0 | 85 | 290 |
+| BN5 dark 4 | 32% | 405 | 39 | 0 | 40 | 326 |
+| Graveyard | 37% | 400 | 67 | 6 | 61 | 266 |
+| CopyBot Comp | 56% | 352 | 42 | 0 | 83 | 227 |
+| Secret | 50% | 334 | 29 | 0 | 126 | 179 |
+| BN5 dark 7 | 41% | 318 | 34 | 0 | 62 | 222 |
+| BN5 dark 5 | 40% | 300 | 32 | 0 | 45 | 223 |
+| BN5 dark 9 | 51% | 190 | 34 | 0 | 38 | 118 |
+| BN5 dark 6 | 61% | 144 | 31 | 0 | 43 | 70 |
+| BN5 dark 8 | 66% | 109 | 32 | 0 | 29 | 48 |
+
+(The comps and homepages that draw all of their one map are left out.)
+
+What it says for the work: a second kind of floor is 8% of what is left,
+and was the wrong place to start for variety. The two levers that reach
+every area are the things beside the floor (larger pieces, pieces that
+touch the floor, more kinds a layer) and the floor's own looks with its
+edges, which the maps' panels laid whole bring along where an area takes
+them (six areas today, [the tile test](tile-test.md)).
+
 ## What follows
 
 The first and the last kind share a root: the learner does not know which
