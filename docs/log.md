@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Creation**: world/level-design/lead-map.md (which of an area's maps a layer's look follows, by its seed; each map measured as the lead, twelve areas' lists). **Update**: world/level-design/index.md (its line).
+* **Update**: world/level-design/roads.md (Which areas have roads: found in an area's map as it is learned, none named; BN4's ACDC and Town Areas join Park; what the rule turns down and why; raised second systems no road), world/level-design/index.md (its line).
 * **Update**: devtools/map-use.md (Where the unused tiles lie, every area: by place and height, no one place holding most; the families that come back in area after area: a second look of walkway, pads of other looks, marks, things; free-standing scenery a small part; the table by area).
 * **Creation**: world/level-design/roads.md (the way's walkways drawn as BN4's Park Area's orange roads: the owner's call, the design, how it is built, what is not mended). **Update**: devtools/map-use.md (What follows: the way chosen and built), research/sources.md (BN4's Park Area: its roads' width and ends, verified in the map).
 * **Update**: rom/bn4.md (Park Area 1's coordinate data: its paths plain floor, its triggers, its ramps), research/sources.md (BN4's Park Area: its orange and yellow paths, verified in the data, assumed in play, the searches that came up empty), devtools/map-use.md (what a layer could do with a road: three ways to choose which walkways, and how its tiles would be learned).

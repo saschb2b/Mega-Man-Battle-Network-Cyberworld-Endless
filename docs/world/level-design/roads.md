@@ -3,7 +3,7 @@ type: Feature
 title: "Roads on the way"
 description: "Roads: in an area whose map has a second look of walkway, found as it is learned (BN4's Park Area's orange roads, its ACDC Area's cyan, its Town Area's yellow), the walkways of a layer's way from its arrival to its exit are drawn in it, the side paths in the area's walkways; a look alone, no rule of play (`mark_roads`, `TILE_ROAD`, `learn_roads`)."
 tags: [world, level-design, tiles]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T15:55:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T20:30:00Z }
 sources:
   - id: owner-call
     resource: "the owner's answer in the session, 13 November 2026"
