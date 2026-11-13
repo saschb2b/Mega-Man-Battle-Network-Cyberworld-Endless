@@ -1,0 +1,8 @@
+{
+  "feature": "The net maps' own pieces on generated layers",
+  "date": "2026-11-13",
+  "name": "The Aquarium's animated tiles are bubbles, not fish",
+  "result": "With the pillars cut whole from Aquarium Comp's maps and set under a generated layer's pads, the two animated blocks (tiles 1-6 and 7-12) sit under the pillars' stubs and show bubbles rising, different from frame to frame; the fish seen beside them are the backdrop's, there before the pillars were set.",
+  "meaning": "The first probe set the blocks alone over the backdrop and read its fish as theirs: a piece is judged where its map sets it. The scripts' addresses and tile numbers stand.",
+  "link": null
+}

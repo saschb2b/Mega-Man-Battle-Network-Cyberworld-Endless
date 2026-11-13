@@ -1,12 +1,12 @@
 ---
 type: Design
 title: "Side pieces"
-description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
+description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:24:00Z }
 ---
 
-# Side pieces (built for four areas, issue #505)
+# Side pieces (built for five areas, issue #505)
 
 The originals do not stop at their floors. CopyBot Comp's walkways are
 gripped by purple claws at their bends, flames stand beside the catwalks of
@@ -81,7 +81,7 @@ Taken per area as looked at, as every laying rule is
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
-| Aquarium Comp | one piece, nothing to see | no |
+| Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | every other area | nothing | - |
 
 ## Pieces the game animates (verified in the game)
@@ -111,15 +111,46 @@ entries, so either area takes the other's too (`net_area.side_maps`):
 Undernet Zero's own come in threes alone, which fit a generated floor about
 once a layer, and with the Undernet's lone bowls and pairs it gets four.
 
+## What stands under a raised floor (`hangs_learn`; verified on the maps and in the game)
+
+Aquarium Comp's glass pads stand on pillars, short stubs with bubbles
+rising under each and long ringed columns. They are no second-layer
+piece: they lie on the first layer, under the pads' lower edges, and its
+pads are raised (its maps hold the water lanes at height 0 and the pads at
+16; Aquarium Comp 2, 0x81:0: 6,177 and 984 height cells). A layer's pads lie
+on the ground, so a cut under ground panels found none.
+
+They are cut in the view that brings the pads' level down to the ground
+(`area_src_raise_in`, as the tiles of a raised floor are learned). A
+first-layer tile belongs to such a piece where it draws, lies off that
+level's floor at its four corners, and lies more than 8 pixels under any
+edge of it, past the pad's own rim. Tiles joined eight ways are one piece
+where no pixel of it lies on that floor and a panel of it lies straight
+above its top row, within 48 pixels; the piece is kept with the panel most
+of that row's columns meet, its neighbourhood and the panels it draws
+over, as a side piece is. The Aquarium's four maps give more than the 24
+looks kept: a lone stub or column (11 to 18 tiles) and whole sides of a pad
+(27 to 55).
+
+A layer sets one under each panel of a pad that fits: the same
+neighbourhood, nothing where it hung over nothing. It begins in the tiles
+of the pad's rim, so up to a third of it may go over tiles the first layer
+already holds there. No seed thins them, as none of the maps' pads lacks
+its pillars: 15 to 20 a layer in the [tile test](../../devtools/tile-test.md)'s
+pictures. The stubs' bubbles are the map's other animation (tiles 1 to 12,
+[the ROM map](../../rom/graphics.md)) and rise on a layer as the
+Undernet's bowls burn (captured: a pad on six pillars, the bubbles under
+its stubs changing from frame to frame; the fish there are the
+backdrop's). Nothing about walking changes: the panels under a
+pillar are void in the layer as in the map.
+
 ## Not built
 
-- **The first tile layer's pieces.** Robot Control's pipes ending in red
-  fists, the Aquarium's pillars under its glass pads, the Judge Tree's
-  planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
+- **The first tile layer's other pieces.** Robot Control's pipes ending in
+  red fists, the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
   lie on the first layer, beside or under the floor (probed on the maps),
   and the Nest's and Mr. Weather's maps hold their background in the
-  second, so theirs lie there too. The Aquarium's pillars carry its other
-  animation, two fish. Scenery refuses a
+  second, so theirs lie there too. Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.
