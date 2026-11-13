@@ -173,6 +173,10 @@ SCENES = [
     # 2; the Underground's teal emblem panels in the Cybeast Nest, seed 3)
     ('copybot-claws', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '15', '--seed', '2'], WEAK, 1000),
     ('nest-emblems', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '7', '--seed', '3'], WEAK, 550),
+    # (Aquarium Comp's glass pads on their pillars, seed 2's second layer;
+    # BN4's Undernet's horns behind its catwalks, seed 4)
+    ('aquarium-pillars', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '12', '--seed', '2'], WEAK, 1000),
+    ('bn4-undernet-horns', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', 'x19', '--seed', '4'], WEAK, 550),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS

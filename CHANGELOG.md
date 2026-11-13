@@ -20,8 +20,9 @@
   Area in its yellow ones.
 - **Each area's own pieces.** Robot Control Comp's teal pads; CopyBot
   Comp's pools in their stone rim, and its claws gripping the walkways,
-  MegaMan passing behind one as in BN6; flames beside BN4's Undernet's
-  catwalks; the Underground's teal emblem panels; BN5's ACDC Area's
+  MegaMan passing behind one as in BN6; Aquarium Comp's glass pads on
+  their pillars, bubbles rising under them; flames beside BN4's
+  Undernet's catwalks and rows of horns behind them; the Underground's teal emblem panels; BN5's ACDC Area's
   guardian's arena as one of its rooms; a teleport's island in Central,
   Seaside and Sky as a small platform; and no stray arrows beside Green
   Area's conveyor lanes.
