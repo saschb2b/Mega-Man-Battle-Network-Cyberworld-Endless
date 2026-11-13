@@ -38,6 +38,9 @@ whose pieces turned up elsewhere (`skip_styles` with `SKIP_ANY_PIXEL`,
 `SKIP_PALE`), and two floors sharing a hue told apart by shape
 (`TILES_WALK_NARROW`).
 
+How much of each original map the layers draw at all is counted beside
+these: [what the layers take from a map](map-use.md).
+
 ## Breaks: the picture itself
 
 The off tiles and the seams say how far a tile's pair was seen from its
