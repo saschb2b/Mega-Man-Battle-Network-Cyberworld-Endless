@@ -252,8 +252,9 @@ of walkway floor. There a panel is left out only where a quarter of its
 top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
 yellow and red), and a room is the square whole.
 
-Where an area asks for it (`TILES_WHOLE`: BN4's Park Area, countries and
-Undernet, BN5's Oran Area and Undernet), its maps' panels are laid whole
+Where an area asks for it (`TILES_WHOLE`: BN4's Park and Town Areas,
+countries and Undernet, BN5's Oran Area and Undernet), its maps' panels
+are laid whole
 before any tile is picked (`src/map/panels.c` learns them,
 `src/map/panels_lay.c` lays them): a panel is the sixteen tiles whose
 centres lie in it, and a layer's panel with the very floors around it that
@@ -288,9 +289,44 @@ beside what is laid there: a void panel's own neighbourhood does not say
 whether it lies under a platform's wall or a walkway's rim, and the
 platforms' upper edges came out scalloped with walkways' rims. Each
 piece's tile is still held to the floor's pixel test and to the strips
-across its edges, and taken up alone where it fails. What this cannot
-mend, and where it made things worse, is in
-[the tile test](../../devtools/tile-test.md) (A floor drawn by hand).
+across its edges, and taken up alone where it fails.
+
+A border is kept whole across its tiles' edges. Its art runs past the line
+a tile may draw up to (a wall over an upper edge, a slab wider than its
+floor), and judged alone the tile that holds the overhang was turned down:
+a tooth at every other tile. The learner follows the floor's own art
+through its map (`tiles_learn.c`, `own_art`): from the pixels the floor's
+tiles must draw to every pixel of the same colour beside one of its own,
+then its outline, within the tiles round the floor and never onto floor of
+another kind; a tile may draw that art wherever it lies, and is marked at
+its place where it needed that (`TilePanel.edge`). Laying has the twin
+rule (`panels_lay.c`, `follow_edges`): a laid tile that draws up to its
+edge, with nothing laid beyond, takes the marked tile its map sets there
+along, and that one the next. On a map that lends its pads alone
+(`TILES_PADS_ALONE`: BN4's Town Area 3, whose other floor is roads, hubs
+and another level's paths) the art is begun in the pads' own colours and a
+tile may draw nothing else, so what BN4 sets against a square is not
+taken for its base. And a walkway's end at a room drawn apart is no dead
+end, though its own view sees one: where the area has no joint piece for
+it, the panel is marked (`TILE_JOINS`, `tilemap.c`) and none is laid on it
+or round it, so the end is picked tile by tile, plain, at the room's rim;
+at a room's upper side it runs on one panel under the room, whose wall
+covers its end.
+A panel off the floor also counts as lying beside what is laid where the
+two hold the same tiles along the edge they share, whatever map each is
+from (`same_edge`: a wall from a map's mirror image over a rim from the
+map); and a room drawn apart, laid in pieces and still short of tiles,
+takes more of the pieces it has, their tiles that only lie beside a panel
+its map has and the floor has not (`lay_more`: a corner's tip).
+What lies off the floor is laid in rounds, while any round lays a tile: a
+panel takes on a later round the tiles it still misses, from a neighbour
+laid after it. And what is drawn off the floor hangs on it: a tile laid
+there that no row of laid tiles joins to the floor's panels is taken up
+again (`lift_loose`), since a map's panel beside a floor also holds what
+another floor near it draws there.
+What all this cannot mend, and where it made things
+worse, is in [the tile test](../../devtools/tile-test.md) (A floor drawn
+by hand, Panels lent tile by tile, A border kept whole).
 
 Some areas never set one floor flush with another. Green's planks reach
 its raised grass by stairs, CopyBot's walkways reach its plateaus, which

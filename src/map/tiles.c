@@ -307,6 +307,8 @@ static void px_panel(const TileGrid *g, int px, int py, int *A, int *B) {
 	*B = tl_floordiv(Y4 - 4 * g->ey, 128);
 }
 
+void tl_pixel_panel(const TileGrid *g, int px, int py, int *A, int *B) { px_panel(g, px, py, A, B); }
+
 unsigned tl_tile_panels(const TileGrid *g, int tx, int ty, int out, int up, int down) {
 	int phase, A, B, a, b;
 	tile_class(g, tx, ty, &phase, &A, &B);
@@ -513,6 +515,10 @@ bool tiles_in_front(const TileGrid *g, int tx, int ty, TileFloor fa, const void 
 			const void *co = ta ? cb : ca;
 			for (int k = 1; k <= g->face; ++k)
 				if (floor_px(g, fo, co, px, py - k)) { ++*(ta ? &va : &vb); break; }
+			/* (and one floor's top just behind the other's upper edge lies
+			 * behind the wall that may stand on it) */
+			for (int k = 1; k <= g->wall; ++k)
+				if (floor_px(g, fo, co, px, py + k)) { ++*(ta ? &vb : &va); break; }
 		}
 	if (va != vb) return va > vb;
 	/* only faces meet here: the floor lower on screen in front (panel
@@ -664,10 +670,12 @@ bool tl_pad_look(const Src *s, const uint8_t *pads, int A, int B) {
 
 /* Whether panel (A, B) is floor whose tiles are not learned. */
 bool tl_skipped(const Src *s, int A, int B) {
-	if (!s->skip_styles) return false;
+	bool pads_alone = s->styles & TILES_PADS_ALONE && s->pads, in = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2;
+	if (!s->skip_styles && !pads_alone) return false;
 	const AreaSrc *a = s->a;
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	if (!drawn_cached(s, A, B) || under_crossing(s, A, B)) return false;
+	if (pads_alone && !(in && s->pads[(B + SPAN / 2) * SPAN + A + SPAN / 2])) return true;
 	if (s->skip_styles & SKIP_OFF_PADS && s->pads && A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2 &&
 		s->pads[(B + SPAN / 2) * SPAN + A + SPAN / 2]) return false;
 	if (s->skip_styles & SKIP_PALE) return tl_src_panel(s, A, B) == TILE_A && !beside_walkway(s, A, B) &&
@@ -726,7 +734,8 @@ void tiles_other_colours(TileBook *b, const uint8_t seen[TILE_COLOURS], bool dro
 	else { free(b->patch); b->patch = NULL; }
 	free(moved);
 	keep_first(b, n);
-	panels_other_colours(&b->panels, seen);
+	if (drop) panels_other_colours(&b->panels, seen);
+	else panels_settle(&b->panels);
 }
 
 void tiles_drop_pads(TileBook *b) {

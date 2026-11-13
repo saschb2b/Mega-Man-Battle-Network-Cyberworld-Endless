@@ -11,13 +11,14 @@
 
 /* ---- learning ---- */
 
-typedef struct { int16_t A, B; uint8_t phase; int tx, ty; uint64_t must, never; } Loose;
+typedef struct { int16_t A, B; uint8_t phase, only; int tx, ty; uint64_t must, never, own; } Loose;
 
 /* a panel's state: whole as far as known, lending in part, or not at all */
 enum { WHOLE, PART, BAD };
 
 struct PanelsLearn {
 	uint8_t state[SPAN * SPAN];
+	uint16_t edge[SPAN * SPAN];   /* per panel, the slots (as told) whose tile is a border's overhang */
 	uint16_t tile[SPAN * SPAN][PANEL_TILES];
 	PanelTile *tiles;
 	uint16_t *px;   /* (their colours, 64 each) */
@@ -34,6 +35,7 @@ PanelsLearn *panels_begin(void) {
 	PanelsLearn *l = malloc(sizeof *l);
 	if (!l) return NULL;
 	memset(l->state, WHOLE, sizeof l->state);
+	memset(l->edge, 0, sizeof l->edge);
 	memset(l->tile, 0xFF, sizeof l->tile);
 	memset(l->hash, 0xFF, sizeof l->hash);
 	memset(l->slot, -1, sizeof l->slot);
@@ -93,6 +95,7 @@ void panels_tile(PanelsLearn *l, PanelSpot at, uint16_t e0, uint16_t e1, uint64_
 	}
 	if (!mask) e0 = e1 = 0;
 	l->tile[(B + H) * SPAN + A + H][l->slot[phase]] = tile_of(l, e0, e1, mask, px);
+	if (at.edge && mask) l->edge[(B + H) * SPAN + A + H] |= (uint16_t)(1u << l->slot[phase]);
 }
 
 void panels_loose(PanelsLearn *l, PanelSpot at, int tx, int ty, uint64_t must, uint64_t never) {
@@ -105,12 +108,13 @@ void panels_loose(PanelsLearn *l, PanelSpot at, int tx, int ty, uint64_t must, u
 		l->loose = t;
 		l->loose_cap = cap;
 	}
-	l->loose[l->nloose++] = (Loose){ (int16_t)A, (int16_t)B, (uint8_t)phase, tx, ty, must, never };
+	l->loose[l->nloose++] = (Loose){ (int16_t)A, (int16_t)B, (uint8_t)phase, 0, tx, ty, must, never, 0 };
 }
 
-/* Whether `mask` draws what a loose tile must, and little beyond. */
-static bool loose_fits(const Loose *t, uint64_t mask) {
-	return tl_popcount64(t->must & ~mask) <= SLACK && tl_popcount64(mask & t->never) <= SLACK;
+void panels_own(PanelsLearn *l, uint64_t own, bool only) {
+	if (!l || l->failed || !l->nloose) return;
+	l->loose[l->nloose - 1].own = own;
+	l->loose[l->nloose - 1].only = only;
 }
 
 /* Whether the pixels of `mask` are all in colours `seen`. */
@@ -120,9 +124,18 @@ static bool colours_seen(const uint8_t *seen, uint64_t mask, const uint16_t px[6
 	return true;
 }
 
-/* The tiles the pixel test turned down, and those that draw nothing on the
- * first layer, kept where they draw what they must in the floor's own
- * colours: on the first layer alone, or on both where the map's second is
+/* Whether a tile fits where it lies: drawing what it must, and beyond what
+ * it may only the floor's own art (*edge: it does) or a stray pixel, in the
+ * floor's own colours; with t->only, nothing but the floor's own art. */
+static bool tile_fits(const Loose *t, const uint8_t *seen, uint64_t mask, const uint16_t px[64], bool *edge) {
+	uint64_t over = mask & (t->only ? ~0ull : t->never);
+	*edge = tl_popcount64(over) > SLACK;
+	return tl_popcount64(t->must & ~mask) <= SLACK && tl_popcount64(over & ~t->own) <= SLACK && (t->only || colours_seen(seen, mask, px));
+}
+
+/* The tiles the pixel test turned down, those that draw nothing on the
+ * first layer and those off a pad's floor (TILES_PADS_ALONE), kept where
+ * they fit: on the first layer alone, or on both where the map's second is
  * no background. */
 static void keep_loose(PanelsLearn *l, const Src *src, const TileBook *out) {
 	uint8_t *seen = calloc(TILE_COLOURS, 1);
@@ -134,7 +147,7 @@ static void keep_loose(PanelsLearn *l, const Src *src, const TileBook *out) {
 		size_t at = (size_t)t->ty * a->tw + t->tx;
 		uint16_t px[64];
 		uint64_t mask = tl_drawn(a, true, t->tx, t->ty, px);
-		bool ok = loose_fits(t, mask) && colours_seen(seen, mask, px);
+		bool edge, ok = tile_fits(t, seen, mask, px, &edge);
 		uint16_t e1 = 0;
 		/* (and nothing on the first where the second draws: an edge's rim set
 		 * there is the panel's, not a tile of nothing) */
@@ -144,11 +157,11 @@ static void keep_loose(PanelsLearn *l, const Src *src, const TileBook *out) {
 			if (!ok || drawn) {
 				mask = drawn;
 				memcpy(px, both, sizeof both);
-				ok = loose_fits(t, mask) && colours_seen(seen, mask, px);
+				ok = tile_fits(t, seen, mask, px, &edge);
 				e1 = a->tile[1][at];
 			}
 		}
-		if (ok) panels_tile(l, (PanelSpot){ t->A, t->B, t->phase }, a->tile[0][at], e1, mask, px);
+		if (ok) panels_tile(l, (PanelSpot){ t->A, t->B, t->phase, edge }, a->tile[0][at], e1, mask, px);
 		else panels_lacks(l, t->A, t->B);
 	}
 	free(seen);
@@ -210,8 +223,12 @@ static void keep_panel(const PanelsLearn *l, const Src *src, const uint8_t *pads
 	t->shape = src_shape(src, pads, t->A, t->B, &t->no);
 	t->rare = t->has = 0;
 	/* (its slots by their phases in order: the same in every book of a lattice) */
+	t->edge = 0;
 	for (int phase = 0, k = 0; phase < 64; ++phase)
-		if (l->slot[phase] >= 0) t->tile[k++] = l->tile[i][l->slot[phase]];
+		if (l->slot[phase] >= 0) {
+			t->edge |= (uint16_t)((l->edge[i] >> l->slot[phase] & 1) << k);
+			t->tile[k++] = l->tile[i][l->slot[phase]];
+		}
 	for (int k = 0; k < PANEL_TILES; ++k) t->has |= (uint16_t)((t->tile[k] != NO_TILE) << k);
 }
 

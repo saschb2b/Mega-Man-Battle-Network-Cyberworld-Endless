@@ -200,20 +200,173 @@ Where they stay off, each looked at with them on:
   glass catwalks come out as its fields' framed squares.
 - **BN5's ACDC Area** (142, 165): its circuits' walkways lose their rims
   to panels from its wide circuit field.
-- **BN4's ACDC Area** (249, 306) and **Town Area** (468, 526): their
-  squares come out complete, both marks and the base, but the walkways
-  take an end stud or a connector at every other panel, and in Town the
-  roads' yellow and the hubs' green come along under the squares.
+- **BN4's ACDC Area** (249, 306): its squares come out complete, both
+  marks and the base, but the walkways take an end stud or a connector at
+  every other panel.
 
 What BN4's Park map has no tiles for, drawn tile by tile as before: the
 tip under a platform's bottom corner (its one bottom corner carries a
 walkway's end, so a room shows two tiles of it there), the inner corner of
 an L of two rooms, a room two panels wide (no field: two rims).
 
-One thing changed that was not asked for and stays (the owner's call, 13
-November 2026): Park's walkways. A dead end is BN4's round end pad now and
-a way's end at a room an arrow head or a pad, since rooms are drawn apart;
-some straight runs repeat BN4's connector piece.
+Park's walkways changed with them: a dead end is BN4's round end pad now,
+and some straight runs repeat BN4's connector piece. A way's end at a room
+took that pad or an arrow head too, since rooms are drawn apart and the
+walkway's own view sees a dead end there; the room then covered half of it
+(the owner, 13 November 2026: "its circle is not round and cut off"). Such
+an end is no dead end, and no panel is laid there now (A border kept
+whole).
+
+## A border kept whole
+
+With panels laid, the layers' borders showed teeth (the owner, 13 November
+2026: "jigsaw edges around the areas, and inside open areas"): a wall or a
+slab's band present in one tile and missing in the next, all along an
+edge. The cause is one and general. A border's art runs past the line a
+tile may draw up to: 3 pixels beside a floor's edge, 8 over an upper edge
+where a wall is let stand. BN4's Park Area's wall, drawn on a slope, is 8
+pixels over the edge at one end of a tile and 12 at the other; its Town
+Area's squares stand on a blue slab 11 pixels wider than they are, all
+round. Each tile was judged alone, so the tile holding the overhang was
+turned down and its neighbour kept: a border cut at a tile's edge.
+
+Two rules mend it, one in the learner and its twin where panels are laid
+([the generator](../world/level-design/generator.md), Tile picking):
+
+- **The learner follows the floor's own art.** From the pixels the
+  floor's tiles must draw, to every pixel of the same colour beside one of
+  its own, and its outline; a tile may draw that art wherever it lies. So
+  the tiles that hold a border's overhang are learned with the border, each
+  marked at its place in its map.
+- **A laid tile takes the next one along.** Where a laid tile draws up to
+  its edge and nothing is laid beyond, the marked tile its map sets there
+  is laid too, and so on from it.
+
+Measured on a square drawn alone in Town's tiles: 34 breaks, 9 with both
+rules (its slab whole all round, the steps left are under its lower sides,
+where BN4 always joins a road or a hub). Park's upper edges carry BN4's
+wall as one band.
+
+Town Area needed its reading put right first. Hue could not tell Town
+Area 3's roads and lower paths from Town Area 1's walkways (both pale
+blue in a panel's middle), and a layer's walkways took the paths' pieces
+at every end and turn. So Town Area 3 lends its squares alone
+(`TILES_PADS_ALONE`) and Town Area 1 the walkways (`TILES_MORE_COLOURS`:
+their colours are none of the squares'); and a tile of Town Area 3 draws
+its squares' own art and nothing else, which keeps out the hub BN4 sets
+against a square's corner and the road joined to its side, though they
+lie where the square's faces may. Its squares' colours are taken from
+what their tops show well inside and what their sides show in most of
+their tiles, counted by tiles: a side's outline is a pixel or two in every
+tile, a hub many pixels in a few. Tried first and dropped: telling other
+levels' art by how often a colour shows far from the floor against on it
+(the squares' own colours are the lower platform's too, and Town Area 1's
+walkways are the upper network's in Town Area 3), and by a tile being
+nearly one colour.
+
+A walkway's end at a room drawn apart is no dead end. Its own view takes
+the room for void, so with panels laid it took its map's dead-end piece,
+Park's round pad or arrow head, half under the room. Where an area has no
+joint piece to stand at such an end (the Undernets' bridges end in theirs),
+the walkway's panel beside the room is marked (`TILE_JOINS`) and no panel
+is laid on it or round it: the end is picked tile by tile, plain, at the
+room's rim. Tried first and dropped: the walkway drawn as running on under
+the room (it came out over the room's rim, and Oran's circuits lost their
+ends at its hubs).
+
+Two more of the owner's points on one Park room (13 November 2026), each
+mended by a rule of its own:
+
+- **Teeth on a small room's upper-right edge** ("weird rounded zigzags").
+  The map's own panels over that edge have a walkway right behind them,
+  whose face reaches the wall's upper tiles, so those are not lent; the
+  mirror image's are clean, but a panel off the floor was laid only beside a
+  rim from its own map, and a small room's rim there is the map's. A map
+  and its mirror image set the very same tile where the art is the same on
+  both sides, a platform's rim: so a panel also counts as lying beside what
+  is laid where its map's neighbour and the laid one hold the same tiles
+  in every slot along the edge the two share (`same_edge`), whatever map
+  each is from. Park's breaks fell from 158 to 142 by it, Oran's from 340
+  to 331; Town's rose by 10, the countries' by 9.
+- **The overhang under a platform's bottom corner** ("tile bleed
+  overhang"): two tiles of the walkway BN4 joins to its one bottom corner.
+  The tip's clean halves exist, the left in the map and the right in its
+  mirror image, each within the 3-pixel margin of the walkway's panel on
+  its own side and so not lent. A panel laid in pieces and still short of
+  tiles now takes more of the pieces it has (`lay_more`): their tiles that
+  lie beside a panel that differs, not on it, where the map has something
+  there and the floor has not; and a tile beside its own mirror image
+  counts as meeting it, no map setting the two together. Only in a piece
+  drawn apart, whose every neighbour in its map is away by design: with
+  floors that join, a panel's own art turns with its neighbour, and Town's
+  walkways took the lattice's junctions (Town 363 to 385). Taking tiles
+  that near anywhere (a margin of 1 pixel) lost a corner's mark elsewhere.
+
+- **A walkway's end at a room's upper side** stopped in steps beside the
+  room's wall, a dash of its outline on the room's rim: its end is picked
+  tile by tile, and tiles end at tiles' edges. There the walkway now runs
+  on one panel under the room (`pieces_floor`): its own view takes the
+  room's panel just below its end for more walkway, so the end is drawn
+  straight, and of its tiles in the room's panel only those that reach
+  back over the room's edge are set, behind the room's; a floor's top just
+  behind another's upper edge counts as behind the wall that may stand
+  there (`tiles_in_front`, `TileGrid.wall`). From below a walkway ends
+  under the room's side face as before. Tried first: every tile of the
+  walkway's in the room's panel set behind the room's (its hidden end came
+  out on top of the room: Park 127 to 182).
+
+- **A border cut off at a room's corners** ("the blue border around: they
+  are sometimes cut off or still jagged", the owner, 13 November 2026). On
+  a Park room drawn alone: a wall missing its last tile at the upper
+  corners, a step under the bottom corner's right half, a notch under the
+  right corner. The first two had one cause: a panel off the floor is laid
+  only beside one laid before it, and in one pass the first by a corner
+  had none yet and stayed empty, while one laid early never took what a
+  later neighbour could have handed it. So **what lies off the floor is
+  laid in rounds**, while any round lays a tile, and a panel in pieces
+  takes the tiles it still misses on a later round (the bottom corner's
+  right half, from the mirror image's face once that lies beside it). Park
+  111 to 94, a room alone 13 breaks to 6. And **what is drawn off the floor
+  hangs on it**: a tile laid there that no row of laid tiles joins to the
+  floor's panels is taken up again (`lift_loose`), since a map's panel
+  beside a floor also holds what another floor near it draws there. Town
+  363 to 356.
+
+  The notch under the right corner is the learner's and stays (Not
+  mended). Tried against the first two and dropped: a panel counted as
+  lying beside a neighbour in pieces by the piece that touches it (Park's
+  tip came out, Oran 331 to 345 and BN5's Undernet 190 to 208); one tile
+  the same along a corner contact (nothing changed).
+
+Breaks per 100 panels against the state before, whole panels now on in
+Town too: Town Area 468 to 356, Park Area 172 to 94, BN5's Oran Area 341
+to 332, BN4's countries 115 to 105, BN5's Undernet 195 to 190, BN4's
+Undernet 262 to 261; the other 33 areas identical. Laying any tile of the
+border's art that meets its neighbours, where the map's own is missing,
+set pieces where none belonged (Town 353 to 396) and is not done.
+
+Not mended:
+
+- **The notch under a Park platform's right corner**, three tiles. BN4's
+  platform ends 13 pixels past its floor's right corner, where a tile may
+  draw 3, in bands a pixel thick (a highlight, two shades, an outline)
+  that no colour of their own joins across a step: the learner's own art
+  stops short of them and the three tiles are turned down. Learned as the
+  floor's art (what is drawn straight under it, and an outline of 3
+  lines), the corner comes out as BN4 draws it, Park 94 to 90, BN4's
+  Undernet 261 to 209, the countries 105 to 90, Town 356 to 334: but BN5's
+  Oran Area then takes a walkway's grey base under a room's rim for the
+  room's own and lays spikes off every room (its count barely moved, 332
+  to 337: the picture shows it, the breaks do not), and BN5's Undernet its
+  lava. Bounding it by depth (2 to 12 pixels) or to colours no top draws
+  loses either the corner or Oran. What it needs is the art told apart by
+  the floor it belongs to, which the learner does not know yet (kept on
+  the branch `wip/learner-under`, commit 044a017d, not pushed).
+- **A seam at the very tip** under a Park platform's bottom corner, where
+  the two halves meet, and a pixel of the walkway's pink.
+- **Town:** where a square joins a walkway or another square, and rooms
+  that are no square of three by three, which take a square's panels in
+  pieces.
 
 ## The seams, and what was tried against them
 
