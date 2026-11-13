@@ -190,65 +190,82 @@ static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out);
 bool props_learn_ornament(const AreaSrc *a, int seed, PropStamp *out) { return learn_art(a, seed, true, out); }
 bool props_learn_void_art(const AreaSrc *a, int seed, PropStamp *out) { return learn_art(a, seed, false, out); }
 
+#define ART_W 17
+#define ART_H 13
+
+/* The art round second-layer tile i of `a` (that layer's tiles joined 8
+ * ways, within two panels' width): its tiles in `q`, places in the ART_W x
+ * ART_H box round i, and the corner of the panel under its middle at z 0.
+ * Their count, 0 where it is none: too few or many, on the wrong ground
+ * (`floor`: an ornament of a pad; else art hung in the void), or mostly
+ * black. */
+static int art_at(const AreaSrc *a, int i, bool floor, int *q, int *Xa, int *Ya) {
+	int sx = i % a->tw, sy = i / a->tw, n = 0;
+	int bx0 = sx - 8, by0 = sy - 6, bw = ART_W, bh = ART_H;
+	char in[ART_W * ART_H] = { 0 };
+	q[n++] = (sy - by0) * bw + sx - bx0;
+	in[q[0]] = 1;
+	for (int h = 0; h < n; ++h) {
+		int cx = q[h] % bw, cy = q[h] / bw;
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) {
+				int x = cx + dx, y = cy + dy, tx = x + bx0, ty = y + by0;
+				if (x < 0 || y < 0 || x >= bw || y >= bh || in[y * bw + x] || tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th) continue;
+				if (!(a->tile[1][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
+				in[y * bw + x] = 1;
+				q[n++] = y * bw + x;
+			}
+	}
+	if (n < 8 || n > 60) return 0;
+	int px = 0, py = 0;
+	for (int k = 0; k < n; ++k) { px += (q[k] % bw + bx0) * 8 + 4; py += (q[k] / bw + by0) * 8 + 4; }
+	px = px / n - a->tw * 4;
+	py = py / n - a->th * 4;
+	int X = (px - 2 * py) / 2, Y = (px + 2 * py) / 2;
+	*Xa = a->ex + PANEL * floordiv(X - a->ex, PANEL);
+	*Ya = a->ey + PANEL * floordiv(Y - a->ey, PANEL);
+	if (area_src_walled_floor(a, *Xa + 16, *Ya + 16) != (floor ? 1 : 0)) return 0;
+	/* (not art that draws mostly black: Sky's tile 0x379 is the pit in
+	 * one of its platforms, not a gem) */
+	long dark = 0, lit = 0;
+	for (int k = 0; k < n; ++k)
+		for (int y = 0; y < 8; ++y)
+			for (int x = 0; x < 8; ++x) {
+				uint32_t c = a->px[(size_t)((q[k] / bw + by0) * 8 + y) * (size_t)(a->tw * 8) + (size_t)((q[k] % bw + bx0) * 8 + x)];
+				if (!(c >> 24)) continue;
+				if (((c >> 16) & 255) + ((c >> 8) & 255) + (c & 255) < 90) ++dark; else ++lit;
+			}
+	return dark > lit ? 0 : n;
+}
+
 static bool learn_art(const AreaSrc *a, int seed, bool floor, PropStamp *out) {
 	memset(out, 0, sizeof *out);
 	if (a->layers < 2) return false;
-	for (int i = 0; i < a->tw * a->th; ++i) {
+	/* of the places that hold the seed, an ornament's first; of art in the
+	 * void the one of the fewest tiles: Green's first bush stands beside an
+	 * arrow panel, whose second layer's tiles joined it and came along, a
+	 * piece of an arrow in the void beside a layer's bushes */
+	int best = -1, least = 0, q[ART_W * ART_H], Xa = 0, Ya = 0;
+	for (int i = 0; i < a->tw * a->th && !(floor && best >= 0); ++i) {
 		if ((a->tile[1][i] & 0x3FF) != seed) continue;
-		/* the art round it (the second layer's tiles joined 8 ways, within
-		 * two panels' width), and the panel under its middle at z 0 */
-		int sx = i % a->tw, sy = i / a->tw, n = 0;
-		int bx0 = sx - 8, by0 = sy - 6, bw = 17, bh = 13;
-		char in[17 * 13] = { 0 };
-		int q[17 * 13];
-		q[n++] = (sy - by0) * bw + sx - bx0;
-		in[q[0]] = 1;
-		for (int h = 0; h < n; ++h) {
-			int cx = q[h] % bw, cy = q[h] / bw;
-			for (int dy = -1; dy <= 1; ++dy)
-				for (int dx = -1; dx <= 1; ++dx) {
-					int x = cx + dx, y = cy + dy, tx = x + bx0, ty = y + by0;
-					if (x < 0 || y < 0 || x >= bw || y >= bh || in[y * bw + x] || tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th) continue;
-					if (!(a->tile[1][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
-					in[y * bw + x] = 1;
-					q[n++] = y * bw + x;
-				}
-		}
-		if (n < 8 || n > 60) continue;
-		int px = 0, py = 0;
-		for (int k = 0; k < n; ++k) { px += (q[k] % bw + bx0) * 8 + 4; py += (q[k] / bw + by0) * 8 + 4; }
-		px = px / n - a->tw * 4;
-		py = py / n - a->th * 4;
-		int X = (px - 2 * py) / 2, Y = (px + 2 * py) / 2;
-		int Xa = a->ex + PANEL * floordiv(X - a->ex, PANEL), Ya = a->ey + PANEL * floordiv(Y - a->ey, PANEL);
-		/* (on floor: an ornament of a pad, not art hung in the void; or
-		 * the void's own) */
-		if (area_src_walled_floor(a, Xa + 16, Ya + 16) != (floor ? 1 : 0)) continue;
-		/* (not art that draws mostly black: Sky's tile 0x379 is the pit in
-		 * one of its platforms, not a gem) */
-		long dark = 0, lit = 0;
-		for (int k = 0; k < n; ++k)
-			for (int y = 0; y < 8; ++y)
-				for (int x = 0; x < 8; ++x) {
-					uint32_t c = a->px[(size_t)((q[k] / bw + by0) * 8 + y) * (size_t)(a->tw * 8) + (size_t)((q[k] % bw + bx0) * 8 + x)];
-					if (!(c >> 24)) continue;
-					if (((c >> 16) & 255) + ((c >> 8) & 255) + (c & 255) < 90) ++dark; else ++lit;
-				}
-		if (dark > lit) continue;
-		out->tiles = calloc((size_t)n, sizeof *out->tiles);
-		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
-		for (int k = 0; k < n; ++k) {
-			int tx = q[k] % bw + bx0, ty = q[k] / bw + by0;
-			StairTile *t = &out->tiles[out->ntiles++];
-			t->px = (int16_t)(tx * 8 - ax);
-			t->py = (int16_t)(ty * 8 - ay);
-			t->e1 = a->tile[1][(size_t)ty * a->tw + tx];
-		}
-		out->len = 1;
-		out->ok = true;
-		return true;
+		int n = art_at(a, i, floor, q, &Xa, &Ya);
+		if (n && (best < 0 || n < least)) { best = i; least = n; }
 	}
-	return false;
+	if (best < 0) return false;
+	int n = art_at(a, best, floor, q, &Xa, &Ya);
+	out->tiles = calloc((size_t)n, sizeof *out->tiles);
+	if (!out->tiles) return false;
+	int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+	for (int k = 0; k < n; ++k) {
+		int tx = q[k] % ART_W + best % a->tw - 8, ty = q[k] / ART_W + best / a->tw - 6;
+		StairTile *t = &out->tiles[out->ntiles++];
+		t->px = (int16_t)(tx * 8 - ax);
+		t->py = (int16_t)(ty * 8 - ay);
+		t->e1 = a->tile[1][(size_t)ty * a->tw + tx];
+	}
+	out->len = 1;
+	out->ok = true;
+	return true;
 }
 
 /* The tiles of layer `l` that draw colour `want` (RGB), a group of 2 to 24

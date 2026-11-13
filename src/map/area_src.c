@@ -486,6 +486,74 @@ int area_src_board(const AreaSrc *a, int X, int Y) {
 	return x >= 0 && y >= 0 && x < 256 && y < 256 && (board.on[y][x >> 3] >> (x & 7) & 1);
 }
 
+static int fdiv(int a, int b) { return a / b - (a % b < 0); }
+
+/* The map's arrow lanes' panels (AreaSrc.arrow): from each start cell's
+ * panel, the one its middle lies in or on the edge before, along its way to
+ * the panel an end cell of that way closes, 12 panels at most. */
+static bool arrow_ends(const AreaSrc *a, int d, int X, int Y) {
+	static const int8_t ux[4] = { 1, 0, -1, 0 }, uy[4] = { 0, 1, 0, -1 };
+	for (int i = 0; i < a->nsec[3]; ++i) {
+		const CoordCell *c = &a->sec[3][i];
+		if (c->value == 0x4C + d && abs(c->x + 4 - 16 * ux[d] - X) <= 16 && abs(c->y + 4 - 16 * uy[d] - Y) <= 16) return true;
+	}
+	return false;
+}
+
+static void arrow_add(AreaSrc *a, int X, int Y) {
+	for (int k = 0; k < a->narrows; ++k)
+		if (a->arrow[k][0] == X && a->arrow[k][1] == Y) return;
+	if (a->narrows == AREA_ARROWS) return;
+	a->arrow[a->narrows][0] = (int16_t)X;
+	a->arrow[a->narrows++][1] = (int16_t)Y;
+}
+
+static bool arrow_listed(const AreaSrc *a, int X, int Y) {
+	for (int k = 0; k < a->narrows; ++k)
+		if (a->arrow[k][0] == X && a->arrow[k][1] == Y) return true;
+	return false;
+}
+
+/* Whether arrow panel (X, Y) lies in a 2 x 2 block of them: a field of
+ * currents (Seaside Area 2's and 3's, 150 and 250 panels), a floor of its
+ * own, not a lane. */
+static bool arrow_field(const AreaSrc *a, int X, int Y) {
+	for (int dy = -32; dy <= 0; dy += 32)
+		for (int dx = -32; dx <= 0; dx += 32)
+			if (arrow_listed(a, X + dx, Y + dy) && arrow_listed(a, X + dx + 32, Y + dy) && arrow_listed(a, X + dx, Y + dy + 32) &&
+				arrow_listed(a, X + dx + 32, Y + dy + 32)) return true;
+	return false;
+}
+
+static void find_arrows(AreaSrc *a) {
+	static const int8_t ux[4] = { 1, 0, -1, 0 }, uy[4] = { 0, 1, 0, -1 };
+	a->narrows = 0;
+	for (int i = 0; a->sec[3] && i < a->nsec[3]; ++i) {
+		const CoordCell *c = &a->sec[3][i];
+		if (c->value < 0x48 || c->value > 0x4B) continue;
+		int d = c->value - 0x48;
+		/* (the panel's middle: a cell on the edge before it counts to it) */
+		int X = a->ex + 16 + 32 * fdiv(c->x + 4 + 8 * ux[d] - a->ex, 32), Y = a->ey + 16 + 32 * fdiv(c->y + 4 + 8 * uy[d] - a->ey, 32);
+		int len = 0;
+		while (len < 12 && !arrow_ends(a, d, X + 32 * ux[d] * len, Y + 32 * uy[d] * len)) ++len;
+		if (len == 12) continue;
+		for (int k = 0; k <= len; ++k) arrow_add(a, X + 32 * ux[d] * k, Y + 32 * uy[d] * k);
+	}
+	/* (the lanes alone: a field's panels marked, then dropped) */
+	bool field[AREA_ARROWS];
+	for (int k = 0; k < a->narrows; ++k) field[k] = arrow_field(a, a->arrow[k][0], a->arrow[k][1]);
+	int n = 0;
+	for (int k = 0; k < a->narrows; ++k)
+		if (!field[k]) { a->arrow[n][0] = a->arrow[k][0]; a->arrow[n++][1] = a->arrow[k][1]; }
+	a->narrows = n;
+}
+
+bool area_src_arrow_at(const AreaSrc *a, int X, int Y) {
+	for (int k = 0; k < a->narrows; ++k)
+		if (abs(X - a->arrow[k][0]) <= 16 && abs(Y - a->arrow[k][1]) <= 16) return true;
+	return false;
+}
+
 static bool load(int group, int number, AreaSrc *a) {
 	memset(a, 0, sizeof *a);
 	a->group = group;
@@ -497,6 +565,7 @@ static bool load(int group, int number, AreaSrc *a) {
 	if (area_src_board(a, 0, 0) >= 0) { a->ex = -board.ox & 31; a->ey = -board.oy & 31; }
 	decode_heights(a);
 	decode_rings(a);
+	find_arrows(a);
 	return true;
 }
 
@@ -578,6 +647,7 @@ static bool copy_parts(const AreaSrc *a, AreaSrc *c, bool zeroed) {
 static void mirror_cells(const AreaSrc *a, AreaSrc *m) {
 	m->ex = (32 - a->ey) & 31;
 	m->ey = (32 - a->ex) & 31;
+	for (int k = 0; k < a->narrows; ++k) { m->arrow[k][0] = (int16_t)-a->arrow[k][1]; m->arrow[k][1] = (int16_t)-a->arrow[k][0]; }
 	if (a->hz) {
 		m->hw = a->hh; m->hh = a->hw;
 		m->hx0 = -(a->hy0 + a->hh); m->hy0 = -(a->hx0 + a->hw);

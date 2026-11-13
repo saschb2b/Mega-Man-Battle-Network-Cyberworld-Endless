@@ -1,0 +1,1 @@
+No tile on a map's arrow lane's panel is learned as floor (find_arrows, learn_tile), and Green's bush is cut where its tiles are fewest (learn_art: no piece of the arrow panel beside the first comes along): layers of Seaside, Green, the Undernet, the Nest, BN5's SciLab, End, Nebula, Oran and Undernet and BN4's countries and Undernet draw other tiles.

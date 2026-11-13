@@ -186,7 +186,11 @@ void gaps between parallel planks, one every second panel, plain and in
 flower in turn (32 in Green Area 1, 25 in Green Area 2). `paste_bushes`
 does so in a void panel with floor on both sides along one axis and void
 on the other two, every second one along the gap, never over the floor's
-own art.
+own art. A bush's stamp is its second-layer tiles joined eight ways, cut
+where they are fewest (`learn_art` in `props.c`): Green Area 1's first
+bush stands beside an arrow panel, whose own second-layer tiles joined
+it, and a piece of an arrow lay in the void beside every third bush of a
+layer.
 
 ## The Graveyard's and the Undernet's emblems (built)
 

@@ -38,6 +38,20 @@ panels set into a walkway. A layer's lane is the quick way back
   Area's and Nebula Area's three, ACDC Area's none ([BN5's maps, songs,
   text and objects](../../rom/bn5-world.md), Its arrow panels and ramps);
   a lane on a layer dressed as one of them is BN5's art over BN6's ride.
+- **Not a walkway's look** (`find_arrows` in `area_src.c`,
+  `learn_tile` in `tiles_learn.c`): a map's arrow lanes' panels are listed
+  as it is loaded (`AreaSrc.arrow`: from each start cell's panel along its
+  way to the panel an end cell closes), and no tile on one is learned as
+  the floor's, nor is the panel lent whole. Their art is an arrow's: a
+  walkway drawn from it showed an arrow where nothing carries MegaMan.
+  The panels beside one still count it as the floor it is (BN5's Undernet
+  joins its rooms to its walkways by single arrow panels, some thirty a
+  map; read as floor of another kind they took the rooms' open rims with
+  them, its breaks up by a quarter). A field of them, a 2 x 2 block or
+  more, is left as it was: Seaside Area 2's and 3's currents are 150 and
+  250 panels, a floor of their own, and without them Seaside's walkways
+  took another map's planks (its breaks up by a fifth). Breaks per 100
+  panels over all areas 89.9 to 89.6, Green 67 to 60, none worse.
 - **The ride** (`nm_lanes_place` in `netmap_extra.c`) is BN6's own: three start
   cells across the lane's near edge and three end cells across its far one
   ([The net's maps and their pieces](../../rom/net-maps.md), Arrow panels), as Robot Control Comp 1's lane has
