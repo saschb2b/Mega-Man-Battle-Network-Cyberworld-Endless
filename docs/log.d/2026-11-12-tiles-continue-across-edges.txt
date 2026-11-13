@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-12T23:40:00Z
-* **Update**: devtools/tile-test.md (the breaks in a layer's picture counted, strips of pixels across tile edges held to the originals'; what they found, the areas still rough, Park Area's platforms drawn apart), world/level-design/generator.md (a tile held to its neighbours' pictures, BN4's ACDC squares' rims learned), code/net-and-map.md (`seams.c`, `tilemap.c`, `breaks.c`), multirom/bn4.md (the off count missed Park Area), devtools/index.md (the tile test's line).

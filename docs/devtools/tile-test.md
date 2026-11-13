@@ -3,7 +3,7 @@ type: Tool
 title: "Tile test: clean tiles in every area"
 description: "`python3 build.py tiles [SEEDS]` runs the atlas over every area and layout, lists each area's breaks in its picture, tiles drawn off and seams per 100 panels with reasons, and fails where a layer got worse than the baseline."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T11:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:40:00Z }
 ---
 
 # Tile test: clean tiles in every area
