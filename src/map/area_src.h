@@ -9,6 +9,8 @@
 
 /* One cell of a coordinate-data section: its 8x8 world cell (x, y) and
  * shape (lowest z, value, height, type). */
+#define AREA_ARROWS 256
+
 typedef struct {
 	int16_t x, y;
 	int8_t z;
@@ -40,6 +42,11 @@ typedef struct {
 	uint8_t *rings;
 	int rx0, ry0, rw, rh;
 	void *held;            /* a view made in place: what it moved aside (area_src_raise_in) */
+	/* its arrow lanes' panels, their middles in world units: from section
+	 * 3's start cells (0x48 + d) along their way to the end cells (0x4C +
+	 * d) that close them (docs/rom/net-maps.md, Arrow panels) */
+	int16_t arrow[AREA_ARROWS][2];
+	int narrows;
 } AreaSrc;
 
 #define HEIGHT_UNEVEN 255
@@ -60,6 +67,10 @@ bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot)
  * stone and purple slime, its plates' mauve stone and lava. */
 bool area_src_load_as(int rom, int group, int number, uint32_t recolour, AreaSrc *a);
 void area_src_free(AreaSrc *a);
+/* Whether world (X, Y) lies on a panel of one of the map's arrow lanes: no
+ * walkway's look is learned from one, its art an arrow's (a walkway drawn
+ * from it lied: an arrow where nothing carries MegaMan). */
+bool area_src_arrow_at(const AreaSrc *a, int X, int Y);
 /* The map flipped left-right: world (X, Y) becomes (-Y, -X), tiles flip.
  * False, and `m` empty, where the memory for it could not be had. */
 bool area_src_mirror(const AreaSrc *a, AreaSrc *m);

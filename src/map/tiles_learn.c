@@ -350,6 +350,15 @@ static bool learn_tile(const Learning *L, int tx, int ty, TileCand *t) {
 	unsigned oa, ob;
 	bool mixed = floors_around(L->src, A, B, &oa, &ob), off_floor = !((oa | ob) & 0x10);
 	if (!(oa | ob) || (mixed && !L->whole)) return false;
+	/* (an arrow lane's panel: its art an arrow's, no pair of the floor's and
+	 * no panel to lend; a walkway drawn from it showed an arrow where
+	 * nothing carries MegaMan. The panels beside it keep it as the floor it
+	 * is: BN5's Undernet joins its rooms to its walkways by such panels, and
+	 * read as floor of another kind they took the rooms' open rims along) */
+	if (area_src_arrow_at(a, a->ex + 16 + 32 * A, a->ey + 16 + 32 * B)) {
+		if (L->whole) panels_bad(L->whole, A, B);
+		return false;
+	}
 	PanelSpot at = { A, B, phase, false };
 	/* (a map that lends its pads alone: a tile of theirs draws their own art
 	 * and no more, or is none of theirs) */
