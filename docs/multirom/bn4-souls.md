@@ -152,10 +152,16 @@ What players said, 3).
 These come before the first BN4 Soul, whichever it is:
 
 - **Art room.** BN5's six sprites fill the Souls' sprite room
-  (`SOULS_SPRITES`, 168 KB). BN4's twelve need 438 KB more, which only
-  `FREE_TAIL` has (about 576 KB, `src/emu/free_space.h`). That is a claim
-  BN4's Navis and music will compete for, and one `tools/heap3ds.py`
-  measures on the 3DS. A Soul's sprite can come in when that Soul does.
+  (`SOULS_SPRITES`, 172,032 bytes: 164,355 taken, 7.5 KB left). BN4's
+  twelve take 438,514 bytes, 33,110 (WindSoul's) to 42,324 (RollSoul's) each, ThunSoul's
+  35,843 (`tools/xrecipe.py`'s `sprite` over BN4's list 0, 13 November
+  2026). An earlier count gave them `FREE_TAIL`, at about 576 KB; the tail
+  is 4 KB since the free space's regions moved, and the whole ROM copy has
+  about 113 KB free in four gaps, the largest 60 KB in the `world` zone
+  (`python3 tools/free_space.py --fit`;
+  [Free space](../engine/emulation/free-space.md)). So the twelve cannot
+  sit side by side, nor two of them: The look, located, below, has the
+  ways.
 - **Numbers in BN6's grown tables.** The power attacks have room (165
   of 256 taken, `soulpower.c`), and so do the attack families (0xD0-0xFF
   spare in `xattack_grow.c`). Three places do not: the charge rows
@@ -274,11 +280,12 @@ rules for a Soul yet, and his look is not moved.
 
 What is left, in order:
 
-1. **The look.** BN4's list 0 number 6 (about 36 KB) in room of its own
-   (`FREE_TAIL`), listed past `SOUL_LIST0_ART_FIRST`, drawn by
-   `soullook.c` for BN6's Soul 13. Then the unison's picture (BN4's list 8
-   number 6, family 0x0D's) and the emotion window's face (the seventh
-   past `SOUL_FACE_FIRST`). Each is held to BN4's frames.
+1. **The look**, which waits on its room (The look, located, below): his
+   sprite (BN4's list 0 number 6, 35,843 bytes), drawn by `soullook.c`
+   for BN6's Soul 13 at a list 0 number past `SOUL_LIST0_ART_FIRST`; the
+   unison's picture (BN4's list 8 number 6, 1,628 bytes, family 0x0D's);
+   the emotion window's face (BN4's face 10, the seventh past
+   `SOUL_FACE_FIRST`). Each is held to BN4's frames.
 2. **The comparator's BN4 Souls.** `tools/xdiff_bn4.py` gets what
    `tools/xdiff.py` has for BN5's (`united`, the form by legit.json's map,
    the proxy's overlay, the power attack's number), each rule from both
@@ -288,3 +295,50 @@ What is left, in order:
    word has 14 and 15 left below BN5's chaos bits (from 16), so the twelve
    need a word of their own; and the run's held mask grows past a byte
    (`RUN_MAGIC`) once a run gives them.
+
+## The look, located
+
+What ThunSoul's look takes from BN4's ROM, read on 13 November 2026 (the
+addresses in [BN4 Red Sun's tables](../rom/bn4.md), The emotion window's
+faces, and Souls in battle):
+
+| Part | In BN4 | Size | BN6's place for it |
+| --- | --- | --- | --- |
+| His sprite | list 0, number the form (`BN4_STATS_SPRITES`) | 35,843 bytes | none yet (below) |
+| The unison's picture | list 8, number the form | 1,628 bytes; 20,570 for the twelve | the Souls' sprite room's 7.5 KB takes ThunSoul's; not the twelve |
+| His face | `BN4_SOUL_FACES`, the face the form + 4 | 0x100 bytes, and a palette of 0x20 | the Souls' sprite room's rest; `SOULS_FACES` and `SOULS_FACE_PALS` have three entries to spare past BN5's six |
+| The count's digits | `BN4_FACE_DIGITS`, six of 0x80 bytes by 5 - the count | 0x300 bytes | beside the face: BN6's step reads 10 - the count, so the address given is five digits before the copy; counts 0 to 5 are there, SoulT+1's 4 among them, where BN6 holds a Soul's turns to 9 |
+| His palette, his arm's points, his buster's flash | not located | | BN5's are `soullook.c`'s palette hooks, `SOULS_ARM_ROWS` and `soullook_flash` |
+
+**Blue Moon's six have no face in Red Sun's ROM.** The window's tables
+lie end to end: five mood faces, six Soul faces, six digits, eleven
+palettes. A face is the form + 4, so forms 7-12 read the digits' and the
+palettes' bytes as tiles and colours. Derived from the layout
+(`BN4_SOUL_FACE_COUNT`); the look of 4 November that saw all twelve unite
+watched the sprite and the name, not the window. Their sprites and
+pictures are whole (the table above counts them). A run that gives Blue
+Moon's six needs their faces from somewhere: Blue Moon's ROM, BN5's of
+the same Navis where BN5 has one (ProtoSoul's and NumberSoul's), or the
+Soul Navi's own mugshot.
+
+**The room.** No gap holds two of the sprites, so they cannot be
+resident as BN5's six are. The ways:
+
+- **One room, the united Soul's** (recommended): 0xA800 bytes, the
+  largest of the twelve (RollSoul's 42,324), filled with the Soul's sprite
+  as he unites, as a BN4 Navi's battle sprite fills
+  `FREE_BN4_NAVI_SPRITE` for the coming battle and a Navi chip's fills
+  its room as the chip is used. Only the `world` zone's 60 KB gap takes
+  it, which is the last gap of its size and not the zone of its kind. It
+  serves one MegaMan: two a side or a NetBattle with BN4 Souls on both
+  sides needs a room a seat. While ThunSoul is the only one moved the
+  room is his from the install.
+- **Regions shrunk to what they hold.** `CYBERWORLD_FREE_SPACE` measures
+  each region's last byte used over runs
+  ([Free space](../engine/emulation/free-space.md), The zones); the last
+  such pass freed 768 KB, since taken. It frees room for a few sprites at
+  best, not for 438 KB.
+- **A larger ROM copy.** The cartridge's address space is 32 MB and the
+  copy is 16. Every platform pays the RAM, the New 3DS first
+  (`tools/heap3ds.py`), so it is the owner's call and a platform change.
+
