@@ -261,9 +261,9 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	int mouths = at_mouths();
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1, lineups, walked, junctions;
 	walk_counts(&lineups, &walked, &junctions);
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, whole %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
 		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
-		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.breaks, tiles_stats.nicks, tiles_stats.off_near, tiles_stats.off_edge,
+		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.whole / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.breaks, tiles_stats.nicks, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7],
 		lineups, junctions, walked);
@@ -285,6 +285,11 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 	for (int i = 0; i < W * H; ++i) if (!(v->px[i] >> 24)) v->px[i] = VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
 	save_bmp(path, v->px, W, H);
+	/* (and its first layer alone: what the tiles are learned from where the
+	 * second sets something over the floor) */
+	for (int i = 0; i < W * H; ++i) if (!(v->px0[i] >> 24)) v->px0[i] = VOID_ARGB;
+	snprintf(path, sizeof path, "%s/src1_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
+	save_bmp(path, v->px0, W, H);
 }
 
 /* The area's own maps as the game draws them, to hold the layers against,
@@ -383,6 +388,45 @@ static void xrom_sources(const char *dir, int xrom) {
 }
 
 static void stair_layers(const char *dir, FILE *report, int biome, int area, int seeds);
+
+/* (dev) A floor drawn by hand in `area`'s tiles, as it stands (no cell
+ * changed): the rows of the file CYBERWORLD_FLOOR names, '.' void, '#' floor,
+ * 'P' a pad's floor; its picture hand_bNN.bmp, its breaks marked in
+ * seams_hand_bNN.bmp. What shapes an area's art draws whole. */
+static void hand_floor(const char *dir, int area) {
+	static uint8_t cell[MAP_H][MAP_W], pad[MAP_H][MAP_W];
+	if (area >= NET_AREAS) { xarea_review(area); xrom_find_beside(); }
+	if (!net_area_def(area)) { printf("atlas: no area %d\n", area); return; }
+	const char *file = getenv("CYBERWORLD_FLOOR");
+	FILE *f = file ? fopen(file, "r") : NULL;
+	if (!f) { printf("atlas: no CYBERWORLD_FLOOR to read\n"); return; }
+	char row[256];
+	for (int y = 4; y < MAP_H - 4 && fgets(row, sizeof row, f); ++y)
+		for (int x = 0; row[x] && row[x] != '\n' && x + 4 < MAP_W - 4; ++x) {
+			cell[y][x + 4] = row[x] != '.' && row[x] != ' ';
+			pad[y][x + 4] = row[x] == 'P';
+		}
+	fclose(f);
+	run_new(1);
+	memset(&layer, 0, sizeof layer);
+	layer.arena = layer.sig_room = layer.exit_room = -1;
+	NetLayout lay = { MAP_W, MAP_H, &cell[0][0], NULL, NULL, 0, NULL, 0, 0, 0, 0, 0, 1, &pad[0][0], NULL, 0, NULL, 0 };
+	memset(&tiles_stats, 0, sizeof tiles_stats);
+	if (!netmap_build(area, &lay)) { printf("atlas: the floor was not built\n"); return; }
+	int tw, th;
+	const uint16_t *tiles = netmap_last_tiles(&tw, &th);
+	const NetAreaDef *a = net_area_def(area);
+	uint32_t *px = area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
+	if (!px) return;
+	for (int i = 0; i < tw * th * 64; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
+	char path[600];
+	snprintf(path, sizeof path, "%s/hand_b%02d.bmp", dir, area);
+	save_bmp(path, px, tw * 8, th * 8);
+	snprintf(path, sizeof path, "hand_b%02d", area);
+	save_marked(dir, path, px, tw, th);
+	free(px);
+	printf("hand floor in area %d: breaks %d, nicks %d, seams %d, whole %d of %d\n", area, tiles_stats.breaks, tiles_stats.nicks, tiles_stats.seams, tiles_stats.whole, tiles_stats.picks);
+}
 
 /* An area's layers, a BN6 biome's or another game's (laid out by the rules
  * of the BN6 area it is like, docs/multirom/): every layout at depth 2,
@@ -512,6 +556,7 @@ int atlas_run(const char *spec) {
 	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
 	if (biomes[0] == 'x') { xrom_sources(dir, atoi(biomes + 1)); return 0; }
 	if (biomes[0] == 'a' && biomes[1] >= '0' && biomes[1] <= '9') { xrom_area(dir, atoi(biomes + 1), seeds); return 0; }
+	if (biomes[0] == 'h') { hand_floor(dir, atoi(biomes + 1)); return 0; }
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }

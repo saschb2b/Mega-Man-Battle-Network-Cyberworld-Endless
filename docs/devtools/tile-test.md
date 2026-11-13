@@ -104,6 +104,52 @@ Still far from clean, each a call of its own rather than the pick's:
   (288), **Seaside** (279), **BN4's and BN5's Undernet** (303, 248),
   **Nebula Area** (248): not looked into here.
 
+## A floor drawn by hand, and the original as the bar
+
+`CYBERWORLD_FLOOR=FILE build/host/cyberworld --headless --rom-dir ROMS
+--data-dir DIR --atlas OUT:hN` draws the floor FILE describes (rows of
+`.` void, `#` floor, `P` a pad's floor; at most some 24 by 18 panels, the
+tile map's size) in area N's tiles as it stands, no cell changed, as
+`hand_bNN.bmp`, its breaks marked in `seams_hand_bNN.bmp`
+(`src/dev/atlas.c`, `hand_floor`). It answers what an area's art can draw
+at all: a sheet of rectangles of every size, a sheet of walkways with their
+turns, ends and joins. The atlas also writes each original map's first tile
+layer alone (`src1_*.bmp`) beside the map as the game draws it.
+
+The originals themselves count no break: the strips are theirs. So the bar
+for a generated layer is 0, and what a layer counts is what it draws that
+no map of its area shows. Two things keep layers from it (13 November
+2026, measured on hand-drawn floors of BN4's Park and Town Areas):
+
+- **The learner's reading of a map.** BN4's Park Area's one platform
+  lies whole on the first tile layer, but a conveyor crosses over its
+  middle and the walls give it as two halves: each half ended, under the
+  conveyor, in an edge that is none, so "a room's end" was learned as plain
+  floor cut off, and the wall standing 8 pixels over its upper edges failed
+  the pixel test. Read as one platform (`TILES_UNDER`, `TILES_INNER_WALLS`)
+  and laid panel by panel ([whole panels](../world/level-design/generator.md)),
+  a rectangle four panels wide or more comes out as BN4's platform, three
+  of its four corners exact. Town Area 3's lower paths pass under its
+  floors the same way, and its two maps measure side faces of 17 and 10
+  pixels, so the walkway lattice of Town Area 1 lends its panels nothing.
+- **The layouts.** Park's platform is four panels wide; a room three wide,
+  a way two wide beside a room, an L of two rooms have no tiles in BN4.
+  Town's maps have walkways one wide and squares of three by three joined
+  at the middles of their sides; a walkway's dead end, a square of another
+  size and two squares side by side have none. Laying whole panels changes
+  nothing there: over all 39 areas it left the breaks where they were
+  (116.8 per 100 panels with it on everywhere), which is the measure of
+  how much of the rest is layout.
+
+Whole panels are on where they were checked by eye (`TILES_WHOLE`): Park
+Area (breaks 304 to 263 per 100 panels) and BN5's Oran Area (529 to 438).
+Elsewhere they are off: the Graveyard's slabs lost their upper rims to
+them (40 to 59), BN4's ACDC Area gained breaks (249 to 272), BN5's ACDC,
+Sky and Robot Control too. In Park and Oran the older counts rose with
+them (seams and nicks, where a panel laid whole meets tiles picked one by
+one): the baseline was **not** rewritten for it, and `build.py tiles`
+names those layers until the layouts' question is settled.
+
 ## The seams, and what was tried against them
 
 The seams are counted only where a tile is partly drawn: two whole tiles

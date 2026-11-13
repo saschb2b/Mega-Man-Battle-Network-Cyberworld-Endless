@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T00:55:00Z
+* **Update**: devtools/tile-test.md (a floor drawn by hand in an area's tiles, the atlas's `hN`; the originals count no break, so the bar is 0; what keeps layers from it, measured on BN4's Park and Town Areas: the learner's reading of a map and the layouts; whole panels on for Park and Oran alone, and where they made things worse), world/level-design/generator.md (the maps' panels laid whole where an area asks, `TILES_WHOLE`), code/net-and-map.md (`panels.c`).
