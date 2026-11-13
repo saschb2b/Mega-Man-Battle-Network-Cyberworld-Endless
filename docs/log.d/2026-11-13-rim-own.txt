@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T20:48:16Z
+* **Update**: devtools/tile-test.md (Each area's laying: a room's rim takes no piece of a walkway's panel, CopyBot's pools framed in their stone).

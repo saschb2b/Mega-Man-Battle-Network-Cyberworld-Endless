@@ -316,6 +316,20 @@ static bool ends_here(const Laid *d, int A, int B) {
 	return false;
 }
 
+/* Whether the book's panel c may lend the floor's panel i pieces at all. */
+static bool lends_pieces(const TileGrid *g, const Laid *d, const TilePanels *p, int c, size_t i) {
+	int A = d->A0 + (int)(i % d->w), B = d->B0 + (int)(i / d->w);
+	if (p->panel[c].rare || (g->single && two_layers(p, &p->panel[c]))) return false;
+	/* (thin books, a road's: its ends are arrows' heads, wider than their
+	 * panel; an end and the panels round it lend nothing where the floor
+	 * has no end) */
+	if (rule(g, LAY_NO_END_ART) && ends_near(p, c) && !ends_here(d, A, B)) return false;
+	/* (LAY_RIM_OWN: a room's rim is no walkway, and a panel with platform
+	 * floor beside it takes no piece of one with none. CopyBot Comp's pools
+	 * stood in the walkways' pattern, where its maps frame them in stone) */
+	return !(g->rules & LAY_RIM_OWN && d->shape[i] >> 18 & 0x1FF && !(p->panel[c].shape >> 18 & 0x1FF));
+}
+
 static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Laid *d, size_t i, bool loose) {
 	int A = d->A0 + (int)(i % d->w), B = d->B0 + (int)(i / d->w), at = d->pieced[i];
 	unsigned left = 0xFFFF;
@@ -330,11 +344,7 @@ static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Lai
 			if (!d->lend[k]) continue;
 			for (int c = 0; c < p->n + p->npart; ++c) {
 				unsigned like = slots_like(d->view, &p->panel[c], d->shape[i], false) & left;
-				if (!like || p->panel[c].rare || (g->single && two_layers(p, &p->panel[c]))) continue;
-				/* (thin books, a road's: its ends are arrows' heads, wider
-				 * than their panel; an end and the panels round it lend
-				 * nothing where the floor has no end) */
-				if (rule(g, LAY_NO_END_ART) && ends_near(p, c) && !ends_here(d, A, B)) continue;
+				if (!like || !lends_pieces(g, d, p, c, i)) continue;
 				int cont = suits(d, k, c, A, B, true, &alike), score = cont * 64 + __builtin_popcount(like) * MOST + alike;
 				/* (off the floor, only as a map lays it beside what is laid) */
 				if (!cont && !loose && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) continue;

@@ -527,7 +527,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * own; where an area has none, a walkway's end at a room is no piece of
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
-	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_PADS_WHOLE | LAY_ROOMS_OVER));
+	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_RIM_OWN | LAY_PADS_WHOLE | LAY_ROOMS_OVER));
 	grid.roads = L->road;
 	grid.nroads = L->nroads;
 	/* (where its pads' panels alone are laid whole, LAY_PADS_WHOLE, the rest is picked as before) */

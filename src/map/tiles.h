@@ -142,6 +142,7 @@ enum { LAY_NO_END_ART = 1, LAY_PLAIN_RUNS = 2, LAY_KEEP_TO_WHOLE = 4, LAY_AGAIN 
  * place, where tile by tile a pad of another size than its map's came out
  * as a jumble of frame and walkway. */
 #define LAY_PADS_WHOLE 64
+#define LAY_RIM_OWN 32   /* a panel with platform floor beside it takes no piece of a walkway's panel: a room's rim has art of its own (panels_lay.c) */
 /* ... its rooms stand over the walkways beside them (BN4's squares 17
  * pixels tall, its walkways 10): where both draw a tile, on the room's
  * panel, beside it or under its faces, the room's goes in front (tilemap.c). */
