@@ -67,10 +67,12 @@
 #define SOUL_LIST0_FIRST   0x45          /* BN6's list-0 number of the first Soul's sprite (BN5's 7), past what BN6 reads through list 0, */
 #define SOUL_LIST0_ART_FIRST 0x4B        /* ... of the first sprite their code draws that BN6 has none of (tools/xsoul.py's ART_FIRST), */
 #define SOULS_LIST0_ENTRIES 0x60         /* ... the list's words (list 0 is the Souls' alone: the tracks' allocations, issue #82) */
+#define SOUL_LIST0_BN4     0x5F          /* ... of BN4's united Soul's sprite, the list's last (tools/xsoul.py's ART_LAST one under it) */
 #define SOUL_EFFECT_FIRST  0xC0          /* BN6's grown effect ids the Souls' code takes (xvirus_grow.h's 256), to: */
 #define SOUL_EFFECT_LAST   0xCF
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
 #define SOUL_FACE_FIRST    0x17          /* BN6's emotion window face of the first Soul's, past BN6's 23 (0x0801CD08) */
+#define SOUL_FACE_BN4      0x1D          /* ... of BN4's united Soul's, past BN5's six (SOULS_FACES and SOULS_FACE_PALS hold 32) */
 #define SOULS_FACE_TILES   (SOULS_ART + 0xE000u)   /* the Souls' faces, 0x100 bytes each (BN5's 0x087417FC on), past the attacks' sprites */
 #define SOULS_DIGITS       (SOULS_ART + 0xE600u)   /* ... and BN5's emotion window's digits, 0x80 bytes each (0x08741DFC on), to: */
 #define SOULS_DIGITS_END   (SOULS_ART + 0xEB80u)
@@ -82,5 +84,14 @@
 #define SOULS_COLONEL_INFO_PAL (SOULS_COLONEL_ART + 0x9C0u) /* ... its palette, */
 #define SOULS_COLONEL_NAME_PAL (SOULS_COLONEL_ART + 0x9E0u) /* ... and the name line's, 0x20 bytes each, to */
 #define SOULS_COLONEL_ART_END (SOULS_COLONEL_ART + 0xA00u)
+
+/* ---- BN4's Souls' look: one room, the united Soul's (free_space.h's FREE_BN4_SOUL_LOOK; soullook.c, docs/multirom/bn4-souls.md,
+ * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time ---- */
+#define SOULS4_SPRITE      (FREE_BN4_SOUL_LOOK + 0x0000u)   /* his sprite, BN4's list 0 by his form, to: */
+#define SOULS4_SPRITE_END  (FREE_BN4_SOUL_LOOK + 0xA800u)
+#define SOULS4_PICTURE     (FREE_BN4_SOUL_LOOK + 0xA800u)   /* kept for his unison's picture (BN4's list 8 by his form, 1,894 bytes at most), to: */
+#define SOULS4_FACE        (FREE_BN4_SOUL_LOOK + 0xB000u)   /* his face's tiles, 0x100 bytes (BN4_SOUL_FACES), */
+#define SOULS4_DIGITS      (FREE_BN4_SOUL_LOOK + 0xB100u)   /* ... and BN4's count's digits, six of 0x80 bytes, 5 to 0 (BN4_FACE_DIGITS), to */
+#define SOULS4_END         (FREE_BN4_SOUL_LOOK + 0xB400u)
 
 #endif

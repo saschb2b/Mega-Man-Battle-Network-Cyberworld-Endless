@@ -87,6 +87,7 @@ FREE_SONGS             +0x1A0000  +0x260000  -    xsong.c                   mult
 FREE_XNAVIS            +0x260000  +0x2A0000  -    xnavi.c                   multirom/overview.md        other games' Navis and map objects
 FREE_BACKDROPS         +0x2A0000  +0x2E0000  -    xbackdrop.c               multirom/overview.md        other games' battle backgrounds
 FREE_FLAME             +0x2E0000  +0x2E1000  end  xnavi.c                   game/meta/bn6-darkchips.md  BN6's own flame of darkness
+FREE_BN4_SOUL_LOOK     +0x2E1000  +0x2EC400  end  soullook.c                multirom/bn4-souls.md       BN4's united Soul's look, one room for whichever Soul is united (the owner's call): his sprite (the largest RollSoul's 42,324 bytes), his unison's picture, his face, and BN4's count's digits
 FREE_MAP_BACKDROPS     +0x2F0000  +0x320000  end  xbackdrop.c               multirom/overview.md        other games' net maps' backdrops
 FREE_BN4_CHIP_SPRITE   +0x320000  +0x32F000  end  xnavi_bn4_chip.c          multirom/bn4-chips.md       a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left
 

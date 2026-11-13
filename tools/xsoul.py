@@ -159,7 +159,7 @@ SPRITE_SETUPS = (0x0800F198, 0x08018926)
 # sprite list 0 the Souls' alone (its words as BN6 reads them through it to 0x44, the Souls' full sprites 0x45-0x4A, what
 # their code draws from soul_room.h's SOUL_LIST0_ART_FIRST up), effects 0xC0-0xCF, and one BN6 song slot a BN5 sound
 ART_LIST = 0                # the list the Souls' sprites BN6 has none of are listed in, ...
-ART_FIRST, ART_LAST = 0x4B, 0x5F   # ... at these numbers (soul_room.h's SOUL_LIST0_ART_FIRST, SOULS_LIST0_ENTRIES - 1)
+ART_FIRST, ART_LAST = 0x4B, 0x5E   # ... at these numbers (soul_room.h's SOUL_LIST0_ART_FIRST, one under SOUL_LIST0_BN4, BN4's Soul's)
 # ... the sprites copied so far in the order they took their numbers (BN5's list and number), placed first so that a
 # number once given stays (tools/bn5_objects.py fixes the flash kinds' by them, and the tracks merge on them); a sprite a
 # later walk meets is numbered after them

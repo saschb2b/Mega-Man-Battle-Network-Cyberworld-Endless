@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "bn4.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"
@@ -13,6 +14,7 @@
 #include "emu.h"
 #include "rom.h"
 #include "soul_room.h"
+#include "soulbn4.h"
 #include "soulcode.h"
 #include "soullife.h"
 #include "xnavi.h"
@@ -24,6 +26,9 @@
 #define FACE_SIZE 0x100      /* a face's tiles (the emotion window's 0x06017680, 0x0801CBCC) */
 #define DIGIT_SIZE 0x80      /* a digit's (its 0x06017780) */
 #define DIGITS 11            /* 0-10 (0xA - the count, 0x0801CBF6) */
+#define BN4_DIGITS 6         /* BN4's: 5-0 (5 - the count, BN4_FACE_STEP) */
+#define BN4_LIST_SOULS 0     /* BN4's list of MegaMan's sprites: a Soul's at its form (BN4_STATS_SPRITES) */
+#define ARM_ROW_MEGAMAN 0    /* BN6's list 0's first arm row, MegaMan's own */
 #define PAL_SIZE 0x20
 #define PALETTE_SOUL 0       /* BN5's palette of a Soul's sprite (0x0800DD8C), */
 #define PALETTE_CHAOS 2      /* ... in Chaos Unison */
@@ -34,6 +39,7 @@
 
 static int breaks;
 static bool done;
+static bool done4;               /* BN4's Souls' look placed (BN4's ROM read): the room, the digits, the tables' entries */
 static uint32_t flash_spawner;   /* BN5's arm flash spawner, moved (its Thumb bit set) */
 
 /* ---- the Soul a side shows ---- */
@@ -58,6 +64,10 @@ static bool chaos_of_obj(uint32_t obj) {
 }
 
 static bool a_soul(int soul) { return soul >= SOUL_FIRST && soul < SOUL_FIRST + SOULS; }
+/* ... one of BN4's whose look stands in the room (soul_room.h's SOULS4_*) */
+static bool a_soul4(int soul) { return done4 && soulbn4_k(soul) >= 0; }
+/* a Soul drawn as its own game draws it: BN5's six, or BN4's in the room (its palette 0 too: BN4's unison writes 0, 0x080EBB9E) */
+static bool looked(int soul) { return a_soul(soul) || a_soul4(soul); }
 
 /* ---- the sprite and its palette ---- */
 
@@ -73,9 +83,11 @@ static int drawn_side(uint32_t obj) {
 static HookAct sprite_read(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_partner(r->r[5]) ? soul_of_obj(r->r[5]) : soul_of(drawn_side(r->r[5]));
-	if (r->r[1] != BN6_FORM_PROXY || !a_soul(soul)) return HOOK_CONTINUE;
+	if (r->r[1] != BN6_FORM_PROXY || !looked(soul)) return HOOK_CONTINUE;
 	int k = soul - SOUL_FIRST + ((breaks & SOULLOOK_BREAK_SPRITE) ? 1 : 0);
-	r->r[2] = (uint32_t)(SOUL_LIST0_FIRST + k % SOULS);
+	/* (BN4's: the room's sprite, the united Soul's; broken, BN5's first) */
+	if (a_soul4(soul)) r->r[2] = (breaks & SOULLOOK_BREAK_SPRITE) ? SOUL_LIST0_FIRST : SOUL_LIST0_BN4;
+	else r->r[2] = (uint32_t)(SOUL_LIST0_FIRST + k % SOULS);
 	r->r[12] = BN6_FORM_SPRITE_BACK | 1;
 	return HOOK_JUMP;
 }
@@ -87,7 +99,7 @@ static uint32_t soul_palette(uint32_t obj) {
 /* (0x0801002C's read of the palettes by the form, r0 the form, r5 MegaMan) */
 static HookAct palette_read(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
+	if (r->r[0] != BN6_FORM_PROXY || !looked(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
 	r->r[4] = soul_palette(r->r[5]);
 	r->r[12] = BN6_FORM_PALETTE_BACK | 1;
 	return HOOK_JUMP;
@@ -97,7 +109,7 @@ static HookAct palette_read(HookRegs *r, void *user) {
  * partner's by his own Soul (two MegaMen a side: his form and look his own) */
 static HookAct palette_read2(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[0] != BN6_FORM_PROXY || !a_soul(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
+	if (r->r[0] != BN6_FORM_PROXY || !looked(soul_of_obj(r->r[5]))) return HOOK_CONTINUE;
 	r->r[0] = soul_palette(r->r[5]);
 	r->r[12] = BN6_FORM_PALETTE2_BACK | 1;
 	return HOOK_JUMP;
@@ -152,8 +164,8 @@ static HookAct image_deco(HookRegs *r, void *user) {
 static HookAct face(HookRegs *r, void *user) {
 	uint32_t owner = hook_read32(r->r[5] + BN6_FACE_OWNER);
 	int side = owner ? side_of(owner) : megaman_side(), soul = owner ? soul_of_obj(owner) : soul_of(side);
-	if (r->r[4] != BN6_FORM_PROXY || !a_soul(soul)) return HOOK_CONTINUE;
-	r->r[6] = (uint32_t)(SOUL_FACE_FIRST + soul - SOUL_FIRST);
+	if (r->r[4] != BN6_FORM_PROXY || !looked(soul)) return HOOK_CONTINUE;
+	r->r[6] = a_soul4(soul) ? SOUL_FACE_BN4 : (uint32_t)(SOUL_FACE_FIRST + soul - SOUL_FIRST);
 	r->r[3] = hook_read8(owner ? soul_field_of(owner, BN6_SOUL_TURNS) : soul_field(side, BN6_SOUL_TURNS));
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
@@ -170,8 +182,9 @@ static HookAct counter_shown(HookRegs *r, void *user) {
 /* (the count's digit, r4 the face: a Soul's from BN5's digits, drawn in its palette) */
 static HookAct digits(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[4] < SOUL_FACE_FIRST || r->r[4] >= SOUL_FACE_FIRST + SOULS) return HOOK_CONTINUE;
-	r->r[1] = SOULS_DIGITS;
+	if (r->r[4] < SOUL_FACE_FIRST || r->r[4] > SOUL_FACE_BN4) return HOOK_CONTINUE;
+	/* (BN6 reads the digit at 10 - the count; BN4's six are 5 to 0, so its first sits five digits in) */
+	r->r[1] = r->r[4] == SOUL_FACE_BN4 ? SOULS4_DIGITS - (DIGITS - BN4_DIGITS) * DIGIT_SIZE : SOULS_DIGITS;
 	r->r[12] = BN6_FACE_DIGITS_NEXT | 1;
 	return HOOK_JUMP;
 }
@@ -317,6 +330,49 @@ static void faces_copy(void) {
 	emu_write32(BN6_FACE_PALS_REF, SOULS_FACE_PALS);
 }
 
+/* ---- BN4's Souls' look: one room, the united Soul's (soul_room.h's SOULS4_*; docs/multirom/bn4-souls.md, The shared room) ---- */
+
+/* The room filled with BN4's k-th moved Soul's look: his sprite (BN4's list 0 by his form), his face's tiles and its palette
+ * (the face his form + 4, BN4_FACE_GET). False, the room as it was, where his sprite cannot be read or does not fit, or
+ * Red Sun's ROM has no face of his (Blue Moon's six, BN4_SOUL_FACE_COUNT). */
+static bool room4_fill(int k) {
+	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
+	SoulBn4 soul;
+	if (!soulbn4_read(k, &soul) || soul.form > BN4_SOUL_FACE_COUNT) return false;
+	uint32_t len;
+	uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, BN4_LIST_SOULS, soul.form, &len);
+	if (!d || len > SOULS4_SPRITE_END - SOULS4_SPRITE) {
+		fprintf(stderr, "soullook: BN4's Soul %d's sprite cannot be read, or does not fit its room\n", soul.form);
+		free(d);
+		return false;
+	}
+	emu_write(SOULS4_SPRITE, d, len);
+	free(d);
+	emu_write(SOULS4_FACE, x->data + (BN4_SOUL_FACES - BUS) + FACE_SIZE * (uint32_t)(soul.form - 1), FACE_SIZE);
+	emu_write(SOULS_FACE_PALS + PAL_SIZE * SOUL_FACE_BN4, x->data + (BN4_FACE_PALS - BUS) + PAL_SIZE * (uint32_t)(soul.form + BN4_FACE_SOUL - 1), PAL_SIZE);
+	return true;
+}
+
+/* BN4's Souls' look as the core starts, after BN5's (the grown tables are theirs): BN4's digits, the room's sprite listed at
+ * its list-0 number with MegaMan's own arm row (BN4 keeps no arm points by sprite: none of BN5's reader's instructions are
+ * in its ROM, so its own are not known), its face at its number; then the room filled. One Soul is moved, so the room is
+ * his from here; a second fills it as he unites. Nothing where BN4's ROM is not read. */
+static void look4_install(void) {
+	const XRom *x = &XR[XROM_BN4_RED_SUN_US];
+	if (!x->data || !x->layout) return;
+	emu_write(SOULS4_DIGITS, x->data + (BN4_FACE_DIGITS - BUS), BN4_DIGITS * DIGIT_SIZE);
+	if (!room4_fill(0)) return;
+	emu_write32(SOULS_FACES + 4u * SOUL_FACE_BN4, SOULS4_FACE);
+	emu_write8(SOULS_ARM_OF + SOUL_LIST0_BN4, ARM_ROW_MEGAMAN);
+	claims_begin(SOULCODE_CLAIMS);
+	emu_write32(SOULS_LIST0 + 4u * SOUL_LIST0_BN4, SOULS4_SPRITE);
+	claims_end();
+	done4 = true;
+}
+_Static_assert(SOULS4_END <= FREE_BN4_SOUL_LOOK_END && SOUL_LIST0_BN4 < SOULS_LIST0_ENTRIES && SOUL_FACE_BN4 == SOUL_FACE_FIRST + SOULS &&
+	4u * (SOUL_FACE_BN4 + 1) <= SOULS_FACES_END - SOULS_FACES && PAL_SIZE * (SOUL_FACE_BN4 + 1) <= SOULS_FACE_PALS_END - SOULS_FACE_PALS,
+	"BN4's Soul's look past its room or the Souls' grown tables (soul_room.h)");
+
 /* a Soul's way into the proxy and out of it: BN5's entries by the Soul (0x0800F030, 0x0800F094), moved, 0 where BN5's
  * is its empty routine */
 static void routes(void) {
@@ -361,11 +417,12 @@ bool soullook_install(int brk) {
 		emu_write(SOULS_PHASES, words, sizeof words);
 		routes();
 		ok = hooks_set();
+		if (ok) look4_install();
 	}
 	claims_end();
 	done = ok;
 	breaks = brk;
-	printf("soullook: the Souls' look%s%s\n", ok ? ": their sprites, palettes, image, faces and flashes" : " NOT placed whole",
-		brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
+	printf("soullook: the Souls' look%s%s%s\n", ok ? ": their sprites, palettes, image, faces and flashes" : " NOT placed whole",
+		done4 ? "; BN4's Soul's in its room" : "", brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
 	return ok;
 }
