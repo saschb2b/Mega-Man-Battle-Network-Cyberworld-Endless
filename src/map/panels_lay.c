@@ -813,6 +813,7 @@ int panels_lay(const TileBook *books, int nbooks, const TileSeams *seams, const 
 	for (size_t i = 0; i < n; ++i) {
 		bool is_floor = (d.shape[i] >> 18 | d.shape[i] >> 9) & 0x10;
 		if (!is_floor || (middles && d.shape[i] == PANEL_SHAPE(0x1FF, 0, 0))) continue;
+		if (g->rules & LAY_PADS_WHOLE && !(d.shape[i] & 0x10)) continue;   /* (its pads alone) */
 		if (!lay_one(books, nbooks, g, &d, i)) lay_pieces(books, nbooks, g, &d, i, false);
 		if (d.pieced[i] >= 0 && d.apart[i]) lay_more(&d, i);
 	}

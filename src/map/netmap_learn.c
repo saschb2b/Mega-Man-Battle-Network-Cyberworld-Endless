@@ -47,7 +47,7 @@ static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	/* (its own map's pads alone, TILES_PADS_ALONE: its other maps lend all) */
-	uint32_t styles = (own ? na->styles : na->styles & ~TILES_PADS_ALONE) | (netmap_whole_forced || na->lay & LAY_WHOLE ? TILES_WHOLE : 0);
+	uint32_t styles = (own ? na->styles : na->styles & ~TILES_PADS_ALONE) | (netmap_whole_forced || (na->lay | netmap_rules_forced) & (LAY_WHOLE | LAY_PADS_WHOLE) ? TILES_WHOLE : 0);
 	if (L->nbooks < MAX_BOOKS && aligned(grid_of, src)) {
 		tiles_learn(src, styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, &L->book[L->nbooks++]);
 		seams_add(&L->seams, src, na->bg_in_map);

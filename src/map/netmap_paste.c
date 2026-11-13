@@ -130,6 +130,11 @@ static void paste_pad(const Learned *L, uint16_t *map, int tw, int th, int mx, i
 		int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
 		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_tile_ok(L, mx, my, px - tw * 4, py - th * 4, floor)) continue;
 		map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
+		/* (and nothing over it: what the classes picked for the second
+		 * layer there lay over the stamp, Seaside's pads a jumble of their
+		 * own frame and their other pads'. No area's pad has art of its own
+		 * on that layer; Central's maps have a warp's panel there) */
+		map[(size_t)tw * th + (size_t)(py / 8) * tw + px / 8] = 0;
 		if (nm_last.pasted) nm_last.pasted[(size_t)(py / 8) * tw + px / 8] |= NETMAP_PASTED_PAD;
 	}
 }
