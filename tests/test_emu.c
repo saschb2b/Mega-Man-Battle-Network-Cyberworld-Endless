@@ -992,8 +992,11 @@ static void quiet_players(void) {
 
 /* As the engine keeps IWRAM's copy of the game's code patched: the
  * engine's bytes made where the game's own are, a state saved with the
- * game's own there (another core reads them so), the engine's made again
- * as one is loaded, and bytes that read neither left as they are */
+ * game's own there (another core reads them so), a checkpoint's queued
+ * state too, the engine's made again as one is loaded, and so where the
+ * state holds another build's patch (issue #482: a checkpoint of 0.20.0's
+ * continued by 0.21.0 kept its hit gate's call to where 0.20.0's code
+ * lay, and the game stood still at the first hit) */
 #define KEPT (IWRAM + 0x200)
 #define KEPT_STATE "build/host/test_emu.state"
 
@@ -1022,11 +1025,20 @@ static void kept_ram(void) {
 	CHECK(state_word(KEPT) == 0x11111111, "the state holds %08x, not the game's own 11111111", state_word(KEPT));
 	emu_write32(KEPT, 0x33333333);
 	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x22222222, "the patch after the state loaded: %08x", emu_read32(KEPT));
-	/* (another's bytes there: neither the game's nor the patch's) */
+	/* (a checkpoint's state, written by the save queue) */
+	CHECK(emu_save_state_queued(KEPT_STATE), "a state queued");
+	save_queue_wait();
+	CHECK(emu_read32(KEPT) == 0x22222222, "the patch after the queued save: %08x", emu_read32(KEPT));
+	CHECK(state_word(KEPT) == 0x11111111, "the queued state holds %08x, not the game's own 11111111", state_word(KEPT));
+	/* (another build's patch there, in a state that build saved: neither
+	 * the game's own nor this build's; saved as it is, and this build's
+	 * once the state is loaded) */
 	emu_write32(KEPT, 0x44444444);
-	CHECK(emu_save_state(KEPT_STATE) && state_word(KEPT) == 0x44444444 && emu_read32(KEPT) == 0x44444444, "another's bytes saved as %08x, left %08x",
+	CHECK(emu_save_state(KEPT_STATE) && state_word(KEPT) == 0x44444444 && emu_read32(KEPT) == 0x22222222, "another's bytes saved as %08x, then %08x",
 		state_word(KEPT), emu_read32(KEPT));
-	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x44444444, "another's bytes loaded made %08x", emu_read32(KEPT));
+	emu_write32(KEPT, 0x33333333);
+	CHECK(emu_load_state(KEPT_STATE) && emu_read32(KEPT) == 0x22222222, "a state with another build's patch loaded: %08x, not this build's 22222222",
+		emu_read32(KEPT));
 	remove(KEPT_STATE);
 }
 

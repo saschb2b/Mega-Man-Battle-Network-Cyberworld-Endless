@@ -168,7 +168,9 @@ ROM, which stops a hit on the submerged as BN6's stops one on the
 invisible but for Elec), each in the routines' image in ROM (`0x081D6000` on),
 which the game copies to IWRAM as it powers on, and kept so in RAM
 (`emu_keep`): a state is saved with BN6's own bytes there, so it loads
-in any build, and they are made the engine's again as one is loaded.
+in any build, and they are made the engine's again as one is loaded,
+whatever it holds there (a checkpoint of 0.20.0's held that build's
+calls, [Hooks](hooks.md), States and resets).
 BN6's own battles run as they did: its panels take the element hit's
 steps in the same cycles (but a Wood hit on a conveyor, three more),
 their flags are read from the ROM's table (a few wait states a read),

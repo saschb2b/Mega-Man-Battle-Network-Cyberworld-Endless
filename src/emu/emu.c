@@ -461,14 +461,19 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
 static int nkept;
 
-/* each patch's bytes made the engine's (or, `own`, the game's again) where
- * they read the other; bytes that read neither are left as they are */
+/* Each patch's bytes made the engine's, whatever they read: the game's
+ * own, or another build's patch, which a state that build saved may hold
+ * (a checkpoint from before the game's own were saved there, its hit
+ * gate's calls going where that build's code lay: issue #482, the game
+ * stood still at the first hit). `own`: the game's again where they read
+ * the engine's, for a state's save; bytes that read neither stay. */
 static void keep_put(bool own) {
 	for (int i = 0; i < nkept; ++i) {
-		const uint8_t *from = own ? kept[i].now : kept[i].was, *to = own ? kept[i].was : kept[i].now;
+		const uint8_t *to = own ? kept[i].was : kept[i].now;
 		bool there = true;
-		for (uint32_t k = 0; there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == from[k];
-		for (uint32_t k = 0; there && k < kept[i].len; ++k) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
+		for (uint32_t k = 0; own && there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == kept[i].now[k];
+		for (uint32_t k = 0; there && k < kept[i].len; ++k)
+			if ((uint8_t)core->rawRead8(core, kept[i].addr + k, -1) != to[k]) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
 	}
 }
 
@@ -529,7 +534,12 @@ bool emu_save_state_queued(const char *path) {
 	 * memory, and leaves the fields it does not use as it found them) */
 	uint8_t *bytes = calloc(1, want);
 	struct VFile *vf = bytes ? VFileFromMemory(bytes, want) : NULL;
+	/* (with the game's own bytes where the engine keeps RAM patched, as
+	 * emu_save_state saves them: a checkpoint is the state another build
+	 * loads) */
+	keep_put(true);
 	bool ok = vf && mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA | SAVESTATE_RTC);
+	keep_put(false);
 	off_t n = ok ? vf->seek(vf, 0, SEEK_CUR) : 0;
 	if (vf) vf->close(vf);
 	if (ok && n > 0 && (size_t)n < want) {

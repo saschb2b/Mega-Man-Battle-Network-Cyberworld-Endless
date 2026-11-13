@@ -121,9 +121,11 @@ bool emu_snapshot_load(void *bytes, size_t size);
  * ROM image the engine patched the same way (IWRAM's routines, copied as
  * the game powers on): `len` bytes (64 at most) at `addr`, the game's own
  * `was` and the engine's `now`. Made the engine's now and after each state
- * is loaded, where they read the game's own; a state is saved with the
- * game's own there, so it holds the game's RAM and loads in any build,
- * with the patch or without. False where there is no core or no room. */
+ * is loaded, whatever they read: a state another build saved may hold that
+ * build's patch, which calls where its code lay (issue #482). A state's
+ * file is saved with the game's own there, so it holds the game's RAM and
+ * loads in any build, with the patch or without. False where there is no
+ * core or no room. */
 bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len);
 
 /* Stereo 16-bit samples at the given rate, pulled by the audio device.
