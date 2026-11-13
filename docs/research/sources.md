@@ -396,6 +396,28 @@ Advance list), against the ROM:
   [BN4's chips in a run](../multirom/bn4-chips.md), the owner's call 13,
   which leaves it out of a run.
 
+## BN4's Park Area: its orange and yellow paths (13 November 2026)
+
+The owner asked for all of a map's "DNA" in a layer, "e.g. the yellow
+parts" of Park Area 1. Whether they are conveyors decides what a layer may
+do with them.
+
+- **In the map's data they are plain floor** (verified: Park Area 1's
+  coordinate data decoded, [BN4 Red Sun's tables](../rom/bn4.md), Park
+  Area 1's coordinate data). No trigger, height or priority cell lies on
+  them, only the walls that ring them, as round the pink walkways; and no
+  cell of the map has BN6's arrow panels' values, which carry MegaMan in
+  BN6 and BN5.
+- **In play: assumed the same, not seen.** No state of BN4 in Park Area is
+  at hand. Three web searches (Park Area with conveyor, moving walkway,
+  one-way path; The Rockman EXE Zone's map pages) returned nothing that
+  names such a thing there; the pages they pointed to, its
+  [Map Guide](https://therockmanexezone.com/wiki/Map_Guide_(MMBN4)) among
+  them, were not read through. A player who knows BN4's Park Area settles
+  it in a sentence.
+- **What climbs to its platform is a ramp**, 208 slope cells in the
+  heights' section; an earlier note here called it a conveyor.
+
 ## The Battle Lab (11 November 2026)
 
 For [the Battle Lab](../game/battle-lab.md):

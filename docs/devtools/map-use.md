@@ -127,6 +127,24 @@ The first step is taken ([the tile test](tile-test.md), The art told
 apart by its floor): each pixel of a floor's art now carries the panel it
 belongs to, and floor of another kind has art of its own.
 Whether a layer should have it is a question for
-[the generator](../world/level-design/generator.md) and the owner: what
-Park's yellow paths do in BN4 is not looked up yet, and a path that moves
-MegaMan there is more than tiles.
+[the generator](../world/level-design/generator.md) and the owner. Park's
+orange and yellow paths are plain floor in the map's data, and assumed so
+in play ([Sources](../research/sources.md), BN4's Park Area): a second
+look of walkway, which BN4 lays as long straight runs with rounded bends
+and striped joints, mostly towards its exits, changing to pink end to end.
+So a layer can carry them without a new rule of play, and without a new
+layout: some of its walkways drawn as roads. Which ones is the design:
+
+- **The way.** The walkways of the layer's way from arrival to exit as
+  roads, the side paths pink: BN4's own habit, and a hint to the way that
+  costs no marker.
+- **By the seed.** Long straight runs as roads, wherever they lie: variety
+  alone.
+- **The lanes.** The arrow lanes' panels as roads
+  ([Arrow lanes](../world/level-design/arrow-lanes.md)): a road that
+  carries MegaMan is ours, not BN4's, as long as BN4's are plain.
+
+In the tiles, a road is a piece drawn apart with books of its own, as a
+platform is: the same map learned a second time with the road's colours as
+its walkway and the pink skipped, and its ends where it meets a walkway
+learned from the map's own.
