@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T23:50:00Z
-* **Update**: rom/bn4.md (Park Area 1's coordinate data: its paths plain floor, its triggers, its ramps), research/sources.md (BN4's Park Area: its orange and yellow paths, verified in the data, assumed in play, the searches that came up empty), devtools/map-use.md (what a layer could do with a road: three ways to choose which walkways, and how its tiles would be learned).

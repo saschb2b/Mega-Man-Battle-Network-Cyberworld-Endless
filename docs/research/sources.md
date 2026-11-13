@@ -3,7 +3,7 @@ type: Research
 title: "Sources"
 description: "Where to look for claims about BN6 and BN5 (romlab, the bn6f disassembly, community wikis, players), how a claim is verified, and the findings: Japanese names, link battles, Chip Trader codes, Liberation, BN4's reception, music, players' reports."
 tags: [research]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T02:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:50:00Z }
 ---
 
 # Sources

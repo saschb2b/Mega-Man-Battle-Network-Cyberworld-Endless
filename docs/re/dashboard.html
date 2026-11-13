@@ -81,8 +81,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-12",
-  "previous": "2026-11-11",
+  "updated": "2026-11-13",
+  "previous": "2026-11-12",
   "features": [
     {
       "name": "Net Square",
@@ -268,76 +268,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-12",
-      "what": "A side's first actor (xchips_bn4.h XC4_FIRST_ACTOR at FREE_BN4_CHIP_STUBS; bn6_forms.h BN6_BATTLE_PLAYER_SLOTS; docs/rom/bn4.md): BN4 0x0800C456's place for BugCurse, the first of a side's four actors in BN6's battle state."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "AirHoc's code moved (BN4's air hockey state 0x27 as BN6's grown attack family 0xFB; docs/rom/bn4.md, the collision data's panel as one word): the puck's move test's unaligned word load given a call-in to XC4_COLL_PANEL_WORD, the bounce's panel side read through a copy of the panel, MegaMan's strike animation 0x10 as BN6's 0x0C."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "AquaUp1-3 and GreenWd1-3 moved in Ligtnin's unit (xreg_bn4 MOVED 181-186 as 0x8C, off ROWS_WAIT); BN4's third-kind sprite step (bn4_chips.h BN4_T3_SPRITE_STEP 0x08014446) copied with the unit (xchiprecipe_bn4 UNIT_COPIED), as BN4's Navis copy it; the differential's panels= gives a BN4 spec's panels a type in both games (src/dev/xdiff.c panels_step)."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "AreaGrab's column search located and ended (bn6_panels.h BN6_GRAB_OWN_COLUMN 0x0800D5BA, BN6_GRAB_TURN 0x0800D5E4, BN6_GRAB_FOUND 0x0800D5E0; docs/rom/liberation.md): BN6's search for a column wholly the grabber's side's never returns where the field holds none, a Surrounded field after a Catack's drive; a hook ends it on the grabber's own column (src/emu/grab_search.c)."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "BigHamr1-3 moved as BN6's grown support routine 0x90 (xreg_bn4 MOVED 104-106; UNITS' BigHamr; the swing's 0xA2 and the quake's 0x122 in grown song slots 0x243 and 0x244); BN4's hammer named (bn4_chips.h BN4_T3_HAMMER 0x4A, BN4_HAMMER_STATES 0x080D698C, BN4_T4_HAMMER 0x26) and BN6's sprite place setter (bn6_battler.h BN6_SPRITE_PLACE_SET 0x0800307C); the differential's held MegaMan keeps his keys and his sprite's screen place at the battle's frame; GodHammr (215) waits in ROWS_WAIT on BN6's hit pass on a struck actor."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "BN4's computed powers located and moved (bn4.h BN4_CHIP_POWER 0x08019348, BN4_CHIP_POWERS 0x08019380 and its 51 entries, BN4_SP_POWER 0x0801949E, BN4_SP_TIMES 0x02037C80, BN4_BCD_TIME 0x08000BBC; docs/rom/bn4.md, Computed powers): BN4's reader is BN6's instruction for instruction, so its SP and DS routines move as a unit of their own into BN6's grown table past BN5's (0xCC on), the SP's deletion times none and its flag test the stub's, the DS's Hole BN6's panel 16. GutsMan's SP is the first chip on them (bn4_chip_gutsman_sp)."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "BN4's misc chips' code located and Repair moved (bn4_chips.h BN4_MISC_RUN 0x080EC972, BN4_MISC_ROUTINES 0x080EC9CC of 0x12, BN4_BATTLE_OBSTACLES 0x68, BN4_OBSTACLE_ADD 0x0800B230, BN4_REPAIR 0x0800C720; bn6_chips.h BN6_MISC_RUN 0x080ED6DC, BN6_MISC_ROUTINES 0x080ED730 of 7, its one word 0x080ED72C, BN6_BATTLE_OBSTACLES 0xA0, BN6_OBSTACLE_ADD 0x0800F614; docs/rom/bn4.md, docs/rom/chips-code.md): the two misc runs are one routine, the side's obstacles' list at another offset of the battle state."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "BN4's mood, emotion, its dark mood at an attack DarkChip's use and Full Synchro's aura located (bn4_battle.h BN4_MOOD_SET 0x0800F4DE, BN4_EMOTION 0x0800F49C, BN4_DARK_MOOD 0x0800D5C4, BN4_DARK_MOOD_PAST 0x0800D5D0, BN4_SYNCHRO_AURA 0x080CD276, BN4_AI_SYNCHRO 0x60; bn6_ai.h BN6_AI_SYNCHRO 0x5C; docs/rom/bn4.md). BN4's confusion after an attack DarkChip named (bn4_battle.h BN4_CONFUSE_STEP 0x0800AECA, BN4_CONFUSED_START), its source assumed, not traced."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "BN4's Program Advances formed (docs/multirom/bn4-chips.md, The Program Advances are formed; docs/rom/bn4.md: BN4_PA_CHECK 0x0801F390 with its two kinds' routines 0x0801F46A and 0x0801F4B2, BN4_BATTLE_DECK 0x0203BE80, BN4_PITRNG 0x080E9A36 with its launcher BN4_T4_PITRNG 0x6C, BN4_BOOMER_SPAWN 0x080D3430): BN4's recipes in BN6's grown list after BN5's, fourteen of nineteen formed, PitRng a unit of its own; 20 bn4_pa_* specs PASS, 26 mutations caught; PitHoky, P.Driver and DarkNeo wait on their parts."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "Boomer's code located and moved (bn4_chips.h BN4_BOOMER 0x080D344E, BN4_T3_BOOMERANG 0x32, BN4_BOOMERANG_FLIGHTS 0x080D31EC; docs/rom/bn4.md). Every sprite a chip unit draws is BN4's copied since, PanlSht's among them."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "CloudMan moved (docs/multirom/navis.md, CloudMan; docs/rom/liberation.md, BN5's Darkloids: src/emu/bn5_darkloids.h's BN5_CLOUD_SPAWN_37, BN5_CLOUD_5F_PARENT, BN5_CLOUD_STATES_37, BN5_CLOUD_ROW_LEFTOVER): cloudman_v1, cloudman_v1_keys and cloudman_sp PASS, five mutations caught; the third kind's 0x0B the Navis' copy (the chips' Bubbles helper gone); the generator renumbers every compare of a parent's CurAction and keeps a block's low byte where its code stores one of its own addresses (LOW_BYTE_KEPT); the Navis' shared art's fourth room (FREE_NAVI_SHARED_FOUR)."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "Counter's code and MegaMan's lock-out located (bn4_chips.h BN4_COUNTER 0x080CFE02, BN4_T3_COUNTER_HIT 0x17, BN4_CHIP_ATTACK_END 0x0800C9FC, BN4_AI_LOCKOUT 0x3A; bn6_chips.h BN6_CHIP_ATTACK_END 0x08011714, BN6_AI_LOCKOUT 0x19; docs/rom/bn4.md): the counter walks the other side's players by BN4's battle state's layout and reads the counter byte at BN4's place, three immediates of the recipe."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "GridMan moved (docs/multirom/navis.md, GridMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_GRID_SPAWN_C6, BN5_GRID_ATTACK_POOL, BN5_GRID_EFFECT_5F): seats 17-18 for Nebula's two (AI 43-44, ids 0x3EC-0x3F3, FREE_NEBULA_NAVIS in code-low's new front); gridman_v1, gridman_v1_keys and gridman_sp PASS, five mutations caught; the third kind's 0x95 and the fourth's 0x58 his copy (his 0xC6 and 0xC8 freed of BN4's chips by their reservation, PR #376); an effect drawing its Navi's own battle sprite named at its place (own_sprite); the comparator knows the new room (XN_NEBULA_ROOM) and the 0xC6's Z leftover."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "GutPnch1-3 moved as a Navi chip's unit (docs/multirom/bn4-chips.md, The Navi chips; docs/rom/bn4.md, GutPnch's code: BN4_GUTPNCH_OBJECT 0x080E90CC, BN4_GUTPNCH_NAVI 0x080C83F8, BN4_GUTPNCH_SPAWN 0x080C85C2, BN4_GUTPNCH_IN_SOUND 0x080E91BC, BN4_GUTPNCH_BITS 0x080C855A; BN6_CHIP_NAVI_IN 0x080E2C38 with its word 0x080E2B90): BN6's Navi object's last state through a stub that plays the unit's step-in sound; bn4_chip_gutpnch1-3 PASS, six mutations caught."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "LarkMan moved (docs/multirom/navis.md, LarkMan; docs/rom/navis.md, Nebula's LarkMan and GridMan: src/emu/bn5_nebula.h's BN5_LARK_SPAWN_B0, BN5_LARK_SPAWN_BA, BN5_LARK_AFTERIMAGE_WORD, BN5_AFTERIMAGE_SPAWN, BN5_AFTERIMAGE_LOAD): seat 17, Navi AI 43, ids 0x3EC-0x3EF; larkman_v1, larkman_v1_keys and larkman_sp PASS, five mutations caught; the third kind's 0xBA, 0xC7, 0xCB and the fourth's 0x28 (the swords' afterimage) his copy, the chips and the Souls calling into it; an afterimage spawn's word set to the sprite's BN6 place (xnavirecipe.py afterimage_sprites); the chips' LarkMan and GridMan units on the Navis' battle sprites; the comparator maps a moved Navi's battle sprite by xnavi_sprites.c's places."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "RollAro1-3 moved as a Navi chip's unit (docs/multirom/bn4-chips.md, The Navi chips; docs/rom/bn4.md, RollAro's code: BN4_ROLLARO_OBJECT 0x080E8FA0, BN4_ROLLARO_NAVI 0x080C8120, BN4_ROLLARO_ARROW 0x080C82CE, BN4_ROLLARO_SPAWN 0x080C83D4): her spawner's side in r3 through a wrapper of the unit's home (XChipUnit.side); bn4_chip_rollaro1-3 PASS, five mutations caught."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "ThunSoul moved into BN6's engine (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine; docs/rom/bn4.md, SandRing's family and ThunSoul's charged shot: src/emu/bn4_chips.h's BN4_CHIP_RING_FAMILY, BN4_RING_STATE, BN4_POWER_THUN, BN4_T3_RING, BN4_RING_KINDS): BN4's family 0x47 an attack unit at BN6's grown 0xD7 with its power attack copied, BN6's Soul 13 on the proxy form; soul_thun PASS held to BN4's trace, three mutations caught; bn4_soul_thun's FAIL at t1 recorded (the Soul's form, the look)."
-    },
-    {
-      "date": "2026-11-12",
-      "what": "WhitWeb's code located and moved (bn4_chips.h BN4_WHITWEB 0x080D4F20 with 0x080D4F2A and 0x080D4F34, BN4_T3_WEB 0x3D; docs/rom/bn4.md): three subfamilies' routines in one object's code, one unit with rows that share its block."
+      "date": "2026-11-13",
+      "what": "Park Area 1's coordinate data read (BN4 map 0x92:0; docs/rom/bn4.md): its orange and yellow paths carry no cell but their walls, no arrow panel's value in the map, a ramp of 208 slope cells climbs to its raised floor."
     }
   ],
   "experiments": [

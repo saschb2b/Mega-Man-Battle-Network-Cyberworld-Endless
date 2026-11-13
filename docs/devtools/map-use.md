@@ -3,7 +3,7 @@ type: Measurement
 title: "What the layers take from a map"
 description: "The atlas counts, per area, how much of each original map its generated layers ever draw (two thirds of the maps' tiles, two fifths of their different tile pictures) and draws each map with the unused tiles tinted; what stays unused, by kind."
 tags: [devtools, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:30:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:50:00Z }
 sources:
   - id: tool
     resource: "src/dev/lent.c, src/dev/atlas.c"
