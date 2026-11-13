@@ -107,6 +107,9 @@ typedef struct {
 /* SPEC's items into s (its defaults first): false, said on stderr, where
  * one is not understood or no foe is given */
 bool xd_spec_parse(const char *text, Spec *s);
+/* Whether a poke of the spec's may name BN4's chips' units' code (an address of BN4's): a spec of BN4's, or one of BN6's
+ * engine whose MegaMan holds a Soul of BN4's (souls6 past BN5's six: its charged shot's code is one of those units, soul_thun's) */
+bool xd_spec_bn4_code(const Spec *s);
 
 /* A folder written as its game's first, each chip owned (its mark its key XOR the game's), with no Regular chip or
  * TagChips: the folders' pointer and marks' at their eToolkit places (game's own read and write) */

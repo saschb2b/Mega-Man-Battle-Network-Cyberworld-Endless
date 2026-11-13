@@ -8,6 +8,7 @@
 #include "bn5.h"
 #include "chip_entry.h"
 #include "emu.h"
+#include "soulbn4.h"
 
 /* ---- the spec ---- */
 
@@ -275,6 +276,8 @@ static bool game_parse(Spec *s, const char *v) {
 	s->bn4 = !strcmp(v, "bn4") ? XD_BN4_ALONE : !strcmp(v, "bn4:trace") ? XD_BN4_TRACE : !strcmp(v, "bn4:bn6") ? XD_BN4_BN6 : 0;
 	return s->bn5 || s->bn6 || s->bn4;
 }
+
+bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 >> SOULS_HELD_BN4) != 0; }
 
 /* MegaMan's setup, then his NaviCust's */
 static int subject_parse(Spec *s, const char *name, char *v) {
