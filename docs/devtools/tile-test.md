@@ -467,15 +467,14 @@ four breaks in a hundred panels either way.) Over all areas 98.5 to 94.9.
 
 Two more ways were measured the same way after it:
 
-- **A pad's panels alone laid whole** (`LAY_PADS_WHOLE`; `CYBERWORLD_RULES=64`).
-  Tile by tile, a pad of another size than its map's came out as a jumble
-  of its frame and the walkway beside it: Seaside's pads counted 8.6
-  breaks a panel, 2024 of its 3514. With the pads' panels from their
-  maps' pads, each in its place, and the rest of the floor as before,
-  Seaside falls from 270 to 242, BN5's SciLab from 193 to 166 and BN4's
-  ACDC Area from 259 to 213, its squares on their green slabs; those three
+- **A pad's panels alone laid whole** (`LAY_PADS_WHOLE`; `CYBERWORLD_RULES=64`):
+  the pads' panels from their maps' pads, each in its place, and the rest
+  of the floor as before. BN5's SciLab falls from 193 to 166 and BN4's
+  ACDC Area from 259 to 213, its squares on their green slabs; those two
   take it. Most other areas rise with it (the Aquarium 56 to 131, the
-  Nest 18 to 28).
+  Nest 18 to 28). Seaside fell with it too (270 to 242), which led to the
+  fault under its pads, below; mended, Seaside draws better without it
+  (136 against 144).
 - **Every walkway drawn apart from the rooms**, a run a piece of its own
   laid on under the room it meets, as a road is
   (`CYBERWORLD_RULES=32` while it was built). Over all areas 94.9 to
@@ -484,6 +483,20 @@ Two more ways were measured the same way after it:
   join. It fell in BN4's countries (84 to 73) and BN5's Undernet (164 to
   131), which lost its joints of lava at its walkways' ends with it. Not
   taken, and its code not kept.
+
+**Nothing over a pad's stamp.** Seaside's pads counted 8.6 breaks a
+panel, 2024 of its 3514, though each is its map's pad cut whole
+(`props_learn_pad`, `nm_paste_pads`). The stamp was set on the first tile
+layer alone, and what the classes had picked for the second stayed over
+it: pieces of Seaside's other pads' frames and of the boardwalk beside,
+across a pad that was otherwise the map's own. The stamp now clears the
+second layer where it sets the first (`src/map/netmap_paste.c`,
+`paste_pad`): Seaside 270 to 136 breaks per 100 panels, its pads BN6's as
+they are drawn; two of Sky's layers lose a stray mark on a pad. It clears
+rather than copies the map's second layer: of the three areas whose pads
+are stamped, Central's maps alone have anything there, a warp's panel, and
+a pad that holds Mystery Data must not show one (measured: 28 of its
+stamp's 196 tiles, none of Seaside's or Sky's). Central draws as before.
 
 The count alone misled twice more here: BN5's End Area fell by an eighth
 and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a

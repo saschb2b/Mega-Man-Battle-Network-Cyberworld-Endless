@@ -345,6 +345,41 @@ static bool island_only(const AreaSrc *a, int A, int B, int tx, int ty) {
 	return true;
 }
 
+/* Whether island (A, B) of map a is a pad of another look than the stamp so
+ * far (`got`, n tiles): of its tiles that draw it alone at places where the
+ * stamp has such a tile, more than a tenth are others. Seaside Area 1 has
+ * pads of two looks in the hues it names, grey-framed with an orange floor
+ * and teal-framed with a yellow one, and a stamp that took each tile from
+ * whichever pad drew it alone was a jumble of the two. */
+static bool other_look(const AreaSrc *a, int A, int B, const StairTile *got, int n) {
+	int Xa = a->ex + PANEL * A, Ya = a->ey + PANEL * B, same = 0, differ = 0;
+	int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
+	int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+	for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
+		for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
+			if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !island_only(a, A, B, tx, ty)) continue;
+			uint16_t e0 = a->tile[0][(size_t)ty * a->tw + tx];
+			int j = 0;
+			while (j < n && (got[j].px != tx * 8 - ax || got[j].py != ty * 8 - ay)) ++j;
+			if (!(e0 & 0x3FF) || j == n || !got[j].opaque) continue;
+			if (got[j].e0 == e0) ++same; else ++differ;
+		}
+	return differ * 10 > same + differ;
+}
+
+/* Tile t into the stamp so far (`got`, *n tiles): in place of the one at
+ * its place where that drew no island alone and t does, or a new one where
+ * `fresh`. */
+static void stamp_take(StairTile *got, int *n, StairTile t, bool fresh) {
+	int j = 0;
+	while (j < *n && (got[j].px != t.px || got[j].py != t.py)) ++j;
+	if (j < *n) {
+		if (!got[j].opaque && t.opaque) got[j] = t;
+		return;
+	}
+	if (fresh && *n < 600) got[(*n)++] = t;
+}
+
 bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 	if (!out->ok) memset(out, 0, sizeof *out);
 	/* the map's islands, around its middle, fewest bridges beside their
@@ -381,8 +416,10 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 	/* its tiles: over the diamond of the first island's panels (the floor
 	 * drawn 4 below their edges), the faces under its lower edges and the
 	 * tiles its rim reaches from outside; each in place, where one of the
-	 * islands has it, as a tile drawing its island alone (e1 1 while
-	 * learning): a bridge beside one comes along in its tiles there (the
+	 * islands has it, as a tile drawing its island alone (`opaque` 1): its
+	 * first layer's alone, the second's what stands on that island (in
+	 * Central Area a warp's panel, which a pad holding Mystery Data must
+	 * not show); a bridge beside one comes along in its tiles there (the
 	 * steps of the classes' pieces had shown along a pad's edges where its
 	 * stamp left them out) */
 	static StairTile got[600];
@@ -396,6 +433,7 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 		int A = isl[k].A, B = isl[k].B, Xa = a->ex + PANEL * A, Ya = a->ey + PANEL * B;
 		int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
 		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
+		if (other_look(a, A, B, got, n)) continue;
 		for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
 			for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
 				if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !(a->tile[0][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
@@ -406,18 +444,10 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 				 * come along, posts floating under a pad) */
 				bool core = in <= 1.0f || under <= 1.0f, alone = island_only(a, A, B, tx, ty);
 				if (!core && !(in <= 1.25f && dy <= 4.0f && alone)) continue;
-				int16_t px = (int16_t)(tx * 8 - ax), py = (int16_t)(ty * 8 - ay);
-				uint16_t e0 = a->tile[0][(size_t)ty * a->tw + tx];
-				int j = 0;
-				while (j < n && (got[j].px != px || got[j].py != py)) ++j;
-				if (j < n) {
-					if (!got[j].e1 && alone) got[j] = (StairTile){ .px = px, .py = py, .e0 = e0, .e1 = 1 };
-					continue;
-				}
 				/* (a new place: the first island's core, or a tile drawing
 				 * its island alone) */
-				if ((!alone && (k > 0 || had)) || n == 600) continue;
-				got[n++] = (StairTile){ .px = px, .py = py, .e0 = e0, .e1 = (uint16_t)alone };
+				StairTile t = { .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx], .opaque = alone };
+				stamp_take(got, &n, t, alone || (k == 0 && !had));
 			}
 	}
 	if (n < 40) return out->ok;
