@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's Souls on BN6's proxy form",
+  "date": "2026-11-13",
+  "name": "ThunSoul's look filmed against BN4's battle",
+  "result": "bn4_soul_thun with film (t2 to t176 every 6 frames, both games' pictures side by side): BN6's MegaMan in ThunSoul's own sprite and colours, his face and the 3 under it as BN4's window shows them, no flame overlay; before, HeatCross's body, a wrong face and an overlay. BN4 draws a flash at his arm at t164 and t170 where BN6 draws none. soul_thun: sprite 0x08AE1000 and palette 0 from t1 to t300, the shot's frames as before (t154, t177).",
+  "meaning": "The shared room serves a BN4 Soul's body and face through BN5's hooks with one list-0 number and one face; the flash and the unison's picture are the look's rest.",
+  "link": "../multirom/bn4-souls.md"
+}
