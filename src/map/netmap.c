@@ -877,9 +877,10 @@ static void mark_pads(int area, uint8_t pads[MAP_H][MAP_W]) {
 		const Room *m = &layer.rooms[r];
 		bool pad = m->kind == ROOM_PAD || every || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena || r == layer.sig_room));
 		/* (a pad of another size where the area's pads are cut whole from
-		 * its maps, 3 x 3: a teleport's island of 4 x 4 is a platform there;
-		 * picked tile by tile in the pads' look it was a jumble of frames) */
-		if (pad && m->kind == ROOM_PAD && na && na->pad_hues && (m->w != 3 || m->h != 3)) pad = false;
+		 * its maps, 3 x 3: a teleport's island of 4 x 4 is a platform there,
+		 * and so is a small platform that is not 3 x 3; picked tile by tile
+		 * in the pads' look it was a jumble of frames) */
+		if (pad && na && na->pad_hues && (m->w != 3 || m->h != 3) && r != layer.arena && r != layer.sig_room) pad = false;
 		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;

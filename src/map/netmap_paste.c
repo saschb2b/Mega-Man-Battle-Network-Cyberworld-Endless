@@ -162,7 +162,7 @@ void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 	if (!L->pad.ok) return;
 	for (int i = 0; i < layer.nrooms; ++i) {
 		const Room *m = &layer.rooms[i];
-		if (m->kind != ROOM_PAD || m->w != 3 || m->h != 3) continue;
+		if (m->w != 3 || m->h != 3 || !(m->kind == ROOM_PAD || (nm_cur->pad && nm_cur->pad[m->y * nm_cur->gw + m->x] && m->kind == ROOM_PLATFORM))) continue;
 		bool flat = true;
 		for (int y = m->y; y < m->y + 3; ++y)
 			for (int x = m->x; x < m->x + 3; ++x) flat &= layer.cell[y][x] == C_PATH && !layer.level[y][x];

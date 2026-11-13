@@ -35,6 +35,13 @@ static bool aligned(const AreaSrc *a, const AreaSrc *b) {
 }
 
 /* A map of the area's own game, BN6's or another's (docs/multirom/). */
+/* How deep under a pad's lower edges its stamp is cut: its map's side faces
+ * as its first book measured them. */
+static int pad_deep(const Learned *L) {
+	int deep = L->nbooks ? L->book[0].face : 0;
+	return deep > 12 ? deep : 12;
+}
+
 static bool load_map(const NetAreaDef *na, int group, int number, AreaSrc *a) {
 	return area_src_load_as(na->xrom, group, number, na->recolour, a);
 }
@@ -297,7 +304,7 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 			if (!L->ornament[o].ok && aligned(grid, &b)) props_learn_ornament(&b, nm_ornament_tile[o], &L->ornament[o]);
 		/* (its pads' tiles too, where its own map's all have a bridge
 		 * beside them there) */
-		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, &L->pad);
+		if (na->pad_hues && aligned(grid, &b)) props_learn_pad(&b, na->pad_hues, pad_deep(L), &L->pad);
 		/* (its emblem, where its own map draws none: BN4's Undernet's
 		 * plain plates, crossed in another of its maps) */
 		if (na->emblem && !L->emblem.ok && aligned(grid, &b)) props_learn_floor_emblem(&b, na->emblem, &L->emblem);
@@ -345,7 +352,7 @@ bool nm_learn(int area, Learned *L) {
 	/* (the pads' centrepieces are BN6's tiles) */
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, nm_ornament_tile[k], &L->ornament[k]);
 	if (na->emblem) props_learn_floor_emblem(&a, na->emblem, &L->emblem);
-	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, &L->pad);
+	if (na->pad_hues) props_learn_pad(&a, na->pad_hues, pad_deep(L), &L->pad);
 	learn_arrows(&a, L);
 	L->rebank[0] = na->rebank[0];
 	L->rebank[1] = na->rebank[1];

@@ -397,7 +397,57 @@ static void stamp_take(StairTile *got, int *n, StairTile t, bool fresh) {
 	if (fresh && *n < 600) got[(*n)++] = t;
 }
 
-bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
+/* The pixels the map draws in one piece with the pad's middle (cx, cy), in
+ * a window of JOIN_W x JOIN_H pixels round it (`join`). What a map sets
+ * beside a pad without touching it is none of the pad's: Robot Control
+ * Comp's figures stand by its pads, and a tile of one lay in the void
+ * beside every pad of a layer. */
+#define JOIN_W 224
+#define JOIN_H 144
+static struct { int x0, y0; uint8_t px[JOIN_W * JOIN_H]; } join;
+
+static void joined_px(const AreaSrc *a, int cx, int cy) {
+	static int queue[JOIN_W * JOIN_H];
+	int n = 0, W = a->tw * 8, H = a->th * 8;
+	join.x0 = ((cx - 104) / 8) * 8 - 8;
+	join.y0 = ((cy - 56) / 8) * 8 - 8;
+	memset(join.px, 0, sizeof join.px);
+	if (cx < join.x0 || cy < join.y0 || cx >= join.x0 + JOIN_W || cy >= join.y0 + JOIN_H) return;
+	queue[n++] = (cy - join.y0) * JOIN_W + cx - join.x0;
+	join.px[queue[0]] = 1;
+	for (int h = 0; h < n; ++h) {
+		static const int side[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+		for (int k = 0; k < 4; ++k) {
+			int x = queue[h] % JOIN_W + side[k][0], y = queue[h] / JOIN_W + side[k][1], X = x + join.x0, Y = y + join.y0;
+			if (x < 0 || y < 0 || x >= JOIN_W || y >= JOIN_H || join.px[y * JOIN_W + x] || X < 0 || Y < 0 || X >= W || Y >= H) continue;
+			if (!(a->px[(size_t)Y * W + X] >> 24)) continue;
+			join.px[y * JOIN_W + x] = 1;
+			queue[n++] = y * JOIN_W + x;
+		}
+	}
+}
+
+/* Whether tile (tx, ty) holds one of those pixels. */
+static bool joined_tile(int tx, int ty) {
+	for (int y = ty * 8 - join.y0; y < ty * 8 - join.y0 + 8; ++y)
+		for (int x = tx * 8 - join.x0; x < tx * 8 - join.x0 + 8; ++x)
+			if (x >= 0 && y >= 0 && x < JOIN_W && y < JOIN_H && join.px[y * JOIN_W + x]) return true;
+	return false;
+}
+
+/* Whether a tile is one of a pad's stamp: on its top (`in` at most 1, its
+ * distance from the middle in the diamond's measure), on the faces under
+ * its lower edges (`under`), or on the rim just past its upper edges and
+ * corners where it draws the island alone (below, what hangs from a bridge
+ * beside it would come along, posts floating under a pad); and off the top
+ * only where it is drawn in one piece with the pad (`joined`). */
+static bool stamp_zone(float in, float under, float dy, bool alone, bool joined) {
+	bool core = in <= 1.0f || under <= 1.0f;
+	if (!core && !(in <= 1.25f && dy <= 4.0f && alone)) return false;
+	return in <= 1.0f || joined;
+}
+
+bool props_learn_pad(const AreaSrc *a, uint16_t hues, int deep, PropStamp *out) {
 	if (!out->ok) memset(out, 0, sizeof *out);
 	/* the map's islands, around its middle, fewest bridges beside their
 	 * lower sides first */
@@ -451,20 +501,17 @@ bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out) {
 		int cx = area_px(a->tw, Xa + 48, Ya + 48), cy = area_py(a->th, Xa + 48, Ya + 48);
 		int ax = area_px(a->tw, Xa, Ya), ay = area_py(a->th, Xa, Ya);
 		if (other_look(a, A, B, got, n)) continue;
+		joined_px(a, cx, cy + 4);
 		for (int ty = (cy - 56) / 8; ty <= (cy + 72) / 8; ++ty)
 			for (int tx = (cx - 104) / 8; tx <= (cx + 104) / 8; ++tx) {
 				if (tx < 0 || ty < 0 || tx >= a->tw || ty >= a->th || !(a->tile[0][(size_t)ty * a->tw + tx] & 0x3FF)) continue;
 				float dx = (float)(tx * 8 + 4 - cx), dy = (float)(ty * 8 + 4 - cy - 4);
-				float in = fabsf(dx) / 96.0f + fabsf(dy) / 48.0f, under = dy > 0 ? fabsf(dx) / 96.0f + (dy - 12.0f) / 48.0f : 9.0f;
-				/* (the rim past the diamond along its upper edges and
-				 * corners: below, what hangs from a bridge beside it would
-				 * come along, posts floating under a pad) */
-				bool core = in <= 1.0f || under <= 1.0f, alone = island_only(a, A, B, tx, ty);
-				if (!core && !(in <= 1.25f && dy <= 4.0f && alone)) continue;
+				float in = fabsf(dx) / 96.0f + fabsf(dy) / 48.0f, under = dy > 0 ? fabsf(dx) / 96.0f + (dy - (float)deep) / 48.0f : 9.0f;
+				bool alone = island_only(a, A, B, tx, ty);
+				if (!stamp_zone(in, under, dy, alone, joined_tile(tx, ty))) continue;
 				/* (a new place: the first island's core, or a tile drawing
 				 * its island alone) */
-				StairTile t = { .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx], .opaque = alone };
-				stamp_take(got, &n, t, alone || (k == 0 && !had));
+				stamp_take(got, &n, (StairTile){ .px = (int16_t)(tx * 8 - ax), .py = (int16_t)(ty * 8 - ay), .e0 = a->tile[0][(size_t)ty * a->tw + tx], .opaque = alone }, alone || (k == 0 && !had));
 			}
 	}
 	if (n < 40) return out->ok;

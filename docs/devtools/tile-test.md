@@ -506,6 +506,32 @@ breaks in one window). Such a pad is drawn as a platform now (`mark_pads`,
 `netmap.c`): Central 56 to 47 breaks per 100 panels, the island a small
 field with its teleport's panel.
 
+**Robot Control's pads.** Its layers' rooms were white slabs of every
+size: none of its maps looks so, their rooms of 3 x 3 are teal pads with
+orange marks, and only Comp 2 has the white platforms beside them. Its
+pads are cut whole from its maps now as Central's are (`pad_hues`), and
+its platforms of 3 x 3 are pads too (`pad_rooms` 9; where pads are cut
+whole a pad of any other size is a platform). Three things the stamp
+needed for it:
+
+- **As deep as the map's faces** (`pad_deep`): a stamp took the faces 12
+  pixels under a pad's lower edges, and Robot Control's stand 17: the
+  rest was picked as a platform's, a dark band under each pad. The depth
+  is the map's own measure now, 12 at least (Central, Seaside and Sky
+  measure 10: their stamps are as before).
+- **In one piece with the pad** (`joined_px`): Robot Control's figures
+  stand beside its pads, and a tile of one came along with the stamp.
+  Off the pad's top a tile is taken only where its pixels join the
+  pad's.
+- **A walkway's lips stay**: its walkways end in a round lip on the pad's
+  own panel, and the pad the stamp is cut from has two. Taking each tile
+  as most of the map's pads draw it removed one lip and half the other,
+  and changed Central's, Seaside's and Sky's stamps; not taken.
+
+Its breaks rise from 25 to 60 per 100 panels, counted along the pads'
+faces and at their joins, and its layers draw 1340 of its maps' tile
+pictures where they drew 1025.
+
 **Rooms and the walkways beside them.** Two faults showed in the worst
 spots of BN4's areas, plain walkway tiles biting squares out of a square's
 rim:

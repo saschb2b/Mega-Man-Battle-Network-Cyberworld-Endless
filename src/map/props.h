@@ -56,8 +56,10 @@ bool props_learn_floor_emblem(const AreaSrc *a, uint16_t bgr, PropStamp *out);
  * over each other, the one with the fewest bridges beside its lower sides
  * first, each tile taken where one of them draws its island alone (e1 1: a
  * bridge beside an island comes along in its tiles there); called again on
- * another map of the area, it fills in `out`. */
-bool props_learn_pad(const AreaSrc *a, uint16_t hues, PropStamp *out);
+ * another map of the area, it fills in `out`. `deep`: how far under its
+ * lower edges its side faces are cut with it, in pixels (the map's faces
+ * as measured, 12 at least). */
+bool props_learn_pad(const AreaSrc *a, uint16_t hues, int deep, PropStamp *out);
 /* An arrow panel of `a` (issue #43), carrying MegaMan towards BN6's way d
  * (0 +X, 1 +Y, 2 -X, 3 -Y): one in a lane a panel wide, closed by the
  * lane's end cells (section 3, 0x4C + d); the tiles of both layers whose
