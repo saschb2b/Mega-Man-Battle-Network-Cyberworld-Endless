@@ -123,6 +123,8 @@ static Learned *learn_area(int area) {
 	return L;
 }
 
+unsigned netmap_road_hues(int area) { return net_area_def(area) && learn_area(area)->ok ? learn_area(area)->road_hues : 0; }
+
 int netmap_scenery;
 LegalStats netmap_legal;
 LastMap nm_last;
@@ -163,7 +165,7 @@ static bool pad_look;         /* its originals' pads have a look for the layer's
 static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
 static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid out as walkway (TILES_ARENA_DRAWN) */
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
-static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (NetAreaDef.road_styles) */
+static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (netmap_learn.c, road_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -253,8 +255,8 @@ static void make_stripes(bool keep_pads) {
 }
 
 /* The way from the layer's arrival to its exit over the floor as it now
- * stands, for its walkways there to be drawn as roads (NetAreaDef.
- * road_styles; docs/world/level-design/roads.md): the generator's way
+ * stands, for its walkways there to be drawn as roads
+ * (docs/world/level-design/roads.md): the generator's way
  * (NetLayout.way) walked again between its two ends, as the legalizer
  * takes cells of it (of a way widened to two, the lane it ran on); the
  * shortest walk, and of those the one that keeps most to the generator's. */

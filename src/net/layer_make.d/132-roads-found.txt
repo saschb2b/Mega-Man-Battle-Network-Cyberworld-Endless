@@ -1,0 +1,1 @@
+An area's roads are found in its own map as it is learned (road_hues: another hue of walkway than its own, a dozen panels, five in a straight run, mostly in the open), none named: BN4's ACDC Area's cyan roads and its Town Area's yellow ones join Park Area's orange, and their layers draw the way to the exit in them; Park's layers and every other area's as before.

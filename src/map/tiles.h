@@ -30,7 +30,7 @@ enum { TILE_VOID, TILE_A, TILE_B };
  * walkway runs on under the room's upper edge (tilemap.c, pieces_floor). */
 #define TILE_JOINS 16
 /* ... a walkway's panel drawn in the area's second look of walkway (BN4's
- * Park Area's orange roads, NetAreaDef.road_styles), from books of its own
+ * Park Area's orange roads, found in its map: netmap_learn.c), from books of its own
  * (TileGrid.roads): a piece drawn apart (tilemap.c). */
 #define TILE_ROAD 32
 #define TILE_MATERIAL(m) ((m) & 3)

@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Roads on the way"
-description: "Roads: in an area whose maps have a second look of walkway (BN4's Park Area's orange paths, `NetAreaDef.road_styles`), the walkways of a layer's way from its arrival to its exit are drawn in it, the side paths in the area's walkways; a look alone, no rule of play (`mark_roads`, `TILE_ROAD`, `learn_roads`)."
+description: "Roads: in an area whose map has a second look of walkway, found as it is learned (BN4's Park Area's orange roads, its ACDC Area's cyan, its Town Area's yellow), the walkways of a layer's way from its arrival to its exit are drawn in it, the side paths in the area's walkways; a look alone, no rule of play (`mark_roads`, `TILE_ROAD`, `learn_roads`)."
 tags: [world, level-design, tiles]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T15:55:00Z }
 sources:
@@ -13,7 +13,7 @@ sources:
     title: "Park Area 1's coordinate data: its orange paths plain floor"
 ---
 
-# Roads on the way (built for BN4's Park Area)
+# Roads on the way (built: BN4's Park, ACDC and Town Areas)
 
 BN4's Park Area 1 has two looks of walkway: pink, and orange roads a panel
 wide in a pink and blue rim, with rounded bends and striped joints. In the
@@ -22,7 +22,42 @@ Park Area 1's coordinate data; in play assumed so,
 [Sources](../../research/sources.md), BN4's Park Area). Three of its five
 exits lie at the end of an orange road, in an arrow's head. The
 [measure of what a layer uses of a map](../../devtools/map-use.md) named
-them as the largest kind of floor a layer left out.
+them as the largest kind of floor a layer left out. BN4's ACDC Area has
+cyan roads and its Town Area yellow ones, the same motif.
+
+## Which areas have roads
+
+None is named: a road is found in an area's own map as it is learned
+(`road_hues`, `src/map/netmap_learn.c`). Its walkways on the ground (floor
+a panel wide, in no 2 x 2 block) are counted by their hue. The area's own
+walkway hue is the one its settings name, or the one most of its maps'
+walkways show; a road is another hue, none of its platforms' and none
+next to its walkways' own, shown by a dozen panels, five of them in one
+straight run, and mostly in the open (a quarter of its panels at least
+with no other floor beside them).
+
+| Area | Its walkways | Its road | Panels, longest run |
+| --- | --- | --- | --- |
+| BN4's Park Area | pink | orange | 30, 11 |
+| BN4's ACDC Area | white | cyan | 15, 8 |
+| BN4's Town Area | pale cyan (Town Area 1's) | yellow (Town Area 3's) | 20, 5 |
+
+Every other area's map was surveyed the same way (13 November 2026) and
+has none on the ground. What the rule turns down, and why it is right to:
+
+- **A platform's hue a panel wide**: Central's green strips, Robot
+  Control's grey.
+- **A shade of the walkway's own**: a dark area's blue beside its cyan (16
+  panels, a run of 9), which as a road drew no different.
+- **A joint's or a pattern's hue**: BN4's Undernet's steel joints (42
+  panels, never three in a row), the Undernet's bridges of three hues.
+- **A look that lies between other floor**: BN5's Oran Area's brown planks
+  between its hubs (34 panels, a run of 6, but an eighth of them in the
+  open): as a road it was laid in scraps.
+
+BN6's and BN5's second systems of floor run on raised levels (End Area's
+highway, Sky's paths, Seaside's): 84 panels a panel wide at most on any
+one level, and no road a layer's ground could take as it stands.
 
 ## What a layer does with them
 
@@ -62,9 +97,9 @@ platform floor and no road. A pad is no road either.
   where it can (`mark_roads`, `src/map/netmap.c`). It reads the layout
   alone, so a layer is the same from its seed.
 - **The look** is learned from the area's own map a second time
-  (`learn_roads`, `src/map/netmap_learn.c`): the roads' hues
-  (`NetAreaDef.road_styles`) as its walkways, its walkways as the floor
-  that lends no tiles, no platform floor. Park Area 1 gives 46 whole
+  (`learn_roads`, `src/map/netmap_learn.c`): the roads' hues as its
+  walkways, its walkways as the floor that lends no tiles, no platform
+  floor, its panels laid whole whatever the area's own are. Park Area 1 gives 46 whole
   panels and 55 in part, per mirror image.
 - **Drawn apart.** A walkway cell on the way is marked `TILE_ROAD` while
   the tiles are picked; the legalizer reads walkway floor as before. Each
@@ -124,5 +159,8 @@ platform floor and no road. A pad is no road either.
   other.
 - **The New 3DS's heap** with two more books is not measured
   (`tools/heap3ds.py`).
-- **Other areas.** BN4's Town Area 3 has yellow roads too; they lend no
-  tiles today. An area gets roads by naming their hues.
+- **Town Area's roads** are the roughest of the three: its map has 22
+  whole panels of road, and its layers count 7% more breaks with them
+  (per 100 panels 329 to 352).
+- **Raised roads.** A second look of floor on a raised level is not found:
+  a layer has no place for it.

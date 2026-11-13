@@ -19,8 +19,9 @@ typedef struct {
 	int ex, ey, tw, th;
 	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
 	int nbooks;
-	TileBook road[2];         /* its roads, a second look of walkway (NetAreaDef.road_styles): its own map and its mirror image, their roads read as the walkways */
+	TileBook road[2];         /* its roads, a second look of walkway found in its own map (netmap_learn.c, road_hues): the map and its mirror image, their roads read as the walkways */
 	int nroads;
+	uint16_t road_hues;       /* ... their hue buckets (0: it has none) */
 	TileSeams seams;          /* the tiles the maps set side by side */
 	Breaks *breaks;           /* (the tile test) the strips they show at their tiles' edges; NULL in a game */
 	DecorBook decor;          /* the scenery of the area's maps */

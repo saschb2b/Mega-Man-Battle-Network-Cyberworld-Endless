@@ -30,7 +30,7 @@ typedef struct {
 	 * layer's are its teleport pair, layer.teleport_*) */
 	const int (*gems)[2];
 	int ngems;
-	const uint8_t *way;     /* 1 on the cells of the way from its arrival to its exit (NULL: none marked): its walkways there are roads where the area has that look (NetAreaDef.road_styles) */
+	const uint8_t *way;     /* 1 on the cells of the way from its arrival to its exit (NULL: none marked): its walkways there are roads where the area's map has that look (netmap_learn.c, road_hues) */
 } NetLayout;
 
 /* How many wall cells of floor (nine panels) a map has at a height for its
@@ -52,6 +52,9 @@ bool netmap_build_layer(int area, uint32_t seed);
 typedef struct { uint16_t *map; int tw, th; AreaVram gfx; } NetmapLook;
 bool netmap_look(int area, NetmapLook *out);
 void netmap_look_free(NetmapLook *l);
+/* (dev) The hue buckets of area `area`'s roads, the second look of walkway
+ * found in its own map (a bit each, 0-11 and 12 grey); 0 where it has none. */
+unsigned netmap_road_hues(int area);
 /* The pieces of scenery the last layer got. */
 extern int netmap_scenery;
 /* The floor cells the last layer's floor changed to be drawable, and the

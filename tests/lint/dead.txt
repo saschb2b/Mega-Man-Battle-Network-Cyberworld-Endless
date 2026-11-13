@@ -3,5 +3,4 @@
 src/map/decor.c: decor_free
 src/map/seams.c: seams_free
 src/map/stairs.c: stairs_free
-src/map/tiles.c: tiles_free
 src/world/townsrc.c: townsrc_free

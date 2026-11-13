@@ -291,9 +291,10 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 	}
 	/* (... and as its roads are learned, netmap_learn.c) */
 	snprintf(path, sizeof path, "%s/roads_b%02d_%02x_%d%s.txt", dir, biome, group, number, tag);
-	f = na->road_styles ? fopen(path, "w") : NULL;
+	unsigned roads = netmap_road_hues(biome);
+	f = roads ? fopen(path, "w") : NULL;
 	if (f) {
-		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), na->road_styles, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
+		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), (uint16_t)roads, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
 		fclose(f);
 	}
 	int W = v->tw * 8, H = v->th * 8;
