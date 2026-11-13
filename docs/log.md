@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: devtools/tile-test.md (Robot Control's pads cut whole from its maps: as deep as the map's faces, in one piece with the pad).
 * **Update**: devtools/tile-test.md (A pad of another size is a platform: a teleport's 4 x 4 island where pads are cut whole).
 * **Update**: devtools/tile-test.md (Each area's laying: Town Area's squares pieces apart, in front of its walkways).
 * **Update**: devtools/tile-test.md (Each area's laying: rooms and the walkways beside them, only floor with a middle a room, BN4's squares and BN5's Undernet's plates in front of the walkways beside them).

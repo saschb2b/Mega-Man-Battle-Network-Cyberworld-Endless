@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T20:22:20Z
-* **Update**: devtools/tile-test.md (Robot Control's pads cut whole from its maps: as deep as the map's faces, in one piece with the pad).
