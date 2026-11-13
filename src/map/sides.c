@@ -108,6 +108,23 @@ static bool same(const SidePiece *p, const SidePiece *q) {
 	return true;
 }
 
+/* The map's layer priorities on panel (A, B) and the eight round it, from
+ * the panel's corner: BN6 draws MegaMan behind a claw on the panel it grips
+ * (CopyBot Comp: 27 to 48 cells within a panel of each of its claws, of the
+ * map's 434). None without memory. */
+static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
+	int X0 = a->ex + 32 * A, Y0 = a->ey + 32 * B;
+	p->prio = calloc((size_t)a->nsec[2] + 1, sizeof *p->prio);
+	p->nprio = 0;
+	for (int k = 0; p->prio && k < a->nsec[2]; ++k) {
+		CoordCell c = a->sec[2][k];
+		if (c.x < X0 - 32 || c.x >= X0 + 64 || c.y < Y0 - 32 || c.y >= Y0 + 64) continue;
+		c.x = (int16_t)(c.x - X0);
+		c.y = (int16_t)(c.y - Y0);
+		p->prio[p->nprio++] = c;
+	}
+}
+
 void sides_learn(const AreaSrc *a, SideBook *out) {
 	if (a->layers < 2 || !a->rings || !a->front) return;
 	int tw = a->tw, th = a->th;
@@ -131,8 +148,9 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 			p->tiles[k] = (StairTile){ .px = (int16_t)(queue[k] % tw * 8 - ax), .py = (int16_t)(queue[k] / tw * 8 - ay), .e1 = a->tile[1][queue[k]] };
 		bool dup = false;
 		for (int k = 0; k < out->n && !dup; ++k) dup = same(&out->piece[k], p);
-		if (dup) free(p->tiles);
-		else ++out->n;
+		if (dup) { free(p->tiles); continue; }
+		priorities(a, A, B, p);
+		++out->n;
 	}
 	free(seen);
 	free(queue);
