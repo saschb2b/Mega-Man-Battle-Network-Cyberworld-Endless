@@ -5,6 +5,7 @@
  * says how the tile picks went. */
 #include "atlas.h"
 #include "layer_sizes.h"
+#include "lent.h"
 #include "navstudy.h"
 #include "town.h"
 
@@ -180,6 +181,14 @@ static bool layer_checked(FILE *report, bool built, int area, int layout, int de
 
 /* A layer of `area` (a BN6 biome's own, or another game's), laid out by
  * `biome`'s rules. */
+/* A layer's tiles drawn with its area's own (free it), and their pictures
+ * kept for what the layers take from the area's maps (lent.c). */
+static uint32_t *layer_drawn(int area, const uint16_t *tiles, int tw, int th) {
+	const NetAreaDef *a = net_area_def(area);
+	lent_layer(a->xrom, a->group, a->number, tiles, tw, th);
+	return area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
+}
+
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
 	run_new(seed);
 	run.depth = depth;
@@ -201,8 +210,7 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	if (!layer_checked(report, built, area, layout, depth, seed)) return;
 	int tw, th;
 	const uint16_t *tiles = netmap_last_tiles(&tw, &th);
-	const NetAreaDef *a = net_area_def(area);
-	uint32_t *px = area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
+	uint32_t *px = layer_drawn(area, tiles, tw, th);
 	if (!px) return;
 	int W = tw * 8, H = th * 8;
 	for (int i = 0; i < W * H; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
@@ -432,15 +440,40 @@ static void hand_floor(const char *dir, int area) {
  * of the BN6 area it is like, docs/multirom/): every layout at depth 2,
  * its guardian's layer in the layout its act plans and layers that climb a
  * stair where it has one, its original maps beside them. */
+/* What the area's layers built since lent_begin took from each of its
+ * maps: a line each in the report, and the map with the tiles no layer
+ * used tinted (lent.c). */
+static void lent_maps(const char *dir, FILE *report, int area) {
+	const NetAreaDef *na = net_area_def(area);
+	for (int k = -1; na && k < NET_MORE_MAPS; ++k) {
+		int group = k < 0 ? na->group : na->more[k][0], number = k < 0 ? na->number : na->more[k][1];
+		if (k >= 0 && !group) break;
+		AreaSrc a;
+		Lent n;
+		if (!area_src_load_as(na->xrom, group, number, na->recolour, &a)) continue;
+		uint32_t *px = lent_map(&a, &n);
+		char path[600];
+		snprintf(path, sizeof path, "%s/lent_b%02d_%02x_%d.bmp", dir, area, group, number);
+		for (int i = 0; px && i < a.tw * a.th * 64; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
+		if (px) save_bmp(path, px, a.tw * 8, a.th * 8);
+		fprintf(report, "lent %2d map %02x:%d: %d tiles drawn, %d as a layer draws one (%.1f%%); %d different, %d of them used (%.1f%%)\n",
+			area, group, number, n.drawn, n.used, 100.0 * n.used / (n.drawn ? n.drawn : 1), n.kinds, n.kinds_used, 100.0 * n.kinds_used / (n.kinds ? n.kinds : 1));
+		free(px);
+		area_src_free(&a);
+	}
+}
+
 static void area_layers(const char *dir, FILE *report, int area, int seeds) {
 	int b = area < NET_AREAS ? area : net_area_def(area)->like;
 	sources(dir, area);
+	lent_begin();
 	for (int l = 0; l < LAYOUT_COUNT; ++l) {
 		if (!layout_weight(b, l)) continue;
 		for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, l, 2, (uint32_t)(s * 7919 + area * 131));
 	}
 	for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, -1, 3, (uint32_t)(s * 104729 + area));
 	stair_layers(dir, report, b, area, seeds);
+	lent_maps(dir, report, area);
 }
 
 /* Another game's net area N alone. */
