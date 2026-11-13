@@ -1,0 +1,1 @@
+CopyBot Comp's dark crystal spikes behind its floors' upper edges (behind_learn, in its raised views too); a piece under a pad or behind a floor goes over the layer's tiles only in the two rows where it meets that floor: CopyBot Comp's, Aquarium Comp's and BN4's Undernet's layers' maps hold other tiles.

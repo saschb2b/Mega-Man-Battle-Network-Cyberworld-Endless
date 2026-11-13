@@ -76,7 +76,7 @@ Taken per area as looked at, as every laying rule is
 
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
-| CopyBot Comp | its claws, 3 looks | yes |
+| CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
@@ -135,7 +135,7 @@ looks kept: a lone stub or column (11 to 18 tiles) and whole sides of a pad
 A layer sets one under each panel of a pad that fits: the same
 neighbourhood, nothing where it hung over nothing. It begins in the tiles
 of the pad's rim, so up to a third of it may go over tiles the first layer
-already holds there. No seed thins them, as none of the maps' pads lacks
+already holds there, in its two top rows alone. No seed thins them, as none of the maps' pads lacks
 its pillars: 15 to 20 a layer in the [tile test](../../devtools/tile-test.md)'s
 pictures. The stubs' bubbles are the map's other animation (tiles 1 to 12,
 [the ROM map](../../rom/graphics.md)) and rise on a layer as the
@@ -166,6 +166,18 @@ layer's seed takes a piece behind every panel of it that fits, as the maps
 set theirs in rows; the rest take none. 0 to 9 a layer in the
 [tile test](../../devtools/tile-test.md)'s pictures. Seen in the game: a row
 of five behind a catwalk, the horn in front of it as before.
+
+CopyBot Comp's dark crystal spikes stand the same way behind its plateaus'
+upper edges, alone and in rows. Its plateaus are raised, so the cut is
+made in the views of their heights too (as the pillars' is): 11 looks,
+11 set over the atlas's eight layers. A piece behind a floor may go over
+the floor's own tiles in its two bottom rows alone, where its foot meets
+that floor's edge; anywhere else a tile it would cover is another floor's,
+and a spike first stood in front of a plateau's underside, over the void. BN5's
+End Area and Oran Area were tried and left: the cut finds 4 looks in each
+and none fits a layer, and what their maps set beside their floors is
+larger than this rule takes (End Area's pagoda, Oran Area's hubs, hundreds
+of tiles).
 
 ## Not built
 

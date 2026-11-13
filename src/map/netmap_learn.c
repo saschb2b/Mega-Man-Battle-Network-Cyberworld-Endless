@@ -85,6 +85,7 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		learn_view(&r, grid_of, area, own, L);
 		/* (and what stands under that floor, where the area sets such: sides.h) */
 		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
+		if (net_area_def(area)->sides & 4) behind_learn(&r, &L->sides);
 		area_src_raise_end(src, &r);
 	}
 	/* (its books are one map's: the layer's lead, netmap.c) */
