@@ -13,6 +13,7 @@
 #include "stairs.h"   /* StairTile */
 
 #define SIDES_MAX 24
+#define SIDE_UNDER 16   /* panels a piece draws over, kept */
 
 /* One piece: its second layer's entries, screen pixels from the corner of
  * the panel it grips (the lowest world X and Y), and that panel's
@@ -22,6 +23,14 @@ typedef struct {
 	uint16_t floor;
 	int ntiles;
 	StairTile *tiles;
+	CoordCell *prio;   /* its map's layer priorities (section 2) on that panel and the eight round it, world units
+	                    * from the panel's corner: where MegaMan is drawn behind its art */
+	int nprio;
+	/* the panels it draws over, (along world X, along world Y) from its own
+	 * and whether ground floor (1) or none (0): a layer sets it where they
+	 * are the same, a flame beside a floor never over another floor */
+	int8_t under[SIDE_UNDER][3];
+	int nunder;
 } SidePiece;
 
 typedef struct {
@@ -29,8 +38,8 @@ typedef struct {
 	int n;
 } SideBook;
 
-/* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles are
- * its book's owner's to free. */
+/* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
+ * priorities are its book's owner's to free. */
 void sides_learn(const AreaSrc *a, SideBook *out);
 
 #endif

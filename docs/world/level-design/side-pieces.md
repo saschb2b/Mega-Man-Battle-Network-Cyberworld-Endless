@@ -1,12 +1,12 @@
 ---
 type: Design
 title: "Side pieces"
-description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, BN4's Undernet's flames), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
+description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T21:24:29Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:24:00Z }
 ---
 
-# Side pieces (built for two areas, issue #505)
+# Side pieces (built for four areas, issue #505)
 
 The originals do not stop at their floors. CopyBot Comp's walkways are
 gripped by purple claws at their bends, flames stand beside the catwalks of
@@ -39,19 +39,35 @@ with the lane).
 
 It is kept with the panel it grips, the one most of its floor pixels lie
 on, and that panel's neighbourhood in its map: which of the nine panels
-round it are ground floor. Each look is kept once, 24 an area at most.
+round it are ground floor. With it go the panels it draws over (6 pixels or
+more, 16 at most), each as ground floor or none; floor of another height
+under it is left out. Each look is kept once, 24 an area at most.
 
 ## Where a layer sets one (`nm_paste_sides`)
 
 On a ground panel of the layer whose neighbourhood is exactly a piece's, so
-a claw cut at a bend stands at a bend and reaches into the same void. Not
+a claw cut at a bend stands at a bend and reaches into the same void, and
+where every panel it draws over is what it is in its map: ground floor
+where it lay on floor, nothing where it hung free. The Undernet's flames
+come in twos and threes that reach past the nine panels, and without that
+a set of three burned over a room's floor (seen on a layer). Not
 on raised floor, a pad, a lane or the arena nor beside them, and not within
 a panel of anything that stands on the layer (Mystery Data, a Navi, a
 warp). Of the panels that fit, half are taken by the layer's seed, none
 within two panels of another, 12 a layer at most; a piece goes down whole
 or not at all (on the map, on its tile lattice, over nothing the second
-layer already holds). It is the second layer's tiles alone: the floor under
+layer already holds, nor over a pad's or a stair's art). It is the second layer's tiles alone: the floor under
 it is the layer's own, and nothing about walking changes.
+
+## Who is in front (`priorities`, `nm_sides_extra`; verified in the game)
+
+BN6 draws MegaMan behind a claw on the panel it grips: its maps hold layer
+priorities (section 2 of the coordinate data) there, 27 to 48 cells within
+a panel of each of CopyBot Comp's claws, of the map's 434. A piece is cut
+with the cells on its panel and the eight round it and they are written
+with the layer's own, so he passes behind a claw on a generated walkway as
+he does in the comp (placed on a claw's panel in a CopyBot layer, the claw
+covers his legs; a panel back, he stands clear of it).
 
 ## Which areas (`net_area.sides`)
 
@@ -62,9 +78,38 @@ Taken per area as looked at, as every laying rule is
 | --- | --- | --- |
 | CopyBot Comp | its claws, 3 looks | yes |
 | BN4's Undernet | the flames beside its catwalks, 8 looks | yes |
+| The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
+| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece, nothing to see | no |
 | every other area | nothing | - |
+
+## Pieces the game animates (verified in the game)
+
+The Undernet's fire bowls burn: their twelve tiles are the ones the map's
+animation script writes over every 8 frames (tiles 726 to 737;
+[the ROM map](../../rom/graphics.md), Net maps' own tile animations), and
+the tile set as stored holds numbered placeholders there, which is how
+the [tile test](../../devtools/tile-test.md)'s pictures show them
+("1 2 3 4 / 5 6 7 8 / 9 10 11 12"). A layer runs on a map of its area's own
+group, whose script BN6 starts by itself, so a piece set with those tile
+numbers burns on a generated floor with nothing added (captured on an
+Undernet layer: bowls of flame beside a bridge and a room's corner, their
+flames changing between frames). Five of Undernet 1's lone bowls draw
+nothing on ground floor and are no side piece; the ones that touch a rim
+are.
+
+The Undernet's maps hold more in the second layer than what hangs on a
+floor's side. In Undernet 1 the rest of it joins into one group of some
+3,000 tiles, which the rule refuses for its size, and every piece it cuts
+there holds a bowl (9 of 9, Undernet Zero's 4 of 4).
+
+The Undernet's four maps (0x95:0 to 3) share one tile set and one palette,
+byte for byte (compared: 23,232 and 5,472 bytes of tiles, the second block
+loaded at tile 726, where the bowl's twelve begin). A piece is its tile
+entries, so either area takes the other's too (`net_area.side_maps`):
+Undernet Zero's own come in threes alone, which fit a generated floor about
+once a layer, and with the Undernet's lone bowls and pairs it gets four.
 
 ## Not built
 
@@ -72,10 +117,9 @@ Taken per area as looked at, as every laying rule is
   fists, the Aquarium's pillars under its glass pads, the Judge Tree's
   planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
   lie on the first layer, beside or under the floor (probed on the maps),
-  and the Undernet's, the Nest's and Mr. Weather's maps hold their
-  background in the second, so theirs lie there too. Scenery refuses a
+  and the Nest's and Mr. Weather's maps hold their background in the
+  second, so theirs lie there too. The Aquarium's pillars carry its other
+  animation, two fish. Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
-- **Who is in front.** A piece carries no layer priorities, so MegaMan is
-  drawn over a claw he walks past where BN6's map draws him behind it.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.

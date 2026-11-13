@@ -86,7 +86,7 @@ static void forget(Learned *L) {
 	seams_free(&L->seams);
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
-	for (int k = 0; k < L->sides.n; ++k) free(L->sides.piece[k].tiles);
+	for (int k = 0; k < L->sides.n; ++k) { free(L->sides.piece[k].tiles); free(L->sides.piece[k].prio); }
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
 		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };
@@ -729,7 +729,10 @@ bool netmap_build(int area, const NetLayout *lay) {
 	nm_gaps_place();
 	nm_blocks_place();
 	nm_lanes_place();
-	return write_tilemap(L) && coords_write(coord_slot, NULL, 0, &nm_extra);
+	if (!write_tilemap(L)) return false;
+	/* (the side pieces the tiles set, their layer priorities with them) */
+	nm_sides_extra();
+	return coords_write(coord_slot, NULL, 0, &nm_extra);
 }
 
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &nm_extra); }

@@ -9,5 +9,9 @@ void nm_gaps_place(void);
 void nm_lanes_place(void);
 extern CoordExtra nm_extra;
 void nm_build_extra(const Learned *L);
+/* The layer priorities of the side pieces the layer's tiles set (sides.h),
+ * each at its panel: after its tiles are picked, before its coordinate
+ * data is written. */
+void nm_sides_extra(void);
 
 #endif

@@ -3,7 +3,7 @@ type: Design
 title: "Props"
 description: "Props on a layer, cut whole from BN6's maps (`src/map/props.c`) and placed by measured rules (`net_landmarks.c`): the Net Dealer's counter, each area's landmark, rows and signs, pads' warp centrepieces, framed pads and emblems."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T19:30:26Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T21:52:25Z }
 ---
 
 # Props
@@ -209,6 +209,13 @@ The slabs' holes follow the originals too: a line along the middle rather
 than a grid, three panels apart where the originals keep two (the floor
 between two holes one panel apart reads as a walkway to the tiles, and
 takes a bridge's link look).
+
+The Underground under the Cybeast's Nest carries the cross in teal on its
+grey stone, eight to a map (issue #505's survey found none on a layer): its
+colour is 0x5340, and its layers set them by the same rule. An emblem is
+cut from platform floor, so none is set in a guardian's arena that is drawn
+in the walkways' floor (`on_walkway_arena`): the Underground's grey stone
+stood in its arena's magenta.
 
 ## Next
 

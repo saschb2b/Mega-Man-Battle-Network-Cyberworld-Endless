@@ -268,7 +268,7 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
-	if (na->sides && !na->bg_in_map) sides_learn(m, &L->sides);
+	if (na->sides) sides_learn(m, &L->sides);
 }
 
 /* (debug output) what area `area` learned */
@@ -318,6 +318,13 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		AreaSrc b;
 		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
 		if (aligned(grid, &b)) learn_arrows(&b, L);
+		area_src_free(&b);
+	}
+	/* (and the side pieces of those listed for them alone) */
+	for (int k = 0; k < 2 && na->sides && na->side_maps[k][0]; ++k) {
+		AreaSrc b;
+		if (!load_map(na, na->side_maps[k][0], na->side_maps[k][1], &b)) continue;
+		sides_learn(&b, &L->sides);
 		area_src_free(&b);
 	}
 }

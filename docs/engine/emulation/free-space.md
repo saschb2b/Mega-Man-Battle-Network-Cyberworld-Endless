@@ -59,7 +59,7 @@ what must travel with every state and is reached a byte at a time,
 | `layers` | `+0x002F00`-`+0x080000` (500.2 KB) | layers and the town: their maps, rewritten as a layer or the town is entered; home's other places | 9 | 32.0 KB (6%) | 32.0 KB |
 | `code-low` | `+0x080000`-`+0x150000` (832.0 KB) | other games' code, art and per-battle rooms that the code zone has no room for: fixed places, the same at every boot with the same ROMs | 14 | 0 B (0%) | 0 B |
 | `words` | `+0x150000`-`+0x170000` (128.0 KB) | the director's and the PET's words: text archives, labels, lists | 12 | 18.8 KB (14%) | 17.0 KB |
-| `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds | 7 | 600.0 KB (33%) | 484.0 KB |
+| `world` | `+0x170000`-`+0x330000` (1792.0 KB) | other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds | 8 | 555.0 KB (30%) | 232.0 KB |
 | `code` | `+0x330000`-`+0x7A0000` (4544.0 KB) | other games' code homes and their per-battle rooms (issue #82): fixed places, the same at every boot with the same ROMs | 27 | 443.9 KB (9%) | 384.0 KB |
 | `art` | `+0x7A0000`-`+0x800000` (384.0 KB) | art copied whole, a place each | 2 | 0 B (0%) | 0 B |
 | `persistent` | `0x02010CE0`-`0x02011800` (2.8 KB) | persistent: only the power-on clear writes 0x02010CDC-0x020117FF (the battle sprite pool from its end) | 5 | 0 B (0%) | 0 B |
@@ -71,8 +71,8 @@ what must travel with every state and is reached a byte at a time,
 Headroom is the zone's spans no region holds and its regions marked `free`
 (`FREE_TAIL`, `RAM_BATTLE_SPARE`). The ROM copy has about 1.1 MB free of
 its 8 MB since the measured pass of 13 November 2026 (below): `world`'s
-600 KB, 484 KB of it one span, `code`'s 444 KB, 384 KB of it one span,
-and the layers' 32 KB; `code-low` and `art` are full. What a region holds
+555 KB, in spans of 232, 207 and 112 KB, `code`'s 444 KB, 384 KB of it
+one span, and the layers' 32 KB; `code-low` and `art` are full. What a region holds
 is measured, not its size: `CYBERWORLD_FREE_SPACE=.build/usage.txt` on any
 run (`build.py shot` passes it into its container; `tools/xdiff.py` gives
 each spec a file of its own, `PATH.SPEC`) writes, as the program ends,
@@ -297,7 +297,12 @@ tell before; `xbackdrop.c` did).
 `FREE_MAP_BACKDROPS` and `FREE_FLAME`, packed behind the songs
 (`+0x240000`-`+0x2A7000`), so that what the zone gave up is one span,
 `+0x2A7000`-`+0x320000` (484 KB), and 112 KB after `FREE_XAREA`
-(`+0x184000`-`+0x1A0000`). `FREE_XAREA` and `FREE_SONGS` shrank from their
+(`+0x184000`-`+0x1A0000`). BN4's Souls' shared room, placed the same day
+by its own change at `+0x2E1000`-`+0x2EC400` (45 KB, where the zone's
+last gap was), lies inside that span and was left there, its spec naming
+its address (`tests/xdiff/soul_thun.json`): the span is 232 KB before it
+and 207 KB after. Moved to `+0x2A7000` by its track, it would leave
+439 KB whole. `FREE_XAREA` and `FREE_SONGS` shrank from their
 ends and stayed: a checkpoint's music player points into the songs, each
 copied where it was in the session that saved it. In `code` nothing moved:
 the chips' code and art are where their recipes put them, and the span
@@ -306,17 +311,19 @@ between them, `+0x640000`-`+0x6A0000` (384 KB), was never written;
 
 | Zone | Headroom before | Headroom now | Largest gap now |
 | --- | --- | --- | --- |
-| `world` | 64 KB (60 KB and 4 KB) | 600 KB | 484 KB, `+0x2A7000`-`+0x320000` |
+| `world` | 64 KB (60 KB and 4 KB; 19 KB once the Souls' room took its 45) | 555 KB with the Souls' room in | 232 KB, `+0x2A7000`-`+0x2E1000`; then 207 KB, `+0x2EC400`-`+0x320000`, and 112 KB, `+0x184000`-`+0x1A0000` |
 | `code` | 3.9 KB (`FREE_TAIL`) | 444 KB | 384 KB, `+0x640000`-`+0x6A0000` |
 | the others | as they were: `layers` 32 KB, `words` 18.8 KB, `engine` 2.4 KB, `code-low` and `art` none | | |
 
-`--fit 0x10000` now lists three places: `world`'s `+0x184000` and
-`+0x2A7000`, `code`'s `+0x640000`. What is known to want room fits with
-room over: BN4's Souls' shared room (`+0x2E1000`-`+0x2EC400`, 45 KB,
-placed by its own change) lies inside `world`'s span, which is then
-232 KB before it and 207 KB after; the town's 60 KB and the Souls' second
-room of 45 KB go beside it with `--fit`, or the second room, a room filled
-per battle, into `code`'s span, its kind's.
+`--fit 0x10000` now lists four places: `world`'s `+0x184000`, `+0x2A7000`
+and `+0x2EC400`, `code`'s `+0x640000`. What is known to want room fits
+with room over: the town's 60 KB and the Souls' second room of 45 KB
+beside the first with `--fit`, or the second room, a room filled per
+battle, into `code`'s span, its kind's. The owner's call for one shared
+room ([BN4's Souls](../../multirom/bn4-souls.md), The shared room) was
+made against a copy with no room for the twelve Souls' sprites, 438 KB
+in all; that much is free now (439 KB around the room in `world`, 384 KB
+in `code`), and the call is the owner's to keep or revisit.
 
 **Saved states.** The regions moved are copied anew by each core, the
 first time each is needed, and found again by a check of the copy
