@@ -3,7 +3,7 @@ type: Feature
 title: "Arrow lanes"
 description: "Arrow lanes (issue #43): BN6's one-way arrow panels as a layer's quick way back from a far detour (`plan_lane`, `carve_lane`), each area's own arrow art (`props_learn_arrow`), and BN6's own ride."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T10:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T19:30:26Z }
 ---
 
 # Arrow lanes (built, issue #43)

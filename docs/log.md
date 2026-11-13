@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: world/level-design/arrow-lanes.md (Not a walkway's look: arrow lanes' panels listed per map and left out of the floor's tiles), world/level-design/props.md (Green's bush cut where its tiles are fewest).
 * **Update**: devtools/tile-test.md (Each area's laying: a pad's panels alone laid whole, taken by BN5's SciLab and BN4's ACDC Area; every walkway drawn apart measured and not taken; nothing left over a pad's stamp on the second tile layer, Seaside's pads mended).
 * **Update**: devtools/tile-test.md (Each area's laying: every area measured as it is, with whole panels and with the thin books' rules; seven areas take what measured better and looked right; where the count misled; Where the breaks lie: a layer's breaks by the place on its floor, the join of a walkway and a room first), code/dev.md (break_places.c).
 * **Creation**: world/level-design/lead-map.md (which of an area's maps a layer's look follows, by its seed; each map measured as the lead, twelve areas' lists). **Update**: world/level-design/index.md (its line).

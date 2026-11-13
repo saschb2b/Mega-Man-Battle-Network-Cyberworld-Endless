@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T19:30:26Z
-* **Update**: world/level-design/arrow-lanes.md (Not a walkway's look: arrow lanes' panels listed per map and left out of the floor's tiles), world/level-design/props.md (Green's bush cut where its tiles are fewest).
