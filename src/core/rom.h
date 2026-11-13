@@ -65,6 +65,7 @@ typedef struct {
 	                          * their ids table's AI index (docs/game/bosses/bn5-navis.md), BN4's by their V1 enemy id
 	                          * (docs/game/bosses/bn4-navis.md; xguardian_named); 0 none: BN6's guardians */
 	uint8_t leads;           /* its other maps (`more`, bit k its k-th) that may lead a layer's look in its own map's place, by the layer's seed: those that as the lead drew its layers no worse (docs/world/level-design/lead-map.md) */
+	uint8_t lay;             /* how its maps' panels are laid, where its layers measured better so (LAY_*, src/map/tiles.h): 16 whole (as TILES_WHOLE), 1 an end's panels lend no other panel art, 2 a straight run from one plain panel, 4 beside a whole panel its map's own tiles, 8 a panel taken up laid again (docs/devtools/tile-test.md, Each area's laying) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */

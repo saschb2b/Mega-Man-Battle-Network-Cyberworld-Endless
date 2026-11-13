@@ -58,6 +58,12 @@ unsigned netmap_road_hues(int area);
 /* (dev) Every layer led by the area's map of this number (0 its own, 1
  * and up its others), whatever its definition allows; -1 as it allows. */
 extern int netmap_lead_forced;
+/* (dev) Every area's maps' panels laid whole (TILES_WHOLE), whatever its
+ * definition says: to measure an area with them. */
+extern bool netmap_whole_forced;
+/* (dev) ... and the thin books' rules of laying (LAY_*, tiles.h) on every
+ * area's own floor. */
+extern unsigned netmap_rules_forced;
 /* The pieces of scenery the last layer got. */
 extern int netmap_scenery;
 /* The floor cells the last layer's floor changed to be drawable, and the

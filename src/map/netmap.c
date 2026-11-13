@@ -485,7 +485,9 @@ static bool install_gfx(const Learned *L) {
  * its definition allows (NetAreaDef.leads: the maps that as the lead drew
  * its layers no worse, docs/world/level-design/lead-map.md). The books in
  * that order into `led`; how many. */
-int netmap_lead_forced = -1;   /* (dev) every layer led by this map, whatever is allowed */
+int netmap_lead_forced = -1;
+bool netmap_whole_forced;
+unsigned netmap_rules_forced;   /* (dev) every layer led by this map, whatever is allowed */
 
 static int lead_books(const Learned *L, TileBook led[MAX_BOOKS]) {
 	int may[1 + NET_MORE_MAPS] = { 0 }, n = 1, nled = 0;
@@ -511,6 +513,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * own; where an area has none, a walkway's end at a room is no piece of
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
+	grid.rules = netmap_rules_forced | (L->def->lay & LAY_RULES);
 	grid.roads = L->road;
 	grid.nroads = L->nroads;
 	for (int k = 0; k < L->nbooks; ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;

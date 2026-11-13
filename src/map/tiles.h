@@ -126,8 +126,17 @@ typedef struct {
 	int wall;          /* how far over a floor's upper edge a wall of it may stand, which lies in front of what is behind it (0: none known; 8 where the area's panels are laid whole) */
 	const struct TileBook *roads;   /* the books of the area's roads, its TILE_ROAD panels' (NULL: it has none) */
 	int nroads;
+	unsigned rules;    /* the thin books' rules of laying that hold here though the books are not thin (LAY_*, panels_lay.c) */
 	bool thin;         /* its books are thin (a road's): a panel taken up for how it meets its neighbours is laid again from another that meets them (panels_lay.c) */
 } TileGrid;
+
+/* TileGrid.rules: an end's panels lend a panel that is no end nothing; a
+ * straight run is laid from its shape's one plain panel; beside a panel
+ * laid whole its map's own tiles; a panel taken up is laid again. A thin
+ * grid has them all. */
+enum { LAY_NO_END_ART = 1, LAY_PLAIN_RUNS = 2, LAY_KEEP_TO_WHOLE = 4, LAY_AGAIN = 8, LAY_RULES = 15 };
+/* NetAreaDef.lay beside them: its maps' panels laid whole, as TILES_WHOLE. */
+#define LAY_WHOLE 16
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD
  * and | TILE_APART. */
