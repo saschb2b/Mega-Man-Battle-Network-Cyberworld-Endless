@@ -133,7 +133,8 @@ no map of its area shows. Two things keep layers from it (13 November
   floors the same way, and its two maps measure side faces of 17 and 10
   pixels, so the walkway lattice of Town Area 1 lends its panels nothing.
 - **The layouts.** Park's platform is four panels wide; a room three wide,
-  a way two wide beside a room, an L of two rooms have no tiles in BN4.
+  a way two wide beside a room, an L of two rooms have no panel in BN4
+  (the first has its tiles all the same: Panels lent tile by tile, below).
   Town's maps have walkways one wide and squares of three by three joined
   at the middles of their sides; a walkway's dead end, a square of another
   size and two squares side by side have none. Laying whole panels changes
@@ -141,21 +142,78 @@ no map of its area shows. Two things keep layers from it (13 November
   (116.8 per 100 panels with it on everywhere), which is the measure of
   how much of the rest is layout.
 
-Whole panels are on where they were checked by eye (`TILES_WHOLE`): Park
-Area (breaks 304 to 263 per 100 panels) and BN5's Oran Area (529 to 438).
-Elsewhere they are off: the Graveyard's slabs lost their upper rims to
-them (40 to 59), BN4's ACDC Area gained breaks (249 to 272), BN5's ACDC,
-Sky and Robot Control too. In Park and Oran the older counts rose with
-them (seams and nicks, where a panel laid whole meets tiles picked one by
-one; all six of each area's layers), and the baseline was rewritten for
-those twelve layers alone: by eye a Park layer's rooms are BN4's platform
-where they were pieces, an L of two rooms too.
+Whole panels were first on for Park Area (breaks 304 to 263 per 100
+panels) and BN5's Oran Area (529 to 438) alone; switched on everywhere
+they left the total where it was, the Graveyard's slabs losing their upper
+rims (40 to 59), BN4's ACDC Area gaining breaks (249 to 272).
 
 The layouts stay as they are (the owner's call, 13 November 2026: no
 area's rooms are held to the shapes its art draws). So what is left is the
-tiles': Park's rooms three panels wide and its small squares, a way two
-wide beside a room, Town's dead ends and squares of other sizes have no
-tiles in BN4, and are drawn tile by tile as before.
+tiles'.
+
+## Panels lent tile by tile
+
+A panel laid only where a map has its whole 3 x 3 leaves most of a map
+unused, and three readings were wrong besides (13 November 2026, on
+hand-drawn floors again, each cause traced to the map panel laid or left
+out):
+
+- **Park's rim under its conveyor was void.** `TILES_UNDER` took a panel
+  passing under the conveyor for floor only in the platforms' hue; the
+  platform's rim, a walkway's by its hue, was a hole there, so both long
+  sides ended in mid-air and their panels lent nothing.
+- **A panel was lent whole or not at all.** Park's left corner draws 4
+  pixels past where a tile may, in one of its sixteen tiles; its lower-left
+  end has a conveyor one panel off. Both were left out, and a room's left
+  corner was a plain wedge. A tile shows only the panels it lies on or
+  beside, so panels are now kept in part and laid piece by piece
+  ([the generator](../world/level-design/generator.md), Tile picking):
+  every rectangle, three wide, three by three or five wide, comes out as
+  BN4's platform with its four corners.
+- **What lies round a floor was laid by its own neighbourhood.** A void
+  panel above an upper edge has the same 3 x 3 under a platform's wall as
+  under a walkway's rim; Park's upper edges were scalloped with walkways'
+  rims. It is laid now as a map lays it beside the floor laid there.
+- **Park's small rooms were pads**, drawn in the look of its map's one
+  pad, its Navi's round hub (`TILES_NO_PAD_LOOK` now).
+- **The Graveyard's upper rims.** Its maps set the rim of some upper edges
+  on the second tile layer. A tile that draws nothing on the first passed
+  as a tile of nothing, and laid over a slab's upper edge it took the rim
+  away. Such a tile is taken from both layers now.
+- **Town Area 3's lower paths were its walkways.** They pass under its
+  roads inside their walls' rings, three rings deep, which reads as floor.
+  `TILES_OUTER_FLOOR` leaves them out. The 17 pixels its side faces
+  measure are no error: they are its squares', which stand on a base, its
+  walkways' in Town Area 1 measure 10; panels are lent whatever the faces.
+
+Breaks per 100 panels, the atlas's 2 seeds: Park Area 263 to 172, BN5's
+Oran Area 438 to 341, and with whole panels now on there, BN4's countries
+195 to 115 (small rooms platforms too), BN4's Undernet 303 to 262, BN5's
+Undernet 248 to 195. Town Area 488 to 468, its look about the same.
+
+Where they stay off, each looked at with them on:
+
+- **The Graveyard** (40, 52 with them): the upper rims are back, but its
+  slabs gain breaks where a pad's room or a walkway joins them, shapes its
+  maps do not have.
+- **Sky** (107, 88 with them): fewer breaks and the wrong picture. Its
+  glass catwalks come out as its fields' framed squares.
+- **BN5's ACDC Area** (142, 165): its circuits' walkways lose their rims
+  to panels from its wide circuit field.
+- **BN4's ACDC Area** (249, 306) and **Town Area** (468, 526): their
+  squares come out complete, both marks and the base, but the walkways
+  take an end stud or a connector at every other panel, and in Town the
+  roads' yellow and the hubs' green come along under the squares.
+
+What BN4's Park map has no tiles for, drawn tile by tile as before: the
+tip under a platform's bottom corner (its one bottom corner carries a
+walkway's end, so a room shows two tiles of it there), the inner corner of
+an L of two rooms, a room two panels wide (no field: two rims).
+
+One thing changed that was not asked for and stays (the owner's call, 13
+November 2026): Park's walkways. A dead end is BN4's round end pad now and
+a way's end at a room an arrow head or a pad, since rooms are drawn apart;
+some straight runs repeat BN4's connector piece.
 
 ## The seams, and what was tried against them
 

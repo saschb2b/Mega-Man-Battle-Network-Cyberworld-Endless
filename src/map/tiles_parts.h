@@ -66,6 +66,7 @@ extern PlainMemo *tl_plain_memo;
 #define FACE_TALL 32        /* taller faces are a raised floor's, down to the ground */
 
 #define OUT 3               /* pixels beyond the floor's edge that may be drawn */
+#define TILE_OUT OUT
 #define WIN (8 + 2 * OUT)   /* the columns a tile's pixels look at */
 
 typedef struct {
@@ -81,6 +82,11 @@ int tl_misses(uint64_t mask, uint64_t must, uint64_t never);
 /* The tile's pixels up to `band` pixels straight above floor: where a wall
  * stands on a floor's upper edge. */
 uint64_t tl_above_floor(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int band);
+/* The panels round tile (tx, ty)'s own (bit k: (A + k % 3 - 1,
+ * B + k / 3 - 1)) that its pixels lie on, each looked for `out` pixels to
+ * its sides too (half as far up and down), and from `up` pixels above it to
+ * `down` below. */
+unsigned tl_tile_panels(const TileGrid *g, int tx, int ty, int out, int up, int down);
 bool tl_flat_tile(const AreaSrc *a, int tx, int ty);
 uint64_t tl_drawn(const AreaSrc *a, bool first, int tx, int ty, uint16_t px[64]);
 void tl_calibrate(const AreaSrc *a, const Src *src, TileGrid *g);

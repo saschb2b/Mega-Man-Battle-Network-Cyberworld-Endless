@@ -307,6 +307,88 @@ static void learn_variety(TileBook *out) {
 	out->vary_first[64] = nv;
 }
 
+/* What learning a map's tiles holds as it goes over them. */
+typedef struct {
+	const AreaSrc *a;
+	const Src *src;
+	const TileGrid *g;
+	const uint8_t *pads;
+	bool bg_in_map;
+	PanelsLearn *whole;   /* its panels learned too (TILES_WHOLE), or NULL */
+} Learning;
+
+/* The platform and walkway floors round panel (A, B); true where floor of
+ * another kind, or floor whose tiles are not learned, lies among them. */
+static bool floors_around(const Src *src, int A, int B, unsigned *oa, unsigned *ob) {
+	bool mixed = false;
+	*oa = *ob = 0;
+	for (int k = 0; k < 9; ++k) {
+		int st = tl_src_panel(src, A + k % 3 - 1, B + k / 3 - 1);
+		if (st == OTHER || tl_skipped(src, A + k % 3 - 1, B + k / 3 - 1)) mixed = true;
+		if (st == TILE_A) *oa |= 1u << k;
+		if (st == TILE_B) *ob |= 1u << k;
+	}
+	return mixed;
+}
+
+/* A tile that is no pair of the floor's, left to its panel, which may keep
+ * it yet (a wall over a floor's upper edge is the panel's to draw). */
+static void to_panel(const Learning *L, PanelSpot at, int tx, int ty, uint64_t must, uint64_t never) {
+	panels_loose(L->whole, at, tx, ty, must, never & ~tl_above_floor(L->g, tx, ty, tl_src_floor, L->src, WALL_BAND));
+}
+
+/* Tile (tx, ty) of the map: its pair in *t where it is one of the floor's
+ * (true); and for the map's panels, the tile or what its panel lacks. */
+static bool learn_tile(const Learning *L, int tx, int ty, TileCand *t) {
+	const AreaSrc *a = L->a;
+	int phase, A, B;
+	tile_class(L->g, tx, ty, &phase, &A, &B);
+	unsigned oa, ob;
+	bool mixed = floors_around(L->src, A, B, &oa, &ob), off_floor = !((oa | ob) & 0x10);
+	if (!(oa | ob) || (mixed && !L->whole)) return false;
+	PanelSpot at = { A, B, phase };
+	uint64_t must, never, deep;
+	tl_expect(L->g, tx, ty, tl_src_floor, L->src, TILE_A, &must, &never, &deep);
+	/* (off the floor, filler the map hides under what it sets over it: no
+	 * tile of the floor's, nor of its panel's) */
+	bool filler = off_floor && tl_flat_tile(a, tx, ty);
+	/* (floor of another kind in or beside its panel: no pair of the floor's,
+	 * but its panel may lend the tile yet, in part) */
+	if (mixed) {
+		if (tl_src_panel(L->src, A, B) == OTHER || tl_skipped(L->src, A, B)) panels_bad(L->whole, A, B);
+		else if (filler) panels_lacks(L->whole, A, B);
+		else to_panel(L, at, tx, ty, must, never);
+		return false;
+	}
+	if (filler) { panels_lacks(L->whole, A, B); return false; }
+	/* The first layer alone where it draws the floor: what the originals
+	 * set in front of their floors on the second (bridges, ornaments,
+	 * spikes, floors overlapping others on screen) belongs to them, not to
+	 * the floor. The second too where the floor needs it (the Judge Tree
+	 * draws its panels' middles there), except where the map holds the
+	 * background: there it is that background. */
+	bool back = false;
+	t->mask = tl_drawn(a, true, tx, ty, t->px);
+	if (tl_misses(t->mask, must, never) > SLACK) {
+		bool second = a->layers >= 2 && !L->bg_in_map;
+		if (second) t->mask = tl_drawn(a, false, tx, ty, t->px);
+		/* (made for something else here; a panel may keep it yet) */
+		if (!second || tl_misses(t->mask, must, never) > SLACK) { to_panel(L, at, tx, ty, must, never); return false; }
+		back = true;
+	}
+	size_t i = (size_t)ty * a->tw + tx;
+	t->key = KEY(phase, oa, ob);
+	t->e0 = a->tile[0][i];
+	t->e1 = back ? a->tile[1][i] : 0;
+	t->count = 1;
+	t->other = 0;
+	t->pad = tl_pad_look(L->src, L->pads, A, B);
+	/* (nothing on the first layer: the second may draw the panel's there) */
+	if (L->whole && !t->mask) to_panel(L, at, tx, ty, must, never);
+	else panels_tile(L->whole, at, t->e0, t->e1, t->mask, t->px);
+	return true;
+}
+
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out) {
 	memset(out, 0, sizeof *out);
 	Src src = { a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, NULL, NULL, styles & TILES_INNER_WALLS, NULL };
@@ -322,60 +404,19 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	TileCand *c = malloc(((size_t)a->tw * a->th + 1) * sizeof *c);
 	if (!c) { src_close(&src); free(pads); return; }   /* (a book of nothing) */
 	size_t n = 0;
-	PanelsLearn *whole = styles & TILES_WHOLE ? panels_begin() : NULL;
+	Learning L = { a, &src, &g, pads, bg_in_map, styles & TILES_WHOLE ? panels_begin() : NULL };
 	/* (the original map's pixels kept as its tiles are tested: learning an
 	 * area asked after each a thousand times, three quarters of the time) */
 	tiles_keep_begin(&g, tl_src_floor, &src);
 	for (int ty = 0; ty < a->th; ++ty)
-		for (int tx = 0; tx < a->tw; ++tx) {
-			int phase, A, B;
-			tile_class(&g, tx, ty, &phase, &A, &B);
-			unsigned oa = 0, ob = 0;
-			bool mixed = false;
-			for (int k = 0; k < 9; ++k) {
-				int st = tl_src_panel(&src, A + k % 3 - 1, B + k / 3 - 1);
-				if (st == OTHER || tl_skipped(&src, A + k % 3 - 1, B + k / 3 - 1)) mixed = true;
-				if (st == TILE_A) oa |= 1u << k;
-				if (st == TILE_B) ob |= 1u << k;
-			}
-			if (!(oa | ob)) continue;
-			if (mixed) { panels_bad(whole, A, B); continue; }
-			TileCand *t = &c[n];
-			uint64_t must, never, deep;
-			tl_expect(&g, tx, ty, tl_src_floor, &src, TILE_A, &must, &never, &deep);
-			if (!((oa | ob) & 0x10) && tl_flat_tile(a, tx, ty)) { panels_loose(whole, (PanelSpot){ A, B, phase }, tx, ty, must, never & ~tl_above_floor(&g, tx, ty, tl_src_floor, &src, WALL_BAND)); continue; }
-			/* The first layer alone where it draws the floor: what the
-			 * originals set in front of their floors on the second (bridges,
-			 * ornaments, spikes, floors overlapping others on screen) belongs
-			 * to them, not to the floor. The second too where the floor needs
-			 * it (the Judge Tree draws its panels' middles there), except where
-			 * the map holds the background: there it is that background. */
-			bool back = false;
-			t->mask = tl_drawn(a, true, tx, ty, t->px);
-			if (tl_misses(t->mask, must, never) > SLACK) {
-				bool second = a->layers >= 2 && !bg_in_map;
-				if (second) t->mask = tl_drawn(a, false, tx, ty, t->px);
-				/* (made for something else here; a panel may keep it yet) */
-				if (!second || tl_misses(t->mask, must, never) > SLACK) { panels_loose(whole, (PanelSpot){ A, B, phase }, tx, ty, must, never & ~tl_above_floor(&g, tx, ty, tl_src_floor, &src, WALL_BAND)); continue; }
-				back = true;
-			}
-			size_t i = (size_t)ty * a->tw + tx;
-			t->key = KEY(phase, oa, ob);
-			t->e0 = a->tile[0][i];
-			t->e1 = back ? a->tile[1][i] : 0;
-			t->count = 1;
-			t->other = 0;
-			t->pad = tl_pad_look(&src, pads, A, B);
-			panels_tile(whole, (PanelSpot){ A, B, phase }, t->e0, t->e1, t->mask, t->px);
-			++n;
-		}
+		for (int tx = 0; tx < a->tw; ++tx) n += learn_tile(&L, tx, ty, &c[n]);
 	tiles_keep_end();
 	learn_shapes(&src, pads, out);
 	keep_cands(c, n, out);
 	tl_find_plain(out);
 	learn_patch(a, &src, &g, pads, out);
 	for (int i = 0; i < out->n; ++i) out->joins += KEY_A(out->cand[i].key) && KEY_B(out->cand[i].key);
-	panels_end(whole, &src, pads, out);
+	panels_end(L.whole, &src, pads, out);
 	src_close(&src);
 	free(pads);
 }
@@ -406,6 +447,8 @@ void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uin
 		}
 		fputc('\n', f);
 	}
+	/* (to lay the panels' grid over its picture) */
+	fprintf(f, "(rows from A %d down, columns from B %d; the grid's origin %d, %d)\n", a1, b0, a->ex, a->ey);
 	src_close(&src);
 	free(pads);
 }
