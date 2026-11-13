@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Hooks"
 description: "Hooks on BN6's code (`src/emu/hook.c`): a BKPT over an instruction that calls the engine's C mid-frame, event and answer hooks, one table per core, and every address hooked, from battles and maps to BN5's Souls."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:40:00Z }
 ---
 
 # Hooks
@@ -43,8 +43,16 @@ function replacement), while BN6's code stays the ROM's.
   the ROM stays; one in RAM is written again after a state is loaded or the
   core reset (`hook_reapply`). A patch of RAM the game copies from a ROM
   image patched alike (IWRAM's routines, as the game powers on) is kept
-  (`emu_keep`): saved with the game's own bytes, made the engine's again
-  as a state is loaded. A hook taken off restores the original; its
+  (`emu_keep`): saved with the game's own bytes, a checkpoint's queued
+  state too, and made the engine's again as a state is loaded, whatever
+  the state holds there. A state another build saved can hold that
+  build's patch, and such a patch calls into the ROM's free space where
+  that build's code lay: 0.20.0's checkpoints held the hit gate's calls
+  to `0x08D90070`, 0.21.0 moved that code by 0x40 bytes and left bytes
+  that read neither the game's own nor its own patch alone, and a run
+  continued across the update stood still at the first hit of any
+  attack, the CPU gone from the gate into another routine (issue #482).
+  A hook taken off restores the original; its
   slot stays only while the CPU may hold its BKPT in the prefetch.
 - **A table per core.** Each core attached keeps its own hooks and queue,
   found by the CPU that met the BKPT, and a hook reads and writes the core
@@ -269,8 +277,10 @@ twin spawned as BN6's own number (its number in the side table too,
 where nothing reads it); a type no family named let go as it first runs.
 Then RAM kept patched (`emu_keep`): the patch made where the game's own
 bytes are, a state saved with the game's own there (another core loading
-it reads them), the patch made again as the state is loaded, and bytes
-that read neither left alone. Last, the installers' claims through
+it reads them), a queued state too, the patch made again as the state is
+loaded, and made so too where the state holds another build's patch
+(issue #482: each of the last three fails on the build before its fix).
+Last, the installers' claims through
 `emu.c`'s writes and hooks (`src/emu/claims.c`): an installer's bytes its
 own, another's write over them told, a write outside any installer
 nobody's, and a hook set on an installer's bytes told. Then the

@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T22:24:00Z
-* **Update**: world/level-design/side-pieces.md (the Undernet's and Undernet Zero's fire bowls, which BN6 animates by itself; a piece set only where the panels it draws over are as in its map), rom/graphics.md (the flames set on layers).

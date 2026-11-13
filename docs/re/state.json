@@ -188,8 +188,8 @@
     {
       "name": "The net maps' own pieces on generated layers",
       "state": "building",
-      "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws and BN4's Undernet's flames, cut from the maps' second tile layer with the panel they grip and MegaMan drawn behind them as in BN6 (src/map/sides.c), and the Underground's teal emblems. Found in the ROM and seen in the game: the Undernet's flames and Aquarium Comp's fish are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py), which a map shows by setting those tile numbers.",
-      "left": "Set the animated blocks on layers; the Aquarium's pillars (its pads are raised floor in its maps) and Robot Control's pipes; the other kinds on issue #505.",
+      "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6, and the Underground's teal emblems. The Undernet's bowls are tile animations the maps' GFXAnim lists write (tiles 726-737; tools/map_anims.py) and burn on a generated layer by the game's own script; Aquarium Comp's fish (tiles 1-12) are found and not set.",
+      "left": "The Aquarium's pillars with their fish (its pads are raised floor in its maps) and Robot Control's pipes; the other kinds on issue #505.",
       "updated": "2026-11-13",
       "link": "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505",
       "state_text": "Being built"
@@ -207,6 +207,10 @@
     },
     {
       "date": "2026-11-13",
+      "what": "ThunSoul's look on the shared room (docs/multirom/bn4-souls.md, The shared room; the owner's call: one room, the united Soul's): FREE_BN4_SOUL_LOOK holds his sprite, face and BN4's digits, BN6's list 0 number 0x5F and face 0x1D the room's, no overlay of the proxy's; soul_thun holds his sprite and palette, mutations 560 and 561 caught; the unison's picture and his buster's flash not moved."
+    },
+    {
+      "date": "2026-11-13",
       "what": "UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code)."
     }
   ],
@@ -217,6 +221,14 @@
       "name": "The emotion window's faces read, and the Souls' sprites measured",
       "result": "tools/xrecipe_thumb.py's walk of BN4 0x08014B78 (the window's step) and 0x08016A20 (the face and count): a Soul's face is his form + 4, its tiles 0x100 bytes at 0x0870B8E0 by the face - 5, the digits six of 0x80 at 0x0870BEE0, the palettes eleven of 0x20 at 0x0870C1E0, the three tables end to end. tools/xrecipe.py's sprite over BN4's list 0, 1-12: 438,514 bytes, 33,110 to 42,324 each, ThunSoul's 35,843; list 8's pictures 1-12 1,564 to 1,894. tools/free_space.py --fit: no gap of 64 KB in the ROM copy, one of 60 KB.",
       "meaning": "Red Sun's ROM holds six Soul faces, its own: Blue Moon's six would draw the digits' bytes (derived, no frame looked at). The Souls' sprites cannot be resident: one room filled as a Soul unites, or a larger ROM copy.",
+      "link": "../multirom/bn4-souls.md"
+    },
+    {
+      "feature": "BN4's Souls on BN6's proxy form",
+      "date": "2026-11-13",
+      "name": "ThunSoul's look filmed against BN4's battle",
+      "result": "bn4_soul_thun with film (t2 to t176 every 6 frames, both games' pictures side by side): BN6's MegaMan in ThunSoul's own sprite and colours, his face and the 3 under it as BN4's window shows them, no flame overlay; before, HeatCross's body, a wrong face and an overlay. BN4 draws a flash at his arm at t164 and t170 where BN6 draws none. soul_thun: sprite 0x08AE1000 and palette 0 from t1 to t300, the shot's frames as before (t154, t177).",
+      "meaning": "The shared room serves a BN4 Soul's body and face through BN5's hooks with one list-0 number and one face; the flash and the unison's picture are the look's rest.",
       "link": "../multirom/bn4-souls.md"
     },
     {

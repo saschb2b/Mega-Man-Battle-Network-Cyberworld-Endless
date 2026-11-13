@@ -1,5 +1,5 @@
 {
- "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6) in BN6's engine alone, held to BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 battle, the reference; docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): the Souls installed holding it (souls6 bit 6: BN6's Soul 13 over the proxy form, src/emu/soulbn4.c), a folder of BN6's chip 30 B (Elec, ThunSoul's kind); the first Custom screen picks the chip, UNITE (five right, down, A) and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90 (BN4_CHARGE_TIMES' row of power attack 0x58, the same at every Charge), its release the charged shot: BN4's family 0x47 moved as BN6's grown 0xD7 (an attack unit of tools/xchiprecipe_bn4.py), from its power attack 0x58 copied with it (BN6's grown 0xA5). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6) in BN6's engine alone, held to BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 battle, the reference; docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): the Souls installed holding it (souls6 bit 6: BN6's Soul 13 over the proxy form, src/emu/soulbn4.c), a folder of BN6's chip 30 B (Elec, ThunSoul's kind); the first Custom screen picks the chip, UNITE (five right, down, A) and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90 (BN4_CHARGE_TIMES' row of power attack 0x58, the same at every Charge), its release the charged shot: BN4's family 0x47 moved as BN6's grown 0xD7 (an attack unit of tools/xchiprecipe_bn4.py), from its power attack 0x58 copied with it (BN6's grown 0xA5). He wears his own look (src/emu/soullook.c's room: his sprite, palette, face and count; no overlay of the proxy's). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
  "kind": "engine",
  "subject": "megaman",
  "foes": "01@52",
@@ -161,6 +161,26 @@
      300,
      "0x7D0"
     ]
+   ],
+   "sprite": [
+    [
+     1,
+     "0x08AE1000"
+    ],
+    [
+     300,
+     "0x08AE1000"
+    ]
+   ],
+   "palette": [
+    [
+     1,
+     "0x00"
+    ],
+    [
+     300,
+     "0x00"
+    ]
    ]
   },
   "foe_hp": [
@@ -177,5 +197,5 @@
    "0x300"
   ]
  },
- "expect_why": "BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 trace, the reference, the same keys; its BN4 numbers in BN6's): ThunSoul united from t1 (BN6's Soul 13, its used bit 0x2000 for the battle), its loadout BN4's form 6 row (ff 00 ff 58) as BN6's six bytes, its charged shot BN6's grown power attack 0xA5 (BN4's 0x58), his element Elec (3, BN4_FORM_ELEMENTS' form 6); the charged shot's state from t154 (BN4's 0x47 at t154, BN6's grown 0xD7) to his ready state again at t177 (BN4's 6 at t177), the Mettaur's HP 40 before its hit and 20 at t167 (BN4's 40 to 20 at t167: the power attack's 20); the ring's sound, BN4's 0x91 at t162, BN6's grown slot 0x300 (BN6 has another song at 0x91). B held 88 frames gives the plain buster in both games (its 1 at t155 in BN4's battle, t156 in BN6's with the reference's lag of 1): the charge is 90 in both."
+ "expect_why": "BN4's own course (tests/xdiff/bn4_soul_thun.json's BN4 trace, the reference, the same keys; its BN4 numbers in BN6's): ThunSoul united from t1 (BN6's Soul 13, its used bit 0x2000 for the battle), its loadout BN4's form 6 row (ff 00 ff 58) as BN6's six bytes, its charged shot BN6's grown power attack 0xA5 (BN4's 0x58), his element Elec (3, BN4_FORM_ELEMENTS' form 6); the charged shot's state from t154 (BN4's 0x47 at t154, BN6's grown 0xD7) to his ready state again at t177 (BN4's 6 at t177), the Mettaur's HP 40 before its hit and 20 at t167 (BN4's 40 to 20 at t167: the power attack's 20); the ring's sound, BN4's 0x91 at t162, BN6's grown slot 0x300 (BN6 has another song at 0x91). B held 88 frames gives the plain buster in both games (its 1 at t155 in BN4's battle, t156 in BN6's with the reference's lag of 1): the charge is 90 in both. His look: his sprite the shared room's, BN4's list 0 number 6 copied to FREE_BN4_SOUL_LOOK (0x08AE1000, BN6's list 0 number 0x5F), in palette 0 as BN4's unison sets it (0x080EBB9E); his face and count in the emotion window are seen by film alone (docs/multirom/bn4-souls.md, The shared room)."
 }

@@ -9,6 +9,7 @@
 #include "darkinvs.h"
 #include "debug.h"
 #include "emu.h"
+#include "soulbn4.h"
 #include "soulmood.h"
 
 #define THUMB_BX_LR 0x4770u   /* a stub's instruction, which its hook stands on */
@@ -51,7 +52,8 @@ uint32_t soul_navi_stats(uint32_t obj) {
 
 /* the proxy's own overlay routines (its entries 8 as soulproxy.c left them: HeatCross's) */
 static uint32_t enter_to, leave_to;
-/* a Soul's own way in and out (soullife_routes), and whether it is set */
+/* a Soul's own way in and out (soullife_routes), and whether it is set; BN4's moved Souls (soulbn4.h) have none, in or out:
+ * no overlay, as BN4 gives ThunSoul no enter routine (BN4_FORM_ENTERS' form 6 its nullsub). One that has comes with its move */
 static uint32_t soul_enter[SOULS_BN5_FORMS], soul_leave[SOULS_BN5_FORMS];
 static bool routed;
 
@@ -103,11 +105,13 @@ static HookAct entered(HookRegs *r, void *user) {
 		darkinvs_leave(me);   /* (... and out of its chip AI, 0x0801214A) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
+		if (soulbn4_k(next) >= 0) return go(r, 0);
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for
 	 * it, 0x0800F01C, where the proxy's would give it HeatCross's overlay) */
 	uint8_t soul = hook_read8(soul_field_of(me, BN6_SOUL_ID));
 	if (!next && soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_enter[soul]);
+	if (!next && soulbn4_k(soul) >= 0) return go(r, 0);
 	return go(r, enter_to);
 }
 
@@ -135,6 +139,7 @@ static HookAct left(HookRegs *r, void *user) {
 	}
 	/* (what BN5's Soul takes away as he leaves it, NumberSoul's) */
 	if (soul && routed && soul < SOULS_BN5_FORMS) return go(r, soul_leave[soul]);
+	if (soulbn4_k(soul) >= 0) return go(r, 0);
 	return go(r, leave_to);
 }
 

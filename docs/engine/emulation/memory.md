@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Memory the engine writes"
 description: "The free space plan for the core's ROM copy past BN6's 8 MB, region by region from `EMU_FREE` (`src/emu/free_space.h`, `claims.c`), BN6's tables patched in place, and the EWRAM BN6 leaves alone (`RAM_*`)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:40:00Z }
 ---
 
 # Memory the engine writes
@@ -90,7 +90,8 @@ offers NetBattles; not in a New 3DS's runs, which offer none (there for
 | `+0x260000`-`+0x2A0000` | `FREE_XNAVIS` | Other games' Navis ([Other games' ROMs](../../multirom/overview.md)): an overworld sprite and its mugshot each, copied whole (their offsets are their own); Gregar's list 6 and mugshots point at them from a number Falzar's Navis have there (72, 74, 76-78). Copied, as the songs are, all at once in the areas' order. After them the other games' map objects (sprites of their list 7), all at once the first time one is needed, each at a list-7 number of its own that points at the placeholder `0x084DC040`: BN5's flame of darkness (a DarkChip's, [The meta layer](../../game/meta/overview.md)) at 160, decompressed and its palette turned purple, its Security Cube at 146, its wall of dark flames at 138, decompressed, a dark hole at 135. Its last `0x12000` bytes (from `+0x28E000`) hold a guardian of another game's ([BN5's Navis](../../game/bosses/bn5-navis.md)): his sprite and face, copied anew on each layer he guards and listed at Gregar's 78, which no area's Navi takes | `xnavi.c` |
 | `+0x2A0000`-`+0x2E0000` | `FREE_BACKDROPS` | Other games' battle backgrounds ([Other games' ROMs](../../multirom/overview.md)): each one's BGAnimData record, its tiles and map (LZ77 encoded again), palette, animation scripts and the tiles and lists their frames name; then copies of BN6's three background tables (records, animations, scroll entries) with them after BN6's 22, which the loader's literals point at. Copied all at once in the areas' order | `xbackdrop.c` |
 | `+0x2E0000`-`+0x2E1000` | `FREE_FLAME` | BN6's own flame of darkness ([BN6's own DarkChips](../../game/meta/bn6-darkchips.md)): its blue flame of sprite list 7 (`0x3C`, 1612 bytes) copied whole, its palette turned purple as BN5's flame is, and listed at Gregar's list-7 `0x54`, which points at the placeholder in the player's ROM; a place of its own, the same with or without another game's ROM, copied once a core | `xnavi.c` |
-| `+0x2E1000`-`+0x2F0000` | | Free (61,440 bytes; zone world) | |
+| `+0x2E1000`-`+0x2EC400` | `FREE_BN4_SOUL_LOOK` | BN4's united Soul's look, one room for whichever Soul is united (the owner's call): his sprite (the largest RollSoul's 42,324 bytes), his unison's picture, his face, and BN4's count's digits | `soullook.c` |
+| `+0x2EC400`-`+0x2F0000` | | Free (15,360 bytes; zone world) | |
 | `+0x2F0000`-`+0x320000` | `FREE_MAP_BACKDROPS` | Other games' net maps' backdrops and animations ([Other games' ROMs](../../multirom/overview.md)): for each of their areas, its learned map's BGAnimData record with the backdrop's tiles and map (LZ77 encoded again) and palette, and the map's GFXAnim scripts with the colours, tile lists and tiles their frames name (a palette script's RAM moved to BN6's). The map its layers take over has three entries of its group's tables pointed at them while one of its layers stands: its GFXAnim list, its BGAnimData record, and its 16-byte scroll entry rewritten with BN6's callbacks that do the same; every other layer writes BN6's own back. Copied all at once in the areas' order, as the first layer is built 192 KB since 8 November 2026 (89 KB taken with BN5's and BN4's areas): its 64 KB from `+0x310000` filled before BN4's last three areas, whose layers then kept BN6's backdrop over their 256-colour tiles ([BN4 Red Sun's tables](../../rom/bn4.md), Net maps in 256 colours); a copy that finds no room is said in the log whatever it is set to | `xbackdrop.c` |
 | `+0x320000`-`+0x32F000` | `FREE_BN4_CHIP_SPRITE` | A BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left | `xnavi_bn4_chip.c` |
 | `+0x32F000`-`+0x330000` | | Free (4,096 bytes; zone world) | |
@@ -168,7 +169,9 @@ ROM, which stops a hit on the submerged as BN6's stops one on the
 invisible but for Elec), each in the routines' image in ROM (`0x081D6000` on),
 which the game copies to IWRAM as it powers on, and kept so in RAM
 (`emu_keep`): a state is saved with BN6's own bytes there, so it loads
-in any build, and they are made the engine's again as one is loaded.
+in any build, and they are made the engine's again as one is loaded,
+whatever it holds there (a checkpoint of 0.20.0's held that build's
+calls, [Hooks](hooks.md), States and resets).
 BN6's own battles run as they did: its panels take the element hit's
 steps in the same cycles (but a Wood hit on a conveyor, three more),
 their flags are read from the ROM's table (a few wait states a read),
