@@ -257,7 +257,7 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * Town Area 3 has the area's squares, but its other floor is roads, hubs
  * and paths of another level, whose pieces a layer's walkways took at
  * their ends and turns; the walkways are Town Area 1's. A tile of such a
- * map draws its pads' own art and no more (tiles_learn.c, own_art): a hub
+ * map draws its pads' own art and no more (tiles_art.c): a hub
  * set against a square's corner, a road joined to its side are none of the
  * square's, though they lie where its faces and legs may. */
 #define TILES_PADS_ALONE 0x80000000u

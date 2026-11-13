@@ -335,36 +335,64 @@ mended by a rule of its own:
   beside a floor also holds what another floor near it draws there. Town
   363 to 356.
 
-  The notch under the right corner is the learner's and stays (Not
-  mended). Tried against the first two and dropped: a panel counted as
+  The notch under the right corner was the learner's (below, The art
+  told apart by its floor). Tried against the first two and dropped: a panel counted as
   lying beside a neighbour in pieces by the piece that touches it (Park's
   tip came out, Oran 331 to 345 and BN5's Undernet 190 to 208); one tile
   the same along a corner contact (nothing changed).
 
 Breaks per 100 panels against the state before, whole panels now on in
-Town too: Town Area 468 to 356, Park Area 172 to 94, BN5's Oran Area 341
-to 332, BN4's countries 115 to 105, BN5's Undernet 195 to 190, BN4's
-Undernet 262 to 261; the other 33 areas identical. Laying any tile of the
+Town too, and before the art was told apart by its floor (below): Town
+Area 468 to 356, Park Area 172 to 94, BN5's Oran Area 341 to 332, BN4's
+countries 115 to 105, BN5's Undernet 195 to 190, BN4's Undernet 262 to
+261; the other 33 areas identical. Laying any tile of the
 border's art that meets its neighbours, where the map's own is missing,
 set pieces where none belonged (Town 353 to 396) and is not done.
 
+### The art told apart by its floor
+
+The notch under a Park platform's right corner was three tiles the learner
+turned down. BN4's platform ends 13 pixels past its floor's right corner,
+where a tile may draw 3, in bands a pixel thick (a highlight, two shades,
+an outline) that no colour of their own joins across a step: the floor's
+own art stopped short of them. Taking what is drawn straight under the art
+as its own, and three lines of outline, gave the corner as BN4 draws it;
+but BN5's Oran Area then laid spikes off every room, a walkway's grey rim
+taken for the room's (its count barely moved, 332 to 337: the picture
+showed it, the breaks did not). The learner could not say whose art a
+pixel is. Now it can (`src/map/tiles_art.c`):
+
+- **Each pixel of the art carries its floor panel**, the one whose tiles
+  must draw the pixel it was followed from, and a tile may draw only the
+  art of the floors in and round its own panel.
+- **The art is followed nearest first**, not by sweeps over the map: a
+  pixel between two floors goes to the nearer one.
+- **Floor of another kind has art of its own.** Its pixels begin it and it
+  takes whatever is drawn beside it; a pixel the map's tiles must draw
+  with none of the floor's above it is its too.
+- **What hangs under the art is its own only on a map of one floor
+  height.** Oran's rooms stand raised over its walkways, and a view of one
+  height takes the other's floors for nothing at all: there the rule stays
+  off, and on the one of BN5's Undernet's two maps that has a second
+  height.
+
+Breaks per 100 panels by it: Park 94 to 90 (a room alone 6 to 1), Town 356
+to 329, BN4's countries 105 to 91, its Undernet 261 to 209, BN5's Undernet
+190 to 187, Oran 332 to 333, and no spike in any of the six areas'
+pictures.
+
+Tried and dropped: a tile lent only where none of the panels whose art it
+draws differs (a floor's face is one piece across its panels, and Park's
+corners lost their pieces: 90 to 107); a tile that draws a far floor's art
+never lent (a wall over an upper edge is followed along the edge from its
+corners, so half a wall counted as far).
+
 Not mended:
 
-- **The notch under a Park platform's right corner**, three tiles. BN4's
-  platform ends 13 pixels past its floor's right corner, where a tile may
-  draw 3, in bands a pixel thick (a highlight, two shades, an outline)
-  that no colour of their own joins across a step: the learner's own art
-  stops short of them and the three tiles are turned down. Learned as the
-  floor's art (what is drawn straight under it, and an outline of 3
-  lines), the corner comes out as BN4 draws it, Park 94 to 90, BN4's
-  Undernet 261 to 209, the countries 105 to 90, Town 356 to 334: but BN5's
-  Oran Area then takes a walkway's grey base under a room's rim for the
-  room's own and lays spikes off every room (its count barely moved, 332
-  to 337: the picture shows it, the breaks do not), and BN5's Undernet its
-  lava. Bounding it by depth (2 to 12 pixels) or to colours no top draws
-  loses either the corner or Oran. What it needs is the art told apart by
-  the floor it belongs to, which the learner does not know yet (kept on
-  the branch `wip/learner-under`, commit 044a017d, not pushed).
+- **The other height's floors.** A view of one height should know the
+  others' floors as floor of another kind; then the rule above could hold
+  on Oran's maps and BN5's Undernet's too.
+
 - **A seam at the very tip** under a Park platform's bottom corner, where
   the two halves meet, and a pixel of the walkway's pink.
 - **Town:** where a square joins a walkway or another square, and rooms
