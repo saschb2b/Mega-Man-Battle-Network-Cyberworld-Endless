@@ -176,9 +176,10 @@ bridge of 3-5 panels, attached where it lies farthest from the arrival
 drawn in the area's second floor so it reads apart from the platforms.
 Pads (the 3x3 rooms on spurs) are drawn with tiles learned on the
 original's own pads, where those are square (not the Judge Tree's round
-stumps or Sky's round pods; Robot Control's are its other maps' raised
-white platforms), and the originals' free-standing scenery is
-set in the void beside the floor (`src/map/decor.c`). The
+stumps or Sky's round pods; Robot Control's are cut whole from its maps,
+as Central's are), the originals' free-standing scenery is
+set in the void beside the floor (`src/map/decor.c`), and what they hang
+on their floors' sides on the floor's panels ([Side pieces](side-pieces.md)). The
 guardian holds its middle and the exit waits on its far side; the room the
 bridge leaves from gets the heal and the Net Dealer ([Guardians and super bosses](../../game/bosses/overview.md)). Services go to the bigger platforms, the
 better Mystery Data to pads, and most other Mystery Data to dead ends. A
