@@ -295,11 +295,19 @@ A border is kept whole across its tiles' edges. Its art runs past the line
 a tile may draw up to (a wall over an upper edge, a slab wider than its
 floor), and judged alone the tile that holds the overhang was turned down:
 a tooth at every other tile. The learner follows the floor's own art
-through its map (`tiles_learn.c`, `own_art`): from the pixels the floor's
-tiles must draw to every pixel of the same colour beside one of its own,
-then its outline, within the tiles round the floor and never onto floor of
-another kind; a tile may draw that art wherever it lies, and is marked at
-its place where it needed that (`TilePanel.edge`). Laying has the twin
+through its map (`tiles_art.c`): from the pixels the floor's tiles must
+draw to every pixel of the same colour beside one of its own, nearest
+first, then its outline, three lines of it. Each pixel of the art carries
+the floor panel it belongs to: the one whose tiles must draw the pixel it
+was followed from. Floor of another kind begins art of its own and takes
+whatever is drawn beside it, so its rim does not go to the floor whose rim
+of the same colour it runs into. A tile may draw the art of the floors in
+and round its own panel wherever it lies, and no other's, and is marked at
+its place where it needed that (`TilePanel.edge`). On a map whose floors
+all lie at one height, what is drawn straight under the art is its own too
+(a slab's shading, down to where a tile may draw and three pixels past):
+where a map has floors at several heights, a view of one height cannot see
+the others' floors, and what hangs under its art may be theirs. Laying has the twin
 rule (`panels_lay.c`, `follow_edges`): a laid tile that draws up to its
 edge, with nothing laid beyond, takes the marked tile its map sets there
 along, and that one the next. On a map that lends its pads alone

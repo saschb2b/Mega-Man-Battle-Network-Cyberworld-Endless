@@ -123,6 +123,9 @@ The first and the last kind share a root: the learner does not know which
 piece of a map a pixel belongs to. Told apart (each floor its own piece,
 with the art that hangs on it), a rim past the line can be kept with its
 floor, and another kind of floor becomes something a layer can be given.
+The first step is taken ([the tile test](tile-test.md), The art told
+apart by its floor): each pixel of a floor's art now carries the panel it
+belongs to, and floor of another kind has art of its own.
 Whether a layer should have it is a question for
 [the generator](../world/level-design/generator.md) and the owner: what
 Park's yellow paths do in BN4 is not looked up yet, and a path that moves

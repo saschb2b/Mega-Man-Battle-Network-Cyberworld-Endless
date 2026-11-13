@@ -21,7 +21,7 @@
  * (a slab a tile wider than its floor, a wall over an upper edge), and a
  * tile judged alone is turned down for it: the border came out cut at that
  * tile's edge, a tooth at every other tile. So the learner follows the
- * floor's own art from tile to tile in its map (tiles_learn.c, own_art) and
+ * floor's own art from tile to tile in its map (tiles_art.c) and
  * keeps the tiles that hold it, each marked at its place (TilePanel.edge);
  * and a laid tile that draws up to its edge takes the marked tile its map
  * sets beside it along (panels_lay.c, follow_edges).
@@ -65,7 +65,7 @@ void panels_tile(PanelsLearn *l, PanelSpot at, uint16_t e0, uint16_t e1, uint64_
  * it draws so, in the floor's own colours. */
 void panels_loose(PanelsLearn *l, PanelSpot at, int tx, int ty, uint64_t must, uint64_t never);
 /* ... and of the tile told last so, its pixels that are the floor's own
- * art (tiles_learn.c, own_art), which it may draw wherever they lie; with
+ * art (tiles_art.c), which it may draw wherever they lie; with
  * `only`, it may draw nothing else at all. */
 void panels_own(PanelsLearn *l, uint64_t own, bool only);
 /* The panels with all their tiles, then those in part (lacking a tile, or
