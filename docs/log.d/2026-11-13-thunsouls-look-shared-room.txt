@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T20:57:00Z
+* **Update**: multirom/bn4-souls.md (The shared room: the owner's call of one room for BN4's united Soul's look, its layout, ThunSoul's sprite, palette, face and count built and seen by film against BN4, what the room does not do yet), engine/emulation/memory.md and engine/emulation/free-space.md (`FREE_BN4_SOUL_LOOK`'s row), code/emu.md (`soullook.c`'s row).

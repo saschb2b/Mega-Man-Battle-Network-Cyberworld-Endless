@@ -97,6 +97,8 @@
 #define FREE_BACKDROPS       (EMU_FREE + 0x2A0000u)  /* other games' battle backgrounds (xbackdrop.c) */
 #define FREE_FLAME           (EMU_FREE + 0x2E0000u)  /* BN6's own flame of darkness (xnavi.c) */
 #define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
+#define FREE_BN4_SOUL_LOOK   (EMU_FREE + 0x2E1000u)  /* BN4's united Soul's look, one room for whichever Soul is united (the owner's call): his sprite (the largest RollSoul's 42,324 bytes), his unison's picture, his face, and BN4's count's digits (soullook.c) */
+#define FREE_BN4_SOUL_LOOK_END (EMU_FREE + 0x2EC400u)
 #define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
 #define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
 #define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x320000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left (xnavi_bn4_chip.c) */
@@ -234,6 +236,7 @@
 	X("FREE_XNAVIS", (EMU_FREE + 0x260000u), (EMU_FREE + 0x2A0000u), "", "world") \
 	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
 	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
+	X("FREE_BN4_SOUL_LOOK", (EMU_FREE + 0x2E1000u), (EMU_FREE + 0x2EC400u), "", "world") \
 	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
 	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x320000u), (EMU_FREE + 0x32F000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \

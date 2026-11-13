@@ -18,5 +18,17 @@
   "spec": "soul_thun",
   "soulbreak": 64,
   "what": "the element's hook gives ThunSoul none where BN4_FORM_ELEMENTS gives form 6 Elec (3): his object's +0x0E 0"
+ },
+ {
+  "name": "ThunSoul drawn as another Soul",
+  "spec": "soul_thun",
+  "soulbreak": 1,
+  "what": "the sprite's hook gives BN5's first Soul's sprite (list 0 number 0x45) where the room's (0x5F) is his: his sprite's address another"
+ },
+ {
+  "name": "ThunSoul's palette 1",
+  "spec": "soul_thun",
+  "soulbreak": 2,
+  "what": "the palette's hook gives 1 where BN4's unison sets 0"
  }
 ]
