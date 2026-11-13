@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: devtools/tile-test.md (Each area's laying: every area measured as it is, with whole panels and with the thin books' rules; seven areas take what measured better and looked right; where the count misled; Where the breaks lie: a layer's breaks by the place on its floor, the join of a walkway and a room first), code/dev.md (break_places.c).
 * **Creation**: world/level-design/lead-map.md (which of an area's maps a layer's look follows, by its seed; each map measured as the lead, twelve areas' lists). **Update**: world/level-design/index.md (its line).
 * **Update**: world/level-design/roads.md (Which areas have roads: found in an area's map as it is learned, none named; BN4's ACDC and Town Areas join Park; what the rule turns down and why; raised second systems no road), world/level-design/index.md (its line).
 * **Update**: devtools/map-use.md (Where the unused tiles lie, every area: by place and height, no one place holding most; the families that come back in area after area: a second look of walkway, pads of other looks, marks, things; free-standing scenery a small part; the table by area).
