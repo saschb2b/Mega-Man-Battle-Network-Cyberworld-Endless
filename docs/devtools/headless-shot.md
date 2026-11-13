@@ -3,7 +3,7 @@ type: Tool
 title: "build.py shot: a headless capture's options"
 description: "`build.py shot`'s options for a headless capture in the build image: the scenes, run depth, area, guardian, seed, setup and marks, `--talk`, scripted `--input` and `--taps`, and the frames saved."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:47Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:49:36Z }
 ---
 
 # build.py shot: a headless capture's options

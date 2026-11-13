@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-13
+* **Update**: engine/voxel.md (renamed Depth lighting for players, `depth_lighting` in settings.ini; in the town, Lan's room and battles too, flat under BN6's own camera; what the HUD is; shadows soft and fading; the blob under who stands lies on the floor), engine/index.md (its line), devtools/headless-shot.md (the flag's name).
+
 ## 2026-11-12
 * **Update**: devtools/tile-test.md (the breaks in a layer's picture counted, strips of pixels across tile edges held to the originals'; what they found, the areas still rough, Park Area's platforms drawn apart), world/level-design/generator.md (a tile held to its neighbours' pictures, BN4's ACDC squares' rims learned), code/net-and-map.md (`seams.c`, `tilemap.c`, `breaks.c`), multirom/bn4.md (the off count missed Park Area), devtools/index.md (the tile test's line).
 * **Creation**: engine/voxel.md (voxel mode: the net rebuilt as lit columns under a lower camera, off by default; how a frame is read, lifted, lit and drawn, and what is open), code/gfx-and-audio.md (the readers and the renderer), code/emu.md (`voxel_scene.c`), devtools/headless-shot.md (`--voxel` and its camera).

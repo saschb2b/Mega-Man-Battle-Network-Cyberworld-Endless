@@ -3,7 +3,7 @@ type: Feature
 title: "Depth lighting: the world lit in 3D"
 description: "Options' Display's Depth lighting (off by default, `depth_lighting` in settings.ini; the code's `voxel_` files, its first name) lights the world as the game runs, on the net, in town and in battle (a sun with soft shadows, shaded sides, a glow, what is far out of focus), and on a net layer rebuilds the picture as columns under a camera a little lower than BN6's: how a frame is read, lifted over the layer's own floor, lit and drawn at the screen's scale, where it runs, what it leaves alone, and what is still open."
 tags: [engine, display, options, voxel]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:47Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:49:36Z }
 sources:
   - id: reference-mod
     resource: "https://github.com/scottcandy34/DramaticShapeVoxelMod-latest"
