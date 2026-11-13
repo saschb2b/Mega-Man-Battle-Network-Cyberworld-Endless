@@ -1,0 +1,1 @@
+Seaside's, BN5's SciLab Area's and BN4's ACDC Area's pads take their maps' pads' panels whole (LAY_PADS_WHOLE), the rest of their floors tile by tile as before: those three areas' layers draw other tiles and their legalizer may change other cells; every other area's layers as before.

@@ -513,10 +513,11 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * own; where an area has none, a walkway's end at a room is no piece of
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
-	grid.rules = netmap_rules_forced | (L->def->lay & LAY_RULES);
+	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_PADS_WHOLE));
 	grid.roads = L->road;
 	grid.nroads = L->nroads;
-	for (int k = 0; k < L->nbooks; ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;
+	/* (where its pads' panels alone are laid whole, LAY_PADS_WHOLE, the rest is picked as before) */
+	for (int k = 0; k < L->nbooks && !(((L->def->lay | netmap_rules_forced) & LAY_PADS_WHOLE) && !(L->def->lay & LAY_WHOLE) && !(L->def->styles & TILES_WHOLE)); ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;
 	free(nm_last.seams);
 	nm_last.seams = calloc(cells, 1);
 	free(nm_last.pasted);

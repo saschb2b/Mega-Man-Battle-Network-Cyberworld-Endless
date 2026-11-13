@@ -465,6 +465,26 @@ or rose: the Aquarium 56 to 156 whole, the Judge Tree 42 to 68, Robot
 Control 25 to 40, Seaside 270 to 324. The homepages and comps count two to
 four breaks in a hundred panels either way.) Over all areas 98.5 to 94.9.
 
+Two more ways were measured the same way after it:
+
+- **A pad's panels alone laid whole** (`LAY_PADS_WHOLE`; `CYBERWORLD_RULES=64`).
+  Tile by tile, a pad of another size than its map's came out as a jumble
+  of its frame and the walkway beside it: Seaside's pads counted 8.6
+  breaks a panel, 2024 of its 3514. With the pads' panels from their
+  maps' pads, each in its place, and the rest of the floor as before,
+  Seaside falls from 270 to 242, BN5's SciLab from 193 to 166 and BN4's
+  ACDC Area from 259 to 213, its squares on their green slabs; those three
+  take it. Most other areas rise with it (the Aquarium 56 to 131, the
+  Nest 18 to 28).
+- **Every walkway drawn apart from the rooms**, a run a piece of its own
+  laid on under the room it meets, as a road is
+  (`CYBERWORLD_RULES=32` while it was built). Over all areas 94.9 to
+  115.2: where an area's maps join a walkway and a room in one floor, a
+  room's edge drawn whole across the walkway's mouth is a break at every
+  join. It fell in BN4's countries (84 to 73) and BN5's Undernet (164 to
+  131), which lost its joints of lava at its walkways' ends with it. Not
+  taken, and its code not kept.
+
 The count alone misled twice more here: BN5's End Area fell by an eighth
 and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a
 fifth and set its lower edges' tabs on its upper ones. Sky drew worse with

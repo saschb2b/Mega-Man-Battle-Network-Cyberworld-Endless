@@ -137,6 +137,11 @@ typedef struct {
 enum { LAY_NO_END_ART = 1, LAY_PLAIN_RUNS = 2, LAY_KEEP_TO_WHOLE = 4, LAY_AGAIN = 8, LAY_RULES = 15 };
 /* NetAreaDef.lay beside them: its maps' panels laid whole, as TILES_WHOLE. */
 #define LAY_WHOLE 16
+/* ... or its pads' panels alone laid whole, the rest of its floor tile by
+ * tile as before: a pad's frame from its map's pads, each panel in its
+ * place, where tile by tile a pad of another size than its map's came out
+ * as a jumble of frame and walkway. */
+#define LAY_PADS_WHOLE 64
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD
  * and | TILE_APART. */
