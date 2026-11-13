@@ -191,6 +191,10 @@ versions are trusted.
   ProtoMan's Sword, Wind, Cursor, Fire, Elec and Recovery. No chip lights
   two Souls, so the rule "the first held Soul of the chip's kind" never
   has to choose, and BN5's own UNITE code needs only its flags for 1-6.
+  That holds among BN5's own: BN4's Souls take eleven of the same kinds
+  again, and what a chip lights then is in
+  [BN4's Souls on BN6's proxy form](../multirom/bn4-souls.md), Two Souls
+  of one kind.
 - **The key with the lock, counted.** By the chip records' kinds, BN6 has
   Sword 24, Fire 19, Elec 20, Wind 12 and Cursor 10 (Recovery is no
   element of BN6's; its Recovery chips light MeddySoul by BN5's kind of

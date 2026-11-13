@@ -55,3 +55,23 @@ bool soulkinds_make(void) {
 int soulkinds_of(int chip) { return made && chip > 0 && chip < CHIPS ? kind[chip] : SOULKIND_NONE; }
 
 bool soulkinds_dark(int chip) { return made && chip > 0 && chip < CHIPS && dark[chip]; }
+
+int soulkinds_lights(const SoulTables *t, int of, bool is_dark, unsigned held, uint32_t used, int *chaos) {
+	*chaos = 0;
+	for (int s = 1; s <= SOULKINDS_BN5; ++s) {
+		if (t->kinds5[s - 1] != of) continue;
+		int k = t->bits5[s - 1];
+		/* (the other version's Soul, or one the run has not won: BN4's of the kind, below) */
+		if (k < 0 || !(held >> k & 1)) break;
+		if (used & (1u << s) << (is_dark ? 16 : 0)) return 0;
+		*chaos = is_dark;
+		return s;
+	}
+	for (int k = 0; k < t->n4; ++k) {
+		if (t->kinds4[k] != of) continue;
+		int s = t->first4 + k;
+		if (is_dark || !(t->moved4 >> k & 1) || !(held >> (t->held4 + k) & 1) || (used & 1u << s)) return 0;
+		return s;
+	}
+	return 0;
+}

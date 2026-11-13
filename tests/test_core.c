@@ -5925,6 +5925,37 @@ static void test_soulkinds(void) {
 	CHECK(!soulkinds_make() && soulkinds_of(140) == SOULKIND_NONE && !soulkinds_dark(290), "soulkinds: nothing made without both ROMs");
 }
 
+/* Which Soul a chip's kind lights among both games' (soulkinds_lights;
+ * docs/multirom/bn4-souls.md, Two Souls of one kind): BN5's kinds as its
+ * ROM has them, Team Colonel's six the held bits 0-5 (Souls 7-12), and two
+ * of BN4's as BN6's 13 and 14: one of Elec, whose BN5 Soul is the other
+ * version's (ThunSoul's case), one of Aqua, ToadSoul's kind (AquaSoul's,
+ * the first that meets a held Soul's). */
+static void test_soul_lights(void) {
+	static const uint8_t kinds5[SOULKINDS_BN5] = { 6, 10, 8, 0, 2, 4, 9, 7, 5, 3, 11, 1 };   /* (BN5_SOUL_KINDS) */
+	static const int8_t bits5[SOULKINDS_BN5] = { -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5 };
+	static const uint8_t kinds4[2] = { 2, 1 };
+	SoulTables t = { kinds5, bits5, kinds4, 2, 13, 6, 3 };
+	enum { TOAD = 1u << 5, THUN = 1u << 6, AQUA = 1u << 7 };
+	int chaos = 9;
+	CHECK(soulkinds_lights(&t, 1, false, TOAD, 0, &chaos) == 12 && !chaos, "a Soul lit: ToadSoul by an Aqua chip");
+	CHECK(soulkinds_lights(&t, 1, true, TOAD, 0, &chaos) == 12 && chaos == 1, "a Soul lit: ToadSoul's Chaos Unison by a DarkChip of Aqua");
+	CHECK(!soulkinds_lights(&t, 1, false, TOAD, 1u << 12, &chaos) && soulkinds_lights(&t, 1, true, TOAD, 1u << 12, &chaos) == 12 &&
+		!soulkinds_lights(&t, 1, true, TOAD, 1u << 28, &chaos), "a Soul lit: once a battle, its Chaos Unison once besides");
+	CHECK(!soulkinds_lights(&t, 1, false, 0, 0, &chaos) && !soulkinds_lights(&t, SOULKIND_NONE, false, TOAD | AQUA, 0, &chaos),
+		"a Soul lit: none where none of the kind is held, none by a chip of no kind");
+	CHECK(soulkinds_lights(&t, 2, false, THUN, 0, &chaos) == 13 && !chaos, "a Soul lit: BN4's where the kind's BN5 Soul is the other version's");
+	CHECK(soulkinds_lights(&t, 1, false, AQUA, 0, &chaos) == 14 && !chaos, "a Soul lit: BN4's where the kind's BN5 Soul is not held");
+	CHECK(!soulkinds_lights(&t, 1, false, AQUA, 1u << 14, &chaos) && !soulkinds_lights(&t, 1, true, AQUA, 0, &chaos),
+		"a Soul lit: BN4's once a battle, and none by a DarkChip");
+	CHECK(soulkinds_lights(&t, 1, false, TOAD | AQUA, 0, &chaos) == 12 && !soulkinds_lights(&t, 1, false, TOAD | AQUA, 1u << 12, &chaos),
+		"a Soul lit: both of a kind held, BN5's alone (issue #499's call)");
+	t.moved4 = 1;
+	CHECK(!soulkinds_lights(&t, 1, false, AQUA, 0, &chaos) && soulkinds_lights(&t, 2, false, THUN, 0, &chaos) == 13,
+		"a Soul lit: none of BN4's whose charged shot is not moved");
+	CHECK(!soulkinds_lights(&t, 2, false, THUN, 1u << 13, &chaos) && !chaos, "a Soul lit: its chaos 0 where none is lit");
+}
+
 /* The run's DarkChips (src/director/darkchips.c; docs/game/meta/bn6-darkchips.md, BN6's own
  * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
  * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
@@ -8046,6 +8077,7 @@ int main(int argc, char **argv) {
 	test_chip_records();
 	test_chips_image();
 	test_soulkinds();
+	test_soul_lights();
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();
