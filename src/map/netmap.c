@@ -82,6 +82,7 @@ static bool area_forgotten[NET_AREAS + XAREAS_MAX];
  * for again */
 static void forget(Learned *L) {
 	for (int k = 0; k < MAX_BOOKS; ++k) tiles_free(&L->book[k]);
+	for (int k = 0; k < 2; ++k) tiles_free(&L->road[k]);
 	seams_free(&L->seams);
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
@@ -162,6 +163,7 @@ static bool pad_look;         /* its originals' pads have a look for the layer's
 static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
 static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid out as walkway (TILES_ARENA_DRAWN) */
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
+static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (NetAreaDef.road_styles) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -250,6 +252,75 @@ static void make_stripes(bool keep_pads) {
 		}
 }
 
+/* The way from the layer's arrival to its exit over the floor as it now
+ * stands, for its walkways there to be drawn as roads (NetAreaDef.
+ * road_styles; docs/world/level-design/roads.md): the generator's way
+ * (NetLayout.way) walked again between its two ends, as the legalizer
+ * takes cells of it (of a way widened to two, the lane it ran on); the
+ * shortest walk, and of those the one that keeps most to the generator's. */
+static uint8_t road[MAP_H][MAP_W];
+
+#define STEP 64   /* a step's cost, one off the generator's way 1 more: the shortest first */
+
+static bool on_way(int x, int y) { return nm_cur->way[y * nm_cur->gw + x]; }
+
+/* The generator's way's two ends still floor (cells as y * MAP_W + x); false none. */
+static bool way_ends(int gw, int gh, int end[2]) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	int ends = 0;
+	for (int i = 0; i < gw * gh; ++i) {
+		int x = i % gw, y = i / gw, n = 0;
+		if (!on_way(x, y) || !nm_kind(x, y)) continue;
+		for (int d = 0; d < 4; ++d) {
+			int nx = x + d4[d][0], ny = y + d4[d][1];
+			n += nx >= 0 && ny >= 0 && nx < gw && ny < gh && on_way(nx, ny);
+		}
+		if (n == 1 && ends++ < 2) end[ends - 1] = y * MAP_W + x;
+	}
+	return ends == 2;
+}
+
+/* What the walk from cell `from` over the floor costs to each cell (INT32_MAX: not reached). */
+static void walk_costs(int gw, int gh, int from, int32_t cost[MAP_H][MAP_W]) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	static int16_t queue[MAP_H * MAP_W * 8];
+	size_t head = 0, tail = 0, size = sizeof queue / sizeof *queue;
+	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cost[y][x] = INT32_MAX;
+	cost[from / MAP_W][from % MAP_W] = 0;
+	queue[tail++ % size] = (int16_t)from;
+	while (head != tail) {
+		int c = queue[head++ % size], x = c % MAP_W, y = c / MAP_W;
+		for (int d = 0; d < 4; ++d) {
+			int nx = x + d4[d][0], ny = y + d4[d][1];
+			if (nx < 0 || ny < 0 || nx >= gw || ny >= gh || !nm_kind(nx, ny)) continue;
+			int32_t to = cost[y][x] + STEP + !on_way(nx, ny);
+			if (to >= cost[ny][nx] || tail - head >= size) continue;
+			cost[ny][nx] = to;
+			queue[tail++ % size] = (int16_t)(ny * MAP_W + nx);
+		}
+	}
+}
+
+static void mark_roads(void) {
+	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
+	static int32_t cost[MAP_H][MAP_W];
+	int gw = nm_cur->gw < MAP_W ? nm_cur->gw : MAP_W, gh = nm_cur->gh < MAP_H ? nm_cur->gh : MAP_H, end[2];
+	memset(road, 0, sizeof road);
+	if (!nm_cur->way || !roads || !way_ends(gw, gh, end)) return;
+	walk_costs(gw, gh, end[1], cost);
+	/* (back from the other end along falling cost: the first way found) */
+	for (int c = end[0], next; c >= 0 && cost[c / MAP_W][c % MAP_W] != INT32_MAX; c = next) {
+		int x = c % MAP_W, y = c / MAP_W;
+		road[y][x] = 1;
+		next = -1;
+		for (int d = 0; d < 4 && next < 0; ++d) {
+			int nx = x + d4[d][0], ny = y + d4[d][1];
+			if (nx < 0 || ny < 0 || nx >= gw || ny >= gh || cost[ny][nx] == INT32_MAX) continue;
+			if (cost[ny][nx] + STEP + !on_way(x, y) == cost[y][x]) next = ny * MAP_W + nx;
+		}
+	}
+}
+
 /* A walkway cell where the area's originals set a joint (the Undernet's
  * gems): its ends, turns and crossings, and where it meets other floor;
  * not in a straight run, a walkway cell on each side along one line and
@@ -279,6 +350,13 @@ static bool arena_walkway(int x, int y) {
 	return arena_b && !(picking && arena_drawn) && x >= nm_cur->ax && x < nm_cur->ax + nm_cur->aw && y >= nm_cur->ay && y < nm_cur->ay + nm_cur->ah;
 }
 
+/* TILE_ROAD for the way's walkways while the tiles are picked: a piece
+ * apart in the area's roads' look (the legalizer reads walkway floor, as
+ * before) */
+static int road_look(int x, int y) {
+	return picking && roads && x < MAP_W && y < MAP_H && road[y][x] && ground(nm_kind(x, y)) && walkway(x, y) ? TILE_ROAD : 0;
+}
+
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_raw(int A, int B, const void *ctx) {
@@ -292,6 +370,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	 * walkways) */
 	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y)) pad |= TILE_APART;
 	pad |= joint_look(x, y);
+	if (!pad) pad |= road_look(x, y);
 	if (one_floor) return TILE_A | pad;
 	/* by shape: walkways and platforms' rims one floor, their middles the other */
 	if (by_shape) return (walkway(x, y) || edge(x, y) ? TILE_B : TILE_A) | pad;
@@ -409,6 +488,8 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * own; where an area has none, a walkway's end at a room is no piece of
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
+	grid.roads = L->road;
+	grid.nroads = L->nroads;
 	for (int k = 0; k < L->nbooks; ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;
 	free(nm_last.seams);
 	nm_last.seams = calloc(cells, 1);
@@ -572,6 +653,7 @@ static Learned *use_area(int area) {
 	joints = na->joint_hues;
 	apart = na->apart;
 	striped = na->styles & TILES_CROSSING;
+	roads = L->nroads > 0;
 	return L;
 }
 
@@ -591,6 +673,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 		centre(lay);
 	}
 	if (striped) make_stripes(keep_pads);
+	mark_roads();
 	coord_slot = L->coord_slot;
 	nm_build_extra(L);
 	nm_gaps_place();
@@ -602,15 +685,15 @@ bool netmap_build(int area, const NetLayout *lay) {
 bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &nm_extra); }
 
 /* (the area settings the pick reads, kept round another look's) */
-typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped; int apart; } AreaFlags;
+typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads; int apart; } AreaFlags;
 
 static AreaFlags flags_now(void) {
-	return (AreaFlags){ one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, apart };
+	return (AreaFlags){ one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads, apart };
 }
 
 static void flags_set(const AreaFlags *f) {
 	one_floor = f->one_floor; by_shape = f->by_shape; arena_b = f->arena_b; rimmed = f->rimmed; pad_look = f->pad_look;
-	pads_walkway = f->pads_walkway; arena_drawn = f->arena_drawn; joints = f->joints; striped = f->striped; apart = f->apart;
+	pads_walkway = f->pads_walkway; arena_drawn = f->arena_drawn; joints = f->joints; striped = f->striped; roads = f->roads; apart = f->apart;
 }
 
 /* The look's tile map: the layer's floor as it stands (its legalizer's
@@ -731,6 +814,14 @@ static void lock_pieces(uint8_t locked[MAP_H][MAP_W]) {
 	}
 }
 
+/* The way from the layer's arrival to its exit, as the generator marked it. */
+static const uint8_t *layer_way(void) {
+	static uint8_t way[MAP_H][MAP_W];
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) way[y][x] = layer_on_way(x, y);
+	return &way[0][0];
+}
+
 bool netmap_build_layer(int area, uint32_t seed) {
 	/* the pads, in their own look (and where the area's platforms are pads,
 	 * the small platforms, the guardian's arena and the layer's signature:
@@ -775,7 +866,7 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	}
 	static NetLayout lay;
 	lay = (NetLayout){ MAP_W, MAP_H, &layer.cell[0][0], &locked[0][0], &layer.level[0][0], layer.rise, layer.stair, layer.nstairs, 0, 0, 0, 0, seed, &pads[0][0],
-		layer.props, layer.nprops };
+		layer.props, layer.nprops, .way = layer_way() };
 	if (layer.arena >= 0) {
 		const Room *a = &layer.rooms[layer.arena];
 		lay.ax = a->x; lay.ay = a->y; lay.aw = a->w; lay.ah = a->h;
@@ -809,7 +900,7 @@ void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
 		out[y][MAP_W] = 0;
 	}
 	if (!nm_last.seams) return;
-	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, 0, false, 0 };
+	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, 0, false, 0, NULL, 0, false };
 	for (int ty = 0; ty < nm_last.th; ++ty)
 		for (int tx = 0; tx < nm_last.tw; ++tx) {
 			if ((nm_last.seams[ty * nm_last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR || nm_last.pasted[ty * nm_last.tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;

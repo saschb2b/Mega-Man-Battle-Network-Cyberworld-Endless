@@ -144,7 +144,8 @@ layout: some of its walkways drawn as roads. Which ones is the design:
   ([Arrow lanes](../world/level-design/arrow-lanes.md)): a road that
   carries MegaMan is ours, not BN4's, as long as BN4's are plain.
 
-In the tiles, a road is a piece drawn apart with books of its own, as a
-platform is: the same map learned a second time with the road's colours as
-its walkway and the pink skipped, and its ends where it meets a walkway
-learned from the map's own.
+The owner chose the way (13 November 2026), and it is built for Park Area:
+[Roads on the way](../world/level-design/roads.md). In the tiles, a road
+is a piece drawn apart with books of its own, as a platform is: the same
+map learned a second time with the road's colours as its walkway and the
+pink skipped. Its ends where it meets a walkway are not learned yet.

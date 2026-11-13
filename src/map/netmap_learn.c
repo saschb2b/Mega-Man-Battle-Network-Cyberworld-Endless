@@ -79,6 +79,23 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, 
 	}
 }
 
+/* The area's roads, a second look of walkway (NetAreaDef.road_styles;
+ * BN4's Park Area's orange paths): its own map learned again, and its
+ * mirror image, with the roads' hues for its walkways' and its walkways'
+ * for the floor that lends no tiles; no platform floor of theirs. */
+static void learn_roads(AreaSrc *src, int area, Learned *L) {
+	const NetAreaDef *na = net_area_def(area);
+	L->nroads = 0;
+	if (!na->road_styles) return;
+	uint32_t styles = na->styles & ~(0x1FFFu | TILES_PADS_ALONE);
+	uint16_t skip = na->walk_styles & 0x1FFFu;
+	tiles_learn(src, styles, na->road_styles, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
+	AreaSrc m;
+	if (!area_src_mirror_in(src, &m)) return;
+	if (aligned(src, &m)) tiles_learn(&m, styles, na->road_styles, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
+	area_src_mirror_end(src, &m);
+}
+
 /* The Net Dealer's counter, cut from its map facing world +Y (FACES_X) and
  * from that map's mirror image facing world -X (FACES_Y). Its tiles must
  * fall on the layer's lattice (`own`'s) at some small offset (paste). */
@@ -136,6 +153,9 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 
 /* (debug output) what area `area` learned */
 static void learn_report(int area, const Learned *L) {
+	for (int k = 0; k < L->nroads; ++k)
+		fprintf(stderr, "roads area %d book %d: %d pairs, %d panels whole and %d in part, floor %d px down, faces %d px, hanging %d px\n", area, k,
+			L->road[k].n, L->road[k].panels.n, L->road[k].panels.npart, L->road[k].dv, L->road[k].face, L->road[k].hang);
 	fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery, its middle's period %dx%d, its looks %d\n",
 		area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n, L->book[0].pa, L->book[0].pb,
 		L->book[0].vary ? L->book[0].vary_first[64] : 0);
@@ -182,6 +202,15 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 	}
 }
 
+/* The books settled, once all are learned; whether its maps have pads. */
+static void settle(Learned *L) {
+	for (int k = 0; k < L->nbooks; ++k) panels_settle(&L->book[k].panels);
+	for (int k = 0; k < L->nroads; ++k) panels_settle(&L->road[k].panels);
+	L->pads_seen = false;
+	for (int k = 0; k < L->nbooks; ++k)
+		for (int i = 0; i < L->book[k].n && !L->pads_seen; ++i) L->pads_seen = L->book[k].cand[i].pad;
+}
+
 bool nm_learn(int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	AreaSrc a;
@@ -195,6 +224,7 @@ bool nm_learn(int area, Learned *L) {
 		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
 	learn_map(&a, &a, area, true, L);
+	learn_roads(&a, area, L);
 	learn_decor(&a, na, L);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);
@@ -230,10 +260,7 @@ bool nm_learn(int area, Learned *L) {
 	 * joins and dead ends better than the area's own tiles and stand out
 	 * there, unless the area takes those colours too */
 	for (int k = own; k < L->nbooks; ++k) tiles_other_colours(&L->book[k], seen, !(na->styles & TILES_MORE_COLOURS));
-	for (int k = 0; k < L->nbooks; ++k) panels_settle(&L->book[k].panels);
-	L->pads_seen = false;
-	for (int k = 0; k < L->nbooks; ++k)
-		for (int i = 0; i < L->book[k].n && !L->pads_seen; ++i) L->pads_seen = L->book[k].cand[i].pad;
+	settle(L);
 	if (emu_debug_on()) learn_report(area, L);
 	return true;
 }

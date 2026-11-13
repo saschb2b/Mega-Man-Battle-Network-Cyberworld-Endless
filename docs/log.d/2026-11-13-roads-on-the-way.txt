@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T15:55:00Z
+* **Creation**: world/level-design/roads.md (the way's walkways drawn as BN4's Park Area's orange roads: the owner's call, the design, how it is built, what is not mended). **Update**: devtools/map-use.md (What follows: the way chosen and built), research/sources.md (BN4's Park Area: its roads' width and ends, verified in the map).

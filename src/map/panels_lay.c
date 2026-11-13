@@ -9,6 +9,7 @@
 #include <string.h>
 
 #define NO_TILE PANEL_NO_TILE
+#define RIM_SLACK 24  /* pixels past where a tile may draw that a road's rim tile has at most (lift_strays) */
 #define WALL_BAND 8   /* pixels over a floor's upper edge a wall on it may stand (tiles_learn.c) */
 
 /* The book's panel at (A, B), -1 none. */
@@ -291,7 +292,29 @@ static int pieced_new(Laid *d) {
  * for the tiles then missing, as far as any has them; of a panel laid in
  * pieces already, the tiles it still misses. False where none has any. */
 #define MOST 9   /* a tile more outweighs every neighbourhood alike */
-static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Laid *d, size_t i) {
+/* Whether a shape is a floor's end: floor on one of its four sides at most. */
+static bool is_end(uint32_t shape) {
+	unsigned f = (shape >> 18 | shape >> 9) & 0x1FF;
+	return f & 0x10 && __builtin_popcount(f & 0xAA) <= 1;
+}
+
+/* Whether the book's panel c is an end or lies beside one in its map. */
+static bool ends_near(const TilePanels *p, int c) {
+	for (int k = 0; k < 9; ++k) {
+		int n = k == 4 ? c : panel_at(p, p->panel[c].A + k % 3 - 1, p->panel[c].B + k / 3 - 1);
+		if (n >= 0 && is_end(p->panel[n].shape)) return true;
+	}
+	return false;
+}
+
+/* ... the floor's panel (A, B). */
+static bool ends_here(const Laid *d, int A, int B) {
+	for (int k = 0; k < 9; ++k)
+		if (is_end(shape_at(d, A + k % 3 - 1, B + k / 3 - 1))) return true;
+	return false;
+}
+
+static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Laid *d, size_t i, bool loose) {
 	int A = d->A0 + (int)(i % d->w), B = d->B0 + (int)(i / d->w), at = d->pieced[i];
 	unsigned left = 0xFFFF;
 	bool any = false;
@@ -306,9 +329,13 @@ static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Lai
 			for (int c = 0; c < p->n + p->npart; ++c) {
 				unsigned like = slots_like(d->view, &p->panel[c], d->shape[i], false) & left;
 				if (!like || p->panel[c].rare || (g->single && two_layers(p, &p->panel[c]))) continue;
+				/* (thin books, a road's: its ends are arrows' heads, wider
+				 * than their panel; an end and the panels round it lend
+				 * nothing where the floor has no end) */
+				if (g->thin && ends_near(p, c) && !ends_here(d, A, B)) continue;
 				int cont = suits(d, k, c, A, B, true, &alike), score = cont * 64 + __builtin_popcount(like) * MOST + alike;
 				/* (off the floor, only as a map lays it beside what is laid) */
-				if (!cont && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) continue;
+				if (!cont && !loose && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) continue;
 				if (score <= best) continue;
 				best = score;
 				best_k = k;
@@ -362,6 +389,10 @@ static void lay_more(Laid *d, size_t i) {
 
 /* The tile a laid panel sets at (tx, ty), NULL none; its panel in *at, and
  * in *from the panel of a map it is from. */
+/* A slot laid with nothing, and left so (keep_to_whole): not picked alone. */
+#define NOTHING (-2)
+static const PanelTile nothing;
+
 static const PanelTile *laid_tile(const TileBook *books, const TileGrid *g, const Laid *d, int tx, int ty, size_t *at, uint32_t *from) {
 	if (tx < 0 || ty < 0 || tx >= g->tw || ty >= g->th) return NULL;
 	int phase, A, B;
@@ -372,6 +403,7 @@ static const PanelTile *laid_tile(const TileBook *books, const TileGrid *g, cons
 	if (k < 0 || s < 0) return NULL;
 	if (d->pieced[*at] >= 0) {
 		const Pieced *pc = &d->pieces[d->pieced[*at]];
+		if (pc->book[s] == NOTHING) { *from = 0; return &nothing; }
 		if (pc->book[s] < 0) return NULL;
 		k = pc->book[s];
 		c = pc->index[s];
@@ -405,10 +437,15 @@ static void lift_strays(const TileBook *books, const TileGrid *g, TileFloor floo
 			if (!t || d->pieced[i] < 0) continue;
 			int phase, A, B;
 			tile_class(g, tx, ty, &phase, &A, &B);
-			if (books[from >> 16].panels.panel[from & 0xFFFF].edge >> d->slot[phase] & 1) continue;   /* (a border's overhang, the learner's to judge) */
+			/* (a border's overhang, the learner's to judge; of thin books, a
+			 * road's, as far as a rim reaches: its rims draw up to 20 pixels
+			 * past where a tile may, a piece of another panel's art laid for
+			 * a rim 36 and more) */
+			bool edge = books[from >> 16].panels.panel[from & 0xFFFF].edge >> d->slot[phase] & 1;
+			if (edge && !g->thin) continue;
 			uint64_t must, never, deep;
 			tl_expect(g, tx, ty, floor, ctx, TILE_A, &must, &never, &deep);
-			if (tl_misses(t->mask, must, never & ~tl_above_floor(g, tx, ty, floor, ctx, WALL_BAND)) > SLACK) lift(g, d, i, tx, ty);
+			if (tl_misses(t->mask, must, never & ~tl_above_floor(g, tx, ty, floor, ctx, WALL_BAND)) > (edge ? RIM_SLACK : SLACK)) lift(g, d, i, tx, ty);
 		}
 }
 
@@ -441,6 +478,44 @@ static void take_up(const TileBook *books, const TileSeams *seams, const TileGri
 					lift(g, d, j, tx + (k == 2), ty + (k == 3));
 				}
 			}
+	}
+}
+
+/* Whether panel i's tiles meet those laid beside them as a map's do
+ * (take_up's test). */
+static bool panel_meets(const TileBook *books, const TileSeams *seams, const TileGrid *g, const Laid *d, size_t i) {
+	for (int ty = 0; ty < g->th; ++ty)
+		for (int tx = 0; tx < g->tw; ++tx) {
+			size_t a = 0, b = 0;
+			uint32_t fa = 0, fb = 0;
+			const PanelTile *t = laid_tile(books, g, d, tx, ty, &a, &fa);
+			for (int k = 2; t && t->mask && k < 4; ++k) {
+				const PanelTile *u = laid_tile(books, g, d, tx + (k == 2), ty + (k == 3), &b, &fb);
+				if (!u || !u->mask || (a != i && b != i) || (b == a && fb == fa) || (k == 2 && mirrored(t, u))) continue;
+				if (!seams_strip_seen(seams, t->side[k], u->side[k ^ 2], k & 1)) return false;
+			}
+		}
+	return true;
+}
+
+/* The floor's panels taken up (take_up) laid again, each from another of
+ * its shape's panels that meets what is laid round it.
+ * Where the books are thin (TileGrid.thin: a road's, a few dozen panels of
+ * one map): a road's rims lie past where a tile picked alone may draw, so a
+ * panel taken up came out as plain floor, its rim a gap. */
+static void lay_again(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g, Laid *d) {
+	for (size_t i = 0, n = (size_t)d->w * d->h; i < n; ++i) {
+		bool is_floor = (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10;
+		if (!is_floor || d->book[i] >= 0 || d->pieced[i] >= 0) continue;
+		for (int k = 0; k < nbooks && d->book[i] < 0; ++k) {
+			const TilePanels *p = &books[k].panels;
+			for (int c = d->lend[k] ? first_of(p, d->shape[i]) : p->n; c < p->n && p->panel[c].shape == d->shape[i] && d->book[i] < 0; ++c) {
+				if (p->panel[c].rare || (g->single && two_layers(p, &p->panel[c]))) continue;
+				d->book[i] = (int8_t)k;
+				d->index[i] = (uint16_t)c;
+				if (!panel_meets(books, seams, g, d, i)) d->book[i] = -1;
+			}
+		}
 	}
 }
 
@@ -586,6 +661,60 @@ static void lift_loose(Laid *d) {
 	free(held);
 }
 
+/* (thin books) A tile off the floor that lies on a panel laid whole is
+ * that panel's map's own there: the tile its map sets beside the panel, and
+ * nothing where its map sets none. At a road's bend the corner's tip is
+ * rounded off, and a piece alike in all it shows, the side of an arrow's
+ * head, filled the tip in: a block past the rim at every bend. */
+static void keep_slot(Laid *d, size_t i, int s) {
+	Pieced *pc = &d->pieces[d->pieced[i]];
+	int x = (int)(i % d->w), y = (int)(i / d->w);
+	for (int k = 0; k < 9 && pc->book[s] >= 0; ++k) {
+		int nx = x + k % 3 - 1, ny = y + k / 3 - 1;
+		if (k == 4 || !(d->view[s].on >> k & 1) || nx < 0 || ny < 0 || nx >= d->w || ny >= d->h) continue;
+		size_t j = (size_t)ny * d->w + nx;
+		if (d->book[j] < 0 || d->pieced[j] >= 0) continue;
+		const TilePanels *p = &d->books[d->book[j]].panels;
+		int c = panel_at(p, p->panel[d->index[j]].A - (k % 3 - 1), p->panel[d->index[j]].B - (k / 3 - 1));
+		if (c < 0) pc->book[s] = NOTHING;
+		else if (p->panel[c].has >> s & 1) { pc->book[s] = d->book[j]; pc->index[s] = (uint16_t)c; }
+	}
+}
+
+static void keep_to_whole(Laid *d) {
+	for (size_t i = 0, n = (size_t)d->w * d->h; i < n; ++i) {
+		if (d->pieced[i] < 0 || (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10) continue;
+		for (int s = 0; s < PANEL_TILES; ++s) keep_slot(d, i, s);
+	}
+}
+
+/* What lies round the floor, round after round (panels_lay). */
+static void lay_around(const TileBook *books, int nbooks, const TileGrid *g, Laid *d) {
+	for (bool laid = true; laid;) {
+		laid = false;
+		for (size_t i = 0, n = (size_t)d->w * d->h; i < n; ++i) {
+			bool is_floor = (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10;
+			if (is_floor || !(d->shape[i] >> 9) || !lay_pieces(books, nbooks, g, d, i, false)) continue;
+			if (d->apart[i]) lay_more(d, i);
+			laid = true;
+		}
+	}
+}
+
+/* Thin books (TileGrid.thin): what was taken up laid again as far as a
+ * panel or a piece suits, and left so; picked alone, a road's rim is a gap. */
+static void lay_thin(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g, Laid *d) {
+	size_t n = (size_t)d->w * d->h;
+	lay_again(books, nbooks, seams, g, d);
+	for (size_t i = 0; i < n; ++i)
+		if (d->pieced[i] >= 0 && (d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10) lay_pieces(books, nbooks, g, d, i, false);
+	lay_around(books, nbooks, g, d);
+	/* (and what is still open round the floor from any panel alike,
+	 * beside what is laid as its map has it or not) */
+	for (size_t i = 0; i < n; ++i)
+		if (!((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10) && d->shape[i] >> 9) lay_pieces(books, nbooks, g, d, i, true);
+}
+
 int panels_lay(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g, TileFloor floor, const void *ctx, TilePick *pick) {
 	bool any = false;
 	if (nbooks > 127) nbooks = 127;
@@ -606,26 +735,21 @@ int panels_lay(const TileBook *books, int nbooks, const TileSeams *seams, const 
 	for (size_t i = 0; i < n; ++i) {
 		bool is_floor = (d.shape[i] >> 18 | d.shape[i] >> 9) & 0x10;
 		if (!is_floor || (middles && d.shape[i] == PANEL_SHAPE(0x1FF, 0, 0))) continue;
-		if (!lay_one(books, nbooks, g, &d, i)) lay_pieces(books, nbooks, g, &d, i);
+		if (!lay_one(books, nbooks, g, &d, i)) lay_pieces(books, nbooks, g, &d, i, false);
 		if (d.pieced[i] >= 0 && d.apart[i]) lay_more(&d, i);
 	}
 	/* (round after round, while any tile is laid: each lies beside one laid
 	 * before it, the first by a corner has none yet on its round, and one
 	 * laid early takes what a later neighbour hands it: under a corner's
 	 * tip, the half its map's mirror image has) */
-	for (bool laid = true; laid;) {
-		laid = false;
-		for (size_t i = 0; i < n; ++i) {
-			bool is_floor = (d.shape[i] >> 18 | d.shape[i] >> 9) & 0x10;
-			if (is_floor || !(d.shape[i] >> 9) || !lay_pieces(books, nbooks, g, &d, i)) continue;
-			if (d.apart[i]) lay_more(&d, i);
-			laid = true;
-		}
-	}
+	lay_around(books, nbooks, g, &d);
 	lift_strays(books, g, floor, ctx, &d);
 	if (seams) take_up(books, seams, g, &d);
+	if (seams && g->thin) lay_thin(books, nbooks, seams, g, &d);
+	if (seams && g->thin) lift_strays(books, g, floor, ctx, &d);
 	follow_edges(&d);
 	lift_loose(&d);
+	if (g->thin) keep_to_whole(&d);
 	int tiles = 0;
 	for (int ty = 0; ty < g->th; ++ty)
 		for (int tx = 0; tx < g->tw; ++tx) {

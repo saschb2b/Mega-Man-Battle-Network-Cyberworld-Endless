@@ -289,6 +289,13 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 		tiles_src_text(v, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map, f);
 		fclose(f);
 	}
+	/* (... and as its roads are learned, netmap_learn.c) */
+	snprintf(path, sizeof path, "%s/roads_b%02d_%02x_%d%s.txt", dir, biome, group, number, tag);
+	f = na->road_styles ? fopen(path, "w") : NULL;
+	if (f) {
+		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), na->road_styles, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
+		fclose(f);
+	}
 	int W = v->tw * 8, H = v->th * 8;
 	for (int i = 0; i < W * H; ++i) if (!(v->px[i] >> 24)) v->px[i] = VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
@@ -418,7 +425,7 @@ static void hand_floor(const char *dir, int area) {
 	run_new(1);
 	memset(&layer, 0, sizeof layer);
 	layer.arena = layer.sig_room = layer.exit_room = -1;
-	NetLayout lay = { MAP_W, MAP_H, &cell[0][0], NULL, NULL, 0, NULL, 0, 0, 0, 0, 0, 1, &pad[0][0], NULL, 0, NULL, 0 };
+	NetLayout lay = { MAP_W, MAP_H, &cell[0][0], NULL, NULL, 0, NULL, 0, 0, 0, 0, 0, 1, &pad[0][0], NULL, 0, NULL, 0, NULL };
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	if (!netmap_build(area, &lay)) { printf("atlas: the floor was not built\n"); return; }
 	int tw, th;
