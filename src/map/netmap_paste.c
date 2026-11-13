@@ -293,24 +293,32 @@ static bool side_under(const SidePiece *p, int x, int y) {
 	return true;
 }
 
+/* Whether grid panel (x, y) is a pad's on the ground: what stands under a
+ * raised floor in its map (SidePiece.hang) stands under a layer's pads. */
+static bool hang_free(int x, int y) {
+	return x >= 1 && y >= 1 && x < MAP_W - 1 && y < MAP_H - 1 && layer.cell[y][x] == C_PATH && !layer.level[y][x]
+		&& nm_cur->pad && nm_cur->pad[y * nm_cur->gw + x];
+}
+
 #define SIDES_A_LAYER 12   /* side pieces a layer sets at most */
 #define SIDES_APART    3   /* panels between two */
 
 /* The piece for grid panel (x, y), by hash h: one of those cut at its
- * neighbourhood, NULL none. */
-static const SidePiece *side_for(const SideBook *b, int x, int y, unsigned h) {
+ * neighbourhood (`hang`: of those that stand under a floor), NULL none. */
+static const SidePiece *side_for(const SideBook *b, bool hang, int x, int y, unsigned h) {
 	unsigned f = side_floor(x, y);
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k)
-		if (b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
+		if (b->piece[k].hang == hang && b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
 
 /* Piece p set at grid panel (x, y), whole or not at all: on the map, on its
- * tile lattice, over nothing the second layer holds. Whether it was. */
+ * tile lattice, over nothing its layer holds (the second; the first for
+ * what stands under a floor). Whether it was. */
 static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, int y) {
-	size_t cells = (size_t)tw * th;
-	int A, B;
+	uint16_t *to = p->hang ? map : map + (size_t)tw * th;
+	int A, B, over = 0;
 	nm_grid_to_panel(x, y, &A, &B);
 	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
 	for (int k = 0; k < p->ntiles; ++k) {
@@ -318,9 +326,11 @@ static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, i
 		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) return false;
 		size_t at = (size_t)(py / 8) * tw + px / 8;
 		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
-		if (map[cells + at] || (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR))) return false;
+		if (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) return false;
+		/* (what stands under a pad begins in its rim's own tiles: a third of it at most, set over them) */
+		if (to[at] && (!p->hang || ++over * 3 > p->ntiles)) return false;
 	}
-	for (int k = 0; k < p->ntiles; ++k) map[cells + (size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->tiles[k].e1;
+	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
 	return true;
 }
 
@@ -335,15 +345,24 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 	nside_at = 0;
 	if (!L->sides.n || nm_cur->gw != MAP_W) return;
-	int set[SIDES_A_LAYER][2], nset = 0;
+	int set[SIDES_A_LAYER][2], nset = 0, nhang = 0;
 	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
 		for (int x = 1; x < MAP_W - 1 && nset < SIDES_A_LAYER; ++x) {
 			unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
 			bool near = false;
 			for (int k = 0; k < nset && !near; ++k) near = abs(set[k][0] - x) < SIDES_APART && abs(set[k][1] - y) < SIDES_APART;
-			if (near || h % 2 || !side_free(x, y)) continue;
-			const SidePiece *p = side_for(&L->sides, x, y, h);
+			/* (under a pad's panel whatever fits; on a floor's side half, apart) */
+			bool hang = hang_free(x, y);
+			if (!hang && (near || h % 2 || !side_free(x, y))) continue;
+			const SidePiece *p = side_for(&L->sides, hang, x, y, h);
 			if (!p || !side_set(p, map, tw, th, x, y)) continue;
+			if (hang) {
+				++nhang;
+				int A, B;
+				nm_grid_to_panel(x, y, &A, &B);
+				if (emu_debug_on()) fprintf(stderr, "  under the pad's panel at world %d,%d: %d tiles\n", nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
+				continue;
+			}
 			int A, B;
 			nm_grid_to_panel(x, y, &A, &B);
 			side_at[nside_at].p = p;
@@ -352,7 +371,7 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			set[nset][0] = x; set[nset++][1] = y;
 		}
 	if (emu_debug_on()) {
-		fprintf(stderr, "side pieces: %d set, of the area's %d\n", nset, L->sides.n);
+		fprintf(stderr, "side pieces: %d set and %d under pads, of the area's %d\n", nset, nhang, L->sides.n);
 		for (int k = 0; k < nside_at; ++k) fprintf(stderr, "  side piece at world %d,%d: %d tiles, %d layer priorities\n", side_at[k].X, side_at[k].Y, side_at[k].p->ntiles, side_at[k].p->nprio);
 	}
 }
