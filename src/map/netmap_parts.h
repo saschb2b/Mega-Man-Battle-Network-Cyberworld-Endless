@@ -19,6 +19,7 @@ typedef struct {
 	int ex, ey, tw, th;
 	TileBook book[MAX_BOOKS]; /* each source map, then its mirror image */
 	int nbooks;
+	uint8_t book_map[MAX_BOOKS];   /* which of its maps each book is of: 0 its own, 1 and up its others (NetAreaDef.more) in their order */
 	TileBook road[2];         /* its roads, a second look of walkway found in its own map (netmap_learn.c, road_hues): the map and its mirror image, their roads read as the walkways */
 	int nroads;
 	uint16_t road_hues;       /* ... their hue buckets (0: it has none) */

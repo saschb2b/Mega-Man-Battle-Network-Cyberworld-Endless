@@ -591,6 +591,11 @@ static void stair_layers(const char *dir, FILE *report, int b, int area, int see
 	}
 }
 
+static int env_int(const char *name, int none) {
+	const char *v = getenv(name);
+	return v ? atoi(v) : none;
+}
+
 int atlas_run(const char *spec) {
 	/* ("nav": the way across BN6's own maps instead, navstudy.c; "arrivals"
 	 * where MegaMan arrives on them) */
@@ -603,6 +608,9 @@ int atlas_run(const char *spec) {
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "atlas: no core\n"); return 1; }
 	tiles_measure = true;
 	breaks_measure = true;
+	/* (CYBERWORLD_LEAD=N: every layer led by its area's map N, to measure a
+	 * map as the lead: docs/world/level-design/lead-map.md) */
+	netmap_lead_forced = env_int("CYBERWORLD_LEAD", -1);
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);

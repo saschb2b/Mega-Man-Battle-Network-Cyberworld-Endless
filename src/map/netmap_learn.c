@@ -66,8 +66,9 @@ static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, bool own,
 /* ... at each of its floor heights: raised floors are drawn higher, so each
  * is learned in a view that brings it down to the ground (made in place,
  * as the mirror is). */
-static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, Learned *L) {
-	int count[256] = { 0 };
+static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, Learned *L) {
+	bool own = !map;
+	int count[256] = { 0 }, first = L->nbooks;
 	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
 	learn_view(src, grid_of, area, own, L);
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
@@ -77,6 +78,8 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, 
 		learn_view(&r, grid_of, area, own, L);
 		area_src_raise_end(src, &r);
 	}
+	/* (its books are one map's: the layer's lead, netmap.c) */
+	for (int k = first; k < L->nbooks; ++k) L->book_map[k] = (uint8_t)map;
 }
 
 /* ---- a map's walkways by their look ---- */
@@ -287,7 +290,7 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
-		learn_map(&b, grid, area, false, L);
+		learn_map(&b, grid, area, k + 1, L);
 		learn_decor(&b, na, L);
 		rebank_seen(&b, na->rebank[1], L);
 		for (int o = 0; o < 3 && !na->xrom; ++o)
@@ -334,7 +337,7 @@ bool nm_learn(int area, Learned *L) {
 	if (L->other ? !area_src_slots(na->over[0], na->over[1], &L->desc, &L->coord_slot)
 		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
-	learn_map(&a, &a, area, true, L);
+	learn_map(&a, &a, area, 0, L);
 	learn_roads(&a, area, more, L);
 	learn_decor(&a, na, L);
 	stairs_learn(&a, L->stairs);

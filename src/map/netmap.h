@@ -55,6 +55,9 @@ void netmap_look_free(NetmapLook *l);
 /* (dev) The hue buckets of area `area`'s roads, the second look of walkway
  * found in its own map (a bit each, 0-11 and 12 grey); 0 where it has none. */
 unsigned netmap_road_hues(int area);
+/* (dev) Every layer led by the area's map of this number (0 its own, 1
+ * and up its others), whatever its definition allows; -1 as it allows. */
+extern int netmap_lead_forced;
 /* The pieces of scenery the last layer got. */
 extern int netmap_scenery;
 /* The floor cells the last layer's floor changed to be drawable, and the

@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T22:30:00Z
+* **Creation**: world/level-design/lead-map.md (which of an area's maps a layer's look follows, by its seed; each map measured as the lead, twelve areas' lists). **Update**: world/level-design/index.md (its line).

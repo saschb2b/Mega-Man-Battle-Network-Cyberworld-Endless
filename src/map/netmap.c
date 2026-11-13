@@ -477,6 +477,27 @@ static bool install_gfx(const Learned *L) {
 	return ok;
 }
 
+/* The layer's lead: one of the area's maps, by the layer's seed, whose
+ * books come before the others', so its looks win where two maps' tiles
+ * fit alike (the first book's panel, the first book's pair at the same
+ * distance: panels_lay.c, tiles_pick.c). An area's own map led every
+ * layer, and its layers all took the one look; now its own or one of those
+ * its definition allows (NetAreaDef.leads: the maps that as the lead drew
+ * its layers no worse, docs/world/level-design/lead-map.md). The books in
+ * that order into `led`; how many. */
+int netmap_lead_forced = -1;   /* (dev) every layer led by this map, whatever is allowed */
+
+static int lead_books(const Learned *L, TileBook led[MAX_BOOKS]) {
+	int may[1 + NET_MORE_MAPS] = { 0 }, n = 1, nled = 0;
+	for (int m = 1; m <= NET_MORE_MAPS; ++m)
+		if (L->def->leads >> (m - 1) & 1) may[n++] = m;
+	int lead = netmap_lead_forced >= 0 ? netmap_lead_forced : may[nm_cur->seed % (uint32_t)n];
+	for (int pass = 0; pass < 2; ++pass)
+		for (int k = 0; k < L->nbooks; ++k)
+			if ((L->book_map[k] == lead) == !pass) led[nled++] = L->book[k];
+	return nled;
+}
+
 /* Both layers of the current layout's tile map in `L`'s tiles, tw x th
  * (freed by the caller): the classes' picks, then what is set whole over
  * them (the props' with `props`: their stamps the layer's own area's), the
@@ -502,7 +523,9 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
 	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
 	picking = true;
-	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
+	static TileBook led[MAX_BOOKS];
+	int nled = lead_books(L, led);
+	tilemap_pick(led, nled, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
 	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
