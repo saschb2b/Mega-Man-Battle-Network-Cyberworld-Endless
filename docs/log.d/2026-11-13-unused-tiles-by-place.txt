@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T19:10:00Z
-* **Update**: devtools/map-use.md (Where the unused tiles lie, every area: by place and height, no one place holding most; the families that come back in area after area: a second look of walkway, pads of other looks, marks, things; free-standing scenery a small part; the table by area).
