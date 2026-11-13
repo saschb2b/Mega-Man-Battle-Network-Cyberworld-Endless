@@ -147,8 +147,15 @@ Elsewhere they are off: the Graveyard's slabs lost their upper rims to
 them (40 to 59), BN4's ACDC Area gained breaks (249 to 272), BN5's ACDC,
 Sky and Robot Control too. In Park and Oran the older counts rose with
 them (seams and nicks, where a panel laid whole meets tiles picked one by
-one): the baseline was **not** rewritten for it, and `build.py tiles`
-names those layers until the layouts' question is settled.
+one; all six of each area's layers), and the baseline was rewritten for
+those twelve layers alone: by eye a Park layer's rooms are BN4's platform
+where they were pieces, an L of two rooms too.
+
+The layouts stay as they are (the owner's call, 13 November 2026: no
+area's rooms are held to the shapes its art draws). So what is left is the
+tiles': Park's rooms three panels wide and its small squares, a way two
+wide beside a room, Town's dead ends and squares of other sizes have no
+tiles in BN4, and are drawn tile by tile as before.
 
 ## The seams, and what was tried against them
 
