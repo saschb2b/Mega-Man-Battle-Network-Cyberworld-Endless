@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T21:52:25Z
+* **Update**: world/level-design/props.md (the Underground's teal emblems; none in an arena drawn in walkway floor).

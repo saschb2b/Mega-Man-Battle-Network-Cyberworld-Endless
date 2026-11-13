@@ -210,6 +210,13 @@ than a grid, three panels apart where the originals keep two (the floor
 between two holes one panel apart reads as a walkway to the tiles, and
 takes a bridge's link look).
 
+The Underground under the Cybeast's Nest carries the cross in teal on its
+grey stone, eight to a map (issue #505's survey found none on a layer): its
+colour is 0x5340, and its layers set them by the same rule. An emblem is
+cut from platform floor, so none is set in a guardian's arena that is drawn
+in the walkways' floor (`on_walkway_arena`): the Underground's grey stone
+stood in its arena's magenta.
+
 ## Next
 
 The field pictures and a hub's centrepiece where the layout has a centre;

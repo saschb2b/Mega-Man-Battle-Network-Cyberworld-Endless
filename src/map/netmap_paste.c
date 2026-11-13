@@ -177,6 +177,14 @@ void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 	}
 }
 
+/* Whether grid panel (x, y) lies in a guardian's arena drawn in the
+ * walkways' floor (netmap.c, arena_b): an emblem is cut from platform
+ * floor, and the Underground's grey stone stood in its arena's magenta. */
+static bool on_walkway_arena(const Learned *L, int x, int y) {
+	if (L->def->styles & (TILES_BY_SHAPE | TILES_ARENA_FLOOR)) return false;
+	return x >= nm_cur->ax && x < nm_cur->ax + nm_cur->aw && y >= nm_cur->ay && y < nm_cur->ay + nm_cur->ah;
+}
+
 /* The emblems the generator set in the floor (PROP_EMBLEM), in place of
  * the floor the classes drew there. */
 void nm_paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
@@ -184,7 +192,7 @@ void nm_paste_emblems(const Learned *L, uint16_t *map, int tw, int th) {
 	size_t cells = (size_t)tw * th;
 	for (int i = 0; i < nm_cur->nprops && i < MAX_PROPS; ++i) {
 		const NetProp *p = &nm_cur->props[i];
-		if (p->kind != PROP_EMBLEM) continue;
+		if (p->kind != PROP_EMBLEM || on_walkway_arena(L, p->x, p->y)) continue;
 		int A, B;
 		nm_grid_to_panel(p->x, p->y, &A, &B);
 		int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
