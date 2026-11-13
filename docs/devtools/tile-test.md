@@ -498,6 +498,14 @@ are stamped, Central's maps alone have anything there, a warp's panel, and
 a pad that holds Mystery Data must not show one (measured: 28 of its
 stamp's 196 tiles, none of Seaside's or Sky's). Central draws as before.
 
+**A pad of another size is a platform.** Where an area's pads are cut whole
+from its maps they are 3 x 3, and the stamp is set on a 3 x 3 pad alone. A
+teleport's island is a pad of 4 x 4: picked tile by tile in the pads' look
+it was a jumble of their frames, the worst spot of Central's layers (128
+breaks in one window). Such a pad is drawn as a platform now (`mark_pads`,
+`netmap.c`): Central 56 to 47 breaks per 100 panels, the island a small
+field with its teleport's panel.
+
 **Rooms and the walkways beside them.** Two faults showed in the worst
 spots of BN4's areas, plain walkway tiles biting squares out of a square's
 rim:

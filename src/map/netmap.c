@@ -865,22 +865,30 @@ static const uint8_t *layer_way(void) {
 	return &way[0][0];
 }
 
-bool netmap_build_layer(int area, uint32_t seed) {
-	/* the pads, in their own look (and where the area's platforms are pads,
-	 * the small platforms, the guardian's arena and the layer's signature:
-	 * the Aquarium's water never widens into one) */
-	static uint8_t pads[MAP_H][MAP_W];
-	memset(pads, 0, sizeof pads);
+/* The pads, in their own look (and where the area's platforms are pads,
+ * the small platforms, the guardian's arena and the layer's signature:
+ * the Aquarium's water never widens into one). */
+static void mark_pads(int area, uint8_t pads[MAP_H][MAP_W]) {
+	const NetAreaDef *na = net_area_def(area);
+	int small = na ? na->pad_rooms : 0;
+	bool every = na && (na->styles & TILES_ONE_WIDE);
+	memset(pads, 0, sizeof(uint8_t[MAP_H][MAP_W]));
 	for (int r = 0; r < layer.nrooms; ++r) {
 		const Room *m = &layer.rooms[r];
-		const NetAreaDef *na = net_area_def(area);
-		int small = na ? na->pad_rooms : 0;
-		bool every = na && (na->styles & TILES_ONE_WIDE);
 		bool pad = m->kind == ROOM_PAD || every || (small && ((m->kind == ROOM_PLATFORM && m->w * m->h <= small) || r == layer.arena || r == layer.sig_room));
+		/* (a pad of another size where the area's pads are cut whole from
+		 * its maps, 3 x 3: a teleport's island of 4 x 4 is a platform there;
+		 * picked tile by tile in the pads' look it was a jumble of frames) */
+		if (pad && m->kind == ROOM_PAD && na && na->pad_hues && (m->w != 3 || m->h != 3)) pad = false;
 		if (!pad) continue;
 		for (int y = m->y; y < m->y + m->h; ++y)
 			for (int x = m->x; x < m->x + m->w; ++x) pads[y][x] = 1;
 	}
+}
+
+bool netmap_build_layer(int area, uint32_t seed) {
+	static uint8_t pads[MAP_H][MAP_W];
+	mark_pads(area, pads);
 	/* what the floor must keep: the cells of objects, rooms' anchors, pads
 	 * and the guardian's arena, and the stairs and raised floors with the
 	 * cells beside them */
