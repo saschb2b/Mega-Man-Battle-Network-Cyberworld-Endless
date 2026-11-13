@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-13",
+  "what": "ThunSoul's look located (docs/multirom/bn4-souls.md, The look, located; docs/rom/bn4.md, The emotion window's faces: src/emu/bn4_battle.h's BN4_FACE_STEP, BN4_FACE_GET, BN4_FACES, BN4_SOUL_FACES, BN4_FACE_DIGITS, BN4_FACE_PALS): Red Sun's ROM holds its own six Souls' faces alone, the twelve sprites take 438,514 bytes and the ROM copy's largest gap is 60 KB, so the look waits on its room."
+}

@@ -239,4 +239,16 @@
                                        * same steps but BN6's +0's 0x04 set (0x080C64A0) and its side read as a halfword; from
                                        * 0x0800D9C8, where his emotion is 2, into his AI data +0x60 (BN4_AI_SYNCHRO) */
 
+/* The emotion window (docs/rom/bn4.md, The emotion window's faces): its step (r5 the window) draws the face its getter gives,
+ * tiles to 0x06017480, the turns left as a digit to 0x06017580, the face's palette to 0x030027C0 */
+#define BN4_FACE_STEP     0x08014B78u /* the window's step: faces 0-4 MegaMan's moods' (0x180 bytes each), from 5 a Soul's (0x100 and a digit) */
+#define BN4_FACE_GET      0x08016A20u /* the face and its count: his emotion's (BN4_EMOTION) row of 0x08016A70; in a Soul (emotion 4, its
+                                       * row 5) his form + 4 and his turns left, AI data +0x19 - +0x18 */
+#define BN4_FACE_SOUL     5           /* the first Soul's face (RollSoul's, form 1): form + 4 */
+#define BN4_FACES         0x0870B160u /* the mood faces' tiles, 0x180 bytes each by the face 0-4, */
+#define BN4_SOUL_FACES    0x0870B8E0u /* ... the Souls' after them, 0x100 bytes each by the face - 5: six, Red Sun's Souls' (forms 1-6) alone, */
+#define BN4_SOUL_FACE_COUNT 6         /* ... Blue Moon's six Souls' faces not in Red Sun's ROM (the digits follow the sixth), */
+#define BN4_FACE_DIGITS   0x0870BEE0u /* ... the count's digits, 0x80 bytes each by 5 - the count (six: 5 to 0), */
+#define BN4_FACE_PALS     0x0870C1E0u /* ... and the faces' palettes, 0x20 bytes each by the face: eleven (faces 0-10) */
+
 #endif
