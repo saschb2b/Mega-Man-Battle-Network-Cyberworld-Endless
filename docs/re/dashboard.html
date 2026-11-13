@@ -263,6 +263,15 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-10",
       "link": "../rom/navicust.md",
       "state_text": "Proven in research, not built"
+    },
+    {
+      "name": "The net maps' own pieces on generated layers",
+      "state": "building",
+      "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws and BN4's Undernet's flames, cut from the maps' second tile layer with the panel they grip and MegaMan drawn behind them as in BN6 (src/map/sides.c), and the Underground's teal emblems. Found in the ROM and seen in the game: the Undernet's flames and Aquarium Comp's fish are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py), which a map shows by setting those tile numbers.",
+      "left": "Set the animated blocks on layers; the Aquarium's pillars (its pads are raised floor in its maps) and Robot Control's pipes; the other kinds on issue #505.",
+      "updated": "2026-11-13",
+      "link": "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505",
+      "state_text": "Being built"
     }
   ],
   "decisions": [],
@@ -288,6 +297,14 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "tools/xrecipe_thumb.py's walk of BN4 0x08014B78 (the window's step) and 0x08016A20 (the face and count): a Soul's face is his form + 4, its tiles 0x100 bytes at 0x0870B8E0 by the face - 5, the digits six of 0x80 at 0x0870BEE0, the palettes eleven of 0x20 at 0x0870C1E0, the three tables end to end. tools/xrecipe.py's sprite over BN4's list 0, 1-12: 438,514 bytes, 33,110 to 42,324 each, ThunSoul's 35,843; list 8's pictures 1-12 1,564 to 1,894. tools/free_space.py --fit: no gap of 64 KB in the ROM copy, one of 60 KB.",
       "meaning": "Red Sun's ROM holds six Soul faces, its own: Blue Moon's six would draw the digits' bytes (derived, no frame looked at). The Souls' sprites cannot be resident: one room filled as a Soul unites, or a larger ROM copy.",
       "link": "../multirom/bn4-souls.md"
+    },
+    {
+      "feature": "The net maps' own pieces on generated layers",
+      "date": "2026-11-13",
+      "name": "The digit blocks are tile animations",
+      "result": "The Undernet's script writes 12 tiles to tile 726 every 8 frames and the Aquarium's two write 6 each to tiles 1 and 7 every 12; the maps set exactly those tile numbers where the stored tile set shows digits; set on a generated layer, the game shows a flickering flame and swimming fish.",
+      "meaning": "The digits are no art and no layer draws them; what they stand for is art a layer misses, and the game animates it by itself wherever a layer sets those tiles.",
+      "link": null
     },
     {
       "feature": "BN4's chips in BN6's tables",

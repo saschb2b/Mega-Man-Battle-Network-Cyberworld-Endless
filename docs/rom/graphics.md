@@ -3,7 +3,7 @@ type: ROM Map
 title: "Sprites, fonts and pictures"
 description: "ROM addresses of BN6's pictures: the sprite pointer lists, fonts, title screen and marks, map and Navi sprites, net and battle backdrops, mugshots, the map-name label and the ROMs screen's faces, each with how it was verified."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-04T02:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:09:04Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
