@@ -40,7 +40,7 @@ Beach Day 0x06 and Challenge 0x23 (no such places), Sorrow 0x0D (BN6's
 own defeat and game over already speak at a run's losses).
 
 **What it costs:** 0x18's copy 1388 bytes of the songs' free space
-(`FREE_SONGS`, 768 KB, some 231 KB used with every BN5 song and sound),
+(`FREE_SONGS`, 640 KB since 13 November 2026, 472,944 bytes of it taken with every theme and sound of BN5's and BN4's, [Free space](../engine/emulation/free-space.md), The measured pass; some 231 KB with BN5's alone when this was written),
 0x24's 796; 0x1C was the board's already. The core's ROM copy holds
 them, so the New 3DS's heap is unchanged (`tools/heap3ds.py`). 0x19 and 0x1F
 take 2564 bytes more (1816 and 748), copied when the first layer of BN5's areas is

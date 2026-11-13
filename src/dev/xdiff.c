@@ -654,7 +654,7 @@ static bool another_navis(const Spec *s, uint32_t to) {
 static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	int other = -1;   /* (a poke5's) another Navi's copy holding it */
 	for (int k = n - 1; k >= 0; --k)
-		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !(m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_TAIL)) &&
+		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !((m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_CHIP_MOVED_END) || (m[k].to >= FREE_CHIP_ART && m[k].to < FREE_TAIL))) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
 		    !((p->bn5 || !xd_spec_bn4_code(s)) && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !(s->bn4 && xd_bn5_family_copy(m[k].to))) {
 			if (!another_navis(s, m[k].to)) return k;

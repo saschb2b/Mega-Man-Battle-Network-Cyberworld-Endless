@@ -27,7 +27,8 @@ RNG_XOR = 0x873CA9E5                              # both games' RNG step (BN5_RN
 XV_CODE = (0x08B68000, 0x08B80000)                # where the install puts the families' code in BN6 (src/emu/xvirus_recipe.h, XV_CODE to XV_ART)
 XN_ROOM = (0x08D90000, 0x08E00000)                # ... and the Navis' code and art (src/emu/xnavi_recipe.h, XN_STUBS to XN_END)
 EMU_FREE = 0x08800000                             # below it, BN6's own ROM: a moved Navi's callback's twin (xnavi_install.c)
-XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL)
+XC_CODE = (0x08E00400, 0x08F00000)                # ... and the chips' moved code (src/emu/xchips_code.h, FREE_CHIP_MOVED to FREE_TAIL;
+                                                  # 0x08E40000-0x08EA0000 of it the plan's free span since 13 November 2026, nothing's yet)
 XN_BN4_ROOM = (0x08F30000, 0x08F48000)            # ... and BN4's Navis' code (src/emu/free_space.h, FREE_BN4_NAVI_CODE to FREE_BN4_NAVI_ART)
 XN_TEAM_ROOM = (0x08893000, 0x088A3800)           # ... and Team ProtoMan's code and art rooms, their overlays' masks (src/emu/free_space.plan, FREE_TEAM_NAVI_CODE to FREE_TEAM_SHARED)
 XN_NEBULA_ROOM = (0x08881000, 0x08887800)         # ... and LarkMan's and GridMan's code and art rooms (src/emu/free_space.plan, FREE_NEBULA_NAVI_CODE to FREE_NEBULA_SPRITES)
