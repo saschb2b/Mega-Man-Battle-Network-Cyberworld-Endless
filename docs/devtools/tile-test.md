@@ -498,6 +498,34 @@ are stamped, Central's maps alone have anything there, a warp's panel, and
 a pad that holds Mystery Data must not show one (measured: 28 of its
 stamp's 196 tiles, none of Seaside's or Sky's). Central draws as before.
 
+**Rooms and the walkways beside them.** Two faults showed in the worst
+spots of BN4's areas, plain walkway tiles biting squares out of a square's
+rim:
+
+- **Only floor with a middle is a room** (`has_middle`, `netmap.c`). Where
+  an area's floors are told by shape, a platform's rim is walkway floor and
+  only its middle platform floor, and every platform was a piece drawn
+  apart. Floor two wide has no middle: BN4's countries' ring road was
+  labelled one piece with the square it passes and picked as one floor with
+  it, and where no map sets the two so, the square's rim took the road's
+  plain tiles. Such floor is the walkways' now. CopyBot 264 to 262, BN5's
+  Undernet 163 to 160, BN4's ACDC 213 to 205, Park 96 to 90, the countries
+  84 to 82; BN5's SciLab 165 to 170.
+- **Rooms in front of the walkways beside them** (`LAY_ROOMS_OVER`, 128;
+  `under_rim`, `tilemap.c`). Pieces are laid over each other by which floor
+  lies nearer, so a walkway joined to a room's lower edge covered the
+  room's side faces, its plain tile whole in each cell: a stair of squares
+  along the edge. BN4's squares stand 17 pixels tall and its walkways 10:
+  the square's rim and faces show over the walkway in its maps, and laid
+  in front they do here. Taken by BN4's ACDC (205 to 199), Park (90 to 81)
+  and the countries (82 to 74) and by BN5's Undernet (160 to 152); not by
+  CopyBot (262 to 280: its rooms stand level with its walkways, and their
+  hanging faces lay over a walkway's first panel) nor BN5's SciLab (170 to
+  189). The room in front only on and beside its own panel, not under its
+  faces, counted worse than either everywhere but BN5's Undernet.
+
+Over all areas 89.6 to 88.3.
+
 The count alone misled twice more here: BN5's End Area fell by an eighth
 and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a
 fifth and set its lower edges' tabs on its upper ones. Sky drew worse with

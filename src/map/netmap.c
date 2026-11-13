@@ -203,6 +203,20 @@ static bool edge(int x, int y) {
 	return false;
 }
 
+/* Whether platform cell (x, y) is a middle or lies beside one (8 ways), where
+ * the floors are told by shape: a room's panel. Floor two wide has no
+ * middle and is all rim, the walkways' floor: BN4's countries' ring road,
+ * labelled a piece apart with the square it passes, was picked as one
+ * floor with it, and where no map sets the two so the square's rim took
+ * the road's plain tiles, squares bitten out of it. */
+static bool has_middle(int x, int y) {
+	if (!by_shape) return true;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (nm_kind(x + dx, y + dy) && !walkway(x + dx, y + dy) && !edge(x + dx, y + dy)) return true;
+	return false;
+}
+
 /* Where the walkways' floor runs on across the platforms they meet
  * (TILES_CROSSING), as the comps' and homepages' maps cross their fields
  * with stripes of it: a walkway entering a platform square on, in the
@@ -370,7 +384,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	int pad = nm_cur->pad && nm_cur->pad[y * nm_cur->gw + x] && (pad_look || ctx) ? TILE_PAD : 0;
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
-	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y)) pad |= TILE_APART;
+	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y) && has_middle(x, y)) pad |= TILE_APART;
 	pad |= joint_look(x, y);
 	if (!pad) pad |= road_look(x, y);
 	if (one_floor) return TILE_A | pad;
@@ -513,7 +527,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	 * own; where an area has none, a walkway's end at a room is no piece of
 	 * its maps: TILE_JOINS) */
 	grid.plain_ends = !joints;
-	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_PADS_WHOLE));
+	grid.rules = netmap_rules_forced | (L->def->lay & (LAY_RULES | LAY_PADS_WHOLE | LAY_ROOMS_OVER));
 	grid.roads = L->road;
 	grid.nroads = L->nroads;
 	/* (where its pads' panels alone are laid whole, LAY_PADS_WHOLE, the rest is picked as before) */
