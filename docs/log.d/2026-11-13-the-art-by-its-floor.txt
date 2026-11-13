@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T23:30:00Z
-* **Update**: devtools/tile-test.md (The art told apart by its floor: each pixel's floor panel, nearest first, another kind's own art, the shading rule on maps of one height; Park's right corner mended, the breaks, what was tried, the other height's floors not mended), world/level-design/generator.md (the learner's art and whose it is), devtools/map-use.md (the first step taken), code/net-and-map.md (`tiles_art.c`).
