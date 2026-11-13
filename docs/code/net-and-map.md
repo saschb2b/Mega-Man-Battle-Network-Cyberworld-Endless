@@ -3,7 +3,7 @@ type: Code Map
 title: "Layer generation and layers as game maps"
 description: "What `src/net/` (layer generation: plan, signature rooms, detours, landmarks, set pieces) and `src/map/` (layers as BN6's maps: tiles learned, the map tables, Lan's HP) hold, file by file."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:40:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T00:55:00Z }
 ---
 
 # Layer generation and layers as game maps

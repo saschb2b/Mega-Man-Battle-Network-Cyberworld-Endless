@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: devtools/tile-test.md (a floor drawn by hand in an area's tiles, the atlas's `hN`; the originals count no break, so the bar is 0; what keeps layers from it, measured on BN4's Park and Town Areas: the learner's reading of a map and the layouts; whole panels on for Park and Oran alone, and where they made things worse; the layouts stay as they are, the owner's call), world/level-design/generator.md (the maps' panels laid whole where an area asks, `TILES_WHOLE`), code/net-and-map.md (`panels.c`).
 * **Update**: engine/voxel.md (renamed Depth lighting for players, `depth_lighting` in settings.ini; in the town, Lan's room and battles too, flat under BN6's own camera; what the HUD is; shadows soft and fading; the blob under who stands lies on the floor), engine/index.md (its line), devtools/headless-shot.md (the flag's name).
 
 ## 2026-11-12
