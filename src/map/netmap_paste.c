@@ -282,6 +282,17 @@ static unsigned side_floor(int x, int y) {
 	return f;
 }
 
+/* Whether the panels piece p draws over are at grid panel (x, y) what they
+ * are in its map: ground floor, or none (beyond the grid is none). */
+static bool side_under(const SidePiece *p, int x, int y) {
+	for (int k = 0; k < p->nunder; ++k) {
+		int gx = x + p->under[k][1], gy = y - p->under[k][0];
+		bool in = gx >= 0 && gy >= 0 && gx < MAP_W && gy < MAP_H;
+		if (p->under[k][2] ? !in || layer.cell[gy][gx] == C_VOID || layer.level[gy][gx] : in && layer.cell[gy][gx] != C_VOID) return false;
+	}
+	return true;
+}
+
 #define SIDES_A_LAYER 12   /* side pieces a layer sets at most */
 #define SIDES_APART    3   /* panels between two */
 
@@ -291,7 +302,7 @@ static const SidePiece *side_for(const SideBook *b, int x, int y, unsigned h) {
 	unsigned f = side_floor(x, y);
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k)
-		if (b->piece[k].floor == f) match[nmatch++] = k;
+		if (b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
 
@@ -304,7 +315,10 @@ static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, i
 	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
 	for (int k = 0; k < p->ntiles; ++k) {
 		int px = px0 + p->tiles[k].px, py = py0 + p->tiles[k].py;
-		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || map[cells + (size_t)(py / 8) * tw + px / 8]) return false;
+		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) return false;
+		size_t at = (size_t)(py / 8) * tw + px / 8;
+		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
+		if (map[cells + at] || (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR))) return false;
 	}
 	for (int k = 0; k < p->ntiles; ++k) map[cells + (size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->tiles[k].e1;
 	return true;
