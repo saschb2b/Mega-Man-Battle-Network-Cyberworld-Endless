@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""free_space.py [--write | --check | --fit SIZE [--zone Z] | --usage FILE]:
+"""free_space.py [--write | --check | --fit SIZE [--zone Z] | --usage FILE...]:
 the free space's plan (src/emu/free_space.plan), the one place every region
 the engine writes past BN6's 8 MB in the core's ROM copy, and in the RAM BN6
 leaves alone, is named, placed and owned (docs/engine/emulation/free-space.md).
@@ -20,10 +20,12 @@ whose words stay the doc's own. Needs no ROM.
   python3 tools/free_space.py --fit SIZE [--zone Z] [--align A]
                                            where a new region of SIZE bytes fits: the free
                                            gaps that hold it, in its kind's zone or all
-  python3 tools/free_space.py --usage FILE the report with what a run used, from the file
-                                           CYBERWORLD_FREE_SPACE=FILE wrote as it quit
-                                           (src/emu/free_space.c: each region's last byte
-                                           that is not the 0xFF fill)
+  python3 tools/free_space.py --usage FILE...
+                                           the report with what runs used, from the files
+                                           CYBERWORLD_FREE_SPACE=FILE wrote as each quit
+                                           (src/emu/free_space_watch.c: each region's last
+                                           byte that is not the 0xFF fill, and every span
+                                           written during the run; several files as one)
 """
 import argparse
 import os
@@ -312,18 +314,45 @@ def size(n):
     return f'{n / 1024:.1f} KB' if n >= 1024 else f'{n} B'
 
 
-def read_usage(path):
-    """CYBERWORLD_FREE_SPACE's file: a line a region, NAME USED_TO"""
-    used = {}
-    with open(path) as f:
-        for line in f:
-            parts = line.split()
-            if len(parts) == 2:
-                used[parts[0]] = int(parts[1], 16)
-    return used
+def read_usage(paths):
+    """CYBERWORLD_FREE_SPACE's files, several runs' as one: a line a region,
+    NAME USED_TO (the furthest of the runs'), and a line a span written
+    during a run, ~ START END (the runs' spans joined)"""
+    used, spans = {}, []
+    for path in paths:
+        with open(path) as f:
+            for line in f:
+                parts = line.split()
+                if len(parts) == 2:
+                    used[parts[0]] = max(used.get(parts[0], 0), int(parts[1], 16))
+                elif len(parts) == 3 and parts[0] == '~':
+                    spans.append((int(parts[1], 16), int(parts[2], 16)))
+    joined = []
+    for a, e in sorted(spans):
+        if joined and a <= joined[-1][1]:
+            joined[-1][1] = max(joined[-1][1], e)
+        else:
+            joined.append([a, e])
+    return used, joined
 
 
-def report(zones, used=None):
+def written_in(r, spans):
+    """of a region: the bytes the runs wrote, the end of the last of them and
+    its largest span they left alone (its start, its size)"""
+    total, last, at, hole = 0, 0, r.at, (r.at, 0)
+    for a, e in spans:
+        a, e = max(a, r.at), min(e, r.end)
+        if a >= e:
+            continue
+        if a - at > hole[1]:
+            hole = (at, a - at)
+        total, last, at = total + e - a, e, e
+    if r.end - at > hole[1]:
+        hole = (at, r.end - at)
+    return total, last, hole
+
+
+def report(zones, used=None, spans=None):
     for z in zones:
         free = sum(e - a for a, e, _ in gaps(z))
         big = max((e - a for a, e, _ in gaps(z)), default=0)
@@ -335,6 +364,11 @@ def report(zones, used=None):
             if used and r.name in used and not r.children:
                 u = used[r.name] - r.at if used[r.name] else 0
                 use = f'  used {size(u)} ({100 * u // (r.end - r.at)}%)'
+                if spans:
+                    total, last, hole = written_in(r, spans)
+                    off = f'+0x{hole[0] - EMU_FREE:06X}' if z.space == 'rom' else f'0x{hole[0]:08X}'
+                    use += (f', written {size(total)} to {size(last - r.at if last else 0)}, '
+                            f'the largest span left {size(hole[1])} at {off}') if z.space == 'rom' else ''
             who = ','.join(r.owners) or 'free'
             print(f'{indent}{r.at:08x}-{r.end:08x} {size(r.end - r.at):>9}  {r.name:<22} {who}{use}')
         for a, e, name in gaps(z):
@@ -362,7 +396,7 @@ def main():
     ap.add_argument('--fit', type=lambda s: int(s, 0))
     ap.add_argument('--zone')
     ap.add_argument('--align', type=lambda s: int(s, 0), default=0x100)
-    ap.add_argument('--usage')
+    ap.add_argument('--usage', nargs='+')
     a = ap.parse_args()
     zones, regions = parse()
     bad = problems(zones, regions)
@@ -402,7 +436,7 @@ def main():
             print(f'free space: no gap of {size(a.fit)} {"in zone " + a.zone if a.zone else "anywhere"}: '
                   'see docs/engine/emulation/free-space.md, Moving regions')
         return 0 if found else 1
-    report(zones, read_usage(a.usage) if a.usage else None)
+    report(zones, *(read_usage(a.usage) if a.usage else (None, None)))
     return 0
 
 

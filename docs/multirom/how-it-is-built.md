@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "How it is built"
 description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space (BN4's 256-colour ones shown so), areas dressed by `run_dress` or held for review, songs copied by `xsong.c`, and the extra ROMs offered on each platform (BN4's whole since 5 November 2026)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:09:57Z }
 ---
 
 # How it is built
@@ -42,7 +42,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
    The map's backdrop and animations come with them (`xbackdrop_map`):
    the learned map's backdrop (its record, tiles, map and palette) and
    its GFXAnim scripts (colour cycles, the backdrop's turning tiles) are
-   copied into `+0x2F0000`, and the taken-over map's entries in its
+   copied into `FREE_MAP_BACKDROPS`, and the taken-over map's entries in its
    group's three tables (animation list, backdrop record, scroll
    callbacks) point at them; a layer of BN6's own puts BN6's back. BN4's
    records are 9 words to BN6's 7 (`XRomLayout.bg_words`) and its

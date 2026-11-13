@@ -57,7 +57,7 @@ bool tools_option(const char *a, const char *v) {
 static int pack_run(const char *spec) {
 	int rom = -1, song = -1;
 	char out[256] = "";
-	static uint8_t room[FREE_XNAVIS - FREE_SONGS];
+	static uint8_t room[FREE_SONGS_END - FREE_SONGS];
 	if (sscanf(spec, "x%d/%i:%255s", &rom, &song, out) != 3) {
 		fprintf(stderr, "xsong-pack: xN/SONG:PATH\n");
 		return 1;

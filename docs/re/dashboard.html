@@ -267,8 +267,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "name": "The net maps' own pieces on generated layers",
       "state": "building",
-      "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6, and the Underground's teal emblems. The Undernet's bowls are tile animations the maps' GFXAnim lists write (tiles 726-737; tools/map_anims.py) and burn on a generated layer by the game's own script; Aquarium Comp's fish (tiles 1-12) are found and not set.",
-      "left": "The Aquarium's pillars with their fish (its pads are raised floor in its maps) and Robot Control's pipes; the other kinds on issue #505.",
+      "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6; the Underground's teal emblems; Aquarium Comp's pillars under its pads, cut from the first layer in the view of the pads' height. The bowls and the bubbles under the pillars' stubs are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py) and run on a generated layer by the game's own scripts.",
+      "left": "Robot Control's pipes; the other kinds on issue #505.",
       "updated": "2026-11-13",
       "link": "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505",
       "state_text": "Being built"
@@ -313,8 +313,16 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "feature": "The net maps' own pieces on generated layers",
       "date": "2026-11-13",
+      "name": "The Aquarium's animated tiles are bubbles, not fish",
+      "result": "With the pillars cut whole from Aquarium Comp's maps and set under a generated layer's pads, the two animated blocks (tiles 1-6 and 7-12) sit under the pillars' stubs and show bubbles rising, different from frame to frame; the fish seen beside them are the backdrop's, there before the pillars were set.",
+      "meaning": "The first probe set the blocks alone over the backdrop and read its fish as theirs: a piece is judged where its map sets it. The scripts' addresses and tile numbers stand.",
+      "link": null
+    },
+    {
+      "feature": "The net maps' own pieces on generated layers",
+      "date": "2026-11-13",
       "name": "The digit blocks are tile animations",
-      "result": "The Undernet's script writes 12 tiles to tile 726 every 8 frames and the Aquarium's two write 6 each to tiles 1 and 7 every 12; the maps set exactly those tile numbers where the stored tile set shows digits; set on a generated layer, the game shows a flickering flame and swimming fish.",
+      "result": "The Undernet's script writes 12 tiles to tile 726 every 8 frames and the Aquarium's two write 6 each to tiles 1 and 7 every 12; the maps set exactly those tile numbers where the stored tile set shows digits; set on a generated layer, the game shows a flickering flame and, in the Aquarium, small moving shapes (bubbles: the next entry).",
       "meaning": "The digits are no art and no layer draws them; what they stand for is art a layer misses, and the game animates it by itself wherever a layer sets those tiles.",
       "link": null
     },

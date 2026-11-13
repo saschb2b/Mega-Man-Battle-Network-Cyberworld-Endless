@@ -367,7 +367,8 @@ XC_POWERS = XC_AT + 0x2000                # BN6's computed powers grown (256 wor
 XC_HOMES = XC_AT + 0x2400                 # a unit's veneers, XC_HOME_SIZE each
 XC_HOME_SIZE, XC_UNITS = 0x400, 80
 XC_CODE = XC_HOMES + XC_HOME_SIZE * XC_UNITS
-XC_ART = FREE_CHIP_CODE + 0xA0000
+XC_CODE_END = FREE_CHIP_CODE + 0x40000   # FREE_CHIP_MOVED's end: the installer refuses a block past it (xchips_code.c)
+XC_ART = FREE_CHIP_CODE + 0xA0000        # FREE_CHIP_ART
 XC_END = FREE_CHIP_CODE + 0x100000
 CODE_STEP = 0x10
 # Each unit's number in BN6, fixed by BN5's (the static model: the same at every boot and in every build, a state saved
