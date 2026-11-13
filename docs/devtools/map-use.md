@@ -117,6 +117,92 @@ Read off the tinted maps of Park, Central, Sky and Town Area 3:
   past the line a tile may draw up to. The same cause as the notch under a
   Park platform's right corner.
 
+## Where the unused tiles lie, every area
+
+The owner's concern is variety across the whole board, not one map at a
+time (13 November 2026). So the measure also says where in its map each
+tile picture no layer drew lies (`lent.c`, `place`; `tiles_src_panels`):
+by the panel its middle is in as the area's tiles are learned, and by the
+walls' heights, since floor at a height is drawn that much higher. Over
+all 39 areas, two seeds a layout, layers draw 40% of 49974 different
+pictures; of the 29986 they leave:
+
+| Where | Pictures | Share |
+| --- | --- | --- |
+| Away from any floor | 8357 | 28% |
+| Beside the layer's own floor (a panel away at most) | 6721 | 22% |
+| On the layer's own floor | 6118 | 20% |
+| On floor at another height | 3379 | 11% |
+| On floor of another kind | 1790 | 6% |
+| On its pads (small platforms on spurs) | 1633 | 5% |
+| On ramps between two heights | 1494 | 5% |
+| Beside floor of another kind | 494 | 2% |
+
+No one place holds most of it. What the tinted maps show in them is a
+few families that come back in area after area, under different places
+of this table:
+
+- **A second look of walkway**, a road: Park's orange, BN4's ACDC Area's
+  red, BN5's SciLab's at its exits, BN5's End Area's raised highway with
+  its ramps, Sky's. It counts as other floor where the area's settings
+  skip its hue, as the layer's own floor where they do not, and as raised
+  floor where it runs at a height. A road mostly ends in an arrow's head
+  at an exit.
+- **Pads and hubs of other looks**: BN4's ACDC Area's round red hubs,
+  Sky's cross-shaped pads, End Area's domed ones. A layer's pads all take
+  the one look.
+- **Marks on the floor**: one-way arrows, caps at crossings, Mr. Weather
+  Comp's belts of lamps across its field.
+- **Things**: the Aquarium's tanks and stepping stones, Mr. Weather Comp's
+  clouds. Free-standing scenery (`decor.c`) is a small part: three areas
+  have any (Robot Control, the Aquarium, CopyBot). A wider rule for it
+  (what is joined to the floor told pixel by pixel) gained 0.3 points and
+  took pads' leg labels for scenery; it was dropped.
+
+| Area | Used | Left | On its floor | On its pads | On other floor | Raised | Ramps | Beside a floor | Away |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Judge Comp | 19% | 2947 | 740 | 144 | 565 | 0 | 0 | 1122 | 376 |
+| Weather Comp | 21% | 2284 | 952 | 115 | 64 | 139 | 103 | 316 | 595 |
+| Aquarium Comp | 35% | 2081 | 87 | 0 | 0 | 360 | 283 | 86 | 1265 |
+| Sky | 37% | 1902 | 37 | 11 | 83 | 792 | 204 | 168 | 607 |
+| BN5 End | 36% | 1867 | 398 | 82 | 66 | 301 | 127 | 475 | 418 |
+| Robot Comp | 38% | 1665 | 318 | 403 | 199 | 0 | 0 | 559 | 186 |
+| Undernet | 34% | 1439 | 145 | 2 | 44 | 344 | 106 | 373 | 425 |
+| Nest | 26% | 1432 | 155 | 17 | 111 | 380 | 94 | 356 | 319 |
+| BN4 ACDC | 34% | 1402 | 791 | 12 | 0 | 0 | 0 | 592 | 7 |
+| BN5 Oran | 36% | 1386 | 326 | 71 | 0 | 181 | 126 | 349 | 333 |
+| BN5 Nebula | 49% | 996 | 119 | 105 | 165 | 107 | 83 | 181 | 236 |
+| BN5 SciLab | 49% | 995 | 510 | 121 | 0 | 0 | 0 | 341 | 23 |
+| Seaside | 54% | 951 | 393 | 63 | 1 | 137 | 0 | 181 | 176 |
+| Central | 56% | 842 | 49 | 98 | 150 | 204 | 0 | 199 | 142 |
+| BN4 Town | 35% | 762 | 142 | 9 | 0 | 5 | 16 | 255 | 335 |
+| BN4 Undernet | 46% | 642 | 102 | 36 | 0 | 0 | 25 | 290 | 189 |
+| Green | 32% | 636 | 27 | 31 | 177 | 186 | 23 | 111 | 81 |
+| BN5 dark 1 | 28% | 507 | 32 | 5 | 0 | 0 | 0 | 56 | 414 |
+| BN5 ACDC | 63% | 490 | 216 | 106 | 12 | 0 | 0 | 149 | 7 |
+| BN4 Park | 44% | 472 | 59 | 32 | 39 | 0 | 51 | 131 | 160 |
+| BN5 dark 3 | 30% | 449 | 18 | 19 | 0 | 0 | 0 | 73 | 339 |
+| BN5 Undernet | 73% | 446 | 137 | 87 | 0 | 6 | 18 | 132 | 66 |
+| BN4 countries | 36% | 431 | 40 | 15 | 108 | 0 | 40 | 145 | 83 |
+| BN5 dark 2 | 32% | 409 | 34 | 0 | 0 | 0 | 0 | 85 | 290 |
+| BN5 dark 4 | 32% | 405 | 39 | 0 | 0 | 0 | 0 | 40 | 326 |
+| Graveyard | 37% | 400 | 67 | 0 | 6 | 120 | 78 | 61 | 68 |
+| CopyBot Comp | 56% | 352 | 34 | 8 | 0 | 59 | 53 | 82 | 116 |
+| Secret | 50% | 334 | 19 | 10 | 0 | 58 | 64 | 89 | 94 |
+| BN5 dark 7 | 41% | 318 | 26 | 8 | 0 | 0 | 0 | 62 | 222 |
+| BN5 dark 5 | 40% | 300 | 32 | 0 | 0 | 0 | 0 | 45 | 223 |
+| BN5 dark 9 | 51% | 190 | 34 | 0 | 0 | 0 | 0 | 38 | 118 |
+| BN5 dark 6 | 61% | 144 | 31 | 0 | 0 | 0 | 0 | 43 | 70 |
+| BN5 dark 8 | 66% | 109 | 9 | 23 | 0 | 0 | 0 | 29 | 48 |
+
+(The comps and homepages that draw all of their one map are left out.)
+
+What it says for the work: [Roads on the way](../world/level-design/roads.md)
+is the mechanism for the first family, and it runs in one area, by a hue
+named for it. Across the board it has to find each map's second look of
+walkway by itself. The second family wants a layer's pads drawn from all
+of its maps' pads, by the seed.
+
 ## What follows
 
 The first and the last kind share a root: the learner does not know which
