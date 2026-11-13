@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: world/level-design/side-pieces.md (Who is in front: a piece's layer priorities cut and written with it, MegaMan behind a claw as in BN6).
 * **Creation**: world/level-design/side-pieces.md (what a map hangs on its floor's sides, cut from its second tile layer and set on panels of the same neighbourhood; issue #505).
 * **Update**: world/level-design/generator.md (Robot Control's pads cut whole; side pieces named beside scenery), code/net-and-map.md (sides.c).
 * **Update**: devtools/tile-test.md (Each area's laying: a room's rim takes no piece of a walkway's panel, CopyBot's pools framed in their stone).

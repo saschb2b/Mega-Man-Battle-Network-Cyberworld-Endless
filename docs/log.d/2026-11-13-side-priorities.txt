@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T21:45:45Z
-* **Update**: world/level-design/side-pieces.md (Who is in front: a piece's layer priorities cut and written with it, MegaMan behind a claw as in BN6).

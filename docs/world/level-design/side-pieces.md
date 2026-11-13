@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, BN4's Undernet's flames), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T21:24:29Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T21:45:45Z }
 ---
 
 # Side pieces (built for two areas, issue #505)
