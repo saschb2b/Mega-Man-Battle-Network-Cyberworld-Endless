@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Fixed: a run continued after the update to 0.21.0 could stand
+  still in its first battle.** A run saved by 0.20.0 or an earlier
+  version and continued in 0.21.0 froze for good the moment any attack
+  hit: a chip, the buster, or a virus's shot at MegaMan. It showed
+  first on a dark layer, but any battle of such a run did it. Those
+  runs now go on, the ones already continued in 0.21.0 too.
+
 ## 0.21.0 (2026-11-12)
 
 - **Every act has its virus.** Each act of a run is now about one virus

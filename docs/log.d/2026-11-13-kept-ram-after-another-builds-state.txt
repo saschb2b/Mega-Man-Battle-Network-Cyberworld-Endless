@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T22:40:00Z
+* **Update**: engine/emulation/hooks.md (States and resets: RAM kept patched is made the engine's after a state is loaded whatever the state holds, a checkpoint's queued state saved with the game's own bytes; what 0.20.0's checkpoints held and why 0.21.0 stood still at the first hit, issue #482; the test's three new checks), engine/emulation/memory.md (the hit gate's kept patch, the same).
