@@ -266,7 +266,10 @@ def run_xdiff(name, text, quiet, extra=()):
     lines printed (quiet: none); a run that fails exits"""
     os.makedirs(os.path.join(WORK, 'runs'), exist_ok=True)
     os.makedirs(os.path.join(WORK, 'data'), exist_ok=True)
-    r = subprocess.run(shot_command() + list(extra) + ['--xdiff', text], cwd=ROOT, capture_output=True, text=True)
+    cmd = shot_command()
+    if os.environ.get('CYBERWORLD_FREE_SPACE'):   # (a measured run: what it wrote of the free space, a file a spec, PATH.NAME)
+        cmd[cmd.index('--rm'):0] = ['-e', f"CYBERWORLD_FREE_SPACE={os.environ['CYBERWORLD_FREE_SPACE']}.{name}"]
+    r = subprocess.run(cmd + list(extra) + ['--xdiff', text], cwd=ROOT, capture_output=True, text=True)
     lines = [l for l in (r.stdout + r.stderr).splitlines() if l.startswith(('xdiff', 'xvirus', 'xchips', 'xattack'))]
     if not quiet:
         for l in lines:

@@ -118,7 +118,7 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	emu_audio_rate(out_rate);
 	emu_audio_open();
 	start_worker();
-	if (getenv("CYBERWORLD_FREE_SPACE")) atexit(usage_at_exit);
+	if (getenv("CYBERWORLD_FREE_SPACE")) { free_space_measure(); atexit(usage_at_exit); }
 	surveying = ram_survey_open();
 	ram_survey_watch(core);
 #ifndef MINIMAL_CORE

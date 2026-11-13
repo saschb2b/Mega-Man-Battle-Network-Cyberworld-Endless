@@ -66,7 +66,7 @@ typedef struct {
 	                          * (docs/game/bosses/bn4-navis.md; xguardian_named); 0 none: BN6's guardians */
 	uint8_t leads;           /* its other maps (`more`, bit k its k-th) that may lead a layer's look in its own map's place, by the layer's seed: those that as the lead drew its layers no worse (docs/world/level-design/lead-map.md) */
 	uint8_t lay;             /* how its maps' panels are laid, where its layers measured better so (LAY_*, src/map/tiles.h): 16 whole (as TILES_WHOLE), 1 an end's panels lend no other panel art, 2 a straight run from one plain panel, 4 beside a whole panel its map's own tiles, 8 a panel taken up laid again, 64 its pads' panels alone whole (docs/devtools/tile-test.md, Each area's laying); 32 a room's rim takes no piece of a walkway's panel (LAY_RIM_OWN); 128 its rooms in front of the walkways beside them (LAY_ROOMS_OVER) */
-	uint8_t sides;           /* 1: its maps' side pieces are set on its layers (src/map/sides.h): CopyBot Comp's claws, the Undernets' flames */
+	uint8_t sides;           /* bit 0: its maps' side pieces are set on its layers (src/map/sides.h): CopyBot Comp's claws, the Undernets' flames; bit 1: what stands under its raised floors under its layers' pads (the Aquarium's pillars); bit 2: what stands behind its floors' upper edges (BN4's Undernet's rows of horns) */
 	uint8_t side_maps[2][2]; /* more maps (group, number) in the same tiles whose side pieces it takes too, beside its own and `more` (0: none): the Undernet's four maps share one tile set, byte for byte */
 } NetAreaDef;
 

@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:15:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -437,7 +437,8 @@ state with them brought in (`tools/xfamily.py --spec native`: BN6's
 Mettaur with BN5's install and without), but for the IWRAM code the
 install patches, the dead stack, and what the Souls do with none held
 (installed with BN5's Navis since issue #82's run round: a pointer into
-the faces' tables they grow, BN5's mood in their own block, as
+the faces' tables they grow, BN5's mood in their own block, MegaMan's
+AI data moved into BN5's size at his set-up, as
 `tools/xproxy.py --souls` explains them), where the flags, now read from ROM,
 move an interrupt a few cycles. Their records now translate
 (`src/emu/xfields.c`: BN6's fields 0x56, 0x5F, 0x61, 0x65 for lava,

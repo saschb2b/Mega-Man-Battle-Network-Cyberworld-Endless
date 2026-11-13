@@ -3,7 +3,7 @@ type: Tool
 title: "The proxy form: where a Soul stands"
 description: "`--dev soulproxy` makes form 8, Falzar's TenguCross that Gregar never offers, an exact copy of HeatCross for BN5's Souls, and `tools/xproxy.py` proves it by one battle fought four ways, every byte traced."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T01:53:58Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:15:00Z }
 ---
 
 # The proxy form: where a Soul stands
@@ -91,6 +91,28 @@ every byte
 into a table the Souls grow, the emotion window's faces and their
 palettes, read through its copy, BN6's bytes at the same place; BN5's
 mood, which the Souls keep in their own block whoever holds one, its
-opening mark, mood and dark latch by side), and the
+opening mark, mood and dark latch by side; and MegaMan's AI data, which
+DarkInvs's install, made with the Souls', moves out of BN6's pool into
+BN5's 0x140 bytes as he is set up, whoever holds a chip or a Soul,
+[The chips' code](../multirom/chips-code.md), His AI data), and the
 proxy HeatCross frame for frame through a Soul's life's two stubs, which
 its overlay entries 8 then point at.
+
+The AI data's move is explained by its role, not by its addresses
+(`ai_move`, `ai_why`, `ai_parted`): where MegaMan's object names an
+entry of BN6's pool in one run and `RAM_PLAYER_AI` in the other, BN6's
+0x100 bytes are read through each run's pointer and must be the same,
+word for word (a word pointing into the AI data the same place of it);
+the two places themselves are then explained (the pool's entry is dead
+in the run that moved it, the block BN6's unused RAM in the other), as
+are his place in the pool, kept after the block, and any word that
+points into the AI data. BN5's chip AI's state past BN6's 0x100
+(+0x100 to +0x13F) is not explained: with no chip AI on him nothing
+writes it but zeroes. `--souls --mutations` tests the rule on the
+traces: a byte of his AI data changed in the block, the same in the
+pool, a byte past BN6's 0x100, his kept place, each written into a copy
+of one frame, and each must be reported. The move came in on 13 October
+2026 (the set-up hook at `0x080172F6`), hours after the check was last
+brought up to the install, and the check stood red unrun until 13
+November: `xfamily.py --spec native`, which compares through it, with
+it.

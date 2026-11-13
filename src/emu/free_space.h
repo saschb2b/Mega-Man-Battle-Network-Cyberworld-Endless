@@ -92,15 +92,19 @@
 
 /* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds ---- */
 #define FREE_XAREA           (EMU_FREE + 0x170000u)  /* another game's net area (netmap.c) */
+#define FREE_XAREA_END       (EMU_FREE + 0x184000u)
 #define FREE_SONGS           (EMU_FREE + 0x1A0000u)  /* other games' songs (xsong.c) */
-#define FREE_XNAVIS          (EMU_FREE + 0x260000u)  /* other games' Navis and map objects (xnavi.c) */
-#define FREE_BACKDROPS       (EMU_FREE + 0x2A0000u)  /* other games' battle backgrounds (xbackdrop.c) */
-#define FREE_FLAME           (EMU_FREE + 0x2E0000u)  /* BN6's own flame of darkness (xnavi.c) */
-#define FREE_FLAME_END       (EMU_FREE + 0x2E1000u)
+#define FREE_SONGS_END       (EMU_FREE + 0x240000u)
+#define FREE_XNAVIS          (EMU_FREE + 0x240000u)  /* other games' Navis and map objects (xnavi.c) */
+#define FREE_XNAVIS_END      (EMU_FREE + 0x26E000u)
+#define FREE_BACKDROPS       (EMU_FREE + 0x26E000u)  /* other games' battle backgrounds (xbackdrop.c) */
+#define FREE_BACKDROPS_END   (EMU_FREE + 0x286000u)
+#define FREE_MAP_BACKDROPS   (EMU_FREE + 0x286000u)  /* other games' net maps' backdrops (xbackdrop.c) */
+#define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x2A6000u)
+#define FREE_FLAME           (EMU_FREE + 0x2A6000u)  /* BN6's own flame of darkness (xnavi.c) */
+#define FREE_FLAME_END       (EMU_FREE + 0x2A7000u)
 #define FREE_BN4_SOUL_LOOK   (EMU_FREE + 0x2E1000u)  /* BN4's united Soul's look, one room for whichever Soul is united (the owner's call): his sprite (the largest RollSoul's 42,324 bytes), his unison's picture, his face, and BN4's count's digits (soullook.c) */
 #define FREE_BN4_SOUL_LOOK_END (EMU_FREE + 0x2EC400u)
-#define FREE_MAP_BACKDROPS   (EMU_FREE + 0x2F0000u)  /* other games' net maps' backdrops (xbackdrop.c) */
-#define FREE_MAP_BACKDROPS_END (EMU_FREE + 0x320000u)
 #define FREE_BN4_CHIP_SPRITE (EMU_FREE + 0x320000u)  /* a BN4 Navi chip's Navi's battle sprite as the chip is used, one room (the largest of the moved Navis', GutsMan's, 60,988 bytes); in the world zone, the one with room left (xnavi_bn4_chip.c) */
 #define FREE_BN4_CHIP_SPRITE_END (EMU_FREE + 0x32F000u)
 
@@ -110,7 +114,7 @@
 #define FREE_CHIPS           (EMU_FREE + 0x400000u)  /* the chip registry: records, names, routines, art (chips.c, xchips_install.c) */
 #define FREE_SOULS           (EMU_FREE + 0x480000u)  /* BN5's Souls in BN6's engine (soul_room.h lays it out) (soulproxy.c, soulunite.c, soullife.c, ...) */
 #define FREE_PANELS          (EMU_FREE + 0x4C0000u)  /* BN5's lava, sea and magnet panel and BN4's Hole as BN6's panel types 13-16: the flags (17 words in 32's room), the tiles, the pull (xpanels.c, xpanels_look.c) */
-#define FREE_PANELS_END      (EMU_FREE + 0x4D0000u)
+#define FREE_PANELS_END      (EMU_FREE + 0x4C2000u)
 #define FREE_LATE_FAMILIES   (EMU_FREE + 0x4D0000u)  /* the late families' art (BN4's past its first eight): their sprites, and the pool's songs of their sounds (xvirus.c) */
 #define FREE_LATE_FAMILIES_END (EMU_FREE + 0x500000u)
 #define FREE_NAVIS           (EMU_FREE + 0x500000u)  /* BN5's Navis in BN6's engine (xnavi_sprites.c, xnavi_room.c, xnavi_install.c, ...) */
@@ -123,7 +127,10 @@
 #define FREE_CHIP_CODE       (EMU_FREE + 0x600000u)  /* the code of BN5's chips (xattack_grow.c, xchips_code.c, xchips_bn5.c) */
 #define FREE_ATTACK_FAMILIES (EMU_FREE + 0x600000u)  /* BN6's attack families grown to 240 (the chips' and the Souls' one copy) (xattack_grow.c) */
 #define FREE_ATTACK_FAMILIES_END (EMU_FREE + 0x600400u)
-#define FREE_CHIP_MOVED      (EMU_FREE + 0x600400u)  /* the chips' moved code, its tables and what it draws (xchips_code.c) */
+#define FREE_CHIP_MOVED      (EMU_FREE + 0x600400u)  /* the chips' moved code and its tables (what it draws: FREE_CHIP_ART) (xchips_code.c) */
+#define FREE_CHIP_MOVED_END  (EMU_FREE + 0x640000u)
+#define FREE_CHIP_ART        (EMU_FREE + 0x6A0000u)  /* what BN5's chips' moved code draws (XC_ART: its sprites, a place each) (xchips_code.c) */
+#define FREE_CHIP_ART_END    (EMU_FREE + 0x700000u)
 #define FREE_SOULS_ART       (EMU_FREE + 0x700000u)  /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c, soulcolonel.c) */
 #define FREE_SOULS_ART_END   (EMU_FREE + 0x710000u)
 #define FREE_BN4_CHIP_STUBS  (EMU_FREE + 0x710000u)  /* BN4's chips' own routines BN6 has no twin of: a side's first actor (BugCurse's target) (xchips_code.c) */
@@ -231,19 +238,19 @@
 	X("FREE_PET_OPTIONS", (EMU_FREE + 0x169000u), (EMU_FREE + 0x16A000u), "", "words") \
 	X("FREE_BBS", (EMU_FREE + 0x16A000u), (EMU_FREE + 0x16B000u), "", "words") \
 	X("FREE_NCP_TEXT", (EMU_FREE + 0x16B000u), (EMU_FREE + 0x16BC00u), "", "words") \
-	X("FREE_XAREA", (EMU_FREE + 0x170000u), (EMU_FREE + 0x1A0000u), "", "world") \
-	X("FREE_SONGS", (EMU_FREE + 0x1A0000u), (EMU_FREE + 0x260000u), "", "world") \
-	X("FREE_XNAVIS", (EMU_FREE + 0x260000u), (EMU_FREE + 0x2A0000u), "", "world") \
-	X("FREE_BACKDROPS", (EMU_FREE + 0x2A0000u), (EMU_FREE + 0x2E0000u), "", "world") \
-	X("FREE_FLAME", (EMU_FREE + 0x2E0000u), (EMU_FREE + 0x2E1000u), "", "world") \
+	X("FREE_XAREA", (EMU_FREE + 0x170000u), (EMU_FREE + 0x184000u), "", "world") \
+	X("FREE_SONGS", (EMU_FREE + 0x1A0000u), (EMU_FREE + 0x240000u), "", "world") \
+	X("FREE_XNAVIS", (EMU_FREE + 0x240000u), (EMU_FREE + 0x26E000u), "", "world") \
+	X("FREE_BACKDROPS", (EMU_FREE + 0x26E000u), (EMU_FREE + 0x286000u), "", "world") \
+	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x286000u), (EMU_FREE + 0x2A6000u), "", "world") \
+	X("FREE_FLAME", (EMU_FREE + 0x2A6000u), (EMU_FREE + 0x2A7000u), "", "world") \
 	X("FREE_BN4_SOUL_LOOK", (EMU_FREE + 0x2E1000u), (EMU_FREE + 0x2EC400u), "", "world") \
-	X("FREE_MAP_BACKDROPS", (EMU_FREE + 0x2F0000u), (EMU_FREE + 0x320000u), "", "world") \
 	X("FREE_BN4_CHIP_SPRITE", (EMU_FREE + 0x320000u), (EMU_FREE + 0x32F000u), "", "world") \
 	X("FREE_VIRUS_ROOM", (EMU_FREE + 0x330000u), (EMU_FREE + 0x348000u), "", "code") \
 	X("FREE_FAMILIES", (EMU_FREE + 0x348000u), (EMU_FREE + 0x400000u), "", "code") \
 	X("FREE_CHIPS", (EMU_FREE + 0x400000u), (EMU_FREE + 0x480000u), "", "code") \
 	X("FREE_SOULS", (EMU_FREE + 0x480000u), (EMU_FREE + 0x4C0000u), "", "code") \
-	X("FREE_PANELS", (EMU_FREE + 0x4C0000u), (EMU_FREE + 0x4D0000u), "", "code") \
+	X("FREE_PANELS", (EMU_FREE + 0x4C0000u), (EMU_FREE + 0x4C2000u), "", "code") \
 	X("FREE_LATE_FAMILIES", (EMU_FREE + 0x4D0000u), (EMU_FREE + 0x500000u), "", "code") \
 	X("FREE_NAVIS", (EMU_FREE + 0x500000u), (EMU_FREE + 0x600000u), "", "code") \
 	X("FREE_NAVI_SPRITES", (EMU_FREE + 0x500000u), (EMU_FREE + 0x580000u), "FREE_NAVIS", "code") \
@@ -251,9 +258,10 @@
 	X("FREE_NAVI_HOMES", (EMU_FREE + 0x588000u), (EMU_FREE + 0x590000u), "FREE_NAVIS", "code") \
 	X("FREE_NAVI_CODE", (EMU_FREE + 0x590000u), (EMU_FREE + 0x5B0000u), "FREE_NAVIS", "code") \
 	X("FREE_NAVI_ART", (EMU_FREE + 0x5B0000u), (EMU_FREE + 0x600000u), "FREE_NAVIS", "code") \
-	X("FREE_CHIP_CODE", (EMU_FREE + 0x600000u), (EMU_FREE + 0x700000u), "", "code") \
+	X("FREE_CHIP_CODE", (EMU_FREE + 0x600000u), (EMU_FREE + 0x640000u), "", "code") \
 	X("FREE_ATTACK_FAMILIES", (EMU_FREE + 0x600000u), (EMU_FREE + 0x600400u), "FREE_CHIP_CODE", "code") \
-	X("FREE_CHIP_MOVED", (EMU_FREE + 0x600400u), (EMU_FREE + 0x700000u), "FREE_CHIP_CODE", "code") \
+	X("FREE_CHIP_MOVED", (EMU_FREE + 0x600400u), (EMU_FREE + 0x640000u), "FREE_CHIP_CODE", "code") \
+	X("FREE_CHIP_ART", (EMU_FREE + 0x6A0000u), (EMU_FREE + 0x700000u), "", "code") \
 	X("FREE_SOULS_ART", (EMU_FREE + 0x700000u), (EMU_FREE + 0x710000u), "", "code") \
 	X("FREE_BN4_CHIP_STUBS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710040u), "", "code") \
 	X("FREE_TAIL", (EMU_FREE + 0x710040u), (EMU_FREE + 0x711000u), "", "code") \

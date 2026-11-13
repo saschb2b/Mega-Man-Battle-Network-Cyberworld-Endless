@@ -3,7 +3,7 @@ type: Research
 title: "BN4's Souls on BN6's proxy form"
 description: "What moving BN4 Red Sun's twelve Souls (Red Sun's six and Blue Moon's six, which run in Red Sun's ROM) onto BN6's proxy form takes: how BN4 takes a form, each Soul's abilities and the code it brings against BN6's twins, what BN5's path supplies and what BN4 must, a cost ranking and which Souls first; ThunSoul moved, the first, and what is left."
 tags: [multirom, bn4, souls]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T20:57:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:09:57Z }
 sources:
   - id: bn4-rom
     resource: "Mega Man Battle Network 4: Red Sun (USA), B4WE, SHA-1 a97e96a7da03abd70f7953328e511b9fa29179f1, read in tools/romlab and by tools/bn4_souls.py"
@@ -376,7 +376,11 @@ the New 3DS first) and over regions shrunk to what they hold (room for a
 few sprites at best, not for 438 KB).
 
 `FREE_BN4_SOUL_LOOK` is that room: 45 KB in the `world` zone's gap, the
-last of its size (15 KB are left there), laid out in `soul_room.h`:
+last of its size when it was placed (15 KB were left there; the measured
+pass of the same day then sized that zone's regions by what they hold,
+and the room lies in 439 KB of free space since,
+[Free space](../engine/emulation/free-space.md), The measured pass), laid
+out in `soul_room.h`:
 
 | Part | Room | From BN4 |
 | --- | --- | --- |

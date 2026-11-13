@@ -55,9 +55,19 @@ that the Souls' install with no Soul held leaves BN6's battle alone every
 byte (native against installed: the Custom screen, the turn's change, a
 weakness hit), and that the proxy plays as HeatCross through a Soul's
 life's two stubs, which its overlay entries 8 then point at (installed
-against proxy). With --mutations, each break of the proxy must still
+against proxy). What the install does whoever holds a Soul is explained
+by its role, never by a bare address: a pointer into a table the Souls
+grew (souls_pointer), BN5's mood in their own block (souls_mood), and
+MegaMan's AI data, which DarkInvs's install (src/emu/darkinvs.c, with the
+Souls') moves out of BN6's pool into BN5's 0x140 bytes as he is set up
+(ai_move: its two places are read through his object's pointer and must
+hold the same bytes, ai_parted; a pointer into it the same place of it;
+BN5's chip AI's state past BN6's 0x100 is not explained, and stays zero).
+With --mutations, each break of the proxy must still
 part it from HeatCross with the Souls over it (where a break leaves its
-tables not HeatCross's, the Souls' install refuses to stand on it).
+tables not HeatCross's, the Souls' install refuses to stand on it), and
+each change a wrong move of his AI data would leave, written into a copy
+of one frame of the traces, must be reported (ai_mutations).
 """
 import argparse
 import functools
@@ -187,12 +197,76 @@ def souls_mood():
                      for f in ('BN6_SOUL_OPENED', 'BN6_SOUL_MOOD', 'BN6_SOUL_DARK'))
 
 
-def why(off, ia, ib, ma, mb, allowed):
+AI_SIZE, AI_POOL, AI_POOL_ENTRIES = 0x100, 0x02034080, 8   # BN6_AI_DATA_SIZE, BN6_AI_POOL, BN6_AI_POOL_ENTRIES (src/emu/bn6.h, bn6_ai.h)
+AI_STATE = 0x80                                            # an AI data's state (bn6.h, BN6_T1_AI_DATA)
+
+
+@functools.lru_cache(maxsize=None)
+def souls_ai():
+    """--souls: (the block MegaMan's AI data is moved into, its size) where BN5's chip AI is installed (src/emu/darkinvs.c,
+    which installs with the Souls: soulchaos.c): RAM_PLAYER_AI, BN5's 0x140 bytes, his place in BN6's pool kept after them"""
+    import xdiff_snap
+    d = xdiff_snap.c_defines('src/emu/free_space.h', 'src/emu/bn5.h')
+    return d['RAM_PLAYER_AI'], d['BN5_AI_DATA_SIZE']
+
+
+def ai_move(ia, ib):
+    """--souls: MegaMan's AI data's place in each run's image, (a's, b's), where his object names an entry of BN6's pool in
+    one (BN6's own set-up, 0x0800ED2C) and the block in the other, or None. Where BN5's ROM is read and its Navis are,
+    DarkInvs's install moves side 0's player's AI data into BN5's 0x140 bytes as he is set up, whoever holds a Soul or a
+    chip (darkinvs.c's init at BN6_PLAYER_INIT_AI, 0x080172F6: BN5's chip AI keeps its state past BN6's 0x100, and a move
+    at the chip's use left his charge glow pointing at the old place; docs/multirom/chips-code.md, His AI data)"""
+    block, _ = souls_ai()
+    pa, pb = X.u32(ia, MEGAMAN + X.AI_DATA_PTR), X.u32(ib, MEGAMAN + X.AI_DATA_PTR)
+    for pool, moved in ((pa, pb), (pb, pa)):
+        if moved == block and AI_POOL <= pool < AI_POOL + AI_POOL_ENTRIES * AI_SIZE and not (pool - AI_POOL) % AI_SIZE:
+            return pa, pb
+    return None
+
+
+def ai_word(va, vb, ma, mb, move):
+    """a word of his AI data, or one that points into it, the same in both runs: equal, or a pointer into what each run
+    moved (xcontrol's), or a pointer into his AI data at the same place of it in each run's"""
+    return va == vb or X.pointer(va, ma) == X.pointer(vb, mb) or (0 <= va - move[0] < AI_SIZE and vb - move[1] == va - move[0])
+
+
+def ai_parted(ia, ib, ma, mb, move):
+    """his AI data read through each run's pointer, BN6's 0x100 bytes: [(a's address, a's byte, b's)] where they differ.
+    The move's own check: the bytes of the two places are explained by it (ai_why), so what they hold is compared here"""
+    out = []
+    for k in range(0, AI_SIZE, 4):
+        va, vb = X.u32(ia, move[0] + k), X.u32(ib, move[1] + k)
+        if not ai_word(va, vb, ma, mb, move):
+            out += [(move[0] + k + n, x, y) for n, (x, y) in enumerate(zip(struct.pack('<I', va), struct.pack('<I', vb))) if x != y]
+    return out
+
+
+def ai_why(off, ia, ib, move):
+    """--souls, where his AI data is moved in one run (ai_move): why the byte at `off` differs, or None. BN6's 0x100 bytes
+    at either place (the pool's entry dead in the run that moved it, its object naming the block; the block BN6's own
+    unused RAM in the other: what they hold compared apart, ai_parted); his place in the pool kept after the block
+    (adopt's POOL_AT); a word pointing into his AI data, at the same place of it in each run's. Not BN5's chip AI's state
+    past BN6's 0x100 (+0x100 to +0x13F: nothing writes it but zeroes while no chip AI has him)"""
+    block, size5 = souls_ai()
+    addr, w = X.addr_of(off), off & ~3
+    if any(p <= addr < p + AI_SIZE for p in move):
+        return 'his AI data, in BN6\'s pool in one run and moved into BN5\'s size in the other (the same bytes read through his object\'s pointer)'
+    va, vb = struct.unpack_from('<I', ia, w)[0], struct.unpack_from('<I', ib, w)[0]
+    if block + size5 <= addr < block + size5 + 4 and {va, vb} == {0, move[0] if move[1] == block else move[1]}:
+        return 'his AI data\'s place in BN6\'s pool, kept after the block it is moved into'
+    if 0 <= va - move[0] < AI_SIZE and vb - move[1] == va - move[0]:
+        return 'a pointer into his AI data, moved (the same place of it)'
+    return None
+
+
+def why(off, ia, ib, ma, mb, allowed, move=None):
     """Why the byte at `off` differs between two runs' images, or None: xcontrol's (a pointer into what each run moved,
     BN6's interrupt stack, dead between frames), with --souls a pointer into a table the Souls grew, read through its
-    copy, and BN5's mood in the Souls' own block, and with `allowed` the proxy's own: a place the form is kept, 1 against 8; MegaMan's NameID, 0x1AC against
+    copy, BN5's mood in the Souls' own block and, where one run moved it (`move`: ai_move), MegaMan's AI data's place,
+    and with `allowed` the proxy's own: a place the form is kept, 1 against 8; MegaMan's NameID, 0x1AC against
     0x1B3; the used bits' word (its row's in both, so far)"""
-    reason = X.why(off, ia, ib, ma, mb, False) or (SOULS and souls_pointer(off, ia, ib))
+    # (the move's first: its places' bytes are many a frame, and xcontrol's reads every range moved for each)
+    reason = (move and ai_why(off, ia, ib, move)) or X.why(off, ia, ib, ma, mb, False) or (SOULS and souls_pointer(off, ia, ib))
     if not reason and SOULS and X.addr_of(off) in souls_mood():
         reason = 'BN5\'s mood, kept in the Souls\' block beside BN6\'s (read by their hooks alone)'
     if reason or not allowed:
@@ -217,6 +291,10 @@ def compare(a, b, ma, mb, allowed):
         ia, ib = a[i][2], b[i][2]
         if ia == ib:
             continue
+        # (--souls: his AI data where one run moved it, read through each run's pointer; its two places' bytes are why's)
+        move = ai_move(ia, ib) if SOULS else None
+        if move:
+            bad += [(a[i][0], addr, x, y) for addr, x, y in ai_parted(ia, ib, ma, mb, move)][:max(0, 200 - len(bad))]
         off = 0
         while off < X.IMAGE:
             k = off
@@ -226,7 +304,7 @@ def compare(a, b, ma, mb, allowed):
             if off >= X.IMAGE:
                 break
             if ia[off] != ib[off]:
-                reason = why(off, ia, ib, ma, mb, allowed)
+                reason = why(off, ia, ib, ma, mb, allowed, move)
                 if reason:
                     seen = explained.setdefault(reason, {})
                     seen[X.addr_of(off)] = seen.get(X.addr_of(off), 0) + 1
@@ -307,6 +385,38 @@ MUTATIONS = (
     (8, 'the arm flash\'s look not hooked: TenguCross\'s arm as he fires', None),
     (16, 'the summon not hooked: TenguMan behind him as he crosses', None),
 )
+
+
+def ai_mutations(native, installed):
+    """--souls: the test of the AI data's move's own rule (ai_move, ai_why, ai_parted), on the two traces, no run: at the
+    first frame his AI data stands moved, each change a wrong move would leave written into a copy of one run's image,
+    which the comparison must then report: whether every one was"""
+    (ma, fa), (mb, fb) = native, installed
+    at = next((i for i in range(min(len(fa), len(fb))) if ai_move(fa[i][2], fb[i][2])), None)
+    if at is None:
+        print('his AI data\'s move: in no frame of the two runs (the installed run has not moved it)')
+        return True
+    pool, block = ai_move(fa[at][2], fb[at][2])
+    if pool == souls_ai()[0]:
+        print('his AI data\'s move: the run without the Souls moved it')
+        return False
+    if compare([fa[at]], [fb[at]], ma, mb, False)[1]:
+        print(f'his AI data\'s move: frame {fa[at][0]} differs before any change (native against installed, above)')
+        return False
+    caught = 0
+    cases = (('a byte of his AI data\'s state, in the block', 1, block + AI_STATE),
+             ('the same byte in BN6\'s pool, in the run that keeps it there', 0, pool + AI_STATE),
+             ('a byte of his AI data BN6\'s set-up wrote before the move, in the block', 1, block),
+             ('BN5\'s chip AI\'s state past BN6\'s 0x100, not zero', 1, block + AI_SIZE),
+             ('his place in the pool, kept after the block', 1, block + souls_ai()[1]))
+    for what, side, addr in cases:
+        imgs = [bytearray(fa[at][2]), bytearray(fb[at][2])]
+        imgs[side][X.off_of(addr)] ^= 4
+        bad = compare([(fa[at][0], fa[at][1], bytes(imgs[0]))], [(fb[at][0], fb[at][1], bytes(imgs[1]))], ma, mb, False)[1]
+        print(f'his AI data\'s move, {what} changed ({addr:08x}, frame {fa[at][0]}): {"caught" if bad else "NOT CAUGHT"}')
+        caught += bool(bad)
+    print(f'{caught} of {len(cases)} changes to his AI data\'s move caught (the comparison\'s own test, on the traces)')
+    return caught == len(cases)
 
 
 def mutations(a, installed):
@@ -395,6 +505,8 @@ def main():
     print('the proxy form: ' + ('HeatCross frame for frame' if ok else 'DIFFERENT'))
     if a.mutations:
         ok = mutations(a, runs['installed']) and ok
+        if a.souls:
+            ok = ai_mutations(runs['native'], runs['installed']) and ok
     sys.exit(0 if ok else 1)
 
 

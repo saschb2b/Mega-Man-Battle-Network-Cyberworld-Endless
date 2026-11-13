@@ -20,7 +20,7 @@
 #include "rom.h"
 
 #define XNAVI_AT   FREE_XNAVIS             /* (docs/engine/emulation/) */
-#define XNAVI_END  FREE_BACKDROPS
+#define XNAVI_END  FREE_XNAVIS_END
 #define XNAVI_GUARD_AT (XNAVI_END - 0x12000)   /* (a guardian of another game's, one at a time: KnightMan's, the largest, 68033 bytes) */
 #define BUS        0x08000000u
 #define LIST_NAVIS 6                       /* sprite lists: the Navis and Mr. Progs */
@@ -81,6 +81,7 @@ static uint32_t copy_sprite_at(const uint8_t *xr, uint32_t lists, int list, int 
 	uint32_t p = get32(xr + at);
 	if (p < BUS || p - BUS >= ROM_SIZE) return 0;
 	uint32_t len = xnavi_sprite_len(xr + (p - BUS), ROM_SIZE - (p - BUS));
+	if (len && *next + len > end) fprintf(stderr, "xnavi: sprite %d of list %d, %u bytes, past its room at %08x: not copied\n", i, list, (unsigned)len, (unsigned)*next);
 	if (!len || *next + len > end) return 0;
 	uint32_t to = *next;
 	emu_write(to, xr + (p - BUS), len);

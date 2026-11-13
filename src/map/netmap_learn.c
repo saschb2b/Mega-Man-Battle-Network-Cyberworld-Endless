@@ -83,6 +83,8 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		AreaSrc r;
 		if (!area_src_raise_in(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, own, L);
+		/* (and what stands under that floor, where the area sets such: sides.h) */
+		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
 		area_src_raise_end(src, &r);
 	}
 	/* (its books are one map's: the layer's lead, netmap.c) */
@@ -268,7 +270,8 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
-	if (na->sides) sides_learn(m, &L->sides);
+	if (na->sides & 1) sides_learn(m, &L->sides);
+	if (na->sides & 4) behind_learn(m, &L->sides);
 }
 
 /* (debug output) what area `area` learned */
@@ -321,7 +324,7 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		area_src_free(&b);
 	}
 	/* (and the side pieces of those listed for them alone) */
-	for (int k = 0; k < 2 && na->sides && na->side_maps[k][0]; ++k) {
+	for (int k = 0; k < 2 && na->sides & 1 && na->side_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->side_maps[k][0], na->side_maps[k][1], &b)) continue;
 		sides_learn(&b, &L->sides);

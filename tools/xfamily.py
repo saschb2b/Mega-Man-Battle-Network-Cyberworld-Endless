@@ -47,7 +47,8 @@ every frame of the battle, src/emu/battle_trace.c). MegaMan stands at
            src/emu/xsea.c), and what the Souls do with no Soul held, which
            install with BN5's Navis since issue #82's run round (xproxy.py
            --souls's: a pointer into a table their install grew, BN5's mood
-           in their own block)
+           in their own block, MegaMan's AI data moved into BN5's size at
+           his set-up, the same bytes read through his object's pointer)
 
 Needs both ROMs (local only). Exits 0 when every check holds.
 """

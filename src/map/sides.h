@@ -31,6 +31,9 @@ typedef struct {
 	 * are the same, a flame beside a floor never over another floor */
 	int8_t under[SIDE_UNDER][3];
 	int nunder;
+	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
+	                    * (StairTile.e0), its panel one of a pad's on a layer */
+	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
 } SidePiece;
 
 typedef struct {
@@ -41,5 +44,15 @@ typedef struct {
 /* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
  * priorities are its book's owner's to free. */
 void sides_learn(const AreaSrc *a, SideBook *out);
+
+/* Adds what view `r` of a map (area_src_raise_in: its raised floor brought
+ * down to the ground) sets under that floor's lower edges, past its side
+ * face: Aquarium Comp's pillars under its glass pads, the bubbles under them too. */
+void hangs_learn(const AreaSrc *r, SideBook *out);
+
+/* Adds what map `a` sets on its first layer behind its floor's upper edges,
+ * off the floor: the flames behind the catwalks of BN4's Undernet, where
+ * the ones in front lie on the second layer (sides_learn). */
+void behind_learn(const AreaSrc *a, SideBook *out);
 
 #endif

@@ -1,8 +1,8 @@
 {
   "name": "The net maps' own pieces on generated layers",
   "state": "building",
-  "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6, and the Underground's teal emblems. The Undernet's bowls are tile animations the maps' GFXAnim lists write (tiles 726-737; tools/map_anims.py) and burn on a generated layer by the game's own script; Aquarium Comp's fish (tiles 1-12) are found and not set.",
-  "left": "The Aquarium's pillars with their fish (its pads are raised floor in its maps) and Robot Control's pipes; the other kinds on issue #505.",
+  "now": "Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6; the Underground's teal emblems; Aquarium Comp's pillars under its pads, cut from the first layer in the view of the pads' height. BN4's Undernet's rows of horns behind its catwalks, the first layer's too. The bowls and the bubbles under the pillars' stubs are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py) and run on a generated layer by the game's own scripts.",
+  "left": "The other kinds on issue #505: free-standing scenery that touches other art in CopyBot Comp, BN5's End Area and Oran Area; floor marks; stairs. Robot Control's arms are dead-end floor, a layout's matter.",
   "updated": "2026-11-13",
   "link": "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505"
 }

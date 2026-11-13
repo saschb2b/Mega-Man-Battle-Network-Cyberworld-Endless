@@ -24,7 +24,7 @@
 #include "rom.h"
 
 #define XBG_AT   FREE_BACKDROPS          /* (docs/engine/emulation/) */
-#define XBG_END  FREE_FLAME
+#define XBG_END  FREE_BACKDROPS_END
 #define XMAP_AT  FREE_MAP_BACKDROPS      /* the net maps' (docs/engine/emulation/) */
 #define XMAP_END FREE_MAP_BACKDROPS_END
 #define BUS      0x08000000u

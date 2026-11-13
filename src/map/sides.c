@@ -21,10 +21,10 @@
 
 static int fdiv(int a, int b) { return a / b - (a % b < 0); }
 
-/* Whether panel (A, B) is floor on the ground. */
+/* Whether panel (A, B) is floor on the ground (a raised view's: at its level). */
 static bool ground(const AreaSrc *a, int A, int B) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
-	return area_src_walled_floor(a, X, Y) == 1 && area_src_height(a, X, Y) == 0;
+	return area_src_walled_floor(a, X, Y) == 1 && area_src_height(a, X, Y) == a->level;
 }
 
 /* The panel whose ground top holds map pixel (x, y). */
@@ -43,11 +43,12 @@ typedef struct {
 	bool gnd[PANELS], edge;
 } Group;
 
-static void count_tile(const AreaSrc *a, int tx, int ty, Group *g) {
+/* (`first`: of the first layer's pixels, else the second's) */
+static void count_tile(const AreaSrc *a, bool first, int tx, int ty, Group *g) {
 	int W = a->tw * 8;
 	for (int y = ty * 8; y < ty * 8 + 8; ++y)
 		for (int x = tx * 8; x < tx * 8 + 8; ++x) {
-			if (!a->front[(size_t)y * W + x]) continue;
+			if (!(first ? a->px0[(size_t)y * W + x] >> 24 : a->front[(size_t)y * W + x])) continue;
 			int A, B;
 			panel_at(a, x, y, &A, &B);
 			bool gnd = ground(a, A, B);
@@ -62,9 +63,35 @@ static void count_tile(const AreaSrc *a, int tx, int ty, Group *g) {
 		}
 }
 
-/* The group of second-layer tiles joined to (sx, sy), its tiles' indexes in
+#define HANG_FACE  8   /* a floor's side face reaches this far under its edge at most */
+#define HANG_UP   48   /* ... and what stands under it begins within this of the floor */
+
+static bool off_floor(const AreaSrc *a, int x, int y) {
+	int A, B;
+	panel_at(a, x, y, &A, &B);
+	return !ground(a, A, B);
+}
+
+/* Whether first-layer tile (tx, ty) lies under a floor's face or free of
+ * any: drawn, and over no floor nor within a face's height under one. */
+static bool hang_tile(const AreaSrc *a, int tx, int ty) {
+	if (!(a->tile[0][ty * a->tw + tx] & 0x3FF)) return false;
+	for (int k = 0; k < 4; ++k) {
+		int x = tx * 8 + 7 * (k & 1), y = ty * 8 + 7 * (k >> 1);
+		if (!off_floor(a, x, y) || !off_floor(a, x, y - HANG_FACE)) return false;
+	}
+	return true;
+}
+
+/* Whether tile (x, y) is one a group is made of: the second layer's, or
+ * (`hang`) the first's under a floor. */
+static bool member(const AreaSrc *a, bool hang, int x, int y) {
+	return hang ? hang_tile(a, x, y) : (a->tile[1][y * a->tw + x] & 0x3FF) != 0;
+}
+
+/* The group of such tiles joined to (sx, sy), its tiles' indexes in
  * `queue`; `seen` marks them. */
-static void group_from(const AreaSrc *a, int sx, int sy, uint8_t *seen, int *queue, Group *g) {
+static void group_from(const AreaSrc *a, bool hang, int sx, int sy, uint8_t *seen, int *queue, Group *g) {
 	int tw = a->tw, th = a->th;
 	memset(g, 0, sizeof *g);
 	g->x0 = g->x1 = sx; g->y0 = g->y1 = sy;
@@ -80,7 +107,7 @@ static void group_from(const AreaSrc *a, int sx, int sy, uint8_t *seen, int *que
 		for (int dy = -1; dy <= 1; ++dy)
 			for (int dx = -1; dx <= 1; ++dx) {
 				int nx = x + dx, ny = y + dy;
-				if (nx < 0 || ny < 0 || nx >= tw || ny >= th || seen[ny * tw + nx] || !(a->tile[1][ny * tw + nx] & 0x3FF)) continue;
+				if (nx < 0 || ny < 0 || nx >= tw || ny >= th || seen[ny * tw + nx] || !member(a, hang, nx, ny)) continue;
 				seen[ny * tw + nx] = 1;
 				queue[g->n++] = ny * tw + nx;
 			}
@@ -90,7 +117,7 @@ static void group_from(const AreaSrc *a, int sx, int sy, uint8_t *seen, int *que
 /* Whether the group is a side piece; its panel in (*A, *B). */
 static bool grips(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) {
 	if (g->edge || g->n < MIN_TILES || g->n > MAX_TILES || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
-	for (int k = 0; k < g->n; ++k) count_tile(a, queue[k] % a->tw, queue[k] / a->tw, g);
+	for (int k = 0; k < g->n; ++k) count_tile(a, false, queue[k] % a->tw, queue[k] / a->tw, g);
 	if (g->on < ON_FLOOR || g->off * 10 < OFF_SHARE * (g->on + g->off) || g->other * 10 > g->on + g->off) return false;
 	int best = -1;
 	for (int k = 0; k < g->npanels; ++k)
@@ -115,7 +142,7 @@ static void under(const Group *g, int A, int B, SidePiece *p) {
 static bool same(const SidePiece *p, const SidePiece *q) {
 	if (p->ntiles != q->ntiles || p->floor != q->floor) return false;
 	for (int k = 0; k < p->ntiles; ++k)
-		if (p->tiles[k].px != q->tiles[k].px || p->tiles[k].py != q->tiles[k].py || p->tiles[k].e1 != q->tiles[k].e1) return false;
+		if (p->tiles[k].px != q->tiles[k].px || p->tiles[k].py != q->tiles[k].py || p->tiles[k].e1 != q->tiles[k].e1 || p->tiles[k].e0 != q->tiles[k].e0) return false;
 	return true;
 }
 
@@ -136,6 +163,31 @@ static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
 	}
 }
 
+/* Group g, on panel (A, B), into the book unless it holds its look. */
+static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
+	bool hang = kind != 0;
+	int tw = a->tw, th = a->th;
+	SidePiece *p = &out->piece[out->n];
+	memset(p, 0, sizeof *p);
+	p->tiles = calloc((size_t)g->n, sizeof *p->tiles);
+	if (!p->tiles) return;
+	p->ntiles = g->n;
+	p->hang = hang;
+	p->behind = kind == 2;
+	for (int k = 0; k < 9; ++k)
+		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
+	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
+	for (int k = 0; k < g->n; ++k) {
+		p->tiles[k] = (StairTile){ .px = (int16_t)(queue[k] % tw * 8 - ax), .py = (int16_t)(queue[k] / tw * 8 - ay) };
+		*(hang ? &p->tiles[k].e0 : &p->tiles[k].e1) = a->tile[hang ? 0 : 1][queue[k]];
+	}
+	for (int k = 0; k < out->n; ++k)
+		if (same(&out->piece[k], p)) { free(p->tiles); p->tiles = NULL; return; }
+	if (!hang) priorities(a, A, B, p);
+	under(g, A, B, p);
+	++out->n;
+}
+
 void sides_learn(const AreaSrc *a, SideBook *out) {
 	if (a->layers < 2 || !a->rings || !a->front) return;
 	int tw = a->tw, th = a->th;
@@ -145,25 +197,69 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
 		Group g;
 		int A, B;
-		group_from(a, i % tw, i / tw, seen, queue, &g);
+		group_from(a, false, i % tw, i / tw, seen, queue, &g);
 		if (!grips(a, queue, &g, &A, &B)) continue;
-		SidePiece *p = &out->piece[out->n];
-		p->tiles = calloc((size_t)g.n, sizeof *p->tiles);
-		if (!p->tiles) break;
-		p->ntiles = g.n;
-		p->floor = 0;
-		for (int k = 0; k < 9; ++k)
-			if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
-		int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
-		for (int k = 0; k < g.n; ++k)
-			p->tiles[k] = (StairTile){ .px = (int16_t)(queue[k] % tw * 8 - ax), .py = (int16_t)(queue[k] / tw * 8 - ay), .e1 = a->tile[1][queue[k]] };
-		bool dup = false;
-		for (int k = 0; k < out->n && !dup; ++k) dup = same(&out->piece[k], p);
-		if (dup) { free(p->tiles); continue; }
-		priorities(a, A, B, p);
-		under(&g, A, B, p);
-		++out->n;
+		keep(a, queue, &g, A, B, 0, out);
 	}
 	free(seen);
 	free(queue);
 }
+
+#define BEHIND_DOWN  16   /* what stands behind a floor ends within this above it */
+#define BEHIND_TILES 24   /* ... and is no larger: an exit's arrow is */
+
+/* Whether a floor's panel lies straight above group g's top row within
+ * HANG_UP (`below`: straight below its bottom row within BEHIND_DOWN), in
+ * (*A, *B) the one most of that row's columns meet. */
+static bool meets(const AreaSrc *a, const int *queue, const Group *g, bool below, int *A, int *B) {
+	int row = below ? g->y1 : g->y0, from = below ? row * 8 + 8 : row * 8 - 1, step = below ? 1 : -1, reach = below ? BEHIND_DOWN : HANG_UP;
+	int PA[2 * MAX_W], PB[2 * MAX_W], votes[2 * MAX_W], n = 0, best = 0;
+	for (int k = 0; k < g->n; ++k) {
+		if (queue[k] / a->tw != row) continue;
+		for (int x = queue[k] % a->tw * 8 + 2; x < queue[k] % a->tw * 8 + 8 && n < 2 * MAX_W; x += 4)
+			for (int y = from; y >= 0 && y < a->th * 8 && abs(y - from) < reach; y += step) {
+				if (off_floor(a, x, y)) continue;
+				int j = 0;
+				panel_at(a, x, y, &PA[n], &PB[n]);
+				while (PA[j] != PA[n] || PB[j] != PB[n]) ++j;
+				if (j == n) votes[n++] = 0;
+				if (++votes[j] > votes[best]) best = j;
+				break;
+			}
+	}
+	if (!n) return false;
+	*A = PA[best]; *B = PB[best];
+	return true;
+}
+
+/* Whether group g stands under a floor, over none itself; `behind`: whether
+ * it stands behind one and under none (a pad's knob over a walkway behind
+ * it is its pad's). */
+static bool hangs(const AreaSrc *a, const int *queue, Group *g, bool behind, int *A, int *B) {
+	if (g->edge || g->n < MIN_TILES || g->n > (behind ? BEHIND_TILES : MAX_TILES) || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
+	for (int k = 0; k < g->n; ++k) count_tile(a, true, queue[k] % a->tw, queue[k] / a->tw, g);
+	if (g->on || g->other * 10 > g->off) return false;
+	return behind ? !meets(a, queue, g, false, A, B) && meets(a, queue, g, true, A, B) : meets(a, queue, g, false, A, B);
+}
+
+/* The first layer's groups off the floor of map or view r that stand under
+ * a floor (kind 1) or behind one (kind 2), into the book. */
+static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
+	if (!r->rings || !r->px0) return;
+	int tw = r->tw, th = r->th;
+	uint8_t *seen = calloc((size_t)tw * th, 1);
+	int *queue = malloc((size_t)tw * th * sizeof *queue);
+	for (int i = 0; seen && queue && i < tw * th && out->n < SIDES_MAX; ++i) {
+		if (seen[i] || !hang_tile(r, i % tw, i / tw)) continue;
+		Group g;
+		int A, B;
+		group_from(r, true, i % tw, i / tw, seen, queue, &g);
+		if (hangs(r, queue, &g, kind == 2, &A, &B)) keep(r, queue, &g, A, B, kind, out);
+	}
+	free(seen);
+	free(queue);
+}
+
+void hangs_learn(const AreaSrc *r, SideBook *out) { first_learn(r, 1, out); }
+
+void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }

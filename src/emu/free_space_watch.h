@@ -21,9 +21,15 @@ bool free_space_write(uint32_t at, uint32_t len);
 /* The writes told so far; and the next told without a word (a test's own). */
 int free_space_strays(void);
 void free_space_quiet(bool on);
+/* From here on every write into the free space is kept, 16 bytes a bit
+ * (64 KB, a measured run's alone: CYBERWORLD_FREE_SPACE). */
+void free_space_measure(void);
 /* What each region of the ROM copy holds: the end of its last byte that is
  * not the copy's 0xFF fill, read with `read8`, written to `path` a line a
- * region ("NAME END", tools/free_space.py --usage FILE reads it). */
+ * region ("NAME END"); then, of a measured run, every span written during
+ * it ("~ START END": what a room filled again per battle or layer reached
+ * at its most, and what lies unwritten before a table at a region's end).
+ * tools/free_space.py --usage FILE... reads it, several runs' as one. */
 bool free_space_usage(const char *path, uint8_t (*read8)(uint32_t));
 
 #endif

@@ -177,11 +177,11 @@ def changes(old, new):
     now = state_lines(new)
     out = []
     for line in now:
-        if key(line) in ('frame', 'screen') or line in was.get(key(line), ()):
+        if key(line) in ('frame', 'screen', 'gameframe') or line in was.get(key(line), ()):
             continue
         before = was.get(key(line), [])
         out.append(line + (f' (was {before[0].split(" ", 1)[1]})' if len(before) == 1 and ' ' in before[0] else ''))
-    keys = {key(line) for line in now}
+    keys = {key(line) for line in now} | {'gameframe'}
     out += [f'{k} gone' for k in was if k not in keys]
     return out
 

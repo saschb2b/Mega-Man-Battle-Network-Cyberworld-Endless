@@ -61,6 +61,10 @@ the last trailer everywhere; the notes open with it.
   rebuilding it; build first or the title shows the old version). Where
   layers or timing changed, re-shoot all and look at every changed file;
   after `clips`, keep only clips whose `.mp4`/`.png` changed.
+- `python3 tools/old_checkpoint.py`: the last two releases' runs continued
+  by this build must go on (issue #482: 0.20.0's checkpoint stood still in
+  0.21.0 at the first hit; docs/devtools/old-checkpoint.md). A FAIL is
+  fixed before the tag; its lists say what the old state still held.
 
 ## 5. Main and the tag
 

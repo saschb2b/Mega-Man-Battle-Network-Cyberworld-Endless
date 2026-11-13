@@ -108,7 +108,7 @@ static bool tables_stage(void) {
 
 /* (a unit's code past the homes, a helper's before the computed powers; the calls of either to the stubs or the helpers'
  * code, each into a helper before it: helper_calls_check) */
-static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS };
+static const XvRegion region = { XC_CODE, XC_CODE_END, XC_ART, XC_END, XC_STUBS, XC_POWERS };
 static const XvRegion helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
 
 /* each call of a unit's into the helpers' code: to code of a helper installed before it (its copy of a BN5 routine) */
