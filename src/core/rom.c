@@ -363,7 +363,7 @@ bool rom_find_close;
  * have them roam (xguard: docs/game/bosses/bn5-navis.md); Nebula Area's and
  * the Undernet's acts draw from both nets' Navis by band (run.h). */
 static const NetAreaDef bn5_areas[] = {
-	{ 0x90, 0, 0x10040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
+	{ 0x90, 0, 0x110040, 0x0030, false, 0x13, 0, 0, 0, { { 0x90, 1 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x90, 0 }, .like = 0,
 		.leads = 1, .lay = 31, .name = "ACDC Area", .short_name = "ACDC Area", .motto = "The net of Lan's old hometown", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 8, .xlooks = XLOOK_CUBE,
 		.xbattles = { { 0x90, 0 }, { 0x90, 1 }, { 0x86, 0 } }, .xguard = { BN5_NAVI_KNIGHTMAN } },   /* ACDC Area 1: cyan platforms framed by rims, green walkways and their pale joins; ACDC Area 2 in the same tiles and colours */
 	{ 0x90, 5, 0x8000, 0x8000, false, 0x13, 0, 0, 0, { { 0x90, 4 }, { 0x90, 6 } }, .pad_rooms = 64, .apart = NET_APART_PLATFORMS, .skip_styles = 0x2006,
