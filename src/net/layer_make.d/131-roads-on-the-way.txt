@@ -1,0 +1,1 @@
+In an area whose maps have a second look of walkway (NetAreaDef.road_styles: BN4's Park Area's orange roads), the walkways of a layer's way from its arrival to its exit are drawn in it (mark_roads, TILE_ROAD, tilemap.c's road pieces): Park Area's layers draw other tiles; their floors, walls and objects, and every other area's layers, as before.

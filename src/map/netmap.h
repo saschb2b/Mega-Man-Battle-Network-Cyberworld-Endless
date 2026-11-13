@@ -30,6 +30,7 @@ typedef struct {
 	 * layer's are its teleport pair, layer.teleport_*) */
 	const int (*gems)[2];
 	int ngems;
+	const uint8_t *way;     /* 1 on the cells of the way from its arrival to its exit (NULL: none marked): its walkways there are roads where the area has that look (NetAreaDef.road_styles) */
 } NetLayout;
 
 /* How many wall cells of floor (nine panels) a map has at a height for its

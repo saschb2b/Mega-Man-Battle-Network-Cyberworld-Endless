@@ -29,6 +29,10 @@ enum { TILE_VOID, TILE_A, TILE_B };
  * just below such an end is marked so too, as the walkway's floor: the
  * walkway runs on under the room's upper edge (tilemap.c, pieces_floor). */
 #define TILE_JOINS 16
+/* ... a walkway's panel drawn in the area's second look of walkway (BN4's
+ * Park Area's orange roads, NetAreaDef.road_styles), from books of its own
+ * (TileGrid.roads): a piece drawn apart (tilemap.c). */
+#define TILE_ROAD 32
 #define TILE_MATERIAL(m) ((m) & 3)
 
 /* One pair of layer entries seen for a class (phase, then the platform and
@@ -81,7 +85,7 @@ typedef struct {
 typedef struct { uint32_t key; int first; } TileClass;
 
 /* Sorted by key and then most common first. */
-typedef struct {
+typedef struct TileBook {
 	TileCand *cand;
 	int n;
 	TileClass *cls;                     /* its classes in order (a pick passes a class whole) */
@@ -120,6 +124,9 @@ typedef struct {
 	int side;          /* how far down beside a side face a tile may draw (0: the face's height) */
 	bool plain_ends;   /* a walkway's end at a piece drawn apart is marked TILE_JOINS: the area has no joint to stand there */
 	int wall;          /* how far over a floor's upper edge a wall of it may stand, which lies in front of what is behind it (0: none known; 8 where the area's panels are laid whole) */
+	const struct TileBook *roads;   /* the books of the area's roads, its TILE_ROAD panels' (NULL: it has none) */
+	int nroads;
+	bool thin;         /* its books are thin (a road's): a panel taken up for how it meets its neighbours is laid again from another that meets them (panels_lay.c) */
 } TileGrid;
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD

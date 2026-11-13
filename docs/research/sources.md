@@ -417,6 +417,12 @@ do with them.
   it in a sentence.
 - **What climbs to its platform is a ramp**, 208 slope cells in the
   heights' section; an earlier note here called it a conveyor.
+- **Its roads are a panel wide and end in an arrow's head or at a pink
+  walkway, never at a platform** (verified: the map's panels as the
+  learner reads them with the roads' hues, the dev atlas's
+  `roads_b36_92_0.txt`, beside its picture; three of its five exits lie
+  at such an arrow). So a road that ends at a room on a layer is ours
+  ([Roads on the way](../world/level-design/roads.md)).
 
 ## The Battle Lab (11 November 2026)
 

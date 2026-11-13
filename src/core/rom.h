@@ -64,6 +64,7 @@ typedef struct {
 	uint8_t xguard[2];       /* (another game's) the Navis of its game who may guard its acts, as its own net maps set them: BN5's by
 	                          * their ids table's AI index (docs/game/bosses/bn5-navis.md), BN4's by their V1 enemy id
 	                          * (docs/game/bosses/bn4-navis.md; xguardian_named); 0 none: BN6's guardians */
+	uint16_t road_styles;    /* hue buckets of a second look of walkway, its roads, which the layer's way to its exit is drawn in (0: none; docs/world/level-design/roads.md) */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
