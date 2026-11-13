@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T22:09:04Z
+* **Update**: rom/graphics.md (Net maps' own tile animations: the Undernet's flames and the Aquarium's fish, the digit blocks their placeholders), code/tools.md (tools/map_anims.py).

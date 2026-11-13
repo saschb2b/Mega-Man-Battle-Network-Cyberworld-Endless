@@ -1,0 +1,8 @@
+{
+  "feature": "The net maps' own pieces on generated layers",
+  "date": "2026-11-13",
+  "name": "The digit blocks are tile animations",
+  "result": "The Undernet's script writes 12 tiles to tile 726 every 8 frames and the Aquarium's two write 6 each to tiles 1 and 7 every 12; the maps set exactly those tile numbers where the stored tile set shows digits; set on a generated layer, the game shows a flickering flame and swimming fish.",
+  "meaning": "The digits are no art and no layer draws them; what they stand for is art a layer misses, and the game animates it by itself wherever a layer sets those tiles.",
+  "link": null
+}
