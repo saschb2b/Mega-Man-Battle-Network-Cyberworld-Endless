@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T12:30:00Z
-* **Update**: devtools/tile-test.md (Panels lent tile by tile: what was read or laid wrong in Park, the Graveyard and Town, each traced to a map panel; the breaks before and after; where whole panels stay off and why; what Park's map has no tiles for), world/level-design/generator.md (a panel laid piece by piece where no map has it, panels kept in part, what lies round the floor laid after it), code/net-and-map.md (`panels_lay.c`).
