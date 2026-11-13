@@ -441,10 +441,20 @@ static void hand_floor(const char *dir, int area) {
  * its guardian's layer in the layout its act plans and layers that climb a
  * stair where it has one, its original maps beside them. */
 /* What the area's layers built since lent_begin took from each of its
- * maps: a line each in the report, and the map with the tiles no layer
- * used tinted (lent.c). */
-static void lent_maps(const char *dir, FILE *report, int area) {
+ * maps: a line each in DIR/lent.txt (begun anew by lent_fresh), and the map
+ * with the tiles no layer used tinted (lent.c). */
+static void lent_fresh(const char *dir) {
+	char path[600];
+	snprintf(path, sizeof path, "%s/lent.txt", dir);
+	remove(path);
+}
+
+static void lent_maps(const char *dir, int area) {
 	const NetAreaDef *na = net_area_def(area);
+	char list[600];
+	snprintf(list, sizeof list, "%s/lent.txt", dir);
+	FILE *report = fopen(list, "a");
+	if (!report) return;
 	for (int k = -1; na && k < NET_MORE_MAPS; ++k) {
 		int group = k < 0 ? na->group : na->more[k][0], number = k < 0 ? na->number : na->more[k][1];
 		if (k >= 0 && !group) break;
@@ -461,6 +471,7 @@ static void lent_maps(const char *dir, FILE *report, int area) {
 		free(px);
 		area_src_free(&a);
 	}
+	fclose(report);
 }
 
 static void area_layers(const char *dir, FILE *report, int area, int seeds) {
@@ -473,7 +484,7 @@ static void area_layers(const char *dir, FILE *report, int area, int seeds) {
 	}
 	for (int s = 1; s <= seeds; ++s) one(dir, report, b, area, -1, 3, (uint32_t)(s * 104729 + area));
 	stair_layers(dir, report, b, area, seeds);
-	lent_maps(dir, report, area);
+	lent_maps(dir, area);
 }
 
 /* Another game's net area N alone. */
@@ -486,6 +497,7 @@ static void xrom_area(const char *dir, int n, int seeds) {
 	snprintf(path, sizeof path, "%s/report.txt", dir);
 	FILE *report = fopen(path, "w");
 	if (!report) return;
+	lent_fresh(dir);
 	area_layers(dir, report, area, seeds);
 	fclose(report);
 }
@@ -597,6 +609,7 @@ int atlas_run(const char *spec) {
 	snprintf(path, sizeof path, "%s/report.txt", dir);
 	FILE *report = fopen(path, "w");
 	if (!report) { fprintf(stderr, "atlas: cannot write %s\n", path); return 1; }
+	lent_fresh(dir);
 	for (int b = 0; b < BIOME_COUNT; ++b)
 		if (want[b]) area_layers(dir, report, b, seeds);
 	/* (and every area another game beside BN6's lends a run, numbered after

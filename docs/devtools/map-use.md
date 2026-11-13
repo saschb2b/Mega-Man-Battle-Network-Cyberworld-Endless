@@ -32,12 +32,12 @@ the game shows them, so the count does not depend on tile numbers or
 flips.
 
 ```bash
-python3 build.py atlas all 6     # .build/atlas/lent_bNN_GG_N.bmp, and "lent" lines in report.txt
+python3 build.py atlas all 6     # .build/atlas/lent_bNN_GG_N.bmp and lent.txt
 ```
 
 Each map comes out as `lent_bNN_GG_N.bmp` (area, map group and number):
 the map as the game draws it, the tiles no layer used tinted red. Its
-line in `report.txt` gives two shares:
+line in `lent.txt` gives two shares:
 
 - **tiles drawn, used:** of the map's tiles that draw something, how many
   show a picture some layer draws. A plain floor repeated a thousand times
