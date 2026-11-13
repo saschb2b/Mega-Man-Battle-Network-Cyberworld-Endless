@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: multirom/bn4-souls.md (The shared room: the owner's call of one room for BN4's united Soul's look, its layout, ThunSoul's sprite, palette, face and count built and seen by film against BN4, what the room does not do yet), engine/emulation/memory.md and engine/emulation/free-space.md (`FREE_BN4_SOUL_LOOK`'s row), code/emu.md (`soullook.c`'s row).
 * **Update**: world/level-design/side-pieces.md (the Undernet's and Undernet Zero's fire bowls, which BN6 animates by itself; a piece set only where the panels it draws over are as in its map), rom/graphics.md (the flames set on layers).
 * **Update**: rom/graphics.md (Net maps' own tile animations: the Undernet's flames and the Aquarium's fish, the digit blocks their placeholders), code/tools.md (tools/map_anims.py).
 * **Update**: world/level-design/props.md (the Underground's teal emblems; none in an arena drawn in walkway floor).

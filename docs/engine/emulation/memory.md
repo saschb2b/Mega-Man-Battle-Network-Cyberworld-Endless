@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Memory the engine writes"
 description: "The free space plan for the core's ROM copy past BN6's 8 MB, region by region from `EMU_FREE` (`src/emu/free_space.h`, `claims.c`), BN6's tables patched in place, and the EWRAM BN6 leaves alone (`RAM_*`)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T20:57:00Z }
 ---
 
 # Memory the engine writes
