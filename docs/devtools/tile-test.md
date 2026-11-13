@@ -523,8 +523,13 @@ rim:
   hanging faces lay over a walkway's first panel) nor BN5's SciLab (170 to
   189). The room in front only on and beside its own panel, not under its
   faces, counted worse than either everywhere but BN5's Undernet.
+- **Town Area's squares** are pieces apart too, in front of its walkways
+  (`NET_APART_PLATFORMS` with `LAY_ROOMS_OVER`): it drew every floor as one
+  piece, and its squares' rims broke wherever a walkway met them. 350 to
+  264, each square whole. What is left there is floor two wide or
+  notched, which no map of Town's draws.
 
-Over all areas 89.6 to 88.3.
+Over all areas 89.6 to 86.6.
 
 The count alone misled twice more here: BN5's End Area fell by an eighth
 and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a

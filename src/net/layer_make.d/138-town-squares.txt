@@ -1,0 +1,1 @@
+BN4's Town Area's squares are pieces drawn apart, set in front of the walkways beside them (NET_APART_PLATFORMS, LAY_ROOMS_OVER): its layers draw other tiles.

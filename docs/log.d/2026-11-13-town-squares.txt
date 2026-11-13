@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T19:57:30Z
+* **Update**: devtools/tile-test.md (Each area's laying: Town Area's squares pieces apart, in front of its walkways).
