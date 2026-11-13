@@ -529,7 +529,7 @@ void xd_log_routes(void) {
 static bool chip_used(uint32_t to);
 
 bool xd_moved_kept(uint32_t to) {
-	return !(to >= FREE_CHIP_MOVED && to < XC_END) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
+	return !XC_HOLDS(to) || (to >= XC_HELPERS && to < XC_HOMES) || chip_used(to);
 }
 
 static bool chip_used(uint32_t to) {
@@ -549,7 +549,7 @@ static bool chip_used(uint32_t to) {
  * twin) */
 static bool chip_code(uint32_t to) {
 	if (xchips_bn4_code_at(to)) return bn4_played;
-	return to >= FREE_CHIP_MOVED && to < FREE_TAIL && !(to >= XC_HELPERS && to < XC_HOMES) && chip_used(to);
+	return XC_HOLDS(to) && !(to >= XC_HELPERS && to < XC_HOMES) && chip_used(to);
 }
 
 /* a family that moved a type `of` runs as shared (XV_TYPE_SHARED): its copy is the one `of` runs */

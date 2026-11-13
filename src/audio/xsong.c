@@ -20,7 +20,7 @@
 #include "song_table.h"
 
 #define XSONG_AT    FREE_SONGS              /* (docs/engine/emulation/) */
-#define XSONG_END   FREE_XNAVIS
+#define XSONG_END   FREE_SONGS_END
 #define SLOT_FIRST  BN6_SONGS_EMPTY_FIRST   /* BN6's empty song slots: a shared header of no tracks (docs/rom/), */
 #define SLOT_LAST   0x31    /* ... the per-run themes' (issue #82's shared allocations: the tracks' copied sounds above them, each
                                sound at a fixed slot whichever track copies it, XSOUNDS; a moved family's packed into its own
@@ -172,6 +172,11 @@ static uint32_t put(const uint8_t *src, uint32_t len) {
 		memcpy(X.buf + (at - X.buf_at), src, len);
 		X.next = (at + len + 3) & ~3u;
 		return at;
+	}
+	if (len && at + len > XSONG_END) {
+		static bool told;
+		if (!told) fprintf(stderr, "xsong: %u bytes past FREE_SONGS, %u of %u taken: the song is not copied\n", (unsigned)len, (unsigned)(at - XSONG_AT), (unsigned)(XSONG_END - XSONG_AT));
+		told = true;
 	}
 	if (!len || at + len > XSONG_END) return 0;
 	emu_write(at, src, len);

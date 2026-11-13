@@ -48,7 +48,7 @@
 
 #define TILEMAP_AT  FREE_TILE_MAP        /* generated tile map (LZ77) */
 #define XGFX_AT     FREE_XAREA              /* another game's area: its tile set and palette (docs/engine/emulation/) */
-#define XGFX_SIZE   0x30000
+#define XGFX_SIZE   (FREE_XAREA_END - FREE_XAREA)   /* (docs/engine/emulation/free-space.md, The measured pass) */
 
 /* (the bytes the last layer's tile map took: the layers' sizes) */
 static size_t tilemap_bytes;
@@ -481,6 +481,11 @@ static bool install_gfx(const Learned *L) {
 	if (!area_src_gfx(L->def->xrom, L->def->group, L->def->number, &ts, &nts, &pal, &npal)) return false;
 	uint32_t pal_at = XGFX_AT + (uint32_t)nts;
 	bool ok = pal_at + npal <= XGFX_AT + XGFX_SIZE;
+	/* (its region holds a tile set that fills the BGs' 64 KB of VRAM, its
+	 * two blocks as literal blocks after their header, and 256 colours; the
+	 * largest there is, BN4's Undernet's with its colours, is 59,876 bytes) */
+	_Static_assert(24 + 2 * LZ_LITERAL_MAX(0x8000) + 4 + 0x200 <= XGFX_SIZE, "a tile set of the BGs' VRAM past its region");
+	if (!ok) fprintf(stderr, "netmap: an area's tile set and colours, %u bytes, past FREE_XAREA's %u: not written\n", (unsigned)(nts + npal), (unsigned)XGFX_SIZE);
 	if (ok) {
 		emu_write(XGFX_AT, ts, nts);
 		emu_write(pal_at, pal, npal);

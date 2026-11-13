@@ -48,8 +48,11 @@
 #define XC_HOME_SIZE 0x400u
 #define XC_UNITS     80                    /* ... this many units (64 until the bubbles' helper and BN5's last Program Advances) */
 #define XC_CODE      (XC_HOMES + XC_HOME_SIZE * XC_UNITS)   /* the units' code, block by block, to: */
-#define XC_ART       (FREE_CHIP_CODE + 0xA0000u)            /* what they draw, to XC_END */
-#define XC_END       FREE_SOULS_ART
+#define XC_CODE_END  FREE_CHIP_MOVED_END                    /* (0x29800 bytes, the units' blocks 61,328 of them; the plan's free span after it) */
+#define XC_ART       FREE_CHIP_ART                          /* what they draw, to XC_END */
+#define XC_END       FREE_CHIP_ART_END
+/* Whether `to` lies in the chips' moved code, its tables or what it draws (not in the span between, another's or none's) */
+#define XC_HOLDS(to) (((to) >= FREE_CHIP_MOVED && (to) < XC_CODE_END) || ((to) >= XC_ART && (to) < XC_END))
 #define XC_ROUTINES  256                   /* entries in each grown routines' table */
 #define XC_FIRST_SUPPORT BN6_CHIP_ROUTINE_COUNT    /* the units' support routines from here, */
 #define XC_FIRST_NAVI    BN6_NAVI_ROUTINE_COUNT    /* ... their Navi routines from here */

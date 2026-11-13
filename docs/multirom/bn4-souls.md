@@ -376,7 +376,11 @@ the New 3DS first) and over regions shrunk to what they hold (room for a
 few sprites at best, not for 438 KB).
 
 `FREE_BN4_SOUL_LOOK` is that room: 45 KB in the `world` zone's gap, the
-last of its size (15 KB are left there), laid out in `soul_room.h`:
+last of its size when it was placed (15 KB were left there; the measured
+pass of the same day then sized that zone's regions by what they hold,
+and the room lies in 439 KB of free space since,
+[Free space](../engine/emulation/free-space.md), The measured pass), laid
+out in `soul_room.h`:
 
 | Part | Room | From BN4 |
 | --- | --- | --- |

@@ -4350,6 +4350,12 @@ static void test_free_space(void) {
 	CHECK(FREE_SOULS_ART_END <= FREE_TAIL, "free space: the Souls' art past %08x, the free tail's start", (unsigned)FREE_TAIL);
 	CHECK(FREE_TAIL <= FREE_BN4_NAVIS, "free space: BN4's Navis' room before the free tail");
 	CHECK(FREE_BRACKET_FACES - FREE_BN4_NAVI_SPRITE >= 61040u, "free space: BN4's Navis' sprite room holds Duo's, the largest");
+	/* (the world's regions sized by what they hold, 13 November 2026: docs/engine/emulation/free-space.md, The measured pass) */
+	CHECK(FREE_SONGS_END - FREE_SONGS >= 472944u + 472944u / 4, "free space: the songs' room holds every theme and listed sound, a quarter to spare");
+	CHECK(FREE_XNAVIS_END - FREE_XNAVIS >= 85472u + 85472u / 4 + 0x12000u, "free space: the Navis' room holds the areas' and the objects', a quarter to spare, and a guardian");
+	CHECK(FREE_BACKDROPS_END - FREE_BACKDROPS >= 2 * 44240u && FREE_MAP_BACKDROPS_END - FREE_MAP_BACKDROPS >= 88976u + 88976u / 4,
+		"free space: the backgrounds' rooms hold every area's");
+	CHECK(FREE_XAREA_END - FREE_XAREA >= 59876u + 59876u / 4, "free space: an area's room holds the largest tile set and colours, BN4's Undernet's");
 	/* (a BN4 Navi chip's Navi's own rooms, xnavi_bn4_chip.h: the sprite's holds the largest of the moved Navis', GutsMan's
 	 * 60,988 bytes; the art's holds every installed Navi's layout of the battle's room, at the same offsets) */
 	uint32_t art4 = 0;
@@ -4454,9 +4460,11 @@ static void test_free_space(void) {
 		{ "the attack families", FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END }, { "the support routines", XC_SUPPORT, XC_SUPPORT + 4u * XC_ROUTINES },
 		{ "the Navi routines", XC_NAVI, XC_NAVI + 4u * XC_ROUTINES }, { "their stubs", XC_STUBS, XC_STUBS_END },
 		{ "the helpers' code", XC_HELPERS, XC_POWERS }, { "the computed powers", XC_POWERS, XC_POWERS + 4u * 256u },
-		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_ART }, { "what they draw", XC_ART, XC_END },
+		{ "the units' homes", XC_HOMES, XC_HOMES + XC_HOME_SIZE * XC_UNITS }, { "the units' code", XC_CODE, XC_CODE_END }, { "what they draw", XC_ART, XC_END },
 	};
 	regions_apart("the chips' code", code, (int)(sizeof code / sizeof *code), FREE_CHIP_CODE, FREE_SOULS_ART);
+	CHECK(XC_CODE_END == FREE_CHIP_CODE + 0x40000u && XC_ART == FREE_CHIP_CODE + 0xA0000u && XC_END == FREE_SOULS_ART,
+		"free space: the chips' code to %08x, what they draw at %08x (the recipes' places, xchips_bn5.c)", (unsigned)XC_CODE_END, (unsigned)XC_ART);
 	const Region attacks[] = { { "the table", XATTACK_TABLE, XATTACK_TABLE + 4u * XATTACK_COUNT }, { "its stub", XATTACK_STUB, XATTACK_STUB + 8u } };
 	regions_apart("the attack families", attacks, 2, FREE_ATTACK_FAMILIES, FREE_ATTACK_FAMILIES_END);
 	CHECK(XATTACK_FIRST + XATTACK_COUNT == 0x100 && XATTACK_BN6_END == BN6_ATTACK_FAMILY_FIRST + BN6_ATTACK_FAMILY_COUNT &&
@@ -5352,7 +5360,7 @@ static void test_xtext(void) {
  * order; the moved chips (src/core/xchips_moved.c) each a registry row of
  * XREG_MOVED playing a unit's number, and every such row one of them. */
 static void test_chip_code(void) {
-	static const XvRegion region = { XC_CODE, XC_ART, XC_ART, XC_END, XC_STUBS, XC_POWERS }, helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
+	static const XvRegion region = { XC_CODE, XC_CODE_END, XC_ART, XC_END, XC_STUBS, XC_POWERS }, helpers = { XC_HELPERS, XC_POWERS, XC_ART, XC_END, XC_STUBS, XC_POWERS };
 	char why[160] = "";
 	CHECK(xchips_bn5_count >= 4 && xchips_bn5_count <= XC_UNITS, "chips' code: %d units", xchips_bn5_count);
 	bool units = false;
