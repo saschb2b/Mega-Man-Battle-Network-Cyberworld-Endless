@@ -76,33 +76,48 @@ platform floor and no road. A pad is no road either.
   floor it meets (`pieces_floor`), and only its own panels' tiles are
   kept (`road_draws`), behind the room's (`stack_road`): its rim runs
   whole up to a room's edge.
-- **Thin books** (`TileGrid.thin`). One map's roads are a few dozen
-  panels, where an area's walkways are hundreds, and a panel that does
-  not meet its neighbour cannot fall back on tiles picked alone: the rim
-  would be a gap. So a panel taken up is laid again from another that
-  meets what is laid round it (`lay_again`), what is still open round the
-  floor is filled from any panel alike, nothing is picked alone off the
-  road's floor or on a corner's tip, an end's panels (an arrow's head,
-  wider than its panel) and those round it lend nothing where the floor
-  has no end, and a tile beside a panel laid whole is the one its map
-  sets there (`keep_to_whole`, `src/map/panels_lay.c`).
+- **Thin books** (`TileGrid.thin`, `src/map/panels_lay.c`). One map's
+  roads are a few dozen panels, where an area's walkways are hundreds, and
+  a road's rim lies past where a tile picked alone may draw: a panel that
+  does not meet its neighbour cannot fall back on single tiles, the rim
+  would be a gap. So:
+  - **A straight run is laid from one plain panel** (`lay_plain`). Park's
+    map has two to six panels between a joint and the next, a bend or an
+    end, and all but the middle ones carry the start of what follows.
+    Laid on by its map's neighbours and then by whatever suited, a run
+    longer than the map's took a panel that did not meet the last at every
+    step, and the joint's panel, which meets anything across its gap, at
+    each: a ladder of joints. The plain panel is the one of its shape that
+    meets itself on both sides, of those one in the open (no other floor's
+    art in the tiles round it).
+  - **Beside a panel laid whole, its map's own tiles** (`keep_to_whole`),
+    set before any tile is judged by how it meets its neighbour: a rim
+    tile from another place did not meet the plain panel, and every second
+    panel of a run was taken up.
+  - A panel taken up is laid again from another that meets what is laid
+    round it, or in pieces (`lay_again`, `lay_thin`); what is still open
+    round the floor is filled from any panel alike.
+  - A road's end lies two panels under what it meets and is never drawn:
+    how a panel meets it takes none up (`hidden_end`), and an end's panels
+    (an arrow's head, wider than its panel) and those round it lend
+    nothing where the floor has no end (`ends_near`).
+  - Nothing is picked alone off the road's floor or on a corner's tip
+    (`tilemap.c`, `on_floor`).
 
 ## Not mended
 
-- **A long road.** Park's map has two or three plain panels between two
-  of its striped joints, and a plain panel laid a second time does not
-  meet its neighbour as a map's tiles do. So a road longer than that takes
-  a joint's panel at every step, which always meets: a ladder of joints
-  where BN4 has one in three, and beside each a rim tile missing. Seen in
-  the layers with the most walkways (depth 3); a road of one to four
-  panels between two rooms is whole.
-- **A bend close to a room.** Park's map has each bend once or twice; a
-  bend one or two panels from a room is laid in pieces, with a nick at its
-  inner corner and now and then a tile past its tip.
+- **Bends.** Park's map has each kind of bend once or twice, some only
+  beside other floor, which lends its tiles in part. A bend is laid whole
+  where its map's panel fits and in pieces where not: then with a nick at
+  its inner corner, a tile past its tip or a gap at it. Two bends in a
+  row (a jog of one panel) show most.
+- **Joints.** A run is plain from end to end. BN4 sets a striped joint
+  every few panels; a layer's road has one only where a panel outside a
+  run happens to carry it.
 - **The tile test's counts.** Park's layers count more breaks with roads
-  (per 100 panels 90 before, 98 now): no map of BN4 shows a road at a
-  room, so each such join counts, as a walkway's does, and the holes
-  above count too. `tests/atlas_baseline.txt` holds the new counts.
+  (per 100 panels 90 before, 96 now): no map of BN4 shows a road at a
+  room, so each such join counts, as a walkway's does.
+  `tests/atlas_baseline.txt` holds the new counts.
 - **Where a road meets a pink walkway** side on, the walkway ends plainly
   at the road's rim; BN4's own change of look end to end (a line across)
   is not learned, as each look's learning skips the panels beside the
