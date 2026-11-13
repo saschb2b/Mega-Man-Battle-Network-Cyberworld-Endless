@@ -20,6 +20,15 @@ enum { TILE_VOID, TILE_A, TILE_B };
 #define TILE_PAD 4
 /* ... it belongs to a piece drawn apart from the rest (tilemap.c). */
 #define TILE_APART 8
+/* ... it lies beside the floor of a piece drawn apart, which its own view
+ * takes for void: a walkway's end at a room. No map of such an area joins
+ * the two, and the end is no dead end: its panel and what lies round it are
+ * picked tile by tile, none of a map's laid whole there (panels.h), where a
+ * dead end's took the map's dead-end piece (BN4's Park Area's round pad,
+ * its arrow head), which the room then covered half of. The room's panel
+ * just below such an end is marked so too, as the walkway's floor: the
+ * walkway runs on under the room's upper edge (tilemap.c, pieces_floor). */
+#define TILE_JOINS 16
 #define TILE_MATERIAL(m) ((m) & 3)
 
 /* One pair of layer entries seen for a class (phase, then the platform and
@@ -56,6 +65,7 @@ typedef struct {
 	uint16_t rare;   /* its look is one its shape seldom has in its map (a third as often as the usual one, or less): not laid */
 	uint16_t has;    /* the slots it has a tile for */
 	uint16_t no;     /* the panels round it (bit k, as its shape's) that are floor of another kind: like no layer's */
+	uint16_t edge;   /* the slots whose tile holds a border's art past where a tile may draw, the floor's own by its colour and place in its map: laid on trust, and followed from the tile beside it (panels_lay.c) */
 } TilePanel;
 typedef struct {
 	TilePanel *panel;
@@ -108,6 +118,8 @@ typedef struct {
 	bool apart;        /* the TILE_APART pieces are drawn as if no other floor touched them (tilemap.c) */
 	bool single;       /* pairs that draw on one layer only */
 	int side;          /* how far down beside a side face a tile may draw (0: the face's height) */
+	bool plain_ends;   /* a walkway's end at a piece drawn apart is marked TILE_JOINS: the area has no joint to stand there */
+	int wall;          /* how far over a floor's upper edge a wall of it may stand, which lies in front of what is behind it (0: none known; 8 where the area's panels are laid whole) */
 } TileGrid;
 
 /* World panel (A, B)'s floor: TILE_VOID, TILE_A or TILE_B, maybe | TILE_PAD
@@ -227,11 +239,11 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * BN4's Park Area's platform with its frame, its corners' marks and the
  * wall on its upper edges, which tile by tile came out in pieces; BN5's
  * Oran Area's circuits; BN4's countries' cream platforms, its Undernet's
- * cushions, BN5's Undernet's plates. Not everywhere, each looked at
- * (docs/devtools/tile-test.md): Sky's glass catwalks came out as its
- * fields' squares, BN5's ACDC Area's circuits lost their rims, BN4's ACDC
- * and Town Areas' walkways took ends and joints at every panel, the
- * Graveyard's slabs gained breaks where they join. */
+ * cushions, BN5's Undernet's plates; BN4's Town Area's squares on their
+ * slabs. Not everywhere, each looked at (docs/devtools/tile-test.md): Sky's
+ * glass catwalks came out as its fields' squares, BN5's ACDC Area's
+ * circuits lost their rims, BN4's ACDC Area's walkways took ends and joints
+ * at every panel, the Graveyard's slabs gained breaks where they join. */
 #define TILES_WHOLE 0x20000000
 /* ... and with TILES_OUTER_FLOOR, only what lies inside one ring of its
  * walls is its floor: a floor ringed again inside a hole (three rings and
@@ -240,6 +252,15 @@ typedef int (*TileFloor)(int A, int B, const void *ctx);
  * drew a layer's, and their edges set its side faces at 17 pixels where
  * Town Area 1's walkways have 10. */
 #define TILES_OUTER_FLOOR 0x40000000
+/* ... and with TILES_PADS_ALONE, its own map lends its pads alone, the
+ * tiles of its other floor none (its other maps lend all of theirs): BN4's
+ * Town Area 3 has the area's squares, but its other floor is roads, hubs
+ * and paths of another level, whose pieces a layer's walkways took at
+ * their ends and turns; the walkways are Town Area 1's. A tile of such a
+ * map draws its pads' own art and no more (tiles_learn.c, own_art): a hub
+ * set against a square's corner, a road joined to its side are none of the
+ * square's, though they lie where its faces and legs may. */
+#define TILES_PADS_ALONE 0x80000000u
 void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, TileBook *out);
 void tiles_free(TileBook *b);
 /* (dev) The panels of map `a` as tiles_learn sees them, as text in a

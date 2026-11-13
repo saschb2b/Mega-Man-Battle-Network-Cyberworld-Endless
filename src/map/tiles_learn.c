@@ -307,6 +307,166 @@ static void learn_variety(TileBook *out) {
 	out->vary_first[64] = nv;
 }
 
+/* A colour of the map's picture as a tile's pixels hold them. */
+static unsigned colour_of(uint32_t c) { return (c >> 19 & 31) | (c >> 11 & 31) << 5 | (c >> 3 & 31) << 10; }
+
+/* Whether panel (A, B) is floor whose tiles are learned. */
+static bool own_floor(const Src *src, int A, int B) {
+	int st = tl_src_panel(src, A, B);
+	return (st == TILE_A || st == TILE_B) && !tl_skipped(src, A, B);
+}
+
+/* Whether tile (tx, ty) has floor whose tiles are learned in or round its
+ * panel. */
+static bool near_own_floor(const Src *src, const TileGrid *g, int tx, int ty) {
+	int phase, A, B;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	for (int k = 0; k < 9; ++k)
+		if (own_floor(src, A + k % 3 - 1, B + k / 3 - 1)) return true;
+	return false;
+}
+
+/* The colours of a map's pads (TILES_PADS_ALONE): what their tops show
+ * well inside them, and what the map draws off the floor where a pad's side
+ * face must be drawn, in at least one in SIDE_SHARE of the tiles the most
+ * common such colour is in. Counted by tiles, not pixels: a side's outline
+ * is a pixel or two in every tile, a hub or a road set against a pad many
+ * pixels in a few. A byte per colour; NULL without memory. (The map's
+ * pixels are kept: tiles_keep_begin.) */
+#define SIDE_SHARE 4
+static uint8_t *pad_colours(const Src *src, const TileGrid *g) {
+	const AreaSrc *a = src->a;
+	int W = a->tw * 8;
+	uint16_t *n = calloc(TILE_COLOURS, 2 * sizeof *n), *last = n ? n + TILE_COLOURS : NULL;
+	uint8_t *own = n ? calloc(TILE_COLOURS, 1) : NULL;
+	if (!own) { free(n); return NULL; }
+	for (int ty = 0, tile = 1; ty < a->th; ++ty)
+		for (int tx = 0; tx < a->tw; ++tx, ++tile) {
+			if (!near_own_floor(src, g, tx, ty)) continue;
+			uint64_t must, never, deep, deep_b;
+			tl_expect(g, tx, ty, tl_src_floor, src, TILE_B, &must, &never, &deep_b);
+			tl_expect(g, tx, ty, tl_src_floor, src, TILE_A, &must, &never, &deep);
+			for (int i = 0, pa, pb; i < 64; ++i) {
+				uint32_t c = area_src_floor_px(a, (size_t)(ty * 8 + i / 8) * W + tx * 8 + i % 8);
+				if (!(c >> 24)) continue;
+				tl_pixel_panel(g, tx * 8 + i % 8, ty * 8 + i / 8, &pa, &pb);
+				if ((deep | deep_b) >> i & 1 && own_floor(src, pa, pb)) own[colour_of(c)] = 1;
+				/* (each colour once a tile: `last`, the tile it was last seen in) */
+				if (!(must >> i & 1) || tl_src_panel(src, pa, pb) || last[colour_of(c)] == (uint16_t)tile) continue;
+				last[colour_of(c)] = (uint16_t)tile;
+				++n[colour_of(c)];
+			}
+		}
+	int most = 0;
+	for (int i = 0; i < TILE_COLOURS; ++i) most = n[i] > most ? n[i] : most;
+	for (int i = 0; i < TILE_COLOURS; ++i) own[i] = own[i] || (n[i] && n[i] * SIDE_SHARE >= most);
+	free(n);
+	return own;
+}
+
+/* A map's floor's own art, pixel by pixel. A border's art runs past the
+ * line a tile may draw up to (a slab a tile wider than its floor, a wall
+ * over an upper edge, an outline round a corner): judged alone, the tile
+ * that holds only the overhang is turned down, and the border comes out cut
+ * at that tile's edge, a tooth at every other tile. So the art is followed:
+ * from the pixels the floor's tiles must draw (its tops and the faces under
+ * its edges) to every pixel of the same colour beside one of its own, as
+ * far as tiles with the floor in or round their panel reach, but not onto
+ * floor of another kind. With `seeds`, a map's pads' colours, the art is
+ * theirs alone: begun in those colours, and followed into any of them. A tile
+ * may draw its floor's own art wherever it lies (panels.h, panels_own).
+ * A byte per map pixel (1: its own); NULL without memory. */
+enum { ART_NONE, ART_OWN, ART_OPEN, ART_LINE };   /* (open: could be, not reached; line: its outline, found) */
+
+/* A map's picture and what of it is its floor's art so far. */
+typedef struct { const AreaSrc *a; uint8_t *art; int W, H; } Art;
+
+static int art_at(const Art *t, int x, int y) {
+	return x < 0 || y < 0 || x >= t->W || y >= t->H ? ART_NONE : t->art[(size_t)y * t->W + x];
+}
+
+/* The map's floor pixel at (x, y), 0 where it draws none. */
+static uint32_t art_px(const Art *t, int x, int y) {
+	if (x < 0 || y < 0 || x >= t->W || y >= t->H) return 0;
+	uint32_t c = area_src_floor_px(t->a, (size_t)y * t->W + x);
+	return c >> 24 ? c : 0;
+}
+
+/* Where the art begins and how far it may go: the pixels the floor's tiles
+ * must draw its own (with `seeds`, those in these colours), the others of
+ * the tiles round the floor open to it, but none on floor of another kind. */
+static void art_begin(const Src *src, const TileGrid *g, const uint8_t *seeds, Art *t) {
+	for (int ty = 0; ty < t->a->th; ++ty)
+		for (int tx = 0; tx < t->a->tw; ++tx) {
+			if (!near_own_floor(src, g, tx, ty)) continue;
+			uint64_t must, never, deep;
+			tl_expect(g, tx, ty, tl_src_floor, src, TILE_A, &must, &never, &deep);
+			for (int i = 0, pa, pb; i < 64; ++i) {
+				int x = tx * 8 + i % 8, y = ty * 8 + i / 8;
+				uint32_t c = art_px(t, x, y);
+				if (!c) continue;
+				tl_pixel_panel(g, x, y, &pa, &pb);
+				if (tl_src_panel(src, pa, pb) && !own_floor(src, pa, pb)) continue;
+				t->art[(size_t)y * t->W + x] = must >> i & 1 && (!seeds || seeds[colour_of(c)]) ? ART_OWN : ART_OPEN;
+			}
+		}
+}
+
+/* One sweep over the map, forwards (d -1: from the pixel left and above) or
+ * back: each open pixel beside one of the art's in its own colour joins it,
+ * and with `seeds`, in any of those colours (an outline is another colour
+ * than what it lines). Whether any joined. */
+static bool art_sweep(const Art *t, const uint8_t *seeds, int d) {
+	bool joined = false;
+	for (int k = 0; k < t->W * t->H; ++k) {
+		int i = d > 0 ? t->W * t->H - 1 - k : k, x = i % t->W, y = i / t->W;
+		if (t->art[i] != ART_OPEN) continue;
+		uint32_t c = art_px(t, x, y);
+		bool any = seeds && seeds[colour_of(c)];
+		if ((art_at(t, x + d, y) == ART_OWN && (any || art_px(t, x + d, y) == c)) ||
+			(art_at(t, x, y + d) == ART_OWN && (any || art_px(t, x, y + d) == c))) {
+			t->art[i] = ART_OWN;
+			joined = true;
+		}
+	}
+	return joined;
+}
+
+/* The art's outline joins it: what is drawn between its art and nothing,
+ * whatever its colour (a line a pixel thick, never where the floor's tiles
+ * must draw, so no colour of theirs). */
+static void art_outline(const Art *t) {
+	for (int i = 0; i < t->W * t->H; ++i) {
+		int x = i % t->W, y = i / t->W;
+		if (t->art[i] != ART_OPEN) continue;
+		bool own = art_at(t, x - 1, y) == ART_OWN || art_at(t, x + 1, y) == ART_OWN || art_at(t, x, y - 1) == ART_OWN || art_at(t, x, y + 1) == ART_OWN;
+		bool bare = false;
+		for (int k = 0; own && k < 9 && !bare; ++k) bare = !art_px(t, x + k % 3 - 1, y + k / 3 - 1);
+		if (own && bare) t->art[i] = ART_LINE;
+	}
+	for (int i = 0; i < t->W * t->H; ++i)
+		if (t->art[i] == ART_LINE) t->art[i] = ART_OWN;
+}
+
+static uint8_t *own_art(const Src *src, const TileGrid *g, const uint8_t *seeds) {
+	Art t = { src->a, NULL, src->a->tw * 8, src->a->th * 8 };
+	if (!(t.art = calloc((size_t)t.W, (size_t)t.H))) return NULL;
+	art_begin(src, g, seeds, &t);
+	/* (swept there and back until nothing joins: a band is followed in a
+	 * sweep or two, and a queue of a map's pixels is four times its size) */
+	for (int sweep = 0; sweep < 64 && art_sweep(&t, seeds, sweep & 1 ? 1 : -1); ++sweep) {}
+	art_outline(&t);
+	return t.art;
+}
+
+/* The pixels of tile (tx, ty) that are its floor's own art. */
+static uint64_t art_of(const Src *src, int tx, int ty) {
+	uint64_t own = 0;
+	for (int i = 0; src->art && i < 64; ++i)
+		if (src->art[(size_t)(ty * 8 + i / 8) * src->a->tw * 8 + tx * 8 + i % 8] == ART_OWN) own |= 1ull << i;
+	return own;
+}
+
 /* What learning a map's tiles holds as it goes over them. */
 typedef struct {
 	const AreaSrc *a;
@@ -332,9 +492,12 @@ static bool floors_around(const Src *src, int A, int B, unsigned *oa, unsigned *
 }
 
 /* A tile that is no pair of the floor's, left to its panel, which may keep
- * it yet (a wall over a floor's upper edge is the panel's to draw). */
+ * it yet: a wall over a floor's upper edge is the panel's to draw, and so
+ * is the floor's own art wherever it lies; on a map that lends its pads
+ * alone, nothing but that art (the rest is its roads' and hubs'). */
 static void to_panel(const Learning *L, PanelSpot at, int tx, int ty, uint64_t must, uint64_t never) {
 	panels_loose(L->whole, at, tx, ty, must, never & ~tl_above_floor(L->g, tx, ty, tl_src_floor, L->src, WALL_BAND));
+	panels_own(L->whole, art_of(L->src, tx, ty), L->src->styles & TILES_PADS_ALONE);
 }
 
 /* Tile (tx, ty) of the map: its pair in *t where it is one of the floor's
@@ -346,7 +509,10 @@ static bool learn_tile(const Learning *L, int tx, int ty, TileCand *t) {
 	unsigned oa, ob;
 	bool mixed = floors_around(L->src, A, B, &oa, &ob), off_floor = !((oa | ob) & 0x10);
 	if (!(oa | ob) || (mixed && !L->whole)) return false;
-	PanelSpot at = { A, B, phase };
+	PanelSpot at = { A, B, phase, false };
+	/* (a map that lends its pads alone: a tile of theirs draws their own art
+	 * and no more, or is none of theirs) */
+	bool only = L->src->styles & TILES_PADS_ALONE && L->src->art;
 	uint64_t must, never, deep;
 	tl_expect(L->g, tx, ty, tl_src_floor, L->src, TILE_A, &must, &never, &deep);
 	/* (off the floor, filler the map hides under what it sets over it: no
@@ -376,6 +542,7 @@ static bool learn_tile(const Learning *L, int tx, int ty, TileCand *t) {
 		if (!second || tl_misses(t->mask, must, never) > SLACK) { to_panel(L, at, tx, ty, must, never); return false; }
 		back = true;
 	}
+	if (only && tl_popcount64(t->mask & ~art_of(L->src, tx, ty)) > SLACK) { to_panel(L, at, tx, ty, must, never); return false; }
 	size_t i = (size_t)ty * a->tw + tx;
 	t->key = KEY(phase, oa, ob);
 	t->e0 = a->tile[0][i];
@@ -408,6 +575,12 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	/* (the original map's pixels kept as its tiles are tested: learning an
 	 * area asked after each a thousand times, three quarters of the time) */
 	tiles_keep_begin(&g, tl_src_floor, &src);
+	/* (the floor's own art, for its panels' borders; from its pads' colours
+	 * alone where it lends only them) */
+	uint8_t *seeds = styles & TILES_PADS_ALONE ? pad_colours(&src, &g) : NULL;
+	uint8_t *art = L.whole || seeds ? own_art(&src, &g, seeds) : NULL;
+	free(seeds);
+	src.art = art;
 	for (int ty = 0; ty < a->th; ++ty)
 		for (int tx = 0; tx < a->tw; ++tx) n += learn_tile(&L, tx, ty, &c[n]);
 	tiles_keep_end();
@@ -419,6 +592,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	panels_end(L.whole, &src, pads, out);
 	src_close(&src);
 	free(pads);
+	free(art);
 }
 
 void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, FILE *f) {

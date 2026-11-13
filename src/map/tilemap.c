@@ -234,6 +234,7 @@ typedef struct {
 	int A0, B0, w, h;
 	uint8_t *label;
 	int lo, hi;   /* the pieces a view shows */
+	bool joins;   /* ... its floor beside a room it does not show marked so (TILE_JOINS) */
 } Pieces;
 
 #define REST 1
@@ -244,11 +245,44 @@ static int piece(const Pieces *p, int A, int B) {
 	return p->label[(size_t)(B - p->B0) * p->w + A - p->A0];
 }
 
-/* The floor of pieces lo..hi alone, the rest taken for void. */
+/* The floor of pieces lo..hi alone, the rest taken for void; with
+ * p->joins, a panel of theirs beside a room the view does not show (no
+ * pad: a pad is where a walkway ends, and its maps draw that) is marked
+ * TILE_JOINS. */
 static int pieces_floor(int A, int B, const void *ctx) {
 	const Pieces *p = ctx;
 	int l = piece(p, A, B);
-	return l && l >= p->lo && l <= p->hi ? p->floor(A, B, p->ctx) : TILE_VOID;
+	static const int side[4][2] = { { -1, 0 }, { 0, -1 }, { 1, 0 }, { 0, 1 } };
+	if (!l || l < p->lo || l > p->hi) {
+		/* (a room's panel just below a walkway's end on screen: the walkway
+		 * runs on under the room's upper edge, whose wall then covers its
+		 * end; ended at its own panel, picked tile by tile, it stopped in
+		 * steps beside that wall) */
+		static const int above[2][2] = { { 1, 0 }, { 0, -1 } };   /* (upper right, upper left) */
+		for (int k = 0; p->joins && l && k < 2; ++k) {
+			int n = piece(p, A + above[k][0], B + above[k][1]);
+			if (n && n >= p->lo && n <= p->hi && !(p->floor(A, B, p->ctx) & TILE_PAD))
+				return TILE_MATERIAL(p->floor(A + above[k][0], B + above[k][1], p->ctx)) | TILE_JOINS;
+		}
+		return TILE_VOID;
+	}
+	int m = p->floor(A, B, p->ctx);
+	for (int k = 0; p->joins && k < 4; ++k) {
+		int n = piece(p, A + side[k][0], B + side[k][1]);
+		if (n && (n < p->lo || n > p->hi) && !(p->floor(A + side[k][0], B + side[k][1], p->ctx) & TILE_PAD)) return m | TILE_JOINS;
+	}
+	return m;
+}
+
+/* Whether tile (tx, ty), whose centre lies in a room's panel, also lies on
+ * a panel of the rest's own floor: it straddles the room's edge. */
+static bool straddles(const TileGrid *g, const Pieces *all, int tx, int ty) {
+	int phase, A, B;
+	tile_class(g, tx, ty, &phase, &A, &B);
+	unsigned on = tl_tile_panels(g, tx, ty, 0, 0, 0);
+	for (int k = 0; k < 9; ++k)
+		if (on >> k & 1 && piece(all, A + k % 3 - 1, B + k / 3 - 1) == REST) return true;
+	return false;
 }
 
 /* Labels the floor's pieces; how many apart from the rest it found. */
@@ -300,6 +334,47 @@ static bool drawn(uint16_t e) { return e & 0x3FF; }
  * (BG2 at priority 2, over the first's BG1 at priority 3). */
 static uint16_t front_of(uint16_t e0, uint16_t e1) { return drawn(e1) ? e1 : e0; }
 
+/* What laying one view's tiles over the map's so far goes by. */
+typedef struct {
+	const TileGrid *g;
+	const Pieces *all, *view, *laid;   /* every piece, the view's, those laid before it */
+	uint16_t *map, *one;               /* the map so far, the view's tiles */
+	uint8_t *left, *one_left, *stacked;
+} Stack;
+
+/* The view's tile at (tx, ty) laid over what the map holds there: where two
+ * draw a tile, the one whose top covers the other's side faces on the
+ * second layer, which the game shows in front. */
+static void stack_tile(const Stack *s, int tx, int ty) {
+	size_t cells = (size_t)s->g->tw * s->g->th, i = (size_t)ty * s->g->tw + tx;
+	uint16_t *e0 = &s->map[i], *e1 = &s->map[cells + i], n0 = s->one[i], n1 = s->one[cells + i];
+	int phase, A, B;
+	tile_class(s->g, tx, ty, &phase, &A, &B);
+	/* (a walkway run on under a room: in the room's panels its tiles go
+	 * behind the room's, and only those that reach back over the room's
+	 * edge onto the walkway's own panel) */
+	if (s->view->joins && piece(s->all, A, B) >= FIRST_PIECE) {
+		if (!(drawn(n0) || drawn(n1)) || (drawn(*e0) && drawn(*e1)) || !straddles(s->g, s->all, tx, ty)) return;
+		uint16_t theirs = front_of(*e0, *e1);
+		*e0 = front_of(n0, n1);
+		*e1 = theirs;
+		s->stacked[i] = 1;
+		return;
+	}
+	unsigned was = s->left[i] >> 2, now = s->one_left[i] >> 2;
+	s->left[i] = (uint8_t)((s->left[i] | s->one_left[i]) & 3) | (uint8_t)(((now & 3) > (was & 3) ? now : was) << 2);
+	if (!drawn(n0) && !drawn(n1)) return;
+	if (!drawn(*e0) && !drawn(*e1)) { *e0 = n0; *e1 = n1; return; }
+	/* (a tile holds two pieces: of three, the one found behind goes) */
+	uint16_t mine = front_of(n0, n1), theirs = front_of(*e0, *e1);
+	/* (which lies in front is the floors' own to say) */
+	Pieces own = *s->view;
+	own.joins = false;
+	if (tiles_in_front(s->g, tx, ty, pieces_floor, &own, pieces_floor, s->laid)) { *e0 = theirs; *e1 = mine; }
+	else if (!drawn(*e0) || !drawn(*e1)) { *e0 = mine; *e1 = theirs; }
+	s->stacked[i] = 1;
+}
+
 void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, const TileGrid *g,
 	TileFloor floor, const void *ctx, uint16_t *map, uint8_t *left) {
 	if (!g->apart) {
@@ -307,11 +382,9 @@ void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, con
 		return;
 	}
 	/* Each piece as if no other floor were there, then the rest of the
-	 * floor as if there were no pieces, laid over each other: where two draw
-	 * a tile, the one whose top covers the other's side faces on the second
-	 * layer, which the game shows in front. A piece keeps its whole rim, and
-	 * a walkway ends at it. */
-	Pieces all = { floor, ctx, 0, 0, 0, 0, NULL, 0, 0 };
+	 * floor as if there were no pieces, laid over each other (stack_tile).
+	 * A piece keeps its whole rim, and a walkway ends at it. */
+	Pieces all = { floor, ctx, 0, 0, 0, 0, NULL, 0, 0, false };
 	int pieces = label_pieces(g, &all);
 	size_t cells = (size_t)g->tw * g->th;
 	uint16_t *one = calloc(cells * 2, sizeof *one);
@@ -324,25 +397,16 @@ void tilemap_pick(const TileBook *books, int nbooks, const TileSeams *seams, con
 	one_layer.single = true;
 	Pieces laid = all, view = all;   /* the pieces laid so far, the next one */
 	laid.lo = FIRST_PIECE; laid.hi = FIRST_PIECE - 1;
+	Stack stack = { g, &all, &view, &laid, map, one, left, one_left, stacked };
 	for (int k = 0; k <= pieces; ++k) {
 		int l = k < pieces ? FIRST_PIECE + k : REST;
 		view.lo = view.hi = l;
+		/* (where the area's panels are laid whole, g->wall: elsewhere a
+		 * walkway's end at a room is picked as it always was) */
+		view.joins = l == REST && g->plain_ends && g->wall;
 		pick_all(books, nbooks, seams, &one_layer, pieces_floor, &view, one, one_left);
 		for (int ty = 0; ty < g->th; ++ty)
-			for (int tx = 0; tx < g->tw; ++tx) {
-				size_t i = (size_t)ty * g->tw + tx;
-				uint16_t *e0 = &map[i], *e1 = &map[cells + i], n0 = one[i], n1 = one[cells + i];
-				unsigned was = left[i] >> 2, now = one_left[i] >> 2;
-				left[i] = (uint8_t)((left[i] | one_left[i]) & 3) | (uint8_t)(((now & 3) > (was & 3) ? now : was) << 2);
-				if (!drawn(n0) && !drawn(n1)) continue;
-				if (!drawn(*e0) && !drawn(*e1)) { *e0 = n0; *e1 = n1; continue; }
-				/* (a tile holds two pieces: of three, the one found behind
-				 * goes) */
-				uint16_t mine = front_of(n0, n1), theirs = front_of(*e0, *e1);
-				if (tiles_in_front(g, tx, ty, pieces_floor, &view, pieces_floor, &laid)) { *e0 = theirs; *e1 = mine; }
-				else if (!drawn(*e0) || !drawn(*e1)) { *e0 = mine; *e1 = theirs; }
-				stacked[i] = 1;
-			}
+			for (int tx = 0; tx < g->tw; ++tx) stack_tile(&stack, tx, ty);
 		if (l != REST) laid.hi = l;
 		else laid.lo = REST;
 	}

@@ -25,6 +25,7 @@ typedef struct {
 	int8_t *drawn;   /* ... whether each is floor of this view at all */
 	bool inner_walls;   /* rings of walls inside the floor ring no holes (TILES_INNER_WALLS) */
 	const uint8_t *pads;   /* its pads (find_pads), once found: SKIP_OFF_PADS spares them */
+	const uint8_t *art;   /* the map's pixels that are its floor's own art (tiles_learn.c, own_art), a byte each, or NULL */
 } Src;
 
 int tl_src_panel(const Src *s, int A, int B);
@@ -82,6 +83,9 @@ int tl_misses(uint64_t mask, uint64_t must, uint64_t never);
 /* The tile's pixels up to `band` pixels straight above floor: where a wall
  * stands on a floor's upper edge. */
 uint64_t tl_above_floor(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int band);
+/* The panel whose floor map pixel (px, py) shows, drawn where the grid
+ * draws its floor. */
+void tl_pixel_panel(const TileGrid *g, int px, int py, int *A, int *B);
 /* The panels round tile (tx, ty)'s own (bit k: (A + k % 3 - 1,
  * B + k / 3 - 1)) that its pixels lie on, each looked for `out` pixels to
  * its sides too (half as far up and down), and from `up` pixels above it to

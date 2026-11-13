@@ -17,6 +17,15 @@
  * is laid after it, as a map lays it beside what is laid there: a void's
  * own neighbourhood does not say what kind of floor it lies under.
  *
+ * A border is kept whole. Its art runs past the line a tile may draw up to
+ * (a slab a tile wider than its floor, a wall over an upper edge), and a
+ * tile judged alone is turned down for it: the border came out cut at that
+ * tile's edge, a tooth at every other tile. So the learner follows the
+ * floor's own art from tile to tile in its map (tiles_learn.c, own_art) and
+ * keeps the tiles that hold it, each marked at its place (TilePanel.edge);
+ * and a laid tile that draws up to its edge takes the marked tile its map
+ * sets beside it along (panels_lay.c, follow_edges).
+ *
  * Learning is panels.c's, laying panels_lay.c's. */
 #ifndef CW_PANELS_H
 #define CW_PANELS_H
@@ -36,7 +45,10 @@
 
 typedef struct PanelsLearn PanelsLearn;
 /* A tile's place: its panel and its phase in it. */
-typedef struct { int A, B, phase; } PanelSpot;
+typedef struct {
+	int A, B, phase;
+	bool edge;   /* its tile holds a border's art past where a tile may draw (TilePanel.edge) */
+} PanelSpot;
 
 PanelsLearn *panels_begin(void);   /* (NULL: no memory, and the calls below do nothing) */
 /* Panel (A, B) is not to be laid: it is floor of another kind itself. */
@@ -52,6 +64,10 @@ void panels_tile(PanelsLearn *l, PanelSpot at, uint16_t e0, uint16_t e1, uint64_
  * stand, over a platform's upper edge): kept after all (panels_end) where
  * it draws so, in the floor's own colours. */
 void panels_loose(PanelsLearn *l, PanelSpot at, int tx, int ty, uint64_t must, uint64_t never);
+/* ... and of the tile told last so, its pixels that are the floor's own
+ * art (tiles_learn.c, own_art), which it may draw wherever they lie; with
+ * `only`, it may draw nothing else at all. */
+void panels_own(PanelsLearn *l, uint64_t own, bool only);
 /* The panels with all their tiles, then those in part (lacking a tile, or
  * with floor of another kind beside them), into `out` (its pairs learned
  * already: their colours are the floor's own); `l` freed. */

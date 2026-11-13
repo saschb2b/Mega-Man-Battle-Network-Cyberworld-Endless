@@ -405,6 +405,11 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	uint16_t *map = calloc(cells * 2, 2);
 	if (!map) return NULL;
 	TileGrid grid = { tw, th, nm_place.ex, nm_place.ey, L->book[0].dv, L->book[0].face, L->book[0].hang, by_shape || rimmed, apart != NET_APART_NONE };
+	/* (a bridge of the Undernets ends at a plate in its joint, a piece of its
+	 * own; where an area has none, a walkway's end at a room is no piece of
+	 * its maps: TILE_JOINS) */
+	grid.plain_ends = !joints;
+	for (int k = 0; k < L->nbooks; ++k) grid.wall = L->book[k].panels.n ? 8 : grid.wall;
 	free(nm_last.seams);
 	nm_last.seams = calloc(cells, 1);
 	free(nm_last.pasted);
@@ -804,7 +809,7 @@ void netmap_last_cells(char out[MAP_H][MAP_W + 1]) {
 		out[y][MAP_W] = 0;
 	}
 	if (!nm_last.seams) return;
-	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, 0 };
+	TileGrid grid = { nm_last.tw, nm_last.th, nm_place.ex, nm_place.ey, 0, 0, 0, false, false, false, 0, false, 0 };
 	for (int ty = 0; ty < nm_last.th; ++ty)
 		for (int tx = 0; tx < nm_last.tw; ++tx) {
 			if ((nm_last.seams[ty * nm_last.tw + tx] >> 2 & 3) != TILE_OFF_NEAR || nm_last.pasted[ty * nm_last.tw + tx] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) continue;
