@@ -16,7 +16,8 @@
 #define ON_FLOOR     8   /* pixels on its panel's top at least: it grips it */
 #define OFF_SHARE    3   /* tenths of its pixels off the ground floor at least */
 #define FLOOR_DV     4   /* a floor's top is drawn this far below its panel's edges */
-#define PANELS      24   /* panels a piece may lie on, counted apart */
+#define PANELS      32   /* panels a piece may lie over, counted apart */
+#define UNDER_PX     6   /* pixels over a panel at least for the panel to count as under it */
 
 static int fdiv(int a, int b) { return a / b - (a % b < 0); }
 
@@ -39,7 +40,7 @@ typedef struct {
 	int n, x0, y0, x1, y1;
 	int on, off, other;
 	int A[PANELS], B[PANELS], count[PANELS], npanels;
-	bool edge;
+	bool gnd[PANELS], edge;
 } Group;
 
 static void count_tile(const AreaSrc *a, int tx, int ty, Group *g) {
@@ -49,16 +50,14 @@ static void count_tile(const AreaSrc *a, int tx, int ty, Group *g) {
 			if (!a->front[(size_t)y * W + x]) continue;
 			int A, B;
 			panel_at(a, x, y, &A, &B);
-			if (!ground(a, A, B)) {
-				/* (floor of another height under it: a bridge, a raised floor's own) */
-				if (area_src_walled_floor(a, a->ex + 16 + 32 * A, a->ey + 16 + 32 * B) == 1) ++g->other;
-				++g->off;
-				continue;
-			}
-			++g->on;
+			bool gnd = ground(a, A, B);
+			++*(gnd ? &g->on : &g->off);
+			/* (floor of another height under it, a bridge or a raised floor's
+			 * own: no panel a layer's must match) */
+			if (!gnd && area_src_walled_floor(a, a->ex + 16 + 32 * A, a->ey + 16 + 32 * B) == 1) { ++g->other; continue; }
 			int k = 0;
 			while (k < g->npanels && (g->A[k] != A || g->B[k] != B)) ++k;
-			if (k == g->npanels && k < PANELS) { g->A[k] = A; g->B[k] = B; g->count[k] = 0; ++g->npanels; }
+			if (k == g->npanels && k < PANELS) { g->A[k] = A; g->B[k] = B; g->gnd[k] = gnd; g->count[k] = 0; ++g->npanels; }
 			if (k < PANELS) ++g->count[k];
 		}
 }
@@ -93,12 +92,24 @@ static bool grips(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) 
 	if (g->edge || g->n < MIN_TILES || g->n > MAX_TILES || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
 	for (int k = 0; k < g->n; ++k) count_tile(a, queue[k] % a->tw, queue[k] / a->tw, g);
 	if (g->on < ON_FLOOR || g->off * 10 < OFF_SHARE * (g->on + g->off) || g->other * 10 > g->on + g->off) return false;
-	int best = 0;
-	for (int k = 1; k < g->npanels; ++k)
-		if (g->count[k] > g->count[best]) best = k;
+	int best = -1;
+	for (int k = 0; k < g->npanels; ++k)
+		if (g->gnd[k] && (best < 0 || g->count[k] > g->count[best])) best = k;
+	if (best < 0) return false;
 	*A = g->A[best]; *B = g->B[best];
 	/* (an arrow lane's frame is its lane's, set with it) */
 	return !area_src_arrow_at(a, a->ex + 16 + 32 * *A, a->ey + 16 + 32 * *B);
+}
+
+/* The panels group g draws over, from panel (A, B), into p. */
+static void under(const Group *g, int A, int B, SidePiece *p) {
+	p->nunder = 0;
+	for (int k = 0; k < g->npanels && p->nunder < SIDE_UNDER; ++k) {
+		if (g->count[k] < UNDER_PX || abs(g->A[k] - A) > 100 || abs(g->B[k] - B) > 100) continue;
+		p->under[p->nunder][0] = (int8_t)(g->A[k] - A);
+		p->under[p->nunder][1] = (int8_t)(g->B[k] - B);
+		p->under[p->nunder++][2] = g->gnd[k];
+	}
 }
 
 static bool same(const SidePiece *p, const SidePiece *q) {
@@ -150,6 +161,7 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 		for (int k = 0; k < out->n && !dup; ++k) dup = same(&out->piece[k], p);
 		if (dup) { free(p->tiles); continue; }
 		priorities(a, A, B, p);
+		under(&g, A, B, p);
 		++out->n;
 	}
 	free(seen);
