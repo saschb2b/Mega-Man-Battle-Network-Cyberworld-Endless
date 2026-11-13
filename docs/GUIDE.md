@@ -1565,6 +1565,12 @@ has for this alone.
   compressed. Only the unmodified US Cybeast Gregar works.
 - **Anything else**: the last start's output is in `ports/cyberworld/log.txt`.
   Please attach it when you report a problem.
+- **Reporting a bug**: the
+  [bug report's form](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new/choose)
+  asks for the version (the title's bottom left corner), your system and
+  your save: **SAVES › EXPORT** on the title
+  ([Moving saves between devices](#moving-saves-between-devices)). With
+  the save we can play your run; it holds no ROM. Never attach a ROM.
 
 ## Building
 

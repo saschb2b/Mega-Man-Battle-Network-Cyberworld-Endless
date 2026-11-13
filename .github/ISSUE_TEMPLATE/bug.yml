@@ -1,0 +1,116 @@
+# The bug report's form (docs/code/platforms.md, Issue forms). Its fields
+# are what it takes to play a reporter's run again: the build, the system,
+# the ROMs read, where in the run, and the exported save. GitHub shows a
+# form from the default branch only, so a change here is seen after it
+# reaches main.
+name: Bug report
+description: The game froze, crashed or did something wrong.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for telling us. Fill in what you can: with your save attached we can load your exact run and look for it there.
+
+        **Never attach a ROM.** A save holds none, so it is safe to share.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: The title screen shows it in the bottom left corner.
+      placeholder: v0.21.0 beta
+    validations:
+      required: true
+  - type: dropdown
+    id: system
+    attributes:
+      label: System
+      options:
+        - Android
+        - iPhone or iPad
+        - Windows
+        - Linux
+        - Steam Deck
+        - macOS
+        - Browser
+        - PortMaster handheld
+        - New 3DS
+        - Switch
+        - PS Vita
+        - PS4
+        - PS5
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device
+      description: "A PortMaster handheld: the device and its firmware (muOS, Knulli, ROCKNIX, ArkOS, AmberELEC...). A phone or tablet: its model. A browser: which one."
+      placeholder: RG35XX Plus, muOS
+  - type: checkboxes
+    id: roms
+    attributes:
+      label: Other ROMs
+      description: BN6 Cybeast Gregar is always there. Tick the others the game has read (the ROMs screen shows them); a run's areas, viruses and chips depend on them.
+      options:
+        - label: BN5 Team Colonel
+        - label: BN4 Red Sun
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where were you?
+      options:
+        - A normal battle
+        - A guardian's battle
+        - A dark layer (Liberation Mission)
+        - A tournament
+        - Walking a layer
+        - The town or Lan's HP
+        - The Net Square or a NetBattle
+        - A menu or the PET
+        - The title, the ROMs screen or SAVES
+        - Somewhere else
+  - type: input
+    id: layer
+    attributes:
+      label: Layer and area
+      description: The layer's number and the area's name, as far as you know them.
+      placeholder: Layer 8, Undernet
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+      description: What you did right before it, and what the game did then (froze with the music still playing, went black, closed, showed the wrong thing).
+      placeholder: I chose a chip and pressed OK. The picture froze and the music kept playing. I expected the turn to start.
+    validations:
+      required: true
+  - type: input
+    id: battle
+    attributes:
+      label: In a battle
+      description: The chip you used last, the Navi you were playing, and the enemies on the field.
+      placeholder: Cannon as ProtoMan, against two Mettaurs and a Swordy
+  - type: dropdown
+    id: again
+    attributes:
+      label: Does it happen again after CONTINUE?
+      options:
+        - Every time
+        - Sometimes
+        - Only that once
+        - Not tried
+  - type: textarea
+    id: save
+    attributes:
+      label: Your save
+      description: |
+        The one thing that lets us play your run. On the title screen press **L** (**Q** on a keyboard) for **SAVES**, choose **EXPORT**, and attach `cyberworld-endless.cwsave` here; the game says where it put the file. In the browser it is **Save backup** in the menu. On Android, an iPhone or an iPad the same file is already in your ROM folder.
+
+        If GitHub refuses the file, zip it first. It holds your run and your profile, and no ROM.
+      placeholder: Tap here, then attach the file (the paperclip, or drag it in).
+  - type: textarea
+    id: media
+    attributes:
+      label: Screenshots or a short video
+      description: A photo of the screen is fine. On a PortMaster handheld or a console, `log.txt` from the game's folder helps too.
+      placeholder: Tap here, then attach them.

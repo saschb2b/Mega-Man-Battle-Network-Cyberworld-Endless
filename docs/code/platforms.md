@@ -22,7 +22,7 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:47:07Z }
 | `ps4/` | The PS4 build, a PS5's too (`build.py ps4`): its README (playing, building, testing on a PS4), the home screen's icon (`icon0.png`, `tools/app_icon.py`) and the fake PKG's project (`pkg.gp4`), which `PkgTool.Core` packs with the eboot and its `param.sfo`. It builds against the OpenOrbis toolchain's SDL 2.0.9 (`src/core/sdl_old.h` stands in for what it lacks); `src/core/start_ps4.c` sets its folders and ROM places; online play goes over BSD sockets and mbedTLS (`src/online/online_stream_tls.c`), the SDK having no libcurl |
 | `ps5/` | The PS5's own build (`build.py ps5`): its README (playing, building, submitting to Prospero Store, testing on a PS5) and the icon; `sce_sys/param.json` at the repository's root (title ID `CWEN00001`, its contentVersion raised with each release and held to the CHANGELOG by `build.py lint`), where Prospero Store's catalog reads it (`icon0.png`, `tools/app_icon.py`). drakmor's ps5-native-app-boilerplate (GPL-3.0, pinned) gives the CRT, linker script, ELF converter, FSELF signer and clean-room `libc.prx`; the Makefile lays out `CWEN00001/` and zips it, links only against modules a game's process gets (`PS5_LOADED`) and sends the allocations to `src/core/ps5_heap.c`'s heap on flexible memory, which `param.json`'s `kernel.flexibleMemorySize` gives. `src/core/ps5_libc.c` gives what the native runtime lacks of the C library; online play and the statistics go over PacBrew's libcurl (`src/online/online_stream_curl.c`) |
 | `docker/` | Build images: `Dockerfile` (host, Debian trixie), `Dockerfile.portmaster` (the PortMaster port's aarch64 binary: Debian bullseye's glibc 2.31 and SDL2 2.0.14, older than any firmware PortMaster serves; `debian/eol` from its snapshot), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads), `Dockerfile.3ds` (devkitPro's devkitARM, SDL2 and mGBA's library for the 3DS, makerom and bannertool from their sources for the CIA: `ctrtools.sh`), `Dockerfile.switch` (devkitPro's devkitA64 with libnx, its SDL2 and libcurl, and mGBA's library for the Switch), `Dockerfile.vita` (VitaSDK with its SDL2 and libcurl, and mGBA's library for the Vita), `Dockerfile.ps4` (the OpenOrbis toolchain, and mbedTLS and mGBA's library built for it through `ps4.cmake`: `mbedtls.sh`), `Dockerfile.ps5` (the native-app template's pipeline, its converter's RELRO placement corrected, the PS5 payload SDK and PacBrew's SDL2 and libcurl, and mGBA's library through `ps5.cmake`), `Dockerfile.music` (the trailers' music when a piece plays a soundfont: Debian's FluidR3 GM, MIT, never in git; `tools/trailer_soundfont.py` reads it, `tools/trailer_music.py`'s render_any runs a piece there) |
-| `.github/` | CI (`ci.yml`: checks, every target on a push and a pull request's share of them, [below](#ci-on-a-pull-request), Pages from `main`), the files tools write, committed after each push to `dev` (`generated.yml`, [Merging in parallel](../project/merging.md)), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot (`dependabot.yml`: the actions and the build images' bases monthly, its PRs to `dev`) |
+| `.github/` | CI (`ci.yml`: checks, every target on a push and a pull request's share of them, [below](#ci-on-a-pull-request), Pages from `main`), the files tools write, committed after each push to `dev` (`generated.yml`, [Merging in parallel](../project/merging.md)), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot (`dependabot.yml`: the actions and the build images' bases monthly, its PRs to `dev`), the issue chooser (`ISSUE_TEMPLATE/`: the bug report's form `bug.yml` and `config.yml`, [below](#issue-forms)) |
 
 ## CI on a pull request
 
@@ -53,3 +53,32 @@ started by hand, run everything, and every push to `dev` is checked to
 its end on its own (a later push no longer cancels it), so a target a
 pull request left out is built on its merge and a break is that merge's.
 To build every target on a branch first: `gh workflow run CI --ref BRANCH`.
+
+## Issue forms
+
+`.github/ISSUE_TEMPLATE/bug.yml` is the bug report's form, written after
+issue #482: three sentences and two screenshots, with no version, ROMs,
+chip or save, cost an hour to read and still could not be played again.
+The form asks for what it takes to load the reporter's run. Required:
+the version (the title's bottom left corner), the system, and what
+happened and what was expected. Asked: the device (a PortMaster
+handheld's firmware, a phone's model, the browser), BN5's and BN4's ROMs
+read (BN6's always is), where in the run (a dropdown, then the layer and
+area), in a battle the last chip, the Navi played and the enemies, whether
+it happens again after CONTINUE, the save, and pictures or a video. The
+save is the title's SAVES > EXPORT ([Portable saves](../engine/saves.md)):
+its `.cwsave` holds the run's checkpoint and the profile and no ROM, and
+GitHub takes it zipped where it refuses the extension. The form's first
+lines say never to attach a ROM. It sets the label `bug`; triage adds the
+rest.
+
+`config.yml` keeps blank issues (the owner's own) and sends ideas and
+questions to Discussions' Ideas and Q&A, and to the
+[guide](../GUIDE.md)'s Troubleshooting; a second form for ideas would
+double what Discussions holds.
+
+GitHub draws a form from the default branch alone, so a change to one is
+seen once it reaches `main`. Before that, check it against GitHub's
+schema: the ids and labels unique, every dropdown with its options,
+`validations` on inputs, textareas and dropdowns only (SchemaStore's
+`github-issue-forms.json` and `github-issue-config.json`).
