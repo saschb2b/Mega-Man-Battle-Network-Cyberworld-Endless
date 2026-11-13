@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T20:46:00Z
-* **Update**: multirom/bn4-souls.md (The look, located: what ThunSoul's look takes from BN4's ROM and its sizes, Blue Moon's six Souls' faces not in Red Sun's ROM, the room the sprites have none of and the ways; the art room's count corrected, `FREE_TAIL` no longer 576 KB), rom/bn4.md (The emotion window's faces).

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Update**: multirom/bn4-souls.md (The look, located: what ThunSoul's look takes from BN4's ROM and its sizes, Blue Moon's six Souls' faces not in Red Sun's ROM, the room the sprites have none of and the ways; the art room's count corrected, `FREE_TAIL` no longer 576 KB), rom/bn4.md (The emotion window's faces).
 * **Update**: devtools/tile-test.md (BN5's ACDC Area's arena in its rooms' floor).
 * **Update**: multirom/bn4-souls.md (Two Souls of one kind: BN4's eleven kinds that are a BN5 Soul's too, the check over both games' Souls and what it lights where BN5's Soul of a kind is not held, the both-held case left to the owner's call of issue #499; ThunSoul's damage mutation, uncaught since 12 November, caught again), game/team-protoman.md (its twelve kinds hold among BN5's own), code/emu.md (`soulkinds.c`'s row), devtools/differential.md (a poke into BN4's chips' units for a spec holding a BN4 Soul).
 * **Update**: devtools/tile-test.md (Robot Control's pads cut whole from its maps: as deep as the map's faces, in one piece with the pad).

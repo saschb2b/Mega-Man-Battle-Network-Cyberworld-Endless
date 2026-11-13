@@ -273,10 +273,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-11-13",
+      "what": "ThunSoul's look located (docs/multirom/bn4-souls.md, The look, located; docs/rom/bn4.md, The emotion window's faces: src/emu/bn4_battle.h's BN4_FACE_STEP, BN4_FACE_GET, BN4_FACES, BN4_SOUL_FACES, BN4_FACE_DIGITS, BN4_FACE_PALS): Red Sun's ROM holds its own six Souls' faces alone, the twelve sprites take 438,514 bytes and the ROM copy's largest gap is 60 KB, so the look waits on its room."
+    },
+    {
+      "date": "2026-11-13",
       "what": "UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code)."
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4's Souls on BN6's proxy form",
+      "date": "2026-11-13",
+      "name": "The emotion window's faces read, and the Souls' sprites measured",
+      "result": "tools/xrecipe_thumb.py's walk of BN4 0x08014B78 (the window's step) and 0x08016A20 (the face and count): a Soul's face is his form + 4, its tiles 0x100 bytes at 0x0870B8E0 by the face - 5, the digits six of 0x80 at 0x0870BEE0, the palettes eleven of 0x20 at 0x0870C1E0, the three tables end to end. tools/xrecipe.py's sprite over BN4's list 0, 1-12: 438,514 bytes, 33,110 to 42,324 each, ThunSoul's 35,843; list 8's pictures 1-12 1,564 to 1,894. tools/free_space.py --fit: no gap of 64 KB in the ROM copy, one of 60 KB.",
+      "meaning": "Red Sun's ROM holds six Soul faces, its own: Blue Moon's six would draw the digits' bytes (derived, no frame looked at). The Souls' sprites cannot be resident: one room filled as a Soul unites, or a larger ROM copy.",
+      "link": "../multirom/bn4-souls.md"
+    },
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-12",
