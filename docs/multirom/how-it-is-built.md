@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "How it is built"
 description: "Extra ROMs found by game code and SHA-1 (`src/core/rom.c`), their maps learned and tile sets copied into BN6's free space (BN4's 256-colour ones shown so), areas dressed by `run_dress` or held for review, songs copied by `xsong.c`, and the extra ROMs offered on each platform (BN4's whole since 5 November 2026)."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:09:57Z }
 ---
 
 # How it is built
