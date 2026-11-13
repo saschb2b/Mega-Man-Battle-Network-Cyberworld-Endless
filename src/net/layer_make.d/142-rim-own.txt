@@ -1,0 +1,1 @@
+A room's rim takes no piece of a walkway's panel (LAY_RIM_OWN) in CopyBot Comp, BN5's Undernet and BN4's Park, countries and Undernet: their layers draw other tiles.

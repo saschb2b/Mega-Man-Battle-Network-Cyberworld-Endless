@@ -571,7 +571,21 @@ rim:
   264, each square whole. What is left there is floor two wide or
   notched, which no map of Town's draws.
 
-Over all areas 89.6 to 86.6.
+- **A room's rim is no walkway** (`LAY_RIM_OWN`, 32; `lay_pieces`,
+  `panels_lay.c`). Where panels are laid, a floor's panel that no map has
+  whole takes its tiles piece by piece from panels alike in all the tile
+  shows, and the outer tiles of a room's rim show nothing of the room: they
+  came from walkways' panels. CopyBot Comp's pools stood in its walkways'
+  red pattern, where its maps frame them in stone, which only its raised
+  plateaus' book holds and the picker then never reached. With the rule a
+  panel with platform floor beside it takes no piece of a panel with none.
+  CopyBot's pools are framed in their stone (its count 262 to 274, the
+  worst of all areas still); BN5's Undernet 152 to 142, Park 81 to 78, the
+  countries 74 to 73, BN4's Undernet 198 to 196. Not BN5's Nebula Area,
+  whose plates do lie in its walkways' cobbles (191 to 194, a plate's
+  flat floor running out over them).
+
+Over all areas 89.6 to 86.5.
 
 The count alone misled twice more here: BN5's End Area fell by an eighth
 and laid pieces of its ramps beside its walkways, the Cybeast's Nest by a
