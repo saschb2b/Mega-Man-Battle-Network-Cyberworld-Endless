@@ -13,6 +13,8 @@
 #include "emu.h"
 #include "gba_world.h"
 #include "lcd_frame.h"
+#include "liberation.h"
+#include "online_visit.h"
 #include "netmap.h"
 #include "platform.h"
 #include "voxel.h"
@@ -26,6 +28,9 @@
 #define SCALE_WHOLE  4
 /* What a frame of it may take before the picture is made smaller */
 #define BUDGET_MS    11.0
+/* The rows whose sprites are the HUD's: an open chat box's from this row down, a battle's gauge and numbers above this one */
+#define CHAT_TOP     96
+#define BATTLE_TOP   40
 /* The frame in tiles, a tile more where the scroll shows part of one */
 #define TILES_X      31
 #define TILES_Y      21
@@ -218,8 +223,52 @@ static bool out_sized(void) {
 	return V.out != NULL;
 }
 
+/* What the frame is of: a layer (its own floor known), another map (the
+ * town, Lan's HP: no floor of ours, all of it flat under BN6's own
+ * camera), a battle (the same, its field from the screen maps), or
+ * nothing voxel mode draws (a menu, a battle beginning, a liberation's
+ * board, whose panels' tints are the picture's, a visit to another's
+ * Square) */
+enum { SCENE_NONE, SCENE_LAYER, SCENE_FLAT, SCENE_BATTLE };
+
+static int scene_now(void) {
+	if (emu_read8(emu_read32(BN6_TOOLKIT)) != BN6_MODE_GAME || online_visit_away() || online_visit_held()) return SCENE_NONE;
+	int sub = emu_read8(BN6_GAMESTATE);
+	if (sub == BN6_SUB_BATTLE) return SCENE_BATTLE;
+	if (sub != BN6_SUB_MAP) return SCENE_NONE;
+	if (!director_on_map() || director_in_town() || director_in_hp()) return SCENE_FLAT;
+	return lib_on() ? SCENE_NONE : SCENE_LAYER;
+}
+
+/* The video memory read, the frame's layers and the world's picture
+ * (the map's whole tile map where it is found, else the frame alone);
+ * false where the frame cannot be read */
+static bool scene_read(int kind, int cam_u, int cam_v) {
+	emu_read_bytes(0x06000000u, V.vram, sizeof V.vram);
+	emu_read_bytes(0x07000000u, V.oam, sizeof V.oam);
+	emu_read_bytes(0x04000000u, V.io, sizeof V.io);
+	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
+	GbaWorld world;
+	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io, V.pal }, &V.layers) || !out_sized()) return false;
+	if (kind == SCENE_BATTLE || !world_read(&world, cam_u, cam_v)) {
+		if (kind == SCENE_LAYER) return false;
+		world = (GbaWorld){ V.vram, V.pal, V.io, { NULL, NULL }, 0, 0, 0, 0 };
+	}
+	on_threads(world_rows, VOX_WH, &world);
+	world_colours(V.scene.map, VOX_WN);
+	world_colours(V.scene.sky, VOX_WN);
+	for (int i = 0; i < VOX_N; ++i)
+		if (V.layers.lying[i]) world_colours(&V.layers.lying[i], 1);
+	if (kind != SCENE_FLAT) return true;
+	emu_picture_tint_world(V.scene.map, VOX_WN);
+	emu_picture_tint_world(V.scene.sky, VOX_WN);
+	emu_picture_tint_world(V.layers.lying, VOX_N);
+	return true;
+}
+
 bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
-	if (!display_voxel() || !director_on_map() || director_in_town() || director_in_hp()) return false;
+	int kind = display_voxel() ? scene_now() : SCENE_NONE;
+	if (kind == SCENE_NONE) return false;
 	if (!vox) {
 		vox = calloc(1, sizeof *vox);
 		if (!vox) return false;
@@ -227,29 +276,22 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 		voxel_bands(on_threads);
 	}
 	uint64_t t0 = SDL_GetPerformanceCounter();
-	int px = bn6_player_x(), py = bn6_player_y();
-	int cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
-	int cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
-	emu_read_bytes(0x06000000u, V.vram, sizeof V.vram);
-	emu_read_bytes(0x07000000u, V.oam, sizeof V.oam);
-	emu_read_bytes(0x04000000u, V.io, sizeof V.io);
-	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
-	GbaWorld world;
-	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io, V.pal }, &V.layers) || !world_read(&world, cam_u, cam_v) || !out_sized()) return false;
-	on_threads(world_rows, VOX_WH, &world);
-	world_colours(V.scene.map, VOX_WN);
-	world_colours(V.scene.sky, VOX_WN);
-	if (lcd_colour() != LCD_COLOUR_OFF)
-		for (int i = 0; i < VOX_N; ++i)
-			if (V.layers.lying[i]) world_colours(&V.layers.lying[i], 1);
-	V.ground.z[0] = 0;
-	V.ground.z[1] = netmap_rise();
-	on_threads(ground_rows, VOX_GH, &(Camera){ cam_u, cam_v });
-	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) != 0, shown, &V.ground, &V.scene);
+	int px = bn6_player_x(), py = bn6_player_y(), hofs = emu_read16(GBA_BG1HOFS) & 0x1FF, vofs = emu_read16(GBA_BG1VOFS) & 0x1FF;
+	bool on_layer = kind == SCENE_LAYER;
+	/* (off a layer the scroll itself: only the tile map's place hangs on it) */
+	int cam_u = on_layer ? unwrap(hofs - 256, px + py) : hofs, cam_v = on_layer ? unwrap(vofs + 256, (py - px) / 2) : vofs;
+	if (!scene_read(kind, cam_u, cam_v)) return false;
+	memset(&V.ground, 0, sizeof V.ground);
+	V.ground.z[1] = on_layer ? netmap_rise() : 0;
+	if (on_layer) on_threads(ground_rows, VOX_GH, &(Camera){ cam_u, cam_v });
+	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) ? CHAT_TOP : kind == SCENE_BATTLE ? -BATTLE_TOP : 0, shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();
 	look.debug = display_voxel() == DISPLAY_VOXEL_DEBUG;
+	/* (a battle is read whole: nothing of it out of focus) */
+	if (kind == SCENE_BATTLE) look.focus = 0;
 	voxel_light(&V.scene, &V.ground, &look, V.lit_map, V.lit_sprite);
-	VoxCamera cam = { display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
+	VoxCamera cam = { 30.0f, 1.0f, 0.0f, CAM_X, CAM_Y, 0.0f };
+	if (on_layer) cam = (VoxCamera){ display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
 		(float)bn6_player_z() };
 	if (!voxel_draw(&V.scene, V.lit_map, V.lit_sprite, &look, &cam, V.scale, V.out)) return false;
 	/* (a system the frame takes too long on draws it smaller: a scale less

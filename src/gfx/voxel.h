@@ -81,9 +81,11 @@ typedef struct {
 } VoxScene;
 
 /* `scene`'s map sorted and placed over `ground`, and the frame's sprites
- * taken from `frame` (its colours as shown) by `layers` (gba_layers.h);
- * `chat`: a chat box is open, its rows' sprites the HUD's. */
-void voxel_lift(const GbaLayers *layers, bool chat, const uint32_t *frame, const VoxGround *ground, VoxScene *scene);
+ * taken from `frame` (its colours as shown) by `layers` (gba_layers.h).
+ * `hud_rows`: the rows whose sprites are the HUD's, from that row down (a
+ * chat box open: 96) or, negative, that many from the top (a battle); 0
+ * none. A sprite on BG0 is the HUD's wherever it is. */
+void voxel_lift(const GbaLayers *layers, int hud_rows, const uint32_t *frame, const VoxGround *ground, VoxScene *scene);
 
 /* What the sun and the lens are set to */
 typedef struct {

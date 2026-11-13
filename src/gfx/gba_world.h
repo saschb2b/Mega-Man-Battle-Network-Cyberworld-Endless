@@ -13,7 +13,8 @@ typedef struct {
 	const uint8_t *vram;      /* 0x06000000, 0x18000 bytes */
 	const uint8_t *pal;       /* 0x05000000, 0x400 */
 	const uint8_t *io;        /* 0x04000000, 0x60 */
-	const uint16_t *map[2];   /* BG1's and BG2's tile maps, tw x th screen entries each */
+	const uint16_t *map[2];   /* BG1's and BG2's tile maps, tw x th screen entries each (NULL: none, the frame alone
+	                           * from their screen maps) */
 	int tw, th;
 	int ox, oy;               /* the map's pixel at the frame's (0, 0) */
 } GbaWorld;

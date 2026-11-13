@@ -1,7 +1,7 @@
 ---
 type: Feature
-title: "Voxel mode: the net in 3D"
-description: "Options' Display's Voxel (off by default, `voxel` in settings.ini) rebuilds a net layer's picture as columns under a sun and a camera a little lower than BN6's: how a frame is read (the GBA's layers, the map's whole tile map), lifted over the layer's own floor, lit and drawn at the screen's scale, where it runs, what it leaves alone, and what is still open."
+title: "Depth lighting: the world lit in 3D"
+description: "Options' Display's Depth lighting (off by default, `depth_lighting` in settings.ini; the code's `voxel_` files, its first name) lights the world as the game runs, on the net, in town and in battle (a sun with soft shadows, shaded sides, a glow, what is far out of focus), and on a net layer rebuilds the picture as columns under a camera a little lower than BN6's: how a frame is read, lifted over the layer's own floor, lit and drawn at the screen's scale, where it runs, what it leaves alone, and what is still open."
 tags: [engine, display, options, voxel]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:50:47Z }
 sources:
@@ -13,15 +13,21 @@ sources:
     title: "GBATEK, LCD Video Controller: BGxCNT, the scroll, OAM's attributes, BLDCNT, BLDALPHA and BLDY, which gba_layers.c and gba_world.c read"
 ---
 
-# Voxel mode: the net in 3D
+# Depth lighting: the world lit in 3D
 
 The owner's first step of a visual sweep (2026-11-12): a mode, off by
-default, that turns BN6's isometric net into something three-dimensional
-and well lit, after a voxel diorama mod for another game (the reference
-above). Options' Display has the line **Voxel** ([the panel's
-rules](ui.md); it sits under [the GBA's screen's lines](lcd.md)), kept as
-`voxel = on` in `settings.ini`; `--voxel on|off|debug` on the command
-line sets it over that. It is not offered on the 3DS or the Vita.
+default, that turns BN6's isometric world into something
+three-dimensional and well lit, after a voxel diorama mod for another
+game (the reference above). Options' Display has the line **Depth
+lighting** ([the panel's rules](ui.md); it sits under [the GBA's
+screen's lines](lcd.md)), kept as `depth_lighting = on` in
+`settings.ini`; `--depth-lighting on|off|debug` on the command line sets
+it over that. It is not offered on the 3DS or the Vita.
+
+It began as "voxel mode", and the code keeps that name (`voxel.h`,
+`voxel_scene.c`, `--voxel` and `voxel =` still read): the owner renamed
+what players see on 2026-11-13, since no voxels are made, only each pixel
+given a place and lit.
 
 It is the owner's exception to two of AGENTS.md's rules, and only while it
 is on: the picture is no longer BN6's 240x160 at a whole scale (it is
@@ -31,14 +37,28 @@ from the core's video memory of that frame.
 
 ## Where it runs
 
-Only while MegaMan walks a generated layer's map
-(`director_on_map`, not the town or Lan's HP): battles, BN6's menus, the
-PET and every engine screen show as they always do. The HUD (the HP in
-the corner, a chat box with its face and arrow, BG0's text) stays BN6's
-own pixels on the canvas, and so does everything the engine draws over
-the picture; the canvas is clear where the world shows, and the platform
-lays it over the voxel picture (`platform_set_under`,
-`src/emu/voxel_scene.c`).
+Wherever BN6 shows a map or a battle (`voxel_scene.c`'s `scene_now`):
+
+| Scene | How |
+| --- | --- |
+| A generated layer | its own floor known (`netmap_floor_at`): slabs, sides, stairs, the camera lower (25 degrees) |
+| The town, Lan's room, Lan's HP, any other map | no floor of ours: all of the map lies flat under BN6's own camera (30 degrees, every pixel where BN6 puts it), its people and furniture standing on it and casting shadows, the town's hour on it |
+| A battle | the same, the field from the backgrounds' screen maps (a battle has no tile map), nothing out of focus |
+
+Not a battle's first frames, BN6's menus, a liberation's board (its
+panels' tints are the picture's) or a visit to another's Square: those
+show as they always do. The owner asked for the town and battles on
+2026-11-13, after a first version that drew layers alone.
+
+The HUD stays BN6's own pixels on the canvas, and so does everything the
+engine draws over the picture; the canvas is clear where the world
+shows, and the platform lays it over the voxel picture
+(`platform_set_under`). The HUD is: BG0; BG3 where its priority puts it
+before BG1 and BG2 (`gba_bg3_front`: a battle's Custom screen, measured
+there as priority 1 over the field's 2 and 3, where a net map's BG3 is
+the sky at priority 3); a sprite on either; a sprite all in the HP's
+corner (48 x 24), in an open chat box's rows, or in a battle's first 40
+rows (its gauge and emotion window).
 
 ## The frame read
 
@@ -95,14 +115,20 @@ sun casts its own.
 
 ## The light and the camera
 
-`voxel_light.c`: a sun from the front left, each pixel shaded by what
-stands between it and the sun (the sprites' outlines, three rows deep,
-and a raised level's slabs), sides darker than tops and darker the
-deeper under their edge, the floor darker where a body stands.
+`voxel_light.c`: a sun from the front left. Each pixel loses the sun to
+what stands between it and the sun (the sprites' outlines, three rows
+deep, a raised level's slabs, a stair), less the farther the shadow has
+travelled (to a quarter over 120 steps), and the shadow's edge is spread
+over two pixels each way; a shadow leaves 62 hundredths of the light.
+Sides are darker than tops and darker the deeper under their edge, the
+floor a little darker where a body stands. A first version cast hard
+shadows that left half the light: too harsh (the owner, 2026-11-13).
+The blob BN6 lays under who stands (a sprite of one colour, wider than
+high) lies on the floor with the pads.
 `voxel_draw.c`: each pixel becomes a face (a top a ground row deep, a
 side or a sprite's pixel a row high) projected through a camera at
 `--voxel-pitch` degrees (BN6's is 30; 25 as it comes), with a z-buffer;
-then the sky softened and dimmed under the floor, a glow off the bright
+seams of up to two voxels between a top and its side closed (they showed the sky in dots under the lower camera; the owner, 2026-11-13); then the sky softened and dimmed under the floor, a glow off the bright
 panels, what is far from MegaMan out of focus, and a vignette. Past 4x
 the picture is made at half the screen's scale.
 

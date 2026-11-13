@@ -2,6 +2,8 @@
 
 #include <stdbool.h>
 
+#include "gba_layers.h"
+
 static unsigned rd16(const uint8_t *p, unsigned at) { return (unsigned)p[at] | (unsigned)p[at + 1] << 8; }
 
 /* A palette entry's 15 bits after the frame's fade, where `fade` says the
@@ -57,19 +59,21 @@ static unsigned tile_pixel(const GbaWorld *g, const Bg *b, unsigned e, unsigned 
 	return n ? (e >> 12) * 16u + n : 0u;
 }
 
-/* A map background's pixel at the frame's (x, y), from the whole tile map */
-static unsigned map_pixel(const GbaWorld *g, const Bg *b, int layer, int x, int y) {
-	int px = x + g->ox, py = y + g->oy;
-	if (!b->on || !g->map[layer] || px < 0 || py < 0 || px >= g->tw * 8 || py >= g->th * 8) return 0;
-	return tile_pixel(g, b, g->map[layer][(py >> 3) * g->tw + (px >> 3)], (unsigned)px & 7u, (unsigned)py & 7u);
-}
-
-/* ... and one of a background's own screen map, wrapped */
+/* A background's pixel at the frame's (x, y) from its own screen map, wrapped */
 static unsigned screen_pixel(const GbaWorld *g, const Bg *b, int x, int y) {
 	if (!b->on) return 0;
 	unsigned px = ((unsigned)x + b->hofs) & ((b->size & 1u) ? 511u : 255u), py = ((unsigned)y + b->vofs) & ((b->size & 2u) ? 511u : 255u);
 	unsigned block = (px >> 8) + (py >> 8) * ((b->size & 1u) ? 2u : 1u);
 	return tile_pixel(g, b, rd16(g->vram, (b->screen + block * 0x800u + ((py >> 3 & 31u) * 32u + (px >> 3 & 31u)) * 2u) & 0xFFFEu), px & 7u, py & 7u);
+}
+
+/* A map background's pixel at the frame's (x, y), from the whole tile map */
+static unsigned map_pixel(const GbaWorld *g, const Bg *b, int layer, int x, int y) {
+	int px = x + g->ox, py = y + g->oy;
+	/* (no whole tile map, a battle's field: the frame's own pixels from the screen map) */
+	if (!g->map[layer]) return x >= 0 && y >= 0 && x < 240 && y < 160 ? screen_pixel(g, b, x, y) : 0;
+	if (!b->on || px < 0 || py < 0 || px >= g->tw * 8 || py >= g->th * 8) return 0;
+	return tile_pixel(g, b, g->map[layer][(py >> 3) * g->tw + (px >> 3)], (unsigned)px & 7u, (unsigned)py & 7u);
 }
 
 void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint32_t *sky) {
@@ -82,12 +86,14 @@ void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, u
 	if (evb > 16) evb = 16;
 	int back_fade = (bld >> 5 & 1u) && (bld >> 6 & 3u) > 1 ? (int)(bld >> 6 & 3u) : 0;
 	bool back_under = (bld >> 13 & 1u) != 0;
+	/* (BG3 in front of the map's backgrounds is the HUD's, not the sky) */
+	bool sky3 = !gba_bg3_front(g->io);
 	/* (of the two, the one the game shows in front first) */
 	int first = bg[2].prio < bg[1].prio ? 2 : 1, second = 3 - first;
 	for (int j = 0; j < h; ++j)
 		for (int i = 0; i < w; ++i) {
 			int x = x0 + i, y = y0 + j, at = j * w + i;
-			unsigned n3 = screen_pixel(g, &bg[3], x, y);
+			unsigned n3 = sky3 ? screen_pixel(g, &bg[3], x, y) : 0;
 			unsigned behind = n3 ? faded(g, n3, bg[3].fade, evy) : faded(g, 0, back_fade, evy);
 			bool behind_under = n3 ? bg[3].under : back_under;
 			sky[at] = shown(behind);

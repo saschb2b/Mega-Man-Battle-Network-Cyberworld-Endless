@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-12T23:49:36Z
+* **Update**: engine/voxel.md (renamed Depth lighting for players, `depth_lighting` in settings.ini; in the town, Lan's room and battles too, flat under BN6's own camera; what the HUD is; shadows soft and fading; the blob under who stands lies on the floor), engine/index.md (its line), devtools/headless-shot.md (the flag's name).

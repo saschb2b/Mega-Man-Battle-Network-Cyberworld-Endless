@@ -12,8 +12,10 @@
 #define RAD    0.01745329f
 /* How many ground rows on the next row's top may lie to be the same floor going on */
 #define RAMP_STEP 4
+/* The widest seam that is closed, in voxels (a gap any wider is the void between two floors) */
+#define SEAM 3
 
-enum { IS_SKY, IS_MAP, IS_SPRITE };
+enum { IS_SKY, IS_MAP, IS_SPRITE, IS_MENDED };
 
 /* The picture being made: each pixel's nearness (the larger the nearer)
  * and what it shows */
@@ -96,9 +98,12 @@ static void face(const Lens *l, const float a[2], const float b[2], float near, 
 /* A floor's top at (x, g) of height h, as far as (gn, hn): the next row's
  * top where the floor goes on (a ramp's rows climb), else a ground row on */
 static void top(const Lens *l, int x, const float from[2], const float to[2], uint32_t c) {
-	float a[2], b[2], g = from[0], h = from[1];
+	float a[2], b[2], own[2], g = from[0], h = from[1];
 	project(l, (float)x, g, h, &a[0], &a[1]);
 	project(l, (float)(x + 1), to[0], to[1], &b[0], &b[1]);
+	/* (no less than its own ground row: a slope's next row may begin lower or higher on the screen than this one ends) */
+	project(l, (float)(x + 1), g + 1.0f, h, &own[0], &own[1]);
+	if (own[1] > b[1]) b[1] = own[1];
 	face(l, a, b, nearness(l, g + 0.5f, h), c, IS_MAP);
 }
 
@@ -111,20 +116,53 @@ static void upright(const Lens *l, int x, int y, float g, uint32_t c, int what) 
 }
 
 static void faces(const VoxScene *s, const uint32_t *map, const uint32_t *sprite, const Lens *l) {
+	Lens smooth = *l;
+	smooth.bevel = 0;
 	for (int j = 0; j < VOX_WH; ++j)
 		for (int i = 0; i < VOX_WW; ++i) {
 			int at = j * VOX_WW + i;
 			if (!map[at] || s->kind[at] == VOX_SKY) continue;
 			if (s->kind[at] == VOX_TOP) {
 				int y = j - VOX_UP, under = at + VOX_WW;
-				bool on = j + 1 < VOX_WH && map[under] && s->kind[under] == VOX_TOP && s->gy[under] > s->gy[at] && s->gy[under] - s->gy[at] <= RAMP_STEP;
+				bool on = j + 1 < VOX_WH && map[under] && s->kind[under] == VOX_TOP && s->gy[under] >= s->gy[at] && s->gy[under] - s->gy[at] <= RAMP_STEP;
 				float from[2] = { (float)s->gy[at], (float)(s->gy[at] - y) }, to[2] = { from[0] + 1.0f, from[1] };
 				if (on) { to[0] = (float)s->gy[under]; to[1] = (float)(s->gy[under] - (y + 1)); }
-				top(l, i - VOX_LEFT, from, to, map[at]);
+				/* (a slope's rows are no voxels of their own: no edges on them) */
+				bool slope = on || (j > 0 && map[at - VOX_WW] && s->kind[at - VOX_WW] == VOX_TOP && s->gy[at - VOX_WW] - (y - 1) != s->gy[at] - y);
+				top(slope ? &smooth : l, i - VOX_LEFT, from, to, map[at]);
 			} else upright(l, i - VOX_LEFT, j - VOX_UP, (float)s->gy[at], map[at], IS_MAP);
 		}
 	for (int i = 0; i < VOX_N; ++i)
 		if (sprite[i]) upright(l, i % VOX_W, i / VOX_W, (float)s->bodies[s->body[i]].gy, sprite[i], IS_SPRITE);
+}
+
+/* Seams closed: a top and its side, or a slope and what hangs from it,
+ * can land a pixel of the frame apart under a lower camera, and the sky
+ * showed through in dots (the owner, 2026-11-13). A pixel nothing was
+ * drawn on, in a gap of at most two voxels between something above and
+ * below it or left and right of it, takes its neighbour's colour. */
+static bool seam(int i, int step, int *from) {
+	int a = 0, b = 0;
+	for (int n = 1; n <= SEAM * T.scale && !a; ++n)
+		if (T.what[i - n * step] != IS_SKY) a = n;
+	for (int n = 1; n <= SEAM * T.scale - a && !b; ++n)
+		if (T.what[i + n * step] != IS_SKY) b = n;
+	*from = i - a * step;
+	return a && b;
+}
+
+static void mend(void) {
+	for (int oy = SEAM * T.scale; oy < T.oh - SEAM * T.scale; ++oy)
+		for (int ox = SEAM * T.scale; ox < T.ow - SEAM * T.scale; ++ox) {
+			int i = oy * T.ow + ox, from;
+			if (T.what[i] != IS_SKY || !(seam(i, T.ow, &from) || seam(i, 1, &from))) continue;
+			T.out[i] = T.out[from];
+			T.z[i] = T.z[from];
+			/* (marked apart until the pass is through: a mended pixel mends none) */
+			T.what[i] = IS_MENDED;
+		}
+	for (int i = 0; i < T.ow * T.oh; ++i)
+		if (T.what[i] == IS_MENDED) T.what[i] = IS_MAP;
 }
 
 /* The sky where nothing stands: far off, it keeps BN6's place (and what
@@ -279,6 +317,7 @@ bool voxel_draw(const VoxScene *scene, const uint32_t *map, const uint32_t *spri
 	if (!target(scale, out)) return false;
 	Lens l = lens(cam, look);
 	faces(scene, map, sprite, &l);
+	if (cam->pitch != 30.0f || cam->zoom != 1.0f || cam->depth != 0.0f) mend();
 	sky_fill(scene, map, &l);
 	if (look->debug) return true;
 	layers(look);

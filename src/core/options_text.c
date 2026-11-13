@@ -75,9 +75,9 @@ static const char *const words[] = {
 	"LCD 3x",   /* OW_LCD3X */
 	"Each pixel striped red, green, blue",   /* OW_LCD3X_ON_NOTE */
 	"Plain pixels, no stripes or lines",   /* OW_LCD3X_OFF_NOTE */
-	"Voxel",   /* OW_VOXEL */
-	"The net in 3D: lit, with shadows",   /* OW_VOXEL_ON_NOTE */
-	"The net as BN6 draws it",   /* OW_VOXEL_OFF_NOTE */
+	"Depth lighting",   /* OW_VOXEL */
+	"Sun, shadows and depth on the world",   /* OW_VOXEL_ON_NOTE */
+	"The world as BN6 draws it",   /* OW_VOXEL_OFF_NOTE */
 	"DEFAULT",   /* OW_DEFAULT */
 	"Display back as it came?",   /* OW_ASK_DISPLAY */
 	"Audio back as it came?",   /* OW_ASK_AUDIO */
@@ -205,10 +205,12 @@ const char *options_lcd3x_note(void) {
 }
 
 const char *options_voxel_note(void) {
-	return "\n# voxel: on rebuilds the net's layers in 3D as MegaMan walks them: the\n"
-		"# floor as slabs under a sun, with shadows, a soft sky and a camera that\n"
-		"# looks from a little lower. Battles and menus stay as they are. Not on\n"
-		"# the 3DS or the Vita. Options' Display changes it too.\n";
+	return "\n# depth_lighting: on lights the world as the game runs: a sun with soft\n"
+		"# shadows, shaded sides, a glow off what is bright and what is far a\n"
+		"# little out of focus, on the net, in town and in battle; on the net's\n"
+		"# layers the camera also looks from a little lower. Menus and the HUD\n"
+		"# stay as they are. Not on the 3DS or the Vita. Options' Display changes\n"
+		"# it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

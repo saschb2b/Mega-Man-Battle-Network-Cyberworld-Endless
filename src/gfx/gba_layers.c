@@ -100,6 +100,20 @@ static bool obj_texel(const Obj *o, int ix, int iy, int *tx, int *ty) {
 	return *tx >= 0 && *ty >= 0 && *tx < o->w && *ty < o->h;
 }
 
+/* A sprite of one colour, wider than high: the blob BN6 lays under one who
+ * stands (measured: MegaMan's a 32x8 of one dark colour) */
+static bool obj_blob(const GbaVideo *v, const Obj *o, bool flat) {
+	unsigned first = 0;
+	if (o->turned || o->w < 2 * o->h) return false;
+	for (int ty = 0; ty < o->h; ++ty)
+		for (int tx = 0; tx < o->w; ++tx) {
+			unsigned c = obj_pixel(v, o->a0, o->a2, o->w, tx, ty, flat);
+			if (c && first && c != first) return false;
+			if (c) first = c;
+		}
+	return first != 0;
+}
+
 static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 	bool flat = (rd16(v->io, 0) & 0x40u) != 0;
 	for (int n = 0; n < GBA_OBJS; ++n) {
@@ -109,6 +123,7 @@ static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 		out->x[n] = (int16_t)o.x0; out->y[n] = (int16_t)o.y0;
 		out->w[n] = (uint8_t)o.bw; out->h[n] = (uint8_t)o.bh;
 		unsigned p = o.a2 >> 10 & 3u;
+		bool lies = (o.a0 >> 10 & 3u) == 0 && (p == 3 || obj_blob(v, &o, flat));
 		for (int iy = 0; iy < o.bh; ++iy)
 			for (int ix = 0; ix < o.bw; ++ix) {
 				int sx = o.x0 + ix, sy = o.y0 + iy, tx, ty, i = sy * W + sx;
@@ -116,7 +131,7 @@ static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 				unsigned c = obj_texel(&o, ix, iy, &tx, &ty) ? obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat) : 0;
 				if (!c) continue;
 				/* (one that lies on the floor: its colour kept, under whoever stands on it) */
-				if (p == 3 && (o.a0 >> 10 & 3u) == 0) {
+				if (lies) {
 					if (!out->lying[i] && v->pal) out->lying[i] = obj_colour(v, c);
 					continue;
 				}
@@ -127,6 +142,14 @@ static void objs(const GbaVideo *v, GbaLayers *out, uint8_t *prio) {
 				prio[i] = (uint8_t)p;
 			}
 	}
+}
+
+bool gba_bg3_front(const uint8_t *io) {
+	unsigned on = rd16(io, 0) >> 8, p3 = rd16(io, 0x0E) & 3u;
+	if (!(on & 8u)) return false;
+	for (unsigned b = 1; b <= 2; ++b)
+		if ((on >> b & 1u) && (rd16(io, 0x08u + 2u * b) & 3u) <= p3) return false;
+	return true;
 }
 
 bool gba_layers(const GbaVideo *v, GbaLayers *out) {
@@ -140,6 +163,7 @@ bool gba_layers(const GbaVideo *v, GbaLayers *out) {
 	else memset(out->w, 0, sizeof out->w);
 	Bg bg[4];
 	for (int b = 0; b < 4; ++b) bg[b] = bg_read(v, b);
+	bool front3 = gba_bg3_front(v->io);
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
 			int i = y * W + x, best = GBA_LAYER_NONE;
@@ -147,6 +171,7 @@ bool gba_layers(const GbaVideo *v, GbaLayers *out) {
 			for (int b = 0; b < 4; ++b)
 				if (bg[b].on && bg[b].prio < best_p && bg_pixel(v, &bg[b], x, y)) { best = b; best_p = bg[b].prio; }
 			out->under[i] = (uint8_t)best;
+			out->hud[i] = best == 0 || (best == 3 && front3);
 			/* (a sprite over a background of its priority) */
 			out->top[i] = out->obj[i] && prio[i] <= best_p ? GBA_LAYER_OBJ : (uint8_t)best;
 		}

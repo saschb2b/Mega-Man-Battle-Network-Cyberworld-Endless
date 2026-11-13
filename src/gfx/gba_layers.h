@@ -26,16 +26,22 @@ typedef struct {
 	uint8_t top[240 * 160];     /* the layer on top: a background's number, GBA_LAYER_OBJ or GBA_LAYER_NONE */
 	uint8_t under[240 * 160];   /* the background on top of the others, sprites aside (or GBA_LAYER_NONE) */
 	uint8_t obj[240 * 160];     /* the sprite on top of the others, its OAM entry + 1 (0 none), whatever covers it */
+	uint8_t hud[240 * 160];     /* 1 where a background of the HUD lies under the sprites: BG0, or BG3 in front (gba_bg3_front) */
 	uint8_t sheer[240 * 160];   /* 1 where that sprite is a blended one (a shadow, a light) */
-	/* the sprites of the last priority (3), which BN6 lays on the floor
-	 * under everyone (a warp pad): the colour of the first of them at
-	 * each pixel, 0xFFBBGGRR (0 none), whatever stands on it; they are no
+	/* the sprites BN6 lays on the floor under everyone, those of the last
+	 * priority (3: a warp pad) and the blobs under who stands (one colour,
+	 * wider than high): the colour of the first of them at each pixel, 0xFFBBGGRR (0 none), whatever stands on it; they are no
 	 * part of `top` and `obj` */
 	uint32_t lying[240 * 160];
 	/* each sprite's box on the screen (w 0: not shown) */
 	int16_t x[GBA_OBJS], y[GBA_OBJS];
 	uint8_t w[GBA_OBJS], h[GBA_OBJS];
 } GbaLayers;
+
+/* Whether BG3 stands in front of the map's two backgrounds (BG1, BG2) by
+ * its priority: a window of the HUD then (a battle's Custom screen), not
+ * the sky behind the world (a net map's) */
+bool gba_bg3_front(const uint8_t *io);
 
 /* False in a mode other than 0 (its backgrounds are not tile maps alone). */
 bool gba_layers(const GbaVideo *v, GbaLayers *out);

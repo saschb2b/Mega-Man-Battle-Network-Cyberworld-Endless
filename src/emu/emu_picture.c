@@ -28,6 +28,13 @@ static uint32_t tinted(uint32_t c, int hour, bool box_row) {
 	return (c & 0xFF000000u) | (b > 255 ? 255 : b) << 16 | (g > 255 ? 255 : g) << 8 | (r > 255 ? 255 : r);
 }
 
+/* The town's hour on colours of the world, as on its picture's (voxel
+ * mode's, which draws the map itself) */
+void emu_picture_tint_world(uint32_t *px, int n) {
+	int hour = online_visit_away() ? 0 : director_town_tint(&(bool){ false });
+	for (int i = 0; hour && i < n; ++i) px[i] = tinted(px[i] | 0x18000000u, hour, false) | 0xFF000000u;
+}
+
 static SDL_Texture *tex;
 
 void emu_picture_draw(int x, int y) {
