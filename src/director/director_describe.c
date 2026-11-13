@@ -250,6 +250,10 @@ void director_describe(FILE *f) {
 	const char *doing = state_doing(&hp, &max);
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
+	/* (the game's own count of its main loop's frames: one that stands while
+	 * the engine's frames go on is a game standing still, issue #482;
+	 * tools/old_checkpoint.py watches it) */
+	fprintf(f, "gameframe %u\n", emu_read16(BN6_FRAME_COUNT));
 	if (D.town) fprintf(f, "place %s\n", director_place_name());
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));

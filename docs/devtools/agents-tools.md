@@ -70,7 +70,11 @@ run (`title`, `saves`, `launcher`), and in it BN6's (`map`, `town`,
 reading of BN6's modes (`src/dev/screen_name.c`). Ask for no picture
 (`picture: false`, `--no-picture`) when the screen and the state's other
 lines answer the question: a call of words only costs a tenth of one with
-a picture. Among the state's lines, `soulturns +1` stands while
+a picture. Among the state's lines, `gameframe` is the game's own count of its
+main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
+`frame` goes on where the game stands still (issue #482;
+[An old checkpoint](old-checkpoint.md) watches it; a `play` call's
+changes leave it out, as they do `frame`), and `soulturns +1` stands while
 MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
