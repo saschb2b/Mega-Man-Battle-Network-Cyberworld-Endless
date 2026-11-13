@@ -13,6 +13,7 @@
 
 #define SLOTS (1u << 18)   /* (a map has a few thousand tile pictures) */
 #define TINT 0xFFFF2050u
+#define HIGHEST 128   /* the highest floor looked for, world units */
 
 static uint64_t *seen;
 
@@ -83,11 +84,22 @@ static int place(const AreaSrc *a, const uint8_t *panels, int i) {
 	int phase, A, B, own = 0, other = 0;
 	tile_class(&g, i % a->tw, i / a->tw, &phase, &A, &B);
 	int p = panel_at(panels, A, B);
-	if (p) return p == TILE_A || p == TILE_B ? LENT_OWN : LENT_OTHER;
+	if (p) return TILE_MATERIAL(p) == 3 ? LENT_OTHER : p & TILE_PAD ? LENT_PAD : LENT_OWN;
+	/* (floor at height z is drawn z pixels up: the tile's middle that much
+	 * lower on the ground) */
+	bool ramp = false;
+	for (int z = 0; z <= HIGHEST; z += 8) {
+		int u = i % a->tw * 8 + 4 - a->tw * 4, v = 2 * (i / a->tw * 8 + 4 + z - a->th * 4), X = (u - v) / 2, Y = (u + v) / 2;
+		if (area_src_walled_floor(a, X, Y) != 1) continue;
+		int h = area_src_height(a, X, Y);
+		if (z && h == z) return LENT_RAISED;
+		ramp |= h == HEIGHT_UNEVEN;
+	}
+	if (ramp) return LENT_RAMP;
 	for (int k = 0; k < 9; ++k) {
 		int q = panel_at(panels, A + k % 3 - 1, B + k / 3 - 1);
-		own += q == TILE_A || q == TILE_B;
-		other += q && q != TILE_A && q != TILE_B;
+		own += q && TILE_MATERIAL(q) != 3;
+		other += TILE_MATERIAL(q) == 3;
 	}
 	return own ? LENT_BY_OWN : other ? LENT_BY_OTHER : LENT_AWAY;
 }

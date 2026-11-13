@@ -442,8 +442,12 @@ uint8_t *tiles_src_panels(const AreaSrc *a, uint32_t styles, uint16_t walk_style
 	Src src = { a, styles, walk_styles, skip_styles, joint_hues, bg_in_map, NULL, NULL, styles & TILES_INNER_WALLS, NULL };
 	uint8_t *out = calloc((size_t)SPAN * SPAN, 1);
 	if (!out || !src_open(&src)) { free(out); return NULL; }
-	for (int B = -SPAN / 2; B < SPAN / 2; ++B)
-		for (int A = -SPAN / 2; A < SPAN / 2; ++A) out[(B + SPAN / 2) * SPAN + A + SPAN / 2] = (uint8_t)tl_src_panel(&src, A, B);
+	uint8_t *pads = tl_find_pads(&src);
+	for (int i = 0; i < SPAN * SPAN; ++i) {
+		int st = tl_src_panel(&src, i % SPAN - SPAN / 2, i / SPAN - SPAN / 2);
+		out[i] = (uint8_t)(st | (st && pads && pads[i] ? TILE_PAD : 0));
+	}
+	free(pads);
 	src_close(&src);
 	return out;
 }

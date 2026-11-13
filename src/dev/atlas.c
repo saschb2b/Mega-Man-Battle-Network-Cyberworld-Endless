@@ -475,9 +475,9 @@ static void lent_maps(const char *dir, int area) {
 		snprintf(path, sizeof path, "%s/lent_b%02d_%02x_%d.bmp", dir, area, group, number);
 		for (int i = 0; px && i < a.tw * a.th * 64; ++i) if (!(px[i] >> 24)) px[i] = VOID_ARGB;
 		if (px) save_bmp(path, px, a.tw * 8, a.th * 8);
-		fprintf(report, "lent %2d map %02x:%d: %d tiles drawn, %d as a layer draws one (%.1f%%); %d different, %d of them used (%.1f%%); left on its floor %d, on other floor %d, beside its floor %d, beside other floor %d, away %d\n",
+		fprintf(report, "lent %2d map %02x:%d: %d tiles drawn, %d as a layer draws one (%.1f%%); %d different, %d of them used (%.1f%%); left on its floor %d, on its pads %d, on other floor %d, on raised floor %d, on ramps %d, beside its floor %d, beside other floor %d, away %d\n",
 			area, group, number, n.drawn, n.used, 100.0 * n.used / (n.drawn ? n.drawn : 1), n.kinds, n.kinds_used, 100.0 * n.kinds_used / (n.kinds ? n.kinds : 1),
-			n.left[LENT_OWN], n.left[LENT_OTHER], n.left[LENT_BY_OWN], n.left[LENT_BY_OTHER], n.left[LENT_AWAY]);
+			n.left[LENT_OWN], n.left[LENT_PAD], n.left[LENT_OTHER], n.left[LENT_RAISED], n.left[LENT_RAMP], n.left[LENT_BY_OWN], n.left[LENT_BY_OTHER], n.left[LENT_AWAY]);
 		free(px);
 		area_src_free(&a);
 	}

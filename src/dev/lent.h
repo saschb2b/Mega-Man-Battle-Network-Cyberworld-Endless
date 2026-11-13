@@ -10,12 +10,15 @@
 #include "area_src.h"
 
 /* Where a tile no layer drew lies in its map, by the panel its middle is
- * in as the area's tiles are learned: on the floor a layer is made of; on
+ * in as the area's tiles are learned: on the floor a layer is made of, its
+ * pads (small platforms on spurs) told apart; on
  * floor of another kind, which lends no tiles (a road, a pad of another
- * look, another surface); off the floor beside the one or the other, a
- * panel away at most (rims, side faces, walls, what stands at an edge); or
- * further off (scenery). */
-enum { LENT_OWN, LENT_OTHER, LENT_BY_OWN, LENT_BY_OTHER, LENT_AWAY, LENT_PLACES };
+ * look, another surface); on floor the walls set at another height, drawn
+ * that much higher, or on a ramp between two heights; off the floor beside
+ * the ground's floor of the one kind or the other, a panel away at most
+ * (rims, side faces, walls, what stands at an edge); or further off
+ * (scenery, raised floors' side faces). */
+enum { LENT_OWN, LENT_PAD, LENT_OTHER, LENT_RAISED, LENT_RAMP, LENT_BY_OWN, LENT_BY_OTHER, LENT_AWAY, LENT_PLACES };
 
 /* A map's tiles that draw something (each layer's counted), those whose
  * picture a layer drew, and the same over its different pictures; of the

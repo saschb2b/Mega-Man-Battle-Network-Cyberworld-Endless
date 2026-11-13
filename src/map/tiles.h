@@ -277,8 +277,8 @@ void tiles_free(TileBook *b);
 void tiles_src_text(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map, FILE *f);
 /* (dev) ... and as numbers: TILES_SRC_SPAN panels a side round the world's
  * origin, panel (A, B) at [(B + SPAN / 2) * SPAN + A + SPAN / 2]: 0 no
- * floor, TILE_A, TILE_B, 3 floor of another kind. NULL without memory
- * (free it). */
+ * floor, TILE_A, TILE_B, 3 floor of another kind, and | TILE_PAD on its
+ * pads (small platforms on spurs). NULL without memory (free it). */
 #define TILES_SRC_SPAN 128
 uint8_t *tiles_src_panels(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16_t skip_styles, uint16_t joint_hues, bool bg_in_map);
 /* The colours the pairs of `b` draw, marked in `seen` (one byte per BGR555
