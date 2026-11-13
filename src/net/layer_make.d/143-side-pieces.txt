@@ -1,0 +1,1 @@
+CopyBot Comp's and BN4's Undernet's layers set their maps' side pieces (claws, flames) on ground panels of their neighbourhoods, some by the seed (nm_paste_sides): their layers draw other tiles.

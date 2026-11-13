@@ -86,6 +86,7 @@ static void forget(Learned *L) {
 	seams_free(&L->seams);
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
+	for (int k = 0; k < L->sides.n; ++k) free(L->sides.piece[k].tiles);
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
 		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };
@@ -554,6 +555,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	nm_paste_emblems(L, map, tw, th);
 	nm_paste_arrows(L, map, tw, th);
 	nm_paste_bushes(L, map, tw, th);
+	nm_paste_sides(L, map, tw, th);
 	/* how the classes' picks went, where they are drawn: not under what
 	 * was set whole over them */
 	for (size_t i = 0; i < cells; ++i) {

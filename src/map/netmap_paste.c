@@ -4,6 +4,7 @@
 #include "netmap_paste.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "debug.h"
@@ -246,6 +247,75 @@ void nm_paste_bushes(const Learned *L, uint16_t *map, int tw, int th) {
 				if (!map[cells + at]) map[cells + at] = st->tiles[k].e1;   /* (never over the floor's own art) */
 			}
 		}
+}
+
+/* Whether grid panel (x, y) is ground floor nothing stands on or beside:
+ * no raised floor, pad, lane or arena, no object within a panel. */
+static bool side_free(int x, int y) {
+	if (x < 1 || y < 1 || x >= MAP_W - 1 || y >= MAP_H - 1 || layer.cell[y][x] != C_PATH || layer.level[y][x]) return false;
+	if (nm_cur->pad && nm_cur->pad[y * nm_cur->gw + x]) return false;
+	if (x >= nm_cur->ax - 1 && x <= nm_cur->ax + nm_cur->aw && y >= nm_cur->ay - 1 && y <= nm_cur->ay + nm_cur->ah) return false;
+	for (int i = 0; i < layer.nobj; ++i)
+		if (abs((int)layer.obj[i].x - x) <= 1 && abs((int)layer.obj[i].y - y) <= 1) return false;
+	for (int i = 0; i < layer.nlanes; ++i)
+		for (int k = 0; k <= layer.lane[i].len + 1; ++k)
+			if (abs(layer.lane[i].x + dir_dx[layer.lane[i].dir] * k - x) <= 1 && abs(layer.lane[i].y + dir_dy[layer.lane[i].dir] * k - y) <= 1) return false;
+	return true;
+}
+
+/* Grid panel (x, y)'s neighbourhood as a side piece's (SidePiece.floor):
+ * panel A runs against grid y, panel B along grid x. */
+static unsigned side_floor(int x, int y) {
+	unsigned f = 0;
+	for (int k = 0; k < 9; ++k) {
+		int gx = x + k / 3 - 1, gy = y - (k % 3 - 1);
+		if (layer.cell[gy][gx] != C_VOID && !layer.level[gy][gx]) f |= 1u << k;
+	}
+	return f;
+}
+
+#define SIDES_A_LAYER 12   /* side pieces a layer sets at most */
+#define SIDES_APART    3   /* panels between two */
+
+/* The piece for grid panel (x, y), by hash h: one of those cut at its
+ * neighbourhood, NULL none. */
+static const SidePiece *side_for(const SideBook *b, int x, int y, unsigned h) {
+	unsigned f = side_floor(x, y);
+	int match[SIDES_MAX], nmatch = 0;
+	for (int k = 0; k < b->n; ++k)
+		if (b->piece[k].floor == f) match[nmatch++] = k;
+	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
+}
+
+/* Piece p set at grid panel (x, y), whole or not at all: on the map, on its
+ * tile lattice, over nothing the second layer holds. Whether it was. */
+static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, int y) {
+	size_t cells = (size_t)tw * th;
+	int A, B;
+	nm_grid_to_panel(x, y, &A, &B);
+	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
+	for (int k = 0; k < p->ntiles; ++k) {
+		int px = px0 + p->tiles[k].px, py = py0 + p->tiles[k].py;
+		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || map[cells + (size_t)(py / 8) * tw + px / 8]) return false;
+	}
+	for (int k = 0; k < p->ntiles; ++k) map[cells + (size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->tiles[k].e1;
+	return true;
+}
+
+void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
+	if (!L->sides.n || nm_cur->gw != MAP_W) return;
+	int set[SIDES_A_LAYER][2], nset = 0;
+	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
+		for (int x = 1; x < MAP_W - 1 && nset < SIDES_A_LAYER; ++x) {
+			unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
+			bool near = false;
+			for (int k = 0; k < nset && !near; ++k) near = abs(set[k][0] - x) < SIDES_APART && abs(set[k][1] - y) < SIDES_APART;
+			if (near || h % 2 || !side_free(x, y)) continue;
+			const SidePiece *p = side_for(&L->sides, x, y, h);
+			if (!p || !side_set(p, map, tw, th, x, y)) continue;
+			set[nset][0] = x; set[nset++][1] = y;
+		}
+	if (emu_debug_on()) fprintf(stderr, "side pieces: %d set, of the area's %d\n", nset, L->sides.n);
 }
 
 bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {
