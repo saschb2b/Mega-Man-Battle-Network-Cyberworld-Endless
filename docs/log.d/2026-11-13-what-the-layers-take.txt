@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T21:30:00Z
-* **Creation**: devtools/map-use.md (what the layers take from a map: the atlas's count per area and its tinted maps, 67% of the maps' tiles and 42% of their different pictures, what stays unused by kind). **Update**: devtools/tile-test.md (a line to it), code/dev.md (`lent.c`).
