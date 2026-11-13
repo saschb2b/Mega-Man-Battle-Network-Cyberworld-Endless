@@ -291,9 +291,10 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 	}
 	/* (... and as its roads are learned, netmap_learn.c) */
 	snprintf(path, sizeof path, "%s/roads_b%02d_%02x_%d%s.txt", dir, biome, group, number, tag);
-	f = na->road_styles ? fopen(path, "w") : NULL;
+	unsigned roads = netmap_road_hues(biome);
+	f = roads ? fopen(path, "w") : NULL;
 	if (f) {
-		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), na->road_styles, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
+		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), (uint16_t)roads, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
 		fclose(f);
 	}
 	int W = v->tw * 8, H = v->th * 8;
@@ -593,6 +594,11 @@ static void stair_layers(const char *dir, FILE *report, int b, int area, int see
 	}
 }
 
+static int env_int(const char *name, int none) {
+	const char *v = getenv(name);
+	return v ? atoi(v) : none;
+}
+
 int atlas_run(const char *spec) {
 	/* ("nav": the way across BN6's own maps instead, navstudy.c; "arrivals"
 	 * where MegaMan arrives on them) */
@@ -605,6 +611,9 @@ int atlas_run(const char *spec) {
 	if (!emu_init(R.data, ROM_SIZE)) { fprintf(stderr, "atlas: no core\n"); return 1; }
 	tiles_measure = true;
 	breaks_measure = true;
+	/* (CYBERWORLD_LEAD=N: every layer led by its area's map N, to measure a
+	 * map as the lead: docs/world/level-design/lead-map.md) */
+	netmap_lead_forced = env_int("CYBERWORLD_LEAD", -1);
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);

@@ -66,8 +66,9 @@ static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, bool own,
 /* ... at each of its floor heights: raised floors are drawn higher, so each
  * is learned in a view that brings it down to the ground (made in place,
  * as the mirror is). */
-static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, Learned *L) {
-	int count[256] = { 0 };
+static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, Learned *L) {
+	bool own = !map;
+	int count[256] = { 0 }, first = L->nbooks;
 	for (int i = 0; src->hz && i < src->hw * src->hh; ++i) count[src->hz[i]]++;
 	learn_view(src, grid_of, area, own, L);
 	for (int z = 8; z < HEIGHT_UNEVEN; z += 8) {
@@ -77,23 +78,133 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, bool own, 
 		learn_view(&r, grid_of, area, own, L);
 		area_src_raise_end(src, &r);
 	}
+	/* (its books are one map's: the layer's lead, netmap.c) */
+	for (int k = first; k < L->nbooks; ++k) L->book_map[k] = (uint8_t)map;
 }
 
-/* The area's roads, a second look of walkway (NetAreaDef.road_styles;
- * BN4's Park Area's orange paths): its own map learned again, and its
+/* ---- a map's walkways by their look ---- */
+
+#define HUES 13   /* hue buckets 0-11 and grey (tl_style_at) */
+
+/* Where panel (A, B)'s middle at height z is drawn in map a; false off its
+ * picture or where nothing is drawn there. */
+static bool panel_px(const AreaSrc *a, int A, int B, int z, int *px, int *py) {
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	*px = area_px(a->tw, X, Y);
+	*py = area_py(a->th, X, Y) - z;
+	return *px >= 0 && *py >= 0 && *px < a->tw * 8 && *py < a->th * 8 && a->px[(size_t)*py * a->tw * 8 + *px] >> 24;
+}
+
+/* Whether panel (A, B) of map a is floor at height z with something drawn
+ * at its middle. */
+static bool floor_at(const AreaSrc *a, int A, int B, int z) {
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B, px, py;
+	return panel_px(a, A, B, z, &px, &py) && area_src_walled_floor(a, X, Y) == 1 && area_src_height(a, X, Y) == z;
+}
+
+/* ... and a walkway's: in no 2 x 2 block of such floor. Its hue bucket, -1
+ * where it is none. */
+static int walk_hue(const AreaSrc *a, int A, int B, int z) {
+	int px, py;
+	if (!floor_at(a, A, B, z)) return -1;
+	for (int db = -1; db <= 0; ++db)
+		for (int da = -1; da <= 0; ++da)
+			if (floor_at(a, A + da, B + db, z) && floor_at(a, A + da + 1, B + db, z) && floor_at(a, A + da, B + db + 1, z) && floor_at(a, A + da + 1, B + db + 1, z)) return -1;
+	panel_px(a, A, B, z, &px, &py);
+	return tl_style_at(a, px, py);
+}
+
+/* Map a's walkways at height z by their hue: per bucket, how many panels
+ * show it and its longest straight run. */
+static void walk_hues(const AreaSrc *a, int z, int count[HUES], int run[HUES]) {
+	memset(count, 0, HUES * sizeof *count);
+	memset(run, 0, HUES * sizeof *run);
+	for (int B = -64; B < 64; ++B)
+		for (int A = -64; A < 64; ++A) {
+			int h = walk_hue(a, A, B, z);
+			if (h < 0) continue;
+			count[h]++;
+			for (int axis = 0; axis < 2; ++axis) {
+				int da = !axis, db = axis, len = 1;
+				if (walk_hue(a, A - da, B - db, z) == h) continue;   /* (a run is measured from its first panel) */
+				while (walk_hue(a, A + len * da, B + len * db, z) == h) ++len;
+				if (len > run[h]) run[h] = len;
+			}
+		}
+}
+
+/* The hues of map a's second look of walkway on the ground, its roads; 0
+ * none. Its walkways' own hues are the area's (walk_styles), or where it
+ * names none the hue most of its maps' walkways show (`more`: the other
+ * maps' counts; BN4's Town Area 3 is mostly road, its walkways Town Area
+ * 1's). A road is another hue, none of its platforms' and none next to its
+ * walkways' (a shade of the same look: a dark area's blue beside its
+ * cyan), that a dozen panels of walkway show, five of them in one straight
+ * run: BN4's Park Area's orange (30 panels, a run of 11), its ACDC Area's
+ * cyan (15, 8), its Town Area's yellow (20, 5). A joint's or a pattern's
+ * hue (BN4's Undernet's steel joints: 42 panels, never 3 in a row; the
+ * Undernet's bridges of three hues) is none. */
+#define ROAD_PANELS 12
+#define ROAD_RUN 5
+static bool hues_apart(int h, unsigned own) {
+	if (h == 12) return true;
+	return !(own >> ((h + 1) % 12) & 1) && !(own >> ((h + 11) % 12) & 1);
+}
+
+static uint16_t road_hues(const AreaSrc *a, const NetAreaDef *na, const int more[HUES]) {
+	int count[HUES], run[HUES], most = 0;
+	walk_hues(a, 0, count, run);
+	for (int h = 1; h < HUES; ++h) if (count[h] + more[h] > count[most] + more[most]) most = h;
+	unsigned own = na->walk_styles & 0x1FFFu ? na->walk_styles & 0x1FFFu : 1u << most, roads = 0;
+	for (int h = 0; h < HUES; ++h)
+		if (!((own | na->styles) >> h & 1) && hues_apart(h, own) && count[h] >= ROAD_PANELS && run[h] >= ROAD_RUN) roads |= 1u << h;
+	return (uint16_t)roads;
+}
+
+/* The walkways of the area's other maps by their hue, added up: each map
+ * loaded and let go, before its own is. */
+static void more_hues(const NetAreaDef *na, int total[HUES]) {
+	memset(total, 0, HUES * sizeof *total);
+	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
+		AreaSrc b;
+		int count[HUES], run[HUES];
+		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
+		walk_hues(&b, 0, count, run);
+		for (int h = 0; h < HUES; ++h) total[h] += count[h];
+		area_src_free(&b);
+	}
+}
+
+/* The area's roads, a second look of walkway, found in its own map
+ * (road_hues: BN4's Park Area's orange paths, its ACDC Area's cyan, its
+ * Town Area's yellow; no area names them): the map learned again, and its
  * mirror image, with the roads' hues for its walkways' and its walkways'
  * for the floor that lends no tiles; no platform floor of theirs. */
-static void learn_roads(AreaSrc *src, int area, Learned *L) {
+static void learn_roads(AreaSrc *src, int area, const int more[HUES], Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	L->nroads = 0;
-	if (!na->road_styles) return;
-	uint32_t styles = na->styles & ~(0x1FFFu | TILES_PADS_ALONE);
+	L->road_hues = 0;
+	uint16_t roads = road_hues(src, na, more);
+	if (emu_debug_on()) fprintf(stderr, "roads area %d: hues %04x\n", area, roads);
+	if (!roads) return;
+	/* (its panels laid whole, whatever the area's own are: a road's rim is
+	 * laid with its panels alone, tilemap.c) */
+	uint32_t styles = (na->styles & ~(0x1FFFu | TILES_PADS_ALONE)) | TILES_WHOLE;
 	uint16_t skip = na->walk_styles & 0x1FFFu;
-	tiles_learn(src, styles, na->road_styles, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
+	tiles_learn(src, styles, roads, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
 	AreaSrc m;
 	if (!area_src_mirror_in(src, &m)) return;
-	if (aligned(src, &m)) tiles_learn(&m, styles, na->road_styles, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
+	if (aligned(src, &m)) tiles_learn(&m, styles, roads, skip, 0, na->bg_in_map, &L->road[L->nroads++]);
 	area_src_mirror_end(src, &m);
+	/* (a road is one mostly in the open: where three quarters of its
+	 * panels lie beside other floor, as BN5's Oran Area's planks between
+	 * its hubs, it is laid in scraps) */
+	const TilePanels *p = &L->road[0].panels;
+	if (p->n * 4 < p->n + p->npart) {
+		for (int k = 0; k < L->nroads; ++k) tiles_free(&L->road[k]);
+		L->nroads = 0;
+	}
+	L->road_hues = L->nroads ? roads : 0;
 }
 
 /* The Net Dealer's counter, cut from its map facing world +Y (FACES_X) and
@@ -179,7 +290,7 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 	for (int k = 0; k < NET_MORE_MAPS && na->more[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->more[k][0], na->more[k][1], &b)) continue;
-		learn_map(&b, grid, area, false, L);
+		learn_map(&b, grid, area, k + 1, L);
 		learn_decor(&b, na, L);
 		rebank_seen(&b, na->rebank[1], L);
 		for (int o = 0; o < 3 && !na->xrom; ++o)
@@ -214,7 +325,10 @@ static void settle(Learned *L) {
 bool nm_learn(int area, Learned *L) {
 	const NetAreaDef *na = net_area_def(area);
 	AreaSrc a;
-	if (!na || !load_map(na, na->group, na->number, &a)) return false;
+	int more[HUES];
+	if (!na) return false;
+	more_hues(na, more);
+	if (!load_map(na, na->group, na->number, &a)) return false;
 	L->ex = a.ex; L->ey = a.ey; L->tw = a.tw; L->th = a.th;
 	L->desc = L->src_desc = a.desc; L->coord_slot = a.coord_slot;
 	/* (another game's area takes over a BN6 map: its slots are BN6's) */
@@ -223,8 +337,8 @@ bool nm_learn(int area, Learned *L) {
 	if (L->other ? !area_src_slots(na->over[0], na->over[1], &L->desc, &L->coord_slot)
 		: na->host && !area_src_slots(na->group, na->host - 1, &L->desc, &L->coord_slot)) { area_src_free(&a); return false; }
 	L->nbooks = 0;
-	learn_map(&a, &a, area, true, L);
-	learn_roads(&a, area, L);
+	learn_map(&a, &a, area, 0, L);
+	learn_roads(&a, area, more, L);
 	learn_decor(&a, na, L);
 	stairs_learn(&a, L->stairs);
 	learn_counter(na->counter, &a, L);

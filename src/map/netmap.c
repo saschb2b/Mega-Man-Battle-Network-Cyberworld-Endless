@@ -123,6 +123,8 @@ static Learned *learn_area(int area) {
 	return L;
 }
 
+unsigned netmap_road_hues(int area) { return net_area_def(area) && learn_area(area)->ok ? learn_area(area)->road_hues : 0; }
+
 int netmap_scenery;
 LegalStats netmap_legal;
 LastMap nm_last;
@@ -163,7 +165,7 @@ static bool pad_look;         /* its originals' pads have a look for the layer's
 static bool pads_walkway;     /* its framed pads are cut from its maps in their walkways' floor */
 static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid out as walkway (TILES_ARENA_DRAWN) */
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
-static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (NetAreaDef.road_styles) */
+static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (netmap_learn.c, road_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -253,8 +255,8 @@ static void make_stripes(bool keep_pads) {
 }
 
 /* The way from the layer's arrival to its exit over the floor as it now
- * stands, for its walkways there to be drawn as roads (NetAreaDef.
- * road_styles; docs/world/level-design/roads.md): the generator's way
+ * stands, for its walkways there to be drawn as roads
+ * (docs/world/level-design/roads.md): the generator's way
  * (NetLayout.way) walked again between its two ends, as the legalizer
  * takes cells of it (of a way widened to two, the lane it ran on); the
  * shortest walk, and of those the one that keeps most to the generator's. */
@@ -475,6 +477,27 @@ static bool install_gfx(const Learned *L) {
 	return ok;
 }
 
+/* The layer's lead: one of the area's maps, by the layer's seed, whose
+ * books come before the others', so its looks win where two maps' tiles
+ * fit alike (the first book's panel, the first book's pair at the same
+ * distance: panels_lay.c, tiles_pick.c). An area's own map led every
+ * layer, and its layers all took the one look; now its own or one of those
+ * its definition allows (NetAreaDef.leads: the maps that as the lead drew
+ * its layers no worse, docs/world/level-design/lead-map.md). The books in
+ * that order into `led`; how many. */
+int netmap_lead_forced = -1;   /* (dev) every layer led by this map, whatever is allowed */
+
+static int lead_books(const Learned *L, TileBook led[MAX_BOOKS]) {
+	int may[1 + NET_MORE_MAPS] = { 0 }, n = 1, nled = 0;
+	for (int m = 1; m <= NET_MORE_MAPS; ++m)
+		if (L->def->leads >> (m - 1) & 1) may[n++] = m;
+	int lead = netmap_lead_forced >= 0 ? netmap_lead_forced : may[nm_cur->seed % (uint32_t)n];
+	for (int pass = 0; pass < 2; ++pass)
+		for (int k = 0; k < L->nbooks; ++k)
+			if ((L->book_map[k] == lead) == !pass) led[nled++] = L->book[k];
+	return nled;
+}
+
 /* Both layers of the current layout's tile map in `L`'s tiles, tw x th
  * (freed by the caller): the classes' picks, then what is set whole over
  * them (the props' with `props`: their stamps the layer's own area's), the
@@ -500,7 +523,9 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	floor_memo = malloc((size_t)memo_w * memo_h * sizeof *floor_memo);
 	if (floor_memo) memset(floor_memo, 0xFF, (size_t)memo_w * memo_h * sizeof *floor_memo);
 	picking = true;
-	tilemap_pick(L->book, L->nbooks, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
+	static TileBook led[MAX_BOOKS];
+	int nled = lead_books(L, led);
+	tilemap_pick(led, nled, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
 	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
