@@ -1,0 +1,1 @@
+The Underground's layers set its maps' teal emblem panels (net_area.emblem 0x5340), none in an arena drawn in walkway floor: its layers draw other tiles.
