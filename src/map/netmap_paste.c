@@ -319,17 +319,25 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
  * what stands under a floor). Whether it was. */
 static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, int y) {
 	uint16_t *to = p->hang ? map : map + (size_t)tw * th;
-	int A, B, over = 0;
+	int A, B, over = 0, top = p->tiles[0].py, foot = top;
 	nm_grid_to_panel(x, y, &A, &B);
 	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
+	for (int k = 1; k < p->ntiles; ++k) {
+		if (p->tiles[k].py < top) top = p->tiles[k].py;
+		if (p->tiles[k].py > foot) foot = p->tiles[k].py;
+	}
 	for (int k = 0; k < p->ntiles; ++k) {
 		int px = px0 + p->tiles[k].px, py = py0 + p->tiles[k].py;
 		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) return false;
 		size_t at = (size_t)(py / 8) * tw + px / 8;
 		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
 		if (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) return false;
-		/* (what stands under a pad begins in its rim's own tiles: a third of it at most, set over them) */
-		if (to[at] && (!p->hang || ++over * 3 > p->ntiles)) return false;
+		/* (what stands under a pad begins in its rim's own tiles, what
+		 * stands behind a floor ends in them: its two rows there, a third
+		 * of it at most, set over them; anywhere else a tile it would
+		 * cover is another floor's, a plateau's underside over the void) */
+		bool meets = p->behind ? p->tiles[k].py >= foot - 8 : p->tiles[k].py <= top + 8;
+		if (to[at] && (!p->hang || !meets || ++over * 3 > p->ntiles)) return false;
 	}
 	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
 	return true;
