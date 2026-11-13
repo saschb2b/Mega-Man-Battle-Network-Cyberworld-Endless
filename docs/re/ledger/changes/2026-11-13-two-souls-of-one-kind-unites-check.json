@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-13",
+  "what": "UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code)."
+}

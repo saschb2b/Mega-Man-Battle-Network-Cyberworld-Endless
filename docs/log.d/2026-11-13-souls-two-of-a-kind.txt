@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-13T20:32:00Z
+* **Update**: multirom/bn4-souls.md (Two Souls of one kind: BN4's eleven kinds that are a BN5 Soul's too, the check over both games' Souls and what it lights where BN5's Soul of a kind is not held, the both-held case left to the owner's call of issue #499; ThunSoul's damage mutation, uncaught since 12 November, caught again), game/team-protoman.md (its twelve kinds hold among BN5's own), code/emu.md (`soulkinds.c`'s row), devtools/differential.md (a poke into BN4's chips' units for a spec holding a BN4 Soul).
