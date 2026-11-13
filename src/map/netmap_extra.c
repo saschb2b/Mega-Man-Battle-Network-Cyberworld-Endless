@@ -195,6 +195,18 @@ static void add_extra(int s, CoordCell c) {
 	if (nm_extra.n[s] < 4096) extra_cells[s][nm_extra.n[s]++] = c;
 }
 
+void nm_sides_extra(void) {
+	const SidePiece *p = NULL;
+	int X = 0, Y = 0;
+	for (int i = 0; i < nm_sides_set(i, &p, &X, &Y); ++i)
+		for (int k = 0; k < p->nprio; ++k) {
+			CoordCell c = p->prio[k];
+			c.x = (int16_t)(c.x + X);
+			c.y = (int16_t)(c.y + Y);
+			add_extra(2, c);
+		}
+}
+
 void netmap_add_walls(const CoordCell *c, int n) {
 	for (int i = 0; i < n; ++i) add_extra(0, c[i]);
 }

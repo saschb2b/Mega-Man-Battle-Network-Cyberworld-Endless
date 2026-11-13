@@ -22,6 +22,9 @@ typedef struct {
 	uint16_t floor;
 	int ntiles;
 	StairTile *tiles;
+	CoordCell *prio;   /* its map's layer priorities (section 2) on that panel and the eight round it, world units
+	                    * from the panel's corner: where MegaMan is drawn behind its art */
+	int nprio;
 } SidePiece;
 
 typedef struct {
@@ -29,8 +32,8 @@ typedef struct {
 	int n;
 } SideBook;
 
-/* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles are
- * its book's owner's to free. */
+/* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
+ * priorities are its book's owner's to free. */
 void sides_learn(const AreaSrc *a, SideBook *out);
 
 #endif

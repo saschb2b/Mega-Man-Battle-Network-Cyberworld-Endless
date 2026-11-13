@@ -53,6 +53,16 @@ or not at all (on the map, on its tile lattice, over nothing the second
 layer already holds). It is the second layer's tiles alone: the floor under
 it is the layer's own, and nothing about walking changes.
 
+## Who is in front (`priorities`, `nm_sides_extra`; verified in the game)
+
+BN6 draws MegaMan behind a claw on the panel it grips: its maps hold layer
+priorities (section 2 of the coordinate data) there, 27 to 48 cells within
+a panel of each of CopyBot Comp's claws, of the map's 434. A piece is cut
+with the cells on its panel and the eight round it and they are written
+with the layer's own, so he passes behind a claw on a generated walkway as
+he does in the comp (placed on a claw's panel in a CopyBot layer, the claw
+covers his legs; a panel back, he stands clear of it).
+
 ## Which areas (`net_area.sides`)
 
 Taken per area as looked at, as every laying rule is
@@ -75,7 +85,5 @@ Taken per area as looked at, as every laying rule is
   and the Undernet's, the Nest's and Mr. Weather's maps hold their
   background in the second, so theirs lie there too. Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
-- **Who is in front.** A piece carries no layer priorities, so MegaMan is
-  drawn over a claw he walks past where BN6's map draws him behind it.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.

@@ -1,0 +1,1 @@
+A side piece's layer priorities are written with the layer's coordinate data (nm_sides_extra): CopyBot Comp's and BN4's Undernet's layers' maps hold other cells.

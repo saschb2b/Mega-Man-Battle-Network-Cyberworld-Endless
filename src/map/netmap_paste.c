@@ -302,7 +302,16 @@ static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, i
 	return true;
 }
 
+static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER];
+static int nside_at;
+
+int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
+	if (i >= 0 && i < nside_at) { *p = side_at[i].p; *X = side_at[i].X; *Y = side_at[i].Y; }
+	return nside_at;
+}
+
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
+	nside_at = 0;
 	if (!L->sides.n || nm_cur->gw != MAP_W) return;
 	int set[SIDES_A_LAYER][2], nset = 0;
 	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
@@ -313,9 +322,17 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			if (near || h % 2 || !side_free(x, y)) continue;
 			const SidePiece *p = side_for(&L->sides, x, y, h);
 			if (!p || !side_set(p, map, tw, th, x, y)) continue;
+			int A, B;
+			nm_grid_to_panel(x, y, &A, &B);
+			side_at[nside_at].p = p;
+			side_at[nside_at].X = nm_place.ex + 32 * A;
+			side_at[nside_at++].Y = nm_place.ey + 32 * B;
 			set[nset][0] = x; set[nset++][1] = y;
 		}
-	if (emu_debug_on()) fprintf(stderr, "side pieces: %d set, of the area's %d\n", nset, L->sides.n);
+	if (emu_debug_on()) {
+		fprintf(stderr, "side pieces: %d set, of the area's %d\n", nset, L->sides.n);
+		for (int k = 0; k < nside_at; ++k) fprintf(stderr, "  side piece at world %d,%d: %d tiles, %d layer priorities\n", side_at[k].X, side_at[k].Y, side_at[k].p->ntiles, side_at[k].p->nprio);
+	}
 }
 
 bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {

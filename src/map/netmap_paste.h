@@ -27,6 +27,9 @@ void nm_paste_bushes(const Learned *L, uint16_t *map, int tw, int th);
 /* The area's side pieces (sides.h) on the layer's free ground panels of
  * their neighbourhoods, some by the layer's seed. */
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th);
+/* The side pieces the last nm_paste_sides set: how many, and piece i with
+ * the world corner of the panel it grips. */
+int nm_sides_set(int i, const SidePiece **p, int *X, int *Y);
 void nm_rebank_map(const Learned *L, uint16_t *map, size_t cells);
 
 #endif
