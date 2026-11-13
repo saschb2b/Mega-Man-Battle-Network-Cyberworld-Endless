@@ -271,6 +271,7 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) sides_learn(m, &L->sides);
+	if (na->sides & 4) behind_learn(m, &L->sides);
 }
 
 /* (debug output) what area `area` learned */
