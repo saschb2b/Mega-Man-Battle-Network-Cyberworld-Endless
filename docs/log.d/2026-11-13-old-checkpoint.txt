@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T23:20:00Z
-* **Creation**: devtools/old-checkpoint.md (`tools/old_checkpoint.py`: the last releases' runs continued and played by this build, what a state carries of the engine's across builds, 0.20.0's and 0.21.0's measured). **Update**: devtools/agents-tools.md (the state's `gameframe` line), code/tools.md (its row).
