@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-13
+* **Creation**: world/level-design/side-pieces.md (what a map hangs on its floor's sides, cut from its second tile layer and set on panels of the same neighbourhood; issue #505).
+* **Update**: world/level-design/generator.md (Robot Control's pads cut whole; side pieces named beside scenery), code/net-and-map.md (sides.c).
 * **Update**: devtools/tile-test.md (Each area's laying: a room's rim takes no piece of a walkway's panel, CopyBot's pools framed in their stone).
 * **Update**: multirom/bn4-souls.md (The look, located: what ThunSoul's look takes from BN4's ROM and its sizes, Blue Moon's six Souls' faces not in Red Sun's ROM, the room the sprites have none of and the ways; the art room's count corrected, `FREE_TAIL` no longer 576 KB), rom/bn4.md (The emotion window's faces).
 * **Update**: devtools/tile-test.md (BN5's ACDC Area's arena in its rooms' floor).

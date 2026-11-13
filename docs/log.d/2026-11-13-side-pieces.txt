@@ -1,4 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-13T21:24:29Z
-* **Creation**: world/level-design/side-pieces.md (what a map hangs on its floor's sides, cut from its second tile layer and set on panels of the same neighbourhood; issue #505).
-* **Update**: world/level-design/generator.md (Robot Control's pads cut whole; side pieces named beside scenery), code/net-and-map.md (sides.c).
