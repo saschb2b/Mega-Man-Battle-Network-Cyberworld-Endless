@@ -1,0 +1,1 @@
+Robot Control Comp's pads are cut whole from its maps, its platforms of 3 x 3 pads too (pad_hues, pad_rooms 9), a pad's stamp as deep as its map's faces and only what is drawn in one piece with the pad: its layers draw other tiles.
