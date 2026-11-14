@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T13:34:57Z
+* **Update**: engine/emulation/3ds-memory.md (Colour indices: a learned map holds its pixels as indices into its palette, 3 bytes a pixel where it took 10, BN6's long runs peaking at 45 to 48 MB where they peaked at 60 to 65; the budget's rows for home's source and a map's learning).

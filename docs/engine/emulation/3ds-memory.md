@@ -218,6 +218,21 @@ Neither crashed: the one place a refusal in the learning still wrote
 through its allocation unchecked, the counter's mirror's walls
 (`props_mirror_walls`), now checks it.
 
+## Colour indices
+
+Since 14 November 2026 a learned map (`AreaSrc`, `src/map/area_src.h`)
+holds its pixels as colour indices into its own 256-colour palette, a
+byte a pixel for the map as shown and one for its first layer alone,
+beside its front marks: 3 bytes a pixel where the two ARGB planes and
+the marks took 10. The ARGB was the palette read at the index, so
+nothing learned changes (`build.py tiles` and `build.py town` drew every
+file byte for byte as before; `area_src_px` reads a pixel as ARGB). The
+same long runs (`tools/heap3ds.py --cases bn6 --seeds 1-6 --frames
+60000`, each to the same depth) peaked at 45 to 48 MB, where they had
+peaked at 60 to 65: some 17 MB less, home's source and a map's learning
+both smaller (the rows below, computed from the pixels' bytes). The
+PSP's port needed it ([The PSP and the DS, measured](psp-and-ds.md)).
+
 ## The budget and the margin rule
 
 What a long run holds on the New 3DS, by part, since the change: the
@@ -228,9 +243,9 @@ budget a new feature is counted against.
 | The core's ROM copy | 16.0 | the whole session |
 | BN6's ROM | 8.0 | the whole session |
 | An extra ROM (BN5's, else BN4's) | 8.0 | the whole session, where read |
-| Home's source (Central Town's map, its mirror image, their entries) | 13.8 | from the first visit home, the whole run |
+| Home's source (Central Town's map, its mirror image, their entries) | some 5 (13.8 in ARGB) | from the first visit home, the whole run |
 | The layer's area's learned books | 2 to 7 | while its layers last |
-| An area's learning: one of its maps at a time | up to 11.8 | while it learns (a layer's first making) |
+| An area's learning: one of its maps at a time | up to 3.5 (11.8 in ARGB) | while it learns (a layer's first making) |
 | The tiles' learning of that map | up to 9 | the same |
 | The installs' log, SDL, mGBA, the game's tables | about 5 | the whole session |
 
