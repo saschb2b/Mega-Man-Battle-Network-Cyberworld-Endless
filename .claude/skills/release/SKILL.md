@@ -78,8 +78,10 @@ the last trailer everywhere; the notes open with it.
 
 ## 6. After the tag
 
-- Check the release: its title, latest, its assets (16 since 0.7.0: the IPA
-  and `altstore-source.json` among them), the site's /download/ links, the
+- Check the release: its title, latest, its assets (the IPA,
+  `altstore-source.json` and, from 0.22.0, `update.json` among them: the
+  game's look for a new version reads the latest release's, so it names
+  this one, docs/engine/updates.md), the site's /download/ links, the
   Linux files in a clean `debian:bookworm` container.
 - itch.io (docs/project/itch.md, Each release): `python3 tools/itch.py push`,
   the description where `docs/itch/` changed, the devlog post

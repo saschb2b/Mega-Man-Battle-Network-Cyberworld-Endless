@@ -422,7 +422,8 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_arc.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c tests/test_voxel.c src/gfx/gba_layers.c src/gfx/gba_world.c src/gfx/voxel_lift.c src/gfx/voxel_light.c src/gfx/voxel_draw.c \
-	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c
+	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c \
+	tests/test_update.c src/update/update_manifest.c src/update/update_sha256.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)

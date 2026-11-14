@@ -3,7 +3,7 @@ type: Tool
 title: "An old checkpoint: the last release's run continued"
 description: "`tools/old_checkpoint.py` saves a run with the last releases' own builds, continues it in this build and plays it on by the autopilot, failing where the game stands still, and lists what the old state's RAM still holds that this build's own run does not."
 tags: [devtools, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 ---
 
 # An old checkpoint: the last release's run continued
@@ -92,6 +92,8 @@ On 13 November 2026, 0.20.0's and 0.21.0's runs:
 | `dev` before the fix | FAIL, the same | ok |
 | `dev` with the fix (#512) | ok; IWRAM's routines the same bytes | ok; the same bytes, every word as this build's own |
 | 0.21.1's candidate (14 November) | ok; IWRAM's routines the same bytes; `SOULS_FACE_PALS`' two words still 0.20.0's (`0x08C82D00` for this build's `0x08C82D60`) | ok; the same bytes, every word as this build's own |
+
+0.21.2's candidate (14 November) continued the last two releases' runs, 0.21.0's and 0.21.1's: both ok (a battle won and layer 3 reached, and two), IWRAM's routines the same bytes and every word into the free space as this build's own.
 
 ## What a state holds of the engine's
 
