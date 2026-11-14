@@ -105,7 +105,7 @@ static uint32_t rnd(void) {
 /* (from the high bits: the low bits of the first draws follow the seed's) */
 static int rnd_range(int lo, int hi) { return lo + (int)(((uint64_t)rnd() * (uint32_t)(hi - lo + 1)) >> 32); }
 
-static int fdiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
+static int div_floor(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 static int fmod_(int a, int b) { int m = a % b; return m < 0 ? m + b : m; }
 
 /* ---- pieces ---- */
@@ -366,8 +366,8 @@ _Static_assert(STYLES == TOWN_LINES, "each style its people and words (town_line
 /* The source tile's centre, as a world cell of the original. */
 static void tile_cell(int stx, int sty, int *cx, int *cy) {
 	int a = stx * 8 + 4 - T.stw * 4, b = (sty * 8 + 4 - T.sth * 4) * 2;
-	*cx = fdiv(fdiv(a - b, 2), 8);
-	*cy = fdiv(fdiv(a + b, 2), 8);
+	*cx = div_floor(div_floor(a - b, 2), 8);
+	*cy = div_floor(div_floor(a + b, 2), 8);
 }
 
 /* The copied piece holding source cell (sx, sy), or NULL. */
@@ -381,7 +381,7 @@ static const Piece *copied(int sx, int sy) {
 
 /* A point of the original (world units) where the plan has moved it. */
 static bool moved(int x, int y, int *tx, int *ty) {
-	const Piece *p = copied(fdiv(x, 8), fdiv(y, 8));
+	const Piece *p = copied(div_floor(x, 8), div_floor(y, 8));
 	if (!p) return false;
 	*tx = x + (p->x0 - p->sx) * 8;
 	*ty = y + (p->y0 - p->sy) * 8;
@@ -491,7 +491,7 @@ static bool front_cell(int cx, int cy) {
  * dy): a jack-in point kept, a check in front of a thing, or the act's
  * other way's port (town_ports.c); every point is the town's one, n = 0 */
 static void carry_trigger(const Piece *p, const CoordCell *c, int dx, int dy) {
-	int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
+	int cx = div_floor(c->x, 8), cy = div_floor(c->y, 8);
 	int port = port_of(c->value);
 	bool jack = (port && c->value < CHECK_TRIGGER) || (c->value >= JACK_IN_TRIGGER && c->value < JACK_IN_TRIGGER + 0x10 &&
 		(p->flags & F_JACK_IN) && (T.style->jack_ins >> (c->value - JACK_IN_TRIGGER) & 1));
@@ -561,7 +561,7 @@ static void carry(void) {
 			for (int k = 0; k < a->nsec[s]; ++k) {
 				const CoordCell *c = &a->sec[s][k];
 				int *n = s ? &T.nheights : &T.nwalls;
-				if (!in_source(p, fdiv(c->x, 8), fdiv(c->y, 8)) || *n >= MAX_WALLS) continue;
+				if (!in_source(p, div_floor(c->x, 8), div_floor(c->y, 8)) || *n >= MAX_WALLS) continue;
 				CoordCell o = *c;
 				o.x = (int16_t)(c->x + dx * 8);
 				o.y = (int16_t)(c->y + dy * 8);
@@ -570,7 +570,7 @@ static void carry(void) {
 		/* behind the art: the piece's own cells, and those its art covers */
 		for (int k = 0; k < a->nsec[2]; ++k) {
 			const CoordCell *c = &a->sec[2][k];
-			int cx = fdiv(c->x, 8), cy = fdiv(c->y, 8);
+			int cx = div_floor(c->x, 8), cy = div_floor(c->y, 8);
 			bool in = in_source(p, cx, cy);
 			if (!in) {
 				int X = area_px(a->tw, c->x + 4, c->y + 4), Y = area_py(a->th, c->x + 4, c->y + 4);
@@ -597,7 +597,7 @@ static void carry(void) {
 			bool green = T.style->group == 0x04 && id == 0x72;   /* (Green Town's knight statue) */
 			if (r[0] != OBJ_SPAWN_MAP_OBJECT || r[1] || (id != 0x7D && id != 0x7E && id != 0x16 && id != 0xBC && !green)) continue;
 			int x = (int32_t)get32(r + 4) >> 16, y = (int32_t)get32(r + 8) >> 16;
-			if (!in_source(p, fdiv(x, 8), fdiv(y, 8))) continue;
+			if (!in_source(p, div_floor(x, 8), div_floor(y, 8))) continue;
 			uint8_t *o = T.obj[T.nobj++];
 			memcpy(o, r, 20);
 			put32(o + 4, (uint32_t)(x + dx * 8) << 16);
@@ -631,7 +631,7 @@ static void hint_tiles(int tw, int th) {
 			TownPin *pin = &T.pins[ty * tw + tx];
 			if (pin->x0 >= 0) continue;
 			int a = tx * 8 + 4 - tw * 4, b = (ty * 8 + 4 - th * 4) * 2;
-			int cx = fdiv(fdiv(a - b, 2), 8), cy = fdiv(fdiv(a + b, 2), 8);
+			int cx = div_floor(div_floor(a - b, 2), 8), cy = div_floor(div_floor(a + b, 2), 8);
 			int x = cx + PLAN_R, y = cy + PLAN_R;
 			if (x < 0 || y < 0 || x >= PLAN_N || y >= PLAN_N || T.owner[y][x] < 0) continue;
 			const Piece *p = &T.piece[T.owner[y][x]];
@@ -643,8 +643,8 @@ static void hint_tiles(int tw, int th) {
 			 * pattern's), else 2 (the tile grid's), staying by the strip */
 			int m = T.mat[y][x], step = m == TM_BRICK || m == TM_COBB ? 8 : 2;
 			int dx = cx - sx - T.gx, dy = cy - sy - T.gy;
-			dx = step * fdiv(dx + step - 1, step) + T.gx;
-			dy = step * fdiv(dy + step - 1, step) + T.gy;
+			dx = step * div_floor(dx + step - 1, step) + T.gx;
+			dy = step * div_floor(dy + step - 1, step) + T.gy;
 			pin->hx = (int16_t)(tx - (dx + dy) - (tw - T.stw) / 2);
 			pin->hy = (int16_t)(ty - (dy - dx) / 2 - (th - T.sth) / 2);
 		}
@@ -770,7 +770,7 @@ static int plan_once(uint32_t seed) {
 		for (int r = 0; r <= 3 && T.folk_at[i][0] == 1 << 20; ++r)
 			for (int dy = -r; dy <= r && T.folk_at[i][0] == 1 << 20; ++dy)
 				for (int dx = -r; dx <= r; ++dx) {
-					int cx = fdiv(fx, 8) + dx, cy = fdiv(fy, 8) + dy;
+					int cx = div_floor(fx, 8) + dx, cy = div_floor(fy, 8) + dy;
 					if ((abs(dx) != r && abs(dy) != r) || !folk_spot_ok(cx, cy, fx + dx * 8, fy + dy * 8, nj > 0)) continue;
 					T.folk_at[i][0] = fx + dx * 8;
 					T.folk_at[i][1] = fy + dy * 8;
@@ -810,8 +810,8 @@ bool town_walk(int x, int y, int steps, int *wx, int *wy, int *cells) {
 	 * `steps` cells along the way from Lan's */
 	static int16_t dist[PLAN_N][PLAN_N];
 	static int16_t q[PLAN_N * PLAN_N];
-	int gx = fdiv(T.info.port_x, 8) + PLAN_R, gy = fdiv(T.info.port_y, 8) + PLAN_R;
-	int sx = fdiv(x, 8) + PLAN_R, sy = fdiv(y, 8) + PLAN_R;
+	int gx = div_floor(T.info.port_x, 8) + PLAN_R, gy = div_floor(T.info.port_y, 8) + PLAN_R;
+	int sx = div_floor(x, 8) + PLAN_R, sy = div_floor(y, 8) + PLAN_R;
 	if (gx < 0 || gy < 0 || gx >= PLAN_N || gy >= PLAN_N || sx < 0 || sy < 0 || sx >= PLAN_N || sy >= PLAN_N) return false;
 	for (int i = 0; i < PLAN_N; ++i) for (int j = 0; j < PLAN_N; ++j) dist[i][j] = -1;
 	int h = 0, t = 0;

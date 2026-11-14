@@ -19,7 +19,7 @@
 #define PANELS      32   /* panels a piece may lie over, counted apart */
 #define UNDER_PX     6   /* pixels over a panel at least for the panel to count as under it */
 
-static int fdiv(int a, int b) { return a / b - (a % b < 0); }
+static int div_floor(int a, int b) { return a / b - (a % b < 0); }
 
 /* Whether panel (A, B) is floor on the ground (a raised view's: at its level). */
 static bool ground(const AreaSrc *a, int A, int B) {
@@ -30,8 +30,8 @@ static bool ground(const AreaSrc *a, int A, int B) {
 /* The panel whose ground top holds map pixel (x, y). */
 static void panel_at(const AreaSrc *a, int x, int y, int *A, int *B) {
 	int u = x - a->tw * 4, v = 2 * (y - FLOOR_DV - a->th * 4);
-	*A = fdiv(fdiv(u - v, 2) - a->ex, 32);
-	*B = fdiv(fdiv(u + v, 2) - a->ey, 32);
+	*A = div_floor(div_floor(u - v, 2) - a->ex, 32);
+	*B = div_floor(div_floor(u + v, 2) - a->ey, 32);
 }
 
 /* A piece while it is measured: its tiles, and the pixels it draws by the

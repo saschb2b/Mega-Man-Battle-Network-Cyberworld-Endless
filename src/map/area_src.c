@@ -486,7 +486,7 @@ int area_src_board(const AreaSrc *a, int X, int Y) {
 	return x >= 0 && y >= 0 && x < 256 && y < 256 && (board.on[y][x >> 3] >> (x & 7) & 1);
 }
 
-static int fdiv(int a, int b) { return a / b - (a % b < 0); }
+static int div_floor(int a, int b) { return a / b - (a % b < 0); }
 
 /* The map's arrow lanes' panels (AreaSrc.arrow): from each start cell's
  * panel, the one its middle lies in or on the edge before, along its way to
@@ -533,7 +533,7 @@ static void find_arrows(AreaSrc *a) {
 		if (c->value < 0x48 || c->value > 0x4B) continue;
 		int d = c->value - 0x48;
 		/* (the panel's middle: a cell on the edge before it counts to it) */
-		int X = a->ex + 16 + 32 * fdiv(c->x + 4 + 8 * ux[d] - a->ex, 32), Y = a->ey + 16 + 32 * fdiv(c->y + 4 + 8 * uy[d] - a->ey, 32);
+		int X = a->ex + 16 + 32 * div_floor(c->x + 4 + 8 * ux[d] - a->ex, 32), Y = a->ey + 16 + 32 * div_floor(c->y + 4 + 8 * uy[d] - a->ey, 32);
 		int len = 0;
 		while (len < 12 && !arrow_ends(a, d, X + 32 * ux[d] * len, Y + 32 * uy[d] * len)) ++len;
 		if (len == 12) continue;
