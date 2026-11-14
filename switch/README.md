@@ -28,6 +28,12 @@ signed title.
 - Online is as on every system: the gate in Lan's HP, the Net Square,
   NetBattles, trades and the DeepNet, over the console's own Wi-Fi.
 - HOME closes it as any homebrew; a run is kept where MegaMan stands.
+- **Updates**: at each start the game looks on GitHub for a newer
+  version (Options' **Updates** switches it off). When one is out, the
+  title says so, and A on Options' **Update to** line downloads
+  `NAME.nro.update` beside your `.nro`; the game then ends, puts it in
+  your file's place and has the Homebrew Menu start it
+  (docs/engine/updates.md, The consoles). Your saves stay as they are.
 
 ## Building
 
@@ -89,3 +95,13 @@ run, on a Switch with Atmosphère:
 - The statistics: `--dev statscheck` sends one `game-dev-check` event
   (docs/devtools/statistics.md).
 - `frame_log = on` in `settings.ini`: a line a second of the frames' times.
+- The update (docs/engine/updates.md, The consoles), with the `.nro` in
+  `sdmc:/switch/cyberworld-endless/` and an older release's version
+  faked: `CYBERWORLD_UPDATE_FROM` cannot be set on a console, so a
+  release build one version behind, started from the Homebrew Menu.
+  `log.txt`'s `update:` lines (a newer version found), the title's
+  `New vX.Y.Z`, Options' line, A, the percent, the game ending and the
+  new version starting by itself (`update: ... in place` in the old
+  log, the new version in the next); `NAME.nro.update` and `NAME.nro.old`
+  gone. A start while the download runs, cut by HOME: the next start
+  removes the half file.

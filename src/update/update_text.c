@@ -13,7 +13,10 @@ static const char *const words[] = {
 	"A: opens the download page",   /* UW_PAGE_NOTE */
 	"On the game's releases page, where this one came from",   /* UW_RELEASES_NOTE */
 	"The itch app installs it for you",   /* UW_ITCH_NOTE */
+	"In Prospero Store, or on the game's releases page",   /* UW_STORE_NOTE */
+	"A: downloads it and closes the game. Your saves and your run stay as they are",   /* UW_INSTALL_END_NOTE */
 	"Downloading. The game starts again when it is done",   /* UW_GETTING_NOTE */
+	"Downloading. The game closes when it is done: start it again",   /* UW_GETTING_END_NOTE */
 	"Failed",   /* UW_FAILED */
 	"The download stopped. A: try again",   /* UW_FAILED_NOTE */
 	"New",   /* UW_NEW */

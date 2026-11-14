@@ -2,9 +2,11 @@
  * thread of its own, a look at the newest release's update.json; where it
  * names a newer version, the title says so beside the version, and the
  * title's Options has a line for it. Where this copy can put the new one
- * in place itself (the AppImage, the Windows installer's copy), A on that
+ * in place itself (the AppImage, the Windows installer's copy, a
+ * PortMaster handheld's, the Switch's .nro, the 3DS's .3dsx), A on that
  * line downloads it, checks its SHA-256, and the game ends and starts
- * again as the new version; elsewhere the line says where it comes from.
+ * again as the new version (the 3DS's from the Homebrew Launcher);
+ * elsewhere the line says where it comes from.
  * On by default (the owner's call, 2026-11-14), Options' Updates line and
  * settings.ini's `updates = off` switch it off. Nothing is sent but the
  * request for that one file.
@@ -24,9 +26,10 @@ typedef enum { UPDATE_IDLE, UPDATE_FOUND, UPDATE_GETTING, UPDATE_FAILED, UPDATE_
 
 /* How this copy is updated: by the game itself, from the download page
  * in the browser, from the releases page by hand (a PortMaster handheld
- * whose launcher cannot put it in place: no browser), or by the itch app
- * that installed it */
-typedef enum { UPDATE_WAY_NONE, UPDATE_WAY_INSTALL, UPDATE_WAY_PAGE, UPDATE_WAY_RELEASES, UPDATE_WAY_ITCH } UpdateWay;
+ * whose launcher cannot put it in place, the 3DS's CIA, the Vita: no
+ * browser), by the itch app that installed it, or from the console's
+ * store (the PS5's Prospero Store) */
+typedef enum { UPDATE_WAY_NONE, UPDATE_WAY_INSTALL, UPDATE_WAY_PAGE, UPDATE_WAY_RELEASES, UPDATE_WAY_ITCH, UPDATE_WAY_STORE } UpdateWay;
 
 /* A frame of the title's, or of Options' over anything (title_version.c,
  * options.c): the first starts the look (settings.ini read by then); a
@@ -41,6 +44,9 @@ void update_set_on(bool on);
 
 UpdateState update_state(void);
 UpdateWay update_way(void);
+/* Whether the game, where it installs one, starts the new version itself
+ * as it ends (the 3DS's .3dsx is started again from the Homebrew Launcher) */
+bool update_starts_again(void);
 /* The newer version found ("0.22.0"), "" where none */
 const char *update_version(void);
 /* The download's share in, 0-100 */

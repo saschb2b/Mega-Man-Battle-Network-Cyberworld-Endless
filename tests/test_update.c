@@ -3,9 +3,12 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "update_manifest.h"
 #include "update_sha256.h"
+#include "update_swap.h"
 
 static int failures;
 #define CHECK(cond, ...) do { if (!(cond)) { ++failures; printf("FAIL %s:%d: ", __FILE__, __LINE__); printf(__VA_ARGS__); printf("\n"); } } while (0)
@@ -82,10 +85,78 @@ static void test_sha256(void) {
 	CHECK(!strcmp(hex, "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"), "sha256(a * 1000000) = %s", hex);
 }
 
+/* (a file holding `text`) */
+static void file_put(const char *path, const char *text) {
+	FILE *f = fopen(path, "wb");
+	if (f) {
+		fputs(text, f);
+		fclose(f);
+	}
+}
+
+/* (`path` holds `text` alone; "" where it is not there) */
+static bool file_is(const char *path, const char *text) {
+	char got[64] = "";
+	FILE *f = fopen(path, "rb");
+	if (!f) return !text[0];
+	size_t n = fread(got, 1, sizeof got - 1, f);
+	fclose(f);
+	got[n] = 0;
+	return text[0] && !strcmp(got, text);
+}
+
+/* The Switch's and the 3DS's swap (update_swap.c) on a made-up SD card:
+ * which argv[0] names a file the game may replace, a swap that puts the
+ * new one in its name and keeps nothing else, one with nothing staged
+ * that leaves the old one alone, and a start's tidying */
+static void test_swap(void) {
+	char dir[600], arg[700], self[700], staged[720], aside[720], other[720];
+	if (!getcwd(dir, 400)) return;
+	snprintf(dir + strlen(dir), sizeof dir - strlen(dir), "/build/host/test-swap-%d", (int)getpid());
+	mkdir("build", 0755);
+	mkdir("build/host", 0755);
+	mkdir(dir, 0755);
+	snprintf(arg, sizeof arg, "%s/cyberworld-endless.nro", dir);
+	file_put(arg, "old");
+	CHECK(update_swap_self(arg, ".nro", self, sizeof self) && !strcmp(self, arg), "swap: %s is the game's file", arg);
+	CHECK(update_swap_self(arg, ".NRO", self, sizeof self), "swap: its extension in any case");
+	CHECK(!update_swap_self(arg, ".3dsx", self, sizeof self) && !self[0], "swap: a .nro is no .3dsx");
+	CHECK(!update_swap_self("3dslink:/cyberworld-endless.3dsx", ".3dsx", self, sizeof self), "swap: 3dslink's copy stays");
+	CHECK(!update_swap_self("cyberworld-endless.nro", ".nro", self, sizeof self), "swap: a path from no root");
+	CHECK(!update_swap_self(NULL, ".nro", self, sizeof self), "swap: no argv[0]");
+	CHECK(!update_swap_self(arg, ".nro", self, strlen(arg) + 4), "swap: no room for the names beside it");
+	snprintf(other, sizeof other, "%s/gone.nro", dir);
+	CHECK(!update_swap_self(other, ".nro", self, sizeof self), "swap: a file that is not there");
+	CHECK(!update_swap_self(dir, "", self, sizeof self), "swap: a folder is no file");
+	update_swap_self(arg, ".nro", self, sizeof self);
+	update_swap_staged(self, staged, sizeof staged);
+	snprintf(aside, sizeof aside, "%s.old", self);
+	/* (nothing staged: the old one stays) */
+	CHECK(!update_swap(self) && file_is(self, "old") && file_is(aside, ""), "swap: with nothing staged, the old one stays");
+	/* (staged: the new one in its name, nothing beside it) */
+	file_put(staged, "new");
+	file_put(aside, "left");
+	CHECK(update_swap(self), "swap: the new one swapped in");
+	CHECK(file_is(self, "new") && file_is(staged, "") && file_is(aside, ""), "swap: the new one in its name, nothing left beside it");
+	/* (a start's tidying: a half download and an old one left aside go,
+	 * but an old one with none in its name stays for the player) */
+	file_put(staged, "half");
+	file_put(aside, "old");
+	update_swap_tidy(self);
+	CHECK(file_is(staged, "") && file_is(aside, "") && file_is(self, "new"), "swap: a start tidies what an earlier one left");
+	remove(self);
+	file_put(aside, "old");
+	update_swap_tidy(self);
+	CHECK(file_is(aside, "old"), "swap: the old one stays where none is in its name");
+	remove(aside);
+	rmdir(dir);
+}
+
 int test_update(void) {
 	failures = 0;
 	test_manifest();
 	test_versions();
 	test_sha256();
+	test_swap();
 	return failures;
 }
