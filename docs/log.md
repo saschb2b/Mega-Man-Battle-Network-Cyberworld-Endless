@@ -4,6 +4,7 @@
 * **Update**: world/level-design/side-pieces.md (CopyBot Comp's crystal spikes behind its plateaus; End Area and Oran Area tried and left).
 
 ## 2026-11-13
+* **Update**: world/level-design/props.md (a pad's stamp set flush against a platform shares the tile with it on two layers at one height: the platform behind under the stamp, the one in front over it), devtools/tile-test.md (A pad against a platform: Robot Control's pad corner whole and the slab's side face closed, Sky's fields flush with its pads).
 * **Update**: world/level-design/side-pieces.md (What stands behind a floor: the rows of horns behind the catwalks of BN4's Undernet, set in stretches).
 * **Creation**: devtools/old-checkpoint.md (`tools/old_checkpoint.py`: the last releases' runs continued and played by this build, what a state carries of the engine's across builds, 0.20.0's and 0.21.0's measured). **Update**: devtools/agents-tools.md (the state's `gameframe` line), code/tools.md (its row).
 * **Update**: devtools/proxy-form.md (`xproxy.py --souls` explains MegaMan's AI data's move into BN5's size, which DarkInvs's install makes at his set-up, by its role: the two places read through his object's pointer, the same bytes; its own test under `--mutations`; red and unrun since 13 October), multirom/one-net.md (the native check's list of what the Souls do with none held).
