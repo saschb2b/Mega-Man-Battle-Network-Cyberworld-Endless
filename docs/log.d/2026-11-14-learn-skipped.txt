@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T18:56:45Z
+* **Update**: devtools/profiling.md (learning the areas' maps: tl_skipped kept a panel with the map's view; over every area 11.1 to 4.5 seconds, BN4's area 34 3.1 to 0.25, the layers the same).

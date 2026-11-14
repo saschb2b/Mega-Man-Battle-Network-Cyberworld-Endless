@@ -101,6 +101,16 @@ over every area the pick 7.8 to 7.2 seconds (13.0 before the grid), BN5's
 Undernet 27.0 to 24.4 billion instructions; every layer the same, the
 3DS's modelled heap the same.
 
+Learning the areas' maps, after the pick the larger part over every area
+(11.1 seconds): in BN4's area 34 it took 3.1 seconds, 67.6 of its 74.4
+billion instructions in following its floors' own art (`tl_own_art`), and
+63.0 of those in `tl_skipped`, whether a panel's tiles are left out,
+which counts the panel's pixels and was asked 2.6 million times. It is now
+asked once a panel and kept with the map's view (`Src.skipped`, asked
+again once the map's pads are found): over every area the learning 11.1
+to 4.5 seconds, area 34's 3.1 to 0.25; every layer the same, the 3DS's
+modelled heap 0.02 MB more while a map is learned.
+
 ## What the profile of 14 November 2026 found
 
 Instructions to the first layer, the second start (its boot state made),
@@ -168,9 +178,10 @@ The same start, BN6 alone, after: 1.50 billion; with BN5 and BN4, 2.29. Of a lay
   `best`'s own comparisons the most of it; in another game's areas,
   laying the maps' panels (`panels_lay`: `suits`, the neighbours a
   suiting panel would meet, after the grid and the shapes' lists).
-- **Learning the area's original maps** (`nm_learn`, 0.36 billion), done
-  again when a run comes back to an area (`3ds/README.md`, "learned
-  again").
+- **Learning the area's original maps** (`nm_learn`), done again when a
+  run comes back to an area (`3ds/README.md`, "learned again"): 4.5
+  seconds over every area since `tl_skipped` is kept, BN6's Seaside
+  (area 2) the slowest at 0.47.
 - **mGBA's CRC32 of the ROM copy** as the core loads it (0.13 billion
   for its 16 MB), in mGBA's own code.
 - **The SHA-1** (0.24 billion a ROM): a hash kept beside the data folder
