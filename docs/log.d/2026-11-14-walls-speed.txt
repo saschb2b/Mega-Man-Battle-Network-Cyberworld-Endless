@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T17:28:30Z
+* **Update**: devtools/profiling.md (the coordinate data's walls: each cell asked once into a map rather than up to fourteen times; 0.11 to 0.02 billion instructions a time, a start with BN6 alone 1.50 billion and with all three ROMs 2.29, the ROM copy the same).

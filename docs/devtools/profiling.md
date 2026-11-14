@@ -55,6 +55,7 @@ Instructions to the first layer, the second start (its boot state made),
 | The floor's fix and the SHA-1 | 1.80 billion (-29%) | 3.15 billion (-23%) |
 | And the installs | 1.78 billion (-30%) | 2.58 billion (-37%) |
 | And the tiles' looks | 1.67 billion (-35%) | 2.46 billion (-40%) |
+| And the walls | 1.50 billion (-41%) | 2.29 billion (-44%) |
 
 Where it went before, by what each part runs:
 
@@ -93,10 +94,18 @@ Where it went before, by what each part runs:
   a pixel's floor beside and below it is read from those columns'
   distances rather than asked again. The atlas's 1,077 pictures the same
   byte for byte.
+- **The coordinate data's walls** (`walls`, `src/map/coords.c`), written
+  for a layer's floor and again with its pads: 0.11 billion each time, 0.02
+  after. It asked each cell of a 252 x 252 square for floor up to fourteen
+  times through `netmap_floor_cell`; now each cell is asked once into a
+  map (floor, the ground's floor raised over it, a stair). The ROM copy
+  after the first layer, its 32 MB dumped by the old build and the new,
+  the same byte for byte over 30 starts (six areas, BN5's among them, and
+  seeds 1-12 at depths 3 and 5).
 
 ## What is left
 
-The same start, BN6 alone, after: 1.67 billion; with BN5 and BN4, 2.46.
+The same start, BN6 alone, after: 1.50 billion; with BN5 and BN4, 2.29. Of a layer's 1.0 billion: the tiles' pick 0.35, the floor's fix 0.30, learning the area's maps 0.29.
 
 - **Picking the tiles** (`tiles_pick`, 0.32 billion over 11,851 calls),
   `best`'s own comparisons the most of it.

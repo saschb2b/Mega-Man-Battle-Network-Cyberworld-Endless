@@ -49,6 +49,23 @@ static Cell from(const CoordCell *c) {
 static bool (*town_floor)(int cx, int cy);
 static bool floor_at(int cx, int cy, int level) { return town_floor ? town_floor(cx, cy) : netmap_floor_cell(cx, cy, level); }
 
+/* What walls() asks of the cells it looks at, -127 to 126 each way (the
+ * ring round its -126 to 125): floor of the level, the ground's floor
+ * raised over it where the layer rises, a stair; asked once a cell rather
+ * than up to fourteen times, which was 0.2 billion instructions a layer
+ * (docs/devtools/profiling.md). */
+#define SPAN 254
+enum { G_FLOOR = 1, G_RAISED = 2, G_STAIR = 4 };
+static uint8_t ground[SPAN * SPAN];
+#define G(x, y) ground[((y) + 127) * SPAN + (x) + 127]
+
+static void ground_fill(int level, int rise) {
+	for (int cy = -127; cy < 127; ++cy)
+		for (int cx = -127; cx < 127; ++cx)
+			G(cx, cy) = (uint8_t)((floor_at(cx, cy, level) ? G_FLOOR : 0) | (!level && rise && floor_at(cx, cy, 1) ? G_RAISED : 0) |
+				(rise && netmap_stair_cell(cx, cy) ? G_STAIR : 0));
+}
+
 /* The wall cells around the floor of `level`, 8 high from z. Walls beside
  * a stair rise with it from the ground (the original's are 10 higher than
  * the climb), and the ground has none where a stair's top meets the raised
@@ -59,18 +76,18 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 		{ -1, 0, 1 }, { 1, 0, 2 }, { 0, -1, 3 }, { 0, 1, 4 },
 		{ -1, 1, 7 }, { -1, -1, 5 }, { 1, -1, 6 }, { 1, 1, 8 },
 	};
+	ground_fill(level, rise);
 	int n = 0;
 	for (int cy = -126; cy < 126; ++cy)
 		for (int cx = -126; cx < 126; ++cx) {
-			if (floor_at(cx, cy, level)) continue;
-			if (!level && rise && floor_at(cx, cy, 1)) continue;
+			if (G(cx, cy) & (G_FLOOR | G_RAISED)) continue;
 			/* floor on two sides round a corner (a walkway's mouth): the
 			 * corner's type, as the originals have it there; two edges in
 			 * one cell, the game took either, and the mouth's side pushed
 			 * MegaMan out sideways or held him */
 			int m = 0;
 			for (int k = 0; k < 4; ++k)
-				if (floor_at(cx + dir[k][0], cy + dir[k][1], level) && !(rise && netmap_stair_cell(cx + dir[k][0], cy + dir[k][1]))) m |= 1 << k;
+				if ((G(cx + dir[k][0], cy + dir[k][1]) & (G_FLOOR | G_STAIR)) == G_FLOOR) m |= 1 << k;
 			if ((m & 3) && (m & 3) != 3 && (m & 12) && (m & 12) != 12 && n < cap) {
 				static const int corner[2][2] = { { 5, 7 }, { 6, 8 } };   /* [+X][+Y] */
 				w[n++] = cell(cx, cy, z, 0, 8, corner[(m & 2) != 0][(m & 8) != 0]);
@@ -80,9 +97,9 @@ static int walls(Cell *w, int cap, int level, int z, int rise) {
 			for (int k = 0; k < 8 && n < cap; ++k) {
 				if (k >= 4 && edge) break;
 				int nx = cx + dir[k][0], ny = cy + dir[k][1];
-				if (!floor_at(nx, ny, level)) continue;
+				if (!(G(nx, ny) & G_FLOOR)) continue;
 				if (k < 4) edge = true;
-				bool by_stair = rise && netmap_stair_cell(nx, ny);
+				bool by_stair = G(nx, ny) & G_STAIR;
 				if (by_stair && level) { if (k >= 4) break; continue; }   /* the ground's wall covers it */
 				w[n++] = by_stair ? cell(cx, cy, 0, 0, rise + 10, dir[k][2]) : cell(cx, cy, z, 0, 8, dir[k][2]);
 				if (k >= 4) break;
