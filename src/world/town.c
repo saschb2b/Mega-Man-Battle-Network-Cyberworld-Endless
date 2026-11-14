@@ -943,6 +943,14 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	if (!T.tiles || (T.style->door && !indoors_bn6_warps(T.style->group, T.style->number))) return false;
 	uint32_t desc, coord_slot;
 	townsrc_slots(T.book, &desc, &coord_slot);
+#if defined(__PSP__) || defined(CW_HEAP_PSP)
+	/* (the PSP keeps no town between visits: its source learned, planned
+	 * from and let go here, learned again at the next visit, as its heap
+	 * holds a layer's learning or a town's, not both:
+	 * docs/engine/emulation/psp-and-ds.md) */
+	for (int i = 0; i < 4; ++i) { townsrc_free(T.books[i]); T.books[i] = NULL; }
+	T.book = NULL;
+#endif
 	int tw = T.info.tw, th = T.info.th;
 	/* the tile map */
 	size_t cells = (size_t)tw * th, raw = cells * 4;

@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __3DS__
+#if defined(__3DS__) || defined(__PSP__) || defined(CW_HEAP_PSP)
 #include "devtools.h"
 #endif
 
@@ -30,11 +30,11 @@ static struct {
 } L;
 
 /* (kept where the Arena's cores read it: every system that offers
- * NetBattles; on the New 3DS, which offers none, its 2 MB stay out of a
- * run's heap but for --dev rollbench and --dev arena, which run the pair
- * there: src/online/arena_pair.h, CW_ARENA) */
+ * NetBattles; on the New 3DS and the PSP, which offer none, its 2 MB stay
+ * out of a run's heap but for --dev rollbench and --dev arena, which run
+ * the pair there: src/online/arena_pair.h, CW_ARENA) */
 static bool kept(void) {
-#ifdef __3DS__
+#if defined(__3DS__) || defined(__PSP__) || defined(CW_HEAP_PSP)
 	return dev.rollbench || dev.arena;
 #else
 	return true;
