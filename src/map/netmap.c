@@ -550,12 +550,14 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	static TileBook led[MAX_BOOKS];
 	int nled = lead_books(L, led);
 	tilemap_pick(led, nled, &L->seams, &grid, floor_cb, NULL, map, nm_last.seams);
+	uint16_t *beside = nm_pick_beside_pads(L, &grid, led, nled, floor_cb);
 	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
 	nm_paste_stairs(L, map, tw, th);
 	if (props) nm_paste_props(map, tw, th);
-	nm_paste_pads(L, map, tw, th);
+	nm_paste_pads(L, map, beside, tw, th);
+	free(beside);
 	nm_paste_ornaments(L, map, tw, th);
 	nm_paste_emblems(L, map, tw, th);
 	nm_paste_arrows(L, map, tw, th);

@@ -10,6 +10,7 @@
 #include "debug.h"
 #include "net_shapes.h"
 #include "netmap_learn.h"
+#include "tilemap.h"
 
 /* ---- output ---- */
 
@@ -103,40 +104,99 @@ static bool drawn_floor(int gx, int gy) {
 	return gx >= 0 && gy >= 0 && gx < nm_cur->gw && gy < nm_cur->gh && nm_cur->cell[gy * nm_cur->gw + gx] != C_VOID;
 }
 
-/* Whether the tile at (pu, pv), map pixels from the map's middle, lies
- * over the 3 x 3 pad from (mx, my)'s own panels or the void alone (at the
- * floor's height, drawn dv below the panel edges). */
-static bool pad_tile_ok(const Learned *L, int mx, int my, int pu, int pv, bool (*floor)(int, int)) {
-	for (int y = 1; y < 8; y += 2)
-		for (int x = 1; x < 8; x += 2) {
-			int u = pu + x, v = 2 * (pv + y - L->book[0].dv), X = (u - v) / 2, Y = (u + v) / 2;
-			int A = nm_floordiv(X - nm_place.ex, 32), B = nm_floordiv(Y - nm_place.ey, 32);
-			int gx = B + nm_place.gx0, gy = -A + nm_place.gy0;
-			if (gx >= mx && gx < mx + 3 && gy >= my && gy < my + 3) continue;
-			if (floor(gx, gy)) return false;
-		}
-	return true;
+/* Whether grid panel (gx, gy) of `floor` lies in a 2 x 2 block of it: a
+ * platform's, not a walkway's (netmap.c, walkway). */
+static bool in_block(bool (*floor)(int, int), int gx, int gy) {
+	for (int dy = -1; dy <= 0; ++dy)
+		for (int dx = -1; dx <= 0; ++dx)
+			if (floor(gx + dx, gy + dy) && floor(gx + dx + 1, gy + dy) && floor(gx + dx, gy + dy + 1) && floor(gx + dx + 1, gy + dy + 1)) return true;
+	return false;
 }
 
-/* The area's pad stamped on the 3 x 3 from (mx, my) */
-static void paste_pad(const Learned *L, uint16_t *map, int tw, int th, int mx, int my, bool (*floor)(int, int)) {
-	int A, B;
+/* What a tile of a pad's stamp lies over besides the pad's own panels and
+ * the void (pad_tile): a walkway's panel; a platform's panel or faces
+ * behind the pad (across its upper edges, or beside a corner); a
+ * platform's panel in front of it (across its lower edges). */
+enum { PAD_ON_WALKWAY = 1, PAD_BEHIND = 2, PAD_IN_FRONT = 4 };
+
+/* What the tile at (pu, pv), map pixels from the map's middle, lies over
+ * besides the 3 x 3 pad from (mx, my)'s own panels and the void, at the
+ * floor's height (drawn dv below the panel edges), PAD_* bits. Each pixel
+ * off the pad's top is looked up the screen as deep as the faces hang
+ * till it meets a panel of other floor, past the pad's own: a slab's face
+ * runs a few pixels past its panel's corner, under the pad's beside it
+ * (Robot Control's, 4). */
+static int pad_tile(const Learned *L, int mx, int my, int pu, int pv, bool (*floor)(int, int)) {
+	int got = 0;
+	for (int y = 1; y < 8; y += 2)
+		for (int x = 1; x < 8; x += 2)
+			for (int up = 0; up <= L->book[0].face; up += 2) {
+				int u = pu + x, v = 2 * (pv + y - up - L->book[0].dv), X = (u - v) / 2, Y = (u + v) / 2;
+				int A = nm_floordiv(X - nm_place.ex, 32), B = nm_floordiv(Y - nm_place.ey, 32);
+				int gx = B + nm_place.gx0, gy = -A + nm_place.gy0;
+				bool own = gx >= mx && gx < mx + 3 && gy >= my && gy < my + 3;
+				if (own && !up) break;
+				if (own || !floor(gx, gy)) continue;
+				/* (a walkway's faces as before: the stamp over them) */
+				bool block = in_block(floor, gx, gy);
+				if (!up && !block) return PAD_ON_WALKWAY;
+				if (block) got |= !up && gx >= mx && gy >= my ? PAD_IN_FRONT : PAD_BEHIND;
+				break;
+			}
+	return got;
+}
+
+static bool drawn(uint16_t e) { return e & 0x3FF; }
+static uint16_t front_of(uint16_t e0, uint16_t e1) { return drawn(e1) ? e1 : e0; }
+
+/* A 3 x 3 the stamp goes on, and the floor it is read in. */
+typedef struct { int x, y; bool (*floor)(int, int); } PadAt;
+
+/* The area's pad stamped on the 3 x 3 `pad`; `beside`, both layers of the
+ * floor round the pad picked with the pad's place taken for void
+ * (nm_pick_beside_pads), or NULL */
+static void paste_pad(const Learned *L, uint16_t *map, const uint16_t *beside, int tw, int th, const PadAt *pad) {
+	int mx = pad->x, my = pad->y, A, B;
 	nm_grid_to_panel(mx, my + 2, &A, &B);
 	int X0 = nm_place.ex + 32 * A, Y0 = nm_place.ey + 32 * B;
 	int px0 = area_px(tw, X0, Y0), py0 = area_py(th, X0, Y0);
-	/* the stamp only over the pad's own panels or the void: its edges
-	 * and faces would cut into a walkway or a platform it touches (a
-	 * walkway's last panel before the pad came out cut) */
+	size_t cells = (size_t)tw * th;
+	/* the stamp alone over the pad's own panels and the void; never over
+	 * a walkway, whose last panel before the pad its edges and faces cut;
+	 * with a platform it touches, on two layers (below) */
 	for (int k = 0; k < L->pad.ntiles; ++k) {
 		int px = px0 + L->pad.tiles[k].px, py = py0 + L->pad.tiles[k].py;
-		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th || !pad_tile_ok(L, mx, my, px - tw * 4, py - th * 4, floor)) continue;
-		map[(size_t)(py / 8) * tw + px / 8] = L->pad.tiles[k].e0;
-		/* (and nothing over it: what the classes picked for the second
-		 * layer there lay over the stamp, Seaside's pads a jumble of their
-		 * own frame and their other pads'. No area's pad has art of its own
-		 * on that layer; Central's maps have a warp's panel there) */
-		map[(size_t)tw * th + (size_t)(py / 8) * tw + px / 8] = 0;
-		if (nm_last.pasted) nm_last.pasted[(size_t)(py / 8) * tw + px / 8] |= NETMAP_PASTED_PAD;
+		if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+		int over = pad_tile(L, mx, my, px - tw * 4, py - th * 4, pad->floor);
+		if (over & PAD_ON_WALKWAY) continue;
+		size_t at = (size_t)(py / 8) * tw + px / 8;
+		uint16_t stamp = L->pad.tiles[k].e0, mine = front_of(map[at], map[cells + at]);
+		/* (a platform set flush with the pad, as no map sets one, at the
+		 * pad's height: a platform in front of the pad on the second layer,
+		 * picked as if no pad were there, so its top hides the pad's side
+		 * faces, the stamp behind it; one behind the pad on the first, as
+		 * the classes picked it, the stamp in front of it. Either way the
+		 * pad is whole and the platform's top and faces show where the
+		 * stamp draws nothing. Left out, the classes' pick there drew the
+		 * pad's other look over its corner; stamped alone, it cut off the
+		 * platform's side face beside it; in front of a platform, the pad
+		 * stood raised above it) */
+		if (over & PAD_IN_FRONT && beside && drawn(front_of(beside[at], beside[cells + at]))) {
+			map[at] = stamp;
+			map[cells + at] = front_of(beside[at], beside[cells + at]);
+		} else if (over) {
+			map[at] = mine;
+			map[cells + at] = stamp;
+		} else {
+			map[at] = stamp;
+			/* (and nothing over it: what the classes picked for the second
+			 * layer there lay over the stamp, Seaside's pads a jumble of
+			 * their own frame and their other pads'. No area's pad has art
+			 * of its own on that layer; Central's maps have a warp's panel
+			 * there) */
+			map[cells + at] = 0;
+		}
+		if (nm_last.pasted) nm_last.pasted[at] |= NETMAP_PASTED_PAD;
 	}
 }
 
@@ -155,13 +215,12 @@ static bool drawn_flat(int mx, int my) {
 	return true;
 }
 
-/* The area's own pad, whole, on every 3 x 3 pad at ground level away from
- * the stairs, in place of the floor the classes drew there (the classes
- * drew Central's pads green, where its maps frame them); their
- * centrepieces go on after. The Net Square's gems' pads the same. */
-void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
-	if (!L->pad.ok) return;
-	for (int i = 0; i < layer.nrooms; ++i) {
+/* The 3 x 3 pads the stamp goes on: every pad at ground level away from
+ * the stairs, and the Net Square's gems' pads; how many (at most max). */
+static int pads_stamped(const Learned *L, PadAt *at, int max) {
+	int n = 0;
+	if (!L->pad.ok) return 0;
+	for (int i = 0; i < layer.nrooms && n < max; ++i) {
 		const Room *m = &layer.rooms[i];
 		if (m->w != 3 || m->h != 3 || !(m->kind == ROOM_PAD || (nm_cur->pad && nm_cur->pad[m->y * nm_cur->gw + m->x] && m->kind == ROOM_PLATFORM))) continue;
 		bool flat = true;
@@ -169,12 +228,80 @@ void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th) {
 			for (int x = m->x; x < m->x + 3; ++x) flat &= layer.cell[y][x] == C_PATH && !layer.level[y][x];
 		for (int s = 0; s < layer.nstairs; ++s)
 			flat &= layer.stair[s].x + 2 < m->x - 1 || layer.stair[s].x > m->x + 3 || layer.stair[s].y + 2 < m->y - 1 || layer.stair[s].y > m->y + 3;
-		if (flat) paste_pad(L, map, tw, th, m->x, m->y, layer_floor);
+		if (flat) at[n++] = (PadAt){ m->x, m->y, layer_floor };
 	}
-	for (int i = 0; i < nm_cur->ngems; ++i) {
+	for (int i = 0; i < nm_cur->ngems && n < max; ++i) {
 		int mx = nm_cur->gems[i][0] - 1, my = nm_cur->gems[i][1] - 1;
-		if (drawn_flat(mx, my)) paste_pad(L, map, tw, th, mx, my, drawn_floor);
+		if (drawn_flat(mx, my)) at[n++] = (PadAt){ mx, my, drawn_floor };
 	}
+	return n;
+}
+
+#define MAX_STAMPED 64
+
+static int pads_by_platforms(const Learned *L, int (*at)[2], int max) {
+	static PadAt pads[MAX_STAMPED];
+	int n = pads_stamped(L, pads, MAX_STAMPED), got = 0;
+	for (int i = 0; i < n && got < max; ++i) {
+		bool by = false;
+		for (int y = pads[i].y - 1; y <= pads[i].y + 3 && !by; ++y)
+			for (int x = pads[i].x - 1; x <= pads[i].x + 3 && !by; ++x)
+				by = (x < pads[i].x || y < pads[i].y || x > pads[i].x + 2 || y > pads[i].y + 2) && pads[i].floor(x, y) && in_block(pads[i].floor, x, y);
+		if (!by) continue;
+		at[got][0] = pads[i].x;
+		at[got][1] = pads[i].y;
+		++got;
+	}
+	return got;
+}
+
+/* The pads the stamp goes on that touch a platform, while the floor round
+ * them is picked alone, and the layer's floor as the classes read it. */
+#define MAX_PADS_BY 32
+static int by_n;
+static int by_at[MAX_PADS_BY][2];
+static TileFloor by_floor;
+
+/* The floor within three panels of those pads, the pads themselves void:
+ * a platform beside one drawn as if no pad were there, its rim and faces
+ * along the pad's edge its own. */
+static int floor_beside(int A, int B, const void *ctx) {
+	int x = B + nm_place.gx0, y = -A + nm_place.gy0;
+	bool near = false;
+	for (int i = 0; i < by_n; ++i) {
+		int px = by_at[i][0], py = by_at[i][1];
+		if (x >= px && x < px + 3 && y >= py && y < py + 3) return TILE_VOID;
+		near |= x >= px - 3 && x < px + 6 && y >= py - 3 && y < py + 6;
+	}
+	return near ? by_floor(A, B, ctx) : TILE_VOID;
+}
+
+uint16_t *nm_pick_beside_pads(const Learned *L, const TileGrid *grid, const TileBook *led, int nled, TileFloor floor) {
+	by_n = pads_by_platforms(L, by_at, MAX_PADS_BY);
+	if (!by_n) return NULL;
+	by_floor = floor;
+	size_t cells = (size_t)grid->tw * grid->th;
+	uint16_t *beside = calloc(cells * 2, sizeof *beside);
+	uint8_t *left = calloc(cells, 1);
+	if (!beside || !left) {
+		free(beside);
+		free(left);
+		return NULL;
+	}
+	TileStats was = tiles_stats;   /* (the layer's own pick is what is counted) */
+	tilemap_pick(led, nled, &L->seams, grid, floor_beside, NULL, beside, left);
+	tiles_stats = was;
+	free(left);
+	return beside;
+}
+
+/* The area's own pad, whole, on every pad the stamp goes on, in place of
+ * the floor the classes drew there (the classes drew Central's pads
+ * green, where its maps frame them); their centrepieces go on after. */
+void nm_paste_pads(const Learned *L, uint16_t *map, const uint16_t *beside, int tw, int th) {
+	static PadAt pads[MAX_STAMPED];
+	int n = pads_stamped(L, pads, MAX_STAMPED);
+	for (int i = 0; i < n; ++i) paste_pad(L, map, beside, tw, th, &pads[i]);
 }
 
 /* Whether grid panel (x, y) lies in a guardian's arena drawn in the

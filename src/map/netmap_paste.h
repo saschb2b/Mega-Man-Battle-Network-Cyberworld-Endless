@@ -20,7 +20,15 @@ extern PropAt nm_prop_at[MAX_PROPS];
 void nm_props_place(const Learned *L);
 void nm_paste_props(uint16_t *map, int tw, int th);
 void nm_paste_ornaments(const Learned *L, uint16_t *map, int tw, int th);
-void nm_paste_pads(const Learned *L, uint16_t *map, int tw, int th);
+/* The area's pad, cut whole from its maps, on the layer's pads; `beside`:
+ * both layers of the floor round the pads that touch a platform, picked
+ * with the pads taken for void, or NULL (netmap.c) */
+void nm_paste_pads(const Learned *L, uint16_t *map, const uint16_t *beside, int tw, int th);
+/* Both layers of the floor round the pads the stamp goes on that touch a
+ * platform's panel (8 ways), picked from `led` with those pads taken for
+ * void, `floor` the layer's as the classes read it, for the stamp to stand
+ * flush with them (freed by the caller); NULL where no pad touches one. */
+uint16_t *nm_pick_beside_pads(const Learned *L, const TileGrid *grid, const TileBook *led, int nled, TileFloor floor);
 void nm_paste_emblems(const Learned *L, uint16_t *map, int tw, int th);
 void nm_paste_arrows(const Learned *L, uint16_t *map, int tw, int th);
 void nm_paste_bushes(const Learned *L, uint16_t *map, int tw, int th);
