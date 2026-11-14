@@ -3,7 +3,7 @@ type: Feature
 title: "The game's own updates"
 description: "How the game learns a newer version is out and, where it can, puts it in place itself: the release's update.json, the look at each start (on by default, Options' Updates line switches it off), the title's note and Options' update line, each system's way (the AppImage over itself, the Windows installer run silently, the PortMaster launcher after the game, Android's installer, the Switch's .nro and the 3DS's .3dsx swapped as the game ends, the download page, the itch app, the releases page or store on the 3DS's CIA, the Vita and the PS5), the checks before a file is placed, the roots the consoles carry for GitHub, and what other systems are to get."
 tags: [engine, updates, platforms]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T05:00:00Z }
 ---
 
 # The game's own updates
