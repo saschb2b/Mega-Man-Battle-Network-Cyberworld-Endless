@@ -1,6 +1,7 @@
 /* The tracks' installs in their order (xinstall.h). */
 #include "xinstall.h"
 
+#include "chip_targets.h"
 #include "emu.h"
 #include "rom.h"
 #include "soulproxy.h"
@@ -52,6 +53,9 @@ void xinstall_core(int families, int navis) {
 	 * spawns the other tracks' copies of the types it shares; the Souls' own install, soulunite.c, finds it there) */
 	if (bn5 && navis == XNAVI_BN5) xstrike_install();
 	xlog_end();
+	/* (BN6's chips that find their targets by NameID aimed at the moved foes too, issue #523: BN6's core alone, as no
+	 * NetBattle meets a moved foe) */
+	chip_targets_install();
 	/* (BN4's bracket screen, where its ROM is read: a main mode of its own, outside the battles' installs) */
 	if (emu_ready() && XR[XROM_BN4_RED_SUN_US].data) xbracket_install();
 }

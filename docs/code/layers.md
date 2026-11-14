@@ -3,7 +3,7 @@ type: Measurement
 title: "The code's layers"
 description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 25 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
 tags: [code, lint, architecture, process]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 sources:
   - { id: measure, title: "python3 tools/layers.py and its --cuts, --uses and --generated on dev at 2744367e (12 November 2026)", resource: "tools/layers.py" }
   - { id: rule, title: "tests/lint/layers.txt, the units and what each may include; tests/lint/layer_violations.txt, the includes it does not allow as they stood", resource: "tests/lint/layers.txt, tests/lint/layer_violations.txt" }
@@ -417,6 +417,7 @@ hold no cycle, so every pair has a baselined include in it.
 | v0.10.0 (5 October 2026) | 54,266 in all | | 330 | | | |
 | dev, 12 November 2026 | 153684 | 25694 | 1118 | 34 | 41 | 147 |
 | v0.21.1 | 161610 | 27320 | 1156 | 31 | 35 | 142 |
+| v0.21.2 | 162075 | 27328 | 1158 | 31 | 35 | 142 |
 <!-- numbers: tools/layers.py --record adds a row above this line -->
 
 (v0.10.0's row is the count of that tag's `src/`, before the tool: its

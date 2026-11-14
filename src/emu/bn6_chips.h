@@ -359,6 +359,18 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_SPREAD_SHOT_KINDS 0x080C8144u /* ... its kinds, 19 rows of 6 bytes: the shape, the argument, the effect, a status, the sound (u16);
                                            * BN4's 17 kinds' shapes at the same numbers, BN6's own effects and sounds */
 
+/* BN6's chips' look-ups of their targets (src/emu/chip_targets.c; docs/rom/chips-code.md, The chips' targets by
+ * NameID): each a bl to object_getEnemyByNameRange (BN6_BY_NAME_RANGE), r1 and r2 a range of NameIDs, r3 the other
+ * side; BN6's three callers that aim the player's chips */
+#define BN6_AQUANDL_FIND_VIRUSES 0x080E64C6u /* AquaNdl1-3's needles (family 0x32, the fourth kind's type 0x40 as it starts, bn6f
+                                           * sub_80E5174): the viruses, 0-0xAE, */
+#define BN6_AQUANDL_FIND_NAVIS 0x080E64DAu /* ... then the Navis and the player's forms, 0x100-0x1C3; its three panels from what it found */
+#define BN6_YOYO_FIND_VIRUSES 0x08012CC4u /* YoYo and GreatYo's strike on up to three foes' panels (family 0x18, bn6f sub_8012CB2 from
+                                           * sub_800FB54): 0-0xBA, */
+#define BN6_YOYO_FIND_NAVIS   0x08012CD8u /* ... then 0x100-0x1C3 */
+#define BN6_RETICLE_FIND      0x080E29C2u /* the reticle over a foe (the fourth kind's type 0x0F, bn6f sub_80E1670; spawned by 0x08014600
+                                           * and 0x080178A8): 0-0x1C3 */
+
 #define BN6_RUNNER_STRUCK     0x0801B2A8u /* a virus's runner: status 0x100 made its state 5 (to 0x0801B2D2), then b 0x0801B338 past: */
 #define BN6_RUNNER_SLIDE      0x0801B2ECu /* ... a pushed object's slide run (status 0x10, or the slide's flag 0x1000: bl 0x080166B6 at
                                            * 0x0801B2FC and 0x0801B30E). BN4's runs the slide first (BN4_RUNNER_SLIDE, BN4_RUNNER_STRUCK) */

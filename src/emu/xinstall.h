@@ -11,7 +11,9 @@
  * submerge (xsea.h) where its sea came in, then where BN5's Navis came in
  * the Souls' moved code and BN5's obstacle strike (xstrike.h: a Navi
  * Colonel's side arms it as ColonelSoul's does; the Souls' code spawns the
- * other tracks' copies of the types it shares). A track whose copies another's
+ * other tracks' copies of the types it shares), and, outside the record,
+ * BN6's chips that find their foes by NameID aimed at the moved ones
+ * (chip_targets.h). A track whose copies another's
  * needs left out (--dev nonavis) leaves that other's install failing, its
  * reason logged. */
 #ifndef CW_XINSTALL_H

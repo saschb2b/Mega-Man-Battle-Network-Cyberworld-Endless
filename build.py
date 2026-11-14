@@ -2438,6 +2438,8 @@ README_GIFS.update({'bn4-heatsprd': (None, 15), 'bn4-meteors': (None, 15), 'bn4-
 # 0.21.1: the floors before and after, two pictures side by side (tools/before_after.py --clips)
 README_GIFS.update({name: (None, 10) for name in ('compare-bn4-park', 'compare-bn4-countries', 'compare-bn5-acdc', 'compare-sky',
                                                    'compare-seaside', 'compare-undernet')})
+# 0.21.2: AquaNdl1 before and after at BN5's and BN4's viruses (tools/before_after.py --clips)
+README_GIFS['compare-bn5-aquandl'] = (None, 15)
 
 
 def clips(only=None):
