@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: devtools/profiling.md (a whole panel's seams asked of its own tiles and their neighbours alone, not every tile of the map: BN5's Nebula Area's pick 17.0 to 14.7 billion instructions, the layers the same).
 * **Update**: devtools/profiling.md (learning the areas' maps: tl_skipped kept a panel with the map's view; over every area 11.1 to 4.5 seconds, BN4's area 34 3.1 to 0.25, the layers the same).
 * **Update**: devtools/profiling.md (the pieces' search: each shape's suiting panels listed once a map's laying; the pick over every area 7.8 to 7.2 seconds, BN5's Undernet 27.0 to 24.4 billion instructions, the layers the same).
 * **Update**: devtools/profiling.md (the lab's seeds a count a layout, as the atlas reads them, and another game's areas as aN; the tiles' pick in another game's areas: a book's panels found by place from a grid, the pick over every area 13.3 to 7.8 seconds, the layers the same).
