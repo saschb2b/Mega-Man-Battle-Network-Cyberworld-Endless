@@ -172,9 +172,9 @@ static bool insn_ok(const XVirusFamily *f, const XvBlock *b, uint32_t a, uint16_
 static int code_walk(const XVirusFamily *f, const XvBlock *b, const uint8_t *code, uint32_t *offs, int max) {
 	int n = 0;
 	for (uint32_t a = b->start; a < b->end && !xv_failed();) {
-		if (!xvirus_is_code(f, a)) { a += 2; continue; }
+		if (!xvirus_is_code_in(f, b->start, b->end, a)) { a += 2; continue; }
 		uint32_t run = a;
-		while (a < b->end && xvirus_is_code(f, a)) a += 2;
+		while (a < b->end && xvirus_is_code_in(f, b->start, b->end, a)) a += 2;
 		int got = thumb_bl_scan(code + (run - b->start), a - run, offs + n, max - n);
 		if (got < 0 || n + got > max) {
 			xv_fail("half a BL, or too many, in %08x-%08x", (unsigned)run, (unsigned)a);

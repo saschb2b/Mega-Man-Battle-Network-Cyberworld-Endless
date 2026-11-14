@@ -349,12 +349,44 @@ const uint32_t *emu_video(void) { return threaded ? shown : video; }
 
 uint32_t emu_pictures(void) { return pictures; }
 
-uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
+/* The cartridge's bytes as mGBA holds them, read and written in place
+ * rather than a byte at a time through its bus: the installs' reads and
+ * writes so were a fifth of a start with BN5 and BN4
+ * (docs/devtools/profiling.md). A read is GBALoad8's for a cartridge
+ * address within the ROM's size (0x08-0x0D, mirrors of one image); a write
+ * leaves what rawWrite8 byte by byte leaves, its last byte written that way
+ * (the copy made from the player's ROM before the first, the size grown
+ * to cover the write), the rest copied in where those writes put them. */
+#define CART_MASK 0x01FFFFFFu
+
+static int cart_read(uint32_t a) {
+	if (!core || (a >> 24) < 0x08 || (a >> 24) > 0x0D) return -1;
+	const struct GBA *gba = core->board;
+	uint32_t off = a & CART_MASK;
+	return off < gba->memory.romSize ? ((const uint8_t *)gba->memory.rom)[off] : -1;
+}
+
+static bool cart_write(uint32_t a, const uint8_t *p, size_t len) {
+	if (!core || !len || len > CART_MASK || a < 0x08000000u || a > 0x0A000000u - len) return false;
+	core->rawWrite8(core, a + (uint32_t)(len - 1), -1, p[len - 1]);
+	struct GBA *gba = core->board;
+	memcpy((uint8_t *)gba->memory.rom + (a & CART_MASK), p, len - 1);
+	return true;
+}
+
+uint8_t emu_read8(uint32_t a) {
+	wait_frame();
+	int v = cart_read(a);
+	return v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a, -1) : 0;
+}
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
-	for (uint32_t i = 0; i < len; ++i) out[i] = core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;
+	for (uint32_t i = 0; i < len; ++i) {
+		int v = cart_read(a + i);
+		out[i] = v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;
+	}
 }
 
 void emu_write8(uint32_t a, uint8_t v) {
@@ -380,6 +412,7 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	claims_note(a, (uint32_t)len);
 	free_space_write(a, (uint32_t)len);
 	xlog_write(a, data, len);
+	if (cart_write(a, p, len)) return;
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
 
