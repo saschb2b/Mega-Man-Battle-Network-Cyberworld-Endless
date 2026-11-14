@@ -248,6 +248,10 @@ void update_tick(void) {
 		U.ended = true;
 		P.quit = true;
 	}
+#if defined(__3DS__) && defined(UPDATE_HERE)
+	/* (a thread done is joined at once: its stack back to the heap) */
+	if (U.thread && !SDL_AtomicGet(&U.busy)) thread_join();
+#endif
 }
 
 bool update_here(void) {

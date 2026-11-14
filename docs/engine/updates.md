@@ -168,8 +168,14 @@ memory](emulation/3ds-memory.md)). The look and the download take the
 network for their GET alone (`network_3ds_begin`, the sockets' megabyte
 given back after), so a player who said no to the statistics has it
 only while the updater asks; the thread is the statistics' kind (128 KB
-of stack, the lowest priority on the game's core, joined before the game
-ends: a 3DS app that ends with a thread alive takes the HOME Menu down).
+of stack, the lowest priority on the game's core), joined on the title's
+or Options' next frame once it is done, its stack back to the heap, and
+before the game ends at the latest (a 3DS app that ends with a thread
+alive takes the HOME Menu down). A look that outlasts the title (START
+pressed within its first seconds) keeps its 128 KB until the game ends,
+or until Options is opened. All of it is the title's: the update's line
+shows there alone, before a run's layers raise the heap to the peak
+`tools/heap3ds.py` measures, so the download adds nothing to that peak.
 
 **The Vita and the PS5** look and say so on the title and in Options;
 A does nothing there. The Vita's VPK is installed by VitaShell from the
