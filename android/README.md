@@ -33,8 +33,27 @@ game's C, built by the NDK as `libmain.so` with SDL2 and the GBA core.
   `HttpURLConnection` on an executor of their own (one at a time, eight
   waiting at most, none after three failures in a row; `statsDrop` drops
   what waits at a no), called from the game's thread
-  (`src/analytics/analytics_net.c`). They are the one reason the app asks
-  for the `INTERNET` permission.
+  (`src/analytics/analytics_net.c`). They, the Net Square and the look
+  for a new version are why the app asks for the `INTERNET` permission.
+- The game's own update (docs/engine/updates.md, Android): `Updater`
+  fetches the release's update.json for the game at each start, and on
+  A in Options downloads the APK it names, checks its SHA-256 and commits
+  it to a `PackageInstaller` session. With `REQUEST_INSTALL_PACKAGES` and
+  `UPDATE_PACKAGES_WITHOUT_USER_ACTION` it goes in without a tap from
+  Android 12 on, once the player allowed installs from the game;
+  otherwise Android's prompt shows over the game. Android then
+  force-stops the game and puts the new version in place; the player
+  opens it from its icon (`UpdateReceiver` opens it up to Android 9,
+  as later versions refuse an app's activity from the background). To
+  try it, build twice (the
+  second with a later version, `TAG=v0.99.0 python3 build.py android`),
+  install the first, serve an update.json naming the second
+  (`tools/update_manifest.py`'s form, its address `http://127.0.0.1:8000/...`)
+  and start the game with `adb root`, `adb reverse tcp:8000 tcp:8000` and
+  `adb shell am start -n io.github.saschb2b.cyberworldendless/.GameActivity
+  --es CYBERWORLD_UPDATE_URL http://127.0.0.1:8000/update.json`;
+  `adb shell appops set io.github.saschb2b.cyberworldendless
+  REQUEST_INSTALL_PACKAGES allow` grants installs without Settings.
 - The saves and settings are in `files/data`, which uninstalling deletes.
   The game keeps a copy of the saves, `cyberworld-endless.cwsave`
   (`src/core/backup.h`), in a folder outside the app

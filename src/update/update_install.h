@@ -3,10 +3,12 @@
  * handheld's launcher puts the port's zip in place as the game ends
  * (port/update.py); the Windows
  * installer's copy runs the new installer silently, which starts the game
- * again when it is done (windows/installer.nsi); a copy the itch app
- * installed is the itch app's; any other is updated from the download
- * page. The download is written to a file of this module's, and placed
- * only once update.c has checked it whole. */
+ * again when it is done (windows/installer.nsi); Android's app hands
+ * the APK to Android's installer (update_android.h, its Java's own
+ * download and check); a copy the itch app installed is the itch app's;
+ * any other is updated from the download page. The download is written
+ * to a file of this module's, and placed only once update.c has checked
+ * it whole. */
 #ifndef CW_UPDATE_INSTALL_H
 #define CW_UPDATE_INSTALL_H
 
