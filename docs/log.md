@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: devtools/profiling.md (the coordinate data's walls: each cell asked once into a map rather than up to fourteen times; 0.11 to 0.02 billion instructions a time, a start with BN6 alone 1.50 billion and with all three ROMs 2.29, the ROM copy the same).
 * **Update**: devtools/profiling.md (a tile's look: each column asked upwards only as far as the first floor, a pixel's neighbours read from the columns; 0.27 to 0.11 billion instructions, a start with BN6 alone 1.67 billion and with all three ROMs 2.46, the layers the same).
 * **Update**: devtools/profiling.md (the installs with BN5 and BN4: the cartridge read and written in place, the claims check one pass, the code walk from marks made once a block; a start with all three ROMs 2.58 billion instructions, 4.09 before; the ROM copy the same byte for byte).
 * **Create**: devtools/profiling.md (the start to the first layer profiled with callgrind: legal_fix asks each panel once between edits and counts the topology once an edit, the SHA-1 unrolled; 29% fewer instructions with BN6 alone, the layers byte for byte the same; the hot spots left).
