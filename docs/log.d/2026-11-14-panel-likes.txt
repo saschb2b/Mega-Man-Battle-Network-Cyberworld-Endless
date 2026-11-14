@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T18:43:11Z
-* **Update**: devtools/profiling.md (the pieces' search: each shape's suiting panels listed once a map's laying; the pick over every area 7.8 to 7.2 seconds, BN5's Undernet 27.0 to 24.4 billion instructions, the layers the same).
