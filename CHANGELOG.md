@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.21.2 (2026-11-14)
+
+- **Fixed: AquaNdl struck nothing at BN5's and BN4's foes.** MegaMan
+  threw, and no needle landed on their viruses or Navis. The needles
+  find them now as they find BN6's, one on each foe, and BeastOut's
+  lock-on marks them too.
+- **Fixed: the Switch build crashed as a run started.** Right after
+  "Building the net..." the game closed. It plays on into the run now.
+
 ## 0.21.1 (2026-11-14)
 
 - **The net's floors, drawn as their maps draw them.** A generated

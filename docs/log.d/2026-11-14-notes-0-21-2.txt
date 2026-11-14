@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T03:30:00Z
+* **Add**: releases/v0.21.2.md (the players' notes of 0.21.2, "Needles that land, a Switch that starts.": AquaNdl1 at BN5's and BN4's viruses before and after as a moving picture, the Switch build starting its runs, both players credited). **Update**: releases/overview.md and releases/index.md (its line), code/site-and-media.md (`docs/clips/compare-*` films a battle too), code/layers.md (v0.21.2's row of numbers), devtools/old-checkpoint.md (0.21.2's candidate continuing 0.21.0's and 0.21.1's runs: ok).

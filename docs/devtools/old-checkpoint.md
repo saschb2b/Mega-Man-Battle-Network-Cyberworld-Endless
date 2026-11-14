@@ -93,6 +93,8 @@ On 13 November 2026, 0.20.0's and 0.21.0's runs:
 | `dev` with the fix (#512) | ok; IWRAM's routines the same bytes | ok; the same bytes, every word as this build's own |
 | 0.21.1's candidate (14 November) | ok; IWRAM's routines the same bytes; `SOULS_FACE_PALS`' two words still 0.20.0's (`0x08C82D00` for this build's `0x08C82D60`) | ok; the same bytes, every word as this build's own |
 
+0.21.2's candidate (14 November) continued the last two releases' runs, 0.21.0's and 0.21.1's: both ok (a battle won and layer 3 reached, and two), IWRAM's routines the same bytes and every word into the free space as this build's own.
+
 ## What a state holds of the engine's
 
 What the engine writes into RAM a state carries to the next build, and
