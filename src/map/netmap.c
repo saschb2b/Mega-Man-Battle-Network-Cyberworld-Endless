@@ -119,7 +119,7 @@ static Learned *learn_area(int area) {
 	if (!L->tried) {
 		forget_areas(area);
 		L->tried = true;
-		L->ok = nm_learn(area, L);
+		NM_TIMED(learn, L->ok = nm_learn(area, L));
 		if (area_forgotten[area]) printf("netmap: area %d learned again\n", area);
 	}
 	return L;
@@ -602,7 +602,8 @@ static bool write_tilemap(const Learned *L) {
 	if ((th & 1) != (L->th & 1)) ++th;
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
-	uint16_t *map = pick_map(L, tw, th, true);
+	uint16_t *map;
+	NM_TIMED(pick, map = pick_map(L, tw, th, true));
 	if (!map) return false;
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
@@ -722,7 +723,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	bool keep_pads = pad_look && L->pads_seen;
 	if (striped) make_stripes(keep_pads);
 	if (lay->locked) {
-		legalize(L, lay);
+		NM_TIMED(fix, legalize(L, lay));
 		centre(lay);
 	}
 	if (striped) make_stripes(keep_pads);
@@ -735,10 +736,10 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (!write_tilemap(L)) return false;
 	/* (the side pieces the tiles set, their layer priorities with them) */
 	nm_sides_extra();
-	return coords_write(coord_slot, NULL, 0, &nm_extra);
+	return nm_coords_timed(coord_slot, NULL, 0);
 }
 
-bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &nm_extra); }
+bool netmap_set_pads(const CoordPad *pads, int n) { return nm_coords_timed(coord_slot, pads, n); }
 
 /* (the area settings the pick reads, kept round another look's) */
 typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads; int apart; } AreaFlags;
@@ -759,7 +760,8 @@ static uint16_t *look_map(Learned *L, int tw, int th) {
 	dry.locked = NULL;
 	nm_cur = &dry;
 	if (striped) make_stripes(pad_look && L->pads_seen);
-	uint16_t *map = pick_map(L, tw, th, false);
+	uint16_t *map;
+	NM_TIMED(pick, map = pick_map(L, tw, th, false));
 	nm_cur = NULL;
 	return map;
 }

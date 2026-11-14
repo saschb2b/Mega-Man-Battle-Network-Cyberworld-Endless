@@ -488,8 +488,12 @@ bool new_layer(bool leaving) {
 	darkbn6_records();
 	D.dark_pack_due = true;
 	uint64_t t0 = SDL_GetPerformanceCounter();
+	netmap_times_begin();
 	bool ok = build_layer();
 	build_ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	/* (its parts, for a slow system's log.txt: docs/devtools/profiling.md) */
+	printf("net: layer made in %.0f ms: maps learned %.0f, floor %.0f, tiles %.0f, coordinates %.0f\n", build_ms, netmap_times.learn,
+		netmap_times.fix, netmap_times.pick, netmap_times.coords);
 	return ok;
 }
 

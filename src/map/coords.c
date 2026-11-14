@@ -189,6 +189,16 @@ bool coords_write(uint32_t slot, const CoordPad *pads, int npads, const CoordExt
 
 size_t coords_layer_bytes(void) { return layer_bytes; }
 
+static uint32_t last_hash;
+
+uint32_t coords_last_hash(void) { return last_hash; }
+
+static uint32_t fnv1a(const uint8_t *p, size_t n) {
+	uint32_t h = 2166136261u;
+	for (size_t i = 0; i < n; ++i) h = (h ^ p[i]) * 16777619u;
+	return h;
+}
+
 bool coords_write_town(uint32_t slot, bool (*floor)(int cx, int cy), const CoordExtra *extra) {
 	town_floor = floor;
 	bool ok = write_at(TOWN_COORD_AT, FREE_TOWN_COORDS_END, slot, NULL, 0, extra);
@@ -255,6 +265,7 @@ static bool write_at(uint32_t at_bus, uint32_t end_bus, uint32_t slot, const Coo
 	for (int s = 0; s < 4; ++s) put32(out + s * 4, (uint32_t)at[s]);
 	size_t lz = lz_literal(d, len, out + 16);
 	layer_bytes = 16 + lz;
+	last_hash = fnv1a(out, layer_bytes);
 	bool fits = put(at_bus, end_bus, slot, out, 16 + lz);
 	free(out);
 	free(d);

@@ -148,4 +148,13 @@ void netmap_add_walls(const CoordCell *c, int n);
 /* The layer's warp pads (the walls are written again with them). */
 bool netmap_set_pads(const CoordPad *pads, int n);
 
+/* How long the parts of making a layer took since netmap_times_begin, in
+ * milliseconds: its area's maps learned (only where they were not kept),
+ * the floor made drawable, the tiles picked, the coordinate data written.
+ * log.txt's "net:" line and the atlas's report show them
+ * (docs/devtools/profiling.md; netmap_extra.c). */
+typedef struct { double learn, fix, pick, coords; } NetmapTimes;
+extern NetmapTimes netmap_times;
+void netmap_times_begin(void);
+
 #endif

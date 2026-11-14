@@ -41,4 +41,9 @@ bool coords_write_raw(uint32_t slot, const CoordExtra *extra);
  * src/dev/layer_sizes.c). */
 size_t coords_layer_bytes(void);
 
+/* A hash (FNV-1a) of the last coordinate data's bytes as written: the
+ * atlas's report holds it, so a change to how they are made is checked to
+ * leave them the same (tools/layer_bench.py). */
+uint32_t coords_last_hash(void);
+
 #endif
