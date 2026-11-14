@@ -19,7 +19,6 @@
 #include "cinema.h"
 #include "game.h"
 #include "gfx.h"
-#include "minifont.h"
 #include "platform.h"
 #include "rom.h"
 #include "meta.h"
@@ -30,8 +29,8 @@
 #include "title_setup.h"
 #include "text.h"
 #include "title_summary.h"
+#include "title_version.h"
 
-#include "version.h"   /* CW_VERSION, from the build (Makefile) */
 #include "weekly.h"
 
 #define T (R.layout->title)
@@ -518,18 +517,6 @@ static void render(void) {
 	SDL_UpdateTexture(S.tex, NULL, px, 240 * 4);
 }
 
-/* The build, for a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1
- * to 0.4 were alphas) */
-static const char *version_words(char *v, size_t n) {
-	const char *cw = CW_VERSION;
-	if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, n, "dev");
-	else {
-		const char *g = strstr(cw, ".g");
-		snprintf(v, n, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " beta" : "");
-	}
-	return v;
-}
-
 /* "BN5 found": the other games' ROMs read beside BN6's, said once a start
  * in the picture's top right corner a moment after the title comes up, in
  * the map's "Run saved" box, and gone (nothing had said whether Team
@@ -588,15 +575,7 @@ static void draw(void) {
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the menu's CONTINUE names its own layer there;
 	 * the question's box covers both) */
-	if (!S.confirm) {
-		char v[40];
-		minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
-		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
-		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
-			snprintf(v, sizeof v, "Best: Layer %d", best);
-			minifont_draw(x0 + CORE_W - 4 - minifont_width(v, 1), y0 + 138, v, rgba(255, 230, 90, 255), 1);
-		}
-	}
+	if (!S.confirm) title_version_draw(x0, y0, S.saved_depth, !(S.menu && S.has_save && S.saved_depth));
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */
@@ -633,10 +612,12 @@ static void draw(void) {
 	if (S.leaving) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, S.leaving * 255 / LEAVE_WHITE));
 }
 
-/* (the second screen's PET at its pace, then the title's frame) */
+/* (the second screen's PET at its pace, then the title's frame, and the
+ * updater's: its look at the start, the game ended once a download is in place) */
 static void tick(void) {
 	platform_second_screen_draw();
 	update();
+	title_version_tick();
 }
 
 const Scene scene_title = { "title", enter, tick, draw, NULL };

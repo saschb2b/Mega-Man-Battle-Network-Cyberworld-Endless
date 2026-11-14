@@ -832,7 +832,8 @@ def port_release():
 def package():
     """build/port/cyberworld: the port as a folder of PortMaster-New's ports/, to copy there
     for a pull request: the launcher, port.json, README.md, gameinfo.xml and the screenshot
-    beside cyberworld/, which holds the binary, one license per part and rom/."""
+    beside cyberworld/, which holds the binary, update.py (the game's own update), one license
+    per part and rom/."""
     out = os.path.join(ROOT, 'build', 'port')
     port = os.path.join(out, 'cyberworld')
     game = os.path.join(port, 'cyberworld')
@@ -846,6 +847,8 @@ def package():
     # (a 640x480 frame, as on the most common handheld screen: build.py screenshots portmaster)
     shutil.copyfile(os.path.join(ROOT, 'docs', 'screenshots', 'portmaster.png'), os.path.join(port, 'screenshot.png'))
     shutil.copy2(os.path.join(ROOT, 'build', 'aarch64', 'cyberworld.aarch64'), game)
+    # (the game's own update, put in place by the launcher once the game ends: docs/engine/updates.md)
+    shutil.copyfile(os.path.join(ROOT, 'port', 'update.py'), os.path.join(game, 'update.py'))
     shutil.copyfile(os.path.join(ROOT, 'LICENSE'), os.path.join(game, 'licenses', 'LICENSE.cyberworld.txt'))
     shutil.copyfile(os.path.join(ROOT, 'build', 'aarch64', 'licenses', 'mGBA.txt'),
                     os.path.join(game, 'licenses', 'LICENSE.mgba.txt'))
@@ -3361,6 +3364,8 @@ def main():
         # (linux/steam/add-to-steam.py, the site's pages and docs/re's status, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
+        if code == 0:   # port/update.py, the PortMaster port's own update
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_port_update.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         if code == 0:   # docs/re's ledger sound (its written files are dev's workflow's: tools/generated.py)

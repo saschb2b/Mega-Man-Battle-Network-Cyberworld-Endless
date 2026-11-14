@@ -1,7 +1,7 @@
 ---
 type: Measurement
 title: "The code's layers"
-description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 24 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
+description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 25 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
 tags: [code, lint, architecture, process]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
 sources:
@@ -83,7 +83,7 @@ part of one**, named in `tests/lint/layers.txt` [^rule] by its files:
   over it. They include the director, the Square and the second screen
   because putting those together is their job: `emu.game`, near the top.
 
-The 24 units, lowest first. A unit may include only the units its line
+The 25 units, lowest first. A unit may include only the units its line
 names, and a line names only units above it:
 
 | Unit | What it is | Files | May include |
@@ -97,18 +97,19 @@ names, and a line names only units above it:
 | `audio` | The engine's MP2K, the device, the sound filter | 21 | `formats` `core.base` `emu` |
 | `gfx` | Sprites, tiles, fonts, the PET's look | 26 | `formats` `core.base` `core.data` `emu` |
 | `analytics` | The anonymous statistics: a sink the levels above report to | 16 | `formats` `core.base` `core.data` `core` `net` `audio` `gfx` |
+| `update` | The game's own updates: the look, the download, each system's way | 9 | `formats` `core.base` `analytics` |
 | `map` | Layers as the game's maps | 39 | `formats` `core.base` `core.data` `core` `emu` `net` `gfx` |
 | `layer` | What stands on a layer | 60 | `formats` `core.base` `core.data` `core` `emu` `net` `map` |
 | `world` | The real world and the town | 31 | the same, and `layer` |
 | `jukebox` | The Jukebox | 6 | `formats` `core.base` `audio` `gfx` |
 | `library` | The Library | 6 | `formats` `core.base` `core.data` `core` `audio` `gfx` |
-| `core.options` | Options and its panels | 15 | `formats` `core.base` `emu` `audio` `gfx` `analytics` |
+| `core.options` | Options and its panels | 15 | `formats` `core.base` `emu` `audio` `gfx` `analytics` `update` |
 | `director` | The run on the game | 163 | everything above this line |
 | `online` | Online play's client | 201 | everything above the director's line but `world` and `core.options`, and `director` |
 | `second` | The second screen: a view of all of it | 29 | everything above this line |
 | `launcher` | The ROMs screen | 20 | `formats` `core.base` `core` `audio` `gfx` `core.options` |
 | `saves` | SAVES | 11 | `formats` `core.base` `core` `audio` `gfx` `launcher` |
-| `scenes` | The start, the title, the error screen | 18 | `formats` `core.base` `core.data` `core` `audio` `gfx` `layer` `core.options` `director` `second` `launcher` `saves` |
+| `scenes` | The start, the title, the error screen | 20 | `formats` `core.base` `core.data` `core` `audio` `gfx` `layer` `core.options` `director` `second` `launcher` `saves` `update` |
 | `emu.game` | The game's scene | 12 | everything above this line |
 | `dev` | Developer tools inside the game | 56 | everything above this line |
 | `core.app` | The entry point and each system's start | 9 | everything |

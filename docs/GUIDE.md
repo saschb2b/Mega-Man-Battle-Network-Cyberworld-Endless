@@ -16,7 +16,7 @@ statistics, troubleshooting and building the game yourself.
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Updates](#updates) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -124,6 +124,11 @@ Releases up to 0.6.0 named the PortMaster port
 `cyberworld-endless-rocknix-portmaster.zip`; up to 0.4.0 it was
 `cyberworld.zip`, the Windows installer `cyberworld-endless-setup-x64.exe`
 and the website's files `cyberworld-endless-web.zip`.
+
+From 0.22.0 the game tells you on its title when a newer version is out,
+and on Windows (the installer's copy), as an AppImage and on a PortMaster
+handheld installs it itself with one press ([Updates](#updates)). 0.22.0
+is the first that looks: install it by hand once, as before.
 
 ### The ROMs screen
 
@@ -1508,6 +1513,31 @@ green arrows turn the sections and the mode on the band turns the mode.
 The lights under the song are its eight tracks, lit as they sound. The
 last song and mode are kept for the next time (`jukebox.ini` in the data
 folder).
+
+## Updates
+
+At each start the game looks on its GitHub page for a newer version: one
+request for the newest release's `update.json`, which says its version
+and its files. Nothing about you, your game or your device is sent. When
+one is out, the title says so beside its own version (`New v0.22.0`),
+and **Options** on the title opens on a line for it, **Update to 0.22.0**,
+whose note says what A does on your system:
+
+| You play | A on the line |
+| --- | --- |
+| On Windows, installed with the installer | Downloads the new installer, and the game ends, installs the new version over itself (no administrator, nothing to click) and starts again |
+| The Linux AppImage | Downloads the new AppImage over the old one (the same file name, so a menu entry or Steam's shortcut keeps working) and starts it |
+| A copy the itch app installed | Nothing: the itch app updates it by itself |
+| Windows' zip, the Flatpak, the `.deb`, the tar.gz | Opens the download page |
+| A PortMaster handheld | Downloads the new version, and the game ends: PortMaster's message asks you to keep the device on while the launcher puts it in place (your saves and ROMs stay in the folder), then the game starts again. Switched off halfway, the next start puts the old version back |
+
+The download is checked against the release's own SHA-256 before it
+replaces anything; a failed one leaves your copy as it was, and A tries
+again. Your saves, your run at its checkpoint and your settings stay as
+they are. The line shows on the title only, never in a run.
+**Updates** on Options' Game page switches the look off (`updates = off`
+in `settings.ini`) and on again. The iPhone and iPad app updates through
+SideStore or AltStore, and the PS5's through Prospero Store, as before.
 
 ## Anonymous statistics
 

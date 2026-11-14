@@ -53,18 +53,19 @@ net:          formats core.base core.data core
 audio:        formats core.base emu
 gfx:          formats core.base core.data emu
 analytics:    formats core.base core.data core net audio gfx
+update:       formats core.base analytics
 map:          formats core.base core.data core emu net gfx
 layer:        formats core.base core.data core emu net map
 world:        formats core.base core.data core emu net map layer
 jukebox:      formats core.base audio gfx
 library:      formats core.base core.data core audio gfx
-core.options: formats core.base emu audio gfx analytics
+core.options: formats core.base emu audio gfx analytics update
 director:     *
 online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director
 second:       *
 launcher:     formats core.base core audio gfx core.options
 saves:        formats core.base core audio gfx launcher
-scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves
+scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves update
 emu.game:     *
 dev:          *
 core.app:     *

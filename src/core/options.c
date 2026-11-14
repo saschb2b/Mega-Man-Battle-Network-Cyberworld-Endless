@@ -22,6 +22,7 @@
 #include "settings_line.h"
 #include "sound_heard.h"
 #include "touch.h"
+#include "update.h"
 
 OptionsState O;
 /* (the page last shown and each page's cursor, kept from one opening to
@@ -46,11 +47,13 @@ int options_lines(int kinds[LINES_MAX]) {
 		if (display_has_lcd3x()) kinds[n++] = LINE_LCD3X;
 		if (display_has_voxel()) kinds[n++] = LINE_VOXEL;
 	} else {
+		if (update_line_shown()) kinds[n++] = LINE_UPDATE;
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
 #endif
 		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
+		if (update_here()) kinds[n++] = LINE_UPDATES;
 	}
 	/* (no Done: B leaves, as everywhere in BN6) */
 	return n;
@@ -84,6 +87,11 @@ void options_open(void) {
 	O.open = true;
 	O.page = kept_page;
 	memcpy(O.at, kept_at, sizeof O.at);
+	/* (a new version found: the first opening on the title shows its line) */
+	if (update_line_first()) {
+		O.page = PAGE_GAME;
+		O.at[PAGE_GAME] = 0;
+	}
 	scroll();
 	/* (the finger that opened it presses nothing more) */
 	touch_release();
@@ -205,6 +213,7 @@ static void turn(int kind, int dir) {
 	case LINE_FAST: fast_keep(fast_speed_next(fast_speed(), dir)); break;
 	case LINE_VIBRATION: feel_keep(kind, feel_level_next(feel_level(), dir)); break;
 	case LINE_TRIGGERS: feel_keep(kind, !feel_triggers()); break;
+	case LINE_UPDATES: update_set_on(!update_on()); break;
 	default: options_sound_keep((SoundFilter)((sound_filter() + SOUND_FILTER_COUNT + (dir < 0 ? -1 : 1)) % SOUND_FILTER_COUNT), true); break;
 	}
 	audio_sfx(SFX_CURSOR);
@@ -259,6 +268,8 @@ static void choose(void) {
 	/* (the statistics' question over the page, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
+	/* (the download begun, or the download page opened: update.h) */
+	case LINE_UPDATE: if (update_press()) audio_sfx(SFX_SELECT); break;
 	default: turn(options_line_kind(), TURN_PRESS); break;
 	}
 }
@@ -307,6 +318,8 @@ static void nav_update(void) {
 /* ---- the overlay: the question, the controls screen, then Options ---- */
 
 void options_update(void) {
+	/* (the updater's frame, the title's own stopped under Options: update.h) */
+	update_tick();
 	if (analytics_ask_shown()) { analytics_ask_update(); return; }
 	if (controls_shown()) { controls_update(); return; }
 	if (O.open) {
