@@ -26,9 +26,10 @@
 #include <mgba/core/blip_buf.h>
 #include <mgba/core/log.h>
 
-#include "audio_pace.h"
 #include "claims.h"
 #include "compat.h"
+#include "emu_keep.h"
+#include "emu_sound.h"
 #include "free_space_watch.h"
 #include "hook_gpsp.h"
 #include "platform.h"
@@ -52,9 +53,6 @@ uint8_t write_memory32(uint32_t address, uint32_t value);
 void flush_translation_cache_ram(void);
 
 #define PAGE 0x8000u
-#define RING 16384 /* stereo frames of buffered sound */
-#define LAT_TARGET 1536
-#define LAT_MAX    6144
 
 static bool ready;
 static uint32_t video[EMU_W * EMU_H];   /* ABGR, as mGBA draws it (emu_picture.c) */
@@ -151,16 +149,11 @@ static void raw_write8(uint32_t a, uint8_t v) {
 }
 
 /* ---- sound: gpSP's samples through a resampler into the ring, as emu.c's
- * mGBA sound goes (audio_pace.h nudges its rate by the ring's fill) ---- */
+ * mGBA sound goes (emu_sound.h) ---- */
 static blip_t *blip[2];
 static int16_t last[2];
 static unsigned clocked;   /* the frame's samples so far */
 static double in_rate = 32768;
-static int16_t ring[RING * 2];
-static int ring_r, ring_w;
-static SDL_mutex *ring_lock;
-static uint64_t ring_written, ring_played, ring_debt;
-static AudioPace pace;
 static unsigned frame_how;
 
 static void sample(int16_t l, int16_t r) {
@@ -175,22 +168,8 @@ static size_t cb_samples(const int16_t *d, size_t n) {
 	return n;
 }
 
-static void ring_put(const int16_t *tmp, int got) {
-	SDL_LockMutex(ring_lock);
-	for (int i = 0; i < got; ++i) {
-		if (ring_debt) { --ring_debt; continue; }
-		int next = (ring_w + 1) % RING;
-		if (next == ring_r) break;
-		ring[ring_w * 2] = tmp[i * 2];
-		ring[ring_w * 2 + 1] = tmp[i * 2 + 1];
-		ring_w = next;
-		++ring_written;
-	}
-	SDL_UnlockMutex(ring_lock);
-}
-
 static void pull_audio(void) {
-	if (!blip[0] || !ring_lock) return;
+	if (!blip[0] || !emu_sound_ready()) return;
 	blip_end_frame(blip[0], clocked);
 	blip_end_frame(blip[1], clocked);
 	clocked = 0;
@@ -201,18 +180,9 @@ static void pull_audio(void) {
 		blip_read_samples(blip[0], tmp, got, 1);
 		blip_read_samples(blip[1], tmp + 1, got, 1);
 		/* (a frame fast forward does not sound: its sound dropped) */
-		if (!(frame_how & EMU_FRAME_UNHEARD)) ring_put(tmp, got);
+		if (!(frame_how & EMU_FRAME_UNHEARD)) emu_sound_put(tmp, got);
 	}
-	SDL_LockMutex(ring_lock);
-	int fill = (ring_w - ring_r + RING) % RING;
-	if (fill > LAT_MAX) {
-		ring_played += (uint64_t)(fill - LAT_TARGET);
-		ring_r = (ring_w - LAT_TARGET + RING) % RING;
-		fill = LAT_TARGET;
-		audio_pace_reset(&pace, fill);
-	}
-	SDL_UnlockMutex(ring_lock);
-	double adj = audio_pace(&pace, fill, LAT_TARGET);
+	double adj = emu_sound_settle();
 	blip_set_rates(blip[0], in_rate, out_rate * adj);
 	blip_set_rates(blip[1], in_rate, out_rate * adj);
 }
@@ -227,47 +197,7 @@ void emu_audio_rate(int rate) {
 void emu_audio_from(void *core) { (void)core; }
 void emu_audio_drop_from(void *core) { (void)core; }
 
-uint64_t emu_audio_mark(void) {
-	if (!ring_lock) return 0;
-	SDL_LockMutex(ring_lock);
-	uint64_t mark = ring_written;
-	SDL_UnlockMutex(ring_lock);
-	return mark;
-}
-
-void emu_audio_rewind(uint64_t mark) {
-	if (!ring_lock) return;
-	SDL_LockMutex(ring_lock);
-	if (mark >= ring_played && mark < ring_written) {
-		ring_w = (int)(((uint64_t)ring_w + RING - (ring_written - mark)) % RING);
-		ring_written = mark;
-	} else if (mark < ring_played) {
-		ring_debt += ring_played - mark;
-		ring_w = ring_r;
-		ring_written = ring_played;
-	}
-	SDL_UnlockMutex(ring_lock);
-}
-
 int emu_audio_out_rate(void) { return out_rate; }
-void emu_audio_open(void) {
-	if (!ring_lock) ring_lock = SDL_CreateMutex();
-}
-
-int emu_audio_read(int16_t *out, int frames) {
-	int n = 0;
-	if (ring_lock) SDL_LockMutex(ring_lock);
-	while (n < frames && ring_r != ring_w) {
-		out[n * 2] = ring[ring_r * 2];
-		out[n * 2 + 1] = ring[ring_r * 2 + 1];
-		ring_r = (ring_r + 1) % RING;
-		++n;
-	}
-	ring_played += (uint64_t)n;
-	if (ring_lock) SDL_UnlockMutex(ring_lock);
-	memset(out + n * 2, 0, (size_t)(frames - n) * 4);
-	return n;
-}
 
 /* ---- libretro's calls ---- */
 static void cb_video(const void *data, unsigned w, unsigned h, size_t pitch) {
@@ -473,30 +403,12 @@ uint8_t *emu_gpsp_save_ram(size_t *size) {
 	return ready ? retro_get_memory_data(RETRO_MEMORY_SAVE_RAM) : NULL;
 }
 
-/* ---- RAM kept patched (emu_keep), as emu.c keeps it ---- */
-#define KEEP_MAX 8
-#define KEEP_LEN 64
-static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
-static int nkept;
-
-static void keep_put(bool own) {
-	for (int i = 0; i < nkept; ++i) {
-		const uint8_t *to = own ? kept[i].was : kept[i].now;
-		bool there = true;
-		for (uint32_t k = 0; own && there && k < kept[i].len; ++k) there = raw_read8(kept[i].addr + k) == kept[i].now[k];
-		for (uint32_t k = 0; there && k < kept[i].len; ++k)
-			if (raw_read8(kept[i].addr + k) != to[k]) raw_write8(kept[i].addr + k, to[k]);
-	}
-}
+/* ---- RAM kept patched (emu_keep, emu_keep.h) ---- */
+static void keep_put(bool own) { emu_keep_put(own, raw_read8, raw_write8); }
 
 bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
-	if (!ready || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	if (!ready || !emu_keep_add(addr, was, now, len)) return false;
 	claims_note(addr, (uint32_t)len);
-	kept[nkept].addr = addr;
-	kept[nkept].len = (uint32_t)len;
-	memcpy(kept[nkept].was, was, len);
-	memcpy(kept[nkept].now, now, len);
-	++nkept;
 	keep_put(false);
 	return true;
 }

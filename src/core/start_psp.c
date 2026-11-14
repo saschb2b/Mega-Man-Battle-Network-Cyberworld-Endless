@@ -16,6 +16,7 @@
 #include <pspkernel.h>
 #include <psppower.h>
 
+#include "frame_log.h"
 #include "game.h"
 #include "rom.h"
 
@@ -55,7 +56,9 @@ void console_args(int *argc, char ***argv) {
 	*argv = words;
 }
 
-void console_heap(char *out, size_t n) {
+/* The heap in words for frame_log: what is in use and the most it held,
+ * against what newlib has taken (docs/engine/emulation/psp-and-ds.md) */
+static void heap_words(char *out, size_t n) {
 	static size_t most;
 	struct mallinfo mi = mallinfo();
 	if ((size_t)mi.uordblks > most) most = (size_t)mi.uordblks;
@@ -67,6 +70,7 @@ void console_start(bool data_dir_given) {
 	/* (the PSP's highest clock: its 333 MHz Allegrex runs the GBA's core
 	 * and the engine on one core, docs/engine/emulation/psp-and-ds.md) */
 	scePowerSetClockFrequency(333, 333, 166);
+	frame_log_heap_from(heap_words);
 	/* (the game's folder beside its EBOOT, where PSP homebrew keeps its
 	 * files: ms0:/PSP/GAME/cyberworld-endless, or ef0: on a PSP Go's own
 	 * memory) */

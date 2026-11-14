@@ -3,9 +3,10 @@
 
 /* (on mGBA; a build on gpSP has emu_gpsp.c instead: CW_GPSP) */
 #ifndef CW_GPSP
-#include "audio_pace.h"
 #include "claims.h"
 #include "compat.h"
+#include "emu_keep.h"
+#include "emu_sound.h"
 #include "free_space_watch.h"
 #include "platform.h"
 #include "ram_survey.h"
@@ -32,16 +33,6 @@
 #include <3ds/thread.h>
 #endif
 
-#define RING 16384 /* stereo frames of buffered sound */
-/* The GBA runs at 59.73 Hz and frames are paced at 60, so the core makes a
- * little more sound than is played: keep the buffer near LAT_TARGET frames
- * (about 32 ms) by nudging the output rate, and drop sound past LAT_MAX. */
-#ifdef CW_DESKTOP
-#define LAT_TARGET 1024   /* (a desktop keeps up: about 21 ms) */
-#else
-#define LAT_TARGET 1536
-#endif
-#define LAT_MAX    6144
 
 static bool surveying;   /* (ram_survey.h) */
 static struct mCore *core;
@@ -49,14 +40,6 @@ static bool layout_ok;   /* the core's struct GBA reads as expected (emu_init) *
 static uint32_t video[EMU_W * EMU_H];
 static int out_rate = 48000;
 
-static int16_t ring[RING * 2];
-static int ring_r, ring_w;
-static SDL_mutex *ring_lock;
-/* the ring's place on the sound's timeline (emu_audio_mark): samples written
- * and played since the start, and those of a rollback's sound still to be
- * skipped, as they were played already (issue #167) */
-static uint64_t ring_written, ring_played, ring_debt;
-static AudioPace pace;   /* (the ring's averaged fill: the output rate's nudge) */
 
 static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va_list a) {
 	(void)l; (void)c; (void)lv; (void)f; (void)a;
@@ -205,33 +188,14 @@ static void pull_audio_from(struct mCore *c) {
 		blip_read_samples(r, tmp + 1, got, 1);
 		if (unheard) { tail_take(tmp, got); continue; }
 		if (own) tail_join(tmp, got);
-		SDL_LockMutex(ring_lock);
-		for (int i = 0; i < got; ++i) {
-			if (ring_debt) { --ring_debt; continue; }   /* (heard already, before a rollback: emu_audio_rewind) */
-			int next = (ring_w + 1) % RING;
-			if (next == ring_r) break; /* full: drop the rest */
-			ring[ring_w * 2] = tmp[i * 2];
-			ring[ring_w * 2 + 1] = tmp[i * 2 + 1];
-			ring_w = next;
-			++ring_written;
-		}
-		SDL_UnlockMutex(ring_lock);
+		emu_sound_put(tmp, got);
 	}
-	SDL_LockMutex(ring_lock);
-	int fill = (ring_w - ring_r + RING) % RING;
-	if (fill > LAT_MAX) {
-		ring_played += (uint64_t)(fill - LAT_TARGET);
-		ring_r = (ring_w - LAT_TARGET + RING) % RING;
-		fill = LAT_TARGET;
-		audio_pace_reset(&pace, fill);
-	}
-	SDL_UnlockMutex(ring_lock);
 	/* (a frame heard: the next unheard one's first samples are its tail) */
 	if (own && !unheard) {
 		tail_n = tail_at = 0;
 		tail_wanted = true;
 	}
-	double adj = audio_pace(&pace, fill, LAT_TARGET);
+	double adj = emu_sound_settle();
 	blip_set_rates(l, c->frequency(c), out_rate * adj);
 	blip_set_rates(r, c->frequency(c), out_rate * adj);
 }
@@ -239,31 +203,7 @@ static void pull_audio_from(struct mCore *c) {
 static void pull_audio(void) { pull_audio_from(core); }
 
 void emu_audio_from(void *other) {
-	if (other && ring_lock) pull_audio_from(other);
-}
-
-uint64_t emu_audio_mark(void) {
-	if (!ring_lock) return 0;
-	SDL_LockMutex(ring_lock);
-	uint64_t mark = ring_written;
-	SDL_UnlockMutex(ring_lock);
-	return mark;
-}
-
-void emu_audio_rewind(uint64_t mark) {
-	if (!ring_lock) return;
-	SDL_LockMutex(ring_lock);
-	if (mark >= ring_played && mark < ring_written) {
-		/* (none of it heard yet: cut, the next written in its place) */
-		ring_w = (int)(((uint64_t)ring_w + RING - (ring_written - mark)) % RING);
-		ring_written = mark;
-	} else if (mark < ring_played) {
-		/* (some heard: the rest cut, and as much of the next written skipped) */
-		ring_debt += ring_played - mark;
-		ring_w = ring_r;
-		ring_written = ring_played;
-	}
-	SDL_UnlockMutex(ring_lock);
+	if (other && emu_sound_ready()) pull_audio_from(other);
 }
 
 void emu_audio_drop_from(void *other) {
@@ -274,10 +214,6 @@ void emu_audio_drop_from(void *other) {
 }
 
 int emu_audio_out_rate(void) { return out_rate; }
-
-void emu_audio_open(void) {
-	if (!ring_lock) ring_lock = SDL_CreateMutex();
-}
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;
@@ -409,21 +345,6 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	if (!unshown) ++pictures;
 }
 
-int emu_audio_read(int16_t *out, int frames) {
-	int n = 0;
-	if (ring_lock) SDL_LockMutex(ring_lock);
-	while (n < frames && ring_r != ring_w) {
-		out[n * 2] = ring[ring_r * 2];
-		out[n * 2 + 1] = ring[ring_r * 2 + 1];
-		ring_r = (ring_r + 1) % RING;
-		++n;
-	}
-	ring_played += (uint64_t)n;
-	if (ring_lock) SDL_UnlockMutex(ring_lock);
-	memset(out + n * 2, 0, (size_t)(frames - n) * 4);
-	return n;
-}
-
 const uint32_t *emu_video(void) { return threaded ? shown : video; }
 
 uint32_t emu_pictures(void) { return pictures; }
@@ -462,38 +383,16 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
 
-/* ---- RAM kept patched (emu_keep) ---- */
+/* ---- RAM kept patched (emu_keep, emu_keep.h) ---- */
 
-#define KEEP_MAX 8
-#define KEEP_LEN 64
-static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
-static int nkept;
-
-/* Each patch's bytes made the engine's, whatever they read: the game's
- * own, or another build's patch, which a state that build saved may hold
- * (a checkpoint from before the game's own were saved there, its hit
- * gate's calls going where that build's code lay: issue #482, the game
- * stood still at the first hit). `own`: the game's again where they read
- * the engine's, for a state's save; bytes that read neither stay. */
-static void keep_put(bool own) {
-	for (int i = 0; i < nkept; ++i) {
-		const uint8_t *to = own ? kept[i].was : kept[i].now;
-		bool there = true;
-		for (uint32_t k = 0; own && there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == kept[i].now[k];
-		for (uint32_t k = 0; there && k < kept[i].len; ++k)
-			if ((uint8_t)core->rawRead8(core, kept[i].addr + k, -1) != to[k]) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
-	}
-}
+static uint8_t raw_read8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
+static void raw_write8(uint32_t a, uint8_t v) { core->rawWrite8(core, a, -1, v); }
+static void keep_put(bool own) { emu_keep_put(own, raw_read8, raw_write8); }
 
 bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
 	wait_frame();
-	if (!core || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	if (!core || !emu_keep_add(addr, was, now, len)) return false;
 	claims_note(addr, (uint32_t)len);
-	kept[nkept].addr = addr;
-	kept[nkept].len = (uint32_t)len;
-	memcpy(kept[nkept].was, was, len);
-	memcpy(kept[nkept].now, now, len);
-	++nkept;
 	keep_put(false);
 	return true;
 }

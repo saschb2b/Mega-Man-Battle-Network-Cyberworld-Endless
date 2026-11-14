@@ -12,11 +12,14 @@
 #include "platform_second.h"
 #ifdef __3DS__
 #include "start_3ds.h"
-#elif defined(__PSP__)
-#include "start_console.h"
 #endif
 
 bool platform_frame_log;
+
+#ifdef __PSP__
+static void (*heap_of)(char *out, size_t n);
+void frame_log_heap_from(void (*heap)(char *out, size_t n)) { heap_of = heap; }
+#endif
 
 /* CYBERWORLD_FRAME_LOG: a line a second of how the frames reached the
  * display (shown, played, the gaps between shown ones), for a player's
@@ -78,10 +81,12 @@ void frame_log_present(uint64_t present) {
 		size_t at = strlen(bottom);
 		snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
 #elif defined(__PSP__)
-		char heap[120];
-		console_heap(heap, sizeof heap);
-		size_t at = strlen(bottom);
-		snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
+		if (heap_of) {
+			char heap[120];
+			heap_of(heap, sizeof heap);
+			size_t at = strlen(bottom);
+			snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
+		}
 #endif
 		printf("frames: %d shown, %llu played, gaps %.1f-%.1f ms (<12.5: %d, <20: %d, <30: %d, more: %d)%s;"
 			" a frame's update %.1f ms (the GBA %.1f drawing its picture, %.1f in %d without), drawing %.1f ms, present %.1f ms,"

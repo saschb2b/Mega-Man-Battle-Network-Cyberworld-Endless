@@ -72,7 +72,7 @@ typedef struct TownStyle Style;
 static struct {
 	const Style *style;
 	const TownLines *lines;   /* its people and words */
-	TownBook *books[4], *book;   /* each style's source, learned once; the current one */
+	TownBook *book;   /* the style's source (townsrc_book: learned once, kept for the next visit) */
 	int stw, sth;
 	uint8_t src_obj[32][20];
 	int nsrc_obj;
@@ -687,8 +687,7 @@ static int plan_once(uint32_t seed) {
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
 	T.lines = &town_lines[si];
-	if (!T.books[si] && !(T.books[si] = townsrc_learn(T.style->group, T.style->number, T.style->mat_of))) return -1;
-	T.book = T.books[si];
+	if (!(T.book = townsrc_book(si, T.style->group, T.style->number, T.style->mat_of))) return -1;
 	townsrc_size(T.book, &T.stw, &T.sth);
 	T.nsrc_obj = townsrc_objects(T.book, T.src_obj, 32);
 	T.npieces = 0;
@@ -943,14 +942,6 @@ bool town_install(int to_group, int to_number, int x, int y) {
 	if (!T.tiles || (T.style->door && !indoors_bn6_warps(T.style->group, T.style->number))) return false;
 	uint32_t desc, coord_slot;
 	townsrc_slots(T.book, &desc, &coord_slot);
-#if defined(__PSP__) || defined(CW_HEAP_PSP)
-	/* (the PSP keeps no town between visits: its source learned, planned
-	 * from and let go here, learned again at the next visit, as its heap
-	 * holds a layer's learning or a town's, not both:
-	 * docs/engine/emulation/psp-and-ds.md) */
-	for (int i = 0; i < 4; ++i) { townsrc_free(T.books[i]); T.books[i] = NULL; }
-	T.book = NULL;
-#endif
 	int tw = T.info.tw, th = T.info.th;
 	/* the tile map */
 	size_t cells = (size_t)tw * th, raw = cells * 4;
@@ -1004,5 +995,6 @@ bool town_install(int to_group, int to_number, int x, int y) {
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
 		mapslot_music(g, n, T.style->song);
 	mapslot_town(false);
+	townsrc_installed();
 	return ok;
 }

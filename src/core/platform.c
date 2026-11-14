@@ -239,9 +239,15 @@ static void layout_canvas(void) {
 		int wx = (int)P.fill + 1, wy = (int)P.fill_y + 1;
 		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * wx, P.h * wy);
 		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
+#ifdef __PSP__
+		/* (the PSP's 2 MB of video memory holds none past the canvas's: the
+		 * canvas itself to the screen, smoothly, sharp scaling from 1x) */
+		else SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeLinear);
+#else
 		/* (no memory for it: the canvas at the whole scale, a little wide;
 		 * stretched, the picture alone at it) */
 		else P.fill = P.fill_y = 0;
+#endif
 	}
 }
 
@@ -895,7 +901,7 @@ static void copy_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha, con
  * soft, no pixel drawn wider than the next). */
 static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_Rect dst = canvas_rect();
-	if (P.fill > 0) {
+	if (P.fill > 0 && P.sharp) {
 		SDL_SetRenderTarget(P.renderer, P.sharp);
 		copy_frames(older, newer, alpha, NULL, false);
 	}
@@ -904,8 +910,8 @@ static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_RenderClear(P.renderer);
 	/* (a picture under the canvas, which is clear where it shows: platform_set_under) */
 	bool over = under_canvas && under_canvas(P.renderer, &dst);
-	if (P.fill > 0) SDL_SetTextureBlendMode(P.sharp, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
-	if (P.fill > 0) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
+	if (P.fill > 0 && P.sharp) SDL_SetTextureBlendMode(P.sharp, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+	if (P.fill > 0 && P.sharp) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
 	else copy_frames(older, newer, alpha, &dst, over);
 	/* (the lcd3x shader at the screen's pixels, as its preset draws; not a menu's own screen) */
 	if (!own_taps) lcd_grid_draw(P.renderer, &dst, P.w, P.h);
