@@ -1044,6 +1044,18 @@ gone once received or after its 15 minutes. Every system with the Net
 Square sends and receives, the browser too; it needs a connection to the
 official server, and nothing else of yours goes with it.
 
+To keep them in step for good, as Steam Cloud does, choose **SAVES ›
+CLOUD › TURN ON** on one device, then **ADD A SYSTEM** there and type its
+code under **RECEIVE** on each other one. From then on each device
+fetches the newest saves as the game starts (the title waits a moment
+for it) and sends its own a few seconds after every save and as you
+close it. Only where two devices both played since they were last in
+step does the game ask which saves to keep, side by side as with
+IMPORT, and **UNDO IMPORT** brings back the ones it replaced. The saves
+are sealed on your device, so the server cannot read them; a copy
+nobody fetches or sends for 180 days is deleted. **UNLINK** stops it on
+one device, **DELETE** removes the copy from the server.
+
 On Android, an iPhone or an iPad the game keeps that file in your ROM
 folder, or one you choose with **FOLDER**, a few seconds after each save.
 After a reinstall, choose that folder again: the game finds the copy and

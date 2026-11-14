@@ -67,7 +67,10 @@ service of `deploy/coolify/compose.yaml`). The console's log names no
 player. Saves sent by a code ([Portable saves](../engine/saves.md),
 Sending by code) it holds sealed, unreadable to it, in memory alone for
 15 minutes or until taken, never in a file, a log or a backup, and
-counts only how many were held and taken a day.
+counts only how many were held and taken a day. Saves kept in step it
+holds on disk, sealed and unreadable to it too, a slot each with the
+hash of its auth, until the game deletes it or 180 days pass unused; out
+of its backups.
 `--admin forget` answers a request to be removed. It follows
 `dev` until the release that ships online play, then `main`
 ([server/README.md, At a release](../../server/README.md#at-a-release-the-official-server-follows-main)).
