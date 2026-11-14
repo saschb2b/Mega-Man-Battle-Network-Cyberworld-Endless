@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: engine/emulation/engine-sound.md (the game's music carried on under the engine's screens over a run and given back, the NaviCust's theme where none plays, the check that proves the hand-over byte for byte; its description), engine/emulation/index.md (its line), rom/sound.md (the RAM and registers the carry reads and writes), code/gfx-and-audio.md (mp2k_layout.c, mp2k_carry.c, music_carry.c).
 * **Update**: devtools/profiling.md (a whole panel's seams asked of its own tiles and their neighbours alone, not every tile of the map: BN5's Nebula Area's pick 17.0 to 14.7 billion instructions, the layers the same).
 * **Update**: devtools/profiling.md (learning the areas' maps: tl_skipped kept a panel with the map's view; over every area 11.1 to 4.5 seconds, BN4's area 34 3.1 to 0.25, the layers the same).
 * **Update**: devtools/profiling.md (the pieces' search: each shape's suiting panels listed once a map's laying; the pick over every area 7.8 to 7.2 seconds, BN5's Undernet 27.0 to 24.4 billion instructions, the layers the same).

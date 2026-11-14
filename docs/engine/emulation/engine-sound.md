@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The engine's own sound"
 description: "The engine's own MP2K (`src/audio/mp2k*.c`, `gba_sound.c`): BN6's sound engine rewritten in C for the title and PET screens, proved byte for byte against the game by `tools/mp2k_verify.py`, BN5's and BN4's songs on it, and the game's own song carried on under the engine's screens over a run and given back."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:30:00Z }
 ---
 
 # The engine's own sound
