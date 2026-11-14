@@ -184,6 +184,7 @@ void director_see(void) {
 	see_locks();
 	see_bug_note();
 	lib_see();
+	lib_way_see();
 	feel_game_frame();
 }
 

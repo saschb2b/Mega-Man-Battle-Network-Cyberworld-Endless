@@ -24,7 +24,8 @@
 /* (made at the first frame in 3D: none of it where the 3D is off) */
 static struct Stereo {
 	uint8_t io[0x60];
-	StereoFlat flat;
+	StereoFlat flat, made_flat;   /* the frame's flat parts, and those the present's spans were last made from */
+	float made_sep;
 	bool kept;          /* the frame drawn's flat parts read */
 	uint64_t live;      /* P.frame + 1 of the frame drawn in 3D */
 } *st;
@@ -87,8 +88,12 @@ static void shot_save(const uint32_t *px) {
 /* The 3DS's present asks at each frame: each row's spans and shift */
 static bool make(Present3dsStereo *out) {
 	if (!st || st->live != P.frame + 1) return false;
-	memset(out, 0, sizeof *out);
 	float sep = SEP_MOST * slider();
+	/* (the spans the present keeps, where the flat parts and the slider are as they were: made anew, up to 1.7 ms a frame) */
+	if (sep == st->made_sep && !memcmp(&st->flat, &st->made_flat, sizeof st->flat)) return true;
+	st->made_flat = st->flat;
+	st->made_sep = sep;
+	memset(out, 0, sizeof *out);
 	for (int y = 0; y < STEREO_H; ++y) {
 		StereoRow r;
 		stereo_row(&st->flat, y, &r);

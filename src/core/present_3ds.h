@@ -16,6 +16,9 @@ SDL_Surface *present3ds_init(int w, int h);
  * over its width too (display.h); with `sync`, at the screen's next
  * refresh, the frame paced by it. */
 void present3ds_frame(bool fill, bool stretch, bool sync);
+/* The canvas's surface (RGBA8888 in memory the GPU reads), NULL before the
+ * present starts: for a picture written into it straight */
+SDL_Surface *present3ds_canvas(void);
 void present3ds_exit(void);
 /* The bottom screen's picture (issue #9): SECOND_W x SECOND_H pixels,
  * RGBA8888, `pitch` bytes a row, in memory the GPU reads; NULL where it has
