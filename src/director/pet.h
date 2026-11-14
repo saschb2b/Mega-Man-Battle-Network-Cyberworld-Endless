@@ -31,6 +31,9 @@ bool pet_holds(void);
 /* ... and whether the second screen follows it meanwhile (the Library's
  * chip under the cursor) */
 bool pet_second_follows(void);
+/* ... and whether it plays its own music meanwhile (the Jukebox's songs):
+ * the game's then waits for it (audio.h, music_carry_held) */
+bool pet_plays_music(void);
 /* The game's scene left: such a screen put away */
 void pet_leave(void);
 

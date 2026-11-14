@@ -91,6 +91,7 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	music_carry_drop();
 	pet_leave();
 	director_pick_shut();
 	online_visit_shutdown();
@@ -155,6 +156,14 @@ static int frames_speed(void) { return director_lab_loading() ? LAB_LOAD_SPEED :
  * is up), or fast forward's */
 static bool frame_goes_on(int i, int speed) { return speed > 1 ? i < speed && !director_lab_shown() : fast_forward_goes_on(i); }
 
+/* the game held under a screen of the engine's this frame, and the scene's
+ * own Options and the touch controls' menu (main.c): its music carried on
+ * under it (audio.h, music_carry_held), where no screen plays its own (the
+ * Jukebox) and no other core sounds (a NetBattle from the Net Square) */
+static void held(void) {
+	if (!pet_plays_music() && !online_visit_held() && !online_visit_waiting()) music_carry_held();
+}
+
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
@@ -165,15 +174,18 @@ static void update(void) {
 	/* (a reward pick up, docs/game/reward-pick.md: the game's core holds still under it, its keys the screen's) */
 	if (director_pick_shown()) {
 		director_pick_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+		held();
 		return;
 	}
 	/* (the Battle Lab's builder up, docs/game/battle-lab.md: the same) */
 	if (director_lab_shown()) {
 		director_lab_keys(keys_from_buttons());
+		held();
 		return;
 	}
 	/* (the PET's Jukebox or Library up: the game's core, its music with it, holds still under it) */
 	if (pet_holds()) {
+		held();
 		/* (the Library's chip under the cursor on the second screen: read again while the game holds) */
 		if (pet_second_follows()) {
 			second_update();
@@ -193,7 +205,8 @@ static void update(void) {
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */
 	if (emu_threaded()) {
-		if (devtools_open()) { frame_keys(); return; }
+		if (devtools_open()) { frame_keys(); held(); return; }
+		music_carry_resume();
 		if (!dev_fast) fast_forward_update();
 		for (int i = 0; frame_goes_on(i, speed); ++i) {
 			if (started) after_frame();
@@ -204,7 +217,8 @@ static void update(void) {
 		return;
 	}
 	uint32_t keys = frame_keys();
-	if (devtools_open()) return;   /* the game holds still under the dev menu */
+	if (devtools_open()) { held(); return; }   /* the game holds still under the dev menu */
+	music_carry_resume();
 	if (!dev_fast) fast_forward_update();
 	for (int i = 0; frame_goes_on(i, speed); ++i) {
 		/* (the way into BN6's folder editor is pressed a frame at a time, run through at once: its keys each frame) */
@@ -241,4 +255,4 @@ static void draw(void) {
 	director_draw_lab();
 }
 
-const Scene scene_emu = { "emu", enter, update, draw, leave };
+const Scene scene_emu = { "emu", enter, update, draw, leave, held };

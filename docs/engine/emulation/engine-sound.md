@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "The engine's own sound"
-description: "The engine's own MP2K (`src/audio/mp2k*.c`, `gba_sound.c`): BN6's sound engine rewritten in C for the title and PET screens, proved byte for byte against the game by `tools/mp2k_verify.py`, and BN5's and BN4's songs on it."
+description: "The engine's own MP2K (`src/audio/mp2k*.c`, `gba_sound.c`): BN6's sound engine rewritten in C for the title and PET screens, proved byte for byte against the game by `tools/mp2k_verify.py`, BN5's and BN4's songs on it, and the game's own song carried on under the engine's screens over a run and given back."
 tags: [engine, emulation]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
 ---
@@ -96,3 +96,51 @@ to silence), and plays its songs on player 31 through `audio.c`'s
 `audio_song_*`, which take the audio device's lock: the engine runs on
 the sound's own thread, and a call into it from the frame's thread
 waits for the mix in hand.
+
+**The game's music under the engine's screens.** The other screens of
+the engine's that hold the core still over a run (Options and its
+Controls, the touch controls' menu and editor, the Library, a reward
+pick, the Battle Lab's builder, the dev menu) stopped the game's music
+dead with it, where BN6's own PET pages play on over the map's song.
+They carry it on now, the owner's ask of 14 November 2026
+(`src/audio/music_carry.c`, `mp2k_carry.c`): at the first frame held,
+the game's music player (31) is read where BN6 keeps it (its
+MusicPlayerInfo, its eight tracks, SoundInfo's four DirectSound
+channels and the PSG's four, the reverb and the PSG's 15-frame count:
+[Sound and music](../../rom/sound.md), The game's music carried) and
+taken by the engine's player 31 field for field (`mp2k_layout.c`, the
+layout `--mp2k-trace` writes): the song goes on from the tick where the
+game was held, its notes sounding on, the PSG's set going again on the
+engine's registers. Its data is read from the core's ROM copy, a byte
+at a time (`emu_rom_byte`, gpSP's pages too), where another game's song
+copied in lives. As the core runs again the song is given back the same
+way: the game's RAM takes what the engine played since, the PSG's notes
+set going on the game's own registers (`emu_io_write8`: mGBA's
+`GBAIOWrite8`, gpSP's store, as the game's own store writes them), and
+the game plays on from there. A channel sounding another's sound keeps
+it, an effect of the engine's as the song is taken (Options' opening
+sound), an effect of the game's as it is given back: the music's note
+there is let go, and a channel given back that another track still
+listed comes off that track's list as BN6's ClearChain takes it off.
+Where the game plays nothing (between songs, its music stopped), the
+screen plays BN6's Navi Customizer theme (0x1E, the NaviCust's screen's
+own song), faded out as the game runs again. The Jukebox plays its own
+songs, and a NetBattle from the Net Square its own cores' sound: there
+nothing is carried. A song given back goes only to the game as it was
+taken; one loaded meanwhile (a test battle's snapshot) keeps its own.
+
+The two run the same code byte for byte, so the song comes back where
+the game would have had it. Measured on 14 November 2026 with the
+check `CYBERWORLD_CARRY_CHECK=N:M:HOW@FRAME` (at the engine's frame
+FRAME the game's music handed to the engine for N frames and given back,
+HOW 1, or left to the game, HOW 0, then M frames of the game; the
+music's state and the PSG's registers 0x04000060-0x0400009F on stderr,
+and the game ends): in the first battle of `cw.py shot battle`, at frame
+900, `300:120:1@900` and `300:120:0@900` printed the same lines, the player, its
+eight tracks, every channel and the PSG's registers byte for byte, a PSG
+note of the song held through the hand-over and given back. Heard: with
+Options opened over Lan's room (`cw.py shot pet/options`, the sound
+dumped with `CYBERWORLD_AUDIO_DUMP` and `CYBERWORLD_AUDIO_OFFLINE`), the
+build before fell silent from Options' opening; this one holds the
+room's song at its level all through, with no gap or doubling at either
+seam.

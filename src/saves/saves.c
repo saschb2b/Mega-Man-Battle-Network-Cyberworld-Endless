@@ -191,7 +191,7 @@ static void update(void) {
 	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) saves_activate(SV.focus);
 }
 
-const Scene scene_saves = { "saves", enter, update, saves_draw, leave };
+const Scene scene_saves = { "saves", enter, update, saves_draw, leave, NULL };
 
 bool saves_key(void) {
 	static bool alone;

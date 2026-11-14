@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **The music plays on under the game's own menus.** Options, the
+  touch controls' menu, the Library, a reward pick and the Battle Lab's
+  builder used to cut the music dead while they were up. Now the song
+  keeps playing from where it was, and goes on from there in the game
+  as you close them. Where nothing was playing, the NaviCust's theme
+  fills in.
 - **The game tells you when a new version is out.** At each start it
   looks for one (a single request for the release's own `update.json`,
   nothing about you sent), and the title shows `New v0.22.0` beside its

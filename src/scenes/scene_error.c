@@ -65,4 +65,4 @@ static void error_update(void) {
 	if (btn_pressed(BTN_START) || btn_pressed(BTN_B)) P.quit = true;
 }
 
-const Scene scene_error = { "error", NULL, error_update, error_draw, NULL };
+const Scene scene_error = { "error", NULL, error_update, error_draw, NULL, NULL };
