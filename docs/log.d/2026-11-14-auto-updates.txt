@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T03:30:00Z
+* **Add**: engine/updates.md (the game's own updates: the release's update.json, the look at each start, the title's note and Options' lines, each system's way, the PortMaster port's update by its launcher, the checks, what comes next), code/update.md (`src/update/`, `title_version.c`, the manifest tool, its tests). **Update**: GUIDE.md (Updates), code/index.md (its line, 25 units), engine/index.md (its line), code/layers.md (the `update` unit, 25 units), code/screens.md (`title_version.c`), code/tests.md (`test_update.c`, `test_port_update.py`), code/platforms.md (the installer's silent update, the port's `update.py`, update.json in releases), code/analytics.md (its GET, the updater's).

@@ -1,5 +1,17 @@
 # Changelog
 
+## Unreleased
+
+- **The game tells you when a new version is out.** At each start it
+  looks for one (a single request for the release's own `update.json`,
+  nothing about you sent), and the title shows `New v0.22.0` beside its
+  version. On Windows (the installer's copy), as a Linux AppImage and on
+  a PortMaster handheld, Options on the title updates the game with one
+  press: it downloads the new version, checks it, and starts again as it,
+  your saves and your run kept. Elsewhere the line opens the download
+  page. Options' Game page has an **Updates** switch to turn the look
+  off.
+
 ## 0.21.2 (2026-11-14)
 
 - **Fixed: AquaNdl struck nothing at BN5's and BN4's foes.** MegaMan
