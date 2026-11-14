@@ -170,7 +170,7 @@ case " $TARGETS " in *" psp "*)
 	cmake --build build-psp --target mgba -j"$(nproc)"
 	for f in util/vfs/vfs-fd util/vfs/vfs-dirent core/lockstep gba/sio/lockstep; do
 		psp-gcc -O2 -G0 -D_GNU_SOURCE -DDISABLE_THREADING -DFIXED_ROM_BUFFER -DMINIMAL_CORE=1 -DM_CORE_GBA \
-		 -Imgba-$VER/include -Imgba-$VER/src -Ibuild-psp/include -c mgba-$VER/src/$f.c -o build-psp/$(echo $f | tr / -).o
+		 -Imgba-$VER/include -Imgba-$VER/src -Ibuild-psp/include -c mgba-$VER/src/$f.c -o "build-psp/$(echo "$f" | tr / -).o"
 	done
 	psp-ar rcs build-psp/libmgba.a build-psp/util-vfs-vfs-fd.o build-psp/util-vfs-vfs-dirent.o build-psp/core-lockstep.o \
 	 build-psp/gba-sio-lockstep.o
