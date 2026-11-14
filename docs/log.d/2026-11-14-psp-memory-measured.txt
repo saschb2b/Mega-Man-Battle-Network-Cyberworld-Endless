@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T02:38:23Z
+* **Update**: engine/emulation/psp-and-ds.md (the PSP's memory measured: the game built for the PSP boots to the title in PPSSPP with its heap full, a BN6 run's heap peaks at 60 to 65 MB, some 37 MB more than a PSP holds, and what a build would have to cut), engine/emulation/index.md (its line).
