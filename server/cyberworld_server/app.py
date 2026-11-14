@@ -17,6 +17,7 @@ from .stands import Stands
 from .teams import Teams
 from .trade import Trades
 from .transfer import Transfers
+from .sync import Slots, scan
 from .week import Weeks, week_of
 from .identity import IdentityStore, append_log
 from . import retention
@@ -50,7 +51,7 @@ class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
                  player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
                  pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time,
-                 maintenance="", hold=None, transfers=True):
+                 maintenance="", hold=None, transfers=True, sync=True, cloud_slots=None, cloud_megabytes=None):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -99,6 +100,10 @@ class Server:
         self.maintenance = protocol.maintenance_line(maintenance)
         # (saves sent by a code: one exchange, no visit, held in memory alone; transfer.py)
         self.transfers = Transfers(transfers, self.daily.count)
+        # (saves kept in step: one exchange, no visit, a slot's blob on disk; sync.py)
+        bounds = {key: value for key, value in (("slots", cloud_slots), ("megabytes", cloud_megabytes)) if value is not None}
+        self.slots = Slots(self.store.directory, sync, self.daily.count, clock, days=self.retention.cloud_days, **bounds)
+        self.daily.kept = lambda: self.slots.kept()
 
     def event(self, kind, **fields):
         """An event in the console's log; one that names a player (a public
@@ -137,6 +142,8 @@ class Server:
         # (an append still in its thread holds the state directory's lock and
         # its log open: done before the server is, or the files stay in use)
         await asyncio.gather(*self.writes, return_exceptions=True)
+        # (... and a slot's blob still being written or read: sync.py)
+        await asyncio.gather(*self.slots.writes, return_exceptions=True)
         if self.roster_task:
             await asyncio.gather(self.roster_task, return_exceptions=True)
         if self.retention_task:
@@ -178,6 +185,10 @@ class Server:
             if data and data[0] == protocol.SPEC["transfer"]:
                 # (a save sent by a code: no player, place, channel or identity)
                 await self.transfers.exchange(reader, writer, data)
+                return
+            if data and data[0] == protocol.SPEC["sync"]:
+                # (saves kept in step: no player, place, channel or identity either)
+                await self.slots.exchange(reader, writer, data)
                 return
             version = protocol.hello_version(data)
             if version is not None:
@@ -359,7 +370,7 @@ class Server:
                 "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
                 "room_capacity": self.capacity, "channels": self.max_channels,
                 "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on,
-                          "transfers": self.transfers.on},
+                          "transfers": self.transfers.on, "sync": self.slots.on},
                 "maintenance": self.maintenance or None, "hold_seconds": self.holds.seconds}
 
     def choose_channel(self, requested, exclude=0):
@@ -516,6 +527,11 @@ class Server:
         except (OSError, ValueError) as exc:
             LOG.error("The retention's pass failed: %s", exc)
             return {}
+        # (the slots' sizes read again, as the pass and `forget` left them: sync.py)
+        try:
+            self.slots.rescan(await asyncio.to_thread(scan, self.store.directory))
+        except OSError as exc:
+            LOG.error("Could not read the slots: %s", exc)
         if gone:
             self.event("retention", **gone)
         return gone

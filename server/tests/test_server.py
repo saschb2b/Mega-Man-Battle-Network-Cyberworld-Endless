@@ -209,7 +209,11 @@ class ContractTests(unittest.TestCase):
                      "transfer", "transfer_state", "transfer_data", "transfer_version", "transfer_put", "transfer_get",
                      "transfer_done", "transfer_bytes", "transfer_state_bytes", "transfer_lookup_bytes", "transfer_max",
                      "transfer_minutes", "transfer_ready", "transfer_held", "transfer_found", "transfer_none",
-                     "transfer_busy", "transfer_taken", "transfer_off", "transfer_removed"):
+                     "transfer_busy", "transfer_taken", "transfer_off", "transfer_removed",
+                     "sync", "sync_state", "sync_version", "sync_pull", "sync_push", "sync_drop", "sync_bytes",
+                     "sync_state_bytes", "sync_slot_bytes", "sync_auth_bytes", "sync_max", "sync_days", "sync_same",
+                     "sync_found", "sync_none", "sync_denied", "sync_ready", "sync_stored", "sync_conflict",
+                     "sync_busy", "sync_off", "sync_dropped"):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
@@ -233,6 +237,9 @@ class ContractTests(unittest.TestCase):
         # (saves sent by a code: transfer.py)
         self.assertEqual(protocol.TRANSFER.size, protocol.SPEC["transfer_bytes"])
         self.assertEqual(protocol.TRANSFER_STATE.size, protocol.SPEC["transfer_state_bytes"])
+        # (saves kept in step: sync.py)
+        self.assertEqual(protocol.SYNC.size, protocol.SPEC["sync_bytes"])
+        self.assertEqual(protocol.SYNC_STATE.size, protocol.SPEC["sync_state_bytes"])
         # (v15: a 2v2's ARENA_SEAT around the largest relayed message)
         self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
         self.assertEqual(protocol.WATCH_KEYS.size, protocol.SPEC["watch_keys_head"])
