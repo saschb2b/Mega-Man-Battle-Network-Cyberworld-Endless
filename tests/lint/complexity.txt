@@ -14,7 +14,6 @@ src/layer/text.c:code_of 29 15
 src/layer/text.c:wrap 40 44
 src/map/coords.c:walls 28 32
 src/map/decor.c:decor_learn 46 65
-src/map/legal.c:legal_fix 38 66
 src/map/props.c:cut_tiles 29 48
 src/map/props.c:floor_emblem_on 29 46
 src/map/props.c:props_learn_counter 27 71

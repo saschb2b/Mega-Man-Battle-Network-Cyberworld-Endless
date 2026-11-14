@@ -13,7 +13,6 @@ includes src/layer/layer_objs.c 24
 nesting src/core/touch_art.c:rasterize 6
 nesting src/map/area_src.c:draw_layers 6
 nesting src/map/decor.c:decor_learn 6
-nesting src/map/legal.c:legal_fix 7
 nesting src/map/legal.c:pieces 6
 nesting src/map/tilemap.c:pick_all 6
 nesting src/map/tiles_pick.c:best 6

@@ -5,7 +5,6 @@ src/core/touch_art.c: img_new: use of floating-point arithmetic here might yield
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'fp' [-Wanalyzer-possible-null-dereference]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'kind' [-Wanalyzer-possible-null-dereference]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'pixels' [-Wanalyzer-possible-null-dereference]
-src/map/legal.c: legal_fix: dereference of possibly-NULL 'stuck' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL '*out.tiles' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL 'mark' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL 'q' [-Wanalyzer-possible-null-dereference]

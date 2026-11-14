@@ -13,7 +13,8 @@ typedef struct {
 	uint8_t *cell;           /* gw x gh, nonzero on floor: edited */
 	const uint8_t *locked;   /* gw x gh, nonzero where the floor must stay as it is */
 	/* whether the panel of grid cell (x, y) is drawn exactly (x, y may lie
-	 * one outside the grid) */
+	 * one outside the grid), from the cells alone: legal_fix asks it once
+	 * between two edits */
 	bool (*clean)(int x, int y, void *ctx);
 	void *ctx;
 } LegalGrid;
