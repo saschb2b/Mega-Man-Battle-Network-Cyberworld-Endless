@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T02:11:11Z
-* **Add**: engine/emulation/psp-and-ds.md (whether a PSP or a DS could run the game, measured in PPSSPP: mGBA too slow, gpSP's dynarec with room, a DS with neither speed nor memory), engine/emulation/index.md (its line), code/platforms.md (the systems not built for), code/tools.md (tools/psp_bench.py's row).
