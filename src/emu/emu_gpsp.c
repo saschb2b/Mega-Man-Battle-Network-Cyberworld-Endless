@@ -388,6 +388,17 @@ void emu_write32(uint32_t a, uint32_t v) {
 	for (int i = 0; ready && i < 4; ++i) raw_write8(a + (uint32_t)i, b[i]);
 }
 
+uint8_t emu_rom_byte(uint32_t a) { return ready && is_rom(a) ? raw_read8(a) : 0; }
+
+/* (the I/O through gpSP's stores, as the game's own: raw_write8 takes it there) */
+void emu_io_write8(uint32_t a, uint8_t v) {
+	if (ready && (a >> 24) == 0x04) write_memory8(a, v);
+}
+
+void emu_io_write32(uint32_t a, uint32_t v) {
+	if (ready && (a >> 24) == 0x04) write_memory32(a, v);
+}
+
 void emu_write(uint32_t a, const void *data, size_t len) {
 	const uint8_t *p = data;
 	claims_note(a, (uint32_t)len);

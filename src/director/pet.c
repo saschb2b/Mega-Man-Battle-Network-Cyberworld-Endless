@@ -105,6 +105,8 @@ bool pet_holds(void) {
 
 bool pet_second_follows(void) { return library_shown(); }
 
+bool pet_plays_music(void) { return jukebox_shown(); }
+
 void pet_leave(void) {
 	jukebox_shut();
 	library_shut();

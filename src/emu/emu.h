@@ -98,6 +98,16 @@ uint32_t emu_read32(uint32_t addr);
 void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
+/* An I/O register written as the game's own store writes it (the sound's:
+ * the game's music given back, music_carry.h), which emu_write leaves
+ * alone */
+void emu_io_write8(uint32_t addr, uint8_t v);
+void emu_io_write32(uint32_t addr, uint32_t v);
+/* A byte of the core's ROM copy (patched, grown past the player's ROM:
+ * free_space.h), read at once, with no wait for a frame in flight: the
+ * sound's thread's, while the core holds still (the game's music carried,
+ * mp2k_game_rom); 0 without a core or outside the cartridge */
+uint8_t emu_rom_byte(uint32_t addr);
 
 /* A hook on the game's code (hook.h; docs/engine/emulation/hooks.md), set
  * between frames: on the Thumb instruction at addr, an answer hook or an

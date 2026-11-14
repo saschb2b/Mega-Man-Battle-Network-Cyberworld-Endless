@@ -620,4 +620,4 @@ static void tick(void) {
 	title_version_tick();
 }
 
-const Scene scene_title = { "title", enter, tick, draw, NULL };
+const Scene scene_title = { "title", enter, tick, draw, NULL, NULL };

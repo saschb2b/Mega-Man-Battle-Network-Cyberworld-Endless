@@ -110,6 +110,7 @@ typedef struct {
 	int8_t ring[2][MP2K_RING_MAX];   /* +0x350: the mix, right then left (DMA A, DMA B) */
 	int slice;                /* the ring's part this frame mixed */
 	const uint8_t *data;      /* (ours) the ROM the part running reads: a player's, a channel's (mp2k_read) */
+	bool game;                /* (ours) ... or the game's ROM copy, a byte at a time (mp2k_game_rom) */
 	int cut[2];               /* (ours) what the music's player's share and the others' fall short of all (mp2k_shares_set) */
 	/* the library's tables in BN6's ROM (docs/rom/) */
 	uint32_t song_table, clock_table, scale_table, freq_table, cgb_scale_table, cgb_freq_table, noise_table, cgb3_vol_table;
@@ -151,6 +152,22 @@ void mp2k_track_stop(Mp2kTrack *t);
 void mp2k_cgb_frame(void);
 uint32_t mp2k_cgb_key_to_freq(int type, int key, int fine);
 void mp2k_cgb_off(int type);
+/* The PSG's registers somewhere: the engine's GBA sound (gba_sound.h), or
+ * the game's own in its core (music_carry.c); `reg` from 0x60 as
+ * gba_sound.h has it */
+typedef struct {
+	uint8_t (*read8)(int reg);
+	void (*write8)(int reg, uint8_t value);
+	void (*write32)(int reg, uint32_t value);
+} Mp2kRegs;
+/* (mp2k_cgb.c) the PSG's channel `ch` (0-3) taken over mid-note
+ * (mp2k_carry.h): its registers on `to` (NULL the engine's) set from where
+ * its note stands, as its start and a frame's change of pitch and volume
+ * set them, sounding again at its envelope's volume; silenced where it is
+ * off, or just begun (its next frame starts it) */
+void mp2k_cgb_resound(int ch, const Mp2kRegs *to);
+/* ... and silenced on `to` (CgbOscOff) */
+void mp2k_cgb_off_on(int ch, const Mp2kRegs *to);
 /* (mp2k_mix.c) the DirectSound channels' frame into the ring (SoundMainRAM) */
 void mp2k_mix_frame(void);
 
