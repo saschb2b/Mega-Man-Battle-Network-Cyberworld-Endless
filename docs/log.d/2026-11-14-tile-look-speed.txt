@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T17:20:12Z
-* **Update**: devtools/profiling.md (a tile's look: each column asked upwards only as far as the first floor, a pixel's neighbours read from the columns; 0.27 to 0.11 billion instructions, a start with BN6 alone 1.67 billion and with all three ROMs 2.46, the layers the same).
