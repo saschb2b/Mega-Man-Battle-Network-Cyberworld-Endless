@@ -90,6 +90,10 @@ void emu_audio_open(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */
 /* `len` bytes from `addr` on (the video memory, voxel_scene.c) */
+/* The game's own memory at `a`, `len` bytes of it read in place (the RAM,
+ * the palette, VRAM, OAM; NULL elsewhere or past them, or with no core):
+ * good until the next frame begins, for a read too large to copy each frame */
+const uint8_t *emu_memory(uint32_t a, uint32_t len);
 void emu_read_bytes(uint32_t addr, uint8_t *out, uint32_t len);
 uint8_t emu_read8(uint32_t addr);
 uint16_t emu_read16(uint32_t addr);

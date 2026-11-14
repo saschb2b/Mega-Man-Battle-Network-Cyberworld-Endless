@@ -23,7 +23,7 @@
 
 /* (made at the first frame in 3D: none of it where the 3D is off) */
 static struct Stereo {
-	uint8_t vram[0x10000], oam[0x400], io[0x60];   /* the backgrounds' part of VRAM */
+	uint8_t io[0x60];
 	StereoFlat flat;
 	bool kept;          /* the frame drawn's flat parts read */
 	uint64_t live;      /* P.frame + 1 of the frame drawn in 3D */
@@ -59,10 +59,11 @@ static void keep(void) {
 	st->kept = false;
 	int kind = slider() > 0.0f ? voxel_scene_kind() : VOXEL_SCENE_NONE;
 	if (kind == VOXEL_SCENE_NONE) return;
-	emu_read_bytes(0x06000000u, st->vram, sizeof st->vram);
-	emu_read_bytes(0x07000000u, st->oam, sizeof st->oam);
+	/* (VRAM's backgrounds and OAM read where the core keeps them: copied, 65 KB a frame cost the 3DS a millisecond) */
+	const uint8_t *vram = emu_memory(0x06000000u, 0x10000), *oam = emu_memory(0x07000000u, 0x400);
+	if (!vram || !oam) return;
 	emu_read_bytes(0x04000000u, st->io, sizeof st->io);
-	stereo_flat(&(GbaVideo){ st->vram, st->oam, st->io, NULL }, voxel_scene_hud_rows(kind), &st->flat);
+	stereo_flat(&(GbaVideo){ vram, oam, st->io, NULL }, voxel_scene_hud_rows(kind), &st->flat);
 	st->kept = true;
 }
 

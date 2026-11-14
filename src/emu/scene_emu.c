@@ -16,7 +16,6 @@
 #include "game_hooks.h"
 #include "gfx.h"
 #include "online_visit.h"
-#include "frame_log.h"
 #include "platform.h"
 #include "rom.h"
 #include "second.h"
@@ -26,7 +25,7 @@
 #include "start_3ds.h"
 #endif
 
-/* (a part of the frame timed for the frame log, where it is on: frame_log.h) */
+/* (a part of the frame timed for the frame log, where it is on: platform.h, frame_log_part) */
 #define TIMED(name, call) do { \
 		uint64_t t0_ = platform_frame_log ? SDL_GetPerformanceCounter() : 0; \
 		call; \

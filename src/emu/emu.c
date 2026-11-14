@@ -387,6 +387,15 @@ uint8_t emu_read8(uint32_t a) {
 }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
+const uint8_t *emu_memory(uint32_t a, uint32_t len) {
+	wait_frame();
+	unsigned region = a >> 24;
+	size_t size = 0;
+	const uint8_t *block = core && (region == 2 || region == 3 || (region >= 5 && region <= 7)) ? core->getMemoryBlock(core, region, &size) : NULL;
+	uint32_t off = a & 0xFFFFFFu;
+	return block && off <= size && len <= size - off ? block + off : NULL;
+}
+
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
 	/* (the RAM, the palette, video memory and OAM copied whole: byte by

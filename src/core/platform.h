@@ -125,6 +125,11 @@ extern bool platform_frame_log;
 /* A played frame's update and drawing, in performance-counter ticks, for
  * the frame log's split */
 void platform_frame_parts(uint64_t update, uint64_t draw);
+/* A part of a frame's work (`name` a string that lives as long as the
+ * game: its address is its key), `ticks` performance-counter ticks long:
+ * the frame log's line names the dearest parts' means a frame, for finding
+ * what keeps a system from its 60 frames (frame_log.c) */
+void frame_log_part(const char *name, uint64_t ticks);
 /* The canvas as drawn so far on the display at once, before a long wait
  * (no frame counted; none headless). */
 /* A picture under the canvas (voxel mode's, src/emu/voxel_scene.c): at

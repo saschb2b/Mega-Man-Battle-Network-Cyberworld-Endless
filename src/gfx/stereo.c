@@ -45,9 +45,11 @@ static unsigned entry_at(const uint8_t *vram, const GbaBg *b, unsigned px, unsig
 static void hud_cells(const GbaVideo *v, const GbaBg *b, StereoFlat *out) {
 	uint8_t seen[1024];
 	memset(seen, 0, sizeof seen);
+	/* (scrolled by whole tiles, as BG0 is: a cell over one tile) */
+	int corners = (b->hofs | b->vofs) & 7u ? 4 : 1;
 	for (int cy = 0; cy < CELLS_Y; ++cy)
 		for (int cx = 0; cx < CELLS_X; ++cx)
-			for (int k = 0; k < 4 && !out->cell[cy][cx]; ++k) {
+			for (int k = 0; k < corners && !out->cell[cy][cx]; ++k) {
 				unsigned px = (unsigned)(cx * 8 + (k & 1) * 7) + b->hofs, py = (unsigned)(cy * 8 + (k >> 1) * 7) + b->vofs;
 				if (tile_drawn(v->vram, b, entry_at(v->vram, b, px, py), seen)) out->cell[cy][cx] = 1;
 			}

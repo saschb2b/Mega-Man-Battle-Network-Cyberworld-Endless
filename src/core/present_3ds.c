@@ -9,6 +9,16 @@
 #include <citro2d.h>
 
 #include "display.h"
+#include "platform.h"
+
+/* (a part of the present timed for the frame log, where it is on: platform.h, frame_log_part) */
+static uint64_t part_at;
+static void part(const char *name) {
+	if (!platform_frame_log) return;
+	uint64_t now = SDL_GetPerformanceCounter();
+	if (name) frame_log_part(name, now - part_at);
+	part_at = now;
+}
 
 #define TEX 256   /* the texture's side, the canvas's rows 256 pixels apart */
 
@@ -155,7 +165,9 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	 * the close) */
 	if (!surface || aptShouldClose()) return;
 	static Present3dsStereo st;
+	part(NULL);
 	bool three_d, layered = spans_ready(&st, &three_d);
+	part("3d spans");
 	GSPGPU_FlushDataCache(pixels, TEX * TEX * 4);
 	C3D_SyncDisplayTransfer(pixels, GX_BUFFER_DIM(TEX, TEX), (u32 *)tex.data, GX_BUFFER_DIM(TEX, TEX),
 		GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |
@@ -173,6 +185,7 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	}
 	GPU_TEXTURE_FILTER_PARAM f = fill ? GPU_LINEAR : GPU_NEAREST;
 	C3D_TexSetFilter(&tex, f, f);
+	part("canvas copy");
 	/* (the GPU swaps the picture in at the screen's next refresh. With the
 	 * GBA core on the main core, waiting for that refresh here cost a frame
 	 * slower than one refresh a second; with the core on its own, since its
@@ -180,6 +193,7 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	 * wait paces the frames evenly, where the main loop's clock alone had
 	 * five to nine a second come early or late, issue #35) */
 	C3D_FrameBegin(sync ? C3D_FRAME_SYNCDRAW : 0);
+	part("frame wait");
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f, sx = stretch ? (float)GSP_SCREEN_HEIGHT_TOP / (float)cw : s;
 	Place place = { ((float)GSP_SCREEN_HEIGHT_TOP - cw * sx) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, sx, s };
 	C2D_Image img = { &tex, &sub };
@@ -191,6 +205,7 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 		if (layered) eye_draw(&st, eye, &place);
 		else C2D_DrawImageAt(img, place.x0, place.y0, 0.5f, NULL, sx, s);
 	}
+	part(layered ? "eyes in 3d" : "eyes");
 	/* the bottom screen: a new picture, else black, in both of its buffers
 	 * once (a screen not drawn keeps its picture; drawn every frame, it
 	 * cost the GPU's time each one) */
@@ -205,7 +220,9 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 		C2D_SceneBegin(bottom);
 		++cleared;
 	}
+	part("bottom screen");
 	C3D_FrameEnd(0);
+	part("frame end");
 }
 
 void present3ds_exit(void) {

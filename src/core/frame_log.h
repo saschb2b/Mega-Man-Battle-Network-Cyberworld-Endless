@@ -18,12 +18,6 @@ void frame_log_heap_from(void (*heap)(char *out, size_t n));
  * `ticks` performance-counter ticks at the picture's `scale` */
 void frame_log_depth(uint64_t ticks, int scale);
 
-/* A part of a frame's work (`name` a string that lives as long as the
- * game: its address is its key), `ticks` performance-counter ticks long:
- * the line names the dearest parts' means a frame, for finding what keeps
- * a system from its 60 frames (docs/devtools/frame-log.md) */
-void frame_log_part(const char *name, uint64_t ticks);
-
 /* A frame shown, its present `present` performance-counter ticks long
  * (0 where it was not measured): the line, once a second */
 void frame_log_present(uint64_t present);
