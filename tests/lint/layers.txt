@@ -23,7 +23,7 @@ formats  = emu/bytes.h emu/free_space.h core/chip_entry.h
 core.base = core/platform* core/present_3ds.* core/second_android.* core/android_call.* core/sdl_old.h core/app_icon.h
 core.base = core/buttons.h core/pads.* core/padmap.* core/keymap.* core/touch.* core/touch_layout.*
 core.base = core/feel.* core/feel_out.* core/fast_forward.* core/frame_log.* core/display.*
-core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.*
+core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.* core/stopwatch.*
 core.base = core/desktop* core/ios* core/ps5_*
 core.base = core/rom.* core/rng.c core/game.h
 

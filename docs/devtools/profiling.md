@@ -44,6 +44,41 @@ A change that is to leave every layer as it was is checked by the
 new, `--atlas OUT:all:1-4`, the pictures compared byte for byte and the
 reports with their `built in N ms` taken out.
 
+## The lab
+
+One start measures one layer of one area, with the boot, the ROMs' hashes
+and the installs around it. The lab measures every area's layers, without
+the game, and checks that a change leaves them as they were:
+
+```sh
+python3 tools/layer_bench.py                        # origin/dev against this tree, every area, seeds 1-4
+python3 tools/layer_bench.py --base HEAD~1 --biomes 8 --seeds 1 --callgrind
+```
+
+`tools/layer_bench.py` builds the base commit once (a worktree in
+`.build/layer-bench/src`) and this tree, has each draw every area's layers
+([the atlas](atlas.md)), and fails where any picture, any text file, any
+report line but its times or the coordinate data's hash differs. Then it
+sums each part of making a layer over the layers, the base's against the
+change's: learning an area's maps, the floor made drawable (`legal_fix`),
+the tiles picked (`tilemap_pick`), the coordinate data (`coords_write`).
+Milliseconds come from the atlas's report (this machine's, and noisy);
+`--callgrind` counts instructions as well, exact, in the build image with
+Valgrind (`cw-layer-prof`, made the first time), on fewer seeds since it
+runs some fifty times slower. The atlas makes each layer twice, as the
+game does and again measuring its tiles, so its counts hold both.
+
+On a player's system the same parts are in `log.txt`, a line a layer:
+`net: layer made in 47 ms: maps learned 13, floor 14, tiles 18,
+coordinates 2` (`src/director/director_layer.c`; the maps learned only
+where their area's were not kept).
+
+Over every area (seeds 1-2, 139 layers; 14 November 2026, this machine)
+the picture is not the one a start in one area gave: the tiles' pick took
+13.2 of the 14.5 seconds of making the layers, learning the areas' maps
+11.0 more (once an area), the floor made drawable 1.1 and the coordinate
+data 0.2. The tiles' pick and the learning are where the time is.
+
 ## What the profile of 14 November 2026 found
 
 Instructions to the first layer, the second start (its boot state made),

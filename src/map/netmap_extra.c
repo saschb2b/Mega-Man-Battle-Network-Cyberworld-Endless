@@ -188,6 +188,16 @@ bool netmap_stair_cell(int cx, int cy) {
 /* Coordinate cells beyond the walls: raised floor heights and the stairs'
  * own ramps, walls and layer priorities, placed at their blocks. */
 CoordExtra nm_extra;
+
+NetmapTimes netmap_times;
+
+void netmap_times_begin(void) { memset(&netmap_times, 0, sizeof netmap_times); }
+
+bool nm_coords_timed(uint32_t slot, const CoordPad *pads, int n) {
+	bool ok;
+	NM_TIMED(coords, ok = coords_write(slot, pads, n, &nm_extra));
+	return ok;
+}
 static CoordCell extra_cells[4][4096];
 static CoordCell over_cells[1024];   /* walls in place of the floor's own (props') */
 
