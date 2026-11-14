@@ -423,31 +423,56 @@ int tl_reach_of(int face, int hang) {
 	return hangs > solid ? hangs : solid;
 }
 
-void tl_expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, int reach, Look *l) {
-	bool k = keeps(g, floor, ctx);
-	int last[WIN];
-	for (int c = 0; c < WIN; ++c) last[c] = -NO_FLOOR;
-	for (int py = ty * 8 - reach; py < ty * 8 + 8; ++py)
-		for (int c = 0; c < WIN; ++c) {
-			if (floor_px_k(g, floor, ctx, k, tx * 8 - OUT + c, py)) last[c] = py;
-			if (py >= ty * 8) l->up[py - ty * 8][c] = last[c] == -NO_FLOOR ? NO_FLOOR : py - last[c];
+/* A tile's floor asked: floor_px_k with what it needs */
+typedef struct { const TileGrid *g; TileFloor floor; const void *ctx; bool k; } Ask;
+
+static int ask(const Ask *a, int px, int py) { return floor_px_k(a->g, a->floor, a->ctx, a->k, px, py); }
+
+/* Each column's nearest floor at or above each of the tile's rows (up):
+ * above the tile only where its top row has none, looked for upwards and
+ * no further than the first; every row of the reach asked of every column
+ * was a sixth of making a layer (docs/devtools/profiling.md). */
+static void look_up(const Ask *a, int tx, int ty, int reach, Look *l) {
+	for (int c = 0; c < WIN; ++c) {
+		int x = tx * 8 - OUT + c, last = -NO_FLOOR;
+		if (!ask(a, x, ty * 8))
+			for (int py = ty * 8 - 1; py >= ty * 8 - reach; --py)
+				if (ask(a, x, py)) { last = py; break; }
+		for (int y = 0; y < 8; ++y) {
+			int py = ty * 8 + y;
+			if (ask(a, x, py)) last = py;
+			l->up[y][c] = last == -NO_FLOOR ? NO_FLOOR : py - last;
 		}
+	}
+}
+
+/* Floor or none beside and below a pixel of the tile, read from `up` (0
+ * where floor is) and asked only past the tile's top and bottom rows */
+_Static_assert(OUT / 2 == 1 && IN / 2 == 1 && IN <= OUT, "below and inner read up's neighbours");
+
+static bool floor_below(const Ask *a, const Look *l, int tx, int ty, int x, int y) {
+	return y < 7 ? !l->up[y + 1][x + OUT] : ask(a, tx * 8 + x, ty * 8 + y + OUT / 2) != 0;
+}
+
+static bool inner_at(const Ask *a, const Look *l, int tx, int ty, int x, int y) {
+	int c = x + OUT;
+	return !l->up[y][c - IN] && !l->up[y][c + IN] && (y > 0 ? !l->up[y - 1][c] : ask(a, tx * 8 + x, ty * 8 + y - IN / 2) != 0) &&
+		(y < 7 ? !l->up[y + 1][c] : ask(a, tx * 8 + x, ty * 8 + y + IN / 2) != 0);
+}
+
+void tl_expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, int reach, Look *l) {
+	const Ask a = { g, floor, ctx, keeps(g, floor, ctx) };
+	look_up(&a, tx, ty, reach, l);
 	l->inner = l->below = l->deep = 0;
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			int px = tx * 8 + x, py = ty * 8 + y;
 			uint64_t bit = 1ull << (y * 8 + x);
-			if (floor_px_k(g, floor, ctx, k, px, py + OUT / 2)) l->below |= bit;
-			if (l->up[y][x + OUT]) continue;   /* (not on the floor) */
-			bool inner = true;
-			for (int j = 0; j < 4 && inner; ++j) {
-				static const int off[4][2] = { { -IN, 0 }, { IN, 0 }, { 0, -IN / 2 }, { 0, IN / 2 } };
-				inner = floor_px_k(g, floor, ctx, k, px + off[j][0], py + off[j][1]) != 0;
-			}
-			if (!inner) continue;
+			if (floor_below(&a, l, tx, ty, x, y)) l->below |= bit;
+			if (l->up[y][x + OUT] || !inner_at(&a, l, tx, ty, x, y)) continue;   /* (not on the floor, or at its edge) */
 			l->inner |= bit;
-			if (floor_px_k(g, floor, ctx, k, px, py) == cm && floor_px_k(g, floor, ctx, k, px - DEEP, py) == cm && floor_px_k(g, floor, ctx, k, px + DEEP, py) == cm &&
-				floor_px_k(g, floor, ctx, k, px, py - DEEP / 2) == cm && floor_px_k(g, floor, ctx, k, px, py + DEEP / 2) == cm) l->deep |= bit;
+			if (ask(&a, px, py) == cm && ask(&a, px - DEEP, py) == cm && ask(&a, px + DEEP, py) == cm && ask(&a, px, py - DEEP / 2) == cm &&
+				ask(&a, px, py + DEEP / 2) == cm) l->deep |= bit;
 		}
 }
 
