@@ -24,6 +24,13 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T09:35:00Z }
 | `docker/` | Build images: `Dockerfile` (host, Debian trixie), `Dockerfile.portmaster` (the PortMaster port's aarch64 binary: Debian bullseye's glibc 2.31 and SDL2 2.0.14, older than any firmware PortMaster serves; `debian/eol` from its snapshot), `Dockerfile.linux` (desktop release, bookworm, SDL2 from source), `Dockerfile.windows` (MinGW-w64, SDL2 and mGBA static, NSIS), `Dockerfile.android` (the SDK, NDK and Gradle, SDL2's source, mGBA per ABI), `Dockerfile.web` (Emscripten, mGBA without threads), `Dockerfile.3ds` (devkitPro's devkitARM, SDL2 and mGBA's library for the 3DS, makerom and bannertool from their sources for the CIA: `ctrtools.sh`), `Dockerfile.switch` (devkitPro's devkitA64 with libnx, its SDL2 and libcurl, and mGBA's library for the Switch), `Dockerfile.vita` (VitaSDK with its SDL2 and libcurl, and mGBA's library for the Vita), `Dockerfile.ps4` (the OpenOrbis toolchain, and mbedTLS and mGBA's library built for it through `ps4.cmake`: `mbedtls.sh`), `Dockerfile.ps5` (the native-app template's pipeline, its converter's RELRO placement corrected, the PS5 payload SDK and PacBrew's SDL2 and libcurl, and mGBA's library through `ps5.cmake`), `Dockerfile.music` (the trailers' music when a piece plays a soundfont: Debian's FluidR3 GM, MIT, never in git; `tools/trailer_soundfont.py` reads it, `tools/trailer_music.py`'s render_any runs a piece there) |
 | `.github/` | CI (`ci.yml`: checks, every target on a push and a pull request's share of them, [below](#ci-on-a-pull-request), Pages from `main`), the files tools write, committed after each push to `dev` (`generated.yml`, [Merging in parallel](../project/merging.md)), releases (`release.yml`, on `v*` tags), the cached image build action, Dependabot (`dependabot.yml`: the actions and the build images' bases monthly, its PRs to `dev`), the issue chooser (`ISSUE_TEMPLATE/`: the bug report's form `bug.yml` and `config.yml`, [below](#issue-forms)) |
 
+Systems the game is not built for: an old 3DS or 2DS, whose ARM11 takes
+longer than a frame for the GBA core alone (`3ds/README.md`), and the PSP
+and the Nintendo DS, measured in their emulators in [The PSP and the DS,
+measured](../engine/emulation/psp-and-ds.md): mGBA is too slow on a PSP,
+gpSP's dynarec would leave room, and a DS has neither the speed nor the
+memory for a GBA core.
+
 ## CI on a pull request
 
 A pull request's run took about ten minutes, and its slowest job set that:
