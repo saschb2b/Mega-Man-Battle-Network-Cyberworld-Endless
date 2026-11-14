@@ -40,7 +40,10 @@
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
 typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
-static InputStep script[1024];
+/* (the steps taken from the heap by the first script, as only headless
+ * tests and remote play have one: a megabyte no game holds otherwise) */
+#define SCRIPT_MAX 1024
+static InputStep *script;
 static int script_len, script_pos, script_left;
 
 /* "UP+A": the GBA's buttons injected as held; "pad.x", "pad.-lefty" a
@@ -107,7 +110,14 @@ static bool dev_step(const InputStep *s) {
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
+/* the script's steps, from the heap at the first; false where there is none */
+static bool script_room(void) {
+	if (!script) script = calloc(SCRIPT_MAX, sizeof *script);
+	return script != NULL;
+}
+
 static void parse_script(const char *spec) {
+	if (!script_room()) return;
 	char *copy = strdup(spec);
 	for (char *tok = strtok(copy, ","); tok && script_len < 512; tok = strtok(NULL, ",")) {
 		char *colon = strchr(tok, ':');
@@ -288,7 +298,8 @@ static bool remote_open(const char *dir) {
  * items apart by ';'. */
 static void remote_parse(char *line) {
 	script_len = script_pos = 0;
-	for (char *tok = strtok(line, ";\n"); tok && script_len < (int)(sizeof script / sizeof *script); tok = strtok(NULL, ";\n")) {
+	if (!script_room()) return;
+	for (char *tok = strtok(line, ";\n"); tok && script_len < SCRIPT_MAX; tok = strtok(NULL, ";\n")) {
 		while (*tok == ' ') ++tok;
 		InputStep *s = &script[script_len];
 		memset(s, 0, sizeof *s);

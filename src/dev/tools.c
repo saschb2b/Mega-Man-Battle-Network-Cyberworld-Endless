@@ -57,17 +57,21 @@ bool tools_option(const char *a, const char *v) {
 static int pack_run(const char *spec) {
 	int rom = -1, song = -1;
 	char out[256] = "";
-	static uint8_t room[FREE_SONGS_END - FREE_SONGS];
 	if (sscanf(spec, "x%d/%i:%255s", &rom, &song, out) != 3) {
 		fprintf(stderr, "xsong-pack: xN/SONG:PATH\n");
 		return 1;
 	}
-	uint32_t header = xsong_pack(rom, song, FREE_SONGS, room, sizeof room);
+	/* (the songs' free space, 640 KB, from the heap for the tool alone) */
+	const uint32_t size = FREE_SONGS_END - FREE_SONGS;
+	uint8_t *room = malloc(size);
+	if (!room) return 1;
+	uint32_t header = xsong_pack(rom, song, FREE_SONGS, room, size);
 	/* (its sequence and header last: the header's tracks' pointers end it) */
 	uint32_t len = header ? header - FREE_SONGS + 8 + 4u * room[header - FREE_SONGS] : 0;
 	FILE *f = header ? fopen(out, "wb") : NULL;
 	bool ok = f && fwrite(room, 1, len, f) == len;
 	if (f) fclose(f);
+	free(room);
 	if (!ok) {
 		fprintf(stderr, "xsong-pack: song %#x of extra ROM %d not copied\n", song, rom);
 		return 1;
