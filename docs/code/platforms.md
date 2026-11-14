@@ -3,7 +3,7 @@ type: Code Map
 title: "The platforms and their packaging"
 description: "What each platform's folder holds: the PortMaster port, the Linux, Windows, macOS, iOS and Android releases, the New 3DS, Switch, PS Vita, PS4 and PS5 builds, the Docker build images and the CI and release workflows."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T05:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 ---
 
 # The platforms and their packaging
