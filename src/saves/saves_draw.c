@@ -14,6 +14,7 @@
 #include "pixfont.h"
 #include "platform.h"
 #include "saves_actions.h"
+#include "saves_cloud.h"
 #include "saves_layout.h"
 #include "saves_state.h"
 #include "saves_text.h"
@@ -119,18 +120,24 @@ void saves_draw(void) {
 	int sx = 22 + look_title_width(title);
 	look_stripes(sx > P.w / 2 ? sx : P.w / 2, 0, P.w - 4, 20);
 	SavesLayout l = layout();
-	if (SV.view == SAVES_HOME || SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) {
+	if (SV.view == SAVES_HOME || SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE || SV.view == SAVES_CLOUD_VIEW) {
 		look_pill(l.back.x, l.back.y, l.back.w);
 		pixfont_draw(l.back.x + l.back.w / 2, l.back.y + 4, saves_word_back(), PET_WHITE, shade(), PIXFONT_CENTER, 1);
 	}
 	if (SV.view == SAVES_SEND_CODE) send_view(&l);
 	else if (SV.view == SAVES_RECEIVE_CODE) receive_view(&l);
+	else if (SV.view == SAVES_CLOUD_VIEW) {
+		char line[300];
+		saves_cloud_line(line, sizeof line);
+		note(l.line, line, SV.said[0] ? PET_GOLD : PET_WHITE);
+	}
 	else if (SV.view == SAVES_HOME) {
 		panel(l.here, &SV.here, false, SV.unreadable, false);
 		MirrorStatus m;
 		mirror_status(&m);
 		char line[1200];
-		saves_status_line(&m, backup_blocked(), pick_saves_capabilities() & SAVES_CAN_FOLDER, line, sizeof line);
+		if (saves_cloud_on() && !backup_blocked()) saves_cloud_line(line, sizeof line);
+		else saves_status_line(&m, backup_blocked(), pick_saves_capabilities() & SAVES_CAN_FOLDER, line, sizeof line);
 		clipped(l.line.x, l.line.y, SV.said[0] ? SV.said : line, l.line.w, SV.said[0] ? PET_GOLD : PET_WHITE);
 	} else if (SV.view == SAVES_COMPARE) {
 		panel(l.here, &SV.here, false, SV.unreadable, true);
@@ -153,7 +160,7 @@ bool saves_pointer(bool (*back)(void)) {
 	if (!platform_tap(&x, &y)) return false;
 	SDL_Point p = { x, y };
 	SavesLayout l = layout();
-	bool has_back = SV.view == SAVES_HOME || SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE;
+	bool has_back = SV.view == SAVES_HOME || SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE || SV.view == SAVES_CLOUD_VIEW;
 	if (has_back && SDL_PointInRect(&p, &l.back)) { back(); return true; }
 	for (int i = 0; i < l.count; ++i) {
 		if (!SDL_PointInRect(&p, &l.buttons[i].rect)) continue;

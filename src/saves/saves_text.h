@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #include "backup.h"
+#include "cloud_link.h"
 #include "mirror.h"
 #include "transfer_link.h"
 
@@ -60,5 +61,19 @@ void saves_code_typed(const char *code, char *out, size_t n);
 void saves_code_left(uint32_t ms, char *out, size_t n);
 const char *saves_code_prompt(void);
 void saves_code_words(const TransferState *s, bool receiving, bool expired, char *out, size_t n);
+
+/* Saves kept in step (saves_cloud.h): the comparison's words where the file
+ * is the cloud's; why a cloud's saves were not taken in; where taken
+ * saves came from ("Cloud: saves from Android, 11-14 08:12"); a trouble's
+ * line; the syncing and the CLOUD view's answers; and the cloud's line for
+ * the link's state (what CLOUD does, where this system has none) */
+void saves_cloud_compare_note(const BackupInfo *here, bool have, bool unreadable, char *out, size_t n);
+void saves_cloud_refused(BackupStatus status, const BackupInfo *cloud, char *out, size_t n);
+void saves_cloud_from(const BackupInfo *cloud, char *out, size_t n);
+const char *saves_cloud_trouble(CloudTrouble trouble);
+const char *saves_cloud_syncing(void);
+const char *saves_cloud_deleted(void);
+const char *saves_cloud_unlinked(void);
+void saves_cloud_status(const CloudState *s, char *out, size_t n);
 
 #endif

@@ -13,6 +13,7 @@
 #include "rivals.h"
 #include "rom.h"
 #include "save.h"
+#include "saves_cloud.h"
 #include "saves_code.h"
 #include "saves_state.h"
 #include "saves_text.h"
@@ -29,10 +30,12 @@ int saves_actions(int *out) {
 		out[n++] = SAVES_IMPORT;
 		if (saves_code_here() && SV.have) out[n++] = SAVES_SEND;
 		if (saves_code_here()) out[n++] = SAVES_RECEIVE;
+		if (saves_cloud_here()) out[n++] = SAVES_CLOUD;
 		if (SV.undo) out[n++] = SAVES_UNDO;
 		if (caps & SAVES_CAN_AUTO) out[n++] = SAVES_AUTO;
 		if (caps & SAVES_CAN_FOLDER) out[n++] = SAVES_FOLDER;
 	} else if (SV.view == SAVES_SEND_CODE) out[n++] = SAVES_DONE;
+	else if (SV.view == SAVES_CLOUD_VIEW) n = saves_cloud_actions(out);
 	else if (SV.view == SAVES_RECEIVE_CODE) {
 		/* (the keys as a keyboard's row: 1 to 9, then 0) */
 		for (int d = 1; d <= 10; ++d) out[n++] = SAVES_DIGIT + d % 10;
@@ -51,7 +54,7 @@ int saves_actions(int *out) {
 	return n;
 }
 
-static void reload(void) {
+void saves_reload(void) {
 	/* (the profile and the rival's record read again over the title; the
 	 * launcher's game reads them as it begins) */
 	if (R.data) {
@@ -69,7 +72,7 @@ static bool can_continue(void) {
 
 static void take(void) {
 	BackupInfo before = SV.here;
-	bool had = SV.have, from_place = SV.from_place;
+	bool had = SV.have, from_place = SV.from_place, from_cloud = SV.from_cloud;
 	BackupStatus status = backup_restore(g_data_dir, SV.bytes, SV.size, bn5());
 	if (status != BACKUP_OK) {
 		saves_clear_file();
@@ -79,7 +82,8 @@ static void take(void) {
 	}
 	if (from_place) mirror_answer(true);
 	saves_clear_file();
-	reload();
+	saves_reload();
+	if (from_cloud) saves_cloud_answered(true);
 	char text[300];
 	saves_imported(&SV.here, &before, had, text, sizeof text);
 	saves_result(text);
@@ -102,7 +106,7 @@ static void undo(void) {
 		saves_result(SV.note);
 		return;
 	}
-	reload();
+	saves_reload();
 	char text[300];
 	if (redo) saves_imported(&SV.here, &was, true, text, sizeof text);
 	else saves_undone(&SV.here, SV.have, text, sizeof text);
@@ -156,7 +160,7 @@ void saves_activate(int action) {
 	if (SV.busy) return;
 	SV.said[0] = 0;
 	if (R.data && action != SAVES_TAKE && action != SAVES_UNDO) audio_sfx(action == SAVES_KEEP || action == SAVES_DONE ? SFX_CANCEL : SFX_SELECT);
-	if (saves_code_press(action)) return;
+	if (saves_code_press(action) || saves_cloud_press(action)) return;
 	switch (action) {
 	case SAVES_EXPORT: export_file(); break;
 	case SAVES_IMPORT: import_file(); break;
@@ -174,7 +178,7 @@ void saves_activate(int action) {
 	case SAVES_TAKE: take(); break;
 	case SAVES_CONTINUE: continue_run(); break;
 	default:
-		if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) saves_code_leave();
+		if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE || SV.view == SAVES_CLOUD_VIEW) saves_code_leave();
 		if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
 		else {
 			SV.view = SAVES_HOME;

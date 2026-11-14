@@ -17,11 +17,13 @@
 enum {
 	SAVES_EXPORT, SAVES_IMPORT, SAVES_SEND, SAVES_RECEIVE, SAVES_UNDO, SAVES_AUTO, SAVES_FOLDER,
 	SAVES_KEEP, SAVES_TAKE, SAVES_DONE, SAVES_CONTINUE, SAVES_ERASE, SAVES_GET,
+	SAVES_CLOUD, SAVES_TURN_ON, SAVES_LINK, SAVES_ADD, SAVES_UNLINK, SAVES_DELETE,
 	SAVES_DIGIT, SAVES_ACTIONS = SAVES_DIGIT + 10
 };
 /* (SEND: the code the server holds the saves under; RECEIVE: a code typed,
  * saves_code.c) */
-typedef enum { SAVES_HOME, SAVES_COMPARE, SAVES_RESULT, SAVES_SEND_CODE, SAVES_RECEIVE_CODE } SavesView;
+/* (CLOUD: saves kept in step, saves_cloud.c) */
+typedef enum { SAVES_HOME, SAVES_COMPARE, SAVES_RESULT, SAVES_SEND_CODE, SAVES_RECEIVE_CODE, SAVES_CLOUD_VIEW } SavesView;
 
 typedef struct {
 	const Scene *back;     /* where it goes back to: the title or the ROMs screen */
@@ -46,6 +48,8 @@ typedef struct {
 	uint32_t sent_hash;    /* the saves SEND last sent (BackupInfo.hash): shown again while their code holds */
 	bool typing;           /* RECEIVE's native keyboard on (text_input.h) */
 	TransferState transfer;   /* SEND's or RECEIVE's link as this frame's update found it, for the picture */
+	bool from_cloud;       /* the file compared is the cloud slot's (saves_cloud.c) */
+	bool delete_asked;     /* the CLOUD view's DELETE pressed once: again deletes */
 } Saves;
 
 extern Saves SV;
@@ -58,6 +62,9 @@ void saves_clear_file(void);
 void saves_compare(uint8_t *bytes, size_t n, bool from_place);
 /* ... of the copy's place's own file (mirror_held): false for none */
 bool saves_compare_held(void);
+/* ... of the cloud slot's saves (taken), where both it and this system
+ * moved on since they were last in step */
+void saves_compare_cloud(uint8_t *bytes, size_t n);
 /* The result view, saying `text` */
 void saves_result(const char *text);
 /* Leaving the comparison without USE THE FILE'S: this device's kept */

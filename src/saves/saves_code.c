@@ -11,6 +11,7 @@
 
 #include "backup.h"
 #include "rom.h"
+#include "saves_cloud.h"
 #include "saves_state.h"
 #include "text_input.h"
 
@@ -131,8 +132,23 @@ bool saves_code_tick(void) {
 	uint8_t *bytes = transfer_link()->take(&n);
 	typing(false);
 	SV.code[0] = 0;
-	saves_compare(bytes, n, false);
+	/* (a code's bytes are saves, or another system's cloud link) */
+	if (bytes && saves_cloud_join(bytes, n)) free(bytes);
+	else saves_compare(bytes, n, false);
 	return false;
+}
+
+void saves_code_send_link(uint8_t *bytes, size_t n) {
+	const TransferLink *link = transfer_link();
+	if (!link || !bytes) {
+		free(bytes);
+		return;
+	}
+	SV.view = SAVES_SEND_CODE;
+	SV.focus = SAVES_DONE;
+	SV.sent_hash = 0;
+	link->send(bytes, n);
+	saves_code_state(&SV.transfer);
 }
 
 void saves_code_leave(void) {

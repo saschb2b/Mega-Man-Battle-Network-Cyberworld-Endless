@@ -11,6 +11,7 @@
 #include "pick.h"
 #include "rom.h"
 #include "saves.h"
+#include "saves_cloud.h"
 #include "saves_state.h"
 
 const char *saves_word_title(void) { return "SAVES"; }
@@ -19,7 +20,28 @@ const char *saves_word_hint(void) { return "Saves"; }
 
 const char *saves_word_back(void) { return "BACK"; }
 
+/* (the code's and the cloud's buttons: saves_code.c, saves_cloud.c) */
+static const char *linked_label(int action) {
+	static const char *const digits[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+	if (action >= SAVES_DIGIT && action < SAVES_DIGIT + 10) return digits[action - SAVES_DIGIT];
+	switch (action) {
+	case SAVES_SEND: return "SEND";
+	case SAVES_RECEIVE: return "RECEIVE";
+	case SAVES_ERASE: return "ERASE";
+	case SAVES_GET: return "OK";
+	case SAVES_CLOUD: return saves_cloud_on() ? "CLOUD: ON" : "CLOUD: OFF";
+	case SAVES_TURN_ON: return "TURN ON";
+	case SAVES_LINK: return "LINK";
+	case SAVES_ADD: return "ADD A SYSTEM";
+	case SAVES_UNLINK: return "UNLINK";
+	case SAVES_DELETE: return SV.delete_asked ? "DELETE: SURE?" : "DELETE";
+	default: return NULL;
+	}
+}
+
 const char *saves_label(int action) {
+	const char *linked = linked_label(action);
+	if (linked) return linked;
 	switch (action) {
 	case SAVES_EXPORT: return "EXPORT";
 	case SAVES_IMPORT: return "IMPORT";
@@ -27,22 +49,13 @@ const char *saves_label(int action) {
 	case SAVES_AUTO: return pick_saves_auto_enabled() ? "AUTO-COPY: ON" : "AUTO-COPY: OFF";
 	case SAVES_FOLDER: return "FOLDER";
 	case SAVES_KEEP: return "KEEP THESE";
-	case SAVES_TAKE: return SV.have || SV.unreadable ? "USE THE FILE'S" : "BRING BACK";
+	case SAVES_TAKE: return SV.from_cloud ? "USE THE CLOUD'S" : SV.have || SV.unreadable ? "USE THE FILE'S" : "BRING BACK";
 	case SAVES_CONTINUE: return "CONTINUE";
-	case SAVES_SEND: return "SEND";
-	case SAVES_RECEIVE: return "RECEIVE";
-	case SAVES_ERASE: return "ERASE";
-	case SAVES_GET: return "OK";
-	default:
-		if (action >= SAVES_DIGIT && action < SAVES_DIGIT + 10) {
-			static const char *const digits[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
-			return digits[action - SAVES_DIGIT];
-		}
-		return "DONE";
+	default: return "DONE";
 	}
 }
 
-const char *saves_panel_title(bool file) { return file ? "THE FILE" : "THIS DEVICE"; }
+const char *saves_panel_title(bool file) { return file ? (SV.from_cloud ? "THE CLOUD" : "THE FILE") : "THIS DEVICE"; }
 
 static void when(uint64_t stamp, char *out, size_t n) {
 	time_t seconds = (time_t)stamp;
@@ -217,4 +230,58 @@ void saves_code_words(const TransferState *s, bool receiving, bool expired, char
 		break;
 	default: break;
 	}
+}
+
+/* (saves kept in step: the cloud's words) */
+
+void saves_cloud_compare_note(const BackupInfo *here, bool have, bool unreadable, char *out, size_t n) {
+	if (unreadable) snprintf(out, n, "This device's saves cannot be read. UNDO IMPORT brings them back.");
+	else if (!have) snprintf(out, n, "This device has no saves yet.");
+	else if (here->run_depth > 0) snprintf(out, n, "USE THE CLOUD'S replaces your Layer %d run. UNDO IMPORT brings it back.\nKEEP THESE: the cloud gets this device's.", here->run_depth);
+	else snprintf(out, n, "USE THE CLOUD'S replaces your saves. UNDO IMPORT brings them back.\nKEEP THESE: the cloud gets this device's.");
+}
+
+void saves_cloud_refused(BackupStatus status, const BackupInfo *cloud, char *out, size_t n) {
+	if (status == BACKUP_NEWER_BUILD || status == BACKUP_NEWER_FORMAT || status == BACKUP_INCOMPATIBLE_RUN)
+		snprintf(out, n, "Cloud: made by %s. Update first.", cloud->version[0] ? cloud->version : "a newer build");
+	else if (status == BACKUP_NEEDS_BN5) snprintf(out, n, "Cloud: its run needs BN5 Team Colonel (USA).");
+	else snprintf(out, n, "Cloud: its saves could not be taken in.");
+}
+
+void saves_cloud_from(const BackupInfo *cloud, char *out, size_t n) {
+	char date[32];
+	when(cloud->stamp, date, sizeof date);
+	snprintf(out, n, "Cloud: saves from %s%s%s", cloud->system[0] ? cloud->system : "another system", date[0] ? ", " : "", date);
+}
+
+const char *saves_cloud_trouble(CloudTrouble trouble) {
+	switch (trouble) {
+	case CLOUD_FINE: return "";
+	case CLOUD_UNREACHED: return "Cloud: not reached. These saves stay.";
+	case CLOUD_BUSY: return "Cloud: the server is busy. It tries again later.";
+	case CLOUD_GONE:
+	case CLOUD_DENIED: return "Cloud: its copy is gone. CLOUD turns it on again.";
+	case CLOUD_OFF: return "Cloud: this server keeps no saves yet.";
+	case CLOUD_CONFLICT: return "Cloud: another system's saves are newer.";
+	case CLOUD_DAMAGED: return "Cloud: what came could not be opened.";
+	case CLOUD_TOO_BIG: return "Cloud: these saves are too big for it.";
+	default: return "Cloud: not enough memory.";
+	}
+}
+
+const char *saves_cloud_syncing(void) { return "Cloud: syncing..."; }
+const char *saves_cloud_deleted(void) { return "Deleted on the server. Unlink your other systems too."; }
+const char *saves_cloud_unlinked(void) { return "Unlinked. These saves stay here."; }
+
+void saves_cloud_status(const CloudState *s, char *out, size_t n) {
+	char date[32];
+	if (!s->linked)
+		snprintf(out, n, "Keeps these saves in step on every system you link, sealed on the official server. A copy unused for 180 days is deleted.");
+	else if (s->doing == CLOUD_PULLING) snprintf(out, n, "%s", saves_cloud_syncing());
+	else if (s->doing == CLOUD_PUSHING) snprintf(out, n, "Cloud: sending: %d%%", s->size ? (int)((uint64_t)s->moved * 100 / s->size) : 0);
+	else if (s->trouble != CLOUD_FINE) snprintf(out, n, "%s", saves_cloud_trouble(s->trouble));
+	else if (s->synced_at) {
+		when(s->synced_at, date, sizeof date);
+		snprintf(out, n, "Cloud: in step %s", date);
+	} else snprintf(out, n, "Cloud: not sent yet");
 }

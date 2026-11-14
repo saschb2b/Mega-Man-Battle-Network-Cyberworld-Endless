@@ -1,7 +1,9 @@
 /* The start's network parts, once the window and settings.ini are there
- * (startup.c): the anonymous statistics' thread (analytics_net.h) and
- * SAVES' saves sent by a code (transfer_link.h), over the official
- * Square's server or --dev online's. Neither opens a connection here. */
+ * (startup.c): the anonymous statistics' thread (analytics_net.h), SAVES'
+ * saves sent by a code (transfer_link.h) and kept in step
+ * (cloud_link.h, saves_cloud.h: a pull due as the title comes up), over
+ * the official Square's server or --dev online's. None opens a connection
+ * here. */
 #ifndef CW_START_NET_H
 #define CW_START_NET_H
 

@@ -21,9 +21,8 @@ src/map/tiles_pick.c:best 56 72
 src/net/net_gen.c:ng_room_spot_in 33 17
 src/net/net_layouts.c:link 34 42
 src/net/net_shapes.c:carve_shape 27 51
-src/scenes/scene_title.c:draw 28 56
-src/scenes/scene_title.c:update 34 62
+src/scenes/scene_title.c:update 30 51
 src/world/town.c:carry 35 63
-src/world/town.c:plan_once 44 106
+src/world/town.c:plan_once 44 105
 src/world/town.c:town_walk 31 33
 src/world/townsrc.c:townsrc_synth 88 125

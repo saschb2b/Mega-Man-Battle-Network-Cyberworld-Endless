@@ -19,6 +19,7 @@
 #include "platform.h"
 #include "rom.h"
 #include "saves_actions.h"
+#include "saves_cloud.h"
 #include "saves_code.h"
 #include "saves_draw.h"
 #include "saves_state.h"
@@ -38,6 +39,7 @@ void saves_clear_file(void) {
 	SV.bytes = NULL;
 	SV.size = 0;
 	SV.from_place = false;
+	SV.from_cloud = false;
 }
 
 void saves_result(const char *text) {
@@ -113,6 +115,13 @@ void saves_compare(uint8_t *bytes, size_t n, bool from_place) {
 	if (R.data) audio_sfx(SFX_REVEAL);
 }
 
+void saves_compare_cloud(uint8_t *bytes, size_t n) {
+	saves_compare(bytes, n, false);
+	if (!SV.bytes) return;
+	SV.from_cloud = true;
+	if (SV.status == BACKUP_OK) saves_cloud_compare_note(&SV.here, SV.have, SV.unreadable, SV.note, sizeof SV.note);
+}
+
 bool saves_compare_held(void) {
 	const uint8_t *held;
 	size_t n;
@@ -135,6 +144,7 @@ void saves_import(const char *path) {
  * and B (the place's file: not opened by itself again, no copy over it) */
 void saves_leave_compare(bool keep_these) {
 	if (SV.from_place) mirror_answer(keep_these);
+	if (SV.from_cloud && keep_these) saves_cloud_answered(false);
 	saves_clear_file();
 	home();
 }
@@ -147,7 +157,7 @@ static bool back(void) {
 	}
 	if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
 	else if (SV.view == SAVES_RESULT) home();
-	else if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) {
+	else if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE || SV.view == SAVES_CLOUD_VIEW) {
 		saves_code_leave();
 		home();
 	}
@@ -213,6 +223,7 @@ bool saves_key(void) {
 void saves_tick(void) {
 	const Scene *scene = scene_current();
 	if (scene != &scene_title && scene != &scene_launcher && scene != &scene_saves) return;
+	saves_cloud_tick();
 	if (SV.busy || pick_busy() || pick_saves_busy() || SV.view == SAVES_COMPARE) return;
 	char path[1100];
 	/* (the ROMs screen takes its own drops: a ROM or a .cwsave) */

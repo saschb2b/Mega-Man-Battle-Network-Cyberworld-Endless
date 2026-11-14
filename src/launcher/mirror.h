@@ -68,4 +68,14 @@ void mirror_wrote(const uint8_t *bytes, size_t n);
  * mirror_note: false for none */
 bool mirror_local(BackupInfo *info);
 
+/* What else follows the saves' writes, as the copy does: SAVES' sync with
+ * the cloud (saves_cloud.c), which stands above the launcher, fills it */
+typedef struct {
+	void (*note)(void);     /* mirror_note's */
+	void (*tick)(void);     /* mirror_tick's: every frame */
+	void (*flush)(void);    /* mirror_flush's: the app going away */
+	void (*rescan)(void);   /* mirror_rescan's: a start or a resume */
+} MirrorFollow;
+void mirror_follow(const MirrorFollow *follow);
+
 #endif

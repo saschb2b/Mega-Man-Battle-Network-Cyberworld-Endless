@@ -99,11 +99,39 @@ static void test_seal(void) {
 	CHECK(!transfer_seal(&k, plain, sizeof plain, none, &m), "no random bytes, no seal");
 }
 
+/* What a slot's secret makes, pinned: a change breaks every linked
+ * system's step with its slot */
+static void test_slot_pinned(void) {
+	static const uint8_t slot[16] = {
+		0xf0, 0x62, 0x97, 0x80, 0xbb, 0x10, 0x77, 0xce, 0x63, 0x30, 0xc0, 0xd4, 0xef, 0x71, 0xf1, 0xc2,
+	};
+	static const uint8_t auth[32] = {
+		0xff, 0xef, 0xc1, 0x67, 0x00, 0xaf, 0x26, 0xa1, 0xa0, 0x13, 0x43, 0x7e, 0x14, 0x58, 0x05, 0x8f,
+		0x27, 0x69, 0x67, 0x25, 0x15, 0xb7, 0x0c, 0xeb, 0x2c, 0x44, 0x63, 0x99, 0xc4, 0x20, 0x5d, 0x13,
+	};
+	static const uint8_t key[32] = {
+		0xbd, 0x32, 0x97, 0xd5, 0xb0, 0x7c, 0xae, 0x69, 0x4a, 0x02, 0x21, 0xc1, 0x0c, 0x13, 0x1f, 0xab,
+		0xf9, 0xbb, 0xa2, 0xd9, 0xef, 0x94, 0xfe, 0x72, 0xa7, 0xc7, 0x20, 0xf8, 0x3f, 0xb9, 0x1b, 0x23,
+	};
+	uint8_t secret[TRANSFER_SECRET];
+	for (int i = 0; i < TRANSFER_SECRET; ++i) secret[i] = (uint8_t)i;
+	TransferSlot s;
+	transfer_slot(secret, &s);
+	CHECK(!memcmp(s.slot, slot, sizeof slot), "the slot as pinned");
+	CHECK(!memcmp(s.auth, auth, sizeof auth), "the auth as pinned");
+	CHECK(!memcmp(s.keys.key, key, sizeof key), "the seal's key as pinned");
+	secret[31] ^= 1;
+	TransferSlot other;
+	transfer_slot(secret, &other);
+	CHECK(memcmp(other.slot, s.slot, 16) && memcmp(other.auth, s.auth, 32) && memcmp(other.keys.key, s.keys.key, 32), "a bit apart, another slot");
+}
+
 int test_transfer_code(void) {
 	failures = 0;
 	test_codes();
 	test_keys_pinned();
 	test_seal();
+	test_slot_pinned();
 	printf("transfer code: %s\n", failures ? "FAILED" : "ok");
 	return failures;
 }

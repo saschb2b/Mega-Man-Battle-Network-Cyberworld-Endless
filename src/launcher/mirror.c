@@ -127,6 +127,11 @@ static bool wrote_here(uint32_t hash) {
 	return false;
 }
 
+/* (SAVES' sync, mirror_follow) */
+static const MirrorFollow *follow;
+
+void mirror_follow(const MirrorFollow *f) { follow = f; }
+
 void mirror_wrote(const uint8_t *bytes, size_t n) {
 	uint32_t hash = fnv(bytes, n);
 	if (wrote_here(hash)) return;
@@ -209,7 +214,10 @@ static void look(void) {
 	else if (r > 0) judge(b, n);
 }
 
-void mirror_rescan(void) { looked = false; }
+void mirror_rescan(void) {
+	looked = false;
+	if (follow) follow->rescan();
+}
 
 void mirror_new_folder(void) {
 	looked = false;
@@ -304,6 +312,7 @@ void mirror_note(void) {
 	local_read = false;
 	dirty = true;
 	written_at = SDL_GetTicks();
+	if (follow) follow->note();
 }
 
 /* (no copy while the last look holds it; a look due again, after a resume
@@ -311,6 +320,10 @@ void mirror_note(void) {
 void mirror_tick(void) {
 	bool held = looked && (verdict == LOOK_HELD || verdict == LOOK_UNREAD);
 	if (dirty && !held && SDL_GetTicks() - written_at >= REST_MS) put();
+	if (follow) follow->tick();
 }
 
-void mirror_flush(void) { put(); }
+void mirror_flush(void) {
+	put();
+	if (follow) follow->flush();
+}
