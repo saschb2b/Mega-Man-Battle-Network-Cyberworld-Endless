@@ -52,7 +52,8 @@ Instructions to the first layer, the second start (its boot state made),
 | | BN6 alone | BN6, BN5 and BN4 |
 | --- | ---: | ---: |
 | Before | 2.54 billion | 4.09 billion |
-| After | 1.80 billion (-29%) | 3.15 billion (-23%) |
+| The floor's fix and the SHA-1 | 1.80 billion (-29%) | 3.15 billion (-23%) |
+| And the installs | 1.78 billion (-30%) | 2.58 billion (-37%) |
 
 Where it went before, by what each part runs:
 
@@ -70,10 +71,23 @@ Where it went before, by what each part runs:
   ROM, its 8 MB hashed. The rounds unrolled with the words'
   roles turned by name: 0.24 billion, the same hashes (`test_sha1`, and
   each ROM still recognised).
+- **The installs** with BN5 and BN4 (`xinstall_core`): 0.76 billion, 0.28
+  after. The cartridge's bytes are read and written in place rather than
+  a byte at a time through mGBA's bus (`src/emu/emu.c`, `cart_read` and
+  `cart_write`: what GBALoad8 reads and GBAPatch8 leaves, the copy made and
+  the size grown by the write's last byte, written mGBA's way); the claims'
+  check (`src/emu/claims.c`) is one pass, the installers' names compared
+  only where two ranges meet (four million comparisons before); and the
+  code walk's "is this halfword code" is answered from marks made once a
+  block (`xvirus_is_code_in`, `src/emu/xvirus_recipe.c`) rather than by
+  scanning the family's blocks and data for each. Checked by the ROM copy
+  after the installs, its 32 MB dumped by the old build and the new and
+  compared, the same byte for byte with BN6 alone and with all three, and
+  an autopilot run's log the same line for line.
 
 ## What is left
 
-The same start, BN6 alone, after: 1.80 billion.
+The same start, BN6 alone, after: 1.78 billion; with BN5 and BN4, 2.58.
 
 - **Picking the tiles** (`tiles_pick`, 0.38 billion over 11,851 calls)
   and the look each tile needs (`tl_expect_look`, `src/map/tiles.c`, 0.27
@@ -87,9 +101,6 @@ The same start, BN6 alone, after: 1.80 billion.
 - **The SHA-1** (0.24 billion a ROM): a hash kept beside the data folder
   for a file whose size and time have not changed would save it at every
   start but the first.
-- **With BN5 and BN4: the installs** (`xinstall_core`, 0.76 billion):
-  every byte written through mGBA's `rawWrite8` (`emu_write`) and the
-  claims' check (`claims.c`) looking over every range for each write.
 
 The game's frames themselves are measured by the [frame log](frame-log.md),
 not here.
