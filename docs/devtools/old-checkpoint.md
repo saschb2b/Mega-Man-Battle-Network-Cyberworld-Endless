@@ -53,10 +53,11 @@ skip one; `--from` names others) and one seed:
    by its pictures alone), where the game leaves the run or stops, or
    the layer is not left in `--limit` frames (20000). MegaMan deleted is
    the autopilot's loss: the seed tells nothing.
-6. **NEW GAME on the release's boot state**: `boot-3.state` in a data
+6. **NEW GAME on the release's boot state**: `boot-4.state` in a data
    folder is written by the first build started there and loaded by
-   every later one at each new run (`src/emu/boot.c`). A new run by this
-   build from the release's folder is played the same way to layer 2.
+   every later one at each new run (`src/emu/boot.c`), until its number
+   is bumped. A new run by this build from the release's folder is
+   played the same way to layer 2.
 7. **What the state carried**: the release's run continued once more
    and left at once, so its quit's state is this build's RAM after the
    CONTINUE; this build's own checkpoint of the same layer, continued
@@ -104,7 +105,7 @@ what makes it this build's again:
 | --- | --- | --- |
 | IWRAM's routines patched in place (`emu_keep`): the hit gate's two calls into the sea's code (`BN6_HIT_HIDDEN`, `BN6_HIT_HIDDEN2`, `xsea.c`), the panels' bonus and hit tests and the panel flags' literal (`xpanels.c`) | as the core starts | made the engine's after every load whatever the state holds, and a checkpoint saved with the game's own bytes (issue #482's fix). Proved here: fails on 0.21.0's build, the same bytes now |
 | A hook's BKPT in RAM | `hook_add` on a RAM address | `hook_reapply` puts this build's again. A BKPT a state holds where this build has no hook is a stray: its instruction is skipped (`hook_strays`). No checkpoint of 0.20.0's or 0.21.0's holds one (their IWRAM and EWRAM searched for the BKPT's words); a release that takes a RAM hook away would leave one, and the first list shows it |
-| The boot state, `boot-3.state` | the first build started in a data folder, `emu_save_state` (the game's own bytes under the kept patches) | loaded at each new run by every later build until its number is bumped. Step 6 plays it: ok from both releases |
+| The boot state, `boot-4.state` | the first build started in a data folder, `emu_save_state` (the game's own bytes under the kept patches) | loaded at each new run by every later build until its number is bumped. Step 6 plays it: ok from both releases. It passed 0.21.0 on 0.20.0's `boot-3.state` too, whose Standard folder was nine-bit and dealt blank chips under ten-bit ids: the step asks for layer 2 reached, not for what the hand holds ([A new run and boot](../engine/emulation/boot.md), Boot) |
 | The layer's maps, objects, warp list, label and texts, pointed at from EWRAM (`FREE_LAYER`, `FREE_WARP_LIST`, `FREE_LABEL`, `FREE_TALK`) | as a layer is entered | the layer is rebuilt before the state loads and entered again after it (`layer_reenter`); where another build made it, from its start, its flags and Mystery Data picks forgotten (`director_resume`, the `!same` branch) |
 | The song the music player plays, a copy in `FREE_SONGS` | a map's or the director's song | stopped where another build made the layer; the map plays its own. Seen on seed 3: the player then still names the song of the checkpoint's moment where this build's own run has gone on to the next; both are this build's addresses. Not listened to |
 | A battle's record, families' and Navis' rooms, chips' code (`FREE_RECORDS`, `FREE_FAMILIES`, `FREE_VIRUS_ROOM`, `FREE_NAVI_CODE`, `FREE_CHIP_*`) | as a battle starts | no checkpoint is written in a battle; what a state holds of the last one is written anew by the next. Step 5's battle is the check |
