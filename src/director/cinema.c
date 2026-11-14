@@ -220,19 +220,30 @@ static void draw_area(int x0, int y0) {
 	if (C.line3[0]) text_draw(x0 + CORE_W / 2, y + 42 + 2 * TEXT_H, C.line3, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 22) / 255), TEXT_CENTER);
 }
 
-/* A filled triangle, pixel by pixel on the canvas. */
+/* Whether the pixel (x, y) lies in the triangle */
+static bool in_tri(int x, int y, const float t[6]) {
+	float px = (float)x + 0.5f, py = (float)y + 0.5f;
+	float d1 = (px - t[2]) * (t[1] - t[3]) - (t[0] - t[2]) * (py - t[3]);
+	float d2 = (px - t[4]) * (t[3] - t[5]) - (t[2] - t[4]) * (py - t[5]);
+	float d3 = (px - t[0]) * (t[5] - t[1]) - (t[4] - t[0]) * (py - t[1]);
+	bool neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
+	return !(neg && pos);
+}
+
+/* A filled triangle on the canvas: each row's run of its pixels one fill
+ * (a fill a pixel, a few hundred calls a frame, cost the 3DS's frame the
+ * arrow showed in) */
 static void tri(float ax, float ay, float bx, float by, float cx, float cy, SDL_Color c) {
+	const float t[6] = { ax, ay, bx, by, cx, cy };
 	int x0 = (int)fminf(ax, fminf(bx, cx)), x1 = (int)fmaxf(ax, fmaxf(bx, cx)) + 1;
 	int y0 = (int)fminf(ay, fminf(by, cy)), y1 = (int)fmaxf(ay, fmaxf(by, cy)) + 1;
-	for (int y = y0; y <= y1; ++y)
-		for (int x = x0; x <= x1; ++x) {
-			float px = x + 0.5f, py = y + 0.5f;
-			float d1 = (px - bx) * (ay - by) - (ax - bx) * (py - by);
-			float d2 = (px - cx) * (by - cy) - (bx - cx) * (py - cy);
-			float d3 = (px - ax) * (cy - ay) - (cx - ax) * (py - ay);
-			bool neg = d1 < 0 || d2 < 0 || d3 < 0, pos = d1 > 0 || d2 > 0 || d3 > 0;
-			if (!(neg && pos)) fill_rect(x, y, 1, 1, c);
-		}
+	for (int y = y0; y <= y1; ++y) {
+		int a = x0;
+		while (a <= x1 && !in_tri(a, y, t)) ++a;
+		int b = a;
+		while (b <= x1 && in_tri(b, y, t)) ++b;
+		if (b > a) fill_rect(a, y, b - a, 1, c);
+	}
 }
 
 /* The way on: an arrow a little off the middle of the picture, where the

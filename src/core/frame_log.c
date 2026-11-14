@@ -40,6 +40,33 @@ void frame_log_depth(uint64_t ticks, int scale) {
 	depth_scale = scale;
 }
 
+/* (the parts named, their time summed over the second) */
+#define PARTS_MOST 32
+static struct { const char *name; uint64_t ticks; } parts[PARTS_MOST];
+static int nparts;
+
+void frame_log_part(const char *name, uint64_t ticks) {
+	for (int i = 0; i < nparts; ++i)
+		if (parts[i].name == name) { parts[i].ticks += ticks; return; }
+	if (nparts == PARTS_MOST) return;
+	parts[nparts].name = name;
+	parts[nparts++].ticks = ticks;
+}
+
+/* The dearest parts, a tenth of a millisecond a frame or more, eight at most, after `out` */
+static void parts_say(char *out, size_t n, double ms, double played) {
+	for (int k = 0; k < 8; ++k) {
+		int best = -1;
+		for (int i = 0; i < nparts; ++i)
+			if (parts[i].ticks && (best < 0 || parts[i].ticks > parts[best].ticks)) best = i;
+		if (best < 0 || parts[best].ticks * ms / played < 0.1) break;
+		size_t at = strlen(out);
+		snprintf(out + at, n - at, "%s%s %.1f", k ? ", " : "; the parts a frame: ", parts[best].name, parts[best].ticks * ms / played);
+		parts[best].ticks = 0;
+	}
+	for (int i = 0; i < nparts; ++i) parts[i].ticks = 0;
+}
+
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
 	part_draw += draw;
@@ -70,13 +97,14 @@ void frame_log_present(uint64_t present) {
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
 #ifdef __3DS__
-		char bottom[320] = "";
+		char bottom[640] = "";
 #else
-		char bottom[160] = "";
+		char bottom[480] = "";
 #endif
 		uint64_t second_ticks;
 		int seconds = platform_second_parts(&second_ticks);
 		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
+		parts_say(bottom, sizeof bottom, ms, played);
 		if (depth_frames) {
 			size_t k = strlen(bottom);
 			snprintf(bottom + k, sizeof bottom - k, "; depth lighting %.1f ms at %dx", depth_ticks * ms / depth_frames, depth_scale);
