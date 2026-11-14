@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: devtools/profiling.md (the lab's seeds a count a layout, as the atlas reads them, and another game's areas as aN; the tiles' pick in another game's areas: a book's panels found by place from a grid, the pick over every area 13.3 to 7.8 seconds, the layers the same).
 * **Update**: devtools/profiling.md (the layer lab: tools/layer_bench.py, every area's layers by a base and a change, compared byte for byte, each part's time and instructions; log.txt's net: line; over every area the tiles' pick and the learning are where the time is), devtools/atlas.md (the report's parts and coordinate hash, learn.txt), code/tools.md (tools/layer_bench.py), code/core.md (stopwatch.c).
 * **Update**: devtools/profiling.md (the coordinate data's walls: each cell asked once into a map rather than up to fourteen times; 0.11 to 0.02 billion instructions a time, a start with BN6 alone 1.50 billion and with all three ROMs 2.29, the ROM copy the same).
 * **Update**: devtools/profiling.md (a tile's look: each column asked upwards only as far as the first floor, a pixel's neighbours read from the columns; 0.27 to 0.11 billion instructions, a start with BN6 alone 1.67 billion and with all three ROMs 2.46, the layers the same).
