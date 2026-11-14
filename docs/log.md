@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Add**: releases/v0.21.1.md (the players' notes of 0.21.1, "The net, drawn as its maps draw it.": the net's floors before and after as moving pictures, one walk in both builds side by side, roads on the way out, each area's own pieces, the Undernet's fire bowls, Depth lighting, the freeze fix). **Update**: releases/overview.md and releases/index.md (its line), GUIDE.md (Depth lighting under Display's lines), code/site-and-media.md (`docs/clips/compare-*`, `tools/before_after.py --clips`), code/layers.md (v0.21.1's row of numbers), devtools/old-checkpoint.md (0.21.1's candidate continuing 0.20.0's and 0.21.0's runs: ok; `SOULS_FACE_PALS` moved 0x60, 0.20.0's two words carried).
 * **Update**: world/level-design/side-pieces.md (CopyBot Comp's crystal spikes behind its plateaus; End Area and Oran Area tried and left).
 
 ## 2026-11-13

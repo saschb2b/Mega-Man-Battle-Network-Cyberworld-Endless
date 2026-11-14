@@ -3,7 +3,7 @@ type: Code Map
 title: "The site, screenshots and clips"
 description: "What `web/` (the GitHub Pages site in BN6's PET look, its Japanese pages, the player and downloads), `docs/screenshots/` and `docs/clips/` (the trailer included) hold."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
 ---
 
 # The site, screenshots and clips

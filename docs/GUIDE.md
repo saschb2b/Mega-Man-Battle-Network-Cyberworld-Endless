@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T09:35:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
 ---
 
 # The player's guide
