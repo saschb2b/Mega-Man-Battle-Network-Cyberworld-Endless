@@ -49,19 +49,26 @@ SDL_Surface *present3ds_init(int w, int h) {
 	memset(pixels, 0, TEX * TEX * 4);
 	if (!C3D_Init(C3D_DEFAULT_CMDBUF_SIZE) || !C2D_Init(C2D_DEFAULT_MAX_OBJECTS)) return NULL;
 	C2D_Prepare();
+	/* (drawn in order: no depth to test or write, the targets having none) */
+	C3D_DepthTest(false, GPU_ALWAYS, GPU_WRITE_COLOR);
 	/* (SDL made the screens RGBA8, where citro2d's own targets write RGB8) */
 	u32 out = GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(0) | GX_TRANSFER_RAW_COPY(0) |
 		GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
 		GX_TRANSFER_SCALING(GX_TRANSFER_SCALE_NO);
-	top = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, GPU_RB_DEPTH16);
-	bottom = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_BOTTOM, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	/* (no depth buffer: the picture is drawn in order, and one read and
+	 * written at each pixel drawn took the GPU's time and the memory's) */
+	top = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, -1);
+	bottom = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_BOTTOM, GPU_RB_RGBA8, -1);
 	if (!top || !bottom) return NULL;
 	C3D_RenderTargetSetOutput(top, GFX_TOP, GFX_LEFT, out);
 	C3D_RenderTargetSetOutput(bottom, GFX_BOTTOM, GFX_LEFT, out);
 	/* (the right eye's: its own target, shown where the screen is in 3D) */
-	right_eye = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	right_eye = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, -1);
 	if (right_eye) C3D_RenderTargetSetOutput(right_eye, GFX_TOP, GFX_RIGHT, out);
-	if (!C3D_TexInit(&tex, TEX, TEX, GPU_RGBA8)) return NULL;
+	/* (in VRAM: the GPU reads it for each eye, up to three times in 3D, and
+	 * read from the main memory it took the memory the GBA core and the
+	 * main core work in: the frame log's GPU time doubled in a battle) */
+	if (!C3D_TexInitVRAM(&tex, TEX, TEX, GPU_RGBA8)) return NULL;
 	C3D_TexSetWrap(&tex, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 	/* (the canvas's first row is the texture's top as the copy leaves it:
 	 * turned over by the copy, it drew upside down in the screen's foot) */
@@ -74,7 +81,7 @@ void *present3ds_bottom(int *pitch) {
 	if (!bot_ready) {
 		bot_ready = true;   /* (tried once) */
 		bot_pixels = linearAlloc(BOT_W * BOT_H * 4);
-		if (!bot_pixels || !C3D_TexInit(&bot_tex, BOT_W, BOT_H, GPU_RGBA8)) {
+		if (!bot_pixels || !C3D_TexInitVRAM(&bot_tex, BOT_W, BOT_H, GPU_RGBA8)) {
 			if (bot_pixels) linearFree(bot_pixels);
 			bot_pixels = NULL;
 			return NULL;
@@ -147,6 +154,14 @@ static void shear_to(const Place *p, float first, float last) {
 	C2D_ViewReset();
 	C2D_ViewTranslate(first * p->sx - slope * p->y0, 0.0f);
 	C2D_ViewShear(slope, 0.0f);
+}
+
+/* A target cleared to black, as citro2d's own clear but its colour alone
+ * (the targets have no depth buffer) */
+static void target_clear(C3D_RenderTarget *t) {
+	C2D_Flush();
+	C3D_FrameSplit(0);
+	C3D_RenderTargetClear(t, C3D_CLEAR_COLOR, 0, 0);
 }
 
 /* Only the pixels whose alpha passes `f` against `ref` drawn from here (citro2d's batch drawn first) */
@@ -248,7 +263,7 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	/* (each eye: the left's on the screen's own target, the right's on its other in 3D) */
 	for (int eye = -1; eye <= (three_d ? 1 : -1); eye += 2) {
 		C3D_RenderTarget *t = eye < 0 ? top : right_eye;
-		C2D_TargetClear(t, C2D_Color32(0, 0, 0, 255));
+		target_clear(t);
 		C2D_SceneBegin(t);
 		canvas_blend(true);
 		if (layered) eye_draw(&st, eye, &place);
@@ -265,13 +280,13 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	 * once (a screen not drawn keeps its picture; drawn every frame, it
 	 * cost the GPU's time each one) */
 	if (bot_on && bot_draws > 0) {
-		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+		target_clear(bottom);
 		C2D_SceneBegin(bottom);
 		C2D_Image b = { &bot_tex, &bot_sub };
 		C2D_DrawImageAt(b, 0, 0, 0.5f, NULL, 1.0f, 1.0f);
 		--bot_draws;
 	} else if (!bot_on && cleared < 2) {
-		C2D_TargetClear(bottom, C2D_Color32(0, 0, 0, 255));
+		target_clear(bottom);
 		C2D_SceneBegin(bottom);
 		++cleared;
 	}

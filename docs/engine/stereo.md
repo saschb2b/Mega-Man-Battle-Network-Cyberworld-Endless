@@ -157,6 +157,16 @@ menus drawn flat costs one quad an eye. `frame_log`'s line on the 3DS
 says whether it holds 60 frames a second ([Frame
 log](../devtools/frame-log.md)).
 
+Measured on the owner's New 3DS, 2026-11-15: on a layer it held 59, the
+GPU drawing a frame in 7 ms; in a battle and at a layer's card it fell
+to 35-49, the GPU at 12-15 ms with only 1-3 bodies and 9-16 quads a
+frame, and the canvas's blit into its texture taking twice its time
+beside it. Neither the quads nor the layers were the cost: the GPU read
+the canvas's texture from the main memory, where the GBA core's core and
+the main core work, and read and wrote a depth buffer at each pixel it
+drew. The texture now lives in VRAM and the targets have no depth
+buffer (the picture is drawn in order).
+
 ## Open
 
 - Measured on a New 3DS, by its owner: this version's frames on a layer
