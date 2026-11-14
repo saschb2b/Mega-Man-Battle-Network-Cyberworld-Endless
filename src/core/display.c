@@ -105,6 +105,16 @@ float display_voxel_pitch(void) { return voxel_cam[0]; }
 float display_voxel_zoom(void) { return voxel_cam[1]; }
 float display_voxel_depth(void) { return voxel_cam[2]; }
 
+bool display_has_stereo(void) {
+#ifdef __3DS__
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool display_stereo(void) { return display_has_stereo() && voxel != DISPLAY_VOXEL_OFF; }
+
 bool display_has_voxel(void) {
 #if defined(__3DS__) || defined(__vita__) || defined(__PSP__)
 	return false;
@@ -234,7 +244,7 @@ void display_blend_keep(LcdBlend b) {
 }
 
 void display_voxel_keep(bool on) {
-	voxel = on && display_has_voxel() ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
+	voxel = on && (display_has_voxel() || display_has_stereo()) ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
 	keep("depth_lighting", voxel ? "on" : "off", options_voxel_note());
 }
 

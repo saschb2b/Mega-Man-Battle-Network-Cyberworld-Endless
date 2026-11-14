@@ -268,6 +268,9 @@ static void worker_entry(void *arg) { worker_main(arg); }
 bool emu_drawing;
 int emu_draw_waits;
 
+static void (*after_frame)(void);
+void emu_after_frame(void (*step)(void)) { after_frame = step; }
+
 static void wait_frame(void) {
 	if (!in_flight) return;
 	emu_draw_waits += emu_drawing;
@@ -275,6 +278,7 @@ static void wait_frame(void) {
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
 	++pictures;
+	if (after_frame) after_frame();
 }
 
 bool emu_threaded(void) { return threaded; }
@@ -343,6 +347,7 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 	run_frame(unshown);
 	if (!unshown) ++pictures;
+	if (after_frame) after_frame();
 }
 
 const uint32_t *emu_video(void) { return threaded ? shown : video; }

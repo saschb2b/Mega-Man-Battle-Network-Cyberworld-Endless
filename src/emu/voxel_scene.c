@@ -367,7 +367,7 @@ static bool out_sized(void) {
  * nothing voxel mode draws (a menu, a battle beginning, a liberation's
  * board, whose panels' tints are the picture's, a visit to another's
  * Square) */
-enum { SCENE_NONE, SCENE_LAYER, SCENE_FLAT, SCENE_BATTLE };
+enum { SCENE_NONE = VOXEL_SCENE_NONE, SCENE_LAYER = VOXEL_SCENE_LAYER, SCENE_FLAT = VOXEL_SCENE_FLAT, SCENE_BATTLE = VOXEL_SCENE_BATTLE };
 
 static int scene_now(void) {
 	if (emu_read8(emu_read32(BN6_TOOLKIT)) != BN6_MODE_GAME || online_visit_away() || online_visit_held()) return SCENE_NONE;
@@ -377,6 +377,10 @@ static int scene_now(void) {
 	if (!director_on_map() || director_in_town() || director_in_hp()) return SCENE_FLAT;
 	return lib_on() ? SCENE_NONE : SCENE_LAYER;
 }
+
+int voxel_scene_kind(void) { return scene_now(); }
+
+int voxel_scene_hud_rows(int kind) { return emu_read8(BN6_CHATBOX) ? CHAT_TOP : kind == SCENE_BATTLE ? -BATTLE_TOP : 0; }
 
 /* The video memory read, the frame's layers and the world's picture
  * (the map's whole tile map where it is found, else the frame alone);
@@ -428,7 +432,7 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 		memset(&V.ground, 0, sizeof V.ground);
 		V.ground_ok = false;
 	}
-	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) ? CHAT_TOP : kind == SCENE_BATTLE ? -BATTLE_TOP : 0, shown, &V.ground, &V.scene);
+	voxel_lift(&V.layers, voxel_scene_hud_rows(kind), shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();
 	look.debug = display_voxel() == DISPLAY_VOXEL_DEBUG;
 	/* (a battle is read whole: nothing of it out of focus) */

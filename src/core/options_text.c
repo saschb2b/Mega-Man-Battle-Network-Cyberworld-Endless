@@ -78,6 +78,9 @@ static const char *const words[] = {
 	"Depth lighting",   /* OW_VOXEL */
 	"Sun, shadows and depth on the world",   /* OW_VOXEL_ON_NOTE */
 	"The world as BN6 draws it",   /* OW_VOXEL_OFF_NOTE */
+	"3D depth",   /* OW_STEREO */
+	"The 3D slider sets the world's depth",   /* OW_STEREO_ON_NOTE */
+	"The picture flat, as BN6 draws it",   /* OW_STEREO_OFF_NOTE */
 	"DEFAULT",   /* OW_DEFAULT */
 	"Display back as it came?",   /* OW_ASK_DISPLAY */
 	"Audio back as it came?",   /* OW_ASK_AUDIO */
@@ -209,8 +212,9 @@ const char *options_voxel_note(void) {
 		"# shadows, shaded sides, a glow off what is bright and what is far a\n"
 		"# little out of focus, on the net, in town and in battle; on the net's\n"
 		"# layers the camera also looks from a little lower. Menus and the HUD\n"
-		"# stay as they are. Not on the 3DS or the Vita. Options' Display changes\n"
-		"# it too.\n";
+		"# stay as they are. On the 3DS it is the 3D depth instead: the 3D slider\n"
+		"# sets how deep the world goes behind the screen, the HUD flat at it.\n"
+		"# Not on the Vita. Options' Display changes it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

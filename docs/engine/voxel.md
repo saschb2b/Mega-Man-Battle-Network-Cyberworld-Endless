@@ -22,7 +22,8 @@ game (the reference above). Options' Display has the line **Depth
 lighting** ([the panel's rules](ui.md); it sits under [the GBA's
 screen's lines](lcd.md)), kept as `depth_lighting = on` in
 `settings.ini`; `--depth-lighting on|off|debug` on the command line sets
-it over that. It is not offered on the 3DS or the Vita.
+it over that. It is not offered on the Vita, nor on the 3DS, where the
+same line is the 3D screen's [3D depth](stereo.md) instead.
 
 It began as "voxel mode", and the code keeps that name (`voxel.h`,
 `voxel_scene.c`, `--voxel` and `voxel =` still read): the owner renamed

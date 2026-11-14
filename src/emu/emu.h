@@ -44,6 +44,11 @@ void emu_frame_as(uint32_t keys, unsigned how);
  * written as the frame's own (an install's: BN4's Navis' sound pool,
  * xnavi_bn4_sounds.h); NULL none. One at a time. */
 void emu_before_frame(void (*step)(void));
+/* A step after each frame the core ends, before the next begins (the
+ * game's memory as the frame left it, the frame the drawing shows: on a
+ * system whose core runs the next frame beside the drawing, the drawing's
+ * own reads would wait for that one) */
+void emu_after_frame(void (*step)(void));
 bool emu_threaded(void);
 /* Waits for a frame the core runs on its own thread: what its hooks left
  * is the main thread's to read after it. */

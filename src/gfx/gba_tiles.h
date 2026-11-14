@@ -55,4 +55,11 @@ static inline void gba_screen_row(const uint8_t *vram, const GbaBg *b, int x0, i
 	}
 }
 
+/* One pixel of a background's own screen map at the frame's (x, y): its palette index (0 clear) */
+static inline unsigned gba_bg_pixel(const uint8_t *vram, const GbaBg *b, int x, int y) {
+	uint8_t one;
+	gba_screen_row(vram, b, x, y, 1, &one);
+	return one;
+}
+
 #endif

@@ -313,6 +313,8 @@ bool emu_threaded(void) { return false; }
 void emu_sync(void) {}
 void emu_quit(void) {}
 void emu_before_frame(void (*step)(void)) { before_frame = step; }
+/* (the 3DS's 3D screen's alone: none on the PSP) */
+void emu_after_frame(void (*step)(void)) { (void)step; }
 bool emu_drawing;
 int emu_draw_waits;
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
