@@ -36,7 +36,7 @@ static const int8_t above[ABOVE][2] = {
 	{ 0, -2 }, { 7, -2 }, { 0, -6 }, { 7, -6 }, { 0, -10 }, { 7, -10 }, { 0, -14 }, { 7, -14 },
 };
 
-static int fdiv(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
+static int div_floor(int a, int b) { return a >= 0 ? a / b : -((-a + b - 1) / b); }
 static int fmod_(int a, int b) { int m = a % b; return m < 0 ? m + b : m; }
 /* (buildings stay apart from the sky: the plan has none, so no tile
  * beside one serves) */
@@ -136,7 +136,7 @@ static void learn_walk(View *v) {
 			v->walk[(size_t)y * v->cw + x] = area_src_walled_floor(a, (x + v->cx0) * 8 + 4, (y + v->cy0) * 8 + 4) == 1;
 	for (int i = 0; i < a->nsec[0]; ++i) {
 		const CoordCell *c = &a->sec[0][i];
-		int x = fdiv(c->x, 8) - v->cx0, y = fdiv(c->y, 8) - v->cy0;
+		int x = div_floor(c->x, 8) - v->cx0, y = div_floor(c->y, 8) - v->cy0;
 		if (c->value < 0x80 && x >= 0 && y >= 0 && x < v->cw && y < v->ch) v->walk[(size_t)y * v->cw + x] = 0;
 	}
 }
@@ -180,8 +180,8 @@ static void learn_parts(TownBook *b) {
 				}
 		}
 		int X = xn ? xsum / xn : 0, ax = X - tw * 4, by = (low - th * 4) * 2;
-		b->foot[id].cx = (int16_t)fdiv(fdiv(ax - by, 2), 8);
-		b->foot[id].cy = (int16_t)fdiv(fdiv(ax + by, 2), 8);
+		b->foot[id].cx = (int16_t)div_floor(div_floor(ax - by, 2), 8);
+		b->foot[id].cy = (int16_t)div_floor(div_floor(ax + by, 2), 8);
 	}
 	free(stack);
 }
@@ -205,14 +205,14 @@ static void learn_palettes(TownBook *b) {
 			int i = a->idx[(size_t)y * W + x];
 			if (!i) continue;
 			int ax = x - a->tw * 4, by = (y - a->th * 4) * 2;
-			int wx = fdiv(ax - by, 2), wy = fdiv(ax + by, 2), cx = fdiv(wx, 8), cy = fdiv(wy, 8);
+			int wx = div_floor(ax - by, 2), wy = div_floor(ax + by, 2), cx = div_floor(wx, 8), cy = div_floor(wy, 8);
 			int m = view_cell(v, cx, cy);
 			if (m == TM_EDGE || m == TM_VOID) {
 				/* a face: floor within 16 pixels above */
 				for (int d = 2; d <= 16; d += 2) {
 					int ay = (y - d - a->th * 4) * 2;
-					int fx = fdiv(ax - ay, 2), fy = fdiv(ax + ay, 2);
-					int fm = view_cell(v, fdiv(fx, 8), fdiv(fy, 8));
+					int fx = div_floor(ax - ay, 2), fy = div_floor(ax + ay, 2);
+					int fm = view_cell(v, div_floor(fx, 8), div_floor(fy, 8));
 					if (fm != TM_VOID && fm != TM_EDGE) { b->allowed[TM_VOID][i] = 1; break; }
 				}
 				continue;
@@ -238,12 +238,12 @@ typedef int (*CellFn)(const void *ctx, int cx, int cy);
 
 static int mat_px(CellFn f, const void *ctx, int X, int Y, int tw, int th) {
 	int a = X - tw * 4, b = (Y - th * 4) * 2;
-	int x = fdiv(a - b, 2), y = fdiv(a + b, 2);
-	return keymat(f(ctx, fdiv(x, 8), fdiv(y, 8)));
+	int x = div_floor(a - b, 2), y = div_floor(a + b, 2);
+	return keymat(f(ctx, div_floor(x, 8), div_floor(y, 8)));
 }
 
 static uint64_t key_at(CellFn f, const void *ctx, int tx, int ty, int tw, int th) {
-	uint64_t k = (uint64_t)fmod_(fdiv(tx * 8 - tw * 4, 8), 2);
+	uint64_t k = (uint64_t)fmod_(div_floor(tx * 8 - tw * 4, 8), 2);
 	for (int i = 0; i < SAMPLES; ++i)
 		k |= (uint64_t)mat_px(f, ctx, tx * 8 + samp[i][0], ty * 8 + samp[i][1], tw, th) << (1 + 3 * i);
 	for (int j = 0; j < ABOVE; ++j)
@@ -262,7 +262,7 @@ static int agree(uint64_t pk, uint64_t k) {
 }
 
 static int tex_phase(int tx, int ty, int tw, int th) {
-	return fmod_(fdiv(tx * 8 - tw * 4, 8), 8) | fmod_(fdiv(ty * 8 - th * 4, 8), 4) << 3;
+	return fmod_(div_floor(tx * 8 - tw * 4, 8), 8) | fmod_(div_floor(ty * 8 - th * 4, 8), 4) << 3;
 }
 
 static int view_cell_cb(const void *ctx, int cx, int cy) { return view_cell(ctx, cx, cy); }
@@ -591,7 +591,7 @@ void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t se
 				for (int x = 0; x < 8; ++x) {
 					int X = tx * 8 + x, Y = ty * 8 + y;
 					int a = X - tw * 4, bb = (Y - th * 4) * 2;
-					int wx = fdiv(a - bb, 2), wy = fdiv(a + bb, 2), cx = fdiv(wx, 8), cy = fdiv(wy, 8);
+					int wx = div_floor(a - bb, 2), wy = div_floor(a + bb, 2), cx = div_floor(wx, 8), cy = div_floor(wy, 8);
 					int m = keymat(cell(cx, cy));
 					bool inner = true;
 					for (int dy = -1; dy <= 1 && inner; ++dy)
