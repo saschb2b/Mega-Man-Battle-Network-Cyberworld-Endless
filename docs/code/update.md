@@ -3,7 +3,7 @@ type: Code Map
 title: "The game's own updates"
 description: "What `src/update/` holds: the look at the release's update.json and the download's thread, the manifest's reading, SHA-256, each system's way to put a new version in place, and the updater's words."
 tags: [code, updates]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T05:00:00Z }
 ---
 
 # The game's own updates

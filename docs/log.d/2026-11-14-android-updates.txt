@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T05:00:00Z
-* **Update**: engine/updates.md (Android's app updates itself: its Java's download and SHA-256 check, a PackageInstaller session without a tap from Android 12 on, Android's prompt otherwise, the game force-stopped and opened again from its icon (Android 10 on refuse a reopen from the background); the developer's extras), code/update.md (update_android.c, Updater.java, UpdateReceiver.java), code/core.md (android_call.c), code/layers.md (android_call in core.base, the counts), code/platforms.md (android/'s Updater and UpdateReceiver), GUIDE.md (Updates: Android's row).
