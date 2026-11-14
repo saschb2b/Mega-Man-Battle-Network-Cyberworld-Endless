@@ -64,12 +64,13 @@ static Learned learned[NET_AREAS + XAREAS_MAX];
  * and in a long run the areas kept, with a new one's learning, filled the
  * 3DS's 96 MB heap: allocations refused in most long runs; with two kept,
  * still in most where BN5's ROM was read (docs/engine/emulation/3ds-memory.md, The 3DS's
- * memory; CW_HEAP_3DS builds the host so, for tools/heap3ds.py, and
+ * memory; the PSP's likewise; CW_HEAP_3DS and CW_HEAP_PSP build the host
+ * so, for tools/heap3ds.py, and
  * AREAS_KEPT sets another number there). An area left behind is learned
  * again, the same, where a run comes back to it: the endless net's acts
  * once round, a detour's way back. */
 #ifndef AREAS_KEPT
-#if defined(__3DS__) || defined(CW_HEAP_3DS)
+#if defined(__3DS__) || defined(CW_HEAP_3DS) || defined(__PSP__) || defined(CW_HEAP_PSP)
 #define AREAS_KEPT 1
 #else
 #define AREAS_KEPT 0   /* (all) */

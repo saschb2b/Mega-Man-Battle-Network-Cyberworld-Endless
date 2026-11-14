@@ -30,7 +30,10 @@ void game_hooks_install(void) {
 	 * them where its ROM is read (xchips_code.h) */
 	xchips_install();
 	gamecall_install();
+#ifndef CW_GPSP
+	/* (gpSP skips BN6's wait for VBlank as its own idle loop) */
 	idle_install();
+#endif
 	/* (the music or effects off: Options' Audio) */
 	sound_quiet_install();
 	npc_reach_install();

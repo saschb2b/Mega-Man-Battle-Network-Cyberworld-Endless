@@ -1,0 +1,288 @@
+diff --git a/Makefile.common b/Makefile.common
+index 9742c05..9ffc873 100644
+--- a/Makefile.common
++++ b/Makefile.common
+@@ -8,6 +8,7 @@ SOURCES_CC := $(CORE_DIR)/video.cc \
+               $(CORE_DIR)/cpu.cc
+ 
+ SOURCES_C := $(CORE_DIR)/main.c \
++             $(CORE_DIR)/cw.c \
+              $(CORE_DIR)/gba_memory.c \
+              $(CORE_DIR)/savestate.c \
+              $(CORE_DIR)/input.c \
+diff --git a/cpu_threaded.c b/cpu_threaded.c
+index 923d962..624c23e 100644
+--- a/cpu_threaded.c
++++ b/cpu_threaded.c
+@@ -23,6 +23,7 @@
+ 
+ #include "common.h"
+ #include "memmap.h"
++#include "cw.h"
+ #if defined(VITA)
+ #include <psp2/kernel/sysmem.h>
+ #include <stdio.h>
+@@ -3222,6 +3223,12 @@ bool translate_block_arm(u32 pc, bool ram_region)
+       arm_process_cheats();
+     }
+ 
++    /* (Cyberworld Endless's hooks: a call out before the instruction, cw.h) */
++    if (cw_hooked && cw_hooked(pc))
++    {
++      arm_cw_hook();
++    }
++
+     update_pc_limits();
+     translate_arm_instruction();
+     block_data_position++;
+@@ -3368,6 +3375,12 @@ bool translate_block_thumb(u32 pc, bool ram_region)
+       thumb_process_cheats();
+     }
+ 
++    /* (Cyberworld Endless's hooks: a call out before the instruction, cw.h) */
++    if (cw_hooked && cw_hooked(pc))
++    {
++      thumb_cw_hook();
++    }
++
+     update_pc_limits();
+     translate_thumb_instruction();
+     block_data_position++;
+diff --git a/cw.c b/cw.c
+new file mode 100644
+index 0000000..b5d4eb6
+--- /dev/null
++++ b/cw.c
+@@ -0,0 +1,33 @@
++/* cw.h: Cyberworld Endless's additions to gpSP (GPL-2.0 as gpSP) */
++#include "common.h"
++#include "cw.h"
++
++bool cw_mode;
++uint8_t *cw_rom_pages[CW_PAGES];
++bool (*cw_hooked)(uint32_t pc);
++
++void cw_rom_page_set(uint32_t index, uint8_t *page)
++{
++  if (index >= CW_PAGES)
++    return;
++  cw_rom_pages[index] = page;
++  /* (the mirrors at 0x0A and 0x0C as map_rom_entry sets them; a 16 MB ROM
++   * fills its 0x08 and 0x0A spans once and 0x0C's half) */
++  memory_map_read[(0x8000000 / (32 * 1024)) + index] = page;
++  memory_map_read[(0xA000000 / (32 * 1024)) + index] = page;
++  if (index < 512)
++    memory_map_read[(0xC000000 / (32 * 1024)) + index] = page;
++}
++
++void cw_flush(void)
++{
++  flush_dynarec_caches();
++}
++
++/* (gpSP alone, as the libretro core it builds: no hooks; the game's own
++ * cw_hook_call takes this one's place where it links gpSP in) */
++__attribute__((weak)) uint32_t cw_hook_call(uint32_t pc)
++{
++  (void)pc;
++  return 0;
++}
+diff --git a/cw.h b/cw.h
+new file mode 100644
+index 0000000..67904f4
+--- /dev/null
++++ b/cw.h
+@@ -0,0 +1,31 @@
++/* Cyberworld Endless's additions to gpSP (the game's docker/gpsp-cyberworld.patch,
++ * GPL-2.0 as gpSP), included by gpSP and by the game alike: the ROM taken
++ * from the game's own pages, and hooks the translator calls out to at
++ * hooked instructions. */
++#ifndef CW_H
++#define CW_H
++
++#include <stdbool.h>
++#include <stdint.h>
++
++/* The ROM in 32 KB pages the game holds (set before retro_init and
++ * retro_load_game: no ROM buffer of gpSP's own is allocated, nor a file
++ * read) */
++#define CW_PAGES 512
++extern bool cw_mode;
++extern uint8_t *cw_rom_pages[CW_PAGES];
++/* A page pointed elsewhere (the game copied it to write it), its mirrors
++ * too; the translations of ROM code are dropped at the next cw_flush */
++void cw_rom_page_set(uint32_t index, uint8_t *page);
++/* Every translation dropped, ROM's and RAM's: after the ROM's code or the
++ * hooks changed, between frames */
++void cw_flush(void);
++
++/* Hooks: whether the instruction at pc is hooked (asked as a block is
++ * translated), and the call the translated code makes before it runs:
++ * 0 to run the instruction, else the address to go on at, bit 0 set for
++ * Thumb code (the game's, cw_hook_call) */
++extern bool (*cw_hooked)(uint32_t pc);
++uint32_t cw_hook_call(uint32_t pc);
++
++#endif
+diff --git a/gba_memory.c b/gba_memory.c
+index 1e304ee..2ba1157 100644
+--- a/gba_memory.c
++++ b/gba_memory.c
+@@ -18,6 +18,7 @@
+  */
+ 
+ #include "common.h"
++#include "cw.h"
+ #include "streams/file_stream.h"
+ 
+ /* Sound */
+@@ -2850,6 +2851,17 @@ static s32 load_gamepak_raw(const char *name)
+   unsigned i, j;
+   u32 raw_size;
+   int64_t fsize;
++  /* (Cyberworld Endless: the ROM is the game's pages, 16 MB, mapped as they
++   * are; its first megabyte one run of them, where the header is read) */
++  if (cw_mode)
++  {
++    gamepak_size = CW_PAGES * 32 * 1024;
++    gamepak_file_blocks = CW_PAGES;
++    gamepak_buffers[0] = cw_rom_pages[0];
++    for (i = 0; i < CW_PAGES; i++)
++      map_rom_entry(read, i, cw_rom_pages[i], CW_PAGES);
++    return 0;
++  }
+   gamepak_file_large = filestream_open(name, RETRO_VFS_FILE_ACCESS_READ,
+                                        RETRO_VFS_FILE_ACCESS_HINT_NONE);
+   if(gamepak_file_large)
+diff --git a/libretro/libretro.c b/libretro/libretro.c
+index ed2a7d2..eb12ee3 100644
+--- a/libretro/libretro.c
++++ b/libretro/libretro.c
+@@ -13,6 +13,7 @@
+ #include "libretro_core_options.h"
+ 
+ #include "../gba_memory.h"
++#include "../cw.h"
+ #include "../gba_cc_lut.h"
+ 
+ #if defined(VITA) && defined(HAVE_DYNAREC)
+@@ -681,7 +682,8 @@ void retro_init(void)
+   #endif
+ #endif
+ 
+-   init_gamepak_buffer();
++   if (!cw_mode)
++      init_gamepak_buffer();
+    init_sound();
+ 
+    if(!gba_screen_pixels)
+@@ -1218,7 +1220,7 @@ bool retro_load_game(const struct retro_game_info* info)
+     * leave none of them allocated.  load_gamepak() reads the cartridge
+     * header straight out of gamepak_buffers[0], so there is no way to
+     * proceed from here without dereferencing NULL. */
+-   if (!gamepak_buffer_count)
++   if (!gamepak_buffer_count && !cw_mode)
+    {
+       error_msg("Not enough memory to allocate the ROM buffer.");
+       return false;
+diff --git a/mips/mips_emit.h b/mips/mips_emit.h
+index 61e02da..043bf29 100644
+--- a/mips/mips_emit.h
++++ b/mips/mips_emit.h
+@@ -61,6 +61,7 @@ u32 execute_read_cpsr();
+ u32 execute_read_spsr();
+ void execute_swi(u32 pc);
+ void mips_cheat_hook(void);
++void mips_cw_hook(void);
+ 
+ u32 execute_spsr_restore(u32 address);
+ void execute_store_cpsr(u32 new_cpsr, u32 store_mask);
+@@ -1849,6 +1850,26 @@ u32 execute_store_cpsr_body(u32 _cpsr, u32 address)
+ #define thumb_process_cheats()                                                \
+   generate_function_call(mips_cheat_hook);
+ 
++/* (Cyberworld Endless's hooks, cw.h: mips_cw_hook saves the ARM registers,
++ * makes the game's call with the hooked pc in a0 and loads them back, its
++ * answer in v0: an address to go on at, as a bx goes, else on to the
++ * instruction. The cycles counted so far stay counted on the way on.) */
++#define cw_hook_callout()                                                     \
++{                                                                             \
++  u8 *jmpinst;                                                                \
++  u32 cycles_held = cycle_count;                                              \
++  generate_load_pc(reg_a0, pc);                                               \
++  generate_function_call(mips_cw_hook);                                       \
++  mips_emit_b_filler(beq, reg_rv, reg_zero, jmpinst);                         \
++  mips_emit_addu(reg_a0, reg_rv, reg_zero);                                   \
++  generate_indirect_branch_cycle_update(dual);                                \
++  generate_branch_patch_conditional(jmpinst, translation_ptr);                \
++  cycle_count = cycles_held;                                                  \
++}
++
++#define thumb_cw_hook() cw_hook_callout()
++#define arm_cw_hook() cw_hook_callout()
++
+ #define arm_process_cheats()                                                  \
+   generate_function_call(mips_cheat_hook);
+ 
+diff --git a/mips/mips_stub.S b/mips/mips_stub.S
+index ef3eecf..3f549a4 100644
+--- a/mips/mips_stub.S
++++ b/mips/mips_stub.S
+@@ -273,6 +273,19 @@ defsymbl(mips_cheat_hook)
+   nop
+ 
+ 
++# Cyberworld Endless's hooks (cw.h): $4 the hooked pc, the game's answer
++# in $2 (an address to go on at, else 0), the ARM registers saved for it
++# and loaded back after, as the game may change them
++defsymbl(mips_cw_hook)
++  sw $ra, REG_SAVE2($16)
++  save_registers
++  cfncall cw_hook_call, 11
++  lw $ra, REG_SAVE2($16)
++  restore_registers
++  jr $ra
++  nop
++
++
+ # Loads the main context and returns to it.
+ # ARM regs must be saved before branching here
+ return_to_main:
+@@ -640,6 +653,7 @@ fnptrs:
+   .long process_cheats                 # 8
+   .long check_and_raise_interrupts     # 9
+   .long execute_arm_vram               # 10
++  .long cw_hook_call                   # 11
+ 
+ #if !defined(MMAP_JIT_CACHE)
+ 
+diff --git a/x86/x86_emit.h b/x86/x86_emit.h
+index dfa4833..a64ffbc 100644
+--- a/x86/x86_emit.h
++++ b/x86/x86_emit.h
+@@ -2268,6 +2268,25 @@ static void function_cc execute_swi(u32 pc)
+ #define thumb_process_cheats()                                                \
+   generate_c_function_call(process_cheats);
+ 
++/* (Cyberworld Endless's hooks, cw.h: the game's call with the hooked pc;
++ * where it answers an address, on there as a bx goes, else on to the
++ * instruction. The cycles counted so far stay counted on the way on.) */
++#define cw_hook_callout()                                                     \
++{                                                                             \
++  u8 *jmpinst;                                                                \
++  u32 cycles_held = cycle_count;                                              \
++  generate_load_pc(arg0, pc);                                                 \
++  generate_c_function_call(cw_hook_call);                                     \
++  generate_cmp_imm(a0, 0);                                                    \
++  x86_emit_j_filler(x86_condition_code_z, jmpinst);                           \
++  generate_indirect_branch_cycle_update(dual);                                \
++  generate_branch_patch_conditional(jmpinst, translation_ptr);                \
++  cycle_count = cycles_held;                                                  \
++}
++
++#define thumb_cw_hook() cw_hook_callout()
++#define arm_cw_hook() cw_hook_callout()
++
+ #define arm_process_cheats()                                                  \
+   generate_c_function_call(process_cheats);
+ 

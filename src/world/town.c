@@ -72,7 +72,7 @@ typedef struct TownStyle Style;
 static struct {
 	const Style *style;
 	const TownLines *lines;   /* its people and words */
-	TownBook *books[4], *book;   /* each style's source, learned once; the current one */
+	TownBook *book;   /* the style's source (townsrc_book: learned once, kept for the next visit) */
 	int stw, sth;
 	uint8_t src_obj[32][20];
 	int nsrc_obj;
@@ -687,8 +687,7 @@ static int plan_once(uint32_t seed) {
 	if (si < 0 || si >= STYLES) si = 0;
 	T.style = &styles[si];
 	T.lines = &town_lines[si];
-	if (!T.books[si] && !(T.books[si] = townsrc_learn(T.style->group, T.style->number, T.style->mat_of))) return -1;
-	T.book = T.books[si];
+	if (!(T.book = townsrc_book(si, T.style->group, T.style->number, T.style->mat_of))) return -1;
 	townsrc_size(T.book, &T.stw, &T.sth);
 	T.nsrc_obj = townsrc_objects(T.book, T.src_obj, 32);
 	T.npieces = 0;
@@ -996,5 +995,6 @@ bool town_install(int to_group, int to_number, int x, int y) {
 		mapslot_jack_in(g, n, to_group, to_number, x, y, 4) &&
 		mapslot_music(g, n, T.style->song);
 	mapslot_town(false);
+	townsrc_installed();
 	return ok;
 }

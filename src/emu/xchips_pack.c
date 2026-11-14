@@ -5,6 +5,7 @@
 #include <mgba/core/core.h>
 #include <mgba/internal/gba/gba.h>
 
+#include "emu_gpsp.h"
 #include "free_space.h"
 
 /* The engine's own Thumb routines, at CHIPS_CODE (numbers: written for
@@ -99,16 +100,28 @@ HookAct xchips_pack_cleared(HookRegs *r, void *user) {
 static const uint8_t mark[BN6_PACK_SAVE_MARKED] = { 'C', 'W', ' ', 'p', 'a', 'c', 'k', ' ', 'i', 'd', 's', ' ', '6', '3', '5', 1 };
 
 /* the mark's place in the core's save RAM, NULL where its save is no SRAM */
+#ifdef CW_GPSP
+/* (on gpSP its cart's save RAM, the one core's whatever core is named) */
+static uint8_t *kept_at(struct mCore *core) {
+	(void)core;
+	size_t n = 0;
+	uint8_t *save = emu_gpsp_save_ram(&n);
+	return save && n >= BN6_PACK_SAVE_MARK - BN6_SAVE_RAM + XPACK_KEPT ? save + (BN6_PACK_SAVE_MARK - BN6_SAVE_RAM) : NULL;
+}
+#else
 static uint8_t *kept_at(struct mCore *core) {
 	struct GBA *gba = core ? core->board : NULL;
 	if (!gba || gba->memory.savedata.type != SAVEDATA_SRAM || !gba->memory.savedata.data) return NULL;
 	return gba->memory.savedata.data + (BN6_PACK_SAVE_MARK - BN6_SAVE_RAM);
 }
+#endif
 
 bool xchips_pack_ready(struct mCore *core) {
+#ifndef CW_GPSP
 	struct GBA *gba = core ? core->board : NULL;
 	/* (mGBA finds the save's kind at the game's first use of it: a read finds SRAM, as BN6's own first read does) */
 	if (gba && gba->memory.savedata.type == SAVEDATA_AUTODETECT) (void)core->busRead8(core, BN6_PACK_SAVE_MARK);
+#endif
 	uint8_t *at = kept_at(core);
 	if (!at) return false;
 	if (memcmp(at, mark, sizeof mark)) {

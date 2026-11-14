@@ -106,7 +106,7 @@ float display_voxel_zoom(void) { return voxel_cam[1]; }
 float display_voxel_depth(void) { return voxel_cam[2]; }
 
 bool display_has_voxel(void) {
-#if defined(__3DS__) || defined(__vita__)
+#if defined(__3DS__) || defined(__vita__) || defined(__PSP__)
 	return false;
 #else
 	return true;
