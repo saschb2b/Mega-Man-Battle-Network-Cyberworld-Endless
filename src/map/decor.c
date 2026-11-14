@@ -34,7 +34,7 @@ static uint8_t *footprint(const AreaSrc *a) {
 			int z = area_src_height(a, X, Y);
 			if (z == HEIGHT_UNEVEN) z = 0;
 			int cx = area_px(a->tw, X, Y), cy = area_py(a->th, X, Y) - z;
-			if (cx < 0 || cy < 0 || cx >= W || cy >= H || !(a->px[(size_t)cy * W + cx] >> 24)) continue;
+			if (cx < 0 || cy < 0 || cx >= W || cy >= H || !a->idx[(size_t)cy * W + cx]) continue;
 			/* the diamond (64 x 32), and under it its faces */
 			for (int dx = -32 - PAD; dx <= 32 + PAD; ++dx) {
 				int half = (32 - abs(dx)) / 2;
@@ -62,7 +62,7 @@ static bool flat(const AreaSrc *a, int tx, int ty) {
 static bool drawn_at(const AreaSrc *a, bool bg_in_map, int x, int y) {
 	int W = a->tw * 8, H = a->th * 8;
 	if (x < 0 || y < 0 || x >= W || y >= H) return false;
-	return (bg_in_map ? a->px0 : a->px)[(size_t)y * W + x] >> 24;
+	return (bg_in_map ? a->idx0 : a->idx)[(size_t)y * W + x] != 0;
 }
 
 /* Whether tile (tx, ty)'s art runs on into its neighbour (dx, dy): a
@@ -97,7 +97,7 @@ void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out) {
 			for (int y = 0; y < 8; ++y)
 				for (int x = 0; x < 8; ++x) {
 					size_t i = (size_t)(ty * 8 + y) * W + tx * 8 + x;
-					if (!((bg_in_map ? a->px0 : a->px)[i] >> 24)) continue;
+					if (!(bg_in_map ? a->idx0 : a->idx)[i]) continue;
 					++drawn;
 					on_floor += fp[i];
 				}
