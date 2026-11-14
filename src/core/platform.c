@@ -239,13 +239,9 @@ static void layout_canvas(void) {
 		int wx = (int)P.fill + 1, wy = (int)P.fill_y + 1;
 		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * wx, P.h * wy);
 		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
-#ifdef __PSP__
-		/* (the PSP's 2 MB of video memory holds none past the canvas's: the
-		 * canvas itself to the screen, smoothly, sharp scaling from 1x) */
+#ifdef __PSP__   /* (its 2 MB of video memory holds none past the canvas: the canvas itself to the screen, smoothly) */
 		else SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeLinear);
-#else
-		/* (no memory for it: the canvas at the whole scale, a little wide;
-		 * stretched, the picture alone at it) */
+#else   /* (no memory for it: the canvas at the whole scale, a little wide; stretched, the picture alone at it) */
 		else P.fill = P.fill_y = 0;
 #endif
 	}
