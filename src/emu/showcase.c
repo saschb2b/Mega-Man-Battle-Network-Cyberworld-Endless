@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef __3DS__
+#if !defined(__3DS__) && !defined(CW_GPSP)
 
 #include <mgba/core/core.h>
 
@@ -255,7 +255,7 @@ void showcase_close(void) {
 	S.staged = -1;
 }
 
-#else   /* (the 3DS: no second core) */
+#else   /* (the 3DS, and a build on gpSP: no second core) */
 
 bool showcase_here(void) { return false; }
 void showcase_want(ShowScene s) { (void)s; }

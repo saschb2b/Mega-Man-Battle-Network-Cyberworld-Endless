@@ -7,6 +7,8 @@
 #include <malloc.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -37,6 +39,22 @@ int ftruncate(int fd, off_t len) { (void)fd; (void)len; return -1; }
 
 static char rom_psp[600];   /* the game's own rom folder */
 
+void console_args(int *argc, char ***argv) {
+	static char text[1024];
+	static char *words[48];
+	FILE *f = fopen("args.txt", "r");
+	if (!f) return;
+	size_t n = fread(text, 1, sizeof text - 1, f);
+	fclose(f);
+	text[n] = 0;
+	int k = 0;
+	for (int i = 0; i < *argc && k < 47; ++i) words[k++] = (*argv)[i];
+	for (char *w = strtok(text, " \t\r\n"); w && k < 47; w = strtok(NULL, " \t\r\n")) words[k++] = w;
+	words[k] = NULL;
+	*argc = k;
+	*argv = words;
+}
+
 void console_heap(char *out, size_t n) {
 	static size_t most;
 	struct mallinfo mi = mallinfo();
@@ -66,6 +84,22 @@ void console_start(bool data_dir_given) {
 	freopen(log, "a", stderr);
 	printf("psp: the CPU at %d MHz, %u KB free for the heap\n", scePowerGetCpuClockFrequency(),
 		(unsigned)(sceKernelTotalFreeMemSize() / 1024));
+	/* (a PSP starts its games with no command line: env.txt beside the
+	 * EBOOT, where there is one, sets the variables a test sets on a
+	 * computer, NAME=value a line: CYBERWORLD_AUTOPILOT=1 the autopilot,
+	 * psp/README.md) */
+	char envs[600], line[256];
+	snprintf(envs, sizeof envs, "%s/env.txt", g_data_dir);
+	FILE *f = fopen(envs, "r");
+	while (f && fgets(line, sizeof line, f)) {
+		line[strcspn(line, "\r\n")] = 0;
+		char *eq = strchr(line, '=');
+		if (!eq || line[0] == '#') continue;
+		*eq = 0;
+		setenv(line, eq + 1, 1);
+		printf("psp: %s=%s from env.txt\n", line, eq + 1);
+	}
+	if (f) fclose(f);
 }
 
 bool console_rom(const char *rom_dir, char *msg, size_t n) {

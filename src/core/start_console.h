@@ -23,6 +23,9 @@ void console_start(bool data_dir_given);
  * beside it, or in those folders */
 bool console_rom(const char *rom_dir, char *msg, size_t n);
 #ifdef __PSP__
+/* The command line a PSP's start has not: args.txt's words beside the
+ * EBOOT after argv's, where there is one (psp/README.md) */
+void console_args(int *argc, char ***argv);
 /* The heap in words for frame_log: what is in use and the most it held,
  * against what the PSP gave (docs/engine/emulation/psp-and-ds.md) */
 void console_heap(char *out, size_t n);

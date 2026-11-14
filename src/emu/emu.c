@@ -1,5 +1,8 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
+
+/* (on mGBA; a build on gpSP has emu_gpsp.c instead: CW_GPSP) */
+#ifndef CW_GPSP
 #include "audio_pace.h"
 #include "claims.h"
 #include "compat.h"
@@ -628,3 +631,5 @@ bool emu_snapshot_load(void *bytes, size_t size) {
 	}
 	return ok;
 }
+
+#endif

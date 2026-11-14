@@ -1,5 +1,9 @@
 # Normally driven by build.py, which runs these targets inside the build image.
 TARGET ?= host
+# The GBA core: mGBA, or gpSP with the game's additions (CW_GPSP), the PSP's
+# and, to test it, a computer's (CYBERWORLD_CORE=gpsp, build.py), built by
+# docker/gpsp.sh into GPSP (docs/engine/emulation/psp-and-ds.md)
+CORE ?= $(if $(filter psp,$(TARGET)),gpsp,mgba)
 CC_host := gcc
 CC_aarch64 := aarch64-linux-gnu-gcc
 CC_asan := gcc
@@ -27,7 +31,7 @@ CC := $(CC_$(TARGET))
 # (the linker: the compiler, but on the PS5, whose link is lld's alone)
 LINK = $(CC)
 PKGCONF := $(PKG_$(TARGET)) pkg-config
-OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
+OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))$(if $(and $(filter gpsp,$(CORE)),$(filter-out psp,$(TARGET))),-gpsp)
 BIN_host := $(OUT)/cyberworld
 BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
@@ -357,6 +361,12 @@ endif
 # one make's own flags on top (build.py lint: each function in a section
 # of its own, and the linker's list of those it drops)
 CFLAGS += $(EXTRA_CFLAGS)
+# (gpSP linked before the rest: its translator calls the game's cw_hook_call)
+ifeq ($(CORE),gpsp)
+GPSP ?= /opt/gpsp/$(TARGET)
+CFLAGS += -DCW_GPSP -isystem $(GPSP)/include
+LDLIBS := $(GPSP)/lib/libgpsp.a $(LDLIBS) -lstdc++ -lm
+endif
 LDLIBS += $(EXTRA_LDFLAGS)
 
 all: $(BIN) $(OUT)/licenses/mGBA.txt

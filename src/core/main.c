@@ -549,6 +549,9 @@ static int game_main(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
+#ifdef __PSP__
+	console_args(&argc, &argv);
+#endif
 	int code = game_main(argc, argv);
 #ifdef CW_PS5
 	console_park(code);
