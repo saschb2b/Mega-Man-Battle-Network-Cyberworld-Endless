@@ -694,7 +694,7 @@ bool tl_pad_look(const Src *s, const uint8_t *pads, int A, int B) {
 }
 
 /* Whether panel (A, B) is floor whose tiles are not learned. */
-bool tl_skipped(const Src *s, int A, int B) {
+static bool skipped_now(const Src *s, int A, int B) {
 	bool pads_alone = s->styles & TILES_PADS_ALONE && s->pads, in = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2;
 	if (!s->skip_styles && !pads_alone) return false;
 	const AreaSrc *a = s->a;
@@ -707,6 +707,17 @@ bool tl_skipped(const Src *s, int A, int B) {
 		pale_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) >= PALE_PIXELS;
 	if (s->skip_styles & SKIP_ANY_PIXEL) return hue_pixels(a, area_px(a->tw, X, Y), area_py(a->th, X, Y), s->skip_styles & 0xFFFu) >= (s->skip_styles & SKIP_QUARTER ? 64 : 8);
 	return s->skip_styles >> tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
+}
+
+/* ... asked once a panel (the source's memo): counting the panel's
+ * pixels each time was nine tenths of learning BN4's maps
+ * (docs/devtools/profiling.md) */
+bool tl_skipped(const Src *s, int A, int B) {
+	int i = A + SPAN / 2, j = B + SPAN / 2;
+	if (!s->skipped || i < 0 || j < 0 || i >= SPAN || j >= SPAN) return skipped_now(s, A, B);
+	int8_t *m = &s->skipped[j * SPAN + i];
+	if (*m < 0) *m = (int8_t)skipped_now(s, A, B);
+	return *m;
 }
 
 void tiles_free(TileBook *b) {
