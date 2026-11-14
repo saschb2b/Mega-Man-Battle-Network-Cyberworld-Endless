@@ -54,6 +54,7 @@ Instructions to the first layer, the second start (its boot state made),
 | Before | 2.54 billion | 4.09 billion |
 | The floor's fix and the SHA-1 | 1.80 billion (-29%) | 3.15 billion (-23%) |
 | And the installs | 1.78 billion (-30%) | 2.58 billion (-37%) |
+| And the tiles' looks | 1.67 billion (-35%) | 2.46 billion (-40%) |
 
 Where it went before, by what each part runs:
 
@@ -84,15 +85,21 @@ Where it went before, by what each part runs:
   after the installs, its 32 MB dumped by the old build and the new and
   compared, the same byte for byte with BN6 alone and with all three, and
   an autopilot run's log the same line for line.
+- **A tile's look** (`tl_expect_look`, `src/map/tiles.c`), which both the
+  tiles' pick and the learning of an area's maps ask for every tile: 0.27
+  billion of its own, 0.11 after. Each of its 14 columns asked every row
+  of the reach above the tile (up to 40 pixels) for floor; now only where
+  the tile's top row has none, upwards and no further than the first. And
+  a pixel's floor beside and below it is read from those columns'
+  distances rather than asked again. The atlas's 1,077 pictures the same
+  byte for byte.
 
 ## What is left
 
-The same start, BN6 alone, after: 1.78 billion; with BN5 and BN4, 2.58.
+The same start, BN6 alone, after: 1.67 billion; with BN5 and BN4, 2.46.
 
-- **Picking the tiles** (`tiles_pick`, 0.38 billion over 11,851 calls)
-  and the look each tile needs (`tl_expect_look`, `src/map/tiles.c`, 0.27
-  billion of its own: every pixel of a tile and its window asks the
-  floor beneath it, memoised per pixel but asked many times).
+- **Picking the tiles** (`tiles_pick`, 0.32 billion over 11,851 calls),
+  `best`'s own comparisons the most of it.
 - **Learning the area's original maps** (`nm_learn`, 0.36 billion), done
   again when a run comes back to an area (`3ds/README.md`, "learned
   again").
