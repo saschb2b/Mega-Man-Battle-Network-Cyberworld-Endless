@@ -73,6 +73,14 @@ void stereo_flat(const GbaVideo *v, int hud_rows, StereoFlat *out) {
 }
 
 void stereo_row(const StereoFlat *f, int y, StereoRow *out) {
+	memset(out, 0, sizeof *out);
+	/* (a row with nothing flat: the world's whole, at once) */
+	bool any = memchr(f->cell[y / 8], 1, CELLS_X) != NULL;
+	for (int r = 0; !any && r < f->nrects; ++r) any = y >= f->rect[r].y0 && y < f->rect[r].y1;
+	if (!any) {
+		out->n = 1;
+		return;
+	}
 	uint8_t flat[STEREO_W];
 	for (int cx = 0; cx < CELLS_X; ++cx) memset(&flat[cx * 8], f->cell[y / 8][cx], 8);
 	for (int r = 0; r < f->nrects; ++r) {
@@ -80,7 +88,6 @@ void stereo_row(const StereoFlat *f, int y, StereoRow *out) {
 		int x0 = f->rect[r].x0 < 0 ? 0 : f->rect[r].x0, x1 = f->rect[r].x1 > STEREO_W ? STEREO_W : f->rect[r].x1;
 		if (x1 > x0) memset(&flat[x0], 1, (size_t)(x1 - x0));
 	}
-	memset(out, 0, sizeof *out);
 	for (int x = 0; x < STEREO_W; ++x) {
 		if (x && flat[x] == flat[x - 1]) continue;
 		/* (past the spans a row may have, the rest of it flat) */

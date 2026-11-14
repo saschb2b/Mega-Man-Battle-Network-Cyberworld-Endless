@@ -17,8 +17,9 @@
 #endif
 
 /* The eyes' parting at the deepest with the slider at its top, in the
- * frame's pixels: 9 of the 3DS's screen at its 1.5x */
-#define SEP_MOST 6.0f
+ * frame's pixels: 15 of the 3DS's screen at its 1.5x (9 first: the owner
+ * found the slider's part in it too small to see) */
+#define SEP_MOST 10.0f
 
 /* (made at the first frame in 3D: none of it where the 3D is off) */
 static struct Stereo {

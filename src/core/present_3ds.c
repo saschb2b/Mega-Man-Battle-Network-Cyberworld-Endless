@@ -101,30 +101,42 @@ static void span_draw(const Place *p, int a, int b, int y, int rows, float at, f
 	C2D_DrawImageAt(img, p->x0 + at * p->sx, p->y0 + (float)y * p->s, 0.5f, NULL, p->sx * w / (float)(b - a), p->s);
 }
 
-/* Rows alike in their spans drawn as one, four at most */
-static void rows_draw(const Present3dsStereo *st, int eye, const Place *p, int y, int rows) {
-	const Present3dsRow *r = &st->row[y];
-	float s = (float)eye * (st->shift[y] + st->shift[y + rows - 1]) * 0.5f;
+/* Whether a row is the world's whole */
+static bool all_world(const Present3dsRow *r) { return r->n <= 1 && (!r->n || !r->flat[0]); }
+
+/* A run of rows alike in their spans, over the sheared world: the gap
+ * each world span leaves beside a flat one filled with its edge's column
+ * drawn `wide` (under the same shear, it ends where the span begins), or,
+ * not `sheared`, the flat spans where they are */
+static void rows_draw(const Present3dsRow *r, const Place *p, int y, int rows, float wide, bool sheared) {
 	for (int i = 0; i < r->n; ++i) {
 		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : cw;
-		if (r->flat[i] || b <= a) continue;
-		span_draw(p, a, b, y, rows, (float)a + s, (float)(b - a));
-		/* (the gap it leaves beside a flat span: its edge's column, drawn wide) */
-		if (i > 0 && s > 0) span_draw(p, a, a + 1, y, rows, (float)a, s);
-		if (i + 1 < r->n && s < 0) span_draw(p, b - 1, b, y, rows, (float)b + s, -s);
-	}
-	for (int i = 0; i < r->n; ++i) {
-		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : cw;
-		if (r->flat[i] && b > a) span_draw(p, a, b, y, rows, (float)a, (float)(b - a));
+		if (b <= a) continue;
+		if (!sheared && r->flat[i]) span_draw(p, a, b, y, rows, (float)a, (float)(b - a));
+		if (!sheared || r->flat[i]) continue;
+		if (wide > 0 && i > 0) span_draw(p, a, a + 1, y, rows, (float)a - wide, wide);
+		if (wide < 0 && i + 1 < r->n) span_draw(p, b - 1, b, y, rows, (float)b, -wide);
 	}
 }
 
-/* One eye's picture from the spans, `eye` -1 the left, +1 the right */
+/* One eye's picture, `eye` -1 the left, +1 the right: the world as one
+ * quad sheared by its rows' depth (a row's shift falls evenly to none at
+ * the last), its gaps beside the flat spans filled, then the flat spans.
+ * Drawn a few rows at a time, a battle's took twice the GPU's calls a
+ * frame has room for. */
 static void eye_draw(const Present3dsStereo *st, int eye, const Place *p) {
-	for (int y = 0, rows; y < ch && y < 160; y += rows) {
-		rows = 1;
-		while (y + rows < ch && y + rows < 160 && rows < 4 && !memcmp(&st->row[y + rows], &st->row[y], sizeof st->row[y])) ++rows;
-		rows_draw(st, eye, p, y, rows);
+	float deepest = (float)eye * st->shift[0], slope = -deepest * p->sx / (159.0f * p->s);
+	C2D_ViewReset();
+	C2D_ViewTranslate(deepest * p->sx - slope * p->y0, 0.0f);
+	C2D_ViewShear(slope, 0.0f);
+	C2D_DrawImageAt((C2D_Image){ &tex, &sub }, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
+	for (int pass = 0; pass < 2; ++pass) {
+		if (pass) C2D_ViewReset();
+		for (int y = 0, rows; y < ch && y < 160; y += rows) {
+			rows = 1;
+			while (y + rows < ch && y + rows < 160 && !memcmp(&st->row[y + rows], &st->row[y], sizeof st->row[y])) ++rows;
+			if (!all_world(&st->row[y])) rows_draw(&st->row[y], p, y, rows, deepest + (deepest > 0 ? 1.0f : deepest < 0 ? -1.0f : 0.0f), !pass);
+		}
 	}
 }
 

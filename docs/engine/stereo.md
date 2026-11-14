@@ -69,16 +69,21 @@ a visit to another's Square stay flat in both eyes.
 2. **Each row's spans.** From those, each row of the frame is spans,
    flat or the world's (eight at most, the rest of the row flat).
 3. **Each eye on the GPU.** The canvas's picture is already the GPU's
-   texture; each eye's picture is drawn from it a few rows at a time
-   (rows of the same spans, four at most): the world's spans moved by
-   their rows' depth, the gap a span leaves beside a flat one filled with
-   its edge's column drawn wide, then the flat spans where they are. The
-   left eye's picture goes to the top screen's own target, the right's to
-   its right one.
+   texture; each eye's picture is drawn from it as one quad sheared by the
+   rows' depth (citro2d's view shear: a row's shift falls evenly from the
+   first row to none at the last), then, under the same shear, the gap
+   each world span leaves beside a flat one filled with its edge's column
+   drawn wide, then the flat spans where they are, rows of the same spans
+   drawn as one. The left eye's picture goes to the top screen's own
+   target, the right's to its right one. Drawn a few rows at a time (some
+   fifty quads an eye, more in a battle), the GPU's calls cost a battle's
+   frame rate on the owner's New 3DS; the net held 60.
 
-The eyes' parting at the deepest is 6 of the frame's pixels with the
-slider at its top (9 of the screen's at the 3DS's 1.5x), the slider's
+The eyes' parting at the deepest is 10 of the frame's pixels with the
+slider at its top (15 of the screen's at the 3DS's 1.5x), the slider's
 share of it below; a row's is that times its depth, `(159 - row) / 159`.
+A first parting of 6 (9 of the screen's) left the slider's part in it
+too small for the owner to see.
 
 ### The first version, and why it went
 
@@ -109,14 +114,14 @@ Nothing with the slider at its bottom (or the line off). With the slider
 up, the main core copies 65 KB of video memory as each frame ends and
 reads the HUD's sprites' boxes and two maps' cells from it, says each
 row's spans, and the GPU draws each eye's picture from the texture it
-has already: some fifty quads an eye where a row is the world's whole, a
-few more where the HUD is. Not yet measured on a 3DS: `frame_log`'s line
-there says whether it holds 60 frames a second.
+has already: one sheared quad for the world, and a few for the HUD's
+spans and the gaps beside them. `frame_log`'s line on the 3DS says
+whether it holds 60 frames a second.
 
 ## Open
 
-- Measured on a New 3DS, by its owner: the frames' pacing with the slider
-  up on a layer, in town and in battle; how deep is comfortable.
+- Measured on a New 3DS, by its owner: the sheared quad's frames in a
+  battle; how deep is comfortable at the wider parting.
 - The raised floor of a layer is the world's by its row, not by its
   height (depth lighting's floor model would raise it, at a cost).
 - What stands goes back with its rows, not upright at its feet's depth.
