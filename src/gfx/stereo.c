@@ -72,10 +72,19 @@ void stereo_flat(const GbaVideo *v, int hud_rows, StereoFlat *out) {
 	GbaBg bg0 = gba_bg(v->io, 0), bg3 = gba_bg(v->io, 3);
 	if (bg0.on) hud_cells(v, &bg0, out);
 	if (bg3.on && gba_bg3_front(v->io)) hud_cells(v, &bg3, out);
+	int cells = 0;
+	for (int cy = 0; cy < CELLS_Y; ++cy)
+		for (int cx = 0; cx < CELLS_X; ++cx) cells += out->cell[cy][cx];
+	out->whole = cells * 4 >= CELLS_X * CELLS_Y;
 }
 
 void stereo_row(const StereoFlat *f, int y, StereoRow *out) {
 	memset(out, 0, sizeof *out);
+	if (f->whole) {
+		out->n = 1;
+		out->flat[0] = 1;
+		return;
+	}
 	/* (a row with nothing flat: the world's whole, at once) */
 	bool any = memchr(f->cell[y / 8], 1, CELLS_X) != NULL;
 	for (int r = 0; !any && r < f->nrects; ++r) any = y >= f->rect[r].y0 && y < f->rect[r].y1;

@@ -87,7 +87,8 @@ static void shot_save(const uint32_t *px) {
 #ifdef __3DS__
 /* The 3DS's present asks at each frame: each row's spans and shift */
 static bool make(Present3dsStereo *out) {
-	if (!st || st->live != P.frame + 1) return false;
+	/* (a screen of menus flat: the picture as it is in both eyes) */
+	if (!st || st->live != P.frame + 1 || st->flat.whole) return false;
 	float sep = SEP_MOST * slider();
 	/* (the spans the present keeps, where the flat parts and the slider are as they were: made anew, up to 1.7 ms a frame) */
 	if (sep == st->made_sep && !memcmp(&st->flat, &st->made_flat, sizeof st->flat)) return true;

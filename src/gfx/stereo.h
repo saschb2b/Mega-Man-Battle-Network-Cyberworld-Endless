@@ -31,6 +31,12 @@ typedef struct {
 	int nrects;
 	struct { int16_t x0, y0, x1, y1; } rect[STEREO_RECTS];
 	uint8_t cell[STEREO_H / 8][STEREO_W / 8];
+	/* a frame a quarter of whose cells or more are the HUD's backgrounds'
+	 * (a battle's Custom screen, a result screen): a screen of menus, flat
+	 * whole (the chips' sprites over its window moved with the field's
+	 * rows behind it, and its spans made anew each frame cost the 3DS its
+	 * 60 frames) */
+	bool whole;
 } StereoFlat;
 
 /* ... read from the frame's video memory (OAM, the IO registers and VRAM's

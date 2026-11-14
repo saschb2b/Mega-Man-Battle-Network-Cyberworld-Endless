@@ -168,7 +168,10 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	part(NULL);
 	bool three_d, layered = spans_ready(&st, &three_d);
 	part("3d spans");
-	GSPGPU_FlushDataCache(pixels, TEX * TEX * 4);
+	/* (the whole once, then the rows the canvas draws into: the rest stays as the first flush left it) */
+	static bool flushed;
+	GSPGPU_FlushDataCache(pixels, flushed ? TEX * (u32)ch * 4 : TEX * TEX * 4);
+	flushed = true;
 	C3D_SyncDisplayTransfer(pixels, GX_BUFFER_DIM(TEX, TEX), (u32 *)tex.data, GX_BUFFER_DIM(TEX, TEX),
 		GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |
 		GX_TRANSFER_IN_FORMAT(GX_TRANSFER_FMT_RGBA8) | GX_TRANSFER_OUT_FORMAT(GX_TRANSFER_FMT_RGBA8) |
