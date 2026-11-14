@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T14:23:41Z
-* **Update**: engine/emulation/psp-and-ds.md (The PSP build: gpSP as its core, the ROM held once in pages, hooks the translator calls out to, measured in PPSSPP at 60 frames a second in a 12.6 MB heap; the old 3DS the same question), engine/emulation/index.md (its line), code/emu.md (emu_gpsp.c, hook_gpsp.c, emu_sound.c, emu_keep.c), code/core.md (start_psp.c), code/platforms.md (psp/, Dockerfile.psp and gpsp.sh, the systems not built for, CI's nine).

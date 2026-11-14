@@ -3,7 +3,7 @@ type: Measurement
 title: "The PSP and the DS, measured"
 description: "Whether the game could run on a PSP or a Nintendo DS, measured in PPSSPP at 333 MHz (14 November 2026): mGBA takes 19 to 25 ms of a 16.7 ms frame on BN6, libretro gpSP's MIPS dynarec 6 to 7.4; the PSP build on gpSP, its ROM held once and its memory cut, plays a run at 60 frames a second in a 12.6 MB heap; a DS has neither the speed nor the memory for any GBA core."
 tags: [engine, emulation, platforms]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T02:38:23Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T14:23:41Z }
 ---
 
 # The PSP and the DS, measured
