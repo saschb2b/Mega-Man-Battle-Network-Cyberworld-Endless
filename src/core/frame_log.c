@@ -67,6 +67,47 @@ static void parts_say(char *out, size_t n, double ms, double played) {
 	for (int i = 0; i < nparts; ++i) parts[i].ticks = 0;
 }
 
+/* (the GPU's time a frame, and the counts named, summed over the second) */
+static double gpu_ms;
+static int gpu_frames;
+#define COUNTS_MOST 8
+static struct { const char *name; long sum; int frames; } counts[COUNTS_MOST];
+static int ncounts;
+
+#ifdef __3DS__
+void frame_log_gpu(float ms) {
+	gpu_ms += ms;
+	++gpu_frames;
+}
+
+void frame_log_count(const char *name, int n) {
+	int i = 0;
+	while (i < ncounts && counts[i].name != name) ++i;
+	if (i == ncounts) {
+		if (ncounts == COUNTS_MOST) return;
+		counts[ncounts].name = name;
+		counts[ncounts].sum = 0;
+		counts[ncounts++].frames = 0;
+	}
+	counts[i].sum += n;
+	++counts[i].frames;
+}
+#endif
+
+/* The GPU's mean and the counts' after `out`, and begun afresh */
+static void extras_say(char *out, size_t n) {
+	size_t at = strlen(out);
+	if (gpu_frames) snprintf(out + at, n - at, "; the GPU %.1f ms a frame", gpu_ms / gpu_frames);
+	for (int i = 0; i < ncounts; ++i) {
+		at = strlen(out);
+		if (counts[i].frames) snprintf(out + at, n - at, "%s %s %.1f", i ? "," : "; a frame's", counts[i].name, (double)counts[i].sum / counts[i].frames);
+		counts[i].sum = 0;
+		counts[i].frames = 0;
+	}
+	gpu_ms = 0;
+	gpu_frames = 0;
+}
+
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
 	part_draw += draw;
@@ -97,7 +138,7 @@ void frame_log_present(uint64_t present) {
 		extern int emu_core_unshown;
 		int drawn = part_played - emu_core_unshown;
 #ifdef __3DS__
-		char bottom[640] = "";
+		char bottom[900] = "";
 #else
 		char bottom[480] = "";
 #endif
@@ -105,6 +146,7 @@ void frame_log_present(uint64_t present) {
 		int seconds = platform_second_parts(&second_ticks);
 		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
 		parts_say(bottom, sizeof bottom, ms, played);
+		extras_say(bottom, sizeof bottom);
 		if (depth_frames) {
 			size_t k = strlen(bottom);
 			snprintf(bottom + k, sizeof bottom - k, "; depth lighting %.1f ms at %dx", depth_ticks * ms / depth_frames, depth_scale);

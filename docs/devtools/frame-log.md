@@ -34,4 +34,8 @@ for the core's next frame, and "the last in" names the part that made
 the last of them: a draw that reads the game belongs in the update
 (the [3D depth](../engine/stereo.md)'s reads were moved to the frame's
 end for it). Where depth lighting ran, the line says its time a frame
-and its scale.
+and its scale. The 3DS's line also says the GPU's time drawing a frame
+(citro3d's `C3D_GetDrawingTime`, beside the main core's, not part of it),
+and in 3D a frame's bodies and quads, so a frame held back by the GPU
+tells itself from one held back by the main core; "show" is the canvas
+put into the GPU's texture by SDL, before the present's own parts.

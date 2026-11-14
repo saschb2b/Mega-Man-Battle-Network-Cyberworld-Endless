@@ -275,12 +275,20 @@ static void box_draw(int x0, int y0) {
 
 static void options_panel_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
+	uint64_t part = frame_part_begin();
 	options_scene_grab();
+	frame_part_end("options: the scene", part);
+	part = frame_part_begin();
 	pet_panel_draw(x0, y0, options_word(OW_TITLE));
 	if (options_page_resets()) look_band_hint(x0, y0, CORE_W, "START", options_word(OW_DEFAULT));
+	frame_part_end("options: the panel", part);
+	part = frame_part_begin();
 	list_draw(x0, y0);
+	frame_part_end("options: the list", part);
+	part = frame_part_begin();
 	box_draw(x0, y0);
 	look_fade_in(x0, y0, CORE_W, CORE_H, O.t);
+	frame_part_end("options: the box", part);
 }
 
 /* the question over all, else the controls screen over Options, else it */

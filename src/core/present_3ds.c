@@ -105,7 +105,10 @@ typedef struct { float x0, y0, sx, s; } Place;
 
 /* The canvas's columns a to b of its rows y to y + rows, at the canvas's
  * column `at`, `w` of its columns wide */
+static int quads;   /* (the quads the eyes drew, for the frame log) */
+
 static void span_draw(const Place *p, int a, int b, int y, int rows, float at, float w) {
+	++quads;
 	Tex3DS_SubTexture t = { (u16)(b - a), (u16)rows, (float)a / TEX, 1.0f - (float)y / TEX, (float)b / TEX, 1.0f - (float)(y + rows) / TEX };
 	C2D_Image img = { &tex, &t };
 	C2D_DrawImageAt(img, p->x0 + at * p->sx, p->y0 + (float)y * p->s, 0.5f, NULL, p->sx * w / (float)(b - a), p->s);
@@ -237,6 +240,8 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	 * five to nine a second come early or late, issue #35) */
 	C3D_FrameBegin(sync ? C3D_FRAME_SYNCDRAW : 0);
 	part("frame wait");
+	if (platform_frame_log) frame_log_gpu(C3D_GetDrawingTime());
+	quads = 0;
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f, sx = stretch ? (float)GSP_SCREEN_HEIGHT_TOP / (float)cw : s;
 	Place place = { ((float)GSP_SCREEN_HEIGHT_TOP - cw * sx) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, sx, s };
 	C2D_Image img = { &tex, &sub };
@@ -251,6 +256,11 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 		canvas_blend(false);
 	}
 	part(layered ? "eyes in 3d" : "eyes");
+	if (layered && platform_frame_log) {
+		static const char bodies_name[] = "3d bodies", quads_name[] = "3d quads";
+		frame_log_count(bodies_name, st.nbodies);
+		frame_log_count(quads_name, quads);
+	}
 	/* the bottom screen: a new picture, else black, in both of its buffers
 	 * once (a screen not drawn keeps its picture; drawn every frame, it
 	 * cost the GPU's time each one) */
