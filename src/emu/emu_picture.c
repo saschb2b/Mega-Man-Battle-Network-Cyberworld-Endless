@@ -82,8 +82,8 @@ void emu_picture_draw(int x, int y) {
 		px[i] = voxel && !hud[i] ? 0 : c | 0xFF000000u;
 #endif
 	}
-	/* (the 3DS's 3D depth, stereo_scene.h: the frame sorted by depth for its present) */
-	stereo_scene_frame(px, x, y);
+	/* (the 3DS's 3D depth, stereo_scene.h: the frame's rows in depth at its present) */
+	stereo_scene_frame(px);
 	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
 	SDL_Rect dst = { x, y, EMU_W, EMU_H };
 	SDL_RenderCopy(P.renderer, tex, NULL, &dst);

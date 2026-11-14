@@ -77,8 +77,8 @@ GBA core alone takes longer than a frame there.
 - The 3DS's buttons are the GBA's: A, B, L, R, START, SELECT, and the D-Pad
   or the Circle Pad. HOME pauses as for any game.
 - Options' Display has **3D depth**, on as it comes (`depth_3d`): the 3D slider
-  gives the picture depth, the world back into the screen and what stands
-  at its feet's depth, the HUD at the screen (docs/engine/stereo.md).
+  gives the picture depth, the world back into the screen row by row, the
+  HUD at the screen (docs/engine/stereo.md).
 - The first start asks whether the game may send anonymous play
   statistics (docs/GUIDE.md, Anonymous statistics); Options, on the
   title's menu or the PET's in a run, has a Statistics line that asks again (and whose Audio sets the

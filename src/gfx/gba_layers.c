@@ -122,6 +122,13 @@ static void objs(const GbaVideo *v, GbaLayers *out) {
 	}
 }
 
+void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]) {
+	for (int n = 0; n < GBA_OBJS; ++n) {
+		Obj o;
+		box[n] = obj_read(v, n, &o) ? (GbaBox){ (int16_t)o.x0, (int16_t)o.y0, (uint8_t)o.bw, (uint8_t)o.bh } : (GbaBox){ 0, 0, 0, 0 };
+	}
+}
+
 bool gba_bg3_front(const uint8_t *io) {
 	unsigned on = gba_rd16(io, 0) >> 8, p3 = gba_rd16(io, 0x0E) & 3u;
 	if (!(on & 8u)) return false;

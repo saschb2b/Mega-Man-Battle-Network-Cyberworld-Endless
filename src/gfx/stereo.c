@@ -9,82 +9,86 @@
  * voxel_lift.c's) */
 #define HP_RIGHT  48
 #define HP_BOTTOM 24
+#define CELLS_X   (STEREO_W / 8)
+#define CELLS_Y   (STEREO_H / 8)
 
-static bool hud_obj(const GbaLayers *l, int n, int hud_rows) {
-	if (!l->w[n]) return false;
-	if (l->x[n] + l->w[n] <= HP_RIGHT && l->y[n] + l->h[n] <= HP_BOTTOM) return true;
-	return hud_rows > 0 ? l->y[n] >= hud_rows : hud_rows < 0 && l->y[n] + l->h[n] <= -hud_rows;
+static bool hud_box(const GbaBox *b, int hud_rows) {
+	if (!b->w) return false;
+	if (b->x + b->w <= HP_RIGHT && b->y + b->h <= HP_BOTTOM) return true;
+	return hud_rows > 0 ? b->y >= hud_rows : hud_rows < 0 && b->y + b->h <= -hud_rows;
 }
 
-/* Whether a background in front of a sprite of priority `p` has a pixel at (x, y) */
-static bool covered(const GbaVideo *v, const GbaBg bg[4], int x, int y, unsigned p) {
-	for (int b = 0; b < 4; ++b)
-		if (bg[b].on && bg[b].prio < p && gba_bg_pixel(v->vram, &bg[b], x, y)) return true;
-	return false;
+/* Whether a tile of a background's has a pixel (`seen`: each tile's answer
+ * so far, 0 not asked, 1 empty, 2 not) */
+static bool tile_drawn(const uint8_t *vram, const GbaBg *b, unsigned tile, uint8_t *seen) {
+	tile &= 0x3FFu;
+	if (!seen[tile]) {
+		unsigned size = b->wide ? 64u : 32u, at = (b->chars + tile * size) & 0xFFFFu;
+		seen[tile] = 1;
+		for (unsigned i = 0; i < size && at + i < 0x10000u; ++i)
+			if (vram[at + i]) { seen[tile] = 2; break; }
+	}
+	return seen[tile] == 2;
 }
 
-/* The HUD's backgrounds: BG0, and BG3 where it stands in front of the map's (a battle's Custom screen) */
-static void hud_backgrounds(const GbaVideo *v, const GbaBg bg[4], StereoFrame *out) {
-	uint8_t row[STEREO_W];
-	bool front3 = gba_bg3_front(v->io);
-	for (int b = 0; b < 4; b += 3) {
-		if (!bg[b].on || (b == 3 && !front3)) continue;
-		for (int y = 0; y < STEREO_H; ++y) {
-			gba_screen_row(v->vram, &bg[b], 0, y, STEREO_W, row);
-			for (int x = 0; x < STEREO_W; ++x)
-				if (row[x]) out->what[y * STEREO_W + x] = STEREO_FLAT;
+/* The screen entry a background's own map has at its pixel (px, py) */
+static unsigned entry_at(const uint8_t *vram, const GbaBg *b, unsigned px, unsigned py) {
+	px &= (b->size & 1u) ? 511u : 255u;
+	py &= (b->size & 2u) ? 511u : 255u;
+	unsigned block = (px >> 8) + (py >> 8) * ((b->size & 1u) ? 2u : 1u);
+	return gba_rd16(vram, (b->screen + block * 0x800u + ((py >> 3 & 31u) * 32u + (px >> 3 & 31u)) * 2u) & 0xFFFEu);
+}
+
+/* The frame's cells a HUD background has a pixel in: each cell asks the
+ * map's tiles under its corners (a scrolled background's cell lies over
+ * up to four) */
+static void hud_cells(const GbaVideo *v, const GbaBg *b, StereoFlat *out) {
+	uint8_t seen[1024];
+	memset(seen, 0, sizeof seen);
+	for (int cy = 0; cy < CELLS_Y; ++cy)
+		for (int cx = 0; cx < CELLS_X; ++cx)
+			for (int k = 0; k < 4 && !out->cell[cy][cx]; ++k) {
+				unsigned px = (unsigned)(cx * 8 + (k & 1) * 7) + b->hofs, py = (unsigned)(cy * 8 + (k >> 1) * 7) + b->vofs;
+				if (tile_drawn(v->vram, b, entry_at(v->vram, b, px, py), seen)) out->cell[cy][cx] = 1;
+			}
+}
+
+void stereo_flat(const GbaVideo *v, int hud_rows, StereoFlat *out) {
+	memset(out, 0, sizeof *out);
+	if (gba_rd16(v->io, 0) & 0x1000u) {
+		GbaBox box[GBA_OBJS];
+		gba_obj_boxes(v, box);
+		for (int n = 0; n < GBA_OBJS && out->nrects < STEREO_RECTS; ++n) {
+			if (!hud_box(&box[n], hud_rows)) continue;
+			int k = out->nrects++;
+			out->rect[k].x0 = box[n].x;
+			out->rect[k].y0 = box[n].y;
+			out->rect[k].x1 = (int16_t)(box[n].x + box[n].w);
+			out->rect[k].y1 = (int16_t)(box[n].y + box[n].h);
 		}
 	}
+	GbaBg bg0 = gba_bg(v->io, 0), bg3 = gba_bg(v->io, 3);
+	if (bg0.on) hud_cells(v, &bg0, out);
+	if (bg3.on && gba_bg3_front(v->io)) hud_cells(v, &bg3, out);
 }
 
-/* One body: the standing pixels joined to (x, y), 8-connected */
-static void body_fill(const uint8_t *stand, StereoFrame *out, int x, int y, int id) {
-	static int16_t stack[STEREO_N * 2];
-	StereoBox *b = &out->body[id];
-	int n = 0;
-	stack[n++] = (int16_t)x;
-	stack[n++] = (int16_t)y;
-	out->what[y * STEREO_W + x] = (uint8_t)(STEREO_BODY + id);
-	while (n) {
-		y = stack[--n];
-		x = stack[--n];
-		if (x < b->x0) b->x0 = (int16_t)x;
-		if (x > b->x1) b->x1 = (int16_t)x;
-		if (y < b->y0) b->y0 = (int16_t)y;
-		if (y > b->y1) b->y1 = (int16_t)y;
-		for (int k = 0; k < 9; ++k) {
-			int nx = x + k % 3 - 1, ny = y + k / 3 - 1, j = ny * STEREO_W + nx;
-			if (nx < 0 || ny < 0 || nx >= STEREO_W || ny >= STEREO_H || !stand[j] || out->what[j] >= STEREO_BODY) continue;
-			out->what[j] = (uint8_t)(STEREO_BODY + id);
-			stack[n++] = (int16_t)nx;
-			stack[n++] = (int16_t)ny;
-		}
+void stereo_row(const StereoFlat *f, int y, StereoRow *out) {
+	uint8_t flat[STEREO_W];
+	for (int cx = 0; cx < CELLS_X; ++cx) memset(&flat[cx * 8], f->cell[y / 8][cx], 8);
+	for (int r = 0; r < f->nrects; ++r) {
+		if (y < f->rect[r].y0 || y >= f->rect[r].y1) continue;
+		int x0 = f->rect[r].x0 < 0 ? 0 : f->rect[r].x0, x1 = f->rect[r].x1 > STEREO_W ? STEREO_W : f->rect[r].x1;
+		if (x1 > x0) memset(&flat[x0], 1, (size_t)(x1 - x0));
 	}
-}
-
-void stereo_sort(const GbaVideo *v, const GbaLayers *l, int hud_rows, StereoFrame *out) {
-	static uint8_t stand[STEREO_N];
-	memset(out->what, STEREO_WORLD, sizeof out->what);
-	memset(stand, 0, sizeof stand);
-	out->nbodies = 0;
-	GbaBg bg[4];
-	for (unsigned b = 0; b < 4; ++b) bg[b] = gba_bg(v->io, b);
-	hud_backgrounds(v, bg, out);
-	bool hud[GBA_OBJS];
-	for (int n = 0; n < GBA_OBJS; ++n) hud[n] = hud_obj(l, n, hud_rows);
-	for (int i = 0; i < STEREO_N; ++i) {
-		if (!l->obj[i]) continue;
-		/* (the HUD's sprites flat; a blended one, a shadow or a light, the floor's; one behind a background, the background's) */
-		if (hud[l->obj[i] - 1]) out->what[i] = STEREO_FLAT;
-		else if (!l->sheer[i] && !covered(v, bg, i % STEREO_W, i / STEREO_W, l->prio[i])) stand[i] = 1;
-	}
-	for (int i = 0; i < STEREO_N; ++i) {
-		if (!stand[i] || out->what[i] >= STEREO_BODY) continue;
-		/* (past the most, the rest join the last) */
-		bool fresh = out->nbodies < STEREO_BODIES;
-		int id = fresh ? out->nbodies++ : STEREO_BODIES - 1;
-		if (fresh) out->body[id] = (StereoBox){ STEREO_W, STEREO_H, -1, -1 };
-		body_fill(stand, out, i % STEREO_W, i / STEREO_W, id);
+	memset(out, 0, sizeof *out);
+	for (int x = 0; x < STEREO_W; ++x) {
+		if (x && flat[x] == flat[x - 1]) continue;
+		/* (past the spans a row may have, the rest of it flat) */
+		if (out->n == STEREO_SPANS) break;
+		bool last = out->n == STEREO_SPANS - 1;
+		if (last && !flat[x] && out->n && out->flat[out->n - 1]) continue;
+		out->x[out->n] = (int16_t)x;
+		out->flat[out->n++] = (uint8_t)(flat[x] || last);
 	}
 }
 
@@ -95,100 +99,37 @@ float stereo_depth(int row) {
 
 float stereo_shift(int eye, float sep, int row) { return 0.5f * (float)eye * sep * stereo_depth(row); }
 
-/* A row's holes (where a body or a flat pixel stood) in the world filled
- * from beside them: the left half from the left, the right half from the
- * right, a hole at the row's end from its one side */
-static void fill_holes(uint32_t *world, const uint8_t *hole) {
-	for (int a = 0; a < STEREO_W;) {
-		if (!hole[a]) { ++a; continue; }
-		int b = a;
-		while (b < STEREO_W && hole[b]) ++b;
-		bool has_l = a > 0, has_r = b < STEREO_W;
-		uint32_t left = has_l ? world[a - 1] : 0, right = has_r ? world[b] : 0;
-		for (int k = a; (has_l || has_r) && k < b; ++k) world[k] = (k - a < (b - a + 1) / 2 ? has_l : !has_r) ? left : right;
-		a = b;
+/* An eye's picture being drawn: its row (in its pixels) and scale */
+typedef struct { uint32_t *out; int w, oy, scale; } Eye;
+
+/* A colour over the frame's columns `from` to `to` (fractions rounded to the eye's pixels) */
+static void paint(const Eye *e, float from, float to, uint32_t c) {
+	int o0 = (int)floorf(from * (float)e->scale + 0.5f), o1 = (int)floorf(to * (float)e->scale + 0.5f);
+	for (int sy = 0; sy < e->scale; ++sy)
+		for (int ox = o0 < 0 ? 0 : o0; ox < o1 && ox < e->w; ++ox) e->out[(e->oy + sy) * e->w + ox] = c;
+}
+
+static void compose_row(const uint32_t *line, const StereoRow *r, float s, const Eye *e) {
+	for (int i = 0; i < r->n; ++i) {
+		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : STEREO_W;
+		if (r->flat[i]) continue;
+		for (int x = a; x < b; ++x) paint(e, (float)x + s, (float)x + 1 + s, line[x]);
+		/* (the gap it leaves beside a flat span: its edge's colour) */
+		if (i > 0 && s > 0) paint(e, (float)a, (float)a + s, line[a]);
+		if (i + 1 < r->n && s < 0) paint(e, (float)b + s, (float)b, line[b - 1]);
+	}
+	for (int i = 0; i < r->n; ++i) {
+		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : STEREO_W;
+		for (int x = a; r->flat[i] && x < b; ++x) paint(e, (float)x, (float)x + 1, line[x]);
 	}
 }
 
-/* A layer's clear pixels beside its own take their colour, clear still:
- * the GPU's smooth scaling then mixes its edges with its own colour, not
- * with black */
-static void edges(uint32_t *layer, int pitch, uint32_t alpha) {
-	for (int y = 0; y < STEREO_H; ++y)
-		for (int x = 0; x < STEREO_W; ++x) {
-			uint32_t *p = &layer[y * pitch + x];
-			if (*p & alpha) continue;
-			uint32_t near = x > 0 && (p[-1] & alpha) ? p[-1] : x + 1 < STEREO_W && (p[1] & alpha) ? p[1] : 0;
-			if (!near && y > 0 && (p[-pitch] & alpha)) near = p[-pitch];
-			if (!near && y + 1 < STEREO_H && (p[pitch] & alpha)) near = p[pitch];
-			*p = near & ~alpha;
-		}
-}
-
-void stereo_layers(const StereoFrame *f, const uint32_t *canvas, int canvas_pitch, const uint32_t *picture, StereoLayers *out) {
-	uint8_t hole[STEREO_W];
-	int x = out->x, y = out->y;
-	for (int cy = 0; cy < STEREO_H; ++cy) {
-		bool any = false;
-		for (int cx = 0; cx < STEREO_W; ++cx) {
-			int fx = cx - x, fy = cy - y, o = cy * out->pitch + cx;
-			uint32_t c = canvas[cy * canvas_pitch + cx];
-			bool in = fx >= 0 && fy >= 0 && fx < STEREO_W && fy < STEREO_H;
-			/* (outside the game's picture, or the engine's drawing over it: flat) */
-			int what = in && c == picture[fy * STEREO_W + fx] ? f->what[fy * STEREO_W + fx] : STEREO_FLAT;
-			out->world[o] = what == STEREO_WORLD ? c : 0;
-			out->bodies[o] = what >= STEREO_BODY ? c : 0;
-			out->flat[o] = what == STEREO_FLAT ? c : 0;
-			hole[cx] = what != STEREO_WORLD;
-			any |= !hole[cx];
-		}
-		out->row_world[cy] = any;
-		if (any) fill_holes(&out->world[cy * out->pitch], hole);
-		else memcpy(&out->world[cy * out->pitch], &canvas[cy * canvas_pitch], sizeof(uint32_t) * STEREO_W);
-	}
-	edges(out->bodies, out->pitch, out->alpha);
-	edges(out->flat, out->pitch, out->alpha);
-}
-
-/* A layer's pixel at the eye's column: drawn where it is not clear */
-static void put(uint32_t *out, int w, int ox, int oy, int scale, uint32_t c) {
-	for (int sy = 0; sy < scale; ++sy)
-		for (int sx = 0; sx < scale; ++sx) {
-			int px = ox + sx;
-			if (px >= 0 && px < w) out[(oy + sy) * w + px] = c;
-		}
-}
-
-static void compose_body(const StereoLayers *l, const StereoBox *b, int eye, float sep, int scale, uint32_t *out) {
-	int w = STEREO_W * scale, x = l->x, y = l->y;
-	float s = stereo_shift(eye, sep, b->y1 + y) * (float)scale;
-	for (int cy = b->y0 + y; cy <= b->y1 + y; ++cy)
-		for (int cx = b->x0 + x; cx <= b->x1 + x; ++cx) {
-			if (cx < 0 || cy < 0 || cx >= STEREO_W || cy >= STEREO_H) continue;
-			uint32_t c = l->bodies[cy * l->pitch + cx];
-			if (c & l->alpha) put(out, w, (int)floorf((float)(cx * scale) + s + 0.5f), cy * scale, scale, c);
-		}
-}
-
-void stereo_compose(const StereoLayers *l, const StereoFrame *f, int eye, float sep, int scale, uint32_t *out) {
+void stereo_compose(const uint32_t *picture, const StereoFlat *f, int eye, float sep, int scale, uint32_t *out) {
 	int w = STEREO_W * scale;
 	memset(out, 0, sizeof *out * (size_t)w * (size_t)(STEREO_H * scale));
-	for (int cy = 0; cy < STEREO_H; ++cy) {
-		float s = l->row_world[cy] ? stereo_shift(eye, sep, cy) * (float)scale : 0.0f;
-		for (int cx = 0; cx < STEREO_W; ++cx) put(out, w, (int)floorf((float)(cx * scale) + s + 0.5f), cy * scale, scale, l->world[cy * l->pitch + cx]);
+	for (int y = 0; y < STEREO_H; ++y) {
+		StereoRow r;
+		stereo_row(f, y, &r);
+		compose_row(&picture[y * STEREO_W], &r, stereo_shift(eye, sep, y), &(Eye){ out, w, y * scale, scale });
 	}
-	/* (the bodies deepest first) */
-	bool done[STEREO_BODIES] = { false };
-	for (int k = 0; k < f->nbodies; ++k) {
-		int next = -1;
-		for (int b = 0; b < f->nbodies; ++b)
-			if (!done[b] && (next < 0 || f->body[b].y1 < f->body[next].y1)) next = b;
-		done[next] = true;
-		compose_body(l, &f->body[next], eye, sep, scale, out);
-	}
-	for (int cy = 0; cy < STEREO_H; ++cy)
-		for (int cx = 0; cx < STEREO_W; ++cx) {
-			uint32_t c = l->flat[cy * l->pitch + cx];
-			if (c & l->alpha) put(out, w, cx * scale, cy * scale, scale, c);
-		}
 }

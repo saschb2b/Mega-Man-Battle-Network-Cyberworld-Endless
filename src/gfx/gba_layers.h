@@ -44,6 +44,11 @@ typedef struct {
  * the sky behind the world (a net map's) */
 bool gba_bg3_front(const uint8_t *io);
 
+/* A sprite's box on the screen as OAM sets it (w 0: not shown) */
+typedef struct { int16_t x, y; uint8_t w, h; } GbaBox;
+/* ... each of the 128, their pixels unread (v->oam alone read) */
+void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]);
+
 /* False in a mode other than 0 (its backgrounds are not tile maps alone). */
 bool gba_layers(const GbaVideo *v, GbaLayers *out);
 /* ... in two steps: the sprites, then the backgrounds' rows `from` to `to`

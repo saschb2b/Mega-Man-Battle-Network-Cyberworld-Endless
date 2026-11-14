@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "3D depth: the 3DS's 3D screen"
-description: "Options' Display's 3D depth on the 3DS (on by default, `depth_3d` in settings.ini) gives the picture depth through the 3DS's own 3D slider: the world tilted back into the screen row by row, what stands at its feet's depth, the HUD and the engine's drawing flat at the screen; how a frame is sorted from the video memory its frame ended with, drawn for each eye by the GPU, looked at on a computer, what it costs, and what is still open."
+description: "Options' Display's 3D depth on the 3DS (on by default, `depth_3d` in settings.ini) gives the picture depth through the 3DS's own 3D slider: the world tilted back into the screen row by row, the HUD flat at the screen; how the flat parts are read as a frame ends, how the GPU draws each eye from the frame's own picture, looked at on a computer, what it costs (a first version, sorting every pixel, halved the frame rate), and what is still open."
 tags: [engine, display, options, 3ds]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:40:00Z }
 sources:
@@ -41,50 +41,58 @@ picture's edges never cut through something in front of them.
 
 | What | Its depth |
 | --- | --- |
-| The world: the map's backgrounds, the sprites that lie on the floor (a warp pad, BN6's blob under who stands) and the blended ones (a shadow, a light) | By its row: the frame's last row at the screen, its first the deepest, the floor tilted back as BN6's camera looks down on it |
-| A sprite that stands, joined with those it touches (8-connected) into a body | Its feet's row: a body stands upright at one depth, not tilted with the floor |
-| A sprite behind a background in front of it | The world's (it shows the background) |
-| The HUD: BG0 (the chat's text), BG3 in front of the map's (a battle's Custom screen), the sprites in the HP's corner, in an open chat box's rows and in a battle's top 40 rows | Flat, at the screen |
-| Whatever the engine draws over the game (a pixel of the canvas unlike the game's picture), and the canvas outside the game's picture | Flat, at the screen |
+| The world: everything but the HUD (the map's backgrounds, the sprites on them, what the engine draws over the game) | By its row: the frame's last row at the screen, its first the deepest, the floor tilted back as BN6's camera looks down on it |
+| The HUD's sprites: those in the HP's corner, in an open chat box's rows and in a battle's top 40 rows (depth lighting's rules) | Flat, at the screen, each by its box |
+| BG0's tiles (the chat's text) and those of a BG3 in front of the map's backgrounds (a battle's Custom screen) | Flat, at the screen, each 8x8 cell of the frame with a pixel of theirs |
 
-Where a body or a flat pixel stood, the world behind takes the colours
-beside it, half from each side: an eye sees a little round what stands
-before the world, and there the frame has nothing. The kinds of scene are
-depth lighting's (`voxel_scene_kind`): a net layer, another map (the
-town, Lan's HP) and a battle are sorted; a menu, a battle beginning, a
-liberation's board and a visit to another's Square stay flat in both
-eyes. The rows a sprite counts as the HUD's are depth lighting's too.
+What stands goes back with its rows: MegaMan's head lies a third of a
+pixel deeper than his feet with the slider at its top, which no eye
+tells from standing upright. The kinds of scene are depth lighting's
+(`voxel_scene_kind`): a net layer, another map (the town, Lan's HP) and a
+battle are in depth; a menu, a battle beginning, a liberation's board and
+a visit to another's Square stay flat in both eyes.
 
-## How a frame is sorted
+## How a frame is drawn
 
-`src/gfx/stereo.c` sorts and draws; `src/emu/stereo_scene.c` feeds it;
-`src/core/present_3ds.c` shows it.
+`src/gfx/stereo.c` says what is flat; `src/emu/stereo_scene.c` reads it;
+`src/core/present_3ds.c` draws the eyes.
 
-1. **The frame's memory, kept.** On the New 3DS the GBA core runs the
-   next frame on its own core while this one is drawn
+1. **What is flat, as the frame ends.** On the New 3DS the GBA core runs
+   the next frame on its own core while this one is drawn
    ([3ds/README.md](../../3ds/README.md)), so the drawing must not read
-   the game: a read would wait for the next frame. A step after each
-   frame the core ends (`emu_after_frame`, as the frame's picture is
-   taken in) copies its video memory (VRAM, OAM, the palette, the IO
-   registers) and what the frame is of, while the slider is up.
-2. **The sort, in the drawing.** The sprites are read from that copy
-   ([depth lighting's reader](voxel.md), `gba_layers_sprites`), BG0 and a
-   BG3 in front read a row at a time, a sprite's pixel looked under for a
-   background in front of it, and the standing ones joined into bodies.
-3. **The layers, at the present.** With the canvas whole (the engine's
-   drawing over the game), three layers of the canvas's size are made in
-   memory the GPU reads: the world (the holes filled), the bodies and the
-   flat; a clear pixel beside a layer's own takes its colour, so the
-   GPU's smooth scaling mixes an edge with its own colour, not black.
-4. **Each eye.** The GPU draws each eye's picture from the layers: the
-   world as 160 strips of a row each, each moved by its row's depth; then
-   each body as one quad, deepest first, moved by its feet's; then the
-   flat layer, unmoved. The left eye's picture goes to the top screen's
-   own target, the right's to its right one.
+   the game: a read would wait for the next frame. A step after each frame
+   the core ends (`emu_after_frame`, as the frame's picture is taken in)
+   copies the sprites' table, the IO registers and the backgrounds' part
+   of VRAM, and reads from them the HUD's sprites' boxes (`gba_obj_boxes`:
+   their places alone, none of their pixels) and the cells of BG0 and a
+   BG3 in front that have a pixel (each map tile's pixels looked at once).
+2. **Each row's spans.** From those, each row of the frame is spans,
+   flat or the world's (eight at most, the rest of the row flat).
+3. **Each eye on the GPU.** The canvas's picture is already the GPU's
+   texture; each eye's picture is drawn from it a few rows at a time
+   (rows of the same spans, four at most): the world's spans moved by
+   their rows' depth, the gap a span leaves beside a flat one filled with
+   its edge's column drawn wide, then the flat spans where they are. The
+   left eye's picture goes to the top screen's own target, the right's to
+   its right one.
 
 The eyes' parting at the deepest is 6 of the frame's pixels with the
 slider at its top (9 of the screen's at the 3DS's 1.5x), the slider's
 share of it below; a row's is that times its depth, `(159 - row) / 159`.
+
+### The first version, and why it went
+
+The first build of 2026-11-14 sorted every pixel: the sprites' pixels
+read and joined into bodies, each standing at its feet's depth, the
+engine's drawing found by the canvas's pixels against the game's, the
+world behind a body filled, and three layers made and copied to the GPU
+each frame. On the owner's New 3DS it held 30 frames a second with the
+slider up (59 down): the drawing took 16 ms of the main core's frame
+where it took 11, the present 17 where it took 5, against a 16.7 ms
+frame of which the main core had about half a millisecond to spare
+(`log.txt`'s frame lines). A body standing at its feet's depth differs
+from its rows' by under a pixel at this parting, so the bodies went with
+the rest.
 
 ## A look on a computer
 
@@ -97,14 +105,13 @@ without a 3D screen ([headless captures](../devtools/headless-shot.md)).
 
 ## Its cost
 
-Nothing with the slider at its bottom (or the line off). With the slider up,
-the 3DS's main core copies 98 KB of video memory a frame, sorts the
-frame (its sprites' pixels, BG0's rows, a few backgrounds' pixels under
-the sprites, a flood fill of the bodies), makes the three layers from the
-canvas (each of its 38,400 pixels once, then the holes and edges), and
-the GPU copies three textures where it copied one and draws about two
-hundred quads an eye. Not measured on a 3DS: `frame_log`'s line says the
-frames' pacing there.
+Nothing with the slider at its bottom (or the line off). With the slider
+up, the main core copies 65 KB of video memory as each frame ends and
+reads the HUD's sprites' boxes and two maps' cells from it, says each
+row's spans, and the GPU draws each eye's picture from the texture it
+has already: some fifty quads an eye where a row is the world's whole, a
+few more where the HUD is. Not yet measured on a 3DS: `frame_log`'s line
+there says whether it holds 60 frames a second.
 
 ## Open
 
@@ -112,20 +119,18 @@ frames' pacing there.
   up on a layer, in town and in battle; how deep is comfortable.
 - The raised floor of a layer is the world's by its row, not by its
   height (depth lighting's floor model would raise it, at a cost).
-- A body is one depth: a tall one's head stands with its feet; two bodies
-  touching are one.
-- The engine's own marks over the world (the Net Square's visitors, a
-  liberation's pieces) are flat with the HUD.
+- What stands goes back with its rows, not upright at its feet's depth.
+- What the engine draws over the game (a layer's name, the Net Square's
+  visitors) is the world's by its row: near the bottom, at the screen.
 
 ## Checked
 
-`tests/test_stereo.c` (in `build.py test`): the sort on video memory of
-the test's own making (a standing sprite one body with its box, the HP's
-corner, BG0 and a chat box's rows flat, a sprite behind a background or
-blended the world's), the depth (the last row at the screen, the eyes
-apart by the parting at the first), and the layers and the eyes (the
-world behind a body filled from beside it, the engine's drawing flat in
-both eyes, the top row moved three pixels each way, a body by its feet's
-depth). `build.py 3ds` builds it; `CYBERWORLD_STEREO_SHOT` was looked over
-on a layer, in town and in a battle (the Custom screen flat, the field and
-the viruses back).
+`tests/test_stereo.c` (in `build.py test`): what is flat on video memory
+of the test's own making (the HP's corner, a battle's top rows and a
+chat box's rows by their sprites, BG0's tile and a BG3 in front by their
+cells, a standing sprite not), each row's spans (the world, the HP's box,
+the world; a row of many spans ending flat), the depth, and the eyes (the
+top row moved three pixels each way, the HP's box the same in both, the
+gap beside it its edge's colour, the last row unmoved). `build.py 3ds`
+builds it; `CYBERWORLD_STEREO_SHOT` was looked over on a layer and in a
+battle (the Custom screen flat, the field back).
