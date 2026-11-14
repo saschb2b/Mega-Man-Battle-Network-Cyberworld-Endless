@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T02:19:56Z
-* **Update**: engine/updates.md (the Switch's .nro and the New 3DS's .3dsx update themselves, staged beside the running file and swapped as the game ends, the Switch's loader starting the new one; the 3DS's CIA and the Vita name the releases page, the PS5 Prospero Store; the roots the consoles carry for GitHub's chains, checked against them; the 3DS's download streamed to the SD card, the network held for the GET alone; What comes next without them), code/update.md (update_swap.c and the roots' row), code/tests.md (test_update.c's swap), code/analytics.md (GitHub's roots for the updater), GUIDE.md (the Updates table's consoles).
