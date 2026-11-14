@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: devtools/profiling.md (the installs with BN5 and BN4: the cartridge read and written in place, the claims check one pass, the code walk from marks made once a block; a start with all three ROMs 2.58 billion instructions, 4.09 before; the ROM copy the same byte for byte).
 * **Create**: devtools/profiling.md (the start to the first layer profiled with callgrind: legal_fix asks each panel once between edits and counts the topology once an edit, the SHA-1 unrolled; 29% fewer instructions with BN6 alone, the layers byte for byte the same; the hot spots left).
 * **Update**: engine/emulation/psp-and-ds.md (The PSP build: gpSP as its core, the ROM held once in pages, hooks the translator calls out to, measured in PPSSPP at 60 frames a second in a 12.6 MB heap; the old 3DS the same question), engine/emulation/index.md (its line), code/emu.md (emu_gpsp.c, hook_gpsp.c, emu_sound.c, emu_keep.c), code/core.md (start_psp.c), code/platforms.md (psp/, Dockerfile.psp and gpsp.sh, the systems not built for, CI's nine).
 * **Update**: engine/emulation/3ds-memory.md (Colour indices: a learned map holds its pixels as indices into its palette, 3 bytes a pixel where it took 10, BN6's long runs peaking at 45 to 48 MB where they peaked at 60 to 65; the budget's rows for home's source and a map's learning).
