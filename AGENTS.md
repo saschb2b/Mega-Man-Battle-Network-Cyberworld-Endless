@@ -127,7 +127,7 @@ part of the tree; a new file gets its line there.
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
 | `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the skills |
-| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `ps4/`, `ps5/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
+| `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `psp/`, `ps4/`, `ps5/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
 | `web/`, `docs/screenshots/`, `docs/clips/` | [docs/code/site-and-media.md](docs/code/site-and-media.md): the site, screenshots and clips |
 | `docs/` | [docs/index.md](docs/index.md): the knowledge base |
 
@@ -411,6 +411,7 @@ python3 build.py flatpak    # build/release/cyberworld-endless.flatpak (flatpak-
 python3 build.py 3ds        # build/3ds: cyberworld-endless.cia and .3dsx (devkitARM in Docker; 3ds/README.md)
 python3 build.py switch     # build/switch/cyberworld-endless.nro (devkitA64 in Docker; switch/README.md)
 python3 build.py vita       # build/vita/cyberworld-endless.vpk (VitaSDK in Docker; vita/README.md)
+python3 build.py psp        # build/psp/EBOOT.PBP (pspdev in Docker, gpSP its core; psp/README.md)
 python3 build.py ps4        # build/ps4/cyberworld-endless.pkg (OpenOrbis in Docker; ps4/README.md)
 python3 build.py ps5        # build/ps5/cyberworld-endless-ps5.zip, the app folder CWEN00001/ (the native-app template in Docker; ps5/README.md)
 python3 tools/cw.py shot options/audio [--do CMDS] [--until COND] [--ref REF]   # one call: a look at a screen (the cyberworld MCP server's shot; docs/devtools/agents-tools.md)
@@ -464,7 +465,7 @@ The desktop and browser builds' differences are
 CI runs without a ROM: it builds every target with `-Werror`
 (`WERROR=1`, set when `CI` is) on each push to `dev` and `main`; a pull
 request builds the Linux desktop, PortMaster, Windows and the 3DS, and
-the other eight (Switch, Vita, PS4, PS5, Android, macOS, iOS, the
+the other nine (Switch, Vita, PSP, PS4, PS5, Android, macOS, iOS, the
 browser) only where its change can reach them: their own folder, the
 Makefile, `build.py`, `docker/`, `.github/`, `shared/`, or a source file
 that holds a system's own code (`tools/ci_changes.py`;
@@ -501,6 +502,7 @@ pacing) stays local.
 | 3DS build | `build.py 3ds`; `python3 tools/heap3ds.py` where a change allocates more (the 3DS's heap modelled here); on a New 3DS (3ds/README.md): the CIA installed with FBI (its QR code, or from the SD card) and started from the HOME Menu, the .3dsx over ftpd and a start from the Homebrew Launcher, NEW GAME to the first layer and its map on the bottom screen, `log.txt`'s frame lines (`frame_log = on`, the heap's high-water mark among them); with BN5's ROM beside BN6's, 3ds/README.md's BN5 checks (`log.txt`'s BN5 and heap lines, a layer of BN5's areas over 3dslink's `--net-biome x0`-`x5`); the other targets still build, as the 3DS's changes are mostly shared code |
 | Switch build | `build.py switch`; on a Switch with Atmosphère (switch/README.md, Testing on a Switch): the `.nro` over nxlink or ftpd and a start from the Homebrew Menu, `log.txt`'s `switch:` line, NEW GAME to the first layer, A on the button marked A, docked and handheld, HOME's close and CONTINUE, the gate to the Net Square and a NetBattle (`--dev rollbench`); the other targets still build, the 3DS's above all, whose libcurl stream the Switch shares |
 | PS Vita build | `build.py vita`; on a Vita with HENkaku or h-encore (vita/README.md, Testing on a Vita): the VPK over VitaShell's FTP and installed, `log.txt`'s `vita:` and `emu:` lines, NEW GAME to the first layer at full speed (`frame_log = on`), Cross as A, the touch controls, a close from the LiveArea and CONTINUE, the gate to the Net Square and a NetBattle's frame times; the other targets still build, the consoles' above all, whose start (`start_console.h`) and curl stream the Vita shares |
+| PSP build | `build.py psp`; in PPSSPP (psp/README.md, Testing on a PSP and in PPSSPP): the title, NEW GAME to the first layer, and the autopilot (`env.txt`, `args.txt`'s `--scene emu`) to a guardian at 60 frames a second with `frame_log`'s heap under its room; where the core's side changes (`src/emu/emu_gpsp.c`, `hook_gpsp.c`, `docker/gpsp-cyberworld.patch`), the host built on gpSP too (`make TARGET=host CORE=gpsp GPSP=...`, its library from `docker/gpsp.sh host`) and its autopilot run; on a PSP-2000 or later with custom firmware, `log.txt`'s frames at 333 MHz; the other targets still build, as the PSP's changes are mostly shared code |
 | PS4 build | `build.py ps4` (its PKG validated by `PkgTool.Core pkg_validate`); on a PS4 with GoldHEN, and a PS5 with etaHEN (ps4/README.md, Testing on a PS4): the PKG installed, `log.txt`'s `ps4:` and `emu:` lines over FTP, NEW GAME to the first layer at full speed, Cross as A, a close and CONTINUE, the gate to the Net Square and a NetBattle; the other targets still build, as the PS4's changes are mostly shared code |
 | PS5 build | `build.py ps5` (its zip's folder, `param.json` and signed `eboot.bin` checked as CI does; `sce_sys/param.json`'s contentVersion raised with each release, `build.py lint` holding it to the CHANGELOG's version); on a jailbroken PS5 with ShadowMountPlus (ps5/README.md, Testing on a PS5): the folder in `/data/homebrew/`, `log.txt`'s `ps5:` and `emu:` lines, NEW GAME to the first layer, Cross as A, the gate to the Net Square and a NetBattle, the statistics' question, an update over the folder keeping the saves; the title ID stays `CWEN00001` |
 | PortMaster port | `build.py package`; `build/port/cyberworld` copied into a PortMaster-New checkout's `ports/` passes its `tools/build_release.py --do-check` and `tools/build_gameinfo.py`; the binary asks for glibc 2.30 at most (CI checks); a device run; a new PortMaster-New pull request needs the testing its template lists (ArkOS, AmberELEC, ROCKNIX, muOS, Knulli; 640x480 and larger) |

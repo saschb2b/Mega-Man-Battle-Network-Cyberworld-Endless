@@ -28,7 +28,7 @@ host)
 	# (unix builds a shared library, which needs no game: its objects archived
 	# instead, linked into the game's binary as the PSP's are)
 	make platform=unix -j"$(nproc)" >/dev/null
-	ar rcs libgpsp.a $(find . -name '*.o')
+	find . -name '*.o' -exec ar rcs libgpsp.a {} +
 	LIB=libgpsp.a ;;
 *)
 	echo "gpsp.sh: psp or host" >&2
