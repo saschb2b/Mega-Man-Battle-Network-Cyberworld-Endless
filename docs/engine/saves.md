@@ -40,23 +40,51 @@ the menu names it), and in the browser also from the page's menu. It
 opens over the title or the ROMs screen, never in a run, and stays off
 the title's menu, whose rows are drawn from the ROM.
 
-## The three views
+## The views
 
-**Home.** THIS DEVICE's panel says the run ("Layer 4, Act 2" and its
-area) and the profile ("3 runs, best Layer 9", or "No runs yet"). One
-line under it says where the copy goes and how the last one went
-("Copied to ROMs 10-12 14:03", "No copy in ROMs: choose it again", "New
-saves in ROMs: IMPORT shows them", ROMs being the folder). The buttons:
-EXPORT where there are saves, IMPORT, UNDO IMPORT where an import can be
-undone, AUTO-COPY: ON or OFF where the system has the automatic copy,
-FOLDER where it has a folder chooser.
+**Home** (`saves_home.c`; reworked on 15 November 2026 when it had grown
+to eight buttons, [Save screens elsewhere](saves-screens.md) has why).
+Options' kin: the pages CLOUD, CODE and FILE as its tabs, turned by L
+and R or a tap (no row where the system has FILE alone: the PSP, a 3DS
+build without libcurl); a strip under them, THIS DEVICE with the run
+("Layer 4, Act 2", its area where it fits) and the record ("3 runs, best
+Layer 9", or "No runs yet"); the page's lines in the cyan window, Up and
+Down round, the line each page was left on kept; KeyItem's information
+box under them, what the line does, then where the page has one how it
+stands. CLOUD: Turn on (where there are saves) and Link with a code, or
+once on Add a device, Unlink this device and, a line apart, Delete cloud
+saves; its status "Synced 11-14 23:34", "Syncing...", "Sending 40%" or a
+trouble. CODE: Send (where there are saves) and Receive. FILE: Export
+(where there are saves), Import, Auto-copy On or Off (a value Left and
+Right turn, between Options' orange arrows) and Folder with its last
+part, where the system has them; its status the copy's ("Copied to
+Downloads 11-14 14:03", "The copy failed. Choose the folder again.",
+"New saves in ROMs. Import shows them."). UNDO IMPORT is no line but
+START's, `START:UNDO IMPORT` on the band where an import can be undone,
+as Options' START:DEFAULT. START, Turn on, Unlink and Delete ask first in
+the box ("Bring back your Layer 4 run from before the import?", "Delete
+the cloud saves? Each device keeps its own."), BN6's Yes and No under
+the words, No chosen. SAVES opens on the page that needs the player (the
+cloud's trouble only the player can answer, or new saves in the copy's
+place, Import under the cursor), else on the page last shown, CLOUD the
+first time. The band names the view, a back arrow before it where B goes
+back, the band's left its tap on a phone without a Back key; a view
+opened from a line names its line (SEND, RECEIVE, ADD A DEVICE, LINK).
+The words are "device" for what holds saves and "sync" for the cloud's
+keeping them alike, one name each.
 
-**Compare.** THIS DEVICE and THE FILE side by side, each with its run,
+**Compare.** THIS DEVICE and THE FILE (THE CODE, THE CLOUD: whatever
+brought them) side by side, each with its run,
 area, runs and best, and the system and date it was last played on
 ("Android, 10-13 09:12": the system's name, never the device's or the
-host's). A note says what USE THE FILE'S replaces and that UNDO IMPORT
+host's). A note says what USE THOSE replaces and that UNDO IMPORT
 brings it back; where the file is the automatic copy's own and the copy
-is on, it adds that KEEP THESE makes the folder's copy this device's. The
+is on, it adds that KEEP THESE writes this device's saves over the copy;
+where it is the cloud's, that KEEP THESE sends this device's saves to the
+cloud and the other device asks at its next start. One that opened by
+itself (the copy's place's, the cloud's) takes no press for half a
+second, and none answers it but A, so a START mashed through the title
+answers nothing. The
 cursor starts on the side with more progress (more runs, then the deeper
 layer, a best or the run on now; this device's at a tie), so after a
 reinstall it is on the file's. On a device with no saves the buttons are
@@ -70,9 +98,10 @@ saves already here goes straight to the result, which says so.
 
 **Result.** What the import put in and what Undo brings back ("Saves
 imported: a run on Layer 2. UNDO IMPORT brings back your Layer 5 run."),
-with CONTINUE where that run can go on, else DONE. UNDO IMPORT is a
-direct swap with no preview; its result offers UNDO again, which swaps
-them back. An export's result says where the file went.
+with CONTINUE where that run can go on, else DONE. The result's UNDO
+IMPORT swaps at once (the import's outcome is on the screen); its result
+offers UNDO again, which swaps them back. An export's result says where
+the file went.
 
 ## What travels
 
@@ -289,21 +318,23 @@ stays a usability problem, as the rest of SAVES: no account, one code,
 nothing changed until the comparison's USE THE FILE'S, UNDO IMPORT after
 it.
 
-**The views.** Home shows SEND where the system has the link and saves
-to send, and RECEIVE where it has the link. SEND packs the saves as
-EXPORT does, seals them and hands them to the server; its view keeps
-this device's panel, then the code in letters twice the size, in two
-groups of five ("61626 62133"), "Works once, for 15 more minutes." and
-"On your other system: SAVES, then RECEIVE." While it sends it says
-"Sending: N%". SEND again with the same saves, while their code holds,
-shows that code again rather than another; leaving the view while it
-sends gives the sending up (a code shown stays with the server till its
-time is up). RECEIVE asks for the code: ten keys in a row (1 to 9, then
-0; two rows of five on a narrow screen), ERASE and OK, the cursor on OK
-once the tenth digit is in; on the desktops and the browser a keyboard's
-digits type it too (`text_input.h`), Enter is OK and Escape goes back. The
-saves that come go to the comparison as an imported file's, THE FILE's
-panel naming the system and the time they were last played. Each failure
+**The views.** Home's CODE page has Send where the system has the link
+and saves to send, and Receive where it has the link. Send packs the
+saves as Export does, seals them and hands them to the server; its view
+(SEND on the band) keeps this device's panel, then the code in letters
+twice the size, in two groups of five ("61626 62133"), "Works once, for
+15 more minutes." and "On your other device: SAVES, CODE, Receive." While
+it sends it says "Sending: N%". Send again with the same saves, while
+their code holds, shows that code again rather than another; leaving the
+view while it sends gives the sending up (a code shown stays with the
+server till its time is up). Receive (RECEIVE on the band) asks for the
+code: ten keys in a row (1 to 9, then 0; two rows of five on a narrow
+screen), ERASE and OK, the cursor on OK once the tenth digit is in; on
+the desktops and the browser a keyboard's digits type it too
+(`text_input.h`), Enter is OK and Escape goes back. The saves that come
+go to the comparison as THE CODE's, its panel naming the system and the
+time they were last played; a cloud's link that comes instead joins this
+device to that cloud ([Saves kept in step](#saves-kept-in-step)). Each failure
 says one line in gold, a receive's with "Your saves are kept.": the
 server not reached, busy (with the minutes to wait), nothing under that
 code ("A code works once, for 15 minutes."), a server that takes no saves
@@ -372,19 +403,22 @@ it replaced); one side's saves whole in a conflict, never a merge; a
 slot unused for 180 days deleted; the Net Square's identity still per
 system.
 
-**What the player sees.** Home's CLOUD: OFF opens the CLOUD view: what it
-does ("Keeps these saves in step on every system you link, sealed on the
-official server. A copy unused for 180 days is deleted."), TURN ON where
-this system has saves, and LINK, which is RECEIVE's code entry. TURN ON
-makes a slot and sends these saves; the view then says how it stands
-("Cloud: sending: N%", "Cloud: in step 11-14 23:34", or a trouble's line)
-over ADD A SYSTEM, UNLINK and DELETE. ADD A SYSTEM shows a code as SEND
-does, which RECEIVE (or LINK) on the other system takes: a code's bytes
-are saves or a link, and a link joins this system to the slot and pulls
-at once. UNLINK forgets the slot here ("Unlinked. These saves stay
-here."); DELETE asks once more ("DELETE: SURE?") and deletes it on the
-server, forgotten here too ("Deleted on the server. Unlink your other
-systems too."). Once linked, home's line is the cloud's.
+**What the player sees.** Home's CLOUD page ([The views](#the-views)):
+Turn on where this device has saves, and Link with a code, which is
+Receive's code entry (LINK on its band). Turn on asks ("Turn on cloud
+saves? These saves go up now.") and makes a slot and sends these saves;
+the page then says how it stands ("Sending 40%", "Synced 11-14 23:34",
+or a trouble's line) under Add a device, Unlink this device and, a line
+apart, Delete cloud saves. Add a device shows a code as Send does (ADD A
+DEVICE on its band, "On your other device: SAVES, CLOUD, Link with a
+code."), which Link with a code (or Receive) on the other device takes: a
+code's bytes are saves or a link, and a link joins this device to the
+slot and pulls at once. Unlink asks, then forgets the slot here
+("Unlinked. Your saves stay here."); Delete asks ("Delete the cloud
+saves? Each device keeps its own."), then deletes it on the server,
+forgotten here too ("Cloud saves deleted. Your other devices stop
+syncing at their next start."). Neither runs while the cloud moves saves
+("Waiting for the sync to end.").
 
 **When it syncs** (`src/saves/saves_cloud.c`). As the game starts and
 whenever it comes back from the background, the title pulls; its menu
@@ -393,9 +427,9 @@ waits for the pull, six seconds at most, and the title's note box says
 generation is taken in without a word where this system's saves are the
 ones it last had in step (an import through `backup_restore`, UNDO
 IMPORT after it, the title shown again over them with the note "Cloud:
-saves from Linux, 11-14 23:35"); where this system moved on too, SAVES
-opens the comparison at once with THE CLOUD for THE FILE, USE THE
-CLOUD'S and KEEP THESE ("KEEP THESE: the cloud gets this device's"),
+Layer 7 from Linux, 11-14 23:35"); where this system moved on too, SAVES
+opens the comparison at once with THE CLOUD, USE THOSE and KEEP THESE
+("KEEP THESE sends this device's saves to the cloud."),
 the cursor on the side with more progress as ever; DONE leaves it to
 the next start. Three seconds after the saves were last written
 (mirror.c's hooks, `MirrorFollow`) they are pushed where they are not
@@ -404,8 +438,8 @@ at most; a New 3DS packs and seals only outside a run (its heap), its
 run's saves going up at the title or as it closes. A push the server
 answers CONFLICT (another system's came first) stops the pushes until
 the title's next pull compares. The slot gone (deleted elsewhere, or
-unused 180 days) unlinks this system with "Cloud: its copy is gone.
-CLOUD turns it on again."; a server that keeps no slots, or one from
+unused 180 days) unlinks this system with "Cloud: the cloud saves are
+gone. Turn on to start again."; a server that keeps no slots, or one from
 before them, says so. Nothing is lost either way: every system keeps its
 own saves, and the server is only how they travel.
 

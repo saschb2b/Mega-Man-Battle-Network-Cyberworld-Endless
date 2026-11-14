@@ -2,8 +2,12 @@
 
 ## Unreleased
 
-- **Cloud saves, like Steam Cloud.** SAVES › CLOUD › TURN ON on one
-  device, ADD A SYSTEM there and its code under RECEIVE on each other:
+- **SAVES in three pages.** Its eight buttons became the pages CLOUD,
+  CODE and FILE, turned with L and R as Options' are, each a short list
+  with a box that says what the line under the cursor does. UNDO IMPORT
+  is START, and it asks first, as Turn on, Unlink and Delete do.
+- **Cloud saves, like Steam Cloud.** SAVES › CLOUD › Turn on on one
+  device, Add a device there and its code under Link with a code on each other:
   from then on every device fetches the newest saves as the game starts
   and sends its own after each save and as you close it, with nothing to
   press. Only where two devices both played since they were last in step

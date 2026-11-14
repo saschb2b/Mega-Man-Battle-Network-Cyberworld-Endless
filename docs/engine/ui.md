@@ -125,8 +125,8 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   the Library's card (the spares list, the chip trade, the chip come
   marked by EQUIP's corners); the song playing, the statistics' words,
   the reconnect wait and the NetPass's card, stamps and tray in
-  SubChip's flat panel; Trade's Deal and No deal, SAVES' and the
-  gate's buttons as pills, the one under the cursor as RUN!; the gate's
+  SubChip's flat panel; Trade's Deal and No deal, SAVES' comparison's and
+  result's and the gate's buttons as pills, the one under the cursor as RUN!; the gate's
   field a slot. The second screen's body stays one window: it is that
   screen's one content.
 - The Library ([The Library, a page per entry](../game/meta/library.md))
@@ -197,6 +197,17 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   one name between the arrows did not say there were other pages, nor
   which key turns them; Valhalla's tab row with its Q and E, Forza's LB
   and RB).
+- SAVES' home is Options' kin (the owner's call, 15 November 2026, over
+  a list and a hub, [Save screens elsewhere](saves-screens.md)): its
+  pages CLOUD, CODE and FILE as Options' tabs (`look_tabs`), L and R
+  between them; THIS DEVICE's strip in SubChip's slim box; each page's
+  lines in the cyan window, a value between Options' orange arrows, the
+  arrow on the line under the cursor; KeyItem's information box under
+  them, what the line does and how its page stands; `START:UNDO IMPORT`
+  on the band as START:DEFAULT, its question and Turn on's, Unlink's and
+  Delete's in the box, Yes and No behind the green triangle, No chosen.
+  Its comparison and result keep their pills. Drawn in the engine's
+  pixel font, as it opens before a ROM is read.
 - The JACK-IN SETUP is Options' kin (the owner's call, 5 November 2026):
   its pages RUN, HELP and EXTRAS as Options' tabs (`look_tabs` draws
   both), L and R between them, START:JACK IN on the band; each page's
