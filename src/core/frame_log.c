@@ -12,6 +12,8 @@
 #include "platform_second.h"
 #ifdef __3DS__
 #include "start_3ds.h"
+#elif defined(__PSP__)
+#include "start_console.h"
 #endif
 
 bool platform_frame_log;
@@ -73,6 +75,11 @@ void frame_log_present(uint64_t present) {
 		 * docs/engine/emulation/3ds-memory.md) */
 		char heap[120];
 		start_3ds_heap(heap, sizeof heap);
+		size_t at = strlen(bottom);
+		snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
+#elif defined(__PSP__)
+		char heap[120];
+		console_heap(heap, sizeof heap);
 		size_t at = strlen(bottom);
 		snprintf(bottom + at, sizeof bottom - at, "; %s", heap);
 #endif

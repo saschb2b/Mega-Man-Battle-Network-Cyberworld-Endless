@@ -14,6 +14,7 @@ CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
 CC_vita := /usr/local/vitasdk/bin/arm-vita-eabi-gcc
+CC_psp := psp-gcc
 CC_ps4 := clang
 CC_ps5 := /usr/local/bin/ps5-cc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
@@ -39,6 +40,7 @@ BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN_switch := $(OUT)/cyberworld-endless.elf
 BIN_vita := $(OUT)/cyberworld-endless.elf
+BIN_psp := $(OUT)/cyberworld-endless.elf
 BIN_ps4 := $(OUT)/cyberworld-endless.elf
 BIN_ps5 := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
@@ -70,7 +72,7 @@ ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita ps4 ps5,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita psp ps4 ps5,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -82,6 +84,9 @@ PKGCONF := true   # SDL2 comes with the OpenOrbis toolchain
 endif
 ifeq ($(TARGET),ps5)
 PKGCONF := true   # SDL2 comes from PacBrew, docker/Dockerfile.ps5
+endif
+ifeq ($(TARGET),psp)
+PKGCONF := psp-pkg-config   # pspdev's SDL2, docker/Dockerfile.psp
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
 MGBA_LICENSE := /opt/mgba/LICENSE
@@ -228,6 +233,26 @@ $(OUT)/cyberworld-endless.vpk: $(OUT)/eboot.bin $(OUT)/param.sfo vita/icon0.png 
 	$(VITA_BIN)/vita-pack-vpk -s $(OUT)/param.sfo -b $(OUT)/eboot.bin -a vita/icon0.png=sce_sys/icon0.png \
 	 -a vita/bg.png=sce_sys/livearea/contents/bg.png -a vita/startup.png=sce_sys/livearea/contents/startup.png \
 	 -a vita/template.xml=sce_sys/livearea/contents/template.xml $@
+endif
+# the PSP (docker/Dockerfile.psp, psp/): pspdev's GCC for its 333 MHz
+# Allegrex, its SDL2 (the GU renderer) and mGBA linked in, made a PRX and
+# packed into an EBOOT.PBP with its title and icon (-Wno-format: uint32_t is
+# an unsigned long there, as on the 3DS); MEMSIZE=1 asks for the
+# PSP-2000's and later's 52 MB (a PSP-1000 has 24, too few: psp/README.md)
+ifeq ($(TARGET),psp)
+PSPSDK := /usr/local/pspdev/psp/sdk
+CFLAGS := $(filter-out -g,$(CFLAGS)) -G0 -ffunction-sections -fdata-sections -D_PSP_FW_VERSION=600 -isystem $(PSPSDK)/include -Wno-format
+LDLIBS := $(PSPSDK)/lib/prxexports.o $(MGBA)/lib/libmgba.a $(shell $(PKGCONF) --libs sdl2) -lpspdebug -lpspdisplay -lpspge \
+          -lpspctrl -lpsppower -lpsprtc -lpspnet -lpspnet_apctl -lm -L$(PSPSDK)/lib -specs=$(PSPSDK)/lib/prxspecs \
+          -Wl,-q,-T$(PSPSDK)/lib/linkfile.prx -Wl,-zmax-page-size=128 -Wl,--gc-sections
+all: $(OUT)/EBOOT.PBP
+$(OUT)/cyberworld-endless.prx: $(BIN)
+	psp-fixup-imports $(BIN)
+	psp-prxgen $(BIN) $@
+$(OUT)/PARAM.SFO: $(GEN)/version.h
+	mksfoex -d MEMSIZE=1 -s APP_VER=$(APP_VER) 'Cyberworld Endless' $@
+$(OUT)/EBOOT.PBP: $(OUT)/cyberworld-endless.prx $(OUT)/PARAM.SFO psp/icon0.png psp/pic1.png
+	pack-pbp $@ $(OUT)/PARAM.SFO psp/icon0.png NULL NULL psp/pic1.png NULL $(OUT)/cyberworld-endless.prx NULL
 endif
 # the PS4 (docker/Dockerfile.ps4, ps4/), whose fake package a jailbroken PS5
 # installs too: OpenOrbis's clang for its FreeBSD-like system, its libc,

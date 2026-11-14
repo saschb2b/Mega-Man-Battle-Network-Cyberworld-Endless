@@ -129,11 +129,12 @@ ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
 SWITCH_IMAGE = 'cyberworld-switch'   # docker/Dockerfile.switch
 VITA_IMAGE = 'cyberworld-vita'   # docker/Dockerfile.vita
+PSP_IMAGE = 'cyberworld-psp'   # docker/Dockerfile.psp
 PS4_IMAGE = 'cyberworld-ps4'   # docker/Dockerfile.ps4
 PS5_IMAGE = 'cyberworld-ps5'   # docker/Dockerfile.ps5
 PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PS4_IMAGE: 'Dockerfile.ps4', PS5_IMAGE: 'Dockerfile.ps5',
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PSP_IMAGE: 'Dockerfile.psp', PS4_IMAGE: 'Dockerfile.ps4', PS5_IMAGE: 'Dockerfile.ps5',
           PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 
 
@@ -250,7 +251,7 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'ps4': PS4_IMAGE, 'ps5': PS5_IMAGE,
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'psp': PSP_IMAGE, 'ps4': PS4_IMAGE, 'ps5': PS5_IMAGE,
              'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
@@ -3340,7 +3341,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3402,6 +3403,11 @@ def main():
         # the Nintendo Switch (switch/README.md): build/switch/cyberworld-endless.nro
         build('switch')
         print('built', os.path.join(ROOT, 'build', 'switch', 'cyberworld-endless.nro'))
+        return
+    if a.action == 'psp':
+        # the PSP (psp/README.md): build/psp/EBOOT.PBP
+        build('psp')
+        print('built', os.path.join(ROOT, 'build', 'psp', 'EBOOT.PBP'))
         return
     if a.action == 'vita':
         # the PlayStation Vita (vita/README.md): build/vita/cyberworld-endless.vpk

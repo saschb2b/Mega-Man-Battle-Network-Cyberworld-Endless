@@ -86,12 +86,12 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	if (!copy) return false;
 	memcpy(copy, rom, len);
 	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
-#ifdef __3DS__
-	/* (on the 3DS the core maps this copy as it is and patches it in place
-	 * (GBALoadROM maps a 16 MB ROM), so it lives as long as the core: a
-	 * chunk made from it would be a second 16 MB on a 3DS's heap. mGBA's
-	 * own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game never
-	 * calls, and start_3ds.c gives it back) */
+#if defined(__3DS__) || defined(__PSP__)
+	/* (on the 3DS and the PSP the core maps this copy as it is and patches
+	 * it in place (GBALoadROM maps a 16 MB ROM), so it lives as long as the
+	 * core: a chunk made from it would be a second 16 MB on their heaps.
+	 * mGBA's own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game
+	 * never calls: start_3ds.c gives the 3DS's back, the PSP's is none) */
 	struct VFile *vf = VFileFromMemory(copy, EMU_ROM_SIZE);
 	if (!vf) { free(copy); return false; }
 #else

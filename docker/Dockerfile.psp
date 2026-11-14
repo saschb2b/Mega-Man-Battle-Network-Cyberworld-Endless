@@ -1,0 +1,8 @@
+# Build image for the PSP (psp/README.md): pspdev's toolchain with its
+# packages (SDL2), pinned, and the embedded GBA core built for it. The game
+# builds into an EBOOT.PBP for the memory stick's PSP/GAME folder
+# (build.py psp).
+FROM pspdev/pspdev@sha256:ee385df3aa783189d5a033af5eb1d4a9cdd93718fb8bf652ec7bb48e54038a8b
+RUN apk add --no-cache curl python3
+COPY mgba.sh /tmp/mgba.sh
+RUN sh /tmp/mgba.sh psp

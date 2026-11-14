@@ -346,13 +346,26 @@ def live_start():
     return im, 2
 
 
+def psp_pic1():
+    """480 x 272: the PSP XMB's background behind the game's icon (the
+    EBOOT's PIC1; base 240 x 136, 2x): the LiveArea's net under the
+    wordmark, the icon's corner left clear."""
+    im = sky(240, 136)
+    net(im, 150, 80, [(-9, -1, 2, 2), (-7, 0, 3, 'u'), (-4, -1, 3, 3), (-3, 2, 3, 'v'), (-4, 5, 2, 2),
+                      (4, -6, 2, 2), (5, -4, 4, 'v'), (4, 0, 3, 3), (7, 1, 3, 'u'), (10, 0, 2, 3),
+                      (0, 6, 3, 2), (-2, 6, 2, 'u')], 7)
+    wordmark(im, 150, 62, 0.8, False)
+    return im, 2
+
+
 def main():
     os.makedirs(OUT, exist_ok=True)
     vita = os.path.join(ROOT, 'vita')
     os.makedirs(vita, exist_ok=True)
+    os.makedirs(os.path.join(ROOT, 'psp'), exist_ok=True)
     for name, make, out in (('capsule', capsule, OUT), ('wide', wide, OUT), ('hero', hero, OUT), ('logo', logo, OUT),
                             ('banner', banner, os.path.join(ROOT, '3ds')), ('bg', live_area, vita),
-                            ('startup', live_start, vita)):
+                            ('startup', live_start, vita), ('pic1', psp_pic1, os.path.join(ROOT, 'psp'))):
         im, k = make()
         im = im.resize((im.width * k, im.height * k), Image.NEAREST)
         path = os.path.join(out, name + '.png')
