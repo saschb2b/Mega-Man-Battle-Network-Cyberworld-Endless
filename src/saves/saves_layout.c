@@ -7,6 +7,26 @@
 
 #define ROW 18     /* a button's height and its gap */
 #define NARROW 230
+#define CODE_H 34  /* SEND's code in letters twice the size, and a line under it */
+
+/* RECEIVE's keys: the ten digits a row (two of five where narrow) over
+ * ERASE and OK; `actions` the digits first */
+static void receive_keys(SavesLayout *l, int width, int height, const int *actions, int n, bool narrow) {
+	int inner = width - 12, per_row = narrow ? 5 : 10, gap = 2;
+	int kw = (inner - (per_row - 1) * gap) / per_row;
+	int digits = n > 10 ? 10 : n, rows = (digits + per_row - 1) / per_row;
+	int top = height - (rows + 1) * ROW - 4;
+	for (int i = 0; i < digits; ++i) {
+		SDL_Rect r = { 6 + (i % per_row) * (kw + gap), top + (i / per_row) * ROW, kw, ROW - 2 };
+		l->buttons[l->count++] = (SavesButton){ r, actions[i] };
+	}
+	int bw = (inner - 4) / 2;
+	for (int i = digits; i < n && l->count < SAVES_ACTIONS; ++i) {
+		SDL_Rect r = { 6 + (i - digits) % 2 * (bw + 4), top + rows * ROW, bw, ROW - 2 };
+		l->buttons[l->count++] = (SavesButton){ r, actions[i] };
+	}
+	l->line = (SDL_Rect){ 10, 26, width - 20, top - 30 };
+}
 
 SavesLayout saves_layout(int width, int height, SavesView view, const int *actions, int n) {
 	SavesLayout l = { 0 };
@@ -14,10 +34,14 @@ SavesLayout saves_layout(int width, int height, SavesView view, const int *actio
 	int cols = narrow ? 1 : 2, rows = (n + cols - 1) / cols, inner = width - 12;
 	l.back = (SDL_Rect){ width - 48, 2, 44, 16 };
 	int top = 24;
-	if (view == SAVES_HOME) {
+	if (view == SAVES_RECEIVE_CODE) {
+		receive_keys(&l, width, height, actions, n, narrow);
+		return l;
+	}
+	if (view == SAVES_HOME || view == SAVES_SEND_CODE) {
 		l.here = (SDL_Rect){ 6, top, inner, 48 };
 		l.line = (SDL_Rect){ 8, top + 51, width - 16, 9 };
-		top += 64;
+		top += view == SAVES_HOME ? 64 : 52;
 	} else if (view == SAVES_COMPARE) {
 		int ph = 58;   /* (a title and four rows) */
 		if (narrow) {
@@ -30,6 +54,9 @@ SavesLayout saves_layout(int width, int height, SavesView view, const int *actio
 		top = l.file.y + ph + 4;
 	}
 	int buttons_y = view == SAVES_HOME ? top : height - rows * ROW - 4;
+	/* (SEND's code under its panel, its words to the foot's button) */
+	if (view == SAVES_SEND_CODE) l.code = (SDL_Rect){ 10, top, width - 20, CODE_H };
+	if (view == SAVES_SEND_CODE) top += CODE_H;
 	if (view != SAVES_HOME) l.line = (SDL_Rect){ 10, top + (view == SAVES_RESULT ? 6 : 0), width - 20, buttons_y - top - 6 };
 	int bw = cols == 1 ? inner : (inner - 4) / 2;
 	for (int i = 0; i < n && i < SAVES_ACTIONS; ++i) {

@@ -53,6 +53,10 @@ SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
 SRCS := $(wildcard src/*/*.c)
 LAYER_MAKE_BUMPS := $(words $(wildcard src/net/layer_make.d/*.txt))
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
+# Others' code kept as its authors released it (third_party/, docs/code/third-party.md):
+# built with the game's flags but none of its warnings, its headers the system's
+THIRD_SRCS := third_party/monocypher/monocypher.c
+OBJS += $(patsubst %.c,$(OUT)/obj/%.o,$(THIRD_SRCS))
 
 # The version the title shows: build.py passes its own (the tag, or the tag
 # and the commits since); made alone, git's; else dev. A header written
@@ -69,7 +73,7 @@ APP_VER = $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' 
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4 ps5,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -isystem third_party/monocypher -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4 ps5,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
@@ -389,6 +393,10 @@ $(OUT)/obj/%.o: src/%.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(GEN) -c -o $@ $<
 
+$(OUT)/obj/third_party/%.o: third_party/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(filter-out $(WARN) $(WARN_GCC) -Werror,$(CFLAGS)) -c -o $@ $<
+
 # (UIKit's, iOS alone: Objective-C with ARC)
 $(OUT)/obj/%.o: src/%.m | $(GEN)/version.h
 	@mkdir -p $(dir $@)
@@ -433,14 +441,18 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_arc.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
 	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c tests/test_voxel.c src/gfx/gba_layers.c src/gfx/gba_world.c src/gfx/voxel_lift.c src/gfx/voxel_light.c src/gfx/voxel_draw.c \
 	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c \
-	tests/test_update.c src/update/update_manifest.c src/update/update_sha256.c src/update/update_swap.c
+	tests/test_update.c src/update/update_manifest.c src/update/update_sha256.c src/update/update_swap.c \
+	tests/test_transfer_code.c src/online/transfer_box.c third_party/monocypher/monocypher.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
 $(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/test_voxel.h tests/backup_fixture.h tests/backup_fixture_v2.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(TEST_WARN) -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online -isystem third_party/monocypher $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
+TEST_WARN = $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror)
+# (others' code, third_party/: none of the game's warnings)
+$(TEST_OBJ_DIR)/third_party/%.o: TEST_WARN =
 # (a map's views, tests/test_core.c's test_area_views: area_src.c reads gfx.h's colours, and gfx.h includes SDL's header)
 $(TEST_OBJ_DIR)/src/map/area_src.o: TEST_OBJ_SDL = $(TEST_SDL)
 build/host/test_core: $(TEST_OBJS)
@@ -474,7 +486,8 @@ build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | 
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
-	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c \
+	src/core/transfer_link.c src/core/text_input.c
 build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
@@ -594,7 +607,7 @@ LINT_TEST_EMU_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TEST_EMU_SRCS))
 LINT_TRANSPORT_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRANSPORT_TEST_SRCS))
 build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online -isystem third_party/monocypher $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)
