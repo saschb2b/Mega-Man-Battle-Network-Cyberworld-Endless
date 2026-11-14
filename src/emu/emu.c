@@ -269,6 +269,9 @@ static void worker_entry(void *arg) { worker_main(arg); }
 bool emu_drawing;
 int emu_draw_waits;
 
+static void (*after_frame)(void);
+void emu_after_frame(void (*step)(void)) { after_frame = step; }
+
 static void wait_frame(void) {
 	if (!in_flight) return;
 	emu_draw_waits += emu_drawing;
@@ -276,6 +279,7 @@ static void wait_frame(void) {
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
 	++pictures;
+	if (after_frame) after_frame();
 }
 
 bool emu_threaded(void) { return threaded; }
@@ -344,6 +348,7 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 	run_frame(unshown);
 	if (!unshown) ++pictures;
+	if (after_frame) after_frame();
 }
 
 const uint32_t *emu_video(void) { return threaded ? shown : video; }
@@ -384,6 +389,15 @@ uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->ra
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
+	/* (the RAM, the palette, video memory and OAM copied whole: byte by
+	 * byte through the bus, VRAM's 96 KB took depth lighting 0.4 ms a frame) */
+	unsigned region = a >> 24;
+	if (core && (region == 2 || region == 3 || (region >= 5 && region <= 7))) {
+		size_t size = 0;
+		const uint8_t *block = core->getMemoryBlock(core, region, &size);
+		uint32_t off = a & 0xFFFFFFu;
+		if (block && off <= size && len <= size - off) { memcpy(out, block + off, len); return; }
+	}
 	for (uint32_t i = 0; i < len; ++i) {
 		int v = cart_read(a + i);
 		out[i] = v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;

@@ -71,17 +71,17 @@ static void test_world(void) {
 	put16(pal, 0, 0x7C00);                /* the backdrop blue */
 	put16(pal, (2 * 16 + 1) * 2, 0x7FFF); /* palette 2's colour 1 white */
 	GbaWorld g = { vram, pal, io, { tiles[0], tiles[1] }, 40, 30, 0, 0 };
-	gba_world(&g, 0, 0, 64, 64, map, sky);
+	gba_world(&g, &(GbaWindow){ 0, 0, 64, 64, 64, map, sky });
 	CHECK(map[44 * 64 + 44] == 0xFFFFFFFFu, "world: the tile's pixel white at (44, 44): %08x", (unsigned)map[44 * 64 + 44]);
 	CHECK(!map[0] && sky[0] == 0xFFFF0000u, "world: none at (0, 0), the backdrop blue behind: %08x", (unsigned)sky[0]);
 	/* (the frame 8 pixels into the map: the tile 8 to the left) */
 	g.ox = 8;
-	gba_world(&g, 0, 0, 64, 64, map, sky);
+	gba_world(&g, &(GbaWindow){ 0, 0, 64, 64, 64, map, sky });
 	CHECK(map[44 * 64 + 36] && !map[44 * 64 + 44], "world: the map's place moves its picture");
 	/* (BG1 faded to black: BLDCNT's mode 3 on it, BLDY 16) */
 	put16(io, 0x50, 0x00C2);
 	put16(io, 0x54, 16);
-	gba_world(&g, 0, 0, 64, 64, map, sky);
+	gba_world(&g, &(GbaWindow){ 0, 0, 64, 64, 64, map, sky });
 	CHECK(map[44 * 64 + 36] == 0xFF000000u && sky[0] == 0xFFFF0000u, "world: a fade on BG1 alone");
 }
 
@@ -152,6 +152,7 @@ static void test_lift(void) {
 			ground.ramp[at] = (uint8_t)(1 + (99 - y) / 2);
 		}
 	ground.z[1] = 20;
+	ground.ramps = true;
 	voxel_lift(&layers, 0, frame, &ground, &scene);
 	CHECK(scene.kind[window(110, 70)] == VOX_TOP && scene.gy[window(110, 70)] - 70 >= 9 && scene.gy[window(110, 70)] - 70 <= 11, "lift: a ramp's pixel stands as high as it shows: %d",
 		scene.gy[window(110, 70)] - 70);

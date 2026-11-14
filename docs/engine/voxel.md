@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Depth lighting: the world lit in 3D"
-description: "Options' Display's Depth lighting (off by default, `depth_lighting` in settings.ini; the code's `voxel_` files, its first name) lights the world as the game runs, on the net, in town and in battle (a sun with soft shadows, shaded sides, a glow, what is far out of focus), and on a net layer rebuilds the picture as columns under a camera a little lower than BN6's: how a frame is read, lifted over the layer's own floor, lit and drawn at the screen's scale, where it runs, what it leaves alone, and what is still open."
+description: "Options' Display's Depth lighting (off by default, `depth_lighting` in settings.ini; the code's `voxel_` files, its first name) lights the world as the game runs, on the net, in town and in battle (a sun with soft shadows, shaded sides, a glow, what is far out of focus), and on a net layer rebuilds the picture as columns under a camera a little lower than BN6's: how a frame is read, lifted over the layer's own floor, lit and drawn at the screen's scale, what it costs a frame, where it runs, what it leaves alone, and what is still open."
 tags: [engine, display, options, voxel]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:49:36Z }
 sources:
@@ -22,7 +22,8 @@ game (the reference above). Options' Display has the line **Depth
 lighting** ([the panel's rules](ui.md); it sits under [the GBA's
 screen's lines](lcd.md)), kept as `depth_lighting = on` in
 `settings.ini`; `--depth-lighting on|off|debug` on the command line sets
-it over that. It is not offered on the 3DS or the Vita.
+it over that. It is not offered on the Vita, nor on the 3DS, where the
+same line is the 3D screen's [3D depth](stereo.md) instead.
 
 It began as "voxel mode", and the code keeps that name (`voxel.h`,
 `voxel_scene.c`, `--voxel` and `voxel =` still read): the owner renamed
@@ -132,13 +133,49 @@ seams of up to two voxels between a top and its side closed (they showed the sky
 panels, what is far from MegaMan out of focus, and a vignette. Past 4x
 the picture is made at half the screen's scale.
 
-Its passes run in bands of rows on a small pool of threads (three
-workers and the game's own; none where a system has no threads): the
-floor's grid, the map's window, the light and the picture's last pass.
-Measured on the development machine at 1440x960: about 11 ms a frame.
+## Its cost
+
+Measured on the development machine (16 cores) on a layer, the picture
+at 2x (480x320): 1.6 ms a frame, against 10 ms before the work of
+2026-11-14 (whose first version also gave up its scale under the budget
+below); 2.0 ms with four threads held to four cores, a handheld's shape,
+and 1.2 ms there at 1x; 1.6 ms in town, 2.1 in a battle. The picture is
+the same as before to a few shades (24 of 153,600 pixels past 8 levels at
+2x, where the seams are closed in another order and the last pass rounds
+in whole numbers). What made it so:
+
+- **What the camera shows, no more.** The window about the frame (for a
+  lower camera or a zoom) is read, lifted, lit and drawn only as far as
+  the camera can show it (`voxel_span`, from the lowest a side hangs to
+  the raised floor's rise): 249x210 of the window's 432x368 under the
+  camera as it comes. A camera that makes the near larger (`--voxel-depth`)
+  still takes the whole window.
+- **The floor kept.** The layer's floor under the window (a few hundred
+  thousand cells, each asked of the layer) is made once a layer and moved
+  with the camera, only the rows and columns it brings in asked for
+  (`netmap_serial` says when the layer is another).
+- **Reads by the row.** The backgrounds are read a screen entry and a row
+  of its tile for every eight pixels (`gba_tiles.h`), video memory copied
+  whole (`emu_read_bytes`), and every colour the world shows comes from a
+  table of the 32,768 made once for each colour correction and town hour.
+- **Threads that stay awake.** The passes' rows (or columns) are handed
+  out a few at a time from a counter to the workers (a core each but the
+  game's, seven at most) and the game's own thread; a worker waits for the
+  next pass awake for half a millisecond, spinning a moment and then
+  yielding its core, before it sleeps. Woken from sleep for each pass, the
+  workers came late to most of them: four threads did the frame in 3 ms,
+  one in 4.
+- **Loops that run straight.** The last pass in whole numbers, a pair of
+  channels at a time, with each column's and row's taps made once; the
+  blurs down the columns a row at a time and across four rows at a time;
+  the seams closed by runs; the faces drawn in bands of the picture's rows
+  (each band only the window's rows that reach it, in one thread's order,
+  so ties fall alike).
+
 Where a frame takes over 11 ms for a second, the picture is made a scale
 smaller for the rest of the session and the screen scales it up
-(`voxel_scene.c`).
+(`voxel_scene.c`). `--frame-log` (`frame_log = on` on a device) adds
+depth lighting's time and scale to its line each second.
 
 The world's colours go through the GBA's screen's colour correction
 ([the GBA's screen](lcd.md)) as the frame's sprites do; its frame
@@ -146,9 +183,9 @@ blending is not applied to them.
 
 ## Open
 
-- Speed on a handheld is not measured: the passes before the picture
-  (the readers, the floor, the lift, the light) cost about half a frame
-  here whatever the scale, and fixed-point for the last pass is not tried.
+- Speed on a handheld is not measured; `frame_log`'s line says it. The
+  soft layers' blurs (a quarter millisecond here) are bound by memory, in
+  floats; the lift's bodies and the faces' heights stay on one thread.
 - Scenery that stands (a tower's art in the map's layers) is painted
   flat; a stair's ramp is taken as even, and casts no shadow.
 - The world skips the frame blending, a liberation's panel tints and a

@@ -112,7 +112,7 @@ static const char *value_word(int kind) {
 	case LINE_COLOUR: return options_word(colour_words[lcd_colour()]);
 	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
-	case LINE_VOXEL: return options_word(display_voxel() ? OW_ON : OW_OFF);
+	case LINE_VOXEL: return options_word(display_voxel() || display_stereo() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_level_word(sound_heard_music());
 	case LINE_EFFECTS: return options_level_word(sound_heard_effects());
 	case LINE_OUTPUT: return options_word((OptionsWord)(OW_SPEAKERS + sound_output()));
@@ -150,6 +150,7 @@ static const char *line_name(int kind) {
 	case LINE_STATS: return analytics_word(AW_ROW);
 	case LINE_UPDATE: return update_name();
 	case LINE_UPDATES: return update_word(UW_ROW);
+	case LINE_VOXEL: return options_word(display_has_stereo() ? OW_STEREO : OW_VOXEL);
 	default: return options_word(names[kind]);
 	}
 }
@@ -200,7 +201,9 @@ static const char *display_note(int kind) {
 	case LINE_COLOUR: return options_word(colour_notes[lcd_colour()]);
 	case LINE_BLEND: return options_word((OptionsWord)(OW_BLEND_OFF_NOTE + lcd_blend()));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_LCD3X_ON_NOTE : OW_LCD3X_OFF_NOTE);
-	case LINE_VOXEL: return options_word(display_voxel() ? OW_VOXEL_ON_NOTE : OW_VOXEL_OFF_NOTE);
+	case LINE_VOXEL:
+		if (display_has_stereo()) return options_word(display_stereo() ? OW_STEREO_ON_NOTE : OW_STEREO_OFF_NOTE);
+		return options_word(display_voxel() ? OW_VOXEL_ON_NOTE : OW_VOXEL_OFF_NOTE);
 	default: return "";
 	}
 }
