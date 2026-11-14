@@ -2069,6 +2069,20 @@ SCREENSHOTS = [
     # ncp_numbropn and ncp_numbropn_control with "shots": [[6, 1, 30, PATH]]
     # added, by `build.py xdiff`; the sheet lays them side by side)
     # 0.21.0 (A) ends: stills
+    # 0.21.1
+    # (BN4's Park Area's first layer, seed 4, as the weak autopilot walks it:
+    # the orange road on the way to the exit between two framed rooms)
+    ('bn4-park-road', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', 'x17', '--seed', '4'],
+     [(320, 'bn4-park-road')], {'CYBERWORLD_AUTOPILOT': 'weak'}),
+    # (Depth lighting off and on, the whole screen at 3x: Sky Area's first
+    # layer, seed 2, and the run's first random battle on layer 6 of the
+    # clips' RUN_7, written out: it is set further down)
+    ('depth-off', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '2', '--seed', '2', '--size', '720x480',
+                   '--depth-lighting', 'off'], [(600, 'depth-off')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
+    ('depth-on', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '2', '--seed', '2', '--size', '720x480',
+                  '--depth-lighting', 'on'], [(600, 'depth-on')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
+    ('depth-battle', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12',
+                      '--size', '720x480', '--depth-lighting', 'on'], [(7700, 'depth-battle')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
 ]
 
 # pictures of others side by side for a release's notes (made after the
@@ -2418,6 +2432,9 @@ README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc
                'lab-won': (None, 12), 'groups-constellation': (None, 12), 'online-pet': (None, 12), 'online-netpass-bn4': (None, 15)}
 # 0.21.0 (B)
 README_GIFS.update({'bn4-heatsprd': (None, 15), 'bn4-meteors': (None, 15), 'bn4-topman-top': (None, 15)})
+# 0.21.1: the floors before and after, two pictures side by side (tools/before_after.py --clips)
+README_GIFS.update({name: (None, 10) for name in ('compare-bn4-park', 'compare-bn4-countries', 'compare-bn5-acdc', 'compare-sky',
+                                                   'compare-seaside', 'compare-undernet')})
 
 
 def clips(only=None):

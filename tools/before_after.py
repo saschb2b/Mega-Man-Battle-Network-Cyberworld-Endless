@@ -21,6 +21,11 @@ it is built, as 4882961's dev steps in --input that a scene's "0:place"
 needs.
 
   python3 tools/before_after.py 1a0f974 --old-label before --new 0.8.0 --pick 4882961 way
+
+--clips films WALKS instead: the same walk in both builds, side by side and
+moving, into docs/clips/NAME.webm, .mp4, .png and .gif.
+
+  python3 tools/before_after.py v0.21.0 --new 0.21.1 --clips compare-bn4-park
 """
 import argparse
 import os
@@ -163,6 +168,30 @@ SCENES = [
     ('library', ['--scene', 'town', '--seed', '2', '--dev', 'library=3', '--input', build.PET_ROOM + '6:DOWN,6:,6:DOWN,6:,6:A,60:,' +
                  '100:'], {}, 700),
     # 0.21.0 (A) ends
+    # (0.21.1's: an area's first layer as the weak autopilot walks it, its
+    # layout the same in both: CopyBot Comp's claw gripping a walkway, seed
+    # 2; the Underground's teal emblem panels in the Cybeast Nest, seed 3)
+    ('copybot-claws', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '15', '--seed', '2'], WEAK, 1000),
+    ('nest-emblems', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '7', '--seed', '3'], WEAK, 550),
+    # (Aquarium Comp's glass pads on their pillars, seed 2's second layer;
+    # BN4's Undernet's horns behind its catwalks, seed 4)
+    ('aquarium-pillars', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '12', '--seed', '2'], WEAK, 1000),
+    ('bn4-undernet-horns', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', 'x19', '--seed', '4'], WEAK, 550),
+]
+# (--clips: the same walk in both builds as moving pictures, OLD's on the
+# left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS
+# names its rate); 0.21.1's: an area's first layer as the weak autopilot
+# walks it, its layout the same in both and its floors drawn anew; the
+# Undernet's to where its fire bowls burn)
+AREA_1 = ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet']
+# name, game options, environment, first and last frame
+WALKS = [
+    ('compare-bn4-park', AREA_1 + ['--net-biome', 'x17', '--seed', '4'], WEAK, 240, 540),
+    ('compare-bn4-countries', AREA_1 + ['--net-biome', 'x18', '--seed', '4'], WEAK, 280, 580),
+    ('compare-bn5-acdc', AREA_1 + ['--net-biome', 'x0', '--seed', '4'], WEAK, 300, 560),
+    ('compare-sky', AREA_1 + ['--net-biome', '2', '--seed', '2'], WEAK, 520, 760),
+    ('compare-seaside', AREA_1 + ['--net-biome', '1', '--seed', '11'], WEAK, 640, 900),
+    ('compare-undernet', AREA_1 + ['--net-biome', '5', '--seed', '4'], WEAK, 680, 940),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -212,6 +241,54 @@ def frame(binary, args, env, at, out, whole=0):
     return im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
 
 
+def frames(binary, args, env, first, last, out):
+    """Every second frame from `first` to `last` of a headless run of `binary`,
+    the game's 240 x 160 each (30 a second, as build.py's clips); its ROM
+    folder as frame()'s."""
+    from PIL import Image
+    tmp = os.path.join(ROOT, '.build', 'before', 'clip')
+    shutil.rmtree(tmp, ignore_errors=True)
+    os.makedirs(os.path.join(tmp, 'data'))
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        code = build.docker(binary, '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/before/clip/data', *args,
+                            '--frames', str(last + 1), '--shot-range', f'{first}:{last}:/src/.build/before/clip/f',
+                            mounts=build.docs_rom_mounts(bn5=build.whole_rom_folder(out)))
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+    if code:
+        sys.exit(f'{out}: the run failed')
+    ims = []
+    for f in range(first, last + 1, 2):
+        im = Image.open(os.path.join(tmp, f'f{f:05d}.bmp')).convert('RGB')
+        w, h = im.size
+        ims.append(im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2)))
+    return ims
+
+
+def walk_clip(old, new, old_label, new_label, name, args, env, first, last):
+    """docs/clips/NAME.*: the same walk in OLD and in NEW, side by side under
+    their versions (build.sheet), encoded as build.py's clips are."""
+    tmp = os.path.join(ROOT, '.build', 'before', 'clip-png')
+    shutil.rmtree(tmp, ignore_errors=True)
+    os.makedirs(os.path.join(tmp, 'png'))
+    out = os.path.join(ROOT, 'docs', 'clips')
+    both = zip(frames(old, args, env, first, last, name), frames(new, args, env, first, last, name))
+    n = 0
+    for n, (a, b) in enumerate(both):
+        im = build.sheet([[(a, old_label), (b, new_label)]])
+        if n == 0:
+            im.save(os.path.join(out, f'{name}.png'), optimize=True)
+        im.save(os.path.join(tmp, 'png', f'{n:05d}.png'))
+    if build.encode_clip(name, tmp, out, n + 1, im.size, True):
+        sys.exit(f'{name}: ffmpeg failed')
+
+
 def pair(old, new, old_label, new_label):
     """Both frames at 2x with whole pixels (a whole screen as it came), each under its version."""
     from PIL import Image, ImageDraw, ImageFont
@@ -236,12 +313,18 @@ def main():
     ap.add_argument('--old-label', help="OLD's label (its tag without the v)")
     ap.add_argument('--new-ref', help='a commit to build as NEW, in place of this build')
     ap.add_argument('--pick', action='append', default=[], help='a commit applied to an older tree before it is built')
+    ap.add_argument('--clips', action='store_true', help='the walks (WALKS) as moving pictures in docs/clips, not the scenes')
     ap.add_argument('names', nargs='*', help='scenes (all)')
     a = ap.parse_args()
     old = old_binary(a.old, a.pick)
     new = old_binary(a.new_ref, a.pick) if a.new_ref else os.path.join('build', 'host', 'cyberworld')
     if not os.path.exists(os.path.join(ROOT, new)):
         sys.exit('build this build first: python3 build.py host')
+    if a.clips:
+        for name, args, env, first, last in WALKS:
+            if not a.names or name in a.names:
+                walk_clip(old, new, a.old_label or a.old.lstrip('v'), a.new, name, args, env, first, last)
+        return
     out = os.path.join(ROOT, 'docs', 'screenshots')
     for name, args, env, at, *whole in SCENES:
         if a.names and name not in a.names:

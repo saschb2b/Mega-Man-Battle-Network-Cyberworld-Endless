@@ -91,6 +91,7 @@ On 13 November 2026, 0.20.0's and 0.21.0's runs:
 | 0.21.0 (`--new v0.21.0`) | FAIL: stands still in layer 2's first battle; `0x03007254` and `0x03007298` still 0.20.0's (`0x08D90071`, `0x08D900A1` for `0x08D900B1`, `0x08D900E1`) | |
 | `dev` before the fix | FAIL, the same | ok |
 | `dev` with the fix (#512) | ok; IWRAM's routines the same bytes | ok; the same bytes, every word as this build's own |
+| 0.21.1's candidate (14 November) | ok; IWRAM's routines the same bytes; `SOULS_FACE_PALS`' two words still 0.20.0's (`0x08C82D00` for this build's `0x08C82D60`) | ok; the same bytes, every word as this build's own |
 
 ## What a state holds of the engine's
 
@@ -105,7 +106,7 @@ what makes it this build's again:
 | The layer's maps, objects, warp list, label and texts, pointed at from EWRAM (`FREE_LAYER`, `FREE_WARP_LIST`, `FREE_LABEL`, `FREE_TALK`) | as a layer is entered | the layer is rebuilt before the state loads and entered again after it (`layer_reenter`); where another build made it, from its start, its flags and Mystery Data picks forgotten (`director_resume`, the `!same` branch) |
 | The song the music player plays, a copy in `FREE_SONGS` | a map's or the director's song | stopped where another build made the layer; the map plays its own. Seen on seed 3: the player then still names the song of the checkpoint's moment where this build's own run has gone on to the next; both are this build's addresses. Not listened to |
 | A battle's record, families' and Navis' rooms, chips' code (`FREE_RECORDS`, `FREE_FAMILIES`, `FREE_VIRUS_ROOM`, `FREE_NAVI_CODE`, `FREE_CHIP_*`) | as a battle starts | no checkpoint is written in a battle; what a state holds of the last one is written anew by the next. Step 5's battle is the check |
-| The emotion window's palettes (`SOULS_FACE_PALS` in `FREE_SOULS`, two words at `0x0200B820` and `0x0200B8E8`) | the Souls' faces (`soul_room.h`) | carried as they are: right while the table stays where it is (0.20.0 and now: `FREE_SOULS` + 0x2D00); a release that moves it would draw a face's colours from the old place until the window is set again. Not provable today |
+| The emotion window's palettes (`SOULS_FACE_PALS` in `FREE_SOULS`, two words at `0x0200B820` and `0x0200B8E8`) | the Souls' faces (`soul_room.h`) | carried as they are: right while the table stays where it is (0.20.0's at `0x08C82D00`); a release that moves it draws a face's colours from the old place until the window is set again. 0.21.1 lays it 0x60 further on (`0x08C82D60`), so a run continued from 0.20.0 carries the old words; what the window then shows is not looked at |
 | The engine's own RAM (`RAM_PACK_EXT`, `RAM_PLAYER_AI` and the battle's, `src/emu/free_space.h`) and the cart's save RAM in the state | the installers and the run | read as this build lays it out; a format that changes needs its reader (`xchips_pack_ready` for the pack's entries) |
 
 A row whose fix is not proved by the tool stays a row here: what to
