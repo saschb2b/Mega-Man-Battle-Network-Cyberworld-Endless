@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-14",
+  "what": "BN6's chips that find their foes by a range of NameIDs (object_getEnemyByNameRange: AquaNdl's needles, YoYo's strike, the reticle over a foe) aimed at the moved families and Navis too (src/emu/chip_targets.c, issue #523): AquaNdl1 struck BN5's Bugtank, ToadMan and BN4's GutsMan in BN6's engine, where before it struck nothing; YoYo's own two calls not reached in play."
+}
