@@ -92,6 +92,15 @@ reads: over every area the pick 13.3 to 7.8 seconds and making the layers
 14.5 to 9.1, BN5's Undernet 35.7 to 27.0 billion instructions; every layer
 the same.
 
+Then the pieces' search (`lay_pieces`): for each of the floor's panels, for
+each of its slots still open and round after round, it tried every panel
+of every book for the slots it suits (`slots_like`), which hangs on the
+panel's shape alone. Each shape's suiting panels are now listed once a
+map's laying, in the books' order (`likes_of`), and the search tries those:
+over every area the pick 7.8 to 7.2 seconds (13.0 before the grid), BN5's
+Undernet 27.0 to 24.4 billion instructions; every layer the same, the
+3DS's modelled heap the same.
+
 ## What the profile of 14 November 2026 found
 
 Instructions to the first layer, the second start (its boot state made),
@@ -157,8 +166,8 @@ The same start, BN6 alone, after: 1.50 billion; with BN5 and BN4, 2.29. Of a lay
 
 - **Picking the tiles** (`tiles_pick`, 0.32 billion over 11,851 calls),
   `best`'s own comparisons the most of it; in another game's areas,
-  laying the maps' panels (`panels_lay`: `slots_like`, `suits`) after
-  the grid.
+  laying the maps' panels (`panels_lay`: `suits`, the neighbours a
+  suiting panel would meet, after the grid and the shapes' lists).
 - **Learning the area's original maps** (`nm_learn`, 0.36 billion), done
   again when a run comes back to an area (`3ds/README.md`, "learned
   again").
