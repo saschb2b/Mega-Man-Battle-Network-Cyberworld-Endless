@@ -55,10 +55,15 @@ float display_voxel_pitch(void);
 float display_voxel_zoom(void);
 float display_voxel_depth(void);
 /* The 3DS's 3D depth (docs/engine/stereo.md): the same line of Options'
- * Display and settings.ini's depth_lighting there, off as it comes; the 3D
- * slider then sets how deep the world goes. The 3DS's alone. */
+ * Display, settings.ini's depth_3d, on as it comes (the
+ * owner's call, 2026-11-14); the 3D slider sets how deep the world goes.
+ * The 3DS's alone. */
 bool display_has_stereo(void);
 bool display_stereo(void);
+/* The line's own default: on where it is the 3DS's 3D depth, off for depth lighting */
+bool display_depth_default(void);
+/* ... and its key in settings.ini: depth_3d on the 3DS, depth_lighting elsewhere */
+const char *display_depth_key(void);
 /* ... either set and kept in settings.ini (Options' Display) */
 void display_voxel_keep(bool on);
 

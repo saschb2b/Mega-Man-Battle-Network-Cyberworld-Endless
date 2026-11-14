@@ -229,7 +229,7 @@ static void defaults(void) {
 		display_colour_keep(LCD_COLOUR_OFF);
 		display_blend_keep(LCD_BLEND_OFF);
 		if (display_has_lcd3x() && lcd_grid()) display_lcd3x_keep(false);
-		if (display_voxel() || display_stereo()) display_voxel_keep(false);
+		if ((display_voxel() || display_stereo()) != display_depth_default()) display_voxel_keep(display_depth_default());
 	} else if (O.page == PAGE_AUDIO) {
 		if (sound_heard_music() != SOUND_LEVELS) heard_keep(LINE_MUSIC, SOUND_LEVELS);
 		if (sound_heard_effects() != SOUND_LEVELS) heard_keep(LINE_EFFECTS, SOUND_LEVELS);

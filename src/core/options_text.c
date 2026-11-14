@@ -208,13 +208,18 @@ const char *options_lcd3x_note(void) {
 }
 
 const char *options_voxel_note(void) {
+#ifdef __3DS__
+	return "\n# depth_3d: on, the 3D slider gives the picture depth: the world goes\n"
+		"# back into the screen, what stands at its feet's depth, the HUD and\n"
+		"# chat boxes flat at the screen; off, the slider does nothing. On as it\n"
+		"# comes. Options' Display changes it too.\n";
+#endif
 	return "\n# depth_lighting: on lights the world as the game runs: a sun with soft\n"
 		"# shadows, shaded sides, a glow off what is bright and what is far a\n"
 		"# little out of focus, on the net, in town and in battle; on the net's\n"
 		"# layers the camera also looks from a little lower. Menus and the HUD\n"
-		"# stay as they are. On the 3DS it is the 3D depth instead: the 3D slider\n"
-		"# sets how deep the world goes behind the screen, the HUD flat at it.\n"
-		"# Not on the Vita. Options' Display changes it too.\n";
+		"# stay as they are. Not on the 3DS (its depth_3d instead) or the Vita.\n"
+		"# Options' Display changes it too.\n";
 }
 
 const char *options_fullscreen_note(void) {

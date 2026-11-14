@@ -1437,11 +1437,11 @@ game's own pixels. It is off until you turn it on
 (`depth_lighting = on`), and not offered on the Vita. How it works is in
 [Depth lighting](engine/voxel.md).
 
-On the 3DS the same line is **3D depth**: turned on, the 3D slider gives
+On the 3DS the same line is **3D depth**: the 3D slider gives
 the picture depth, the world going back into the screen and MegaMan and
 the viruses standing in it, the HUD and chat boxes at the screen. It is
-off until you turn it on; off, the slider does nothing. How it works is
-in [3D depth](engine/stereo.md).
+on as it comes (`depth_3d`); off, the slider does nothing. How it works
+is in [3D depth](engine/stereo.md).
 
 ## Sound
 

@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "3D depth: the 3DS's 3D screen"
-description: "Options' Display's 3D depth on the 3DS (off by default, `depth_lighting` in settings.ini as on other systems) gives the picture depth through the 3DS's own 3D slider: the world tilted back into the screen row by row, what stands at its feet's depth, the HUD and the engine's drawing flat at the screen; how a frame is sorted from the video memory its frame ended with, drawn for each eye by the GPU, looked at on a computer, what it costs, and what is still open."
+description: "Options' Display's 3D depth on the 3DS (on by default, `depth_3d` in settings.ini) gives the picture depth through the 3DS's own 3D slider: the world tilted back into the screen row by row, what stands at its feet's depth, the HUD and the engine's drawing flat at the screen; how a frame is sorted from the video memory its frame ended with, drawn for each eye by the GPU, looked at on a computer, what it costs, and what is still open."
 tags: [engine, display, options, 3ds]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:40:00Z }
 sources:
@@ -22,9 +22,12 @@ ARM11 cores; its 3D screen is the 3DS's own way to give the picture
 depth, and needs far less.
 
 On the 3DS, Options' Display's depth lighting line is **3D depth** ([the
-panel's rules](ui.md)), off as it comes (the owner's default for depth
-lighting), kept as `depth_lighting = on` in `settings.ini`, the same key
-as on every other system. On, the screen is put in 3D (`gfxSet3D`) and
+panel's rules](ui.md)), on as it comes (the owner's call, 2026-11-14: the
+slider is the switch a 3DS player reaches for, and costs nothing down),
+kept as `depth_3d` in `settings.ini`, a key of its own: builds before it
+wrote `depth_lighting = off` into every `settings.ini`, the 3DS's too,
+where no line could set it, so the 3DS reads `depth_3d` alone. START's
+DEFAULT puts it back on. On, the screen is put in 3D (`gfxSet3D`) and
 the 3D slider sets how deep the picture goes; at the slider's bottom the
 screen shows the left eye alone and nothing is sorted. Off, the screen is
 not in 3D and the slider does nothing. Its notes: "The 3D slider sets the
@@ -94,7 +97,7 @@ without a 3D screen ([headless captures](../devtools/headless-shot.md)).
 
 ## Its cost
 
-Nothing with the line off or the slider at its bottom. With the slider up,
+Nothing with the slider at its bottom (or the line off). With the slider up,
 the 3DS's main core copies 98 KB of video memory a frame, sorts the
 frame (its sprites' pixels, BG0's rows, a few backgrounds' pixels under
 the sprites, a flood fill of the bodies), makes the three layers from the
