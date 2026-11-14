@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "The game's own updates"
-description: "How the game learns a newer version is out and, where it can, puts it in place itself: the release's update.json, the look at each start (on by default, Options' Updates line switches it off), the title's note and Options' update line, each system's way (the AppImage over itself, the Windows installer run silently, the PortMaster launcher after the game, the Switch's .nro and the 3DS's .3dsx swapped as the game ends, the download page, the itch app, the releases page or store on the 3DS's CIA, the Vita and the PS5), the checks before a file is placed, the roots the consoles carry for GitHub, and what other systems are to get."
+description: "How the game learns a newer version is out and, where it can, puts it in place itself: the release's update.json, the look at each start (on by default, Options' Updates line switches it off), the title's note and Options' update line, each system's way (the AppImage over itself, the Windows installer run silently, the PortMaster launcher after the game, Android's installer, the Switch's .nro and the 3DS's .3dsx swapped as the game ends, the download page, the itch app, the releases page or store on the 3DS's CIA, the Vita and the PS5), the checks before a file is placed, the roots the consoles carry for GitHub, and what other systems are to get."
 tags: [engine, updates, platforms]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 ---
@@ -63,7 +63,8 @@ that skips the title) settles what the copy is and starts the look on a
 thread of its own: one GET of update.json, through the statistics' own
 HTTP client (`src/analytics/analytics_http.c`: libcurl on Linux and the
 PortMaster handhelds, WinHTTP on Windows, libcurl linked in on the
-Switch, the New 3DS, the Vita and the PS5, [The consoles](#the-consoles)),
+Switch, the New 3DS, the Vita and the PS5, [The consoles](#the-consoles);
+on Android `HttpURLConnection` in the app's Java, [below](#android)),
 its User-Agent `CyberworldEndless/VERSION` and nothing else sent. A newer
 version sets the state the title and Options read. Nothing looks where:
 
@@ -71,15 +72,16 @@ version sets the state the title and Options read. Nothing looks where:
   build has a version to compare;
 - the game runs headless (captures, playtests, CI);
 - `updates = off`;
-- the system has none of the ways below yet (macOS, iOS, Android, the
-  PS4 and the browser, [What comes next](#what-comes-next)), or no HTTP
-  client (a 3DS build made without devkitPro's libcurl).
+- the system has none of the ways below yet (macOS, iOS, the PS4 and
+  the browser, [What comes next](#what-comes-next)), or no HTTP client (a
+  3DS build made without devkitPro's libcurl).
 
 A developer points it elsewhere with `CYBERWORLD_UPDATE_URL` (another
 update.json, any build, headless too) and `CYBERWORLD_UPDATE_FROM` (the
 version the build counts as); a local `python3 -m http.server` with a
 made-up update.json and file tests the whole way, as this page's first
-check did.
+check did. Android's app takes both as `GameActivity`'s string extras
+([below](#android)).
 
 ## Each copy's way
 
@@ -93,6 +95,7 @@ check did.
 | The Flatpak, the .deb, the tar.gz's folder, Windows' zip | The download page | Opens the project's download page in the browser |
 | A PortMaster handheld whose launcher gives an update folder (`CYBERWORLD_UPDATE_DIR`: the 0.22.0 launcher on, with python3) | Installs itself (`portmaster`) | Downloads the port's zip into `ports/.cyberworld-update/`, checks it and writes `ready.txt` with its version; as the game ends, the launcher shows PortMaster's "keep the device on" message and runs `update.py` (below) |
 | A PortMaster handheld with an older launcher, or without python3 | The releases page | Nothing: the note names the releases page, where the port came from |
+| Android's app (the release's APK however it came: the browser, Obtainium, `adb`) | Installs itself (`android`) | Downloads the new APK into the app's cache, checks it and hands it to Android's installer while the game waits on the title. From Android 12 on, once the player has let the game install apps, Android puts it in place without a tap; before that, or the first time, Android's own prompt comes up over the game. Android ends the game as it replaces the app, and the player opens the new version from its icon ([below](#android)) |
 | The Switch's `.nro`, started from the Homebrew Menu | Installs itself (`switch`) | Downloads `NAME.nro.update` beside it, checks it, and as the game ends swaps it in and has the Homebrew Menu's loader start it ([The consoles](#the-consoles)) |
 | The New 3DS's `.3dsx`, started from the Homebrew Launcher | Installs itself (`3ds-3dsx`) | Downloads `NAME.3dsx.update` beside it, checks it, and as the game ends swaps it in: the Homebrew Launcher comes back, and the player starts the new version there (the note says so) |
 | The 3DS's CIA, a copy sent by nxlink or 3dslink | The releases page | Nothing: the note names the releases page |
@@ -105,6 +108,57 @@ next start removes what an earlier one left. The game ends the frame
 after the file is in place (`update_tick` sets the platform's quit, so
 the run, the settings and the statistics end as at any quit), and the
 exit handler starts the new version.
+
+## Android
+
+Android has no HTTP client of the game's, so the app's Java does the
+work (`android/.../Updater.java`, called from the game's thread through
+`src/update/update_android.c` and polled each frame): `HttpURLConnection`
+on a thread of its own fetches update.json for the C to read as on every
+system, and on A the APK under the `android` key, its size and SHA-256
+taken as it comes in. A checked APK is written into a `PackageInstaller`
+session and committed with `USER_ACTION_NOT_REQUIRED`, which the app may
+ask for as it holds `UPDATE_PACKAGES_WITHOUT_USER_ACTION` and updates
+itself; `REQUEST_INSTALL_PACKAGES` lets it install at all.
+
+- **Without a tap**, from Android 12 on (the app targets SDK 35, which
+  Android 12 to 16 accept), once the player has allowed installs from
+  the game in Android's settings ("Install unknown apps"). Android ends
+  the game about a second after the session is committed, so the line
+  shows its note (`Android installs it and closes the game. Then open it
+  again`) for two and a half seconds first.
+- **Android's prompt** where it wants the player's word all the same:
+  the first update, which leads through that setting, and every update
+  before Android 12. The installer's answer comes to a receiver of the
+  game's (`STATUS_PENDING_USER_ACTION`), which shows the prompt over the
+  game; a no to it, or any failure, sets the line to `Failed`, and A
+  installs the APK already checked again without downloading it anew.
+- **The new version**: Android force-stops the game as it replaces the
+  app (on the title the run waits at its checkpoint, and the settings
+  are written as they change), then tells the new version
+  `MY_PACKAGE_REPLACED`. From Android 10 on an app may not open itself
+  from the background: on Android 14 in the emulator the system refused
+  it (`Background activity launch blocked`, `BAL_BLOCK`), so the player
+  opens the game from its icon. Up to Android 9 `UpdateReceiver` opens
+  it where the game itself started the update (a mark in the app's
+  files, ten minutes at most); that version was not tried, the
+  emulator's image being Android 14's.
+
+Every release is signed with the one key ([android/README.md](../../android/README.md),
+Signing), so the update keeps the app's files and the saves; an APK
+signed otherwise (a build of one's own) is refused by Android and the
+line fails. The next start removes the APK and any session an earlier
+one left. A developer points the look elsewhere with the extras, on the
+`adb` shell's root (the activity is not exported):
+
+    adb root
+    adb reverse tcp:8000 tcp:8000
+    adb shell am start -n io.github.saschb2b.cyberworldendless/.GameActivity \
+      --es CYBERWORLD_UPDATE_URL http://127.0.0.1:8000/update.json
+
+Plain HTTP reaches this device itself alone (`127.0.0.1`, `localhost`:
+`res/xml/network_security_config.xml`), which `adb reverse` carries to
+the computer's server.
 
 ## The consoles
 
@@ -219,11 +273,8 @@ a crash) is stale: the next start removes it with its zip.
 
 Researched on 14 November 2026 for the owner; each a change of its own.
 
-- **Android**: `PackageInstaller` with `UPDATE_PACKAGES_WITHOUT_USER_ACTION`
-  updates the app without a tap from Android 12 on, after the one
-  "install unknown apps" grant (targetSdk 35 already); the download and
-  the session in `GameActivity`. Obtainium's link on the download page
-  for those who use it.
+- **Android**: built ([above](#android)). Obtainium's link on the
+  download page for those who use it.
 - **macOS**: the app bundle swapped by the game itself (NSURLSession,
   `hdiutil`); a file the app downloads carries no quarantine, so only the
   first install meets Gatekeeper (to be confirmed on a Mac). Sparkle 2

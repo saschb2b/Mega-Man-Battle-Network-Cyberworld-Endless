@@ -1,7 +1,8 @@
 /* update.h. Two threads at most, one at a time: the start's look at
  * update.json, and a press's download. Each writes what it found before
  * it sets the state, which the game's thread reads (SDL's atomics are
- * full barriers). */
+ * full barriers). On Android, Java's thread does both, and the game's
+ * frames poll it (update_android.h). */
 #include "update.h"
 
 #include <stdio.h>
@@ -20,11 +21,16 @@
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
 #include "analytics_http.h"
 
-/* (the systems whose own library fetches it, analytics_http.c's: Linux
- * and the PortMaster handhelds, Windows, and the Switch, the New 3DS, the
- * Vita and the PS5) */
+/* (the systems whose own library fetches it on a thread of the game's,
+ * analytics_http.c's: Linux and the PortMaster handhelds, Windows, and the
+ * Switch, the New 3DS, the Vita and the PS5; Android's Java fetches it,
+ * update_android.c) */
 #ifdef ANALYTICS_HTTP
 #define UPDATE_HERE 1
+#define UPDATE_THREADS 1
+#elif defined(__ANDROID__)
+#define UPDATE_HERE 1
+#include "update_android.h"
 #endif
 
 #ifdef __3DS__
@@ -37,7 +43,7 @@
 #define MANIFEST_MAX (16 * 1024)
 
 static struct {
-	bool settled, looked, here, on, offered, ended;
+	bool settled, looked, here, on, offered, ended, asking;
 	UpdateWay way;
 	const char *key;           /* this copy's file in update.json, where it installs one */
 	char url[300];             /* update.json's address (a developer's may differ) */
@@ -80,12 +86,38 @@ void update_set_on(bool on) {
 	if (!on) {
 		SDL_AtomicSet(&U.stop, 1);
 		SDL_AtomicSet(&U.state, UPDATE_IDLE);
+#ifdef __ANDROID__
+		update_android_stop();
+#endif
 	}
 }
 
-/* ---- the threads ---- */
+/* ---- the look and the download ---- */
 
 #ifdef UPDATE_HERE
+
+/* What the start's look found: a newer version, and this copy's file in
+ * it where it installs one (a release without that file: the download
+ * page instead) */
+static void looked(bool answered, const char *text) {
+	UpdateRelease r;
+	bool read = answered && update_manifest_read(text, NULL, &r);
+	bool newer = read && update_version_cmp(r.version, U.from) > 0 && !SDL_AtomicGet(&U.stop);
+	if (newer) {
+		if (U.key && !update_manifest_read(text, U.key, &U.found)) {
+			U.way = UPDATE_WAY_PAGE;
+			U.found = r;
+		}
+		if (!U.key) U.found = r;
+		SDL_AtomicSet(&U.state, UPDATE_FOUND);
+	}
+	printf("update: %s %s %s\n", U.from, newer ? "has a newer version:" : read ? "is the newest" : answered ? "read no update.json" : "had no answer",
+		newer ? U.found.version : "");
+}
+
+#endif
+
+#ifdef UPDATE_THREADS
 
 /* update.json's text as it comes */
 typedef struct {
@@ -102,24 +134,11 @@ static bool keep_text(void *user, const void *data, size_t n) {
 	return true;
 }
 
-/* The start's look: a newer version, and this copy's file in it where it
- * installs one (a release without that file: the download page instead) */
+/* The start's look, on its thread */
 static int look(void *arg) {
 	(void)arg;
 	static Manifest m;
-	UpdateRelease r;
-	bool answered = analytics_http_get(U.url, U.agent, keep_text, &m, &U.stop), read = answered && update_manifest_read(m.text, NULL, &r);
-	bool newer = read && update_version_cmp(r.version, U.from) > 0 && !SDL_AtomicGet(&U.stop);
-	if (newer) {
-		if (U.key && !update_manifest_read(m.text, U.key, &U.found)) {
-			U.way = UPDATE_WAY_PAGE;
-			U.found = r;
-		}
-		if (!U.key) U.found = r;
-		SDL_AtomicSet(&U.state, UPDATE_FOUND);
-	}
-	printf("update: %s %s %s\n", U.from, newer ? "has a newer version:" : read ? "is the newest" : answered ? "read no update.json" : "had no answer",
-		newer ? U.found.version : "");
+	looked(analytics_http_get(U.url, U.agent, keep_text, &m, &U.stop), m.text);
 	SDL_AtomicSet(&U.busy, 0);
 	return 0;
 }
@@ -192,6 +211,36 @@ static bool thread_start(SDL_ThreadFunction work, const char *name) {
 #endif
 }
 
+static bool look_begin(void) { return analytics_http_ready() && thread_start(look, "update look"); }
+
+static bool fetch_begin(void) { return thread_start(fetch, "update download"); }
+
+#elif defined(__ANDROID__)
+
+/* (Java's work, update_android.h: begun here, its end polled on the
+ * game's frames) */
+static bool look_begin(void) { return update_android_look(U.url, U.agent); }
+
+static bool fetch_begin(void) { return update_android_fetch(U.found.url, U.agent, U.found.size, U.found.sha256); }
+
+/* The look's answer once it comes, then the download's share and
+ * Android's installer: in its hands (READY) the game goes on until
+ * Android ends it to put the new version in place, and a no to its
+ * prompt fails the update, which A tries again */
+static void android_tick(void) {
+	if (U.asking) {
+		static char text[MANIFEST_MAX];
+		int got = update_android_looked(text, sizeof text);
+		U.asking = got < 0;
+		if (got >= 0) looked(got > 0, text);
+	}
+	UpdateState s = (UpdateState)SDL_AtomicGet(&U.state);
+	if (s != UPDATE_GETTING && s != UPDATE_READY) return;
+	int p = update_android_progress();
+	SDL_AtomicSet(&U.state, p == UPDATE_ANDROID_FAILED ? UPDATE_FAILED : p >= UPDATE_ANDROID_INSTALLING ? UPDATE_READY : UPDATE_GETTING);
+	if (p >= 0) SDL_AtomicSet(&U.percent, p > 100 ? 100 : p);
+}
+
 #endif
 
 /* ---- the game's side ---- */
@@ -201,7 +250,7 @@ static bool thread_start(SDL_ThreadFunction work, const char *name) {
  * what it wrote; one done starts the new version) */
 static void at_exit(void) {
 	SDL_AtomicSet(&U.stop, 1);
-#if defined(__3DS__) && defined(UPDATE_HERE)
+#if defined(__3DS__) && defined(UPDATE_THREADS)
 	thread_join();
 #endif
 	for (int i = 0; i < 30 && SDL_AtomicGet(&U.busy); ++i) SDL_Delay(50);
@@ -232,9 +281,10 @@ static void look_start(void) {
 	update_install_tidy();
 	atexit(at_exit);
 #ifdef UPDATE_HERE
-	if (!U.on || !analytics_http_ready()) return;
+	if (!U.on) return;
 	snprintf(U.agent, sizeof U.agent, "CyberworldEndless/%s", U.from);
-	if (!thread_start(look, "update look")) printf("update: no thread to look with\n");
+	U.asking = look_begin();
+	if (!U.asking) printf("update: nothing to look with\n");
 #endif
 }
 
@@ -244,13 +294,17 @@ void update_tick(void) {
 		settle();
 		look_start();
 	}
+#ifdef __ANDROID__
+	android_tick();
+#else
 	if (SDL_AtomicGet(&U.state) == UPDATE_READY && !U.ended) {
 		U.ended = true;
 		P.quit = true;
 	}
-#if defined(__3DS__) && defined(UPDATE_HERE)
+#if defined(__3DS__) && defined(UPDATE_THREADS)
 	/* (a thread done is joined at once: its stack back to the heap) */
 	if (U.thread && !SDL_AtomicGet(&U.busy)) thread_join();
+#endif
 #endif
 }
 
@@ -297,7 +351,7 @@ bool update_press(void) {
 	SDL_AtomicSet(&U.percent, 0);
 	SDL_AtomicSet(&U.stop, 0);
 	SDL_AtomicSet(&U.state, UPDATE_GETTING);
-	if (thread_start(fetch, "update download")) return true;
+	if (fetch_begin()) return true;
 	SDL_AtomicSet(&U.state, UPDATE_FAILED);
 #endif
 	return false;

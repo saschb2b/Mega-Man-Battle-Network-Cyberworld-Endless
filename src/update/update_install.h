@@ -3,13 +3,15 @@
  * handheld's launcher puts the port's zip in place as the game ends
  * (port/update.py); the Windows
  * installer's copy runs the new installer silently, which starts the game
- * again when it is done (windows/installer.nsi); a copy the itch app
- * installed is the itch app's; the Switch's .nro and the 3DS's .3dsx put
- * the new file in their own place as the game ends (update_swap.c), the
- * Switch's loader starting it; the 3DS's CIA and the Vita's VPK come from
- * the releases page, the PS5's app from Prospero Store; any other is
- * updated from the download page. The download is written to a file of
- * this module's, and placed only once update.c has checked it whole. */
+ * again when it is done (windows/installer.nsi); Android's app hands
+ * the APK to Android's installer (update_android.h, its Java's own
+ * download and check); a copy the itch app installed is the itch app's;
+ * the Switch's .nro and the 3DS's .3dsx put the new file in their own
+ * place as the game ends (update_swap.c), the Switch's loader starting
+ * it; the 3DS's CIA and the Vita's VPK come from the releases page, the
+ * PS5's app from Prospero Store; any other is updated from the download
+ * page. The download is written to a file of this module's, and placed
+ * only once update.c has checked it whole. */
 #ifndef CW_UPDATE_INSTALL_H
 #define CW_UPDATE_INSTALL_H
 
