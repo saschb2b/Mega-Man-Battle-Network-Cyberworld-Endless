@@ -42,6 +42,12 @@ OpenGL ES 3 renderer mGBA turns on there). `switch/icon.jpg`
 (`tools/app_icon.py`) is the Homebrew Menu's icon; `nacptool` gives the
 title, the author and the version.
 
+mGBA's library is built `-fPIE` as libnx's code is, never `-fPIC`: with
+libnx's `-mtp=soft` the PIC build's thread-local reads came out wrong,
+and the first log line of the core crashed the game as a run started
+(discussion #524). The image's build fails where that read is not the
+plain local-exec one.
+
 What differs from the other builds:
 
 - **The start** (`src/core/start_switch.c`): the sockets, the output to
@@ -65,8 +71,19 @@ What differs from the other builds:
 
 ## Testing on a Switch
 
-Built and checked by CI; not yet run on a console. The checks for a first
-run, on a Switch with Atmosphère:
+Built and checked by CI and run here in an emulator; on a console, only
+players have run it so far.
+
+- **Ryubing** (the Ryujinx fork, its Linux build) runs the `.nro` with
+  no keys or firmware: `Ryujinx --no-gui --root-data-dir DIR
+  build/switch/cyberworld-endless.nro`, `DIR/sdcard/` the SD card (the
+  ROM in `switch/cyberworld-endless/rom/`, `log.txt` beside it). A crash
+  prints the guest's stack as offsets into the `.nro`, which
+  `aarch64-none-elf-addr2line -f -e build/switch/cyberworld-endless.elf`
+  names. The headless mode takes no scripted input: a local build whose
+  `main` adds `--scene town` reaches a run.
+
+The checks on a Switch with Atmosphère:
 
 - **nxlink** sends the game over Wi-Fi, its output in the terminal: in
   the Homebrew Menu press Y (the netloader), then
