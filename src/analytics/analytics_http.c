@@ -130,12 +130,17 @@ static CURLcode add_roots(CURL *h, void *context, void *user) {
 	sslContextImportServerPki(context, analytics_roots, (u32)strlen(analytics_roots), SslCertificateFormat_Pem, NULL);
 	return CURLE_OK;
 }
+
+/* (no blob there: the roots go in through the context) */
+typedef int RootsBlob;
+#else
+typedef struct curl_blob RootsBlob;
 #endif
 
 /* What every request sets: where, who asks, how long it waits for the
  * host, how it stops, and the roots the game carries where asked for
  * (`ca`, the caller's while the request runs) */
-static void request_common(CURL *h, const char *url, const char *agent, SDL_atomic_t *stop, bool roots, struct curl_blob *ca) {
+static void request_common(CURL *h, const char *url, const char *agent, SDL_atomic_t *stop, bool roots, RootsBlob *ca) {
 	CURL_DO(easy_setopt)(h, CURLOPT_URL, url);
 	CURL_DO(easy_setopt)(h, CURLOPT_USERAGENT, agent);
 	CURL_DO(easy_setopt)(h, CURLOPT_CONNECTTIMEOUT, CONNECT_S);
@@ -157,7 +162,7 @@ static int curl_once(const char *url, const char *agent, const char *body, SDL_a
 	CURL *h = CURL_DO(easy_init)();
 	if (!h) return -1;
 	struct curl_slist *head = CURL_DO(slist_append)(NULL, "Content-Type: application/json");
-	struct curl_blob ca;
+	RootsBlob ca;
 	request_common(h, url, agent, stop, roots, &ca);
 	CURL_DO(easy_setopt)(h, CURLOPT_HTTPHEADER, head);
 	CURL_DO(easy_setopt)(h, CURLOPT_POSTFIELDS, body);
@@ -187,7 +192,7 @@ static size_t sink_write(char *p, size_t size, size_t n, void *user) {
 static int curl_get_once(const char *url, const char *agent, Sinking *to, SDL_atomic_t *stop, bool roots, long *code) {
 	CURL *h = CURL_DO(easy_init)();
 	if (!h) return -1;
-	struct curl_blob ca;
+	RootsBlob ca;
 	request_common(h, url, agent, stop, roots, &ca);
 	CURL_DO(easy_setopt)(h, CURLOPT_FOLLOWLOCATION, 1L);
 	CURL_DO(easy_setopt)(h, CURLOPT_MAXREDIRS, 5L);
