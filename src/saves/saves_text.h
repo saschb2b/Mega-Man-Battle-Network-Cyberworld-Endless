@@ -15,11 +15,8 @@
 #include "mirror.h"
 #include "transfer_link.h"
 
-/* The screen's title and its back button */
-const char *saves_word_title(void);
-const char *saves_word_back(void);
-/* A button's label, as SV has it now (USE THE FILE'S or BRING BACK, the
- * copy on or off) */
+/* A button's label, as SV has it now (USE THOSE or BRING BACK, UNDO
+ * IMPORT or UNDO, RECEIVE's keys) */
 const char *saves_label(int action);
 /* A panel's title: this device's, or the file's */
 const char *saves_panel_title(bool file);
@@ -71,9 +68,30 @@ void saves_cloud_compare_note(const BackupInfo *here, bool have, bool unreadable
 void saves_cloud_refused(BackupStatus status, const BackupInfo *cloud, char *out, size_t n);
 void saves_cloud_from(const BackupInfo *cloud, char *out, size_t n);
 const char *saves_cloud_trouble(CloudTrouble trouble);
+/* ... as the title's note says it ("Cloud: Not reached...") */
+void saves_cloud_titled(CloudTrouble trouble, char *out, size_t n);
 const char *saves_cloud_syncing(void);
 const char *saves_cloud_deleted(void);
 const char *saves_cloud_unlinked(void);
+const char *saves_cloud_waiting(void);
 void saves_cloud_status(const CloudState *s, char *out, size_t n);
+
+/* Home's pages (docs/engine/saves-screens.md): a page's tab (SavesPage),
+ * START's hint, a line's name and its value at the right (false for
+ * none), and the information box's words for the line under the cursor:
+ * what it does, then how the cloud or the copy stands */
+const char *saves_page_name(int page);
+const char *saves_word_undo(void);
+const char *saves_line_label(int action);
+bool saves_line_value(int action, char *out, size_t n);
+void saves_line_note(int action, char *out, size_t n);
+/* The box's question before a line that asks (saves_home.h), its Yes and
+ * No; the strip's label; the band's name for the view shown */
+void saves_ask_words(int action, char *out, size_t n);
+const char *saves_word_yes(void);
+const char *saves_word_no(void);
+const char *saves_word_device(void);
+const char *saves_word_information(void);
+const char *saves_view_title(void);
 
 #endif

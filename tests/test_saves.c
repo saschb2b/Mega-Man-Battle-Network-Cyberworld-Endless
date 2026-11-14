@@ -28,6 +28,7 @@
 #include "saves_actions.h"
 #include "saves_cloud.h"
 #include "saves_draw.h"
+#include "saves_home.h"
 #include "saves_state.h"
 #include "saves_text.h"
 #include "second_frame.h"
@@ -101,6 +102,27 @@ void look_button(int x, int y, int w, int h) { (void)x; (void)y; (void)w; (void)
 int look_title_width(const char *s) { return (int)strlen(s) * 7; }
 void look_title(int x, int y, const char *s, SDL_Color c) { (void)x; (void)y; (void)s; (void)c; }
 void look_stripes(int sx, int y, int right, int h) { (void)sx; (void)y; (void)right; (void)h; }
+/* (home's PET parts: the tabs' names and the small capitals counted as words drawn) */
+void look_caps(int x, int y, const char *s, SDL_Color c, SDL_Color shade) {
+	(void)x; (void)y; (void)c; (void)shade;
+	if (shown_count < 64) snprintf(shown[shown_count++], sizeof shown[0], "%s", s);
+}
+int look_caps_width(const char *s) { return (int)strlen(s) * 6; }
+int look_hint_width(const char *key, const char *what) { return look_caps_width(key) + 6 + look_caps_width(what); }
+void look_hint(int x, int y, const char *key, const char *what) {
+	look_caps(x, y, key, (SDL_Color){ 0 }, (SDL_Color){ 0 });
+	look_caps(x, y, what, (SDL_Color){ 0 }, (SDL_Color){ 0 });
+}
+void look_tabs(int x, int y, int w, int count, int shown_page, const char *const *names) {
+	(void)x; (void)y; (void)w; (void)shown_page;
+	for (int i = 0; i < count; ++i) look_caps(0, 0, names[i], (SDL_Color){ 0 }, (SDL_Color){ 0 });
+}
+SDL_Rect look_window(int x, int y, int w, int h, int top, bool bar) { (void)top; (void)bar; return (SDL_Rect){ x + 5, y + 5, w - 10, h - 10 }; }
+SDL_Rect look_info(int x, int y, int w, int h, const char *label) { (void)label; return (SDL_Rect){ x + 2, y + 1, w - 4, h - 3 }; }
+void look_arrow(int x, int y, bool right) { (void)x; (void)y; (void)right; }
+void look_cursor(int x, int y) { (void)x; (void)y; }
+void look_choice(int x, int y) { (void)x; (void)y; }
+void look_pointer(int x, int y, int size, bool left, SDL_Color c) { (void)x; (void)y; (void)size; (void)left; (void)c; }
 
 /* the pickers: a place folder of plain files, choosers that end when told */
 unsigned pick_saves_capabilities(void) { return capabilities; }
@@ -250,15 +272,24 @@ static int local_runs(void) {
 static void test_home(void) {
 	capabilities = 0;
 	open_home();
-	CHECK(current == &scene_saves && SV.view == SAVES_HOME && SV.focus == SAVES_EXPORT, "saves: home, the cursor on EXPORT");
-	press(BTN_RIGHT);
-	CHECK(SV.focus == SAVES_IMPORT, "saves: right of EXPORT is IMPORT");
-	press(BTN_LEFT);
+	CHECK(current == &scene_saves && SV.view == SAVES_HOME && SV.page == SAVES_PAGE_FILE && SV.focus == SAVES_EXPORT,
+		"saves: home on FILE alone where the system has no network, the cursor on Export");
+	press(BTN_DOWN);
+	CHECK(SV.focus == SAVES_IMPORT, "saves: under Export is Import");
+	press(BTN_DOWN);
+	CHECK(SV.focus == SAVES_EXPORT, "saves: the list wraps round");
+	press(BTN_UP);
+	CHECK(SV.focus == SAVES_IMPORT, "saves: ... both ways");
+	press(BTN_UP);
 	CHECK(shows(SAVES_EXPORT) && shows(SAVES_IMPORT) && !shows(SAVES_UNDO) && !shows(SAVES_AUTO) && !shows(SAVES_FOLDER),
 		"saves: the browser's home shows only what it can do");
 	capabilities = SAVES_CAN_AUTO | SAVES_CAN_FOLDER;
 	CHECK(shows(SAVES_AUTO) && shows(SAVES_FOLDER), "saves: the copy's row and FOLDER where the system has them");
-	CHECK(drawn("Layer 4, Act 2") && drawn("3 runs, best Layer 9") && !drawn("0 runs"), "saves: the panel names the run and the record");
+	CHECK(drawn("THIS DEVICE") && drawn("Layer 4, Act 2") && !drawn("3 runs"), "saves: the GBA's 160 rows: the strip names this device's run alone");
+	P.h = 240;
+	CHECK(drawn("Layer 4, Act 2") && drawn("3 runs, best Layer 9") && !drawn("0 runs"), "saves: a taller canvas: the run and the record");
+	P.h = 160;
+	CHECK(drawn("Export") && drawn("Auto-copy") && drawn("Off"), "saves: the page's lines, a value at the right");
 	press(BTN_B);
 	CHECK(current == &scene_title && title_menu, "saves: B goes back to the title's menu");
 	current = &scene_emu;
@@ -289,7 +320,7 @@ static void test_import_undo(const char *base) {
 	press(0);
 	CHECK(SV.view == SAVES_COMPARE && SV.focus == SAVES_TAKE && shows(SAVES_KEEP) && shows(SAVES_TAKE),
 		"saves: compared, the cursor on the side with more progress (the file's)");
-	CHECK(drawn("THIS DEVICE") && drawn("THE FILE") && drawn("USE THE FILE'S"), "saves: both sides and the answers shown");
+	CHECK(drawn("THIS DEVICE") && drawn("THE FILE") && drawn("USE THOSE"), "saves: both sides and the answers shown");
 	CHECK(strstr(SV.note, "replaces your Layer 4 run") != NULL, "saves: the note says what is replaced: %s", SV.note);
 	press(BTN_A);
 	CHECK(SV.view == SAVES_RESULT && local_runs() == 12 && strstr(SV.note, "UNDO IMPORT brings back your Layer 4 run") &&
@@ -308,8 +339,15 @@ static void test_import_undo(const char *base) {
 	free(after);
 	CHECK(choose(SAVES_UNDO) && local_runs() == 12 && !SV.undone, "saves: UNDO again puts the import back");
 	press(BTN_B);
-	CHECK(SV.view == SAVES_HOME && shows(SAVES_UNDO), "saves: home offers UNDO IMPORT after an import");
-	CHECK(choose(SAVES_UNDO) && local_runs() == 3, "saves: UNDO IMPORT from home");
+	CHECK(SV.view == SAVES_HOME && SV.undo && !shows(SAVES_UNDO), "saves: home's UNDO IMPORT is START's, no line of a page");
+	press(BTN_START);
+	CHECK(saves_home_asking() == SAVES_UNDO && !saves_home_yes() && local_runs() == 12, "saves: START asks first, No chosen");
+	press(BTN_A);
+	CHECK(saves_home_asking() < 0 && local_runs() == 12, "saves: No changes nothing");
+	press(BTN_START);
+	press(BTN_LEFT);
+	press(BTN_A);
+	CHECK(local_runs() == 3, "saves: Yes brings the saves from before the import back");
 	press(BTN_B);
 
 	/* a second import: the saves Undo held kept as a file */
@@ -356,8 +394,9 @@ static void test_place_file(const char *base) {
 	current = &scene_title;
 	saves_tick();
 	press(0);
-	CHECK(current == &scene_saves && SV.view == SAVES_COMPARE && SV.from_place && strstr(SV.note, "becomes this device's"),
+	CHECK(current == &scene_saves && SV.view == SAVES_COMPARE && SV.from_place && strstr(SV.note, "KEEP THESE writes this device's saves over the copy"),
 		"saves: the title opens the place's file's comparison, KEEP THESE named plainly: %s", SV.note);
+	for (int i = 0; i < 30; ++i) press(0);   /* (one that opened by itself waits half a second) */
 	choose(SAVES_KEEP);
 	char receipts[700];
 	snprintf(receipts, sizeof receipts, "%s/saves-receipts.txt", g_data_dir);
@@ -427,7 +466,7 @@ static void test_unreadable(const char *base) {
 	open_home();
 	saves_import(file);
 	press(0);
-	CHECK(SV.unreadable && strstr(SV.note, "cannot be read") && !strcmp(saves_label(SAVES_TAKE), "USE THE FILE'S") && drawn("Damaged"),
+	CHECK(SV.unreadable && strstr(SV.note, "cannot be read") && !strcmp(saves_label(SAVES_TAKE), "USE THOSE") && drawn("Damaged"),
 		"saves: unreadable saves are said so, not called none: %s", SV.note);
 	press(BTN_B);
 	press(BTN_B);
@@ -502,7 +541,7 @@ static void test_cloud(const char *base) {
 	saves_cloud_start();
 	current = &scene_title;
 	saves_tick();
-	CHECK(!FC.pulls && !strcmp(saves_label(SAVES_CLOUD), "CLOUD: OFF"), "cloud: nothing pulled where this device has no slot");
+	CHECK(!FC.pulls, "cloud: nothing pulled where this device has no slot");
 	FC.st.linked = true;
 	FC.st.generation = 3;
 	FC.st.hash = local_hash();
@@ -515,7 +554,7 @@ static void test_cloud(const char *base) {
 	CHECK(backup_can_undo(g_data_dir), "cloud: ... UNDO IMPORT after it");
 	char text[160];
 	int frame, len;
-	CHECK(saves_cloud_note(text, sizeof text, &frame, &len) && strstr(text, "Cloud: saves from"), "cloud: the title says where they came from: %s", text);
+	CHECK(saves_cloud_note(text, sizeof text, &frame, &len) && strstr(text, "Cloud: Layer 6 from"), "cloud: the title says which run came, and from where: %s", text);
 	CHECK(pull_of(base, 7, 12, 6, 4) && (saves_tick(), FC.st.generation == 4 && current == &scene_title),
 		"cloud: the same saves pulled again change nothing");
 	CHECK(progress(g_data_dir, 8, 12, 2), "cloud: this device moves on");
@@ -523,9 +562,11 @@ static void test_cloud(const char *base) {
 	CHECK(pull_of(base, 9, 14, 7, 5), "cloud: ... and so does the slot");
 	saves_tick();
 	CHECK(current == &scene_saves && SV.view == SAVES_COMPARE && SV.from_cloud, "cloud: both moved on: the comparison");
-	CHECK(!strcmp(saves_label(SAVES_TAKE), "USE THE CLOUD'S") && !strcmp(saves_panel_title(true), "THE CLOUD") && strstr(SV.note, "KEEP THESE: the cloud"),
+	CHECK(!strcmp(saves_label(SAVES_TAKE), "USE THOSE") && !strcmp(saves_panel_title(true), "THE CLOUD") && strstr(SV.note, "KEEP THESE sends"),
 		"cloud: ... in the cloud's words: %s", SV.note);
-	press(0);   /* (the comparison's first frame takes no press) */
+	press(BTN_START);   /* (one that opened by itself takes no press for half a second) */
+	CHECK(SV.view == SAVES_COMPARE && FC.pushes == 0, "cloud: a START mashed through the title answers nothing");
+	for (int i = 0; i < 30; ++i) press(0);
 	CHECK(choose(SAVES_KEEP) && FC.pushes == 1 && FC.pushed_from == 5 && local_runs() == 8,
 		"cloud: KEEP THESE pushes this device's from the slot's generation (%d pushes, from %u)", FC.pushes, (unsigned)FC.pushed_from);
 	press(BTN_B);

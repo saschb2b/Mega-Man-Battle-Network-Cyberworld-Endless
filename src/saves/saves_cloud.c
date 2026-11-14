@@ -45,12 +45,10 @@ static CloudState shown;
 
 static bool bn5(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
 
-/* (the CLOUD view's cursor on its first button, as the link stands now) */
+/* (home's CLOUD page, its cursor on its first line, as the link stands now) */
 static void focus_first(void) {
 	if (cloud_link()) cloud_link()->state(&shown);
-	int actions[SAVES_ACTIONS];
-	int n = saves_actions(actions);
-	SV.focus = n ? actions[0] : SAVES_DONE;
+	saves_home_page(SAVES_PAGE_CLOUD);
 }
 
 static void note(const char *text) {
@@ -148,7 +146,9 @@ static void pulled(const CloudState *s) {
 	BackupInfo cloud, here;
 	if (!bytes || !backup_info(bytes, n, &cloud)) {
 		free(bytes);
-		note(saves_cloud_trouble(CLOUD_DAMAGED));
+		char text[160];
+		saves_cloud_titled(CLOUD_DAMAGED, text, sizeof text);
+		note(text);
 		return;
 	}
 	bool have = mirror_local(&here);
@@ -174,7 +174,9 @@ static void ended(const CloudState *s) {
 	case CLOUD_DENIED: c->unlink(); break;
 	default: break;
 	}
-	note(saves_cloud_trouble(s->trouble));
+	char text[160];
+	saves_cloud_titled(s->trouble, text, sizeof text);
+	note(text);
 }
 
 void saves_cloud_tick(void) {
@@ -222,7 +224,13 @@ bool saves_cloud_note(char *out, size_t n, int *t, int *len) {
 
 bool saves_cloud_here(void) { return cloud_link() != NULL; }
 
-bool saves_cloud_on(void) { return shown.linked; }
+void saves_cloud_look(void) {
+	if (cloud_link()) cloud_link()->state(&shown);
+}
+
+bool saves_cloud_needs_you(void) {
+	return shown.linked && (shown.trouble == CLOUD_CONFLICT || shown.trouble == CLOUD_DAMAGED || shown.trouble == CLOUD_TOO_BIG);
+}
 
 int saves_cloud_actions(int *out) {
 	int n = 0;
@@ -237,10 +245,7 @@ int saves_cloud_actions(int *out) {
 	return n;
 }
 
-void saves_cloud_line(char *out, size_t n) {
-	if (SV.said[0]) snprintf(out, n, "%s", SV.said);
-	else saves_cloud_status(&shown, out, n);
-}
+void saves_cloud_line(char *out, size_t n) { saves_cloud_status(&shown, out, n); }
 
 static void turn_on(void) {
 	const CloudLink *c = cloud_link();
@@ -258,34 +263,34 @@ static void add_system(void) {
 	saves_code_send_link(bytes, n);
 }
 
-static void delete_slot(void) {
-	if (!SV.delete_asked) {
-		SV.delete_asked = true;
-		return;
-	}
-	SV.delete_asked = false;
-	cloud_link()->drop();
-	snprintf(SV.said, sizeof SV.said, "%s", saves_cloud_deleted());
+/* (where the cloud is moving saves, Unlink and Delete wait for it) */
+static bool syncing(void) {
+	if (shown.doing == CLOUD_IDLE) return false;
+	snprintf(SV.said, sizeof SV.said, "%s", saves_cloud_waiting());
+	return true;
 }
 
 bool saves_cloud_press(int action) {
 	const CloudLink *c = cloud_link();
 	if (!c) return false;
-	if (action != SAVES_DELETE) SV.delete_asked = false;
 	switch (action) {
-	case SAVES_CLOUD:
-		SV.view = SAVES_CLOUD_VIEW;
-		SV.said[0] = 0;
-		focus_first();
+	case SAVES_TURN_ON:
+		turn_on();
+		SV.page_focus[SAVES_PAGE_CLOUD] = SAVES_ADD;
+		break;
+	case SAVES_LINK:
+		saves_code_press(SAVES_RECEIVE);
+		SV.linking = true;
 		return true;
-	case SAVES_TURN_ON: turn_on(); break;
-	case SAVES_LINK: saves_code_press(SAVES_RECEIVE); return true;
 	case SAVES_ADD: add_system(); return true;
 	case SAVES_UNLINK:
-		c->unlink();
-		snprintf(SV.said, sizeof SV.said, "%s", saves_cloud_unlinked());
+	case SAVES_DELETE:
+		if (syncing()) return true;
+		if (action == SAVES_DELETE) c->drop();
+		else c->unlink();
+		snprintf(SV.said, sizeof SV.said, "%s", action == SAVES_DELETE ? saves_cloud_deleted() : saves_cloud_unlinked());
+		SV.page_focus[SAVES_PAGE_CLOUD] = SAVES_LINK;
 		break;
-	case SAVES_DELETE: delete_slot(); break;
 	default: return false;
 	}
 	focus_first();
@@ -296,7 +301,6 @@ bool saves_cloud_join(const uint8_t *bytes, size_t n) {
 	const CloudLink *c = cloud_link();
 	if (!c || !c->join(bytes, n)) return false;
 	K.pull_due = true;
-	SV.view = SAVES_CLOUD_VIEW;
 	SV.said[0] = 0;   /* (the line says the syncing) */
 	focus_first();
 	return true;

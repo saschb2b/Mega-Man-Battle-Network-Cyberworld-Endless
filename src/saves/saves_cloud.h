@@ -22,13 +22,17 @@ bool saves_cloud_settling(void);
 /* The title's note now, its frame and length for its box (cinema's):
  * false for none */
 bool saves_cloud_note(char *out, size_t n, int *t, int *len);
-/* Whether this system can keep its saves in step, and whether it does */
+/* Whether this system can keep its saves in step */
 bool saves_cloud_here(void);
-bool saves_cloud_on(void);
+/* The link's state taken in now (SAVES opening: its CLOUD page's lines) */
+void saves_cloud_look(void);
+/* ... and whether its page should open first: a trouble only the player
+ * can answer */
+bool saves_cloud_needs_you(void);
 /* The CLOUD view's buttons now, in reading order: their count */
 int saves_cloud_actions(int *out);
-/* The CLOUD view's line, for the picture (the link as this frame's update
- * found it) */
+/* The cloud's line, how it stands (the link as this frame's update found
+ * it): CLOUD's information box */
 void saves_cloud_line(char *out, size_t n);
 /* A button of the cloud's chosen (home's CLOUD, the CLOUD view's): false
  * for any other */

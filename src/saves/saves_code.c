@@ -43,6 +43,8 @@ static void saves_code_send(void) {
 	if (!link || !SV.have) return;
 	SV.view = SAVES_SEND_CODE;
 	SV.focus = SAVES_DONE;
+	if (SV.code_link) transfer_link()->cancel();   /* (a link's code shown last: these saves' own now) */
+	SV.code_link = false;
 	if (code_holds()) { saves_code_state(&SV.transfer); return; }
 	size_t n = 0;
 	uint8_t *bytes = backup_pack(g_data_dir, 0, &n);
@@ -64,6 +66,7 @@ static void typing(bool on) {
 static void saves_code_receive(void) {
 	if (!transfer_link()) return;
 	SV.view = SAVES_RECEIVE_CODE;
+	SV.linking = false;
 	SV.focus = SAVES_DIGIT + 1;
 	SV.code[0] = 0;
 	transfer_link()->cancel();
@@ -134,7 +137,10 @@ bool saves_code_tick(void) {
 	SV.code[0] = 0;
 	/* (a code's bytes are saves, or another system's cloud link) */
 	if (bytes && saves_cloud_join(bytes, n)) free(bytes);
-	else saves_compare(bytes, n, false);
+	else {
+		saves_compare(bytes, n, false);
+		SV.from_code = SV.bytes != NULL;
+	}
 	return false;
 }
 
@@ -147,6 +153,8 @@ void saves_code_send_link(uint8_t *bytes, size_t n) {
 	SV.view = SAVES_SEND_CODE;
 	SV.focus = SAVES_DONE;
 	SV.sent_hash = 0;
+	SV.code_link = true;
+	link->cancel();
 	link->send(bytes, n);
 	saves_code_state(&SV.transfer);
 }

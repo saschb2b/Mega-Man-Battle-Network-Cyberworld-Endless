@@ -15,7 +15,12 @@ typedef struct {
 } SavesButton;
 
 typedef struct {
-	SDL_Rect here, file;   /* the panels (file: the comparison's) */
+	SDL_Rect here, file;   /* the panels (file: the comparison's; home: here its strip under the tabs) */
+	SDL_Rect tabs;         /* home: the tabs' row (look_tabs'), and each tab */
+	SDL_Rect tab[3];
+	int tab_count;
+	SDL_Rect list;         /* home: the window of the page's lines (each one of `buttons`) */
+	SDL_Rect info;         /* home: the information box under it */
 	SDL_Rect line;         /* home's line under its panel; the note */
 	SDL_Rect code;         /* SEND's code (RECEIVE's in its `line`) */
 	SDL_Rect back;
@@ -24,8 +29,9 @@ typedef struct {
 } SavesLayout;
 
 /* The view's layout on a `width` x `height` canvas, its buttons
- * `actions` (`n` of them, in reading order) */
+ * `actions` (`n` of them, in reading order); home's, its `pages` tabs */
 SavesLayout saves_layout(int width, int height, SavesView view, const int *actions, int n);
+SavesLayout saves_home_layout(int width, int height, int pages, const int *lines, int n);
 /* The button the cursor goes to from `focus`, in the direction (dx, dy) */
 int saves_layout_move(const SavesLayout *layout, int focus, int dx, int dy);
 

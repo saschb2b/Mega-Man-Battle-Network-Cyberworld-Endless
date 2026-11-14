@@ -25,17 +25,17 @@ static bool bn5(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
 int saves_actions(int *out) {
 	int n = 0;
 	unsigned caps = pick_saves_capabilities();
-	if (SV.view == SAVES_HOME) {
+	if (SV.view == SAVES_HOME && SV.page == SAVES_PAGE_CLOUD) n = saves_cloud_actions(out);
+	else if (SV.view == SAVES_HOME && SV.page == SAVES_PAGE_CODE) {
+		if (SV.have) out[n++] = SAVES_SEND;
+		out[n++] = SAVES_RECEIVE;
+	} else if (SV.view == SAVES_HOME) {
+		/* (UNDO IMPORT on no page: START, on every page) */
 		if (SV.have) out[n++] = SAVES_EXPORT;
 		out[n++] = SAVES_IMPORT;
-		if (saves_code_here() && SV.have) out[n++] = SAVES_SEND;
-		if (saves_code_here()) out[n++] = SAVES_RECEIVE;
-		if (saves_cloud_here()) out[n++] = SAVES_CLOUD;
-		if (SV.undo) out[n++] = SAVES_UNDO;
 		if (caps & SAVES_CAN_AUTO) out[n++] = SAVES_AUTO;
 		if (caps & SAVES_CAN_FOLDER) out[n++] = SAVES_FOLDER;
 	} else if (SV.view == SAVES_SEND_CODE) out[n++] = SAVES_DONE;
-	else if (SV.view == SAVES_CLOUD_VIEW) n = saves_cloud_actions(out);
 	else if (SV.view == SAVES_RECEIVE_CODE) {
 		/* (the keys as a keyboard's row: 1 to 9, then 0) */
 		for (int d = 1; d <= 10; ++d) out[n++] = SAVES_DIGIT + d % 10;
@@ -178,12 +178,9 @@ void saves_activate(int action) {
 	case SAVES_TAKE: take(); break;
 	case SAVES_CONTINUE: continue_run(); break;
 	default:
-		if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE || SV.view == SAVES_CLOUD_VIEW) saves_code_leave();
+		if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) saves_code_leave();
 		if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
-		else {
-			SV.view = SAVES_HOME;
-			SV.focus = SV.have ? SAVES_EXPORT : SAVES_IMPORT;
-		}
+		else saves_home_page(SV.page);
 		break;
 	}
 }
