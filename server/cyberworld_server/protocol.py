@@ -36,6 +36,9 @@ TEAM_STATE = struct.Struct("!BBIII4IBBBBHB")    # (v15: the format)
 WATCH = struct.Struct("!BBI")
 WATCH_STATE = struct.Struct("!BBIIIBBII")        # (v15: the format, the partners' seats)
 WATCH_KEYS = struct.Struct("!BIBIH")
+# (saves sent by a code, no protocol version of their own: transfer.py)
+TRANSFER = struct.Struct("!BBB16sI")
+TRANSFER_STATE = struct.Struct("!BBI")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -385,3 +388,29 @@ def watch_keys(match, side, first, keys):
 def stands(entries):
     """STANDS: a channel's NetBattles, each a tuple in STANDS_ENTRY's order."""
     return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
+
+
+def read_transfer(data):
+    """TRANSFER checked (shared/online/README.md, Saves sent by a code):
+    its op, lookup and size, a put's 1 to transfer_max, a get's and a
+    done's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["transfer"] and data[1] != SPEC["transfer_version"]:
+        raise ProtocolError("Unknown transfer version")
+    if len(data) != TRANSFER.size or data[0] != SPEC["transfer"]:
+        raise ProtocolError("Malformed TRANSFER")
+    _, _, op, lookup, size = TRANSFER.unpack(data)
+    if op == SPEC["transfer_put"]:
+        if not 1 <= size <= SPEC["transfer_max"]:
+            raise ProtocolError("Transfer size out of range")
+    elif op in (SPEC["transfer_get"], SPEC["transfer_done"]):
+        if size:
+            raise ProtocolError("Malformed TRANSFER")
+    else:
+        raise ProtocolError("Unknown transfer op")
+    return op, lookup, size
+
+
+def transfer_state(status, value=0):
+    """TRANSFER_STATE: a status and its value (seconds, or a blob's size)."""
+    return TRANSFER_STATE.pack(SPEC["transfer_state"], status, value)

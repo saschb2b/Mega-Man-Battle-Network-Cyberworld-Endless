@@ -16,6 +16,7 @@ from .social import Social
 from .stands import Stands
 from .teams import Teams
 from .trade import Trades
+from .transfer import Transfers
 from .week import Weeks, week_of
 from .identity import IdentityStore, append_log
 from . import retention
@@ -49,7 +50,7 @@ class Server:
     def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
                  player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
                  pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time,
-                 maintenance="", hold=None):
+                 maintenance="", hold=None, transfers=True):
         if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
             raise ValueError("seed must be uint32; capacity must be 1..8")
         if not 1 <= tick_hz <= 30:
@@ -96,6 +97,8 @@ class Server:
         # (issue #153: a dropped link's place held; server.ini's maintenance line)
         self.holds = Holds(self) if hold is None else Holds(self, hold)
         self.maintenance = protocol.maintenance_line(maintenance)
+        # (saves sent by a code: one exchange, no visit, held in memory alone; transfer.py)
+        self.transfers = Transfers(transfers, self.daily.count)
 
     def event(self, kind, **fields):
         """An event in the console's log; one that names a player (a public
@@ -172,6 +175,10 @@ class Server:
                 self.pending.discard(task)
             if opcode != 2:
                 raise protocol.ProtocolError("Expected binary HELLO")
+            if data and data[0] == protocol.SPEC["transfer"]:
+                # (a save sent by a code: no player, place, channel or identity)
+                await self.transfers.exchange(reader, writer, data)
+                return
             version = protocol.hello_version(data)
             if version is not None:
                 self.daily.hello(version)
@@ -351,7 +358,8 @@ class Server:
         return {"status": "ok", "protocol": protocol.SPEC["version"], "name": self.name,
                 "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
                 "room_capacity": self.capacity, "channels": self.max_channels,
-                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on},
+                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on,
+                          "transfers": self.transfers.on},
                 "maintenance": self.maintenance or None, "hold_seconds": self.holds.seconds}
 
     def choose_channel(self, requested, exclude=0):
@@ -536,6 +544,7 @@ class Server:
                 self.trades.expire(now)
                 self.arena.expire(now)
                 self.teams.expire(now)
+                self.transfers.prune()
             self.holds.expire(now)
             self.stands.pump(now)
             flags = self.peer_flags()
