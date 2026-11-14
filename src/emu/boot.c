@@ -30,12 +30,19 @@ static void run(int frames, uint32_t keys) {
 	ran += frames;
 }
 
-/* bump the number when the boot sequence changes */
-static void state_path(char *out, size_t n) { snprintf(out, n, "%s/boot-3.state", g_data_dir); }
+/* Bump the number when the boot sequence changes, or what NEW GAME gives
+ * in the core's copy. 4: ten-bit chip ids (xchips_wide.c), the preset
+ * folders widened. A boot-3.state, kept by a build before them, holds the
+ * Standard folder nine-bit, which ten bits read as other chips: BN4's
+ * CloudMn for Cannon B, dealt blank where BN4's ROM is not read (a New
+ * 3DS's run; own_folder_chips mends a run begun from one). */
+#define BOOT_STATE "boot-4.state"
+#define BOOT_STATE_OLD "boot-3.state"
+static void state_path(char *out, size_t n, const char *name) { snprintf(out, n, "%s/%s", g_data_dir, name); }
 
 bool emu_boot(void) {
 	char path[600];
-	state_path(path, sizeof path);
+	state_path(path, sizeof path, BOOT_STATE);
 	if (emu_load_state(path)) return true;
 	uint32_t t0 = SDL_GetTicks();
 	ran = 0;
@@ -55,6 +62,10 @@ bool emu_boot(void) {
 	emu_write8(BN6_CHATBOX_STATE, 0);
 	run(30, 0);
 	bool kept = emu_save_state(path);
+	/* (the old number's, no build reads it now: its 420 KB back) */
+	char old[600];
+	state_path(old, sizeof old, BOOT_STATE_OLD);
+	if (kept) remove(old);
 	/* (once per install: a slow machine's first start is told apart) */
 	printf("boot: %d frames from power-on in %.2f s, %s\n", ran, (SDL_GetTicks() - t0) / 1000.0,
 		kept ? "kept for the next start" : "not kept: the state could not be written");

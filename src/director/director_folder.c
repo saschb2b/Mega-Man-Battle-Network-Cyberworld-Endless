@@ -127,23 +127,46 @@ void folder_souls_load(void) { loot_soul_souls(souls_layer()); }
  * where the Standard folder's chips, given at NEW GAME, played (session
  * 30). Every fresh layer and CONTINUE mark the folder's chips again, so a
  * run saved before this is mended. */
-/* A run saved with nine-bit folders, its state just loaded where this
- * build's are ten (save_state_nine): Folder1, Folder2 and the ExtraFolder
- * (eToolkit +0x48, 30 entries each) in this build's form, once */
-static void folders_from9(uint32_t data) {
-	if (!save_state_nine()) return;
-	save_state_nine_done();
+/* (whether the pack counts folder entry `e`, its chip in its code: it
+ * does every chip the run holds in a folder, whose copies its counts
+ * hold; none a code the chip's record lacks) */
+static bool pack_holds(uint16_t e) {
+	const uint8_t *rec = chips_record((int)chip_entry_id(e));
+	uint32_t at = pack_entry((int)chip_entry_id(e));
+	for (uint32_t k = 0; rec && at && k < 4; ++k)
+		if (rec[BN6_CHIP_CODES + k] == chip_entry_code(e)) return emu_read8(at + k) > 0;
+	return false;
+}
+
+/* (an entry a boot state of a nine-bit build gave, src/emu/boot.c: one
+ * of the Standard folder's nine-bit entries, which the pack counts as
+ * GiveFolder did, in its nine bits, and not as ten bits read it) */
+static bool boot_nine(uint16_t e) { return chips_preset_nine(e) && !pack_holds(e) && pack_holds(chip_entry_from9(e)); }
+
+/* Folder1, Folder2 and the ExtraFolder (eToolkit +0x48, 30 entries each)
+ * in this build's form: every entry where `all` (a run saved with
+ * nine-bit folders, its state just loaded where this build's are ten:
+ * save_state_nine), else each one a run begun from a boot-3.state holds
+ * (boot_nine); the entries changed */
+static int folders_from9(uint32_t data, bool all) {
+	int n = 0;
 	for (uint32_t i = 0; i < BN6_FOLDERS * BN6_FOLDER_ENTRIES; ++i) {
-		uint16_t e = chip_entry_from9(emu_read16(data + 2 * i));
+		uint16_t was = emu_read16(data + 2 * i), e = chip_entry_from9(was);
+		if (e == was || (!all && !boot_nine(was))) continue;
 		const uint8_t b[2] = { (uint8_t)e, (uint8_t)(e >> 8) };
 		emu_write(data + 2 * i, b, 2);
+		++n;
 	}
+	return n;
 }
 
 void own_folder_chips(void) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), marks = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIP_MARKS);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END || marks < BN6_EWRAM || marks >= BN6_EWRAM_END) return;
-	folders_from9(data);
+	bool all = save_state_nine();
+	save_state_nine_done();
+	int widened = folders_from9(data, all);
+	if (widened && !all) printf("folder: %d of the Standard folder's entries widened, nine-bit as a boot state before ten-bit chip ids gave them\n", widened);
 	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) {
 		int id = (int)chip_entry_id(emu_read16(data + 2u * (uint32_t)i));
 		if (id > 0) emu_write8(marks + (uint32_t)id, (uint8_t)(emu_read8(BN6_CHIP_KEYS + (uint32_t)id) ^ BN6_CHIP_KEY_XOR));
