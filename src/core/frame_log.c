@@ -30,6 +30,16 @@ static uint64_t part_update, part_draw, part_present;
 static uint64_t part_longest;   /* (the longest frame's update and drawing together: a hitch the means hide) */
 static int part_played;
 
+/* (depth lighting's frames and their time, and the scale of its last) */
+static uint64_t depth_ticks;
+static int depth_frames, depth_scale;
+
+void frame_log_depth(uint64_t ticks, int scale) {
+	depth_ticks += ticks;
+	++depth_frames;
+	depth_scale = scale;
+}
+
 void platform_frame_parts(uint64_t update, uint64_t draw) {
 	part_update += update;
 	part_draw += draw;
@@ -67,6 +77,12 @@ void frame_log_present(uint64_t present) {
 		uint64_t second_ticks;
 		int seconds = platform_second_parts(&second_ticks);
 		if (seconds) snprintf(bottom, sizeof bottom, " (the bottom screen's picture %.1f ms of it, %d times)", second_ticks * ms / seconds, seconds);
+		if (depth_frames) {
+			size_t k = strlen(bottom);
+			snprintf(bottom + k, sizeof bottom - k, "; depth lighting %.1f ms at %dx", depth_ticks * ms / depth_frames, depth_scale);
+			depth_ticks = 0;
+			depth_frames = 0;
+		}
 		/* (and reads of the game that waited, drawing, for the next frame) */
 		if (emu_draw_waits) {
 			size_t k = strlen(bottom);

@@ -383,6 +383,15 @@ uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->ra
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
+	/* (the RAM, the palette, video memory and OAM copied whole: byte by
+	 * byte through the bus, VRAM's 96 KB took depth lighting 0.4 ms a frame) */
+	unsigned region = a >> 24;
+	if (core && (region == 2 || region == 3 || (region >= 5 && region <= 7))) {
+		size_t size = 0;
+		const uint8_t *block = core->getMemoryBlock(core, region, &size);
+		uint32_t off = a & 0xFFFFFFu;
+		if (block && off <= size && len <= size - off) { memcpy(out, block + off, len); return; }
+	}
 	for (uint32_t i = 0; i < len; ++i) {
 		int v = cart_read(a + i);
 		out[i] = v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;

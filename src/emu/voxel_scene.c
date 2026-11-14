@@ -2,6 +2,9 @@
 
 #include <stdlib.h>
 #include <string.h>
+#if defined(__linux__) || defined(__APPLE__)
+#include <sched.h>
+#endif
 
 #include <SDL.h>
 
@@ -11,6 +14,7 @@
 #include "director.h"
 #include "display.h"
 #include "emu.h"
+#include "frame_log.h"
 #include "gba_world.h"
 #include "lcd_frame.h"
 #include "liberation.h"
@@ -44,6 +48,15 @@ static struct Vox {
 	uint8_t vram[0x18000], oam[0x400], io[0x60], pal[0x400], raw[TILES_MOST * 2];
 	uint16_t tiles[TILES_MOST];
 	uint32_t lit_map[VOX_WN], lit_sprite[VOX_N];
+	/* each of the 32768 colours as the world shows them: made again when
+	 * the screen's correction or the town's hour changes */
+	uint32_t lut[0x8000];
+	int lut_lcd, lut_hour;
+	bool lut_ok;
+	/* the floor kept between frames: the layer's it is of, the camera it was made at */
+	bool ground_ok;
+	unsigned ground_serial;
+	int ground_u, ground_v;
 	uint32_t *out;
 	int scale, out_scale;
 	/* the tile map's place: its pixel at the frame's (0, 0) less the camera's, found by matching */
@@ -112,16 +125,19 @@ static bool world_read(GbaWorld *g, int cam_u, int cam_v) {
 	return false;
 }
 
-/* The floor over the window's lattice, each level's panels */
-typedef struct { int cam_u, cam_v; } Camera;
+static void on_threads(VoxBand band, int rows, void *ctx);
+
+/* The floor over the window's lattice, each level's panels: its columns
+ * x0 to x1 of the rows a band is given */
+typedef struct { int cam_u, cam_v, x0, x1; } Cells;
 
 static void ground_rows(int from, int to, void *ctx) {
-	const Camera *c = ctx;
+	const Cells *c = ctx;
 	for (int j = from; j < to; ++j)
-		for (int i = 0; i < VOX_GW; ++i) {
+		for (int i = c->x0; i < c->x1; ++i) {
 			int u = i - VOX_LEFT - VOX_MARGIN - CAM_X + c->cam_u, v = j - VOX_UP - VOX_MARGIN - CAM_Y + c->cam_v;
 			/* (a stair is its ramp, floor of neither level) */
-			int ramp = V.ground.z[1] > 0 ? netmap_stair_height(u - 2 * v, u + 2 * v) : -1;
+			int ramp = V.ground.ramps ? netmap_stair_height(u - 2 * v, u + 2 * v) : -1;
 			unsigned bits = ramp < 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 0) ? 1u : 0u;
 			if (ramp < 0 && V.ground.z[1] > 0 && netmap_floor_at(u - 2 * v, u + 2 * v, 1)) bits |= 2u;
 			V.ground.floor[j * VOX_GW + i] = (uint8_t)bits;
@@ -129,35 +145,133 @@ static void ground_rows(int from, int to, void *ctx) {
 		}
 }
 
+/* A lattice moved under a camera moved by (du, dv): each cell takes the
+ * one du columns and dv rows on, what comes in from beyond left as it was */
+static void shifted(uint8_t *a, int du, int dv) {
+	if (dv > 0) memmove(a, a + dv * VOX_GW, (size_t)((VOX_GH - dv) * VOX_GW));
+	else if (dv < 0) memmove(a - dv * VOX_GW, a, (size_t)((VOX_GH + dv) * VOX_GW));
+	for (int j = 0; du && j < VOX_GH; ++j) {
+		uint8_t *row = a + j * VOX_GW;
+		if (du > 0) memmove(row, row + du, (size_t)(VOX_GW - du));
+		else memmove(row - du, row, (size_t)(VOX_GW + du));
+	}
+}
+
+/* The layer's floor under the camera: made whole on a new layer (a few
+ * hundred thousand cells), else moved with the camera and only the cells
+ * it brings in asked for (a walk's frame, a few rows and columns) */
+static void ground_at(int cam_u, int cam_v) {
+	unsigned serial = netmap_serial();
+	int rise = netmap_rise(), du = cam_u - V.ground_u, dv = cam_v - V.ground_v;
+	bool keep = V.ground_ok && serial == V.ground_serial && rise == V.ground.z[1] && abs(du) < VOX_GW && abs(dv) < VOX_GH;
+	V.ground_ok = true;
+	V.ground_serial = serial;
+	V.ground_u = cam_u;
+	V.ground_v = cam_v;
+	if (!keep) {
+		V.ground.z[0] = 0;
+		V.ground.z[1] = rise;
+		V.ground.ramps = netmap_stairs() > 0;
+		on_threads(ground_rows, VOX_GH, &(Cells){ cam_u, cam_v, 0, VOX_GW });
+		return;
+	}
+	if (!du && !dv) return;
+	shifted(V.ground.floor, du, dv);
+	shifted(V.ground.ramp, du, dv);
+	int y0 = dv > 0 ? VOX_GH - dv : 0, y1 = dv > 0 ? VOX_GH : -dv;
+	ground_rows(y0, y1, &(Cells){ cam_u, cam_v, 0, VOX_GW });
+	/* (the columns it brings in, in the rows not made already) */
+	Cells cols = { cam_u, cam_v, du > 0 ? VOX_GW - du : 0, du > 0 ? VOX_GW : -du };
+	if (du) {
+		ground_rows(dv > 0 ? 0 : y1, dv > 0 ? y0 : VOX_GH, &cols);
+	}
+}
+
+/* The frame's layers, a band of its rows */
+static void layer_rows(int from, int to, void *ctx) { gba_layers_rows(ctx, &V.layers, from, to); }
+
 /* The map's picture over the window */
 static void world_rows(int from, int to, void *ctx) {
-	gba_world(ctx, -VOX_LEFT, -VOX_UP + from, VOX_WW, to - from, V.scene.map + from * VOX_WW, V.scene.sky + from * VOX_WW);
+	VoxSpan sp = V.scene.span;
+	int at = (sp.y0 + from) * VOX_WW + sp.x0;
+	gba_world(ctx, &(GbaWindow){ sp.x0 - VOX_LEFT, sp.y0 + from - VOX_UP, sp.x1 - sp.x0, to - from, VOX_WW, V.scene.map + at, V.scene.sky + at });
 }
 
 /* ---- the draw's bands on threads ---- */
 
-#define WORKERS_MOST 3
-typedef struct { VoxBand band; int from, to; void *ctx; } Band;
-static struct { SDL_sem *go; Band job; } worker[WORKERS_MOST];
-static SDL_sem *done;
+/* (a worker a core but this one, seven at most) */
+#define WORKERS_MOST 7
+/* How long a worker waits for the next band awake before it sleeps: a
+ * frame's bands come a fraction of a millisecond apart, and woken from
+ * sleep each time a worker came late to most of them (four threads did
+ * the frame in 3 ms, one in 4) */
+#define AWAKE_MS     0.5
+/* ... and spins without giving its core away (then it yields it to any
+ * thread that waits for one: with more threads than cores, a worker that
+ * kept its core held up the one whose band was late) */
+#define SPIN_MS      0.02
+#if defined(__linux__) || defined(__APPLE__)
+#define YIELD() sched_yield()
+#else
+#define YIELD() SDL_Delay(0)
+#endif
+#if defined(__i386__) || defined(__x86_64__)
+#define PAUSE() __builtin_ia32_pause()
+#elif defined(__aarch64__) || (defined(__arm__) && defined(__ARM_ARCH) && __ARM_ARCH >= 7)
+#define PAUSE() __asm__ __volatile__("yield")
+#else
+#define PAUSE() ((void)0)
+#endif
+/* The round's work: `band` over rows 0 to `rows`, taken a few rows at a
+ * time by whoever is free (a band a thread, the floor's rows lay in two
+ * of four and a slow core held up the rest) */
+static struct { VoxBand band; int rows, chunk; void *ctx; } job;
+static struct { SDL_sem *go; SDL_atomic_t asleep; } worker[WORKERS_MOST];
+static SDL_atomic_t round_of, busy, taken;   /* the rounds handed out so far; the workers still at this one; its rows taken */
 static int workers = -1;
 
+/* Waiting a moment: spun the first SPIN_MS since `from`, then each look
+ * after the core yielded */
+static void wait_a_moment(uint64_t from, int spins) {
+	if ((spins & 63) || SDL_GetPerformanceCounter() - from < (uint64_t)((double)SDL_GetPerformanceFrequency() * SPIN_MS / 1000.0)) PAUSE();
+	else YIELD();
+}
+
+/* The next round's number, waited for awake a while, then asleep */
+static int next_round(int w, int seen) {
+	uint64_t from = SDL_GetPerformanceCounter(), until = from + (uint64_t)((double)SDL_GetPerformanceFrequency() * AWAKE_MS / 1000.0);
+	for (int spins = 0; SDL_AtomicGet(&round_of) == seen; ++spins) {
+		wait_a_moment(from, spins);
+		if ((spins & 63) || SDL_GetPerformanceCounter() < until) continue;
+		/* (asleep, then the round looked at again: one handed out between is not missed, and a post left over only wakes it to look) */
+		SDL_AtomicSet(&worker[w].asleep, 1);
+		while (SDL_AtomicGet(&round_of) == seen) SDL_SemWait(worker[w].go);
+		SDL_AtomicSet(&worker[w].asleep, 0);
+	}
+	return SDL_AtomicGet(&round_of);
+}
+
+/* The round's rows, a chunk at a time, till none are left */
+static void take_rows(void) {
+	for (int from; (from = SDL_AtomicAdd(&taken, job.chunk)) < job.rows;)
+		job.band(from, from + job.chunk < job.rows ? from + job.chunk : job.rows, job.ctx);
+}
+
 static int work(void *p) {
-	int w = (int)(intptr_t)p;
+	int w = (int)(intptr_t)p, seen = 0;
 	for (;;) {
-		SDL_SemWait(worker[w].go);
-		worker[w].job.band(worker[w].job.from, worker[w].job.to, worker[w].job.ctx);
-		SDL_SemPost(done);
+		seen = next_round(w, seen);
+		take_rows();
+		SDL_AtomicAdd(&busy, -1);
 	}
 	return 0;
 }
 
-/* (a worker a core but this one, three at most; none where a system has no threads) */
+/* (none where a system has no threads) */
 static void workers_start(void) {
 	int want = SDL_GetCPUCount() - 1;
 	workers = 0;
-	done = SDL_CreateSemaphore(0);
-	for (int w = 0; done && w < want && w < WORKERS_MOST; ++w) {
+	for (int w = 0; w < want && w < WORKERS_MOST; ++w) {
 		worker[w].go = SDL_CreateSemaphore(0);
 		SDL_Thread *t = worker[w].go ? SDL_CreateThread(work, "voxel", (void *)(intptr_t)w) : NULL;
 		if (!t) break;
@@ -166,16 +280,23 @@ static void workers_start(void) {
 	}
 }
 
-/* `band` over rows 0 to `rows`: a band a worker, the last one here */
+/* `band` over rows 0 to `rows`, on the workers and here */
 static void on_threads(VoxBand band, int rows, void *ctx) {
 	if (workers < 0) workers_start();
-	int n = workers + 1;
-	for (int w = 0; w < workers; ++w) {
-		worker[w].job = (Band){ band, rows * w / n, rows * (w + 1) / n, ctx };
-		SDL_SemPost(worker[w].go);
-	}
-	band(rows * workers / n, rows, ctx);
-	for (int w = 0; w < workers; ++w) SDL_SemWait(done);
+	if (!workers) { band(0, rows, ctx); return; }
+	int chunk = rows / ((workers + 1) * 4);
+	job.band = band;
+	job.rows = rows;
+	job.chunk = chunk < 1 ? 1 : chunk;
+	job.ctx = ctx;
+	SDL_AtomicSet(&taken, 0);
+	SDL_AtomicSet(&busy, workers);
+	SDL_AtomicAdd(&round_of, 1);
+	for (int w = 0; w < workers; ++w)
+		if (SDL_AtomicGet(&worker[w].asleep)) SDL_SemPost(worker[w].go);
+	take_rows();
+	uint64_t from = SDL_GetPerformanceCounter();
+	for (int spins = 0; SDL_AtomicGet(&busy) > 0; ++spins) wait_a_moment(from, spins);
 }
 
 /* The world's colours as the picture's are shown (the GBA's screen's
@@ -188,6 +309,23 @@ static void world_colours(uint32_t *px, int n) {
 		if (!pass) lcd_correct_pixels(px, n);
 	}
 }
+
+/* The table of every colour as the world shows it, the town's hour on
+ * those off a layer: made once for each correction and hour (made a frame
+ * at a time from the window's pixels, it was the window's every one) */
+static void lut_for(int hour) {
+	int lcd = (int)lcd_colour();
+	if (V.lut_ok && V.lut_lcd == lcd && V.lut_hour == hour) return;
+	for (unsigned c = 0; c < 0x8000u; ++c) V.lut[c] = gba_shown(c);
+	world_colours(V.lut, 0x8000);
+	if (hour) emu_picture_tint_world(V.lut, 0x8000);
+	V.lut_ok = true;
+	V.lut_lcd = lcd;
+	V.lut_hour = hour;
+}
+
+/* A colour as mGBA shows it (gba_shown's) as the table shows it */
+static uint32_t by_lut(uint32_t c) { return V.lut[(c >> 3 & 31u) | (c >> 11 & 31u) << 5 | (c >> 19 & 31u) << 10]; }
 
 /* ---- the picture, and its place under the canvas ---- */
 
@@ -249,20 +387,18 @@ static bool scene_read(int kind, int cam_u, int cam_v) {
 	emu_read_bytes(0x04000000u, V.io, sizeof V.io);
 	emu_read_bytes(0x05000000u, V.pal, sizeof V.pal);
 	GbaWorld world;
-	if (!gba_layers(&(GbaVideo){ V.vram, V.oam, V.io, V.pal }, &V.layers) || !out_sized()) return false;
+	GbaVideo video = { V.vram, V.oam, V.io, V.pal };
+	if (!gba_layers_sprites(&video, &V.layers) || !out_sized()) return false;
+	on_threads(layer_rows, VOX_H, &video);
 	if (kind == SCENE_BATTLE || !world_read(&world, cam_u, cam_v)) {
 		if (kind == SCENE_LAYER) return false;
-		world = (GbaWorld){ V.vram, V.pal, V.io, { NULL, NULL }, 0, 0, 0, 0 };
+		world = (GbaWorld){ V.vram, V.pal, V.io, { NULL, NULL }, 0, 0, 0, 0, NULL };
 	}
-	on_threads(world_rows, VOX_WH, &world);
-	world_colours(V.scene.map, VOX_WN);
-	world_colours(V.scene.sky, VOX_WN);
+	lut_for(kind == SCENE_FLAT && !online_visit_away() ? director_town_tint(&(bool){ false }) : 0);
+	world.lut = V.lut;
+	on_threads(world_rows, V.scene.span.y1 - V.scene.span.y0, &world);
 	for (int i = 0; i < VOX_N; ++i)
-		if (V.layers.lying[i]) world_colours(&V.layers.lying[i], 1);
-	if (kind != SCENE_FLAT) return true;
-	emu_picture_tint_world(V.scene.map, VOX_WN);
-	emu_picture_tint_world(V.scene.sky, VOX_WN);
-	emu_picture_tint_world(V.layers.lying, VOX_N);
+		if (V.layers.lying[i]) V.layers.lying[i] = by_lut(V.layers.lying[i]);
 	return true;
 }
 
@@ -280,23 +416,30 @@ bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud) {
 	bool on_layer = kind == SCENE_LAYER;
 	/* (off a layer the scroll itself: only the tile map's place hangs on it) */
 	int cam_u = on_layer ? unwrap(hofs - 256, px + py) : hofs, cam_v = on_layer ? unwrap(vofs + 256, (py - px) / 2) : vofs;
+	VoxCamera cam = { 30.0f, 1.0f, 0.0f, CAM_X, CAM_Y, 0.0f };
+	if (on_layer) cam = (VoxCamera){ display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
+		(float)bn6_player_z() };
+	/* (what the camera can show: the sides hang no deeper than their run's
+	 * longest and the slack about it, the raised floor no higher than its rise) */
+	V.scene.span = voxel_span(&cam, 40, on_layer ? netmap_rise() + 4 : 4);
 	if (!scene_read(kind, cam_u, cam_v)) return false;
-	memset(&V.ground, 0, sizeof V.ground);
-	V.ground.z[1] = on_layer ? netmap_rise() : 0;
-	if (on_layer) on_threads(ground_rows, VOX_GH, &(Camera){ cam_u, cam_v });
+	if (on_layer) ground_at(cam_u, cam_v);
+	else if (V.ground_ok || V.ground.z[1]) {
+		memset(&V.ground, 0, sizeof V.ground);
+		V.ground_ok = false;
+	}
 	voxel_lift(&V.layers, emu_read8(BN6_CHATBOX) ? CHAT_TOP : kind == SCENE_BATTLE ? -BATTLE_TOP : 0, shown, &V.ground, &V.scene);
 	VoxLook look = voxel_look_default();
 	look.debug = display_voxel() == DISPLAY_VOXEL_DEBUG;
 	/* (a battle is read whole: nothing of it out of focus) */
 	if (kind == SCENE_BATTLE) look.focus = 0;
 	voxel_light(&V.scene, &V.ground, &look, V.lit_map, V.lit_sprite);
-	VoxCamera cam = { 30.0f, 1.0f, 0.0f, CAM_X, CAM_Y, 0.0f };
-	if (on_layer) cam = (VoxCamera){ display_voxel_pitch(), display_voxel_zoom(), display_voxel_depth(), (float)(CAM_X + px + py - cam_u), (float)(CAM_Y + (py - px) / 2 - cam_v),
-		(float)bn6_player_z() };
 	if (!voxel_draw(&V.scene, V.lit_map, V.lit_sprite, &look, &cam, V.scale, V.out)) return false;
 	/* (a system the frame takes too long on draws it smaller: a scale less
 	 * after a second of frames over the budget, and no more again) */
-	double ms = (double)(SDL_GetPerformanceCounter() - t0) * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	uint64_t took = SDL_GetPerformanceCounter() - t0;
+	double ms = (double)took * 1000.0 / (double)SDL_GetPerformanceFrequency();
+	if (platform_frame_log) frame_log_depth(took, V.scale);
 	V.slow = ms > BUDGET_MS ? V.slow + 1 : 0;
 	if (V.slow >= 60 && V.scale > 1) { V.scale_most = V.scale - 1; V.slow = 0; }
 	V.live = P.frame + 1;
