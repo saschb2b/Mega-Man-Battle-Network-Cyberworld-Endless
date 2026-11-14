@@ -85,13 +85,13 @@ product only; none of its code was read or used.
 | `tools/online_pair_run.c` | Plays Practice on the pair, takes a snapshot, plays on, restores and replays, and compares every replayed frame |
 
 ```sh
-python3 build.py online-pair --rom PATH/bn6g.gba --state PATH/boot-3.state [--at 1150] [--horizon 8]
+python3 build.py online-pair --rom PATH/bn6g.gba --state PATH/boot-4.state [--at 1150] [--horizon 8]
 ```
 
 It builds `build/host/online-pair` in the build image (`make online-pair`,
 which CI builds with `-Werror`) and runs it with the ROM and state mounted
 read-only; the per-frame CSV goes to `.build/online-pair/`. A game's
-`.build/data/boot-3.state` is the state it needs, not a run's checkpoint,
+`.build/data/boot-4.state` is the state it needs, not a run's checkpoint,
 whose map would need rebuilding. On 18 Oct 2026 it printed 2,822 frames,
 18,855 serial transfers, a snapshot of 863,016 bytes at frame 1,150 whose
 8 replayed frames all matched (64 at frame 2,527 too), and side 0's win.

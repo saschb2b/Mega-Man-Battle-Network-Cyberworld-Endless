@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "A new run and boot"
-description: "NEW GAME's start in the town (first layer built, Lan warped to his start, jack-in flag 0x1727 cleared) and `emu_boot`, which presses through BN6's title to Seaside Area 1 and saves `boot-3.state`."
+description: "NEW GAME's start in the town (first layer built, Lan warped to his start, jack-in flag 0x1727 cleared) and `emu_boot`, which presses through BN6's title to Seaside Area 1 and saves `boot-4.state`, its number bumped when what NEW GAME gives changes."
 tags: [engine, emulation]
 generated: { by: claude-code/unrecorded, at: 2026-09-30T00:25:15Z }
 ---
@@ -23,9 +23,29 @@ always resumes a run in the net.
 ## Boot
 
 `emu_boot` resets the core, presses through the title and NEW GAME, warps to
-Seaside Area 1 and ends the intro cutscene, then saves `boot-3.state` in the
+Seaside Area 1 and ends the intro cutscene, then saves `boot-4.state` in the
 data directory. Later runs start from that state. It is made on the device
 and never shipped.
+
+Every later build loads the state the first one kept, so its number
+(`BOOT_STATE` in `src/emu/boot.c`) is bumped whenever the boot's sequence
+changes or what NEW GAME gives in the core's copy does. 4 came with
+ten-bit chip ids ([the census](../../rom/chips-code.md), Ten-bit chip ids),
+which widen BN6's preset folders in the core's copy: a `boot-3.state`, kept
+by a build before them, held the Standard folder as BN6's ROM holds it,
+nine-bit. On an install that had kept one before 0.21.0, every new run
+on the Standard folder from 0.21.0 to 0.21.2 read those entries as other
+chips: Cannon B as BN4's CloudMn (513) in A, AirShot * as AirShot in N,
+MiniBomb B as BN4's 566 in A. A code the chip's record lacks is dealt
+blank, and so is a chip of BN4's where its ROM is not read: no icon, and
+used, no effect. A New 3DS, which reads BN5's ROM beside BN6's and not
+BN4's, showed it first (November 2026: 26 of its folder's 30 entries).
+The new state is made at the next start, and the old one is deleted once
+it is written. A run begun from the old state is mended as it continues
+(`own_folder_chips`, `src/director/director_folder.c`): an entry of the
+Standard folder's nine-bit form that the pack counts in its nine bits
+and not in its ten is widened, as GiveFolder had counted it, and the log
+says how many (`folder: N of the Standard folder's entries widened`).
 
 The boot's frames are never shown, so the core draws no picture for them;
 nor for a frame the main loop plays unshown to catch up with the GBA's pace

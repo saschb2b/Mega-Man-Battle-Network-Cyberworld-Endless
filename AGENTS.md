@@ -208,7 +208,7 @@ part of the tree; a new file gets its line there.
   the build counts the files (`src/net/layer_make.h`). Where generation
   changed and no file was added, the unit tests fail and name the file to
   add; the hash they compare is `dev`'s workflow's to record
-  (`tests/layer_make_hash.txt`, never a branch's). Emulator states (`boot-3.state`, `run.state`) are made on the device
+  (`tests/layer_make_hash.txt`, never a branch's). Emulator states (`boot-4.state`, `run.state`) are made on the device
   and never committed.
 
 ## Code structure
