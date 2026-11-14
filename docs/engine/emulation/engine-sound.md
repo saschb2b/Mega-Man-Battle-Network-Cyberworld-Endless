@@ -138,7 +138,11 @@ music's state and the PSG's registers 0x04000060-0x0400009F on stderr,
 and the game ends): in the first battle of `cw.py shot battle`, at frame
 900, `300:120:1@900` and `300:120:0@900` printed the same lines, the player, its
 eight tracks, every channel and the PSG's registers byte for byte, a PSG
-note of the song held through the hand-over and given back. Heard: with
+note of the song held through the hand-over and given back; in Lan's
+room (`--scene town --seed 2`) over the room's song's loop,
+`1500:200:1@560` against `1500:200:0@560`, the same but for the leftover
+bytes of one silent channel of no track, where the game left to itself
+had played a sound of its own in those 1500 frames. Heard: with
 Options opened over Lan's room (`cw.py shot pet/options`, the sound
 dumped with `CYBERWORLD_AUDIO_DUMP` and `CYBERWORLD_AUDIO_OFFLINE`), the
 build before fell silent from Options' opening; this one holds the
