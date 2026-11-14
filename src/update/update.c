@@ -19,17 +19,23 @@
 #include "update_sha256.h"
 #include "update_text.h"
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
+#include "analytics_http.h"
 
 /* (the systems whose own library fetches it on a thread of the game's,
- * analytics_http.c's: Linux and the PortMaster handhelds, and Windows;
- * Android's Java fetches it, update_android.c) */
-#if (defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)) || defined(_WIN32)
+ * analytics_http.c's: Linux and the PortMaster handhelds, Windows, and the
+ * Switch, the New 3DS, the Vita and the PS5; Android's Java fetches it,
+ * update_android.c) */
+#ifdef ANALYTICS_HTTP
 #define UPDATE_HERE 1
 #define UPDATE_THREADS 1
-#include "analytics_http.h"
 #elif defined(__ANDROID__)
 #define UPDATE_HERE 1
 #include "update_android.h"
+#endif
+
+#ifdef __3DS__
+#include <3ds/types.h>
+#include <3ds/thread.h>
 #endif
 
 /* the newest release's own, which GitHub sends on to that release's file */
@@ -45,6 +51,9 @@ static struct {
 	char agent[64];            /* the requests' User-Agent */
 	UpdateRelease found;       /* the newer release, written before the state says FOUND */
 	SDL_atomic_t state, percent, stop, busy;
+#ifdef __3DS__
+	Thread thread;             /* the last one started, joined before the next and at the end */
+#endif
 } U = { .on = true, .url = MANIFEST_URL };
 
 /* ---- the switch ---- */
@@ -167,13 +176,39 @@ static int fetch(void *arg) {
 	return 0;
 }
 
+#ifdef __3DS__
+/* (the 3DS's last thread joined: one ending with the game alive takes the
+ * HOME Menu down) */
+static void thread_join(void) {
+	if (!U.thread) return;
+	threadJoin(U.thread, U64_MAX);
+	threadFree(U.thread);
+	U.thread = NULL;
+}
+
+static SDL_ThreadFunction thread_work;
+static void thread_3ds(void *arg) { thread_work(arg); }
+#endif
+
 /* `work` on a thread of its own, where none is under way */
 static bool thread_start(SDL_ThreadFunction work, const char *name) {
 	if (!SDL_AtomicCAS(&U.busy, 0, 1)) return false;
+#ifdef __3DS__
+	/* (as the statistics' thread: below the game's own, on its core, the
+	 * requests in the frames' waits for the screen; libcurl and mbedTLS
+	 * want a deep stack) */
+	(void)name;
+	thread_join();
+	thread_work = work;
+	U.thread = threadCreate(thread_3ds, NULL, 0x20000, 0x3F, -2, false);
+	if (!U.thread) SDL_AtomicSet(&U.busy, 0);
+	return U.thread != NULL;
+#else
 	SDL_Thread *t = SDL_CreateThreadWithStackSize(work, name, 256 * 1024, NULL);
 	if (t) SDL_DetachThread(t);
 	else SDL_AtomicSet(&U.busy, 0);
 	return t != NULL;
+#endif
 }
 
 static bool look_begin(void) { return analytics_http_ready() && thread_start(look, "update look"); }
@@ -215,6 +250,9 @@ static void android_tick(void) {
  * what it wrote; one done starts the new version) */
 static void at_exit(void) {
 	SDL_AtomicSet(&U.stop, 1);
+#if defined(__3DS__) && defined(UPDATE_THREADS)
+	thread_join();
+#endif
 	for (int i = 0; i < 30 && SDL_AtomicGet(&U.busy); ++i) SDL_Delay(50);
 	if (SDL_AtomicGet(&U.state) != UPDATE_READY) return;
 	printf("update: starting %s\n", U.found.version);
@@ -263,6 +301,10 @@ void update_tick(void) {
 		U.ended = true;
 		P.quit = true;
 	}
+#if defined(__3DS__) && defined(UPDATE_THREADS)
+	/* (a thread done is joined at once: its stack back to the heap) */
+	if (U.thread && !SDL_AtomicGet(&U.busy)) thread_join();
+#endif
 #endif
 }
 
@@ -279,6 +321,8 @@ bool update_on(void) {
 UpdateState update_state(void) { return U.on ? (UpdateState)SDL_AtomicGet(&U.state) : UPDATE_IDLE; }
 
 UpdateWay update_way(void) { return U.way; }
+
+bool update_starts_again(void) { return update_install_starts_again(); }
 
 const char *update_version(void) { return update_state() != UPDATE_IDLE ? U.found.version : ""; }
 

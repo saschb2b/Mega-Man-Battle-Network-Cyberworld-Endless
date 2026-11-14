@@ -1,5 +1,5 @@
-/* The roots of trust the statistics' requests and the consoles' online
- * streams carry where the system's own may not reach Umami's host or the
+/* The roots of trust the statistics' requests, the updater's and the
+ * consoles' online streams carry where the system's own may not reach Umami's host or the
  * Net Square's (analytics_http.c, online_stream_curl.c, online_stream_tls.c): Let's Encrypt's,
  * whose chain the host serves (its certificate from YR2, under ISRG Root
  * YR, which ISRG Root X1 signs too). The 3DS has no store of its own that
@@ -12,5 +12,13 @@
  * and ISRG Root YR (to 2045, E5:7B:7E:6F:15:0C:41:91:...:EB:F4:A8:6F), as
  * PEM, from letsencrypt.org/certificates; "" where no request needs them */
 extern char analytics_roots[];
+/* ... and after them the roots GitHub's chains end at, for the updater's
+ * GETs (src/update/): github.com's (Sectigo Public Server Authentication
+ * Root E46 and R46, to 2046, which USERTrust ECC and RSA Certification
+ * Authority sign, to 2038) and DigiCert Global Root G2 (to 2038), which
+ * signed the release-assets host before it moved to Let's Encrypt; as
+ * Mozilla's root store has them, checked against the chains served on 14
+ * November 2026 (docs/engine/updates.md, The consoles) */
+extern char analytics_roots_github[];
 
 #endif

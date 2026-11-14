@@ -28,6 +28,10 @@ signed title.
 - Closing the game from the LiveArea ends it at once, as every Vita game:
   the run goes on from its last checkpoint (a layer's start, a guardian
   arena's door), not from where MegaMan stood.
+- At each start the game looks on GitHub for a newer version (Options'
+  **Updates** switches it off): the title says when one is out, and
+  Options' line names the releases page, whose VPK VitaShell installs
+  over this one, the saves kept (docs/engine/updates.md, The consoles).
 
 ## Building
 

@@ -122,25 +122,29 @@ static int stopped(void *stop, curl_off_t a, curl_off_t b, curl_off_t c, curl_of
 }
 
 #ifdef __SWITCH__
+#define PEM_END "-----END CERTIFICATE-----\n"
 /* (the roots the game carries into the console's TLS context, which curl
- * hands over before it connects: its 7.69 has no CAINFO_BLOB) */
-static CURLcode add_roots(CURL *h, void *context, void *user) {
+ * hands over before it connects: its 7.69 has no CAINFO_BLOB; a
+ * certificate at a time, as the console's import takes them) */
+static CURLcode add_roots(CURL *h, void *context, void *pem) {
 	(void)h;
-	(void)user;
-	sslContextImportServerPki(context, analytics_roots, (u32)strlen(analytics_roots), SslCertificateFormat_Pem, NULL);
+	for (const char *at = pem, *end; (at = strstr(at, "-----BEGIN CERTIFICATE-----")) && (end = strstr(at, PEM_END)); at = end) {
+		end += strlen(PEM_END);
+		sslContextImportServerPki(context, at, (u32)(end - at), SslCertificateFormat_Pem, NULL);
+	}
 	return CURLE_OK;
 }
-
-/* (no blob there: the roots go in through the context) */
-typedef int RootsBlob;
+/* (none: the context's callback reads the roots) */
+typedef char RootsBlob;
 #else
 typedef struct curl_blob RootsBlob;
 #endif
 
 /* What every request sets: where, who asks, how long it waits for the
  * host, how it stops, and the roots the game carries where asked for
- * (`ca`, the caller's while the request runs) */
-static void request_common(CURL *h, const char *url, const char *agent, SDL_atomic_t *stop, bool roots, RootsBlob *ca) {
+ * (`pem`, NULL for the system's own; `ca`, the caller's while the request
+ * runs) */
+static void request_common(CURL *h, const char *url, const char *agent, SDL_atomic_t *stop, char *pem, RootsBlob *ca) {
 	CURL_DO(easy_setopt)(h, CURLOPT_URL, url);
 	CURL_DO(easy_setopt)(h, CURLOPT_USERAGENT, agent);
 	CURL_DO(easy_setopt)(h, CURLOPT_CONNECTTIMEOUT, CONNECT_S);
@@ -150,10 +154,13 @@ static void request_common(CURL *h, const char *url, const char *agent, SDL_atom
 	CURL_DO(easy_setopt)(h, CURLOPT_XFERINFODATA, (void *)stop);
 #ifdef __SWITCH__
 	(void)ca;
-	if (roots) CURL_DO(easy_setopt)(h, CURLOPT_SSL_CTX_FUNCTION, add_roots);
+	if (pem) {
+		CURL_DO(easy_setopt)(h, CURLOPT_SSL_CTX_FUNCTION, add_roots);
+		CURL_DO(easy_setopt)(h, CURLOPT_SSL_CTX_DATA, (void *)pem);
+	}
 #else
-	*ca = (struct curl_blob){ analytics_roots, strlen(analytics_roots), CURL_BLOB_NOCOPY };
-	if (roots) CURL_DO(easy_setopt)(h, CURLOPT_CAINFO_BLOB, ca);
+	*ca = (struct curl_blob){ pem, pem ? strlen(pem) : 0, CURL_BLOB_NOCOPY };
+	if (pem) CURL_DO(easy_setopt)(h, CURLOPT_CAINFO_BLOB, ca);
 #endif
 }
 
@@ -163,7 +170,7 @@ static int curl_once(const char *url, const char *agent, const char *body, SDL_a
 	if (!h) return -1;
 	struct curl_slist *head = CURL_DO(slist_append)(NULL, "Content-Type: application/json");
 	RootsBlob ca;
-	request_common(h, url, agent, stop, roots, &ca);
+	request_common(h, url, agent, stop, roots ? analytics_roots : NULL, &ca);
 	CURL_DO(easy_setopt)(h, CURLOPT_HTTPHEADER, head);
 	CURL_DO(easy_setopt)(h, CURLOPT_POSTFIELDS, body);
 	CURL_DO(easy_setopt)(h, CURLOPT_POSTFIELDSIZE, (long)strlen(body));
@@ -188,12 +195,13 @@ static size_t sink_write(char *p, size_t size, size_t n, void *user) {
 	return s->sink(s->user, p, size * n) ? size * n : 0;
 }
 
-/* One GET: its result, the answer's status in `code` */
+/* One GET: its result, the answer's status in `code` (the roots carried
+ * GitHub's too: the updater's GETs go there) */
 static int curl_get_once(const char *url, const char *agent, Sinking *to, SDL_atomic_t *stop, bool roots, long *code) {
 	CURL *h = CURL_DO(easy_init)();
 	if (!h) return -1;
 	RootsBlob ca;
-	request_common(h, url, agent, stop, roots, &ca);
+	request_common(h, url, agent, stop, roots ? analytics_roots_github : NULL, &ca);
 	CURL_DO(easy_setopt)(h, CURLOPT_FOLLOWLOCATION, 1L);
 	CURL_DO(easy_setopt)(h, CURLOPT_MAXREDIRS, 5L);
 	/* (a download takes as long as it takes, while it moves) */
@@ -235,8 +243,9 @@ static SDL_atomic_t roots;
 
 /* The library ready for a request, once (`global_init` is no thread's to
  * race: the statistics' and the updater's threads both start at the
- * game's start): false where the network is not */
-static bool curl_begin(void) {
+ * game's start): false where the network is not. On the 3DS a post holds
+ * the network till the statistics end; a GET holds its own (the GET's) */
+static bool curl_begin(bool post) {
 	static SDL_SpinLock lock;
 	static bool begun;
 #ifdef CURL_LINKED
@@ -246,7 +255,9 @@ static bool curl_begin(void) {
 	SDL_AtomicSet(&roots, 1);
 #endif
 #ifdef __3DS__
-	if (!net_3ds()) return false;
+	if (post && !net_3ds()) return false;
+#else
+	(void)post;
 #endif
 	SDL_AtomicLock(&lock);
 	if (!begun) {
@@ -267,19 +278,30 @@ static bool roots_again(int r) {
 }
 
 bool analytics_http_post(const char *url, const char *agent, const char *body, SDL_atomic_t *stop) {
-	if (!curl_begin()) return false;
+	if (!curl_begin(true)) return false;
 	long code = 0;
 	int r = curl_once(url, agent, body, stop, SDL_AtomicGet(&roots), &code);
 	if (roots_again(r)) r = curl_once(url, agent, body, stop, true, &code);
 	return r == CURLE_OK && code >= 200 && code < 300;
 }
 
+/* (on the 3DS the GET holds the network itself and lets it go after: the
+ * updater's look and download, for a player who may have said no to the
+ * statistics, whose sockets' megabyte the heap then has back) */
 bool analytics_http_get(const char *url, const char *agent, AnalyticsSink sink, void *user, SDL_atomic_t *stop) {
-	if (!curl_begin()) return false;
+#ifdef __3DS__
+	if (!network_3ds_begin()) return false;
+#endif
 	Sinking to = { sink, user };
 	long code = 0;
-	int r = curl_get_once(url, agent, &to, stop, SDL_AtomicGet(&roots), &code);
-	if (roots_again(r)) r = curl_get_once(url, agent, &to, stop, true, &code);
+	int r = -1;
+	if (curl_begin(false)) {
+		r = curl_get_once(url, agent, &to, stop, SDL_AtomicGet(&roots), &code);
+		if (roots_again(r)) r = curl_get_once(url, agent, &to, stop, true, &code);
+	}
+#ifdef __3DS__
+	network_3ds_end();
+#endif
 	return r == CURLE_OK && code >= 200 && code < 300;
 }
 

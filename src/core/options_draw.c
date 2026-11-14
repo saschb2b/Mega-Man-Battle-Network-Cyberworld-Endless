@@ -181,9 +181,14 @@ static void line_draw(int x0, int y, int kind, bool on) {
  * download goes */
 static const char *update_note(void) {
 	static const UpdateWord ways[] = { [UPDATE_WAY_NONE] = UW_RELEASES_NOTE, [UPDATE_WAY_INSTALL] = UW_INSTALL_NOTE,
-		[UPDATE_WAY_PAGE] = UW_PAGE_NOTE, [UPDATE_WAY_RELEASES] = UW_RELEASES_NOTE, [UPDATE_WAY_ITCH] = UW_ITCH_NOTE };
+		[UPDATE_WAY_PAGE] = UW_PAGE_NOTE, [UPDATE_WAY_RELEASES] = UW_RELEASES_NOTE, [UPDATE_WAY_ITCH] = UW_ITCH_NOTE,
+		[UPDATE_WAY_STORE] = UW_STORE_NOTE };
 	UpdateState s = update_state();
-	return update_word(s == UPDATE_FAILED ? UW_FAILED_NOTE : s == UPDATE_GETTING ? UW_GETTING_NOTE : s == UPDATE_READY ? UW_READY_NOTE : ways[update_way()]);
+	/* (the 3DS's .3dsx: the game closes, and the player starts it again) */
+	bool again = update_way() != UPDATE_WAY_INSTALL || update_starts_again();
+	if (s == UPDATE_FAILED) return update_word(UW_FAILED_NOTE);
+	if (s == UPDATE_GETTING || (s == UPDATE_READY && !again)) return update_word(again ? UW_GETTING_NOTE : UW_GETTING_END_NOTE);
+	return update_word(s == UPDATE_READY ? UW_READY_NOTE : again ? ways[update_way()] : UW_INSTALL_END_NOTE);
 }
 
 /* the Display page's lines' notes */

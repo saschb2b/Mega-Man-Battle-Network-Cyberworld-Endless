@@ -16,6 +16,14 @@ GBA core alone takes longer than a frame there.
 - **The Homebrew Launcher:** copy `cyberworld-endless.3dsx` to
   `sdmc:/3ds/` and start it there. It is the same game, with the same
   saves.
+- **Updates**: at each start the game looks on GitHub for a newer
+  version (Options' **Updates** switches it off), and the title says
+  when one is out. The `.3dsx` updates itself: A on Options' **Update
+  to** line downloads `NAME.3dsx.update` beside it (to the SD card as it
+  comes, never into memory), and the game ends and puts it in your
+  file's place; start it again from the Homebrew Launcher. The CIA's
+  note names the releases page, where the new CIA is
+  (docs/engine/updates.md, The consoles).
 - The ROM, Mega Man Battle Network 6: Cybeast Gregar (USA), goes in
   `sdmc:/3ds/cyberworld-endless/rom/`, or stays where 3DS players keep GBA
   games (`sdmc:/roms/gba`, `sdmc:/roms`, `sdmc:/gba`). Any file name works:
@@ -222,6 +230,17 @@ What differs from the other builds:
   measures the Arena's pair, plays a battle by itself and quits back to
   the launcher, so one Y covers it. The netloader takes one connection:
   a probe of its port ends its wait.
+- **The update** (docs/engine/updates.md, The consoles): a release build
+  one version behind, as a `.3dsx` in `sdmc:/3ds/`, started from the
+  Homebrew Launcher (3dslink's copy names the releases page). With the
+  statistics off and on: `log.txt`'s `update:` lines, the title's `New
+  vX.Y.Z`, Options' line and its notes (the game closes; start it again),
+  A, the percent through the download (some 4.5 MB), the game closing
+  back to the Launcher with `update: ... in place`, and the new version
+  starting from it; `NAME.3dsx.update` and `NAME.3dsx.old` gone, and with
+  `frame_log = on` the heap's high-water mark no higher than without the
+  download. The CIA: its note names the releases page, and A does
+  nothing.
 - Luma3DS keeps crash dumps in `sdmc:/luma/dumps/arm11/`: registers at 40
   bytes in, then the code and the stack; `arm-none-eabi-addr2line -f -e
   build/3ds/cyberworld-endless.elf ADDRESS` in the image names the place.

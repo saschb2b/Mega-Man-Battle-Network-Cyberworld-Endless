@@ -6,9 +6,12 @@
  * again when it is done (windows/installer.nsi); Android's app hands
  * the APK to Android's installer (update_android.h, its Java's own
  * download and check); a copy the itch app installed is the itch app's;
- * any other is updated from the download page. The download is written
- * to a file of this module's, and placed only once update.c has checked
- * it whole. */
+ * the Switch's .nro and the 3DS's .3dsx put the new file in their own
+ * place as the game ends (update_swap.c), the Switch's loader starting
+ * it; the 3DS's CIA and the Vita's VPK come from the releases page, the
+ * PS5's app from Prospero Store; any other is updated from the download
+ * page. The download is written to a file of this module's, and placed
+ * only once update.c has checked it whole. */
 #ifndef CW_UPDATE_INSTALL_H
 #define CW_UPDATE_INSTALL_H
 
@@ -33,6 +36,9 @@ void update_install_drop(void);
 /* As the game exits, the new version started with the game's own
  * arguments: returns only where it could not be */
 void update_install_start(void);
+/* Whether the new version starts by itself once the game has ended (the
+ * 3DS's .3dsx is started again from the Homebrew Launcher) */
+bool update_install_starts_again(void);
 /* The download page, in the system's browser: false where none opened */
 bool update_install_page(void);
 
