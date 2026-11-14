@@ -34,12 +34,14 @@ static uint16_t px555(uint32_t c) {
 /* The strip of picture `pic` (W pixels wide) across the edge between tile
  * (tx, ty) and the one to its right, or with `v` the one below; false
  * where nothing is drawn on either side. */
-static bool strip_read(const uint32_t *pic, int W, int tx, int ty, int v, uint16_t first[8], uint16_t second[8]) {
+static bool strip_read(const uint32_t *pic, const AreaSrc *a, const uint8_t *plane, int W, int tx, int ty, int v, uint16_t first[8],
+                       uint16_t second[8]) {
 	bool drawn = false;
 	for (int i = 0; i < 8; ++i) {
-		size_t p = v ? (size_t)(ty * 8 + 7) * W + tx * 8 + i : (size_t)(ty * 8 + i) * W + tx * 8 + 7;
-		first[i] = px555(pic[p]);
-		second[i] = px555(pic[p + (v ? (size_t)W : 1)]);
+		size_t p = v ? (size_t)(ty * 8 + 7) * W + tx * 8 + i : (size_t)(ty * 8 + i) * W + tx * 8 + 7, q = p + (v ? (size_t)W : 1);
+		/* (an ARGB picture, or a learned map's colour indices) */
+		first[i] = px555(pic ? pic[p] : area_src_colour(a, plane, p));
+		second[i] = px555(pic ? pic[q] : area_src_colour(a, plane, q));
 		drawn |= first[i] != NONE || second[i] != NONE;
 	}
 	return drawn;
@@ -71,14 +73,14 @@ void breaks_add(Breaks **bp, const AreaSrc *a) {
 	Breaks *b = *bp;
 	if (!b) return;
 	b->sorted = false;
-	const uint32_t *pics[2] = { a->px, a->px0 };
+	const uint8_t *planes[2] = { a->idx, a->idx0 };
 	for (int k = 0; k < 2; ++k)
 		for (int ty = 0; ty < a->th; ++ty)
 			for (int tx = 0; tx < a->tw; ++tx)
 				for (int v = 0; v < 2; ++v) {
 					uint16_t first[8], second[8];
 					if (v ? ty + 1 >= a->th : tx + 1 >= a->tw) continue;
-					if (!strip_read(pics[k], a->tw * 8, tx, ty, v, first, second)) continue;
+					if (!strip_read(NULL, a, planes[k], a->tw * 8, tx, ty, v, first, second)) continue;
 					if (!push(b, v, 0, first, second) || !push(b, v, 1, second, first)) return;
 				}
 }
@@ -138,7 +140,7 @@ void breaks_count(Breaks *b, const uint32_t *px, int tw, int th, uint8_t *out, i
 			for (int v = 0; v < 2; ++v) {
 				uint16_t first[8], second[8];
 				if (v ? ty + 1 >= th : tx + 1 >= tw) continue;
-				if (!strip_read(px, tw * 8, tx, ty, v, first, second)) continue;
+				if (!strip_read(px, NULL, NULL, tw * 8, tx, ty, v, first, second)) continue;
 				int d = nearest(b, v, 0, first, second), e = d ? nearest(b, v, 1, second, first) : 0;
 				if (e < d) d = e;
 				if (!d) continue;

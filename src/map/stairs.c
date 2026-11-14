@@ -79,7 +79,7 @@ static void cut_tiles(const AreaSrc *a, const int *cells, int n, int x0, int y0,
 				st->py = (int16_t)(ty * 8 - py0);
 				st->e0 = a->tile[0][i];
 				st->e1 = a->layers > 1 ? a->tile[1][i] : 0;
-				for (int p = 0; p < 64; ++p) st->opaque += (a->px[(size_t)(ty * 8 + p / 8) * a->tw * 8 + tx * 8 + p % 8] >> 24) != 0;
+				for (int p = 0; p < 64; ++p) st->opaque += a->idx[(size_t)(ty * 8 + p / 8) * a->tw * 8 + tx * 8 + p % 8] != 0;
 			}
 	}
 	free(mark);

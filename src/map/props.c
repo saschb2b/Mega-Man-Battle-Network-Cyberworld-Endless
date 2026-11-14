@@ -231,7 +231,7 @@ static int art_at(const AreaSrc *a, int i, bool floor, int *q, int *Xa, int *Ya)
 	for (int k = 0; k < n; ++k)
 		for (int y = 0; y < 8; ++y)
 			for (int x = 0; x < 8; ++x) {
-				uint32_t c = a->px[(size_t)((q[k] / bw + by0) * 8 + y) * (size_t)(a->tw * 8) + (size_t)((q[k] % bw + bx0) * 8 + x)];
+				uint32_t c = area_src_px(a, (size_t)((q[k] / bw + by0) * 8 + y) * (size_t)(a->tw * 8) + (size_t)((q[k] % bw + bx0) * 8 + x));
 				if (!(c >> 24)) continue;
 				if (((c >> 16) & 255) + ((c >> 8) & 255) + (c & 255) < 90) ++dark; else ++lit;
 			}
@@ -278,7 +278,7 @@ static bool floor_emblem_on(const AreaSrc *a, uint32_t want, int l, PropStamp *o
 		for (int y = 0; y < 8 && !mark[t]; ++y)
 			for (int x = 0; x < 8; ++x) {
 				size_t i = (size_t)(t / a->tw * 8 + y) * W + t % a->tw * 8 + x;
-				uint32_t c = l ? (a->front[i] ? a->px[i] : 0) : a->px0[i];
+				uint32_t c = l ? (a->front[i] ? area_src_px(a, i) : 0) : area_src_px0(a, i);
 				if (c >> 24 && (c & 0xFFFFFF) == want) { mark[t] = 1; break; }
 			}
 	for (int t0 = 0; t0 < cells && !out->ok; ++t0) {
@@ -353,7 +353,7 @@ static bool island_only(const AreaSrc *a, int A, int B, int tx, int ty) {
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			int px = tx * 8 + x, py = ty * 8 + y;
-			if (!(a->px0[(size_t)py * W + px] >> 24)) continue;
+			if (!a->idx0[(size_t)py * W + px]) continue;
 			int u = px - a->tw * 4, w = 2 * (py - 4 - a->th * 4);
 			int pA = floordiv((u - w) / 2 - a->ex, PANEL), pB = floordiv((u + w) / 2 - a->ey, PANEL);
 			if (pA >= A && pA <= A + 2 && pB >= B && pB <= B + 2) continue;
@@ -420,7 +420,7 @@ static void joined_px(const AreaSrc *a, int cx, int cy) {
 		for (int k = 0; k < 4; ++k) {
 			int x = queue[h] % JOIN_W + side[k][0], y = queue[h] / JOIN_W + side[k][1], X = x + join.x0, Y = y + join.y0;
 			if (x < 0 || y < 0 || x >= JOIN_W || y >= JOIN_H || join.px[y * JOIN_W + x] || X < 0 || Y < 0 || X >= W || Y >= H) continue;
-			if (!(a->px[(size_t)Y * W + X] >> 24)) continue;
+			if (!a->idx[(size_t)Y * W + X]) continue;
 			join.px[y * JOIN_W + x] = 1;
 			queue[n++] = y * JOIN_W + x;
 		}
