@@ -134,6 +134,8 @@ void update_install_start(void) {
 	execv(a, args);
 }
 
+bool update_install_starts_again(void) { return true; }
+
 #elif defined(_WIN32)
 
 #include <windows.h>
@@ -213,15 +215,120 @@ void update_install_start(void) {
 	CloseHandle(pi.hProcess);
 }
 
-#else
+bool update_install_starts_again(void) { return true; }
 
-/* (the systems whose updates come another way: none looks yet) */
+#elif defined(__SWITCH__) || (defined(__3DS__) && defined(CW_3DS_CURL))
+
+#include "update_swap.h"
+
+#ifdef __SWITCH__
+#include <switch/types.h>
+#include <switch/result.h>
+#include <switch/runtime/env.h>
+#define SELF_EXT ".nro"
+#define SELF_KEY "switch"
+#else
+#include <3ds/types.h>
+#include <3ds/env.h>
+#define SELF_EXT ".3dsx"
+#define SELF_KEY "3ds-3dsx"
+#endif
+
+/* (the loader's arguments, libnx's and libctru's own: the first the
+ * file's path, as the Homebrew Menu or Launcher started it) */
+extern int __system_argc;
+extern char **__system_argv;
+
+/* (the file the game runs from, and the new one beside it) */
+static char self[600], staged[620];
+
 UpdateWay update_install_way(const char **key) {
 	*key = NULL;
+#ifdef __3DS__
+	/* (the CIA, a title of the HOME Menu's: the releases page, for now) */
+	if (!envIsHomebrew()) return UPDATE_WAY_RELEASES;
+#endif
+	/* (a copy sent over the network, nxlink's or 3dslink's, or one whose
+	 * loader named no file: the releases page) */
+	if (__system_argc < 1 || !update_swap_self(__system_argv[0], SELF_EXT, self, sizeof self)) return UPDATE_WAY_RELEASES;
+	update_swap_staged(self, staged, sizeof staged);
+	*key = SELF_KEY;
+	return UPDATE_WAY_INSTALL;
+}
+
+void update_install_tidy(void) {
+	if (self[0]) update_swap_tidy(self);
+}
+
+/* (on the SD card as it comes, never in memory: the 3DS's heap) */
+FILE *update_install_open(void) { return staged[0] ? fopen(staged, "wb") : NULL; }
+
+/* (checked whole, it waits beside the old one for the game's end) */
+bool update_install_place(const char *version) {
+	(void)version;
+	return staged[0] != 0;
+}
+
+void update_install_drop(void) {
+	if (staged[0]) remove(staged);
+}
+
+/* (the old file is free once the game has ended: no RomFS holds it. The
+ * Switch's loader then starts the new one, as aio-switch-updater's
+ * forwarder hands over; the 3DS's Homebrew Launcher comes back, where the
+ * player starts it) */
+void update_install_start(void) {
+	if (!update_swap(self)) {
+		printf("update: %s not swapped in\n", staged);
+		return;
+	}
+	printf("update: %s in place\n", self);
+#ifdef __SWITCH__
+	char line[620];
+	if (strchr(self, ' ')) snprintf(line, sizeof line, "\"%s\"", self);
+	else snprintf(line, sizeof line, "%s", self);
+	if (envHasNextLoad()) envSetNextLoad(self, line);
+#endif
+}
+
+bool update_install_starts_again(void) {
+#ifdef __SWITCH__
+	return envHasNextLoad();
+#else
+	return false;
+#endif
+}
+
+#else
+
+#ifdef __ANDROID__
+#include "update_android.h"
+
+/* (Android: GameActivity's Java downloads the APK, checks it and hands
+ * it to Android's installer, update_android.h; nothing is written here) */
+UpdateWay update_install_way(const char **key) {
+	*key = "android";
+	return UPDATE_WAY_INSTALL;
+}
+
+void update_install_tidy(void) { update_android_tidy(); }
+#else
+/* (the systems whose updates come another way: the Vita's VPK from the
+ * releases page, by hand through VitaShell; the PS5's app from Prospero
+ * Store, whose listing follows the releases; the others look not yet) */
+UpdateWay update_install_way(const char **key) {
+	*key = NULL;
+#if defined(__vita__)
+	return UPDATE_WAY_RELEASES;
+#elif defined(CW_PS5)
+	return UPDATE_WAY_STORE;
+#else
 	return UPDATE_WAY_NONE;
+#endif
 }
 
 void update_install_tidy(void) {}
+#endif
 
 FILE *update_install_open(void) { return NULL; }
 
@@ -233,5 +340,14 @@ bool update_install_place(const char *version) {
 void update_install_drop(void) {}
 
 void update_install_start(void) {}
+
+/* (Android's installer ends the game, and its notes say so) */
+bool update_install_starts_again(void) {
+#ifdef __ANDROID__
+	return true;
+#else
+	return false;
+#endif
+}
 
 #endif

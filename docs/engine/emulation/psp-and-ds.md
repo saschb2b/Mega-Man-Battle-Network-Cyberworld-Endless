@@ -1,9 +1,9 @@
 ---
 type: Measurement
 title: "The PSP and the DS, measured"
-description: "Whether the game could run on a PSP or a Nintendo DS, measured in PPSSPP at 333 MHz (14 November 2026): mGBA takes 19 to 25 ms of a 16.7 ms frame on BN6, libretro gpSP's MIPS dynarec 6 to 7.4, and a DS has neither the speed nor the memory for any GBA core."
+description: "Whether the game could run on a PSP or a Nintendo DS, measured in PPSSPP at 333 MHz (14 November 2026): mGBA takes 19 to 25 ms of a 16.7 ms frame on BN6, libretro gpSP's MIPS dynarec 6 to 7.4, but the game's heap is full at the title and a run needs some 37 MB more than a PSP has; a DS has neither the speed nor the memory for any GBA core."
 tags: [engine, emulation, platforms]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T02:11:11Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T02:38:23Z }
 ---
 
 # The PSP and the DS, measured
@@ -90,18 +90,40 @@ dynarec written for that CPU.
   Whether the PSP itself keeps a whole frame needs one run on a PSP
   (the harness's EBOOT, as `psp_bench.py` builds it, with the ROM beside
   it in `ms0:/PSP/GAME/cwgpsp/`).
-- **Memory**: a PSP-2000, 3000 or Go gives homebrew about 52 MB with
-  large memory; a PSP-1000 about 24, too little for the ROM, the core's
-  copy and a run. gpSP takes its ROM buffer in 1 MB blocks, up to 32 as
-  many as it finds (41 MB of the heap in use here, the harness's own
-  copy of the ROM with it); sized for the game's 16 MB copy it would
-  hold BN6 alone, with no room for BN5's or BN4's ROM beside it.
+- **Memory** is the PSP's harder limit, below. A PSP-2000, 3000 or Go
+  gives homebrew about 52 MB with large memory; a PSP-1000 about 24.
 - **Making a layer** took about 20 seconds on the New 3DS for a run's
   first layer ("Building the net...", `3ds/README.md`); a PSP's CPU at
   333 MHz with no L2 cache would take two to three times that, not
   measured.
 
-What a PSP build would ask of the engine: gpSP as a second core beside
+## The PSP's memory
+
+The game itself, built for the PSP (branch `psp-port`: `build.py psp`,
+mGBA as its core for now), boots in PPSSPP to the title, and there its
+heap is full: 26.9 MB in use of 26.9 (`frame_log`'s heap line), BN6's
+ROM and the core's 16 MB copy 24 of it. Its code and statics take the
+rest of the 52 MB: 4.6 MB of code and 19.9 MB of static arrays (the
+host's are 18.3, of which 5.5 MB are the dev tools' own, the economy
+report's 3.2 MB the largest, and 1.2 MB the second screen's). NEW GAME
+then finds nothing to make a layer with, and the screen stays black.
+
+What a run needs was measured on this computer with the 3DS's heap
+model ([The 3DS's memory](3ds-memory.md), `tools/heap3ds.py --cases bn6
+--seeds 1-6 --frames 60000`): BN6 alone peaks at 60 to 65 MB of heap,
+42 MB still in use at a run's end. The 3DS page's breakdown says where:
+the ROMs (24 MB), the town's source kept for the next visit (some 14),
+the layer's area's map being learned and the learning itself (some 20 at
+once), the installs' log (2). With the PSP's statics that is about 37 MB
+more than a PSP holds, before the core's own needs. A PSP build would
+have to take the static arrays only a dev tool or a second screen uses
+from the heap when used (some 7 MB, on every system), page the ROM from
+the memory stick rather than hold it twice (gpSP pages a ROM in 32 KB
+pieces; the engine's reads of `R.data` would need the same), keep no
+town between visits and learn an area's maps in half the memory. Each
+is a change to the engine every system shares.
+
+What a PSP build would ask of the engine besides: gpSP as a second core beside
 mGBA, behind what `src/emu/` takes from mGBA today (the hooks' BKPT,
 which gpSP's dynarec would have to call out on and then run the
 replaced instruction, [Hooks](hooks.md); writes to the ROM copy, which

@@ -14,7 +14,11 @@ typedef enum {
 	UW_PAGE_NOTE,
 	UW_RELEASES_NOTE,
 	UW_ITCH_NOTE,
+	UW_STORE_NOTE,
+	UW_INSTALL_END_NOTE,   /* ... where the game ends without starting it (the 3DS's .3dsx), */
+	UW_GETTING_END_NOTE,   /* ... and while it downloads there */
 	UW_GETTING_NOTE,   /* ... while it downloads */
+	UW_READY_NOTE,     /* ... once it is in place (on Android, with Android's installer) */
 	UW_FAILED,         /* ... the line's value after a failed download, */
 	UW_FAILED_NOTE,    /* ... and its note */
 	UW_NEW,            /* the title's note beside the version: the new one after it */

@@ -3,7 +3,7 @@ type: Measurement
 title: "The code's layers"
 description: "Which part of `src/` may include which: the dependencies between its folders measured (`tools/layers.py`), the intended order as 25 units lowest first (`tests/lint/layers.txt`), the rule `build.py lint` holds with a baseline that only shrinks, how to fix a violation, what the six widest headers' includers use of them, the files a tool writes, the first ten cuts and the numbers a release records."
 tags: [code, lint, architecture, process]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T05:00:00Z }
 sources:
   - { id: measure, title: "python3 tools/layers.py and its --cuts, --uses and --generated on dev at 2744367e (12 November 2026)", resource: "tools/layers.py" }
   - { id: rule, title: "tests/lint/layers.txt, the units and what each may include; tests/lint/layer_violations.txt, the includes it does not allow as they stood", resource: "tests/lint/layers.txt, tests/lint/layer_violations.txt" }
@@ -89,7 +89,7 @@ names, and a line names only units above it:
 | Unit | What it is | Files | May include |
 | --- | --- | ---: | --- |
 | `formats` | The games' addresses, record layouts, byte packing, the free space's plan; headers alone | 39 | nothing |
-| `core.base` | The platform, input, settings, the ROM file and `RomLayout`, the scenes' switch | 56 | `formats` |
+| `core.base` | The platform, input, settings, the ROM file and `RomLayout`, the scenes' switch | 58 | `formats` |
 | `core.data` | The ROM's tables: chips, programs, foes, the other games' records and registry | 27 | `formats` `core.base` |
 | `emu` | The mGBA core, hooks, gamecalls, the game's memory, the moved families, Navis, chips and Souls | 171 | `formats` `core.base` `core.data` |
 | `core` | The run: its state, rules, loot, pacing, saves, the profile | 57 | `formats` `core.base` `core.data` |
@@ -97,7 +97,7 @@ names, and a line names only units above it:
 | `audio` | The engine's MP2K, the device, the sound filter | 21 | `formats` `core.base` `emu` |
 | `gfx` | Sprites, tiles, fonts, the PET's look | 26 | `formats` `core.base` `core.data` `emu` |
 | `analytics` | The anonymous statistics: a sink the levels above report to | 16 | `formats` `core.base` `core.data` `core` `net` `audio` `gfx` |
-| `update` | The game's own updates: the look, the download, each system's way | 9 | `formats` `core.base` `analytics` |
+| `update` | The game's own updates: the look, the download, each system's way | 11 | `formats` `core.base` `analytics` |
 | `map` | Layers as the game's maps | 39 | `formats` `core.base` `core.data` `core` `emu` `net` `gfx` |
 | `layer` | What stands on a layer | 60 | `formats` `core.base` `core.data` `core` `emu` `net` `map` |
 | `world` | The real world and the town | 31 | the same, and `layer` |
@@ -137,7 +137,7 @@ What the order says, beyond the obvious:
 | Unit | Files of `src/core/` |
 | --- | --- |
 | `formats` | `chip_entry.h` (a chip's entry as the game packs it; `bn6_chips.h` includes it) |
-| `core.base` | `platform*`, `present_3ds`, `second_android`, `sdl_old.h`, `app_icon.h`; input: `buttons.h`, `pads`, `padmap`, `keymap`, `touch`, `touch_layout`, `feel`, `feel_out`, `fast_forward`; `display`, `frame_log`; `compat`, `save_queue`, `settings_line`, `text_input`, `network_3ds`; `desktop*`, `ios*`, `ps5_*`; `rom` (the ROM files and `RomLayout`), `rng.c`, `game.h` |
+| `core.base` | `platform*`, `present_3ds`, `second_android`, `android_call`, `sdl_old.h`, `app_icon.h`; input: `buttons.h`, `pads`, `padmap`, `keymap`, `touch`, `touch_layout`, `feel`, `feel_out`, `fast_forward`; `display`, `frame_log`; `compat`, `save_queue`, `settings_line`, `text_input`, `network_3ds`; `desktop*`, `ios*`, `ps5_*`; `rom` (the ROM files and `RomLayout`), `rng.c`, `game.h` |
 | `core.data` | `data`, `chips`, `chip_pool`, `foes.h`, `library_pages*`, `xchips*` (the registry, the moved chips, the Program Advances), `xprograms`, `xrecords` |
 | `core` (the run) | Everything else: `run*`, `save*`, `backup*`, `meta*`, `loot*`, `pacing`, `economy`, `jobs`, `rivals`, `weekly`, `groups`, `group_*`, `formations`, `visitors`, `visitor_families`, `xbattles`, `super_boss`, `battle_data`, `extras*` |
 | `core.options` | `options*`, `controls*`, `touch_art`, `pet_panel.h` |

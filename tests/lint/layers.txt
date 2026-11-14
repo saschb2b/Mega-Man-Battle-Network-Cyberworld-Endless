@@ -20,7 +20,7 @@ formats  = emu/bn6.h emu/bn6_*.h emu/bn5.h emu/bn5_*.h emu/bn4.h emu/bn4_*.h
 formats  = emu/bytes.h emu/free_space.h core/chip_entry.h
 
 # the platform, input, settings, the ROM file and RomLayout, the scenes' switch
-core.base = core/platform* core/present_3ds.* core/second_android.* core/sdl_old.h core/app_icon.h
+core.base = core/platform* core/present_3ds.* core/second_android.* core/android_call.* core/sdl_old.h core/app_icon.h
 core.base = core/buttons.h core/pads.* core/padmap.* core/keymap.* core/touch.* core/touch_layout.*
 core.base = core/feel.* core/feel_out.* core/fast_forward.* core/frame_log.* core/display.*
 core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.*
