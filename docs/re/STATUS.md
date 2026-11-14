@@ -3,12 +3,12 @@ type: Status
 title: "Research status: Cyberworld Endless: online Net Squares (epic #120)"
 description: "Where each reverse-engineering feature stands, written by tools/re_status.py from docs/re/ledger/: its state, what is done and left, the changes since, experiments and decisions needed."
 tags: [re]
-generated: { by: process:re_status, at: 2026-11-13T00:00:00Z }
+generated: { by: process:re_status, at: 2026-11-14T00:00:00Z }
 ---
 
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 13 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
+Updated 14 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
@@ -34,12 +34,9 @@ Updated 13 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/le
 | [BN5's NaviCust programs](../rom/navicust.md) | Proven in research, not built | BN5's SoulT+1 is BN6's NaviCust program 48 where BN5's ROM is read (src/emu/xncp.c): BN6's records, effects, compression codes, descriptions and names each grown by one in the core's copy, the words of BN6's code that name them repointed, the NaviCust's list made to go on past RUN's key item and list RUN last. It shows on BN6's own NaviCust screen with BN5's name, shape and lines, RUN answers OK, and a run hands it out in a Soul's guardian's draft and, while it holds a Soul, in the drafts and the workshop's list. Proved by the differential: each game's own compile gives its NaviStats one extra turn (ncp5, ncp6: BN5's on the guest's core by a call from its main loop), and KnightSoul lasts four turns in both, every frame (soul_soult PASS, three mutations caught). A Beast Out is not lengthened (the owner's call: Souls only): BN6 times it by its own counter, NaviStats +0x21, and reads the byte only into a record's field nothing reads; it ends on the same frame with the program placed as without (beast_out, beast_soult PASS, two mutations caught). The other six programs BN5 has alone are located, read and cut (docs/multirom/gaps.md). | The link's program trade's screen and check stop before RUN's item and list no program 48 (no run reaches them). BN5's NaviCust screen itself was not driven: its compile was run on its board, written from the spec. Not seen on a device. | 10 Nov 2026 |
 | [The net maps' own pieces on generated layers](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505) | Being built | Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6; the Underground's teal emblems; Aquarium Comp's pillars under its pads, cut from the first layer in the view of the pads' height. BN4's Undernet's rows of horns behind its catwalks and CopyBot Comp's crystal spikes behind its plateaus, the first layer's too. The bowls and the bubbles under the pillars' stubs are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py) and run on a generated layer by the game's own scripts. | The other kinds on issue #505: the large set pieces beside floors (BN5's End Area's pagoda, Oran Area's hubs); floor marks; stairs. Robot Control's arms are dead-end floor, a layout's matter. | 13 Nov 2026 |
 
-## Since the last update (12 Nov 2026)
+## Since the last update (13 Nov 2026)
 
-- 13 Nov 2026: Park Area 1's coordinate data read (BN4 map 0x92:0; docs/rom/bn4.md): its orange and yellow paths carry no cell but their walls, no arrow panel's value in the map, a ramp of 208 slope cells climbs to its raised floor.
-- 13 Nov 2026: ThunSoul's look located (docs/multirom/bn4-souls.md, The look, located; docs/rom/bn4.md, The emotion window's faces: src/emu/bn4_battle.h's BN4_FACE_STEP, BN4_FACE_GET, BN4_FACES, BN4_SOUL_FACES, BN4_FACE_DIGITS, BN4_FACE_PALS): Red Sun's ROM holds its own six Souls' faces alone, the twelve sprites take 438,514 bytes and the ROM copy's largest gap is 60 KB, so the look waits on its room.
-- 13 Nov 2026: ThunSoul's look on the shared room (docs/multirom/bn4-souls.md, The shared room; the owner's call: one room, the united Soul's): FREE_BN4_SOUL_LOOK holds his sprite, face and BN4's digits, BN6's list 0 number 0x5F and face 0x1D the room's, no overlay of the proxy's; soul_thun holds his sprite and palette, mutations 560 and 561 caught; the unison's picture and his buster's flash not moved.
-- 13 Nov 2026: UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code).
+- 14 Nov 2026: BN6's chips that find their foes by a range of NameIDs (object_getEnemyByNameRange: AquaNdl's needles, YoYo's strike, the reticle over a foe) aimed at the moved families and Navis too (src/emu/chip_targets.c, issue #523): AquaNdl1 struck BN5's Bugtank, ToadMan and BN4's GutsMan in BN6's engine, where before it struck nothing; YoYo's own two calls not reached in play.
 
 ## Experiments
 

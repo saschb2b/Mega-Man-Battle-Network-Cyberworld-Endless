@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-13",
-  "previous": "2026-11-12",
+  "updated": "2026-11-14",
+  "previous": "2026-11-13",
   "features": [
     {
       "name": "Net Square",
@@ -198,20 +198,8 @@
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-13",
-      "what": "Park Area 1's coordinate data read (BN4 map 0x92:0; docs/rom/bn4.md): its orange and yellow paths carry no cell but their walls, no arrow panel's value in the map, a ramp of 208 slope cells climbs to its raised floor."
-    },
-    {
-      "date": "2026-11-13",
-      "what": "ThunSoul's look located (docs/multirom/bn4-souls.md, The look, located; docs/rom/bn4.md, The emotion window's faces: src/emu/bn4_battle.h's BN4_FACE_STEP, BN4_FACE_GET, BN4_FACES, BN4_SOUL_FACES, BN4_FACE_DIGITS, BN4_FACE_PALS): Red Sun's ROM holds its own six Souls' faces alone, the twelve sprites take 438,514 bytes and the ROM copy's largest gap is 60 KB, so the look waits on its room."
-    },
-    {
-      "date": "2026-11-13",
-      "what": "ThunSoul's look on the shared room (docs/multirom/bn4-souls.md, The shared room; the owner's call: one room, the united Soul's): FREE_BN4_SOUL_LOOK holds his sprite, face and BN4's digits, BN6's list 0 number 0x5F and face 0x1D the room's, no overlay of the proxy's; soul_thun holds his sprite and palette, mutations 560 and 561 caught; the unison's picture and his buster's flash not moved."
-    },
-    {
-      "date": "2026-11-13",
-      "what": "UNITE's check over both games' Souls (src/emu/soulkinds.c's soulkinds_lights; docs/multirom/bn4-souls.md, Two Souls of one kind): a BN4 Soul lights where the kind's BN5 Soul is not held, the both-held case left to the owner (issue #499); soul_thun's damage mutation, uncaught since the differential kept pokes out of BN4's chips' units, caught again (xd_spec_bn4_code)."
+      "date": "2026-11-14",
+      "what": "BN6's chips that find their foes by a range of NameIDs (object_getEnemyByNameRange: AquaNdl's needles, YoYo's strike, the reticle over a foe) aimed at the moved families and Navis too (src/emu/chip_targets.c, issue #523): AquaNdl1 struck BN5's Bugtank, ToadMan and BN4's GutsMan in BN6's engine, where before it struck nothing; YoYo's own two calls not reached in play."
     }
   ],
   "experiments": [
