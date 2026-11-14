@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T21:13:18Z
-* **Update**: engine/saves.md (Sending by code: SEND and RECEIVE, the code and its seal, the exchange, what is not yet), GUIDE.md (SEND and RECEIVE in Moving saves between devices), code/online.md (transfer.c, transfer_box.c), code/screens.md (saves_code.c), code/core.md (transfer_link.c, start_net.c), code/tests.md (test_transfer_code.c), code/server.md (transfer.py), online/server-and-wire.md (saves sent by a code on the official server), engine/index.md (saves.md's line). **New**: code/third-party.md (third_party/: Monocypher 4.0.2, how it is built and updated).

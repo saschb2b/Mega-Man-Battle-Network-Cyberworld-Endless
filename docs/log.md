@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: engine/saves.md (Sending by code: SEND and RECEIVE, the code and its seal, the exchange, what is not yet), GUIDE.md (SEND and RECEIVE in Moving saves between devices), code/online.md (transfer.c, transfer_box.c), code/screens.md (saves_code.c), code/core.md (transfer_link.c, start_net.c), code/tests.md (test_transfer_code.c), code/server.md (transfer.py), online/server-and-wire.md (saves sent by a code on the official server), engine/index.md (saves.md's line). **New**: code/third-party.md (third_party/: Monocypher 4.0.2, how it is built and updated).
 * **Update**: engine/emulation/engine-sound.md (the game's music carried on under the engine's screens over a run and given back, the NaviCust's theme where none plays, the check that proves the hand-over byte for byte; its description), engine/emulation/index.md (its line), rom/sound.md (the RAM and registers the carry reads and writes), code/gfx-and-audio.md (mp2k_layout.c, mp2k_carry.c, music_carry.c).
 * **Update**: devtools/profiling.md (a whole panel's seams asked of its own tiles and their neighbours alone, not every tile of the map: BN5's Nebula Area's pick 17.0 to 14.7 billion instructions, the layers the same).
 * **Update**: devtools/profiling.md (learning the areas' maps: tl_skipped kept a panel with the map's view; over every area 11.1 to 4.5 seconds, BN4's area 34 3.1 to 0.25, the layers the same).
