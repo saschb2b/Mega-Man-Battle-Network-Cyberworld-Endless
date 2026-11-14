@@ -91,9 +91,19 @@ case " $TARGETS " in *" switch "*)
 	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
 	sed -i 's/set(BUILD_GLES3 ON CACHE BOOL "Build with OpenGL|ES 3" FORCE)/set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)/' mgba-$VER/CMakeLists.txt
 	grep -q 'set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)' mgba-$VER/CMakeLists.txt
+	# (not position-independent: the toolchain's -fPIE is libnx's way, and
+	# -fPIC gives the core's thread-local (mCoreThreadGet's, which every
+	# mLog reads) a dynamic TLS model that devkitA64's GCC gets wrong with
+	# libnx's -mtp=soft: it read the thread pointer plus itself, and the
+	# game crashed at the run's start on a Switch, discussion #524. Checked
+	# below: the read is a local-exec one, the thread pointer plus a fixed
+	# offset)
 	cmake -S mgba-$VER -B build-switch $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/switch \
-	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/switch/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/switch/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
 	cmake --build build-switch --target mgba -j"$(nproc)"
+	"$DEVKITPRO/devkitA64/bin/aarch64-none-elf-objdump" -dr build-switch/CMakeFiles/mgba.dir/src/core/thread.c.obj \
+	 | grep -q R_AARCH64_TLSLE
 	mkdir -p /opt/mgba/switch/lib /opt/mgba/switch/include
 	cp build-switch/libmgba.a /opt/mgba/switch/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/switch/include/

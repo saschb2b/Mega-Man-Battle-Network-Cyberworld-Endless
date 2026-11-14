@@ -111,6 +111,7 @@
 #include "visitor_families.h"
 #include "visitors.h"
 #include "grab_search.h"
+#include "chip_targets.h"
 #include "group_arc.h"
 #include "groups.h"
 #include "xpanels_look.h"
@@ -8102,6 +8103,18 @@ int main(int argc, char **argv) {
 	CHECK(!grab_search_lost(1, 1, 0) && grab_search_lost(-1, 1, 0), "grab: an enemy's search, lost once it has walked its own way off the field");
 	CHECK(!grab_search_lost(1, 0, 1) && grab_search_lost(-1, 0, 1) && !grab_search_lost(-1, 1, 1) && grab_search_lost(1, 1, 1),
 		"grab: a search by one turned round (Surrounded's L or R)");
+	/* The player's chips' look-ups (chip_targets.h, issue #523): a moved family read as BN6's first virus, inside every
+	 * viruses' range BN6's chips ask for and no Navis'; a moved Navi, BN5's or BN4's, as its first Navi; BN6's own as they are */
+	CHECK(chip_targets_name(XV_FIRST_ID) == CHIP_TARGETS_VIRUS && chip_targets_name(XV_FIRST_ID + XV_FAMILIES * XV_VERSIONS - 1) == CHIP_TARGETS_VIRUS &&
+		chip_targets_name(0x212) == CHIP_TARGETS_VIRUS, "chip_targets: the moved families' ids, viruses (Bugtank's 0x212 among them)");
+	CHECK(chip_targets_name(XN_FIRST_ID) == CHIP_TARGETS_NAVI && chip_targets_name(XN_IDS_END - 1) == CHIP_TARGETS_NAVI &&
+		chip_targets_name(XN_BN4_FIRST_ID) == CHIP_TARGETS_NAVI && chip_targets_name(XN_MORE_IDS_END - 1) == CHIP_TARGETS_NAVI &&
+		chip_targets_name(0x1D8) == CHIP_TARGETS_NAVI && chip_targets_name(0x384) == CHIP_TARGETS_NAVI,
+		"chip_targets: the moved Navis' ids, Navis (ToadMan's 0x1D8, BN4's GutsMan's 0x384)");
+	CHECK(chip_targets_name(0x01) == 0x01 && chip_targets_name(0xAE) == 0xAE && chip_targets_name(0x100) == 0x100 &&
+		chip_targets_name(0x1C3) == 0x1C3 && chip_targets_name(XV_IDS) == XV_IDS, "chip_targets: BN6's own ids, and one past the moved, as they are");
+	CHECK(CHIP_TARGETS_VIRUS <= 0xAE && CHIP_TARGETS_NAVI > 0xBA && CHIP_TARGETS_NAVI >= 0x100 && CHIP_TARGETS_NAVI <= 0x1C3,
+		"chip_targets: the stand-ins inside AquaNdl's and YoYo's ranges of their kind, outside the other's");
 	if (failures) { printf("%d check(s) failed\n", failures); return 1; }
 	printf("all core checks passed\n");
 	return 0;

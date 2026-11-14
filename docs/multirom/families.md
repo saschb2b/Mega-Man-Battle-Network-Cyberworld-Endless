@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted families"
 description: "Issue #82's virus families moved from BN5 into BN6's battle engine (`src/emu/xvirus.c`): generated recipes (`tools/xrecipe.py`), the all-or-nothing install, the engine's grown tables and second-level dispatch, all 25 families proved by `build.py xdiff`, and BN4's late families' rooms, numbers and pooled sounds."
 tags: [multirom, bn5]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T01:53:00Z }
 ---
 
 # Transplanted families
@@ -396,7 +396,13 @@ and its calls aimed again (`src/emu/xvirus.c`):
   one: in every spec only Zomon's object holds a chip, its own AreaGrab).
   A family's lookups by a range of NameIDs make their bounds in
   instructions, past an immediate's 255 for BN6's ids: a shim loads them
-  (`XvRange`, 12 families). BN5's virus dispatcher steps Dominerd and
+  (`XvRange`, 12 families). BN6's own chips that look their foes up by
+  such a range (AquaNdl's needles, YoYo's strike, the reticle over a foe)
+  ask for BN6's ids alone and found no moved family or Navi: AquaNdl
+  thrown at them struck nothing (issue #523). Hooks on those calls read
+  a moved family's NameID as a virus's and a moved Navi's as a Navi's
+  (`src/emu/chip_targets.c`; [The chip registry and BN5's chips' code](../rom/chips-code.md),
+  The chips' targets by NameID). BN5's virus dispatcher steps Dominerd and
   Appley before their state each frame, BN6's for no family's id: a hook
   on BN6's dispatcher runs BN5's step, ported (`XV_PRESTEP`). Dominerd wraps
   a generic state in a routine of its own, which is copied once more for

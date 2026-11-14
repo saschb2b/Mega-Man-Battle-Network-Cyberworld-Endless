@@ -26,6 +26,7 @@ needs.
 moving, into docs/clips/NAME.webm, .mp4, .png and .gif.
 
   python3 tools/before_after.py v0.21.0 --new 0.21.1 --clips compare-bn4-park
+  python3 tools/before_after.py v0.21.1 --new 0.21.2 --clips compare-bn5-aquandl
 """
 import argparse
 import os
@@ -192,6 +193,11 @@ WALKS = [
     ('compare-sky', AREA_1 + ['--net-biome', '2', '--seed', '2'], WEAK, 520, 760),
     ('compare-seaside', AREA_1 + ['--net-biome', '1', '--seed', '11'], WEAK, 640, 900),
     ('compare-undernet', AREA_1 + ['--net-biome', '5', '--seed', '4'], WEAK, 680, 940),
+    # (0.21.2's: AquaNdl1 C thrown at BN5's CanGard and Cactikil and BN4's
+    # Walla, issue #523: nothing found before, a needle on each after)
+    ('compare-bn5-aquandl', ['--scene', 'emu', '--net-biome', '0', '--run-depth', '4', '--seed', '4', '--dev', 'quiet,god', '--input',
+                             '300:,' + '4:A,26:,' * 20 + '0:chip 61 C 30,0:foes 200@41/272@52/2d2@63,270:,6:A,30:,6:START,14:,6:A,200:,6:A,300:'],
+     {}, 1390, 1560),
 ]
 FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 

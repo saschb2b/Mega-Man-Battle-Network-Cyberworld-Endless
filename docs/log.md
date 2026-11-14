@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Add**: releases/v0.21.2.md (the players' notes of 0.21.2, "Needles that land, a Switch that starts.": AquaNdl1 at BN5's and BN4's viruses before and after as a moving picture, the Switch build starting its runs, both players credited). **Update**: releases/overview.md and releases/index.md (its line), code/site-and-media.md (`docs/clips/compare-*` films a battle too), code/layers.md (v0.21.2's row of numbers), devtools/old-checkpoint.md (0.21.2's candidate continuing 0.21.0's and 0.21.1's runs: ok).
+* **Update**: rom/chips-code.md (a row for the chips' targets by NameID: object_getEnemyByNameRange's callers that aim the player's chips, AquaNdl's, YoYo's and the reticle's, hooked so they find the moved foes, issue #523), multirom/families.md (BN6's chips that look their foes up by NameID, aimed at the moved families too), code/emu.md (chip_targets.c).
 * **Add**: releases/v0.21.1.md (the players' notes of 0.21.1, "The net, drawn as its maps draw it.": the net's floors before and after as moving pictures, one walk in both builds side by side, roads on the way out, each area's own pieces, the Undernet's fire bowls, Depth lighting, the freeze fix). **Update**: releases/overview.md and releases/index.md (its line), GUIDE.md (Depth lighting under Display's lines), code/site-and-media.md (`docs/clips/compare-*`, `tools/before_after.py --clips`), code/layers.md (v0.21.1's row of numbers), devtools/old-checkpoint.md (0.21.1's candidate continuing 0.20.0's and 0.21.0's runs: ok; `SOULS_FACE_PALS` moved 0x60, 0.20.0's two words carried).
 * **Update**: world/level-design/side-pieces.md (CopyBot Comp's crystal spikes behind its plateaus; End Area and Oran Area tried and left).
 
