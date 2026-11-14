@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-14
+* **Update**: devtools/profiling.md (learning the areas' maps: tl_skipped kept a panel with the map's view; over every area 11.1 to 4.5 seconds, BN4's area 34 3.1 to 0.25, the layers the same).
 * **Update**: devtools/profiling.md (the pieces' search: each shape's suiting panels listed once a map's laying; the pick over every area 7.8 to 7.2 seconds, BN5's Undernet 27.0 to 24.4 billion instructions, the layers the same).
 * **Update**: devtools/profiling.md (the lab's seeds a count a layout, as the atlas reads them, and another game's areas as aN; the tiles' pick in another game's areas: a book's panels found by place from a grid, the pick over every area 13.3 to 7.8 seconds, the layers the same).
 * **Update**: devtools/profiling.md (the layer lab: tools/layer_bench.py, every area's layers by a base and a change, compared byte for byte, each part's time and instructions; log.txt's net: line; over every area the tiles' pick and the learning are where the time is), devtools/atlas.md (the report's parts and coordinate hash, learn.txt), code/tools.md (tools/layer_bench.py), code/core.md (stopwatch.c).
