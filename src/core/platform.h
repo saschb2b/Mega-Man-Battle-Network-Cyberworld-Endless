@@ -130,6 +130,11 @@ void platform_frame_parts(uint64_t update, uint64_t draw);
  * the frame log's line names the dearest parts' means a frame, for finding
  * what keeps a system from its 60 frames (frame_log.c) */
 void frame_log_part(const char *name, uint64_t ticks);
+/* ... a part begun (its counter, 0 with the frame log off) and ended */
+static inline uint64_t frame_part_begin(void) { return platform_frame_log ? SDL_GetPerformanceCounter() : 0; }
+static inline void frame_part_end(const char *name, uint64_t begun) {
+	if (platform_frame_log) frame_log_part(name, SDL_GetPerformanceCounter() - begun);
+}
 /* The canvas as drawn so far on the display at once, before a long wait
  * (no frame counted; none headless). */
 /* A picture under the canvas (voxel mode's, src/emu/voxel_scene.c): at

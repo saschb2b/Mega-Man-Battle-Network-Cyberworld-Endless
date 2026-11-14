@@ -59,9 +59,13 @@ void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note,
 
 int cinema_note_height(void) { return C.note_len && !C.off_map ? TEXT_H + 6 : 0; }
 
+/* (each card's own number: the drawn card's texture is of one) */
+static int card_serial;
+
 static void card(int kind, const char *top, const char *name, const char *l1, const char *l2, SDL_Color accent, int frames) {
 	C.card = kind;
 	C.card_t = 0;
+	++card_serial;
 	C.card_len = frames;
 	snprintf(C.top, sizeof C.top, "%s", top ? top : "");
 	snprintf(C.name, sizeof C.name, "%s", name ? name : "");
@@ -205,19 +209,57 @@ static void draw_grand(int x0, int y0) {
 	text_draw(x0 + CORE_W / 2 - (255 - ep) * 90 / 255, mid + 24, C.line1, with_alpha(rgba(224, 224, 240, 255), a * ep / 255), TEXT_CENTER);
 }
 
-static void draw_area(int x0, int y0) {
-	int a = card_alpha();
+/* The area card's parts at (x0, y0), `a` its opacity and `t` its frame */
+static void area_parts(int x0, int y0, int a, int t) {
 	int y = y0 + 44;
 	fill_rect(x0, y - 8, CORE_W, C.line3[0] ? 92 : C.line2[0] ? 80 : 68, rgba(0, 0, 16, 150 * a / 255));
-	text_draw(x0 + CORE_W / 2, y, C.top, with_alpha(C.accent, a * ease(C.card_t, 0) / 255), TEXT_CENTER);
-	int in = ease(C.card_t, 4);
+	text_draw(x0 + CORE_W / 2, y, C.top, with_alpha(C.accent, a * ease(t, 0) / 255), TEXT_CENTER);
+	int in = ease(t, 4);
 	int sc = name_scale(C.name);
 	text_draw_scaled(x0 + CORE_W / 2, y + 12 + (2 - sc) * TEXT_H / 2 - (255 - in) * 8 / 255, C.name, with_alpha(WHITE, a * in / 255), TEXT_CENTER, sc);
-	int line = 150 * ease(C.card_t, 10) / 255;
+	int line = 150 * ease(t, 10) / 255;
 	fill_rect(x0 + (CORE_W - line) / 2, y + 38, line, 1, with_alpha(C.accent, a));
-	text_draw(x0 + CORE_W / 2, y + 42, C.line1, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 14) / 255), TEXT_CENTER);
-	text_draw(x0 + CORE_W / 2, y + 42 + TEXT_H, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 18) / 255), TEXT_CENTER);
-	if (C.line3[0]) text_draw(x0 + CORE_W / 2, y + 42 + 2 * TEXT_H, C.line3, with_alpha(rgba(216, 216, 232, 255), a * ease(C.card_t, 22) / 255), TEXT_CENTER);
+	text_draw(x0 + CORE_W / 2, y + 42, C.line1, with_alpha(rgba(216, 216, 232, 255), a * ease(t, 14) / 255), TEXT_CENTER);
+	text_draw(x0 + CORE_W / 2, y + 42 + TEXT_H, C.line2, with_alpha(rgba(216, 216, 232, 255), a * ease(t, 18) / 255), TEXT_CENTER);
+	if (C.line3[0]) text_draw(x0 + CORE_W / 2, y + 42 + 2 * TEXT_H, C.line3, with_alpha(rgba(216, 216, 232, 255), a * ease(t, 22) / 255), TEXT_CENTER);
+}
+
+/* The card whole once its parts have come in (its last line EASE_IN
+ * frames after its 22nd), drawn once into a texture: drawn anew each frame,
+ * its box and lines blended on the canvas a pixel at a time, it cost the
+ * 3DS's frame 5.6 ms of its 16.7 for the seconds it stood */
+#define CARD_STILL (22 + EASE_IN)
+static struct { SDL_Texture *tex; int serial, lost, h; } still;
+
+static bool area_still(int x0, int y0) {
+	int h = C.line3[0] ? 92 : C.line2[0] ? 80 : 68;
+	if (!still.tex || still.serial != card_serial || still.lost != P.textures_lost || still.h != h) {
+		if (still.tex && still.lost == P.textures_lost) SDL_DestroyTexture(still.tex);
+		still.tex = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_TARGET, CORE_W, h);
+		still.serial = card_serial;
+		still.lost = P.textures_lost;
+		still.h = h;
+		SDL_Texture *was = SDL_GetRenderTarget(P.renderer);
+		if (!still.tex || SDL_SetRenderTarget(P.renderer, still.tex)) {
+			if (still.tex) SDL_DestroyTexture(still.tex);
+			still.tex = NULL;
+			return false;
+		}
+		SDL_SetRenderDrawBlendMode(P.renderer, SDL_BLENDMODE_NONE);
+		SDL_SetRenderDrawColor(P.renderer, 0, 0, 0, 0);
+		SDL_RenderClear(P.renderer);
+		area_parts(0, -36, 255, CARD_STILL);
+		SDL_SetRenderTarget(P.renderer, was);
+		SDL_SetTextureBlendMode(still.tex, SDL_BLENDMODE_BLEND);
+	}
+	SDL_SetTextureAlphaMod(still.tex, (Uint8)card_alpha());
+	SDL_RenderCopy(P.renderer, still.tex, NULL, &(SDL_Rect){ x0, y0 + 36, CORE_W, h });
+	return true;
+}
+
+static void draw_area(int x0, int y0) {
+	if (C.card_t >= CARD_STILL && area_still(x0, y0)) return;
+	area_parts(x0, y0, card_alpha(), C.card_t);
 }
 
 /* Whether the pixel (x, y) lies in the triangle */

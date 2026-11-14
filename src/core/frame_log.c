@@ -114,8 +114,10 @@ void frame_log_present(uint64_t present) {
 		/* (and reads of the game that waited, drawing, for the next frame) */
 		if (emu_draw_waits) {
 			size_t k = strlen(bottom);
-			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing", emu_draw_waits);
+			snprintf(bottom + k, sizeof bottom - k, "; %d reads of the game waited while drawing%s%s", emu_draw_waits, emu_draw_waited ? ", the last in " : "",
+				emu_draw_waited ? emu_draw_waited : "");
 			emu_draw_waits = 0;
+			emu_draw_waited = NULL;
 		}
 #ifdef __3DS__
 		/* (and the heap, whose high-water mark a layer's learning raises:

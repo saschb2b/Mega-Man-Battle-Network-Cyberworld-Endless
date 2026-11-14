@@ -27,9 +27,12 @@
 
 /* (a part of the frame timed for the frame log, where it is on: platform.h, frame_log_part) */
 #define TIMED(name, call) do { \
-		uint64_t t0_ = platform_frame_log ? SDL_GetPerformanceCounter() : 0; \
+		uint64_t t0_ = frame_part_begin(); \
+		const char *was_ = emu_draw_part; \
+		emu_draw_part = name; \
 		call; \
-		if (platform_frame_log) frame_log_part(name, SDL_GetPerformanceCounter() - t0_); \
+		emu_draw_part = was_; \
+		frame_part_end(name, t0_); \
 	} while (0)
 
 

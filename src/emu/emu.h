@@ -58,6 +58,9 @@ void emu_sync(void);
  * which the frame log shows). */
 extern bool emu_drawing;
 extern int emu_draw_waits;
+/* ... the part of the drawing under way (frame_log_part's name, NULL none),
+ * and the last a read waited in */
+extern const char *emu_draw_part, *emu_draw_waited;
 /* Ends the core's thread, before the program ends. */
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */

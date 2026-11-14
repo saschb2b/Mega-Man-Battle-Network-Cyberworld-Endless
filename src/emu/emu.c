@@ -268,13 +268,17 @@ static void worker_entry(void *arg) { worker_main(arg); }
  * the frame its present; the drawing takes what it reads from the update) */
 bool emu_drawing;
 int emu_draw_waits;
+const char *emu_draw_part, *emu_draw_waited;
 
 static void (*after_frame)(void);
 void emu_after_frame(void (*step)(void)) { after_frame = step; }
 
 static void wait_frame(void) {
 	if (!in_flight) return;
-	emu_draw_waits += emu_drawing;
+	if (emu_drawing) {
+		++emu_draw_waits;
+		if (emu_draw_part) emu_draw_waited = emu_draw_part;
+	}
 	SDL_SemWait(done);
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);

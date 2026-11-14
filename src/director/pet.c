@@ -113,10 +113,16 @@ void pet_leave(void) {
 }
 
 void pet_draw(void) {
+	uint64_t t = frame_part_begin();
 	if (home_gate_asking()) netpass_screen_strip();
 	netpass_screen_draw();
+	frame_part_end("netpass", t);
+	t = frame_part_begin();
 	jukebox_draw();
+	frame_part_end("jukebox", t);
+	t = frame_part_begin();
 	library_draw();
+	frame_part_end("library", t);
 }
 
 uint32_t pet_keys(uint32_t keys) {
