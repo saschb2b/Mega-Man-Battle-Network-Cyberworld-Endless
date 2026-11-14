@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T01:53:00Z
+* **Update**: rom/chips-code.md (a row for the chips' targets by NameID: object_getEnemyByNameRange's callers that aim the player's chips, AquaNdl's, YoYo's and the reticle's, hooked so they find the moved foes, issue #523), multirom/families.md (BN6's chips that look their foes up by NameID, aimed at the moved families too), code/emu.md (chip_targets.c).
