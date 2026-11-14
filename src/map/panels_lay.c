@@ -49,6 +49,11 @@ typedef struct { int8_t book[PANEL_TILES]; uint16_t index[PANEL_TILES]; } Pieced
 #define REACH 8
 typedef struct { uint16_t near, wide, up, down, on; } View;   /* (on: the panels it lies on, none beside) */
 
+/* A panel whose tiles suit a shape (book, panel, the slots they suit), and
+ * a shape's list of them (likes_of) */
+typedef struct { int8_t k; uint16_t c, like; } Liked;
+struct Likes { uint32_t shape; int n; Liked *e; };
+
 /* The floor's panels a map shows, w x h from (A0, B0), each with its shape
  * (0: no floor in or around it) and the panel laid on it (book, index; book
  * -1 none), or its pieces (`pieced`, -1 none; book and index then its first
@@ -68,6 +73,8 @@ typedef struct {
 	View view[PANEL_TILES];   /* what each slot's tile shows */
 	int8_t slot[64];          /* a phase's slot on this map, -1 none */
 	bool *lend;               /* per book: whether its panels are laid here */
+	struct Likes *likes;      /* the panels each shape's slots suit (likes_of) */
+	int nlikes, caplikes;
 } Laid;
 
 /* Whether a rule of the thin books' laying holds on grid g. */
@@ -237,6 +244,8 @@ static void laid_close(Laid *d) {
 	free(d->apart);
 	free(d->pieces);
 	free(d->lend);
+	for (int i = 0; i < d->nlikes; ++i) free(d->likes[i].e);
+	free(d->likes);
 }
 
 /* The panel that suits the floor's panel i best, of the books' with its
@@ -336,32 +345,72 @@ static bool lends_pieces(const TileGrid *g, const Laid *d, const TilePanels *p, 
 	return !(g->rules & LAY_RIM_OWN && d->shape[i] >> 18 & 0x1FF && !(p->panel[c].shape >> 18 & 0x1FF));
 }
 
+/* For one shape, the panels whose tiles suit it in some slot (slots_like,
+ * not tight), in the books' order, with those slots: what the pieces'
+ * search tried of every panel of every book for each panel of the floor,
+ * for each of its slots still open and round after round, depends on the
+ * shape alone (the slots' views and the books lent are the map's). Asked
+ * once a shape: in BN5's Undernet the trying was a quarter of making a
+ * layer (docs/devtools/profiling.md). NULL without memory for it. */
+static const struct Likes *likes_of(Laid *d, int nbooks, uint32_t shape) {
+	for (int j = 0; j < d->nlikes; ++j)
+		if (d->likes[j].shape == shape) return &d->likes[j];
+	if (d->nlikes == d->caplikes) {
+		int cap = d->caplikes ? 2 * d->caplikes : 16;
+		struct Likes *more = realloc(d->likes, (size_t)cap * sizeof *more);
+		if (!more) return NULL;
+		d->likes = more;
+		d->caplikes = cap;
+	}
+	struct Likes l = { shape, 0, NULL };
+	int cap = 0;
+	for (int k = 0; k < nbooks; ++k)
+		for (int c = 0; d->lend[k] && c < d->books[k].panels.n + d->books[k].panels.npart; ++c) {
+			unsigned like = slots_like(d->view, &d->books[k].panels.panel[c], shape, false);
+			if (!like) continue;
+			if (l.n == cap) {
+				Liked *more = realloc(l.e, (size_t)(cap = cap ? 2 * cap : 64) * sizeof *more);
+				if (!more) { free(l.e); return NULL; }
+				l.e = more;
+			}
+			l.e[l.n++] = (Liked){ (int8_t)k, (uint16_t)c, (uint16_t)like };
+		}
+	d->likes[d->nlikes] = l;
+	return &d->likes[d->nlikes++];
+}
+
+/* The pieces' search for the floor's panel i (loose: lay_pieces'), and
+ * its best so far: its score (-1 none), book, panel and slots. */
+typedef struct { size_t i; bool loose; int score, k, c; unsigned like; } Best;
+
+/* Book k's panel c tried, the slots it suits that are still open `like`:
+ * kept in *b where it scores higher. */
+static void consider(const TileGrid *g, const Laid *d, int k, int c, unsigned like, Best *b) {
+	size_t i = b->i;
+	if (!like || !lends_pieces(g, d, &d->books[k].panels, c, i)) return;
+	int A = d->A0 + (int)(i % d->w), B = d->B0 + (int)(i / d->w), alike;
+	int cont = suits(d, k, c, A, B, true, &alike), score = cont * 64 + __builtin_popcount(like) * MOST + alike;
+	/* (off the floor, only as a map lays it beside what is laid) */
+	if (!cont && !b->loose && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) return;
+	if (score > b->score) { b->score = score; b->k = k; b->c = c; b->like = like; }
+}
+
 static bool lay_pieces(const TileBook *books, int nbooks, const TileGrid *g, Laid *d, size_t i, bool loose) {
-	int A = d->A0 + (int)(i % d->w), B = d->B0 + (int)(i / d->w), at = d->pieced[i];
+	int at = d->pieced[i];
 	unsigned left = 0xFFFF;
 	bool any = false;
 	for (int s = 0; at >= 0 && s < PANEL_TILES; ++s)
 		if (d->pieces[at].book[s] >= 0) left &= ~(1u << s);
+	const struct Likes *likes = likes_of(d, nbooks, d->shape[i]);
 	while (left) {
-		int best = -1, best_k = 0, best_c = 0, alike;
-		unsigned best_like = 0;
-		for (int k = 0; k < nbooks; ++k) {
-			const TilePanels *p = &books[k].panels;
-			if (!d->lend[k]) continue;
-			for (int c = 0; c < p->n + p->npart; ++c) {
-				unsigned like = slots_like(d->view, &p->panel[c], d->shape[i], false) & left;
-				if (!like || !lends_pieces(g, d, p, c, i)) continue;
-				int cont = suits(d, k, c, A, B, true, &alike), score = cont * 64 + __builtin_popcount(like) * MOST + alike;
-				/* (off the floor, only as a map lays it beside what is laid) */
-				if (!cont && !loose && !((d->shape[i] >> 18 | d->shape[i] >> 9) & 0x10)) continue;
-				if (score <= best) continue;
-				best = score;
-				best_k = k;
-				best_c = c;
-				best_like = like;
-			}
-		}
-		if (best < 0) break;
+		Best b = { i, loose, -1, 0, 0, 0 };
+		for (int j = 0; likes && j < likes->n; ++j) consider(g, d, likes->e[j].k, likes->e[j].c, likes->e[j].like & left, &b);
+		for (int k = 0; !likes && k < nbooks; ++k)
+			for (int c = 0; d->lend[k] && c < books[k].panels.n + books[k].panels.npart; ++c)
+				consider(g, d, k, c, slots_like(d->view, &books[k].panels.panel[c], d->shape[i], false) & left, &b);
+		if (b.score < 0) break;
+		int best_k = b.k, best_c = b.c;
+		unsigned best_like = b.like;
 		if (at < 0) {
 			if ((at = pieced_new(d)) < 0) return false;
 			d->pieced[i] = (int16_t)at;
