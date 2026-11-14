@@ -11,9 +11,9 @@ drawable, the tiles picked, the coordinate data), base against change: in
 milliseconds here, or in instructions with --callgrind (Valgrind in the
 build image; slower, exact, the measure for a slow CPU).
 
-    python3 tools/layer_bench.py                       # origin/dev against this tree, seeds 1-4
-    python3 tools/layer_bench.py --base HEAD~1 --seeds 1-2 --biomes 0,3,8
-    python3 tools/layer_bench.py --callgrind           # instructions too (seed 1 alone by default)
+    python3 tools/layer_bench.py                       # origin/dev against this tree, a seed a layout
+    python3 tools/layer_bench.py --base HEAD~1 --seeds 3 --biomes 0,3,8
+    python3 tools/layer_bench.py --biomes a5 --callgrind   # another game's area 5 (NET_AREAS + 5), instructions too
     python3 tools/layer_bench.py --base-binary PATH    # a base built already
 
 The base is built once a commit in a worktree (.build/layer-bench/src,
@@ -177,17 +177,17 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
     ap.add_argument('--base', default='origin/dev', help='the commit to compare against (default origin/dev)')
     ap.add_argument('--base-binary', help='a base host binary built already')
-    ap.add_argument('--seeds', default='1-4', help="the atlas's seeds (default 1-4)")
-    ap.add_argument('--biomes', default='all', help="the atlas's areas (default all)")
+    ap.add_argument('--seeds', default='1', help='seeds a layout (default 1)')
+    ap.add_argument('--biomes', default='all', help="the atlas's areas: all, BN6's as a comma list (0,3,8), or aN, another game's area N (default all)")
     ap.add_argument('--callgrind', action='store_true', help='instructions by part too (Valgrind in the build image)')
-    ap.add_argument('--cg-seeds', default='1', help='the seeds under callgrind (default 1)')
+    ap.add_argument('--cg-seeds', default='1', help='seeds a layout under callgrind (default 1)')
     a = ap.parse_args()
     if a.base_binary:
         base, sha = os.path.abspath(a.base_binary), 'given'
     else:
         base, sha = base_binary(a.base)
     new = new_binary()
-    print(f'base {sha[:12]}, change this tree; areas {a.biomes}, seeds {a.seeds}; ROMs in {rom_dir()}')
+    print(f'base {sha[:12]}, change this tree; areas {a.biomes}, {a.seeds} seed(s) a layout; ROMs in {rom_dir()}')
     sb = atlas(base, 'base', a.biomes, a.seeds)
     sn = atlas(new, 'new', a.biomes, a.seeds)
     diffs = same(os.path.join(WORK, 'base'), os.path.join(WORK, 'new'))
@@ -206,7 +206,7 @@ def main():
         valgrind_image()
         ib = instructions(base, 'base', a.biomes, a.cg_seeds)
         inew = instructions(new, 'new', a.biomes, a.cg_seeds)
-        table(f'instructions, millions (callgrind, seeds {a.cg_seeds}; exact)', ib, inew, 'M', 1e6)
+        table(f'instructions, millions (callgrind, {a.cg_seeds} seed(s) a layout; exact)', ib, inew, 'M', 1e6)
     return 1 if diffs else 0
 
 

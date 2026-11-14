@@ -11,8 +11,14 @@
 #define NO_TILE PANEL_NO_TILE
 #define WALL_BAND 8   /* pixels over a floor's upper edge a wall on it may stand (tiles_learn.c) */
 
-/* The book's panel at (A, B), -1 none. */
+/* The book's panel at (A, B), -1 none: read from its grid where it has
+ * one (panels.c), else found by halving the book */
 static int panel_at(const TilePanels *p, int A, int B) {
+	if (p->grid) {
+		unsigned a = (unsigned)(A - p->grid_a0), b = (unsigned)(B - p->grid_b0);
+		int i = a < (unsigned)p->grid_w && b < (unsigned)p->grid_h ? p->grid[b * (unsigned)p->grid_w + a] : NO_TILE;
+		return i == NO_TILE ? -1 : i;
+	}
 	int lo = 0, hi = p->n + p->npart;
 	while (lo < hi) {
 		int mid = (lo + hi) / 2;

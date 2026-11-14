@@ -41,7 +41,7 @@ alone, or with BN5 and BN4 beside it (their installs and hashes count).
 
 A change that is to leave every layer as it was is checked by the
 [atlas](atlas.md): every area's layers drawn by the old binary and the
-new, `--atlas OUT:all:1-4`, the pictures compared byte for byte and the
+new, `--atlas OUT:all:1` (its last number the seeds a layout), the pictures compared byte for byte and the
 reports with their `built in N ms` taken out.
 
 ## The lab
@@ -51,8 +51,9 @@ and the installs around it. The lab measures every area's layers, without
 the game, and checks that a change leaves them as they were:
 
 ```sh
-python3 tools/layer_bench.py                        # origin/dev against this tree, every area, seeds 1-4
-python3 tools/layer_bench.py --base HEAD~1 --biomes 8 --seeds 1 --callgrind
+python3 tools/layer_bench.py                        # origin/dev against this tree, every area, a seed a layout
+python3 tools/layer_bench.py --base HEAD~1 --biomes 8 --seeds 3 --callgrind
+python3 tools/layer_bench.py --biomes a5            # another game's area 5 (NET_AREAS + 5: BN5's Undernet)
 ```
 
 `tools/layer_bench.py` builds the base commit once (a worktree in
@@ -73,11 +74,23 @@ On a player's system the same parts are in `log.txt`, a line a layer:
 coordinates 2` (`src/director/director_layer.c`; the maps learned only
 where their area's were not kept).
 
-Over every area (seeds 1-2, 139 layers; 14 November 2026, this machine)
+Over every area (a seed a layout, 139 layers; 14 November 2026, this machine)
 the picture is not the one a start in one area gave: the tiles' pick took
 13.2 of the 14.5 seconds of making the layers, learning the areas' maps
 11.0 more (once an area), the floor made drawable 1.1 and the coordinate
 data 0.2. The tiles' pick and the learning are where the time is.
+
+The lab's first find there: another game's areas pick far slower than
+BN6's (BN5's Undernet 483 ms a layer here, a BN6 Comp 18), and in them
+the pick spends its time laying the maps' whole panels
+(`src/map/panels_lay.c`), above all finding a book's panel by its place
+(`panel_at`): 45 million searches of a book sorted by place, 9.6 billion
+instructions of BN5's Undernet's 45.9. Each book now keeps a grid of its
+panels by place (`src/map/panels.c`; 3 KB for the largest book, the 3DS's
+modelled heap the same to 0.01 MB, `tools/heap3ds.py`), which the search
+reads: over every area the pick 13.3 to 7.8 seconds and making the layers
+14.5 to 9.1, BN5's Undernet 35.7 to 27.0 billion instructions; every layer
+the same.
 
 ## What the profile of 14 November 2026 found
 
@@ -103,7 +116,7 @@ Where it went before, by what each part runs:
   (the clean callback reads the cells alone, `legal.h`), the grid's
   pieces are counted once an edit, and the flood fill runs in a copy
   ringed with walls, without bounds: 0.30 billion, and every area's
-  layers the same byte for byte (139 layers, 1,077 pictures, seeds 1-4).
+  layers the same byte for byte (139 layers, 1,077 pictures, a seed a layout).
 - **Each ROM's SHA-1** at the start (`src/core/rom.c`): 0.33 billion a
   ROM, its 8 MB hashed. The rounds unrolled with the words'
   roles turned by name: 0.24 billion, the same hashes (`test_sha1`, and
@@ -143,7 +156,9 @@ Where it went before, by what each part runs:
 The same start, BN6 alone, after: 1.50 billion; with BN5 and BN4, 2.29. Of a layer's 1.0 billion: the tiles' pick 0.35, the floor's fix 0.30, learning the area's maps 0.29.
 
 - **Picking the tiles** (`tiles_pick`, 0.32 billion over 11,851 calls),
-  `best`'s own comparisons the most of it.
+  `best`'s own comparisons the most of it; in another game's areas,
+  laying the maps' panels (`panels_lay`: `slots_like`, `suits`) after
+  the grid.
 - **Learning the area's original maps** (`nm_learn`, 0.36 billion), done
   again when a run comes back to an area (`3ds/README.md`, "learned
   again").
