@@ -3,7 +3,7 @@ type: Tool
 title: "An old checkpoint: the last release's run continued"
 description: "`tools/old_checkpoint.py` saves a run with the last releases' own builds, continues it in this build and plays it on by the autopilot, failing where the game stands still, and lists what the old state's RAM still holds that this build's own run does not."
 tags: [devtools, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 ---
 
 # An old checkpoint: the last release's run continued
