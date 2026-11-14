@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T05:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
 ---
 
 # The player's guide
@@ -1033,6 +1033,16 @@ back what an import replaced. Runs from two devices are never merged;
 controls, screen settings, volumes and your statistics answer stay on
 each. In the browser, **Save backup** in the player's menu opens SAVES
 over the title, and **Load backup** opens it with the file chooser.
+
+To move them without copying a file, choose **SAVES › SEND**: the game
+puts that same file on its server and shows a ten-digit code. On the
+other device, within 15 minutes, choose **SAVES › RECEIVE** and type the
+code (the keys on the screen, or a keyboard's digits); the two saves are
+compared there as with IMPORT. A code works once. The file is locked
+with the code before it leaves, so the server cannot read it, and it is
+gone once received or after its 15 minutes. Every system with the Net
+Square sends and receives, the browser too; it needs a connection to the
+official server, and nothing else of yours goes with it.
 
 On Android, an iPhone or an iPad the game keeps that file in your ROM
 folder, or one you choose with **FOLDER**, a few seconds after each save.

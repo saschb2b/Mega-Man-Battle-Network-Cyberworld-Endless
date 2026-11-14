@@ -3,7 +3,7 @@ type: Feature
 title: "The server and the wire"
 description: "Protocol v18, binary over a WebSocket: what each version since v7 added, what the server refuses and bounds (NOTICE 28 without the full set), and the official server's moderation and how long it keeps what."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
 ---
 
 # The server and the wire
@@ -64,6 +64,10 @@ Board for 14 days, and its daily totals, with no names, for a year at
 `log_days`, `backup_days`, `stats_days`), each pruned by the server itself
 (`retention.py`) and by its backup service (`backup.py`, a second
 service of `deploy/coolify/compose.yaml`). The console's log names no
-player. `--admin forget` answers a request to be removed. It follows
+player. Saves sent by a code ([Portable saves](../engine/saves.md),
+Sending by code) it holds sealed, unreadable to it, in memory alone for
+15 minutes or until taken, never in a file, a log or a backup, and
+counts only how many were held and taken a day.
+`--admin forget` answers a request to be removed. It follows
 `dev` until the release that ships online play, then `main`
 ([server/README.md, At a release](../../server/README.md#at-a-release-the-official-server-follows-main)).

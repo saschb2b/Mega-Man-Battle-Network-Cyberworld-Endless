@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "analytics_net.h"
 #include "backup.h"
 #include "capture.h"
 #include "compat.h"
@@ -24,6 +23,7 @@
 #include "rom.h"
 #include "sound_filter.h"
 #include "sound_heard.h"
+#include "start_net.h"
 #include "touch.h"
 #ifdef CW_IOS
 #include "ios.h"
@@ -315,8 +315,8 @@ void player_files(bool headless, int smooth_arg, const SoundArgs *sound, const c
 	feel_set_level(feel_level());
 	feel_trace(dev.feel);
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
-	 * view where it is yes: analytics.h) */
-	analytics_net_start(headless, plain);
+	 * view where it is yes: analytics.h; SAVES' saves sent by a code) */
+	start_net(headless, plain);
 	/* (BN5's boot state, which its battles on a second core kept beside the
 	 * saves until issue #82 brought every battle into BN6's engine: gone,
 	 * once, from a data folder that has it; docs/multirom/) */

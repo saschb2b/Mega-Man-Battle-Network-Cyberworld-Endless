@@ -8,8 +8,11 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include <stdint.h>
+
 #include "backup.h"
 #include "mirror.h"
+#include "transfer_link.h"
 
 /* The screen's title and its back button */
 const char *saves_word_title(void);
@@ -47,5 +50,15 @@ const char *saves_waiting(int action);
 const char *saves_cancelled(int action);
 /* A checkpoint that would not load after an import */
 const char *saves_no_continue(void);
+
+/* Saves sent by a code (saves_code.h): a code as shown, two groups of
+ * five; RECEIVE's digits typed so far, a dash for each still to come;
+ * how long a sent code holds (`ms` left); RECEIVE's ask; and SEND's or
+ * RECEIVE's line for the link's state (`expired`: a sent code's time up) */
+void saves_code_shown(const char *code, char *out, size_t n);
+void saves_code_typed(const char *code, char *out, size_t n);
+void saves_code_left(uint32_t ms, char *out, size_t n);
+const char *saves_code_prompt(void);
+void saves_code_words(const TransferState *s, bool receiving, bool expired, char *out, size_t n);
 
 #endif

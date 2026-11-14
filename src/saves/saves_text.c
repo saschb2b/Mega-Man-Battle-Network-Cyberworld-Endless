@@ -29,7 +29,16 @@ const char *saves_label(int action) {
 	case SAVES_KEEP: return "KEEP THESE";
 	case SAVES_TAKE: return SV.have || SV.unreadable ? "USE THE FILE'S" : "BRING BACK";
 	case SAVES_CONTINUE: return "CONTINUE";
-	default: return "DONE";
+	case SAVES_SEND: return "SEND";
+	case SAVES_RECEIVE: return "RECEIVE";
+	case SAVES_ERASE: return "ERASE";
+	case SAVES_GET: return "OK";
+	default:
+		if (action >= SAVES_DIGIT && action < SAVES_DIGIT + 10) {
+			static const char *const digits[10] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+			return digits[action - SAVES_DIGIT];
+		}
+		return "DONE";
 	}
 }
 
@@ -153,4 +162,59 @@ const char *saves_waiting(int action) {
 
 const char *saves_cancelled(int action) {
 	return action == SAVES_EXPORT ? "Nothing exported." : action == SAVES_IMPORT ? "Nothing imported." : "The folder is as it was.";
+}
+
+/* (saves sent by a code: SEND's and RECEIVE's words) */
+
+void saves_code_shown(const char *code, char *out, size_t n) { snprintf(out, n, "%.5s %.5s", code, strlen(code) > 5 ? code + 5 : ""); }
+
+void saves_code_typed(const char *code, char *out, size_t n) {
+	char all[11];
+	size_t k = strlen(code);
+	for (size_t i = 0; i < 10; ++i) all[i] = i < k ? code[i] : '-';
+	all[10] = 0;
+	saves_code_shown(all, out, n);
+}
+
+void saves_code_left(uint32_t ms, char *out, size_t n) {
+	unsigned minutes = (ms + 59999) / 60000;
+	if (ms < 60000) snprintf(out, n, "Works once, for under a minute.");
+	else snprintf(out, n, "Works once, for %u more minutes.", minutes);
+}
+
+const char *saves_code_prompt(void) { return "Type the code your other system shows after SEND."; }
+
+static const char *trouble(const TransferState *s, char *busy, size_t n) {
+	switch (s->trouble) {
+	case TRANSFER_UNREACHED: return "The server could not be reached.";
+	case TRANSFER_BUSY: {
+		unsigned minutes = (s->wait_s + 59) / 60;
+		snprintf(busy, n, "The server is busy. Try again in %u minute%s.", minutes ? minutes : 1, minutes > 1 ? "s" : "");
+		return busy;
+	}
+	case TRANSFER_NO_SAVES: return "Nothing waits under that code. A code works once, for 15 minutes.";
+	case TRANSFER_OFF: return "This server takes no saves yet.";
+	case TRANSFER_DAMAGED: return "What came could not be opened.";
+	case TRANSFER_TOO_BIG: return "These saves are too big to send.";
+	default: return "Not enough memory for this.";
+	}
+}
+
+void saves_code_words(const TransferState *s, bool receiving, bool expired, char *out, size_t n) {
+	char busy[96];
+	int percent = s->size ? (int)((uint64_t)s->moved * 100 / s->size) : 0;
+	out[0] = 0;
+	switch (s->phase) {
+	case TRANSFER_WORKING:
+		if (!s->moved) snprintf(out, n, "%s", receiving ? "Asking the server..." : "Sending...");
+		else snprintf(out, n, "%s: %d%%", receiving ? "Receiving" : "Sending", percent);
+		break;
+	case TRANSFER_SENT:
+		snprintf(out, n, "%s", expired ? "This code's time is up. SEND makes a new one." : "On your other system: SAVES, then RECEIVE.");
+		break;
+	case TRANSFER_FAILED:
+		snprintf(out, n, "%s%s", trouble(s, busy, sizeof busy), receiving ? "\nYour saves are kept." : "");
+		break;
+	default: break;
+	}
 }

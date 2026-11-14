@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Send your saves to another device with a code.** SAVES (L on the
+  title) has **SEND**: the game puts your saves on its server and shows
+  a ten-digit code. On the other device, **SAVES › RECEIVE**, type the
+  code, and the two saves are compared as with IMPORT, **UNDO IMPORT**
+  after. No account and no file to copy. A code works once, for 15
+  minutes; the saves are locked with it before they leave, so the server
+  cannot read them, and are gone once received. Every system with the
+  Net Square sends and receives, the browser too.
 - **The music plays on under the game's own menus.** Options, the
   touch controls' menu, the Library, a reward pick and the Battle Lab's
   builder used to cut the music dead while they were up. Now the song

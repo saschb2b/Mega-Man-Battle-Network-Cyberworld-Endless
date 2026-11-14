@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "Portable saves"
-description: "Portable saves (issue #114): the SAVES screen's three views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, and the automatic copy (`mirror.c`)."
+description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code over the Net Square's server (`saves_code.c`, `transfer.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
 ---
 
 # Portable saves
@@ -268,6 +268,90 @@ path, an Android document tree's URI, or an iOS folder's resolved URL.
 `savedata.old/`, that is all SAVES keeps in the data folder; its
 temporary files (an export's, a picked file's copy) are removed once
 written or read.
+
+## Sending by code
+
+SEND and RECEIVE move the same `.cwsave` file over the official Net
+Square's server, for a player who asked to "load my save file through
+internet without copy the file physically" (GitHub discussion 5,
+November 2026). A copy by hand or the automatic copy's folder still
+work; this is the way with no file to carry.
+
+**Design.** Five agents weighed it in November 2026 (prior art, the
+server, the UX through the game-design skill, a devil's advocate): an
+account or a Google sign-in costs every player a second screen and
+leaves the conflicts to be built anyway, and continuous sync is the most
+to build and keep for a demand not yet measured. The owner chose a
+one-shot code first (2026-11-14); the server's daily totals count the
+codes held and taken (`transfers_held`, `transfers_taken`,
+server/README.md), which says whether the next step, sync, is wanted. It
+stays a usability problem, as the rest of SAVES: no account, one code,
+nothing changed until the comparison's USE THE FILE'S, UNDO IMPORT after
+it.
+
+**The views.** Home shows SEND where the system has the link and saves
+to send, and RECEIVE where it has the link. SEND packs the saves as
+EXPORT does, seals them and hands them to the server; its view keeps
+this device's panel, then the code in letters twice the size, in two
+groups of five ("61626 62133"), "Works once, for 15 more minutes." and
+"On your other system: SAVES, then RECEIVE." While it sends it says
+"Sending: N%". SEND again with the same saves, while their code holds,
+shows that code again rather than another; leaving the view while it
+sends gives the sending up (a code shown stays with the server till its
+time is up). RECEIVE asks for the code: ten keys in a row (1 to 9, then
+0; two rows of five on a narrow screen), ERASE and OK, the cursor on OK
+once the tenth digit is in; on the desktops and the browser a keyboard's
+digits type it too (`text_input.h`), Enter is OK and Escape goes back. The
+saves that come go to the comparison as an imported file's, THE FILE's
+panel naming the system and the time they were last played. Each failure
+says one line in gold, a receive's with "Your saves are kept.": the
+server not reached, busy (with the minutes to wait), nothing under that
+code ("A code works once, for 15 minutes."), a server that takes no saves
+yet (one from before them answers TRANSFER with an ERROR), saves that
+could not be opened, too big (more than 2 MiB sealed), or too little
+memory. Captured in `--scene saves` against a local server
+(`server/main.py`, `--dev online=ws://127.0.0.1:PORT/presence`): a send,
+its code typed on a fresh data folder, the comparison, the import, and
+CONTINUE on the sender's layer, every file the same but `profile.sav`,
+whose volumes the receiver keeps ([What travels](#what-travels)).
+
+**The code and the seal** (`src/online/transfer_box.c`). Ten digits from
+the system's random bytes (`network_identity`, a byte past 249 thrown
+away so each digit is as likely). Argon2id (Monocypher 4.0.2,
+[third_party/](../code/third-party.md); a megabyte, eight passes, the
+salt `cyberworld.transfer.v1`) makes a 32-byte key and a 16-byte
+lookup from them; the saves are sealed with XChaCha20-Poly1305, a random
+nonce and `CWT1` as their mark and associated data. The code itself is
+never sent: the server files the blob under the lookup and can open
+neither. Opening one without the code means trying codes, each an
+Argon2 run, up to ten billion of them; as the salt is fixed so that both
+systems make the same key, a table could be made once for every code,
+which the blob's fifteen minutes in the server's memory alone make worth
+little. What a code makes is pinned in `tests/test_transfer_code.c`: a
+change to it would break every transfer between builds before it and
+after.
+
+**The exchange** (`src/online/transfer.c`). shared/online/README.md
+(Saves sent by a code) has the wire: a connection to the Square's
+`/presence` whose first message is TRANSFER, over the Square's own
+socket on a thread of its own (`online_socket.h`; the browser's
+`online_browser.h` on its main thread, SAVES' frames moving it on), never
+while a visit is on, as SAVES opens only over the title and the ROMs
+screen. A put whose lookup the server holds already (TAKEN) is sealed
+again under a new code, three times at most. The server's side, its
+limits and what it keeps are server/README.md's. SAVES reaches it through
+`src/core/transfer_link.h`, which online's transfer sets at the start
+(`start_net.c`), as SAVES may not include online
+([the layers](../code/layers.md)); a system without the Square's socket
+(the PSP, a 3DS build without libcurl) has no link and shows neither
+button. The server is the official one, or `--dev online`'s.
+
+**Not yet.** Continuous sync: two systems linked once by such a code,
+the saves pulled at the title and pushed after each save, the comparison
+only where both moved on, and a run open on one system said on the
+other. Its design is the five agents' (the key handed over by the code,
+never made from it; the server a carrier, never the saves' only home),
+for when the daily totals show the codes in use.
 
 ## Platform boundary
 

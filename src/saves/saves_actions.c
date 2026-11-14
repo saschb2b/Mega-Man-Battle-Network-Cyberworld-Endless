@@ -13,6 +13,7 @@
 #include "rivals.h"
 #include "rom.h"
 #include "save.h"
+#include "saves_code.h"
 #include "saves_state.h"
 #include "saves_text.h"
 
@@ -26,9 +27,17 @@ int saves_actions(int *out) {
 	if (SV.view == SAVES_HOME) {
 		if (SV.have) out[n++] = SAVES_EXPORT;
 		out[n++] = SAVES_IMPORT;
+		if (saves_code_here() && SV.have) out[n++] = SAVES_SEND;
+		if (saves_code_here()) out[n++] = SAVES_RECEIVE;
 		if (SV.undo) out[n++] = SAVES_UNDO;
 		if (caps & SAVES_CAN_AUTO) out[n++] = SAVES_AUTO;
 		if (caps & SAVES_CAN_FOLDER) out[n++] = SAVES_FOLDER;
+	} else if (SV.view == SAVES_SEND_CODE) out[n++] = SAVES_DONE;
+	else if (SV.view == SAVES_RECEIVE_CODE) {
+		/* (the keys as a keyboard's row: 1 to 9, then 0) */
+		for (int d = 1; d <= 10; ++d) out[n++] = SAVES_DIGIT + d % 10;
+		out[n++] = SAVES_ERASE;
+		out[n++] = SAVES_GET;
 	} else if (SV.view == SAVES_COMPARE) {
 		if (SV.status != BACKUP_OK) out[n++] = SAVES_DONE;
 		else {
@@ -147,6 +156,7 @@ void saves_activate(int action) {
 	if (SV.busy) return;
 	SV.said[0] = 0;
 	if (R.data && action != SAVES_TAKE && action != SAVES_UNDO) audio_sfx(action == SAVES_KEEP || action == SAVES_DONE ? SFX_CANCEL : SFX_SELECT);
+	if (saves_code_press(action)) return;
 	switch (action) {
 	case SAVES_EXPORT: export_file(); break;
 	case SAVES_IMPORT: import_file(); break;
@@ -164,6 +174,7 @@ void saves_activate(int action) {
 	case SAVES_TAKE: take(); break;
 	case SAVES_CONTINUE: continue_run(); break;
 	default:
+		if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) saves_code_leave();
 		if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
 		else {
 			SV.view = SAVES_HOME;
