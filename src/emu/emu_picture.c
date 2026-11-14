@@ -11,9 +11,6 @@
 #include "lcd_frame.h"
 #include "online_visit.h"
 #include "platform.h"
-#ifdef __3DS__
-#include "present_3ds.h"
-#endif
 #include "stereo_scene.h"
 #include "voxel_scene.h"
 
@@ -41,23 +38,6 @@ void emu_picture_tint_world(uint32_t *px, int n) {
 
 static SDL_Texture *tex;
 
-#ifdef __3DS__
-/* The picture (mGBA's colours, 0x??BBGGRR) into the 3DS's canvas, RGBA8888,
- * its (0, 0) at the canvas's (x, y), what falls off it left out: past
- * SDL's queue of draws, flushed first so the scene's black stays under it */
-static void picture_into(SDL_Surface *canvas, const uint32_t *px, int x, int y) {
-	SDL_RenderFlush(P.renderer);
-	for (int j = 0; j < EMU_H; ++j) {
-		int cy = y + j, from = x < 0 ? -x : 0, to = canvas->w - x < EMU_W ? canvas->w - x : EMU_W;
-		if (cy < 0 || cy >= canvas->h) continue;
-		uint32_t *row = (uint32_t *)((uint8_t *)canvas->pixels + cy * canvas->pitch) + x;
-		for (int i = from; i < to; ++i) {
-			uint32_t c = px[j * EMU_W + i];
-			row[i] = (c & 0xFFu) << 24 | (c & 0xFF00u) << 8 | (c >> 8 & 0xFF00u) | 0xFFu;
-		}
-	}
-}
-#endif
 
 /* (a part of the picture timed for the frame log, and named while it runs: a read of the game in it that waits is told by it) */
 #define PART(name, call) do { \
@@ -104,15 +84,6 @@ void emu_picture_draw(int x, int y) {
 	 * keeps the HUD's pixels and is clear at the rest; not the 3DS's) */
 	static uint8_t hud[EMU_W * EMU_H];
 	bool voxel = voxel_scene_frame(px, hud);
-#else
-	/* (straight into the canvas's memory: through a texture and SDL's copy
-	 * onto the canvas, a copy each way, it took 1.7 ms of the 3DS's frame) */
-	SDL_Surface *canvas = present3ds_canvas();
-	if (canvas) {
-		PART("picture: 3d", stereo_scene_frame(px));
-		PART("picture: onto the canvas", picture_into(canvas, px, x, y));
-		return;
-	}
 #endif
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];

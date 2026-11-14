@@ -70,8 +70,6 @@ SDL_Surface *present3ds_init(int w, int h) {
 	return surface;
 }
 
-SDL_Surface *present3ds_canvas(void) { return surface; }
-
 void *present3ds_bottom(int *pitch) {
 	if (!bot_ready) {
 		bot_ready = true;   /* (tried once) */
