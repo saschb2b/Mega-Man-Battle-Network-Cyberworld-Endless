@@ -114,10 +114,10 @@ static void span_draw(const Place *p, int a, int b, int y, int rows, float at, f
 /* Whether a row is the world's whole */
 static bool all_world(const Present3dsRow *r) { return r->n <= 1 && (!r->n || !r->flat[0]); }
 
-/* A run of rows alike in their spans, over the sheared world: the gap
- * each world span leaves beside a flat one filled with its edge's column
- * drawn `wide` (under the same shear, it ends where the span begins), or,
- * not `sheared`, the flat spans where they are */
+/* A run of rows alike in their spans, over the sheared map: the gap each
+ * world span leaves beside a flat one filled with its edge's column drawn
+ * `wide` (under the same shear, it ends where the span begins), or, not
+ * `sheared`, the flat spans where they are */
 static void rows_draw(const Present3dsRow *r, const Place *p, int y, int rows, float wide, bool sheared) {
 	for (int i = 0; i < r->n; ++i) {
 		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : cw;
@@ -129,25 +129,65 @@ static void rows_draw(const Present3dsRow *r, const Place *p, int y, int rows, f
 	}
 }
 
-/* One eye's picture, `eye` -1 the left, +1 the right: the world as one
- * quad sheared by its rows' depth (a row's shift falls evenly to none at
- * the last), its gaps beside the flat spans filled, then the flat spans.
- * Drawn a few rows at a time, a battle's took twice the GPU's calls a
- * frame has room for. */
-static void eye_draw(const Present3dsStereo *st, int eye, const Place *p) {
-	float deepest = (float)eye * st->shift[0], slope = -deepest * p->sx / (159.0f * p->s);
-	C2D_ViewReset();
-	C2D_ViewTranslate(deepest * p->sx - slope * p->y0, 0.0f);
-	C2D_ViewShear(slope, 0.0f);
-	C2D_DrawImageAt((C2D_Image){ &tex, &sub }, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
-	for (int pass = 0; pass < 2; ++pass) {
-		if (pass) C2D_ViewReset();
-		for (int y = 0, rows; y < ch && y < 160; y += rows) {
-			rows = 1;
-			while (y + rows < ch && y + rows < 160 && !memcmp(&st->row[y + rows], &st->row[y], sizeof st->row[y])) ++rows;
-			if (!all_world(&st->row[y])) rows_draw(&st->row[y], p, y, rows, deepest + (deepest > 0 ? 1.0f : deepest < 0 ? -1.0f : 0.0f), !pass);
-		}
+/* The rows' spans, a run of rows alike at a time */
+static void spans_draw(const Present3dsStereo *st, const Place *p, float wide, bool sheared) {
+	for (int y = 0, rows; y < ch && y < 160; y += rows) {
+		rows = 1;
+		while (y + rows < ch && y + rows < 160 && !memcmp(&st->row[y + rows], &st->row[y], sizeof st->row[y])) ++rows;
+		if (!all_world(&st->row[y])) rows_draw(&st->row[y], p, y, rows, wide, sheared);
 	}
+}
+
+/* The view sheared so the canvas's first row moves `first` and its last `last` (the canvas's pixels) */
+static void shear_to(const Place *p, float first, float last) {
+	float slope = -(first - last) * p->sx / (159.0f * p->s);
+	C2D_ViewReset();
+	C2D_ViewTranslate(first * p->sx - slope * p->y0, 0.0f);
+	C2D_ViewShear(slope, 0.0f);
+}
+
+/* Only the pixels whose alpha passes `f` against `ref` drawn from here (citro2d's batch drawn first) */
+static void alpha_test(bool on, GPU_TESTFUNC f, int ref) {
+	C2D_Flush();
+	C3D_AlphaTest(on, f, ref);
+}
+
+/* One eye's picture, `eye` -1 the left, +1 the right: the moving
+ * background at its depth (first at the map's, which fills the gap it
+ * leaves beside the map's edge with its own), the map sheared by its rows'
+ * depth, its gaps beside the flat spans filled, each body upright at its
+ * depth, then the flat spans */
+static void eye_draw(const Present3dsStereo *st, int eye, const Place *p) {
+	C2D_Image all = { &tex, &sub };
+	float first = (float)eye * st->map_first, last = (float)eye * st->map_last;
+	if (st->sky_on) {
+		alpha_test(true, GPU_LESS, 0x40);
+		shear_to(p, first, last);
+		C2D_DrawImageAt(all, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
+		C2D_ViewReset();
+		C2D_DrawImageAt(all, p->x0 + (float)eye * st->sky * p->sx, p->y0, 0.5f, NULL, p->sx, p->s);
+		alpha_test(true, GPU_GREATER, 0x40);
+	}
+	shear_to(p, first, last);
+	C2D_DrawImageAt(all, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
+	alpha_test(false, GPU_ALWAYS, 0);
+	spans_draw(st, p, first + (first > 0 ? 1.0f : first < 0 ? -1.0f : 0.0f), true);
+	C2D_ViewReset();
+	alpha_test(true, GPU_GREATER, 0xC0);
+	for (int b = 0; b < st->nbodies; ++b) {
+		const int16_t *box = st->box[b];
+		if (box[2] > box[0] && box[3] > box[1]) span_draw(p, box[0], box[2], box[1], box[3] - box[1], (float)box[0] + (float)eye * st->box_shift[b], (float)(box[2] - box[0]));
+	}
+	alpha_test(false, GPU_ALWAYS, 0);
+	spans_draw(st, p, 0.0f, false);
+}
+
+/* The canvas drawn whole over what is there, its alpha the parts' marks
+ * and no one's opacity (the default's blending, after) */
+static void canvas_blend(bool replace) {
+	C2D_Flush();
+	if (replace) C3D_AlphaBlend(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_ONE, GPU_ZERO, GPU_ONE, GPU_ZERO);
+	else C3D_AlphaBlend(GPU_BLEND_ADD, GPU_BLEND_ADD, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA, GPU_SRC_ALPHA, GPU_ONE_MINUS_SRC_ALPHA);
 }
 
 /* The screen in 3D while Options' 3D depth is on (the slider at 0 shows
@@ -205,8 +245,10 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 		C3D_RenderTarget *t = eye < 0 ? top : right_eye;
 		C2D_TargetClear(t, C2D_Color32(0, 0, 0, 255));
 		C2D_SceneBegin(t);
+		canvas_blend(true);
 		if (layered) eye_draw(&st, eye, &place);
 		else C2D_DrawImageAt(img, place.x0, place.y0, 0.5f, NULL, sx, s);
+		canvas_blend(false);
 	}
 	part(layered ? "eyes in 3d" : "eyes");
 	/* the bottom screen: a new picture, else black, in both of its buffers

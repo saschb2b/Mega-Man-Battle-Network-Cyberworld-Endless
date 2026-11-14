@@ -129,6 +129,26 @@ void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]) {
 	}
 }
 
+void gba_obj_pixels(const GbaVideo *v, const uint8_t want[GBA_OBJS], uint8_t *mask, uint8_t drew[GBA_OBJS]) {
+	bool flat = (gba_rd16(v->io, 0) & 0x40u) != 0;
+	memset(mask, 0, W * H);
+	memset(drew, 0, GBA_OBJS);
+	for (int n = 0; n < GBA_OBJS; ++n) {
+		Obj o;
+		if (!want[n] || !obj_read(v, n, &o) || (o.a0 >> 10 & 3u) != 0 || (o.a2 >> 10 & 3u) == 3 || obj_blob(v, &o, flat)) continue;
+		for (int iy = 0; iy < o.bh; ++iy) {
+			int sy = o.y0 + iy;
+			if (sy < 0 || sy >= H) continue;
+			for (int ix = 0; ix < o.bw; ++ix) {
+				int sx = o.x0 + ix, tx, ty;
+				if (sx < 0 || sx >= W || !obj_texel(&o, ix, iy, &tx, &ty) || !obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat)) continue;
+				mask[sy * W + sx] = 1;
+				drew[n] = 1;
+			}
+		}
+	}
+}
+
 bool gba_bg3_front(const uint8_t *io) {
 	unsigned on = gba_rd16(io, 0) >> 8, p3 = gba_rd16(io, 0x0E) & 3u;
 	if (!(on & 8u)) return false;

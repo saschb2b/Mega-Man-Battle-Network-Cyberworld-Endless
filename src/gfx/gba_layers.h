@@ -48,6 +48,12 @@ bool gba_bg3_front(const uint8_t *io);
 typedef struct { int16_t x, y; uint8_t w, h; } GbaBox;
 /* ... each of the 128, their pixels unread (v->oam alone read) */
 void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]);
+/* The pixels of the sprites that stand, of those `want` names (1 each):
+ * 1 in `mask` (240x160, cleared first) where one shows, `drew` 1 for each
+ * that showed any. One that lies on the floor (priority 3, or a blob) and
+ * a blended one (a shadow, a light) are left out; whatever covers them is
+ * not asked. Only the entries wanted are read, a pixel at a time. */
+void gba_obj_pixels(const GbaVideo *v, const uint8_t want[GBA_OBJS], uint8_t *mask, uint8_t drew[GBA_OBJS]);
 
 /* False in a mode other than 0 (its backgrounds are not tile maps alone). */
 bool gba_layers(const GbaVideo *v, GbaLayers *out);

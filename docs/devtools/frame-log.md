@@ -21,3 +21,17 @@ and played a second, gaps 15-18 ms, after the first layer's first seconds
 (27 shown, 52 played, while the layer is made). On the 3DS (`frame_log =
 on` in `settings.ini`) each line ends with the heap: its use and its
 high-water mark against its size ([The 3DS's memory](../engine/emulation/3ds-memory.md)).
+
+Each line names a frame's dearest parts: "the parts a frame:", up to
+eight of a tenth of a millisecond or more, dearest first, each a mean
+over the frames played (the picture's conversion, the GBA's screen, the 3D's eyes, the
+present's, a screen's own drawing), timed where the code marks them
+(`frame_part_begin`/`frame_part_end` in `platform.h`, `frame_log_part`
+for a time taken elsewhere). On the New 3DS, where the GBA core runs on
+a core of its own, "reads of the game waited while drawing" counts the
+reads of the game's memory a frame's drawing made, each of which waits
+for the core's next frame, and "the last in" names the part that made
+the last of them: a draw that reads the game belongs in the update
+(the [3D depth](../engine/stereo.md)'s reads were moved to the frame's
+end for it). Where depth lighting ran, the line says its time a frame
+and its scale.

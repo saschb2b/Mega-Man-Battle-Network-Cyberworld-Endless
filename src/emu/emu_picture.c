@@ -85,10 +85,18 @@ void emu_picture_draw(int x, int y) {
 	static uint8_t hud[EMU_W * EMU_H];
 	bool voxel = voxel_scene_frame(px, hud);
 #endif
+#ifdef __3DS__
+	/* (in 3D, each pixel's part in its alpha, which the 3DS's GPU draws each
+	 * at its depth by: the standing sprites', the map's, the moving
+	 * background's by mGBA's tag on the core's own picture, stereo_scene.h) */
+	const uint8_t *standing = stereo_scene_sprites();
+	bool sky = stereo_scene_sky();
+#endif
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];
 #ifdef __3DS__
-		px[i] = 0xFF000000u | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
+		uint32_t a = !standing ? 0xFFu : standing[i] ? 0xFFu : sky && stereo_sky_tag(v[i]) ? 0x00u : 0x80u;
+		px[i] = a << 24 | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
 #else
 		px[i] = voxel && !hud[i] ? 0 : c | 0xFF000000u;
 #endif
