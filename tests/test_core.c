@@ -7539,16 +7539,17 @@ static void view_map(AreaSrc *a, int tw, int th, int layers, unsigned seed) {
 	a->tw = tw; a->th = th; a->layers = layers; a->ex = 12; a->ey = 20; a->group = 0x90;
 	size_t cells = (size_t)tw * th, n = cells * 64;
 	for (int l = 0; l < layers; ++l) a->tile[l] = malloc(cells * 2);
-	a->px = malloc(n * 4); a->px0 = malloc(n * 4); a->front = malloc(n); a->idx = malloc(n);
+	a->idx = malloc(n); a->idx0 = malloc(n); a->front = malloc(n);
+	for (int i = 0; i < 256; ++i) a->colors[i] = 0xFF000000u | (uint32_t)i * 0x010203u;
 	a->hw = 3; a->hh = 5; a->hx0 = -2; a->hy0 = 1; a->hz = malloc(15);
 	a->rw = 4; a->rh = 2; a->rx0 = 3; a->ry0 = -1; a->rings = malloc(8);
 	a->sec[0] = calloc(2, sizeof(CoordCell)); a->nsec[0] = 1;
-	CHECK(a->px && a->px0 && a->front && a->idx && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
+	CHECK(a->idx && a->idx0 && a->front && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
 	for (int l = 0; l < layers; ++l)
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)((seed = seed * 1103515245u + 12345u) >> 8);
 	for (size_t i = 0; i < n; ++i) {
 		seed = seed * 1103515245u + 12345u;
-		a->px[i] = seed; a->px0[i] = seed ^ 0x5A5A5A5Au; a->front[i] = (uint8_t)(seed >> 24); a->idx[i] = (uint8_t)(seed >> 16);
+		a->idx[i] = (uint8_t)(seed >> 16); a->idx0[i] = (uint8_t)(seed >> 8); a->front[i] = (uint8_t)(seed >> 24);
 	}
 	for (int i = 0; i < 15; ++i) a->hz[i] = (uint8_t)(i * 8);
 	for (int i = 0; i < 8; ++i) a->rings[i] = (uint8_t)(i + 1);
@@ -7564,7 +7565,8 @@ static bool same_view(const AreaSrc *x, const AreaSrc *y) {
 		&& same_bytes(x->hz, y->hz, (size_t)x->hw * x->hh) && same_bytes(x->rings, y->rings, (size_t)x->rw * x->rh);
 	for (int l = 0; l < 2; ++l) ok = ok && same_bytes(x->tile[l], y->tile[l], cells * 2);
 	for (int k = 0; k < 4; ++k) ok = ok && x->nsec[k] == y->nsec[k];
-	return ok && same_bytes(x->px, y->px, n * 4) && same_bytes(x->px0, y->px0, n * 4) && same_bytes(x->front, y->front, n) && same_bytes(x->idx, y->idx, n);
+	return ok && same_bytes(x->idx, y->idx, n) && same_bytes(x->idx0, y->idx0, n) && same_bytes(x->front, y->front, n) &&
+		!memcmp(x->colors, y->colors, sizeof x->colors);
 }
 
 static void test_area_views(void) {

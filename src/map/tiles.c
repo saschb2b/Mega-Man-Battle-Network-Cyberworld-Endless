@@ -127,7 +127,7 @@ static bool under_crossing(const Src *s, int A, int B) {
 	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
 	for (int k = 0; k < 5; ++k) {
 		int x = px + probe[k][0], y = py + probe[k][1];
-		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px0[(size_t)y * W + x] >> 24)) return false;
+		if (x < 0 || y < 0 || x >= W || y >= H || !a->idx0[(size_t)y * W + x]) return false;
 	}
 	return ((s->styles | s->walk_styles) & 0x1FFFu) >> tl_style_at(a, px, py) & 1;
 }
@@ -155,8 +155,8 @@ static bool panel_drawn(const Src *s, int A, int B) {
 	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
 	for (int k = 0; k < 5; ++k) {
 		int x = px + probe[k][0], y = py + probe[k][1];
-		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px[(size_t)y * W + x] >> 24)) return 0;
-		if (s->bg_in_map && !(a->px0[(size_t)y * W + x] >> 24)) return 0;
+		if (x < 0 || y < 0 || x >= W || y >= H || !a->idx[(size_t)y * W + x]) return 0;
+		if (s->bg_in_map && !a->idx0[(size_t)y * W + x]) return 0;
 	}
 	return 1;
 }
@@ -551,11 +551,11 @@ bool tl_flat_tile(const AreaSrc *a, int tx, int ty) {
  * where the second strays). */
 uint64_t tl_drawn(const AreaSrc *a, bool first, int tx, int ty, uint16_t px[64]) {
 	int W = a->tw * 8;
-	const uint32_t *pic = first ? a->px0 : a->px;
+	const uint8_t *pic = first ? a->idx0 : a->idx;
 	uint64_t m = 0;
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
-			uint32_t c = pic[(size_t)(ty * 8 + y) * W + tx * 8 + x];
+			uint32_t c = area_src_colour(a, pic, (size_t)(ty * 8 + y) * W + tx * 8 + x);
 			px[y * 8 + x] = (uint16_t)((c >> 19 & 31) | (c >> 11 & 31) << 5 | (c >> 3 & 31) << 10);
 			if (c >> 24) m |= 1ull << (y * 8 + x);
 		}
@@ -577,12 +577,12 @@ void tl_calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 		for (int y = 1; y + 8 < H; ++y) {
 			above = here;
 			here = floor_px_on(g, tl_src_floor, src, x, y, last);
-			if (!above && here && !(a->px[(size_t)(y - 1) * W + x] >> 24))
+			if (!above && here && !a->idx[(size_t)(y - 1) * W + x])
 				for (int d = 0; d <= 8; ++d)
-					if (a->px[(size_t)(y + d) * W + x] >> 24) { top[d]++; break; }
+					if (a->idx[(size_t)(y + d) * W + x]) { top[d]++; break; }
 			if (above && !here) {
 				int d = 0;
-				while (d < FACE_MAX && y + d < H && a->px[(size_t)(y + d) * W + x] >> 24) ++d;
+				while (d < FACE_MAX && y + d < H && a->idx[(size_t)(y + d) * W + x]) ++d;
 				face[d]++;
 			}
 		}

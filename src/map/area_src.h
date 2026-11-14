@@ -23,12 +23,16 @@ typedef struct {
 	int tw, th;            /* size in tiles */
 	int layers;
 	uint16_t *tile[2];     /* map entries, row-major, per layer */
-	uint32_t *px;          /* the map as the game shows it, the second layer in
-	                        * front of the first (ARGB, alpha 0 where empty) */
-	uint32_t *px0;         /* the first layer alone */
+	/* The map's pixels as colour indices into its palette, 0 where empty
+	 * (a 16-colour map's: its bank times 16 and the colour, which is never
+	 * 0 where drawn), a byte a pixel where ARGB took four
+	 * (area_src_px reads them as ARGB): */
+	uint8_t *idx;          /* the map as the game shows it, the second layer in
+	                        * front of the first: a 256-colour map's materials
+	                        * are index ranges */
+	uint8_t *idx0;         /* the first layer alone */
 	uint8_t *front;        /* 1 where the last layer (the second) is drawn */
-	uint8_t *idx;          /* the colour index shown (0 where empty): a
-	                        * 256-colour map's materials are index ranges */
+	uint32_t colors[256];  /* the palette, ARGB (alpha 255) */
 	int ex, ey;            /* panel edges in world units: X = ex, Y = ey (mod 32) */
 	uint32_t desc;         /* ROM offset of its MapBGDescriptor */
 	uint32_t coord_slot;   /* ROM offset of its coordinate-data pointer */
@@ -51,6 +55,15 @@ typedef struct {
 
 #define HEIGHT_UNEVEN 255
 
+/* Pixel i (y * tw * 8 + x) of the map as the game shows it, ARGB with
+ * alpha 0 where empty; of its first layer alone; and an index plane's
+ * pixel the same way */
+static inline uint32_t area_src_colour(const AreaSrc *a, const uint8_t *plane, size_t i) {
+	return plane[i] ? a->colors[plane[i]] : 0;
+}
+static inline uint32_t area_src_px(const AreaSrc *a, size_t i) { return area_src_colour(a, a->idx, i); }
+static inline uint32_t area_src_px0(const AreaSrc *a, size_t i) { return area_src_colour(a, a->idx0, i); }
+
 bool area_src_load(int group, int number, AreaSrc *a);
 /* The same from an extra game's ROM (XRomId, docs/multirom/), where it
  * has been read. */
@@ -67,6 +80,10 @@ bool area_src_slots(int group, int number, uint32_t *desc, uint32_t *coord_slot)
  * stone and purple slime, its plates' mauve stone and lava. */
 bool area_src_load_as(int rom, int group, int number, uint32_t recolour, AreaSrc *a);
 void area_src_free(AreaSrc *a);
+/* The map as the game shows it as ARGB pixels (tw * 8 x th * 8), `empty`
+ * where nothing is drawn, for a picture of it (free them); NULL where the
+ * memory could not be had */
+uint32_t *area_src_argb(const AreaSrc *a, uint32_t empty);
 /* Whether world (X, Y) lies on a panel of one of the map's arrow lanes: no
  * walkway's look is learned from one, its art an arrow's (a walkway drawn
  * from it lied: an arrow where nothing carries MegaMan). */
@@ -135,7 +152,7 @@ int area_src_board(const AreaSrc *a, int X, int Y);
 /* Pixel i of the map's floors: the first layer where it draws, else the
  * second, as if nothing stood in front of them (the originals set their
  * bridges, spikes and ornaments on the second layer, and some floors). */
-static inline uint32_t area_src_floor_px(const AreaSrc *a, size_t i) { return a->px0[i] >> 24 ? a->px0[i] : a->px[i]; }
+static inline uint32_t area_src_floor_px(const AreaSrc *a, size_t i) { return a->idx0[i] ? area_src_px0(a, i) : area_src_px(a, i); }
 
 /* World <-> map pixel, as the game's camera routine maps them. */
 static inline int area_px(int tw, int x, int y) { return x + y + tw * 4; }

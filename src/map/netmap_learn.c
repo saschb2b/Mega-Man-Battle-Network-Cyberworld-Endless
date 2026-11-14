@@ -102,7 +102,7 @@ static bool panel_px(const AreaSrc *a, int A, int B, int z, int *px, int *py) {
 	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
 	*px = area_px(a->tw, X, Y);
 	*py = area_py(a->th, X, Y) - z;
-	return *px >= 0 && *py >= 0 && *px < a->tw * 8 && *py < a->th * 8 && a->px[(size_t)*py * a->tw * 8 + *px] >> 24;
+	return *px >= 0 && *py >= 0 && *px < a->tw * 8 && *py < a->th * 8 && a->idx[(size_t)*py * a->tw * 8 + *px] != 0;
 }
 
 /* Whether panel (A, B) of map a is floor at height z with something drawn

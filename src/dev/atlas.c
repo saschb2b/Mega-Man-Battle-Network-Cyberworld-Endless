@@ -299,14 +299,17 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 		fclose(f);
 	}
 	int W = v->tw * 8, H = v->th * 8;
-	for (int i = 0; i < W * H; ++i) if (!(v->px[i] >> 24)) v->px[i] = VOID_ARGB;
+	uint32_t *pic = malloc((size_t)W * H * sizeof *pic);
+	if (!pic) return;
+	for (int i = 0; i < W * H; ++i) pic[i] = v->idx[i] ? area_src_px(v, (size_t)i) : VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
-	save_bmp(path, v->px, W, H);
+	save_bmp(path, pic, W, H);
 	/* (and its first layer alone: what the tiles are learned from where the
 	 * second sets something over the floor) */
-	for (int i = 0; i < W * H; ++i) if (!(v->px0[i] >> 24)) v->px0[i] = VOID_ARGB;
+	for (int i = 0; i < W * H; ++i) pic[i] = v->idx0[i] ? area_src_px0(v, (size_t)i) : VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src1_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
-	save_bmp(path, v->px0, W, H);
+	save_bmp(path, pic, W, H);
+	free(pic);
 }
 
 /* The area's own maps as the game draws them, to hold the layers against,
@@ -339,10 +342,11 @@ static void group_sources(const char *dir, int group) {
 		if (!area_src_load(group, n, &a)) { ++miss; continue; }
 		miss = 0;
 		int W = a.tw * 8, H = a.th * 8;
-		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+		uint32_t *px = area_src_argb(&a, VOID_ARGB);
 		char path[600];
 		snprintf(path, sizeof path, "%s/src_g%02x_%d.bmp", dir, group, n);
-		save_bmp(path, a.px, W, H);
+		if (px) save_bmp(path, px, W, H);
+		free(px);
 		area_src_free(&a);
 	}
 }
@@ -357,20 +361,22 @@ static void world_sources(const char *dir) {
 			AreaSrc a;
 			if (!area_src_load(g, n, &a)) { printf("world %02x:%d: no map\n", g, n); continue; }
 			int W = a.tw * 8, H = a.th * 8;
-			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			uint32_t *px = area_src_argb(&a, VOID_ARGB);
+			if (!px) { area_src_free(&a); continue; }
 			char path[600];
 			snprintf(path, sizeof path, "%s/world_%02x_%d.bmp", dir, g, n);
-			save_bmp(path, a.px, W, H);
+			save_bmp(path, px, W, H);
 			static const uint32_t mark[4] = { 0xFFFF3030u, 0xFF3070FFu, 0xFF30FF30u, 0xFFFFE020u };
 			for (int s = 0; s < 4; ++s)
 				for (int i = 0; i < a.nsec[s]; ++i) {
 					const CoordCell *c = &a.sec[s][i];
 					int x = area_px(a.tw, c->x + 4, c->y + 4), y = area_py(a.th, c->x + 4, c->y + 4) - (c->z > 0 ? c->z : 0);
 					if (s == 2) continue;
-					dot(a.px, W, H, x, y, s == 3 ? 2 : 1, mark[s]);
+					dot(px, W, H, x, y, s == 3 ? 2 : 1, mark[s]);
 				}
 			snprintf(path, sizeof path, "%s/world_%02x_%d_coords.bmp", dir, g, n);
-			save_bmp(path, a.px, W, H);
+			save_bmp(path, px, W, H);
+			free(px);
 			printf("world %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", g, n, a.tw, a.th,
 				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
 			area_src_free(&a);
@@ -393,10 +399,11 @@ static void xrom_sources(const char *dir, int xrom) {
 			if (!area_src_load_x(xrom, g, n, &a)) { ++miss; continue; }
 			miss = 0;
 			int W = a.tw * 8, H = a.th * 8;
-			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			uint32_t *px = area_src_argb(&a, VOID_ARGB);
 			char path[600];
 			snprintf(path, sizeof path, "%s/x%d_%02x_%d.bmp", dir, xrom, g, n);
-			save_bmp(path, a.px, W, H);
+			if (px) save_bmp(path, px, W, H);
+			free(px);
 			printf("x%d %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", xrom, g, n, a.tw, a.th,
 				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
 			area_src_free(&a);
