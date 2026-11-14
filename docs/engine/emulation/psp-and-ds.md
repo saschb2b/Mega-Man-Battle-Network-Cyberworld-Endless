@@ -1,7 +1,7 @@
 ---
 type: Measurement
 title: "The PSP and the DS, measured"
-description: "Whether the game could run on a PSP or a Nintendo DS, measured in PPSSPP at 333 MHz (14 November 2026): mGBA takes 19 to 25 ms of a 16.7 ms frame on BN6, libretro gpSP's MIPS dynarec 6 to 7.4, but the game's heap is full at the title and a run needs some 37 MB more than a PSP has; a DS has neither the speed nor the memory for any GBA core."
+description: "Whether the game could run on a PSP or a Nintendo DS, measured in PPSSPP at 333 MHz (14 November 2026): mGBA takes 19 to 25 ms of a 16.7 ms frame on BN6, libretro gpSP's MIPS dynarec 6 to 7.4; the PSP build on gpSP, its ROM held once and its memory cut, plays a run at 60 frames a second in a 12.6 MB heap; a DS has neither the speed nor the memory for any GBA core."
 tags: [engine, emulation, platforms]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T02:38:23Z }
 ---
@@ -99,14 +99,14 @@ dynarec written for that CPU.
 
 ## The PSP's memory
 
-The game itself, built for the PSP (branch `psp-port`: `build.py psp`,
-mGBA as its core for now), boots in PPSSPP to the title, and there its
+The game itself, first built for the PSP with mGBA as its core
+(`build.py psp`), booted in PPSSPP to the title, and there its
 heap is full: 26.9 MB in use of 26.9 (`frame_log`'s heap line), BN6's
 ROM and the core's 16 MB copy 24 of it. Its code and statics take the
 rest of the 52 MB: 4.6 MB of code and 19.9 MB of static arrays (the
 host's are 18.3, of which 5.5 MB are the dev tools' own, the economy
 report's 3.2 MB the largest, and 1.2 MB the second screen's). NEW GAME
-then finds nothing to make a layer with, and the screen stays black.
+then found nothing to make a layer with, and the screen stayed black.
 
 What a run needs was measured on this computer with the 3DS's heap
 model ([The 3DS's memory](3ds-memory.md), `tools/heap3ds.py --cases bn6
@@ -115,26 +115,63 @@ model ([The 3DS's memory](3ds-memory.md), `tools/heap3ds.py --cases bn6
 the ROMs (24 MB), the town's source kept for the next visit (some 14),
 the layer's area's map being learned and the learning itself (some 20 at
 once), the installs' log (2). With the PSP's statics that is about 37 MB
-more than a PSP holds, before the core's own needs. A PSP build would
-have to take the static arrays only a dev tool or a second screen uses
+more than a PSP holds, before the core's own needs. A PSP build had
+to take the static arrays only a dev tool or a second screen uses
 from the heap when used (some 7 MB, on every system), page the ROM from
 the memory stick rather than hold it twice (gpSP pages a ROM in 32 KB
 pieces; the engine's reads of `R.data` would need the same), keep no
 town between visits and learn an area's maps in half the memory. Each
 is a change to the engine every system shares.
 
-What a PSP build would ask of the engine besides: gpSP as a second core beside
-mGBA, behind what `src/emu/` takes from mGBA today (the hooks' BKPT,
-which gpSP's dynarec would have to call out on and then run the
-replaced instruction, [Hooks](hooks.md); writes to the ROM copy, which
-must drop gpSP's translations of it; raw reads and writes; the states the
-checkpoints and `boot-3.state` are, in gpSP's own form, which a save
-moved from another system would need converted); one core only, so no
-NetBattles or Arena and nothing that runs a spare core; BN6's net alone;
-the online parts left out; the 480x272 screen filled at a sharp-scaled
-1.7x, as the 640x480 rule does (AGENTS.md). gpSP is GPL-2.0: a PSP
-binary linking it would be distributed under the GPL's terms, the
-project's own code staying MIT.
+## The PSP build
+
+The memory was cut where every system gains (PRs #533 and #535: the dev
+tools' static arrays taken from the heap when used, 6.2 MB; a learned
+map's pixels held as colour indices, 3 bytes a pixel where they took 10,
+a BN6 run's heap peak from 60-65 MB to 45-48), and by the PSP's own
+rules (`CW_HEAP_PSP`: one area's learned maps kept, no town between
+visits, no installs' log; `tools/heap3ds.py --cases psp`, 39 to 43.5 MB
+with mGBA's copy still in it). The rest came with gpSP as the PSP's core
+(`src/emu/emu_gpsp.c`, [psp/README.md](../../../psp/README.md)):
+
+- **The ROM held once.** gpSP maps its ROM by 32 KB pages; the PSP's
+  points them at the player's own bytes (`R.data`), copies a page before
+  the engine writes it, and points the free space at one shared page of
+  0xFF until a page of it is written (`docker/gpsp-cyberworld.patch`'s
+  `cw_rom_pages`). mGBA's builds hold a 16 MB copy beside the 8 MB ROM.
+- **Hooks without a BKPT.** gpSP's translator asks a table at each
+  instruction it translates and, at a hooked one, emits a call out to
+  the engine's hook before it, the ARM registers spilled for it, and a
+  branch on where the hook answers an address (HOOK_RETURN, HOOK_JUMP):
+  written for the MIPS dynarec and for x86-64's, so the host built on
+  gpSP (`CORE=gpsp`) plays it too ([Hooks](hooks.md)). A test of its own
+  hooked BN6's `main_awaitFrame` once a frame on both: every frame of
+  1500 the picture the plain run drew, as when the hook sent the CPU
+  back to its own instruction every other time.
+- **States** are gpSP's own with the cart's save RAM after them, so a
+  checkpoint saved on another system does not load on a PSP; one core
+  alone, so no NetBattles, no Arena and no second core for Options'
+  scene; gpSP skips BN6's wait for VBlank itself, the idle hook off.
+
+Measured in PPSSPP at 333 MHz on 14 November 2026, the autopilot from a
+run's first layer (`args.txt`'s `--scene emu`, `env.txt`'s
+`CYBERWORLD_AUTOPILOT=1`, ten emulated minutes, `frame_log = on`): two
+battles won, the act's guardian reached, the run's end screen; 60 frames
+shown in 499 of the 560 seconds' lines and 57 to 61 in the rest, a
+frame's update 10.2 ms (the GBA 9.8 of it, its picture with it), drawing
+1.5 ms, the worst frames 75 and 94 ms as a layer was made; the heap at
+most 12.6 MB, BN6's ROM in it, of the some 27 MB the 23 MB of code and
+statics leave (gpSP's 2.4 MB of translation caches among them). The
+title's own drawing takes 21 ms a frame there (27 frames a second), the
+one screen under its pace. The picture fills the screen at 1.70x,
+smoothly from 1x: the PSP's 2 MB of video memory holds no sharp texture
+beside the canvas. On a PSP itself the times will be longer than
+PPSSPP's count; one has not yet been run.
+
+The old 3DS is the same question: mGBA alone takes longer than a frame
+on its 268 MHz ARM11 (`3ds/README.md`), and gpSP has an ARM dynarec for
+it that would need the same call out written; its 64 MB would hold what
+the PSP's 52 do.
 
 ## The DS
 
