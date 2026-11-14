@@ -718,6 +718,7 @@ void tiles_free(TileBook *b) {
 	free(b->vary_weight);
 	free(b->panels.panel);
 	free(b->panels.at);
+	free(b->panels.grid);
 	free(b->panels.tile);
 	free(b->panels.px);
 	memset(b, 0, sizeof *b);

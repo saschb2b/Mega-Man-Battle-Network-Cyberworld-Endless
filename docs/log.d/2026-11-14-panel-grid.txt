@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T18:25:19Z
+* **Update**: devtools/profiling.md (the lab's seeds a count a layout, as the atlas reads them, and another game's areas as aN; the tiles' pick in another game's areas: a book's panels found by place from a grid, the pick over every area 13.3 to 7.8 seconds, the layers the same).

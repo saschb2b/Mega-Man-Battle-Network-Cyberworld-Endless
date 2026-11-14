@@ -73,8 +73,8 @@ typedef struct {
 } TilePanel;
 typedef struct {
 	TilePanel *panel;
-	int n, npart;        /* whole ones, then those in part */
-	uint16_t *at;        /* the panels' indices by (B, A), all of them */
+	int n, npart, grid_a0, grid_b0, grid_w, grid_h;   /* whole ones, then those in part; the grid's corner and size */
+	uint16_t *at, *grid; /* the panels' indices by (B, A), all of them; by place, from (grid_a0, grid_b0), NO_TILE none */
 	PanelTile *tile;
 	int ntile;
 	uint16_t *px;        /* the tiles' colours while an area's books are learned (panels_settle) */
