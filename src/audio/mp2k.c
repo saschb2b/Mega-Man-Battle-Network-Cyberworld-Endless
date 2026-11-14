@@ -19,6 +19,11 @@ Mp2k M;
 #define BN6_RING 1584
 #define BN6_MASTER_VOLUME 15
 
+/* the game's ROM copy, as its core holds it (mp2k_game_rom) */
+static uint8_t (*game_byte)(uint32_t addr);
+
+void mp2k_game_rom(uint8_t (*read8)(uint32_t addr)) { game_byte = read8; }
+
 /* the ROM of index `rom` (mp2k_state.h), NULL where it is not there */
 static const uint8_t *rom_data(int rom) {
 	if (rom <= 0) return R.data;
@@ -26,11 +31,13 @@ static const uint8_t *rom_data(int rom) {
 }
 
 void mp2k_read(int rom) {
-	M.data = rom_data(rom);
-	if (!M.data) M.data = R.data;
+	M.game = rom == MP2K_ROM_GAME && game_byte;
+	M.data = M.game ? NULL : rom_data(rom);
+	if (!M.game && !M.data) M.data = R.data;
 }
 
 uint8_t mp2k_u8(uint32_t addr) {
+	if (M.game) return game_byte(addr);
 	return rom_is_ptr(addr) && M.data ? M.data[addr - 0x08000000] : 0;
 }
 
@@ -108,7 +115,7 @@ bool mp2k_init(void) {
 /* song `song` of ROM `rom`: the player its table names (BN5's 32 players
  * are BN6's, docs/rom/) and its header, the ROM left being read */
 static Mp2kPlayer *player_of(int rom, int song, uint32_t *header) {
-	if (!M.ready || song < 0 || song >= MP2K_SONGS || !rom_data(rom)) return NULL;
+	if (!M.ready || rom == MP2K_ROM_GAME || song < 0 || song >= MP2K_SONGS || !rom_data(rom)) return NULL;
 	mp2k_read(rom);
 	uint32_t row = (rom ? 0x08000000 + XR[rom - 1].layout->song_table : M.song_table) + (uint32_t)song * 8;
 	unsigned p = mp2k_u8(row + 4);

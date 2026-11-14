@@ -11,6 +11,9 @@ typedef struct {
 	void (*update)(void);
 	void (*draw)(void);
 	void (*leave)(void);
+	/* a frame its update did not run, Options or the touch controls'
+	 * menu over it (main.c); NULL none */
+	void (*held)(void);
 } Scene;
 
 void scene_set(const Scene *s);

@@ -101,8 +101,10 @@ static bool game_frame(void) {
 	capture_taps();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
+	bool over = options_shown() || touch_paused();
 	if (options_shown()) options_update();
 	else if (current && current->update && !touch_paused()) current->update();
+	if (over && current && current->held) current->held();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
@@ -507,6 +509,9 @@ static int frame_loop(const Options *o) {
 	 * connection closed first: its gate's checkpoint stays) */
 	online_visit_shutdown();
 	if (current == &scene_emu) director_suspend();
+	/* (the game's song carried under a screen let go before its core: the
+	 * sound's thread reads that core's ROM, audio.h) */
+	music_carry_drop();
 	cores_quit();
 #endif
 	platform_shutdown();

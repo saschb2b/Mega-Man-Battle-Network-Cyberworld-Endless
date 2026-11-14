@@ -30,6 +30,12 @@ void audio_external(AudioSource src);
 /* Without a device but with CYBERWORLD_AUDIO_DUMP, renders one frame of sound. */
 void audio_frame(void);
 bool audio_offline(void);
+/* Whether there is sound to play on: a device, or the offline dump */
+bool audio_on(void);
+/* The engine's sound runs on the device's thread: a change of its state
+ * from the frame's thread is made between these (music_carry.c) */
+void audio_lock(void);
+void audio_unlock(void);
 void audio_sfx(Sfx s);
 /* The start's chime (intro_chime.h), once, beside the songs at the
  * effects' volume. */
@@ -55,5 +61,22 @@ void audio_song_fade(int rom, int song, int speed);
 int audio_song_state(int rom, int song, uint8_t *levels, int max, int *tracks);
 /* ... into a WAV file */
 bool audio_render_wav(int rom, int song, int seconds, const char *path);
+
+/* The game's music under the engine's own screens over a run (Options, the
+ * touch controls' menu, the Library, a reward pick, the Battle Lab's
+ * builder, the dev menu; music_carry.c): where one holds the game's core
+ * still, BN6's song plays on on the engine's MP2K from where the game was
+ * held, and goes back into the game, where the engine has brought it, as
+ * the core runs again (mp2k_carry.h); where the game plays none, BN6's
+ * NaviCust theme, the PET's own screen's song
+ * (docs/engine/emulation/engine-sound.md, The game's music under the
+ * engine's screens). Nothing where there is no sound to play on.
+ * music_carry_held: a frame the core is held under such a screen, the song
+ * taken at the first; music_carry_resume: the core about to run again, the
+ * song given back; music_carry_drop: the game left (its scene, a soft
+ * reset), the engine's song stopped, nothing given back. */
+void music_carry_held(void);
+void music_carry_resume(void);
+void music_carry_drop(void);
 
 #endif

@@ -383,4 +383,4 @@ static void leave(void) {
 	memset(&B, 0, sizeof B);
 }
 
-const Scene scene_rollbench = { "rollbench", enter, update, draw, leave };
+const Scene scene_rollbench = { "rollbench", enter, update, draw, leave, NULL };

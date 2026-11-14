@@ -304,4 +304,4 @@ static void draw(void) {
 	arena_card_fade(255 - (int)S.t * 255 / FADE, true);
 }
 
-const Scene scene_arena = { "arena", enter, update, draw, leave };
+const Scene scene_arena = { "arena", enter, update, draw, leave, NULL };

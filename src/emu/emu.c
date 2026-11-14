@@ -26,6 +26,7 @@
 #include <mgba/core/serialize.h>
 #include <mgba/feature/video-logger.h>
 #include <mgba/internal/gba/gba.h>
+#include <mgba/internal/gba/io.h>
 #include <mgba/internal/gba/overrides.h>
 #include <mgba-util/vfs.h>
 #ifdef __3DS__
@@ -414,6 +415,23 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	xlog_write(a, data, len);
 	if (cart_write(a, p, len)) return;
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
+}
+
+/* (a raw write leaves the I/O registers alone, mGBA's GBAPatch8: the
+ * game's own way in, as its store would make it) */
+void emu_io_write8(uint32_t a, uint8_t v) {
+	wait_frame();
+	if (core && (a >> 24) == 0x04) GBAIOWrite8(core->board, a & 0x00FFFFFFu, v);
+}
+
+void emu_io_write32(uint32_t a, uint32_t v) {
+	wait_frame();
+	if (core && (a >> 24) == 0x04) GBAIOWrite32(core->board, a & 0x00FFFFFCu, v);
+}
+
+uint8_t emu_rom_byte(uint32_t a) {
+	int v = cart_read(a);
+	return v >= 0 ? (uint8_t)v : 0;
 }
 
 /* ---- RAM kept patched (emu_keep, emu_keep.h) ---- */

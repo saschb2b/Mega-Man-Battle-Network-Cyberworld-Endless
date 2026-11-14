@@ -13,6 +13,8 @@
 #define BN6_SOUND_PCM_FREQ    (BN6_SOUND_INFO + 0x14) /* s32: the mix's rate in Hz, 10512 (above its half the GBA's mix holds only images) */
 #define BN6_SOUND_CGB_CHANS   0x03005600u /* the PSG's four CgbChannels, 0x40 bytes each */
 #define BN6_SOUND_MAX_CHANS   (BN6_SOUND_INFO + 0x06) /* u8: its DirectSound channels in use, 4 */
+#define BN6_SOUND_REVERB      (BN6_SOUND_INFO + 0x05) /* u8: the reverb, 13 at the start (a song's header may set its own) */
+#define BN6_SOUND_C15         (BN6_SOUND_INFO + 0x0A) /* u8: CgbSound's count to its extra envelope step, 14 down to 0 */
 #define BN6_CGB_CHAN_COUNT    4    /* the PSG's channels at BN6_SOUND_CGB_CHANS, its squares, wave and noise */
 /* a channel (SoundChannel, CgbChannel alike to +0x2C; src/audio/mp2k_state.h) */
 #define BN6_CHAN_SIZE         0x40

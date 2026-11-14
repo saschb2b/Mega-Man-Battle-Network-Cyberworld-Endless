@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T21:30:00Z
+* **Update**: engine/emulation/engine-sound.md (the game's music carried on under the engine's screens over a run and given back, the NaviCust's theme where none plays, the check that proves the hand-over byte for byte; its description), engine/emulation/index.md (its line), rom/sound.md (the RAM and registers the carry reads and writes), code/gfx-and-audio.md (mp2k_layout.c, mp2k_carry.c, music_carry.c).
