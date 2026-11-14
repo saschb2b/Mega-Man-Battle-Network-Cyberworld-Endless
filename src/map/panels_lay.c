@@ -75,6 +75,7 @@ typedef struct {
 	bool *lend;               /* per book: whether its panels are laid here */
 	struct Likes *likes;      /* the panels each shape's slots suit (likes_of) */
 	int nlikes, caplikes;
+	int *tile_first, *tile_list;   /* each of the floor's panels' tiles, from tile_first[i] to [i + 1] (tiles_index), NULL until asked */
 } Laid;
 
 /* Whether a rule of the thin books' laying holds on grid g. */
@@ -246,6 +247,8 @@ static void laid_close(Laid *d) {
 	free(d->lend);
 	for (int i = 0; i < d->nlikes; ++i) free(d->likes[i].e);
 	free(d->likes);
+	free(d->tile_first);
+	free(d->tile_list);
 }
 
 /* The panel that suits the floor's panel i best, of the books' with its
@@ -553,18 +556,63 @@ static void take_up(const TileBook *books, const TileSeams *seams, const TileGri
 
 /* Whether panel i's tiles meet those laid beside them as a map's do
  * (take_up's test). */
-static bool panel_meets(const TileBook *books, const TileSeams *seams, const TileGrid *g, const Laid *d, size_t i) {
-	for (int ty = 0; ty < g->th; ++ty)
-		for (int tx = 0; tx < g->tw; ++tx) {
-			size_t a = 0, b = 0;
-			uint32_t fa = 0, fb = 0;
-			const PanelTile *t = laid_tile(books, g, d, tx, ty, &a, &fa);
-			for (int k = 2; t && t->mask && k < 4; ++k) {
-				const PanelTile *u = laid_tile(books, g, d, tx + (k == 2), ty + (k == 3), &b, &fb);
-				if (!u || !u->mask || (a != i && b != i) || (b == a && fb == fa) || (k == 2 && mirrored(t, u)) || hidden_end(g, d, a, b)) continue;
-				if (!seams_strip_seen(seams, t->side[k], u->side[k ^ 2], k & 1)) return false;
+/* Each of the floor's panels' tiles, by where tile_class puts them: made
+ * once a laying, for panel_meets. False without memory for it. */
+static bool tiles_index(Laid *d) {
+	if (d->tile_list) return true;
+	const TileGrid *g = d->g;
+	size_t n = (size_t)d->w * d->h;
+	int *first = calloc(n + 1, sizeof *first), *fill = malloc(n * sizeof *fill), *list = malloc(((size_t)g->tw * g->th + 1) * sizeof *list);
+	for (int pass = 0; first && fill && list && pass < 2; ++pass) {
+		for (int ty = 0; ty < g->th; ++ty)
+			for (int tx = 0; tx < g->tw; ++tx) {
+				int phase, A, B;
+				tile_class(g, tx, ty, &phase, &A, &B);
+				if (A < d->A0 || B < d->B0 || A >= d->A0 + d->w || B >= d->B0 + d->h) continue;
+				size_t at = (size_t)(B - d->B0) * d->w + A - d->A0;
+				if (pass) list[fill[at]++] = ty * g->tw + tx; else ++first[at + 1];
 			}
-		}
+		for (size_t k = 0; !pass && k < n; ++k) first[k + 1] += first[k];
+		if (!pass) memcpy(fill, first, n * sizeof *fill);
+	}
+	free(fill);
+	if (!first || !fill || !list) { free(first); free(list); return false; }
+	d->tile_first = first;
+	d->tile_list = list;
+	return true;
+}
+
+/* Whether the tile at (tx, ty) meets the one beside it (k: 2 to its right,
+ * 3 under it) as the maps' do: true where neither is panel i's, either is
+ * not laid, or the edge between them is one no map draws. */
+static bool pair_meets(const Laid *d, size_t i, int tx, int ty, int k) {
+	size_t a = 0, b = 0;
+	uint32_t fa = 0, fb = 0;
+	const PanelTile *t = laid_tile(d->books, d->g, d, tx, ty, &a, &fa);
+	if (!t || !t->mask) return true;
+	const PanelTile *u = laid_tile(d->books, d->g, d, tx + (k == 2), ty + (k == 3), &b, &fb);
+	if (!u || !u->mask || (a != i && b != i) || (b == a && fb == fa) || (k == 2 && mirrored(t, u)) || hidden_end(d->g, d, a, b)) return true;
+	return seams_strip_seen(d->seams, t->side[k], u->side[k ^ 2], k & 1);
+}
+
+/* Whether the tiles of the floor's panel i meet those beside them as the
+ * maps' do. Only a pair with one of its tiles can fail: its own tiles and
+ * those left of and over them are asked, not every tile of the map (a
+ * map's every tile for every panel tried was a tenth of making a layer in
+ * BN5's Nebula Area; docs/devtools/profiling.md). */
+static bool panel_meets(Laid *d, size_t i) {
+	const TileGrid *g = d->g;
+	if (!tiles_index(d)) {
+		for (int ty = 0; ty < g->th; ++ty)
+			for (int tx = 0; tx < g->tw; ++tx)
+				if (!pair_meets(d, i, tx, ty, 2) || !pair_meets(d, i, tx, ty, 3)) return false;
+		return true;
+	}
+	for (int j = d->tile_first[i]; j < d->tile_first[i + 1]; ++j) {
+		int tx = d->tile_list[j] % g->tw, ty = d->tile_list[j] / g->tw;
+		if (!pair_meets(d, i, tx, ty, 2) || !pair_meets(d, i, tx, ty, 3) || !pair_meets(d, i, tx - 1, ty, 2) || !pair_meets(d, i, tx, ty - 1, 3))
+			return false;
+	}
 	return true;
 }
 
@@ -605,7 +653,7 @@ static bool plain_panel(const TileBook *books, int nbooks, const TileSeams *seam
 		for (int c = d->lend[k] ? first_of(p, d->shape[i]) : p->n; c < p->n && p->panel[c].shape == d->shape[i]; ++c) {
 			if (p->panel[c].rare || (g->single && two_layers(p, &p->panel[c])) || (found && !in_the_open(p, c))) continue;
 			for (int m = 0; m < 3; ++m) { d->book[at[m]] = (int8_t)k; d->index[at[m]] = (uint16_t)c; }
-			if (!panel_meets(books, seams, g, d, i)) continue;
+			if (!panel_meets(d, i)) continue;
 			*out = (Whole){ (int8_t)k, (uint16_t)c };
 			found = true;
 			if (in_the_open(p, c)) k = nbooks;   /* (the one looked for) */
@@ -655,7 +703,7 @@ static void lay_again(const TileBook *books, int nbooks, const TileSeams *seams,
 				if (p->panel[c].rare || (g->single && two_layers(p, &p->panel[c]))) continue;
 				d->book[i] = (int8_t)k;
 				d->index[i] = (uint16_t)c;
-				if (!panel_meets(books, seams, g, d, i)) d->book[i] = -1;
+				if (!panel_meets(d, i)) d->book[i] = -1;
 			}
 		}
 	}
