@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T17:54:31Z
-* **Update**: devtools/profiling.md (the layer lab: tools/layer_bench.py, every area's layers by a base and a change, compared byte for byte, each part's time and instructions; log.txt's net: line; over every area the tiles' pick and the learning are where the time is), devtools/atlas.md (the report's parts and coordinate hash, learn.txt), code/tools.md (tools/layer_bench.py), code/core.md (stopwatch.c).

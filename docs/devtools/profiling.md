@@ -3,7 +3,7 @@ type: Tool
 title: "Profiling: where a start's instructions go"
 description: "How the time to the first layer is profiled (Valgrind's callgrind on the host build, in the build image, counting each function's instructions), what the profile of 14 November 2026 found, what was made faster, and the hot spots left."
 tags: [devtools, performance, layers]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:28:30Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:54:31Z }
 ---
 
 # Profiling: where a start's instructions go

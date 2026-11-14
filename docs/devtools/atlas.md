@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:54:31Z }
 ---
 
 # Atlas: every layer drawn
