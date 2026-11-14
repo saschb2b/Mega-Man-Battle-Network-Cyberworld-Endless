@@ -2141,6 +2141,14 @@
    "comment": "---- the board ----",
    "line": 90
   },
+  "update_text:update_setting_note": {
+   "header": "settings.ini's comment before the updates line, where one is added",
+   "line": 25
+  },
+  "update_text:words": {
+   "comment": "(in UpdateWord's order, its name beside each)",
+   "line": 7
+  },
   "xchips_text:xchips_text_desc": {
    "header": "Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)",
    "line": 8
@@ -2725,6 +2733,15 @@
    "speaker": "Screen",
    "stem": "second_text"
   },
+  "src/update/update_text.c": {
+   "comment": "update_text.h. Menu words, short and plain: what the check does and sends, what a press does, as docs/GUIDE.md's Updates says it.",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 11,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "update_text"
+  },
   "src/world/job_words.c": {
    "comment": "job_words.h. The askers' requests in their own voices (docs/voice/rules.md): the NetBattler at AsterLand's board (a grown-up who calls Lan \"kid\"), the NetBattle club's member in class 6-1 (a classmate), the man from Dad's lab in town. Each offers, waits, and settles at the next visit, paying in BN6's own way (\"MegaMan got: ...\"); BN6's Request BBS's rule holds: one request at a time.",
    "domain": "Requests",
@@ -2839,7 +2856,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2376,
+  "boxes": 2387,
   "domains": {
    "Arena": {
     "files": [
@@ -2993,11 +3010,12 @@
      "src/layer/battler_words.c",
      "src/layer/fork_words.c",
      "src/layer/glitch_words.c",
-     "src/online/emote_strip_text.c"
+     "src/online/emote_strip_text.c",
+     "src/update/update_text.c"
     ],
-    "flagged": 16,
-    "lines": 312,
-    "speech": 288
+    "flagged": 22,
+    "lines": 323,
+    "speech": 299
    },
    "Powers": {
     "files": [
@@ -3119,19 +3137,21 @@
     "speech": 7
    }
   },
-  "flagged": 130,
+  "flagged": 136,
   "flags": {
    "beats": 3,
-   "box-words": 4,
+   "box-words": 7,
    "button": 5,
-   "colon": 40,
-   "comma-space": 4,
-   "line-long": 13,
+   "colon": 44,
+   "comma-space": 6,
+   "line-long": 14,
    "long-speech": 49,
-   "meta": 3,
-   "pages": 13,
+   "meta": 4,
+   "pages": 16,
+   "paren": 1,
    "prog-caps": 1,
    "rule-talk": 8,
+   "semicolon": 1,
    "spelling": 4,
    "summary": 1
   },
@@ -3196,7 +3216,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 843,
+    "boxes": 844,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3209,7 +3229,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 140",
+    "stutters": "1 box in 141",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3251,7 +3271,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 2088,
+  "lines": 2099,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3494,7 +3514,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 843,
+    "boxes": 844,
     "dots_per_box": 0.22,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3507,7 +3527,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 140",
+    "stutters": "1 box in 141",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3707,7 +3727,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1499
+  "speech": 1510
  },
  "version": 1,
  "conversations": [
@@ -4302,6 +4322,8 @@
   {"container":"liberation_words:lib_label_enemy_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_enemy_phase","line":189,"lines":["liberation_words:lib_label_enemy_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label enemy phase","when":""},
   {"container":"liberation_words:lib_label_player_phase","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_label_player_phase","line":189,"lines":["liberation_words:lib_label_player_phase:0"],"speakers":["Mr.Prog"],"title":"Lib label player phase","when":""},
   {"container":"liberation_words:lib_faced_label","domain":"Other","file":"src/director/liberation_words.c","id":"liberation_words:lib_faced_label","line":194,"lines":["liberation_words:lib_faced_label:caseLIB_ITEM.0","liberation_words:lib_faced_label:caseLIB_RING.0","liberation_words:lib_faced_label:caseLIB_TRAP.0","liberation_words:lib_faced_label:caseLIB_CLEAN.0"],"speakers":["MegaMan"],"title":"What MegaMan faces, for the menu's information","when":"What MegaMan faces, for the menu's information: a panel's kind (liberation_board.h's LIB_*), or a unit's name"},
+  {"container":"update_text:words","domain":"Other","file":"src/update/update_text.c","id":"update_text:words","line":9,"lines":["update_text:words:1","update_text:words:2","update_text:words:3","update_text:words:4","update_text:words:5","update_text:words:6","update_text:words:7","update_text:words:8","update_text:words:10","update_text:words:0"],"speakers":["MegaMan"],"title":"Words","when":"(in UpdateWord's order, its name beside each)"},
+  {"container":"update_text:update_setting_note","domain":"Other","file":"src/update/update_text.c","id":"update_text:update_setting_note","line":26,"lines":["update_text:update_setting_note:0"],"speakers":["MegaMan"],"title":"Settings.ini's comment before the updates line, where one is added","when":"settings.ini's comment before the updates line, where one is added"},
   {"container":"options_text:words","domain":"Options","file":"src/core/options_text.c","id":"options_text:words","line":11,"lines":["options_text:words:2","options_text:words:6","options_text:words:8","options_text:words:12","options_text:words:13","options_text:words:19","options_text:words:20","options_text:words:21","options_text:words:22","options_text:words:23","options_text:words:24","options_text:words:25","options_text:words:30","options_text:words:31","options_text:words:33","options_text:words:34","options_text:words:35","options_text:words:36","options_text:words:37","options_text:words:42","options_text:words:43","options_text:words:44","options_text:words:45","options_text:words:46","options_text:words:47","options_text:words:48","options_text:words:49","options_text:words:53","options_text:words:54","options_text:words:55","options_text:words:56","options_text:words:60","options_text:words:61","options_text:words:62","options_text:words:63","options_text:words:64","options_text:words:65","options_text:words:66","options_text:words:67","options_text:words:68","options_text:words:69","options_text:words:70","options_text:words:71","options_text:words:73","options_text:words:74","options_text:words:75","options_text:words:77","options_text:words:82","options_text:words:83","options_text:words:84","options_text:words:85","options_text:words:86","options_text:words:0"],"speakers":["Screen"],"title":"Words","when":"(in OptionsWord's order, its name beside each)"},
   {"container":"options_text:options_sound_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_sound_note","line":107,"lines":["options_text:options_sound_note:0"],"speakers":["Screen"],"title":"Settings.ini's lines before the sound line","when":"settings.ini's lines before the sound line: what it is"},
   {"container":"options_text:options_low_pass_note","domain":"Options","file":"src/core/options_text.c","id":"options_text:options_low_pass_note","line":116,"lines":["options_text:options_low_pass_note:0"],"speakers":["Screen"],"title":"Options low pass note","when":"... before mGBA's filter's level and the output's"},
@@ -6406,6 +6428,17 @@
   {"boxes":[{"pages":[["Calls Rush over a","gap: one held for"],["each of its panels,","one eaten"]],"speaker":"Screen","text":"Calls Rush over a gap: one held for each of its panels, one eaten"}],"container":"second_item_does","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_item_does:caseITEM_RUSH_FOOD.0","kind":"screen","line":314,"speaker":"Screen","speakers":["Screen"],"text":"Calls Rush over a gap: one held for each of its panels, one eaten","text_hash":"b27467170d95"},
   {"boxes":[{"pages":[["Opens every skull","door of the Undernet"]],"speaker":"Screen","text":"Opens every skull door of the Undernet"}],"container":"second_item_does","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_item_does:caseITEM_WWW_ID.0","kind":"screen","line":315,"speaker":"Screen","speakers":["Screen"],"text":"Opens every skull door of the Undernet","text_hash":"b5586cf07fe8"},
   {"boxes":[{"pages":[["Opens a purple","Mystery Data"]],"speaker":"Screen","text":"Opens a purple Mystery Data"}],"container":"second_item_does","domain":"The second screen","file":"src/second/second_text.c","flags":[],"id":"second_text:second_item_does:caseSUB_UNLOCKER.0","kind":"screen","line":316,"speaker":"Screen","speakers":["Screen"],"text":"Opens a purple Mystery Data","text_hash":"e1c4a8ee4dd2"},
+  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"14 words","code":"box-words"}],"pages":[["Looks on GitHub for","a new version at"],["each start. Sends","nothing about you"]],"speaker":"MegaMan","text":"Looks on GitHub for a new version at each start. Sends nothing about you"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":["box-words","pages"],"fragment":true,"id":"update_text:words:1","kind":"speech","line":9,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Looks on GitHub for a new version at each start. Sends nothing about you","text_hash":"f6c49f81ff9c"},
+  {"boxes":[{"pages":[["The game never looks","for a new version"]],"speaker":"MegaMan","text":"The game never looks for a new version"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":[],"fragment":true,"id":"update_text:words:2","kind":"speech","line":10,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The game never looks for a new version","text_hash":"9ec45eb553b5"},
+  {"boxes":[{"pages":[["Update to"]],"speaker":"MegaMan","text":"Update to"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":[],"fragment":true,"id":"update_text:words:3","kind":"speech","line":11,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Update to","text_hash":"e16acfb55448"},
+  {"boxes":[{"flags":[{"at":"4 lines","code":"pages"},{"at":"15 words","code":"box-words"},{"at":":","code":"colon"},{"at":"saves","code":"meta"}],"pages":[["A: downloads it and","starts it. Your"],["saves and your run","stay as they are"]],"speaker":"MegaMan","text":"A: downloads it and starts it. Your saves and your run stay as they are"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":["box-words","colon","meta","pages"],"fragment":true,"id":"update_text:words:4","kind":"speech","line":12,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A: downloads it and starts it. Your saves and your run stay as they are","text_hash":"4f53f7464935"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["A: opens the","download page"]],"speaker":"MegaMan","text":"A: opens the download page"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":["colon"],"fragment":true,"id":"update_text:words:5","kind":"speech","line":13,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A: opens the download page","text_hash":"147c768742ef"},
+  {"boxes":[{"flags":[{"at":"page, where","code":"comma-space"}],"pages":[["On the game's","releases page, where","this one came from"]],"speaker":"MegaMan","text":"On the game's releases page, where this one came from"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":["comma-space"],"fragment":true,"id":"update_text:words:6","kind":"speech","line":14,"speaker":"MegaMan","speakers":["MegaMan"],"text":"On the game's releases page, where this one came from","text_hash":"59868e341f11"},
+  {"boxes":[{"pages":[["The itch app","installs it for you"]],"speaker":"MegaMan","text":"The itch app installs it for you"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":[],"fragment":true,"id":"update_text:words:7","kind":"speech","line":15,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The itch app installs it for you","text_hash":"ef7f8e2833eb"},
+  {"boxes":[{"pages":[["Downloading. The","game starts again","when it is done"]],"speaker":"MegaMan","text":"Downloading. The game starts again when it is done"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":[],"fragment":true,"id":"update_text:words:8","kind":"speech","line":16,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Downloading. The game starts again when it is done","text_hash":"7ecca859668f"},
+  {"boxes":[{"flags":[{"at":":","code":"colon"}],"pages":[["The download","stopped. A: try","again"]],"speaker":"MegaMan","text":"The download stopped. A: try again"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":["colon"],"fragment":true,"id":"update_text:words:10","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The download stopped. A: try again","text_hash":"c222c5b9cd52"},
+  {"boxes":[{"pages":[["a word for each","UpdateWord"]],"speaker":"MegaMan","text":"a word for each UpdateWord"}],"container":"words","domain":"Other","file":"src/update/update_text.c","flags":[],"fragment":true,"id":"update_text:words:0","kind":"speech","line":21,"speaker":"MegaMan","speakers":["MegaMan"],"text":"a word for each UpdateWord","text_hash":"18054f4fc55d"},
+  {"boxes":[{"flags":[{"at":"10 lines","code":"pages"},{"at":"# update.json on GitHub; nothing about you or your game is sent), and","code":"line-long"},{"at":"31 words","code":"box-words"},{"at":"sent), and","code":"comma-space"},{"at":":","code":"colon"},{"at":";","code":"semicolon"},{"at":"()","code":"paren"}],"pages":[["# updates: on looks","for a new version at","each start (the"],["release's","# update.json on","GitHub; nothing"],["about you or your","game is sent), and"],["# Options offers it.","off never looks."]],"speaker":"MegaMan","text":"\n# updates: on looks for a new version at each start (the release's\n# update.json on GitHub; nothing about you or your game is sent), and\n# Options offers it. off never looks.\n"}],"container":"update_setting_note","domain":"Other","file":"src/update/update_text.c","flags":["box-words","colon","comma-space","line-long","pages","paren","semicolon"],"id":"update_text:update_setting_note:0","kind":"speech","line":26,"speaker":"MegaMan","speakers":["MegaMan"],"text":"\n# updates: on looks for a new version at each start (the release's\n# update.json on GitHub; nothing about you or your game is sent), and\n# Options offers it. off never looks.\n","text_hash":"19e9485385b7"},
   {"boxes":[{"pages":[["{pay} Zenny"]],"speaker":"Townsfolk","text":"{pay} Zenny"}],"container":"pay_name","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:pay_name:casePAY_ZENNY.0","kind":"screen","line":38,"placeholders":[{"name":"pay","spec":"%u"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"{pay} Zenny","text_hash":"ef8c122df22c"},
   {"boxes":[{"pages":[["{pay} BugFrags"]],"speaker":"Townsfolk","text":"{pay} BugFrags"}],"container":"pay_name","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:pay_name:casePAY_BUGFRAGS.0","kind":"screen","line":39,"placeholders":[{"name":"pay","spec":"%u"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"{pay} BugFrags","text_hash":"abde07b70af6"},
   {"boxes":[{"pages":[["{pay} HPMemory"]],"speaker":"Townsfolk","text":"{pay} HPMemory"}],"container":"pay_name","domain":"Requests","file":"src/world/job_words.c","flags":[],"id":"job_words:pay_name:casedefault.0","kind":"screen","line":45,"placeholders":[{"name":"pay","spec":"%u"}],"speaker":"Townsfolk","speakers":["Townsfolk"],"text":"{pay} HPMemory","text_hash":"223da561ea98"},

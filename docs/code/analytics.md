@@ -3,7 +3,7 @@ type: Code Map
 title: "The anonymous statistics"
 description: "What `src/analytics/` holds: the anonymous statistics' answer, events and Umami payloads, the question, and each system's way to send them off the frame loop."
 tags: [code]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:50:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
 ---
 
 # The anonymous statistics
