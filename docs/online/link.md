@@ -3,7 +3,7 @@ type: Research
 title: "The link cable and the Arena"
 description: "The link cable research behind the Arena: two cores per client on mGBA's `GBASIOLockstep` with only inputs crossing, why raw serial over a network stalls, the measurements, the pair's snapshot, and `build.py online-pair`."
 tags: [online, link]
-generated: { by: claude-code/unrecorded, at: 2026-10-18T12:01:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:27:59Z }
 ---
 
 # The link cable and the Arena
