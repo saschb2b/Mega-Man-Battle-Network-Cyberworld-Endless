@@ -89,7 +89,8 @@ async def run(args):
                         name=settings.get("name", "Cyberworld Endless"), motd=settings.get("motd", "Welcome to the Net Square"),
                         whitelist=tuple(public_id(value) for value in settings.get("whitelist", "").split()),
                         trading=settings.getboolean("trading", True), arena=settings.getboolean("arena", True),
-                        policy=Retention.from_settings(settings), maintenance=settings.get("maintenance", ""))
+                        policy=Retention.from_settings(settings), maintenance=settings.get("maintenance", ""),
+                        transfers=settings.getboolean("transfers", True))
         port = await server.start(host, port, tls)
         await announce(server, host, port, tls is not None, state_dir, config_path(args))
         stop = asyncio.Event()

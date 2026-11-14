@@ -420,6 +420,47 @@ their battle is over. ARENA_STATUS is taken from the cable's first player
 of a started battle, at most twice a second but for the one naming the
 winner. Nothing a spectator sends reaches the battle.
 
+**Saves sent by a code** (docs/engine/saves.md, Sending by code). A
+connection to `/presence` whose first message is TRANSFER (36) rather
+than HELLO is no visit: it takes no place, no channel and no identity,
+and goes no further than its one exchange. It changes no message of a
+visit's, so it has no protocol version of its own and bumps none: a
+server from before it answers TRANSFER as it answers any first message
+that is not a HELLO, with an ERROR, and the game says that server takes
+no saves.
+
+| Message | Direction | Payload after the one-byte type |
+| --- | --- | --- |
+| TRANSFER (36) | client → server, first | u8 `transfer_version` (1), u8 op (`transfer_put` 1, `transfer_get` 2, `transfer_done` 3), 16-byte lookup, u32 size (a put's: the blob's bytes, 1 to `transfer_max`; else 0): `transfer_bytes` (23) |
+| TRANSFER_STATE (37) | server → client | u8 status, u32 its value: `transfer_state_bytes` (6) |
+| TRANSFER_DATA (38) | either way | the blob's next bytes, 1 to 511, in order |
+
+A put: TRANSFER put, then the server's READY (0); the blob's bytes in
+TRANSFER_DATA; then HELD (1, the value the seconds it is held:
+`transfer_minutes` 15 as 900) once the last byte is in, and the server
+closes. A put whose lookup is held already is answered TAKEN (5): the
+game makes another code. A get: TRANSFER get, then FOUND (2, the value
+the blob's size) and its bytes in TRANSFER_DATA, or NONE (3) where
+nothing is held under that lookup (never held, gone after its 15
+minutes, or let go); the game then sends TRANSFER done on the same
+connection, once it has opened the blob, and the server answers REMOVED
+(7) and lets it go. A blob a get found and no DONE let go stays until its
+time is up, so a broken download can be tried again. BUSY (4, the value
+the seconds to wait) answers a put while the server holds as much as it
+will, a put or a get past the lookups it allows a minute (a put's TAKEN
+would otherwise tell which lookups are held), and either while as many
+transfers are under way as it takes; OFF (6) answers both on a
+server whose `transfers` setting is off. Anything else, a DATA too long
+or past the size, or a connection quiet for 15 seconds, ends it with an
+ERROR.
+
+The lookup and the blob are the game's: the code a player reads off one
+system and types on the other is never sent, and the server can open
+neither the blob nor the code from what it holds (docs/engine/saves.md
+says how they are made). The server keeps them in memory alone, never in
+a file, a log or a backup, and counts the day's held and taken in its
+daily totals.
+
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's
 hash (`src/online/square_plan.h`), checked by the server against

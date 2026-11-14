@@ -19,6 +19,7 @@
 #include "platform.h"
 #include "rom.h"
 #include "saves_actions.h"
+#include "saves_code.h"
 #include "saves_draw.h"
 #include "saves_state.h"
 #include "saves_text.h"
@@ -146,6 +147,10 @@ static bool back(void) {
 	}
 	if (SV.view == SAVES_COMPARE) saves_leave_compare(false);
 	else if (SV.view == SAVES_RESULT) home();
+	else if (SV.view == SAVES_SEND_CODE || SV.view == SAVES_RECEIVE_CODE) {
+		saves_code_leave();
+		home();
+	}
 	else {
 		if (SV.back == &scene_title) title_menu = true;
 		scene_set(SV.back ? SV.back : &scene_title);
@@ -171,11 +176,13 @@ static void enter(void) {
 static void leave(void) {
 	platform_own_taps(false);
 	platform_on_back(NULL);
+	saves_code_leave();
 	saves_clear_file();
 }
 
 static void update(void) {
 	saves_tick();
+	if (saves_code_tick()) { back(); return; }
 	if (saves_picked() || SV.guard_input) {
 		int x, y;
 		SV.guard_input = false;

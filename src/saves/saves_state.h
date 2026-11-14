@@ -10,13 +10,18 @@
 
 #include "backup.h"
 #include "game.h"
+#include "transfer_link.h"
 
-/* Its buttons, those shown in each view */
+/* Its buttons, those shown in each view (SEND and RECEIVE's view's
+ * digits: SAVES_DIGIT + 0..9) */
 enum {
-	SAVES_EXPORT, SAVES_IMPORT, SAVES_UNDO, SAVES_AUTO, SAVES_FOLDER,
-	SAVES_KEEP, SAVES_TAKE, SAVES_DONE, SAVES_CONTINUE, SAVES_ACTIONS
+	SAVES_EXPORT, SAVES_IMPORT, SAVES_SEND, SAVES_RECEIVE, SAVES_UNDO, SAVES_AUTO, SAVES_FOLDER,
+	SAVES_KEEP, SAVES_TAKE, SAVES_DONE, SAVES_CONTINUE, SAVES_ERASE, SAVES_GET,
+	SAVES_DIGIT, SAVES_ACTIONS = SAVES_DIGIT + 10
 };
-typedef enum { SAVES_HOME, SAVES_COMPARE, SAVES_RESULT } SavesView;
+/* (SEND: the code the server holds the saves under; RECEIVE: a code typed,
+ * saves_code.c) */
+typedef enum { SAVES_HOME, SAVES_COMPARE, SAVES_RESULT, SAVES_SEND_CODE, SAVES_RECEIVE_CODE } SavesView;
 
 typedef struct {
 	const Scene *back;     /* where it goes back to: the title or the ROMs screen */
@@ -37,6 +42,10 @@ typedef struct {
 	BackupStatus status;   /* the file's, checked */
 	char note[700];        /* the comparison's or the result's words */
 	char said[96];         /* home's line in the copy's place: a picker's wait, or its cancel (a playtester's EXPORT said nothing, session 74) */
+	char code[11];         /* RECEIVE's digits typed so far */
+	uint32_t sent_hash;    /* the saves SEND last sent (BackupInfo.hash): shown again while their code holds */
+	bool typing;           /* RECEIVE's native keyboard on (text_input.h) */
+	TransferState transfer;   /* SEND's or RECEIVE's link as this frame's update found it, for the picture */
 } Saves;
 
 extern Saves SV;

@@ -131,6 +131,7 @@ file. The environment sets any of them too, over the file:
 | `port` | 8765 | The TCP port |
 | `capacity`, `player_cap` | 8, 64 | Players in a channel, and in the Square (another channel opens as one fills) |
 | `trading`, `arena` | `true` | Trade Central and the NetBattles |
+| `transfers` | `true` | Saves sent by a code, held in memory for 15 minutes ([What is kept](#what-is-kept-and-for-how-long)); `false` tells the game this server takes none |
 | `origins` | `https://saschb2b.github.io` | The browser pages whose game may come in (the published one); empty, native games alone |
 | `maintenance` | empty | A line that turns every game away at the gate ([Maintenance](#maintenance)) |
 
@@ -211,8 +212,9 @@ it nowhere.
 | The Board, `weeks.jsonl` | your best dive of a week: public identity, name, layer, act, minutes | the Board shows this week and the last | 2 weeks |
 | Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
 | The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
-| The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
+| The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, saves sent by a code held and taken, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
 | Backups | the server's secret, moderation and the Board | to bring the server back after a fault | 14 days |
+| Saves sent by a code, in memory alone | a save your game sealed before sending, and the lookup it is held under, both made by your game. The code you read off one system and type on the other is never sent, and the server can neither open the save nor work out the code. Never in a file, a log or a backup | to hand the save to your other system | 15 minutes, or until your other system takes it; a server restart drops it |
 
 Everything else stays in memory and goes when you leave or the server
 restarts: where you walk, your card, the phrases you send, your trade
@@ -307,8 +309,9 @@ protocol, occupancy, limits and rules. It contains no player identities.
 `GET /stats` returns the daily totals: today so far and the last 30 days
 ([The daily totals](#the-daily-totals)).
 `trading` and `arena` (both on unless set `false`) open or close Trade
-Central and the Arena; `free_text` must stay false (quick phrases and
-emotes only), and setting it refuses startup.
+Central and the Arena, and `transfers` (on unless set `false`) saves sent
+by a code; `free_text` must stay false (quick phrases and emotes only),
+and setting it refuses startup.
 
 ## Trade Central and the Arena
 
@@ -614,7 +617,9 @@ Moderation updates use an atomic replace. Every write of the state's
 files (moderation, the trades' and the Board's logs, the players' log, a
 retention pass, a restore) holds the state directory's lock,
 `moderation.lock`, so local CLI edits and the running server never meet
-in a half-written file. There is no game save or ROM on the server.
+in a half-written file. There is no readable game save and no ROM on the
+server: a save sent by a code is sealed by the game before it is sent,
+and held in memory alone until it is taken or its 15 minutes are up.
 
 The server reads `moderation.json` again only when the file changes. If a
 hand edit leaves it unreadable, the running server keeps the last rules it
@@ -660,6 +665,7 @@ Each UTC day the server counts, with no personal data (`stats.py`):
 | `battles_started`, `battles_finished` | NetBattles begun, and those whose end the cable's first game told (a battle left or broken is begun and not finished) |
 | `watched` | battles watched from the stands |
 | `dives` | the week's dives posted to the Board |
+| `transfers_held`, `transfers_taken` | saves sent by a code: those held (a put whose last byte came in), and those taken (a DONE that let one go) |
 | `versions` | HELLOs by the protocol version they carry, those of another version refused (16 versions apart, the rest as `other`) |
 | `passes` | joins by the NetPass: `full` (the full set: BN6's, BN5's and BN4's ROMs) or `square` (any less; a New 3DS's full pass with one game counts here, as it neither battles nor dives) |
 
@@ -732,6 +738,15 @@ cannot lock players out. A new connection with a profile that is already
 connected (a reconnect the server has not yet seen drop) replaces the old
 session: the old one receives ERROR 12 and a close frame saying why, and
 the new one takes its place and, unless it asks for another, its channel.
+
+A connection whose first message is TRANSFER, not HELLO, is a save sent
+by a code ([the wire](../shared/online/README.md), Saves sent by a code;
+`transfer.py`): one exchange, no player, no place and no channel. The
+server holds 128 saves and 64 MiB at most, takes 8 such exchanges at once
+and answers 30 lookups a minute (puts and gets together, for the whole
+server, as a proxy hides the players' addresses); past any of these it
+answers BUSY with the seconds to wait. An exchange quiet for 15 seconds or
+longer than 2 minutes ends with an ERROR.
 
 ### A dropped link: the place held
 

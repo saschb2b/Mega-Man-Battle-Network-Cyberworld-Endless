@@ -2873,7 +2873,7 @@ def lint_analyzer(update):
     from collections import Counter
     # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
     # line naming their function, so files' lines must not interleave)
-    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online -isystem third_party/monocypher '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
               'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '

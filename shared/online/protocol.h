@@ -130,4 +130,31 @@
 #define ONLINE_TEAM_SIDE_BY_SIDE 1    /* ... two MegaMen a side on one field */
 #define ONLINE_STANDS_SIDE_BY_SIDE 255 /* STANDS's bout byte for a side-by-side battle (a relay's bout its number) */
 
+/* Saves sent by a code (docs/engine/saves.md, Sending by code): a
+ * connection to /presence whose first message is TRANSFER instead of
+ * HELLO, with no protocol version of its own (a server without them
+ * answers it as any first message that is not a HELLO, an ERROR). The
+ * blob is sealed on the game's side; the server holds it, unread, in
+ * memory for ONLINE_TRANSFER_MINUTES. */
+#define ONLINE_TRANSFER 36            /* client -> server, first: u8 version, u8 op, 16-byte lookup, u32 size (a put's) */
+#define ONLINE_TRANSFER_STATE 37      /* server -> client: u8 status, u32 its value */
+#define ONLINE_TRANSFER_DATA 38       /* either way: the blob's next bytes, at most ONLINE_MAX_MESSAGE - 1 */
+#define ONLINE_TRANSFER_VERSION 1
+#define ONLINE_TRANSFER_PUT 1         /* TRANSFER's op: a blob to hold, its DATA after READY */
+#define ONLINE_TRANSFER_GET 2         /* ... the blob held under the lookup, FOUND and its DATA */
+#define ONLINE_TRANSFER_DONE 3        /* ... after a GET, on the same connection: the blob let go (REMOVED) */
+#define ONLINE_TRANSFER_BYTES 23
+#define ONLINE_TRANSFER_STATE_BYTES 6
+#define ONLINE_TRANSFER_LOOKUP_BYTES 16
+#define ONLINE_TRANSFER_MAX 2097152   /* a blob's bytes at most */
+#define ONLINE_TRANSFER_MINUTES 15    /* how long the server holds one */
+#define ONLINE_TRANSFER_READY 0       /* TRANSFER_STATE's status: send the DATA */
+#define ONLINE_TRANSFER_HELD 1        /* ... the blob is held, for the value's seconds */
+#define ONLINE_TRANSFER_FOUND 2       /* ... the blob follows, the value its size */
+#define ONLINE_TRANSFER_NONE 3        /* ... nothing held under that lookup */
+#define ONLINE_TRANSFER_BUSY 4        /* ... the server is full or asked too often: again in the value's seconds */
+#define ONLINE_TRANSFER_TAKEN 5       /* ... a put's lookup is in use: another code */
+#define ONLINE_TRANSFER_OFF 6         /* ... this server takes no transfers */
+#define ONLINE_TRANSFER_REMOVED 7     /* ... DONE: the blob is gone */
+
 #endif

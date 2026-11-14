@@ -5,7 +5,8 @@ A day counts its joins; its distinct public identities, as a number only
 (a set held in memory for the day and dropped at its end, never written
 and never served); the most players online at once; the trades
 committed; the NetBattles started and finished; the battles watched; the
-week's dives posted; the HELLOs by the protocol version they carry (a game
+week's dives posted; the saves sent by a code that were held and those
+taken (transfer.py); the HELLOs by the protocol version they carry (a game
 of another version is refused, so the older and newer games that tried
 show here); and the joins by the NetPass, the full set's or the Square's.
 HELLO names no system, so there is no count by one.
@@ -26,7 +27,8 @@ from .identity import rewrite_log, state_lock
 LOG = "stats.jsonl"
 SHOWN = 30              # the days /stats serves besides today
 VERSIONS = 16           # protocol versions counted apart; the rest as "other"
-COUNTS = ("joins", "peak", "trades", "battles_started", "battles_finished", "watched", "dives")
+COUNTS = ("joins", "peak", "trades", "battles_started", "battles_finished", "watched", "dives",
+          "transfers_held", "transfers_taken")
 
 
 def day_of(now):

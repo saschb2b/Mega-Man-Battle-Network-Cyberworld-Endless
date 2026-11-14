@@ -64,6 +64,10 @@ Board for 14 days, and its daily totals, with no names, for a year at
 `log_days`, `backup_days`, `stats_days`), each pruned by the server itself
 (`retention.py`) and by its backup service (`backup.py`, a second
 service of `deploy/coolify/compose.yaml`). The console's log names no
-player. `--admin forget` answers a request to be removed. It follows
+player. Saves sent by a code ([Portable saves](../engine/saves.md),
+Sending by code) it holds sealed, unreadable to it, in memory alone for
+15 minutes or until taken, never in a file, a log or a backup, and
+counts only how many were held and taken a day.
+`--admin forget` answers a request to be removed. It follows
 `dev` until the release that ships online play, then `main`
 ([server/README.md, At a release](../../server/README.md#at-a-release-the-official-server-follows-main)).

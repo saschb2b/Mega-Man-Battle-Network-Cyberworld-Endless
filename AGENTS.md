@@ -127,6 +127,7 @@ part of the tree; a new file gets its line there.
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
 | `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the skills |
+| `third_party/` | [docs/code/third-party.md](docs/code/third-party.md): others' code, kept as released (Monocypher) |
 | `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `psp/`, `ps4/`, `ps5/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
 | `web/`, `docs/screenshots/`, `docs/clips/` | [docs/code/site-and-media.md](docs/code/site-and-media.md): the site, screenshots and clips |
 | `docs/` | [docs/index.md](docs/index.md): the knowledge base |

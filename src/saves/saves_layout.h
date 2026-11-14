@@ -17,6 +17,7 @@ typedef struct {
 typedef struct {
 	SDL_Rect here, file;   /* the panels (file: the comparison's) */
 	SDL_Rect line;         /* home's line under its panel; the note */
+	SDL_Rect code;         /* SEND's code (RECEIVE's in its `line`) */
 	SDL_Rect back;
 	SavesButton buttons[SAVES_ACTIONS];
 	int count;
