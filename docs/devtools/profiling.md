@@ -111,6 +111,14 @@ again once the map's pads are found): over every area the learning 11.1
 to 4.5 seconds, area 34's 3.1 to 0.25; every layer the same, the 3DS's
 modelled heap 0.02 MB more while a map is learned.
 
+Whether a whole panel tried meets the tiles beside it (`panel_meets`)
+asked every tile of the map for every panel tried, when only a pair with
+one of the panel's own tiles can fail: each of the floor's panels' tiles
+are now listed once a laying (`tiles_index`), and its own tiles and those
+left of and over them asked. BN5's Nebula Area's pick 17.0 to 14.7
+billion instructions; every layer the same, the 3DS's modelled heap the
+same.
+
 ## What the profile of 14 November 2026 found
 
 Instructions to the first layer, the second start (its boot state made),

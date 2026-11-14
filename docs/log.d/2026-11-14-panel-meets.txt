@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-14T19:10:05Z
+* **Update**: devtools/profiling.md (a whole panel's seams asked of its own tiles and their neighbours alone, not every tile of the map: BN5's Nebula Area's pick 17.0 to 14.7 billion instructions, the layers the same).
