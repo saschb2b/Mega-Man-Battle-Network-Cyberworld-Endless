@@ -2,16 +2,19 @@
  * thread of its own, a look at the newest release's update.json; where it
  * names a newer version, the title says so beside the version, and the
  * title's Options has a line for it. Where this copy can put the new one
- * in place itself (the AppImage, the Windows installer's copy), A on that
- * line downloads it, checks its SHA-256, and the game ends and starts
- * again as the new version; elsewhere the line says where it comes from.
+ * in place itself (the AppImage, the Windows installer's copy, a
+ * PortMaster handheld's, Android's app), A on that line downloads it,
+ * checks its SHA-256, and the game ends and starts again as the new
+ * version (on Android, Android's installer ends it and puts the new one
+ * in place); elsewhere the line says where it comes from.
  * On by default (the owner's call, 2026-11-14), Options' Updates line and
  * settings.ini's `updates = off` switch it off. Nothing is sent but the
  * request for that one file.
  *
  * A developer's look elsewhere: CYBERWORLD_UPDATE_URL (another
  * update.json, any build, headless too) and CYBERWORLD_UPDATE_FROM (the
- * version this build counts as). */
+ * version this build counts as); on Android, the same names as
+ * GameActivity's string extras. */
 #ifndef CW_UPDATE_H
 #define CW_UPDATE_H
 
@@ -19,7 +22,8 @@
 
 /* Where it stands: nothing (none found, not looked, or switched off), a
  * newer version found, its download under way, failed, or done and in
- * place (the game ends at the next tick and starts it) */
+ * place (the game ends at the next tick and starts it; on Android, in
+ * the hands of Android's installer, which ends the game itself) */
 typedef enum { UPDATE_IDLE, UPDATE_FOUND, UPDATE_GETTING, UPDATE_FAILED, UPDATE_READY } UpdateState;
 
 /* How this copy is updated: by the game itself, from the download page

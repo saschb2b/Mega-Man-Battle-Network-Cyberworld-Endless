@@ -215,6 +215,18 @@ void update_install_start(void) {
 
 #else
 
+#ifdef __ANDROID__
+#include "update_android.h"
+
+/* (Android: GameActivity's Java downloads the APK, checks it and hands
+ * it to Android's installer, update_android.h; nothing is written here) */
+UpdateWay update_install_way(const char **key) {
+	*key = "android";
+	return UPDATE_WAY_INSTALL;
+}
+
+void update_install_tidy(void) { update_android_tidy(); }
+#else
 /* (the systems whose updates come another way: none looks yet) */
 UpdateWay update_install_way(const char **key) {
 	*key = NULL;
@@ -222,6 +234,7 @@ UpdateWay update_install_way(const char **key) {
 }
 
 void update_install_tidy(void) {}
+#endif
 
 FILE *update_install_open(void) { return NULL; }
 

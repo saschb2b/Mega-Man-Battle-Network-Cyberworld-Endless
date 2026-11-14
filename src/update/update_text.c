@@ -9,13 +9,26 @@ static const char *const words[] = {
 	"Looks on GitHub for a new version at each start. Sends nothing about you",   /* UW_ON_NOTE */
 	"The game never looks for a new version",   /* UW_OFF_NOTE */
 	"Update to",   /* UW_GET */
+#ifdef __ANDROID__
+	/* (Android's installer puts it in place: the first time it asks) */
+	"A: downloads it and installs it. Your saves and your run stay as they are",   /* UW_INSTALL_NOTE */
+#else
 	"A: downloads it and starts it. Your saves and your run stay as they are",   /* UW_INSTALL_NOTE */
+#endif
 	"A: opens the download page",   /* UW_PAGE_NOTE */
 	"On the game's releases page, where this one came from",   /* UW_RELEASES_NOTE */
 	"The itch app installs it for you",   /* UW_ITCH_NOTE */
+#ifdef __ANDROID__
+	"Downloading. Android installs it when it is done",   /* UW_GETTING_NOTE */
+	"Android installs it and closes the game. Then open it again",   /* UW_READY_NOTE */
+	"Failed",   /* UW_FAILED */
+	"The update stopped. A: try again",   /* UW_FAILED_NOTE */
+#else
 	"Downloading. The game starts again when it is done",   /* UW_GETTING_NOTE */
+	"Done. The game starts again as the new version",   /* UW_READY_NOTE */
 	"Failed",   /* UW_FAILED */
 	"The download stopped. A: try again",   /* UW_FAILED_NOTE */
+#endif
 	"New",   /* UW_NEW */
 };
 _Static_assert(sizeof words / sizeof *words == UW_COUNT, "a word for each UpdateWord");

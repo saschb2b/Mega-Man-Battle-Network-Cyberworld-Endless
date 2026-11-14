@@ -183,7 +183,7 @@ static const char *update_note(void) {
 	static const UpdateWord ways[] = { [UPDATE_WAY_NONE] = UW_RELEASES_NOTE, [UPDATE_WAY_INSTALL] = UW_INSTALL_NOTE,
 		[UPDATE_WAY_PAGE] = UW_PAGE_NOTE, [UPDATE_WAY_RELEASES] = UW_RELEASES_NOTE, [UPDATE_WAY_ITCH] = UW_ITCH_NOTE };
 	UpdateState s = update_state();
-	return update_word(s == UPDATE_FAILED ? UW_FAILED_NOTE : s == UPDATE_GETTING || s == UPDATE_READY ? UW_GETTING_NOTE : ways[update_way()]);
+	return update_word(s == UPDATE_FAILED ? UW_FAILED_NOTE : s == UPDATE_GETTING ? UW_GETTING_NOTE : s == UPDATE_READY ? UW_READY_NOTE : ways[update_way()]);
 }
 
 /* the Display page's lines' notes */
