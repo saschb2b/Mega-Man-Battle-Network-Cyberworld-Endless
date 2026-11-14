@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-14T16:36:50Z
-* **Create**: devtools/profiling.md (the start to the first layer profiled with callgrind: legal_fix asks each panel once between edits and counts the topology once an edit, the SHA-1 unrolled; 29% fewer instructions with BN6 alone, the layers byte for byte the same; the hot spots left).
