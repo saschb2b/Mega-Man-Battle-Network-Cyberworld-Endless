@@ -3,7 +3,7 @@ type: Feature
 title: "Link Navi obstacles"
 description: "Link Navi obstacles (issue #42): BN6's geysers, cybertrees, flames, cyclones and clouds in a pocket's mouth, each area's own kind, opened by the run's Crosses (`layer_block_kind`, `ng_plan_obstacle`, `blockers.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-07T08:43:35Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:31:48Z }
 ---
 
 # Link Navi obstacles (built, issue #42)

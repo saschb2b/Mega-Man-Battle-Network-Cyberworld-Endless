@@ -3,7 +3,7 @@ type: Feature
 title: "Security cubes"
 description: "Security Cubes and cyberbarriers (issue #45): BN6's gold Security Cube in a pocket's mouth, opened by a P-Code one bystander knows, or its striped cyberbarrier taking a zenny toll in Seaside (`layer_cube_kind`, `ng_place_teller`); no navi within three panels of any piece's A."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-05T12:22:13Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:31:48Z }
 ---
 
 # Security cubes (built, issue #45)

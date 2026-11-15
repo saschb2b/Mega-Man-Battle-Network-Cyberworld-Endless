@@ -3,7 +3,7 @@ type: Design
 title: "Set pieces"
 description: "Set pieces and detours (issue #49): blue Mystery Data at the detours' ends (`net_detours.c`), long detours never left empty, the layer's RegUp, and the act's plan of which pieces a layer holds (`layer_pieces` in `net_pieces.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T11:29:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:31:48Z }
 ---
 
 # Set pieces

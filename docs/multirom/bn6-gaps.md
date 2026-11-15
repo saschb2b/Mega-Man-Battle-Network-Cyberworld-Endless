@@ -3,7 +3,7 @@ type: Status
 title: "BN6 Gregar's own gaps"
 description: "The audit of 11 November 2026: what BN6 Cybeast Gregar's own ROM holds that a run does not use, kind by kind (Program Advances, chips, fights, NaviCust programs, music, the net's looks and boards, requests and traders), each verified by a ROM read, the code or a capture, or marked assumed, sized, and split into what is built without a call and what waits on the owner."
 tags: [multirom, bn6, status]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:31:48Z }
 sources:
   - id: bn6-rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read by scratch scripts (not in git) and fought in BN6's engine by `build.py xdiff`'s engine specs"

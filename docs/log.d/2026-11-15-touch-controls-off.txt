@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T17:10:00Z
-* **Update**: GUIDE.md (Options' Game page's Touch controls line, Auto or Off: kept away while a controller or the keyboard plays; touch_controls in settings.ini).
