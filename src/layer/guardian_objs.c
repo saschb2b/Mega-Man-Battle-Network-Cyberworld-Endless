@@ -205,7 +205,7 @@ void guardian_scripts(TextArchive *text, const NetObj *o, int wx, int wy, int wz
 	/* (a first battle with this Navi, in any run: its battle data comes
 	 * with the Guardian Data, and the next briefing reads it) */
 	ScriptsReward reward = { .name = gd->name, .cross = data_cross(g), .power = data_says(g), .chip = chip, .code = code, .chip_name = ci.name, .last = last,
-		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
+		.taken_flag = LAYER_REWARD_TAKEN_FLAG, .shown_flag = LAYER_REWARD_FLAG, .hp_memories = run.threat >= 9 ? SCRIPTS_BOSS_HP_MEMORIES - 1 : SCRIPTS_BOSS_HP_MEMORIES,
 		.draft = &draft, .head = super_boss(g->navi) ? super_reward_head(g->navi) : NULL };
 	g->reward = ta_guardian_reward(text, &reward);
 	bracket_scripts(text, g);

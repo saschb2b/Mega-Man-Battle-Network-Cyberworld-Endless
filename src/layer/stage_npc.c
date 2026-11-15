@@ -37,6 +37,7 @@ static void op(Script *s, const uint8_t *b, int n) { memcpy(s->b + s->n, b, (siz
 static void mark(Script *s, int l) { s->label[l] = s->n; }
 static void addr(Script *s, int l) { s->fix[s->nfix].at = s->n; s->fix[s->nfix++].label = l; s->n += 4; }
 static void jump_if(Script *s, int flag, int l) { OP(s, 0x04, (uint8_t)flag, (uint8_t)(flag >> 8)); addr(s, l); }
+static void jump(Script *s, int l) { OP(s, 0x02); addr(s, l); }
 static void sound(Script *s, int id) { OP(s, 0x28, (uint8_t)id, (uint8_t)(id >> 8)); }
 static void coords(Script *s, int x, int y, int z) {
 	OP(s, 0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), (uint8_t)z, (uint8_t)(z >> 8));
@@ -61,7 +62,7 @@ static uint32_t commit(Script *s) {
 	return at;
 }
 
-enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END };
+enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END, L_STAY };
 
 uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f) {
 	Script s = { .n = 0 };
@@ -125,8 +126,15 @@ uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int 
 	mark(&s, L_SHOW);
 	sound(&s, SOUND_APPEAR);
 	OP(&s, 0x08, 0x0D, 0x20);
+	/* (there while `reward` is set and `taken` not: its chat clears
+	 * `reward` as it opens, and the crystal goes under its first box) */
 	mark(&s, L_IDLE);
-	wait_flag(&s, f->taken, L_LEAVE);
+	jump_if(&s, f->taken, L_LEAVE);
+	jump_if(&s, f->reward, L_STAY);
+	jump(&s, L_LEAVE);
+	mark(&s, L_STAY);
+	OP(&s, 0x10, 0x01);
+	jump(&s, L_IDLE);
 	mark(&s, L_LEAVE);
 	OP(&s, 0x03);
 	return commit(&s);
@@ -182,13 +190,16 @@ uint32_t npc_seal(int x, int y, int z, const StageFlags *f) {
 	return commit(&s);
 }
 
-uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2) {
+uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag) {
 	Script s = { .n = 0 };
 	/* as npc_prop's pads: a floor sprite under MegaMan (npc.c) */
 	OP(&s, 0x09, 0x25, (uint8_t)index, (uint8_t)(category * 4), 0x16, 0x00, 0x0A, 0x00, 0x1F, 0x0E);
 	x += NPC_FLOOR_BACK; y -= NPC_FLOOR_BACK; z -= NPC_FLOOR_BACK;
 	coords(&s, x, y, z);
-	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, over_bg2 ? 0x1A : 0x1B);
+	/* (over the second layer: the arena's floor has art there in BN5's
+	 * looks and BN4's Town Area, whose pale floor hid the pad under it, so
+	 * MegaMan walked onto bare floor and was gone, session 78) */
+	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, 0x1A);
 	wait_flag(&s, open_flag, L_SHOW);
 	mark(&s, L_SHOW);
 	sound(&s, SOUND_APPEAR);
