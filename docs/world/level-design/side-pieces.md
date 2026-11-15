@@ -84,6 +84,7 @@ Taken per area as looked at, as every laying rule is
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
+| BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | every other area | nothing | - |
 
@@ -259,6 +260,38 @@ among them the junction the survey took for a hub's piece (`b23_90_2` at
 centrepieces and raised hubs; and a machine on one of Oran Area 1's hubs,
 on its second tile layer over the floor alone, which this page's rule
 takes for a centrepiece (whether it blocks the way in BN5 was not checked).
+
+## What BN4's ACDC Area sets round its floors (nothing; measured on the maps and the atlas)
+
+BN4's ACDC Area (its maps 0x90:2, 0x90:0 and 0x90:1, ACDC Area 3, 1 and
+2; the atlas's `a15`) sets no thing on, beside, behind or under its
+floors. Every cut on this page was run on its three maps (15 November
+2026, each switched on for the area in turn and taken back):
+
+- **Its second tile layer** holds one piece in the three maps: a
+  half-open green lid on a hub of ACDC Area 2 (0x90:1, at (1014, 301) in
+  the atlas's picture), over the hub's floor alone, which this page's rule
+  takes for a centrepiece. The side-piece cuts, over a floor's side and
+  under its lower edge, take nothing.
+- **The cut behind a floor** takes 6 looks, and none is a thing: five are
+  the upper halves of dead ends' round discs (5 to 18 tiles), drawn past
+  the walls of the panel they end, and one is an exit arrow's head. Set on
+  a layer, they put a dead end's rim behind a walkway's panel (0 to 5 a
+  layer in the atlas's).
+- **Scenery** (`decor.c`): none; nothing in the maps stands clear of the
+  floor's art. Nor do the maps raise any floor, so nothing stands under one.
+
+What its layers never draw beside a floor (455 tile pictures of the
+three maps, [what the layers take](../../devtools/map-use.md); marked tile by tile on the
+maps and looked over) is the floors' own art: the rims and sides of its
+round hubs, its cyan roads and their exit arrows, some 130 of them (the
+hubs and roads lend no tiles, so their edges count beside the walkways;
+the arrows' edges are also all 7 pictures away from a floor); and the
+green and white of its walkways: the outsides of their turns and the green filling inside
+a bend, the rims of the dead ends' discs, and the rounded ends of the
+deeper green skirt under some stretches of walkway. None is a piece to
+set; the hubs, roads, arrows and the hub's lid are of the kinds left to
+the owner (issue #505's 3 to 5).
 
 ## Scenery a face's depth from the floor (Robot Control Comp; verified on the maps and in the game)
 
