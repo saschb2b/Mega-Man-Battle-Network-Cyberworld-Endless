@@ -268,13 +268,17 @@ static void worker_entry(void *arg) { worker_main(arg); }
  * the frame its present; the drawing takes what it reads from the update) */
 bool emu_drawing;
 int emu_draw_waits;
+const char *emu_draw_part, *emu_draw_waited;
 
 static void (*after_frame)(void);
 void emu_after_frame(void (*step)(void)) { after_frame = step; }
 
 static void wait_frame(void) {
 	if (!in_flight) return;
-	emu_draw_waits += emu_drawing;
+	if (emu_drawing) {
+		++emu_draw_waits;
+		if (emu_draw_part) emu_draw_waited = emu_draw_part;
+	}
 	SDL_SemWait(done);
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
@@ -387,6 +391,15 @@ uint8_t emu_read8(uint32_t a) {
 }
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
+const uint8_t *emu_memory(uint32_t a, uint32_t len) {
+	wait_frame();
+	unsigned region = a >> 24;
+	size_t size = 0;
+	const uint8_t *block = core && (region == 2 || region == 3 || (region >= 5 && region <= 7)) ? core->getMemoryBlock(core, region, &size) : NULL;
+	uint32_t off = a & 0xFFFFFFu;
+	return block && off <= size && len <= size - off ? block + off : NULL;
+}
+
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
 	/* (the RAM, the palette, video memory and OAM copied whole: byte by

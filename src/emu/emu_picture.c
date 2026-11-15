@@ -38,6 +38,17 @@ void emu_picture_tint_world(uint32_t *px, int n) {
 
 static SDL_Texture *tex;
 
+
+/* (a part of the picture timed for the frame log, and named while it runs: a read of the game in it that waits is told by it) */
+#define PART(name, call) do { \
+		uint64_t t0_ = frame_part_begin(); \
+		const char *was_ = emu_draw_part; \
+		emu_draw_part = name; \
+		call; \
+		emu_draw_part = was_; \
+		frame_part_end(name, t0_); \
+	} while (0)
+
 void emu_picture_draw(int x, int y) {
 	/* (on the 3DS in the canvas's order, so the copy onto it converts
 	 * nothing: mGBA's red and blue swapped here, where a computer's GPU
@@ -57,16 +68,16 @@ void emu_picture_draw(int x, int y) {
 	const uint32_t *v = emu_video();
 	bool box = false;
 	int hour = online_visit_away() ? 0 : director_town_tint(&box);
-	for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i];
+	PART("picture: tint", for (int i = 0; i < EMU_W * EMU_H; ++i) px[i] = hour ? tinted(v[i], hour, box && i / EMU_W >= TINT_BOX_TOP) : v[i]);
 	/* (a liberation's dark panels, docs/game/liberation/) */
-	director_tint_board(px);
+	PART("picture: board", director_tint_board(px));
 	/* (a Glitch layer's, docs/game/glitch-layer.md) */
-	director_glitch_frame(px);
+	PART("picture: glitch", director_glitch_frame(px));
 	/* (each picture the core made blended once, as a frontend blends each
 	 * frame it is given; the game paused, the last one's frame again) */
 	static uint32_t seen;
 	uint32_t made = emu_pictures();
-	lcd_frame(px, EMU_W * EMU_H, made != seen);
+	PART("picture: lcd", lcd_frame(px, EMU_W * EMU_H, made != seen));
 	seen = made;
 #ifndef __3DS__
 	/* (voxel mode, voxel_scene.h: the world drawn under the canvas, which
@@ -74,17 +85,24 @@ void emu_picture_draw(int x, int y) {
 	static uint8_t hud[EMU_W * EMU_H];
 	bool voxel = voxel_scene_frame(px, hud);
 #endif
+#ifdef __3DS__
+	/* (in 3D, each pixel's part in its alpha, which the 3DS's GPU draws each
+	 * at its depth by: the standing sprites', the map's, the moving
+	 * background's by mGBA's tag on the core's own picture, stereo_scene.h) */
+	const uint8_t *standing = stereo_scene_sprites();
+	bool sky = stereo_scene_sky();
+#endif
 	for (int i = 0; i < EMU_W * EMU_H; ++i) {
 		uint32_t c = px[i];
 #ifdef __3DS__
-		px[i] = 0xFF000000u | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
+		uint32_t a = !standing ? 0xFFu : standing[i] ? 0xFFu : sky && stereo_sky_tag(v[i]) ? 0x00u : 0x80u;
+		px[i] = a << 24 | (c & 0xFF00u) | (c & 0xFFu) << 16 | (c >> 16 & 0xFFu);
 #else
 		px[i] = voxel && !hud[i] ? 0 : c | 0xFF000000u;
 #endif
 	}
 	/* (the 3DS's 3D depth, stereo_scene.h: the frame's rows in depth at its present) */
-	stereo_scene_frame(px);
-	SDL_UpdateTexture(tex, NULL, px, EMU_W * 4);
+	PART("picture: 3d", stereo_scene_frame(px));
 	SDL_Rect dst = { x, y, EMU_W, EMU_H };
-	SDL_RenderCopy(P.renderer, tex, NULL, &dst);
+	PART("picture: onto the canvas", SDL_UpdateTexture(tex, NULL, px, EMU_W * 4); SDL_RenderCopy(P.renderer, tex, NULL, &dst));
 }

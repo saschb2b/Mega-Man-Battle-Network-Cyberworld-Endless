@@ -7,6 +7,7 @@
 #include "bn6.h"
 #include "director.h"
 #include "director_gate.h"
+#include "director_see.h"
 #include "emu.h"
 #include "jukebox.h"
 #include "library.h"
@@ -113,10 +114,16 @@ void pet_leave(void) {
 }
 
 void pet_draw(void) {
-	if (home_gate_asking()) netpass_screen_strip();
+	uint64_t t = frame_part_begin();
+	if (seen.gate_strip) netpass_screen_strip();
 	netpass_screen_draw();
+	frame_part_end("netpass", t);
+	t = frame_part_begin();
 	jukebox_draw();
+	frame_part_end("jukebox", t);
+	t = frame_part_begin();
 	library_draw();
+	frame_part_end("library", t);
 }
 
 uint32_t pet_keys(uint32_t keys) {

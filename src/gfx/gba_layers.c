@@ -129,6 +129,54 @@ void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]) {
 	}
 }
 
+/* A plain (not turned) sprite's pixels marked a tile row at a time: true
+ * where it has one on the screen */
+static bool plain_mark(const GbaVideo *v, const Obj *o, bool flat, uint8_t *mask) {
+	bool any = false, wide = (o->a0 & 0x2000u) != 0, mirrored = (o->a1 & 0x1000u) != 0;
+	unsigned first = o->a2 & 0x3FFu, cols = (unsigned)o->w >> 3;
+	for (int iy = 0; iy < o->h; ++iy) {
+		int sy = o->y0 + iy;
+		if (sy < 0 || sy >= H) continue;
+		unsigned ty = (unsigned)((o->a1 & 0x2000u) ? o->h - 1 - iy : iy), cy = ty >> 3;
+		for (unsigned cx = 0; cx < cols; ++cx) {
+			unsigned tile = first + (wide ? (flat ? (cy * cols + cx) * 2u : cy * 32u + cx * 2u) : (flat ? cy * cols + cx : cy * 32u + cx));
+			const uint8_t *row = &v->vram[0x10000u + (tile & 0x3FFu) * 32u + (ty & 7u) * (wide ? 8u : 4u)];
+			for (unsigned k = 0; k < 8; ++k) {
+				unsigned c = wide ? row[k] : (k & 1u) ? row[k >> 1] >> 4 : row[k >> 1] & 15u;
+				int tx = (int)(cx * 8u + k), sx = o->x0 + (mirrored ? o->w - 1 - tx : tx);
+				if (!c || sx < 0 || sx >= W) continue;
+				mask[sy * W + sx] = 1;
+				any = true;
+			}
+		}
+	}
+	return any;
+}
+
+void gba_obj_pixels(const GbaVideo *v, const uint8_t want[GBA_OBJS], uint8_t *mask, uint8_t drew[GBA_OBJS]) {
+	bool flat = (gba_rd16(v->io, 0) & 0x40u) != 0;
+	memset(mask, 0, W * H);
+	memset(drew, 0, GBA_OBJS);
+	for (int n = 0; n < GBA_OBJS; ++n) {
+		Obj o;
+		if (!want[n] || !obj_read(v, n, &o) || (o.a0 >> 10 & 3u) != 0 || (o.a2 >> 10 & 3u) == 3 || obj_blob(v, &o, flat)) continue;
+		if (!o.turned) {
+			drew[n] = plain_mark(v, &o, flat, mask);
+			continue;
+		}
+		for (int iy = 0; iy < o.bh; ++iy) {
+			int sy = o.y0 + iy;
+			if (sy < 0 || sy >= H) continue;
+			for (int ix = 0; ix < o.bw; ++ix) {
+				int sx = o.x0 + ix, tx, ty;
+				if (sx < 0 || sx >= W || !obj_texel(&o, ix, iy, &tx, &ty) || !obj_pixel(v, o.a0, o.a2, o.w, tx, ty, flat)) continue;
+				mask[sy * W + sx] = 1;
+				drew[n] = 1;
+			}
+		}
+	}
+}
+
 bool gba_bg3_front(const uint8_t *io) {
 	unsigned on = gba_rd16(io, 0) >> 8, p3 = gba_rd16(io, 0x0E) & 3u;
 	if (!(on & 8u)) return false;

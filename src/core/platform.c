@@ -247,8 +247,7 @@ static void layout_canvas(void) {
 	}
 }
 
-/* The canvas's scale as the log says it: "5x", "2.67x (fill)", or
- * "8.00x6.75 (stretch)". */
+/* The canvas's scale as the log says it: "5x", "2.67x (fill)", or "8.00x6.75 (stretch)". */
 static const char *scale_words(void) {
 	static char s[24];
 	if (P.fill > 0 && P.fill_y != P.fill) snprintf(s, sizeof s, "%.2fx%.2f (stretch)", (double)P.fill, (double)P.fill_y);
@@ -517,8 +516,7 @@ static void phone_controls(void) {
 /* Keyboard defaults and file drops are ready before the first event. */
 static void input_start(void) { keymap_default(); SDL_EventState(SDL_DROPFILE, SDL_ENABLE); }
 
-/* The renderer SDL is asked for first, where its own first choice is the
- * worse one. */
+/* The renderer SDL is asked for first, where its own first choice is the worse one. */
 static void render_hints(void) {
 #ifdef _WIN32
 	/* Direct3D 11 first: SDL's lets the GPU queue one frame at most
@@ -944,8 +942,10 @@ void platform_present_blend(double w) {
 
 /* The canvas on the display, at its scale. */
 static void present_canvas(void) {
+	uint64_t part = frame_part_begin();
 	show_frames(P.canvas, NULL, 255);
 	over_picture();
+	frame_part_end("show", part);
 #ifdef __3DS__
 	present3ds_frame(display_scale() != SCALE_WHOLE, display_scale() == SCALE_STRETCH, emu_threaded());
 #else

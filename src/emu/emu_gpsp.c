@@ -315,8 +315,14 @@ void emu_quit(void) {}
 void emu_before_frame(void (*step)(void)) { before_frame = step; }
 /* (the 3DS's 3D screen's alone: none on the PSP) */
 void emu_after_frame(void (*step)(void)) { (void)step; }
+const uint8_t *emu_memory(uint32_t a, uint32_t len) {
+	(void)a;
+	(void)len;
+	return NULL;
+}
 bool emu_drawing;
 int emu_draw_waits;
+const char *emu_draw_part, *emu_draw_waited;
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;
 

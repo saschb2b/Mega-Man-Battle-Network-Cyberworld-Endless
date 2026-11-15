@@ -109,8 +109,12 @@ static bool game_frame(void) {
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
+	uint64_t part = frame_part_begin();
 	platform_apply_effects();
+	frame_part_end("effects", part);
+	part = frame_part_begin();
 	options_draw();
+	frame_part_end("options", part);
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	capture_shots();

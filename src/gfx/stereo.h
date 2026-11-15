@@ -1,16 +1,14 @@
-/* The 3DS's 3D screen (docs/engine/stereo.md): the frame parted by depth.
- * The world goes back into the screen row by row, its last row at the
- * screen and its first the deepest, as the floor goes back under BN6's
- * camera; what stands on it goes back with its rows (a sprite's head under
- * a pixel deeper than its feet at the most). The HUD stays flat at the
- * screen: the sprites in the HP's corner, in an open chat box's rows and
- * in a battle's top rows, and the tiles of BG0 (the chat's text) and of a
- * BG3 in front of the map (a battle's Custom screen). Nothing comes out of
- * the screen, so the HUD is never behind the world. Only which parts of a
- * row are flat is worked out here, from the sprites' table and two
- * backgrounds' maps: each eye's picture is the frame's own, its rows'
- * spans moved apart (by the 3DS's GPU, or stereo_compose). Nothing of the
- * game's is kept. */
+/* The 3DS's 3D screen (docs/engine/stereo.md): the frame's parts at depths
+ * of their own. The moving background (BG3 behind the map, which mGBA's
+ * picture tags pixel for pixel) lies far behind, flat; the map is a floor
+ * tilted back between it and the screen, its last row the nearest; what
+ * stands on it (the sprites joined into bodies where they touch) stands
+ * upright at the depth of the floor at its feet; the HUD stays flat at the
+ * screen (the sprites in the HP's corner, in an open chat box's rows and in
+ * a battle's top rows, BG0's tiles and a BG3 in front of the map). Nothing
+ * comes out of the screen, so the HUD is never behind the world. Each
+ * eye's picture is the frame's own, its parts moved apart (by the 3DS's
+ * GPU, or stereo_compose). Nothing of the game's is kept. */
 #ifndef CW_STEREO_H
 #define CW_STEREO_H
 
@@ -31,6 +29,12 @@ typedef struct {
 	int nrects;
 	struct { int16_t x0, y0, x1, y1; } rect[STEREO_RECTS];
 	uint8_t cell[STEREO_H / 8][STEREO_W / 8];
+	/* a frame a quarter of whose cells or more are the HUD's backgrounds'
+	 * (a battle's Custom screen, a result screen): a screen of menus, flat
+	 * whole (the chips' sprites over its window moved with the field's
+	 * rows behind it, and its spans made anew each frame cost the 3DS its
+	 * 60 frames) */
+	bool whole;
 } StereoFlat;
 
 /* ... read from the frame's video memory (OAM, the IO registers and VRAM's
@@ -49,18 +53,46 @@ typedef struct {
 } StereoRow;
 void stereo_row(const StereoFlat *f, int y, StereoRow *out);
 
-/* How deep a row of the frame lies, from 0 (its last row, at the screen) to 1 (its first) */
-float stereo_depth(int row);
-/* ... and how far an eye (-1 the left, +1 the right) sees the world's
- * pixels of the row moved, `sep` the two eyes' parting at the deepest */
-float stereo_shift(int eye, float sep, int row);
+/* What stands: its pixels (`mask`, 1 a standing sprite's) and its bodies,
+ * the boxes of the sprites that showed joined where they touch (x1 and y1
+ * past their last), from the sprites' table and their tiles; the HUD's
+ * sprites (as stereo_flat's) left out */
+#define STEREO_BODIES 48
+typedef struct { int16_t x0, y0, x1, y1; } StereoBox;
+typedef struct {
+	int n;
+	StereoBox box[STEREO_BODIES];
+} StereoBodies;
+void stereo_sprites(const GbaVideo *v, int hud_rows, uint8_t *mask, StereoBodies *out);
 
-/* One eye's picture (240x160 at `scale`, nearest) of the frame's own
- * `picture` (its rows STEREO_W apart), drawn as the 3DS's GPU draws it:
- * each row's world spans moved, the gap a span leaves beside a flat one
- * filled with its edge's colour, the flat spans unmoved. For a look at the
- * depth on a system without a 3D screen (CYBERWORLD_STEREO_SHOT) and the
- * tests. */
-void stereo_compose(const uint32_t *picture, const StereoFlat *f, int eye, float sep, int scale, uint32_t *out);
+/* A pixel's part: the map's (and what lies on it), the moving background's, a standing sprite's */
+enum { STEREO_MAP, STEREO_SKY, STEREO_SPRITE };
+
+/* How far up the frame a row lies, from 0 (its last row) to 1 (its first) */
+float stereo_depth(int row);
+/* The depths, from 0 (at the screen) to 1 (the deepest): the moving
+ * background's and the map's at a row, each tilted back by its rows, the
+ * background behind the map at every row, and a body's (the map's at its
+ * feet) */
+float stereo_sky_depth(int row);
+float stereo_map_depth(int row);
+float stereo_body_depth(const StereoBox *b);
+/* ... and how far an eye (-1 the left, +1 the right) sees what lies at a
+ * depth moved, `sep` the two eyes' parting at the deepest */
+float stereo_shift(int eye, float sep, float depth);
+
+/* One eye's picture (240x160 at `scale`, nearest) of the frame, drawn as
+ * the 3DS's GPU draws it: the background at its rows' depth (where `sky`),
+ * the map at its rows' (the gap a part leaves filled from beside it), each
+ * body at its own, the flat spans unmoved. For a look at the depth on a
+ * system without a 3D screen (CYBERWORLD_STEREO_SHOT) and the tests. */
+typedef struct {
+	const uint32_t *picture;   /* the frame's colours, its rows STEREO_W apart */
+	const uint8_t *part;       /* each pixel's part (STEREO_MAP, ...) */
+	const StereoFlat *flat;
+	const StereoBodies *bodies;
+	bool sky;                  /* the background behind (a layer's, a battle's) */
+} StereoPicture;
+void stereo_compose(const StereoPicture *p, int eye, float sep, int scale, uint32_t *out);
 
 #endif

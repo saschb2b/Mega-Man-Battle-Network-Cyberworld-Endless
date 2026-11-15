@@ -1,5 +1,6 @@
 #include "test_stereo.h"
 
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -76,23 +77,68 @@ static void test_rows(void) {
 }
 
 static void test_depth(void) {
-	CHECK(stereo_depth(STEREO_H - 1) == 0.0f && stereo_depth(0) == 1.0f, "stereo: the last row at the screen, the first the deepest");
-	CHECK(stereo_shift(-1, 6.0f, 0) == -3.0f && stereo_shift(1, 6.0f, 0) == 3.0f, "stereo: the eyes parted by 6 at the deepest, each its way");
-	CHECK(stereo_shift(1, 6.0f, STEREO_H - 1) == 0.0f, "stereo: none at the last row");
+	CHECK(stereo_depth(STEREO_H - 1) == 0.0f && stereo_depth(0) == 1.0f, "stereo: the last row 0, the first 1");
+	bool behind = true;
+	for (int y = 0; y < STEREO_H; ++y) behind = behind && stereo_sky_depth(y) >= stereo_map_depth(y) + 0.2f;
+	CHECK(stereo_map_depth(STEREO_H - 1) == 0.0f && stereo_map_depth(0) > stereo_map_depth(80) && behind, "stereo: the map tilted back from the screen, the background behind it at every row");
+	CHECK(stereo_shift(-1, 10.0f, stereo_sky_depth(0)) == -5.0f && stereo_shift(1, 10.0f, stereo_sky_depth(STEREO_H - 1)) == 2.5f, "stereo: the background tilted, 5 each way at the top, 2.5 at the foot");
+	StereoBox b = { 100, 60, 116, 76 };
+	CHECK(stereo_body_depth(&b) == stereo_map_depth(75), "stereo: a body at the map's depth at its feet");
 }
 
+static void test_sprites(void) {
+	static uint8_t mask[STEREO_N];
+	StereoBodies bodies;
+	video_make();
+	GbaVideo v = { vram, oam, io, NULL };
+	/* (sprite 2 an 8x8 touching sprite 0's right side; sprite 3 one of priority 3, lying; sprite 4 a blended one) */
+	memset(vram + 0x10000 + 2 * 32, 0x33, 32 * 4);
+	put16(oam, 16, 64);
+	put16(oam, 18, 116);
+	put16(oam, 20, 2 | 1 << 10);
+	put16(oam, 24, 120);
+	put16(oam, 26, 20);
+	put16(oam, 28, 2 | 3 << 10);
+	put16(oam, 32, 120 | 1 << 10);
+	put16(oam, 34, 60);
+	put16(oam, 36, 2 | 1 << 10);
+	stereo_sprites(&v, 0, mask, &bodies);
+	CHECK(mask[70 * STEREO_W + 105] && mask[66 * STEREO_W + 118], "stereo: the standing sprites' pixels marked");
+	CHECK(!mask[3 * STEREO_W + 5], "stereo: the HP's corner not a body");
+	CHECK(!mask[122 * STEREO_W + 22] && !mask[122 * STEREO_W + 62], "stereo: a lying sprite and a blended one not bodies");
+	CHECK(bodies.n == 1 && bodies.box[0].x0 == 100 && bodies.box[0].y0 == 60 && bodies.box[0].x1 == 124 && bodies.box[0].y1 == 76,
+		"stereo: two touching sprites one body: %d, (%d, %d)-(%d, %d)", bodies.n, bodies.box[0].x0, bodies.box[0].y0, bodies.box[0].x1, bodies.box[0].y1);
+}
+
+/* A picture of the test's own: a colour by row and column; the background
+ * left of column 60, a body at (100, 60)-(116, 76), the map the rest; the
+ * HP's box flat */
 static void test_compose(void) {
 	static StereoFlat f;
+	static StereoBodies bodies;
 	static uint32_t picture[STEREO_N], eye[2][STEREO_N];
-	video_make();
-	stereo_flat(&(GbaVideo){ vram, oam, io, NULL }, 0, &f);
-	for (int i = 0; i < STEREO_N; ++i) picture[i] = 0xFF000000u | (uint32_t)(i / STEREO_W) | (uint32_t)(i % STEREO_W) << 8;
-	stereo_compose(picture, &f, -1, 6.0f, 1, eye[0]);
-	stereo_compose(picture, &f, 1, 6.0f, 1, eye[1]);
-	CHECK(eye[0][10] == picture[13] && eye[1][10] == picture[7], "stereo: the top row moved 3 each way: %08x %08x", (unsigned)eye[0][10], (unsigned)eye[1][10]);
+	static uint8_t part[STEREO_N];
+	memset(&f, 0, sizeof f);
+	f.nrects = 1;
+	f.rect[0].x0 = 4, f.rect[0].y0 = 2, f.rect[0].x1 = 12, f.rect[0].y1 = 10;
+	bodies.n = 1;
+	bodies.box[0] = (StereoBox){ 100, 60, 116, 76 };
+	for (int i = 0; i < STEREO_N; ++i) {
+		int x = i % STEREO_W, y = i / STEREO_W;
+		picture[i] = 0xFF000000u | (uint32_t)y | (uint32_t)x << 8;
+		part[i] = x < 60 ? STEREO_SKY : x >= 100 && x < 116 && y >= 60 && y < 76 ? STEREO_SPRITE : STEREO_MAP;
+	}
+	StereoPicture p = { picture, part, &f, &bodies, true };
+	stereo_compose(&p, -1, 10.0f, 1, eye[0]);
+	stereo_compose(&p, 1, 10.0f, 1, eye[1]);
+	CHECK(eye[1][0 * STEREO_W + 25] == picture[0 * STEREO_W + 20] && eye[0][0 * STEREO_W + 15] == picture[0 * STEREO_W + 20], "stereo: the background's top 5 each way");
+	CHECK(eye[1][159 * STEREO_W + 23] == picture[159 * STEREO_W + 20] && eye[0][159 * STEREO_W + 18] == picture[159 * STEREO_W + 20], "stereo: the background's foot 2.5 each way");
+	int at = (int)floorf(150.0f + stereo_shift(1, 10.0f, stereo_map_depth(80)) + 0.5f);
+	CHECK(eye[1][80 * STEREO_W + at] == picture[80 * STEREO_W + 150], "stereo: the map at its row's depth");
+	int body = (int)floorf(105.0f + stereo_shift(1, 10.0f, stereo_body_depth(&bodies.box[0])) + 0.5f);
+	CHECK(eye[1][62 * STEREO_W + body] == picture[62 * STEREO_W + 105] && eye[1][74 * STEREO_W + body] == picture[74 * STEREO_W + 105],
+		"stereo: the body upright, its head moved as its feet");
 	CHECK(eye[0][5 * STEREO_W + 8] == picture[5 * STEREO_W + 8] && eye[1][5 * STEREO_W + 8] == picture[5 * STEREO_W + 8], "stereo: the HP's box the same in both eyes");
-	CHECK(eye[1][5 * STEREO_W + 13] == picture[5 * STEREO_W + 12], "stereo: the gap beside it its edge's colour: %08x", (unsigned)eye[1][5 * STEREO_W + 13]);
-	CHECK(eye[0][159 * STEREO_W + 100] == picture[159 * STEREO_W + 100], "stereo: the last row unmoved");
 }
 
 int test_stereo(void) {
@@ -100,6 +146,7 @@ int test_stereo(void) {
 	test_flat();
 	test_rows();
 	test_depth();
+	test_sprites();
 	test_compose();
 	return failures;
 }
