@@ -126,8 +126,11 @@ static void after_frame(void) {
 	online_visit_update();
 	if (online_visit_away()) { second_update(); emu_debug_frame(); return; }
 	director_see();
-	director_update();
+	/* (a pick's choice starts its script before the director's own talk
+	 * can take the free chat box: MegaMan's words on the battle's older
+	 * Net virus came before "MegaMan got: DiveMan", session 78) */
 	director_pick_watch();
+	director_update();
 	director_lab_watch();
 	director_hold_watch();
 	director_settle_watch();
