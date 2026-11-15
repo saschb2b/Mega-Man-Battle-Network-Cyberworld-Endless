@@ -42,7 +42,7 @@ static const char *const words[] = {
 	"The sounds of menus, chips and battles play",   /* OW_EFFECTS_ON_NOTE */
 	"No sounds from menus, chips or battles",   /* OW_EFFECTS_OFF_NOTE */
 	"Fast forward",   /* OW_FAST */
-	"FAST's button speeds up walks, talk and fades. Every fight stays at BN6's pace",   /* OW_FAST_ON_NOTE */
+	"FAST's button speeds up walks, talk and fades. Fights keep BN6's pace",   /* OW_FAST_ON_NOTE */
 	"The game always at the GBA's pace: FAST's button does nothing",   /* OW_FAST_OFF_NOTE */
 	"Vibration",   /* OW_VIBRATION */
 	"Weak",   /* OW_WEAK */

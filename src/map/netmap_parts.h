@@ -63,5 +63,7 @@ enum { K_VOID, K_FLOOR, K_RAISED, K_STAIR, K_SOLID };
 
 int nm_kind(int x, int y);
 int nm_kind_at(int A, int B);
+/* Whether grid cell (x, y) is a walkway: floor in no 2 x 2 block. */
+bool nm_walkway(int x, int y);
 
 #endif

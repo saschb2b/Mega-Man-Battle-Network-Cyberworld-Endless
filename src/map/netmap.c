@@ -30,6 +30,7 @@
 #include "netmap_extra.h"
 #include "netmap_learn.h"
 #include "netmap_paste.h"
+#include "netmap_roads.h"
 #include "tilemap.h"
 #include "xbackdrop.h"
 
@@ -169,6 +170,7 @@ static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid o
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
 static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (netmap_learn.c, road_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
+static bool framed;           /* its platforms drawn apart, and its blocks two wide alone, all drawn as its framed squares, its pads (TILES_SQUARE_PADS) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
 /* What the layer has at grid cell (x, y). */
@@ -193,6 +195,8 @@ static bool walkway(int x, int y) {
 			if (nm_kind(x + dx, y + dy) && nm_kind(x + dx + 1, y + dy) && nm_kind(x + dx, y + dy + 1) && nm_kind(x + dx + 1, y + dy + 1)) return false;
 	return true;
 }
+
+bool nm_walkway(int x, int y) { return walkway(x, y); }
 
 /* The floor's material as the screen shows it: ground panels where they
  * are, raised ones where a flat panel `rise` world units up the screen
@@ -270,75 +274,6 @@ static void make_stripes(bool keep_pads) {
 		}
 }
 
-/* The way from the layer's arrival to its exit over the floor as it now
- * stands, for its walkways there to be drawn as roads
- * (docs/world/level-design/roads.md): the generator's way
- * (NetLayout.way) walked again between its two ends, as the legalizer
- * takes cells of it (of a way widened to two, the lane it ran on); the
- * shortest walk, and of those the one that keeps most to the generator's. */
-static uint8_t road[MAP_H][MAP_W];
-
-#define STEP 64   /* a step's cost, one off the generator's way 1 more: the shortest first */
-
-static bool on_way(int x, int y) { return nm_cur->way[y * nm_cur->gw + x]; }
-
-/* The generator's way's two ends still floor (cells as y * MAP_W + x); false none. */
-static bool way_ends(int gw, int gh, int end[2]) {
-	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
-	int ends = 0;
-	for (int i = 0; i < gw * gh; ++i) {
-		int x = i % gw, y = i / gw, n = 0;
-		if (!on_way(x, y) || !nm_kind(x, y)) continue;
-		for (int d = 0; d < 4; ++d) {
-			int nx = x + d4[d][0], ny = y + d4[d][1];
-			n += nx >= 0 && ny >= 0 && nx < gw && ny < gh && on_way(nx, ny);
-		}
-		if (n == 1 && ends++ < 2) end[ends - 1] = y * MAP_W + x;
-	}
-	return ends == 2;
-}
-
-/* What the walk from cell `from` over the floor costs to each cell (INT32_MAX: not reached). */
-static void walk_costs(int gw, int gh, int from, int32_t cost[MAP_H][MAP_W]) {
-	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
-	static int16_t queue[MAP_H * MAP_W * 8];
-	size_t head = 0, tail = 0, size = sizeof queue / sizeof *queue;
-	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) cost[y][x] = INT32_MAX;
-	cost[from / MAP_W][from % MAP_W] = 0;
-	queue[tail++ % size] = (int16_t)from;
-	while (head != tail) {
-		int c = queue[head++ % size], x = c % MAP_W, y = c / MAP_W;
-		for (int d = 0; d < 4; ++d) {
-			int nx = x + d4[d][0], ny = y + d4[d][1];
-			if (nx < 0 || ny < 0 || nx >= gw || ny >= gh || !nm_kind(nx, ny)) continue;
-			int32_t to = cost[y][x] + STEP + !on_way(nx, ny);
-			if (to >= cost[ny][nx] || tail - head >= size) continue;
-			cost[ny][nx] = to;
-			queue[tail++ % size] = (int16_t)(ny * MAP_W + nx);
-		}
-	}
-}
-
-static void mark_roads(void) {
-	static const int d4[4][2] = { { 1, 0 }, { 0, 1 }, { -1, 0 }, { 0, -1 } };
-	static int32_t cost[MAP_H][MAP_W];
-	int gw = nm_cur->gw < MAP_W ? nm_cur->gw : MAP_W, gh = nm_cur->gh < MAP_H ? nm_cur->gh : MAP_H, end[2];
-	memset(road, 0, sizeof road);
-	if (!nm_cur->way || !roads || !way_ends(gw, gh, end)) return;
-	walk_costs(gw, gh, end[1], cost);
-	/* (back from the other end along falling cost: the first way found) */
-	for (int c = end[0], next; c >= 0 && cost[c / MAP_W][c % MAP_W] != INT32_MAX; c = next) {
-		int x = c % MAP_W, y = c / MAP_W;
-		road[y][x] = 1;
-		next = -1;
-		for (int d = 0; d < 4 && next < 0; ++d) {
-			int nx = x + d4[d][0], ny = y + d4[d][1];
-			if (nx < 0 || ny < 0 || nx >= gw || ny >= gh || cost[ny][nx] == INT32_MAX) continue;
-			if (cost[ny][nx] + STEP + !on_way(x, y) == cost[y][x]) next = ny * MAP_W + nx;
-		}
-	}
-}
-
 /* A walkway cell where the area's originals set a joint (the Undernet's
  * gems): its ends, turns and crossings, and where it meets other floor;
  * not in a straight run, a walkway cell on each side along one line and
@@ -372,7 +307,25 @@ static bool arena_walkway(int x, int y) {
  * apart in the area's roads' look (the legalizer reads walkway floor, as
  * before) */
 static int road_look(int x, int y) {
-	return picking && roads && x < MAP_W && y < MAP_H && road[y][x] && ground(nm_kind(x, y)) && walkway(x, y) ? TILE_ROAD : 0;
+	return picking && roads && nm_road(x, y) && ground(nm_kind(x, y)) && walkway(x, y) ? TILE_ROAD : 0;
+}
+
+/* Where the area's platforms are its framed squares, while the tiles are
+ * picked every platform drawn apart (`pad` TILE_APART) is drawn as one,
+ * its pads' look, and so is a block of floor two wide that touches no room
+ * (8 ways): BN4's ACDC Area's rooms past 64 panels, its rings and L's,
+ * came out in its walkways' rim, their upper edges in steps, and a
+ * junction widened to a block (legal.c) as bends' pieces, notched and
+ * stepped, where its maps join their walkways at hubs and squares. The
+ * legalizer reads them as before. What cell (x, y) adds to its floor. */
+static int framed_look(int x, int y, int pad) {
+	if (!picking || !framed) return 0;
+	if (pad & TILE_APART) return TILE_PAD;
+	if (walkway(x, y) || has_middle(x, y)) return 0;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (ground(nm_kind(x + dx, y + dy)) && !walkway(x + dx, y + dy) && has_middle(x + dx, y + dy)) return 0;
+	return TILE_PAD | TILE_APART;
 }
 
 /* TILE_PAD where cell (x, y) is a pad's, in the pads' look (with a
@@ -399,6 +352,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
 	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y) && has_middle(x, y)) pad |= TILE_APART;
+	pad |= framed_look(x, y, pad);
 	pad |= joint_look(x, y);
 	if (!pad) pad |= road_look(x, y);
 	if (one_floor) return TILE_A | pad;
@@ -724,6 +678,10 @@ static Learned *use_area(int area) {
 	apart = na->apart;
 	striped = na->styles & TILES_CROSSING;
 	roads = L->nroads > 0;
+	/* (not where every room is a pad already and the way is kept one wide,
+	 * TILES_ONE_WIDE: BN4's Town Area's blocks framed as its squares, which
+	 * stand on a slab, stood over the squares beside them) */
+	framed = apart == NET_APART_PLATFORMS && na->styles & TILES_SQUARE_PADS && !(na->styles & TILES_ONE_WIDE) && pad_look;
 	return L;
 }
 
@@ -744,7 +702,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 		centre(lay);
 	}
 	if (striped) make_stripes(keep_pads);
-	mark_roads();
+	nm_mark_roads(roads);
 	coord_slot = L->coord_slot;
 	nm_build_extra(L);
 	nm_gaps_place();
@@ -759,15 +717,15 @@ bool netmap_build(int area, const NetLayout *lay) {
 bool netmap_set_pads(const CoordPad *pads, int n) { return nm_coords_timed(coord_slot, pads, n); }
 
 /* (the area settings the pick reads, kept round another look's) */
-typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads; int apart; } AreaFlags;
+typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads, framed; int apart; } AreaFlags;
 
 static AreaFlags flags_now(void) {
-	return (AreaFlags){ one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads, apart };
+	return (AreaFlags){ one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads, framed, apart };
 }
 
 static void flags_set(const AreaFlags *f) {
 	one_floor = f->one_floor; by_shape = f->by_shape; arena_b = f->arena_b; rimmed = f->rimmed; pad_look = f->pad_look;
-	pads_walkway = f->pads_walkway; arena_drawn = f->arena_drawn; joints = f->joints; striped = f->striped; roads = f->roads; apart = f->apart;
+	pads_walkway = f->pads_walkway; arena_drawn = f->arena_drawn; joints = f->joints; striped = f->striped; roads = f->roads; framed = f->framed; apart = f->apart;
 }
 
 /* The look's tile map: the layer's floor as it stands (its legalizer's
