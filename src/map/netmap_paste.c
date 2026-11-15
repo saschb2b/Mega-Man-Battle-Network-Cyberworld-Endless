@@ -437,7 +437,9 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
 	unsigned f = side_floor(x, y);
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k)
-		if (b->piece[k].hang + b->piece[k].behind == kind && b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
+		/* (what stands on both layers by the panels it draws over alone: it
+		 * reaches past the nine, as a tank does past its landing's road) */
+		if (b->piece[k].hang + b->piece[k].behind == kind && (b->piece[k].both || b->piece[k].floor == f) && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
 
@@ -445,7 +447,8 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
  * tile lattice, over nothing its layer holds (the second; the first for
  * what stands under a floor). Whether it was. */
 static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, int y) {
-	uint16_t *to = p->hang ? map : map + (size_t)tw * th;
+	size_t cells = (size_t)tw * th;
+	uint16_t *to = p->hang ? map : map + cells;
 	int A, B, over = 0, top = p->tiles[0].py, foot = top;
 	nm_grid_to_panel(x, y, &A, &B);
 	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
@@ -464,9 +467,18 @@ static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, i
 		 * of it at most, set over them; anywhere else a tile it would
 		 * cover is another floor's, a plateau's underside over the void) */
 		bool meets = p->behind ? p->tiles[k].py >= foot - 8 : p->tiles[k].py <= top + 8;
-		if (to[at] && (!p->hang || !meets || ++over * 3 > p->ntiles)) return false;
+		/* (what stands behind a floor on both layers: over nothing but
+		 * where its map draws its foot over the floor) */
+		if (p->both ? map[cells + at] || (map[at] && (p->tiles[k].e0 || !p->tiles[k].over)) : to[at] && (!p->hang || !meets || ++over * 3 > p->ntiles)) return false;
 	}
-	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
+	for (int k = 0; k < p->ntiles; ++k) {
+		size_t at = (size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8;
+		if (p->both) {
+			if (nm_last.pasted && map[at] && p->tiles[k].over) nm_last.pasted[at] |= NETMAP_PASTED_FOOT;
+			if (p->tiles[k].e0) map[at] = p->tiles[k].e0;
+			if (p->tiles[k].e1) map[cells + at] = p->tiles[k].e1;
+		} else to[at] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
+	}
 	return true;
 }
 

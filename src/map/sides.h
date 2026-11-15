@@ -34,6 +34,7 @@ typedef struct {
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
 	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
+	bool both;         /* ... drawn on both layers (stands_learn): StairTile.e1 its front, e0 what shows behind it */
 } SidePiece;
 
 typedef struct {
@@ -54,5 +55,12 @@ void hangs_learn(const AreaSrc *r, SideBook *out);
  * off the floor: the flames behind the catwalks of BN4's Undernet, where
  * the ones in front lie on the second layer (sides_learn). */
 void behind_learn(const AreaSrc *a, SideBook *out);
+
+/* Adds what view `r` of a map (area_src_raise_in) sets on its second layer
+ * behind that floor's upper edges, its foot on the floor's rim, with what
+ * shows through it on the first: Aquarium Comp's tanks behind its raised
+ * landings. Where the map sets it in a row of copies, each in front of the
+ * last, the front one is cut, whole. */
+void stands_learn(const AreaSrc *r, SideBook *out);
 
 #endif
