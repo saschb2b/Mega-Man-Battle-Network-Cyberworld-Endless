@@ -190,8 +190,12 @@ static uint32_t *layer_drawn(int area, const uint16_t *tiles, int tw, int th) {
 	return area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
 }
 
+/* (dev) CYBERWORLD_ATLAS_RUN=S: the run whose layer is drawn, of seed S
+ * (0: one of the layer's own seed) */
+static uint32_t atlas_run_seed;
+
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
-	run_new(seed);
+	run_new(atlas_run_seed ? atlas_run_seed : seed);
 	run.depth = depth;
 	run.biome = biome;
 	layout_forced = layout;
@@ -521,6 +525,8 @@ static void area_layers(const char *dir, FILE *report, int area, int seeds) {
 	lent_maps(dir, area);
 }
 
+static int env_int(const char *name, int none);
+
 /* Another game's net area N alone. */
 static void xrom_area(const char *dir, int n, int seeds) {
 	int area = NET_AREAS + n;
@@ -532,7 +538,13 @@ static void xrom_area(const char *dir, int n, int seeds) {
 	FILE *report = fopen(path, "w");
 	if (!report) return;
 	lent_fresh(dir);
-	area_layers(dir, report, area, seeds);
+	/* (CYBERWORLD_ATLAS_RUN=S: the area's first layer of a run of seed S
+	 * alone, as the game builds it with --net-biome: a player's layer) */
+	atlas_run_seed = (uint32_t)env_int("CYBERWORLD_ATLAS_RUN", 0);
+	if (atlas_run_seed) {
+		run_new(atlas_run_seed);
+		one(dir, report, net_area_def(area)->like, area, -1, 1, run_layer_seed(1, LAYER_NORMAL));
+	} else area_layers(dir, report, area, seeds);
 	fclose(report);
 }
 
