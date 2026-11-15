@@ -35,8 +35,8 @@
 #define POINT_IN 9           /* a point's letters after its arrow */
 #define GAP 5                /* between paragraphs, under a heading */
 #define BUTTON_Y (WIN_Y + WIN_H + 4)
-#define BUTTON_W 100
-#define BUTTON_GAP 8
+#define BUTTON_W 108
+#define BUTTON_GAP 6
 #define PARS_MAX 700
 #define PAGES_MAX 120
 #define TEXT_MAX (48 * 1024)
