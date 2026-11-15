@@ -6,11 +6,14 @@ tags: [world, level-design, guidance, interface]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 sources:
   - id: code
-    resource: "src/director/director_way.c (goal_way, heal_first, arrow_update), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow)"
+    resource: "src/director/director_way.c (goal_way, heal_first, arrow_update, arrow_scene), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow, arrow_settle)"
     title: "The arrow and the map's way as built"
   - id: s76
     resource: "Playtest session 76 (kai5, kai8), replayed on their pinned build e2005dac6"
     title: "Two players' arrow at Lan's HP's wall and the green arrow"
+  - id: s77
+    resource: "Playtest session 77 (kai5), replayed on its pinned build 0f2643619; the cases staged on the fix's build"
+    title: "The arrow over MegaMan, a chat box and a guardian's log-in"
 ---
 
 # The way-on arrow
@@ -46,6 +49,30 @@ without knowing what the colour meant (one at 80 of 140 HP with the heal 4
 panels back). The map's own key now names it, with no words added. The game-design
 call: colour alone carries nothing, so the colour is paired with the map's line
 and its labelled square.
+
+## Where it stands, and when it waits
+
+The arrow rings MegaMan where BN6's camera draws him (his feet projected
+from the camera's place, `arrow_scene`), its heads 32 pixels across and 30
+down from a point 21 above his feet: the picture's (120, 66) where the
+camera keeps him in the middle, and with him where it does not. Pointing
+down it stands farther out, clear of his sprite (it had stood on his legs).
+
+It waits unseen, its time running on, while MegaMan cannot walk its way
+(`arrow_settle`): through a chat that is not its own words (a Mystery
+Data's, a Prog's, a dealer's, a navi's), a cutscene of BN6's, and a
+guardian's staging from his log-in to the battle. L's words, and R's at
+home, are the arrow's own, and it shows through them as before, but where
+it would cross the open chat box (pointing down) it waits for the box to
+close. Kai5 saw it over MegaMan's legs and the box's top edge as he took a
+Mystery Data, and over SpoutMan as he logged in (session 77). Off the map
+and under BN6's fade it hides at once, as the cards and notes do (the
+fade's byte, [game state](../../rom/game-state.md)).
+
+Two of kai5's arrows that pointed against the map's line followed their
+walks: in a band two panels wide the fewest-turns walk sets off one panel
+across onto the band's other row (one step up-right, then on up-left), and
+at a walkway's crossing the arrow turns as MegaMan reaches it.
 
 ## Lan's HP's corridor
 

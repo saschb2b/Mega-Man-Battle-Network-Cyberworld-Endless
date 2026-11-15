@@ -110,6 +110,13 @@
   draws the way in the key's Heal green. The arrow, the corner notes
   ("Run saved"), the area cards and L's counters step aside while BN6's
   own fade covers the screen, so none hangs alone on a jack-in's white.
+- **The arrow keeps out of the way.** It waits through a chat that is not
+  L's (a Mystery Data's, a Prog's, a dealer's), a cutscene and a
+  guardian's arrival, and comes back after with the time it had left.
+  Pointing down it stands below MegaMan's feet, not on his legs, and
+  through L's words it waits for the box to close rather than cover it.
+  It now rings MegaMan where the camera draws him, also where the camera
+  stops short of keeping him in the middle.
 - **The title keeps your best depth.** With a run saved, the title
   dropped "Best: Layer N" because CONTINUE named a layer, but that is
   the saved run's, not your record; it shows whenever you have one now.

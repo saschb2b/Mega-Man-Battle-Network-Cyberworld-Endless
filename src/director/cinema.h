@@ -46,6 +46,12 @@ int cinema_arrow_dir(void);
 void cinema_arrow_heal(bool heal);
 /* How long the arrow has shown, in frames. */
 int cinema_arrow_age(void);
+/* The arrow waits unseen while `quiet` (a chat not its own words, a
+ * cutscene, a guardian's staging), its time running on. */
+void cinema_arrow_quiet(bool quiet);
+/* MegaMan's feet at (x, y) on the picture, which the arrow rings and keeps
+ * clear of, and whether a chat box is open (the arrow keeps off it too). */
+void cinema_arrow_near(int x, int y, bool box);
 /* A guardian's title card: `top` over its name, large, and `epithet`. */
 void cinema_title(const char *top, const char *name, const char *epithet, SDL_Color accent, int frames);
 /* A super boss's title card (docs/game/bosses/super-bosses.md): the picture

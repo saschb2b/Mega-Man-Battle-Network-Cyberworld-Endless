@@ -13,6 +13,17 @@
 #define BAR_FRAMES 12
 #define EASE_IN    16   /* frames a card's parts take to slide in */
 #define FADE_OUT   14
+/* The way-on arrow's place, measured on the picture (kai5's Mystery Data,
+ * session 77): MegaMan's feet stand at y 87 where the camera keeps him,
+ * his head 33 above them, 16 across; the arrow's heads ring a point 21
+ * above his feet (the picture's (120, 66) then), and BN6's chat box on the
+ * map has its top edge at y 99. */
+#define ARROW_FEET   87
+#define ARROW_UP     21
+#define MM_HALF_W    8
+#define MM_HEIGHT    33
+#define CHAT_TOP     99
+#define ARROW_PUSH   24   /* the farthest it stands out to clear him */
 
 enum { CARD_NONE, CARD_TITLE, CARD_AREA, CARD_GRAND };
 
@@ -31,11 +42,19 @@ static struct {
 	SDL_Color accent;
 	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
 	bool arrow_heal;                     /* it leads to the Recovery Mr. Prog: green, the map's Heal */
+	bool arrow_quiet;                    /* it waits unseen (cinema_arrow_quiet) */
+	int arrow_mx, arrow_my;              /* MegaMan's feet on the picture (cinema_arrow_near) */
+	bool arrow_box;                      /* a chat box open at the picture's foot */
+	int arrow_push, arrow_vis;           /* pixels it stands farther out, clear of him; its opacity, 0-255 */
 	char note[24];
 	int note_t, note_len;                /* a corner note: frames shown, of */
 } C;
 
-void cinema_reset(void) { memset(&C, 0, sizeof C); }
+void cinema_reset(void) {
+	memset(&C, 0, sizeof C);
+	C.arrow_mx = CORE_W / 2;
+	C.arrow_my = ARROW_FEET;
+}
 
 /* (a talk that opens on its own takes a B held to run as a press to
  * hurry it: a player running into a guardian's last-stop words saw none
@@ -57,6 +76,8 @@ int cinema_arrow_age(void) { return C.arrow_len ? C.arrow_t : 0; }
 void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
 void cinema_arrow_heal(bool heal) { C.arrow_heal = heal; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
+void cinema_arrow_quiet(bool quiet) { C.arrow_quiet = quiet; }
+void cinema_arrow_near(int x, int y, bool box) { C.arrow_mx = x; C.arrow_my = y; C.arrow_box = box; }
 void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
 /* Off the map, or under BN6's fade: a jack-in's white, a warp's, a
@@ -65,6 +86,64 @@ void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note,
 static bool unseen(void) { return C.off_map || C.faded; }
 
 int cinema_note_height(void) { return C.note_len && !unseen() ? TEXT_H + 6 : 0; }
+
+/* The arrow's way on the picture, a unit (0 right, then clockwise in
+ * eighths; a diagonal along the isometric floor's, as a walkway runs) */
+static void arrow_unit(float *ux, float *uy) {
+	float ang = (float)C.arrow_dir * 3.14159265f / 4.0f;
+	float x = cosf(ang), y = sinf(ang) * 0.5f, n = sqrtf(x * x + y * y);
+	*ux = x / n;
+	*uy = y / n;
+}
+
+/* The middle of its front head, `out` pixels on from its ring (bob and
+ * push), the ring 32 across and 30 down about a point above MegaMan's feet */
+static void arrow_middle(float ux, float uy, float out, float *cx, float *cy) {
+	*cx = (float)C.arrow_mx + ux * (32 + out);
+	*cy = (float)(C.arrow_my - ARROW_UP) + uy * (30 + out);
+}
+
+/* The box its two heads take on the picture (x0, y0, x1, y1), outlines
+ * and all: each head from 4 behind its middle to 11 ahead, 7 to a side,
+ * the back one 9 behind the front */
+static void arrow_bounds(float ux, float uy, float out, float b[4]) {
+	float cx, cy;
+	arrow_middle(ux, uy, out, &cx, &cy);
+	const float along[5] = { 11.2f, -4, -4, -13, -13 }, side[5] = { 0, 7, -7, 7, -7 };
+	b[0] = b[1] = 1e9f;
+	b[2] = b[3] = -1e9f;
+	for (int k = 0; k < 5; ++k) {
+		float x = cx + ux * along[k] - uy * side[k], y = cy + uy * along[k] + ux * side[k];
+		b[0] = fminf(b[0], x); b[1] = fminf(b[1], y);
+		b[2] = fmaxf(b[2], x); b[3] = fmaxf(b[3], y);
+	}
+}
+
+static bool covers_megaman(const float b[4]) {
+	return b[0] < (float)(C.arrow_mx + MM_HALF_W) && b[2] > (float)(C.arrow_mx - MM_HALF_W) &&
+		b[1] < (float)(C.arrow_my + 1) && b[3] > (float)(C.arrow_my - MM_HEIGHT);
+}
+
+/* Where the arrow stands this frame and whether it shows: pushed out along
+ * its way until clear of MegaMan at its bob's nearest (pointing down it
+ * stood on his legs); unseen while it waits (a chat, a cutscene, a
+ * guardian's staging) or where it would cross an open chat box at its
+ * bob's farthest (it stood on the box's top edge, session 77). It fades
+ * out over 4 frames and in over 8; off the map or under BN6's fade at once. */
+static void arrow_settle(void) {
+	float ux, uy, b[4];
+	arrow_unit(&ux, &uy);
+	int push = 0;
+	while (push <= ARROW_PUSH && (arrow_bounds(ux, uy, (float)push - 3, b), covers_megaman(b))) ++push;
+	bool blocked = push > ARROW_PUSH;
+	C.arrow_push = blocked ? ARROW_PUSH : push;
+	arrow_bounds(ux, uy, (float)C.arrow_push + 3, b);
+	blocked |= C.arrow_box && b[3] >= CHAT_TOP;
+	int to = C.arrow_len && !C.arrow_quiet && !blocked ? 255 : 0;
+	if (unseen()) C.arrow_vis = 0;
+	else if (to > C.arrow_vis) C.arrow_vis = C.arrow_vis + 32 > to ? to : C.arrow_vis + 32;
+	else C.arrow_vis = C.arrow_vis - 64 < to ? to : C.arrow_vis - 64;
+}
 
 /* (each card's own number: the drawn card's texture is of one) */
 static int card_serial;
@@ -129,6 +208,7 @@ void cinema_update(void) {
 	 * would hold MegaMan with them) */
 	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
 	if (C.arrow_len && ++C.arrow_t >= C.arrow_len) C.arrow_len = 0;
+	arrow_settle();
 	/* (and a note waits out a menu or a fade, unseen) */
 	if (C.note_len && !unseen() && ++C.note_t >= C.note_len) C.note_len = 0;
 }
@@ -298,23 +378,23 @@ static void tri(float ax, float ay, float bx, float by, float cx, float cy, SDL_
 	}
 }
 
-/* The way on: an arrow a little off the middle of the picture, where the
- * camera keeps MegaMan, pointing along the route (0 right, then clockwise
- * in eighths), bobbing that way; it fades out at its end. Green while it
- * leads to the heal: a playtester told it led there first followed it,
- * then heard the exit's way, and could not tell which it showed (session
- * 62). */
+/* The way on: an arrow about MegaMan on the picture, pointing along the
+ * route (0 right, then clockwise in eighths), bobbing that way; it fades
+ * out at its end. Green while it leads to the heal: a playtester told it
+ * led there first followed it, then heard the exit's way, and could not
+ * tell which it showed (session 62). Where it stands and whether it
+ * shows: arrow_settle. */
 static void draw_arrow(int x0, int y0) {
-	if (!C.arrow_len || unseen()) return;
+	if (!C.arrow_len || unseen() || !C.arrow_vis) return;
 	int left = C.arrow_len - C.arrow_t;
 	int a = C.arrow_t < 8 ? C.arrow_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
-	float ang = (float)C.arrow_dir * 3.14159265f / 4.0f;
-	float ux = cosf(ang), uy = sinf(ang) * 0.5f;   /* (a diagonal along the isometric floor's, as a walkway runs) */
-	float n = sqrtf(ux * ux + uy * uy);
-	ux /= n; uy /= n;
+	a = a * C.arrow_vis / 255;
+	float ux, uy, cx, cy;
+	arrow_unit(&ux, &uy);
 	float bob = 3.0f * sinf((float)C.arrow_t * 0.25f);
-	/* (clear of the chat box below when it points down) */
-	float cx = (float)x0 + 120 + ux * (32 + bob), cy = (float)y0 + 66 + uy * (30 + bob);
+	arrow_middle(ux, uy, bob + (float)C.arrow_push, &cx, &cy);
+	cx += (float)x0;
+	cy += (float)y0;
 	/* two slender heads, one behind the other (">>"), outlined */
 	for (int head = 1; head >= 0; --head) {
 		float hx = cx - ux * 9 * (float)head, hy = cy - uy * 9 * (float)head;

@@ -7,6 +7,7 @@
 
 #include "battle_floor.h"
 #include "bn6_fields.h"
+#include "bn6_forms.h"
 #include "boss.h"
 #include "cinema.h"
 #include "director_folder.h"
@@ -247,10 +248,39 @@ static void map_arrow(void) {
 	was = D.map_shown;
 }
 
+/* Where the arrow stands and when it waits (cinema.c, arrow_settle):
+ * MegaMan's feet on the picture, from BN6's camera as it is drawn (its
+ * point shows at (CAM_X, CAM_Y)), so it rings him where the camera does
+ * not keep him in the middle; a chat box open; and quiet while he cannot
+ * walk its way: a chat of BN6's or another of ours (L's own words are
+ * the arrow's, and it shows through them), a cutscene, a guardian's
+ * staging. A playtester saw it on MegaMan's legs and the box's top edge
+ * as he took a Mystery Data, and over SpoutMan as he logged in (kai5,
+ * session 77). */
+#define CAM_X 120
+#define CAM_Y 80
+#define ARROW_FEET_DY 7   /* his feet below the camera's point (measured) */
+static void arrow_scene(void) {
+	uint32_t cam = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
+	int x = CAM_X, y = CAM_Y + ARROW_FEET_DY;
+	if (cam >= BN6_EWRAM && cam <= BN6_EWRAM_END - 80) {
+		int cx = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_X) >> 16, cy = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Y) >> 16;
+		int cz = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Z) >> 16;
+		int px = bn6_player_x(), py = bn6_player_y(), pz = bn6_player_z();
+		x = px + py - (cx + cy) + CAM_X;
+		y = (py - px) / 2 - pz - ((cy - cx) / 2 - cz) + CAM_Y + ARROW_FEET_DY;
+	}
+	bool box = emu_read8(BN6_CHATBOX) != 0;
+	cinema_arrow_near(x, y, box);
+	bool chat = (box || talk_busy()) && !D.arrow_pending;
+	cinema_arrow_quiet(chat || emu_read32(BN6_CUTSCENE_POS) != 0 || boss_cinematic());
+}
+
 /* The way-on arrow: on while L's words last, however many boxes, then ten
  * seconds more, and on while MegaMan walks, up to half a minute; and after
  * the map. */
 void arrow_update(void) {
+	arrow_scene();
 	/* (not over a warp's or the jack-in's flash and tunnel) */
 	if (D.warping || emu_read8(BN6_WARP_PENDING)) {
 		if (cinema_arrow_on()) cinema_arrow(0, 0);
