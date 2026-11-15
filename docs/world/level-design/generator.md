@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:17:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:01:17Z }
 ---
 
 # The generator
@@ -95,6 +95,16 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   others widen as above. Over sixty layers of RoboDog's comp
   (`test_way_shapes`), the way's turns into a walkway on wide floor fell
   from 25 to 14 and its one-panel jogs from 3 to 1.
+- **No pit between walkways** (15 November 2026). Walkways and platforms
+  meeting round a single void panel left a pit, floor on its four sides
+  and void on a corner, that the art draws as a walkway cut in half and
+  BN6's walls keep MegaMan off; the walk went round it in a jog, where the
+  same playtester stood still beside one. No original map has one; the
+  holes punched in the Graveyard's slabs and Green's fields keep their
+  corners floor. Such pits are filled once the way is widened
+  (`fill_pits`): over the tests' 300 layers, 19 in 18 layers before, none
+  between walkways now (`test_way_shapes` holds it), 5 left inside the
+  fields of guardians' layers.
 - **Rungs meet a field square on** (issue #98). A comb's rung back to a
   ragged field that met its edge on a tab beside a bite was a mouth two
   panels wide on one side, the field going on past it, where the arrow's
@@ -267,6 +277,25 @@ rims of both squares lent no tiles, and a room's upper edges were steps
 of walkway floor. There a panel is left out only where a quarter of its
 top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
 yellow and red), and a room is the square whole.
+
+BN4's ACDC Area's maps hold no white floor wider than a walkway but their
+framed squares of four by four, which it draws its pads with
+(`TILES_SQUARE_PADS`, every room up to 64 panels a pad). A larger room,
+an L or a ring, was drawn in the walkways' rim round the squares' middle,
+its upper edges in steps of walkway floor, and a walkway's junction or
+bend that the legalizer widened to a block of two by two came out of
+bends' pieces: U-shaped notches, a bend's green side face in the middle
+of the floor, the void through. So while the tiles are picked, where an
+area's pads are its framed squares and its rooms are drawn apart (and
+its way is not kept one wide, as BN4's Town Area's is: its squares stand
+on a slab and a block framed so stood over the squares beside it), every
+room is drawn as one of them, and so is a block of floor two wide that
+touches no room, a small square where its maps join their walkways at
+squares and hubs (`framed`, `src/map/netmap.c`); the legalizer reads them
+as before. Over 8 layers its breaks fell from 2541 to 1808: on rooms'
+edges from 660 to 230, their corners 388 to 125, notches 115 to 63. A
+block that touches a room stays walkway: framed, it joined the room's
+piece and stacked a second frame on its rim.
 
 Where an area asks for it (`TILES_WHOLE`: BN4's Park and Town Areas,
 countries and Undernet, BN5's Oran Area and Undernet), its maps' panels
