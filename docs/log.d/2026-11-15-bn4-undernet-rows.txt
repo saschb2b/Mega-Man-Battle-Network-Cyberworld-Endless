@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T19:06:45Z
+* **Update**: world/level-design/side-pieces.md (BN4's Undernet's horns in rows along whole catwalk runs, `SIDES_RUNS`, measured on its two maps; what else they hold that no layer draws is floor or a mark on it).
