@@ -14,6 +14,7 @@ python3 tools/heap3ds.py --seeds 1-24 --cases bn5 --no-build
 python3 tools/heap3ds.py --cases bn5 --cap 90   # a heap 6 MB short: what a refusal does where fragmentation took that much
 python3 tools/heap3ds.py --cases bn6,bn5,bn4 --cap 86   # the margin rule: 10 MB short, nothing refused
 python3 tools/heap3ds.py --cases bn5 --seeds 1 --frames 40000 --shots 1000 --refuse tiles_keep_begin --no-build
+python3 tools/heap3ds.py --cases bn6,bn5 --dev glitch,glitchlook=15+5+6   # a Glitch layer on every act's first layer from the second, its looks from the areas with the most side pieces
 ```
 
 `tools/heap3ds.py` plays long runs of the host build headless (the test

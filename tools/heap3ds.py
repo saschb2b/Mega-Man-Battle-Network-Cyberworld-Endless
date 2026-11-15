@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--refuse FUNC,...] [--shots N] [--no-build]: the
+"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--refuse FUNC,...] [--shots N] [--dev SWITCHES] [--no-build]: the
 New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
 docs/engine/emulation/3ds-memory.md).
 
@@ -110,17 +110,17 @@ def frames_after(text, marker, binary):
     return re.findall(r'heap3ds:   at \S*' + re.escape(os.path.basename(binary)) + r'\+(0x[0-9a-f]+)', text.split(marker, 1)[1].split('heap3ds: refused', 1)[0])
 
 
-def one(bp, rom, case, seed, frames, cap, refuse='', shots=0):
+def one(bp, rom, case, seed, frames, cap, refuse='', shots=0, more_dev=''):
     """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes; the
     allocations asked for in the game's ranges `refuse` refused, and a
-    picture every `shots` frames"""
+    picture every `shots` frames; `more_dev` more --dev switches"""
     extras, fixed, binary = CASES[case]
     data = os.path.join(WORK, case, f's{seed}')
     shutil.rmtree(data, ignore_errors=True)
     os.makedirs(data)
     mounts = [(os.path.join(rom, 'bn6.gba'), '/rom/bn6.gba:ro')]
     mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
-    dev = 'god,onehit'
+    dev = 'god,onehit' + (',' + more_dev if more_dev else '')
     env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
            ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')] + ([('HEAP3DS_REFUSE', refuse)] if refuse else [])
     rel = os.path.relpath(data, ROOT)
@@ -187,6 +187,7 @@ def main():
     ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
     ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
     ap.add_argument('--refuse', default='', help='functions whose allocations are all refused, as FUNC,FUNC: what a refusal there does')
+    ap.add_argument('--dev', default='', help="more --dev switches for every run: glitch,glitchlook=15+x19 the Glitch layer on every act's first layer from the second, its flips from those areas (docs/game/glitch-layer.md)")
     ap.add_argument('--shots', type=int, default=0, help="a picture every N frames, into each run's folder (64 at most), to set beside another run's")
     a = ap.parse_args()
     for case in ('bn6', 'bn5', 'bn4', 'all'):
@@ -207,7 +208,7 @@ def main():
     jobs = [(c, s) for c in cases for s in seeds_of(a.seeds)]
     refuse = {b: ranges(bp, b, [f for f in a.refuse.split(',') if f]) for b in {CASES[c][2] for c in cases}}
     with ThreadPoolExecutor(a.jobs) as pool:
-        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB, refuse[CASES[j[0]][2]], a.shots), jobs)))
+        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB, refuse[CASES[j[0]][2]], a.shots, a.dev), jobs)))
     places = {}
     for binary in {res['binary'] for res in results.values()}:
         places.update({(binary, k): v for k, v in names(bp, binary, sorted({f for res in results.values() if res['binary'] == binary

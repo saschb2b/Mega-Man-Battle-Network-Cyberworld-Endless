@@ -318,6 +318,55 @@ that pass. Two ways to look at it:
   (`build.py shot --scene emu --run-depth 4 --dev
   glitch,side=4,glitchstage=5,glitchlook=N,glitchhold`).
 
+## Heights in a flip
+
+Twelve areas raise rooms and terraces on their own stairs
+([Heights](../world/level-design/heights.md)), and a Glitch layer of one
+keeps them. A look draws a stair from its own area's template of the
+same way and width (`nm_paste_stairs`), and its raised floor where a
+flat panel `rise` units up the screen would be. Into an area with no
+such stair, or one of another rise or length, the ramp was left void
+under MegaMan's feet and the raised rooms floated as islands on the
+area's short faces (Green's stairs in Central's look, `build.py atlas
+into0`, 15 November 2026): the picture lied about where he can walk.
+
+So a look whose area cannot draw every stair of the layer as it stands
+(`heights_drawn`, netmap.c: its way and width learned, at the layer's
+rise and the stair's length) draws the raised floor and the stairs
+level with the ground (`NetmapLook.level`): the rooms where their panels
+lie, the ramps as walkways between them. Every panel MegaMan can walk is
+drawn; he walks on at his own height over it, a rise above the picture
+on a raised room, as the flip already lies about where he is and never
+about where he can walk. A look into an area that draws the stairs keeps
+them as they stand. The atlas's report says which (`drawn level`, `drawn
+as they stand`).
+
+## Who is in front in a flip
+
+On a layer of their own area, MegaMan passes behind a side piece's claw
+or horn: its layer priorities, cut with it, are written into the
+coordinate data with the layer's own ([side
+pieces](../world/level-design/side-pieces.md), Who is in front). A flip
+changes the picture alone, so a look's pieces carry none, and the
+layer's own pieces' priorities stay under the look. Measured on 15
+November 2026 with a look held (`glitchhold`) and MegaMan put on the
+panel a claw grips: on a Central layer in CopyBot Comp's look he stands
+in front of the look's claw where its own layers would hide his legs;
+on a CopyBot layer in Central's look the claw's own priorities hide him
+behind nothing, the look's second tile layer being empty there, and he
+is drawn whole.
+
+**Decided (the game-design skill): a look's pieces stay without
+priorities.** Writing them in step with the tiles means rewriting
+section 2 of the coordinate data BN6 reads in place at `0x02027A00`, its
+sections' offsets fixed in ROM, at every flip and back, for a draw order
+seen for 10 to 130 frames on the few panels a piece grips. Draw order
+carries no decision: walls and heights stay the layer's, so where
+MegaMan can walk is never misdrawn, and a sprite drawn over the
+scenery it should pass behind is a priority slip of the kind a GBA's
+corruption shows, the glitch the layer is about. Revisit if a look's
+piece ever stands on the way itself.
+
 **Checked:** `build.py test` (`test_glitch`: one run in three over 3,000
 seeds, never two, on an act's first layer from the second; the warp and
 no dark warp on its layer, away from the arrival; the Glitch layer's

@@ -75,8 +75,10 @@ BIOMES `intoN` and `fromN` draw a Glitch layer's looks instead
 (`src/dev/atlas_looks.c`): a layer of every other area as a flip into
 area N shows it, or one of N's in every other area's look, side by side
 with the layer as built, `look_intoNN_fromFF_dD_sS.png` and a line each in
-`report.txt` ([the Glitch layer](../game/glitch-layer.md), Checking an
-area's look).
+`report.txt` (its stairs and how the look drew them, `drawn level` or
+`drawn as they stand`, the scenery and side pieces each pick set, the
+holes left: [the Glitch layer](../game/glitch-layer.md), Checking an
+area's look and Heights in a flip).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. A layer whose map's backdrop, as the game would

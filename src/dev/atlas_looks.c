@@ -111,8 +111,9 @@ static void pair(const char *dir, FILE *report, int from, int into, int depth, u
 	char name[200];
 	snprintf(name, sizeof name, "look_into%02d_from%02d_d%d_s%u", into, from, depth, seed);
 	if (own && px) save_pair(dir, name, own, px, tw, th);
-	fprintf(report, "look from %d into %d depth %d seed %u: stairs %d rise %d (its stairs 0x%x, ladders 0x%x, rise %d), scenery %d -> %d, sides %d -> %d, holes left %d -> %d\n",
-		from, into, depth, seed, stairs, rise, kit.stair_dirs, kit.stair_narrow, kit.rise, scenery, look.scenery, sides, look.sides, holes, holes_left());
+	fprintf(report, "look from %d into %d depth %d seed %u: stairs %d rise %d (its stairs 0x%x, ladders 0x%x, rise %d: %s), scenery %d -> %d, sides %d -> %d, holes left %d -> %d\n",
+		from, into, depth, seed, stairs, rise, kit.stair_dirs, kit.stair_narrow, kit.rise, look.level ? "drawn level" : "drawn as they stand",
+		scenery, look.scenery, sides, look.sides, holes, holes_left());
 	free(own);
 	free(px);
 	netmap_look_free(&look);
