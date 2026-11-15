@@ -61,7 +61,10 @@ The viruses on it do nothing outside the Battler.
 `src/layer/battler_words.c`). He names his first pair, as BN6's record
 for the round holds it, and his stake: that Battler's repeat prize in
 BN6, 500, 700, 1500, 2000 or 3000 zenny, taken by BN6's own zenny check
-on Yes (the question starts on No). Each round is BN6's own record
+on Yes (the question starts on No). His words said, a later talk on his
+layer (after a No, or too little zenny) is one box, his pair, and the
+question, as a shop's second visit is (a playtester sat through his
+rounds and rule again, session 76). Each round is BN6's own record
 forced (`emu_battle_force_record`): its BATTLE n START!, the VIRUS LIST,
 the placing, the fight. The pot starts at the stake, and each win adds
 it again; after a win he names the next pair and asks TAKE THE POT (and B)

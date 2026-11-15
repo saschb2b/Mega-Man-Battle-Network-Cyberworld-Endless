@@ -12,10 +12,10 @@
  * does not (a boot's own leave none), its key item given; none without the
  * card. */
 void card_to_game(void);
-/* ... and back: the card a Battler's chat gave (BATTLER_CARD_FLAG, with
- * Mettaur's and Gunner's data), and the families the run's game has put
- * on it since (a Rare deleted: BN6's "You got new Virus Data"), the
- * profile saved where it changed. */
+/* ... and back: the card a Battler's chat gave (BATTLER_TOLD_FLAG set
+ * while the profile holds none; with Mettaur's and Gunner's data), and
+ * the families the run's game has put on it since (a Rare deleted: BN6's
+ * "You got new Virus Data"), the profile saved where it changed. */
 void card_from_game(void);
 bool card_held(void);
 /* The families on the card, BN6's VIRUS LIST's count of BN6_CARD_FAMILIES */
