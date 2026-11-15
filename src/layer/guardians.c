@@ -144,6 +144,10 @@ NpcBody guardian_body(int navi, int face) {
 	NpcBody b = { 6, guardian_sprite(navi), face, false, -1, guardian(navi)->pose, -1 };
 	if (navi == 12 || navi == 16) b.anim = toward_camera(face);
 	log_anims(&b);
+	/* (BN4's overworld sprites hold 6 to 18 animations, none at 0x19 on:
+	 * he shows and goes with the beam, as ElementMan; docs/rom/bn4.md,
+	 * Sprite lists) */
+	if (guardian_bn4(navi)) b.log_in = b.log_out = -1;
 	/* (Falzar's in their battle sprites: BN6's warp-in, their animation 3,
 	 * and its reverse, 4) */
 	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1, 4 };

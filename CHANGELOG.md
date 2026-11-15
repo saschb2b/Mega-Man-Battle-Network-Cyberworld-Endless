@@ -66,6 +66,13 @@
   runs most often start, caught the most). In every area, a pit left
   between walkways, which the walk had to jog round, is filled. A layer
   saved before this update starts afresh at a CONTINUE.
+- **Fixed: GutsMan's Guardian Data could not be taken (issue #614).**
+  Continued at his data, BN4's GutsMan logged in again, unseen, and
+  stood on it: A only turned MegaMan to face it. A guardian deleted
+  before a CONTINUE now stays gone, and BN4's Navis show and go with
+  BN6's beam, as their own sprites have no log-in of BN6's. GutsMan no
+  longer stands invisible through his entrance, either. A run saved
+  before this update starts its layer afresh at a CONTINUE.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.

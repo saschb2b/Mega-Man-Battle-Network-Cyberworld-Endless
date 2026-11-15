@@ -68,6 +68,11 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	OP(&s, 0x09, 0x25, (uint8_t)b->index, (uint8_t)(b->list * 4), 0x16, (uint8_t)b->anim, 0x0E, 0x13);
 	if (b->mirror) OP(&s, 0x26);   /* (the sprite turned the other way) */
 	coords(&s, x, y, z);
+	/* (gone already: a CONTINUE by his data, whose map entered again
+	 * starts the NPCs anew; he logged in again there and out, and BN4's
+	 * GutsMan, waiting on a log-in his sprite lacks, stood unseen over his
+	 * data, which no A reached, issue #614) */
+	jump_if(&s, f->gone, L_END);
 	wait_flag(&s, f->appear, L_SHOW);
 	mark(&s, L_SHOW);
 	/* logs in where it stands, by its sprite's own log-in beside the beam
@@ -86,6 +91,7 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	 * actually work"), and the owner saw as a "blup" */
 	if (b->log_out >= 0) OP(&s, 0x2E, (uint8_t)b->log_out, 0x2A, 0xC0);
 	else OP(&s, 0x10, BEAM_RISE);
+	mark(&s, L_END);
 	OP(&s, 0x09, 0x03);
 	return commit(&s);
 }
