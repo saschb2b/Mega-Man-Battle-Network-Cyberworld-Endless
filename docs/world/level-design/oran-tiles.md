@@ -122,8 +122,5 @@ layer, and no seed makes anything else.
   room's own rim as rim was tried (270.1, the chips stayed).
 - **Rooms bigger than 3 x 3**: drawn as hubs, their inner edge scalloped
   (tiles drawn off), their frame repeated along a side.
-- **Conveyors where none pushes.** A circuit one panel long between two
-  pads takes BN5's blue arrow panels, which lend tiles beside a pad
-  (`SKIP_OFF_PADS`): a conveyor's look on plain floor.
 - The [roads' rule](roads.md) found none here: Oran's brown planks lie
   between its hubs, in scraps.
