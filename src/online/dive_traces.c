@@ -215,8 +215,11 @@ static int ahead(void) {
 	return -1;
 }
 
+static bool strip_up;    /* the strip opened here, till its keys are let go */
+
 static void press(void) {
-	if (!btn_pressed(BTN_A) || talk_busy() || emu_read8(BN6_CHATBOX) || !director_on_map()) return;
+	/* (not the A the strip took: the phrase it left can be back from the server in the same frame) */
+	if (strip_up || !btn_pressed(BTN_A) || talk_busy() || emu_read8(BN6_CHATBOX) || !director_on_map()) return;
 	int k = ahead();
 	if (k >= 64) phrase_said(&T.phrases[k - 64]);
 	else if (k >= 0) mark_said(&T.marks[k]);
@@ -235,7 +238,6 @@ void dive_traces_frame(void) {
 
 /* ---- a phrase left: the strip's phrases on R ---- */
 
-static bool strip_up;    /* opened here, till its keys are let go */
 
 static void leave(int phrase) {
 	uint8_t m[ONLINE_DIVE_PHRASE_BYTES];
