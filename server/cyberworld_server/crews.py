@@ -13,7 +13,8 @@ tells every member everyone's, so that each game opens the portal only
 when all agree.
 
 A crewmate's random battle starting (CREW battle, its index on the layer)
-is offered to his crewmates in the same room (CREW_STATE offer); each
+is offered to his crewmates in the same room (CREW_STATE offer), never to
+or from a game that cannot run the one field (HELLO's no_arena); each
 answers with CREW join within crew_join_ms. When every one offered has
 joined, or the window ends, the server starts a party battle (party.py)
 with the battle's owner as seat 0 and the joiners; where nobody joined,

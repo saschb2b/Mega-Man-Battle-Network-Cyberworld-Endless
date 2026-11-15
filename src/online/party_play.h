@@ -40,11 +40,14 @@ void party_play_dev(const PartyDev *d);
 void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay);
 /* ... a crew's random battle its (after party_play_start, at once: the
  * shared dive's join-in battles, dive_join.h), each game making `e` alike
- * (director_crew_battle); its end goes back through director_crew_over,
- * with BN6's reward the field's results gave; false where it could not be
- * taken over. Whether one is under way. */
+ * (director_crew_battle) and the run's next battle already
+ * (director_crew_record); false where it could not be taken over. Whether
+ * one is under way; and its end, once, where the field fought it to one:
+ * won, this seat's MegaMan's HP, and the reward BN6's results on the field
+ * picked (BN6_BATTLE_REWARD) */
 bool party_play_crew(const Encounter *e);
 bool party_play_crew_fighting(void);
+bool party_play_crew_end(bool *won, int *hp, uint16_t *reward);
 /* ... a seat of it gone (ARENA_STATE seat_gone) */
 void party_play_gone(unsigned seat);
 /* ARENA_SEAT for it: a seat's MegaMan, keys or hash; false where it is not */

@@ -39,7 +39,7 @@ static struct {
 	char name[ONLINE_NAME_BYTES + 1];
 	uint32_t since;           /* the stage's start (ms) */
 	uint32_t battle;          /* its ARENA_STATE battle once taken */
-	int fought_from;          /* the layer's battles as it was taken (director_crew_index): one more once the field fought it */
+	Encounter e;              /* ... and its battle */
 	uint32_t keys;
 } J;
 
@@ -117,14 +117,22 @@ void dive_join_frame(const OnlineSnapshot *s) {
 	case JOIN_JOINED:
 		if (waited > ONLINE_CREW_JOIN_MS + LATE_MS) { fprintf(stderr, "dive: the joined battle never started\n"); to(JOIN_NONE); }
 		break;
-	case JOIN_FIGHTING:
-		if (!party_play_crew_fighting()) {
-			fprintf(stderr, "dive: the crew's battle over, back on the layer\n");
-			if (director_crew_index() > J.fought_from) dive_splits_fought();
-			J.battle = 0;
-			to(JOIN_NONE);
+	case JOIN_FIGHTING: {
+		if (party_play_crew_fighting()) break;
+		/* (fought to its end on the field: a battle of this run's own; else, the field not made, the owner fights it here
+		 * and a joiner is back as he was) */
+		bool won;
+		int hp;
+		uint16_t reward;
+		if (party_play_crew_end(&won, &hp, &reward)) {
+			director_crew_over(&J.e, won, hp, reward);
+			dive_splits_fought();
 		}
+		fprintf(stderr, "dive: the crew's battle over, back on the layer\n");
+		J.battle = 0;
+		to(JOIN_NONE);
 		break;
+	}
 	default: break;
 	}
 }
@@ -176,18 +184,19 @@ void dive_join_crew_state(const CrewState *c) {
 static void take(const PartyState *p) {
 	unsigned n = 0;
 	for (unsigned k = 0; k < ONLINE_SEATS; ++k) n += p->seats[k] != 0;
-	Encounter e = director_crew_battle(J.index);
+	J.e = director_crew_battle(J.index);
 	int walked = director_crew_steps_reset();
 	fprintf(stderr, "dive: the crew's battle %d, seat %u of %u; the encounter count reset (walked %d)\n", J.index, p->seat, n, walked);
+	/* (the run's next battle too, so that the owner fights it alone where the field cannot be made) */
+	director_crew_record(&J.e);
 	party_play_on(true);
 	party_play_start(p->battle, p->seat, n, p->delay);
-	if (!party_play_crew(&e)) {
+	if (!party_play_crew(&J.e)) {
 		if (p->seat == 0) alone("the field could not take it");
 		else to(JOIN_NONE);
 		return;
 	}
 	J.battle = p->battle;
-	J.fought_from = director_crew_index();
 	to(JOIN_FIGHTING);
 }
 

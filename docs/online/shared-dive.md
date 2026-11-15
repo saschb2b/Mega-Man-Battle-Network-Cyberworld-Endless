@@ -77,9 +77,14 @@ Verified on `dev`, 15 November 2026:
   is the run's seed with the depth and the side kind mixed in, and a main
   layer's area comes from its depth (`layer_biome_at` in
   `src/director/director_layer.c`, `biome_for_depth`). So every diver on
-  the week's seed at one depth and side stands on the same layer: its map,
-  its Mystery Data's places and its n-th random battle
-  (`loot_random_battle` takes the layer's seed and the battle's number).
+  the week's seed at one depth and side stands on the same layer: its map
+  and its Mystery Data's places. Its n-th random battle is not the same
+  for every diver (found building the join-in battles, below):
+  `loot_random_battle` takes the layer's seed and the battle's number,
+  but the run's own roll (`make_encounter` in `src/core/loot.c`) draws on
+  the run's RNG and its memory of the battles fought, and `roll_encounter`
+  rolls again every few seconds on the map; a crew's battle is rolled
+  aside from both, from the layer's seed and its index.
   The ways that part the pack are the ones a run chooses: Lan's HP's
   portals (the act's area, the other way, the Undernet, a special route;
   [Lan's HP after an act](../world/home/lans-hp.md)), side layers, and a
@@ -197,8 +202,65 @@ Verified on `dev`, 15 November 2026:
   frames (`talk_reset`): a session held still by one, "talk director"
   with no box, was how it was found. BN6's own trigger at the pink
   pad's foot still warps at once, a crewmate stepping on it there
-  splitting the way. Not yet: the crew's join-in battles (on the one
-  field).
+  splitting the way. The crew's join-in battles: below.
+
+- **Join-in battles** (15 November 2026, `dive_join.c`, `director_crew.c`;
+  `encounter.c`'s `emu_encounters_offer`): while a crewmate stands within
+  four panels of MegaMan on a dive layer (128 world units, the room's
+  SNAPSHOT), a random battle BN6's roll gives is held at the roll's
+  branch (`BN6_ENCOUNTER_ROLLED` taken to `BN6_ENCOUNTER_SKIP`, as a
+  bracket holds its rounds) and MegaMan stands still; CREW battle offers
+  it by its index on the layer, the band saying "Battle! Calling the
+  crew...". A crewmate near whose game gets the offer shows "Alpha's in a
+  battle!  A:Jump in" in the dive's band for the window
+  (`ONLINE_CREW_JOIN_MS`; never over BN6's chat box), and A sends CREW
+  join ("Jumping in!"); a join is sent only inside the window, a newer
+  offer replaces an older. The server's START takes every game in to
+  the party's core (`party_play_crew`), the battle made alike on each from
+  the layer's seed and the index, its kind by the index
+  (`director_crew_battle`; no Mystery Data on its field, whose row is a
+  record's own, nor a Glitch layer's hardening), the foes unscaled; each
+  game's walk toward its next battle is reset there
+  (`BN6_STEPS_WALKED`, `BN6_STEPS_CHECKED`), the joiner's run held still on
+  its map under the field. Nobody joining (CREW_STATE alone), or no
+  answer within the window and three seconds, the owner's battle begins
+  as ever. At the end each run takes the battle as one of its own
+  (`director_crew_over`): MegaMan's HP as the field left it, a deletion
+  ending the run as alone; won, its viruses counted and BN6's reward, the
+  entry BN6's results screen on the field picked (`BN6_BATTLE_REWARD` on
+  the party's core, given with `GiveChips`, `GiveZenny` or
+  `GiveBugfrags`): that is BN6's normal reward for the battle, its own
+  pick by the Busting Level the party earned, the one the player saw on
+  the results, where rolling the run's own would have needed a Busting
+  Level no run's battle had; it comes from the rows of each game's ROM
+  copy, so the run's leaning of a row's codes reaches it only where an
+  earlier battle of the run leaned that row. The server offers nothing to,
+  or from, a game without the one field (HELLO's `hello_no_arena`: the
+  New 3DS and the PSP), and a field the games built apart lets the
+  server's battle go (ARENA leave), the owner fighting alone. The dev's
+  `battle` step on a dive with the crew near comes through BN6's roll
+  (its way on to StartBattle taken by hand, the branch reading the flags
+  the roll left), and a headless game holding for a party's field now
+  runs at the clock's pace. Seen headless with two crewed games on a
+  local server (layer 1 of week 2966's seed, Beta four panels off): Alpha's
+  battle 0 held and offered, Beta's band offering it, Beta's A; both
+  made battle 0 alike (`0/23/0@4,1`, one virus), Beta's walk reset from
+  22, both ready with `04c5352ceca6a5f3`, 6 hashes agreed on each (frames
+  60 to 360), Beta's own Custom screen and picks, the battle won at frame
+  378, Busting Level 9, both runs given BN6's MachGun1 T (`262b`) with 100
+  HP, back on the layer, the layer's battles 1 on each. Nobody joining:
+  Alpha's battle 1 held, "Calling the crew" for the window, then "nobody
+  jumped in" and BN6's own battle against a Mettaur alone. A join sent
+  from a stale offer showed the fields' check at work: the two games had
+  built battles 1 and 2, the ready hashes differed, and each went back,
+  Alpha into his battle alone. Again with Beta at 1 HP (`--dev hp=1`),
+  two crew battles in a row: both runs given BN6's reward each time
+  (`262b`, then `0083`), Beta's HP 1 written back, the layer's battles 2
+  on each, so the next battle's index and split are the layer's. Not yet
+  seen: a deletion in a crew's battle (Beta at 1 HP was never hit by the
+  bots' layer-1 viruses; the guardian's path, `director_party_over`, is
+  the same), a crew of three or four, and a crewmate on a New 3DS or a
+  PSP in a real crew.
 
 - **Mystery Data found** (15 November 2026, `dive_finds.c`, `dive_traces.c`):
   a data MegaMan opens on a dive layer is told as DIVE found by its index
@@ -221,8 +283,10 @@ Verified on `dev`, 15 November 2026:
 
 - **Busting splits** (15 November 2026, `dive_splits.c`): a battle on a
   dive layer won is told as DIVE split: its index among the layer's
-  battles counted from 0 as the layer is entered (the n-th random battle
-  is the same for every diver; a guardian's battle is index 255 for
+  battles counted from 0 as the layer is entered (a crew's battle fought
+  on the party's core counted too; the n-th random battle is each diver's
+  own roll, the same only for a crew's, What it rests on above; a
+  guardian's battle is index 255 for
   everyone, since each diver meets him after his own count of random
   ones), its time in tenths from BN6's DeleteTime (`BN6_BATTLE_TIMER`, 60
   frames a second), BN6's Busting Level as the battle ends
@@ -356,8 +420,8 @@ Verified on `dev`, 15 November 2026:
   system but the New 3DS and the PSP stops saying `hello_no_arena`, so the
   server seats them on one field; `dive_party.c` hands a START of format
   `arena_party` to the party's core and a seat gone to it, and fights
-  `arena_linked` as before. Not yet: a crew's join-in battles on one
-  field (the partners' own chips, below).
+  `arena_linked` as before; a crew's join-in battles take the same START
+  to the party's core (Join-in battles, above).
 - **Who the enemies aim at** (15 November 2026, `party_field.c`'s
   `party_field_aim`): a probe first, side 0's first two slots of
   `BN6_BATTLE_PLAYERS` swapped at iteration 300 against BlastMan: his
@@ -464,10 +528,13 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
 
 ## Open before it is built
 
-1. **The join window.** The two-a-side hook trades the battle's list at
-   its spawn (`BN6_SPAWN_ENTITIES`), so a MegaMan cannot be added to a
-   battle already begun. The offer likely has to come as the encounter
-   starts, the owner's battle waiting a moment for the answer.
+1. **The join window.** Built (Join-in battles, above): the two-a-side
+   hook trades the battle's list at its spawn (`BN6_SPAWN_ENTITIES`), so a
+   MegaMan cannot be added to a battle already begun, and the offer comes
+   as the encounter starts, BN6's roll held while the server's window
+   (`ONLINE_CREW_JOIN_MS`) waits for the answers. Open: how the window
+   feels to the owner (three seconds of MegaMan held still), for the
+   owner's eye.
 2. **One field against a guardian.** Built (As built, above), the
    guardian's aim passed over the party in turn, each partner his own
    NaviStats, hand and Custom screen. Open: the turn's length, a partner's
