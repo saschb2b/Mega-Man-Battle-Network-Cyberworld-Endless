@@ -90,6 +90,7 @@ Taken per area as looked at, as every laying rule is
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
 | BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
+| Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
 | every other area | nothing | - |
@@ -526,6 +527,49 @@ Left as they are:
   piece), the robot's door and its striped conveyor (a set piece), its
   pads' centrepieces and exit arrows (issue #505's kind 4).
 
+## Mr. Weather Comp's clouds (`decor_learn_floating`; verified on the maps)
+
+Mr. Weather Comp's four maps (0x83:0 to 2 and 0x85:2) set big white
+clouds over its field and round it: squares 20 by 10 and 28 by 14 tiles,
+a puff 12 by 7, and long ones bent like walkways, up to 104 tiles across,
+some ending in a yellow-rimmed pad. They lie on the maps' second tile
+layer (the two layers drawn apart: the field, its belts and its fans on
+the first; the clouds, their pads, the escalator and a console on the
+second), and most of them are no scenery but floor: the maps' heights
+(section 1 of the coordinate data) put them at 64, and their walls
+(section 0) ring them there, 1,114 wall cells at that height in Comp 1
+and 1,612 in Comp 2 against the field's 394 and 404. Measured cloud by
+cloud in the view of that height, 45 to 68% of a walkable cloud's pixels
+lie on its floor's top. They are raised floor of another kind, reached by
+the escalator (a conveyor) and the yellow pads, which issue #505 listed
+as scenery: none is set, as floor of another kind is the layouts' matter
+(issue #505's kinds 3 to 5, the owner's calls).
+
+The rest float over the field, drawn over its floor with no height and
+no walls of their own: the puff (the same tiles in Comp 2, Comp 3 and
+0x85:2) and 0x85:2's two squares (145 and 148 tiles). Two clouds at 64
+with a yellow pad (Comp 1's 28 by 14, 0x85:2's 32 by 17) are walled at
+their pads alone. The scenery cut ([the generator](generator.md),
+`decor.c`) reads a map's first layer alone where its background lies in
+its own tiles (`bg_in_map`), and the side-piece cut asks for a group that
+hangs off a floor, so neither took a cloud. Where an area's background is
+its own tiles, the scenery cut now also reads its second layer
+(`decor_learn_floating`): a whole group of its tiles, joined eight ways,
+32 tiles a side at most and two panels' tops in pixels at least (2,048:
+what is smaller marks the floor), nine tenths or more of whose pixels lie
+over ground floor and at most 8 on the top of floor at any of the map's
+raised heights. That takes the puff and the two squares, and refuses every
+walkable cloud, each cloud with a pad (a warp's place, issue #505's kind
+4), the escalator (its top pad) and the console (most of it off the
+floor). Of the three other areas whose background is their own tiles,
+the Undernet's maps gave one group (Undernet 1's warp hole in its frame,
+on a crossing of four plates, 24 tiles) until the size was asked;
+Undernet Zero's and the Nest's give none. They are set as any scenery is: in the void beside a layer's
+floor, a tile clear of both layers' tiles and within three of the floor,
+4 to 10 a layer, rather than over its floor as their maps draw them,
+where they would cover the floor's art (a layer draws no clouds' shadows
+on its panels, which the maps' first layer does).
+
 ## What BN4's countries set round their floors (none set; measured on the map and the atlas)
 
 BN4's countries (their area's map 0x93:2, the one of the four looks it
@@ -688,10 +732,9 @@ on its layers. The centrepieces, the machine and the arrows are issue
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
   red fists (above), the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
-  lie on the first layer, beside or under the floor (probed on the maps),
-  and Mr. Weather's maps hold their background in the second, so its
-  pieces lie on the first too. (The Nest's were counted here as well; its
-  crystals lie on the second layer, below.) Scenery refuses a
+  lie on the first layer, beside or under the floor (probed on the maps).
+  (The Nest's and Mr. Weather's were counted here as well; theirs lie on
+  the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.

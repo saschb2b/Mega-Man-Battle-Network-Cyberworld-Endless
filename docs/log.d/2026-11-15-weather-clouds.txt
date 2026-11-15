@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:30:00Z
+* **Update**: world/level-design/side-pieces.md (Mr. Weather Comp's clouds measured: most are walkable floor at height 64, walled there, reached by the escalator and the yellow pads, and none is set; its low clouds over the field, on no floor of their own, are scenery cut from the second layer of a map whose background is its own tiles, `decor_learn_floating`, and set in the void beside a layer's floor; its row in the areas' table; the first layer's pieces corrected).
