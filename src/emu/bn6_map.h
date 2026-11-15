@@ -45,6 +45,7 @@
  * world cells, ascending) and a u16 offset, then n shapes of 4 bytes (z,
  * value, height, type; src/map/coords.c). A wall whose value has bit 7 set
  * is skipped while event 0x1640 + (value & 0x7F) is set */
+#define BN6_LOAD_BG_ANIM_DATA 0x080304E8u /* bn6f LoadBGAnimData, r0 a BGAnimData record: a net map's backdrop on BG3, its tiles, 32x32 map and palette into bank 0 (docs/rom/graphics.md) */
 #define BN6_MAP_COORDS        0x02027A00u
 #define BN6_COORD_ENTRIES     (BN6_MAP_COORDS + 4) /* the walls' section's entries, after its count */
 #define BN6_COORD_ENTRY       4           /* an entry's bytes, and a shape's */
