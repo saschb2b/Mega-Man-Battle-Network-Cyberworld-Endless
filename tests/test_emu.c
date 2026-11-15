@@ -370,6 +370,34 @@ static void save_queue_checks(void) {
 	CHECK(save_queue_file(a, filled(64, 10), 10), "a later write can recover");
 	save_queue_wait();
 	CHECK(save_write_failures() == before && file_is(a, 64, 10), "a successful group has no new failures");
+	/* a set held back (a quit mid-talk's, director_save.c): kept, not
+	 * written, till it is released or dropped */
+	save_queue_hold(true);
+	CHECK(save_queue_file(a, filled(70, 10), 10) && save_queue_holding() && !save_queue_held(), "a held file is taken, the set not whole yet");
+	save_queue_hold(false);
+	save_queue_wait();
+	CHECK(save_queue_held() && file_is(a, 64, 10), "a held file is not written");
+	save_queue_drop();
+	save_queue_release();
+	save_queue_wait();
+	CHECK(!save_queue_held() && file_is(a, 64, 10), "a dropped set writes nothing");
+	save_queue_hold(true);
+	save_queue_file(a, filled(71, 10), 10);
+	save_queue_hold(false);
+	save_queue_hold(true);   /* (a new set replaces the last) */
+	save_queue_file(a, filled(72, 10), 10);
+	save_queue_file(b, filled(73, 20), 20);
+	save_queue_hold(false);
+	save_queue_release();
+	save_queue_wait();
+	CHECK(!save_queue_held() && file_is(a, 72, 10) && file_is(b, 73, 20), "a released set writes the last set, each file whole");
+	save_queue_hold(true);
+	save_queue_file(a, filled(74, 10), 10);
+	save_queue_spoil();
+	save_queue_hold(false);
+	save_queue_release();
+	save_queue_wait();
+	CHECK(!save_queue_held() && file_is(a, 72, 10), "a spoilt set is dropped as the hold ends");
 	save_queue_quit();
 	remove(a);
 	remove(b);
