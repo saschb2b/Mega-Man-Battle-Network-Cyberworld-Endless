@@ -69,10 +69,6 @@ bool dive_link_begin(void) {
 	return true;
 }
 
-void dive_link_scene_left(void) {
-	if (L.starting) return;
-	dive_link_close();
-}
 
 bool dive_link_diving(void) { return weekly_on(); }
 
@@ -94,6 +90,14 @@ static void ended(void) {
 	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause()));
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
+}
+
+void dive_link_scene_left(void) {
+	if (L.starting) return;
+	/* (a deletion or a win ends the run and leaves the scene in one frame,
+	 * before dive_link_frame sees it: its end told here, or no mark is left) */
+	if (L.on && !weekly_on() && weekly_record()->pending) ended();
+	else dive_link_close();
 }
 
 /* the layer MegaMan stands on, its room entered as it changes */

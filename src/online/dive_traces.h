@@ -26,12 +26,16 @@ void dive_traces_room(DiveWay way);
 void dive_traces_mail(const DiveTraces *t);
 /* Each frame on the layer: the objects placed by MegaMan; A on one. */
 void dive_traces_frame(void);
+/* The keys on their way to the game, a dive under way: R on a layer's map
+ * opens the emote strip's phrases (emote_strip.h), A there leaving the one
+ * under its cursor on MegaMan's panel (DIVE phrase); the game held while
+ * it is up. */
+uint32_t dive_traces_keys(uint32_t keys);
+/* ... the strip drawn over the game while it is up. */
+void dive_traces_draw(void);
 /* The week's first finder of Mystery Data `index` ("" none known). */
 const char *dive_traces_finder(unsigned index);
 /* Whether another diver opened Mystery Data `index` this week. */
 bool dive_traces_opened(unsigned index);
-/* The layer's split records come in (DIVE_TRACES' splits): the quickest
- * bust of battle `index` at party size 1, 0 none. */
-unsigned dive_traces_best(unsigned index);
 
 #endif

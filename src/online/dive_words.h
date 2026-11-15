@@ -19,7 +19,7 @@ const char *dive_place_words(unsigned tenths, unsigned place, unsigned count, un
  * (`cause` its name, "" unknown); `won` a mark of the net cleared. */
 const char *dive_mark_words(const char *name, const char *cause, bool won);
 /* A phrase left on a panel: its boxes (who left it, the phrase, how many
- * waved), MegaMan's wave after them. */
-const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves);
+ * waved), MegaMan's wave after them where `wave`. */
+const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave);
 
 #endif

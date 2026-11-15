@@ -61,6 +61,11 @@ void dive_finds_frame(void) {
 		F.opened = opened_now();
 		F.known = true;
 		F.pending = -1;
+		for (int k = 0; k < director_md_count(); ++k) {
+			int x, y, z;
+			director_md_place(k, &x, &y, &z);
+			fprintf(stderr, "dive: Mystery Data %d at %d,%d,%d%s\n", k, x, y, z, director_md_opened(k) ? ", opened" : "");
+		}
 		return;
 	}
 	uint32_t now = opened_now(), fresh = now & ~F.opened;

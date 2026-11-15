@@ -11,11 +11,14 @@
 #include "claims.h"
 #include "data.h"
 #include "director.h"
+#include "dive_link.h"
 #include "dive_words.h"
+#include "emote_strip.h"
 #include "emu.h"
 #include "npc.h"
 #include "online_text.h"
 #include "online_transport.h"
+#include "online_visit.h"
 #include "platform.h"
 #include "puppet.h"
 #include "run.h"
@@ -36,8 +39,7 @@ static struct {
 	DiveMark marks[ONLINE_TRACES_MOST];
 	DivePhrase phrases[ONLINE_TRACES_MOST];
 	DiveFind finds[ONLINE_TRACES_MOST];
-	DiveSplit splits[ONLINE_TRACES_MOST];
-	int nmarks, nphrases, nfinds, nsplits;
+	int nmarks, nphrases, nfinds;
 	uint8_t opened[32];      /* a bit per Mystery Data index others opened */
 	uint32_t waved[ONLINE_TRACES_MOST];
 	int nwaved;
@@ -65,6 +67,7 @@ int dive_traces_more(NpcList *npcs, int room) {
 	}
 	O.seed = run.layer_seed;
 	O.depth = run.depth;
+	fprintf(stderr, "dive: traces' objects on this layer: %s%s\n", O.skull ? "marks" : "none", O.spark ? ", sparkles" : "");
 	return taken;
 }
 
@@ -103,12 +106,6 @@ static void find(const DiveFind *f) {
 	T.finds[slot(T.finds, &T.nfinds, sizeof T.finds[0])] = *f;
 }
 
-static void split(const DiveSplit *s) {
-	for (int k = 0; k < T.nsplits; ++k)
-		if (T.splits[k].index == s->index && T.splits[k].party == s->party) { T.splits[k] = *s; return; }
-	T.splits[slot(T.splits, &T.nsplits, sizeof T.splits[0])] = *s;
-}
-
 void dive_traces_mail(const DiveTraces *t) {
 	for (int k = 0; k < t->count; ++k) {
 		switch (t->kind) {
@@ -116,12 +113,12 @@ void dive_traces_mail(const DiveTraces *t) {
 		case ONLINE_TRACE_PHRASES: phrase(&t->u.phrases[k]); break;
 		case ONLINE_TRACE_FINDS: find(&t->u.finds[k]); break;
 		case ONLINE_TRACE_OPENED: T.opened[t->u.opened[k] >> 3] |= (uint8_t)(1u << (t->u.opened[k] & 7)); break;
-		case ONLINE_TRACE_SPLITS: split(&t->u.splits[k]); break;
 		case ONLINE_TRACE_GONE: gone(t->u.gone[k]); break;
 		default: break;
 		}
 	}
-	fprintf(stderr, "dive: traces of kind %u: %u (marks %d, phrases %d, finds %d, splits %d)\n", t->kind, t->count, T.nmarks, T.nphrases, T.nfinds, T.nsplits);
+	/* (a layer's split records come in DIVE_PLACE's answer: dive_splits.c) */
+	fprintf(stderr, "dive: traces of kind %u: %u (marks %d, phrases %d, finds %d)\n", t->kind, t->count, T.nmarks, T.nphrases, T.nfinds);
 }
 
 const char *dive_traces_finder(unsigned index) {
@@ -131,12 +128,6 @@ const char *dive_traces_finder(unsigned index) {
 }
 
 bool dive_traces_opened(unsigned index) { return index < 256 && (T.opened[index >> 3] >> (index & 7) & 1); }
-
-unsigned dive_traces_best(unsigned index) {
-	for (int k = 0; k < T.nsplits; ++k)
-		if (T.splits[k].index == index && T.splits[k].party == 1) return T.splits[k].tenths;
-	return 0;
-}
 
 /* ---- each frame: the nearest of each kind shown ---- */
 
@@ -202,8 +193,10 @@ static void mark_said(const DiveMark *m) {
 
 static void phrase_said(const DivePhrase *p) {
 	const char *words = p->phrase < ONLINE_PHRASE_COUNT ? online_phrases[p->phrase] : "...";
-	talk_start(dive_phrase_words(p->name, words, p->waves), FACE_MEGAMAN);
-	if (waved(p->id)) return;
+	/* (his own phrase read, not waved at) */
+	bool own = !strcmp(p->name, online_visit_name());
+	talk_start(dive_phrase_words(p->name, words, p->waves, !own), FACE_MEGAMAN);
+	if (own || waved(p->id)) return;
 	uint8_t m[ONLINE_DIVE_WAVE_BYTES];
 	size_t n = dive_wire_wave(m, p->id);
 	if (n && online_transport_send(m, n)) fprintf(stderr, "dive: waved at %s's phrase %u\n", p->name, p->id);
@@ -237,4 +230,36 @@ void dive_traces_frame(void) {
 	claims_begin(WRITER);
 	show(bn6_player_x(), bn6_player_y());
 	claims_end();
+}
+
+/* ---- a phrase left: the strip's phrases on R ---- */
+
+static bool strip_up;    /* opened here, till its keys are let go */
+
+static void leave(int phrase) {
+	uint8_t m[ONLINE_DIVE_PHRASE_BYTES];
+	int x = bn6_player_x(), y = bn6_player_y(), z = bn6_player_z();
+	size_t n = dive_wire_phrase(m, (unsigned)phrase, x, y, z);
+	if (n && online_transport_send(m, n)) fprintf(stderr, "dive: left phrase %d at %d,%d,%d\n", phrase, x, y, z);
+}
+
+uint32_t dive_traces_keys(uint32_t keys) {
+	bool here = dive_link_diving() && director_on_layer();
+	if (!here) {
+		if (strip_up) emote_strip_close();
+		strip_up = false;
+		return keys;
+	}
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	if (strip_up && emote_strip_update(&s)) return 0;
+	strip_up = false;
+	if (!btn_pressed(BTN_R) || !s.connected || !director_on_map() || talk_busy() || emu_read8(BN6_CHATBOX)) return keys;
+	emote_strip_open_phrases(leave);
+	strip_up = true;
+	return 0;
+}
+
+void dive_traces_draw(void) {
+	if (strip_up) emote_strip_draw();
 }

@@ -49,11 +49,11 @@ const char *dive_mark_words(const char *name, const char *cause, bool won) {
 	return s;
 }
 
-const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves) {
+const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave) {
 	static char s[160];
 	int n = snprintf(s, sizeof s, "%s left a message here.|\"%s\"", name, phrase);
 	if (waves == 1) n += snprintf(s + n, sizeof s - (size_t)n, "|One Navi waved back.");
 	else if (waves > 1) n += snprintf(s + n, sizeof s - (size_t)n, "|%u Navis waved back.", waves);
-	snprintf(s + n, sizeof s - (size_t)n, "|*wave*");
+	if (wave) snprintf(s + n, sizeof s - (size_t)n, "|*wave*");
 	return s;
 }
