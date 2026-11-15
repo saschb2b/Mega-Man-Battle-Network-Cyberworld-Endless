@@ -49,9 +49,18 @@ bool netmap_build_layer(int area, uint32_t seed);
  * layer's own area's), and that area's tile set and colours as VRAM takes
  * them; nothing written to the game. False where the area cannot draw it
  * (none learned, or 256-colour tiles). Free with netmap_look_free. */
-typedef struct { uint16_t *map; int tw, th; AreaVram gfx; } NetmapLook;
+typedef struct {
+	uint16_t *map;
+	int tw, th;
+	AreaVram gfx;
+	int scenery, sides;   /* the scenery and side pieces its pick set (netmap_scenery, netmap_sides) */
+	bool level;           /* its area cannot draw the layer's stairs: its raised floor and stairs drawn level with the ground */
+} NetmapLook;
 bool netmap_look(int area, NetmapLook *out);
 void netmap_look_free(NetmapLook *l);
+/* The side pieces the last pick set on the floor (beside it, under pads
+ * and behind floors not counted): the layer's, or a look's just made */
+int netmap_sides(void);
 /* (dev) The hue buckets of area `area`'s roads, the second look of walkway
  * found in its own map (a bit each, 0-11 and 12 grey); 0 where it has none. */
 unsigned netmap_road_hues(int area);

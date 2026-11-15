@@ -47,7 +47,7 @@ static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
 		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers }, { "lab", &dev.lab },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
-		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "tourney", &dev.tourney },
+		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
 		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
 		{ "feel", &dev.feel }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
@@ -90,6 +90,11 @@ void devtools_parse(const char *spec) {
 			dev.folder_n = *end == '/' ? atoi(end + 1) : 30;
 		}
 		else if (!strncmp(t, "souls=", 6)) souls_dev_mask = (uint8_t)strtoul(t + 6, NULL, 0);
+		/* (glitchlook=3+x0: BN6's Green Area, then BN5's first, as --net-biome
+		 * names them; another game's kept as -1 - N, glitch_look.c) */
+		else if (!strncmp(t, "glitchlook=", 11))
+			for (char *a = t + 11; *a && dev.glitch_looks < (int)(sizeof dev.glitch_look / sizeof *dev.glitch_look); a += strcspn(a, "+"), a += *a == '+')
+				dev.glitch_look[dev.glitch_looks++] = *a == 'x' ? -1 - atoi(a + 1) : atoi(a);
 		/* (kept past this call: copies of their own) */
 		else if (!strncmp(t, "online=", 7)) { static char url[200]; snprintf(url, sizeof url, "%s", t + 7); dev.online = url; }
 		else if (!strncmp(t, "onlinename=", 11)) { static char name[17]; snprintf(name, sizeof name, "%s", t + 11); dev.online_name = name; }

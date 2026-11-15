@@ -25,6 +25,10 @@ typedef struct {
 	bool tourney;   /* every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin (docs/game/tournament.md; run_debug_bracket) */
 	bool glitch;    /* every act's first layer from the second holds the Glitch warp (docs/game/glitch-layer.md; run_debug_glitch) */
 	int glitch_stage; /* glitchstage=N: a Glitch layer held at stage N - 1 (1-5), its glitches and battles; 0 the floor's */
+	int glitch_look[4]; /* glitchlook=AREA[+AREA...]: a Glitch layer's looks from these areas first (N a BN6 area, xN another game's,
+	                       as --net-biome names them, kept as -1 - N; docs/game/glitch-layer.md, Checking an area's look) */
+	int glitch_looks; /* ... how many */
+	bool glitch_hold; /* glitchhold: a Glitch layer's first look held on its floor, no other glitch over it (captures) */
 	bool route;     /* a special route found on the act before's dark layer (at home; on a layer, this act's): the next fork's third way (docs/game/liberation/) */
 	bool veteran;   /* a profile that has met seven guardians, found two Spins and beaten the rival (captures: the PET's mail) */
 	bool folders;   /* every starting folder open in the profile (captures: the setup's Folder row, each folder's first hand) */
