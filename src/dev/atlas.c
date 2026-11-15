@@ -193,9 +193,10 @@ static uint32_t *layer_drawn(int area, const uint16_t *tiles, int tw, int th) {
 /* (dev) CYBERWORLD_ATLAS_RUN=S: the run whose layer is drawn, of seed S
  * (0: one of the layer's own seed) */
 static uint32_t atlas_run_seed;
+static uint32_t run_seed(uint32_t layer_seed) { return atlas_run_seed ? atlas_run_seed : layer_seed; }
 
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
-	run_new(atlas_run_seed ? atlas_run_seed : seed);
+	run_new(run_seed(seed));
 	run.depth = depth;
 	run.biome = biome;
 	layout_forced = layout;

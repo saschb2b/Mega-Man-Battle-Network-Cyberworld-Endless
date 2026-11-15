@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Roads on the way"
-description: "Roads: in an area whose map has a second look of walkway, found as it is learned (BN4's Park Area's orange roads, its ACDC Area's cyan, its Town Area's yellow), the walkways of a layer's way from its arrival to its exit are drawn in it, the side paths in the area's walkways; a look alone, no rule of play (`mark_roads`, `TILE_ROAD`, `learn_roads`)."
+description: "Roads: in an area whose map has a second look of walkway, found as it is learned (BN4's Park Area's orange roads, its ACDC Area's cyan, its Town Area's yellow), the walkways of a layer's way from its arrival to its exit are drawn in it, the side paths in the area's walkways; a look alone, no rule of play (`nm_mark_roads`, `TILE_ROAD`, `learn_roads`)."
 tags: [world, level-design, tiles]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T20:30:00Z }
 sources:
@@ -94,7 +94,7 @@ platform floor and no road. A pad is no road either.
   `NetLayout.way`. The legalizer then changes cells, among them a lane of
   a way widened to two, so the map walks it again over the floor as it
   stands, between the same two ends, keeping to the generator's cells
-  where it can (`mark_roads`, `src/map/netmap.c`). It reads the layout
+  where it can (`nm_mark_roads`, `src/map/netmap_roads.c`). It reads the layout
   alone, so a layer is the same from its seed.
 - **The look** is learned from the area's own map a second time
   (`learn_roads`, `src/map/netmap_learn.c`): the roads' hues as its
@@ -115,7 +115,7 @@ platform floor and no road. A pad is no road either.
   (`stack_road`): its rim runs whole up to a room's edge, and a road of
   three panels between two squares draws whole.
 - **No scraps.** A run of road shorter than three panels is walkway
-  (`drop_short_roads`, `src/map/netmap.c`): what the way left between two
+  (`drop_short_runs`, `src/map/netmap_roads.c`): what the way left between two
   stretches of wider floor (a junction widened to a block, a room) was
   all ends, and drew as a block of the road's hue with no rim, in steps
   where it met the walkway (a player's layer, 15 November 2026). Tried
