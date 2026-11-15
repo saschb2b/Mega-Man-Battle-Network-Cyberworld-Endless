@@ -103,7 +103,8 @@ Two settings of its entry, measured each way:
 Every layer counts fewer breaks and nicks, and five of the six fewer
 seams (one 301 to 314). More tiles are picked one
 at a time from a nearby neighbourhood, since hubs and circuits are one
-floor now (11% to 16% of tiles over the six layers), so the area's rows
+floor now (10% to 14% of tiles on average over the six layers, 20% at
+most), so the area's rows
 in `tests/atlas_baseline.txt` were written again. The layouts are as they
 were: the cells and the coordinate data's hash are the same for every
 layer, and no seed makes anything else.
