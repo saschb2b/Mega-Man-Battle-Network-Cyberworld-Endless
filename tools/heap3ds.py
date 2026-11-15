@@ -187,7 +187,7 @@ def main():
     ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
     ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
     ap.add_argument('--refuse', default='', help='functions whose allocations are all refused, as FUNC,FUNC: what a refusal there does')
-    ap.add_argument('--dev', default='', help="more --dev switches for every run: glitch,glitchlook=15+x19 the Glitch layer on every act's first layer from the second, its flips from those areas (docs/game/glitch-layer.md)")
+    ap.add_argument('--dev', default='', help="more --dev switches for every run: glitch,side=4,glitchstage=5,glitchlook=15+5+6 each run started on a Glitch layer, its looks from those areas (docs/game/glitch-layer.md)")
     ap.add_argument('--shots', type=int, default=0, help="a picture every N frames, into each run's folder (64 at most), to set beside another run's")
     a = ap.parse_args()
     for case in ('bn6', 'bn5', 'bn4', 'all'):
