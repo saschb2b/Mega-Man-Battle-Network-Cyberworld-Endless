@@ -24,6 +24,7 @@ void talk_update(void);
 bool talk_busy(void);
 /* No talk begins while on (a quit running the game on to MegaMan free: director_settle.c) */
 void talk_refuse(bool on);
+bool talk_refused(void);
 /* Forgets a conversation under way (a new run, a new layer). */
 void talk_reset(void);
 

@@ -9,6 +9,7 @@
 #include "bn6.h"
 #include "cinema.h"
 #include "debug.h"
+#include "director_save.h"
 #include "emu.h"
 #include "flags.h"
 #include "gamecall.h"
@@ -27,6 +28,7 @@ static struct {
 static bool can_begin(void) { return !K.running && !K.refused && !emu_read8(BN6_CHATBOX); }
 
 void talk_refuse(bool on) { K.refused = on; }
+bool talk_refused(void) { return K.refused; }
 
 /* The player held for the talk as the game holds him for a dialogue no NPC
  * starts (bn6f owPlayer_lockPlayerForNonNPCDialogue_809E0B0 and its unlock):
@@ -39,6 +41,8 @@ static void hold(bool on) {
 }
 
 static void begin(uint32_t archive, int script) {
+	/* (the run as it stood before it, for a quit with it open) */
+	director_before_talk();
 	hold(true);
 	game_call(BN6_CHAT_RUN_SCRIPT, archive, (uint32_t)script);
 	cinema_input(CINEMA_TALK);
