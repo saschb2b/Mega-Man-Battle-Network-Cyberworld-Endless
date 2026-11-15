@@ -38,6 +38,8 @@ typedef struct {
 	bool over;         /* a side piece kept with the first layer's tiles under it (StairTile.e0, 0 where it held
 	                    * none), set only where a layer's are the same: the Nest's crystals over its rims' tabs and
 	                    * spikes (sides_learn_under) */
+	uint8_t hole[2];   /* what stands in a walled hole in the floor (hole_learn): the hole's panels along world X and Y
+	                    * from its own, the lowest; 0 none */
 	bool grows;        /* ... or what grows on a floor's edge (edges_learn): a tuft on its back rim, a planter at its wall's
 	                    * foot, its tiles the first layer's, its panel any free one of a layer's floor */
 	uint64_t onto;     /* (grows) its tiles (bit k: tiles[k], 48 at most) that hold the floor's own art too, set over the layer's */
@@ -68,6 +70,11 @@ void hangs_learn(const AreaSrc *r, SideBook *out);
  * the ones in front lie on the second layer (sides_learn). */
 void behind_learn(const AreaSrc *a, SideBook *out);
 
+/* The first piece map `a` sets in a walled hole in its floor, whole on its
+ * second layer, into `out` where it has none (BN5's End Area's pagoda): a
+ * landmark, its tiles, the panels it draws over and the map's layer
+ * priorities round it; its tiles and priorities its owner's to free. */
+void hole_learn(const AreaSrc *a, SidePiece *out);
 /* Adds what map `a` grows on its floor's edges, on its first layer in the
  * same tiles as the floor's own art: the Judge Tree's tufts of grass on
  * its walkways' back rims and the planters stacked at its walls' feet,

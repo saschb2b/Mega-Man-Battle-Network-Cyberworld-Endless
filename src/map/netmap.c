@@ -91,6 +91,8 @@ static void forget(Learned *L) {
 	decor_free(&L->decor);
 	for (int k = 0; k < L->sides.n; ++k) { free(L->sides.piece[k].tiles); free(L->sides.piece[k].prio); }
 	free(L->sides.piece);
+	free(L->hole.tiles);
+	free(L->hole.prio);
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
 		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };
@@ -837,6 +839,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
 	 * world +Y, grid y world -X) */
 	for (int g = 0; g < 4; ++g) kit->arrows |= (unsigned)learned[area].arrow[(g + 1) & 3].ok << g;
+	nm_kit_hole(&learned[area], kit);
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -938,6 +941,10 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
 		if (p->kind == PROP_EMBLEM) lock(locked, p->x, p->y, 1, 1, 1);   /* (its floor all round kept) */
+		else if (p->kind == PROP_HOLE) {   /* (its floor all round, and what the piece draws over) */
+			lock(locked, p->x, p->y, p->len, p->faces, 1);
+			for (int k = 0; k < learned[area].hole.nunder; ++k) lock(locked, p->x + learned[area].hole.under[k][1], p->y + p->faces - 1 - learned[area].hole.under[k][0], 1, 1, 0);
+		}
 		else if (p->faces == FACES_X) lock(locked, p->x - 1, p->y, 3, p->len, 1);
 		else lock(locked, p->x, p->y - 1, p->len, 3, 1);
 	}
