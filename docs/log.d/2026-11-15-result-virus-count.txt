@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T02:10:00Z
-* **Update**: game/meta/design.md (the run summary's closest goal a whole sentence, "Viruses deleted" counting a lost or fled battle's deleted viruses), code/director.md (`director_tally.c`).

@@ -229,36 +229,36 @@
    "line": 73
   },
   "battler_words:answers": {
-   "line": 20
+   "line": 21
   },
   "battler_words:card": {
    "comment": "The BtlrCard, BN6's own: its key item and the flags BN6's HeelNavi sets as he sells it (the card, Mettaur's and Gunner's data), and his rules",
    "line": 50
   },
   "battler_words:offer": {
-   "comment": "The pair, the stake and the question, then the stake taken, into the script under way: the box opened (`first`), and the pot's rule in a line where the card's chat has not said it all",
-   "line": 37
+   "comment": "The pair after `lead` (its boxes, or its line in the pair's box), the stake and the question, then the stake taken, into the script under way: the box opened (`first`)",
+   "line": 38
   },
   "battler_words:pot": {
    "comment": "The pot given, as BN6 gives zenny",
-   "line": 86
+   "line": 96
   },
   "battler_words:series_won": {
    "comment": "The series won: the pot, and a first win's prize",
-   "line": 120
+   "line": 130
   },
   "battler_words:ta_battler": {
    "line": 67
   },
   "battler_words:ta_battler_after": {
-   "line": 143
+   "line": 153
   },
   "battler_words:won": {
    "comment": "A win short of the series' end: the pot, the next pair, and the choice",
-   "line": 94
+   "line": 104
   },
   "battler_words:won.labels": {
-   "line": 112
+   "line": 122
   },
   "board_words:bug_pay_words": {
    "comment": "A battle won with bugs on the board paid `frags` BugFrags (docs/game/ navicust.md, 3): said the first time a session, what MegaMan sees",
@@ -1046,6 +1046,10 @@
    "comment": "(in the folders' order, FOLDER_STANDARD first)",
    "line": 10
   },
+  "meta_text:meta_goal_words": {
+   "header": "Goal `goal`'s sentence, made into `buf` (n bytes): `arg` the folder (GOAL_FOLDER) or the threat to win on (GOAL_THREAT), else unread.",
+   "line": 21
+  },
   "navicust_words:abouts": {
    "comment": "What each program of the pool does, in MegaMan's words, its name first (navicust.c's POOL)",
    "line": 12
@@ -1100,7 +1104,7 @@
   },
   "nets_words:old_net_words": {
    "comment": "After a CONTINUE without BN5's ROM (docs/multirom/one-net.md, One net: the design, call 4): the run's folder holding chips of BN5's, they sit out of battles until it is back; the run holding Souls, they sleep till then. MegaMan says so, on the map, once.",
-   "line": 108
+   "line": 122
   },
   "nets_words:visitor_words": {
    "comment": "MegaMan on the first family of another net a profile met: one of the older Net's (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's (docs/multirom/one-net.md, One net: the telegraph), named by its family",
@@ -2244,10 +2248,10 @@
    "stem": "extras_text"
   },
   "src/core/meta_text.c": {
-   "comment": "meta_text.h. Menu words, short and plain: a folder's style and its cost in a line, as KeyItem's box says what an item is, and its milestone as the summary's goal line says it (\"Delete an Aqua guardian: Storm\", 32 letters at most with the name).",
+   "comment": "meta_text.h. Menu words, short and plain: a folder's style and its cost in a line, as KeyItem's box says what an item is, and its milestone as the setup's shut folders list it (\"Storm: delete an Aqua guardian\"); the summary's closest goal, a sentence of three lines at most.",
    "domain": "Title",
    "kind": "screen",
-   "lines": 11,
+   "lines": 15,
    "shows": [],
    "speaker": "Screen",
    "stem": "meta_text"
@@ -2403,7 +2407,7 @@
    "comment": "MegaMan and Lan where the nets meet (docs/multirom/one-net.md: the telegraph; docs/voice/rules.md): an older net's area fought our way, the first visitor of the other net, the deep's both nets; and, a run continued without BN5's ROM, the chips and Souls of BN5's that wait for it.",
    "domain": "Where the nets meet",
    "kind": "speech",
-   "lines": 10,
+   "lines": 13,
    "shows": [
     "screenshots/bn5-visitor.png"
    ],
@@ -2484,10 +2488,10 @@
    "stem": "pick_text"
   },
   "src/layer/battler_words.c": {
-   "comment": "A Virus Battler Mr.Prog's words (battler_words.h): BN6's minigame in his voice, ALL CAPITALS (docs/voice/rules.md, Mr.Prog). His rules are said once a profile, with the BtlrCard; after that he names the pair and the price.",
+   "comment": "A Virus Battler Mr.Prog's words (battler_words.h): BN6's minigame in his voice, ALL CAPITALS (docs/voice/rules.md, Mr.Prog). His rules are said once a profile, with the BtlrCard; after that he names the pair and the price, and a later talk on his layer is the pair and the question.",
    "domain": "Other",
    "kind": "speech",
-   "lines": 19,
+   "lines": 21,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "battler_words"
@@ -2921,7 +2925,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2373,
+  "boxes": 2384,
   "domains": {
    "Arena": {
     "files": [
@@ -3078,9 +3082,9 @@
      "src/online/emote_strip_text.c",
      "src/update/update_text.c"
     ],
-    "flagged": 27,
-    "lines": 331,
-    "speech": 307
+    "flagged": 28,
+    "lines": 333,
+    "speech": 309
    },
    "Powers": {
     "files": [
@@ -3181,7 +3185,7 @@
      "src/scenes/title_summary_text.c"
     ],
     "flagged": 0,
-    "lines": 50,
+    "lines": 54,
     "speech": 7
    },
    "Trade Central": {
@@ -3198,18 +3202,18 @@
      "src/director/nets_words.c"
     ],
     "flagged": 0,
-    "lines": 10,
-    "speech": 10
+    "lines": 13,
+    "speech": 13
    }
   },
-  "flagged": 138,
+  "flagged": 139,
   "flags": {
    "beats": 3,
    "box-words": 9,
    "button": 5,
    "colon": 48,
    "comma-space": 7,
-   "line-long": 14,
+   "line-long": 15,
    "long-speech": 47,
    "meta": 6,
    "pages": 22,
@@ -3262,11 +3266,11 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 80,
-    "dots_per_box": 0.19,
-    "end_ask": 0.17,
-    "end_bang": 0.7,
-    "end_dots": 0.06,
+    "boxes": 83,
+    "dots_per_box": 0.2,
+    "end_ask": 0.18,
+    "end_bang": 0.67,
+    "end_dots": 0.08,
     "openers": [
      "Then",
      "The",
@@ -3275,13 +3279,13 @@
      "*gulp*",
      "Battle"
     ],
-    "stutters": "1 box in 40",
-    "words_per_box": 5.6
+    "stutters": "1 box in 42",
+    "words_per_box": 5.5
    },
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 849,
+    "boxes": 857,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3294,7 +3298,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 142",
+    "stutters": "1 box in 143",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3309,8 +3313,8 @@
      "THE",
      "A",
      "HMM",
-     "NET",
      "OH",
+     "NET",
      "ONE"
     ],
     "stutters": "never",
@@ -3336,7 +3340,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 2163,
+  "lines": 2172,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3560,11 +3564,11 @@
    "Lan": {
     "bangs_per_box": 0.01,
     "bn6": "Lan",
-    "boxes": 80,
-    "dots_per_box": 0.19,
-    "end_ask": 0.17,
-    "end_bang": 0.7,
-    "end_dots": 0.06,
+    "boxes": 83,
+    "dots_per_box": 0.2,
+    "end_ask": 0.18,
+    "end_bang": 0.67,
+    "end_dots": 0.08,
     "openers": [
      "Then",
      "The",
@@ -3573,13 +3577,13 @@
      "*gulp*",
      "Battle"
     ],
-    "stutters": "1 box in 40",
-    "words_per_box": 5.6
+    "stutters": "1 box in 42",
+    "words_per_box": 5.5
    },
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 849,
+    "boxes": 857,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3592,7 +3596,7 @@
      "He",
      "Let's"
     ],
-    "stutters": "1 box in 142",
+    "stutters": "1 box in 143",
     "words_per_box": 5.8
    },
    "Mr.Prog": {
@@ -3607,8 +3611,8 @@
      "THE",
      "A",
      "HMM",
-     "NET",
      "OH",
+     "NET",
      "ONE"
     ],
     "stutters": "never",
@@ -3792,7 +3796,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1513
+  "speech": 1518
  },
  "version": 1,
  "conversations": [
@@ -3801,6 +3805,7 @@
   {"container":"title_setup_text:setup_word","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_word","line":43,"lines":["title_setup_text:setup_word:0"],"speakers":["Screen"],"title":"Setup word","when":""},
   {"container":"title_setup_text:setup_cross_note","domain":"Title","file":"src/scenes/title_setup_text.c","id":"title_setup_text:setup_cross_note","line":50,"lines":["title_setup_text:setup_cross_note:0","title_setup_text:setup_cross_note:1"],"speakers":["Screen"],"title":"The Cross row's note for a Cross with its `strong` power and `weak` element","when":"(its costs said: BN6's own weakness, which a playtester was told wrong; and \"break it\": a playtester knew it from BN6, a newer player would not)"},
   {"container":"meta_text:folders","domain":"Title","file":"src/core/meta_text.c","id":"meta_text:folders","line":11,"lines":["meta_text:folders:0.1","meta_text:folders:1.1","meta_text:folders:1.2","meta_text:folders:2.1","meta_text:folders:2.2","meta_text:folders:3.1","meta_text:folders:3.2","meta_text:folders:4.1","meta_text:folders:4.2","meta_text:folders:5.1","meta_text:folders:5.2"],"speakers":["Screen"],"title":"Folders","when":"(in the folders' order, FOLDER_STANDARD first)"},
+  {"container":"meta_text:meta_goal_words","domain":"Title","file":"src/core/meta_text.c","id":"meta_text:meta_goal_words","line":24,"lines":["meta_text:meta_goal_words:caseGOAL_ENDLESS.0","meta_text:meta_goal_words:caseGOAL_CROSS.0","meta_text:meta_goal_words:caseGOAL_THREAT.0","meta_text:meta_goal_words:caseGOAL_FOLDER.0"],"speakers":["Screen"],"title":"Goal `goal`'s sentence, made into `buf`","when":"Goal `goal`'s sentence, made into `buf` (n bytes): `arg` the folder (GOAL_FOLDER) or the threat to win on (GOAL_THREAT), else unread."},
   {"container":"title_summary_text:words","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:words","line":13,"lines":["title_summary_text:words:4","title_summary_text:words:5","title_summary_text:words:7","title_summary_text:words:8","title_summary_text:words:11"],"speakers":["Screen"],"title":"Words","when":"(in SummaryText's order, its name beside each)"},
   {"container":"title_summary_text:summary_text","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_text","line":24,"lines":["title_summary_text:summary_text:0"],"speakers":["Screen"],"title":"Summary text","when":""},
   {"container":"title_summary_text:summary_layer","domain":"Title","file":"src/scenes/title_summary_text.c","id":"title_summary_text:summary_layer","line":29,"lines":["title_summary_text:summary_layer:0"],"speakers":["Screen"],"title":"A layer, as the rows give it","when":"a layer, as the rows give it: \"Layer 5\""},
@@ -4034,8 +4039,8 @@
   {"container":"powers_words:powers_beast_words","domain":"Powers","file":"src/director/powers_words.c","id":"powers_words:powers_beast_words","line":46,"lines":["powers_words:powers_beast_words:0"],"speakers":["Dad","MegaMan","Narration"],"title":"Dad's word, said on in his call after the Cybeast's fall","when":"Dad's word, said on in his call after the Cybeast's fall (story_words.c): beat the beast, then its power (issue #109)"},
   {"container":"lesson_words:port_words","domain":"Lessons","file":"src/director/lesson_words.c","id":"lesson_words:port_words","line":17,"lines":["lesson_words:port_words:0","lesson_words:port_words:1","lesson_words:port_words:2","lesson_words:port_words:3","lesson_words:port_words:4","lesson_words:port_words:5","lesson_words:port_words:6","lesson_words:port_words:7"],"speakers":["MegaMan"],"title":"MegaMan's word on R pressed in the town away from the port","when":"MegaMan's word on R pressed in the town away from the port: almost at a jack-in cell (`way` the way to it), close to the port (`way` the walk's), or nowhere near it"},
   {"container":"nets_words:nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","id":"nets_words:nets_arrival_words","line":48,"lines":["nets_words:nets_arrival_words:0","nets_words:nets_arrival_words:1","nets_words:nets_arrival_words:2","nets_words:nets_arrival_words:3","nets_words:nets_arrival_words:4","nets_words:nets_arrival_words:5"],"speakers":["MegaMan","Lan"],"title":"Where the nets meet, the first time a profile comes there, after the arrival's own words","when":"Where the nets meet, the first time a profile comes there, after the arrival's own words: an older net's area whose battles are ours (a profile once told its battles ran the old way, on the guest core that has left runs, hears that its Cross and its Navis are ours now), and the deep, where both nets' viruses come; the Cross named only in a run that holds one"},
-  {"container":"nets_words:visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","id":"nets_words:visitor_words","line":86,"lines":["nets_words:visitor_words:0","nets_words:visitor_words:1"],"speakers":["MegaMan","Lan"],"title":"MegaMan on the first family of another net a profile met","when":"MegaMan on the first family of another net a profile met: one of the older Net's (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's (docs/multirom/one-net.md, One net: the telegraph), named by its family"},
-  {"container":"nets_words:old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","id":"nets_words:old_net_words","line":113,"lines":["nets_words:old_net_words:0","nets_words:old_net_words:1"],"speakers":["MegaMan","Lan"],"title":"After a CONTINUE without BN5's ROM","when":"After a CONTINUE without BN5's ROM (docs/multirom/one-net.md, One net: the design, call 4): the run's folder holding chips of BN5's, they sit out of battles until it is back; the run holding Souls, they sleep till then. MegaMan says so, on the map, once."},
+  {"container":"nets_words:visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","id":"nets_words:visitor_words","line":92,"lines":["nets_words:visitor_words:0","nets_words:visitor_words:1","nets_words:visitor_words:2","nets_words:visitor_words:3","nets_words:visitor_words:4"],"speakers":["MegaMan","Lan"],"title":"MegaMan on the first family of another net a profile met","when":"MegaMan on the first family of another net a profile met: one of the older Net's (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's (docs/multirom/one-net.md, One net: the telegraph), named by its family"},
+  {"container":"nets_words:old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","id":"nets_words:old_net_words","line":127,"lines":["nets_words:old_net_words:0","nets_words:old_net_words:1"],"speakers":["MegaMan","Lan"],"title":"After a CONTINUE without BN5's ROM","when":"After a CONTINUE without BN5's ROM (docs/multirom/one-net.md, One net: the design, call 4): the run's folder holding chips of BN5's, they sit out of battles until it is back; the run holding Souls, they sleep till then. MegaMan says so, on the map, once."},
   {"container":"pet_text:codes_known","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:codes_known","line":139,"lines":["pet_text:codes_known:0","pet_text:codes_known:1","pet_text:codes_known:2","pet_text:codes_known:3"],"speakers":["Screen"],"title":"The guardians whose code MegaMan has","when":"The guardians whose code MegaMan has (deleted GATE_CODE times, in any runs): how many, and into `text` (NULL: none) what the NaviCode says of them, two by name at most (three lines of twenty letters: four names pushed the end off the box)."},
   {"container":"pet_text:install_descriptions","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_descriptions","line":158,"lines":["pet_text:install_descriptions:0","pet_text:install_descriptions:1","pet_text:install_descriptions:2","pet_text:install_descriptions:3","pet_text:install_descriptions:4","pet_text:install_descriptions:5"],"speakers":["Screen"],"title":"Install descriptions","when":""},
   {"container":"pet_text:cross_words","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:cross_words","line":274,"lines":["pet_text:cross_words:0","pet_text:cross_words:1","pet_text:cross_words:2"],"speakers":["Dad"],"title":"The Cross the run brought, after its folder","when":"The Cross the run brought, after its folder (\" and HeatCross (fire chips +50...; Aqua attacks do 2x to it).\", or \".\"), with what it does to a Navi where that differs"},
@@ -4325,15 +4330,15 @@
   {"container":"liberation_pick_text:lib_pick_word","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_word","line":21,"lines":["liberation_pick_text:lib_pick_word:0"],"speakers":["Screen"],"title":"Lib pick word","when":""},
   {"container":"liberation_pick_text:lib_pick_hp","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_hp","line":31,"lines":["liberation_pick_text:lib_pick_hp:0"],"speakers":["Screen"],"title":"The Navi's HP","when":"The Navi's HP (\"HP 350\")"},
   {"container":"liberation_pick_text:lib_pick_command_note","domain":"Other","file":"src/director/liberation_pick_text.c","id":"liberation_pick_text:lib_pick_command_note","line":37,"lines":["liberation_pick_text:lib_pick_command_note:caseLIB_DO_NONE.0","liberation_pick_text:lib_pick_command_note:caseLIB_DO_BOMB.0","liberation_pick_text:lib_pick_command_note:casedefault.0"],"speakers":["Screen"],"title":"What command `command`","when":"What command `command` (liberation_board.h's LIB_DO_*) costs, in small capitals for its tag: a battle, none, or always on"},
-  {"container":"battler_words:answers","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:answers","line":22,"lines":["battler_words:answers:0","battler_words:answers:1","battler_words:answers:2"],"speakers":["Mr.Prog"],"title":"Answers","when":""},
-  {"container":"battler_words:offer","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:offer","line":39,"lines":["battler_words:offer:0","battler_words:offer:1","battler_words:offer:2"],"speakers":["Mr.Prog"],"title":"The pair, the stake and the question, then the stake taken, into the script under way","when":"The pair, the stake and the question, then the stake taken, into the script under way: the box opened (`first`), and the pot's rule in a line where the card's chat has not said it all"},
+  {"container":"battler_words:answers","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:answers","line":23,"lines":["battler_words:answers:0","battler_words:answers:1","battler_words:answers:2"],"speakers":["Mr.Prog"],"title":"Answers","when":""},
+  {"container":"battler_words:offer","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:offer","line":40,"lines":["battler_words:offer:0","battler_words:offer:1"],"speakers":["Mr.Prog"],"title":"The pair after `lead`","when":"The pair after `lead` (its boxes, or its line in the pair's box), the stake and the question, then the stake taken, into the script under way: the box opened (`first`)"},
   {"container":"battler_words:card","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:card","line":52,"lines":["battler_words:card:0","battler_words:card:1"],"speakers":["Mr.Prog","MegaMan","Lan"],"title":"The BtlrCard, BN6's own","when":"The BtlrCard, BN6's own: its key item and the flags BN6's HeelNavi sets as he sells it (the card, Mettaur's and Gunner's data), and his rules"},
-  {"container":"battler_words:ta_battler","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler","line":68,"lines":["battler_words:ta_battler:0"],"speakers":["Mr.Prog"],"title":"Battler","when":""},
-  {"container":"battler_words:pot","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:pot","line":89,"lines":["battler_words:pot:0"],"speakers":["MegaMan"],"title":"The pot given, as BN6 gives zenny","when":"The pot given, as BN6 gives zenny"},
-  {"container":"battler_words:won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won","line":100,"lines":["battler_words:won:0","battler_words:won:1","battler_words:won:2"],"speakers":["Mr.Prog"],"title":"A win short of the series' end","when":"A win short of the series' end: the pot, the next pair, and the choice"},
-  {"container":"battler_words:won.labels","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won.labels","line":112,"lines":["battler_words:won.labels:0","battler_words:won.labels:1"],"speakers":["MegaMan"],"title":"Won: labels","when":""},
-  {"container":"battler_words:series_won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:series_won","line":123,"lines":["battler_words:series_won:0","battler_words:series_won:1"],"speakers":["Mr.Prog"],"title":"The series won","when":"The series won: the pot, and a first win's prize"},
-  {"container":"battler_words:ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler_after","line":148,"lines":["battler_words:ta_battler_after:0","battler_words:ta_battler_after:1"],"speakers":["Mr.Prog"],"title":"Battler after","when":""},
+  {"container":"battler_words:ta_battler","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler","line":69,"lines":["battler_words:ta_battler:0","battler_words:ta_battler:1","battler_words:ta_battler:2","battler_words:ta_battler:3"],"speakers":["Mr.Prog"],"title":"Battler","when":""},
+  {"container":"battler_words:pot","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:pot","line":99,"lines":["battler_words:pot:0"],"speakers":["MegaMan"],"title":"The pot given, as BN6 gives zenny","when":"The pot given, as BN6 gives zenny"},
+  {"container":"battler_words:won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won","line":110,"lines":["battler_words:won:0","battler_words:won:1","battler_words:won:2"],"speakers":["Mr.Prog"],"title":"A win short of the series' end","when":"A win short of the series' end: the pot, the next pair, and the choice"},
+  {"container":"battler_words:won.labels","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won.labels","line":122,"lines":["battler_words:won.labels:0","battler_words:won.labels:1"],"speakers":["MegaMan"],"title":"Won: labels","when":""},
+  {"container":"battler_words:series_won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:series_won","line":133,"lines":["battler_words:series_won:0","battler_words:series_won:1"],"speakers":["Mr.Prog"],"title":"The series won","when":"The series won: the pot, and a first win's prize"},
+  {"container":"battler_words:ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler_after","line":158,"lines":["battler_words:ta_battler_after:0","battler_words:ta_battler_after:1"],"speakers":["Mr.Prog"],"title":"Battler after","when":""},
   {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":7,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"The keys' hints","when":"the keys' hints: the favourites' box's, the palette's"},
   {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":8,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
   {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":9,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
@@ -4652,9 +4657,13 @@
   {"boxes":[{"pages":[["Cannons in A, B and","C for GigaCan1."],["Little hits behind","cover"]],"speaker":"Screen","text":"Cannons in A, B and C for GigaCan1. Little hits behind cover"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:3.1","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"Cannons in A, B and C for GigaCan1. Little hits behind cover","text_hash":"c88863c60fea"},
   {"boxes":[{"pages":[["use a Program","Advance"]],"speaker":"Screen","text":"use a Program Advance"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:3.2","kind":"screen","line":14,"speaker":"Screen","speakers":["Screen"],"text":"use a Program Advance","text_hash":"3b18c7cfcc6b"},
   {"boxes":[{"pages":[["Heavy hitters in L","and R. No Recovery","chips"]],"speaker":"Screen","text":"Heavy hitters in L and R. No Recovery chips"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:4.1","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"Heavy hitters in L and R. No Recovery chips","text_hash":"27274d3852ce"},
-  {"boxes":[{"pages":[["clear an act, no","Recov"]],"speaker":"Screen","text":"clear an act, no Recov"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:4.2","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"clear an act, no Recov","text_hash":"52805ef52049"},
+  {"boxes":[{"pages":[["clear an act with no","Recov"]],"speaker":"Screen","text":"clear an act with no Recov"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:4.2","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"clear an act with no Recov","text_hash":"2588137ac884"},
   {"boxes":[{"pages":[["Seven kinds in B or","*: whole hands,","little else"]],"speaker":"Screen","text":"Seven kinds in B or *: whole hands, little else"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:folders:5.1","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"Seven kinds in B or *: whole hands, little else","text_hash":"6bde526b79be"},
   {"boxes":[{"pages":[["reach layer 10"]],"speaker":"Screen","text":"reach layer 10"}],"container":"folders","domain":"Title","file":"src/core/meta_text.c","flags":[],"fragment":true,"id":"meta_text:folders:5.2","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"reach layer 10","text_hash":"65dac702bce6"},
+  {"boxes":[{"pages":[["Win a short net to","open the endless net"]],"speaker":"Screen","text":"Win a short net to open the endless net"}],"container":"meta_goal_words","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:meta_goal_words:caseGOAL_ENDLESS.0","kind":"screen","line":24,"speaker":"Screen","speakers":["Screen"],"text":"Win a short net to open the endless net","text_hash":"087bad9241e7"},
+  {"boxes":[{"pages":[["Delete a Cross Navi","to start in his","Cross"]],"speaker":"Screen","text":"Delete a Cross Navi to start in his Cross"}],"container":"meta_goal_words","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:meta_goal_words:caseGOAL_CROSS.0","kind":"screen","line":25,"speaker":"Screen","speakers":["Screen"],"text":"Delete a Cross Navi to start in his Cross","text_hash":"76b743931c4a"},
+  {"boxes":[{"pages":[["Win on threat {arg} to","open threat {arg}"]],"speaker":"Screen","text":"Win on threat {arg} to open threat {arg}"}],"container":"meta_goal_words","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:meta_goal_words:caseGOAL_THREAT.0","kind":"screen","line":26,"placeholders":[{"name":"arg","spec":"%d"},{"name":"arg","spec":"%d"}],"speaker":"Screen","speakers":["Screen"],"text":"Win on threat {arg} to open threat {arg}","text_hash":"06dd5a2d180e"},
+  {"boxes":[{"pages":[["{opens}{opens} to","open the {name}","folder"]],"speaker":"Screen","text":"{opens}{opens} to open the {name} folder"}],"container":"meta_goal_words","domain":"Title","file":"src/core/meta_text.c","flags":[],"id":"meta_text:meta_goal_words:caseGOAL_FOLDER.0","kind":"screen","line":30,"note":"(its milestone, as the setup lists it, made a sentence)","placeholders":[{"name":"opens","spec":"%c"},{"name":"opens","spec":"%s"},{"name":"name","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{opens}{opens} to open the {name} folder","text_hash":"76a2ce44b34c"},
   {"boxes":[{"pages":[["Which buttons and","keys are A, B, L, R,","START and SELECT"]],"speaker":"Screen","text":"Which buttons and keys are A, B, L, R, START and SELECT"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:2","kind":"screen","line":11,"speaker":"Screen","speakers":["Screen"],"text":"Which buttons and keys are A, B, L, R, START and SELECT","text_hash":"27046bd21805"},
   {"boxes":[{"pages":[["As a GBA plays it:","BN6's own mix, crisp","and bright"]],"speaker":"Screen","text":"As a GBA plays it: BN6's own mix, crisp and bright"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:6","kind":"screen","line":15,"speaker":"Screen","speakers":["Screen"],"text":"As a GBA plays it: BN6's own mix, crisp and bright","text_hash":"87f8fd8f2c4a"},
   {"boxes":[{"pages":[["The Legacy","Collection's","balance: softer"],["highs, less deep","bass"]],"speaker":"Screen","text":"The Legacy Collection's balance: softer highs, less deep bass"}],"container":"words","domain":"Options","file":"src/core/options_text.c","flags":[],"id":"options_text:words:8","kind":"screen","line":17,"speaker":"Screen","speakers":["Screen"],"text":"The Legacy Collection's balance: softer highs, less deep bass","text_hash":"d404c7577cde"},
@@ -5167,10 +5176,13 @@
   {"boxes":[{"pages":[["But we fight them","our way. Cross and","all!"]],"speaker":"MegaMan","text":"But we fight them our way. Cross and all!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:3","kind":"speech","line":55,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M But we fight them our way. Cross and all!","text_hash":"f9a66bc6ab07"},
   {"boxes":[{"pages":[["But we fight them","our way!"]],"speaker":"MegaMan","text":"But we fight them our way!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:4","kind":"speech","line":55,"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M But we fight them our way!","text_hash":"e57fadde680e"},
   {"boxes":[{"pages":[["{k}Lan... The","two Nets run","together down here."]],"speaker":"MegaMan","text":"{k}Lan... The two Nets run together down here."},{"pages":[["The old viruses and","ours? Side by side?"]],"speaker":"Lan","text":"The old viruses and ours? Side by side?"},{"pages":[["Yeah. Anything could","come at us!"]],"speaker":"MegaMan","text":"Yeah. Anything could come at us!"}],"container":"nets_arrival_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:nets_arrival_words:5","kind":"speech","line":57,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|@M Yeah. Anything could come at us!","text_hash":"6fd339f4e6a4"},
-  {"boxes":[{"pages":[["Lan,that {name}","back there..."]],"speaker":"MegaMan","text":"Lan,that {name} back there..."},{"pages":[["It came from the","older Net!"]],"speaker":"MegaMan","text":"It came from the older Net!"},{"pages":[["The two Nets are","mixing!?"]],"speaker":"Lan","text":"The two Nets are mixing!?"},{"pages":[["Where they","meet,yeah. Stay","sharp!"]],"speaker":"MegaMan","text":"Where they meet,yeah. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:0","kind":"speech","line":86,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan,that {name} back there...|@M It came from the older Net!|@L The two Nets are mixing!?|@M Where they meet,yeah. Stay sharp!","text_hash":"b52d22c94cad"},
-  {"boxes":[{"pages":[["Huh? That {name}","was one of ours,Lan!"]],"speaker":"MegaMan","text":"Huh? That {name} was one of ours,Lan!"},{"pages":[["In the older Net!?"]],"speaker":"Lan","text":"In the older Net!?"},{"pages":[["The Nets meet here.","Stay sharp!"]],"speaker":"MegaMan","text":"The Nets meet here. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:1","kind":"speech","line":88,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Huh? That {name} was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!","text_hash":"b14a1ca94773"},
-  {"boxes":[{"pages":[["Huh? Some of our","chips came from the","older Net..."]],"speaker":"MegaMan","text":"Huh? Some of our chips came from the older Net..."},{"pages":[["And its cartridge","isn't here!"]],"speaker":"Lan","text":"And its cartridge isn't here!"},{"pages":[["Right. They'll sit","out until it's back!"]],"speaker":"MegaMan","text":"Right. They'll sit out until it's back!"}],"container":"old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:old_net_words:0","kind":"speech","line":113,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Huh? Some of our chips came from the older Net...|@L And its cartridge isn't here!|@M Right. They'll sit out until it's back!","text_hash":"143d68c42df1"},
-  {"boxes":[{"pages":[["{k}I can't feel","the old Souls,Lan..."]],"speaker":"MegaMan","text":"{k}I can't feel the old Souls,Lan..."},{"pages":[["Not till the older","Net's back."]],"speaker":"MegaMan","text":"Not till the older Net's back."}],"container":"old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:old_net_words:1","kind":"speech","line":116,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M I can't feel the old Souls,Lan...|@M Not till the older Net's back.","text_hash":"99823cc29555"},
+  {"boxes":[{"pages":[["Lan,that {name}","back there..."]],"speaker":"MegaMan","text":"Lan,that {name} back there..."},{"pages":[["It came from the","older Net!"]],"speaker":"MegaMan","text":"It came from the older Net!"},{"pages":[["Both Nets,like you","said..."]],"speaker":"Lan","text":"Both Nets,like you said..."},{"pages":[["Yeah. Stay sharp!"]],"speaker":"MegaMan","text":"Yeah. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:0","kind":"speech","line":92,"note":"(Lan's answer by where they stand: in the deep MegaMan has said both Nets run together; a layer wearing an older Net's area over battles of ours (BN4's areas, docs/multirom/bn4.md) looked old already, its viruses the news. A playtester in BN4's ACDC Area found \"mixing!?\" late there)","placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan,that {name} back there...|@M It came from the older Net!|@L Both Nets,like you said...|@M Yeah. Stay sharp!","text_hash":"25b4b1fe0536"},
+  {"boxes":[{"pages":[["Lan,that {name}","back there..."]],"speaker":"MegaMan","text":"Lan,that {name} back there..."},{"pages":[["It came from the","older Net!"]],"speaker":"MegaMan","text":"It came from the older Net!"},{"pages":[["Its old viruses","too!?"]],"speaker":"Lan","text":"Its old viruses too!?"},{"pages":[["Yeah. The Nets meet","here. Stay sharp!"]],"speaker":"MegaMan","text":"Yeah. The Nets meet here. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:1","kind":"speech","line":95,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan,that {name} back there...|@M It came from the older Net!|@L Its old viruses too!?|@M Yeah. The Nets meet here. Stay sharp!","text_hash":"ae75be0beaee"},
+  {"boxes":[{"pages":[["Lan,that {name}","back there..."]],"speaker":"MegaMan","text":"Lan,that {name} back there..."},{"pages":[["It came from the","older Net!"]],"speaker":"MegaMan","text":"It came from the older Net!"},{"pages":[["The two Nets are","mixing!?"]],"speaker":"Lan","text":"The two Nets are mixing!?"},{"pages":[["Where they","meet,yeah. Stay","sharp!"]],"speaker":"MegaMan","text":"Where they meet,yeah. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:2","kind":"speech","line":98,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Lan,that {name} back there...|@M It came from the older Net!|@L The two Nets are mixing!?|@M Where they meet,yeah. Stay sharp!","text_hash":"b52d22c94cad"},
+  {"boxes":[{"pages":[["Huh? That {name}","was one of ours,Lan!"]],"speaker":"MegaMan","text":"Huh? That {name} was one of ours,Lan!"},{"pages":[["Both Nets,like you","said..."]],"speaker":"Lan","text":"Both Nets,like you said..."},{"pages":[["Yeah. Stay sharp!"]],"speaker":"MegaMan","text":"Yeah. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:3","kind":"speech","line":101,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Huh? That {name} was one of ours,Lan!|@L Both Nets,like you said...|@M Yeah. Stay sharp!","text_hash":"a6ea2bece8db"},
+  {"boxes":[{"pages":[["Huh? That {name}","was one of ours,Lan!"]],"speaker":"MegaMan","text":"Huh? That {name} was one of ours,Lan!"},{"pages":[["In the older Net!?"]],"speaker":"Lan","text":"In the older Net!?"},{"pages":[["The Nets meet here.","Stay sharp!"]],"speaker":"MegaMan","text":"The Nets meet here. Stay sharp!"}],"container":"visitor_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:visitor_words:4","kind":"speech","line":102,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Huh? That {name} was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!","text_hash":"b14a1ca94773"},
+  {"boxes":[{"pages":[["Huh? Some of our","chips came from the","older Net..."]],"speaker":"MegaMan","text":"Huh? Some of our chips came from the older Net..."},{"pages":[["And its cartridge","isn't here!"]],"speaker":"Lan","text":"And its cartridge isn't here!"},{"pages":[["Right. They'll sit","out until it's back!"]],"speaker":"MegaMan","text":"Right. They'll sit out until it's back!"}],"container":"old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:old_net_words:0","kind":"speech","line":127,"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"@M Huh? Some of our chips came from the older Net...|@L And its cartridge isn't here!|@M Right. They'll sit out until it's back!","text_hash":"143d68c42df1"},
+  {"boxes":[{"pages":[["{k}I can't feel","the old Souls,Lan..."]],"speaker":"MegaMan","text":"{k}I can't feel the old Souls,Lan..."},{"pages":[["Not till the older","Net's back."]],"speaker":"MegaMan","text":"Not till the older Net's back."}],"container":"old_net_words","domain":"Where the nets meet","file":"src/director/nets_words.c","flags":[],"id":"nets_words:old_net_words:1","kind":"speech","line":130,"placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M I can't feel the old Souls,Lan...|@M Not till the older Net's back.","text_hash":"99823cc29555"},
   {"boxes":[{"pages":[["No codes yet. Delete","a guardian twice for","his."]],"speaker":"Screen","text":"No codes yet. Delete a guardian twice for his."}],"container":"codes_known","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:codes_known:0","kind":"screen","line":139,"speaker":"Screen","speakers":["Screen"],"text":"No codes yet. Delete a guardian twice for his.","text_hash":"892d9903cf7b"},
   {"boxes":[{"pages":[["{name}'s code. It","opens the gate","sealed with it."]],"speaker":"Screen","text":"{name}'s code. It opens the gate sealed with it."}],"container":"codes_known","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:codes_known:1","kind":"screen","line":140,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{name}'s code. It opens the gate sealed with it.","text_hash":"5b008824ba15"},
   {"boxes":[{"pages":[["{name}'s and","{name}'s codes.","Each opens its gate."]],"speaker":"Screen","text":"{name}'s and {name}'s codes. Each opens its gate."}],"container":"codes_known","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:codes_known:2","kind":"screen","line":141,"placeholders":[{"name":"name","spec":"%s"},{"name":"name","spec":"%s"}],"speaker":"Screen","speakers":["Screen"],"text":"{name}'s and {name}'s codes. Each opens its gate.","text_hash":"f3506815db83"},
@@ -5433,25 +5445,27 @@
   {"boxes":[{"pages":[["The file could not","be written."]],"speaker":"Screen","text":"The file could not be written."}],"container":"pick_text_not_written","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"id":"pick_text:pick_text_not_written:0","kind":"screen","line":16,"speaker":"Screen","speakers":["Screen"],"text":"The file could not be written.","text_hash":"6bdef1afb7c5"},
   {"boxes":[{"pages":[["The folder could not","be kept."]],"speaker":"Screen","text":"The folder could not be kept."}],"container":"pick_text_folder_not_kept","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"id":"pick_text:pick_text_folder_not_kept:0","kind":"screen","line":18,"speaker":"Screen","speakers":["Screen"],"text":"The folder could not be kept.","text_hash":"bc3b6e286b48"},
   {"boxes":[{"pages":[["your downloads"]],"speaker":"Screen","text":"your downloads"}],"container":"pick_text_downloads","domain":"The ROMs screen","file":"src/launcher/pick_text.c","flags":[],"fragment":true,"id":"pick_text:pick_text_downloads:0","kind":"screen","line":21,"speaker":"Screen","speakers":["Screen"],"text":"your downloads","text_hash":"185c45e4ae1e"},
-  {"boxes":[{"pages":[["NOT ENOUGH ZENNY!"]],"speaker":"Mr.Prog","text":"NOT ENOUGH ZENNY!"},{"pages":[["COME BACK WITH {stake}!"]],"speaker":"Mr.Prog","text":"COME BACK WITH {stake}!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:0","kind":"speech","line":22,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NOT ENOUGH ZENNY!|COME BACK WITH {stake}!","text_hash":"0f5de3c9ff04"},
-  {"boxes":[{"pages":[["OK! ANYTIME!"]],"speaker":"Mr.Prog","text":"OK! ANYTIME!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:1","kind":"speech","line":25,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OK! ANYTIME!","text_hash":"7dd3978ce1e5"},
-  {"boxes":[{"pages":[["ALL RIGHT! LET'S","VIRUS BATTLE!"]],"speaker":"Mr.Prog","text":"ALL RIGHT! LET'S VIRUS BATTLE!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:2","kind":"speech","line":29,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ALL RIGHT! LET'S VIRUS BATTLE!","text_hash":"935ba3049d12"},
-  {"boxes":[{"pages":[["VIRUS BATTLE! {rounds}","ROUNDS!"]],"speaker":"Mr.Prog","text":"VIRUS BATTLE! {rounds} ROUNDS!"},{"pages":[["EACH WIN ADDS {stake}","ZENNY!"]],"speaker":"Mr.Prog","text":"EACH WIN ADDS {stake} ZENNY!"},{"pages":[["MY FIRST PAIR...","{pair}!"]],"speaker":"Mr.Prog","text":"MY FIRST PAIR...\n{pair}!"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:0","kind":"speech","line":39,"placeholders":[{"name":"rounds","spec":"%d"},{"name":"stake","spec":"%d"},{"name":"pair","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"VIRUS BATTLE! {rounds} ROUNDS!|EACH WIN ADDS {stake} ZENNY!|MY FIRST PAIR...\n{pair}!","text_hash":"395bafb18047"},
-  {"boxes":[{"pages":[["{rounds} ROUNDS!"]],"speaker":"Mr.Prog","text":"{rounds} ROUNDS!"},{"pages":[["MY FIRST PAIR...","{pair}!"]],"speaker":"Mr.Prog","text":"MY FIRST PAIR...\n{pair}!"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:1","kind":"speech","line":40,"placeholders":[{"name":"rounds","spec":"%d"},{"name":"pair","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{rounds} ROUNDS!|MY FIRST PAIR...\n{pair}!","text_hash":"5e271037ba32"},
-  {"boxes":[{"pages":[["ENTER FOR","{stake} ZENNY?"]],"speaker":"Mr.Prog","text":"ENTER FOR\n{stake} ZENNY?\n"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:2","kind":"speech","line":42,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ENTER FOR\n{stake} ZENNY?\n","text_hash":"e88b8aff46a9"},
+  {"boxes":[{"pages":[["NOT ENOUGH ZENNY!"]],"speaker":"Mr.Prog","text":"NOT ENOUGH ZENNY!"},{"pages":[["COME BACK WITH {stake}!"]],"speaker":"Mr.Prog","text":"COME BACK WITH {stake}!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:0","kind":"speech","line":23,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"NOT ENOUGH ZENNY!|COME BACK WITH {stake}!","text_hash":"0f5de3c9ff04"},
+  {"boxes":[{"pages":[["OK! ANYTIME!"]],"speaker":"Mr.Prog","text":"OK! ANYTIME!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:1","kind":"speech","line":26,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OK! ANYTIME!","text_hash":"7dd3978ce1e5"},
+  {"boxes":[{"pages":[["ALL RIGHT! LET'S","VIRUS BATTLE!"]],"speaker":"Mr.Prog","text":"ALL RIGHT! LET'S VIRUS BATTLE!"}],"container":"answers","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:answers:2","kind":"speech","line":30,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ALL RIGHT! LET'S VIRUS BATTLE!","text_hash":"935ba3049d12"},
+  {"boxes":[{"flags":[{"at":"{lead}MY FIRST PAIR...","code":"line-long"}],"pages":[["{lead}MY FIRST","PAIR...","{pair}!"]],"speaker":"Mr.Prog","text":"{lead}MY FIRST PAIR...\n{pair}!"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":["line-long"],"id":"battler_words:offer:0","kind":"speech","line":40,"placeholders":[{"name":"lead","spec":"%s"},{"name":"pair","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{lead}MY FIRST PAIR...\n{pair}!","text_hash":"a86040e7461b"},
+  {"boxes":[{"pages":[["ENTER FOR","{stake} ZENNY?"]],"speaker":"Mr.Prog","text":"ENTER FOR\n{stake} ZENNY?\n"}],"container":"offer","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:offer:1","kind":"speech","line":42,"placeholders":[{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"ENTER FOR\n{stake} ZENNY?\n","text_hash":"e88b8aff46a9"},
   {"boxes":[{"pages":[["HI THERE! I'M A","VIRUS BATTLER!"]],"speaker":"Mr.Prog","text":"HI THERE! I'M A VIRUS BATTLER!"},{"pages":[["YOUR VIRUSES BATTLE","MINE!"]],"speaker":"Mr.Prog","text":"YOUR VIRUSES BATTLE MINE!"},{"pages":[["BUT FIRST,TAKE THIS!"]],"speaker":"Mr.Prog","text":"BUT FIRST,TAKE THIS!"}],"container":"card","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:card:0","kind":"speech","line":52,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"HI THERE! I'M A VIRUS BATTLER!|YOUR VIRUSES BATTLE MINE!|BUT FIRST,TAKE THIS!","text_hash":"c2e2a00e4c90"},
   {"boxes":[{"pages":[["METTAUR AND GUNNER","ARE ON IT!"]],"speaker":"Mr.Prog","text":"METTAUR AND GUNNER ARE ON IT!"},{"pages":[["DELETE A RARE","VIRUS,AND IT JOINS","THEM!"]],"speaker":"Mr.Prog","text":"DELETE A RARE VIRUS,AND IT JOINS THEM!"},{"pages":[["A card of","viruses,Lan!"]],"speaker":"MegaMan","text":"A card of viruses,Lan!"},{"pages":[["ENTRY'S {stake} ZENNY."]],"speaker":"Mr.Prog","text":"ENTRY'S {stake} ZENNY."},{"pages":[["EACH WIN ADDS {stake} TO","THE POT!"]],"speaker":"Mr.Prog","text":"EACH WIN ADDS {stake} TO THE POT!"},{"pages":[["STOP AFTER ANY WIN.","IT'S YOURS!"]],"speaker":"Mr.Prog","text":"STOP AFTER ANY WIN. IT'S YOURS!"},{"pages":[["And if we lose?"]],"speaker":"Lan","text":"And if we lose?"},{"pages":[["THEN IT'S ALL MINE!"]],"speaker":"Mr.Prog","text":"THEN IT'S ALL MINE!"}],"container":"card","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:card:1","kind":"speech","line":61,"placeholders":[{"name":"stake","spec":"%d"},{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog","MegaMan","Lan"],"text":"METTAUR AND GUNNER ARE ON IT!|DELETE A RARE VIRUS,AND IT JOINS THEM!|@M A card of viruses,Lan!|ENTRY'S {stake} ZENNY.|EACH WIN ADDS {stake} TO THE POT!|STOP AFTER ANY WIN. IT'S YOURS!|@L And if we lose?|THEN IT'S ALL MINE!","text_hash":"a2a7999de380"},
-  {"boxes":[{"pages":[["THAT'S MY SERIES FOR","TODAY!"]],"speaker":"Mr.Prog","text":"THAT'S MY SERIES FOR TODAY!"},{"pages":[["SEE YOU AROUND THE","NET!"]],"speaker":"Mr.Prog","text":"SEE YOU AROUND THE NET!"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:0","kind":"speech","line":68,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S MY SERIES FOR TODAY!|SEE YOU AROUND THE NET!","text_hash":"5a2c981a546a"},
-  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"pot","domain":"Other","file":"src/layer/battler_words.c","flags":[],"fragment":true,"id":"battler_words:pot:0","kind":"speech","line":89,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
-  {"boxes":[{"pages":[["SMART! SEE YOU","AROUND THE NET!"]],"speaker":"Mr.Prog","text":"SMART! SEE YOU AROUND THE NET!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:0","kind":"speech","line":100,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SMART! SEE YOU AROUND THE NET!","text_hash":"376cb1ea3f92"},
-  {"boxes":[{"pages":[["THAT'S THE SPIRIT!","HERE THEY COME!"]],"speaker":"Mr.Prog","text":"THAT'S THE SPIRIT! HERE THEY COME!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:1","kind":"speech","line":104,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S THE SPIRIT! HERE THEY COME!","text_hash":"6d3df57e5617"},
-  {"boxes":[{"pages":[["YOU WIN!! THE POT'S","{pot} ZENNY!"]],"speaker":"Mr.Prog","text":"YOU WIN!! THE POT'S\n{pot} ZENNY!"},{"pages":[["ROUND {round} OF {rounds}!","NEXT PAIR...","{next}!"]],"speaker":"Mr.Prog","text":"ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:2","kind":"speech","line":108,"placeholders":[{"name":"pot","spec":"%d"},{"name":"round","spec":"%d"},{"name":"rounds","spec":"%d"},{"name":"next","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU WIN!! THE POT'S\n{pot} ZENNY!|ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!","text_hash":"93442809cdc8"},
-  {"boxes":[{"pages":[["TAKE THE POT"]],"speaker":"MegaMan","text":"TAKE THE POT"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:0","kind":"screen","line":112,"speaker":"MegaMan","speakers":["MegaMan"],"text":"TAKE THE POT","text_hash":"edd100c360ac"},
-  {"boxes":[{"pages":[["FIGHT ON"]],"speaker":"MegaMan","text":"FIGHT ON"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:1","kind":"screen","line":112,"speaker":"MegaMan","speakers":["MegaMan"],"text":"FIGHT ON","text_hash":"eef940a7b692"},
-  {"boxes":[{"pages":[["YOU BEAT MY WHOLE","SERIES!!"]],"speaker":"Mr.Prog","text":"YOU BEAT MY WHOLE SERIES!!"},{"pages":[["WOW,WOW!"]],"speaker":"Mr.Prog","text":"WOW,WOW!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:0","kind":"speech","line":123,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU BEAT MY WHOLE SERIES!!|WOW,WOW!","text_hash":"edc3e953355c"},
-  {"boxes":[{"pages":[["AND FOR YOUR FIRST","WIN..."]],"speaker":"Mr.Prog","text":"AND FOR YOUR FIRST WIN..."},{"pages":[["TAKE THIS!"]],"speaker":"Mr.Prog","text":"TAKE THIS!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:1","kind":"speech","line":127,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AND FOR YOUR FIRST WIN...|TAKE THIS!","text_hash":"731ee4c7d321"},
-  {"boxes":[{"pages":[["TIME UP! A DRAW!"]],"speaker":"Mr.Prog","text":"TIME UP! A DRAW!"},{"pages":[["A DRAW GOES TO ME!"]],"speaker":"Mr.Prog","text":"A DRAW GOES TO ME!"},{"pages":[["THE {pot} ZENNY'S","MINE!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:0","kind":"speech","line":148,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TIME UP! A DRAW!|A DRAW GOES TO ME!|THE {pot} ZENNY'S MINE!","text_hash":"64178801f1d7"},
-  {"boxes":[{"pages":[["MY VIRUSES WIN!"]],"speaker":"Mr.Prog","text":"MY VIRUSES WIN!"},{"pages":[["THE {pot} ZENNY'S","MINE! THANKS!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE! THANKS!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:1","kind":"speech","line":149,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"MY VIRUSES WIN!|THE {pot} ZENNY'S MINE! THANKS!","text_hash":"12f383b8de12"},
+  {"boxes":[{"pages":[["THAT'S MY SERIES FOR","TODAY!"]],"speaker":"Mr.Prog","text":"THAT'S MY SERIES FOR TODAY!"},{"pages":[["SEE YOU AROUND THE","NET!"]],"speaker":"Mr.Prog","text":"SEE YOU AROUND THE NET!"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:0","kind":"speech","line":69,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S MY SERIES FOR TODAY!|SEE YOU AROUND THE NET!","text_hash":"5a2c981a546a"},
+  {"boxes":[{"pages":[["OH! YOU'RE BACK!"]],"speaker":"Mr.Prog","text":"OH! YOU'RE BACK!\n"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:1","kind":"speech","line":75,"note":"(his words said: a later talk on his layer is a box and the question, as a shop's \"Back for more?\"; a playtester heard his rounds and rule again after a No, session 76)","speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"OH! YOU'RE BACK!\n","text_hash":"0f9dd5498e3e"},
+  {"boxes":[{"pages":[["VIRUS BATTLE! {rounds}","ROUNDS!"]],"speaker":"Mr.Prog","text":"VIRUS BATTLE! {rounds} ROUNDS!"},{"pages":[["EACH WIN ADDS {stake}","ZENNY!"]],"speaker":"Mr.Prog","text":"EACH WIN ADDS {stake} ZENNY!"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:2","kind":"speech","line":80,"note":"(the card once a profile: a later Battler's first talk his rounds and the pot's rule)","placeholders":[{"name":"rounds","spec":"%d"},{"name":"stake","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"VIRUS BATTLE! {rounds} ROUNDS!|EACH WIN ADDS {stake} ZENNY!|","text_hash":"5363021f1d6a"},
+  {"boxes":[{"pages":[["{rounds} ROUNDS!"]],"speaker":"Mr.Prog","text":"{rounds} ROUNDS!"}],"container":"ta_battler","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler:3","kind":"speech","line":90,"placeholders":[{"name":"rounds","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"{rounds} ROUNDS!|","text_hash":"fd9e56bfeae9"},
+  {"boxes":[{"pages":[["{zenny} Zenny"]],"speaker":"MegaMan","text":"{zenny} Zenny"}],"container":"pot","domain":"Other","file":"src/layer/battler_words.c","flags":[],"fragment":true,"id":"battler_words:pot:0","kind":"speech","line":99,"placeholders":[{"name":"zenny","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{zenny} Zenny","text_hash":"586cf40493d7"},
+  {"boxes":[{"pages":[["SMART! SEE YOU","AROUND THE NET!"]],"speaker":"Mr.Prog","text":"SMART! SEE YOU AROUND THE NET!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:0","kind":"speech","line":110,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SMART! SEE YOU AROUND THE NET!","text_hash":"376cb1ea3f92"},
+  {"boxes":[{"pages":[["THAT'S THE SPIRIT!","HERE THEY COME!"]],"speaker":"Mr.Prog","text":"THAT'S THE SPIRIT! HERE THEY COME!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:1","kind":"speech","line":114,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"THAT'S THE SPIRIT! HERE THEY COME!","text_hash":"6d3df57e5617"},
+  {"boxes":[{"pages":[["YOU WIN!! THE POT'S","{pot} ZENNY!"]],"speaker":"Mr.Prog","text":"YOU WIN!! THE POT'S\n{pot} ZENNY!"},{"pages":[["ROUND {round} OF {rounds}!","NEXT PAIR...","{next}!"]],"speaker":"Mr.Prog","text":"ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!"}],"container":"won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won:2","kind":"speech","line":118,"placeholders":[{"name":"pot","spec":"%d"},{"name":"round","spec":"%d"},{"name":"rounds","spec":"%d"},{"name":"next","spec":"%s"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU WIN!! THE POT'S\n{pot} ZENNY!|ROUND {round} OF {rounds}!\nNEXT PAIR...\n{next}!","text_hash":"93442809cdc8"},
+  {"boxes":[{"pages":[["TAKE THE POT"]],"speaker":"MegaMan","text":"TAKE THE POT"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:0","kind":"screen","line":122,"speaker":"MegaMan","speakers":["MegaMan"],"text":"TAKE THE POT","text_hash":"edd100c360ac"},
+  {"boxes":[{"pages":[["FIGHT ON"]],"speaker":"MegaMan","text":"FIGHT ON"}],"container":"won.labels","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:won.labels:1","kind":"screen","line":122,"speaker":"MegaMan","speakers":["MegaMan"],"text":"FIGHT ON","text_hash":"eef940a7b692"},
+  {"boxes":[{"pages":[["YOU BEAT MY WHOLE","SERIES!!"]],"speaker":"Mr.Prog","text":"YOU BEAT MY WHOLE SERIES!!"},{"pages":[["WOW,WOW!"]],"speaker":"Mr.Prog","text":"WOW,WOW!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:0","kind":"speech","line":133,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"YOU BEAT MY WHOLE SERIES!!|WOW,WOW!","text_hash":"edc3e953355c"},
+  {"boxes":[{"pages":[["AND FOR YOUR FIRST","WIN..."]],"speaker":"Mr.Prog","text":"AND FOR YOUR FIRST WIN..."},{"pages":[["TAKE THIS!"]],"speaker":"Mr.Prog","text":"TAKE THIS!"}],"container":"series_won","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:series_won:1","kind":"speech","line":137,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"AND FOR YOUR FIRST WIN...|TAKE THIS!","text_hash":"731ee4c7d321"},
+  {"boxes":[{"pages":[["TIME UP! A DRAW!"]],"speaker":"Mr.Prog","text":"TIME UP! A DRAW!"},{"pages":[["A DRAW GOES TO ME!"]],"speaker":"Mr.Prog","text":"A DRAW GOES TO ME!"},{"pages":[["THE {pot} ZENNY'S","MINE!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:0","kind":"speech","line":158,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TIME UP! A DRAW!|A DRAW GOES TO ME!|THE {pot} ZENNY'S MINE!","text_hash":"64178801f1d7"},
+  {"boxes":[{"pages":[["MY VIRUSES WIN!"]],"speaker":"Mr.Prog","text":"MY VIRUSES WIN!"},{"pages":[["THE {pot} ZENNY'S","MINE! THANKS!"]],"speaker":"Mr.Prog","text":"THE {pot} ZENNY'S MINE! THANKS!"}],"container":"ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","flags":[],"id":"battler_words:ta_battler_after:1","kind":"speech","line":159,"placeholders":[{"name":"pot","spec":"%d"}],"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"MY VIRUSES WIN!|THE {pot} ZENNY'S MINE! THANKS!","text_hash":"12f383b8de12"},
   {"boxes":[{"pages":[["A strong Navi's","signal!"]],"speaker":"MegaMan","text":"A strong Navi's signal!"}],"container":"calls","domain":"Other","file":"src/layer/fork_words.c","flags":[],"id":"fork_words:calls:0.first","kind":"speech","line":17,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A strong Navi's signal!","text_hash":"f39224b15927"},
   {"boxes":[{"pages":[["A strong virus","signal!"]],"speaker":"MegaMan","text":"A strong virus signal!"}],"container":"calls","domain":"Other","file":"src/layer/fork_words.c","flags":[],"id":"fork_words:calls:1.first","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A strong virus signal!","text_hash":"ed463c8af603"},
   {"boxes":[{"pages":[["A strong virus","signal,too!"]],"speaker":"MegaMan","text":"A strong virus signal,too!"}],"container":"calls","domain":"Other","file":"src/layer/fork_words.c","flags":[],"id":"fork_words:calls:1.too","kind":"speech","line":18,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A strong virus signal,too!","text_hash":"979cac5d44d0"},
