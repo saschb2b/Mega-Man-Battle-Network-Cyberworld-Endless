@@ -1,8 +1,8 @@
 {
   "name": "Shared dive",
   "state": "building",
-  "now": "Four MegaMen fight one of the run's battles on one core (--dev party=N): spawned, moved by keys, deleted one by one, the battle won by whoever stands.",
-  "left": "Find what the enemies aim at, so a guardian's attacks spread over the party; then the party's battle over the server.",
+  "now": "A door's party fights its guardian on one field over the server: a core of its own built alike on every game (--dev partycore=N alone), every seat's keys guessed and rolled back as the Arena's, the hashes compared, the end back into each run.",
+  "left": "The partners' own NaviStats, hand and Custom screen on the field; a crew's join-in battles on one field; what the enemies aim at.",
   "updated": "2026-11-15",
   "link": "../online/shared-dive.md"
 }

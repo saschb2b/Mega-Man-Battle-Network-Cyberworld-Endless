@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T05:40:00Z
+* **Update**: online/shared-dive.md (As built: the guardian's fight on one field, the party's own core built alike on every game, over the server, guessed and rolled back, its hashes compared, its end into each run, every system but the New 3DS and the PSP on it; the linked bullet's last sentence), code/online.md (`party_core.c`, `party_play.c`, `party_field.c`'s line).

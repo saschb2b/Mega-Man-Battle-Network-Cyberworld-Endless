@@ -10,6 +10,7 @@
 #include "dive_words.h"
 #include "emu.h"
 #include "online_transport.h"
+#include "party_play.h"
 #include "pet_look.h"
 
 #define SEND_EVERY 6          /* frames between the fight's messages, each sent only on a change */
@@ -111,7 +112,12 @@ static void fight(void) {
 
 void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 	if (Q.door == DOOR_STARTED && Q.party.battle) {
-		if (boss_fighting()) { fight(); return; }
+		/* (one field: the party's core fights him, party_play.c; linked: this game's battle, his HP the party's) */
+		if (boss_fighting()) {
+			if (Q.party.form == ONLINE_ARENA_PARTY) Q.fighting = true;
+			else fight();
+			return;
+		}
 		/* (the fight over, won or lost: the next door begins afresh) */
 		if (Q.fighting) { fprintf(stderr, "dive: the party's fight over\n"); reset(); }
 		return;
@@ -151,6 +157,19 @@ static void queue_state(const QueueState *q) {
 	}
 }
 
+/* a party battle's START (one field: the party's core takes the guardian's
+ * fight, party_play.h; linked: this game's own) and a seat gone */
+static void party_state(const PartyState *p) {
+	if (p->stage == ONLINE_ARENA_SEAT_GONE && p->battle == Q.party.battle) { party_play_gone(p->seat); return; }
+	if (p->stage != ARENA_START) return;
+	Q.party = *p;
+	if (p->form != ONLINE_ARENA_PARTY) return;
+	unsigned n = 0;
+	for (unsigned k = 0; k < ONLINE_SEATS; ++k) n += p->seats[k] != 0;
+	party_play_on(true);
+	party_play_start(p->battle, p->seat, n ? n : Q.q.count, p->delay);
+}
+
 void dive_party_mail(const uint8_t *m, size_t n) {
 	QueueState q;
 	PartyState p;
@@ -161,9 +180,10 @@ void dive_party_mail(const uint8_t *m, size_t n) {
 		if (dive_wire_queue_state(m, n, &q)) queue_state(&q);
 		break;
 	case ONLINE_ARENA_STATE:
-		if (dive_wire_party_state(m, n, &p) && p.stage == ARENA_START) Q.party = p;
+		if (dive_wire_party_state(m, n, &p)) party_state(&p);
 		break;
 	case ONLINE_ARENA_SEAT:
+		if (party_play_mail(m, n)) break;
 		if (dive_wire_damage(m, n, &seat, &battle, &damage, &hp) && battle == Q.party.battle && seat < ONLINE_SEATS) Q.theirs[seat] = damage;
 		break;
 	case ONLINE_PARTY_HP:

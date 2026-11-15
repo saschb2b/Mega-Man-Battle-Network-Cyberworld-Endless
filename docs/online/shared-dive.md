@@ -167,15 +167,94 @@ Verified on `dev`, 15 November 2026:
   its own battle, his HP the party's: seat 0's game counts every seat's
   damage (its own, PARTY_DAMAGE from the others) and tells the HP it keeps
   (PARTY_HP); no game ever raises its guardian's HP over what its own
-  battle left him. Until the one field over the server is built, every
-  game's HELLO says `hello_no_arena`, so the server makes every party
-  linked. Seen headless with two games on a local server at layer 3's
+  battle left him. Linked is now the New 3DS's and the PSP's way (their
+  HELLO says `hello_no_arena`), and every party's where seat 0's system is
+  one of them; the others fight on one field (below). Seen headless with two games on a local server at layer 3's
   guardian (BN4's FireMan, 1200 HP for two): the queue's band on both, the
   leader's A, both in the fight; Beta's hits (1200 to 1193) on Alpha's
   guardian and Alpha's (to 1191) on Beta's; Alpha's last hit deleted him in
   both games at once, Beta's guardian falling to the HP written. Open: seat
   0 deleted leaves the others without the party's HP (each then fights the
   rest alone), and the leader's idle pass.
+
+- **One field: the party's core** (15 November 2026, `party_core.c`,
+  `party_field.c`): the guardian's fight on a BN6 core of its own that
+  every game of the party builds alike. The Arena's boot to the net
+  (`core_boot.h`, kept for the next battle); the run's ROM copy as its
+  installs left it, each hook's original back under its BKPT
+  (`emu_rom_clean`, `hook_originals`: the party's games stand on one
+  layer of one seed, so their copies agree where a battle reads them);
+  the guardian's record as the run's staging wrote it (`emu_encounter_set`,
+  his BN4 Navi's sounds' pool pointed at him), moved to `FREE_RECORDS`'
+  first slot; the lead's MegaMan (seat 0's loadout) in BN6's own RAM as an
+  Arena core takes one (`arena_loadout_install`); the installs' hooks
+  (`xlog_hook_core`) and the field's: the battle's list grown with seats
+  1..n-1 as MegaMen on side 0's free panels (`BN6_SPAWN_ENTITIES`, the
+  spike's, generalized to a state of its own a core), each one's keys into
+  his AI data at `BN6_KEY_COPY` (directions and B: no hand of his own yet),
+  each MegaMan's HP and max HP his own loadout's at the battle's first
+  iteration, the guardian's HP raised for the party at his spawn
+  (`BN6_SPAWN_HP`). The overworld's encounter check forced into
+  StartBattle with the record (`BN6_ENCOUNTER_CHECK` to
+  `BN6_ENCOUNTER_START`, encounter.c's own way), the core runs with no keys
+  to the battle's first Custom screen: the ready. Staged by `boss.c`'s
+  `boss_party_fight`: the run's core does not start the battle and holds
+  still under the party's (`online_visit`'s holder), which shows the
+  party's core's picture and plays its sound. Seen headless with `--dev
+  partycore=2,partytwin=1,partyroll=30,partyend=200` at layer 3's guardian
+  of `--seed 3` (BlastMan, 400 HP): two MegaMen and BlastMan on the
+  field, a second core built beside it from the same keys agreeing at
+  every 60th frame (20 of 20, the hash at frame 60 `ac164177e6d71616` in
+  two runs), the field rolled back 30 frames every 30 and run again to
+  the same hash (41 of 41), the partner's shot deleting BlastMan at
+  iteration 309, the win back on the map at frame 1242.
+- **Over the server** (15 November 2026, `party_play.c`, protocol v19's
+  party seats): seat 0's START with format `arena_party` takes the next
+  guardian's fight to the party's core. Each game sends its MegaMan
+  (ARENA_LOADOUT, kept as the others read him, the pack left home), its
+  keys a frame at a time with an input delay (ARENA_INPUT; the Arena's
+  `arena_link_net` with a party's seats, `arena_link_net_party`) and its
+  field's hash at its ready and every 60th frame (ARENA_HASH), all through
+  the server's ARENA_SEAT. A frame runs at its tick: where a seat's keys
+  for it have not come, on a guess (his last), at most 8 frames past the
+  last frame every seat's keys have come for (`partyroll=W` another), the
+  field kept before the first guess (`party_core_save`) and put back and
+  run again where the keys that came proved a guess wrong, as the Arena
+  rolls its pair back; a hash goes once every seat's keys before its
+  frame have come. Keys go at the wall clock's 60 a second, never a burst
+  past the server's relay bucket (a headless game twice dropped with
+  "Message rate exceeded" before). A seat gone (ARENA_STATE `seat_gone`, or
+  this game's link broken) takes his MegaMan off the field (his HP 0) and
+  stops the hashes: each game then finishes its own battle. Seen headless
+  with two games on a local server at layer 3's guardian of week 2966's
+  seed (BN4's AquaMan moved into BN6's engine, his next version for two: 1000 HP, 1200), `--dev partyend=600,
+  partybot=1` on both (the Arena's bot's keys as each game's pad, the
+  guardian at 1 HP at iteration 600): both ready with `69d5611be9442d5d`,
+  21 hashes agreed on each (frames 60 to 1260), the battle over at frame
+  1261 in both, won. Run again with `partydelay=1`, the frames mostly
+  guessed (1250 of Alpha's 1261 frames on a guess, 30 rollbacks; 616 of
+  Beta's, 16): the same 21 hashes agreed, each the lockstep run's own
+  (`03c86e95f9bbd37b` at frame 60, `052d533a189ea788` at 1260, the bot's
+  keys being the frame's), the battle over at 1261 again.
+- **The end into each run** (15 November 2026, `director_party_over`):
+  BN6's results on the party's core, then won or lost and this seat's
+  MegaMan's HP as the field last saw it written into the run; won, the
+  guardian's course goes on as after a fight of its own (his last word,
+  his log-out, his Guardian Data); HP 0, the run ends as a deletion ends
+  it, whatever the party did (the owner's call). Seat 0 reports the end
+  (ARENA_STATUS, ARENA over). In the run above Alpha, the lead, was
+  deleted before the win and his run ended; Beta won with 100 HP and took
+  AquaMan's data; every diver's feed said "Alpha's party of 2 beat layer
+  3".
+- **Switched on** (15 November 2026, `online_transport.c`'s HELLO): every
+  system but the New 3DS and the PSP stops saying `hello_no_arena`, so the
+  server seats them on one field; `dive_party.c` hands a START of format
+  `arena_party` to the party's core and a seat gone to it, and fights
+  `arena_linked` as before. Not yet: the partners' own NaviStats, hand and
+  Custom screen (the two-a-side's, one partner a side, to be grown to three
+  on side 0: a partner fights with his buster and his own HP, his B and
+  directions alone crossing), a crew's join-in battles on one field, and
+  who the enemies aim at.
 
 ## The spike: four on one field (15 November 2026)
 
