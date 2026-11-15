@@ -9,11 +9,11 @@
 #include "text.h"
 
 /* His offer: the BtlrCard first where the profile holds none (BN6's own
- * key item, Mettaur's and Gunner's data on it, BATTLER_CARD_FLAG set),
- * his rules then said in full; his first pair, the stake, a question that
- * starts on No, and on Yes the stake taken and `flag` set (not enough
- * zenny: he says so); once BATTLER_DONE_FLAG is set, his word that the
- * series is over. */
+ * key item, Mettaur's and Gunner's data on it), his rules then said in
+ * full; his first pair, the stake, a question that starts on No, and on
+ * Yes the stake taken and `flag` set (not enough zenny: he says so).
+ * BATTLER_TOLD_FLAG set, a later talk is his pair and the question; once
+ * BATTLER_DONE_FLAG is set, his word that the series is over. */
 typedef struct {
 	int flag;
 	int stake, rounds;
