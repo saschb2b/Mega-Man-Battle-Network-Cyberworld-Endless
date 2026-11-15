@@ -108,9 +108,14 @@ sprite holds 6 to 18 animations, none at BN6's log-in (`0x19` on) or
 log-out (`0x21` on), and a wait on one that is not there never ended
 (issue #614: GutsMan, continued at his data, logged in again unseen and
 stood on it, [the guardian's sequence](sequence.md); the counts in
-[BN4 Red Sun's tables](../../rom/bn4.md), Sprite lists). His standing
-facing still takes BN6's number:
-WindMan's sprite draws four, so facing left he shows nothing.
+[BN4 Red Sun's tables](../../rom/bn4.md), Sprite lists). He stands in
+the view his sprite draws nearest his facing, turned to MegaMan: BN4's
+Navis are drawn in four diagonals, not BN6's eight, so a guardian facing
+left stands in his down-left view and one facing right in his down-right
+(the layout, and BN4's own scripts' use of it, in the same row). BN6's
+number alone had turned GutsMan, Roll, FireMan, ThunderMan and AquaMan
+their backs to MegaMan on his left, and left WindMan, TopMan and SparkMan
+unseen there (15 November 2026).
 
 ## His Guardian Data
 

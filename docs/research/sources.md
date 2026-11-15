@@ -439,6 +439,27 @@ Whether a generated hub may show a side with nothing beside it, as
   dock panel inside the walls' rings, as the circuits'). In play: assumed
   MegaMan steps onto them, not seen.
 
+## BN4's Navis face four ways, not eight (15 November 2026)
+
+Whether BN4 draws its Navis on the net facing all eight ways, as BN6
+does, decides how a guardian of BN4's stands to MegaMan.
+
+- **Their sprites draw the four diagonals** (verified: each proved
+  Navi's overworld sprite in list 6 decoded, its animations' first
+  frames drawn side by side and compared pixel for pixel; [BN4 Red Sun's
+  tables](../rom/bn4.md), Sprite lists). Animations 0-7 follow BN6's
+  facings, each pair one diagonal's view; WindMan draws four alone,
+  TopMan's and SparkMan's backs are empty, and BN4's own MegaMan draws
+  all eight in the same order.
+- **BN4 stands them in the odd animations alone** (verified: its NPC
+  commands decoded, 0x16 and 0x17 as BN6's, and every script of BN4's
+  that sets a proved Navi's sprite walked: 1, 3, 5 and 7, WindMan's 2
+  and 0, no mirror command). BN6's left is an even one, BN4's back
+  view up-left.
+- **Where the scripts are**: found by their bytes (`17 IDX 14`) in
+  `0x08050000`-`0x080B0000`, which held every likely hit; scripts
+  elsewhere, or one setting the sprite another way, were not searched.
+
 ## The Battle Lab (11 November 2026)
 
 For [the Battle Lab](../game/battle-lab.md):
