@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-15T21:09:36Z
+* **Update**: code/tools.md (`tools/loading_picture.py`'s row: the "Building the net..." screen from a windowed run on a virtual display, for 0.22.0's notes), releases/v0.22.0.md (the pictures of the saves, the dive, the systems, the words and the fixes written in).
