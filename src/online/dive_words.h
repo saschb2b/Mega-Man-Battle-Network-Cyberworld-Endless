@@ -13,4 +13,9 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
  * MegaMan leads it, its leader's name. */
 const char *dive_door_words(unsigned count, bool leads, const char *leader);
 
+/* MegaMan on a diver he faces (`mate`: one of the crew), and the
+ * question to split up with the crew. */
+const char *dive_crew_meet_words(const char *name, bool mate);
+const char *dive_crew_split_question(void);
+
 #endif

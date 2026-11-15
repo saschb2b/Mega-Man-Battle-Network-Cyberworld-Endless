@@ -15,6 +15,11 @@
 /* The puppets made as each layer is built (layer_objs_more), or not. */
 void dive_people_on(bool on);
 
+/* The words' room this layer gave the dive's chats (0 none), and the
+ * diver whose puppet stands ahead of MegaMan within reach (0 none). */
+uint32_t dive_people_talk_room(void);
+uint32_t dive_people_ahead(void);
+
 /* Each frame on a layer: the room's divers as the snapshot has them. */
 void dive_people_frame(const OnlineSnapshot *s);
 

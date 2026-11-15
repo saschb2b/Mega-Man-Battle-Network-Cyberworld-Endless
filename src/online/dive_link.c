@@ -8,6 +8,7 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "director.h"
+#include "dive_crew.h"
 #include "dive_party.h"
 #include "dive_people.h"
 #include "dive_wire.h"
@@ -52,6 +53,7 @@ void dive_link_adopt(void) {
 	}
 	L.on = true;
 	dive_party_on(true);
+	dive_crew_reset();
 	L.week = s.week;
 	L.seed = s.week_seed;
 	dive_people_on(true);
@@ -60,7 +62,7 @@ void dive_link_adopt(void) {
 
 bool dive_link_on(void) { return L.on; }
 
-uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_party_keys(keys) : keys; }
+uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_crew_keys(dive_party_keys(keys)) : keys; }
 
 bool dive_link_begin(void) {
 	/* (the puppets' room asked for before the dive's first layer is built) */
@@ -109,6 +111,19 @@ static void room(void) {
 	if (n) L.room = w;
 }
 
+/* a line for the band, after those waiting */
+static void say(const char *line) {
+
+	if (L.nfeed == FEED_MOST) { memmove(L.feed, L.feed + 1, sizeof L.feed[0] * (FEED_MOST - 1)); --L.nfeed; L.shown_at = 0; }
+	snprintf(L.feed[L.nfeed++], sizeof L.feed[0], "%s", line);
+	fprintf(stderr, "dive: feed: %s\n", line);
+}
+
+static void feed(const DiveFeed *f) {
+	const char *line = dive_feed_words(f->kind, f->name, f->way.depth, f->party);
+	if (*line) say(line);
+}
+
 void dive_link_frame(void) {
 	if (!L.on) return;
 	OnlineSnapshot s;
@@ -133,22 +148,17 @@ void dive_link_frame(void) {
 		L.shown_at = --L.nfeed ? now : 0;
 	}
 	if (L.nfeed && !L.shown_at) L.shown_at = now;
-	/* (the party at a guardian's door, and its fight) */
+	/* (the party at a guardian's door, and its fight; the crew's chats and news) */
 	dive_party_frame(&s, L.room);
+	dive_crew_frame(&s);
+	const char *crew = dive_crew_news();
+	if (crew) say(crew);
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
 	dive_people_frame(&s);
-}
-
-static void feed(const DiveFeed *f) {
-	const char *line = dive_feed_words(f->kind, f->name, f->way.depth, f->party);
-	if (!*line) return;
-	if (L.nfeed == FEED_MOST) { memmove(L.feed, L.feed + 1, sizeof L.feed[0] * (FEED_MOST - 1)); --L.nfeed; L.shown_at = 0; }
-	snprintf(L.feed[L.nfeed++], sizeof L.feed[0], "%s", line);
-	fprintf(stderr, "dive: feed: %s\n", line);
 }
 
 void dive_link_mail(const uint8_t *m, size_t n) {
@@ -167,6 +177,9 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 		break;
 	case ONLINE_QUEUE_STATE: case ONLINE_ARENA_STATE: case ONLINE_ARENA_SEAT: case ONLINE_PARTY_HP:
 		dive_party_mail(m, n);
+		break;
+	case ONLINE_CREW_STATE:
+		dive_crew_mail(m, n);
 		break;
 	default: break;
 	}

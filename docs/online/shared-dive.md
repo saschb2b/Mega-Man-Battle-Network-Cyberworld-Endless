@@ -177,6 +177,19 @@ Verified on `dev`, 15 November 2026:
   0 deleted leaves the others without the party's HP (each then fights the
   rest alone), and the leader's idle pass.
 
+- **Crews** (15 November 2026, `dive_crew.c`): A on a diver's MegaMan
+  (within reach of where MegaMan faces, `dive_people_ahead`) opens BN6's
+  own chat, MegaMan's "Lan,it's Beta!" and Team NetBattles' "Team
+  up,Lan?" (on a crewmate, "Split up,Lan?"); Yes asks (CREW ask), and the
+  diver asked gets "Alpha wants to team up with us!" and the same
+  question; the band says "Alright! We're a team with Beta!" or the
+  split. The chats' words go in a room the layer gives them (as the
+  Square's), their Yes in the Square's team flag `0x14C7`, which a layer
+  otherwise never sets, cleared as read. Seen headless with two games on
+  a local server: the ask, the answer, the crew formed on both. Not yet:
+  a fork's portal waiting for the whole crew, and the crew's join-in
+  battles (on the one field).
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
