@@ -9,6 +9,7 @@
 #include "scripts.h"
 
 void ta_ask_in(TextArchive *t, int face, const char *question, int no, bool after, bool risky);
+void ta_ask_costly(TextArchive *t, int face, const char *question, int no);
 void ta_ask(TextArchive *t, int face, const char *question, int no);
 void ta_flag_set(TextArchive *t, int flag);
 int ta_closing(TextArchive *t);

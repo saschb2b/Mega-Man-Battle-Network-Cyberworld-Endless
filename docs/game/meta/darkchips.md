@@ -57,10 +57,14 @@ engine's, and all twelve kinds play there, each by its own net's rule
   when it comes and its price before it is taken, all of it the first
   time a profile meets one (a returning playtester heard only "when I'm
   hurt badly", session 68), the words following the rule the chip plays
-  by; then asks, starting on Yes: holding one costs nothing till it is
-  used, and a paging A that said No twice (sessions 67 and 68) sent a
-  playtester through the whole chat again. Yes gives the chip to the
-  Pack, and the flame goes.
+  by; then asks, starting on No, as BN6's own costly questions do
+  ("MegaMan, jack out?", a strength test's "ARE YOU READY?": bn6f's
+  `ts_select 0x6, 0x81`), its options about a second after the
+  question: on Yes, an A pressed through the words took a DarkChip
+  unchosen twice (session 77), and the pause keeps the paging A that
+  said No (sessions 67 and 68) from sending a playtester through the
+  whole chat again (`ta_ask_costly`). Yes gives the chip to the Pack,
+  and the flame goes.
 - **Counted as each net counts a use:** BN6's where its dark power ran (a
   BugFrag paid); BN5's where it ran by BN5's rule, both where BN6 runs a
   chip's after-effects, once a battle however many ran. A DarkChip given

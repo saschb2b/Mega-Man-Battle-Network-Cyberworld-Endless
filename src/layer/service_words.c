@@ -197,10 +197,11 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 		"Each battle I use one in takes %d max HP,for the dive.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
-	/* (on Yes: holding one costs nothing till it's used, and a paging A
-	 * that said No twice, sessions 67 and 68, sent a playtester through
-	 * the whole chat again) */
-	ta_ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, false);
+	/* (on No, its options a moment after it: on Yes, a paging A took one
+	 * unchosen twice, session 77; the moment keeps the paging A that said
+	 * No twice, sessions 67 and 68, from sending a playtester through the
+	 * whole chat again) */
+	ta_ask_costly(t, FACE_MEGAMAN, "Take the DarkChip?\n", no);
 	ta_flag_set(t, flag);
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
@@ -227,9 +228,8 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 		DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
-	/* (on Yes, as BN5's flame asks: holding one costs nothing till it is
-	 * used) */
-	ta_ask_in(t, FACE_MEGAMAN, "Take the DarkChip?\n", no, true, false);
+	/* (as ta_dark_flame asks it: on No, its options a moment after it) */
+	ta_ask_costly(t, FACE_MEGAMAN, "Take the DarkChip?\n", no);
 	ta_flag_set(t, flag);
 	char got[48];
 	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", d->chip);
