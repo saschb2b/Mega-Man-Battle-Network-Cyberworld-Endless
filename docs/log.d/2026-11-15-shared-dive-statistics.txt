@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T06:20:00Z
-* **Update**: online/shared-dive.md (a quiet net: the `deepnet-together` event counts the dive's company), GUIDE.md (the statistics' table: the week's dive's end).

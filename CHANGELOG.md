@@ -187,13 +187,16 @@
 - **Fixed: SAVES called a first start's device Damaged.** Before the
   first save, SAVES read THIS DEVICE as "Damaged" and said its saves
   could not be read. It says "No runs yet".
-- **BN4's ACDC Area and BN5's Oran Area, drawn whole.** BN4's ACDC
+- **BN4's ACDC Area and BN5's Oran and Nebula Areas, drawn whole.** BN4's ACDC
   Area draws every room as its framed squares, rings and L's too, and
   its walkways meet at small squares as BN4's do, with no stray cyan
   scraps. BN5's Oran Area lays its hubs as one floor with their
   circuits, joined as BN5 joins them, where every meeting was a jumble
   of docks and orange chips. BN4's ACDC roads turn only where BN4's own
-  roads bend, with no navy squares left in the cyan.
+  roads bend, with no navy squares left in the cyan. BN5's Nebula Area
+  draws a room of any size as one of its plates, purple to the rim with
+  stones at its corners, where a wide room was a field of cobbles round
+  a plate.
 - **BN4's and BN5's areas keep their wide ways.** A way through their
   layers keeps the two-panel walkways it was laid with, crossing no
   more one-wide ones than the area's own maps do. The drawing used to
