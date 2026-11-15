@@ -367,7 +367,10 @@ static void map_update(void) {
 			for (int x = r->x - 1; x <= r->x + r->w; ++x)
 				if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 	}
-	last_stop(cx, cy);
+	/* (not where an A may be meant for someone: the last stop's words
+	 * began as a playtester reached the Net Dealer, and took his A,
+	 * session 77) */
+	if (!talk_in_reach()) last_stop(cx, cy);
 	fork_pad_read(cx, cy);
 	final_update();
 }

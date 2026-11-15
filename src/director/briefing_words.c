@@ -378,8 +378,9 @@ const char *status_words(void) {
 /* The last stop before a guardian's arena: the Net Dealer and a heal stand
  * in the room before it or one beside it (net_gen.c), off the arrow's
  * line, and a playtester walked past both to SpoutMan at 120 of 140 HP
- * with 1150 zenny unspent. Stepping into the room before the arena,
- * MegaMan names those not yet used, once, and which way each is. */
+ * with 1150 zenny unspent. On the way in (the room before the arena, its
+ * bridge), the arena within ARENA_AHEAD panels' walk, MegaMan names those
+ * not yet used, once, and which way each is. */
 /* (where a service lies from MegaMan, as L and the map give it, and how
  * far the walk there is: "right here,to the left", "to the lower right",
  * "a long way back,straight up"; where the walk sets off another
@@ -412,11 +413,17 @@ static bool heal_to_name(const NetObj *o, int hp, int max) {
 	return o->type == OBJ_HEAL && !flag_get(LAYER_HEAL_TOLD_FLAG) && !heal_spent() && hp < max;
 }
 
+/* (how near the arena is "just ahead": said on stepping into the room
+ * before it, fourteen panels' walk across an 8x8 room from SpoutMan's,
+ * and the map's mark of him on its frame's edge, a playtester heard it far
+ * off; eight is the bridge and a few steps of the room) */
+#define ARENA_AHEAD 8
+
 void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
-	const Room *a = &layer.rooms[layer.ante];
-	if (cx < a->x || cy < a->y || cx >= a->x + a->w || cy >= a->y + a->h) return;
 	if (emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping || D.map_shown) return;
+	int walk = arena_walk(cx, cy);
+	if (walk < 0 || walk > ARENA_AHEAD) return;
 	D.last_stop_told = true;
 	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
 	const char *dealer = NULL, *heal = NULL;
@@ -433,8 +440,10 @@ void last_stop(int cx, int cy) {
 	int k = arena_ahead(buf, sizeof buf);
 	/* (no running once in is BN6's own, as from its story bosses, unsaid:
 	 * the voice sweep, docs/voice/sweep/net.md) */
-	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
-	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.", dealer);
-	else snprintf(buf + k, sizeof buf - (size_t)k, "Want to heal up first?|@M A Recovery Mr.Prog's %s.", heal);
+	/* (a suggestion, not a question: "Want to get ready first?" asked one
+	 * that took no answer, session 77) */
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.", dealer);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "Let's heal up first!|@M A Recovery Mr.Prog's %s.", heal);
 	talk_start(buf, FACE_MEGAMAN);
 }
