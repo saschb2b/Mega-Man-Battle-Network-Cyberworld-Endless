@@ -79,7 +79,7 @@ Taken per area as looked at, as every laying rule is
 | CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
-| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
+| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9; the rest round its floors is drawn into its rims and its bridges' faces, which no cut separates: its rims' clamps and corner pins, and the long spikes under its bridges, tried past the laid depth and not placed (below) | the bowls |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
 | Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
@@ -475,6 +475,49 @@ The overpass (a raised walkway over the catwalks, its raised field and two
 raised pads), the plaza, the warp discs and the two exit arrows are issue
 #505's kinds 3 to 5, left to the owner; the overpass also crosses over
 other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
+
+## What Undernet Zero sets round its floors (bowls set; measured on the map and the atlas)
+
+Undernet Zero's map (0x95:1, the atlas's `6`) shows its layers 57% of its
+different tile pictures (two seeds a layout: 386 of 673). Its fire bowls
+are on its layers already (above, Pieces the game animates). Of the
+rest, what is no floor (its raised plateaus, their ramps and its two exit
+arrows are issue #505's kinds, left to the owner) is small and drawn into
+the floor's own first-layer tiles, so no cut here separates it:
+
+- **Clamps on its plateaus' upper rims**, a pale clamp at every join of
+  two panels along an upper edge (2 by 1 tiles, some 50 in the map).
+  Layers draw a plain stud at those joins.
+- **Pins at its plateaus' left and right corners** (a tile each, some 40).
+- **Two long spikes under each bridge segment**, hanging from one face (a
+  tile wide, some 60 in the map). Layers draw a row of short stubs under
+  both faces of a bridge instead, and no tips: the map draws the spikes
+  deeper (about 27 pixels under a panel's edge) than its tiles are laid
+  (22: `tl_calibrate` keeps only the legs seen under a quarter of the
+  faces, and the spikes hang under the bridges alone).
+- **Bowls over a rim**: 16 tiles where a bowl and the rim behind it are
+  drawn in one tile; a bowl set whole draws them where it stands so.
+
+The cut behind a floor (`behind_learn`) finds nothing there: switched on
+for a probe, the area's 13 looks were its bowls alone, as without it. The
+clamps and pins are joined into the rim's tiles, which they share, so
+neither it nor scenery takes them.
+
+The spikes were tried as a cut of their own (15 November 2026): the
+first-layer tiles under a floor past the laid depth, a tile to eight,
+kept with the panel above them where it is a straight run one panel wide
+(a bridge's), and set under a layer's bridge panel of the same
+neighbourhood where the tile over each of their columns is the one the
+map's root holds. It took 6 looks; on the atlas's layers the tips stood
+under no root of theirs, since the layers lay their bridges' faces with
+stubs, not the map's spike roots, and where an entry matched it was a
+nearly empty tile, so they floated in the void a panel below the bridge.
+Under a plateau's rims and corners (before the cut kept to bridges) they
+hung red posts and broke the picture (21 to 36 breaks on one layer). It
+was taken out. The spikes, and the clamps and pins with them, need the
+bridges and rims laid as the map draws them, which is the laying's
+([the tile test](../../devtools/tile-test.md), Each area's laying), not a
+side piece's.
 
 ## Not built
 
