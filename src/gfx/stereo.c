@@ -161,11 +161,16 @@ float stereo_depth(int row) {
 	return d < 0 ? 0 : d > 1 ? 1 : d;
 }
 
-/* (the map's floor from 0.15 at the frame's last row to 0.6 at its first:
- * the background's 1 well behind it all) */
-#define MAP_NEAR 0.15f
-#define MAP_FAR  0.6f
+/* (the floor tilted from the screen at the frame's last row to three
+ * quarters of the depth at its first, and the moving background tilted
+ * behind it, from half to all of it: a floor tilted from 0.15 to 0.6 and
+ * the background a wall at 1, the owner saw it flat, 2026-11-15) */
+#define MAP_NEAR 0.0f
+#define MAP_FAR  0.75f
+#define SKY_NEAR 0.5f
+#define SKY_FAR  1.0f
 float stereo_map_depth(int row) { return MAP_NEAR + (MAP_FAR - MAP_NEAR) * stereo_depth(row); }
+float stereo_sky_depth(int row) { return SKY_NEAR + (SKY_FAR - SKY_NEAR) * stereo_depth(row); }
 
 float stereo_body_depth(const StereoBox *b) { return stereo_map_depth(b->y1 - 1); }
 
@@ -201,8 +206,8 @@ static void gap_fills(const uint32_t *line, const StereoRow *r, float s, const E
 void stereo_compose(const StereoPicture *p, int eye, float sep, int scale, uint32_t *out) {
 	int w = STEREO_W * scale, all = 1 << STEREO_MAP | 1 << STEREO_SKY | 1 << STEREO_SPRITE;
 	memset(out, 0, sizeof *out * (size_t)w * (size_t)(STEREO_H * scale));
-	float sky = stereo_shift(eye, sep, STEREO_SKY_DEPTH);
 	for (int y = 0; y < STEREO_H; ++y) {
+		float sky = stereo_shift(eye, sep, stereo_sky_depth(y));
 		const uint32_t *line = &p->picture[y * STEREO_W];
 		const uint8_t *part = &p->part[y * STEREO_W];
 		Eye e = { out, w, y * scale, scale };

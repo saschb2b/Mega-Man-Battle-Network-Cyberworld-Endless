@@ -111,7 +111,8 @@ static bool make(Present3dsStereo *out) {
 	float sep = SEP_MOST * slider();
 	out->map_first = stereo_shift(1, sep, stereo_map_depth(0));
 	out->map_last = stereo_shift(1, sep, stereo_map_depth(STEREO_H - 1));
-	out->sky = stereo_shift(1, sep, STEREO_SKY_DEPTH);
+	out->sky_first = stereo_shift(1, sep, stereo_sky_depth(0));
+	out->sky_last = stereo_shift(1, sep, stereo_sky_depth(STEREO_H - 1));
 	out->sky_on = st->sky;
 	out->nbodies = st->bodies.n < PRESENT3DS_BODIES ? st->bodies.n : PRESENT3DS_BODIES;
 	for (int b = 0; b < out->nbodies; ++b) {

@@ -182,8 +182,8 @@ static void eye_draw(const Present3dsStereo *st, int eye, const Place *p) {
 		alpha_test(true, GPU_LESS, 0x40);
 		shear_to(p, first, last);
 		C2D_DrawImageAt(all, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
-		C2D_ViewReset();
-		C2D_DrawImageAt(all, p->x0 + (float)eye * st->sky * p->sx, p->y0, 0.5f, NULL, p->sx, p->s);
+		shear_to(p, (float)eye * st->sky_first, (float)eye * st->sky_last);
+		C2D_DrawImageAt(all, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
 		alpha_test(true, GPU_GREATER, 0x40);
 	}
 	shear_to(p, first, last);

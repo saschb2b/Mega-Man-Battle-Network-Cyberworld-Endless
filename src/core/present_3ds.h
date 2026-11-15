@@ -27,9 +27,9 @@ void present3ds_bottom_show(bool on);
 /* The 3D screen (docs/engine/stereo.md), with Options' 3D depth on: each
  * eye's picture is the canvas's own, its parts told apart by the canvas's
  * alpha (0 the moving background, 0x80 the map, 0xFF what stands) and
- * drawn by the GPU at their depths: the background moved by `sky` (where
- * `sky_on`), the map sheared from `map_first` at the first row to
- * `map_last` at the last, each body (its box on the canvas, x1 and y1 past
+ * drawn by the GPU at their depths: the background sheared from
+ * `sky_first` at the first row to `sky_last` at the last (where
+ * `sky_on`), the map from `map_first` to `map_last`, each body (its box on the canvas, x1 and y1 past
  * its last) by its own, the flat spans unmoved, a row's span i from x[i]
  * to x[i + 1] (the last to the canvas's edge). The shifts are the right
  * eye's, in the canvas's pixels (the left's the other way). */
@@ -42,7 +42,7 @@ typedef struct {
 } Present3dsRow;
 typedef struct {
 	Present3dsRow row[160];
-	float map_first, map_last, sky;
+	float map_first, map_last, sky_first, sky_last;
 	bool sky_on;
 	int nbodies;
 	int16_t box[PRESENT3DS_BODIES][4];

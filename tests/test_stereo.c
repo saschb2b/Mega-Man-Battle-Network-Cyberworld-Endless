@@ -78,8 +78,10 @@ static void test_rows(void) {
 
 static void test_depth(void) {
 	CHECK(stereo_depth(STEREO_H - 1) == 0.0f && stereo_depth(0) == 1.0f, "stereo: the last row 0, the first 1");
-	CHECK(stereo_map_depth(STEREO_H - 1) > 0.1f && stereo_map_depth(0) < 0.7f && stereo_map_depth(0) > stereo_map_depth(80), "stereo: the map tilted back, short of the background");
-	CHECK(stereo_shift(-1, 10.0f, STEREO_SKY_DEPTH) == -5.0f && stereo_shift(1, 10.0f, STEREO_SKY_DEPTH) == 5.0f, "stereo: the background 5 each way");
+	bool behind = true;
+	for (int y = 0; y < STEREO_H; ++y) behind = behind && stereo_sky_depth(y) >= stereo_map_depth(y) + 0.2f;
+	CHECK(stereo_map_depth(STEREO_H - 1) == 0.0f && stereo_map_depth(0) > stereo_map_depth(80) && behind, "stereo: the map tilted back from the screen, the background behind it at every row");
+	CHECK(stereo_shift(-1, 10.0f, stereo_sky_depth(0)) == -5.0f && stereo_shift(1, 10.0f, stereo_sky_depth(STEREO_H - 1)) == 2.5f, "stereo: the background tilted, 5 each way at the top, 2.5 at the foot");
 	StereoBox b = { 100, 60, 116, 76 };
 	CHECK(stereo_body_depth(&b) == stereo_map_depth(75), "stereo: a body at the map's depth at its feet");
 }
@@ -129,7 +131,8 @@ static void test_compose(void) {
 	StereoPicture p = { picture, part, &f, &bodies, true };
 	stereo_compose(&p, -1, 10.0f, 1, eye[0]);
 	stereo_compose(&p, 1, 10.0f, 1, eye[1]);
-	CHECK(eye[1][100 * STEREO_W + 25] == picture[100 * STEREO_W + 20] && eye[0][100 * STEREO_W + 15] == picture[100 * STEREO_W + 20], "stereo: the background 5 each way");
+	CHECK(eye[1][0 * STEREO_W + 25] == picture[0 * STEREO_W + 20] && eye[0][0 * STEREO_W + 15] == picture[0 * STEREO_W + 20], "stereo: the background's top 5 each way");
+	CHECK(eye[1][159 * STEREO_W + 23] == picture[159 * STEREO_W + 20] && eye[0][159 * STEREO_W + 18] == picture[159 * STEREO_W + 20], "stereo: the background's foot 2.5 each way");
 	int at = (int)floorf(150.0f + stereo_shift(1, 10.0f, stereo_map_depth(80)) + 0.5f);
 	CHECK(eye[1][80 * STEREO_W + at] == picture[80 * STEREO_W + 150], "stereo: the map at its row's depth");
 	int body = (int)floorf(105.0f + stereo_shift(1, 10.0f, stereo_body_depth(&bodies.box[0])) + 0.5f);

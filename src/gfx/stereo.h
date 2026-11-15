@@ -71,8 +71,10 @@ enum { STEREO_MAP, STEREO_SKY, STEREO_SPRITE };
 /* How far up the frame a row lies, from 0 (its last row) to 1 (its first) */
 float stereo_depth(int row);
 /* The depths, from 0 (at the screen) to 1 (the deepest): the moving
- * background's, the map's at a row, and a body's (the map's at its feet) */
-#define STEREO_SKY_DEPTH 1.0f
+ * background's and the map's at a row, each tilted back by its rows, the
+ * background behind the map at every row, and a body's (the map's at its
+ * feet) */
+float stereo_sky_depth(int row);
 float stereo_map_depth(int row);
 float stereo_body_depth(const StereoBox *b);
 /* ... and how far an eye (-1 the left, +1 the right) sees what lies at a
@@ -80,8 +82,8 @@ float stereo_body_depth(const StereoBox *b);
 float stereo_shift(int eye, float sep, float depth);
 
 /* One eye's picture (240x160 at `scale`, nearest) of the frame, drawn as
- * the 3DS's GPU draws it: the background at its depth (where `sky`), the
- * map at its rows' (the gap a part leaves filled from beside it), each
+ * the 3DS's GPU draws it: the background at its rows' depth (where `sky`),
+ * the map at its rows' (the gap a part leaves filled from beside it), each
  * body at its own, the flat spans unmoved. For a look at the depth on a
  * system without a 3D screen (CYBERWORLD_STEREO_SHOT) and the tests. */
 typedef struct {

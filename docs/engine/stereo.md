@@ -46,8 +46,8 @@ So the picture is three kinds of thing, each at a depth of its own:
 
 | What | Its depth (the eyes' parting with the slider at its top, in the frame's pixels) |
 | --- | --- |
-| The moving background: BG3 on a net layer and behind a battle's field (mGBA's tag on each pixel of the core's picture, BG3's or the backdrop's) | The deepest, 10 |
-| The map: the floor's backgrounds, the sprites lying on it (priority 3, and the one-colour blob BN6 lays under one who stands), blended ones, and what the engine draws over the game | By its row, tilted back as BN6's camera looks down on it: 1.5 at the last row, 6 at the first, so the farthest floor still stands 4 in front of the background |
+| The moving background: BG3 on a net layer and behind a battle's field (mGBA's tag on each pixel of the core's picture, BG3's or the backdrop's) | Tilted back by its rows behind the map: 5 at the last row, 10 at the first |
+| The map: the floor's backgrounds, the sprites lying on it (priority 3, and the one-colour blob BN6 lays under one who stands), blended ones, and what the engine draws over the game | By its row, tilted back as BN6's camera looks down on it: 0 at the last row (at the screen, as the HUD), 7.5 at the first, the background 2.5 to 5 behind it at every row |
 | What stands: each sprite drawn plainly (not blended, not lying), outside the HUD's places; sprites that touch or overlap joined into one body (a Navi's or a virus's parts) | Upright, the whole body at the map's depth under its feet (its box's last row): its head no deeper than its feet |
 | The HUD's sprites: those in the HP's corner, in an open chat box's rows and in a battle's top 40 rows (depth lighting's rules) | Flat, at the screen, each by its box |
 | BG0's tiles (the chat's text) and those of a BG3 in front of the map's backgrounds (a battle's Custom screen) | Flat, at the screen, each 8x8 cell of the frame with a pixel of theirs |
@@ -91,7 +91,7 @@ pixel's part; `src/core/present_3ds.c` draws the eyes.
      quad sheared by the map's rows (citro2d's view shear: the first
      row's shift falling evenly to the last's), filling where the
      background's own move uncovers what no picture shows, then as one
-     quad moved by the background's depth;
+     quad sheared by its own rows' depth;
    - the map and what stands (passing over 0x40), one quad sheared as
      the map; the gaps each world span leaves beside a flat one, filled
      with its edge's column drawn wide;
@@ -142,7 +142,12 @@ screen ([headless captures](../devtools/headless-shot.md)). On a layer of
 MegaMan by 4 at his head and his feet alike, the floor under him by 4
 and its nearest rows by 3, the HP's box by none; in a battle the field's
 background stood behind the panels, MegaMan and the Gunner upright on
-them.
+them. That pair's background was a wall at one depth, and its floor
+tilted from 1.5 to 6: the owner, 2026-11-15, on the 3DS: "the moving
+background looked good before in 3d. now it just flat". With the
+background tilted by its rows again and the floor from the screen to
+7.5, the pair parts the background's top by 9, MegaMan by 3 at head and
+feet, the HP's box by none.
 
 ## Its cost
 
