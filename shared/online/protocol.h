@@ -130,8 +130,8 @@
 #define ONLINE_TEAM_SIDE_BY_SIDE 1    /* ... two MegaMen a side on one field */
 #define ONLINE_STANDS_SIDE_BY_SIDE 255 /* STANDS's bout byte for a side-by-side battle (a relay's bout its number) */
 
-/* (protocol v19, issue #589: the shared dive, docs/online/shared-dive.md;
- * shared/online/README.md, Protocol v19) */
+/* (protocol v19, issue #589: the shared dive; shared/online/README.md,
+ * Protocol v19) */
 #define ONLINE_WEEK_PARTY 2           /* WEEK_BOARD's entry flags: a guardian of the dive fought in a party */
 #define ONLINE_HELLO_NO_ARENA 8192    /* HELLO's channel word: the game's system cannot run the Arena (a linked fighter) */
 #define ONLINE_PEER_DIVING 128        /* SNAPSHOT's per-peer byte, bit 7: he dives (a dive room's peers) */

@@ -419,7 +419,7 @@ def stands(entries):
     return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
 
 
-# -- the shared dive (protocol v19, issue #589; docs/online/shared-dive.md) --
+# -- the shared dive (protocol v19, issue #589; shared/online/README.md, Protocol v19) --
 
 def name16(name):
     return name.encode("ascii")[:16]

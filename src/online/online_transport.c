@@ -42,7 +42,10 @@ static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
 static bool mail(uint8_t kind) {
 	return kind == ONLINE_TRADE_STATE || kind == ONLINE_BOARD || kind == ONLINE_WEEK_BOARD || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
 		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH || kind == ONLINE_STANDS || kind == ONLINE_WATCH_STATE ||
-		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS || kind == ONLINE_TEAM_STATE || kind == ONLINE_ARENA_SEAT;
+		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS || kind == ONLINE_TEAM_STATE || kind == ONLINE_ARENA_SEAT ||
+		/* (the shared dive's, v19: the Square's games hear its feed, DIVERS and WEEK_SPLITS too; dive_wire.h reads them) */
+		(kind >= ONLINE_DIVE_ROOM && kind <= ONLINE_DIVERS) || kind == ONLINE_CREW_STATE || kind == ONLINE_QUEUE_STATE ||
+		kind == ONLINE_PARTY_HP || kind == ONLINE_WEEK_SPLITS;
 }
 
 /* A dropped link (issue #153, online_transport.h): a link welcomed and then

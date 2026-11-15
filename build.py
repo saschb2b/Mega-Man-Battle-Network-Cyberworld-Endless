@@ -2912,7 +2912,7 @@ def lint_dead(update):
         links[target] = run.stdout
     ensure_image()
     test_bins = ' '.join('build/lint/' + name for name in
-                         ('test_core', 'test_emu', 'test_online_transport'))
+                         ('test_core', 'test_emu', 'test_online_transport', 'test_online'))
     test = subprocess.run(docker_run() +
                           ['--rm', '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src', IMAGE,
                            'sh', '-c', f'rm -f {test_bins} && '

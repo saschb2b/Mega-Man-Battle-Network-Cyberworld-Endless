@@ -1,6 +1,6 @@
 """The guardians' doors' queues and the party battles of the shared dive
-(protocol v19, issue #589; docs/online/shared-dive.md, The owner's
-decisions; shared/online/README.md, Protocol v19).
+(protocol v19, issue #589, the owner's calls on the door and the fight;
+shared/online/README.md, Protocol v19).
 
 A door's queue is kept by its layer (dive.py's room key: week, seed,
 depth, side and way, every instance of it): a diver on that layer joins

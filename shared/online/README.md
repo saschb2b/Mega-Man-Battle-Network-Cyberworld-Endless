@@ -1,20 +1,20 @@
-# Net Square protocol v18
+# Net Square protocol v19
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v18`. The server also
+`/presence` with subprotocol `cyberworld.presence.v19`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
 
 | Message | Direction | Payload after the one-byte type |
 | --- | --- | --- |
-| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1, then BN4 Red Sun's (v17; each all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below; v18: bit 14, `hello_one_extra` 16384, the game's system reads one extra ROM beside BN6's at most), u8 name length, name bytes |
+| HELLO (1) | client → server, first | u16 protocol, u16 SQUARE_MAKE, u32 SQUARE_HASH, 4-byte ROM game code, 20-byte ROM SHA-1 (BN6's), 4-byte and 20-byte BN5 Team Colonel's game code and SHA-1, then BN4 Red Sun's (v17; each all zeros where the game has not its ROM), 16-byte private guest key, u16 requested channel (0 chooses one; its top bit, `hello_resume` 32768, takes back a place held: below; v18: bit 14, `hello_one_extra` 16384, the game's system reads one extra ROM beside BN6's at most; v19: bit 13, `hello_no_arena` 8192, the game's system cannot run the Arena, a party's linked fighter), u8 name length, name bytes |
 | WELCOME (2) | server → client | u32 world seed, u32 session player ID, u16 tick Hz, u8 room capacity, u16 channel, 16-byte public identity, u16 channel count, u32 the week's seed (never 0), u16 the week's number (weeks since Monday 5 January 1970, `week_epoch`) |
 | STATE (3) | client → server | i32 x, i32 y, i32 z in whole world units, u8 facing (0..7) |
-| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; v18: bit 6, `roms_one_extra`, his system reads one extra ROM at most; no other bit) |
+| SNAPSHOT (4) | server → client | u8 peer count, then 50 bytes per peer: u32 session ID, 16-byte public identity, three i32 coordinates, u8 facing, 16-byte zero-padded name, u8 ROMs and more (bit 0, `roms_bn5`: his game has BN5 Team Colonel's ROM; v17: bit 5, `roms_bn4`, BN4 Red Sun's; v13: bits 1-2, from `busy_shift`, what he is busy with, 0 free, `busy_battle` 1 a NetBattle under way (his own or his team match's), `busy_watch` 2 watching one, `busy_trade` 3 a trade; bits 3-4, from `link_shift`, his link's bars from the round trip his PING said, 0 unknown, 3 under `link_good_ms` (100), 2 under `link_fair_ms` (200), else 1; v18: bit 6, `roms_one_extra`, his system reads one extra ROM at most; v19: bit 7, `peer_diving`, he dives: a dive room's peers, never a Square channel's; every bit has its meaning) |
 | ERROR (5) | server → client | u16 reason code, at most 96 printable ASCII bytes |
 | PING (6) / PONG (7) | client → server / server → client | u32 client clock value, echoed unchanged (PONG: 5 bytes); since v13 PING is `ping_bytes` (7): the clock, then u16 the sender's round trip in ms as it measures it (0 unknown; a game on the server's own machine says 1), for its link's bars in the others' SNAPSHOT. A 5-byte PING is still answered, its round trip unknown |
 | PROFILE (8) | client → server | 69-byte public profile, described below |
@@ -27,14 +27,14 @@ side is behind, rather than a refused upgrade (v10).
 | TRADE (15) | client → server | u8 action (1 propose, 2 answer, 3 accept, 4 cancel, 5 take a board offer), u32 reference (a proposal's or a take's target session ID, else the trade's ID), the chip given (u16 id 1..511, u8 code 0..26, 26 the `*`), the chip taken (the same; zero in a proposal; a take's is the offer's chip) |
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
 | ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over, 5 `arena_seen` (v13): the challenge's question up on the challenged's screen, from him alone, once), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8), u8 a team challenge's format (v15: `team_relay` 0, `team_side_by_side` 1; else 0, and a lone challenge's is taken as 0) |
-| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; else zeros) |
+| ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2; v19: a party battle's, `arena_party` 2 on one field, `arena_linked` 3 a linked fighter), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; v19: a party's, its seats, zeros past them; else zeros); v19's stage 6, `arena_seat_gone`: a party's seat gone, its side byte that seat, the other his session |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
 | ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
-| WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0) |
-| WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won), u16 minutes |
+| WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0), u8 (v19) the acts whose guardian was fought in a party, bit 0 act 1 to bit 3 act 4, none past the dive's act |
+| WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won; v19: bit 1 `week_party`, a guardian of the dive fought in a party), u16 minutes |
 | STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle; v15: `stands_side_by_side`, 255, a side-by-side battle) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
@@ -44,12 +44,28 @@ side is behind, rather than a refused upgrade (v10).
 | BYE (32) | client → server, last | nothing: the game leaves (the pad, R and home, the game closed), so its place is freed at once; a WebSocket close says the same |
 | TEAM (33) | client → server | u8 action (1 ask a player to team up, 2 answer one, 3 split the team or take an ask back, 4 the order), u32 reference (the player asked, the one who asked, 0 for a split, the lead's session for the order), u8 value (an answer's 1 yes; else 0) |
 | TEAM_STATE (34) | server → client | u8 stage (1 asked, 2 waiting, 3 formed, 4 split, 5 a match begun, 6 the order shown, 7 a bout called, 8 the bout started, 9 the match over), u32 the partner's session (asked: the asker; waiting: the one asked; split: the other), u32 the team match's ID, u32 the bout under way (its ARENA battle ID, 0 none), four u32 sessions: the recipient's team's two, then the other's, each team's MegaMan up now first (before the order: its captain first; side by side: its captain, the lead), u8 MegaMen standing of the recipient's team, u8 of the other, u8 the bout's number, u8 the result (the match over: 1 won, 2 lost, 3 broken off, 4 drawn; else 0), u16 the staying MegaMan's HP as the last bout's report left it (0 none), u8 the format (v15: 0 the relay, 1 side by side) |
-| ARENA_SEAT (35) | server → client | v15, a 2v2's: u8 the sending seat (0..3), then its ARENA_LOADOUT, ARENA_INPUT or ARENA_HASH as it sent it, to the three other seats |
+| ARENA_SEAT (35) | server → client | v15, a 2v2's: u8 the sending seat (0..3), then its ARENA_LOADOUT, ARENA_INPUT or ARENA_HASH as it sent it, to the three other seats (v19: a party battle's too, to its other party seats; and a linked fighter's PARTY_DAMAGE, to seat 0 alone) |
+| DIVE (36) | client → server | v19: u8 action, then its fields, each action a size of its own (with the type byte): 1 `dive_enter` (u16 week, u32 that week's seed, u8 the layer's depth 1..`week_layers`, u8 its side kind, 0 the main path, else the game's LAYER_* kind, u8 its way, the layer's area id: 11 bytes), 2 `dive_leave` (nothing: 2), 3 `dive_end` (u8 how, `dive_deleted` 1 or `dive_won` 2, i16 x, i16 y, i16 z within `coordinate_limit`, u16 what deleted MegaMan, 0 unknown: 11), 4 `dive_found` (u8 the Mystery Data's index on the layer: 3), 5 `dive_phrase` (u8 a phrase ID, i16 x, y, z: 9), 6 `dive_wave` (u32 a phrase's ID, the server's: 6), 7 `dive_split` (u8 the battle's index on the layer, u16 tenths of a second (not 0), u8 BN6's Busting Level 1..`busting_most`, 11 for S, u8 flags, bit 0 `split_guardian` the layer's guardian, u8 the party's size 1..`party_most`: 8) |
+| DIVE_ROOM (37) | server → client | v19, an enter's answer: u16 week, u8 depth, u8 side, u8 way, u16 the room's instance (1 the first), u8 divers in it, the recipient among them (9 bytes) |
+| DIVE_TRACES (38) | server → client | v19: u8 kind, u8 count, then count entries of that kind (as many messages as they take): 1 `trace_marks` (16-byte name, i16 x, y, z, u16 cause, u8 how: 25 bytes), 2 `trace_phrases` (u32 ID, 16-byte name, u8 phrase, i16 x, y, z, u16 Waves: 29), 3 `trace_finds` (u8 index, 16-byte name of its first finder this week: 17), 4 `trace_opened` (u8 an index opened this week: 1), 5 `trace_splits` (u8 battle index, u8 party size, u16 tenths, u8 Busting Level, u8 flags, 16-byte name: the quickest bust of that battle at that size: 22), 6 `trace_gone` (u32 a phrase's ID, gone: 4) |
+| DIVE_PLACE (39) | server → client | v19, a split's answer: u8 battle index, u8 party size, u16 the tenths sent, u16 their place among this week's busts of that battle at that size (each identity's quickest), u16 how many busted it, u16 the quickest's tenths, 16-byte his name (27 bytes) |
+| DIVE_FEED (40) | server → client | v19: u8 kind (`feed_deleted` 1, `feed_won` 2, `feed_guardian` 3 a party's guardian down, `feed_flare` 4 a diver waits at a door), 16-byte name, u8 depth, u8 side, u8 way (a flare's: the door's), u16 cause (a deletion's), u8 party size (a guardian's: 2..4; else 0): 24 bytes |
+| DIVERS (41) | server → client | v19: u16 how many dive now, u8 count (0..`divers_most`, 16), then 19 bytes a diver, the deepest first: 16-byte name, u8 depth, u8 act, u8 flags (bit 0 `divers_fighting`, in a party battle) |
+| CREW (42) | client → server | v19: u8 action (1 `crew_ask`, 2 `crew_answer`, 3 `crew_split` (or an ask taken back), 4 `crew_way`, 5 `crew_battle`, 6 `crew_join`), u32 reference (the diver asked, the asker, 0, 0, 0, the battle's owner), u8 value (an answer's 1 yes; a battle's its index on the layer; else 0), u8 depth, u8 side, u8 way (`crew_way`'s: the fork's portal he stands on, depth 0 none): 10 bytes |
+| CREW_STATE (43) | server → client | v19: u8 stage (1 `crew_asked`, 2 `crew_waiting`, 3 `crew_formed` (the crew as it stands, its ways), 4 `crew_split_up`, 5 `crew_offer` a crewmate's battle offered, 6 `crew_alone` the battle's owner fights alone), u32 the other (asked: the asker; waiting: the one asked; split: who split; offer: the owner), u8 value (an offer's battle index), then four members, zeros past them: u32 session, 16-byte name, u8 depth, u8 side, u8 way (23 bytes each; 99 in all) |
+| QUEUE (44) | client → server | v19: u8 action (1 `queue_join`, 2 `queue_leave`, 3 `queue_start`, 4 `queue_pass`), u8 depth, u8 side, u8 way (a join's door: his layer's; else zeros): 5 bytes |
+| QUEUE_STATE (45) | server → client | v19: u8 stage (1 `queue_waiting`, 2 `queue_started`, 3 `queue_out`, 4 `queue_alone`), u8 depth, u8 side, u8 way, u8 the recipient's place (1 the leader, 0 none), u8 count, then four entries, zeros past them: u32 session, 16-byte name, u8 flags (bit 0 `queue_arena`, his system runs the Arena): 21 bytes each, 91 in all |
+| PARTY_DAMAGE (46) | client → server → seat 0 | v19, a linked fighter's: u32 battle ID, u16 his damage to the guardian so far, u16 his HP (9 bytes); seat 0 hears it as ARENA_SEAT, the sender's seat first |
+| PARTY_HP (47) | client → server → linked fighters | v19, seat 0's: u32 battle ID, u16 the guardian's HP, u16 its max HP (9 bytes), to every linked fighter of the battle as sent |
+| WEEK_SPLITS (48) | server → client | v19, with every WEEK_BOARD: u16 this week, then sixteen entries, act 1's first, each act's alone then parties of two, three and four: u16 tenths of the week's fastest bust of that act's guardian (0 none), 16-byte name (291 bytes) |
 
 HELLO's fixed prefix is 76 bytes, WELCOME is 38, CARD is 90, TRADE 12,
-TRADE_STATE 32, ARENA 9 (8 before v15), ARENA_STATE 45 (28 before v15), OFFER 5, WEEK_POST 17,
+TRADE_STATE 32, ARENA 9 (8 before v15), ARENA_STATE 45 (28 before v15), OFFER 5, WEEK_POST 18 (17 before v19),
 ARENA_STATUS 20, WATCH 6, WATCH_STATE 24 (15 before v15), TEAM 7 and TEAM_STATE 37 (36 before v15); a STANDS entry is 63 (62 before v12) and
-WATCH_KEYS's head 12 (each count with its type byte). The
+WATCH_KEYS's head 12; v19's: DIVE by action as its row says, DIVE_ROOM 9, DIVE_PLACE 27,
+DIVE_FEED 24, DIVERS's head 4 and its entry 19, CREW 10, CREW_STATE 99,
+QUEUE 5, QUEUE_STATE 91, PARTY_DAMAGE and PARTY_HP 9 each, WEEK_SPLITS
+291, DIVE_TRACES's head 3 (each count with its type byte). The
 profile fields are u16 HP, u16 maximum HP, u8 attack, u8 speed, u8 charge,
 u16 Souls mask, u16 Crosses mask, u16 depth, u8 act, u16 best depth,
 u32 title marks, and 49 row-major NaviCust color cells (a 7×7 grid).
@@ -64,7 +80,11 @@ Surprised, Thinking, Bow, Got it!, Buster, Phew..., I'm beat, Spin,
 Zapped). The client owns their localized words and visuals (MegaMan's
 BN6 poses and sounds: docs/online/square/emotes.md). No arbitrary chat text is accepted. NOTICE codes are
 10 channel unavailable, 11 muted, 12 social cooldown and 13 Inspect
-target unavailable. ERROR closes the connection; it includes version
+target unavailable; the shared dive's (v19) 30 `notice_dive_out` (that
+takes a dive), 31 `notice_dive_in` (not on a dive), 32
+`notice_dive_wait` (traces too fast), 33 `notice_trace_gone` (that
+phrase is gone), 34 `notice_crew` (a crew's ask refused) and 35
+`notice_queue` (a door's queue refused). ERROR closes the connection; it includes version
 and identity mismatch, rate violation and moderation. ERROR 12 tells a
 session that a newer connection with the same profile replaced it.
 ERROR 2 (another protocol) and 3 (another Square generator) now say the
@@ -419,6 +439,105 @@ held from the battle's two players: they hear nothing of the stands until
 their battle is over. ARENA_STATUS is taken from the cable's first player
 of a started battle, at most twice a second but for the one naming the
 winner. Nothing a spectator sends reaches the battle.
+
+Protocol v19 (issue #589): **the shared dive**, the server's side and
+the wire ahead of the game's. The week's net is dived with everyone
+diving it at the same time; this version carries it.
+
+**Rooms by layer.** DIVE enter names a layer of this week's or the
+last's net (its seed that week's: NOTICE 23 and 24, as WEEK_POST's) and
+takes the NetPass's DeepNet stamp, the full set (NOTICE 28). The
+session leaves its Square channel as CHANNEL does (its trade, battle,
+team and watching end) and stands in a room of that layer, keyed by
+(week, seed, depth, side, way): an instance of at most the server's
+room capacity (eight), a new one where those are full, numbered from 1
+in DIVE_ROOM. A room is a channel of its own past every Square channel,
+so STATE, SNAPSHOT, SOCIAL and INSPECT work in it as in the Square (the
+layer's world units, bounded as ever), and no Square sees a diver; a
+room's SNAPSHOT marks each peer `peer_diving`. DIVE enter again moves
+him to another layer's room; DIVE leave, or CHANNEL, goes back to a
+Square channel with a fresh WELCOME, the dive's crew, queue and battle
+left. A diver's TRADE, OFFER, TEAM, WATCH and ARENA challenge or accept
+are answered NOTICE 31 (`notice_dive_in`); DIVE's other actions, CREW
+and QUEUE from a session not in a room NOTICE 30 (`notice_dive_out`). A
+dropped diver's place is held in no room: his resume's WELCOME names a
+Square channel, and his game dives again.
+
+**Traces of the week**, kept by layer (every instance of it) for this
+week and the last, pruned past them, each list capped at `traces_most`
+(32, oldest out; a battle's busts 64 identities, the slowest out;
+a week's layers 512, the one touched longest ago out), appended to the
+state folder's `dives.jsonl` and read back at the start as `weeks.jsonl`
+is (`server/cyberworld_server/traces.py`). Entering a room sends the
+layer's in DIVE_TRACES (marks, phrases, first finds, the opened set,
+splits), and each new one goes to every diver of the layer as it
+happens: an end's mark (a win only on layer `week_layers`, NOTICE 25
+otherwise); a find, its index added to the opened set and, the first
+this week, its finder named; a phrase, one a diver a layer (his new one
+replaces his last: `trace_gone`) and a Wave at one by its ID, counted
+(a phrase gone: NOTICE 33, `notice_trace_gone`); a split, its battle's
+quickest bust at that party size kept by identity, answered with the
+sender's place (DIVE_PLACE). A muted identity leaves no phrase (NOTICE
+11), a hidden one no trace (NOTICE 26), and traces come at SOCIAL's
+burst and refill (NOTICE 32, `notice_dive_wait`). A moderator's
+`--admin hide` takes that week's marks, phrases and first finds of that
+identity off every layer (the opened set names nobody and stays), and
+`forget` his traces of every week.
+
+**The feed and the pack.** An end goes to every diver of that week and
+every Square session as DIVE_FEED (deleted or won, the name, the depth,
+the cause), and so does a door's party battle won (seat 0's report's
+winner the first side) with the party's size. A diver joining a door's
+queue is a flare to every diver of the week behind him in the same act
+(a lower depth, three layers an act, the Nest the fourth), the door's
+depth, side and way with it. DIVERS goes to every session after each
+WELCOME and, where it changed, at most every `divers_ms` (2000).
+
+**Crews** (`crews.py`), modelled on TEAM: an ask only to a diver of the
+same room (NOTICE 17 otherwise; 16 where an ask is out already; 34,
+`notice_crew`, where the other is in a crew or the crew holds
+`party_most`), answered within 30 seconds; any member asks. A crew lasts
+across layers until a member splits up (the rest go on where two or more
+stay), leaves the dive or the server, or ends his dive (DIVE end).
+`crew_way` tells every member which fork's portal each stands on, so each
+game opens it only when all agree. `crew_battle` offers a crewmate's
+random battle to his crewmates in the same room; `crew_join` answers
+within `crew_join_ms` (3000). When everyone offered has joined, or the
+window ends, a party battle starts, the owner seat 0 and the joiners
+after him; with nobody, the owner is told `crew_alone`.
+
+**The door's queue and party battles** (`party.py`). QUEUE join names
+the door of the sender's layer (NOTICE 35, `notice_queue`, for another,
+for a queue of `party_most` already, or for a start or a pass from
+anyone but its leader). The first in it leads and starts when he likes;
+alone, he is told `queue_alone`. His game's pass, after a minute idle,
+puts him last. A start makes a party battle: a battle ID from the
+Arena's count and seats in queue order, each told with ARENA_STATE START
+(its seat, the delay from the seats' round trips, its format, the
+seats' sessions) after QUEUE_STATE started. A seat's format is
+`arena_party` where both its system and seat 0's run the Arena, else
+`arena_linked` (HELLO's `hello_no_arena`: the New 3DS and the PSP join
+as linked fighters, their own battle, their damage into the field's
+guardian). Party seats' ARENA_LOADOUT, ARENA_INPUT and ARENA_HASH go to
+the other party seats as ARENA_SEAT; a linked fighter's PARTY_DAMAGE
+goes to seat 0 as ARENA_SEAT; seat 0's PARTY_HP goes to the linked
+fighters. Seat 0 reports with ARENA_STATUS and ends the battle with ARENA
+over (ARENA_STATE ended to every seat still in it); a seat's ARENA leave,
+its leaving the dive or its dropped link is told to the others as
+ARENA_STATE `arena_seat_gone`, and the battle goes on for the rest, each
+game finishing its own. Party battles are busy (SNAPSHOT's busy bits,
+DIVERS's flag) and need no `arena` switch on the server. The stands do
+not show them yet.
+
+**The Board.** WEEK_POST grows its last byte, the acts whose guardian
+was fought in a party (none past the dive's act: NOTICE 25), kept with
+the best entry; WEEK_BOARD's entry flags carry it as `week_party`.
+WEEK_SPLITS follows every WEEK_BOARD and goes to everyone when a
+guardian's split changes the week's fastest of its act and size.
+
+A v18 game would refuse a SNAPSHOT with bit 7, a DIVERS or a WEEK_SPLITS
+and send a WEEK_POST a byte short, hence the version: client and server
+go out together (ERROR 2 or 17 for either one older).
 
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's

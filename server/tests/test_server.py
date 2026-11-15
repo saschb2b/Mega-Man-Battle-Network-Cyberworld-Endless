@@ -327,7 +327,18 @@ class ContractTests(unittest.TestCase):
             self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
         self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=3, resume=True, bn5=True, bn4=False, one_extra=True))[2:],
                          (3, bn5 | one, True, False))
-        # (v19: a system that cannot run the Arena says so in the channel word too, clear of the channel and the others)
+        # (v19: its bit clear of the resume's, the one extra's and every channel (256 at most); SNAPSHOT's bit 7, the
+        # last free, clear of the ROMs', busy's and link's bits; every message the dive adds within max_message)
+        spec = protocol.SPEC
+        self.assertFalse(spec["hello_no_arena"] & (spec["hello_resume"] | spec["hello_one_extra"]))
+        self.assertGreater(spec["hello_no_arena"], 256)
+        self.assertEqual(spec["peer_diving"], 0x80)
+        self.assertFalse(spec["peer_diving"] & (spec["roms_bn5"] | spec["roms_bn4"] | spec["roms_one_extra"] | 3 << spec["busy_shift"]
+                                                | 3 << spec["link_shift"]))
+        for size in ("dive_enter_bytes", "crew_state_bytes", "queue_state_bytes", "week_splits_bytes", "dive_place_bytes"):
+            self.assertLessEqual(spec[size], spec["max_message"])
+        self.assertLessEqual(spec["divers_head"] + spec["divers_most"] * spec["divers_entry_bytes"], spec["max_message"])
+        # (a system that cannot run the Arena says so in the channel word too, clear of the channel and the others)
         self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=5, one_extra=True, bn5=True, bn4=False, no_arena=True))[2:],
                          (5, bn5 | one, False, True))
 

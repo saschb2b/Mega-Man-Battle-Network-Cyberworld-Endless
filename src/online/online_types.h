@@ -19,6 +19,7 @@ typedef struct {
 	uint8_t roms;   /* the ROMs his game has besides BN6's: ONLINE_ROMS_BN5 (BN5 Team Colonel's), ONLINE_ROMS_BN4 (BN4 Red Sun's), and ONLINE_ROMS_ONE_EXTRA where his system reads one at most (netpass_peer_has), the server's word */
 	uint8_t busy;   /* what he is busy with (v13): 0 free, ONLINE_BUSY_BATTLE, ONLINE_BUSY_WATCH, ONLINE_BUSY_TRADE, the server's word */
 	uint8_t link;   /* his link's bars as his PING said his round trip (v13): 0 unknown, 1-3 */
+	bool diving;    /* he dives (v19, ONLINE_PEER_DIVING): a dive room's peer, the server's word */
 } OnlinePeer;
 
 typedef struct {

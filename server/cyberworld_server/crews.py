@@ -1,5 +1,5 @@
-"""Crews on the shared dive (protocol v19, issue #589; docs/online/shared-dive.md,
-Crews; shared/online/README.md, Protocol v19), modelled on teams.py.
+"""Crews on the shared dive (protocol v19, issue #589, the owner's calls on
+crews; shared/online/README.md, Protocol v19), modelled on teams.py.
 
 A diver asks another diver of his room to crew up (CREW ask); the other
 answers within ASK_WAIT seconds. A crew is up to party_most divers, the
