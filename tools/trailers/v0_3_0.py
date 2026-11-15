@@ -16,6 +16,7 @@ import shutil
 import sys
 
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont
+import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import trailer as kit  # noqa: E402

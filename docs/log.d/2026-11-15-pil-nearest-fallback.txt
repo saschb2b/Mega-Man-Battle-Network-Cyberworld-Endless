@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T13:40:00Z
+* **Update**: code/tools.md (`tools/pil_nearest.py`'s row: Pillow's nearest resize kept working where Ubuntu's python3-pil 12.1.1-2ubuntu1.5 breaks it).

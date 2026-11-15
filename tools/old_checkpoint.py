@@ -154,6 +154,7 @@ def keep_picture(h, path, name):
     out = os.path.join(h, name + '.png')
     try:
         from PIL import Image
+        import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
         im = Image.open(path).convert('RGB')
         im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(out)
     except Exception:   # (no Pillow: the BMP)

@@ -202,6 +202,7 @@ def talk(h, line, timeout=300):
 
 def picture(paths, out):
     from PIL import Image, ImageDraw
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
     frames = [Image.open(p).convert('RGB') for p in paths]
     if len(frames) == 1:
         img = frames[0].resize((frames[0].width * SCALE, frames[0].height * SCALE), Image.NEAREST)
@@ -388,6 +389,7 @@ def cmd_do(name, rest):
     for i, p in enumerate(seconds):
         if os.path.exists(p):
             from PIL import Image
+            import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
             png = os.path.join(h, 'shots', f'{n:04d}-second{i}.png')
             im = Image.open(p).convert('RGB')
             im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(png)

@@ -223,6 +223,7 @@ def frame(binary, args, env, at, out, whole=0):
     On BN6's ROM alone, but a scene named for BN5 or BN4 (`out`, build.whole_rom_folder) or the ROMs screen with
     the whole folder."""
     from PIL import Image
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
     tmp = os.path.join(ROOT, '.build', 'before', 'shot')
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(os.path.join(tmp, 'data'))
@@ -252,6 +253,7 @@ def frames(binary, args, env, first, last, out):
     the game's 240 x 160 each (30 a second, as build.py's clips); its ROM
     folder as frame()'s."""
     from PIL import Image
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
     tmp = os.path.join(ROOT, '.build', 'before', 'clip')
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(os.path.join(tmp, 'data'))
@@ -298,6 +300,7 @@ def walk_clip(old, new, old_label, new_label, name, args, env, first, last):
 def pair(old, new, old_label, new_label):
     """Both frames at 2x with whole pixels (a whole screen as it came), each under its version."""
     from PIL import Image, ImageDraw, ImageFont
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
     gap, bar = 8, 30
     if old.size == (240, 160):
         old, new = old.resize((480, 320), Image.NEAREST), new.resize((480, 320), Image.NEAREST)
