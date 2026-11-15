@@ -33,11 +33,10 @@ static const char *suffix(unsigned n) {
 	return n % 10 == 1 ? "st" : n % 10 == 2 ? "nd" : n % 10 == 3 ? "rd" : "th";
 }
 
-const char *dive_place_words(unsigned tenths, unsigned place, unsigned count, unsigned best, const char *best_name) {
+const char *dive_place_words(unsigned tenths, unsigned place, unsigned count) {
 	static char s[64];
 	if (place == 1) snprintf(s, sizeof s, "%u.%u sec! Fastest of %u this week!", tenths / 10, tenths % 10, count);
-	else snprintf(s, sizeof s, "%u.%u sec,%u%s of %u. %s:%u.%u", tenths / 10, tenths % 10, place, suffix(place), count,
-		best_name, best / 10, best % 10);
+	else snprintf(s, sizeof s, "%u.%u sec,%u%s of %u this week", tenths / 10, tenths % 10, place, suffix(place), count);
 	return s;
 }
 

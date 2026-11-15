@@ -88,7 +88,7 @@ void dive_splits_frame(void) {
 
 void dive_splits_place(const DivePlace *p) {
 	fprintf(stderr, "dive: battle %u's split: %u of %u, the quickest %u by %s\n", p->index, p->place, p->count, p->best, p->best_name);
-	if (p->place) dive_link_line(dive_place_words(p->tenths, p->place, p->count, p->best, p->best_name));
+	if (p->place) dive_link_line(dive_place_words(p->tenths, p->place, p->count));
 }
 
 unsigned dive_splits_cause(void) { return S.cause; }

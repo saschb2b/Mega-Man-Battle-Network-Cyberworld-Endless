@@ -155,6 +155,80 @@ Verified on `dev`, 15 November 2026:
   it. Seen headless with two games on a local server: both in layer 1's
   room, each seeing the other walk.
 
+- **Mystery Data found** (15 November 2026, `dive_finds.c`, `dive_traces.c`):
+  a data MegaMan opens on a dive layer is told as DIVE found by its index
+  among the layer's (the director's `director_md_count`, `director_md_opened`:
+  BN6's flag `MAPSLOT_MD_FLAG` + index set as the game opens it), the same
+  index on every game since the seed places them (two games on layer 1 of
+  seed 3 logged the same four data at the same places). Once BN6's own box
+  of what MegaMan got has closed, the feed's band names the week's first to
+  open it ("dtB opened this one first", or "First to open this one this
+  week!" where the server's answer names him): BN6 has no place in its own
+  box for a name, and the band is where the dive's news already shows. Data
+  others opened this week and MegaMan has not shimmer: BN6's own small star
+  burst (sprite list 5's `0x05`, `BN6_FX_SPARKLE`, animations 0 and 8 in
+  turn every 90 frames) over the crystal, a puppet in a slot the layer
+  leaves free, since the crystal's palette is shared by every data of its
+  colour and its animation is the game's to run; one sparkle shows, over
+  the nearest such data or phrase. Seen headless with two games: the
+  second's band after the first had opened data 3, and the burst over
+  data 3 on the second's screen before he opened it.
+
+- **Busting splits** (15 November 2026, `dive_splits.c`): a battle on a
+  dive layer won is told as DIVE split: its index among the layer's
+  battles counted from 0 as the layer is entered (the n-th random battle
+  is the same for every diver; a guardian's battle is index 255 for
+  everyone, since each diver meets him after his own count of random
+  ones), its time in tenths from BN6's DeleteTime (`BN6_BATTLE_TIMER`, 60
+  frames a second), BN6's Busting Level as the battle ends
+  (`BN6_BATTLE_BUSTING`, 1-10 and 11 for S), the guardian's flag
+  (`director_guardian_battle`) and a party of 1. The answer, DIVE_PLACE,
+  shows in the band ("17.0 sec! Fastest of 1 this week!", or "21.4
+  sec,3rd of 9 this week"). The battle's strongest foe (a Navi's NameID
+  before a virus's) is kept as the cause a deletion's DIVE end carries.
+  Seen headless: a Mettaur's battle won at 17.0 seconds, Busting Level 3,
+  answered 1 of 1; DiveMan's guardian battle on layer 3 won with the dev
+  menu's Win, sent with the guardian's flag, and WEEK_SPLITS sent to every
+  session after it.
+
+- **Deletion marks and phrases** (15 November 2026, `dive_traces.c`): the
+  room's traces (DIVE_TRACES as the room is entered and as each comes) are
+  kept for the layer, and two puppets in the NPC slots the layer leaves
+  free, taken before the divers' (`dive_traces_more` from `dive_people.c`'s
+  `layer_objs_more`; the layer's own objects and the seed untouched) show
+  the nearest of them within 220 world units: the nearest mark as BN6's
+  skull burst (list 5's `0x07` animation 3, `BN6_FX_BURST`, which holds its
+  last frame), and the nearest phrase, or data others opened, as the
+  sparkle; the marks' slot goes first where the layer leaves room for only
+  one. A on a mark (within 22 units of the point 16 before MegaMan) opens
+  BN6's chat box with MegaMan's words on who fell there and to what (the
+  cause's name from BN6's own, `enemy_name`); A on a phrase shows who left
+  it, the phrase and how many waved back, and MegaMan waves at it once a
+  layer (DIVE wave; his own phrase is read, not waved at). A phrase is
+  left with R on a dive layer's map: the Square's emote strip opens on its
+  phrases page alone (`emote_strip_open_phrases`), and A leaves the one
+  under the cursor on MegaMan's panel (DIVE phrase); B closes it, and SELECT
+  held keeps R for the map and the dev menu. No screen is new: the strip is
+  the Square's own. Seen headless with three games: one left "Nice build!"
+  and another read it and waved (the server's count came back); a game
+  deleted by HeatMan left a mark that the first saw as a skull where he
+  fell, and A on it said who and "By HeatMan...". A deletion ends the run
+  and leaves the scene in one frame, before the link's frame sees it, so
+  the end is now told as the scene is left (`dive_link_scene_left`), and the
+  transport sends what waits in its outbox before its goodbye (a dive's end
+  had been lost behind it).
+
+- **The Board** (15 November 2026, `square_week.c`, `square_week_words.c`,
+  `dive_pack.c`): a "+" after a dive whose guardian was fought in a party
+  (WEEK_BOARD's `week_party`) with a box saying what it means; who dives
+  now ("Diving now:N", then each diver and his layer, a "!" while he
+  fights in a party) from DIVERS; and the week's fastest guardian busts
+  (WEEK_SPLITS: "L3 solo:1.5s dtA", "L10 x3:9.8s ..."), three to a box, in
+  the Board's posts after the deepest dives. Seen headless in the Square
+  while another game dived: "Diving now:1", "dtA:layer 1" (then "layer
+  3"), and "L3 solo:1.5s dtA" after his guardian split. The party mark is
+  held by `tests/test_online.c` alone: no party battle is fought yet.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own

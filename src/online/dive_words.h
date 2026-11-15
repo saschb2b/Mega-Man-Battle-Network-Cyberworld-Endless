@@ -13,8 +13,8 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
  * this week (`mine` he is the first: `name` his own). */
 const char *dive_find_words(const char *name, bool mine);
 /* The band's line for a bust's place among the week's (DIVE_PLACE): its
- * time in tenths, its place of `count`, the quickest's and his name. */
-const char *dive_place_words(unsigned tenths, unsigned place, unsigned count, unsigned best, const char *best_name);
+ * time in tenths, its place of `count`. */
+const char *dive_place_words(unsigned tenths, unsigned place, unsigned count);
 /* A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what
  * (`cause` its name, "" unknown; `navi` a Navi's); `won` a mark of the net cleared. */
 const char *dive_mark_words(const char *name, const char *cause, bool navi, bool won);
