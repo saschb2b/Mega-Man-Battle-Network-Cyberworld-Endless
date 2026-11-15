@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T18:30:00Z
-* **Update**: world/level-design/side-pieces.md (BN5's Oran Area's row and what it sets round its floors: its sprigs behind the brown planks fit no layer, the generated circuits' and hubs' rims standing a tile higher, the behind cut's 4 looks no thing, the rest the owner's kinds), world/level-design/oran-tiles.md (its sprigs, linked).
