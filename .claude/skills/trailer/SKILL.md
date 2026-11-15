@@ -342,6 +342,11 @@ only: `build.py 3ds` renders the banner with it.
    owner's call, as editing a published release is.
 6. Add the trailer to `lessons.md`: its concept, its devices, the owner's
    words on it.
+7. After the tag, YouTube: the youtube-publish skill
+   (`.claude/skills/youtube-publish/`) makes its 4K master with
+   `python3 tools/trailer_youtube.py VERSION`, uploads it to the channel
+   and the trailers' playlist, and writes its id into
+   docs/project/youtube.md.
 
 ## Pitfalls met
 

@@ -87,6 +87,8 @@ the last trailer everywhere; the notes open with it.
   the description where `docs/itch/` changed, the devlog post
   (`tools/itch.py devlog`, posted on itch, then `tools/itch.py record --post
   TAG URL`), and `tools/itch.py check`.
+- A new trailer on YouTube: the youtube-publish skill
+  (`.claude/skills/youtube-publish/`; docs/project/youtube.md).
 - The PS5 catalog: a PR from the owner's fork updating CWEN00001's record
   (version, artifact_url, sha256, icon_url; ps5/README.md, Submitting to
   Prospero Store).

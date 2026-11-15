@@ -124,9 +124,10 @@ wordmark and net and the site's PET colours, nothing from the ROM:
 | Background tile | [itch/background.png](../itch/background.png): the site's PET floor | 48x48 |
 | Screenshots | `.build/itch/NN-NAME.png`: eight of `docs/screenshots` at 4x, whole frames | 960x640 |
 
-itch's trailer field takes YouTube, Vimeo or Sketchfab only, and the
-project has no channel there: the description's GIFs show the game in
-motion, and the trailer itself stays on the website.
+itch's trailer field takes YouTube, Vimeo or Sketchfab only. The
+trailers are on [YouTube](youtube.md) since 15 November 2026; the field
+stays empty until the owner sets it, the description's GIFs showing the
+game in motion and the website the trailer.
 
 ## The theme
 
