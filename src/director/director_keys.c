@@ -1,7 +1,7 @@
 /* The pad on its way to the game (director_keys): A turned to what it
  * means and walked up to it, the guards that hold an A off as a screen
- * changes, the Custom screen's kept L and R, SELECT's map, R in the town, L's
- * briefing; and MegaMan freed from inside an NPC. */
+ * changes, the Custom screen's kept L and R, SELECT's map, R in the town and
+ * on a layer, L's briefing; and MegaMan freed from inside an NPC. */
 #include "director_keys.h"
 
 #include <math.h>
@@ -423,6 +423,17 @@ static bool home_r(uint32_t *keys) {
 	return true;
 }
 
+/* R on a layer, where the run holds BN6's jack-out off (lock_run) and the
+ * game would do nothing: MegaMan's word on the way home. Not through a
+ * chat, a warp or a guardian's staging; the keys as they go on. */
+static uint32_t layer_r(uint32_t keys) {
+	if (talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || D.warping || emu_read8(BN6_WARP_PENDING) != 0 || boss_cinematic() ||
+		boss_fighting() || emu_read8(BN6_MAP_GROUP) < 0x80)
+		return keys;
+	talk_start(jack_out_words(boss_beaten()), FACE_MEGAMAN);
+	return keys & ~KEY_R;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	keys = director_lab_after(keys);
 	talk_only_update();
@@ -450,6 +461,7 @@ uint32_t director_keys(uint32_t keys) {
 	/* (a liberation's board: its own moves and menu, docs/game/liberation/) */
 	if (lib_on()) return lib_keys(keys);
 	if (director_in_town() && r_pressed && home_r(&keys)) return keys;
+	if (!D.town && r_pressed) keys = layer_r(keys);
 	/* on the map L is MegaMan's word on where they are: the game's own
 	 * has no lines for this story */
 	keys &= ~KEY_L;

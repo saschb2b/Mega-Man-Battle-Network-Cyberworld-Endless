@@ -1,7 +1,8 @@
 /* MegaMan's word on R pressed in the town away from its port (docs/voice/rules.md):
  * where the port is, never how to jack in, BN6's own (Rush's bone panels'
  * lesson went in the voice sweep of 19 October 2026: BN6's RushFood, and
- * A named on every layer; docs/voice/sweep/net.md). */
+ * A named on every layer; docs/voice/sweep/net.md); and on R on a layer,
+ * where the run holds BN6's jack-out off: where the way home is. */
 #include "lesson_words.h"
 
 #include <stdio.h>
@@ -29,4 +30,13 @@ const char *port_words(int how, const char *way) {
 	else
 		snprintf(buf, sizeof buf, "@M No port here,Lan!|@M It's by the %s!", town_info()->landmark_at);
 	return buf;
+}
+
+/* R on a layer: BN6's own answer where a jack-out can't be (bn6f
+ * CompText87388A8's "I can't jack out!", MegaMan's), and where the way home
+ * is, which a playtester looked for mid-act to reach the Battle Lab
+ * (docs/world/home/design.md, No way home mid-act) */
+const char *jack_out_words(bool exit_open) {
+	if (exit_open) return "@M I can't jack out here,Lan!|@M But the exit's open. It'll take us home!";
+	return "@M Lan,I can't jack out down here!|@M Our way home's past the guardian!";
 }
