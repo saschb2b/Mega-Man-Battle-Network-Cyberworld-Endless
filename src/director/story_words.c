@@ -144,6 +144,16 @@ void arrival_words(void) {
 	 * at its end the act card's, just before; the main path's words cut,
 	 * one channel a fact: docs/game/core-loop.md) */
 	nets_arrival_words();
+	/* (the area's battlefields, on its first layer: a playtester froze on
+	 * the Aquarium's ice, 140 to 80 HP, and nothing had said so; a
+	 * homepage's conveyor carried another off the row he stepped into,
+	 * every time. Said on arriving, where L's first words carried it,
+	 * among ten boxes, session 77) */
+	bool icy = run.biome == BIOME_AQUARIUM_COMP, belts = run.biome == BIOME_HOMEPAGE;
+	size_t k = strlen(D.beat);
+	if (first_of_act && (icy || belts) && k < sizeof D.beat)
+		snprintf(D.beat + k, sizeof D.beat - k, "%s%s", k ? "|" : "",
+			icy ? "@M Brr... The battlefields here are icy,Lan." : "@M The battlefields here have conveyors and ice!");
 }
 
 /* What the act's card says beside its number: the act's signature family

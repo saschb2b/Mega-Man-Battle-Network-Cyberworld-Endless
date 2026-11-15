@@ -162,10 +162,38 @@ void hp_full_watch(void) {
  * two playtesters followed a green arrow away from an exit pad on the
  * screen without knowing what the colour meant (session 76). */
 bool heal_first(int *x, int *y) {
-	if (D.town || !hurt_now() || heal_spent()) return false;
+	if (D.town || D.heal_declined || !hurt_now() || heal_spent()) return false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_HEAL) { *x = (int)layer.obj[i].x; *y = (int)layer.obj[i].y; return true; }
 	return false;
+}
+
+/* MegaMan turned away from the heal the arrow leads to: his walk there
+ * grown HEAL_TURNED panels past the shortest it has been since. The way
+ * on is the exit's again, the arrow cyan and the map's way yellow, until L
+ * names the heal again (status_words): a playtester heading for the exit
+ * past the heal L had named followed a green arrow back to it and stuck
+ * at a junction, ten moves (session 77). Not when the heal is used alone
+ * (the player who chose the exit kept the heal's arrow), nor at the next
+ * L alone (who knew to press it?); a walk followed to the heal only
+ * shortens. */
+#define HEAL_TURNED 3
+void heal_turn_watch(void) {
+	static int tick;
+	int hx, hy, len;
+	double gx, gy;
+	if (++tick % 10 || !heal_first(&hx, &hy)) return;
+	netmap_grid(bn6_player_x(), bn6_player_y(), &gx, &gy);
+	route_floor();
+	if (route_way(gx, gy, hx, hy, &len) < 0) return;
+	if (!D.heal_near || len + 1 < D.heal_near) D.heal_near = len + 1;
+	else if (len + 1 >= D.heal_near + HEAL_TURNED) D.heal_declined = true;
+}
+
+/* L asked again: the heal named, and the arrow leads there afresh */
+void heal_turn_reset(void) {
+	D.heal_declined = false;
+	D.heal_near = 0;
 }
 
 /* How many panels MegaMan on panel (cx, cy), on the way into the

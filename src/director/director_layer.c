@@ -463,6 +463,8 @@ static bool build_layer(void) {
 	D.bugs_known = false;
 	D.off_told = false;
 	D.last_stop_told = false;
+	D.heal_declined = false;
+	D.heal_near = 0;
 	D.fork_told = false;
 	D.final_told = false;
 	D.checkpoint_data = false;
