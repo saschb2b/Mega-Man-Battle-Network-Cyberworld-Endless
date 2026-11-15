@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T07:40:00Z
+* **Update**: releases/v0.22.0.md (#609's own entry written in: the arrow keeps out of the way).
