@@ -86,7 +86,16 @@ numbered after BN6's 19 in the order `src/core/rom.c` lists them (BN5's
 from 19), each laid out by the rules of the BN6 area it dresses, its
 guardian's layer too; `aN` draws another game's area N alone. `gNN` draws
 every map of group 0xNN instead (`src_gNN_N.png`), for choosing the maps
-an area learns from.
+an area learns from. `rSEED,DEPTH,AREA` draws one layer of a run as the
+game builds it, to look at one a player saw: run SEED's (hex, as the run
+log writes it) layer at DEPTH in area AREA's tiles (`r2269,1,8`: kai8's
+RoboDog Comp of 15 November 2026).
+
+The seams pictures frame the tiles whose top showed a hole, the
+background through a walkable panel ([holes in the floor](../world/level-design/floor-holes.md)):
+white where the safety net mended it, blue where it left it; the report's
+`voids` and `holes left` count them. With `CYBERWORLD_VOIDS=0` the net is
+off, and the layers are drawn with their holes as their tiles left them.
 
 The atlas is also the tiles' regression check: each layer's near misses,
 fallbacks, seams, inexact panels, tiles in other colours and tiles drawn off

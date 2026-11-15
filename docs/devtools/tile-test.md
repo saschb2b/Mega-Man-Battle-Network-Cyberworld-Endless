@@ -16,8 +16,10 @@ The atlas of every area and layout (2 seeds each by default, about three
 minutes), and in the areas that have stairs (Sky, the Undernet) as many
 layers that climb one, then a table per area: its layers and panels, the
 breaks in its picture, the tiles drawn with other floors than they show and
-the seams per 100 panels, and why the tiles were drawn off
-(`src/map/tiles.h`, `TILE_WHY_*`):
+the seams per 100 panels, the tiles whose top showed a hole (`holes`: the
+background through a walkable panel, [holes in the floor](../world/level-design/floor-holes.md))
+and those of them the safety net could not mend (`left`), and why the
+tiles were drawn off (`src/map/tiles.h`, `TILE_WHY_*`):
 
 - `unseen`: no pair of the area's maps at that place in a panel shows what
   the tile shows. A shape its maps never draw: change the layout, or learn

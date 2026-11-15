@@ -207,12 +207,16 @@ static int built_as_game(int area, uint32_t seed, NetmapTimes *parts) {
 /* (a run's own layer: its run's seed, the layer's seed from it) */
 static uint32_t run_seed_forced;
 
-/* The holes the safety net found in the layer's floor (voids.h), framed in
- * `sp`: blue those left, white those mended, and listed in `list` (a tile's
- * pixel x, y and 1 where mended). How many, and *left. */
-static int mark_voids(uint32_t *sp, int tw, int th, FILE *list, int *left) {
+/* The holes the safety net found in layer `name`'s floor (voids.h), framed
+ * in `sp`: blue those left, white those mended, and listed in
+ * DIR/voids_NAME.txt (a tile's pixel x, y and 1 where mended). How many,
+ * and *left. */
+static int mark_voids(const char *dir, const char *name, uint32_t *sp, int tw, int th, int *left) {
 	int vtw, vth, found = 0;
 	const uint8_t *v = voids_last(&vtw, &vth);
+	char path[1216];   /* (a dir and a name of 600 each) */
+	snprintf(path, sizeof path, "%s/voids_%s.txt", dir, name);
+	FILE *list = fopen(path, "w");
 	*left = 0;
 	for (int ty = 0; v && vtw == tw && vth == th && ty < th; ++ty)
 		for (int tx = 0; tx < tw; ++tx) {
@@ -226,11 +230,14 @@ static int mark_voids(uint32_t *sp, int tw, int th, FILE *list, int *left) {
 				sp[(size_t)(ty * 8) * tw * 8 + tx * 8 + k] = sp[(size_t)(ty * 8 + 7) * tw * 8 + tx * 8 + k] =
 					sp[(size_t)(ty * 8 + k) * tw * 8 + tx * 8] = sp[(size_t)(ty * 8 + k) * tw * 8 + tx * 8 + 7] = c;
 		}
+	if (list) fclose(list);
 	return found;
 }
 
+static uint32_t run_seed(uint32_t layer_seed) { return run_seed_forced ? run_seed_forced : layer_seed; }
+
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
-	run_new(run_seed_forced ? run_seed_forced : seed);
+	run_new(run_seed(seed));
 	run.depth = depth;
 	run.biome = biome;
 	layout_forced = layout;
@@ -288,10 +295,6 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 				if (seams[ty * tw + tx] & 1 && tx + 1 < tw) sp[(size_t)(ty * 8 + k) * W + tx * 8 + 7] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 8] = SEAM_ARGB;
 				if (seams[ty * tw + tx] & 2 && ty + 1 < th) sp[(size_t)(ty * 8 + 7) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 8) * W + tx * 8 + k] = SEAM_ARGB;
 			}
-	snprintf(path, sizeof path, "%s/voids_b%02d_l%d_d%d_s%u.txt", dir, area, layout, depth, seed);
-	FILE *vl = fopen(path, "w");
-	int voids_left, voids = mark_voids(sp, tw, th, vl, &voids_left);
-	if (vl) fclose(vl);
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int X, Y;
@@ -302,13 +305,13 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	snprintf(path, sizeof path, "%s/b%02d_l%d_d%d_s%u.bmp", dir, area, layout, depth, seed);
 	save_bmp(path, px, W, H);
 	snprintf(path, sizeof path, "b%02d_l%d_d%d_s%u", area, layout, depth, seed);
+	int voids_left, voids = mark_voids(dir, path, sp, tw, th, &voids_left);
 	save_marked(dir, path, sp, tw, th);
 	write_cells(dir, area, layout, depth, seed);
 	free(sp);
 	free(px);
-	int floor = 0;
+	int floor = 0, mouths = at_mouths();
 	for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) floor += layer.cell[y][x] == C_PATH;
-	int mouths = at_mouths();
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1, lineups, walked, junctions;
 	walk_counts(&lineups, &walked, &junctions);
 	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, whole %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels, voids %d, holes left %d, parts learn %.1f fix %.1f pick %.1f coords %.1f ms, coordinates %08x\n",
@@ -701,6 +704,20 @@ static int run_layer(const char *dir, const char *spec) {
 	return 0;
 }
 
+/* A spec named by its first letter (gNN a group's maps, xN another game's,
+ * aN its area N's layers, hN a floor drawn by hand, rSEED,DEPTH,AREA a
+ * run's layer): its exit code, or -1 where it is none of them. */
+static int letter_spec(const char *dir, const char *biomes, int seeds) {
+	switch (biomes[0]) {
+	case 'g': group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0;
+	case 'x': xrom_sources(dir, atoi(biomes + 1)); return 0;
+	case 'a': if (biomes[1] < '0' || biomes[1] > '9') return -1; xrom_area(dir, atoi(biomes + 1), seeds); return 0;
+	case 'h': hand_floor(dir, atoi(biomes + 1)); return 0;
+	case 'r': xarea_review(XAREA_ALL); xrom_find_beside(); return run_layer(dir, biomes + 1);
+	default: return -1;
+	}
+}
+
 int atlas_run(const char *spec) {
 	/* ("nav": the way across BN6's own maps instead, navstudy.c; "arrivals"
 	 * where MegaMan arrives on them) */
@@ -723,11 +740,8 @@ int atlas_run(const char *spec) {
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);
-	if (biomes[0] == 'g') { group_sources(dir, (int)strtol(biomes + 1, NULL, 16)); return 0; }
-	if (biomes[0] == 'x') { xrom_sources(dir, atoi(biomes + 1)); return 0; }
-	if (biomes[0] == 'a' && biomes[1] >= '0' && biomes[1] <= '9') { xrom_area(dir, atoi(biomes + 1), seeds); return 0; }
-	if (biomes[0] == 'h') { hand_floor(dir, atoi(biomes + 1)); return 0; }
-	if (biomes[0] == 'r') { xarea_review(XAREA_ALL); xrom_find_beside(); return run_layer(dir, biomes + 1); }
+	int lettered = letter_spec(dir, biomes, seeds);
+	if (lettered >= 0) return lettered;
 	bool want[BIOME_COUNT] = { false };
 	if (!strcmp(biomes, "all")) for (int b = 0; b < BIOME_COUNT; ++b) want[b] = true;
 	else for (char *t = strtok(biomes, ","); t; t = strtok(NULL, ",")) { int b = atoi(t); if (b >= 0 && b < BIOME_COUNT) want[b] = true; }
