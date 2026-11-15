@@ -3,7 +3,7 @@ type: Feature
 title: "Oran Area's tiles"
 description: "BN5's Oran Area drawn on generated layers: what its maps draw (octagon hubs, never a bare side), the kinds of breaks its layers showed, the drawing taken (hubs one floor with their circuits, lay 11, hub cells worn to circuits drawn as circuits: 332 to 241 breaks per 100 panels) and what is left."
 tags: [world, level-design, tiles, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
 sources:
   - id: bn5-maps
     resource: "BN5 Team Colonel (USA), Oran Area 2 (0x90:3) and Oran Area 1 (0x90:2), drawn by `--atlas DIR:a4:2`"
@@ -45,6 +45,8 @@ surveyed by eye beside the generated layers:
   frame.
 - Brown planks, blue and purple arrow panels (conveyors) and the green
   warp pads, which lend no tiles off the hubs (`skip_styles`).
+- Grey sprigs behind the planks' upper edges, which no layer can set
+  ([side pieces](side-pieces.md), What Oran Area sets round its floors).
 
 ## The breaks it showed
 

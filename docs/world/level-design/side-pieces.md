@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:42:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
 ---
 
 # Side pieces (built for five areas, issue #505)
@@ -84,6 +84,7 @@ Taken per area as looked at, as every laying rule is
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
+| BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | every other area | nothing | - |
 
@@ -225,8 +226,7 @@ that floor's edge; anywhere else a tile it would cover is another floor's,
 and a spike first stood in front of a plateau's underside, over the void. BN5's
 End Area and Oran Area were tried and left: the cut finds 4 looks in each
 and none fits a layer. End Area's are the pins along its roads' upper rims
-and a raised warp pad (below, End Area's survey); Oran Area's hubs are
-hundreds of tiles.
+and a raised warp pad (below, End Area's survey); Oran Area's are below.
 
 ## What stands in a walled hole (`hole_learn`; verified on the maps and in the game)
 
@@ -291,6 +291,38 @@ The cut behind a floor (`behind_learn`) finds 4 looks: three rows of pins,
 fits a layer's panels by its neighbourhood, but on every one the layer's
 floor already holds all of its tiles (13 of 13, probed): the pins are
 drawn in the rim's tiles, which the floor's own art lays.
+
+## What Oran Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's Oran Area (its maps 0x90:3 and 0x90:2, the atlas's `a4`) sets one
+thing of these kinds round its floors: sprigs, a few grey pixels forking
+once or twice, standing behind a walkway's upper edge, about twenty in
+Oran Area 2 (counted by eye). None can reach a layer:
+
+- Almost all stand behind its brown planks, the floor of another kind its
+  layers leave out ([Oran Area's tiles](oran-tiles.md)). A sprig has a tile
+  of its own in ten places (its left fork, 14 pixels, 7 looks); the rest
+  of it lies in the tiles of the planks' own lip. Cut alone (the behind
+  cut taking pieces of one tile, tried) and set behind a generated circuit
+  or hub, it fit nowhere over the atlas's six layers: in 26 of 34 tries
+  its tile was the generated floor's own rim, the circuits' and hubs' lips
+  standing a tile higher than the planks', and the other 8 lay off the tile
+  lattice.
+- The few behind its green circuits stand behind a raised one, drawn on
+  the second tile layer (no ground panel lies under it), and the area's
+  layers have no raised floor.
+- The behind cut's 4 looks are no thing: two are pieces of a circuit's own
+  rim behind a bend, one the knob under the raised warp hub, one an
+  escalator's top.
+
+The rest of what its layers never draw (1386 tile pictures of its two
+maps, [what the layers take](../../devtools/map-use.md)) is of the kinds
+left to the owner (issue #505's 3 to 5) or no side piece: its brown planks,
+among them the junction the survey took for a hub's piece (`b23_90_2` at
+(544, 336)); its conveyors and escalators; its exit arrows; its warp
+centrepieces and raised hubs; and a machine on one of Oran Area 1's hubs,
+on its second tile layer over the floor alone, which this page's rule
+takes for a centrepiece (whether it blocks the way in BN5 was not checked).
 
 ## Scenery a face's depth from the floor (Robot Control Comp; verified on the maps and in the game)
 
