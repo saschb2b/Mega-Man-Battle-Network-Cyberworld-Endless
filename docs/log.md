@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (the Undernet's fire bowls behind upper edges on the second layer, gripping none, cut by `sides_learn_behind` (`net_area.sides` bit 7, now 16 bits), a row cut a bowl each, set where the floor below and the first layer's tiles match; its row in the area table; the bowls in Undernet 3's raised ring's holes left, and why; Undernet 1's lone bowls counted again: two, not five).
 * **Update**: world/level-design/side-pieces.md (BN5's ACDC Area's row, and a section on what its maps set round their floors: wire tufts behind its blue walkways drawn into a rim no layer draws, so none set; the rest floor art or the owner's kinds).
 * **Update**: world/level-design/side-pieces.md (BN4's countries' row, nothing taken, and a section on what their map sets round its floors: one pair of sockets on platforms' rims joined by a cable through the void, which no cut takes, a set piece for one pair in one map; the rest kinds 3 to 5).
 * **Update**: game/glitch-layer.md (Glitchier: the glitch thickens towards the heart, the music drags and stalls with the flips, the sky flips with the floor, the copy's body glitches between its forms), rom/sound.md (the music player's tempo fields), rom/graphics.md (LoadBGAnimData named and called by a flip), code/director.md (`glitch_music.c`), code/layer.md (`glitch_objs.c`).
