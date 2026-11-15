@@ -3,7 +3,7 @@ type: Tool
 title: "Tile test: clean tiles in every area"
 description: "`python3 build.py tiles [SEEDS]` runs the atlas over every area and layout, lists each area's breaks in its picture, tiles drawn off and seams per 100 panels with reasons, and fails where a layer got worse than the baseline."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:36:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:40:00Z }
 ---
 
 # Tile test: clean tiles in every area
@@ -111,12 +111,17 @@ Still far from clean, each a call of its own rather than the pick's:
 
 `CYBERWORLD_FLOOR=FILE build/host/cyberworld --headless --rom-dir ROMS
 --data-dir DIR --atlas OUT:hN` draws the floor FILE describes (rows of
-`.` void, `#` floor, `P` a pad's floor; at most some 24 by 18 panels, the
+`.` void, `#` floor, `P` a pad's floor, `R` floor on the layer's way, one
+run with two ends, a road where the area has one
+([roads](../world/level-design/roads.md)); at most some 24 by 18 panels, the
 tile map's size) in area N's tiles as it stands, no cell changed, as
 `hand_bNN.bmp`, its breaks marked in `seams_hand_bNN.bmp`
 (`src/dev/atlas.c`, `hand_floor`). It answers what an area's art can draw
 at all: a sheet of rectangles of every size, a sheet of walkways with their
-turns, ends and joins. The atlas also writes each original map's first tile
+turns, ends and joins. And `CYBERWORLD_ATLAS_RUN=S` with `--atlas
+OUT:aN` draws another game's area N's first layer of a run of seed S, the
+one `build.py shot --scene emu --seed S --net-biome xN` walks: a player's
+layer from their seed. The atlas also writes each original map's first tile
 layer alone (`src1_*.bmp`) beside the map as the game draws it.
 
 The originals themselves count no break: the strips are theirs. So the bar
@@ -459,6 +464,7 @@ wrong.
 | BN5 dark 8 | 72 | 63 | 77 | not taken: a Liberation Mission's board, not measured as one |
 | BN4 ACDC | 259 | 234 | 274 | not taken: its rooms in pieces |
 | BN4 countries | 91 | (whole today) | 84 | **rules** |
+| BN5 Oran | 332 | (whole today) | 303 | **rules but 4, one floor** (15 November 2026: 271 with its hubs no longer drawn apart, 241 with hub cells worn to circuits drawn as circuits, [Oran Area's tiles](../world/level-design/oran-tiles.md)) |
 
 (Breaks per 100 panels. The areas left out moved by less than a twentieth,
 or rose: the Aquarium 56 to 156 whole, the Judge Tree 42 to 68, Robot

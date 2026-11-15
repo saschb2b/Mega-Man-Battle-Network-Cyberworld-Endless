@@ -61,6 +61,7 @@ CHANNELS = [
     ('3ds-3dsx', 'cyberworld-endless.3dsx', 'file'),
     ('switch-nro', 'cyberworld-endless.nro', 'file'),
     ('vita-vpk', 'cyberworld-endless.vpk', 'file'),
+    ('psp-zip', 'cyberworld-endless-psp.zip', 'file'),
     ('ps4-pkg', 'cyberworld-endless.pkg', 'file'),
     ('ps5-zip', 'cyberworld-endless-ps5.zip', 'file'),
 ]

@@ -136,6 +136,7 @@ FILES = {
     '3ds-3dsx': 'cyberworld-endless.3dsx',
     'switch': 'cyberworld-endless.nro',
     'vita': 'cyberworld-endless.vpk',
+    'psp': 'cyberworld-endless-psp.zip',
     'ps4': 'cyberworld-endless.pkg',
     'ps5': 'cyberworld-endless-ps5.zip',
     'pictures': PICTURES,

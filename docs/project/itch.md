@@ -172,6 +172,7 @@ to a butler channel under the release's version:
 | `3ds-3dsx` | `cyberworld-endless.3dsx` | none (New 3DS, Homebrew Launcher) |
 | `switch-nro` | `cyberworld-endless.nro` | none (Switch, Homebrew Menu) |
 | `vita-vpk` | `cyberworld-endless.vpk` | none (PS Vita, VitaShell) |
+| `psp-zip` | `cyberworld-endless-psp.zip`, whole | none (PSP with custom firmware) |
 | `ps4-pkg` | `cyberworld-endless.pkg` | none (PS4 with GoldHEN) |
 | `ps5-zip` | `cyberworld-endless-ps5.zip`, whole | none (PS5, its app folder) |
 
@@ -193,6 +194,7 @@ app can start. The display names, set once on the edit page:
 | `3ds-3dsx` | New 3DS (.3dsx, for the Homebrew Launcher) |
 | `switch-nro` | Switch (.nro, for the Homebrew Menu) |
 | `vita-vpk` | PS Vita (.vpk, for VitaShell) |
+| `psp-zip` | PSP (.zip, its PSP/GAME folder) |
 | `ps4-pkg` | PS4 (.pkg, for GoldHEN) |
 | `ps5-zip` | PS5 (.zip, its app folder) |
 

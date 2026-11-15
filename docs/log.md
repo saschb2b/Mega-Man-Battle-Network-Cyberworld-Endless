@@ -1,6 +1,11 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/generator.md (BN4's ACDC Area draws every room and each lone block two wide as its framed squares while its tiles are picked; its breaks 2541 to 1808 over 8 layers), world/level-design/roads.md (nm_mark_roads in netmap_roads.c; no road shorter than three panels; how BN4's ACDC maps end their roads at squares; what was tried; a jog's two failing turnings), code/net-and-map.md (netmap_roads.c), devtools/tile-test.md (a hand-drawn floor's way cells, R; CYBERWORLD_ATLAS_RUN draws a run's first layer from its seed).
+* **Create**: world/level-design/oran-tiles.md (BN5's Oran Area on generated layers: what its maps draw, a circuit or a dock at every hub side, the kinds of breaks surveyed by eye and by place, its hubs drawn one floor with their circuits and lay 11, a hub's cell worn to a circuit's shape drawn as a circuit, 332 to 241 breaks per 100 panels, what is left: bare sides, orange blobs where hubs nearly touch, big rooms). **Update**: world/level-design/index.md (its line), devtools/tile-test.md (Oran's row in Each area's laying), research/sources.md (BN5's Oran Area: a dock or a circuit at every hub side, its docks floor).
+* **Update**: world/home/central-town.md (R within 12 units of the PC's cells steps Lan onto them and jacks in; BN6 asks no facing).
+* **Update**: world/level-design/generator.md (Navigation: no pit between walkways, a void panel with floor on four sides and void on a corner filled by fill_pits; 19 in 18 of the tests' 300 layers before, none between walkways now).
+* **Update**: game/rival.md (a race's squad holds no virus that decides when it can be hit: BN6's Quaker, and now BN5's Powie, its timer verified frame for frame against BN5's).
 * **Update**: game/meta/design.md (the run summary's closest goal a whole sentence, "Viruses deleted" counting a lost or fled battle's deleted viruses), code/director.md (`director_tally.c`).
 * **Update**: world/level-design/virus-battler.md (a later talk with the Virus Battler on his layer is one box, his pair, and the question).
 * **Update**: world/level-design/generator.md (Navigation: the comps and homepages cross one one-wide walkway on the way, as their originals' single rooms; the shapes that stopped a playtester, counted by test_way_shapes, before and after).
