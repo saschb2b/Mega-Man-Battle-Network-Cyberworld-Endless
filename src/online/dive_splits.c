@@ -13,6 +13,7 @@
 #include "run.h"
 
 #define FRAMES_PER_TENTH 6   /* the GBA's 60 frames a second */
+#define GUARDIAN_INDEX 255   /* the guardian's battle's index on its layer */
 
 static struct {
 	uint32_t seed;
@@ -55,8 +56,9 @@ static void watch(void) {
 
 static void ended(void) {
 	S.fighting = false;
-	int index = S.battles++;
-	if (emu_read8(BN6_BATTLE_RESULT) != 1 || index > 255) return;
+	/* (the guardian's battle one index for every diver, past the random ones: each diver meets him after his own count of them) */
+	int index = S.guardian ? GUARDIAN_INDEX : S.battles++;
+	if (emu_read8(BN6_BATTLE_RESULT) != 1 || (!S.guardian && index >= GUARDIAN_INDEX)) return;
 	DiveSplit s;
 	memset(&s, 0, sizeof s);
 	s.index = (uint8_t)index;
