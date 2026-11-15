@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:17:31Z }
 ---
 
 # The generator
@@ -78,10 +78,23 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   3), the way's walkways widen as above, before those between big
   platforms (one widened joins its platforms into a bigger one). Central's
   layers cross fewer than BN6's Central maps already: its glass bridges
-  are its own. The comps' and homepages' originals are single small
-  rooms, nothing to hold a layer to, and the Graveyard's slabs cross
-  eight: those keep the cap between big platforms alone. `test_way_links`
-  holds each area to its count on eight ways in ten.
+  are its own. The Graveyard's slabs cross eight: it keeps the cap
+  between big platforms alone. `test_way_links` holds each area to its
+  count on eight ways in ten.
+- **The comps and homepages cross one** (15 November 2026). Their
+  originals are single small rooms: RoboDog's comp and the Lab's cross
+  0.19 one-wide walkways a map over sixteen maps each, the homepages one
+  (`--atlas nav`). They were held to no count, and their layers crossed
+  the most of any area, RoboDog's 3.1 on the way. A playtester stopped
+  at their mouths for about 25 calls (session 76): a turn off a
+  platform's middle into a walkway on its side, where no edge stops
+  MegaMan on its line, and a walkway stepping one panel aside, whose
+  second corner he left before its wall. At each stop the arrow showed
+  the single direction that freed him; the walk is BN6's. So they are
+  held to one (`narrow_cap`), the fewest a way may cross, and the way's
+  others widen as above. Over sixty layers of RoboDog's comp
+  (`test_way_shapes`), the way's turns into a walkway on wide floor fell
+  from 25 to 14 and its one-panel jogs from 3 to 1.
 - **Rungs meet a field square on** (issue #98). A comb's rung back to a
   ragged field that met its edge on a tab beside a bite was a mouth two
   panels wide on one side, the field going on past it, where the arrow's

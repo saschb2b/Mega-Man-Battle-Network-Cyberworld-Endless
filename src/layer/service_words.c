@@ -253,8 +253,13 @@ int ta_dark_rumor(TextArchive *t, int face) {
 	}
 	if (!len) return -1;
 	int i = ta_script(t);
-	if (face >= 0) ta_mugshot(t, face);
-	ta_open(t);
+	/* (his own two boxes first, on the purple flame he walked past: the
+	 * post is a reply on BN6's BBS, and alone its "A dar...DarkChip!?"
+	 * came out of nowhere, a playtester's word, session 76; so he is
+	 * the one it dawns on, and MegaMan's find at the flame stays his) */
+	bool open = true;
+	ta_pages(t, "Hey... Did you see that purple flame?|Something dark's burning in it...", face, &open);
+	ta_clear(t);
 	ta_bytes(t, line, len);
 	ta_end(t);
 	return i;

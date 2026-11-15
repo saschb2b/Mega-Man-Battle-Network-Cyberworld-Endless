@@ -154,13 +154,18 @@ static const uint8_t way_cap[BIOME_COUNT] = {
  * map's two farthest panels: Central 2, 6, 2; Seaside 0, 3, 0; Sky 5, 4,
  * 2; Green 2, 1; the Undernet 3, 3, 1; the Secret Area 1; the Nest's
  * Underground 3, 3; Robot Control 3, 3; the Aquarium 5, 1, 4; the Judge
- * Tree 6, 2, 5; Mr. Weather 1, 1, 0; CopyBot's 4, 4, 1, 5, 1). 0: none
- * (the comps' and homepages' originals are single small rooms, nothing to
- * hold a layer to; the Graveyard's eight run over its slabs). */
+ * Tree 6, 2, 5; Mr. Weather 1, 1, 0; CopyBot's 4, 4, 1, 5, 1). The comps'
+ * and homepages' originals are single small rooms: RoboDog's comp and the
+ * Lab's cross 0 or 1 (0.19 a map over 16 each), the homepages 1; held to
+ * the fewest a way may cross, 1 (their layers crossed 1.8 to 3.1, the most
+ * of any area, and a playtester stopped at their mouths for 25 calls,
+ * session 76). 0: none (the Graveyard's eight run over its slabs). */
 static const uint8_t narrow_cap[BIOME_COUNT] = {
 	[BIOME_CENTRAL] = 3, [BIOME_SEASIDE] = 1, [BIOME_SKY] = 4, [BIOME_GREEN] = 2,
 	[BIOME_UNDERNET] = 2, [BIOME_SECRET] = 1, [BIOME_NEST] = 3,
+	[BIOME_COMP] = 1, [BIOME_HOMEPAGE] = 1, [BIOME_COMP_B] = 1,
 	[BIOME_ROBOT_COMP] = 3, [BIOME_AQUARIUM_COMP] = 3, [BIOME_JUDGE_COMP] = 4, [BIOME_WEATHER_COMP] = 1, [BIOME_COPYBOT_COMP] = 3,
+	[BIOME_ACDC_HP] = 1, [BIOME_GREEN_HP] = 1, [BIOME_SKY_HP] = 1,
 };
 
 /* The way: the shortest walk over the floor, its cells from start to goal. */

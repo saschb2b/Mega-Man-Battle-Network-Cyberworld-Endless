@@ -90,7 +90,7 @@ static bool say_result(void) {
 
 void battler_update(void) {
 	if (!B.known || B.seed != run.layer_seed) battler_layer();
-	if (!card_held() && flag_get(BATTLER_CARD_FLAG)) card_from_game();
+	if (!card_held() && flag_get(BATTLER_TOLD_FLAG)) card_from_game();
 	if (!D.battler_series || D.battler || talk_busy() || emu_read8(BN6_CHATBOX)) return;
 	if (B.result) {
 		if (say_result()) B.result = 0;

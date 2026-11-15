@@ -112,7 +112,8 @@ typedef struct {
 int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d);
 /* BN6's own words on DarkChips, a post of its BBS run from the player's
  * ROM (docs/rom/), said by a bystander with `face` on a flame's
- * layer; -1 where the ROM's text is not as expected. */
+ * layer after two boxes of his own on the flame he saw; -1 where the
+ * ROM's text is not as expected. */
 int ta_dark_rumor(TextArchive *t, int face);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
  * guardian, any runs) is short of `needed`, its words say so (flag -1:

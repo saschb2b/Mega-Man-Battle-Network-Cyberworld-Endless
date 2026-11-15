@@ -43,7 +43,7 @@ void card_to_game(void) {
 
 void card_from_game(void) {
 	bool changed = false;
-	if (!card_held() && flag_get(BATTLER_CARD_FLAG)) {
+	if (!card_held() && flag_get(BATTLER_TOLD_FLAG)) {
 		profile.btlr_card |= BTLR_CARD_HELD;
 		profile.btlr_data |= 1u << AI_METTAUR | 1u << AI_GUNNER;
 		changed = true;
