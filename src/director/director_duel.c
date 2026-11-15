@@ -38,13 +38,13 @@ void resume_duel(void) {
 }
 
 /* Whether Chaud has called Lan before this layer's call (docs/game/rival.md,
- * Chaud's call): a duel in the record, a run before this one that reached
- * the first duel layer (an act's second, layer 2), or this run past its
- * first guardian, a duel layer behind it. (The record alone missed a call
- * heard and never raced: a playtester's second run, and an act's call
- * after one declined, heard his first words word for word, session 76.) */
+ * Chaud's call): a duel in the record, or a call of his this profile has
+ * heard, kept as it played (director.c's rival_update). (The record alone
+ * missed a call heard and never raced, session 76; the depth a run reached
+ * counted a test start's, dropped in at layer 4 or 7 and deleted before
+ * any call, and his first call ever opened "it's Chaud again", session 77.) */
 bool duel_called_before(void) {
-	return profile.duel_won + profile.duel_lost || profile.best_depth >= 2 || run.bosses_beaten;
+	return profile.duel_won + profile.duel_lost || (profile.heard & HEARD_CHAUD);
 }
 
 /* Whether ProtoMan's duel stands on the layer. */

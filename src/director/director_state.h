@@ -59,6 +59,7 @@ typedef struct {
 	bool beat_native;      /* the arrival's words say an older net's area fights our way, the first time a profile comes to one (docs/multirom/one-net.md) */
 	bool beat_ours;        /* ... to a profile once told its battles were the old way, that they are ours now, Crosses and all */
 	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
+	bool beat_first;       /* ... are the first dive's, the first time a profile dives (HEARD_FIRST_DIVE) */
 	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
 	bool deep;             /* ... or the deep's, of both nets (loot_deep) */
 	int visitor_due;       /* the first visitor a profile met (visitors.h's visitor_telegraph): one of the older Net's, BN5's or BN4's, in a battle of BN6's, or one of BN6's in BN5's; MegaMan's words due */
