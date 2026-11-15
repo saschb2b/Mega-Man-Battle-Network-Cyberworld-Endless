@@ -77,7 +77,7 @@ Taken per area as looked at, as every laying rule is
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
 | CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
-| BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
+| BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below), both along whole catwalk runs | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
@@ -212,9 +212,43 @@ the panels it draws over.
 A layer sets them on free floor panels as it does side pieces, but in
 stretches: of the squares of four panels a side, one in three by the
 layer's seed takes a piece behind every panel of it that fits, as the maps
-set theirs in rows; the rest take none. 0 to 9 a layer in the
-[tile test](../../devtools/tile-test.md)'s pictures. Seen in the game: a row
-of five behind a catwalk, the horn in front of it as before.
+set theirs in rows; the rest take none. CopyBot Comp's spikes are set so;
+BN4's Undernet's horns go along whole catwalks instead (below).
+
+### Rows along a catwalk (`SIDES_RUNS`; measured on the maps and the atlas)
+
+BN4's Undernet's maps line whole catwalks, not stretches. The Undernet 3
+(0x94:2) sets a horn behind every panel of 6 of its catwalks' straight
+runs, joint to joint: rows of 10, 6, 6, 4, 3 and 2, some 31 horns over its
+299 panels (counted on the map's picture), a fifth of its catwalk panels.
+Two of those runs, four panels each beside a plate and beside the exit,
+are lined in front too, with 3 and 2 of the big horns. The Undernet 5
+(0x94:4) sets none. The cut takes 17 of the 31 (the rest have another
+catwalk within 48 pixels above them, which reads as standing under a
+floor) but every look: 9 behind, 8 in front. Everything else the two maps
+draw that no layer draws is floor or a mark on it, out of this page's
+reach: the Undernet 3's red road to a green warp plate, the Undernet 5's
+grey plate and its bridge, the exits' arrows, the green arrow panels, the
+plates' blue crosses and an orange warp disc, and the rims of the joints
+where a catwalk ends ([map use](../../devtools/map-use.md), its tinted
+maps).
+
+The squares set them in groups of four panels at most and the ones in
+front singly: 22 behind and 18 in front over the atlas's eight layers. So
+the area (`NetAreaDef.sides` bit 8, `SIDES_RUNS`) sets them by run: a
+walkway a panel wide, no floor either side across it, two panels long or
+more, from where it begins to where it meets a joint, a turn or a room.
+Every other run by the layer's seed takes a horn behind every panel of it
+that fits, a third of those a horn in front of every panel too, and none
+stands anywhere else. On a run a piece's neighbourhood is compared along
+the run and on the side it stands (behind, the upper), not across it:
+where a room's corner or a joint lies diagonally on the far side, no look
+was cut there, though the horn never reaches it (every look the maps cut
+behind a catwalk differs from a plain one's there alone). A layer takes
+every other run where the map takes about one in seven, as its catwalks
+lie closer together: a run with another catwalk just behind it has no room
+for a horn. Over the atlas's eight layers: 26 behind and 9 in front, in
+rows of up to seven panels.
 
 CopyBot Comp's dark crystal spikes stand the same way behind its plateaus'
 upper edges, alone and in rows. Its plateaus are raised, so the cut is

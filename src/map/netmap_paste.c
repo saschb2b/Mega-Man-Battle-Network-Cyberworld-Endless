@@ -535,6 +535,65 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 
 int netmap_sides(void) { return nside_at; }
 
+/* Whether grid panel (x, y) is ground floor (side_floor's). */
+static bool side_ground(int x, int y) {
+	return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] != C_VOID && !layer.level[y][x];
+}
+
+/* Whether grid panel (x, y) is a walkway's a panel wide running along grid
+ * x (dx 1) or y (dy 1): floor with none on either side across it. */
+static bool side_walk(int x, int y, int dx, int dy) {
+	return side_ground(x, y) && !side_ground(x - dy, y - dx) && !side_ground(x + dy, y + dx);
+}
+
+/* The walkway run grid panel (x, y) lies in, two panels long or more, as a
+ * hash of its first panel and its way (*d: 0 along grid x, 1 along y); 0
+ * none. */
+static unsigned side_run(int x, int y, int *d) {
+	for (*d = 0; *d < 2; ++*d) {
+		int dx = !*d, dy = *d, sx = x, sy = y, n = 1;
+		if (!side_walk(x, y, dx, dy)) continue;
+		while (side_walk(sx - dx, sy - dy, dx, dy)) sx -= dx, sy -= dy, ++n;
+		while (side_walk(sx + n * dx, sy + n * dy, dx, dy)) ++n;
+		return n < 2 ? 0 : ((nm_cur->seed ^ (uint32_t)(sx * 7919 + sy * 104729 + *d * 15485863)) * 2654435761u >> 8) | 1;
+	}
+	return 0;
+}
+
+/* (SIDES_RUNS) side_for on grid panel (x, y) of a walkway run of way d,
+ * its neighbourhood compared along the run and on the side the piece
+ * stands (`kind` 2 behind it, the upper; 0 in front, the lower), whatever
+ * lies across the run on the other (a room's corner, a joint's): every look
+ * the maps cut beside a catwalk differs there alone. Bit k of a
+ * neighbourhood is panel (A + k % 3 - 1, B + k / 3 - 1); a run along grid x
+ * runs along B, its upper side A + 1, one along grid y along A, its upper
+ * side B - 1. */
+static const SidePiece *side_for_run(const SideBook *b, int kind, int x, int y, unsigned h, const SideMap *m, int d) {
+	unsigned other = d ? (kind ? 0x1C0u : 0x007u) : (kind ? 0x049u : 0x124u), f = side_floor(x, y) & ~other;
+	int match[SIDES_MAX], nmatch = 0;
+	for (int k = 0; k < b->n; ++k) {
+		const SidePiece *p = &b->piece[k];
+		if (p->hang + p->behind == kind && (p->floor & ~other) == f && side_under(p, x, y) && side_fits(p, m, x, y)) match[nmatch++] = k;
+	}
+	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
+}
+
+#define RUNS_EVERY 2   /* (SIDES_RUNS) a walkway run in this many takes a row behind it */
+#define RUNS_LINED 3   /* ... and one of those in this many a row in front too */
+
+/* (SIDES_RUNS) The piece behind free grid panel (x, y), by hash h, and in
+ * `front` the one on its side (NULL none), as BN4's Undernet's maps line
+ * their catwalks: every other walkway run a horn behind each panel it fits
+ * on, a third of those runs one in front too; none elsewhere. */
+static const SidePiece *side_pick_run(const SideBook *b, int x, int y, unsigned h, const SideMap *m, const SidePiece **front) {
+	int d;
+	unsigned r = side_run(x, y, &d);
+	*front = NULL;
+	if (!r || (r >> 4) % RUNS_EVERY) return NULL;
+	if (!((r >> 12) % RUNS_LINED)) *front = side_for_run(b, 0, x, y, h, m, d);
+	return side_for_run(b, 2, x, y, h, m, d);
+}
+
 /* The piece for free grid panel (x, y), by hash h, NULL none (`near`:
  * within SIDES_APART of one set): under a pad's panel whatever fits; on a
  * floor's side half, apart, or where its look keeps the first layer's
@@ -560,7 +619,10 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			bool near = false;
 			for (int k = 0; k < nset && !near; ++k) near = abs(set[k][0] - x) < SIDES_APART && abs(set[k][1] - y) < SIDES_APART;
 			if (!hang_free(x, y) && !side_free(x, y)) continue;
-			const SidePiece *p = side_pick(&L->sides, x, y, h, near, &m);
+			/* (BN4's Undernet's horns in rows: the one behind, then the one in front) */
+			const SidePiece *front = NULL, *p = L->def->sides & SIDES_RUNS ? side_pick_run(&L->sides, x, y, h, &m, &front) : side_pick(&L->sides, x, y, h, near, &m);
+			if (p && front && side_set(p, &m, x, y)) ++nhang;
+			if (front) p = front;
 			if (!p || !side_set(p, &m, x, y)) continue;
 			if (p->hang) {
 				++nhang;
