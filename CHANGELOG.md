@@ -66,6 +66,15 @@
   runs most often start, caught the most). In every area, a pit left
   between walkways, which the walk had to jog round, is filled. A layer
   saved before this update starts afresh at a CONTINUE.
+- **The net's locks, met every act.** Each act's middle layer now holds
+  one of BN6's locks off the way: Rush's gap, a Link Navi's obstacle, a
+  security cube or door, or an invisible path. Half the runs had met none
+  before their first guardian; now a run meets one on its second layer.
+  Where a layer's floor has no pocket for an obstacle or a cube, a short
+  walkway and a pad of its own are laid for it, so the locks the act
+  planned stand (twice as many as before), and a teleport is no longer
+  planned where the area cannot draw its pad. A layer saved before this
+  update starts afresh at a CONTINUE.
 - **Fixed: GutsMan's Guardian Data could not be taken (issue #614).**
   Continued at his data, BN4's GutsMan logged in again, unseen, and
   stood on it: A only turned MegaMan to face it. A guardian deleted

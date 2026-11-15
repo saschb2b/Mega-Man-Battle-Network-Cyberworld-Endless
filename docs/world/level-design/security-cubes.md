@@ -12,8 +12,9 @@ BN6's security cube (handler 3, sprite 7:0x03, its records looking the four
 ways) stands across a walkway and vanishes when its condition is met. A
 layer sets one where the act's plan calls for it, in every comp and
 homepage, Central and Seaside (`layer_cube_kind` in `net_pieces.c`), in a
-pocket's mouth as an obstacle stands (`plan_obstacle`), its one thing a
-blue data of the best quality:
+pocket's mouth as an obstacle stands (`plan_obstacle`), or in a pocket
+carved for it where the floor has none ([Link Navi obstacles](link-navi-obstacles.md), Its
+pocket), its one thing a blue data of the best quality:
 
 - **A P-Code** (comps, homepages, Central): four digits from the layer's
   seed, which one bystander knows (`ng_place_teller` in `net_set_pieces.c`). He

@@ -937,8 +937,8 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 		npcs_held += layer.teleport_island;   /* (the island's data, placed last) */
 	}
 	int block = pieces & PIECE_OBSTACLE ? layer_block_kind(depth, biome) : -1;
-	if (block >= 0) ng_plan_obstacle(block);
-	if (pieces & PIECE_CUBE) ng_plan_obstacle(ng_cube_kind(depth, biome, kind));
+	if (block >= 0) ng_plan_obstacle(block, rise);
+	if (pieces & PIECE_CUBE) ng_plan_obstacle(ng_cube_kind(depth, biome, kind), rise);
 	npcs_held += layer.nblocks + (ng_pcode_cube() >= 0);   /* (the pockets' data, and a P-Code's teller, placed last) */
 	npcs_held += pieces & PIECE_HIDDEN ? 2 : 0;          /* (an invisible path's data and the navi who hints at it) */
 	npcs_held += layer_battler(depth, kind) != 0;        /* (the Virus Battler, after the blue data) */

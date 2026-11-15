@@ -88,11 +88,49 @@ knows which keys to stock (`layer_pieces_ahead`):
 
 - **Budget by the act's rhythm.** None on the run's first layer or in the
   Secret Area; one on an act's first layer (half of them), two on its
-  middle one (the dealer's: a choice of where to spend), one on the
-  guardian's (four in ten), one on a dark warp's layer (six in ten).
+  middle one (the dealer's: a choice of where to spend), always, one of
+  them a lock (a Rush gap, an obstacle a Cross the run holds opens, a
+  cube or door, an invisible path: `PIECE_LOCKS`), its second pick a
+  lock where its first was none; one on the guardian's (four in ten),
+  one on a dark warp's layer (six in ten). The act teaches its locks as
+  a level teaches a mechanic: met on the middle layer every act, the
+  run's second layer the first, then again on the others now and then.
 - **Each area its own,** by weights from what its original maps hold
   (purple data everywhere but the Secret Area, the most in the Graveyard
   and the Undernet; Rush in Central, Seaside, Green, Sky, the Undernet and
   ACDC's homepage), with a weight of nothing beside them, so an area with
   few of BN6's pieces keeps them rare, as its maps do; never one piece
-  twice on a layer, and no Rush before a guardian.
+  twice on a layer, and no Rush before a guardian. A teleport only where
+  the layer's maps draw BN6's gem (`draws_gem`): not where another game's
+  area dresses the area, nor in Sky, whose maps' gem its kit does not
+  learn (Sky's three pairs wait on it); there its weight is nothing's,
+  as none stood there, so the purple data come as often.
+
+## How often (measured)
+
+`--atlas DIR:pieces:RUNS` ([Atlas](../../devtools/atlas.md)) builds each normal layer of
+a run's cycle as the game does, its area dressed by the run's seed, and
+counts what the plan gave it beside what stands. Over 200 runs (3800
+layers), on 15 November 2026, before and after the act's middle layer
+took a lock every act, the gem was asked for and pockets were carved
+([Link Navi obstacles](link-navi-obstacles.md), Its pocket):
+
+| | Before | After |
+| --- | --- | --- |
+| Layers holding a lock | 20.7% | 40.2% |
+| An act's middle layer holding one | 34.8% | 92.7% |
+| Runs whose first lock is in act 1 / act 2 / later / never | 86 / 52 / 60 / 2 | 194 / 6 / 0 / 0 |
+| Obstacles standing of those planned | 164 / 327 | 294 / 342 |
+| Cubes and doors standing | 351 / 627 | 871 / 878 |
+| Teleports standing | 9 / 85 | 8 / 8 (all Green's) |
+| Rush gaps standing | 207 / 214 | 308 / 316 |
+| Purple data | 761 | 736 |
+
+Before, one run in two met no lock before its first guardian: the act's
+plan gave the middle layer two pieces nine times in ten, but purple data,
+arrow lanes and a weight of nothing took many of them, and nearly half
+the obstacles and cubes planned stood nowhere: no mouth on the floor
+closed off a pocket of six panels or more (7067 of the 10493 mouths
+measured closed off fewer), and an obstacle no Cross the run held opened
+was left out three times in five. An act's first layer holds a
+lock about one time in five, a guardian's one in eight, as before.
