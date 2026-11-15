@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T12:00:00Z
+* **Add**: world/level-design/way-on-arrow.md (the arrow's way, its green to the Recovery Mr.Prog matched by the map's way in the key's Heal, Lan's HP's corridor band); **Update**: world/level-design/index.md (its line), world/home/lans-hp.md (the corridor's mouth open to y -1, the arrow at its middle off the band), rom/world.md (Lan's HP's row: the mouth re-walked, -24 to -1), GUIDE.md (SELECT's map: the way to the Heal while the arrow is green).
