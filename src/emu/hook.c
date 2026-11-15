@@ -219,6 +219,16 @@ static void put_original(HookCore *c, const Hook *h) {
 	else c->core->rawWrite16(c->core, h->addr, -1, (uint16_t)h->original);
 }
 
+void hook_originals(struct mCore *core, uint8_t *rom, size_t size) {
+	const HookCore *c = core ? core_of(core->cpu) : NULL;
+	for (int i = 0; c && i < c->nhooks; ++i) {
+		const Hook *h = &c->hooks[i];
+		uint32_t off = h->addr - 0x08000000u, n = h->arm ? 4u : 2u;
+		if (!h->live || h->addr < 0x08000000u || off > size - n) continue;
+		for (uint32_t b = 0; b < n; ++b) rom[off + b] = (uint8_t)(h->original >> (8 * b));
+	}
+}
+
 void hook_detach(struct mCore *core) {
 	struct ARMCore *cpu = core->cpu;
 	HookCore *c = core_of(cpu);

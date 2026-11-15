@@ -167,9 +167,9 @@ Verified on `dev`, 15 November 2026:
   its own battle, his HP the party's: seat 0's game counts every seat's
   damage (its own, PARTY_DAMAGE from the others) and tells the HP it keeps
   (PARTY_HP); no game ever raises its guardian's HP over what its own
-  battle left him. Until the one field over the server is built, every
-  game's HELLO says `hello_no_arena`, so the server makes every party
-  linked. Seen headless with two games on a local server at layer 3's
+  battle left him. Linked is now the New 3DS's and the PSP's way (their
+  HELLO says `hello_no_arena`), and every party's where seat 0's system is
+  one of them; the others fight on one field (below). Seen headless with two games on a local server at layer 3's
   guardian (BN4's FireMan, 1200 HP for two): the queue's band on both, the
   leader's A, both in the fight; Beta's hits (1200 to 1193) on Alpha's
   guardian and Alpha's (to 1191) on Beta's; Alpha's last hit deleted him in
@@ -268,7 +268,115 @@ Verified on `dev`, 15 November 2026:
   the Board's posts after the deepest dives. Seen headless in the Square
   while another game dived: "Diving now:1", "dtA:layer 1" (then "layer
   3"), and "L3 solo:1.5s dtA" after his guardian split. The party mark is
-  held by `tests/test_online.c` alone: no party battle is fought yet.
+  held by `tests/test_online.c`, not yet seen on the Board in a game.
+
+- **One field: the party's core** (15 November 2026, `party_core.c`,
+  `party_field.c`): the guardian's fight on a BN6 core of its own that
+  every game of the party builds alike. The Arena's boot to the net
+  (`core_boot.h`, kept for the next battle); the run's ROM copy as its
+  installs left it, each hook's original back under its BKPT
+  (`emu_rom_clean`, `hook_originals`: the party's games stand on one
+  layer of one seed, so their copies agree where a battle reads them);
+  the guardian's record as the run's staging wrote it (`emu_encounter_set`,
+  his BN4 Navi's sounds' pool pointed at him), moved to `FREE_RECORDS`'
+  first slot; the lead's MegaMan (seat 0's loadout) in BN6's own RAM as an
+  Arena core takes one (`arena_loadout_install`); the installs' hooks
+  (`xlog_hook_core`) and the field's: the battle's list grown with seats
+  1..n-1 as MegaMen on side 0's free panels (`BN6_SPAWN_ENTITIES`, the
+  spike's, generalized to a state of its own a core), each one's keys into
+  his AI data at `BN6_KEY_COPY` (directions and B: no hand of his own yet),
+  each MegaMan's HP and max HP his own loadout's at the battle's first
+  iteration, the guardian's HP raised for the party at his spawn
+  (`BN6_SPAWN_HP`). The overworld's encounter check forced into
+  StartBattle with the record (`BN6_ENCOUNTER_CHECK` to
+  `BN6_ENCOUNTER_START`, encounter.c's own way), the core runs with no keys
+  to the battle's first Custom screen: the ready. Staged by `boss.c`'s
+  `boss_party_fight`: the run's core does not start the battle and holds
+  still under the party's (`online_visit`'s holder), which shows the
+  party's core's picture and plays its sound. Seen headless with `--dev
+  partycore=2,partytwin=1,partyroll=30,partyend=200` at layer 3's guardian
+  of `--seed 3` (BlastMan, 400 HP): two MegaMen and BlastMan on the
+  field, a second core built beside it from the same keys agreeing at
+  every 60th frame (20 of 20, the hash at frame 60 `ac164177e6d71616` in
+  two runs), the field rolled back 30 frames every 30 and run again to
+  the same hash (41 of 41), the lead's buster deleting BlastMan at
+  iteration 309, the win back on the map at frame 1242 (the partners
+  stood still then: `partycore` now gives them the spike's script).
+- **Over the server** (15 November 2026, `party_play.c`, protocol v19's
+  party seats): seat 0's START with format `arena_party` takes the next
+  guardian's fight to the party's core. Each game sends its MegaMan
+  (ARENA_LOADOUT, kept as the others read him, the pack left home), its
+  keys a frame at a time with an input delay (ARENA_INPUT; the Arena's
+  `arena_link_net` with a party's seats, `arena_link_net_party`) and its
+  field's hash at its ready and every 60th frame (ARENA_HASH), all through
+  the server's ARENA_SEAT. A frame runs at its tick: where a seat's keys
+  for it have not come, on a guess (his last), at most 8 frames past the
+  last frame every seat's keys have come for (`partyroll=W` another), the
+  field kept before the first guess (`party_core_save`) and put back and
+  run again where the keys that came proved a guess wrong, as the Arena
+  rolls its pair back; a hash goes once every seat's keys before its
+  frame have come. Keys go at the wall clock's 60 a second, never a burst
+  past the server's relay bucket (a headless game twice dropped with
+  "Message rate exceeded" before). A seat gone (ARENA_STATE `seat_gone`, or
+  this game's link broken) takes his MegaMan off the field (his HP 0) and
+  stops the hashes: each game then finishes its own battle. Seen headless
+  with two games on a local server at layer 3's guardian of week 2966's
+  seed (BN4's AquaMan moved into BN6's engine, his next version for two:
+  1000 HP, 1200), `--dev partyend=600,partybot=1` on both (the Arena's bot's keys as each game's pad, the
+  guardian at 1 HP at iteration 600): both ready with `69d5611be9442d5d`,
+  21 hashes agreed on each (frames 60 to 1260), the battle over at frame
+  1261 in both, won. Run again with `partydelay=1`, the frames mostly
+  guessed (1250 of Alpha's 1261 frames on a guess, 30 rollbacks; 616 of
+  Beta's, 16): the same 21 hashes agreed, each the lockstep run's own
+  (`03c86e95f9bbd37b` at frame 60, `052d533a189ea788` at 1260, the bot's
+  keys being the frame's), the battle over at 1261 again. Beta's game
+  killed partway (`partyend=900`): 7 hashes agreed to frame 420, Alpha
+  told "seat 1 gone" at frame 476, Beta's MegaMan off the field, Alpha
+  fighting on alone until AquaMan deleted him at 658 (his run over).
+  Three games (Alpha, Beta, Gamma; AquaMan two versions up for three,
+  1800 HP), the aim passed in turn, the bots' keys: every seat ready with
+  `802688165d7ce459`, 9 hashes agreed on each of the three (to frame 540,
+  `efcc26a4d7355d52` there), all three MegaMen deleted at frame 586 in
+  all three games, lost, their runs over.
+- **The end into each run** (15 November 2026, `director_party_over`):
+  BN6's results on the party's core, then won or lost and this seat's
+  MegaMan's HP as the field last saw it written into the run; won, the
+  guardian's course goes on as after a fight of its own (his last word,
+  his log-out, his Guardian Data); HP 0, the run ends as a deletion ends
+  it, whatever the party did (the owner's call). Seat 0 reports the end
+  (ARENA_STATUS, ARENA over). In the run above Alpha, the lead, was
+  deleted before the win and his run ended; Beta won with 100 HP and took
+  AquaMan's data; every diver's feed said "Alpha's party of 2 beat layer
+  3".
+- **Switched on** (15 November 2026, `online_transport.c`'s HELLO): every
+  system but the New 3DS and the PSP stops saying `hello_no_arena`, so the
+  server seats them on one field; `dive_party.c` hands a START of format
+  `arena_party` to the party's core and a seat gone to it, and fights
+  `arena_linked` as before. Not yet: the partners' own NaviStats, hand and
+  Custom screen (the two-a-side's, one partner a side, to be grown to three
+  on side 0: a partner fights with his buster and his own HP, his B and
+  directions alone crossing), and a crew's join-in battles on one field.
+- **Who the enemies aim at** (15 November 2026, `party_field.c`'s
+  `party_field_aim`): a probe first, side 0's first two slots of
+  `BN6_BATTLE_PLAYERS` swapped at iteration 300 against BlastMan: his
+  next hit (377) still struck the lead, every one after (694, 929, 1417,
+  1706) the partner now in slot 0, who stood still; the panels under every
+  MegaMan held the same flags. So BN6's enemies take their aim from side
+  0's first slot (bn6f battle_findPlayer, `BN6_SIDE_PLAYER_GET`, returns
+  the side's first player-like actor), deciding it some frames before the
+  hit. On the party's core that slot now holds, while an object of side
+  1's routine runs (`BN6_OBJECT_LOGIC_CALL`, bn6f RunBattleObjectLogic's
+  call, to `BN6_OBJECT_LOGIC_BACK`), the MegaMan whose turn it is, each
+  standing one 240 iterations in turn, the lead's object back as the
+  routine returns; every other routine sees BN6's own order.
+  (`partylead=1` gives BN6's own aim.) Against BlastMan with three
+  MegaMen his hits went to all three in turn (377 actor 1, 694 actor 2,
+  929 the lead, 1417 actor 2, 1692 the lead, 1955 actor 1, 2415 the
+  lead), a twin core and 30-frame rollbacks agreeing every time (56 and
+  113 of them); over the server with two games (`partybot=1`,
+  `partydelay=1`, AquaMan for two) 16 hashes agreed on each to the
+  battle's end at frame 966, both bots' MegaMen struck and deleted, lost
+  in both. The turn's length is a first pick, for the owner's eye.
 
 ## The spike: four on one field (15 November 2026)
 
@@ -308,9 +416,9 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
    its spawn (`BN6_SPAWN_ENTITIES`), so a MegaMan cannot be added to a
    battle already begun. The offer likely has to come as the encounter
    starts, the owner's battle waiting a moment for the answer.
-2. **One field against a guardian.** Four MegaMen stand and fight on one
-   GBA (the spike, above). Open: what the enemies aim at, so the
-   guardian's attacks can spread over the party.
+2. **One field against a guardian.** Built (As built, above), the
+   guardian's aim passed over the party in turn. Open: the partners' own
+   NaviStats, hands and Custom screens on the field, and the turn's length.
 3. **The version ladder** for BN5's and BN4's Navis and for guardians
    with no SP of their own.
 4. **A linked fighter in a party**: whether they count in its size, and
