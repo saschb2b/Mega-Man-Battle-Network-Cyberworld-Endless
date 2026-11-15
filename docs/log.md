@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (what stands in a walled hole: End Area's pagoda cut whole and stood as its layers' landmark, the area's row, End Area's survey and why the cut behind a floor fits nowhere), world/level-design/props.md (End Area's landmark row), code/net-and-map.md (sides.c's line).
 * **Update**: world/level-design/side-pieces.md (Seaside Area's row, and what its three maps set round their floors: nothing, every cut run on them taking one look, an arrow field's rim; the rest floor art and the owner's kinds 3 to 5).
 * **Update**: world/level-design/side-pieces.md (BN5's SciLab Area's row, nothing taken, and a section on its wire tufts: drawn into its circuits' green upper edge, which no layer draws, so none fits; cut with their rim's tiles, 0 of 42 tries).
 * **Update**: world/level-design/side-pieces.md (BN5's Oran Area's row and what it sets round its floors: its sprigs behind the brown planks fit no layer, the generated circuits' and hubs' rims standing a tile higher, the behind cut's 4 looks no thing, the rest the owner's kinds), world/level-design/oran-tiles.md (its sprigs, linked).

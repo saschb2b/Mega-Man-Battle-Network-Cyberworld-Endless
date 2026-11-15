@@ -3,7 +3,7 @@ type: Design
 title: "Props"
 description: "Props on a layer, cut whole from BN6's maps (`src/map/props.c`) and placed by measured rules (`net_landmarks.c`): the Net Dealer's counter, each area's landmark, rows and signs, pads' warp centrepieces, framed pads and emblems."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:36:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:46:48Z }
 ---
 
 # Props
