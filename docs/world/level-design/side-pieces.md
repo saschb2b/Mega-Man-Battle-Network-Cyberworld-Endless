@@ -88,6 +88,7 @@ Taken per area as looked at, as every laying rule is
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
+| BN5's Undernet | nothing that grips, hangs under or stands behind its floors; in the void beside them, on the first layer, its skull totems, which are scenery (below), 4 looks | the skull totems |
 | BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | Judge Tree Comp | nothing on the second layer; on its walkways' edges, in the floor's own tiles, the tufts on its back rims and the planters stacked at its walls' feet, 139 looks over its four maps (below). Not placed: its stumps with their tree houses, doors, bridges and roots, and its tree's red court with the tree and the terminal on it, floor of another kind (the stumps its pads' look, the court skipped on purpose, `skip_styles`; issue #505's kinds 3-5) | what grows on the edges |
@@ -931,6 +932,60 @@ The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
 
+## BN5's Undernet's skull totems (scenery; verified in the ROM, the atlas and the game)
+
+BN5's Undernet (its maps 0x90:11 and 0x90:12, BN5's Undernet 2 and 3;
+the atlas's `a5`) sets one thing round its floors that its layers did not
+draw: skull totems, a skull on a plinth, 4 by 5 tiles (17 drawn), in the
+void beside its walkways and plates, mostly behind their upper edges, a
+few in front of their lower ones, 11 in Undernet 2 and 14 in Undernet 3
+(and 8 in Undernet 1, which the area does not learn). Issue #505 took them
+for dark figures standing where the area's statues stand, set as objects
+(`LOOK_STATUE`). They are not: they lie on the first tile layer, in palette
+bank 12, and the statue a layer sets is BN6's own sprite, another thing.
+
+They looked like figures because the maps store bank 12 black: BN5's
+palette script for these two maps fills it as the map runs (its first
+frame the whole bank; [the ROM map](../../rom/graphics.md), Net maps'
+backdrops and animations), so the atlas's pictures drew each totem as a
+black silhouette. There are two looks, each also mirrored: one whose eyes
+are colour 14, which the script flashes red and lets fade every 360
+frames, and one whose eyes are colour 15, which it flashes teal 160 frames
+after the red has faded. Both maps hold both looks.
+
+They touch no floor, so they are [the generator](generator.md)'s scenery
+(`decor.c`), but the cut refused them: a tile of one colour is filler to
+it, and a totem's middle tiles are one colour (black) where the bank is
+stored blank, so the totem was cut in two and its rim refused as touching
+other art. A tile of one colour is no filler where its bank is stored
+blank, one colour throughout (`blank_bank`): its colours come as the map
+runs. Over every area's maps only these two have such tiles (bank 12,
+probed over the whole atlas), so no other area's scenery changed. The cut
+takes the 4 looks, Undernet 2's (Undernet 3's are the same), and a layer
+sets them as any scenery: 4 to 10 pieces a layer, each look twice at
+most, in the void within three tiles of the floor (5 to 8 a layer over
+the atlas's ten, `build.py atlas a5 2`). The layers draw 82% of Undernet
+2's different tile pictures where they drew 78%, and 75% of Undernet 3's
+where they drew 69% ([what the layers take](../../devtools/map-use.md)).
+
+A layer of the area runs the map's own animations
+([the ROM map](../../rom/graphics.md)): its totems take their colours and
+their eyes flash as in BN5 (captured, below). They lie on the first layer,
+behind MegaMan wherever he stands, as in the maps, which hold no layer
+priorities for them: he passes in front of a totem behind a walkway's
+upper edge, and one in front of a walkway's lower edge stands below his
+feet. A Glitch flip into the area sets them too (`pick_map`), but a flip
+loads the look's stored palette and backdrop, not its palette scripts
+(`glitch_look.c`), so there they would stand black (read from the code,
+not captured).
+
+What else the layers never draw in its two maps is of the kinds left to
+the owner or no piece: its exit arrows, the stone stairs (issue #505's
+kind 5), the warp pool's octagon on a plate (a warp's centrepiece), its
+magenta arrow panels (floor of another kind), and the joints of its
+plates and cobbled paths and the plates' crosses round their emblems
+(floor tiles the pick does not choose).
+
 ## What the Graveyard sets round its floors (none; measured on the map and the atlas)
 
 The Graveyard has one map, Graveyard 2 (0x96:1, the atlas's `4`): its
@@ -1129,8 +1184,10 @@ no layer, and the hole cut finds no hole. Sky takes none.
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists (above), BN5's Undernet's dark figures and Nebula Area's dripping pods
-  lie on the first layer, beside or under the floor (probed on the maps).
+  red fists (above) and Nebula Area's dripping pods
+  lie on the first layer, beside or under the floor (probed on the maps);
+  the Judge Tree's planters and BN5's Undernet's dark figures, counted here
+  too, are set now (above).
   (The Nest's and Mr. Weather's were counted here as well; theirs lie on
   the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.

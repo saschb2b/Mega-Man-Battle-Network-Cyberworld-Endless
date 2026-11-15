@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:09:01Z
+* **Update**: world/level-design/side-pieces.md (BN5's Undernet's skull totems, which issue #505 took for dark figures where its statues stand: first-layer art in a bank its palette script fills, now scenery on its layers; its row in the area table; the Not built note), rom/graphics.md (BN5's Undernet 2 and 3's bank-12 palette script, which colours the totems and flashes their eyes).

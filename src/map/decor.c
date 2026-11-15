@@ -51,14 +51,27 @@ static uint8_t *footprint(const AreaSrc *a, int reach) {
 	return fp;
 }
 
-/* An opaque tile of one colour: filler, not scenery. */
+/* Whether palette bank `bank` of map a is stored blank, one colour
+ * throughout: a bank the map's palette script fills as it runs (BN5's
+ * Undernet's bank 12, its skull totems'), whose tiles show one colour
+ * here and their art in the game. */
+static bool blank_bank(const AreaSrc *a, int bank) {
+	for (int k = 2; k < 16; ++k)
+		if (a->colors[bank * 16 + k] != a->colors[bank * 16 + 1]) return false;
+	return true;
+}
+
+/* An opaque tile of one colour: filler, not scenery; but not one in a
+ * bank stored blank (its art, coloured as the map runs). */
 static bool flat(const AreaSrc *a, int tx, int ty) {
 	int W = a->tw * 8;
+	size_t at = (size_t)ty * a->tw + tx;
+	uint16_t e = a->idx0[(size_t)(ty * 8) * W + tx * 8] || a->layers < 2 ? a->tile[0][at] : a->tile[1][at];
 	uint32_t c = area_src_floor_px(a, (size_t)(ty * 8) * W + tx * 8);
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x)
 			if (area_src_floor_px(a, (size_t)(ty * 8 + y) * W + tx * 8 + x) != c) return false;
-	return true;
+	return !blank_bank(a, e >> 12);
 }
 
 static bool drawn_at(const AreaSrc *a, bool bg_in_map, int x, int y) {
