@@ -155,6 +155,28 @@ Verified on `dev`, 15 November 2026:
   it. Seen headless with two games on a local server: both in layer 1's
   room, each seeing the other walk.
 
+- **The guardian's door and the party's fight, linked** (15 November
+  2026, `dive_party.c`; `boss.c`'s `boss_at_door`, `boss_door_hold` and
+  `boss_party_set`): MegaMan saved at the arena's door with other divers
+  on the layer joins its queue (QUEUE join), and the staging waits there.
+  A band over the map's foot says who waits: the leader's "PARTY OF 2!
+  A:GO IN B:ALONE", the others' "ALPHA LEADS 2 B:GO ALONE"; alone on the
+  layer he goes in as ever. The leader's A starts the party: each game's
+  guardian is scaled for it (two meet his next version, three or four the
+  one after, his HP times the party, at most 9999) and each fights him in
+  its own battle, his HP the party's: seat 0's game counts every seat's
+  damage (its own, PARTY_DAMAGE from the others) and tells the HP it keeps
+  (PARTY_HP); no game ever raises its guardian's HP over what its own
+  battle left him. Until the one field over the server is built, every
+  game's HELLO says `hello_no_arena`, so the server makes every party
+  linked. Seen headless with two games on a local server at layer 3's
+  guardian (BN4's FireMan, 1200 HP for two): the queue's band on both, the
+  leader's A, both in the fight; Beta's hits (1200 to 1193) on Alpha's
+  guardian and Alpha's (to 1191) on Beta's; Alpha's last hit deleted him in
+  both games at once, Beta's guardian falling to the HP written. Open: seat
+  0 deleted leaves the others without the party's HP (each then fights the
+  rest alone), and the leader's idle pass.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own

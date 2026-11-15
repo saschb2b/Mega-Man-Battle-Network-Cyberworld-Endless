@@ -3,10 +3,14 @@
 #ifndef CW_DIVE_WORDS_H
 #define CW_DIVE_WORDS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 /* A line of the feed: `kind` ONLINE_FEED_*, the diver's name, the layer,
  * a guardian's party's size; "" where the kind is unknown. */
 const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, unsigned party);
+/* The band at a guardian's door while a party forms: `count` in it, whether
+ * MegaMan leads it, its leader's name. */
+const char *dive_door_words(unsigned count, bool leads, const char *leader);
 
 #endif

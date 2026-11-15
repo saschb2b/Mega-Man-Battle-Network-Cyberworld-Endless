@@ -8,6 +8,7 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "director.h"
+#include "dive_party.h"
 #include "dive_people.h"
 #include "dive_wire.h"
 #include "dive_words.h"
@@ -50,11 +51,16 @@ void dive_link_adopt(void) {
 		return;
 	}
 	L.on = true;
+	dive_party_on(true);
 	L.week = s.week;
 	L.seed = s.week_seed;
 	dive_people_on(true);
 	fprintf(stderr, "dive: the link kept for week %u's dive\n", s.week);
 }
+
+bool dive_link_on(void) { return L.on; }
+
+uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_party_keys(keys) : keys; }
 
 bool dive_link_begin(void) {
 	/* (the puppets' room asked for before the dive's first layer is built) */
@@ -76,6 +82,7 @@ void dive_link_close(void) {
 	if (!L.on) return;
 	L.on = false;
 	dive_people_on(false);
+	dive_party_on(false);
 	online_transport_end();
 }
 
@@ -126,6 +133,8 @@ void dive_link_frame(void) {
 		L.shown_at = --L.nfeed ? now : 0;
 	}
 	if (L.nfeed && !L.shown_at) L.shown_at = now;
+	/* (the party at a guardian's door, and its fight) */
+	dive_party_frame(&s, L.room);
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();
@@ -156,11 +165,15 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 	case ONLINE_DIVERS:
 		if (dive_wire_divers(m, n, &d)) L.divers = d.total;
 		break;
+	case ONLINE_QUEUE_STATE: case ONLINE_ARENA_STATE: case ONLINE_ARENA_SEAT: case ONLINE_PARTY_HP:
+		dive_party_mail(m, n);
+		break;
 	default: break;
 	}
 }
 
 void dive_link_draw(void) {
-	if (!L.on || !L.nfeed || !director_on_map()) return;
-	look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, L.feed[0]);
+	if (!L.on || !director_on_map()) return;
+	if (L.nfeed) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, L.feed[0]);
+	else dive_party_draw(P.core_x, P.core_y);
 }

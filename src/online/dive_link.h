@@ -21,6 +21,10 @@ bool dive_link_diving(void);
 /* The visit's connection taken over for the dive under way (a visit from
  * the dive back to it), or let go where it is not connected. */
 void dive_link_adopt(void);
+/* Whether a dive's link is open. */
+bool dive_link_on(void);
+/* The pad's keys while the link is open: the party's at a guardian's door. */
+uint32_t dive_link_keys(uint32_t keys);
 /* Each frame of the game while on: the room, the place, the divers, the
  * dive's end told and the link closed. */
 void dive_link_frame(void);

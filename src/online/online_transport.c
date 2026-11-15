@@ -95,7 +95,9 @@ static uint32_t retry_wait(unsigned tries) {
 /* (HELLO's channel word's own bits: v18, a system that reads fewer extra
  * ROMs than there are, rom.h's xroms_short, the New 3DS: the server's
  * rule for its pass, protocol.py's pass_full) */
-static uint16_t hello_says(void) { return xroms_short() ? ONLINE_HELLO_ONE_EXTRA : 0; }
+/* (no_arena: a dive's party fights linked on every system until its one
+ * field over the server is built, docs/online/shared-dive.md) */
+static uint16_t hello_says(void) { return (uint16_t)((xroms_short() ? ONLINE_HELLO_ONE_EXTRA : 0) | ONLINE_HELLO_NO_ARENA); }
 
 static void hello_resume(uint16_t channel) {
 	online_put16(transport.hello + HELLO_CHANNEL, (uint16_t)(channel | ONLINE_HELLO_RESUME | hello_says()));

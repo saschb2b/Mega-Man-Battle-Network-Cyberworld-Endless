@@ -216,6 +216,7 @@ void online_visit_wait_frame(void) {
 
 uint32_t online_visit_keys(uint32_t keys) {
 	if (V.stage == VISIT_AWAY) return online_scene_keys(keys);
+	if (V.stage == VISIT_HOME) return dive_link_keys(keys);
 	if (V.stage != VISIT_CALLING) return keys;
 	if (btn_pressed(BTN_B)) come_home(VISIT_END_CANCELLED);
 	return 0;

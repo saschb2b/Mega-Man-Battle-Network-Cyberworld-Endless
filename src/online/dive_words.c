@@ -19,3 +19,11 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
 	}
 	return s;
 }
+
+const char *dive_door_words(unsigned count, bool leads, const char *leader) {
+	static char s[64];
+	if (count < 2) snprintf(s, sizeof s, leads ? "Waiting for a party  A:Go in" : "Joining the party...");
+	else if (leads) snprintf(s, sizeof s, "Party of %u!  A:Go in  B:Alone", count);
+	else snprintf(s, sizeof s, "%s leads %u  B:Go alone", leader, count);
+	return s;
+}

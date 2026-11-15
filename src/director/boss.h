@@ -41,6 +41,16 @@ bool boss_take_checkpoint(void);
  * at its door, this frame, before the staging takes him (once an approach:
  * the call clears it; the staging begins on the next frame). */
 bool boss_take_door(void);
+/* The shared dive (docs/online/shared-dive.md): whether MegaMan stands in
+ * the arena's mouth, saved at its door, the guardian still waiting; while
+ * boss_door_hold (a part above's, NULL none) says so, the staging waits
+ * there; and the party (1 alone) the next guardian's fight is scaled for:
+ * two meet his next version, three or four the one after, his HP times
+ * the party (at most PARTY_HP_MOST). */
+bool boss_at_door(void);
+extern bool (*boss_door_hold)(void);
+void boss_party_set(int n);
+#define PARTY_HP_MOST 9999
 /* After a run saved mid-layer is loaded: the guardian's state from its
  * flags. */
 void boss_resume(void);
