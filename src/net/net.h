@@ -65,7 +65,7 @@ typedef struct {
  * the floor's edge, or on a walled-off cell (C_SOLID) in the floor, a hole
  * as the originals set their statues and stones in. An emblem is art in
  * the floor itself, walked over (the Graveyard's crosses). */
-enum { PROP_COUNTER, PROP_SPRITE, PROP_EMBLEM };
+enum { PROP_COUNTER, PROP_SPRITE, PROP_EMBLEM, PROP_HOLE };
 enum { FACES_X, FACES_Y };
 /* the sprite props' looks (the map side knows their objects) */
 enum { LOOK_TREE, LOOK_GIANT_TREE, LOOK_STATUE, LOOK_BRAZIER, LOOK_MONUMENT, LOOK_GRAVE, LOOK_SIGN, LOOK_BBS, LOOK_COUNT };
@@ -76,6 +76,8 @@ typedef struct {
 	int x, y, len;    /* a counter's first cell (lowest along its run); a sprite's cell */
 	int look;         /* a sprite's LOOK_* */
 } NetProp;
+/* (a hole's piece, PROP_HOLE: its walled hole's box from (x, y), len cells
+ * along grid x and `faces` along y; its tiles the map side's) */
 
 /* Room kinds: where points of interest go (docs/world/level-design/). */
 enum { ROOM_PLATFORM, ROOM_PAD, ROOM_FIELD, ROOM_LEG };   /* ROOM_LEG: a stretch of a winding path, never raised */
@@ -215,6 +217,14 @@ typedef struct {
 	unsigned stair_narrow;   /* the ways its maps climb by a stair one panel wide, a ladder (bit per STAIR_UP_*; stair_dirs: two wide) */
 	uint8_t stair_len[2][STAIR_WIDTHS];   /* the panels each of its stairs runs, by way and width (0: 2) */
 	bool terraced;    /* its originals raise every platform over the walkways, reached by ladders (Green's, CopyBot Comp's): all its rooms that can be are */
+	/* the piece its maps set in a walled hole in their floor, its landmark
+	 * (BN5's End Area's pagoda; src/map/sides.h, hole_learn): the hole's
+	 * cells along grid x and y (0: none), and the cells round it the piece
+	 * draws over, (dx, dy) from the hole's lowest x and highest y, and
+	 * whether floor (1) or void (0) there */
+	uint8_t hole_w, hole_h;
+	int8_t hole_under[16][3];
+	int nhole_under;
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */

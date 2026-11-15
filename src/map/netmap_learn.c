@@ -273,6 +273,7 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) (na->sides & 8 ? sides_learn_under : sides_learn)(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);
+	if (na->sides & 16) hole_learn(m, &L->hole);
 }
 
 /* (debug output) what area `area` learned */
@@ -407,4 +408,19 @@ bool nm_learn(int area, Learned *L) {
 	settle(L);
 	if (emu_debug_on()) learn_report(area, L);
 	return true;
+}
+
+void nm_kit_hole(const Learned *L, LayerKit *kit) {
+	/* (grid x runs along world Y, grid y against world X: the hole's lowest
+	 * panel is its box's lowest x and highest y) */
+	const SidePiece *h = &L->hole;
+	if (!h->ntiles || !h->hole[0] || !h->hole[1]) return;
+	kit->hole_w = h->hole[1];
+	kit->hole_h = h->hole[0];
+	for (int k = 0; k < h->nunder && kit->nhole_under < 16; ++k) {
+		int8_t *u = kit->hole_under[kit->nhole_under++];
+		u[0] = h->under[k][1];
+		u[1] = (int8_t)-h->under[k][0];
+		u[2] = h->under[k][2];
+	}
 }
