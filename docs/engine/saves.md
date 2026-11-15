@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code and kept in step with a cloud slot over the Net Square's server (`saves_code.c`, `saves_cloud.c`, `transfer.c`, `cloud.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 ---
 
 # Portable saves

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:30:00Z
-* **Update**: engine/saves.md (The views: home as CLOUD, CODE and FILE pages, the questions, where it opens; the code's and the cloud's views in the new words), engine/saves-screens.md (what was built, the three reviews), engine/ui.md (SAVES' home as Options' kin), GUIDE.md (SAVES' three pages in Moving saves between devices), code/screens.md (saves_home.c).

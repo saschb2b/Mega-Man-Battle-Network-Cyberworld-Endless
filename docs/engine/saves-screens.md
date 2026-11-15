@@ -3,7 +3,7 @@ type: Research
 title: "Save screens elsewhere: what SAVES can take"
 description: "How consoles, launchers, emulator frontends and games lay out save management with many actions (what they group by, how many actions a screen shows, where status, automatic switches and destructive actions go), researched on 15 November 2026 when SAVES had grown to eight buttons, three layouts drawn for a 240x160 PET panel, and the one recommended: CLOUD, CODE and FILE as Options' tabs."
 tags: [engine, ui, saves, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T00:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 sources:
   - id: ps5
     resource: "https://www.playstation.com/en-us/support/subscriptions/ps5-ps-plus-cloud-storage/"
