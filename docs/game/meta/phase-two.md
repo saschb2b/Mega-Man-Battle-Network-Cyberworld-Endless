@@ -3,7 +3,7 @@ type: Design
 title: "Phase two, reasoned"
 description: "Meta phase two: rewards leaned to the folder's codes, Cross starts, the Library, programs found joining later runs; and phase three begun: route choices in Lan's HP and Navi gates sealed with a guardian's code."
 tags: [game, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # Phase two, reasoned (29 September 2026)

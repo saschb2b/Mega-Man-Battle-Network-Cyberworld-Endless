@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/progression/structure.md (a run from a Server's battle leaves it standing, its talk asking again; why, by the game-design skill), game/rival.md (ProtoMan's later talk on his layer, one box and the question), game/meta/darkchips.md (a flame's later talk, one box and the question), game/meta/phase-two.md (a Navi gate's SP stands again after a run), game/glitch-layer.md (the copy's later talk, and a run from its fight), engine/emulation/layer.md (flags 0x14D1-0x14D9, a choice's and the flame's words said, and BN6's own use of them checked).
 * **Update**: game/pet.md (the PET's Save ends on a box of its own, "Run saved.", and A is kept from the map until it is up: a playtester's next A took a Guardian Data).
 * **Update**: game/bosses/sequence.md (after a guardian: the map drops his Boss mark, his data takes no A in its first second, its crystal goes as its boxes close, the sealed exit pad draws over the second layer, BN4's Town Area's pale floor having hidden it).
 * **Update**: world/level-design/nebula-tiles.md (new: BN5's Nebula Area's plates drawn as plain platform floor, lay 31 | 64, 273 to 211 breaks per 100 panels), devtools/tile-test.md (Nebula's row in Each area's laying; CopyBot Comp's and BN4's Town Area's kinds of break measured, looked at and what was tried), world/level-design/index.md (its line).

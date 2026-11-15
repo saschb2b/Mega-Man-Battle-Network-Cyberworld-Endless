@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T15:26:08Z
-* **Update**: game/progression/structure.md (a run from a Server's battle leaves it standing, its talk asking again; why, by the game-design skill), game/rival.md (ProtoMan's later talk on his layer, one box and the question), game/meta/darkchips.md (a flame's later talk, one box and the question), game/meta/phase-two.md (a Navi gate's SP stands again after a run), game/glitch-layer.md (the copy's later talk, and a run from its fight), engine/emulation/layer.md (flags 0x14D1-0x14D9, a choice's and the flame's words said, and BN6's own use of them checked).

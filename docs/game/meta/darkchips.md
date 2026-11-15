@@ -3,7 +3,7 @@ type: Feature
 title: "DarkChips"
 description: "DarkChips (issue #82): twelve kinds, each played by its own net's rule, offered by a flame of darkness on each act's middle layer, priced at 20 max HP per battle a dark power ran in."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # DarkChips (3 October 2026; in every battle since issue #82)
