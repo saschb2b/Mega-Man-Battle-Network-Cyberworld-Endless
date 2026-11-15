@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/rival.md (Chaud's call says who he is the first time alone, Lan's surprise right after his name, and a profile that has heard him, a duel fought or not, hears "it's Chaud again" or the record; ProtoMan names the race Chaud's call set rather than telling it again; his time is given to the hundredth, half a second either way; a race's question is MegaMan's "Race his time?", session 76).
+* **Update**: voice/sweep/main-path.md (the third pass: the Net Dealer's one box before his list and L's two detours, counted before and after; the double A on a finished box BN6's own), voice/sweep/index.md (its line), world/level-design/teaching-set-pieces.md (the dealer names a key for his own layer's lock, L no longer lists the pieces), world/level-design/index.md (its line), voice/sweep/net.md (the dealer's gap and L's "I sense" since the third pass), game/core-loop.md (act 1's dealer's line as it now reads).
+* **Update**: game/fidelity.md (the title's key hints moved from under the copyright line, which ran into its letters at the picture's foot, to a line each over the version in the bottom left corner).
 * **Update**: world/level-design/fork-read.md (the read at the pad opens "Where this pad leads..." for "Past this pad...", which a playtester took for this layer's far side, and why no reminder of an unvisited shop or heal).
 * **Update**: rom/battle.md (a row on MegaMan's mood kept from one battle to the next, BN6's own: written back at a battle's end, zeroed only by a jack-in, a jack-out or a real-world script battle, so Full Synchro carries; playtest s76's two sightings).
 * **Update**: engine/saves.md (a first start's device, no savedata/ yet, reads "No runs yet" in SAVES, not "Damaged").

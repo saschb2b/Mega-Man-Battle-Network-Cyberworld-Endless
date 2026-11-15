@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:10:05Z
-* **Update**: voice/sweep/main-path.md (the third pass: the Net Dealer's one box before his list and L's two detours, counted before and after; the double A on a finished box BN6's own), voice/sweep/index.md (its line), world/level-design/teaching-set-pieces.md (the dealer names a key for his own layer's lock, L no longer lists the pieces), world/level-design/index.md (its line), voice/sweep/net.md (the dealer's gap and L's "I sense" since the third pass), game/core-loop.md (act 1's dealer's line as it now reads).
