@@ -109,8 +109,17 @@ rest for half a second as it opens (its fade in among them), and A
 counts only after it has rested a third of a second on the screen: A
 pressed through the lines before the chat box's options once took the
 first of three for good (session 55), and in a capture a mash through
-Mr.Prog's lines ran on into the screen past its fade. No confirmation
-follows A: the screen is the look a question gave before.
+Mr.Prog's lines ran on into the screen past its fade. Nor does A take
+anything before the screen has been up a second and a half
+(`PICK_SEEN`, 90 frames), long enough to be seen: a playtester pressing
+A about once a second through Mr.Prog's lines had the next press land
+55 frames after the gift's screen opened, past both rests, and take
+its first row unseen (session 76). An A held from before the screen
+opened counts only once released and pressed again. The hold is A's
+alone, for every kind: Up and Down move once the fade is done, and B
+takes nothing (it leaves a pick that keeps, or goes to the draft's
+skip row). No confirmation follows A: the
+screen is the look a question gave before.
 
 ## How it is built
 
