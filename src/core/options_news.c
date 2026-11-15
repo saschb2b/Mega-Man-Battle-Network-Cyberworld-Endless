@@ -46,7 +46,7 @@
 #define PAGES_MAX 120
 #define TEXT_MAX (48 * 1024)
 #define BOLD_LINES 4         /* a heading's or the tagline's, at most */
-#define LINE_MAX 96
+#define BOLD_LEN 96
 
 /* A paragraph's kind, by its mark in update.json's changes */
 enum { P_TAGLINE, P_SUMMARY, P_SECTION, P_HEADING, P_POINT, P_PARA, P_PICTURE };
@@ -96,20 +96,20 @@ static int kind_of(const char *s, int *skip) {
 
 /* `s` in the bold letters, in lines no wider than `w`, broken at spaces:
  * how many (each into `out` where it is given) */
-static int bold_wrap(const char *s, int w, char out[][LINE_MAX]) {
+static int bold_wrap(const char *s, int w, char out[][BOLD_LEN]) {
 	int n = 0;
 	while (*s && n < BOLD_LINES) {
 		while (*s == ' ') ++s;
 		size_t len = strlen(s), cut = 0;
-		for (size_t k = 1; k <= len && k < LINE_MAX; ++k) {
+		for (size_t k = 1; k <= len && k < BOLD_LEN; ++k) {
 			if (s[k] != ' ' && s[k]) continue;
-			char t[LINE_MAX];
+			char t[BOLD_LEN];
 			snprintf(t, sizeof t, "%.*s", (int)k, s);
 			if (text_width(t) > w) break;
 			cut = k;
 		}
-		if (!cut) cut = len < LINE_MAX - 1 ? len : LINE_MAX - 1;
-		if (out) snprintf(out[n], LINE_MAX, "%.*s", (int)cut, s);
+		if (!cut) cut = len < BOLD_LEN - 1 ? len : BOLD_LEN - 1;
+		if (out) snprintf(out[n], BOLD_LEN, "%.*s", (int)cut, s);
 		++n;
 		s += cut;
 	}
@@ -356,7 +356,7 @@ void news_box_tap(int x, int y) {
 
 /* a bold paragraph's lines from its top `y` in the page, those in view */
 static void bold_draw(const Par *p, SDL_Rect f, int y, bool centre, SDL_Color c) {
-	char lines[BOLD_LINES][LINE_MAX];
+	char lines[BOLD_LINES][BOLD_LEN];
 	int n = bold_wrap(par_text(p), TEXT_W, lines);
 	for (int i = 0; i < n; ++i) {
 		int ly = y + i * LOOK_LINE;
