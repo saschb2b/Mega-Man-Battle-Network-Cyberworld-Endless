@@ -27,6 +27,7 @@
 
 #define CARD_SKIP    30   /* frames a card shows before A ends it, where MegaMan is held for it */
 #define PORT_STEP    16   /* world units from a jack-in cell that R steps onto it */
+#define PC_REACH     12   /* world units off Lan's PC's cells that R steps onto them (PORT_STEP from a cell's middle) */
 #define WALK_UP      45   /* frames the walk up to a navi out of reach may take */
 
 /* A on the map: MegaMan turns to face what he means to talk to, so the
@@ -264,11 +265,28 @@ static uint32_t custom_buffer(uint32_t keys, bool l_pressed, bool r_pressed) {
 	return keys;
 }
 
+/* Lan takes the step onto a jack-in cell at (x, y), and R goes on to BN6's
+ * own jack-in there */
+static uint32_t step_on(uint32_t keys, int x, int y) {
+	emu_write32(BN6_PLAYER_X, (uint32_t)x << 16);
+	emu_write32(BN6_PLAYER_Y, (uint32_t)y << 16);
+	cinema_arrow(0, 0);
+	D.arrow_pending = false;
+	return keys;
+}
+
 /* R in Lan's house, or in his room off the PC (on it, BN6's own jack-in):
- * MegaMan says where the PC is */
+ * MegaMan says where the PC is. Within PC_REACH of the PC's cells Lan
+ * steps onto them and R jacks in. BN6's cells reach 16 units out from the
+ * desk, short of the shelf at its right, and BN6 asks no facing: two
+ * playtesters at the desk, 3 and 5 units in front of them, heard "The
+ * PC's straight up,Lan!" and "to the left" (15 November 2026). */
 static uint32_t house_r(uint32_t keys, int number) {
 	int px = bn6_player_x(), py = bn6_player_y(), gx, gy, far;
-	if ((number == LAN_ROOM && lan_room_on_pc(px, py)) || !lan_house_way(number, px, py, &gx, &gy)) return keys;
+	if (number == LAN_ROOM && lan_room_on_pc(px, py)) return keys;
+	int near = number == LAN_ROOM ? lan_room_pc_near(px, py, &gx, &gy) : -1;
+	if (near >= 0 && near <= PC_REACH * PC_REACH) return step_on(keys, gx, gy);
+	if (!lan_house_way(number, px, py, &gx, &gy)) return keys;
 	talk_start(port_words(number == LAN_ROOM ? PORT_ROOM : PORT_HOUSE, way_to(gx, gy, &far)), FACE_MEGAMAN);
 	D.arrow_pending = true;
 	cinema_arrow(way_last(), 600);
@@ -299,13 +317,7 @@ static uint32_t town_r(uint32_t keys) {
 	/* (a step short of a jack-in cell: he takes it, and R jacks in; a
 	 * playtester stood at the mermaid fountain's rim a step off its
 	 * ring and pressed R five times) */
-	if (near >= 0 && near <= PORT_STEP * PORT_STEP) {
-		emu_write32(BN6_PLAYER_X, (uint32_t)nx << 16);
-		emu_write32(BN6_PLAYER_Y, (uint32_t)ny << 16);
-		cinema_arrow(0, 0);
-		D.arrow_pending = false;
-		return keys;
-	}
+	if (near >= 0 && near <= PORT_STEP * PORT_STEP) return step_on(keys, nx, ny);
 	const char *way = town_way(&far);
 	/* (close by: which way to its nearest cell, as the crow flies, where
 	 * the walk to the front's middle wound round the basin and turned

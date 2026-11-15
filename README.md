@@ -151,6 +151,7 @@ Online, the two fill your NetPass.
 | **New 3DS** | the `.cia`, or the `.3dsx` | all but NetBattles | [On a New 3DS](docs/GUIDE.md#on-a-new-3ds) |
 | **Switch** with custom firmware | the `.nro` | all of it | [On a Switch](docs/GUIDE.md#on-a-switch) |
 | **PS Vita** with custom firmware | the `.vpk` | all of it | [On a PS Vita](docs/GUIDE.md#on-a-ps-vita) |
+| **PSP** with custom firmware | the PSP zip | BN6's net, offline | [On a PSP](docs/GUIDE.md#on-a-psp) |
 | **PS4** with GoldHEN | the `.pkg` | all of it | [On a PS4](docs/GUIDE.md#on-a-ps4) |
 | **PS5**, jailbroken | the app folder's `.zip`, or Prospero Store | all of it | [On a PS5](docs/GUIDE.md#on-a-ps5) |
 

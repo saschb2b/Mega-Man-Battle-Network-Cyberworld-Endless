@@ -6,6 +6,7 @@
 
 #include "gfx.h"
 #include "minifont.h"
+#include "options_news.h"
 #include "platform.h"
 #include "save.h"
 #include "update.h"
@@ -14,7 +15,10 @@
 
 #define LINE_Y 138   /* the line's top in the picture: over the copyright */
 
-void title_version_tick(void) { update_tick(); }
+void title_version_tick(bool menu) {
+	update_tick();
+	if (menu) news_box_offer();
+}
 
 /* The build, for a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1
  * to 0.4 were alphas) */
@@ -28,17 +32,21 @@ static const char *version_words(char *v, size_t n) {
 	return v;
 }
 
-void title_version_draw(int x0, int y0, int saved_depth, bool best) {
+void title_version_draw(int x0, int y0, int saved_depth, bool menu) {
 	char v[40];
 	minifont_draw(x0 + 4, y0 + LINE_Y, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
-	/* (a newer version found, beside it, in the PET's green: Options has its line) */
-	if (update_version()[0]) {
+	/* (a newer version found, beside it, in the PET's green, until the menu's
+	 * rows come over it: then the hints' SELECT: Update says where, title_menu.c) */
+	if (update_version()[0] && !menu) {
 		int at = x0 + 4 + minifont_width(v, 1) + 6;
 		snprintf(v, sizeof v, "%s v%s", update_word(UW_NEW), update_version());
 		minifont_draw(at, y0 + LINE_Y, v, rgba(120, 230, 140, 255), 1);
 	}
+	/* (with a saved run too: CONTINUE's word is where that run stands, this
+	 * the record; hiding it there left a playtester's Layer 7 unsaid,
+	 * session 76) */
 	int depth = profile.best_depth > saved_depth ? profile.best_depth : saved_depth;
-	if (depth > 0 && best) {
+	if (depth > 0) {
 		snprintf(v, sizeof v, "Best: Layer %d", depth);
 		minifont_draw(x0 + CORE_W - 4 - minifont_width(v, 1), y0 + LINE_Y, v, rgba(255, 230, 90, 255), 1);
 	}

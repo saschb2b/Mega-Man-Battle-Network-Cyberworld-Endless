@@ -233,7 +233,7 @@ def docker(*cmd, mounts=(), image=IMAGE, env=()):
         args += ['-v', f'{host}:{guest}']
     for name, value in env:
         args += ['-e', f'{name}={value}']
-    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES', 'CYBERWORLD_BATTLE_PROBE'):
+    for var in ('CYBERWORLD_AUDIO_DUMP', 'CYBERWORLD_SOUND_MUTE', 'CYBERWORLD_SOUND_PHASE', 'CYBERWORLD_SFX_LOG', 'CYBERWORLD_AUDIO_OFFLINE', 'CYBERWORLD_EMU_DEBUG', 'CYBERWORLD_FREE_SPACE', 'CYBERWORLD_WATCH', 'CYBERWORLD_BTRACE', 'CYBERWORLD_AUTOPILOT_BACK', 'CYBERWORLD_AUTOPILOT_ROUTE', 'CYBERWORLD_TILE_AT', 'CYBERWORLD_VOIDS', 'CYBERWORLD_AUTOPILOT', 'CYBERWORLD_TOWN_DEBUG', 'CYBERWORLD_TOWN_STYLE', 'CYBERWORLD_TOWN_VARIANT', 'CYBERWORLD_TOWN_TILE', 'CYBERWORLD_TOWN_START', 'CYBERWORLD_EMU_THREAD', 'CYBERWORLD_XDRAWS', 'CYBERWORLD_XBRACKET_MUTATE', 'CYBERWORLD_XBRACKET_FACES', 'CYBERWORLD_BATTLE_PROBE'):
         if os.environ.get(var):
             args += ['-e', f'{var}={os.environ[var]}']
     args += [image, *cmd]
@@ -493,6 +493,39 @@ def windows_release():
               image=WINDOWS_IMAGE) != 0:
         sys.exit('makensis failed')
     print('released', os.path.join(RELEASE, WINDOWS_SETUP))
+
+
+PSP_ZIP = 'cyberworld-endless-psp.zip'
+
+
+def psp_release():
+    """build/psp/cyberworld-endless-psp.zip: the memory stick's PSP/GAME/cyberworld-endless/
+    with the EBOOT, an empty rom/ for BN6, and the licenses; gpSP, which the PSP's
+    build links, is GPL-2.0, so the source's place goes with it (psp/README.md)."""
+    import zipfile
+    out = os.path.join(ROOT, 'build', 'psp')
+    with open(os.path.join(ROOT, 'docker', 'gpsp.sh'), encoding='utf-8') as f:
+        commit = re.search(r'^COMMIT=([0-9a-f]+)', f.read(), re.M)[1]
+    tag = os.environ.get('TAG', '')
+    ref = tag if tag.startswith('v') else 'dev'
+    source = (f'Cyberworld Endless {version()} for the PSP\n\n'
+              'This build links libretro gpSP (GPL-2.0, licenses/gpSP.txt) and parts of\n'
+              'mGBA (MPL-2.0, licenses/mGBA.txt); the game is MIT (LICENSE.txt). It is\n'
+              'distributed under the GPL\'s terms. Its source:\n\n'
+              f'  the game:  https://github.com/{REPO}/tree/{ref}\n'
+              f'  gpSP:      https://github.com/libretro/gpsp/tree/{commit}\n'
+              '             with docker/gpsp-cyberworld.patch from the game\'s source over it\n'
+              '             (docker/gpsp.sh builds it; psp/README.md builds the rest)\n')
+    base = 'PSP/GAME/cyberworld-endless/'
+    archive = os.path.join(out, PSP_ZIP)
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.write(os.path.join(out, 'EBOOT.PBP'), base + 'EBOOT.PBP')
+        z.writestr(base + 'rom/', '')
+        z.write(os.path.join(ROOT, 'LICENSE'), base + 'LICENSE.txt')
+        for name in ('gpSP.txt', 'mGBA.txt'):
+            z.write(os.path.join(out, 'licenses', name), base + 'licenses/' + name)
+        z.writestr(base + 'SOURCE.txt', source)
+    print('released', archive)
 
 
 def version():
@@ -952,25 +985,31 @@ def tiles(seeds='2', baseline=False):
     report = os.path.join(ROOT, '.build', 'atlas', 'report.txt')
     if not os.path.exists(report):
         return code or 1
-    agg = collections.defaultdict(lambda: [0, 0, 0, 0, 0])
+    agg = collections.defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0])
     for l in open(report):
         m = re.match(r'biome +(\d+) .*?: (\d+) panels.*seams (\d+), breaks (\d+), nicks (\d+), off near (\d+)', l)
         if m:
             a = agg[int(m[1])]
             a[0] += 1; a[1] += int(m[2]); a[2] += int(m[3]); a[3] += int(m[6]); a[4] += int(m[4])
+            # (the holes in its floor's top the safety net found, and those it left: src/map/voids.h)
+            v = re.search(r'voids (\d+), holes left (\d+)', l)
+            if v:
+                a[5] += int(v[1]); a[6] += int(v[2])
     print()
-    print(f'{"area":16} {"layers":>6} {"panels":>7} {"breaks /100":>12} {"off /100":>9} {"seams /100":>11}   why off')
-    total = [0, 0, 0, 0]
-    for b, (n, panels, seams, off, breaks) in sorted(agg.items()):
+    print(f'{"area":16} {"layers":>6} {"panels":>7} {"breaks /100":>12} {"off /100":>9} {"seams /100":>11} {"holes":>6} {"left":>5}   why off')
+    total = [0, 0, 0, 0, 0, 0]
+    for b, (n, panels, seams, off, breaks, voids, left) in sorted(agg.items()):
         why = ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate((WHY or {}).get(b, [])) if v) if WHY else ''
         print(f'{AREAS[b] if b < len(AREAS) else b:16} {n:6} {panels:7} {100 * breaks / panels:12.1f} {100 * off / panels:9.1f} '
-              f'{100 * seams / panels:11.1f}   {why}')
-        total[0] += panels; total[1] += off; total[2] += seams; total[3] += breaks
-    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[3] / total[0]:12.1f} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}')
+              f'{100 * seams / panels:11.1f} {voids:6} {left:5}   {why}')
+        total[0] += panels; total[1] += off; total[2] += seams; total[3] += breaks; total[4] += voids; total[5] += left
+    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[3] / total[0]:12.1f} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}'
+          f' {total[4]:6} {total[5]:5}')
     print('breaks: tile edges across which the picture shows a strip of pixels no original map shows at a tile\'s edge, a panel'
           ' line cut off or a block of another shade (yellow in the seams pictures, listed in .build/atlas/breaks_*.txt);'
           ' off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
-          ' seams: tiles meeting as no original map sets them (red)')
+          ' seams: tiles meeting as no original map sets them (red); holes: tiles whose floor\'s top showed the void'
+          ' (src/map/voids.h), framed white where the safety net mended them, blue where it left one (left)')
     return code
 
 
@@ -3369,6 +3408,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
         if code == 0:   # port/update.py, the PortMaster port's own update
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_port_update.py')])
+        if code == 0:   # tools/update_manifest.py's notes, as the update box shows them
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_update_manifest.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         if code == 0:   # docs/re's ledger sound (its written files are dev's workflow's: tools/generated.py)
@@ -3412,9 +3453,11 @@ def main():
         print('built', os.path.join(ROOT, 'build', 'switch', 'cyberworld-endless.nro'))
         return
     if a.action == 'psp':
-        # the PSP (psp/README.md): build/psp/EBOOT.PBP
+        # the PSP (psp/README.md): build/psp/EBOOT.PBP, and the release's
+        # build/psp/cyberworld-endless-psp.zip
         build('psp')
         print('built', os.path.join(ROOT, 'build', 'psp', 'EBOOT.PBP'))
+        psp_release()
         return
     if a.action == 'vita':
         # the PlayStation Vita (vita/README.md): build/vita/cyberworld-endless.vpk

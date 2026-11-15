@@ -64,4 +64,13 @@ bool update_line_first(void);
  * where it does nothing (the itch app's, a handheld's releases page) */
 bool update_press(void);
 
+/* The newer version's changes: its CHANGELOG section as update.json has
+ * it, a paragraph a line, a headline marked "# " ("" where it has none) */
+const char *update_changes(void);
+/* Whether the title's update box asks now: a newer version found, on the
+ * title, and not offered before (a No or B remembered for that version,
+ * settings.ini's update_offered); once asked, update_box_done keeps it */
+bool update_box_due(void);
+void update_box_done(void);
+
 #endif

@@ -13,30 +13,52 @@
 #include "director_folder.h"
 #include "director_state.h"
 #include "emu.h"
+#include "powers.h"
 #include "save.h"
 #include "souls.h"
 #include "talk.h"
 #include "visitor_families.h"
 #include "visitors.h"
 
+/* (whether MegaMan has a Cross now, as the Custom screen offers them:
+ * the run's brought or won, its CROSSSELECT entries on. A run with none
+ * hears no "Cross and all!", which two playtesters' did; the words are
+ * made on a layer's arrival, the game running, a CONTINUE saying none) */
+static bool cross_owned(void) {
+	for (int navi = 1; navi <= 5; ++navi)
+		if (powers_cross_owned(navi)) return true;
+	return false;
+}
+
 /* Where the nets meet, the first time a profile comes there, after the
  * arrival's own words: an older net's area whose battles are ours (a
  * profile once told its battles ran the old way, on the guest core that
  * has left runs, hears that its Cross and its Navis are ours now), and the
- * deep, where both nets' viruses come */
+ * deep, where both nets' viruses come; the Cross named only in a run that
+ * holds one */
+/* (an older net's area: a territory's, or the deep's dressed in one) */
+static bool older_here(void) { return D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS); }
+
+/* (a profile once told its battles ran the old way hears that they are ours) */
+static bool ours_news(void) { return older_here() && (profile.cross_old_told || profile.guest_taught) && !profile.navis_ours_told; }
+
+bool nets_older_news(void) { return older_here() && !profile.native_taught && !ours_news(); }
+
 void nets_arrival_words(void) {
-	/* (an older net's area: a territory's, or the deep's dressed in one) */
-	bool older = D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS);
-	D.beat_ours = older && (profile.cross_old_told || profile.guest_taught) && !profile.navis_ours_told;
-	D.beat_native = older && !profile.native_taught && !D.beat_ours;
+	D.beat_ours = ours_news();
+	D.beat_native = nets_older_news();
 	D.beat_deep = D.deep && !profile.deep_taught;
 	size_t k = strlen(D.beat);
-	if (D.beat_ours)
+	bool cross = cross_owned();
+	if (D.beat_ours && cross)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! Our Cross works in the older Net now!|@M Whoa... Even its Navis fight like ours!|"
 			"@L Alright! Cross and all!", k ? "|" : "");
+	else if (D.beat_ours)
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! The older Net's changed!|@M Whoa... Its Navis fight like ours now!|"
+			"@L Alright!", k ? "|" : "");
 	else if (D.beat_native)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
-			"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!", k ? "|" : "");
+			"@M Its viruses are the old ones,Lan.|%s", k ? "|" : "", cross ? "@M But we fight them our way. Cross and all!" : "@M But we fight them our way!");
 	if (D.beat_deep && k < sizeof D.beat)
 		snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
 			"@M Yeah. Anything could come at us!", k ? "|" : "");
@@ -56,8 +78,13 @@ void nets_battle_note(const Encounter *e) {
 	}
 }
 
-/* (MegaMan free on the map, nothing said or shown: a word can start) */
-static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
+/* (MegaMan free on the map, nothing said or shown, the screen faded in: a
+ * word can start. One begun in the fade back from a battle drew its box
+ * empty and grey under the fade, a playtester's "flash" after a run away,
+ * session 77) */
+static bool quiet(void) {
+	return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && emu_read8(BN6_FADE_ACTIVE) != 1;
+}
 
 /* MegaMan on the first family of another net a profile met: one of the older Net's
  * (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's
@@ -66,9 +93,23 @@ static void visitor_words(void) {
 	if (!D.visitor_due || !quiet()) return;
 	char name[24], words[240];
 	enemy_name(visitor_id(visitor_net(D.visitor_family), D.visitor_family, 0), name, sizeof name);
-	if (D.visitor_due == VISITOR_OLDER_NETS)
+	/* (Lan's answer by where they stand: in the deep MegaMan has said both
+	 * Nets run together; a layer wearing an older Net's area over battles
+	 * of ours (BN4's areas, docs/multirom/bn4.md) looked old already, its
+	 * viruses the news. A playtester in BN4's ACDC Area found "mixing!?"
+	 * late there) */
+	bool older = D.visitor_due == VISITOR_OLDER_NETS;
+	if (older && D.deep)
+		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L Both Nets,like you said...|"
+			"@M Yeah. Stay sharp!", name);
+	else if (older && D.layer_tiles >= NET_AREAS)
+		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L Its old viruses too!?|"
+			"@M Yeah. The Nets meet here. Stay sharp!", name);
+	else if (older)
 		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
 			"@M Where they meet,yeah. Stay sharp!", name);
+	else if (D.deep)
+		snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L Both Nets,like you said...|@M Yeah. Stay sharp!", name);
 	else snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!", name);
 	if (!talk_start(words, FACE_MEGAMAN)) return;
 	D.visitor_due = 0;

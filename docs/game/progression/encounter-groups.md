@@ -3,7 +3,7 @@ type: Design
 title: "Encounter groups"
 description: "The encounter rework, approved 11 November 2026: one pool of virus families across every ROM tagged by what they do, authored constellations beside each area's own battles, an arc per act around a signature family, rewards from the group fought; what replaces the visitors and the deep's coin, what was measured, and the phases."
 tags: [game, progression, multirom]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T04:50:00Z }
 sources:
   - id: owner
     resource: "The owner's calls of 11 November 2026, given in the project's sessions and written down here"
@@ -512,6 +512,18 @@ a player's had an arc until Step 3 turned them on (below).
   layer, so a third battle is seldom met, and the beat alone is an eased
   battle as the second opener is. Never with the Gentle helper, on a side
   layer or a Glitch layer.
+  A battle is picked by the layer's seed and the count of random battles
+  fought on the layer, and that count is saved with a checkpoint (`run.act`,
+  [Moving saves](../../engine/saves.md)): a CONTINUE goes on with the
+  layer's next battle. Until 15 November 2026 it began at 0 again, so the
+  battle after each CONTINUE was the beat, and on the run's first layer
+  the eased first battle: a playtester met act 1's pair (Powie and BN5's
+  CanGard) in all three battles of one layer across two CONTINUEs
+  (session 77). Measured with every ROM read, seeds 1 to 300, three
+  battles a layer: played through, 2.65 to 2.99 formations of 3 in acts 1
+  and 2 and no layer all one; with a CONTINUE before each, every layer of
+  depths 2 to 6 met its beat three times, and 47 of 300 first layers
+  one formation.
 - **Act 1 holds every beat to the eased limits**: the band's lower half
   and two thirds of the caps, as its first beat (Easing act 1's pair,
   below).

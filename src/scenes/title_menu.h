@@ -2,7 +2,7 @@
  * a run is saved, and OPTIONS, each a row of the title's own lettering
  * (BN6's two its own tiles, OPTIONS set from their letters and PRESS
  * START's); the cursor's arrow, CONTINUE's word on where the run goes
- * on, and the word on the keys under the picture. */
+ * on, and the words on the keys in the bottom left corner. */
 #ifndef CW_TITLE_MENU_H
 #define CW_TITLE_MENU_H
 
@@ -20,9 +20,10 @@ typedef struct {
 /* Its rows: NEW GAME, CONTINUE where a run is saved, OPTIONS the last. */
 int title_menu_rows(bool has_save);
 void title_menu_draw(int x0, int y0, const TitleMenu *m);
-/* The word under the picture: ENTER before START where a keyboard is the
+/* The words on the keys: ENTER under PRESS START where a keyboard is the
  * only controller (a PC player had no word of which key it is), then
- * with the menu the keys for SAVES and the ROMs' screen; none while
+ * with the menu the keys for SAVES and the ROMs' screen, a line each
+ * over the build's in the bottom left corner; none while
  * something is `over` the menu (NEW GAME's question, Options, whose panel
  * stops short of the picture's foot). */
 void title_hint_draw(int x0, int y0, bool menu, bool pressed, bool over);

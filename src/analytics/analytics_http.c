@@ -416,7 +416,7 @@ bool analytics_http_get(const char *url, const char *agent, AnalyticsSink sink, 
 	Request q = { 0 };
 	bool ok = request_open(&q, url, agent, L"GET", 20) && H.send(q.r, WINHTTP_NO_ADDITIONAL_HEADERS, 0, WINHTTP_NO_REQUEST_DATA, 0, 0, 0) &&
 		request_answered(&q);
-	static char buf[64 * 1024];   /* (the updater's thread alone reads) */
+	char buf[16 * 1024];   /* (on each fetching thread's own stack: the updater fetches on two at once) */
 	for (DWORD has = 0, got = 0; ok; ) {
 		if (SDL_AtomicGet(stop) || !H.available(q.r, &has)) { ok = false; break; }
 		if (!has) break;

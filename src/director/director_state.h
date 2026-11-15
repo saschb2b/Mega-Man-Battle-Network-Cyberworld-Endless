@@ -59,6 +59,7 @@ typedef struct {
 	bool beat_native;      /* the arrival's words say an older net's area fights our way, the first time a profile comes to one (docs/multirom/one-net.md) */
 	bool beat_ours;        /* ... to a profile once told its battles were the old way, that they are ours now, Crosses and all */
 	bool beat_deep;        /* ... that both nets meet in the deep, the first time a profile comes there */
+	bool beat_first;       /* ... are the first dive's, the first time a profile dives (HEARD_FIRST_DIVE) */
 	bool territory_native; /* the layer's random battles are its territory's own records in BN6's engine (loot.h's loot_territory) */
 	bool deep;             /* ... or the deep's, of both nets (loot_deep) */
 	int visitor_due;       /* the first visitor a profile met (visitors.h's visitor_telegraph): one of the older Net's, BN5's or BN4's, in a battle of BN6's, or one of BN6's in BN5's; MegaMan's words due */
@@ -104,7 +105,6 @@ typedef struct {
 	bool port_told;        /* MegaMan has said where the way on is at home (the town's port and how to jack in, Lan's HP's pink pad) */
 	bool errands_told;     /* ... and, this visit, what the town holds besides: requests posted, AsterLand's order */
 	bool layer_told;       /* ... where they are on this layer (as LAYER_TOLD_FLAG) */
-	bool more_told;        /* ... and, at a second L, what else the layer holds */
 	int layer_act;         /* 1 + the act of the layer built last, 0 none (a side layer) */
 	int dealer_act;        /* 1 + the act whose Net Dealer has already spoken, 0 none (kept across a CONTINUE: act_note) */
 	int heard_act;         /* 1 + the act whose guardian a bystander has named, 0 none (kept across a CONTINUE: act_note) */
@@ -148,5 +148,12 @@ void end_run(void);
  * exit (director_end.c, as end_run) */
 void win_run(void);
 void drop_events(void);
+/* The viruses a battle deleted, as BN6 counts its enemies down
+ * (director_tally.c): begun with the battle, read each of its frames;
+ * of the `foes` it set out, every one where it was won, else those BN6
+ * counted down before MegaMan was deleted or ran */
+void tally_battle_start(void);
+void tally_battle_frame(void);
+int tally_deleted(bool won, int foes);
 
 #endif

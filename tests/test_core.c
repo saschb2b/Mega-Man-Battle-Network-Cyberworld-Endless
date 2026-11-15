@@ -32,9 +32,11 @@
 #include "analytics_online.h"
 #include "online_visit.h"
 #include "area_src.h"
+#include "tiles.h"
 #include "backup.h"
 #include "battle_data.h"
 #include "lab_text.h"
+#include "scripts.h"
 #include "test_backup.h"
 #include "test_transfer_code.h"
 #include "test_update.h"
@@ -53,6 +55,7 @@
 #include "library_pages.h"
 #include "loot.h"
 #include "meta.h"
+#include "meta_text.h"
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
@@ -191,6 +194,7 @@ bool emu_debug_on(void) { return false; }
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
 char loot_fit_code(int id, char code, bool always) { (void)id; (void)always; return code; }
 void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
+void emu_write8(uint32_t addr, uint8_t v) { (void)addr; (void)v; }   /* (scripts.c's chat marks: test_heal_again links it) */
 /* (the meta layer and a run's start words: no saves, chip pools or town) */
 void profile_save(void) {}
 int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
@@ -2597,6 +2601,185 @@ static void test_walks(void) {
 		}
 	}
 	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
+}
+
+/* (x, y) in a 2 x 2 block of floor: wide floor, not a walkway */
+static bool shape_wide(int x, int y) {
+	for (int k = 0; k < 4; ++k) {
+		int bx = x - (k & 1), by = y - (k >> 1);
+		if (walk_floor(bx, by) && walk_floor(bx + 1, by) && walk_floor(bx, by + 1) && walk_floor(bx + 1, by + 1)) return true;
+	}
+	return false;
+}
+
+/* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
+static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
+
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, WAY_SHAPES };
+
+/* (a walkway leaving wide floor at p[i] turns a corner within two panels:
+ * the playtesters' road off a square's side, session 76) */
+static bool short_leg(const int16_t *p, int i, int n) {
+	int ex = p[i + 1] % MAP_W - p[i] % MAP_W, ey = p[i + 1] / MAP_W - p[i] / MAP_W;
+	for (int k = 1; k <= 2 && i + k + 1 < n; ++k) {
+		int ax = p[i + k] % MAP_W, ay = p[i + k] / MAP_W;
+		if (shape_wide(ax, ay)) return false;
+		if (!shape_step(p, i + k, ex, ey)) return !walk_floor(ax + ex, ay + ey);
+	}
+	return false;
+}
+
+/* The turns on the arrow's walk from the arrival to the goal where BN6's
+ * walk stops MegaMan unless he stops on a line first, added to out: into a
+ * one-wide walkway from wide floor, where no edge stops him on its line
+ * (the playtester's first stop, session 76); at a walkways' junction, the
+ * one he walks on going on past it; a jog, a walkway stepping one panel
+ * aside between two runs of two, each corner taken only from its wall; a
+ * walkway that leaves wide floor and turns within two panels, its mouth
+ * and its corner one lining up (the other games' squares, session 76).
+ * And the layer's pits: a void panel between walkways, floor on its four
+ * sides and void on a corner (a hole in a field, floor all round, is the
+ * field's own). */
+static void way_shapes(int *out) {
+	for (int y = 1; y + 1 < MAP_H; ++y)
+		for (int x = 1; x + 1 < MAP_W; ++x)
+			if (layer.cell[y][x] == C_VOID && walk_floor(x - 1, y) && walk_floor(x + 1, y) && walk_floor(x, y - 1) && walk_floor(x, y + 1) &&
+				!(walk_floor(x - 1, y - 1) && walk_floor(x + 1, y - 1) && walk_floor(x - 1, y + 1) && walk_floor(x + 1, y + 1)))
+				++out[SHAPE_PIT];
+	int tx, ty, sx, sy, len;
+	if (!arrow_goal(&tx, &ty) || !arrow_start(-1, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) return;
+	static int16_t p[MAP_W * MAP_H];
+	int n = route_walk_len;
+	for (int i = 0; i < n; ++i) p[i] = route_walk[n - 1 - i];
+	for (int i = 1; i + 1 < n; ++i) {
+		int x = p[i] % MAP_W, y = p[i] / MAP_W, nx = p[i + 1] % MAP_W, ny = p[i + 1] / MAP_W;
+		int dx = x - p[i - 1] % MAP_W, dy = y - p[i - 1] / MAP_W, ex = nx - x, ey = ny - y;
+		if (shape_wide(x, y) && !shape_wide(nx, ny) && short_leg(p, i, n)) ++out[SHAPE_SHORT_LEG];
+		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
+		bool beyond = walk_floor(x + dx, y + dy);
+		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
+			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
+			++out[SHAPE_JOG];
+	}
+}
+
+static void shapes_line(const char *what, int layers, const int *got) {
+	printf("  %s: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs, %d short legs; %d pits\n", what, layers,
+		got[SHAPE_TURN_WIDE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
+}
+
+/* The other games' areas (rom.c's, docs/multirom/) as the generator lays
+ * them out: each as the BN6 area it is like, with the kit its own art gives
+ * (netmap_kit): every room drawn as its hubs where its rooms up to 25
+ * panels and more are (no signature), the way kept one wide where its art
+ * draws nothing wider, held to its own maps' count of one-wide walkways
+ * (NetAreaDef.narrows) where fewer than that area's. Its ways' shapes into
+ * all, the layers into *layers, and the ways past that count (of the areas
+ * the cap widens) into *over of *ways. */
+static void xarea_shapes(int *all, int *layers, int *over, int *ways) {
+	char what[64];
+	for (int x = 0; xrom_layout(x); ++x) {
+		const XRomLayout *xl = xrom_layout(x);
+		for (int k = 0; k < xl->nareas; ++k) {
+			const NetAreaDef *a = &xl->areas[k];
+			if (a->held) continue;
+			LayerKit xk = kit;
+			xk.hub_rooms = a->pad_rooms >= 25;
+			xk.one_wide = a->styles & TILES_ONE_WIDE;
+			xk.narrows = a->narrows;
+			int cap = layer_narrow_cap(a->like), got[WAY_SHAPES] = { 0 }, past = 0;
+			if (a->narrows && (!cap || a->narrows < cap)) cap = a->narrows;
+			for (uint32_t seed = 1; seed <= 60; ++seed) {
+				layer_generate(seed * 7919u + (uint32_t)(100 * x + k), seed % 2 ? 6 : 5, a->like, LAYER_NORMAL, &xk);
+				way_shapes(got);
+				if (!cap || xk.one_wide) continue;
+				const Room *g = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
+				past += layer_way_narrows(layer.rooms[0].ax, layer.rooms[0].ay, g->ax, g->ay) > cap;
+				++*ways;
+			}
+			*over += past;
+			*layers += 60;
+			for (int s = 0; s < WAY_SHAPES; ++s) all[s] += got[s];
+			if (getenv("CW_WAY_STATS")) {
+				snprintf(what, sizeof what, "shapes %s %s (%d past %d)", xl->tag, a->short_name, past, cap);
+				shapes_line(what, 60, got);
+			}
+		}
+	}
+}
+
+/* The void panels with floor on all four sides and void on a corner, a
+ * pit no original map has (fill_pits); *holes those with their corners floor
+ * too, punched in a slab or a field on purpose (SHAPE_HOLED); *loose the
+ * pits in no room's box, between walkways */
+static int layer_pits(int *holes, int *loose) {
+	int n = 0;
+	*holes = *loose = 0;
+	for (int y = 1; y + 1 < MAP_H; ++y)
+		for (int x = 1; x + 1 < MAP_W; ++x) {
+			if (layer.cell[y][x] != C_VOID || !walk_floor(x + 1, y) || !walk_floor(x - 1, y) || !walk_floor(x, y + 1) || !walk_floor(x, y - 1)) continue;
+			if (walk_floor(x + 1, y + 1) && walk_floor(x - 1, y + 1) && walk_floor(x + 1, y - 1) && walk_floor(x - 1, y - 1)) { ++*holes; continue; }
+			++n;
+			bool in = false;
+			for (int r = 0; r < layer.nrooms && !in; ++r)
+				in = x >= layer.rooms[r].x && x < layer.rooms[r].x + layer.rooms[r].w && y >= layer.rooms[r].y && y < layer.rooms[r].y + layer.rooms[r].h;
+			*loose += !in;
+		}
+	return n;
+}
+
+/* The shapes way_shapes counts, on sixty layers of every area (test_way_links'):
+ * the comps' and homepages' held to one one-wide walkway on the way, as
+ * their originals' single rooms (docs/world/level-design/generator.md,
+ * Navigation): RoboDog's comp's ways turned into a walkway on wide floor 14
+ * times in its 60 layers, 25 before, and stepped aside one panel once, 3
+ * before (session 76: a playtester stopped at such mouths for 25 calls).
+ * The other games' areas, held to their own maps' count where fewer than
+ * the BN6 area they are laid out as (BN4's ACDC Area 2 for Central's 3, its
+ * Undernet 1): their ways past that count stay as few as the BN6 areas'
+ * (test_way_links). */
+static void test_way_shapes(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	int all[WAY_SHAPES] = { 0 };
+	char what[32];
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int got[WAY_SHAPES] = { 0 };
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 7919u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+			way_shapes(got);
+		}
+		for (int k = 0; k < WAY_SHAPES; ++k) all[k] += got[k];
+		if (getenv("CW_WAY_STATS")) {
+			snprintf(what, sizeof what, "shapes area %2d", b);
+			shapes_line(what, 60, got);
+		}
+	}
+	shapes_line("way shapes", 60 * BIOME_COUNT, all);
+	int xall[WAY_SHAPES] = { 0 }, layers = 0, over = 0, ways = 0;
+	xarea_shapes(xall, &layers, &over, &ways);
+	shapes_line("the other games' areas' way shapes", layers, xall);
+	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
+	/* (a pit between walkways, its walls keeping MegaMan off it, where the
+	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
+	 * layer 1; 19 in 18 of these layers before, none between walkways now,
+	 * 5 left in the fields of guardians' layers) */
+	int pits = 0, pitted = 0, holes = 0, loose = 0;
+	for (uint32_t seed = 1; seed <= 300; ++seed) {   /* (test_generation's 300) */
+		int depth = 1 + (int)(seed % 25);
+		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
+		layer_generate(seed * 7919u, depth, biome, kind, biome == BIOME_UNDERNET ? &undernet_kit : &kit);
+		int h, l, n = layer_pits(&h, &l);
+		holes += h;
+		loose += l;
+		pits += n;
+		pitted += n > 0;
+	}
+	CHECK(loose == 0, "%d one-panel pits between walkways", loose);
+	printf("  pits: %d one-panel pits in %d of 300 layers, %d between walkways (and %d holes punched in floor)\n", pits, pitted, loose, holes);
 }
 
 /* The way across (docs/world/level-design/generator.md, Navigation): from the arrival to
@@ -5151,11 +5334,13 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance: Z-Canon"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
-	for (int f = FOLDER_ZCANON; f < FOLDER_COUNT; ++f) {
-		char g[64];
-		snprintf(g, sizeof g, "%c%s: %s", meta_folder(f)->opens[0] - 'a' + 'A', meta_folder(f)->opens + 1, meta_folder(f)->name);
-		CHECK(strlen(g) <= 32, "folders: the goal line \"%s\" past 32 letters", g);
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	/* (each a sentence the information box holds in two of its three
+	 * lines) */
+	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
+		char g[96];
+		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
+		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
 	}
 	profile.folder_feats = FEAT_PA;
 	meta_run_over(false);
@@ -6608,6 +6793,15 @@ static void test_launcher(void) {
 	CHECK(!strcmp(said, "Play with BN6. BN5 can come later: R on the title brings this screen back."), "launcher: PLAY's note (%s)", said);
 	note_play(1u << SLOT_BN5, 0, true, "R", said, sizeof said);
 	CHECK(!strcmp(said, "Back to the title, BN5's net in."), "launcher: DONE's note (%s)", said);
+	note_play(1u << SLOT_BN5 | 1u << SLOT_BN4, 0, true, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Back to the title, BN5's and BN4's nets in."), "launcher: DONE's note, both in (%s)", said);
+	note_play(1u << SLOT_BN4, 0, true, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Back to the title, BN4's net in."), "launcher: DONE's note, BN4 alone (%s)", said);
+	note_slot_ready(SLOT_BN4, NULL, said, sizeof said);
+	CHECK(!strcmp(said, "BN4 Red Sun (USA), checked by its SHA-1. Its net joins ours: BN4's areas, viruses, Navis and chips in runs."),
+		"launcher: what BN4 lends (%s)", said);
+	note_gone(SLOT_BN4, said, sizeof said);
+	CHECK(!strcmp(said, "BN4 Red Sun (USA) is gone from where it was: its areas stay out of runs until it is back."), "launcher: BN4 gone (%s)", said);
 	note_play(1u << SLOT_BN5, 1u << SLOT_BN4, false, "R", said, sizeof said);
 	CHECK(!strcmp(said, "Play with BN6 and BN5. BN4 can come later: R on the title brings this screen back."), "launcher: PLAY's note, BN4 out (%s)", said);
 	note_play(1u << SLOT_BN5 | 1u << SLOT_BN4, 0, false, "R", said, sizeof said);
@@ -7761,6 +7955,45 @@ static void test_lab_text(void) {
 		!((NET_AREAS + XAREAS_MAX - 1) & LAB_AREA_SECOND), "lab: a set's song and area bytes hold every game's");
 }
 
+/* The Recovery Mr.Prog's half patch, its amount set again in place (a
+ * CONTINUE builds the layer before its state holds MegaMan's max HP, and
+ * the patch gave 1 HP, session 77): the bytes ta_heal_bytes writes at the
+ * HealSpot are those a build with that amount writes, every byte after them
+ * where it was; a heal to full (the guardian's layer, the Heals helper's)
+ * has no amount to set. */
+static void test_heal_again(void) {
+	static TextArchive a, b;
+	for (int vow = 0; vow < 2; ++vow)
+		for (int amount = 1; amount <= 9999; amount = amount * 10 + 7) {
+			HealSpot sa, sb;
+			ta_begin(&a);
+			ta_say(&a, FACE_PROG, "BEFORE");
+			ta_heal(&a, 2, 0x1451, 0x1464, 1, vow, &sa);
+			ta_say(&a, FACE_PROG, "AFTER");
+			ta_begin(&b);
+			ta_say(&b, FACE_PROG, "BEFORE");
+			ta_heal(&b, 2, 0x1451, 0x1464, amount, vow, &sb);
+			ta_say(&b, FACE_PROG, "AFTER");
+			CHECK(sa.amount_at > 0 && sa.got_at > sa.amount_at && sa.amount_at == sb.amount_at && sa.got_at == sb.got_at,
+				"heal: %d HP's amount at %d and %d, 1 HP's at %d and %d", amount, sb.amount_at, sb.got_at, sa.amount_at, sa.got_at);
+			CHECK(a.len == b.len && a.n == b.n && !memcmp(a.off, b.off, sizeof a.off), "heal: %d HP's script is not 1 HP's length", amount);
+			if (sa.amount_at < 0 || a.len != b.len) continue;
+			uint8_t amt[2], got[HEAL_GOT_LEN];
+			ta_heal_bytes(amount, amt, got);
+			memcpy(a.buf + sa.amount_at, amt, sizeof amt);
+			memcpy(a.buf + sa.got_at, got, sizeof got);
+			CHECK(!memcmp(a.buf, b.buf, (size_t)a.len), "heal: 1 HP set again to %d is not the patch built with %d%s", amount, amount, vow ? " (a vow)" : "");
+			CHECK(b.buf[sb.amount_at - 2] == 0xFB && b.buf[sb.amount_at - 1] == 0x08 && (b.buf[sb.amount_at] | b.buf[sb.amount_at + 1] << 8) == amount,
+				"heal: the amount's place is not ts_start_heal's");
+		}
+	for (int amount = -1; amount <= 0; ++amount) {
+		HealSpot s = { 5, 5 };
+		ta_begin(&a);
+		ta_heal(&a, 0, 0x1451, 0x1464, amount, false, &s);
+		CHECK(s.amount_at < 0 && s.got_at < 0, "heal: a heal to full (%d) has an amount to set", amount);
+	}
+}
+
 /* The encounter groups' templates and their filling (groups.h;
  * docs/game/progression/encounter-groups.md): a pool of five families
  * made up here, no ROM */
@@ -8029,6 +8262,7 @@ int main(int argc, char **argv) {
 	test_sha1();
 	test_battle_data();
 	test_lab_text();
+	test_heal_again();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();
@@ -8059,6 +8293,7 @@ int main(int argc, char **argv) {
 	test_guardian_gone();
 	test_walks();
 	test_way_links();
+	test_way_shapes();
 	test_navicust();
 	test_xprograms();
 	test_depth_plan();

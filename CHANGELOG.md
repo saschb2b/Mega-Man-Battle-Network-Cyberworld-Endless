@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The PSP.** A PSP-2000, PSP-3000, PSP Go or PSP Street with custom
+  firmware (6.61 PRO or ARK-4) plays the game: unpack
+  `cyberworld-endless-psp.zip` onto the memory stick and start it from
+  the XMB. It holds BN6's net alone, with no room for BN5's or BN4's
+  ROM, and plays offline. Its GBA core is gpSP, built for the PSP's
+  CPU, which keeps a battle at full speed where mGBA could not; that
+  core makes this build GPL, and the zip says where its source is.
+  Played in PPSSPP so far: tell us how it runs on yours.
 - **SAVES in three pages.** Its eight buttons became the pages CLOUD,
   CODE and FILE, turned with L and R as Options' are, each a short list
   with a box that says what the line under the cursor does. UNDO IMPORT
@@ -29,15 +37,155 @@
   keeps playing from where it was, and goes on from there in the game
   as you close them. Where nothing was playing, the NaviCust's theme
   fills in.
-- **The game tells you when a new version is out.** At each start it
-  looks for one (a single request for the release's own `update.json`,
-  nothing about you sent), and the title shows `New v0.22.0` beside its
-  version. On Windows (the installer's copy), as a Linux AppImage and on
-  a PortMaster handheld, Options on the title updates the game with one
-  press: it downloads the new version, checks it, and starts again as it,
-  your saves and your run kept. Elsewhere the line opens the download
-  page. Options' Game page has an **Updates** switch to turn the look
-  off.
+- **3D on the New 3DS, at full speed.** With the 3D slider up, the net
+  sinks into the screen: the moving background far behind, the floor
+  tilted away from you, MegaMan, viruses and people upright at their
+  feet's depth, the HUD flat on the glass. The game holds 59 frames a
+  second with 3D up, battles included. It is Options' Display's **3D
+  depth**, on by default on the 3DS, where the slider is the switch.
+  Elsewhere the same line is Depth lighting, about six times faster
+  than in 0.21.1.
+- **Android and the consoles update too.** On Android, Options' update
+  line downloads the new version, checks it and installs it, from
+  Android 12 on without a tap once you have allowed installs from the
+  game; Android then closes the game, and you open it again from its
+  icon. The Switch's `.nro` and the New 3DS's `.3dsx` update
+  themselves: the new file goes in as the game closes, the Switch's
+  Homebrew Menu starts it, and the 3DS's Homebrew Launcher has it. The 3DS's CIA, the Vita and the PS5 say
+  where the new version is.
+- **Building the net is faster, and lighter.** "Building the net..."
+  does about 40% less work up to the first layer, with BN6 alone and
+  with BN5 and BN4 alike; picking a layer's tiles takes 45% less time
+  in every area, and learning an area's maps 59% less. Every seed makes
+  the same layer it made. A run also needs about 17 MB less memory,
+  room the New 3DS feels most.
+- **The comps' walkways, as their maps lay them.** A way through the
+  comps and homepages crosses one one-wide walkway at most, as their
+  originals' rooms do; its others are two panels wide, so the walk from
+  arrival to exit catches less on walkway mouths (RoboDog Comp, where
+  runs most often start, caught the most). In every area, a pit left
+  between walkways, which the walk had to jog round, is filled. A layer
+  saved before this update starts afresh at a CONTINUE.
+- **Fixed: a quit after a won battle lost it.** Quitting on a won
+  battle's RESULT, or in the fade back to the map, fell back to the
+  layer's start: the battle, its reward and the walk since were gone.
+  The game now runs on until MegaMan is free and saves the run where he
+  stands.
+- **Fixed: blank chips in the Standard folder.** A system that kept
+  its start-up state from before 0.21.0 dealt a new game's folder
+  misread: some chips came out blank and did nothing, and FOLDER EDIT
+  opened empty on "You found damaged Chip Data!". The state is made
+  afresh now, and a run begun from the old one is mended as it
+  continues.
+- **Shorter stops on the way.** A Net Dealer says one box before his
+  list (his word on the guardian, or a greeting; his codes too in act
+  1), where he said seven or eight. L names two things worth a detour
+  at most (ProtoMan, a flame of darkness, a violet mark, Mystery Data
+  behind a lock), then the heal and the way: seven boxes over two
+  presses on a busy layer, where it took twelve. A second talk with the
+  Virus Battler is his first pair and the question, as a shop's second
+  visit is.
+- **Chaud's call and ProtoMan's race, tightened.** Lan's surprise
+  comes right after Chaud's name, not after his whole call; a profile
+  that has heard him gets "Lan,it's Chaud again."; ProtoMan names the
+  race Chaud set rather than telling it over (six boxes, from nine); his
+  time is run to the hundredth; and the race's question is MegaMan's
+  "Race his time?".
+- **Lines that say what they mean.** The Recovery Mr.Prog says the HP
+  his patch gave, or "fully restored", where "recovered up to 70 HP!"
+  read as 70 HP left, and his greeting no longer runs the program
+  before he asks. At a fork's exit pad, MegaMan's read opens "Where this pad
+  leads...", so a dealer he senses is the next layer's, not this one's.
+  The Program Advance whisper asks "Got these?": a combo to try with
+  your own chips, not a gift. The DarkChip post opens on the purple
+  flame the Navi saw. MegaMan's arrival in the older Net says "Cross
+  and all!" only with a Cross, and Dad's first call says what the run
+  is: the short net down to the Nest, or the endless one. After the
+  first virus from another Net, Lan's answer fits where you are: "Its
+  old viruses too!?" in BN4's areas, "Both Nets,like you said..." in
+  the deep.
+- **The arrow and the map, clearer.** In Lan's HP the arrow points up
+  the corridor from anywhere in its mouth, where it sent MegaMan
+  sideways and back. While it leads to the Recovery Mr.Prog, the map
+  draws the way in the key's Heal green. The arrow, the corner notes
+  ("Run saved"), the area cards and L's counters step aside while BN6's
+  own fade covers the screen, so none hangs alone on a jack-in's white.
+- **The title keeps your best depth.** With a run saved, the title
+  dropped "Best: Layer N" because CONTINUE named a layer, but that is
+  the saved run's, not your record; it shows whenever you have one now.
+  The SAVES and ROMs key hints each take a line in the bottom left,
+  clear of the copyright line they ran into.
+- **Fixed: L's Mystery Data counter flickered.** With no data known, L
+  drew an empty sliver of a box at the top right, and a count could pop
+  in and vanish a few frames later. It fades in and out once a press
+  now, and not at all when there is nothing to count.
+- **Fixed: SAVES called a first start's device Damaged.** Before the
+  first save, SAVES read THIS DEVICE as "Damaged" and said its saves
+  could not be read. It says "No runs yet".
+- **BN4's ACDC Area and BN5's Oran Area, drawn whole.** BN4's ACDC
+  Area draws every room as its framed squares, rings and L's too, and
+  its walkways meet at small squares as BN4's do, with no stray cyan
+  scraps. BN5's Oran Area lays its hubs as one floor with their
+  circuits, joined as BN5 joins them, where every meeting was a jumble
+  of docks and orange chips.
+- **BN4's and BN5's areas keep their wide ways.** A way through their
+  layers keeps the two-panel walkways it was laid with, crossing no
+  more one-wide ones than the area's own maps do. The drawing used to
+  wear them back to one wide, step them aside and cut their mouths off
+  a junction's line: BN4's ACDC squares let you out at their corners
+  alone, and BN5's Oran and Nebula Areas tied knots of narrow junctions.
+- **Fixed: holes in the floor.** Here and there a panel MegaMan could
+  walk on let the background show through, a gap in its tiles (Sky's
+  catwalks, BN4's areas, Oran, Robot Control Comp). Every tile is
+  checked now as the layer is drawn, and a hole is filled with a piece
+  of the area's own maps.
+- **R jacks in from a step short of Lan's PC.** At Lan's desk, R a
+  step short of the PC walks Lan onto it and jacks in, as R does at the
+  town's jack-in spots.
+- **Fixed: RESULT counted too few viruses.** The battle that ended a
+  run, and a battle you ran from, now count the viruses deleted in
+  them. RECORDS' closest goal reads as a whole sentence.
+- **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
+  Pressing A at a steady pace through his words, the next press could
+  land just after the gift's screen opened and take its first choice
+  before you had seen it. A reward pick's screen now takes a choice only
+  once it has been up a second and a half (the cursor moves sooner), for
+  the gift, a guardian's draft and every other pick alike.
+- **The game tells you when a new version is out, and what it brings.**
+  At each start it looks for one (a single request for the release's own
+  `update.json`, nothing about you sent). When one is out, a box opens
+  on the title with its release notes, a page an entry with its
+  picture (SELECT shows it full size), Left and Right to turn them, and
+  two buttons that say what they do: **Update now** and **Later**. On Windows (the installer's copy), as a Linux AppImage
+  and on a PortMaster handheld, Update now downloads the new version,
+  checks it, and starts again as it, your saves and your run kept;
+  elsewhere the box opens the download page or says where the update
+  comes from. Later is kept: the title's hints show **Update** on
+  SELECT, and Options has its line. Options' Game page has an
+  **Updates** switch to turn the look off.
+- **The layer map's key names everything on a busy layer.** Where a
+  layer held many kinds (Exit, Heal, Shop, Trader, Event, ProtoMan), the
+  key under SELECT's map dropped You and still cut ProtoMan's name off at
+  the edge. Now it keeps every entry and takes a second row where one
+  can't hold them, on the second screen's map too.
+- **The Jukebox's Unused section.** The songs BN5's and BN4's
+  cartridges hold but never play, listed by their numbers, were in a
+  section called More, and their "Song 07" rows read as unfinished. The
+  section is called Unused now.
+- **ProtoMan's races leave out Powies.** A Powie spends two seconds on
+  its panel between jumps and can't be hit in the air, so a race against
+  it timed its jumps, not your hand. A race squad with one is rolled
+  again among the act's battles, as one with a Quaker already was. A
+  run saved on a race's layer by an earlier build continues that layer
+  afresh.
+- **Fixed: two menu lines said too little.** Options' Fast forward note
+  ran past its box and ended at "BN6's"; it fits whole now. The ROMs
+  screen said BN4 Red Sun brings only its viruses: it says what BN4
+  brings today, its areas, viruses, Navis and chips, as BN5's line does.
+- **Fixed: Mr.Prog's patch gave 1 HP after a CONTINUE.** On a layer
+  continued from the title, the Recovery Mr.Prog asked to use the
+  layer's one patch, then healed a single HP and called it spent. It
+  heals half of MegaMan's max HP again, however you reached the layer.
 
 ## 0.21.2 (2026-11-14)
 

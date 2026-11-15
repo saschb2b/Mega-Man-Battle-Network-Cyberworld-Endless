@@ -197,6 +197,7 @@ typedef struct {
 	unsigned arrows;  /* the ways its maps draw an arrow panel (bit per DIR_*, issue #43) */
 	bool hub_rooms;   /* its art draws every room as its small hubs: no signature, one more of them (issue #98) */
 	bool one_wide;    /* its art draws no floor two wide but its pads: the way's walkways never widened (TILES_ONE_WIDE, issue #164) */
+	int narrows;      /* the one-wide walkways the way may cross, its own maps' count where fewer than the biome's (NetAreaDef.narrows; 0: the biome's) */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */
@@ -226,7 +227,7 @@ void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
 /* The one-wide walkways the way from the arrival to (gx, gy) crosses, past
  * the area's cap widened to two panels (net_way.c, docs/world/level-design/generator.md,
  * Navigation); and how many it crosses, from (sx, sy). */
-void layer_widen_way(int biome, int gx, int gy);
+void layer_widen_way(int biome, int narrows, int gx, int gy);
 int layer_way_runs(int sx, int sy, int gx, int gy);
 /* ... and every one-wide walkway the way crosses, between platforms of any
  * size (each a mouth MegaMan lines up at) */
@@ -244,6 +245,10 @@ int layer_narrow_cap(int biome);
 bool layer_by_way(int x, int y);
 /* ... on the way itself. */
 bool layer_on_way(int x, int y);
+/* The way's floor marked in keep: the panels it runs on and the floor
+ * beside them (a widened walkway's other half), for the legalizer to keep
+ * as generated (netmap.c, another game's area). */
+void layer_way_floor(uint8_t keep[MAP_H][MAP_W]);
 /* How many panels a walk from the way to (x, y) takes, -1 off the floor
  * (once the layer's data are placed: net_gen.c, Detours). */
 int layer_detour(int x, int y);

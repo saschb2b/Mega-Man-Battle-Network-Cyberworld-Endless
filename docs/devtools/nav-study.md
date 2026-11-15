@@ -1,9 +1,9 @@
 ---
 type: Tool
 title: "Nav study: the way across BN6's own maps"
-description: "`--atlas nav` walks each area's original BN6 net maps and counts the one-wide walkways crossed between their farthest panels, setting `narrow_cap`, and `--atlas arrivals` lists where BN6's maps place MegaMan as he arrives."
+description: "`--atlas nav` walks each area's original net maps, BN6's and the other games' read beside it, and counts the one-wide walkways crossed between their farthest panels, setting `narrow_cap` and `NetAreaDef.narrows`, and `--atlas arrivals` lists where BN6's maps place MegaMan as he arrives."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T13:05:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:23:00Z }
 ---
 
 # Nav study: the way across BN6's own maps
@@ -18,6 +18,15 @@ ones, and its length: per map, then the area's average
 the unit tests run on the layers too: `CW_WAY_STATS=1 build/host/test_core`
 prints them per area). The originals' counts set `narrow_cap`
 ([The generator](../world/level-design/generator.md#navigation), Navigation).
+
+Then the other games' areas read beside BN6 (BN5's and BN4's, rom.c's
+`bn5_areas` and `bn4_areas`, those kept out of runs left out), the same
+count over each one's own map and its `more` maps, its line naming the BN6
+area it is laid out as (`like`) and the count its layers are held to
+(`NetAreaDef.narrows`, 0 where that area's cap is fewer already). Where an
+area's own maps cross fewer one-wide walkways than the BN6 area it is like
+lets its layers, they set that count; `CW_WAY_STATS=1` prints the unit
+tests' count of the shapes on their layers per area (`test_way_shapes`).
 
 `--atlas arrivals` reads where BN6's own maps put MegaMan as he arrives
 (the same file, `navstudy_arrivals`): every jack-in destination and every

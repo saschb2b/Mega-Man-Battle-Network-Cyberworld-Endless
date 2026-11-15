@@ -257,6 +257,27 @@ uint32_t devtools_keys(uint32_t keys) {
 	return 0;
 }
 
+/* hp=N: MegaMan's max HP N, the base BN6 counts HPMemory into moved with
+ * it, so that the max BN6 sums again from the base and the NaviCust's
+ * programs at each return to the map (bn6f reloadCurNaviStatBoosts_813c3ac,
+ * which also cuts his HP to that max on the net) comes to N as well. With
+ * the max alone, that sum put the max back after every battle, shop and
+ * PET, his HP was cut to it, the map's HP box started from there and
+ * counted up to N, and he was healed full (playtest session 76). His HP
+ * goes to N as the max is made N: the run's start, an HPMemory, a part.
+ * (hp=N/H: his HP H through the run's first 600 frames, past the heals of
+ * its start, then left to the battles.) */
+static void hold_max_hp(void) {
+	static int now_frames;
+	bool set_now = dev.hp_now > 0 && dev.hp_now <= dev.hp && now_frames++ < 600 && emu_read16(BN6_NAVI_HP) != dev.hp_now;
+	int max = emu_read16(BN6_NAVI_MAX_HP);
+	if (dev.hp <= 0 || dev.hp > 9999 || (max == dev.hp && !set_now)) return;
+	int now = set_now ? dev.hp_now : dev.hp, base = emu_read16(BN6_NAVI_BASE_MAX_HP) + dev.hp - max;
+	if (base < 1) base = 1;
+	uint8_t v[6] = { (uint8_t)base, (uint8_t)(base >> 8), (uint8_t)now, (uint8_t)(now >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
+	emu_write(BN6_NAVI_BASE_MAX_HP, v, sizeof v);
+}
+
 void devtools_update(void) {
 	if (dev.quiet) flag_set(BN6_FLAG_NO_ENCOUNTERS);
 	if (dev.mapall) director_dev_reveal();
@@ -268,15 +289,7 @@ void devtools_update(void) {
 		}
 		battle_hp(0, -1, true);
 	}
-	/* (hp=N/H: his HP H through the run's first 600 frames, past the
-	 * heals of its start, then left to the battles) */
-	static int now_frames;
-	bool set_now = dev.hp_now > 0 && dev.hp_now <= dev.hp && now_frames++ < 600 && emu_read16(BN6_NAVI_HP) != dev.hp_now;
-	if (dev.hp > 0 && dev.hp <= 9999 && (emu_read16(BN6_NAVI_MAX_HP) != dev.hp || set_now)) {
-		int now = set_now ? dev.hp_now : dev.hp;
-		uint8_t v[4] = { (uint8_t)now, (uint8_t)(now >> 8), (uint8_t)dev.hp, (uint8_t)(dev.hp >> 8) };
-		emu_write(BN6_NAVI_HP, v, sizeof v);
-	}
+	hold_max_hp();
 	if (dev.onehit) battle_hp(1, 1, false);
 	if (dev.powers) {
 		flag_set(BN6_FLAG_BEAST_OUT);

@@ -20,17 +20,67 @@ static void heal_check(TextArchive *t, int flag, int to) {
 	ta_bytes(t, check, sizeof check);
 }
 
-int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow) {
+/* The patch's end: under a vow, the Mr.Prog's word that it was the
+ * layer's one; the patch marked given. */
+static void heal_said(TextArchive *t, int told_flag, bool vow) {
+	if (vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
+	ta_flag_set(t, told_flag);
+	ta_end(t);
+}
+
+/* What MegaMan got from the patch, `got`, then its end. */
+static void heal_page(TextArchive *t, const char *got, int told_flag, bool vow) {
+	ta_page(t, FACE_NONE, got, false);
+	heal_said(t, told_flag, vow);
+}
+
+/* The HP the patch gave, as said: the box's two lines into `s`, the
+ * amount 1-9999; the second line's start, the amount's, returned. */
+static const char *heal_line(char s[48], int amount) {
+	snprintf(s, 48, "MegaMan recovered\n%dHP!", amount < 1 ? 1 : amount > 9999 ? 9999 : amount);
+	const char *got = strchr(s, '\n');
+	return got ? got + 1 : s;
+}
+
+void ta_heal_bytes(int amount, uint8_t a[2], uint8_t got[HEAL_GOT_LEN]) {
+	amount = amount < 1 ? 1 : amount > 9999 ? 9999 : amount;
+	a[0] = (uint8_t)amount;
+	a[1] = (uint8_t)(amount >> 8);
+	char s[48];
+	memset(got, 0x00, HEAL_GOT_LEN);   /* (spaces, the charmap's 0x00: after "HP!", unseen) */
+	ta_encode(heal_line(s, amount), got, HEAL_GOT_LEN);
+}
+
+/* ... said in a box of its own, the second line padded to HEAL_GOT_LEN
+ * with spaces; where that line lies in the script's bytes. */
+static int heal_got(TextArchive *t, int amount) {
+	static const uint8_t hide[] = { 0xF5, 0x01 };   /* (no face, as ta_page's FACE_NONE) */
+	static const uint8_t pad[HEAL_GOT_LEN] = { 0 };
+	char s[48];
+	int got = (int)(heal_line(s, amount) - s), len = (int)strlen(s);
+	ta_bytes(t, hide, sizeof hide);
+	ta_clear(t);
+	int at = t->len + got;
+	ta_text(t, s);
+	if (len - got < HEAL_GOT_LEN) ta_bytes(t, pad, HEAL_GOT_LEN - (len - got));
+	ta_wait(t);
+	return at;
+}
+
+int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow, HealSpot *spot) {
+	static const char full[] = "MegaMan's HP was fully restored!";
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
 		"DR.HIKARI SENT ME!\nOUCH,YOU'RE HURT!",
-		"RECOVERY PROGRAM,GO!\nTHIS WON'T HURT!",
+		/* (ready, not "GO!": the patch waits on his question, kai5) */
+		"RECOVERY PROGRAM,\nREADY TO GO!",
 	};
 	/* once he has patched MegaMan on this layer (flag set): one patch a
 	 * layer (issue #71: a heal as often as asked refunded every detour's
 	 * HP), so his word that it is spent and where MiniEnrg is; the Heals
 	 * helper's (amount < 0) heals again, in one box (an A too many after
 	 * "fully restored" talked to him again, two boxes) */
+	if (spot) *spot = (HealSpot){ -1, -1 };
 	int back = ta_script(t);
 	if (amount < 0) {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
@@ -46,6 +96,13 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	 * heal he could not tell what it would do to it, session 69; the
 	 * layer's one patch is on Yes too, his No keeping it) */
 	int keep = vow ? ta_say(t, FACE_MEGAMAN, "Right! We keep our vow!") : -1;
+	/* (half his max HP that reached it: said as a heal to full, where "up
+	 * to 70 HP" at 80 of 140 read as his HP now, kai8, 15 November 2026) */
+	int topped = -1;
+	if (amount > 0) {
+		topped = ta_script(t);
+		heal_page(t, full, told_flag, vow);
+	}
 	bool asks = amount >= 0 && !vow;
 	int later = asks ? ta_say(t, FACE_PROG, "OK! I'LL BE RIGHT\nHERE,MEGAMAN!") : -1;
 	int i = ta_script(t);
@@ -59,19 +116,26 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	if (asks) ta_ask_in(t, FACE_PROG, "ONE PATCH A LAYER!\nUSE IT NOW?\n", later, true, false);
 	if (amount > 0) {
 		/* (half of max HP, away from the arena: ts_start_heal, BN6's own,
-		 * no higher than his max) */
-		uint8_t heal[] = { 0xFB, 0x08, (uint8_t)amount, (uint8_t)(amount >> 8) };
+		 * no higher than his max, at once (bn6f chatbox_804252C); then
+		 * ts_wait, a frame for the director's full flag to see it, and
+		 * the HP he got, in BN6's own words for MiniEnrg's "recovers
+		 * 50HP!", or "fully restored" where the half reached his max;
+		 * the amount's bytes in places of their own, `spot`, which a
+		 * CONTINUE sets again once its state holds his max HP, session 77) */
+		uint8_t a[2], got[HEAL_GOT_LEN];
+		ta_heal_bytes(amount, a, got);
+		uint8_t heal[] = { 0xFB, 0x08, a[0], a[1], 0xEE, 0x00, 2, 0 };
+		int amount_at = t->len + 2;
 		ta_bytes(t, heal, sizeof heal);
-		char got[48];
-		snprintf(got, sizeof got, "MegaMan recovered\nup to %d HP!", amount);
-		ta_page(t, FACE_NONE, got, false);
+		heal_check(t, full_flag, topped);
+		int got_at = heal_got(t, amount);
+		heal_said(t, told_flag, vow);
+		/* (an archive that filled may have left them out) */
+		if (spot && !t->full) *spot = (HealSpot){ amount_at, got_at };
 	} else {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+		heal_page(t, full, told_flag, vow && amount == 0);
 	}
-	if (amount >= 0 && vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
-	ta_flag_set(t, told_flag);
-	ta_end(t);
 	return i;
 }
 
@@ -234,21 +298,30 @@ int ta_dark_rumor(TextArchive *t, int face) {
 	}
 	if (!len) return -1;
 	int i = ta_script(t);
-	if (face >= 0) ta_mugshot(t, face);
-	ta_open(t);
+	/* (his own two boxes first, on the purple flame he walked past: the
+	 * post is a reply on BN6's BBS, and alone its "A dar...DarkChip!?"
+	 * came out of nowhere, a playtester's word, session 76; so he is
+	 * the one it dawns on, and MegaMan's find at the flame stays his) */
+	bool open = true;
+	ta_pages(t, "Hey... Did you see that purple flame?|Something dark's burning in it...", face, &open);
+	ta_clear(t);
 	ta_bytes(t, line, len);
 	ta_end(t);
 	return i;
 }
 
-int ta_duel(TextArchive *t, int flag, int face, const char *terms) {
+int ta_duel(TextArchive *t, int flag, int face, const char *terms, bool race) {
 	int no = ta_closing(t);
 	int i = ta_script(t);
 	/* ProtoMan's terms, then the choice, which starts on No (a duel costs
-	 * HP; docs/game/rival.md) */
+	 * HP; docs/game/rival.md); a race's asked by MegaMan, as the layer's
+	 * other risks are, after his own words on it (ProtoMan's "Take the
+	 * duel?" read as a fight with him, where L and Chaud had said a race
+	 * against his time, session 76) */
 	bool first = true;
 	ta_pages(t, terms, face, &first);
-	ta_ask_in(t, face, "Take the duel?\n", no, true, true);
+	if (race) ta_ask_in(t, FACE_MEGAMAN, "Race his time?\n", no, true, true);
+	else ta_ask_in(t, face, "Take the duel?\n", no, true, true);
 	ta_flag_set(t, flag);
 	ta_end(t);
 	return i;

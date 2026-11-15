@@ -37,6 +37,16 @@ void resume_duel(void) {
 	D.duel_call_due = false;
 }
 
+/* Whether Chaud has called Lan before this layer's call (docs/game/rival.md,
+ * Chaud's call): a duel in the record, or a call of his this profile has
+ * heard, kept as it played (director.c's rival_update). (The record alone
+ * missed a call heard and never raced, session 76; the depth a run reached
+ * counted a test start's, dropped in at layer 4 or 7 and deleted before
+ * any call, and his first call ever opened "it's Chaud again", session 77.) */
+bool duel_called_before(void) {
+	return profile.duel_won + profile.duel_lost || (profile.heard & HEARD_CHAUD);
+}
+
 /* Whether ProtoMan's duel stands on the layer. */
 static bool duel_layer(void) {
 	for (int i = 0; i < layer.nobj; ++i)
@@ -72,11 +82,15 @@ static int duel_frames(int hp) {
 	return (int)(t * k);
 }
 
-/* A race's squad holds no virus that decides when it can be hit. */
+/* A race's squad holds no virus that decides when it can be hit: BN6's
+ * Quaker, and BN5's Powie, two seconds on its panel between jumps (two
+ * hops in its own area, then a crush onto MegaMan's panel), out of reach
+ * in the air each time, on BN5's own timer (tools/xdiff.py powie_v1). */
 #define FAMILY_QUAKER 6   /* (the families are BN6's sprite categories less 0x0E) */
+#define FAMILY_POWIE 34   /* (BN5's AI 2, moved in as AI 34: docs/multirom/families.md) */
 static bool duel_race_fair(const Encounter *e) {
 	for (int i = 0; i < e->nfoes; ++i)
-		if (e->foes[i].kind == FOE_VIRUS && e->foes[i].family == FAMILY_QUAKER) return false;
+		if (e->foes[i].kind == FOE_VIRUS && (e->foes[i].family == FAMILY_QUAKER || e->foes[i].family == FAMILY_POWIE)) return false;
 	return true;
 }
 
@@ -120,7 +134,8 @@ void duel_roll(void) {
 	if (layer_objs_duel_rung == 2) D.duel_enc.song = BN6_SONG_SHOWDOWN;
 	/* (and none a race can't hurry: a Quaker is out of reach in the air
 	 * until it lands, so the clock times its hops, not the player; three of
-	 * a playtester's four duels were Quakers, "a Quaker lottery") */
+	 * a playtester's four duels were Quakers, "a Quaker lottery"; and two
+	 * of BN5's Powies made another's act 1 race "mostly luck", session 76) */
 	for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
 		D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
 	layer_objs_duel_foes = D.duel_enc.nfoes;
@@ -136,9 +151,14 @@ void duel_roll(void) {
 	int lo, hi;
 	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 	D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
+	/* (his time a time he ran, to the hundredth, give or take half a
+	 * second, the same on average: flat seconds, 0:10.00 and 0:11.00, read
+	 * as made up beside a playtester's 0:20.85, session 76; rolled after
+	 * the squad, which stays the seed's) */
+	int jitter = rng_range(0, 59) - 30;
 	loot_memory_set(&fought);
 	rng_restore(saved);
-	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
+	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc)) + jitter;
 	D.duel_call_due = true;
 }
 

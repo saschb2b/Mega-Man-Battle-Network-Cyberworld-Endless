@@ -72,6 +72,33 @@ static bool file_read(const char *p, const char *end, const char *key, UpdateRel
 		string_at(value_of(entry, entry_end, "sha256"), entry_end, out->sha256, sizeof out->sha256) && strlen(out->sha256) == 64;
 }
 
+/* JSON's escape after a backslash: a line's end, a tab as a space, \u's
+ * four digits as one '?' (the file is ASCII), else the letter itself */
+static char unescape(const char **v, const char *end) {
+	char e = *++*v;
+	if (e == 'n') return '\n';
+	if (e == 't') return ' ';
+	if (e == 'u') {
+		*v += *v + 4 < end ? 4 : 0;
+		return '?';
+	}
+	return e;
+}
+
+bool update_manifest_changes(const char *json, char *out, size_t size) {
+	out[0] = 0;
+	if (!json) return false;
+	const char *end = json + strlen(json), *v = value_of(json, end, "changes");
+	if (!v || *v != '"') return false;
+	size_t n = 0;
+	for (++v; v < end && *v != '"'; ++v) {
+		char c = *v == '\\' && v + 1 < end ? unescape(&v, end) : *v;
+		if (n + 1 < size) out[n++] = c;
+	}
+	out[n] = 0;
+	return v < end && n > 0;
+}
+
 bool update_manifest_read(const char *json, const char *key, UpdateRelease *out) {
 	memset(out, 0, sizeof *out);
 	if (!json) return false;

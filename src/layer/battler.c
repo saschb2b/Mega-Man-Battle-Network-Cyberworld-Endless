@@ -83,7 +83,7 @@ int battler_offer(TextArchive *t, int flag, int k) {
 	BattlerOffer b = { flag, battler_stake(k), battler_rounds(k), pair, (profile.btlr_card & BTLR_CARD_HELD) != 0, battler_sprite(k) };
 	flag_clear(BATTLER_ON_FLAG);
 	flag_clear(BATTLER_DONE_FLAG);
-	flag_clear(BATTLER_CARD_FLAG);
+	flag_clear(BATTLER_TOLD_FLAG);
 	if (emu_debug_on()) fprintf(stderr, "battler: %d, %d rounds, stake %d, first pair %s\n", k, b.rounds, b.stake, pair);
 	return ta_battler(t, &b);
 }

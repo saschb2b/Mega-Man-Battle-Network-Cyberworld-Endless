@@ -22,11 +22,26 @@ typedef enum {
 	UW_FAILED,         /* ... the line's value after a failed download, */
 	UW_FAILED_NOTE,    /* ... and its note */
 	UW_NEW,            /* the title's note beside the version: the new one after it */
+	UW_HINT,           /* ... and once the menu shows, the title's key hint: SELECT: Update */
+	UW_BOX_TITLE,      /* the update box (options_news.c): its band */
+	UW_BOX_NEWS,       /* ... the head over its changes, the version after it */
+	UW_BOX_NONE,       /* ... its window where the release has no changes */
+	UW_BOX_SCROLL,     /* ... its band's hint, Up and Down's */
+	UW_BOX_PICTURE,    /* ... or SELECT's, where the page has a picture */
+	UW_BTN_UPDATE,     /* ... its buttons, by the way this copy updates: the game itself */
+	UW_BTN_DOWNLOAD,   /* ... the download page */
+	UW_BTN_LATER,      /* ... and the other */
+	UW_BOX_ITCH,       /* ... or what it says where it can do nothing, OK beside it */
+	UW_BOX_RELEASES,
+	UW_BOX_STORE,
+	UW_OK,
 	UW_COUNT
 } UpdateWord;
 
 const char *update_word(UpdateWord w);
 /* settings.ini's comment before the updates line, where one is added */
 const char *update_setting_note(void);
+/* ... before the update_offered line */
+const char *update_offered_note(void);
 
 #endif

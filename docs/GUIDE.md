@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 ---
 
 # The player's guide
@@ -29,7 +29,8 @@ statistics, troubleshooting and building the game yourself.
   handheld, a New 3DS, New 3DS XL or New 2DS XL with custom firmware
   (Luma3DS) and FBI, a Switch with custom firmware (Atmosphère), a
   PlayStation Vita or PlayStation TV with custom firmware (HENkaku or
-  h-encore) and VitaShell, a PS4 with GoldHEN, a jailbroken PS5 with
+  h-encore) and VitaShell, a PSP-2000, PSP-3000, PSP Go or PSP Street with
+  custom firmware (6.61 PRO or ARK-4), a PS4 with GoldHEN, a jailbroken PS5 with
   ShadowMountPlus, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
@@ -116,6 +117,7 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A Switch with custom firmware | `cyberworld-endless.nro` (Homebrew Menu) | [On a Switch](#on-a-switch) |
 | A PS Vita or PS TV with custom firmware | `cyberworld-endless.vpk` (VitaShell) | [On a PS Vita](#on-a-ps-vita) |
+| A PSP with custom firmware | `cyberworld-endless-psp.zip` (its `PSP/GAME` folder) | [On a PSP](#on-a-psp) |
 | A PS4 with GoldHEN | `cyberworld-endless.pkg` (the Package Installer) | [On a PS4](#on-a-ps4) |
 | A jailbroken PS5 | `cyberworld-endless-ps5.zip` (Prospero Store, or its folder in `/data/homebrew/`) | [On a PS5](#on-a-ps5) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
@@ -428,6 +430,25 @@ the touch controls. Closing the game from the LiveArea ends it at once, so
 a run goes on from its last checkpoint. Online is as everywhere.
 [vita/README.md](../vita/README.md) has the rest.
 
+### On a PSP
+
+On a PSP-2000, PSP-3000, PSP Go or PSP Street with custom firmware (6.61
+PRO or ARK-4), unpack `cyberworld-endless-psp.zip` onto the memory stick
+(a PSP Go's own memory works too): the game lands in
+`PSP/GAME/cyberworld-endless/` and shows on the XMB under Game, Memory
+Stick. A PSP-1000 has too little memory for it.
+
+Put your ROM in `PSP/GAME/cyberworld-endless/rom/`, or leave it where you
+keep GBA games (`ms0:/ROMS/GBA`, `ms0:/ROMS`, `ms0:/PSP/GAME/gpSP`): any
+file name works. A PSP holds BN6's net alone, with no room for BN5's or
+BN4's ROM beside it, and plays offline: no Net Square, NetBattles, trades
+or cloud saves. Cross is the GBA's A and Circle its B. HOME's Exit Game
+ends it at once, so a run goes on from its last checkpoint. A new
+version is the new zip unpacked over the old folder; your saves stay
+beside the EBOOT. Its GBA core is gpSP rather than mGBA, so this build is
+distributed under the GPL (its `SOURCE.txt` says where the source is).
+[psp/README.md](../psp/README.md) has the rest.
+
 ### On a PS4
 
 On a PS4 with GoldHEN, install `cyberworld-endless.pkg` from its Package
@@ -607,7 +628,7 @@ save folder).
 | L | Ask MegaMan where you are and what's ahead; the layer's Mystery Data counters show at the top right for a few seconds | Open the Custom screen; on it, try to run (never from a guardian) |
 | R | Jack in (at Lan's PC); in Lan's HP, jack out | Open the Custom screen; on it, describe the chip or Cross under the cursor |
 | Start | Open the PET | Pause |
-| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings where they stand, or arrowheads on the frame pointing their way), the way to the exit or guardian, and the Mystery Data MegaMan knows of by colour: taken, of those seen or sensed behind a set piece (dim once all are taken; there may be more out there), each one seen and not yet taken marked where it stands (and, while you hold an Unlocker, every purple one); let go, and the arrow shows the way on | On the Custom screen, hide it to see the field; again to bring it back |
+| Select | Hold for the map of the layer so far: where you have been, the services (those MegaMan senses but you have not reached as rings where they stand, or arrowheads on the frame pointing their way), the way to the exit or guardian (to the Heal first, in the key's green, while the arrow is green: MegaMan is hurt and the layer's Recovery Mr.Prog has his patch), and the Mystery Data MegaMan knows of by colour: taken, of those seen or sensed behind a set piece (dim once all are taken; there may be more out there), each one seen and not yet taken marked where it stands (and, while you hold an Unlocker, every purple one); let go, and the arrow shows the way on | On the Custom screen, hide it to see the field; again to bring it back |
 
 In the net MegaMan walks as in BN6: a single direction goes straight across
 the screen, and two together (like DOWN+LEFT) go along a walkway. A turns
@@ -1530,10 +1551,10 @@ game holds still while it is open, its music too, and goes on where it
 was when you close it.
 
 The songs are in sections by game and by where they play (Towns, The
-Net, Battles, Story, Screens; BN5's songs whose place is not known yet
-are in **More**, by their number). **L** and **R** (or Left and Right)
-turn the sections, Up and Down pick a song, **A** plays it, **START**
-turns the mode and **B** closes it. On a phone a song's row plays it, the
+Net, Battles, Story, Screens; the songs BN5's and BN4's cartridges hold
+but never play are in **Unused**, by their number). **L** and **R** (or
+Left and Right) turn the sections, Up and Down pick a song, **A** plays
+it, **START** turns the mode and **B** closes it. On a phone a song's row plays it, the
 green arrows turn the sections and the mode on the band turns the mode.
 
 | Mode | Plays |
@@ -1549,13 +1570,20 @@ folder).
 ## Updates
 
 At each start the game looks on its GitHub page for a newer version: one
-request for the newest release's `update.json`, which says its version
-and its files. Nothing about you, your game or your device is sent. When
-one is out, the title says so beside its own version (`New v0.22.0`),
-and **Options** on the title opens on a line for it, **Update to 0.22.0**,
-whose note says what A does on your system:
+request for the newest release's `update.json`, which says its version,
+what is new in it and its files. Nothing about you, your game or your
+device is sent. When one is out, the first time the title's menu shows a
+box opens with what is new, the release's notes a page an entry, each
+with its picture: Left and Right turn the pages, Up and Down scroll a
+long one, SELECT shows the picture full size. Its buttons say
+what they do: **Update now** (A) or **Later** (B), or **Download** where
+your copy updates from the download page. Later is kept for that
+version, so the box does not come back; the title's key hints then show
+**Update** on SELECT, and **Options** on the title opens on a line for
+it, **Update to 0.22.0**, whose A shows the box again. What **Update
+now** does on your system:
 
-| You play | A on the line |
+| You play | Update now |
 | --- | --- |
 | On Windows, installed with the installer | Downloads the new installer, and the game ends, installs the new version over itself (no administrator, nothing to click) and starts again |
 | The Linux AppImage | Downloads the new AppImage over the old one (the same file name, so a menu entry or Steam's shortcut keeps working) and starts it |
@@ -1566,6 +1594,7 @@ whose note says what A does on your system:
 | The Switch, from the Homebrew Menu | Downloads the new `.nro` beside yours, and the game ends, puts it in your file's place and starts it again |
 | The New 3DS, from the Homebrew Launcher (the `.3dsx`) | Downloads the new `.3dsx` beside yours, and the game ends and puts it in your file's place: the Homebrew Launcher comes back, and you start the game again there |
 | The 3DS's CIA, the PS Vita | Nothing: the note names the releases page, where the new CIA or VPK is |
+| The PSP | Nothing: it plays offline and does not look; the new zip unpacked over the old folder updates it |
 | The PS5 | Nothing: the note names Prospero Store, which lists the new version, and the releases page |
 
 The download is checked against the release's own SHA-256 before it

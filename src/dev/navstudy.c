@@ -24,10 +24,11 @@
 
 /* Map (group, number)'s floor, a cell a panel: where its walls put the
  * panel's middle on floor; panel (A, B)'s middle at world (ex + 16 + 32A,
- * ey + 16 + 32B), (ex, ey) given where asked. */
-static bool map_floor_at(int group, int number, uint8_t *cells, int *ex, int *ey) {
+ * ey + 16 + 32B), (ex, ey) given where asked. BN6's map, or extra game
+ * `xrom`'s (XRomId; -1 BN6). */
+static bool map_floor_in(int xrom, int group, int number, uint8_t *cells, int *ex, int *ey) {
 	AreaSrc a;
-	if (!area_src_load(group, number, &a)) return false;
+	if (!(xrom < 0 ? area_src_load(group, number, &a) : area_src_load_x(xrom, group, number, &a))) return false;
 	memset(cells, 0, (size_t)(2 * SPAN) * (2 * SPAN));
 	for (int B = -SPAN; B < SPAN; ++B)
 		for (int A = -SPAN; A < SPAN; ++A)
@@ -38,7 +39,39 @@ static bool map_floor_at(int group, int number, uint8_t *cells, int *ex, int *ey
 	return true;
 }
 
+static bool map_floor_at(int group, int number, uint8_t *cells, int *ex, int *ey) { return map_floor_in(-1, group, number, cells, ex, ey); }
 static bool map_floor(int group, int number, uint8_t *cells) { return map_floor_at(group, number, cells, NULL, NULL); }
+
+/* The one-wide walkways the way across map (group, number) of extra game
+ * `xrom` crosses (grid_way_narrows), its total, joined and way's panels
+ * added to *narrows, *links, *len; whether it was read. */
+static bool xmap_way(int xrom, int group, int number, uint8_t *cells, int *narrows, int *links, int *len) {
+	if (!map_floor_in(xrom, group, number, cells, NULL, NULL)) return false;
+	int big, way, n = grid_way_narrows(cells, 2 * SPAN, 2 * SPAN, &big, &way);
+	printf(" %02X:%d %d/%d (%d)", group, number, n, big, way);
+	*narrows += n; *links += big; *len += way;
+	return true;
+}
+
+/* The other games' areas read beside BN6 (rom.h's, docs/multirom/), the
+ * same count over each area's own map and its `more` maps: the way its
+ * layers are held to where fewer than the BN6 area they are laid out as
+ * (NetAreaDef.narrows; docs/world/level-design/generator.md, Navigation). */
+static void xareas_run(uint8_t *cells) {
+	xarea_review(XAREA_ALL);
+	xrom_find_beside();
+	for (int k = 0; k < XAREAS_MAX; ++k) {
+		const NetAreaDef *d = net_area_def(NET_AREAS + k);
+		if (!d || d->held) continue;
+		int maps = 0, narrows = 0, links = 0, len = 0;
+		printf("area x%d %s (like %d, held to %d):", k, d->name, d->like, d->narrows);
+		maps += xmap_way(d->xrom - 1, d->group, d->number, cells, &narrows, &links, &len);
+		for (int m = 0; m < NET_MORE_MAPS && d->more[m][0]; ++m) maps += xmap_way(d->xrom - 1, d->more[m][0], d->more[m][1], cells, &narrows, &links, &len);
+		if (maps) printf("  ->  %.2f one-wide walkways across, %.2f between big platforms, a way of %d panels\n",
+			(double)narrows / maps, (double)links / maps, len / maps);
+		else printf("  none read\n");
+	}
+}
 
 int navstudy_run(void) {
 	static uint8_t cells[(2 * SPAN) * (2 * SPAN)];
@@ -57,6 +90,7 @@ int navstudy_run(void) {
 			(double)narrows / maps, (double)links / maps, len / maps);
 		else printf("  none read\n");
 	}
+	xareas_run(cells);
 	return 0;
 }
 

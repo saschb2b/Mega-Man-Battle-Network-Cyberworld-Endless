@@ -313,18 +313,6 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	}
 }
 
-/* What the layer's Recovery Mr. Prog gives, once (issue #71, the owner's
- * call on a player's proposal): half of MegaMan's max HP, as the layer is
- * built, away from the arena, so a detour's HP carries on; to full before
- * the arena (0), where the guardian is met as his band assumes; the Heals
- * helper's, to full as often as asked (-1). */
-static int heal_amount(void) {
-	if (run.helpers & HELP_HEALS) return -1;
-	if (layer.boss_layer) return 0;
-	int half = emu_read16(BN6_NAVI_MAX_HP) / 2;
-	return half > 0 ? half : 1;
-}
-
 /* The obstacles' sprites, first: one that could not load would stand as
  * noise in its pocket's mouth. */
 static void blocker_sprites(NpcList *npcs) {
@@ -430,6 +418,7 @@ typedef struct {
 	MysteryPlan plan;
 	ScriptsVault server;   /* a Server's three chips (install_server) */
 	ScriptsVault copy;     /* a Glitch layer's copy's (install_copy) */
+	HealSpot heal;         /* the Recovery Mr.Prog's amount in the text (ta_heal's) */
 } Install;
 
 /* A bystander's talker (Normal Navis and pink navis, or the two Navis
@@ -603,7 +592,7 @@ static void install_dealer(Install *in, Talker *tk) {
 	 * net till met: docs/game/bosses/super-bosses.md) */
 	bool tells = navi > 0 && (guardian_known(navi) || (layer_in_act(run.depth) > 0 && !super_boss(navi)));
 	layer_objs_dealer_named = tells;
-	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
+	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here(), profile.heard & HEARD_DEALER };
 	ShopWords w = dealer_words(&talk);
 	if (emu_debug_on()) fprintf(stderr, "dealer: %s\n", w.hello);
 	tk->sprite = SPR_DEALER;
@@ -838,7 +827,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 		/* (he logs out as the duel begins: one a layer) */
 		tk->gone_flag = flag;
 	}
-	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms)
+	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms, layer_objs_duel_rung != 2)
 		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
 		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
@@ -896,7 +885,10 @@ static bool install_talk(Install *in, const NetObj *o, Talker *tk, int i) {
 	switch (o->type) {
 	case OBJ_MYSTERY: mystery_or_flame(in, tk, i); return false;
 	case OBJ_NPC: bystander(in, tk, i); return false;
-	case OBJ_HEAL: tk->script = ta_heal(in->text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, LAYER_HP_FULL_FLAG, heal_amount(), jobs_vow_holds(&run.job, run.depth)); return false;
+	case OBJ_HEAL:
+		tk->script = ta_heal(in->text, o->npc_line + run.depth, LAYER_HEAL_TOLD_FLAG, LAYER_HP_FULL_FLAG, layer_heal_amount(),
+			jobs_vow_holds(&run.job, run.depth), in->heal.amount_at < 0 ? &in->heal : NULL);
+		return false;
 	case OBJ_TRADER:
 	case OBJ_BUGTRADER: install_trader(in, o, tk); return false;
 	case OBJ_SHOP: install_dealer(in, tk); return false;
@@ -947,6 +939,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	in.number = number;
 	in.out = out;
 	in.text = &text;
+	in.heal = (HealSpot){ -1, -1 };
 	install_begin(&in);
 	for (int i = 0; i < layer.nobj; ++i) install_object(&in, i);
 	if (layer.dark) lib_prizes_install(out, &text);
@@ -975,6 +968,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	if (out->spin_colour) out->spin_found = spin_words(&text, out->spin_colour, in.spin_first);
 	uint32_t archive = commit_text(&text, group, number);
 	out->archive = archive;
+	layer_heal_place(out, archive, text.n, &in.heal);
 	if (out->guardian.navi) guardian_actors(npcs, archive, &out->guardian);
 	for (int i = 0; i < in.ntalk && npcs->n < 32; ++i) {
 		const Talker *t = &in.talkers[i];

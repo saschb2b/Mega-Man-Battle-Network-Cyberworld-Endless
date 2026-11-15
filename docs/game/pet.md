@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T19:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:26:28Z }
 ---
 
 # The PET
@@ -189,8 +189,8 @@ songs play on the engine's own MP2K, BN6's code ([The engine's own sound](../eng
 engine's own sound).
 
 The songs are in sections by game, then by where they play: Towns, The
-Net, Battles, Story, Screens, and More (BN5's and BN4's songs nothing in
-their game starts). A unit test (`tests/test_core.c`, test_jukebox_songs)
+Net, Battles, Story, Screens, and Unused (BN5's and BN4's songs nothing in
+their cartridge starts). A unit test (`tests/test_core.c`, test_jukebox_songs)
 holds the list to each game's music player: every song of each range
 once, the ones left out each with its reason, and a game for each ROM the
 engine reads, so the next ROM's songs cannot be left out. On the left the song
@@ -306,7 +306,13 @@ version: the game's own music is the run's).
 - *Never started:* BN5's 0x07, 0x08, 0x09, 0x11, 0x12, 0x20 and 0x21,
   which nothing in Team Colonel starts, and BN4's 0x10, 0x11 and 0x20,
   which nothing in Red Sun starts (the searches, [Sources](../research/sources.md#the-jukeboxs-songs), The
-  Jukebox's songs): they carry their number ("Song 07") in More.
+  Jukebox's songs): they carry their number ("Song 07") in Unused. Each
+  is a whole song all the same, none left out: on the music's player
+  (31), BN5's with six tracks and BN4's with eight, tracks of its own
+  that no other song's header points at (each song table read, 15
+  November 2026). The section was named More until a playtester read its
+  "Song 07" rows as placeholders (session 76); its name says now why they
+  are named for no place.
 
 **In a run**, three of BN5's songs play where BN5 plays them
 ([BN5's music in a run](../multirom/music.md)): Before the Boss as a guardian

@@ -26,6 +26,16 @@ uint8_t ng_way_band[MAP_H][MAP_W];
 bool layer_by_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x]; }
 bool layer_on_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x] == 2; }
 
+void layer_way_floor(uint8_t keep[MAP_H][MAP_W]) {
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!layer_on_way(x, y)) continue;
+			keep[y][x] = 1;
+			for (int d = 0; d < 4; ++d)
+				if (floor_at(x + dir_dx[d], y + dir_dy[d])) keep[y + dir_dy[d]][x + dir_dx[d]] = 1;
+		}
+}
+
 void ng_mark_way(int sx, int sy, int gx, int gy) {
 	static int16_t from[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
@@ -154,13 +164,18 @@ static const uint8_t way_cap[BIOME_COUNT] = {
  * map's two farthest panels: Central 2, 6, 2; Seaside 0, 3, 0; Sky 5, 4,
  * 2; Green 2, 1; the Undernet 3, 3, 1; the Secret Area 1; the Nest's
  * Underground 3, 3; Robot Control 3, 3; the Aquarium 5, 1, 4; the Judge
- * Tree 6, 2, 5; Mr. Weather 1, 1, 0; CopyBot's 4, 4, 1, 5, 1). 0: none
- * (the comps' and homepages' originals are single small rooms, nothing to
- * hold a layer to; the Graveyard's eight run over its slabs). */
+ * Tree 6, 2, 5; Mr. Weather 1, 1, 0; CopyBot's 4, 4, 1, 5, 1). The comps'
+ * and homepages' originals are single small rooms: RoboDog's comp and the
+ * Lab's cross 0 or 1 (0.19 a map over 16 each), the homepages 1; held to
+ * the fewest a way may cross, 1 (their layers crossed 1.8 to 3.1, the most
+ * of any area, and a playtester stopped at their mouths for 25 calls,
+ * session 76). 0: none (the Graveyard's eight run over its slabs). */
 static const uint8_t narrow_cap[BIOME_COUNT] = {
 	[BIOME_CENTRAL] = 3, [BIOME_SEASIDE] = 1, [BIOME_SKY] = 4, [BIOME_GREEN] = 2,
 	[BIOME_UNDERNET] = 2, [BIOME_SECRET] = 1, [BIOME_NEST] = 3,
+	[BIOME_COMP] = 1, [BIOME_HOMEPAGE] = 1, [BIOME_COMP_B] = 1,
 	[BIOME_ROBOT_COMP] = 3, [BIOME_AQUARIUM_COMP] = 3, [BIOME_JUDGE_COMP] = 4, [BIOME_WEATHER_COMP] = 1, [BIOME_COPYBOT_COMP] = 3,
+	[BIOME_ACDC_HP] = 1, [BIOME_GREEN_HP] = 1, [BIOME_SKY_HP] = 1,
 };
 
 /* The way: the shortest walk over the floor, its cells from start to goal. */
@@ -343,10 +358,12 @@ int layer_way_runs(int sx, int sy, int gx, int gy) {
 }
 
 /* The way's walkways past a cap widened, the shortest first (`any`: every
- * one-wide walkway against narrow_cap, else those between big platforms
- * against way_cap) */
-static void widen_past(int biome, int gx, int gy, bool any) {
+ * one-wide walkway against narrow_cap, or `narrows` where fewer: another
+ * game's area held to its own maps' count; else those between big
+ * platforms against way_cap) */
+static void widen_past(int biome, int narrows, int gx, int gy, bool any) {
 	int sx = layer.rooms[0].ax, sy = layer.rooms[0].ay, cap = any ? narrow_cap[biome] : way_cap[biome];
+	if (any && narrows && (!cap || narrows < cap)) cap = narrows;
 	if (any && !cap) return;
 	for (int tries = 0; tries < MAX_RUNS; ++tries) {
 		int s0[MAX_RUNS], s1[MAX_RUNS];
@@ -362,11 +379,11 @@ static void widen_past(int biome, int gx, int gy, bool any) {
 	}
 }
 
-void layer_widen_way(int biome, int gx, int gy) {
+void layer_widen_way(int biome, int narrows, int gx, int gy) {
 	/* (every walkway first: one widened joins its platforms, and the
 	 * walkways between big platforms are counted on what that makes) */
-	widen_past(biome, gx, gy, true);
-	widen_past(biome, gx, gy, false);
+	widen_past(biome, narrows, gx, gy, true);
+	widen_past(biome, narrows, gx, gy, false);
 }
 
 /* ---- The same count on any floor: BN6's own maps too (src/dev/navstudy.c) ----

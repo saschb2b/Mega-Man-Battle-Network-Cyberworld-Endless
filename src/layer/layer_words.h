@@ -20,6 +20,7 @@ typedef struct {
 	const ShopItem *stock;   /* his list, his pick first */
 	int nstock;
 	bool purple, skull;      /* purple data, skull doors on this layer */
+	bool met;                /* he has greeted this profile before, on any layer of any run (HEARD_DEALER) */
 } DealerTalk;
 
 ShopWords dealer_words(const DealerTalk *d);

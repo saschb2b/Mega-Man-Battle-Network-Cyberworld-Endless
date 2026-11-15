@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:23:00Z }
 ---
 
 # The generator
@@ -78,10 +78,67 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   3), the way's walkways widen as above, before those between big
   platforms (one widened joins its platforms into a bigger one). Central's
   layers cross fewer than BN6's Central maps already: its glass bridges
-  are its own. The comps' and homepages' originals are single small
-  rooms, nothing to hold a layer to, and the Graveyard's slabs cross
-  eight: those keep the cap between big platforms alone. `test_way_links`
-  holds each area to its count on eight ways in ten.
+  are its own. The Graveyard's slabs cross eight: it keeps the cap
+  between big platforms alone. `test_way_links` holds each area to its
+  count on eight ways in ten.
+- **The comps and homepages cross one** (15 November 2026). Their
+  originals are single small rooms: RoboDog's comp and the Lab's cross
+  0.19 one-wide walkways a map over sixteen maps each, the homepages one
+  (`--atlas nav`). They were held to no count, and their layers crossed
+  the most of any area, RoboDog's 3.1 on the way. A playtester stopped
+  at their mouths for about 25 calls (session 76): a turn off a
+  platform's middle into a walkway on its side, where no edge stops
+  MegaMan on its line, and a walkway stepping one panel aside, whose
+  second corner he left before its wall. At each stop the arrow showed
+  the single direction that freed him; the walk is BN6's. So they are
+  held to one (`narrow_cap`), the fewest a way may cross, and the way's
+  others widen as above. Over sixty layers of RoboDog's comp
+  (`test_way_shapes`), the way's turns into a walkway on wide floor fell
+  from 25 to 14 and its one-panel jogs from 3 to 1.
+- **No pit between walkways** (15 November 2026). Walkways and platforms
+  meeting round a single void panel left a pit, floor on its four sides
+  and void on a corner, that the art draws as a walkway cut in half and
+  BN6's walls keep MegaMan off; the walk went round it in a jog, where the
+  same playtester stood still beside one. No original map has one; the
+  holes punched in the Graveyard's slabs and Green's fields keep their
+  corners floor. Such pits are filled once the way is widened
+  (`fill_pits`): over the tests' 300 layers, 19 in 18 layers before, none
+  between walkways now (`test_way_shapes` holds it), 5 left inside the
+  fields of guardians' layers.
+- **The other games' areas keep the way they were given** (15 November
+  2026). BN4's and BN5's areas are laid out as the BN6 area each is like
+  (`NetAreaDef.like`) and drawn in their own art, and playtesters stalled
+  there as at the comps (session 76): BN4's ACDC Area's squares "only let
+  you out at certain corners", a road leaving a square's side and turning
+  after two panels, a knot of one-wide junctions; stops in BN5's Oran
+  Area. Counted on their own maps (`--atlas nav`, [Nav
+  study](../../devtools/nav-study.md)), several cross fewer one-wide
+  walkways than the area they are like lets their layers: BN4's ACDC
+  Area 2.3 and BN5's 1.5 against Central's 3, BN5's SciLab 2.0 and BN4's
+  countries 2 against Sky's 4, BN4's Park 1 against Green's 2, BN4's
+  Undernet none against the Undernet's 2, Nebula 3.5 where the Graveyard
+  counts none. Those are held to their own count, at least one
+  (`NetAreaDef.narrows`, `LayerKit.narrows`), and the way's walkways past
+  it widen as above; Oran (6.5) and BN5's Undernet (7) cross more than
+  their BN6 area's cap and keep it, BN5's End Area and BN4's Town Area
+  keep their one-wide way. Over sixty layers of each (`test_way_shapes`,
+  which reads their settings without the ROMs), the ways past their
+  originals' count fell from 194 of 540 to 28.
+  That reached the generator's floor and hardly the player's. Their art
+  draws walkways one panel wide, and the legalizer, keeping only what an
+  area's tiles show, wore the widened walkways back to one wide, stepped
+  them aside and cut their mouths off a junction's line: over 192 layers
+  of seven of them, the way on the floor as built turned at a junction
+  91 times to the generator's 34, stepped aside a panel 54 times to its
+  14, and had 573 mouths to its 401. So
+  in another game's area the way's floor is kept as generated: its panels
+  and the floor beside them are locked (`layer_way_floor`, `netmap.c`), the
+  legalizer free to add floor round them; a mission's dark board is left
+  as it was. Over 72 layers of seven of those areas (the atlas, three
+  seeds a layout), the panels on the walks where MegaMan must stop on one
+  exact panel fell from 291 to 141 and the junctions from 187 to 79; the
+  tiles' breaks rose from 157.5 to 160.0 a hundred panels, their seams
+  fell from 90.5 to 83.9.
 - **Rungs meet a field square on** (issue #98). A comb's rung back to a
   ragged field that met its edge on a tab beside a bite was a mouth two
   panels wide on one side, the field going on past it, where the arrow's
@@ -243,7 +300,9 @@ them). Against a tile that draws nothing no strip is asked after: the
 floor's outline is the pixel test's, and a rim's own tile, the wall above
 it cut off, lost to a block of plain walkway floor there. What the tile
 test counts of it is in [the tile test](../../devtools/tile-test.md),
-Breaks.
+Breaks. A tile that draws nothing over part of the floor's top, a hole
+where the background shows through, is mended once the map is whole:
+[holes in the floor](floor-holes.md).
 
 BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
 (`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,
@@ -252,6 +311,25 @@ rims of both squares lent no tiles, and a room's upper edges were steps
 of walkway floor. There a panel is left out only where a quarter of its
 top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
 yellow and red), and a room is the square whole.
+
+BN4's ACDC Area's maps hold no white floor wider than a walkway but their
+framed squares of four by four, which it draws its pads with
+(`TILES_SQUARE_PADS`, every room up to 64 panels a pad). A larger room,
+an L or a ring, was drawn in the walkways' rim round the squares' middle,
+its upper edges in steps of walkway floor, and a walkway's junction or
+bend that the legalizer widened to a block of two by two came out of
+bends' pieces: U-shaped notches, a bend's green side face in the middle
+of the floor, the void through. So while the tiles are picked, where an
+area's pads are its framed squares and its rooms are drawn apart (and
+its way is not kept one wide, as BN4's Town Area's is: its squares stand
+on a slab and a block framed so stood over the squares beside it), every
+room is drawn as one of them, and so is a block of floor two wide that
+touches no room, a small square where its maps join their walkways at
+squares and hubs (`framed`, `src/map/netmap.c`); the legalizer reads them
+as before. Over 8 layers its breaks fell from 2541 to 1808: on rooms'
+edges from 660 to 230, their corners 388 to 125, notches 115 to 63. A
+block that touches a room stays walkway: framed, it joined the room's
+piece and stacked a second frame on its rim.
 
 Where an area asks for it (`TILES_WHOLE`: BN4's Park and Town Areas,
 countries and Undernet, BN5's Oran Area and Undernet), its maps' panels

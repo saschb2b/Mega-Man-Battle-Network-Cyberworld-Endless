@@ -97,6 +97,7 @@ typedef struct {
 	int lib_bonus[4];          /* ... the chips its BonusPanels give (LIB_BONUS_CHIPS, the item panels' band), -1 none */
 	uint32_t lib_anim[16];     /* ... each unit's and teammate's animation byte (npc_live; liberation_state.h's LIB_OBJS), 0 none */
 	uint32_t lib_body[16];     /* ... and its script's sprite number (a team picked on arrival dresses its Navis there), 0 none */
+	uint32_t heal_amount_at, heal_got_at;   /* the Recovery Mr.Prog's half patch in the archive: its amount, the HP said (HealSpot's), 0 none */
 } LayerObjs;
 
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny
@@ -115,6 +116,18 @@ int lib_darkloid_prize(int ai, int tier);
  * holds the shop data as it was saved: `saved`, what was bought there
  * stays bought). */
 void layer_objs_shops(const LayerObjs *o, bool saved);
+
+/* (layer_heal.c) What the layer's Recovery Mr.Prog's patch gives, as
+ * ta_heal takes it: half of MegaMan's max HP; 0 to full, on a guardian's
+ * layer; -1 to full as often as asked, the Heals helper's (issue #71). */
+int layer_heal_amount(void);
+/* ... where its amount lies (`spot`, ta_heal's) in the archive at
+ * `archive` of `scripts` scripts, into `out` (none: 0) */
+void layer_heal_place(LayerObjs *out, uint32_t archive, int scripts, const HealSpot *spot);
+/* ... the half patch set again from MegaMan's max HP now (after a state
+ * load: a CONTINUE builds the layer before it, BN6's RAM holding no
+ * MegaMan yet). */
+void layer_objs_heal_again(const LayerObjs *o);
 
 /* Installs the current layer's objects in map (group, number). */
 bool layer_objs_install(int group, int number, LayerObjs *out);
