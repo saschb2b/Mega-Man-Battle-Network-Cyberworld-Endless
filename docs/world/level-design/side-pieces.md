@@ -98,6 +98,7 @@ Taken per area as looked at, as every laying rule is
 | Green Area | nothing: its second layer holds its potted bushes (set by a rule of their own), the blue-framed plates and warp discs on its raised grass, arrow panels' frames, a pad's centrepiece and its stairs, and in Green Area 2 the NetCafe desk, which means a shop; nothing stands under or behind its floors (below) | - |
 | Sky Area | nothing: what its maps leave undrawn is raised floor, pods, stairs and roads, or stands on the floor alone; behind its fields' edges the cut takes a scrap of a pod's arm (below) | no |
 | BN5's Liberation boards (BN5 dark 1-9) | nothing set: on their second layer the panels' middles alone, which a board's panel looks cover; on the first, slime and lava blobs on the floors' corners, fins on the back rims and drips under the faces, all drawn into the floor's own rim and face tiles (below) | no |
+| The Graveyard | nothing: its one map's second layer holds only its ramps' slats; at its raised floor three scraps of floor and rim, which fit no layer; no scenery (below) | - |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -929,6 +930,45 @@ side piece:
 The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
+
+## What the Graveyard sets round its floors (none; measured on the map and the atlas)
+
+The Graveyard has one map, Graveyard 2 (0x96:1, the atlas's `4`): its
+group's 0x96:0 and 0x96:2 are empty placeholders
+([BN4's ROM](../../rom/bn4.md), Net maps in 256 colours), and the atlas
+measures the one. Its second tile layer holds only the slats of its three
+ramps ([Net maps](../../rom/net-maps.md), Floor emblems), so nothing there
+grips, hangs under or stands behind a floor. Every rule this page has was
+run on it (15 November 2026: the atlas over the Graveyard, two seeds a
+layout, eight layers, with every cut switched on and each learned look
+printed):
+
+- the side-piece cut, with what stands under a lower edge (bit 3) and the
+  second layer's cut behind an upper edge (bit 7), takes nothing;
+- the scenery cut, the floor's faces taken 44 and 12 pixels deep (its
+  faces are 9), takes nothing;
+- at its raised floor (64), the cut under a floor takes two strips of 4
+  tiles of a raised slab's own floor, one across a cross, and the cut
+  behind a floor a 12-tile stretch of a raised slab's upper rim with two of
+  its clips. None is a thing, and none goes down on any of the eight
+  layers.
+
+What the layers never draw (334 of its 631 tile pictures,
+[what the layers take](../../devtools/map-use.md), with the ramps
+[Heights](heights.md) lays) is floor and the kinds left to the owner
+(issue #505's 3 to 5):
+
+- **Floor art**: the caps of the clips at the panels' joins along the
+  slabs' upper rims, in the variants no layer's rim needs (`b04_96_1` at
+  (812, 350)); the lip under a hole's lower corner (at (720, 498)).
+- **Raised floor and its ramps**: the pale slabs 64 above the ground, and
+  the parts of the striped ramps with magenta discs that climb to them (at
+  (760, 200)) a layer's ramps do not draw (kind 5).
+- **The grooved grey bridges** between the link pads (at (400, 820)).
+- **An exit's arrow** (at (1120, 850), kind 4).
+
+Its gravestones and its monument are map objects a layer sets as such
+([Props](props.md)), not tiles of its map.
 
 ## What BN4's Town Area sets round its floors (nothing; measured on the maps and the atlas)
 
