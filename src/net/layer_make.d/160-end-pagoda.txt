@@ -1,0 +1,1 @@
+End Area's layers stand its pagoda in a walled hole of a room as their landmark, the piece End Area 2 sets in the middle of a pad, its hole walled off and the cells its roof draws over kept clear of objects and set pieces (src/map/sides.c, hole_learn; net_landmarks.c, ng_landmark_hole; docs/world/level-design/side-pieces.md).

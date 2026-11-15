@@ -90,6 +90,9 @@ static void forget(Learned *L) {
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
 	for (int k = 0; k < L->sides.n; ++k) { free(L->sides.piece[k].tiles); free(L->sides.piece[k].prio); }
+	free(L->sides.piece);
+	free(L->hole.tiles);
+	free(L->hole.prio);
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
 		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };
@@ -171,6 +174,7 @@ static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid o
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
 static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (netmap_learn.c, road_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
+static bool level_look;       /* a look whose area cannot draw the layer's stairs: its raised floor and stairs drawn level with the ground (netmap_look) */
 static bool framed;           /* its platforms drawn apart, and its blocks two wide alone, all drawn as its framed squares, its pads (TILES_SQUARE_PADS) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -344,11 +348,12 @@ static int pad_at(int x, int y, const void *ctx) {
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_raw(int A, int B, const void *ctx) {
-	int k = nm_cur->rise / 32, x = B + nm_place.gx0, y = -A + nm_place.gy0;
-	if (!ground(nm_kind(x, y)) && k) {
+	int k = level_look ? 0 : nm_cur->rise / 32, x = B + nm_place.gx0, y = -A + nm_place.gy0, kind = nm_kind(x, y);
+	if (level_look && (kind == K_RAISED || kind == K_STAIR)) kind = K_FLOOR;
+	if (!ground(kind) && k) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (nm_kind(x, y) != K_RAISED) return TILE_VOID;
-	} else if (!ground(nm_kind(x, y))) return TILE_VOID;
+	} else if (!ground(kind)) return TILE_VOID;
 	int pad = pad_at(x, y, ctx);
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
@@ -526,7 +531,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
-	nm_paste_stairs(L, map, tw, th);
+	if (!level_look) nm_paste_stairs(L, map, tw, th);
 	if (props) nm_paste_props(map, tw, th);
 	nm_paste_pads(L, map, beside, tw, th);
 	free(beside);
@@ -763,9 +768,14 @@ bool netmap_look(int area, NetmapLook *out) {
 	bool ok = L && !area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
 	if (ok) {
 		nm_cur = cur;
+		/* (an area that cannot draw the layer's stairs: drawn level, docs/game/glitch-layer.md, Heights in a flip) */
+		out->level = level_look = !nm_stairs_drawn(L);
 		out->map = look_map(L, last.tw, last.th);
+		level_look = false;
 		out->tw = last.tw;
 		out->th = last.th;
+		out->scenery = netmap_scenery;
+		out->sides = netmap_sides();
 		ok = out->map && area_src_vram(L->def->xrom, L->def->group, L->def->number, &out->gfx);
 	}
 	free(nm_last.seams);
@@ -830,6 +840,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
 	 * world +Y, grid y world -X) */
 	for (int g = 0; g < 4; ++g) kit->arrows |= (unsigned)learned[area].arrow[(g + 1) & 3].ok << g;
+	nm_kit_hole(&learned[area], kit);
 }
 
 /* Locks the w x h cells from (x, y) and `margin` around them. */
@@ -931,6 +942,10 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
 		if (p->kind == PROP_EMBLEM) lock(locked, p->x, p->y, 1, 1, 1);   /* (its floor all round kept) */
+		else if (p->kind == PROP_HOLE) {   /* (its floor all round, and what the piece draws over) */
+			lock(locked, p->x, p->y, p->len, p->faces, 1);
+			for (int k = 0; k < learned[area].hole.nunder; ++k) lock(locked, p->x + learned[area].hole.under[k][1], p->y + p->faces - 1 - learned[area].hole.under[k][0], 1, 1, 0);
+		}
 		else if (p->faces == FACES_X) lock(locked, p->x - 1, p->y, 3, p->len, 1);
 		else lock(locked, p->x, p->y - 1, p->len, 3, 1);
 	}

@@ -17,8 +17,8 @@
  * the screen. */
 #define STAIR_DIRS 2
 
-typedef struct { int16_t px, py; uint16_t e0, e1; uint8_t opaque, over; } StairTile;   /* (opaque: of its 64 pixels, as the map draws them;
-                                                                               * over: a side piece's tile its map draws over floor, its foot) */
+typedef struct { int16_t px, py; uint16_t e0, e1; uint8_t opaque, foot; } StairTile;   /* (opaque: of its 64 pixels, as the map draws them;
+                                                                               * foot: a side piece's tile its map draws over floor, its foot) */
 
 typedef struct {
 	bool ok;

@@ -3,7 +3,7 @@ type: Tool
 title: "The 3DS's heap on a computer"
 description: "`tools/heap3ds.py` plays long headless runs of the host build with every allocation counted as the New 3DS's 96 MB heap holds it, reporting the peak, refused allocations and run depth, BN6 alone, with BN5, with BN4 Red Sun, or with both."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:00:00Z }
 ---
 
 # The 3DS's heap on a computer
@@ -14,6 +14,7 @@ python3 tools/heap3ds.py --seeds 1-24 --cases bn5 --no-build
 python3 tools/heap3ds.py --cases bn5 --cap 90   # a heap 6 MB short: what a refusal does where fragmentation took that much
 python3 tools/heap3ds.py --cases bn6,bn5,bn4 --cap 86   # the margin rule: 10 MB short, nothing refused
 python3 tools/heap3ds.py --cases bn5 --seeds 1 --frames 40000 --shots 1000 --refuse tiles_keep_begin --no-build
+python3 tools/heap3ds.py --cases bn6,bn5 --frames 30000 --dev glitch,side=4,glitchstage=5,glitchlook=15+5+6   # each run started on a Glitch layer, its looks from the areas with the most side pieces (15 November 2026: 45.2 and 57.1 MB, none refused)
 ```
 
 `tools/heap3ds.py` plays long runs of the host build headless (the test

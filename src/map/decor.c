@@ -23,9 +23,11 @@
 #define PIECES_MAX   10
 #define TRIES       500
 
-/* Pixels of floor, faces and legs, over the whole map. */
-static uint8_t *footprint(const AreaSrc *a) {
+/* Pixels of floor, faces and legs, over the whole map; `reach` pixels
+ * under its lower edges are the floor's (0: FACE_REACH). */
+static uint8_t *footprint(const AreaSrc *a, int reach) {
 	int W = a->tw * 8, H = a->th * 8;
+	if (!reach) reach = FACE_REACH;
 	uint8_t *fp = calloc((size_t)W * H, 1);
 	for (int A = -64; A < 64; ++A)
 		for (int B = -64; B < 64; ++B) {
@@ -39,7 +41,7 @@ static uint8_t *footprint(const AreaSrc *a) {
 			for (int dx = -32 - PAD; dx <= 32 + PAD; ++dx) {
 				int half = (32 - abs(dx)) / 2;
 				if (half < 0) half = 0;
-				int top = cy - half - PAD, bottom = cy + half + FACE_REACH + PAD;
+				int top = cy - half - PAD, bottom = cy + half + reach + PAD;
 				for (int y = top; y <= bottom; ++y) {
 					int x = cx + dx;
 					if (x >= 0 && y >= 0 && x < W && y < H) fp[(size_t)y * W + x] = 1;
@@ -85,10 +87,10 @@ static bool same_piece(const DecorPiece *p, const DecorPiece *q) {
 		!memcmp(p->e0, q->e0, (size_t)p->w * p->h * 2) && !memcmp(p->e1, q->e1, (size_t)p->w * p->h * 2);
 }
 
-void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out) {
+void decor_learn(const AreaSrc *a, bool bg_in_map, int reach, DecorBook *out) {
 	if (!a->rings) return;
 	int W = a->tw * 8, tw = a->tw, th = a->th;
-	uint8_t *fp = footprint(a);
+	uint8_t *fp = footprint(a, reach);
 	/* 1: scenery, 2: taken into a piece, 3: floor and whatever touches it */
 	uint8_t *kind = calloc((size_t)tw * th, 1), *pixels = calloc((size_t)tw * th, 1);
 	for (int ty = 0; ty < th; ++ty)
@@ -155,6 +157,99 @@ void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out) {
 	free(kind);
 	free(pixels);
 	free(fp);
+}
+
+/* ---- what a map draws over its floor (decor_learn_floating) ---- */
+
+#define FLOAT_SIDE   32   /* tiles a side at most */
+#define FLOAT_OVER    9   /* tenths of its pixels over ground floor at least */
+#define FLOAT_ON      8   /* pixels on raised floor at most: a walkable cloud's, its yellow pad's */
+#define FLOAT_PX   2048   /* pixels at least, two panels' tops: what is smaller marks the floor (Undernet 1's warp hole in its frame) */
+
+static int div_floor(int a, int b) { return a / b - (a % b < 0); }
+
+/* Whether pixel (x, y) of map a lies on the top of floor at height z:
+ * the panel its world point at that height falls in is walled floor of
+ * that height. */
+static bool floor_at(const AreaSrc *a, int x, int y, int z) {
+	int s = x - a->tw * 4, d = 2 * (y + z - a->th * 4);   /* X + Y, Y - X (area_px, area_py) */
+	int A = div_floor(div_floor(s - d, 2) - a->ex, 32), B = div_floor(div_floor(s + d, 2) - a->ey, 32);
+	int PX = a->ex + 16 + 32 * A, PY = a->ey + 16 + 32 * B;
+	return area_src_walled_floor(a, PX, PY) == 1 && area_src_height(a, PX, PY) == z;
+}
+
+/* The group of second-layer tiles joined 8 ways to tile `at`, marked in
+ * `seen`, into q; its box in box[] (x0, y0, x1, y1), whether the map's
+ * edge cuts it in *edge. */
+static int float_group(const AreaSrc *a, int at, uint8_t *seen, int *q, int box[4], bool *edge) {
+	int tw = a->tw, th = a->th, n = 0;
+	box[0] = box[2] = at % tw; box[1] = box[3] = at / tw;
+	*edge = false;
+	q[n++] = at;
+	seen[at] = 1;
+	for (int h = 0; h < n; ++h) {
+		int x = q[h] % tw, y = q[h] / tw;
+		if (x < box[0]) box[0] = x;
+		if (x > box[2]) box[2] = x;
+		if (y < box[1]) box[1] = y;
+		if (y > box[3]) box[3] = y;
+		*edge |= x == 0 || y == 0 || x == tw - 1 || y == th - 1;
+		for (int dy = -1; dy <= 1; ++dy)
+			for (int dx = -1; dx <= 1; ++dx) {
+				int nx = x + dx, ny = y + dy;
+				if (nx < 0 || ny < 0 || nx >= tw || ny >= th) continue;
+				int j = ny * tw + nx;
+				if (seen[j] || !(a->tile[1][j] & 0x3FF)) continue;
+				seen[j] = 1;
+				q[n++] = j;
+			}
+	}
+	return n;
+}
+
+/* Whether the group lies over the ground floor and is none itself:
+ * FLOAT_PX pixels or more, nine tenths of them or more over ground panels,
+ * hardly any on the top of floor at any of the map's raised heights
+ * (`levels`). */
+static bool over_floor(const AreaSrc *a, const int *q, int n, const bool *levels) {
+	int W = a->tw * 8, drawn = 0, over = 0, on = 0;
+	for (int k = 0; k < n; ++k)
+		for (int y = q[k] / a->tw * 8; y < q[k] / a->tw * 8 + 8; ++y)
+			for (int x = q[k] % a->tw * 8; x < q[k] % a->tw * 8 + 8; ++x) {
+				if (!a->front[(size_t)y * W + x]) continue;
+				++drawn;
+				over += floor_at(a, x, y, 0);
+				for (int z = 8; z < HEIGHT_UNEVEN && on <= FLOAT_ON; z += 8) on += levels[z] && floor_at(a, x, y, z);
+			}
+	return drawn >= FLOAT_PX && on <= FLOAT_ON && over * 10 >= FLOAT_OVER * drawn;
+}
+
+void decor_learn_floating(const AreaSrc *a, DecorBook *out) {
+	if (a->layers < 2 || !a->front || !a->rings) return;
+	int tw = a->tw, th = a->th;
+	bool levels[256] = { false };
+	for (int i = 0; a->hz && i < a->hw * a->hh; ++i) levels[a->hz[i]] = true;
+	uint8_t *seen = calloc((size_t)tw * th, 1);
+	int *q = malloc((size_t)tw * th * sizeof *q);
+	for (int i = 0; seen && q && i < tw * th && out->n < DECOR_MAX; ++i) {
+		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
+		int box[4];
+		bool edge;
+		int n = float_group(a, i, seen, q, box, &edge), w = box[2] - box[0] + 1, h = box[3] - box[1] + 1;
+		if (edge || n < MIN_TILES || w > FLOAT_SIDE || h > FLOAT_SIDE || !over_floor(a, q, n, levels)) continue;
+		DecorPiece *p = &out->piece[out->n];
+		p->w = (uint8_t)w; p->h = (uint8_t)h;
+		p->e0 = calloc((size_t)w * h, 2);
+		p->e1 = calloc((size_t)w * h, 2);
+		if (!p->e0 || !p->e1) { free(p->e0); free(p->e1); break; }
+		for (int k = 0; k < n; ++k) p->e1[(q[k] / tw - box[1]) * w + q[k] % tw - box[0]] = a->tile[1][q[k]];
+		bool dup = false;
+		for (int k = 0; k < out->n && !dup; ++k) dup = same_piece(&out->piece[k], p);
+		if (dup) { free(p->e0); free(p->e1); continue; }
+		out->n++;
+	}
+	free(seen);
+	free(q);
 }
 
 void decor_free(DecorBook *b) {

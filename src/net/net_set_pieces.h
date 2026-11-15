@@ -20,7 +20,7 @@ void ng_carve_gap(const GapSite *g, int rise);
 void ng_place_hidden(int rise);
 void ng_plan_teleport(void);
 void ng_carve_teleport_island(int rise);
-void ng_plan_obstacle(int kind);
+void ng_plan_obstacle(int kind, int rise);
 int ng_cube_kind(int depth, int biome, int kind);
 int ng_pcode_cube(void);
 bool ng_apart(int x, int y);

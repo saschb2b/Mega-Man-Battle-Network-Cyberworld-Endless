@@ -45,6 +45,7 @@ typedef enum {
 	OW_OUTPUT, OW_SPEAKERS, OW_HEADPHONES, OW_MONO,   /* the Audio section's Output (sound_filter.h; SoundOutput's order) */
 	OW_SPEAKERS_NOTE, OW_HEADPHONES_NOTE, OW_MONO_NOTE,
 	OW_MUSIC_LOW_NOTE, OW_EFFECTS_LOW_NOTE,   /* Music's and Effects' notes under the game's own level */
+	OW_TOUCH, OW_TOUCH_AUTO_NOTE, OW_TOUCH_OFF_NOTE,   /* the Game page's touch controls line (touch.h) */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
@@ -73,5 +74,7 @@ const char *options_fast_note(void);
 /* ... before the controller's vibration and trigger effects */
 const char *options_vibration_note(void);
 const char *options_triggers_note(void);
+/* ... before the touch controls' */
+const char *options_touch_note(void);
 
 #endif

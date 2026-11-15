@@ -10,6 +10,9 @@
 
 void nm_stair_origin(const Stair *st, int *X0, int *Y0);
 void nm_paste_stairs(const Learned *L, uint16_t *map, int tw, int th);
+/* Whether `L`'s stairs draw every stair of the layer as it stands: each
+ * one's way and width learned, at its rise and length */
+bool nm_stairs_drawn(const Learned *L);
 
 /* ---- props ---- */
 

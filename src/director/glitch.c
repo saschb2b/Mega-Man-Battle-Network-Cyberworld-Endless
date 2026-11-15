@@ -17,6 +17,7 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "bn6_forms.h"
+#include "debug.h"
 #include "devtools.h"
 #include "director.h"
 #include "director_layer.h"
@@ -27,6 +28,7 @@
 #include "mapslot.h"
 #include "net.h"
 #include "netmap.h"
+#include "npc_sprite.h"
 #include "run.h"
 #include "talk.h"
 
@@ -64,7 +66,7 @@ static struct {
 	 * sprites' colours, a bit each of BGR555) */
 	int sx, sy, mx, my;
 	int look;           /* the warp's colours, turned one of three ways */
-	int look_k;         /* its look now (glitch_look_sprite) */
+	int look_k;         /* its look now (D.objs.look_sprite: the warp's pad, the copy's form) */
 	int look_set, blur, blur_len;   /* frames of its new look's snippet, and of its mosaic clearing */
 	int box_w, box_up, box_down;    /* the box its glitches are drawn in, round its foot */
 	int jitter;         /* frames left of a small jitter between its glitches */
@@ -73,6 +75,7 @@ static struct {
 	bool box, shown;
 	uint8_t sprite[32768 / 8];
 	bool settled;       /* the copy deleted: the glitch gone */
+	int stall, drag;    /* a flip's first frames with the music stalled, and its tempo's factor after (glitch_music) */
 } G;
 
 static uint32_t next_rng(void) {
@@ -86,6 +89,7 @@ static int roll(int lo, int hi) { return lo + (int)(next_rng() % (uint32_t)(hi -
 
 void glitch_layer_begin(void) {
 	memset(&G, 0, sizeof G);
+	glitch_music_whole();
 	G.on = run.side_kind == LAYER_GLITCH;
 	G.rng = run.layer_seed ^ 0x9E3779B9u;
 	if (!G.rng) G.rng = 1;
@@ -103,7 +107,7 @@ void glitch_layer_begin(void) {
 		for (int x = 0; x < MAP_W; ++x) G.floor += layer.cell[y][x] == C_PATH;
 	G.next = roll(gap_lo[0], gap_hi[0]);
 	G.look = 1;
-	if (G.on) glitch_looks_make(D.layer_tiles);
+	if (G.on) glitch_looks_make(D.layer_tiles, dev.glitch_look, dev.glitch_looks);
 	else glitch_looks_free();
 }
 
@@ -121,18 +125,24 @@ static void measure(void) {
 }
 
 /* The warp's next look: a pad of another kind the map loaded, under BN6's
- * mosaic (its talker's look snippet, npc_talker_looks) */
+ * mosaic (its talker's look snippet, npc_talker_looks); on a Glitch layer
+ * its copy's, another of its forms' bodies (Its copy), at a block slipped
+ * or a flip, and never while a box is open */
 static void warp_look_next(int frames) {
 	const NpcLooks *w = &D.objs.glitch_warp;
-	if (G.on || !w->jump_at || !w->look || !w->blur) return;
+	if (!w->jump_at || !w->look || !w->blur) return;
+	if (G.on && (G.settled || (G.fx != FX_SLIP && G.fx != FX_FLIP) || emu_read8(BN6_CHATBOX))) return;
 	int other[GLITCH_LOOKS], n = 0;
 	for (int k = 0; k < GLITCH_LOOKS; ++k)
 		if (k != G.look_k && (D.objs.glitch_looks >> k & 1)) other[n++] = k;
 	if (!n) return;
 	G.look_k = other[roll(0, n - 1)];
-	uint8_t sprite = glitch_look_sprite[G.look_k], m[2] = { LOOK_MOSAIC, LOOK_MOSAIC };
-	emu_write(w->look + 1, &sprite, 1);
+	int list = D.objs.look_list[G.look_k], sprite = D.objs.look_sprite[G.look_k];
+	uint8_t was[4] = { (uint8_t)sprite, (uint8_t)(list * 4), 0x16, (uint8_t)npc_sprite_stand(list, sprite, D.objs.look_anim[G.look_k]) },
+		m[2] = { LOOK_MOSAIC, LOOK_MOSAIC };
+	emu_write(w->look + 1, was, sizeof was);
 	emu_write(w->look + 6, m, 2);
+	if (G.on && emu_debug_on()) fprintf(stderr, "glitch: the copy's body now look %d, list %d sprite %#x\n", G.look_k, list, sprite);
 	G.look_set = LOOK_SET;
 	G.blur = G.blur_len = frames + LOOK_SET;
 }
@@ -166,8 +176,28 @@ static void warp_jitter(void) {
 	G.jitter_seed = next_rng();
 }
 
+/* How near the heart MegaMan is, 0 (HEART_REACH world units off or more,
+ * walking across) to HEART_REACH at the copy: the glitch thickens towards
+ * it, a warmer and colder that leads to the heart (docs/game/glitch-layer.md,
+ * Towards the heart) */
+#define HEART_REACH 448
+static int heart_near(void) {
+	if (!G.on || !G.warp) return 0;
+	int d = abs(bn6_player_x() - G.wx) + abs(bn6_player_y() - G.wy);
+	return d < HEART_REACH ? HEART_REACH - d : 0;
+}
+
+/* The stage the glitch shows: the layer's, a stage more from a third of the
+ * way in to the heart and two from two thirds; its battles and words keep
+ * the layer's own */
+static int shown_stage(int near) {
+	int s = G.on ? G.stage + (3 * near >= HEART_REACH) + (3 * near >= 2 * HEART_REACH) : 0;
+	return s < GLITCH_STAGES ? s : GLITCH_STAGES - 1;
+}
+
 /* The next glitch: torn rows first, blocks slipped from stage 1, colours
- * turned from stage 2; longer the further the layer has come apart */
+ * turned from stage 2; longer the further the layer has come apart, and
+ * nearer each other near the heart */
 static void schedule(void) {
 	if (G.fx_left > 0) { --G.fx_left; return; }
 	/* (a flip over: the layer's own back; the warp's new colours) */
@@ -175,15 +205,19 @@ static void schedule(void) {
 	if (G.fx != FX_NONE) G.look = 1 + (G.look + roll(0, 1)) % 3;
 	G.fx = FX_NONE;
 	if (D.frame < G.next) return;
-	int s = G.on ? G.stage : 0, kinds = s >= 2 ? 3 + (glitch_looks() > 0) : s >= 1 ? 2 : 1;
+	int near = heart_near(), s = shown_stage(near), kinds = s >= 2 ? 3 + (glitch_looks() > 0) : s >= 1 ? 2 : 1;
 	G.fx = FX_TEAR + roll(0, kinds - 1);
 	G.fx_left = G.fx == FX_FLIP ? roll(10 + 20 * (s - 2), 30 + 50 * (s - 2)) : roll(2, 4 + 2 * s);
 	G.fx_len = G.fx_left;
 	G.fx_seed = next_rng();
 	if (G.fx == FX_FLIP) glitch_look_flip(roll(0, glitch_looks() - 1));
+	/* (the music drags while the floor is another area's, stalled at its
+	 * edge from stage 3: Its sound) */
+	G.stall = G.fx == FX_FLIP && s >= 3 ? roll(4, 4 + 4 * (s - 2)) : 0;
+	G.drag = roll(0x90, 0xD0);
 	warp_look_next(G.fx_left);
 	/* (the warp's: every three to seven seconds) */
-	G.next = D.frame + G.fx_left + (G.on ? roll(gap_lo[s], gap_hi[s]) : roll(180, 420));
+	G.next = D.frame + G.fx_left + (G.on ? roll(gap_lo[s], gap_hi[s]) * (2 * HEART_REACH - near) / (2 * HEART_REACH) : roll(180, 420));
 }
 
 /* (the warp on the screen, from BN6's camera as it is drawn) */
@@ -227,10 +261,19 @@ void glitch_update(void) {
 	warp_look_step();
 	if (G.settled) {
 		if (glitch_look_shown() >= 0) glitch_look_flip(-1);
+		glitch_music(0x100);
+		G.fx = FX_NONE;
+		return;
+	}
+	/* (dev, glitchhold: the first look held on the floor, the rest still,
+	 * for a capture of an area's look: docs/game/glitch-layer.md) */
+	if (dev.glitch_hold && G.on && glitch_looks() > 0) {
+		if (glitch_look_shown() != 0) glitch_look_flip(0);
 		G.fx = FX_NONE;
 		return;
 	}
 	schedule();
+	glitch_music(G.fx != FX_FLIP || glitch_look_shown() < 0 ? 0x100 : G.fx_len - G.fx_left < G.stall ? 0 : G.drag);
 	warp_jitter();
 	++G.tick;
 	G.box = emu_read8(BN6_CHATBOX) != 0;

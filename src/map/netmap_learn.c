@@ -87,9 +87,10 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		 * sets such: sides.h; what stands on both layers first, whose looks
 		 * are few, the Aquarium's pillars under its pads being more than a
 		 * book holds) */
-		if (net_area_def(area)->sides & 8) stands_learn(&r, &L->sides);
+		if (net_area_def(area)->sides & 32) stands_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 4) behind_learn(&r, &L->sides);
+		if (net_area_def(area)->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&r, &L->sides);
 		area_src_raise_end(src, &r);
 	}
 	/* (its books are one map's: the layer's lead, netmap.c) */
@@ -273,10 +274,20 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
  * own never shows, on its own map's grid. */
 /* map m's free-standing pieces, unless the area sets none (TILES_NO_SCENERY) */
 static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
-	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
+	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, na->scenery_reach, &L->decor);
+	/* (and, where its background is its own tiles, what its second layer
+	 * draws over its floor: Mr. Weather Comp's low clouds, decor.h) */
+	if (!(na->styles & TILES_NO_SCENERY) && na->bg_in_map) decor_learn_floating(m, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
-	if (na->sides & 1) sides_learn(m, &L->sides);
+	if (na->sides & 1) (na->sides & 8 ? sides_learn_under : sides_learn)(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);
+	if (na->sides & SIDES_BEHIND_FRONT) sides_learn_behind(m, &L->sides);
+	if (na->sides & 16) hole_learn(m, &L->hole);
+	if (na->sides & 64) {
+		uint8_t *panels = tiles_src_panels(m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map);
+		if (panels) edges_learn(m, L->book[0].face, panels, &L->sides);
+		free(panels);
+	}
 }
 
 /* (debug output) what area `area` learned */
@@ -335,11 +346,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
 		area_src_free(&b);
 	}
-	/* (and the side pieces of those listed for them alone) */
+	/* (and the side pieces of those listed for them alone, and what they
+	 * set behind their floors where the area takes that: Undernet Zero's
+	 * bowls behind edges are Undernet 1's and 3's) */
 	for (int k = 0; k < 2 && na->sides & 1 && na->side_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->side_maps[k][0], na->side_maps[k][1], &b)) continue;
 		sides_learn(&b, &L->sides);
+		if (na->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&b, &L->sides);
 		/* (and their stairs: Undernet 1's two-by-two for Undernet Zero,
 		 * whose own climb three panels wide) */
 		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
@@ -411,4 +425,19 @@ bool nm_learn(int area, Learned *L) {
 	settle(L);
 	if (emu_debug_on()) learn_report(area, L);
 	return true;
+}
+
+void nm_kit_hole(const Learned *L, LayerKit *kit) {
+	/* (grid x runs along world Y, grid y against world X: the hole's lowest
+	 * panel is its box's lowest x and highest y) */
+	const SidePiece *h = &L->hole;
+	if (!h->ntiles || !h->hole[0] || !h->hole[1]) return;
+	kit->hole_w = h->hole[1];
+	kit->hole_h = h->hole[0];
+	for (int k = 0; k < h->nunder && kit->nhole_under < 16; ++k) {
+		int8_t *u = kit->hole_under[kit->nhole_under++];
+		u[0] = h->under[k][1];
+		u[1] = (int8_t)-h->under[k][0];
+		u[2] = h->under[k][2];
+	}
 }

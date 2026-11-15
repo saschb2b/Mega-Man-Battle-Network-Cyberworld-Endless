@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:03:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T21:30:00Z }
 ---
 
 # Side pieces (built for five areas, issue #505)
@@ -77,12 +77,139 @@ Taken per area as looked at, as every laying rule is
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
 | CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
-| BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
-| The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
-| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
-| Central Area | the Net Dealer's capsule counter, which means a shop | no |
+| BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below), both along whole catwalk runs | yes, both |
+| BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
+| The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4; behind upper edges on the second layer, gripping none, a row of five along a walkway, a bowl each, and two alone by its exits: 7 looks (below); the two in a raised ring's holes stand behind no edge and fit no layer (below) | yes, both |
+| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9; the rest round its floors is drawn into its rims and its bridges' faces, which no cut separates: its rims' clamps and corner pins, and the long spikes under its bridges, tried past the laid depth and not placed (below) | the bowls |
+| BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
+| BN5's ACDC Area | nothing; its wire tufts behind its blue walkways' upper edges are drawn into a rim no layer draws, its layers laying no blue walkway (below) | no |
+| The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
+| Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars; behind its raised landings, the tanks, and on a raised platform's closed corner, the whale-topped console (all below) | the pillars and the tanks |
+| BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
+| BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
+| BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
+| Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
+| Judge Tree Comp | nothing on the second layer; on its walkways' edges, in the floor's own tiles, the tufts on its back rims and the planters stacked at its walls' feet, 139 looks over its four maps (below). Not placed: its stumps with their tree houses, doors, bridges and roots, and its tree's red court with the tree and the terminal on it, floor of another kind (the stumps its pads' look, the court skipped on purpose, `skip_styles`; issue #505's kinds 3-5) | what grows on the edges |
+| Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
+| Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
+| BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| BN4's Town Area | nothing: on its second layers a warp hub's ring with its exit arrow, a hub's centrepiece and Town Area 3's upper level, left out on purpose; under that level a rail between two lower hubs; Town Area 2 and 4 the same kinds (below) | - |
+| Green Area | nothing: its second layer holds its potted bushes (set by a rule of their own), the blue-framed plates and warp discs on its raised grass, arrow panels' frames, a pad's centrepiece and its stairs, and in Green Area 2 the NetCafe desk, which means a shop; nothing stands under or behind its floors (below) | - |
+| Sky Area | nothing: what its maps leave undrawn is raised floor, pods, stairs and roads, or stands on the floor alone; behind its fields' edges the cut takes a scrap of a pod's arm (below) | no |
+| BN5's Liberation boards (BN5 dark 1-9) | nothing set: on their second layer the panels' middles alone, which a board's panel looks cover; on the first, slime and lava blobs on the floors' corners, fins on the back rims and drips under the faces, all drawn into the floor's own rim and face tiles (below) | no |
+| The Graveyard | nothing: its one map's second layer holds only its ramps' slats; at its raised floor three scraps of floor and rim, which fit no layer; no scenery (below) | - |
 | every other area | nothing | - |
+
+## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
+
+The Cybeast Nest's two maps (0x93:0 and 0x93:1, the Underground) stand
+crystals round their rims: squat stumps and tall spires, with loose
+rubble about them. They lie on the second tile layer, as the Undernet's
+bowls do (the maps' two layers drawn apart: the crystals and rubble on
+the second, the floor, its rims, tabs and spikes on the first), and
+none of their pixels lies on a floor's top where they stand in front of
+a lower edge. So the side-piece cut takes, in this area, a group that
+touches no floor's top where a ground panel lies straight above its top
+row within 48 pixels, kept with that panel (bit 3 of `net_area.sides`).
+With the ones behind upper edges that the cut took already, the maps give
+17 looks.
+
+Set as they were cut, a piece behind an upper edge stood over a rim's tab
+its map had not had there, and each added about three breaks to the
+[tile test](../../devtools/tile-test.md). So each of these looks keeps
+the first layer's tiles under it (`SidePiece.over`; an entry that draws
+no pixel counts as none) and goes down only where the picture round it is
+the same: where the layer's first-layer tile differs from its map's, both
+must lie wholly behind the crystal's own pixels (the tiles' pixels,
+`voids_entry_px`). That is rare at any one panel, so these looks try
+every free panel of the floor rather than half, still three apart, and a
+panel takes any of the looks that fit there rather than the one its hash
+names. Over 18 of the atlas's layers that sets 2.8 a layer (0 to 6, one
+layer without), in three looks (a stump with its rubble in front of a
+lower edge or behind an upper one, a spire behind an upper edge), and no
+layer's breaks grew.
+
+The lone spires (8 tiles) never fit: in their maps they stand in front of
+a room's corner, over the stem of the tab that hangs there and the rim's
+face (92 tries refused over six layers), which a layer's corner rarely
+draws in the same tiles. Set without them, the stem would be cut off at
+the spire's edge. The rubble alone in the void (a tile to three) is
+smaller than a piece, the rubble on the floor's top is no side piece, and
+the crystals along the maps' bridges stand by raised floor, beside no
+ground panel.
+
+The maps hold no layer priorities round them (none within a panel of any
+look), and none are needed: BN6 draws MegaMan in front of the second
+layer there, so he walks in front of a stump behind an upper edge, and
+stands behind one in front of a lower edge, his feet on the floor above
+it (captured on a Nest layer, seed 4). A Glitch flip into the Nest
+draws them too: they are set in the tiles' own pass (`pick_map`) from
+what the area learned, and need nothing but their tiles.
+
+## What grows on a floor's edge (`edges_learn`; verified on the maps and in the game)
+
+The Judge Tree's walkways carry two things the rules above cannot cut, as
+its four maps were looked over beside the tile test's tinted copies (its
+unused tiles in red; 15 November 2026). Both lie on the first layer in the
+very tiles that draw the floor's rim and wall, so no group of tiles off
+the floor holds them:
+
+- **tufts of grass** on the back rims, a little mound with green blades
+  rising 4 to 6 pixels over the rim, at the back corners and along the
+  back edges, some 30 to 40 a map (2 to 3 tiles each, the rim's tiles
+  among them);
+- **planters stacked at the walls' feet**, two to four brick boxes of
+  green, the upper on the wall, the lower hanging below its foot, some 9
+  to 12 stacks a map, and lone planters whose box pokes below the wall.
+
+The planters on the walls themselves are the floor's own art and were
+already drawn.
+
+A first-layer tile grows on the floor where it draws 4 pixels or more past
+the floor's body: off every ground panel's top, more than 3 pixels over
+it (a plain back rim's outline stands 2 over its top, the tufts' blades 4
+to 6) and more than the walls' height under it (25 pixels on the Judge
+Tree's maps, the book's `face`). Tiles that do, joined eight ways, are one
+piece, 24 at most, cut whole with the ring of tiles round it that draw the
+floor's art, 8 pixels of it or more (the mound under a tuft's blades, a
+planter's top on the wall; a planter's corner that only lies where a wall
+would is no wall), 48 at most. It is a tuft where more of its floor's art is rim than wall,
+gripping the panel straight under it; else a planter, gripping the panel
+straight over it. With it go the panels of its neighbourhood, as a side
+piece's, and every panel whose top, rim or wall could draw in its tiles
+(the walls of the panels over it, the rims of those under it), 32 at most,
+each as ground floor or none: a wall of a walkway further back reaching
+down to a tuft cut a notch in it on a layer until that was asked. A piece
+is kept only where its panel and every floor round it is the area's own
+walkway floor (`tiles_src_panels`), so nothing is cut from its stumps or
+its court. Each look is kept once: 74 tufts and 65 planters over the four
+maps, which is more than the book's 24 its other kinds keep, so a book
+grows as looks come (an area without any holds none).
+
+A layer sets one on two in three of its free ground panels of the same
+neighbourhood, by its seed (on every one, a long straight edge took a tuft
+every other panel), where every panel it reaches is what it is in its map,
+none a panel from another; of the looks that fit there, the first from the
+one the seed picks whose tiles go down cleanly. Its tiles that drew the
+floor's art too go over the layer's own there, which is the same art (the
+same panels round it), the rest over nothing, and each tile at its edge
+must meet the layer's tile beside it as the area's maps set those two side
+by side (`seams_seen`): a planter stack's top beside a planter the layer's
+wall already shows cut that one in two, 31 more breaks on a layer of the
+[tile test](../../devtools/tile-test.md), until that was asked. Its layers
+show the same breaks with them as without, and 12 to 17 a layer, where its
+maps carry some 45 on as many panels: mostly tufts and lone planters, the
+stacks where the wall beside them is plain.
+
+Nothing about walking changes: its tiles are the first layer's, and the
+panels under them are what they were. MegaMan stands in front of them as
+he does of the floor's rim and walls (captured on a layer: a tuft's blades
+show behind his helmet as he stands on the rim's panel); none stands where
+he could pass behind it, a tuft behind a rim over the void and a planter
+under a wall. They are set in `pick_map`'s pastes from the area's
+`Learned` alone, so a [Glitch layer](../../game/glitch-layer.md)'s flip into
+the Judge Tree draws them too; they need no layer priorities.
 
 ## Pieces the game animates (verified in the game)
 
@@ -95,9 +222,10 @@ the [tile test](../../devtools/tile-test.md)'s pictures show them
 group, whose script BN6 starts by itself, so a piece set with those tile
 numbers burns on a generated floor with nothing added (captured on an
 Undernet layer: bowls of flame beside a bridge and a room's corner, their
-flames changing between frames). Five of Undernet 1's lone bowls draw
-nothing on ground floor and are no side piece; the ones that touch a rim
-are.
+flames changing between frames). Two of Undernet 1's lone bowls draw
+nothing on ground floor and are no side piece: they stand behind a pad's
+corner by its exits ([below](#behind-a-floor-on-the-second-layer-sides_learn_behind-verified-on-the-maps-the-atlas-and-in-the-game));
+the ones that touch a rim are.
 
 The Undernet's maps hold more in the second layer than what hangs on a
 floor's side. In Undernet 1 the rest of it joins into one group of some
@@ -163,9 +291,43 @@ the panels it draws over.
 A layer sets them on free floor panels as it does side pieces, but in
 stretches: of the squares of four panels a side, one in three by the
 layer's seed takes a piece behind every panel of it that fits, as the maps
-set theirs in rows; the rest take none. 0 to 9 a layer in the
-[tile test](../../devtools/tile-test.md)'s pictures. Seen in the game: a row
-of five behind a catwalk, the horn in front of it as before.
+set theirs in rows; the rest take none. CopyBot Comp's spikes are set so;
+BN4's Undernet's horns go along whole catwalks instead (below).
+
+### Rows along a catwalk (`SIDES_RUNS`; measured on the maps and the atlas)
+
+BN4's Undernet's maps line whole catwalks, not stretches. The Undernet 3
+(0x94:2) sets a horn behind every panel of 6 of its catwalks' straight
+runs, joint to joint: rows of 10, 6, 6, 4, 3 and 2, some 31 horns over its
+299 panels (counted on the map's picture), a fifth of its catwalk panels.
+Two of those runs, four panels each beside a plate and beside the exit,
+are lined in front too, with 3 and 2 of the big horns. The Undernet 5
+(0x94:4) sets none. The cut takes 17 of the 31 (the rest have another
+catwalk within 48 pixels above them, which reads as standing under a
+floor) but every look: 9 behind, 8 in front. Everything else the two maps
+draw that no layer draws is floor or a mark on it, out of this page's
+reach: the Undernet 3's red road to a green warp plate, the Undernet 5's
+grey plate and its bridge, the exits' arrows, the green arrow panels, the
+plates' blue crosses and an orange warp disc, and the rims of the joints
+where a catwalk ends ([map use](../../devtools/map-use.md), its tinted
+maps).
+
+The squares set them in groups of four panels at most and the ones in
+front singly: 22 behind and 18 in front over the atlas's eight layers. So
+the area (`NetAreaDef.sides` bit 8, `SIDES_RUNS`) sets them by run: a
+walkway a panel wide, no floor either side across it, two panels long or
+more, from where it begins to where it meets a joint, a turn or a room.
+Every other run by the layer's seed takes a horn behind every panel of it
+that fits, a third of those a horn in front of every panel too, and none
+stands anywhere else. On a run a piece's neighbourhood is compared along
+the run and on the side it stands (behind, the upper), not across it:
+where a room's corner or a joint lies diagonally on the far side, no look
+was cut there, though the horn never reaches it (every look the maps cut
+behind a catwalk differs from a plain one's there alone). A layer takes
+every other run where the map takes about one in seven, as its catwalks
+lie closer together: a run with another catwalk just behind it has no room
+for a horn. Over the atlas's eight layers: 26 behind and 9 in front, in
+rows of up to seven panels.
 
 CopyBot Comp's dark crystal spikes stand the same way behind its plateaus'
 upper edges, alone and in rows. Its plateaus are raised, so the cut is
@@ -175,9 +337,794 @@ the floor's own tiles in its two bottom rows alone, where its foot meets
 that floor's edge; anywhere else a tile it would cover is another floor's,
 and a spike first stood in front of a plateau's underside, over the void. BN5's
 End Area and Oran Area were tried and left: the cut finds 4 looks in each
-and none fits a layer, and what their maps set beside their floors is
-larger than this rule takes (End Area's pagoda, Oran Area's hubs, hundreds
-of tiles).
+and none fits a layer. End Area's are the pins along its roads' upper rims
+and a raised warp pad (below, End Area's survey); Oran Area's are below.
+
+## What stands in a walled hole (`hole_learn`; verified on the maps and in the game)
+
+End Area 2 (0x90:8) stands a pagoda on one of its grey pads: an orange
+plinth under a purple roof of three tiers, 163 second-layer tiles, 16 by
+17. It is no side piece, too big for one and gripping no rim: its plinth
+fills a block of 2 by 2 panels the map's walls leave out of the floor (a
+hole, MegaMan walks round it), ground floor all round the block, and its
+roof reaches back over the pad's floor behind it and over the void past
+the pad's back corner. The map's layer priorities (92 cells round it) put
+MegaMan behind the roof there. It is the map's one landmark, and none of
+the other two maps has one.
+
+A second-layer group of 400 tiles at most is such a piece where the panels
+it covers half of or more that are no floor and lie inside the floor
+(floor within three panels of each, along world X and Y both ways: the
+roof over the void past a rim is not) make a block of three a side at
+most with ground floor all round it. It is kept with that block's lowest
+panel, the block's size, the panels it draws over (floor or none) and the
+map's layer priorities over those and one round them: one piece an area
+(`Learned.hole`).
+
+A layer stands it as its landmark (`ng_landmark_hole`, where the area sets
+no landmark of BN6's): in the best room that holds it, the signature
+first, then big rooms far from the way, not the arrival's, the exit's, the
+arena or a pad. Its hole lies in the room, off the way, with floor all
+round it, cutting nothing off; every cell its roof hangs over that is void
+in its map is void on the layer (a roof over floor where its map has
+none would show MegaMan standing on it), and a cell over floor is floor
+or void. So it stands in a room's back corner, as in its map. The hole is
+walled off (`C_SOLID`, drawn as the floor round it) and the cells it draws
+over are kept clear of objects and of set pieces' floor (`ng_reserved`).
+Its tiles go on the second layer whole, its priorities with the side
+pieces' (`nm_sides_extra`). It stands on about one End Area layer in
+six: the first layer of 7 runs in 40 (seeds 1 to 40, `--net-biome x2`),
+2 of the atlas's 16 (four seeds a layout); the way through the rooms'
+middles keeps it off most of the rest.
+
+A Glitch layer's flip swaps tiles and colours alone: a flip into End
+Area draws no pagoda (its hole and priorities are the layer's own), and a
+flip out of one shows its hole as the other area's floor.
+
+## End Area's survey (15 November 2026)
+
+What End Area's three maps (0x90:7-9) set on and round their floors that
+no layer drew, from the atlas's tinted maps (`build.py atlas a2 2`,
+`lent_b21_*`) grouped tile by tile:
+
+| What | Where it stands | Size, how often | Taken |
+| --- | --- | --- | --- |
+| The pagoda | in a walled hole of a pad, End Area 2 | 163 tiles, once | yes, above |
+| The raised highway, its ramps and the posts under it | second layer, over the void and the roads | 1,200 to 2,000 tiles a map, one group | no: a road, issue #505's kind 5 |
+| Raised pads, the diamond one with a warp disc | raised floor (height 32) | 25 to 48 tiles each, one or two a map | no: raised floor and a warp's centrepiece |
+| Its 3x3 pads' centrepieces: a green warp disc, a purple one, a red console block | second layer, on a pad's middle alone | 24 to 32 tiles, one a map | no: pads' centrepieces, kind 4 |
+| Exit arrows | at the maps' edges | about 100 tiles each, End Area 2's two | no: kind 4 |
+| Arrow panels | on the roads | 15 or 16 tiles, three to eight a map | no: floor of another kind |
+| Pins along the roads' upper rims | first layer, in the rim's own tiles and the row above | 2 or 3 pixels each, dozens a map | drawn already with the rims; the variants left are floor tiles |
+| The rings' lower faces, road ends, bends | first layer, the floor's own | 4 to 12 tiles | floor tiles the pick does not choose, no piece |
+
+The cut behind a floor (`behind_learn`) finds 4 looks: three rows of pins,
+11 to 13 tiles, and the raised warp pad seen at the ground's level. Each
+fits a layer's panels by its neighbourhood, but on every one the layer's
+floor already holds all of its tiles (13 of 13, probed): the pins are
+drawn in the rim's tiles, which the floor's own art lays.
+
+## Behind a floor on the second layer (`sides_learn_behind`; verified on the maps, the atlas and in the game)
+
+The Undernet's maps set fire bowls that grip no floor. Undernet 3 (0x95:2)
+stands a row of five behind a walkway's upper edge, a bowl behind each
+panel, its foot on the rim; Undernet 1 (0x95:0) stands one beside each
+of two exits, behind a pad's corner. They lie on the second layer, as its
+other bowls do, and none of their pixels lies on a floor's top, so the
+side-piece cut refuses them (it wants 8), and `behind_learn` reads the
+first layer alone (cut with a debug line per group: on-floor pixels 0, a
+floor straight below, none above).
+
+Bit 7 of `net_area.sides` (`SIDES_BEHIND_FRONT`, any area may set it) cuts
+them: a group of the second layer's tiles is such a piece where it is
+`behind_learn`'s, the other layer (no pixel on a floor's top, a floor
+straight below its bottom row within 16 pixels, none straight above it
+within 48), up to 160 tiles, at every floor height (the raised views
+too). A group most of whose tiles repeat at one step is cut into its
+copies, each whole with the panel it stands behind: the row of five
+joins into one group of 70 tiles, its step 4 tiles across and 2 up, and
+gives a bowl each. Cut by the panel each tile column stands behind
+instead, a bowl came apart in two, as one stands behind the joint of two
+panels' edges. With the exits' two that is 7 looks.
+
+A layer sets them in stretches, as it sets `behind_learn`'s, but not by
+the panel's neighbourhood: the row stands behind a stepped edge, each
+panel a tooth with floor before it and void on both sides, which a
+layer's floor never draws (matched so, 2 were set over the atlas's ten
+layers). A look goes down on a free floor panel where the panels it
+draws over are void, as in its map, the panels straight below its bottom
+row are floor (a bowl in a step's inner corner stands where both steps
+are, not off one), and the first layer under it shows what its map's did
+(`SidePiece.over`, as [the Nest's crystals](#the-nests-crystals-sides_learn_under-verified-on-the-maps-and-in-the-game)):
+set without that, a bowl at a room's corner covered the corner's rim with
+its bottom row, and one layer's nicks went from 30 to 34 in the
+[tile test](../../devtools/tile-test.md). So set, 0 to 3 a layer, 18 over
+the atlas's ten (`build.py atlas 5 2`), beside the 1 to 8 that grip a rim,
+about the maps' share (7 of their 32 bowls stand behind an edge so); no
+layer's tile test worse. They burn as the others do.
+
+The maps hold no layer priorities for them, and none are kept: BN6 draws
+MegaMan in front of the second layer there, so he walks in front of a
+bowl behind the edge he stands on. A Glitch flip into the Undernet sets
+them too, in the tiles' own pass (`pick_map`).
+
+Undernet Zero sets them too (`SIDES_BEHIND_FRONT` on its row). Its own map
+stands no bowl behind an edge, so it takes the Undernet's through
+`side_maps`, whose maps are cut for pieces behind a floor as well where the
+area sets the bit.
+
+Not set: the two bowls in the holes of Undernet 3's raised ring (0x95:2,
+at height 120), each in a hole a panel wide, a floor straight above it
+and none within 16 pixels below, so neither behind an edge nor under
+one; and a layer of the Undernet has no such hole (only Mr. Weather
+Comp's and the Graveyard's rooms are holed).
+
+## What Oran Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's Oran Area (its maps 0x90:3 and 0x90:2, the atlas's `a4`) sets one
+thing of these kinds round its floors: sprigs, a few grey pixels forking
+once or twice, standing behind a walkway's upper edge, about twenty in
+Oran Area 2 (counted by eye). None can reach a layer:
+
+- Almost all stand behind its brown planks, the floor of another kind its
+  layers leave out ([Oran Area's tiles](oran-tiles.md)). A sprig has a tile
+  of its own in ten places (its left fork, 14 pixels, 7 looks); the rest
+  of it lies in the tiles of the planks' own lip. Cut alone (the behind
+  cut taking pieces of one tile, tried) and set behind a generated circuit
+  or hub, it fit nowhere over the atlas's six layers: in 26 of 34 tries
+  its tile was the generated floor's own rim, the circuits' and hubs' lips
+  standing a tile higher than the planks', and the other 8 lay off the tile
+  lattice.
+- The few behind its green circuits stand behind a raised one, drawn on
+  the second tile layer (no ground panel lies under it), and the area's
+  layers have no raised floor.
+- The behind cut's 4 looks are no thing: two are pieces of a circuit's own
+  rim behind a bend, one the knob under the raised warp hub, one an
+  escalator's top.
+
+The rest of what its layers never draw (1386 tile pictures of its two
+maps, [what the layers take](../../devtools/map-use.md)) is of the kinds
+left to the owner (issue #505's 3 to 5) or no side piece: its brown planks,
+among them the junction the survey took for a hub's piece (`b23_90_2` at
+(544, 336)); its conveyors and escalators; its exit arrows; its warp
+centrepieces and raised hubs; and a machine on one of Oran Area 1's hubs,
+on its second tile layer over the floor alone, which this page's rule
+takes for a centrepiece (whether it blocks the way in BN5 was not checked).
+
+## What BN4's ACDC Area sets round its floors (nothing; measured on the maps and the atlas)
+
+BN4's ACDC Area (its maps 0x90:2, 0x90:0 and 0x90:1, ACDC Area 3, 1 and
+2; the atlas's `a15`) sets no thing on, beside, behind or under its
+floors. Every cut on this page was run on its three maps (15 November
+2026, each switched on for the area in turn and taken back):
+
+- **Its second tile layer** holds one piece in the three maps: a
+  half-open green lid on a hub of ACDC Area 2 (0x90:1, at (1014, 301) in
+  the atlas's picture), over the hub's floor alone, which this page's rule
+  takes for a centrepiece. The side-piece cuts, over a floor's side and
+  under its lower edge, take nothing.
+- **The cut behind a floor** takes 6 looks, and none is a thing: five are
+  the upper halves of dead ends' round discs (5 to 18 tiles), drawn past
+  the walls of the panel they end, and one is an exit arrow's head. Set on
+  a layer, they put a dead end's rim behind a walkway's panel (0 to 5 a
+  layer in the atlas's).
+- **Scenery** (`decor.c`): none; nothing in the maps stands clear of the
+  floor's art. Nor do the maps raise any floor, so nothing stands under one.
+
+What its layers never draw beside a floor (455 tile pictures of the
+three maps, [what the layers take](../../devtools/map-use.md); marked tile by tile on the
+maps and looked over) is the floors' own art: the rims and sides of its
+round hubs, its cyan roads and their exit arrows, some 130 of them (the
+hubs and roads lend no tiles, so their edges count beside the walkways;
+the arrows' edges are also all 7 pictures away from a floor); and the
+green and white of its walkways: the outsides of their turns and the green filling inside
+a bend, the rims of the dead ends' discs, and the rounded ends of the
+deeper green skirt under some stretches of walkway. None is a piece to
+set; the hubs, roads, arrows and the hub's lid are of the kinds left to
+the owner (issue #505's 3 to 5).
+
+## What Seaside Area sets round its floors (nothing; measured on the maps)
+
+Seaside Area's three maps (0x91:0 to 2, the atlas's `1`) set no thing
+round their floors: nothing in the sea, nothing gripping a rim, nothing
+under a boardwalk or behind an edge. Every rule this page has was run on
+each map, its two tile layers drawn apart (15 November 2026): the
+side-piece cut, with and without what stands under a lower edge, the cuts
+under and behind a floor at the ground and at Seaside 1's raised floor
+(64), and the scenery cut with the floor's faces taken 0, 22 and 44 pixels
+deep. The scenery cut and the cuts at the raised floor take nothing. The
+side-piece cut takes one look, a 50-tile stretch of the rim of Seaside 3's
+arrow field where it meets the yellow field, which goes with that field.
+The cut under a floor, run at the ground, takes 8 groups of the first
+layer in Seaside 2 and 3: two exit arrows, and yellow and blue field
+panels lying under the second layer's arrow fields and yellow field. None
+is a thing.
+
+What the layers never draw (951 tile pictures, [what the layers take](../../devtools/map-use.md))
+is floor and the kinds left to the owner (issue #505's 3 to 5):
+
+- **Floor art.** The yellow fields' and boardwalks' rims, faces and turns'
+  outsides in the variants no layer's floor happens to need: the small
+  yellow and blue lamps along the fields' faces, the posts on the
+  boardwalks, and the boardwalks' cleats, a pair of orange (Seaside 1) or
+  green (Seaside 3) brackets some 3 by 5 pixels, every panel or two along
+  a boardwalk's front face. A cleat shares its 8 by 8 tiles with the face
+  round it, so it is no piece to cut; the layers draw some with the faces
+  they lay. The blue field's panels Seaside 1's boardwalks cross over (on
+  the second layer) are drawn part covered there, the same.
+- **Floor of another kind.** Seaside 2's and 3's arrow fields, the
+  currents (150 and 250 panels, a floor of their own,
+  [Arrow lanes](arrow-lanes.md)); the boardwalks of Seaside 2 and 3 in their
+  own colours.
+- **Raised floor and its stairs.** Seaside 1's two framed platforms, 64
+  above the field, each reached by a ramp of striped steps (kind 5).
+- **What marks a warp or an exit.** The round plate with a gold cube on
+  Seaside 2's blue field, the violet ring on Seaside 3's framed pad, and
+  the exit arrows, two in Seaside 1 and 2 and one in Seaside 3 (kind 4).
+
+Seaside's geysers and cyclones are the Link Navi obstacles a layer already
+sets as objects ([Link Navi obstacles](link-navi-obstacles.md)), not tiles
+of its maps.
+
+## What Park Area sets round its floors (none; measured on the map and the atlas)
+
+BN4's Park Area (its one map 0x92:0, the atlas's `a17`) sets nothing on,
+beside, behind or under its floors that is not floor or a set piece. Its
+layers draw 39% of the map's 837 different tile pictures (two seeds, six
+layers); what they leave, looked at on the tinted map and cut by each rule
+in turn (the cuts switched on for the area and every group they weighed
+listed, 15 November 2026):
+
+- **Its second tile layer** holds three groups: the two overpasses with
+  the stairs up to them (553 and 665 tiles, past the 160 a side piece may
+  have; heights and stairs, issue #505's kind 5) and the centrepiece of
+  its Navi's round hub (21 tiles, on the floor alone: a centrepiece,
+  kind 4). None hangs off a floor's side.
+- **Under a floor** there is nothing to cut: the map's only floor above
+  the ground is its overpasses', and no view at their height has enough
+  cells to be learned.
+- **Behind its floors** the cut weighs 21 groups of the first layer and
+  takes none, and none is a thing: the far halves of its dead ends' round
+  discs (four, 17 and 18 tiles), its walkways' S-bends under the left
+  overpass (five, on floor at the overpass's height), a road's rounded end
+  and a stair's foot (7 and 6 tiles), and its rims, roads, exit arrows and
+  the platform's frame (24 to 759 tiles, larger than the cut takes: 24
+  tiles, under 20 wide).
+- **The scenery cut** takes nothing: every group off the floor touches
+  other art.
+
+The rest is floor art or the owner's kinds: its orange and yellow roads'
+rims, bends and stripes ([Roads on the way](roads.md) draws the roads
+themselves), the outer rims of its walkways' turns and forks, a walkway
+broken off where it nears the platform (at (792, 456)), its two round
+hubs, its exit arrows, and the overpasses and their stairs.
+
+## Scenery a face's depth from the floor (Robot Control Comp; verified on the maps and in the game)
+
+Robot Control Comp sets its robot figures, alone and in twos to fours, and
+its wires with red lights, alone and in twos and threes, in the void beside
+its walkways and pads, on the first tile layer. They touch no floor, and
+the scenery cut ([the generator](generator.md), `decor.c`) is theirs: but it
+counts 44 pixels under every panel's lower edges as the floor's own, room
+for the tall faces and legs of other areas, and Robot's faces are 17
+pixels deep. A figure standing closer than that was cut in two, its lower
+half refused as touching the floor's art. The area sets its own depth
+(`scenery_reach`, 20 pixels: the faces and 3 more), and the cut takes 11
+looks from its three maps where it took 3 (a robot and two wires): the
+figures alone and in pairs, the wires in their groups. A layer sets 4 to
+10 as it sets any scenery. The layers draw 47 to 52% of the three maps'
+different tile pictures where they drew 46 to 49% (two seeds a layout). In
+the game the figures glow as the maps' do: their colours are the palette
+the area's own map cycles.
+
+Left as they are:
+
+- **The bulbs on springs** under its white platforms' lower faces (Comp 2
+  and the Pavilion's map). They share their tiles with the face they hang
+  from, so they come only with a stretch of it. The cut under a floor
+  (`hangs_learn`) at the ground's level takes them so, but also flat
+  scraps where the platforms' inner walls ring their cubes, bare face
+  segments and a fist, and sets what it cuts under pads alone; a layer's
+  pads here are its teal ones, which hang none. A rule of their own would
+  set a face-and-bulb stretch under a room's lower edge.
+- **Figures and wires touching a walkway or an arm**, behind its upper
+  edge or against its face, share a tile with its art and are refused by
+  the scenery cut (a tile of the map holds both). The cut behind a floor
+  (`behind_learn`) finds 7 looks, robots and wires behind one-wide
+  walkways, and none fits a layer over three layers.
+- **The fists past its arms' ends** (issue #505: a dead end's art, not a
+  piece), the robot's door and its striped conveyor (a set piece), its
+  pads' centrepieces and exit arrows (issue #505's kind 4).
+
+## Mr. Weather Comp's clouds (`decor_learn_floating`; verified on the maps)
+
+Mr. Weather Comp's four maps (0x83:0 to 2 and 0x85:2) set big white
+clouds over its field and round it: squares 20 by 10 and 28 by 14 tiles,
+a puff 12 by 7, and long ones bent like walkways, up to 104 tiles across,
+some ending in a yellow-rimmed pad. They lie on the maps' second tile
+layer (the two layers drawn apart: the field, its belts and its fans on
+the first; the clouds, their pads, the escalator and a console on the
+second), and most of them are no scenery but floor: the maps' heights
+(section 1 of the coordinate data) put them at 64, and their walls
+(section 0) ring them there, 1,114 wall cells at that height in Comp 1
+and 1,612 in Comp 2 against the field's 394 and 404. Measured cloud by
+cloud in the view of that height, 45 to 68% of a walkable cloud's pixels
+lie on its floor's top. They are raised floor of another kind, reached by
+the escalator (a conveyor) and the yellow pads, which issue #505 listed
+as scenery: none is set, as floor of another kind is the layouts' matter
+(issue #505's kinds 3 to 5, the owner's calls).
+
+The rest float over the field, drawn over its floor with no height and
+no walls of their own: the puff (the same tiles in Comp 2, Comp 3 and
+0x85:2) and 0x85:2's two squares (145 and 148 tiles). Two clouds at 64
+with a yellow pad (Comp 1's 28 by 14, 0x85:2's 32 by 17) are walled at
+their pads alone. The scenery cut ([the generator](generator.md),
+`decor.c`) reads a map's first layer alone where its background lies in
+its own tiles (`bg_in_map`), and the side-piece cut asks for a group that
+hangs off a floor, so neither took a cloud. Where an area's background is
+its own tiles, the scenery cut now also reads its second layer
+(`decor_learn_floating`): a whole group of its tiles, joined eight ways,
+32 tiles a side at most and two panels' tops in pixels at least (2,048:
+what is smaller marks the floor), nine tenths or more of whose pixels lie
+over ground floor and at most 8 on the top of floor at any of the map's
+raised heights. That takes the puff and the two squares, and refuses every
+walkable cloud, each cloud with a pad (a warp's place, issue #505's kind
+4), the escalator (its top pad) and the console (most of it off the
+floor). Of the three other areas whose background is their own tiles,
+the Undernet's maps gave one group (Undernet 1's warp hole in its frame,
+on a crossing of four plates, 24 tiles) until the size was asked;
+Undernet Zero's and the Nest's give none. They are set as any scenery is: in the void beside a layer's
+floor, a tile clear of both layers' tiles and within three of the floor,
+4 to 10 a layer, rather than over its floor as their maps draw them,
+where they would cover the floor's art (a layer draws no clouds' shadows
+on its panels, which the maps' first layer does).
+
+## What BN4's countries set round their floors (none set; measured on the map and the atlas)
+
+BN4's countries (their area's map 0x93:2, the one of the four looks it
+learns; the atlas's `a18`) set one thing off their floor: a pair of
+sockets, cyan half-discs in a green rim, joined by a blue cable. One
+stands in front of a platform's lower edge (map pixels (800, 150) to
+(870, 200)), the other behind another platform's upper edge ((985, 335)
+to (1055, 375)), and the cable between them runs through the void along
+the panels' two ways, 33 tiles one way and 6 the other, turning at
+(1105, 318); along each run it is the same five tile pictures a row,
+two tiles further on each row. The map holds that one pair. No cut
+takes it (each cut switched on in the area's row, `.sides = 1 | 4`, and
+what it refused printed; reverted):
+
+- The cut behind a floor (first layer): the sockets and the cable touch
+  the platforms' faces, and with them make one group of 1,695 tiles, far
+  past its 24. Its other groups (2 to 45 tiles) are corners of faces with
+  no floor straight below.
+- The side cut (second layer): the map's second layer holds only its
+  orange arrow conveyors (groups of 24 to 420 tiles: too large, over floor
+  of another kind, or lying on the floor alone) and the green shading
+  along some walkways' sides (7 to 69 tiles, over floor of another kind or
+  not off the floor). It holds nothing that hangs off a floor.
+- Scenery: none (the learn report's "0 pieces of scenery"). The sockets
+  touch the rims, and the cable alone is 33 tiles across, past scenery's
+  20.
+- What stands under a raised floor: the map's floor is all at one height
+  where it is not a stairway.
+
+A layer could only set it as a set piece: two platforms whose edges face
+each other across the void, a socket on each, and the cable drawn along
+the void panels between them from its runs and its turn. That is a rule
+of its own for one pair in one map; not built.
+
+The rest of what its layers never draw is no side piece: the two exit
+arrows, the pink warp hub, the arrow conveyors, the stairway's steps,
+the cyan joints where a walkway meets a platform's rim, and the rims'
+pieces at walkways' turns (floor art; issue #505's kinds 3 to 5).
+
+## What SciLab Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's SciLab Area (its maps 0x90:5, 0x90:4 and 0x90:6, the atlas's `a1`)
+sets one thing of these kinds round its floors: wire tufts, a cyan fork of
+a few pixels standing behind a green circuit's upper edge, 18, 16 and 20 in
+its three maps. They lie on the first tile layer, and a tuft is three tiles
+in a row: one of its own (tile 0x014, mirrored 0x414), and one or two of
+the circuit's rim with the fork drawn into them (0x015 and 0x016, whose
+plain rims are 0x002 and 0x001: the same pixels but the fork's). None can
+reach a layer:
+
+- The cut behind a floor takes nothing in SciLab. A tuft's own tile is one
+  tile where the cut takes 4 at least, and the area's circuits run a panel
+  or two apart, so another floor stands within the cut's 48 pixels above
+  most of them.
+- Cut whole with its rim's tiles, each kept with the plain rim it goes over
+  and set only where a layer draws that rim (tried: 17 looks from the three
+  maps), it fit nowhere on the atlas's layers. In 42 tries over its three
+  layouts the layer drew a cyan lip there (tile 0x03C in 28, 0x019, 0x0D1
+  and 0x0AB in the rest), never the green edge: a layer's circuits are
+  wide, edged in its hubs' lip, and none of the six layers of two seeds
+  draws the green edge's tiles 0x001 and 0x002 at all, which the maps draw
+  along every long circuit's upper side. They are among the tiles beside the floor that
+  [what the layers take](../../devtools/map-use.md) counts as never drawn.
+- Set over the lip anyway, a tuft's rim tile would cut the lip off; set
+  alone, its own tile is the fork's two smallest prongs.
+
+So the tufts come with the green edge: where a layer draws its circuits'
+upper sides as the maps do, a cut of the tuft with its rim's tiles can set
+them. That edge is floor art, the tiles' matter, not a piece's.
+
+The rest of what its layers never draw is no side piece: the green edges
+and the rounded rims where its circuits cross (floor art); its orange exit
+roads, their dark faces and the arrows at their ends; the warp discs on two
+of its hubs; and the orange-striped blocks standing on 0x90:6's circuits,
+on the floor alone (issue #505's kinds 3 to 5).
+
+## What Central Area sets round its floors (none set; measured on the maps and the atlas)
+
+Central Area's two maps (0x90:0 and 0x90:1, the atlas's `0`) set nothing
+on, beside, behind or under their floors that a layer can carry. Its
+layers draw 65% and 48% of the maps' different tile pictures (two seeds a
+layout), and what is left is floor or one of the kinds left to the owner:
+
+- **Its second layer** holds the Net Dealer's capsule counter (Central
+  Area 2), its pads' emblems and warp discs, a bench and one arm of a rail
+  on Central Area 1's yellow plaza, and all of Central Area 2's overpass.
+  Of these the side-piece cut takes the capsule alone (24 tiles: it grips
+  its floor and hangs off it). Switched on for a probe, it set the capsule
+  bare, no dealer behind it, on 7 of the atlas's 8 layers: a counter that
+  means a shop, so the area stays out.
+- **Behind its floors** the cut finds one look: a field's panel drawn
+  darker where the overpass's shadow falls on it (Central Area 2), the
+  field's own art. No layer set it.
+- **Under its raised floors** nothing: the overpass and its raised field
+  stand on no legs, and no free-standing piece is left for the scenery cut
+  (none learned).
+- **The plaza** by Central Area 1's exit to Central Area 2 is floor of
+  another kind (yellow, sunken in its middle). Its rail, an L along its
+  back edges (one arm on each tile layer), and its bench on a raised slab
+  stand on it alone and go with it.
+- **The rest is floor art**: where a one-wide catwalk meets a pad's rim
+  (its lip with a pink stripe), a catwalk's end caps (a tile each), and
+  the catwalks drawn again under the overpass.
+
+The overpass (a raised walkway over the catwalks, its raised field and two
+raised pads), the plaza, the warp discs and the two exit arrows are issue
+#505's kinds 3 to 5, left to the owner; the overpass also crosses over
+other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
+
+## What BN5's Liberation boards set round their floors (none set; measured on the maps and the atlas)
+
+The nine maps a [dark layer](../../game/liberation/building/mission-look.md)
+is drawn from (0x86:0 to 8, BN5's nine Liberation Missions; the atlas's
+`a6` to `a14`) share one tile set, and their layers draw 29% to 66% of each
+map's different tile pictures (two seeds a layout, `build.py atlas a6 2`
+and on). What is left is floor, the kinds left to the owner, or three
+families of things drawn into the floor's own tiles, which no cut of these
+takes yet. Each map was looked over in the atlas's tinted copy and in a
+mask of its two tile layers (a probe, 15 November 2026).
+
+- **The second tile layer** holds the framed panels' coloured middles, on
+  every board one group over the whole board (2,768 to 3,920 tiles), and on
+  boards 1, 3 and 4 a warp hub's disc (32 tiles, on the floor alone). On a
+  board BN5 shows its panel looks on that layer's background alone (BG2,
+  [the ROM map](../../rom/liberation.md)), and a dark layer does the same:
+  `clear_layer` (`src/director/liberation_look.c`) empties the map's
+  second layer as the board starts. So nothing on it shows on a board,
+  in BN5 or here, and the side-piece cut has nothing to take (the middles'
+  group is far past its size, the disc lies on the floor alone).
+- **Blobs on the floors' corners**: crimson slime on boards 7 to 9 and
+  orange lava on board 6, draped over a floor's outer corner (its west or
+  east) and down its face, some 3 by 4 tiles, about a dozen on boards 6
+  and 7, twenty on board 8 and six on board 9 (counted by eye). They lie on
+  the first layer, and the half over the corner is drawn into the corner's
+  own rim and face tiles. The cut behind a floor takes the other half (5
+  tiles; 1 look on board 6, 2 on board 7, switched on for the probe) and
+  set it on none of the atlas's layers; set alone it would be half a blob
+  cut at the rim.
+- **Fins on the back rims**: small wedges a tile or two high where the
+  panels' frames meet along a board's upper edges, on all nine, dozens a
+  map, drawn into the rim's tiles.
+- **Drips under the faces**: one-tile drips hanging from the lower faces'
+  tips, on all nine, dozens a map, joined to the face they hang from.
+
+These three are what the Judge Tree Comp's cut of what grows on
+a floor's edge is for (issue #505; PR #645, open as this was written):
+first-layer art past the floor's body in its own rim and wall tiles, cut
+with the ring of floor tiles round it. Once that cut is in, the boards take
+it by their own setting (`LIB_MAP` in `src/core/rom.c`, the nine boards'
+one macro), to be looked over beside the maps as every area's is; until
+then no rule fits them.
+
+What a board's units stand on is untouched either way: anything of these
+kinds lies on the first layer, under the panel looks, and changes no panel.
+The rest of what the layers never draw is no thing: boards 1 to 4's
+circuit walkways and hubs (floor of another kind, counted away from the
+layer's floor), the warp hubs' discs, the exit arrows on all nine, board
+5's zigzag walkway and board 2's raised hub (issue #505's kinds 3 to 5),
+and the panels' middles, which the looks cover.
+
+## What Undernet Zero sets round its floors (bowls set; measured on the map and the atlas)
+
+Undernet Zero's map (0x95:1, the atlas's `6`) shows its layers 57% of its
+different tile pictures (two seeds a layout: 386 of 673). Its fire bowls
+are on its layers already (above, Pieces the game animates). Of the
+rest, what is no floor (its raised plateaus, their ramps and its two exit
+arrows are issue #505's kinds, left to the owner) is small and drawn into
+the floor's own first-layer tiles, so no cut here separates it:
+
+- **Clamps on its plateaus' upper rims**, a pale clamp at every join of
+  two panels along an upper edge (2 by 1 tiles, some 50 in the map).
+  Layers draw a plain stud at those joins.
+- **Pins at its plateaus' left and right corners** (a tile each, some 40).
+- **Two long spikes under each bridge segment**, hanging from one face (a
+  tile wide, some 60 in the map). Layers draw a row of short stubs under
+  both faces of a bridge instead, and no tips: the map draws the spikes
+  deeper (about 27 pixels under a panel's edge) than its tiles are laid
+  (22: `tl_calibrate` keeps only the legs seen under a quarter of the
+  faces, and the spikes hang under the bridges alone).
+- **Bowls over a rim**: 16 tiles where a bowl and the rim behind it are
+  drawn in one tile; a bowl set whole draws them where it stands so.
+
+The cut behind a floor (`behind_learn`) finds nothing there: switched on
+for a probe, the area's 13 looks were its bowls alone, as without it. The
+clamps and pins are joined into the rim's tiles, which they share, so
+neither it nor scenery takes them.
+
+The spikes were tried as a cut of their own (15 November 2026): the
+first-layer tiles under a floor past the laid depth, a tile to eight,
+kept with the panel above them where it is a straight run one panel wide
+(a bridge's), and set under a layer's bridge panel of the same
+neighbourhood where the tile over each of their columns is the one the
+map's root holds. It took 6 looks; on the atlas's layers the tips stood
+under no root of theirs, since the layers lay their bridges' faces with
+stubs, not the map's spike roots, and where an entry matched it was a
+nearly empty tile, so they floated in the void a panel below the bridge.
+Under a plateau's rims and corners (before the cut kept to bridges) they
+hung red posts and broke the picture (21 to 36 breaks on one layer). It
+was taken out. The spikes, and the clamps and pins with them, need the
+bridges and rims laid as the map draws them, which is the laying's
+([the tile test](../../devtools/tile-test.md), Each area's laying), not a
+side piece's.
+
+## What BN5's ACDC Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's ACDC Area (its maps 0x90:0 and 0x90:1, ACDC Area 1 and 2, the
+atlas's `a0`) sets one thing of these kinds round its floors: wire tufts,
+a teal fork of a few pixels standing behind a blue walkway's upper edge,
+some twenty in ACDC Area 1 and twice that in Area 2 (counted by eye). None
+stands behind its green walkways or its cyan platforms. A tuft lies on the
+first tile layer, as SciLab's do: two tiles of its own over the void, and
+one or two of the walkway's rim with the fork drawn into them. None can
+reach a layer:
+
+- **Cut alone**, a tuft's own tiles are two where the cut behind a floor
+  takes 4 at least; the cut weighs 12 groups in the two maps and keeps
+  none: eight are entries that draw no pixel, four are the side faces
+  under a walkway's lower edge (7 to 18 tiles).
+- **Cut with its rim's tiles**, it could go down only where a layer draws
+  the same plain rim, as SciLab's test asked. No tile a tuft is drawn into
+  is such a rim: of the 377 tile pictures the atlas's eight layers (two
+  seeds a layout) never draw in the two maps, 8 are a picture some layer
+  draws with up to 20 pixels added over its empty ones, and all 8 are
+  joins of a platform's rim to a walkway or an exit's end, none a tuft
+  (compared pixel by pixel on the atlas's pictures). The layers lay the
+  area's walkways in its green circuits' tiles, and a blue walkway's upper
+  rim is tinted in both maps' pictures wherever a tuft stands.
+- Set over a platform's or a green walkway's edge instead, a tuft would
+  stand where neither map sets one.
+
+So the tufts come with the blue walkway's own upper edge, which is the
+floor's tiles' matter, not a piece's.
+
+The rest of what its layers never draw (86 tile pictures beside the floor,
+5 away from it, [what the layers take](../../devtools/map-use.md)) is no
+side piece:
+
+- **Floor art**: the blue walkways' upper rims and their comb and zigzag
+  turns (`b19_90_1` at (600, 80)), and the crest where a green walkway
+  bends (`b19_90_0` at (472, 96)).
+- **On the floor alone**, its second layer's every group: the warp pads'
+  centrepieces (three in each map; `b19_90_0` at (456, 192)), and in ACDC
+  Area 2 a purple machine on a platform (`b19_90_1` at (760, 192), 24
+  tiles), which the cut takes for a centrepiece (whether it blocks the way
+  in BN5 was not checked).
+- **The exit arrows** at the maps' edges (`b19_90_0` at (72, 200),
+  `b19_90_1` at (272, 96) and (1088, 408)).
+
+The area has no raised floor to cut under, and the scenery cut sets none
+on its layers. The centrepieces, the machine and the arrows are issue
+#505's kind 4, left to the owner.
+
+## What the Graveyard sets round its floors (none; measured on the map and the atlas)
+
+The Graveyard has one map, Graveyard 2 (0x96:1, the atlas's `4`): its
+group's 0x96:0 and 0x96:2 are empty placeholders
+([BN4's ROM](../../rom/bn4.md), Net maps in 256 colours), and the atlas
+measures the one. Its second tile layer holds only the slats of its three
+ramps ([Net maps](../../rom/net-maps.md), Floor emblems), so nothing there
+grips, hangs under or stands behind a floor. Every rule this page has was
+run on it (15 November 2026: the atlas over the Graveyard, two seeds a
+layout, eight layers, with every cut switched on and each learned look
+printed):
+
+- the side-piece cut, with what stands under a lower edge (bit 3) and the
+  second layer's cut behind an upper edge (bit 7), takes nothing;
+- the scenery cut, the floor's faces taken 44 and 12 pixels deep (its
+  faces are 9), takes nothing;
+- at its raised floor (64), the cut under a floor takes two strips of 4
+  tiles of a raised slab's own floor, one across a cross, and the cut
+  behind a floor a 12-tile stretch of a raised slab's upper rim with two of
+  its clips. None is a thing, and none goes down on any of the eight
+  layers.
+
+What the layers never draw (334 of its 631 tile pictures,
+[what the layers take](../../devtools/map-use.md), with the ramps
+[Heights](heights.md) lays) is floor and the kinds left to the owner
+(issue #505's 3 to 5):
+
+- **Floor art**: the caps of the clips at the panels' joins along the
+  slabs' upper rims, in the variants no layer's rim needs (`b04_96_1` at
+  (812, 350)); the lip under a hole's lower corner (at (720, 498)).
+- **Raised floor and its ramps**: the pale slabs 64 above the ground, and
+  the parts of the striped ramps with magenta discs that climb to them (at
+  (760, 200)) a layer's ramps do not draw (kind 5).
+- **The grooved grey bridges** between the link pads (at (400, 820)).
+- **An exit's arrow** (at (1120, 850), kind 4).
+
+Its gravestones and its monument are map objects a layer sets as such
+([Props](props.md)), not tiles of its map.
+
+## What BN4's Town Area sets round its floors (nothing; measured on the maps and the atlas)
+
+BN4's Town Area (the atlas's `a16`) learns from Town Area 3 (0x91:2), its
+squares alone (`TILES_PADS_ALONE`), and Town Area 1 (0x91:0), its
+walkways. Neither map sets a thing on, beside, behind or under its floors
+that a layer could carry. Its layers draw 26% of Town Area 3's 680
+different tile pictures and 58% of Town Area 1's 498 (two seeds, six
+layers); what they leave, looked at group by group on the tinted maps and
+cut by every rule on this page in turn (switched on for the area, what
+each took printed, taken back; 15 November 2026):
+
+- **No cut takes anything.** The side cut (with and without the one under
+  a lower edge), the cuts under a raised floor, behind a floor on either
+  layer and in a walled hole, and scenery, also at a face's depth
+  (`scenery_reach` 16): each took 0 pieces (the learn report's 0 side
+  pieces, 0 pieces of scenery, no hole). Nothing in either map grips a
+  rim, stands behind or under an edge, or stands clear of the floor's art.
+- **Town Area 1's second tile layer** holds two things, joined: the ring
+  of its warp hub (at (400, 305) in the atlas's picture) and the large exit
+  arrow running from it to the map's upper edge (to (415, 60)), 280 tiles
+  together: a warp's centrepiece and an exit arrow, issue #505's kind 4.
+  Its yellow roads (lending no tiles), their stripes (11 tiles each,
+  seven) and their arrow heads at (290, 190) and (790, 630) are roads and
+  exit arrows. The rest is scraps of 1 to 4 tiles: the outer rims of its
+  round pads' far ends and of a walkway's rounded corners, floor art the
+  pick does not choose.
+- **Town Area 3** sets its upper level on its second layer (1,704 of the
+  2,493 tiles of one group with the level below): white walkways, the
+  yellow road over the large square, two round hubs, the ramp down. They
+  are left out on purpose (Town Area 3 lends its squares alone). On the
+  middle hub stands a red half-dome on the second layer, at (690, 315): a
+  hub's centrepiece, on the floor alone. Under the upper level, on the
+  first layer, a thin rail runs through the void between two round hubs of
+  the lowest level, half-discs half hidden under the two small squares (at
+  (260, 235) and (855, 530)), about 75 tiles across: part of the lower
+  level a layer has none of, touching floor at both ends. The large
+  square's slab faces (182 tiles) are its pad's own faces.
+
+The two maps the area does not learn from, Town Area 2 and 4 (0x91:1 and
+0x91:3, drawn with `--atlas DIR:x1` and looked over, not cut), show the
+same kinds and nothing else: hubs with centrepieces, exit arrows, a yellow
+road, stairs, Town Area 4's arrow conveyors, and in Town Area 2 the same
+rail between two half-discs by its road's ends. A `side_maps` entry would
+likely bring nothing either.
+
+## What Green Area sets round its floors (none set; measured on the maps and the atlas)
+
+Green Area's layers learn from Green Area 1 (0x92:0, the atlas's `3`);
+Green Area 2 (0x92:1) lends its arrow panels and its NetCafe desk alone.
+Neither map sets a thing on, beside, behind or under its floors that its
+layers lack. Their own things are on them already: the potted bushes in
+the gaps between planks (set by their own rule, [Props](props.md), Green's
+potted bushes), the blue-framed red plates on the raised grass, and the
+trees and signs, which are map objects, not tiles.
+
+Every cut this page has was switched on for Green Area for a probe and
+each group it weighed was printed (15 November 2026, the atlas's two seeds
+a layout): the side-piece cut, what stands under a raised floor (the
+grass and the pads, at 32) and what stands behind a floor, at the ground
+and at 32. None kept a piece. Green Area 1's second layer holds 23 groups:
+
+- **Its potted bushes**, alone or several joined (14 to 56 tiles, 9
+  groups), all over the void: they touch no floor, so they are no side
+  piece.
+- **The blue-framed plates** on the raised grass (28 tiles, six; a
+  seventh joined with the field's front corner, 84) and **its two warp
+  discs** there (28 each): on floor of another height.
+- **An arrow panel's frame** (65 tiles; a second, 25 tiles, lies mostly
+  on its floor): refused as its lane's.
+- **The centrepiece of the Navi's pad** (28 tiles), on that pad alone.
+- **The stairs** from the grass down to the planks (68 and 137 tiles),
+  which a layer lays with its raised floor ([Heights](heights.md)).
+
+Nothing stands under the grass or the pads: their side faces are 9 pixels
+deep with green and violet tabs drawn into them, and the void below is
+empty. Nothing stands behind an upper edge either, and the scenery cut
+finds no piece (0 learned).
+
+Green Area 2 was probed the same way, learned beside Green Area 1 for
+the probe (as one of the area's `more` maps, which it is not today).
+The cuts keep four looks there, none a thing to set:
+
+- **The NetCafe desk** on its purple deck (`b03_92_1` at (128, 200), 32
+  tiles), taken by the side-piece cut: it grips the deck and hangs off
+  it. It is the Net Dealer's counter, which the area's layers already set
+  where a dealer stands (`net_area.counter`, [Props](props.md)); set bare
+  by this cut it would be a shop with no one behind it, as Central's
+  capsule would.
+- **Two scraps of a potted bush** (7 tiles each, at (816, 280) and at
+  (944, 344)), cut behind a plank's upper edge where a stair's foot
+  splits the bush's tiles from the rest of it.
+- **A raised grass field's corner** (16 tiles, at (368, 520)), drawn
+  behind the planks in front of it: floor of another height.
+
+The rest of Green Area 2 is what Green Area 1 has, and its own kinds: a
+second potted-bush row, stairs up to four raised pads, its raised purple
+deck, arrow panels on its grass and an exit arrow. Its nineteen
+cybertrees and the giant one are map objects.
+
+What the layers never draw of Green Area 1 (624 of its 937 tile pictures,
+[what the layers take](../../devtools/map-use.md)) lies in nine groups and
+some thirty lone tiles, none a thing to set:
+
+- **The three 3x3 pads** at its corners (`b03_92_0` at (64, 448), at
+  (832, 64), at (992, 528)), raised, about 220 tiles each: pads of a
+  look of their own, which stand raised on the originals and are not cut
+  ([Props](props.md)).
+- **The two exit arrows** (`b03_92_0` at (424, 736), at (1152, 240)), kind 4.
+- **The two arrow panels** on the planks (at (896, 288), at (896, 352)):
+  floor of another kind ([Arrow lanes](arrow-lanes.md)), set with a lane
+  where a layer has one.
+- **The two warp discs** on the raised grass (at (680, 240), at (168,
+  368)), kind 4.
+- **Lone tiles at the planks' free ends** (some 28, e.g. at (1272, 528)),
+  and two at the stairs' feet: floor art. A layer's planks end free in
+  the same rounded look (seen in the atlas's pictures), drawn from other
+  tiles of the map's ends; these are the variants no layer's end happened
+  to take.
+
+## What Sky Area sets round its floors (none set; measured on the maps and the atlas)
+
+Sky Area's two maps the layers learn from (0x94:0 and 0x94:1, Sky Area 1
+and 2, the atlas's `2`) set no thing beside, under or behind their floors,
+and nothing stands in the sky around them. They were looked over on 15
+November 2026 in three pictures each: the atlas's tinted map (`build.py
+atlas 2 2`, `lent_b02_*`), the same map with the tiles no layer draws
+coloured by where they lie (`lent.c`'s places), and the map's second tile
+layer alone.
+
+| What | Where it stands | Size, how often | Taken |
+| --- | --- | --- | --- |
+| The white fields at a height, their side faces | raised floor | most of Sky Area 2's upper half, Sky Area 1's top field | no: raised floor, the heights' ([Heights](heights.md)) |
+| The raised cyan walkways and the lavender road, the posts along their edges | raised floor, on the second layer where they cross the ground | Sky Area 1's road, Sky Area 2's two | no: roads at a height |
+| The round pods with four arms, Sky Area 2's raised hub | second layer, over the ground | five in Sky Area 1, one in Sky Area 2 | no: pads of another look |
+| The stairs | second layer, between the ground, the fields and the pods | joined to the pods and roads they meet, 68 to 811 tiles a group | no: stairs, learned already |
+| The dark patterned panels at the fields' edges | the ground floor | a few at each field's upper edge | no: floor of another kind |
+| The exit arrows, the roads to them | at the maps' edges | two in Sky Area 1, three in Sky Area 2 | no: kind 4 |
+| The arrow lanes' panels in green frames | second layer, on raised floor, Sky Area 2 | 24 tiles each, three | no: [arrow lanes](arrow-lanes.md) |
+| The cross-shaped pad, the green-framed marks, the hub's emblem | second layer, on the floor alone, Sky Area 2 (`b02_94_1` at (384, 760), at (384, 88), at (608, 296)) | 28 tiles each; one, three, one | no: kind 4 |
+| The gem on a pod | Sky Area 1's right pod | one | a teleport's ([Teleports](teleports.md)) |
+| A long bar along the raised field's upper edge, a block on that field, a short bar on a pod | second layer, on the floor alone, Sky Area 1 (`b02_94_0` at (744, 120), at (832, 200), at (136, 312)) | 30, 23 and 24 tiles there, once each | no: on the floor, as a centrepiece is; what they are in the game was not looked into |
+
+Nothing hangs under the raised floors or the pods: their faces end at
+their rims, with no legs or pillars. The scenery cut sets none on the
+atlas's layers (`scenery 0` on all eight).
+
+Every rule this page has was run on Sky's maps together (15 November
+2026, on `dev` after the heights came in): the side-piece cut, with what
+stands under a lower edge too, over its own two maps and Sky Area 3's
+(0x94:2); the cuts under and behind a floor, at the ground and at each
+raised floor's height; and the cut in a walled hole. They keep two looks.
+The cut behind a floor takes 23 tiles of a pod's arm, seen at a field's
+level, and sets them in the void behind a field's upper edge on 2 of the
+atlas's 8 layers: a scrap of raised floor, no thing. The other look fits
+no layer, and the hole cut finds no hole. Sky takes none.
 
 ## What stands behind a raised floor on both layers (`stands_learn`; verified on the maps)
 
@@ -190,8 +1137,10 @@ layer's showing through it (its back panes), about 18 tiles square, and
 the tile test's tinted maps showed none of it in a layer
 ([what the layers take from a map](../../devtools/map-use.md)). Neither
 rule above takes it: the side pieces' cut is made on the ground alone, a
-piece behind a floor is the first layer's, and a row's tanks join into
-one group of 511 to 676 tiles, each in front of the last.
+piece behind a floor is the first layer's or, on the second
+(`sides_learn_behind`), touches none of the floor's top where a tank's
+foot stands on it, and a row's tanks join into one group of 511 to 676
+tiles, each in front of the last.
 
 They are cut in the views of their heights, as the pillars are. A group of
 the second layer is a row of copies where a third of its tiles or more
@@ -228,16 +1177,17 @@ alone, draws it as a layer of its own area does.
 Aquarium Comp 3's whale-topped console stands the same way on a raised
 platform's corner, a panel its walls close, and is cut too (69 tiles), but
 it fits only where a layer's floor has the same notch, which none of the
-atlas's showed. Comp 2's (0x85:0) plain console is not reached: the
-side pieces' book (24 looks) is full of the pillars before that map.
+atlas's showed. Comp 2's (0x85:0) plain console is not reached: the 24
+looks a book takes of a floor's sides, under or behind it (sides.c's
+`LOOKS`) are the pillars' before that map.
 
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists, the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
-  lie on the first layer, beside or under the floor (probed on the maps),
-  and the Nest's and Mr. Weather's maps hold their background in the
-  second, so theirs lie there too. Scenery refuses a
+  red fists (above), BN5's Undernet's dark figures and Nebula Area's dripping pods
+  lie on the first layer, beside or under the floor (probed on the maps).
+  (The Nest's and Mr. Weather's were counted here as well; theirs lie on
+  the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
 - **Aquarium Comp's road and landings.** The tanks' road of stepping
   stones (fish-shaped plates on pink planks), its orange landings and its
