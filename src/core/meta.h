@@ -80,6 +80,7 @@ bool meta_library_add(int id);
  * many the current run added. Its pages by entry: library_pages.h. */
 int meta_library_count(int cls);
 int meta_library_new(void);
+void meta_library_from_here(void);   /* the summary's count from here: the run's starting folder in */
 /* Whether the short net's dark way into the Undernet is open: the Secret
  * Area cleared in any run (the title's S). */
 bool meta_dark_way_open(void);

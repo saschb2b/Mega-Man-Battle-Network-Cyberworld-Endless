@@ -459,11 +459,14 @@ static int mail_body(int navi, uint8_t *out, int max) {
 }
 
 /* Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned):
- * what the lab made and where it waits, then what it holds so far */
+ * what the lab made, where it waits and when MegaMan is there (the mail
+ * comes on a layer, and a playtester looked for a way home mid-act to
+ * reach it, session 77), then what it holds so far */
 static void lab_mail_text(char *out, size_t n) {
 	snprintf(out, n, "Lan,the lab built\nsomething from your\nbattle data.\f"
 		"A place to fight\ncopies of viruses\nMegaMan knows well.\f"
 		"Our lab's Navi waits\nin your HP. No copy\ncan delete MegaMan.\f"
+		"Stop by when you\ncome home after a\nguardian,OK?\f"
 		"So far the data is\ncomplete on %d\nvirus families.", battle_data_families_complete());
 }
 
