@@ -105,7 +105,7 @@ Two settings of its entry, measured each way, and a rule:
   area's laying). Straight circuits come out whole. Rule 4 (beside a
   panel laid whole, its map's own tiles) drew a little worse here.
 - **A hub's cell worn to a circuit's shape is drawn as one** while the
-  tiles are picked (`floor_raw`, `src/map/netmap.c`): on a floor drawn as
+  tiles are picked (`pad_at`, `src/map/netmap.c`): on a floor drawn as
   one and told by shape, a pad's cell in no 2 x 2 block of floor loses
   the pads' look. Measured over every area: it changes Oran's alone,
   where it holds; on floors drawn apart it changed three areas, all for
