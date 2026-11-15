@@ -1,0 +1,1 @@
+BN4's Undernet sets its horns along whole catwalk runs (`SIDES_RUNS`): every other walkway run a horn behind each panel it fits on, a third of those runs lined in front too, and no horn elsewhere, where it set them in squares of four panels and singly; which changes the side pieces its layers set (netmap_paste.c).
