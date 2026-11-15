@@ -72,7 +72,12 @@ through all six, [Decisions and phase one](../game/meta/decisions.md)) and `duel
 words naming the third act before it, `duels=1` opens the official gates
 of level 1; [The rival: Chaud and ProtoMan](../game/rival.md)), and `hp=N` (MegaMan's max HP made N, and his
 HP with it whenever the game moves the max: a later act's guardian, which
-a headless start meets at 100 HP, fought at a playtester's HP; `hp=N/H`
+a headless start meets at 100 HP, fought at a playtester's HP; the base
+BN6 counts HPMemory into moves with the max, so BN6's own sum of the base
+and the NaviCust's programs, made again at each return to the map, comes
+to N too: his HP stays as the battles leave it, and the map's HP box does
+not count up from 100 after every battle, shop or PET, as it did until
+session 76; `hp=N/H`
 holds his HP at H through the run's first 600 frames, a battle begun
 hurt), and
 `pieces=MASK` (the set pieces in MASK on every layer whose area has them,
