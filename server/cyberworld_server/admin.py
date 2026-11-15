@@ -10,6 +10,7 @@ from pathlib import Path
 import time
 
 from .week import compact, week_of
+from . import traces
 from .identity import (KICK_MINUTES, kick_expires, prune_kicks, prune_moderation, public_id, read_json,
                        state_lock, write_json)
 from .retention import PlayersLog
@@ -64,6 +65,8 @@ def perform(action, directory, identity=None, reason="", minutes=None, week=None
         result["expires"] = kick_expires(entries[identity])
     if action == "hide":
         result["week"] = entries[identity]["week"]
+        # (v19: that week's traces of the shared dive by this identity off every layer: traces.py)
+        result["traces"] = traces.compact(directory, 0, hide=(identity, entries[identity]["week"]))[1]
     return result
 
 
@@ -75,9 +78,10 @@ def forget(directory, identity):
     hold them until they age out."""
     _, trades = prune_log(directory, 0, forget=identity)
     _, board = compact(directory, 0, forget=identity)
+    _, dives = traces.compact(directory, 0, forget=identity)
     logs = PlayersLog(directory).forget(identity)
     moderation = prune_moderation(directory, time.time(), forget=identity)
-    return {"action": "forget", "identity": identity, "trades": trades, "board": board, "logs": logs,
+    return {"action": "forget", "identity": identity, "trades": trades, "board": board, "dives": dives, "logs": logs,
             "moderation": moderation, "then": "restart the server, which reads the Board only as it starts"}
 
 

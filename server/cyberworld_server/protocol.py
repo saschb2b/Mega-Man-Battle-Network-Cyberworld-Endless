@@ -36,6 +36,34 @@ TEAM_STATE = struct.Struct("!BBIII4IBBBBHB")    # (v15: the format)
 WATCH = struct.Struct("!BBI")
 WATCH_STATE = struct.Struct("!BBIIIBBII")        # (v15: the format, the partners' seats)
 WATCH_KEYS = struct.Struct("!BIBIH")
+# (the shared dive, protocol v19: dive.py, traces.py, crews.py, party.py)
+DIVE_ROOM = struct.Struct("!BHBBBHB")
+DIVE_FEED = struct.Struct("!BB16sBBBHB")
+DIVERS_HEAD = struct.Struct("!BHB")
+DIVERS_ENTRY = struct.Struct("!16sBBB")
+DIVE_PLACE = struct.Struct("!BBBHHHH16s")
+TRACE_HEAD = struct.Struct("!BBB")
+TRACE_MARK = struct.Struct("!16shhhHB")
+TRACE_PHRASE = struct.Struct("!I16sBhhhH")
+TRACE_FIND = struct.Struct("!B16s")
+TRACE_SPLIT = struct.Struct("!BBHBB16s")
+CREW = struct.Struct("!BBIBBBB")
+CREW_STATE_HEAD = struct.Struct("!BBIB")
+CREW_MEMBER = struct.Struct("!I16sBBB")
+QUEUE = struct.Struct("!BBBBB")
+QUEUE_STATE_HEAD = struct.Struct("!BBBBBBB")
+QUEUE_ENTRY = struct.Struct("!I16sB")
+PARTY = struct.Struct("!BIHH")
+SPLITS_HEAD = struct.Struct("!BH")
+SPLITS_ENTRY = struct.Struct("!H16s")
+# (DIVE's actions: each one's fields after the type and the action byte, its whole size protocol.json's)
+DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes"),
+               SPEC["dive_leave"]: (struct.Struct("!"), "dive_leave_bytes"),
+               SPEC["dive_end"]: (struct.Struct("!BhhhH"), "dive_end_bytes"),
+               SPEC["dive_found"]: (struct.Struct("!B"), "dive_found_bytes"),
+               SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
+               SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
+               SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes")}
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -54,7 +82,9 @@ def read_hello(data):
     reads one game's ROM beside BN6's at most, the channel's hello_one_extra
     bit, v18: pass_full)
     and whether it takes back a place held (the channel's hello_resume bit,
-    protocol v10: a game come back after its link dropped, holds.py)."""
+    protocol v10: a game come back after its link dropped, holds.py), and
+    whether its system cannot run the Arena (hello_no_arena, v19: a party's
+    linked fighter, party.py)."""
     # (which side is behind, so the game can say where the newer one is: the
     # version read first, as another version's HELLO may be shaped otherwise; v10)
     version = hello_version(data)
@@ -93,7 +123,8 @@ def read_hello(data):
     # (v18: a system that reads one extra ROM at most says so; one that names both games' ROMs reads both)
     if channel & SPEC["hello_one_extra"] and not (bn5 and bn4):
         roms |= SPEC["roms_one_extra"]
-    return name.decode("ascii").rstrip(), key, channel & ~(SPEC["hello_resume"] | SPEC["hello_one_extra"]), roms, resume
+    bits = SPEC["hello_resume"] | SPEC["hello_one_extra"] | SPEC["hello_no_arena"]
+    return name.decode("ascii").rstrip(), key, channel & ~bits, roms, resume, bool(channel & SPEC["hello_no_arena"])
 
 
 def hello_version(data):
@@ -139,7 +170,7 @@ def holds(roms, chip):
     return not game or bool(roms & game)
 
 
-def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, one_extra=False, **overrides):
+def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, one_extra=False, no_arena=False, **overrides):
     spec = dict(SPEC, **overrides)
     name = name.encode("ascii")
     rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
@@ -148,6 +179,7 @@ def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, one_extr
     rom4 = (spec["bn4_code"].encode(), bytes.fromhex(spec["bn4_sha1"])) if bn4 else (bytes(4), bytes(20))
     channel |= spec["hello_resume"] if resume else 0
     channel |= spec["hello_one_extra"] if one_extra else 0
+    channel |= spec["hello_no_arena"] if no_arena else 0
     return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
                       spec["square_hash"], spec["rom_code"].encode(),
                       bytes.fromhex(spec["rom_sha1"]), *rom5, *rom4, key or secrets.token_bytes(16), channel, len(name)) + name
@@ -385,3 +417,151 @@ def watch_keys(match, side, first, keys):
 def stands(entries):
     """STANDS: a channel's NetBattles, each a tuple in STANDS_ENTRY's order."""
     return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
+
+
+# -- the shared dive (protocol v19, issue #589; docs/online/shared-dive.md) --
+
+def name16(name):
+    return name.encode("ascii")[:16]
+
+
+def read_dive(data):
+    """DIVE: its action and that action's fields, each bounded (a layer's
+    depth 1..week_layers, a position within coordinate_limit, a phrase of
+    the Square's, a split's party 1..party_most and Busting Level
+    1..busting_most); a ProtocolError otherwise."""
+    if len(data) < 2 or data[0] != SPEC["dive"] or data[1] not in DIVE_BODIES:
+        raise ProtocolError("Malformed DIVE")
+    body, size = DIVE_BODIES[data[1]]
+    if len(data) != SPEC[size] or 2 + body.size != SPEC[size]:
+        raise ProtocolError("Malformed DIVE")
+    action, fields = data[1], body.unpack(data[2:])
+    if not dive_fields_ok(action, fields):
+        raise ProtocolError("Invalid dive values")
+    return action, fields
+
+
+def dive_fields_ok(action, fields):
+    limit = SPEC["coordinate_limit"]
+    if action == SPEC["dive_enter"]:
+        return 1 <= fields[2] <= SPEC["week_layers"]
+    if action == SPEC["dive_end"]:
+        how, x, y, z, _ = fields
+        return how in (SPEC["dive_deleted"], SPEC["dive_won"]) and all(abs(v) <= limit for v in (x, y, z))
+    if action == SPEC["dive_phrase"]:
+        return fields[0] < SPEC["phrase_count"] and all(abs(v) <= limit for v in fields[1:])
+    if action == SPEC["dive_wave"]:
+        return fields[0] != 0
+    if action == SPEC["dive_split"]:
+        _, tenths, level, flags, party = fields
+        return bool(tenths) and 1 <= level <= SPEC["busting_most"] and not flags & ~SPEC["split_guardian"] \
+            and 1 <= party <= SPEC["party_most"]
+    return True
+
+
+def dive(action, *fields):
+    """A DIVE as a game sends it (the tests')."""
+    body, _ = DIVE_BODIES[action]
+    return bytes((SPEC["dive"], action)) + body.pack(*fields)
+
+
+def dive_room(week, depth, side, way, instance, count):
+    return DIVE_ROOM.pack(SPEC["dive_room"], week, depth, side, way, instance, count)
+
+
+TRACE_SIZES = {SPEC["trace_marks"]: SPEC["trace_mark_bytes"], SPEC["trace_phrases"]: SPEC["trace_phrase_bytes"],
+               SPEC["trace_finds"]: SPEC["trace_find_bytes"], SPEC["trace_opened"]: 1,
+               SPEC["trace_splits"]: SPEC["trace_split_bytes"], SPEC["trace_gone"]: 4}
+
+
+def dive_traces(kind, entries):
+    """DIVE_TRACES: entries already packed, in as many messages as they take
+    within max_message (none where there are none)."""
+    most = min(255, (SPEC["max_message"] - SPEC["trace_head"]) // TRACE_SIZES[kind])
+    return [TRACE_HEAD.pack(SPEC["dive_traces"], kind, len(entries[at:at + most])) + b"".join(entries[at:at + most])
+            for at in range(0, len(entries), most)]
+
+
+def dive_place(index, party, tenths, place, count, best, best_name):
+    return DIVE_PLACE.pack(SPEC["dive_place"], index, party, tenths, place, count, best, name16(best_name))
+
+
+def dive_feed(kind, name, depth, side=0, way=0, cause=0, party=0):
+    return DIVE_FEED.pack(SPEC["dive_feed"], kind, name16(name), depth, side, way, cause, party)
+
+
+def divers(total, entries):
+    """DIVERS: how many dive, then (name, depth, act, flags) of at most divers_most."""
+    entries = entries[:SPEC["divers_most"]]
+    return DIVERS_HEAD.pack(SPEC["divers"], min(total, 0xffff), len(entries)) + b"".join(
+        DIVERS_ENTRY.pack(name16(name), depth, act, flags) for name, depth, act, flags in entries)
+
+
+def read_crew(data):
+    """CREW: an action (crew_ask .. crew_join), its reference, a value (an
+    answer's 1 yes; a battle's its index on the layer) and a way (a fork's
+    portal: depth 0 none)."""
+    if len(data) != SPEC["crew_bytes"] or data[0] != SPEC["crew"]:
+        raise ProtocolError("Malformed CREW")
+    _, action, ref, value, depth, side, way = CREW.unpack(data)
+    asks = (SPEC["crew_ask"], SPEC["crew_answer"], SPEC["crew_join"])
+    if not SPEC["crew_ask"] <= action <= SPEC["crew_join"] or depth > SPEC["week_layers"] \
+            or (value > 1 and action != SPEC["crew_battle"]) or (action in asks and not ref):
+        raise ProtocolError("Invalid crew action")
+    return action, ref, value, (depth, side, way)
+
+
+def crew(action, ref=0, value=0, way=(0, 0, 0)):
+    return CREW.pack(SPEC["crew"], action, ref, value, *way)
+
+
+def crew_state(stage, other, value, members):
+    """CREW_STATE: members (session, name, (depth, side, way)) of at most party_most, zeros past them."""
+    out = CREW_STATE_HEAD.pack(SPEC["crew_state"], stage, other, value)
+    for k in range(SPEC["party_most"]):
+        session, name, way = members[k] if k < len(members) else (0, "", (0, 0, 0))
+        out += CREW_MEMBER.pack(session, name16(name), *way)
+    return out
+
+
+def read_queue(data):
+    """QUEUE: an action (queue_join .. queue_pass) and a door (a join's: its layer's depth, side and way)."""
+    if len(data) != SPEC["queue_bytes"] or data[0] != SPEC["queue"]:
+        raise ProtocolError("Malformed QUEUE")
+    _, action, depth, side, way = QUEUE.unpack(data)
+    if not SPEC["queue_join"] <= action <= SPEC["queue_pass"] or depth > SPEC["week_layers"] \
+            or (action == SPEC["queue_join"] and not depth):
+        raise ProtocolError("Invalid queue action")
+    return action, (depth, side, way)
+
+
+def queue(action, door=(0, 0, 0)):
+    return QUEUE.pack(SPEC["queue"], action, *door)
+
+
+def queue_state(stage, door, place, entries):
+    """QUEUE_STATE: entries (session, name, flags) of at most party_most, the leader first, zeros past them."""
+    out = QUEUE_STATE_HEAD.pack(SPEC["queue_state"], stage, *door, place, len(entries))
+    for k in range(SPEC["party_most"]):
+        session, name, flags = entries[k] if k < len(entries) else (0, "", 0)
+        out += QUEUE_ENTRY.pack(session, name16(name), flags)
+    return out
+
+
+def read_party(data):
+    """PARTY_DAMAGE or PARTY_HP: the battle, then two u16 (damage and HP; HP and max HP)."""
+    if len(data) != SPEC["party_bytes"] or data[0] not in (SPEC["party_damage"], SPEC["party_hp"]):
+        raise ProtocolError("Malformed party message")
+    kind, battle, first, second = PARTY.unpack(data)
+    if not battle or (kind == SPEC["party_hp"] and first > second):
+        raise ProtocolError("Invalid party values")
+    return kind, battle, first, second
+
+
+def party(kind, battle, first, second):
+    return PARTY.pack(kind, battle, first, second)
+
+
+def week_splits(week, entries):
+    """WEEK_SPLITS: for each act 1..4, each party size 1..party_most, (tenths, name); (0, "") none."""
+    return SPLITS_HEAD.pack(SPEC["week_splits"], week) + b"".join(SPLITS_ENTRY.pack(t, name16(n)) for t, n in entries)

@@ -35,6 +35,7 @@ from .identity import append_log, prune_moderation, rewrite_log, state_lock
 from . import stats
 from .trade import prune_log
 from .week import compact
+from . import traces
 
 DAY = 24 * 3600
 PASS = 3600             # seconds between the retention's passes
@@ -127,6 +128,7 @@ def apply(directory, policy, now, week):
     first_week = week - policy.board_weeks + 1
     gone = {"trades": prune_log(directory, now - policy.trade_days * DAY)[0],
             "board": compact(directory, first_week)[1],
+            "dives": traces.compact(directory, first_week)[1],
             "moderation": prune_moderation(directory, now, first_week),
             "logs": PlayersLog(directory, policy.log_days).prune(now),
             "stats": stats.prune(directory, now, policy.stats_days)}
