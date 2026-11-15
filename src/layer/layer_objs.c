@@ -602,7 +602,7 @@ static void install_dealer(Install *in, Talker *tk) {
 	 * net till met: docs/game/bosses/super-bosses.md) */
 	bool tells = navi > 0 && (guardian_known(navi) || (layer_in_act(run.depth) > 0 && !super_boss(navi)));
 	layer_objs_dealer_named = tells;
-	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here() };
+	DealerTalk talk = { navi, tells, layer_objs_dealer_again, in->counter, in->stock, in->nstock, purple_here(), skull_here(), profile.heard & HEARD_DEALER };
 	ShopWords w = dealer_words(&talk);
 	if (emu_debug_on()) fprintf(stderr, "dealer: %s\n", w.hello);
 	tk->sprite = SPR_DEALER;

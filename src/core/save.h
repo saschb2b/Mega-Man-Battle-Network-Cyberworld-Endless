@@ -162,10 +162,16 @@ typedef struct {
 	 * profile saved before reads them 0 */
 	uint8_t lab_folder_on;
 	uint16_t lab_folder[30];
+	/* the first meetings this profile has heard, a bit each (HEARD_*), set
+	 * as the line plays: Chaud's first call, the Net Dealer's greeting, the
+	 * first dive's words; a profile saved before reads 0 and takes what the
+	 * old tests judged, once (profile_load) */
+	uint8_t heard;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };
 enum { BTLR_CARD_HELD = 1 };
+enum { HEARD_CHAUD = 1, HEARD_DEALER = 2, HEARD_FIRST_DIVE = 4, HEARD_KEPT = 0x80 /* the byte is kept: a profile of before is judged once */ };
 enum { FEAT_PA = 1 /* a Program Advance used: Z-Canon */, FEAT_DRY_ACT = 2 /* an act cleared without a Recovery chip: Busting */ };
 #define RUN_OPEN 0xA5
 enum { BEAST_OPEN = 1, BEAST_TAUGHT = 2, BEAST_OLD_TOLD = 4 /* (unused since the guest core left runs) */ };

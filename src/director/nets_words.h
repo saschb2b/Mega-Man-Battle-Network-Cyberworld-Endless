@@ -7,6 +7,9 @@
 /* The arrival's words where the nets meet, the first time a profile comes
  * there (after the arrival's own, into D.beat) */
 void nets_arrival_words(void);
+/* Whether those words will tell the profile this layer is an older net's
+ * copy, its first time in one (D.beat_native's) */
+bool nets_older_news(void);
 /* A battle over: the first visitor a profile met, its words due */
 void nets_battle_note(const Encounter *e);
 /* Once a frame on the map: the words due (the first visitor; after a
