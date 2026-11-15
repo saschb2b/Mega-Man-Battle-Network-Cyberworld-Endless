@@ -30,7 +30,11 @@ bracket again, until the final's battle, after which the bracket shows
 MegaMan the winner before After. A round has no talk and no last word.
 
 Event flags `0x1448`-`0x144C` drive the NPCs: the guardian leaves, logs in,
-the Guardian Data shows, it was taken, the exit shows. While the exit is
+the Guardian Data shows, it was taken, the exit shows. A CONTINUE enters
+the map again, which starts the NPCs anew: the guardian and his beam,
+gone already, end at once rather than play his log-in again (issue
+#614: BN4's GutsMan, waiting on a log-in animation his sprite lacks,
+stood unseen over his data, and no A reached it). While the exit is
 shut, flag `0x16F1` keeps its warp from starting.
 
 The silence is BN6's own "no song", 0x63, which its `PlayMusic` stops

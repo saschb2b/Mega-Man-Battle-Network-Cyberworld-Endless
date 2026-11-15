@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T13:42:42Z
+* **Update**: game/bosses/sequence.md (a guardian gone before a CONTINUE ends at once rather than log in again, issue #614), game/bosses/bn4-navis.md (BN4's Navis log in and out by BN6's beam alone; WindMan facing left still shows nothing), rom/bn4.md (its Navis' overworld sprites' animation counts, Sprite lists), rom/battle.md (Guardians: BN4's Navis have no log-in animations).

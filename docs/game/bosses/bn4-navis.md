@@ -103,6 +103,15 @@ version, the area's boss theme and BN4's backdrop, his art and sounds loaded
 for the battle as a tournament round's are. Lost, the run ends as at any
 guardian.
 
+He logs in and out by BN6's beam alone, as ElementMan does: his BN4
+sprite holds 6 to 18 animations, none at BN6's log-in (`0x19` on) or
+log-out (`0x21` on), and a wait on one that is not there never ended
+(issue #614: GutsMan, continued at his data, logged in again unseen and
+stood on it, [the guardian's sequence](sequence.md); the counts in
+[BN4 Red Sun's tables](../../rom/bn4.md), Sprite lists). His standing
+facing still takes BN6's number:
+WindMan's sprite draws four, so facing left he shows nothing.
+
 ## His Guardian Data
 
 Five HPMemory, a full heal and the NaviCust's draft, as every guardian's,
