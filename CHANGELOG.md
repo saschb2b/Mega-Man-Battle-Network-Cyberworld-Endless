@@ -38,9 +38,9 @@
 - **The game tells you when a new version is out, and what it brings.**
   At each start it looks for one (a single request for the release's own
   `update.json`, nothing about you sent). When one is out, a box opens
-  on the title with its release notes, a page an entry, Left and Right
-  to turn them, and two buttons that say what they do: **Update now**
-  and **Later**. On Windows (the installer's copy), as a Linux AppImage
+  on the title with its release notes, a page an entry with its
+  picture (SELECT shows it full size), Left and Right to turn them, and
+  two buttons that say what they do: **Update now** and **Later**. On Windows (the installer's copy), as a Linux AppImage
   and on a PortMaster handheld, Update now downloads the new version,
   checks it, and starts again as it, your saves and your run kept;
   elsewhere the box opens the download page or says where the update

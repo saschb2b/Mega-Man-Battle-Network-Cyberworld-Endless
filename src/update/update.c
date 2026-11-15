@@ -16,6 +16,7 @@
 #include "settings_line.h"
 #include "update_install.h"
 #include "update_manifest.h"
+#include "update_pictures.h"
 #include "update_sha256.h"
 #include "update_text.h"
 #include "version.h"   /* CW_VERSION, from the build (Makefile) */
@@ -117,6 +118,10 @@ static void looked(bool answered, const char *text) {
 		}
 		if (!U.key) U.found = r;
 		update_manifest_changes(text, U.changes, sizeof U.changes);
+		/* (the notes' pictures, fetched at once where the title's box is due
+		 * this start, else when it is opened: update_pictures.h) */
+		pictures_found(text, U.agent);
+		if (strcmp(U.boxed, U.found.version)) update_pictures_want();
 		SDL_AtomicSet(&U.state, UPDATE_FOUND);
 	}
 	printf("update: %s %s %s\n", U.from, newer ? "has a newer version:" : read ? "is the newest" : answered ? "read no update.json" : "had no answer",
@@ -262,6 +267,7 @@ static void at_exit(void) {
 	thread_join();
 #endif
 	for (int i = 0; i < 30 && SDL_AtomicGet(&U.busy); ++i) SDL_Delay(50);
+	pictures_end();
 	if (SDL_AtomicGet(&U.state) != UPDATE_READY) return;
 	printf("update: starting %s\n", U.found.version);
 	update_install_start();

@@ -38,6 +38,7 @@ static const char *const words[] = {
 	"What's new in",   /* UW_BOX_NEWS */
 	"A new version is out. Its notes are on the releases page",   /* UW_BOX_NONE */
 	"SCROLL",   /* UW_BOX_SCROLL */
+	"PICTURE",   /* UW_BOX_PICTURE */
 	"Update now",   /* UW_BTN_UPDATE */
 	"Download",   /* UW_BTN_DOWNLOAD */
 	"Later",   /* UW_BTN_LATER */

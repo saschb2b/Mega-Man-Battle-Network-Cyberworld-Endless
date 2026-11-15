@@ -27,6 +27,7 @@ typedef enum {
 	UW_BOX_NEWS,       /* ... the head over its changes, the version after it */
 	UW_BOX_NONE,       /* ... its window where the release has no changes */
 	UW_BOX_SCROLL,     /* ... its band's hint, Up and Down's */
+	UW_BOX_PICTURE,    /* ... or SELECT's, where the page has a picture */
 	UW_BTN_UPDATE,     /* ... its buttons, by the way this copy updates: the game itself */
 	UW_BTN_DOWNLOAD,   /* ... the download page */
 	UW_BTN_LATER,      /* ... and the other */

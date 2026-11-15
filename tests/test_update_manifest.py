@@ -6,6 +6,7 @@ rules and tables left off) and from a made-up CHANGELOG where a release
 has no notes (headlines marked, sub-points kept, markdown and other
 letters left off), a long one cut at a heading with the rest named."""
 import os
+import struct
 import sys
 import tempfile
 import unittest
@@ -115,6 +116,82 @@ class Changes(unittest.TestCase):
         self.assertEqual(lines, ['# The game tells you when a new version is out',
                                  'At each start it looks for one (update.json), and the title shows New v0.22.0.',
                                  '- On Windows it installs itself.', "- See the guide - it's there.", update_manifest.MORE])
+
+
+def unlz77(src):
+    """The game's lz77_decompress (src/core/rom.c), line for line."""
+    n = src[1] | src[2] << 8 | src[3] << 16
+    out, p = bytearray(), 4
+    while len(out) < n:
+        flags = src[p]
+        p += 1
+        for _ in range(8):
+            if len(out) >= n:
+                break
+            if flags & 0x80:
+                v = src[p] << 8 | src[p + 1]
+                p += 2
+                for _ in range((v >> 12) + 3):
+                    if len(out) < n:
+                        out.append(out[-((v & 0xFFF) + 1)])
+            else:
+                out.append(src[p])
+                p += 1
+            flags = flags << 1 & 0xFF
+    return bytes(out)
+
+
+@unittest.skipUnless(update_manifest.HAS_PIL, 'Pillow is not installed')
+class Pictures(unittest.TestCase):
+    def picture(self, size, scale, colours):
+        """A made-up capture: `colours` stripes at the game's `size`, `scale` times over."""
+        from PIL import Image
+        im = Image.new('RGB', size)
+        im.putdata([((i * 37) % 256, (i * 91) % 256, i % 256) for i in range(colours)
+                    for _ in range(size[0] * size[1] // colours)])
+        im = im.resize((size[0] * scale, size[1] * scale), Image.NEAREST)
+        fd, path = tempfile.mkstemp(suffix='.png')
+        os.close(fd)
+        im.save(path)
+        self.addCleanup(os.remove, path)
+        return path, im.resize(size, Image.NEAREST)
+
+    def test_own_pixels(self):
+        """A capture at 2x or 3x comes back to the game's own pixels, its colours exact."""
+        for scale in (1, 2, 3):
+            path, small = self.picture((240, 160), scale, 40)
+            w, h, pal, idx = update_manifest.picture(path)
+            self.assertEqual((w, h), (240, 160))
+            colours = [tuple(pal[i * 3:i * 3 + 3]) for i in range(len(pal) // 3)]
+            self.assertEqual([colours[i] for i in idx], list(small.getdata()))
+
+    def test_wide_fits(self):
+        """A wider strip is scaled into the game's frame, kept to 256 colours."""
+        path, _ = self.picture((484, 175), 2, 300)
+        w, h, pal, idx = update_manifest.picture(path)
+        self.assertLessEqual(w, 240)
+        self.assertLessEqual(h, 160)
+        self.assertEqual(len(idx), w * h)
+        self.assertLessEqual(len(pal), 256 * 3)
+
+    def test_pack(self):
+        """The file as the game reads it: its head, each picture's, LZ77 that the game's decoder unpacks."""
+        pics = [(3, 2, bytes([1, 2, 3, 4, 5, 6]), bytes([0, 1, 0, 1, 1, 1])), (2, 2, bytes(3), bytes(4))]
+        blob = update_manifest.pack(pics)
+        self.assertEqual(blob[:4], b'CWPX')
+        self.assertEqual(struct.unpack_from('<HH', blob, 4), (1, 2))
+        at = 8
+        for w, h, pal, idx in pics:
+            pw, ph, colours, n = struct.unpack_from('<HHHI', blob, at)
+            at += 10
+            self.assertEqual((pw, ph, colours), (w, h, len(pal) // 3))
+            self.assertEqual(blob[at:at + len(pal)], pal)
+            at += len(pal)
+            self.assertEqual(unlz77(blob[at:at + n]), idx)
+            at += n
+        self.assertEqual(at, len(blob))
+        data = bytes(range(256)) * 20 + bytes(5000)
+        self.assertEqual(unlz77(update_manifest.lz77(data)), data)
 
 
 if __name__ == '__main__':

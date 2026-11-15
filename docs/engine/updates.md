@@ -29,6 +29,9 @@ next](#what-comes-next).
   capitals and the page's number between the PET's arrows over BN6's
   list window, the heading in the bold letters, the paragraphs and
   points (the PET's gold arrow before each) in the list's thin ones.
+  An entry's first picture stands under its heading at half the game's
+  scale, each of its pixels the mean of four of the capture's; SELECT
+  shows it whole, at the game's own 240x160, and any button goes back.
   Left and Right (or L and R) turn the pages, Up and Down scroll a long
   one, its scroll bar beside it. Under the window two buttons say what
   they do, each with its key, where a Yes and No said nothing of it:
@@ -54,9 +57,30 @@ The notes come in update.json's `changes`, written by
 `tools/update_manifest.py` from the release's players' notes
 (`docs/releases/vX.Y.Z.md`: the `<h2>` tagline, the summary under it, the
 `##` sections, the `###` entries, their paragraphs and points; the
-pictures, rules and tables are left to GitHub) or, for a release without
-notes, its CHANGELOG section, an entry a page. Past 40 KB they stop at a
+rules and tables are left to GitHub) or, for a release without notes,
+its CHANGELOG section, an entry a page. Past 40 KB they stop at a
 heading, a last line naming the releases page; the game keeps 48 KB.
+
+## The pictures
+
+Each entry's first picture, taken from its notes by the same tool, goes
+into `update-pictures.bin`, a file of the release's that update.json
+names under `pictures` with its size and SHA-256, an `@N WxH` line under
+the entry's heading marking it in the notes (so the page keeps its room
+before the picture comes). A capture at 2x or 3x comes back to the
+game's own pixels; a wider one (the before-and-after strips) is scaled to
+fit 240x160; each is kept to 256 colours, its pixels packed in the GBA's
+LZ77, which the game's own `lz77_decompress` unpacks (`rom.c`). 0.21.0's
+twenty pictures came to 163 KB; the tool stops at 1 MB. The pictures are
+whole frames of the game, as the release's page on GitHub shows them.
+
+`src/update/update_pictures.c` fetches the file on a thread of its own,
+right after the look where the title's box is due that start, else when
+the box is opened from Options, checks it whole, and keeps it packed; the
+box unpacks the shown page's picture into two textures (whole, and at
+half scale) as the page turns. Android, whose look is Java's, the
+browser, and the 3DS, whose heap is short, fetch none: their pages leave
+no room for them.
 - **Updates** on the same page, `On` or `Off`, kept in `settings.ini`
   (`updates = off`). Off forgets what was found and stops a download.
 

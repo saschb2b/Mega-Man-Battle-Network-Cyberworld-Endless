@@ -1552,8 +1552,9 @@ At each start the game looks on its GitHub page for a newer version: one
 request for the newest release's `update.json`, which says its version,
 what is new in it and its files. Nothing about you, your game or your
 device is sent. When one is out, the first time the title's menu shows a
-box opens with what is new, the release's notes a page an entry: Left
-and Right turn the pages, Up and Down scroll a long one. Its buttons say
+box opens with what is new, the release's notes a page an entry, each
+with its picture: Left and Right turn the pages, Up and Down scroll a
+long one, SELECT shows the picture full size. Its buttons say
 what they do: **Update now** (A) or **Later** (B), or **Download** where
 your copy updates from the download page. Later is kept for that
 version, so the box does not come back; the title's key hints then show

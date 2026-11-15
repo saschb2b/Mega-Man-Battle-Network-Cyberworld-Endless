@@ -21,12 +21,107 @@ import hashlib
 import json
 import os
 import re
+import struct
 import sys
 
 REPO = 'saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless'
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CHANGES_MAX = 40000   # (the game's buffer is 48 KB: past this, the rest on the releases page)
 MORE = 'More on the releases page'
+PICTURES = 'update-pictures.bin'   # (each entry's first picture, as the box shows it)
+try:
+    from PIL import Image as _Image  # noqa: F401
+    HAS_PIL = True
+except ImportError:   # (the release's job installs it; without it, the notes go without pictures)
+    HAS_PIL = False
+    print('update_manifest: no Pillow, so no pictures', file=sys.stderr)
+PICTURES_MAX = 1 << 20             # (past this, the entries left show none)
+FRAME = (240, 160)                 # (the game's picture: none is stored larger)
+
+
+def lz77(data):
+    """GBA LZ77 (the BIOS's type 0x10), as the game's lz77_decompress reads
+    it (src/core/rom.c): a flag byte each eight tokens, a literal or a copy
+    of 3 to 18 bytes from up to 4096 back."""
+    n = len(data)
+    out = bytearray([0x10, n & 0xFF, n >> 8 & 0xFF, n >> 16 & 0xFF])
+    seen, pos = {}, 0
+
+    def note(at):
+        if at + 3 <= n:
+            seen.setdefault(data[at:at + 3], []).append(at)
+    while pos < n:
+        flag_at, flags = len(out), 0
+        out.append(0)
+        for bit in range(8):
+            if pos >= n:
+                break
+            best, dist = 0, 0
+            for cand in reversed(seen.get(data[pos:pos + 3], [])[-48:]):
+                if pos - cand > 4096:
+                    break
+                k, most = 3, min(18, n - pos)
+                while k < most and data[cand + k] == data[pos + k]:
+                    k += 1
+                if k > best:
+                    best, dist = k, pos - cand
+                if k == 18:
+                    break
+            if best >= 3:
+                flags |= 0x80 >> bit
+                v = (best - 3) << 12 | (dist - 1)
+                out += bytes([v >> 8, v & 0xFF])
+                for k in range(best):
+                    note(pos + k)
+                pos += best
+            else:
+                out.append(data[pos])
+                note(pos)
+                pos += 1
+        out[flag_at] = flags
+    return bytes(out)
+
+
+def picture(path):
+    """A picture as the box stores it: no larger than the game's frame (a
+    capture at 2x or 3x back to its own pixels, a wider one scaled to fit),
+    in 256 colours at most: (width, height, palette RGB, a byte a pixel)."""
+    from PIL import Image
+    im = Image.open(path)
+    im.seek(0)
+    im = im.convert('RGB')
+    w, h = im.size
+    for f in range(1, 9):
+        if w % f or h % f or w // f > FRAME[0] or h // f > FRAME[1]:
+            continue
+        small = im.resize((w // f, h // f), Image.NEAREST)
+        if f == 1 or small.resize((w, h), Image.NEAREST).tobytes() == im.tobytes():
+            im = small
+            break
+    else:
+        s = min(FRAME[0] / w, FRAME[1] / h)
+        im = im.resize((max(1, round(w * s)), max(1, round(h * s))), Image.LANCZOS)
+    exact = im.getcolors(256)
+    if exact:
+        colours = [c for _, c in exact]
+        at = {c: i for i, c in enumerate(colours)}
+        idx = bytes(at[c] for c in im.getdata())
+        pal = b''.join(bytes(c) for c in colours)
+    else:
+        q = im.quantize(256)
+        idx = q.tobytes()
+        pal = bytes(q.getpalette()[:256 * 3])
+    return im.size[0], im.size[1], pal, idx
+
+
+def pack(pictures):
+    """The pictures' file: "CWPX", its form and count, then each one's
+    width, height, colours and packed length, its palette and its pixels"""
+    out = bytearray(b'CWPX') + struct.pack('<HH', 1, len(pictures))
+    for w, h, pal, idx in pictures:
+        packed = lz77(idx)
+        out += struct.pack('<HHHI', w, h, len(pal) // 3, len(packed)) + pal + packed
+    return bytes(out)
 
 # (the game's key for each file: src/update/update_install.c's, and the
 # ones the systems that update themselves later will ask for)
@@ -43,6 +138,7 @@ FILES = {
     'vita': 'cyberworld-endless.vpk',
     'ps4': 'cyberworld-endless.pkg',
     'ps5': 'cyberworld-endless-ps5.zip',
+    'pictures': PICTURES,
 }
 
 
@@ -93,13 +189,16 @@ def from_changelog(version, changelog):
     return lines
 
 
-def from_notes(path):
+def from_notes(path, pictures=None):
     """The players' notes as the box's lines: the tagline and the summary
     under it, each section's name, each entry's heading and its
-    paragraphs and points; pictures, rules and tables left to GitHub."""
+    paragraphs and points; rules and tables left to GitHub. Where
+    `pictures` is a list, each entry's first picture joins it, an "@N WxH"
+    line under the heading marking it (N its place, W and H its size)."""
     with open(path, encoding='utf-8') as f:
         text = re.sub(r'\A---\n.*?\n---\n', '', f.read(), flags=re.S)
     lines, para, summary = [], [], False
+    entry = None   # (the line after the open entry's heading, while it has no picture)
 
     def flush():
         if para:
@@ -121,6 +220,14 @@ def from_notes(path):
             name = plain(line.lstrip('#'))
             if name:
                 lines.append(mark + name)
+            entry = len(lines) if mark == '# ' and name else None
+        elif entry is not None and pictures is not None and HAS_PIL and re.search(r'<img[^>]*src="([^"]+)"', line):
+            src = os.path.join(os.path.dirname(path), re.search(r'<img[^>]*src="([^"]+)"', line).group(1))
+            if os.path.isfile(src) and sum(len(x[3]) for x in pictures) < PICTURES_MAX:
+                pictures.append(picture(src))
+                w, h = pictures[-1][:2]
+                lines.insert(entry, f'@{len(pictures) - 1} {w}x{h}')
+            entry = None
         elif line.startswith('- ') or line.startswith('* '):
             flush()
             lines.append('- ' + plain(line[2:]))
@@ -132,11 +239,12 @@ def from_notes(path):
     return [x for x in lines if x not in ('', '- ', '# ', '## ', '= ', '> ')]
 
 
-def changes(version, changelog, notes=None):
+def changes(version, changelog, notes=None, pictures=None):
     """The release's notes as the box shows them, a line a paragraph, past
-    CHANGES_MAX cut at a heading and the rest named on the releases page."""
+    CHANGES_MAX cut at a heading and the rest named on the releases page;
+    each entry's first picture into `pictures` where it is a list."""
     notes = notes or os.path.join(ROOT, 'docs', 'releases', f'v{version}.md')
-    lines = from_notes(notes) if os.path.isfile(notes) else from_changelog(version, changelog)
+    lines = from_notes(notes, pictures) if os.path.isfile(notes) else from_changelog(version, changelog)
     out = []
     for line in lines:
         if len('\n'.join(out + [line])) > CHANGES_MAX - len(MORE) - 1:
@@ -145,6 +253,8 @@ def changes(version, changelog, notes=None):
                 out.pop()
             if not line.startswith('#') and out:
                 out.pop()
+            if pictures:
+                del pictures[sum(1 for x in out if x.startswith('@')):]
             out.append(MORE)
             break
         out.append(line)
@@ -153,6 +263,12 @@ def changes(version, changelog, notes=None):
 
 def manifest(tag, folder, changelog=os.path.join(ROOT, 'CHANGELOG.md')):
     version = tag[1:] if tag.startswith('v') else tag
+    # (the notes' pictures into the folder first, a file of the release's like the rest)
+    pictures = []
+    text = changes(version, changelog, pictures=pictures)
+    if pictures:
+        with open(os.path.join(folder, PICTURES), 'wb') as f:
+            f.write(pack(pictures))
     files = {}
     for key, name in FILES.items():
         path = os.path.join(folder, name)
@@ -165,7 +281,7 @@ def manifest(tag, folder, changelog=os.path.join(ROOT, 'CHANGELOG.md')):
     return {
         'version': version,
         'notes': f'https://github.com/{REPO}/releases/tag/{tag}',
-        'changes': changes(version, changelog),
+        'changes': text,
         'files': files,
     }
 

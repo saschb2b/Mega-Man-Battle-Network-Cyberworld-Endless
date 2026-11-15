@@ -6,11 +6,15 @@
  * each) in the list's thin ones, space between them; Left and Right turn
  * the pages, Up and Down scroll a long one. Under the window the buttons
  * as SAVES has them, STATUS's pills, the action NaviCust's green RUN!,
- * each with its key. The notes are laid out once, as the box opens:
- * drawing changes nothing. */
+ * each with its key. An entry's picture stands under its heading at half
+ * the game's scale (each pixel of it four of the capture's, mixed), SELECT
+ * shows it whole over the box. The notes are laid out once, as the box
+ * opens, a page's picture unpacked as the page shows: drawing changes
+ * nothing. */
 #include "options_news.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "audio.h"
@@ -21,6 +25,7 @@
 #include "platform.h"
 #include "touch.h"
 #include "update.h"
+#include "update_pictures.h"
 #include "update_text.h"
 
 #define BOX_WAIT 30          /* frames before it takes a press: a menu's A mashed is no Update */
@@ -44,12 +49,14 @@
 #define LINE_MAX 96
 
 /* A paragraph's kind, by its mark in update.json's changes */
-enum { P_TAGLINE, P_SUMMARY, P_SECTION, P_HEADING, P_POINT, P_PARA };
+enum { P_TAGLINE, P_SUMMARY, P_SECTION, P_HEADING, P_POINT, P_PARA, P_PICTURE };
 
 typedef struct {
 	int at, skip;     /* its letters' start, and its mark's to leave off */
 	int kind, lines;  /* (P_*), its lines */
 	int y, page;      /* its top within its page, and the page (-1: a section's name, over its pages) */
+	int h;            /* its height: its lines', or its picture's at half scale */
+	int pic, w;       /* a picture's place in the file, and its width at half scale */
 } Par;
 
 typedef struct {
@@ -58,11 +65,14 @@ typedef struct {
 } Page;
 
 static struct {
-	bool open, first;
+	bool open, first, zoom;
 	int t, page, scroll, pars, pages;
 	char text[TEXT_MAX];
 	Par par[PARS_MAX];
 	Page pg[PAGES_MAX];
+	/* the shown page's picture, unpacked: whole and at half scale */
+	SDL_Texture *full, *half;
+	int shown, full_w, full_h;   /* (its place in the file, -1 none) */
 } K;
 
 static bool asks(void) { return update_way() == UPDATE_WAY_INSTALL || update_way() == UPDATE_WAY_PAGE; }
@@ -74,7 +84,7 @@ static const char *par_text(const Par *p) { return K.text + p->at + p->skip; }
 /* a line's kind by its mark, and the mark's length */
 static int kind_of(const char *s, int *skip) {
 	static const struct { const char *mark; int kind; } marks[] = {
-		{ "= ", P_TAGLINE }, { "> ", P_SUMMARY }, { "## ", P_SECTION }, { "# ", P_HEADING }, { "- ", P_POINT } };
+		{ "= ", P_TAGLINE }, { "> ", P_SUMMARY }, { "## ", P_SECTION }, { "# ", P_HEADING }, { "- ", P_POINT }, { "@", P_PICTURE } };
 	for (size_t i = 0; i < sizeof marks / sizeof *marks; ++i)
 		if (!strncmp(s, marks[i].mark, strlen(marks[i].mark))) {
 			*skip = (int)strlen(marks[i].mark);
@@ -108,11 +118,22 @@ static int bold_wrap(const char *s, int w, char out[][LINE_MAX]) {
 
 static bool bold(int kind) { return kind == P_TAGLINE || kind == P_HEADING || kind == P_SECTION; }
 
-/* a paragraph onto page `page`, wrapped as its kind sets it */
+/* a paragraph onto page `page`, wrapped as its kind sets it; a picture
+ * ("@N WxH") its room at half scale, where pictures can come */
 static void add(int at, int skip, int kind, int page) {
-	Par *p = &K.par[K.pars++];
-	*p = (Par){ at, skip, kind, 0, 0, page };
+	Par *p = &K.par[K.pars];
+	*p = (Par){ at, skip, kind, 0, 0, page, 0, -1, 0 };
+	if (kind == P_PICTURE) {
+		int w = 0, h = 0;
+		if (!update_pictures_here() || sscanf(par_text(p), "%d %dx%d", &p->pic, &w, &h) != 3 || w <= 0 || h <= 0) return;
+		p->w = w / 2;
+		p->h = h / 2;
+		++K.pars;
+		return;
+	}
+	++K.pars;
 	p->lines = bold(kind) ? bold_wrap(par_text(p), TEXT_W, NULL) : look_wrapped_lines(par_text(p), kind == P_POINT ? TEXT_W - POINT_IN : TEXT_W);
+	p->h = p->lines * LOOK_LINE;
 }
 
 /* each page's paragraphs stacked, in order: each one's top, the page's height */
@@ -122,7 +143,7 @@ static void stack(void) {
 		Par *p = &K.par[i];
 		if (p->page < 0) continue;
 		p->y = K.pg[p->page].h;
-		K.pg[p->page].h += p->lines * LOOK_LINE + (p->kind == P_POINT ? 2 : GAP) + (p->kind == P_TAGLINE ? 4 : 0);
+		K.pg[p->page].h += p->h + (p->kind == P_POINT ? 2 : GAP) + (p->kind == P_TAGLINE ? 4 : 0);
 	}
 }
 
@@ -160,12 +181,69 @@ static void lay_out(void) {
 	stack();
 }
 
+/* ---- the page's picture ---- */
+
+static void picture_drop(void) {
+	if (K.full) SDL_DestroyTexture(K.full);
+	if (K.half) SDL_DestroyTexture(K.half);
+	K.full = K.half = NULL;
+	K.shown = -1;
+	K.zoom = false;
+}
+
+/* the shown page's picture, NULL where it has none */
+static const Par *page_picture(void) {
+	for (int i = 0; i < K.pars; ++i)
+		if (K.par[i].page == K.page && K.par[i].kind == P_PICTURE) return &K.par[i];
+	return NULL;
+}
+
+static SDL_Texture *texture_of(const uint32_t *px, int w, int h) {
+	SDL_Texture *t = SDL_CreateTexture(P.renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, w, h);
+	if (t) SDL_UpdateTexture(t, NULL, px, w * 4);
+	return t;
+}
+
+/* `px` (w x h) at half scale, each pixel the mean of the four it stands for */
+static uint32_t *halved(const uint32_t *px, int w, int h) {
+	int hw = w / 2, hh = h / 2;
+	uint32_t *out = hw > 0 && hh > 0 ? malloc((size_t)hw * hh * sizeof *out) : NULL;
+	for (int y = 0; out && y < hh; ++y)
+		for (int x = 0; x < hw; ++x) {
+			const uint32_t *a = px + (2 * y) * w + 2 * x, *b = a + w;
+			uint32_t c = 0xFF000000u;
+			for (int s = 0; s < 24; s += 8) c |= (((a[0] >> s & 255) + (a[1] >> s & 255) + (b[0] >> s & 255) + (b[1] >> s & 255) + 2) / 4) << s;
+			out[y * hw + x] = c;
+		}
+	return out;
+}
+
+/* The shown page's picture unpacked, once it has come */
+static void picture_sync(void) {
+	const Par *p = page_picture();
+	int w, h;
+	uint32_t *px;
+	if (!p || p->pic == K.shown || !update_picture(p->pic, &w, &h, &px)) return;
+	picture_drop();
+	uint32_t *half = halved(px, w, h);
+	K.full = texture_of(px, w, h);
+	K.half = half ? texture_of(half, w / 2, h / 2) : NULL;
+	free(px);
+	free(half);
+	K.shown = p->pic;
+	K.full_w = w;
+	K.full_h = h;
+}
+
 /* ---- the box ---- */
 
 static void open_box(bool first) {
+	K.shown = -1;
 	K.open = true;
 	K.first = first;
 	K.t = K.page = K.scroll = 0;
+	picture_drop();
+	update_pictures_want();
 	lay_out();
 	/* (the finger that opened it presses nothing more) */
 	touch_release();
@@ -189,6 +267,7 @@ bool news_box_shown(void) { return K.open; }
 static void press(bool act) {
 	update_box_done();
 	K.open = false;
+	picture_drop();
 	audio_sfx(act ? SFX_SELECT : SFX_CANCEL);
 	if (!act || !asks() || !update_press()) return;
 	if (K.first && update_way() == UPDATE_WAY_INSTALL) options_open_update();
@@ -215,8 +294,23 @@ static void turn(int by) {
 }
 
 void news_box_update(void) {
-	if (!K.open || ++K.t < BOX_WAIT) return;
+	if (!K.open) return;
+	picture_sync();
+	if (++K.t < BOX_WAIT) return;
 	uint32_t pr = P.menu_pressed, rep = P.menu_repeat;
+	/* (a picture whole: any of the buttons back to the page) */
+	if (K.zoom) {
+		if (pr & (BTN_A | BTN_B | BTN_SELECT | BTN_START)) {
+			K.zoom = false;
+			audio_sfx(SFX_CANCEL);
+		}
+		return;
+	}
+	if ((pr & BTN_SELECT) && K.full && page_picture()) {
+		K.zoom = true;
+		audio_sfx(SFX_SELECT);
+		return;
+	}
 	if (pr & BTN_B) { press(false); return; }
 	if (pr & (BTN_A | BTN_START)) { press(asks()); return; }
 	if (rep & (BTN_UP | BTN_DOWN)) scroll_by(rep & BTN_UP ? -LOOK_LINE : LOOK_LINE);
@@ -225,6 +319,10 @@ void news_box_update(void) {
 
 bool news_box_back(void) {
 	if (!K.open) return false;
+	if (K.zoom) {
+		K.zoom = false;
+		return true;
+	}
 	press(false);
 	return true;
 }
@@ -239,6 +337,10 @@ static SDL_Rect button_rect(int b) {
 
 void news_box_tap(int x, int y) {
 	if (!K.open || K.t < BOX_WAIT) return;
+	if (K.zoom) {
+		K.zoom = false;
+		return;
+	}
 	for (int b = 0; b < buttons(); ++b) {
 		SDL_Rect r = button_rect(b);
 		if (x >= r.x && x < r.x + r.w && y >= r.y - 2 && y < r.y + r.h + 2) { press(asks() && b == 0); return; }
@@ -272,13 +374,27 @@ static void thin_draw(const Par *p, SDL_Rect f, int y, int in, SDL_Color c) {
 	look_wrapped_from(par_text(p), &at);
 }
 
+/* the page's picture at half scale, the part in view; its room, until it comes */
+static void picture_draw(const Par *p, SDL_Rect f, int y) {
+	int top = y < 0 ? -y : 0, bottom = y + p->h > VIEW_H ? VIEW_H - y : p->h;
+	if (bottom <= top) return;
+	SDL_Rect dst = { f.x + (f.w - p->w) / 2, f.y + y + top, p->w, bottom - top };
+	if (!K.half || K.shown != p->pic) {
+		fill_rect(dst.x, dst.y, dst.w, dst.h, rgba(16, 40, 72, 255));
+		return;
+	}
+	SDL_Rect src = { 0, top, p->w, bottom - top };
+	SDL_RenderCopy(P.renderer, K.half, &src, &dst);
+}
+
 static void page_draw(SDL_Rect f) {
 	for (int i = 0; i < K.pars; ++i) {
 		const Par *p = &K.par[i];
 		if (p->page != K.page) continue;
 		int y = p->y - K.scroll;
-		if (y + p->lines * LOOK_LINE <= 0 || y >= VIEW_H) continue;
+		if (y + p->h <= 0 || y >= VIEW_H) continue;
 		switch (p->kind) {
+		case P_PICTURE: picture_draw(p, f, y); break;
 		case P_TAGLINE: bold_draw(p, f, y, true, PET_GOLD); break;
 		case P_HEADING: case P_SECTION: bold_draw(p, f, y, false, PET_GOLD); break;
 		case P_POINT:
@@ -331,9 +447,18 @@ static void buttons_draw(int x0, int y0) {
 void news_box_draw(void) {
 	if (!K.open || !K.pages) return;
 	int x0 = P.core_x, y0 = P.core_y;
+	/* (a picture whole, over all, at the game's own scale) */
+	if (K.zoom && K.full) {
+		fill_rect(x0, y0, CORE_W, CORE_H, BLACK);
+		SDL_Rect dst = { x0 + (CORE_W - K.full_w) / 2, y0 + (CORE_H - K.full_h) / 2, K.full_w, K.full_h };
+		SDL_RenderCopy(P.renderer, K.full, NULL, &dst);
+		return;
+	}
 	bool long_page = scroll_most() > 0;
 	pet_panel_draw(x0, y0, update_word(UW_BOX_TITLE));
-	if (long_page) look_band_hint(x0, y0, CORE_W, "UP/DOWN", update_word(UW_BOX_SCROLL));
+	/* (the band's hint: SELECT's picture where the page has one, else Up and Down's scroll) */
+	if (K.full && page_picture()) look_band_hint(x0, y0, CORE_W, controls_word(BTN_SELECT), update_word(UW_BOX_PICTURE));
+	else if (long_page) look_band_hint(x0, y0, CORE_W, "UP/DOWN", update_word(UW_BOX_SCROLL));
 	head_draw(x0, y0);
 	SDL_Rect f = look_window(x0 + WIN_X, y0 + WIN_Y, WIN_W, WIN_H, 0, long_page);
 	page_draw(f);
