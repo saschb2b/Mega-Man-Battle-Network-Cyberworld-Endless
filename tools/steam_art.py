@@ -19,6 +19,7 @@ import os
 import random
 
 from PIL import Image
+import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUT = os.path.join(ROOT, 'linux', 'steam')
