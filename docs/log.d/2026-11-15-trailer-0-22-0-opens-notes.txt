@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-15T22:00:00Z
-* **Update**: releases/v0.22.0.md (opens with its trailer).

@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-15T19:30:00Z
-* **Update**: project/youtube.md (the thumbnail made for YouTube by `tools/trailer_thumbnail.py`, three for Test & compare; the narrator, Dad in BN6's own chat box; the title's hook first), devtools/headless-shot.md (`--talk narrate`), code/tools.md (rows for `tools/trailer_thumbnail.py` and the trailers' house look and band; `trailer_youtube.py`'s thumbnails and title).

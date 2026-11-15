@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (opens with its trailer).
+* **Update**: project/youtube.md (the thumbnail made for YouTube by `tools/trailer_thumbnail.py`, three for Test & compare; the narrator, Dad in BN6's own chat box; the title's hook first), devtools/headless-shot.md (`--talk narrate`), code/tools.md (rows for `tools/trailer_thumbnail.py` and the trailers' house look and band; `trailer_youtube.py`'s thumbnails and title).
+* **Update**: project/youtube.md (0.22.0's video made ahead of its release, its upload refused by the day's limit).
 * **Update**: world/level-design/side-pieces.md (the Graveyard's row and section: its one map sets no side piece, scenery or piece under or behind a floor, measured with every cut; what its layers never draw is floor, raised floor and ramps, its grooved bridges and an exit's arrow).
 * **Update**: world/level-design/side-pieces.md (what grows on a floor's edge: the Judge Tree's tufts on its back rims and planters at its walls' feet, cut in the floor's own tiles with every panel that reaches them; its row, what is not placed and why), code/net-and-map.md (sides.c's line).
 * **Update**: world/level-design/side-pieces.md (BN4's Town Area's row, and a section on what its four maps set round their floors: a warp hub's ring and exit arrow, a hub's centrepiece, Town Area 3's upper level and a rail under it, none a piece any cut takes, so none set).
