@@ -86,6 +86,14 @@ bool director_on_layer(void) { return D.active && !D.town; }
 
 int director_guardian_battle(void) { return D.active && boss_fighting() ? boss_foe() : 0; }
 
+int director_md_count(void) { return D.active && !D.town ? D.objs.nmd : 0; }
+bool director_md_opened(int k) { return k >= 0 && k < director_md_count() && flag_get(MAPSLOT_MD_FLAG + k); }
+void director_md_place(int k, int *x, int *y, int *z) {
+	bool in = k >= 0 && k < director_md_count();
+	*x = in ? D.objs.md_x[k] : 0;
+	*y = in ? D.objs.md_y[k] : 0;
+	*z = in ? D.objs.md_z[k] : 0;
+}
 int director_trader_kind(void) { return D.active && !D.town ? D.objs.trader_kind : -1; }
 
 int director_guardian_waiting(void) { return D.active && !D.town && D.objs.guardian.navi && !boss_exit_open() ? D.objs.guardian.navi : 0; }

@@ -452,7 +452,7 @@ static void week(void) {
 	const WeekBoard *b = online_week_board();
 	assert(b->serial == 1 && b->week == 2963 && b->place == 2 && b->ntop == 2 && b->nlast == 1);
 	assert(!strcmp(b->top[0].name, "Gamma") && b->top[0].won && b->mine.depth == 5 && !strcmp(b->last[0].name, "Alpha"));
-	const char *s = square_week_board(b, 2963);
+	const char *s = square_week_board(b, 2963, NULL, NULL);
 	assert(strstr(s, "Oct 19-Oct 25") && strstr(s, "1.Gamma:10!\n2.Beta:5") && strstr(s, "layer 5,#2") && strstr(s, "1.Alpha:7"));
 	assert(!online_week_mail(m, sizeof m - 1));
 	m[3] = 9; assert(!online_week_mail(m, sizeof m)); m[3] = 2;
@@ -468,6 +468,18 @@ static void week(void) {
 	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = ONLINE_WEEK_PARTY;
 	assert(online_week_mail(m, sizeof m) && online_week_board()->top[0].party && !online_week_board()->top[0].won);
 	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = 4; assert(!online_week_mail(m, sizeof m));
+	/* (the Board's v19 posts: the party's mark, who dives now, the week's split records) */
+	static DiveDivers d;
+	static WeekSplits w;
+	d.total = 2; d.count = 2;
+	snprintf(d.e[0].name, sizeof d.e[0].name, "Beta"); d.e[0].depth = 4;
+	snprintf(d.e[1].name, sizeof d.e[1].name, "Gamma"); d.e[1].depth = 6; d.e[1].flags = ONLINE_DIVERS_FIGHTING;
+	w.best[0][0].tenths = 123; snprintf(w.best[0][0].name, sizeof w.best[0][0].name, "Beta");
+	w.best[3][2].tenths = 98; snprintf(w.best[3][2].name, sizeof w.best[3][2].name, "Gamma");
+	s = square_week_board(online_week_board(), 2963, &d, &w);
+	assert(strstr(s, "1.Gamma:10+") && strstr(s, "|>+:a guardian beaten"));
+	assert(strstr(s, "|>Diving now:2|Beta:layer 4\nGamma:layer 6!"));
+	assert(strstr(s, "|>Fastest guardian\nbusts this week|L3 solo:12.3s Beta\nL10 x3:9.8s Gamma"));
 }
 
 /* ---- the shared dive's wire (protocol v19, dive_wire.h): what the game sends, byte for byte as the server's

@@ -8,7 +8,11 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "director.h"
+#include "dive_finds.h"
+#include "dive_pack.h"
 #include "dive_people.h"
+#include "dive_splits.h"
+#include "dive_traces.h"
 #include "dive_wire.h"
 #include "dive_words.h"
 #include "emu.h"
@@ -87,7 +91,7 @@ static void send(const uint8_t *m, size_t n) {
 static void ended(void) {
 	const WeeklyRecord *r = weekly_record();
 	uint8_t m[ONLINE_DIVE_END_BYTES];
-	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, 0));
+	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause()));
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
 }
@@ -99,7 +103,7 @@ static void room(void) {
 	uint8_t m[ONLINE_DIVE_ENTER_BYTES];
 	size_t n = dive_wire_enter(m, L.week, L.seed, w);
 	send(m, n);
-	if (n) L.room = w;
+	if (n) { L.room = w; dive_traces_room(w); }
 }
 
 void dive_link_frame(void) {
@@ -132,14 +136,31 @@ void dive_link_frame(void) {
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
 	dive_people_frame(&s);
+	dive_traces_frame();
+	dive_finds_frame();
+	dive_splits_frame();
 }
 
-static void feed(const DiveFeed *f) {
-	const char *line = dive_feed_words(f->kind, f->name, f->way.depth, f->party);
+void dive_link_line(const char *line) {
 	if (!*line) return;
 	if (L.nfeed == FEED_MOST) { memmove(L.feed, L.feed + 1, sizeof L.feed[0] * (FEED_MOST - 1)); --L.nfeed; L.shown_at = 0; }
 	snprintf(L.feed[L.nfeed++], sizeof L.feed[0], "%s", line);
 	fprintf(stderr, "dive: feed: %s\n", line);
+}
+
+static void feed(const DiveFeed *f) { dive_link_line(dive_feed_words(f->kind, f->name, f->way.depth, f->party)); }
+
+/* the traces, a split's place and the Board's records (dive_traces.h, dive_splits.h, dive_pack.h) */
+static void traces_mail(const uint8_t *m, size_t n) {
+	static DiveTraces t;
+	static WeekSplits w;
+	DivePlace p;
+	switch (m[0]) {
+	case ONLINE_DIVE_TRACES: if (dive_wire_traces(m, n, &t)) dive_traces_mail(&t); break;
+	case ONLINE_DIVE_PLACE: if (dive_wire_place(m, n, &p)) dive_splits_place(&p); break;
+	case ONLINE_WEEK_SPLITS: if (dive_wire_splits(m, n, &w)) dive_pack_splits(&w); break;
+	default: break;
+	}
 }
 
 void dive_link_mail(const uint8_t *m, size_t n) {
@@ -154,9 +175,9 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 		if (dive_wire_feed(m, n, &f)) feed(&f);
 		break;
 	case ONLINE_DIVERS:
-		if (dive_wire_divers(m, n, &d)) L.divers = d.total;
+		if (dive_wire_divers(m, n, &d)) { L.divers = d.total; dive_pack_divers(&d); }
 		break;
-	default: break;
+	default: traces_mail(m, n); break;
 	}
 }
 
