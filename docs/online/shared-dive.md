@@ -106,7 +106,7 @@ Verified on `dev`, 15 November 2026:
 | The portal | By the Board in the greeter's place, the Prog gone: BN6's Yes/No with the week's dates and how many Navis dive now | The plaza's centre; the portal with the Prog beside it |
 | Others on a layer | Walk-through MegaMen with name tags, up to seven others (a channel's eight); every diver on the layer a dot on the PET's map | The nearest only; dots only |
 | Traces of the week | A deletion feed to every diver; a mark where a diver fell, for the week, A on it saying what deleted them; one of the Square's fixed phrases left on a panel, others able to Wave at it; dealers and portals saying live facts (Navis gone each way, chips bought) | (all four taken) |
-| Mystery Data | Each diver opens their own; the week's first finder's name on a data; data others opened this week shimmer faintly | A pair data opened by two divers together |
+| Mystery Data | Each diver opens their own, at the same places for everyone (the layer's seed), its chip by their own folder; the week's first finder's name on a data; data others opened this week shimmer faintly (kept so on 15 November 2026 over who got what there, an opened count, and a cheer for two opening one together) | A pair data opened by two divers together |
 | Crews | Up to four, Team up on a diver's card; a crew lasts across layers until someone splits up, leaves or ends their dive | One layer at a time; pairs |
 | A crew at a fork | The portal opens only when the whole crew stands on it, or someone splits up | Each picks and the crew splits; the captain picks for all |
 | Random battles | Each diver's own; crewmates within a few panels are offered to jump in; only crewmates | Anyone near; the battle's owner accepting each |
@@ -137,6 +137,23 @@ Verified on `dev`, 15 November 2026:
   straight into the dive's first layer (`weekly_dive` no longer starts in
   Lan's room). Seen headless against a local server: the vortex at the
   plaza's edge, its question, the dive begun on layer 1.
+
+- **The dive's link and the divers on a layer** (15 November 2026,
+  `dive_link.c`, `dive_people.c`, `puppet.c`; the wire's v19 in
+  [shared/online/README.md](../../shared/online/README.md)): the Square's
+  connection is kept as the portal warps MegaMan into the dive, and kept
+  again by a visit to the Square from the dive and back. Each layer he
+  stands on is a room of the server's (DIVE enter: the week, its seed,
+  the layer's depth, side and area); his place goes as STATE, and the
+  room's divers come back in SNAPSHOT as BN6's MegaMen, puppets in the
+  NPC slots the layer leaves free (BN6 runs 16: layer 1 of seed 1 held
+  11, so five there), walked through. At home between acts nothing is
+  sent and his last place stands. The server's feed (a deletion, a win, a
+  guardian beaten, a flare) shows in a band over the map's foot, a line
+  at a time. A link lost for 20 seconds leaves the dive solo; a dive's
+  end is told (DIVE end) and the link closed; a quit to the title closes
+  it. Seen headless with two games on a local server: both in layer 1's
+  room, each seeing the other walk.
 
 ## The spike: four on one field (15 November 2026)
 

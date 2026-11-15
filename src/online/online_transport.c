@@ -554,7 +554,9 @@ bool online_transport_channel(uint16_t channel) {
 
 bool online_transport_send(const uint8_t *data, size_t size) {
 	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_WEEK_POST || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
-		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH || data[0] == ONLINE_TEAM);
+		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH || data[0] == ONLINE_TEAM ||
+		/* (the shared dive's, protocol v19: dive_link.c) */
+		data[0] == ONLINE_DIVE || data[0] == ONLINE_CREW || data[0] == ONLINE_QUEUE || data[0] == ONLINE_PARTY_DAMAGE || data[0] == ONLINE_PARTY_HP);
 	if (!transport.enabled || !ours) return false;
 	/* (a link down: nothing kept for the next session, which the server
 	 * began afresh, what was under way ended at the drop; issue #153) */

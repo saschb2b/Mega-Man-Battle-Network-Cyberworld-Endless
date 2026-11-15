@@ -24,21 +24,13 @@
 #include "netmap.h"
 #include "npc.h"
 #include "pad_art.h"
+#include "puppet.h"
 #include "rom.h"
 #include "square_plan.h"
 #include "xnavi.h"
 
-#define PEER_SPRITE 55     /* list 6's MegaMan, bn6f npcSpritePtrs[0x37] */
 #define PROG_SPRITE 61     /* list 6's Mr.Prog: the keeper, the greeter, the referee */
 #define RETURN_PAD 0x81    /* list 7's return pad, as a side layer's way back */
-/* the puppets' script: shown or hidden, animation, position, a frame's
- * pause, and a jump back, or once through a sound first */
-#define SCRIPT_LOOP 9
-#define SCRIPT_VISIBLE SCRIPT_LOOP
-#define SCRIPT_ANIM (SCRIPT_LOOP + 2)
-#define SCRIPT_POSITION (SCRIPT_LOOP + 4)
-#define SCRIPT_JUMP (SCRIPT_LOOP + 13)
-#define SCRIPT_SOUND (SCRIPT_LOOP + 17)
 #define SQUARE_WRITER "online square"
 #define PROG_TEXT 1024
 #define DESK_SPRITE 0x78   /* list 7's reception desk, two robot clerks at it: Trade Central */
@@ -97,26 +89,6 @@ static uint32_t geometry_hash(void) {
 	return h;
 }
 
-/* A puppet of sprite `index` of list `category`, moved by the Square
- * between frames: the mutable loop uses existing NPC bytecode (visible or
- * hidden, animation, position, a frame's pause, a jump), and a jump through
- * a sound (0x28) once when one is asked for. ns_set_animation only reloads
- * a changed animation, so a walker keeps its cadence (bn6f npc.s). */
-static uint32_t puppet_script(int category, int index) {
-	uint8_t script[] = {
-		0x09, 0x25, (uint8_t)index, (uint8_t)(category * 4), 0x0A, 0, 0x1F, 0x0E, 0x13,
-		0x09, 0x16, 0, 0x14, 0, 0, 0, 0, 0, 0,
-		0x10, 1, 0x02, 0, 0, 0, 0,
-		0x28, 0, 0, 0x02, 0, 0, 0, 0,
-	};
-	uint32_t at = mapslot_alloc(script, sizeof script);
-	if (!at) return 0;
-	put32(script + SCRIPT_JUMP, at + SCRIPT_LOOP);
-	put32(script + sizeof script - 4, at + SCRIPT_LOOP);
-	emu_write(at, script, sizeof script);
-	return at;
-}
-
 /* the plan's props as BN6's map objects (layer_objs.c's pieces), those on
  * the stage's and the ring's rims at their height */
 static void props(NpcList *npcs) {
@@ -129,20 +101,6 @@ static void props(NpcList *npcs) {
 	memset(recs + n * 20, 0, 4);
 	recs[n * 20] = 0xFF;
 	npcs->objects = n ? mapslot_alloc(recs, n * 20 + 4) : 0;
-}
-
-static void put_jump(uint32_t script, uint32_t to) {
-	uint8_t b[4];
-	put32(b, to);
-	emu_write(script + SCRIPT_JUMP, b, sizeof b);
-}
-
-static void position(uint32_t at, int x, int y, int z) {
-	uint8_t p[6];
-	put16(p, (uint16_t)x);
-	put16(p + 2, (uint16_t)y);
-	put16(p + 4, (uint16_t)z);
-	emu_write(at + SCRIPT_POSITION, p, sizeof p);
 }
 
 static int level_z(int gx, int gy) { return plan.level[gy][gx] ? rise : 0; }
@@ -203,15 +161,15 @@ static bool people(NpcList *npcs) {
 	talk_room = mapslot_alloc(empty, TALK_ROOM);
 	progs(npcs, empty);
 	desk(npcs, empty);
-	if (!npc_need_sprite(npcs, 6, PEER_SPRITE)) return false;
+	if (!npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return false;
 	for (int i = 0; i < SQUARE_PEERS; ++i) {
-		actors[i].script = puppet_script(6, PEER_SPRITE);
+		actors[i].script = puppet_make(6, PUPPET_MEGAMAN);
 		if (!actors[i].script) return false;
 		npcs->script[npcs->n++] = actors[i].script;
 	}
 	for (int k = 0; k < SQUARE_ACTORS && npcs->n < BN6_NPC_COUNT; ++k) {
 		if (!npc_need_sprite(npcs, extra_sprites[k][0], extra_sprites[k][1])) continue;
-		extras[k].script = puppet_script(extra_sprites[k][0], extra_sprites[k][1]);
+		extras[k].script = puppet_make(extra_sprites[k][0], extra_sprites[k][1]);
 		if (extras[k].script) npcs->script[npcs->n++] = extras[k].script;
 	}
 	return true;
@@ -355,16 +313,16 @@ bool online_square_exit_ahead(int x, int y, int face) {
 static void peer_at(unsigned slot, const OnlinePeer *peer) {
 	uint32_t at = actors[slot].script;
 	bool visible = peer != NULL;
-	emu_write8(at + SCRIPT_VISIBLE, visible ? 0x08 : 0x09);
+	puppet_show(at, visible);
 	actors[slot].visible = visible;
 	if (!visible) { actors[slot].id = 0; return; }
 	bool moved = actors[slot].id == peer->id && (actors[slot].x != peer->x || actors[slot].y != peer->y);
 	if (moved) actors[slot].moving = 8;
 	else if (actors[slot].moving) --actors[slot].moving;
-	emu_write8(at + SCRIPT_ANIM, (uint8_t)(peer->facing + (actors[slot].moving ? 8 : 0)));
-	position(at, peer->x, peer->y, peer->z);
+	puppet_anim(at, peer->facing + (actors[slot].moving ? PUPPET_WALK : 0));
+	puppet_place(at, peer->x, peer->y, peer->z);
 	/* (a sound asked for last frame has played: the loop again) */
-	if (actors[slot].sound) { put_jump(at, at + SCRIPT_LOOP); actors[slot].sound = 0; }
+	if (actors[slot].sound) { puppet_loop(at); actors[slot].sound = 0; }
 	actors[slot].id = peer->id;
 	actors[slot].x = peer->x;
 	actors[slot].y = peer->y;
@@ -375,35 +333,33 @@ void online_square_actor(int k, bool visible, int anim, int x, int y, int z) {
 	Puppet *a = &extras[k];
 	if (k < 0 || k >= SQUARE_ACTORS || !a->script) return;
 	claims_begin(SQUARE_WRITER);
-	emu_write8(a->script + SCRIPT_VISIBLE, visible ? 0x08 : 0x09);
-	emu_write8(a->script + SCRIPT_ANIM, (uint8_t)anim);
-	position(a->script, x, y, z);
+	puppet_show(a->script, visible);
+	puppet_anim(a->script, anim);
+	puppet_place(a->script, x, y, z);
 	/* (a sound asked for last frame has played: the loop again) */
-	if (a->sound) { put_jump(a->script, a->script + SCRIPT_LOOP); a->sound = 0; }
+	if (a->sound) { puppet_loop(a->script); a->sound = 0; }
 	claims_end();
 	a->visible = visible; a->anim = anim; a->x = x; a->y = y; a->z = z;
 }
 
-static void puppet_sound(Puppet *a, int sound) {
+static void sound_once(Puppet *a, int sound) {
 	claims_begin(SQUARE_WRITER);
-	emu_write8(a->script + SCRIPT_SOUND + 1, (uint8_t)sound);
-	emu_write8(a->script + SCRIPT_SOUND + 2, (uint8_t)(sound >> 8));
-	put_jump(a->script, a->script + SCRIPT_SOUND);
+	puppet_sound(a->script, sound);
 	claims_end();
 	a->sound = sound;
 }
 
 void online_square_actor_sound(int k, int sound) {
 	if (k < 0 || k >= SQUARE_ACTORS || !extras[k].script) return;
-	puppet_sound(&extras[k], sound);
+	sound_once(&extras[k], sound);
 }
 
 void online_square_peer_pose(unsigned slot, int anim, int sound) {
 	if (slot >= SQUARE_PEERS || !actors[slot].script || !actors[slot].visible) return;
 	claims_begin(SQUARE_WRITER);
-	emu_write8(actors[slot].script + SCRIPT_ANIM, (uint8_t)anim);
+	puppet_anim(actors[slot].script, anim);
 	claims_end();
-	if (sound > 0) puppet_sound(&actors[slot], sound);
+	if (sound > 0) sound_once(&actors[slot], sound);
 }
 
 int online_square_actor_ahead(int x, int y, int face) {

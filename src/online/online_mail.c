@@ -2,6 +2,7 @@
 
 #include <stdio.h>
 
+#include "dive_link.h"
 #include "online_board.h"
 #include "online_trade.h"
 #include "online_week.h"
@@ -26,6 +27,10 @@ void online_mail_frame(void) {
 			square_watch_mail(m, n);
 			break;
 		case ONLINE_TEAM_STATE: square_team_mail(m, n); break;
+		case ONLINE_DIVE_ROOM: case ONLINE_DIVE_TRACES: case ONLINE_DIVE_PLACE: case ONLINE_DIVE_FEED: case ONLINE_DIVERS:
+		case ONLINE_CREW_STATE: case ONLINE_QUEUE_STATE: case ONLINE_PARTY_HP: case ONLINE_WEEK_SPLITS:
+			dive_link_mail(m, n);
+			break;
 		default: break;
 		}
 		if (!ok) fprintf(stderr, "online: a malformed message of kind %u set aside\n", m[0]);

@@ -50,6 +50,7 @@ int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 int layer_objs_bystander = LAYER_BYSTANDER, layer_objs_bystander2 = LAYER_BYSTANDER;   /* (EvilNavi) */
+void (*layer_objs_more)(NpcList *npcs);
 unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
@@ -985,5 +986,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}
 	rush_install(group, number);
+	if (layer_objs_more) layer_objs_more(npcs);
 	return mapslot_install(group, number, npcs, in.md, in.nmd);
 }

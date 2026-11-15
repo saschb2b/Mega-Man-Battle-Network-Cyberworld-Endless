@@ -152,6 +152,10 @@ extern int layer_objs_official_level;
  * layer_objs_dark_first). It stands in its last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
+/* NPCs a part above the layer adds to each layer's list as it is built,
+ * after the layer's own (the shared dive's other divers, dive_people.h; the
+ * layer's generation and objects stay what its seed makes); NULL none. */
+extern void (*layer_objs_more)(NpcList *npcs);
 /* ... one BN6's own rule plays (docs/game/meta/bn6-darkchips.md): its
  * words' pieces, NULL for BN5's own */
 extern const ScriptsDark6 *layer_objs_dark6;
