@@ -3,7 +3,7 @@ type: Feature
 title: "BN6's own DarkChips"
 description: "BN6's own DarkChips (issue #70): what DrkSword, DarkThnd, DrkRecov, DarkInvs and DarkPlus do in BN6's battles, the owner's calls (20 max HP plus BN6's BugFrag, a BN6 flame per act) and `src/director/darkbn6.c`."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T09:50:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:00:00Z }
 ---
 
 # BN6's own DarkChips (4 October 2026, issue #70)
@@ -172,8 +172,10 @@ counted by the engine.
   eight seconds, and nothing touches us.
 - **BN6's own lines:** a bystander on the flame's layer runs BN6's own
   script about DarkChips ("A dar...DarkChip!? Those are against the
-  law!"), a rumor before the find; at a fourth DarkChip the folder editor's
-  NAVIGATOR line is MegaMan's own.
+  law!"), a rumor before the find, after two boxes of his own on the
+  purple flame he saw, so that it dawns on him (alone, BN6's reply on its
+  BBS came out of nowhere, a playtester's word, session 76); at a fourth
+  DarkChip the folder editor's NAVIGATOR line is MegaMan's own.
 - **Just in time:** after a profile's first battle with dark power used,
   MegaMan names what it took (the BugFrag, the bug gone with the battle,
   with B the 20 max HP that stays gone); the first time one falls back
@@ -268,9 +270,10 @@ own code runs them, our part is the run around it (`src/director/darkbn6.c`,
   After a battle where one ran as its base chip, once a session: "With
   none to burn, that DrkSword was only a Sword." BN6's own words, run
   from the player's ROM: on a flame's layer the first bystander free of
-  a part to play says its BBS's post on DarkChips ("A dar...DarkChip!?
-  Those are against the law!"), and the folder's NAVIGATOR line is
-  MegaMan's.
+  a part to play asks whether MegaMan saw the purple flame, feels
+  something dark in it, and says its BBS's post on DarkChips ("A
+  dar...DarkChip!? Those are against the law!"); the folder's NAVIGATOR
+  line is MegaMan's.
 - **Where BN5's ROM is read** (the owner's call of 13 October 2026,
   [DarkChips](darkchips.md)): DarkPlus and DarkInvs are BN5's chips in BN6's
   records (DarkInvs from either flame, by BN5's rule and words; DarkPlus

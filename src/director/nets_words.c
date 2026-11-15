@@ -13,17 +13,29 @@
 #include "director_folder.h"
 #include "director_state.h"
 #include "emu.h"
+#include "powers.h"
 #include "save.h"
 #include "souls.h"
 #include "talk.h"
 #include "visitor_families.h"
 #include "visitors.h"
 
+/* (whether MegaMan has a Cross now, as the Custom screen offers them:
+ * the run's brought or won, its CROSSSELECT entries on. A run with none
+ * hears no "Cross and all!", which two playtesters' did; the words are
+ * made on a layer's arrival, the game running, a CONTINUE saying none) */
+static bool cross_owned(void) {
+	for (int navi = 1; navi <= 5; ++navi)
+		if (powers_cross_owned(navi)) return true;
+	return false;
+}
+
 /* Where the nets meet, the first time a profile comes there, after the
  * arrival's own words: an older net's area whose battles are ours (a
  * profile once told its battles ran the old way, on the guest core that
  * has left runs, hears that its Cross and its Navis are ours now), and the
- * deep, where both nets' viruses come */
+ * deep, where both nets' viruses come; the Cross named only in a run that
+ * holds one */
 void nets_arrival_words(void) {
 	/* (an older net's area: a territory's, or the deep's dressed in one) */
 	bool older = D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS);
@@ -31,12 +43,16 @@ void nets_arrival_words(void) {
 	D.beat_native = older && !profile.native_taught && !D.beat_ours;
 	D.beat_deep = D.deep && !profile.deep_taught;
 	size_t k = strlen(D.beat);
-	if (D.beat_ours)
+	bool cross = cross_owned();
+	if (D.beat_ours && cross)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! Our Cross works in the older Net now!|@M Whoa... Even its Navis fight like ours!|"
 			"@L Alright! Cross and all!", k ? "|" : "");
+	else if (D.beat_ours)
+		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan! The older Net's changed!|@M Whoa... Its Navis fight like ours now!|"
+			"@L Alright!", k ? "|" : "");
 	else if (D.beat_native)
 		k += (size_t)snprintf(D.beat + k, sizeof D.beat - k, "%s@M Wait... This Net's a copy of an older one!|@L The Nest copied that too!?|"
-			"@M Its viruses are the old ones,Lan.|@M But we fight them our way. Cross and all!", k ? "|" : "");
+			"@M Its viruses are the old ones,Lan.|%s", k ? "|" : "", cross ? "@M But we fight them our way. Cross and all!" : "@M But we fight them our way!");
 	if (D.beat_deep && k < sizeof D.beat)
 		snprintf(D.beat + k, sizeof D.beat - k, "%s@M Lan... The two Nets run together down here.|@L The old viruses and ours? Side by side?|"
 			"@M Yeah. Anything could come at us!", k ? "|" : "");

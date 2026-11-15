@@ -3,7 +3,7 @@ type: Design
 title: "The reward pick's screen"
 description: "The run's picks of one reward among several (a guardian's NaviCust draft, a vault's, a Server's and a Glitch copy's three chips, an official gate's, Mr.Prog's first gift) on a screen of ours in BN6's PET look: each choice on the Library's card with its picture and details, the skip a row of its own, and how a pick's script opens it (`src/director/reward_pick.c`)."
 tags: [game, ui, navicust, rewards]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:10:00Z }
 ---
 
 # The reward pick's screen
@@ -109,8 +109,17 @@ rest for half a second as it opens (its fade in among them), and A
 counts only after it has rested a third of a second on the screen: A
 pressed through the lines before the chat box's options once took the
 first of three for good (session 55), and in a capture a mash through
-Mr.Prog's lines ran on into the screen past its fade. No confirmation
-follows A: the screen is the look a question gave before.
+Mr.Prog's lines ran on into the screen past its fade. Nor does A take
+anything before the screen has been up a second and a half
+(`PICK_SEEN`, 90 frames), long enough to be seen: a playtester pressing
+A about once a second through Mr.Prog's lines had the next press land
+55 frames after the gift's screen opened, past both rests, and take
+its first row unseen (session 76). An A held from before the screen
+opened counts only once released and pressed again. The hold is A's
+alone, for every kind: Up and Down move once the fade is done, and B
+takes nothing (it leaves a pick that keeps, or goes to the draft's
+skip row). No confirmation follows A: the
+screen is the look a question gave before.
 
 ## How it is built
 

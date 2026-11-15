@@ -34,8 +34,9 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
  * keeps: docs/game/meta/what-megaman-knows.md). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
 /* The rival's duel (docs/game/rival.md): ProtoMan's terms (boxes apart by '|'),
- * then "Take the duel?", starting on No; Yes sets `flag`. */
-int ta_duel(TextArchive *t, int flag, int face, const char *terms);
+ * then the question, starting on No (a `race` against his time MegaMan's,
+ * the netbattle ProtoMan's); Yes sets `flag`. */
+int ta_duel(TextArchive *t, int flag, int face, const char *terms, bool race);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
  * (the flag set) and `again` after; `sold_out` instead of both, and no
@@ -111,7 +112,8 @@ typedef struct {
 int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d);
 /* BN6's own words on DarkChips, a post of its BBS run from the player's
  * ROM (docs/rom/), said by a bystander with `face` on a flame's
- * layer; -1 where the ROM's text is not as expected. */
+ * layer after two boxes of his own on the flame he saw; -1 where the
+ * ROM's text is not as expected. */
 int ta_dark_rumor(TextArchive *t, int face);
 /* A gate sealed with `navi`'s code: while `beaten` (his deletions as a
  * guardian, any runs) is short of `needed`, its words say so (flag -1:
