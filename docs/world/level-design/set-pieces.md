@@ -117,13 +117,13 @@ took a lock every act, the gem was asked for and pockets were carved
 
 | | Before | After |
 | --- | --- | --- |
-| Layers holding a lock | 20.7% | 40.2% |
-| An act's middle layer holding one | 34.8% | 92.7% |
-| Runs whose first lock is in act 1 / act 2 / later / never | 86 / 52 / 60 / 2 | 194 / 6 / 0 / 0 |
-| Obstacles standing of those planned | 164 / 327 | 294 / 342 |
-| Cubes and doors standing | 351 / 627 | 871 / 878 |
-| Teleports standing | 9 / 85 | 8 / 8 (all Green's) |
-| Rush gaps standing | 207 / 214 | 308 / 316 |
+| Layers holding a lock | 20.7% | 38.7% |
+| An act's middle layer holding one | 34.8% | 88.5% |
+| Runs whose first lock is in act 1 / act 2 / later / never | 86 / 52 / 60 / 2 | 190 / 10 / 0 / 0 |
+| Obstacles standing of those planned | 164 / 327 | 263 / 342 |
+| Cubes and doors standing | 351 / 627 | 865 / 878 |
+| Teleports standing | 9 / 85 | 6 / 8 (all Green's) |
+| Rush gaps standing | 207 / 214 | 288 / 316 |
 | Purple data | 761 | 736 |
 
 Before, one run in two met no lock before its first guardian: the act's
@@ -133,4 +133,8 @@ the obstacles and cubes planned stood nowhere: no mouth on the floor
 closed off a pocket of six panels or more (7067 of the 10493 mouths
 measured closed off fewer), and an obstacle no Cross the run held opened
 was left out three times in five. An act's first layer holds a
-lock about one time in five, a guardian's one in eight, as before.
+lock about one time in five, a guardian's one in eight, as before. The
+"after" is measured with the layers' stairs and raised rooms
+([The generator](generator.md)), which take some of the floor a gap's or a
+pocket's stand would: without them 40.2% of layers held a lock and the
+middle layer 92.7%.
