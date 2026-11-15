@@ -32,6 +32,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import build  # noqa: E402  (its docker helper, ROM folder, media entries and ffmpeg image)
 import trailer_music  # noqa: E402
+import trailer_youtube  # noqa: E402
 import trailers  # noqa: E402
 
 OUT = os.path.join(ROOT, 'docs', 'clips')
@@ -142,9 +143,11 @@ def encode(out, poster, label):
     jobs = [common + ['-c:v', 'libx264', '-crf', '27', '-preset', 'slow', '-maxrate', '3M', '-bufsize', '6M', '-pix_fmt', 'yuv420p', '-c:a', 'aac', '-b:a', '160k',
                       '-movflags', '+faststart', f'/src/{dest}/trailer.mp4'],
             common + ['-c:v', 'libvpx-vp9', '-b:v', '2M', '-crf', '38', '-row-mt', '1', '-pix_fmt', 'yuv420p', '-c:a', 'libopus',
-                      '-b:a', '128k', f'/src/{dest}/trailer.webm']]
+                      '-b:a', '128k', f'/src/{dest}/trailer.webm'],
+            # (YouTube's 4K master from the lossless frames, for tools/trailer_youtube.py)
+            trailer_youtube.frames_job(f'/src/{rel}', f'/src/{rel}/youtube.mp4')]
     for i, args in enumerate(jobs):
-        if subprocess.call(['docker', 'run', '--rm', '--name', f'cw-trailer-{os.getpid()}-{i}', '-u', f'{os.getuid()}:{os.getgid()}',
+        if subprocess.call(['docker', 'run', '--rm', '--name', f'cw-trailer-{os.getpid()}-{i}', '-u', f'{os.getuid()}:{os.getgid()}', '--entrypoint', 'ffmpeg',
                             '-v', f'{ROOT}:/src', build.FFMPEG_IMAGE, *args]) != 0:
             sys.exit('ffmpeg failed')
     Image.open(os.path.join(WORK, 'frames', f'{poster:05d}.png')).save(os.path.join(out, 'trailer.png'), optimize=True)

@@ -68,6 +68,7 @@ commits, issues and old notes) are mapped section by section in
 | How parallel PRs stay out of each other's way: the files `dev`'s workflow writes, what a branch does when it meets one, what conflicted and how often | [docs/project/merging.md](docs/project/merging.md) |
 | The numbers each branch in flight may take (ids, slots, free-space spans, units, `Run`): a claim a branch, held apart by lint | [docs/project/claims.md](docs/project/claims.md) |
 | The itch.io page: its texts, settings, pictures and files, each release's devlog post, and the record (`docs/itch/state.json`) that `build.py lint` holds it to | [docs/project/itch.md](docs/project/itch.md) |
+| The trailers on YouTube: the channel, each video's fields, the 4K masters, the upload through the owner's Chrome, the videos | [docs/project/youtube.md](docs/project/youtube.md); the [youtube-publish skill](.claude/skills/youtube-publish/SKILL.md) |
 
 Keeping it (the okf skill's implicit mode, whenever `docs/` changes):
 
@@ -440,6 +441,7 @@ python3 tools/app_icon.py              # linux/icons and src/core/app_icon.h: th
 python3 tools/steam_art.py             # linux/steam: Steam's library artwork (capsules, hero, logo); 3ds/banner.png
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 tools/trailer.py [VERSION] [--keep]   # docs/clips/trailer.*: the current trailer (tools/trailers/; an older VERSION into .build/ only)
+python3 tools/trailer_youtube.py [VERSION ...]   # .build/youtube: each trailer's 4K master, thumbnail, title and description for YouTube (docs/project/youtube.md)
 python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's chime (Pixabay's "UI Success Chime", kept out of git) and its two tones
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip

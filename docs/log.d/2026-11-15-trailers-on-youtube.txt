@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T06:40:00Z
+* **Create**: project/youtube.md (the trailers on the owner's channel: the 4K masters `tools/trailer_youtube.py` makes, each video's fields, the pieced upload through Chrome, what the channel's verification opens, the owner's answers, each release's step, the ten videos). **Update**: project/index.md (its line), project/itch.md (the trailer field: the trailers are on YouTube now), code/tools.md (`tools/trailer_youtube.py`'s row, the youtube-publish skill's row), code/index.md (the skills named).
