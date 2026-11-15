@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T03:00:00Z
+* **New**: online/shared-dive.md (the week's net dived together, proposed and unbuilt: the portal in the greeter's place, divers seen live, crews of four, join-in battles, the guardian door's queue of four on one field scaled by BN6's versions, the owner's 21 decisions and what is open), online/index.md (its line), online/weekly-net.md (a link to the proposal).

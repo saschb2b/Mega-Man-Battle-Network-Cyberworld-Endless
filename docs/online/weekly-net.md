@@ -25,6 +25,10 @@ system that reads one extra ROM at most, the New 3DS, holds no DeepNet
 stamp though its pass is full and trades
 ([A system with room for one game](netpass.md#a-system-with-room-for-one-game)).
 
+A proposal to dive it together, every diver on the seed seen live and the
+guardians fought by parties of up to four, is [The shared dive](shared-dive.md)
+(15 November 2026, unbuilt).
+
 ## Its design
 
 Through the game-design skill:
