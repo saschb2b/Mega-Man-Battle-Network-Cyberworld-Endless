@@ -180,7 +180,9 @@ static void heights(NetLayout *lay) {
 	LayerKit kit;
 	netmap_kit(plan.area, &kit);
 	rise = 0;
-	if (!(kit.stair_dirs & 1u << STAIR_UP_NY) || kit.rise < 32) return;
+	/* (Sky's two-by-two: a stage's stair, square_plan.c) */
+	int len = kit.stair_len[STAIR_UP_NY][STAIR_WIDE];
+	if (!(kit.stair_dirs & 1u << STAIR_UP_NY) || kit.rise != 32 || (len && len != 2)) return;
 	rise = kit.rise;
 	lay->level = &plan.level[0][0];
 	lay->rise = rise;

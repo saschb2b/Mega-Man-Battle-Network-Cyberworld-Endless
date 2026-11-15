@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:40:00Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"
@@ -287,8 +287,36 @@ senses, Lan reacts; neither names what they have not seen.
   glitch under BN6's mosaic, through its talker's idle loop; its colours
   turned, torn and split by colour over the frame.
 - Dev: `--dev glitch` (the warp on every act's first layer from the
-  second), `glitchstage=N`, `side=4`, the `glitch` step and `--talk
-  glitch`/`copy` ([the dev menu](../devtools/dev-menu.md)).
+  second), `glitchstage=N`, `side=4`, `glitchlook=AREA` and `glitchhold`
+  (below), the `glitch` step and `--talk glitch`/`copy` ([the dev
+  menu](../devtools/dev-menu.md)).
+
+## Checking an area's look
+
+A flip is the layer's floor picked again in another area's tiles by the
+same pass a layer of that area is picked by (`pick_map`: its stairs,
+pads, ornaments, emblems, arrows, bushes, [side
+pieces](../world/level-design/side-pieces.md), the safety net for holes
+and the scenery), its props left out. So what an area learns to set
+around its floors comes along in its flips wherever it is set inside
+that pass. Two ways to look at it:
+
+- **Without the game**, `python3 build.py atlas intoN` (`xN` another
+  game's area, as `--net-biome` names them): a layer of every other area
+  (a plain one at depth 2, and one up a stair where the area climbs
+  them), each as built on the left and as a flip into N shows it on the
+  right, `.build/atlas/look_intoNN_fromFF_dD_sS.png`, and a line each in
+  its `report.txt`: the layer's stairs and rise, N's own stairs, ladders
+  and rise, and what each pick set (scenery, side pieces) and the holes
+  its safety net left, the layer's `->` the look's. `fromN` draws one of
+  N's layers in every other area's look. The [atlas](../devtools/atlas.md)'s
+  third field is the seeds per area (1).
+- **In the game**, `--dev glitch,side=4,glitchstage=5,glitchlook=N`: a run
+  that starts on a Glitch layer at stage 4, its looks from N first (more
+  areas joined by `+`, `glitchlook=3+x0`); with `glitchhold` the first
+  look stays on the floor, no other glitch over it, for a capture
+  (`build.py shot --scene emu --run-depth 4 --dev
+  glitch,side=4,glitchstage=5,glitchlook=N,glitchhold`).
 
 **Checked:** `build.py test` (`test_glitch`: one run in three over 3,000
 seeds, never two, on an act's first layer from the second; the warp and

@@ -151,7 +151,7 @@ static void fuzz(void) {
 
 static bool on_stair(const SquarePlan *p, int x, int y) {
 	for (int i = 0; i < p->nstairs; ++i)
-		if (x >= p->stairs[i].x && x < p->stairs[i].x + 2 && y >= p->stairs[i].y && y < p->stairs[i].y + 2) return true;
+		if (stair_covers(&p->stairs[i], x, y)) return true;
 	return false;
 }
 

@@ -35,7 +35,7 @@ static bool pad_at(int x, int y) {
 
 static bool stair_at(int x, int y) {
 	for (int i = 0; i < layer.nstairs; ++i)
-		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
+		if (stair_covers(&layer.stair[i], x, y)) return true;
 	return false;
 }
 

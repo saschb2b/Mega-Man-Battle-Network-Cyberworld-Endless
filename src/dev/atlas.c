@@ -4,6 +4,7 @@
  * own tiles and colours, with its objects marked; a report line per layer
  * says how the tile picks went. */
 #include "atlas.h"
+#include "atlas_looks.h"
 #include "layer_sizes.h"
 #include "pieces_census.h"
 #include "break_places.h"
@@ -679,7 +680,7 @@ static void towns(const char *dir, int seeds) {
 static void stair_layers(const char *dir, FILE *report, int b, int area, int seeds) {
 	LayerKit kit;
 	netmap_kit(area, &kit);
-	for (int s = 1, found = 0; kit.stair_dirs && s <= 300 && found < seeds; ++s) {
+	for (int s = 1, found = 0; (kit.stair_dirs | kit.stair_narrow) && s <= 300 && found < seeds; ++s) {
 		uint32_t seed = (uint32_t)(s * 7919 + area * 131 + 17);
 		run_new(seed);
 		run.depth = 5;
@@ -753,6 +754,9 @@ int atlas_run(const char *spec) {
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);
 	if (!strcmp(biomes, "pieces")) return pieces_census_run(dir, seeds);
+	/* (intoAREA, fromAREA: a Glitch layer's looks, atlas_looks.c) */
+	int looks;
+	if (atlas_looks_run(dir, biomes, seeds, &looks)) return looks;
 	int lettered = letter_spec(dir, biomes, seeds);
 	if (lettered >= 0) return lettered;
 	bool want[BIOME_COUNT] = { false };

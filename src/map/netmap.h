@@ -49,9 +49,17 @@ bool netmap_build_layer(int area, uint32_t seed);
  * layer's own area's), and that area's tile set and colours as VRAM takes
  * them; nothing written to the game. False where the area cannot draw it
  * (none learned, or 256-colour tiles). Free with netmap_look_free. */
-typedef struct { uint16_t *map; int tw, th; AreaVram gfx; } NetmapLook;
+typedef struct {
+	uint16_t *map;
+	int tw, th;
+	AreaVram gfx;
+	int scenery, sides;   /* the scenery and side pieces its pick set (netmap_scenery, netmap_sides) */
+} NetmapLook;
 bool netmap_look(int area, NetmapLook *out);
 void netmap_look_free(NetmapLook *l);
+/* The side pieces the last pick set on the floor (beside it, under pads
+ * and behind floors not counted): the layer's, or a look's just made */
+int netmap_sides(void);
 /* (dev) The hue buckets of area `area`'s roads, the second look of walkway
  * found in its own map (a bit each, 0-11 and 12 grey); 0 where it has none. */
 unsigned netmap_road_hues(int area);
@@ -112,7 +120,7 @@ bool netmap_floor_cell(int cx, int cy, int level);
  * off (voxel mode's ground, docs/engine/voxel.md). */
 bool netmap_floor_at(int wx2, int wy2, int level);
 /* How high a stair's ramp stands at that point, from its foot (0) to the
- * layer's rise, taken as even over its two panels; -1 off every stair. */
+ * layer's rise, taken as even over its length; -1 off every stair. */
 int netmap_stair_height(int wx2, int wy2);
 /* Whether wall cell (cx, cy) lies on a stair. */
 bool netmap_stair_cell(int cx, int cy);

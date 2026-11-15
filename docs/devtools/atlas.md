@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:42:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:40:00Z }
 ---
 
 # Atlas: every layer drawn
@@ -70,6 +70,13 @@ Output in `.build/atlas`:
   the floor runs on past; a corner's wall stops him there) and the
   walkways' junctions passed, and the panels walked (`src/dev/lineups.c`;
   [the generator](../world/level-design/generator.md), Navigation).
+
+BIOMES `intoN` and `fromN` draw a Glitch layer's looks instead
+(`src/dev/atlas_looks.c`): a layer of every other area as a flip into
+area N shows it, or one of N's in every other area's look, side by side
+with the layer as built, `look_intoNN_fromFF_dD_sS.png` and a line each in
+`report.txt` ([the Glitch layer](../game/glitch-layer.md), Checking an
+area's look).
 
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. A layer whose map's backdrop, as the game would

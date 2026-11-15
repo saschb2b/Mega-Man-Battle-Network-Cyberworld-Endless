@@ -178,7 +178,7 @@ static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 int nm_kind(int x, int y) {
 	if (x < 0 || y < 0 || x >= nm_cur->gw || y >= nm_cur->gh || !nm_cur->cell[y * nm_cur->gw + x]) return K_VOID;
 	for (int i = 0; i < nm_cur->nstairs; ++i)
-		if (x >= nm_cur->stairs[i].x && x < nm_cur->stairs[i].x + 2 && y >= nm_cur->stairs[i].y && y < nm_cur->stairs[i].y + 2) return K_STAIR;
+		if (stair_covers(&nm_cur->stairs[i], x, y)) return K_STAIR;
 	if (nm_cur->cell[y * nm_cur->gw + x] == C_SOLID) return K_SOLID;
 	return nm_cur->level && nm_cur->level[y * nm_cur->gw + x] ? K_RAISED : K_FLOOR;
 }
@@ -765,6 +765,8 @@ bool netmap_look(int area, NetmapLook *out) {
 		out->map = look_map(L, last.tw, last.th);
 		out->tw = last.tw;
 		out->th = last.th;
+		out->scenery = netmap_scenery;
+		out->sides = netmap_sides();
 		ok = out->map && area_src_vram(L->def->xrom, L->def->group, L->def->number, &out->gfx);
 	}
 	free(nm_last.seams);
@@ -780,26 +782,45 @@ bool netmap_look(int area, NetmapLook *out) {
 	return ok;
 }
 
+int netmap_sides(void) {
+	const SidePiece *p;
+	int X, Y;
+	return nm_sides_set(-1, &p, &X, &Y);
+}
+
 void netmap_look_free(NetmapLook *l) {
 	free(l->map);
 	area_vram_free(&l->gfx);
 	memset(l, 0, sizeof *l);
 }
 
-/* The stairs area `area` can draw (bit per STAIR_UP_*) and their rise. */
-static unsigned netmap_stair_dirs(int area, int *rise) {
-	if (!net_area_def(area)) return 0;
+/* The stairs area `area` can draw: two panels wide and one (bit per
+ * STAIR_UP_*), their lengths and their rise; whether its originals raise
+ * every platform they can over the walkways (Green's, CopyBot Comp's: its
+ * platforms drawn apart, its ladders learned). A way with a stair two wide
+ * keeps to it (Sky's: its one-wide stairs stand among Sky Area 1's
+ * catwalks at 32 and 64, and cut whole they came out notched where the
+ * catwalks' faces hang under their foot; docs/world/level-design/heights.md). */
+static void kit_stairs(int area, LayerKit *kit) {
+	const NetAreaDef *na = net_area_def(area);
+	if (!na) return;
 	Learned *L = learn_area(area);
-	unsigned dirs = 0;
-	*rise = 0;
+	if (!L->ok) return;
 	for (int d = 0; d < STAIR_DIRS; ++d)
-		if (L->ok && L->stairs[d].ok) { dirs |= 1u << d; *rise = L->stairs[d].rise; }
-	return dirs;
+		for (int w = 0; w < STAIR_WIDTHS; ++w) {
+			const StairTemplate *t = &L->stairs[d][w];
+			if (!t->ok || (w == STAIR_NARROW && L->stairs[d][STAIR_WIDE].ok)) continue;
+			if (w == STAIR_WIDE) kit->stair_dirs |= 1u << d;
+			else kit->stair_narrow |= 1u << d;
+			kit->stair_len[d][w] = (uint8_t)t->len;
+			kit->rise = t->rise;
+		}
+	kit->terraced = na->apart == NET_APART_PLATFORMS && kit->stair_narrow;
 }
 
 void netmap_kit(int area, LayerKit *kit) {
 	memset(kit, 0, sizeof *kit);
-	kit->stair_dirs = netmap_stair_dirs(area, &kit->rise);
+	kit_stairs(area, kit);
 	const NetAreaDef *na = net_area_def(area);
 	if (!na || !learned[area].ok) return;
 	for (int f = 0; f < 2; ++f) kit->counter_len[f] = learned[area].counter[f].ok ? learned[area].counter[f].len : 0;
@@ -901,7 +922,7 @@ bool netmap_build_layer(int area, uint32_t seed) {
 		lock(locked, m->ax, m->ay, 1, 1, 0);
 		if (m->kind == ROOM_PAD || r == layer.arena) lock(locked, m->x, m->y, m->w, m->h, 0);
 	}
-	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
+	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, stair_w(&layer.stair[i]), stair_h(&layer.stair[i]), 2);
 	lock_pieces(locked);
 	/* (and in another game's area, the way's floor: its maps' walkways are
 	 * one panel wide, and the legalizer wore the way's widened walkways
