@@ -14,5 +14,13 @@ void home_saves(void);
 void checkpoint_update(void);
 /* MegaMan into the layer's map again where he stands (or at its start) */
 void layer_reenter(bool at_start);
+/* The run as it stands, held back for a quit before MegaMan is free again
+ * (director_save.c, a quit mid-talk): as the director begins a talk, and
+ * once a frame on a layer, which lets it go */
+void director_before_talk(void);
+void held_watch(void);
+/* Whether a talk due on the map may begin: MegaMan free, the run held back
+ * before it as it begins */
+bool talk_due_now(void);
 
 #endif

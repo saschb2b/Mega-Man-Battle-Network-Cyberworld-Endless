@@ -534,6 +534,9 @@ bool emu_save_state_queued(const char *path) {
 		room = want * 2;
 	}
 	free(bytes);
+	/* (a set held back takes no file written now: it is spoilt, and the
+	 * next state sized to fit) */
+	if (save_queue_holding()) { save_queue_spoil(); return false; }
 	save_queue_wait();   /* (after those queued before it) */
 	return emu_save_state(path);
 }

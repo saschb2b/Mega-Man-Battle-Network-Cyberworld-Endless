@@ -549,6 +549,13 @@ static void rival_update(void) {
 /* What waits for its moment on the map: the Server's pick, the PET's words
  * and Dad's mail, Chaud's verdict and call, the lessons, a ScrtData's */
 static void talks_due(void) {
+	/* (each begun once MegaMan is free on the map, the run then held back
+	 * before it for a quit with it open: begun in the fade back from
+	 * ProtoMan's race, Chaud's verdict had no save before it, and a quit
+	 * in it went back to the layer's start, session 78; what else runs
+	 * here runs each frame as before) */
+	bool refused = talk_refused();
+	if (!talk_due_now()) talk_refuse(true);
 	/* (as a talk, MegaMan held: run straight off, the A paging its first
 	 * box talked to the Server he faced, whose own words took the box, and
 	 * the prize was never named) */
@@ -558,6 +565,7 @@ static void talks_due(void) {
 	rival_update();
 	words_due();
 	if (D.fragment_due && talk_script(D.objs.archive, D.objs.fragment_found)) D.fragment_due = false;
+	talk_refuse(refused);
 }
 
 /* The arrival's cards and MegaMan's words after them, as one beat; Chaud's
@@ -613,6 +621,7 @@ void director_update(void) {
 	 * statistics' minutes and the week's Board as they were: save.h) */
 	profile_played_frame();
 	take_events();
+	held_watch();
 	if (!D.active) return;
 	netmap_colours();
 	if (D.town) { home_update(); return; }
