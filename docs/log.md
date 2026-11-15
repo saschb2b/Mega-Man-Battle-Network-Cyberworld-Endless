@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: devtools/dev-menu.md (`hp=N` moves the base BN6 counts HPMemory into with the max, so BN6's own sum at each return to the map comes to N: no full heal after every battle and no HP box counting up from 100, session 76).
 * **Update**: rom/game-state.md (eScreenFade's first byte measured frame by frame: 1 from a fade's first frame until its fade back in ends, over a jack-in's white, warp pads and a battle's way in and out; what hides the engine's way-on arrow, corner note, cards and Mystery Data counter under BN6's fade, kai7's finding in session 76).
 * **Update**: game/reward-pick.md (Keys: A takes a choice only once the screen has been up a second and a half, after a playtester's steady A through Mr.Prog's lines took the gift unseen).
 * **New**: engine/saves-screens.md (save screens elsewhere: what they group by, the principles, three layouts drawn for SAVES, tabs by method recommended).
