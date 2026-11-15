@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:17:31Z
-* **Update**: world/level-design/generator.md (Navigation: the comps and homepages cross one one-wide walkway on the way, as their originals' single rooms; the shapes that stopped a playtester, counted by test_way_shapes, before and after).

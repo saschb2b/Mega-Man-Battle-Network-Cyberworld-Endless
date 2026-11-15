@@ -12,10 +12,12 @@
 
 /* Event flags a Battler's chats set on his layer (layer_objs.h's range):
  * fight on chosen after a win, his series over on this layer (cashed out,
- * won or lost), and the BtlrCard given (the profile's from then on) */
+ * won or lost), and his words said on this layer, a later talk his pair
+ * and the question (with the BtlrCard where the profile held none: set
+ * without the card held, the card was given, the profile's from then on) */
 #define BATTLER_ON_FLAG   0x1477
 #define BATTLER_DONE_FLAG 0x1478
-#define BATTLER_CARD_FLAG 0x1479
+#define BATTLER_TOLD_FLAG 0x1479
 
 /* Battler `k` (1-5, BN6's order: RoboDog's comp to Central Area 1): his
  * series' rounds (3, 5, 5, 10, 10), the stake to enter and what each win

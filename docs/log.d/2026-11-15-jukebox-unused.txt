@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:26:28Z
-* **Update**: game/pet.md (the Jukebox's More section named Unused; its songs whole songs, none left out), GUIDE.md (the Jukebox's Unused section), devtools/play.md (sound in a session: the device's clock against headless frames, the log's music lines the engine's alone, frame-exact dumps).
