@@ -526,6 +526,7 @@ bool director_start_run(void) {
 	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
+	meta_library_from_here();
 	/* (or one begun and quit before any save: no run to continue, and no
 	 * deletion either, session 74) */
 	bool abandoned = save_exists() || meta_run_was_open();
@@ -561,6 +562,7 @@ bool director_start_layer(void) {
 	dev_programs();
 	star_folder_pack();
 	note_folder_codes();
+	meta_library_from_here();
 	if (!new_layer(false)) return false;
 	lock_run();
 	emu_warp(D.group, D.number, D.start_x, D.start_y, D.start_face);
