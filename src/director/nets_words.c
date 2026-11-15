@@ -72,8 +72,13 @@ void nets_battle_note(const Encounter *e) {
 	}
 }
 
-/* (MegaMan free on the map, nothing said or shown: a word can start) */
-static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
+/* (MegaMan free on the map, nothing said or shown, the screen faded in: a
+ * word can start. One begun in the fade back from a battle drew its box
+ * empty and grey under the fade, a playtester's "flash" after a run away,
+ * session 77) */
+static bool quiet(void) {
+	return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && emu_read8(BN6_FADE_ACTIVE) != 1;
+}
 
 /* MegaMan on the first family of another net a profile met: one of the older Net's
  * (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's
