@@ -251,26 +251,33 @@ static void panel_take(void) {
 	*p = lab_panel_types[i];
 }
 
-/* the cursor over the field's panels: FOES keeps to the foes' side */
+/* the cursor over the field's panels: FOES keeps to the foes' side; on
+ * FIELD, Up from the top row goes to what stands over its column in the
+ * strip, Preset over MegaMan's side, BATTLE! over the foes' (the column
+ * kept for the way back down) */
 static void field_move(uint32_t now) {
 	int left = LS.page == LAB_PAGE_FOES ? LAB_COLS / 2 : 0;
 	if ((now & KEY_LEFT) && LS.col > left) --LS.col;
 	if ((now & KEY_RIGHT) && LS.col < LAB_COLS - 1) ++LS.col;
-	if ((now & KEY_UP) && LS.line > 0) --LS.line;
-	if (now & KEY_DOWN) {
-		if (LS.line < LAB_ROWS - 1) ++LS.line;
-		else if (LS.page == LAB_PAGE_FIELD) LS.at = LAB_AT_LIST;
+	if (now & KEY_UP) {
+		if (LS.line > 0) --LS.line;
+		else if (LS.page == LAB_PAGE_FIELD) LS.at = LS.col < LAB_COLS / 2 ? LAB_AT_LIST : LAB_AT_GO;
 	}
+	if ((now & KEY_DOWN) && LS.line < LAB_ROWS - 1) ++LS.line;
+}
+
+/* FIELD's Preset and BATTLE!: Down to the field's top row under them */
+static void to_field(void) {
+	LS.at = LAB_AT_FIELD;
+	LS.line = 0;
 }
 
 static void list_move(uint32_t now) {
 	int rows = lab_rows(), *row = &LS.row[LS.page];
-	if (now & KEY_UP) {
-		if (*row > 0) --*row;
-		else if (LS.page == LAB_PAGE_FIELD) LS.at = LAB_AT_FIELD;
-	}
+	if ((now & KEY_UP) && *row > 0) --*row;
 	if (now & KEY_DOWN) {
 		if (*row < rows - 1) ++*row;
+		else if (LS.page == LAB_PAGE_FIELD) to_field();
 		else LS.at = LAB_AT_GO;
 	}
 	if (now & KEY_LEFT) row_turn(-1);
@@ -279,6 +286,15 @@ static void list_move(uint32_t now) {
 		if (*row < LS.top) LS.top = *row;
 		if (*row >= LS.top + LAB_ROWS_SHOWN) LS.top = *row - LAB_ROWS_SHOWN + 1;
 	}
+}
+
+/* the cursor on BATTLE!: Up to the list over it; on FIELD, where it
+ * stands beside Preset over the field, Left to Preset and Down to the field */
+static void go_move(uint32_t now) {
+	if (LS.page != LAB_PAGE_FIELD) {
+		if (now & KEY_UP) LS.at = LAB_AT_LIST;
+	} else if (now & KEY_LEFT) LS.at = LAB_AT_LIST;
+	else if (now & KEY_DOWN) to_field();
 }
 
 static void page_turn(int by) {
@@ -318,6 +334,7 @@ static void show(void) {
 static void battle(void) {
 	if (!LS.set.nfoes || !lab_battle_held()) return;
 	set_keep();
+	LS.fought = LS.set;
 	runlog_choice(CHOICE_LAB);   /* (the run's choices: a test battle fought) */
 	lab_battle_go();
 	LS.up = false;
@@ -335,12 +352,17 @@ static void folder_edit(void) {
 	LS.editing = true;
 }
 
-/* A and B where the cursor is */
+/* A and B where the cursor is. B goes back a level, as BN6's menus: a
+ * family lifted back to the list, BATTLE! back to the page's own place
+ * (FIELD's field, the others' list), FIELD's Preset back to the field;
+ * at a page's own place it asks before the Lab is left, as NaviCust's
+ * quit asks (docs/engine/ui.md) */
 static void take(uint32_t now) {
 	if (now & KEY_B) {
+		bool field = LS.page == LAB_PAGE_FIELD;
 		if (LS.lifted) { LS.lifted = false; LS.at = LAB_AT_LIST; }
-		else if (LS.at == LAB_AT_GO) LS.at = lab_rows() ? LAB_AT_LIST : LAB_AT_FIELD;
-		else { set_keep(); LS.up = false; }
+		else if (LS.at == LAB_AT_GO || (field && LS.at == LAB_AT_LIST)) LS.at = field ? LAB_AT_FIELD : LAB_AT_LIST;
+		else { LS.asking = true; LS.yes = true; }
 		return;
 	}
 	if (!(now & KEY_A)) return;
@@ -361,6 +383,31 @@ static void take(uint32_t now) {
 	}
 }
 
+/* "Leave the Lab?": A on Yes leaves (the set kept), on No stays; B stays;
+ * a direction turns from one to the other */
+static void answer(uint32_t now) {
+	if (now & (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT)) LS.yes = !LS.yes;
+	if (now & KEY_B) LS.asking = false;
+	else if (now & (KEY_A | KEY_START)) {
+		LS.asking = false;
+		if (LS.yes) { set_keep(); LS.up = false; }
+	}
+}
+
+/* The directions held on from their press, stepping again as a menu's
+ * do: a list of a hundred families is browsed by holding Down */
+static uint32_t repeats(uint32_t keys, uint32_t now) {
+	static const uint32_t dirs[4] = { KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT };
+	uint32_t again = 0;
+	for (int i = 0; i < 4; ++i) {
+		int *t = &LS.hold[i];
+		/* (a key held since before the screen took keys never steps: it was no press of the screen's) */
+		*t = !(keys & dirs[i]) ? 0 : (now & dirs[i]) ? 1 : *t ? *t + 1 : 0;
+		if (*t > LAB_REPEAT_AFTER && (*t - LAB_REPEAT_AFTER) % LAB_REPEAT_EVERY == 0) again |= dirs[i];
+	}
+	return again;
+}
+
 static uint32_t held_after;   /* the keys held as the screen left, each until let go */
 
 void director_lab_keys(uint32_t keys) {
@@ -372,12 +419,16 @@ void director_lab_keys(uint32_t keys) {
 	uint32_t now = keys & ~LS.was;
 	LS.was = keys;
 	if (LS.t < LAB_LOCK) return;
-	if ((now & (KEY_L | KEY_R)) && !LS.lifted) { page_turn(now & KEY_R ? 1 : -1); return; }
-	if (now & KEY_START) { battle(); return; }
-	if (LS.at == LAB_AT_FIELD) field_move(now);
-	else if (LS.at == LAB_AT_LIST) list_move(now);
-	else if (now & KEY_UP) LS.at = lab_rows() ? LAB_AT_LIST : LAB_AT_FIELD;
-	take(now);
+	uint32_t move = now | repeats(keys, now);
+	if (LS.asking) answer(now);
+	else if ((now & (KEY_L | KEY_R)) && !LS.lifted) { page_turn(now & KEY_R ? 1 : -1); return; }
+	else if (now & KEY_START) { battle(); return; }
+	else {
+		if (LS.at == LAB_AT_FIELD) field_move(move);
+		else if (LS.at == LAB_AT_LIST) list_move(move);
+		else go_move(move);
+		take(now);
+	}
 	/* (left: all put back; the set changed: BN6's field of it in the last one's place) */
 	if (!LS.up && !LS.fighting && !LS.editing) lab_battle_leave();
 	else if (LS.up && (LS.refold || memcmp(&LS.set, &LS.shown, sizeof LS.set))) show();
