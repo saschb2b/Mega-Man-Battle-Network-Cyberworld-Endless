@@ -203,7 +203,15 @@ corruption a GBA really shows, kept as the flip's edge. The way back
 writes what the look covered, read before it came. Sprites, MegaMan, the
 NPCs and the walls never change; the palette's banks reach the backdrop
 too, whose sky turns with the floor; BN6's map animations keep cycling
-the layer's own colours over the look, a glitch of their own.
+the layer's own colours over the look, a glitch of their own. Another
+game's look comes in the colours its own layer shows from its map's
+entry: the first frame of each palette script its learned map runs, read
+from that game's ROM (`xbackdrop_palette_first`, `glitch_looks_make`),
+laid over its stored palette. A bank its map stores blank is coloured
+so: BN5's Undernet's skull totems ([Side pieces](../world/level-design/side-pieces.md))
+stood black in its flips before (captured since: a flip into it, a totem
+in its colours). The scripts do not run on a flip, so those banks stay at
+that frame.
 
 **The tears, slips and turned colours are the frame's**, drawn after BN6
 has drawn it as the dark way's portal is recoloured (`liberation_way.c`):

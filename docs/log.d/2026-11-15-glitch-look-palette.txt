@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:37:46Z
+* **Update**: game/glitch-layer.md (another game's look in its palette scripts' first frames, so a bank its map stores blank is coloured in a flip), world/level-design/side-pieces.md (BN5's Undernet's skull totems in a flip: coloured, captured).
