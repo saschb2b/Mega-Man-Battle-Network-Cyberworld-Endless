@@ -62,6 +62,42 @@ static bool road_cell(int c) {
 	return (k == K_FLOOR || k == K_SOLID) && nm_walkway(x, y);
 }
 
+/* The bit of a panel's neighbourhood (TILE_SHAPE) for the grid cell (dx,
+ * dy) from it: panel (A - dy, B + dx), nm_grid_to_panel. */
+static int shape_bit(int dx, int dy) { return (dx + 1) * 3 + 1 - dy; }
+
+/* Whether the area's roads' art has a bend between the grid cells (ax, ay)
+ * and (bx, by) from it: a panel of road with road on those two sides
+ * alone, and none at the corner between them, in its map or its mirror
+ * image. */
+static bool bend_seen(const struct TileBook *books, int nbooks, int ax, int ay, int bx, int by) {
+	unsigned need = 1u << 4 | 1u << shape_bit(ax, ay) | 1u << shape_bit(bx, by);
+	unsigned none = 1u << shape_bit(-ax, -ay) | 1u << shape_bit(-bx, -by) | 1u << shape_bit(ax + bx, ay + by);
+	for (int k = 0; k < nbooks; ++k)
+		for (int i = 0; i < books[k].nshapes; ++i) {
+			unsigned o = (books[k].shapes[i] >> 10 | books[k].shapes[i] >> 1) & 0x1FFu;
+			if ((o & need) == need && !(o & none)) return true;
+		}
+	return false;
+}
+
+/* A road turns only where its map shows the bend: one it lacks was laid in
+ * pieces, the void through its inner corner or past its tip (BN4's ACDC
+ * Area draws the bends whose inner corner faces the screen's left or
+ * right, and not those facing up or down, where a player saw navy
+ * squares in the cyan). There the bend's panel is walkway, and the road
+ * ends on either side of it, under it (tilemap.c). The way's cells in its
+ * order: `path`, n of them. */
+static void cut_unseen_bends(const struct TileBook *books, int nbooks, const int16_t *path, int n) {
+	for (int i = 1; i + 1 < n; ++i) {
+		int x = path[i] % MAP_W, y = path[i] / MAP_W;
+		int ax = path[i - 1] % MAP_W - x, ay = path[i - 1] / MAP_W - y, bx = path[i + 1] % MAP_W - x, by = path[i + 1] / MAP_W - y;
+		if (ax == -bx && ay == -by) continue;   /* (straight on) */
+		if (!road_cell(path[i - 1]) || !road_cell(path[i]) || !road_cell(path[i + 1])) continue;
+		if (!bend_seen(books, nbooks, ax, ay, bx, by)) road[y][x] = 0;
+	}
+}
+
 /* A run of road shorter than ROAD_MIN panels is walkway: what the way left
  * between two stretches of wider floor (a junction widened to a block, a
  * room) was all ends, and drew as a block of the road's hue with no rim,
@@ -72,17 +108,17 @@ static bool road_cell(int c) {
 static void drop_short_runs(const int16_t *path, int n) {
 	for (int i = 0, j; i < n; i = j + 1) {
 		j = i;
-		while (j < n && road_cell(path[j])) ++j;
+		while (j < n && road_cell(path[j]) && road[path[j] / MAP_W][path[j] % MAP_W]) ++j;
 		for (int k = i; j - i < ROAD_MIN && k < j; ++k) road[path[k] / MAP_W][path[k] % MAP_W] = 0;
 	}
 }
 
-void nm_mark_roads(bool roads) {
+void nm_mark_roads(const struct TileBook *books, int nbooks) {
 	static int32_t cost[MAP_H][MAP_W];
 	static int16_t path[MAP_H * MAP_W];
 	int gw = nm_cur->gw < MAP_W ? nm_cur->gw : MAP_W, gh = nm_cur->gh < MAP_H ? nm_cur->gh : MAP_H, end[2], n = 0;
 	memset(road, 0, sizeof road);
-	if (!nm_cur->way || !roads || !way_ends(gw, gh, end)) return;
+	if (!nm_cur->way || nbooks <= 0 || !way_ends(gw, gh, end)) return;
 	walk_costs(gw, gh, end[1], cost);
 	/* (back from the other end along falling cost: the first way found) */
 	for (int c = end[0], next; c >= 0 && cost[c / MAP_W][c % MAP_W] != INT32_MAX && n < MAP_H * MAP_W; c = next) {
@@ -96,6 +132,7 @@ void nm_mark_roads(bool roads) {
 			if (cost[ny][nx] + STEP + !on_way(x, y) == cost[y][x]) next = ny * MAP_W + nx;
 		}
 	}
+	cut_unseen_bends(books, nbooks, path, n);
 	drop_short_runs(path, n);
 }
 

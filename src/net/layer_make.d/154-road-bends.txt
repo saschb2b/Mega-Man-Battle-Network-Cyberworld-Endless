@@ -1,0 +1,1 @@
+A road turns only where its area's own roads show the bend: elsewhere the bend's panel is walkway and the road ends on either side of it (BN4's ACDC Area's bends facing up or down the screen, laid in pieces, the void through their inner corner), docs/world/level-design/roads.md.

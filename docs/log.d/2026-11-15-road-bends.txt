@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T05:00:00Z
+* **Update**: world/level-design/roads.md (a road turns only where its area's own roads show the bend; elsewhere the bend's panel is walkway: BN4's ACDC Area's bends facing up or down, where a player saw navy squares; Bends under Not mended narrowed to what is left).
