@@ -6,8 +6,11 @@
  * of their own; what touches no floor is scenery (decor.c). */
 #include "sides.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "debug.h"
 
 #define MIN_TILES    4
 #define MAX_TILES  160
@@ -84,14 +87,15 @@ static bool hang_tile(const AreaSrc *a, int tx, int ty) {
 }
 
 /* Whether tile (x, y) is one a group is made of: the second layer's, or
- * (`hang`) the first's under a floor. */
-static bool member(const AreaSrc *a, bool hang, int x, int y) {
+ * (`hang`) the first's under a floor, or (`grow`) one it marks. */
+static bool member(const AreaSrc *a, bool hang, const uint8_t *grow, int x, int y) {
+	if (grow) return grow[y * a->tw + x] & 1;
 	return hang ? hang_tile(a, x, y) : (a->tile[1][y * a->tw + x] & 0x3FF) != 0;
 }
 
 /* The group of such tiles joined to (sx, sy), its tiles' indexes in
  * `queue`; `seen` marks them. */
-static void group_from(const AreaSrc *a, bool hang, int sx, int sy, uint8_t *seen, int *queue, Group *g) {
+static void group_from(const AreaSrc *a, bool hang, const uint8_t *grow, int sx, int sy, uint8_t *seen, int *queue, Group *g) {
 	int tw = a->tw, th = a->th;
 	memset(g, 0, sizeof *g);
 	g->x0 = g->x1 = sx; g->y0 = g->y1 = sy;
@@ -107,7 +111,7 @@ static void group_from(const AreaSrc *a, bool hang, int sx, int sy, uint8_t *see
 		for (int dy = -1; dy <= 1; ++dy)
 			for (int dx = -1; dx <= 1; ++dx) {
 				int nx = x + dx, ny = y + dy;
-				if (nx < 0 || ny < 0 || nx >= tw || ny >= th || seen[ny * tw + nx] || !member(a, hang, nx, ny)) continue;
+				if (nx < 0 || ny < 0 || nx >= tw || ny >= th || seen[ny * tw + nx] || !member(a, hang, grow, nx, ny)) continue;
 				seen[ny * tw + nx] = 1;
 				queue[g->n++] = ny * tw + nx;
 			}
@@ -167,6 +171,7 @@ static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
 static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
 	bool hang = kind != 0;
 	int tw = a->tw, th = a->th;
+	if (out->n >= SIDES_MAX) return;
 	SidePiece *p = &out->piece[out->n];
 	memset(p, 0, sizeof *p);
 	p->tiles = calloc((size_t)g->n, sizeof *p->tiles);
@@ -174,6 +179,7 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	p->ntiles = g->n;
 	p->hang = hang;
 	p->behind = kind == 2;
+	p->grows = kind == 3;
 	for (int k = 0; k < 9; ++k)
 		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
 	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
@@ -197,7 +203,7 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
 		Group g;
 		int A, B;
-		group_from(a, false, i % tw, i / tw, seen, queue, &g);
+		group_from(a, false, NULL, i % tw, i / tw, seen, queue, &g);
 		if (!grips(a, queue, &g, &A, &B)) continue;
 		keep(a, queue, &g, A, B, 0, out);
 	}
@@ -253,7 +259,7 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 		if (seen[i] || !hang_tile(r, i % tw, i / tw)) continue;
 		Group g;
 		int A, B;
-		group_from(r, true, i % tw, i / tw, seen, queue, &g);
+		group_from(r, true, NULL, i % tw, i / tw, seen, queue, &g);
 		if (hangs(r, queue, &g, kind == 2, &A, &B)) keep(r, queue, &g, A, B, kind, out);
 	}
 	free(seen);
@@ -263,3 +269,112 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 void hangs_learn(const AreaSrc *r, SideBook *out) { first_learn(r, 1, out); }
 
 void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }
+
+/* ---- what grows on a floor's edges ----
+ *
+ * The Judge Tree's walkways carry tufts of grass on their back rims and
+ * planters stacked at their walls' feet, on the first layer in the very
+ * tiles that draw the rim and the wall: the floor's own art with
+ * something more. A tile grows on the floor where it draws some pixels
+ * past the floor's body (its top, its rim, its walls), and tiles that do
+ * joined 8 ways are one piece; the ones among them that draw the floor's
+ * art too are set over a layer's own, the others over nothing. */
+
+#define RIM_UP      6   /* a floor's back rim and its outline stand this far over its top at most */
+#define PAST_PX     4   /* pixels a tile draws past the floor's body at least to grow on it */
+#define EDGE_TILES 24   /* ... and what grows is no larger (the Judge Tree's stumps, its tree's court are) */
+
+/* Which of the map's pixels lie on a ground panel's top, a bit each. */
+static uint8_t *tops_of(const AreaSrc *a) {
+	int W = a->tw * 8, H = a->th * 8;
+	uint8_t *t = calloc(((size_t)W * H + 7) / 8, 1);
+	for (int y = 0; t && y < H; ++y) {
+		int lastA = 0, lastB = 0;
+		bool on = false, known = false;
+		for (int x = 0; x < W; ++x) {
+			int A, B;
+			panel_at(a, x, y, &A, &B);
+			if (!known || A != lastA || B != lastB) { on = ground(a, A, B); lastA = A; lastB = B; known = true; }
+			if (on) t[((size_t)y * W + x) >> 3] |= (uint8_t)(1u << (x & 7));
+		}
+	}
+	return t;
+}
+
+static bool top_at(const AreaSrc *a, const uint8_t *t, int x, int y) {
+	int W = a->tw * 8;
+	return y >= 0 && y < a->th * 8 && t[((size_t)y * W + x) >> 3] >> (x & 7) & 1;
+}
+
+/* What first-layer pixel (x, y) is to the floor: 0 past its body, 1 its
+ * top, 2 its rim (its top just under it), 3 its wall (its top within the
+ * wall's height over it). */
+static int body_at(const AreaSrc *a, const uint8_t *t, int face, int x, int y) {
+	if (top_at(a, t, x, y)) return 1;
+	for (int d = 1; d <= RIM_UP; ++d)
+		if (top_at(a, t, x, y + d)) return 2;
+	for (int d = 1; d <= face; ++d)
+		if (top_at(a, t, x, y - d)) return 3;
+	return 0;
+}
+
+/* Per tile: bit 0 it grows on the floor, bit 1 it draws the floor's art
+ * too; and over the map, how many of those pixels are a rim's and a
+ * wall's, in rim[] and wall[] by tile. */
+static uint8_t *grow_marks(const AreaSrc *a, int face, uint16_t *rim, uint16_t *wall) {
+	int tw = a->tw, th = a->th, W = tw * 8;
+	uint8_t *t = tops_of(a), *m = calloc((size_t)tw * th, 1);
+	for (int i = 0; t && m && i < tw * th; ++i) {
+		if (!(a->tile[0][i] & 0x3FF)) continue;
+		int past = 0, body = 0;
+		for (int y = i / tw * 8; y < i / tw * 8 + 8; ++y)
+			for (int x = i % tw * 8; x < i % tw * 8 + 8; ++x) {
+				if (!a->idx0[(size_t)y * W + x]) continue;
+				int b = body_at(a, t, face, x, y);
+				++*(b ? &body : &past);
+				if (b == 2) ++rim[i];
+				if (b == 3) ++wall[i];
+			}
+		m[i] = (uint8_t)((past >= PAST_PX) | (body > 0) << 1);
+	}
+	free(t);
+	return m;
+}
+
+void edges_learn(const AreaSrc *a, int face, SideBook *out) {
+	if (!a->rings || !a->idx0) return;
+	int tw = a->tw, th = a->th;
+	uint16_t *rim = calloc((size_t)tw * th, sizeof *rim), *wall = calloc((size_t)tw * th, sizeof *wall);
+	uint8_t *mark = rim && wall ? grow_marks(a, face, rim, wall) : NULL;
+	uint8_t *seen = calloc((size_t)tw * th, 1);
+	int *queue = malloc((size_t)tw * th * sizeof *queue);
+	for (int i = 0; mark && seen && queue && i < tw * th && out->n < SIDES_MAX; ++i) {
+		if (seen[i] || !(mark[i] & 1)) continue;
+		Group g;
+		int A, B, nrim = 0, nwall = 0;
+		group_from(a, true, mark, i % tw, i / tw, seen, queue, &g);
+		if (g.edge || g.n > EDGE_TILES || g.x1 - g.x0 >= MAX_W || g.y1 - g.y0 >= MAX_H) continue;
+		for (int k = 0; k < g.n; ++k) {
+			count_tile(a, true, queue[k] % tw, queue[k] / tw, &g);
+			nrim += rim[queue[k]];
+			nwall += wall[queue[k]];
+		}
+		/* (a tuft stands on a rim, the floor straight under it; a planter
+		 * at a wall's foot, the floor straight over it) */
+		if (g.other * 10 > g.on + g.off || !(nrim || nwall) || !meets(a, queue, &g, nrim >= nwall, &A, &B)) continue;
+		if (area_src_arrow_at(a, a->ex + 16 + 32 * A, a->ey + 16 + 32 * B) || !ground(a, A, B)) continue;
+		int n = out->n;
+		keep(a, queue, &g, A, B, 3, out);
+		if (out->n == n) continue;
+		SidePiece *p = &out->piece[n];
+		for (int k = 0; k < g.n; ++k)
+			if (mark[queue[k]] & 2) p->over |= 1u << k;
+		if (emu_debug_on()) fprintf(stderr, "edges map %x:%d: %s at panel %d,%d, %d tiles (%d over the floor's), floor %03x, %d under\n", a->group, a->number,
+			nrim >= nwall ? "on a rim" : "at a wall's foot", A, B, g.n, __builtin_popcount(p->over), p->floor, p->nunder);
+	}
+	free(mark);
+	free(seen);
+	free(queue);
+	free(rim);
+	free(wall);
+}

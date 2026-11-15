@@ -34,6 +34,9 @@ typedef struct {
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
 	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
+	bool grows;        /* ... or what grows on a floor's edge (edges_learn): a tuft on its back rim, a planter at its wall's
+	                    * foot, its tiles the first layer's, its panel any free one of a layer's floor */
+	uint32_t over;     /* (grows) its tiles (bit k: tiles[k]) that hold the floor's own art too, set over the layer's */
 } SidePiece;
 
 typedef struct {
@@ -54,5 +57,11 @@ void hangs_learn(const AreaSrc *r, SideBook *out);
  * off the floor: the flames behind the catwalks of BN4's Undernet, where
  * the ones in front lie on the second layer (sides_learn). */
 void behind_learn(const AreaSrc *a, SideBook *out);
+
+/* Adds what map `a` grows on its floor's edges, on its first layer in the
+ * same tiles as the floor's own art: the Judge Tree's tufts of grass on
+ * its walkways' back rims and the planters stacked at its walls' feet,
+ * whose walls are `face` pixels tall. */
+void edges_learn(const AreaSrc *a, int face, SideBook *out);
 
 #endif
