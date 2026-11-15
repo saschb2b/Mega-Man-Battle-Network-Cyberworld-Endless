@@ -51,8 +51,7 @@ static uint64_t flip_y(uint64_t m) {
 	return r;
 }
 
-/* The pixels map entry `e` draws: its tile, flipped as it says. */
-static uint64_t entry_px(const uint64_t *opaque, uint16_t e) {
+uint64_t voids_entry_px(const uint64_t *opaque, uint16_t e) {
 	if (!(e & 0x3FF)) return 0;
 	uint64_t m = opaque[e & 0x3FF];
 	if (e & 0x400) m = flip_x(m);
@@ -156,7 +155,7 @@ static int class_distance(uint32_t key, unsigned oa, unsigned ob) {
 #define EXTRA_COST 2
 static void consider(Hole *h, uint16_t back, uint16_t front, int cost) {
 	if (cost >= h->cost) return;
-	uint64_t drawn = entry_px(h->opaque, back) | entry_px(h->opaque, front);
+	uint64_t drawn = voids_entry_px(h->opaque, back) | voids_entry_px(h->opaque, front);
 	if (tl_popcount64(h->top & ~drawn) > VOID_SLACK) return;
 	if (tl_popcount64(drawn & ~h->drawn & h->never) > SLACK) return;
 	cost += EXTRA_COST * tl_popcount64(drawn & ~h->drawn & ~h->top);
@@ -176,7 +175,7 @@ static void consider(Hole *h, uint16_t back, uint16_t front, int cost) {
 /* The pairs of `books` at the tile's phase, each as a tile laid behind its
  * front one where it is one tile, and as the tile's pair in its stead. */
 static void try_books(Hole *h, const TileBook *books, int nbooks, int phase) {
-	int aside = tl_popcount64(entry_px(h->opaque, h->back) & ~entry_px(h->opaque, h->front));
+	int aside = tl_popcount64(voids_entry_px(h->opaque, h->back) & ~voids_entry_px(h->opaque, h->front));
 	for (int k = 0; k < nbooks; ++k) {
 		const TileBook *b = &books[k];
 		for (int i = tl_first_of(b, KEY(phase, 0, 0)); i < b->n && KEY_PHASE(b->cand[i].key) == phase; ++i) {
@@ -251,7 +250,7 @@ int voids_mend(const VoidFloor *f, uint16_t *map, int *left) {
 	for (int ty = 0; ty < g->th; ++ty)
 		for (int tx = 0; tx < g->tw; ++tx) {
 			size_t i = (size_t)ty * g->tw + tx;
-			uint64_t drawn = entry_px(opaque, map[i]) | entry_px(opaque, map[cells + i]);
+			uint64_t drawn = voids_entry_px(opaque, map[i]) | voids_entry_px(opaque, map[cells + i]);
 			if (drawn == ~0ull || !by_floor(&p, tx, ty)) continue;
 			uint64_t top = top_of(&p, tx, ty);
 			if (tl_popcount64(top & ~drawn) <= VOID_SLACK || hole_is_art(&p, tx, ty, top & ~drawn)) continue;
