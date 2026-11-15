@@ -29,15 +29,16 @@ _Static_assert(sizeof words / sizeof *words == W_COUNT, "a word for each Launche
 const char *launcher_word(LauncherWord w) { return (unsigned)w < W_COUNT ? words[w] : ""; }
 
 /* each cartridge's names (`named` as a refusal says it), and what an
- * extra one's game lends a run: in a line of its own (`adds`), in a word
- * (`lends`, "BN5's net in") and while it is gone (`stays`) */
-static const struct { const char *shortname, *caption, *brief, *label[3], *tag, *named, *adds, *lends, *stays; } slots[SLOTS] = {
+ * extra one's game lends a run (its net: its areas, viruses, Navis and
+ * chips, docs/multirom/overview.md): in a line of its own (`adds`) and
+ * while it is gone (`stays`) */
+static const struct { const char *shortname, *caption, *brief, *label[3], *tag, *named, *adds, *stays; } slots[SLOTS] = {
 	[SLOT_BN6] = { "BN6", "Cybeast Gregar (USA)", "Gregar (USA)", { "GREGAR", "CYBEAST", "GREGAR" }, "BN6 Cybeast Gregar (USA)",
-		"BN6 Gregar", "", "", "" },
+		"BN6 Gregar", "", "" },
 	[SLOT_BN5] = { "BN5", "Team Colonel (USA)", "Colonel (USA)", { "COLONEL", "TEAM", "COLONEL" }, "BN5 Team Colonel (USA)",
-		"BN5 Team Colonel", "Its net joins ours: BN5's areas, viruses, Navis and chips in runs.", "net", "its areas stay" },
+		"BN5 Team Colonel", "Its net joins ours: BN5's areas, viruses, Navis and chips in runs.", "its areas stay" },
 	[SLOT_BN4] = { "BN4", "Red Sun (USA)", "Red Sun (USA)", { "RED SUN", "RED", "SUN" }, "BN4 Red Sun (USA)",
-		"BN4 Red Sun", "Its viruses join ours: BN4's families in runs' battles.", "viruses", "its viruses stay" },
+		"BN4 Red Sun", "Its net joins ours: BN4's areas, viruses, Navis and chips in runs.", "its areas stay" },
 };
 
 static int clamp_slot(int slot) { return slot >= 0 && slot < SLOTS ? slot : SLOT_BN6; }
@@ -47,9 +48,8 @@ const char *slot_caption(int slot, bool brief) { return brief ? slots[clamp_slot
 const char *slot_label(int slot, int line, bool large) { return slots[clamp_slot(slot)].label[large ? 1 + (line ? 1 : 0) : 0]; }
 
 /* The cartridges in `bits` by their short names: "BN5", "BN5 and BN4",
- * "BN6, BN5 and BN4"; or (`lends`) by what each lends: "BN5's net and
- * BN4's viruses" */
-static void list_of(unsigned bits, bool lends, char *out, size_t n) {
+ * "BN6, BN5 and BN4"; or (`owners`) as whose: "BN5's and BN4's" */
+static void list_of(unsigned bits, bool owners, char *out, size_t n) {
 	int count = 0, done = 0;
 	for (int s = 0; s < SLOTS; ++s) count += (bits >> s) & 1;
 	if (n) out[0] = 0;
@@ -57,8 +57,7 @@ static void list_of(unsigned bits, bool lends, char *out, size_t n) {
 		if (!((bits >> s) & 1)) continue;
 		size_t m = strlen(out);
 		const char *sep = !done ? "" : done == count - 1 ? " and " : ", ";
-		if (lends) snprintf(out + m, n - m, "%s%s's %s", sep, slots[s].shortname, slots[s].lends);
-		else snprintf(out + m, n - m, "%s%s", sep, slots[s].shortname);
+		snprintf(out + m, n - m, "%s%s%s", sep, slots[s].shortname, owners ? "'s" : "");
 		++done;
 	}
 }
@@ -92,11 +91,12 @@ void note_slot_ready(int slot, const char *kept, char *out, size_t n) {
 }
 
 void note_play(unsigned in, unsigned missing, bool from_title, const char *title_button, char *out, size_t n) {
-	char with[64], later[64], lends[96];
+	char with[64], later[64], whose[64];
 	list_of(in | 1u << SLOT_BN6, false, with, sizeof with);
 	list_of(missing, false, later, sizeof later);
-	list_of(in, true, lends, sizeof lends);
-	if (from_title && in) snprintf(out, n, "Back to the title, %s in.", lends);
+	list_of(in, true, whose, sizeof whose);
+	/* ("BN5's net", "BN5's and BN4's nets") */
+	if (from_title && in) snprintf(out, n, "Back to the title, %s %s in.", whose, in & (in - 1) ? "nets" : "net");
 	else if (from_title) snprintf(out, n, "Back to the title.");
 	else if (!missing) snprintf(out, n, "Play with %s.", with);
 	else snprintf(out, n, "Play with %s. %s can come later: %s on the title brings this screen back.", with, later, title_button);

@@ -6608,6 +6608,15 @@ static void test_launcher(void) {
 	CHECK(!strcmp(said, "Play with BN6. BN5 can come later: R on the title brings this screen back."), "launcher: PLAY's note (%s)", said);
 	note_play(1u << SLOT_BN5, 0, true, "R", said, sizeof said);
 	CHECK(!strcmp(said, "Back to the title, BN5's net in."), "launcher: DONE's note (%s)", said);
+	note_play(1u << SLOT_BN5 | 1u << SLOT_BN4, 0, true, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Back to the title, BN5's and BN4's nets in."), "launcher: DONE's note, both in (%s)", said);
+	note_play(1u << SLOT_BN4, 0, true, "R", said, sizeof said);
+	CHECK(!strcmp(said, "Back to the title, BN4's net in."), "launcher: DONE's note, BN4 alone (%s)", said);
+	note_slot_ready(SLOT_BN4, NULL, said, sizeof said);
+	CHECK(!strcmp(said, "BN4 Red Sun (USA), checked by its SHA-1. Its net joins ours: BN4's areas, viruses, Navis and chips in runs."),
+		"launcher: what BN4 lends (%s)", said);
+	note_gone(SLOT_BN4, said, sizeof said);
+	CHECK(!strcmp(said, "BN4 Red Sun (USA) is gone from where it was: its areas stay out of runs until it is back."), "launcher: BN4 gone (%s)", said);
 	note_play(1u << SLOT_BN5, 1u << SLOT_BN4, false, "R", said, sizeof said);
 	CHECK(!strcmp(said, "Play with BN6 and BN5. BN4 can come later: R on the title brings this screen back."), "launcher: PLAY's note, BN4 out (%s)", said);
 	note_play(1u << SLOT_BN5 | 1u << SLOT_BN4, 0, false, "R", said, sizeof said);
