@@ -82,9 +82,23 @@ static void visitor_words(void) {
 	if (!D.visitor_due || !quiet()) return;
 	char name[24], words[240];
 	enemy_name(visitor_id(visitor_net(D.visitor_family), D.visitor_family, 0), name, sizeof name);
-	if (D.visitor_due == VISITOR_OLDER_NETS)
+	/* (Lan's answer by where they stand: in the deep MegaMan has said both
+	 * Nets run together; a layer wearing an older Net's area over battles
+	 * of ours (BN4's areas, docs/multirom/bn4.md) looked old already, its
+	 * viruses the news. A playtester in BN4's ACDC Area found "mixing!?"
+	 * late there) */
+	bool older = D.visitor_due == VISITOR_OLDER_NETS;
+	if (older && D.deep)
+		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L Both Nets,like you said...|"
+			"@M Yeah. Stay sharp!", name);
+	else if (older && D.layer_tiles >= NET_AREAS)
+		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L Its old viruses too!?|"
+			"@M Yeah. The Nets meet here. Stay sharp!", name);
+	else if (older)
 		snprintf(words, sizeof words, "@M Lan,that %s back there...|@M It came from the older Net!|@L The two Nets are mixing!?|"
 			"@M Where they meet,yeah. Stay sharp!", name);
+	else if (D.deep)
+		snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L Both Nets,like you said...|@M Yeah. Stay sharp!", name);
 	else snprintf(words, sizeof words, "@M Huh? That %s was one of ours,Lan!|@L In the older Net!?|@M The Nets meet here. Stay sharp!", name);
 	if (!talk_start(words, FACE_MEGAMAN)) return;
 	D.visitor_due = 0;
