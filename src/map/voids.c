@@ -148,13 +148,19 @@ static int class_distance(uint32_t key, unsigned oa, unsigned ob) {
 	return d + (floors & 0x10 ? 4 : other & 0x10 ? 2 : 0);
 }
 
-/* The tile as entries (back, front), at `cost`: kept where it leaves no
- * hole, draws nothing more where the floor must not be, and costs less. */
+/* The tile as entries (back, front), at `cost` and EXTRA_COST for each
+ * pixel it shows past the hole where the tile showed nothing: kept where
+ * it leaves no hole, draws nothing more where the floor must not be, and
+ * costs less. (A rim's tile laid behind Robot Control's stud stood out
+ * beside it, where the platform's own corner without one closes it.) */
+#define EXTRA_COST 2
 static void consider(Hole *h, uint16_t back, uint16_t front, int cost) {
 	if (cost >= h->cost) return;
 	uint64_t drawn = entry_px(h->opaque, back) | entry_px(h->opaque, front);
 	if (tl_popcount64(h->top & ~drawn) > VOID_SLACK) return;
 	if (tl_popcount64(drawn & ~h->drawn & h->never) > SLACK) return;
+	cost += EXTRA_COST * tl_popcount64(drawn & ~h->drawn & ~h->top);
+	if (cost >= h->cost) return;
 	h->e0 = back;
 	h->e1 = front;
 	h->cost = cost;
