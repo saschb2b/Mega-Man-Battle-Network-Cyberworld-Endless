@@ -155,17 +155,19 @@ ShopWords vendor_words(char names[][16], int n) {
  * beat (`frames`), as the results screen shows a DeleteTime (seconds and
  * hundredths, cut), and the rung's rule; the squad (`foes` viruses) and the
  * stake said before the choice (a playtester took it at 100 HP, nothing
- * saying it was a real fight; and the two are old rivals, not strangers);
- * the first duel (`met` none before) says who he is. To heal first goes
+ * saying it was a real fight; and the two are old rivals, not strangers).
+ * Chaud's call has said who he is and his time on this layer: ProtoMan
+ * names the same race, not a second one (he had said it all again, nine
+ * boxes on every talk: "two challenges, or one told twice?", session 76);
+ * one met in a duel before (`met`) he greets as such. To heal first goes
  * unsaid, and the stake is noted (the voice sweep,
  * docs/voice/sweep/net.md). */
 void duel_terms(char *terms, size_t n, int met, int foes, int frames, int rung) {
-	static const char *const count[] = { "", "a lone virus", "a pair of viruses", "three viruses", "four viruses" };
+	static const char *const count[] = { "", "One virus", "Two viruses", "Three viruses", "Four viruses" };
 	int f = frames, sec = f / 60, cs = (f % 60) * 100 / 60;
 	int nf = foes >= 1 && foes <= 4 ? foes : 3;
-	snprintf(terms, n, "%sI busted %s here in %d:%02d.%02d.|Beat that%s.|@M Real viruses,Lan!|@M If they delete us,the dive's over.",
-		met ? "Back again,MegaMan? Chaud's watching.|" :
-		"MegaMan... So it's you,diving the Endless Net.|The Nest copies Navis,they say.|I'm no copy.|Chaud wants to see your skill.|",
+	snprintf(terms, n, "%s%s here. %d:%02d.%02d.|Beat that%s.|@M Real viruses,Lan!|@M If they delete us,the dive's over.",
+		met ? "Back again,MegaMan? Chaud's watching.|" : "MegaMan. You heard Chaud.|",
 		count[nf], sec / 60, sec % 60, cs, rung == 1 ? " without taking a hit" : "");
 }
 

@@ -260,14 +260,18 @@ int ta_dark_rumor(TextArchive *t, int face) {
 	return i;
 }
 
-int ta_duel(TextArchive *t, int flag, int face, const char *terms) {
+int ta_duel(TextArchive *t, int flag, int face, const char *terms, bool race) {
 	int no = ta_closing(t);
 	int i = ta_script(t);
 	/* ProtoMan's terms, then the choice, which starts on No (a duel costs
-	 * HP; docs/game/rival.md) */
+	 * HP; docs/game/rival.md); a race's asked by MegaMan, as the layer's
+	 * other risks are, after his own words on it (ProtoMan's "Take the
+	 * duel?" read as a fight with him, where L and Chaud had said a race
+	 * against his time, session 76) */
 	bool first = true;
 	ta_pages(t, terms, face, &first);
-	ta_ask_in(t, face, "Take the duel?\n", no, true, true);
+	if (race) ta_ask_in(t, FACE_MEGAMAN, "Race his time?\n", no, true, true);
+	else ta_ask_in(t, face, "Take the duel?\n", no, true, true);
 	ta_flag_set(t, flag);
 	ta_end(t);
 	return i;
