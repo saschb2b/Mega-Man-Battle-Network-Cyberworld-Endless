@@ -337,11 +337,14 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
 		area_src_free(&b);
 	}
-	/* (and the side pieces of those listed for them alone) */
+	/* (and the side pieces of those listed for them alone, and what they
+	 * set behind their floors where the area takes that: Undernet Zero's
+	 * bowls behind edges are Undernet 1's and 3's) */
 	for (int k = 0; k < 2 && na->sides & 1 && na->side_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->side_maps[k][0], na->side_maps[k][1], &b)) continue;
 		sides_learn(&b, &L->sides);
+		if (na->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&b, &L->sides);
 		/* (and their stairs: Undernet 1's two-by-two for Undernet Zero,
 		 * whose own climb three panels wide) */
 		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
