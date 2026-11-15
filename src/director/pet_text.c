@@ -616,3 +616,5 @@ int pet_text_refresh(void) {
 	}
 	return got;
 }
+
+const char *pet_saved_text(void) { return "Run saved."; }

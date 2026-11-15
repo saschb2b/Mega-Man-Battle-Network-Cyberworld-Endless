@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "bn6.h"
+#include "cinema.h"
 #include "director.h"
 #include "director_gate.h"
 #include "director_see.h"
@@ -18,9 +19,16 @@
 #include "platform.h"
 #include "rom.h"
 #include "square_pet.h"
+#include "talk.h"
 
 /* A Save under way: the PET closing, then the checkpoint. */
 static int saving;
+
+/* The frames from the PET closed after a Save until its box is up, A kept
+ * from the map: the checkpoint waits for MegaMan free, and an A meant for
+ * a box took the Guardian Data he faced (session 78); at most a second */
+#define SAVE_BOX_WAIT 60
+static int box_wait;
 
 /* The PET's input handler (its state 4, run each frame the menu takes
  * input), hooked: A on Save, disabled in a run, and on Comm, the run's
@@ -84,8 +92,11 @@ void pet_update(void) {
 		saving = 0;
 		/* (in the Net Square the run was saved at the gate, and a note says so: square_pet.h) */
 		if (online_visit_away()) square_pet_saved();
-		else director_save_here();
+		else if (director_save_here()) box_wait = SAVE_BOX_WAIT;
 	}
+	/* the checkpoint taken: the PET's box says so, and takes the next A,
+	 * as BN6's own Save ends on its words (HandleSaveMenu8132B88, bn6f) */
+	if (director_pet_saved() && !talk_start(pet_saved_text(), FACE_NONE)) cinema_note("Run saved", 150);
 }
 
 int pet_key_item(void) {
@@ -140,6 +151,8 @@ uint32_t pet_keys(uint32_t keys) {
 		jukebox_open();
 		return keys & ~(uint32_t)KEY_A;
 	}
+	if (box_wait > 0 && (talk_busy() || --box_wait == 0)) box_wait = 0;
+	if (box_wait > 0) return keys & ~(uint32_t)KEY_A;
 	if (!saving) return keys;
 	/* (B, pressed and let go, till the PET has closed) */
 	++saving;
