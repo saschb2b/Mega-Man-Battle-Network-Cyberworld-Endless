@@ -174,6 +174,9 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   own panel under the cursor, a value Left and Right turn stands between
   Options' small orange arrows. It takes BN6's Virus Battler's flow: a
   family picked from the list, then set down on a panel by a cursor.
+  B goes back a level on every page and, at the page's own place, asks
+  "Leave the Lab?" in the information box as Options' START asks, Yes
+  chosen as NaviCust's quit opens.
 - No A or B hints: the Jukebox, Options, the statistics question, Trade
   Central's two screens and the emote strip show none.
 - BN6's own PET menu in the Net Square carries the one hint of ours on a
