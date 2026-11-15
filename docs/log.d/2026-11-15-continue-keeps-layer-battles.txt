@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T04:50:00Z
+* **Update**: game/progression/encounter-groups.md (a CONTINUE goes on with the layer's next battle, its count saved with the checkpoint; the formations a layer gives measured played through and continued), engine/saves.md (`run.act` holds the layer's battles fought).

@@ -41,13 +41,18 @@
  * no count on its AREA CLEAR card and its next Net Dealer greeted MegaMan
  * as new (a playtester's, both), and the guardian a rumor had named on
  * the act's first layer was "one we've never faced" again (session 63).
- * (A note from before `heard` reads it as 0.) */
+ * And the random battles fought on the checkpoint's layer before it: the
+ * layer's next battle is rolled by their count (the act's beat is its
+ * first, loot.h), and a CONTINUE that began it at 0 again met the beat
+ * after each one, a playtester's act 1 pair three times on one layer
+ * across two CONTINUEs (session 77).
+ * (A note from before `heard` or `battles` reads it as 0.) */
 #define ACT_NOTE_MAGIC 0x41435432u   /* "ACT2" */
-typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where; } ActNote;
-_Static_assert(sizeof(ActNote) == 32 && offsetof(ActNote, seed) == 0 && offsetof(ActNote, act) == 4 &&
+typedef struct { uint32_t seed; int32_t act, viruses, frames, dealer, unknown, heard, where, battles; } ActNote;
+_Static_assert(sizeof(ActNote) == 36 && offsetof(ActNote, seed) == 0 && offsetof(ActNote, act) == 4 &&
 	offsetof(ActNote, viruses) == 8 && offsetof(ActNote, frames) == 12 && offsetof(ActNote, dealer) == 16 &&
-	offsetof(ActNote, unknown) == 20 && offsetof(ActNote, heard) == 24 && offsetof(ActNote, where) == 28,
-	"Act save layout changed");
+	offsetof(ActNote, unknown) == 20 && offsetof(ActNote, heard) == 24 && offsetof(ActNote, where) == 28 &&
+	offsetof(ActNote, battles) == 32, "Act save layout changed");
 _Static_assert(sizeof(int) == 4 && sizeof D.layer_tiles == 4 && sizeof D.seen == 4096, "Layer save layout changed");
 enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME, SAVED_HOME_HERE };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
@@ -58,7 +63,7 @@ static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
 	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
 		suspending ? SAVED_LEFT : D.town ? (D.checkpoint_here ? SAVED_HOME_HERE : SAVED_HOME) : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
-		D.checkpoint_data ? SAVED_DATA : SAVED_START };
+		D.checkpoint_data ? SAVED_DATA : SAVED_START, D.battles };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
 
@@ -358,6 +363,12 @@ bool director_resume(void) {
 		/* where they are, again; the arrival's words were said before */
 		begin_area(false);
 		act_note_apply();
+		/* (the layer's battles fought before it count on: its next is
+		 * rolled by them, as it would have been without the quit) */
+		if (same && act_note_ok && act_note.battles > 0) {
+			D.battles = act_note.battles;
+			roll_encounter();
+		}
 		D.beat[0] = 0;
 		resume_note(!same);
 		return true;
