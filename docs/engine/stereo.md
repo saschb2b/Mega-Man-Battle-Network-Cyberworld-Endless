@@ -3,7 +3,7 @@ type: Feature
 title: "3D depth: the 3DS's 3D screen"
 description: "Options' Display's 3D depth on the 3DS (on by default, `depth_3d` in settings.ini) gives the picture depth through the 3DS's own 3D slider: the moving background deepest, the floor tilted back by its rows, what stands on it (MegaMan, viruses, people) upright at its feet's depth, the HUD flat at the screen; how each pixel's part is read as a frame ends and carried in its alpha, how the GPU draws each eye in layers from the frame's own texture, looked at on a computer, what it costs, the two versions before it, and what is still open."
 tags: [engine, display, options, 3ds]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 sources:
   - id: libctru
     resource: "https://libctru.devkitpro.org/gfx_8h.html"

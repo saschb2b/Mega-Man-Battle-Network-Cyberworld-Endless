@@ -3,7 +3,7 @@ type: Tool
 title: "Frame log: pacing on a player's machine"
 description: "`CYBERWORLD_FRAME_LOG=1` (on the 3DS `frame_log = on` in `settings.ini`) prints a line a second of frames shown and played, the gaps between them and each frame's update, drawing and present times, plus the 3DS's heap."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T00:52:19Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 ---
 
 # Frame log: pacing on a player's machine
