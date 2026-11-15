@@ -145,6 +145,20 @@
 - **Fixed: RESULT counted too few viruses.** The battle that ended a
   run, and a battle you ran from, now count the viruses deleted in
   them. RECORDS' closest goal reads as a whole sentence.
+- **Fixed: a CONTINUE replayed the layer's first battle.** A CONTINUE
+  mid-layer counted the layer's battles from nothing again, so its first
+  random battle came round once more; it goes on with the layer's next.
+- **Fixed: first meetings that went by the wrong thing.** Chaud's first
+  call, the Net Dealer's first words and MegaMan's first dive into an
+  older Net's area went by how deep a profile had gone, so a second run
+  could hear the wrong one, and MegaMan knew an old area before he
+  found it. The profile remembers each line as it plays now.
+- **Fixed: a word after a battle opened under the fade.** A line of
+  MegaMan's right after a battle opened its box as an empty grey frame
+  under BN6's fade back to the map; it waits for the fade now.
+- **The Battle Lab's builder, easier to drive.** B goes back a level on
+  every page and asks "Leave the Lab?" before it leaves, FIELD's Preset
+  is reachable with Up, and held directions repeat.
 - **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
   Pressing A at a steady pace through his words, the next press could
   land just after the gift's screen opened and take its first choice
