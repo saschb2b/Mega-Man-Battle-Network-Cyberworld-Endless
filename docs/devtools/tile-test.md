@@ -107,7 +107,34 @@ Still far from clean, each a call of its own rather than the pick's:
   139 breaks per 100 panels over all areas, the seams 84 to 111).
 - **BN4's Town Area** (488), **BN5's Oran Area** (529), **CopyBot Comp**
   (288), **Seaside** (279), **BN4's and BN5's Undernet** (303, 248),
-  **Nebula Area** (248): not looked into here.
+  **Nebula Area** (248): not looked into here. Oran and Nebula had passes
+  of their own since ([Oran Area's tiles](../world/level-design/oran-tiles.md),
+  [Nebula Area's tiles](../world/level-design/nebula-tiles.md)).
+- **CopyBot Comp** (278 on 15 November 2026, the worst left): its rooms'
+  edges (1740 of 4053 breaks on 280 of 1459 panels, 6.2 a panel), where a
+  walkway meets a room (854) and a room's corners (624). Its maps' only
+  rooms are raised plateaus: a purple pool in a ring of cyan stone over a
+  tall wall of purple ovals, reached by a dock and a ladder. A generated
+  room stands level with its walkways, so its rim panels draw the
+  plateau's ring on their inner half and the walkways' cream and legs on
+  their outer, the ring's outer edge in steps all round. Tried and
+  dropped: drawn as one floor (247, the pools in the walkways' red
+  pattern, the stone ring gone), its pads apart (243, the pool a blob of
+  purple in steps), every flag and lay of its entry (none nearer than
+  273 with the ring kept). Mending it means drawing the ring's outer
+  edge as the plateau's, over its wall, which no rule does yet.
+- **BN4's Town Area** (249 on 15 November 2026): where a walkway meets a
+  room (833 of 2734 breaks) and **a room's inside** (647 on 142 panels,
+  4.6 a panel: the playtester's pale patches over a big platform, seed
+  1016 at depth 3). Its maps' rooms are Town Area 3's squares of 3 x 3,
+  whose middle panel is light blue in a ring of white panels, and one big
+  square whose inside is all light blue but for a road across it. Every
+  panel inside a generated room wider than 3 x 3 is laid whole as a small
+  square's middle, which brings the ring's white into its corners: a
+  checker of white wedges over the light blue. A room drawn by hand
+  (`CYBERWORLD_FLOOR`, 7 x 7 of `P`) shows it alone. Tried and dropped:
+  such panels left to the tile picker (arrows and rim pieces inside, 168
+  breaks to 185 on the hand floor), every flag and lay of its entry.
 
 ## A floor drawn by hand, and the original as the bar
 
@@ -456,7 +483,7 @@ wrong.
 | CopyBot Comp | 288 | 274 | 264 | **whole, rules** |
 | BN5 ACDC | 140 | 131 | 115 | **whole, rules** |
 | BN5 End | 173 | 167 | 152 | not taken: stray pieces of its ramps |
-| BN5 Nebula | 241 | 218 | 191 | **whole, rules** |
+| BN5 Nebula | 241 | 218 | 191 | **whole, rules** (15 November 2026: 211 with its plates as plain platform floor and lay 31 \| 64, [Nebula Area's tiles](../world/level-design/nebula-tiles.md)) |
 | BN5 Undernet | 187 | (whole today) | 164 | **rules** |
 | BN5 dark 2 | 68 | 60 | 62 | not taken: a Liberation Mission's board, not measured as one |
 | BN5 dark 3 | 89 | 56 | 72 | not taken: a Liberation Mission's board, not measured as one |
