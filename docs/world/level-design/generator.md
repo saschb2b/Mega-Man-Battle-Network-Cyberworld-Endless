@@ -95,6 +95,40 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   others widen as above. Over sixty layers of RoboDog's comp
   (`test_way_shapes`), the way's turns into a walkway on wide floor fell
   from 25 to 14 and its one-panel jogs from 3 to 1.
+- **The other games' areas keep the way they were given** (15 November
+  2026). BN4's and BN5's areas are laid out as the BN6 area each is like
+  (`NetAreaDef.like`) and drawn in their own art, and playtesters stalled
+  there as at the comps (session 76): BN4's ACDC Area's squares "only let
+  you out at certain corners", a road leaving a square's side and turning
+  after two panels, a knot of one-wide junctions; stops in BN5's Oran
+  Area. Counted on their own maps (`--atlas nav`, [Nav
+  study](../../devtools/nav-study.md)), several cross fewer one-wide
+  walkways than the area they are like lets their layers: BN4's ACDC
+  Area 2.3 and BN5's 1.5 against Central's 3, BN5's SciLab 2.0 and BN4's
+  countries 2 against Sky's 4, BN4's Park 1 against Green's 2, BN4's
+  Undernet none against the Undernet's 2, Nebula 3.5 where the Graveyard
+  counts none. Those are held to their own count, at least one
+  (`NetAreaDef.narrows`, `LayerKit.narrows`), and the way's walkways past
+  it widen as above; Oran (6.5) and BN5's Undernet (7) cross more than
+  their BN6 area's cap and keep it, BN5's End Area and BN4's Town Area
+  keep their one-wide way. Over sixty layers of each (`test_way_shapes`,
+  which reads their settings without the ROMs), the ways past their
+  originals' count fell from 194 of 540 to 28.
+  That reached the generator's floor and hardly the player's. Their art
+  draws walkways one panel wide, and the legalizer, keeping only what an
+  area's tiles show, wore the widened walkways back to one wide, stepped
+  them aside and cut their mouths off a junction's line: over 192 layers
+  of seven of them, the way on the floor as built turned at a junction
+  91 times to the generator's 34, stepped aside a panel 54 times to its
+  14, and had 573 mouths to its 401. So
+  in another game's area the way's floor is kept as generated: its panels
+  and the floor beside them are locked (`netmap.c`, `lock_way`), the
+  legalizer free to add floor round them; a mission's dark board is left
+  as it was. Over 72 layers of seven of those areas (the atlas, three
+  seeds a layout), the panels on the walks where MegaMan must stop on one
+  exact panel fell from 291 to 141 and the junctions from 187 to 79; the
+  tiles' breaks rose from 157.5 to 160.0 a hundred panels, their seams
+  fell from 90.5 to 83.9.
 - **Rungs meet a field square on** (issue #98). A comb's rung back to a
   ragged field that met its edge on a tab beside a bite was a mouth two
   panels wide on one side, the field going on past it, where the arrow's

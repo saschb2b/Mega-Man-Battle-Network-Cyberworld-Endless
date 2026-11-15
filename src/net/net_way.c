@@ -26,6 +26,16 @@ uint8_t ng_way_band[MAP_H][MAP_W];
 bool layer_by_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x]; }
 bool layer_on_way(int x, int y) { return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_way_band[y][x] == 2; }
 
+void layer_way_floor(uint8_t keep[MAP_H][MAP_W]) {
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x) {
+			if (!layer_on_way(x, y)) continue;
+			keep[y][x] = 1;
+			for (int d = 0; d < 4; ++d)
+				if (floor_at(x + dir_dx[d], y + dir_dy[d])) keep[y + dir_dy[d]][x + dir_dx[d]] = 1;
+		}
+}
+
 void ng_mark_way(int sx, int sy, int gx, int gy) {
 	static int16_t from[MAP_H][MAP_W];
 	static int16_t qx[MAP_W * MAP_H], qy[MAP_W * MAP_H];
@@ -348,10 +358,12 @@ int layer_way_runs(int sx, int sy, int gx, int gy) {
 }
 
 /* The way's walkways past a cap widened, the shortest first (`any`: every
- * one-wide walkway against narrow_cap, else those between big platforms
- * against way_cap) */
-static void widen_past(int biome, int gx, int gy, bool any) {
+ * one-wide walkway against narrow_cap, or `narrows` where fewer: another
+ * game's area held to its own maps' count; else those between big
+ * platforms against way_cap) */
+static void widen_past(int biome, int narrows, int gx, int gy, bool any) {
 	int sx = layer.rooms[0].ax, sy = layer.rooms[0].ay, cap = any ? narrow_cap[biome] : way_cap[biome];
+	if (any && narrows && (!cap || narrows < cap)) cap = narrows;
 	if (any && !cap) return;
 	for (int tries = 0; tries < MAX_RUNS; ++tries) {
 		int s0[MAX_RUNS], s1[MAX_RUNS];
@@ -367,11 +379,11 @@ static void widen_past(int biome, int gx, int gy, bool any) {
 	}
 }
 
-void layer_widen_way(int biome, int gx, int gy) {
+void layer_widen_way(int biome, int narrows, int gx, int gy) {
 	/* (every walkway first: one widened joins its platforms, and the
 	 * walkways between big platforms are counted on what that makes) */
-	widen_past(biome, gx, gy, true);
-	widen_past(biome, gx, gy, false);
+	widen_past(biome, narrows, gx, gy, true);
+	widen_past(biome, narrows, gx, gy, false);
 }
 
 /* ---- The same count on any floor: BN6's own maps too (src/dev/navstudy.c) ----
