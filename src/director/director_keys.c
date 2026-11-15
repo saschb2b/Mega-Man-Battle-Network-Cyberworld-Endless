@@ -380,10 +380,23 @@ static bool home_a(void) {
 	return true;
 }
 
+/* No A in the guardian's data's first second (boss_reward_fresh), nor one
+ * held from then till it is let go: it was pressed at his last word, and
+ * A's reach (talk_target) turned and walked MegaMan to the data. */
+static uint32_t reward_guard(uint32_t keys, bool *a_pressed) {
+	static bool held;
+	if (boss_reward_fresh()) held = true;
+	else if (!(keys & KEY_A)) held = false;
+	if (!held) return keys;
+	*a_pressed = false;
+	return keys & ~KEY_A;
+}
+
 /* A on the map: let go a fifth of a second after a chat closes, else
  * turned to what it would talk to, or walked up to it; the keys as they go
  * on to the game */
 static uint32_t a_keys(uint32_t keys, bool a_pressed) {
+	keys = reward_guard(keys, &a_pressed);
 	/* (no A a fifth of a second after a chat closes: a playtester's A
 	 * pressed through a chat's last box talked to the gift Prog beside him
 	 * again, twice a session) */

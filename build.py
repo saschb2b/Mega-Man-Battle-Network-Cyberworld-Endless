@@ -66,6 +66,12 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py economy [RUNS]  what a run hands out by act (chips, good
                                 chips, codes, zenny, Mystery Data) against
                                 their bands, in .build/economy.txt
+  python3 build.py npc-anims    every NPC in another game's sprite (BN5's
+                                and BN4's guardians, Darkloids, teammates,
+                                bystanders, map objects): each animation
+                                our code tells it to play there, and drawn
+                                where it stands in it, in .build/npc-anims.txt;
+                                local only, the ROMs (docs/devtools/)
   python3 build.py xdiff [SPEC ...] [--mutations]
                                 the differential (issue #82): a family moved
                                 into BN6's engine against its own game's
@@ -3404,7 +3410,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'npc-anims', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3561,6 +3567,13 @@ def main():
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
                         '--economy', f'/src/.build/economy{"-noarc" if noarc else ""}.txt:{runs}{":noarc" if noarc else ""}',
                         mounts=[(rom_dir, '/rom:ro')]))
+    if a.action == 'npc-anims':
+        # (local only: the ROMs, BN5's and BN4's read; each animation an NPC in another game's sprite is told to play, issue #614)
+        build('host')
+        rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+        os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
+        sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                        '--npc-anims', '/src/.build/npc-anims.txt', mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'town':
         build('host')
         sys.exit(town(*a.rest[:1]))

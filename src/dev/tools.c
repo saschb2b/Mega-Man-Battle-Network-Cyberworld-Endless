@@ -1,6 +1,6 @@
 /* tools.h: --atlas (atlas.c), --pacing (pacing_report.c), --economy
  * (economy_report.c), --render-song (a song into a WAV file), --sheet (sheets.c), --xdiff (xdiff.c),
- * --xrecords (xrecords_report.c), --chip-texts (chip_texts.c), --mp2k-trace (mp2k_trace.c), --xsong-pack (another game's song as
+ * --xrecords (xrecords_report.c), --chip-texts (chip_texts.c), --npc-anims (npc_anims.c), --mp2k-trace (mp2k_trace.c), --xsong-pack (another game's song as
  * xsong.c copies it), --pick-fit (pick_fit.c) and --encounter-tags (encounter_tags.c), each run in the game's place once the
  * ROM is read. */
 #include "tools.h"
@@ -18,6 +18,7 @@
 #include "free_space.h"
 #include "mp2k_trace.h"
 #include "net_layouts.h"
+#include "npc_anims.h"
 #include "pacing_report.h"
 #include "pick_fit.h"
 #include "rom.h"
@@ -27,7 +28,7 @@
 #include "xsong.h"
 
 static const char *atlas_spec, *pacing_spec, *economy_spec, *render_spec, *sheet_spec, *xdiff_spec, *xrecords_spec, *mp2k_spec,
-	*pack_spec, *fit_spec, *tags_spec, *texts_spec;
+	*pack_spec, *fit_spec, *tags_spec, *texts_spec, *anims_spec;
 
 bool tools_option(const char *a, const char *v) {
 	/* (another game's song, xN/: the games read for research alone read too, BN4's) */
@@ -44,6 +45,7 @@ bool tools_option(const char *a, const char *v) {
 	else if (!strcmp(a, "--pick-fit")) fit_spec = v;
 	else if (!strcmp(a, "--encounter-tags")) tags_spec = v;
 	else if (!strcmp(a, "--chip-texts")) texts_spec = v;
+	else if (!strcmp(a, "--npc-anims")) anims_spec = v;
 	else if (!strcmp(a, "--net-layout")) layout_forced = atoi(v);
 	/* (a game under the flat plan, the rolls before issue #154, beside
 	 * the opening one in play: docs/game/economy/) */
@@ -106,5 +108,6 @@ int tools_run(void) {
 	if (fit_spec) return pick_fit_run(fit_spec);
 	if (tags_spec) return encounter_tags_run(tags_spec);
 	if (texts_spec) return chip_texts_run(texts_spec);
+	if (anims_spec) return npc_anims_run(anims_spec);
 	return -1;
 }

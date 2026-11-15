@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T14:12:26Z
-* **Update**: rom/bn4.md (Sprite lists: its Navis' overworld sprites draw four diagonals by BN6's eight facings, WindMan four alone, TopMan's and SparkMan's backs empty; BN4's NPC commands 0x16 and 0x17 and its scripts standing them in the odd animations; the pale ones its log-outs), game/bosses/bn4-navis.md (a guardian of BN4's stands in the view nearest his facing, turned to MegaMan), research/sources.md (BN4's Navis face four ways, not eight).

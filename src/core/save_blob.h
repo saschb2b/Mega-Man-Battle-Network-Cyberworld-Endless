@@ -12,6 +12,8 @@
 
 void save_path(char *out, size_t n, const char *name);
 bool save_write_blob(const char *name, uint32_t magic, const void *data, size_t n);
+/* The set held back (save_queue.h) written, all of it, before this returns */
+void save_held_write(void);
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n);
 /* The same for a struct that grows at its end: a blob up to n bytes, the
  * rest zeroed. */

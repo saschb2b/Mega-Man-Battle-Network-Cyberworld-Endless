@@ -54,15 +54,16 @@ _Static_assert(sizeof(ActNote) == 36 && offsetof(ActNote, seed) == 0 && offsetof
 	offsetof(ActNote, unknown) == 20 && offsetof(ActNote, heard) == 24 && offsetof(ActNote, where) == 28 &&
 	offsetof(ActNote, battles) == 32, "Act save layout changed");
 _Static_assert(sizeof(int) == 4 && sizeof D.layer_tiles == 4 && sizeof D.seen == 4096, "Layer save layout changed");
-enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME, SAVED_HOME_HERE };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
+enum { SAVED_START = 1, SAVED_HERE, SAVED_DATA, SAVED_LEFT, SAVED_DOOR, SAVED_HOME, SAVED_HOME_HERE, SAVED_TALK, SAVED_PET };   /* the checkpoint's place (ActNote's where; 0 a note from before) */
 static bool suspending;   /* the checkpoint being saved is a quit's, where MegaMan stands */
+static int before;        /* ... or the set held back before a talk or the PET opened: its place (SAVED_TALK, SAVED_PET) */
 static ActNote act_note;
 static bool act_note_ok;
 
 static void act_note_save(void) {
 	/* (an act already continued without one has no whole count to keep) */
 	ActNote an = { run.seed, (run.depth - 1) / 3, D.act_viruses, D.act_frames, D.dealer_act, D.act_resumed, D.heard_act,
-		suspending ? SAVED_LEFT : D.town ? (D.checkpoint_here ? SAVED_HOME_HERE : SAVED_HOME) : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
+		before ? before : suspending ? SAVED_LEFT : D.town ? (D.checkpoint_here ? SAVED_HOME_HERE : SAVED_HOME) : D.checkpoint_door ? SAVED_DOOR : D.checkpoint_here ? SAVED_HERE :
 		D.checkpoint_data ? SAVED_DATA : SAVED_START, D.battles };
 	save_write_blob("run.act", ACT_NOTE_MAGIC, &an, sizeof an);
 }
@@ -88,12 +89,12 @@ static void act_note_read(void) {
  * (session 63) */
 static void resume_note(bool restarted) {
 	static const char *const from[] = { NULL, "From the layer's start", "From where you saved", "From the Guardian Data", "From where you left off",
-		"From the arena's door", "From Lan's HP", "From where you saved" };
+		"From the arena's door", "From Lan's HP", "From where you saved", "From before that talk", "From before the PET" };
 	/* (a layer made otherwise, by this build or without the ROM that drew
 	 * it, starts again: "From where you left off" over the layer's start
 	 * misled a playtester, session 67) */
 	if (restarted) cinema_note(from[SAVED_START], 240);
-	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_HOME_HERE) cinema_note(from[act_note.where], 240);
+	else if (act_note_ok && act_note.where >= SAVED_START && act_note.where <= SAVED_PET) cinema_note(from[act_note.where], 240);
 }
 
 /* ... and after it, where building it began the act afresh */
@@ -104,13 +105,13 @@ static void act_note_apply(void) {
 		act_note.act, act_note.viruses, act_note.frames, act_note.dealer);
 }
 
-void save_checkpoint(void) {
+/* The checkpoint's files: false where the run's or its state could not be
+ * given to the save queue */
+static bool checkpoint_files(void) {
 	char path[600];
 	save_state_path(path, sizeof path);
-	library_from_game();
-	programs_from_game();
-	save_run();
-	emu_save_state_queued(path);
+	bool ok = save_run();
+	ok = emu_save_state_queued(path) && ok;
 	int make = LAYER_MAKE;
 	save_write_blob("run.make", LAYER_MAKE_MAGIC, &make, sizeof make);
 	save_write_blob("run.area", LAYER_AREA_MAGIC, &D.layer_tiles, sizeof D.layer_tiles);
@@ -123,13 +124,99 @@ void save_checkpoint(void) {
 	lib_save();
 	off_board_save();
 	runlog_tally_save();
+	return ok;
+}
+
+/* ---- the run as it stood before a talk (a quit with one open) ----
+ * A quit while a chat box, a shop or the PET is open saved nothing, for
+ * no state is saved under one (checkpoint_update), and the CONTINUE went
+ * back to the last save under "From where you left off": a playtester's
+ * purchase, two Mystery Data, a race won and a Chip Order's chip, gone
+ * (session 78). So on the last frame MegaMan is free before one opens (A
+ * or START pressed, or a talk of the director's begun) the checkpoint's
+ * files are made and held back (save_queue.h); a quit before he is free
+ * again writes them, and the CONTINUE says "From before that talk". A
+ * battle, a warp or a guardian's staging lets them go, as a quit there
+ * keeps the last checkpoint; so do some frames of MegaMan free, where a
+ * quit saves where he stands. The set is the state a quit a frame sooner
+ * would have saved: nothing to roll again, and the profile's records
+ * (Library, programs found, heard lines) are of a talk heard, the same
+ * when it is heard again (docs/engine/emulation/layer.md, the quit's save). */
+
+#define HELD_FREE_MOST 8   /* frames MegaMan free, one after another, that let the set go */
+
+static int held_kind;   /* the held set's place (SAVED_TALK, SAVED_PET), 0 none */
+static int held_free;
+
+static void held_forget(void) {
+	if (held_kind) save_queue_drop();
+	held_kind = 0;
+}
+
+static void held_save(int kind) {
+	if (!director_can_suspend()) {
+		if (emu_debug_on()) fprintf(stderr, "held: none, MegaMan not free (%s%s%s%s)\n", held_names(bn6_held()), hold_save_ok() ? "" : " busy",
+			D.challenge ? " challenge" : "", D.warping ? " warping" : "");
+		return;
+	}
+	/* (each may save the profile, no file of the set) */
+	library_from_game();
+	programs_from_game();
+	save_queue_hold(true);
+	before = kind;
+	if (!checkpoint_files()) save_queue_spoil();
+	before = 0;
+	save_queue_hold(false);
+	held_kind = save_queue_held() ? kind : 0;
+	held_free = 0;
+	if (emu_debug_on()) fprintf(stderr, "held: the run saved before %s%s\n", kind == SAVED_PET ? "the PET" : "a talk", held_kind ? "" : ", spoilt");
+}
+
+void director_before_talk(void) { held_save(SAVED_TALK); }
+
+bool talk_due_now(void) { return hold_save_ok(); }
+
+/* each frame's keys as the game takes them: A or START pressed afresh */
+void director_before_keys(uint32_t keys) {
+	static uint32_t last;
+	uint32_t pressed = keys & ~last;
+	last = keys;
+	if (!D.active || D.town || !on_map()) return;
+	if (pressed & KEY_START) held_save(SAVED_PET);
+	else if (pressed & KEY_A) held_save(SAVED_TALK);
+}
+
+static bool in_battle(void) {
+	int sub = emu_read8(BN6_GAMESTATE);
+	return D.in_battle || (main_mode() == BN6_MODE_GAME && (sub == BN6_SUB_BATTLE_INIT || sub == BN6_SUB_BATTLE));
+}
+
+/* whether the held set may stand for the run now */
+static bool held_stands(void) {
+	return held_kind && D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && !D.battler_series && !in_battle();
+}
+
+void held_watch(void) {
+	if (!held_kind) return;
+	if (!held_stands()) held_forget();
+	else if (!hold_save_ok()) held_free = 0;
+	else if (++held_free >= HELD_FREE_MOST) held_forget();
+}
+
+void save_checkpoint(void) {
+	library_from_game();
+	programs_from_game();
+	/* (a newer save than any held back) */
+	held_forget();
+	checkpoint_files();
 }
 
 bool director_can_suspend(void) {
 	return D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && !D.battler_series && hold_save_ok();
 }
 
-const char *director_saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
+/* where the run was last saved, for the quit prompt */
+static const char *saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
 
 /* the PET's Save's checkpoint taken, its box still to open (pet.c) */
 static bool pet_said;
@@ -217,12 +304,25 @@ void checkpoint_update(void) {
 /* (at a quit, or as iOS sends the game to the background, where it may
  * end it unasked: its files written before it returns, save_queue.h) */
 bool director_suspend(void) {
-	if (!director_can_suspend()) return false;
+	if (!director_can_suspend()) {
+		/* (with a talk open: the run as it stood before it) */
+		if (!held_stands()) return false;
+		save_held_write();
+		held_kind = 0;
+		return true;
+	}
 	suspending = true;
 	save_checkpoint();
 	suspending = false;
 	save_queue_wait();
 	return true;
+}
+
+/* the quit prompt's line on where the run goes on from */
+const char *director_quit_where(void) {
+	if (director_quit_keeps()) return "Your run is saved right here";
+	if (held_stands()) return held_kind == SAVED_PET ? "Run saved before the PET" : "Run saved before this talk";
+	return saved_where();
 }
 
 /* Whether the layer just rebuilt is the one the checkpoint saved: made by
@@ -286,6 +386,7 @@ static bool resume_home(void) {
 
 bool director_resume(void) {
 	drop_events();
+	held_forget();
 	/* (a checkpoint resumed is saved already: a save asked for before it,
 	 * on the map a Net Square visit left, would write the new map's state) */
 	D.checkpoint = D.checkpoint_here = D.checkpoint_data = D.checkpoint_door = false;

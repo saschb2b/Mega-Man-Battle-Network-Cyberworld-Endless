@@ -73,6 +73,12 @@
   BN6's beam, as their own sprites have no log-in of BN6's. GutsMan no
   longer stands invisible through his entrance, either. A run saved
   before this update starts its layer afresh at a CONTINUE.
+- **Fixed: after a guardian.** The A that paged his last word no
+  longer takes his Guardian Data the moment it appears, from a panel
+  away: it waits to be taken for a second. The crystal goes as its
+  "MegaMan got:" boxes close, not after the program pick, the map drops
+  his red Boss mark once he is deleted, and the exit pad in BN4's Town
+  Area shows on its pale floor, where it was there but unseen.
 - **Fixed: BN4's guardians turned their backs, or were not there.**
   BN4 draws its Navis facing four ways where BN6 draws eight, and
   BN6's "facing left" is a back view in BN4's: with MegaMan on his
@@ -80,6 +86,14 @@
   backs, WindMan, TopMan and SparkMan nothing at all. Each now stands
   in his own sprite's view that faces MegaMan, on either side of his
   arena.
+- **Fixed: the Glitch copy of a Falzar Navi was a flicker of streaks,
+  and CosmoMan vanished on his board.** The copy at a Glitch layer's
+  heart stood in SpoutMan's, TomahawkMan's or another Falzar Navi's
+  warp-out, over and over; it now stands as he does in battle. CosmoMan's
+  BN5 sprite faces the camera only, so on a dark layer's board he
+  vanished whenever he turned to strike upward; he now turns towards the
+  camera. Nobody the game places in another game's sprite turns to face
+  MegaMan where that sprite draws nothing.
 - **Fixed: the PET's Save let your next A through to the map.** It
   closed the PET with only the corner's "Run saved", so the A you meant
   for a save box talked to, or picked up, whatever MegaMan faced: one
@@ -95,6 +109,12 @@
   layer's start: the battle, its reward and the walk since were gone.
   The game now runs on until MegaMan is free and saves the run where he
   stands.
+- **Fixed: a quit with a text box open lost the layer.** Quitting while
+  a chat, a shop or the PET was open saved nothing, so CONTINUE went
+  back to the last save while it said "From where you left off":
+  purchases, Mystery Data and a race won were gone. The run is now kept
+  as it stood the moment before that box opened, and CONTINUE says
+  "From before that talk".
 - **Fixed: blank chips in the Standard folder.** A system that kept
   its start-up state from before 0.21.0 dealt a new game's folder
   misread: some chips came out blank and did nothing, and FOLDER EDIT
@@ -216,7 +236,9 @@
   land just after the gift's screen opened and take its first choice
   before you had seen it. A reward pick's screen now takes a choice only
   once it has been up a second and a half (the cursor moves sooner), for
-  the gift, a guardian's draft and every other pick alike.
+  the gift, a guardian's draft and every other pick alike. Its cursor
+  shows when: it stands still and faded while A would take nothing, and
+  bobs in full orange once A takes.
 - **The game tells you when a new version is out, and what it brings.**
   At each start it looks for one (a single request for the release's own
   `update.json`, nothing about you sent). When one is out, a box opens
