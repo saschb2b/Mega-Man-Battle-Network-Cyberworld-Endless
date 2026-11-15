@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T17:40:00Z
-* **Update**: game/glitch-layer.md (Checking an area's look: the atlas's `intoN`/`fromN` and `--dev glitchlook=AREA`, `glitchhold`), devtools/dev-menu.md (`glitchlook=`, `glitchhold`), devtools/atlas.md (`intoN`, `fromN`), code/dev.md (`atlas_looks.c`).
