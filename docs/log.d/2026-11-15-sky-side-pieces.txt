@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T19:36:53Z
-* **Update**: world/level-design/side-pieces.md (Sky Area surveyed: nothing beside, under or behind its floors, what its maps leave undrawn is raised floor, pods, stairs, roads and kinds 3 to 5; its row in the area table and its section, every cut run on its maps, none taken).
