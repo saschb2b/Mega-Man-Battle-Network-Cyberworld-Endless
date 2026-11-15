@@ -440,8 +440,10 @@ void last_stop(int cx, int cy) {
 	int k = arena_ahead(buf, sizeof buf);
 	/* (no running once in is BN6's own, as from its story bosses, unsaid:
 	 * the voice sweep, docs/voice/sweep/net.md) */
-	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
-	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.", dealer);
-	else snprintf(buf + k, sizeof buf - (size_t)k, "Want to heal up first?|@M A Recovery Mr.Prog's %s.", heal);
+	/* (a suggestion, not a question: "Want to get ready first?" asked one
+	 * that took no answer, session 77) */
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.", dealer);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "Let's heal up first!|@M A Recovery Mr.Prog's %s.", heal);
 	talk_start(buf, FACE_MEGAMAN);
 }
