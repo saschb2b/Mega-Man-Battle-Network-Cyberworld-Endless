@@ -552,7 +552,8 @@ three pages, tabs across the top of its list, the one shown lit green: **L** and
 own, and a tap on a tab opens it: **Display**, the picture ([Screen](#screen)); **Audio**, the
 music's and the sound effects' levels, the output and the sound ([Sound](#sound)); and **Game**,
 with **Controls** (the controls screen, not on the 3DS, whose buttons are
-its own), **Fast forward**'s speed ([Fast forward](#fast-forward)) and
+its own), **Touch controls** where there is a touch screen (below),
+**Fast forward**'s speed ([Fast forward](#fast-forward)) and
 **Statistics**, your answer to the statistics' question, where the game
 can send them. Left and Right turn a line's value, kept at once; B
 leaves (on a phone, the touch controls' B), and Options opens again on
@@ -607,7 +608,12 @@ under `[joystick]` as SDL's mappings name a joystick's: `b0`, `h0.1` (its
 hat up), `-a1` (its second axis one way).
 
 A touch screen shows the buttons on it from its first touch (a Steam
-Deck's too), until a key or a controller is used again. The D-pad takes
+Deck's too), until a key or a controller is used again. Playing on a
+handheld's own buttons and they get in the way? Options › Game ›
+**Touch controls** **Off** keeps them away while a controller is
+connected or the keyboard plays (`touch_controls = off` in
+`settings.ini`); a phone with neither still shows them at a touch, so
+it can always be played. The D-pad takes
 diagonals where MegaMan walks (the net's walkways run along them) and four
 directions in battles and menus. Their **MENU** button pauses the game and
 opens their menu: **SIZE** and **OPACITY** of them all, **HAPTICS** (a tick
