@@ -1,0 +1,1 @@
+Aquarium Comp's layers set its maps' tanks behind their floors' upper edges (stands_learn, nm_paste_sides), on both tile layers, in the stretches that take what stands behind a floor: their tiles and its pillars' looks (three fewer, the tanks and the whale's console first in the book) change.

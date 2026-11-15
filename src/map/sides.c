@@ -195,45 +195,65 @@ static bool drawn0(const AreaSrc *a, int tx, int ty) {
 	return false;
 }
 
+/* A new piece of up to n tiles for panel (A, B) of map a, at the book's end
+ * (grown as looks come), its neighbourhood set; NULL where the book is full
+ * or memory runs out. */
+static SidePiece *begin(const AreaSrc *a, int n, int A, int B, SideBook *out) {
+	if (out->n >= SIDES_MAX) return NULL;
+	if (out->n == out->cap) {
+		int cap = out->cap ? 2 * out->cap : 8;
+		SidePiece *more = realloc(out->piece, (size_t)cap * sizeof *more);
+		if (!more) return NULL;
+		out->piece = more;
+		out->cap = cap;
+	}
+	SidePiece *p = &out->piece[out->n];
+	memset(p, 0, sizeof *p);
+	p->tiles = calloc((size_t)n, sizeof *p->tiles);
+	if (!p->tiles) return NULL;
+	p->ntiles = n;
+	for (int k = 0; k < 9; ++k)
+		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
+	return p;
+}
+
+/* Map tile i's place from panel (A, B)'s corner. */
+static StairTile placed(const AreaSrc *a, int i, int A, int B) {
+	int ax = area_px(a->tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(a->th, a->ex + 32 * A, a->ey + 32 * B);
+	return (StairTile){ .px = (int16_t)(i % a->tw * 8 - ax), .py = (int16_t)(i / a->tw * 8 - ay) };
+}
+
+/* Piece p, group g's on panel (A, B), into the book unless it holds its
+ * look; whether it went in. */
+static bool finish(const AreaSrc *a, const Group *g, int A, int B, SidePiece *p, SideBook *out) {
+	for (int k = 0; k < out->n; ++k)
+		if (same(&out->piece[k], p)) { free(p->tiles); p->tiles = NULL; return false; }
+	/* (MegaMan passes in front of what stands behind a floor: none) */
+	if (!p->hang && !p->behind) priorities(a, A, B, p);
+	under(g, A, B, p);
+	++out->n;
+	return true;
+}
+
 /* Group g, on panel (A, B), into the book unless it holds its look; kind 0
  * a side piece, 1 under a floor, 2 behind one, 3 a side piece with the
  * first layer's tiles under it (SidePiece.over), 4 behind a floor on the
  * second layer, with them too. */
 static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
 	bool hang = kind == 1 || kind == 2 || kind == 5;
-	int tw = a->tw, th = a->th;
-	if (out->n >= SIDES_MAX) return;
-	if (out->n == out->cap) {
-		int cap = out->cap ? 2 * out->cap : 8;
-		SidePiece *more = realloc(out->piece, (size_t)cap * sizeof *more);
-		if (!more) return;
-		out->piece = more;
-		out->cap = cap;
-	}
-	SidePiece *p = &out->piece[out->n];
-	memset(p, 0, sizeof *p);
-	p->tiles = calloc((size_t)g->n, sizeof *p->tiles);
-	if (!p->tiles) return;
-	p->ntiles = g->n;
+	int tw = a->tw;
+	SidePiece *p = begin(a, g->n, A, B, out);
+	if (!p) return;
 	p->hang = hang;
 	p->behind = kind == 2 || kind == 4;
 	p->over = kind == 3 || kind == 4;
 	p->grows = kind == 5;
-	for (int k = 0; k < 9; ++k)
-		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
-	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
 	for (int k = 0; k < g->n; ++k) {
-		p->tiles[k] = (StairTile){ .px = (int16_t)(queue[k] % tw * 8 - ax), .py = (int16_t)(queue[k] / tw * 8 - ay) };
+		p->tiles[k] = placed(a, queue[k], A, B);
 		*(hang ? &p->tiles[k].e0 : &p->tiles[k].e1) = a->tile[hang ? 0 : 1][queue[k]];
 		if (p->over) p->tiles[k].e0 = drawn0(a, queue[k] % tw, queue[k] / tw) ? a->tile[0][queue[k]] : 0;
 	}
-	for (int k = 0; k < out->n; ++k)
-		if (same(&out->piece[k], p)) { free(p->tiles); p->tiles = NULL; return; }
-	/* (MegaMan passes in front of what stands behind a floor: none) */
-	if (!hang && !p->behind) priorities(a, A, B, p);
-	under(g, A, B, p);
-	if (kind == 4) stands_on(a, queue, g, A, B, p);
-	++out->n;
+	if (finish(a, g, A, B, p, out) && kind == 4) stands_on(a, queue, g, A, B, p);
 }
 
 /* The second layer's side pieces (kind 0), with the first layer's tiles
@@ -399,6 +419,191 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 void hangs_learn(const AreaSrc *r, SideBook *out) { first_learn(r, 1, out); }
 
 void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }
+
+#define STAND_TILES 400   /* what stands behind a floor on both layers is no larger (a tank: 215) */
+#define STAND_W      24   /* tiles */
+#define STAND_H      24
+#define STAND_OFF     7   /* tenths of its pixels off the floor at least: it meets it at its foot */
+
+/* A group of the second layer cut as what stands behind a floor: where it
+ * is a row of copies, the step from one to the next (lower on the screen,
+ * in front of it), its front copy and how far back its back copy stands. */
+typedef struct {
+	const AreaSrc *a;
+	const int *queue, *owner;   /* the group's tiles; each map tile's group (its first tile), this one `id` */
+	const Group *g;
+	int id, dx, dy, back;
+	uint8_t *mark;              /* all clear, and left so */
+	int *unit, n;               /* the front copy's tiles */
+	Group u;                    /* ... measured */
+	int lo[STAND_H], hi[STAND_H], rows;   /* its rows' ends */
+} Row;
+
+/* Whether tile (x, y) is on the map and a copy of tile i: the row's, with
+ * its second-layer entry. */
+static bool copy_at(const Row *r, int i, int x, int y) {
+	const AreaSrc *a = r->a;
+	return x >= 0 && y >= 0 && x < a->tw && y < a->th && r->owner[y * a->tw + x] == r->id && a->tile[1][i] == a->tile[1][y * a->tw + x];
+}
+
+/* Whether the group is a row of copies, a step (dx, dy) tiles apart: the
+ * step a third of its tiles repeat at, the most. */
+static bool repeat_step(Row *r) {
+	int most = 0, tw = r->a->tw;
+	for (int y = 0; y <= STAND_H; ++y)
+		for (int x = y ? -STAND_W : 1; x <= STAND_W; ++x) {
+			int n = 0;
+			for (int k = 0; k < r->g->n; ++k) n += copy_at(r, r->queue[k], r->queue[k] % tw + x, r->queue[k] / tw + y);
+			if (n > most) { most = n; r->dx = x; r->dy = y; }
+		}
+	return most * 3 >= r->g->n;
+}
+
+/* The front copy into r->unit: the tiles with no copy a step on, the
+ * largest lot of them joined 8 ways (with no step, the whole group). */
+static void front_copy(Row *r) {
+	const AreaSrc *a = r->a;
+	int tw = a->tw, best = 0, nbest = 0, n = 0;
+	const int *q = r->queue;
+	if (!r->dx && !r->dy) { memcpy(r->unit, q, (size_t)r->g->n * sizeof *q); r->n = r->g->n; return; }
+	for (int k = 0; k < r->g->n; ++k) r->mark[q[k]] = !copy_at(r, q[k], q[k] % tw + r->dx, q[k] / tw + r->dy);
+	for (int k = 0; k < r->g->n; ++k) {
+		if (r->mark[q[k]] != 1) continue;
+		int from = n;
+		r->unit[n++] = q[k];
+		r->mark[q[k]] = 2;
+		for (int h = from; h < n; ++h)
+			for (int d = 0; d < 9; ++d) {
+				int x = r->unit[h] % tw + d % 3 - 1, y = r->unit[h] / tw + d / 3 - 1;
+				if (x < 0 || y < 0 || x >= tw || y >= a->th || r->mark[y * tw + x] != 1) continue;
+				r->mark[y * tw + x] = 2;
+				r->unit[n++] = y * tw + x;
+			}
+		if (n - from > nbest) { best = from; nbest = n - from; }
+	}
+	for (int k = 0; k < r->g->n; ++k) r->mark[q[k]] = 0;
+	memmove(r->unit, r->unit + best, (size_t)nbest * sizeof *r->unit);
+	r->n = nbest;
+}
+
+/* How many steps back the back copy stands from the front one: the
+ * farthest that half the front copy's tiles repeat at. */
+static int back_steps(const Row *r) {
+	int j = 0, tw = r->a->tw;
+	while (r->dx || r->dy) {
+		int same = 0;
+		for (int k = 0; k < r->n; ++k) same += copy_at(r, r->unit[k], r->unit[k] % tw - (j + 1) * r->dx, r->unit[k] / tw - (j + 1) * r->dy);
+		if (same * 2 < r->n) break;
+		++j;
+	}
+	return j;
+}
+
+/* The front copy's box and pixels (r->u) and its rows' ends. */
+static void measure(Row *r) {
+	int tw = r->a->tw;
+	Group *u = &r->u;
+	memset(u, 0, sizeof *u);
+	u->n = r->n;
+	u->x0 = u->x1 = r->unit[0] % tw;
+	u->y0 = u->y1 = r->unit[0] / tw;
+	for (int k = 0; k < r->n; ++k) {
+		int x = r->unit[k] % tw, y = r->unit[k] / tw;
+		if (x < u->x0) u->x0 = x;
+		if (x > u->x1) u->x1 = x;
+		if (y < u->y0) u->y0 = y;
+		if (y > u->y1) u->y1 = y;
+		count_tile(r->a, false, x, y, u);
+	}
+	r->rows = u->y1 - u->y0 + 1;
+	for (int y = 0; y < STAND_H; ++y) { r->lo[y] = tw; r->hi[y] = -1; }
+	for (int k = 0; k < r->n && r->rows <= STAND_H; ++k) {
+		int x = r->unit[k] % tw, y = r->unit[k] / tw - u->y0;
+		if (x < r->lo[y]) r->lo[y] = x;
+		if (x > r->hi[y]) r->hi[y] = x;
+	}
+}
+
+/* Whether tile (x, y) lies in the front copy's rows, between their ends. */
+static bool in_rows(const Row *r, int x, int y) {
+	int k = y - r->u.y0;
+	return k >= 0 && k < r->rows && x >= r->lo[k] && x <= r->hi[k];
+}
+
+/* Where to read the front copy's tile (x, y): the copies stand over the one
+ * behind them, so where the copy behind the front one reaches into it (as
+ * its map draws it, the two in one tile), the back copy, which nothing
+ * stands over; elsewhere the front copy. */
+static int stand_source(const Row *r, int x, int y) {
+	int bx = x - r->back * r->dx, by = y - r->back * r->dy, tw = r->a->tw;
+	if (!r->back || !in_rows(r, x + r->dx, y + r->dy) || in_rows(r, x - r->dx, y - r->dy)) return y * tw + x;
+	return bx >= 0 && by >= 0 && bx < tw && by < r->a->th ? by * tw + bx : y * tw + x;
+}
+
+/* Piece p's tiles, the front copy's on panel (A, B), each as the copy that
+ * shows it whole draws it: its second layer's, and the first layer's off
+ * the floor between its ends in each row, what shows through it. */
+static void stand_tiles(const Row *r, int A, int B, SidePiece *p) {
+	const AreaSrc *a = r->a;
+	int tw = a->tw;
+	p->ntiles = 0;
+	for (int y = r->u.y0; y <= r->u.y1; ++y)
+		for (int x = r->lo[y - r->u.y0]; x <= r->hi[y - r->u.y0]; ++x) {
+			int src = stand_source(r, x, y);
+			bool off = hang_tile(a, src % tw, src / tw);
+			uint16_t e0 = off ? a->tile[0][src] : 0, e1 = a->tile[1][src] & 0x3FF ? a->tile[1][src] : 0;
+			if (!e0 && !e1) continue;
+			StairTile *t = &p->tiles[p->ntiles++];
+			*t = placed(a, y * tw + x, A, B);
+			t->e0 = e0;
+			t->e1 = e1;
+			t->foot = e1 && (a->tile[0][src] & 0x3FF) && !off;
+		}
+}
+
+/* The row r's group as what stands behind its view's floor, its front copy
+ * where it is a row of them, into the book. */
+static void stand(Row *r, SideBook *out) {
+	const Group *g = r->g, *u = &r->u;
+	int A, B;
+	r->dx = r->dy = 0;
+	bool whole = g->n <= STAND_TILES && g->x1 - g->x0 < STAND_W && g->y1 - g->y0 < STAND_H;
+	if (!whole && !repeat_step(r)) return;
+	front_copy(r);
+	measure(r);
+	if (r->n < MIN_TILES || r->n > STAND_TILES || u->x1 - u->x0 >= STAND_W || u->y1 - u->y0 >= STAND_H) return;
+	/* (its foot on the floor, the rest off it, over no other floor; a
+	 * floor straight below it and none above) */
+	if (u->on < ON_FLOOR || u->off * 10 < STAND_OFF * (u->on + u->off) || u->other * 10 > u->on + u->off) return;
+	if (meets(r->a, r->unit, u, false, &A, &B) || !meets(r->a, r->unit, u, true, &A, &B)) return;
+	SidePiece *p = begin(r->a, (u->x1 - u->x0 + 1) * (u->y1 - u->y0 + 1), A, B, out);
+	if (!p) return;
+	p->hang = p->behind = p->both = true;
+	r->back = back_steps(r);
+	stand_tiles(r, A, B, p);
+	finish(r->a, u, A, B, p, out);
+}
+
+void stands_learn(const AreaSrc *a, SideBook *out) {
+	if (a->layers < 2 || !a->rings || !a->idx0) return;
+	size_t cells = (size_t)a->tw * a->th;
+	uint8_t *seen = calloc(cells, 1), *mark = calloc(cells, 1);
+	int *queue = malloc(cells * sizeof *queue), *owner = malloc(cells * sizeof *owner), *unit = malloc(cells * sizeof *unit);
+	for (size_t i = 0; owner && i < cells; ++i) owner[i] = -1;
+	for (size_t i = 0; seen && mark && queue && owner && unit && i < cells && out->n < SIDES_MAX; ++i) {
+		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
+		Group g;
+		group_from(a, false, NULL, (int)i, seen, queue, &g);
+		for (int k = 0; k < g.n; ++k) owner[queue[k]] = (int)i;
+		Row r = { .a = a, .queue = queue, .owner = owner, .g = &g, .id = (int)i, .mark = mark, .unit = unit };
+		if (!g.edge && g.n >= MIN_TILES) stand(&r, out);
+	}
+	free(seen);
+	free(mark);
+	free(queue);
+	free(owner);
+	free(unit);
+}
 
 /* ---- what grows on a floor's edges ----
  *

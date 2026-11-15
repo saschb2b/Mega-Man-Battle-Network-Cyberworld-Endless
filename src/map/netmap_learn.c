@@ -83,7 +83,11 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		AreaSrc r;
 		if (!area_src_raise_in(src, z, &r)) continue;
 		learn_view(&r, grid_of, area, own, L);
-		/* (and what stands under that floor, where the area sets such: sides.h) */
+		/* (and what stands under that floor and behind it, where the area
+		 * sets such: sides.h; what stands on both layers first, whose looks
+		 * are few, the Aquarium's pillars under its pads being more than a
+		 * book holds) */
+		if (net_area_def(area)->sides & 32) stands_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 4) behind_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&r, &L->sides);

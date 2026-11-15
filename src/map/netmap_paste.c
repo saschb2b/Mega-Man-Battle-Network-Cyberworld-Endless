@@ -502,9 +502,34 @@ static bool grows_meets(const SidePiece *p, const SideMap *m, int px0, int py0) 
 	return true;
 }
 
+/* Whether tile t of what stands behind a floor on both layers may go on
+ * map cell `at`: over nothing but where its map draws its foot over the
+ * floor (StairTile.foot), there over the floor's own art. */
+static bool both_free(const StairTile *t, const SideMap *m, size_t at) {
+	return !m->map[(size_t)m->tw * m->th + at] && (!m->map[at] || (!t->e0 && t->foot));
+}
+
+/* Whether tile k of piece p, which stands behind a floor on both layers or
+ * grows on a floor's edge, may go on map cell `at` (`to`: its layer). */
+static bool kept_free(const SidePiece *p, int k, const SideMap *m, const uint16_t *to, size_t at) {
+	if (p->both) return both_free(&p->tiles[k], m, at);
+	/* (what grows on a floor's edge goes over the floor's own art where its
+	 * tile drew that too in its map, and nowhere else) */
+	return !to[at] == !(p->onto >> k & 1);
+}
+
+/* Piece p's tile t on map cell `at`; a foot over the floor's art marked so
+ * (NETMAP_PASTED_FOOT). */
+static void side_put(const SidePiece *p, const StairTile *t, uint16_t *map, size_t cells, size_t at) {
+	if (!p->both) { (p->hang ? map : map + cells)[at] = p->hang ? t->e0 : t->e1; return; }
+	if (nm_last.pasted && map[at] && t->foot) nm_last.pasted[at] |= NETMAP_PASTED_FOOT;
+	if (t->e0) map[at] = t->e0;
+	if (t->e1) map[cells + at] = t->e1;
+}
+
 /* Whether piece p goes down whole at grid panel (x, y): on the map, on its
  * tile lattice, over nothing its layer holds (the second; the first for
- * what stands under a floor). */
+ * what stands under a floor; both for what stands on both). */
 static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
 	int tw = m->tw, th = m->th;
 	const uint16_t *to = p->hang ? m->map : m->map + (size_t)tw * th;
@@ -521,10 +546,10 @@ static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
 		size_t at = (size_t)(py / 8) * tw + px / 8;
 		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
 		if (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) return false;
-		/* (what grows on a floor's edge goes over the floor's own art where
-		 * its tile drew that too in its map, and nowhere else) */
-		if (p->grows) {
-			if (!to[at] != !(p->onto >> k & 1)) return false;
+		/* (what stands on both layers or grows on a floor's edge: rules of
+		 * their own, kept_free) */
+		if (p->both || p->grows) {
+			if (!kept_free(p, k, m, to, at)) return false;
 			continue;
 		}
 		/* (what stands under a pad begins in its rim's own tiles, what
@@ -545,11 +570,10 @@ static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
  * Whether it was. */
 static bool side_set(const SidePiece *p, const SideMap *m, int x, int y) {
 	if (!side_fits(p, m, x, y)) return false;
-	uint16_t *to = p->hang ? m->map : m->map + (size_t)m->tw * m->th;
 	int A, B;
 	nm_grid_to_panel(x, y, &A, &B);
 	int px0 = area_px(m->tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(m->th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
-	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * m->tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
+	for (int k = 0; k < p->ntiles; ++k) side_put(p, &p->tiles[k], m->map, (size_t)m->tw * m->th, (size_t)((py0 + p->tiles[k].py) / 8) * m->tw + (px0 + p->tiles[k].px) / 8);
 	return true;
 }
 
@@ -564,8 +588,10 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
 		const SidePiece *p = &b->piece[k];
 		/* (the second layer's pieces behind a floor stand behind any
 		 * stretch of its upper edge: the panels they draw over void, as
-		 * in their maps, whatever floor lies before them) */
-		bool any = p->behind && !p->hang;
+		 * in their maps, whatever floor lies before them; so do those on
+		 * both layers, which reach past the nine, as a tank does past its
+		 * landing's road) */
+		bool any = p->behind && (!p->hang || p->both);
 		if (!p->grows && (p->behind ? 2 : p->hang) == kind && (p->floor == f || any) && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
 	}
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
@@ -613,6 +639,26 @@ static void hang_said(const SidePiece *p, int x, int y) {
 	nm_grid_to_panel(x, y, &A, &B);
 	fprintf(stderr, "  %s at world %d,%d: %d tiles\n", p->grows ? "on the floor's edge" : p->behind ? "behind the floor" : "under the pad's panel",
 		nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
+}
+
+/* (measuring) the breaks across the edges of a side piece's foot, set
+ * whole over the floor's art, are none: its map stands it on a floor of
+ * another look (the Aquarium's tanks behind their orange landings), so the
+ * layer's floor going on under its foot shows strips no map does, as the
+ * landing goes on under it there (docs/world/level-design/side-pieces.md) */
+void nm_unfoot_breaks(int tw, int th) {
+	uint8_t *b = nm_last.breaks;
+	for (int i = 0; b && nm_last.pasted && i < tw * th; ++i) {
+		if (!(nm_last.pasted[i] & NETMAP_PASTED_FOOT)) continue;
+		/* (its right and lower edges, its left neighbour's right and its upper one's lower) */
+		uint8_t *at[4] = { &b[i], &b[i], i % tw ? &b[i - 1] : NULL, i >= tw ? &b[i - tw] : NULL };
+		const uint8_t edge[4] = { 1, 2, 1, 2 };
+		for (int k = 0; k < 4; ++k) {
+			if (!at[k]) continue;
+			if (*at[k] & edge[k]) { *at[k] &= (uint8_t)~edge[k]; --tiles_stats.breaks; }
+			if (*at[k] & edge[k] << 2) { *at[k] &= (uint8_t)~(edge[k] << 2); --tiles_stats.nicks; }
+		}
+	}
 }
 
 static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER + 1];   /* (and the piece in a hole) */

@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (what stands behind a raised floor on both layers, the Aquarium's tanks cut from their rows and set behind its layers' floors; its whale console, the road and landings left, with why), devtools/tile-test.md (a side piece's foot left out of the breaks).
 * **Update**: world/level-design/side-pieces.md (BN5's Undernet's skull totems, which issue #505 took for dark figures where its statues stand: first-layer art in a bank its palette script fills, now scenery on its layers; its row in the area table; the Not built note), rom/graphics.md (BN5's Undernet 2 and 3's bank-12 palette script, which colours the totems and flashes their eyes).
 * **Update**: world/level-design/side-pieces.md (BN5's Nebula Area surveyed: its dripping pods and pools are drawn with its plates' corners and paths' ends, no cut learns a piece from its two maps, the crate on a plate a centrepiece; its row in the area table, a section of its own, and the Not built list without its pods).
 * **Update**: releases/v0.22.0.md (opens with its trailer).
