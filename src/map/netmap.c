@@ -702,7 +702,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 		centre(lay);
 	}
 	if (striped) make_stripes(keep_pads);
-	nm_mark_roads(roads);
+	nm_mark_roads(L->road, roads ? L->nroads : 0);
 	coord_slot = L->coord_slot;
 	nm_build_extra(L);
 	nm_gaps_place();
