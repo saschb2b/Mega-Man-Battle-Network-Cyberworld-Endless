@@ -19,6 +19,7 @@ The master is the 1280x720 trailer scaled 3x, nearest neighbour, to
 at every size and at a higher bitrate, where a 720p upload's H.264 blurs
 the game's pixels.
 """
+import datetime
 import html
 import json
 import os
@@ -122,10 +123,12 @@ def thumbnails(version):
 def describe(version):
     try:
         tagline, para = notes(version)
+    except FileNotFoundError:               # (before its notes are written)
+        tagline, para = f'Cyberworld Endless {version}', ''
+    try:
         date = released(version)
-    except (FileNotFoundError, subprocess.CalledProcessError):
-        # (before the release: its notes and its tag are still to come)
-        tagline, para, date = f'Cyberworld Endless {version}', '(the release notes are not written yet)', 'not yet'
+    except subprocess.CalledProcessError:   # (before its tag: the video may go up ahead of the release)
+        date = None
     title = f'Cyberworld Endless {version} Trailer – {tagline}'
     lead = hook(version)
     if lead:
@@ -135,7 +138,7 @@ def describe(version):
     text = '\n'.join([
         f'{tagline} {para}',
         '',
-        f'Cyberworld Endless {version}, released {date}: a roguelike that runs Mega Man Battle Network 6 '
+        f'Cyberworld Endless {version}{f", released {date}" if date else ""}: a roguelike that runs Mega Man Battle Network 6 '
         'from your own ROM. Every shot is the game running; the music is original, written for this trailer.',
         '',
         f'Play in the browser: {SITE}play/',
@@ -150,7 +153,8 @@ def describe(version):
         '#MegaManBattleNetwork #roguelike #indiegame',
     ])
     shown = thumbnails(version)
-    return {'version': version, 'title': title, 'description': text, 'tags': TAGS, 'recorded': date,
+    return {'version': version, 'title': title, 'description': text, 'tags': TAGS,
+            'recorded': date or datetime.date.today().isoformat(),
             'video': f'{name(version)}.mp4', 'thumbnail': shown[0], 'thumbnails': shown}
 
 

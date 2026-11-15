@@ -730,9 +730,12 @@ stand still (two and three fight on), divers carry no name tag, the
 leader's A at the door also opens the crew's chat.
 
 The owner on the sketches: "a is good" (15 November 2026): "Carry on".
-Still his: his word on the cut (gate 5), and whether Dad should have a
-voice some day; until then the cut renders into `.build/` and 0.21.0's
-stays the current one.
+The owner on the second cut (15 November 2026): "Yes, approved". It
+became the current trailer the same day (the site's hero and texts, the
+README, the notes' opening, the 3DS banner from the climax's hook),
+before the tag; its areas' footage is retaken once the layer generators
+settle (delete a scene's folder, render again). Still his: whether Dad
+should have a voice some day.
 
 Chosen by this cut (the next one's are others): the green accent, the
 climbing packets, the sweep, the tune "Carry on", the Beast Out as the
