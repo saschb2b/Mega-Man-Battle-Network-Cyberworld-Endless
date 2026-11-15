@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (Undernet Zero sets the bowls behind upper edges too, taken from the Undernet's maps through `side_maps`).
 * **Update**: world/level-design/side-pieces.md (BN4's Undernet's horns in rows along whole catwalk runs, `SIDES_RUNS`, measured on its two maps; what else they hold that no layer draws is floor or a mark on it).
 * **Update**: world/level-design/side-pieces.md (BN5's nine Liberation boards surveyed: nothing set; their second layer is the panels' middles, which the panel looks cover, and their corner blobs, rim fins and face drips are drawn into the floor's own tiles, the Judge Tree's edge cut's kind; a row in the area table and a section).
 * **Update**: world/level-design/side-pieces.md (Undernet Zero's row and what its map sets round its floors: its rims' clamps and corner pins and its bridges' long spikes drawn into the floor's own tiles, which no cut separates; the spikes tried as a cut past the laid depth, 6 looks that floated under the layers' bridges, taken out; the cut behind a floor finding its bowls alone).
