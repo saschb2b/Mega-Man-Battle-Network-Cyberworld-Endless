@@ -22,11 +22,12 @@ The landmark is the area's own first: Green's giant cybertree among
 cybertrees; in Central and Sky the Undernet's statue or the Graveyard's
 monument by the seed, ringed by braziers or cybertrees by the seed. By
 the seed too, cybertrees past the plaza's top corner, or past its left
-and right ones. Only Sky's maps have stairs to cut (Sky Area's, climbing
-towards grid -y, 32 high): there the stage and the ring stand raised as
+and right ones. Only Sky's maps have a stair two panels wide to cut among these (Sky
+Area's, climbing towards grid -y, 32 high; Green's are ladders one wide,
+[Heights](../../world/level-design/heights.md)): there the stage and the ring stand raised as
 BN6's raised floors, by the layers' own rules (`net_height.c`: nothing
 within a panel of where a raised room is drawn, a panel up the screen).
-Central's and Green's maps have none, so their stage and ring are flat
+Central's have none and Green's none so wide, so their stage and ring are flat
 daises in the same places. The props are BN6's map objects through the
 layers' own pieces (`layer_prop_objects`), at the stage's or the ring's
 height past their back rims. Sprites: six of the twelve the loader
