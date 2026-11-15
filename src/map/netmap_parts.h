@@ -28,6 +28,7 @@ typedef struct {
 	Breaks *breaks;           /* (the tile test) the strips they show at their tiles' edges; NULL in a game */
 	DecorBook decor;          /* the scenery of the area's maps */
 	SideBook sides;           /* what they hang on their floors' sides (sides.h) */
+	SidePiece hole;           /* what one of them sets in a walled hole in its floor, its layers' landmark (hole_learn; ntiles 0: none) */
 	uint32_t desc, coord_slot;   /* the map its layers take over (net_area.host) */
 	uint32_t src_desc;        /* the learned map's, whose tile set and colours they draw in */
 	bool other;               /* its maps are another game's (docs/multirom/): src_desc is that game's */
