@@ -15,11 +15,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T13:42:42Z }
 | Title | The title card, while Gregar's own Navis strike their signature pose (animation 24) |
 | Talk | The intro lines; input is A and B only. A B held as the talk opens counts once let go, so a player running in reads the lines; one pressed while the staging held MegaMan hurries them (a CONTINUE from the arena's door, MegaMan back on the step in, begins the staging at once: a playtester's B pressed under the title card waited on the first box, session 77) |
 | Fight | The game's navi battle, forced at once (the random battle record is not re-rolled over it) |
-| After | Back on the map: bars, silence |
+| After | Back on the map: bars, silence. From here the map (SELECT) leaves out his red Boss mark and its key's entry: two playtesters read it on the arena after he was gone (session 78) |
 | Last word | Its defeat line |
 | Log out | His sprite's own log-out (`0x21` + his facing: a frame in his lighter colours, then gone) beside BN6's beam and its sound, about a quarter of a second, as BN6's Navis log out on the net; no flash and no fading by alpha, which BN6 never does (the owner saw the old fade as a "blup"); then a beat, 45 frames from its start |
-| Reward | The Guardian Data shows (sound 0x94), BN6's Mystery Data crystal turning (its sprite's animation 0); the area's theme returns and MegaMan walks to it. Taken, it gives in BN6's own "MegaMan got:" boxes, MegaMan's one word on a Cross and on a first meeting's battle data, the heal, and the draft: one box and its menu |
-| Open | Taken: the exit pad appears and its warp works |
+| Reward | The Guardian Data shows (sound 0x94), BN6's Mystery Data crystal turning (its sprite's animation 0); the area's theme returns and MegaMan walks to it. For its first second (`REWARD_SEEN`, 60 frames) no A reaches it, and an A held from then counts only once let go: two playtesters' A's, pressed in step to page the last word, came 5 and 14 frames after it showed, and A's reach turned MegaMan and walked him to it from a panel and a half away (session 78). Taken, it gives in BN6's own "MegaMan got:" boxes, MegaMan's one word on a Cross and on a first meeting's battle data, the heal, and the draft: one box and its menu. Its chat clears the shown flag as it opens, and the crystal goes as the boxes close, before the draft's screen: BN6 runs no NPC's script while its chat is open, as its own Mystery Data goes when its box closes; it had waited for the taken flag at the chat's end, through the pick |
+| Open | Taken: the exit pad appears and its warp works. The pad draws over the map's second layer (layer priority 2), still under MegaMan: BN4's Town Area lays its pale floor there, and the pad under it was unseen (session 78), as BN5's looks hid a dark layer's |
 
 Where the tournament's bracket stands in the guardian's place
 ([the tournament](../tournament.md), As built), Enter shows BN4's bracket

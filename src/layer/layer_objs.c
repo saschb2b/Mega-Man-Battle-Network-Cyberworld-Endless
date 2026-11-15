@@ -564,7 +564,7 @@ static void install_exit(Install *in, const NetObj *o, int wx, int wy, int wz) {
 	set_pads(in->group, in->number, wx, wy);
 	npc_need_sprite(&in->npcs, 7, pad);
 	if (in->npcs.n < 32)
-		in->npcs.script[in->npcs.n++] = layer.boss_layer || layer.dark ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG, layer.dark)
+		in->npcs.script[in->npcs.n++] = layer.boss_layer || layer.dark ? npc_sealed_pad(7, pad, wx, wy, wz, LAYER_EXIT_OPEN_FLAG)
 			: npc_prop(7, pad, wx, wy, wz, 0);
 }
 

@@ -143,6 +143,10 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 		take[k] = draft_take(t, r->draft->program[k], r->draft->color[k], r->taken_flag, next);
 	if (n) menu = draft_open(t, r->draft, take, draft_skip(t, r->draft->skip_frags, r->taken_flag, next));
 	int i = ta_script(t);
+	/* (the crystal gone as it is checked, as the boxes say MegaMan got it:
+	 * it stood through them and the pick until the taken flag at their
+	 * end, and a playtester read it as not taken, session 78) */
+	if (r->shown_flag) ta_flag_clear(t, r->shown_flag);
 	bool first = true;
 	/* (BN6's own "MegaMan got:" boxes lead, and its own rules go unsaid:
 	 * the Cross's weakness, the Pack, ExpMemry's board, what a program

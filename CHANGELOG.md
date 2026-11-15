@@ -73,6 +73,12 @@
   BN6's beam, as their own sprites have no log-in of BN6's. GutsMan no
   longer stands invisible through his entrance, either. A run saved
   before this update starts its layer afresh at a CONTINUE.
+- **Fixed: after a guardian.** The A that paged his last word no
+  longer takes his Guardian Data the moment it appears, from a panel
+  away: it waits to be taken for a second. The crystal goes as its
+  "MegaMan got:" boxes close, not after the program pick, the map drops
+  his red Boss mark once he is deleted, and the exit pad in BN4's Town
+  Area shows on its pale floor, where it was there but unseen.
 - **Fixed: BN4's guardians turned their backs, or were not there.**
   BN4 draws its Navis facing four ways where BN6 draws eight, and
   BN6's "facing left" is a back view in BN4's: with MegaMan on his
