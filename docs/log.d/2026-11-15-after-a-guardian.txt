@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T15:11:58Z
+* **Update**: game/bosses/sequence.md (after a guardian: the map drops his Boss mark, his data takes no A in its first second, its crystal goes as its boxes close, the sealed exit pad draws over the second layer, BN4's Town Area's pale floor having hidden it).
