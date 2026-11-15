@@ -37,23 +37,28 @@ static bool same(const char *a, const char *b) { return a == b || (a && b && !st
  * a range of its own it touches */
 static bool claim(const char *who, uint32_t at, uint32_t end) {
 	bool ok = true;
+	/* (one pass: another's overlaps told, and the first range of its own it
+	 * touches found, which the two passes there were found the same way;
+	 * names compared only where the ranges meet. A start with BN5 and BN4
+	 * compared four million names; docs/devtools/profiling.md) */
+	Claim *own = NULL;
 	for (int i = 0; i < nclaims; ++i) {
-		const Claim *c = &claims[i];
-		if (at < c->end && c->at < end && !same(c->who, who)) {
+		Claim *c = &claims[i];
+		if (at > c->end || c->at > end) continue;
+		bool same_who = same(c->who, who);
+		if (at < c->end && c->at < end && !same_who) {
 			if (!quiet)
 				fprintf(stderr, "claims: %s writes %08x-%08x, where %s wrote %08x-%08x\n", who, (unsigned)at, (unsigned)(end - 1), c->who,
 					(unsigned)c->at, (unsigned)(c->end - 1));
 			++overlaps;
 			ok = false;
 		}
+		if (same_who && !own) own = c;
 	}
-	for (int i = 0; i < nclaims; ++i) {
-		Claim *c = &claims[i];
-		if (same(c->who, who) && at <= c->end && c->at <= end) {
-			if (at < c->at) c->at = at;
-			if (end > c->end) c->end = end;
-			return ok;
-		}
+	if (own) {
+		if (at < own->at) own->at = at;
+		if (end > own->end) own->end = end;
+		return ok;
 	}
 	if (nclaims < CLAIMS_MAX) claims[nclaims++] = (Claim){ at, end, who };
 	else if (!full) {

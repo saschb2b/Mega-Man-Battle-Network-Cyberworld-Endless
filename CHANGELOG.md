@@ -1,5 +1,49 @@
 # Changelog
 
+## Unreleased
+
+- **SAVES in three pages.** Its eight buttons became the pages CLOUD,
+  CODE and FILE, turned with L and R as Options' are, each a short list
+  with a box that says what the line under the cursor does. UNDO IMPORT
+  is START, and it asks first, as Turn on, Unlink and Delete do.
+- **Cloud saves, like Steam Cloud.** SAVES › CLOUD › Turn on on one
+  device, Add a device there and its code under Link with a code on each other:
+  from then on every device fetches the newest saves as the game starts
+  and sends its own after each save and as you close it, with nothing to
+  press. Only where two devices both played since they were last in step
+  does the game show both saves side by side and ask which to keep, UNDO
+  IMPORT after it. The saves are sealed on your device, so the server
+  cannot read them, and a copy unused for 180 days is deleted. No
+  account.
+- **Send your saves to another device with a code.** SAVES (L on the
+  title) has **SEND**: the game puts your saves on its server and shows
+  a ten-digit code. On the other device, **SAVES › RECEIVE**, type the
+  code, and the two saves are compared as with IMPORT, **UNDO IMPORT**
+  after. No account and no file to copy. A code works once, for 15
+  minutes; the saves are locked with it before they leave, so the server
+  cannot read them, and are gone once received. Every system with the
+  Net Square sends and receives, the browser too.
+- **The music plays on under the game's own menus.** Options, the
+  touch controls' menu, the Library, a reward pick and the Battle Lab's
+  builder used to cut the music dead while they were up. Now the song
+  keeps playing from where it was, and goes on from there in the game
+  as you close them. Where nothing was playing, the NaviCust's theme
+  fills in.
+- **The game tells you when a new version is out.** At each start it
+  looks for one (a single request for the release's own `update.json`,
+  nothing about you sent), and the title shows `New v0.22.0` beside its
+  version. On Windows (the installer's copy), as a Linux AppImage and on
+  a PortMaster handheld, Options on the title updates the game with one
+  press: it downloads the new version, checks it, and starts again as it,
+  your saves and your run kept. Elsewhere the line opens the download
+  page. Options' Game page has an **Updates** switch to turn the look
+  off.
+- **The layer map's key names everything on a busy layer.** Where a
+  layer held many kinds (Exit, Heal, Shop, Trader, Event, ProtoMan), the
+  key under SELECT's map dropped You and still cut ProtoMan's name off at
+  the edge. Now it keeps every entry and takes a second row where one
+  can't hold them, on the second screen's map too.
+
 ## 0.21.2 (2026-11-14)
 
 - **Fixed: AquaNdl struck nothing at BN5's and BN4's foes.** MegaMan

@@ -20,6 +20,10 @@ the 3DS's malloc does. Each case is a 3DS:
   bn4    the same with BN4 Red Sun's beside BN6's, read whole, its six
          families installed (the visitors, docs/multirom/bn4.md)
   all    the same with both, BN5's and BN4's, beside BN6's
+  psp    BN6's ROM alone with the PSP's rules (the host built with
+         CW_HEAP_PSP: one area's maps kept, no town kept between visits,
+         no installs' log); give its heap with --cap
+         (docs/engine/emulation/psp-and-ds.md)
 
 Per case and seed: the heap's peak, the allocations refused (the first's
 place named), a crash's place, how deep the run went and how often an area
@@ -49,9 +53,10 @@ BUFFER = 16 * MB           # mGBA's ROM buffer (docker/mgba.sh's 16 MB), held be
 CORE_COPY = 16 * MB        # the core's ROM copy (EMU_ROM_SIZE), which the 3DS keeps (src/emu/emu.c)
 HOST = 'build/host/cyberworld'
 AS_3DS = 'build/heap3ds/cyberworld'   # the host build with CW_HEAP_3DS: the 3DS's rules where they are its own
+AS_PSP = 'build/heap3ds-psp/cyberworld'   # ... and with CW_HEAP_PSP, the PSP's (no town kept between visits)
 # each case: the extra ROMs beside BN6's, mGBA's buffer held, the binary
 CASES = {'today': ((), BUFFER, HOST), 'bn6': ((), 0, AS_3DS), 'bn5': (('bn5',), 0, AS_3DS), 'bn4': (('bn4',), 0, AS_3DS),
-         'all': (('bn5', 'bn4'), 0, AS_3DS)}
+         'all': (('bn5', 'bn4'), 0, AS_3DS), 'psp': ((), 0, AS_PSP)}
 
 
 def build_py():
@@ -162,13 +167,14 @@ def ranges(bp, binary, funcs):
     return ','.join(out)
 
 
-def build(bp):
-    """The host build, and the host built with the 3DS's rules (CW_HEAP_3DS)"""
+def build(bp, psp=False):
+    """The host build, and the host built with the 3DS's rules (CW_HEAP_3DS) or the PSP's (CW_HEAP_PSP)"""
     subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
-    r = docker_run(bp, f'3ds-heap3ds-make-{os.getpid()}', ['make', 'TARGET=host', 'OUT=build/heap3ds', 'VERSION=heap3ds',
-                                                           f'-j{os.cpu_count() or 4}', 'EXTRA_CFLAGS=-DCW_HEAP_3DS', AS_3DS])
+    out, flag, binary = ('build/heap3ds-psp', 'CW_HEAP_PSP', AS_PSP) if psp else ('build/heap3ds', 'CW_HEAP_3DS', AS_3DS)
+    r = docker_run(bp, f'3ds-heap3ds-make-{os.getpid()}', ['make', 'TARGET=host', f'OUT={out}', 'VERSION=heap3ds',
+                                                           f'-j{os.cpu_count() or 4}', f'EXTRA_CFLAGS=-D{flag}', binary])
     if r.returncode:
-        sys.exit('the host build with CW_HEAP_3DS failed\n' + r.stdout[-2000:] + r.stderr[-2000:])
+        sys.exit(f'the host build with {flag} failed\n' + r.stdout[-2000:] + r.stderr[-2000:])
 
 
 def main():
@@ -189,7 +195,10 @@ def main():
     rom = find_roms({'bn6'} | {x for c in cases for x in CASES[c][0]})
     bp = build_py()
     if not a.no_build:
-        build(bp)
+        if any(CASES[c][2] == a.as_3ds for c in cases):
+            build(bp)
+        if 'psp' in cases:
+            build(bp, psp=True)
     os.makedirs(WORK, exist_ok=True)
     r = docker_run(bp, f'3ds-heap3ds-cc-{os.getpid()}', ['gcc', '-O2', '-shared', '-fPIC', '-o', '.build/heap3ds/heap3ds.so',
                                                          'tools/heap3ds.c', '-ldl'])

@@ -102,14 +102,20 @@ static bool game_frame(void) {
 	capture_taps();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
+	bool over = options_shown() || touch_paused();
 	if (options_shown()) options_update();
 	else if (current && current->update && !touch_paused()) current->update();
+	if (over && current && current->held) current->held();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
+	uint64_t part = frame_part_begin();
 	platform_apply_effects();
+	frame_part_end("effects", part);
+	part = frame_part_begin();
 	options_draw();
+	frame_part_end("options", part);
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	capture_shots();
@@ -508,6 +514,9 @@ static int frame_loop(const Options *o) {
 	 * connection closed first: its gate's checkpoint stays) */
 	online_visit_shutdown();
 	if (current == &scene_emu) emu_keep_run();
+	/* (the game's song carried under a screen let go before its core: the
+	 * sound's thread reads that core's ROM, audio.h) */
+	music_carry_drop();
 	cores_quit();
 #endif
 	platform_shutdown();
@@ -550,6 +559,9 @@ static int game_main(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
+#ifdef __PSP__
+	console_args(&argc, &argv);
+#endif
 	int code = game_main(argc, argv);
 #ifdef CW_PS5
 	console_park(code);

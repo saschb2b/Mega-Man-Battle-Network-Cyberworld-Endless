@@ -129,6 +129,11 @@ bool netmap_gap_any(void);
 void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side);
 /* The raised floor's world z, 0 when the layer is flat. */
 int netmap_rise(void);
+/* How many stairs the layer has */
+int netmap_stairs(void);
+/* A number each layer built has anew: what depth lighting keeps of a
+ * layer's floor between frames is the layer's of that number */
+unsigned netmap_serial(void);
 /* Each frame: a layer in another game's 256-colour tiles (BN4's) has BG1
  * and BG2 shown in 256 colours while BN6 shows the net's map, which sets
  * them 16-colour as it enters one (docs/rom/bn4.md, Net maps in 256
@@ -147,5 +152,14 @@ bool netmap_backdrop_over(int area, uint32_t *lo, uint32_t *hi);
 void netmap_add_walls(const CoordCell *c, int n);
 /* The layer's warp pads (the walls are written again with them). */
 bool netmap_set_pads(const CoordPad *pads, int n);
+
+/* How long the parts of making a layer took since netmap_times_begin, in
+ * milliseconds: its area's maps learned (only where they were not kept),
+ * the floor made drawable, the tiles picked, the coordinate data written.
+ * log.txt's "net:" line and the atlas's report show them
+ * (docs/devtools/profiling.md; netmap_extra.c). */
+typedef struct { double learn, fix, pick, coords; } NetmapTimes;
+extern NetmapTimes netmap_times;
+void netmap_times_begin(void);
 
 #endif

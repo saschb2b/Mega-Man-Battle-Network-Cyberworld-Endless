@@ -43,7 +43,7 @@ static uint32_t look(const AreaSrc *a, bool bg_in_map, int tx, int ty) {
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			size_t p = (size_t)(ty * 8 + y) * W + tx * 8 + x;
-			if ((bg_in_map ? a->px0 : a->px)[p] >> 24) return a->tile[0][(size_t)ty * a->tw + tx];
+			if ((bg_in_map ? a->idx0 : a->idx)[p]) return a->tile[0][(size_t)ty * a->tw + tx];
 		}
 	return SEAM_VOID;
 }
@@ -66,13 +66,13 @@ static uint16_t strip_px(uint32_t c) {
 /* The strip of picture `pic` (W pixels wide) across the edge between tile
  * (tx, ty) and the one to its right, or with `vertical` the one below,
  * into the set; none where nothing is drawn on either side. */
-static void strip_put(TileSeams *s, const uint32_t *pic, int W, int tx, int ty, bool vertical) {
+static void strip_put(TileSeams *s, const AreaSrc *a, const uint8_t *plane, int W, int tx, int ty, bool vertical) {
 	uint16_t first[8], second[8];
 	bool drawn = false;
 	for (int i = 0; i < 8; ++i) {
 		size_t p = vertical ? (size_t)(ty * 8 + 7) * W + tx * 8 + i : (size_t)(ty * 8 + i) * W + tx * 8 + 7;
-		first[i] = strip_px(pic[p]);
-		second[i] = strip_px(pic[p + (vertical ? (size_t)W : 1)]);
+		first[i] = strip_px(area_src_colour(a, plane, p));
+		second[i] = strip_px(area_src_colour(a, plane, p + (vertical ? (size_t)W : 1)));
 		drawn |= first[i] != STRIP_NONE || second[i] != STRIP_NONE;
 	}
 	if (drawn) put(s, strip_hash(seams_side(first), seams_side(second), vertical));
@@ -95,8 +95,8 @@ void seams_add(TileSeams *s, const AreaSrc *a, bool bg_in_map) {
 			 * layer alone draws them: a generated map sets most tiles so) */
 			for (int v = 0; v < 2; ++v) {
 				if (v ? ty + 1 >= a->th : tx + 1 >= a->tw) continue;
-				strip_put(s, a->px, a->tw * 8, tx, ty, v);
-				strip_put(s, a->px0, a->tw * 8, tx, ty, v);
+				strip_put(s, a, a->idx, a->tw * 8, tx, ty, v);
+				strip_put(s, a, a->idx0, a->tw * 8, tx, ty, v);
 			}
 		}
 	free(k);

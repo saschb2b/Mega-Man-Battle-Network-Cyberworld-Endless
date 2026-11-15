@@ -9,6 +9,9 @@
  * table and queue, found by the CPU that met the BKPT. */
 #include "hook.h"
 
+/* (on mGBA; a build on gpSP has hook_gpsp.c instead: CW_GPSP) */
+#ifndef CW_GPSP
+
 #include <string.h>
 
 #include <mgba/core/core.h>
@@ -302,3 +305,5 @@ int hook_drain(HookEvent *out, int max) {
 	while (c && n < max && c->qhead != c->qtail) out[n++] = c->queue[c->qhead++ & (QUEUE - 1)];
 	return n;
 }
+
+#endif

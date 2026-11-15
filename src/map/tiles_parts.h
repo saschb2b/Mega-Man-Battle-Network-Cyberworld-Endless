@@ -26,6 +26,7 @@ typedef struct {
 	bool inner_walls;   /* rings of walls inside the floor ring no holes (TILES_INNER_WALLS) */
 	const uint8_t *pads;   /* its pads (find_pads), once found: SKIP_OFF_PADS spares them */
 	const uint8_t *art;   /* the map's pixels that are its floor's own art, a byte each: 0 none, else the floor panel it belongs to (tiles_art.c); or NULL */
+	int8_t *skipped;   /* SPAN x SPAN: tl_skipped of each panel, -1 until asked (asked again once the pads are set) */
 } Src;
 
 int tl_src_panel(const Src *s, int A, int B);

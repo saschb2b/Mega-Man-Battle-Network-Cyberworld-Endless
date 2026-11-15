@@ -8,7 +8,9 @@
  * board steps it (BN5_LIB_DARK_FRAMES' timing): the frame alone is
  * recoloured, so BN6's own palettes, its scripts and the sprites over the
  * portal stay as they are. With MegaMan on or at the portal the mark goes,
- * his sprite over it left whole. Reads only. */
+ * his sprite over it left whole. Reads only, and the game's read in the
+ * update (lib_way_see): read while drawing, on the 3DS each read waited for
+ * the core's next frame, and Lan's HP held 33 to 58 frames a second. */
 #include "liberation.h"
 
 #include <stdint.h>
@@ -56,7 +58,12 @@ static int shade(uint32_t c, bool pad) {
 	return s < 2 ? 2 : s > RAMP - 1 ? RAMP - 1 : s;
 }
 
-void lib_way_tint(uint32_t *px) {
+/* What the tint draws by, read as the frame ends: the portal marked (-1
+ * none) and BN6's camera, the world point at the picture's middle */
+static struct { int k, cam_u, cam_v; } W = { -1, 0, 0 };
+
+void lib_way_see(void) {
+	W.k = -1;
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
 	if (!x->data || !D.active || !home_in_hp() || !on_map()) return;
 	int n, k = -1;
@@ -66,11 +73,18 @@ void lib_way_tint(uint32_t *px) {
 	if (k < 0 || !(home_lit() >> k & 1)) return;
 	int mx = bn6_player_x(), my = bn6_player_y();
 	if (lanhp_portal_near(mx, my, NEAR) == k) return;
-	/* (BN6's camera: the world point at the picture's middle) */
 	uint32_t cam = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
 	int cx = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_X) >> 16, cy = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Y) >> 16;
 	int cz = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Z) >> 16;
-	int cam_u = cx + cy, cam_v = (cy - cx) / 2 - cz;
+	W.k = k;
+	W.cam_u = cx + cy;
+	W.cam_v = (cy - cx) / 2 - cz;
+}
+
+void lib_way_tint(uint32_t *px) {
+	const XRom *x = &XR[XROM_BN5_COLONEL_US];
+	int k = W.k, cam_u = W.cam_u, cam_v = W.cam_v;
+	if (k < 0 || !x->data) return;
 	const uint8_t *pal = swirl(x->data, D.frame);
 	uint32_t ramp[RAMP];
 	for (int i = 0; i < RAMP; ++i) {

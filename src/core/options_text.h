@@ -38,6 +38,7 @@ typedef enum {
 	OW_BLEND_OFF_NOTE, OW_SIMPLE_NOTE, OW_SMART_NOTE, OW_LCD_NOTE, OW_LCD_FAST_NOTE,   /* (LcdBlend's order) */
 	OW_LCD3X, OW_LCD3X_ON_NOTE, OW_LCD3X_OFF_NOTE,
 	OW_VOXEL, OW_VOXEL_ON_NOTE, OW_VOXEL_OFF_NOTE,
+	OW_STEREO, OW_STEREO_ON_NOTE, OW_STEREO_OFF_NOTE,   /* the same line on the 3DS: its 3D screen */
 	OW_DEFAULT,         /* START's hint on the band: the page's lines back */
 	OW_ASK_DISPLAY, OW_ASK_AUDIO, OW_ASK_GAME,   /* ... its question, a page each (PAGE_*'s order) */
 	OW_MGBA, OW_MGBA_NOTE,   /* the Sound line's third (SoundFilter's order after OW_SOFT) */

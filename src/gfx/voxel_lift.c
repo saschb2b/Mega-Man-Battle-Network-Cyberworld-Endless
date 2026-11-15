@@ -27,7 +27,7 @@ static int top_at(const VoxGround *g, int x, int y) {
 	if (g->z[raised] > 0 && (vox_floor(g, x, y + g->z[raised]) >> raised & 1u)) return y + g->z[raised];
 	/* (of the heights a ramp could show at, the one it stands nearest to) */
 	int best = -1, off = 2;
-	for (int k = g->z[raised]; k >= 0; --k) {
+	for (int k = g->z[raised]; g->ramps && k >= 0; --k) {
 		int r = vox_ramp(g, x, y + k) - 1, d = r < 0 ? 2 : r > k ? r - k : k - r;
 		if (d < off) { best = y + k; off = d; }
 	}
@@ -53,48 +53,103 @@ static bool lift_floor(const VoxGround *g, int x, int y, uint8_t *kind, int16_t 
 static uint8_t run[VOX_WN];
 static bool known[VOX_WN];
 
-static int run_end(const VoxScene *s, int i, int j) {
-	while (j + 1 < VOX_WH && s->map[(j + 1) * VOX_WW + i] && !known[(j + 1) * VOX_WW + i]) ++j;
+static int run_end(const VoxScene *s, int i, int j, int to) {
+	while (j + 1 < to && s->map[(j + 1) * VOX_WW + i] && !known[(j + 1) * VOX_WW + i]) ++j;
 	return j;
 }
 
-/* Each run by itself: a side is short, right under what the floor
- * explains, and ends in the void (a run between two floors is floor).
- * Then the longest of those sides are the scenery's after all: an area's
- * sides are of a few depths (its rim, what holds a slab up), and a strip
- * of floor at a platform's notch is deeper than nine in ten of them. */
-static void runs_sort(const VoxScene *s) {
-	int depths[SIDE_MOST + 1] = { 0 }, sides = 0, most = SIDE_MOST;
-	memset(run, 0, sizeof run);
-	for (int i = 0; i < VOX_WW; ++i)
-		for (int j = 0; j < VOX_WH; ++j) {
-			int from = j;
-			if (!s->map[j * VOX_WW + i] || known[j * VOX_WW + i]) continue;
-			j = run_end(s, i, j);
-			bool side = from > 0 && known[(from - 1) * VOX_WW + i] && j - from < SIDE_MOST && (j + 1 >= VOX_WH || !s->map[(j + 1) * VOX_WW + i]);
-			if (side) { ++depths[j - from + 1]; ++sides; }
-			for (int y = from; y <= j; ++y) run[y * VOX_WW + i] = side ? 1 : 2;
+/* The lift's passes, each on bands of the span's rows or columns */
+typedef struct { const VoxGround *g; VoxScene *s; VoxSpan sp; int most; } Lift;
+/* each column's sides by their depth */
+static int depths_of[VOX_WW][SIDE_MOST + 1];
+
+/* Each pixel by the layer's floor */
+static void lift_rows(int from, int to, void *ctx) {
+	const Lift *c = ctx;
+	VoxScene *s = c->s;
+	VoxSpan sp = c->sp;
+	for (int j = sp.y0 + from; j < sp.y0 + to; ++j) {
+		memset(&run[j * VOX_WW + sp.x0], 0, (size_t)(sp.x1 - sp.x0));
+		for (int i = sp.x0; i < sp.x1; ++i) {
+			int at = j * VOX_WW + i;
+			s->kind[at] = VOX_SKY;
+			s->gy[at] = (int16_t)(j - VOX_UP);
+			known[at] = s->map[at] && lift_floor(c->g, i - VOX_LEFT, j - VOX_UP, &s->kind[at], &s->gy[at]);
 		}
+	}
+}
+
+/* Each run by itself: a side is short, right under what the floor
+ * explains, and ends in the void (a run between two floors is floor) */
+static void runs_cols(int from, int to, void *ctx) {
+	const Lift *c = ctx;
+	const VoxScene *s = c->s;
+	VoxSpan sp = c->sp;
+	for (int i = sp.x0 + from; i < sp.x0 + to; ++i) {
+		memset(depths_of[i], 0, sizeof depths_of[i]);
+		for (int j = sp.y0; j < sp.y1; ++j) {
+			int top = j;
+			if (!s->map[j * VOX_WW + i] || known[j * VOX_WW + i]) continue;
+			j = run_end(s, i, j, sp.y1);
+			bool side = top > sp.y0 && known[(top - 1) * VOX_WW + i] && j - top < SIDE_MOST && (j + 1 >= sp.y1 || !s->map[(j + 1) * VOX_WW + i]);
+			if (side) ++depths_of[i][j - top + 1];
+			for (int y = top; y <= j; ++y) run[y * VOX_WW + i] = side ? 1 : 2;
+		}
+	}
+}
+
+/* Then the longest of those sides are the scenery's after all: an area's
+ * sides are of a few depths (its rim, what holds a slab up), and a strip
+ * of floor at a platform's notch is deeper than nine in ten of them */
+static int sides_most(VoxSpan sp) {
+	int depths[SIDE_MOST + 1] = { 0 }, sides = 0;
+	for (int i = sp.x0; i < sp.x1; ++i)
+		for (int d = 1; d <= SIDE_MOST; ++d) { depths[d] += depths_of[i][d]; sides += depths_of[i][d]; }
 	for (int d = 1, seen = 0; d <= SIDE_MOST; ++d) {
 		seen += depths[d];
-		if (seen * 10 >= sides * 9) { most = d + 2; break; }
+		if (seen * 10 >= sides * 9) return d + 2;
 	}
-	for (int i = 0; i < VOX_WW; ++i)
-		for (int j = 0; j < VOX_WH; ++j) {
-			int from = j;
+	return SIDE_MOST;
+}
+
+static void cut_cols(int from, int to, void *ctx) {
+	const Lift *c = ctx;
+	VoxSpan sp = c->sp;
+	for (int i = sp.x0 + from; i < sp.x0 + to; ++i)
+		for (int j = sp.y0; j < sp.y1; ++j) {
+			int top = j;
 			if (run[j * VOX_WW + i] != 1) continue;
-			while (j + 1 < VOX_WH && run[(j + 1) * VOX_WW + i] == 1) ++j;
-			for (int y = from; j - from + 1 > most && y <= j; ++y) run[y * VOX_WW + i] = 2;
+			while (j + 1 < sp.y1 && run[(j + 1) * VOX_WW + i] == 1) ++j;
+			for (int y = top; j - top + 1 > c->most && y <= j; ++y) run[y * VOX_WW + i] = 2;
 		}
 }
 
 /* Whether the side's run from row `from` to `to` of column i has the
  * scenery beside it in its rows: then it is a strip of it too */
-static bool beside_scenery(int i, int from, int to) {
+static bool beside_scenery(VoxSpan sp, int i, int from, int to) {
+	int lo = i - BESIDE < sp.x0 ? sp.x0 : i - BESIDE, hi = i + BESIDE >= sp.x1 ? sp.x1 - 1 : i + BESIDE;
 	for (int y = from; y <= to; ++y)
-		for (int d = -BESIDE; d <= BESIDE; ++d)
-			if (i + d >= 0 && i + d < VOX_WW && run[y * VOX_WW + i + d] == 2) return true;
+		for (int x = lo; x <= hi; ++x)
+			if (run[y * VOX_WW + x] == 2) return true;
 	return false;
+}
+
+/* The runs as what they are: a side hangs from the edge over it */
+static void sides_cols(int from, int to, void *ctx) {
+	const Lift *c = ctx;
+	VoxScene *s = c->s;
+	VoxSpan sp = c->sp;
+	for (int i = sp.x0 + from; i < sp.x0 + to; ++i)
+		for (int j = sp.y0; j < sp.y1; ++j) {
+			int top = j, over = (j - 1) * VOX_WW + i;
+			if (!run[j * VOX_WW + i]) continue;
+			while (j + 1 < sp.y1 && run[(j + 1) * VOX_WW + i]) ++j;
+			bool side = run[top * VOX_WW + i] == 1 && !beside_scenery(sp, i, top, j);
+			for (int y = top; y <= j; ++y) {
+				s->kind[y * VOX_WW + i] = side ? VOX_WALL : VOX_TOP;
+				if (side) s->gy[y * VOX_WW + i] = (int16_t)(s->gy[over] + (s->kind[over] == VOX_TOP ? 1 : 0));
+			}
+		}
 }
 
 /* The map's pixels sorted. The layer's floor says where its tops are.
@@ -102,25 +157,13 @@ static bool beside_scenery(int i, int from, int to) {
  * the scenery's: the platforms pasted beside the way, which the layer's
  * floor knows nothing of and which lie flat on the ground. */
 static void lift_window(const VoxGround *g, VoxScene *s) {
-	for (int j = 0; j < VOX_WH; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
-			int at = j * VOX_WW + i;
-			s->kind[at] = VOX_SKY;
-			s->gy[at] = (int16_t)(j - VOX_UP);
-			known[at] = s->map[at] && lift_floor(g, i - VOX_LEFT, j - VOX_UP, &s->kind[at], &s->gy[at]);
-		}
-	runs_sort(s);
-	for (int i = 0; i < VOX_WW; ++i)
-		for (int j = 0; j < VOX_WH; ++j) {
-			int from = j, over = (j - 1) * VOX_WW + i;
-			if (!run[j * VOX_WW + i]) continue;
-			while (j + 1 < VOX_WH && run[(j + 1) * VOX_WW + i]) ++j;
-			bool side = run[from * VOX_WW + i] == 1 && !beside_scenery(i, from, j);
-			for (int y = from; y <= j; ++y) {
-				s->kind[y * VOX_WW + i] = side ? VOX_WALL : VOX_TOP;
-				if (side) s->gy[y * VOX_WW + i] = (int16_t)(s->gy[over] + (s->kind[over] == VOX_TOP ? 1 : 0));
-			}
-		}
+	Lift c = { g, s, vox_span(s), SIDE_MOST };
+	int rows = c.sp.y1 - c.sp.y0, cols = c.sp.x1 - c.sp.x0;
+	voxel_in_bands(lift_rows, rows, &c);
+	voxel_in_bands(runs_cols, cols, &c);
+	c.most = sides_most(c.sp);
+	voxel_in_bands(cut_cols, cols, &c);
+	voxel_in_bands(sides_cols, cols, &c);
 }
 
 /* One body: the sprite pixels joined to (x, y), 8-connected */

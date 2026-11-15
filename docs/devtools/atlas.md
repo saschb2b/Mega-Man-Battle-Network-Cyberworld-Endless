@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T21:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:54:31Z }
 ---
 
 # Atlas: every layer drawn
@@ -50,8 +50,12 @@ Output in `.build/atlas`:
   shows ([Level design](../world/level-design/overview.md)), the tiles picked in colours the area's own
   map never shows on its floors (other colours: pieces of another surface,
   0 but for Seaside's yellow panels, `TILES_MORE_COLOURS`), the scenery
-  placed, whether a guardian layer has its arena, its stairs, and how long
-  the layer took to build as the game builds it. Seams, other colours,
+  placed, whether a guardian layer has its arena, its stairs, how long
+  the layer took to build as the game builds it and its parts' times
+  (`parts learn fix pick coords`, milliseconds), and a hash of its
+  coordinate data (`coordinates`), which the [layer lab](profiling.md)
+  compares between two builds. `learn.txt`: the time each area's maps took
+  to learn, where they were learned. Seams, other colours,
   `off near` and `off edge` count the map as drawn, not the tiles a pad's
   or a stair's stamp covers; `off near` and `off edge` are the magenta and
   yellow tiles, `at mouths` the services and navis

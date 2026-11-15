@@ -9,7 +9,9 @@
 
 #include "bn4.h"
 #include "bn5.h"
+#include "bn6.h"
 #include "bytes.h"
+#include "chip_entry.h"
 #include "rom.h"
 #include "text.h"
 #include "xchips_record.h"
@@ -403,6 +405,13 @@ static bool ready(void) {
 /* ---- read ---- */
 
 const uint8_t *chips_record(int id) { return id >= 0 && id < CHIPS_IDS && ready() ? M.img + XREC_SIZE * (uint32_t)id : NULL; }
+
+bool chips_preset_nine(uint16_t e) {
+	if (CHIP_ID_BITS == 9 || chip_entry_from9(e) == e || !ready()) return false;
+	for (uint32_t k = 0; k < BN6_FOLDER_ENTRIES; ++k)
+		if (rom_u16(BN6_PRESET_FOLDERS - BUS + 2 * k) == e) return true;
+	return false;
+}
 
 void chips_name(int id, char *out, size_t n) {
 	uint32_t len;

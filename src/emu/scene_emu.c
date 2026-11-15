@@ -1,5 +1,7 @@
 /* The running game in the window: the core's frame in the 240x160 view,
  * its sound on the audio device and the port's buttons as GBA keys. */
+#include <SDL.h>
+
 #include "audio.h"
 #include "boot.h"
 #include "cinema.h"
@@ -22,6 +24,17 @@
 #ifdef __3DS__
 #include "start_3ds.h"
 #endif
+
+/* (a part of the frame timed for the frame log, where it is on: platform.h, frame_log_part) */
+#define TIMED(name, call) do { \
+		uint64_t t0_ = frame_part_begin(); \
+		const char *was_ = emu_draw_part; \
+		emu_draw_part = name; \
+		call; \
+		emu_draw_part = was_; \
+		frame_part_end(name, t0_); \
+	} while (0)
+
 
 bool emu_resume_requested;
 bool emu_start_in_town;
@@ -91,6 +104,7 @@ static void enter(void) {
 }
 
 static void leave(void) {
+	music_carry_drop();
 	pet_leave();
 	director_pick_shut();
 	online_visit_shutdown();
@@ -182,6 +196,14 @@ static int frames_speed(void) { return director_lab_loading() ? LAB_LOAD_SPEED :
  * is up), or fast forward's */
 static bool frame_goes_on(int i, int speed) { return speed > 1 ? i < speed && !director_lab_shown() : fast_forward_goes_on(i); }
 
+/* the game held under a screen of the engine's this frame, and the scene's
+ * own Options and the touch controls' menu (main.c): its music carried on
+ * under it (audio.h, music_carry_held), where no screen plays its own (the
+ * Jukebox) and no other core sounds (a NetBattle from the Net Square) */
+static void held(void) {
+	if (!pet_plays_music() && !online_visit_held() && !online_visit_waiting()) music_carry_held();
+}
+
 static void update(void) {
 	emu_drawing = false;
 	if (soft_reset()) return;
@@ -192,15 +214,18 @@ static void update(void) {
 	/* (a reward pick up, docs/game/reward-pick.md: the game's core holds still under it, its keys the screen's) */
 	if (director_pick_shown()) {
 		director_pick_keys(autopilot_on() ? autopilot_keys() : keys_from_buttons());
+		held();
 		return;
 	}
 	/* (the Battle Lab's builder up, docs/game/battle-lab.md: the same) */
 	if (director_lab_shown()) {
 		director_lab_keys(keys_from_buttons());
+		held();
 		return;
 	}
 	/* (the PET's Jukebox or Library up: the game's core, its music with it, holds still under it) */
 	if (pet_holds()) {
+		held();
 		/* (the Library's chip under the cursor on the second screen: read again while the game holds) */
 		if (pet_second_follows()) {
 			second_update();
@@ -210,7 +235,7 @@ static void update(void) {
 	}
 	/* (the second screen first, from what the last update saw: the GBA's
 	 * frame runs on beside it, where the reads below would wait for it) */
-	platform_second_screen_draw();
+	TIMED("second screen", platform_second_screen_draw());
 	/* (several of the game's frames to one shown: the dev menu's speed, or
 	 * fast forward where it may run, fast_forward_game.h) */
 	/* (the Battle Lab's builder bringing a set's field up: BN6's battle opening run through at once, lab_battle.h) */
@@ -220,10 +245,11 @@ static void update(void) {
 	 * then the next begun, which runs while this one is drawn; keys, frames
 	 * and the logic keep their order */
 	if (emu_threaded()) {
-		if (devtools_open()) { frame_keys(); return; }
+		if (devtools_open()) { frame_keys(); held(); return; }
+		music_carry_resume();
 		if (!dev_fast) fast_forward_update();
 		for (int i = 0; frame_goes_on(i, speed); ++i) {
-			if (started) after_frame();
+			if (started) TIMED("director", after_frame());
 			emu_frame_as(cinema_keys(frame_keys()), dev_fast ? 0 : fast_forward_how(i));
 			started = true;
 		}
@@ -231,15 +257,33 @@ static void update(void) {
 		return;
 	}
 	uint32_t keys = frame_keys();
-	if (devtools_open()) return;   /* the game holds still under the dev menu */
+	if (devtools_open()) { held(); return; }   /* the game holds still under the dev menu */
+	music_carry_resume();
 	if (!dev_fast) fast_forward_update();
 	for (int i = 0; frame_goes_on(i, speed); ++i) {
 		/* (the way into BN6's folder editor is pressed a frame at a time, run through at once: its keys each frame) */
 		if (i && director_lab_editing()) keys = frame_keys();
 		emu_frame_as(cinema_keys(keys), dev_fast ? 0 : fast_forward_how(i));
-		after_frame();
+		TIMED("director", after_frame());
 	}
 	if (revealed || director_arrived()) ++revealed;
+}
+
+/* The engine's own drawing over the game's picture, each part timed */
+static void overlays_draw(void) {
+	TIMED("cinema", cinema_draw());
+	TIMED("map", director_draw_map());
+	TIMED("counts", director_draw_counts());
+	TIMED("fast forward", fast_forward_draw());
+	TIMED("bug note", director_draw_bug_note());
+	TIMED("duel", director_draw_duel());
+	TIMED("board", director_draw_board());
+	TIMED("tent", director_draw_tent());
+	TIMED("dev tools", devtools_draw());
+	TIMED("visit", online_visit_draw());
+	TIMED("pet", pet_draw());
+	TIMED("pick", director_draw_pick());
+	TIMED("lab", director_draw_lab());
 }
 
 static void draw(void) {
@@ -249,23 +293,11 @@ static void draw(void) {
 	if (online_visit_held()) { online_visit_draw(); return; }
 	int dx = 0, dy = 0;
 	cinema_offset(&dx, &dy);
-	emu_picture_draw(P.core_x + dx, P.core_y + dy);
+	TIMED("picture", emu_picture_draw(P.core_x + dx, P.core_y + dy));
 	if (!revealed) { fill_rect(P.core_x, P.core_y, EMU_W, EMU_H, BLACK); return; }
 	if (revealed < REVEAL_FRAMES) { P.fx_fade = REVEAL_FRAMES - revealed; P.fx_fade_color = BLACK; }
 	if (online_visit_away()) { online_visit_draw(); return; }
-	cinema_draw();
-	director_draw_map();
-	director_draw_counts();
-	fast_forward_draw();
-	director_draw_bug_note();
-	director_draw_duel();
-	director_draw_board();
-	director_draw_tent();
-	devtools_draw();
-	online_visit_draw();
-	pet_draw();
-	director_draw_pick();
-	director_draw_lab();
+	overlays_draw();
 }
 
-const Scene scene_emu = { "emu", enter, update, draw, leave };
+const Scene scene_emu = { "emu", enter, update, draw, leave, held };

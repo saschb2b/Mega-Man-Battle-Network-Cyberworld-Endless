@@ -111,7 +111,7 @@ uint32_t *lent_map(const AreaSrc *a, const uint8_t *panels, Lent *n) {
 	uint32_t *out = malloc(cells * 64 * sizeof *out);
 	memset(n, 0, sizeof *n);
 	bool ok = seen && tiles && kinds && out;
-	if (ok) memcpy(out, a->px, cells * 64 * sizeof *out);
+	for (size_t i = 0; ok && i < cells * 64; ++i) out[i] = area_src_px(a, i);
 	for (int l = 0; ok && l < a->layers; ++l) {
 		memcpy(tiles + l * cells, a->tile[l], cells * sizeof *tiles);
 		uint32_t *px = layer_alone(a->rom, a->group, a->number, tiles, a->tw, a->th, l);

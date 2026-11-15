@@ -3,6 +3,7 @@
  * counters' state, the NaviCust's bug note and the duel's clock; and what
  * the controller's feel reads of it (feel_game.h), output as the drawing is. */
 #include "director_see.h"
+#include "director_gate.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -184,6 +185,8 @@ void director_see(void) {
 	see_locks();
 	see_bug_note();
 	lib_see();
+	lib_way_see();
+	seen.gate_strip = home_gate_asking();
 	feel_game_frame();
 }
 

@@ -16,6 +16,11 @@ static const uint8_t NR0[4] = { 0x60, 0x61, 0x70, 0x71 }, NR1[4] = { 0x62, 0x68,
 #define BIAS_HI 0x89
 #define WAVE_RAM 0x90
 
+/* where the registers are written: the engine's GBA sound, but while a
+ * channel is set going on the game's (mp2k_cgb_resound) */
+static const Mp2kRegs engine_regs = { gba_sound_read8, gba_sound_write8, gba_sound_write32 };
+static const Mp2kRegs *io = &engine_regs;
+
 uint32_t mp2k_cgb_key_to_freq(int type, int key, int fine) {
 	unsigned k = (uint8_t)key, f = (uint8_t)fine;
 	if (type == 4) {
@@ -35,10 +40,10 @@ uint32_t mp2k_cgb_key_to_freq(int type, int key, int fine) {
 /* CgbOscOff: the channel silenced */
 void mp2k_cgb_off(int type) {
 	switch (type) {
-	case 1: gba_sound_write8(0x63, 8); gba_sound_write8(0x65, 0x80); break;
-	case 2: gba_sound_write8(0x69, 8); gba_sound_write8(0x6D, 0x80); break;
-	case 3: gba_sound_write8(0x70, 0); break;
-	default: gba_sound_write8(0x79, 8); gba_sound_write8(0x7D, 0x80); break;
+	case 1: io->write8(0x63, 8); io->write8(0x65, 0x80); break;
+	case 2: io->write8(0x69, 8); io->write8(0x6D, 0x80); break;
+	case 3: io->write8(0x70, 0); break;
+	default: io->write8(0x79, 8); io->write8(0x7D, 0x80); break;
 	}
 }
 
@@ -57,8 +62,8 @@ static void mod_vol(Mp2kChan *c) {
 /* the wave channel's 32 samples loaded where they changed */
 static void wave_load(Mp2kChan *c) {
 	if (c->wav == c->cur) return;
-	gba_sound_write8(0x70, 0x40);
-	for (uint32_t i = 0; i < 16; i += 4) gba_sound_write32(WAVE_RAM + (int)i, mp2k_u32(c->wav + i));
+	io->write8(0x70, 0x40);
+	for (uint32_t i = 0; i < 16; i += 4) io->write32(WAVE_RAM + (int)i, mp2k_u32(c->wav + i));
 	c->cur = c->wav;
 }
 
@@ -70,15 +75,15 @@ static void start(Mp2kChan *c, int ch, uint8_t *env) {
 	mod_vol(c);
 	if (ch == 2) {
 		wave_load(c);
-		gba_sound_write8(0x70, 0);
-		gba_sound_write8(NR1[2], c->length);
+		io->write8(0x70, 0);
+		io->write8(NR1[2], c->length);
 		c->n4 = c->length ? 0xC0 : 0x80;
 	} else {
-		if (ch == 0) gba_sound_write8(NR0[0], c->sweep);
+		if (ch == 0) io->write8(NR0[0], c->sweep);
 		if (ch == 3) {
-			gba_sound_write8(NR1[3], c->length);
-			gba_sound_write8(NR3[3], (uint8_t)(c->wav << 3));
-		} else gba_sound_write8(NR1[ch], (uint8_t)((c->wav << 6) + c->length));
+			io->write8(NR1[3], c->length);
+			io->write8(NR3[3], (uint8_t)(c->wav << 3));
+		} else io->write8(NR1[ch], (uint8_t)((c->wav << 6) + c->length));
 		*env = (uint8_t)(c->attack + 8);
 		c->n4 = c->length ? 0x40 : 0;
 	}
@@ -165,34 +170,34 @@ static bool envelope(Mp2kChan *c, int ch, uint8_t *env, bool extra) {
 static void registers(Mp2kChan *c, int ch, uint8_t env) {
 	if (c->modify & 2) {
 		if (ch < 3 && (c->type & 8)) {
-			uint8_t pwm = gba_sound_read8(BIAS_HI);
+			uint8_t pwm = io->read8(BIAS_HI);
 			if (pwm <= 0x3F) c->frequency = (c->frequency + 2) & 0x7FC;
 			else if (pwm <= 0x7F) c->frequency = (c->frequency + 1) & 0x7FE;
 		}
-		uint32_t f = ch != 3 ? c->frequency : (gba_sound_read8(NR3[3]) & 8) | c->frequency;
-		gba_sound_write8(NR3[ch], (uint8_t)f);
+		uint32_t f = ch != 3 ? c->frequency : (io->read8(NR3[3]) & 8) | c->frequency;
+		io->write8(NR3[ch], (uint8_t)f);
 		c->n4 = (uint8_t)((c->n4 & 0xC0) + ((c->frequency & 0x3F00) >> 8));
-		gba_sound_write8(NR4[ch], c->n4);
+		io->write8(NR4[ch], c->n4);
 	}
 	if (!(c->modify & 1)) return;
-	gba_sound_write8(NR51, (uint8_t)((gba_sound_read8(NR51) & ~c->pan_mask) | c->pan));
+	io->write8(NR51, (uint8_t)((io->read8(NR51) & ~c->pan_mask) | c->pan));
 	if (ch == 2) {
-		gba_sound_write8(NR2[2], mp2k_lib_u8(M.cgb3_vol_table + c->env));
+		io->write8(NR2[2], mp2k_lib_u8(M.cgb3_vol_table + c->env));
 		if (c->n4 & 0x80) {
-			gba_sound_write8(0x70, 0x80);
-			gba_sound_write8(NR4[2], c->n4);
+			io->write8(0x70, 0x80);
+			io->write8(NR4[2], c->n4);
 			c->n4 &= 0x7F;
 		}
 		return;
 	}
-	gba_sound_write8(NR2[ch], (uint8_t)((c->env << 4) + (env & 0xF)));
-	gba_sound_write8(NR4[ch], (uint8_t)(c->n4 | 0x80));
-	if (ch == 0 && !(gba_sound_read8(NR0[0]) & 8)) gba_sound_write8(NR4[0], (uint8_t)(c->n4 | 0x80));
+	io->write8(NR2[ch], (uint8_t)((c->env << 4) + (env & 0xF)));
+	io->write8(NR4[ch], (uint8_t)(c->n4 | 0x80));
+	if (ch == 0 && !(io->read8(NR0[0]) & 8)) io->write8(NR4[0], (uint8_t)(c->n4 | 0x80));
 }
 
 /* a channel's frame; false where it went off */
 static bool channel(Mp2kChan *c, int ch, bool extra) {
-	uint8_t env = gba_sound_read8(NR2[ch]);
+	uint8_t env = io->read8(NR2[ch]);
 	if (c->status & CHN_START) {
 		if (c->status & CHN_STOP) return false;
 		start(c, ch, &env);
@@ -206,7 +211,7 @@ static bool channel(Mp2kChan *c, int ch, bool extra) {
 		}
 		--c->env_left;
 		if (extra && !envelope(c, ch, &env, false)) return false;
-	} else if ((c->status & CHN_ECHO) || !(gba_sound_read8(NR52) >> ch & 1)) {
+	} else if ((c->status & CHN_ECHO) || !(io->read8(NR52) >> ch & 1)) {
 		if ((int8_t)--c->echo_length <= 0) return false;
 	} else if ((c->status & CHN_STOP) && (c->status & 3)) {
 		c->status &= 0xFC;
@@ -234,4 +239,56 @@ void mp2k_cgb_frame(void) {
 		}
 		c->modify = 0;
 	}
+}
+
+/* the NRx2's low bits for where the envelope stands: its attack's step up,
+ * its decay's or release's down, none while sustained or echoing (start,
+ * attack_done, sustain, the release in channel) */
+static uint8_t env_step(const Mp2kChan *c) {
+	if (c->status & CHN_ECHO) return 8;
+	switch (c->status & 3) {
+	case 3: return (uint8_t)(c->attack + 8);
+	case 2: return c->decay;
+	case 1: return 8;
+	default: return c->release;
+	}
+}
+
+void mp2k_cgb_resound(int ch, const Mp2kRegs *to) {
+	const Mp2kRegs *was = io;
+	if (to) io = to;
+	Mp2kChan *c = CGB_CHAN(ch);
+	if (!(c->status & CHN_ON) || (c->status & CHN_START)) {
+		mp2k_cgb_off(ch + 1);
+		io = was;
+		return;
+	}
+	/* (a copy: the frame's pitch step of a fixed-pitch channel taken once) */
+	Mp2kChan k = *c;
+	mp2k_read(k.rom);
+	if (ch == 2) {
+		k.cur = 0;
+		wave_load(&k);
+		io->write8(0x70, 0);
+		io->write8(NR1[2], k.length);
+		k.n4 = k.length ? 0xC0 : 0x80;
+	} else {
+		if (ch == 0) io->write8(NR0[0], k.sweep);
+		if (ch == 3) {
+			io->write8(NR1[3], k.length);
+			io->write8(NR3[3], (uint8_t)(k.wav << 3));
+		} else io->write8(NR1[ch], (uint8_t)((k.wav << 6) + k.length));
+	}
+	k.modify = 3;
+	registers(&k, ch, env_step(&k));
+	c->cur = k.cur;
+	mp2k_read(0);
+	io = was;
+}
+
+void mp2k_cgb_off_on(int ch, const Mp2kRegs *to) {
+	const Mp2kRegs *was = io;
+	if (to) io = to;
+	mp2k_cgb_off(ch + 1);
+	io = was;
 }

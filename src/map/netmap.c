@@ -64,12 +64,13 @@ static Learned learned[NET_AREAS + XAREAS_MAX];
  * and in a long run the areas kept, with a new one's learning, filled the
  * 3DS's 96 MB heap: allocations refused in most long runs; with two kept,
  * still in most where BN5's ROM was read (docs/engine/emulation/3ds-memory.md, The 3DS's
- * memory; CW_HEAP_3DS builds the host so, for tools/heap3ds.py, and
+ * memory; the PSP's likewise; CW_HEAP_3DS and CW_HEAP_PSP build the host
+ * so, for tools/heap3ds.py, and
  * AREAS_KEPT sets another number there). An area left behind is learned
  * again, the same, where a run comes back to it: the endless net's acts
  * once round, a detour's way back. */
 #ifndef AREAS_KEPT
-#if defined(__3DS__) || defined(CW_HEAP_3DS)
+#if defined(__3DS__) || defined(CW_HEAP_3DS) || defined(__PSP__) || defined(CW_HEAP_PSP)
 #define AREAS_KEPT 1
 #else
 #define AREAS_KEPT 0   /* (all) */
@@ -118,7 +119,7 @@ static Learned *learn_area(int area) {
 	if (!L->tried) {
 		forget_areas(area);
 		L->tried = true;
-		L->ok = nm_learn(area, L);
+		NM_TIMED(learn, L->ok = nm_learn(area, L));
 		if (area_forgotten[area]) printf("netmap: area %d learned again\n", area);
 	}
 	return L;
@@ -422,6 +423,10 @@ static int floor_cb(int A, int B, const void *ctx) {
 }
 
 int netmap_rise(void) { return nm_cur ? nm_cur->rise : 0; }
+int netmap_stairs(void) { return nm_cur ? nm_cur->nstairs : 0; }
+
+static unsigned built;
+unsigned netmap_serial(void) { return built; }
 
 static bool in_256;   /* (the layer's tiles 256-colour: BN4's) */
 static int map_256;   /* (... and the map its layers take over, group and number as BN6's MapId reads them) */
@@ -601,7 +606,8 @@ static bool write_tilemap(const Learned *L) {
 	if ((th & 1) != (L->th & 1)) ++th;
 	if (tw > 255 || th > 255 || (size_t)tw * th * 4 > BN6_TILEMAP_MAX) return false;
 	size_t cells = (size_t)tw * th;
-	uint16_t *map = pick_map(L, tw, th, true);
+	uint16_t *map;
+	NM_TIMED(pick, map = pick_map(L, tw, th, true));
 	if (!map) return false;
 	size_t raw = cells * 4;
 	uint8_t *out = malloc(16 + raw + raw / 8 + 16);
@@ -712,6 +718,7 @@ static Learned *use_area(int area) {
 bool netmap_build(int area, const NetLayout *lay) {
 	Learned *L = use_area(area);
 	if (!L) return false;
+	++built;
 	nm_cur = lay;
 	nm_place.ex = L->ex;
 	nm_place.ey = L->ey;
@@ -721,7 +728,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	bool keep_pads = pad_look && L->pads_seen;
 	if (striped) make_stripes(keep_pads);
 	if (lay->locked) {
-		legalize(L, lay);
+		NM_TIMED(fix, legalize(L, lay));
 		centre(lay);
 	}
 	if (striped) make_stripes(keep_pads);
@@ -734,10 +741,10 @@ bool netmap_build(int area, const NetLayout *lay) {
 	if (!write_tilemap(L)) return false;
 	/* (the side pieces the tiles set, their layer priorities with them) */
 	nm_sides_extra();
-	return coords_write(coord_slot, NULL, 0, &nm_extra);
+	return nm_coords_timed(coord_slot, NULL, 0);
 }
 
-bool netmap_set_pads(const CoordPad *pads, int n) { return coords_write(coord_slot, pads, n, &nm_extra); }
+bool netmap_set_pads(const CoordPad *pads, int n) { return nm_coords_timed(coord_slot, pads, n); }
 
 /* (the area settings the pick reads, kept round another look's) */
 typedef struct { bool one_floor, by_shape, arena_b, rimmed, pad_look, pads_walkway, arena_drawn, joints, striped, roads; int apart; } AreaFlags;
@@ -758,7 +765,8 @@ static uint16_t *look_map(Learned *L, int tw, int th) {
 	dry.locked = NULL;
 	nm_cur = &dry;
 	if (striped) make_stripes(pad_look && L->pads_seen);
-	uint16_t *map = pick_map(L, tw, th, false);
+	uint16_t *map;
+	NM_TIMED(pick, map = pick_map(L, tw, th, false));
 	nm_cur = NULL;
 	return map;
 }

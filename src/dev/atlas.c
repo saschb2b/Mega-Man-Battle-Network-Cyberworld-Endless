@@ -190,6 +190,17 @@ static uint32_t *layer_drawn(int area, const uint16_t *tiles, int tw, int th) {
 	return area_src_render(a->xrom, a->group, a->number, tiles, tw, th);
 }
 
+/* The layer built as the game builds it (its tiles not measured), timed:
+ * its milliseconds, its parts' in *parts */
+static int built_as_game(int area, uint32_t seed, NetmapTimes *parts) {
+	tiles_measure = false;
+	netmap_times_begin();
+	clock_t t0 = clock();
+	netmap_build_layer(area, seed);
+	*parts = netmap_times;
+	return (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
+}
+
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
 	run_new(seed);
 	run.depth = depth;
@@ -199,10 +210,8 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	netmap_kit(area, &kit);
 	/* timed as the game builds it, then again measured */
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
-	tiles_measure = false;
-	clock_t t0 = clock();
-	netmap_build_layer(area, seed);
-	int ms = (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
+	NetmapTimes parts;
+	int ms = built_as_game(area, seed, &parts);
 	tiles_measure = true;
 	if (getenv("CYBERWORLD_TILE_AT")) fprintf(stderr, "layer b%02d_l%d_d%d_s%u\n", area, layout, depth, seed);
 	layer_generate(seed, depth, biome, LAYER_NORMAL, &kit);
@@ -270,17 +279,30 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 	int mouths = at_mouths();
 	int picks = tiles_stats.picks ? tiles_stats.picks : 1, lineups, walked, junctions;
 	walk_counts(&lineups, &walked, &junctions);
-	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, whole %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels\n",
+	fprintf(report, "biome %2d layout %d (%s) depth %d seed %u: %d panels, %d rooms, near %.1f%%, whole %.1f%%, fallback %.2f%%, seams %d, breaks %d, nicks %d, off near %d, off edge %d, cells changed %d, panels not exact %d, other colours %d, scenery %d, arena %s, stairs %d, built in %d ms, at mouths %d, signature %s, arrives %s facing %s, lineups %d and junctions %d over %d panels, parts learn %.1f fix %.1f pick %.1f coords %.1f ms, coordinates %08x\n",
 		area, layout, layout_names[layer.layout], depth, seed, floor, layer.nrooms,
 		100.0 * tiles_stats.near / picks, 100.0 * tiles_stats.whole / picks, 100.0 * tiles_stats.fallbacks / picks, tiles_stats.seams, tiles_stats.breaks, tiles_stats.nicks, tiles_stats.off_near, tiles_stats.off_edge,
 		netmap_legal.edits, netmap_legal.left, tiles_stats.other, netmap_scenery,
 		layer.arena >= 0 ? "yes" : layer.boss_layer ? "NO" : "-", layer.nstairs, ms, mouths, sig_names[layer.sig], side_names[layer.arrive_side & 3], face_names[layer.arrive_face & 7],
-		lineups, junctions, walked);
+		lineups, junctions, walked, parts.learn, parts.fix, parts.pick, parts.coords, (unsigned)coords_last_hash());
 }
 
 /* A view of an area's map: its panels as the tiles learn them (as text,
  * read before the void is filled in: the panels' test reads its pixels),
  * then its picture. */
+/* The time an area's maps took to learn, where they were learned just now:
+ * a line of DIR/learn.txt (tools/layer_bench.py) */
+static void learn_timed(const char *dir, int area) {
+	if (netmap_times.learn <= 0) return;
+	char path[600];
+	snprintf(path, sizeof path, "%s/learn.txt", dir);
+	FILE *f = fopen(path, "a");
+	if (f) {
+		fprintf(f, "area %d learned in %.1f ms\n", area, netmap_times.learn);
+		fclose(f);
+	}
+}
+
 static void source_view(const char *dir, const NetAreaDef *na, int biome, int group, int number, AreaSrc *v) {
 	char path[600], tag[16] = "";
 	if (v->level) snprintf(tag, sizeof tag, "_z%d", v->level);
@@ -292,21 +314,26 @@ static void source_view(const char *dir, const NetAreaDef *na, int biome, int gr
 	}
 	/* (... and as its roads are learned, netmap_learn.c) */
 	snprintf(path, sizeof path, "%s/roads_b%02d_%02x_%d%s.txt", dir, biome, group, number, tag);
+	netmap_times_begin();
 	unsigned roads = netmap_road_hues(biome);
+	learn_timed(dir, biome);
 	f = roads ? fopen(path, "w") : NULL;
 	if (f) {
 		tiles_src_text(v, na->styles & ~(0x1FFFu | TILES_PADS_ALONE), (uint16_t)roads, na->walk_styles & 0x1FFFu, 0, na->bg_in_map, f);
 		fclose(f);
 	}
 	int W = v->tw * 8, H = v->th * 8;
-	for (int i = 0; i < W * H; ++i) if (!(v->px[i] >> 24)) v->px[i] = VOID_ARGB;
+	uint32_t *pic = malloc((size_t)W * H * sizeof *pic);
+	if (!pic) return;
+	for (int i = 0; i < W * H; ++i) pic[i] = v->idx[i] ? area_src_px(v, (size_t)i) : VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
-	save_bmp(path, v->px, W, H);
+	save_bmp(path, pic, W, H);
 	/* (and its first layer alone: what the tiles are learned from where the
 	 * second sets something over the floor) */
-	for (int i = 0; i < W * H; ++i) if (!(v->px0[i] >> 24)) v->px0[i] = VOID_ARGB;
+	for (int i = 0; i < W * H; ++i) pic[i] = v->idx0[i] ? area_src_px0(v, (size_t)i) : VOID_ARGB;
 	snprintf(path, sizeof path, "%s/src1_b%02d_%02x_%d%s.bmp", dir, biome, group, number, tag);
-	save_bmp(path, v->px0, W, H);
+	save_bmp(path, pic, W, H);
+	free(pic);
 }
 
 /* The area's own maps as the game draws them, to hold the layers against,
@@ -339,10 +366,11 @@ static void group_sources(const char *dir, int group) {
 		if (!area_src_load(group, n, &a)) { ++miss; continue; }
 		miss = 0;
 		int W = a.tw * 8, H = a.th * 8;
-		for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+		uint32_t *px = area_src_argb(&a, VOID_ARGB);
 		char path[600];
 		snprintf(path, sizeof path, "%s/src_g%02x_%d.bmp", dir, group, n);
-		save_bmp(path, a.px, W, H);
+		if (px) save_bmp(path, px, W, H);
+		free(px);
 		area_src_free(&a);
 	}
 }
@@ -357,20 +385,22 @@ static void world_sources(const char *dir) {
 			AreaSrc a;
 			if (!area_src_load(g, n, &a)) { printf("world %02x:%d: no map\n", g, n); continue; }
 			int W = a.tw * 8, H = a.th * 8;
-			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			uint32_t *px = area_src_argb(&a, VOID_ARGB);
+			if (!px) { area_src_free(&a); continue; }
 			char path[600];
 			snprintf(path, sizeof path, "%s/world_%02x_%d.bmp", dir, g, n);
-			save_bmp(path, a.px, W, H);
+			save_bmp(path, px, W, H);
 			static const uint32_t mark[4] = { 0xFFFF3030u, 0xFF3070FFu, 0xFF30FF30u, 0xFFFFE020u };
 			for (int s = 0; s < 4; ++s)
 				for (int i = 0; i < a.nsec[s]; ++i) {
 					const CoordCell *c = &a.sec[s][i];
 					int x = area_px(a.tw, c->x + 4, c->y + 4), y = area_py(a.th, c->x + 4, c->y + 4) - (c->z > 0 ? c->z : 0);
 					if (s == 2) continue;
-					dot(a.px, W, H, x, y, s == 3 ? 2 : 1, mark[s]);
+					dot(px, W, H, x, y, s == 3 ? 2 : 1, mark[s]);
 				}
 			snprintf(path, sizeof path, "%s/world_%02x_%d_coords.bmp", dir, g, n);
-			save_bmp(path, a.px, W, H);
+			save_bmp(path, px, W, H);
+			free(px);
 			printf("world %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", g, n, a.tw, a.th,
 				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
 			area_src_free(&a);
@@ -393,10 +423,11 @@ static void xrom_sources(const char *dir, int xrom) {
 			if (!area_src_load_x(xrom, g, n, &a)) { ++miss; continue; }
 			miss = 0;
 			int W = a.tw * 8, H = a.th * 8;
-			for (int i = 0; i < W * H; ++i) if (!(a.px[i] >> 24)) a.px[i] = VOID_ARGB;
+			uint32_t *px = area_src_argb(&a, VOID_ARGB);
 			char path[600];
 			snprintf(path, sizeof path, "%s/x%d_%02x_%d.bmp", dir, xrom, g, n);
-			save_bmp(path, a.px, W, H);
+			if (px) save_bmp(path, px, W, H);
+			free(px);
 			printf("x%d %02x:%d: %dx%d tiles, %d layers, walls %d, heights %d, priority %d, triggers %d\n", xrom, g, n, a.tw, a.th,
 				a.layers, a.nsec[0], a.nsec[1], a.nsec[2], a.nsec[3]);
 			area_src_free(&a);

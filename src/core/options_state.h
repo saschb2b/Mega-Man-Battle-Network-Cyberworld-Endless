@@ -12,14 +12,15 @@
  * the system has them: display.h), the Audio page's (Music and Effects,
  * sound_heard.h; Output and Sound, sound_filter.h; Vibration and Trigger
  * effects where the system has
- * them, feel_out.h) and the Game page's (Controls, Fast forward,
- * Statistics) */
-enum { LINE_CONTROLS, LINE_STATS, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
-	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL };
+ * them, feel_out.h) and the Game page's (the update found, on the
+ * title: update.h; Controls, Fast forward, Statistics, and Updates where
+ * the build looks for them) */
+enum { LINE_CONTROLS, LINE_STATS, LINE_UPDATE, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
+	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL, LINE_UPDATES };
 #define LINES_MAX 7
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
-static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_VOXEL; }
+static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_UPDATES; }
 
 /* The pages, L and R turning from one to the next as the Library turns
  * its own (Valhalla's tabs, docs/engine/settings-screens.md) */

@@ -88,7 +88,10 @@ typedef struct {
 	int together[RUNS_MAX][LAYERS], stars[RUNS_MAX][LAYERS], earned[RUNS_MAX][LAYERS], wanted[RUNS_MAX][LAYERS];
 } Measure;
 
-static Measure M[PLANS], S[PLANS];   /* the endless net's, the short net's */
+/* the endless net's, the short net's, and one the tables' probes share in
+ * turn (measure clears what it fills): taken from the heap by
+ * economy_report_run, 3 MB no game that never runs the report holds */
+static Measure *M, *S, *probe;
 static const EconPlan *const plans[PLANS] = { &econ_flat, &econ_opening };
 static int runs;
 static int codes_held[CODES];
@@ -598,13 +601,12 @@ static void skill_table(FILE *out) {
 	fprintf(out, "\n");
 	int keep = runs;
 	runs = runs < 100 ? runs : 100;
-	static Measure probe;
 	for (int a = 0; a < 6; a += 3) {
 		fprintf(out, "%-4d", a + 1);
 		for (unsigned k = 0; k < sizeof levels / sizeof *levels; ++k) {
 			bust_fixed = levels[k];
-			measure(&probe, econ_plan, LAYERS);
-			LayerTally s = act_sum(&probe, a);
+			measure(probe, econ_plan, LAYERS);
+			LayerTally s = act_sum(probe, a);
 			fprintf(out, "  %3d: %3.0f%% %4.0f", levels[k], s.battles ? 100 * s.bt_chip / s.battles : 0, s.battles ? s.bt_zenny / s.battles : 0);
 		}
 		fprintf(out, "\n");
@@ -693,22 +695,21 @@ static void souls_table(FILE *out) {
 	for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %-12s", act_names[a]);
 	fprintf(out, "  dealers' lists                     all chips\n");
 	const Measure *before = &M[econ_plan == plans[0] ? 0 : 1];
-	static Measure probe;
 	for (int k = 0; k < SOULS_TEAM; ++k) {
 		souls_held = 1u << k;
-		measure(&probe, econ_plan, LAYERS);
+		measure(probe, econ_plan, LAYERS);
 		souls_held = 0;
 		int kind = loot_soul_kind_of(k);
 		fprintf(out, "%-12s %-5s", names[k], kind >= 0 && kind < (int)(sizeof kinds / sizeof *kinds) ? kinds[kind] : "-");
 		double all[2] = { 0, 0 };
 		for (int a = 0; a < ECON_ACTS; ++a) {
-			LayerTally b = act_sum(before, a), n = act_sum(&probe, a);
+			LayerTally b = act_sum(before, a), n = act_sum(probe, a);
 			fprintf(out, " %4.2f->%4.2f ", b.kind[k], n.kind[k]);
 			all[0] += b.chips;
 			all[1] += n.chips;
 		}
 		fprintf(out, " ");
-		for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %4.2f", act_sum(&probe, a).kind_offer[k]);
+		for (int a = 0; a < ECON_ACTS; ++a) fprintf(out, " %4.2f", act_sum(probe, a).kind_offer[k]);
 		fprintf(out, "   %5.1f->%5.1f\n", all[0], all[1]);
 	}
 	/* (the chips a run can hold of each kind, BN6's and the older Net's own, by
@@ -736,7 +737,6 @@ static int nets_table(FILE *out) {
 	static const char *const metrics[ECON_METRICS] = { "chips", "good%", "MD", "zenny", "codes" };
 	static const int acts[] = { 0, 1, 2, 3, 4, 5, ECON_ACTS - 1 };
 	static short all[CHIPS_IDS];
-	static Measure probe;
 	int flagged = 0;
 	fprintf(out, "\nThe older Net's half (%d%% of a layer's finds and stock on another game's ground and in the deep, of the tier rolled, BN6's\n"
 		"where the catalogue has none of it; chip_pool.h): each catalogue's chips by tier 0-4, of them the registry's own (BN5's + BN4's)\n",
@@ -764,12 +764,12 @@ static int nets_table(FILE *out) {
 		int net = g ? g - 1 : GROUND_BY_SEED;
 		if (net == CHIP_NET_BN6 || (net < CHIP_NETS && !chip_pool_net_read(net))) continue;
 		ground_net = net;
-		measure(&probe, econ_plan, LAYERS);
+		measure(probe, econ_plan, LAYERS);
 		ground_net = 0;
 		for (unsigned i = 0; i < sizeof acts / sizeof *acts; ++i) {
 			double v[ECON_METRICS];
-			act_metrics(&probe, acts[i], v);
-			LayerTally sum = act_sum(&probe, acts[i]);
+			act_metrics(probe, acts[i], v);
+			LayerTally sum = act_sum(probe, acts[i]);
 			int first, last;
 			act_range(acts[i], &first, &last);
 			fprintf(out, "%-13s %-4s ", net == GROUND_BY_SEED ? "by the seed" : names[net], act_names[acts[i]]);
@@ -795,8 +795,16 @@ int economy_report_run(const char *spec) {
 	if (runs < 1) runs = 1;
 	if (runs > RUNS_MAX) runs = RUNS_MAX;
 	if (!emu_init(R.data, ROM_SIZE)) return 1;
-	FILE *out = fopen(path, "w");
-	if (!out) return 1;
+	M = calloc(PLANS, sizeof *M);
+	S = calloc(PLANS, sizeof *S);
+	probe = calloc(1, sizeof *probe);
+	FILE *out = M && S && probe ? fopen(path, "w") : NULL;
+	if (!out) {
+		free(M);
+		free(S);
+		free(probe);
+		return 1;
+	}
 	for (int p = 0; p < PLANS; ++p) {
 		measure(&M[p], plans[p], LAYERS);
 		measure(&S[p], plans[p], SHORT_LAYERS);
@@ -819,6 +827,9 @@ int economy_report_run(const char *spec) {
 	souls_table(out);
 	flagged += nets_table(out);
 	fclose(out);
+	free(M);
+	free(S);
+	free(probe);
 	printf("economy report in %s: %d numbers of the plan in play (%s) outside their band\n", path, flagged, econ_plan->name);
 	return 0;
 }

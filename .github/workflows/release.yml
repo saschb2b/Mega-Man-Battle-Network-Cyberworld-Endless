@@ -269,12 +269,16 @@ jobs:
         with:
           name: android
           path: build/release
+      # (what the game reads at its start to know a newer version is out,
+      # its address the latest release's: tools/update_manifest.py)
+      - name: Update manifest
+        run: python3 tools/update_manifest.py "$TAG" build/release > build/release/update.json
       - name: Checksums
         working-directory: build/release
         run: |
           ls cyberworld-endless-portmaster.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
             cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-windows-x64-setup.exe \
-            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.ipa altstore-source.json \
+            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.ipa altstore-source.json update.json \
             cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx cyberworld-endless.nro cyberworld-endless.vpk cyberworld-endless.pkg cyberworld-endless-ps5.zip \
             cyberworld-endless-website.zip cyberworld-server-python.zip \
             cyberworld-server-linux-x86_64.zip cyberworld-server-linux-arm64.zip \

@@ -20,6 +20,7 @@ static void learn_variety(TileBook *out);
 static void src_close(Src *s) {
 	free(s->state);
 	free(s->drawn);
+	free(s->skipped);
 }
 
 /* A view of the area's original map, its panels measured as they are
@@ -28,12 +29,14 @@ static void src_close(Src *s) {
 static bool src_open(Src *s) {
 	s->state = malloc(SPAN * SPAN);
 	s->drawn = malloc(SPAN * SPAN);
-	if (!s->state || !s->drawn) {
+	s->skipped = malloc(SPAN * SPAN);
+	if (!s->state || !s->drawn || !s->skipped) {
 		src_close(s);
 		return false;
 	}
 	memset(s->state, -1, SPAN * SPAN);
 	memset(s->drawn, -1, SPAN * SPAN);
+	memset(s->skipped, -1, SPAN * SPAN);
 	return true;
 }
 
@@ -413,6 +416,7 @@ void tiles_learn(const AreaSrc *a, uint32_t styles, uint16_t walk_styles, uint16
 	uint8_t *pads = tl_find_pads(&src);
 	if (!pads) { src_close(&src); return; }   /* (a book of nothing) */
 	src.pads = pads;
+	memset(src.skipped, -1, SPAN * SPAN);   /* (asked without the pads before: asked again) */
 	TileGrid g = { a->tw, a->th, a->ex, a->ey, 0, 0, 0, false };
 	tl_calibrate(a, &src, &g);
 	out->dv = g.dv;
