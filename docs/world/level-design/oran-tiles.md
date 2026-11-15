@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Oran Area's tiles"
-description: "BN5's Oran Area drawn on generated layers: what its maps draw (octagon hubs with a circuit or a dock at every side), the kinds of breaks its layers showed, the drawing taken (hubs one floor with their circuits, lay 11: 332 to 271 breaks per 100 panels) and what is left."
+description: "BN5's Oran Area drawn on generated layers: what its maps draw (octagon hubs, never a bare side), the kinds of breaks its layers showed, the drawing taken (hubs one floor with their circuits, lay 11, hub cells worn to circuits drawn as circuits: 332 to 241 breaks per 100 panels) and what is left."
 tags: [world, level-design, tiles, bn5]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:40:00Z }
 sources:
@@ -53,15 +53,15 @@ Six layers, two seeds a layout, 809 panels, 2683 breaks, counted by
 
 | Place | Before | After |
 | --- | --- | --- |
-| A circuit at a hub | 677 / 130 | 463 / 130 |
-| A pad (a 3 x 3 hub) | 497 / 180 | 434 / 180 |
-| A circuit's straight run | 380 / 150 | 225 / 150 |
-| A room's edge | 351 / 102 | 370 / 102 |
-| A room's corner | 326 / 100 | 254 / 100 |
-| A circuit's end | 200 / 29 | 206 / 29 |
-| A circuit's fork | 135 / 42 | 135 / 42 |
-| A circuit's bend | 92 / 17 | 66 / 17 |
-| A room's notch | 25 / 9 | 40 / 9 |
+| A circuit at a hub | 677 / 130 | 289 / 130 |
+| A pad (a 3 x 3 hub) | 497 / 180 | 435 / 180 |
+| A circuit's straight run | 380 / 150 | 181 / 150 |
+| A room's edge | 351 / 102 | 378 / 102 |
+| A room's corner | 326 / 100 | 250 / 100 |
+| A circuit's end | 200 / 29 | 207 / 29 |
+| A circuit's fork | 135 / 42 | 124 / 42 |
+| A circuit's bend | 92 / 17 | 48 / 17 |
+| A room's notch | 25 / 9 | 41 / 9 |
 
 The kinds, looked at in the worst windows of each layer:
 
@@ -76,12 +76,16 @@ The kinds, looked at in the worst windows of each layer:
 3. **Straight runs.** A circuit's panels taken up for how they met their
    neighbours were picked again tile by tile, the circuit's pattern broken
    every few panels.
-4. **Shapes BN5 never draws**: two hubs a panel apart, a circuit one
+4. **Hubs worn to circuits.** The legalizer changes some of a layout's
+   cells, and a hub's cell it leaves in no 2 x 2 block of floor still had
+   the pads' look: it took a hub's panels, orange middles in the mouth of
+   a circuit.
+5. **Shapes BN5 never draws**: two hubs a panel apart, a circuit one
    panel long between them, rooms bigger than 3 x 3 drawn as hubs.
 
 ## What it draws now
 
-Two settings of its entry, measured each way:
+Two settings of its entry, measured each way, and a rule:
 
 | Laying | Breaks per 100 panels |
 | --- | --- |
@@ -90,7 +94,8 @@ Two settings of its entry, measured each way:
 | Drawn apart, rules 11 | 303.2 |
 | One floor | 315.8 |
 | One floor, rules 15 | 276.6 |
-| **One floor, rules 11** | **271.1** |
+| One floor, rules 11 | 271.1 |
+| **One floor, rules 11, worn hubs drawn as circuits** | **241.4** |
 
 - **The hubs one floor with their circuits** (no `.apart`). A circuit
   meeting a hub's side is laid from the map's own joins, its lips running
@@ -99,12 +104,21 @@ Two settings of its entry, measured each way:
   no other panel art ([the tile test](../../devtools/tile-test.md), Each
   area's laying). Straight circuits come out whole. Rule 4 (beside a
   panel laid whole, its map's own tiles) drew a little worse here.
+- **A hub's cell worn to a circuit's shape is drawn as one** while the
+  tiles are picked (`floor_raw`, `src/map/netmap.c`): on a floor drawn as
+  one and told by shape, a pad's cell in no 2 x 2 block of floor loses
+  the pads' look. Measured over every area: it changes Oran's alone,
+  where it holds; on floors drawn apart it changed three areas, all for
+  fewer breaks (BN4's Town Area 264 to 222 per 100 panels, its ACDC
+  Area 199 to 190, SciLab 170 to 169), but in BN4's the worn cells take
+  the way's road look, which those areas' own passes should judge, so
+  it holds on floors drawn as one alone.
 
-Every layer counts fewer breaks and nicks, and five of the six fewer
-seams (one 301 to 314). More tiles are picked one
-at a time from a nearby neighbourhood, since hubs and circuits are one
-floor now (10% to 14% of tiles on average over the six layers, 20% at
-most), so the area's rows
+Every layer counts fewer breaks, nicks and seams (2683 breaks to 1953,
+seams 2114 to 1845). More tiles are picked one at a time from a nearby
+neighbourhood, since hubs and circuits are one floor now (10.5% to 13.4%
+of tiles on average over the six layers, 18.9% at most), so the area's
+rows
 in `tests/atlas_baseline.txt` were written again. The layouts are as they
 were: the cells and the coordinate data's hash are the same for every
 layer, and no seed makes anything else.
@@ -117,10 +131,10 @@ layer, and no seed makes anything else.
   the area to 270 per 100 panels, and looked like BN5's hubs. But BN5's
   docks are floor MegaMan steps onto, and here a dock would be drawn over
   void he cannot step onto. That is the owner's call, and it is not done.
-- **Orange chips** where a circuit meets a hub away from the middle of
-  its side, or two hubs nearly touch: told by shape, a hub's rim with
-  floor closing round it reads as the hub's middle. Keeping each pad
-  room's own rim as rim was tried (270.1, the chips stayed).
+- **Orange blobs** where two hubs nearly touch: told by shape, a hub's
+  rim with floor closing round it reads as the hub's middle. Keeping
+  each pad room's own rim as rim was tried (270.1 before the rule above,
+  the blobs stayed).
 - **Rooms bigger than 3 x 3**: drawn as hubs, their inner edge scalloped
   (tiles drawn off), their frame repeated along a side.
 - The [roads' rule](roads.md) found none here: Oran's brown planks lie
