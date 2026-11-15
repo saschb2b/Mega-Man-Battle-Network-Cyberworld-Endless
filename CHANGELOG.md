@@ -93,6 +93,12 @@
   layer's start: the battle, its reward and the walk since were gone.
   The game now runs on until MegaMan is free and saves the run where he
   stands.
+- **Fixed: a quit with a text box open lost the layer.** Quitting while
+  a chat, a shop or the PET was open saved nothing, so CONTINUE went
+  back to the last save while it said "From where you left off":
+  purchases, Mystery Data and a race won were gone. The run is now kept
+  as it stood the moment before that box opened, and CONTINUE says
+  "From before that talk".
 - **Fixed: blank chips in the Standard folder.** A system that kept
   its start-up state from before 0.21.0 dealt a new game's folder
   misread: some chips came out blank and did nothing, and FOLDER EDIT

@@ -93,6 +93,12 @@ static bool read_blob(const char *name, uint32_t magic, void *data, size_t n, bo
 	return ok;
 }
 
+void save_held_write(void) {
+	save_queue_release();
+	save_queue_wait();
+	platform_persist();
+}
+
 bool save_read_blob(const char *name, uint32_t magic, void *data, size_t n) { return read_blob(name, magic, data, n, false); }
 bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n) { return read_blob(name, magic, data, n, true); }
 
