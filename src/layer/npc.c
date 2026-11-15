@@ -26,6 +26,7 @@
 #include "bytes.h"
 #include "emu.h"
 #include "mapslot.h"
+#include "npc_sprite.h"
 #include "rom.h"
 
 /* A navi's radius (the game's is 4 units; a panel is 32), for talking and
@@ -209,10 +210,12 @@ uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32
  * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */
 static uint32_t talker(int category, int index, int x, int y, int z, int anim, uint32_t archive, int script, int gone_flag, bool floor,
                        bool behind, int sx, int sy) {
+	/* (standing as asked where its sprite draws that, else towards the
+	 * camera: another game's sprite may hold fewer, docs/rom/bn4.md) */
 	uint8_t s[56] = {
 		0x08,
 		0x25, (uint8_t)index, (uint8_t)(category * 4),
-		0x16, (uint8_t)anim,
+		0x16, (uint8_t)npc_sprite_stand(category, index, anim),
 		0x44, (uint8_t)script, (uint8_t)archive, (uint8_t)(archive >> 8), (uint8_t)(archive >> 16), (uint8_t)(archive >> 24),
 	};
 	int n = 12;
@@ -225,8 +228,10 @@ static uint32_t talker(int category, int index, int x, int y, int z, int anim, u
 	/* an object (sprite list 7) has no frames facing MegaMan: turning to
 	 * him when spoken to would hide it for the whole conversation. Its
 	 * reach is a navi's (the game's 4 answered a Server only from before
-	 * its face) */
-	if (category == 7) s[n++] = 0x13;
+	 * its face). Nor does a battle sprite, or a Navi's sprite that draws
+	 * none of the facing BN6 would turn it to (BN4's TopMan and SparkMan
+	 * away from the camera, WindMan's four, which end before 7) */
+	if (!npc_sprite_turns(category, index)) s[n++] = 0x13;
 	if (behind) {
 		s[n++] = 0x1B;
 		s[n++] = 0x0C; s[n++] = (uint8_t)sx; s[n++] = (uint8_t)sy; s[n++] = 0;

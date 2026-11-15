@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "net.h"
+#include "npc_sprite.h"
 #include "rivals.h"
 #include "rom.h"
 #include "run.h"
@@ -152,6 +153,10 @@ NpcBody guardian_body(int navi, int face) {
 		b.anim = xguardian_bn4_stand(navi, face);
 		b.log_in = b.log_out = -1;
 	}
+	/* (and any other whose sprite, copied from his game, draws nothing
+	 * that way: BN5's sprite of CosmoMan is drawn only towards the camera,
+	 * 2 to 5, and he stood unseen on a dark layer's board facing up) */
+	if (!npc_sprite_shows(b.list, b.index, b.anim)) b.anim = toward_camera(face);
 	/* (Falzar's in their battle sprites: BN6's warp-in, their animation 3,
 	 * and its reverse, 4) */
 	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1, 4 };
