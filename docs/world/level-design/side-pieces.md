@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T20:30:00Z }
 ---
 
 # Side pieces (built for five areas, issue #505)
@@ -80,7 +80,7 @@ Taken per area as looked at, as every laying rule is
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4; behind upper edges on the second layer, gripping none, a row of five along a walkway, a bowl each, and two alone by its exits: 7 looks (below); the two in a raised ring's holes stand behind no edge and fit no layer (below) | yes, both |
-| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
+| Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9; the rest round its floors is drawn into its rims and its bridges' faces, which no cut separates: its rims' clamps and corner pins, and the long spikes under its bridges, tried past the laid depth and not placed (below) | the bowls |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
 | BN5's ACDC Area | nothing; its wire tufts behind its blue walkways' upper edges are drawn into a rim no layer draws, its layers laying no blue walkway (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
@@ -91,6 +91,7 @@ Taken per area as looked at, as every laying rule is
 | BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | Judge Tree Comp | nothing on the second layer; on its walkways' edges, in the floor's own tiles, the tufts on its back rims and the planters stacked at its walls' feet, 139 looks over its four maps (below). Not placed: its stumps with their tree houses, doors, bridges and roots, and its tree's red court with the tree and the terminal on it, floor of another kind (the stumps its pads' look, the court skipped on purpose, `skip_styles`; issue #505's kinds 3-5) | what grows on the edges |
+| Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
 | every other area | nothing | - |
@@ -591,6 +592,49 @@ Left as they are:
   piece), the robot's door and its striped conveyor (a set piece), its
   pads' centrepieces and exit arrows (issue #505's kind 4).
 
+## Mr. Weather Comp's clouds (`decor_learn_floating`; verified on the maps)
+
+Mr. Weather Comp's four maps (0x83:0 to 2 and 0x85:2) set big white
+clouds over its field and round it: squares 20 by 10 and 28 by 14 tiles,
+a puff 12 by 7, and long ones bent like walkways, up to 104 tiles across,
+some ending in a yellow-rimmed pad. They lie on the maps' second tile
+layer (the two layers drawn apart: the field, its belts and its fans on
+the first; the clouds, their pads, the escalator and a console on the
+second), and most of them are no scenery but floor: the maps' heights
+(section 1 of the coordinate data) put them at 64, and their walls
+(section 0) ring them there, 1,114 wall cells at that height in Comp 1
+and 1,612 in Comp 2 against the field's 394 and 404. Measured cloud by
+cloud in the view of that height, 45 to 68% of a walkable cloud's pixels
+lie on its floor's top. They are raised floor of another kind, reached by
+the escalator (a conveyor) and the yellow pads, which issue #505 listed
+as scenery: none is set, as floor of another kind is the layouts' matter
+(issue #505's kinds 3 to 5, the owner's calls).
+
+The rest float over the field, drawn over its floor with no height and
+no walls of their own: the puff (the same tiles in Comp 2, Comp 3 and
+0x85:2) and 0x85:2's two squares (145 and 148 tiles). Two clouds at 64
+with a yellow pad (Comp 1's 28 by 14, 0x85:2's 32 by 17) are walled at
+their pads alone. The scenery cut ([the generator](generator.md),
+`decor.c`) reads a map's first layer alone where its background lies in
+its own tiles (`bg_in_map`), and the side-piece cut asks for a group that
+hangs off a floor, so neither took a cloud. Where an area's background is
+its own tiles, the scenery cut now also reads its second layer
+(`decor_learn_floating`): a whole group of its tiles, joined eight ways,
+32 tiles a side at most and two panels' tops in pixels at least (2,048:
+what is smaller marks the floor), nine tenths or more of whose pixels lie
+over ground floor and at most 8 on the top of floor at any of the map's
+raised heights. That takes the puff and the two squares, and refuses every
+walkable cloud, each cloud with a pad (a warp's place, issue #505's kind
+4), the escalator (its top pad) and the console (most of it off the
+floor). Of the three other areas whose background is their own tiles,
+the Undernet's maps gave one group (Undernet 1's warp hole in its frame,
+on a crossing of four plates, 24 tiles) until the size was asked;
+Undernet Zero's and the Nest's give none. They are set as any scenery is: in the void beside a layer's
+floor, a tile clear of both layers' tiles and within three of the floor,
+4 to 10 a layer, rather than over its floor as their maps draw them,
+where they would cover the floor's art (a layer draws no clouds' shadows
+on its panels, which the maps' first layer does).
+
 ## What BN4's countries set round their floors (none set; measured on the map and the atlas)
 
 BN4's countries (their area's map 0x93:2, the one of the four looks it
@@ -700,6 +744,49 @@ raised pads), the plaza, the warp discs and the two exit arrows are issue
 #505's kinds 3 to 5, left to the owner; the overpass also crosses over
 other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
 
+## What Undernet Zero sets round its floors (bowls set; measured on the map and the atlas)
+
+Undernet Zero's map (0x95:1, the atlas's `6`) shows its layers 57% of its
+different tile pictures (two seeds a layout: 386 of 673). Its fire bowls
+are on its layers already (above, Pieces the game animates). Of the
+rest, what is no floor (its raised plateaus, their ramps and its two exit
+arrows are issue #505's kinds, left to the owner) is small and drawn into
+the floor's own first-layer tiles, so no cut here separates it:
+
+- **Clamps on its plateaus' upper rims**, a pale clamp at every join of
+  two panels along an upper edge (2 by 1 tiles, some 50 in the map).
+  Layers draw a plain stud at those joins.
+- **Pins at its plateaus' left and right corners** (a tile each, some 40).
+- **Two long spikes under each bridge segment**, hanging from one face (a
+  tile wide, some 60 in the map). Layers draw a row of short stubs under
+  both faces of a bridge instead, and no tips: the map draws the spikes
+  deeper (about 27 pixels under a panel's edge) than its tiles are laid
+  (22: `tl_calibrate` keeps only the legs seen under a quarter of the
+  faces, and the spikes hang under the bridges alone).
+- **Bowls over a rim**: 16 tiles where a bowl and the rim behind it are
+  drawn in one tile; a bowl set whole draws them where it stands so.
+
+The cut behind a floor (`behind_learn`) finds nothing there: switched on
+for a probe, the area's 13 looks were its bowls alone, as without it. The
+clamps and pins are joined into the rim's tiles, which they share, so
+neither it nor scenery takes them.
+
+The spikes were tried as a cut of their own (15 November 2026): the
+first-layer tiles under a floor past the laid depth, a tile to eight,
+kept with the panel above them where it is a straight run one panel wide
+(a bridge's), and set under a layer's bridge panel of the same
+neighbourhood where the tile over each of their columns is the one the
+map's root holds. It took 6 looks; on the atlas's layers the tips stood
+under no root of theirs, since the layers lay their bridges' faces with
+stubs, not the map's spike roots, and where an entry matched it was a
+nearly empty tile, so they floated in the void a panel below the bridge.
+Under a plateau's rims and corners (before the cut kept to bridges) they
+hung red posts and broke the picture (21 to 36 breaks on one layer). It
+was taken out. The spikes, and the clamps and pins with them, need the
+bridges and rims laid as the map draws them, which is the laying's
+([the tile test](../../devtools/tile-test.md), Each area's laying), not a
+side piece's.
+
 ## What BN5's ACDC Area sets round its floors (none set; measured on the maps and the atlas)
 
 BN5's ACDC Area (its maps 0x90:0 and 0x90:1, ACDC Area 1 and 2, the
@@ -753,10 +840,9 @@ on its layers. The centrepieces, the machine and the arrows are issue
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
   red fists (above), BN5's Undernet's dark figures and Nebula Area's dripping pods
-  lie on the first layer, beside or under the floor (probed on the maps),
-  and Mr. Weather's maps hold their background in the second, so its
-  pieces lie on the first too. (The Nest's were counted here as well; its
-  crystals lie on the second layer, below.) Scenery refuses a
+  lie on the first layer, beside or under the floor (probed on the maps).
+  (The Nest's and Mr. Weather's were counted here as well; theirs lie on
+  the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.
