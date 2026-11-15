@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T05:20:00Z
-* **Update**: releases/v0.22.0.md (#582's fix written in: holes in the floor filled).
