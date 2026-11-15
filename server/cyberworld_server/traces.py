@@ -240,9 +240,13 @@ def compact(directory, first_week, forget=None, hide=None):
         traces = Traces()
         for entry in entries:
             try:
-                if int(entry["week"]) < first_week or entry.get("identity") == forget \
-                        or (hide and entry.get("identity") == hide[0] and int(entry["week"]) == hide[1]):
+                if int(entry["week"]) < first_week:
                     continue
+                if entry.get("identity") == forget or (hide and entry.get("identity") == hide[0] and int(entry["week"]) == hide[1]):
+                    # (the opened glow names nobody: it stays)
+                    if entry.get("kind") != "find":
+                        continue
+                    entry = dict(entry, kind="open", identity="", name="")
             except (KeyError, TypeError, ValueError):
                 continue
             traces.apply(entry)
