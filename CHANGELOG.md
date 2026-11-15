@@ -80,6 +80,14 @@
   backs, WindMan, TopMan and SparkMan nothing at all. Each now stands
   in his own sprite's view that faces MegaMan, on either side of his
   arena.
+- **Fixed: the Glitch copy of a Falzar Navi was a flicker of streaks,
+  and CosmoMan vanished on his board.** The copy at a Glitch layer's
+  heart stood in SpoutMan's, TomahawkMan's or another Falzar Navi's
+  warp-out, over and over; it now stands as he does in battle. CosmoMan's
+  BN5 sprite faces the camera only, so on a dark layer's board he
+  vanished whenever he turned to strike upward; he now turns towards the
+  camera. Nobody the game places in another game's sprite turns to face
+  MegaMan where that sprite draws nothing.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.

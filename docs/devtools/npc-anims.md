@@ -58,3 +58,13 @@ board: his sprite (BN5's list 6's 78) draws him only towards the camera,
 the way he faces now turns towards the camera (`guardian_body`), a log-in
 or log-out his sprite lacks is the beam's (`npc_guardian`), and a talker
 stands in a facing its sprite draws (`npc_sprite_stand`).
+
+Beside it, in the same talker's code: a Glitch layer's copy
+([the Glitch layer](../game/glitch-layer.md)) of a Falzar Navi, in his
+battle sprite (list 0), stood in animation 4, every talker's standing
+facing, which in a battle sprite is his warp-out, looping as streaks of
+his colours. He now stands in his body's own animation (`guardian_body`,
+0 for a battle sprite), and a battle sprite never turns to MegaMan
+(its odd animations are its attacks). Seen on seed 1 at depth 7 with
+`--dev glitch,side=4`; `CYBERWORLD_EMU_DEBUG` names the copy's form and
+place (`copy: navi 6 at 412 -12`).

@@ -736,6 +736,7 @@ static void install_copy(Install *in, Talker *tk) {
 	tk->sprite = body.index;
 	tk->anim = body.anim;
 	npc_need_sprite(&in->npcs, body.list, body.index);
+	if (emu_debug_on()) fprintf(stderr, "copy: navi %d at %d %d, list %d sprite %d animation %d\n", n ? forms[0] : 1, tk->x, tk->y, body.list, body.index, body.anim);
 	for (int k = 0; k < 3; ++k) {
 		int navi = k < n ? forms[k] : 0, code = 26, chip = 0;
 		if (navi && guardian_older(navi)) chip = xguardian_chip(navi, run.depth + 9, &code);
