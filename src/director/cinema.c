@@ -21,6 +21,7 @@ static struct {
 	bool faded;     /* BN6's own fade on the screen (bn6_screen_faded): nothing of ours over its flash */
 	int input;
 	bool b_latch;   /* a B held as a talk took the keys: kept from it until let go */
+	bool b_prev, b_fresh;   /* B down the last frame; B pressed while the staging held MegaMan, held since */
 	uint32_t walk;
 	bool bars;
 	int bar;                 /* 0 .. BAR_FRAMES */
@@ -39,9 +40,13 @@ void cinema_reset(void) { memset(&C, 0, sizeof C); }
 
 /* (a talk that opens on its own takes a B held to run as a press to
  * hurry it: a player running into a guardian's last-stop words saw none
- * of them; the B counts again once let go) */
+ * of them; the B counts again once let go. A B pressed while the staging
+ * held MegaMan is no run but a press to hurry what comes: a playtester's,
+ * pressed under a guardian's title card and held, waited on his first
+ * box, session 77) */
 void cinema_input(int mode) {
-	if (mode == CINEMA_TALK && C.input != CINEMA_TALK) C.b_latch = true;
+	if (mode == CINEMA_TALK && C.input != CINEMA_TALK) C.b_latch = !C.b_fresh;
+	if (mode == CINEMA_FREE) C.b_fresh = false;
 	C.input = mode;
 }
 int cinema_input_mode(void) { return C.input; }
@@ -105,6 +110,10 @@ void cinema_card_yield(void) {
 int cinema_card_age(void) { return C.card == CARD_AREA ? C.card_t : -1; }
 
 uint32_t cinema_keys(uint32_t keys) {
+	bool b = (keys & KEY_B) != 0;
+	if (!b) C.b_fresh = false;
+	else if (!C.b_prev && (C.input == CINEMA_HOLD || C.input == CINEMA_WALK)) C.b_fresh = true;
+	C.b_prev = b;
 	if (C.off_map) return keys;
 	if (C.input == CINEMA_HOLD) return 0;
 	if (C.input == CINEMA_TALK) {
