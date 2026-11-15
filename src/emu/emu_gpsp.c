@@ -306,6 +306,9 @@ bool emu_init(const uint8_t *rom, size_t len) {
 }
 
 bool emu_ready(void) { return ready; }
+
+/* (no party core on gpSP, nothing to copy the ROM for: its parties fight linked) */
+bool emu_rom_clean(uint8_t *out, size_t size) { (void)out; (void)size; return false; }
 void emu_reset(void) {
 	if (ready) retro_reset();
 }
