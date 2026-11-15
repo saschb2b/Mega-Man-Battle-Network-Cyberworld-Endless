@@ -93,6 +93,7 @@ Taken per area as looked at, as every laying rule is
 | Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| BN5's Liberation boards (BN5 dark 1-9) | nothing set: on their second layer the panels' middles alone, which a board's panel looks cover; on the first, slime and lava blobs on the floors' corners, fins on the back rims and drips under the faces, all drawn into the floor's own rim and face tiles (below) | no |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -712,6 +713,57 @@ The overpass (a raised walkway over the catwalks, its raised field and two
 raised pads), the plaza, the warp discs and the two exit arrows are issue
 #505's kinds 3 to 5, left to the owner; the overpass also crosses over
 other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
+
+## What BN5's Liberation boards set round their floors (none set; measured on the maps and the atlas)
+
+The nine maps a [dark layer](../../game/liberation/building/mission-look.md)
+is drawn from (0x86:0 to 8, BN5's nine Liberation Missions; the atlas's
+`a6` to `a14`) share one tile set, and their layers draw 29% to 66% of each
+map's different tile pictures (two seeds a layout, `build.py atlas a6 2`
+and on). What is left is floor, the kinds left to the owner, or three
+families of things drawn into the floor's own tiles, which no cut of these
+takes yet. Each map was looked over in the atlas's tinted copy and in a
+mask of its two tile layers (a probe, 15 November 2026).
+
+- **The second tile layer** holds the framed panels' coloured middles, on
+  every board one group over the whole board (2,768 to 3,920 tiles), and on
+  boards 1, 3 and 4 a warp hub's disc (32 tiles, on the floor alone). On a
+  board BN5 shows its panel looks on that layer's background alone (BG2,
+  [the ROM map](../../rom/liberation.md)), and a dark layer does the same:
+  `clear_layer` (`src/director/liberation_look.c`) empties the map's
+  second layer as the board starts. So nothing on it shows on a board,
+  in BN5 or here, and the side-piece cut has nothing to take (the middles'
+  group is far past its size, the disc lies on the floor alone).
+- **Blobs on the floors' corners**: crimson slime on boards 7 to 9 and
+  orange lava on board 6, draped over a floor's outer corner (its west or
+  east) and down its face, some 3 by 4 tiles, about a dozen on boards 6
+  and 7, twenty on board 8 and six on board 9 (counted by eye). They lie on
+  the first layer, and the half over the corner is drawn into the corner's
+  own rim and face tiles. The cut behind a floor takes the other half (5
+  tiles; 1 look on board 6, 2 on board 7, switched on for the probe) and
+  set it on none of the atlas's layers; set alone it would be half a blob
+  cut at the rim.
+- **Fins on the back rims**: small wedges a tile or two high where the
+  panels' frames meet along a board's upper edges, on all nine, dozens a
+  map, drawn into the rim's tiles.
+- **Drips under the faces**: one-tile drips hanging from the lower faces'
+  tips, on all nine, dozens a map, joined to the face they hang from.
+
+These three are what the Judge Tree Comp's cut of what grows on
+a floor's edge is for (issue #505; PR #645, open as this was written):
+first-layer art past the floor's body in its own rim and wall tiles, cut
+with the ring of floor tiles round it. Once that cut is in, the boards take
+it by their own setting (`LIB_MAP` in `src/core/rom.c`, the nine boards'
+one macro), to be looked over beside the maps as every area's is; until
+then no rule fits them.
+
+What a board's units stand on is untouched either way: anything of these
+kinds lies on the first layer, under the panel looks, and changes no panel.
+The rest of what the layers never draw is no thing: boards 1 to 4's
+circuit walkways and hubs (floor of another kind, counted away from the
+layer's floor), the warp hubs' discs, the exit arrows on all nine, board
+5's zigzag walkway and board 2's raised hub (issue #505's kinds 3 to 5),
+and the panels' middles, which the looks cover.
 
 ## What Undernet Zero sets round its floors (bowls set; measured on the map and the atlas)
 
