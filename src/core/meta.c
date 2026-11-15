@@ -466,21 +466,14 @@ int meta_unlocked(const char **out, int max) {
 }
 
 const char *meta_next_goal(void) {
-	static char goal[64];
-	/* (a line of the summary: 32 letters at most) */
-	if (!meta_endless_open()) return "Win a short net: the endless net";
+	static char goal[96];
+	/* (the summary's information box: its words in meta_text.c) */
+	if (!meta_endless_open()) return meta_goal_words(goal, sizeof goal, GOAL_ENDLESS, 0);
 	for (int f = 1; f < FOLDER_COUNT; ++f)
-		if (!meta_folder_open(f) && meta_folder(f)->opens) {
-			/* ("Delete an Aqua guardian: Storm") */
-			snprintf(goal, sizeof goal, "%c%s: %s", meta_folder(f)->opens[0] - 'a' + 'A', meta_folder(f)->opens + 1, meta_folder(f)->name);
-			return goal;
-		}
+		if (!meta_folder_open(f) && meta_folder(f)->opens) return meta_goal_words(goal, sizeof goal, GOAL_FOLDER, f);
 	bool cross = false;
 	for (int n = 1; n <= 5; ++n) cross |= meta_cross_open(n);
-	if (!cross) return "Delete a Cross Navi: Cross start";
-	if (meta_threat_open() < THREAT_MAX) {
-		snprintf(goal, sizeof goal, "Win on threat %d for threat %d", meta_threat_open(), meta_threat_open() + 1);
-		return goal;
-	}
+	if (!cross) return meta_goal_words(goal, sizeof goal, GOAL_CROSS, 0);
+	if (meta_threat_open() < THREAT_MAX) return meta_goal_words(goal, sizeof goal, GOAL_THREAT, meta_threat_open());
 	return NULL;
 }
