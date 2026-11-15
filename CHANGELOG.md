@@ -38,6 +38,10 @@
   your saves and your run kept. Elsewhere the line opens the download
   page. Options' Game page has an **Updates** switch to turn the look
   off.
+- **The Jukebox's Unused section.** The songs BN5's and BN4's
+  cartridges hold but never play, listed by their numbers, were in a
+  section called More, and their "Song 07" rows read as unfinished. The
+  section is called Unused now.
 
 ## 0.21.2 (2026-11-14)
 
