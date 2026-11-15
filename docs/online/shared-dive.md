@@ -228,8 +228,8 @@ Verified on `dev`, 15 November 2026:
   this game's link broken) takes his MegaMan off the field (his HP 0) and
   stops the hashes: each game then finishes its own battle. Seen headless
   with two games on a local server at layer 3's guardian of week 2966's
-  seed (BN4's AquaMan moved into BN6's engine, his next version for two: 1000 HP, 1200), `--dev partyend=600,
-  partybot=1` on both (the Arena's bot's keys as each game's pad, the
+  seed (BN4's AquaMan moved into BN6's engine, his next version for two:
+  1000 HP, 1200), `--dev partyend=600,partybot=1` on both (the Arena's bot's keys as each game's pad, the
   guardian at 1 HP at iteration 600): both ready with `69d5611be9442d5d`,
   21 hashes agreed on each (frames 60 to 1260), the battle over at frame
   1261 in both, won. Run again with `partydelay=1`, the frames mostly
@@ -240,6 +240,11 @@ Verified on `dev`, 15 November 2026:
   killed partway (`partyend=900`): 7 hashes agreed to frame 420, Alpha
   told "seat 1 gone" at frame 476, Beta's MegaMan off the field, Alpha
   fighting on alone until AquaMan deleted him at 658 (his run over).
+  Three games (Alpha, Beta, Gamma; AquaMan two versions up for three,
+  1800 HP), the aim passed in turn, the bots' keys: every seat ready with
+  `802688165d7ce459`, 9 hashes agreed on each of the three (to frame 540,
+  `efcc26a4d7355d52` there), all three MegaMen deleted at frame 586 in
+  all three games, lost, their runs over.
 - **The end into each run** (15 November 2026, `director_party_over`):
   BN6's results on the party's core, then won or lost and this seat's
   MegaMan's HP as the field last saw it written into the run; won, the
@@ -318,9 +323,9 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
    its spawn (`BN6_SPAWN_ENTITIES`), so a MegaMan cannot be added to a
    battle already begun. The offer likely has to come as the encounter
    starts, the owner's battle waiting a moment for the answer.
-2. **One field against a guardian.** Four MegaMen stand and fight on one
-   GBA (the spike, above). Open: what the enemies aim at, so the
-   guardian's attacks can spread over the party.
+2. **One field against a guardian.** Built (As built, above), the
+   guardian's aim passed over the party in turn. Open: the partners' own
+   NaviStats, hands and Custom screens on the field, and the turn's length.
 3. **The version ladder** for BN5's and BN4's Navis and for guardians
    with no SP of their own.
 4. **A linked fighter in a party**: whether they count in its size, and

@@ -532,6 +532,8 @@ void party_play_frame(uint32_t pad) {
 	if (PP.core) party_core_sound(PP.core, PP.stage >= PP_FIGHT);
 }
 
+/* the party's field, or while it is made and the others come, the staging's
+ * last picture of the run's own core */
 void party_play_draw(void) {
-	if (PP.core && PP.stage >= PP_FIGHT) arena_view_core(party_core_video(PP.core));
+	arena_view_core(PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 }
