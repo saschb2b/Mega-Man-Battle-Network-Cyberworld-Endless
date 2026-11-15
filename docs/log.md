@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/glitch-layer.md (Glitchier: the glitch thickens towards the heart, the music drags and stalls with the flips, the sky flips with the floor, the copy's body glitches between its forms), rom/sound.md (the music player's tempo fields), rom/graphics.md (LoadBGAnimData named and called by a flip), code/director.md (`glitch_music.c`), code/layer.md (`glitch_objs.c`).
+* **Update**: world/level-design/side-pieces.md (BN4's Park Area's row and what it sets round its floors: nothing a rule can take, its second layer its overpasses and its Navi's hub's centrepiece, the behind cut's 21 groups no thing, the scenery cut none, the rest roads, rims and the owner's kinds).
 * **Update**: world/level-design/side-pieces.md (BN4's ACDC Area measured: no thing on, beside, behind or under its floors; a row in the area table and a section on what its layers leave beside their floors).
 * **Update**: world/level-design/side-pieces.md (Central Area's row, and a section on what its maps set round their floors: nothing a layer can carry, the capsule a shop, the rest floor art or the owner's kinds).
 * **Update**: world/level-design/side-pieces.md (what stands in a walled hole: End Area's pagoda cut whole and stood as its layers' landmark, the area's row, End Area's survey and why the cut behind a floor fits nowhere), world/level-design/props.md (End Area's landmark row), code/net-and-map.md (sides.c's line).
