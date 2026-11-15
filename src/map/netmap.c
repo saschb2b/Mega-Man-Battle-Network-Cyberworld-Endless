@@ -375,6 +375,18 @@ static int road_look(int x, int y) {
 	return picking && roads && x < MAP_W && y < MAP_H && road[y][x] && ground(nm_kind(x, y)) && walkway(x, y) ? TILE_ROAD : 0;
 }
 
+/* TILE_PAD where cell (x, y) is a pad's, in the pads' look (with a
+ * context, whatever their look: the neighbourhoods legal.c asks after).
+ * While the tiles are picked, on a floor drawn as one and told by shape,
+ * a pad's cell the legalizer wore to a walkway's shape, in no 2 x 2 block
+ * of floor, is drawn as a walkway: in the pads' look it took a hub's
+ * panels, their orange middles beside BN5's Oran Area's circuits
+ * (docs/world/level-design/oran-tiles.md). */
+static int pad_at(int x, int y, const void *ctx) {
+	if (!nm_cur->pad || !nm_cur->pad[y * nm_cur->gw + x] || !(pad_look || ctx)) return 0;
+	return picking && by_shape && apart == NET_APART_NONE && walkway(x, y) ? 0 : TILE_PAD;
+}
+
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_raw(int A, int B, const void *ctx) {
@@ -383,7 +395,7 @@ static int floor_raw(int A, int B, const void *ctx) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (nm_kind(x, y) != K_RAISED) return TILE_VOID;
 	} else if (!ground(nm_kind(x, y))) return TILE_VOID;
-	int pad = nm_cur->pad && nm_cur->pad[y * nm_cur->gw + x] && (pad_look || ctx) ? TILE_PAD : 0;
+	int pad = pad_at(x, y, ctx);
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
 	if (apart == NET_APART_PADS ? pad : apart == NET_APART_PLATFORMS && !walkway(x, y) && has_middle(x, y)) pad |= TILE_APART;

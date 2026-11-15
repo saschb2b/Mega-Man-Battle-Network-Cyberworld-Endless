@@ -424,6 +424,21 @@ do with them.
   at such an arrow). So a road that ends at a room on a layer is ours
   ([Roads on the way](../world/level-design/roads.md)).
 
+## BN5's Oran Area: a dock or a circuit at every hub side (15 November 2026)
+
+Whether a generated hub may show a side with nothing beside it, as
+[Oran Area's tiles](../world/level-design/oran-tiles.md) asks.
+
+- **No hub side of Oran Area 2 meets void** (verified: the map's panels
+  as the learner reads them, the dev atlas's `src_b23_90_3.txt`, beside
+  its picture). Of its eleven hubs' 44 sides, 40 meet an olive circuit or
+  a dock, a pale stone plate one panel long; the other four meet brown
+  planks or an arrow panel, by eye.
+- **Its docks are floor** (verified: the walls of 0x90:3's coordinate
+  data read at every panel with `area_src_walled_floor`, which puts each
+  dock panel inside the walls' rings, as the circuits'). In play: assumed
+  MegaMan steps onto them, not seen.
+
 ## The Battle Lab (11 November 2026)
 
 For [the Battle Lab](../game/battle-lab.md):

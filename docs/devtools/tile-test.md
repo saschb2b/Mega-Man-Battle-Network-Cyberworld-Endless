@@ -459,6 +459,7 @@ wrong.
 | BN5 dark 8 | 72 | 63 | 77 | not taken: a Liberation Mission's board, not measured as one |
 | BN4 ACDC | 259 | 234 | 274 | not taken: its rooms in pieces |
 | BN4 countries | 91 | (whole today) | 84 | **rules** |
+| BN5 Oran | 332 | (whole today) | 303 | **rules but 4, one floor** (15 November 2026: 271 with its hubs no longer drawn apart, 241 with hub cells worn to circuits drawn as circuits, [Oran Area's tiles](../world/level-design/oran-tiles.md)) |
 
 (Breaks per 100 panels. The areas left out moved by less than a twentieth,
 or rose: the Aquarium 56 to 156 whole, the Judge Tree 42 to 68, Robot
