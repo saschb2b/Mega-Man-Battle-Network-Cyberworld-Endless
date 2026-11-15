@@ -270,6 +270,9 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
 /* map m's free-standing pieces, unless the area sets none (TILES_NO_SCENERY) */
 static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, na->scenery_reach, &L->decor);
+	/* (and, where its background is its own tiles, what its second layer
+	 * draws over its floor: Mr. Weather Comp's low clouds, decor.h) */
+	if (!(na->styles & TILES_NO_SCENERY) && na->bg_in_map) decor_learn_floating(m, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) (na->sides & 8 ? sides_learn_under : sides_learn)(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);
