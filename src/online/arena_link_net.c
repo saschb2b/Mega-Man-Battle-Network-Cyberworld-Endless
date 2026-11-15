@@ -215,8 +215,8 @@ static bool take_from(ArenaNetLink *l, unsigned seat, const uint8_t *data, size_
 	 * the link holds breaks it) */
 	if (frame != s->next) { breaks(l, "the other player's keys came out of order"); return true; }
 	if (s->next + count - s->polled > ARENA_NET_PEER) { breaks(l, "the other player's keys came too far ahead"); return true; }
-	/* (a partner's stream keeps its sixteen bits: his picks, arena_team_custom.h) */
-	uint16_t mask = seat < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK;
+	/* (a partner's stream keeps its sixteen bits: his picks, arena_team_custom.h; a party's seats 1-3 each a partner) */
+	uint16_t mask = (l->party ? seat >= 1 : seat >= 2) ? ARENA_PARTNER_MASK : ARENA_KEYS_MASK;
 	for (unsigned i = 0; i < count; ++i) s->keys[(frame + i) & (ARENA_NET_PEER - 1)] = keys[i] & mask;
 	s->next += count;
 	return true;

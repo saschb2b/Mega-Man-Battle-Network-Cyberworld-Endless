@@ -9,6 +9,9 @@
 
 #include "arena_loadout.h"
 #include "arena_pair.h"
+#include "arena_team_custom.h"
+#include "arena_team_navi.h"
+#include "arena_team_navicust.h"
 #include "bn6.h"
 #include "bytes.h"
 #include "core_boot.h"
@@ -16,6 +19,7 @@
 #include "free_space.h"
 #include "hook.h"
 #include "soulunite.h"
+#include "team_shape.h"
 #include "xinstall_log.h"
 
 #define READY_MOST 1200   /* frames from the boot's net to the battle's first Custom screen, at most */
@@ -121,12 +125,39 @@ static void field_set(PartyField *f, const PartyBattle *b) {
 	f->quiet = b->quiet;
 	f->scripted = b->scripted;
 	f->spread = b->spread;
+	f->own = b->own && b->n > 1;
 	f->foe_from = b->foe_from;
 	f->foe_to = b->foe_to;
 	f->end = b->end;
 	for (unsigned k = 0; k < b->n && k < PARTY_MOST; ++k) {
 		f->hp[k] = b->seat[k].hp ? b->seat[k].hp : b->seat[k].max_hp;
 		f->max_hp[k] = b->seat[k].max_hp;
+	}
+}
+
+/* each partner's own MegaMan for his record, his deck and his Custom screen
+ * (arena_team_navi.h, arena_team_custom.h), the same on every game: his
+ * NaviCust compiled by BN6 over the kept boot (his loadout's numbers where
+ * it cannot be), his folder */
+static void partners_given(const PartyBattle *b) {
+	for (unsigned p = 0; p < TEAM_PARTNERS; ++p) {
+		const OnlineLoadout *l = p + 1 < b->n ? &b->seat[p + 1] : NULL;
+		arena_team_navi_compiled(p, NULL);
+		arena_team_navi_loadout(p, 0, 0, NULL);
+		arena_team_custom_folder(p, l ? l->folder : NULL, l ? l->regular : 0, l ? l->tag : NULL);
+		if (!l) continue;
+		uint8_t stats[BN6_BATTLE_NAVI_SIZE];
+		char why[96];
+		if (team_navicust_compile(K.state, K.size, l, stats, why, sizeof why)) {
+			arena_team_navi_compiled(p, stats);
+			fprintf(stderr, "party: partner %u's NaviCust compiled by BN6: HP %u, Custom %u, buster %u %u %u\n", p + 1,
+				(unsigned)get16(stats + BN6_NS_MAX_HP), stats[BN6_NS_CUSTOM], stats[BN6_NS_ATTACK] + 1u, stats[BN6_NS_SPEED] + 1u,
+				stats[BN6_NS_CHARGE] + 1u);
+			continue;
+		}
+		const uint8_t buster[3] = { l->attack, l->speed, l->charge };
+		arena_team_navi_loadout(p, l->max_hp, l->base_hp, buster);
+		fprintf(stderr, "party: partner %u's NaviCust not compiled (%s): his loadout's HP and buster\n", p + 1, why);
 	}
 }
 
@@ -167,6 +198,9 @@ PartyCore *party_core_open(const uint8_t *rom, size_t size, const uint8_t *run_r
 	if (!arena_loadout_install(&m, &b->seat[0], why, wn)) { party_core_close(pc); return NULL; }
 	HookCore *hc = hook_core(pc->core);
 	pc->forcing = true;
+	/* (the partners side 0's slots 1-3 on this core, their own MegaMen given: team_shape.h) */
+	if (hc) team_shape_party(hook_slot_of(pc->core), pc->field.own, &pc->field.swapped);
+	if (pc->field.own) partners_given(b);
 	if (!hc || !xlog_hook_core(pc->core) || !soulunite_held_core(pc->core, b->seat[0].souls) || !party_field_hooks(hc, &pc->field) || !party_field_aim(hc, &pc->field) ||
 		!hook_on(hc, BN6_ENCOUNTER_CHECK, forced, pc)) {
 		fail(pc, why, wn, "the party's core's hooks could not be set");
@@ -184,6 +218,7 @@ void party_core_close(PartyCore *pc) {
 	if (pc->core) {
 		emu_audio_drop_from(pc->core);
 		soulunite_held_core(pc->core, 0);
+		team_shape_party(hook_slot_of(pc->core), false, NULL);
 		hook_detach(pc->core);
 		arena_core_free(pc->core);
 	}
@@ -199,9 +234,20 @@ static void seen_hp(PartyCore *pc) {
 	}
 }
 
+/* (as a hook of the field's core runs: the partners' words of the frame
+ * into their turns, the keys their battle takes into the field's) */
+static void partners_frame(void *user) {
+	PartyCore *pc = user;
+	uint16_t words[TEAM_PARTNERS], out[TEAM_PARTNERS];
+	for (unsigned p = 0; p < TEAM_PARTNERS; ++p) words[p] = pc->field.keys[p + 1];
+	arena_team_custom_party(words, (unsigned)pc->field.n - 1u, out);
+	for (unsigned p = 0; p < TEAM_PARTNERS; ++p) pc->field.keys[p + 1] = out[p];
+}
+
 void party_core_frame(PartyCore *pc, const uint16_t keys[PARTY_MOST]) {
 	struct mCore *c = pc->core;
 	memcpy(pc->field.keys, keys, sizeof pc->field.keys);
+	if (pc->field.own && pc->field.standing) hook_run_on(c, partners_frame, pc);
 	c->setKeys(c, keys[0]);
 	c->runFrame(c);
 	++pc->frames;
@@ -224,6 +270,8 @@ uint64_t party_core_hash(PartyCore *pc) {
 	const PartyField *f = &pc->field;
 	const uint32_t kept[] = { (uint32_t)f->standing, f->tick, pc->frames };
 	hash_more(&hash, kept, sizeof kept);
+	/* (the partners' folders, which no core holds: their decks are dealt from them) */
+	if (f->own) hash = team_custom_hash(hash, (unsigned)f->n - 1u);
 	return hash ? hash : 1;
 }
 
@@ -286,6 +334,19 @@ unsigned party_core_foe_hp(PartyCore *pc) {
 }
 
 const uint32_t *party_core_video(const PartyCore *pc) { return pc->video; }
+
+struct mCore *party_core_gba(PartyCore *pc) { return pc->core; }
+
+unsigned party_core_deck(PartyCore *pc, unsigned seat, uint16_t out[BN6_DECK_SIZE]) {
+	return seat && seat <= TEAM_PARTNERS && pc->field.own ? arena_team_custom_deck(pc->core, seat - 1, out) : 0;
+}
+
+bool party_core_picking(PartyCore *pc, unsigned seat) {
+	return seat && seat <= TEAM_PARTNERS && pc->field.own && arena_team_custom_picking(pc->core, seat - 1);
+}
+
+unsigned party_core_clock(PartyCore *pc) { return arena_team_custom_clock_of(pc->core); }
+
 
 void party_core_sound(PartyCore *pc, bool heard) {
 	if (heard) {

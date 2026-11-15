@@ -105,6 +105,9 @@ void hook_post(const HookRegs *r, int kind);
 int hook_slot(void);
 /* ... and a core's own, between frames (-1: none attached) */
 int hook_slot_of(struct mCore *core);
+/* `fn` run between frames as a hook of `core` runs: hook_read8 and the rest,
+ * hook_slot and what hooks keep, its; false where the core has no hooks */
+bool hook_run_on(struct mCore *core, void (*fn)(void *user), void *user);
 /* What hooks keep between two of their calls, one a core: an array of
  * HOOK_CORES entries of `each` bytes indexed by hook_slot, named once as
  * its hooks are installed (the same array again is no second), so that a

@@ -18,10 +18,10 @@
 #include "encounter.h"
 #include "free_space.h"
 #include "online_mail.h"
-#include "online_snapshot.h"
 #include "online_visit.h"
 #include "online_transport.h"
 #include "party_core.h"
+#include "party_turn.h"
 #include "rom.h"
 #include "souls.h"
 #include "stands_wire.h"
@@ -89,6 +89,7 @@ static void send_over(bool won) {
 }
 
 static void stop(void) {
+	party_turn_reset();
 	party_core_close(PP.core);
 	party_core_close(PP.twin);
 	party_core_snap_free(PP.snap);
@@ -240,7 +241,10 @@ static bool all_here(void) {
 static void open_core(void) {
 	char why[160] = "";
 	PP.b.quiet = PP.net;
-	PP.b.scripted = !PP.net;
+	/* (over the server each partner his own NaviStats, hand and Custom screen; the dev's stood-in partners a script, or with
+	 * partybot=1 each his own screen on this game, the bot's keys on it) */
+	PP.b.own = PP.b.n > 1 && (PP.net || PP.dev.bot);
+	PP.b.scripted = !PP.net && !PP.b.own;
 	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
@@ -348,7 +352,9 @@ static uint16_t key_at(unsigned k, uint32_t f, bool *guess) {
 	if (f < to) return PP.real[k][f % RING];
 	if (PP.gone >> k & 1u) return 0;
 	*guess = true;
-	return to > PP.delay ? PP.real[k][(to - 1) % RING] : 0;
+	/* (his last keys; never a message of his Custom screen again, which comes once) */
+	uint16_t last = to > PP.delay ? PP.real[k][(to - 1) % RING] : 0;
+	return party_turn_guess(last);
 }
 
 /* frame f on the field, a guess where a seat's keys have not come; the
@@ -439,21 +445,35 @@ static void send_mine(uint16_t mine) {
 	}
 }
 
-/* partybot=1: the Arena's bot's keys (arena_bot_keys) on the party's field */
-static uint16_t bot(uint32_t tick) {
+/* partybot=1: a bot's keys on the party's field: on the Custom screen the
+ * chip under the cursor taken and the cursor a chip right every 20 frames
+ * (BN6 takes the chips that fit, and at last OK), then charged shots and
+ * now and then A, a chip used */
+static uint16_t bot(uint32_t tick, unsigned seat) {
 	if (party_core_phase(PP.core) == BN6_PHASE_CUSTOM) {
-		uint32_t t = tick % 160;
-		if (t >= 40 && t < 100) return (t - 40) % 12 < 4 ? KEY_RIGHT : 0;
-		return t >= 100 && t < 104 ? KEY_A : 0;
+		uint32_t t = tick % 20;
+		return t < 2 ? KEY_A : t >= 10 && t < 12 ? KEY_RIGHT : 0;
 	}
-	return tick % 120 < 100u + 4 * PP.seat ? KEY_B : 0;
+	uint32_t t = (tick + 37u * seat) % 120;
+	return t < 100u + 4 * seat ? KEY_B : t >= 114 && t < 118 ? KEY_A : 0;
+}
+
+/* seat's stream's word for the frame: a partner's own turn's (party_turn.h) where the field gives him one, else his keys */
+static uint16_t word_of(unsigned seat, uint32_t pad, uint32_t tick) {
+	uint16_t keys = (uint16_t)((PP.dev.bot ? bot(tick, seat) : pad) & ARENA_KEYS_MASK);
+	if (!PP.b.own || seat == 0 || !PP.core) return keys;
+	return party_turn_word(PP.core, PP.run_rom, seat, keys, PP.dev.bot != 0);
 }
 
 static void fight_frame(uint32_t pad) {
-	uint16_t mine = (uint16_t)((PP.dev.bot ? bot(PP.tick) : pad) & ARENA_KEYS_MASK);
+	/* (the dev's game alone: the bot's clock the field's frames, as no keys are sent) */
+	uint16_t mine = word_of(PP.seat, pad, PP.net ? PP.tick : party_core_frames(PP.core));
 	if (!PP.net || PP.alone) {
 		uint16_t keys[PARTY_MOST] = { 0 };
 		keys[PP.seat] = mine;
+		/* (the dev's stood-in partners with their own screens: each his words, the bot's keys) */
+		for (unsigned k = 0; !PP.net && PP.b.own && k < PP.b.n; ++k)
+			if (k != PP.seat) keys[k] = word_of(k, 0, party_core_frames(PP.core));
 		step(keys);
 		return;
 	}
@@ -495,6 +515,8 @@ static void results_frame(uint32_t pad) {
 		if (PP.seat == 0) send_over(won);
 	}
 	party_core_sound(PP.core, false);
+	for (unsigned k = 1; PP.b.own && k < PP.b.n; ++k)
+		if (k == PP.seat || !PP.net) party_turn_report(k);
 	bool on = PP.on;
 	stop();
 	PP.on = on;
@@ -535,5 +557,8 @@ void party_play_frame(uint32_t pad) {
 /* the party's field, or while it is made and the others come, the staging's
  * last picture of the run's own core */
 void party_play_draw(void) {
-	arena_view_core(PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
+	const uint32_t *turn = PP.core && PP.stage == PP_FIGHT ? party_turn_video(PP.seat) : NULL;
+
+	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 }
+

@@ -33,9 +33,12 @@ typedef struct {
 	bool quiet;                           /* no field log */
 	bool scripted;                        /* the partners' keys the spike's script (--dev partycore alone) */
 	bool spread;                          /* the enemies' aim passed over the party in turn (party_field_aim) */
+	bool own;                             /* each partner his own NaviStats, hand and Custom screen (team_shape.h): his
+	                                         seat's keys his battle keys or his screen's picks (arena_team_custom.h) */
 	int end;                              /* the enemies set to 1 HP at this iteration (the dev's partyend), 0 never */
 } PartyBattle;
 
+struct mCore;
 typedef struct PartyCore PartyCore;
 
 /* The boot to the net, kept for every party battle after: run in slices
@@ -82,5 +85,15 @@ unsigned party_core_foe_hp(PartyCore *pc);
  * sound into the game's (true) or dropped */
 const uint32_t *party_core_video(const PartyCore *pc);
 void party_core_sound(PartyCore *pc, bool heard);
+
+/* The field's own GBA (between frames: a partner's screen is copied from it) */
+struct mCore *party_core_gba(PartyCore *pc);
+/* A partner's (seat 1-3) deck as the field dealt it, the order drawn
+ * (0 before it is dealt, or no partners' own); whether his turn is open */
+unsigned party_core_deck(PartyCore *pc, unsigned seat, uint16_t out[BN6_DECK_SIZE]);
+bool party_core_picking(PartyCore *pc, unsigned seat);
+/* The turn's clock: frames since its first OK (0 none) */
+unsigned party_core_clock(PartyCore *pc);
+
 
 #endif

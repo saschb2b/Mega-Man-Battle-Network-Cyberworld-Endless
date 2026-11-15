@@ -20,16 +20,19 @@
 #include "soullife.h"
 #include "soulunite.h"
 #include "team_check.h"
+#include "team_shape.h"
 
-#define SIDES     2
+#define PARTNERS  TEAM_PARTNERS
 #define FOLDER    BN6_FOLDER_ENTRIES
 #define NONE8     0xFFu
 #define NONE16    0xFFFFu
 #define POWER_COMPUTED 1000   /* a record's power from here on is a routine's number (BN6_CHIP_COMPUTED_POWER) */
 #define SOUL_COLONEL   7      /* BN5's Soul 7, ColonelSoul: the one whose button takes a chip (arena_team_soul.h) */
 
-/* A side's room in RAM_TEAM_CUSTOM, the same in both cores (our own
- * layout, not the game's): */
+/* A partner's room, the same in every core (our own layout, not the
+ * game's): the Arena's in RAM_TEAM_CUSTOM, a side's each; a party's three
+ * in RAM_TEAM_ROOMS, whose RAM_TEAM_LINK no party's field reads (it runs
+ * no link): */
 #define ROOM_SIZE  0x38
 #define R_DECK     0x00   /* his deck: folder indices in the order drawn, NONE8 past the last */
 #define R_STATE    0x1E   /* his turn: ST_* */
@@ -52,23 +55,31 @@
  * open with them in; closed before they came */
 enum { ST_CLOSED, ST_OPEN, ST_IN, ST_WAITING };
 
-_Static_assert(RAM_TEAM_CUSTOM + SIDES * ROOM_SIZE <= RAM_TEAM_CUSTOM_END, "the partners' decks and turns past their room");
+_Static_assert(RAM_TEAM_CUSTOM + TEAM_ARENA * ROOM_SIZE <= RAM_TEAM_CUSTOM_END, "the partners' decks and turns past their room");
+_Static_assert(RAM_TEAM_ROOMS + TEAM_PARTNERS * ROOM_SIZE <= RAM_TEAM_ROOMS_END, "a party's partners' decks and turns past their room");
 _Static_assert(R_PICKS + TEAM_CUSTOM_PICKS <= R_TAKE_AT && R_TAKE + TEAM_CUSTOM_PICKS <= R_DEALT && R_WAIT + 2 <= R_CROSS && R_LIMIT < ROOM_SIZE,
 	"a partner's turn's fields overlap");
 
 static struct {
-	bool given[SIDES];                /* his folder given (a carried MegaMan's), else read from his side's GBA */
-	uint16_t folder[SIDES][FOLDER];   /* the folder dealt (given, or read as the deck was dealt) */
-	uint8_t regular[SIDES], tags[SIDES][2];
-	uint32_t seed[SIDES][SIDES];      /* the seed each GBA's RNG gave, by the side dealt: what the output says */
-	unsigned dealt[SIDES], said[SIDES], late[SIDES], set[SIDES], taken[SIDES], chips[SIDES], limits[SIDES];
-	unsigned held[SIDES];             /* the most frames his side's GBA held for him in a turn */
-	unsigned crosses[SIDES], pas[SIDES];   /* his Crosses and Program Advances said */
-	TeamAllowed allowed[SIDES];       /* what his MegaMan holds, as every game was given it: what his messages may say */
-	unsigned refused[SIDES];          /* his messages refused by team_check.h's rules, every core's */
+	bool given[PARTNERS];                /* his folder given (a carried MegaMan's), else read from his side's GBA */
+	uint16_t folder[PARTNERS][FOLDER];   /* the folder dealt (given, or read as the deck was dealt) */
+	uint8_t regular[PARTNERS], tags[PARTNERS][2];
+	uint32_t seed[PARTNERS][2];          /* the seed each GBA's RNG gave, by the partner dealt: what the output says */
+	unsigned dealt[PARTNERS], said[PARTNERS], late[PARTNERS], set[PARTNERS], taken[PARTNERS], chips[PARTNERS], limits[PARTNERS];
+	unsigned held[PARTNERS];             /* the most frames his side's GBA held for him in a turn */
+	unsigned crosses[PARTNERS], pas[PARTNERS];   /* his Crosses and Program Advances said */
+	TeamAllowed allowed[PARTNERS];       /* what his MegaMan holds, as every game was given it: what his messages may say */
+	unsigned refused[PARTNERS];          /* his messages refused by team_check.h's rules, every core's */
 } C;
 
-static uint32_t room(unsigned side) { return RAM_TEAM_CUSTOM + (side & 1u) * ROOM_SIZE; }
+/* partner p's room on the core in hook slot `slot` (a party's, or the Arena's) */
+static uint32_t room_of(int slot, unsigned p) {
+	return team_shape_is_party_of(slot) ? RAM_TEAM_ROOMS + (p % PARTNERS) * ROOM_SIZE : RAM_TEAM_CUSTOM + (p & 1u) * ROOM_SIZE;
+}
+/* ... from a hook */
+static uint32_t room(unsigned p) { return room_of(hook_slot(), p); }
+/* ... of a core between frames */
+static uint32_t room_in(struct mCore *c, unsigned p) { return room_of(hook_slot_of(c), p); }
 
 static uint8_t get8(struct mCore *c, uint32_t at) { return (uint8_t)c->rawRead8(c, at, -1); }
 static uint16_t get16(struct mCore *c, uint32_t at) { return (uint16_t)c->rawRead16(c, at, -1); }
@@ -77,7 +88,7 @@ static void put8(uint32_t at, uint8_t v) { hook_write8(at, v); }
 static void put16(uint32_t at, uint16_t v) { hook_write16(at, v); }
 
 void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t regular, const uint8_t tags[2]) {
-	side &= 1u;
+	if (side >= PARTNERS) return;
 	C.given[side] = folder != NULL;
 	if (!folder) return;
 	memcpy(C.folder[side], folder, sizeof C.folder[side]);
@@ -87,13 +98,17 @@ void arena_team_custom_folder(unsigned side, const uint16_t *folder, uint8_t reg
 }
 
 void arena_team_custom_allow(unsigned side, const TeamAllowed *allowed) {
-	side &= 1u;
+	if (side >= PARTNERS) return;
 	if (allowed) C.allowed[side] = *allowed;
 	else memset(&C.allowed[side], 0, sizeof C.allowed[side]);
 }
 
 void arena_team_custom_begin(void) {
-	for (uint32_t a = RAM_TEAM_CUSTOM; a < RAM_TEAM_CUSTOM_END; a += 4) hook_write32(a, 0);
+	bool party = team_shape_is_party();
+	/* (both end at the rooms' end: the Arena's turns are its last part) */
+	uint32_t from = party ? RAM_TEAM_ROOMS : RAM_TEAM_CUSTOM;
+	_Static_assert(RAM_TEAM_CUSTOM_END == RAM_TEAM_ROOMS_END, "the Arena's turns end the rooms");
+	for (uint32_t a = from; a < RAM_TEAM_ROOMS_END; a += 4) hook_write32(a, 0);
 }
 
 static unsigned chip_id(uint16_t e) { return chip_entry_id(e); }
@@ -113,7 +128,7 @@ static void lead_folder(struct mCore *c, unsigned side) {
 
 /* (each side's GBA's core, as the pair last handed it a frame: his lead's folder read from it as his deck is dealt, a
  * folder that stays as it is for the battle, so that a core dealing before or after its partner reads the same) */
-static struct mCore *side_core[SIDES];
+static struct mCore *side_core[TEAM_ARENA];
 
 void arena_team_custom_sampled(struct mCore *core, unsigned side) { side_core[side & 1u] = core; }
 
@@ -129,11 +144,12 @@ static uint32_t xorshift(uint32_t *s) {
  * shuffle ours, seeded by his side's GBA's random number as the deck is
  * dealt (both GBAs keep it alike), so that every client and spectator
  * deals the same */
-static void deal(unsigned side, bool second) {
-	if (!C.given[side] && side_core[side]) lead_folder(side_core[side], side);
+/* the Arena's stood-in partners' folders as the dev's flags open them (never a party's field, nor over the network) */
+static void dev_folder(unsigned side) {
+	if (team_shape_is_party() || arena_seats_net()) return;
 	/* (teampa=1: side 0's partner's folder opens with Cannon A, B and C as its Regular chip and TagChips, dealt first: a Program
 	 * Advance in his first hand; over the network his own game gives his folder so instead, arena_seats_pa_folder) */
-	if (dev.team_pa && side == 0 && !arena_seats_net()) {
+	if (dev.team_pa && side == 0) {
 		for (unsigned i = 0; i < 3; ++i) C.folder[side][i] = chip_entry(BN6_CHIP_CANNON, i);
 		C.regular[side] = 0;
 		C.tags[side][0] = 1;
@@ -141,12 +157,18 @@ static void deal(unsigned side, bool second) {
 	}
 	/* (teamunite=2: each stood-in partner's folder opens with Atk+10 *, a Plus chip that lights NumberSoul: a UNITE of three
 	 * turns where the Souls held have it; 3 with RockCube *, an Obstacle, ColonelSoul's) */
-	if ((dev.team_unite == 2 || dev.team_unite == 3) && !arena_seats_net()) {
+	if (dev.team_unite == 2 || dev.team_unite == 3) {
 		C.folder[side][0] = chip_entry(dev.team_unite == 2 ? BN6_CHIP_ATK10 : BN6_CHIP_ROCKCUBE, 26);
 		C.regular[side] = 0;
 		C.tags[side][0] = C.tags[side][1] = NONE8;
 	}
+}
+
+static void deal(unsigned side, bool second) {
+	if (!C.given[side] && !team_shape_is_party() && side_core[side & 1u]) lead_folder(side_core[side & 1u], side);
+	dev_folder(side);
 	uint8_t deck[FOLDER], n = 0, fixed = 0;
+
 	bool used[FOLDER] = { false };
 	uint8_t first[3] = { C.regular[side], NONE8, NONE8 };
 	if (C.tags[side][0] < FOLDER && C.tags[side][1] < FOLDER) { first[1] = C.tags[side][0]; first[2] = C.tags[side][1]; }
@@ -174,7 +196,7 @@ static void deal(unsigned side, bool second) {
 
 static unsigned deck_left(struct mCore *c, unsigned side) {
 	unsigned n = 0;
-	while (n < FOLDER && get8(c, room(side) + R_DECK + n) != NONE8) ++n;
+	while (n < FOLDER && get8(c, room_in(c, side) + R_DECK + n) != NONE8) ++n;
 	return n;
 }
 
@@ -222,12 +244,12 @@ static const char *picks_checked(unsigned side, const uint8_t *slots, unsigned n
 }
 
 unsigned arena_team_custom_deck(struct mCore *c, unsigned side, uint16_t out[30]) {
-	side &= 1u;
-	if (!c || !get8(c, room(side) + R_DEALT)) return 0;
+	if (!c || side >= PARTNERS || !get8(c, room_in(c, side) + R_DEALT)) return 0;
 	unsigned n = deck_left(c, side);
-	for (unsigned i = 0; i < n; ++i) out[i] = C.folder[side][get8(c, room(side) + R_DECK + i) % FOLDER];
+	for (unsigned i = 0; i < n; ++i) out[i] = C.folder[side][get8(c, room_in(c, side) + R_DECK + i) % FOLDER];
 	return n;
 }
+
 
 /* his side's screen closed and his picks in: set for the battle loop's
  * next iteration, taken out of his deck */
@@ -271,6 +293,11 @@ static void commit(unsigned side) {
 /* his Soul's message (index 1, his UNITE) or ColonelSoul's chip (2 and 3), checked: a Soul refused takes the proxy form with it */
 static void soul_said(unsigned side, unsigned index, unsigned slot, bool second) {
 	const char *why;
+	/* (a party's field has no Souls of a partner's yet: docs/online/shared-dive.md, As built) */
+	if (team_shape_is_party()) {
+		refuse(side, "Soul", "not on a party's field");
+		return;
+	}
 	if (index == 1) {
 		unsigned soul = slot & 0xFu, chaos = slot >> 4 & 1u;
 		why = team_check_soul(soul, chaos, soulunite_held_bit((int)soul), &C.allowed[side], team_soul_used(side));
@@ -278,7 +305,7 @@ static void soul_said(unsigned side, unsigned index, unsigned slot, bool second)
 	} else {
 		uint16_t hand[TEAM_CHECK_DEALT];
 		unsigned dealt = hand_dealt(side, hand);
-		uint32_t o = hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
+		uint32_t o = hook_read32(team_partner_slot(side));
 		bool colonel = team_soul_next(side) == SOUL_COLONEL || (o >= BN6_EWRAM && o < BN6_EWRAM_END && soul_id_of(o) == SOUL_COLONEL);
 		why = team_check_soul_chip((index - 2) << 8 | (slot & 0xFFu), colonel, hand, dealt);
 	}
@@ -298,7 +325,7 @@ static void pick_said(unsigned side, uint16_t value, bool second) {
 		/* (the Soul his UNITE committed, said after it: into his own Souls block, arena_team_soul.h) */
 		if (index) soul_said(side, index, slot, second);
 		else {
-			const char *why = team_check_form(slot, &C.allowed[side]);
+			const char *why = team_shape_is_party() ? "not on a party's field" : team_check_form(slot, &C.allowed[side]);
 			if (why) {
 				refuse(side, "Cross", why);
 				return;
@@ -337,7 +364,7 @@ static void pick_said(unsigned side, uint16_t value, bool second) {
 
 /* a turn begun: picks that never came for the last one dropped */
 static void turn_open(unsigned side, uint32_t r) {
-	team_soul_turn_open(side);
+	if (!team_shape_is_party()) team_soul_turn_open(side);
 	put8(r + R_STATE, ST_OPEN);
 	put8(r + R_PICKED, 0);
 	put8(r + R_OWED, 0);
@@ -363,7 +390,7 @@ void arena_team_custom_clock(void) {
 		/* (an OK this core sees: its own lead's, past it on its screen; a partner's, his picks in while his turn is open) */
 		unsigned mode = hook_read8(BN6_CUSTOM_MODE);
 		bool ok = mode == BN6_MODE_OK || mode == BN6_MODE_PA || mode == BN6_MODE_WAIT;
-		for (unsigned side = 0; side < SIDES && !ok; ++side) ok = hook_read8(room(side) + R_STATE) == ST_IN;
+		for (unsigned p = 0, n = team_partners(); p < n && !ok; ++p) ok = hook_read8(room(p) + R_STATE) == ST_IN;
 		if (!ok) return;
 		hook_write8(RAM_TEAM_CLOCK + 2, 1);
 	}
@@ -389,8 +416,15 @@ static void limit_frame(unsigned side, uint32_t r) {
 	printf("arena2v2: side %u's GBA at the turn's limit, %u frames after its first OK: his picks none, said in his place\n", side, t);
 }
 
-uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
-	side &= 1u;
+/* partner p on the field: his object there, HP left (from a hook) */
+static bool standing(unsigned p) {
+	uint32_t o = hook_read32(team_partner_slot(p));
+	return o >= BN6_EWRAM && o < BN6_EWRAM_END && hook_read16(o + BN6_T1_HP);
+}
+
+/* partner p's turn as a frame of his side's comes with his word: his deck dealt, his turn opened, a message taken
+ * (`limit`: his side's GBA's limit said where it is due, the Arena's), his picks set once the screen has closed */
+static uint16_t turn_word(unsigned side, uint16_t word, bool second, bool limit) {
 	uint32_t r = room(side);
 	bool custom = hook_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, said = (word & TEAM_PICK_MARK) != 0;
 	if (custom && !hook_read8(r + R_DEALT)) deal(side, second);
@@ -399,10 +433,40 @@ uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
 	if (said) pick_said(side, word, second);
 	state = hook_read8(r + R_STATE);
 	if (custom && state == ST_OPEN && hook_read8(r + R_OWED)) held_frame(side, r);
-	if (custom && state == ST_OPEN && (hook_read8(BN6_BATTLE_SIDE) & 1u) == side) limit_frame(side, r);
+	if (custom && state == ST_OPEN && limit) limit_frame(side, r);
 	if (!custom && state == ST_IN) commit(side);
 	else if (!custom && state == ST_OPEN) put8(r + R_STATE, ST_WAITING);
 	return custom || said ? 0 : (uint16_t)(word & ARENA_KEYS_MASK);
+}
+
+uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second) {
+	side &= 1u;
+	return turn_word(side, word, second, (hook_read8(BN6_BATTLE_SIDE) & 1u) == side);
+}
+
+/* (a party's field, partner p's turn open at the turn's limit: his picks none, taken at once on every game alike, as the
+ * field's frames are; his own game sends the picks he has before it) */
+static void party_limit(unsigned p) {
+	uint32_t r = room(p);
+	if (hook_read8(BN6_BATTLE_PHASE) != BN6_PHASE_CUSTOM || hook_read8(r + R_STATE) != ST_OPEN || !hook_read8(r + R_DEALT)) return;
+	unsigned t = hook_read16(RAM_TEAM_CLOCK);
+	if (t < TEAM_TURN_LIMIT || hook_read8(r + R_LIMIT)) return;
+	put8(r + R_LIMIT, 1);
+	++C.limits[p];
+	printf("party: partner %u's turn at its limit, %u frames after its first OK: his picks none\n", p + 1, t);
+	pick_said(p, TEAM_PICK(0, 0, 0), false);
+}
+
+void arena_team_custom_party(const uint16_t words[TEAM_PARTNERS], unsigned n, uint16_t keys[TEAM_PARTNERS]) {
+	arena_team_custom_clock();
+	for (unsigned p = 0; p < TEAM_PARTNERS; ++p) {
+		keys[p] = 0;
+		if (p >= n) continue;
+		/* (a partner deleted, or gone, has no turn: his keys alone) */
+		if (!standing(p)) { keys[p] = (uint16_t)(words[p] & TEAM_PICK_MARK ? 0 : words[p] & ARENA_KEYS_MASK); continue; }
+		keys[p] = turn_word(p, words[p], false, false);
+		party_limit(p);
+	}
 }
 
 /* side's partner's picks into his hand at `h`, as BN6 writes a side's
@@ -452,7 +516,22 @@ unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, un
 	return k;
 }
 
+bool team_pa_found(const uint16_t *deck, unsigned dealt, const uint8_t *picks, unsigned n, uint16_t pa, const uint16_t *built,
+	unsigned *at, unsigned *took) {
+	uint16_t entries[TEAM_CUSTOM_PICKS];
+	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) entries[i] = picks[i] < dealt ? deck[picks[i]] : NONE16;
+	for (*took = 3; *took <= 4; ++*took)
+		for (*at = 0; *at + *took <= n; ++*at) {
+			TeamHand h;
+			unsigned k = team_hand_build(entries, n, *at + 1, *took, pa, &h), same = 1;
+			for (unsigned i = 0; i < BN6_HAND_MAX && same; ++i) same = (i < k ? h.id[i] : NONE16) == built[i] || i > k;
+			if (same) return true;
+		}
+	return false;
+}
+
 static void write_hand(unsigned side, uint32_t h, bool second) {
+
 	uint32_t r = room(side);
 	unsigned n = hook_read8(r + R_TAKEN), took = 0;
 	uint16_t entries[TEAM_CUSTOM_PICKS];
@@ -483,8 +562,8 @@ static void write_hand(unsigned side, uint32_t h, bool second) {
 	}
 }
 
-void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool second) {
-	for (unsigned side = 0; side < SIDES; ++side) {
+void arena_team_custom_take(uint32_t tick, const uint32_t hand[TEAM_PARTNERS], bool second) {
+	for (unsigned side = 0, n = team_partners(); side < n; ++side) {
 		uint32_t r = room(side);
 		uint16_t at = hook_read16(r + R_TAKE_AT);
 		if (!at || at != (uint16_t)tick || !hand[side]) continue;
@@ -494,31 +573,39 @@ void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool second) 
 	}
 }
 
-/* side's partner on the field: his object there, HP left (from a hook) */
-static bool standing(unsigned side) {
-	uint32_t o = hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER);
-	return o >= BN6_EWRAM && o < BN6_EWRAM_END && hook_read16(o + BN6_T1_HP);
-}
-
 bool arena_team_custom_holds(unsigned side) {
-	side &= 1u;
-	uint32_t r = room(side);
-	return hook_read8(r + R_DEALT) && hook_read8(r + R_STATE) == ST_OPEN && standing(side);
+	bool holds = false;
+	for (unsigned p = 0, n = team_partners(); p < n && !holds; ++p) {
+		uint32_t r = room(p);
+		holds = team_partner_side(p) == (side & 1u) && hook_read8(r + R_DEALT) && hook_read8(r + R_STATE) == ST_OPEN && standing(p);
+	}
+	return holds;
 }
 
 uint8_t arena_team_custom_cross(unsigned side) { return hook_read8(room(side & 1u) + R_CROSS); }
 void arena_team_custom_cross_taken(unsigned side) { hook_write8(room(side & 1u) + R_CROSS, 0); }
 
-void arena_team_custom_owe(unsigned side, bool owed) { hook_write8(room(side & 1u) + R_OWED, owed); }
-bool arena_team_custom_owed(unsigned side) { return hook_read8(room(side & 1u) + R_OWED) != 0; }
-
-bool arena_team_custom_lead_waits(struct mCore *c, unsigned side) { return c && get8(c, room(side & 1u) + R_OWED); }
-bool arena_team_custom_picking(struct mCore *c, unsigned side) {
-	return c && get8(c, room(side & 1u) + R_DEALT) && get8(c, room(side & 1u) + R_STATE) == ST_OPEN;
+/* (a side's hold: each of its partners' rooms holds the mark) */
+void arena_team_custom_owe(unsigned side, bool owed) {
+	for (unsigned p = 0, n = team_partners(); p < n; ++p)
+		if (team_partner_side(p) == (side & 1u)) hook_write8(room(p) + R_OWED, owed);
 }
 
-uint64_t arena_team_custom_hash(uint64_t h) {
-	for (unsigned side = 0; side < SIDES; ++side) {
+bool arena_team_custom_owed(unsigned side) {
+	for (unsigned p = 0, n = team_partners(); p < n; ++p)
+		if (team_partner_side(p) == (side & 1u) && hook_read8(room(p) + R_OWED)) return true;
+	return false;
+}
+
+bool arena_team_custom_lead_waits(struct mCore *c, unsigned side) { return c && get8(c, room_in(c, side) + R_OWED); }
+bool arena_team_custom_picking(struct mCore *c, unsigned side) {
+	return c && side < PARTNERS && get8(c, room_in(c, side) + R_DEALT) && get8(c, room_in(c, side) + R_STATE) == ST_OPEN;
+}
+
+uint64_t arena_team_custom_hash(uint64_t h) { return team_custom_hash(h, TEAM_ARENA); }
+
+uint64_t team_custom_hash(uint64_t h, unsigned n) {
+	for (unsigned side = 0; side < n && side < PARTNERS; ++side) {
 		for (unsigned i = 0; i < FOLDER; ++i) h = (h ^ C.folder[side][i]) * UINT64_C(1099511628211);
 		h = (h ^ (C.regular[side] | (uint32_t)C.tags[side][0] << 8 | (uint32_t)C.tags[side][1] << 16)) * UINT64_C(1099511628211);
 	}
@@ -526,7 +613,8 @@ uint64_t arena_team_custom_hash(uint64_t h) {
 }
 
 void arena_team_custom_report(void) {
-	for (unsigned side = 0; side < SIDES; ++side)
+	for (unsigned side = 0; side < TEAM_ARENA; ++side)
+
 		printf("arena2v2: side %u's partner's own deck dealt %u times (%s folder; the seed %08X on the first GBA, %08X on the "
 			"second), his picks said %u times in his stream (%u after his side's Custom screen closed), set %u times (%u chips) "
 			"and taken into his hand %u times, every core's; his side's GBA held for him %u frames at most in a turn, %u times "

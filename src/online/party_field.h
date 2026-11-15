@@ -29,6 +29,7 @@ typedef struct {
 	int foe_from, foe_to;           /* the enemy spawning with foe_from HP given foe_to (the guardian's for the party) */
 	int hp_set, end;                /* the spike's: the partners' HP (partyhp), the enemies' HP set to 1 at an iteration (partyend) */
 	bool spread;                    /* the enemies' aim passed over the party in turn (party_field_aim) */
+	bool own;                       /* each partner his own NaviStats, hand and Custom screen (arena_team_navi.h, arena_team_custom.h) */
 	/* set before each frame */
 	uint16_t keys[PARTY_MOST];      /* each partner's keys (keys[0] the pad's, unused here) */
 	/* the battle's, which a rollback puts back with the core */
@@ -37,6 +38,7 @@ typedef struct {
 	uint16_t seen_hp[2][PARTY_MOST];   /* each side's actors' HP as last seen */
 	uint32_t seen_obj[2][PARTY_MOST];  /* ... and their objects */
 	unsigned swapped;               /* side 0's slot traded into its first while an enemy's routine runs (0 none) */
+	uint8_t seen_at[PARTY_MOST];    /* each partner's own hand's chip up next as last seen (the log's) */
 } PartyField;
 
 /* `f`'s hooks on `core`'s table (hook_core's): false where one was not

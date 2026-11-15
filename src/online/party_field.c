@@ -6,6 +6,9 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "arena_team_custom.h"
+#include "arena_team_navi.h"
+#include "arena_team_wait.h"
 #include "bn6.h"
 #include "bn6_link.h"
 #include "bytes.h"
@@ -16,7 +19,8 @@
  * NetBattle ever runs, and the spike is a dev flag's on the run's core) */
 #define LIST_MOST  ((RAM_TEAM_END - RAM_TEAM) / BN6_ENTITY_SIZE)   /* entries the grown list holds, its end among them */
 #define SIDE_MOST  4                                               /* BN6's actors a side (bn6f BATTLE_ACTORS_PER_SIDE) */
-#define PARTNER_KEYS (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)   /* a partner's: no hand, so no A; no Custom screen of his own */
+#define PARTNER_KEYS (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)   /* a partner's with no hand of his own: no A */
+#define OWN_KEYS     (PARTNER_KEYS | KEY_A)                                /* ... with his own (f->own): A uses his chip */
 #define AIM_TURN     240                                           /* the battle loop's iterations each MegaMan in turn draws the enemies' aim */
 
 _Static_assert(SIDE_MOST == PARTY_MOST, "a party is a side's actors");
@@ -78,7 +82,14 @@ static HookAct spawn(HookRegs *r, void *user) {
 	f->tick = 0;
 	memset(f->seen_hp, 0, sizeof f->seen_hp);
 	memset(f->seen_obj, 0, sizeof f->seen_obj);
+	memset(f->seen_at, 0xFF, sizeof f->seen_at);
 	say_list(f, list, len, added, count);
+	/* (the partners' own NaviStats and hands in their rooms, their decks and turns emptied: arena_team_navi.h, arena_team_custom.h) */
+	if (f->own) {
+		hook_write32(RAM_TEAM_TICK, 0);
+		arena_team_navi_begin();
+		arena_team_custom_begin();
+	}
 	return HOOK_CONTINUE;
 }
 
@@ -122,17 +133,38 @@ static void first_iteration(const PartyField *f) {
 	}
 }
 
+/* each partner's own hand as it changes (his picks in, a chip used), said in the log */
+static void hands_watch(PartyField *f, uint32_t tick) {
+	for (int k = 1; k < f->standing && k < SIDE_MOST; ++k) {
+		uint32_t h = arena_team_navi_hand((unsigned)k - 1);
+		uint8_t at = h ? hook_read8(h + BN6_HAND_AT) : 0xFF;
+		if (at == f->seen_at[k]) continue;
+		f->seen_at[k] = at;
+		if (f->quiet || !h) continue;
+		uint16_t chip = at < BN6_HAND_MAX ? hook_read16(h + BN6_HAND_CHIPS + 2u * at) : 0xFFFF;
+		printf("party: iteration %u: partner %d's own hand: chip up next %u (%03X), his lead's %u\n", (unsigned)tick, k, at, chip,
+			hook_read8(BN6_BATTLE_HAND + BN6_HAND_AT));
+	}
+}
+
 /* side 0's copy (r0 0): each partner's keys into his AI data as the copy
  * writes the player's */
+
 static HookAct keys(HookRegs *r, void *user) {
 	PartyField *f = user;
 	if (r->r[0] != 0 || f->standing < 2) return HOOK_CONTINUE;
 	uint32_t tick = ++f->tick;
+	/* (each partner's own Custom screen's picks into his own hand, at the iteration they were set for: arena_team_custom.h) */
+	if (f->own) {
+		hook_write32(RAM_TEAM_TICK, tick);
+		const uint32_t hands[TEAM_PARTNERS] = { arena_team_navi_hand(0), arena_team_navi_hand(1), arena_team_navi_hand(2) };
+		arena_team_custom_take(tick, hands, false);
+	}
 	for (int k = 1; k < f->standing && k < SIDE_MOST; ++k) {
 		uint32_t obj = actor(0, k);
 		uint32_t ai = obj ? hook_read32(obj + BN6_T1_AI_DATA) : 0;
 		if (!ai) continue;
-		uint16_t key = (uint16_t)((f->scripted ? scripted(k, tick) : f->keys[k] & PARTNER_KEYS) | BN6_KEYS_VALID);
+		uint16_t key = (uint16_t)((f->scripted ? scripted(k, tick) : f->keys[k] & (f->own ? OWN_KEYS : PARTNER_KEYS)) | BN6_KEYS_VALID);
 		uint16_t held = hook_read16(ai + BN6_AI_HELD);
 		hook_write16(ai + BN6_AI_LAST, held);
 		hook_write16(ai + BN6_AI_HELD, key);
@@ -140,6 +172,7 @@ static HookAct keys(HookRegs *r, void *user) {
 		hook_write16(ai + BN6_AI_UP, (uint16_t)(~key & held));
 	}
 	if (tick == 1) first_iteration(f);
+	if (f->own) hands_watch(f, tick);
 	if (f->end > 0 && tick == (uint32_t)f->end)
 		for (unsigned k = 0; k < SIDE_MOST; ++k) {
 			uint32_t obj = actor(1, (int)k);
@@ -201,8 +234,10 @@ bool party_field_aim(HookCore *core, PartyField *f) {
 
 bool party_field_hooks(HookCore *core, PartyField *f) {
 	return hook_on(core, BN6_SPAWN_ENTITIES, spawn, f) && hook_on(core, BN6_KEY_COPY, keys, f) &&
-		(f->foe_from <= 0 || f->foe_to == f->foe_from || hook_on(core, BN6_SPAWN_HP, spawned, f));
+		(f->foe_from <= 0 || f->foe_to == f->foe_from || hook_on(core, BN6_SPAWN_HP, spawned, f)) &&
+		(!f->own || (arena_team_navi_hooks(core, TEAM_PARTNERS, -1) && arena_team_wait_hooks(core)));
 }
+
 
 void party_field_install(int n, int hp, int end) {
 	static PartyField spike;

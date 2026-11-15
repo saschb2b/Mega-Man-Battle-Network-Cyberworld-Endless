@@ -114,6 +114,16 @@ int hook_slot_of(struct mCore *core) {
 	return c ? (int)(c - cores) : -1;
 }
 
+bool hook_run_on(struct mCore *core, void (*fn)(void *user), void *user) {
+	HookCore *c = core ? core_of(core->cpu) : NULL;
+	if (!c) return false;
+	HookCore *was = running;
+	running = c;
+	fn(user);
+	running = was;
+	return true;
+}
+
 /* ---- what hooks keep a core between calls, for a rollback ---- */
 
 #define KEPT_MAX 8

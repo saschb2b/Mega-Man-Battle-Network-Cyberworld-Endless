@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T09:15:00Z
+* **Update**: online/shared-dive.md (As built: the partners' own chips on the one field, the two-a-side's NaviStats, hands and Custom screen grown to three partners on side 0, each partner's turn on BN6's own screen on his own game and his picks in his seat's stream, seen with a stood-in partner and a twin core and rollbacks agreeing; Open's second item, issue #589), code/online.md (its row: `team_shape.c`, `party_turn.c`), engine/emulation/memory.md (`RAM_TEAM_ROOMS`, a party's three partners' rooms over the two-a-side's link words and turns), engine/emulation/free-space.md (the same, written by the plan's tool).

@@ -13,8 +13,10 @@
 #include "arena_team_navi.h"
 #include "bn6.h"
 #include "emu.h"
+#include "hook.h"
 #include "soullife.h"
 #include "soulunite.h"
+#include "xinstall_log.h"
 
 #define NONE16  0xFFFFu
 #define CROSSES 5   /* Gregar's, their flags from BN6_FLAG_HEAT_CROSS on */
@@ -32,7 +34,14 @@ struct TeamScreen {
 	uint32_t used;           /* ... those he has chosen this battle (BN6_CROSSES_USED's), kept from his last OK */
 	double ms, worst, copy, copy_worst;
 	unsigned frames, copies;
+	/* a party's (team_screen_one): one core, no cable */
+	struct mCore *one;
+	ArenaCoreSnap *one_snap;
+	uint32_t one_video[ARENA_W * ARENA_H];
 };
+
+/* the GBA his screen runs on */
+static struct mCore *gba(const TeamScreen *s) { return s->one ? s->one : arena_pair_core(s->pair, s->side); }
 
 static double since(uint64_t t) {
 	return (double)(SDL_GetPerformanceCounter() - t) * 1000.0 / (double)SDL_GetPerformanceFrequency();
@@ -62,7 +71,47 @@ void team_screen_free(TeamScreen *s) {
 	if (!s) return;
 	arena_pair_snap_free(s->snap);
 	arena_pair_close(s->pair);
+	arena_core_snap_free(s->one_snap);
+	if (s->one) {
+		emu_audio_drop_from(s->one);
+		hook_detach(s->one);
+		arena_core_free(s->one);
+	}
 	free(s);
+}
+
+TeamScreen *team_screen_one(const uint8_t *rom, size_t size, const uint8_t *field_rom, size_t field_size) {
+	TeamScreen *s = calloc(1, sizeof *s);
+	if (!s) return NULL;
+	/* (the field's ROM copy and the installs' hooks, as the party's core has them: BN5's and BN4's chips drawn as there) */
+	s->one = arena_core_new(rom, size, s->one_video, true);
+	if (!s->one || !arena_core_rom(s->one, field_rom, field_size) || !hook_core(s->one) || !xlog_hook_core(s->one) ||
+		!(s->one_snap = arena_core_snap_new(s->one))) {
+		team_screen_free(s);
+		return NULL;
+	}
+	return s;
+}
+
+bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n) {
+	uint64_t t = SDL_GetPerformanceCounter();
+	uint8_t rec[BN6_BATTLE_NAVI_SIZE];
+	bool own = arena_team_navi_record(field, p, rec);
+	if (!arena_core_snap_save(field, s->one_snap) || !arena_core_snap_load(s->one, s->one_snap)) return false;
+	struct mCore *c = s->one;
+	for (unsigned i = 0; i < BN6_DECK_SIZE; ++i) c->rawWrite16(c, BN6_BATTLE_DECK + 2 * i, -1, (uint16_t)(i < n ? deck[i] : NONE16));
+	/* (his own record as side 0's battle NaviStats there: BN6's screen deals his hand by his own Custom level) */
+	for (unsigned i = 0; own && i < BN6_BATTLE_NAVI_SIZE; ++i) c->rawWrite8(c, BN6_BATTLE_NAVI + i, -1, rec[i]);
+	/* (the Custom screen's phase at its first step: BN6 sets the screen up anew the next frame, its hand dealt from the deck) */
+	c->rawWrite8(c, BN6_BATTLE_STEP, -1, 0);
+	double took = since(t);
+	s->copy += took;
+	if (took > s->copy_worst) s->copy_worst = took;
+	++s->copies;
+	s->open = true;
+	s->pa = false;
+	s->mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1);
+	return true;
 }
 
 bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsigned n) {
@@ -103,16 +152,23 @@ bool team_screen_frame(TeamScreen *s, uint16_t keys, uint8_t *picks, unsigned *n
 	*n = 0;
 	if (!s->open) return false;
 	uint64_t t = SDL_GetPerformanceCounter();
-	uint16_t k[ARENA_LOOKAHEAD][2] = { { 0, 0 } };
-	k[0][s->side] = keys;
-	bool ran = arena_pair_step(s->pair, (const uint16_t (*)[2])k, false);
-	arena_pair_mute(s->pair);
+	bool ran = true;
+	if (s->one) {
+		s->one->setKeys(s->one, keys);
+		s->one->runFrame(s->one);
+		emu_audio_drop_from(s->one);
+	} else {
+		uint16_t k[ARENA_LOOKAHEAD][2] = { { 0, 0 } };
+		k[0][s->side] = keys;
+		ran = arena_pair_step(s->pair, (const uint16_t (*)[2])k, false);
+		arena_pair_mute(s->pair);
+	}
 	double ms = since(t);
 	s->ms += ms;
 	if (ms > s->worst) s->worst = ms;
 	++s->frames;
 	if (!ran) { s->open = false; return false; }
-	struct mCore *c = arena_pair_core(s->pair, s->side);
+	struct mCore *c = gba(s);
 	uint8_t mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1), was = s->mode;
 	s->mode = mode;
 	/* (his OK; where it made a Program Advance, BN6 shows it first: his hand is whole once the screen waits for the cable) */
@@ -132,7 +188,7 @@ bool team_screen_frame(TeamScreen *s, uint16_t keys, uint8_t *picks, unsigned *n
 }
 
 unsigned team_screen_picks(const TeamScreen *s, uint8_t *picks) {
-	struct mCore *c = arena_pair_core(s->pair, s->side);
+	struct mCore *c = gba(s);
 	unsigned picked = (unsigned)c->rawRead8(c, BN6_CUSTOM_PICKED, -1);
 	if (picked > TEAM_CUSTOM_PICKS) picked = TEAM_CUSTOM_PICKS;
 	for (unsigned i = 0; i < picked; ++i) picks[i] = (uint8_t)c->rawRead8(c, BN6_CUSTOM_PICKS + i, -1);
@@ -165,7 +221,8 @@ uint16_t team_screen_pa(const TeamScreen *s, uint16_t *built) {
 }
 
 void team_screen_close(TeamScreen *s) { s->open = false; }
-const uint32_t *team_screen_video(const TeamScreen *s) { return arena_pair_video(s->pair, s->side); }
+const uint32_t *team_screen_video(const TeamScreen *s) { return s->one ? s->one_video : arena_pair_video(s->pair, s->side); }
+
 bool team_screen_open_now(const TeamScreen *s) { return s && s->open; }
 double team_screen_ms(const TeamScreen *s, bool worst) { return worst ? s->worst : s->frames ? s->ms / s->frames : 0; }
 double team_screen_copy_ms(const TeamScreen *s, bool worst) { return worst ? s->copy_worst : s->copies ? s->copy / s->copies : 0; }

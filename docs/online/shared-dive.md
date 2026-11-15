@@ -352,10 +352,8 @@ Verified on `dev`, 15 November 2026:
   system but the New 3DS and the PSP stops saying `hello_no_arena`, so the
   server seats them on one field; `dive_party.c` hands a START of format
   `arena_party` to the party's core and a seat gone to it, and fights
-  `arena_linked` as before. Not yet: the partners' own NaviStats, hand and
-  Custom screen (the two-a-side's, one partner a side, to be grown to three
-  on side 0: a partner fights with his buster and his own HP, his B and
-  directions alone crossing), and a crew's join-in battles on one field.
+  `arena_linked` as before. Not yet: a crew's join-in battles on one
+  field (the partners' own chips, below).
 - **Who the enemies aim at** (15 November 2026, `party_field.c`'s
   `party_field_aim`): a probe first, side 0's first two slots of
   `BN6_BATTLE_PLAYERS` swapped at iteration 300 against BlastMan: his
@@ -377,6 +375,50 @@ Verified on `dev`, 15 November 2026:
   `partydelay=1`, AquaMan for two) 16 hashes agreed on each to the
   battle's end at frame 966, both bots' MegaMen struck and deleted, lost
   in both. The turn's length is a first pick, for the owner's eye.
+- **The partners' own chips** (15 November 2026, `team_shape.c`,
+  `party_turn.c`; the two-a-side's [NaviStats](arena/two-a-side/navistats.md),
+  [hands](arena/two-a-side/hands.md) and [Custom
+  screen](arena/two-a-side/custom-screen.md) grown from a partner a side to
+  three on side 0, not written again): `team_shape.c` names a core's
+  partners, the Arena's (partner p on side p, the side's second slot) or a
+  party's field's (side 0's slots 1-3, read through the aim's trade), and
+  `arena_team_navi.c` and `arena_team_custom.c` take a partner by it. Each
+  partner's record is his own MegaMan's NaviStats as BN6 compiles them from
+  his NaviCust over the party's kept boot (`team_navicust_compile`, the
+  two-a-side's, the same on every game), in the fourth kind's last three
+  slots (the Arena's last two); his deck is dealt from his own folder as
+  the field's first Custom screen opens and lives in the field's RAM
+  (`RAM_TEAM_ROOMS`, which holds the Arena's link words and turns where a
+  NetBattle runs: a party's field runs no link, so its three partners'
+  rooms take the span); his folder is folded into the field's hash. His
+  Custom screen is BN6's own on a core of his own game
+  (`team_screen_one`: the field copied in, his deck and record written
+  as side 0's, the screen's step put back so BN6 deals his hand and runs
+  its rules), shown while his turn is open; only his picks cross, as the
+  two-a-side's do (`TEAM_PICK`, a Program Advance's `TEAM_PA`), in his
+  seat's stream (a party's seats 1-3 keep sixteen bits,
+  `arena_link_net.c`), one a frame, never guessed again. Every game takes
+  them at the same frame of the field: as each frame begins
+  (`hook_run_on`, a hook of the field's core between frames) each
+  partner's word goes to his turn (`arena_team_custom_party`), his picks
+  set once the field's screen has closed and written into his own hand at
+  the battle loop's next iteration; A then uses his chip. The lead's OK
+  waits for the partners still picking through the two-a-side's hold on
+  the screen's packet (`arena_team_wait.c`), 30 seconds at most after the
+  first OK, then his picks none. Seen headless with `--dev
+  partycore=2,partytwin=1,partyroll=30,partybot=1` at layer 3's guardian
+  of `--seed 3` (BlastMan, 400 HP; partybot=1 now stands each partner in
+  with his own screen on this game): partner 1's NaviCust compiled (HP
+  100, Custom 5), his screen open at the field's frame 1 with his 30-chip
+  deck, his OK's three picks (0C0, 09A, 036) said, his own hand taking
+  them at iteration 1 while the lead's held its own, his first chip used
+  at iteration 4831 (his hand's next 0 to 1, the lead's at 2); the twin
+  core agreed at every 60th frame and every 30-frame rollback ran again to
+  the same hash to the battle's end at frame 6176 (308 checks, none
+  apart), lost. Not yet seen: two or three games on the server (the
+  driver to bring several games to one door is to write), a partner's own
+  turn held past the lead's OK, a Program Advance of a partner's, his Cross
+  and Souls (refused on a party's field for now: the Arena's).
 
 ## The spike: four on one field (15 November 2026)
 
@@ -417,8 +459,10 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
    battle already begun. The offer likely has to come as the encounter
    starts, the owner's battle waiting a moment for the answer.
 2. **One field against a guardian.** Built (As built, above), the
-   guardian's aim passed over the party in turn. Open: the partners' own
-   NaviStats, hands and Custom screens on the field, and the turn's length.
+   guardian's aim passed over the party in turn, each partner his own
+   NaviStats, hand and Custom screen. Open: the turn's length, a partner's
+   Cross and Souls, and the over-the-server proof of the partners' chips.
+
 3. **The version ladder** for BN5's and BN4's Navis and for guardians
    with no SP of their own.
 4. **A linked fighter in a party**: whether they count in its size, and
