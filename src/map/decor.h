@@ -25,6 +25,12 @@ typedef struct {
  * pixels under a floor's lower edges that are its own, its faces and what
  * hangs there (0: 44). */
 void decor_learn(const AreaSrc *a, bool bg_in_map, int reach, DecorBook *out);
+/* Adds what map `a`, whose background is its own tiles (NetAreaDef.bg_in_map:
+ * decor_learn reads its first layer alone), draws over its floor on its
+ * second layer: whole groups of its tiles nine tenths over ground floor
+ * and on no raised floor (Mr. Weather Comp's low clouds; its walkable
+ * ones lie on floor at height 64), each look once. */
+void decor_learn_floating(const AreaSrc *a, DecorBook *out);
 void decor_free(DecorBook *b);
 /* Sets some pieces into the layers of a tw x th tile map (layer 1 after
  * layer 0's cells), on empty tiles near its floor, chosen by `seed`; how
