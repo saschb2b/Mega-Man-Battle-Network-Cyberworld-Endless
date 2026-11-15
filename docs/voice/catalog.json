@@ -1253,6 +1253,10 @@
    "comment": "A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled).",
    "line": 434
   },
+  "pet_text:pet_saved_text": {
+   "header": "The PET's own box after its Save (no face: no character speaks of a save, docs/voice/rules.md), which the next A closes as BN6's save screen's last words are closed (pet.c)",
+   "line": 620
+  },
   "pet_text:records_text": {
    "comment": "Every guardian met, in any run, with how their battles went, a line each, and whose code MegaMan holds",
    "line": 328
@@ -2441,7 +2445,7 @@
    "comment": "The PET's KeyItem and E-Mail screens with the run's own words (docs/game/pet.md, docs/rom/).",
    "domain": "The PET",
    "kind": "speech",
-   "lines": 58,
+   "lines": 59,
    "shows": [
     "screenshots/pet-mail.png",
     "screenshots/bbs.png",
@@ -2948,7 +2952,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2398,
+  "boxes": 2399,
   "domains": {
    "Arena": {
     "files": [
@@ -3162,9 +3166,9 @@
      "src/core/xchips_text.c",
      "src/director/pet_text.c"
     ],
-    "flagged": 1,
-    "lines": 64,
-    "speech": 21
+    "flagged": 2,
+    "lines": 65,
+    "speech": 22
    },
    "The ROMs screen": {
     "files": [
@@ -3229,7 +3233,7 @@
     "speech": 13
    }
   },
-  "flagged": 141,
+  "flagged": 142,
   "flags": {
    "beats": 3,
    "box-words": 8,
@@ -3238,7 +3242,7 @@
    "comma-space": 10,
    "line-long": 16,
    "long-speech": 47,
-   "meta": 6,
+   "meta": 7,
    "pages": 23,
    "paren": 1,
    "prog-caps": 1,
@@ -3363,7 +3367,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 2180,
+  "lines": 2181,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3682,20 +3686,21 @@
    "PET": {
     "bangs_per_box": 0.0,
     "bn6": null,
-    "boxes": 5,
+    "boxes": 6,
     "dots_per_box": 0.0,
-    "end_ask": 0.2,
+    "end_ask": 0.17,
     "end_bang": 0.0,
     "end_dots": 0.0,
     "openers": [
      "A",
      "Lan",
      "Our",
+     "Run",
      "So",
      "Stop"
     ],
     "stutters": "never",
-    "words_per_box": 10.2
+    "words_per_box": 8.8
    },
    "Players": {
     "bangs_per_box": 0.0,
@@ -3820,7 +3825,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1526
+  "speech": 1527
  },
  "version": 1,
  "conversations": [
@@ -4079,6 +4084,7 @@
   {"container":"pet_text:mail_body","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:mail_body","line":442,"lines":["pet_text:mail_body:0"],"speakers":["Dad"],"title":"A guardian's mail","when":"A guardian's mail: Dad's face and words, then MegaMan's, the warning as he logged it (the briefing's: the tip's boxes, \"|@M \" apart), in BN6's own mail form (a face set up with FC 06 and F5 02/03, the box opened with E8 10; the map chat's F5/E8 00 drew the mail as a chat box, its banner garbled)."},
   {"container":"pet_text:lab_mail_text","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:lab_mail_text","line":466,"lines":["pet_text:lab_mail_text:0"],"speakers":["PET"],"title":"Dad's mail on the Battle Lab","when":"Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned): what the lab made, where it waits and when MegaMan is there (the mail comes on a layer, and a playtester looked for a way home mid-act to reach it, session 77), then what it holds so far"},
   {"container":"pet_text:install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:install_mails.subjects","line":485,"lines":["pet_text:install_mails.subjects:0","pet_text:install_mails.subjects:3","pet_text:install_mails.subjects:4"],"speakers":["Screen"],"title":"Install mails: subjects","when":""},
+  {"container":"pet_text:pet_saved_text","domain":"The PET","file":"src/director/pet_text.c","id":"pet_text:pet_saved_text","line":620,"lines":["pet_text:pet_saved_text:0"],"speakers":["PET"],"title":"The PET's own box after its Save","when":"The PET's own box after its Save (no face: no character speaks of a save, docs/voice/rules.md), which the next A closes as BN6's save screen's last words are closed (pet.c)"},
   {"container":"xchips_text:xchips_text_desc","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc","line":8,"lines":["xchips_text:xchips_text_desc:0","xchips_text:xchips_text_desc:1","xchips_text:xchips_text_desc:2"],"speakers":["Screen"],"title":"Xchips text desc: its description, three lines as the folder's box shows them","when":"Its description, three lines as the folder's box shows them (nine letters at most, as BN6's own)"},
   {"container":"xchips_text:xchips_text_desc4","domain":"The PET","file":"src/core/xchips_text.c","id":"xchips_text:xchips_text_desc4","line":12,"lines":["xchips_text:xchips_text_desc4:0","xchips_text:xchips_text_desc4:1","xchips_text:xchips_text_desc4:2"],"speakers":["Screen"],"title":"Xchips text desc4","when":""},
   {"container":"square_words:square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","id":"square_words:square_keeper_options","line":6,"lines":["square_words:square_keeper_options:0","square_words:square_keeper_options:1"],"speakers":["MegaMan"],"title":"Square keeper options","when":""},
@@ -5268,6 +5274,7 @@
   {"boxes":[{"pages":[["Dive report"]],"speaker":"Screen","text":"Dive report"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:0","kind":"screen","line":485,"speaker":"Screen","speakers":["Screen"],"text":"Dive report","text_hash":"10723cf513aa"},
   {"boxes":[{"pages":[["Endless Net"]],"speaker":"Screen","text":"Endless Net"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:3","kind":"screen","line":485,"speaker":"Screen","speakers":["Screen"],"text":"Endless Net","text_hash":"55f7c0f022a0"},
   {"boxes":[{"pages":[["Battle Lab"]],"speaker":"Screen","text":"Battle Lab"}],"container":"install_mails.subjects","domain":"The PET","file":"src/director/pet_text.c","flags":[],"id":"pet_text:install_mails.subjects:4","kind":"screen","line":485,"speaker":"Screen","speakers":["Screen"],"text":"Battle Lab","text_hash":"5147aeebc0eb"},
+  {"boxes":[{"flags":[{"at":"saved","code":"meta"}],"pages":[["Run saved."]],"speaker":"PET","text":"Run saved."}],"container":"pet_saved_text","domain":"The PET","file":"src/director/pet_text.c","flags":["meta"],"id":"pet_text:pet_saved_text:0","kind":"speech","line":620,"speaker":"PET","speakers":["PET"],"text":"Run saved.","text_hash":"a05913956f6b"},
   {"boxes":[{"flags":[{"at":"4 lines","code":"pages"}],"pages":[["{k}{name}'s","Cross data... We"],["already brought his","Cross!"]],"speaker":"MegaMan","text":"{k}{name}'s Cross data... We already brought his Cross!"}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":["pages"],"id":"powers_words:powers_reward_words:0","kind":"speech","line":23,"placeholders":[{"name":"k","spec":"%s"},{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M {name}'s Cross data... We already brought his Cross!","text_hash":"f2e09e342630"},
   {"boxes":[{"pages":[["{k}{name}'s","Cross data... We","keep our {brought}."]],"speaker":"MegaMan","text":"{k}{name}'s Cross data... We keep our {brought}."}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":[],"id":"powers_words:powers_reward_words:1","kind":"speech","line":31,"note":"(said as the net's fact, not a rule's: \"One Cross a run!\" put the game's word in MegaMan's mouth; and said as settled, the brought one kept: \"It won't fit beside our SlashCross\" read to a playtester as an offer to swap, which never came, session 64. That a first win opens its start for the next dive is the setup's to show, never MegaMan's: the voice sweep, docs/voice/sweep/net.md; one box since the main path's words cut)","placeholders":[{"name":"k","spec":"%s"},{"name":"name","spec":"%s"},{"name":"brought","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{k}@M {name}'s Cross data... We keep our {brought}.","text_hash":"9fdea9f58057"},
   {"boxes":[{"pages":[["{k}Grrrr...!"]],"speaker":"MegaMan","text":"{k}Grrrr...!"},{"pages":[["L-Lan... The Nest is","calling to the","Cybeast in me!"]],"speaker":"MegaMan","text":"L-Lan... The Nest is calling to the Cybeast in me!"},{"pages":[["Easy,MegaMan! You've","kept it in check all","along!"]],"speaker":"Lan","text":"Easy,MegaMan! You've kept it in check all along!"},{"pages":[["...Right. I won't","let it take","over,Lan."]],"speaker":"MegaMan","text":"...Right. I won't let it take over,Lan."}],"container":"powers_reward_words","domain":"Powers","file":"src/director/powers_words.c","flags":[],"id":"powers_words:powers_reward_words:2","kind":"speech","line":37,"note":"(the Nest's call, and Lan's word, no unlocking: the beast stirs here, and its power comes once MegaMan has beaten it at the Nest, issue #109; a run that brought BeastOut hears the same)","placeholders":[{"name":"k","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan","Lan"],"text":"{k}@B Grrrr...!|@M L-Lan... The Nest is calling to the Cybeast in me!|@L Easy,MegaMan! You've kept it in check all along!|@M ...Right. I won't let it take over,Lan.","text_hash":"2e845a68fd4f"},

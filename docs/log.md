@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/pet.md (the PET's Save ends on a box of its own, "Run saved.", and A is kept from the map until it is up: a playtester's next A took a Guardian Data).
 * **Update**: game/bosses/sequence.md (after a guardian: the map drops his Boss mark, his data takes no A in its first second, its crystal goes as its boxes close, the sealed exit pad draws over the second layer, BN4's Town Area's pale floor having hidden it).
 * **Update**: world/level-design/nebula-tiles.md (new: BN5's Nebula Area's plates drawn as plain platform floor, lay 31 | 64, 273 to 211 breaks per 100 panels), devtools/tile-test.md (Nebula's row in Each area's laying; CopyBot Comp's and BN4's Town Area's kinds of break measured, looked at and what was tried), world/level-design/index.md (its line).
 * **Add**: devtools/npc-anims.md (`build.py npc-anims`: every NPC in another game's sprite, each animation our code tells it to play against the sprite copied into the core; CosmoMan's blank facings on a dark layer's board found and turned to the camera). **Update**: devtools/index.md (its line), code/dev.md (`npc_anims.c`), code/layer.md (`npc_sprite.c`: a talker stands in a facing its sprite draws and turns only where it draws BN6's four turns, a guardian turns to the camera where his sprite draws nothing his way, a log-in his sprite lacks is the beam's).
