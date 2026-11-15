@@ -15,6 +15,7 @@
 #include "gamecall.h"
 #include "loot.h"
 #include "run.h"
+#include "weekly.h"
 
 #define CREW_SALT 0xC3E5B47Du   /* the crew's battles' draws, apart from every other aside's */
 
@@ -29,7 +30,9 @@ static void no_gem(Encounter *e) {
 	e->nobj = n;
 }
 
-Encounter director_crew_battle(int index) {
+bool dive_battles(void) { return weekly_on(); }
+
+Encounter dive_battle(int index) {
 	uint32_t saved = rng_state();
 	LootMemory fought, none = LOOT_MEMORY_NONE;
 	loot_memory(&fought);
@@ -39,6 +42,11 @@ Encounter director_crew_battle(int index) {
 	Encounter e = loot_random_battle(run.depth, run.biome, encounter_kind(index), run.layer_seed, index);
 	loot_memory_set(&fought);
 	rng_restore(saved);
+	return e;
+}
+
+Encounter director_crew_battle(int index) {
+	Encounter e = dive_battle(index);
 	no_gem(&e);
 	fprintf(stderr, "crew battle %d on depth %d (layer seed %08x):", index, run.depth, (unsigned)run.layer_seed);
 	for (int i = 0; i < e.nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e.foes[i].kind, e.foes[i].family, e.foes[i].version, e.foes[i].col, e.foes[i].row);

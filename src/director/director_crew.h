@@ -19,8 +19,9 @@ int director_crew_index(void);
 /* The layer's random battle `index` as every game on the layer makes it:
  * its kind by the index, rolled from the layer's seed and the index, the
  * run's own draws and its memory of the battles fought left aside (the
- * run's own roll draws on both, so two divers' n-th battles differ); no
- * Mystery Data on its field, whose row is a record's own */
+ * run's own roll draws on both): a dive's own battle (dive_battle,
+ * director_state.h) with no Mystery Data on its field, whose row is a
+ * record's own */
 Encounter director_crew_battle(int index);
 /* `e` the run's next battle, as the director keeps it (the party's core
  * reads its record; the battle's owner fights it alone where the field

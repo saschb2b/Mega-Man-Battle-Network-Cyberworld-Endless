@@ -200,6 +200,13 @@ int encounter_kind(int index) {
 }
 
 void roll_encounter(void) {
+	/* (a dive's: the layer's n-th battle the same for every diver, director_state.h) */
+	if (dive_battles()) {
+		Encounter e = dive_battle(D.battles);
+		if (dev.gem) loot_add_gem(&e);
+		set_encounter(&e, false);
+		return;
+	}
 	/* (a Glitch layer's battles harden as it comes apart: docs/game/glitch-layer.md) */
 	int depth = run.depth;
 	bool mixed = false;

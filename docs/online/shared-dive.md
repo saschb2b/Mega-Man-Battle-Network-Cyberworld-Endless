@@ -78,13 +78,18 @@ Verified on `dev`, 15 November 2026:
   layer's area comes from its depth (`layer_biome_at` in
   `src/director/director_layer.c`, `biome_for_depth`). So every diver on
   the week's seed at one depth and side stands on the same layer: its map
-  and its Mystery Data's places. Its n-th random battle is not the same
-  for every diver (found building the join-in battles, below):
-  `loot_random_battle` takes the layer's seed and the battle's number,
-  but the run's own roll (`make_encounter` in `src/core/loot.c`) draws on
-  the run's RNG and its memory of the battles fought, and `roll_encounter`
-  rolls again every few seconds on the map; a crew's battle is rolled
-  aside from both, from the layer's seed and its index.
+  and its Mystery Data's places. Its n-th random battle was not (found
+  building the join-in battles, below): the run's own roll
+  (`make_encounter` in `src/core/loot.c`) draws on the run's RNG and its
+  memory of the battles fought. On a dive it now is, the owner's call of
+  15 November 2026 (every diver the same course, a split the same
+  battle): `roll_encounter` takes a dive's battle from `dive_battle`
+  (`director_crew.c`), rolled aside from the layer's seed and its index
+  alone, the Glitch layer's hardening left out, so its rolls again every
+  few seconds give the same battle; a crew's battle is that one with no
+  Mystery Data on its field. Seen headless: two dives' layer 1 handed out
+  the same battles in the same order. A normal run's battles are rolled
+  as before.
   The ways that part the pack are the ones a run chooses: Lan's HP's
   portals (the act's area, the other way, the Undernet, a special route;
   [Lan's HP after an act](../world/home/lans-hp.md)), side layers, and a
@@ -284,8 +289,8 @@ Verified on `dev`, 15 November 2026:
 - **Busting splits** (15 November 2026, `dive_splits.c`): a battle on a
   dive layer won is told as DIVE split: its index among the layer's
   battles counted from 0 as the layer is entered (a crew's battle fought
-  on the party's core counted too; the n-th random battle is each diver's
-  own roll, the same only for a crew's, What it rests on above; a
+  on the party's core counted too; on a dive the n-th random battle is
+  the same for every diver, What it rests on above; a
   guardian's battle is index 255 for
   everyone, since each diver meets him after his own count of random
   ones), its time in tenths from BN6's DeleteTime (`BN6_BATTLE_TIMER`, 60

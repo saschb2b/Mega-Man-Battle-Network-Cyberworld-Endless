@@ -1354,8 +1354,8 @@ the stamp, and on the New 3DS, you get his calls and the board's post.
 #### The week's DeepNet
 
 Every Monday (00:00 UTC) each server opens a net of its own for the
-week, and everyone on that server who dives it dives the same net, from
-the same start: the short net, the Standard folder, threat 0, no helpers
+week, and everyone on that server who dives it dives the same net, its
+layers' random battles the same for everyone, from the same start: the short net, the Standard folder, threat 0, no helpers
 and no Cross, nothing your other runs unlocked. The portal in the
 welcome plaza, a purple vortex, offers it to a pass with the DeepNet
 stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
