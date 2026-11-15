@@ -2508,3 +2508,71 @@ The economy was the brief, and kai spent the session walking: when a
 session is meant to judge a system, its persona is pointed at it (a seed
 whose first layer's dealer is near the arrival, or a dev step) rather than
 left to reach it, and the walking is a report of its own.
+
+## Session 76: four bug hunters at once (kai5-kai8, 6/10 each; all four would keep playing and recommend it, warning of the walking)
+
+The owner asked for several playtesters hunting bugs ("things that are not
+smooth or behave weird") rather than a score. Four fresh profiles played
+the pinned build e2005dac6 (0.21.2+114) at once, each with a beat: kai5 a
+NEW GAME through act 1's second layer; kai6 the title, Options, SAVES,
+the PET, the town and three save round trips; kai7 a test start on layer
+4 (`--scene emu --run-depth 4 --dev hp=200`), then a new run; kai8 a test
+start on layer 7 (`--run-depth 7 --dev hp=300`), its loss screens, then a
+new run. 19 to 23 minutes and 195 to 285 calls each.
+
+Each finding went to a worktree session of its own (the owner's call),
+which verified it, fixed it and merged its PR; a sweep every 20 minutes
+merged what was green and archived what was done. Fixed: the map's key
+(#554), the reward pick's input guard (#553), SAVES' "Damaged" on a new
+profile (#558), the heal Mr.Prog's line (#559), `--dev hp` (#556), the
+fork read at an exit pad (#557), Chaud's call and ProtoMan's race words
+(#560), overlays under BN6's fades (#561), the Mystery Data counter
+(#562), story lines that follow the run's setup (#563, #574), the arrow in
+Lan's HP and its green way (#564), a quit after a won battle (#565), the
+dealer's and L's words (#566), the title's hints and best layer (#567,
+#578), RESULT's virus count (#569), the Jukebox's unused songs (#572),
+BN6's walkway mouths and pits (#573, #583), the Virus Battler's second
+talk (#575), the bystanders' PA whisper and DarkChip lines (#571), R at
+Lan's PC (#579), Powie out of ProtoMan's races (#581); the floors' tile
+passes (#570 Oran, #577 BN4's ACDC, #582 a net under every layer's tiles)
+and the other games' way shapes (#587) were in CI at the log's writing.
+
+Misreads and BN6's own: "Busting LV. ?" (BN6's 7 at 2x; the log said 7);
+the townsperson who "didn't talk" (outside BN6's reach each time);
+Powie's green landing pillar (BN5 draws it so); MegaMan over Navis
+(drawn by depth, as BN6); Full Synchro carried into the next battle
+(BN6's rule, written down in #555); the Battle Lab not found (it opens
+after three families' battle data: the patch notes didn't say so); LEFT
+from the Custom screen's first chip (likely BN6's wrap to OK, not
+checked).
+
+The floor holes were not a regression (v0.21.2 drew the same pixels) but
+old tile debt in the other games' areas, breaks per 100 panels: BN5's
+Oran 334, CopyBot 256, BN4's Town 250, BN5's Nebula 199, BN4's ACDC 193,
+BN6's own Comps about 2. CopyBot, BN4's Town and Nebula are left.
+
+Cost: about 1.2M tokens for the four testers and some 32 fix sessions;
+the machine's load reached 186 on 16 cores and sessions waited for it.
+
+Loop changes:
+
+- **Patch notes say when a feature first shows.** kai6 searched Lan's HP
+  for the Battle Lab on a fresh profile; a note that names a feature the
+  persona's save cannot reach yet says what opens it.
+- **A test start's dev options skew what they touch.** `--dev hp=N`
+  refilled MegaMan after every battle and made the HP box count up (two
+  testers reported both; #556 fixed the option). A prompt for a test
+  start says what it changed, and the triage discounts reports on it.
+- **A game the developers started can still be quit and continued.**
+  kai7 skipped its quit-and-CONTINUE tests, told never to start the game;
+  `persona_prompt.py --running` writes that prompt now (no start or fresh
+  while it runs, and how to stop and start it for CONTINUE).
+- **Parallel fixers need a merge discipline.** The sweep merged #573
+  while its session was still pushing the pit fill; it now merges only a
+  PR whose session is idle. #566's line broke every clang build, which
+  its own CI never built; the next PR that built iOS found it. A merge
+  that breaks a platform the PR left out is the merger's to fix at once,
+  with full CI dispatched on the fix's branch (#580).
+- **The machine caps the fan-out.** About 30 sessions drove the load past
+  180 and every build waited; about 15 at once is what this machine
+  carries well.
