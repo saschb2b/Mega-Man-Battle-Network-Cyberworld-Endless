@@ -379,6 +379,11 @@ MegaMan in front of the second layer there, so he walks in front of a
 bowl behind the edge he stands on. A Glitch flip into the Undernet sets
 them too, in the tiles' own pass (`pick_map`).
 
+Undernet Zero sets them too (`SIDES_BEHIND_FRONT` on its row). Its own map
+stands no bowl behind an edge, so it takes the Undernet's through
+`side_maps`, whose maps are cut for pieces behind a floor as well where the
+area sets the bit.
+
 Not set: the two bowls in the holes of Undernet 3's raised ring (0x95:2,
 at height 120), each in a hole a panel wide, a floor straight above it
 and none within 16 pixels below, so neither behind an edge nor under
