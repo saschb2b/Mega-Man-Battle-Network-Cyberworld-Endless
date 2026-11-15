@@ -264,8 +264,9 @@ own code runs them, our part is the run around it (`src/director/darkbn6.c`,
 - **The words.** MegaMan at a BN6 flame: what its dark power does, the
   BugFrag a use burns, the bug for the battle, the base chip without one,
   the 20 max HP, all of it a profile's first time and the rule after, then
-  the question on Yes, and where it goes. After a profile's first battle
-  its dark power ran in, what it took: the BugFrags, the bug gone with
+  the question on No, its options a moment after it, as BN5's flame asks
+  it ([DarkChips](darkchips.md)), and where it goes. After a profile's
+  first battle its dark power ran in, what it took: the BugFrags, the bug gone with
   the battle, the max HP that stays gone; then as BN5's battles say it.
   After a battle where one ran as its base chip, once a session: "With
   none to burn, that DrkSword was only a Sword." BN6's own words, run
