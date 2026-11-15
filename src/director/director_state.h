@@ -130,6 +130,8 @@ typedef struct {
 	bool pet_seen;         /* the PET's menus were open since the map was last quiet */
 	bool off_told;         /* ... and MegaMan has said, on this layer, that a program is off the board */
 	bool last_stop_told;   /* ... and named the Net Dealer and the heal before the guardian's arena */
+	bool heal_declined;    /* ... and MegaMan turned away from the heal the arrow led to: the way on is the exit's again until L (heal_turn_watch) */
+	int heal_near;         /* ... the shortest walk to that heal since, in panels plus one (0: none measured yet) */
 	bool fork_told;        /* ... and, at a fork's exit pad, read the layer past it (director_fork.c) */
 	bool final_told;       /* ... and, the short net's last guardian fallen, said the run is won */
 	int code_due;          /* a program whose compression code was entered for the first time in any run, until MegaMan says Dad keeps it (issue #50) */

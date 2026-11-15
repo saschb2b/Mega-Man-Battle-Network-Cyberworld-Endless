@@ -216,6 +216,11 @@ static void describe_pos(FILE *f) {
 			fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
 			goal_way();
 			fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
+			/* (the arrow's heal first, the shortest walk there since, or
+			 * MegaMan turned away from it: heal_turn_watch) */
+			int hx, hy;
+			if (heal_first(&hx, &hy)) fprintf(f, "heal first at %d %d, nearest %d\n", hx, hy, D.heal_near - 1);
+			else if (D.heal_declined) fprintf(f, "heal turned away from\n");
 			for (int y = cy - 4; y <= cy + 4; ++y) {
 				fprintf(f, "cells ");
 				for (int x = cx - 4; x <= cx + 4; ++x)
