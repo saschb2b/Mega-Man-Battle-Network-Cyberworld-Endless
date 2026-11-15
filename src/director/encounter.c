@@ -67,12 +67,12 @@ static int pays_record[2], pays_on;
  * roll gave (its own step counter and chance) becomes the engine's record. */
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
-	/* (the dev's battle step on a dive with the crew near: this roll a battle, as BN6's own would give one) */
-	if (!r->r[0] && roll_next && !quiet && !crew_held) {
-		roll_next = false;
-		r->r[0] = record;
-	}
-	if (!r->r[0]) return HOOK_CONTINUE;
+	/* (the dev's battle step on a dive with the crew near: this roll a
+	 * battle, as BN6's own would give one; the branch reads the flags the
+	 * roll left, so its way on is taken by hand, to StartBattle) */
+	bool step = !r->r[0] && roll_next && !quiet && !crew_held;
+	if (step) roll_next = false;
+	if (!r->r[0] && !step) return HOOK_CONTINUE;
 	/* (held: past StartBattle to the check's end, as no roll had come; a
 	 * crew's battle held so, told between frames, until it begins here or
 	 * is fought elsewhere: emu_encounter_go, emu_encounter_drop) */
@@ -82,7 +82,9 @@ static HookAct rolled(HookRegs *r, void *user) {
 		return HOOK_JUMP;
 	}
 	r->r[0] = record;
-	return HOOK_CONTINUE;
+	if (!step) return HOOK_CONTINUE;
+	r->r[12] = BN6_ENCOUNTER_START;
+	return HOOK_JUMP;
 }
 
 /* A battle now: from the check's first test (MegaMan on the map) straight

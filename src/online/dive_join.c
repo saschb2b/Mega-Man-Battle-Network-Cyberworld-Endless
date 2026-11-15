@@ -11,6 +11,7 @@
 #include "director.h"
 #include "director_crew.h"
 #include "dive_crew.h"
+#include "dive_splits.h"
 #include "dive_words.h"
 #include "emu.h"
 #include "encounter.h"
@@ -38,6 +39,7 @@ static struct {
 	char name[ONLINE_NAME_BYTES + 1];
 	uint32_t since;           /* the stage's start (ms) */
 	uint32_t battle;          /* its ARENA_STATE battle once taken */
+	int fought_from;          /* the layer's battles as it was taken (director_crew_index): one more once the field fought it */
 	uint32_t keys;
 } J;
 
@@ -97,10 +99,13 @@ static void alone(const char *why) {
 void dive_join_frame(const OnlineSnapshot *s) {
 	uint32_t now = SDL_GetTicks(), waited = now - J.since;
 	switch (J.stage) {
-	case JOIN_NONE:
-		emu_encounters_offer(free_here() && near(s, 0, NULL));
+	case JOIN_NONE: {
+		bool on = free_here() && near(s, 0, NULL);
+		if (on != emu_encounters_offering()) fprintf(stderr, "dive: %s\n", on ? "a crewmate near: a battle rolled is offered" : "no crewmate near");
+		emu_encounters_offer(on);
 		if (emu_encounter_held()) call();
 		break;
+	}
 	case JOIN_CALLING:
 		emu_encounters_offer(false);
 		if (waited > ONLINE_CREW_JOIN_MS + LATE_MS) alone("no answer");
@@ -113,7 +118,12 @@ void dive_join_frame(const OnlineSnapshot *s) {
 		if (waited > ONLINE_CREW_JOIN_MS + LATE_MS) { fprintf(stderr, "dive: the joined battle never started\n"); to(JOIN_NONE); }
 		break;
 	case JOIN_FIGHTING:
-		if (!party_play_crew_fighting()) { fprintf(stderr, "dive: the crew's battle over, back on the layer\n"); J.battle = 0; to(JOIN_NONE); }
+		if (!party_play_crew_fighting()) {
+			fprintf(stderr, "dive: the crew's battle over, back on the layer\n");
+			if (director_crew_index() > J.fought_from) dive_splits_fought();
+			J.battle = 0;
+			to(JOIN_NONE);
+		}
 		break;
 	default: break;
 	}
@@ -125,10 +135,16 @@ uint32_t dive_join_keys(uint32_t keys) {
 	/* (MegaMan stands still while his battle waits on the answer, or his join on its start) */
 	if (J.stage == JOIN_CALLING || J.stage == JOIN_JOINED) return 0;
 	if (J.stage != JOIN_OFFERED || emu_read8(BN6_CHATBOX) || talk_busy()) return keys;
+	/* (the window over before this frame's A: the server's offer is gone, and a join now would be for the owner's next) */
+	if (SDL_GetTicks() - J.since > ONLINE_CREW_JOIN_MS) {
+		to(JOIN_NONE);
+		return keys;
+	}
 	if (pressed & KEY_A) {
 		send(ONLINE_CREW_JOIN, J.owner, 0);
 		fprintf(stderr, "dive: jumping into %s's battle %d\n", J.name, J.index);
-		to(JOIN_JOINED);
+		/* (its wait counted from the offer: a join the server turned down as late holds MegaMan only so long) */
+		J.stage = JOIN_JOINED;
 		return 0;
 	}
 	return keys;
@@ -139,7 +155,9 @@ void dive_join_crew_state(const CrewState *c) {
 		if (J.stage == JOIN_CALLING) alone("nobody jumped in");
 		return;
 	}
-	if (c->stage != ONLINE_CREW_OFFER || J.stage != JOIN_NONE) return;
+	/* (an offer while one stood or was joined: the server's last, the earlier one over) */
+	if (c->stage != ONLINE_CREW_OFFER || (J.stage != JOIN_NONE && J.stage != JOIN_OFFERED && J.stage != JOIN_JOINED)) return;
+	if (J.stage != JOIN_NONE) to(JOIN_NONE);
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	const char *name = "";
@@ -169,6 +187,7 @@ static void take(const PartyState *p) {
 		return;
 	}
 	J.battle = p->battle;
+	J.fought_from = director_crew_index();
 	to(JOIN_FIGHTING);
 }
 

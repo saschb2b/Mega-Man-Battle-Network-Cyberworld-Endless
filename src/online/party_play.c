@@ -241,6 +241,11 @@ bool party_play_held(void) { return PP.stage != PP_NONE; }
 /* ---- the fight's frames ---- */
 
 static void failed(const char *why) {
+	/* (the server's party battle let go of, this seat gone: the others told, a later battle or queue not refused as busy) */
+	if (PP.net) {
+		uint8_t m[ONLINE_ARENA_BYTES];
+		if (!online_transport_send(m, arena_wire_action(m, ARENA_ACT_LEAVE, PP.battle, 0, 0))) fprintf(stderr, "party: the leave not sent\n");
+	}
 	if (PP.crew) {
 		/* (a crew's battle: its owner's game fights it alone, as the field would have; a joiner back on his map) */
 		bool owner = PP.seat == 0;

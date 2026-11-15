@@ -12,6 +12,9 @@
 
 /* Each frame on a dive layer, in battle or out. */
 void dive_splits_frame(void);
+/* A battle of the layer fought on the party's core (a crew's, dive_join.h)
+ * counted, so that the next one's index is the layer's next. */
+void dive_splits_fought(void);
 /* A DIVE_PLACE come in. */
 void dive_splits_place(const DivePlace *p);
 /* What deleted MegaMan where his last battle was lost: its strongest

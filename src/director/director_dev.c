@@ -398,7 +398,7 @@ static void dev_battle(void) {
 	D.battle_due = false;
 	/* (on a dive with the crew near: through BN6's roll, which the crew's hold takes, dive_join.h) */
 	if (emu_encounters_offering()) {
-		if (emu_debug_on()) fprintf(stderr, "battle: the step's, through BN6's roll\n");
+		fprintf(stderr, "battle: the step's, through BN6's roll\n");
 		emu_encounter_roll_next();
 		return;
 	}
