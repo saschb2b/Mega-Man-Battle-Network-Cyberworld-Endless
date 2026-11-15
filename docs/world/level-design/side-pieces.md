@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:31:49Z }
 ---
 
 # Side pieces (built for five areas, issue #505)
@@ -80,6 +80,7 @@ Taken per area as looked at, as every laying rule is
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
+| BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
 | Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
@@ -296,6 +297,43 @@ Left as they are:
 - **The fists past its arms' ends** (issue #505: a dead end's art, not a
   piece), the robot's door and its striped conveyor (a set piece), its
   pads' centrepieces and exit arrows (issue #505's kind 4).
+
+## What SciLab Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's SciLab Area (its maps 0x90:5, 0x90:4 and 0x90:6, the atlas's `a1`)
+sets one thing of these kinds round its floors: wire tufts, a cyan fork of
+a few pixels standing behind a green circuit's upper edge, 18, 16 and 20 in
+its three maps. They lie on the first tile layer, and a tuft is three tiles
+in a row: one of its own (tile 0x014, mirrored 0x414), and one or two of
+the circuit's rim with the fork drawn into them (0x015 and 0x016, whose
+plain rims are 0x002 and 0x001: the same pixels but the fork's). None can
+reach a layer:
+
+- The cut behind a floor takes nothing in SciLab. A tuft's own tile is one
+  tile where the cut takes 4 at least, and the area's circuits run a panel
+  or two apart, so another floor stands within the cut's 48 pixels above
+  most of them.
+- Cut whole with its rim's tiles, each kept with the plain rim it goes over
+  and set only where a layer draws that rim (tried: 17 looks from the three
+  maps), it fit nowhere on the atlas's layers. In 42 tries over its three
+  layouts the layer drew a cyan lip there (tile 0x03C in 28, 0x019, 0x0D1
+  and 0x0AB in the rest), never the green edge: a layer's circuits are
+  wide, edged in its hubs' lip, and none of the six layers of two seeds
+  draws the green edge's tiles 0x001 and 0x002 at all, which the maps draw
+  along every long circuit's upper side. They are among the tiles beside the floor that
+  [what the layers take](../../devtools/map-use.md) counts as never drawn.
+- Set over the lip anyway, a tuft's rim tile would cut the lip off; set
+  alone, its own tile is the fork's two smallest prongs.
+
+So the tufts come with the green edge: where a layer draws its circuits'
+upper sides as the maps do, a cut of the tuft with its rim's tiles can set
+them. That edge is floor art, the tiles' matter, not a piece's.
+
+The rest of what its layers never draw is no side piece: the green edges
+and the rounded rims where its circuits cross (floor art); its orange exit
+roads, their dark faces and the arrows at their ends; the warp discs on two
+of its hubs; and the orange-striped blocks standing on 0x90:6's circuits,
+on the floor alone (issue #505's kinds 3 to 5).
 
 ## What Central Area sets round its floors (none set; measured on the maps and the atlas)
 
