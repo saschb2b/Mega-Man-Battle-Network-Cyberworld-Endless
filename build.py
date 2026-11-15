@@ -2667,6 +2667,12 @@ SCREENSHOTS += [
     # (SAVES on a first start: no save yet, THIS DEVICE "No runs yet")
     ('saves-first', ['--scene', 'saves', '--size', '240x160'], [(120, 'saves-first')], {}),
 ]
+# 0.22.0's notes: Aquarium Comp's tanks (the autopilot's seed 1 in Aquarium
+# Comp alone, passing the tank that stands on its third layer)
+SCREENSHOTS += [
+    ('aquarium-tank', ['--scene', 'emu', '--seed', '1', '--net-biome', '12', '--run-depth', '3', '--dev', 'quiet'],
+     [(550, 'aquarium-tank')], {'CYBERWORLD_AUTOPILOT': '1'}),
+]
 
 
 # the clips the README or a release's notes show as GIFs too (GitHub plays no
