@@ -1,0 +1,1 @@
+BN4's ACDC Area draws every room, and each block of floor two wide that touches no room, as its framed squares, and the way's roads shorter than three panels in BN4's ACDC, Town and Park Areas as walkway: their layers draw other tiles, docs/world/level-design/roads.md

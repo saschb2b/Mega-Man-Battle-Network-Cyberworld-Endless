@@ -105,12 +105,26 @@ platform floor and no road. A pad is no road either.
   the tiles are picked; the legalizer reads walkway floor as before. Each
   run of road is a piece of its own, after the rooms and before the rest
   of the floor (`src/map/tilemap.c`), picked from the roads' books.
-- **Its ends.** BN4 ends a road in an arrow's head or at a pink walkway,
-  never at a platform, and a road's rim is wider than a tile picked alone
-  may draw. So a road is laid as if it ran on two panels under whatever
-  floor it meets (`pieces_floor`), and only its own panels' tiles are
-  kept (`road_draws`), behind the room's (`stack_road`): its rim runs
-  whole up to a room's edge.
+- **Its ends.** Park's map ends a road in an arrow's head or at a pink
+  walkway, never at a platform; BN4's ACDC Area 1 and 2 run theirs into
+  a square's side through a gate in its rim (seen in their maps as the
+  atlas draws them, `src_b34_90_0` and `_1`). A road's rim is wider than
+  a tile picked alone may draw. So a road is laid as if it ran on two
+  panels under whatever floor it meets (`pieces_floor`), and only its own
+  panels' tiles are kept (`road_draws`), behind the room's
+  (`stack_road`): its rim runs whole up to a room's edge, and a road of
+  three panels between two squares draws whole.
+- **No scraps.** A run of road shorter than three panels is walkway
+  (`drop_short_roads`, `src/map/netmap.c`): what the way left between two
+  stretches of wider floor (a junction widened to a block, a room) was
+  all ends, and drew as a block of the road's hue with no rim, in steps
+  where it met the walkway (a player's layer, 15 November 2026). Tried
+  and dropped: ending a road a panel before the room it meets, at a
+  walkway (BN4's ACDC Area 2541 to 2586 breaks over 8 layers: the walkway
+  panel between them drew as stubs); learning the area's other maps'
+  roads too (no layer changed: Area 1's are drawn a pixel lower, `dv` 4
+  against 3, and lend no panel; Area 2's add no shape the layers ask
+  for).
 - **Thin books** (`TileGrid.thin`, `src/map/panels_lay.c`). One map's
   roads are a few dozen panels, where an area's walkways are hundreds, and
   a road's rim lies past where a tile picked alone may draw: a panel that
@@ -145,14 +159,20 @@ platform floor and no road. A pad is no road either.
   beside other floor, which lends its tiles in part. A bend is laid whole
   where its map's panel fits and in pieces where not: then with a nick at
   its inner corner, a tile past its tip or a gap at it. Two bends in a
-  row (a jog of one panel) show most.
+  row (a jog of one panel) show most: in BN4's ACDC Area two of a jog's
+  four turnings draw whole and the other two leave the void showing at
+  both inner corners (drawn by hand, `R` in [the tile test's hand
+  floor](../../devtools/tile-test.md), A floor drawn by hand), where a
+  player saw navy squares in the cyan.
 - **Joints.** A run is plain from end to end. BN4 sets a striped joint
   every few panels; a layer's road has one only where a panel outside a
   run happens to carry it.
 - **The tile test's counts.** Park's layers count more breaks with roads
   (per 100 panels 90 before, 96 now): no map of BN4 shows a road at a
   room, so each such join counts, as a walkway's does.
-  `tests/atlas_baseline.txt` holds the new counts.
+  `tests/atlas_baseline.txt` holds the new counts. With no scraps, Park's
+  6 layers count 905 breaks (921), Town's 2722 (2756), ACDC's 8 with its
+  rooms framed ([the generator](generator.md), Tile picking) 1808 (2541).
 - **Where a road meets a pink walkway** side on, the walkway ends plainly
   at the road's rim; BN4's own change of look end to end (a line across)
   is not learned, as each look's learning skips the panels beside the
