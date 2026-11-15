@@ -79,12 +79,22 @@ clearance opens), which only matter to a player who plays on.
    ("You're on, Chaud!"). Before the first win Chaud says what it earns:
    "Beat it, and you'll have my first clearance: the official Chip Orders
    open for it." L's briefing names ProtoMan's way, and the map
-   marks him.
+   marks him. Who Chaud is (the Endless Net, the Nest's copies, ProtoMan
+   the real thing) he says the first time alone, Lan's "Huh!? Chaud!?"
+   right after his name; to a profile that has heard him (a duel in the
+   record, an earlier run that reached layer 2, or this run past its
+   first guardian) he opens with the record, or "Lan, it's Chaud again."
+   where none was fought. Before, the record alone chose, and Lan's
+   surprise came after seven boxes of Chaud's: a playtester heard the
+   first words again in a second run (session 76).
 2. **The ring.** ProtoMan stands on the layer, off the way on. His words
    give the terms: the squad's size ("a pair of viruses"), his time and
    the rung's rule; then MegaMan the stake ("Real viruses, Lan. If they
    delete us, the dive's over, so let's be at full HP."). The choice
-   starts on No. ProtoMan greets MegaMan as the old rival he is.
+   starts on No: MegaMan's "Race his time?" for a race, as he asks the
+   layer's other risks (ProtoMan's "Take the duel?" read as a fight with
+   him, session 76), ProtoMan's "Take the duel?" for the netbattle.
+   ProtoMan greets MegaMan as the old rival he is.
 3. **The squad.** One of the act's own formations, in its band: the same
    viruses ProtoMan busted, fixed by the layer's seed alone. Not by the
    battles fought before it, which keep the random battles from
