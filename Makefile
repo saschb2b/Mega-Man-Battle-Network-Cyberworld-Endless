@@ -487,7 +487,7 @@ build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | 
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
 	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c \
-	src/core/transfer_link.c src/core/text_input.c
+	src/core/transfer_link.c src/core/text_input.c src/core/cloud_link.c
 build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \

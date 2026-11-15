@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- **SAVES in three pages.** Its eight buttons became the pages CLOUD,
+  CODE and FILE, turned with L and R as Options' are, each a short list
+  with a box that says what the line under the cursor does. UNDO IMPORT
+  is START, and it asks first, as Turn on, Unlink and Delete do.
+- **Cloud saves, like Steam Cloud.** SAVES › CLOUD › Turn on on one
+  device, Add a device there and its code under Link with a code on each other:
+  from then on every device fetches the newest saves as the game starts
+  and sends its own after each save and as you close it, with nothing to
+  press. Only where two devices both played since they were last in step
+  does the game show both saves side by side and ask which to keep, UNDO
+  IMPORT after it. The saves are sealed on your device, so the server
+  cannot read them, and a copy unused for 180 days is deleted. No
+  account.
 - **Send your saves to another device with a code.** SAVES (L on the
   title) has **SEND**: the game puts your saves on its server and shows
   a ten-digit code. On the other device, **SAVES › RECEIVE**, type the

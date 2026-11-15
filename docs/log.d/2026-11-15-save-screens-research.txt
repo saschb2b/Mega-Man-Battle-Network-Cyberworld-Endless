@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T00:40:00Z
+* **New**: engine/saves-screens.md (save screens elsewhere: what they group by, the principles, three layouts drawn for SAVES, tabs by method recommended).

@@ -39,6 +39,9 @@ WATCH_KEYS = struct.Struct("!BIBIH")
 # (saves sent by a code, no protocol version of their own: transfer.py)
 TRANSFER = struct.Struct("!BBB16sI")
 TRANSFER_STATE = struct.Struct("!BBI")
+# (saves kept in step, no protocol version of their own either: sync.py)
+SYNC = struct.Struct("!BBB16s32sII")
+SYNC_STATE = struct.Struct("!BBII")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -414,3 +417,29 @@ def read_transfer(data):
 def transfer_state(status, value=0):
     """TRANSFER_STATE: a status and its value (seconds, or a blob's size)."""
     return TRANSFER_STATE.pack(SPEC["transfer_state"], status, value)
+
+
+def read_sync(data):
+    """SYNC checked (shared/online/README.md, Saves kept in step): its op,
+    slot, auth, generation and size, a push's 1 to sync_max, a pull's and
+    a drop's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["sync"] and data[1] != SPEC["sync_version"]:
+        raise ProtocolError("Unknown sync version")
+    if len(data) != SYNC.size or data[0] != SPEC["sync"]:
+        raise ProtocolError("Malformed SYNC")
+    _, _, op, slot, auth, generation, size = SYNC.unpack(data)
+    if op == SPEC["sync_push"]:
+        if not 1 <= size <= SPEC["sync_max"]:
+            raise ProtocolError("Sync size out of range")
+    elif op in (SPEC["sync_pull"], SPEC["sync_drop"]):
+        if size:
+            raise ProtocolError("Malformed SYNC")
+    else:
+        raise ProtocolError("Unknown sync op")
+    return op, slot, auth, generation, size
+
+
+def sync_state(status, generation=0, size=0):
+    """SYNC_STATE: a status, a generation and a size (BUSY's: the seconds to wait)."""
+    return SYNC_STATE.pack(SPEC["sync_state"], status, generation, size)

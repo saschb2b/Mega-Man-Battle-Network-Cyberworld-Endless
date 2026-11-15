@@ -85,3 +85,15 @@ bool transfer_open(const TransferKeys *keys, uint8_t *sealed, size_t n, size_t *
 	*plain_n = size;
 	return true;
 }
+
+/* (one of the secret's values: BLAKE2b keyed with it, over a label) */
+static void derive(const uint8_t secret[TRANSFER_SECRET], const char *label, uint8_t *out, size_t n) {
+	crypto_blake2b_keyed(out, n, secret, TRANSFER_SECRET, (const uint8_t *)label, strlen(label));
+}
+
+void transfer_slot(const uint8_t secret[TRANSFER_SECRET], TransferSlot *out) {
+	memset(out, 0, sizeof *out);
+	derive(secret, "cyberworld.slot.v1", out->slot, sizeof out->slot);
+	derive(secret, "cyberworld.auth.v1", out->auth, sizeof out->auth);
+	derive(secret, "cyberworld.seal.v1", out->keys.key, sizeof out->keys.key);
+}

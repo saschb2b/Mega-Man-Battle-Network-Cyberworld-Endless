@@ -157,7 +157,7 @@ The screen also says where your saves are kept. On a PC or a Mac that is
 the data folder, which uninstalling leaves alone. On a phone or tablet,
 where uninstalling the app deletes its files, it names the folder that
 keeps a copy for a reinstall: the ROM folder you chose, or another chosen
-with **SAVES › FOLDER** ([Moving saves between devices](#moving-saves-between-devices)).
+with **SAVES › FILE › Folder** ([Moving saves between devices](#moving-saves-between-devices)).
 ROMs chosen as files leave no folder for the copy until you choose one.
 
 ### On Windows
@@ -301,7 +301,7 @@ on a 3DS ([android/README.md](../android/README.md#the-second-screen)).
 
 Uninstalling the app deletes its own files, the saves among them. The
 game keeps a copy, `cyberworld-endless.cwsave`, in your ROM folder or a
-folder chosen with **SAVES › FOLDER**; after a reinstall, choose that
+folder chosen with **SAVES › FILE › Folder**; after a reinstall, choose that
 folder again and the game offers the copy back
 ([Moving saves between devices](#moving-saves-between-devices)).
 Android's own backup, where it is turned on, keeps the saves and settings
@@ -337,7 +337,7 @@ marketplaceID").
    My iPhone › Cyberworld**, where the app keeps your saves too and looks
    at every start. Deleting the app deletes that folder with it. The
    game keeps a copy of the saves, `cyberworld-endless.cwsave`, in your
-   ROM folder or a folder chosen with **SAVES › FOLDER**; after a
+   ROM folder or a folder chosen with **SAVES › FILE › Folder**; after a
    reinstall, choose that folder again and the game offers the copy back.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
@@ -1023,34 +1023,50 @@ best depth is kept in `profile.sav`.
 
 ### Moving saves between devices
 
-Press L on the title (Q on a keyboard) to open **SAVES**. **EXPORT**
-writes your progress, unlocks, Library, records and the current run's
-checkpoint to one file, `cyberworld-endless.cwsave` (no ROM in it). Copy
-it to the other device, start the game there with your own ROM and
-choose **SAVES › IMPORT**: both saves are shown side by side, yours are
-kept unless you choose **USE THE FILE'S**, and **UNDO IMPORT** brings
-back what an import replaced. Runs from two devices are never merged;
-controls, screen settings, volumes and your statistics answer stay on
-each. In the browser, **Save backup** in the player's menu opens SAVES
-over the title, and **Load backup** opens it with the file chooser.
+Press L on the title (Q on a keyboard) to open **SAVES**: three pages,
+**CLOUD**, **CODE** and **FILE**, turned with L and R (or a tap on
+their tabs), each a short list with a box that says what the line under
+the cursor does. Whichever way saves come in, both are shown side by
+side first, yours are kept unless you choose **USE THOSE**, and START
+(**START:UNDO IMPORT** on the band, after a Yes) brings back what an
+import replaced. Runs from two devices are never merged; controls,
+screen settings, volumes and your statistics answer stay on each.
 
-To move them without copying a file, choose **SAVES › SEND**: the game
+**FILE.** **Export** writes your progress, unlocks, Library, records and
+the current run's checkpoint to one file, `cyberworld-endless.cwsave` (no
+ROM in it). Copy it to the other device, start the game there with your
+own ROM and choose **Import**. In the browser, **Save backup** in the
+player's menu opens SAVES over the title, and **Load backup** opens it
+with the file chooser.
+
+**CODE.** To move them once without a file, choose **Send**: the game
 puts that same file on its server and shows a ten-digit code. On the
-other device, within 15 minutes, choose **SAVES › RECEIVE** and type the
-code (the keys on the screen, or a keyboard's digits); the two saves are
-compared there as with IMPORT. A code works once. The file is locked
-with the code before it leaves, so the server cannot read it, and it is
-gone once received or after its 15 minutes. Every system with the Net
-Square sends and receives, the browser too; it needs a connection to the
-official server, and nothing else of yours goes with it.
+other device, within 15 minutes, choose **CODE › Receive** and type the
+code (the keys on the screen, or a keyboard's digits). A code works
+once. The file is locked with the code before it leaves, so the server
+cannot read it, and it is gone once received or after its 15 minutes.
+
+**CLOUD.** To keep them synced for good, as Steam Cloud does, choose
+**Turn on** on one device, then **Add a device** there and type its code
+under **CLOUD › Link with a code** on each other one. From then on each
+device fetches the newest saves as the game starts (the title waits a
+moment for it) and sends its own a few seconds after every save and as
+you close it. Only where two devices both played since they last synced
+does the game ask which saves to keep. The saves are sealed on your
+device, so the server cannot read them; cloud saves nobody fetches or
+sends for 180 days are deleted. **Unlink this device** stops it on one
+device, **Delete cloud saves** removes them from the server. Every system
+with the Net Square sends, receives and syncs, the browser too; it needs
+a connection to the official server, and nothing else of yours goes with
+it.
 
 On Android, an iPhone or an iPad the game keeps that file in your ROM
-folder, or one you choose with **FOLDER**, a few seconds after each save.
-After a reinstall, choose that folder again: the game finds the copy and
-offers it back. It never writes over a file another device left there,
-and asks once which saves to keep. **AUTO-COPY** turns the copy on or
-off; elsewhere it starts off and goes to Downloads (a PC or a Mac) or
-the data folder (a PortMaster handheld, the 3DS).
+folder, or one you choose with **FILE › Folder**, a few seconds after
+each save. After a reinstall, choose that folder again: the game finds
+the copy and offers it back. It never writes over a file another device
+left there, and asks once which saves to keep. **Auto-copy** turns the
+copy on or off; elsewhere it starts off and goes to Downloads (a PC or a
+Mac) or the data folder (a PortMaster handheld, the 3DS).
 
 A file from a newer version of the game, a damaged one, or a run that
 needs BN5 where **BN5 Team Colonel (USA)** is missing (always on the 3DS)
@@ -1628,7 +1644,7 @@ has for this alone.
 - **Reporting a bug**: the
   [bug report's form](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new/choose)
   asks for the version (the title's bottom left corner), your system and
-  your save: **SAVES › EXPORT** on the title
+  your save: **SAVES › FILE › Export** on the title
   ([Moving saves between devices](#moving-saves-between-devices)). With
   the save we can play your run; it holds no ROM. Never attach a ROM.
 

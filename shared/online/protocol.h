@@ -157,4 +157,33 @@
 #define ONLINE_TRANSFER_OFF 6         /* ... this server takes no transfers */
 #define ONLINE_TRANSFER_REMOVED 7     /* ... DONE: the blob is gone */
 
+/* Saves kept in step (docs/engine/saves.md, Saves kept in step): a
+ * connection to /presence whose first message is SYNC, a slot's sealed
+ * saves pulled, pushed on the generation they were pulled at, or dropped.
+ * The slot and its key are the game's (a secret the linked systems share);
+ * the server keeps the blob on disk, unread, ONLINE_SYNC_DAYS after its
+ * last use. TRANSFER_DATA carries the bytes either way. */
+#define ONLINE_SYNC 39                /* client -> server, first: u8 version, u8 op, 16-byte slot, 32-byte auth, u32 generation, u32 size (a push's) */
+#define ONLINE_SYNC_STATE 40          /* server -> client: u8 status, u32 generation, u32 size */
+#define ONLINE_SYNC_VERSION 1
+#define ONLINE_SYNC_PULL 1            /* SYNC's op: the slot's saves, where newer than the generation named */
+#define ONLINE_SYNC_PUSH 2            /* ... saves to the slot, made from the generation named (0: a new slot) */
+#define ONLINE_SYNC_DROP 3            /* ... the slot deleted */
+#define ONLINE_SYNC_BYTES 59
+#define ONLINE_SYNC_STATE_BYTES 10
+#define ONLINE_SYNC_SLOT_BYTES 16
+#define ONLINE_SYNC_AUTH_BYTES 32
+#define ONLINE_SYNC_MAX 2097152       /* a slot's blob's bytes at most */
+#define ONLINE_SYNC_DAYS 180          /* a slot unused this long is deleted */
+#define ONLINE_SYNC_SAME 0            /* SYNC_STATE's status: the pull's generation is the slot's */
+#define ONLINE_SYNC_FOUND 1           /* ... the slot's newer saves follow: its generation, their size */
+#define ONLINE_SYNC_NONE 2            /* ... no such slot (never made, dropped, or unused past its days) */
+#define ONLINE_SYNC_DENIED 3          /* ... the slot's, but not its auth */
+#define ONLINE_SYNC_READY 4           /* ... send the push's DATA */
+#define ONLINE_SYNC_STORED 5          /* ... the push is kept: the slot's new generation */
+#define ONLINE_SYNC_CONFLICT 6        /* ... the push was made from an older generation: the slot's now */
+#define ONLINE_SYNC_BUSY 7            /* ... the server is full or busy: again in the size field's seconds */
+#define ONLINE_SYNC_OFF 8             /* ... this server keeps no slots */
+#define ONLINE_SYNC_DROPPED 9         /* ... the slot is gone */
+
 #endif

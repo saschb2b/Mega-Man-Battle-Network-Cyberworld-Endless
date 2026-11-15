@@ -19,7 +19,9 @@
 #include "platform.h"
 #include "rom.h"
 #include "saves_actions.h"
+#include "saves_cloud.h"
 #include "saves_code.h"
+#include "saves_home.h"
 #include "saves_draw.h"
 #include "saves_state.h"
 #include "saves_text.h"
@@ -38,6 +40,8 @@ void saves_clear_file(void) {
 	SV.bytes = NULL;
 	SV.size = 0;
 	SV.from_place = false;
+	SV.from_cloud = false;
+	SV.from_code = false;
 }
 
 void saves_result(const char *text) {
@@ -47,9 +51,50 @@ void saves_result(const char *text) {
 	SV.focus = SAVES_DONE;
 }
 
-static void home(void) {
+int saves_pages(SavesPage *out) {
+	int n = 0;
+	if (saves_cloud_here()) out[n++] = SAVES_PAGE_CLOUD;
+	if (saves_code_here()) out[n++] = SAVES_PAGE_CODE;
+	out[n++] = SAVES_PAGE_FILE;
+	return n;
+}
+
+void saves_home_page(SavesPage page) {
+	SavesPage pages[SAVES_PAGES];
+	int n = saves_pages(pages), at = 0;
+	for (int i = 0; i < n; ++i) if (pages[i] == page) at = i;
 	SV.view = SAVES_HOME;
-	SV.focus = SV.have ? SAVES_EXPORT : SAVES_IMPORT;
+	SV.page = pages[at];
+	SV.paged = true;
+	int lines[SAVES_ACTIONS], k = saves_actions(lines);
+	SV.focus = k ? lines[0] : SAVES_DONE;
+	/* (the line this page was left on, where it still stands) */
+	for (int i = 0; i < k; ++i) if (lines[i] == SV.page_focus[SV.page]) SV.focus = lines[i];
+}
+
+/* (home: the page that needs the player, the cloud's trouble or saves
+ * waiting in the copy's place; else the page last shown; the first there
+ * is at the first opening) */
+static void home(void) {
+	MirrorStatus m;
+	mirror_status(&m);
+	saves_cloud_look();
+	if (saves_cloud_needs_you()) saves_home_page(SAVES_PAGE_CLOUD);
+	else if (m.state == MIRROR_HELD) {
+		SV.page_focus[SAVES_PAGE_FILE] = SAVES_IMPORT;
+		saves_home_page(SAVES_PAGE_FILE);
+	} else saves_home_page(SV.paged ? SV.page : SAVES_PAGE_CLOUD);
+}
+
+/* (L and R: the page before or after, round) */
+static void turn_page(int step) {
+	SavesPage pages[SAVES_PAGES];
+	int n = saves_pages(pages), at = 0;
+	if (n < 2) return;
+	for (int i = 0; i < n; ++i) if (pages[i] == SV.page) at = i;
+	saves_home_page(pages[(at + step + n) % n]);
+	SV.said[0] = 0;
+	if (R.data) audio_sfx(SFX_CURSOR);
 }
 
 bool saves_open(void) {
@@ -92,7 +137,9 @@ void saves_compare(uint8_t *bytes, size_t n, bool from_place) {
 	saves_refresh();
 	memset(&SV.file, 0, sizeof SV.file);
 	SV.status = bytes && backup_info(bytes, n, &SV.file) ? backup_check(&SV.file, XR[XROM_BN5_COLONEL_US].data != NULL) : BACKUP_DAMAGED;
-	SV.guard_input = true;
+	/* (one that opened by itself, the cloud's or the copy's place's, waits
+	 * half a second: a START mashed through the title answers nothing) */
+	SV.guard_input = from_place || SV.from_cloud ? 30 : 1;
 	if (SV.status == BACKUP_OK && SV.have && SV.here.hash == SV.file.hash) {
 		if (from_place) mirror_answer(true);
 		saves_clear_file();
@@ -111,6 +158,14 @@ void saves_compare(uint8_t *bytes, size_t n, bool from_place) {
 		SV.focus = file_ahead() ? SAVES_TAKE : SV.have ? SAVES_KEEP : SAVES_DONE;
 	}
 	if (R.data) audio_sfx(SFX_REVEAL);
+}
+
+void saves_compare_cloud(uint8_t *bytes, size_t n) {
+	saves_compare(bytes, n, false);
+	if (!SV.bytes) return;
+	SV.from_cloud = true;
+	SV.guard_input = 30;
+	if (SV.status == BACKUP_OK) saves_cloud_compare_note(&SV.here, SV.have, SV.unreadable, SV.note, sizeof SV.note);
 }
 
 bool saves_compare_held(void) {
@@ -135,6 +190,7 @@ void saves_import(const char *path) {
  * and B (the place's file: not opened by itself again, no copy over it) */
 void saves_leave_compare(bool keep_these) {
 	if (SV.from_place) mirror_answer(keep_these);
+	if (SV.from_cloud && keep_these) saves_cloud_answered(false);
 	saves_clear_file();
 	home();
 }
@@ -185,17 +241,22 @@ static void update(void) {
 	if (saves_code_tick()) { back(); return; }
 	if (saves_picked() || SV.guard_input) {
 		int x, y;
-		SV.guard_input = false;
+		if (SV.guard_input) --SV.guard_input;
 		(void)platform_tap(&x, &y);
 		return;
 	}
-	if (btn_pressed(BTN_B)) { back(); return; }
-	if (SV.busy || saves_pointer(back)) return;
+	if (btn_pressed(BTN_B)) {
+		if (!saves_home_back()) back();
+		return;
+	}
+	if (SV.busy || saves_pointer(back, turn_page)) return;
+	if (SV.view == SAVES_HOME) { saves_home_keys(turn_page); return; }
 	if (btn_repeat(BTN_UP)) saves_move_focus(0, -1);
 	if (btn_repeat(BTN_DOWN)) saves_move_focus(0, 1);
 	if (btn_repeat(BTN_LEFT)) saves_move_focus(-1, 0);
 	if (btn_repeat(BTN_RIGHT)) saves_move_focus(1, 0);
-	if (btn_pressed(BTN_A) || btn_pressed(BTN_START)) saves_activate(SV.focus);
+	/* (the comparison's answers by A alone: START opened nothing here) */
+	if (btn_pressed(BTN_A) || (SV.view != SAVES_COMPARE && btn_pressed(BTN_START))) saves_activate(SV.focus);
 }
 
 const Scene scene_saves = { "saves", enter, update, saves_draw, leave, NULL };
@@ -213,6 +274,7 @@ bool saves_key(void) {
 void saves_tick(void) {
 	const Scene *scene = scene_current();
 	if (scene != &scene_title && scene != &scene_launcher && scene != &scene_saves) return;
+	saves_cloud_tick();
 	if (SV.busy || pick_busy() || pick_saves_busy() || SV.view == SAVES_COMPARE) return;
 	char path[1100];
 	/* (the ROMs screen takes its own drops: a ROM or a .cwsave) */

@@ -44,4 +44,15 @@ uint8_t *transfer_seal(const TransferKeys *keys, const uint8_t *plain, size_t n,
  * where it is not one of ours, or was sealed with another key or changed */
 bool transfer_open(const TransferKeys *keys, uint8_t *sealed, size_t n, size_t *plain_n);
 
+/* Saves kept in step (docs/engine/saves.md): a slot's secret, shared by the
+ * systems it links, makes its id and auth for the server and the key that
+ * seals its saves (keyed BLAKE2b, a label each); pinned like a code's */
+#define TRANSFER_SECRET 32
+typedef struct {
+	uint8_t slot[16];
+	uint8_t auth[32];
+	TransferKeys keys;   /* (its key; its lookup unused) */
+} TransferSlot;
+void transfer_slot(const uint8_t secret[TRANSFER_SECRET], TransferSlot *out);
+
 #endif

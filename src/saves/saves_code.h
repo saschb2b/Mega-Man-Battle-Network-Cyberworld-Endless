@@ -21,6 +21,9 @@ bool saves_code_press(int action);
  * saves come to the comparison), the keyboard's digits; true where the
  * keyboard's Escape asks to go back */
 bool saves_code_tick(void);
+/* The cloud's ADD A SYSTEM: its link's bytes (taken) sent under a code,
+ * shown as SEND shows its own */
+void saves_code_send_link(uint8_t *bytes, size_t n);
 /* SEND's or RECEIVE's view left: what is under way given up (a code shown
  * stays with the server till its time is up) */
 void saves_code_leave(void);

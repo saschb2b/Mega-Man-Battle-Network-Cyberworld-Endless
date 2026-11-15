@@ -461,6 +461,48 @@ says how they are made). The server keeps them in memory alone, never in
 a file, a log or a backup, and counts the day's held and taken in its
 daily totals.
 
+**Saves kept in step** (docs/engine/saves.md, Saves kept in step). Like
+TRANSFER, a connection to `/presence` whose first message is SYNC (39)
+is one exchange and no visit, and bumps no version: a server from before
+it answers SYNC with an ERROR. A slot is a place on the server for one
+player's saves, named by a 16-byte slot id and opened by a 32-byte auth,
+both made by the game from a secret the systems it links share (the
+secret travels between them as a TRANSFER, never to the server). The
+server keeps a slot's blob on disk, sealed by the game and unread, with
+its generation, a count it raises at each push.
+
+| Message | Direction | Payload after the one-byte type |
+| --- | --- | --- |
+| SYNC (39) | client → server, first | u8 `sync_version` (1), u8 op (`sync_pull` 1, `sync_push` 2, `sync_drop` 3), 16-byte slot, 32-byte auth, u32 generation, u32 size (a push's: the blob's bytes, 1 to `sync_max`; else 0): `sync_bytes` (59) |
+| SYNC_STATE (40) | server → client | u8 status, u32 generation, u32 size (BUSY's: the seconds to wait): `sync_state_bytes` (10) |
+| TRANSFER_DATA (38) | either way | the blob's next bytes, 1 to 511, in order |
+
+A pull names the generation the game last had of the slot (0 none): SAME
+(0) where it is still the slot's; FOUND (1, the slot's generation and the
+blob's size) and the blob in TRANSFER_DATA where the slot has another;
+then the server closes. A push names the generation its saves were made
+from: READY (4), the blob in TRANSFER_DATA, then STORED (5, the slot's new
+generation, one past the old) once the last byte is on disk; CONFLICT (6,
+the slot's generation now) where the slot moved on since, and nothing is
+written. A push from generation 0 to a slot the server has not got makes
+it, the auth its own from then on; to a slot it has, generation 0 is a
+CONFLICT like any other. A drop deletes the slot: DROPPED (9). Any op on
+a slot the server has not got (never made, dropped, or unused for
+`sync_days`, 180) is NONE (2), but a push from 0, and on a slot with
+another auth DENIED (3). BUSY (7, the seconds to wait in the size field)
+answers where the server keeps as many slots or bytes as it will, makes
+no more slots this hour, or has as many exchanges under way as it takes,
+and a push to a slot another push is filling; OFF (8) every SYNC on a
+server whose `sync` setting is off. Anything else, a DATA too long or past
+the size, or a connection quiet for 15 seconds, ends it with an ERROR.
+
+The server stores the auth's SHA-256, never the auth, and can open no
+blob: the key that seals it is made from the shared secret too and never
+sent. A slot's files are left out of the server's backups, and the game
+keeps every save it has on the system, so a slot lost loses only the
+step, never the saves. The daily totals count the pulls and pushes and
+the slots kept.
+
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's
 hash (`src/online/square_plan.h`), checked by the server against

@@ -1,7 +1,7 @@
 ---
 type: Feature
 title: "Portable saves"
-description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code over the Net Square's server (`saves_code.c`, `transfer.c`)."
+description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code and kept in step with a cloud slot over the Net Square's server (`saves_code.c`, `saves_cloud.c`, `transfer.c`, `cloud.c`)."
 tags: [engine, saves]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
 ---
@@ -40,23 +40,51 @@ the menu names it), and in the browser also from the page's menu. It
 opens over the title or the ROMs screen, never in a run, and stays off
 the title's menu, whose rows are drawn from the ROM.
 
-## The three views
+## The views
 
-**Home.** THIS DEVICE's panel says the run ("Layer 4, Act 2" and its
-area) and the profile ("3 runs, best Layer 9", or "No runs yet"). One
-line under it says where the copy goes and how the last one went
-("Copied to ROMs 10-12 14:03", "No copy in ROMs: choose it again", "New
-saves in ROMs: IMPORT shows them", ROMs being the folder). The buttons:
-EXPORT where there are saves, IMPORT, UNDO IMPORT where an import can be
-undone, AUTO-COPY: ON or OFF where the system has the automatic copy,
-FOLDER where it has a folder chooser.
+**Home** (`saves_home.c`; reworked on 15 November 2026 when it had grown
+to eight buttons, [Save screens elsewhere](saves-screens.md) has why).
+Options' kin: the pages CLOUD, CODE and FILE as its tabs, turned by L
+and R or a tap (no row where the system has FILE alone: the PSP, a 3DS
+build without libcurl); a strip under them, THIS DEVICE with the run
+("Layer 4, Act 2", its area where it fits) and the record ("3 runs, best
+Layer 9", or "No runs yet"); the page's lines in the cyan window, Up and
+Down round, the line each page was left on kept; KeyItem's information
+box under them, what the line does, then where the page has one how it
+stands. CLOUD: Turn on (where there are saves) and Link with a code, or
+once on Add a device, Unlink this device and, a line apart, Delete cloud
+saves; its status "Synced 11-14 23:34", "Syncing...", "Sending 40%" or a
+trouble. CODE: Send (where there are saves) and Receive. FILE: Export
+(where there are saves), Import, Auto-copy On or Off (a value Left and
+Right turn, between Options' orange arrows) and Folder with its last
+part, where the system has them; its status the copy's ("Copied to
+Downloads 11-14 14:03", "The copy failed. Choose the folder again.",
+"New saves in ROMs. Import shows them."). UNDO IMPORT is no line but
+START's, `START:UNDO IMPORT` on the band where an import can be undone,
+as Options' START:DEFAULT. START, Turn on, Unlink and Delete ask first in
+the box ("Bring back your Layer 4 run from before the import?", "Delete
+the cloud saves? Each device keeps its own."), BN6's Yes and No under
+the words, No chosen. SAVES opens on the page that needs the player (the
+cloud's trouble only the player can answer, or new saves in the copy's
+place, Import under the cursor), else on the page last shown, CLOUD the
+first time. The band names the view, a back arrow before it where B goes
+back, the band's left its tap on a phone without a Back key; a view
+opened from a line names its line (SEND, RECEIVE, ADD A DEVICE, LINK).
+The words are "device" for what holds saves and "sync" for the cloud's
+keeping them alike, one name each.
 
-**Compare.** THIS DEVICE and THE FILE side by side, each with its run,
+**Compare.** THIS DEVICE and THE FILE (THE CODE, THE CLOUD: whatever
+brought them) side by side, each with its run,
 area, runs and best, and the system and date it was last played on
 ("Android, 10-13 09:12": the system's name, never the device's or the
-host's). A note says what USE THE FILE'S replaces and that UNDO IMPORT
+host's). A note says what USE THOSE replaces and that UNDO IMPORT
 brings it back; where the file is the automatic copy's own and the copy
-is on, it adds that KEEP THESE makes the folder's copy this device's. The
+is on, it adds that KEEP THESE writes this device's saves over the copy;
+where it is the cloud's, that KEEP THESE sends this device's saves to the
+cloud and the other device asks at its next start. One that opened by
+itself (the copy's place's, the cloud's) takes no press for half a
+second, and none answers it but A, so a START mashed through the title
+answers nothing. The
 cursor starts on the side with more progress (more runs, then the deeper
 layer, a best or the run on now; this device's at a tie), so after a
 reinstall it is on the file's. On a device with no saves the buttons are
@@ -70,9 +98,10 @@ saves already here goes straight to the result, which says so.
 
 **Result.** What the import put in and what Undo brings back ("Saves
 imported: a run on Layer 2. UNDO IMPORT brings back your Layer 5 run."),
-with CONTINUE where that run can go on, else DONE. UNDO IMPORT is a
-direct swap with no preview; its result offers UNDO again, which swaps
-them back. An export's result says where the file went.
+with CONTINUE where that run can go on, else DONE. The result's UNDO
+IMPORT swaps at once (the import's outcome is on the screen); its result
+offers UNDO again, which swaps them back. An export's result says where
+the file went.
 
 ## What travels
 
@@ -289,21 +318,23 @@ stays a usability problem, as the rest of SAVES: no account, one code,
 nothing changed until the comparison's USE THE FILE'S, UNDO IMPORT after
 it.
 
-**The views.** Home shows SEND where the system has the link and saves
-to send, and RECEIVE where it has the link. SEND packs the saves as
-EXPORT does, seals them and hands them to the server; its view keeps
-this device's panel, then the code in letters twice the size, in two
-groups of five ("61626 62133"), "Works once, for 15 more minutes." and
-"On your other system: SAVES, then RECEIVE." While it sends it says
-"Sending: N%". SEND again with the same saves, while their code holds,
-shows that code again rather than another; leaving the view while it
-sends gives the sending up (a code shown stays with the server till its
-time is up). RECEIVE asks for the code: ten keys in a row (1 to 9, then
-0; two rows of five on a narrow screen), ERASE and OK, the cursor on OK
-once the tenth digit is in; on the desktops and the browser a keyboard's
-digits type it too (`text_input.h`), Enter is OK and Escape goes back. The
-saves that come go to the comparison as an imported file's, THE FILE's
-panel naming the system and the time they were last played. Each failure
+**The views.** Home's CODE page has Send where the system has the link
+and saves to send, and Receive where it has the link. Send packs the
+saves as Export does, seals them and hands them to the server; its view
+(SEND on the band) keeps this device's panel, then the code in letters
+twice the size, in two groups of five ("61626 62133"), "Works once, for
+15 more minutes." and "On your other device: SAVES, CODE, Receive." While
+it sends it says "Sending: N%". Send again with the same saves, while
+their code holds, shows that code again rather than another; leaving the
+view while it sends gives the sending up (a code shown stays with the
+server till its time is up). Receive (RECEIVE on the band) asks for the
+code: ten keys in a row (1 to 9, then 0; two rows of five on a narrow
+screen), ERASE and OK, the cursor on OK once the tenth digit is in; on
+the desktops and the browser a keyboard's digits type it too
+(`text_input.h`), Enter is OK and Escape goes back. The saves that come
+go to the comparison as THE CODE's, its panel naming the system and the
+time they were last played; a cloud's link that comes instead joins this
+device to that cloud ([Saves kept in step](#saves-kept-in-step)). Each failure
 says one line in gold, a receive's with "Your saves are kept.": the
 server not reached, busy (with the minutes to wait), nothing under that
 code ("A code works once, for 15 minutes."), a server that takes no saves
@@ -334,8 +365,9 @@ after.
 **The exchange** (`src/online/transfer.c`). shared/online/README.md
 (Saves sent by a code) has the wire: a connection to the Square's
 `/presence` whose first message is TRANSFER, over the Square's own
-socket on a thread of its own (`online_socket.h`; the browser's
-`online_browser.h` on its main thread, SAVES' frames moving it on), never
+socket through the relay (`relay.c`, below: a thread of its own,
+`online_socket.h`; the browser's `online_browser.h` on its main thread,
+SAVES' frames moving it on), never
 while a visit is on, as SAVES opens only over the title and the ROMs
 screen. A put whose lookup the server holds already (TAKEN) is sealed
 again under a new code, three times at most. The server's side, its
@@ -346,12 +378,98 @@ limits and what it keeps are server/README.md's. SAVES reaches it through
 (the PSP, a 3DS build without libcurl) has no link and shows neither
 button. The server is the official one, or `--dev online`'s.
 
-**Not yet.** Continuous sync: two systems linked once by such a code,
-the saves pulled at the title and pushed after each save, the comparison
-only where both moved on, and a run open on one system said on the
-other. Its design is the five agents' (the key handed over by the code,
-never made from it; the server a carrier, never the saves' only home),
-for when the daily totals show the codes in use.
+## Saves kept in step
+
+CLOUD keeps a system's saves in step with the player's other systems, as
+Steam Cloud keeps a game's: set up once on each system, then nothing to
+press. It rides the same server and the same sealing as a code's saves
+([Sending by code](#sending-by-code)), and the owner asked for it
+(2026-11-14) right after the code went in, to give "a Steam cloud save
+like experience".
+
+**Design.** The game-design pass is the one the five agents made for it
+(November 2026): moving between systems is a frequent errand for the
+players who ask for this, not a rare one, so the cloud acts by itself
+wherever that is safe and asks only where it is not. Steam's own shape,
+measured against what players hold against it: a sync before play, an
+upload as the game closes, and one question where both sides moved on,
+which here shows each side's run, area, runs and system rather than two
+dates, and is undone by UNDO IMPORT where Steam's overwrite is final. No
+account: a system joins the slot by a code from one already in it, the
+one step Steam's login spares its players. The owner's calls, given as
+defaults on 2026-11-14 and his to change: a pull taken in without asking
+where this system has not moved on (UNDO IMPORT still brings back what
+it replaced); one side's saves whole in a conflict, never a merge; a
+slot unused for 180 days deleted; the Net Square's identity still per
+system.
+
+**What the player sees.** Home's CLOUD page ([The views](#the-views)):
+Turn on where this device has saves, and Link with a code, which is
+Receive's code entry (LINK on its band). Turn on asks ("Turn on cloud
+saves? These saves go up now.") and makes a slot and sends these saves;
+the page then says how it stands ("Sending 40%", "Synced 11-14 23:34",
+or a trouble's line) under Add a device, Unlink this device and, a line
+apart, Delete cloud saves. Add a device shows a code as Send does (ADD A
+DEVICE on its band, "On your other device: SAVES, CLOUD, Link with a
+code."), which Link with a code (or Receive) on the other device takes: a
+code's bytes are saves or a link, and a link joins this device to the
+slot and pulls at once. Unlink asks, then forgets the slot here
+("Unlinked. Your saves stay here."); Delete asks ("Delete the cloud
+saves? Each device keeps its own."), then deletes it on the server,
+forgotten here too ("Cloud saves deleted. Your other devices stop
+syncing at their next start."). Neither runs while the cloud moves saves
+("Waiting for the sync to end.").
+
+**When it syncs** (`src/saves/saves_cloud.c`). As the game starts and
+whenever it comes back from the background, the title pulls; its menu
+waits for the pull, six seconds at most, and the title's note box says
+"Cloud: syncing...". A pull whose saves are newer than the receipt's
+generation is taken in without a word where this system's saves are the
+ones it last had in step (an import through `backup_restore`, UNDO
+IMPORT after it, the title shown again over them with the note "Cloud:
+Layer 7 from Linux, 11-14 23:35"); where this system moved on too, SAVES
+opens the comparison at once with THE CLOUD, USE THOSE and KEEP THESE
+("KEEP THESE sends this device's saves to the cloud."),
+the cursor on the side with more progress as ever; DONE leaves it to
+the next start. Three seconds after the saves were last written
+(mirror.c's hooks, `MirrorFollow`) they are pushed where they are not
+the ones in step, and again as the game closes, waited for four seconds
+at most; a New 3DS packs and seals only outside a run (its heap), its
+run's saves going up at the title or as it closes. A push the server
+answers CONFLICT (another system's came first) stops the pushes until
+the title's next pull compares. The slot gone (deleted elsewhere, or
+unused 180 days) unlinks this system with "Cloud: the cloud saves are
+gone. Turn on to start again."; a server that keeps no slots, or one from
+before them, says so. Nothing is lost either way: every system keeps its
+own saves, and the server is only how they travel.
+
+**The slot** (`src/online/cloud.c`). A 32-byte secret made on the system
+that turned it on, kept in `cloud.ini` in the data folder with the
+receipt (the slot's generation these saves are in step with, their
+hash, when), never in a `.cwsave`. From it, keyed BLAKE2b makes the
+slot's id and auth for the server and the key that seals the saves
+(`transfer_slot`, pinned in `tests/test_transfer_code.c`); the link a
+code carries is the secret itself, sealed as a code's saves are. The
+saves go up as `CWSY`, a flags byte (none yet) and the `.cwsave`,
+sealed. shared/online/README.md (Saves kept in step) has the wire, its
+generations and their CONFLICT; server/README.md what the server keeps
+(the auth's hash, the sealed blob, its days) and its limits.
+
+**One exchange at a time** (`src/online/relay.c`). A code's transfer and
+the cloud's pulls and pushes share one engine on the Square's socket: a
+connection, a first message, a blob sent or taken; an exchange asked for
+while another runs waits for it. Online's transfer and cloud set their
+links at the start (`start_net.c`), as SAVES may not include online.
+
+Checked end to end against a local server (`server/main.py`,
+`--dev online`): TURN ON from a folder with a run (the slot at
+generation 1), a restart pulling SAME ("in step"), ADD A SYSTEM's code
+typed on an empty folder (linked, pulled, taken in), a run there saving
+and pushing at once (generation 2), the first system's title taking that
+in by itself, and both systems' saves changed apart: the first's start
+pushing (generation 3), the second's opening the comparison at its
+start, USE THE CLOUD'S leaving both at generation 3 with the same saves.
+`tests/test_saves.c` drives the decisions with a link of its own.
 
 ## Platform boundary
 
