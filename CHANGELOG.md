@@ -2,6 +2,46 @@
 
 ## Unreleased
 
+- **The week's DeepNet, dived together.** The greeter Mr.Prog by the
+  Board gave way to a portal, which warps MegaMan straight into the
+  week's net, and everyone on the server who dives it at the same time
+  is there with you: whoever stands on your layer walks it as a MegaMan,
+  and a band at the foot of the screen says who was deleted, who beat a
+  guardian, who cleared the net. **A** on a diver asks to team up, a
+  crew of up to four: a crewmate's battle near you is yours to join on
+  one field, each with his own reward, and at Lan's HP a portal waits
+  for the whole crew. At a guardian's door the divers on the layer wait
+  for each other; the leader's **A** takes up to four in against a
+  stronger guardian, every MegaMan with his own folder, and **B** goes
+  alone. The week leaves traces: a skull burst where a diver was
+  deleted, phrases left on a panel with **R**, Mystery Data others
+  opened sparkling, your busting time's place among the week's. The
+  Board marks a dive that fought a guardian as a party and lists who
+  dives now. On the New 3DS and the PSP each of a party fights on a
+  field of his own, the guardian's HP shared. New, and played by two at
+  a time so far: tell us how a full party goes.
+- **The net climbs.** Twelve areas build their layers with their own
+  stairs, where only Sky Area and the Undernet did: Green Area's yellow
+  stairs, CopyBot Comp's railed ladders, the Graveyard's and Mr. Weather
+  Comp's long ramps, Undernet Zero's, BN5's End Area, Nebula Area and
+  Undernet, and BN4's Town Area and countries. A room the rest of the
+  floor meets only from the front stands raised, a stair at every way
+  in; elsewhere a terrace of floor rises behind a line across the layer.
+  Green's and CopyBot's platforms stand at their real height. A layer
+  saved before this update starts afresh at a CONTINUE.
+- **What stands beside the floor.** More areas' layers set what their
+  maps stand round their floors: Robot Control Comp's robot figures and
+  its wires with red lights, the Cybeast Nest's crystals, Judge Tree
+  Comp's tufts of grass and planters, Mr. Weather Comp's low clouds, the
+  Undernet's and Undernet Zero's fire bowls behind a floor's upper edge,
+  BN4's Undernet's horns along whole catwalks, BN5's Undernet's skull
+  totems, their eyes flashing, and BN5's End Area's pagoda, a landmark
+  MegaMan walks behind.
+- **The Glitch layer, glitchier.** Towards the copy at its heart the
+  glitches come up to twice as often and run deeper, so they lead you to
+  it. While another area's look is on the floor the music drags, and
+  stalls as a flip opens; a flip brings that area's sky with it; and the
+  copy changes between its forms' bodies as it waits.
 - **Touch controls you can turn off.** Options › Game has **Touch
   controls**: Auto shows them at a touch, as before; Off keeps them away
   while a controller is connected or the keyboard plays, for a handheld
@@ -71,8 +111,9 @@
   originals' rooms do; its others are two panels wide, so the walk from
   arrival to exit catches less on walkway mouths (RoboDog Comp, where
   runs most often start, caught the most). In every area, a pit left
-  between walkways, which the walk had to jog round, is filled. A layer
-  saved before this update starts afresh at a CONTINUE.
+  between walkways, which the walk had to jog round, is filled, and a
+  one-wide walkway the way turns into off wide floor widens first. A
+  layer saved before this update starts afresh at a CONTINUE.
 - **The net's locks, met every act.** Each act's middle layer now holds
   one of BN6's locks off the way: Rush's gap, a Link Navi's obstacle, a
   security cube or door, or an invisible path. Half the runs had met none
