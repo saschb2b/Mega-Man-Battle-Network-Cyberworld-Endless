@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T19:55:31Z
-* **Update**: world/level-design/side-pieces.md (the Graveyard's row and section: its one map sets no side piece, scenery or piece under or behind a floor, measured with every cut; what its layers never draw is floor, raised floor and ramps, its grooved bridges and an exit's arrow).

@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (the Graveyard's row and section: its one map sets no side piece, scenery or piece under or behind a floor, measured with every cut; what its layers never draw is floor, raised floor and ramps, its grooved bridges and an exit's arrow).
+* **Update**: world/level-design/side-pieces.md (what grows on a floor's edge: the Judge Tree's tufts on its back rims and planters at its walls' feet, cut in the floor's own tiles with every panel that reaches them; its row, what is not placed and why), code/net-and-map.md (sides.c's line).
 * **Update**: world/level-design/side-pieces.md (BN4's Town Area's row, and a section on what its four maps set round their floors: a warp hub's ring and exit arrow, a hub's centrepiece, Town Area 3's upper level and a rail under it, none a piece any cut takes, so none set).
 * **Update**: world/level-design/side-pieces.md (Green Area's row, and what its two maps set round their floors: nothing a layer lacks, every cut run on them keeping no piece; the rest pads, arrows, warp discs and plank ends, floor art and the owner's kinds 3 to 5).
 * **Update**: world/level-design/side-pieces.md (Sky Area surveyed: nothing beside, under or behind its floors, what its maps leave undrawn is raised floor, pods, stairs, roads and kinds 3 to 5; its row in the area table and its section, every cut run on its maps, none taken).
