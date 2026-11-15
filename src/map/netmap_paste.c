@@ -45,6 +45,21 @@ void nm_paste_stairs(const Learned *L, uint16_t *map, int tw, int th) {
 		}
 	}
 }
+/* A look's area cannot draw the layer's stairs where one's way and width
+ * is not learned, or not at the layer's rise and the stair's length: its
+ * ramps were void under MegaMan's feet and its raised floor islands on
+ * short faces (Green's stairs in Central's look), so it draws them level
+ * with the ground (netmap_look; docs/game/glitch-layer.md, Heights in a
+ * flip). */
+bool nm_stairs_drawn(const Learned *L) {
+	for (int i = 0; i < nm_cur->nstairs; ++i) {
+		const Stair *st = &nm_cur->stairs[i];
+		const StairTemplate *t = &L->stairs[st->dir][stair_width(st)];
+		if (!t->ok || t->rise != nm_cur->rise || t->len != stair_len(st)) return false;
+	}
+	return true;
+}
+
 PropAt nm_prop_at[MAX_PROPS];
 
 void nm_props_place(const Learned *L) {
@@ -479,6 +494,8 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 	if (i >= 0 && i < nside_at) { *p = side_at[i].p; *X = side_at[i].X; *Y = side_at[i].Y; }
 	return nside_at;
 }
+
+int netmap_sides(void) { return nside_at; }
 
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 	nside_at = 0;

@@ -52,6 +52,7 @@ int options_lines(int kinds[LINES_MAX]) {
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
 #endif
+		if (touch_here()) kinds[n++] = LINE_TOUCH;
 		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 		if (update_here()) kinds[n++] = LINE_UPDATES;
@@ -187,6 +188,15 @@ static void fast_keep(int speed) {
 	platform_persist();
 }
 
+/* the touch controls kept away (`off`) or not, and kept */
+static void touch_keep(bool off) {
+	char path[600];
+	touch_set_off(off);
+	snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);
+	settings_line_write(path, "touch_controls", off ? "off" : "auto", options_touch_note());
+	platform_persist();
+}
+
 /* the vibration set to `level`, or the trigger effects to `level` (0 or
  * 1), and kept */
 static void feel_keep(int kind, int level) {
@@ -228,6 +238,7 @@ static void turn(int kind, int dir) {
 	case LINE_VIBRATION: feel_keep(kind, feel_level_next(feel_level(), dir)); break;
 	case LINE_TRIGGERS: feel_keep(kind, !feel_triggers()); break;
 	case LINE_UPDATES: update_set_on(!update_on()); break;
+	case LINE_TOUCH: touch_keep(!touch_off()); break;
 	default: options_sound_keep((SoundFilter)((sound_filter() + SOUND_FILTER_COUNT + (dir < 0 ? -1 : 1)) % SOUND_FILTER_COUNT), true); break;
 	}
 	audio_sfx(SFX_CURSOR);

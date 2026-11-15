@@ -66,8 +66,9 @@ int layer_cube_kind(int depth, int biome, int kind) {
 /* A layer's pieces (PIECE_* bits): none on the run's first layer or in the
  * Secret Area; else, as the act goes, one on its first layer (half of
  * them), two on its middle one (the dealer's: a choice of where to spend),
- * one on the guardian's (four in ten), one on a dark warp's layer (six in
- * ten); each of the area's, picked by its weight, never twice. */
+ * one of them a lock, one on the guardian's (four in ten), one on a dark
+ * warp's layer (six in ten); each of the area's, picked by its weight,
+ * never twice. */
 unsigned layer_pieces_forced;
 
 /* The pieces an area has at all (a weight of its own). */
@@ -87,10 +88,34 @@ unsigned layer_pieces(int depth, int biome, int kind) {
 	return rolled_pieces(depth, biome, kind) | forced;
 }
 
+/* The locks a player opens or finds his way past: what the act's middle
+ * layer holds one of (an arrow lane is a shortcut, a teleport pair most
+ * often one too, a purple data a lock on one thing alone) */
+#define PIECE_LOCKS (PIECE_RUSH | PIECE_OBSTACLE | PIECE_CUBE | PIECE_HIDDEN)
+
+/* Weight w[i] in a pick: none for a piece already got, nor where the pick
+ * must be a lock, for any other or for an obstacle no Cross the run holds
+ * opens (a lesson for the next run's Cross is no lock on this one). */
+static int pick_weight(int i, const int *w, const unsigned *bits, unsigned got, bool lock, bool openable) {
+	if (got & bits[i]) return 0;
+	if (lock && (!(bits[i] & PIECE_LOCKS) || (bits[i] == PIECE_OBSTACLE && !openable))) return 0;
+	return w[i];
+}
+
+/* Whether the area's layers draw BN6's teleport gem (netmap_kit's gem):
+ * none where another game's area dresses it (run_dress), nor in Sky,
+ * whose maps' gem its kit does not learn (Sky's three pairs wait on it:
+ * none of its layers' stood over 200 runs, docs/world/level-design/set-pieces.md, How often). */
+static bool draws_gem(int biome) { return biome != BIOME_SKY && run_dress(biome) == biome; }
+
 static unsigned rolled_pieces(int depth, int biome, int kind) {
 	int in_act = layer_in_act(depth);
-	int chance = kind == LAYER_UNDERNET ? 60 : in_act == 0 ? 50 : in_act == 1 ? 90 : 40;
+	/* (the act's middle layer always holds its two: the run's second
+	 * layer a lock every run, where one in two runs had met none by the
+	 * act's guardian, the census over 200 runs, docs/world/level-design/set-pieces.md, How often) */
+	int chance = kind == LAYER_UNDERNET ? 60 : in_act == 0 ? 50 : in_act == 1 ? 100 : 40;
 	int budget = kind == LAYER_NORMAL && in_act == 1 ? 2 : 1;
+	bool must_lock = kind == LAYER_NORMAL && in_act == 1;
 	uint32_t h = piece_hash(depth, 0x9A7B1E5Du);
 	if ((int)(h % 100) >= chance) return 0;
 	/* (and a weight of nothing, so an area with few of BN6's pieces keeps
@@ -100,18 +125,25 @@ static unsigned rolled_pieces(int depth, int biome, int kind) {
 	 * the map, the guardian's actors too) */
 	/* (an invisible path from the second act on: a secret for a player who
 	 * knows the net by then) */
-	int w[8] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush,
-		area_pieces[biome].teleport, area_pieces[biome].obstacle, area_pieces[biome].cube, area_pieces[biome].arrow,
-		depth > 3 ? area_pieces[biome].hidden : 0, 2 };
+	/* (a teleport where the layer's maps draw BN6's gem, else its weight
+	 * nothing's, as none stood there: the purple data as often) */
+	int tele = area_pieces[biome].teleport, gem = draws_gem(biome) ? tele : 0;
+	int w[8] = { area_pieces[biome].purple, kind == LAYER_NORMAL && is_boss_depth(depth) ? 0 : area_pieces[biome].rush, gem,
+		area_pieces[biome].obstacle, area_pieces[biome].cube, area_pieces[biome].arrow, depth > 3 ? area_pieces[biome].hidden : 0,
+		2 + tele - gem };
 	unsigned bits[8] = { PIECE_PURPLE, PIECE_RUSH, PIECE_TELEPORT, PIECE_OBSTACLE, PIECE_CUBE, PIECE_ARROW, PIECE_HIDDEN, 0 }, got = 0;
+	bool openable = w[3] && layer_block_kind(depth, biome) >= 0 && block_openers(layer_block_kind(depth, biome)) & layer_crosses(depth);
 	for (int k = 0; k < budget; ++k) {
+		/* (the last pick a lock where none came before it) */
+		bool lock = must_lock && k == budget - 1 && !(got & PIECE_LOCKS);
 		int total = 0;
-		for (int i = 0; i < 8; ++i) total += got & bits[i] ? 0 : w[i];
+		for (int i = 0; i < 8; ++i) total += pick_weight(i, w, bits, got, lock, openable);
+		if (!total) continue;
 		int roll = (int)((h >> (8 + 8 * k)) % (uint32_t)total);
 		for (int i = 0; i < 8; ++i) {
-			if (got & bits[i]) continue;
-			if (roll < w[i]) { got |= bits[i]; break; }
-			roll -= w[i];
+			int wi = pick_weight(i, w, bits, got, lock, openable);
+			if (roll < wi) { got |= bits[i]; break; }
+			roll -= wi;
 		}
 	}
 	return got;

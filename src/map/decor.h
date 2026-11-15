@@ -21,8 +21,10 @@ typedef struct {
 	int n;
 } DecorBook;
 
-/* Adds the scenery of map `a` to `out`, each look once. */
-void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out);
+/* Adds the scenery of map `a` to `out`, each look once; `reach`: the
+ * pixels under a floor's lower edges that are its own, its faces and what
+ * hangs there (0: 44). */
+void decor_learn(const AreaSrc *a, bool bg_in_map, int reach, DecorBook *out);
 void decor_free(DecorBook *b);
 /* Sets some pieces into the layers of a tw x th tile map (layer 1 after
  * layer 0's cells), on empty tiles near its floor, chosen by `seed`; how

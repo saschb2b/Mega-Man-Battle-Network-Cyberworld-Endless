@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T16:42:43Z
+* **Update**: world/level-design/side-pieces.md (Robot Control Comp's row: its robot figures and wires with red lights cut as scenery against its own faces, 11 looks where 3; why its bulbs on springs, the figures touching a walkway and its arms' fists are not placed).

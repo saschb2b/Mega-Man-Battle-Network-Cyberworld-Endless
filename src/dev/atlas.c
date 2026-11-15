@@ -4,7 +4,8 @@
  * own tiles and colours, with its objects marked; a report line per layer
  * says how the tile picks went. */
 #include "atlas.h"
-#include "layer_sizes.h"
+#include "atlas_looks.h"
+#include "atlas_reports.h"
 #include "break_places.h"
 #include "lent.h"
 #include "navstudy.h"
@@ -750,7 +751,12 @@ int atlas_run(const char *spec) {
 	voids_on = env_int("CYBERWORLD_VOIDS", 1) != 0;   /* (0: the layers' holes as their tiles leave them, voids.h) */
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
-	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);
+	/* (sizes, pieces: counted, not drawn, atlas_reports.c) */
+	int counted = atlas_report_run(dir, biomes, seeds);
+	if (counted >= 0) return counted;
+	/* (intoAREA, fromAREA: a Glitch layer's looks, atlas_looks.c) */
+	int looks;
+	if (atlas_looks_run(dir, biomes, seeds, &looks)) return looks;
 	int lettered = letter_spec(dir, biomes, seeds);
 	if (lettered >= 0) return lettered;
 	bool want[BIOME_COUNT] = { false };

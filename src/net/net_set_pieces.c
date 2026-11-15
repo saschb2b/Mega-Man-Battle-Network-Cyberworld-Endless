@@ -23,6 +23,14 @@ static bool in_gap_of(const NetGap *g, int n, int x, int y) {
 
 static bool in_gap(int x, int y) { return in_gap_of(layer.gap, layer.ngaps, x, y) || in_gap_of(layer.path, layer.npaths, x, y); }
 
+/* The void a planned island keeps until it is carved, last (a Rush gap's,
+ * a teleport's): kept clear of a pocket carved before it. */
+static void keep_void(int x0, int y0, int x1, int y1) {
+	for (int j = y0; j <= y1; ++j)
+		for (int i = x0; i <= x1; ++i)
+			if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) ng_reserved[j][i] = 1;
+}
+
 static bool gap_fits(int x, int y, int d, int len) {
 	int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
 	for (int k = 1; k <= len + 4; ++k)
@@ -30,7 +38,8 @@ static bool gap_fits(int x, int y, int d, int len) {
 			if (k < len && abs(s) > 1) continue;
 			int i = x + dir_dx[d] * k + sx * s, j = y + dir_dy[d] * k + sy * s;
 			bool island = k > len && k <= len + 3 && abs(s) <= 1;
-			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || ng_prop_at_cell(i, j) || in_gap(i, j)) return false;
+			if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || layer.cell[j][i] != C_VOID || ng_reserved[j][i] || ng_prop_at_cell(i, j) || in_gap(i, j))
+				return false;
 			if ((island || (k <= len && !s)) && !win_in(i, j)) return false;
 		}
 	return true;
@@ -60,6 +69,11 @@ GapSite ng_plan_gap(int want) {
 		ng_reserved[best.y][best.x] = 1;
 		ng_reserved[best.y - dir_dy[best.d]][best.x - dir_dx[best.d]] = 1;
 		ng_hush(best.x, best.y);
+		/* (the gap and its island's void, gap_fits's) */
+		int ax = best.x + dir_dx[best.d], ay = best.y + dir_dy[best.d];
+		int bx = best.x + dir_dx[best.d] * (best.len + 4), by = best.y + dir_dy[best.d] * (best.len + 4);
+		int wx = dir_dx[best.d] ? 0 : 2, wy = dir_dy[best.d] ? 0 : 2;
+		keep_void((ax < bx ? ax : bx) - wx, (ay < by ? ay : by) - wy, (ax > bx ? ax : bx) + wx, (ay > by ? ay : by) + wy);
 	}
 	return best;
 }
@@ -193,7 +207,7 @@ static bool teleport_island_site(int bx, int by, int *ox, int *oy) {
 			bool ok = true;
 			for (int j = -3; j <= 4 && ok; ++j)
 				for (int i = -3; i <= 4 && ok; ++i)
-					ok = layer.cell[y + j][x + i] == C_VOID && !ng_prop_at_cell(x + i, y + j) &&
+					ok = layer.cell[y + j][x + i] == C_VOID && !ng_reserved[y + j][x + i] && !ng_prop_at_cell(x + i, y + j) &&
 						(i < -1 || i > 2 || j < -1 || j > 2 || win_in(x + i, y + j));
 			if (ok) { best = d; *ox = x; *oy = y; }
 		}
@@ -222,6 +236,7 @@ void ng_plan_teleport(void) {
 				if (teleport_spot(x, y, 2, 6)) { bx = x; by = y; }
 		if (bx < 0 || !teleport_island_site(bx, by, &ax, &ay)) return;
 		layer.teleport_island = true;
+		keep_void(ax - 3, ay - 3, ax + 4, ay + 4);
 	}
 	layer.teleport_x[0] = ax; layer.teleport_y[0] = ay;
 	layer.teleport_x[1] = bx; layer.teleport_y[1] = by;
@@ -329,7 +344,59 @@ static bool pocket_end(int bx, int by, int *rx, int *ry) {
 	return true;
 }
 
-void ng_plan_obstacle(int kind) {
+/* The lock across mouth (bx, by), entered towards `bd`, its one thing at
+ * (rx, ry): nothing else in the pocket pocket_of marked, its mouth or the
+ * floor before it. */
+static void stand_block(int bx, int by, int bd, int kind, int rx, int ry) {
+	layer.block[layer.nblocks++] = (NetBlock){ bx, by, bd, kind, rx, ry };
+	for (int y = 0; y < MAP_H; ++y)
+		for (int x = 0; x < MAP_W; ++x)
+			if (pocket[y][x]) ng_reserved[y][x] = 1;
+	ng_reserved[by][bx] = 1;
+	ng_reserved[by - dir_dy[bd]][bx - dir_dx[bd]] = 1;
+	ng_hush(bx, by);
+}
+
+/* A layer whose floor leaves no pocket: one carved, as BN6's maps hang a
+ * 3x3 pad on a spur (docs/world/level-design/originals.md), a walkway
+ * POCKET_LEN panels long off a platform's edge, off the way and near it,
+ * to a pad of its own, the void a panel round them as round a Rush gap's
+ * island (gap_fits); the lock in the walkway's first panel, its one thing
+ * on the pad. False where none fits, or the map would grow too big for
+ * the game's tile map. */
+#define POCKET_LEN 2
+static bool carve_pocket(int kind, int rise) {
+	int bx = -1, by = -1, bd = 0, best = -1;
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x)
+			for (int d = 0; d < 4; ++d) {
+				if (!stand_ok(x, y, d) || !gap_fits(x, y, d, POCKET_LEN)) continue;
+				/* (a platform's edge: the lock in a walkway's mouth off a wider floor) */
+				int sx = dir_dx[(d + 1) % 4], sy = dir_dy[(d + 1) % 4];
+				if (!ng_floor_cell(x + sx, y + sy) && !ng_floor_cell(x - sx, y - sy)) continue;
+				/* (seen from the way: the nearest) */
+				int score = 20 - (ng_detour[y][x] < 20 ? ng_detour[y][x] : 20);
+				if (score > best) { best = score; bx = x; by = y; bd = d; }
+			}
+	if (bx < 0) return false;
+	int dx = dir_dx[bd], dy = dir_dy[bd], mx = bx + dx * (POCKET_LEN + 2), my = by + dy * (POCKET_LEN + 2);
+	for (int k = 1; k <= POCKET_LEN; ++k) layer.cell[by + dy * k][bx + dx * k] = C_PATH;
+	carve_shape(SHAPE_RECT, mx - 1, my - 1, 3, 3);
+	int rx = mx, ry = my;
+	if (!ng_fits(rise) || pocket_of(bx + dx, by + dy) < 6 || !pocket_end(bx + dx, by + dy, &rx, &ry)) {
+		for (int k = 1; k <= POCKET_LEN; ++k) layer.cell[by + dy * k][bx + dx * k] = C_VOID;
+		for (int j = my - 1; j <= my + 1; ++j)
+			for (int i = mx - 1; i <= mx + 1; ++i) layer.cell[j][i] = C_VOID;
+		return false;
+	}
+	add_room(mx - 1, my - 1, 3, 3, ROOM_PAD);
+	/* (the spur's panels measured off the way, as the layer's others) */
+	ng_measure_detours();
+	stand_block(bx + dx, by + dy, bd, kind, rx, ry);
+	return true;
+}
+
+void ng_plan_obstacle(int kind, int rise) {
 	enum { MOUTHS = 256 };
 	static struct { int16_t x, y, d, score; } cand[MOUTHS];
 	int nc = 0, rx = 0, ry = 0;
@@ -356,16 +423,11 @@ void ng_plan_obstacle(int kind) {
 		pocket_of(cand[c].x, cand[c].y);
 		if (pocket_end(cand[c].x, cand[c].y, &rx, &ry)) break;
 	}
-	if (c == nc) return;
-	int bx = cand[c].x, by = cand[c].y, bd = cand[c].d;
-	layer.block[layer.nblocks++] = (NetBlock){ bx, by, bd, kind, rx, ry };
-	/* (nothing else in the pocket, its mouth or the floor before it) */
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x)
-			if (pocket[y][x]) ng_reserved[y][x] = 1;
-	ng_reserved[by][bx] = 1;
-	ng_reserved[by - dir_dy[bd]][bx - dir_dx[bd]] = 1;
-	ng_hush(bx, by);
+	if (c == nc) {
+		carve_pocket(kind, rise);
+		return;
+	}
+	stand_block(cand[c].x, cand[c].y, cand[c].d, kind, rx, ry);
 }
 
 /* A cube's lock (layer_cube_kind): a number door asks how many braziers
