@@ -496,26 +496,6 @@ static int lead_books(const Learned *L, TileBook led[MAX_BOOKS]) {
  * (freed by the caller): the classes' picks, then what is set whole over
  * them (the props' with `props`: their stamps the layer's own area's), the
  * palette banks and the scenery */
-/* (measuring) the breaks across the edges of a side piece's foot, set
- * whole over the floor's art, are none: its map stands it on a floor of
- * another look (the Aquarium's tanks behind their orange landings), so the
- * layer's floor going on under its foot shows strips no map does, as the
- * landing goes on under it there (docs/world/level-design/side-pieces.md) */
-static void unfoot_breaks(int tw, int th) {
-	uint8_t *b = nm_last.breaks;
-	for (int i = 0; b && i < tw * th; ++i) {
-		if (!(nm_last.pasted[i] & NETMAP_PASTED_FOOT)) continue;
-		/* (its right and lower edges, its left neighbour's right and its upper one's lower) */
-		uint8_t *at[4] = { &b[i], &b[i], i % tw ? &b[i - 1] : NULL, i >= tw ? &b[i - tw] : NULL };
-		const uint8_t edge[4] = { 1, 2, 1, 2 };
-		for (int k = 0; k < 4; ++k) {
-			if (!at[k]) continue;
-			if (*at[k] & edge[k]) { *at[k] &= (uint8_t)~edge[k]; --tiles_stats.breaks; }
-			if (*at[k] & edge[k] << 2) { *at[k] &= (uint8_t)~(edge[k] << 2); --tiles_stats.nicks; }
-		}
-	}
-}
-
 static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	size_t cells = (size_t)tw * th;
 	uint16_t *map = calloc(cells * 2, 2);
@@ -577,7 +557,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	uint32_t *px = L->breaks && tiles_measure ? area_src_render(L->def->xrom, L->def->group, L->def->number, map, tw, th) : NULL;
 	if (px && (nm_last.breaks = calloc(cells, 1))) breaks_count(L->breaks, px, tw, th, nm_last.breaks, &tiles_stats.breaks, &tiles_stats.nicks);
 	free(px);
-	unfoot_breaks(tw, th);
+	nm_unfoot_breaks(tw, th);
 	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
 	return map;
 }

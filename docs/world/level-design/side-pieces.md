@@ -81,7 +81,7 @@ Taken per area as looked at, as every laying rule is
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
-| Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
+| Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars; behind its raised landings, the tanks, and on a raised platform's closed corner, the whale-topped console (all below) | the pillars and the tanks |
 | every other area | nothing | - |
 
 ## Pieces the game animates (verified in the game)
@@ -179,6 +179,58 @@ and none fits a layer, and what their maps set beside their floors is
 larger than this rule takes (End Area's pagoda, Oran Area's hubs, hundreds
 of tiles).
 
+## What stands behind a raised floor on both layers (`stands_learn`; verified on the maps)
+
+Aquarium Comp's maps set big glass tanks in a row beside the road of
+stepping stones that leads to their exit: 4 in Aquarium Comp 3 (0x81:2), 3
+in each of the other three (0x81:0, 0x81:1, 0x85:0), each standing in the
+void behind an orange landing two panels wide on the road, at height 16.
+A tank is the second layer's (its frame and front glass) with the first
+layer's showing through it (its back panes), about 18 tiles square, and
+the tile test's tinted maps showed none of it in a layer
+([what the layers take from a map](../../devtools/map-use.md)). Neither
+rule above takes it: the side pieces' cut is made on the ground alone, a
+piece behind a floor is the first layer's, and a row's tanks join into
+one group of 511 to 676 tiles, each in front of the last.
+
+They are cut in the views of their heights, as the pillars are. A group of
+the second layer is a row of copies where a third of its tiles or more
+hold the same entry a step on (the tanks: 12 tiles across and 6 down, 683
+of the row's tiles repeating, 53 not, where one tank stands over the
+last); the front copy is the tiles with no copy a step on, the largest lot
+of them joined, and the one whole tank (181 tiles). The map draws two
+tanks in one tile where one stands over the other, so each tile of the
+piece is read from the copy that shows it whole: the front one, but where
+the tank behind it reaches into it, the back one, which nothing stands
+over. With it go the first layer's tiles off the floor between its ends
+in each row, its back panes (215 tiles in all). It is such a piece where
+some of it lies on that floor (its foot), seven tenths or more off it, a
+floor straight below its bottom row and none above its top. Two looks,
+one a row facing each way (0x81:2's and 0x81:1's are the same).
+
+A layer sets one in the stretches that take what stands behind a floor,
+on a free panel whose panels it draws over are what they are in its map:
+floor under its foot, the void behind it. The nine panels round it are not
+held to the map's, as they are for a smaller piece: a tank reaches past
+them, and its landing's road beside it is floor no layer draws. It goes on
+both layers whole, over nothing but where its map draws its foot over the
+landing; there it goes over the layer's floor, which runs on under it as
+the landing does. Those tiles' edges are no strips any map shows (blue
+floor under a foot the maps stand on orange) and the
+[tile test](../../devtools/tile-test.md) leaves them out of its breaks, as
+it leaves out a pad's (`NETMAP_PASTED_FOOT`): one tank added 10 breaks to
+a layer of 82, and looked over at 4x its foot meets the floor's rim as on
+its landing. 0 or 1 a layer in the atlas's four. Nothing about walking
+changes: its panels are void. A tank holds no layer priorities, so a
+[Glitch layer](../../game/glitch-layer.md)'s flip, which swaps tiles and colours
+alone, draws it as a layer of its own area does.
+
+Aquarium Comp 3's whale-topped console stands the same way on a raised
+platform's corner, a panel its walls close, and is cut too (69 tiles), but
+it fits only where a layer's floor has the same notch, which none of the
+atlas's showed. Comp 2's (0x85:0) plain console is not reached: the
+side pieces' book (24 looks) is full of the pillars before that map.
+
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
@@ -187,5 +239,10 @@ of tiles).
   and the Nest's and Mr. Weather's maps hold their background in the
   second, so theirs lie there too. Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
+- **Aquarium Comp's road and landings.** The tanks' road of stepping
+  stones (fish-shaped plates on pink planks), its orange landings and its
+  exit arrow are floor of another kind and a road, its stairs rising 16
+  (half a panel) to the pads and platforms are stairs, and its pads' red
+  marks are an exit's centrepiece: the owner's calls (issue #505).
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.
