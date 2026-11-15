@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T00:51:27Z
+* **Update**: devtools/dev-menu.md (`hp=N` moves the base BN6 counts HPMemory into with the max, so BN6's own sum at each return to the map comes to N: no full heal after every battle and no HP box counting up from 100, session 76).
