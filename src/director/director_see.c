@@ -104,8 +104,15 @@ static void see_counts(void) {
 		seen.md_taken[c] += taken;
 	}
 	if (D.counts_t > 0 && !talk_busy()) --D.counts_t;
+	/* (none known as L is heard: no counters this time, nor for the rest
+	 * of its seconds; an empty box had stood there through MegaMan's
+	 * words, and the first one seen as he walked on had popped in whole
+	 * and out again, kai7, session 76) */
+	if (!seen.md_known[0] && !seen.md_known[1] && !seen.md_known[2]) D.counts_t = 0;
 	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
-	seen.counts_a = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
+	int to = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
+	/* (in over 8 frames, as it goes over 16) */
+	seen.counts_a = to > seen.counts_a + 32 ? seen.counts_a + 32 : to;
 }
 
 

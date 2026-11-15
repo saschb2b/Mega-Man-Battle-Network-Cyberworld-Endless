@@ -404,8 +404,9 @@ static void map_mystery(const MapView *m) {
  * the note while one shows ("Run saved" stands there as a layer begins,
  * when L is pressed first) */
 void director_draw_counts(void) {
-	int a = seen.counts_a, w = a ? md_counts(0, 0, 0) + 8 : 0;
-	if (!w) return;
+	int a = seen.counts_a, w = a ? md_counts(0, 0, 0) : 0;
+	if (!w) return;   /* (nothing to count: no empty box) */
+	w += 8;
 	int x = P.core_x + 240 - w - 3, y = P.core_y + 3 + cinema_note_height();
 	fill_rect(x, y, w, TEXT_H + 4, rgba(0, 16, 40, (Uint8)(170 * a / 255)));
 	fill_rect(x, y + TEXT_H + 3, w, 1, rgba(120, 248, 255, (Uint8)(200 * a / 255)));
