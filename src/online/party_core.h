@@ -80,6 +80,9 @@ unsigned party_core_phase(PartyCore *pc);
 unsigned party_core_hp(const PartyCore *pc, unsigned seat);
 /* The guardian's HP and max (side 1's first actor), 0 none */
 unsigned party_core_foe_hp(PartyCore *pc);
+/* The reward BN6's results picked as the battle ended (BN6_BATTLE_REWARD:
+ * a row's entry, chip_entry.h's REWARD_*) */
+uint16_t party_core_reward(PartyCore *pc);
 
 /* The picture (PARTY_W x PARTY_H, mGBA's colour order), and the core's
  * sound into the game's (true) or dropped */

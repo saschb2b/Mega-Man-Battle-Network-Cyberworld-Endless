@@ -38,6 +38,16 @@ const char *dive_crew_meet_words(const char *name, bool mate) {
 const char *dive_crew_split_question(void) { return "Split up,Lan?\n"; }
 
 const char *dive_crew_wait_words(void) { return "Waiting for the crew..."; }
+
+const char *dive_join_offer_words(const char *name) {
+	static char s[64];
+	snprintf(s, sizeof s, "%s's in a battle!  A:Jump in", name);
+	return s;
+}
+
+const char *dive_join_calling_words(void) { return "Battle! Calling the crew..."; }
+
+const char *dive_join_joined_words(void) { return "Jumping in!"; }
 const char *dive_find_words(const char *name, bool mine) {
 	static char s[64];
 	if (mine) snprintf(s, sizeof s, "First to open this one this week!");

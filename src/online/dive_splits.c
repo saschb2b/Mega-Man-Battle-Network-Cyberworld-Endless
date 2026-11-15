@@ -86,6 +86,10 @@ void dive_splits_frame(void) {
 	else if (S.fighting && sub == BN6_SUB_MAP) ended();
 }
 
+void dive_splits_fought(void) {
+	if (S.seed == run.layer_seed && S.depth == run.depth) ++S.battles;
+}
+
 void dive_splits_place(const DivePlace *p) {
 	fprintf(stderr, "dive: battle %u's split: %u of %u, the quickest %u by %s\n", p->index, p->place, p->count, p->best, p->best_name);
 	if (p->place) dive_link_line(dive_place_words(p->tenths, p->place, p->count));

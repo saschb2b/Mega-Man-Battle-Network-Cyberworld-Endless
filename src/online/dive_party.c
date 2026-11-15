@@ -7,6 +7,7 @@
 #include "boss.h"
 #include "bn6.h"
 #include "bytes.h"
+#include "dive_join.h"
 #include "dive_words.h"
 #include "emu.h"
 #include "online_transport.h"
@@ -160,8 +161,13 @@ static void queue_state(const QueueState *q) {
 /* a party battle's START (one field: the party's core takes the guardian's
  * fight, party_play.h; linked: this game's own) and a seat gone */
 static void party_state(const PartyState *p) {
-	if (p->stage == ONLINE_ARENA_SEAT_GONE && p->battle == Q.party.battle) { party_play_gone(p->seat); return; }
+	if (p->stage == ONLINE_ARENA_SEAT_GONE && p->battle && (p->battle == Q.party.battle || p->battle == dive_join_battle())) {
+		party_play_gone(p->seat);
+		return;
+	}
 	if (p->stage != ARENA_START) return;
+	/* (a crew's random battle MegaMan offered or joined: dive_join.h) */
+	if (Q.door != DOOR_STARTED && dive_join_start(p)) return;
 	Q.party = *p;
 	if (p->form != ONLINE_ARENA_PARTY) return;
 	unsigned n = 0;

@@ -73,7 +73,12 @@ static struct {
 	uint32_t started_ms, said_ms;   /* the fight's first frame by the wall clock; its last status line */
 	bool alone;                   /* the link broken: every other seat gone */
 	uint64_t mine_ready;
+	bool crew;                    /* a crew's random battle (party_play_crew), not a guardian's */
 } PP;
+
+/* A crew's battle's end, kept for party_play_crew_end */
+typedef struct { bool due, won; int hp; uint16_t reward; } CrewEnd;
+static CrewEnd crew_end;
 
 static bool out(void *context, const uint8_t *data, size_t size) {
 	(void)context;
@@ -107,7 +112,8 @@ static void stop(void) {
 /* the record the run's core was given, as at FREE_RECORDS, and its BN4
  * Navi's sounds' pool pointed at him in the run's ROM (xnavi_bn4_sounds.h) */
 static void take_record(const Encounter *e) {
-	emu_encounter_set(e);
+	/* (a crew's: its caller has made it the run's next battle already, director_crew_record) */
+	if (!PP.crew) emu_encounter_set(e);
 	uint32_t at = FREE_RECORDS + (uint32_t)emu_encounter_slot() * PARTY_RECORD_BYTES;
 	emu_read_bytes(at, PP.b.record, PARTY_RECORD_BYTES);
 	xnavi_bn4_sounds_for((uint32_t)PP.b.record[RECORD_FOE + 2] | (uint32_t)PP.b.record[RECORD_FOE + 3] << 8);
@@ -146,10 +152,22 @@ static bool fight(const Encounter *e, int own_hp, int fought_hp) {
 	/* (the dev's stood-in partners: my MegaMan again, their keys a script) */
 	for (unsigned k = 0; !PP.net && k < PP.b.n; ++k) { PP.b.seat[k] = *mine; PP.have[k] = true; }
 	PP.stage = PP_BOOT;
-	fprintf(stderr, "party: the guardian's fight taken over, %u MegaMen, my seat %u, his HP %d (his own %d)\n", PP.b.n, PP.seat, fought_hp,
+	if (PP.crew) fprintf(stderr, "party: the crew's battle taken over, %u MegaMen, my seat %u\n", PP.b.n, PP.seat);
+	else fprintf(stderr, "party: the guardian's fight taken over, %u MegaMen, my seat %u, his HP %d (his own %d)\n", PP.b.n, PP.seat, fought_hp,
 		own_hp);
 	return true;
 }
+
+bool party_play_crew(const Encounter *e) {
+	if (!PP.started) return false;
+	PP.crew = true;
+	crew_end.due = false;
+	if (fight(e, 0, 0)) return true;
+	PP.crew = false;
+	return false;
+}
+
+bool party_play_crew_fighting(void) { return PP.crew && PP.stage != PP_NONE; }
 
 static void hold_frame(uint32_t pad) {
 	/* (the transport's inbox, which the held game's own frame no longer drains) */
@@ -223,6 +241,21 @@ bool party_play_held(void) { return PP.stage != PP_NONE; }
 /* ---- the fight's frames ---- */
 
 static void failed(const char *why) {
+	/* (the server's party battle let go of, this seat gone: the others told, a later battle or queue not refused as busy) */
+	if (PP.net) {
+		uint8_t m[ONLINE_ARENA_BYTES];
+		if (!online_transport_send(m, arena_wire_action(m, ARENA_ACT_LEAVE, PP.battle, 0, 0))) fprintf(stderr, "party: the leave not sent\n");
+	}
+	if (PP.crew) {
+		/* (a crew's battle: its owner's game fights it alone, as the field would have; a joiner back on his map) */
+		bool owner = PP.seat == 0;
+		fprintf(stderr, "party: %s; %s\n", why, owner ? "the run's core fights the crew's battle alone" : "back on the map");
+		if (PP.net) arena_link_net_flush(&PP.link);
+		stop();
+		if (owner) emu_encounter_go();
+		else emu_encounter_drop();
+		return;
+	}
 	fprintf(stderr, "party: %s; the run's core fights the guardian alone\n", why);
 	int own = PP.b.foe_from, fought;
 	stop();
@@ -240,6 +273,8 @@ static bool all_here(void) {
 
 static void open_core(void) {
 	char why[160] = "";
+	/* (the lead's MegaMan is the field's own: with him gone before it was made there is no field) */
+	if (PP.net && !PP.have[0]) { failed("the lead left before the field was made"); return; }
 	PP.b.quiet = PP.net;
 	/* (over the server each partner his own NaviStats, hand and Custom screen; the dev's stood-in partners a script, or with
 	 * partybot=1 each his own screen on this game, the bot's keys on it) */
@@ -517,10 +552,26 @@ static void results_frame(uint32_t pad) {
 	party_core_sound(PP.core, false);
 	for (unsigned k = 1; PP.b.own && k < PP.b.n; ++k)
 		if (k == PP.seat || !PP.net) party_turn_report(k);
+	/* (a crew's battle: its end kept for its caller, the reward BN6's results gave on the field this game's to give in
+	 * its own run, party_play_crew_end) */
+	bool crew = PP.crew;
+	if (crew) {
+		crew_end = (CrewEnd){ true, won, (int)hp, party_core_reward(PP.core) };
+		fprintf(stderr, "party: the crew's battle's reward on the field %04x\n", crew_end.reward);
+	}
 	bool on = PP.on;
 	stop();
 	PP.on = on;
-	director_party_over(won, (int)hp);
+	if (!crew) director_party_over(won, (int)hp);
+}
+
+bool party_play_crew_end(bool *won, int *hp, uint16_t *reward) {
+	if (!crew_end.due) return false;
+	*won = crew_end.won;
+	*hp = crew_end.hp;
+	*reward = crew_end.reward;
+	crew_end.due = false;
+	return true;
 }
 
 static void fighting(uint32_t pad) {

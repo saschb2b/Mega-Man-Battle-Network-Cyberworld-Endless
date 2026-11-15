@@ -501,7 +501,9 @@ across layers until a member splits up (the rest go on where two or more
 stay), leaves the dive or the server, or ends his dive (DIVE end).
 `crew_way` tells every member which fork's portal each stands on, so each
 game opens it only when all agree. `crew_battle` offers a crewmate's
-random battle to his crewmates in the same room; `crew_join` answers
+random battle to his crewmates in the same room, never to or from a
+session whose HELLO said `hello_no_arena` (the battle is fought on one
+field); `crew_join` answers
 within `crew_join_ms` (3000). When everyone offered has joined, or the
 window ends, a party battle starts, the owner seat 0 and the joiners
 after him; with nobody, the owner is told `crew_alone`.

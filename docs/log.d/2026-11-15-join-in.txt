@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T13:50:44Z
+* **Update**: online/shared-dive.md (the crew's join-in battles built and seen with two games over a local server: BN6's roll held while a crewmate stands near, the offer in the band, the joined battle on the party's core with its hashes agreeing, BN6's reward and HP into each run, the owner alone where nobody joins; the n-th random battle found not the same for every diver; the join window's open question closed), rom/battle.md (the encounter roll's branch held for the crew, and why a hook that gives a battle jumps to StartBattle), code/online.md (`dive_join.c`), code/director.md (`director_crew.c`, the crew's hold in `encounter.c`).
