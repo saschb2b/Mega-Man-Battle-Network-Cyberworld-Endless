@@ -85,6 +85,7 @@ Taken per area as looked at, as every laying rule is
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
+| BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -259,6 +260,39 @@ among them the junction the survey took for a hub's piece (`b23_90_2` at
 centrepieces and raised hubs; and a machine on one of Oran Area 1's hubs,
 on its second tile layer over the floor alone, which this page's rule
 takes for a centrepiece (whether it blocks the way in BN5 was not checked).
+
+## What Park Area sets round its floors (none; measured on the map and the atlas)
+
+BN4's Park Area (its one map 0x92:0, the atlas's `a17`) sets nothing on,
+beside, behind or under its floors that is not floor or a set piece. Its
+layers draw 39% of the map's 837 different tile pictures (two seeds, six
+layers); what they leave, looked at on the tinted map and cut by each rule
+in turn (the cuts switched on for the area and every group they weighed
+listed, 15 November 2026):
+
+- **Its second tile layer** holds three groups: the two overpasses with
+  the stairs up to them (553 and 665 tiles, past the 160 a side piece may
+  have; heights and stairs, issue #505's kind 5) and the centrepiece of
+  its Navi's round hub (21 tiles, on the floor alone: a centrepiece,
+  kind 4). None hangs off a floor's side.
+- **Under a floor** there is nothing to cut: the map's only floor above
+  the ground is its overpasses', and no view at their height has enough
+  cells to be learned.
+- **Behind its floors** the cut weighs 21 groups of the first layer and
+  takes none, and none is a thing: the far halves of its dead ends' round
+  discs (four, 17 and 18 tiles), its walkways' S-bends under the left
+  overpass (five, on floor at the overpass's height), a road's rounded end
+  and a stair's foot (7 and 6 tiles), and its rims, roads, exit arrows and
+  the platform's frame (24 to 759 tiles, larger than the cut takes: 24
+  tiles, under 20 wide).
+- **The scenery cut** takes nothing: every group off the floor touches
+  other art.
+
+The rest is floor art or the owner's kinds: its orange and yellow roads'
+rims, bends and stripes ([Roads on the way](roads.md) draws the roads
+themselves), the outer rims of its walkways' turns and forks, a walkway
+broken off where it nears the platform (at (792, 456)), its two round
+hubs, its exit arrows, and the overpasses and their stairs.
 
 ## Scenery a face's depth from the floor (Robot Control Comp; verified on the maps and in the game)
 
