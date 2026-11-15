@@ -79,7 +79,7 @@ Taken per area as looked at, as every laying rule is
 | CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
-| The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
+| The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4; behind upper edges on the second layer, gripping none, a row of five along a walkway, a bowl each, and two alone by its exits: 7 looks (below); the two in a raised ring's holes stand behind no edge and fit no layer (below) | yes, both |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
 | BN5's ACDC Area | nothing; its wire tufts behind its blue walkways' upper edges are drawn into a rim no layer draws, its layers laying no blue walkway (below) | no |
@@ -151,9 +151,10 @@ the [tile test](../../devtools/tile-test.md)'s pictures show them
 group, whose script BN6 starts by itself, so a piece set with those tile
 numbers burns on a generated floor with nothing added (captured on an
 Undernet layer: bowls of flame beside a bridge and a room's corner, their
-flames changing between frames). Five of Undernet 1's lone bowls draw
-nothing on ground floor and are no side piece; the ones that touch a rim
-are.
+flames changing between frames). Two of Undernet 1's lone bowls draw
+nothing on ground floor and are no side piece: they stand behind a pad's
+corner by its exits ([below](#behind-a-floor-on-the-second-layer-sides_learn_behind-verified-on-the-maps-the-atlas-and-in-the-game));
+the ones that touch a rim are.
 
 The Undernet's maps hold more in the second layer than what hangs on a
 floor's side. In Undernet 1 the rest of it joins into one group of some
@@ -297,6 +298,56 @@ The cut behind a floor (`behind_learn`) finds 4 looks: three rows of pins,
 fits a layer's panels by its neighbourhood, but on every one the layer's
 floor already holds all of its tiles (13 of 13, probed): the pins are
 drawn in the rim's tiles, which the floor's own art lays.
+
+## Behind a floor on the second layer (`sides_learn_behind`; verified on the maps, the atlas and in the game)
+
+The Undernet's maps set fire bowls that grip no floor. Undernet 3 (0x95:2)
+stands a row of five behind a walkway's upper edge, a bowl behind each
+panel, its foot on the rim; Undernet 1 (0x95:0) stands one beside each
+of two exits, behind a pad's corner. They lie on the second layer, as its
+other bowls do, and none of their pixels lies on a floor's top, so the
+side-piece cut refuses them (it wants 8), and `behind_learn` reads the
+first layer alone (cut with a debug line per group: on-floor pixels 0, a
+floor straight below, none above).
+
+Bit 7 of `net_area.sides` (`SIDES_BEHIND_FRONT`, any area may set it) cuts
+them: a group of the second layer's tiles is such a piece where it is
+`behind_learn`'s, the other layer (no pixel on a floor's top, a floor
+straight below its bottom row within 16 pixels, none straight above it
+within 48), up to 160 tiles, at every floor height (the raised views
+too). A group most of whose tiles repeat at one step is cut into its
+copies, each whole with the panel it stands behind: the row of five
+joins into one group of 70 tiles, its step 4 tiles across and 2 up, and
+gives a bowl each. Cut by the panel each tile column stands behind
+instead, a bowl came apart in two, as one stands behind the joint of two
+panels' edges. With the exits' two that is 7 looks.
+
+A layer sets them in stretches, as it sets `behind_learn`'s, but not by
+the panel's neighbourhood: the row stands behind a stepped edge, each
+panel a tooth with floor before it and void on both sides, which a
+layer's floor never draws (matched so, 2 were set over the atlas's ten
+layers). A look goes down on a free floor panel where the panels it
+draws over are void, as in its map, the panels straight below its bottom
+row are floor (a bowl in a step's inner corner stands where both steps
+are, not off one), and the first layer under it shows what its map's did
+(`SidePiece.over`, as [the Nest's crystals](#the-nests-crystals-sides_learn_under-verified-on-the-maps-and-in-the-game)):
+set without that, a bowl at a room's corner covered the corner's rim with
+its bottom row, and one layer's nicks went from 30 to 34 in the
+[tile test](../../devtools/tile-test.md). So set, 0 to 3 a layer, 18 over
+the atlas's ten (`build.py atlas 5 2`), beside the 1 to 8 that grip a rim,
+about the maps' share (7 of their 32 bowls stand behind an edge so); no
+layer's tile test worse. They burn as the others do.
+
+The maps hold no layer priorities for them, and none are kept: BN6 draws
+MegaMan in front of the second layer there, so he walks in front of a
+bowl behind the edge he stands on. A Glitch flip into the Undernet sets
+them too, in the tiles' own pass (`pick_map`).
+
+Not set: the two bowls in the holes of Undernet 3's raised ring (0x95:2,
+at height 120), each in a hole a panel wide, a floor straight above it
+and none within 16 pixels below, so neither behind an edge nor under
+one; and a layer of the Undernet has no such hole (only Mr. Weather
+Comp's and the Graveyard's rooms are holed).
 
 ## What Oran Area sets round its floors (none set; measured on the maps and the atlas)
 

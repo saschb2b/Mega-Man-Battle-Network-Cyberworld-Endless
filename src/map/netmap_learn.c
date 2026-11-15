@@ -86,6 +86,7 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		/* (and what stands under that floor, where the area sets such: sides.h) */
 		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 4) behind_learn(&r, &L->sides);
+		if (net_area_def(area)->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&r, &L->sides);
 		area_src_raise_end(src, &r);
 	}
 	/* (its books are one map's: the layer's lead, netmap.c) */
@@ -273,6 +274,7 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) (na->sides & 8 ? sides_learn_under : sides_learn)(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);
+	if (na->sides & SIDES_BEHIND_FRONT) sides_learn_behind(m, &L->sides);
 	if (na->sides & 16) hole_learn(m, &L->hole);
 }
 
