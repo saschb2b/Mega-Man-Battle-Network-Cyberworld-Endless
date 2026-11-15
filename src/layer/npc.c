@@ -205,6 +205,10 @@ uint32_t npc_live(int category, int index, int x, int y, int z, int anim, uint32
 	return live_and_write(s, 15, anim, anim_at);
 }
 
+/* (the next talker never turns to MegaMan, whatever its sprite draws:
+ * npc_talker_looks') */
+static bool still_next;
+
 /* (behind: a navi behind a counter, drawn under the second layer that
  * draws the counter, its talk centre shifted by (sx, sy) towards the
  * counter's front: the originals' 0x1B and 0x0C, collision radius 8) */
@@ -231,7 +235,7 @@ static uint32_t talker(int category, int index, int x, int y, int z, int anim, u
 	 * its face). Nor does a battle sprite, or a Navi's sprite that draws
 	 * none of the facing BN6 would turn it to (BN4's TopMan and SparkMan
 	 * away from the camera, WindMan's four, which end before 7) */
-	if (!npc_sprite_turns(category, index)) s[n++] = 0x13;
+	if (still_next || !npc_sprite_turns(category, index)) s[n++] = 0x13;
 	if (behind) {
 		s[n++] = 0x1B;
 		s[n++] = 0x0C; s[n++] = (uint8_t)sx; s[n++] = (uint8_t)sy; s[n++] = 0;
@@ -246,13 +250,16 @@ uint32_t npc_talker(int category, int index, int x, int y, int z, int anim, uint
 
 uint32_t npc_talker_looks(const NpcTalk *t, NpcLooks *looks) {
 	memset(looks, 0, sizeof *looks);
-	uint32_t at = talker(t->category, t->index, t->x, t->y, t->z, 0, t->archive, t->script, t->gone_flag, true, false, 0, 0);
+	still_next = true;
+	int anim = t->anim >= 0 ? t->anim : 0;
+	uint32_t at = talker(t->category, t->index, t->x, t->y, t->z, anim, t->archive, t->script, t->gone_flag, t->floor, false, 0, 0);
+	still_next = false;
 	if (!at) return 0;
 	looks->jump_at = idle_jump_at;
 	looks->loop = idle_loop;
 	/* (ns_set_sprite's 0x25, the animation's 0x16, ns_set_mosaic's 0x2D,
 	 * then back to the loop: bn6f asm/npc.s) */
-	uint8_t look[] = { 0x25, (uint8_t)t->index, (uint8_t)(t->category * 4), 0x16, 0, 0x2D, 0, 0, 0x02, 0, 0, 0, 0 };
+	uint8_t look[] = { 0x25, (uint8_t)t->index, (uint8_t)(t->category * 4), 0x16, (uint8_t)npc_sprite_stand(t->category, t->index, anim), 0x2D, 0, 0, 0x02, 0, 0, 0, 0 };
 	uint8_t blur[] = { 0x2D, 0, 0, 0x02, 0, 0, 0, 0 };
 	put32(look + 9, idle_loop);
 	put32(blur + 4, idle_loop);

@@ -21,9 +21,11 @@
 #include "bn6_map.h"
 #include "director_state.h"
 #include "emu.h"
+#include "gamecall.h"
 #include "netmap.h"
 #include "rom.h"
 #include "run.h"
+#include "xbackdrop.h"
 
 /* (the looks made as the layer begins: learning an area's maps takes
  * about a second on a New 3DS, whose heap keeps one area learned at a time,
@@ -51,6 +53,10 @@ static struct {
 	uint16_t *map;
 	size_t map_bytes;
 	bool kept;
+	/* (the backdrops: each look's area's BGAnimData record, the map's own,
+	 * and whether a look's is on BG3 now) */
+	uint32_t bg[LOOKS], own_bg;
+	bool bg_on;
 } L;
 
 void glitch_looks_free(void) {
@@ -99,7 +105,11 @@ void glitch_looks_make(int own, const int *first, int nfirst) {
 	int areas[2 * BIOME_COUNT + 4], n = candidates(areas, 2 * BIOME_COUNT + 4, own, first, nfirst < 4 ? nfirst : 4), got[LOOKS];
 	uint32_t t0 = SDL_GetTicks();
 	for (int i = 0; i < n && L.n < LOOKS; ++i)
-		if (netmap_look(areas[i], &L.look[L.n])) got[L.n++] = areas[i];
+		if (netmap_look(areas[i], &L.look[L.n])) {
+			L.bg[L.n] = xbackdrop_area_record(areas[i]);
+			got[L.n++] = areas[i];
+		}
+	L.own_bg = xbackdrop_map_record(D.group, D.number);
 	printf("glitch: %d looks of other areas (", L.n);
 	for (int k = 0; k < L.n; ++k) printf("%s%d", k ? ", " : "", got[k]);
 	printf(") in %u ms\n", (unsigned)(SDL_GetTicks() - t0));
@@ -176,6 +186,11 @@ void glitch_look_flip(int k) {
 		vram_write(L.lo, (const uint8_t *)L.vram, L.hi - L.lo);
 		emu_write(BN6_BG_PALETTE, L.pal, PALETTE_SIZE);
 	}
+	/* (the sky with the floor: the look's area's backdrop on BG3, its tiles,
+	 * map and bank 0, through BN6's own loader as a map's entry loads it;
+	 * the map's own back with the floor) */
+	uint32_t bg = k >= 0 ? L.bg[k] : L.bg_on ? L.own_bg : 0;
+	if (bg && L.own_bg && game_call(BN6_LOAD_BG_ANIM_DATA, bg, 0)) L.bg_on = k >= 0;
 	L.want = k;
 	L.step = 1;
 }
@@ -186,7 +201,7 @@ static void map_entered(void) {
 	if (L.shown < 0 || L.step) return;
 	const uint16_t *map = L.look[L.shown].map;
 	for (size_t k = 0; k < L.map_bytes / 2; k += 97)
-		if (emu_read16(BN6_MAP_TILEMAP + BN6_MAP_TILEMAP_HEAD + 2 * (uint32_t)k) != map[k]) { L.shown = -1; return; }
+		if (emu_read16(BN6_MAP_TILEMAP + BN6_MAP_TILEMAP_HEAD + 2 * (uint32_t)k) != map[k]) { L.shown = -1; L.bg_on = false; return; }
 }
 
 void glitch_look_update(void) {
