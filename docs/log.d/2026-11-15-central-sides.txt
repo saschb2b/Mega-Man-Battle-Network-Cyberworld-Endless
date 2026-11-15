@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T18:48:10Z
-* **Update**: world/level-design/side-pieces.md (Central Area's row, and a section on what its maps set round their floors: nothing a layer can carry, the capsule a shop, the rest floor art or the owner's kinds).
