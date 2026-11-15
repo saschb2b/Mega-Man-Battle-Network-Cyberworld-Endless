@@ -95,6 +95,16 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   others widen as above. Over sixty layers of RoboDog's comp
   (`test_way_shapes`), the way's turns into a walkway on wide floor fell
   from 25 to 14 and its one-panel jogs from 3 to 1.
+- **No pit between walkways** (15 November 2026). Walkways and platforms
+  meeting round a single void panel left a pit, floor on its four sides
+  and void on a corner, that the art draws as a walkway cut in half and
+  BN6's walls keep MegaMan off; the walk went round it in a jog, where the
+  same playtester stood still beside one. No original map has one; the
+  holes punched in the Graveyard's slabs and Green's fields keep their
+  corners floor. Such pits are filled once the way is widened
+  (`fill_pits`): over the tests' 300 layers, 19 in 18 layers before, none
+  between walkways now (`test_way_shapes` holds it), 5 left inside the
+  fields of guardians' layers.
 - **Rungs meet a field square on** (issue #98). A comb's rung back to a
   ragged field that met its edge on a tab beside a bite was a mouth two
   panels wide on one side, the field going on past it, where the arrow's
