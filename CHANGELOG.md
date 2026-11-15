@@ -79,10 +79,12 @@
   continues.
 - **Shorter stops on the way.** A Net Dealer says one box before his
   list (his word on the guardian, or a greeting; his codes too in act
-  1), where he said seven or eight. L names two things worth a detour
-  at most (ProtoMan, a flame of darkness, a violet mark, Mystery Data
-  behind a lock), then the heal and the way: seven boxes over two
-  presses on a busy layer, where it took twelve. A second talk with the
+  1), where he said seven or eight. L's first press says the way and
+  two things worth a detour at most (ProtoMan, a flame of darkness, a
+  violet mark, Mystery Data behind a lock, the heal while you're hurt);
+  the tips that rode along with it come where they help instead. When
+  L points you to the heal and you walk away from it, the arrow turns
+  back to the exit. A second talk with the
   Virus Battler is his first pair and the question, as a shop's second
   visit is.
 - **Chaud's call and ProtoMan's race, tightened.** Lan's surprise
@@ -134,7 +136,8 @@
   its walkways meet at small squares as BN4's do, with no stray cyan
   scraps. BN5's Oran Area lays its hubs as one floor with their
   circuits, joined as BN5 joins them, where every meeting was a jumble
-  of docks and orange chips.
+  of docks and orange chips. BN4's ACDC roads turn only where BN4's own
+  roads bend, with no navy squares left in the cyan.
 - **BN4's and BN5's areas keep their wide ways.** A way through their
   layers keeps the two-panel walkways it was laid with, crossing no
   more one-wide ones than the area's own maps do. The drawing used to
@@ -166,6 +169,24 @@
 - **The Battle Lab's builder, easier to drive.** B goes back a level on
   every page and asks "Leave the Lab?" before it leaves, FIELD's Preset
   is reachable with Up, and held directions repeat.
+- **The guardian's gate on the way's line.** The bridge to a
+  guardian's arena leaves its antechamber where the way meets it,
+  straight on, rather than from the middle of a side you had to turn
+  into.
+- **What the run tells you.** Dad's first call says what a dive leaves
+  behind and what it keeps, R on a layer answers with the way home, and
+  RECORDS counts the Library's new entries from the starting folder on.
+  MegaMan's word before a guardian's arena comes a few panels from its
+  door, never while someone stands in reach of A, and says "Let's get
+  ready first!" rather than asking a question that takes no answer.
+- **Fixed: a stray A could take a DarkChip or open a purchase.** "Take
+  the DarkChip?" starts on No, its options a moment after the question,
+  and a shop opened from a talk takes no A for its first second and a
+  half, so an A pressed through the words takes nothing.
+- **Fixed: a CONTINUE at a guardian's door forgot him.** After a
+  CONTINUE from an arena's door, the act card names the guardian met
+  there, and B hurries his words again. The card's "A layer here has
+  gone dark" shows only before the act's dark layer.
 - **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
   Pressing A at a steady pace through his words, the next press could
   land just after the gift's screen opened and take its first choice
