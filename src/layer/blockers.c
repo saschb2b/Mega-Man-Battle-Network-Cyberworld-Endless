@@ -37,18 +37,25 @@
 #define H3_ORIGINALS 86
 #define BLOCKERS_AT  FREE_BLOCKERS         /* BN6's records, then the engine's (docs/engine/emulation/) */
 #define BLOCK_ID0    0x56          /* the engine's: + variant x 8 + slot */
-#define BLOCK_SLOTS  8
+#define BLOCK_SLOTS  4           /* (a layer's two locks, MAX_BLOCKS, then another game's prop) */
 #define NET_CHECKS   0x08034728u   /* per internet group from 0x80, per map: the 16 checks' scripts */
 #define NET_ARCHIVES 0x08040798u   /* per internet group from 0x80, per map: its LZ77 text archive */
 
-/* The variants: the cube looking each of four ways (issue #45), then the
- * five obstacles, then another game's looks for them (docs/multirom/):
- * BN5's Security Cube, its wall of dark flames across a walkway along
- * world Y and along X, and its dark hole, a prop that never opens; bytes
- * 6-15 of their records as BN6's own (sprite list, sprite, idle and open
- * animations, a sprite field, palette, priority, a spare, sound 0x74) */
-enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, V_XWALL, V_XHOLE = V_XWALL + 2, VARIANTS };
-#define XPROP_SLOT 7   /* the slot of another game's prop: its present flag set while it stands, its walls and check named by no cell */
+/* The variants: the cyberbarrier looking each of four ways (issue #45),
+ * then the five obstacles, then another game's looks for them
+ * (docs/multirom/): BN5's Security Cube, its wall of dark flames across a
+ * walkway along world Y and along X, and its dark hole, a prop that never
+ * opens; then BN6's own Security Cube; bytes 6-15 of their records as
+ * BN6's own (sprite list, sprite, idle and open animations, a sprite
+ * field, palette, priority, a spare, sound 0x74). BN6 names the gold cube
+ * with X faces its Security Cube, asking a P-Code (Central Area 1's and
+ * Seaside Area 2's, ids 0x09 and 0x52), and the striped walls, its 37
+ * story blocks, the cyberbarrier (docs/rom/net-maps.md, Link Navi
+ * obstacles). */
+enum { V_CUBE, V_WATER = 4, V_TREE, V_FLAMES, V_CYCLONE, V_CLOUD, V_XCUBE, V_XWALL, V_XHOLE = V_XWALL + 2, V_SCUBE, VARIANTS };
+/* (BN6's Security Cube, its id 0x09's record) */
+static const uint8_t security_cube[10] = { 0x1C, 0x01, 0, 1, 0, 0, 2, 0xFF, 0x74, 0 };
+#define XPROP_SLOT 3   /* the slot of another game's prop: its present flag set while it stands, its walls and check named by no cell */
 static const uint8_t templates[V_XCUBE][10] = {
 	{ 0x1C, 0x03, 0, 0, 0x38, 0, 2, 0xFF, 0x74, 0 },
 	{ 0x1C, 0x03, 1, 1, 0x38, 0, 2, 0xFF, 0x74, 0 },
@@ -73,6 +80,7 @@ static void template_of(int v, uint8_t out[10]) {
 		{ XOBJ_DARK_WALL, V_FLAMES, { 0x1C, 0, 1, 3, 0, 0, 2, 0xFF, 0x74, 0 } },
 		{ XOBJ_DARK_HOLE, V_FLAMES, { 0x1C, 0, 0, 0, 0, 0, 3, 0xFF, 0x74, 0 } },
 	};
+	if (v == V_SCUBE) { memcpy(out, security_cube, 10); return; }
 	int slot = v < V_XCUBE ? -1 : xnavi_object(xlook[v - V_XCUBE].obj);
 	if (slot < 0) { memcpy(out, templates[v < V_XCUBE ? v : xlook[v - V_XCUBE].bn6], 10); return; }
 	memcpy(out, xlook[v - V_XCUBE].rec, 10);
@@ -90,6 +98,7 @@ static int variant_of(const NetBlock *b) {
 	if (b->kind == BLOCK_FLAMES && (layer_objs_xlooks & XLOOK_DARK_WALL) && xnavi_object(XOBJ_DARK_WALL) >= 0) return V_XWALL + !(dir & 1);
 	if (b->kind < BLOCK_KINDS) return obstacle[b->kind];
 	if ((b->kind == BLOCK_PCODE || b->kind == BLOCK_TOLL) && (layer_objs_xlooks & XLOOK_CUBE) && xnavi_object(XOBJ_CUBE) >= 0) return V_XCUBE;
+	if (b->kind == BLOCK_PCODE) return V_SCUBE;
 	static const int look[4] = { 0, 3, 2, 1 };
 	return V_CUBE + look[dir];
 }
@@ -115,6 +124,11 @@ void blockers_install(void) {
 		emu_write32(H3_LITERAL, BLOCKERS_AT);
 	}
 	for (int k = 0; k < layer.nblocks; ++k) flag_set(BLOCK_PRESENT_FLAG + k);
+}
+
+bool blocker_is_cube(int b) {
+	int v = b >= 0 && b < layer.nblocks ? variant_of(&layer.block[b]) : -1;
+	return v == V_SCUBE || v == V_XCUBE;
 }
 
 void blocker_sprite(int b, int *category, int *index) {
@@ -166,9 +180,9 @@ int blockers_objects(uint8_t *recs, int n, int max) {
 		const NetBlock *b = &layer.block[k];
 		int dir, edge, side, x, y;
 		netmap_block_edges(b, &dir, &edge, &side);
-		/* (BN5's Security Cube stands in the walkway's middle, as BN6's
-		 * obstacles do: its sprite is drawn about its spot as theirs) */
-		spot(dir, variant_of(b) == V_XCUBE ? BLOCK_FLAMES : b->kind, edge, side, &x, &y);
+		/* (a Security Cube, BN5's or BN6's, stands in the walkway's middle,
+		 * as BN6's obstacles do: its sprite is drawn about its spot as theirs) */
+		spot(dir, blocker_is_cube(k) ? BLOCK_FLAMES : b->kind, edge, side, &x, &y);
 		if (emu_debug_on()) fprintf(stderr, "blockers: lock %d, kind %d, variant %d, at world %d,%d facing %d\n", k, b->kind, variant_of(b), x, y, dir);
 		uint8_t *r = recs + n++ * 20;
 		memset(r, 0, 20);
@@ -205,7 +219,7 @@ static int talk(TextArchive *t, int k) {
 	/* (a security cube's: a P-Code told on the layer, or a toll, 200
 	 * zenny in act 1 and 100 more an act: half the Net Dealer's answer) */
 	if (b->kind == BLOCK_PCODE) return ta_cube_pcode(t, BLOCK_PRESENT_FLAG + k, LAYER_PCODE_FLAG, blockers_pcode());
-	if (b->kind == BLOCK_TOLL) return ta_cube_toll(t, BLOCK_PRESENT_FLAG + k, 200 + 100 * (pacing_act(run.depth) + 7 * pacing_loop(run.depth)));
+	if (b->kind == BLOCK_TOLL) return ta_cube_toll(t, BLOCK_PRESENT_FLAG + k, 200 + 100 * (pacing_act(run.depth) + 7 * pacing_loop(run.depth)), blocker_is_cube(k));
 	/* (the Undernet's doors, issue #47) */
 	if (b->kind == BLOCK_SKULL) return ta_cube_skull(t, BLOCK_PRESENT_FLAG + k, ITEM_WWW_ID);
 	if (b->kind == BLOCK_NUMBER) return ta_cube_number(t, BLOCK_PRESENT_FLAG + k, LAYER_NUMBER_SEALED_FLAG, layer.braziers, run.layer_seed >> 11);

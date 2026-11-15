@@ -31,15 +31,16 @@ int ta_cube_pcode(TextArchive *t, int present, int told, const char *code) {
 	uint8_t check[] = { 0xEF, 0x00, (uint8_t)told, (uint8_t)(told >> 8), (uint8_t)open, 0xFF };  /* ts_check_flag */
 	ta_bytes(t, check, sizeof check);
 	first = true;
-	ta_pages(t, "A security cube,Lan.|It wants a P-Code...|Someone here must know it.|Let's ask around!", FACE_MEGAMAN, &first);
+	ta_pages(t, "A Security Cube,Lan.|It wants a P-Code...|Someone here must know it.|Let's ask around!", FACE_MEGAMAN, &first);
 	ta_end(t);
 	return i;
 }
 
-int ta_cube_toll(TextArchive *t, int present, int price) {
+int ta_cube_toll(TextArchive *t, int present, int price, bool cube) {
 	int paid = ta_script(t);
 	cube_opens(t, present);
-	ta_page(t, FACE_NONE, "Paid. The cube opens!", false);
+	/* (BN5's Security Cube where its area lends it, else BN6's striped cyberbarrier) */
+	ta_page(t, FACE_NONE, cube ? "Paid. The cube opens!" : "Paid. The cyberbarrier lifts!", false);
 	ta_end(t);
 	bool first = true;
 	int broke = ta_script(t);
@@ -127,7 +128,7 @@ int ta_pcode_teller(TextArchive *t, int face, const char *code, int told) {
 	char s[160];
 	bool first = true;
 	int i = ta_script(t);
-	snprintf(s, sizeof s, "Psst! MegaMan!|That security cube here?|Its P-Code is %s.|Don't tell anyone I told you!", code);
+	snprintf(s, sizeof s, "Psst! MegaMan!|That Security Cube here?|Its P-Code is %s.|Don't tell anyone I told you!", code);
 	ta_pages(t, s, face, &first);
 	ta_flag_set(t, told);
 	ta_end(t);

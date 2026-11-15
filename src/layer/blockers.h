@@ -18,6 +18,11 @@
  * would open). */
 void blockers_install(void);
 
+/* Whether lock b looks a Security Cube, BN6's gold one (a P-Code's) or
+ * BN5's where its area lends it, rather than BN6's striped cyberbarrier:
+ * what its words call it. */
+bool blocker_is_cube(int b);
+
 /* Obstacle b's sprite (list category, index), which the map must load. */
 void blocker_sprite(int b, int *category, int *index);
 

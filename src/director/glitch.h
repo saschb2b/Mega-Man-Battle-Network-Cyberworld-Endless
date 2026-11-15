@@ -38,8 +38,9 @@ void glitch_settle(void);
 
 /* (glitch_look.c) The layer's other looks, made as it begins: the same
  * floor in up to three other areas' tiles, from the areas that draw the
- * run's (not `own`, the layer's); and freed */
-void glitch_looks_make(int own);
+ * run's (not `own`, the layer's), the `nfirst` areas in `first` first (dev,
+ * glitchlook=: any area, another game's area N as -1 - N); and freed */
+void glitch_looks_make(int own, const int *first, int nfirst);
 void glitch_looks_free(void);
 int glitch_looks(void);
 /* ... look `k` flipped in (-1: the layer's own back), its tiles and colours

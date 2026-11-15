@@ -39,7 +39,9 @@ static TouchPrefs prefs, before;   /* (before: as they were when the editor open
 static TouchLayout lay;
 static TouchScreen scr;
 static char prefs_path[600];
-static bool prefs_read, shown, always;
+static bool prefs_read, shown, always, off;
+/* (shown as a screen of its own came up: touch_own_screen) */
+static bool shown_before;
 static int warm;    /* (the pressed looks made for this layout so far) */
 static uint32_t taken;
 /* What a finger does: nothing yet (it went down between the controls),
@@ -61,8 +63,11 @@ bool touch_paused(void) { return shown && page != PAGE_NONE; }
 
 static void close_menu(void);
 
+bool touch_kept_away(void) { return off && !always && (platform_pad_present() || P.keyboard_last); }
+
 bool touch_show(bool on) {
 	if (always) on = true;
+	else if (on && touch_kept_away()) on = false;
 	if (on == shown) return false;
 	shown = on;
 	/* (a key or a button put them away: their menu keeps what it has) */
@@ -73,6 +78,33 @@ bool touch_show(bool on) {
 }
 
 void touch_always(void) { always = shown = true; }
+
+void touch_set_off(bool o) { off = o; }
+
+bool touch_away(void) {
+	shown_before = false;
+	return touch_show(false);
+}
+
+bool touch_own_screen(bool on) {
+	if (on) shown_before = shown;
+	return touch_show(on ? false : shown_before);
+}
+bool touch_off(void) { return off; }
+
+bool touch_here(void) {
+#ifdef __3DS__
+	return false;
+#elif defined(__ANDROID__) || defined(CW_IOS)
+	return true;
+#else
+	if (shown || off) return true;
+	/* (a browser's and Windows' touch screens are known from their first touch) */
+	for (int i = 0; i < SDL_GetNumTouchDevices(); ++i)
+		if (SDL_GetTouchDeviceType(SDL_GetTouchDevice(i)) == SDL_TOUCH_DEVICE_DIRECT) return true;
+	return false;
+#endif
+}
 
 void touch_release(void) {
 	memset(fingers, 0, sizeof fingers);
@@ -250,6 +282,8 @@ bool touch_finger(uint32_t type, SDL_FingerID id, float x, float y) {
 	while (k < FINGERS && !(fingers[k].on && fingers[k].id == id)) ++k;
 	if (type == SDL_FINGERDOWN) {
 		if (touch_show(true)) return true;
+		/* (kept away: Options' Touch controls Off) */
+		if (!shown) return false;
 		if (k == FINGERS) for (k = 0; k < FINGERS && fingers[k].on; ++k) {}
 		if (k == FINGERS) return false;
 		memset(&fingers[k], 0, sizeof fingers[k]);

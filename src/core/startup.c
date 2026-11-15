@@ -234,8 +234,9 @@ bool startup_fullscreen(bool big) {
 /* settings.ini in the data folder, made with the defaults where it is
  * missing: the display's lines (display.h), the sound, the music and
  * the effects heard (sound_heard.h), fast forward's speed (fast_forward.h),
- * the controller's vibration and trigger effects (feel_out.h), the frame
- * log */
+ * the controller's vibration and trigger effects (feel_out.h), the touch
+ * controls kept away or not (touch.h, written once Options sets it), the
+ * frame log */
 static void settings_load(const char *path) {
 	FILE *f = fopen(path, "r");
 	if (!f) {
@@ -265,6 +266,7 @@ static void settings_load(const char *path) {
 		if (!strcmp(key, "fast_forward")) fast_speed_set(fast_speed_read(val));
 		if (!strcmp(key, "vibration")) feel_set_level(feel_level_read(val));
 		if (!strcmp(key, "trigger_effects")) feel_set_triggers(on);
+		if (!strcmp(key, "touch_controls")) touch_set_off(!strcmp(val, "off"));
 		/* (not written by default: for a report of a machine's pacing) */
 		if (!strcmp(key, "frame_log")) platform_frame_log = !strcmp(val, "on") || !strcmp(val, "yes") || !strcmp(val, "1");
 	}

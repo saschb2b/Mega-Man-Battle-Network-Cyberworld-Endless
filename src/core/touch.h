@@ -2,10 +2,11 @@
  * one, the Android build) or a Steam Deck's screen. A D-pad, A and B, L
  * and R, START and SELECT round the game's picture, drawn at the screen's
  * own resolution (touch_layout.c places them, touch_art.c draws them),
- * shown from the first touch until a key or a controller's button is used,
- * or all along with --touch. Their MENU button opens their menu over the
- * paused game: their size and opacity, haptics, and the editor that moves
- * and sizes each one (touch.ini keeps it all). */
+ * shown from the first touch until a key or a controller's button is used
+ * (Options' Touch controls Off: never while a controller or the keyboard
+ * plays), or all along with --touch. Their MENU button opens their menu
+ * over the paused game: their size and opacity, haptics, and the editor
+ * that moves and sizes each one (touch.ini keeps it all). */
 #ifndef CW_TOUCH_H
 #define CW_TOUCH_H
 
@@ -21,6 +22,26 @@ bool touch_shown(void);
 bool touch_show(bool on);
 /* --touch: shown from the start and never hidden. */
 void touch_always(void);
+/* A key's or a controller's press: hidden, and not put back after a
+ * screen of its own (touch_own_screen); true where the layout changed */
+bool touch_away(void);
+/* A screen that takes its own taps came up (`on`) or went
+ * (platform_own_taps): hidden over it, then back as they were, unless a
+ * key or a button was pressed meanwhile (a handheld's player saw them
+ * come back unasked after SAVES or the ROMs, discussion #552) */
+bool touch_own_screen(bool on);
+/* Options' Touch controls (settings.ini's touch_controls): Auto, or Off,
+ * which keeps them away while a controller is connected or the keyboard
+ * plays; a touch screen with neither still shows them at a touch, or a
+ * phone could press nothing (discussion #552: a handheld's player, on its
+ * own buttons, saw them come up unasked). */
+void touch_set_off(bool off);
+bool touch_off(void);
+/* ... kept away now: platform_poll hides them where they show */
+bool touch_kept_away(void);
+/* Whether Options shows that line: a touch screen here (a phone's, or
+ * one SDL knows of), or the controls shown or set Off already */
+bool touch_here(void);
 /* Every finger let go: the app lost the screen (a notification shade, the
  * home screen), whose fingers never send their lifting. */
 void touch_release(void);
