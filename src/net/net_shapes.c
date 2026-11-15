@@ -248,3 +248,15 @@ int dead_ends(int *xs, int *ys, int max) {
 		}
 	return n;
 }
+
+int fill_pits(void) {
+	int n = 0;
+	for (int y = 1; y + 1 < MAP_H; ++y)
+		for (int x = 1; x + 1 < MAP_W; ++x) {
+			if (layer.cell[y][x] != C_VOID || !floor_at(x + 1, y) || !floor_at(x - 1, y) || !floor_at(x, y + 1) || !floor_at(x, y - 1)) continue;
+			if (floor_at(x + 1, y + 1) && floor_at(x - 1, y + 1) && floor_at(x + 1, y - 1) && floor_at(x - 1, y - 1)) continue;
+			layer.cell[y][x] = C_PATH;
+			++n;
+		}
+	return n;
+}

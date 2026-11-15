@@ -2637,6 +2637,26 @@ static void way_shapes(int *out) {
 	}
 }
 
+/* The void panels with floor on all four sides and void on a corner, a
+ * pit no original map has (fill_pits); *holes those with their corners floor
+ * too, punched in a slab or a field on purpose (SHAPE_HOLED); *loose the
+ * pits in no room's box, between walkways */
+static int layer_pits(int *holes, int *loose) {
+	int n = 0;
+	*holes = *loose = 0;
+	for (int y = 1; y + 1 < MAP_H; ++y)
+		for (int x = 1; x + 1 < MAP_W; ++x) {
+			if (layer.cell[y][x] != C_VOID || !walk_floor(x + 1, y) || !walk_floor(x - 1, y) || !walk_floor(x, y + 1) || !walk_floor(x, y - 1)) continue;
+			if (walk_floor(x + 1, y + 1) && walk_floor(x - 1, y + 1) && walk_floor(x + 1, y - 1) && walk_floor(x - 1, y - 1)) { ++*holes; continue; }
+			++n;
+			bool in = false;
+			for (int r = 0; r < layer.nrooms && !in; ++r)
+				in = x >= layer.rooms[r].x && x < layer.rooms[r].x + layer.rooms[r].w && y >= layer.rooms[r].y && y < layer.rooms[r].y + layer.rooms[r].h;
+			*loose += !in;
+		}
+	return n;
+}
+
 /* The shapes way_shapes counts, on sixty layers of every area (test_way_links'):
  * the comps' and homepages' held to one one-wide walkway on the way, as
  * their originals' single rooms (docs/world/level-design/generator.md,
@@ -2659,6 +2679,24 @@ static void test_way_shapes(void) {
 			printf("  shapes area %2d: %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", b, got[0], got[1], got[2]);
 	}
 	printf("  way shapes: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", 60 * BIOME_COUNT, all[0], all[1], all[2]);
+	/* (a pit between walkways, its walls keeping MegaMan off it, where the
+	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
+	 * layer 1; 19 in 18 of these layers before, none between walkways now,
+	 * 5 left in the fields of guardians' layers) */
+	int pits = 0, pitted = 0, holes = 0, loose = 0;
+	for (uint32_t seed = 1; seed <= 300; ++seed) {   /* (test_generation's 300) */
+		int depth = 1 + (int)(seed % 25);
+		int kind = seed % 7 == 0 ? LAYER_UNDERNET : seed % 11 == 0 ? LAYER_SECRET : LAYER_NORMAL;
+		int biome = seed % 3 == 0 ? (int)(seed / 3 % BIOME_COUNT) : biome_for_depth(depth);
+		layer_generate(seed * 7919u, depth, biome, kind, biome == BIOME_UNDERNET ? &undernet_kit : &kit);
+		int h, l, n = layer_pits(&h, &l);
+		holes += h;
+		loose += l;
+		pits += n;
+		pitted += n > 0;
+	}
+	CHECK(loose == 0, "%d one-panel pits between walkways", loose);
+	printf("  pits: %d one-panel pits in %d of 300 layers, %d between walkways (and %d holes punched in floor)\n", pits, pitted, loose, holes);
 }
 
 /* The way across (docs/world/level-design/generator.md, Navigation): from the arrival to
