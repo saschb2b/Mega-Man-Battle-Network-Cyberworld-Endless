@@ -11,6 +11,7 @@
 #include "mapslot.h"
 #include "claims.h"
 #include "director.h"
+#include "dive_traces.h"
 #include "layer_objs.h"
 #include "npc.h"
 #include "puppet.h"
@@ -39,6 +40,8 @@ static void more(NpcList *npcs) {
 	P.seed = run.layer_seed;
 	P.depth = run.depth;
 	if (npcs->n >= BN6_NPC_COUNT || !npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return;
+	/* (the week's traces first, a slot or two where the layer leaves room: dive_traces.h) */
+	dive_traces_more(npcs, BN6_NPC_COUNT - npcs->n);
 	while (P.made < DIVE_PEOPLE && npcs->n < BN6_NPC_COUNT) {
 		uint32_t at = puppet_make(6, PUPPET_MEGAMAN);
 		if (!at) break;

@@ -3,7 +3,7 @@ type: Feature
 title: "A fork's read"
 description: "MegaMan reads the layer behind each way at a fork (an exit pad beside a dark warp, the warp itself, Lan's HP's portals): a Server's signal, the NaviCust vendor, a trader, the Net Dealer, a dark board, from the seed before the layer is built (`layer_holds`, `fork_words.c`)."
 tags: [world, level-design, design, voice]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T00:52:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T19:56:00Z }
 sources:
   - id: core-loop
     resource: "docs/game/core-loop.md, Phase 2: MegaMan reads the next layer at a fork"

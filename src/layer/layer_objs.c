@@ -308,6 +308,9 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_x[out->nmd] = (int16_t)m->x;
+		out->md_y[out->nmd] = (int16_t)m->y;
+		out->md_z[out->nmd] = (int16_t)m->z;
 		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
 		out->md_colour[out->nmd++] = (uint8_t)m->type;
 	}

@@ -3,7 +3,7 @@ type: Feature
 title: "The Virus Battler"
 description: "BN6's Virus Battler in a run: his Mr.Prog on a side path, the BtlrCard on the profile, battle mode 6's VIRUS LIST and timed fight, the five Battlers' series, the stake and the pot, by BN6's own code."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:05:00Z }
+generated: { by: claude-code/unrecorded, at: 2026-10-25T17:18:46Z }
 ---
 
 # The Virus Battler

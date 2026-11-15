@@ -3,7 +3,7 @@ type: Process
 title: "itch.io"
 description: "The itch.io page's source, changed here first: its title, tagline, settings, tags, pictures (`tools/itch_art.py`) and theme, the files `tools/itch.py` pushes to butler channels, the browser build there, and each release's steps."
 tags: [project, itch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-08T20:40:00Z }
 ---
 
 # itch.io

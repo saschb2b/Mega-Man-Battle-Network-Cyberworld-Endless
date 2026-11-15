@@ -5,27 +5,25 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "analytics_online.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "director.h"
+#include "dive_band.h"
 #include "dive_crew.h"
 #include "dive_party.h"
+#include "dive_finds.h"
+#include "dive_mail.h"
 #include "dive_people.h"
+#include "dive_splits.h"
+#include "dive_traces.h"
 #include "dive_wire.h"
-#include "dive_words.h"
 #include "emu.h"
-#include "gfx.h"
 #include "online_mail.h"
 #include "online_transport.h"
-#include "pet_look.h"
-#include "platform.h"
 #include "run.h"
 #include "square_week.h"
 #include "weekly.h"
 
-#define FEED_MOST 4          /* lines waiting their turn */
-#define FEED_MS 3500         /* each shown so long */
 #define LOST_MS 20000        /* a link down so long leaves the dive solo */
 
 static struct {
@@ -36,11 +34,6 @@ static struct {
 	DiveWay room;            /* the layer the server has MegaMan in (depth 0 none) */
 	int x, y, z;             /* his place as last sent */
 	uint32_t lost_at;
-	char feed[FEED_MOST][64];
-	int nfeed;
-	uint32_t shown_at;       /* the first line's start, 0 not yet */
-	uint16_t divers;         /* how many dive now, as DIVERS last said */
-	int layers, shared, most, crew, parties, party;   /* the dive's company, for the statistics (analytics_dive_together) */
 } L;
 
 void dive_link_adopt(void) {
@@ -56,6 +49,8 @@ void dive_link_adopt(void) {
 	L.on = true;
 	dive_party_on(true);
 	dive_crew_reset();
+	dive_mail_reset();
+	dive_band_reset();
 	home_way_hold = dive_crew_way_hold;
 	L.week = s.week;
 	L.seed = s.week_seed;
@@ -65,7 +60,7 @@ void dive_link_adopt(void) {
 
 bool dive_link_on(void) { return L.on; }
 
-uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_crew_keys(dive_party_keys(keys)) : keys; }
+uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_traces_keys(dive_crew_keys(dive_party_keys(keys))) : dive_traces_keys(keys); }
 
 bool dive_link_begin(void) {
 	/* (the puppets' room asked for before the dive's first layer is built) */
@@ -76,10 +71,6 @@ bool dive_link_begin(void) {
 	return true;
 }
 
-void dive_link_scene_left(void) {
-	if (L.starting) return;
-	dive_link_close();
-}
 
 bool dive_link_diving(void) { return weekly_on(); }
 
@@ -100,10 +91,18 @@ static void send(const uint8_t *m, size_t n) {
 static void ended(void) {
 	const WeeklyRecord *r = weekly_record();
 	uint8_t m[ONLINE_DIVE_END_BYTES];
-	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, 0));
-	analytics_dive_together(L.layers, L.shared, L.most, L.crew, L.parties, L.party);
+	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause()));
+	dive_mail_told();
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
+}
+
+void dive_link_scene_left(void) {
+	if (L.starting) return;
+	/* (a deletion or a win ends the run and leaves the scene in one frame,
+	 * before dive_link_frame sees it: its end told here, or no mark is left) */
+	if (L.on && !weekly_on() && weekly_record()->pending) ended();
+	else dive_link_close();
 }
 
 /* the layer MegaMan stands on, its room entered as it changes */
@@ -113,21 +112,9 @@ static void room(void) {
 	uint8_t m[ONLINE_DIVE_ENTER_BYTES];
 	size_t n = dive_wire_enter(m, L.week, L.seed, w);
 	send(m, n);
-	if (n) L.room = w;
+	if (n) { L.room = w; dive_traces_room(w); }
 }
 
-/* a line for the band, after those waiting */
-static void say(const char *line) {
-
-	if (L.nfeed == FEED_MOST) { memmove(L.feed, L.feed + 1, sizeof L.feed[0] * (FEED_MOST - 1)); --L.nfeed; L.shown_at = 0; }
-	snprintf(L.feed[L.nfeed++], sizeof L.feed[0], "%s", line);
-	fprintf(stderr, "dive: feed: %s\n", line);
-}
-
-static void feed(const DiveFeed *f) {
-	const char *line = dive_feed_words(f->kind, f->name, f->way.depth, f->party);
-	if (*line) say(line);
-}
 
 void dive_link_frame(void) {
 	if (!L.on) return;
@@ -148,68 +135,25 @@ void dive_link_frame(void) {
 		else dive_link_close();
 		return;
 	}
-	if (L.nfeed && L.shown_at && now - L.shown_at > FEED_MS) {
-		memmove(L.feed, L.feed + 1, sizeof L.feed[0] * (size_t)(L.nfeed - 1));
-		L.shown_at = --L.nfeed ? now : 0;
-	}
-	if (L.nfeed && !L.shown_at) L.shown_at = now;
+	dive_band_frame(now);
 	/* (the party at a guardian's door, and its fight; the crew's chats and news) */
 	dive_party_frame(&s, L.room);
 	dive_crew_frame(&s);
 	const char *crew = dive_crew_news();
-	if (crew) say(crew);
+	if (crew) dive_link_line(crew);
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
 	dive_people_frame(&s);
+	dive_traces_frame();
+	dive_finds_frame();
+	dive_splits_frame();
 }
 
-/* the parties begun and the crews formed, counted for the statistics */
-static void together(const uint8_t *m, size_t n) {
-	QueueState q;
-	CrewState c;
-	if (m[0] == ONLINE_QUEUE_STATE && dive_wire_queue_state(m, n, &q) && q.stage == ONLINE_QUEUE_STARTED) {
-		++L.parties;
-		if (q.count > L.party) L.party = q.count;
-	}
-	if (m[0] == ONLINE_CREW_STATE && dive_wire_crew_state(m, n, &c) && c.stage == ONLINE_CREW_FORMED && c.count > L.crew) L.crew = c.count;
-}
 
-void dive_link_mail(const uint8_t *m, size_t n) {
-	DiveRoom r;
-	DiveFeed f;
-	DiveDivers d;
-	switch (m[0]) {
-	case ONLINE_DIVE_ROOM:
-		if (!dive_wire_room(m, n, &r)) break;
-		fprintf(stderr, "dive: in layer %u's room %u, %u divers\n", r.way.depth, r.instance, r.divers);
-		++L.layers;
-		L.shared += r.divers > 1;
-		if (r.divers > L.most) L.most = r.divers;
-		break;
-	case ONLINE_DIVE_FEED:
-		if (dive_wire_feed(m, n, &f)) feed(&f);
-		break;
-	case ONLINE_DIVERS:
-		if (dive_wire_divers(m, n, &d)) L.divers = d.total;
-		break;
-	case ONLINE_QUEUE_STATE: case ONLINE_ARENA_STATE: case ONLINE_ARENA_SEAT: case ONLINE_PARTY_HP:
-		together(m, n);
-		dive_party_mail(m, n);
-		break;
-	case ONLINE_CREW_STATE:
-		together(m, n);
-		dive_crew_mail(m, n);
-		break;
-	default: break;
-	}
-}
 
-void dive_link_draw(void) {
-	if (!L.on || !director_on_map()) return;
-	if (L.nfeed) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, L.feed[0]);
-	else if (dive_crew_waiting()) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, dive_crew_wait_words());
-	else dive_party_draw(P.core_x, P.core_y);
-}
+
+
+

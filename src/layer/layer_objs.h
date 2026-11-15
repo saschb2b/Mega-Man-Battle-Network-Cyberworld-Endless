@@ -91,6 +91,7 @@ typedef struct {
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
 	uint8_t md_colour[16], md_obj[16];
 	uint32_t md_find[16];      /* ... and what each holds: its content's kind << 16 | its value (a chip's id, zenny), for the run's counts */
+	int16_t md_x[16], md_y[16], md_z[16];   /* ... and where each stands in world units (the shared dive's shimmer, dive_traces.c) */
 	int lib_prize[3];          /* a dark layer's prizes by its par (docs/game/liberation/): two under and at par a chip, over zenny; their scripts, -1 none */
 	int lib_loot[6];           /* ... its board's chips found in item panels (liberation_board.h's LIB_LOOT, by their loot index), -1 none */
 	int lib_zenny;             /* ... and its zenny found (lib_zenny's), -1 none */

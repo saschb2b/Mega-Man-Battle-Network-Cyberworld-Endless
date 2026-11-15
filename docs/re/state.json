@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-15",
-  "previous": "2026-11-14",
+  "updated": "2026-11-14",
+  "previous": "2026-11-13",
   "features": [
     {
       "name": "Net Square",
@@ -196,24 +196,13 @@
     }
   ],
   "decisions": [],
-  "since": [],
+  "since": [
+    {
+      "date": "2026-11-14",
+      "what": "BN6's chips that find their foes by a range of NameIDs (object_getEnemyByNameRange: AquaNdl's needles, YoYo's strike, the reticle over a foe) aimed at the moved families and Navis too (src/emu/chip_targets.c, issue #523): AquaNdl1 struck BN5's Bugtank, ToadMan and BN4's GutsMan in BN6's engine, where before it struck nothing; YoYo's own two calls not reached in play."
+    }
+  ],
   "experiments": [
-    {
-      "feature": "Battle",
-      "date": "2026-11-15",
-      "name": "A battle opens in Full Synchro: BN6's kept mood",
-      "result": "Two playtesters' battles opened in Full Synchro (the emotion window's outline, Cannon 40x2). BN6 writes a battle's mood into MegaMan's NaviStats at its end (0x08007D94) and the next battle copies it; only the jack-in, the jack-out and a real-world script battle zero it (0x08015C32). kai6's checkpoint held 0xFF there after a battle won in Full Synchro.",
-      "meaning": "BN6's own rule, kept: nothing of the run's writes BN6's mood between battles. Named BN6_MOOD_KEPT, BN6_MOOD_KEPT_WRITE and BN6_MOOD_ZERO_ALL (src/emu/bn6_forms.h; docs/rom/battle.md).",
-      "link": null
-    },
-    {
-      "feature": "Battle",
-      "date": "2026-11-15",
-      "name": "SpoutMan behind MegaMan: BN6's own attack",
-      "result": "A playtester saw SpoutMan stand on column 1 row 2, behind MegaMan, and swing his hose forward. bn6f's sub_80F77E8 picks the first free panel of a fixed pair for his side, (2,2) then (1,2) for an enemy (byte_80F7828; Gregar 0x080F8B50, the same bytes), and his attack 0xC (sub_80F7EA6) lights it 35 frames and lands there. A replay showed the lit panel, then him on it, MegaMan 240 to 220.",
-      "meaning": "BN6's own pattern, kept: nothing of the run's touches his AI. Named BN6_SPOUTMAN_BACK (src/emu/bn6_navis.h; docs/rom/battle.md).",
-      "link": null
-    },
     {
       "feature": "BN4's Souls on BN6's proxy form",
       "date": "2026-11-13",

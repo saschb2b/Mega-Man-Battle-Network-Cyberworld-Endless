@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude/claude-opus-5-5, at: 2026-11-15T03:35:14Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T14:10:00Z }
 ---
 
 # The rival: Chaud and ProtoMan

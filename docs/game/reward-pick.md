@@ -3,7 +3,7 @@ type: Design
 title: "The reward pick's screen"
 description: "The run's picks of one reward among several (a guardian's NaviCust draft, a vault's, a Server's and a Glitch copy's three chips, an official gate's, Mr.Prog's first gift) on a screen of ours in BN6's PET look: each choice on the Library's card with its picture and details, the skip a row of its own, and how a pick's script opens it (`src/director/reward_pick.c`)."
 tags: [game, ui, navicust, rewards]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-11T00:30:00Z }
 ---
 
 # The reward pick's screen

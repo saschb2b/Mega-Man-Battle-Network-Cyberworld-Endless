@@ -20,5 +20,17 @@ const char *dive_crew_split_question(void);
 
 /* The band at Lan's HP while MegaMan waits on his crew at a portal. */
 const char *dive_crew_wait_words(void);
+/* The band's line as MegaMan opens a Mystery Data another opened first
+ * this week (`mine` he is the first: `name` his own). */
+const char *dive_find_words(const char *name, bool mine);
+/* The band's line for a bust's place among the week's (DIVE_PLACE): its
+ * time in tenths, its place of `count`. */
+const char *dive_place_words(unsigned tenths, unsigned place, unsigned count);
+/* A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what
+ * (`cause` its name, "" unknown; `navi` a Navi's); `won` a mark of the net cleared. */
+const char *dive_mark_words(const char *name, const char *cause, bool navi, bool won);
+/* A phrase left on a panel: its boxes (who left it, the phrase, how many
+ * waved), MegaMan's wave after them where `wave`. */
+const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave);
 
 #endif

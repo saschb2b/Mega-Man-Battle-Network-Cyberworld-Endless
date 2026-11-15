@@ -3,7 +3,7 @@ type: Review Log
 title: "Voice sweep: the main path's words cut"
 description: "Log of the cuts of the words a run's main path pages through (Phase 1 of the core loop's review): 26 October 2026's Guardian Data chain in two passes, arrival talk and the channels that name the next guardian, and 15 November's Net Dealer before his list and L's briefing, with the boxes counted before and after."
 tags: [voice]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:10:05Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
 ---
 # Voice sweep: the main path's words cut
 

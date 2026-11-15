@@ -48,6 +48,13 @@ bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* The layer's Mystery Data (the shared dive's finds, docs/online/shared-dive.md):
+ * how many it holds (0 off a layer), whether the k-th is opened, and where
+ * it stands in world units; the k-th is the same on every game of the
+ * layer's seed. */
+int director_md_count(void);
+bool director_md_opened(int k);
+void director_md_place(int k, int *x, int *y, int *z);
 /* The layer's Chip or BugFrag Trader's kind (TraderKind, trader.h), -1
  * for none */
 int director_trader_kind(void);

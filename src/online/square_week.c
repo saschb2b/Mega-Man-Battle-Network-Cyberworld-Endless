@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "analytics_online.h"
+#include "dive_pack.h"
 #include "netpass.h"
 #include "online_square.h"
 #include "online_text.h"
@@ -77,7 +78,9 @@ WeekOffer square_week_offer(void) {
 	return WEEK_OFFER_NEW;
 }
 
-const char *square_week_board_words(void) { return Q.s.week ? square_week_board(online_week_board(), Q.s.week) : ""; }
+const char *square_week_board_words(void) {
+	return Q.s.week ? square_week_board(online_week_board(), Q.s.week, dive_pack_now(), dive_pack_records()) : "";
+}
 
 /* the greeter's words on the week's net (pages; his question or options
  * after them) */

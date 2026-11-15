@@ -23,12 +23,15 @@ bool dive_link_diving(void);
 void dive_link_adopt(void);
 /* Whether a dive's link is open. */
 bool dive_link_on(void);
-/* The pad's keys while the link is open: the party's at a guardian's door. */
-uint32_t dive_link_keys(uint32_t keys);
 /* Each frame of the game while on: the room, the place, the divers, the
  * dive's end told and the link closed. */
 void dive_link_frame(void);
 void dive_link_draw(void);
+/* The keys on their way to the game at home or on a dive: the party's at a
+ * guardian's door, a crew's A on a diver, a phrase left on its layer. */
+uint32_t dive_link_keys(uint32_t keys);
+/* A line into the feed's band (a find's first finder, a split's place). */
+void dive_link_line(const char *line);
 /* The dive's messages, from online_mail_frame. */
 void dive_link_mail(const uint8_t *m, size_t n);
 /* The link closed at once (the game shut down). */

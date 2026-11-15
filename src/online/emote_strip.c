@@ -26,6 +26,7 @@ static struct {
 	int kept_t;
 	Anim pose;
 	StripView view;
+	void (*leave)(int phrase);   /* opened on a dive layer: its phrases alone, A leaving one there */
 } T;
 
 void emote_strip_reset(void) {
@@ -39,6 +40,7 @@ void emote_strip_reset(void) {
 bool emote_strip_shown(void) { return T.shown; }
 
 void emote_strip_open(void) {
+	T.leave = NULL;
 	T.shown = true;
 	/* (the opening SELECT still down: a direction with it keeps, its release leaves the strip open) */
 	T.select_down = btn_held(BTN_SELECT);
@@ -52,6 +54,13 @@ void emote_strip_open(void) {
 	if (emu_debug_on()) fprintf(stderr, "online: the emote strip opened on item %d\n", T.cursor[T.page]);
 }
 
+void emote_strip_open_phrases(void (*leave)(int phrase)) {
+	emote_strip_open();
+	T.leave = leave;
+	T.page = 1;
+	if (T.cursor[1] < SQUARE_PHRASE) T.cursor[1] = SQUARE_PHRASE;
+}
+
 void emote_strip_close(void) {
 	if (!T.shown) return;
 	T.shown = false;
@@ -61,6 +70,13 @@ void emote_strip_close(void) {
 
 /* the item under the cursor sent, the strip closed: the Square's answer seen whole */
 static void send(int item, const OnlineSnapshot *s) {
+	if (T.leave) {
+		if (item < SQUARE_PHRASE) { audio_sfx(SFX_ERROR); return; }
+		T.leave(item - SQUARE_PHRASE);
+		audio_sfx(SFX_CHIP_OK);
+		emote_strip_close();
+		return;
+	}
 	bool ok = square_emote_send_item(item, square_emote_faced(s), SDL_GetTicks());
 	if (emu_debug_on()) fprintf(stderr, "online: the strip sent item %d%s\n", item, ok ? "" : " (the burst spent)");
 	if (!ok) audio_sfx(SFX_ERROR);
@@ -79,7 +95,7 @@ static void move(int dx, int dy) {
 }
 
 static void turn(int page) {
-	if (page == T.page) return;
+	if (page == T.page || (T.leave && page == 0)) return;
 	T.page = page;
 	T.view.t = 0;
 	audio_sfx(SFX_CHIP_CURSOR);
