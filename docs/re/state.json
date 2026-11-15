@@ -196,7 +196,12 @@
     }
   ],
   "decisions": [],
-  "since": [],
+  "since": [
+    {
+      "date": "2026-11-15",
+      "what": "BN4's guardians stand in their sprites' own views (src/layer/xguardian_bn4.c's views, BN4_OW_VIEWS* in src/emu/bn4_navis.h): BN4's Navis draw four diagonals by BN6's eight facings, so a guardian facing left had shown his back or nothing; now each faces MegaMan at both sides of his arena, the Glitch copy's body too."
+    }
+  ],
   "experiments": [
     {
       "feature": "Battle",
@@ -205,6 +210,14 @@
       "result": "Two playtesters' battles opened in Full Synchro (the emotion window's outline, Cannon 40x2). BN6 writes a battle's mood into MegaMan's NaviStats at its end (0x08007D94) and the next battle copies it; only the jack-in, the jack-out and a real-world script battle zero it (0x08015C32). kai6's checkpoint held 0xFF there after a battle won in Full Synchro.",
       "meaning": "BN6's own rule, kept: nothing of the run's writes BN6's mood between battles. Named BN6_MOOD_KEPT, BN6_MOOD_KEPT_WRITE and BN6_MOOD_ZERO_ALL (src/emu/bn6_forms.h; docs/rom/battle.md).",
       "link": null
+    },
+    {
+      "feature": "BN4's Navis in BN6's engine",
+      "date": "2026-11-15",
+      "name": "Their overworld sprites' four views, against BN4's own scripts",
+      "result": "Each proved Navi's list-6 sprite decoded and its animations' first frames compared pixel for pixel: 0-7 by BN6's facings, each pair one diagonal's view (0-1 up-right, 2-3 down-right, 4-5 down-left, 6-7 up-left, the left flipped by its own objects); WindMan's 0-3 the four diagonals alone; TopMan's and SparkMan's backs empty; BN4's MegaMan all eight. BN4's NPC commands decoded (0x16 the animation at +0x14, 0x17 list 6's sprite, 0x26 the mirror) and every script setting a proved Navi's sprite walked: the odd animations alone (Roll 30 times in 1, 3, 5, 7), WindMan's 2 and 0, no 0x26. In BN6's engine, before: facing left GutsMan, Roll, FireMan, ThunderMan and AquaMan showed their backs, WindMan, TopMan and SparkMan nothing; after (guardian_body by xguardian_bn4_stand), all twelve in their front views turned to MegaMan at seed 1 (right) and seed 3 (left).",
+      "meaning": "BN4's Navis stand in the diagonal nearest a facing, a side turned to the camera; the pale animation each script plays after the beam's sound is BN4's own log-out, left for a later change.",
+      "link": "../rom/bn4.md"
     },
     {
       "feature": "Battle",

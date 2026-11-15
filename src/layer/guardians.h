@@ -110,6 +110,11 @@ const char *guardian_rumor(int navi);
  * run (rivals.sav). Before that he names him nowhere, and briefs none of
  * his moves. */
 bool guardian_known(int navi);
+/* Whether MegaMan has met guardian `navi`, in any run: stood before him,
+ * his title card the reveal (rivals.sav's meetings, counted as the
+ * staging begins), whether or not a battle ended. His name is known from
+ * then on, his moves only once known (docs/game/meta/what-megaman-knows.md). */
+bool guardian_met(int navi);
 /* A guardian's overworld sprite (list 6), where Gregar has one; else a
  * HeelNavi's (Falzar's Navis, who stand in their battle sprites instead:
  * guardian_body). */

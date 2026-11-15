@@ -460,7 +460,11 @@ is used.
     mails on its first layer, not in Lan's room as first designed: a
     run's mails are made as a layer begins. It is NEW again with each
     family whose data is complete since, so E-Mail shows the gauge's
-    progress in a run.
+    progress in a run. As it comes on a layer, it says when MegaMan is
+    home ("Stop by when you come home after a guardian,OK?"): a
+    playtester read it on layer 1 and looked for a way home mid-act
+    (session 77; [Home's design](../world/home/design.md), No way home
+    mid-act).
   - *The sets* (`Profile.lab_sets`, `src/core/lab_set.h`): a fourth
     page, SETS, lists four; A takes one in hand, the one in hand kept as
     a battle starts and as the screen leaves. A win that beats a set's

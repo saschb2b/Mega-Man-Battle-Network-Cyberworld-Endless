@@ -4,10 +4,14 @@
  * last services before the fight stand. */
 #include "net_arena.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "net_gen.h"
 #include "net_shapes.h"
+
+/* (a gate the walk meets on its line beats one this many panels' walk farther) */
+#define GATE_LINED 1000
 
 /* The arena's box for a bridge of `len` leaving (ex, ey) in direction d:
  * the bridge meets the middle of its near side. */
@@ -29,28 +33,69 @@ static bool bridge_clear(int ex, int ey, int d, int len) {
 	return true;
 }
 
+/* Whether the walk from the arrival (dist) meets the bridge leaving (x, y)
+ * in direction d on its line: each step it may take into (x, y) runs on
+ * into the bridge, or runs along the room's side to where the side ends,
+ * its edge stopping MegaMan on the bridge's line. A gate in the middle of
+ * a side the walk runs along is a mouth he walks past (BN6's walk enters
+ * a one-wide walkway only from its lane: session 77's playtesters stood
+ * at the antechamber's side holding the bridge's way). */
+static bool gate_lined(int16_t dist[MAP_H][MAP_W], int x, int y, int d) {
+	int steps = 0;
+	for (int k = 0; k < 4; ++k) {
+		int px = x - dir_dx[k], py = y - dir_dy[k];
+		if (!win_in(px, py) || dist[py][px] < 0 || dist[py][px] != dist[y][x] - 1) continue;
+		++steps;
+		if (k != d && floor_at(x + dir_dx[k], y + dir_dy[k])) return false;
+	}
+	return steps > 0;
+}
+
+/* Where the bridge leaves room r's side d: the middle of that side
+ * (room_edge), or where the walk meets it on its line, the side's
+ * outermost panel nearest the middle (gate_lined); *lined whether it
+ * does. */
+static bool gate_start(int16_t dist[MAP_H][MAP_W], int r, int d, int *ex, int *ey, bool *lined) {
+	if (!room_edge(r, d, ex, ey) || dist[*ey][*ex] < 0) return false;
+	*lined = gate_lined(dist, *ex, *ey, d);
+	if (*lined) return true;
+	const Room *m = &layer.rooms[r];
+	int best = 1 << 30;
+	for (int j = m->y; j < m->y + m->h; ++j)
+		for (int i = m->x; i < m->x + m->w; ++i) {
+			bool side = d == DIR_E || d == DIR_W ? i == *ex : j == *ey;
+			if (!side || !floor_at(i, j) || floor_at(i + dir_dx[d], j + dir_dy[d]) || dist[j][i] < 0 || !gate_lined(dist, i, j, d)) continue;
+			int off = abs(i - *ex) + abs(j - *ey);
+			if (off < best) { best = off; *ex = i; *ey = j; }
+		}
+	*lined = best < (1 << 30);
+	return true;
+}
+
 /* (as far from the arrival as there is room for, past the layer's
  * signature where it can be: the way to the guardian runs through it,
- * docs/world/level-design/identity.md) */
-int arena_attach(int n, ArenaInfo *out) {
+ * docs/world/level-design/identity.md; a gate the walk meets on its line
+ * first, wherever one is) */
+int arena_attach(int n, ArenaInfo *out, bool lined_first, int rise) {
 	static int16_t dist[MAP_H][MAP_W];
 	ng_walk_past_signature(dist);
-	int best = -1, best_r = -1, best_d = 0, best_len = 0;
+	int best = -1, best_r = -1, best_d = 0, best_len = 0, best_x = 0, best_y = 0;
 	for (int r = 1; r < layer.nrooms; ++r)
 		for (int d = 0; d < 4; ++d) {
 			int ex, ey;
-			if (!room_edge(r, d, &ex, &ey) || dist[ey][ex] < 0) continue;
+			bool lined = false;
+			if (lined_first ? !gate_start(dist, r, d, &ex, &ey, &lined) : !room_edge(r, d, &ex, &ey) || dist[ey][ex] < 0) continue;
 			for (int len = 3; len <= 5; ++len) {
 				int x0, y0;
 				arena_box(ex, ey, d, len, n, &x0, &y0);
 				if (!bridge_clear(ex, ey, d, len) || !box_free(x0, y0, n, n, 1)) continue;
-				int score = dist[ey][ex] + len;
-				if (score > best) { best = score; best_r = r; best_d = d; best_len = len; }
+				bool lines = lined && lined_first && ng_fits_with(rise, x0, y0, x0 + n - 1, y0 + n - 1);
+				int score = dist[ey][ex] + len + (lines ? GATE_LINED : 0);
+				if (score > best) { best = score; best_r = r; best_d = d; best_len = len; best_x = ex; best_y = ey; }
 			}
 		}
 	if (best_r < 0) return -1;
-	int ex, ey, x0, y0;
-	room_edge(best_r, best_d, &ex, &ey);
+	int ex = best_x, ey = best_y, x0, y0;
 	arena_box(ex, ey, best_d, best_len, n, &x0, &y0);
 	bridge_line(ex, ey, best_d, best_len);
 	carve_shape(n >= 7 ? SHAPE_OCTAGON : SHAPE_RECT, x0, y0, n, n);

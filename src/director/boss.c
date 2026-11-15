@@ -55,6 +55,11 @@ enum {
 
 /* A guardian's log-out to his data: BN6's 17 frames, then a beat */
 #define LOGOUT_BEAT 45
+/* Frames his data shows before an A takes it: two playtesters' A's,
+ * pressed in step to page his last word, came 5 and 14 frames after it
+ * showed and took it from a panel and a half away, MegaMan turned and
+ * walked to it, before they had seen it (session 78) */
+#define REWARD_SEEN 60
 
 static struct {
 	int state, t;
@@ -570,6 +575,8 @@ bool boss_beaten(void) { return B.state >= B_AFTER; }
 bool boss_cinematic(void) { return B.state >= B_ENTER && B.state <= B_LOGOUT && B.state != B_FIGHT; }
 
 bool boss_reward_waiting(void) { return B.state == B_REWARD; }
+
+bool boss_reward_fresh(void) { return B.state == B_REWARD && B.t < REWARD_SEEN; }
 
 bool boss_done(void) { return B.state >= B_OPEN; }
 

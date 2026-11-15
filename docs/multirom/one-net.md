@@ -3,7 +3,7 @@ type: Design
 title: "One net: the design"
 description: "Issue #82's design for one Battle Network: every battle in BN6's engine, BN5's territories keeping their identity with visitors at the seams, Souls in every battle, DarkChips at one price, and its rounds as built."
 tags: [multirom, bn5]
-generated: { by: claude/claude-opus-5-5, at: 2026-11-15T03:35:14Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T05:00:00Z }
 ---
 
 # One net: the design (issue #82)
@@ -249,8 +249,9 @@ run, meta as variety):
   in the deep, "Nets meet" in a BN6 area from act 2 where visitors can
   come (none under the Gentle helper); MegaMan names the first native
   territory, the first visitor and the first deep act once a profile
-  (Profile.native_taught, visitor_taught, deep_taught); L's briefing names
-  the older net's viruses or both nets'. Where a first layer is a native
+  (Profile.native_taught, visitor_taught, deep_taught); L's briefing no
+  longer repeats it on every layer there, the card's telegraph and the
+  first arrival's words being its channel (session 77). Where a first layer is a native
   territory still to be named, the first dive's words do not name its
   area before MegaMan finds it old ("So this is the Endless Net." for
   "It looks just like End Area!", session 77); those words play once a

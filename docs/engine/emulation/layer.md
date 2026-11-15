@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A layer"
 description: "How a layer is built into the game (`net_gen.c`, `netmap.c`, `layer_objs.c`, `mapslot.c`), its exit pad's warp, what `director.c` watches, checkpoints and CONTINUE, the engine's event flags and `talk.c`'s conversations."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:04:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:18:17Z }
 ---
 
 # A layer
@@ -61,7 +61,27 @@ first, unseen, A paging the RESULT and the director's talks waiting
 playtester's quit in that fade had gone back to the layer's start, the
 battle, its reward and the map walked since lost (session 76). A battle
 under way is never run on, nor a guardian's, which [the arena's
-door](../../game/meta/arena-door.md) keeps. Loading it restores the guardian's state from its flags. The shops'
+door](../../game/meta/arena-door.md) keeps. A quit with a chat box, a
+shop or the PET open keeps the run as it stood before it opened: no state
+is saved under a box (the talk slot's text is not in a state, and BN6's
+own scripts are not safe to take up mid-box), so on the last frame
+MegaMan is free before one opens (A or START pressed afresh, or a talk of
+the director's begun) the checkpoint's files are made and held back in
+memory (`save_queue.h`'s held set); a quit before he is free again writes
+them, and the CONTINUE says "From before that talk" (or "From before the
+PET"), the quit prompt "Run saved before this talk". A battle, a warp, a
+guardian's staging or eight frames of him free let them go. The director's
+talks due on the map (Chaud's verdict, a Server's prize, Dad's mail, the
+lessons) begin once he is free, so each has its set: Chaud's verdict, begun
+in the fade back from ProtoMan's race, had none, and a quit in it went back
+to the layer's start (session 78, kai13: a purchase, two Mystery Data, the
+race won and a Chip Order's chip lost under "From where you left off").
+The set is what a quit a frame sooner would have saved, so it opens
+nothing to roll again; the profile's records a talk writes (the Library,
+the programs found, lines heard) are the same when it is heard again, and
+the duel's record, written after its battle, is one the run takes back on
+a CONTINUE before it (`resume_duel`: ProtoMan gone, the gate as the
+verdict left it). Loading it restores the guardian's state from its flags. The shops'
 stock is written again after the load (the ROM copy the shop screen checks
 the list against is not in a state), each entry the saved list holds
 keeping its stock there, and `run.make` records the build's `LAYER_MAKE`: a run saved by a

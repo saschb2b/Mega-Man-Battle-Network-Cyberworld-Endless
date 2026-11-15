@@ -388,9 +388,9 @@ static const NetAreaDef bn5_areas[] = {
 	{ 0x90, 7, 0x1001002, 0, false, 0x13, 0, 0, 0, { { 0x90, 8 }, { 0x90, 9 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x91, 1 }, .like = 1,
 		.leads = 3, .name = "End Area", .short_name = "End Area", .motto = "Highways to the old net's end", .xsong = 0x13, .xnavi = 60, .xnavi2 = 62, .xbg = 15, .xlooks = XLOOK_CUBE,
 		.xbattles = { { 0x93, 0 }, { 0x86, 3 }, { 0x93, 1 } }, .xguard = { BN5_NAVI_NUMBERMAN, BN5_NAVI_TOADMAN } },   /* End Area 1-3: one-wide yellow roads in grey, rings round posts and grey pads; no floor two wide but the pads, so every room is drawn as one and the way kept one wide (TILES_ONE_WIDE, issue #164) */
-	{ 0x90, 13, 0x8980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4, .narrows = 4,
-		.leads = 1, .lay = 31, .name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25, .xlooks = XLOOK_DARK_WALL | XLOOK_DARK_HOLE,
-		.xbattles = { { 0x86, 6 }, { 0x94, 3 }, { 0x86, 7 } } },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows */
+	{ 0x90, 13, 0xC980, 0x8440, false, 0x13, 0, 0, 0, { { 0x90, 14 } }, .xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 0 }, .like = 4, .narrows = 4,
+		.leads = 1, .lay = 31 | 64, .name = "Nebula Area", .short_name = "Nebula", .motto = "Where Nebula once ruled", .xsong = 0x14, .xnavi = 60, .xbg = 25, .xlooks = XLOOK_DARK_WALL | XLOOK_DARK_HOLE,
+		.xbattles = { { 0x86, 6 }, { 0x94, 3 }, { 0x86, 7 } } },   /* Nebula Area 2 and 4: small purple platforms with an emblem, on long cobbled paths whose stones turn purple and teal by turns: told by shape among its hues (purple, teal, magenta), not its pale arrows; its plates purple to their rims, stones at their corners, as plain platform floor (TILES_NO_PAD_LOOK: in its pads' look every room wider than a plate was its paths' cobbles round a plate), its floor picked tile by tile round panels laid whole (lay 31 | 64; docs/world/level-design/nebula-tiles.md) */
 	{ 0x90, 3, 0x20008000, 0x8000, false, 0x13, 0, 0, 0, { { 0x90, 2 } }, .pad_rooms = 64, .lay = 11, .skip_styles = 0x21C1, .recolour = 0x524231,
 		.xrom = 1 + XROM_BN5_COLONEL_US, .over = { 0x92, 1 }, .like = 3,
 		.name = "Oran Area", .short_name = "Oran Area", .motto = "The net of Oran Isle's mines", .xsong = 0x13, .xnavi = 60, .xbg = 9,

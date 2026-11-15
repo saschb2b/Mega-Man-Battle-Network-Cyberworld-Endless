@@ -29,6 +29,9 @@ bool boss_beaten(void);
 bool boss_cinematic(void);
 /* Its Guardian Data shows, not yet taken. */
 bool boss_reward_waiting(void);
+/* ... and has shown for less than a second: an A then was pressed at the
+ * guardian's last word, not at it (director_keys.c). */
+bool boss_reward_fresh(void);
 /* Its Guardian Data has been taken. */
 bool boss_done(void);
 /* Nothing of the guardian under way: not met yet, or all done (a run can

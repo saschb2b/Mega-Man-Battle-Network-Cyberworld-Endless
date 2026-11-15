@@ -4,9 +4,12 @@
 
 #include <stdbool.h>
 
+struct TileBook;
+
 /* The current layer's way from its arrival to its exit marked again over
- * its floor as it now stands, where the area has roads (`roads`). */
-void nm_mark_roads(bool roads);
+ * its floor as it now stands, where the area has roads: `books`, its
+ * roads' art (nbooks of them, 0 none), which says where a road may turn. */
+void nm_mark_roads(const struct TileBook *books, int nbooks);
 /* Whether grid cell (x, y) lies on that way and is drawn as road. */
 bool nm_road(int x, int y);
 

@@ -1,7 +1,7 @@
 /* The pad on its way to the game (director_keys): A turned to what it
  * means and walked up to it, the guards that hold an A off as a screen
- * changes, the Custom screen's kept L and R, SELECT's map, R in the town, L's
- * briefing; and MegaMan freed from inside an NPC. */
+ * changes, the Custom screen's kept L and R, SELECT's map, R in the town and
+ * on a layer, L's briefing; and MegaMan freed from inside an NPC. */
 #include "director_keys.h"
 
 #include <math.h>
@@ -81,6 +81,25 @@ static int talk_target(void) {
 	/* (but one he touches beats one before him out of reach) */
 	if (front >= 0 && !(near >= 0 && nd <= 24 * 24 && fd > 52 * 52)) return front;
 	return ahead >= 0 ? ahead : near;
+}
+
+/* MegaMan where an A of his may be meant for someone: within the probes'
+ * 52 units of an NPC (talk_target's reach), A held, or walking up to one
+ * after an A. MegaMan's own words wait: the last stop's began the frame a
+ * playtester reached the Net Dealer, and the A he pressed for the dealer
+ * went into them (session 77). */
+bool talk_in_reach(void) {
+	if (D.a_held || D.walk_t > 0) return true;
+	int px = bn6_player_x(), py = bn6_player_y();
+	for (int i = 0; i < 16; ++i) {
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
+		if (!(emu_read8(o) & 1) || !emu_read8(o + BN6_NPC_RADIUS)) continue;
+		int cx, cy;
+		npc_centre(o, &cx, &cy);
+		int dx = cx - px, dy = cy - py;
+		if (dx * dx + dy * dy <= 52 * 52) return true;
+	}
+	return false;
 }
 
 /* Where NPC slot i stands from MegaMan, the facing whose probe points at
@@ -179,14 +198,31 @@ static uint32_t talk_walk(uint32_t keys) {
  * off for half a second and more, which read as input lag). */
 #define A_GUARD 12
 
+/* A shop opened from a talk takes no A until it has been up a second and a
+ * half, as a reward pick's (PICK_SEEN): with the Net Dealer down to one
+ * box, kai5's A, pressed at it as at the boxes before, landed on his list
+ * and opened "Thunder S? Are you sure? > Yes" (BN6's own default), the
+ * talk's 24-frame wait long past (session 77). BN6's shops put "Look /
+ * Don't look" between the keeper's words and the list, which takes such
+ * an A; ours go straight to it. The pad, R and B are the list's as ever.
+ * An A held as a guard ends is let go till it is released, so no press is
+ * made of it. */
+#define SHOP_SEEN 90
+
 static uint32_t shop_guard(uint32_t keys) {
 	static int chat_recent, guard, last_mode = -1;
+	static bool held;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent)
+		guard = mode == BN6_MODE_SHOP ? SHOP_SEEN : A_GUARD;
+	/* (the map again, B having left the list early: the guard was the list's) */
+	else if (mode == BN6_MODE_GAME) guard = 0;
 	last_mode = mode;
-	if (guard > 0) { --guard; keys &= ~KEY_A; }
-	return keys;
+	if (guard > 0) --guard;
+	else if (!held || !(keys & KEY_A)) { held = false; return keys; }
+	held = (keys & KEY_A) != 0;
+	return keys & ~KEY_A;
 }
 
 /* A choice, BN6's or ours: a playtester's A's, pressed through a Net
@@ -344,10 +380,23 @@ static bool home_a(void) {
 	return true;
 }
 
+/* No A in the guardian's data's first second (boss_reward_fresh), nor one
+ * held from then till it is let go: it was pressed at his last word, and
+ * A's reach (talk_target) turned and walked MegaMan to the data. */
+static uint32_t reward_guard(uint32_t keys, bool *a_pressed) {
+	static bool held;
+	if (boss_reward_fresh()) held = true;
+	else if (!(keys & KEY_A)) held = false;
+	if (!held) return keys;
+	*a_pressed = false;
+	return keys & ~KEY_A;
+}
+
 /* A on the map: let go a fifth of a second after a chat closes, else
  * turned to what it would talk to, or walked up to it; the keys as they go
  * on to the game */
 static uint32_t a_keys(uint32_t keys, bool a_pressed) {
+	keys = reward_guard(keys, &a_pressed);
 	/* (no A a fifth of a second after a chat closes: a playtester's A
 	 * pressed through a chat's last box talked to the gift Prog beside him
 	 * again, twice a session) */
@@ -423,6 +472,17 @@ static bool home_r(uint32_t *keys) {
 	return true;
 }
 
+/* R on a layer, where the run holds BN6's jack-out off (lock_run) and the
+ * game would do nothing: MegaMan's word on the way home. Not through a
+ * chat, a warp or a guardian's staging; the keys as they go on. */
+static uint32_t layer_r(uint32_t keys) {
+	if (talk_busy() || emu_read8(BN6_CHATBOX) || cinema_busy() || D.warping || emu_read8(BN6_WARP_PENDING) != 0 || boss_cinematic() ||
+		boss_fighting() || emu_read8(BN6_MAP_GROUP) < 0x80)
+		return keys;
+	talk_start(jack_out_words(boss_beaten()), FACE_MEGAMAN);
+	return keys & ~KEY_R;
+}
+
 uint32_t director_keys(uint32_t keys) {
 	keys = director_lab_after(keys);
 	talk_only_update();
@@ -450,6 +510,7 @@ uint32_t director_keys(uint32_t keys) {
 	/* (a liberation's board: its own moves and menu, docs/game/liberation/) */
 	if (lib_on()) return lib_keys(keys);
 	if (director_in_town() && r_pressed && home_r(&keys)) return keys;
+	if (!D.town && r_pressed) keys = layer_r(keys);
 	/* on the map L is MegaMan's word on where they are: the game's own
 	 * has no lines for this story */
 	keys &= ~KEY_L;

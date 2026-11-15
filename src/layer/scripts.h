@@ -93,6 +93,7 @@ typedef struct {
 	const char *chip_name;
 	bool last;               /* the run's last guardian: only what carries over */
 	int taken_flag;          /* event flag set on every branch of the draft */
+	int shown_flag;          /* event flag cleared as it is checked, its crystal gone with it; 0 none */
 	int hp_memories;         /* HPMemory through the game's own item, +20 max HP each */
 	const ScriptsDraft *draft;   /* the NaviCust's draft, NULL for none */
 	const char *head;        /* its first line, NULL for "MegaMan downloaded NAME's Guardian Data!" (a super boss's own) */

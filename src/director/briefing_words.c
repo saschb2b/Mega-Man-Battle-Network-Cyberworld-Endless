@@ -1,16 +1,14 @@
-/* L's briefing (docs/voice/rules.md): where MegaMan and Lan are, what guards the
- * layer, what else it holds, the heal while he is hurt and the way on; and
- * his word on the last stop before a guardian's arena. */
+/* L's briefing (docs/voice/rules.md): what guards the layer, two things
+ * worth a detour at most (the heal while he is hurt among them) and the way
+ * on; and his word on the last stop before a guardian's arena. */
 #include "briefing_words.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "board_words.h"
 #include "boss.h"
 #include "cinema.h"
-#include "director_board.h"
 #include "director_folder.h"
 #include "director_home.h"
 #include "director_layer.h"
@@ -104,29 +102,6 @@ static int heal_note(char *buf, int k, int size, bool heal) {
 			     : "@M The Net Dealer sells MiniEnrg,Lan!|@M He's %s,%s%s.|", hw, near_far[hf], wind);
 		break;
 	}
-	return k;
-}
-
-/* L's word on a program left off the board, appended to `buf` at `k`; the
- * new length. Said on every layer until placed, unless MegaMan has said it
- * on this layer already (a playtester heard it on CONTINUE, then again in
- * L's first words); not for one that cannot fit beside the others, nor
- * how to turn one or make room, BN6's own (the voice sweep,
- * docs/voice/sweep/net.md). */
-static int off_board_note(char *buf, int k, int size) {
-	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	int offv;
-	const char *off = run_won_here() || D.off_told ? NULL : program_off_board(&offv);
-	int k0 = k;
-	if (off && !fits_beside_placed(offv)) off = NULL;
-	if (off && *off && off_board_explained(offv)) {
-		if (fits_as_it_stands(offv)) ADD("@M Lan,%s is still off our board!|", off);
-	} else if (off && *off) {
-		ADD("@M Lan,%s isn't on our NaviCust board yet!|", off);
-		off_board_explain(offv);
-	} else if (off) ADD("@M Lan,a program isn't on our NaviCust board yet!|");
-	if (k > k0) D.off_told = true;
-	#undef ADD
 	return k;
 }
 
@@ -247,14 +222,14 @@ static void here_scan(Here *h) {
 /* L's first words on a layer: what guards it, a box each ended by "|",
  * appended to `buf` at `k`; the new length. The layer and the area are
  * the screen's corner and the act card's, unsaid (the main path's words
- * cut, one channel a fact: docs/game/core-loop.md). */
+ * cut, one channel a fact: docs/game/core-loop.md); so is whose viruses
+ * an older Net's area holds, the card's "Older Net" and MegaMan's words on
+ * arriving at the first (docs/multirom/one-net.md: L said it on every
+ * layer there, session 77). */
 static int first_words(char *buf, int k, int size) {
 	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
 	/* (a trip back: its way home, docs/world/home/) */
 	if (run.side_kind == LAYER_BACK) ADD("@M We're back in %s,Lan!|@M The exit pad takes us home.|", guardian_area_in_text(run.biome, run.side_kind));
-	/* (where the nets meet: docs/multirom/one-net.md) */
-	if (D.deep) ADD("@M Both Nets' viruses come down here!|");
-	else if (D.territory_native) ADD("@M Its viruses come from the older Net!|");
 	/* (on his own layer only: before it, the act card names him as the act
 	 * begins and the Net Dealer at his pick, one channel a decision) */
 	if (D.objs.guardian.navi && !boss_beaten()) k = guardian_words(buf, k, size);
@@ -291,44 +266,44 @@ static int event_words(char *buf, int k, int size) {
 	return k;
 }
 
-/* L's first words on a layer, after what guards it: the area's
- * battlefields on its first layer, then the things worth a detour, two at
- * most, by their worth (ProtoMan waiting, a flame of darkness, one of the
- * map's violet marks, Mystery Data sensed behind a lock), a program off
- * the board and the map's tip; appended to `buf` at `k`, the new length.
- * The services and the rest are the map's key's, and each piece says
- * itself at A: L named them all at a second press, nine boxes after six
- * (session 76), and before that on arriving (eight boxes in act 3). */
-static int detour_words(char *buf, int k, int size) {
-	#define ADD(...) (k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, __VA_ARGS__))
-	/* (the area's battlefields, on its first layer: a playtester froze
-	 * on the Aquarium's ice, 140 to 80 HP, and nothing had said so) */
-	if (run.biome == BIOME_AQUARIUM_COMP && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-		ADD("@M Brr... The battlefields here are icy,Lan.|");
-	/* (and a homepage's conveyors and ice: a conveyor carried a
-	 * playtester off the row he stepped into, every time, and the ice
-	 * froze him twice in the next act) */
-	if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
-		ADD("@M The battlefields here have conveyors and ice!|");
+/* L's first words on a layer, after what guards it: the things worth a
+ * detour, `most` of them, by their worth (ProtoMan waiting, a flame of
+ * darkness, one of the map's violet marks, Mystery Data sensed behind a
+ * lock); appended to `buf` at `k`, the new length. The services and the
+ * rest are the map's key's, and each piece says itself at A: L named them
+ * all at a second press, nine boxes after six (session 76), and before that
+ * on arriving (eight boxes in act 3). The tips that rode along went where
+ * they are needed (session 77: ten and twelve boxes on arriving, two
+ * detours among them): the area's battlefields in the arrival's words
+ * (arrival_words), a program off the board after a battle and the PET
+ * (off_board_words), the map at L's next press (map_tip). */
+static int detour_words(char *buf, int k, int size, int most) {
 	int said = 0;
 	/* (where the rival waits: the map showed him as the official gate's
 	 * violet, and a playtester's session ran out at the gate, alone,
 	 * looking for him; his race named in Chaud's call, which says why) */
-	const char *rw = rival_where();
-	if (rw) { ADD("@M ProtoMan's waiting %s!|", rw); ++said; }
-	if (flame_here()) { k = flame_words(buf, k, size); ++said; }
-	if (said < 2) {
+	const char *rw = said < most ? rival_where() : NULL;
+	if (rw) { k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M ProtoMan's waiting %s!|", rw); ++said; }
+	if (said < most && flame_here()) { k = flame_words(buf, k, size); ++said; }
+	if (said < most) {
 		int k0 = k;
 		k = event_words(buf, k, size);
 		if (k > k0) ++said;
 	}
-	if (said < 2) k = prize_note(buf, k, size, 1);
-	#undef ADD
-	k = off_board_note(buf, k, size);
-	/* (the map's tip on the run's first layers, until the map has been
-	 * held: a playtester who used it heard it again every run) */
-	if (run.depth <= 2 && !map_was_held()) k += snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M Hold SELECT for a map of where we've been!|");
+	if (said < most) k = prize_note(buf, k, size, 1);
 	return k;
+}
+
+/* The map's tip, at L's second press on a layer until the map has been
+ * held, once a game: a player who asks again for the way is the one it
+ * helps. It rode along on L's first words on the run's first two layers,
+ * and a CONTINUE heard it again (session 77). Appended to `buf` at `k`;
+ * the new length. */
+static int map_tip(char *buf, int k, int size) {
+	static bool said;
+	if (said || map_was_held()) return k;
+	said = true;
+	return k + snprintf(buf + k, k < size ? (size_t)(size - k) : 0, "@M Hold SELECT for a map of where we've been!|");
 }
 
 /* What MegaMan says when L is pressed: where they are, what is ahead. */
@@ -348,27 +323,34 @@ const char *status_words(void) {
 		D.port_told = true;
 		return buf;
 	}
-	/* where they are and what guards it, what is worth a detour, then the
-	 * heal while hurt and the way on (a playtester paged twelve and
-	 * thirteen boxes on arriving, and asked for the guardian, the heal and
-	 * the way first, session 63); after that, the heal while hurt,
-	 * ProtoMan while he waits and the way */
+	/* what guards it, what is worth a detour, then the heal while hurt and
+	 * the way on (a playtester paged twelve and thirteen boxes on
+	 * arriving, and asked for the guardian, the heal and the way first,
+	 * session 63); after that, the heal while hurt, ProtoMan while he
+	 * waits, the map's tip once and the way */
 	D.layer_told |= flag_get(LAYER_TOLD_FLAG);
 	bool told = D.layer_told;
+	Here h;
+	here_scan(&h);
+	bool hurt = hurt_now(), vow = hurt && jobs_vow_holds(&run.job, run_reached());
+	/* (the heal while hurt is one of the two things worth a detour: the
+	 * arrow leads there, and a playtester counted it a third, session 77) */
+	bool heal_said = vow || (hurt && (h.heal || h.shop));
+	heal_turn_reset();
 	if (!told) {
 		k = first_words(buf, k, (int)sizeof buf);
-		k = detour_words(buf, k, (int)sizeof buf);
+		k = detour_words(buf, k, (int)sizeof buf, heal_said ? 1 : 2);
 		D.layer_told = true;
 		flag_set(LAYER_TOLD_FLAG);
 	}
-	Here h;
-	here_scan(&h);
-	bool hurt = hurt_now();
-	/* (a vow held: no patch for us, the dealer's MiniEnrg instead) */
-	if (hurt && jobs_vow_holds(&run.job, run_reached())) ADD("@M No patch-ups,Lan. We made a vow!|");
-	if (hurt && (h.heal || h.shop)) k = heal_note(buf, k, (int)sizeof buf, h.heal);
+	/* (ProtoMan before the heal, as on arriving: "Then the exit's" after
+	 * him read as the way on from ProtoMan) */
 	const char *rival = told ? rival_where() : NULL;
 	if (rival) ADD("@M ProtoMan's waiting %s!|", rival);
+	if (told && !(heal_said && rival)) k = map_tip(buf, k, (int)sizeof buf);
+	/* (a vow held: no patch for us, the dealer's MiniEnrg instead) */
+	if (vow) ADD("@M No patch-ups,Lan. We made a vow!|");
+	if (hurt && (h.heal || h.shop)) k = heal_note(buf, k, (int)sizeof buf, h.heal);
 	k = goal_words(buf, k, (int)sizeof buf, hurt && h.heal, told);
 	#undef ADD
 	goal_way();   /* (the arrow's way, which the words that follow start) */
@@ -378,8 +360,9 @@ const char *status_words(void) {
 /* The last stop before a guardian's arena: the Net Dealer and a heal stand
  * in the room before it or one beside it (net_gen.c), off the arrow's
  * line, and a playtester walked past both to SpoutMan at 120 of 140 HP
- * with 1150 zenny unspent. Stepping into the room before the arena,
- * MegaMan names those not yet used, once, and which way each is. */
+ * with 1150 zenny unspent. On the way in (the room before the arena, its
+ * bridge), the arena within ARENA_AHEAD panels' walk, MegaMan names those
+ * not yet used, once, and which way each is. */
 /* (where a service lies from MegaMan, as L and the map give it, and how
  * far the walk there is: "right here,to the left", "to the lower right",
  * "a long way back,straight up"; where the walk sets off another
@@ -412,11 +395,17 @@ static bool heal_to_name(const NetObj *o, int hp, int max) {
 	return o->type == OBJ_HEAL && !flag_get(LAYER_HEAL_TOLD_FLAG) && !heal_spent() && hp < max;
 }
 
+/* (how near the arena is "just ahead": said on stepping into the room
+ * before it, fourteen panels' walk across an 8x8 room from SpoutMan's,
+ * and the map's mark of him on its frame's edge, a playtester heard it far
+ * off; eight is the bridge and a few steps of the room) */
+#define ARENA_AHEAD 8
+
 void last_stop(int cx, int cy) {
 	if (D.last_stop_told || layer.ante < 0 || !D.objs.guardian.navi || boss_beaten() || boss_fighting()) return;
-	const Room *a = &layer.rooms[layer.ante];
-	if (cx < a->x || cy < a->y || cx >= a->x + a->w || cy >= a->y + a->h) return;
 	if (emu_read8(BN6_CHATBOX) || talk_busy() || cinema_busy() || D.warping || D.map_shown) return;
+	int walk = arena_walk(cx, cy);
+	if (walk < 0 || walk > ARENA_AHEAD) return;
 	D.last_stop_told = true;
 	int hp = emu_read16(BN6_NAVI_HP), max = emu_read16(BN6_NAVI_MAX_HP);
 	const char *dealer = NULL, *heal = NULL;
@@ -433,8 +422,10 @@ void last_stop(int cx, int cy) {
 	int k = arena_ahead(buf, sizeof buf);
 	/* (no running once in is BN6's own, as from its story bosses, unsaid:
 	 * the voice sweep, docs/voice/sweep/net.md) */
-	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
-	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Want to get ready first?|@M The Net Dealer's %s.", dealer);
-	else snprintf(buf + k, sizeof buf - (size_t)k, "Want to heal up first?|@M A Recovery Mr.Prog's %s.", heal);
+	/* (a suggestion, not a question: "Want to get ready first?" asked one
+	 * that took no answer, session 77) */
+	if (dealer && heal) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.|@M A Recovery Mr.Prog's %s.", dealer, heal);
+	else if (dealer) snprintf(buf + k, sizeof buf - (size_t)k, "Let's get ready first!|@M The Net Dealer's %s.", dealer);
+	else snprintf(buf + k, sizeof buf - (size_t)k, "Let's heal up first!|@M A Recovery Mr.Prog's %s.", heal);
 	talk_start(buf, FACE_MEGAMAN);
 }

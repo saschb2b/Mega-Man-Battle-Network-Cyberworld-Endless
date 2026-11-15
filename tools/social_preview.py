@@ -10,6 +10,7 @@ import os
 import sys
 
 from PIL import Image, ImageDraw, ImageFont
+import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 W, H = 1280, 640

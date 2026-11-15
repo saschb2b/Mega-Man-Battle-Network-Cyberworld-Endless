@@ -3,7 +3,7 @@ type: Design
 title: "BN4's Navis as guardians"
 description: "Nine of BN4 Red Sun's proved Navis guarding the areas BN4 dresses, as BN5's six guard theirs: where its net's records set each, how often, the version and HP band, the staging in his own sprite and face, and his Guardian Data (his Navi chip, a BN6 kin's while his own sits out; no Soul until the owner's call)."
 tags: [game, bosses, bn4, design]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T14:12:26Z }
 sources:
   - id: records
     resource: "BN4 Red Sun's net battle records, tallied by tools/bn4_lab.py (docs/rom/bn4.md, Battle records): which Navis each net group's lists hold"
@@ -102,6 +102,20 @@ lists), as BN5's are; the battle is BN6's engine's at his moved id and
 version, the area's boss theme and BN4's backdrop, his art and sounds loaded
 for the battle as a tournament round's are. Lost, the run ends as at any
 guardian.
+
+He logs in and out by BN6's beam alone, as ElementMan does: his BN4
+sprite holds 6 to 18 animations, none at BN6's log-in (`0x19` on) or
+log-out (`0x21` on), and a wait on one that is not there never ended
+(issue #614: GutsMan, continued at his data, logged in again unseen and
+stood on it, [the guardian's sequence](sequence.md); the counts in
+[BN4 Red Sun's tables](../../rom/bn4.md), Sprite lists). He stands in
+the view his sprite draws nearest his facing, turned to MegaMan: BN4's
+Navis are drawn in four diagonals, not BN6's eight, so a guardian facing
+left stands in his down-left view and one facing right in his down-right
+(the layout, and BN4's own scripts' use of it, in the same row). BN6's
+number alone had turned GutsMan, Roll, FireMan, ThunderMan and AquaMan
+their backs to MegaMan on his left, and left WindMan, TopMan and SparkMan
+unseen there (15 November 2026).
 
 ## His Guardian Data
 

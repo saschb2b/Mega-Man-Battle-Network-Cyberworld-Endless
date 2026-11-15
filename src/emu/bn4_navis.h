@@ -37,6 +37,17 @@
 #define BN4_OW_TOPMAN     0x53 /* (named as he joined the proved; the others the row names wait for theirs) */
 #define BN4_OW_SPARKMAN   0x52 /* (named as he joined the proved, as TopMan) */
 #define BN4_OW_BURNERMAN  0x57 /* (named as he joined the proved, as TopMan) */
+/* ... their standing animations, the four diagonals each draws (up-right, down-right, down-left, up-left; docs/rom/bn4.md,
+ * Sprite lists): eight by BN6's facings (0 up, clockwise), each pair one diagonal's view, the left side's the right's
+ * flipped by its own objects (BN4's MegaMan, list 6 0x40, draws all eight, 5-7 flipped 3-1), BN4's own NPC scripts
+ * standing them in the odd ones alone (0x17 the sprite, 0x16 the animation), never mirroring (0x26); WindMan's four
+ * alone, the diagonals in that order, his scripts standing him in 2 and 0; TopMan's and SparkMan's backs drawn empty;
+ * WoodMan's, SearchMan's, JunkMan's and BurnerMan's eight all front views */
+#define BN4_OW_VIEWS      { 1, 3, 5, 7 }
+#define BN4_OW_VIEWS_FOUR { 0, 1, 2, 3 }
+#define BN4_OW_VIEWS_FRONT { 3, 3, 5, 5 } /* (the backs empty: turned to the camera) */
+#define BN4_NPCSCRIPT_SPRITE 0x17   /* NPC command: list 6's sprite of the next byte, its animation 0 (or a few sprites' own) */
+#define BN4_NPCSCRIPT_ANIM   0x16   /* NPC command: the next byte the object's animation (its +0x14), as BN6's */
 #define BN4_NAVI_TYPE_ROLL       0x1D /* Roll's (ids 128-131) first-kind type (BN4_ENEMY_TYPE of its records), Red Sun's Soul Navis first */
 #define BN4_NAVI_TYPE_GUTSMAN    0x0A /* GutsMan's (132-135) first-kind type (BN4_ENEMY_TYPE of its records) */
 #define BN4_NAVI_TYPE_WINDMAN    0x30 /* WindMan's (136-139) first-kind type (BN4_ENEMY_TYPE of its records) */

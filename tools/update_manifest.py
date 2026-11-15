@@ -87,6 +87,7 @@ def picture(path):
     capture at 2x or 3x back to its own pixels, a wider one scaled to fit),
     in 256 colours at most: (width, height, palette RGB, a byte a pixel)."""
     from PIL import Image
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
     im = Image.open(path)
     im.seek(0)
     im = im.convert('RGB')

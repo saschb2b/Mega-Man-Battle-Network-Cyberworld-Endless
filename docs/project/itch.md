@@ -3,7 +3,7 @@ type: Process
 title: "itch.io"
 description: "The itch.io page's source, changed here first: its title, tagline, settings, tags, pictures (`tools/itch_art.py`) and theme, the files `tools/itch.py` pushes to butler channels, the browser build there, and each release's steps."
 tags: [project, itch]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T06:40:00Z }
 ---
 
 # itch.io
@@ -124,9 +124,10 @@ wordmark and net and the site's PET colours, nothing from the ROM:
 | Background tile | [itch/background.png](../itch/background.png): the site's PET floor | 48x48 |
 | Screenshots | `.build/itch/NN-NAME.png`: eight of `docs/screenshots` at 4x, whole frames | 960x640 |
 
-itch's trailer field takes YouTube, Vimeo or Sketchfab only, and the
-project has no channel there: the description's GIFs show the game in
-motion, and the trailer itself stays on the website.
+itch's trailer field takes YouTube, Vimeo or Sketchfab only. The
+trailers are on [YouTube](youtube.md) since 15 November 2026; the field
+stays empty until the owner sets it, the description's GIFs showing the
+game in motion and the website the trailer.
 
 ## The theme
 

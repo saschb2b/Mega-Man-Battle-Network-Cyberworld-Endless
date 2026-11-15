@@ -87,8 +87,11 @@ static int map_kind(int type) {
 
 /* a mark the map leaves out: a Server's once its battle is taken (a
  * playtester saw it still there after he had won), ProtoMan's once his
- * duel is done or put off (he only talks then) */
+ * duel is done or put off (he only talks then), the guardian's once he is
+ * deleted (two playtesters saw his red mark on the arena after, session
+ * 78) */
 static bool map_left_out(int type) {
+	if (type == OBJ_BOSS) return boss_beaten();
 	if (type != OBJ_CHALLENGE && type != OBJ_DUEL) return false;
 	for (int i = 0; i < D.objs.nchoices; ++i)
 		if (D.objs.choice[i].type == type && (D.chosen & (1u << i))) return true;
@@ -291,7 +294,7 @@ static void map_marks(const MapView *m, int *gx, int *gy, SDL_Color *gc) {
 		const NetObj *o = &layer.obj[i];
 		int x = (int)o->x, y = (int)o->y, kind = map_kind(o->type);
 		if (kind < 0 || x < 0 || y < 0 || x >= MAP_W || y >= MAP_H || map_left_out(o->type)) continue;
-		if (o->type == OBJ_BOSS && !boss_beaten()) { *gx = x; *gy = y; *gc = map_key[kind].c; goal_boss = true; }
+		if (o->type == OBJ_BOSS) { *gx = x; *gy = y; *gc = map_key[kind].c; goal_boss = true; }
 		else if (o->type == OBJ_EXIT && !goal_boss) { *gx = x; *gy = y; }
 		map_mark(m, o->type, x, y, map_key[kind].c);
 	}
@@ -320,7 +323,7 @@ static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
 /* the key's entries this layer holds: MegaMan, the exit, and the rest */
 static void map_key_has(bool has[MAP_KEYS]) {
 	for (int i = 0; i < MAP_KEYS; ++i) has[i] = i == MAP_YOU || i == MAP_EXIT;
-	has[MAP_BOSS] = D.objs.guardian.navi != 0;
+	has[MAP_BOSS] = D.objs.guardian.navi != 0 && !boss_beaten();
 	has[MAP_EVENT] = seen.locks != 0;
 	for (int i = 0; i < layer.nobj; ++i) {
 		int kind = map_kind(layer.obj[i].type);

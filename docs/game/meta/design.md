@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
 ---
 
 # The meta layer's design
@@ -150,7 +150,14 @@ fifth helper", below.
 ### 5. The Library (the collection)
 
 Every chip MegaMan ever holds enters the profile's Library, BN6's own word
-for it. The summary names the new entries of a run. The Library feeds:
+for it. The summary names the new entries of a run, counted from the
+Library once the run's starting folder is in it (`meta_library_from_here`:
+counted from before the folder, a fresh profile's twelve starting chips
+read "Library 15 (+15)" after a run that found three, session 77). Dad's
+first call says what carries over in the fiction: a dive's chips and
+Zenny vanish, the PET's Library keeps every chip's data, and the battle
+data goes to his lab ("Nothing you find comes back out with you" read
+false beside the RECORDS screen). The Library feeds:
 
 - rarer stock at dealers and traders once a chip has been seen;
 - later, a custom starting folder built from Library chips under a

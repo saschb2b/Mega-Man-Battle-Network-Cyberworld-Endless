@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "net.h"
+#include "npc_sprite.h"
 #include "rivals.h"
 #include "rom.h"
 #include "run.h"
@@ -65,6 +66,8 @@ bool guardian_known(int navi) {
 	const Rival *rv = rival(navi);
 	return rv->megaman_won + rv->navi_won > 0;
 }
+
+bool guardian_met(int navi) { return guardian_known(navi) || rival(navi)->met > 0; }
 
 const Guardian *guardian(int navi) {
 	static const Guardian unknown = { "???", "Guardian", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 200 };
@@ -142,6 +145,18 @@ NpcBody guardian_body(int navi, int face) {
 	NpcBody b = { 6, guardian_sprite(navi), face, false, -1, guardian(navi)->pose, -1 };
 	if (navi == 12 || navi == 16) b.anim = toward_camera(face);
 	log_anims(&b);
+	/* (BN4's overworld sprites hold 6 to 18 animations, none at 0x19 on:
+	 * he shows and goes with the beam, as ElementMan, and stands in the
+	 * diagonal his sprite draws nearest his facing, a side turned to the
+	 * camera; docs/rom/bn4.md, Sprite lists) */
+	if (guardian_bn4(navi)) {
+		b.anim = xguardian_bn4_stand(navi, face);
+		b.log_in = b.log_out = -1;
+	}
+	/* (and any other whose sprite, copied from his game, draws nothing
+	 * that way: BN5's sprite of CosmoMan is drawn only towards the camera,
+	 * 2 to 5, and he stood unseen on a dark layer's board facing up) */
+	if (!npc_sprite_shows(b.list, b.index, b.anim)) b.anim = toward_camera(face);
 	/* (Falzar's in their battle sprites: BN6's warp-in, their animation 3,
 	 * and its reverse, 4) */
 	if (navi >= 6 && navi <= 10) b = (NpcBody){ 0, 0x2E + navi, 0, face >= 1 && face <= 3, 3, -1, 4 };

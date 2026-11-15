@@ -44,6 +44,8 @@
 #include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
+#include "npc_sprite.h"
+#include "xguardian_bn4.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
 #include "fork_words.h"
@@ -188,7 +190,14 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 /* (another game's songs: no core to copy them into) */
 void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
-uint32_t emu_read32(uint32_t addr) { (void)addr; return 0; }
+/* (a made-up sprite list at FAKE_SPRITES for npc_sprite.c's reader, test_npc_sprite; nothing anywhere else) */
+#define FAKE_SPRITES 0x08F00000u
+static uint8_t fake_sprites[0x200];
+uint8_t emu_read8(uint32_t addr) { return addr - FAKE_SPRITES < sizeof fake_sprites ? fake_sprites[addr - FAKE_SPRITES] : 0; }
+uint32_t emu_read32(uint32_t addr) {
+	return addr - FAKE_SPRITES <= sizeof fake_sprites - 4 ? (uint32_t)emu_read8(addr) | (uint32_t)emu_read8(addr + 1) << 8 |
+		(uint32_t)emu_read8(addr + 2) << 16 | (uint32_t)emu_read8(addr + 3) << 24 : 0;
+}
 bool emu_debug_on(void) { return false; }
 /* (a request's chip: no ROM's pools here) */
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
@@ -2612,10 +2621,16 @@ static bool shape_wide(int x, int y) {
 	return false;
 }
 
+/* (x, y) inside room r's box */
+static bool in_room(int r, int x, int y) {
+	const Room *m = &layer.rooms[r];
+	return r >= 0 && x >= m->x && x < m->x + m->w && y >= m->y && y < m->y + m->h;
+}
+
 /* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
 static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
 
-enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, WAY_SHAPES };
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, SHAPE_GATE, WAY_SHAPES };
 
 /* (a walkway leaving wide floor at p[i] turns a corner within two panels:
  * the playtesters' road off a square's side, session 76) */
@@ -2657,7 +2672,10 @@ static void way_shapes(int *out) {
 		if (shape_wide(x, y) && !shape_wide(nx, ny) && short_leg(p, i, n)) ++out[SHAPE_SHORT_LEG];
 		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
 		bool beyond = walk_floor(x + dx, y + dy);
-		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) {
+			++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+			out[SHAPE_GATE] += shape_wide(x, y) && layer.arena >= 0 && arena_approach(x, y) && arena_approach(nx, ny) && !in_room(layer.ante, nx, ny);
+		}
 		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
 			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
 			++out[SHAPE_JOG];
@@ -2665,8 +2683,8 @@ static void way_shapes(int *out) {
 }
 
 static void shapes_line(const char *what, int layers, const int *got) {
-	printf("  %s: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs, %d short legs; %d pits\n", what, layers,
-		got[SHAPE_TURN_WIDE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
+	printf("  %s: over %d layers, %d turns into a walkway on wide floor (%d into a guardian's gate), %d at junctions, %d jogs, %d short legs; %d pits\n", what,
+		layers, got[SHAPE_TURN_WIDE], got[SHAPE_GATE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
 }
 
 /* The other games' areas (rom.c's, docs/multirom/) as the generator lays
@@ -2761,6 +2779,12 @@ static void test_way_shapes(void) {
 	int xall[WAY_SHAPES] = { 0 }, layers = 0, over = 0, ways = 0;
 	xarea_shapes(xall, &layers, &over, &ways);
 	shapes_line("the other games' areas' way shapes", layers, xall);
+	/* (the guardian's gate leaving the middle of the antechamber's side the
+	 * way runs along, MegaMan walking past its mouth: session 77's
+	 * playtesters at RoboDog's comp and Green's homepage; 84 of BN6's 1140
+	 * layers and 35 of the other games' 660 before, 14 and 8 now, where no
+	 * side the arena fits off has a gate the walk meets on its line) */
+	CHECK(all[SHAPE_GATE] <= 20 && xall[SHAPE_GATE] <= 12, "%d and %d ways turn into the guardian's gate off its line", all[SHAPE_GATE], xall[SHAPE_GATE]);
 	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
 	/* (a pit between walkways, its walls keeping MegaMan off it, where the
 	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
@@ -5334,7 +5358,7 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
@@ -6859,6 +6883,19 @@ static void super_records(void) {
 		guardian_body(12, GUARDIAN_FACE_LEFT).anim == 5 && guardian_body(16, GUARDIAN_FACE_RIGHT).anim == 2 &&
 		guardian_body(1, GUARDIAN_FACE_LEFT).anim == GUARDIAN_FACE_LEFT && guardian_body(7, GUARDIAN_FACE_RIGHT).mirror &&
 		!guardian_body(7, GUARDIAN_FACE_LEFT).mirror, "super: facing across the screen");
+	/* (BN4's in the diagonal their sprites draw towards the camera, never
+	 * mirrored: the front views' 3 and 5, WindMan's four alone 1 and 2;
+	 * GutsMan's left stood in his back, WindMan's past his four; up-left
+	 * their backs, TopMan's and SparkMan's empty and turned to the camera:
+	 * docs/rom/bn4.md, Sprite lists) */
+	bool bn4 = xguardian_bn4_count() == 12;
+	for (int k = 0; k < xguardian_bn4_count(); ++k) {
+		int navi = xguardian_bn4_navi(k), four = xguardian_bn4_ow(navi) == BN4_OW_WINDMAN;
+		NpcBody r = guardian_body(navi, GUARDIAN_FACE_RIGHT), l = guardian_body(navi, GUARDIAN_FACE_LEFT);
+		bn4 = bn4 && r.anim == (four ? 1 : 3) && l.anim == (four ? 2 : 5) && !r.mirror && !l.mirror &&
+			guardian_body(navi, 5).anim == l.anim && guardian_body(navi, 7).anim == (four ? 3 : xguardian_bn4_ow(navi) == BN4_OW_TOPMAN || xguardian_bn4_ow(navi) == BN4_OW_SPARKMAN ? 5 : 7);
+	}
+	CHECK(bn4, "super: BN4's guardians face across the screen in their sprites' own views");
 	CHECK(super_cybeast_form(0) == SUPER_CYBEAST_V1 && super_cybeast_form(1) == SUPER_CYBEAST_SP && super_cybeast_form(4) == SUPER_CYBEAST_SP,
 		"super: Gregar SP after the first Net");
 	CHECK(super_song(SUPER_BASS) == 0x16 && super_song(SUPER_CYBEAST) == 0x17, "super: their records' themes");
@@ -6950,6 +6987,49 @@ static void super_words(void) {
 	rival_met(SUPER_CYBEAST);
 	rival_result(SUPER_CYBEAST, RIVAL_MEGAMAN_WON, NULL, 0);
 	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false, 0));
+}
+
+/* npc_sprite.c's reader over a made-up sprite in BN's layout (numbers only): its animations' count, which
+ * draw (a tile not all colour 0), what a Navi stands in where his facing is blank (BN4's TopMan facing up, BN5's
+ * CosmoMan), whether a talker turns, and a sprite it cannot read (a compressed one) left as told */
+static void put32_at(uint32_t at, uint32_t v) { for (int i = 0; i < 4; ++i) fake_sprites[at + (uint32_t)i] = (uint8_t)(v >> 8 * i); }
+static void test_npc_sprite(void) {
+	static RomLayout layout;
+	layout.sprite_lists = FAKE_SPRITES - 0x08000000u;
+	const RomLayout *was = R.layout;
+	R.layout = &layout;
+	memset(fake_sprites, 0, sizeof fake_sprites);
+	for (uint32_t k = 0; k < 10; ++k) put32_at(4 * k, FAKE_SPRITES + 0x40);   /* (every list the same: sprite 0, then 1 compressed) */
+	put32_at(0x40, FAKE_SPRITES + 0x100);
+	put32_at(0x44, 0x80000000u | (FAKE_SPRITES + 0x100));
+	const uint32_t b = 0x104, frames = 24, drawn = 144, blank = 180, sub = 216, objs = 224;   /* (after its 4-byte header) */
+	for (uint32_t a = 0; a < 6; ++a) {
+		uint32_t f = frames + 20 * a;
+		put32_at(b + 4 * a, f);
+		put32_at(b + f, a == 3 || a == 5 ? drawn : blank);
+		put32_at(b + f + 4, drawn);
+		put32_at(b + f + 8, sub);
+		put32_at(b + f + 12, objs);
+		fake_sprites[b + f + 18] = 0x80;
+	}
+	put32_at(b + drawn, 32);
+	memset(fake_sprites + b + drawn + 4, 0x11, 32);
+	put32_at(b + blank, 32);
+	put32_at(b + sub, 4);          /* (its entry: object list 0) */
+	put32_at(b + objs, 4);         /* (list 0: one object, then its end) */
+	fake_sprites[b + objs + 9] = 0xFF;
+	fake_sprites[b + objs + 10] = 0xFF;
+	CHECK(npc_sprite_anims(6, 0) == 6 && npc_sprite_has(6, 0, 5) && !npc_sprite_has(6, 0, 6) && !npc_sprite_has(6, 0, 0x19),
+		"npc sprite: six animations, none past them");
+	CHECK(npc_sprite_shows(6, 0, 3) && npc_sprite_shows(6, 0, 5) && !npc_sprite_shows(6, 0, 1) && !npc_sprite_shows(6, 0, 4) &&
+		!npc_sprite_shows(6, 0, 7), "npc sprite: 3 and 5 drawn, a blank tile's facings and one past them not");
+	CHECK(npc_sprite_stand(6, 0, 1) == 3 && npc_sprite_stand(6, 0, 5) == 5 && npc_sprite_stand(7, 0, 1) == 1,
+		"npc sprite: a Navi stands towards the camera where his facing is blank, an object as told");
+	CHECK(!npc_sprite_turns(6, 0) && !npc_sprite_turns(7, 0) && !npc_sprite_turns(0, 0), "npc sprite: no turn to a blank facing, nor an object's");
+	CHECK(npc_sprite_anims(6, 1) == -1 && npc_sprite_has(6, 1, 0x28) && npc_sprite_shows(6, 1, 7) && npc_sprite_stand(6, 1, 4) == 4 &&
+		npc_sprite_turns(6, 1), "npc sprite: a compressed one left as told");
+	R.layout = was;
+	memset(fake_sprites, 0, sizeof fake_sprites);
 }
 
 static void test_super_bosses(void) {
@@ -8364,6 +8444,7 @@ int main(int argc, char **argv) {
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();
+	test_npc_sprite();
 	test_analytics();
 	test_analytics_online();
 	test_visitors();

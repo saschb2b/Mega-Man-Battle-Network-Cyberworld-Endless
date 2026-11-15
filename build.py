@@ -66,6 +66,12 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
   python3 build.py economy [RUNS]  what a run hands out by act (chips, good
                                 chips, codes, zenny, Mystery Data) against
                                 their bands, in .build/economy.txt
+  python3 build.py npc-anims    every NPC in another game's sprite (BN5's
+                                and BN4's guardians, Darkloids, teammates,
+                                bystanders, map objects): each animation
+                                our code tells it to play there, and drawn
+                                where it stands in it, in .build/npc-anims.txt;
+                                local only, the ROMs (docs/devtools/)
   python3 build.py xdiff [SPEC ...] [--mutations]
                                 the differential (issue #82): a family moved
                                 into BN6's engine against its own game's
@@ -121,6 +127,16 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+
+
+def keep_pil_nearest():
+    """Pillow's nearest resize kept working where a Pillow build breaks it
+    (tools/pil_nearest.py; Ubuntu's python3-pil 12.1.1-2ubuntu1.5)."""
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    try:
+        import pil_nearest  # noqa: F401
+    finally:
+        sys.path.pop(0)
 IMAGE = 'cyberworld-build'
 LINUX_IMAGE = 'cyberworld-linux'   # docker/Dockerfile.linux
 WEB_IMAGE = 'cyberworld-web'       # docker/Dockerfile.web
@@ -903,6 +919,7 @@ def atlas(biomes='all', seeds='1', baseline=False):
     if code:
         return code
     from PIL import Image
+    keep_pil_nearest()
     import collections
     import glob
     import re
@@ -1056,6 +1073,7 @@ def layer_sizes(seeds='300'):
 def bmp_sheet(paths, out, cols=3):
     """The game's frames (240 x 160 in the middle of each capture) in a sheet."""
     from PIL import Image
+    keep_pil_nearest()
     if not paths:
         return
     rows = (len(paths) + cols - 1) // cols
@@ -1073,6 +1091,7 @@ def town(seeds='4'):
     """The towns runs of seeds 1..SEEDS start in, drawn; then the game around the first one."""
     import glob
     from PIL import Image
+    keep_pil_nearest()
     out = os.path.join(ROOT, '.build', 'town')
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
@@ -1098,6 +1117,7 @@ def world():
     import glob
     import re
     from PIL import Image
+    keep_pil_nearest()
     out = os.path.join(ROOT, '.build', 'world')
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
@@ -1196,6 +1216,7 @@ def tour(biomes='all'):
     if code:
         return code
     from PIL import Image
+    keep_pil_nearest()
     import collections
     import glob
     import re
@@ -2170,6 +2191,7 @@ def screenshot_sheets(only=None):
     """docs/screenshots/NAME.png for each SCREENSHOT_SHEETS entry whose
     pictures were just made (all of them, with no names)."""
     from PIL import Image
+    keep_pil_nearest()
     out = os.path.join(ROOT, 'docs', 'screenshots')
     for name, rows in SCREENSHOT_SHEETS.items():
         if only and name not in only:
@@ -2219,6 +2241,7 @@ def two_screens(top, bottom):
     the top one (400x240), its pixels mixed at their edges as the GPU's filter
     mixes them, and the second screen (320x240) under it."""
     from PIL import Image
+    keep_pil_nearest()
     im = Image.new('RGB', (416, 512), (28, 30, 38))
     im.paste(Image.new('RGB', (400, 240)), (8, 8))
     im.paste(top.resize((360, 240), Image.BILINEAR), (28, 8))
@@ -2248,6 +2271,7 @@ def screenshots(only=None):
     and the second screen as a New 3DS shows them; or 'second', the second
     screen alone)."""
     from PIL import Image
+    keep_pil_nearest()
     out = os.path.join(ROOT, 'docs', 'screenshots')
     tmp = os.path.join(ROOT, '.build', 'screenshots')
     os.makedirs(out, exist_ok=True)
@@ -2488,6 +2512,7 @@ def clips(only=None):
     marked '3ds' as a New 3DS shows it, the second screen under the
     picture (two_screens), 2x and its GIF 1x."""
     from PIL import Image
+    keep_pil_nearest()
     out = os.path.join(ROOT, 'docs', 'clips')
     tmp = os.path.join(ROOT, '.build', 'clips')
     os.makedirs(out, exist_ok=True)
@@ -3385,7 +3410,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'npc-anims', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3542,6 +3567,13 @@ def main():
         sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
                         '--economy', f'/src/.build/economy{"-noarc" if noarc else ""}.txt:{runs}{":noarc" if noarc else ""}',
                         mounts=[(rom_dir, '/rom:ro')]))
+    if a.action == 'npc-anims':
+        # (local only: the ROMs, BN5's and BN4's read; each animation an NPC in another game's sprite is told to play, issue #614)
+        build('host')
+        rom_dir = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+        os.makedirs(os.path.join(ROOT, '.build', 'data'), exist_ok=True)
+        sys.exit(docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/data',
+                        '--npc-anims', '/src/.build/npc-anims.txt', mounts=[(rom_dir, '/rom:ro')]))
     if a.action == 'town':
         build('host')
         sys.exit(town(*a.rest[:1]))

@@ -3,7 +3,7 @@ type: Design
 title: "What MegaMan knows"
 description: "What MegaMan knows: guardians, super bosses and virus families known only after a first battle in any run (`guardian_known`, `families_fought` in rivals.sav and the profile), hearsay from bystanders and the Net Dealer before."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:46:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:42:25Z }
 ---
 
 # What MegaMan knows (29 September 2026)
@@ -28,7 +28,13 @@ the PET's battle data on a copy exists once they have fought it.
   ahead", a portal in Lan's HP its data and "And a strong Navi's
   signal...", and the briefing on his layer
   that they have no battle data on it: watch the yellow panels, the
-  net's own telegraph for every attack. The arena's card is the reveal.
+  net's own telegraph for every attack. The arena's card is the reveal:
+  from that meeting on, in any run, the act's card and the PET name him
+  plainly (`guardian_met`: rivals.sav's meetings, counted as the
+  staging begins), a fight left unfinished too (a CONTINUE from the
+  arena's door read "Guardian: ???", or "SlashMan?" past the dealer's
+  word, session 77), while nothing briefs his moves until a battle with
+  him has ended.
   What can be learned before is what Navis who live on the net say: the
   first bystander on the act's first layer passes on who guards its end
   and a rumor (`guardian_rumor`: one line on his manner, never his moves

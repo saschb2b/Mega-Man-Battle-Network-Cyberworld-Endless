@@ -140,6 +140,11 @@ void director_draw_tent(void);
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);
 bool director_suspend(void);
+/* Each frame's keys as the game takes them: a talk or the PET opened by
+ * them finds the run saved before it, for a quit (director_save.c) */
+void director_before_keys(uint32_t keys);
+/* The quit prompt's line on where the run goes on from */
+const char *director_quit_where(void);
 /* A quit on a won battle's way back to the map (its RESULT, the fade, the
  * map's entry), where BN6 still holds MegaMan: true while the game is to
  * run on to him free before the run is kept (scene_emu.c's emu_keep_run),
@@ -163,9 +168,6 @@ void director_save_here(void);
 void director_hold_watch(void);
 /* A Navi on the net has named the act's guardian this session. */
 bool director_guardian_heard(void);
-/* Where the run was last saved on this layer, for the quit prompt: its
- * start, or its Guardian Data. */
-const char *director_saved_where(void);
 /* Lan (or MegaMan) is on the map the run put him on: the picture can show. */
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */

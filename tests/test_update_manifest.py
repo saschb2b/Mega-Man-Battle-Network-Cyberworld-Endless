@@ -146,6 +146,7 @@ class Pictures(unittest.TestCase):
     def picture(self, size, scale, colours):
         """A made-up capture: `colours` stripes at the game's `size`, `scale` times over."""
         from PIL import Image
+        import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
         im = Image.new('RGB', size)
         im.putdata([((i * 37) % 256, (i * 91) % 256, i % 256) for i in range(colours)
                     for _ in range(size[0] * size[1] // colours)])

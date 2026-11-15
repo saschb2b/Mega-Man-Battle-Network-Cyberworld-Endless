@@ -66,11 +66,45 @@
   runs most often start, caught the most). In every area, a pit left
   between walkways, which the walk had to jog round, is filled. A layer
   saved before this update starts afresh at a CONTINUE.
+- **Fixed: GutsMan's Guardian Data could not be taken (issue #614).**
+  Continued at his data, BN4's GutsMan logged in again, unseen, and
+  stood on it: A only turned MegaMan to face it. A guardian deleted
+  before a CONTINUE now stays gone, and BN4's Navis show and go with
+  BN6's beam, as their own sprites have no log-in of BN6's. GutsMan no
+  longer stands invisible through his entrance, either. A run saved
+  before this update starts its layer afresh at a CONTINUE.
+- **Fixed: after a guardian.** The A that paged his last word no
+  longer takes his Guardian Data the moment it appears, from a panel
+  away: it waits to be taken for a second. The crystal goes as its
+  "MegaMan got:" boxes close, not after the program pick, the map drops
+  his red Boss mark once he is deleted, and the exit pad in BN4's Town
+  Area shows on its pale floor, where it was there but unseen.
+- **Fixed: BN4's guardians turned their backs, or were not there.**
+  BN4 draws its Navis facing four ways where BN6 draws eight, and
+  BN6's "facing left" is a back view in BN4's: with MegaMan on his
+  left, GutsMan, Roll, FireMan, ThunderMan and AquaMan showed their
+  backs, WindMan, TopMan and SparkMan nothing at all. Each now stands
+  in his own sprite's view that faces MegaMan, on either side of his
+  arena.
+- **Fixed: the Glitch copy of a Falzar Navi was a flicker of streaks,
+  and CosmoMan vanished on his board.** The copy at a Glitch layer's
+  heart stood in SpoutMan's, TomahawkMan's or another Falzar Navi's
+  warp-out, over and over; it now stands as he does in battle. CosmoMan's
+  BN5 sprite faces the camera only, so on a dark layer's board he
+  vanished whenever he turned to strike upward; he now turns towards the
+  camera. Nobody the game places in another game's sprite turns to face
+  MegaMan where that sprite draws nothing.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.
   The game now runs on until MegaMan is free and saves the run where he
   stands.
+- **Fixed: a quit with a text box open lost the layer.** Quitting while
+  a chat, a shop or the PET was open saved nothing, so CONTINUE went
+  back to the last save while it said "From where you left off":
+  purchases, Mystery Data and a race won were gone. The run is now kept
+  as it stood the moment before that box opened, and CONTINUE says
+  "From before that talk".
 - **Fixed: blank chips in the Standard folder.** A system that kept
   its start-up state from before 0.21.0 dealt a new game's folder
   misread: some chips came out blank and did nothing, and FOLDER EDIT
@@ -79,10 +113,12 @@
   continues.
 - **Shorter stops on the way.** A Net Dealer says one box before his
   list (his word on the guardian, or a greeting; his codes too in act
-  1), where he said seven or eight. L names two things worth a detour
-  at most (ProtoMan, a flame of darkness, a violet mark, Mystery Data
-  behind a lock), then the heal and the way: seven boxes over two
-  presses on a busy layer, where it took twelve. A second talk with the
+  1), where he said seven or eight. L's first press says the way and
+  two things worth a detour at most (ProtoMan, a flame of darkness, a
+  violet mark, Mystery Data behind a lock, the heal while you're hurt);
+  the tips that rode along with it come where they help instead. When
+  L points you to the heal and you walk away from it, the arrow turns
+  back to the exit. A second talk with the
   Virus Battler is his first pair and the question, as a shop's second
   visit is.
 - **Chaud's call and ProtoMan's race, tightened.** Lan's surprise
@@ -110,6 +146,13 @@
   draws the way in the key's Heal green. The arrow, the corner notes
   ("Run saved"), the area cards and L's counters step aside while BN6's
   own fade covers the screen, so none hangs alone on a jack-in's white.
+- **The arrow keeps out of the way.** It waits through a chat that is not
+  L's (a Mystery Data's, a Prog's, a dealer's), a cutscene and a
+  guardian's arrival, and comes back after with the time it had left.
+  Pointing down it stands below MegaMan's feet, not on his legs, and
+  through L's words it waits for the box to close rather than cover it.
+  It now rings MegaMan where the camera draws him, also where the camera
+  stops short of keeping him in the middle.
 - **The title keeps your best depth.** With a run saved, the title
   dropped "Best: Layer N" because CONTINUE named a layer, but that is
   the saved run's, not your record; it shows whenever you have one now.
@@ -127,7 +170,8 @@
   its walkways meet at small squares as BN4's do, with no stray cyan
   scraps. BN5's Oran Area lays its hubs as one floor with their
   circuits, joined as BN5 joins them, where every meeting was a jumble
-  of docks and orange chips.
+  of docks and orange chips. BN4's ACDC roads turn only where BN4's own
+  roads bend, with no navy squares left in the cyan.
 - **BN4's and BN5's areas keep their wide ways.** A way through their
   layers keeps the two-panel walkways it was laid with, crossing no
   more one-wide ones than the area's own maps do. The drawing used to
@@ -145,12 +189,46 @@
 - **Fixed: RESULT counted too few viruses.** The battle that ended a
   run, and a battle you ran from, now count the viruses deleted in
   them. RECORDS' closest goal reads as a whole sentence.
+- **Fixed: a CONTINUE replayed the layer's first battle.** A CONTINUE
+  mid-layer counted the layer's battles from nothing again, so its first
+  random battle came round once more; it goes on with the layer's next.
+- **Fixed: first meetings that went by the wrong thing.** Chaud's first
+  call, the Net Dealer's first words and MegaMan's first dive into an
+  older Net's area went by how deep a profile had gone, so a second run
+  could hear the wrong one, and MegaMan knew an old area before he
+  found it. The profile remembers each line as it plays now.
+- **Fixed: a word after a battle opened under the fade.** A line of
+  MegaMan's right after a battle opened its box as an empty grey frame
+  under BN6's fade back to the map; it waits for the fade now.
+- **The Battle Lab's builder, easier to drive.** B goes back a level on
+  every page and asks "Leave the Lab?" before it leaves, FIELD's Preset
+  is reachable with Up, and held directions repeat.
+- **The guardian's gate on the way's line.** The bridge to a
+  guardian's arena leaves its antechamber where the way meets it,
+  straight on, rather than from the middle of a side you had to turn
+  into.
+- **What the run tells you.** Dad's first call says what a dive leaves
+  behind and what it keeps, R on a layer answers with the way home, and
+  RECORDS counts the Library's new entries from the starting folder on.
+  MegaMan's word before a guardian's arena comes a few panels from its
+  door, never while someone stands in reach of A, and says "Let's get
+  ready first!" rather than asking a question that takes no answer.
+- **Fixed: a stray A could take a DarkChip or open a purchase.** "Take
+  the DarkChip?" starts on No, its options a moment after the question,
+  and a shop opened from a talk takes no A for its first second and a
+  half, so an A pressed through the words takes nothing.
+- **Fixed: a CONTINUE at a guardian's door forgot him.** After a
+  CONTINUE from an arena's door, the act card names the guardian met
+  there, and B hurries his words again. The card's "A layer here has
+  gone dark" shows only before the act's dark layer.
 - **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
   Pressing A at a steady pace through his words, the next press could
   land just after the gift's screen opened and take its first choice
   before you had seen it. A reward pick's screen now takes a choice only
   once it has been up a second and a half (the cursor moves sooner), for
-  the gift, a guardian's draft and every other pick alike.
+  the gift, a guardian's draft and every other pick alike. Its cursor
+  shows when: it stands still and faded while A would take nothing, and
+  bobs in full orange once A takes.
 - **The game tells you when a new version is out, and what it brings.**
   At each start it looks for one (a single request for the release's own
   `update.json`, nothing about you sent). When one is out, a box opens

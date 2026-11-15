@@ -83,8 +83,7 @@ static void quit_prompt_draw(void) {
 	const char *again = P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit";
 #endif
 	text_draw(P.w / 2, y + 2, again, WHITE, TEXT_CENTER);
-	if (saved) text_draw(P.w / 2, y + 14, director_quit_keeps() ? "Your run is saved right here" : director_saved_where(),
-		rgba(170, 200, 255, 255), TEXT_CENTER);
+	if (saved) text_draw(P.w / 2, y + 14, director_quit_where(), rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
 /* One game frame: scenes, input, update, sound, drawing. False once the

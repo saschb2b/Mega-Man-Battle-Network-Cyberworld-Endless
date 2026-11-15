@@ -184,6 +184,14 @@ static void describe_home(FILE *f) {
 	fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
 }
 
+/* The arrow's heal first, the shortest walk there since L named it, or
+ * MegaMan turned away from it (heal_turn_watch) */
+static void describe_heal(FILE *f) {
+	int hx, hy;
+	if (heal_first(&hx, &hy)) fprintf(f, "heal first at %d %d, nearest %d\n", hx, hy, D.heal_near - 1);
+	else if (D.heal_declined) fprintf(f, "heal turned away from\n");
+}
+
 /* For the developer reproducing a playtest (CYBERWORLD_STATE_POS): where
  * Lan or MegaMan is, the floor around him, the layer drawn in letters
  * (=map), and the game's NPC objects near him */
@@ -216,6 +224,7 @@ static void describe_pos(FILE *f) {
 			fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
 			goal_way();
 			fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
+			describe_heal(f);
 			for (int y = cy - 4; y <= cy + 4; ++y) {
 				fprintf(f, "cells ");
 				for (int x = cx - 4; x <= cx + 4; ++x)
@@ -281,7 +290,7 @@ void director_describe(FILE *f) {
 	 * find a guardian's seed read it) */
 	if (D.objs.guardian.navi)
 		fprintf(f, "guardian %s %s\n",
-			guardian_known(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done() ||
+			guardian_met(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done() ||
 					getenv("CYBERWORLD_STATE_POS")
 				? guardian(D.objs.guardian.navi)->name : "???",
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");

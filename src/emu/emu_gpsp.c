@@ -497,6 +497,7 @@ bool emu_save_state_queued(const char *path) {
 	if (!b) return false;
 	if (save_queue_file(path, b, n)) { platform_persist(); return true; }
 	free(b);
+	if (save_queue_holding()) { save_queue_spoil(); return false; }
 	save_queue_wait();
 	return emu_save_state(path);
 }

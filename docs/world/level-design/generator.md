@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:23:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:40:53Z }
 ---
 
 # The generator
@@ -95,6 +95,25 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   others widen as above. Over sixty layers of RoboDog's comp
   (`test_way_shapes`), the way's turns into a walkway on wide floor fell
   from 25 to 14 and its one-panel jogs from 3 to 1.
+- **The guardian's gate meets the way on its line** (15 November 2026).
+  The bridge to the guardian's arena, one panel wide by design, left the
+  middle of the antechamber's side; where the way ran along that side,
+  MegaMan walked past its mouth or stood beside it holding the bridge's
+  way. Two playtesters of session 77 spent six and four calls so, in
+  RoboDog's comp and at Green's homepage, the arrow showing the turn each
+  time. A turn into a one-wide walkway is lined up for him where the walk
+  runs straight on into it, or where the side it runs along ends at the
+  mouth, its edge stopping him on the bridge's line, as a corner of
+  Capcom's platforms does. The gate now leaves from such a place on the
+  side, the one nearest its middle, wherever a side the arena fits off
+  has one and the layer still fits the map (`net_arena.c`, `gate_start`),
+  and from the middle as before where none does. Over the tests' layers
+  (`test_way_shapes`), the ways turning into the gate off its line fell
+  from 84 of BN6's 1140 to 14, and from 35 of the other games' 660 to 8;
+  the turns into a walkway on wide floor from 233 to 170 and from 157 to
+  131. Where the playtesters left the way's line themselves (after a
+  dealer's talk, or along the side past the arrow's turn), BN6's walk
+  still asks them to line up.
 - **No pit between walkways** (15 November 2026). Walkways and platforms
   meeting round a single void panel left a pit, floor on its four sides
   and void on a corner, that the art draws as a walkway cut in half and

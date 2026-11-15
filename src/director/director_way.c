@@ -16,7 +16,9 @@
 #include "fork_words.h"
 #include "gamecall.h"
 #include "jobs.h"
+#include "net_arena.h"
 #include "net_route.h"
+#include "net_shapes.h"
 #include "netmap.h"
 #include "pad_art.h"
 #include "save.h"
@@ -160,10 +162,60 @@ void hp_full_watch(void) {
  * two playtesters followed a green arrow away from an exit pad on the
  * screen without knowing what the colour meant (session 76). */
 bool heal_first(int *x, int *y) {
-	if (D.town || !hurt_now() || heal_spent()) return false;
+	if (D.town || D.heal_declined || !hurt_now() || heal_spent()) return false;
 	for (int i = 0; i < layer.nobj; ++i)
 		if (layer.obj[i].type == OBJ_HEAL) { *x = (int)layer.obj[i].x; *y = (int)layer.obj[i].y; return true; }
 	return false;
+}
+
+/* MegaMan turned away from the heal the arrow leads to: his walk there
+ * grown HEAL_TURNED panels past the shortest it has been since. The way
+ * on is the exit's again, the arrow cyan and the map's way yellow, until L
+ * names the heal again (status_words): a playtester heading for the exit
+ * past the heal L had named followed a green arrow back to it and stuck
+ * at a junction, ten moves (session 77). Not when the heal is used alone
+ * (the player who chose the exit kept the heal's arrow), nor at the next
+ * L alone (who knew to press it?); a walk followed to the heal only
+ * shortens. */
+#define HEAL_TURNED 3
+void heal_turn_watch(void) {
+	static int tick;
+	int hx, hy, len;
+	double gx, gy;
+	if (++tick % 10 || !heal_first(&hx, &hy)) return;
+	netmap_grid(bn6_player_x(), bn6_player_y(), &gx, &gy);
+	route_floor();
+	if (route_way(gx, gy, hx, hy, &len) < 0) return;
+	if (!D.heal_near || len + 1 < D.heal_near) D.heal_near = len + 1;
+	else if (len + 1 >= D.heal_near + HEAL_TURNED) D.heal_declined = true;
+}
+
+/* L asked again: the heal named, and the arrow leads there afresh */
+void heal_turn_reset(void) {
+	D.heal_declined = false;
+	D.heal_near = 0;
+}
+
+/* How many panels MegaMan on panel (cx, cy), on the way into the
+ * guardian's arena (the room before it, its bridge: arena_approach), walks
+ * to it, along the floor as the arrow leads (net_route.c), to its first
+ * panel on the bridge's line (net_arena.c's arena_box); -1 off that way in
+ * or where no walk reaches it. Worked out again only as he steps onto
+ * another panel. */
+int arena_walk(int cx, int cy) {
+	static int at = -1, len = -1;
+	static uint32_t seed;
+	if (layer.arena < 0 || !arena_approach(cx, cy)) return -1;
+	if (at == cy * MAP_W + cx && seed == run.layer_seed) return len;
+	at = cy * MAP_W + cx;
+	seed = run.layer_seed;
+	const Room *a = &layer.rooms[layer.arena];
+	int d = layer.arena_dir, tx = a->ax - dir_dx[d] * (a->w / 2), ty = a->ay - dir_dy[d] * (a->h / 2);
+	double gx, gy;
+	netmap_grid(bn6_player_x(), bn6_player_y(), &gx, &gy);
+	route_floor();
+	if (route_way(gx, gy, tx, ty, &len) < 0) len = -1;
+	return len;
 }
 
 /* The way on as the arrow shows it: along the floor to the exit or the
@@ -247,10 +299,22 @@ static void map_arrow(void) {
 	was = D.map_shown;
 }
 
+/* When the arrow waits (cinema.c, arrow_settle, which keeps it clear of
+ * MegaMan and of an open chat box): while he cannot walk its way, through
+ * a chat of BN6's or another of ours (L's own words are the arrow's, and
+ * it shows through them), a cutscene, a guardian's staging. A playtester
+ * saw it on MegaMan's legs and the box's top edge as he took a Mystery
+ * Data, and over SpoutMan as he logged in (kai5, session 77). */
+static void arrow_quiet(void) {
+	bool chat = (emu_read8(BN6_CHATBOX) || talk_busy()) && !D.arrow_pending;
+	cinema_arrow_quiet(chat || emu_read32(BN6_CUTSCENE_POS) != 0 || boss_cinematic());
+}
+
 /* The way-on arrow: on while L's words last, however many boxes, then ten
  * seconds more, and on while MegaMan walks, up to half a minute; and after
  * the map. */
 void arrow_update(void) {
+	arrow_quiet();
 	/* (not over a warp's or the jack-in's flash and tunnel) */
 	if (D.warping || emu_read8(BN6_WARP_PENDING)) {
 		if (cinema_arrow_on()) cinema_arrow(0, 0);
