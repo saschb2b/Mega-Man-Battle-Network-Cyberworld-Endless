@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (the merges of #569-#583 written in: BN4's ACDC and BN5's Oran Areas drawn whole, the pits between walkways filled, ProtoMan's races without Powies, the jack-in from a step short, the Virus Battler's second talk, the first visitor's answer, RESULT's virus count, the two menu lines).
 * **Update**: world/level-design/generator.md (the other games' areas held to their own maps' count of one-wide walkways where fewer than the BN6 area they are laid out as, and the way's floor kept from the legalizer there), devtools/nav-study.md (`--atlas nav` counts the other games' areas too).
 * **Update**: engine/updates.md (the update box: the release's notes a page an entry, Update now and Later as buttons with their keys, once a version; the title's note and SELECT: Update hint; update.json's changes from the players' notes), GUIDE.md (Updates: the box), code/update.md (`options_news.c`, the title's hint, the tool's notes, their tests), code/core.md (`options_news.c`), code/tests.md (`test_update_manifest.py`).
 * **Update**: engine/updates.md (The pictures: each entry's first picture in update-pictures.bin, fetched, checked and shown at half scale, SELECT whole), GUIDE.md (Updates: the pictures), code/update.md (`update_pictures.c`, the tool's pictures, their tests).
