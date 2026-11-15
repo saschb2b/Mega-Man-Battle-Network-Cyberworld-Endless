@@ -765,6 +765,8 @@ bool netmap_look(int area, NetmapLook *out) {
 		out->map = look_map(L, last.tw, last.th);
 		out->tw = last.tw;
 		out->th = last.th;
+		out->scenery = netmap_scenery;
+		out->sides = netmap_sides();
 		ok = out->map && area_src_vram(L->def->xrom, L->def->group, L->def->number, &out->gfx);
 	}
 	free(nm_last.seams);
@@ -778,6 +780,12 @@ bool netmap_look(int area, NetmapLook *out) {
 	netmap_scenery = scenery;
 	if (!ok) netmap_look_free(out);
 	return ok;
+}
+
+int netmap_sides(void) {
+	const SidePiece *p;
+	int X, Y;
+	return nm_sides_set(-1, &p, &X, &Y);
 }
 
 void netmap_look_free(NetmapLook *l) {

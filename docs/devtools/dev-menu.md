@@ -58,7 +58,10 @@ seeks the sealed region's route first, its key and then the route, and
 takes the way it opens at home), `tourney` (every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin, the setup's switch and the Glitch layer's act still honoured, BN4's own plates on its screen until the faces come: [the tournament](../game/tournament.md)), `glitch` (every act's first layer from
 the second holds the Glitch warp, [the Glitch layer](../game/glitch-layer.md); with
 `glitchstage=N` a Glitch layer held at stage N - 1, 1 to 5, its glitches,
-flips and battles, and with `side=4` the run starts on one; the debug
+flips and battles, with `glitchlook=AREA` its flips' looks from AREA first
+(as `--net-biome` names it, `xN` another game's; more joined by `+`), with
+`glitchhold` its first look held on its floor and no other glitch over it
+([Checking an area's look](../game/glitch-layer.md)), and with `side=4` the run starts on one; the debug
 output names the copy's forms, and stdout the stage a Glitch layer's
 exit was reached at), `route` (a special route found: with
 `--scene home` on the act before's board, from a layer on its own act's,

@@ -103,7 +103,7 @@ void glitch_layer_begin(void) {
 		for (int x = 0; x < MAP_W; ++x) G.floor += layer.cell[y][x] == C_PATH;
 	G.next = roll(gap_lo[0], gap_hi[0]);
 	G.look = 1;
-	if (G.on) glitch_looks_make(D.layer_tiles);
+	if (G.on) glitch_looks_make(D.layer_tiles, dev.glitch_look, dev.glitch_looks);
 	else glitch_looks_free();
 }
 
@@ -227,6 +227,13 @@ void glitch_update(void) {
 	warp_look_step();
 	if (G.settled) {
 		if (glitch_look_shown() >= 0) glitch_look_flip(-1);
+		G.fx = FX_NONE;
+		return;
+	}
+	/* (dev, glitchhold: the first look held on the floor, the rest still,
+	 * for a capture of an area's look: docs/game/glitch-layer.md) */
+	if (dev.glitch_hold && G.on && glitch_looks() > 0) {
+		if (glitch_look_shown() != 0) glitch_look_flip(0);
 		G.fx = FX_NONE;
 		return;
 	}

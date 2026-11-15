@@ -22,6 +22,7 @@
 #include "director_state.h"
 #include "emu.h"
 #include "netmap.h"
+#include "rom.h"
 #include "run.h"
 
 /* (the looks made as the layer begins: learning an area's maps takes
@@ -60,32 +61,42 @@ void glitch_looks_free(void) {
 	L.shown = -1;
 }
 
+/* (area `a` among the `n` in `out` or the layer's own: not taken again) */
+static bool taken(const int *out, int n, int a, int own) {
+	bool seen = a == own;
+	for (int j = 0; j < n; ++j) seen |= out[j] == a;
+	return seen;
+}
+
 /* (the areas a look may come from: those that draw the run's areas this
  * run, BN6's and another net's, the layer's own left out; in an order of
- * the layer's seed) */
-static int candidates(int *out, int max, int own) {
+ * the layer's seed, after the `nfirst` in `first`, any area (glitchlook=,
+ * another game's area N as -1 - N), first) */
+static int candidates(int *out, int max, int own, const int *first, int nfirst) {
 	int n = 0;
+	for (int k = 0; k < nfirst && n < max; ++k) {
+		int a = first[k] < 0 ? NET_AREAS - 1 - first[k] : first[k];
+		if (!taken(out, n, a, own)) out[n++] = a;
+	}
+	int forced = n;
 	for (int b = 0; b < BIOME_COUNT && n < max; ++b) {
 		int a[2] = { run_dress(b), b };
-		for (int i = 0; i < 2; ++i) {
-			bool seen = a[i] == own;
-			for (int j = 0; j < n; ++j) seen |= out[j] == a[i];
-			if (!seen && n < max) out[n++] = a[i];
-		}
+		for (int i = 0; i < 2; ++i)
+			if (!taken(out, n, a[i], own) && n < max) out[n++] = a[i];
 	}
 	uint32_t h = run.layer_seed | 1;
-	for (int i = n - 1; i > 0; --i) {
+	for (int i = n - 1; i > forced; --i) {
 		h ^= h << 13; h ^= h >> 17; h ^= h << 5;
-		int j = (int)(h % (uint32_t)(i + 1)), t = out[i];
+		int j = forced + (int)(h % (uint32_t)(i - forced + 1)), t = out[i];
 		out[i] = out[j];
 		out[j] = t;
 	}
 	return n;
 }
 
-void glitch_looks_make(int own) {
+void glitch_looks_make(int own, const int *first, int nfirst) {
 	glitch_looks_free();
-	int areas[2 * BIOME_COUNT], n = candidates(areas, 2 * BIOME_COUNT, own), got[LOOKS];
+	int areas[2 * BIOME_COUNT + 4], n = candidates(areas, 2 * BIOME_COUNT + 4, own, first, nfirst < 4 ? nfirst : 4), got[LOOKS];
 	uint32_t t0 = SDL_GetTicks();
 	for (int i = 0; i < n && L.n < LOOKS; ++i)
 		if (netmap_look(areas[i], &L.look[L.n])) got[L.n++] = areas[i];
