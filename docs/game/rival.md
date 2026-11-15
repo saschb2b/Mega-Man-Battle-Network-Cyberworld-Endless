@@ -106,7 +106,14 @@ clearance opens), which only matter to a player who plays on.
    them, and a playtester's "pair of viruses in 0:12.00" came back as
    three in 0:14.50 (session 64). The time is the test, not the squad's
    strength (one above the band deleted a playtester at 100 of 140 HP on
-   layer 2, his run over).
+   layer 2, his run over). And no virus that decides when it can be hit:
+   a squad with BN6's Quaker or BN5's Powie is rolled again among the
+   act's battles (up to eight times, from the duel's own seeded roll). A
+   Quaker is out of reach in the air until it lands ("a Quaker lottery",
+   three of a playtester's four duels); a Powie stands two seconds on its
+   panel between jumps, out of reach in each (BN5's own timer, frame for
+   frame in BN6's engine: `build.py xdiff powie_v1`), and two of them made
+   an act 1 race "mostly luck", 0:20.85 against 0:10.00 (session 76).
 4. **ProtoMan's time.** Set from the squad's HP so that a good hand beats
    it and a slow one does not (4 s and one for each 20 HP: a playtester's
    act 1 hand took 27.5 s to the 11 s of 3 s and one for each 30), then

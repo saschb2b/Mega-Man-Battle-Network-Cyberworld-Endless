@@ -106,6 +106,20 @@ bool lan_room_on_pc(int x, int y) {
 	return read_spots() && x >= L.pc_box[0] && y >= L.pc_box[1] && x < L.pc_box[2] && y < L.pc_box[3];
 }
 
+static int clamp(int v, int lo, int hi) { return v < lo ? lo : v > hi ? hi : v; }
+
+/* (the spot a cell in from the cells' ends, where its row allows: BN6's
+ * real-world triggers have their corner cells cut, docs/rom/net-maps.md) */
+int lan_room_pc_near(int x, int y, int *cx, int *cy) {
+	if (!read_spots()) return -1;
+	const int *b = L.pc_box;
+	int in = b[2] - b[0] >= 24 ? 12 : 4;
+	*cx = clamp(x, b[0] + in, b[2] - in);
+	*cy = clamp(y, b[1] + 4, b[3] - 4);
+	int dx = clamp(x, b[0], b[2] - 1) - x, dy = clamp(y, b[1], b[3] - 1) - y;
+	return dx * dx + dy * dy;
+}
+
 void lan_house_frame(int number) {
 	if (number == LAN_HOUSE) indoors_shut(HOUSE_DOORS);
 	else if (number == LAN_ROOM) indoors_shut(1u << STAIRS_DOWN);

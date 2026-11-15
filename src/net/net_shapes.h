@@ -57,4 +57,10 @@ void connect_all(void);
 /* Floor cells with exactly one floor neighbour. */
 int dead_ends(int *xs, int *ys, int max);
 
+/* Fills the void panels with floor on all four sides and void on a
+ * corner: pits left where walkways and platforms meet round them, which no
+ * original map has (a hole punched in a slab or a field keeps its corners
+ * floor and stays). How many were filled. */
+int fill_pits(void);
+
 #endif

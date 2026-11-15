@@ -36,7 +36,14 @@ its houses, people and checks, and Lan's front door (its warp 1, carried
 with his house) is its door home (AsterLand's and the Academy's open
 too, piece 10); it has no jack-in of its own. R in the
 town, the house, or the room off the PC has MegaMan say where the PC is
-("Home's right here,Lan! The PC's up in your room!"). BN6's jack-out from
+("Home's right here,Lan! The PC's up in your room!"). BN6 jacks in only
+from the PC's own cells, which reach 16 units out from the desk and stop
+short of the shelf at its right, whatever way Lan faces (`sub_8034CB6`
+reads the trigger under him): two playtesters standing at the desk, 3
+and 5 units in front of the cells, heard "The PC's straight up,Lan!"
+(15 November 2026). So R within 12 units of them steps Lan onto them,
+as the town's R does a step short of a jack-in cell, and BN6's own
+jack-in follows. BN6's jack-out from
 Lan's HP sets Lan down at his PC. In the house the arrow leads from the
 front door straight up past the sofa's end before it turns to the
 stairs: the straight line runs into the shoe cabinet and the sofa

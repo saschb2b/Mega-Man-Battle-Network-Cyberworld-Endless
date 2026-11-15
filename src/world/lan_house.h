@@ -31,6 +31,10 @@ bool lan_house_way(int number, int px, int py, int *x, int *y);
 bool lan_house_door(int *x, int *y);
 /* Whether world (x, y) of the room stands on the PC's jack-in cells. */
 bool lan_room_on_pc(int x, int y);
+/* How far world (x, y) of the room is from the PC's jack-in cells, squared
+ * (0 on them), and (*cx, *cy) the spot well on them nearest it, clear of
+ * their corner cells; -1 where the room's cells cannot be read. */
+int lan_room_pc_near(int x, int y, int *cx, int *cy);
 /* Each frame in the house or the room (`number`): their doors but BN6's
  * kept ones shut, the bathroom's among them (indoors_shut). */
 void lan_house_frame(int number);
