@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (Undernet Zero's row and what its map sets round its floors: its rims' clamps and corner pins and its bridges' long spikes drawn into the floor's own tiles, which no cut separates; the spikes tried as a cut past the laid depth, 6 looks that floated under the layers' bridges, taken out; the cut behind a floor finding its bowls alone).
 * **Update**: world/level-design/side-pieces.md (Mr. Weather Comp's clouds measured: most are walkable floor at height 64, walled there, reached by the escalator and the yellow pads, and none is set; its low clouds over the field, on no floor of their own, are scenery cut from the second layer of a map whose background is its own tiles, `decor_learn_floating`, and set in the void beside a layer's floor; its row in the areas' table; the first layer's pieces corrected).
 * **Update**: world/level-design/side-pieces.md (the Undernet's fire bowls behind upper edges on the second layer, gripping none, cut by `sides_learn_behind` (`net_area.sides` bit 7, now 16 bits), a row cut a bowl each, set where the floor below and the first layer's tiles match; its row in the area table; the bowls in Undernet 3's raised ring's holes left, and why; Undernet 1's lone bowls counted again: two, not five).
 * **Update**: world/level-design/side-pieces.md (BN5's ACDC Area's row, and a section on what its maps set round their floors: wire tufts behind its blue walkways drawn into a rim no layer draws, so none set; the rest floor art or the owner's kinds).
