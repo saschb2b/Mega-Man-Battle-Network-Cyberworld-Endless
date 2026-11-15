@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T03:42:25Z
-* **Update**: game/meta/what-megaman-knows.md (the act's card and the PET name a guardian plainly once met at his arena, a fight left unfinished too), game/bosses/sequence.md (the talk: a B pressed while the staging held MegaMan hurries it), game/liberation/building/stage-1.md (the card's dark-layer line on the act's first two layers only).

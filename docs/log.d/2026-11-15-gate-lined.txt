@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T03:40:53Z
-* **Update**: world/level-design/generator.md (Navigation: the guardian's gate leaves the antechamber where the walk meets it on its line, session 77's stops, the counts before and after).

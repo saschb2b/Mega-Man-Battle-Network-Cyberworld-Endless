@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T03:55:00Z
-* **Update**: game/meta/darkchips.md ("Take the DarkChip?" starts on No, as BN6's own costly questions do, its options a moment after the question, so an A pressed through the words takes nothing; session 77), game/meta/bn6-darkchips.md (BN6's flame asks it the same way).

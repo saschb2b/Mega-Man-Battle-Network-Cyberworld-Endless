@@ -3,7 +3,7 @@ type: Feature
 title: "Stage 1, as built"
 description: "Stage 1 as built: the dark layer behind an act's fork (`run_dark_area`), its board made from the seed (`liberation_board.c`), the phases' course, fences, BN5's look, camera and music, and `run.lib` across a CONTINUE."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T01:11:12Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:42:25Z }
 ---
 
 # Stage 1, as built (23 October 2026)

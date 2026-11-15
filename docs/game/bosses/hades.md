@@ -3,7 +3,7 @@ type: Research
 title: "What Hades does, and what was taken"
 description: "What was taken from Hades' boss staging: safe antechamber, locked arena, the music's drop, intro lines by history, title card, log-out, Guardian Data, area-clear card, `rivals.sav`; changing arenas and extra phases left out."
 tags: [game, bosses]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:44:04Z }
 ---
 
 # What Hades does, and what was taken
