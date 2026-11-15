@@ -35,13 +35,14 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 uint32_t npc_beam(int x, int y, int z, const StageFlags *f);
 /* The Guardian Data it leaves: a Mystery Data crystal (animation `anim`)
  * that shows on `reward` and runs text `script` of `archive` when checked,
- * which should set `taken`. */
+ * which should clear `reward` (the crystal goes) and set `taken`. */
 uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int script, const StageFlags *f);
 /* A floor pad (sprite list `category`, `index`) that appears once
- * `open_flag` is set; `over_bg2` draws it over the map's second layer
- * (layer priority 2), as a dark layer's board lies there in BN5's look
- * (docs/game/liberation/), still under MegaMan, sorted after him by depth. */
-uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2);
+ * `open_flag` is set, over the map's second layer (layer priority 2),
+ * where a dark layer's board lies in BN5's look (docs/game/liberation/)
+ * and BN4's Town Area draws its pale floor; still under MegaMan, sorted
+ * after him by depth. */
+uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag);
 
 /* A super boss's body (docs/game/bosses/super-bosses.md): his sprite, the
  * animation he stands in and his pose (NpcBody's; no log-in), how long the

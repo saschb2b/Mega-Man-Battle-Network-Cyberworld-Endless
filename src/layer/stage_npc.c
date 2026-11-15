@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "mapslot.h"
 #include "npc.h"
+#include "npc_sprite.h"
 
 /* BN6's own on the net: its beam's sound, a Navi's log-in and log-out
  * alike (bn6f's npcscript_809F86C and byte_809F880; docs/rom/battle.md,
@@ -37,6 +38,7 @@ static void op(Script *s, const uint8_t *b, int n) { memcpy(s->b + s->n, b, (siz
 static void mark(Script *s, int l) { s->label[l] = s->n; }
 static void addr(Script *s, int l) { s->fix[s->nfix].at = s->n; s->fix[s->nfix++].label = l; s->n += 4; }
 static void jump_if(Script *s, int flag, int l) { OP(s, 0x04, (uint8_t)flag, (uint8_t)(flag >> 8)); addr(s, l); }
+static void jump(Script *s, int l) { OP(s, 0x02); addr(s, l); }
 static void sound(Script *s, int id) { OP(s, 0x28, (uint8_t)id, (uint8_t)(id >> 8)); }
 static void coords(Script *s, int x, int y, int z) {
 	OP(s, 0x14, (uint8_t)x, (uint8_t)(x >> 8), (uint8_t)y, (uint8_t)(y >> 8), (uint8_t)z, (uint8_t)(z >> 8));
@@ -61,10 +63,15 @@ static uint32_t commit(Script *s) {
 	return at;
 }
 
-enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END };
+enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END, L_STAY };
 
 uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f) {
 	Script s = { .n = 0 };
+	/* (a log-in or log-out his sprite lacks is the beam's: BN6 reads an
+	 * animation past a sprite's as stray bytes and never ends it, and the
+	 * script waits on its end; BN4's GutsMan stood unseen so, issue #614) */
+	int log_in = npc_sprite_has(b->list, b->index, b->log_in) ? b->log_in : -1;
+	int log_out = npc_sprite_has(b->list, b->index, b->log_out) ? b->log_out : -1;
 	OP(&s, 0x09, 0x25, (uint8_t)b->index, (uint8_t)(b->list * 4), 0x16, (uint8_t)b->anim, 0x0E, 0x13);
 	if (b->mirror) OP(&s, 0x26);   /* (the sprite turned the other way) */
 	coords(&s, x, y, z);
@@ -78,7 +85,7 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	/* logs in where it stands, by its sprite's own log-in beside the beam
 	 * (which sounds), or shown as the beam rises where its sprite has
 	 * none; then strikes its pose for the title card */
-	if (b->log_in >= 0) OP(&s, 0x16, (uint8_t)b->log_in, 0x08, 0x2A, 0xC0);
+	if (log_in >= 0) OP(&s, 0x16, (uint8_t)log_in, 0x08, 0x2A, 0xC0);
 	else OP(&s, 0x10, BEAM_RISE, 0x08);
 	if (b->pose >= 0) OP(&s, 0x16, (uint8_t)b->pose, 0x10, 90);
 	OP(&s, 0x16, (uint8_t)b->anim);
@@ -89,7 +96,7 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	 * beside the beam, or gone as the beam rises; not by its alpha, which
 	 * BN6 never fades a Navi by (bn6f's note on the command: it "doesn't
 	 * actually work"), and the owner saw as a "blup" */
-	if (b->log_out >= 0) OP(&s, 0x2E, (uint8_t)b->log_out, 0x2A, 0xC0);
+	if (log_out >= 0) OP(&s, 0x2E, (uint8_t)log_out, 0x2A, 0xC0);
 	else OP(&s, 0x10, BEAM_RISE);
 	mark(&s, L_END);
 	OP(&s, 0x09, 0x03);
@@ -125,8 +132,15 @@ uint32_t npc_guardian_data(int x, int y, int z, int anim, uint32_t archive, int 
 	mark(&s, L_SHOW);
 	sound(&s, SOUND_APPEAR);
 	OP(&s, 0x08, 0x0D, 0x20);
+	/* (there while `reward` is set and `taken` not: its chat clears
+	 * `reward` as it opens, and the crystal goes under its first box) */
 	mark(&s, L_IDLE);
-	wait_flag(&s, f->taken, L_LEAVE);
+	jump_if(&s, f->taken, L_LEAVE);
+	jump_if(&s, f->reward, L_STAY);
+	jump(&s, L_LEAVE);
+	mark(&s, L_STAY);
+	OP(&s, 0x10, 0x01);
+	jump(&s, L_IDLE);
 	mark(&s, L_LEAVE);
 	OP(&s, 0x03);
 	return commit(&s);
@@ -182,13 +196,16 @@ uint32_t npc_seal(int x, int y, int z, const StageFlags *f) {
 	return commit(&s);
 }
 
-uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag, bool over_bg2) {
+uint32_t npc_sealed_pad(int category, int index, int x, int y, int z, int open_flag) {
 	Script s = { .n = 0 };
 	/* as npc_prop's pads: a floor sprite under MegaMan (npc.c) */
 	OP(&s, 0x09, 0x25, (uint8_t)index, (uint8_t)(category * 4), 0x16, 0x00, 0x0A, 0x00, 0x1F, 0x0E);
 	x += NPC_FLOOR_BACK; y -= NPC_FLOOR_BACK; z -= NPC_FLOOR_BACK;
 	coords(&s, x, y, z);
-	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, over_bg2 ? 0x1A : 0x1B);
+	/* (over the second layer: the arena's floor has art there in BN5's
+	 * looks and BN4's Town Area, whose pale floor hid the pad under it, so
+	 * MegaMan walked onto bare floor and was gone, session 78) */
+	OP(&s, 0x0C, (uint8_t)-NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, (uint8_t)NPC_FLOOR_BACK, 0x1A);
 	wait_flag(&s, open_flag, L_SHOW);
 	mark(&s, L_SHOW);
 	sound(&s, SOUND_APPEAR);

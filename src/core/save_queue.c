@@ -29,7 +29,7 @@ bool save_file_write(const char *path, const void *data, size_t n) {
 
 #ifdef __EMSCRIPTEN__
 /* (the browser's build: no threads, each file written at once) */
-bool save_queue_file(const char *path, void *data, size_t n) {
+static bool queue_file(const char *path, void *data, size_t n) {
 	(void)path;
 	(void)data;
 	(void)n;
@@ -101,7 +101,7 @@ static bool started(void) {
 	return thread != NULL;
 }
 
-bool save_queue_file(const char *path, void *data, size_t n) {
+static bool queue_file(const char *path, void *data, size_t n) {
 	if (!started()) return false;
 	Job *j = malloc(sizeof *j);
 	if (!j) return false;
@@ -137,3 +137,72 @@ void save_queue_quit(void) {
 	let_go();
 }
 #endif
+
+/* ---- the held set ---- */
+
+typedef struct Held {
+	struct Held *next;
+	char path[600];
+	void *data;
+	size_t n;
+} Held;
+
+static Held *held, **held_end = &held;
+static bool holding, spoilt;
+
+void save_queue_drop(void) {
+	while (held) {
+		Held *h = held;
+		held = h->next;
+		free(h->data);
+		free(h);
+	}
+	held_end = &held;
+}
+
+void save_queue_hold(bool on) {
+	if (on) {
+		save_queue_drop();
+		spoilt = false;
+	} else if (holding && spoilt) {
+		save_queue_drop();
+	}
+	holding = on;
+}
+
+bool save_queue_holding(void) { return holding; }
+void save_queue_spoil(void) { spoilt = true; }
+bool save_queue_held(void) { return held != NULL && !holding; }
+
+void save_queue_release(void) {
+	if (holding) return;
+	while (held) {
+		Held *h = held;
+		held = h->next;
+		if (!queue_file(h->path, h->data, h->n)) {
+			save_queue_wait();   /* (after those queued before it) */
+			save_file_write(h->path, h->data, h->n);
+			free(h->data);
+		}
+		free(h);
+	}
+	held_end = &held;
+}
+
+bool save_queue_file(const char *path, void *data, size_t n) {
+	if (!holding) return queue_file(path, data, n);
+	Held *h = malloc(sizeof *h);
+	if (!h) {
+		/* (taken all the same, the set spoilt: the caller writes nothing now) */
+		free(data);
+		spoilt = true;
+		return true;
+	}
+	snprintf(h->path, sizeof h->path, "%s", path);
+	h->data = data;
+	h->n = n;
+	h->next = NULL;
+	*held_end = h;
+	held_end = &h->next;
+	return true;
+}

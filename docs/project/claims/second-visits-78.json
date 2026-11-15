@@ -1,0 +1,9 @@
+{
+  "branch": "second-visits-78",
+  "what": "Short second talks: a per-object told flag for each choice index and the flame of darkness (session 78)",
+  "takes": {
+    "event_flags": [["0x14D1", "0x14D9"]]
+  },
+  "units": [],
+  "run": false
+}

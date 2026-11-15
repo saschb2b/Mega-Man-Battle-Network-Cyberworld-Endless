@@ -18,6 +18,19 @@
  * renamed over it: true where it is queued (the queue frees it), false
  * where the caller is to write it now (the browser's build, or no thread) */
 bool save_queue_file(const char *path, void *data, size_t n);
+/* A set of files held back instead of written: while the hold is on, each
+ * file given to save_queue_file is kept (always taken, the browser's build
+ * too), the set replacing any held before. A quit with a talk open writes
+ * the set saved before it began (director_save.c). One file not kept
+ * spoils the set, dropped as the hold ends. */
+void save_queue_hold(bool on);
+bool save_queue_holding(void);
+/* ... one file the caller could not give it: the set is spoilt */
+void save_queue_spoil(void);
+bool save_queue_held(void);
+/* The held set queued (or written at once where nothing queues), or forgotten */
+void save_queue_release(void);
+void save_queue_drop(void);
 /* Until every file queued is written */
 void save_queue_wait(void);
 /* Every file queued written, and the thread gone (the game's end) */

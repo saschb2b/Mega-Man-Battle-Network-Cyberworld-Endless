@@ -44,6 +44,7 @@
 #include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
+#include "npc_sprite.h"
 #include "xguardian_bn4.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
@@ -189,7 +190,14 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 uint32_t mapslot_alloc(const void *bytes, int len) { (void)bytes; (void)len; return 0; }
 /* (another game's songs: no core to copy them into) */
 void emu_write(uint32_t addr, const void *data, size_t len) { (void)addr; (void)data; (void)len; }
-uint32_t emu_read32(uint32_t addr) { (void)addr; return 0; }
+/* (a made-up sprite list at FAKE_SPRITES for npc_sprite.c's reader, test_npc_sprite; nothing anywhere else) */
+#define FAKE_SPRITES 0x08F00000u
+static uint8_t fake_sprites[0x200];
+uint8_t emu_read8(uint32_t addr) { return addr - FAKE_SPRITES < sizeof fake_sprites ? fake_sprites[addr - FAKE_SPRITES] : 0; }
+uint32_t emu_read32(uint32_t addr) {
+	return addr - FAKE_SPRITES <= sizeof fake_sprites - 4 ? (uint32_t)emu_read8(addr) | (uint32_t)emu_read8(addr + 1) << 8 |
+		(uint32_t)emu_read8(addr + 2) << 16 | (uint32_t)emu_read8(addr + 3) << 24 : 0;
+}
 bool emu_debug_on(void) { return false; }
 /* (a request's chip: no ROM's pools here) */
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
@@ -6994,6 +7002,49 @@ static void super_words(void) {
 	check_talk("the Nest's port with the Cybeast met", home_port_words(BIOME_NEST, SUPER_CYBEAST, false, false, false, false, 0));
 }
 
+/* npc_sprite.c's reader over a made-up sprite in BN's layout (numbers only): its animations' count, which
+ * draw (a tile not all colour 0), what a Navi stands in where his facing is blank (BN4's TopMan facing up, BN5's
+ * CosmoMan), whether a talker turns, and a sprite it cannot read (a compressed one) left as told */
+static void put32_at(uint32_t at, uint32_t v) { for (int i = 0; i < 4; ++i) fake_sprites[at + (uint32_t)i] = (uint8_t)(v >> 8 * i); }
+static void test_npc_sprite(void) {
+	static RomLayout layout;
+	layout.sprite_lists = FAKE_SPRITES - 0x08000000u;
+	const RomLayout *was = R.layout;
+	R.layout = &layout;
+	memset(fake_sprites, 0, sizeof fake_sprites);
+	for (uint32_t k = 0; k < 10; ++k) put32_at(4 * k, FAKE_SPRITES + 0x40);   /* (every list the same: sprite 0, then 1 compressed) */
+	put32_at(0x40, FAKE_SPRITES + 0x100);
+	put32_at(0x44, 0x80000000u | (FAKE_SPRITES + 0x100));
+	const uint32_t b = 0x104, frames = 24, drawn = 144, blank = 180, sub = 216, objs = 224;   /* (after its 4-byte header) */
+	for (uint32_t a = 0; a < 6; ++a) {
+		uint32_t f = frames + 20 * a;
+		put32_at(b + 4 * a, f);
+		put32_at(b + f, a == 3 || a == 5 ? drawn : blank);
+		put32_at(b + f + 4, drawn);
+		put32_at(b + f + 8, sub);
+		put32_at(b + f + 12, objs);
+		fake_sprites[b + f + 18] = 0x80;
+	}
+	put32_at(b + drawn, 32);
+	memset(fake_sprites + b + drawn + 4, 0x11, 32);
+	put32_at(b + blank, 32);
+	put32_at(b + sub, 4);          /* (its entry: object list 0) */
+	put32_at(b + objs, 4);         /* (list 0: one object, then its end) */
+	fake_sprites[b + objs + 9] = 0xFF;
+	fake_sprites[b + objs + 10] = 0xFF;
+	CHECK(npc_sprite_anims(6, 0) == 6 && npc_sprite_has(6, 0, 5) && !npc_sprite_has(6, 0, 6) && !npc_sprite_has(6, 0, 0x19),
+		"npc sprite: six animations, none past them");
+	CHECK(npc_sprite_shows(6, 0, 3) && npc_sprite_shows(6, 0, 5) && !npc_sprite_shows(6, 0, 1) && !npc_sprite_shows(6, 0, 4) &&
+		!npc_sprite_shows(6, 0, 7), "npc sprite: 3 and 5 drawn, a blank tile's facings and one past them not");
+	CHECK(npc_sprite_stand(6, 0, 1) == 3 && npc_sprite_stand(6, 0, 5) == 5 && npc_sprite_stand(7, 0, 1) == 1,
+		"npc sprite: a Navi stands towards the camera where his facing is blank, an object as told");
+	CHECK(!npc_sprite_turns(6, 0) && !npc_sprite_turns(7, 0) && !npc_sprite_turns(0, 0), "npc sprite: no turn to a blank facing, nor an object's");
+	CHECK(npc_sprite_anims(6, 1) == -1 && npc_sprite_has(6, 1, 0x28) && npc_sprite_shows(6, 1, 7) && npc_sprite_stand(6, 1, 4) == 4 &&
+		npc_sprite_turns(6, 1), "npc sprite: a compressed one left as told");
+	R.layout = was;
+	memset(fake_sprites, 0, sizeof fake_sprites);
+}
+
 static void test_super_bosses(void) {
 	Profile profile_was = profile;
 	Run run_was = run;
@@ -8402,6 +8453,7 @@ int main(int argc, char **argv) {
 	test_darkchips();
 	test_rom_pages();
 	test_super_bosses();
+	test_npc_sprite();
 	test_analytics();
 	test_analytics_online();
 	test_visitors();
