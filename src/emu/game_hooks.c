@@ -12,15 +12,14 @@
 #include "idle.h"
 #include "npc.h"
 #include "order_sort.h"
+#include "party_field.h"
 #include "pet.h"
 #include "pet_text.h"
 #include "protoman_cross.h"
 #include "scripts.h"
 #include "soulproxy.h"
-#include "soulunite.h"
 #include "sound_quiet.h"
 #include "xchips_install.h"
-#include "xinstall_log.h"
 
 void game_hooks_install(void) {
 	/* (BN6's chip tables grown, BN5's chips in them or their placeholders,
@@ -45,14 +44,7 @@ void game_hooks_install(void) {
 	 * are, every battle of a run: the run's Souls reach them as each battle
 	 * begins, encounter.c; docs/multirom/souls.md. And the
 	 * proxy form for its own test, --dev soulproxy) */
-	bool souls = soulproxy_bn5_read() && !dev.nonavis && !dev.xnavicontrol;
-	if (dev.soulproxy || souls) {
-		/* (written down for the Arena's cores as they are made: xinstall_log.h) */
-		xlog_begin();
-		bool proxy = soulproxy_install(dev.proxybreak);
-		if (proxy) soulunite_install(dev.unitebreak, dev.soulbreak);
-		xlog_end();
-	}
+	soulproxy_install_run(dev.soulproxy, dev.nonavis || dev.xnavicontrol, dev.proxybreak, dev.unitebreak, dev.soulbreak);
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
 	if (emu_debug_on()) claims_report();
@@ -62,4 +54,6 @@ void game_hooks_after_boot(void) {
 	emu_encounters_install();
 	protoman_cross_install();
 	events_install();
+	/* (a party on one field: the shared dive's spike, party_field.h) */
+	if (dev.party > 1) party_field_install(dev.party, dev.party_hp, dev.party_end);
 }

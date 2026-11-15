@@ -29,8 +29,12 @@ enum {
 	SOULPROXY_BREAK_SUMMON = 16,  /* the summon not hooked */
 };
 bool soulproxy_install(int breaks);
-/* Whether BN5's ROM, the Souls' own, is read beside BN6's */
-bool soulproxy_bn5_read(void);
+/* The Souls' hooks as a run's core takes them at its start (game_hooks.c):
+ * the proxy form and UNITE wherever BN5's Navis are (no_navis: they are
+ * not), or always where forced (--dev soulproxy), each written down for
+ * the Arena's cores (xinstall_log.h); the breaks as soulproxy_install's
+ * and soulunite_install's. */
+void soulproxy_install_run(bool forced, bool no_navis, int proxy_breaks, int unite_breaks, int soul_breaks);
 
 /* (dev step "cross F", tools/xproxy.py) The next Cross MegaMan chooses on
  * CROSSSELECT is committed as form F (1-0x18) instead of its own, by

@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "The shared dive"
-description: "The week's net dived together (proposed 15 November 2026, unbuilt): a portal in the Square, every diver on the seed seen live, crews of four, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
+description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:00:00Z }
 sources:
@@ -12,7 +12,7 @@ sources:
 
 # The shared dive
 
-**Proposed, unbuilt** ([issue #589](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/589)).
+**Being built** ([issue #589](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/589)).
 The owner's idea of 15 November 2026, put through
 the game-design skill and settled the same day in six rounds of
 questions, each answer the owner's (below). It changes [The week's
@@ -123,17 +123,47 @@ Verified on `dev`, 15 November 2026:
 | The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
 | Build order | One field first, the linked fallback in the same release | Linked first; a spike first |
 
+## The spike: four on one field (15 November 2026)
+
+`--dev party=N` (`src/online/party_field.c`) grows one of the run's own
+battles to N MegaMen on side 0 on one core, the way `--dev arena2v2`
+grows a NetBattle: the battle's list rewritten at its spawn
+(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, the back
+column first) and each partner's keys written into his AI data at the
+battle loop's key copy (`BN6_KEY_COPY`), here a script. BN6 keeps four
+actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
+`BN6_BATTLE_PLAYERS`), so four fit its tables. Seen headless with
+`tools/cw.py play` and `foes 101@52` (HeatMan V1) and `foes 85@52`
+(a Gunner), the log's `party:` lines and the pictures:
+
+- **Four stand and fight.** Each partner is BN6's MegaMan (name 0x1A0),
+  with the player's HP; he moves and shoots from his keys, his hits
+  land.
+- **A partner deleted leaves the field and the battle goes on**
+  (`partyhp=30`).
+- **The lead deleted does not end it while a partner stands**, and the
+  partner's win ends it as a win, back on the map (`hp=10,partyhp=500,
+  partyend=600`): BN6 ends a battle when a side has no actor standing.
+  Each game decides what a fall means for its own run.
+- **Who the enemies aim at is open.** A Gunner's and HeatMan's hits went
+  to the lead alone, all 15 and 16 of them. BN6's lookup of a side's
+  player (`BN6_SIDE_PLAYER_GET`, bn6f battle_findPlayer, 149 callers)
+  reads only the side's first actor, and a nearest-actor lookup (bn6f
+  sub_80103F8, 45 callers) the nearest; answered for every enemy caller
+  with each MegaMan in turn, neither changed one hit, frame for frame. The
+  AIs read their target elsewhere: the next thing to find, since a
+  guardian that aims at the lead alone makes the lead's fight the party's
+  hardest (the scaling above assumes the aim spreads).
+
 ## Open before it is built
 
 1. **The join window.** The two-a-side hook trades the battle's list at
    its spawn (`BN6_SPAWN_ENTITIES`), so a MegaMan cannot be added to a
    battle already begun. The offer likely has to come as the encounter
    starts, the owner's battle waiting a moment for the answer.
-2. **One field against a guardian.** A party is four MegaMen on side 0
-   against BN6's AI on one GBA, not two a side on two. Whether a
-   guardian's AI aims at any MegaMan but the first, and how four stand on
-   the red side's nine panels, are unverified: a spike with the
-   reverse-engineering skill before the release is planned.
+2. **One field against a guardian.** Four MegaMen stand and fight on one
+   GBA (the spike, above). Open: what the enemies aim at, so the
+   guardian's attacks can spread over the party.
 3. **The version ladder** for BN5's and BN4's Navis and for guardians
    with no SP of their own.
 4. **A linked fighter in a party**: whether they count in its size, and

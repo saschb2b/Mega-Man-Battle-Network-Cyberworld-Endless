@@ -58,7 +58,7 @@ static bool dev_switch(const char *t) {
 		{ "side=", &dev.side }, { "glitchstage=", &dev.glitch_stage }, { "battler=", &layer_battler_forced }, { "bass=", &dev.bass }, { "beast=", &dev.beast }, { "proxybreak=", &dev.proxybreak },
 		{ "unitebreak=", &dev.unitebreak }, { "soulbreak=", &dev.soulbreak },
 		{ "arenadelay=", &dev.arena_delay }, { "arenalag=", &dev.arena_lag }, { "arenahp=", &dev.arena_hp }, { "arenacarry=", &dev.arena_carry }, { "arenadesync=", &dev.arena_desync },
-		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
+		{ "arenaroll=", &dev.arena_roll }, { "arena2v2=", &dev.arena_2v2 }, { "party=", &dev.party }, { "partyhp=", &dev.party_hp }, { "partyend=", &dev.party_end }, { "teamhp=", &dev.team_hp }, { "arenawindow=", &dev.arena_window },
 		{ "matehp=", &dev.mate_hp }, { "group=", &dev.group },
 		{ "arenafreeze=", &dev.arena_freeze }, { "arenaseed=", &dev.arena_seed }, { "arenaagain=", &dev.arena_again },
 		{ "arenaseedoff=", &dev.arena_seed_off }, { "teamseat=", &dev.team_seat }, { "teampick=", &dev.team_pick }, { "teambuster=", &dev.team_buster },

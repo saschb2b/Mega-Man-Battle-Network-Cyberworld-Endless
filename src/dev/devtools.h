@@ -87,6 +87,10 @@ typedef struct {
 	int arena_2v2;  /* arena2v2=N (epic #167): the pair's Practice NetBattle with two MegaMen a side, the partners' keys two
 	                   more streams queued by the battle loop's iteration (arena_team.h); N > 1 one key of the second GBA's flipped
 	                   from iteration N */
+	int party;      /* party=N (2-4, the shared dive's spike, #589): a battle of the run's own with N MegaMen on side 0, the partners'
+	                   keys scripted (party_field.h) */
+	int party_hp;   /* partyhp=N: under party=N the partners begin each battle with N HP (the spike's deletion test) */
+	int party_end;  /* partyend=N: under party=N the enemies' HP set to 1 at the battle loop's iteration N (the spike's win test) */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
 	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second
