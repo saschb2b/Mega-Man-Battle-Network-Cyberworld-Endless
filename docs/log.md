@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (#618's own entry written in: BN4's guardians face MegaMan).
 * **Update**: releases/v0.22.0.md (#617's own entry written in first among the fixes: GutsMan's Guardian Data after a CONTINUE, its reporter credited).
 * **Update**: rom/bn4.md (Sprite lists: its Navis' overworld sprites draw four diagonals by BN6's eight facings, WindMan four alone, TopMan's and SparkMan's backs empty; BN4's NPC commands 0x16 and 0x17 and its scripts standing them in the odd animations; the pale ones its log-outs), game/bosses/bn4-navis.md (a guardian of BN4's stands in the view nearest his facing, turned to MegaMan), research/sources.md (BN4's Navis face four ways, not eight).
 * **Update**: code/tools.md (`tools/pil_nearest.py`'s row: Pillow's nearest resize kept working where Ubuntu's python3-pil 12.1.1-2ubuntu1.5 breaks it).
