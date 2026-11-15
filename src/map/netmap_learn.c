@@ -269,7 +269,7 @@ static void rebank_seen(const AreaSrc *a, int to, Learned *L) {
  * own never shows, on its own map's grid. */
 /* map m's free-standing pieces, unless the area sets none (TILES_NO_SCENERY) */
 static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
-	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, &L->decor);
+	if (!(na->styles & TILES_NO_SCENERY)) decor_learn(m, na->bg_in_map, na->scenery_reach, &L->decor);
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) sides_learn(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);

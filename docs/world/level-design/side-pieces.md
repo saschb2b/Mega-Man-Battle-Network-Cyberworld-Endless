@@ -82,6 +82,7 @@ Taken per area as looked at, as every laying rule is
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
+| Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | every other area | nothing | - |
 
 ## Pieces the game animates (verified in the game)
@@ -179,10 +180,47 @@ and none fits a layer, and what their maps set beside their floors is
 larger than this rule takes (End Area's pagoda, Oran Area's hubs, hundreds
 of tiles).
 
+## Scenery a face's depth from the floor (Robot Control Comp; verified on the maps and in the game)
+
+Robot Control Comp sets its robot figures, alone and in twos to fours, and
+its wires with red lights, alone and in twos and threes, in the void beside
+its walkways and pads, on the first tile layer. They touch no floor, and
+the scenery cut ([the generator](generator.md), `decor.c`) is theirs: but it
+counts 44 pixels under every panel's lower edges as the floor's own, room
+for the tall faces and legs of other areas, and Robot's faces are 17
+pixels deep. A figure standing closer than that was cut in two, its lower
+half refused as touching the floor's art. The area sets its own depth
+(`scenery_reach`, 20 pixels: the faces and 3 more), and the cut takes 11
+looks from its three maps where it took 3 (a robot and two wires): the
+figures alone and in pairs, the wires in their groups. A layer sets 4 to
+10 as it sets any scenery. The layers draw 47 to 52% of the three maps'
+different tile pictures where they drew 46 to 49% (two seeds a layout). In
+the game the figures glow as the maps' do: their colours are the palette
+the area's own map cycles.
+
+Left as they are:
+
+- **The bulbs on springs** under its white platforms' lower faces (Comp 2
+  and the Pavilion's map). They share their tiles with the face they hang
+  from, so they come only with a stretch of it. The cut under a floor
+  (`hangs_learn`) at the ground's level takes them so, but also flat
+  scraps where the platforms' inner walls ring their cubes, bare face
+  segments and a fist, and sets what it cuts under pads alone; a layer's
+  pads here are its teal ones, which hang none. A rule of their own would
+  set a face-and-bulb stretch under a room's lower edge.
+- **Figures and wires touching a walkway or an arm**, behind its upper
+  edge or against its face, share a tile with its art and are refused by
+  the scenery cut (a tile of the map holds both). The cut behind a floor
+  (`behind_learn`) finds 7 looks, robots and wires behind one-wide
+  walkways, and none fits a layer over three layers.
+- **The fists past its arms' ends** (issue #505: a dead end's art, not a
+  piece), the robot's door and its striped conveyor (a set piece), its
+  pads' centrepieces and exit arrows (issue #505's kind 4).
+
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists, the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
+  red fists (above), the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
   lie on the first layer, beside or under the floor (probed on the maps),
   and the Nest's and Mr. Weather's maps hold their background in the
   second, so theirs lie there too. Scenery refuses a
