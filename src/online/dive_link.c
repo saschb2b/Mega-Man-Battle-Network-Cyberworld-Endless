@@ -185,7 +185,10 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 	}
 }
 
+uint32_t dive_link_keys(uint32_t keys) { return dive_traces_keys(keys); }
+
 void dive_link_draw(void) {
+	dive_traces_draw();
 	if (!L.on || !L.nfeed || !director_on_map()) return;
 	look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, L.feed[0]);
 }

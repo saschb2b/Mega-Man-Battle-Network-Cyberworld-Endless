@@ -127,7 +127,8 @@ const char *dive_traces_finder(unsigned index) {
 	return "";
 }
 
-bool dive_traces_opened(unsigned index) { return index < 256 && (T.opened[index >> 3] >> (index & 7) & 1); }
+/* whether another diver opened Mystery Data `index` this week */
+static bool opened(unsigned index) { return index < 256 && (T.opened[index >> 3] >> (index & 7) & 1); }
 
 /* ---- each frame: the nearest of each kind shown ---- */
 
@@ -152,7 +153,7 @@ static int nearest_spark(int px, int py, int *x, int *y, int *z) {
 		if (e < d) { d = e; best = k; *x = T.phrases[k].x; *y = T.phrases[k].y; *z = T.phrases[k].z; }
 	}
 	for (int k = 0; k < director_md_count(); ++k) {
-		if (!dive_traces_opened((unsigned)k) || director_md_opened(k)) continue;
+		if (!opened((unsigned)k) || director_md_opened(k)) continue;
 		int mx, my, mz;
 		director_md_place(k, &mx, &my, &mz);
 		int e = far_from(px, py, mx, my);

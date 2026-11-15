@@ -25,6 +25,9 @@ void dive_link_adopt(void);
  * dive's end told and the link closed. */
 void dive_link_frame(void);
 void dive_link_draw(void);
+/* The keys on their way to the game at home or on a dive: a phrase left
+ * on its layer (dive_traces.h). */
+uint32_t dive_link_keys(uint32_t keys);
 /* A line into the feed's band (a find's first finder, a split's place). */
 void dive_link_line(const char *line);
 /* The dive's messages, from online_mail_frame. */

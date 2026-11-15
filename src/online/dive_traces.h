@@ -35,7 +35,5 @@ uint32_t dive_traces_keys(uint32_t keys);
 void dive_traces_draw(void);
 /* The week's first finder of Mystery Data `index` ("" none known). */
 const char *dive_traces_finder(unsigned index);
-/* Whether another diver opened Mystery Data `index` this week. */
-bool dive_traces_opened(unsigned index);
 
 #endif

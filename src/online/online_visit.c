@@ -8,7 +8,6 @@
 #include "director.h"
 #include "director_gate.h"
 #include "dive_link.h"
-#include "dive_traces.h"
 #include "emu.h"
 #include "game.h"
 #include "loot.h"
@@ -218,7 +217,7 @@ void online_visit_wait_frame(void) {
 uint32_t online_visit_keys(uint32_t keys) {
 	if (V.stage == VISIT_AWAY) return online_scene_keys(keys);
 	/* (a dive's: a phrase left on its layer, dive_traces.h) */
-	if (V.stage == VISIT_HOME) return dive_traces_keys(keys);
+	if (V.stage == VISIT_HOME) return dive_link_keys(keys);
 	if (V.stage != VISIT_CALLING) return keys;
 	if (btn_pressed(BTN_B)) come_home(VISIT_END_CANCELLED);
 	return 0;
@@ -239,7 +238,7 @@ void online_visit_draw(void) {
 	else if (online_visit_held()) square_watch_draw();
 	else if (V.stage == VISIT_AWAY) online_scene_draw();
 	/* (the gate's fields, over the game in Lan's HP; a dive's feed on its layers) */
-	else { online_field_draw(); dive_link_draw(); dive_traces_draw(); }
+	else { online_field_draw(); dive_link_draw(); }
 }
 
 void online_visit_leave(VisitEnd why) {
