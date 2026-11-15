@@ -114,11 +114,17 @@ static void group_from(const AreaSrc *a, bool hang, int sx, int sy, uint8_t *see
 	}
 }
 
-/* Whether the group is a side piece; its panel in (*A, *B). */
-static bool grips(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) {
+static bool meets(const AreaSrc *a, const int *queue, const Group *g, bool below, int *A, int *B);
+
+/* Whether the group is a side piece; its panel in (*A, *B). `under`: or
+ * one that stands under a floor's lower edge touching none of its top,
+ * kept with the panel straight above it (the Nest's crystals). */
+static bool grips(const AreaSrc *a, const int *queue, Group *g, bool under, int *A, int *B) {
 	if (g->edge || g->n < MIN_TILES || g->n > MAX_TILES || g->x1 - g->x0 >= MAX_W || g->y1 - g->y0 >= MAX_H) return false;
 	for (int k = 0; k < g->n; ++k) count_tile(a, false, queue[k] % a->tw, queue[k] / a->tw, g);
-	if (g->on < ON_FLOOR || g->off * 10 < OFF_SHARE * (g->on + g->off) || g->other * 10 > g->on + g->off) return false;
+	if (g->other * 10 > g->on + g->off) return false;
+	if (under && !g->on && meets(a, queue, g, false, A, B)) return !area_src_arrow_at(a, a->ex + 16 + 32 * *A, a->ey + 16 + 32 * *B);
+	if (g->on < ON_FLOOR || g->off * 10 < OFF_SHARE * (g->on + g->off)) return false;
 	int best = -1;
 	for (int k = 0; k < g->npanels; ++k)
 		if (g->gnd[k] && (best < 0 || g->count[k] > g->count[best])) best = k;
@@ -163,9 +169,20 @@ static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
 	}
 }
 
-/* Group g, on panel (A, B), into the book unless it holds its look. */
+/* Whether the first layer draws any pixel of tile (tx, ty): an entry that
+ * draws none is the void a layer leaves empty. */
+static bool drawn0(const AreaSrc *a, int tx, int ty) {
+	for (int y = ty * 8; y < ty * 8 + 8; ++y)
+		for (int x = tx * 8; x < tx * 8 + 8; ++x)
+			if (a->idx0[(size_t)y * a->tw * 8 + x]) return true;
+	return false;
+}
+
+/* Group g, on panel (A, B), into the book unless it holds its look; kind 0
+ * a side piece, 1 under a floor, 2 behind one, 3 a side piece with the
+ * first layer's tiles under it (SidePiece.over). */
 static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
-	bool hang = kind != 0;
+	bool hang = kind == 1 || kind == 2;
 	int tw = a->tw, th = a->th;
 	SidePiece *p = &out->piece[out->n];
 	memset(p, 0, sizeof *p);
@@ -174,12 +191,14 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	p->ntiles = g->n;
 	p->hang = hang;
 	p->behind = kind == 2;
+	p->over = kind == 3;
 	for (int k = 0; k < 9; ++k)
 		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
 	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
 	for (int k = 0; k < g->n; ++k) {
 		p->tiles[k] = (StairTile){ .px = (int16_t)(queue[k] % tw * 8 - ax), .py = (int16_t)(queue[k] / tw * 8 - ay) };
 		*(hang ? &p->tiles[k].e0 : &p->tiles[k].e1) = a->tile[hang ? 0 : 1][queue[k]];
+		if (p->over) p->tiles[k].e0 = drawn0(a, queue[k] % tw, queue[k] / tw) ? a->tile[0][queue[k]] : 0;
 	}
 	for (int k = 0; k < out->n; ++k)
 		if (same(&out->piece[k], p)) { free(p->tiles); p->tiles = NULL; return; }
@@ -188,7 +207,8 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	++out->n;
 }
 
-void sides_learn(const AreaSrc *a, SideBook *out) {
+/* (`under`: sides_learn_under's) */
+static void second_learn(const AreaSrc *a, bool under, SideBook *out) {
 	if (a->layers < 2 || !a->rings || !a->front) return;
 	int tw = a->tw, th = a->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
@@ -198,12 +218,16 @@ void sides_learn(const AreaSrc *a, SideBook *out) {
 		Group g;
 		int A, B;
 		group_from(a, false, i % tw, i / tw, seen, queue, &g);
-		if (!grips(a, queue, &g, &A, &B)) continue;
-		keep(a, queue, &g, A, B, 0, out);
+		if (!grips(a, queue, &g, under, &A, &B)) continue;
+		keep(a, queue, &g, A, B, under ? 3 : 0, out);
 	}
 	free(seen);
 	free(queue);
 }
+
+void sides_learn(const AreaSrc *a, SideBook *out) { second_learn(a, false, out); }
+
+void sides_learn_under(const AreaSrc *a, SideBook *out) { second_learn(a, true, out); }
 
 #define BEHIND_DOWN  16   /* what stands behind a floor ends within this above it */
 #define BEHIND_TILES 24   /* ... and is no larger: an exit's arrow is */

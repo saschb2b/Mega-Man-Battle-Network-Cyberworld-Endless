@@ -80,10 +80,57 @@ Taken per area as looked at, as every laying rule is
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
+| The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | every other area | nothing | - |
+
+## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
+
+The Cybeast Nest's two maps (0x93:0 and 0x93:1, the Underground) stand
+crystals round their rims: squat stumps and tall spires, with loose
+rubble about them. They lie on the second tile layer, as the Undernet's
+bowls do (the maps' two layers drawn apart: the crystals and rubble on
+the second, the floor, its rims, tabs and spikes on the first), and
+none of their pixels lies on a floor's top where they stand in front of
+a lower edge. So the side-piece cut takes, in this area, a group that
+touches no floor's top where a ground panel lies straight above its top
+row within 48 pixels, kept with that panel (bit 3 of `net_area.sides`).
+With the ones behind upper edges that the cut took already, the maps give
+17 looks.
+
+Set as they were cut, a piece behind an upper edge stood over a rim's tab
+its map had not had there, and each added about three breaks to the
+[tile test](../../devtools/tile-test.md). So each of these looks keeps
+the first layer's tiles under it (`SidePiece.over`; an entry that draws
+no pixel counts as none) and goes down only where the picture round it is
+the same: where the layer's first-layer tile differs from its map's, both
+must lie wholly behind the crystal's own pixels (the tiles' pixels,
+`voids_entry_px`). That is rare at any one panel, so these looks try
+every free panel of the floor rather than half, still three apart, and a
+panel takes any of the looks that fit there rather than the one its hash
+names. Over 18 of the atlas's layers that sets 2.8 a layer (0 to 6, one
+layer without), in three looks (a stump with its rubble in front of a
+lower edge or behind an upper one, a spire behind an upper edge), and no
+layer's breaks grew.
+
+The lone spires (8 tiles) never fit: in their maps they stand in front of
+a room's corner, over the stem of the tab that hangs there and the rim's
+face (92 tries refused over six layers), which a layer's corner rarely
+draws in the same tiles. Set without them, the stem would be cut off at
+the spire's edge. The rubble alone in the void (a tile to three) is
+smaller than a piece, the rubble on the floor's top is no side piece, and
+the crystals along the maps' bridges stand by raised floor, beside no
+ground panel.
+
+The maps hold no layer priorities round them (none within a panel of any
+look), and none are needed: BN6 draws MegaMan in front of the second
+layer there, so he walks in front of a stump behind an upper edge, and
+stands behind one in front of a lower edge, his feet on the floor above
+it (captured on a Nest layer, seed 4). A Glitch flip into the Nest
+draws them too: they are set in the tiles' own pass (`pick_map`) from
+what the area learned, and need nothing but their tiles.
 
 ## Pieces the game animates (verified in the game)
 
@@ -222,8 +269,9 @@ Left as they are:
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
   red fists (above), the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
   lie on the first layer, beside or under the floor (probed on the maps),
-  and the Nest's and Mr. Weather's maps hold their background in the
-  second, so theirs lie there too. Scenery refuses a
+  and Mr. Weather's maps hold their background in the second, so its
+  pieces lie on the first too. (The Nest's were counted here as well; its
+  crystals lie on the second layer, below.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.
