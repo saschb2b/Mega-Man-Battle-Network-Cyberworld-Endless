@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T04:10:00Z
+* **Update**: releases/v0.22.0.md (the merges of #569-#583 written in: BN4's ACDC and BN5's Oran Areas drawn whole, the pits between walkways filled, ProtoMan's races without Powies, the jack-in from a step short, the Virus Battler's second talk, the first visitor's answer, RESULT's virus count, the two menu lines).
