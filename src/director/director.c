@@ -14,7 +14,6 @@
 #include <stdio.h>
 
 #include "battle_floor.h"
-#include "bn6_battle_loop.h"
 #include "bn6_fields.h"
 #include "boss.h"
 #include "briefing_words.h"
@@ -311,13 +310,11 @@ static void gate_words(void) {
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 }
 
-/* The run's tally of the viruses a battle deleted (a guardian's battle
- * counts none, nor a Virus Battler's round): every one where it was won,
- * else those BN6 counted down before MegaMan was deleted or ran, as the
- * RESULT's "Viruses deleted" says */
+/* The run's tally of the viruses a battle deleted, as RESULT's "Viruses
+ * deleted" says (director_tally.c; a guardian's battle counts none, nor a
+ * Virus Battler's round) */
 static void count_deleted(bool won) {
-	if (boss_fighting() || D.battler) return;
-	run.viruses_deleted += (won || D.foes_down > D.foes) ? D.foes : D.foes_down;
+	if (!boss_fighting() && !D.battler) run.viruses_deleted += tally_deleted(won, D.foes);
 }
 
 /* MegaMan deleted: the game plays its GAME OVER, then the run ends; true
@@ -387,17 +384,6 @@ static void placed_tell(void) {
 	}
 }
 
-/* The battle's enemies as BN6 counts them down (BattleState's side 1 left,
- * lowered as each one's dying begins): the most that stood, and how many
- * fell since; read past the battle loop's first phase, its foes all in
- * (the count of the battle before stands until they are) */
-static void foes_watch(void) {
-	if (!emu_read8(BN6_LOOP)) return;
-	int left = emu_read8(BN6_BATTLE_STATE + BN6_STATE_SIDE1_LEFT);
-	if (left > D.foes_most) D.foes_most = left;
-	D.foes_down = D.foes_most - left;
-}
-
 /* A battle under way, the game off its map: its start counted, the duel's
  * time, the battle the game was handed */
 static void battle_update(void) {
@@ -419,13 +405,13 @@ static void battle_update(void) {
 		const Encounter *g = guardian ? boss_battle(&hp) : NULL;
 		if (guardian) runlog_guardian_start(boss_foe(), g, hp);
 		D.souls_used = 0;
-		D.foes_most = D.foes_down = 0;
+		tally_battle_start();
 		home_jobs_battle_start();
 	}
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		runlog_fought();
-		foes_watch();
+		tally_battle_frame();
 		boss_battle_frame();
 		lib_battle_frame();
 		home_jobs_battle_frame();
