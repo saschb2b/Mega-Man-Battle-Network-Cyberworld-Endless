@@ -179,14 +179,31 @@ static uint32_t talk_walk(uint32_t keys) {
  * off for half a second and more, which read as input lag). */
 #define A_GUARD 12
 
+/* A shop opened from a talk takes no A until it has been up a second and a
+ * half, as a reward pick's (PICK_SEEN): with the Net Dealer down to one
+ * box, kai5's A, pressed at it as at the boxes before, landed on his list
+ * and opened "Thunder S? Are you sure? > Yes" (BN6's own default), the
+ * talk's 24-frame wait long past (session 77). BN6's shops put "Look /
+ * Don't look" between the keeper's words and the list, which takes such
+ * an A; ours go straight to it. The pad, R and B are the list's as ever.
+ * An A held as a guard ends is let go till it is released, so no press is
+ * made of it. */
+#define SHOP_SEEN 90
+
 static uint32_t shop_guard(uint32_t keys) {
 	static int chat_recent, guard, last_mode = -1;
+	static bool held;
 	int mode = main_mode();
 	chat_recent = emu_read8(BN6_CHATBOX) ? 30 : chat_recent > 0 ? chat_recent - 1 : 0;
-	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent) guard = A_GUARD;
+	if (last_mode == BN6_MODE_GAME && mode != BN6_MODE_GAME && mode != BN6_MODE_GAME_OVER && chat_recent)
+		guard = mode == BN6_MODE_SHOP ? SHOP_SEEN : A_GUARD;
+	/* (the map again, B having left the list early: the guard was the list's) */
+	else if (mode == BN6_MODE_GAME) guard = 0;
 	last_mode = mode;
-	if (guard > 0) { --guard; keys &= ~KEY_A; }
-	return keys;
+	if (guard > 0) --guard;
+	else if (!held || !(keys & KEY_A)) { held = false; return keys; }
+	held = (keys & KEY_A) != 0;
+	return keys & ~KEY_A;
 }
 
 /* A choice, BN6's or ours: a playtester's A's, pressed through a Net
