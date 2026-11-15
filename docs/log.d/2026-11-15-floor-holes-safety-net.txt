@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:42:00Z
-* **New**: world/level-design/floor-holes.md (the safety net under a layer's tiles: each tile's top held to the pixels its entries draw, a hole filled from behind with a tile of the area's books from its place in a panel or the tile laid again with one of their pairs; the maps' own art left; RoboDog Comp's sighting a pit in the layout, not the tiles; what the atlas counts). **Update**: world/level-design/index.md (its line), world/level-design/generator.md (Tile picking: holes mended once the map is whole), devtools/atlas.md (rSEED,DEPTH,AREA, the holes framed and counted, CYBERWORLD_VOIDS), devtools/tile-test.md (the holes and left columns), code/net-and-map.md (voids.c), code/tests.md (test_voids.c).
