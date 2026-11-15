@@ -380,6 +380,16 @@ $(OUT)/licenses/mGBA.txt: $(MGBA_LICENSE)
 	@mkdir -p $(dir $@)
 	cp $< $@
 
+# gpSP is GPL-2.0; its license ships with a build that links it, the PSP's
+# (psp/README.md; source: github.com/libretro/gpsp at docker/gpsp.sh's commit,
+# docker/gpsp-cyberworld.patch over it)
+ifeq ($(CORE),gpsp)
+all: $(OUT)/licenses/gpSP.txt
+$(OUT)/licenses/gpSP.txt: $(GPSP)/LICENSE
+	@mkdir -p $(dir $@)
+	cp $< $@
+endif
+
 $(BIN): $(OBJS)
 	$(LINK) -o $@ $^ $(LDLIBS)
 

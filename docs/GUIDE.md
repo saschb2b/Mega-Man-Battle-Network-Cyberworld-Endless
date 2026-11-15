@@ -29,7 +29,8 @@ statistics, troubleshooting and building the game yourself.
   handheld, a New 3DS, New 3DS XL or New 2DS XL with custom firmware
   (Luma3DS) and FBI, a Switch with custom firmware (Atmosphère), a
   PlayStation Vita or PlayStation TV with custom firmware (HENkaku or
-  h-encore) and VitaShell, a PS4 with GoldHEN, a jailbroken PS5 with
+  h-encore) and VitaShell, a PSP-2000, PSP-3000, PSP Go or PSP Street with
+  custom firmware (6.61 PRO or ARK-4), a PS4 with GoldHEN, a jailbroken PS5 with
   ShadowMountPlus, or a current browser.
 - **Mega Man Battle Network 6: Cybeast Gregar (USA)** as an unmodified `.gba`
   file, dumped from your own cartridge. Its SHA-1 is
@@ -116,6 +117,7 @@ ROM ([What you need](#what-you-need)); none contains game data.
 | A New 3DS, New 3DS XL or New 2DS XL | `cyberworld-endless.cia` (HOME Menu) or `cyberworld-endless.3dsx` (Homebrew Launcher) | [On a New 3DS](#on-a-new-3ds) |
 | A Switch with custom firmware | `cyberworld-endless.nro` (Homebrew Menu) | [On a Switch](#on-a-switch) |
 | A PS Vita or PS TV with custom firmware | `cyberworld-endless.vpk` (VitaShell) | [On a PS Vita](#on-a-ps-vita) |
+| A PSP with custom firmware | `cyberworld-endless-psp.zip` (its `PSP/GAME` folder) | [On a PSP](#on-a-psp) |
 | A PS4 with GoldHEN | `cyberworld-endless.pkg` (the Package Installer) | [On a PS4](#on-a-ps4) |
 | A jailbroken PS5 | `cyberworld-endless-ps5.zip` (Prospero Store, or its folder in `/data/homebrew/`) | [On a PS5](#on-a-ps5) |
 | A browser, a phone's too | nothing: [the player](https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/play/) | [In a browser](#in-a-browser) |
@@ -427,6 +429,25 @@ those folders. Cross is the GBA's A and Circle its B; a touch on the front scree
 the touch controls. Closing the game from the LiveArea ends it at once, so
 a run goes on from its last checkpoint. Online is as everywhere.
 [vita/README.md](../vita/README.md) has the rest.
+
+### On a PSP
+
+On a PSP-2000, PSP-3000, PSP Go or PSP Street with custom firmware (6.61
+PRO or ARK-4), unpack `cyberworld-endless-psp.zip` onto the memory stick
+(a PSP Go's own memory works too): the game lands in
+`PSP/GAME/cyberworld-endless/` and shows on the XMB under Game, Memory
+Stick. A PSP-1000 has too little memory for it.
+
+Put your ROM in `PSP/GAME/cyberworld-endless/rom/`, or leave it where you
+keep GBA games (`ms0:/ROMS/GBA`, `ms0:/ROMS`, `ms0:/PSP/GAME/gpSP`): any
+file name works. A PSP holds BN6's net alone, with no room for BN5's or
+BN4's ROM beside it, and plays offline: no Net Square, NetBattles, trades
+or cloud saves. Cross is the GBA's A and Circle its B. HOME's Exit Game
+ends it at once, so a run goes on from its last checkpoint. A new
+version is the new zip unpacked over the old folder; your saves stay
+beside the EBOOT. Its GBA core is gpSP rather than mGBA, so this build is
+distributed under the GPL (its `SOURCE.txt` says where the source is).
+[psp/README.md](../psp/README.md) has the rest.
 
 ### On a PS4
 
@@ -1549,13 +1570,20 @@ folder).
 ## Updates
 
 At each start the game looks on its GitHub page for a newer version: one
-request for the newest release's `update.json`, which says its version
-and its files. Nothing about you, your game or your device is sent. When
-one is out, the title says so beside its own version (`New v0.22.0`),
-and **Options** on the title opens on a line for it, **Update to 0.22.0**,
-whose note says what A does on your system:
+request for the newest release's `update.json`, which says its version,
+what is new in it and its files. Nothing about you, your game or your
+device is sent. When one is out, the first time the title's menu shows a
+box opens with what is new, the release's notes a page an entry, each
+with its picture: Left and Right turn the pages, Up and Down scroll a
+long one, SELECT shows the picture full size. Its buttons say
+what they do: **Update now** (A) or **Later** (B), or **Download** where
+your copy updates from the download page. Later is kept for that
+version, so the box does not come back; the title's key hints then show
+**Update** on SELECT, and **Options** on the title opens on a line for
+it, **Update to 0.22.0**, whose A shows the box again. What **Update
+now** does on your system:
 
-| You play | A on the line |
+| You play | Update now |
 | --- | --- |
 | On Windows, installed with the installer | Downloads the new installer, and the game ends, installs the new version over itself (no administrator, nothing to click) and starts again |
 | The Linux AppImage | Downloads the new AppImage over the old one (the same file name, so a menu entry or Steam's shortcut keeps working) and starts it |
@@ -1566,6 +1594,7 @@ whose note says what A does on your system:
 | The Switch, from the Homebrew Menu | Downloads the new `.nro` beside yours, and the game ends, puts it in your file's place and starts it again |
 | The New 3DS, from the Homebrew Launcher (the `.3dsx`) | Downloads the new `.3dsx` beside yours, and the game ends and puts it in your file's place: the Homebrew Launcher comes back, and you start the game again there |
 | The 3DS's CIA, the PS Vita | Nothing: the note names the releases page, where the new CIA or VPK is |
+| The PSP | Nothing: it plays offline and does not look; the new zip unpacked over the old folder updates it |
 | The PS5 | Nothing: the note names Prospero Store, which lists the new version, and the releases page |
 
 The download is checked against the release's own SHA-256 before it

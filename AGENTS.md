@@ -10,7 +10,7 @@ for ROCKNIX, the primary target, as a Linux desktop build, as a Windows
 build, as a macOS app, as a browser build on GitHub Pages and as a
 homebrew build for the New 3DS (a CIA for the HOME Menu and a .3dsx), the
 Switch (a .nro for the Homebrew Menu), the PlayStation Vita (a .vpk for
-VitaShell), the PS4 (a fake .pkg) and the PS5 (a native app's folder,
+VitaShell), the PSP (an EBOOT on gpSP, its folder zipped), the PS4 (a fake .pkg) and the PS5 (a native app's folder,
 zipped for Prospero Store) and an iPhone and iPad app through AltStore and SideStore. Reference
 devices: Retroid Nova (1280x960) and Retroid Pocket Flip 2 (1920x1080).
 

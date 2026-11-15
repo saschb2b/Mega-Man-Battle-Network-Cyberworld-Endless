@@ -19,6 +19,7 @@ static const char manifest[] =
 	"{\n"
 	" \"version\": \"0.22.0\",\n"
 	" \"notes\": \"https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/tag/v0.22.0\",\n"
+	" \"changes\": \"# The game tells you when a new version is out\\nAt each start it looks.\\n- \\\"files\\\" read as text\",\n"
 	" \"files\": {\n"
 	"  \"appimage\": {\n"
 	"   \"url\": \"https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/download/v0.22.0/cyberworld-endless-x86_64.AppImage\",\n"
@@ -32,6 +33,20 @@ static const char manifest[] =
 	"  }\n"
 	" }\n"
 	"}\n";
+
+/* the release's changes: escapes read (a line's end, a quote, a tab), cut
+ * to the buffer; none where the file has none */
+static void test_changes(void) {
+	char out[256];
+	CHECK(update_manifest_changes(manifest, out, sizeof out) &&
+		!strcmp(out, "# The game tells you when a new version is out\nAt each start it looks.\n- \"files\" read as text"),
+		"the changes: %s", out);
+	char small[12];
+	CHECK(update_manifest_changes(manifest, small, sizeof small) && !strcmp(small, "# The game "), "cut changes: %s", small);
+	CHECK(!update_manifest_changes("{\"version\": \"0.22.0\"}", out, sizeof out) && !out[0], "changes where there are none");
+	CHECK(!update_manifest_changes("{\"version\": \"0.22.0\", \"changes\": \"cut off", out, sizeof out), "cut-off changes read");
+	CHECK(update_manifest_changes("{\"changes\": \"a\\tb\\u00e9c\"}", out, sizeof out) && !strcmp(out, "a b?c"), "escapes: %s", out);
+}
 
 static void test_manifest(void) {
 	UpdateRelease r;
@@ -155,6 +170,7 @@ static void test_swap(void) {
 int test_update(void) {
 	failures = 0;
 	test_manifest();
+	test_changes();
 	test_versions();
 	test_sha256();
 	test_swap();

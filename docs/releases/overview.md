@@ -3,7 +3,7 @@ type: Overview
 title: "Release notes"
 description: "The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with."
 tags: [releases]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T03:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:15:00Z }
 ---
 
 # Release notes
@@ -21,6 +21,7 @@ The players' notes of each release, which the site's versions page renders (`too
 
 ## The releases
 
+- [Cyberworld Endless 0.22.0](v0.22.0.md): Your run, on every device. (In preparation: drafted while dev's fixes land, dated and pictured at the release.)
 - [Cyberworld Endless 0.21.2](v0.21.2.md): Needles that land, a Switch that starts.
 - [Cyberworld Endless 0.21.1](v0.21.1.md): The net, drawn as its maps draw it.
 - [Cyberworld Endless 0.21.0](v0.21.0.md): Three games. One run.

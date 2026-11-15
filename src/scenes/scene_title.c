@@ -587,7 +587,7 @@ static void draw(void) {
 	/* a line above the copyright, the marks holding the top: the build
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the question's box covers both) */
-	if (!S.confirm) title_version_draw(x0, y0, S.saved_depth);
+	if (!S.confirm) title_version_draw(x0, y0, S.saved_depth, S.menu);
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */
@@ -629,7 +629,7 @@ static void draw(void) {
 static void tick(void) {
 	platform_second_screen_draw();
 	update();
-	title_version_tick();
+	title_version_tick(S.menu && !S.confirm);
 }
 
 const Scene scene_title = { "title", enter, tick, draw, NULL, NULL };
