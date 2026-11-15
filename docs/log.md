@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (What stands round a plateau: CopyBot Comp's 30 spikes surveyed, the second layer cut by palette bank in the plateaus' view and mirrored, set round every platform at its height two panels apart, after the floor's breaks are measured as scenery is; its spikes behind an edge round the platforms alone), code/net-and-map.md (sides.c's row).
 * **Update**: game/glitch-layer.md (another game's look in its palette scripts' first frames, so a bank its map stores blank is coloured in a flip), world/level-design/side-pieces.md (BN5's Undernet's skull totems in a flip: coloured, captured).
 * **Update**: world/level-design/side-pieces.md (what stands behind a raised floor on both layers, the Aquarium's tanks cut from their rows and set behind its layers' floors; its whale console, the road and landings left, with why), devtools/tile-test.md (a side piece's foot left out of the breaks).
 * **Update**: world/level-design/side-pieces.md (BN5's Undernet's skull totems, which issue #505 took for dark figures where its statues stand: first-layer art in a bank its palette script fills, now scenery on its layers; its row in the area table; the Not built note), rom/graphics.md (BN5's Undernet 2 and 3's bank-12 palette script, which colours the totems and flashes their eyes).
