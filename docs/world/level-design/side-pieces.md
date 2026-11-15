@@ -82,7 +82,7 @@ Taken per area as looked at, as every laying rule is
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
-| Central Area | the Net Dealer's capsule counter, which means a shop | no |
+| Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
@@ -442,6 +442,39 @@ and the rounded rims where its circuits cross (floor art); its orange exit
 roads, their dark faces and the arrows at their ends; the warp discs on two
 of its hubs; and the orange-striped blocks standing on 0x90:6's circuits,
 on the floor alone (issue #505's kinds 3 to 5).
+
+## What Central Area sets round its floors (none set; measured on the maps and the atlas)
+
+Central Area's two maps (0x90:0 and 0x90:1, the atlas's `0`) set nothing
+on, beside, behind or under their floors that a layer can carry. Its
+layers draw 65% and 48% of the maps' different tile pictures (two seeds a
+layout), and what is left is floor or one of the kinds left to the owner:
+
+- **Its second layer** holds the Net Dealer's capsule counter (Central
+  Area 2), its pads' emblems and warp discs, a bench and one arm of a rail
+  on Central Area 1's yellow plaza, and all of Central Area 2's overpass.
+  Of these the side-piece cut takes the capsule alone (24 tiles: it grips
+  its floor and hangs off it). Switched on for a probe, it set the capsule
+  bare, no dealer behind it, on 7 of the atlas's 8 layers: a counter that
+  means a shop, so the area stays out.
+- **Behind its floors** the cut finds one look: a field's panel drawn
+  darker where the overpass's shadow falls on it (Central Area 2), the
+  field's own art. No layer set it.
+- **Under its raised floors** nothing: the overpass and its raised field
+  stand on no legs, and no free-standing piece is left for the scenery cut
+  (none learned).
+- **The plaza** by Central Area 1's exit to Central Area 2 is floor of
+  another kind (yellow, sunken in its middle). Its rail, an L along its
+  back edges (one arm on each tile layer), and its bench on a raised slab
+  stand on it alone and go with it.
+- **The rest is floor art**: where a one-wide catwalk meets a pad's rim
+  (its lip with a pink stripe), a catwalk's end caps (a tile each), and
+  the catwalks drawn again under the overpass.
+
+The overpass (a raised walkway over the catwalks, its raised field and two
+raised pads), the plaza, the warp discs and the two exit arrows are issue
+#505's kinds 3 to 5, left to the owner; the overpass also crosses over
+other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
 
 ## Not built
 
