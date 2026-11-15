@@ -5,7 +5,7 @@
 #include <string.h>
 
 #include "net.h"
-#include "npc.h"
+#include "npc_sprite.h"
 #include "rivals.h"
 #include "rom.h"
 #include "run.h"

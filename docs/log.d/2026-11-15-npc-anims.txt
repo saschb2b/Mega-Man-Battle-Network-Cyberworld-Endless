@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T15:30:00Z
+* **Add**: devtools/npc-anims.md (`build.py npc-anims`: every NPC in another game's sprite, each animation our code tells it to play against the sprite copied into the core; CosmoMan's blank facings on a dark layer's board found and turned to the camera). **Update**: devtools/index.md (its line), code/dev.md (`npc_anims.c`), code/layer.md (`npc_sprite.c`: a talker stands in a facing its sprite draws and turns only where it draws BN6's four turns, a guardian turns to the camera where his sprite draws nothing his way, a log-in his sprite lacks is the beam's).

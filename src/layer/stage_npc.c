@@ -12,6 +12,7 @@
 #include "emu.h"
 #include "mapslot.h"
 #include "npc.h"
+#include "npc_sprite.h"
 
 /* BN6's own on the net: its beam's sound, a Navi's log-in and log-out
  * alike (bn6f's npcscript_809F86C and byte_809F880; docs/rom/battle.md,

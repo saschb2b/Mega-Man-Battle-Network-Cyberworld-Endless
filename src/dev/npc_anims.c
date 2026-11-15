@@ -13,7 +13,7 @@
 #include "guardians.h"
 #include "liberation.h"
 #include "liberation_board.h"
-#include "npc.h"
+#include "npc_sprite.h"
 #include "rom.h"
 #include "stage_npc.h"
 #include "xguardian.h"
@@ -74,7 +74,7 @@ static void guardian_check(int navi) {
 		if (guardian_darkloid(navi)) continue;
 		need(&c, b.log_in, false, "logs in");
 		need(&c, b.log_out, false, "logs out");
-		if (face == 5) need(&c, npc_shown_anim(b.list, b.index, b.anim), true, "copy stands");
+		if (face == 5) need(&c, npc_sprite_stand(b.list, b.index, b.anim), true, "copy stands");
 	}
 	done(&c);
 }
@@ -98,7 +98,7 @@ static void bystanders_check(void) {
 				if (slot < 0) continue;
 				Check c = { .list = 6, .index = slot };
 				snprintf(c.who, sizeof c.who, "%s's bystander %d", XR[x].layout->tag, navis[k]);
-				need(&c, npc_shown_anim(6, slot, 4), true, "stands");
+				need(&c, npc_sprite_stand(6, slot, 4), true, "stands");
 				done(&c);
 			}
 		}
