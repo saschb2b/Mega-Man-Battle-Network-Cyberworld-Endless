@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "blockers.h"
 #include "boss.h"
 #include "cinema.h"
 #include "director_folder.h"
@@ -136,7 +137,7 @@ static int goal_words(char *buf, int k, int size, bool to_heal, bool told) {
 }
 
 /* Where a set piece keeps Mystery Data k, as L says it ("behind the
- * security cube"), or NULL: the counters count data MegaMan senses there,
+ * Security Cube"), or NULL: the counters count data MegaMan senses there,
  * and a playtester's read 0/1 with nothing in sight and no word of where
  * (session 63). The lock it is behind in *lock (layer.block[]), -1 none. */
 static const char *prize_where(int k, int *lock) {
@@ -149,7 +150,7 @@ static const char *prize_where(int k, int *lock) {
 		if (b->rx != x || b->ry != y) continue;
 		*lock = i;
 		return b->kind < BLOCK_KINDS ? "behind the Link Navi's obstacle" : b->kind == BLOCK_SKULL ? "behind the skull door"
-			: b->kind == BLOCK_NUMBER ? "behind the number door" : "behind the security cube";
+			: b->kind == BLOCK_NUMBER ? "behind the number door" : blocker_is_cube(i) ? "behind the Security Cube" : "behind the cyberbarrier";
 	}
 	if (layer.nteleports && layer.teleport_island && abs(x - layer.teleport_x[0]) <= 3 && abs(y - layer.teleport_y[0]) <= 3)
 		return "past the teleport pads";
@@ -166,7 +167,7 @@ static const char *prize_where(int k, int *lock) {
 static int lock_words(char *buf, int k, int size, int lock) {
 	if (lock < 0 || !lock_shut(lock)) return k;
 	const NetBlock *b = &layer.block[lock];
-	const char *what = b->kind < BLOCK_KINDS ? "obstacle" : b->kind == BLOCK_SKULL || b->kind == BLOCK_NUMBER ? "door" : "cube";
+	const char *what = b->kind < BLOCK_KINDS ? "obstacle" : b->kind == BLOCK_SKULL || b->kind == BLOCK_NUMBER ? "door" : blocker_is_cube(lock) ? "cube" : "cyberbarrier";
 	char where[96];
 	int wx, wy;
 	netmap_world(b->x, b->y, &wx, &wy);

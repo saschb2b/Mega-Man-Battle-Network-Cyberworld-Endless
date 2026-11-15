@@ -1,19 +1,31 @@
 ---
 type: Feature
 title: "Security cubes"
-description: "Security cubes (issue #45): BN6's cube across a pocket's mouth, opened by a P-Code one bystander knows or a zenny toll in Seaside (`layer_cube_kind`, `ng_place_teller`); no navi within three panels of any piece's A."
+description: "Security Cubes and cyberbarriers (issue #45): BN6's gold Security Cube in a pocket's mouth, opened by a P-Code one bystander knows, or its striped cyberbarrier taking a zenny toll in Seaside (`layer_cube_kind`, `ng_place_teller`); no navi within three panels of any piece's A."
 tags: [world, level-design]
 generated: { by: claude-code/unrecorded, at: 2026-10-05T12:22:13Z }
 ---
 
 # Security cubes (built, issue #45)
 
-BN6's security cube (handler 3, sprite 7:0x03, its records looking the four
-ways) stands across a walkway and vanishes when its condition is met. A
-layer sets one where the act's plan calls for it, in every comp and
+Two of BN6's map objects (handler 3) stand across a walkway and vanish
+when their condition is met, and BN6's own text names them apart
+([The net's maps and their pieces](../../rom/net-maps.md), Link Navi obstacles): the **Security
+Cube**, the gold cube with X faces (sprite 7:0x01), "A Security Cube that
+protects Cyber Academy. It can't be unlocked without its P-Code" in
+Central Area 1 and the Aquarium's in Seaside Area 2; and the
+**cyberbarrier**, the striped wall (sprite 7:0x03, its records looking
+the four ways), the 37 blocks BN6's story raises and lifts ("I have to get
+the Mayor to get rid of the cyberbarrier"). A P-Code's lock is the
+Security Cube, standing in the walkway's middle as an obstacle does; a
+toll's and the Undernet's doors are the cyberbarrier (BN6's own skull
+doors are its records too). Until 15 November 2026 every one was the
+cyberbarrier, MegaMan calling it a security cube. A layer sets one where
+the act's plan calls for it, in every comp and
 homepage, Central and Seaside (`layer_cube_kind` in `net_pieces.c`), in a
-pocket's mouth as an obstacle stands (`plan_obstacle`), its one thing a
-blue data of the best quality:
+pocket's mouth as an obstacle stands (`plan_obstacle`), or in a pocket
+carved for it where the floor has none ([Link Navi obstacles](link-navi-obstacles.md), Its
+pocket), its one thing a blue data of the best quality:
 
 - **A P-Code** (comps, homepages, Central): four digits from the layer's
   seed, which one bystander knows (`ng_place_teller` in `net_set_pieces.c`). He

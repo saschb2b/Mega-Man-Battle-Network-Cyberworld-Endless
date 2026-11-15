@@ -96,7 +96,13 @@ every map of group 0xNN instead (`src_gNN_N.png`), for choosing the maps
 an area learns from. `rSEED,DEPTH,AREA` draws one layer of a run as the
 game builds it, to look at one a player saw: run SEED's (hex, as the run
 log writes it) layer at DEPTH in area AREA's tiles (`r2269,1,8`: kai8's
-RoboDog Comp of 15 November 2026).
+RoboDog Comp of 15 November 2026). `pieces` draws nothing: over SEEDS
+runs (`DIR:pieces:200`), each normal layer of the net's cycle built as the
+game builds it, its area dressed by the run's seed and its kit that
+area's, it counts the [set pieces](../world/level-design/set-pieces.md) the act's plan
+gave each layer beside those that stand, by the layer's place in its act,
+by BN6's areas and the dressed ones and by area, and in which act each
+run met its first lock, in `DIR/pieces.txt` (`src/dev/pieces_census.c`).
 
 The seams pictures frame the tiles whose top showed a hole, the
 background through a walkable panel ([holes in the floor](../world/level-design/floor-holes.md)):
