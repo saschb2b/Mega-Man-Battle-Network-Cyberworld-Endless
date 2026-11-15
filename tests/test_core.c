@@ -53,6 +53,7 @@
 #include "library_pages.h"
 #include "loot.h"
 #include "meta.h"
+#include "meta_text.h"
 #include "npc_lines.h"
 #include "powers.h"
 #include "rivals.h"
@@ -5151,11 +5152,13 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance: Z-Canon"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
-	for (int f = FOLDER_ZCANON; f < FOLDER_COUNT; ++f) {
-		char g[64];
-		snprintf(g, sizeof g, "%c%s: %s", meta_folder(f)->opens[0] - 'a' + 'A', meta_folder(f)->opens + 1, meta_folder(f)->name);
-		CHECK(strlen(g) <= 32, "folders: the goal line \"%s\" past 32 letters", g);
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	/* (each a sentence the information box holds in two of its three
+	 * lines) */
+	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
+		char g[96];
+		meta_goal_words(g, sizeof g, GOAL_FOLDER, f);
+		CHECK(strlen(g) <= 56, "folders: the goal line \"%s\" past 56 letters", g);
 	}
 	profile.folder_feats = FEAT_PA;
 	meta_run_over(false);
