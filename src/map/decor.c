@@ -23,9 +23,11 @@
 #define PIECES_MAX   10
 #define TRIES       500
 
-/* Pixels of floor, faces and legs, over the whole map. */
-static uint8_t *footprint(const AreaSrc *a) {
+/* Pixels of floor, faces and legs, over the whole map; `reach` pixels
+ * under its lower edges are the floor's (0: FACE_REACH). */
+static uint8_t *footprint(const AreaSrc *a, int reach) {
 	int W = a->tw * 8, H = a->th * 8;
+	if (!reach) reach = FACE_REACH;
 	uint8_t *fp = calloc((size_t)W * H, 1);
 	for (int A = -64; A < 64; ++A)
 		for (int B = -64; B < 64; ++B) {
@@ -39,7 +41,7 @@ static uint8_t *footprint(const AreaSrc *a) {
 			for (int dx = -32 - PAD; dx <= 32 + PAD; ++dx) {
 				int half = (32 - abs(dx)) / 2;
 				if (half < 0) half = 0;
-				int top = cy - half - PAD, bottom = cy + half + FACE_REACH + PAD;
+				int top = cy - half - PAD, bottom = cy + half + reach + PAD;
 				for (int y = top; y <= bottom; ++y) {
 					int x = cx + dx;
 					if (x >= 0 && y >= 0 && x < W && y < H) fp[(size_t)y * W + x] = 1;
@@ -85,10 +87,10 @@ static bool same_piece(const DecorPiece *p, const DecorPiece *q) {
 		!memcmp(p->e0, q->e0, (size_t)p->w * p->h * 2) && !memcmp(p->e1, q->e1, (size_t)p->w * p->h * 2);
 }
 
-void decor_learn(const AreaSrc *a, bool bg_in_map, DecorBook *out) {
+void decor_learn(const AreaSrc *a, bool bg_in_map, int reach, DecorBook *out) {
 	if (!a->rings) return;
 	int W = a->tw * 8, tw = a->tw, th = a->th;
-	uint8_t *fp = footprint(a);
+	uint8_t *fp = footprint(a, reach);
 	/* 1: scenery, 2: taken into a piece, 3: floor and whatever touches it */
 	uint8_t *kind = calloc((size_t)tw * th, 1), *pixels = calloc((size_t)tw * th, 1);
 	for (int ty = 0; ty < th; ++ty)

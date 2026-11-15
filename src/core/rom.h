@@ -69,6 +69,7 @@ typedef struct {
 	uint8_t sides;           /* bit 0: its maps' side pieces are set on its layers (src/map/sides.h): CopyBot Comp's claws, the Undernets' flames; bit 1: what stands under its raised floors under its layers' pads (the Aquarium's pillars); bit 2: what stands behind its floors' upper edges (BN4's Undernet's rows of horns, CopyBot Comp's crystal spikes) */
 	uint8_t side_maps[2][2]; /* more maps (group, number) in the same tiles whose side pieces it takes too, beside its own and `more` (0: none): the Undernet's four maps share one tile set, byte for byte */
 	uint8_t narrows;         /* (another game's) the one-wide walkways its layers' way may cross, where its own maps' way across crosses fewer than the BN6 area it is laid out as lets it (`--atlas nav`; net_way.c's narrow_cap; 0: that area's) */
+	uint8_t scenery_reach;   /* the pixels under its floor's lower edges that are the floor's own (its faces), where its scenery stands closer than most (decor.c; 0: 44): Robot Control's figures and wires a face's depth below its walkways */
 } NetAreaDef;
 
 /* Addresses of the data the engine reads (ROM offsets, not bus addresses). */
