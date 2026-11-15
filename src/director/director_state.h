@@ -157,5 +157,12 @@ void drop_events(void);
 void tally_battle_start(void);
 void tally_battle_frame(void);
 int tally_deleted(bool won, int foes);
+/* The shared dive (director_crew.c, docs/online/shared-dive.md): whether a
+ * dive is under way, and the layer's random battle `index` as every
+ * diver's game makes it, from the layer's seed and the index alone, so the
+ * n-th battle of a layer is the same for every diver (the owner's call,
+ * 15 November 2026) */
+bool dive_battles(void);
+Encounter dive_battle(int index);
 
 #endif

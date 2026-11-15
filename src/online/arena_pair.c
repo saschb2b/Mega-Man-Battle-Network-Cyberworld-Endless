@@ -655,3 +655,62 @@ void arena_pair_mute(ArenaPair *p) {
 	emu_audio_drop_from(p->core[0]);
 	emu_audio_drop_from(p->core[1]);
 }
+
+/* ---- one core alone (the shared dive's party core, party_core.c) ---- */
+
+struct ArenaCoreSnap {
+	uint8_t *state, *kept;
+	size_t state_size, kept_size;
+	GbaSnap gba;
+};
+
+ArenaCoreSnap *arena_core_snap_new(struct mCore *core) {
+	size_t state_size = core->stateSize(core), kept_size = hook_kept_size();
+	ArenaCoreSnap *s = calloc(1, sizeof *s + state_size + kept_size);
+	if (!s) return NULL;
+	s->state_size = state_size;
+	s->kept_size = kept_size;
+	s->state = (uint8_t *)(s + 1);
+	s->kept = s->state + state_size;
+	return s;
+}
+
+void arena_core_snap_free(ArenaCoreSnap *s) { free(s); }
+
+bool arena_core_snap_save(struct mCore *core, ArenaCoreSnap *s) {
+	if (core->stateSize(core) != s->state_size || !core->saveState(core, s->state)) return false;
+	if (s->kept_size) hook_kept_save(hook_slot_of(core), s->kept);
+	gba_save(core->board, &s->gba);
+	xchips_pack_keep(core, s->gba.pack);
+	return true;
+}
+
+bool arena_core_snap_load(struct mCore *core, const ArenaCoreSnap *s) {
+	if (core->stateSize(core) != s->state_size || !core->loadState(core, s->state)) return false;
+	if (s->kept_size) hook_kept_load(hook_slot_of(core), s->kept);
+	gba_load(core->board, &s->gba);
+	xchips_pack_put(core, s->gba.pack);
+	return true;
+}
+
+uint64_t arena_core_hash(struct mCore *core, uint8_t *scratch, size_t size) {
+	uint64_t hash = UINT64_C(14695981039346656037);
+	memset(scratch, 0, size);
+	if (core->stateSize(core) != size || !core->saveState(core, scratch)) return 0;
+	if (size >= SAMPLES_END) {
+		memset(scratch + SOUND_AT, 0, SOUND_END - SOUND_AT);
+		memset(scratch + SAMPLES_AT, 0, SAMPLES_END - SAMPLES_AT);
+	}
+	hash_bytes(&hash, scratch, size);
+	uint64_t made = xlog_hash();
+	hash_word(&hash, (uint32_t)made);
+	hash_word(&hash, (uint32_t)(made >> 32));
+	return hash ? hash : 1;
+}
+
+bool arena_core_rom(struct mCore *core, const uint8_t *rom, size_t size) {
+	struct GBA *gba = core->board;
+	if (!rom || size > gba->memory.romSize) return false;
+	memcpy(gba->memory.rom, rom, size);
+	return true;
+}

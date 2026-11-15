@@ -115,6 +115,10 @@ void emu_io_write32(uint32_t addr, uint32_t v);
  * sound's thread's, while the core holds still (the game's music carried,
  * mp2k_game_rom); 0 without a core or outside the cartridge */
 uint8_t emu_rom_byte(uint32_t addr);
+/* The core's ROM copy as its installs left it, `size` bytes (EMU_ROM_SIZE;
+ * 0xFF past it), each hook's original instruction where its BKPT stands
+ * (hook_originals): the shared dive's party core's ROM (party_core.c) */
+bool emu_rom_clean(uint8_t *out, size_t size);
 
 /* A hook on the game's code (hook.h; docs/engine/emulation/hooks.md), set
  * between frames: on the Thumb instruction at addr, an answer hook or an

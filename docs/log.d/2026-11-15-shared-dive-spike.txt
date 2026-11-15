@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T04:00:00Z
+* **Update**: online/shared-dive.md (being built: the spike of four MegaMen on one field, `--dev party=N`, what it showed and what the enemies' aim leaves open; its description), online/index.md (its line), code/online.md (`party_field.c`).

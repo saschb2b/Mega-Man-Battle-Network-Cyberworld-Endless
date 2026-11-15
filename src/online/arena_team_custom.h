@@ -28,6 +28,7 @@
 
 #include "bn6.h"
 #include "team_check.h"
+#include "team_shape.h"
 
 struct mCore;
 
@@ -74,6 +75,10 @@ typedef struct {
  * then each Atk+10, Atk+30 or Navi+20 merged into the chip before it
  * (sub_8029224); the chips in the hand */
 unsigned team_hand_build(const uint16_t *entries, unsigned n, unsigned pa_at, unsigned pa_took, unsigned pa_id, TeamHand *out);
+/* A Program Advance a partner's OK made (BN6 built `built`, its chips): the picks it took found among his `picks` (slots of
+ * the first `dealt` of `deck`), from *at, *took of them, each place and count tried through team_hand_build; false none */
+bool team_pa_found(const uint16_t *deck, unsigned dealt, const uint8_t *picks, unsigned n, uint16_t pa, const uint16_t *built,
+	unsigned *at, unsigned *took);
 
 /* side's partner's folder before the battle: 30 entries (chip | code <<
  * 9, 0xFFFF none), its Regular chip and TagChips (entries, 0xFF none);
@@ -102,11 +107,18 @@ void arena_team_custom_sampled(struct mCore *core, unsigned side);
  * cable's second GBA, for the output). The keys his battle takes: none
  * while that screen is open, nor in a message's frame. */
 uint16_t arena_team_custom_link(unsigned side, uint16_t word, bool second);
+/* A party's field (team_shape.h: partners 0-2 on side 0, the shared
+ * dive's; docs/online/shared-dive.md), from a hook as each frame of it
+ * begins (party_core.c): the turn's clock, then each of its n partners'
+ * word of the frame (his keys or a message of his Custom screen) taken as
+ * the Arena's GBA takes it from his side's packet, his turn's limit taken
+ * at once where it is due; the keys his battle takes into keys[] */
+void arena_team_custom_party(const uint16_t words[TEAM_PARTNERS], unsigned n, uint16_t keys[TEAM_PARTNERS]);
 /* from the key copy's hook at iteration `tick`: each partner's picks set
  * for it written into his own hand at `hand[side]` (`second`: the second
  * GBA's core, where teampick=-1 leaves a chip short and teampa=-1 his
  * Program Advance out, the mutations) */
-void arena_team_custom_take(uint32_t tick, const uint32_t hand[2], bool second);
+void arena_team_custom_take(uint32_t tick, const uint32_t hand[TEAM_PARTNERS], bool second);
 /* side's partner's deck as `core` holds it: its entries in the order drawn,
  * how many (his own client's screen deals from it); 0 before it is dealt */
 unsigned arena_team_custom_deck(struct mCore *core, unsigned side, uint16_t out[30]);
@@ -127,8 +139,10 @@ bool arena_team_custom_owed(unsigned side);
 bool arena_team_custom_lead_waits(struct mCore *core, unsigned side);
 bool arena_team_custom_picking(struct mCore *core, unsigned side);
 
-/* the partners' folders folded into the pair's hash */
+/* the partners' folders folded into the pair's hash; a party's n */
 uint64_t arena_team_custom_hash(uint64_t h);
+uint64_t team_custom_hash(uint64_t h, unsigned n);
+
 /* how the turns went (decks dealt, picks come, set and taken), said in the output */
 void arena_team_custom_report(void);
 

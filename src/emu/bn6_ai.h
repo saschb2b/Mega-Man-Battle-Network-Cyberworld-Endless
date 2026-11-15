@@ -16,6 +16,9 @@
 #define BN6_AI_POOL_BIT       0x7C        /* u32 an entry's own bit (a copy of the AI data carries it: its let-go clears the entry it came from) */
 #define BN6_AI_TAKE           0x0800ED2Cu /* r0 the entry taken (laid out: +0 to +0x7B, +0x80 to +0x9F, +0xA0 to +0xEF zeroed), 0 none free */
 #define BN6_AI_LET_GO         0x0800ED80u /* r0 the AI data: the entry its +0x7C names free again (mov pc,lr) */
+#define BN6_OBJECT_LOGIC_CALL 0x080031FAu /* RunBattleObjectLogic's call of each battle object's routine (push {r7}; mov lr,pc; bx r0):
+                                             r5 the object, as the linked list's walk reaches it */
+#define BN6_OBJECT_LOGIC_BACK 0x08003200u /* ... the instruction its routine returns to (pop {r7}) */
 #define BN6_SIDE_PLAYER_GET   0x080103BCu /* r0 a side: its player's object (BN6_BATTLE_PLAYERS' first word of it, where its name's class,
                                              0x0800F29C, is a MegaMan's), else 0: a side's player alone, never his partner. BN5's twin
                                              0x0800E140, which BN5's moved Navis (ShadowMan's, NumberMan's, TomahawkMan's AIs) call for the

@@ -50,12 +50,13 @@ static bool read_peers(const uint8_t *data, size_t size, uint32_t now, OnlineSna
 		memcpy(peer->name, in + 33, ONLINE_NAME_BYTES);
 		peer->name[ONLINE_NAME_BYTES] = '\0';
 		/* (v13: his ROMs, what he is busy with and his link's bars; v17: BN4's ROM, bit 5; v18: bit 6, his system reads
-		 * one extra ROM at most; no bit past it) */
+		 * one extra ROM at most; v19: bit 7, he dives; every bit has its meaning) */
 		const uint8_t roms = ONLINE_ROMS_BN5 | ONLINE_ROMS_BN4 | ONLINE_ROMS_ONE_EXTRA;
 		peer->roms = in[49] & roms;
 		peer->busy = (uint8_t)(in[49] >> ONLINE_BUSY_SHIFT & 3u);
 		peer->link = (uint8_t)(in[49] >> ONLINE_LINK_SHIFT & 3u);
-		if ((in[49] & ~roms) >> (ONLINE_LINK_SHIFT + 2) || !peer->id || peer->id == snapshot->player_id || peer->facing > 7 ||
+		peer->diving = in[49] & ONLINE_PEER_DIVING;
+		if ((in[49] & ~(roms | ONLINE_PEER_DIVING)) >> (ONLINE_LINK_SHIFT + 2) || !peer->id || peer->id == snapshot->player_id || peer->facing > 7 ||
 		    !online_wire_name(peer->name) || !identity_valid(peer->identity)) return false;
 		if (peer->x < -ONLINE_COORDINATE_LIMIT || peer->x > ONLINE_COORDINATE_LIMIT ||
 		    peer->y < -ONLINE_COORDINATE_LIMIT || peer->y > ONLINE_COORDINATE_LIMIT ||

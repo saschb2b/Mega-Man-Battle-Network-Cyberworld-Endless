@@ -1,0 +1,109 @@
+/* director_crew.h */
+#include "director_crew.h"
+
+#include <stdio.h>
+
+#include "bn6.h"
+#include "bytes.h"
+#include "chip_entry.h"
+#include "director.h"
+#include "director_layer.h"
+#include "director_state.h"
+#include "emu.h"
+#include "encounter.h"
+#include "game.h"
+#include "gamecall.h"
+#include "loot.h"
+#include "run.h"
+#include "weekly.h"
+
+#define CREW_SALT 0xC3E5B47Du   /* the crew's battles' draws, apart from every other aside's */
+
+int director_crew_index(void) { return D.battles; }
+
+/* (a Mystery Data on its field takes the record's own row, which each game
+ * of a party holds in another record: none on a crew's battle) */
+static void no_gem(Encounter *e) {
+	int n = 0;
+	for (int i = 0; i < e->nobj && i < MAX_FIELD_OBJS; ++i)
+		if (e->obj[i].kind >> 4 != FIELD_GEM) e->obj[n++] = e->obj[i];
+	e->nobj = n;
+}
+
+bool dive_battles(void) { return weekly_on(); }
+
+Encounter dive_battle(int index) {
+	uint32_t saved = rng_state();
+	LootMemory fought, none = LOOT_MEMORY_NONE;
+	loot_memory(&fought);
+	loot_memory_set(&none);
+	rng_seed(run.layer_seed ^ CREW_SALT ^ (uint32_t)index * 2654435761u);
+	/* (a Glitch layer's hardening left out: each game's comes apart at its own pace) */
+	Encounter e = loot_random_battle(run.depth, run.biome, encounter_kind(index), run.layer_seed, index);
+	loot_memory_set(&fought);
+	rng_restore(saved);
+	return e;
+}
+
+Encounter director_crew_battle(int index) {
+	Encounter e = dive_battle(index);
+	no_gem(&e);
+	fprintf(stderr, "crew battle %d on depth %d (layer seed %08x):", index, run.depth, (unsigned)run.layer_seed);
+	for (int i = 0; i < e.nfoes; ++i) fprintf(stderr, " %d/%d/%d@%d,%d", e.foes[i].kind, e.foes[i].family, e.foes[i].version, e.foes[i].col, e.foes[i].row);
+	fprintf(stderr, "\n");
+	return e;
+}
+
+void director_crew_record(const Encounter *e) { set_encounter(e, false); }
+
+int director_crew_steps_reset(void) {
+	uint32_t steps = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_STEPS);
+	if (steps < BN6_EWRAM || steps >= BN6_EWRAM_END) return -1;
+	int walked = emu_read16(steps + BN6_STEPS_WALKED);
+	const uint8_t zero[2] = { 0, 0 };
+	emu_write(steps + BN6_STEPS_WALKED, zero, sizeof zero);
+	emu_write(steps + BN6_STEPS_CHECKED, zero, sizeof zero);
+	return walked;
+}
+
+/* BN6's results' entry given in the run, as its results' exit gives it */
+static void give(uint16_t reward) {
+	unsigned amount = reward_amount(reward);
+	switch (reward == REWARD_NONE ? 4u : reward_kind(reward)) {
+	case REWARD_CHIP: game_call_ret(BN6_GIVE_CHIPS, reward_chip_id(reward), reward_chip_code(reward), 1, NULL); break;
+	case REWARD_ZENNY: game_call(BN6_GIVE_ZENNY, amount, 0); break;
+	case REWARD_BUGFRAGS: game_call(BN6_GIVE_BUGFRAGS, amount, 0); break;
+	case REWARD_HP: {
+		unsigned hp = emu_read16(BN6_NAVI_HP) + amount, max = emu_read16(BN6_NAVI_MAX_HP);
+		uint8_t b[2];
+		put16(b, (uint16_t)(hp > max ? max : hp));
+		emu_write(BN6_NAVI_HP, b, sizeof b);
+		break;
+	}
+	default: break;
+	}
+	fprintf(stderr, "crew battle: the reward %04x given in the run\n", reward);
+}
+
+void director_crew_over(const Encounter *e, bool won, int hp, uint16_t reward) {
+	emu_encounter_drop();
+	int max = emu_read16(BN6_NAVI_MAX_HP);
+	uint8_t b[2];
+	put16(b, (uint16_t)(hp < 0 ? 0 : hp > max ? max : hp));
+	emu_write(BN6_NAVI_HP, b, sizeof b);
+	/* (deleted: the run over as a deletion ends it alone, the owner's call) */
+	if (hp <= 0) {
+		fprintf(stderr, "crew battle: MegaMan deleted; the run is over\n");
+		D.lost_to = 0;
+		end_run();
+		return;
+	}
+	++D.battles;
+	loot_battle_fought(e);
+	if (won) {
+		for (int i = 0; i < e->nfoes; ++i) run.viruses_deleted += e->foes[i].kind == FOE_VIRUS;
+		give(reward);
+	}
+	fprintf(stderr, "crew battle: %s, MegaMan's HP %d, the layer's battles %d\n", won ? "won" : "lost", hp, D.battles);
+	roll_encounter();
+}

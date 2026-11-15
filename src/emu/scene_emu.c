@@ -118,7 +118,8 @@ static uint32_t frame_keys(void) {
 	if (online_visit_away()) return online_visit_keys(keys);
 	/* (the Battle Lab's folder in BN6's own editor, docs/game/battle-lab.md: its keys alone, no screen of ours over it) */
 	if (director_lab_editing()) return director_lab_edit_keys(keys);
-	keys = director_keys(pet_keys(devtools_keys(online_visit_keys(keys))));
+	/* (the dev menu's keys first: its A is never a dive's A on a diver) */
+	keys = director_keys(pet_keys(online_visit_keys(devtools_keys(keys))));
 	director_before_keys(keys);
 	return keys;
 }

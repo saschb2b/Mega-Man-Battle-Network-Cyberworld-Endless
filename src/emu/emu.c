@@ -456,6 +456,17 @@ void emu_io_write32(uint32_t a, uint32_t v) {
 	if (core && (a >> 24) == 0x04) GBAIOWrite32(core->board, a & 0x00FFFFFCu, v);
 }
 
+bool emu_rom_clean(uint8_t *out, size_t size) {
+	wait_frame();
+	if (!core || !out) return false;
+	const struct GBA *gba = core->board;
+	size_t n = gba->memory.romSize < size ? gba->memory.romSize : size;
+	memcpy(out, gba->memory.rom, n);
+	memset(out + n, 0xFF, size - n);
+	hook_originals(core, out, size);
+	return true;
+}
+
 uint8_t emu_rom_byte(uint32_t a) {
 	int v = cart_read(a);
 	return v >= 0 ? (uint8_t)v : 0;

@@ -54,6 +54,15 @@ static inline bool online_visit_away(void) { return online_visit_stage() == VISI
  * held still, a frame of the battle with the pad's keys in its place, and
  * online_visit_draw draws the battle's picture alone */
 bool online_visit_held(void);
+/* ... or held by another part's screen while it runs (the shared dive's
+ * guardian on the party's core, party_play.h): whether it holds, its frame
+ * with the pad's keys and its picture; NULL none */
+typedef struct {
+	bool (*held)(void);
+	void (*frame)(uint32_t keys);
+	void (*draw)(void);
+} VisitHold;
+extern const VisitHold *online_visit_hold;
 void online_visit_held_frame(uint32_t keys);
 /* After each frame of the core while a visit is on. */
 void online_visit_update(void);

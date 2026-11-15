@@ -212,6 +212,7 @@ it nowhere.
 | The players' log, `logs/` | when you came, under which name and public identity, in which channel | a host who takes reports can match a name with its identity | not kept on the official server (`log_days = 0`) |
 | The trades' log, `trades.jsonl` | each trade: when, both public identities, the chip each gave | what a moderator checks when a game trades chips it should not have | 14 days |
 | The Board, `weeks.jsonl` | your best dive of a week: public identity, name, layer, act, minutes | the Board shows this week and the last | 2 weeks |
+| The dive's traces, `dives.jsonl` | what you left on a layer of the week's net (protocol v19): where your dive ended and what deleted MegaMan, the phrase you left and its Waves, the Mystery Data you opened first, your quickest bust of each battle; with your public identity and name | every diver of that week sees them on the layer | 2 weeks |
 | Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
 | The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
 | The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, saves sent by a code held and taken, saves kept in step pulled and pushed and the slots kept, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
@@ -654,7 +655,7 @@ start and every hour (`retention.py`):
 | Key | Default | What it bounds |
 | --- | --- | --- |
 | `trade_days` | 14 | `trades.jsonl`, the trades committed; 0 writes none |
-| `board_weeks` | 2 | `weeks.jsonl`, the Board's weeks: at least 2, this one and the last, which the Board shows; with them go the entries `hide` hid |
+| `board_weeks` | 2 | `weeks.jsonl`, the Board's weeks, and `dives.jsonl`, the dive's traces (v19): at least 2, this one and the last, which the Board shows; with them go the entries `hide` hid |
 | `log_days` | 14 | `logs/players-YYYY-MM-DD.jsonl`, the players' log, a file a UTC day; 0 writes none |
 | `backup_days` | 14 | the archives `--backup` keeps |
 | `stats_days` | 365 | `stats.jsonl`, the daily totals, a line a UTC day ([The daily totals](#the-daily-totals)); 0 writes none |

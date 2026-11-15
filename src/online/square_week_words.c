@@ -60,15 +60,50 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
 
 const char *square_week_question(WeekOffer offer) { return offer == WEEK_OFFER_NEW ? "DIVE IN NOW?\n" : NULL; }
 
-const char *square_week_off(void) { return "OFF YOU GO!\nHEAD HOME AND\nJACK IN!"; }
+const char *square_week_off(void) { return "THE PORTAL OPENS\nINTO THIS WEEK'S\nDEEP NET!"; }
+const char *square_week_closed(void) { return "THE PORTAL'S\nSHUT. NO DEEP NET\nTHIS WEEK."; }
 
 static int line(char *s, size_t n, int place, const WeekEntry *e) {
-	return snprintf(s, n, "%d.%s:%u%s", place, e->name, e->depth, e->won ? "!" : "");
+	return snprintf(s, n, "%d.%s:%u%s%s", place, e->name, e->depth, e->won ? "!" : "", e->party ? "+" : "");
+}
+
+/* who dives now: a box of the count, then the divers three to a box */
+static int pack(char *s, size_t n, const DiveDivers *d) {
+	if (!d || !d->total) return 0;
+	int k = snprintf(s, n, "|>Diving now:%u", d->total);
+	for (int i = 0; i < d->count && (size_t)k < n; ++i) {
+		k += snprintf(s + k, n - (size_t)k, i % 3 ? "\n" : "|");
+		k += snprintf(s + k, n - (size_t)k, "%s:layer %u%s", d->e[i].name, d->e[i].depth, d->e[i].flags & ONLINE_DIVERS_FIGHTING ? "!" : "");
+	}
+	return k;
+}
+
+/* one split record: the guardian's layer, the party's size (1 alone), the time and who */
+static int record(char *s, size_t n, int act, int size, const WeekSplit *b) {
+	int layer = act < 3 ? 3 * act + 3 : 10;
+	if (size == 1) return snprintf(s, n, "L%d solo:%u.%us %s", layer, b->tenths / 10u, b->tenths % 10u, b->name);
+	return snprintf(s, n, "L%d x%d:%u.%us %s", layer, size, b->tenths / 10u, b->tenths % 10u, b->name);
+}
+
+/* the week's fastest bust of each guardian (layers 3, 6, 9 and the tenth's),
+ * alone and by party size, three to a box */
+static int records(char *s, size_t n, const WeekSplits *w) {
+	if (!w) return 0;
+	int k = 0, shown = 0;
+	for (int act = 0; act < 4; ++act)
+		for (int size = 0; size < ONLINE_PARTY_MOST && (size_t)k < n; ++size) {
+			const WeekSplit *b = &w->best[act][size];
+			if (!b->tenths) continue;
+			if (!shown) k += snprintf(s + k, n - (size_t)k, "|>Fastest guardian\nbusts this week");
+			k += snprintf(s + k, n - (size_t)k, shown++ % 3 ? "\n" : "|");
+			k += record(s + k, n - (size_t)k, act, size + 1, b);
+		}
+	return k;
 }
 
 /* the Board's boxes: a heading, then the dives three to a box */
-const char *square_week_board(const WeekBoard *b, uint16_t week) {
-	static char s[720];
+const char *square_week_board(const WeekBoard *b, uint16_t week, const DiveDivers *d, const WeekSplits *w) {
+	static char s[1200];
 	char when[32];
 	dates(when, sizeof when, week, false);
 	int n = snprintf(s, sizeof s, ">DEEP NET,%s\nDeepest layers,as\nNavis report them.", when);
@@ -77,7 +112,11 @@ const char *square_week_board(const WeekBoard *b, uint16_t week) {
 		n += snprintf(s + n, sizeof s - (size_t)n, k % 3 ? "\n" : "|");
 		n += line(s + n, sizeof s - (size_t)n, k + 1, &b->top[k]);
 	}
+	for (int k = 0; k < b->ntop; ++k)
+		if (b->top[k].party) { n += snprintf(s + n, sizeof s - (size_t)n, "|>+:a guardian beaten\nwith a party."); break; }
 	if (b->place) n += snprintf(s + n, sizeof s - (size_t)n, "|>Your best is\nlayer %u,#%d!", b->mine.depth, b->place);
+	n += pack(s + n, sizeof s - (size_t)n, d);
+	n += records(s + n, sizeof s - (size_t)n, w);
 	if (b->nlast) {
 		n += snprintf(s + n, sizeof s - (size_t)n, "|>Last week's best");
 		for (int k = 0; k < b->nlast; ++k) {

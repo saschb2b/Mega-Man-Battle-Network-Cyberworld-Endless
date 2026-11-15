@@ -141,7 +141,7 @@ static HookAct keys(HookRegs *r, void *user) {
 	/* (each partner's own Custom screen's picks into his own hand, at the iteration they were set for; teampick=-1 a chip short
 	 * on the second GBA alone, the mutation) */
 	int slot = hook_slot();
-	const uint32_t hands[SIDES] = { arena_team_navi_hand(0), arena_team_navi_hand(1) };
+	const uint32_t hands[TEAM_PARTNERS] = { arena_team_navi_hand(0), arena_team_navi_hand(1), 0 };
 	arena_team_custom_take(tick, hands, T && slot == T->slot[1]);
 	int g = T && slot >= 0 ? (slot == T->slot[0] ? 0 : slot == T->slot[1] ? 1 : -1) : -1;
 	bool kept = g >= 0 && tick < ITERATIONS;
