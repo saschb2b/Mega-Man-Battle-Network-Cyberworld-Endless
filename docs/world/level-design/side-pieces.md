@@ -82,6 +82,7 @@ Taken per area as looked at, as every laying rule is
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
+| BN5's ACDC Area | nothing; its wire tufts behind its blue walkways' upper edges are drawn into a rim no layer draws, its layers laying no blue walkway (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
 | Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
@@ -582,6 +583,55 @@ The overpass (a raised walkway over the catwalks, its raised field and two
 raised pads), the plaza, the warp discs and the two exit arrows are issue
 #505's kinds 3 to 5, left to the owner; the overpass also crosses over
 other floor, which no layer does ([what the layers take](../../devtools/map-use.md)).
+
+## What BN5's ACDC Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's ACDC Area (its maps 0x90:0 and 0x90:1, ACDC Area 1 and 2, the
+atlas's `a0`) sets one thing of these kinds round its floors: wire tufts,
+a teal fork of a few pixels standing behind a blue walkway's upper edge,
+some twenty in ACDC Area 1 and twice that in Area 2 (counted by eye). None
+stands behind its green walkways or its cyan platforms. A tuft lies on the
+first tile layer, as SciLab's do: two tiles of its own over the void, and
+one or two of the walkway's rim with the fork drawn into them. None can
+reach a layer:
+
+- **Cut alone**, a tuft's own tiles are two where the cut behind a floor
+  takes 4 at least; the cut weighs 12 groups in the two maps and keeps
+  none: eight are entries that draw no pixel, four are the side faces
+  under a walkway's lower edge (7 to 18 tiles).
+- **Cut with its rim's tiles**, it could go down only where a layer draws
+  the same plain rim, as SciLab's test asked. No tile a tuft is drawn into
+  is such a rim: of the 377 tile pictures the atlas's eight layers (two
+  seeds a layout) never draw in the two maps, 8 are a picture some layer
+  draws with up to 20 pixels added over its empty ones, and all 8 are
+  joins of a platform's rim to a walkway or an exit's end, none a tuft
+  (compared pixel by pixel on the atlas's pictures). The layers lay the
+  area's walkways in its green circuits' tiles, and a blue walkway's upper
+  rim is tinted in both maps' pictures wherever a tuft stands.
+- Set over a platform's or a green walkway's edge instead, a tuft would
+  stand where neither map sets one.
+
+So the tufts come with the blue walkway's own upper edge, which is the
+floor's tiles' matter, not a piece's.
+
+The rest of what its layers never draw (86 tile pictures beside the floor,
+5 away from it, [what the layers take](../../devtools/map-use.md)) is no
+side piece:
+
+- **Floor art**: the blue walkways' upper rims and their comb and zigzag
+  turns (`b19_90_1` at (600, 80)), and the crest where a green walkway
+  bends (`b19_90_0` at (472, 96)).
+- **On the floor alone**, its second layer's every group: the warp pads'
+  centrepieces (three in each map; `b19_90_0` at (456, 192)), and in ACDC
+  Area 2 a purple machine on a platform (`b19_90_1` at (760, 192), 24
+  tiles), which the cut takes for a centrepiece (whether it blocks the way
+  in BN5 was not checked).
+- **The exit arrows** at the maps' edges (`b19_90_0` at (72, 200),
+  `b19_90_1` at (272, 96) and (1088, 408)).
+
+The area has no raised floor to cut under, and the scenery cut sets none
+on its layers. The centrepieces, the machine and the arrows are issue
+#505's kind 4, left to the owner.
 
 ## Not built
 
