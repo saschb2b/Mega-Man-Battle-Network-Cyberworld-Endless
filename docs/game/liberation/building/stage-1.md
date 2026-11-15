@@ -16,7 +16,10 @@ one, either way by a coin of the run's seed (`run_dark_area`,
 from the seed (the plan's area, and the other way as `run_route_alt`
 offered it), so a CONTINUE knows. MegaMan says so at the way's portal
 ("Part of it's gone dark. Dark panels,like Nebula's!"), and the act's card
-says "A layer here has gone dark" in its motto's place, in Nebula's purple.
+says "A layer here has gone dark" in its motto's place, in Nebula's purple,
+on the act's first two layers (on its last, past the dark one, the area's
+own motto: a drop-in on an act's last layer read of one it never saw,
+session 77).
 The short net meets one in acts 2 and 3, the endless net in acts 2 to 4.
 `--dev dark` makes every act's second layer from the second a dark one.
 With BN5's ROM (without it there is no dark layer, nothing to mark) the
