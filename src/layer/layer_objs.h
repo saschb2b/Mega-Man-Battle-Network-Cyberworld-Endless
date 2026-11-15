@@ -82,8 +82,9 @@ typedef struct {
 	struct { int type, flag; } choice[LAYER_MAX_CHOICES];   /* type: OBJ_* */
 	int challenge_reward;      /* the script a won challenge runs, -1 for none */
 	int copy_reward;           /* ... and a Glitch layer's copy deleted, its pick, -1 for none */
-	NpcLooks glitch_warp;      /* the layer's Glitch warp, its look changed through these (npc_talker_looks), jump_at 0 none */
+	NpcLooks glitch_warp;      /* the layer's Glitch warp, or a Glitch layer's copy, its look changed through these (npc_talker_looks), jump_at 0 none */
 	uint8_t glitch_looks;      /* ... the looks whose sprites the map loads, a bit each */
+	uint8_t look_list[GLITCH_LOOKS], look_sprite[GLITCH_LOOKS], look_anim[GLITCH_LOOKS];   /* ... each look: its sprite's list and number, the way it faces (npc_sprite_stand's anim; the warp's pads, the copy's forms' bodies) */
 	int fragment_found;        /* what MegaMan says when the layer's ScrtData is picked up, -1 for none */
 	int spin_found;            /* ... and the run's Spin (docs/game/meta/), -1 for none */
 	int spin_colour;           /* its colour (1-6), 0 for none on this layer */
@@ -106,6 +107,13 @@ typedef struct {
 	uint32_t lib_body[16];     /* ... and its script's sprite number (a team picked on arrival dresses its Navis there), 0 none */
 	uint32_t heal_amount_at, heal_got_at;   /* the Recovery Mr.Prog's half patch in the archive: its amount, the HP said (HealSpot's), 0 none */
 } LayerObjs;
+
+/* (glitch_objs.c) The Glitch warp's looks, its three pads; a Glitch layer's
+ * copy's, its forms' bodies (`n` of `forms`, the first's sprite loaded now);
+ * ... the others' loaded once the layer's props took theirs */
+void glitch_warp_looks(NpcList *npcs, LayerObjs *out);
+void glitch_copy_looks(NpcList *npcs, LayerObjs *out, const int *forms, int n);
+void glitch_copy_looks_more(NpcList *npcs, LayerObjs *out);
 
 /* (lib_prizes.c) A dark layer's prizes by its par, and the chips and zenny
  * its board's item panels hold: their scripts into `out` (docs/game/liberation/) */

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T16:46:48Z
-* **Update**: world/level-design/side-pieces.md (what stands in a walled hole: End Area's pagoda cut whole and stood as its layers' landmark, the area's row, End Area's survey and why the cut behind a floor fits nowhere), world/level-design/props.md (End Area's landmark row), code/net-and-map.md (sides.c's line).

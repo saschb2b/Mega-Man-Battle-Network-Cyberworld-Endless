@@ -33,6 +33,9 @@
 /* its MusicPlayerInfo */
 #define BN6_MPLAY_SONG        0x00 /* u32: the song it plays, its header's address (a lower priority's start refused leaves it) */
 #define BN6_MPLAY_CLOCK       0x0C /* u32: its clock, 0 as a song starts on it */
+#define BN6_MPLAY_TEMPO_D     0x1C /* u16: its tempo as the song sets it (150 at a song's start) */
+#define BN6_MPLAY_TEMPO_U     0x1E /* u16: its tempo's factor in 256ths (0x100 at a song's start: m4aMPlayTempoControl's) */
+#define BN6_MPLAY_TEMPO_I     0x20 /* u16: the two worked out, D x U >> 8, which MPlayMain adds each frame */
 /* a song's entry in the song table (RomLayout.song_table), 8 bytes */
 #define BN6_SONG_ROW          8
 #define BN6_SONGS_EMPTY_SLOT  0x26 /* the first of BN6's own empty slots (bn6_families.h BN6_SONGS_EMPTY_FIRST): the shared header of no tracks, player 0 */
