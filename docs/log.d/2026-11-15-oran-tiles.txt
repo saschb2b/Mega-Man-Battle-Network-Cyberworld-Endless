@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T02:40:00Z
-* **Create**: world/level-design/oran-tiles.md (BN5's Oran Area on generated layers: what its maps draw, a circuit or a dock at every hub side, the kinds of breaks surveyed by eye and by place, its hubs drawn one floor with their circuits and lay 11, a hub's cell worn to a circuit's shape drawn as a circuit, 332 to 241 breaks per 100 panels, what is left: bare sides, orange blobs where hubs nearly touch, big rooms). **Update**: world/level-design/index.md (its line), devtools/tile-test.md (Oran's row in Each area's laying), research/sources.md (BN5's Oran Area: a dock or a circuit at every hub side, its docks floor).
