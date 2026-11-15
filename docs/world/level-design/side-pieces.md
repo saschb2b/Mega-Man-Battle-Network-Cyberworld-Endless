@@ -78,6 +78,7 @@ Taken per area as looked at, as every laying rule is
 | --- | --- | --- |
 | CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below) | yes, both |
+| BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4 | yes |
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | BN5's SciLab Area | nothing; its wire tufts behind its circuits' upper edges are drawn into a rim no layer draws (below) | no |
@@ -472,6 +473,45 @@ Left as they are:
 - **The fists past its arms' ends** (issue #505: a dead end's art, not a
   piece), the robot's door and its striped conveyor (a set piece), its
   pads' centrepieces and exit arrows (issue #505's kind 4).
+
+## What BN4's countries set round their floors (none set; measured on the map and the atlas)
+
+BN4's countries (their area's map 0x93:2, the one of the four looks it
+learns; the atlas's `a18`) set one thing off their floor: a pair of
+sockets, cyan half-discs in a green rim, joined by a blue cable. One
+stands in front of a platform's lower edge (map pixels (800, 150) to
+(870, 200)), the other behind another platform's upper edge ((985, 335)
+to (1055, 375)), and the cable between them runs through the void along
+the panels' two ways, 33 tiles one way and 6 the other, turning at
+(1105, 318); along each run it is the same five tile pictures a row,
+two tiles further on each row. The map holds that one pair. No cut
+takes it (each cut switched on in the area's row, `.sides = 1 | 4`, and
+what it refused printed; reverted):
+
+- The cut behind a floor (first layer): the sockets and the cable touch
+  the platforms' faces, and with them make one group of 1,695 tiles, far
+  past its 24. Its other groups (2 to 45 tiles) are corners of faces with
+  no floor straight below.
+- The side cut (second layer): the map's second layer holds only its
+  orange arrow conveyors (groups of 24 to 420 tiles: too large, over floor
+  of another kind, or lying on the floor alone) and the green shading
+  along some walkways' sides (7 to 69 tiles, over floor of another kind or
+  not off the floor). It holds nothing that hangs off a floor.
+- Scenery: none (the learn report's "0 pieces of scenery"). The sockets
+  touch the rims, and the cable alone is 33 tiles across, past scenery's
+  20.
+- What stands under a raised floor: the map's floor is all at one height
+  where it is not a stairway.
+
+A layer could only set it as a set piece: two platforms whose edges face
+each other across the void, a socket on each, and the cable drawn along
+the void panels between them from its runs and its turn. That is a rule
+of its own for one pair in one map; not built.
+
+The rest of what its layers never draw is no side piece: the two exit
+arrows, the pink warp hub, the arrow conveyors, the stairway's steps,
+the cyan joints where a walkway meets a platform's rim, and the rims'
+pieces at walkways' turns (floor art; issue #505's kinds 3 to 5).
 
 ## What SciLab Area sets round its floors (none set; measured on the maps and the atlas)
 

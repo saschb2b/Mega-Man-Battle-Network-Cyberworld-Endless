@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T19:04:50Z
+* **Update**: world/level-design/side-pieces.md (BN4's countries' row, nothing taken, and a section on what their map sets round its floors: one pair of sockets on platforms' rims joined by a cable through the void, which no cut takes, a set piece for one pair in one map; the rest kinds 3 to 5).
