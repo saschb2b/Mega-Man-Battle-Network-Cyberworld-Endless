@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T01:14:10Z
+* **Update**: game/fidelity.md (the title's key hints moved from under the copyright line, which ran into its letters at the picture's foot, to a line each over the version in the bottom left corner).
