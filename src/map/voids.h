@@ -7,7 +7,8 @@
  * ACDC Area, navy squares cut into its cyan roads). Once the map is whole,
  * each tile's top is held to the pixels its entries draw, and a hole is
  * filled from behind with a tile of the area's own maps from that place in
- * a panel, or the tile is laid again with one of their pairs. */
+ * a panel, or the tile is laid again with one of their pairs
+ * (docs/world/level-design/floor-holes.md). */
 #ifndef CW_VOIDS_H
 #define CW_VOIDS_H
 
