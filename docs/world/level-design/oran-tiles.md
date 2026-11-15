@@ -45,6 +45,8 @@ surveyed by eye beside the generated layers:
   frame.
 - Brown planks, blue and purple arrow panels (conveyors) and the green
   warp pads, which lend no tiles off the hubs (`skip_styles`).
+- Grey sprigs behind the planks' upper edges, which no layer can set
+  ([side pieces](side-pieces.md), What Oran Area sets round its floors).
 
 ## The breaks it showed
 
