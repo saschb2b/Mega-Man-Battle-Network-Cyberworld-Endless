@@ -19,10 +19,12 @@ that).
   (Pokémon's, Tunic's manual pages, Hollow Knight's hints).
 - **Program Advances, as a friend told them:** BN6's own, read from its
   table ([ROM data](../../rom/overview.md)), the recipe picked for the chips the folder
-  holds as the layer is made, in codes they come in: "Psst! My operator
-  sent these,in order! / Sword H, WideSwrd H, LongSwrd H... / Then...
+  holds as the layer is made, in codes they come in: "Psst! Got these?
+  Use 'em in order! / Sword H, WideSwrd H, LongSwrd H... / Then...
   LifeSrd! A Program Advance!!" BN6 never names its Program Advances
-  in play; players learned them from each other.
+  in play; players learned them from each other. A combo to try with
+  chips of one's own, asked, never a promise: "My operator sent these"
+  read to a playtester as a gift that never came (session 76).
 - **Secrets, said only while the profile has yet to find them, never the
   answer:** that a NaviCust program shrinks by a secret pattern of buttons
   (until a compression code is entered), that a Spin hides deeper in each
