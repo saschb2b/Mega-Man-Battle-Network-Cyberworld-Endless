@@ -92,6 +92,7 @@ Taken per area as looked at, as every laying rule is
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| Green Area | nothing: its second layer holds its potted bushes (set by a rule of their own), the blue-framed plates and warp discs on its raised grass, arrow panels' frames, a pad's centrepiece and its stairs, and in Green Area 2 the NetCafe desk, which means a shop; nothing stands under or behind its floors (below) | - |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -632,6 +633,80 @@ side piece:
 The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
+
+## What Green Area sets round its floors (none set; measured on the maps and the atlas)
+
+Green Area's layers learn from Green Area 1 (0x92:0, the atlas's `3`);
+Green Area 2 (0x92:1) lends its arrow panels and its NetCafe desk alone.
+Neither map sets a thing on, beside, behind or under its floors that its
+layers lack. Their own things are on them already: the potted bushes in
+the gaps between planks (set by their own rule, [Props](props.md), Green's
+potted bushes), the blue-framed red plates on the raised grass, and the
+trees and signs, which are map objects, not tiles.
+
+Every cut this page has was switched on for Green Area for a probe and
+each group it weighed was printed (15 November 2026, the atlas's two seeds
+a layout): the side-piece cut, what stands under a raised floor (the
+grass and the pads, at 32) and what stands behind a floor, at the ground
+and at 32. None kept a piece. Green Area 1's second layer holds 23 groups:
+
+- **Its potted bushes**, alone or several joined (14 to 56 tiles, 9
+  groups), all over the void: they touch no floor, so they are no side
+  piece.
+- **The blue-framed plates** on the raised grass (28 tiles, six; a
+  seventh joined with the field's front corner, 84) and **its two warp
+  discs** there (28 each): on floor of another height.
+- **An arrow panel's frame** (65 tiles; a second, 25 tiles, lies mostly
+  on its floor): refused as its lane's.
+- **The centrepiece of the Navi's pad** (28 tiles), on that pad alone.
+- **The stairs** from the grass down to the planks (68 and 137 tiles),
+  which a layer lays with its raised floor ([Heights](heights.md)).
+
+Nothing stands under the grass or the pads: their side faces are 9 pixels
+deep with green and violet tabs drawn into them, and the void below is
+empty. Nothing stands behind an upper edge either, and the scenery cut
+finds no piece (0 learned).
+
+Green Area 2 was probed the same way, learned beside Green Area 1 for
+the probe (as one of the area's `more` maps, which it is not today).
+The cuts keep four looks there, none a thing to set:
+
+- **The NetCafe desk** on its purple deck (`b03_92_1` at (128, 200), 32
+  tiles), taken by the side-piece cut: it grips the deck and hangs off
+  it. It is the Net Dealer's counter, which the area's layers already set
+  where a dealer stands (`net_area.counter`, [Props](props.md)); set bare
+  by this cut it would be a shop with no one behind it, as Central's
+  capsule would.
+- **Two scraps of a potted bush** (7 tiles each, at (816, 280) and at
+  (944, 344)), cut behind a plank's upper edge where a stair's foot
+  splits the bush's tiles from the rest of it.
+- **A raised grass field's corner** (16 tiles, at (368, 520)), drawn
+  behind the planks in front of it: floor of another height.
+
+The rest of Green Area 2 is what Green Area 1 has, and its own kinds: a
+second potted-bush row, stairs up to four raised pads, its raised purple
+deck, arrow panels on its grass and an exit arrow. Its nineteen
+cybertrees and the giant one are map objects.
+
+What the layers never draw of Green Area 1 (624 of its 937 tile pictures,
+[what the layers take](../../devtools/map-use.md)) lies in nine groups and
+some thirty lone tiles, none a thing to set:
+
+- **The three 3x3 pads** at its corners (`b03_92_0` at (64, 448), at
+  (832, 64), at (992, 528)), raised, about 220 tiles each: pads of a
+  look of their own, which stand raised on the originals and are not cut
+  ([Props](props.md)).
+- **The two exit arrows** (`b03_92_0` at (424, 736), at (1152, 240)), kind 4.
+- **The two arrow panels** on the planks (at (896, 288), at (896, 352)):
+  floor of another kind ([Arrow lanes](arrow-lanes.md)), set with a lane
+  where a layer has one.
+- **The two warp discs** on the raised grass (at (680, 240), at (168,
+  368)), kind 4.
+- **Lone tiles at the planks' free ends** (some 28, e.g. at (1272, 528)),
+  and two at the stairs' feet: floor art. A layer's planks end free in
+  the same rounded look (seen in the atlas's pictures), drawn from other
+  tiles of the map's ends; these are the variants no layer's end happened
+  to take.
 
 ## Not built
 
