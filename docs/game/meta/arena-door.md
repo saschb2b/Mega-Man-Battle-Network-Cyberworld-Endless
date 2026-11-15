@@ -28,3 +28,6 @@ saves at the arena's door, "as other bigger RPGs normally do it".
   last save. Once it is won, a quit on its RESULT or in the fade back
   keeps it, the game run on to MegaMan free first ([A
   layer](../../engine/emulation/layer.md), the quit's save; session 76).
+- **A talk, a shop or the PET** open at a quit keeps the run as it stood
+  the frame before it opened, "From before that talk" (session 78); a
+  battle begun from one lets that go, its quit the last save's as above.
