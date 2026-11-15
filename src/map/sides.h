@@ -33,7 +33,8 @@ typedef struct {
 	int nunder;
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
-	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
+	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor; the
+	                    * first layer's tiles where `hang`, else the second's (sides_learn_behind) */
 	bool over;         /* a side piece kept with the first layer's tiles under it (StairTile.e0, 0 where it held
 	                    * none), set only where a layer's are the same: the Nest's crystals over its rims' tabs and
 	                    * spikes (sides_learn_under) */
@@ -63,5 +64,11 @@ void hangs_learn(const AreaSrc *r, SideBook *out);
  * off the floor: the flames behind the catwalks of BN4's Undernet, where
  * the ones in front lie on the second layer (sides_learn). */
 void behind_learn(const AreaSrc *a, SideBook *out);
+
+/* ... and what it sets on its second layer behind its floor's upper edges,
+ * touching none of its top: the Undernet's fire bowls in a row along a
+ * walkway's far side, and alone in a ring's holes. A row is one piece, set
+ * where a layer's floor runs before each of it (SidePiece.under). */
+void sides_learn_behind(const AreaSrc *a, SideBook *out);
 
 #endif
