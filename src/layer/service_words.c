@@ -20,16 +20,54 @@ static void heal_check(TextArchive *t, int flag, int to) {
 	ta_bytes(t, check, sizeof check);
 }
 
-/* What MegaMan got from the patch, its end: under a vow, the Mr.Prog's
- * word that it was the layer's one; the patch marked given. */
-static void heal_said(TextArchive *t, const char *got, int told_flag, bool vow) {
-	ta_page(t, FACE_NONE, got, false);
+/* The patch's end: under a vow, the Mr.Prog's word that it was the
+ * layer's one; the patch marked given. */
+static void heal_said(TextArchive *t, int told_flag, bool vow) {
 	if (vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
 	ta_flag_set(t, told_flag);
 	ta_end(t);
 }
 
-int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow) {
+/* What MegaMan got from the patch, `got`, then its end. */
+static void heal_page(TextArchive *t, const char *got, int told_flag, bool vow) {
+	ta_page(t, FACE_NONE, got, false);
+	heal_said(t, told_flag, vow);
+}
+
+/* The HP the patch gave, as said: the box's two lines into `s`, the
+ * amount 1-9999; the second line's start, the amount's, returned. */
+static const char *heal_line(char s[48], int amount) {
+	snprintf(s, 48, "MegaMan recovered\n%dHP!", amount < 1 ? 1 : amount > 9999 ? 9999 : amount);
+	const char *got = strchr(s, '\n');
+	return got ? got + 1 : s;
+}
+
+void ta_heal_bytes(int amount, uint8_t a[2], uint8_t got[HEAL_GOT_LEN]) {
+	amount = amount < 1 ? 1 : amount > 9999 ? 9999 : amount;
+	a[0] = (uint8_t)amount;
+	a[1] = (uint8_t)(amount >> 8);
+	char s[48];
+	memset(got, 0x00, HEAL_GOT_LEN);   /* (spaces, the charmap's 0x00: after "HP!", unseen) */
+	ta_encode(heal_line(s, amount), got, HEAL_GOT_LEN);
+}
+
+/* ... said in a box of its own, the second line padded to HEAL_GOT_LEN
+ * with spaces; where that line lies in the script's bytes. */
+static int heal_got(TextArchive *t, int amount) {
+	static const uint8_t hide[] = { 0xF5, 0x01 };   /* (no face, as ta_page's FACE_NONE) */
+	static const uint8_t pad[HEAL_GOT_LEN] = { 0 };
+	char s[48];
+	int got = (int)(heal_line(s, amount) - s), len = (int)strlen(s);
+	ta_bytes(t, hide, sizeof hide);
+	ta_clear(t);
+	int at = t->len + got;
+	ta_text(t, s);
+	if (len - got < HEAL_GOT_LEN) ta_bytes(t, pad, HEAL_GOT_LEN - (len - got));
+	ta_wait(t);
+	return at;
+}
+
+int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow, HealSpot *spot) {
 	static const char full[] = "MegaMan's HP was fully restored!";
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
@@ -42,6 +80,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	 * HP), so his word that it is spent and where MiniEnrg is; the Heals
 	 * helper's (amount < 0) heals again, in one box (an A too many after
 	 * "fully restored" talked to him again, two boxes) */
+	if (spot) *spot = (HealSpot){ -1, -1 };
 	int back = ta_script(t);
 	if (amount < 0) {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
@@ -62,7 +101,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	int topped = -1;
 	if (amount > 0) {
 		topped = ta_script(t);
-		heal_said(t, full, told_flag, vow);
+		heal_page(t, full, told_flag, vow);
 	}
 	bool asks = amount >= 0 && !vow;
 	int later = asks ? ta_say(t, FACE_PROG, "OK! I'LL BE RIGHT\nHERE,MEGAMAN!") : -1;
@@ -80,16 +119,22 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 		 * no higher than his max, at once (bn6f chatbox_804252C); then
 		 * ts_wait, a frame for the director's full flag to see it, and
 		 * the HP he got, in BN6's own words for MiniEnrg's "recovers
-		 * 50HP!", or "fully restored" where the half reached his max) */
-		uint8_t heal[] = { 0xFB, 0x08, (uint8_t)amount, (uint8_t)(amount >> 8), 0xEE, 0x00, 2, 0 };
+		 * 50HP!", or "fully restored" where the half reached his max;
+		 * the amount's bytes in places of their own, `spot`, which a
+		 * CONTINUE sets again once its state holds his max HP, session 77) */
+		uint8_t a[2], got[HEAL_GOT_LEN];
+		ta_heal_bytes(amount, a, got);
+		uint8_t heal[] = { 0xFB, 0x08, a[0], a[1], 0xEE, 0x00, 2, 0 };
+		int amount_at = t->len + 2;
 		ta_bytes(t, heal, sizeof heal);
 		heal_check(t, full_flag, topped);
-		char got[48];
-		snprintf(got, sizeof got, "MegaMan recovered\n%dHP!", amount);
-		heal_said(t, got, told_flag, vow);
+		int got_at = heal_got(t, amount);
+		heal_said(t, told_flag, vow);
+		/* (an archive that filled may have left them out) */
+		if (spot && !t->full) *spot = (HealSpot){ amount_at, got_at };
 	} else {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		heal_said(t, full, told_flag, vow && amount == 0);
+		heal_page(t, full, told_flag, vow && amount == 0);
 	}
 	return i;
 }

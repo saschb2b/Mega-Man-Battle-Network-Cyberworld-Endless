@@ -292,6 +292,9 @@ bool director_resume(void) {
 		/* (chips or Souls of BN5's, BN5's ROM not read: they wait for it,
 		 * and MegaMan says so, docs/multirom/) */
 		D.resumed = true;
+		/* (the layer was built before the state held MegaMan's max HP:
+		 * its Recovery Mr.Prog's half patch from it now, session 77) */
+		layer_objs_heal_again(&D.objs);
 		if (home) return resume_home();
 		spins_sync();
 		/* (the ScrtData the state holds, as the game counts them) */
