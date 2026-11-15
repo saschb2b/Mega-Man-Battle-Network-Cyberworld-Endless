@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **The PSP.** A PSP-2000, PSP-3000, PSP Go or PSP Street with custom
+  firmware (6.61 PRO or ARK-4) plays the game: unpack
+  `cyberworld-endless-psp.zip` onto the memory stick and start it from
+  the XMB. It holds BN6's net alone, with no room for BN5's or BN4's
+  ROM, and plays offline. Its GBA core is gpSP, built for the PSP's
+  CPU, which keeps a battle at full speed where mGBA could not; that
+  core makes this build GPL, and the zip says where its source is.
+  Played in PPSSPP so far: tell us how it runs on yours.
 - **SAVES in three pages.** Its eight buttons became the pages CLOUD,
   CODE and FILE, turned with L and R as Options' are, each a short list
   with a box that says what the line under the cursor does. UNDO IMPORT
