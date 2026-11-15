@@ -28,6 +28,7 @@ typedef struct {
 	uint8_t obj[240 * 160];     /* the sprite on top of the others, its OAM entry + 1 (0 none), whatever covers it */
 	uint8_t hud[240 * 160];     /* 1 where a background of the HUD lies under the sprites: BG0, or BG3 in front (gba_bg3_front) */
 	uint8_t sheer[240 * 160];   /* 1 where that sprite is a blended one (a shadow, a light) */
+	uint8_t prio[240 * 160];    /* that sprite's priority */
 	/* the sprites BN6 lays on the floor under everyone, those of the last
 	 * priority (3: a warp pad) and the blobs under who stands (one colour,
 	 * wider than high): the colour of the first of them at each pixel, 0xFFBBGGRR (0 none), whatever stands on it; they are no
@@ -43,7 +44,22 @@ typedef struct {
  * the sky behind the world (a net map's) */
 bool gba_bg3_front(const uint8_t *io);
 
+/* A sprite's box on the screen as OAM sets it (w 0: not shown) */
+typedef struct { int16_t x, y; uint8_t w, h; } GbaBox;
+/* ... each of the 128, their pixels unread (v->oam alone read) */
+void gba_obj_boxes(const GbaVideo *v, GbaBox box[GBA_OBJS]);
+/* The pixels of the sprites that stand, of those `want` names (1 each):
+ * 1 in `mask` (240x160, cleared first) where one shows, `drew` 1 for each
+ * that showed any. One that lies on the floor (priority 3, or a blob) and
+ * a blended one (a shadow, a light) are left out; whatever covers them is
+ * not asked. Only the entries wanted are read, a pixel at a time. */
+void gba_obj_pixels(const GbaVideo *v, const uint8_t want[GBA_OBJS], uint8_t *mask, uint8_t drew[GBA_OBJS]);
+
 /* False in a mode other than 0 (its backgrounds are not tile maps alone). */
 bool gba_layers(const GbaVideo *v, GbaLayers *out);
+/* ... in two steps: the sprites, then the backgrounds' rows `from` to `to`
+ * (each band of rows by itself, on threads if a caller likes) */
+bool gba_layers_sprites(const GbaVideo *v, GbaLayers *out);
+void gba_layers_rows(const GbaVideo *v, GbaLayers *out, int from, int to);
 
 #endif

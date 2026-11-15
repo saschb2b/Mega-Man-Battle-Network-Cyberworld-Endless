@@ -17,11 +17,21 @@ typedef struct {
 	                           * from their screen maps) */
 	int tw, th;
 	int ox, oy;               /* the map's pixel at the frame's (0, 0) */
+	const uint32_t *lut;      /* each of the 32768 colours as the window shows it (the screen's correction, a tint), 0xFFBBGGRR;
+	                           * NULL: as mGBA shows them (gba_shown) */
 } GbaWorld;
 
-/* The window w x h whose corner is the frame's (x0, y0): `map` the map's
+/* 15 bits as mGBA shows them, 0xFFBBGGRR (5 bits a channel, its top bits again below) */
+uint32_t gba_shown(unsigned c);
+
+/* A window w x h whose corner is the frame's (x0, y0): `map` the map's
  * colour where BG1 or BG2 has a pixel (0xFFBBGGRR, else 0), `sky` what is
- * behind it. */
-void gba_world(const GbaWorld *g, int x0, int y0, int w, int h, uint32_t *map, uint32_t *sky);
+ * behind it, their rows `stride` pixels apart */
+typedef struct {
+	int x0, y0, w, h, stride;
+	uint32_t *map, *sky;
+} GbaWindow;
+
+void gba_world(const GbaWorld *g, const GbaWindow *win);
 
 #endif

@@ -58,6 +58,13 @@ const uint8_t *chips_bytes(uint32_t bus, uint32_t n);
  * tiles, which take offsets */
 const uint8_t *chips_offset_bytes(uint32_t off, uint32_t n);
 
+/* Whether folder entry `e` is one of the Standard folder NEW GAME copies
+ * as BN6's ROM holds it (nine-bit) that ten bits read as another chip:
+ * what a boot state of a nine-bit build gave (src/emu/boot.c,
+ * boot-3.state), Cannon B read as BN4's CloudMn in A, dealt blank. False
+ * where CHIP_ID_BITS is 9. */
+bool chips_preset_nine(uint16_t e);
+
 /* Whether chip `id` sits out of BN6's battles (taken out of the battle's
  * deck as it is dealt: xchips_install.c): a chip of BN5's whose code is
  * not moved yet, a DarkChip of BN5's until its rule is, every one of BN5's

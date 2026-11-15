@@ -104,7 +104,7 @@ static void mix_sources(int16_t *out, int frames) {
 	}
 	external(out, frames);
 	/* (a PET screen's sounds over the held game: the Arena's way in and its card, the NetPass, Trade Central;
-	 * the engine's music is never playing then) */
+	 * the engine's music while a screen of its own holds the game: the game's song carried on, music_carry.h) */
 	if (!mp2k_busy()) return;
 	static int16_t fx[4096 * 2];
 	for (int done = 0; done < frames;) {
@@ -203,6 +203,9 @@ void audio_frame(void) {
 
 static void lock(void) { if (dev) SDL_LockAudioDevice(dev); }
 static void unlock(void) { if (dev) SDL_UnlockAudioDevice(dev); }
+void audio_lock(void) { lock(); }
+void audio_unlock(void) { unlock(); }
+bool audio_on(void) { return dev || offline; }
 
 /* (each song on the player BN6's song table names, as m4aSongNumStart
  * plays it: an effect over another on its player as its priority lets it) */

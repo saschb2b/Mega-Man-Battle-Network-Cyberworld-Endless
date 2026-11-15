@@ -685,3 +685,22 @@ void townsrc_synth(const TownBook *b, TownCell cell, int tw, int th, uint32_t se
 		}
 	free(src);
 }
+
+/* ---- the sources kept for the next visit, a style's each ---- */
+#define KEPT_STYLES 8
+static TownBook *kept[KEPT_STYLES];
+
+TownBook *townsrc_book(int style, int group, int number, TownMatOf mat_of) {
+	if (style < 0 || style >= KEPT_STYLES) return NULL;
+	if (!kept[style]) kept[style] = townsrc_learn(group, number, mat_of);
+	return kept[style];
+}
+
+void townsrc_installed(void) {
+#if defined(__PSP__) || defined(CW_HEAP_PSP)
+	for (int i = 0; i < KEPT_STYLES; ++i) {
+		townsrc_free(kept[i]);
+		kept[i] = NULL;
+	}
+#endif
+}

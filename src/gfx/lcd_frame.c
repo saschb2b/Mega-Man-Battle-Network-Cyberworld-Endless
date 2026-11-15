@@ -119,6 +119,15 @@ uint32_t lcd_shown565(LcdColour c, uint16_t px) {
  * which reads green's top five bits: an entry for each of the two), made
  * once each time a colour is chosen */
 static uint32_t *table;
+/* ... and by its 15 bits alone (red, green, blue, five each), half the
+ * table: what the frame is read through where nothing blends it, a pass
+ * of the picture (three passes and the whole table took the 3DS 3 ms) */
+static uint32_t *table15;
+
+static void table15_made(void) {
+	if (!table15 && !(table15 = malloc(32768 * sizeof *table15))) return;
+	for (unsigned i = 0; i < 32768; ++i) table15[i] = table[(i >> 10) << 11 | (i >> 5 & 0x1F) << 6 | (i & 0x1F)];
+}
 
 static bool table_made(LcdColour c) {
 	if (!table && !(table = malloc(65536 * sizeof *table))) return false;
@@ -142,6 +151,7 @@ LcdColour lcd_colour(void) { return colour; }
 void lcd_set_colour(LcdColour c) {
 	if (c == colour && table) return;
 	colour = (unsigned)c < LCD_COLOUR_COUNT && c != LCD_COLOUR_OFF && table_made(c) ? c : LCD_COLOUR_OFF;
+	if (colour != LCD_COLOUR_OFF) table15_made();
 }
 
 /* ---- Interframe Blending ---- */
@@ -277,6 +287,14 @@ static void seed_from_now(LcdHistory *h) {
 
 void lcd_frame_in(LcdHistory *h, uint32_t *px, int n, bool fresh) {
 	if ((colour == LCD_COLOUR_OFF && blend == LCD_BLEND_OFF) || !h || !ready(h, n)) return;
+	/* (the colours alone, nothing blended: each pixel through the table at once) */
+	if (blend == LCD_BLEND_OFF && table15) {
+		for (int i = 0; i < n; ++i) {
+			uint32_t c = px[i];
+			px[i] = table15[(c >> 3 & 0x1F) << 10 | (c >> 11 & 0x1F) << 5 | (c >> 19 & 0x1F)];
+		}
+		return;
+	}
 	if (fresh || h->seed || blend == LCD_BLEND_OFF) {
 		/* (the 8-bit picture back to mGBA's 565: its top five bits a channel) */
 		for (int i = 0; i < n; ++i) {

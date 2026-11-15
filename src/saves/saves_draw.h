@@ -9,8 +9,9 @@
 void saves_draw(void);
 /* The cursor moved in the direction (dx, dy) */
 void saves_move_focus(int dx, int dy);
-/* A tap or a click this frame: its button chosen, or `back` called; true
- * where there was one */
-bool saves_pointer(bool (*back)(void));
+/* A tap or a click this frame: its button chosen, `back` called, or on
+ * home a tab's page turned to by `turn` (its step); true where there was
+ * one */
+bool saves_pointer(bool (*back)(void), void (*turn)(int step));
 
 #endif

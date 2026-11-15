@@ -1,8 +1,12 @@
 /* mGBA core host: runs the player's ROM, exposes its frame, sound and memory. */
 #include "emu.h"
-#include "audio_pace.h"
+
+/* (on mGBA; a build on gpSP has emu_gpsp.c instead: CW_GPSP) */
+#ifndef CW_GPSP
 #include "claims.h"
 #include "compat.h"
+#include "emu_keep.h"
+#include "emu_sound.h"
 #include "free_space_watch.h"
 #include "platform.h"
 #include "ram_survey.h"
@@ -22,6 +26,7 @@
 #include <mgba/core/serialize.h>
 #include <mgba/feature/video-logger.h>
 #include <mgba/internal/gba/gba.h>
+#include <mgba/internal/gba/io.h>
 #include <mgba/internal/gba/overrides.h>
 #include <mgba-util/vfs.h>
 #ifdef __3DS__
@@ -29,16 +34,6 @@
 #include <3ds/thread.h>
 #endif
 
-#define RING 16384 /* stereo frames of buffered sound */
-/* The GBA runs at 59.73 Hz and frames are paced at 60, so the core makes a
- * little more sound than is played: keep the buffer near LAT_TARGET frames
- * (about 32 ms) by nudging the output rate, and drop sound past LAT_MAX. */
-#ifdef CW_DESKTOP
-#define LAT_TARGET 1024   /* (a desktop keeps up: about 21 ms) */
-#else
-#define LAT_TARGET 1536
-#endif
-#define LAT_MAX    6144
 
 static bool surveying;   /* (ram_survey.h) */
 static struct mCore *core;
@@ -46,14 +41,6 @@ static bool layout_ok;   /* the core's struct GBA reads as expected (emu_init) *
 static uint32_t video[EMU_W * EMU_H];
 static int out_rate = 48000;
 
-static int16_t ring[RING * 2];
-static int ring_r, ring_w;
-static SDL_mutex *ring_lock;
-/* the ring's place on the sound's timeline (emu_audio_mark): samples written
- * and played since the start, and those of a rollback's sound still to be
- * skipped, as they were played already (issue #167) */
-static uint64_t ring_written, ring_played, ring_debt;
-static AudioPace pace;   /* (the ring's averaged fill: the output rate's nudge) */
 
 static void quiet(struct mLogger *l, int c, enum mLogLevel lv, const char *f, va_list a) {
 	(void)l; (void)c; (void)lv; (void)f; (void)a;
@@ -86,12 +73,12 @@ bool emu_init(const uint8_t *rom, size_t len) {
 	if (!copy) return false;
 	memcpy(copy, rom, len);
 	memset(copy + len, 0xFF, EMU_ROM_SIZE - len);
-#ifdef __3DS__
-	/* (on the 3DS the core maps this copy as it is and patches it in place
-	 * (GBALoadROM maps a 16 MB ROM), so it lives as long as the core: a
-	 * chunk made from it would be a second 16 MB on a 3DS's heap. mGBA's
-	 * own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game never
-	 * calls, and start_3ds.c gives it back) */
+#if defined(__3DS__) || defined(__PSP__)
+	/* (on the 3DS and the PSP the core maps this copy as it is and patches
+	 * it in place (GBALoadROM maps a 16 MB ROM), so it lives as long as the
+	 * core: a chunk made from it would be a second 16 MB on their heaps.
+	 * mGBA's own ROM buffer, FIXED_ROM_BUFFER's, serves loaders the game
+	 * never calls: start_3ds.c gives the 3DS's back, the PSP's is none) */
 	struct VFile *vf = VFileFromMemory(copy, EMU_ROM_SIZE);
 	if (!vf) { free(copy); return false; }
 #else
@@ -202,33 +189,14 @@ static void pull_audio_from(struct mCore *c) {
 		blip_read_samples(r, tmp + 1, got, 1);
 		if (unheard) { tail_take(tmp, got); continue; }
 		if (own) tail_join(tmp, got);
-		SDL_LockMutex(ring_lock);
-		for (int i = 0; i < got; ++i) {
-			if (ring_debt) { --ring_debt; continue; }   /* (heard already, before a rollback: emu_audio_rewind) */
-			int next = (ring_w + 1) % RING;
-			if (next == ring_r) break; /* full: drop the rest */
-			ring[ring_w * 2] = tmp[i * 2];
-			ring[ring_w * 2 + 1] = tmp[i * 2 + 1];
-			ring_w = next;
-			++ring_written;
-		}
-		SDL_UnlockMutex(ring_lock);
+		emu_sound_put(tmp, got);
 	}
-	SDL_LockMutex(ring_lock);
-	int fill = (ring_w - ring_r + RING) % RING;
-	if (fill > LAT_MAX) {
-		ring_played += (uint64_t)(fill - LAT_TARGET);
-		ring_r = (ring_w - LAT_TARGET + RING) % RING;
-		fill = LAT_TARGET;
-		audio_pace_reset(&pace, fill);
-	}
-	SDL_UnlockMutex(ring_lock);
 	/* (a frame heard: the next unheard one's first samples are its tail) */
 	if (own && !unheard) {
 		tail_n = tail_at = 0;
 		tail_wanted = true;
 	}
-	double adj = audio_pace(&pace, fill, LAT_TARGET);
+	double adj = emu_sound_settle();
 	blip_set_rates(l, c->frequency(c), out_rate * adj);
 	blip_set_rates(r, c->frequency(c), out_rate * adj);
 }
@@ -236,31 +204,7 @@ static void pull_audio_from(struct mCore *c) {
 static void pull_audio(void) { pull_audio_from(core); }
 
 void emu_audio_from(void *other) {
-	if (other && ring_lock) pull_audio_from(other);
-}
-
-uint64_t emu_audio_mark(void) {
-	if (!ring_lock) return 0;
-	SDL_LockMutex(ring_lock);
-	uint64_t mark = ring_written;
-	SDL_UnlockMutex(ring_lock);
-	return mark;
-}
-
-void emu_audio_rewind(uint64_t mark) {
-	if (!ring_lock) return;
-	SDL_LockMutex(ring_lock);
-	if (mark >= ring_played && mark < ring_written) {
-		/* (none of it heard yet: cut, the next written in its place) */
-		ring_w = (int)(((uint64_t)ring_w + RING - (ring_written - mark)) % RING);
-		ring_written = mark;
-	} else if (mark < ring_played) {
-		/* (some heard: the rest cut, and as much of the next written skipped) */
-		ring_debt += ring_played - mark;
-		ring_w = ring_r;
-		ring_written = ring_played;
-	}
-	SDL_UnlockMutex(ring_lock);
+	if (other && emu_sound_ready()) pull_audio_from(other);
 }
 
 void emu_audio_drop_from(void *other) {
@@ -271,10 +215,6 @@ void emu_audio_drop_from(void *other) {
 }
 
 int emu_audio_out_rate(void) { return out_rate; }
-
-void emu_audio_open(void) {
-	if (!ring_lock) ring_lock = SDL_CreateMutex();
-}
 
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;
@@ -328,14 +268,22 @@ static void worker_entry(void *arg) { worker_main(arg); }
  * the frame its present; the drawing takes what it reads from the update) */
 bool emu_drawing;
 int emu_draw_waits;
+const char *emu_draw_part, *emu_draw_waited;
+
+static void (*after_frame)(void);
+void emu_after_frame(void (*step)(void)) { after_frame = step; }
 
 static void wait_frame(void) {
 	if (!in_flight) return;
-	emu_draw_waits += emu_drawing;
+	if (emu_drawing) {
+		++emu_draw_waits;
+		if (emu_draw_part) emu_draw_waited = emu_draw_part;
+	}
 	SDL_SemWait(done);
 	in_flight = false;
 	memcpy(shown, video, sizeof shown);
 	++pictures;
+	if (after_frame) after_frame();
 }
 
 bool emu_threaded(void) { return threaded; }
@@ -404,33 +352,69 @@ void emu_frame_as(uint32_t keys, unsigned how) {
 	if (unshown) ((struct GBA *)core->board)->video.frameskipCounter = 1;
 	run_frame(unshown);
 	if (!unshown) ++pictures;
-}
-
-int emu_audio_read(int16_t *out, int frames) {
-	int n = 0;
-	if (ring_lock) SDL_LockMutex(ring_lock);
-	while (n < frames && ring_r != ring_w) {
-		out[n * 2] = ring[ring_r * 2];
-		out[n * 2 + 1] = ring[ring_r * 2 + 1];
-		ring_r = (ring_r + 1) % RING;
-		++n;
-	}
-	ring_played += (uint64_t)n;
-	if (ring_lock) SDL_UnlockMutex(ring_lock);
-	memset(out + n * 2, 0, (size_t)(frames - n) * 4);
-	return n;
+	if (after_frame) after_frame();
 }
 
 const uint32_t *emu_video(void) { return threaded ? shown : video; }
 
 uint32_t emu_pictures(void) { return pictures; }
 
-uint8_t emu_read8(uint32_t a) { wait_frame(); return core ? (uint8_t)core->rawRead8(core, a, -1) : 0; }
+/* The cartridge's bytes as mGBA holds them, read and written in place
+ * rather than a byte at a time through its bus: the installs' reads and
+ * writes so were a fifth of a start with BN5 and BN4
+ * (docs/devtools/profiling.md). A read is GBALoad8's for a cartridge
+ * address within the ROM's size (0x08-0x0D, mirrors of one image); a write
+ * leaves what rawWrite8 byte by byte leaves, its last byte written that way
+ * (the copy made from the player's ROM before the first, the size grown
+ * to cover the write), the rest copied in where those writes put them. */
+#define CART_MASK 0x01FFFFFFu
+
+static int cart_read(uint32_t a) {
+	if (!core || (a >> 24) < 0x08 || (a >> 24) > 0x0D) return -1;
+	const struct GBA *gba = core->board;
+	uint32_t off = a & CART_MASK;
+	return off < gba->memory.romSize ? ((const uint8_t *)gba->memory.rom)[off] : -1;
+}
+
+static bool cart_write(uint32_t a, const uint8_t *p, size_t len) {
+	if (!core || !len || len > CART_MASK || a < 0x08000000u || a > 0x0A000000u - len) return false;
+	core->rawWrite8(core, a + (uint32_t)(len - 1), -1, p[len - 1]);
+	struct GBA *gba = core->board;
+	memcpy((uint8_t *)gba->memory.rom + (a & CART_MASK), p, len - 1);
+	return true;
+}
+
+uint8_t emu_read8(uint32_t a) {
+	wait_frame();
+	int v = cart_read(a);
+	return v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a, -1) : 0;
+}
 uint16_t emu_read16(uint32_t a) { wait_frame(); return core ? (uint16_t)core->rawRead16(core, a, -1) : 0; }
 uint32_t emu_read32(uint32_t a) { wait_frame(); return core ? core->rawRead32(core, a, -1) : 0; }
+const uint8_t *emu_memory(uint32_t a, uint32_t len) {
+	wait_frame();
+	unsigned region = a >> 24;
+	size_t size = 0;
+	const uint8_t *block = core && (region == 2 || region == 3 || (region >= 5 && region <= 7)) ? core->getMemoryBlock(core, region, &size) : NULL;
+	uint32_t off = a & 0xFFFFFFu;
+	return block && off <= size && len <= size - off ? block + off : NULL;
+}
+
 void emu_read_bytes(uint32_t a, uint8_t *out, uint32_t len) {
 	wait_frame();
-	for (uint32_t i = 0; i < len; ++i) out[i] = core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;
+	/* (the RAM, the palette, video memory and OAM copied whole: byte by
+	 * byte through the bus, VRAM's 96 KB took depth lighting 0.4 ms a frame) */
+	unsigned region = a >> 24;
+	if (core && (region == 2 || region == 3 || (region >= 5 && region <= 7))) {
+		size_t size = 0;
+		const uint8_t *block = core->getMemoryBlock(core, region, &size);
+		uint32_t off = a & 0xFFFFFFu;
+		if (block && off <= size && len <= size - off) { memcpy(out, block + off, len); return; }
+	}
+	for (uint32_t i = 0; i < len; ++i) {
+		int v = cart_read(a + i);
+		out[i] = v >= 0 ? (uint8_t)v : core ? (uint8_t)core->rawRead8(core, a + i, -1) : 0;
+	}
 }
 
 void emu_write8(uint32_t a, uint8_t v) {
@@ -456,41 +440,37 @@ void emu_write(uint32_t a, const void *data, size_t len) {
 	claims_note(a, (uint32_t)len);
 	free_space_write(a, (uint32_t)len);
 	xlog_write(a, data, len);
+	if (cart_write(a, p, len)) return;
 	for (size_t i = 0; core && i < len; ++i) core->rawWrite8(core, a + (uint32_t)i, -1, p[i]);
 }
 
-/* ---- RAM kept patched (emu_keep) ---- */
-
-#define KEEP_MAX 8
-#define KEEP_LEN 64
-static struct { uint32_t addr, len; uint8_t was[KEEP_LEN], now[KEEP_LEN]; } kept[KEEP_MAX];
-static int nkept;
-
-/* Each patch's bytes made the engine's, whatever they read: the game's
- * own, or another build's patch, which a state that build saved may hold
- * (a checkpoint from before the game's own were saved there, its hit
- * gate's calls going where that build's code lay: issue #482, the game
- * stood still at the first hit). `own`: the game's again where they read
- * the engine's, for a state's save; bytes that read neither stay. */
-static void keep_put(bool own) {
-	for (int i = 0; i < nkept; ++i) {
-		const uint8_t *to = own ? kept[i].was : kept[i].now;
-		bool there = true;
-		for (uint32_t k = 0; own && there && k < kept[i].len; ++k) there = (uint8_t)core->rawRead8(core, kept[i].addr + k, -1) == kept[i].now[k];
-		for (uint32_t k = 0; there && k < kept[i].len; ++k)
-			if ((uint8_t)core->rawRead8(core, kept[i].addr + k, -1) != to[k]) core->rawWrite8(core, kept[i].addr + k, -1, to[k]);
-	}
+/* (a raw write leaves the I/O registers alone, mGBA's GBAPatch8: the
+ * game's own way in, as its store would make it) */
+void emu_io_write8(uint32_t a, uint8_t v) {
+	wait_frame();
+	if (core && (a >> 24) == 0x04) GBAIOWrite8(core->board, a & 0x00FFFFFFu, v);
 }
+
+void emu_io_write32(uint32_t a, uint32_t v) {
+	wait_frame();
+	if (core && (a >> 24) == 0x04) GBAIOWrite32(core->board, a & 0x00FFFFFCu, v);
+}
+
+uint8_t emu_rom_byte(uint32_t a) {
+	int v = cart_read(a);
+	return v >= 0 ? (uint8_t)v : 0;
+}
+
+/* ---- RAM kept patched (emu_keep, emu_keep.h) ---- */
+
+static uint8_t raw_read8(uint32_t a) { return (uint8_t)core->rawRead8(core, a, -1); }
+static void raw_write8(uint32_t a, uint8_t v) { core->rawWrite8(core, a, -1, v); }
+static void keep_put(bool own) { emu_keep_put(own, raw_read8, raw_write8); }
 
 bool emu_keep(uint32_t addr, const void *was, const void *now, size_t len) {
 	wait_frame();
-	if (!core || nkept >= KEEP_MAX || !len || len > KEEP_LEN) return false;
+	if (!core || !emu_keep_add(addr, was, now, len)) return false;
 	claims_note(addr, (uint32_t)len);
-	kept[nkept].addr = addr;
-	kept[nkept].len = (uint32_t)len;
-	memcpy(kept[nkept].was, was, len);
-	memcpy(kept[nkept].now, now, len);
-	++nkept;
 	keep_put(false);
 	return true;
 }
@@ -628,3 +608,5 @@ bool emu_snapshot_load(void *bytes, size_t size) {
 	}
 	return ok;
 }
+
+#endif

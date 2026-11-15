@@ -72,8 +72,9 @@ static uint8_t *map_gfx(uint32_t ts, uint32_t pal, uint32_t colors[256]) {
 	return vram;
 }
 
-/* Draws tile maps into px (tw * 8 x th * 8), layer `top` over the others,
- * marking its pixels when given. The real world's maps use 256-colour
+/* Draws tile maps into px (tw * 8 x th * 8) and its colour indices into
+ * idx, each where given, layer `top` over the others, marking its pixels
+ * in front when given. The real world's maps use 256-colour
  * tiles (64 bytes, a colour index per pixel), the internet's 16-colour
  * ones (32 bytes, a bank per map entry). */
 static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_t *const *tile, int layers, int top, int tw, int th, uint32_t *px, uint8_t *front, uint8_t *idx, bool bpp8) {
@@ -93,7 +94,7 @@ static void draw_layers(const uint8_t *vram, const uint32_t colors[256], uint16_
 						else { uint8_t v = t[y * 4 + x / 2]; ci = (x & 1) ? v >> 4 : v & 15; }
 						if (!ci) continue;
 						int X = (e & 0x400) ? 7 - x : x, Y = (e & 0x800) ? 7 - y : y;
-						px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[bpp8 ? ci : (e >> 12) * 16 + ci];
+						if (px) px[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = colors[bpp8 ? ci : (e >> 12) * 16 + ci];
 						if (idx) idx[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = (uint8_t)(bpp8 ? ci : (e >> 12) * 16 + ci);
 						if (l == top && front) front[(size_t)(ty * 8 + Y) * W + tx * 8 + X] = 1;
 					}
@@ -135,8 +136,9 @@ static bool draw_map(AreaSrc *a, uint32_t ts, uint32_t pal, uint32_t tm) {
 	uint8_t *vram = map_gfx(ts, pal, colors);
 	if (!vram) return false;
 	bool rw = map_bpp8(a->group, tm);
-	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, a->px, a->front, a->idx, rw);
-	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, a->px0, NULL, NULL, rw);
+	memcpy(a->colors, colors, sizeof a->colors);
+	draw_layers(vram, colors, a->tile, a->layers, a->layers - 1, a->tw, a->th, NULL, a->front, a->idx, rw);
+	draw_layers(vram, colors, a->tile, 1, 0, a->tw, a->th, NULL, NULL, a->idx0, rw);
 	free(vram);
 	return true;
 }
@@ -158,11 +160,10 @@ static bool decode_tiles(AreaSrc *a) {
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)(m[(l * cells + i) * 2] | m[(l * cells + i) * 2 + 1] << 8);
 	}
 	free(m);
-	a->px = calloc(cells * 64, 4);
-	a->px0 = calloc(cells * 64, 4);
-	a->front = calloc(cells * 64, 1);
 	a->idx = calloc(cells * 64, 1);
-	if (!a->px || !a->px0 || !a->front || !a->idx) return false;
+	a->idx0 = calloc(cells * 64, 1);
+	a->front = calloc(cells * 64, 1);
+	if (!a->idx || !a->idx0 || !a->front) return false;
 	return draw_map(a, ts, pal, tm);
 }
 
@@ -595,10 +596,9 @@ static bool recolour(AreaSrc *a, uint32_t pairs) {
 	use_rom(a->rom - 1);
 	uint32_t desc, ts, pal, tm;
 	if (!map_desc(a->group, a->number, &desc, &ts, &pal, &tm)) return false;
-	memset(a->px, 0, cells * 64 * 4);
-	memset(a->px0, 0, cells * 64 * 4);
-	memset(a->front, 0, cells * 64);
 	memset(a->idx, 0, cells * 64);
+	memset(a->idx0, 0, cells * 64);
+	memset(a->front, 0, cells * 64);
 	return draw_map(a, ts, pal, tm);
 }
 
@@ -611,14 +611,20 @@ bool area_src_load_as(int rom, int group, int number, uint32_t pairs, AreaSrc *a
 
 void area_src_free(AreaSrc *a) {
 	for (int l = 0; l < 2; ++l) free(a->tile[l]);
-	free(a->px);
-	free(a->px0);
-	free(a->front);
 	free(a->idx);
+	free(a->idx0);
+	free(a->front);
 	for (int k = 0; k < 4; ++k) free(a->sec[k]);
 	free(a->hz);
 	free(a->rings);
 	memset(a, 0, sizeof *a);
+}
+
+uint32_t *area_src_argb(const AreaSrc *a, uint32_t empty) {
+	size_t n = (size_t)a->tw * a->th * 64;
+	uint32_t *px = malloc(n * sizeof *px);
+	for (size_t i = 0; px && i < n; ++i) px[i] = a->idx[i] ? area_src_px(a, i) : empty;
+	return px;
 }
 
 /* (each copy checked: a whole map's pixels twice, and a New 3DS ran short
@@ -629,11 +635,10 @@ static bool copy_parts(const AreaSrc *a, AreaSrc *c, bool zeroed) {
 	for (int k = 0; k < 4; ++k) { c->sec[k] = NULL; c->nsec[k] = 0; }
 	c->tile[0] = c->tile[1] = NULL;
 	c->hz = c->rings = NULL;
-	c->px = zeroed ? calloc(n, 4) : malloc(n * 4);
-	c->px0 = zeroed ? calloc(n, 4) : malloc(n * 4);
+	c->idx = zeroed ? calloc(n, 1) : malloc(n);
+	c->idx0 = zeroed ? calloc(n, 1) : malloc(n);
 	c->front = zeroed ? calloc(n, 1) : malloc(n);
-	c->idx = !a->idx ? NULL : zeroed ? calloc(n, 1) : malloc(n);
-	bool ok = c->px && c->px0 && c->front && (!a->idx || c->idx);
+	bool ok = c->idx && c->idx0 && c->front;
 	for (int l = 0; l < 2 && ok; ++l)
 		if (a->tile[l]) ok = (c->tile[l] = calloc(cells, 2)) != NULL;
 	if (a->hz && ok) ok = (c->hz = malloc((size_t)a->hw * a->hh)) != NULL;
@@ -676,10 +681,9 @@ bool area_src_mirror(const AreaSrc *a, AreaSrc *m) {
 	}
 	for (int y = 0; y < H; ++y)
 		for (int x = 0; x < W; ++x) {
-			m->px[(size_t)y * W + (W - 1 - x)] = a->px[(size_t)y * W + x];
-			m->px0[(size_t)y * W + (W - 1 - x)] = a->px0[(size_t)y * W + x];
+			m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
+			m->idx0[(size_t)y * W + (W - 1 - x)] = a->idx0[(size_t)y * W + x];
 			m->front[(size_t)y * W + (W - 1 - x)] = a->front[(size_t)y * W + x];
-			if (m->idx) m->idx[(size_t)y * W + (W - 1 - x)] = a->idx[(size_t)y * W + x];
 		}
 	mirror_cells(a, m);
 	return true;
@@ -695,10 +699,9 @@ bool area_src_raise(const AreaSrc *a, int z, AreaSrc *r) {
 			memcpy(r->tile[l] + (size_t)ty * a->tw, a->tile[l] + (size_t)(ty - rows) * a->tw, (size_t)a->tw * 2);
 	}
 	for (int y = z; y < H; ++y) {
-		memcpy(r->px + (size_t)y * W, a->px + (size_t)(y - z) * W, (size_t)W * 4);
-		memcpy(r->px0 + (size_t)y * W, a->px0 + (size_t)(y - z) * W, (size_t)W * 4);
+		memcpy(r->idx + (size_t)y * W, a->idx + (size_t)(y - z) * W, (size_t)W);
+		memcpy(r->idx0 + (size_t)y * W, a->idx0 + (size_t)(y - z) * W, (size_t)W);
 		memcpy(r->front + (size_t)y * W, a->front + (size_t)(y - z) * W, (size_t)W);
-		if (r->idx) memcpy(r->idx + (size_t)y * W, a->idx + (size_t)(y - z) * W, (size_t)W);
 	}
 	if (a->hz) memcpy(r->hz, a->hz, (size_t)a->hw * a->hh);
 	if (a->rings) memcpy(r->rings, a->rings, (size_t)a->rw * a->rh);
@@ -730,12 +733,10 @@ static void flip_in_place(const AreaSrc *a) {
 	for (int y = 0; y < H; ++y) {
 		size_t at = (size_t)y * W;
 		for (int i = 0, j = W - 1; i < j; ++i, --j) {
-			uint32_t p = a->px[at + i], p0 = a->px0[at + i];
-			uint8_t f = a->front[at + i];
-			a->px[at + i] = a->px[at + j]; a->px[at + j] = p;
-			a->px0[at + i] = a->px0[at + j]; a->px0[at + j] = p0;
+			uint8_t c = a->idx[at + i], c0 = a->idx0[at + i], f = a->front[at + i];
+			a->idx[at + i] = a->idx[at + j]; a->idx[at + j] = c;
+			a->idx0[at + i] = a->idx0[at + j]; a->idx0[at + j] = c0;
 			a->front[at + i] = a->front[at + j]; a->front[at + j] = f;
-			if (a->idx) { uint8_t c = a->idx[at + i]; a->idx[at + i] = a->idx[at + j]; a->idx[at + j] = c; }
 		}
 	}
 }
@@ -756,7 +757,7 @@ bool area_src_mirror_in(AreaSrc *a, AreaSrc *m) {
 }
 
 void area_src_mirror_end(AreaSrc *a, AreaSrc *m) {
-	if (!m->px) return;
+	if (!m->idx) return;
 	flip_in_place(a);
 	for (int k = 0; k < 4; ++k) free(m->sec[k]);
 	free(m->hz);
@@ -770,7 +771,7 @@ static size_t raise_rows(const AreaSrc *a, int z, int *rows, int *zz) {
 	int H = a->th * 8;
 	*zz = z < H ? z : H;
 	*rows = z / 8 < a->th ? z / 8 : a->th;
-	return (size_t)*rows * a->tw * 2 * 2 + (size_t)*zz * a->tw * 8 * (4 + 4 + 1 + 1);
+	return (size_t)*rows * a->tw * 2 * 2 + (size_t)*zz * a->tw * 8 * 3;
 }
 
 bool area_src_raise_in(AreaSrc *a, int z, AreaSrc *r) {
@@ -787,10 +788,9 @@ bool area_src_raise_in(AreaSrc *a, int z, AreaSrc *r) {
 		memmove(a->tile[l] + (size_t)rows * a->tw, a->tile[l], (size_t)(a->th - rows) * trow);
 		memset(a->tile[l], 0, (size_t)rows * trow);
 	}
-	void *plane[4] = { a->px, a->px0, a->front, a->idx };
-	const size_t bpp[4] = { 4, 4, 1, 1 };
-	for (int k = 0; k < 4; ++k) {
-		size_t row = (size_t)W * bpp[k];
+	uint8_t *plane[3] = { a->idx, a->idx0, a->front };
+	for (int k = 0; k < 3; ++k) {
+		size_t row = (size_t)W;
 		uint8_t *p = plane[k];
 		if (p) {
 			memcpy(at, p + (size_t)(H - zz) * row, (size_t)zz * row);
@@ -817,10 +817,9 @@ void area_src_raise_end(AreaSrc *a, AreaSrc *r) {
 		}
 		at += (size_t)rows * trow;
 	}
-	void *plane[4] = { a->px, a->px0, a->front, a->idx };
-	const size_t bpp[4] = { 4, 4, 1, 1 };
-	for (int k = 0; k < 4; ++k) {
-		size_t row = (size_t)W * bpp[k];
+	uint8_t *plane[3] = { a->idx, a->idx0, a->front };
+	for (int k = 0; k < 3; ++k) {
+		size_t row = (size_t)W;
 		uint8_t *p = plane[k];
 		if (p) {
 			memmove(p, p + (size_t)zz * row, (size_t)(H - zz) * row);

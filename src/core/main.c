@@ -72,7 +72,8 @@ static struct {
 static void quit_prompt_draw(void) {
 	if (P.quit_prompt <= 0 || !R.data) return;
 	/* (a run is saved from its first layer on: where MegaMan stands when he
-	 * is free to move, else at the layer's start) */
+	 * is free to move, or after a won battle's RESULT once he is, else at
+	 * the last checkpoint) */
 	bool saved = director_on_layer();
 	int y = P.core_y + CORE_H - 30;
 	fill_rect(0, y, P.w, saved ? 26 : 14, rgba(0, 0, 0, 200));
@@ -82,7 +83,7 @@ static void quit_prompt_draw(void) {
 	const char *again = P.quit_pad ? "Hold SELECT+START again to quit" : "Press Esc again to quit";
 #endif
 	text_draw(P.w / 2, y + 2, again, WHITE, TEXT_CENTER);
-	if (saved) text_draw(P.w / 2, y + 14, director_can_suspend() ? "Your run is saved right here" : director_saved_where(),
+	if (saved) text_draw(P.w / 2, y + 14, director_quit_keeps() ? "Your run is saved right here" : director_saved_where(),
 		rgba(170, 200, 255, 255), TEXT_CENTER);
 }
 
@@ -101,14 +102,20 @@ static bool game_frame(void) {
 	capture_taps();
 	/* (the touch controls' menu and the controls screen pause the game
 	 * under them) */
+	bool over = options_shown() || touch_paused();
 	if (options_shown()) options_update();
 	else if (current && current->update && !touch_paused()) current->update();
+	if (over && current && current->held) current->held();
 	audio_frame();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
+	uint64_t part = frame_part_begin();
 	platform_apply_effects();
+	frame_part_end("effects", part);
+	part = frame_part_begin();
 	options_draw();
+	frame_part_end("options", part);
 	quit_prompt_draw();
 	if (devtools_shot[0]) { platform_save_canvas(devtools_shot); devtools_shot[0] = 0; }
 	capture_shots();
@@ -150,7 +157,7 @@ static bool step(void) {
 	 * drawn, which iOS refuses an app it cannot see, till it comes back) */
 	if (P.background) {
 		static bool kept;
-		if (!kept && current == &scene_emu) director_suspend();
+		if (!kept && current == &scene_emu) emu_keep_run();
 		kept = true;
 		SDL_Delay(50);
 		platform_poll();
@@ -506,7 +513,10 @@ static int frame_loop(const Options *o) {
 	/* a run on a layer is kept where MegaMan stands (a Net Square visit's
 	 * connection closed first: its gate's checkpoint stays) */
 	online_visit_shutdown();
-	if (current == &scene_emu) director_suspend();
+	if (current == &scene_emu) emu_keep_run();
+	/* (the game's song carried under a screen let go before its core: the
+	 * sound's thread reads that core's ROM, audio.h) */
+	music_carry_drop();
 	cores_quit();
 #endif
 	platform_shutdown();
@@ -549,6 +559,9 @@ static int game_main(int argc, char **argv) {
 }
 
 int main(int argc, char **argv) {
+#ifdef __PSP__
+	console_args(&argc, &argv);
+#endif
 	int code = game_main(argc, argv);
 #ifdef CW_PS5
 	console_park(code);

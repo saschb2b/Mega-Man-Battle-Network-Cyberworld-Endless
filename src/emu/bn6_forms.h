@@ -291,6 +291,10 @@
 #define BN6_MOOD_FROM_SCRIPT  0x08027310u /* ... a Custom screen's script (0x0802359C); */
 #define BN6_CALM_FROM_CHIP    0x08012876u /* the calm's: the chip's Anger (0x0800FFB8), */
 #define BN6_CALM_FROM_ANGER   0x0801438Eu /* ... Anger's end (0x08011A74) */
+#define BN6_MOOD_KEPT         (BN6_NAVI_STATS + 0x0E) /* u8 the mood a battle ended in, which the next one opens with: Full Synchro carried */
+#define BN6_MOOD_KEPT_WRITE   0x08007D94u /* bl SetCurPETNaviStatsByte(+0x0E) at a battle's end: its mood (0x08015B54's r2; 0x80 by the effects' 0x10000) */
+#define BN6_MOOD_ZERO_ALL     0x08015C32u /* ZeroAllNaviStatsMood: every Navi's kept mood 0, called by the jack-in (0x08033FDC, at 0x08034068), the
+                                             jack-out (0x080340F6, at 0x080341A0) and a script's battle in the real world */
 #define BN6_COMPACT           0x0802945Au /* the deck's compaction (BN5's 0x080250EA, the same body), its call as a Custom screen opens */
 #define BN6_COMPACT_CALL      0x08026954u /* ... (BN5 calls its worried rule just before, 0x08022CFC) */
 /* A Soul's chips (soulchips.c; S5) */

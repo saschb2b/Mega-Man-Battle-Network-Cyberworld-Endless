@@ -19,19 +19,19 @@
 #include "cinema.h"
 #include "game.h"
 #include "gfx.h"
-#include "minifont.h"
 #include "platform.h"
 #include "rom.h"
 #include "meta.h"
 #include "save.h"
 #include "saves.h"
+#include "saves_cloud.h"
 #include "second.h"
 #include "title_menu.h"
 #include "title_setup.h"
 #include "text.h"
 #include "title_summary.h"
+#include "title_version.h"
 
-#include "version.h"   /* CW_VERSION, from the build (Makefile) */
 #include "weekly.h"
 
 #define T (R.layout->title)
@@ -403,23 +403,28 @@ static void summary_update(void) {
 	if (S.new_marks) audio_sfx(SFX_REVEAL);
 }
 
+/* Jacking in: MegaMan's fall into the net, then the run (CONTINUE's, or a
+ * new one as the setup has it) */
+static void leave_step(void) {
+	++S.leaving;
+	if (S.jack_v < 96) S.jack_v += 4;
+	S.jack_y += S.jack_v;
+	if (S.leaving <= LEAVE_FRAMES) return;
+	if (S.choice == 1 && load_run()) emu_resume_requested = true;
+	else {
+		run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
+		title_setup_apply();
+		meta_run_begun();
+		emu_start_in_town = true;
+	}
+	scene_set(&scene_emu);
+}
+
 static void update(void) {
 	++S.t;
 	saves_tick();
 	if (S.leaving) {
-		++S.leaving;
-		if (S.jack_v < 96) S.jack_v += 4;
-		S.jack_y += S.jack_v;
-		if (S.leaving > LEAVE_FRAMES) {
-			if (S.choice == 1 && load_run()) emu_resume_requested = true;
-			else {
-				run_new_varied(title_seed ? title_seed++ : rng_next() ^ (uint32_t)SDL_GetTicks());
-				title_setup_apply();
-				meta_run_begun();
-				emu_start_in_town = true;
-			}
-			scene_set(&scene_emu);
-		}
+		leave_step();
 		return;
 	}
 	if (title_setup_shown()) { if (title_setup_update()) jack_in(); return; }
@@ -430,6 +435,9 @@ static void update(void) {
 		if (S.t - S.pressed >= MENU_AFTER) S.menu = S.t;
 		return;
 	}
+	/* (the cloud's pull as the game starts: the saves CONTINUE takes may be
+	 * another system's, saves_cloud.h; a few seconds at most) */
+	if (saves_cloud_settling()) return;
 	/* NEW GAME over a saved run: the run ends at its next checkpoint, so
 	 * the one destructive choice here asks first, No chosen */
 	bool ok = btn_pressed(BTN_A) || btn_pressed(BTN_START);
@@ -518,18 +526,6 @@ static void render(void) {
 	SDL_UpdateTexture(S.tex, NULL, px, 240 * 4);
 }
 
-/* The build, for a report (v0.5.0 beta, v0.5.0+12 a dozen commits on; 0.1
- * to 0.4 were alphas) */
-static const char *version_words(char *v, size_t n) {
-	const char *cw = CW_VERSION;
-	if (!strncmp(cw, "dev", 3) || !strncmp(cw, "0.0.1+git", 9)) snprintf(v, n, "dev");
-	else {
-		const char *g = strstr(cw, ".g");
-		snprintf(v, n, "v%.*s%s", g ? (int)(g - cw) : (int)strlen(cw), cw, !strncmp(cw, "0.", 2) ? " beta" : "");
-	}
-	return v;
-}
-
 /* "BN5 found": the other games' ROMs read beside BN6's, said once a start
  * in the picture's top right corner a moment after the title comes up, in
  * the map's "Run saved" box, and gone (nothing had said whether Team
@@ -559,6 +555,10 @@ static void found_draw(int x0, int y0) {
 static void top_draw(int x0, int y0) {
 	marks_draw(x0, y0);
 	found_draw(x0, y0);
+	/* (the cloud's word, over "BN5 found" where both are up: saves_cloud.h) */
+	char s[160];
+	int t, len;
+	if (saves_cloud_note(s, sizeof s, &t, &len)) cinema_note_box(x0, y0, s, t, len);
 }
 
 static void draw(void) {
@@ -588,15 +588,7 @@ static void draw(void) {
 	 * (version_words), and the best depth, a saved run deeper than the
 	 * record counting too (the menu's CONTINUE names its own layer there;
 	 * the question's box covers both) */
-	if (!S.confirm) {
-		char v[40];
-		minifont_draw(x0 + 4, y0 + 138, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
-		int best = profile.best_depth > S.saved_depth ? profile.best_depth : S.saved_depth;
-		if (best > 0 && !(S.menu && S.has_save && S.saved_depth)) {
-			snprintf(v, sizeof v, "Best: Layer %d", best);
-			minifont_draw(x0 + CORE_W - 4 - minifont_width(v, 1), y0 + 138, v, rgba(255, 230, 90, 255), 1);
-		}
-	}
+	if (!S.confirm) title_version_draw(x0, y0, S.saved_depth, !(S.menu && S.has_save && S.saved_depth));
 
 	uint32_t text = gfx_lz_ref(T.text_tiles) + 4 - 32; /* OBJ tile 1 is the block's first */
 	/* PRESS START blinks; once pressed it flickers until the menu */
@@ -633,10 +625,12 @@ static void draw(void) {
 	if (S.leaving) fill_rect(x0, y0, CORE_W, CORE_H, rgba(255, 255, 255, S.leaving * 255 / LEAVE_WHITE));
 }
 
-/* (the second screen's PET at its pace, then the title's frame) */
+/* (the second screen's PET at its pace, then the title's frame, and the
+ * updater's: its look at the start, the game ended once a download is in place) */
 static void tick(void) {
 	platform_second_screen_draw();
 	update();
+	title_version_tick();
 }
 
-const Scene scene_title = { "title", enter, tick, draw, NULL };
+const Scene scene_title = { "title", enter, tick, draw, NULL, NULL };

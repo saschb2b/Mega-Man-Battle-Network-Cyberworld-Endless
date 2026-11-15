@@ -359,7 +359,7 @@ static void draw(void) {
 	launcher_draw_all(&lay);
 }
 
-const Scene scene_launcher = { "launcher", enter, update, draw, leave };
+const Scene scene_launcher = { "launcher", enter, update, draw, leave, NULL };
 
 /* ---- the ways in ---- */
 

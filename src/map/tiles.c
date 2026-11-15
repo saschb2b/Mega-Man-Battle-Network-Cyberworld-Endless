@@ -127,7 +127,7 @@ static bool under_crossing(const Src *s, int A, int B) {
 	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
 	for (int k = 0; k < 5; ++k) {
 		int x = px + probe[k][0], y = py + probe[k][1];
-		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px0[(size_t)y * W + x] >> 24)) return false;
+		if (x < 0 || y < 0 || x >= W || y >= H || !a->idx0[(size_t)y * W + x]) return false;
 	}
 	return ((s->styles | s->walk_styles) & 0x1FFFu) >> tl_style_at(a, px, py) & 1;
 }
@@ -155,8 +155,8 @@ static bool panel_drawn(const Src *s, int A, int B) {
 	static const int probe[5][2] = { { 0, 0 }, { -12, 0 }, { 12, 0 }, { 0, -6 }, { 0, 6 } };
 	for (int k = 0; k < 5; ++k) {
 		int x = px + probe[k][0], y = py + probe[k][1];
-		if (x < 0 || y < 0 || x >= W || y >= H || !(a->px[(size_t)y * W + x] >> 24)) return 0;
-		if (s->bg_in_map && !(a->px0[(size_t)y * W + x] >> 24)) return 0;
+		if (x < 0 || y < 0 || x >= W || y >= H || !a->idx[(size_t)y * W + x]) return 0;
+		if (s->bg_in_map && !a->idx0[(size_t)y * W + x]) return 0;
 	}
 	return 1;
 }
@@ -423,31 +423,56 @@ int tl_reach_of(int face, int hang) {
 	return hangs > solid ? hangs : solid;
 }
 
-void tl_expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, int reach, Look *l) {
-	bool k = keeps(g, floor, ctx);
-	int last[WIN];
-	for (int c = 0; c < WIN; ++c) last[c] = -NO_FLOOR;
-	for (int py = ty * 8 - reach; py < ty * 8 + 8; ++py)
-		for (int c = 0; c < WIN; ++c) {
-			if (floor_px_k(g, floor, ctx, k, tx * 8 - OUT + c, py)) last[c] = py;
-			if (py >= ty * 8) l->up[py - ty * 8][c] = last[c] == -NO_FLOOR ? NO_FLOOR : py - last[c];
+/* A tile's floor asked: floor_px_k with what it needs */
+typedef struct { const TileGrid *g; TileFloor floor; const void *ctx; bool k; } Ask;
+
+static int ask(const Ask *a, int px, int py) { return floor_px_k(a->g, a->floor, a->ctx, a->k, px, py); }
+
+/* Each column's nearest floor at or above each of the tile's rows (up):
+ * above the tile only where its top row has none, looked for upwards and
+ * no further than the first; every row of the reach asked of every column
+ * was a sixth of making a layer (docs/devtools/profiling.md). */
+static void look_up(const Ask *a, int tx, int ty, int reach, Look *l) {
+	for (int c = 0; c < WIN; ++c) {
+		int x = tx * 8 - OUT + c, last = -NO_FLOOR;
+		if (!ask(a, x, ty * 8))
+			for (int py = ty * 8 - 1; py >= ty * 8 - reach; --py)
+				if (ask(a, x, py)) { last = py; break; }
+		for (int y = 0; y < 8; ++y) {
+			int py = ty * 8 + y;
+			if (ask(a, x, py)) last = py;
+			l->up[y][c] = last == -NO_FLOOR ? NO_FLOOR : py - last;
 		}
+	}
+}
+
+/* Floor or none beside and below a pixel of the tile, read from `up` (0
+ * where floor is) and asked only past the tile's top and bottom rows */
+_Static_assert(OUT / 2 == 1 && IN / 2 == 1 && IN <= OUT, "below and inner read up's neighbours");
+
+static bool floor_below(const Ask *a, const Look *l, int tx, int ty, int x, int y) {
+	return y < 7 ? !l->up[y + 1][x + OUT] : ask(a, tx * 8 + x, ty * 8 + y + OUT / 2) != 0;
+}
+
+static bool inner_at(const Ask *a, const Look *l, int tx, int ty, int x, int y) {
+	int c = x + OUT;
+	return !l->up[y][c - IN] && !l->up[y][c + IN] && (y > 0 ? !l->up[y - 1][c] : ask(a, tx * 8 + x, ty * 8 + y - IN / 2) != 0) &&
+		(y < 7 ? !l->up[y + 1][c] : ask(a, tx * 8 + x, ty * 8 + y + IN / 2) != 0);
+}
+
+void tl_expect_look(const TileGrid *g, int tx, int ty, TileFloor floor, const void *ctx, int cm, int reach, Look *l) {
+	const Ask a = { g, floor, ctx, keeps(g, floor, ctx) };
+	look_up(&a, tx, ty, reach, l);
 	l->inner = l->below = l->deep = 0;
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
 			int px = tx * 8 + x, py = ty * 8 + y;
 			uint64_t bit = 1ull << (y * 8 + x);
-			if (floor_px_k(g, floor, ctx, k, px, py + OUT / 2)) l->below |= bit;
-			if (l->up[y][x + OUT]) continue;   /* (not on the floor) */
-			bool inner = true;
-			for (int j = 0; j < 4 && inner; ++j) {
-				static const int off[4][2] = { { -IN, 0 }, { IN, 0 }, { 0, -IN / 2 }, { 0, IN / 2 } };
-				inner = floor_px_k(g, floor, ctx, k, px + off[j][0], py + off[j][1]) != 0;
-			}
-			if (!inner) continue;
+			if (floor_below(&a, l, tx, ty, x, y)) l->below |= bit;
+			if (l->up[y][x + OUT] || !inner_at(&a, l, tx, ty, x, y)) continue;   /* (not on the floor, or at its edge) */
 			l->inner |= bit;
-			if (floor_px_k(g, floor, ctx, k, px, py) == cm && floor_px_k(g, floor, ctx, k, px - DEEP, py) == cm && floor_px_k(g, floor, ctx, k, px + DEEP, py) == cm &&
-				floor_px_k(g, floor, ctx, k, px, py - DEEP / 2) == cm && floor_px_k(g, floor, ctx, k, px, py + DEEP / 2) == cm) l->deep |= bit;
+			if (ask(&a, px, py) == cm && ask(&a, px - DEEP, py) == cm && ask(&a, px + DEEP, py) == cm && ask(&a, px, py - DEEP / 2) == cm &&
+				ask(&a, px, py + DEEP / 2) == cm) l->deep |= bit;
 		}
 }
 
@@ -551,11 +576,11 @@ bool tl_flat_tile(const AreaSrc *a, int tx, int ty) {
  * where the second strays). */
 uint64_t tl_drawn(const AreaSrc *a, bool first, int tx, int ty, uint16_t px[64]) {
 	int W = a->tw * 8;
-	const uint32_t *pic = first ? a->px0 : a->px;
+	const uint8_t *pic = first ? a->idx0 : a->idx;
 	uint64_t m = 0;
 	for (int y = 0; y < 8; ++y)
 		for (int x = 0; x < 8; ++x) {
-			uint32_t c = pic[(size_t)(ty * 8 + y) * W + tx * 8 + x];
+			uint32_t c = area_src_colour(a, pic, (size_t)(ty * 8 + y) * W + tx * 8 + x);
 			px[y * 8 + x] = (uint16_t)((c >> 19 & 31) | (c >> 11 & 31) << 5 | (c >> 3 & 31) << 10);
 			if (c >> 24) m |= 1ull << (y * 8 + x);
 		}
@@ -577,12 +602,12 @@ void tl_calibrate(const AreaSrc *a, const Src *src, TileGrid *g) {
 		for (int y = 1; y + 8 < H; ++y) {
 			above = here;
 			here = floor_px_on(g, tl_src_floor, src, x, y, last);
-			if (!above && here && !(a->px[(size_t)(y - 1) * W + x] >> 24))
+			if (!above && here && !a->idx[(size_t)(y - 1) * W + x])
 				for (int d = 0; d <= 8; ++d)
-					if (a->px[(size_t)(y + d) * W + x] >> 24) { top[d]++; break; }
+					if (a->idx[(size_t)(y + d) * W + x]) { top[d]++; break; }
 			if (above && !here) {
 				int d = 0;
-				while (d < FACE_MAX && y + d < H && a->px[(size_t)(y + d) * W + x] >> 24) ++d;
+				while (d < FACE_MAX && y + d < H && a->idx[(size_t)(y + d) * W + x]) ++d;
 				face[d]++;
 			}
 		}
@@ -669,7 +694,7 @@ bool tl_pad_look(const Src *s, const uint8_t *pads, int A, int B) {
 }
 
 /* Whether panel (A, B) is floor whose tiles are not learned. */
-bool tl_skipped(const Src *s, int A, int B) {
+static bool skipped_now(const Src *s, int A, int B) {
 	bool pads_alone = s->styles & TILES_PADS_ALONE && s->pads, in = A >= -SPAN / 2 && B >= -SPAN / 2 && A < SPAN / 2 && B < SPAN / 2;
 	if (!s->skip_styles && !pads_alone) return false;
 	const AreaSrc *a = s->a;
@@ -684,6 +709,17 @@ bool tl_skipped(const Src *s, int A, int B) {
 	return s->skip_styles >> tl_style_at(a, area_px(a->tw, X, Y), area_py(a->th, X, Y)) & 1;
 }
 
+/* ... asked once a panel (the source's memo): counting the panel's
+ * pixels each time was nine tenths of learning BN4's maps
+ * (docs/devtools/profiling.md) */
+bool tl_skipped(const Src *s, int A, int B) {
+	int i = A + SPAN / 2, j = B + SPAN / 2;
+	if (!s->skipped || i < 0 || j < 0 || i >= SPAN || j >= SPAN) return skipped_now(s, A, B);
+	int8_t *m = &s->skipped[j * SPAN + i];
+	if (*m < 0) *m = (int8_t)skipped_now(s, A, B);
+	return *m;
+}
+
 void tiles_free(TileBook *b) {
 	free(b->cand);
 	free(b->cls);
@@ -693,6 +729,7 @@ void tiles_free(TileBook *b) {
 	free(b->vary_weight);
 	free(b->panels.panel);
 	free(b->panels.at);
+	free(b->panels.grid);
 	free(b->panels.tile);
 	free(b->panels.px);
 	memset(b, 0, sizeof *b);

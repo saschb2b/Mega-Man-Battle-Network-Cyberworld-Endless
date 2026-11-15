@@ -25,6 +25,10 @@ installs PS4 packages can take the PS4 build's PKG instead, ps4/README.md.)
   map; Create is the PS5's own); Options' Controls moves the rest.
 - Online is as on every system, and the anonymous statistics are asked
   for as elsewhere.
+- At each start the game looks on GitHub for a newer version (Options'
+  **Updates** switches it off): the title says when one is out, and
+  Options' line names Prospero Store, whose listing follows the
+  releases, and the releases page (docs/engine/updates.md, The consoles).
 
 ## Building
 

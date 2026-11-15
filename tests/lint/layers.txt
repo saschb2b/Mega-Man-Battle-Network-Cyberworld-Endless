@@ -20,10 +20,10 @@ formats  = emu/bn6.h emu/bn6_*.h emu/bn5.h emu/bn5_*.h emu/bn4.h emu/bn4_*.h
 formats  = emu/bytes.h emu/free_space.h core/chip_entry.h
 
 # the platform, input, settings, the ROM file and RomLayout, the scenes' switch
-core.base = core/platform* core/present_3ds.* core/second_android.* core/sdl_old.h core/app_icon.h
+core.base = core/platform* core/present_3ds.* core/second_android.* core/android_call.* core/sdl_old.h core/app_icon.h
 core.base = core/buttons.h core/pads.* core/padmap.* core/keymap.* core/touch.* core/touch_layout.*
 core.base = core/feel.* core/feel_out.* core/fast_forward.* core/frame_log.* core/display.*
-core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.*
+core.base = core/compat.* core/save_queue.* core/settings_line.* core/text_input.* core/network_3ds.* core/stopwatch.*
 core.base = core/desktop* core/ios* core/ps5_*
 core.base = core/rom.* core/rng.c core/game.h
 
@@ -40,7 +40,7 @@ core.app = core/main.c core/startup.* core/start_*
 # the game's scene: the frame that runs the core, the director and the screens over it
 emu.game = emu/scene_emu.* emu/emu_picture.* emu/game_hooks.* emu/fast_forward_game.* emu/feel_game.*
 emu.game = emu/autopilot* emu/showcase.*
-emu.game = emu/voxel_scene.*
+emu.game = emu/voxel_scene.* emu/stereo_scene.*
 
 # ---- the layers, lowest first ----
 
@@ -53,18 +53,19 @@ net:          formats core.base core.data core
 audio:        formats core.base emu
 gfx:          formats core.base core.data emu
 analytics:    formats core.base core.data core net audio gfx
+update:       formats core.base analytics
 map:          formats core.base core.data core emu net gfx
 layer:        formats core.base core.data core emu net map
 world:        formats core.base core.data core emu net map layer
 jukebox:      formats core.base audio gfx
 library:      formats core.base core.data core audio gfx
-core.options: formats core.base emu audio gfx analytics
+core.options: formats core.base emu audio gfx analytics update
 director:     *
 online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director
 second:       *
 launcher:     formats core.base core audio gfx core.options
 saves:        formats core.base core audio gfx launcher
-scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves
+scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves update
 emu.game:     *
 dev:          *
 core.app:     *

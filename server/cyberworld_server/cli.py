@@ -15,7 +15,7 @@ import sys
 import threading
 
 from .app import Server
-from . import admin, backup, hosting
+from . import admin, backup, hosting, sync
 from .identity import public_id
 from .retention import Retention
 
@@ -69,7 +69,8 @@ async def run(args):
     port = args.port if args.port is not None else settings.getint("port", 8765)
     seed = args.seed if args.seed is not None else settings.getint("seed", 120)
     if args.admin:
-        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes, args.week), indent=2))
+        print(json.dumps(admin.perform(args.admin, state_dir, args.identity, args.reason, args.minutes, args.week,
+                                       args.cloud), indent=2))
         return
     if settings.getboolean("free_text", False):
         raise ValueError("free_text is unavailable: quick phrases and emotes only")
@@ -89,7 +90,10 @@ async def run(args):
                         name=settings.get("name", "Cyberworld Endless"), motd=settings.get("motd", "Welcome to the Net Square"),
                         whitelist=tuple(public_id(value) for value in settings.get("whitelist", "").split()),
                         trading=settings.getboolean("trading", True), arena=settings.getboolean("arena", True),
-                        policy=Retention.from_settings(settings), maintenance=settings.get("maintenance", ""))
+                        policy=Retention.from_settings(settings), maintenance=settings.get("maintenance", ""),
+                        transfers=settings.getboolean("transfers", True), sync=settings.getboolean("sync", True),
+                        cloud_slots=settings.getint("cloud_slots", sync.MOST),
+                        cloud_megabytes=settings.getint("cloud_megabytes", sync.MEGABYTES))
         port = await server.start(host, port, tls)
         await announce(server, host, port, tls is not None, state_dir, config_path(args))
         stop = asyncio.Event()
@@ -139,6 +143,7 @@ def main():
     parser.add_argument("--reason", default="", help="Local moderation note, not sent to players")
     parser.add_argument("--minutes", type=int, help="How long a kick refuses the profile (default 10)")
     parser.add_argument("--week", type=int, help="With --admin hide: the week whose Board entry is taken down (default this week)")
+    parser.add_argument("--cloud", metavar="SLOT", help="With --admin forget: the slot of saves kept in step to delete (32 hex)")
     parser.add_argument("--backup", metavar="DIR", help="Archive the state directory into DIR once a UTC day, keeping backup_days days, instead of starting the server")
     parser.add_argument("--once", action="store_true", help="With --backup: one archive now, then exit")
     parser.add_argument("--restore", metavar="ARCHIVE", help="Put the state directory back as a backup's ARCHIVE holds it, then restart the server")

@@ -6,7 +6,8 @@
 # Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
 # 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
 # library alone; switch: the Nintendo Switch, devkitA64's, the same way;
-# vita: the PlayStation Vita, VitaSDK's, the same way; ps4: the PS4,
+# vita: the PlayStation Vita, VitaSDK's, the same way; psp: the PSP,
+# pspdev's psp-cmake, minimal and without threads; ps4: the PS4,
 # OpenOrbis's clang and libc, docker/ps4.cmake; ps5: the PS5, the native-app
 # template's clang, docker/ps5.cmake).
 # The web build
@@ -153,6 +154,30 @@ case " $TARGETS " in *" ps5 "*)
 	cp build-ps5/libmgba.a /opt/mgba/ps5/lib/
 	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps5/include/
 	cp -r build-ps5/include/mgba /opt/mgba/ps5/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" psp "*)
+	# (the PSP, docker/Dockerfile.psp: pspdev's psp-cmake, the library
+	# alone and the minimal core mGBA builds for a "Generic" system (its
+	# whole one wants sockets the PSP's libc has not), without threads;
+	# FIXED_ROM_BUFFER as on the 3DS, so the game's 16 MB copy is patched in
+	# place rather than copied into 32 MB more (the game defines the
+	# buffer, empty: src/core/start_psp.c); added to the library, the parts
+	# the minimal core leaves out that the game names: mGBA's POSIX files
+	# and the link cable's lockstep, which the Arena's code calls)
+	psp-cmake -S mgba-$VER -B build-psp $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/psp -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF -DHAVE_PTHREAD_H=OFF \
+	 -DCMAKE_C_FLAGS="-O2 -G0 -DDISABLE_THREADING -DFIXED_ROM_BUFFER -D_GNU_SOURCE"
+	cmake --build build-psp --target mgba -j"$(nproc)"
+	for f in util/vfs/vfs-fd util/vfs/vfs-dirent core/lockstep gba/sio/lockstep; do
+		psp-gcc -O2 -G0 -D_GNU_SOURCE -DDISABLE_THREADING -DFIXED_ROM_BUFFER -DMINIMAL_CORE=1 -DM_CORE_GBA \
+		 -Imgba-$VER/include -Imgba-$VER/src -Ibuild-psp/include -c mgba-$VER/src/$f.c -o "build-psp/$(echo "$f" | tr / -).o"
+	done
+	psp-ar rcs build-psp/libmgba.a build-psp/util-vfs-vfs-fd.o build-psp/util-vfs-vfs-dirent.o build-psp/core-lockstep.o \
+	 build-psp/gba-sio-lockstep.o
+	mkdir -p /opt/mgba/psp/lib /opt/mgba/psp/include
+	cp build-psp/libmgba.a /opt/mgba/psp/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/psp/include/
+	cp -r build-psp/include/mgba /opt/mgba/psp/include/ 2>/dev/null || true ;;
 esac
 case " $TARGETS " in *" android "*)
 	for abi in arm64-v8a armeabi-v7a x86_64; do

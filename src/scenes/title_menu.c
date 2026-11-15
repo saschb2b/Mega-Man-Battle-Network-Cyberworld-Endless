@@ -20,7 +20,10 @@
 #define ROW_X 88          /* the rows' left, BN6's */
 #define ARROW_X 73        /* the arrow's */
 #define LABEL_X 170       /* CONTINUE's word on where the run goes on */
-#define HINT_Y 154        /* the word on the keys: under the copyright line */
+#define HINT_X 4          /* the words on the keys: the bottom left corner, */
+#define HINT_Y 131        /* ... the last's top over the build's line (138), */
+#define HINT_LINE 7       /* ... a line each, upwards, */
+#define HINT_W (ARROW_X - 2 - HINT_X)   /* ... short of the menu's arrow */
 #define ENTER_Y 138
 #define WORD_W 64         /* OPTIONS' pixels across, at most */
 #define WORD_H 16
@@ -150,25 +153,30 @@ void title_menu_draw(int x0, int y0, const TitleMenu *m) {
 	if (!m->asking) rom_tiles(T.arrow + (uint32_t)f * 4 * 32, T.arrow_pal, x0 + ARROW_X, y0 + row_top(m->cursor, rows) + 1, 2, 2, 0);
 }
 
-/* (with the menu: SAVES on L, kept off the menu's ROM-drawn rows, and the
- * ROMs on R where the launcher is, issue #97: no way to add BN5 had been
- * found; each on the player's own button, controls_word's "L", "Q") */
+/* A key's line, "Q: Saves": the GBA's button where the key's name would
+ * reach the menu's arrow ("Right Shift") */
+static void key_line(int x, int y, const char *key, const char *gba, const char *word) {
+	char line[64];
+	snprintf(line, sizeof line, "%s: %s", key, word);
+	if (minifont_width(line, 1) > HINT_W) snprintf(line, sizeof line, "%s: %s", gba, word);
+	minifont_draw(x, y, line, rgba(150, 160, 190, 255), 1);
+}
+
+/* (with the menu: SAVES on L, and the ROMs on R where the launcher is,
+ * issue #97: no way to add BN5 had been found; each on the player's own
+ * button, controls_word's "L", "Q", "LB". A line each in the bottom left
+ * corner over the build's, left of the menu's arrow: a row under the
+ * copyright line ran into its letters at the picture's foot, session 76) */
 void title_hint_draw(int x0, int y0, bool menu, bool pressed, bool over) {
-	SDL_Color grey = rgba(150, 160, 190, 255);
-	if (!menu && !pressed && controls_keyboard_only()) minifont_draw_centered(x0 + CORE_W / 2, y0 + ENTER_Y, "ENTER", grey, 1);
+	if (!menu && !pressed && controls_keyboard_only())
+		minifont_draw_centered(x0 + CORE_W / 2, y0 + ENTER_Y, "ENTER", rgba(150, 160, 190, 255), 1);
 	if (!menu || over) return;
-	char hint[80];
 #ifdef __3DS__
-	snprintf(hint, sizeof hint, "L: %s", saves_word_hint());
+	key_line(x0 + HINT_X, y0 + HINT_Y, "L", "L", saves_word_hint());
 #else
-	/* (controls_word's own buffer, one word at a time) */
-	char r[32];
-	snprintf(r, sizeof r, "%s", controls_word(BTN_R));
-	snprintf(hint, sizeof hint, "%s: %s", controls_word(BTN_L), saves_word_hint());
-	if (launcher_here()) {
-		size_t m = strlen(hint);
-		snprintf(hint + m, sizeof hint - m, "  %s: ROMs", r);
-	}
+	bool roms = launcher_here();
+	int y = y0 + HINT_Y - (roms ? HINT_LINE : 0);
+	key_line(x0 + HINT_X, y, controls_word(BTN_L), "L", saves_word_hint());
+	if (roms) key_line(x0 + HINT_X, y + HINT_LINE, controls_word(BTN_R), "R", "ROMs");
 #endif
-	minifont_draw_centered(x0 + CORE_W / 2, y0 + HINT_Y, hint, grey, 1);
 }

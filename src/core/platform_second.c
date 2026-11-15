@@ -3,6 +3,7 @@
  * Android's second display, and for --second-shot on any build. */
 #include "platform_second.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 #include "gfx.h"
@@ -94,12 +95,14 @@ void platform_second_shot_size(int w, int h) {
 }
 
 bool platform_save_second_screen(const char *path) {
-	static uint32_t px[SHOT_MAX_W * SHOT_MAX_H];
-	memset(px, 0, sizeof px);
-	if (!draw_second(px, shot_w, shot_h, shot_w * 4)) return false;
-	SDL_Surface *s = SDL_CreateRGBSurfaceWithFormatFrom(px, shot_w, shot_h, 32, shot_w * 4, SDL_PIXELFORMAT_RGBA8888);
-	bool ok = s && SDL_SaveBMP(s, path) == 0;
+	/* (the picture from the heap for the shot alone: a test's, 1.2 MB) */
+	uint32_t *px = calloc((size_t)shot_w * (size_t)shot_h, sizeof *px);
+	if (!px) return false;
+	bool ok = draw_second(px, shot_w, shot_h, shot_w * 4);
+	SDL_Surface *s = ok ? SDL_CreateRGBSurfaceWithFormatFrom(px, shot_w, shot_h, 32, shot_w * 4, SDL_PIXELFORMAT_RGBA8888) : NULL;
+	ok = s && SDL_SaveBMP(s, path) == 0;
 	if (s) SDL_FreeSurface(s);
+	free(px);
 	return ok;
 }
 

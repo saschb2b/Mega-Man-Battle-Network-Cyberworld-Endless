@@ -5,7 +5,9 @@ kept `backup_days` days (retention.py), and its restore.
 
 The trades' and the players' logs and the roster are left out: they are
 the shortest-lived records, kept for moderation alone, and go with their
-days. An archive is `cyberworld-state-YYYYMMDD-HHMMSS.tar.gz` (UTC), made
+days. So is `cloud/`, the saves kept in step (sync.py): sealed blobs the
+server cannot open, whose game keeps every save they hold, so a slot lost
+loses only the step; a restore neither brings one in nor removes one. An archive is `cyberworld-state-YYYYMMDD-HHMMSS.tar.gz` (UTC), made
 beside the others under a temporary name and renamed when whole, read
 under the state's lock (shared: a read-only mount of the state takes it
 too), so it never holds half a moderator's edit."""

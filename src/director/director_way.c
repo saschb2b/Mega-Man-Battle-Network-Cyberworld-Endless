@@ -154,12 +154,15 @@ void hp_full_watch(void) {
 	else flag_clear(LAYER_HP_FULL_FLAG);
 }
 
-/* Where the layer's Recovery Mr. Prog stands, in the world; false for
- * none. */
-static bool heal_spot(int *wx, int *wy) {
-	if (heal_spent()) return false;
+/* The layer's Recovery Mr. Prog while the way on leads to him first
+ * (MegaMan hurt, his patch unspent): his panel; false else. The arrow is
+ * green then and the map draws his way in its key's Heal, the same green:
+ * two playtesters followed a green arrow away from an exit pad on the
+ * screen without knowing what the colour meant (session 76). */
+bool heal_first(int *x, int *y) {
+	if (D.town || !hurt_now() || heal_spent()) return false;
 	for (int i = 0; i < layer.nobj; ++i)
-		if (layer.obj[i].type == OBJ_HEAL) { netmap_world((int)layer.obj[i].x, (int)layer.obj[i].y, wx, wy); return true; }
+		if (layer.obj[i].type == OBJ_HEAL) { *x = (int)layer.obj[i].x; *y = (int)layer.obj[i].y; return true; }
 	return false;
 }
 
@@ -168,11 +171,13 @@ static bool heal_spot(int *wx, int *wy) {
  * hurt, to the layer's Recovery Mr. Prog first, as L says (a playtester
  * at 180 HP heard which way it was, and the arrow led to the exit). */
 void goal_way(void) {
-	int far;
+	int far, hx, hy;
 	if (D.town) { cinema_arrow_heal(false); home_way(&far); return; }
 	int gx = D.objs.exit_x, gy = D.objs.exit_y;
 	if (D.objs.guardian.navi && !boss_beaten()) { gx = D.objs.guardian.x; gy = D.objs.guardian.y; }
-	cinema_arrow_heal(hurt_now() && heal_spot(&gx, &gy));
+	bool heal = heal_first(&hx, &hy);
+	if (heal) netmap_world(hx, hy, &gx, &gy);
+	cinema_arrow_heal(heal);
 	if (!route_to(gx, gy, &far)) way_to(gx, gy, &far);
 }
 

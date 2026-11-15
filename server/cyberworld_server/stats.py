@@ -5,7 +5,9 @@ A day counts its joins; its distinct public identities, as a number only
 (a set held in memory for the day and dropped at its end, never written
 and never served); the most players online at once; the trades
 committed; the NetBattles started and finished; the battles watched; the
-week's dives posted; the HELLOs by the protocol version they carry (a game
+week's dives posted; the saves sent by a code that were held and those
+taken (transfer.py); the saves kept in step pulled and pushed, and the
+slots kept as the day ends (sync.py); the HELLOs by the protocol version they carry (a game
 of another version is refused, so the older and newer games that tried
 show here); and the joins by the NetPass, the full set's or the Square's.
 HELLO names no system, so there is no count by one.
@@ -26,7 +28,9 @@ from .identity import rewrite_log, state_lock
 LOG = "stats.jsonl"
 SHOWN = 30              # the days /stats serves besides today
 VERSIONS = 16           # protocol versions counted apart; the rest as "other"
-COUNTS = ("joins", "peak", "trades", "battles_started", "battles_finished", "watched", "dives")
+COUNTS = ("joins", "peak", "trades", "battles_started", "battles_finished", "watched", "dives",
+          "transfers_held", "transfers_taken", "sync_pulls", "sync_pushes")
+KEPT = ("sync_slots",)  # how many of a thing are kept as the day ends (or so far): a number, not counted up
 
 
 def day_of(now):
@@ -34,7 +38,7 @@ def day_of(now):
 
 
 def fresh(day):
-    return dict({"day": day, "identities": 0, "versions": {}, "passes": {}}, **{field: 0 for field in COUNTS})
+    return dict({"day": day, "identities": 0, "versions": {}, "passes": {}}, **{field: 0 for field in COUNTS + KEPT})
 
 
 def checked(entry):
@@ -42,7 +46,7 @@ def checked(entry):
     if not isinstance(entry, dict) or not isinstance(entry.get("day"), str) or len(entry["day"]) != 10:
         return None
     out = fresh(entry["day"])
-    for field in COUNTS + ("identities",):
+    for field in COUNTS + KEPT + ("identities",):
         value = entry.get(field, 0)
         out[field] = value if isinstance(value, int) and not isinstance(value, bool) and value >= 0 else 0
     for table in ("versions", "passes"):
@@ -72,6 +76,7 @@ class Daily:
         self.seen = set()       # today's public identities: counted, never written
         self.before = 0         # ... and those of today's line before a restart
         self.past = []          # the days written, oldest first (the last SHOWN kept)
+        self.kept = lambda: 0   # the slots kept now (sync.py; app.py sets it)
         self.load()
 
     def load(self):
@@ -121,6 +126,7 @@ class Daily:
         """Today so far: its totals, the identities as a number."""
         day = dict(self.today, versions=dict(self.today["versions"]), passes=dict(self.today["passes"]))
         day["identities"] = self.before + len(self.seen)
+        day["sync_slots"] = self.kept()
         return day
 
     def public(self):

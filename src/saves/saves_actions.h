@@ -12,5 +12,9 @@ int saves_actions(int *out);
 void saves_activate(int action);
 /* A picker's end taken up: true where one ended this frame */
 bool saves_picked(void);
+/* The saves read again after they changed under the game (an import, an
+ * Undo, the cloud's): the profile and the rival's record over the title,
+ * the browser's copy kept, SAVES' panel */
+void saves_reload(void);
 
 #endif

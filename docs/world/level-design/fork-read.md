@@ -3,7 +3,7 @@ type: Feature
 title: "A fork's read"
 description: "MegaMan reads the layer behind each way at a fork (an exit pad beside a dark warp, the warp itself, Lan's HP's portals): a Server's signal, the NaviCust vendor, a trader, the Net Dealer, a dark board, from the seed before the layer is built (`layer_holds`, `fork_words.c`)."
 tags: [world, level-design, design, voice]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T19:56:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T00:52:00Z }
 sources:
   - id: core-loop
     resource: "docs/game/core-loop.md, Phase 2: MegaMan reads the next layer at a fork"
@@ -25,14 +25,24 @@ behind them, with no new screen. Built 26 October 2026.
 
 | The fork | Its ways | What MegaMan says, and when |
 | --- | --- | --- |
-| A layer with a dark warp (from layer 4, 12% of normal layers before a guardian's, 40% in the Graveyard) | The exit pad to the next layer; the warp to an Undernet layer whose exit leads to that same next layer | Within three panels of the exit pad, once a layer: "Past this pad..." and the next layer's two strongest calls (`fork_pad_read`, `director_way.c`). At the warp, its own talk adds "And a strong virus signal!" where the Undernet behind it holds a Server (`ta_undernet`, `service_words.c`) |
+| A layer with a dark warp (from layer 4, 12% of normal layers before a guardian's, 40% in the Graveyard) | The exit pad to the next layer; the warp to an Undernet layer whose exit leads to that same next layer | Within three panels of the exit pad, once a layer: "Where this pad leads..." and the next layer's two strongest calls (`fork_pad_read`, `director_way.c`). At the warp, its own talk adds "And a strong virus signal!" where the Undernet behind it holds a Server (`ta_undernet`, `service_words.c`) |
 | Lan's HP after an act | Each lit portal's area, its act's first layer (one way of them may hold the act's [dark layer](../../game/liberation/overview.md) second) | Beside a portal, after the area's feel and its guardian's signal ([Lan's HP](../home/lans-hp.md)): "Out there..." and its first layer's Server, vendor or trader, nothing more where it holds none (`home_port_words`) |
 
 The read at the pad is the exit's next layer: where that layer is its act's
-dark board, "Lan... It's gone dark past here. Dark panels,like Nebula's!",
-as the portal says of the way that holds one; where it is the guardian's,
-"A strong Navi's signal!" first. With nothing of note: "Past this pad...
-It's quiet."
+dark board, "Lan... Where this pad leads... It's gone dark! Dark
+panels,like Nebula's!", as the portal says of the way that holds one;
+where it is the guardian's, "A strong Navi's signal!" first. With nothing
+of note: "Where this pad leads... It's quiet."
+
+The opener names where the pad leads, never what lies past it. It read
+"Past this pad..." until a playtester (session 76, layer 4 of seed 7707)
+took "Someone's selling programs!" for this layer's shop on the far side
+of the pad, stepped onto the exit for it and left the layer's own dealer,
+heal and Mystery Data behind. The pad "leads" as the game's other lines
+say it does ("The pink pad leads into it!"). MegaMan does not add that
+this layer still holds a shop or heal not visited: the map marks them,
+and he does not coach ([the voice rules](../../voice/rules.md), What
+nobody says).
 
 ## The design
 

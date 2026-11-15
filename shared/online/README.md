@@ -420,6 +420,89 @@ their battle is over. ARENA_STATUS is taken from the cable's first player
 of a started battle, at most twice a second but for the one naming the
 winner. Nothing a spectator sends reaches the battle.
 
+**Saves sent by a code** (docs/engine/saves.md, Sending by code). A
+connection to `/presence` whose first message is TRANSFER (36) rather
+than HELLO is no visit: it takes no place, no channel and no identity,
+and goes no further than its one exchange. It changes no message of a
+visit's, so it has no protocol version of its own and bumps none: a
+server from before it answers TRANSFER as it answers any first message
+that is not a HELLO, with an ERROR, and the game says that server takes
+no saves.
+
+| Message | Direction | Payload after the one-byte type |
+| --- | --- | --- |
+| TRANSFER (36) | client → server, first | u8 `transfer_version` (1), u8 op (`transfer_put` 1, `transfer_get` 2, `transfer_done` 3), 16-byte lookup, u32 size (a put's: the blob's bytes, 1 to `transfer_max`; else 0): `transfer_bytes` (23) |
+| TRANSFER_STATE (37) | server → client | u8 status, u32 its value: `transfer_state_bytes` (6) |
+| TRANSFER_DATA (38) | either way | the blob's next bytes, 1 to 511, in order |
+
+A put: TRANSFER put, then the server's READY (0); the blob's bytes in
+TRANSFER_DATA; then HELD (1, the value the seconds it is held:
+`transfer_minutes` 15 as 900) once the last byte is in, and the server
+closes. A put whose lookup is held already is answered TAKEN (5): the
+game makes another code. A get: TRANSFER get, then FOUND (2, the value
+the blob's size) and its bytes in TRANSFER_DATA, or NONE (3) where
+nothing is held under that lookup (never held, gone after its 15
+minutes, or let go); the game then sends TRANSFER done on the same
+connection, once it has opened the blob, and the server answers REMOVED
+(7) and lets it go. A blob a get found and no DONE let go stays until its
+time is up, so a broken download can be tried again. BUSY (4, the value
+the seconds to wait) answers a put while the server holds as much as it
+will, a put or a get past the lookups it allows a minute (a put's TAKEN
+would otherwise tell which lookups are held), and either while as many
+transfers are under way as it takes; OFF (6) answers both on a
+server whose `transfers` setting is off. Anything else, a DATA too long
+or past the size, or a connection quiet for 15 seconds, ends it with an
+ERROR.
+
+The lookup and the blob are the game's: the code a player reads off one
+system and types on the other is never sent, and the server can open
+neither the blob nor the code from what it holds (docs/engine/saves.md
+says how they are made). The server keeps them in memory alone, never in
+a file, a log or a backup, and counts the day's held and taken in its
+daily totals.
+
+**Saves kept in step** (docs/engine/saves.md, Saves kept in step). Like
+TRANSFER, a connection to `/presence` whose first message is SYNC (39)
+is one exchange and no visit, and bumps no version: a server from before
+it answers SYNC with an ERROR. A slot is a place on the server for one
+player's saves, named by a 16-byte slot id and opened by a 32-byte auth,
+both made by the game from a secret the systems it links share (the
+secret travels between them as a TRANSFER, never to the server). The
+server keeps a slot's blob on disk, sealed by the game and unread, with
+its generation, a count it raises at each push.
+
+| Message | Direction | Payload after the one-byte type |
+| --- | --- | --- |
+| SYNC (39) | client → server, first | u8 `sync_version` (1), u8 op (`sync_pull` 1, `sync_push` 2, `sync_drop` 3), 16-byte slot, 32-byte auth, u32 generation, u32 size (a push's: the blob's bytes, 1 to `sync_max`; else 0): `sync_bytes` (59) |
+| SYNC_STATE (40) | server → client | u8 status, u32 generation, u32 size (BUSY's: the seconds to wait): `sync_state_bytes` (10) |
+| TRANSFER_DATA (38) | either way | the blob's next bytes, 1 to 511, in order |
+
+A pull names the generation the game last had of the slot (0 none): SAME
+(0) where it is still the slot's; FOUND (1, the slot's generation and the
+blob's size) and the blob in TRANSFER_DATA where the slot has another;
+then the server closes. A push names the generation its saves were made
+from: READY (4), the blob in TRANSFER_DATA, then STORED (5, the slot's new
+generation, one past the old) once the last byte is on disk; CONFLICT (6,
+the slot's generation now) where the slot moved on since, and nothing is
+written. A push from generation 0 to a slot the server has not got makes
+it, the auth its own from then on; to a slot it has, generation 0 is a
+CONFLICT like any other. A drop deletes the slot: DROPPED (9). Any op on
+a slot the server has not got (never made, dropped, or unused for
+`sync_days`, 180) is NONE (2), but a push from 0, and on a slot with
+another auth DENIED (3). BUSY (7, the seconds to wait in the size field)
+answers where the server keeps as many slots or bytes as it will, makes
+no more slots this hour, or has as many exchanges under way as it takes,
+and a push to a slot another push is filling; OFF (8) every SYNC on a
+server whose `sync` setting is off. Anything else, a DATA too long or past
+the size, or a connection quiet for 15 seconds, ends it with an ERROR.
+
+The server stores the auth's SHA-256, never the auth, and can open no
+blob: the key that seals it is made from the shared secret too and never
+sent. A slot's files are left out of the server's backups, and the game
+keeps every save it has on the system, so a slot lost loses only the
+step, never the saves. The daily totals count the pulls and pushes and
+the slots kept.
+
 Changing the wire shape bumps the protocol version. HELLO's SQUARE_MAKE
 and SQUARE_HASH are the Square generator's own version and its plan's
 hash (`src/online/square_plan.h`), checked by the server against

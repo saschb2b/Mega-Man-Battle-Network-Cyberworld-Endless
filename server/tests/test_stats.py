@@ -182,7 +182,9 @@ class DailyTests(unittest.IsolatedAsyncioTestCase):
         # nothing personal in the file, nor at /stats
         self.assert_nothing_personal((self.dir / stats.LOG).read_text())
         self.assertEqual(set(days[0]), {"day", "joins", "identities", "peak", "trades", "battles_started",
-                                        "battles_finished", "watched", "dives", "versions", "passes"})
+                                        "battles_finished", "watched", "dives", "transfers_held", "transfers_taken",
+                                        "sync_pulls", "sync_pushes", "sync_slots",
+                                        "versions", "passes"})
 
     async def test_kept_stats_days_by_the_retention_and_none_where_zero(self):
         old = [dict(stats.fresh(stats.day_of(NOW - k * DAY)), joins=k) for k in (400, 366, 365, 364, 1)]

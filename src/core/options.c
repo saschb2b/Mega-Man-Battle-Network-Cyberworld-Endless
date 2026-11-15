@@ -22,6 +22,7 @@
 #include "settings_line.h"
 #include "sound_heard.h"
 #include "touch.h"
+#include "update.h"
 
 OptionsState O;
 /* (the page last shown and each page's cursor, kept from one opening to
@@ -44,13 +45,15 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_COLOUR;
 		kinds[n++] = LINE_BLEND;
 		if (display_has_lcd3x()) kinds[n++] = LINE_LCD3X;
-		if (display_has_voxel()) kinds[n++] = LINE_VOXEL;
+		if (display_has_voxel() || display_has_stereo()) kinds[n++] = LINE_VOXEL;
 	} else {
+		if (update_line_shown()) kinds[n++] = LINE_UPDATE;
 #ifndef __3DS__
 		kinds[n++] = LINE_CONTROLS;
 #endif
 		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
+		if (update_here()) kinds[n++] = LINE_UPDATES;
 	}
 	/* (no Done: B leaves, as everywhere in BN6) */
 	return n;
@@ -84,6 +87,11 @@ void options_open(void) {
 	O.open = true;
 	O.page = kept_page;
 	memcpy(O.at, kept_at, sizeof O.at);
+	/* (a new version found: the first opening on the title shows its line) */
+	if (update_line_first()) {
+		O.page = PAGE_GAME;
+		O.at[PAGE_GAME] = 0;
+	}
 	scroll();
 	/* (the finger that opened it presses nothing more) */
 	touch_release();
@@ -198,13 +206,14 @@ static void turn(int kind, int dir) {
 	case LINE_COLOUR: display_colour_keep(display_colour_next(dir)); break;
 	case LINE_BLEND: display_blend_keep(display_blend_next(dir)); break;
 	case LINE_LCD3X: display_lcd3x_keep(!lcd_grid()); break;
-	case LINE_VOXEL: display_voxel_keep(!display_voxel()); break;
+	case LINE_VOXEL: display_voxel_keep(!display_voxel() && !display_stereo()); break;
 	case LINE_MUSIC:
 	case LINE_EFFECTS: heard_keep(kind, level_next(kind == LINE_MUSIC ? sound_heard_music() : sound_heard_effects(), dir)); break;
 	case LINE_OUTPUT: output_keep((SoundOutput)((sound_output() + SOUND_OUTPUT_COUNT + (dir < 0 ? -1 : 1)) % SOUND_OUTPUT_COUNT)); break;
 	case LINE_FAST: fast_keep(fast_speed_next(fast_speed(), dir)); break;
 	case LINE_VIBRATION: feel_keep(kind, feel_level_next(feel_level(), dir)); break;
 	case LINE_TRIGGERS: feel_keep(kind, !feel_triggers()); break;
+	case LINE_UPDATES: update_set_on(!update_on()); break;
 	default: options_sound_keep((SoundFilter)((sound_filter() + SOUND_FILTER_COUNT + (dir < 0 ? -1 : 1)) % SOUND_FILTER_COUNT), true); break;
 	}
 	audio_sfx(SFX_CURSOR);
@@ -220,7 +229,7 @@ static void defaults(void) {
 		display_colour_keep(LCD_COLOUR_OFF);
 		display_blend_keep(LCD_BLEND_OFF);
 		if (display_has_lcd3x() && lcd_grid()) display_lcd3x_keep(false);
-		if (display_voxel()) display_voxel_keep(false);
+		if ((display_voxel() || display_stereo()) != display_depth_default()) display_voxel_keep(display_depth_default());
 	} else if (O.page == PAGE_AUDIO) {
 		if (sound_heard_music() != SOUND_LEVELS) heard_keep(LINE_MUSIC, SOUND_LEVELS);
 		if (sound_heard_effects() != SOUND_LEVELS) heard_keep(LINE_EFFECTS, SOUND_LEVELS);
@@ -259,6 +268,8 @@ static void choose(void) {
 	/* (the statistics' question over the page, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
+	/* (the download begun, or the download page opened: update.h) */
+	case LINE_UPDATE: if (update_press()) audio_sfx(SFX_SELECT); break;
 	default: turn(options_line_kind(), TURN_PRESS); break;
 	}
 }
@@ -307,6 +318,8 @@ static void nav_update(void) {
 /* ---- the overlay: the question, the controls screen, then Options ---- */
 
 void options_update(void) {
+	/* (the updater's frame, the title's own stopped under Options: update.h) */
+	update_tick();
 	if (analytics_ask_shown()) { analytics_ask_update(); return; }
 	if (controls_shown()) { controls_update(); return; }
 	if (O.open) {

@@ -6,19 +6,20 @@ a pull request).
 Every pull request runs the checks that find most of what CI finds: the
 scripts' lint, the code checks, the unit tests, the Linux desktop,
 PortMaster and Windows builds, and the 3DS's as the 32-bit console. The
-other eight (Switch, Vita, PS4, PS5, Android, macOS, iOS, the browser)
+other nine (Switch, Vita, PSP, PS4, PS5, Android, macOS, iOS, the browser)
 build the same C with another toolchain and their own packaging: in 400
 pull request runs one of them failed alone in 8, while iOS's alone is the
 slowest job there is. So on a pull request each of those runs only where
 the change could reach it:
 
   its own folder (ios/, vita/, web/ ...)             that job
-  what every platform builds with (COMMON: the       all eight
+  what every platform builds with (COMMON: the       all nine
     Makefile, build.py, the build images, the
     workflows, the wire)
-  a source file that holds a platform's own code     all eight
+  a source file that holds a platform's own code     all nine
     (PLATFORM: an #if on a system's macro in it,
-    or Objective-C), or one that is gone
+    the PSP's core's CW_GPSP among them, or
+    Objective-C), or one that is gone
 
 A push (dev, main) and a run started by hand run all of them, so dev's
 own CI on each merge is still the check of every target. To run them all
@@ -39,6 +40,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OWN = {
     'switch': ('switch/',),
     'vita': ('vita/',),
+    'psp': ('psp/',),
     'ps4': ('ps4/',),
     'ps5': ('ps5/', 'ps4/'),          # (the PS5's app is built with the PS4's pieces beside its own)
     'android': ('android/',),
@@ -49,8 +51,8 @@ OWN = {
 # What every platform's build reads beyond the game's C: a change there runs them all.
 COMMON = ('Makefile', 'build.py', 'docker/', '.github/', 'tools/ci_changes.py', 'shared/')
 # A system's own macro: a source file that tests one holds code only that system's toolchain compiles.
-PLATFORM = re.compile(r'__3DS__|__SWITCH__|__vita__|__PS4__|__ORBIS__|__PROSPERO__|__APPLE__|__ANDROID__|'
-                      r'__EMSCRIPTEN__|_WIN32|TARGET_OS_')
+PLATFORM = re.compile(r'__3DS__|__SWITCH__|__vita__|__PSP__|CW_GPSP|__PS4__|__ORBIS__|__PROSPERO__|__APPLE__|'
+                      r'__ANDROID__|__EMSCRIPTEN__|_WIN32|TARGET_OS_')
 
 
 def shared(path):

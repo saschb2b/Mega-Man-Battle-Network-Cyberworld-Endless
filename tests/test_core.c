@@ -36,6 +36,9 @@
 #include "battle_data.h"
 #include "lab_text.h"
 #include "test_backup.h"
+#include "test_transfer_code.h"
+#include "test_update.h"
+#include "test_stereo.h"
 #include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -5044,6 +5047,32 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
+/* A boot state of a nine-bit build (src/emu/boot.c, boot-3.state): its
+ * Standard folder nine-bit as BN6's ROM holds it, which ten bits read as
+ * other chips (Cannon B as BN4's CloudMn in A, dealt blank on a New 3DS).
+ * chips_preset_nine names such an entry: one of the preset's that widening
+ * changes; not one in A, which both read alike, nor the same chip written
+ * in ten bits, nor an empty entry. A made-up ROM's preset. */
+static void test_preset_nine(void) {
+	static RomLayout layout;
+	layout.chip_data = 0x1000;
+	layout.chip_names[0] = layout.chip_names[1] = 0x2000;
+	R.data = calloc(ROM_SIZE, 1);
+	R.layout = &layout;
+	chips_forget();
+	if (!R.data) { CHECK(false, "preset nine: no memory for a made-up ROM"); return; }
+	static const uint16_t preset[3] = { 0x0001, 0x0201, 0x3404 };   /* Cannon A, Cannon B, AirShot * (nine-bit) */
+	for (int i = 0; i < 3; ++i) put16(R.data + (BN6_PRESET_FOLDERS - 0x08000000u) + 2 * i, preset[i]);
+	CHECK(chips_preset_nine(0x0201) && chips_preset_nine(0x3404), "preset nine: the Standard folder's Cannon B and AirShot * as BN6's ROM holds them");
+	CHECK(chip_entry_from9(0x0201) == CHIP_ENTRY(1, 1) && chip_entry_from9(0x3404) == CHIP_ENTRY(4, 26), "preset nine: widened, Cannon B and AirShot *");
+	CHECK(!chips_preset_nine(0x0001) && !chips_preset_nine(CHIP_ENTRY(1, 1)) && !chips_preset_nine(0xFFFF) && !chips_preset_nine(0x0202),
+		"preset nine: Cannon A, Cannon B in ten bits, an empty entry, a chip no preset holds");
+	free(R.data);
+	R.data = NULL;
+	R.layout = NULL;
+	chips_forget();
+}
+
 /* The starting folders (docs/game/meta/design.md, Starting folders): each
  * a legal folder of 30 chips in codes BN6 gives them, five of a chip at
  * most, its identity kept (Z-Canon's Cannons A, B and C, Busting with no
@@ -7538,16 +7567,17 @@ static void view_map(AreaSrc *a, int tw, int th, int layers, unsigned seed) {
 	a->tw = tw; a->th = th; a->layers = layers; a->ex = 12; a->ey = 20; a->group = 0x90;
 	size_t cells = (size_t)tw * th, n = cells * 64;
 	for (int l = 0; l < layers; ++l) a->tile[l] = malloc(cells * 2);
-	a->px = malloc(n * 4); a->px0 = malloc(n * 4); a->front = malloc(n); a->idx = malloc(n);
+	a->idx = malloc(n); a->idx0 = malloc(n); a->front = malloc(n);
+	for (int i = 0; i < 256; ++i) a->colors[i] = 0xFF000000u | (uint32_t)i * 0x010203u;
 	a->hw = 3; a->hh = 5; a->hx0 = -2; a->hy0 = 1; a->hz = malloc(15);
 	a->rw = 4; a->rh = 2; a->rx0 = 3; a->ry0 = -1; a->rings = malloc(8);
 	a->sec[0] = calloc(2, sizeof(CoordCell)); a->nsec[0] = 1;
-	CHECK(a->px && a->px0 && a->front && a->idx && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
+	CHECK(a->idx && a->idx0 && a->front && a->hz && a->rings && a->sec[0] && a->tile[layers - 1], "views: a map's memory");
 	for (int l = 0; l < layers; ++l)
 		for (size_t i = 0; i < cells; ++i) a->tile[l][i] = (uint16_t)((seed = seed * 1103515245u + 12345u) >> 8);
 	for (size_t i = 0; i < n; ++i) {
 		seed = seed * 1103515245u + 12345u;
-		a->px[i] = seed; a->px0[i] = seed ^ 0x5A5A5A5Au; a->front[i] = (uint8_t)(seed >> 24); a->idx[i] = (uint8_t)(seed >> 16);
+		a->idx[i] = (uint8_t)(seed >> 16); a->idx0[i] = (uint8_t)(seed >> 8); a->front[i] = (uint8_t)(seed >> 24);
 	}
 	for (int i = 0; i < 15; ++i) a->hz[i] = (uint8_t)(i * 8);
 	for (int i = 0; i < 8; ++i) a->rings[i] = (uint8_t)(i + 1);
@@ -7563,7 +7593,8 @@ static bool same_view(const AreaSrc *x, const AreaSrc *y) {
 		&& same_bytes(x->hz, y->hz, (size_t)x->hw * x->hh) && same_bytes(x->rings, y->rings, (size_t)x->rw * x->rh);
 	for (int l = 0; l < 2; ++l) ok = ok && same_bytes(x->tile[l], y->tile[l], cells * 2);
 	for (int k = 0; k < 4; ++k) ok = ok && x->nsec[k] == y->nsec[k];
-	return ok && same_bytes(x->px, y->px, n * 4) && same_bytes(x->px0, y->px0, n * 4) && same_bytes(x->front, y->front, n) && same_bytes(x->idx, y->idx, n);
+	return ok && same_bytes(x->idx, y->idx, n) && same_bytes(x->idx0, y->idx0, n) && same_bytes(x->front, y->front, n) &&
+		!memcmp(x->colors, y->colors, sizeof x->colors);
 }
 
 static void test_area_views(void) {
@@ -8070,10 +8101,14 @@ int main(int argc, char **argv) {
 	test_qr();
 	failures += test_backup();
 	failures += test_voxel();
+	failures += test_stereo();
+	failures += test_update();
+	failures += test_transfer_code();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();
+	test_preset_nine();
 	test_beast();
 	test_folders();
 	test_xchips();

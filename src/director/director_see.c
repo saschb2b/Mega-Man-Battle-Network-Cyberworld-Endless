@@ -3,6 +3,7 @@
  * counters' state, the NaviCust's bug note and the duel's clock; and what
  * the controller's feel reads of it (feel_game.h), output as the drawing is. */
 #include "director_see.h"
+#include "director_gate.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -103,7 +104,8 @@ static void see_counts(void) {
 		seen.md_taken[c] += taken;
 	}
 	if (D.counts_t > 0 && !talk_busy()) --D.counts_t;
-	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
+	/* (not over a warp's white, as the way-on arrow: cinema.c) */
+	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown && !bn6_screen_faded();
 	seen.counts_a = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
 }
 
@@ -184,6 +186,8 @@ void director_see(void) {
 	see_locks();
 	see_bug_note();
 	lib_see();
+	lib_way_see();
+	seen.gate_strip = home_gate_asking();
 	feel_game_frame();
 }
 
