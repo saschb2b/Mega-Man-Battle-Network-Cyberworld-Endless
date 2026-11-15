@@ -3,7 +3,7 @@ type: Design
 title: "What MegaMan knows"
 description: "What MegaMan knows: guardians, super bosses and virus families known only after a first battle in any run (`guardian_known`, `families_fought` in rivals.sav and the profile), hearsay from bystanders and the Net Dealer before."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:46:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:42:25Z }
 ---
 
 # What MegaMan knows (29 September 2026)

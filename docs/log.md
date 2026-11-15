@@ -1,6 +1,13 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/way-on-arrow.md (the heal's green arrow goes back to the exit once MegaMan turns three panels away from it, until L names the heal again; session 77's game-design call), world/level-design/teaching-set-pieces.md (L's two things worth a detour count the heal while hurt), multirom/one-net.md (L no longer repeats the older Net's viruses on every layer).
+* **Update**: world/home/design.md (No way home mid-act: R on a layer answers with MegaMan's way home, Dad's Battle Lab mail says when, no jack-out added), game/battle-lab.md (the mail's new page on when MegaMan is home), game/meta/design.md (the summary's Library count from the starting folder in; Dad's first call on what carries over), voice/rules.md (lesson_words.c's row: R on a layer).
+* **Update**: game/meta/darkchips.md ("Take the DarkChip?" starts on No, as BN6's own costly questions do, its options a moment after the question, so an A pressed through the words takes nothing; session 77), game/meta/bn6-darkchips.md (BN6's flame asks it the same way).
+* **Update**: world/level-design/generator.md (Navigation: the guardian's gate leaves the antechamber where the walk meets it on its line, session 77's stops, the counts before and after).
+* **Update**: game/meta/what-megaman-knows.md (the act's card and the PET name a guardian plainly once met at his arena, a fight left unfinished too), game/bosses/sequence.md (the talk: a B pressed while the staging held MegaMan hurries it), game/liberation/building/stage-1.md (the card's dark-layer line on the act's first two layers only).
+* **Update**: game/bosses/hades.md (the last stop before a guardian's arena is said eight panels' walk from it or nearer, never with someone in A's reach, and suggests getting ready rather than asking).
+* **Update**: world/level-design/roads.md (a road turns only where its area's own roads show the bend; elsewhere the bend's panel is walkway: BN4's ACDC Area's bends facing up or down, where a player saw navy squares; Bends under Not mended narrowed to what is left).
 * **Update**: releases/v0.22.0.md (#582's fix written in: holes in the floor filled).
 * **Creation**: devtools/chip-texts.md (every chip's name and description held against its own entry in the three games' archives, as BN6's routines find them; 721 checked, none wrong; MarkCannon's and Thunder's texts that read wrong are BN5's and BN6's own). **Update**: devtools/index.md (its line), code/dev.md (`chip_texts.c`), code/tools.md (`tools/chip_texts.py`'s row).
 * **Update**: code/layer.md (`layer_heal.c`: the Recovery Mr.Prog's patch, its amount set again after a CONTINUE's state loads, where it had given 1 HP).

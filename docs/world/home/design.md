@@ -3,7 +3,7 @@ type: Design
 title: "Home's design"
 description: "Home's design by the game-design skill: the old town's faults, two homes (Central Town for Lan, Lan's HP for MegaMan), the prepare-or-press-on dialectic, the loop stack, its patterns and what must not move home."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T01:42:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
 ---
 
 # Home's design

@@ -1,17 +1,20 @@
 ---
 type: Feature
 title: "The way-on arrow"
-description: "The arrow over MegaMan that shows the way on along the floor (to the exit, the guardian, at home the port), green and to the Recovery Mr.Prog first while he is hurt, the map's way drawn in the same colour as its key's Heal (`goal_way`, `heal_first`, `map_way`, `hp_way`)."
+description: "The arrow over MegaMan that shows the way on along the floor (to the exit, the guardian, at home the port), green and to the Recovery Mr.Prog first while he is hurt until he turns away from it, the map's way drawn in the same colour as its key's Heal (`goal_way`, `heal_first`, `heal_turn_watch`, `map_way`, `hp_way`)."
 tags: [world, level-design, guidance, interface]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 sources:
   - id: code
-    resource: "src/director/director_way.c (goal_way, heal_first, arrow_update, arrow_quiet), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow, arrow_settle, megaman_feet)"
+    resource: "src/director/director_way.c (goal_way, heal_first, heal_turn_watch, arrow_update, arrow_quiet), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow, arrow_settle, megaman_feet)"
     title: "The arrow and the map's way as built"
   - id: s76
     resource: "Playtest session 76 (kai5, kai8), replayed on their pinned build e2005dac6"
     title: "Two players' arrow at Lan's HP's wall and the green arrow"
   - id: s77
+    resource: "Playtest session 77 (kai9, frames 22577-23265), replayed on kai7's layer 2 (seed 9230599) on dev"
+    title: "A player heading for the exit led back to the heal"
+  - id: s77-kai5
     resource: "Playtest session 77 (kai5), replayed on its pinned build 0f2643619; the cases staged on the fix's build"
     title: "The arrow over MegaMan, a chat box and a guardian's log-in"
 ---
@@ -49,6 +52,22 @@ without knowing what the colour meant (one at 80 of 140 HP with the heal 4
 panels back). The map's own key now names it, with no words added. The game-design
 call: colour alone carries nothing, so the colour is paired with the map's line
 and its labelled square.
+
+**Turning away from it.** The heal is a recommendation, and the player
+may pass it up. Once MegaMan's walk to the heal has grown three panels
+past the shortest it has been since L last named it (`heal_turn_watch`,
+a look every ten frames), the way on is the exit's again: the arrow
+cyan, the map's way yellow, for the rest of the layer, until L is
+pressed again, which names the heal again and leads there afresh. A
+walk followed toward the heal only shortens, so it never trips; a short
+detour (ProtoMan two panels further on) does not either. In session 77
+a player heading for the exit past the heal L had named followed the
+green arrow back toward it and lost ten moves at a junction (kai9). The
+game-design call, from three candidates: once the heal is used kept
+leading a player who had chosen the exit back to it, and at the next L
+asked for a press nobody knew to make; the walk itself says what the
+player chose, the guidance-versus-discovery axis's opt-in help: L is the
+ask, the walk the answer.
 
 ## Where it stands, and when it waits
 

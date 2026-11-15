@@ -3,7 +3,7 @@ type: Feature
 title: "BN6's own DarkChips"
 description: "BN6's own DarkChips (issue #70): what DrkSword, DarkThnd, DrkRecov, DarkInvs and DarkPlus do in BN6's battles, the owner's calls (20 max HP plus BN6's BugFrag, a BN6 flame per act) and `src/director/darkbn6.c`."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:55:00Z }
 ---
 
 # BN6's own DarkChips (4 October 2026, issue #70)

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T03:45:00Z
-* **Update**: world/home/design.md (No way home mid-act: R on a layer answers with MegaMan's way home, Dad's Battle Lab mail says when, no jack-out added), game/battle-lab.md (the mail's new page on when MegaMan is home), game/meta/design.md (the summary's Library count from the starting folder in; Dad's first call on what carries over), voice/rules.md (lesson_words.c's row: R on a layer).

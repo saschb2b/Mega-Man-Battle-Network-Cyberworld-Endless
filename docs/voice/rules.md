@@ -3,7 +3,7 @@ type: Style Guide
 title: "Voice"
 description: "Voice guide for every character line, measured from BN6's script: about six words a box, how BN6's people talk, the cast, what reads machine-written, what nobody says, where lines live, checks before committing."
 tags: [voice]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T16:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
 ---
 
 # Voice

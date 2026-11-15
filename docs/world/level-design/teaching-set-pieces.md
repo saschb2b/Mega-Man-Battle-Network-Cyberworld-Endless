@@ -3,7 +3,7 @@ type: Design
 title: "Teaching them"
 description: "Teaching set pieces (issue #48): each names itself and its key at A, the Net Dealer names a key whose lock is on his layer (`dealer_keys`), L names Mystery Data behind a lock among his detours (`status_words`), and the map marks every shut lock."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:10:05Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T05:00:00Z }
 ---
 
 # Teaching them (issue #48, in part)
@@ -20,7 +20,8 @@ together:
   (eight boxes before his list, session 76;
   [the main path's words cut](../../voice/sweep/main-path.md)).
 - **From L** (`status_words`): his first words on a layer name two things
-  worth a detour at most, and Mystery Data he senses behind a lock is one
+  worth a detour at most (the heal while MegaMan is hurt one of them, as
+  the arrow leads there), and Mystery Data he senses behind a lock is one
   of them, with where the lock stands ("The cube's straight down,far
   off!"). He no longer lists the set pieces and services: each piece says
   itself at A, and the map's key marks the services and the shut locks
