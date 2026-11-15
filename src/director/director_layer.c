@@ -454,7 +454,7 @@ static bool build_layer(void) {
 	if (first_of_act || run.side_kind != LAYER_NORMAL || biome == BIOME_NEST) begin_area(first_of_act);
 	arrival_words();
 	memset(D.seen, 0, sizeof D.seen);
-	D.layer_told = D.more_told = false;
+	D.layer_told = false;
 	D.fragment_due = false;
 	D.spin_due = false;
 	D.duel = false;
