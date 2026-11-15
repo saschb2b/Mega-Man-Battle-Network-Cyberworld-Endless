@@ -81,14 +81,17 @@ the PC takes him back to the blue pad. A run's start goes the same way:
 Lan's room, his PC, Lan's HP with one portal ("Our HP,Lan! Home sweet
 home!", once a profile, then a word), the first layer. The second screen
 shows the PET at home there. The way from the blue pad to the pink pad
-runs up a corridor whose mouth (x 119, open from y -24 to -4) a walk
+runs up a corridor whose mouth (x 119, open from y -24 to -1) a walk
 straight from the blue pad meets a few units off its line; a playtester
 pushed at its lip for sixteen calls, the arrow pointing at the pad
-through the wall (session 69). The arrow leads onto the corridor's line
-first, and L names that first stretch, as the town's way does: from the
-wall beside the mouth too, where MegaMan stops at its x, and where the
-arrow had pointed at the pad through the wall and L said "straight up"
-(session 74, eight calls pushing there); at home too, pushing a while
+through the wall (session 69). Off the mouth's band the arrow leads at
+its middle, and L names that first stretch, as the town's way does: from
+the wall beside the mouth too, where MegaMan stops at its x, and where
+the arrow had pointed at the pad through the wall and L said "straight
+up" (session 74, eight calls pushing there); within the band it points
+up the corridor, where a narrower line had sent MegaMan across from
+where a walk goes in (session 76, [the way-on
+arrow](../level-design/way-on-arrow.md)); at home too, pushing a while
 where the pad goes nowhere brings the arrow, as on a layer.
 
 The courier (issue #108): playtests jacked out only when told to, and the

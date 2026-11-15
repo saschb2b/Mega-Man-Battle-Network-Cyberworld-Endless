@@ -219,8 +219,11 @@ static void way_legs(double wx, double wy, int mx, int my, int ex, int ey) {
 	}
 }
 
-/* the way on to the exit, or to the guardian while he stands, worked out
- * again where what it was worked out from changed */
+/* the way on to the exit, or to the guardian while he stands, or as the
+ * arrow leads, to the Recovery Mr. Prog first in the key's Heal (the
+ * arrow's green, which two playtesters could not read while the map drew
+ * the exit's way, session 76); worked out again where what it was worked
+ * out from changed */
 static void map_way(const MapView *m, int px, int py) {
 	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey;
 	SDL_Color tc = rgba(255, 230, 60, 200);
@@ -228,7 +231,8 @@ static void map_way(const MapView *m, int px, int py) {
 	double wx, wy;
 	netmap_grid(px, py, &wx, &wy);
 	route_floor();
-	if (!netmap_panel(tx, ty, &ex, &ey)) return;
+	if (heal_first(&ex, &ey)) { tc = map_key[MAP_HEAL].c; tc.a = 200; }
+	else if (!netmap_panel(tx, ty, &ex, &ey)) return;
 	int nseen = seen_count();
 	if (way.mx != m->mx || way.my != m->my || way.ex != ex || way.ey != ey || way.seen != nseen || way.layer != run.layer_seed || way.gone != route_gone) {
 		way_legs(wx, wy, m->mx, m->my, ex, ey);
