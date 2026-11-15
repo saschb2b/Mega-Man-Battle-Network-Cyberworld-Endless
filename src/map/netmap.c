@@ -804,6 +804,7 @@ void netmap_kit(int area, LayerKit *kit) {
 	 * its tiles off on a fifth more of the floor, over 18 layers each) */
 	kit->hub_rooms = na->pad_rooms >= 25;
 	kit->one_wide = na->styles & TILES_ONE_WIDE;
+	kit->narrows = na->narrows;
 	kit->emblem = learned[area].emblem.ok;
 	kit->gem = learned[area].ornament[0].ok;
 	/* (a lane towards grid DIR_* g runs towards BN6's way g + 1: grid x is
@@ -896,9 +897,14 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	}
 	for (int i = 0; i < layer.nstairs; ++i) lock(locked, layer.stair[i].x, layer.stair[i].y, 2, 2, 2);
 	lock_pieces(locked);
-	for (int y = 0; y < MAP_H; ++y)
-		for (int x = 0; x < MAP_W; ++x)
-			if (layer.level[y][x]) lock(locked, x, y, 1, 1, 2);
+	/* (and in another game's area, the way's floor: its maps' walkways are
+	 * one panel wide, and the legalizer wore the way's widened walkways
+	 * back to one wide, stepped them aside and cut their mouths off a
+	 * junction's line; half the exact-panel stops on its walks were made
+	 * there, docs/world/level-design/generator.md, Navigation; a mission's
+	 * dark board as it was) */
+	const NetAreaDef *na = net_area_def(area);
+	if (area >= NET_AREAS && na && !na->held && !layer.dark) layer_way_floor(locked);
 	/* the props with their aisles and the floor before them */
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];

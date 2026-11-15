@@ -32,6 +32,7 @@
 #include "analytics_online.h"
 #include "online_visit.h"
 #include "area_src.h"
+#include "tiles.h"
 #include "backup.h"
 #include "battle_data.h"
 #include "lab_text.h"
@@ -2612,15 +2613,37 @@ static bool shape_wide(int x, int y) {
 /* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
 static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
 
-enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, WAY_SHAPES };
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, WAY_SHAPES };
+
+/* (a walkway leaving wide floor at p[i] turns a corner within two panels:
+ * the playtesters' road off a square's side, session 76) */
+static bool short_leg(const int16_t *p, int i, int n) {
+	int ex = p[i + 1] % MAP_W - p[i] % MAP_W, ey = p[i + 1] / MAP_W - p[i] / MAP_W;
+	for (int k = 1; k <= 2 && i + k + 1 < n; ++k) {
+		int ax = p[i + k] % MAP_W, ay = p[i + k] / MAP_W;
+		if (shape_wide(ax, ay)) return false;
+		if (!shape_step(p, i + k, ex, ey)) return !walk_floor(ax + ex, ay + ey);
+	}
+	return false;
+}
 
 /* The turns on the arrow's walk from the arrival to the goal where BN6's
  * walk stops MegaMan unless he stops on a line first, added to out: into a
  * one-wide walkway from wide floor, where no edge stops him on its line
  * (the playtester's first stop, session 76); at a walkways' junction, the
  * one he walks on going on past it; a jog, a walkway stepping one panel
- * aside between two runs of two, each corner taken only from its wall. */
+ * aside between two runs of two, each corner taken only from its wall; a
+ * walkway that leaves wide floor and turns within two panels, its mouth
+ * and its corner one lining up (the other games' squares, session 76).
+ * And the layer's pits: a void panel between walkways, floor on its four
+ * sides and void on a corner (a hole in a field, floor all round, is the
+ * field's own). */
 static void way_shapes(int *out) {
+	for (int y = 1; y + 1 < MAP_H; ++y)
+		for (int x = 1; x + 1 < MAP_W; ++x)
+			if (layer.cell[y][x] == C_VOID && walk_floor(x - 1, y) && walk_floor(x + 1, y) && walk_floor(x, y - 1) && walk_floor(x, y + 1) &&
+				!(walk_floor(x - 1, y - 1) && walk_floor(x + 1, y - 1) && walk_floor(x - 1, y + 1) && walk_floor(x + 1, y + 1)))
+				++out[SHAPE_PIT];
 	int tx, ty, sx, sy, len;
 	if (!arrow_goal(&tx, &ty) || !arrow_start(-1, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) return;
 	static int16_t p[MAP_W * MAP_H];
@@ -2629,12 +2652,58 @@ static void way_shapes(int *out) {
 	for (int i = 1; i + 1 < n; ++i) {
 		int x = p[i] % MAP_W, y = p[i] / MAP_W, nx = p[i + 1] % MAP_W, ny = p[i + 1] / MAP_W;
 		int dx = x - p[i - 1] % MAP_W, dy = y - p[i - 1] / MAP_W, ex = nx - x, ey = ny - y;
+		if (shape_wide(x, y) && !shape_wide(nx, ny) && short_leg(p, i, n)) ++out[SHAPE_SHORT_LEG];
 		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
 		bool beyond = walk_floor(x + dx, y + dy);
 		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
 		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
 			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
 			++out[SHAPE_JOG];
+	}
+}
+
+static void shapes_line(const char *what, int layers, const int *got) {
+	printf("  %s: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs, %d short legs; %d pits\n", what, layers,
+		got[SHAPE_TURN_WIDE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
+}
+
+/* The other games' areas (rom.c's, docs/multirom/) as the generator lays
+ * them out: each as the BN6 area it is like, with the kit its own art gives
+ * (netmap_kit): every room drawn as its hubs where its rooms up to 25
+ * panels and more are (no signature), the way kept one wide where its art
+ * draws nothing wider, held to its own maps' count of one-wide walkways
+ * (NetAreaDef.narrows) where fewer than that area's. Its ways' shapes into
+ * all, the layers into *layers, and the ways past that count (of the areas
+ * the cap widens) into *over of *ways. */
+static void xarea_shapes(int *all, int *layers, int *over, int *ways) {
+	char what[64];
+	for (int x = 0; xrom_layout(x); ++x) {
+		const XRomLayout *xl = xrom_layout(x);
+		for (int k = 0; k < xl->nareas; ++k) {
+			const NetAreaDef *a = &xl->areas[k];
+			if (a->held) continue;
+			LayerKit xk = kit;
+			xk.hub_rooms = a->pad_rooms >= 25;
+			xk.one_wide = a->styles & TILES_ONE_WIDE;
+			xk.narrows = a->narrows;
+			int cap = layer_narrow_cap(a->like), got[WAY_SHAPES] = { 0 }, past = 0;
+			if (a->narrows && (!cap || a->narrows < cap)) cap = a->narrows;
+			for (uint32_t seed = 1; seed <= 60; ++seed) {
+				layer_generate(seed * 7919u + (uint32_t)(100 * x + k), seed % 2 ? 6 : 5, a->like, LAYER_NORMAL, &xk);
+				way_shapes(got);
+				if (!cap || xk.one_wide) continue;
+				const Room *g = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
+				past += layer_way_narrows(layer.rooms[0].ax, layer.rooms[0].ay, g->ax, g->ay) > cap;
+				++*ways;
+			}
+			*over += past;
+			*layers += 60;
+			for (int s = 0; s < WAY_SHAPES; ++s) all[s] += got[s];
+			if (getenv("CW_WAY_STATS")) {
+				snprintf(what, sizeof what, "shapes %s %s (%d past %d)", xl->tag, a->short_name, past, cap);
+				shapes_line(what, 60, got);
+			}
+		}
 	}
 }
 
@@ -2663,12 +2732,17 @@ static int layer_pits(int *holes, int *loose) {
  * their originals' single rooms (docs/world/level-design/generator.md,
  * Navigation): RoboDog's comp's ways turned into a walkway on wide floor 14
  * times in its 60 layers, 25 before, and stepped aside one panel once, 3
- * before (session 76: a playtester stopped at such mouths for 25 calls). */
+ * before (session 76: a playtester stopped at such mouths for 25 calls).
+ * The other games' areas, held to their own maps' count where fewer than
+ * the BN6 area they are laid out as (BN4's ACDC Area 2 for Central's 3, its
+ * Undernet 1): their ways past that count stay as few as the BN6 areas'
+ * (test_way_links). */
 static void test_way_shapes(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
 	int all[WAY_SHAPES] = { 0 };
+	char what[32];
 	for (int b = 0; b < BIOME_COUNT; ++b) {
 		int got[WAY_SHAPES] = { 0 };
 		for (uint32_t seed = 1; seed <= 60; ++seed) {
@@ -2676,10 +2750,16 @@ static void test_way_shapes(void) {
 			way_shapes(got);
 		}
 		for (int k = 0; k < WAY_SHAPES; ++k) all[k] += got[k];
-		if (getenv("CW_WAY_STATS"))
-			printf("  shapes area %2d: %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", b, got[0], got[1], got[2]);
+		if (getenv("CW_WAY_STATS")) {
+			snprintf(what, sizeof what, "shapes area %2d", b);
+			shapes_line(what, 60, got);
+		}
 	}
-	printf("  way shapes: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", 60 * BIOME_COUNT, all[0], all[1], all[2]);
+	shapes_line("way shapes", 60 * BIOME_COUNT, all);
+	int xall[WAY_SHAPES] = { 0 }, layers = 0, over = 0, ways = 0;
+	xarea_shapes(xall, &layers, &over, &ways);
+	shapes_line("the other games' areas' way shapes", layers, xall);
+	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
 	/* (a pit between walkways, its walls keeping MegaMan off it, where the
 	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
 	 * layer 1; 19 in 18 of these layers before, none between walkways now,

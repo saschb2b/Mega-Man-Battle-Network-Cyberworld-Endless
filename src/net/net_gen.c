@@ -516,14 +516,15 @@ static void last_stop(int kind, const LayerKit *kit) {
 
 /* The rooms' last shaping once the arena stands: the exit, the way to it
  * widened past the area's cap (net_way.c, the guardian's own bridge left
- * as his gate) where the area's art draws floor two wide (`one_wide`: BN5's
- * End Area draws none, and the legalizer wore a widened way into rings,
- * issue #164), the raised rooms. */
-static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, bool one_wide) {
+ * as his gate; another game's area its own maps' count where fewer,
+ * LayerKit.narrows) where the area's art draws floor two wide (`one_wide`:
+ * BN5's End Area draws none, and the legalizer wore a widened way into
+ * rings, issue #164), the raised rooms. */
+static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, const LayerKit *kit) {
 	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
-	if (!one_wide) {
-		layer_widen_way(layer.biome, goal->ax, goal->ay);
+	if (!(kit && kit->one_wide)) {
+		layer_widen_way(layer.biome, kit ? kit->narrows : 0, goal->ax, goal->ay);
 		fill_pits();   /* (a pit left between walkways: session 76's playtester stuck beside one) */
 	}
 	/* (a dark layer flat: the board's units stand on one floor) */
@@ -972,7 +973,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* (a super boss's arena is bigger: docs/game/bosses/super-bosses.md) */
 	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
 	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
-	finish_rooms(seed, stair_dirs, rise, kit && kit->one_wide);
+	finish_rooms(seed, stair_dirs, rise, kit);
 	place_ends(kind, biome, &arena);
 	/* (a dark layer's floor is its board: the director places the rest) */
 	if (!layer.dark) fill_layer(seed, depth, biome, kind, size, rise, kit);

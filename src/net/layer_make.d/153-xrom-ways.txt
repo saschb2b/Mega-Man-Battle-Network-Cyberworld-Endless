@@ -1,0 +1,1 @@
+The other games' areas: the way held to their own maps' count of one-wide walkways where fewer than the BN6 area they are laid out as (NetAreaDef.narrows), its walkways past it widened, and its floor kept from the legalizer (netmap.c's lock_way).
