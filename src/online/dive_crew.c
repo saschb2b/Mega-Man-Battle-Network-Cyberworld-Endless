@@ -16,6 +16,7 @@
 #include "emu.h"
 #include "flags.h"
 #include "online_transport.h"
+#include "run.h"
 #include "script_kit.h"
 #include "talk.h"
 #include "text.h"
@@ -34,9 +35,10 @@ static struct {
 	uint32_t keys;
 	char news[96];
 	bool news_new;
+	int chosen;               /* the home portal MegaMan waits on, -1 none */
 } C;
 
-void dive_crew_reset(void) { memset(&C, 0, sizeof C); }
+void dive_crew_reset(void) { memset(&C, 0, sizeof C); C.chosen = -1; }
 
 /* whether `session` is in MegaMan's crew */
 static bool dive_crew_has(uint32_t session) {
@@ -57,11 +59,35 @@ static void news(const char *s) {
 	C.news_new = true;
 }
 
-static void send(unsigned action, uint32_t ref, unsigned value) {
+static void send_way(unsigned action, uint32_t ref, unsigned value, DiveWay w) {
 	uint8_t m[ONLINE_CREW_BYTES];
-	DiveWay none = { 0, 0, 0 };
-	size_t n = dive_wire_crew(m, action, ref, value, none);
+	size_t n = dive_wire_crew(m, action, ref, value, w);
 	if (n && !online_transport_send(m, n)) fprintf(stderr, "dive: a crew message not sent\n");
+}
+
+static void send(unsigned action, uint32_t ref, unsigned value) {
+	DiveWay none = { 0, 0, 0 };
+	send_way(action, ref, value, none);
+}
+
+bool dive_crew_waiting(void) { return C.chosen >= 0; }
+
+bool dive_crew_way_hold(int portal) {
+	DiveWay none = { 0, 0, 0 };
+	if (portal < 0 || C.c.count < 2) {
+		if (C.chosen >= 0) send_way(ONLINE_CREW_WAY, 0, 0, none);
+		C.chosen = -1;
+		return false;
+	}
+	/* (the way a portal takes: its index past 0, the same on every
+	 * crewmate's game, whose run is the same week's) */
+	DiveWay w = { (uint8_t)run.depth, 0, (uint8_t)(portal + 1) };
+	if (C.chosen != portal) { C.chosen = portal; send_way(ONLINE_CREW_WAY, 0, 0, w); }
+	for (int k = 0; k < C.c.count; ++k)
+		if (C.c.m[k].way.way != w.way) return true;
+	fprintf(stderr, "dive: the crew all on portal %d\n", portal);
+	C.chosen = -1;
+	return false;
 }
 
 static const char *name_of(const OnlineSnapshot *s, uint32_t id) {
@@ -144,7 +170,10 @@ static void crew_state(const CrewState *c) {
 	switch (c->stage) {
 	case ONLINE_CREW_ASKED: C.asked_by = c->other; break;
 	case ONLINE_CREW_FORMED: {
+		/* (a crewmate's way: the crew as it stands, no news) */
+		bool again = C.c.count == c->count;
 		C.c = *c;
+		if (again) break;
 		OnlineSnapshot s;
 		online_transport_snapshot(&s);
 		uint32_t me = s.player_id;

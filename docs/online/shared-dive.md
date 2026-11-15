@@ -186,9 +186,15 @@ Verified on `dev`, 15 November 2026:
   split. The chats' words go in a room the layer gives them (as the
   Square's), their Yes in the Square's team flag `0x14C7`, which a layer
   otherwise never sets, cleared as read. Seen headless with two games on
-  a local server: the ask, the answer, the crew formed on both. Not yet:
-  a fork's portal waiting for the whole crew, and the crew's join-in
-  battles (on the one field).
+  a local server: the ask, the answer, the crew formed on both. At Lan's
+  HP a portal taken (a lit link's Yes, or the pink pad's art) waits while
+  any crewmate stands on no other (`home_way_hold` in
+  `director_town.c`; CREW way, its index past 0), a band saying "Waiting
+  for the crew...", and is let go as MegaMan steps off: built, not yet
+  seen with two crewed divers at home. BN6's own trigger at the pink
+  pad's foot still warps at once, a crewmate stepping on it there
+  splitting the way. Not yet: the crew's join-in battles (on the one
+  field).
 
 ## The spike: four on one field (15 November 2026)
 

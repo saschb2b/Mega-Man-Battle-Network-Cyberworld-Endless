@@ -54,6 +54,7 @@ void dive_link_adopt(void) {
 	L.on = true;
 	dive_party_on(true);
 	dive_crew_reset();
+	home_way_hold = dive_crew_way_hold;
 	L.week = s.week;
 	L.seed = s.week_seed;
 	dive_people_on(true);
@@ -85,6 +86,7 @@ void dive_link_close(void) {
 	L.on = false;
 	dive_people_on(false);
 	dive_party_on(false);
+	home_way_hold = NULL;
 	online_transport_end();
 }
 
@@ -188,5 +190,6 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 void dive_link_draw(void) {
 	if (!L.on || !director_on_map()) return;
 	if (L.nfeed) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, L.feed[0]);
+	else if (dive_crew_waiting()) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, dive_crew_wait_words());
 	else dive_party_draw(P.core_x, P.core_y);
 }

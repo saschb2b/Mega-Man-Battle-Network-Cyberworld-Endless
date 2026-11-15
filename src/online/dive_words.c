@@ -36,3 +36,5 @@ const char *dive_crew_meet_words(const char *name, bool mate) {
 }
 
 const char *dive_crew_split_question(void) { return "Split up,Lan?\n"; }
+
+const char *dive_crew_wait_words(void) { return "Waiting for the crew..."; }

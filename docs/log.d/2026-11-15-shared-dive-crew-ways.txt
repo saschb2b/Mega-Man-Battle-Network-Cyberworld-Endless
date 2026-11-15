@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:00:00Z
+* **Update**: online/shared-dive.md (crews: a home portal held until the whole crew stands on it, its band; built, not yet seen), code/director.md (`director_town.c`'s `home_way_hold`).

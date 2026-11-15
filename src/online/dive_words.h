@@ -18,4 +18,7 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader);
 const char *dive_crew_meet_words(const char *name, bool mate);
 const char *dive_crew_split_question(void);
 
+/* The band at Lan's HP while MegaMan waits on his crew at a portal. */
+const char *dive_crew_wait_words(void);
+
 #endif

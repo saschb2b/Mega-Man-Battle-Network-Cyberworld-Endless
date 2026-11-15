@@ -19,6 +19,10 @@ void dive_crew_frame(const OnlineSnapshot *s);
 uint32_t dive_crew_keys(uint32_t keys);
 /* CREW_STATE. */
 void dive_crew_mail(const uint8_t *m, size_t n);
+/* The crew at Lan's HP (home_way_hold): portal k taken holds while some
+ * crewmate stands on no other (-1: stepped off); whether MegaMan waits. */
+bool dive_crew_way_hold(int portal);
+bool dive_crew_waiting(void);
 /* A line for the dive's band, taken once (NULL none). */
 const char *dive_crew_news(void);
 
