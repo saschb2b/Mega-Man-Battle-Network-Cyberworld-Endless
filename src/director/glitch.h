@@ -36,6 +36,13 @@ void glitch_copy_over(bool won);
  * layer's own look back */
 void glitch_settle(void);
 
+/* (glitch_music.c) The music's tempo's factor in 256ths while the glitch
+ * holds it (0x100 as the song set it, 0 stalled: its notes sound on), on
+ * the song playing now; and the factor given back whatever was written
+ * (a state saved while it dragged) */
+void glitch_music(int u);
+void glitch_music_whole(void);
+
 /* (glitch_look.c) The layer's other looks, made as it begins: the same
  * floor in up to three other areas' tiles, from the areas that draw the
  * run's (not `own`, the layer's), the `nfirst` areas in `first` first (dev,

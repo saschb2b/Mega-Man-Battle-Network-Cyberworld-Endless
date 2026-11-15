@@ -31,4 +31,12 @@ void xbackdrop_map(int area);
  * tiles' VRAM [*lo, *hi) (bus addresses); false where it has none. */
 bool xbackdrop_map_vram(int group, int number, uint32_t *lo, uint32_t *hi);
 
+/* The BGAnimData record (a bus address) BN6 loads map (group, number)'s
+ * backdrop from as set now; and the one net area `area`'s own map has:
+ * BN6's own as its ROM has it, or another game's copied in by
+ * xbackdrop_map. 0 where none: a Glitch layer's look flips the backdrop
+ * with the floor through BN6's LoadBGAnimData (BN6_LOAD_BG_ANIM_DATA). */
+uint32_t xbackdrop_map_record(int group, int number);
+uint32_t xbackdrop_area_record(int area);
+
 #endif

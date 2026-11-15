@@ -555,3 +555,24 @@ bool xbackdrop_map_vram(int group, int number, uint32_t *lo, uint32_t *hi) {
 	*hi = *lo + 4 * emu_read32(gfx);
 	return true;
 }
+
+uint32_t xbackdrop_map_record(int group, int number) {
+	MapTables own;
+	if (!R.data || !R.layout || !R.layout->map_anims || number < 0
+		|| !map_tables(R.data, R.layout->map_enters, R.layout->map_anims, group, &own)) return 0;
+	uint32_t rec = emu_read32(own.records + 4u * (uint32_t)number);
+	return xptr(rec, 28) ? rec : 0;
+}
+
+uint32_t xbackdrop_area_record(int area) {
+	const NetAreaDef *a = net_area_def(area);
+	if (!a || !R.data || !R.layout || !R.layout->map_anims) return 0;
+	int k = area - NET_AREAS;
+	if (k >= 0) return k < XAREAS_MAX && M.area[k].ok ? M.area[k].record : 0;
+	/* (BN6's own, as its ROM has it: the map may be one another game's
+	 * area takes over now) */
+	MapTables own;
+	if (!map_tables(R.data, R.layout->map_enters, R.layout->map_anims, a->group, &own)) return 0;
+	uint32_t rec = entry_at(R.data, own.records, (uint32_t)a->number);
+	return xptr(rec, 28) ? rec : 0;
+}

@@ -377,15 +377,60 @@ the true swap over three forms to the results, and its pick of three;
 the autopilot through Glitch layers on ten seeds to the next layer and
 on (stage 0 at their exits, no data taken).
 
-**Left for later:** the copy's body switching between its forms on the
-layer (as the warp's pads switch: `npc_talker_looks`); its record
-and first meeting as "???", a title's mark, Dad's mail; the backdrop and
-the theme flipping with the floor; the statistics' choices (Glitch layers
+**Left for later:** its record
+and first meeting as "???", a title's mark, Dad's mail; the theme of the
+look's area played during a flip (a song begun on every flip started the
+layer's own from its top again: the music drags instead, Glitchier); the statistics' choices (Glitch layers
 entered, stage reached, the copy fought and beaten); another net's Navis
 among the forms once the swap is proven on their deletion; a Custom
 screen between forms, if play asks for it; the bands in `build.py
 pacing` and `build.py economy` for the copy and the deeper data; a run
 on a New 3DS.
+
+## Glitchier (15 November 2026)
+
+The owner asked for the layer "even glitchier", and took the three
+recommended of the options weighed with the game-design skill: the
+channels the glitch had not touched, each telling the player something
+or costing nothing at the floor. Sprites flickering, words corrupted,
+frames stuttering, a Mystery Data's colour as a timing gamble (it moves
+the economy's bands) and two looks on the floor at once (VRAM's room
+unmeasured) were left.
+
+**Towards the heart** (`glitch.c`, `heart_near`): within 14 panels of
+the copy (448 world units, walking across) the glitches come up to twice
+as often, and the glitch shows a stage more from a third of the way in
+and two from two thirds: a warmer and colder that leads to the heart.
+The picture alone: its battles and MegaMan's words keep the layer's own
+stage.
+
+**Its sound** (`glitch_music.c`): while a look is on the floor the
+music drags, BN6's own music player's tempo factor at 0x90 to 0xD0 of
+0x100 (`BN6_MPLAY_TEMPO_U` and `_I`, as m4aMPlayTempoControl writes
+them), and from stage 3 a flip opens on it stalled for 4 to 12 frames
+(the factor 0: the sequence stops, its notes sound on). The song is
+never restarted, a song begun since (a battle's) is left alone, and a
+Glitch layer begun sets the factor back, should a state have been saved
+while it dragged. Measured: the player's clock stands still through a
+stall and runs on slower through the drag.
+
+**Its sky** (`glitch_look.c`): a flip loads the look's area's backdrop
+through BN6's own LoadBGAnimData (`BN6_LOAD_BG_ANIM_DATA`), as a map's
+entry loads it: its tiles, BG3's map and palette bank 0; the layer's own
+again as the floor comes back. Its record is BN6's own map's, or another
+game's copied in (`xbackdrop_area_record`). The layer's own backdrop
+animations keep running over it, a glitch of their own.
+
+**Its copy** (`layer_objs.c`, `copy_looks`; `glitch.c`, `warp_look_next`):
+the copy's body glitches between its forms' bodies, as the warp's pads
+switch, through the same look snippet (`npc_talker_looks`, now carrying
+the sprite's list and standing animation), at a block slipped or a
+flip, never while a box is open: the fight it holds is shown before it
+is chosen. Its forms' bodies are loaded after the layer's props; all
+but JudgeMan's are uncompressed and take no room in the map's sprite
+list, and a body that did not load is never switched to. The copy
+never turns to MegaMan, as another form's sprite may draw none of the
+facing BN6 would turn it to.
 
 ## The owner's calls
 
