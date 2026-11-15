@@ -32,7 +32,7 @@ typedef struct {
 	uint32_t src_desc;        /* the learned map's, whose tile set and colours they draw in */
 	bool other;               /* its maps are another game's (docs/multirom/): src_desc is that game's */
 	const NetAreaDef *def;
-	StairTemplate stairs[STAIR_DIRS];
+	StairKit stairs;   /* by way and width (stairs.h) */
 	PropStamp counter[2];     /* the Net Dealer's counter, facing FACES_X and FACES_Y */
 	int counter_dx[2], counter_dy[2];   /* the world offset that sets its tiles on the layer's lattice */
 	PropStamp ornament[3];    /* pads' centrepieces: the red gem, the link ring, the cube on its base */
