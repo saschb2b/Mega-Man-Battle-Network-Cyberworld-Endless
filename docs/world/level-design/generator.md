@@ -276,6 +276,25 @@ of walkway floor. There a panel is left out only where a quarter of its
 top shows the hues (`SKIP_QUARTER`: the roads' cyan, the hubs' azure,
 yellow and red), and a room is the square whole.
 
+BN4's ACDC Area's maps hold no white floor wider than a walkway but their
+framed squares of four by four, which it draws its pads with
+(`TILES_SQUARE_PADS`, every room up to 64 panels a pad). A larger room,
+an L or a ring, was drawn in the walkways' rim round the squares' middle,
+its upper edges in steps of walkway floor, and a walkway's junction or
+bend that the legalizer widened to a block of two by two came out of
+bends' pieces: U-shaped notches, a bend's green side face in the middle
+of the floor, the void through. So while the tiles are picked, where an
+area's pads are its framed squares and its rooms are drawn apart (and
+its way is not kept one wide, as BN4's Town Area's is: its squares stand
+on a slab and a block framed so stood over the squares beside it), every
+room is drawn as one of them, and so is a block of floor two wide that
+touches no room, a small square where its maps join their walkways at
+squares and hubs (`framed`, `src/map/netmap.c`); the legalizer reads them
+as before. Over 8 layers its breaks fell from 2541 to 1808: on rooms'
+edges from 660 to 230, their corners 388 to 125, notches 115 to 63. A
+block that touches a room stays walkway: framed, it joined the room's
+piece and stacked a second frame on its rim.
+
 Where an area asks for it (`TILES_WHOLE`: BN4's Park and Town Areas,
 countries and Undernet, BN5's Oran Area and Undernet), its maps' panels
 are laid whole
