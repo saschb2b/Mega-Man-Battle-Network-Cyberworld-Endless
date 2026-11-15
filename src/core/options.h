@@ -25,6 +25,9 @@
 #include "sound_filter.h"
 
 void options_open(void);
+/* ... on the update's line, where one was found: the title's update box's
+ * Yes shows the download go there (options_news.h) */
+void options_open_update(void);
 /* The statistics' question, once: the first start where the build can
  * send (analytics_ask_offer), in Options' place */
 void options_first_start(void);

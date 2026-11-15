@@ -122,15 +122,18 @@
   before you had seen it. A reward pick's screen now takes a choice only
   once it has been up a second and a half (the cursor moves sooner), for
   the gift, a guardian's draft and every other pick alike.
-- **The game tells you when a new version is out.** At each start it
-  looks for one (a single request for the release's own `update.json`,
-  nothing about you sent), and the title shows `New v0.22.0` beside its
-  version. On Windows (the installer's copy), as a Linux AppImage and on
-  a PortMaster handheld, Options on the title updates the game with one
-  press: it downloads the new version, checks it, and starts again as it,
-  your saves and your run kept. Elsewhere the line opens the download
-  page. Options' Game page has an **Updates** switch to turn the look
-  off.
+- **The game tells you when a new version is out, and what it brings.**
+  At each start it looks for one (a single request for the release's own
+  `update.json`, nothing about you sent). When one is out, a box opens
+  on the title with its release notes, a page an entry with its
+  picture (SELECT shows it full size), Left and Right to turn them, and
+  two buttons that say what they do: **Update now** and **Later**. On Windows (the installer's copy), as a Linux AppImage
+  and on a PortMaster handheld, Update now downloads the new version,
+  checks it, and starts again as it, your saves and your run kept;
+  elsewhere the box opens the download page or says where the update
+  comes from. Later is kept: the title's hints show **Update** on
+  SELECT, and Options has its line. Options' Game page has an
+  **Updates** switch to turn the look off.
 - **The layer map's key names everything on a busy layer.** Where a
   layer held many kinds (Exit, Heal, Shop, Trader, Event, ProtoMan), the
   key under SELECT's map dropped You and still cut ProtoMan's name off at

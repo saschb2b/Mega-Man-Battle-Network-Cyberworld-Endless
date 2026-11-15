@@ -9,6 +9,7 @@
 #define CW_UPDATE_MANIFEST_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 typedef struct {
 	char version[24];   /* "0.22.0" */
@@ -19,8 +20,12 @@ typedef struct {
 
 /* `json`'s version, and the file under `key` where it has one (NULL: the
  * version alone). False where it has no version or the file's entry is
- * not whole. */
+ * not whole (the version read all the same). */
 bool update_manifest_read(const char *json, const char *key, UpdateRelease *out);
+/* `json`'s "changes", the release's CHANGELOG section as plain text (a
+ * paragraph a line, a headline marked "# "), into `out` (cut to `size`):
+ * false where it has none */
+bool update_manifest_changes(const char *json, char *out, size_t size);
 /* Whether `v` is a release's version: numbers and two dots ("0.22.0"),
  * never a build between releases ("0.21.1-4-gabc123") or "dev" */
 bool update_version_release(const char *v);

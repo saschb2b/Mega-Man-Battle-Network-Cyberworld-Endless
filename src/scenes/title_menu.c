@@ -15,6 +15,8 @@
 #include "rom.h"
 #include "saves.h"
 #include "text.h"
+#include "update.h"
+#include "update_text.h"
 
 #define T (R.layout->title)
 #define ROW_X 88          /* the rows' left, BN6's */
@@ -155,12 +157,15 @@ void title_menu_draw(int x0, int y0, const TitleMenu *m) {
 
 /* A key's line, "Q: Saves": the GBA's button where the key's name would
  * reach the menu's arrow ("Right Shift") */
-static void key_line(int x, int y, const char *key, const char *gba, const char *word) {
+static void key_line(int x, int y, const char *key, const char *gba, const char *word, SDL_Color c) {
 	char line[64];
 	snprintf(line, sizeof line, "%s: %s", key, word);
 	if (minifont_width(line, 1) > HINT_W) snprintf(line, sizeof line, "%s: %s", gba, word);
-	minifont_draw(x, y, line, rgba(150, 160, 190, 255), 1);
+	minifont_draw(x, y, line, c, 1);
 }
+
+#define HINT_GREY rgba(150, 160, 190, 255)
+#define HINT_NEW rgba(120, 230, 140, 255)   /* (the update's, in the build's note's green: title_version.c) */
 
 /* (with the menu: SAVES on L, and the ROMs on R where the launcher is,
  * issue #97: no way to add BN5 had been found; each on the player's own
@@ -171,12 +176,18 @@ void title_hint_draw(int x0, int y0, bool menu, bool pressed, bool over) {
 	if (!menu && !pressed && controls_keyboard_only())
 		minifont_draw_centered(x0 + CORE_W / 2, y0 + ENTER_Y, "ENTER", rgba(150, 160, 190, 255), 1);
 	if (!menu || over) return;
+	/* (a newer version found: SELECT's Options has its line, on top of the
+	 * others, the build's note beside the version giving way to the menu's
+	 * rows: update.h) */
+	bool update = update_version()[0] != 0;
 #ifdef __3DS__
-	key_line(x0 + HINT_X, y0 + HINT_Y, "L", "L", saves_word_hint());
+	if (update) key_line(x0 + HINT_X, y0 + HINT_Y - HINT_LINE, "SELECT", "SEL", update_word(UW_HINT), HINT_NEW);
+	key_line(x0 + HINT_X, y0 + HINT_Y, "L", "L", saves_word_hint(), HINT_GREY);
 #else
 	bool roms = launcher_here();
 	int y = y0 + HINT_Y - (roms ? HINT_LINE : 0);
-	key_line(x0 + HINT_X, y, controls_word(BTN_L), "L", saves_word_hint());
-	if (roms) key_line(x0 + HINT_X, y + HINT_LINE, controls_word(BTN_R), "R", "ROMs");
+	if (update) key_line(x0 + HINT_X, y - HINT_LINE, controls_word(BTN_SELECT), "SELECT", update_word(UW_HINT), HINT_NEW);
+	key_line(x0 + HINT_X, y, controls_word(BTN_L), "L", saves_word_hint(), HINT_GREY);
+	if (roms) key_line(x0 + HINT_X, y + HINT_LINE, controls_word(BTN_R), "R", "ROMs", HINT_GREY);
 #endif
 }

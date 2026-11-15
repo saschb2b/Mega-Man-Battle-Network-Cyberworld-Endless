@@ -1570,13 +1570,20 @@ folder).
 ## Updates
 
 At each start the game looks on its GitHub page for a newer version: one
-request for the newest release's `update.json`, which says its version
-and its files. Nothing about you, your game or your device is sent. When
-one is out, the title says so beside its own version (`New v0.22.0`),
-and **Options** on the title opens on a line for it, **Update to 0.22.0**,
-whose note says what A does on your system:
+request for the newest release's `update.json`, which says its version,
+what is new in it and its files. Nothing about you, your game or your
+device is sent. When one is out, the first time the title's menu shows a
+box opens with what is new, the release's notes a page an entry, each
+with its picture: Left and Right turn the pages, Up and Down scroll a
+long one, SELECT shows the picture full size. Its buttons say
+what they do: **Update now** (A) or **Later** (B), or **Download** where
+your copy updates from the download page. Later is kept for that
+version, so the box does not come back; the title's key hints then show
+**Update** on SELECT, and **Options** on the title opens on a line for
+it, **Update to 0.22.0**, whose A shows the box again. What **Update
+now** does on your system:
 
-| You play | A on the line |
+| You play | Update now |
 | --- | --- |
 | On Windows, installed with the installer | Downloads the new installer, and the game ends, installs the new version over itself (no administrator, nothing to click) and starts again |
 | The Linux AppImage | Downloads the new AppImage over the old one (the same file name, so a menu entry or Steam's shortcut keeps working) and starts it |

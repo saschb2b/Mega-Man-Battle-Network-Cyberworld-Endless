@@ -19,6 +19,7 @@
 #include "fast_forward.h"
 #include "feel_out.h"
 #include "gfx.h"
+#include "options_news.h"
 #include "options_scene.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -294,6 +295,7 @@ static void options_panel_draw(void) {
 /* the question over all, else the controls screen over Options, else it */
 void options_draw(void) {
 	if (analytics_ask_shown()) analytics_ask_draw();
+	else if (news_box_shown()) news_box_draw();
 	else if (controls_shown()) controls_draw();
 	else if (O.open) options_panel_draw();
 }
