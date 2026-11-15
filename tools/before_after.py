@@ -178,6 +178,29 @@ SCENES = [
     # BN4's Undernet's horns behind its catwalks, seed 4)
     ('aquarium-pillars', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', '12', '--seed', '2'], WEAK, 1000),
     ('bn4-undernet-horns', ['--scene', 'emu', '--run-depth', '1', '--dev', 'quiet', '--net-biome', 'x19', '--seed', '4'], WEAK, 550),
+    # (0.22.0's, against 0.21.2: the net climbs: Green's second layer of seed 2 as the weak autopilot walks
+    # it, a walkway before and its yellow stair after; CopyBot Comp's, MegaMan placed on the walkway under
+    # its railed ladder, a claw there before)
+    ('green-stairs', ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '3', '--dev', 'quiet'], WEAK, 400),
+    ('copybot-ladder', ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '15', '--dev', 'quiet', '--input',
+                        build.N22_ARRIVE + '0:place 268 -124 7,40:'], {}, 500),
+    # (RoboDog Comp's first layer, seed 1: a one-wide walkway beside the room, then wide floor; BN4's ACDC
+    # Area, seed 4: scraps, then its framed squares; its road to a square, worn and stepped, then two
+    # panels wide; BN5's Oran Area, seed 3: narrow knots, then one floor; Nebula Area, seed 3: cobbles round
+    # a plate, then the plate to its rim)
+    ('robodog-walkways', build.n22_walk(8, 1, dev='quiet'), WEAK, 350),
+    ('bn4-acdc-rooms', build.n22_walk('x15', 4, dev='quiet'), WEAK, 350),
+    ('bn4-acdc-ways', build.n22_walk('x15', 4, dev='quiet'), WEAK, 500),
+    ('bn5-oran-hubs', build.n22_walk('x4', 3, dev='quiet'), WEAK, 800),
+    ('bn5-nebula-plates', build.n22_walk('x3', 3, dev='quiet'), WEAK, 350),
+    # (the guardian's gate: Central Area's third layer of seed 4, its map whole, the way bending in the
+    # antechamber before and running straight onto the bridge after)
+    ('gate-line', ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--net-biome', '0', '--dev', 'quiet,mapall', '--input',
+                   build.N22_ARRIVE + '30:,240:SELECT,40:'], {}, 700),
+    # (holes in the floor, the fix alone on a layer both builds lay alike: Robot Control Comp's first layer
+    # of seed 3, the exit pad's far corner cut off before #582 and whole after it: 8fa8801f3 against
+    # 3761e87f2, `before_after.py 8fa8801f3 --old-label before --new-ref 3761e87f2 --new after robot-hole`)
+    ('robot-hole', build.n22_walk(11, 3), WEAK, 1440),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS

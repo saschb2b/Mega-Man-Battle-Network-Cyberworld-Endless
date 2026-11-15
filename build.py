@@ -2516,6 +2516,81 @@ README_GIFS.update({name: (None, 10) for name in ('compare-bn4-park', 'compare-b
                                                    'compare-seaside', 'compare-undernet')})
 # 0.21.2: AquaNdl1 before and after at BN5's and BN4's viruses (tools/before_after.py --clips)
 README_GIFS['compare-bn5-aquandl'] = (None, 15)
+# 0.22.0's notes: the net
+# (a layer's arrival paged, MegaMan free at 470, as tools/trailers/v0_22_0_footage.py's ARRIVE; an area's
+# layer walked by the weak autopilot in god mode, so no battle moves its frames)
+N22_ARRIVE = '150:,' + '6:A,4:,' * 30 + '20:,'
+N22_WEAK = {'CYBERWORLD_AUTOPILOT': 'weak'}
+N22_AUTO = {'CYBERWORLD_AUTOPILOT': '1'}
+
+
+def n22_walk(biome, seed, depth=1, dev='quiet,god'):
+    return ['--scene', 'emu', '--run-depth', str(depth), '--seed', str(seed), '--net-biome', str(biome), '--dev', dev]
+
+
+# (L, its boxes paged, and the arrow it leaves)
+N22_L = N22_ARRIVE + '20:,6:L,144:,' + '6:A,144:,' * 3 + '60:,200:'
+# (ProtoMan's terms opened at 610 and paged, Yes, OK with no chips: the race's first turn)
+N22_RACE = '300:,' + '4:A,6:,' * 30 + '6:A,114:,' * 6 + '120:,6:LEFT,14:,6:A,400:,6:START,4:,6:A,600:'
+# (Lan's room, Dad's call paged: Lan free at 530)
+N22_ROOM = '40:,' + '4:A,6:,' * 46 + '30:,'
+# (seed 7's layer 3 to its arena's door, a soft reset, START, CONTINUE)
+N22_DOOR = '1500:,6:A+B+SELECT+START,260:,6:START,150:,6:A,500:'
+N22_GUTSMAN = ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--net-biome', 'x15', '--guardian', '35', '--dev', 'quiet,god,onehit']
+N22_GLITCH = ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,god,glitch,side=4,glitchstage=5']
+N22_COPYBOT = ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '15', '--dev', 'quiet']
+SCREENSHOTS += [
+    # (the net's locks: seed 4's second layer, the Security Cube beside the arrival, MegaMan's first box on it;
+    # the footage's LOCK)
+    ('lock-cube', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input',
+                   N22_ARRIVE + '24:UP+RIGHT,20:,60:DOWN+LEFT,10:,' + '6:A,116:,' * 4 + '6:A,60:'], [(660, 'lock-cube')], {}),
+    # (what stands beside the floor, MegaMan by each: Robot Control Comp's figure behind seed 9's arrival pad
+    # and its wires' red lights; the Nest's crystals; Judge Tree Comp's planters under a wall and tufts on the
+    # rims; Mr. Weather Comp's cloud; the Undernet's fire bowls and Undernet Zero's; BN4's Undernet's horns;
+    # BN5's Undernet's skull totem; End Area's pagoda, "piece in a hole at world 68,-84" of seed 9's layer in
+    # CYBERWORLD_EMU_DEBUG's lines)
+    ('robot-figure', n22_walk(11, 9, dev='quiet') + ['--input', '110:,' + '6:A,24:,' * 8 + '50:UP+LEFT,150:'], [(520, 'robot-figure')], {}),
+    ('robot-wires', n22_walk(11, 9), [(620, 'robot-wires')], N22_WEAK),
+    ('nest-crystals', n22_walk(7, 4, 2), [(852, 'nest-crystals')], N22_WEAK),
+    ('judge-planters', n22_walk(13, 1), [(1380, 'judge-planters')], N22_WEAK),
+    ('weather-cloud', n22_walk(14, 2), [(260, 'weather-cloud')], N22_WEAK),
+    ('undernet-bowls', n22_walk(5, 5, 2), [(780, 'undernet-bowls')], N22_WEAK),
+    ('undernet-zero-bowls', n22_walk(6, 5, 2), [(1800, 'undernet-zero-bowls')], N22_WEAK),
+    ('bn4-horns-run', n22_walk('x19', 1), [(460, 'bn4-horns-run')], N22_WEAK),
+    ('bn5-undernet-totem', n22_walk('x5', 2, 2), [(1140, 'bn5-undernet-totem')], N22_WEAK),
+    ('bn5-end-pagoda', n22_walk('x2', 9) + ['--input', N22_ARRIVE + '0:place 100 -100 7,40:'], [(505, 'bn5-end-pagoda')], {}),
+    # (ProtoMan's race on seed 3's second layer: a Mettaur and an OldStove, his time over the clock)
+    ('race-start', n22_walk(0, 3, 2, 'quiet') + ['--talk', 'duel:610', '--input', N22_RACE], [(2030, 'race-start')], {}),
+    # (SELECT's map on seed 2's second layer, MegaMan hurt and L's way to the Recovery Mr.Prog in the key's
+    # Heal green, the key's ProtoMan on its second row)
+    ('map-heal-way', ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '0', '--dev', 'quiet,mapall,hp=300/60', '--input',
+                      N22_ARRIVE + '20:,6:L,144:,' + '6:A,144:,' * 6 + '60:,240:SELECT,40:'], [(1700, 'map-heal-way')], {}),
+    # (the arrow pointing down, below MegaMan's feet: seed 52's second layer after L)
+    ('arrow-below', ['--scene', 'emu', '--run-depth', '2', '--seed', '52', '--dev', 'quiet', '--input', N22_L], [(1170, 'arrow-below')], {}),
+    # (fixed: BN4's GutsMan guarding BN4's ACDC Area, facing MegaMan on his left, and his Guardian Data once
+    # he is deleted; Town Area's exit pad on its pale floor after FireMan, #624's start; the Glitch copy
+    # standing as SpoutMan, #626's start; a CONTINUE from seed 7's arena's door and the guardian's card after)
+    ('bn4-gutsman-data', N22_GUTSMAN, [(1800, 'bn4-gutsman-faces'), (4250, 'bn4-gutsman-data')], N22_AUTO),
+    ('bn4-town-exit-pad', ['--scene', 'emu', '--run-depth', '3', '--seed', '1016', '--net-biome', 'x16', '--dev', 'quiet,god,onehit'],
+     [(2640, 'bn4-town-exit-pad')], N22_AUTO),
+    ('glitch-copy-spoutman', ['--scene', 'emu', '--run-depth', '7', '--seed', '1', '--dev', 'quiet,god,glitch,side=4', '--input',
+                              N22_ARRIVE + '0:glitch,300:'], [(520, 'glitch-copy-spoutman')], {}),
+    ('continue-door', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12', '--input', N22_DOOR],
+     [(2010, 'continue-door'), (2250, 'continue-door-card')], N22_WEAK),
+]
+CLIPS += [
+    # (the net climbs: Green's layer 4 of seed 2, up the yellow stair to the terrace and back down; CopyBot
+    # Comp's layer 2, up its railed ladder onto the raised room: the footage's CLIMB_A and CLIMB_B)
+    ('net-climb', ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--net-biome', '3', '--dev', 'quiet'], {},
+     N22_ARRIVE + '100:UP+RIGHT,30:,100:DOWN+LEFT,30:', 470, 730),
+    ('net-climb-ladder', N22_COPYBOT, {}, N22_ARRIVE + '0:place 268 -124 7,20:,150:UP+LEFT,40:', 470, 680),
+    # (the Glitch layer: MegaMan by the copy at its heart (0:glitch), its body changing between its forms'
+    # and a flip into Seaside's look with Seaside's sky)
+    ('glitch-copy-bodies', N22_GLITCH, {}, N22_ARRIVE + '0:glitch,400:', 480, 860),
+    # (Lan a step short of his desk, R: he walks onto the PC's spot and jacks in)
+    ('desk-jack-in', ['--scene', 'town', '--seed', '2'], {}, N22_ROOM + '0:place -24 8 7,30:,6:R,300:', 540, 800),
+]
+README_GIFS.update({'net-climb': (None, 10), 'net-climb-ladder': (None, 10), 'glitch-copy-bodies': (None, 12), 'desk-jack-in': (None, 15)})
 
 
 def clips(only=None):
