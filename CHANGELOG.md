@@ -37,8 +37,9 @@
   Comp's tufts of grass and planters, Mr. Weather Comp's low clouds, the
   Undernet's and Undernet Zero's fire bowls behind a floor's upper edge,
   BN4's Undernet's horns along whole catwalks, BN5's Undernet's skull
-  totems, their eyes flashing, Aquarium Comp's big glass tanks, and
-  BN5's End Area's pagoda, a landmark MegaMan walks behind.
+  totems, their eyes flashing, Aquarium Comp's big glass tanks, CopyBot
+  Comp's dark crystal spikes ringing its plateaus, and BN5's End Area's
+  pagoda, a landmark MegaMan walks behind.
 - **The Glitch layer, glitchier.** Towards the copy at its heart the
   glitches come up to twice as often and run deeper, so they lead you to
   it. While another area's look is on the floor the music drags, and
