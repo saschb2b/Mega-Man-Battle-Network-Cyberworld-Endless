@@ -94,7 +94,11 @@ clearance opens), which only matter to a player who plays on.
    starts on No: MegaMan's "Race his time?" for a race, as he asks the
    layer's other risks (ProtoMan's "Take the duel?" read as a fight with
    him, session 76), ProtoMan's "Take the duel?" for the netbattle.
-   ProtoMan greets MegaMan as the old rival he is.
+   ProtoMan greets MegaMan as the old rival he is, and names the race
+   Chaud's call set, not a second one: "MegaMan. You heard Chaud. Three
+   viruses here. 0:12.00. Beat that." (he had said who he was and the
+   time again, nine boxes on every talk: a playtester read two
+   challenges, or one told twice, session 76).
 3. **The squad.** One of the act's own formations, in its band: the same
    viruses ProtoMan busted, fixed by the layer's seed alone. Not by the
    battles fought before it, which keep the random battles from
@@ -107,7 +111,10 @@ clearance opens), which only matter to a player who plays on.
    it and a slow one does not (4 s and one for each 20 HP: a playtester's
    act 1 hand took 27.5 s to the 11 s of 3 s and one for each 30), then
    eight percent faster for each duel he has lost at that rung, never
-   under a floor. Tuned by playtests. In the battle, under the Custom
+   under a floor, then give or take half a second from the layer's seed,
+   the same on average: a time run to the hundredth (flat seconds,
+   0:10.00 and 0:11.00, read as made up beside a playtester's 0:20.85,
+   session 76). Tuned by playtests. In the battle, under the Custom
    gauge, MegaMan's time so far against ProtoMan's (and on the second
    rung whether MegaMan has been hit), hidden while BN6's clock holds.
 5. **The terms, by rung** (the rivalry's wins, in any run):
