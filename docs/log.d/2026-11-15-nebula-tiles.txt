@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T15:11:16Z
+* **Update**: world/level-design/nebula-tiles.md (new: BN5's Nebula Area's plates drawn as plain platform floor, lay 31 | 64, 273 to 211 breaks per 100 panels), devtools/tile-test.md (Nebula's row in Each area's laying; CopyBot Comp's and BN4's Town Area's kinds of break measured, looked at and what was tried), world/level-design/index.md (its line).
