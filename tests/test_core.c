@@ -2599,6 +2599,68 @@ static void test_walks(void) {
 	printf("  walks: the most winding area (%d) %.1f legs on average\n", most_area, most);
 }
 
+/* (x, y) in a 2 x 2 block of floor: wide floor, not a walkway */
+static bool shape_wide(int x, int y) {
+	for (int k = 0; k < 4; ++k) {
+		int bx = x - (k & 1), by = y - (k >> 1);
+		if (walk_floor(bx, by) && walk_floor(bx + 1, by) && walk_floor(bx, by + 1) && walk_floor(bx + 1, by + 1)) return true;
+	}
+	return false;
+}
+
+/* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
+static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
+
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, WAY_SHAPES };
+
+/* The turns on the arrow's walk from the arrival to the goal where BN6's
+ * walk stops MegaMan unless he stops on a line first, added to out: into a
+ * one-wide walkway from wide floor, where no edge stops him on its line
+ * (the playtester's first stop, session 76); at a walkways' junction, the
+ * one he walks on going on past it; a jog, a walkway stepping one panel
+ * aside between two runs of two, each corner taken only from its wall. */
+static void way_shapes(int *out) {
+	int tx, ty, sx, sy, len;
+	if (!arrow_goal(&tx, &ty) || !arrow_start(-1, tx, ty, &sx, &sy) || route_way(sx, sy, tx, ty, &len) < 0) return;
+	static int16_t p[MAP_W * MAP_H];
+	int n = route_walk_len;
+	for (int i = 0; i < n; ++i) p[i] = route_walk[n - 1 - i];
+	for (int i = 1; i + 1 < n; ++i) {
+		int x = p[i] % MAP_W, y = p[i] / MAP_W, nx = p[i + 1] % MAP_W, ny = p[i + 1] / MAP_W;
+		int dx = x - p[i - 1] % MAP_W, dy = y - p[i - 1] / MAP_W, ex = nx - x, ey = ny - y;
+		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
+		bool beyond = walk_floor(x + dx, y + dy);
+		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
+			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
+			++out[SHAPE_JOG];
+	}
+}
+
+/* The shapes way_shapes counts, on sixty layers of every area (test_way_links'):
+ * the comps' and homepages' held to one one-wide walkway on the way, as
+ * their originals' single rooms (docs/world/level-design/generator.md,
+ * Navigation): RoboDog's comp's ways turned into a walkway on wide floor 14
+ * times in its 60 layers, 25 before, and stepped aside one panel once, 3
+ * before (session 76: a playtester stopped at such mouths for 25 calls). */
+static void test_way_shapes(void) {
+	memset(&run, 0, sizeof run);
+	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
+	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
+	int all[WAY_SHAPES] = { 0 };
+	for (int b = 0; b < BIOME_COUNT; ++b) {
+		int got[WAY_SHAPES] = { 0 };
+		for (uint32_t seed = 1; seed <= 60; ++seed) {
+			layer_generate(seed * 7919u + (uint32_t)b, seed % 2 ? 6 : 5, b, LAYER_NORMAL, &kit);
+			way_shapes(got);
+		}
+		for (int k = 0; k < WAY_SHAPES; ++k) all[k] += got[k];
+		if (getenv("CW_WAY_STATS"))
+			printf("  shapes area %2d: %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", b, got[0], got[1], got[2]);
+	}
+	printf("  way shapes: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs\n", 60 * BIOME_COUNT, all[0], all[1], all[2]);
+}
+
 /* The way across (docs/world/level-design/generator.md, Navigation): from the arrival to
  * the guardian's antechamber or the exit, a layer crosses no more one-wide
  * walkways than its area's originals do, each a lining up for MegaMan. */
@@ -8059,6 +8121,7 @@ int main(int argc, char **argv) {
 	test_guardian_gone();
 	test_walks();
 	test_way_links();
+	test_way_shapes();
 	test_navicust();
 	test_xprograms();
 	test_depth_plan();
