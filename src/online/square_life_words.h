@@ -40,10 +40,8 @@ typedef struct {
 	int part;                        /* the part MegaMan is in, -1 none */
 } SquareFacts;
 
-/* The greeter in the welcome plaza, and his word over his head as a Navi
- * logs in (`in`) or out. */
-const char *square_greeter_words(const SquareFacts *f);
-
+/* The word over the week's portal (where the greeter stood) as a Navi logs
+ * in (`in`) or out. */
 const char *square_greeter_bark(const char *name, bool in);
 /* The referee by the Arena's ring, and his call over his head as a
  * battle of this game's ends (`result` 1 won, 2 lost, 4 broken off, else over; `name`

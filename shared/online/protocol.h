@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 18
+#define ONLINE_PROTOCOL_VERSION 19
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v18"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v19"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -62,7 +62,7 @@
 #define ONLINE_WANT_LAST 9
 #define ONLINE_WEEK_POST 24
 #define ONLINE_WEEK_BOARD 25
-#define ONLINE_WEEK_POST_BYTES 17
+#define ONLINE_WEEK_POST_BYTES 18  /* (v19: the acts whose guardian was fought in a party) */
 #define ONLINE_WEEK_ENTRY_BYTES 22
 #define ONLINE_WEEK_TOP 8
 #define ONLINE_WEEK_LAST_TOP 3
@@ -130,6 +130,106 @@
 #define ONLINE_TEAM_SIDE_BY_SIDE 1    /* ... two MegaMen a side on one field */
 #define ONLINE_STANDS_SIDE_BY_SIDE 255 /* STANDS's bout byte for a side-by-side battle (a relay's bout its number) */
 
+/* (protocol v19, issue #589: the shared dive; shared/online/README.md,
+ * Protocol v19) */
+#define ONLINE_WEEK_PARTY 2           /* WEEK_BOARD's entry flags: a guardian of the dive fought in a party */
+#define ONLINE_HELLO_NO_ARENA 8192    /* HELLO's channel word: the game's system cannot run the Arena (a linked fighter) */
+#define ONLINE_PEER_DIVING 128        /* SNAPSHOT's per-peer byte, bit 7: he dives (a dive room's peers) */
+#define ONLINE_DIVE 41                /* client -> server: u8 action, then that action's fields */
+#define ONLINE_DIVE_ROOM 42           /* server -> client: the room entered */
+#define ONLINE_DIVE_TRACES 43         /* server -> client: u8 kind, u8 count, entries */
+#define ONLINE_DIVE_PLACE 44          /* server -> client: a split's place */
+#define ONLINE_DIVE_FEED 45           /* server -> divers and the Square: who fell, who won, a party's guardian down, a flare */
+#define ONLINE_DIVERS 46              /* server -> divers and the Square: how many dive, and where */
+#define ONLINE_CREW 47                /* client -> server */
+#define ONLINE_CREW_STATE 48          /* server -> client */
+#define ONLINE_QUEUE 49               /* client -> server: a guardian door's queue */
+#define ONLINE_QUEUE_STATE 50         /* server -> client */
+#define ONLINE_PARTY_DAMAGE 51        /* linked fighter -> server -> seat 0 (as ARENA_SEAT) */
+#define ONLINE_PARTY_HP 52            /* seat 0 -> server -> the linked fighters */
+#define ONLINE_WEEK_SPLITS 53         /* server -> client, with WEEK_BOARD */
+#define ONLINE_DIVE_ENTER 1           /* DIVE's actions ... */
+#define ONLINE_DIVE_LEAVE 2
+#define ONLINE_DIVE_END 3
+#define ONLINE_DIVE_FOUND 4
+#define ONLINE_DIVE_PHRASE 5
+#define ONLINE_DIVE_WAVE 6
+#define ONLINE_DIVE_SPLIT 7
+#define ONLINE_DIVE_ENTER_BYTES 11    /* ... and each one's size, its type byte counted */
+#define ONLINE_DIVE_LEAVE_BYTES 2
+#define ONLINE_DIVE_END_BYTES 11
+#define ONLINE_DIVE_FOUND_BYTES 3
+#define ONLINE_DIVE_PHRASE_BYTES 9
+#define ONLINE_DIVE_WAVE_BYTES 6
+#define ONLINE_DIVE_SPLIT_BYTES 8
+#define ONLINE_DIVE_DELETED 1         /* a dive's end: deleted ... */
+#define ONLINE_DIVE_WON 2             /* ... or won */
+#define ONLINE_BUSTING_MOST 11        /* BN6's Busting Level: 1 to 10, 11 for S (docs/rom/battle.md) */
+#define ONLINE_PARTY_MOST 4           /* a party's or a crew's MegaMen at most */
+#define ONLINE_DIVE_ROOM_BYTES 9
+#define ONLINE_TRACE_MARKS 1          /* DIVE_TRACES's kinds ... */
+#define ONLINE_TRACE_PHRASES 2
+#define ONLINE_TRACE_FINDS 3
+#define ONLINE_TRACE_OPENED 4
+#define ONLINE_TRACE_SPLITS 5
+#define ONLINE_TRACE_GONE 6
+#define ONLINE_TRACE_HEAD 3           /* ... its head, then each kind's entry */
+#define ONLINE_TRACE_MARK_BYTES 25
+#define ONLINE_TRACE_PHRASE_BYTES 29
+#define ONLINE_TRACE_FIND_BYTES 17
+#define ONLINE_TRACE_SPLIT_BYTES 22
+#define ONLINE_TRACES_MOST 32         /* a layer's marks, phrases, first finds and splits kept, each */
+#define ONLINE_SPLIT_GUARDIAN 1       /* a split's flags: the battle was the layer's guardian */
+#define ONLINE_DIVE_PLACE_BYTES 27
+#define ONLINE_DIVE_FEED_BYTES 24
+#define ONLINE_FEED_DELETED 1         /* DIVE_FEED's kinds */
+#define ONLINE_FEED_WON 2
+#define ONLINE_FEED_GUARDIAN 3
+#define ONLINE_FEED_FLARE 4
+#define ONLINE_DIVERS_HEAD 4
+#define ONLINE_DIVERS_ENTRY_BYTES 19
+#define ONLINE_DIVERS_MOST 16
+#define ONLINE_DIVERS_MS 2000         /* DIVERS at most so often, on a change */
+#define ONLINE_DIVERS_FIGHTING 1      /* a DIVERS entry's flags: in a party's fight */
+#define ONLINE_CREW_BYTES 10
+#define ONLINE_CREW_STATE_BYTES 99
+#define ONLINE_CREW_MEMBER_BYTES 23
+#define ONLINE_CREW_ASK 1             /* CREW's actions */
+#define ONLINE_CREW_ANSWER 2
+#define ONLINE_CREW_SPLIT 3
+#define ONLINE_CREW_WAY 4
+#define ONLINE_CREW_BATTLE 5
+#define ONLINE_CREW_JOIN 6
+#define ONLINE_CREW_ASKED 1           /* CREW_STATE's stages */
+#define ONLINE_CREW_WAITING 2
+#define ONLINE_CREW_FORMED 3
+#define ONLINE_CREW_SPLIT_UP 4
+#define ONLINE_CREW_OFFER 5
+#define ONLINE_CREW_ALONE 6
+#define ONLINE_CREW_JOIN_MS 3000      /* a battle's offer stands so long */
+#define ONLINE_QUEUE_BYTES 5
+#define ONLINE_QUEUE_STATE_BYTES 91
+#define ONLINE_QUEUE_ENTRY_BYTES 21
+#define ONLINE_QUEUE_JOIN 1           /* QUEUE's actions */
+#define ONLINE_QUEUE_LEAVE 2
+#define ONLINE_QUEUE_START 3
+#define ONLINE_QUEUE_PASS 4
+#define ONLINE_QUEUE_WAITING 1        /* QUEUE_STATE's stages */
+#define ONLINE_QUEUE_STARTED 2
+#define ONLINE_QUEUE_OUT 3
+#define ONLINE_QUEUE_ALONE 4
+#define ONLINE_QUEUE_ARENA 1          /* a queue entry's flags: his system runs the Arena */
+#define ONLINE_PARTY_BYTES 9          /* PARTY_DAMAGE and PARTY_HP */
+#define ONLINE_ARENA_PARTY 2          /* ARENA_STATE START's format: a party on one field ... */
+#define ONLINE_ARENA_LINKED 3         /* ... a linked fighter, his own battle */
+#define ONLINE_ARENA_SEAT_GONE 6      /* ARENA_STATE's stage: a party's seat gone (its side byte the seat) */
+#define ONLINE_WEEK_SPLITS_BYTES 291
+#define ONLINE_NOTICE_DIVE_OUT 30     /* that takes a dive */
+#define ONLINE_NOTICE_DIVE_IN 31      /* not on a dive */
+#define ONLINE_NOTICE_DIVE_WAIT 32    /* traces too fast */
+#define ONLINE_NOTICE_TRACE_GONE 33   /* that phrase is gone */
+#define ONLINE_NOTICE_CREW 34         /* a crew's ask refused */
+#define ONLINE_NOTICE_QUEUE 35        /* a door's queue refused */
 /* Saves sent by a code (docs/engine/saves.md, Sending by code): a
  * connection to /presence whose first message is TRANSFER instead of
  * HELLO, with no protocol version of its own (a server without them

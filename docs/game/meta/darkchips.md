@@ -3,7 +3,7 @@ type: Feature
 title: "DarkChips"
 description: "DarkChips (issue #82): twelve kinds, each played by its own net's rule, offered by a flame of darkness on each act's middle layer, priced at 20 max HP per battle a dark power ran in."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:55:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # DarkChips (3 October 2026; in every battle since issue #82)
@@ -64,7 +64,10 @@ engine's, and all twelve kinds play there, each by its own net's rule
   unchosen twice (session 77), and the pause keeps the paging A that
   said No (sessions 67 and 68) from sending a playtester through the
   whole chat again (`ta_ask_costly`). Yes gives the chip to the Pack,
-  and the flame goes.
+  and the flame goes. A later talk at the flame on its layer, after a
+  No, is one box and the question ("Lan... It's still burning.
+  DrkSword!"): kai13 heard a first flame's eight boxes again (session
+  78). BN6's flames' talk is the same.
 - **Counted as each net counts a use:** BN6's where its dark power ran (a
   BugFrag paid); BN5's where it ran by BN5's rule, both where BN6 runs a
   chip's after-effects, once a battle however many ran. A DarkChip given

@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "analytics_online.h"
+#include "dive_pack.h"
 #include "netpass.h"
 #include "online_square.h"
 #include "online_text.h"
@@ -77,7 +78,9 @@ WeekOffer square_week_offer(void) {
 	return WEEK_OFFER_NEW;
 }
 
-const char *square_week_board_words(void) { return Q.s.week ? square_week_board(online_week_board(), Q.s.week) : ""; }
+const char *square_week_board_words(void) {
+	return Q.s.week ? square_week_board(online_week_board(), Q.s.week, dive_pack_now(), dive_pack_records()) : "";
+}
 
 /* the greeter's words on the week's net (pages; his question or options
  * after them) */
@@ -105,11 +108,11 @@ bool square_week_dive(void) {
 static void ask(TextArchive *t, const char *words, WeekOffer offer) {
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, words, FACE_PROG, &first);
-	ta_ask_in(t, FACE_PROG, square_week_question(offer), 1, !first, true);
+	ta_pages(t, words, FACE_NONE, &first);
+	ta_ask_in(t, FACE_NONE, square_week_question(offer), 1, !first, true);
 	ta_flag_set(t, SQUARE_DIVE_FLAG);
 	bool more = false;
-	ta_pages(t, square_week_off(), FACE_PROG, &more);
+	ta_pages(t, square_week_off(), FACE_NONE, &more);
 	ta_end(t);
 	ta_closing(t);
 }
@@ -118,8 +121,7 @@ static void ask(TextArchive *t, const char *words, WeekOffer offer) {
 static void options(TextArchive *t, const char *words) {
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, words, FACE_PROG, &first);
-	ta_mugshot(t, FACE_PROG);
+	ta_pages(t, words, FACE_NONE, &first);
 	ta_clear(t);
 	ta_options(t, square_week_again_options, WEEK_AGAIN_OPTIONS);
 	int to[WEEK_AGAIN_OPTIONS] = { 1, 2, 3 };
@@ -129,22 +131,21 @@ static void options(TextArchive *t, const char *words) {
 		ta_flag_set(t, SQUARE_DIVE_FLAG);
 		if (k) ta_flag_set(t, SQUARE_DIVE_OVER_FLAG);
 		bool f = true;
-		ta_pages(t, square_week_off(), FACE_PROG, &f);
+		ta_pages(t, square_week_off(), FACE_NONE, &f);
 		ta_end(t);
 	}
 	ta_closing(t);
 }
 
-bool square_week_greeter(const char *welcome) {
+bool square_week_portal(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
-	static char words[640];
 	WeekOffer offer = square_week_offer();
-	const char *week = square_week_words();
-	snprintf(words, sizeof words, "%s%s%s", welcome, *week ? "|" : "", week);
+	const char *words = square_week_words();
+	if (!*words) words = square_week_closed();
 	ta_begin(&t);
 	if (offer == WEEK_OFFER_NEW) ask(&t, words, offer);
 	else if (offer == WEEK_OFFER_AGAIN) options(&t, words);
-	else ta_say(&t, FACE_PROG, words);
+	else ta_say(&t, FACE_NONE, words);
 	return online_square_prog_say(SQUARE_PROG_GREETER, out, ta_build(&t, out));
 }

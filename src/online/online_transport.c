@@ -42,7 +42,10 @@ static size_t ring_take(Ring *r, uint8_t *out, size_t cap) {
 static bool mail(uint8_t kind) {
 	return kind == ONLINE_TRADE_STATE || kind == ONLINE_BOARD || kind == ONLINE_WEEK_BOARD || kind == ONLINE_ARENA_STATE || kind == ONLINE_ARENA_LOADOUT ||
 		kind == ONLINE_ARENA_INPUT || kind == ONLINE_ARENA_HASH || kind == ONLINE_STANDS || kind == ONLINE_WATCH_STATE ||
-		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS || kind == ONLINE_TEAM_STATE || kind == ONLINE_ARENA_SEAT;
+		kind == ONLINE_WATCH_RELAY || kind == ONLINE_WATCH_KEYS || kind == ONLINE_TEAM_STATE || kind == ONLINE_ARENA_SEAT ||
+		/* (the shared dive's, v19: the Square's games hear its feed, DIVERS and WEEK_SPLITS too; dive_wire.h reads them) */
+		(kind >= ONLINE_DIVE_ROOM && kind <= ONLINE_DIVERS) || kind == ONLINE_CREW_STATE || kind == ONLINE_QUEUE_STATE ||
+		kind == ONLINE_PARTY_HP || kind == ONLINE_WEEK_SPLITS;
 }
 
 /* A dropped link (issue #153, online_transport.h): a link welcomed and then
@@ -92,7 +95,16 @@ static uint32_t retry_wait(unsigned tries) {
 /* (HELLO's channel word's own bits: v18, a system that reads fewer extra
  * ROMs than there are, rom.h's xroms_short, the New 3DS: the server's
  * rule for its pass, protocol.py's pass_full) */
-static uint16_t hello_says(void) { return xroms_short() ? ONLINE_HELLO_ONE_EXTRA : 0; }
+/* (no_arena: a dive's party fights on one field, the party's core, where
+ * the system runs one beside its own (party_core.h); the New 3DS, whose
+ * Arena's cores do not fit a frame, and the PSP, whose core is gpSP's,
+ * fight linked: docs/online/shared-dive.md) */
+#if defined(__3DS__) || defined(__PSP__)
+#define HELLO_ARENA ONLINE_HELLO_NO_ARENA
+#else
+#define HELLO_ARENA 0
+#endif
+static uint16_t hello_says(void) { return (uint16_t)((xroms_short() ? ONLINE_HELLO_ONE_EXTRA : 0) | HELLO_ARENA); }
 
 static void hello_resume(uint16_t channel) {
 	online_put16(transport.hello + HELLO_CHANNEL, (uint16_t)(channel | ONLINE_HELLO_RESUME | hello_says()));
@@ -287,6 +299,9 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			/* (sent whether or not the WELCOME is in yet: this socket's
 			 * HELLO went first, and a resume the server took before its
 			 * WELCOME reached the game would otherwise be held) */
+			/* (what was put to go out before it first: a dive's end sent
+			 * as its link closes, dive_link.c, was lost behind the goodbye) */
+			if (snapshot->connected) send_mail();
 			data[0] = ONLINE_BYE;
 			/* (then the server's close, its answer to it, before the
 			 * socket goes: a socket closed at once can be reset with the
@@ -551,7 +566,9 @@ bool online_transport_channel(uint16_t channel) {
 
 bool online_transport_send(const uint8_t *data, size_t size) {
 	bool ours = size && (data[0] == ONLINE_TRADE || data[0] == ONLINE_OFFER || data[0] == ONLINE_WEEK_POST || data[0] == ONLINE_ARENA || data[0] == ONLINE_ARENA_LOADOUT ||
-		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH || data[0] == ONLINE_TEAM);
+		data[0] == ONLINE_ARENA_INPUT || data[0] == ONLINE_ARENA_HASH || data[0] == ONLINE_ARENA_STATUS || data[0] == ONLINE_WATCH || data[0] == ONLINE_TEAM ||
+		/* (the shared dive's, protocol v19: dive_link.c) */
+		data[0] == ONLINE_DIVE || data[0] == ONLINE_CREW || data[0] == ONLINE_QUEUE || data[0] == ONLINE_PARTY_DAMAGE || data[0] == ONLINE_PARTY_HP);
 	if (!transport.enabled || !ours) return false;
 	/* (a link down: nothing kept for the next session, which the server
 	 * began afresh, what was under way ended at the drop; issue #153) */

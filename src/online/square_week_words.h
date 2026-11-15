@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "dive_wire.h"
 #include "online_week.h"
 
 /* What the greeter offers (square_week.c) */
@@ -31,10 +32,15 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted);
 /* ... his question where he asks one (its end a '\n'): Yes/No for a new
  * dive, NULL where there is none or the options ask */
 const char *square_week_question(WeekOffer offer);
-/* ... and his word as MegaMan goes to dive */
+/* ... and the portal's word as MegaMan goes to dive */
 const char *square_week_off(void);
+/* The portal's words where the server names no week. */
+const char *square_week_closed(void);
 /* The Board's posts of the week's net: its dates, its deepest dives as
- * reported, MegaMan's own, last week's three. */
-const char *square_week_board(const WeekBoard *b, uint16_t week);
+ * reported (a "+" by a dive whose guardian fell to a party), MegaMan's
+ * own, who dives now and where (`d`, NULL none), the week's fastest
+ * guardian busts alone and by party size (`w`, NULL none), last week's
+ * three. */
+const char *square_week_board(const WeekBoard *b, uint16_t week, const DiveDivers *d, const WeekSplits *w);
 
 #endif

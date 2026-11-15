@@ -14,6 +14,9 @@ bool guardian_heard(void);
 void set_encounter(const Encounter *e, bool force);
 void lock_run(void);
 void roll_encounter(void);
+/* The kind (loot.h's ENC_*) of the layer's random battle `index`: the run's
+ * first, the act's opening ones, else a normal one */
+int encounter_kind(int index);
 bool new_layer(bool leaving);
 void forget_heard(void);
 /* What the run's layer at `depth` of kind `side` will hold, from its seed

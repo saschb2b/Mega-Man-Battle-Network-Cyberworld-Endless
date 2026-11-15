@@ -3,7 +3,7 @@ type: Feature
 title: "The PET"
 description: "The PET in a run (`src/director/pet.c`): BN6's screens, Save taking a checkpoint, Options in Comm's place, E-Mail as Dad's lab, KeyItem's profile items, the NetPass and the Jukebox, and the hooks that take them over."
 tags: [game, pet]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:26:28Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:30:00Z }
 ---
 
 # The PET
@@ -28,10 +28,22 @@ a use of its own.
 
 BN6's Save wrote its own save file; a run keeps its own checkpoints
 ([Running the game's own logic](../engine/emulation/overview.md)). Save closes the PET and takes a checkpoint where
-MegaMan stands, as a layer's arrival does, and "Run saved" shows in the
-corner; the quit prompt then says "Run saved where you saved it". In the
-town, before the first layer, there is no run to save yet, and a note says
-so.
+MegaMan stands, as a layer's arrival does, and the PET's own box says
+"Run saved." (no face: no character speaks of a save,
+[the voice](../voice/rules.md)); the quit prompt then says "Run saved
+where you saved it". In the town, before the first layer, there is no run
+to save yet, and a note says so.
+
+The box is there for the A that follows. BN6's Save is a screen of its own
+(bn6f's `HandleSaveMenu8132B88`) that asks, saves and ends on its words,
+which the next A closes. Ours closed to the map with only the corner's
+"Run saved", and a playtester's A meant for a save box picked up the
+Guardian Data MegaMan faced (session 78). So from the PET's close until
+the box is up (the checkpoint waits for MegaMan free to move), A is kept
+from the map, for a second at most (`pet.c`, `SAVE_BOX_WAIT`); the box
+then takes it. The run's other saves (a layer's start, the arena's door,
+the Guardian Data, home) keep the corner's note alone: nobody asked for
+those.
 
 ## Library
 

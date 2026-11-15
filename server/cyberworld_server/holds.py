@@ -44,6 +44,7 @@ class Holds:
         """The session of `player` ended (handle's end): what was under way
         ended, then the place freed, or held where it ended without a word."""
         server = self.server
+        server.dive.dropped(player)
         server.trades.left(player)
         server.arena.left(player.id)
         server.teams.left(player.id)
@@ -89,7 +90,8 @@ class Holds:
         """A resume's HELLO: `player` takes `old`'s place, his id, channel,
         position, card and the visit's one trade with it."""
         self.until.pop(old.id, None)
-        player.id, player.channel, player.position = old.id, old.channel, old.position
+        # (a diver's place is held in no room, his channel chosen anew: dive.py)
+        player.id, player.channel, player.position = old.id, old.channel or player.channel, old.position
         player.profile, player.profile_time, player.joined = old.profile, old.profile_time, old.joined
         player.offer_time = old.offer_time
         self.server.event("resume", id=player.id, identity=player.identity.hex(), channel=player.channel)

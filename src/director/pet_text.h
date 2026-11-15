@@ -33,5 +33,9 @@ int pet_text_refresh(void);
  * the lab's and the guardians'; FACE_NONE for the BBS's (a board, its
  * posts in their posters' faces) and BN6's own, which a run never sends. */
 int pet_mail_face(int m);
+/* The PET's own box after its Save (no face: no character speaks of a
+ * save, docs/voice/rules.md), which the next A closes as BN6's save
+ * screen's last words are closed (pet.c) */
+const char *pet_saved_text(void);
 
 #endif

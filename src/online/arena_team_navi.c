@@ -9,17 +9,18 @@
 #include "bn6.h"
 #include "devtools.h"
 #include "hook.h"
+#include "team_shape.h"
 
 #define KINDS 3   /* the objects a spawn makes: the first kind's (actors), the third's (attacks), the fourth's (effects) */
-#define SIDES 2
+#define PARTNERS TEAM_PARTNERS
 #define HAND_SIZE BN6_HAND_SIZE   /* a side's hand (BN6_BATTLE_HAND): in a partner's room after his NaviStats */
-#define ROOM  30  /* the fourth kind's slot side 0's partner's record takes, side 1's the next: the pool's last, which a spawn
-                     takes only when the 30 before them are in play */
+#define SLOTS 32  /* the fourth kind's slots: the partners' records take the pool's last (the Arena's 30 and 31, side 0's partner's
+                     first; a party's 29 to 31), which a spawn takes only when the slots before them are in play */
 
 /* what the hooks keep a core between calls (a rollback puts it back,
  * hook_keep_slots): the rooms taken, whose the object spawning now is,
- * and whose each object slot of each kind is (0 none, 1 + the side of
- * the partner) */
+ * and whose each object slot of each kind is (0 none, 1 + the partner:
+ * the Arena's his side, team_shape.h) */
 typedef struct {
 	uint8_t taken;
 	uint8_t pending;
@@ -28,17 +29,19 @@ typedef struct {
 static Kept kept[HOOK_CORES];
 static int second_slot = -1;   /* the second GBA's core's slot: teamhp's mutation (negative) there alone */
 /* each partner's own loadout's numbers, the same on every client (arena_team_navi_loadout) */
-static struct { bool given; uint16_t max_hp, base_hp; uint8_t attack, speed, charge; } own[SIDES];
+static struct { bool given; uint16_t max_hp, base_hp; uint8_t attack, speed, charge; } own[PARTNERS];
 /* ... and his NaviStats as BN6 compiled them from his NaviCust's board on his own client (arena_team_navicust.h) */
-static struct { bool given; uint8_t stats[BN6_BATTLE_NAVI_SIZE]; } compiled[SIDES];
+static struct { bool given; uint8_t stats[BN6_BATTLE_NAVI_SIZE]; } compiled[PARTNERS];
 /* the records' answers by the asker (a partner's own object, one of each kind he spawned) and the objects marked a
  * partner's, every core's, a rollback's frames run again among them: what the output says */
-static uint32_t answered[SIDES][1 + KINDS], hands[SIDES][1 + KINDS], marked;
+static uint32_t answered[PARTNERS][1 + KINDS], hands[PARTNERS][1 + KINDS], marked;
 
-/* side's partner's room: the fourth kind's slot ROOM + side, from its node (BN6_T4_SIZE bytes: his NaviStats, then his hand) */
-static uint32_t room(unsigned side) { return BN6_T4_OBJECTS - BN6_OBJECT_NODE + (ROOM + side) * BN6_T4_SIZE; }
-static uint32_t hand(unsigned side) { return room(side) + BN6_BATTLE_NAVI_SIZE; }
-static uint32_t room_bit(unsigned side) { return 1u << (31 - (ROOM + side)); }
+/* partner p's room of n's: the fourth kind's slot SLOTS - n + p, from its node (BN6_T4_SIZE bytes: his NaviStats, then his hand) */
+static uint32_t room_of(unsigned n, unsigned p) { return BN6_T4_OBJECTS - BN6_OBJECT_NODE + (SLOTS - n + p) * BN6_T4_SIZE; }
+static uint32_t rooms_bits(unsigned n) { return ((1u << n) - 1u); }   /* (slot i bit 31 - i: the pool's last n, its low bits) */
+/* ... from a hook */
+static uint32_t room(unsigned p) { return room_of(team_partners(), p); }
+static uint32_t hand(unsigned p) { return room(p) + BN6_BATTLE_NAVI_SIZE; }
 
 /* an object's kind and slot from its address; false where it is none of them */
 static bool slot_of(uint32_t obj, unsigned *kind, unsigned *slot) {
@@ -59,8 +62,8 @@ static unsigned whose(uint32_t obj, unsigned *how) {
 	int s = hook_slot();
 	*how = 0;
 	if (!obj || s < 0 || s >= HOOK_CORES || !kept[s].taken) return 0;
-	for (unsigned side = 0; side < SIDES; ++side)
-		if (obj == hook_read32(BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + BN6_SIDE_PARTNER)) return 1 + side;
+	for (unsigned p = 0, n = team_partners(); p < n; ++p)
+		if (obj == hook_read32(team_partner_slot(p))) return 1 + p;
 	unsigned kind, slot;
 	if (!slot_of(obj, &kind, &slot)) return 0;
 	*how = 1 + kind;
@@ -95,7 +98,7 @@ static HookAct stats(HookRegs *r, void *user) {
 	if (from < BN6_NAVI_BY_OBJECT || from >= BN6_NAVI_BY_OBJECT_END) return HOOK_CONTINUE;
 	unsigned how, who = whose(r->r[5], &how);
 	/* (his side asked for: a partner's object's own alliance) */
-	if (!who || r->r[0] != who - 1) return HOOK_CONTINUE;
+	if (!who || r->r[0] != team_partner_side(who - 1)) return HOOK_CONTINUE;
 	++answered[who - 1][how];
 	r->r[0] = room(who - 1);
 	r->r[1] = BN6_BATTLE_NAVI;   /* (as the routine leaves it) */
@@ -106,7 +109,7 @@ static HookAct stats(HookRegs *r, void *user) {
 static HookAct hand_of(HookRegs *r, void *user) {
 	(void)user;
 	unsigned how, who = whose(r->r[5], &how);
-	if (!who || r->r[0] != who - 1) return HOOK_CONTINUE;
+	if (!who || r->r[0] != team_partner_side(who - 1)) return HOOK_CONTINUE;
 	++hands[who - 1][how];
 	r->r[0] = hand(who - 1);
 	r->r[1] = BN6_BATTLE_HAND;   /* (as the routine leaves it) */
@@ -120,13 +123,44 @@ bool arena_team_navi_hooks(struct HookCore *core, unsigned side, int slot) {
 		hook_on(core, BN6_NAVI_STATS_ADDR, stats, NULL) && hook_on(core, BN6_HAND_ADDR, hand_of, NULL);
 }
 
+/* partner p's record made from his side's (s the core's hook slot, hp teamhp's) */
+static void record_made(unsigned p, int s, int hp) {
+	unsigned side = team_partner_side(p);
+	uint32_t to = room(p), from = BN6_BATTLE_NAVI + side * BN6_BATTLE_NAVI_SIZE;
+	for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
+	/* (his NaviCust's programs whole: his NaviStats as BN6 compiled them, but for the two bytes a link battle's start sets in
+	 * every MegaMan's alike, kept from his side's; teamcust=-1 the second GBA's his side's copy, a mutation that must part them) */
+	if (compiled[p].given && !(dev.team_cust == -1 && s == second_slot)) {
+		uint8_t start = hook_read8(from + BN6_NS_START_FORM), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
+		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) hook_write8(to + i, compiled[p].stats[i]);
+		hook_write8(to + BN6_NS_START_FORM, start);
+		hook_write8(to + BN6_NS_BEAST_TURNS, beast);
+	}
+	/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
+	for (unsigned i = 0; i < HAND_SIZE; ++i) hook_write8(hand(p) + i, hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i));
+	/* (his own loadout's HP and buster, as the Arena carries a lead's: BN6 copies a side's battle NaviStats from his menu's) */
+	if (own[p].given && !compiled[p].given) {
+		if (own[p].max_hp) {
+			hook_write16(to + BN6_NS_BASE_HP, own[p].base_hp);
+			hook_write16(to + BN6_NS_CUR_HP, own[p].max_hp);
+			hook_write16(to + BN6_NS_MAX_HP, own[p].max_hp);
+		}
+		hook_write8(to + BN6_NS_ATTACK, own[p].attack);
+		hook_write8(to + BN6_NS_SPEED, own[p].speed);
+		hook_write8(to + BN6_NS_CHARGE, own[p].charge);
+	}
+	if (hp > 0)
+		for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) hook_write16(to + f, (uint16_t)hp);
+}
+
 void arena_team_navi_begin(void) {
 	int s = hook_slot();
 	if (s < 0 || s >= HOOK_CORES) return;
 	kept[s] = (Kept){ 0 };
-	/* (the rooms: two slots of the fourth kind's 32 taken in BN6's own pool as the battle has just set it up, never run or
-	 * freed since nothing links them into the run order; BN6 clears them with the pool as the next battle sets up) */
-	uint32_t active = hook_read32(BN6_T4_ACTIVE), bits = room_bit(0) | room_bit(1);
+	/* (the rooms: the fourth kind's last slots taken in BN6's own pool as the battle has just set it up, never run or freed
+	 * since nothing links them into the run order; BN6 clears them with the pool as the next battle sets up) */
+	unsigned n = team_partners();
+	uint32_t active = hook_read32(BN6_T4_ACTIVE), bits = rooms_bits(n);
 	if (active & bits) {
 		printf("arena2v2: the partners' rooms in the fourth kind's pool are taken (%08X): their NaviStats their sides'\n", (unsigned)active);
 		return;
@@ -134,69 +168,44 @@ void arena_team_navi_begin(void) {
 	hook_write32(BN6_T4_ACTIVE, active | bits);
 	kept[s].taken = 1;
 	/* (teamhp=N: each partner's own max HP, as his own loadout would give it; -N the second GBA's alone, a mutation that must
-	 * part them) */
-	int hp = dev.team_hp < 0 && s == second_slot ? -dev.team_hp : dev.team_hp;
-	for (unsigned side = 0; side < SIDES; ++side) {
-		uint32_t to = room(side), from = BN6_BATTLE_NAVI + side * BN6_BATTLE_NAVI_SIZE;
-		for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; i += 4) hook_write32(to + i, hook_read32(from + i));
-		/* (his NaviCust's programs whole: his NaviStats as BN6 compiled them, but for the two bytes a link battle's start sets in
-		 * every MegaMan's alike, kept from his side's; teamcust=-1 the second GBA's his side's copy, a mutation that must part them) */
-		if (compiled[side].given && !(dev.team_cust == -1 && s == second_slot)) {
-			uint8_t start = hook_read8(from + BN6_NS_START_FORM), beast = hook_read8(from + BN6_NS_BEAST_TURNS);
-			for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) hook_write8(to + i, compiled[side].stats[i]);
-			hook_write8(to + BN6_NS_START_FORM, start);
-			hook_write8(to + BN6_NS_BEAST_TURNS, beast);
-		}
-		/* (his hand his side's as the battle sets it up, empty, until his own Custom screen's picks: arena_team_custom.h) */
-		for (unsigned i = 0; i < HAND_SIZE; ++i) hook_write8(hand(side) + i, hook_read8(BN6_BATTLE_HAND + side * HAND_SIZE + i));
-		/* (his own loadout's HP and buster, as the Arena carries a lead's: BN6 copies a side's battle NaviStats from his menu's) */
-		if (own[side].given && !compiled[side].given) {
-			if (own[side].max_hp) {
-				hook_write16(to + BN6_NS_BASE_HP, own[side].base_hp);
-				hook_write16(to + BN6_NS_CUR_HP, own[side].max_hp);
-				hook_write16(to + BN6_NS_MAX_HP, own[side].max_hp);
-			}
-			hook_write8(to + BN6_NS_ATTACK, own[side].attack);
-			hook_write8(to + BN6_NS_SPEED, own[side].speed);
-			hook_write8(to + BN6_NS_CHARGE, own[side].charge);
-		}
-		if (hp > 0)
-			for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) hook_write16(to + f, (uint16_t)hp);
-	}
+	 * part them; the Arena's flag alone) */
+	int hp = team_shape_is_party() ? 0 : dev.team_hp < 0 && s == second_slot ? -dev.team_hp : dev.team_hp;
+	for (unsigned p = 0; p < n; ++p) record_made(p, s, hp);
 }
 
-void arena_team_navi_loadout(unsigned side, uint16_t max_hp, uint16_t base_hp, const uint8_t buster[3]) {
-	side &= 1u;
-	own[side].given = buster != NULL;
+void arena_team_navi_loadout(unsigned p, uint16_t max_hp, uint16_t base_hp, const uint8_t buster[3]) {
+	if (p >= PARTNERS) return;
+	own[p].given = buster != NULL;
 	if (!buster) return;
-	own[side].max_hp = max_hp;
-	own[side].base_hp = base_hp;
-	own[side].attack = buster[0];
-	own[side].speed = buster[1];
-	own[side].charge = buster[2];
+	own[p].max_hp = max_hp;
+	own[p].base_hp = base_hp;
+	own[p].attack = buster[0];
+	own[p].speed = buster[1];
+	own[p].charge = buster[2];
 }
 
-void arena_team_navi_compiled(unsigned side, const uint8_t *stats) {
-	side &= 1u;
-	compiled[side].given = stats != NULL;
-	if (stats) memcpy(compiled[side].stats, stats, sizeof compiled[side].stats);
+void arena_team_navi_compiled(unsigned p, const uint8_t *stats) {
+	if (p >= PARTNERS) return;
+	compiled[p].given = stats != NULL;
+	if (stats) memcpy(compiled[p].stats, stats, sizeof compiled[p].stats);
 }
 
-bool arena_team_navi_record(struct mCore *c, unsigned side, uint8_t *out) {
-	uint32_t bits = room_bit(0) | room_bit(1);
-	if (!c || ((uint32_t)c->rawRead32(c, BN6_T4_ACTIVE, -1) & bits) != bits) return false;
-	for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) out[i] = (uint8_t)c->rawRead8(c, room(side & 1u) + i, -1);
+bool arena_team_navi_record(struct mCore *c, unsigned p, uint8_t *out) {
+	unsigned n = team_partners_of(hook_slot_of(c));
+	uint32_t bits = rooms_bits(n);
+	if (!c || p >= n || ((uint32_t)c->rawRead32(c, BN6_T4_ACTIVE, -1) & bits) != bits) return false;
+	for (uint32_t i = 0; i < BN6_BATTLE_NAVI_SIZE; ++i) out[i] = (uint8_t)c->rawRead8(c, room_of(n, p) + i, -1);
 	return true;
 }
 
-uint32_t arena_team_navi_record_at(unsigned side) {
+uint32_t arena_team_navi_record_at(unsigned p) {
 	int s = hook_slot();
-	return s >= 0 && s < HOOK_CORES && kept[s].taken ? room(side & 1u) : 0;
+	return s >= 0 && s < HOOK_CORES && kept[s].taken && p < team_partners() ? room(p) : 0;
 }
 
-uint32_t arena_team_navi_hand(unsigned side) {
+uint32_t arena_team_navi_hand(unsigned p) {
 	int s = hook_slot();
-	return s >= 0 && s < HOOK_CORES && kept[s].taken ? hand(side & 1u) : 0;
+	return s >= 0 && s < HOOK_CORES && kept[s].taken && p < team_partners() ? hand(p) : 0;
 }
 
 uint8_t arena_team_navi_at(unsigned side, bool partner) {
@@ -204,21 +213,21 @@ uint8_t arena_team_navi_at(unsigned side, bool partner) {
 }
 
 uint32_t arena_team_navi_digest(uint32_t h) {
-	for (unsigned side = 0; side < SIDES; ++side) {
-		for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) h = (h ^ hook_read16(room(side) + f)) * 16777619u;
-		h = (h ^ hook_read8(hand(side) + BN6_HAND_AT)) * 16777619u;
-		h = (h ^ hook_read8(room(side) + BN6_NAVI_FORM)) * 16777619u;
-		for (unsigned i = 0; i < BN6_HAND_MAX; ++i) h = (h ^ hook_read16(hand(side) + BN6_HAND_CHIPS + 2 * i)) * 16777619u;
+	for (unsigned p = 0, n = team_partners(); p < n; ++p) {
+		for (uint32_t f = BN6_NS_BASE_HP; f <= BN6_NS_MAX_HP; f += 2) h = (h ^ hook_read16(room(p) + f)) * 16777619u;
+		h = (h ^ hook_read8(hand(p) + BN6_HAND_AT)) * 16777619u;
+		h = (h ^ hook_read8(room(p) + BN6_NAVI_FORM)) * 16777619u;
+		for (unsigned i = 0; i < BN6_HAND_MAX; ++i) h = (h ^ hook_read16(hand(p) + BN6_HAND_CHIPS + 2 * i)) * 16777619u;
 	}
 	return h;
 }
 
 void arena_team_navi_report(void) {
-	for (unsigned side = 0; side < SIDES; ++side)
+	for (unsigned side = 0; side < TEAM_ARENA; ++side)
 		printf("arena2v2: side %u's partner's own NaviStats answered %u times for him, %u for his attacks (the third kind), %u for "
 			"his actors and %u for his effects\n", side, (unsigned)answered[side][0], (unsigned)answered[side][2],
 			(unsigned)answered[side][1], (unsigned)answered[side][3]);
-	for (unsigned side = 0; side < SIDES; ++side)
+	for (unsigned side = 0; side < TEAM_ARENA; ++side)
 		printf("arena2v2: side %u's partner's own hand answered %u times for him, %u for his attacks, %u for his actors and %u for "
 			"his effects\n", side, (unsigned)hands[side][0], (unsigned)hands[side][2], (unsigned)hands[side][1],
 			(unsigned)hands[side][3]);

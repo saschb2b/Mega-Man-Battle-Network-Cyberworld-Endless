@@ -1,0 +1,8 @@
+{
+  "feature": "Shared dive",
+  "date": "2026-11-15",
+  "name": "The party's own core",
+  "result": "A guardian's battle on a core of its own (src/online/party_core.c): the Arena's boot to the net, the run's ROM copy with each hook's original back under its BKPT (hook_originals), the record at FREE_RECORDS, the lead's loadout in BN6's RAM, the installs' hooks, the encounter check (BN6_ENCOUNTER_CHECK) forced to StartBattle (BN6_ENCOUNTER_START), the list grown at BN6_SPAWN_ENTITIES, partners' keys at BN6_KEY_COPY, the guardian's HP at BN6_SPAWN_HP: BlastMan's battle's first Custom screen 143 frames after the boot's state, a second core from the same keys at the same hash every 60th frame (20 of 20), a 30-frame rollback every 30 frames run again to the same hash (41 of 41); over the server two games built the same field (ready 69d5611be9442d5d) and agreed at every 60th frame to the win at 1261 (21 of 21 each); with an input delay of 1 the frames ran mostly on a guess (1250 of 1261, 30 rollbacks) and the same 21 hashes agreed, each the lockstep run's own.",
+  "meaning": "One field over the server stands on BN6's own battle with no address of its own: the hooks are the spike's and encounter.c's, on another core's table. The run's ROM copies of a party's games agree where the battle reads them (one layer of one seed): BN4's AquaMan, moved into BN6's engine (id 0x3A9, his sounds' pool pointed once as the fight is taken over), fought alike on both games. Not yet: the partners' own NaviStats and hands (they share the lead's, A held back), and the enemies' aim, which stays on the lead.",
+  "link": "../online/shared-dive.md"
+}

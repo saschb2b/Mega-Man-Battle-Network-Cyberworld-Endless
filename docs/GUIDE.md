@@ -1141,8 +1141,8 @@ He also moves you to the next or the last channel.
 #### Finding your way
 
 You arrive in the **welcome plaza**: the Square's landmark in its
-middle, the pad home beside you, the greeter, the keeper and the Board
-close by. Everyone arrives here, and everyone comes back here. Off three
+middle, the pad home beside you, the week's portal, the keeper and the
+Board close by. Everyone arrives here, and everyone comes back here. Off three
 of its sides stand warps, BN6's gem pads, each with its part's name over
 it in gold and who is there now ("ARENA: Mira"):
 
@@ -1223,7 +1223,7 @@ handheld's second display) while you are in the Square.
 The welcome plaza with a landmark in its middle (a statue, a monument or
 a giant cybertree, by the server), its board and the pad home, and warps
 to Trade Central, the Arena's ring with its stands, and a stage up a
-stair. A greeter Mr.Prog calls out who logs in, two Navis stroll about
+stair. The week's portal calls out who logs in, two Navis stroll about
 (one round the landmark, one before the stage) and chat about who's here
 and what just happened, and every three
 minutes they parade round the landmark: walk with them. A on a tree, the
@@ -1354,24 +1354,59 @@ the stamp, and on the New 3DS, you get his calls and the board's post.
 #### The week's DeepNet
 
 Every Monday (00:00 UTC) each server opens a net of its own for the
-week, and everyone on that server who dives it dives the same net, from
-the same start: the short net, the Standard folder, threat 0, no helpers
-and no Cross, nothing your other runs unlocked. The greeter Mr.Prog in
-the welcome plaza offers it to a pass with the DeepNet stamp; say Yes
-(the cursor starts on No), and the dive begins in Lan's room, as a new
-game does.
+week, and everyone on that server who dives it dives the same net, its
+layers' random battles the same for everyone, from the same start: the short net, the Standard folder, threat 0, no helpers
+and no Cross, nothing your other runs unlocked. The portal in the
+welcome plaza, a purple vortex, offers it to a pass with the DeepNet
+stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
+into the dive's first layer.
+
+You dive it together with everyone on the server who dives it at the
+same time. Whoever stands on your layer walks there as a MegaMan; you
+walk through each other. A band at the foot of
+the screen says what happens to the others: who was deleted on which
+layer, who beat a guardian, who cleared the net.
+
+- **A guardian's door.** Step into the arena with other divers on the
+  layer and you wait at its door for them; the first one there leads.
+  The leader's **A** goes in with everyone waiting (up to four), anyone's
+  **B** goes alone. A party meets the guardian stronger (his next
+  version for two, the one after for three or four, his HP times the
+  party) and fights him on one field, every MegaMan with his own folder
+  and chips, the guardian taking aim at each in turn. A MegaMan deleted
+  in it ends his own run, even if the party wins. On the New 3DS and the
+  PSP each of the party fights him on a field of his own, his HP shared.
+- **Crews.** **A** on another diver asks to team up (BN6's own Yes or
+  No, on both sides), up to four. A crew stays together across layers:
+  at Lan's HP a portal waits until the whole crew stands on it. A
+  crewmate's battle near you is yours to join: the band says so for a
+  few seconds, and **A** jumps in, the two of you on one field against
+  the viruses he met, each with his own reward after. A battle you join
+  counts as one of yours, so a crew fights about as many as one alone.
+- **Traces of the week.** Where a diver was deleted this week a skull
+  burst stays; **A** on it says who and to what. **R** on a layer opens
+  the phrases you know from the Square: **A** leaves one on your panel
+  for everyone diving after you, who can wave at it.
+- **Mystery Data** sit in the same places for everyone and each of you
+  opens your own. The band names the week's first to open one, and those
+  others have opened sparkle.
+- **Busting.** After a battle won the band says your time and your place
+  among the week's divers who fought the same battle.
 
 Your run in progress waits in its own save, untouched: the title's
 CONTINUE is always that run, and when the dive ends, won or deleted, you
 are back with it. To go on with an unfinished dive, visit the Square
-and talk to the greeter: Keep diving, Start over or Not now. Divers
+and step up to the portal: Keep diving, Start over or Not now. Divers
 don't trade.
 
 How deep you got goes up on the board at your next visit: the week's
-eight deepest dives, your own best and its place, and last week's
-three. Dive as often as you like; your best counts. The board says the
-layers are as players report them, and nothing is won for one. A dive
-unlocks nothing and counts in none of your records.
+eight deepest dives (a **+** beside a dive that fought a guardian as a
+party), your own best and its place, and last week's three; who is
+diving right now and on which layer; and the week's fastest busts of
+each guardian, alone and by party size. Dive as often as you like; your
+best counts. The board says the layers are as players report them, and
+nothing is won for one. A dive unlocks nothing and counts in none of
+your records.
 
 #### Servers
 
@@ -1638,6 +1673,7 @@ rollback are tuned on real networks.
 | A trade is done | that one was, and whether it began with a trade board's offer |
 | You stop watching a battle | how (its end, left, too slow, stopped, the connection lost) and its seconds |
 | The week's dive is posted | its layer and act, and whether it reached the end |
+| The week's dive ends | how many layers it entered, on how many another diver was too, the most divers on one, the biggest crew, the party fights and the biggest party |
 
 Never sent from the Square: your name or another's, your identity on a
 server, the server's address, the chips, phrases or anything typed.

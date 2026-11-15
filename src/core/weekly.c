@@ -107,7 +107,9 @@ bool weekly_dive(uint16_t week, uint32_t seed) {
 	W.running = 1;
 	record_write();
 	fprintf(stderr, "weekly: a dive of week %u begun (seed %08x)\n", week, seed);
-	emu_start_in_town = true;
+	/* (the week's portal warps MegaMan into the Deep Net's first layer, never
+	 * Lan's room: the shared dive, docs/online/shared-dive.md) */
+	emu_start_in_town = false;
 	scene_set(&scene_emu);
 	return true;
 }

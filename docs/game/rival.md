@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude/claude-opus-5-5, at: 2026-11-15T03:35:14Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # The rival: Chaud and ProtoMan
@@ -101,7 +101,11 @@ clearance opens), which only matter to a player who plays on.
    Chaud's call set, not a second one: "MegaMan. You heard Chaud. Three
    viruses here. 0:12.00. Beat that." (he had said who he was and the
    time again, nine boxes on every talk: a playtester read two
-   challenges, or one told twice, session 76).
+   challenges, or one told twice, session 76). A later talk on the
+   layer, after a No, is his time in one box ("...Well? 0:09.70. Beat
+   it.", "Without a hit." on the no-hit rung, "...Well,MegaMan? I'm
+   waiting." for the netbattle) and the question: kai13 sat through his
+   terms again (session 78).
 3. **The squad.** One of the act's own formations, in its band: the same
    viruses ProtoMan busted, fixed by the layer's seed alone. Not by the
    battles fought before it, which keep the random battles from

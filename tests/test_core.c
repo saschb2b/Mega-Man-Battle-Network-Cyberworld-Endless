@@ -2756,12 +2756,14 @@ static int layer_pits(int *holes, int *loose) {
  * The other games' areas, held to their own maps' count where fewer than
  * the BN6 area they are laid out as (BN4's ACDC Area 2 for Central's 3, its
  * Undernet 1): their ways past that count stay as few as the BN6 areas'
- * (test_way_links). */
+ * (test_way_links). The way's walkways it enters only from their line
+ * (a turn into one on wide floor, a jog, a short leg) widened first,
+ * whatever the cap (net_way.c, widen_lined): counted by kind of area. */
 static void test_way_shapes(void) {
 	memset(&run, 0, sizeof run);
 	for (int b = 0; b < BIOME_COUNT; ++b) run.boss_order[b] = 12;
 	for (int i = 0; i < 6; ++i) run.biome_order[i] = (uint8_t)i;
-	int all[WAY_SHAPES] = { 0 };
+	int all[WAY_SHAPES] = { 0 }, lined[3] = { 0 };
 	char what[32];
 	for (int b = 0; b < BIOME_COUNT; ++b) {
 		int got[WAY_SHAPES] = { 0 };
@@ -2770,6 +2772,9 @@ static void test_way_shapes(void) {
 			way_shapes(got);
 		}
 		for (int k = 0; k < WAY_SHAPES; ++k) all[k] += got[k];
+		/* (the plain areas, the comps, the homepages) */
+		int kind = b < BIOME_COMP ? 0 : b == BIOME_HOMEPAGE || b >= BIOME_ACDC_HP ? 2 : 1;
+		lined[kind] += got[SHAPE_TURN_WIDE] + got[SHAPE_JOG] + got[SHAPE_SHORT_LEG];
 		if (getenv("CW_WAY_STATS")) {
 			snprintf(what, sizeof what, "shapes area %2d", b);
 			shapes_line(what, 60, got);
@@ -2785,6 +2790,14 @@ static void test_way_shapes(void) {
 	 * layers and 35 of the other games' 660 before, 14 and 8 now, where no
 	 * side the arena fits off has a gate the walk meets on its line) */
 	CHECK(all[SHAPE_GATE] <= 20 && xall[SHAPE_GATE] <= 12, "%d and %d ways turn into the guardian's gate off its line", all[SHAPE_GATE], xall[SHAPE_GATE]);
+	/* (the walkways the way enters only from their line, a turn on wide
+	 * floor, a jog or a short leg: session 78's four playtesters stopped
+	 * at such mouths in every area; over these layers 211 in the plain
+	 * areas, 118 in the comps, 40 at the homepages and 277 in the other
+	 * games' areas before they were widened first, 77, 58, 9 and 135 now) */
+	int xlined = xall[SHAPE_TURN_WIDE] + xall[SHAPE_JOG] + xall[SHAPE_SHORT_LEG];
+	printf("  lined up at a mouth: %d ways in the plain areas, %d in the comps, %d at the homepages, %d in the other games' areas\n", lined[0], lined[1], lined[2], xlined);
+	CHECK(lined[0] <= 95 && lined[1] <= 70 && lined[2] <= 15 && xlined <= 160, "the ways enter %d, %d, %d and %d walkways only from their line", lined[0], lined[1], lined[2], xlined);
 	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
 	/* (a pit between walkways, its walls keeping MegaMan off it, where the
 	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
@@ -7428,7 +7441,8 @@ static bool stats_keys_only(const char *json, const char *const *keys, int n) {
 
 static void test_analytics_online(void) {
 	static const char *const allowed[] = { "system", "pass", "ended", "minutes", "official", "result", "side", "delay", "window",
-		"rollbacks", "deepest", "stalls", "worst_tick_ms", "seconds", "board", "layer", "act", "won" };
+		"rollbacks", "deepest", "stalls", "worst_tick_ms", "seconds", "board", "layer", "act", "won",
+		"layers", "shared", "most", "crew", "parties", "party" };
 	const int nallowed = (int)(sizeof allowed / sizeof *allowed);
 	char base[64], settings[128];
 	snprintf(base, sizeof base, "build/host/test-online-stats-%d", (int)getpid());
@@ -7480,7 +7494,10 @@ static void test_analytics_online(void) {
 	analytics_watch(ANALYTICS_WATCH_LEFT, 42);
 	analytics_watch(ANALYTICS_WATCH_SLOW, 3);
 	analytics_dive_post(17, 3, false);
-	CHECK(stats_posts == 4 && strstr(stats_sent[0], "\"name\":\"online-trade\",\"data\":{\"board\":true}") &&
+	analytics_dive_together(9, 4, 3, 2, 1, 3);
+	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"deepnet-together\",\"data\":{\"layers\":9,\"shared\":4,\"most\":3,\"crew\":2,\"parties\":1,\"party\":3}"),
+		"online statistics: deepnet-together (%s)", stats_sent[4]);
+	CHECK(stats_posts == 5 && strstr(stats_sent[0], "\"name\":\"online-trade\",\"data\":{\"board\":true}") &&
 		strstr(stats_sent[1], "\"name\":\"online-watch\",\"data\":{\"ended\":\"left\",\"seconds\":42}") &&
 		strstr(stats_sent[2], "\"ended\":\"too slow\"") &&
 		strstr(stats_sent[3], "\"name\":\"deepnet-post\",\"data\":{\"layer\":17,\"act\":3,\"won\":false}"),

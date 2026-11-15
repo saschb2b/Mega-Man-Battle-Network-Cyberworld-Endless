@@ -3,7 +3,7 @@ type: Design
 title: "Phase two, reasoned"
 description: "Meta phase two: rewards leaned to the folder's codes, Cross starts, the Library, programs found joining later runs; and phase three begun: route choices in Lan's HP and Navi gates sealed with a guardian's code."
 tags: [game, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-10T00:58:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # Phase two, reasoned (29 September 2026)
@@ -118,7 +118,9 @@ Lan. Deleting JudgeMan twice as a guardian, in any dive, would crack it.
 We haven't yet."). The code is that Navi deleted twice as a guardian, in
 any runs (rivals.sav), so an earned code opens every such gate in later
 runs: behind it his SP waits, a challenge fought to the boss theme, and
-the win pays his SP chip. The telegraph comes a run or more before the
+the win pays his SP chip; a run from it leaves him there, the gate's talk
+"JudgeMan SP's still in there!" and the question
+([Risk the player chooses](../progression/structure.md)). The telegraph comes a run or more before the
 key, and the route choice lets a player seek the guardian whose code they
 want.
 

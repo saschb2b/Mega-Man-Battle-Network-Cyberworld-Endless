@@ -218,17 +218,27 @@ bool director_can_suspend(void) {
 /* where the run was last saved, for the quit prompt */
 static const char *saved_where(void) { return D.saved_at ? D.saved_at : "Run saved at the layer's start"; }
 
-void director_save_here(void) {
+/* the PET's Save's checkpoint taken, its box still to open (pet.c) */
+static bool pet_said;
+
+bool director_pet_saved(void) {
+	bool was = pet_said;
+	pet_said = false;
+	return was;
+}
+
+bool director_save_here(void) {
 	/* (the PET's Save: in the town, before the run's first layer, there is
 	 * no run to save yet; home after an act saves where Lan stands, as the
 	 * HP's arrival saved: a playtester's purchase and request in town were
 	 * not saved, and "Saves begin on layer 1" told him so wrongly, session
 	 * 70) */
-	if (!D.active) return;
-	if (D.town && D.home) { D.home_save_due = true; return; }
-	if (D.town) { cinema_note("Saves begin on layer 1", 150); return; }
+	if (!D.active) return false;
+	if (D.town && D.home) { D.home_save_due = true; return true; }
+	if (D.town) { cinema_note("Saves begin on layer 1", 150); return false; }
 	D.checkpoint = true;
 	D.checkpoint_here = true;
+	return true;
 }
 
 /* The arena's door (the owner's: bigger RPGs save before a boss): the run
@@ -245,10 +255,13 @@ void arena_door_save(void) {
 	cinema_note("Run saved", 150);
 }
 
-static void home_save(void) {
+/* (the PET's Save says so in its own box, pet.c; the others in the
+ * corner's note) */
+static void home_save(bool pet) {
 	save_checkpoint();
 	D.saved_at = "Run saved at home";
-	cinema_note("Run saved", 150);
+	if (pet) pet_said = true;
+	else cinema_note("Run saved", 150);
 }
 
 /* Home's saves once MegaMan (or Lan) is free: its checkpoint in Lan's HP,
@@ -258,12 +271,12 @@ void home_saves(void) {
 	if (D.home_save_due) {
 		D.home_save_due = false;
 		D.checkpoint_here = true;
-		home_save();
+		home_save(true);
 		D.checkpoint_here = false;
 	}
 	if (D.home && home_in_hp() && D.intro_said && !D.home_saved) {
 		D.home_saved = true;
-		home_save();
+		home_save(false);
 	}
 }
 
@@ -282,8 +295,9 @@ void checkpoint_update(void) {
 	 * safe to stop) */
 	D.saved_at = D.checkpoint_here ? "Run saved where you saved it" : D.checkpoint_data ? "Run saved at the Guardian Data" :
 		"Run saved at the layer's start";
+	if (D.checkpoint_here) pet_said = true;
+	else cinema_note("Run saved", 150);
 	D.checkpoint_data = D.checkpoint_here = false;
-	cinema_note("Run saved", 150);
 	if (D.nest_cleared) { D.nest_cleared = false; profile.nest_clears++; profile_save(); }
 }
 
@@ -376,7 +390,7 @@ bool director_resume(void) {
 	/* (a checkpoint resumed is saved already: a save asked for before it,
 	 * on the map a Net Square visit left, would write the new map's state) */
 	D.checkpoint = D.checkpoint_here = D.checkpoint_data = D.checkpoint_door = false;
-	D.home_save_due = false;
+	D.home_save_due = pet_said = false;
 	off_board_load();
 	forget_heard();
 	D.saved_at = "Run saved where you continued";
@@ -435,6 +449,7 @@ bool director_resume(void) {
 			flag_clear(LAYER_NUMBER_SEALED_FLAG);
 			flag_clear(LAYER_SERVER_WON_FLAG);
 			flag_clear(LAYER_SERVER_TAKEN_FLAG);
+			for (int f = LAYER_TOLD_BASE; f <= LAYER_TOLD_FLAME; ++f) flag_clear(f);
 			for (int i = 0; i <= LAYER_GIFT_FLAG - MAPSLOT_MD_FLAG; ++i) { uint8_t z[2] = { 0, 0 }; emu_write(BN6_MYSTERY_PICKS + 2 * (uint32_t)i, z, 2); }
 			emu_write32(BN6_PLAYER_X, (uint32_t)D.start_x << 16);
 			emu_write32(BN6_PLAYER_Y, (uint32_t)D.start_y << 16);

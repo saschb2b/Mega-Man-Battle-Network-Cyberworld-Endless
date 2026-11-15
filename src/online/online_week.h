@@ -15,6 +15,7 @@ typedef struct {
 	uint16_t depth, minutes;
 	uint8_t act;
 	bool won;
+	bool party;          /* a guardian of the dive fought in a party (v19, ONLINE_WEEK_PARTY) */
 } WeekEntry;
 
 typedef struct {

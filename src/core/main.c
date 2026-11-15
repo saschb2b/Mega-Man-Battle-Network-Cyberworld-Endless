@@ -173,8 +173,10 @@ static bool step(void) {
 		if ((SDL_GetPerformanceCounter() - t0) * 1000 < SDL_GetPerformanceFrequency()) SDL_Delay(1);
 		return true;
 	}
-	/* (a Net Square visit at the clock's pace: headless clients meet there) */
-	if (!loop.headless || online_visit_active() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
+	/* (a Net Square visit at the clock's pace: headless clients meet there;
+	 * and a dive's party's field, which runs at the clock's pace, so that a
+	 * batch of frames lasts as long headless as on a screen) */
+	if (!loop.headless || online_visit_active() || online_visit_held() || (getenv("CYBERWORLD_AUDIO_DUMP") && !audio_offline())) {
 		loop.acc += elapsed();
 		if (loop.acc < 1.0 / 60.0 - 0.002) { SDL_Delay(1); return true; }
 		loop.acc -= 1.0 / 60.0;

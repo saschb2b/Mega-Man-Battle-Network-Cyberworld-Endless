@@ -47,6 +47,23 @@ void arena_core_free(struct mCore *core);
 uint8_t *arena_core_save(struct mCore *core, size_t *size);
 bool arena_core_load(struct mCore *core, const uint8_t *state, size_t size);
 
+/* One core alone, as a rollback puts it back (the shared dive's party
+ * core, party_core.c): its raw state, what its GBA keeps outside it, what
+ * its hooks keep (hook_keep_slots) and the chip pack's entries; NULL where
+ * memory ran out */
+typedef struct ArenaCoreSnap ArenaCoreSnap;
+ArenaCoreSnap *arena_core_snap_new(struct mCore *core);
+void arena_core_snap_free(ArenaCoreSnap *snap);
+bool arena_core_snap_save(struct mCore *core, ArenaCoreSnap *snap);
+bool arena_core_snap_load(struct mCore *core, const ArenaCoreSnap *snap);
+/* ... its hash as the pair's (the sound's fields left out, the installs'
+ * record in), `scratch` room for its raw state (`size`, stateSize's); 0
+ * where it failed */
+uint64_t arena_core_hash(struct mCore *core, uint8_t *scratch, size_t size);
+/* `size` bytes from 0x08000000 of its ROM copy replaced by `rom`'s (before
+ * its hooks are set): false where they do not fit */
+bool arena_core_rom(struct mCore *core, const uint8_t *rom, size_t size);
+
 /* The pair: two cores of the ROM, each loaded with its state, then
  * linked, with BN5's installs (full rules, every NetBattle's: their bytes,
  * and their hooks on each core's own table), souls[side] that side's player's Souls for

@@ -34,16 +34,32 @@ int director_route_portal(void);
  * over it (the drawing reads them: draws change nothing). */
 int director_town_hour(void);
 int director_town_tint(bool *box);
+/* The shared dive's crew at Lan's HP (docs/online/shared-dive.md): a
+ * portal taken (k; -1 stepped off) waits while it says so, until every
+ * crewmate stands on the same one (a part above's, NULL none). */
+extern bool (*home_way_hold)(int portal);
 /* The ways lit at home (Lan's HP's portals, docs/world/home/): each one's area,
  * its guardian (0 none: a trip back), and whether it goes back to an area
  * won; at most `most`, how many. */
 typedef struct { int biome, navi; bool back; } DirectorWay;
 int director_home_ways(DirectorWay *out, int most);
 /* A run is under way on the layers (it has been saved). */
+/* The guardian's battle the run's core did not fight (the shared dive's
+ * party core, party_play.h) over: won or not, MegaMan's HP left written
+ * into the run, and the guardian's course on as after a fight of its own;
+ * HP 0, he was deleted, and the run ends as a deletion ends it */
+void director_party_over(bool won, int hp);
 bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* The layer's Mystery Data (the shared dive's finds, docs/online/shared-dive.md):
+ * how many it holds (0 off a layer), whether the k-th is opened, and where
+ * it stands in world units; the k-th is the same on every game of the
+ * layer's seed. */
+int director_md_count(void);
+bool director_md_opened(int k);
+void director_md_place(int k, int *x, int *y, int *z);
 /* The layer's Chip or BugFrag Trader's kind (TraderKind, trader.h), -1
  * for none */
 int director_trader_kind(void);
@@ -145,8 +161,12 @@ bool director_quit_keeps(void);
  * run's (map_label) or, for the Net Square, its own. */
 void director_map_label(const char *name, const char *place);
 /* The PET's Save: a checkpoint where MegaMan stands, once he is free to
- * move on the map ("Run saved"). */
-void director_save_here(void);
+ * move on the map; whether one is due (none in the town before the run's
+ * first layer, a note says so). */
+bool director_save_here(void);
+/* Whether the PET's Save's checkpoint was just taken (once: its box is
+ * pet.c's to open, docs/game/pet.md, Save). */
+bool director_pet_saved(void);
 /* After a CONTINUE, once a frame: MegaMan held by BN6 with nothing under way
  * is let go (director_hold.c, issue #23) */
 void director_hold_watch(void);

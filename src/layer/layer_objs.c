@@ -50,6 +50,7 @@ int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 int layer_objs_bystander = LAYER_BYSTANDER, layer_objs_bystander2 = LAYER_BYSTANDER;   /* (EvilNavi) */
+void (*layer_objs_more)(NpcList *npcs);
 unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
@@ -307,6 +308,9 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_x[out->nmd] = (int16_t)m->x;
+		out->md_y[out->nmd] = (int16_t)m->y;
+		out->md_z[out->nmd] = (int16_t)m->z;
 		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
 		out->md_colour[out->nmd++] = (uint8_t)m->type;
 	}
@@ -390,8 +394,9 @@ static int flame_host(void) {
 static void flame_stand(TextArchive *text, LayerObjs *out, Talker *tk, int i) {
 	tk->cat = 7;
 	tk->sprite = layer_objs_dark_flame;
-	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark6)
-		: ta_dark_flame(text, LAYER_DARK_TAKEN_FLAG, layer_objs_dark_chip, layer_objs_dark_does, layer_objs_dark_first);
+	ScriptsChoice c = { LAYER_DARK_TAKEN_FLAG, LAYER_TOLD_FLAME };
+	tk->script = out->dark_flame = layer_objs_dark6 ? ta_dark_flame6(text, c, layer_objs_dark6)
+		: ta_dark_flame(text, c, layer_objs_dark_chip, layer_objs_dark_does, layer_objs_dark_first);
 	tk->gone_flag = LAYER_DARK_TAKEN_FLAG;
 	out->dark_flame_obj = i;
 	if (emu_debug_on()) fprintf(stderr, "dark: the flame of darkness at %d %d\n", tk->x, tk->y);
@@ -763,7 +768,7 @@ static bool install_navi_gate(Install *in, const NetObj *o, Talker *tk) {
 	const char *name = guardian(navi)->name;
 	bool asks = won >= GATE_CODE;
 	in->out->gate_navi = navi;
-	if (!asks) tk->script = ta_navi_gate(in->text, -1, name, won, GATE_CODE);
+	if (!asks) tk->script = ta_navi_gate(in->text, (ScriptsChoice){ -1, -1 }, name, won, GATE_CODE);
 	else {
 		int chip = navi_chip(navi, 2), code = 26;
 		ChipInfo ci = { 0 };
@@ -815,28 +820,32 @@ static void install_vault(Install *in, Talker *tk) {
 static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 	LayerObjs *out = in->out;
 	int flag = LAYER_FLAG_BASE + out->nchoices;
+	ScriptsChoice c = { flag, LAYER_TOLD_BASE + out->nchoices };
 	out->choice[out->nchoices].type = o->type;
 	out->choice[out->nchoices++].flag = flag;
 	static char terms[GUARDIAN_TERMS_MAX];
+	char again[64] = "";
 	if (o->type == OBJ_DUEL) {
 		/* his terms: the time to beat and the rung's rule (layer_words.c);
 		 * the netbattle's, his own */
 		if (layer_objs_duel_rung == 2) guardian_netbattle_terms(terms, sizeof terms);
 		else duel_terms(terms, sizeof terms, profile.duel_won + profile.duel_lost, layer_objs_duel_foes, layer_objs_duel_frames,
 			layer_objs_duel_rung);
+		duel_again(again, sizeof again, layer_objs_duel_frames, layer_objs_duel_rung);
 		/* (he logs out as the duel begins: one a layer) */
 		tk->gone_flag = flag;
 	}
-	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms, layer_objs_duel_rung != 2)
-		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
-		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
-		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)
+	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, c, guardian_face(11), terms, again, layer_objs_duel_rung != 2)
+		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, c, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
+		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, c, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
+		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, c, guardian(o->param)->name, GATE_CODE, GATE_CODE)
 		: o->type == OBJ_BATTLER ? battler_offer(in->text, flag, o->param)
-		: o->type == OBJ_GLITCH ? ta_glitch_warp(in->text, flag)
-		: o->type == OBJ_COPY ? ta_copy(in->text, flag, LAYER_COPY_WON_FLAG, LAYER_COPY_TAKEN_FLAG, out->copy_reward, &in->copy, false)
+		: o->type == OBJ_GLITCH ? ta_glitch_warp(in->text, c)
+		: o->type == OBJ_COPY ? ta_copy(in->text, c, LAYER_COPY_WON_FLAG, LAYER_COPY_TAKEN_FLAG, out->copy_reward, &in->copy, false)
 		: ta_secret_gate(in->text, flag);
-	/* not chosen yet */
+	/* not chosen yet, nor its words said */
 	flag_clear(flag);
+	flag_clear(c.told);
 }
 
 /* A dark layer's unit (docs/game/liberation/): its sprite standing on its
@@ -929,6 +938,11 @@ static void install_object(Install *in, int i) {
 	if (tk.script >= 0 && in->ntalk < 16) in->talkers[in->ntalk++] = tk;
 }
 
+/* the NPCs a part above adds after the layer's own (layer_objs_more) */
+static void more_npcs(NpcList *npcs) {
+	if (layer_objs_more) layer_objs_more(npcs);
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	static TextArchive text;
@@ -980,5 +994,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}
 	rush_install(group, number);
+	more_npcs(npcs);
 	return mapslot_install(group, number, npcs, in.md, in.nmd);
 }

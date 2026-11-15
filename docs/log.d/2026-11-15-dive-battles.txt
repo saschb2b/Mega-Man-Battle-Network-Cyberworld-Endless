@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T14:57:00Z
+* **Update**: online/shared-dive.md (a dive's random battles rolled from the layer's seed and their index alone, the owner's call: every diver's n-th battle the same, a split the same battle), GUIDE.md (The week's DeepNet: the same random battles for everyone).

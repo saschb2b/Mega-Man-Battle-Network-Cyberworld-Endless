@@ -3,7 +3,7 @@ type: Design
 title: "The structure"
 description: "The progression structure: depth decides difficulty, the short and endless nets, per-act HP and damage targets, how battles, BN5's records, areas and guardians are chosen, the battle floor, growth, risk the player chooses, the Cybeast, later cycles."
 tags: [game, progression]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # The structure
@@ -338,6 +338,17 @@ prize's code as BN6 does, three in four one the pack lacks.
   it. The tier stays the old prize's (two layers deeper, the same twelve
   rolls, four a chip): `build.py economy` finds a good chip among the
   three at 96 to 100% of Servers by act.
+- **A run from its battle leaves the Server standing** (the game-design
+  skill, 15 November 2026): its talk asks again, the same viruses, one
+  box naming its three chips and the question. kai11 ran from one, and
+  its talk said "The signal's quiet now,Lan." with the viruses still
+  there and no way back to them (session 78). Only a win pays, so a
+  second try costs what the first did: the HP spent stays spent, the
+  layer's one heal with it, and running pays nothing to farm. "Quiet" is
+  the won Server's word, once its chip is taken. A Navi gate's SP and
+  the Glitch layer's copy stand again after a run the same way
+  (`choice_again` in `src/director/director.c`); ProtoMan's race does
+  not, a run from it a loss ([the rival](../rival.md)).
 - The dark flame into the Undernet stays a side route with tougher viruses
   and better Mystery Data.
 - Busting Level stays the game's: a clean, fast battle already earns better

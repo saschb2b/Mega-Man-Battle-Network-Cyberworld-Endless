@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A layer"
 description: "How a layer is built into the game (`net_gen.c`, `netmap.c`, `layer_objs.c`, `mapslot.c`), its exit pad's warp, what `director.c` watches, checkpoints and CONTINUE, the engine's event flags and `talk.c`'s conversations."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:18:17Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 ---
 
 # A layer
@@ -105,6 +105,17 @@ boss strikes his pose out of the white (it was the Guardian Data's dark
 way into the Undernet); `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
+`0x14D1`-`0x14D8` that choice 0-7's words were said and `0x14D9` the
+flame of darkness's, so a later talk is a box and the question (session
+78; past the Net Square's own, cleared as a layer begins and by a
+CONTINUE of another build's layer. BN6 names none of them in its code,
+text, map or NPC scripts, nor in its map objects' records (bn6f has
+only their `EVENT_14D1`-`EVENT_14D9` enums; Gregar's 86 records at
+`0x080A6144` checked); its one use is Mystery Data's: group `0x96` map
+2's lists at `0x0A484C` hold `0x14D1`-`0x14D4`, two blue and two green,
+lists no run shows, every map's pointed elsewhere as a layer installs,
+and a jack-in's roll only clears a green one's flag, as BN6's lists
+hold `0x144A` and `0x1462` too: [net maps](../../rom/net-maps.md)),
 [The rival: Chaud and ProtoMan](../../game/rival.md) (`0x146E`, which named the chips that sat out of the
 guest core's battles, is free since they left runs); at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the

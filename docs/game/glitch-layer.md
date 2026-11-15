@@ -3,7 +3,7 @@ type: Design
 title: "The Glitch layer"
 description: "A rare side layer behind a glitching warp: a normal layer of its area that comes apart the further MegaMan explores it, other areas' looks breaking through on the same floor, its data pulled from deeper in the Net, and a copy at its heart that glitches between guardians; designed with the game-design skill and the owner's calls of 4 November 2026."
 tags: [game, design, glitch]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:26:08Z }
 sources:
   - id: owner
     resource: "The owner's brief, given in the project's sessions on 4 November 2026"
@@ -225,7 +225,9 @@ Glitch layer's heart, the farthest end of its detours, stands one that
 went wrong: copies written over each other. On the layer it is its first
 form's body, its colours turned and torn as the warp's are. Talked to, it
 names what its data holds (the three chips) and asks; it never blocks
-the exit and never moves.
+the exit and never moves. A later talk on the layer, after a No or a run
+from its fight, is its data in one box and the question, and it fights
+again ([Risk the player chooses](progression/structure.md)).
 
 **How it fights: the true swap** (the owner's call 2). One BN6 battle,
 its forms one after another on the same panel, one pool of HP (one and a

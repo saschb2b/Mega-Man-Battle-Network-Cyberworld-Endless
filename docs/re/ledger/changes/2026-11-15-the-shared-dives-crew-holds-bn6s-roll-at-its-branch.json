@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-15",
+  "what": "The shared dive's join-in battles hold BN6's random-battle roll at its branch (src/director/encounter.c emu_encounters_offer, BN6_ENCOUNTER_ROLLED to BN6_ENCOUNTER_SKIP while a crewmate stands near) and force it later through BN6_ENCOUNTER_CHECK, or fight it on the party's core; the branch at 0x08005AE2 follows the roll's bl with no instruction between, so it reads the flags the roll left, and a hook that gives a battle where the roll gave none jumps to BN6_ENCOUNTER_START itself (docs/rom/battle.md, Encounter roll). The joiner's walk toward his next battle reset through BN6_STEPS_WALKED and BN6_STEPS_CHECKED, and the reward BN6's results picked read from the party's core at BN6_BATTLE_REWARD; no new address."
+}

@@ -19,6 +19,12 @@
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
 #define LAYER_MAX_CHOICES 8
+/* A choice's words said on the layer (LAYER_TOLD_BASE + its index), and
+ * the flame of darkness's: a later talk is a box and the question
+ * (ScriptsChoice; session 78). Past the Net Square's flags (0x1480-0x14D0,
+ * its own RAM, thrown away on the way home), cleared as a layer begins. */
+#define LAYER_TOLD_BASE  0x14D1
+#define LAYER_TOLD_FLAME (LAYER_TOLD_BASE + LAYER_MAX_CHOICES)
 /* The first layer's gift was chosen. */
 #define LAYER_GIFT_FLAG 0x144D
 /* L has told where they are on this layer, so its next L says the rest
@@ -91,6 +97,7 @@ typedef struct {
 	int nmd;                   /* the Mystery Data placed, each one's MYSTERY_* colour and layer.obj index (its flag MAPSLOT_MD_FLAG + its index) */
 	uint8_t md_colour[16], md_obj[16];
 	uint32_t md_find[16];      /* ... and what each holds: its content's kind << 16 | its value (a chip's id, zenny), for the run's counts */
+	int16_t md_x[16], md_y[16], md_z[16];   /* ... and where each stands in world units (the shared dive's shimmer, dive_traces.c) */
 	int lib_prize[3];          /* a dark layer's prizes by its par (docs/game/liberation/): two under and at par a chip, over zenny; their scripts, -1 none */
 	int lib_loot[6];           /* ... its board's chips found in item panels (liberation_board.h's LIB_LOOT, by their loot index), -1 none */
 	int lib_zenny;             /* ... and its zenny found (lib_zenny's), -1 none */
@@ -165,6 +172,10 @@ extern int layer_objs_official_level;
  * layer_objs_dark_first). It stands in its last bystander's place. */
 extern int layer_objs_dark_flame;
 extern const char *layer_objs_dark_chip;
+/* NPCs a part above the layer adds to each layer's list as it is built,
+ * after the layer's own (the shared dive's other divers, dive_people.h; the
+ * layer's generation and objects stay what its seed makes); NULL none. */
+extern void (*layer_objs_more)(NpcList *npcs);
 /* ... one BN6's own rule plays (docs/game/meta/bn6-darkchips.md): its
  * words' pieces, NULL for BN5's own */
 extern const ScriptsDark6 *layer_objs_dark6;

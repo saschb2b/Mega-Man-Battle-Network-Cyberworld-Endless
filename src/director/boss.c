@@ -32,6 +32,8 @@
 #define WALK_NEAR   52   /* world units from the guardian MegaMan walks up to, where he has no place beside him */
 #define WALK_FRAMES 100  /* his steps up to a guardian, at most */
 #define STAND_NEAR  4    /* world units from his place beside the guardian he stops at */
+#define BN6_VERSIONS 3   /* a guardian of BN6's: V1, EX, SP (lab_navis.c's) */
+#define MOVED_VERSIONS 4 /* another game's: V1, V2, V3, SP */
 
 enum {
 	B_NONE,      /* no guardian on this layer */
@@ -70,6 +72,7 @@ static struct {
 	GuardianStage g;
 	Encounter fought;        /* his battle, as it was forced (the run log's), */
 	int fought_hp;           /* ... and the HP he spawns with */
+	int party;               /* the shared dive's party fighting him next (1 alone; boss_party_set) */
 	bool soul_new;           /* BN5's guardian beaten, his Soul new to the run: his data's words told it (souls.h) */
 	/* how his battle stands, its last frame his record's (rivals.h):
 	 * MegaMan's form while he stands, and each side's HP and max */
@@ -190,6 +193,7 @@ void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
 		fprintf(stderr, "guardian %d at %d %d, arena entered along %d, MegaMan meets him at %d %d facing %d\n", g->navi, g->x, g->y,
 			layer.arena_dir, g->stand_x, g->stand_y, g->stand_face);
 	B.door = B.door_taken = false;
+	B.party = 1;
 	emu_encounters_hold(false);
 	round_set(g->bracket ? 0 : 2);
 	to(g->navi ? B_WAIT : B_NONE);
@@ -240,6 +244,9 @@ static void wait_update(void) {
 	 * free (the owner's: bigger RPGs save before a boss), so a quit in the
 	 * fight goes on from here, not from the layer's start */
 	if (!B.door_taken) { B.door = B.door_taken = true; return; }
+	/* (the shared dive's party forming at the door: the staging waits on
+	 * its leader, boss_door_hold) */
+	if (boss_door_hold && boss_door_hold()) return;
 	/* the arena closes around MegaMan, who steps up to the guardian */
 	cinema_input(CINEMA_WALK);
 	cinema_letterbox(true);
@@ -264,6 +271,20 @@ static void reward_taught(void) {
 	if (soul || form || board) profile_save();
 }
 
+/* A party's guardian (the shared dive, docs/online/shared-dive.md): two
+ * meet his next version, three or four the one after, as far as his
+ * versions go (`most`); past them his HP alone grows (party_hp) */
+static int party_version(int version, int most) {
+	int steps = B.party >= 3 ? 2 : B.party == 2 ? 1 : 0;
+	if (B.g.bracket || super_boss(B.foe)) return version;
+	return version + steps < most ? version + steps : most - 1;
+}
+
+static int party_hp(int hp) {
+	long n = (long)hp * (B.party > 1 ? B.party : 1);
+	return n > PARTY_HP_MOST ? PARTY_HP_MOST : (int)n;
+}
+
 /* No question after his words: the battle begins, the player's again. */
 static void fight_begin(void) {
 	cinema_input(CINEMA_FREE);
@@ -272,7 +293,9 @@ static void fight_begin(void) {
 	 * version his act's band takes: docs/game/bosses/bn5-navis.md,
 	 * bn4-navis.md) */
 	bool moved = guardian_moved(B.foe), round = B.g.bracket && B.round < 2;
-	Encounter e = moved ? xguardian_encounter(B.foe, B.foe_version) : make_boss(run.depth, run.biome, B.foe);
+	int version = moved ? party_version(B.foe_version, MOVED_VERSIONS) : 0;
+	Encounter e = moved ? xguardian_encounter(B.foe, version) : make_boss(run.depth, run.biome, B.foe);
+	if (!moved) e.foes[0].version = party_version(e.foes[0].version, BN6_VERSIONS);
 	emu_encounters_hold(false);
 	/* (a bracket's round at its own version: run_bracket_draw) */
 	if (round && !moved) e.foes[0].version = B.foe_version;
@@ -282,16 +305,20 @@ static void fight_begin(void) {
 	e.held = true;
 	/* (a tenth more HP each notch of the Net's clock, docs/world/home/: on his
 	 * own HP, or on BN5's held to the act's band, as he spawns) */
-	int own = moved ? xguardian_hp(B.foe, B.foe_version) : navi_hp(e.foes[0].family, e.foes[0].version);
-	int fought = moved ? xguardian_hp_fought(B.foe, B.foe_version, run.depth) : own;
+	int own = moved ? xguardian_hp(B.foe, version) : navi_hp(e.foes[0].family, e.foes[0].version);
+	int fought = moved ? xguardian_hp_fought(B.foe, version, run.depth) : own;
 	if (round && moved) fought = B.g.rounds.hp[B.round];
 	/* (a special route's last boss at the endless Nest: the Cybeast's HP) */
 	if (run.biome == BIOME_NEST && run.side_kind == LAYER_NORMAL) fought = run_nest_hp(run.depth, B.g.navi, fought);
-	B.fought_hp = pacing_clock_hp(fought, run.clock);
-	emu_battle_hp(own, B.fought_hp);
+	B.fought_hp = party_hp(pacing_clock_hp(fought, run.clock));
 	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d%s\n", B.foe, e.foes[0].id, e.foes[0].version, own,
 		B.fought_hp, B.g.bracket ? B.round == 0 ? " (round 1)" : B.round == 1 ? " (round 2)" : " (the final)" : "");
 	B.fought = e;
+	/* (the shared dive's party on one field: its own core fights him,
+	 * party_play.c; else this one, his HP raised at his spawn: a fight after
+	 * a party's, the hook still set, had left him at his own) */
+	if (boss_party_fight && boss_party_fight(&e, own, B.fought_hp)) return;
+	emu_battle_hp(own, B.fought_hp);
 	emu_battle_force(&e);
 }
 
@@ -465,6 +492,14 @@ void boss_update(void) {
 }
 
 bool boss_fighting(void) { return B.state == B_FIGHT; }
+
+bool (*boss_door_hold)(void);
+
+bool boss_at_door(void) { return B.state == B_WAIT && B.door_taken; }
+
+void boss_party_set(int n) { B.party = n < 1 ? 1 : n; }
+
+bool (*boss_party_fight)(const Encounter *e, int own_hp, int fought_hp);
 
 void boss_battle_frame(void) {
 	if (B.state != B_FIGHT) return;
