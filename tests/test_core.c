@@ -5332,7 +5332,7 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
