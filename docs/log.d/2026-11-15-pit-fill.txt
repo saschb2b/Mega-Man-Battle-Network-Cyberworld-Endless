@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T02:01:17Z
-* **Update**: world/level-design/generator.md (Navigation: no pit between walkways, a void panel with floor on four sides and void on a corner filled by fill_pits; 19 in 18 of the tests' 300 layers before, none between walkways now).
