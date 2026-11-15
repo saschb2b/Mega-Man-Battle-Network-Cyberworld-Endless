@@ -156,6 +156,7 @@ static void card(int x, int y) {
  * in heavy capitals, here and on the card, whose zero is slashed: the
  * list's and the chat font's O is a zero's oval */
 #define NAME_X 26
+#define CURSOR_WAITS 96   /* the cursor's alpha while A waits */
 #define CODE_X (NAME_X + 8 * 9)
 static void row(SDL_Rect f, int r) {
 	int y = f.y + 2 + r * row_h();
@@ -177,7 +178,9 @@ static void row(SDL_Rect f, int r) {
 		} else snprintf(name, sizeof name, "%s", reward_pick_hp_name());
 	}
 	text_draw_cells(f.x + NAME_X, y + 1, name, LOOK_TEXT, LOOK_SHADE);
-	if (r == RP.cursor) look_cursor(f.x - 3, y + 2);
+	/* (still and faded while A would take nothing: reward_pick_state.h) */
+	if (r == RP.cursor && reward_pick_ready()) look_cursor(f.x - 3, y + 2);
+	else if (r == RP.cursor) look_cursor_scaled(f.x - 3, y + 2, 1, CURSOR_WAITS);
 }
 
 /* ---- the information box ---- */
