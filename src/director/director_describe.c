@@ -184,6 +184,14 @@ static void describe_home(FILE *f) {
 	fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
 }
 
+/* The arrow's heal first, the shortest walk there since L named it, or
+ * MegaMan turned away from it (heal_turn_watch) */
+static void describe_heal(FILE *f) {
+	int hx, hy;
+	if (heal_first(&hx, &hy)) fprintf(f, "heal first at %d %d, nearest %d\n", hx, hy, D.heal_near - 1);
+	else if (D.heal_declined) fprintf(f, "heal turned away from\n");
+}
+
 /* For the developer reproducing a playtest (CYBERWORLD_STATE_POS): where
  * Lan or MegaMan is, the floor around him, the layer drawn in letters
  * (=map), and the game's NPC objects near him */
@@ -216,11 +224,7 @@ static void describe_pos(FILE *f) {
 			fprintf(f, "panel %d %d (centre %d %d)\n", cx, cy, wx, wy);
 			goal_way();
 			fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
-			/* (the arrow's heal first, the shortest walk there since, or
-			 * MegaMan turned away from it: heal_turn_watch) */
-			int hx, hy;
-			if (heal_first(&hx, &hy)) fprintf(f, "heal first at %d %d, nearest %d\n", hx, hy, D.heal_near - 1);
-			else if (D.heal_declined) fprintf(f, "heal turned away from\n");
+			describe_heal(f);
 			for (int y = cy - 4; y <= cy + 4; ++y) {
 				fprintf(f, "cells ");
 				for (int x = cx - 4; x <= cx + 4; ++x)
