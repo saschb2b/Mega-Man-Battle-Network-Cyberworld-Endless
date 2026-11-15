@@ -115,7 +115,14 @@ anything before the screen has been up a second and a half
 A about once a second through Mr.Prog's lines had the next press land
 55 frames after the gift's screen opened, past both rests, and take
 its first row unseen (session 76). An A held from before the screen
-opened counts only once released and pressed again. The hold is A's
+opened counts only once released and pressed again. The cursor shows
+which: held still and faded while A would take nothing, it bobs in full
+from the frame A would take (`reward_pick_ready`, the same test the key
+makes). Without it a first A pressed at the screen in its second and a
+half, the choice seen, did nothing, three picks of three, and read as a
+frozen screen (session 78); the press that took the gift unseen came at
+the same time after the screen opened, so the time alone cannot tell
+them apart, and the arrow tells the player instead. The hold is A's
 alone, for every kind: Up and Down move once the fade is done, and B
 takes nothing (it leaves a pick that keeps, or goes to the draft's
 skip row). No confirmation follows A: the
