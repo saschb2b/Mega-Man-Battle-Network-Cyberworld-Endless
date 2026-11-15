@@ -408,10 +408,12 @@ static void stair_layers(const char *dir, FILE *report, int biome, int area, int
 
 /* (dev) A floor drawn by hand in `area`'s tiles, as it stands (no cell
  * changed): the rows of the file CYBERWORLD_FLOOR names, '.' void, '#' floor,
- * 'P' a pad's floor; its picture hand_bNN.bmp, its breaks marked in
- * seams_hand_bNN.bmp. What shapes an area's art draws whole. */
+ * 'P' a pad's floor, 'R' floor on the layer's way (a road where the area has
+ * one: a run of them with two ends, docs/world/level-design/roads.md); its
+ * picture hand_bNN.bmp, its breaks marked in seams_hand_bNN.bmp. What shapes
+ * an area's art draws whole. */
 static void hand_floor(const char *dir, int area) {
-	static uint8_t cell[MAP_H][MAP_W], pad[MAP_H][MAP_W];
+	static uint8_t cell[MAP_H][MAP_W], pad[MAP_H][MAP_W], way[MAP_H][MAP_W];
 	if (area >= NET_AREAS) { xarea_review(area); xrom_find_beside(); }
 	if (!net_area_def(area)) { printf("atlas: no area %d\n", area); return; }
 	const char *file = getenv("CYBERWORLD_FLOOR");
@@ -422,12 +424,13 @@ static void hand_floor(const char *dir, int area) {
 		for (int x = 0; row[x] && row[x] != '\n' && x + 4 < MAP_W - 4; ++x) {
 			cell[y][x + 4] = row[x] != '.' && row[x] != ' ';
 			pad[y][x + 4] = row[x] == 'P';
+			way[y][x + 4] = row[x] == 'R';
 		}
 	fclose(f);
 	run_new(1);
 	memset(&layer, 0, sizeof layer);
 	layer.arena = layer.sig_room = layer.exit_room = -1;
-	NetLayout lay = { MAP_W, MAP_H, &cell[0][0], NULL, NULL, 0, NULL, 0, 0, 0, 0, 0, 1, &pad[0][0], NULL, 0, NULL, 0, NULL };
+	NetLayout lay = { MAP_W, MAP_H, &cell[0][0], NULL, NULL, 0, NULL, 0, 0, 0, 0, 0, 1, &pad[0][0], NULL, 0, NULL, 0, &way[0][0] };
 	memset(&tiles_stats, 0, sizeof tiles_stats);
 	if (!netmap_build(area, &lay)) { printf("atlas: the floor was not built\n"); return; }
 	int tw, th;
