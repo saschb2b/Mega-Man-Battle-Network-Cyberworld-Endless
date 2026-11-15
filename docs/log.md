@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: engine/updates.md (the update box: the release's notes a page an entry, Update now and Later as buttons with their keys, once a version; the title's note and SELECT: Update hint; update.json's changes from the players' notes), GUIDE.md (Updates: the box), code/update.md (`options_news.c`, the title's hint, the tool's notes, their tests), code/core.md (`options_news.c`), code/tests.md (`test_update_manifest.py`).
+* **Update**: engine/updates.md (The pictures: each entry's first picture in update-pictures.bin, fetched, checked and shown at half scale, SELECT whole), GUIDE.md (Updates: the pictures), code/update.md (`update_pictures.c`, the tool's pictures, their tests).
 * **Update**: GUIDE.md (On a PSP: the release's zip, where the ROM goes, offline, BN6 alone, updated by unpacking over it; its rows in what you need, the files and the updates), code/platforms.md (`psp/`'s row: `cyberworld-endless-psp.zip`, its layout and `SOURCE.txt`), project/itch.md (the `psp-zip` channel and its display name).
 * **Create**: releases/v0.22.0.md (0.22.0's players' notes, drafted while dev's bugfixes land: cloud saves, saves by a code, the game's own updates, the New 3DS's 3D, the faster net, the playtests' fixes; pictures and the trailer to come before the tag). **Update**: releases/overview.md and releases/index.md (its line).
 * **Update**: releases/v0.22.0.md (the PSP joins the systems: its section and the opening paragraph's line).
