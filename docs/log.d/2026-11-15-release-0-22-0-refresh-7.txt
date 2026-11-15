@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T09:30:00Z
+* **Update**: releases/v0.22.0.md (#617's own entry written in first among the fixes: GutsMan's Guardian Data after a CONTINUE, its reporter credited).
