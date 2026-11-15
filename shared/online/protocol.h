@@ -135,19 +135,19 @@
 #define ONLINE_WEEK_PARTY 2           /* WEEK_BOARD's entry flags: a guardian of the dive fought in a party */
 #define ONLINE_HELLO_NO_ARENA 8192    /* HELLO's channel word: the game's system cannot run the Arena (a linked fighter) */
 #define ONLINE_PEER_DIVING 128        /* SNAPSHOT's per-peer byte, bit 7: he dives (a dive room's peers) */
-#define ONLINE_DIVE 36                /* client -> server: u8 action, then that action's fields */
-#define ONLINE_DIVE_ROOM 37           /* server -> client: the room entered */
-#define ONLINE_DIVE_TRACES 38         /* server -> client: u8 kind, u8 count, entries */
-#define ONLINE_DIVE_PLACE 39          /* server -> client: a split's place */
-#define ONLINE_DIVE_FEED 40           /* server -> divers and the Square: who fell, who won, a party's guardian down, a flare */
-#define ONLINE_DIVERS 41              /* server -> divers and the Square: how many dive, and where */
-#define ONLINE_CREW 42                /* client -> server */
-#define ONLINE_CREW_STATE 43          /* server -> client */
-#define ONLINE_QUEUE 44               /* client -> server: a guardian door's queue */
-#define ONLINE_QUEUE_STATE 45         /* server -> client */
-#define ONLINE_PARTY_DAMAGE 46        /* linked fighter -> server -> seat 0 (as ARENA_SEAT) */
-#define ONLINE_PARTY_HP 47            /* seat 0 -> server -> the linked fighters */
-#define ONLINE_WEEK_SPLITS 48         /* server -> client, with WEEK_BOARD */
+#define ONLINE_DIVE 41                /* client -> server: u8 action, then that action's fields */
+#define ONLINE_DIVE_ROOM 42           /* server -> client: the room entered */
+#define ONLINE_DIVE_TRACES 43         /* server -> client: u8 kind, u8 count, entries */
+#define ONLINE_DIVE_PLACE 44          /* server -> client: a split's place */
+#define ONLINE_DIVE_FEED 45           /* server -> divers and the Square: who fell, who won, a party's guardian down, a flare */
+#define ONLINE_DIVERS 46              /* server -> divers and the Square: how many dive, and where */
+#define ONLINE_CREW 47                /* client -> server */
+#define ONLINE_CREW_STATE 48          /* server -> client */
+#define ONLINE_QUEUE 49               /* client -> server: a guardian door's queue */
+#define ONLINE_QUEUE_STATE 50         /* server -> client */
+#define ONLINE_PARTY_DAMAGE 51        /* linked fighter -> server -> seat 0 (as ARENA_SEAT) */
+#define ONLINE_PARTY_HP 52            /* seat 0 -> server -> the linked fighters */
+#define ONLINE_WEEK_SPLITS 53         /* server -> client, with WEEK_BOARD */
 #define ONLINE_DIVE_ENTER 1           /* DIVE's actions ... */
 #define ONLINE_DIVE_LEAVE 2
 #define ONLINE_DIVE_END 3

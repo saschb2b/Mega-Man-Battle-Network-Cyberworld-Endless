@@ -475,13 +475,13 @@ static void week(void) {
 
 static void dive_sent(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
-	static const uint8_t enter[] = { 36, 1, 11, 147, 245, 33, 254, 54, 3, 2, 7 };
-	static const uint8_t end[] = { 36, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145 };
-	static const uint8_t phrase[] = { 36, 5, 4, 0, 10, 255, 236, 0, 0 };
-	static const uint8_t split[] = { 36, 7, 0, 1, 44, 9, 1, 2 };
-	static const uint8_t crew[] = { 42, 4, 0, 0, 0, 0, 0, 3, 1, 9 };
-	static const uint8_t queue[] = { 44, 1, 3, 0, 1 };
-	static const uint8_t damage[] = { 46, 0, 0, 0, 77, 0, 120, 0, 80 };
+	static const uint8_t enter[] = { 41, 1, 11, 147, 245, 33, 254, 54, 3, 2, 7 };
+	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145 };
+	static const uint8_t phrase[] = { 41, 5, 4, 0, 10, 255, 236, 0, 0 };
+	static const uint8_t split[] = { 41, 7, 0, 1, 44, 9, 1, 2 };
+	static const uint8_t crew[] = { 47, 4, 0, 0, 0, 0, 0, 3, 1, 9 };
+	static const uint8_t queue[] = { 49, 1, 3, 0, 1 };
+	static const uint8_t damage[] = { 51, 0, 0, 0, 77, 0, 120, 0, 80 };
 	DiveWay way = { 3, 2, 7 }, none = { 0, 0, 0 };
 	assert(dive_wire_enter(m, 2963, 0xF521FE36u, way) == sizeof enter && !memcmp(m, enter, sizeof enter));
 	assert(dive_wire_end(m, ONLINE_DIVE_DELETED, -5, 6, 0, 0x91) == sizeof end && !memcmp(m, end, sizeof end));
@@ -510,9 +510,9 @@ static void dive_sent(void) {
 }
 
 static void dive_heard_traces(void) {
-	static const uint8_t phrases[] = { 38, 2, 1, 0, 0, 0, 7, 65, 108, 112, 104, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 10, 255,
+	static const uint8_t phrases[] = { 43, 2, 1, 0, 0, 0, 7, 65, 108, 112, 104, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 10, 255,
 		236, 0, 0, 0, 1 };
-	static const uint8_t marks[] = { 38, 1, 1, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 251, 0, 6, 0, 0, 0, 145, 1 };
+	static const uint8_t marks[] = { 43, 1, 1, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 251, 0, 6, 0, 0, 0, 145, 1 };
 	static DiveTraces t;
 	assert(dive_wire_traces(phrases, sizeof phrases, &t) && t.kind == ONLINE_TRACE_PHRASES && t.count == 1);
 	assert(t.u.phrases[0].id == 7 && !strcmp(t.u.phrases[0].name, "Alpha") && t.u.phrases[0].phrase == 4 && t.u.phrases[0].y == -20 &&
@@ -543,10 +543,10 @@ static void dive_heard_traces(void) {
 }
 
 static void dive_heard_rooms_and_feed(void) {
-	static const uint8_t room[] = { 37, 11, 147, 3, 2, 7, 0, 1, 2 };
-	static const uint8_t feed[] = { 40, 3, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 3 };
-	static const uint8_t place[] = { 39, 0, 1, 0, 250, 0, 2, 0, 2, 0, 200, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-	static const uint8_t divers[] = { 41, 0, 3, 2, 71, 97, 109, 109, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 0, 65, 108, 112, 104,
+	static const uint8_t room[] = { 42, 11, 147, 3, 2, 7, 0, 1, 2 };
+	static const uint8_t feed[] = { 45, 3, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 3 };
+	static const uint8_t place[] = { 44, 0, 1, 0, 250, 0, 2, 0, 2, 0, 200, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const uint8_t divers[] = { 46, 0, 3, 2, 71, 97, 109, 109, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 0, 65, 108, 112, 104,
 		97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 1 };
 	DiveRoom r;
 	assert(dive_wire_room(room, sizeof room, &r) && r.week == 2963 && r.way.depth == 3 && r.way.side == 2 && r.way.way == 7 &&
@@ -575,7 +575,7 @@ static void dive_heard_rooms_and_feed(void) {
 static void dive_heard_crews_and_parties(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE] = { 0 };
 	/* (CREW_STATE formed, two members, the second on a portal: protocol.crew_state's bytes, its zeros past them) */
-	static const uint8_t crew[] = { 43, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1, 65, 108, 112, 104, 97 };
+	static const uint8_t crew[] = { 48, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1, 65, 108, 112, 104, 97 };
 	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 9 };
 	memcpy(m, crew, sizeof crew); memcpy(m + 7 + ONLINE_CREW_MEMBER_BYTES, mate, sizeof mate);
 	CrewState c;
@@ -584,7 +584,7 @@ static void dive_heard_crews_and_parties(void) {
 	m[1] = 7; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
 	m[7 + 3] = 0; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 3] = 1;   /* (a hole before a member) */
 	/* (QUEUE_STATE waiting: Beta leads, his system runs the Arena; Gamma's does not; the recipient second) */
-	static const uint8_t queue[] = { 45, 1, 3, 0, 1, 2, 2, 0, 0, 0, 5, 66, 101, 116, 97 };
+	static const uint8_t queue[] = { 50, 1, 3, 0, 1, 2, 2, 0, 0, 0, 5, 66, 101, 116, 97 };
 	static const uint8_t second[] = { 0, 0, 0, 6, 71, 97, 109, 109, 97 };
 	memset(m, 0, sizeof m); memcpy(m, queue, sizeof queue); m[7 + 20] = ONLINE_QUEUE_ARENA;
 	memcpy(m + 7 + ONLINE_QUEUE_ENTRY_BYTES, second, sizeof second);
@@ -604,7 +604,7 @@ static void dive_heard_crews_and_parties(void) {
 	m[26] = 2; m[1] = ONLINE_ARENA_SEAT_GONE; assert(dive_wire_party_state(m, sizeof start, &s) && s.seat == 2);
 	m[1] = 2; assert(!dive_wire_party_state(m, sizeof start, &s));
 	/* (a linked fighter's damage at seat 0, seat 0's HP at the linked) */
-	static const uint8_t damage[] = { ONLINE_ARENA_SEAT, 2, 46, 0, 0, 0, 77, 0, 120, 0, 80 };
+	static const uint8_t damage[] = { ONLINE_ARENA_SEAT, 2, ONLINE_PARTY_DAMAGE, 0, 0, 0, 77, 0, 120, 0, 80 };
 	unsigned seat, dealt, hp, max_hp;
 	uint32_t battle;
 	assert(dive_wire_damage(damage, sizeof damage, &seat, &battle, &dealt, &hp) && seat == 2 && battle == 77 && dealt == 120 && hp == 80);
