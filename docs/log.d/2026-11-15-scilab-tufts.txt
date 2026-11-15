@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T18:31:49Z
-* **Update**: world/level-design/side-pieces.md (BN5's SciLab Area's row, nothing taken, and a section on its wire tufts: drawn into its circuits' green upper edge, which no layer draws, so none fits; cut with their rim's tiles, 0 of 42 tries).
