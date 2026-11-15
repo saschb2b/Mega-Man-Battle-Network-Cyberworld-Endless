@@ -385,7 +385,8 @@ seen; the opening plan of 21 October is still unplayed by a person.
   in act 6 the Mystery Data's chips spread over 219 kinds rather than
   172, a third of the finds fit the folder rather than half, and a median
   run holds 17 chips of one code rather than 19; act 1's dealer adds
-  "Deeper in,Mystery Data too!".
+  "Mystery Data's too,deeper in!" (one box with his codes since 15
+  November 2026, [the main path's words cut](../voice/sweep/main-path.md)).
 - **The Server's prize a pick of one from three** on the vault's screen:
   the riskiest optional fight pays a decision, not a roll. Built 26
   October 2026 ([the structure](progression/structure.md), Risk the player

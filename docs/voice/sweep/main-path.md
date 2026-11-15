@@ -1,7 +1,7 @@
 ---
 type: Review Log
 title: "Voice sweep: the main path's words cut"
-description: "Log of the 26 October 2026 cuts of the words a run's main path pages through (Phase 1 of the core loop's review): the Guardian Data chain in two passes, arrival talk and the channels that name the next guardian, with the boxes counted before and after."
+description: "Log of the cuts of the words a run's main path pages through (Phase 1 of the core loop's review): 26 October 2026's Guardian Data chain in two passes, arrival talk and the channels that name the next guardian, and 15 November's Net Dealer before his list and L's briefing, with the boxes counted before and after."
 tags: [voice]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:00:00Z }
 ---
@@ -108,6 +108,54 @@ DiveMan's "His wave lights our panels? Get to our back column!"
 | `reward_words:draft_take:0` | **Let's install it!** (a program that fits; the second pass) | The draft's ask says it before every pick; L names one left off |
 | `reward_words:draft_take:2` | **We'll move one / to make room,Lan!** (the second pass) | BN6's NaviCust shows what moves; the draft offers only programs that fit once one does |
 | `reward_words:draft_menu:0` | Program data**,too**! / **Pick one!** Or B for / {skip_frags} BugFrags**,Lan**! (the second pass) | Reworded, not cut: "Let's install one!" carries the install, and the line's three fit one box at three-digit BugFrags |
+
+## The Net Dealer and L, a third pass
+
+15 November 2026, from session 76's playtest (and session 73's "the
+dealer's seven boxes before his list"): a Net Dealer's first visit paged
+seven and eight boxes before his list, and L on a busy layer six, then
+nine more at a second press, against 0.17.0's "fewer words on the way".
+Counted on `--talk shop:430` and `--talk status:430` captures
+(`--run-depth 2 --seed 3`, this build beside `dev`'s) and the playtesters'
+pictures:
+
+| Where | Before | After |
+| --- | --- | --- |
+| Act 1's first dealer, his list's first row his pick and purple data on the layer | 6 | 3 (his codes, his word, the Unlocker) |
+| An act's first dealer past act 1, a gap on his layer (session 76, kai7) | 8 | 2 (his word, the gap) |
+| A first dealer before the net's word has come back (session 76, kai5) | 7 | 1 |
+| L on a busy layer (the older Net's viruses, ProtoMan, a flame, three services, purple data), two presses | 3 + 9 | 5 + 2 |
+
+The dealer (`layer_words.c`, `dealer_words`): one box before his list,
+his word on the guardian if the net's word has come back ("Word
+is,BlastMan can't stand Aqua! My pick's first!"), else his greeting; on
+the run's first act his codes in one box ("Chips in your codes! Mystery
+Data's too,deeper in!", the rule [the core loop's review](../../game/core-loop.md)
+has him say); a box for each key whose lock is on his layer. Cut: "Ask
+me again deeper in" and the two boxes before it, the count he brought
+(his list's), the keys for deeper in (each lock names its key at A, R
+his list's use of it), "Welcome!" where his word stands (his list's own
+box says it).
+
+L (`briefing_words.c`, `status_words`): his first words name two things
+worth a detour at most, by their worth: ProtoMan waiting, a flame of
+darkness, one of the map's violet marks ("I sense a dark warp to the
+upper left!"), Mystery Data behind a lock; then a program off the
+board, the map's tip on the first layers, the heal while hurt and the
+way. "There's more here,Lan." and the second press's list of every
+service, mark and set piece went: the map's key marks the services, the
+marks and the shut locks, and each piece says itself at A. A later L
+says the heal while hurt, ProtoMan while he waits and the way, as the
+third press did. What the playtests relied on stays: the dealer's word
+and his pick first (sessions 32 to 36), the dealer's MiniEnrg at low HP
+and the heal and the way first (sessions 32, 63).
+
+A box a playtester needed two A presses on, its arrow showing, is BN6's
+own: `chatbox_E7_buttonhalt` (bn6f, `ts_key_wait`, which every box of
+ours and 24,689 of BN6's end with) shows the arrow at once and takes A or
+B only after 5 frames; a press that lands in those frames is lost
+(replayed from kai7's session at frame 22568: the arrow up at 154, the
+press at 158 lost, the next taken).
 
 ## Kept, and why some stay
 
