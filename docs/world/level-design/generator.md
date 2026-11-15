@@ -124,6 +124,47 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   (`fill_pits`): over the tests' 300 layers, 19 in 18 layers before, none
   between walkways now (`test_way_shapes` holds it), 5 left inside the
   fields of guardians' layers.
+- **A walkway the way enters only from its line widens first** (15
+  November 2026). Four playtesters stopped at walkway mouths in every
+  kind of area (session 78), the walkway's own direction and the arrow's
+  first one doing nothing until a straight direction held lined MegaMan
+  up. Replayed, the stops sorted so: on the way, a walkway stepping one
+  panel aside at its mouth (Seaside's arrival), or turned into off a
+  platform's side; off it, the guardian's gate at the antechamber's
+  corner after a talk to the dealer or the heal in its middle (BN4's
+  ACDC and Town Areas, the Lab's comp), a Mystery Data's spur off the
+  middle of a side (BN5's ACDC Area), a junction after a talk (Central).
+  The gate at a corner is the friendliest one-wide mouth there is: the
+  straight direction towards that corner slides him along the edges and
+  in from anywhere in the room, and the arrow shows it; the stops off
+  the way are BN6's walk, as in Capcom's maps. On the way, the walkways
+  entered by a turn on wide floor that goes on past it, a turn within
+  their first two panels or a one-panel step aside now widen to two
+  panels before any other, whatever the area's cap (`net_way.c`,
+  `widen_lined`): a band's width or the floor's edge takes him in. Over
+  the tests' layers (`test_way_shapes`), such entries fell from 211 to
+  77 in the plain areas, 118 to 58 in the comps, 40 to 9 at the
+  homepages and 277 to 135 in the other games' areas (BN5's End Area and
+  BN4's Town Area keep their one-wide way); the turns into a walkway on
+  wide floor from 170 to 80, the jogs from 49 to 20, the short legs from
+  150 to 44, and the ways past their area's count from 63 of 1140 to
+  50.
+  The Seaside arrival's step aside was no generator's: it widened that
+  walkway, and the legalizer, keeping only what Seaside's tiles show,
+  wore it back into the step, as it wore the other games' areas' ways
+  before their floor was kept (below). So the way's floor is kept in
+  BN6's own areas too (`layer_way_floor`, `netmap.c`). On the floor as
+  built (the atlas, four seeds of every area's layouts, 556 layers), the
+  lineups on the walks to the goal and the dealers fell from 279 to 215
+  in the plain areas, 263 to 231 in the comps, 151 to 98 at the
+  homepages and 835 to 799 in the other games' areas, the junctions from
+  145 to 96, 169 to 149, 13 to 9 and 349 to 337; the widening alone,
+  worn by the legalizer, had left Seaside's at 37 of 37 and raised the
+  comps' to 276. The tiles' breaks fell from 58.7 to 57.1 a hundred
+  panels in the plain areas and 2.4 to 1.9 at the homepages and rose
+  from 79.8 to 84.2 in the comps (CopyBot's and the Aquarium's), the
+  seams fell in every kind, and the panels not drawn exactly moved by
+  less than one a hundred.
 - **The other games' areas keep the way they were given** (15 November
   2026). BN4's and BN5's areas are laid out as the BN6 area each is like
   (`NetAreaDef.like`) and drawn in their own art, and playtesters stalled
