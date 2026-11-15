@@ -1,0 +1,1 @@
+The scenery cut takes a tile of one colour off the floor where art free of the floor lies on its four sides (decor.c, inside): BN5's Undernet's skull totems, whose middles its stored palette draws in one colour, are scenery on its layers (their tiles and the seed's other scenery rolls change there).

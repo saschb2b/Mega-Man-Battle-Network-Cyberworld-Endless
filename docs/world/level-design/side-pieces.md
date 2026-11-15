@@ -89,8 +89,10 @@ Taken per area as looked at, as every laying rule is
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
 | BN5's Nebula Area | nothing: its dripping pods and pools are drawn into its plates' corners and its paths' ends, which its layers lay; no cut learns a piece from its maps (below) | - |
+| BN5's Undernet | nothing that grips, hangs under or stands behind its floors; in the void beside them, on the first layer, its skull totems, which are scenery (below), 4 looks | the skull totems |
 | BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
+| Judge Tree Comp | nothing on the second layer; on its walkways' edges, in the floor's own tiles, the tufts on its back rims and the planters stacked at its walls' feet, 139 looks over its four maps (below). Not placed: its stumps with their tree houses, doors, bridges and roots, and its tree's red court with the tree and the terminal on it, floor of another kind (the stumps its pads' look, the court skipped on purpose, `skip_styles`; issue #505's kinds 3-5) | what grows on the edges |
 | Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
@@ -98,6 +100,7 @@ Taken per area as looked at, as every laying rule is
 | Green Area | nothing: its second layer holds its potted bushes (set by a rule of their own), the blue-framed plates and warp discs on its raised grass, arrow panels' frames, a pad's centrepiece and its stairs, and in Green Area 2 the NetCafe desk, which means a shop; nothing stands under or behind its floors (below) | - |
 | Sky Area | nothing: what its maps leave undrawn is raised floor, pods, stairs and roads, or stands on the floor alone; behind its fields' edges the cut takes a scrap of a pod's arm (below) | no |
 | BN5's Liberation boards (BN5 dark 1-9) | nothing set: on their second layer the panels' middles alone, which a board's panel looks cover; on the first, slime and lava blobs on the floors' corners, fins on the back rims and drips under the faces, all drawn into the floor's own rim and face tiles (below) | no |
+| The Graveyard | nothing: its one map's second layer holds only its ramps' slats; at its raised floor three scraps of floor and rim, which fit no layer; no scenery (below) | - |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -145,6 +148,70 @@ stands behind one in front of a lower edge, his feet on the floor above
 it (captured on a Nest layer, seed 4). A Glitch flip into the Nest
 draws them too: they are set in the tiles' own pass (`pick_map`) from
 what the area learned, and need nothing but their tiles.
+
+## What grows on a floor's edge (`edges_learn`; verified on the maps and in the game)
+
+The Judge Tree's walkways carry two things the rules above cannot cut, as
+its four maps were looked over beside the tile test's tinted copies (its
+unused tiles in red; 15 November 2026). Both lie on the first layer in the
+very tiles that draw the floor's rim and wall, so no group of tiles off
+the floor holds them:
+
+- **tufts of grass** on the back rims, a little mound with green blades
+  rising 4 to 6 pixels over the rim, at the back corners and along the
+  back edges, some 30 to 40 a map (2 to 3 tiles each, the rim's tiles
+  among them);
+- **planters stacked at the walls' feet**, two to four brick boxes of
+  green, the upper on the wall, the lower hanging below its foot, some 9
+  to 12 stacks a map, and lone planters whose box pokes below the wall.
+
+The planters on the walls themselves are the floor's own art and were
+already drawn.
+
+A first-layer tile grows on the floor where it draws 4 pixels or more past
+the floor's body: off every ground panel's top, more than 3 pixels over
+it (a plain back rim's outline stands 2 over its top, the tufts' blades 4
+to 6) and more than the walls' height under it (25 pixels on the Judge
+Tree's maps, the book's `face`). Tiles that do, joined eight ways, are one
+piece, 24 at most, cut whole with the ring of tiles round it that draw the
+floor's art, 8 pixels of it or more (the mound under a tuft's blades, a
+planter's top on the wall; a planter's corner that only lies where a wall
+would is no wall), 48 at most. It is a tuft where more of its floor's art is rim than wall,
+gripping the panel straight under it; else a planter, gripping the panel
+straight over it. With it go the panels of its neighbourhood, as a side
+piece's, and every panel whose top, rim or wall could draw in its tiles
+(the walls of the panels over it, the rims of those under it), 32 at most,
+each as ground floor or none: a wall of a walkway further back reaching
+down to a tuft cut a notch in it on a layer until that was asked. A piece
+is kept only where its panel and every floor round it is the area's own
+walkway floor (`tiles_src_panels`), so nothing is cut from its stumps or
+its court. Each look is kept once: 74 tufts and 65 planters over the four
+maps, which is more than the book's 24 its other kinds keep, so a book
+grows as looks come (an area without any holds none).
+
+A layer sets one on two in three of its free ground panels of the same
+neighbourhood, by its seed (on every one, a long straight edge took a tuft
+every other panel), where every panel it reaches is what it is in its map,
+none a panel from another; of the looks that fit there, the first from the
+one the seed picks whose tiles go down cleanly. Its tiles that drew the
+floor's art too go over the layer's own there, which is the same art (the
+same panels round it), the rest over nothing, and each tile at its edge
+must meet the layer's tile beside it as the area's maps set those two side
+by side (`seams_seen`): a planter stack's top beside a planter the layer's
+wall already shows cut that one in two, 31 more breaks on a layer of the
+[tile test](../../devtools/tile-test.md), until that was asked. Its layers
+show the same breaks with them as without, and 12 to 17 a layer, where its
+maps carry some 45 on as many panels: mostly tufts and lone planters, the
+stacks where the wall beside them is plain.
+
+Nothing about walking changes: its tiles are the first layer's, and the
+panels under them are what they were. MegaMan stands in front of them as
+he does of the floor's rim and walls (captured on a layer: a tuft's blades
+show behind his helmet as he stands on the rim's panel); none stands where
+he could pass behind it, a tuft behind a rim over the void and a planter
+under a wall. They are set in `pick_map`'s pastes from the area's
+`Learned` alone, so a [Glitch layer](../../game/glitch-layer.md)'s flip into
+the Judge Tree draws them too; they need no layer priorities.
 
 ## Pieces the game animates (verified in the game)
 
@@ -915,6 +982,99 @@ Whether BN5 makes the crate block the way with an object of its own was
 not checked in the game. A Glitch layer's flip into Nebula Area draws what
 it drew before: its `Learned` holds no piece.
 
+## BN5's Undernet's skull totems (scenery; verified in the ROM, the atlas and the game)
+
+BN5's Undernet (its maps 0x90:11 and 0x90:12, BN5's Undernet 2 and 3;
+the atlas's `a5`) sets one thing round its floors that its layers did not
+draw: skull totems, a skull on a plinth, 4 by 5 tiles (17 drawn), in the
+void beside its walkways and plates, mostly behind their upper edges, a
+few in front of their lower ones, 11 in Undernet 2 and 14 in Undernet 3
+(and 8 in Undernet 1, which the area does not learn). Issue #505 took them
+for dark figures standing where the area's statues stand, set as objects
+(`LOOK_STATUE`). They are not: they lie on the first tile layer, in palette
+bank 12, and the statue a layer sets is BN6's own sprite, another thing.
+
+They looked like figures because the maps store bank 12 black: BN5's
+palette script for these two maps fills it as the map runs (its first
+frame the whole bank; [the ROM map](../../rom/graphics.md), Net maps'
+backdrops and animations), so the atlas's pictures drew each totem as a
+black silhouette. There are two looks, each also mirrored: one whose eyes
+are colour 14, which the script flashes red and lets fade every 360
+frames, and one whose eyes are colour 15, which it flashes teal 160 frames
+after the red has faded. Both maps hold both looks.
+
+They touch no floor, so they are [the generator](generator.md)'s scenery
+(`decor.c`), but the cut refused them: a tile of one colour is filler to
+it, and a totem's middle tiles are one colour (black) where the bank is
+stored blank, so the totem was cut in two and its rim refused as touching
+other art. A tile of one colour is no filler where its bank is stored
+blank, one colour throughout (`blank_bank`): its colours come as the map
+runs. Over every area's maps only these two have such tiles (bank 12,
+probed over the whole atlas), so no other area's scenery changed. The cut
+takes the 4 looks, Undernet 2's (Undernet 3's are the same), and a layer
+sets them as any scenery: 4 to 10 pieces a layer, each look twice at
+most, in the void within three tiles of the floor (5 to 8 a layer over
+the atlas's ten, `build.py atlas a5 2`). The layers draw 82% of Undernet
+2's different tile pictures where they drew 78%, and 75% of Undernet 3's
+where they drew 69% ([what the layers take](../../devtools/map-use.md)).
+
+A layer of the area runs the map's own animations
+([the ROM map](../../rom/graphics.md)): its totems take their colours and
+their eyes flash as in BN5 (captured, below). They lie on the first layer,
+behind MegaMan wherever he stands, as in the maps, which hold no layer
+priorities for them: he passes in front of a totem behind a walkway's
+upper edge, and one in front of a walkway's lower edge stands below his
+feet. A Glitch flip into the area sets them too (`pick_map`), but a flip
+loads the look's stored palette and backdrop, not its palette scripts
+(`glitch_look.c`), so there they would stand black (read from the code,
+not captured).
+
+What else the layers never draw in its two maps is of the kinds left to
+the owner or no piece: its exit arrows, the stone stairs (issue #505's
+kind 5), the warp pool's octagon on a plate (a warp's centrepiece), its
+magenta arrow panels (floor of another kind), and the joints of its
+plates and cobbled paths and the plates' crosses round their emblems
+(floor tiles the pick does not choose).
+
+## What the Graveyard sets round its floors (none; measured on the map and the atlas)
+
+The Graveyard has one map, Graveyard 2 (0x96:1, the atlas's `4`): its
+group's 0x96:0 and 0x96:2 are empty placeholders
+([BN4's ROM](../../rom/bn4.md), Net maps in 256 colours), and the atlas
+measures the one. Its second tile layer holds only the slats of its three
+ramps ([Net maps](../../rom/net-maps.md), Floor emblems), so nothing there
+grips, hangs under or stands behind a floor. Every rule this page has was
+run on it (15 November 2026: the atlas over the Graveyard, two seeds a
+layout, eight layers, with every cut switched on and each learned look
+printed):
+
+- the side-piece cut, with what stands under a lower edge (bit 3) and the
+  second layer's cut behind an upper edge (bit 7), takes nothing;
+- the scenery cut, the floor's faces taken 44 and 12 pixels deep (its
+  faces are 9), takes nothing;
+- at its raised floor (64), the cut under a floor takes two strips of 4
+  tiles of a raised slab's own floor, one across a cross, and the cut
+  behind a floor a 12-tile stretch of a raised slab's upper rim with two of
+  its clips. None is a thing, and none goes down on any of the eight
+  layers.
+
+What the layers never draw (334 of its 631 tile pictures,
+[what the layers take](../../devtools/map-use.md), with the ramps
+[Heights](heights.md) lays) is floor and the kinds left to the owner
+(issue #505's 3 to 5):
+
+- **Floor art**: the caps of the clips at the panels' joins along the
+  slabs' upper rims, in the variants no layer's rim needs (`b04_96_1` at
+  (812, 350)); the lip under a hole's lower corner (at (720, 498)).
+- **Raised floor and its ramps**: the pale slabs 64 above the ground, and
+  the parts of the striped ramps with magenta discs that climb to them (at
+  (760, 200)) a layer's ramps do not draw (kind 5).
+- **The grooved grey bridges** between the link pads (at (400, 820)).
+- **An exit's arrow** (at (1120, 850), kind 4).
+
+Its gravestones and its monument are map objects a layer sets as such
+([Props](props.md)), not tiles of its map.
+
 ## What BN4's Town Area sets round its floors (nothing; measured on the maps and the atlas)
 
 BN4's Town Area (the atlas's `a16`) learns from Town Area 3 (0x91:2), its
@@ -1074,10 +1234,10 @@ no layer, and the hole cut finds no hole. Sky takes none.
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists (above), the Judge Tree's planters and BN5's Undernet's dark figures
-  lie on the first layer, beside or under the floor (probed on the maps;
-  Nebula Area's dripping pods, once listed here, are drawn with its
-  plates, above).
+  red fists (above) lie on the first layer, beside or under the floor
+  (probed on the maps). The Judge Tree's planters and BN5's Undernet's dark
+  figures, counted here too, are set now, and Nebula Area's dripping pods
+  are drawn with its plates (above).
   (The Nest's and Mr. Weather's were counted here as well; theirs lie on
   the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.

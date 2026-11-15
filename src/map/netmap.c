@@ -90,6 +90,7 @@ static void forget(Learned *L) {
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
 	for (int k = 0; k < L->sides.n; ++k) { free(L->sides.piece[k].tiles); free(L->sides.piece[k].prio); }
+	free(L->sides.piece);
 	free(L->hole.tiles);
 	free(L->hole.prio);
 	stairs_free(L->stairs);

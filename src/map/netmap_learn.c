@@ -279,6 +279,11 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	if (na->sides & 4) behind_learn(m, &L->sides);
 	if (na->sides & SIDES_BEHIND_FRONT) sides_learn_behind(m, &L->sides);
 	if (na->sides & 16) hole_learn(m, &L->hole);
+	if (na->sides & 64) {
+		uint8_t *panels = tiles_src_panels(m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map);
+		if (panels) edges_learn(m, L->book[0].face, panels, &L->sides);
+		free(panels);
+	}
 }
 
 /* (debug output) what area `area` learned */
