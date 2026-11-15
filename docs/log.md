@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/way-on-arrow.md (the heal's green arrow goes back to the exit once MegaMan turns three panels away from it, until L names the heal again; session 77's game-design call), world/level-design/teaching-set-pieces.md (L's two things worth a detour count the heal while hurt), multirom/one-net.md (L no longer repeats the older Net's viruses on every layer).
 * **Update**: world/home/design.md (No way home mid-act: R on a layer answers with MegaMan's way home, Dad's Battle Lab mail says when, no jack-out added), game/battle-lab.md (the mail's new page on when MegaMan is home), game/meta/design.md (the summary's Library count from the starting folder in; Dad's first call on what carries over), voice/rules.md (lesson_words.c's row: R on a layer).
 * **Update**: game/meta/darkchips.md ("Take the DarkChip?" starts on No, as BN6's own costly questions do, its options a moment after the question, so an A pressed through the words takes nothing; session 77), game/meta/bn6-darkchips.md (BN6's flame asks it the same way).
 * **Update**: world/level-design/generator.md (Navigation: the guardian's gate leaves the antechamber where the walk meets it on its line, session 77's stops, the counts before and after).

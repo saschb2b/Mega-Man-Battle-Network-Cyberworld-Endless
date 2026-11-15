@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T05:00:00Z
-* **Update**: world/level-design/way-on-arrow.md (the heal's green arrow goes back to the exit once MegaMan turns three panels away from it, until L names the heal again; session 77's game-design call), world/level-design/teaching-set-pieces.md (L's two things worth a detour count the heal while hurt), multirom/one-net.md (L no longer repeats the older Net's viruses on every layer).
