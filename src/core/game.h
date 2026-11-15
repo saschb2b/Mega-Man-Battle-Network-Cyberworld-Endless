@@ -39,6 +39,10 @@ bool launcher_here(void);
 /* ... over the title, to add BN5 or see the ROMs (its R); false where there is none */
 bool launcher_open(void);
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
+/* A quit (or iOS's background) in the game: the run kept where MegaMan
+ * stands, on a won battle's way back the game run on to him free first
+ * (director_settles) */
+void emu_keep_run(void);
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */
 /* The saved run (peek_run's seed and depth) was saved at home, between

@@ -19,9 +19,14 @@
 #define TALK_SIZE 0x2000
 
 static struct {
-	bool running, seen;
+	bool running, seen, refused;
 	int t;
 } K;
+
+/* whether a talk may begin: none under way, no chat box of the game's, none refused */
+static bool can_begin(void) { return !K.running && !K.refused && !emu_read8(BN6_CHATBOX); }
+
+void talk_refuse(bool on) { K.refused = on; }
 
 /* The player held for the talk as the game holds him for a dialogue no NPC
  * starts (bn6f owPlayer_lockPlayerForNonNPCDialogue_809E0B0 and its unlock):
@@ -43,7 +48,7 @@ static void begin(uint32_t archive, int script) {
 }
 
 bool talk_start(const char *boxes, int face) {
-	if (K.running || emu_read8(BN6_CHATBOX)) return false;
+	if (!can_begin()) return false;
 	static TextArchive a;
 	static uint8_t bytes[TEXT_ARCHIVE_MAX];
 	ta_begin(&a);
@@ -57,7 +62,7 @@ bool talk_start(const char *boxes, int face) {
 }
 
 bool talk_ask(const char *boxes, int face, const char *question, int yes_flag) {
-	if (K.running || emu_read8(BN6_CHATBOX)) return false;
+	if (!can_begin()) return false;
 	static TextArchive a;
 	static uint8_t bytes[TEXT_ARCHIVE_MAX];
 	ta_begin(&a);
@@ -77,7 +82,7 @@ bool talk_ask(const char *boxes, int face, const char *question, int yes_flag) {
 }
 
 bool talk_archive(const TextArchive *a, int script) {
-	if (K.running || emu_read8(BN6_CHATBOX)) return false;
+	if (!can_begin()) return false;
 	static uint8_t bytes[TEXT_ARCHIVE_MAX];
 	int n = ta_build(a, bytes);
 	if (n > TALK_SIZE) return false;
@@ -87,7 +92,7 @@ bool talk_archive(const TextArchive *a, int script) {
 }
 
 bool talk_script(uint32_t archive, int script) {
-	if (K.running || emu_read8(BN6_CHATBOX) || !archive || script < 0) return false;
+	if (!can_begin() || !archive || script < 0) return false;
 	begin(archive, script);
 	return true;
 }

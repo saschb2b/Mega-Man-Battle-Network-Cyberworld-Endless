@@ -116,6 +116,7 @@ static void after_frame(void) {
 	director_pick_watch();
 	director_lab_watch();
 	director_hold_watch();
+	director_settle_watch();
 	pet_update();
 	devtools_update();
 	tour_update();
@@ -147,6 +148,32 @@ static bool soft_reset(void) {
 	P.quit_prompt = 0;
 	scene_set(&scene_title);
 	return true;
+}
+
+#define SETTLE_MOST 600   /* frames run on at most: a won battle's RESULT paged and the way to the map took about 200 (session 76) */
+
+/* The quit's save waits for MegaMan free; on a won battle's way back to
+ * the map (its RESULT, the fade, the map's entry) the game is run on to
+ * him free first, unseen and unheard, so the battle and its reward are
+ * kept with the run (director_settle.c). On the core's own thread, the
+ * frame begun last is ended and its logic run first, and the next update
+ * begins afresh. */
+void emu_keep_run(void) {
+	if (!director_can_suspend() && director_settles()) {
+		emu_sync();
+		if (emu_threaded() && started) after_frame();
+		started = false;
+		director_settling(true);
+		int n = 0;
+		for (; n < SETTLE_MOST && director_settles() && !director_can_suspend(); ++n) {
+			emu_frame_as(director_settle_keys(n), EMU_FRAME_UNSHOWN | EMU_FRAME_UNHEARD);
+			emu_sync();
+			after_frame();
+		}
+		director_settling(false);
+		printf("quit: the game run on %d frames after the battle, MegaMan %s\n", n, director_can_suspend() ? "free" : "still held");
+	}
+	director_suspend();
 }
 
 #define LAB_LOAD_SPEED 24   /* the game's frames to one shown while a set's field comes up: about 200 of BN6's in a sixth of a second */
