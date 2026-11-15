@@ -54,7 +54,12 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
-      options: --privileged
+      # (/var/lib/flatpak on a volume, filled from the image: once Flathub has a
+      # newer runtime than the image's, flatpak renames the old one aside, and
+      # across the image's overlay layers that fails with "Invalid cross-device
+      # link", the update of org.freedesktop.Sdk with it, and xvfb-run falls
+      # over, as at v0.22.0's tag)
+      options: --privileged -v /var/lib/flatpak
     steps:
       - uses: actions/checkout@v7
         with:
