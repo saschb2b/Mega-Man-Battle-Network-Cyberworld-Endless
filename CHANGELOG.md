@@ -53,6 +53,12 @@
   cartridges hold but never play, listed by their numbers, were in a
   section called More, and their "Song 07" rows read as unfinished. The
   section is called Unused now.
+- **ProtoMan's races leave out Powies.** A Powie spends two seconds on
+  its panel between jumps and can't be hit in the air, so a race against
+  it timed its jumps, not your hand. A race squad with one is rolled
+  again among the act's battles, as one with a Quaker already was. A
+  run saved on a race's layer by an earlier build continues that layer
+  afresh.
 
 ## 0.21.2 (2026-11-14)
 

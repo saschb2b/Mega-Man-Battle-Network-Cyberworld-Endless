@@ -82,11 +82,15 @@ static int duel_frames(int hp) {
 	return (int)(t * k);
 }
 
-/* A race's squad holds no virus that decides when it can be hit. */
+/* A race's squad holds no virus that decides when it can be hit: BN6's
+ * Quaker, and BN5's Powie, two seconds on its panel between jumps (two
+ * hops in its own area, then a crush onto MegaMan's panel), out of reach
+ * in the air each time, on BN5's own timer (tools/xdiff.py powie_v1). */
 #define FAMILY_QUAKER 6   /* (the families are BN6's sprite categories less 0x0E) */
+#define FAMILY_POWIE 34   /* (BN5's AI 2, moved in as AI 34: docs/multirom/families.md) */
 static bool duel_race_fair(const Encounter *e) {
 	for (int i = 0; i < e->nfoes; ++i)
-		if (e->foes[i].kind == FOE_VIRUS && e->foes[i].family == FAMILY_QUAKER) return false;
+		if (e->foes[i].kind == FOE_VIRUS && (e->foes[i].family == FAMILY_QUAKER || e->foes[i].family == FAMILY_POWIE)) return false;
 	return true;
 }
 
@@ -130,7 +134,8 @@ void duel_roll(void) {
 	if (layer_objs_duel_rung == 2) D.duel_enc.song = BN6_SONG_SHOWDOWN;
 	/* (and none a race can't hurry: a Quaker is out of reach in the air
 	 * until it lands, so the clock times its hops, not the player; three of
-	 * a playtester's four duels were Quakers, "a Quaker lottery") */
+	 * a playtester's four duels were Quakers, "a Quaker lottery"; and two
+	 * of BN5's Powies made another's act 1 race "mostly luck", session 76) */
 	for (int tries = 0; layer_objs_duel_rung != 2 && tries < 8 && !duel_race_fair(&D.duel_enc); ++tries)
 		D.duel_enc = make_encounter(run.depth, run.biome, ENC_NORMAL);
 	layer_objs_duel_foes = D.duel_enc.nfoes;

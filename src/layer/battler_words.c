@@ -1,6 +1,7 @@
 /* A Virus Battler Mr.Prog's words (battler_words.h): BN6's minigame in his
  * voice, ALL CAPITALS (docs/voice/rules.md, Mr.Prog). His rules are said once a
- * profile, with the BtlrCard; after that he names the pair and the price. */
+ * profile, with the BtlrCard; after that he names the pair and the price,
+ * and a later talk on his layer is the pair and the question. */
 #include "battler_words.h"
 
 #include <stdio.h>
@@ -31,13 +32,12 @@ static Answers answers(TextArchive *t, const BattlerOffer *b) {
 	return a;
 }
 
-/* The pair, the stake and the question, then the stake taken, into the
- * script under way: the box opened (`first`), and the pot's rule in a
- * line where the card's chat has not said it all */
-static void offer(TextArchive *t, const BattlerOffer *b, const Answers *a, bool first, bool rule) {
-	char s[160];
-	if (rule) snprintf(s, sizeof s, "VIRUS BATTLE! %d ROUNDS!|EACH WIN ADDS %d ZENNY!|MY FIRST PAIR...\n%s!", b->rounds, b->stake, b->pair);
-	else snprintf(s, sizeof s, "%d ROUNDS!|MY FIRST PAIR...\n%s!", b->rounds, b->pair);
+/* The pair after `lead` (its boxes, or its line in the pair's box), the
+ * stake and the question, then the stake taken, into the script under
+ * way: the box opened (`first`) */
+static void offer(TextArchive *t, const BattlerOffer *b, const Answers *a, bool first, const char *lead) {
+	char s[200];
+	snprintf(s, sizeof s, "%sMY FIRST PAIR...\n%s!", lead, b->pair);
 	ta_pages(t, s, b->face, &first);
 	snprintf(s, sizeof s, "ENTER FOR\n%d ZENNY?\n", b->stake);
 	ta_ask_in(t, b->face, s, a->no, !first, true);
@@ -55,7 +55,7 @@ static void card(TextArchive *t, int stake, int face) {
 	ta_flag_set(t, BN6_FLAG_BTLRCARD);
 	ta_flag_set(t, BN6_FLAG_VIRUS_DATA + 1);
 	ta_flag_set(t, BN6_FLAG_VIRUS_DATA + 23);
-	ta_flag_set(t, BATTLER_CARD_FLAG);
+	ta_flag_set(t, BATTLER_TOLD_FLAG);
 	ta_got(t, "BtlrCard", &first);
 	char s[240];
 	snprintf(s, sizeof s, "METTAUR AND GUNNER ARE ON IT!|DELETE A RARE VIRUS,AND IT JOINS THEM!|@M A card of viruses,Lan!|"
@@ -65,20 +65,30 @@ static void card(TextArchive *t, int stake, int face) {
 }
 
 int ta_battler(TextArchive *t, const BattlerOffer *b) {
+	char lead[80];
 	int done = ta_say(t, b->face, "THAT'S MY SERIES FOR TODAY!|SEE YOU AROUND THE NET!");
 	Answers a = answers(t, b);
-	/* (the card once: a second talk on the layer it came on asks at once) */
+	/* (his words said: a later talk on his layer is a box and the
+	 * question, as a shop's "Back for more?"; a playtester heard his
+	 * rounds and rule again after a No, session 76) */
+	int again = ta_script(t);
+	offer(t, b, &a, true, "OH! YOU'RE BACK!\n");
+	/* (the card once a profile: a later Battler's first talk his rounds
+	 * and the pot's rule) */
 	int ask = ta_script(t);
-	offer(t, b, &a, true, true);
+	ta_flag_set(t, BATTLER_TOLD_FLAG);
+	snprintf(lead, sizeof lead, "VIRUS BATTLE! %d ROUNDS!|EACH WIN ADDS %d ZENNY!|", b->rounds, b->stake);
+	offer(t, b, &a, true, lead);
 	int i = ta_script(t);
 	if_flag(t, BATTLER_DONE_FLAG, done);
+	if_flag(t, BATTLER_TOLD_FLAG, again);
 	if (b->card) {
 		ta_jump(t, ask);
 		return i;
 	}
-	if_flag(t, BATTLER_CARD_FLAG, ask);
 	card(t, b->stake, b->face);
-	offer(t, b, &a, false, false);
+	snprintf(lead, sizeof lead, "%d ROUNDS!|", b->rounds);
+	offer(t, b, &a, false, lead);
 	return i;
 }
 

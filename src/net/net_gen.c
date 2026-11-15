@@ -523,7 +523,10 @@ static void last_stop(int kind, const LayerKit *kit) {
 static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, const LayerKit *kit) {
 	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
-	if (!(kit && kit->one_wide)) layer_widen_way(layer.biome, kit ? kit->narrows : 0, goal->ax, goal->ay);
+	if (!(kit && kit->one_wide)) {
+		layer_widen_way(layer.biome, kit ? kit->narrows : 0, goal->ax, goal->ay);
+		fill_pits();   /* (a pit left between walkways: session 76's playtester stuck beside one) */
+	}
 	/* (a dark layer flat: the board's units stand on one floor) */
 	layer_raise_rooms(seed, layer.dark ? 0u : stair_dirs, rise);
 }

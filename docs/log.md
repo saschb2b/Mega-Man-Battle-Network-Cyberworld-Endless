@@ -1,6 +1,11 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/home/central-town.md (R within 12 units of the PC's cells steps Lan onto them and jacks in; BN6 asks no facing).
+* **Update**: world/level-design/generator.md (Navigation: no pit between walkways, a void panel with floor on four sides and void on a corner filled by fill_pits; 19 in 18 of the tests' 300 layers before, none between walkways now).
+* **Update**: game/rival.md (a race's squad holds no virus that decides when it can be hit: BN6's Quaker, and now BN5's Powie, its timer verified frame for frame against BN5's).
+* **Update**: game/meta/design.md (the run summary's closest goal a whole sentence, "Viruses deleted" counting a lost or fled battle's deleted viruses), code/director.md (`director_tally.c`).
+* **Update**: world/level-design/virus-battler.md (a later talk with the Virus Battler on his layer is one box, his pair, and the question).
 * **Update**: world/level-design/generator.md (Navigation: the comps and homepages cross one one-wide walkway on the way, as their originals' single rooms; the shapes that stopped a playtester, counted by test_way_shapes, before and after).
 * **Update**: game/meta/rumors.md (a Program Advance's whisper asks "Got these? Use 'em in order!", a combo to try, where "My operator sent these" read as a gift), game/meta/bn6-darkchips.md (the bystander on a flame's layer opens BN6's DarkChip post with two boxes of his own on the purple flame he saw).
 * **Update**: game/pet.md (the Jukebox's More section named Unused; its songs whole songs, none left out), GUIDE.md (the Jukebox's Unused section), devtools/play.md (sound in a session: the device's clock against headless frames, the log's music lines the engine's alone, frame-exact dumps).

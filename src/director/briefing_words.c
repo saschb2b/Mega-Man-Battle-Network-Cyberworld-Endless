@@ -310,14 +310,18 @@ static int detour_words(char *buf, int k, int size) {
 	 * froze him twice in the next act) */
 	if (run.biome == BIOME_HOMEPAGE && run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0)
 		ADD("@M The battlefields here have conveyors and ice!|");
-	int said = 0, k0;
+	int said = 0;
 	/* (where the rival waits: the map showed him as the official gate's
 	 * violet, and a playtester's session ran out at the gate, alone,
 	 * looking for him; his race named in Chaud's call, which says why) */
 	const char *rw = rival_where();
 	if (rw) { ADD("@M ProtoMan's waiting %s!|", rw); ++said; }
 	if (flame_here()) { k = flame_words(buf, k, size); ++said; }
-	if (said < 2 && (k0 = k, k = event_words(buf, k, size)) > k0) ++said;
+	if (said < 2) {
+		int k0 = k;
+		k = event_words(buf, k, size);
+		if (k > k0) ++said;
+	}
 	if (said < 2) k = prize_note(buf, k, size, 1);
 	#undef ADD
 	k = off_board_note(buf, k, size);

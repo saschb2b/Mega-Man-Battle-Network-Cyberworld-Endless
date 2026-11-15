@@ -3,7 +3,7 @@ type: Design
 title: "The meta layer's design"
 description: "The meta layer's design: what you bring against what you find, the loop stack, variety not power, and its pieces: starting folders, Cross starts, the threat staircase, helpers, the Library, gates, routes, run length."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T21:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:10:00Z }
 ---
 
 # The meta layer's design
@@ -212,8 +212,11 @@ them a use.
 
 - The run summary names what the run unlocked (on its RECORDS screen,
   four lines at most, each marked NEW: the setup's new entries first,
-  then the title's marks) and what is closest
-  ("One more sword finish: the Blade folder"). A Cross that won't fit
+  then the title's marks) and what is closest, a whole sentence in
+  KeyItem's information box ("Delete any guardian to open the Blade
+  folder"; a playtester read the old "Win a short net: the endless net"
+  as cut off). Its "Viruses deleted" counts every virus deleted, in a
+  battle lost or run from too. A Cross that won't fit
   beside the run's says, at its first win, that the next dive can start
   with it.
 - The first unlock comes in the first or second run (front-load the first

@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:17:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:01:17Z }
 ---
 
 # The generator
@@ -95,6 +95,16 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   others widen as above. Over sixty layers of RoboDog's comp
   (`test_way_shapes`), the way's turns into a walkway on wide floor fell
   from 25 to 14 and its one-panel jogs from 3 to 1.
+- **No pit between walkways** (15 November 2026). Walkways and platforms
+  meeting round a single void panel left a pit, floor on its four sides
+  and void on a corner, that the art draws as a walkway cut in half and
+  BN6's walls keep MegaMan off; the walk went round it in a jog, where the
+  same playtester stood still beside one. No original map has one; the
+  holes punched in the Graveyard's slabs and Green's fields keep their
+  corners floor. Such pits are filled once the way is widened
+  (`fill_pits`): over the tests' 300 layers, 19 in 18 layers before, none
+  between walkways now (`test_way_shapes` holds it), 5 left inside the
+  fields of guardians' layers.
 - **The other games' areas keep the way they were given** (15 November
   2026). BN4's and BN5's areas are laid out as the BN6 area each is like
   (`NetAreaDef.like`) and drawn in their own art, and playtesters stalled
@@ -122,7 +132,7 @@ ramps. A cap on mouths would be wrong; the rule caps the way:
   91 times to the generator's 34, stepped aside a panel 54 times to its
   14, and had 573 mouths to its 401. So
   in another game's area the way's floor is kept as generated: its panels
-  and the floor beside them are locked (`netmap.c`, `lock_way`), the
+  and the floor beside them are locked (`layer_way_floor`, `netmap.c`), the
   legalizer free to add floor round them; a mission's dark board is left
   as it was. Over 72 layers of seven of those areas (the atlas, three
   seeds a layout), the panels on the walks where MegaMan must stop on one

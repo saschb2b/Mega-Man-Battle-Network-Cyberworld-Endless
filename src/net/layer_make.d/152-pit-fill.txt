@@ -1,0 +1,1 @@
+A void panel left with floor on all four sides and void on a corner, a pit walkways and platforms run round, is filled once the way is widened (fill_pits in net_shapes.c); holes punched in slabs and fields keep their corners floor and stay.
