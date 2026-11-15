@@ -247,8 +247,11 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
    The owner's call stands; the statistics will show what it does.
 6. **A quiet net.** With live divers only, the dive is as busy as the
    server: in October 31 players visited the Square and 6 posted dives
-   (the same page). The statistics count from the first release how often
-   two dives share a layer, parties' and crews' sizes, and joins.
+   (the same page). The statistics count it from the first release: as a
+   dive ends, `deepnet-together` says the layers it entered, on how many
+   another diver was too, the most divers on one, the biggest crew, the
+   party fights and the biggest party (`analytics_dive_together`); joins
+   come with the join-in battles.
 7. **The wire.** Layer channels keyed by week, depth, side and way;
    positions; crews; the queue; the party's field; the feed, marks,
    phrases and first finds kept per week; a protocol version. A `Run`

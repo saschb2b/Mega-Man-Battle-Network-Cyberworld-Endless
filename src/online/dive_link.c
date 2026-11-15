@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "analytics_online.h"
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "director.h"
@@ -39,6 +40,7 @@ static struct {
 	int nfeed;
 	uint32_t shown_at;       /* the first line's start, 0 not yet */
 	uint16_t divers;         /* how many dive now, as DIVERS last said */
+	int layers, shared, most, crew, parties, party;   /* the dive's company, for the statistics (analytics_dive_together) */
 } L;
 
 void dive_link_adopt(void) {
@@ -99,6 +101,7 @@ static void ended(void) {
 	const WeeklyRecord *r = weekly_record();
 	uint8_t m[ONLINE_DIVE_END_BYTES];
 	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, 0));
+	analytics_dive_together(L.layers, L.shared, L.most, L.crew, L.parties, L.party);
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
 }
@@ -163,13 +166,28 @@ void dive_link_frame(void) {
 	dive_people_frame(&s);
 }
 
+/* the parties begun and the crews formed, counted for the statistics */
+static void together(const uint8_t *m, size_t n) {
+	QueueState q;
+	CrewState c;
+	if (m[0] == ONLINE_QUEUE_STATE && dive_wire_queue_state(m, n, &q) && q.stage == ONLINE_QUEUE_STARTED) {
+		++L.parties;
+		if (q.count > L.party) L.party = q.count;
+	}
+	if (m[0] == ONLINE_CREW_STATE && dive_wire_crew_state(m, n, &c) && c.stage == ONLINE_CREW_FORMED && c.count > L.crew) L.crew = c.count;
+}
+
 void dive_link_mail(const uint8_t *m, size_t n) {
 	DiveRoom r;
 	DiveFeed f;
 	DiveDivers d;
 	switch (m[0]) {
 	case ONLINE_DIVE_ROOM:
-		if (dive_wire_room(m, n, &r)) fprintf(stderr, "dive: in layer %u's room %u, %u divers\n", r.way.depth, r.instance, r.divers);
+		if (!dive_wire_room(m, n, &r)) break;
+		fprintf(stderr, "dive: in layer %u's room %u, %u divers\n", r.way.depth, r.instance, r.divers);
+		++L.layers;
+		L.shared += r.divers > 1;
+		if (r.divers > L.most) L.most = r.divers;
 		break;
 	case ONLINE_DIVE_FEED:
 		if (dive_wire_feed(m, n, &f)) feed(&f);
@@ -178,9 +196,11 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 		if (dive_wire_divers(m, n, &d)) L.divers = d.total;
 		break;
 	case ONLINE_QUEUE_STATE: case ONLINE_ARENA_STATE: case ONLINE_ARENA_SEAT: case ONLINE_PARTY_HP:
+		together(m, n);
 		dive_party_mail(m, n);
 		break;
 	case ONLINE_CREW_STATE:
+		together(m, n);
 		dive_crew_mail(m, n);
 		break;
 	default: break;

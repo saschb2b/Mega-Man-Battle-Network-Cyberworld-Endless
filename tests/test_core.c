@@ -7348,7 +7348,8 @@ static bool stats_keys_only(const char *json, const char *const *keys, int n) {
 
 static void test_analytics_online(void) {
 	static const char *const allowed[] = { "system", "pass", "ended", "minutes", "official", "result", "side", "delay", "window",
-		"rollbacks", "deepest", "stalls", "worst_tick_ms", "seconds", "board", "layer", "act", "won" };
+		"rollbacks", "deepest", "stalls", "worst_tick_ms", "seconds", "board", "layer", "act", "won",
+		"layers", "shared", "most", "crew", "parties", "party" };
 	const int nallowed = (int)(sizeof allowed / sizeof *allowed);
 	char base[64], settings[128];
 	snprintf(base, sizeof base, "build/host/test-online-stats-%d", (int)getpid());
@@ -7400,7 +7401,10 @@ static void test_analytics_online(void) {
 	analytics_watch(ANALYTICS_WATCH_LEFT, 42);
 	analytics_watch(ANALYTICS_WATCH_SLOW, 3);
 	analytics_dive_post(17, 3, false);
-	CHECK(stats_posts == 4 && strstr(stats_sent[0], "\"name\":\"online-trade\",\"data\":{\"board\":true}") &&
+	analytics_dive_together(9, 4, 3, 2, 1, 3);
+	CHECK(stats_posts == 5 && strstr(stats_sent[4], "\"name\":\"deepnet-together\",\"data\":{\"layers\":9,\"shared\":4,\"most\":3,\"crew\":2,\"parties\":1,\"party\":3}"),
+		"online statistics: deepnet-together (%s)", stats_sent[4]);
+	CHECK(stats_posts == 5 && strstr(stats_sent[0], "\"name\":\"online-trade\",\"data\":{\"board\":true}") &&
 		strstr(stats_sent[1], "\"name\":\"online-watch\",\"data\":{\"ended\":\"left\",\"seconds\":42}") &&
 		strstr(stats_sent[2], "\"ended\":\"too slow\"") &&
 		strstr(stats_sent[3], "\"name\":\"deepnet-post\",\"data\":{\"layer\":17,\"act\":3,\"won\":false}"),

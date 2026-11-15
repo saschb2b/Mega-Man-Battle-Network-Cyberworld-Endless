@@ -1638,6 +1638,7 @@ rollback are tuned on real networks.
 | A trade is done | that one was, and whether it began with a trade board's offer |
 | You stop watching a battle | how (its end, left, too slow, stopped, the connection lost) and its seconds |
 | The week's dive is posted | its layer and act, and whether it reached the end |
+| The week's dive ends | how many layers it entered, on how many another diver was too, the most divers on one, the biggest crew, the party fights and the biggest party |
 
 Never sent from the Square: your name or another's, your identity on a
 server, the server's address, the chips, phrases or anything typed.
