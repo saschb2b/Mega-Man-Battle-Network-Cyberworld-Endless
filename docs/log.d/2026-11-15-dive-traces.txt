@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T05:10:00Z
-* **Update**: online/shared-dive.md (As built: Mystery Data found and the week's first finder in the band, the shimmer over data others opened as BN6's sparkle; busting splits and their place; deletion marks as BN6's skull burst and phrases on a layer, A on them, a wave, a phrase left from the emote strip's phrases on R; the dive's end told as the scene is left and sent before the goodbye; the Board's party mark, who dives now and the week's fastest guardian busts, issue #589), code/online.md (its row: `dive_traces.c`, `dive_finds.c`, `dive_splits.c`, `dive_pack.c`).

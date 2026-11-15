@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T04:50:00Z
-* **Update**: online/shared-dive.md (As built: the dive's link kept from the Square, a layer a room, the divers as puppets in the NPC slots left free, the feed's band, the link lost or closed; the Mystery Data row said whole), code/online.md (`dive_link.c`, `dive_people.c`, `dive_words.c`, `puppet.c`), code/layer.md (`layer_objs_more`).

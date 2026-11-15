@@ -3,7 +3,7 @@ type: ROM Map
 title: "Online: the Square, the Arena and the link battle"
 description: "Addresses online play rests on: a Net Square trade settled, its music and name tags, the Arena's end of a NetBattle, the stands' report, two MegaMen a side in BN6's link battle, the link packet and BN6's expressions."
 tags: [rom]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T16:53:46Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T05:40:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
