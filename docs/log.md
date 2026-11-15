@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/battle-lab.md (the builder's keys after session 77: B back a level on every page and "Leave the Lab?" at a page's own place, Yes chosen as NaviCust's quit; FIELD's Up to Preset or BATTLE!; held directions repeat; BATTLE!'s information for the set in hand; the keeper's question with Yes and No), engine/ui.md (the Lab's B and its question).
 * **Update**: game/progression/encounter-groups.md (a CONTINUE goes on with the layer's next battle, its count saved with the checkpoint; the formations a layer gives measured played through and continued), engine/saves.md (`run.act` holds the layer's battles fought).
 * **Update**: releases/v0.22.0.md (#584's update box written in as "What's new, on the title"; #587's wide ways in BN4's and BN5's areas).
 * **New**: world/level-design/floor-holes.md (the safety net under a layer's tiles: each tile's top held to the pixels its entries draw, a hole filled from behind with a tile of the area's books from its place in a panel or the tile laid again with one of their pairs; the maps' own art left; RoboDog Comp's sighting a pit in the layout, not the tiles; what the atlas counts). **Update**: world/level-design/index.md (its line), world/level-design/generator.md (Tile picking: holes mended once the map is whole), devtools/atlas.md (rSEED,DEPTH,AREA, the holes framed and counted, CYBERWORLD_VOIDS), devtools/tile-test.md (the holes and left columns), code/net-and-map.md (voids.c), code/tests.md (test_voids.c).
