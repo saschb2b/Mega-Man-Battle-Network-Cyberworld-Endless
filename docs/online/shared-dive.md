@@ -191,7 +191,11 @@ Verified on `dev`, 15 November 2026:
   any crewmate stands on no other (`home_way_hold` in
   `director_town.c`; CREW way, its index past 0), a band saying "Waiting
   for the crew...", and is let go as MegaMan steps off: built, not yet
-  seen with two crewed divers at home. BN6's own trigger at the pink
+  seen with two crewed divers at home. The dev menu's keys go before the
+  dive's (`scene_emu.c`), so its A is never an A on a diver, and a crew's
+  chat that never shows (its map gone under it) is given up after 90
+  frames (`talk_reset`): a session held still by one, "talk director"
+  with no box, was how it was found. BN6's own trigger at the pink
   pad's foot still warps at once, a crewmate stepping on it there
   splitting the way. Not yet: the crew's join-in battles (on the one
   field).
@@ -415,10 +419,16 @@ Verified on `dev`, 15 November 2026:
   at iteration 4831 (his hand's next 0 to 1, the lead's at 2); the twin
   core agreed at every 60th frame and every 30-frame rollback ran again to
   the same hash to the battle's end at frame 6176 (308 checks, none
-  apart), lost. Not yet seen: two or three games on the server (the
-  driver to bring several games to one door is to write), a partner's own
-  turn held past the lead's OK, a Program Advance of a partner's, his Cross
-  and Souls (refused on a party's field for now: the Arena's).
+  apart), lost. Over the server (two games through the portal, the dev
+  menu's "Next guardian" and the door's queue on a local server, later the
+  same day): both built the same field (`5bf0a16fb06d8b79`), "every seat
+  ready", the fight begun; Beta's own screen opened with his own deck (30
+  chips, the first 0x09A) and his pick crossed ("seat 1's turn 1: 1 picks
+  said"). Not yet seen: a whole turn and the battle to its end over the
+  server (two games driven at once by hand did not get the lead's OK
+  through: a driver of its own is to write), a partner's own turn held
+  past the lead's OK, a Program Advance of a partner's, his Cross and
+  Souls (refused on a party's field for now: the Arena's).
 
 ## The spike: four on one field (15 November 2026)
 

@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
-at: 2026-11-15T19:00:00Z
+at: 2026-11-15T06:00:00Z
 * **Update**: online/shared-dive.md (As built: crews, a team-up asked and answered in BN6's own chat on a layer, the band's news; what is not yet), code/online.md (`dive_crew.c`).

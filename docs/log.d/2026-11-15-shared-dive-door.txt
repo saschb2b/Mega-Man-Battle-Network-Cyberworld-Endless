@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
-at: 2026-11-15T17:00:00Z
+at: 2026-11-15T05:50:00Z
 * **Update**: online/shared-dive.md (As built: the guardian's door's queue and its band, the party's scaling, the fight linked with the guardian's HP the party's, seen with two games; what is open), code/online.md (`dive_party.c`), code/director.md (`boss.c`'s door, hold and scaling).

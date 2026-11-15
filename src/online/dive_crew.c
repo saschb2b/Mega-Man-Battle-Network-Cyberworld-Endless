@@ -21,6 +21,7 @@
 #include "talk.h"
 #include "text.h"
 
+#define CHAT_WAIT 90          /* frames a chat asked for may take to show */
 #define YES_FLAG 0x14C7       /* the Square's team Yes (docs/engine/emulation/layer.md), on a layer the crew's */
 
 enum { CHAT_NONE, CHAT_ASK, CHAT_SPLIT, CHAT_ASKED };
@@ -32,6 +33,7 @@ static struct {
 	char name[ONLINE_NAME_BYTES + 1];
 	int chat;                 /* CHAT_*: the chat open, read as it closes */
 	bool shown;               /* ... and seen open */
+	int waited;               /* frames it has been asked for and not shown */
 	uint32_t keys;
 	char news[96];
 	bool news_new;
@@ -123,6 +125,7 @@ static void open_chat(int chat, uint32_t about, const char *name, const char *wo
 	if (!ask(words, question)) { fprintf(stderr, "dive: the crew's chat could not open\n"); return; }
 	C.chat = chat;
 	C.shown = false;
+	C.waited = 0;
 	C.about = about;
 	snprintf(C.name, sizeof C.name, "%s", name);
 }
@@ -141,8 +144,10 @@ static void read_chat(void) {
 void dive_crew_frame(const OnlineSnapshot *s) {
 	bool open = talk_busy() || emu_read8(BN6_CHATBOX);
 	if (C.chat != CHAT_NONE) {
-		if (open) C.shown = true;
-		else if (C.shown) read_chat();
+		if (emu_read8(BN6_CHATBOX)) C.shown = true;
+		else if (C.shown && !open) read_chat();
+		/* (a chat that never showed, its map gone under it: given up) */
+		else if (!C.shown && ++C.waited > CHAT_WAIT) { fprintf(stderr, "dive: the crew's chat never showed\n"); talk_reset(); C.chat = CHAT_NONE; }
 		return;
 	}
 	if (!C.asked_by || open || !director_on_map()) return;

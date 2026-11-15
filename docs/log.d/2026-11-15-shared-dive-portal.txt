@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
-at: 2026-11-15T08:30:00Z
+at: 2026-11-15T04:20:00Z
 * **Update**: online/shared-dive.md (As built: the week's portal in the greeter's place, its look, its words without a mugshot, the dive warped into its first layer), online/weekly-net.md (the portal's offer and the dive's start on the first layer; its description), online/index.md (its line), code/online.md (`square_week.c`'s portal), GUIDE.md (the portal in the welcome plaza and the dive's start).
