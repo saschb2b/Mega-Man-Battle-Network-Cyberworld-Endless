@@ -635,3 +635,108 @@ Devices now used up: the three channels in the cartridges' colours, the
 tags with their one word, the picture's colours closing as the cut,
 ghosts that add up to white, the picture at 4x with the caption on its
 last lines, the three colours meeting in the logo.
+
+## The blueprint, and 0.22.0: Your run, on every device (2026-11-15), `tools/trailers/v0_22_0.py`
+
+The owner, before the release: a trailer for it, and with it an end to
+ten trailers that read as ten projects. "We need to find a good consens
+to have stable trailers. like a blueprint. So that not every trailer
+looks completetly different. Yet has as much freedom to showcase its
+changes to its fullest", 0.17.0 the reference ("I really like the music
+from 0.17.0 and its pace. Especially when there is much to showcase"), a
+narrator ("Maybe lans father? Like he comes on after the trailer starts,
+introduces himself, very short explanation ... and slides into the new
+changes ... With a nice outro thanking players"), and a thumbnail made
+for YouTube. It reverses 13 October's "never the last trailer with new
+screens" for the frame and the band; `blueprint.md` is the result, its
+fixed half code (`house.py`, `house_music.py`), and 0.22.0 the first cut
+on it: about 150 lines of its own where a cut was 600 to 1000.
+
+What was made: 69 seconds, 42 bars at 150. The cold open is a Beast Out
+(the dark, the flare, the white, the beast) and three MegaMen on one
+field against BlastMan; the title YOUR RUN, ON EVERY DEVICE (the notes'
+own line); Dad's hello; five segments (saves that follow you; the net,
+relaid; the little things; more ways to play; dive together, the climax)
+on 0.17.0's frame, the panel now a list of
+the segment's shots under the PET's orange cursor (0.17.0's chips were
+that cut's own); the recap, four tiles at 2x and the fixes counted from
+the CHANGELOG as the cut is drawn; Dad's thanks; the stinger; the end
+card with THANKS FOR DIVING IN. Its own half: the RUN! button's green,
+packets climbing the net's lines, each shot drawn in from the left as a
+transfer fills, and the tune.
+
+The narrator: `--talk narrate:FRAME` has the game say a cut's lines as
+Dad in BN6's own chat box (`CYBERWORLD_NARRATE`), nothing redrawn. The
+first take had him over the layer he was captured on, MegaMan standing
+there; the owner, mid-work: "having dad speak while megaman just sits
+there is boring. find a better way to fill the backdrop with something
+related." A chat stops the game under it, so his box (its rows of his
+frame, found by where a frame with the box differs from one before it)
+is laid over other footage: a dive, three areas for "a new Net on every
+dive", a beat of each segment's best shot for "here's what 0.22.0
+brings". It reads as the game does when a call comes in over play.
+BN6's chat types a letter every two frames; the cut plays the typing at
+twice that.
+
+The music: 0.17.0's piece failed today's gate 3 as it stands (its lead,
+backing and bass on the squares and the wave alone: it was made a week
+before the gate). The house band keeps its notes and doubles those three
+on FluidR3 GM. Three tunes on it as sketches (`sketch_house_a` "Carry
+on", `_b` "In step", `_c` "Wide ways"), each "busier than the source:
+none", no rub, "every part on FluidR3 GM"; the piece grown from A reads
+46/33/19/2 against 0.17.0's 49/33/17/1, punch 7.9 dB against 7.8, highs
+5.5% against 5.9%. A's first cadence rubbed (an F on the Lydian B major:
+its F-sharp instead).
+
+What went wrong on the way: Silkscreen Bold's 4 and % close up into
+blobs ("04" read as a 0 and a heart, "40%" as nothing): `house.text`
+strikes those two from the regular face twice; check a new digit at the
+cut's size as 0.16.0's lesson says of B, G, 8 and 6. A count ran over
+its caption (the plate now keeps the count's own width clear). A cut's
+module named its runs `footage`, which is the kit's hook for a cut's own
+captures (`cut.footage(keep)`): the kit called a module. The footage's
+agent renamed scenes after the cut had captured them, and `--keep` kept
+the old pictures under the new names: delete a renamed scene's folder.
+Depth lighting cannot be filmed by `capture()` (`--shot-range` saves the
+canvas, the lighting is laid at presentation; `--screen-shot` shows it,
+sixteen frames a run), so the 3D shot shows Options' line turning.
+Scenes that need a server (the saves' cloud and code: a Net Square; the
+update's box: a manifest over HTTP) are the cut's `footage()`, which
+starts both and stops them.
+
+The thumbnails (the youtube-publish skill's `thumbnail.md`): three SVGs
+of one layout, a region of a whole frame with two lines of words (DIVE
+TOGETHER!, CLOUD SAVES!, THE NET CLIMBS!). The first sheet set the words
+in Silkscreen: "NOW" read as "NO" and a heart at 168 wide; Lato Black
+Italic since. The first heroes were picked blind and put a blast under
+the scrim: pick the frame on a sheet. In a battle MegaMan stands on the
+left, where the words were: `'side': 'right'` mirrors the layout.
+
+The first cut had four segments and 58 seconds, laid from the
+CHANGELOG's Unreleased section. The owner: "are you sure you have
+everything showcased in its fullest glory? go over the merged prs you've
+most likely missed something. for example the online multiplayer dive
+addition". The shared dive (pull request 590) and the layers' heights
+(632), the Nest's crystals (640) and Robot Control Comp's figures (634)
+were merged and in neither the CHANGELOG nor the notes. All 108 pull
+requests since 0.21.2 read, the cut grew to five segments with the dive
+last: its portal, four divers on a layer, a crew asked and formed, a
+crewmate's battle joined, the party at a guardian's door and its fight
+on one field, taken with up to four games on a local server
+(`v0_22_0_footage.py`'s `online_footage`, the week pinned so every take
+dives the same net). It is `blueprint.md`'s step 0 since. Taking the
+footage found bugs before the tag again: four MegaMen on one field
+stand still (two and three fight on), divers carry no name tag, the
+leader's A at the door also opens the crew's chat.
+
+The owner on the sketches: "a is good" (15 November 2026): "Carry on".
+The owner on the second cut (15 November 2026): "Yes, approved". It
+became the current trailer the same day (the site's hero and texts, the
+README, the notes' opening, the 3DS banner from the climax's hook),
+before the tag; its areas' footage is retaken once the layer generators
+settle (delete a scene's folder, render again). Still his: whether Dad
+should have a voice some day.
+
+Chosen by this cut (the next one's are others): the green accent, the
+climbing packets, the sweep, the tune "Carry on", the Beast Out as the
+cold open.

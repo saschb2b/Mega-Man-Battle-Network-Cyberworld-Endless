@@ -1,6 +1,6 @@
 ---
 name: youtube-publish
-description: Publish Cyberworld Endless's trailers on YouTube (the owner's channel, @Saschb2b) - a 4K master per trailer from tools/trailer_youtube.py, uploaded through the owner's signed-in Chrome in 9 MB pieces the Studio page joins and hash-checks, then each video's title, description, poster thumbnail, playlist, audience, AI answer, date and copyright check filled in Studio's wizard and published oldest first, and its id written into docs/project/youtube.md. Use when a release's new trailer is to go on YouTube, when a trailer is to be uploaded again or its details, thumbnail or playlist changed, or when asked to publish, upload or manage the project's videos.
+description: Publish Cyberworld Endless's trailers on YouTube (the owner's channel, @Saschb2b) - a 4K master per trailer from tools/trailer_youtube.py and its thumbnails from tools/trailer_thumbnail.py (the series' layout, a hook of two lines over a frame of the game, up to three for Studio's Test & compare; thumbnail.md), uploaded through the owner's signed-in Chrome in 9 MB pieces the Studio page joins and hash-checks, then each video's title (the news first), description, thumbnail, playlist, audience, AI answer, date and copyright check filled in Studio's wizard and published oldest first, and its id written into docs/project/youtube.md. Use when a release's new trailer is to go on YouTube, when a trailer is to be uploaded again or its details, thumbnail or playlist changed, when a thumbnail or a title is to be designed or judged, or when asked to publish, upload or manage the project's videos.
 ---
 
 # Publishing the trailers on YouTube
@@ -10,6 +10,12 @@ The channel, what each video's fields hold and the table of videos are
 first. This skill is how an upload goes, learned on the first ten (15
 November 2026). A new trailer joins after the release's tag, from the
 release skill's after-the-tag steps.
+
+What a video looks like on YouTube before anyone plays it, its thumbnail
+and its title, is [thumbnail.md](thumbnail.md): what good ones do, the
+series' layout, the release's half (`THUMBNAILS` and `YOUTUBE_HOOK` in
+the cut) and its rules. The trailer itself, with Dad as its narrator, is
+the trailer skill's (`.claude/skills/trailer/blueprint.md`).
 
 ## The owner's standing answers
 
@@ -31,9 +37,20 @@ python3 tools/trailer_youtube.py VERSION     # or none: every trailer
 
 It writes `.build/youtube/cyberworld-endless-VERSION-trailer.mp4` (4K,
 nearest neighbour, at most 20 Mbit/s), the `.png` poster beside it and
-`videos.json` (titles, descriptions, tags, dates). One trailer takes a
-few minutes; it runs two at once. Pull a frame (`ffmpeg -ss 20 -frames:v
-1`) and look: hard pixel edges, 3840x2160.
+`videos.json` (titles, descriptions, tags, dates, thumbnails). One
+trailer takes a few minutes; it runs two at once. Pull a frame (`ffmpeg
+-ss 20 -frames:v 1`) and look: hard pixel edges, 3840x2160.
+
+A cut on the blueprint has thumbnails of its own. Make them first, so
+`videos.json` names them:
+
+```sh
+python3 tools/trailer_thumbnail.py VERSION
+```
+
+and read `...-thumbnail-check.png` by thumbnail.md's rule 4 before any
+goes up. `videos.json`'s `thumbnail` is then thumbnail A, `thumbnails`
+all of them; an older cut's is its poster.
 
 Split each master for the upload, and note its hash and size:
 
@@ -66,7 +83,9 @@ Upload the oldest first: the channel lists by publish time.
    (the upload dialog opens), wait 4 s, paste
    [scripts/studio_helpers.js](scripts/studio_helpers.js) whole into one
    `javascript_tool` call, then `find` "cw parts file input" for its ref.
-2. `file_upload` each part, then the `.png`, to that ref, one call each.
+2. `file_upload` each part, then the thumbnail (`videos.json`'s
+   `thumbnail`: thumbnail A, or an older cut's poster), to that ref, one
+   call each.
 3. `await cwJoin('cyberworld-endless-VERSION-trailer.mp4', SHA, SIZE)`:
    both `sizeOk` and `shaOk` true, or start again from 1.
 4. `cwGive()`, wait 5 s: the wizard opens on **Details**, saving as
@@ -103,6 +122,17 @@ finishes from its edit page, `https://studio.youtube.com/video/ID/edit`:
 the same fields (the thumbnail input is there too), **Speichern**, then
 **Entwurf bearbeiten** for the wizard's checks and visibility.
 
+## Test & compare
+
+Where the cut has three thumbnails and Studio offers it (the video's
+edit page, **Thumbnail**, **Testen und vergleichen**; a computer only,
+and not while the video is private): upload B and C beside A there after
+publishing. The test runs up to two weeks and names the one with the
+largest watch time share; note the winner in docs/project/youtube.md's
+table, and what it had that the others lacked in thumbnail.md, so the
+next release's three start from it. Where Studio does not offer it yet,
+publish with A and say so in the table.
+
 ## Verification and its prompts
 
 Studio's Settings, Kanal, **Verfügbarkeit der Funktionen** shows what is
@@ -111,6 +141,15 @@ on since 15 November 2026), and after a few in a day the advanced ones;
 links in descriptions are clickable only with the advanced features (a
 video check, an ID or the channel's history), and become clickable on
 the published videos when they open.
+
+**Tägliches Upload-Limit erreicht** in a bar under the wizard, right
+after `cwGive()` (the wizard opens, "Link wird erstellt…" never becomes a
+link): an unverified channel takes about ten uploads a day, and the first
+ten trailers used them on 15 November 2026, so 0.22.0's was refused that
+evening. Its **Überprüfung starten** is the owner's (the identity check
+below); otherwise the limit lifts 24 hours after the day's first upload.
+Close the dialog (no draft is left), say so, and upload again then: the
+parts must be given to the page anew.
 
 A prompt **Einmalige Überprüfung deiner Identität erforderlich** is the
 owner's to answer: stop, tell them where it is, never enter a phone

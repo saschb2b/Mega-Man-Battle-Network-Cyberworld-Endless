@@ -277,10 +277,14 @@ axis is checked against that page first.
 A release whose news changes how the game looks or plays (a minor
 version, 0.N.0, as a rule) gets a trailer of its own (the trailer skill,
 `.claude/skills/trailer/`), which replaces the last one everywhere: the project's face changes with the game rather than
-piling up. Each one is new, its look and its music, not the last one's
-with new shots. A cut is `tools/trailers/vX_Y_Z.py` (its footage, from the
-release pictures' scripted runs, and its look) with `vX_Y_Z_music.py` (an
-original piece in the manner of a game it shows, written from that game's
+piling up. From 0.22.0 the trailers are one series, made on a blueprint
+(the skill's `blueprint.md`): the slots, the frame, the band and the
+narrator (Dad, in BN6's own chat box, his hello and his thanks) are the
+series' and fixed in `tools/trailers/house.py` and `house_music.py`;
+the name, the accent, the motif, the tune, the segments and their shots
+are the release's, never the last one's again. A cut is `tools/trailers/vX_Y_Z.py` (its footage, from
+scripted runs, and the release's half of the look) with `vX_Y_Z_music.py` (an
+original tune on the house band, in the manner of a Battle Network song, written from its
 habits, never its notes) and `CURRENT` in `tools/trailers/__init__.py`.
 `python3 tools/trailer.py` writes `docs/clips/trailer.*`, which the
 project page's hero, every page's preview picture, the README, the
@@ -442,6 +446,7 @@ python3 tools/steam_art.py             # linux/steam: Steam's library artwork (c
 python3 tools/social_preview.py        # build/social-preview.png: the repository's social preview, uploaded by hand
 python3 tools/trailer.py [VERSION] [--keep]   # docs/clips/trailer.*: the current trailer (tools/trailers/; an older VERSION into .build/ only)
 python3 tools/trailer_youtube.py [VERSION ...]   # .build/youtube: each trailer's 4K master, thumbnail, title and description for YouTube (docs/project/youtube.md)
+python3 tools/trailer_thumbnail.py [VERSION]   # .build/youtube: a cut's YouTube thumbnails (its THUMBNAILS, up to three) and their check sheet at the sizes YouTube shows (Chrome draws the SVG)
 python3 tools/intro_chime.py FILE      # src/audio/intro_chime.c: the start's chime (Pixabay's "UI Success Chime", kept out of git) and its two tones
 python3 tools/before_after.py v0.5.3 --new 0.6.0   # docs/screenshots/compare-*.png: one spot as the last release and this build draw it, for the notes
 python3 build.py release    # build/release/: the PortMaster zip, the Linux AppImage, .deb and tar.gz, the site zip

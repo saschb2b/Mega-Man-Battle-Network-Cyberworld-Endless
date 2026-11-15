@@ -1,7 +1,7 @@
 ---
 type: Process
 title: "YouTube"
-description: "The trailers on YouTube: the channel (@Saschb2b), a video per trailer in one playlist, the 4K masters `tools/trailer_youtube.py` makes, what each video's fields hold, how an upload goes, and each release's step."
+description: "The trailers on YouTube: the channel (@Saschb2b), a video per trailer in one playlist, the 4K masters `tools/trailer_youtube.py` makes, the thumbnails `tools/trailer_thumbnail.py` draws, the narrator, what each video's fields hold, how an upload goes, and each release's step."
 tags: [project, youtube, trailers]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T06:40:00Z }
 ---
@@ -36,9 +36,10 @@ Studio's language is German.
   upload recommendations), its sound as it shipped. A 4K upload is
   streamed with VP9 or AV1 at every size and a higher bitrate; a 720p
   one gets H.264 at a low bitrate that smears the game's pixels.
-- `...-trailer.png`: its poster, `docs/clips/trailer.png`, as the
-  thumbnail (1280x720, well under YouTube's 2 MB).
-- `videos.json`: each one's title, description, tags and date.
+- `...-trailer.png`: its poster, `docs/clips/trailer.png` (1280x720): the
+  thumbnail of a cut that has none of its own (every one before 0.22.0).
+- `videos.json`: each one's title, description, tags, date and
+  thumbnails.
 
 A trailer's video is the last `docs/clips/trailer.mp4` committed while it
 was the current one, read from git: 0.12.0's came after its tag, and
@@ -47,15 +48,53 @@ was the current one, read from git: 0.12.0's came after its tag, and
 `.build/trailer-VERSION/youtube.mp4` from its lossless frames and music,
 and the tool takes that instead.
 
+## The thumbnail
+
+From 0.22.0 a trailer's thumbnail is made for YouTube, not borrowed from
+the site (the owner, 15 November 2026: a definition of the thumbnail,
+following what good thumbnails on YouTube do). The poster, a logo and
+small capitals on navy, is right for a visitor who already chose the
+project; at 168 pixels wide between other videos it promises nothing.
+
+`python3 tools/trailer_thumbnail.py VERSION` draws up to three from the
+cut's `THUMBNAILS`, each an SVG that Chrome turns into a 1280x720 PNG,
+and a check sheet of each at 320, 168 and 120 wide on YouTube's dark and
+light pages. The layout is the series' and fixed: a region of one whole
+frame of the game filling the picture at a whole scale, a navy scrim
+under the words, the PET's cyan frame, the logo with the version and a
+green NEW top left, two lines of heavy slanted type bottom left (four
+words at most, the hook: `CLOUD SAVES!`), the bottom right clear for
+YouTube's length stamp. The frame, its region, the words and an optional
+pointer (the PET's orange cursor) are the release's. Never a sprite or a
+mugshot cut out: a region of a whole frame, half its width at least
+(AGENTS.md, Rules). Three, because Studio's Test & compare takes three
+and names the one that held viewers longest. The rules, what was looked
+up and where, are the youtube-publish skill's `thumbnail.md`.
+
+## The narrator
+
+From 0.22.0 a trailer is told by Lan's father (the owner, 15 November
+2026): after the title card he says who he is, what Cyberworld Endless
+is, and hands over to the release's news; before the logo he thanks the
+players. BN has no voices, so he speaks as he does in the game, in BN6's
+own chat box with his face: the game itself types his lines
+([`--talk narrate`](../devtools/headless-shot.md), the boxes in
+`CYBERWORLD_NARRATE`), and the cut lays that box over footage that fits
+what he says, since a chat stops the game under it (the owner: "having
+dad speak while megaman just sits there is boring"). His lines follow
+[the voice rules](../voice/rules.md)' Dad. The trailer skill's
+`blueprint.md` has the slots, the lines' rules and the rest of the
+series' blueprint.
+
 ## Each video
 
 | Field | Value |
 | --- | --- |
-| Title | `Cyberworld Endless VERSION Trailer – TAGLINE`, the tagline the release's notes' `description` |
+| Title | From 0.22.0 `HOOK \| Cyberworld Endless VERSION Trailer`, the cut's `YOUTUBE_HOOK` (the news in its first forty letters, which is what a phone shows); before it `Cyberworld Endless VERSION Trailer – TAGLINE`, the tagline the release's notes' `description` |
 | Description | the tagline and the notes' first paragraph (without "the Nth beta"), the release date, the links (play in the browser, download, the release on GitHub, itch.io, the source), the ROM it needs, Capcom's notice, three hashtags |
 | Tags | `trailer_youtube.TAGS` |
 | Language | English |
-| Thumbnail | the poster |
+| Thumbnail | From 0.22.0 the cut's thumbnail A, with B and C in Studio's Test & compare where the channel has it (The thumbnail, above); before it the poster |
 | Playlist | Cyberworld Endless – Trailers |
 | Audience | not made for kids |
 | AI used | yes, for the music (below) |
@@ -116,6 +155,12 @@ published video, and its row below.
 | 0.19.0 | <https://youtu.be/M62DJAEzlPg> | 2026-11-15 |
 | 0.20.0 | <https://youtu.be/GOWV6RM4j8s> | 2026-11-15 |
 | 0.21.0 | <https://youtu.be/FgRgRRJFtUM> | 2026-11-15 |
+
+0.22.0's master, thumbnails and words were made on 15 November 2026,
+ahead of its release (the owner: the video and the release need not go
+out together); Studio refused the upload that evening, the day's limit
+used up by the ten above. It goes up once the limit lifts or the owner
+verifies the channel.
 
 0.21.0 went up with a still Studio picked (its battle on three ROMs'
 marks): the day's custom thumbnails had run out before the advanced

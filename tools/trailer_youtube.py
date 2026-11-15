@@ -10,11 +10,16 @@ came after its tag, 0.3.0's end card was corrected after its), or, where
 tools/trailer.py rendered it here, .build/trailer-VERSION/youtube.mp4, the
 master it writes from its lossless frames.
 
+A cut's YOUTUBE_HOOK leads its title, and where tools/trailer_thumbnail.py
+made its thumbnails (the cut's THUMBNAILS), videos.json lists them, A the
+one a video goes up with; else the poster is its thumbnail.
+
 The master is the 1280x720 trailer scaled 3x, nearest neighbour, to
 3840x2160, at a high quality: YouTube streams a 4K upload with VP9 or AV1
 at every size and at a higher bitrate, where a 720p upload's H.264 blurs
 the game's pixels.
 """
+import datetime
 import html
 import json
 import os
@@ -98,21 +103,50 @@ def released(version):
     return git('log', '-1', '--format=%cs', f'v{version}').decode().strip()
 
 
+def hook(version, what='YOUTUBE_HOOK'):
+    """the cut's YOUTUBE_HOOK: the news a title leads with (the
+    youtube-publish skill's thumbnail.md, The title), or None; with
+    `what` 'YOUTUBE_NOTE', a sentence its description adds to the notes'
+    paragraph (what the trailer shows and the notes do not say yet)"""
+    try:
+        return getattr(trailers.module(version), what, None)
+    except ImportError:
+        return None
+
+
+def thumbnails(version):
+    """the cut's thumbnails where tools/trailer_thumbnail.py made them
+    (A first, the one a video goes up with), else its poster"""
+    made = [f'{name(version)[:-len("trailer")]}thumbnail-{c}.png' for c in 'abc']
+    made = [f for f in made if os.path.exists(os.path.join(OUT, f))]
+    return made or [f'{name(version)}.png']
+
+
 def describe(version):
-    tagline, para = notes(version)
-    date = released(version)
+    try:
+        tagline, para = notes(version)
+    except FileNotFoundError:               # (before its notes are written)
+        tagline, para = f'Cyberworld Endless {version}', ''
+    try:
+        date = released(version)
+    except subprocess.CalledProcessError:   # (before its tag: the video may go up ahead of the release)
+        date = None
     title = f'Cyberworld Endless {version} Trailer – {tagline}'
+    lead = hook(version)
+    if lead:
+        title = f'{lead} | Cyberworld Endless {version} Trailer'
     if len(title) > 100:
         title = f'Cyberworld Endless {version} Trailer'
-    text = '\n'.join([
-        f'{tagline} {para}',
+    note = hook(version, 'YOUTUBE_NOTE')
+    lines = [
+        f'{tagline} {para}' + (f' {note}' if note else ''),
         '',
-        f'Cyberworld Endless {version}, released {date}: a roguelike that runs Mega Man Battle Network 6 '
+        f'Cyberworld Endless {version}{f", released {date}" if date else ""}: a roguelike that runs Mega Man Battle Network 6 '
         'from your own ROM. Every shot is the game running; the music is original, written for this trailer.',
         '',
         f'Play in the browser: {SITE}play/',
         f'Download (PC, handhelds, phones, consoles): {SITE}download/',
-        f'What {version} brought: {REPO}/releases/tag/v{version}',
+        f'What {version} brought: {REPO}/releases/tag/v{version}' if date else None,   # (no page before its tag)
         f'itch.io: {ITCH}',
         f'Source: {REPO}',
         '',
@@ -120,9 +154,12 @@ def describe(version):
         'Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by Capcom.',
         '',
         '#MegaManBattleNetwork #roguelike #indiegame',
-    ])
-    return {'version': version, 'title': title, 'description': text, 'tags': TAGS, 'recorded': date,
-            'video': f'{name(version)}.mp4', 'thumbnail': f'{name(version)}.png'}
+    ]
+    text = '\n'.join(line for line in lines if line is not None)
+    shown = thumbnails(version)
+    return {'version': version, 'title': title, 'description': text, 'tags': TAGS,
+            'recorded': date or datetime.date.today().isoformat(),
+            'video': f'{name(version)}.mp4', 'thumbnail': shown[0], 'thumbnails': shown}
 
 
 def export(version, sha):
@@ -137,8 +174,12 @@ def export(version, sha):
             f.write(git('show', f'{sha}:{CLIP}'))
         rel = lambda p: '/src/' + os.path.relpath(p, ROOT)  # noqa: E731
         ffmpeg(['-y', '-loglevel', 'error', '-i', rel(src), *VIDEO, '-c:a', 'copy', rel(dest + '.mp4')], version)
-    with open(dest + '.png', 'wb') as f:
-        f.write(git('show', f'{sha}:docs/clips/trailer.png'))
+    poster = os.path.join(ROOT, '.build', f'trailer-{version}', 'out', 'trailer.png')
+    if sha:
+        with open(dest + '.png', 'wb') as f:
+            f.write(git('show', f'{sha}:docs/clips/trailer.png'))
+    elif os.path.exists(poster):
+        shutil.copyfile(poster, dest + '.png')   # (a trailer rendered here and not yet the current one)
     return describe(version)
 
 
@@ -151,13 +192,15 @@ def main():
     if os.path.exists(listed):
         with open(listed, encoding='utf-8') as f:
             videos = {v['version']: v for v in json.load(f)}
-    missing = [v for v in versions if v not in found]
+    missing = [v for v in versions
+               if v not in found and not os.path.exists(os.path.join(ROOT, '.build', f'trailer-{v}', 'youtube.mp4'))]
     if missing:
-        sys.exit(f'no committed trailer for {", ".join(missing)}')
+        sys.exit(f'no committed trailer for {", ".join(missing)}, and none rendered here')
 
     def one(version):
-        videos[version] = export(version, found[version])
-        print('wrote', os.path.relpath(os.path.join(OUT, name(version)), ROOT) + '.mp4, .png', 'from', found[version][:9], flush=True)
+        videos[version] = export(version, found.get(version))
+        print('wrote', os.path.relpath(os.path.join(OUT, name(version)), ROOT) + '.mp4, .png', 'from',
+              (found.get(version) or 'its render here')[:16], flush=True)
     with ThreadPoolExecutor(2) as pool:   # (two encodes at once, oldest first)
         list(pool.map(one, versions))
     order = sorted(videos.values(), key=lambda v: tuple(int(x) for x in v['version'].split('.')))

@@ -150,10 +150,18 @@ static bool dev_gift(const char *name) {
 }
 
 /* A dev talk said in the engine's own words: L's (status), the layer's
- * rumor (rumor, rumor_lines.c); false for another. */
+ * rumor (rumor, rumor_lines.c); and a trailer's narrator (narrate): Dad
+ * saying the boxes of CYBERWORLD_NARRATE in BN6's own chat box, a cut's
+ * own lines (tools/trailers/house.py; docs/devtools/headless-shot.md);
+ * false for another. */
 static bool dev_say(const char *name) {
 	if (!strcmp(name, "status")) talk_start(status_words(), FACE_MEGAMAN);
 	else if (!strcmp(name, "rumor")) { if (rumors_line()) talk_start(rumors_line(), FACE_NAVI); }
+	else if (!strcmp(name, "narrate")) {
+		const char *boxes = getenv("CYBERWORLD_NARRATE");
+		if (boxes && *boxes) talk_start(boxes, FACE_DAD);
+		else printf("--talk narrate: CYBERWORLD_NARRATE holds no boxes\n");
+	}
 	else return false;
 	return true;
 }
