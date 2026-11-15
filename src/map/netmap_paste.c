@@ -562,7 +562,11 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k) {
 		const SidePiece *p = &b->piece[k];
-		if (!p->grows && p->hang + p->behind == kind && p->floor == f && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
+		/* (the second layer's pieces behind a floor stand behind any
+		 * stretch of its upper edge: the panels they draw over void, as
+		 * in their maps, whatever floor lies before them) */
+		bool any = p->behind && !p->hang;
+		if (!p->grows && (p->behind ? 2 : p->hang) == kind && (p->floor == f || any) && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
 	}
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
@@ -674,7 +678,7 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			const SidePiece *p = side_pick(&L->sides, x, y, h, near, &m);
 			/* (and where none, what grows on its edge) */
 			if (p ? !side_set(p, &m, x, y) : hang || !(p = grows_set(&L->sides, &m, x, y, &grown))) continue;
-			if (p->hang) {
+			if (p->hang || p->behind) {
 				++nhang;
 				hang_said(p, x, y);
 				continue;
