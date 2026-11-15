@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (BN4's Town Area's row, and a section on what its four maps set round their floors: a warp hub's ring and exit arrow, a hub's centrepiece, Town Area 3's upper level and a rail under it, none a piece any cut takes, so none set).
+* **Update**: world/level-design/side-pieces.md (Green Area's row, and what its two maps set round their floors: nothing a layer lacks, every cut run on them keeping no piece; the rest pads, arrows, warp discs and plank ends, floor art and the owner's kinds 3 to 5).
+* **Update**: world/level-design/side-pieces.md (Sky Area surveyed: nothing beside, under or behind its floors, what its maps leave undrawn is raised floor, pods, stairs, roads and kinds 3 to 5; its row in the area table and its section, every cut run on its maps, none taken).
 * **Update**: world/level-design/side-pieces.md (Undernet Zero sets the bowls behind upper edges too, taken from the Undernet's maps through `side_maps`).
 * **Update**: world/level-design/side-pieces.md (BN4's Undernet's horns in rows along whole catwalk runs, `SIDES_RUNS`, measured on its two maps; what else they hold that no layer draws is floor or a mark on it).
 * **Update**: world/level-design/side-pieces.md (BN5's nine Liberation boards surveyed: nothing set; their second layer is the panels' middles, which the panel looks cover, and their corner blobs, rim fins and face drips are drawn into the floor's own tiles, the Judge Tree's edge cut's kind; a row in the area table and a section).
