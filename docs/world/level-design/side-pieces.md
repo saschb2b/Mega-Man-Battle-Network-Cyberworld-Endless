@@ -3,7 +3,7 @@ type: Design
 title: "Side pieces"
 description: "What an original map hangs on its floor's sides (CopyBot Comp's claws, the Undernets' flames, the Aquarium's pillars), cut whole from its second tile layer with the panel it grips (`src/map/sides.c`) and set on a generated floor's panel of the same neighbourhood; the survey of what layers still miss (issue #505)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T20:30:00Z }
 ---
 
 # Side pieces (built for five areas, issue #505)
