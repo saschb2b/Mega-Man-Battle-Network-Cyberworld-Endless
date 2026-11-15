@@ -1530,10 +1530,10 @@ game holds still while it is open, its music too, and goes on where it
 was when you close it.
 
 The songs are in sections by game and by where they play (Towns, The
-Net, Battles, Story, Screens; BN5's songs whose place is not known yet
-are in **More**, by their number). **L** and **R** (or Left and Right)
-turn the sections, Up and Down pick a song, **A** plays it, **START**
-turns the mode and **B** closes it. On a phone a song's row plays it, the
+Net, Battles, Story, Screens; the songs BN5's and BN4's cartridges hold
+but never play are in **Unused**, by their number). **L** and **R** (or
+Left and Right) turn the sections, Up and Down pick a song, **A** plays
+it, **START** turns the mode and **B** closes it. On a phone a song's row plays it, the
 green arrows turn the sections and the mode on the band turns the mode.
 
 | Mode | Plays |

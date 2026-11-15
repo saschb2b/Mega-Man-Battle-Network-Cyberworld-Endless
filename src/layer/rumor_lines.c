@@ -1,7 +1,9 @@
 /* The net's rumors (docs/game/meta/rumors.md): one bystander a layer passes on
  * the kind of thing a schoolyard did. BN6's own Program Advances, read from
  * its table and picked for the chips the folder holds (a recipe told by a
- * friend: Sword, WideSwrd and LongSwrd in one code); or a word on a secret
+ * friend: Sword, WideSwrd and LongSwrd in one code, asked as "Got these?",
+ * where "My operator sent these" read as a gift that never came, session
+ * 76); or a word on a secret
  * the profile has not found yet, which never gives its answer away (that a
  * Spin hides down deep, not where). Every line is true. */
 #include "rumor_lines.h"
@@ -116,13 +118,13 @@ static const char *pa_line(uint32_t seed) {
 	chip_info(a->result, &r);
 	for (int i = 0; i < (a->kind == 4 ? a->n : 1); ++i) chip_info(a->chip[i], &ci[i]);
 	if (a->kind == 0)
-		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
+		snprintf(line, sizeof line, "Psst! Got these?\nUse 'em in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
 			"Advance!!", ci[0].name, c, ci[0].name, c1, ci[0].name, c2, r.name);
 	else if (a->n == 3)
-		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
+		snprintf(line, sizeof line, "Psst! Got these?\nUse 'em in order!|%s %c,\n%s %c,\n%s %c...|Then... %s!\nA Program "
 			"Advance!!", ci[0].name, c, ci[1].name, c, ci[2].name, c, r.name);
 	else
-		snprintf(line, sizeof line, "Psst! My operator sent these,in order!|%s %c,\n%s %c,|%s %c,\n%s %c...|Then... %s!\nA "
+		snprintf(line, sizeof line, "Psst! Got these?\nUse 'em in order!|%s %c,\n%s %c,|%s %c,\n%s %c...|Then... %s!\nA "
 			"Program Advance!!", ci[0].name, c, ci[1].name, c, ci[2].name, c, ci[3].name, c, r.name);
 	return line;
 }

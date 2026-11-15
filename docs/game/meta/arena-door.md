@@ -3,7 +3,7 @@ type: Feature
 title: "The arena's door"
 description: "The arena-door save: the run saves the frame MegaMan steps into a guardian's arena, so a quit or crash mid-fight resumes from the door with the HP and chips he walked in with."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:59:51Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:04:49Z }
 ---
 
 # The arena's door (4 October 2026)
@@ -24,3 +24,7 @@ saves at the arena's door, "as other bigger RPGs normally do it".
 - **What it keeps fair**: a crash or a closed lid costs nothing, and a quit
   wins nothing over losing but the fight's knowledge, which a rematch in
   any run gives too.
+- **A random battle** has no door: a quit in its fight goes back to the
+  last save. Once it is won, a quit on its RESULT or in the fade back
+  keeps it, the game run on to MegaMan free first ([A
+  layer](../../engine/emulation/layer.md), the quit's save; session 76).

@@ -147,5 +147,12 @@ void end_run(void);
  * exit (director_end.c, as end_run) */
 void win_run(void);
 void drop_events(void);
+/* The viruses a battle deleted, as BN6 counts its enemies down
+ * (director_tally.c): begun with the battle, read each of its frames;
+ * of the `foes` it set out, every one where it was won, else those BN6
+ * counted down before MegaMan was deleted or ran */
+void tally_battle_start(void);
+void tally_battle_frame(void);
+int tally_deleted(bool won, int foes);
 
 #endif
