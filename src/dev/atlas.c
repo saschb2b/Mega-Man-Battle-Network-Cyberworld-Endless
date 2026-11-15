@@ -5,6 +5,7 @@
  * says how the tile picks went. */
 #include "atlas.h"
 #include "layer_sizes.h"
+#include "pieces_census.h"
 #include "break_places.h"
 #include "lent.h"
 #include "navstudy.h"
@@ -751,6 +752,7 @@ int atlas_run(const char *spec) {
 	if (!strcmp(biomes, "world")) { world_sources(dir); return 0; }
 	if (!strcmp(biomes, "town")) { towns(dir, seeds); return 0; }
 	if (!strncmp(biomes, "sizes", 5)) return layer_sizes_run(dir, biomes + 5, seeds);
+	if (!strcmp(biomes, "pieces")) return pieces_census_run(dir, seeds);
 	int lettered = letter_spec(dir, biomes, seeds);
 	if (lettered >= 0) return lettered;
 	bool want[BIOME_COUNT] = { false };
