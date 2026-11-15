@@ -16,6 +16,8 @@ const char *lies_at(int wx, int wy);
 bool hurt_now(void);
 bool heal_spent(void);
 void hp_full_watch(void);
+/* The Recovery Mr. Prog's panel while the way on leads to him first. */
+bool heal_first(int *x, int *y);
 void goal_way(void);
 void push_arrow(void);
 /* MegaMan standing still on the exit pad as drawn: its warp (pad_art.h). */

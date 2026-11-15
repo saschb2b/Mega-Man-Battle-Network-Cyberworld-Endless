@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code and kept in step with a cloud slot over the Net Square's server (`saves_code.c`, `saves_cloud.c`, `transfer.c`, `cloud.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
+generated: { by: agent/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 ---
 
 # Portable saves
@@ -48,7 +48,10 @@ Options' kin: the pages CLOUD, CODE and FILE as its tabs, turned by L
 and R or a tap (no row where the system has FILE alone: the PSP, a 3DS
 build without libcurl); a strip under them, THIS DEVICE with the run
 ("Layer 4, Act 2", its area where it fits) and the record ("3 runs, best
-Layer 9", or "No runs yet"); the page's lines in the cyan window, Up and
+Layer 9", or "No runs yet", which a first start's device, its `savedata/`
+not yet made, reads too: `backup_local_info` takes a missing folder for
+no saves, never "Damaged", unless an import cut short left it missing);
+the page's lines in the cyan window, Up and
 Down round, the line each page was left on kept; KeyItem's information
 box under them, what the line does, then where the page has one how it
 stands. CLOUD: Turn on (where there are saves) and Link with a code, or

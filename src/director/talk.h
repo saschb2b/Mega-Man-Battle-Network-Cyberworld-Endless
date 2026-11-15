@@ -22,6 +22,8 @@ bool talk_script(uint32_t archive, int script);
 /* Each frame: gives the keys back once the conversation has closed. */
 void talk_update(void);
 bool talk_busy(void);
+/* No talk begins while on (a quit running the game on to MegaMan free: director_settle.c) */
+void talk_refuse(bool on);
 /* Forgets a conversation under way (a new run, a new layer). */
 void talk_reset(void);
 

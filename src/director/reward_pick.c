@@ -123,7 +123,7 @@ void director_pick_keys(uint32_t keys) {
 	int rows = reward_pick_rows(), was = RP.cursor;
 	if (now & KEY_UP) RP.cursor = (RP.cursor + rows - 1) % rows;
 	else if (now & KEY_DOWN) RP.cursor = (RP.cursor + 1) % rows;
-	else if ((now & KEY_A) && rested >= PICK_REST) {
+	else if ((now & KEY_A) && rested >= PICK_REST && RP.t >= PICK_SEEN) {
 		/* (the choice's script, or the skip's from its row) */
 		choose(RP.cursor < RP.o.n ? RP.o.c[RP.cursor].script : RP.o.skip);
 	} else if (now & KEY_B) {
