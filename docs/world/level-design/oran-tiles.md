@@ -100,7 +100,8 @@ Two settings of its entry, measured each way:
   area's laying). Straight circuits come out whole. Rule 4 (beside a
   panel laid whole, its map's own tiles) drew a little worse here.
 
-Every layer counts fewer breaks, nicks and seams. More tiles are picked one
+Every layer counts fewer breaks and nicks, and five of the six fewer
+seams (one 301 to 314). More tiles are picked one
 at a time from a nearby neighbourhood, since hubs and circuits are one
 floor now (11% to 16% of tiles over the six layers), so the area's rows
 in `tests/atlas_baseline.txt` were written again. The layouts are as they
