@@ -11,7 +11,7 @@
 #define JUKE_SECTION_MOST 40   /* songs in a section at most */
 #define JUKE_TITLE_MOST 15     /* a name's letters at most: a row of the list holds as many */
 
-/* a song's section: where it plays */
+/* a song's section: where it plays (JUKE_MORE: nowhere, "Unused") */
 typedef enum { JUKE_TOWNS, JUKE_NET, JUKE_BATTLES, JUKE_STORY, JUKE_SCREENS, JUKE_MORE, JUKE_KINDS } JukeKind;
 
 /* a song: its game (0 BN6, 1 + XRomId another: mp2k.h), its number in

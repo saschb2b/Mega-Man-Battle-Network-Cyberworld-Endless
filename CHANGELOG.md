@@ -49,6 +49,10 @@
   key under SELECT's map dropped You and still cut ProtoMan's name off at
   the edge. Now it keeps every entry and takes a second row where one
   can't hold them, on the second screen's map too.
+- **The Jukebox's Unused section.** The songs BN5's and BN4's
+  cartridges hold but never play, listed by their numbers, were in a
+  section called More, and their "Song 07" rows read as unfinished. The
+  section is called Unused now.
 - **Fixed: two menu lines said too little.** Options' Fast forward note
   ran past its box and ended at "BN6's"; it fits whole now. The ROMs
   screen said BN4 Red Sun brings only its viruses: it says what BN4
