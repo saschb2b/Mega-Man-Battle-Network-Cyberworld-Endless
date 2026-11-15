@@ -2161,6 +2161,89 @@ SCREENSHOTS = [
                       '--size', '720x480', '--depth-lighting', 'on'], [(7700, 'depth-battle')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
 ]
 
+# 0.22.0's notes: saves, the dive, systems
+# (the routes are the 0.22.0 trailer's, tools/trailers/v0_22_0_footage.py,
+# written out: a run's arrival on seed 7's layer 5 paged so that its
+# checkpoint is written, the soft reset to the title (A+B+SELECT+START) and
+# L, SAVES over a title with a run saved, at the 240x160 it lays itself out
+# for; its pages turned with R; CLOUD's Turn on, its question, Yes and the
+# sync, and CODE's Send and its code, both on a Net Square server of this
+# machine (SCREENSHOT_SERVERS); the title's menu with that run's CONTINUE)
+N22_ARRIVE = '150:,' + '6:A,4:,' * 30 + '20:,'
+N22_TITLE = '100:,' + '4:A,6:,' * 30 + '100:,6:A+B+SELECT+START,200:,'
+N22_SAVES = N22_TITLE + '6:L,60:,'
+N22_SAVED = ['--scene', 'emu', '--run-depth', '5', '--seed', '7', '--dev', 'quiet']
+N22_SQUARE_PORT, N22_UPDATE_PORT = 18732, 18733
+N22_ONLINE = ['--scene', 'emu', '--run-depth', '5', '--seed', '7', '--dev', f'quiet,online=ws://172.17.0.1:{N22_SQUARE_PORT}/presence',
+              '--size', '240x160']
+# (the update box on the title, a look for a made-up update.json of
+# 0.22.0 from a build that calls itself 0.21.2: the box as START first
+# shows it, a page on, Later; SELECT, Options' Game on its Update line)
+N22_UPDATE = '240:,6:pad.start,180:,6:pad.dpright,80:,6:pad.b,60:,6:pad.back,160:'
+# (Options from the PET on seed 4's second layer, its Audio page; the
+# builder with two Mettaurs set, B at FOES; the Jukebox from Lan's room,
+# L from BN6's Towns six sections back to BN5's Unused)
+N22_OPTIONS = N22_ARRIVE + '6:START,40:,' + '6:DOWN,6:,' * 6 + '6:A,120:,6:R,60:'
+N22_JUKEBOX = ('40:,' + '6:A,4:,' * 46 + '30:,6:START,6:,40:,' + '6:DOWN,6:,' * 5 + '6:A,6:,60:,6:DOWN,6:,6:RIGHT,6:,14:,6:A,6:,40:,'
+               + '40:,6:L,60:,6:DOWN,40:,6:DOWN,60:,' + '6:L,10:,' * 6 + '60:')
+SCREENSHOTS += [
+    ('saves-pages', N22_SAVED + ['--size', '240x160', '--input', N22_SAVES + '70:,6:R,74:,6:DOWN,40:,6:R,120:'],
+     [(800, 'saves-page-cloud'), (890, 'saves-page-code'), (1010, 'saves-page-file')], {}),
+    ('saves-cloud', N22_ONLINE + ['--input', N22_SAVES + '60:,6:A,90:,6:LEFT,40:,6:A,900:'],
+     [(960, 'saves-cloud-ask'), (1870, 'saves-cloud')], {}),
+    ('saves-code', N22_ONLINE + ['--input', N22_SAVES + '60:,6:R,60:,6:A,900:'], [(1800, 'saves-code')], {}),
+    ('update-box', ['--scene', 'title', '--pad', 'xbox', '--input', N22_UPDATE],
+     [(306, 'update-box'), (500, 'update-box-page'), (560, 'update-hint'), (790, 'options-update')], {}),
+    ('options-touch', ['--scene', 'title', '--touch', '--input', '60:,4:SELECT,100:,4:L,6:,60:,4:DOWN,6:,110:,4:RIGHT,6:,170:'],
+     [(410, 'options-touch')], {}),
+    ('options-depth', ['--scene', 'title', '--input', '60:,4:SELECT,100:,4:UP,6:,90:,4:RIGHT,6:,170:'], [(310, 'options-depth')], {}),
+    ('options-music', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', N22_OPTIONS], [(760, 'options-music')], {}),
+    # (Depth lighting on a layer with heights, the whole screen at 3x: Green
+    # Area's layer 4 of seed 2, MegaMan up its yellow stair on the terrace)
+    ('depth-climb', ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--net-biome', '3', '--dev', 'quiet', '--size', '720x480',
+                     '--depth-lighting', 'on', '--input', N22_ARRIVE + '100:UP+RIGHT,60:'], [(600, 'depth-climb')], {}, 1),
+    ('lab-leave', LAB + ['--input', LAB_METS + '6:B,60:'], [(936, 'lab-leave')], {}),
+    ('title-best', N22_SAVED + ['--input', N22_TITLE + '60:,6:START,150:'], [(840, 'title-best')], {}),
+    ('jukebox-bn5-unused', ['--scene', 'town', '--seed', '2', '--input', N22_JUKEBOX], [(1144, 'jukebox-bn5-unused')], {}),
+]
+WHOLE_ROMS_A += ('lab-leave',)
+# (the pictures that talk to a server of this machine, started before the
+# run and stopped after it: 'square' a Net Square server from source,
+# 'update' a folder with a release's update.json over HTTP)
+SCREENSHOT_SERVERS = {'saves-cloud': 'square', 'saves-code': 'square', 'update-box': 'update'}
+N22_SQUARE_INI = ('[server]\nname = Cyberworld Endless\nmotd = Welcome\nhost = 0.0.0.0\nport = {port}\nseed = 120\ncapacity = 8\n'
+                  'player_cap = 64\ntick_hz = 20\nstate_dir = {state}\nwhitelist =\nfree_text = false\ntrading = true\narena = true\norigins =\n')
+
+
+def screenshot_server(kind, tmp):
+    """A picture's server (SCREENSHOT_SERVERS), which a container reaches at
+    Docker's bridge address: its process (None where the picture needs none)
+    and what the run's environment gets for it."""
+    import time
+    if kind == 'square':
+        state = os.path.join(tmp, 'square')
+        os.makedirs(state)
+        ini = os.path.join(state, 'server.ini')
+        with open(ini, 'w', encoding='utf-8') as f:
+            f.write(N22_SQUARE_INI.format(port=N22_SQUARE_PORT, state=state))
+        server, env = subprocess.Popen([sys.executable, os.path.join(ROOT, 'server', 'main.py'), '--config', ini],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), []
+    elif kind == 'update':
+        folder = os.path.join(tmp, 'update')
+        os.makedirs(folder)
+        with open(os.path.join(folder, 'update.json'), 'w', encoding='utf-8') as f:
+            if subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'update_manifest.py'), 'v0.22.0', folder], stdout=f):
+                sys.exit('screenshot_server: no update.json')
+        server = subprocess.Popen([sys.executable, '-m', 'http.server', str(N22_UPDATE_PORT), '--bind', '0.0.0.0', '--directory', folder],
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        env = [('CYBERWORLD_UPDATE_URL', f'http://172.17.0.1:{N22_UPDATE_PORT}/update.json'), ('CYBERWORLD_UPDATE_FROM', '0.21.2')]
+    else:
+        return None, []
+    time.sleep(2)
+    if server.poll() is not None:
+        sys.exit(f'screenshot_server: the {kind} server did not start')
+    return server, env
+
 # pictures of others side by side for a release's notes (made after the
 # screenshots they hold): name, then its rows of (screenshot, label), each
 # at 2x under its label as tools/before_after.py's pairs
@@ -2175,6 +2258,8 @@ SCREENSHOT_SHEETS = {
     'numbropn-hand': [[('numbropn-five', 'Five chips'), ('numbropn-ten', 'NumbrOpn: ten chips')]],
     'groups-beats': [[('groups-beat-1', 'Layer 1: alone'), ('groups-beat-2', 'Layer 2: beside a partner'),
                       ('groups-beat-3', 'Layer 3: its constellation')]],
+    # 0.22.0's notes: saves, the dive, systems
+    'saves-pages': [[('saves-page-cloud', 'CLOUD'), ('saves-page-code', 'CODE'), ('saves-page-file', 'FILE')]],
 }
 SHEET_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -2321,9 +2406,15 @@ def screenshots(only=None):
                 return code
             home = SAVES_HOME
             mounts = mounts + [(os.path.join(tmp, 'home'), SAVES_HOME)]
-        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
-                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=mounts, env=[('HOME', home)] if rom_screen or saves else ())
+        server, served = screenshot_server(SCREENSHOT_SERVERS.get(name), tmp)
+        try:
+            code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
+                          *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
+                          mounts=mounts, env=([('HOME', home)] if rom_screen or saves else []) + served)
+        finally:
+            if server:
+                server.terminate()
+                server.wait()
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -2516,6 +2607,8 @@ README_GIFS.update({name: (None, 10) for name in ('compare-bn4-park', 'compare-b
                                                    'compare-seaside', 'compare-undernet')})
 # 0.21.2: AquaNdl1 before and after at BN5's and BN4's viruses (tools/before_after.py --clips)
 README_GIFS['compare-bn5-aquandl'] = (None, 15)
+# 0.22.0's notes: saves, the dive, systems (tools/online_pictures.py's DIVE_CLIPS)
+README_GIFS['online-dive'] = (None, 15)
 
 
 def clips(only=None):
