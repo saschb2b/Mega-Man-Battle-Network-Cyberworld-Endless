@@ -54,6 +54,10 @@ int voids_mend(const VoidFloor *f, uint16_t *map, int *left);
  * set cannot be read. */
 const uint64_t *voids_opaque(int rom, int group, int number);
 
+/* The pixels map entry `e` draws of those (bit y * 8 + x): its tile,
+ * flipped as it says; none for tile 0. */
+uint64_t voids_entry_px(const uint64_t *opaque, uint16_t e);
+
 /* (dev) Off where false: the atlas draws a layer without the net, the
  * holes as its tiles left them. And, kept where voids_measure is set (the
  * atlas), what the last map's pass found, per tile: VOID_FOUND, and
