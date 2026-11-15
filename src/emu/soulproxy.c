@@ -23,6 +23,8 @@
 #include "rom.h"
 #include "soullook.h"
 #include "soulpassive.h"
+#include "soulunite.h"
+#include "xinstall_log.h"
 #include "xvirus_grow.h"
 
 #define BUS 0x08000000u
@@ -94,7 +96,8 @@ static HookAct summon(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
-bool soulproxy_bn5_read(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
+/* whether BN5's ROM, the Souls' own, is read beside BN6's */
+static bool soulproxy_bn5_read(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
 
 bool soulproxy_install(int breaks) {
 	static bool done;
@@ -159,4 +162,12 @@ bool soulproxy_cross(int form) {
 	if (hooked) next_form = form;
 	printf("cross: the next Cross chosen on CROSSSELECT %s form %d\n", hooked ? "commits" : "cannot commit (no hook)", form);
 	return hooked;
+}
+
+void soulproxy_install_run(bool forced, bool no_navis, int proxy_breaks, int unite_breaks, int soul_breaks) {
+	if (!forced && (no_navis || !soulproxy_bn5_read())) return;
+	xlog_begin();
+	bool proxy = soulproxy_install(proxy_breaks);
+	if (proxy) soulunite_install(unite_breaks, soul_breaks);
+	xlog_end();
 }

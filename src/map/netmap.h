@@ -113,7 +113,7 @@ bool netmap_floor_cell(int cx, int cy, int level);
  * off (voxel mode's ground, docs/engine/voxel.md). */
 bool netmap_floor_at(int wx2, int wy2, int level);
 /* How high a stair's ramp stands at that point, from its foot (0) to the
- * layer's rise, taken as even over its two panels; -1 off every stair. */
+ * layer's rise, taken as even over its length; -1 off every stair. */
 int netmap_stair_height(int wx2, int wy2);
 /* Whether wall cell (cx, cy) lies on a stair. */
 bool netmap_stair_cell(int cx, int cy);

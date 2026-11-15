@@ -16,7 +16,7 @@
 
 /* A stair block's corner with the lowest panel indices, in world units. */
 void nm_stair_origin(const Stair *st, int *X0, int *Y0) {
-	int A0 = -(st->y + 1 - nm_place.gy0), B0 = st->x - nm_place.gx0;
+	int A0 = -(st->y + stair_h(st) - 1 - nm_place.gy0), B0 = st->x - nm_place.gx0;
 	*X0 = nm_place.ex + 32 * A0;
 	*Y0 = nm_place.ey + 32 * B0;
 }
@@ -25,11 +25,13 @@ void nm_stair_origin(const Stair *st, int *X0, int *Y0) {
 void nm_paste_stairs(const Learned *L, uint16_t *map, int tw, int th) {
 	size_t cells = (size_t)tw * th;
 	for (int i = 0; i < nm_cur->nstairs; ++i) {
-		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir];
+		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir][stair_width(&nm_cur->stairs[i])];
 		if (!t->ok) continue;
 		int X0, Y0;
 		nm_stair_origin(&nm_cur->stairs[i], &X0, &Y0);
 		int px0 = X0 + Y0 + tw * 4, py0 = (Y0 - X0) / 2 + th * 4;
+		if (emu_debug_on()) fprintf(stderr, "stair pasted area biome %d seed %u: dir %d wide %d len %d at %d,%d, world corner %d,%d\n", layer.biome, nm_cur->seed,
+			nm_cur->stairs[i].dir, stair_wide(&nm_cur->stairs[i]), stair_len(&nm_cur->stairs[i]), px0, py0, X0, Y0);
 		for (int k = 0; k < t->ntiles; ++k) {
 			int px = px0 + t->tiles[k].px, py = py0 + t->tiles[k].py;
 			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
@@ -210,7 +212,7 @@ static bool drawn_flat(int mx, int my) {
 		}
 	for (int s = 0; s < nm_cur->nstairs; ++s) {
 		const Stair *st = &nm_cur->stairs[s];
-		if (!(st->x + 2 < mx - 1 || st->x > mx + 3 || st->y + 2 < my - 1 || st->y > my + 3)) return false;
+		if (!(st->x + stair_w(st) < mx - 1 || st->x > mx + 3 || st->y + stair_h(st) < my - 1 || st->y > my + 3)) return false;
 	}
 	return true;
 }
@@ -227,7 +229,7 @@ static int pads_stamped(const Learned *L, PadAt *at, int max) {
 		for (int y = m->y; y < m->y + 3; ++y)
 			for (int x = m->x; x < m->x + 3; ++x) flat &= layer.cell[y][x] == C_PATH && !layer.level[y][x];
 		for (int s = 0; s < layer.nstairs; ++s)
-			flat &= layer.stair[s].x + 2 < m->x - 1 || layer.stair[s].x > m->x + 3 || layer.stair[s].y + 2 < m->y - 1 || layer.stair[s].y > m->y + 3;
+			flat &= layer.stair[s].x + stair_w(&layer.stair[s]) < m->x - 1 || layer.stair[s].x > m->x + 3 || layer.stair[s].y + stair_h(&layer.stair[s]) < m->y - 1 || layer.stair[s].y > m->y + 3;
 		if (flat) at[n++] = (PadAt){ m->x, m->y, layer_floor };
 	}
 	for (int i = 0; i < nm_cur->ngems && n < max; ++i) {

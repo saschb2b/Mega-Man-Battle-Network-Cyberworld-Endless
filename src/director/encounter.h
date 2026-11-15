@@ -69,5 +69,19 @@ bool emu_battle_forcing(void);
  * map entered again after BN4's screen lifts the game's own flag
  * (BN6_FLAG_NO_ENCOUNTERS) before the director's next frame */
 void emu_encounters_hold(bool hold);
+/* The shared dive's join-in battles (docs/online/shared-dive.md, As built):
+ * while `on` (a crewmate near MegaMan, set between frames) a random battle
+ * BN6's roll gives is held back, not begun, MegaMan still on the map, and
+ * emu_encounter_held says so until it begins here (go: the record the roll
+ * was handed, forced as a guardian's is) or is fought elsewhere (drop: the
+ * party's core fought it); while one is held no other roll begins one.
+ * roll_next: BN6's next roll gives a battle (the dev's battle step on a
+ * dive with the crew near, so that it comes through the hold). */
+void emu_encounters_offer(bool on);
+bool emu_encounters_offering(void);
+bool emu_encounter_held(void);
+void emu_encounter_go(void);
+void emu_encounter_drop(void);
+void emu_encounter_roll_next(void);
 
 #endif

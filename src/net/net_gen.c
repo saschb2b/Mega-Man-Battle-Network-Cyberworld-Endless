@@ -76,7 +76,7 @@ bool ng_cell_free(int x, int y) {
 		if (nx >= 0 && ny >= 0 && nx < MAP_W && ny < MAP_H && layer.cell[ny][nx] == C_PROPPED) return false;
 	}
 	for (int i = 0; i < layer.nstairs; ++i)
-		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return false;
+		if (stair_covers(&layer.stair[i], x, y)) return false;
 	/* (nor beside another solid object: A answers whichever is in reach,
 	 * and a crowd answered the wrong one) */
 	for (int i = 0; i < layer.nobj; ++i) {
@@ -522,7 +522,7 @@ static void last_stop(int kind, const LayerKit *kit) {
  * LayerKit.narrows) where the area's art draws floor two wide (`one_wide`:
  * BN5's End Area draws none, and the legalizer wore a widened way into
  * rings, issue #164), the raised rooms. */
-static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, const LayerKit *kit) {
+static void finish_rooms(uint32_t seed, const LayerKit *kit) {
 	layer.exit_room = layer.arena >= 0 ? layer.arena : exit_far();
 	const Room *goal = &layer.rooms[layer.arena >= 0 ? layer.ante : layer.exit_room];
 	if (!(kit && kit->one_wide)) {
@@ -530,7 +530,7 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, const Lay
 		fill_pits();   /* (a pit left between walkways: session 76's playtester stuck beside one) */
 	}
 	/* (a dark layer flat: the board's units stand on one floor) */
-	layer_raise_rooms(seed, layer.dark ? 0u : stair_dirs, rise);
+	layer_raise_rooms(seed, layer.dark ? NULL : kit);
 }
 
 /* A guardian's arena, `arena_n` panels a side, on the layout just built,
@@ -957,7 +957,6 @@ bool layer_make_dark;
 static bool make_dark(int kind) { return layer_make_dark && kind == LAYER_NORMAL && !layer.boss_layer; }
 
 void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKit *kit) {
-	unsigned stair_dirs = kit ? kit->stair_dirs : 0;
 	int rise = kit ? kit->rise : 0;
 	memset(&layer, 0, sizeof layer);
 	memset(ng_reserved, 0, sizeof ng_reserved);
@@ -985,7 +984,7 @@ void layer_generate(uint32_t seed, int depth, int biome, int kind, const LayerKi
 	/* (a super boss's arena is bigger: docs/game/bosses/super-bosses.md) */
 	int arena_n = super_boss(layer_guardian_of(biome, kind)) ? SUPER_ARENA_SIZE : ARENA_SIZE;
 	build_layout(planned, sig, biome, size, rise, arena_n, &arena);
-	finish_rooms(seed, stair_dirs, rise, kit);
+	finish_rooms(seed, kit);
 	place_ends(kind, biome, &arena);
 	/* (a dark layer's floor is its board: the director places the rest) */
 	if (!layer.dark) fill_layer(seed, depth, biome, kind, size, rise, kit);

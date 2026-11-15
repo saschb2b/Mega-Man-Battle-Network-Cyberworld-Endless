@@ -25,6 +25,7 @@
 #include <stdint.h>
 
 struct ArenaPair;
+struct mCore;
 typedef struct TeamScreen TeamScreen;
 
 /* side's partner's screen: a plain pair of the ROM's bytes (BN5's
@@ -33,6 +34,16 @@ typedef struct TeamScreen TeamScreen;
  * where he holds any (none: no hook at all); NULL where it could not be
  * made */
 TeamScreen *team_screen_new(const uint8_t *rom, size_t size, struct ArenaPair *pair, unsigned side, unsigned souls);
+/* A party's partner's screen (the shared dive's one field, docs/online/
+ * shared-dive.md): the field is one core with no cable, so his screen is
+ * one core too, of `field_rom` (the field's ROM copy, field_size bytes)
+ * with the installs' hooks; NULL where it could not be made */
+TeamScreen *team_screen_one(const uint8_t *rom, size_t size, const uint8_t *field_rom, size_t field_size);
+/* ... his turn: `field` copied in (its own core, between frames), his
+ * record (partner p's, arena_team_navi.h) as side 0's NaviStats there and
+ * `deck` as side 0's, its Custom screen set up anew; the rest as below */
+bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n);
+
 void team_screen_free(TeamScreen *s);
 /* His turn: `pair` copied in, `deck` (n entries, chip | code << 9, in the
  * order drawn) written into BN6's deck on his side's GBA, its Custom

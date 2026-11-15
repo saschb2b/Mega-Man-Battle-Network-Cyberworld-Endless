@@ -24,6 +24,10 @@
  * second screen's palette too, emote_palette.h). */
 void emote_strip_reset(void);
 void emote_strip_open(void);
+/* On a dive layer (dive_traces.h): its phrases' page alone, A handing the
+ * phrase under the cursor (0 to ONLINE_PHRASE_COUNT - 1) to `leave` and
+ * closing it. */
+void emote_strip_open_phrases(void (*leave)(int phrase));
 void emote_strip_close(void);
 bool emote_strip_shown(void);
 /* The frame's course (the keys and taps while it is up, the palette's

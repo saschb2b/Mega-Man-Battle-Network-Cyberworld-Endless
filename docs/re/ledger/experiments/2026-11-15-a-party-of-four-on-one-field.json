@@ -1,0 +1,8 @@
+{
+  "feature": "Shared dive",
+  "date": "2026-11-15",
+  "name": "A party of four on one field",
+  "result": "--dev party=N grows a battle's list at BN6_SPAWN_ENTITIES with MegaMen on side 0 (BN6 keeps four actors a side): against HeatMan V1 (0x101) four stood, moved and shot from keys written at BN6_KEY_COPY; a partner at 0 HP left the field and the battle went on; the lead at 0 HP did not end it while a partner stood, and the partner's win ended it as a win (partyhp, partyend).",
+  "meaning": "One field works on one core with BN6's own battle: the battle ends when every MegaMan is down. Not yet: who the enemies aim at. A Gunner's and HeatMan's hits went to the lead alone, and answering both of BN6's lookups (battle_findPlayer, BN6_SIDE_PLAYER_GET, and the nearest actor, bn6f sub_80103F8) for enemy callers changed nothing frame for frame: the AIs read their target elsewhere.",
+  "link": "../online/shared-dive.md"
+}

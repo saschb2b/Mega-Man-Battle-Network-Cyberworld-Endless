@@ -70,5 +70,9 @@ void analytics_watch(int how, int seconds);
 
 /* The week's dive taken by the Board: its layer, act, and won */
 void analytics_dive_post(int layer, int act, bool won);
+/* The shared dive's company as a dive ends (docs/online/shared-dive.md):
+ * the layers entered, those another diver was on, the most divers on one,
+ * the biggest crew, the party fights and the biggest party. */
+void analytics_dive_together(int layers, int shared, int most, int crew, int parties, int party);
 
 #endif

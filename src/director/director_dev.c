@@ -396,6 +396,12 @@ static void dev_battle(void) {
 		return;
 	}
 	D.battle_due = false;
+	/* (on a dive with the crew near: through BN6's roll, which the crew's hold takes, dive_join.h) */
+	if (emu_encounters_offering()) {
+		fprintf(stderr, "battle: the step's, through BN6's roll\n");
+		emu_encounter_roll_next();
+		return;
+	}
 	if (emu_debug_on()) fprintf(stderr, "battle: the step's%s\n", D.next.xrecord ? ", an older net's record" : "");
 	Encounter e = D.next;
 	set_encounter(&e, true);

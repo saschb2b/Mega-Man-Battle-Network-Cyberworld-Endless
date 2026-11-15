@@ -272,6 +272,15 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "updated": "2026-11-13",
       "link": "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505",
       "state_text": "Being built"
+    },
+    {
+      "name": "Shared dive",
+      "state": "building",
+      "now": "A door's party fights its guardian on one field over the server: a core of its own built alike on every game (--dev partycore=N alone), every seat's keys guessed and rolled back as the Arena's, the hashes compared, the guardian's aim passed over the party in turn, the end back into each run.",
+      "left": "The partners' own NaviStats, hand and Custom screen on the field; a crew's join-in battles on one field.",
+      "updated": "2026-11-15",
+      "link": "../online/shared-dive.md",
+      "state_text": "Being built"
     }
   ],
   "decisions": [],
@@ -279,6 +288,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     {
       "date": "2026-11-15",
       "what": "BN4's guardians stand in their sprites' own views (src/layer/xguardian_bn4.c's views, BN4_OW_VIEWS* in src/emu/bn4_navis.h): BN4's Navis draw four diagonals by BN6's eight facings, so a guardian facing left had shown his back or nothing; now each faces MegaMan at both sides of his arena, the Glitch copy's body too."
+    },
+    {
+      "date": "2026-11-15",
+      "what": "The shared dive's join-in battles hold BN6's random-battle roll at its branch (src/director/encounter.c emu_encounters_offer, BN6_ENCOUNTER_ROLLED to BN6_ENCOUNTER_SKIP while a crewmate stands near) and force it later through BN6_ENCOUNTER_CHECK, or fight it on the party's core; the branch at 0x08005AE2 follows the roll's bl with no instruction between, so it reads the flags the roll left, and a hook that gives a battle where the roll gave none jumps to BN6_ENCOUNTER_START itself (docs/rom/battle.md, Encounter roll). The joiner's walk toward his next battle reset through BN6_STEPS_WALKED and BN6_STEPS_CHECKED, and the reward BN6's results picked read from the party's core at BN6_BATTLE_REWARD; no new address."
     }
   ],
   "experiments": [
@@ -289,6 +302,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "Two playtesters' battles opened in Full Synchro (the emotion window's outline, Cannon 40x2). BN6 writes a battle's mood into MegaMan's NaviStats at its end (0x08007D94) and the next battle copies it; only the jack-in, the jack-out and a real-world script battle zero it (0x08015C32). kai6's checkpoint held 0xFF there after a battle won in Full Synchro.",
       "meaning": "BN6's own rule, kept: nothing of the run's writes BN6's mood between battles. Named BN6_MOOD_KEPT, BN6_MOOD_KEPT_WRITE and BN6_MOOD_ZERO_ALL (src/emu/bn6_forms.h; docs/rom/battle.md).",
       "link": null
+    },
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-15",
+      "name": "A partner's own chips on one field",
+      "result": "On the party's core with two MegaMen against BlastMan (layer 3 of --seed 3, --dev partycore=2,partytwin=1,partyroll=30,partybot=1): the two-a-side's answering hooks at BN6_NAVI_STATS_ADDR and BN6_HAND_ADDR, its marks at BN6_SPAWN_COMMON and BN6_SPAWN_MADE and its hold at BN6_LINK_SEND and BN6_CUSTOM_WAIT_LOOP, taken on a single-player battle's core with the partner read from side 0's slot 1; his record compiled by BN6 from his NaviCust over the party's kept boot (HP 100, Custom 5) in the fourth kind's last three slots, his deck dealt in RAM_TEAM_ROOMS as the field's first Custom screen opened (30 chips). His own BN6 Custom screen, a core of its own copied from the field with his deck at BN6_BATTLE_DECK, his record at BN6_BATTLE_NAVI and BN6_BATTLE_STEP put back to 0, dealt his hand and ran its rules: his OK's three picks (0C0, 09A, 036) crossed in his stream, his own hand took them at iteration 1 while the lead's held its own, and his A used his first chip at iteration 4831 (his hand's chip up next 0 to 1, the lead's at 2). A second core from the same keys agreed at every 60th frame and a 30-frame rollback every 30 ran again to the same hash, 308 checks and none apart, to the battle's end at frame 6176 (lost); the same build run twice gave the same ready hash (f41d5584e539094b) and end.",
+      "meaning": "The two-a-side's per-object NaviStats and hands answer for three partners on one side of a single-player battle as they do for one a side of a link battle, and BN6's Custom screen runs a partner's own turn on a lone core copied from a single-player battle (no cable to miss, unlike the pair's). Not yet seen: the lead's OK held past it while a partner still picks (the single-player screen's mode 0x14 sends its packet through BN6_LINK_SEND as a link battle's does, bn6f sub_8026DC4, so the two-a-side's hold is built there), two or three games over the server, a partner's Program Advance, Cross and Souls.",
+      "link": "../online/shared-dive.md"
+    },
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-15",
+      "name": "A party of four on one field",
+      "result": "--dev party=N grows a battle's list at BN6_SPAWN_ENTITIES with MegaMen on side 0 (BN6 keeps four actors a side): against HeatMan V1 (0x101) four stood, moved and shot from keys written at BN6_KEY_COPY; a partner at 0 HP left the field and the battle went on; the lead at 0 HP did not end it while a partner stood, and the partner's win ended it as a win (partyhp, partyend).",
+      "meaning": "One field works on one core with BN6's own battle: the battle ends when every MegaMan is down. Not yet: who the enemies aim at. A Gunner's and HeatMan's hits went to the lead alone, and answering both of BN6's lookups (battle_findPlayer, BN6_SIDE_PLAYER_GET, and the nearest actor, bn6f sub_80103F8) for enemy callers changed nothing frame for frame: the AIs read their target elsewhere.",
+      "link": "../online/shared-dive.md"
     },
     {
       "feature": "BN4's Navis in BN6's engine",
@@ -305,6 +334,22 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
       "result": "A playtester saw SpoutMan stand on column 1 row 2, behind MegaMan, and swing his hose forward. bn6f's sub_80F77E8 picks the first free panel of a fixed pair for his side, (2,2) then (1,2) for an enemy (byte_80F7828; Gregar 0x080F8B50, the same bytes), and his attack 0xC (sub_80F7EA6) lights it 35 frames and lands there. A replay showed the lit panel, then him on it, MegaMan 240 to 220.",
       "meaning": "BN6's own pattern, kept: nothing of the run's touches his AI. Named BN6_SPOUTMAN_BACK (src/emu/bn6_navis.h; docs/rom/battle.md).",
       "link": null
+    },
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-15",
+      "name": "The enemies aim at side 0's first slot",
+      "result": "On the party's core with two MegaMen against BlastMan (layer 3 of --seed 3), side 0's first two slots of BN6_BATTLE_PLAYERS swapped at the battle loop's iteration 300 (the lead's object into slot 1, the partner's into slot 0): BlastMan's next hit, at iteration 377, still struck the lead at column 2 row 2, and every hit after (694, 929, 1417, 1706) struck the partner at column 1 row 1, who stood still. The panels under all three MegaMen held the same flags (0x08410012 from iteration 120), so no occupant's bit tells the lead apart. battle_findPlayer (0x080103BC, BN6_SIDE_PLAYER_GET) walks the side's four slots and returns the first whose NameID it classes as a player (0x0800F29C gives 2); its 149 callers include object_getEnemyPlayerPanels (0x0800D06A), which asks it for the other side; object_getEnemyPlayerPanelY (0x0800D048) has no caller. Then side 0's first slot traded only while an object of side 1's routine runs (BN6_OBJECT_LOGIC_CALL 0x080031FA to BN6_OBJECT_LOGIC_BACK 0x08003200, RunBattleObjectLogic's call), the MegaMan in turn 240 iterations each: three MegaMen against BlastMan took his hits in turn (377 actor 1, 694 actor 2, 929 actor 0, 1417 actor 2, 1692 actor 0, 1955 actor 1, 2415 actor 0), a twin core and 30-frame rollbacks agreeing (56 and 113 of 56 and 113).",
+      "meaning": "BN6's enemies take their target from side 0's first slot (through battle_findPlayer or the table itself), deciding an attack's aim some frames before it lands. Handing each of side 1's objects, as its routine runs, another MegaMan in that slot spreads a guardian's aim over the party without touching the lead's own place in BN6's tables (src/online/party_field.c, party_field_aim). The spike's earlier answer of battle_findPlayer for enemy callers changed nothing, which this does not explain: its caller test may not have matched.",
+      "link": "../online/shared-dive.md"
+    },
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-15",
+      "name": "The party's own core",
+      "result": "A guardian's battle on a core of its own (src/online/party_core.c): the Arena's boot to the net, the run's ROM copy with each hook's original back under its BKPT (hook_originals), the record at FREE_RECORDS, the lead's loadout in BN6's RAM, the installs' hooks, the encounter check (BN6_ENCOUNTER_CHECK) forced to StartBattle (BN6_ENCOUNTER_START), the list grown at BN6_SPAWN_ENTITIES, partners' keys at BN6_KEY_COPY, the guardian's HP at BN6_SPAWN_HP: BlastMan's battle's first Custom screen 143 frames after the boot's state, a second core from the same keys at the same hash every 60th frame (20 of 20), a 30-frame rollback every 30 frames run again to the same hash (41 of 41); over the server two games built the same field (ready 69d5611be9442d5d) and agreed at every 60th frame to the win at 1261 (21 of 21 each); with an input delay of 1 the frames ran mostly on a guess (1250 of 1261, 30 rollbacks) and the same 21 hashes agreed, each the lockstep run's own.",
+      "meaning": "One field over the server stands on BN6's own battle with no address of its own: the hooks are the spike's and encounter.c's, on another core's table. The run's ROM copies of a party's games agree where the battle reads them (one layer of one seed): BN4's AquaMan, moved into BN6's engine (id 0x3A9, his sounds' pool pointed once as the fight is taken over), fought alike on both games. Not yet: the partners' own NaviStats and hands (they share the lead's, A held back), and the enemies' aim, which stays on the lead.",
+      "link": "../online/shared-dive.md"
     },
     {
       "feature": "BN4's Souls on BN6's proxy form",

@@ -191,6 +191,24 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         await writer.wait_closed()
 
 
+# (protocol v19, the shared dive: every constant it added, which protocol.h holds too)
+DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", "dive", "dive_room", "dive_traces", "dive_place",
+              "dive_feed", "divers", "crew", "crew_state", "queue", "queue_state", "party_damage", "party_hp", "week_splits",
+              "dive_enter", "dive_leave", "dive_end", "dive_found", "dive_phrase", "dive_wave", "dive_split",
+              "dive_enter_bytes", "dive_leave_bytes", "dive_end_bytes", "dive_found_bytes", "dive_phrase_bytes",
+              "dive_wave_bytes", "dive_split_bytes", "dive_deleted", "dive_won", "busting_most", "party_most",
+              "dive_room_bytes", "trace_marks", "trace_phrases", "trace_finds", "trace_opened", "trace_splits", "trace_gone",
+              "trace_head", "trace_mark_bytes", "trace_phrase_bytes", "trace_find_bytes", "trace_split_bytes", "traces_most",
+              "split_guardian", "dive_place_bytes", "dive_feed_bytes", "feed_deleted", "feed_won", "feed_guardian", "feed_flare",
+              "divers_head", "divers_entry_bytes", "divers_most", "divers_ms", "divers_fighting", "crew_bytes",
+              "crew_state_bytes", "crew_member_bytes", "crew_ask", "crew_answer", "crew_split", "crew_way", "crew_battle",
+              "crew_join", "crew_asked", "crew_waiting", "crew_formed", "crew_split_up", "crew_offer", "crew_alone",
+              "crew_join_ms", "queue_bytes", "queue_state_bytes", "queue_entry_bytes", "queue_join", "queue_leave",
+              "queue_start", "queue_pass", "queue_waiting", "queue_started", "queue_out", "queue_alone", "queue_arena",
+              "party_bytes", "arena_party", "arena_linked", "arena_seat_gone", "week_splits_bytes", "notice_dive_out",
+              "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue")
+
+
 class ContractTests(unittest.TestCase):
     def test_shared_constants_and_game_generation_match(self):
         header = (ROOT / "shared/online/protocol.h").read_text()
@@ -213,7 +231,8 @@ class ContractTests(unittest.TestCase):
                      "sync", "sync_state", "sync_version", "sync_pull", "sync_push", "sync_drop", "sync_bytes",
                      "sync_state_bytes", "sync_slot_bytes", "sync_auth_bytes", "sync_max", "sync_days", "sync_same",
                      "sync_found", "sync_none", "sync_denied", "sync_ready", "sync_stored", "sync_conflict",
-                     "sync_busy", "sync_off", "sync_dropped"):
+                     "sync_busy", "sync_off", "sync_dropped",
+                     *DIVE_NAMES):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
@@ -321,7 +340,21 @@ class ContractTests(unittest.TestCase):
                          (dict(bn4=True, one_extra=True), bn4 | one), (dict(bn5=True, one_extra=True), bn5 | bn4)):
             self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
         self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=3, resume=True, bn5=True, bn4=False, one_extra=True))[2:],
-                         (3, bn5 | one, True))
+                         (3, bn5 | one, True, False))
+        # (v19: its bit clear of the resume's, the one extra's and every channel (256 at most); SNAPSHOT's bit 7, the
+        # last free, clear of the ROMs', busy's and link's bits; every message the dive adds within max_message)
+        spec = protocol.SPEC
+        self.assertFalse(spec["hello_no_arena"] & (spec["hello_resume"] | spec["hello_one_extra"]))
+        self.assertGreater(spec["hello_no_arena"], 256)
+        self.assertEqual(spec["peer_diving"], 0x80)
+        self.assertFalse(spec["peer_diving"] & (spec["roms_bn5"] | spec["roms_bn4"] | spec["roms_one_extra"] | 3 << spec["busy_shift"]
+                                                | 3 << spec["link_shift"]))
+        for size in ("dive_enter_bytes", "crew_state_bytes", "queue_state_bytes", "week_splits_bytes", "dive_place_bytes"):
+            self.assertLessEqual(spec[size], spec["max_message"])
+        self.assertLessEqual(spec["divers_head"] + spec["divers_most"] * spec["divers_entry_bytes"], spec["max_message"])
+        # (a system that cannot run the Arena says so in the channel word too, clear of the channel and the others)
+        self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=5, one_extra=True, bn5=True, bn4=False, no_arena=True))[2:],
+                         (5, bn5 | one, False, True))
 
 
 if __name__ == "__main__":

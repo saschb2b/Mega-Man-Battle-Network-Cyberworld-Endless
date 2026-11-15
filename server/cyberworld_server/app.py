@@ -11,6 +11,9 @@ import time
 
 from . import protocol, websocket
 from .arena import Arena
+from .crews import Crews
+from .dive import Dive
+from .party import Parties
 from .holds import BACKLOG, Holds
 from .social import Social
 from .stands import Stands
@@ -45,6 +48,7 @@ class Player:
     round_trip: int = 0       # its round trip to here in ms as its PING says it (v13), 0 unknown: its link's bars
     refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
     resumed: bool = False     # a place held taken back by this session (holds.py)
+    no_arena: bool = False    # its system cannot run the Arena (HELLO's hello_no_arena, v19): a party's linked fighter (party.py)
 
 
 class Server:
@@ -92,6 +96,10 @@ class Server:
         self.stands = Stands(self)
         self.social_rules = Social(self)
         self.teams = Teams(self)
+        # (the shared dive, protocol v19: its rooms and traces, crews, doors' queues and party battles)
+        self.dive = Dive(self)
+        self.crews = Crews(self)
+        self.parties = Parties(self)
         # (the day's totals, no personal data: stats.py)
         self.daily = Daily(state_dir, self.retention.stats_days, clock)
         self.daily_task = None
@@ -200,6 +208,7 @@ class Server:
             await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
             await self.weeks.send(player)
             self.stands.send_to(player)
+            self.dive.send_divers(player)
             await self.serve_player(reader, player)
             goodbye = True
         except protocol.ProtocolError as exc:
@@ -232,7 +241,7 @@ class Server:
                 finally:
                     self.connections.discard(task)
 
-    def join(self, writer, name, key, requested, roms=0, resume=False):
+    def join(self, writer, name, key, requested, roms=0, resume=False, no_arena=False):
         if self.maintenance:
             raise protocol.ProtocolError(self.maintenance, protocol.SPEC["error_maintenance"])
         identity = self.store.identity(key)
@@ -249,16 +258,19 @@ class Server:
         # The same profile again (a reconnect after a drop the server has not
         # noticed yet) takes over its old session, and by default its channel.
         old = next((p for p in self.players.values() if p.identity == identity), None)
-        # (a resume takes its own place back, held or not yet noticed gone: holds.py)
-        channel = old.channel if old and resume else \
-            self.choose_channel(requested or (old.channel if old else 0), old.id if old else 0)
+        # (a resume takes its own place back, held or not yet noticed gone: holds.py; a
+        # diver's is his Square's, a channel chosen anew: his game dives again, dive.py)
+        prior = old.channel if old and 0 < old.channel <= self.max_channels else 0
+        channel = prior if old and resume and prior else self.choose_channel(requested or prior, old.id if old else 0)
         if not channel or len(self.players) - bool(old) >= self.player_cap:
             raise protocol.ProtocolError("Square or channel is full", 7)
-        player = Player(self.next_id, name, writer, identity, channel, roms=roms, resumed=bool(old and resume))
+        player = Player(self.next_id, name, writer, identity, channel, roms=roms, resumed=bool(old and resume),
+                        no_arena=no_arena)
         if not player.resumed:
             self.next_id = self.next_id % 0xffffffff + 1
         if old:
             del self.players[old.id]
+            self.dive.dropped(old)
             self.trades.left(old)
             self.arena.left(old.id)
             self.teams.left(old.id)
@@ -291,7 +303,8 @@ class Server:
         # (the Arena's keys come 60 times a second: a bucket of their own)
         tokens, relay, previous = 40.0, 150.0, time.monotonic()
         moves = float(BACKLOG)
-        relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"])
+        relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"],
+                   protocol.SPEC["party_damage"], protocol.SPEC["party_hp"])
         while True:
             opcode, data = await asyncio.wait_for(websocket.receive(reader), 15)
             now = time.monotonic()
@@ -348,6 +361,9 @@ class Server:
             await self.social(player, data, now)
         elif len(data) == 3 and data[0] == protocol.SPEC["channel"]:
             await self.switch_channel(player, struct.unpack("!H", data[1:])[0])
+        elif data and data[0] in self.square_only and player.id in self.dive.of:
+            # (a diver trades, teams up and watches nothing: the Square's, v19)
+            await self.notice(player, protocol.SPEC["notice_dive_in"], "Not on a dive")
         elif data and data[0] == protocol.SPEC["trade"]:
             await self.trades.handle(player, data)
         elif data and data[0] == protocol.SPEC["offer"]:
@@ -357,11 +373,25 @@ class Server:
         elif data and data[0] == protocol.SPEC["week_post"]:
             await self.weeks.handle(player, data)
         elif data and data[0] == protocol.SPEC["arena_status"]:
-            self.stands.status(player, data)
+            if not self.parties.status(player, data):
+                self.stands.status(player, data)
         elif data and data[0] == protocol.SPEC["watch"]:
             await self.stands.watch(player, data)
         elif data and data[0] == protocol.SPEC["team"]:
             await self.teams.handle(player, data)
+        else:
+            await self.dive_message(player, data, now)
+
+    square_only = (protocol.SPEC["trade"], protocol.SPEC["offer"], protocol.SPEC["team"], protocol.SPEC["watch"])
+
+    async def dive_message(self, player, data, now):
+        """The shared dive's messages (protocol v19): dive.py, crews.py, party.py."""
+        if data and data[0] == protocol.SPEC["dive"]:
+            await self.dive.handle(player, data, now)
+        elif data and data[0] == protocol.SPEC["crew"]:
+            await self.crews.handle(player, data, now)
+        elif data and data[0] == protocol.SPEC["queue"]:
+            await self.parties.handle(player, data)
         else:
             raise protocol.ProtocolError("Unknown or out-of-order message")
 
@@ -412,20 +442,33 @@ class Server:
         return True
 
     async def switch_channel(self, player, requested):
+        if player.id in self.dive.of:
+            # (a diver's CHANNEL: out of the dive, into that channel, v19)
+            await self.dive.leave(player, requested)
+            return
         channel = self.choose_channel(requested, player.id)
         if not channel:
             await self.notice(player, 10, "Channel is full or unavailable")
             return
+        self.leave_channel(player)
+        player.channel = channel
+        await self.arrive(player)
+        self.event("channel", id=player.id, channel=channel)
+
+    def leave_channel(self, player):
+        """A player out of his channel: what was under way there ends (a trade, a battle, a team, watching)."""
         self.trades.left(player)
         self.arena.left(player.id)
         self.teams.left(player.id)
         self.stands.left(player)
         self.social_rules.left(player.id)
-        player.channel = channel
+
+    async def arrive(self, player):
+        """A player come into his channel: WELCOME, the channel's BOARD and STANDS, and DIVERS."""
         await self.welcome(player)
         await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
         self.stands.send_to(player)
-        self.event("channel", id=player.id, channel=channel)
+        self.dive.send_divers(player)
 
     async def inspect(self, player, target):
         # Every accepted request needs a reply: reopening a card otherwise
@@ -560,9 +603,12 @@ class Server:
                 self.trades.expire(now)
                 self.arena.expire(now)
                 self.teams.expire(now)
+                self.crews.expire(now)
                 self.transfers.prune()
             self.holds.expire(now)
             self.stands.pump(now)
+            self.crews.pump(now)
+            self.dive.pump(now)
             flags = self.peer_flags()
             for player in list(self.players.values()):
                 if player.writer.is_closing():
@@ -582,10 +628,11 @@ class Server:
             return spec["busy_battle"]
         if self.stands.busy(player_id):
             return spec["busy_watch"]
-        if self.teams.busy(player_id):
+        if self.teams.busy(player_id) or self.parties.fighting(player_id):
             return spec["busy_battle"]
         return spec["busy_trade"] if player_id in self.trades.of else 0
 
     def peer_flags(self):
         """Each player's SNAPSHOT bits beside his ROMs: busy and his link's bars"""
-        return {p.id: protocol.peer_byte(self.busy_with(p.id), p.round_trip) for p in self.players.values()}
+        return {p.id: protocol.peer_byte(self.busy_with(p.id), p.round_trip) | self.dive.peer_bits(p.id)
+                for p in self.players.values()}

@@ -9,6 +9,8 @@ else that names a player goes by itself:
 - `trades.jsonl`, the trades committed: `trade_days` days;
 - `weeks.jsonl`, the week's Board: `board_weeks` weeks, this one and the
   last (the Board shows both), each identity's best in each;
+- `dives.jsonl`, the shared dive's traces (protocol v19, traces.py): the
+  same weeks, rewritten as they stand;
 - `moderation.json`'s kicks once they end, and its Board entries hidden
   once their week leaves `weeks.jsonl`;
 - `logs/players-DATE.jsonl`, who came under which name (the events that
@@ -41,6 +43,7 @@ from . import stats, sync
 from .protocol import SPEC
 from .trade import prune_log
 from .week import compact
+from . import traces
 
 DAY = 24 * 3600
 PASS = 3600             # seconds between the retention's passes
@@ -134,6 +137,7 @@ def apply(directory, policy, now, week):
     first_week = week - policy.board_weeks + 1
     gone = {"trades": prune_log(directory, now - policy.trade_days * DAY)[0],
             "board": compact(directory, first_week)[1],
+            "dives": traces.compact(directory, first_week)[1],
             "moderation": prune_moderation(directory, now, first_week),
             "logs": PlayersLog(directory, policy.log_days).prune(now),
             "stats": stats.prune(directory, now, policy.stats_days),

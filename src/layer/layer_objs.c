@@ -50,6 +50,7 @@ int layer_objs_official_level;
 bool layer_objs_duel_later;
 
 int layer_objs_bystander = LAYER_BYSTANDER, layer_objs_bystander2 = LAYER_BYSTANDER;   /* (EvilNavi) */
+void (*layer_objs_more)(NpcList *npcs);
 unsigned layer_objs_xlooks;
 int layer_objs_dark_flame = -1;
 const char *layer_objs_dark_chip = "";
@@ -307,6 +308,9 @@ static void fill_mystery(MysteryData *m, const NetObj *o, int i, MysteryPlan *p,
 	if (emu_debug_on()) fprintf(stderr, "mystery: kind %d value %d code %d at %d %d\n", m->content[0], m->content[4] | m->content[5] << 8, m->content[3], m->x, m->y);
 	if (out->nmd < 16) {
 		out->md_obj[out->nmd] = (uint8_t)i;
+		out->md_x[out->nmd] = (int16_t)m->x;
+		out->md_y[out->nmd] = (int16_t)m->y;
+		out->md_z[out->nmd] = (int16_t)m->z;
 		out->md_find[out->nmd] = (uint32_t)m->content[0] << 16 | (uint32_t)(m->content[4] | m->content[5] << 8);
 		out->md_colour[out->nmd++] = (uint8_t)m->type;
 	}
@@ -934,6 +938,11 @@ static void install_object(Install *in, int i) {
 	if (tk.script >= 0 && in->ntalk < 16) in->talkers[in->ntalk++] = tk;
 }
 
+/* the NPCs a part above adds after the layer's own (layer_objs_more) */
+static void more_npcs(NpcList *npcs) {
+	if (layer_objs_more) layer_objs_more(npcs);
+}
+
 bool layer_objs_install(int group, int number, LayerObjs *out) {
 	mapslot_reset();
 	static TextArchive text;
@@ -985,5 +994,6 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}
 	rush_install(group, number);
+	more_npcs(npcs);
 	return mapslot_install(group, number, npcs, in.md, in.nmd);
 }
