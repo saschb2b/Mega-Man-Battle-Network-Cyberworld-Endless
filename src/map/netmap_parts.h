@@ -66,5 +66,9 @@ int nm_kind(int x, int y);
 int nm_kind_at(int A, int B);
 /* Whether grid cell (x, y) is a walkway: floor in no 2 x 2 block. */
 bool nm_walkway(int x, int y);
+/* Whether grid panel (x, y) is a platform's, drawn apart from the walkways
+ * (NET_APART_PLATFORMS): no walkway's, and a middle beside it where its
+ * area tells its floors by shape. */
+bool nm_platform(int x, int y);
 
 #endif

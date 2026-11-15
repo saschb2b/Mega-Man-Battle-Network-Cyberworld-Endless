@@ -95,6 +95,15 @@ static bool member(const AreaSrc *a, bool hang, const uint8_t *grow, int x, int 
 	return hang ? hang_tile(a, x, y) : (a->tile[1][y * a->tw + x] & 0x3FF) != 0;
 }
 
+/* The looks of a floor's sides, under or behind it, the book holds (LOOKS
+ * at most): all but what stands round a raised floor, which is learned
+ * first, from the raised views, and takes none of them. */
+static int looks(const SideBook *b) {
+	int n = 0;
+	for (int k = 0; k < b->n; ++k) n += !b->piece[k].stands;
+	return n;
+}
+
 /* The group of such tiles joined to tile `start` (y * tw + x), its tiles'
  * indexes in `queue`; `seen` marks them. */
 static void group_from(const AreaSrc *a, bool hang, const uint8_t *grow, int start, uint8_t *seen, int *queue, Group *g) {
@@ -146,7 +155,7 @@ static bool grips(const AreaSrc *a, const int *queue, Group *g, bool under, int 
 /* The panels group g draws over, from panel (A, B), into p. */
 static void under(const Group *g, int A, int B, SidePiece *p) {
 	p->nunder = 0;
-	for (int k = 0; k < g->npanels && p->nunder < SIDE_UNDER; ++k) {
+	for (int k = 0; k < g->npanels && p->nunder < (p->stands ? SIDE_REACH : SIDE_UNDER); ++k) {
 		if (g->count[k] < UNDER_PX || abs(g->A[k] - A) > 100 || abs(g->B[k] - B) > 100) continue;
 		p->under[p->nunder][0] = (int8_t)(g->A[k] - A);
 		p->under[p->nunder][1] = (int8_t)(g->B[k] - B);
@@ -198,7 +207,8 @@ static bool drawn0(const AreaSrc *a, int tx, int ty) {
 /* Group g, on panel (A, B), into the book unless it holds its look; kind 0
  * a side piece, 1 under a floor, 2 behind one, 3 a side piece with the
  * first layer's tiles under it (SidePiece.over), 4 behind a floor on the
- * second layer, with them too. */
+ * second layer, with them too, 5 growing on its edge, 6 standing round a
+ * raised floor. */
 static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int B, int kind, SideBook *out) {
 	bool hang = kind == 1 || kind == 2 || kind == 5;
 	int tw = a->tw, th = a->th;
@@ -219,6 +229,7 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	p->behind = kind == 2 || kind == 4;
 	p->over = kind == 3 || kind == 4;
 	p->grows = kind == 5;
+	p->stands = kind == 6;
 	for (int k = 0; k < 9; ++k)
 		if (ground(a, A + k % 3 - 1, B + k / 3 - 1)) p->floor |= (uint16_t)(1u << k);
 	int ax = area_px(tw, a->ex + 32 * A, a->ey + 32 * B), ay = area_py(th, a->ex + 32 * A, a->ey + 32 * B);
@@ -243,7 +254,7 @@ static void second_learn(const AreaSrc *a, int kind, SideBook *out) {
 	int tw = a->tw, th = a->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
 	int *queue = malloc((size_t)tw * th * sizeof *queue);
-	for (int i = 0; seen && queue && i < tw * th && out->n < LOOKS; ++i) {
+	for (int i = 0; seen && queue && i < tw * th && looks(out) < LOOKS; ++i) {
 		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
 		Group g;
 		int A, B;
@@ -385,7 +396,7 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 	int tw = r->tw, th = r->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
 	int *queue = malloc((size_t)tw * th * sizeof *queue);
-	for (int i = 0; seen && queue && i < tw * th && out->n < LOOKS; ++i) {
+	for (int i = 0; seen && queue && i < tw * th && looks(out) < LOOKS; ++i) {
 		if (seen[i] || !hang_tile(r, i % tw, i / tw)) continue;
 		Group g;
 		int A, B;
@@ -689,5 +700,88 @@ void hole_learn(const AreaSrc *a, SidePiece *out) {
 		priorities_over(a, A, B, box, out);
 	}
 	free(seen);
+	free(queue);
+}
+
+#define STAND_TILES 200   /* what stands round a raised floor: tiles at most (two rows of three spikes, 171) */
+#define STAND_W      16   /* ... and its size in tiles */
+#define STAND_H      28
+#define STAND_ON      3   /* tenths of its pixels over that floor's top at most: more lie on it (its own corner pieces) */
+#define STAND_OTHER   5   /* ... over other floor (a ladder beside it), tenths at most */
+#define STAND_GROUND  1   /* ... where the ground's floor is drawn, quarters at most: a ladder's rails lie on its ramp */
+#define STAND_REACH  80   /* a pixel of it within this of a panel of that floor's middle (|dx| + 2|dy| pixels; 32 its rim, 76 the three behind a ladder's foot) */
+#define STAND_LOOK    6   /* panels each way from its box's top looked through for the nearest */
+#define STAND_NEAR  ((2 * STAND_LOOK + 1) * (2 * STAND_LOOK + 1))
+
+/* The view's floor panels within STAND_LOOK of group g's box's top: their
+ * middles' pixels and the panels, into c; how many. */
+static int stand_near(const AreaSrc *a, const Group *g, int c[STAND_NEAR][4]) {
+	int A0, B0, n = 0;
+	panel_at(a, (g->x0 + g->x1) * 4 + 4, g->y0 * 8, &A0, &B0);
+	for (int A = A0 - STAND_LOOK; A <= A0 + STAND_LOOK; ++A)
+		for (int B = B0 - STAND_LOOK; B <= B0 + STAND_LOOK; ++B) {
+			if (!ground(a, A, B)) continue;
+			int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+			c[n][0] = area_px(a->tw, X, Y);
+			c[n][1] = area_py(a->th, X, Y) + FLOOR_DV;
+			c[n][2] = A;
+			c[n++][3] = B;
+		}
+	return n;
+}
+
+/* Whether pixel (px, py) of the view lies where the ground's floor is drawn
+ * (the view draws the ground `level` pixels lower): floor of another
+ * height there than the raised floor's own. */
+static bool lowered(const AreaSrc *a, int px, int py) {
+	int A, B;
+	panel_at(a, px, py - a->level, &A, &B);
+	int X = a->ex + 16 + 32 * A, Y = a->ey + 16 + 32 * B;
+	return area_src_walled_floor(a, X, Y) == 1 && area_src_height(a, X, Y) != a->level;
+}
+
+/* Whether group g stands round the view's floor: over it hardly at all,
+ * and where the ground's floor is drawn hardly at all either (a ladder's
+ * rails lie on its ramp; a spike's foot may stand behind a walkway), a
+ * pixel of it within STAND_REACH of a panel of that floor, the nearest in
+ * (*A, *B). */
+static bool stands(const AreaSrc *a, const int *queue, Group *g, int *A, int *B) {
+	if (g->edge || g->n < MIN_TILES || g->n > STAND_TILES || g->x1 - g->x0 >= STAND_W || g->y1 - g->y0 >= STAND_H) return false;
+	for (int k = 0; k < g->n; ++k) count_tile(a, false, queue[k] % a->tw, queue[k] / a->tw, g);
+	int all = g->on + g->off, W = a->tw * 8, low = 0, best = STAND_REACH + 1, c[STAND_NEAR][4];
+	if (g->on * 10 > STAND_ON * all || g->other * 10 > STAND_OTHER * all) return false;
+	int nc = stand_near(a, g, c);
+	for (int k = 0; nc && k < g->n; ++k)
+		for (int i = 0; i < 64; ++i) {
+			int px = queue[k] % a->tw * 8 + i % 8, py = queue[k] / a->tw * 8 + i / 8;
+			if (!a->front[(size_t)py * W + px]) continue;
+			low += lowered(a, px, py);
+			for (int j = 0; j < nc; ++j) {
+				int d = abs(px - c[j][0]) + 2 * abs(py - c[j][1]);
+				if (d < best) { best = d; *A = c[j][2]; *B = c[j][3]; }
+			}
+		}
+	return low * 4 <= STAND_GROUND * all && best <= STAND_REACH;
+}
+
+void stands_learn(const AreaSrc *r, SideBook *out) {
+	if (r->layers < 2 || !r->rings || !r->front || !r->level) return;
+	int n = r->tw * r->th;
+	uint8_t *seen = calloc((size_t)n, 1), *bank = calloc((size_t)n, 1);
+	int *queue = malloc((size_t)n * sizeof *queue);
+	/* (a palette bank's tiles at a time: the spikes' are one bank, the
+	 * ladders' rails and the plateau's own corner pieces others) */
+	for (int b = 0; seen && bank && queue && b < 16; ++b) {
+		for (int i = 0; i < n; ++i) bank[i] = (r->tile[1][i] & 0x3FF) && r->tile[1][i] >> 12 == b;
+		for (int i = 0; i < n && out->n < SIDES_MAX; ++i) {
+			if (seen[i] || !bank[i]) continue;
+			Group g;
+			int A = 0, B = 0;
+			group_from(r, false, bank, i, seen, queue, &g);
+			if (stands(r, queue, &g, &A, &B)) keep(r, queue, &g, A, B, 6, out);
+		}
+	}
+	free(seen);
+	free(bank);
 	free(queue);
 }

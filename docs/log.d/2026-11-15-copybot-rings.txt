@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:22:56Z
+* **Update**: world/level-design/side-pieces.md (What stands round a plateau: CopyBot Comp's 30 spikes surveyed, the second layer cut by palette bank in the plateaus' view and mirrored, set round every platform at its height two panels apart, after the floor's breaks are measured as scenery is; its spikes behind an edge round the platforms alone), code/net-and-map.md (sides.c's row).
