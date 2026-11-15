@@ -19,6 +19,12 @@
 /* Event flags the layer's choices set (Yes), one per choice. */
 #define LAYER_FLAG_BASE 0x1440
 #define LAYER_MAX_CHOICES 8
+/* A choice's words said on the layer (LAYER_TOLD_BASE + its index), and
+ * the flame of darkness's: a later talk is a box and the question
+ * (ScriptsChoice; session 78). Past the Net Square's flags (0x1480-0x14D0,
+ * its own RAM, thrown away on the way home), cleared as a layer begins. */
+#define LAYER_TOLD_BASE  0x14D1
+#define LAYER_TOLD_FLAME (LAYER_TOLD_BASE + LAYER_MAX_CHOICES)
 /* The first layer's gift was chosen. */
 #define LAYER_GIFT_FLAG 0x144D
 /* L has told where they are on this layer, so its next L says the rest

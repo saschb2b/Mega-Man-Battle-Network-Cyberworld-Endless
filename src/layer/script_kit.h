@@ -12,6 +12,13 @@ void ta_ask_in(TextArchive *t, int face, const char *question, int no, bool afte
 void ta_ask_costly(TextArchive *t, int face, const char *question, int no);
 void ta_ask(TextArchive *t, int face, const char *question, int no);
 void ta_flag_set(TextArchive *t, int flag);
+/* ts_check_flag: on to script `to` while `flag` is set */
+void ta_if_flag(TextArchive *t, int flag, int to);
+/* A choice's later talk once its words are said (ScriptsChoice): on to
+ * script `later` where `c.told` is set (none where it is -1) */
+void ta_if_told(TextArchive *t, ScriptsChoice c, int later);
+/* ... and its words said, as its first talk reaches the question */
+void ta_told(TextArchive *t, ScriptsChoice c);
 int ta_closing(TextArchive *t);
 extern const uint8_t ta_full_hp[4];   /* ts_call_set_full_h_p */
 void ta_give_chip(TextArchive *t, int id, int code, int count);

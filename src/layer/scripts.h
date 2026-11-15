@@ -43,13 +43,21 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
  * the HP said into `got` ("70HP!" and spaces), as ta_heal writes them at
  * its HealSpot. */
 void ta_heal_bytes(int amount, uint8_t a[2], uint8_t got[HEAL_GOT_LEN]);
+/* A choice's two event flags: `flag`, set on Yes (the director acts on
+ * it), and `told`, set by its first talk on the layer as the question
+ * comes, after which a talk there is a box and the question, as the Net
+ * Dealer's is a line and his list: kai13 sat through ProtoMan's terms and
+ * a flame's whole price again after a No (session 78). layer_objs.h's
+ * LAYER_TOLD_BASE; `told` -1: every talk whole. */
+typedef struct { int flag, told; } ScriptsChoice;
 /* Words that set `flag` as they are said (a bystander's news the director
  * keeps: docs/game/meta/what-megaman-knows.md). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);
 /* The rival's duel (docs/game/rival.md): ProtoMan's terms (boxes apart by '|'),
  * then the question, starting on No (a `race` against his time MegaMan's,
- * the netbattle ProtoMan's); Yes sets `flag`. */
-int ta_duel(TextArchive *t, int flag, int face, const char *terms, bool race);
+ * the netbattle ProtoMan's); Yes sets `c.flag`; told, `again` (a box of
+ * his) and the question. */
+int ta_duel(TextArchive *t, ScriptsChoice c, int face, const char *terms, const char *again, bool race);
 /* A shopkeeper with `face`: `greeting` (ta_talk's boxes), then shop
  * `shop`'s screen; with `again` and a flag, the greeting the first time
  * (the flag set) and `again` after; `sold_out` instead of both, and no
@@ -62,7 +70,7 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 
 /* Choices: Yes sets event flag `flag`, which the director acts on (a
  * challenge's, ta_challenge, below). The gate first wants three ScrtData. */
-int ta_undernet(TextArchive *t, int flag, bool deeper, bool server);
+int ta_undernet(TextArchive *t, ScriptsChoice c, bool deeper, bool server);
 int ta_secret_gate(TextArchive *t, int flag);
 /* Plays song `song` (0x63, BN6's no song, stops the music;
  * SCRIPTS_AREA_MUSIC the map's own) without opening the chat box. */
@@ -109,7 +117,7 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r);
  * "" or NULL none: DarkPlus's, DarkInvs's), when it comes (BN5's
  * worried rule) and its price (all of it the `first` time); then asks,
  * starting on Yes; Yes sets event flag `flag`, which it leaves by. */
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first);
+int ta_dark_flame(TextArchive *t, ScriptsChoice c, const char *chip, const char *does, bool first);
 /* A flame of darkness holding one BN6's own rule plays (docs/game/meta/bn6-darkchips.md): its
  * DarkChip, its base chip BN6 plays it as without a BugFrag, what its dark
  * power does in MegaMan's words, and whether he says all of its price (a
@@ -122,7 +130,7 @@ typedef struct {
  * battle, the base chip, the max HP (all of it the `first` time, the rule
  * after), then asks, starting on Yes; Yes sets event flag `flag`, which it
  * leaves by. */
-int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d);
+int ta_dark_flame6(TextArchive *t, ScriptsChoice c, const ScriptsDark6 *d);
 /* BN6's own words on DarkChips, a post of its BBS run from the player's
  * ROM (docs/rom/), said by a bystander with `face` on a flame's
  * layer after two boxes of his own on the flame he saw; -1 where the
@@ -132,7 +140,7 @@ int ta_dark_rumor(TextArchive *t, int face);
  * guardian, any runs) is short of `needed`, its words say so (flag -1:
  * no choice); else it asks for his SP, flag set on Yes, and says the gate
  * is quiet once it has been. */
-int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed);
+int ta_navi_gate(TextArchive *t, ScriptsChoice c, const char *navi, int beaten, int needed);
 /* A security cube (issue #45). One asking a P-Code: once a navi of the
  * layer has told it (flag `told`), A opens it (clears flag `present`); else
  * MegaMan says to ask around. One taking a toll: `price` zenny to pass,
@@ -169,10 +177,11 @@ int ta_vault(TextArchive *t, int flag, int need, int have, const ScriptsVault *v
  * held, waiting on his duel's winner. */
 int ta_official(TextArchive *t, int flag, int open_flag, int level, int won, bool duel_prize, const ScriptsVault *v);
 /* A Server's challenge (docs/game/core-loop.md, Phase 2): its signal and
- * the three chips `v` it holds, then Yes sets `flag`; answered only once.
- * Once `won_flag` is set (the director sets it as the battle is won), its
- * talk is the pick, `pick` (ta_server_pick). */
-int ta_challenge(TextArchive *t, int flag, int won_flag, int pick, const ScriptsVault *v, const char *navi);
+ * the three chips `v` it holds, then Yes sets `c.flag` (cleared again where
+ * MegaMan ran from the battle: the signal stands, and asks again). Once
+ * `won_flag` is set (the director sets it as the battle is won), its talk
+ * is the pick, `pick` (ta_server_pick). */
+int ta_challenge(TextArchive *t, ScriptsChoice c, int won_flag, int pick, const ScriptsVault *v, const char *navi);
 /* A won challenge's own reward: its three chips, one to take (event flag
  * `taken_flag` set as it is, after which the signal is quiet; B leaves
  * them, for the Server's talk to open again). */
@@ -186,8 +195,8 @@ int ta_copy_pick(TextArchive *t, int taken_flag, const ScriptsVault *v);
  * holds (`v`, its three chips named), the question, Yes setting `flag`;
  * once `won_flag` is set the copy's talk is its pick, `pick`, once
  * `taken_flag` a quiet line; `met` the copy met in an earlier run. */
-int ta_glitch_warp(TextArchive *t, int flag);
-int ta_copy(TextArchive *t, int flag, int won_flag, int taken_flag, int pick, const ScriptsVault *v, bool met);
+int ta_glitch_warp(TextArchive *t, ScriptsChoice c);
+int ta_copy(TextArchive *t, ScriptsChoice c, int won_flag, int taken_flag, int pick, const ScriptsVault *v, bool met);
 /* What a dark layer's item panel held (docs/game/liberation/): a chip, its
  * code (0-25, 26 '*'), or zenny, given as BN6 gives them and said */
 int ta_lib_find_chip(TextArchive *t, int chip, const char *chip_name, int code);

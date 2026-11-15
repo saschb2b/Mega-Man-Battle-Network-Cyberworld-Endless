@@ -14,12 +14,6 @@
 #include "run.h"
 #include "script_kit.h"
 
-/* (ts_check_flag: on to script `to` while `flag` is set) */
-static void heal_check(TextArchive *t, int flag, int to) {
-	uint8_t check[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)to, 0xFF };
-	ta_bytes(t, check, sizeof check);
-}
-
 /* The patch's end: under a vow, the Mr.Prog's word that it was the
  * layer's one; the patch marked given. */
 static void heal_said(TextArchive *t, int told_flag, bool vow) {
@@ -106,8 +100,8 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	bool asks = amount >= 0 && !vow;
 	int later = asks ? ta_say(t, FACE_PROG, "OK! I'LL BE RIGHT\nHERE,MEGAMAN!") : -1;
 	int i = ta_script(t);
-	heal_check(t, told_flag, back);
-	heal_check(t, full_flag, fine);
+	ta_if_flag(t, told_flag, back);
+	ta_if_flag(t, full_flag, fine);
 	if (vow) {
 		ta_page(t, FACE_MEGAMAN, "Lan... A patch-up breaks our vow!", true);
 		ta_ask_in(t, FACE_MEGAMAN, "Patch up anyway?\n", keep, true, true);
@@ -127,7 +121,7 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 		uint8_t heal[] = { 0xFB, 0x08, a[0], a[1], 0xEE, 0x00, 2, 0 };
 		int amount_at = t->len + 2;
 		ta_bytes(t, heal, sizeof heal);
-		heal_check(t, full_flag, topped);
+		ta_if_flag(t, full_flag, topped);
 		int got_at = heal_got(t, amount);
 		heal_said(t, told_flag, vow);
 		/* (an archive that filled may have left them out) */
@@ -188,39 +182,78 @@ int ta_counter(TextArchive *t, int shop, int face, const char *greeting, int clo
 	return i;
 }
 
-int ta_challenge(TextArchive *t, int flag, int won_flag, int pick, const ScriptsVault *v, const char *navi) {
+/* A Server's question, Yes setting its flag */
+static void challenge_ask(TextArchive *t, ScriptsChoice c, int no) {
+	ta_ask_in(t, FACE_MEGAMAN, "Win,and one's ours!\nTake it on?\n", no, true, true);
+	ta_flag_set(t, c.flag);
+	ta_end(t);
+}
+
+int ta_challenge(TextArchive *t, ScriptsChoice c, int won_flag, int pick, const ScriptsVault *v, const char *navi) {
 	int quiet = ta_say(t, FACE_MEGAMAN, "The signal's quiet now,Lan.");
 	int no = ta_closing(t);
+	/* (what it pays, the three by name: "a good chip" left a playtester
+	 * guessing whether the risk was worth it) */
+	char held[96];
+	snprintf(held, sizeof held, "It holds %s %c,%s %c and %s %c!", v->name[0], v->code[0] == 26 ? '*' : 'A' + v->code[0],
+		v->name[1], v->code[1] == 26 ? '*' : 'A' + v->code[1], v->name[2], v->code[2] == 26 ? '*' : 'A' + v->code[2]);
+	/* (said on the layer, a later talk, after a No or a run from its
+	 * battle, is the three and the question: session 78) */
+	int later = ta_script(t);
+	bool first = true;
+	ta_pages(t, held, FACE_MEGAMAN, &first);
+	challenge_ask(t, c, no);
 	int i = ta_script(t);
 	/* (won, its pick waits: B left the three) */
-	uint8_t won[] = { 0xEF, 0x00, (uint8_t)won_flag, (uint8_t)(won_flag >> 8), (uint8_t)pick, 0xFF };  /* ts_check_flag */
-	ta_bytes(t, won, sizeof won);
-	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };
-	ta_bytes(t, done, sizeof done);
+	ta_if_flag(t, won_flag, pick);
+	ta_if_flag(t, c.flag, quiet);
+	ta_if_told(t, c, later);
 	/* how strong, before the choice (a playtester took one on at 100 HP,
 	 * not knowing, and came out at 10) */
-	bool first = true;
+	first = true;
 	/* (a Navi's signal named as one: a playtester's "strong virus signal"
 	 * held ElementMan SP, session 65) */
 	char signal[160];
 	if (navi && *navi) snprintf(signal, sizeof signal, "Lan,careful! A strong Navi's signal!|%s|He outclasses anything here!", navi);
 	else snprintf(signal, sizeof signal, "Lan,careful! A strong virus signal!|Its viruses outclass anything here!");
 	ta_pages(t, signal, FACE_MEGAMAN, &first);
-	/* (and what it pays, the three by name: "a good chip" left a
-	 * playtester guessing whether the risk was worth it) */
-	char held[96];
-	snprintf(held, sizeof held, "It holds %s %c,%s %c and %s %c!", v->name[0], v->code[0] == 26 ? '*' : 'A' + v->code[0],
-		v->name[1], v->code[1] == 26 ? '*' : 'A' + v->code[1], v->name[2], v->code[2] == 26 ? '*' : 'A' + v->code[2]);
 	ta_pages(t, held, FACE_MEGAMAN, &first);
-	ta_ask_in(t, FACE_MEGAMAN, "Win,and one's ours!\nTake it on?\n", no, true, true);
-	ta_flag_set(t, flag);
-	ta_end(t);
+	ta_told(t, c);
+	challenge_ask(t, c, no);
 	return i;
 }
 
-int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, bool first) {
-	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
+/* A flame's question, starting on No, its options a moment after it (on
+ * Yes, a paging A took one unchosen twice, session 77; the moment keeps
+ * the paging A that said No twice, sessions 67 and 68, from sending a
+ * playtester through the whole chat again); Yes sets its flag, and the
+ * chip is MegaMan's. */
+static void flame_ask(TextArchive *t, ScriptsChoice c, const char *chip, int no) {
+	ta_ask_costly(t, FACE_MEGAMAN, "Take the DarkChip?\n", no);
+	ta_flag_set(t, c.flag);
+	char got[48];
+	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
+	ta_page(t, FACE_NONE, got, false);
+	ta_end(t);
+}
+
+/* A flame's later talk on its layer, its price said there: a box and the
+ * question (kai13 heard all eight boxes of a first flame again after a
+ * No, session 78) */
+static int flame_again(TextArchive *t, ScriptsChoice c, const char *chip, int no) {
 	int i = ta_script(t);
+	char s[64];
+	snprintf(s, sizeof s, "Lan... It's still burning. %s!", chip);
+	ta_page(t, FACE_MEGAMAN, s, true);
+	flame_ask(t, c, chip, no);
+	return i;
+}
+
+int ta_dark_flame(TextArchive *t, ScriptsChoice c, const char *chip, const char *does, bool first) {
+	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
+	int later = flame_again(t, c, chip, no);
+	int i = ta_script(t);
+	ta_if_told(t, c, later);
 	/* (the price named before the bargain, the whole of it a profile's
 	 * first time: docs/game/meta/, issue #65; when it comes, said every time:
 	 * a returning playtester heard only "when I'm hurt badly", session 68;
@@ -242,22 +275,16 @@ int ta_dark_flame(TextArchive *t, int flag, const char *chip, const char *does, 
 		"Each battle I use one in takes %d max HP,for the dive.", chip, bar, does, DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
-	/* (on No, its options a moment after it: on Yes, a paging A took one
-	 * unchosen twice, session 77; the moment keeps the paging A that said
-	 * No twice, sessions 67 and 68, from sending a playtester through the
-	 * whole chat again) */
-	ta_ask_costly(t, FACE_MEGAMAN, "Take the DarkChip?\n", no);
-	ta_flag_set(t, flag);
-	char got[48];
-	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", chip);
-	ta_page(t, FACE_NONE, got, false);
-	ta_end(t);
+	ta_told(t, c);
+	flame_ask(t, c, chip, no);
 	return i;
 }
 
-int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
+int ta_dark_flame6(TextArchive *t, ScriptsChoice c, const ScriptsDark6 *d) {
 	int no = ta_say(t, FACE_MEGAMAN, "Let's leave it be,Lan.");
+	int later = flame_again(t, c, d->chip, no);
 	int i = ta_script(t);
+	ta_if_told(t, c, later);
 	/* (all of it a profile's first BN6 flame: what it does, the BugFrag it
 	 * burns, the NaviCust's bug for the battle, its base chip, the max HP;
 	 * the price every time after, as BN5's flame says its own: the rule
@@ -273,13 +300,8 @@ int ta_dark_flame6(TextArchive *t, int flag, const ScriptsDark6 *d) {
 		DARK_PRICE);
 	bool open = true;
 	ta_pages(t, words, FACE_MEGAMAN, &open);
-	/* (as ta_dark_flame asks it: on No, its options a moment after it) */
-	ta_ask_costly(t, FACE_MEGAMAN, "Take the DarkChip?\n", no);
-	ta_flag_set(t, flag);
-	char got[48];
-	snprintf(got, sizeof got, "MegaMan got:\n\"%s\"!!", d->chip);
-	ta_page(t, FACE_NONE, got, false);
-	ta_end(t);
+	ta_told(t, c);
+	flame_ask(t, c, d->chip, no);
 	return i;
 }
 
@@ -310,39 +332,66 @@ int ta_dark_rumor(TextArchive *t, int face) {
 	return i;
 }
 
-int ta_duel(TextArchive *t, int flag, int face, const char *terms, bool race) {
-	int no = ta_closing(t);
-	int i = ta_script(t);
-	/* ProtoMan's terms, then the choice, which starts on No (a duel costs
-	 * HP; docs/game/rival.md); a race's asked by MegaMan, as the layer's
-	 * other risks are, after his own words on it (ProtoMan's "Take the
-	 * duel?" read as a fight with him, where L and Chaud had said a race
-	 * against his time, session 76) */
-	bool first = true;
-	ta_pages(t, terms, face, &first);
+/* The duel's choice, which starts on No (a duel costs HP;
+ * docs/game/rival.md); a race's asked by MegaMan, as the layer's other
+ * risks are, after his own words on it (ProtoMan's "Take the duel?" read
+ * as a fight with him, where L and Chaud had said a race against his
+ * time, session 76); Yes sets its flag */
+static void duel_ask(TextArchive *t, ScriptsChoice c, int face, int no, bool race) {
 	if (race) ta_ask_in(t, FACE_MEGAMAN, "Race his time?\n", no, true, true);
 	else ta_ask_in(t, face, "Take the duel?\n", no, true, true);
-	ta_flag_set(t, flag);
+	ta_flag_set(t, c.flag);
 	ta_end(t);
+}
+
+int ta_duel(TextArchive *t, ScriptsChoice c, int face, const char *terms, const char *again, bool race) {
+	int no = ta_closing(t);
+	/* (his terms said on the layer, a later talk is his box and the
+	 * choice: kai13 sat through them again after a No, session 78) */
+	int later = ta_script(t);
+	bool first = true;
+	ta_pages(t, again, face, &first);
+	duel_ask(t, c, face, no, race);
+	int i = ta_script(t);
+	ta_if_told(t, c, later);
+	/* ProtoMan's terms, then the choice */
+	first = true;
+	ta_pages(t, terms, face, &first);
+	ta_told(t, c);
+	duel_ask(t, c, face, no, race);
 	return i;
 }
 
-int ta_undernet(TextArchive *t, int flag, bool deeper, bool server) {
+/* The dark warp's question, Yes setting its flag */
+static void undernet_ask(TextArchive *t, ScriptsChoice c, bool deeper, int no) {
+	ta_ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true, true);
+	ta_flag_set(t, c.flag);
+	ta_end(t);
+}
+
+int ta_undernet(TextArchive *t, ScriptsChoice c, bool deeper, bool server) {
 	int no = ta_closing(t);
+	const char *exit = deeper ? "Its exit leads back to the main path." : "Its exit leads to the next layer.";
+	/* (said on the layer, a later talk is where its exit leads and the
+	 * question, as a choice's are: session 78) */
+	int later = ta_script(t);
+	bool first = true;
+	ta_pages(t, exit, FACE_MEGAMAN, &first);
+	undernet_ask(t, c, deeper, no);
 	int i = ta_script(t);
+	ta_if_told(t, c, later);
 	/* what is in there, where it is chosen (a playtester kept off one, not
 	 * knowing what it was for): the Undernet's viruses, its richer Mystery
 	 * Data and BugFrag Trader, and where its exit leads */
-	bool first = true;
+	first = true;
 	ta_pages(t, deeper ? "Even tougher viruses down there!|And richer data,too!" : "The Undernet,Lan!|Tougher viruses,and richer data!|A BugFrag Trader,too!",
 		FACE_MEGAMAN, &first);
 	/* (what the Undernet behind it holds, read from its seed: a Server's
 	 * signal, as at the exit pad beside it, docs/world/level-design/fork-read.md) */
 	if (server) ta_pages(t, "And a strong virus signal!", FACE_MEGAMAN, &first);
-	ta_pages(t, deeper ? "Its exit leads back to the main path." : "Its exit leads to the next layer.", FACE_MEGAMAN, &first);
-	ta_ask_in(t, FACE_MEGAMAN, deeper ? "Even deeper into the\nUndernet... Go in?\n" : "A warp into the\nUndernet! Go in?\n", no, true, true);
-	ta_flag_set(t, flag);
-	ta_end(t);
+	ta_pages(t, exit, FACE_MEGAMAN, &first);
+	ta_told(t, c);
+	undernet_ask(t, c, deeper, no);
 	return i;
 }
 
