@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: game/bosses/sequence.md (a guardian gone before a CONTINUE ends at once rather than log in again, issue #614), game/bosses/bn4-navis.md (BN4's Navis log in and out by BN6's beam alone; WindMan facing left still shows nothing), rom/bn4.md (its Navis' overworld sprites' animation counts, Sprite lists), rom/battle.md (Guardians: BN4's Navis have no log-in animations).
 * **Create**: project/youtube.md (the trailers on the owner's channel: the 4K masters `tools/trailer_youtube.py` makes, each video's fields, the pieced upload through Chrome, what the channel's verification opens, the owner's answers, each release's step, the ten videos). **Update**: project/index.md (its line), project/itch.md (the trailer field: the trailers are on YouTube now), code/tools.md (`tools/trailer_youtube.py`'s row, the youtube-publish skill's row), code/index.md (the skills named).
 * **Update**: releases/v0.22.0.md (#609's own entry written in: the arrow keeps out of the way).
 * **Update**: releases/v0.22.0.md (#601-#610 written in: L's first press and the heal's arrow, the guardian's gate on the way's line, BN4's ACDC roads, what the run tells you, a stray A at a DarkChip or a shop, a CONTINUE at a guardian's door).
