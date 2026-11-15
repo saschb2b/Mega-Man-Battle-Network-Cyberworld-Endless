@@ -48,7 +48,10 @@ Options' kin: the pages CLOUD, CODE and FILE as its tabs, turned by L
 and R or a tap (no row where the system has FILE alone: the PSP, a 3DS
 build without libcurl); a strip under them, THIS DEVICE with the run
 ("Layer 4, Act 2", its area where it fits) and the record ("3 runs, best
-Layer 9", or "No runs yet"); the page's lines in the cyan window, Up and
+Layer 9", or "No runs yet", which a first start's device, its `savedata/`
+not yet made, reads too: `backup_local_info` takes a missing folder for
+no saves, never "Damaged", unless an import cut short left it missing);
+the page's lines in the cyan window, Up and
 Down round, the line each page was left on kept; KeyItem's information
 box under them, what the line does, then where the page has one how it
 stands. CLOUD: Turn on (where there are saves) and Link with a code, or

@@ -1,0 +1,3 @@
+by: agent/claude-opus-5-5
+at: 2026-11-15T00:53:21Z
+* **Update**: engine/saves.md (a first start's device, no savedata/ yet, reads "No runs yet" in SAVES, not "Damaged").
