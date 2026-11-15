@@ -65,6 +65,11 @@ enum { L_SHOW, L_IDLE, L_LEAVE, L_POSE, L_END };
 
 uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f) {
 	Script s = { .n = 0 };
+	/* (a log-in or log-out his sprite lacks is the beam's: BN6 reads an
+	 * animation past a sprite's as stray bytes and never ends it, and the
+	 * script waits on its end; BN4's GutsMan stood unseen so, issue #614) */
+	int log_in = npc_sprite_has(b->list, b->index, b->log_in) ? b->log_in : -1;
+	int log_out = npc_sprite_has(b->list, b->index, b->log_out) ? b->log_out : -1;
 	OP(&s, 0x09, 0x25, (uint8_t)b->index, (uint8_t)(b->list * 4), 0x16, (uint8_t)b->anim, 0x0E, 0x13);
 	if (b->mirror) OP(&s, 0x26);   /* (the sprite turned the other way) */
 	coords(&s, x, y, z);
@@ -78,7 +83,7 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	/* logs in where it stands, by its sprite's own log-in beside the beam
 	 * (which sounds), or shown as the beam rises where its sprite has
 	 * none; then strikes its pose for the title card */
-	if (b->log_in >= 0) OP(&s, 0x16, (uint8_t)b->log_in, 0x08, 0x2A, 0xC0);
+	if (log_in >= 0) OP(&s, 0x16, (uint8_t)log_in, 0x08, 0x2A, 0xC0);
 	else OP(&s, 0x10, BEAM_RISE, 0x08);
 	if (b->pose >= 0) OP(&s, 0x16, (uint8_t)b->pose, 0x10, 90);
 	OP(&s, 0x16, (uint8_t)b->anim);
@@ -89,7 +94,7 @@ uint32_t npc_guardian(const NpcBody *b, int x, int y, int z, const StageFlags *f
 	 * beside the beam, or gone as the beam rises; not by its alpha, which
 	 * BN6 never fades a Navi by (bn6f's note on the command: it "doesn't
 	 * actually work"), and the owner saw as a "blup" */
-	if (b->log_out >= 0) OP(&s, 0x2E, (uint8_t)b->log_out, 0x2A, 0xC0);
+	if (log_out >= 0) OP(&s, 0x2E, (uint8_t)log_out, 0x2A, 0xC0);
 	else OP(&s, 0x10, BEAM_RISE);
 	mark(&s, L_END);
 	OP(&s, 0x09, 0x03);

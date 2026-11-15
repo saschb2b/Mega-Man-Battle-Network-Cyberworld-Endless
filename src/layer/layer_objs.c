@@ -119,7 +119,7 @@ typedef struct {
 	/* behind a counter: facing its front (animation), spoken to across it
 	 * at (sx, sy) from where it stands */
 	bool behind;
-	int anim, sx, sy;
+	int anim, sx, sy;   /* (anim -1: a Navi stands facing down, 4, an object in its first) */
 	bool looks;         /* a Glitch warp: its look changed by the director (npc_talker_looks) */
 } Talker;
 
@@ -870,7 +870,7 @@ static bool install_place(Install *in, const NetObj *o, int wx, int wy, int wz) 
  * aisle, facing its front (screen down-right or down-left: the game's
  * facings 3 and 5). */
 static Talker talker_at(const NetObj *o, int wx, int wy, int wz) {
-	Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, false, 0, false, 0, 0, 0 };
+	Talker tk = { wx, wy, wz, 6, SPR_PROG, -1, -1, false, false, 0, false, -1, 0, 0 };
 	if (o->prop >= 0 && netmap_prop_navi(o->prop, &tk.x, &tk.y, &tk.sx, &tk.sy)) {
 		tk.behind = true;
 		tk.anim = layer.props[o->prop].faces == FACES_X ? 3 : 5;
@@ -975,7 +975,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 		NpcTalk looks = { t->cat, t->sprite, t->x, t->y, t->z, a, t->script, t->gone_flag };
 		npcs->script[npcs->n++] = t->looks ? npc_talker_looks(&looks, &out->glitch_warp)
 			: t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
-			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
+			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim >= 0 ? t->anim : t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);
 		if (t->variation) npc_variation(npcs->script[npcs->n - 1]);
 	}
 	rush_install(group, number);
