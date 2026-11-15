@@ -563,6 +563,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	if (px && (nm_last.breaks = calloc(cells, 1))) breaks_count(L->breaks, px, tw, th, nm_last.breaks, &tiles_stats.breaks, &tiles_stats.nicks);
 	free(px);
 	nm_unfoot_breaks(tw, th);
+	nm_paste_rings(L, map, tw, th);   /* (in the void beside the floor, as scenery is: not its picture) */
 	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
 	return map;
 }

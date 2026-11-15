@@ -458,6 +458,7 @@ typedef struct {
 	int tw, th;
 	const uint64_t *opaque;
 	const TileSeams *seams;
+	int lift;   /* pixels a piece is set higher: the raised floor's rise, for one round a raised platform */
 } SideMap;
 
 /* Whether the first layer shows the same round second-layer tile `e1`
@@ -535,7 +536,7 @@ static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
 	const uint16_t *to = p->hang ? m->map : m->map + (size_t)tw * th;
 	int A, B, over = 0, top = p->tiles[0].py, foot = top;
 	nm_grid_to_panel(x, y, &A, &B);
-	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
+	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B) - m->lift;
 	for (int k = 1; k < p->ntiles; ++k) {
 		if (p->tiles[k].py < top) top = p->tiles[k].py;
 		if (p->tiles[k].py > foot) foot = p->tiles[k].py;
@@ -572,7 +573,7 @@ static bool side_set(const SidePiece *p, const SideMap *m, int x, int y) {
 	if (!side_fits(p, m, x, y)) return false;
 	int A, B;
 	nm_grid_to_panel(x, y, &A, &B);
-	int px0 = area_px(m->tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(m->th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
+	int px0 = area_px(m->tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(m->th, nm_place.ex + 32 * A, nm_place.ey + 32 * B) - m->lift;
 	for (int k = 0; k < p->ntiles; ++k) side_put(p, &p->tiles[k], m->map, (size_t)m->tw * m->th, (size_t)((py0 + p->tiles[k].py) / 8) * m->tw + (px0 + p->tiles[k].px) / 8);
 	return true;
 }
@@ -592,7 +593,7 @@ static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsi
 		 * both layers, which reach past the nine, as a tank does past its
 		 * landing's road) */
 		bool any = p->behind && (!p->hang || p->both);
-		if (!p->grows && (p->behind ? 2 : p->hang) == kind && (p->floor == f || any) && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
+		if (!p->grows && !p->ring_stand && (p->behind ? 2 : p->hang) == kind && (p->floor == f || any) && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
 	}
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
@@ -737,7 +738,7 @@ static const SidePiece *side_for_run(const SideBook *b, int kind, int x, int y, 
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k) {
 		const SidePiece *p = &b->piece[k];
-		if ((p->behind ? 2 : p->hang) == kind && (p->floor & ~other) == f && side_under(p, x, y) && side_fits(p, m, x, y)) match[nmatch++] = k;
+		if (!p->ring_stand && (p->behind ? 2 : p->hang) == kind && (p->floor & ~other) == f && side_under(p, x, y) && side_fits(p, m, x, y)) match[nmatch++] = k;
 	}
 	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
@@ -763,13 +764,130 @@ static const SidePiece *side_pick_run(const SideBook *b, int x, int y, unsigned 
  * floor's side half, apart, or where its look keeps the first layer's
  * tiles, every one where it fits, apart; behind a floor's edge whatever
  * fits in one stretch of four panels square in three, as the maps set
- * theirs in rows. */
-static const SidePiece *side_pick(const SideBook *b, int x, int y, unsigned h, bool near, const SideMap *m) {
+ * theirs in rows (`ringed`: none, nm_paste_rings sets them round the
+ * platforms). */
+static const SidePiece *side_pick(const SideBook *b, int x, int y, unsigned h, bool near, const SideMap *m, bool ringed) {
 	if (hang_free(x, y)) return side_for(b, 1, x, y, h, m);
 	const SidePiece *p = near ? NULL : side_for(b, 0, x, y, h, m);
 	if (p && !p->over && h % 2) p = NULL;
 	unsigned stretch = (nm_cur->seed ^ (uint32_t)(x / 4 * 7919 + y / 4 * 104729)) * 2654435761u >> 8;
-	return p || stretch % 3 ? p : side_for(b, 2, x, y, h, m);
+	/* (where the area rings its platforms, what stands behind a floor stands
+	 * round them alone: nm_paste_rings) */
+	return p || stretch % 3 || ringed ? p : side_for(b, 2, x, y, h, m);
+}
+
+/* ---- round the platforms (SIDES_STANDS: CopyBot Comp's spikes) ---- */
+
+/* Whether grid panel (x, y) is floor at level lv. */
+static bool floor_lv(int x, int y, int lv) {
+	return x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && layer.cell[y][x] != C_VOID && layer.level[y][x] == lv;
+}
+
+/* Whether grid panel (x, y) is floor beside the void (8 ways): a rim. */
+static bool ring_rim(int x, int y) {
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (!nm_kind(x + dx, y + dy)) return true;
+	return false;
+}
+
+/* Whether grid panel (x, y) is drawn as a platform where the area tells its
+ * floors by shape (TILES_BY_SHAPE, as SIDES_STANDS's CopyBot Comp does,
+ * netmap.c's): no walkway's, and floor beside it that is neither a
+ * walkway's nor a rim (a room of walkways has none). */
+static bool ring_platform(int x, int y) {
+	if (nm_walkway(x, y)) return false;
+	for (int dy = -1; dy <= 1; ++dy)
+		for (int dx = -1; dx <= 1; ++dx)
+			if (nm_kind(x + dx, y + dy) && !nm_walkway(x + dx, y + dy) && !ring_rim(x + dx, y + dy)) return true;
+	return false;
+}
+
+/* Whether grid panel (x, y) is a platform's, at any height, that what
+ * stands round a raised floor may stand round: drawn as a platform
+ * (no walkway's, nor a room of walkways'), no pad's. */
+static bool ring_free(int x, int y) {
+	if (x < 1 || y < 1 || x >= MAP_W - 1 || y >= MAP_H - 1 || layer.cell[y][x] != C_PATH || !ring_platform(x, y)) return false;
+	return !nm_cur->pad || !nm_cur->pad[y * nm_cur->gw + x];
+}
+
+/* Whether the panels piece p draws over are at grid panel (x, y), of level
+ * lv, what they are in its map: floor of that level, or none, where no
+ * floor of any level shows either (a level drawn `s` panels up the screen
+ * more: grid x - s, y - s). */
+static bool ring_under(const SidePiece *p, int x, int y, int lv, int s) {
+	for (int k = 0; k < p->nunder; ++k) {
+		int gx = x + p->under[k][1], gy = y - p->under[k][0];
+		if (p->under[k][2]) {
+			if (!floor_lv(gx, gy, lv)) return false;
+			continue;
+		}
+		for (int l = 0; l <= 1; ++l)
+			if (floor_lv(gx + (l - lv) * s, gy + (l - lv) * s, l)) return false;
+	}
+	return true;
+}
+
+/* The piece standing round (`behind`: behind) the platform at grid panel
+ * (x, y) of level lv, by hash h: one cut at its neighbourhood at that
+ * level that fits; NULL none. */
+static const SidePiece *ring_for(const SideBook *b, bool behind, int x, int y, int lv, unsigned h, const SideMap *m) {
+	unsigned f = 0;
+	for (int k = 0; k < 9; ++k)
+		if (floor_lv(x + k / 3 - 1, y - (k % 3 - 1), lv)) f |= 1u << k;
+	int match[SIDES_MAX], nmatch = 0, s = layer.rise >= 64 ? layer.rise / 32 : 1;
+	for (int k = 0; k < b->n; ++k) {
+		const SidePiece *p = &b->piece[k];
+		/* (what stands round a platform where the floor it stood by is
+		 * there and the panels it draws over are as in its map, whatever
+		 * else lies round its own: its maps' stand by ladders and
+		 * walkways' mouths, a layer's by any face) */
+		bool by = behind ? p->behind && p->hang && p->floor == f : p->ring_stand && (p->floor & ~f) == 0;
+		if (by && ring_under(p, x, y, lv, s) && side_fits(p, m, x, y)) match[nmatch++] = k;
+	}
+	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
+}
+
+#define RING_APART 2   /* panels between the panels two groups stand by: the maps' stand in ones, twos and threes, gaps between */
+
+/* Whether a group may stand by grid panel (x, y): none stands by a panel
+ * within RING_APART of it. */
+static bool ring_room(uint8_t stood[MAP_H][MAP_W], int x, int y) {
+	for (int dy = -RING_APART + 1; dy < RING_APART; ++dy)
+		for (int dx = -RING_APART + 1; dx < RING_APART; ++dx)
+			if (stood[y + dy][x + dx]) return false;
+	return true;
+}
+
+/* (SIDES_STANDS) Round every platform of the layer, raised or not, what
+ * the maps set round their raised floors: on each of its panels whatever
+ * fits there (a group standing by one no nearer than RING_APART to
+ * another's), behind its upper edges and standing in front of its faces
+ * and beside its corners, as the maps ring theirs (CopyBot Comp's dark
+ * crystal spikes). The art alone: the panels are walked as they were. */
+static void paste_rings(const Learned *L, SideMap *m) {
+	int n[2] = { 0, 0 }, raised = 0;
+	static uint8_t stood[MAP_H][MAP_W];
+	memset(stood, 0, sizeof stood);
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!ring_free(x, y)) continue;
+			int lv = layer.level[y][x];
+			unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
+			m->lift = lv ? layer.rise : 0;
+			for (int behind = !ring_room(stood, x, y); behind < 2; ++behind) {
+				const SidePiece *p = ring_for(&L->sides, behind, x, y, lv, h >> behind, m);
+				if (!p || !side_set(p, m, x, y)) continue;
+				stood[y][x] = !behind;
+				++n[behind];
+				raised += lv > 0;
+				int A, B;
+				nm_grid_to_panel(x, y, &A, &B);
+				if (emu_debug_on()) fprintf(stderr, "  %s at world %d,%d level %d: %d tiles\n", behind ? "behind a platform" : "round a platform", nm_place.ex + 32 * A, nm_place.ey + 32 * B, lv, p->ntiles);
+			}
+		}
+	m->lift = 0;
+	if (emu_debug_on()) fprintf(stderr, "rings: %d pieces stand round the platforms and %d behind them, %d of them round raised ones\n", n[0], n[1], raised);
 }
 
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
@@ -788,7 +906,7 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			bool hang = hang_free(x, y);
 			if (!hang && !side_free(x, y)) continue;
 			/* (BN4's Undernet's horns in rows: the one behind, then the one in front) */
-			const SidePiece *front = NULL, *p = L->def->sides & SIDES_RUNS ? side_pick_run(&L->sides, x, y, h, &m, &front) : side_pick(&L->sides, x, y, h, near, &m);
+			const SidePiece *front = NULL, *p = L->def->sides & SIDES_RUNS ? side_pick_run(&L->sides, x, y, h, &m, &front) : side_pick(&L->sides, x, y, h, near, &m, L->def->sides & SIDES_STANDS);
 			if (p && front && side_set(p, &m, x, y)) ++nhang;
 			if (front) p = front;
 			if (!(p = side_or_grows(p, &L->sides, &m, x, y, hang, &grown))) continue;
@@ -808,6 +926,12 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 		fprintf(stderr, "side pieces: %d set and %d under pads or behind floors, of the area's %d\n", nset, nhang, L->sides.n);
 		for (int k = 0; k < nside_at; ++k) fprintf(stderr, "  side piece at world %d,%d: %d tiles, %d layer priorities\n", side_at[k].X, side_at[k].Y, side_at[k].p->ntiles, side_at[k].p->nprio);
 	}
+}
+
+void nm_paste_rings(const Learned *L, uint16_t *map, int tw, int th) {
+	if (nm_cur->gw != MAP_W || !(L->def->sides & SIDES_STANDS)) return;
+	SideMap m = { map, tw, th, voids_opaque(L->def->xrom, L->def->group, L->def->number), &L->seams, 0 };
+	paste_rings(L, &m);
 }
 
 bool netmap_prop_navi(int i, int *wx, int *wy, int *tx, int *ty) {

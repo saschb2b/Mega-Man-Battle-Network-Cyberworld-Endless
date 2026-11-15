@@ -70,6 +70,17 @@ static void learn_view(AreaSrc *src, const AreaSrc *grid_of, int area, bool own,
 	area_src_mirror_end(src, &m);
 }
 
+/* What view r stands round its raised floor (ring_learn), as it is and
+ * mirrored: its maps' spikes stand in front of two of a plateau's four
+ * faces, the mirror's in front of the other two. */
+static void ring_learn_both(AreaSrc *r, SideBook *out) {
+	ring_learn(r, out);
+	AreaSrc m;
+	if (!area_src_mirror_in(r, &m)) return;
+	ring_learn(&m, out);
+	area_src_mirror_end(r, &m);
+}
+
 /* ... at each of its floor heights: raised floors are drawn higher, so each
  * is learned in a view that brings it down to the ground (made in place,
  * as the mirror is). */
@@ -91,6 +102,7 @@ static void learn_map(AreaSrc *src, const AreaSrc *grid_of, int area, int map, L
 		if (net_area_def(area)->sides & 2) hangs_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & 4) behind_learn(&r, &L->sides);
 		if (net_area_def(area)->sides & SIDES_BEHIND_FRONT) sides_learn_behind(&r, &L->sides);
+		if (net_area_def(area)->sides & SIDES_STANDS) ring_learn_both(&r, &L->sides);
 		area_src_raise_end(src, &r);
 	}
 	/* (its books are one map's: the layer's lead, netmap.c) */
@@ -298,6 +310,12 @@ static void learn_report(int area, const Learned *L) {
 	fprintf(stderr, "tiles area %d floor %d px down, faces %d px, hanging %d px, %d books, %d pieces of scenery, its middle's period %dx%d, its looks %d\n",
 		area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n, L->book[0].pa, L->book[0].pb,
 		L->book[0].vary ? L->book[0].vary_first[64] : 0);
+	for (int k = 0; k < L->sides.n; ++k) {
+		const SidePiece *p = &L->sides.piece[k];
+		fprintf(stderr, "side piece area %d look %d: %s, %d tiles, floor %03X, over %d panels, %d layer priorities\n", area, k,
+			p->ring_stand ? "stands round a raised floor" : p->behind ? "behind a floor" : p->hang ? "under a raised floor" : "on a floor's side",
+			p->ntiles, p->floor, p->nunder, p->nprio);
+	}
 	for (int d = 0; d < STAIR_DIRS; ++d)
 		for (int w = 0; w < STAIR_WIDTHS; ++w) {
 			const StairTemplate *t = &L->stairs[d][w];

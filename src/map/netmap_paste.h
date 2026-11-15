@@ -38,6 +38,12 @@ void nm_paste_bushes(const Learned *L, uint16_t *map, int tw, int th);
 /* The area's side pieces (sides.h) on the layer's free ground panels of
  * their neighbourhoods, some by the layer's seed. */
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th);
+/* Round every platform of the layer, raised or not, what the area's maps
+ * stand round their raised floors and behind their upper edges (net_area's
+ * SIDES_STANDS: CopyBot Comp's dark crystal spikes), on map's two layers:
+ * art in the void beside the floor, set after its breaks are measured, as
+ * scenery is. */
+void nm_paste_rings(const Learned *L, uint16_t *map, int tw, int th);
 /* (measuring) the breaks across a side piece's foot, set over the floor's
  * art (NETMAP_PASTED_FOOT), taken out of nm_last.breaks and tiles_stats. */
 void nm_unfoot_breaks(int tw, int th);

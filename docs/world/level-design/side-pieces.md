@@ -76,7 +76,7 @@ Taken per area as looked at, as every laying rule is
 
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
-| CopyBot Comp | its claws, 3 looks; behind its plateaus, the dark crystal spikes (below) | yes, both |
+| CopyBot Comp | its claws, 3 looks; round its plateaus, the dark crystal spikes: behind them (below) and standing in front of their faces and beside their corners ([What stands round a plateau](#what-stands-round-a-plateau-ring_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)) | yes, all |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below), both along whole catwalk runs | yes, both |
 | BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4; behind upper edges on the second layer, gripping none, a row of five along a walkway, a bowl each, and two alone by its exits: 7 looks (below); the two in a raised ring's holes stand behind no edge and fit no layer (below) | yes, both |
@@ -293,8 +293,9 @@ the panels it draws over.
 A layer sets them on free floor panels as it does side pieces, but in
 stretches: of the squares of four panels a side, one in three by the
 layer's seed takes a piece behind every panel of it that fits, as the maps
-set theirs in rows; the rest take none. CopyBot Comp's spikes are set so;
-BN4's Undernet's horns go along whole catwalks instead (below).
+set theirs in rows; the rest take none. BN4's Undernet's horns go along
+whole catwalks instead (below), and CopyBot Comp's spikes round its
+platforms ([What stands round a plateau](#what-stands-round-a-plateau-ring_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)).
 
 ### Rows along a catwalk (`SIDES_RUNS`; measured on the maps and the atlas)
 
@@ -333,14 +334,91 @@ rows of up to seven panels.
 
 CopyBot Comp's dark crystal spikes stand the same way behind its plateaus'
 upper edges, alone and in rows. Its plateaus are raised, so the cut is
-made in the views of their heights too (as the pillars' is): 11 looks,
-11 set over the atlas's eight layers. A piece behind a floor may go over
+made in the views of their heights too (as the pillars' is): 6 looks, set
+round the platforms alone (below). A piece behind a floor may go over
 the floor's own tiles in its two bottom rows alone, where its foot meets
 that floor's edge; anywhere else a tile it would cover is another floor's,
 and a spike first stood in front of a plateau's underside, over the void. BN5's
 End Area and Oran Area were tried and left: the cut finds 4 looks in each
 and none fits a layer. End Area's are the pins along its roads' upper rims
 and a raised warp pad (below, End Area's survey); Oran Area's are below.
+
+## What stands round a plateau (`ring_learn`, `nm_paste_rings`; verified on the maps and in the game)
+
+CopyBot Comp (0x85:4, its one map) raises two plateaus of five panels a
+side to height 32, each with a stub of two panels to the ladder down its
+front, and rings both with tall dark crystal spikes. The spike is one
+look: 30 tiles on the second layer, its tip a tile wide for three rows and
+then three wide for nine, in palette bank 10, drawn as it is or mirrored
+(the entries read off the map, 15 November 2026). The map stands 23 of
+them on the second layer, in the void: one beside each of the plateaus'
+four outer corners, a single and a pair in front of a face, and threes on
+both sides of each ladder; and 7 more on the first layer behind the
+plateaus' upper edges, the floor's own art over their feet, which
+[the cut behind a floor](#what-stands-behind-a-floor-behind_learn-verified-on-the-maps-and-in-the-game)
+takes. Where spikes stand close, the one in front is the second layer's
+whole entries over the one behind.
+
+None of the 23 was a piece. On the second layer they join the ladders'
+rails and the plateaus' own corner pieces (other palette banks) into
+groups of 300 to 480 tiles, past every rule's size; those in front of a
+face lie over its art, which [scenery](generator.md) refuses; and they
+touch no ground floor, so no side piece grips it. In the plateaus' own
+view (raised to the ground, as the pillars are cut) the tips of the ones
+in front lie over the floor's top, up to a fifth of their pixels.
+
+So the second layer is cut by palette bank: a group of one bank's tiles
+joined eight ways stands round the view's raised floor where at most
+three tenths of its pixels lie over that floor's top (the plateau's own
+corner pieces lie on it), half over other floor (a ladder beside it), and
+a quarter where the ground's floor is drawn below (a ladder's rails lie on
+its ramp; a three's feet stand behind the walkway at a ladder's foot),
+200 tiles and 16 by 28 at most, a pixel of it within 80 (|dx| + 2|dy|) of
+a panel's middle of that floor. It is kept with that panel, its
+neighbourhood, the 32 panels at most it draws over, and the map's layer
+priorities round the panel: none, for any of them, so BN6 draws MegaMan
+in front of every spike. That takes 10 groups in 8 looks (the four corner
+singles in three, the single and the pair in front of a face, the threes
+beside the ladders, two of them standing together as a group of six),
+and the map mirrored 6 more: its spikes stand in front of two of a
+plateau's four faces, the mirror's in front of the other two. Area flag
+`SIDES_STANDS` (bit 9).
+
+A layer sets them round every platform (`nm_paste_rings`): each panel
+drawn as a platform (no walkway's, nor a room of walkways', no pad's; the
+guardian's arena too), at its own height, takes a group where the floor
+it stood by is there (whatever else lies round it: the threes stood by a
+ladder's stub, a layer's by any face) and the panels it draws over are as
+in its map: floor of that height where it lay over floor, and where it
+hung free no floor showing at any height (floor raised one level is drawn
+where flat floor a panel up the screen would be). It goes down whole on
+the second layer over nothing that holds, lifted by the rise round raised
+floor, and no nearer than two panels to the panel another group stands by
+(the map's stand in ones, twos and threes with gaps between; by every
+panel that fits, a long face was a palisade). The spikes behind the upper
+edges go round the platforms the same way, every panel that fits (their
+neighbourhood exact), and nowhere else: the map sets none behind its
+walkways. It is art alone: the panels are walked as before.
+
+The rings go down after the [tile test](../../devtools/tile-test.md) has
+measured the floor's breaks, with the scenery: they stand in the void
+beside the floor, and a spike's own tile edges over a face the map never
+stood it by counted as breaks (some 150 more on a layer), though the
+spike runs on whole across them. Held to the floor alone, no CopyBot
+layer's breaks grew (eight a little fewer, the spikes behind its edges
+no longer among them), and no other area's layers changed.
+
+Over the atlas's ten CopyBot layers (two seeds each layout), where dev's
+set 30 spikes behind edges and none standing (0 to 11 a layer), they set
+169 behind and 133 groups standing (1 to 34 and 0 to 23 a layer): a
+platform with void round it is ringed as the map's are, one hemmed in by
+walkways keeps what fits (the guardian's layer, its plateau in a ring of
+walkways: 1). Raised plateaus (run seeds 4 and 5) are ringed at their
+height, and a Glitch layer's flips into CopyBot Comp's look ring theirs
+(43 flips: 375 groups standing, 427 behind). In the game (run seed 5,
+CopyBot at depth 2) MegaMan stands at a plateau's front edge in front of
+the spikes' tips, on the ground and on a raised one, as BN6 draws him
+there: the map holds no layer priorities round them.
 
 ## What stands in a walled hole (`hole_learn`; verified on the maps and in the game)
 

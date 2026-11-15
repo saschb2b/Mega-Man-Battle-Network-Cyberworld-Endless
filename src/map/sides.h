@@ -13,7 +13,7 @@
 #include "stairs.h"   /* StairTile */
 
 #define SIDES_MAX 256   /* looks a book holds at most: 24 of a floor's sides, under or behind it (sides.c's LOOKS), the rest what grows on its edges */
-#define SIDE_UNDER 16   /* panels a piece draws over, kept */
+#define SIDE_UNDER 16   /* panels a piece draws over, kept (SIDE_REACH for what stands round a raised floor: a row of three spikes, some 24) */
 #define SIDE_REACH 32   /* ... what grows on a floor's edge: every panel whose top, rim or wall reaches its tiles */
 
 /* One piece: its second layer's entries, screen pixels from the corner of
@@ -45,6 +45,8 @@ typedef struct {
 	bool grows;        /* ... or what grows on a floor's edge (edges_learn): a tuft on its back rim, a planter at its wall's
 	                    * foot, its tiles the first layer's, its panel any free one of a layer's floor */
 	uint64_t onto;     /* (grows) its tiles (bit k: tiles[k], 48 at most) that hold the floor's own art too, set over the layer's */
+	bool ring_stand;   /* what stands round a raised floor in the void, in front of its side faces and beside its
+	                    * corners (ring_learn): the second layer's, its panel one of a layer's platforms at any height */
 } SidePiece;
 
 typedef struct {
@@ -85,6 +87,16 @@ void stands_learn(const AreaSrc *r, SideBook *out);
  * cut into its copies, a bowl each; each with the first layer's tiles under
  * it (SidePiece.over) and the panels it stands behind (SidePiece.under). */
 void sides_learn_behind(const AreaSrc *a, SideBook *out);
+
+/* Adds what view `r` of a map (area_src_raise_in) sets on its second layer
+ * round its raised floor, standing in the void in front of the floor's side
+ * faces and beside its corners (net_area.sides' SIDES_STANDS): CopyBot
+ * Comp's tall dark crystal spikes, alone, in pairs and in threes. Each
+ * group of one palette bank's tiles is a piece (the ladders' rails and the
+ * plateau's own corner pieces join them on that layer in other colours),
+ * kept with the panel of that floor nearest it and the map's layer
+ * priorities round that panel. */
+void ring_learn(const AreaSrc *r, SideBook *out);
 
 /* The first piece map `a` sets in a walled hole in its floor, whole on its
  * second layer, into `out` where it has none (BN5's End Area's pagoda): a
