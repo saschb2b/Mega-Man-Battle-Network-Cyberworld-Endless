@@ -299,10 +299,22 @@ static void map_arrow(void) {
 	was = D.map_shown;
 }
 
+/* When the arrow waits (cinema.c, arrow_settle, which keeps it clear of
+ * MegaMan and of an open chat box): while he cannot walk its way, through
+ * a chat of BN6's or another of ours (L's own words are the arrow's, and
+ * it shows through them), a cutscene, a guardian's staging. A playtester
+ * saw it on MegaMan's legs and the box's top edge as he took a Mystery
+ * Data, and over SpoutMan as he logged in (kai5, session 77). */
+static void arrow_quiet(void) {
+	bool chat = (emu_read8(BN6_CHATBOX) || talk_busy()) && !D.arrow_pending;
+	cinema_arrow_quiet(chat || emu_read32(BN6_CUTSCENE_POS) != 0 || boss_cinematic());
+}
+
 /* The way-on arrow: on while L's words last, however many boxes, then ten
  * seconds more, and on while MegaMan walks, up to half a minute; and after
  * the map. */
 void arrow_update(void) {
+	arrow_quiet();
 	/* (not over a warp's or the jack-in's flash and tunnel) */
 	if (D.warping || emu_read8(BN6_WARP_PENDING)) {
 		if (cinema_arrow_on()) cinema_arrow(0, 0);
