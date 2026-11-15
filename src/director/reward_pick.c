@@ -32,6 +32,8 @@ void reward_pick_offer(int kind, const PickOffer *o) {
 
 int reward_pick_rows(void) { return RP.o.n + (RP.o.frags > 0); }
 
+bool reward_pick_ready(void) { return RP.t + 1 >= PICK_SEEN && RP.rest >= PICK_REST; }
+
 /* A choice's variant `mark` (a code, a colour), its count `held` more:
  * listed once, in the order they come */
 static void add_held(int k, int mark, int held) {
@@ -114,16 +116,17 @@ static void choose(int script) {
 
 void director_pick_keys(uint32_t keys) {
 	if (!RP.up) return;
+	/* (as the cursor showed it the frame before) */
+	bool ready = reward_pick_ready();
 	++RP.t;
 	uint32_t now = keys & ~RP.was;
 	RP.was = keys;
-	int rested = RP.rest;
 	RP.rest = keys & KEY_A ? 0 : RP.rest + 1;
 	if (RP.t < PICK_LOCK) return;
 	int rows = reward_pick_rows(), was = RP.cursor;
 	if (now & KEY_UP) RP.cursor = (RP.cursor + rows - 1) % rows;
 	else if (now & KEY_DOWN) RP.cursor = (RP.cursor + 1) % rows;
-	else if ((now & KEY_A) && rested >= PICK_REST && RP.t >= PICK_SEEN) {
+	else if ((now & KEY_A) && ready) {
 		/* (the choice's script, or the skip's from its row) */
 		choose(RP.cursor < RP.o.n ? RP.o.c[RP.cursor].script : RP.o.skip);
 	} else if (now & KEY_B) {

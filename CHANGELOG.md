@@ -214,7 +214,9 @@
   land just after the gift's screen opened and take its first choice
   before you had seen it. A reward pick's screen now takes a choice only
   once it has been up a second and a half (the cursor moves sooner), for
-  the gift, a guardian's draft and every other pick alike.
+  the gift, a guardian's draft and every other pick alike. Its cursor
+  shows when: it stands still and faded while A would take nothing, and
+  bobs in full orange once A takes.
 - **The game tells you when a new version is out, and what it brings.**
   At each start it looks for one (a single request for the release's own
   `update.json`, nothing about you sent). When one is out, a box opens

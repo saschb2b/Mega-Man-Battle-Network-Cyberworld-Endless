@@ -15,7 +15,10 @@
  * been up PICK_SEEN frames, long enough to be seen: a press a second
  * through Mr.Prog's lines landed 55 frames after it opened and took the
  * gift's first choice unseen (session 76). An A held from before it opened
- * counts only once released and pressed again. */
+ * counts only once released and pressed again. The cursor shows which:
+ * held still and faded while A would take nothing, bobbing from the frame
+ * it would (reward_pick_ready), as a first A in that second and a half,
+ * pressed at what was seen, looked like a frozen screen (session 78). */
 #define PICK_LOCK 30
 #define PICK_REST 20
 #define PICK_SEEN 90
@@ -45,5 +48,8 @@ extern PickState RP;
 
 /* The rows: the choices, and the skip's where it has one */
 int reward_pick_rows(void);
+/* An A pressed next would take the row under the cursor: the screen up
+ * PICK_SEEN frames and A let go PICK_REST */
+bool reward_pick_ready(void);
 
 #endif
