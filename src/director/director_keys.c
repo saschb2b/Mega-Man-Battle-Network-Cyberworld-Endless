@@ -83,6 +83,25 @@ static int talk_target(void) {
 	return ahead >= 0 ? ahead : near;
 }
 
+/* MegaMan where an A of his may be meant for someone: within the probes'
+ * 52 units of an NPC (talk_target's reach), A held, or walking up to one
+ * after an A. MegaMan's own words wait: the last stop's began the frame a
+ * playtester reached the Net Dealer, and the A he pressed for the dealer
+ * went into them (session 77). */
+bool talk_in_reach(void) {
+	if (D.a_held || D.walk_t > 0) return true;
+	int px = bn6_player_x(), py = bn6_player_y();
+	for (int i = 0; i < 16; ++i) {
+		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
+		if (!(emu_read8(o) & 1) || !emu_read8(o + BN6_NPC_RADIUS)) continue;
+		int cx, cy;
+		npc_centre(o, &cx, &cy);
+		int dx = cx - px, dy = cy - py;
+		if (dx * dx + dy * dy <= 52 * 52) return true;
+	}
+	return false;
+}
+
 /* Where NPC slot i stands from MegaMan, the facing whose probe points at
  * it best, and whether that probe reaches it. */
 static bool talk_reach(int i, int *face) {
