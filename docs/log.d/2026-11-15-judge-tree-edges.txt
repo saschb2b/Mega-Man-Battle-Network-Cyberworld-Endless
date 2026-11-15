@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T16:51:05Z
+* **Update**: world/level-design/side-pieces.md (what grows on a floor's edge: the Judge Tree's tufts on its back rims and planters at its walls' feet, cut in the floor's own tiles with every panel that reaches them; its row, what is not placed and why), code/net-and-map.md (sides.c's line).
