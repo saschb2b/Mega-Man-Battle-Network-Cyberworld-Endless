@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T02:15:00Z
+* **Create**: releases/v0.22.0.md (0.22.0's players' notes, drafted while dev's bugfixes land: cloud saves, saves by a code, the game's own updates, the New 3DS's 3D, the faster net, the playtests' fixes; pictures and the trailer to come before the tag). **Update**: releases/overview.md and releases/index.md (its line).
