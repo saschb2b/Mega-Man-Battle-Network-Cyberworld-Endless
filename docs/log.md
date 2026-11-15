@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (BN5's Undernet's skull totems, which issue #505 took for dark figures where its statues stand: first-layer art in a bank its palette script fills, now scenery on its layers; its row in the area table; the Not built note), rom/graphics.md (BN5's Undernet 2 and 3's bank-12 palette script, which colours the totems and flashes their eyes).
+* **Update**: world/level-design/side-pieces.md (BN5's Nebula Area surveyed: its dripping pods and pools are drawn with its plates' corners and paths' ends, no cut learns a piece from its two maps, the crate on a plate a centrepiece; its row in the area table, a section of its own, and the Not built list without its pods).
 * **Update**: releases/v0.22.0.md (opens with its trailer).
 * **Update**: project/youtube.md (the thumbnail made for YouTube by `tools/trailer_thumbnail.py`, three for Test & compare; the narrator, Dad in BN6's own chat box; the title's hook first), devtools/headless-shot.md (`--talk narrate`), code/tools.md (rows for `tools/trailer_thumbnail.py` and the trailers' house look and band; `trailer_youtube.py`'s thumbnails and title).
 * **Update**: project/youtube.md (0.22.0's video made ahead of its release, its upload refused by the day's limit).
