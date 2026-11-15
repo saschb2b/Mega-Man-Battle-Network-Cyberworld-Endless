@@ -2234,6 +2234,12 @@ def screenshot_server(kind, tmp):
         with open(os.path.join(folder, 'update.json'), 'w', encoding='utf-8') as f:
             if subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'update_manifest.py'), 'v0.22.0', folder], stdout=f):
                 sys.exit('screenshot_server: no update.json')
+        # (the notes' pictures from this server too: the release's own are not on GitHub before the tag)
+        with open(os.path.join(folder, 'update.json'), encoding='utf-8') as f:
+            manifest = f.read().replace('https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/download/v0.22.0/'
+                                        'update-pictures.bin', f'http://172.17.0.1:{N22_UPDATE_PORT}/update-pictures.bin')
+        with open(os.path.join(folder, 'update.json'), 'w', encoding='utf-8') as f:
+            f.write(manifest)
         server = subprocess.Popen([sys.executable, '-m', 'http.server', str(N22_UPDATE_PORT), '--bind', '0.0.0.0', '--directory', folder],
                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         env = [('CYBERWORLD_UPDATE_URL', f'http://172.17.0.1:{N22_UPDATE_PORT}/update.json'), ('CYBERWORLD_UPDATE_FROM', '0.21.2')]

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.22.0 (2026-11-15)
+
 - **The week's DeepNet, dived together.** The greeter Mr.Prog by the
   Board gave way to a portal, which warps MegaMan straight into the
   week's net, and everyone on the server who dives it at the same time
