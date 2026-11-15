@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/way-on-arrow.md (where the arrow stands, ringing MegaMan where the camera draws him and clear of his sprite, and when it waits: a chat not its own words, a cutscene, a guardian's staging, an open box it would cross; kai5's two arrows against the map's line followed their walks).
 * **Update**: releases/v0.22.0.md (#596-#605 written in: the Battle Lab's builder, a CONTINUE's next battle, Mr.Prog's patch after a CONTINUE, first meetings, a word after a battle).
 * **Update**: world/level-design/way-on-arrow.md (the heal's green arrow goes back to the exit once MegaMan turns three panels away from it, until L names the heal again; session 77's game-design call), world/level-design/teaching-set-pieces.md (L's two things worth a detour count the heal while hurt), multirom/one-net.md (L no longer repeats the older Net's viruses on every layer).
 * **Update**: world/home/design.md (No way home mid-act: R on a layer answers with MegaMan's way home, Dad's Battle Lab mail says when, no jack-out added), game/battle-lab.md (the mail's new page on when MegaMan is home), game/meta/design.md (the summary's Library count from the starting folder in; Dad's first call on what carries over), voice/rules.md (lesson_words.c's row: R on a layer).
