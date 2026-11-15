@@ -635,3 +635,85 @@ Devices now used up: the three channels in the cartridges' colours, the
 tags with their one word, the picture's colours closing as the cut,
 ghosts that add up to white, the picture at 4x with the caption on its
 last lines, the three colours meeting in the logo.
+
+## The blueprint, and 0.22.0: Your run, on every device (2026-11-15), `tools/trailers/v0_22_0.py`
+
+The owner, before the release: a trailer for it, and with it an end to
+ten trailers that read as ten projects. "We need to find a good consens
+to have stable trailers. like a blueprint. So that not every trailer
+looks completetly different. Yet has as much freedom to showcase its
+changes to its fullest", 0.17.0 the reference ("I really like the music
+from 0.17.0 and its pace. Especially when there is much to showcase"), a
+narrator ("Maybe lans father? Like he comes on after the trailer starts,
+introduces himself, very short explanation ... and slides into the new
+changes ... With a nice outro thanking players"), and a thumbnail made
+for YouTube. It reverses 13 October's "never the last trailer with new
+screens" for the frame and the band; `blueprint.md` is the result, its
+fixed half code (`house.py`, `house_music.py`), and 0.22.0 the first cut
+on it: about 150 lines of its own where a cut was 600 to 1000.
+
+What was made: 58 seconds, 35 bars at 150. The cold open is a Beast Out
+(the dark, the flare, the white, the beast) and its fight through fire
+rings; the title YOUR RUN, ON EVERY DEVICE (the notes' own line); Dad's
+hello; four segments (saves that follow you; the net, relaid; the little
+things; more ways to play) on 0.17.0's frame, the panel now a list of
+the segment's shots under the PET's orange cursor (0.17.0's chips were
+that cut's own); the recap, four tiles at 2x and the fixes counted from
+the CHANGELOG as the cut is drawn; Dad's thanks; the stinger; the end
+card with THANKS FOR DIVING IN. Its own half: the RUN! button's green,
+packets climbing the net's lines, each shot drawn in from the left as a
+transfer fills, and the tune.
+
+The narrator: `--talk narrate:FRAME` has the game say a cut's lines as
+Dad in BN6's own chat box (`CYBERWORLD_NARRATE`), nothing redrawn. The
+first take had him over the layer he was captured on, MegaMan standing
+there; the owner, mid-work: "having dad speak while megaman just sits
+there is boring. find a better way to fill the backdrop with something
+related." A chat stops the game under it, so his box (its rows of his
+frame, found by where a frame with the box differs from one before it)
+is laid over other footage: a dive, three areas for "a new Net on every
+dive", a beat of each segment's best shot for "here's what 0.22.0
+brings". It reads as the game does when a call comes in over play.
+BN6's chat types a letter every two frames; the cut plays the typing at
+twice that.
+
+The music: 0.17.0's piece failed today's gate 3 as it stands (its lead,
+backing and bass on the squares and the wave alone: it was made a week
+before the gate). The house band keeps its notes and doubles those three
+on FluidR3 GM. Three tunes on it as sketches (`sketch_house_a` "Carry
+on", `_b` "In step", `_c` "Wide ways"), each "busier than the source:
+none", no rub, "every part on FluidR3 GM"; the piece grown from A reads
+46/33/19/2 against 0.17.0's 49/33/17/1, punch 7.9 dB against 7.8, highs
+5.5% against 5.9%. A's first cadence rubbed (an F on the Lydian B major:
+its F-sharp instead).
+
+What went wrong on the way: Silkscreen Bold's 4 and % close up into
+blobs ("04" read as a 0 and a heart, "40%" as nothing): `house.text`
+strikes those two from the regular face twice; check a new digit at the
+cut's size as 0.16.0's lesson says of B, G, 8 and 6. A count ran over
+its caption (the plate now keeps the count's own width clear). A cut's
+module named its runs `footage`, which is the kit's hook for a cut's own
+captures (`cut.footage(keep)`): the kit called a module. The footage's
+agent renamed scenes after the cut had captured them, and `--keep` kept
+the old pictures under the new names: delete a renamed scene's folder.
+Depth lighting cannot be filmed by `capture()` (`--shot-range` saves the
+canvas, the lighting is laid at presentation; `--screen-shot` shows it,
+sixteen frames a run), so the 3D shot shows Options' line turning.
+Scenes that need a server (the saves' cloud and code: a Net Square; the
+update's box: a manifest over HTTP) are the cut's `footage()`, which
+starts both and stops them.
+
+The thumbnails (the youtube-publish skill's `thumbnail.md`): three SVGs
+of one layout, a region of a whole frame with two lines of words. The
+first sheet set the words in Silkscreen: "NOW" read as "NO" and a heart
+at 168 wide; Lato Black Italic since. The first heroes were picked
+blind and put a blast under the scrim: pick the frame on a sheet, its
+subject in the right two thirds.
+
+Still the owner's: his pick of a tune (gate 4), his word on the cut
+(gate 5), and whether Dad should have a voice some day; until then the
+cut renders into `.build/` and 0.21.0's stays the current one.
+
+Chosen by this cut (the next one's are others): the green accent, the
+climbing packets, the sweep, the tune "Carry on", the Beast Out as the
+cold open.

@@ -10,6 +10,10 @@ came after its tag, 0.3.0's end card was corrected after its), or, where
 tools/trailer.py rendered it here, .build/trailer-VERSION/youtube.mp4, the
 master it writes from its lossless frames.
 
+A cut's YOUTUBE_HOOK leads its title, and where tools/trailer_thumbnail.py
+made its thumbnails (the cut's THUMBNAILS), videos.json lists them, A the
+one a video goes up with; else the poster is its thumbnail.
+
 The master is the 1280x720 trailer scaled 3x, nearest neighbour, to
 3840x2160, at a high quality: YouTube streams a 4K upload with VP9 or AV1
 at every size and at a higher bitrate, where a 720p upload's H.264 blurs
@@ -98,10 +102,34 @@ def released(version):
     return git('log', '-1', '--format=%cs', f'v{version}').decode().strip()
 
 
+def hook(version):
+    """the cut's YOUTUBE_HOOK: the news a title leads with (the
+    youtube-publish skill's thumbnail.md, The title), or None"""
+    try:
+        return getattr(trailers.module(version), 'YOUTUBE_HOOK', None)
+    except ImportError:
+        return None
+
+
+def thumbnails(version):
+    """the cut's thumbnails where tools/trailer_thumbnail.py made them
+    (A first, the one a video goes up with), else its poster"""
+    made = [f'{name(version)[:-len("trailer")]}thumbnail-{c}.png' for c in 'abc']
+    made = [f for f in made if os.path.exists(os.path.join(OUT, f))]
+    return made or [f'{name(version)}.png']
+
+
 def describe(version):
-    tagline, para = notes(version)
-    date = released(version)
+    try:
+        tagline, para = notes(version)
+        date = released(version)
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        # (before the release: its notes and its tag are still to come)
+        tagline, para, date = f'Cyberworld Endless {version}', '(the release notes are not written yet)', 'not yet'
     title = f'Cyberworld Endless {version} Trailer – {tagline}'
+    lead = hook(version)
+    if lead:
+        title = f'{lead} | Cyberworld Endless {version} Trailer'
     if len(title) > 100:
         title = f'Cyberworld Endless {version} Trailer'
     text = '\n'.join([
@@ -121,8 +149,9 @@ def describe(version):
         '',
         '#MegaManBattleNetwork #roguelike #indiegame',
     ])
+    shown = thumbnails(version)
     return {'version': version, 'title': title, 'description': text, 'tags': TAGS, 'recorded': date,
-            'video': f'{name(version)}.mp4', 'thumbnail': f'{name(version)}.png'}
+            'video': f'{name(version)}.mp4', 'thumbnail': shown[0], 'thumbnails': shown}
 
 
 def export(version, sha):
@@ -137,8 +166,12 @@ def export(version, sha):
             f.write(git('show', f'{sha}:{CLIP}'))
         rel = lambda p: '/src/' + os.path.relpath(p, ROOT)  # noqa: E731
         ffmpeg(['-y', '-loglevel', 'error', '-i', rel(src), *VIDEO, '-c:a', 'copy', rel(dest + '.mp4')], version)
-    with open(dest + '.png', 'wb') as f:
-        f.write(git('show', f'{sha}:docs/clips/trailer.png'))
+    poster = os.path.join(ROOT, '.build', f'trailer-{version}', 'out', 'trailer.png')
+    if sha:
+        with open(dest + '.png', 'wb') as f:
+            f.write(git('show', f'{sha}:docs/clips/trailer.png'))
+    elif os.path.exists(poster):
+        shutil.copyfile(poster, dest + '.png')   # (a trailer rendered here and not yet the current one)
     return describe(version)
 
 
@@ -151,13 +184,15 @@ def main():
     if os.path.exists(listed):
         with open(listed, encoding='utf-8') as f:
             videos = {v['version']: v for v in json.load(f)}
-    missing = [v for v in versions if v not in found]
+    missing = [v for v in versions
+               if v not in found and not os.path.exists(os.path.join(ROOT, '.build', f'trailer-{v}', 'youtube.mp4'))]
     if missing:
-        sys.exit(f'no committed trailer for {", ".join(missing)}')
+        sys.exit(f'no committed trailer for {", ".join(missing)}, and none rendered here')
 
     def one(version):
-        videos[version] = export(version, found[version])
-        print('wrote', os.path.relpath(os.path.join(OUT, name(version)), ROOT) + '.mp4, .png', 'from', found[version][:9], flush=True)
+        videos[version] = export(version, found.get(version))
+        print('wrote', os.path.relpath(os.path.join(OUT, name(version)), ROOT) + '.mp4, .png', 'from',
+              (found.get(version) or 'its render here')[:16], flush=True)
     with ThreadPoolExecutor(2) as pool:   # (two encodes at once, oldest first)
         list(pool.map(one, versions))
     order = sorted(videos.values(), key=lambda v: tuple(int(x) for x in v['version'].split('.')))

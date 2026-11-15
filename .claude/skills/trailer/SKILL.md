@@ -1,6 +1,6 @@
 ---
 name: trailer
-description: Make Cyberworld Endless's trailer for a release - a new look and an original piece of music in the manner of the game the release shows (its habits read from the ROM's song, never its notes), footage from the release pictures' scripted runs, built in tools/trailers/, reviewed frame by frame and by numbers, then shown everywhere the project shows its face (the site's hero, every page's preview, the README, the notes, the 3DS banner's sound). Use when asked for a trailer, a release video or a new cut, when a minor release (0.N.0) is being prepared, or when the trailer's music, look or placement is to change.
+description: Make Cyberworld Endless's trailer for a release on the series' blueprint - the house look and band (0.17.0's frame and music, tools/trailers/house.py and house_music.py), Dad as the narrator in BN6's own chat box, and the release's own half (its accent, field, cut, tune, segments and shots), footage from scripted runs, built in tools/trailers/, reviewed frame by frame and by numbers, its YouTube thumbnails drawn, then shown everywhere the project shows its face (the site's hero, every page's preview, the README, the notes, the 3DS banner's sound). Use when asked for a trailer, a release video or a new cut, when a minor release (0.N.0) is being prepared, or when the trailer's music, look, narrator, blueprint or placement is to change.
 ---
 
 # The trailer
@@ -8,13 +8,22 @@ description: Make Cyberworld Endless's trailer for a release - a new look and an
 A release that changes how the game looks or plays gets a trailer of its
 own, and it replaces the last one everywhere (AGENTS.md, Trailers). The
 project's face changes with the game instead of piling up. Read
-`lessons.md` first: the trailers made so far and what the owner said of
-each; and `music_rules.md` before writing a note.
+`blueprint.md` first, then `lessons.md` (the trailers made so far and
+what the owner said of each) and `music_rules.md` before writing a note.
 
-The one rule the owner gave in so many words: **never the last trailer
-with new screens.** Each trailer has its own look and its own music, in
-the manner of what the release is about (0.12.0, BN5's net: BN5's title
-theme for the music, BN5's Liberation Missions for the look).
+**From 0.22.0 every trailer is made on the blueprint** (`blueprint.md`;
+the owner, 15 November 2026: "stable trailers. like a blueprint. So that
+not every trailer looks completetly different. Yet has as much freedom to
+showcase its changes"). The series' half is fixed in code: the slots, the
+frame, the narrator, the band (0.17.0's, the trailer he named as the
+reference for its music and its pace). The release's half is the cut: its
+name, accent, field, cut, tune, segments, shots and Dad's lines. Where
+this file and `blueprint.md` differ, the blueprint holds.
+
+Before it (13 October 2026) the rule was "never the last trailer with new
+screens", a look and a piece of its own each time; what is left of that
+rule is the release's half: never the last trailer's shots, tune, accent
+or motif again.
 
 ## The owner's gates
 
@@ -80,6 +89,11 @@ time waits, it is not cut short. Each came from a cut the owner refused.
 
 ## The structure (every trailer)
 
+(`blueprint.md`, The slots, is this structure as it now stands: the
+narrator's hello after the title card and his thanks before the stinger,
+the bars each slot takes, 45 to 75 seconds. What follows is where it came
+from and its label grammar, which the house frame keeps.)
+
 The owner (26 October 2026): "I want structure, and professional polish,
 while still making each trailer unique and interesting to consume",
 pointing at two update trailers to study frame by frame: Cyberpunk 2077's
@@ -123,7 +137,11 @@ as a candidate.
 
 | Part | Where |
 | --- | --- |
-| A cut: footage, look, `VERSION`, `POSTER`, `PLAY_LABEL`, `scenes()`, `compose(only)` | `tools/trailers/vX_Y_Z.py` |
+| The blueprint's fixed half: the house look (the frame, the slots' pictures, `Trailer`, `Segment`, `Shot`, `Tile`, `Narration`) and the house band (`form`, `arrangement`, `sketch`) | `tools/trailers/house.py`, `tools/trailers/house_music.py` |
+| A cut: footage, look, `VERSION`, `POSTER`, `PLAY_LABEL`, `scenes()`, `compose(only)`; on the blueprint a `house.Trailer` and the release's half, with `THUMBNAILS` and `YOUTUBE_HOOK` for YouTube | `tools/trailers/vX_Y_Z.py` |
+| Its footage's runs: `SCENES`, and `MARKS`, what each sample shows | `tools/trailers/vX_Y_Z_footage.py` |
+| The narrator's talk: Dad saying `CYBERWORLD_NARRATE`'s boxes in BN6's own chat box | `--talk narrate:FRAME` (`src/director/director_dev.c`) |
+| Its YouTube thumbnails, an SVG each drawn by Chrome | `tools/trailer_thumbnail.py`; the youtube-publish skill's `thumbnail.md` |
 | Its music: `arrangement()`, `instruments()`, `BPM`, `BARS`, `TAIL`, `MIX`, `DS_ENV`, `DS_GAIN`, `DS_LEVEL`, `REVERB`, `BANNER`, and optionally `HARDWARE`, `CHORD_SAMPLES`, `SOUNDFONT` and `BANNER_AUDIO` | `tools/trailers/vX_Y_Z_music.py` (standard library only: the 3DS build renders its banner, or copies its kept `BANNER_AUDIO`) |
 | Which is current | `CURRENT` and `VERSIONS` in `tools/trailers/__init__.py` |
 | The shared kit: capture, `from_shots`, `from_clips`, `shot`, encode, the play poster | `tools/trailer.py` |
@@ -136,20 +154,23 @@ as a candidate.
 
 `python3 tools/trailer.py [VERSION] [--keep] [--footage] [--frames A,B]`
 captures, renders the music, draws and encodes; only the current one
-writes `docs/clips/trailer.*`. The earlier cuts stay renderable (into
-`.build/trailer-VERSION/out`), and their videos stay at their release's
-tag.
+(`trailers.CURRENT`) writes `docs/clips/trailer.*`. Any other renders
+into `.build/trailer-VERSION/out`: the earlier cuts, whose videos stay at
+their release's tag, and the next release's while it is made (it is in
+`VERSIONS` from the start and becomes `CURRENT` at step 6).
 
 ## 1. The brief (before any code)
 
 Write down, in a few lines:
 - **The release's headline**, from the CHANGELOG section: what a player
   would tell a friend. The trailer shows that, not the whole game.
-- **The vibe**: which game's or which feature's spirit it carries, and the
-  visual concept that comes from its fiction. BN5 gave Liberation
-  Missions: dark panels freed shot by shot. Name the devices the last
-  trailer used (`lessons.md`) and choose others: its transitions, its
-  type, its overlays, its colours.
+- **The release's half** (`blueprint.md`, The frame): its accent, its
+  field's motif, its cut, each from what the release is about (0.22.0's
+  saves: the RUN! button's green, packets climbing the net, a shot drawn
+  in as a transfer fills). Name what the last trailer chose
+  (`lessons.md`) and choose others.
+- **Dad's lines** and what plays behind each box (`blueprint.md`, The
+  narrator).
 - **The arc in bars**, on the structure's slots (above): which moment is
   the cold open, the title card's words, each feature segment's section
   card and its shots in order, the recap grid's tiles, the stinger and
@@ -200,7 +221,11 @@ the squares' jobs, bass, drums, arrangement, mix and timbre.
 2. **Read the recording** if there is one: `scripts/music_check.py
    --ref FILE` prints its balance and its punch (the swing inside a beat)
    to match.
-3. **Sketch first, never skipped** (the owner's gate 4). Before the full
+3. **Sketch first, never skipped** (the owner's gate 4). On the
+   blueprint the sketches are three tunes on the house band, nine bars
+   each (`house_music.sketch(TUNE)`, `sketch_house_a.py`; `blueprint.md`,
+   The music), and steps 1, 4 and 6 are the band's, done once. Off it
+   (the owner's word): before the full
    piece, write three eight-bar sketches (12-16 seconds) from the chosen
    song, in the soundfont (gate 3), in different moods as modules beside the cuts
    (`tools/trailers/sketch_a.py`; not in `VERSIONS`), render them with
@@ -345,7 +370,9 @@ only: `build.py 3ds` renders the banner with it.
 7. After the tag, YouTube: the youtube-publish skill
    (`.claude/skills/youtube-publish/`) makes its 4K master with
    `python3 tools/trailer_youtube.py VERSION`, uploads it to the channel
-   and the trailers' playlist, and writes its id into
+   and the trailers' playlist with the cut's thumbnails
+   (`tools/trailer_thumbnail.py`, made and looked at with the cut, before
+   the owner sees it) and its title's hook, and writes its id into
    docs/project/youtube.md.
 
 ## Pitfalls met

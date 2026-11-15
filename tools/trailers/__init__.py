@@ -1,13 +1,14 @@
 """The trailers, one for each release that earned one (AGENTS.md,
 Trailers): a VERSION's footage and look in vX_Y_Z.py, its music in
-vX_Y_Z_music.py. The newest is the current one: docs/clips/trailer.* are
-its, and the 3DS HOME Menu banner plays its music's BANNER. An older one
-still renders from here, into .build/ only, and its video stays at its
-release's tag."""
+vX_Y_Z_music.py. CURRENT is the one shown: docs/clips/trailer.* are its,
+and the 3DS HOME Menu banner plays its music's BANNER. Any other renders
+from here into .build/ only: an older one, whose video stays at its
+release's tag, and the next release's while it is being made, which
+becomes CURRENT once the owner has seen it (the trailer skill, step 6)."""
 import importlib
 
 CURRENT = '0.21.0'
-VERSIONS = ('0.3.0', '0.12.0', '0.13.0', '0.14.0', '0.15.0', '0.16.0', '0.17.0', '0.19.0', '0.20.0', '0.21.0')
+VERSIONS = ('0.3.0', '0.12.0', '0.13.0', '0.14.0', '0.15.0', '0.16.0', '0.17.0', '0.19.0', '0.20.0', '0.21.0', '0.22.0')
 
 
 def module(version=None, music=False):
