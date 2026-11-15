@@ -495,6 +495,39 @@ def windows_release():
     print('released', os.path.join(RELEASE, WINDOWS_SETUP))
 
 
+PSP_ZIP = 'cyberworld-endless-psp.zip'
+
+
+def psp_release():
+    """build/psp/cyberworld-endless-psp.zip: the memory stick's PSP/GAME/cyberworld-endless/
+    with the EBOOT, an empty rom/ for BN6, and the licenses; gpSP, which the PSP's
+    build links, is GPL-2.0, so the source's place goes with it (psp/README.md)."""
+    import zipfile
+    out = os.path.join(ROOT, 'build', 'psp')
+    with open(os.path.join(ROOT, 'docker', 'gpsp.sh'), encoding='utf-8') as f:
+        commit = re.search(r'^COMMIT=([0-9a-f]+)', f.read(), re.M)[1]
+    tag = os.environ.get('TAG', '')
+    ref = tag if tag.startswith('v') else 'dev'
+    source = (f'Cyberworld Endless {version()} for the PSP\n\n'
+              'This build links libretro gpSP (GPL-2.0, licenses/gpSP.txt) and parts of\n'
+              'mGBA (MPL-2.0, licenses/mGBA.txt); the game is MIT (LICENSE.txt). It is\n'
+              'distributed under the GPL\'s terms. Its source:\n\n'
+              f'  the game:  https://github.com/{REPO}/tree/{ref}\n'
+              f'  gpSP:      https://github.com/libretro/gpsp/tree/{commit}\n'
+              '             with docker/gpsp-cyberworld.patch from the game\'s source over it\n'
+              '             (docker/gpsp.sh builds it; psp/README.md builds the rest)\n')
+    base = 'PSP/GAME/cyberworld-endless/'
+    archive = os.path.join(out, PSP_ZIP)
+    with zipfile.ZipFile(archive, 'w', zipfile.ZIP_DEFLATED) as z:
+        z.write(os.path.join(out, 'EBOOT.PBP'), base + 'EBOOT.PBP')
+        z.writestr(base + 'rom/', '')
+        z.write(os.path.join(ROOT, 'LICENSE'), base + 'LICENSE.txt')
+        for name in ('gpSP.txt', 'mGBA.txt'):
+            z.write(os.path.join(out, 'licenses', name), base + 'licenses/' + name)
+        z.writestr(base + 'SOURCE.txt', source)
+    print('released', archive)
+
+
 def version():
     """The release's version: the tag being released (TAG, as the release
     workflow sets it) or the latest v* tag with the commits since, else a
@@ -3412,9 +3445,11 @@ def main():
         print('built', os.path.join(ROOT, 'build', 'switch', 'cyberworld-endless.nro'))
         return
     if a.action == 'psp':
-        # the PSP (psp/README.md): build/psp/EBOOT.PBP
+        # the PSP (psp/README.md): build/psp/EBOOT.PBP, and the release's
+        # build/psp/cyberworld-endless-psp.zip
         build('psp')
         print('built', os.path.join(ROOT, 'build', 'psp', 'EBOOT.PBP'))
+        psp_release()
         return
     if a.action == 'vita':
         # the PlayStation Vita (vita/README.md): build/vita/cyberworld-endless.vpk

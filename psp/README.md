@@ -3,22 +3,25 @@
 The game for a PSP-2000, PSP-3000, PSP Go or PSP Street (E1000) with
 custom firmware (6.61 PRO or ARK-4): an `EBOOT.PBP` for the memory
 stick's `PSP/GAME` folder, with its XMB icon and background. A PSP-1000
-has 32 MB, not the 64 the game needs: it is not supported. The build is
-new and not yet among a release's files; it has been played in PPSSPP,
-not yet on a PSP (docs/engine/emulation/psp-and-ds.md).
+has 32 MB, not the 64 the game needs: it is not supported. A release
+carries it from 0.22.0 as `cyberworld-endless-psp.zip`; it has been
+played in PPSSPP, not yet on a PSP (docs/engine/emulation/psp-and-ds.md).
 
 Its GBA core is gpSP, not mGBA: mGBA's interpreter takes 19 to 25 ms of
 the PSP's 16.7 ms frame, gpSP's dynarec, written for the PSP's CPU,
 about 7. gpSP is GPL-2.0, so the PSP's build, which links it in, is
 distributed under the GPL's terms; its source is this repository with
 `docker/gpsp-cyberworld.patch` over gpSP's pinned commit
-(`docker/gpsp.sh`).
+(`docker/gpsp.sh`). The release's zip carries gpSP's and mGBA's licenses
+and a `SOURCE.txt` that says so.
 
 ## Playing
 
-- Copy the folder `cyberworld-endless` with its `EBOOT.PBP` into
-  `ms0:/PSP/GAME/` (on a PSP Go's own memory, `ef0:/PSP/GAME/`). The game
-  shows on the XMB under Game, Memory Stick.
+- Unpack `cyberworld-endless-psp.zip` onto the memory stick's root: its
+  `PSP/GAME/cyberworld-endless/` holds the `EBOOT.PBP` (on a PSP Go's own
+  memory, `ef0:/PSP/GAME/`). The game shows on the XMB under Game, Memory
+  Stick. A new version is the new zip unpacked over it; the saves beside
+  the EBOOT stay. The PSP plays offline, so it does not look for one.
 - The ROM, Mega Man Battle Network 6: Cybeast Gregar (USA), goes in
   `PSP/GAME/cyberworld-endless/rom/`, or stays where PSP players keep GBA
   games (`ms0:/ROMS/GBA`, `ms0:/ROMS`, `ms0:/PSP/GAME/gpSP`). Any file
