@@ -78,7 +78,10 @@ raised, and the loop's own lessons.
    - *Vanilla BN6*: confirm in the disassembly (`~/.cache/mmbn-ref/bn6f`,
      Falzar; Gregar addresses are shifted, find the same bytes) or with
      `tools/romlab`. Change it only where the roguelike breaks it: the Chip
-     Trader's "chips the Library has" rule gave one chip every time.
+     Trader's "chips the Library has" rule gave one chip every time. Seen
+     so far: a battle opening in Full Synchro (the emotion window's dark
+     outline, a chip's "x2") after one won in it, as BN6 keeps the mood
+     until a jack-in or jack-out (docs/rom/battle.md, s76).
    - *Real bug or design gap*: fix it. A single sighting of something the
      generator makes (an unreachable-looking object, a crowded room) is
      first counted over the tests' 300 layers: the count sizes the problem

@@ -37,6 +37,16 @@ void resume_duel(void) {
 	D.duel_call_due = false;
 }
 
+/* Whether Chaud has called Lan before this layer's call (docs/game/rival.md,
+ * Chaud's call): a duel in the record, a run before this one that reached
+ * the first duel layer (an act's second, layer 2), or this run past its
+ * first guardian, a duel layer behind it. (The record alone missed a call
+ * heard and never raced: a playtester's second run, and an act's call
+ * after one declined, heard his first words word for word, session 76.) */
+bool duel_called_before(void) {
+	return profile.duel_won + profile.duel_lost || profile.best_depth >= 2 || run.bosses_beaten;
+}
+
 /* Whether ProtoMan's duel stands on the layer. */
 static bool duel_layer(void) {
 	for (int i = 0; i < layer.nobj; ++i)
@@ -136,9 +146,14 @@ void duel_roll(void) {
 	int lo, hi;
 	pacing_guardian_band(pacing_act(run.depth), &lo, &hi);
 	D.duel_cap = layer_objs_duel_rung == 2 && pacing_loop(run.depth) == 0 ? hi / 2 : 0;
+	/* (his time a time he ran, to the hundredth, give or take half a
+	 * second, the same on average: flat seconds, 0:10.00 and 0:11.00, read
+	 * as made up beside a playtester's 0:20.85, session 76; rolled after
+	 * the squad, which stays the seed's) */
+	int jitter = rng_range(0, 59) - 30;
 	loot_memory_set(&fought);
 	rng_restore(saved);
-	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc));
+	layer_objs_duel_frames = duel_frames(encounter_hp(&D.duel_enc)) + jitter;
 	D.duel_call_due = true;
 }
 

@@ -54,7 +54,14 @@ go too. The dev step `stuck NAME` (play.py, `--input "0:stuck conveyor"`) saves
 the run held so, to test it. Quitting (Escape
 twice, SIGTERM or SIGINT from a launcher) saves the run once more where he
 stands if he is free on the layer's map with nothing of the guardian under
-way; loading it restores the guardian's state from its flags. The shops'
+way. On a won battle's way back to the map (its RESULT, the fade, the
+map's entry, where BN6 still holds him) the game is run on to him free
+first, unseen, A paging the RESULT and the director's talks waiting
+(`src/director/director_settle.c`, `scene_emu.c`'s `emu_keep_run`): a
+playtester's quit in that fade had gone back to the layer's start, the
+battle, its reward and the map walked since lost (session 76). A battle
+under way is never run on, nor a guardian's, which [the arena's
+door](../../game/meta/arena-door.md) keeps. Loading it restores the guardian's state from its flags. The shops'
 stock is written again after the load (the ROM copy the shop screen checks
 the list against is not in a state), each entry the saved list holds
 keeping its stock there, and `run.make` records the build's `LAYER_MAKE`: a run saved by a

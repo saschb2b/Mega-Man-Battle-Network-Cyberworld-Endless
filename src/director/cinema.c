@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6_fields.h"
 #include "emu.h"
 #include "gfx.h"
 #include "platform.h"
@@ -17,6 +18,7 @@ enum { CARD_NONE, CARD_TITLE, CARD_AREA, CARD_GRAND };
 
 static struct {
 	bool off_map;
+	bool faded;     /* BN6's own fade on the screen (bn6_screen_faded): nothing of ours over its flash */
 	int input;
 	bool b_latch;   /* a B held as a talk took the keys: kept from it until let go */
 	uint32_t walk;
@@ -57,7 +59,12 @@ void cinema_arrow_heal(bool heal) { C.arrow_heal = heal; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
 void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
-int cinema_note_height(void) { return C.note_len && !C.off_map ? TEXT_H + 6 : 0; }
+/* Off the map, or under BN6's fade: a jack-in's white, a warp's, a
+ * jack-out's (a playtester saw the way-on arrow over the jack-in's white,
+ * session 76). What shows on the map waits it out unseen. */
+static bool unseen(void) { return C.off_map || C.faded; }
+
+int cinema_note_height(void) { return C.note_len && !unseen() ? TEXT_H + 6 : 0; }
 
 /* (each card's own number: the drawn card's texture is of one) */
 static int card_serial;
@@ -111,16 +118,19 @@ uint32_t cinema_keys(uint32_t keys) {
 }
 
 void cinema_update(void) {
+	C.faded = bn6_screen_faded();
 	if (C.bars && C.bar < BAR_FRAMES) ++C.bar;
 	if (!C.bars && C.bar > 0) --C.bar;
 	if (C.white_in + C.white_hold + C.white_out > 0 && ++C.white_t >= C.white_in + C.white_hold + C.white_out)
 		C.white_in = C.white_hold = C.white_out = 0;
 	if (C.shake > 0) --C.shake;
-	/* (a card waits out a shop, the PET or a battle, unseen) */
+	/* (a card waits out a shop, the PET or a battle, unseen; under a fade
+	 * it runs on, hidden: the arrival's words wait for it, and a fade held
+	 * would hold MegaMan with them) */
 	if (C.card && !C.off_map && ++C.card_t >= C.card_len) C.card = CARD_NONE;
 	if (C.arrow_len && ++C.arrow_t >= C.arrow_len) C.arrow_len = 0;
-	/* (and a note waits out a menu, unseen, as a card does) */
-	if (C.note_len && !C.off_map && ++C.note_t >= C.note_len) C.note_len = 0;
+	/* (and a note waits out a menu or a fade, unseen) */
+	if (C.note_len && !unseen() && ++C.note_t >= C.note_len) C.note_len = 0;
 }
 
 void cinema_offset(int *dx, int *dy) {
@@ -295,7 +305,7 @@ static void tri(float ax, float ay, float bx, float by, float cx, float cy, SDL_
  * then heard the exit's way, and could not tell which it showed (session
  * 62). */
 static void draw_arrow(int x0, int y0) {
-	if (!C.arrow_len || C.off_map) return;
+	if (!C.arrow_len || unseen()) return;
 	int left = C.arrow_len - C.arrow_t;
 	int a = C.arrow_t < 8 ? C.arrow_t * 255 / 8 : left < 16 ? left * 255 / 16 : 255;
 	float ang = (float)C.arrow_dir * 3.14159265f / 4.0f;
@@ -332,7 +342,7 @@ void cinema_note_box(int x0, int y0, const char *text, int t, int len) {
 }
 
 static void draw_note(int x0, int y0) {
-	if (!C.note_len || C.off_map) return;
+	if (!C.note_len || unseen()) return;
 	cinema_note_box(x0, y0, C.note, C.note_t, C.note_len);
 }
 
@@ -355,8 +365,8 @@ void cinema_draw(void) {
 	}
 	draw_arrow(x0, y0);
 	draw_note(x0, y0);
-	if (C.card == CARD_TITLE && !C.off_map) draw_title(x0, y0);
-	if (C.card == CARD_AREA && !C.off_map) draw_area(x0, y0);
-	if (C.card == CARD_GRAND && !C.off_map) draw_grand(x0, y0);
+	if (C.card == CARD_TITLE && !unseen()) draw_title(x0, y0);
+	if (C.card == CARD_AREA && !unseen()) draw_area(x0, y0);
+	if (C.card == CARD_GRAND && !unseen()) draw_grand(x0, y0);
 	draw_white(x0, y0);
 }

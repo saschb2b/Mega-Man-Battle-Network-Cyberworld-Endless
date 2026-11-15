@@ -717,6 +717,18 @@ static void test_local_read_only(void) {
 	snprintf(path, sizeof path, "%s/savedata", dir);
 	CHECK(backup_local_info(dir, &info) && info.runs == 2 && count_files(path) == 1 && waits > before,
 		"backup: the local summary writes no manifest, and waits for the save queue first");
+	/* (a first start's folder, no savedata/ yet: no saves, not damaged ones) */
+	remove_tree(path);
+	CHECK(!backup_local_info(dir, &info) && info.status == BACKUP_OK && access(path, F_OK) != 0,
+		"backup: no savedata/ yet is no saves, status %d, and makes none", (int)info.status);
+	/* (a savedata/ that cannot be read is still said to be) */
+	CHECK(backup_write_file(path, (const uint8_t *)"x", 1) && !backup_local_info(dir, &info) && info.status == BACKUP_IO,
+		"backup: a savedata that is no folder cannot be read, status %d", (int)info.status);
+	remove(path);
+	mkdir(path, 0755);
+	snprintf(path, sizeof path, "%s/savedata/transfer.manifest", dir);
+	CHECK(backup_write_file(path, (const uint8_t *)"broken", 6) && !backup_local_info(dir, &info) && info.status == BACKUP_DAMAGED,
+		"backup: a savedata/ with a broken manifest is damaged, status %d", (int)info.status);
 	remove_tree(dir);
 }
 

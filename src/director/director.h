@@ -124,6 +124,18 @@ void director_draw_tent(void);
  * (CONTINUE resumes it where MegaMan stood); false when it could not be. */
 bool director_can_suspend(void);
 bool director_suspend(void);
+/* A quit on a won battle's way back to the map (its RESULT, the fade, the
+ * map's entry), where BN6 still holds MegaMan: true while the game is to
+ * run on to him free before the run is kept (scene_emu.c's emu_keep_run),
+ * the watch each frame that knows it, the keys of each frame run on (A
+ * paging the RESULT), and the director's talks held back meanwhile
+ * (director_settle.c). */
+bool director_settles(void);
+void director_settle_watch(void);
+uint32_t director_settle_keys(int frame);
+void director_settling(bool on);
+/* ... whether a quit now keeps the run where MegaMan is: free, or run on to free */
+bool director_quit_keeps(void);
 /* The map's name as BN6 shows it on entering, and the PET's PLACE: the
  * run's (map_label) or, for the Net Square, its own. */
 void director_map_label(const char *name, const char *place);
