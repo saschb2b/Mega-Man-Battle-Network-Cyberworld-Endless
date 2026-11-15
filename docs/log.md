@@ -1,6 +1,10 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (the shared dive, the net climbing, what stands beside the floor, the locks, the Glitch layer, touch controls off and SAVES on a first start written in, from the pull requests merged since #627).
+* **Update**: code/tools.md (`tools/psp_picture.py`'s row: the PSP build's pictures from PPSSPP's headless runner, for 0.22.0's notes).
+* **Update**: code/tools.md (`tools/loading_picture.py`'s row: the "Building the net..." screen from a windowed run on a virtual display, for 0.22.0's notes), releases/v0.22.0.md (the pictures of the saves, the dive, the systems, the words and the fixes written in).
+* **Update**: code/layers.md (0.22.0's row of numbers), releases/v0.22.0.md (the net's pictures; the draft's note gone), releases/overview.md (0.22.0 no longer in preparation).
 * **Update**: world/level-design/side-pieces.md (What stands round a plateau: CopyBot Comp's 30 spikes surveyed, the second layer cut by palette bank in the plateaus' view and mirrored, set round every platform at its height two panels apart, after the floor's breaks are measured as scenery is; its spikes behind an edge round the platforms alone), code/net-and-map.md (sides.c's row).
 * **Update**: game/glitch-layer.md (another game's look in its palette scripts' first frames, so a bank its map stores blank is coloured in a flip), world/level-design/side-pieces.md (BN5's Undernet's skull totems in a flip: coloured, captured).
 * **Update**: world/level-design/side-pieces.md (what stands behind a raised floor on both layers, the Aquarium's tanks cut from their rows and set behind its layers' floors; its whale console, the road and landings left, with why), devtools/tile-test.md (a side piece's foot left out of the breaks).

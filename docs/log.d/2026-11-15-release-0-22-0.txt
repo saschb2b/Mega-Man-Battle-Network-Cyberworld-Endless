@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-15T21:18:06Z
-* **Update**: code/layers.md (0.22.0's row of numbers), releases/v0.22.0.md (the net's pictures; the draft's note gone), releases/overview.md (0.22.0 no longer in preparation).
