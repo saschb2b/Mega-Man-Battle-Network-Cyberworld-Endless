@@ -22,18 +22,6 @@ static void here(char *out, size_t n, const SquareFacts *f) {
 	}
 }
 
-const char *square_greeter_words(const SquareFacts *f) {
-	static char s[240];
-	int n = snprintf(s, sizeof s, "HELLO! WELCOME,\nWELCOME!");
-	if (f->arrived) n += snprintf(s + n, sizeof s - (size_t)n, "|%s JUST\nLOGGED IN!", f->arrived);
-	if (f->navis <= 1) n += snprintf(s + n, sizeof s - (size_t)n, "|IT'S QUIET NOW.\nFRIENDS LOG IN\nRIGHT HERE!");
-	else n += snprintf(s + n, sizeof s - (size_t)n, "|%u NAVIS ARE ON\nCHANNEL %u!", f->navis, f->channel);
-	/* (the parts, each a warp off the plaza: session 74 found neither wing) */
-	snprintf(s + n, sizeof s - (size_t)n, "|THE WARPS GO TO\nTRADE CENTRAL,THE\nARENA,THE STAGE!");
-	return s;
-}
-
-
 const char *square_greeter_bark(const char *name, bool in) {
 	static char s[48];
 	snprintf(s, sizeof s, in ? "%s LOGGED IN!" : "%s LOGGED OUT!", name);

@@ -172,10 +172,12 @@ int netmap_stair_height(int wx2, int wy2) {
 	for (int i = 0; nm_cur && i < nm_cur->nstairs; ++i) {
 		int X0, Y0;
 		nm_stair_origin(&nm_cur->stairs[i], &X0, &Y0);
-		int dx = wx2 - 2 * X0, dy = wy2 - 2 * Y0;
-		if (dx < 0 || dy < 0 || dx >= 128 || dy >= 128) continue;
+		const Stair *st = &nm_cur->stairs[i];
+		/* (its box in half units: grid y is world -X, grid x world +Y) */
+		int dx = wx2 - 2 * X0, dy = wy2 - 2 * Y0, along = 64 * stair_len(st) - 1;
+		if (dx < 0 || dy < 0 || dx >= 64 * stair_h(st) || dy >= 64 * stair_w(st)) continue;
 		/* (towards grid -y the ramp climbs to world +X, towards grid -x to world -Y: stairs.h) */
-		return nm_cur->rise * (nm_cur->stairs[i].dir == STAIR_UP_NY ? dx : 127 - dy) / 127;
+		return nm_cur->rise * (st->dir == STAIR_UP_NY ? dx : along - dy) / along;
 	}
 	return -1;
 }
@@ -230,7 +232,7 @@ void netmap_add_walls(const CoordCell *c, int n) {
  * #22). */
 static void stair_steps(const Learned *L) {
 	for (int i = 0; i < nm_cur->nstairs; ++i) {
-		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir];
+		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir][stair_width(&nm_cur->stairs[i])];
 		if (!t->ok) continue;
 		int X0, Y0;
 		nm_stair_origin(&nm_cur->stairs[i], &X0, &Y0);
@@ -288,7 +290,7 @@ void nm_build_extra(const Learned *L) {
 				}
 		}
 	for (int i = 0; i < nm_cur->nstairs; ++i) {
-		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir];
+		const StairTemplate *t = &L->stairs[nm_cur->stairs[i].dir][stair_width(&nm_cur->stairs[i])];
 		if (!t->ok) continue;
 		int X0, Y0;
 		nm_stair_origin(&nm_cur->stairs[i], &X0, &Y0);

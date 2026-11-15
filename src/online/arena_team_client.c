@@ -144,21 +144,7 @@ static uint16_t cross_keys(const Client *c, uint32_t frame) {
 		? KEY_A : 0;
 }
 
-/* a Program Advance his OK made: the picks it took (from at, took of them) found as the hand BN6 built has them, each place
- * and count tried through the pair's own build; false where none gives BN6's hand */
-static bool pa_found(const Client *c, const uint8_t *picks, unsigned n, uint16_t pa, const uint16_t *built, unsigned *at,
-	unsigned *took) {
-	uint16_t entries[TEAM_CUSTOM_PICKS];
-	for (unsigned i = 0; i < n && i < TEAM_CUSTOM_PICKS; ++i) entries[i] = picks[i] < c->dealt ? c->deck[picks[i]] : 0xFFFFu;
-	for (*took = 3; *took <= 4; ++*took)
-		for (*at = 0; *at + *took <= n; ++*at) {
-			TeamHand h;
-			unsigned k = team_hand_build(entries, n, *at + 1, *took, pa, &h), same = 1;
-			for (unsigned i = 0; i < BN6_HAND_MAX && same; ++i) same = (i < k ? h.id[i] : 0xFFFFu) == built[i] || i > k;
-			if (same) return true;
-		}
-	return false;
-}
+
 
 /* his Cross (where his CROSSSELECT committed one), a Program Advance (where his OK made one) and his picks into his stream,
  * one a frame */
@@ -182,7 +168,8 @@ static void say(Client *c, const uint8_t *picks, unsigned n) {
 	}
 	uint16_t built[BN6_HAND_MAX], pa = team_screen_pa(c->screen, built);
 	unsigned at, took;
-	if (pa && pa_found(c, picks, n, pa, built, &at, &took)) {
+	if (pa && team_pa_found(c->deck, c->dealt, picks, n, pa, built, &at, &took)) {
+
 		c->out[c->queued++] = TEAM_PA(at, took, pa);
 		++c->pas;
 		printf("arena2v2: a partner's Program Advance %03X from his picks %u to %u, as BN6's OK built it on his screen\n", pa, at,

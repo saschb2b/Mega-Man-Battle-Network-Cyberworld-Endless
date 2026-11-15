@@ -7,6 +7,7 @@
 
 #include "netpass.h"
 #include "netpass_text.h"
+#include "dive_wire.h"
 #include "online_motion.h"
 #include "online_people.h"
 #include "online_transport.h"
@@ -75,7 +76,9 @@ static void positions(void) {
 	/* (v18: bit 6, his system reads one extra ROM at most, beside the game it has; no bit past it) */
 	bytes[51] = (uint8_t)(ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN5 | ONLINE_BUSY_TRADE << ONLINE_BUSY_SHIFT);
 	assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].roms == (ONLINE_ROMS_ONE_EXTRA | ONLINE_ROMS_BN5) && out.peers[0].busy == ONLINE_BUSY_TRADE);
-	bytes[51] = 0x80; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[51] = 0;
+	/* (v19: bit 7, he dives, the last bit free; a Square's peers never have it, a dive room's all do) */
+	bytes[51] = ONLINE_PEER_DIVING; assert(online_wire_message(bytes, ONE, 100, &out) && out.peers[0].diving && !out.peers[0].roms);
+	bytes[51] = 0; assert(online_wire_message(bytes, ONE, 100, &out) && !out.peers[0].diving);
 	for (size_t size = 0; size < ONE; ++size) assert(!online_wire_message(bytes, size, 100, &out));
 	bytes[34] = 8; assert(!online_wire_message(bytes, ONE, 100, &out)); bytes[34] = 7;
 	online_put32(bytes + 22, 8193); assert(!online_wire_message(bytes, ONE, 100, &out));
@@ -148,7 +151,7 @@ static void fuzz(void) {
 
 static bool on_stair(const SquarePlan *p, int x, int y) {
 	for (int i = 0; i < p->nstairs; ++i)
-		if (x >= p->stairs[i].x && x < p->stairs[i].x + 2 && y >= p->stairs[i].y && y < p->stairs[i].y + 2) return true;
+		if (stair_covers(&p->stairs[i], x, y)) return true;
 	return false;
 }
 
@@ -449,7 +452,7 @@ static void week(void) {
 	const WeekBoard *b = online_week_board();
 	assert(b->serial == 1 && b->week == 2963 && b->place == 2 && b->ntop == 2 && b->nlast == 1);
 	assert(!strcmp(b->top[0].name, "Gamma") && b->top[0].won && b->mine.depth == 5 && !strcmp(b->last[0].name, "Alpha"));
-	const char *s = square_week_board(b, 2963);
+	const char *s = square_week_board(b, 2963, NULL, NULL);
 	assert(strstr(s, "Oct 19-Oct 25") && strstr(s, "1.Gamma:10!\n2.Beta:5") && strstr(s, "layer 5,#2") && strstr(s, "1.Alpha:7"));
 	assert(!online_week_mail(m, sizeof m - 1));
 	m[3] = 9; assert(!online_week_mail(m, sizeof m)); m[3] = 2;
@@ -459,6 +462,177 @@ static void week(void) {
 	assert(strstr(square_week_post(WEEK_OFFER_NEW, 2965, 0), "NOV 2-NOV 8"));
 	assert(online_week_post(2963, 0xF521FE36u, 5, 2, false, 12, 0x1234) && sent_size == ONLINE_WEEK_POST_BYTES);
 	assert(sent[0] == ONLINE_WEEK_POST && sent[1] == 0x0B && sent[2] == 0x93 && sent[8] == 5 && sent[9] == 2 && sent[10] == 0 && sent[12] == 12);
+	/* (v19: a post's last byte the acts fought in a party, none yet; an entry's bit 1 a party's mark, no bit past it) */
+	assert(ONLINE_WEEK_POST_BYTES == 18 && sent[17] == 0);
+	online_put16(m + 6 + ONLINE_WEEK_ENTRY_BYTES + 16, 10);
+	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = ONLINE_WEEK_PARTY;
+	assert(online_week_mail(m, sizeof m) && online_week_board()->top[0].party && !online_week_board()->top[0].won);
+	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = 4; assert(!online_week_mail(m, sizeof m));
+	/* (the Board's v19 posts: the party's mark, who dives now, the week's split records) */
+	static DiveDivers d;
+	static WeekSplits w;
+	d.total = 2; d.count = 2;
+	snprintf(d.e[0].name, sizeof d.e[0].name, "Beta"); d.e[0].depth = 4;
+	snprintf(d.e[1].name, sizeof d.e[1].name, "Gamma"); d.e[1].depth = 6; d.e[1].flags = ONLINE_DIVERS_FIGHTING;
+	w.best[0][0].tenths = 123; snprintf(w.best[0][0].name, sizeof w.best[0][0].name, "Beta");
+	w.best[3][2].tenths = 98; snprintf(w.best[3][2].name, sizeof w.best[3][2].name, "Gamma");
+	s = square_week_board(online_week_board(), 2963, &d, &w);
+	assert(strstr(s, "1.Gamma:10+") && strstr(s, "|>+:a guardian beaten"));
+	assert(strstr(s, "|>Diving now:2|Beta:layer 4\nGamma:layer 6!"));
+	assert(strstr(s, "|>Fastest guardian\nbusts this week|L3 solo:12.3s Beta\nL10 x3:9.8s Gamma"));
+}
+
+/* ---- the shared dive's wire (protocol v19, dive_wire.h): what the game sends, byte for byte as the server's
+ * protocol.py packs it, and what the server says, its bytes from protocol.py's encoder, read and refused ---- */
+
+static void dive_sent(void) {
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	static const uint8_t enter[] = { 41, 1, 11, 147, 245, 33, 254, 54, 3, 2, 7 };
+	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145 };
+	static const uint8_t phrase[] = { 41, 5, 4, 0, 10, 255, 236, 0, 0 };
+	static const uint8_t split[] = { 41, 7, 0, 1, 44, 9, 1, 2 };
+	static const uint8_t crew[] = { 47, 4, 0, 0, 0, 0, 0, 3, 1, 9 };
+	static const uint8_t queue[] = { 49, 1, 3, 0, 1 };
+	static const uint8_t damage[] = { 51, 0, 0, 0, 77, 0, 120, 0, 80 };
+	DiveWay way = { 3, 2, 7 }, none = { 0, 0, 0 };
+	assert(dive_wire_enter(m, 2963, 0xF521FE36u, way) == sizeof enter && !memcmp(m, enter, sizeof enter));
+	assert(dive_wire_end(m, ONLINE_DIVE_DELETED, -5, 6, 0, 0x91) == sizeof end && !memcmp(m, end, sizeof end));
+	assert(dive_wire_phrase(m, 4, 10, -20, 0) == sizeof phrase && !memcmp(m, phrase, sizeof phrase));
+	DiveSplit s = { .index = 0, .party = 2, .tenths = 300, .level = 9, .guardian = true };
+	assert(dive_wire_split(m, &s) == sizeof split && !memcmp(m, split, sizeof split));
+	DiveWay portal = { 3, 1, 9 }, door = { 3, 0, 1 };
+	assert(dive_wire_crew(m, ONLINE_CREW_WAY, 0, 0, portal) == sizeof crew && !memcmp(m, crew, sizeof crew));
+	assert(dive_wire_queue(m, ONLINE_QUEUE_JOIN, door) == sizeof queue && !memcmp(m, queue, sizeof queue));
+	assert(dive_wire_party(m, ONLINE_PARTY_DAMAGE, 77, 120, 80) == sizeof damage && !memcmp(m, damage, sizeof damage));
+	assert(dive_wire_leave(m) == ONLINE_DIVE_LEAVE_BYTES && m[0] == ONLINE_DIVE && m[1] == ONLINE_DIVE_LEAVE);
+	assert(dive_wire_found(m, 6) == ONLINE_DIVE_FOUND_BYTES && m[2] == 6 && !dive_wire_found(m, 256));
+	assert(dive_wire_wave(m, 0x01020304u) == ONLINE_DIVE_WAVE_BYTES && m[2] == 1 && m[5] == 4 && !dive_wire_wave(m, 0));
+	/* (each bound the server's: a layer past the net, a coordinate past the limit, a phrase past the Square's, a split's
+	 * party, level and time, an ask with nobody, a join with no door, HP past its max) */
+	DiveWay deep = { 11, 0, 0 };
+	assert(!dive_wire_enter(m, 1, 1, none) && !dive_wire_enter(m, 1, 1, deep));
+	assert(!dive_wire_end(m, 3, 0, 0, 0, 0) && !dive_wire_end(m, ONLINE_DIVE_WON, 8193, 0, 0, 0) && !dive_wire_end(m, 1, 0, 0, 0, 0x10000));
+	assert(!dive_wire_phrase(m, ONLINE_PHRASE_COUNT, 0, 0, 0) && !dive_wire_phrase(m, 0, 0, -8193, 0));
+	s.party = 5; assert(!dive_wire_split(m, &s)); s.party = 1; s.level = 12; assert(!dive_wire_split(m, &s));
+	s.level = 11; s.tenths = 0; assert(!dive_wire_split(m, &s)); s.tenths = 1; assert(dive_wire_split(m, &s) && m[5] == ONLINE_BUSTING_MOST);
+	assert(!dive_wire_crew(m, ONLINE_CREW_ASK, 0, 0, none) && !dive_wire_crew(m, 7, 1, 0, none) && !dive_wire_crew(m, ONLINE_CREW_ANSWER, 1, 2, none));
+	assert(dive_wire_crew(m, ONLINE_CREW_BATTLE, 0, 200, none) && m[6] == 200 && !dive_wire_crew(m, ONLINE_CREW_WAY, 0, 0, deep));
+	assert(!dive_wire_queue(m, ONLINE_QUEUE_JOIN, none) && !dive_wire_queue(m, 5, door) && dive_wire_queue(m, ONLINE_QUEUE_PASS, none));
+	assert(!dive_wire_party(m, ONLINE_PARTY_HP, 77, 10, 5) && !dive_wire_party(m, ONLINE_PARTY_DAMAGE, 0, 1, 1) && !dive_wire_party(m, 45, 1, 1, 1));
+}
+
+static void dive_heard_traces(void) {
+	static const uint8_t phrases[] = { 43, 2, 1, 0, 0, 0, 7, 65, 108, 112, 104, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 10, 255,
+		236, 0, 0, 0, 1 };
+	static const uint8_t marks[] = { 43, 1, 1, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 251, 0, 6, 0, 0, 0, 145, 1 };
+	static DiveTraces t;
+	assert(dive_wire_traces(phrases, sizeof phrases, &t) && t.kind == ONLINE_TRACE_PHRASES && t.count == 1);
+	assert(t.u.phrases[0].id == 7 && !strcmp(t.u.phrases[0].name, "Alpha") && t.u.phrases[0].phrase == 4 && t.u.phrases[0].y == -20 &&
+		t.u.phrases[0].waves == 1);
+	assert(dive_wire_traces(marks, sizeof marks, &t) && t.kind == ONLINE_TRACE_MARKS && t.u.marks[0].x == -5 && t.u.marks[0].cause == 0x91 &&
+		t.u.marks[0].how == ONLINE_DIVE_DELETED && !strcmp(t.u.marks[0].name, "Beta"));
+	assert(!dive_wire_traces(marks, sizeof marks - 1, &t) && !dive_wire_traces(phrases, 2, &t));
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	memcpy(m, marks, sizeof marks);
+	m[27] = 3; assert(!dive_wire_traces(m, sizeof marks, &t)); m[27] = 1;
+	m[1] = 7; assert(!dive_wire_traces(m, sizeof marks, &t)); m[1] = 1;
+	m[10] = 'x'; assert(!dive_wire_traces(m, sizeof marks, &t));        /* (a name with a byte past its end) */
+	/* (the opened set: as many indexes as a message holds; the gone phrases, never id 0) */
+	m[0] = ONLINE_DIVE_TRACES; m[1] = ONLINE_TRACE_OPENED; m[2] = 255;
+	for (int k = 0; k < 255; ++k) m[3 + k] = (uint8_t)k;
+	assert(dive_wire_traces(m, 258, &t) && t.count == 255 && t.u.opened[254] == 254);
+	m[1] = ONLINE_TRACE_GONE; m[2] = 2;
+	memset(m + 3, 0, 8); m[6] = 9; m[10] = 1;
+	assert(dive_wire_traces(m, 11, &t) && t.u.gone[0] == 9 && t.u.gone[1] == 1);
+	m[10] = 0; assert(!dive_wire_traces(m, 11, &t));
+	/* (a split: a guardian's, BN6's level 11 for S at most) */
+	m[1] = ONLINE_TRACE_SPLITS; m[2] = 1;
+	static const uint8_t split[] = { 9, 2, 1, 154, 11, 1, 'G', 'a', 'm', 'm', 'a' };
+	memset(m + 3, 0, ONLINE_TRACE_SPLIT_BYTES); memcpy(m + 3, split, sizeof split);
+	assert(dive_wire_traces(m, 3 + ONLINE_TRACE_SPLIT_BYTES, &t) && t.u.splits[0].tenths == 410 && t.u.splits[0].guardian &&
+		t.u.splits[0].party == 2 && !strcmp(t.u.splits[0].name, "Gamma"));
+	m[7] = 12; assert(!dive_wire_traces(m, 3 + ONLINE_TRACE_SPLIT_BYTES, &t));
+}
+
+static void dive_heard_rooms_and_feed(void) {
+	static const uint8_t room[] = { 42, 11, 147, 3, 2, 7, 0, 1, 2 };
+	static const uint8_t feed[] = { 45, 3, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 1, 0, 0, 3 };
+	static const uint8_t place[] = { 44, 0, 1, 0, 250, 0, 2, 0, 2, 0, 200, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const uint8_t divers[] = { 46, 0, 3, 2, 71, 97, 109, 109, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 2, 0, 65, 108, 112, 104,
+		97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 1 };
+	DiveRoom r;
+	assert(dive_wire_room(room, sizeof room, &r) && r.week == 2963 && r.way.depth == 3 && r.way.side == 2 && r.way.way == 7 &&
+		r.instance == 1 && r.divers == 2);
+	uint8_t m[ONLINE_MAX_MESSAGE];
+	memcpy(m, room, sizeof room); m[8] = 9; assert(!dive_wire_room(m, sizeof room, &r));
+	m[8] = 2; m[7] = 0; assert(!dive_wire_room(m, sizeof room, &r));
+	DiveFeed f;
+	assert(dive_wire_feed(feed, sizeof feed, &f) && f.kind == ONLINE_FEED_GUARDIAN && !strcmp(f.name, "Beta") && f.way.depth == 3 &&
+		f.way.way == 1 && f.party == 3);
+	memcpy(m, feed, sizeof feed); m[23] = 1; assert(!dive_wire_feed(m, sizeof feed, &f));
+	m[23] = 0; m[1] = ONLINE_FEED_FLARE; assert(dive_wire_feed(m, sizeof feed, &f)); m[1] = 5; assert(!dive_wire_feed(m, sizeof feed, &f));
+	DivePlace p;
+	assert(dive_wire_place(place, sizeof place, &p) && p.tenths == 250 && p.place == 2 && p.count == 2 && p.best == 200 &&
+		!strcmp(p.best_name, "Beta"));
+	memcpy(m, place, sizeof place); m[6] = 3; assert(!dive_wire_place(m, sizeof place, &p));
+	DiveDivers d;
+	assert(dive_wire_divers(divers, sizeof divers, &d) && d.total == 3 && d.count == 2 && !strcmp(d.e[0].name, "Gamma") &&
+		d.e[0].depth == 4 && d.e[0].act == 2 && d.e[1].flags == ONLINE_DIVERS_FIGHTING);
+	assert(!dive_wire_divers(divers, sizeof divers - 1, &d));
+	memcpy(m, divers, sizeof divers); m[2] = 1; assert(!dive_wire_divers(m, sizeof divers, &d));
+	static const uint8_t none[] = { ONLINE_DIVERS, 0, 0, 0 };
+	assert(dive_wire_divers(none, sizeof none, &d) && !d.total && !d.count);
+}
+
+static void dive_heard_crews_and_parties(void) {
+	uint8_t m[ONLINE_MAX_MESSAGE] = { 0 };
+	/* (CREW_STATE formed, two members, the second on a portal: protocol.crew_state's bytes, its zeros past them) */
+	static const uint8_t crew[] = { 48, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1, 65, 108, 112, 104, 97 };
+	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1, 9 };
+	memcpy(m, crew, sizeof crew); memcpy(m + 7 + ONLINE_CREW_MEMBER_BYTES, mate, sizeof mate);
+	CrewState c;
+	assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_FORMED && c.other == 2 && c.count == 2 &&
+		c.m[0].session == 1 && !c.m[0].way.depth && c.m[1].way.way == 9 && !strcmp(c.m[1].name, "Beta"));
+	m[1] = 7; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
+	m[7 + 3] = 0; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 3] = 1;   /* (a hole before a member) */
+	/* (QUEUE_STATE waiting: Beta leads, his system runs the Arena; Gamma's does not; the recipient second) */
+	static const uint8_t queue[] = { 50, 1, 3, 0, 1, 2, 2, 0, 0, 0, 5, 66, 101, 116, 97 };
+	static const uint8_t second[] = { 0, 0, 0, 6, 71, 97, 109, 109, 97 };
+	memset(m, 0, sizeof m); memcpy(m, queue, sizeof queue); m[7 + 20] = ONLINE_QUEUE_ARENA;
+	memcpy(m + 7 + ONLINE_QUEUE_ENTRY_BYTES, second, sizeof second);
+	QueueState q;
+	assert(dive_wire_queue_state(m, ONLINE_QUEUE_STATE_BYTES, &q) && q.stage == ONLINE_QUEUE_WAITING && q.place == 2 && q.count == 2 &&
+		q.e[0].session == 5 && q.e[0].flags == ONLINE_QUEUE_ARENA && !q.e[1].flags && q.door.depth == 3 && q.door.way == 1);
+	m[6] = 3; assert(!dive_wire_queue_state(m, ONLINE_QUEUE_STATE_BYTES, &q)); m[6] = 2;
+	m[5] = 3; assert(!dive_wire_queue_state(m, ONLINE_QUEUE_STATE_BYTES, &q));
+	/* (a party's START: protocol.arena_state's bytes, the recipient's seat 1 of three, the party's format) */
+	static const uint8_t start[] = { 18, 3, 0, 0, 0, 77, 0, 0, 0, 9, 171, 171, 171, 171, 171, 171, 171, 171, 171, 171, 171, 171, 171,
+		171, 171, 171, 1, 2, 2, 0, 0, 0, 8, 0, 0, 0, 9, 0, 0, 0, 10, 0, 0, 0, 0 };
+	PartyState s;
+	assert(dive_wire_party_state(start, sizeof start, &s) && s.stage == 3 && s.battle == 77 && s.seat == 1 && s.delay == 2 &&
+		s.form == ONLINE_ARENA_PARTY && s.seats[2] == 10 && !s.seats[3]);
+	memcpy(m, start, sizeof start); m[28] = 1; assert(!dive_wire_party_state(m, sizeof start, &s));      /* (a 2v2's, not a party's) */
+	m[28] = ONLINE_ARENA_LINKED; m[26] = 3; assert(!dive_wire_party_state(m, sizeof start, &s));        /* (a seat past the party) */
+	m[26] = 2; m[1] = ONLINE_ARENA_SEAT_GONE; assert(dive_wire_party_state(m, sizeof start, &s) && s.seat == 2);
+	m[1] = 2; assert(!dive_wire_party_state(m, sizeof start, &s));
+	/* (a linked fighter's damage at seat 0, seat 0's HP at the linked) */
+	static const uint8_t damage[] = { ONLINE_ARENA_SEAT, 2, ONLINE_PARTY_DAMAGE, 0, 0, 0, 77, 0, 120, 0, 80 };
+	unsigned seat, dealt, hp, max_hp;
+	uint32_t battle;
+	assert(dive_wire_damage(damage, sizeof damage, &seat, &battle, &dealt, &hp) && seat == 2 && battle == 77 && dealt == 120 && hp == 80);
+	memcpy(m, damage, sizeof damage); m[1] = 0; assert(!dive_wire_damage(m, sizeof damage, &seat, &battle, &dealt, &hp));
+	uint8_t heard[ONLINE_PARTY_BYTES];
+	assert(dive_wire_party(heard, ONLINE_PARTY_HP, 77, 880, 1000) && dive_wire_party_hp(heard, sizeof heard, &battle, &hp, &max_hp) &&
+		hp == 880 && max_hp == 1000);
+	heard[5] = 0xFF; assert(!dive_wire_party_hp(heard, sizeof heard, &battle, &hp, &max_hp));
+	/* (WEEK_SPLITS: act 1's guardian by a party of two, the rest none) */
+	memset(m, 0, sizeof m);
+	m[0] = ONLINE_WEEK_SPLITS; online_put16(m + 1, 2963); online_put16(m + 3 + 18, 410); memcpy(m + 3 + 18 + 2, "Alpha", 5);
+	static WeekSplits w;
+	assert(dive_wire_splits(m, ONLINE_WEEK_SPLITS_BYTES, &w) && w.week == 2963 && w.best[0][1].tenths == 410 &&
+		!strcmp(w.best[0][1].name, "Alpha") && !w.best[3][3].tenths);
+	m[3 + 2] = 'Z'; assert(!dive_wire_splits(m, ONLINE_WEEK_SPLITS_BYTES, &w));    /* (a name where no bust is) */
+	assert(!dive_wire_splits(m, ONLINE_WEEK_SPLITS_BYTES - 1, &w));
 }
 
 /* What BN6's PET changed in the Square, carried home (pet_carry.h): a folder's bytes whole and only where home
@@ -506,7 +680,8 @@ int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
 	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();
+	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
-	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list and the PET's changes carried home passed");
+	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list, the PET's changes carried home and the shared dive's wire passed");
 	return 0;
 }

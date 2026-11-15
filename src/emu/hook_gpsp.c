@@ -138,6 +138,8 @@ int hook_drain(HookEvent *out, int max) {
 void hook_attach(struct mCore *core) { (void)core; }
 HookCore *hook_core(struct mCore *core) { (void)core; return NULL; }
 void hook_detach(struct mCore *core) { (void)core; }
+/* (no spare core on gpSP: a dive's party fights linked there, docs/online/shared-dive.md) */
+bool hook_run_on(struct mCore *core, void (*fn)(void *user), void *user) { (void)core; (void)fn; (void)user; return false; }
 bool hook_on(HookCore *core, uint32_t addr, EmuHook fn, void *user) { return !core && hook_add(addr, fn, user); }
 int hook_slot(void) { return 0; }
 int hook_slot_of(struct mCore *core) { (void)core; return -1; }

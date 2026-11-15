@@ -25,10 +25,10 @@ void square_week_reset(void);
 void square_week_frame(const OnlineSnapshot *s);
 /* What the greeter offers now. */
 WeekOffer square_week_offer(void);
-/* The greeter's archive: his welcome (`welcome`, pages), the week's net's
- * post after it, and his question or options with their flags; true where
- * it was put in his place (online_square_prog_say). */
-bool square_week_greeter(const char *welcome);
+/* The week's portal's words as the week stands (in the greeter's place:
+ * the shared dive, docs/online/shared-dive.md), its question or options
+ * after them; false where they could not be written. */
+bool square_week_portal(void);
 /* What the greeter's words were made of, to write them again as it changes */
 unsigned square_week_said(void);
 /* The Board's posts of the week's net, as the server last said them */

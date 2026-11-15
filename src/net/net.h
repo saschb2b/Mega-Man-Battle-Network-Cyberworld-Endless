@@ -9,7 +9,7 @@
 #define MAP_H 64
 #define MAX_OBJS 64
 #define MAX_ROOMS 24
-#define MAX_STAIRS 4
+#define MAX_STAIRS 8
 
 /* A cell: void, floor, or floor a prop stands on (drawn as floor, never
  * walked in the layout's terms): C_SOLID is walled off in the game too (a
@@ -97,11 +97,24 @@ typedef struct {
  * exit leads on to the act's next layer). */
 enum { LAYER_NORMAL, LAYER_UNDERNET, LAYER_SECRET, LAYER_BACK, LAYER_GLITCH };
 
-/* Which way a stair climbs: towards grid -x or -y (see src/map/stairs.h). */
+/* Which way a stair climbs: towards grid -x or -y (see src/map/stairs.h),
+ * and how wide it is: two panels (Sky's and the Undernet's) or one, a
+ * ladder (Green's, CopyBot Comp's, the Graveyard's;
+ * docs/world/level-design/heights.md). */
 enum { STAIR_UP_NX, STAIR_UP_NY };
+enum { STAIR_WIDE, STAIR_NARROW, STAIR_WIDTHS };
 
-/* A stair: 2 x 2 cells from (x, y). */
-typedef struct { int x, y, dir; } Stair;
+/* A stair from cell (x, y): `len` panels along its climb and `wide` across
+ * it (0: 2, the two-by-two stair every layer had first). */
+typedef struct { int x, y, dir, wide, len; } Stair;
+
+static inline int stair_len(const Stair *s) { return s->len ? s->len : 2; }
+static inline int stair_wide(const Stair *s) { return s->wide ? s->wide : 2; }
+static inline int stair_width(const Stair *s) { return stair_wide(s) == 1 ? STAIR_NARROW : STAIR_WIDE; }
+/* its cells' box: along grid x where it climbs towards -x */
+static inline int stair_w(const Stair *s) { return s->dir == STAIR_UP_NX ? stair_len(s) : stair_wide(s); }
+static inline int stair_h(const Stair *s) { return s->dir == STAIR_UP_NX ? stair_wide(s) : stair_len(s); }
+static inline bool stair_covers(const Stair *s, int x, int y) { return x >= s->x && x < s->x + stair_w(s) && y >= s->y && y < s->y + stair_h(s); }
 
 /* A gap Rush bridges (issue #14): from floor panel (x, y), MegaMan's
  * stand, `len` void panels towards DIR_* `dir` to floor of the same
@@ -184,7 +197,8 @@ extern int arrive_forced;
 extern Layer layer;
 
 /* What an area's original maps give its layers to draw (learned from the
- * ROM, src/map): the stairs it has (bit per STAIR_UP_*) and their height,
+ * ROM, src/map): the stairs it has (two panels wide, bit per STAIR_UP_*;
+ * one wide in stair_narrow) and their height,
  * and a counter's length in panels for each way it can face (FACES_*, 0
  * none). */
 typedef struct {
@@ -198,6 +212,9 @@ typedef struct {
 	bool hub_rooms;   /* its art draws every room as its small hubs: no signature, one more of them (issue #98) */
 	bool one_wide;    /* its art draws no floor two wide but its pads: the way's walkways never widened (TILES_ONE_WIDE, issue #164) */
 	int narrows;      /* the one-wide walkways the way may cross, its own maps' count where fewer than the biome's (NetAreaDef.narrows; 0: the biome's) */
+	unsigned stair_narrow;   /* the ways its maps climb by a stair one panel wide, a ladder (bit per STAIR_UP_*; stair_dirs: two wide) */
+	uint8_t stair_len[2][STAIR_WIDTHS];   /* the panels each of its stairs runs, by way and width (0: 2) */
+	bool terraced;    /* its originals raise every platform over the walkways, reached by ladders (Green's, CopyBot Comp's): all its rooms that can be are */
 } LayerKit;
 
 /* Generation is deterministic for a given seed and kit. */
@@ -222,8 +239,9 @@ unsigned layer_holds(uint32_t seed, int depth, int biome, int kind);
  * takes one, the guardian two (himself and his data). The layer's count. */
 #define LAYER_NPC_MAX 16
 int layer_npcs(void);
-/* Lifts dead-end rooms onto stairs (net_height.c). */
-void layer_raise_rooms(uint32_t seed, unsigned dirs, int rise);
+/* Lifts rooms onto stairs (net_height.c): those the floor around them
+ * reaches only from where the kit's stairs climb. */
+void layer_raise_rooms(uint32_t seed, const LayerKit *kit);
 /* The one-wide walkways the way from the arrival to (gx, gy) crosses, past
  * the area's cap widened to two panels (net_way.c, docs/world/level-design/generator.md,
  * Navigation); and how many it crosses, from (sx, sy). */

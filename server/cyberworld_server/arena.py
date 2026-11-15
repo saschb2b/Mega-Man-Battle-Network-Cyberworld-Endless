@@ -149,6 +149,12 @@ class Arena:
 
     async def handle(self, player, data):
         action, ref, latency, form = protocol.read_arena(data)
+        # (a party battle of the shared dive's, v19: party.py; a diver's Arena is none other)
+        if action in (LEAVE, OVER) and self.server.parties.action(player, action, ref):
+            return
+        if player.id in self.server.dive.of:
+            await self.server.notice(player, protocol.SPEC["notice_dive_in"], "Not on a dive")
+            return
         if not self.server.arena_on:
             await self.server.notice(player, 18, "The Arena is closed on this server")
             return
@@ -230,7 +236,15 @@ class Arena:
         self.send(target.id, match, CHALLENGED)
 
     def relay(self, player, data):
-        match = self.matches.get(protocol.arena_relay(data))
+        parties = self.server.parties
+        if data and data[0] in (protocol.SPEC["party_damage"], protocol.SPEC["party_hp"]):
+            parties.linked(player, data)
+            return
+        match_id = protocol.arena_relay(data)
+        if match_id in parties.battles:
+            parties.relay(player, data, match_id)
+            return
+        match = self.matches.get(match_id)
         if not match or not match.started or player.id not in match.seats:
             return
         if match.four:

@@ -78,6 +78,11 @@ void hook_detach(struct mCore *core);
 bool hook_add(uint32_t addr, EmuHook fn, void *user);
 bool hook_add_arm(uint32_t addr, EmuHook fn, void *user);
 bool hook_add_event(uint32_t addr, int kind);
+/* A copy of `core`'s ROM (`size` bytes from 0x08000000) with its hooks'
+ * originals in place of their BKPTs: what the game's code is under them
+ * (the shared dive's party core, src/online/party_core.c, takes the run's
+ * ROM copy so) */
+void hook_originals(struct mCore *core, uint8_t *rom, size_t size);
 /* hook_add on a core of its own (hook_core's) */
 bool hook_on(HookCore *core, uint32_t addr, EmuHook fn, void *user);
 void hook_remove(uint32_t addr);
@@ -100,6 +105,9 @@ void hook_post(const HookRegs *r, int kind);
 int hook_slot(void);
 /* ... and a core's own, between frames (-1: none attached) */
 int hook_slot_of(struct mCore *core);
+/* `fn` run between frames as a hook of `core` runs: hook_read8 and the rest,
+ * hook_slot and what hooks keep, its; false where the core has no hooks */
+bool hook_run_on(struct mCore *core, void (*fn)(void *user), void *user);
 /* What hooks keep between two of their calls, one a core: an array of
  * HOOK_CORES entries of `each` bytes indexed by hook_slot, named once as
  * its hooks are installed (the same array again is no second), so that a

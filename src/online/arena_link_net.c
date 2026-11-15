@@ -15,6 +15,8 @@ static void breaks(ArenaNetLink *l, const char *why) {
 /* the peer: the other GBA's player (a partner's, the other side's lead) */
 static unsigned peer_seat(const ArenaNetLink *l) { return l->link.side ^ 1u; }
 static unsigned my_seat(const ArenaNetLink *l) { return arena_link_seat(&l->link); }
+/* a battle of two (else a 2v2's four seats or a party's, each other seat's messages as ARENA_SEAT) */
+static bool pair(const ArenaNetLink *l) { return l->seats == 2 && !l->party; }
 
 bool arena_link_net_flush(ArenaNetLink *l) {
 	if (!l->batched) return true;
@@ -87,7 +89,7 @@ static bool agreed(const ArenaNetLink *l, uint64_t mine, uint64_t *out, bool (*w
 	bool apart = false;
 	for (unsigned k = 0; k < l->seats; ++k) {
 		uint64_t theirs;
-		if (k == my_seat(l)) continue;
+		if (k == my_seat(l) || (l->gone >> k & 1u)) continue;
 		if (!word(&l->from[k], &theirs)) return false;
 		if (theirs != mine && !apart) { first = theirs; apart = true; }
 	}
@@ -97,13 +99,13 @@ static bool agreed(const ArenaNetLink *l, uint64_t mine, uint64_t *out, bool (*w
 
 static bool net_poll_hash(ArenaLink *link, uint32_t frame, uint64_t *hash) {
 	ArenaNetLink *l = of(link);
-	if (l->seats == 2) return find(l->from[peer_seat(l)].hashes, l->from[peer_seat(l)].nhashes, frame, hash);
+	if (pair(l)) return find(l->from[peer_seat(l)].hashes, l->from[peer_seat(l)].nhashes, frame, hash);
 	uint64_t mine, first = 0;
 	bool apart = false;
 	if (!find(l->mine, l->nmine, frame, &mine)) return false;
 	for (unsigned k = 0; k < l->seats; ++k) {
 		uint64_t theirs;
-		if (k == my_seat(l)) continue;
+		if (k == my_seat(l) || (l->gone >> k & 1u)) continue;
 		if (!find(l->from[k].hashes, l->from[k].nhashes, frame, &theirs)) return false;
 		if (theirs != mine && !apart) { first = theirs; apart = true; }
 	}
@@ -176,6 +178,18 @@ void arena_link_net_seats(ArenaNetLink *l, unsigned seat) {
 	l->link.poll_player = net_poll_player;
 }
 
+void arena_link_net_party(ArenaNetLink *l, unsigned seat, unsigned n) {
+	l->seats = n < 2 ? 2 : n > ONLINE_SEATS ? ONLINE_SEATS : n;
+	l->party = true;
+	l->link.seat = seat < l->seats ? seat : 0;
+	l->link.side = l->link.seat & 1u;   /* (arena_link_seat: a seat below 2 by its side) */
+	l->link.poll_player = net_poll_player;
+}
+
+void arena_link_net_gone(ArenaNetLink *l, unsigned seat) {
+	if (seat < ONLINE_SEATS) l->gone |= 1u << seat;
+}
+
 static void keep_hash(ArenaNetSeat *s, uint32_t frame, uint64_t hash) {
 	if (frame == ARENA_NET_READY) { s->ready = true; s->ready_hash = hash; return; }
 	if (frame == ARENA_NET_RECORD) { s->recorded = true; s->record = hash; return; }
@@ -201,8 +215,8 @@ static bool take_from(ArenaNetLink *l, unsigned seat, const uint8_t *data, size_
 	 * the link holds breaks it) */
 	if (frame != s->next) { breaks(l, "the other player's keys came out of order"); return true; }
 	if (s->next + count - s->polled > ARENA_NET_PEER) { breaks(l, "the other player's keys came too far ahead"); return true; }
-	/* (a partner's stream keeps its sixteen bits: his picks, arena_team_custom.h) */
-	uint16_t mask = seat < 2 ? ARENA_KEYS_MASK : ARENA_PARTNER_MASK;
+	/* (a partner's stream keeps its sixteen bits: his picks, arena_team_custom.h; a party's seats 1-3 each a partner) */
+	uint16_t mask = (l->party ? seat >= 1 : seat >= 2) ? ARENA_PARTNER_MASK : ARENA_KEYS_MASK;
 	for (unsigned i = 0; i < count; ++i) s->keys[(frame + i) & (ARENA_NET_PEER - 1)] = keys[i] & mask;
 	s->next += count;
 	return true;
@@ -212,9 +226,9 @@ bool arena_link_net_take(ArenaNetLink *l, const uint8_t *data, size_t size) {
 	unsigned seat;
 	const uint8_t *inner;
 	size_t n;
-	if (arena_wire_seat(data, size, &seat, &inner, &n)) return l->seats > 2 && take_from(l, seat, inner, n);
+	if (arena_wire_seat(data, size, &seat, &inner, &n)) return !pair(l) && take_from(l, seat, inner, n);
 	/* (a battle of two: the peer's, as relayed) */
-	return l->seats == 2 && take_from(l, peer_seat(l), data, size);
+	return pair(l) && take_from(l, peer_seat(l), data, size);
 }
 
 bool arena_link_net_ready(ArenaNetLink *l, uint64_t hash) {
@@ -228,7 +242,7 @@ static bool ready_of(const ArenaNetSeat *s, uint64_t *hash) { if (s->ready) *has
 static bool record_of(const ArenaNetSeat *s, uint64_t *record) { if (s->recorded) *record = s->record; return s->recorded; }
 
 bool arena_link_net_peer_ready(const ArenaNetLink *l, uint64_t *hash) {
-	if (l->seats == 2) return ready_of(&l->from[peer_seat(l)], hash);
+	if (pair(l)) return ready_of(&l->from[peer_seat(l)], hash);
 	return l->readied && agreed(l, l->ready_hash, hash, ready_of);
 }
 
@@ -244,7 +258,7 @@ bool arena_link_net_record(ArenaNetLink *l, uint64_t record) {
 }
 
 bool arena_link_net_peer_record(const ArenaNetLink *l, uint64_t *record) {
-	if (l->seats == 2) return record_of(&l->from[peer_seat(l)], record);
+	if (pair(l)) return record_of(&l->from[peer_seat(l)], record);
 	return l->recorded && agreed(l, l->record, record, record_of);
 }
 

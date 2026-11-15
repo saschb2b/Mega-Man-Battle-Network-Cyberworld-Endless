@@ -46,7 +46,7 @@ void ng_emblems(const LayerKit *kit) {
 /* within a cell of a stair's block: its landing stays open */
 bool ng_near_stair(int x, int y) {
 	for (int i = 0; i < layer.nstairs; ++i)
-		if (x >= layer.stair[i].x - 1 && x < layer.stair[i].x + 3 && y >= layer.stair[i].y - 1 && y < layer.stair[i].y + 3) return true;
+		if (x >= layer.stair[i].x - 1 && x <= layer.stair[i].x + stair_w(&layer.stair[i]) && y >= layer.stair[i].y - 1 && y <= layer.stair[i].y + stair_h(&layer.stair[i])) return true;
 	return false;
 }
 

@@ -1,9 +1,9 @@
 ---
 type: Feature
 title: "The week's net"
-description: "The week's net (issue #127): each server's weekly seed (`week.py`), a dive in a save slot of its own from a standard profile (`src/core/weekly.c`), the greeter's offer, WEEK_POST and the Board's reported depths."
+description: "The week's net (issue #127): each server's weekly seed (`week.py`), a dive in a save slot of its own from a standard profile (`src/core/weekly.c`), the portal's offer, WEEK_POST and the Board's reported depths."
 tags: [online]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T04:20:00Z }
 ---
 
 # The week's net
@@ -24,6 +24,10 @@ families, the chips found) is the same on every dive. That is why a
 system that reads one extra ROM at most, the New 3DS, holds no DeepNet
 stamp though its pass is full and trades
 ([A system with room for one game](netpass.md#a-system-with-room-for-one-game)).
+
+A proposal to dive it together, every diver on the seed seen live and the
+guardians fought by parties of up to four, is [The shared dive](shared-dive.md)
+(15 November 2026, unbuilt).
 
 ## Its design
 
@@ -110,13 +114,17 @@ given for one, so the Board says "as reported".
   slot, makes its standard profile and the run with `run_new` on the
   week's seed (not `run_new_varied`, which avoids the last run's first
   guardian), `run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0, 0)`, and the
-  game starts it in Lan's room as NEW GAME does. Continuing it loads the
+  game starts it on the first layer, the portal's warp (Lan's room, as
+  NEW GAME does, until 15 November 2026). Continuing it loads the
   slot's checkpoint as CONTINUE loads a run. The title always leaves the
   slot first (`weekly_normal_saved`), so its CONTINUE is the normal
   run's whether the dive ended, was reset or the game was closed.
-- **The greeter** (`src/online/square_week.c`, words in
-  `square_week_words.c`): his archive is his welcome, then, to a pass
-  with the DeepNet stamp, the week's post: the net shifted, this week's deep net open, its dates, every Navi
+- **The portal** (`src/online/square_week.c`, words in
+  `square_week_words.c`; the greeter Mr.Prog's place and words until 15
+  November 2026, [The shared dive](shared-dive.md)): BN5's dark hole, or
+  BN6's exit pad where BN5's ROM is not read, spoken to as the greeter
+  was, with no mugshot. To a pass with the DeepNet stamp it says the
+  week's post: the net shifted, this week's deep net open, its dates, every Navi
   dives the same net, and "DIVE IN NOW?" (Yes/No, the cursor on No). With
   an unfinished dive of this week, "YOUR DIVE INTO THE DEEP NET ISN'T
   OVER!" and Keep diving, Start over, Not now. On a dive, he wishes
@@ -132,7 +140,7 @@ given for one, so the Board says "as reported".
   and saves are done in its slot) keeps its layer, act, won, minutes and
   hash, the better of two of the same week. The next visit sends it as
   soon as WELCOME has named the week; the server's answer, a WEEK_BOARD
-  or a NOTICE, lets it go. The greeter then says "YOUR DIVE TO LAYER 5 IS
+  or a NOTICE, lets it go. The portal then says "YOUR DIVE TO LAYER 5 IS
   UP ON THE BOARD!".
 - **The Board**: after its channel's posts, "DEEP NET" with the week's
   dates, "Deepest layers,as Navis report them.", the top eight three to

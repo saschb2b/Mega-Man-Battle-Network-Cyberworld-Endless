@@ -13,6 +13,9 @@
                                              panel row << 4 | column, u16 id; the kind's high nibble the spawner, 0 MegaMan, its bit 0
                                              the side; BN6_ENTITY_END the end) (bn6f SpawnBattleObjectUsingBattleEntityConfig_8007368) */
 #define BN6_ENTITY_SIZE       4
+#define BN6_ENTITY_KIND       0           /* an entry's kind (BN6_SPAWN_ENTITIES), */
+#define BN6_ENTITY_PANEL      1           /* ... its panel, row << 4 | column, */
+#define BN6_ENTITY_ID         2           /* ... and its id, u16 */
 #define BN6_ENTITY_MEGAMAN    0x00        /* an entry's kind: MegaMan on side 0 (| 1: on side 1), a NetBattle's two its first entries */
 #define BN6_ENTITY_END        0xF0
 #define BN6_SIDE_PARTNER      4           /* BN6_BATTLE_PLAYERS + a side's BN6_BATTLE_PLAYER_STEP: its second Navi's object (0 none), its

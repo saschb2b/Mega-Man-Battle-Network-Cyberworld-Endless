@@ -135,8 +135,9 @@ zone persistent  ram  0x02010CE0  0x02011800  end=RAM_PERSISTENT_END  persistent
 RAM_PACK_EXT           0x02010CE0  0x020115E0  end  xchips_install.c        multirom/chip-registry.md   the chip pack's extension: ids 411-511 in place, 512-602 in the entries of 320-410 (BN6_PACK_EXT, bn6_pack_entry)
 RAM_PLAYER_AI          0x020115E0  0x02011730  end  darkinvs.c              engine/emulation/memory.md  MegaMan's AI data under BN5's chip AI, BN5's 0x140 bytes, then his own's place
 RAM_TEAM               0x02011730  0x02011750  end  arena_team.c            rom/online.md               --dev arena2v2's list of what the Practice NetBattle spawns (epic #167)
-RAM_TEAM_LINK          0x02011750  0x02011790  end  arena_team_link.c       rom/online.md               the partners' words for and from BN6's packets, 0x20 bytes a side
-RAM_TEAM_CUSTOM        0x02011790  0x02011800  end  arena_team_custom.c     rom/online.md               each partner's deck and own Custom screen, 0x38 bytes a side
+RAM_TEAM_ROOMS         0x02011750  0x02011800  end  arena_team_custom.c     rom/online.md               the two-a-side's partners' words and turns below, or on a party's field (no link) each of its three partners' deck and own Custom screen, 0x38 bytes a partner
+RAM_TEAM_LINK          0x02011750  0x02011790  end,in=RAM_TEAM_ROOMS  arena_team_link.c       rom/online.md               the partners' words for and from BN6's packets, 0x20 bytes a side
+RAM_TEAM_CUSTOM        0x02011790  0x02011800  end,in=RAM_TEAM_ROOMS  arena_team_custom.c     rom/online.md               each partner's deck and own Custom screen, 0x38 bytes a side
 
 zone mode  ram  0x02029A00  0x0202DA00  -  a main mode's own while the map waits (BN6's shop, mode 0x2C, unpacks into 0x02029A00, 0x0202BA00 and 0x0202DA00 as it runs, and the map goes on after it): a moved screen's, run as a mode of its own from the map
 RAM_BRACKET            0x02029A00  0x0202DA00  end  xbracket.c              multirom/bn4-tournament.md  BN4's bracket screen moved: its state, tournaments, blend values, menu sprites and its tiles unpacked (xbracket.h)

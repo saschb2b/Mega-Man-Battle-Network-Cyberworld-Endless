@@ -3,7 +3,7 @@ type: Design
 title: "The generator"
 description: "The layer generator's rules, measured from BN6's maps: a cap on the way's one-wide walkways (`net_way.c`), each area's layouts (`net_layouts.c`), the guardian's arena, walkway joins, tile picking and the floor legalizer (`legal.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:40:53Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:12:36Z }
 ---
 
 # The generator
@@ -488,6 +488,11 @@ face goes on the second layer, which the game shows in front: a platform
 keeps its whole rim, a walkway coming from below on screen ends over its
 side face and one coming from above ends behind its rim. The Aquarium's
 guardian arena, wider than its water ever gets, is a pool as well.
+Green's and CopyBot's platforms also stand at their height wherever a
+layer can raise them, up the area's own ladders, and every layer of the
+twelve areas with stairs raises the rooms and terraces the rest of its
+floor meets only from the front ([Heights](heights.md)); the Aquarium's
+pads, whose stairs rise half a panel, stay level with the water.
 
 The originals draw on their second tile layer what stands in front of a
 floor: Seaside's boardwalks and Central's bridges where they cross a

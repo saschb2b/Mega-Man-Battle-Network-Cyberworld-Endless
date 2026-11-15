@@ -7,6 +7,7 @@
 #include "cinema.h"
 #include "director.h"
 #include "director_gate.h"
+#include "dive_link.h"
 #include "emu.h"
 #include "game.h"
 #include "loot.h"
@@ -21,7 +22,6 @@
 #include "square_pet.h"
 #include "square_arena.h"
 #include "square_watch.h"
-#include "square_week.h"
 
 #define CALL_TIMEOUT_MS 20000   /* a server that never answers */
 
@@ -81,6 +81,8 @@ static void counted(VisitEnd why, bool away) {
 
 bool online_visit_begin(const char *url, const char *name, const uint8_t identity[ONLINE_IDENTITY_BYTES], bool official) {
 	if (V.stage != VISIT_HOME) return false;
+	/* (a visit from a dive takes the dive's link over: dive_link.h) */
+	dive_link_close();
 	V.official = official;
 	V.run = run;
 	V.profile = profile;
@@ -135,7 +137,10 @@ static void put_back(void) {
 static void come_home(VisitEnd why) {
 	bool away = V.stage == VISIT_AWAY;
 	online_scene_end();
-	online_transport_end();
+	/* (a dive keeps the link: the portal's warp into one, or a visit from
+	 * one back to it; dive_link.h) */
+	bool keep = away && (why == VISIT_END_DIVE || dive_link_diving());
+	if (!keep) online_transport_end();
 	counted(why, away);
 	V.stage = VISIT_HOME;
 	V.ended = why;
@@ -150,13 +155,16 @@ static void come_home(VisitEnd why) {
 		/* (what BN6's PET changed in the Square waits in its file for the run's next CONTINUE: square_pet.h) */
 		director_stop();
 		V.ended = VISIT_END_NONE;
-		if (square_week_dive()) return;
+		if (dive_link_begin()) return;
+		online_transport_end();
+		keep = false;
 		fprintf(stderr, "online: the dive did not begin; back to the gate\n");
 		V.ended = VISIT_END_BROKEN;
 	}
 	if (!director_resume()) {
 		/* (the gate's checkpoint is still on disk: CONTINUE tries it again) */
 		fprintf(stderr, "online: the gate's checkpoint did not load; to the title\n");
+		if (keep) online_transport_end();
 		director_stop();
 		title_menu = true;
 		scene_set(&scene_title);
@@ -167,6 +175,7 @@ static void come_home(VisitEnd why) {
 	put_back();
 	cinema_reset();
 	settle();
+	if (keep) dive_link_adopt();
 }
 
 /* Into the Square: the run's director stopped, the MegaMan carried read,
@@ -185,7 +194,7 @@ static void go_away(const OnlineSnapshot *s) {
 }
 
 void online_visit_update(void) {
-	if (V.stage == VISIT_HOME) return;
+	if (V.stage == VISIT_HOME) { dive_link_frame(); return; }
 	if (V.stage == VISIT_AWAY) {
 		VisitEnd why = online_scene_update();
 		if (why != VISIT_END_NONE) come_home(why);
@@ -207,15 +216,23 @@ void online_visit_wait_frame(void) {
 
 uint32_t online_visit_keys(uint32_t keys) {
 	if (V.stage == VISIT_AWAY) return online_scene_keys(keys);
+	/* (a dive's: a phrase left on its layer, dive_traces.h) */
+	if (V.stage == VISIT_HOME) return dive_link_keys(keys);
 	if (V.stage != VISIT_CALLING) return keys;
 	if (btn_pressed(BTN_B)) come_home(VISIT_END_CANCELLED);
 	return 0;
 }
 
-bool online_visit_held(void) { return V.stage == VISIT_AWAY && (square_arena_on() || square_watch_on()); }
+const VisitHold *online_visit_hold;
+
+static bool hold_on(void) { return online_visit_hold && online_visit_hold->held(); }
+
+bool online_visit_held(void) { return (V.stage == VISIT_AWAY && (square_arena_on() || square_watch_on())) || hold_on(); }
 
 /* (a battle of this game's, or one watched from the stands) */
 void online_visit_held_frame(uint32_t keys) {
+	/* (another part's screen over the held game: the shared dive's party core, party_play.h) */
+	if (hold_on()) { online_visit_hold->frame(keys); return; }
 	if (square_arena_on()) square_arena_frame(keys);
 	else square_watch_frame(keys);
 	/* (a Team NetBattle's next bout, or the others' bout watched) */
@@ -223,11 +240,12 @@ void online_visit_held_frame(uint32_t keys) {
 }
 
 void online_visit_draw(void) {
+	if (hold_on()) { online_visit_hold->draw(); return; }
 	if (online_visit_held() && square_arena_on()) square_arena_draw();
 	else if (online_visit_held()) square_watch_draw();
 	else if (V.stage == VISIT_AWAY) online_scene_draw();
-	/* (the gate's fields, over the game in Lan's HP) */
-	else online_field_draw();
+	/* (the gate's fields, over the game in Lan's HP; a dive's feed on its layers) */
+	else { online_field_draw(); dive_link_draw(); }
 }
 
 void online_visit_leave(VisitEnd why) {
@@ -243,7 +261,7 @@ VisitEnd online_visit_ended(void) {
 const char *online_visit_end_note(void) { return V.note; }
 
 void online_visit_shutdown(void) {
-	if (V.stage == VISIT_HOME) return;
+	if (V.stage == VISIT_HOME) { dive_link_scene_left(); return; }
 	emu_sync();
 	online_scene_end();
 	online_transport_end();

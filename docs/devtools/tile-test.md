@@ -13,8 +13,8 @@ python3 build.py tiles [SEEDS] [--baseline]
 ```
 
 The atlas of every area and layout (2 seeds each by default, about three
-minutes), and in the areas that have stairs (Sky, the Undernet) as many
-layers that climb one, then a table per area: its layers and panels, the
+minutes), and in the areas that have stairs (twelve, [Heights](../world/level-design/heights.md))
+as many layers that climb one, then a table per area: its layers and panels, the
 breaks in its picture, the tiles drawn with other floors than they show and
 the seams per 100 panels, the tiles whose top showed a hole (`holes`: the
 background through a walkable panel, [holes in the floor](../world/level-design/floor-holes.md))

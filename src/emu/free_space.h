@@ -161,6 +161,8 @@
 #define RAM_PLAYER_AI_END    0x02011730u
 #define RAM_TEAM             0x02011730u             /* --dev arena2v2's list of what the Practice NetBattle spawns (epic #167) (arena_team.c) */
 #define RAM_TEAM_END         0x02011750u
+#define RAM_TEAM_ROOMS       0x02011750u             /* the two-a-side's partners' words and turns below, or on a party's field (no link) each of its three partners' deck and own Custom screen, 0x38 bytes a partner (arena_team_custom.c) */
+#define RAM_TEAM_ROOMS_END   0x02011800u
 #define RAM_TEAM_LINK        0x02011750u             /* the partners' words for and from BN6's packets, 0x20 bytes a side (arena_team_link.c) */
 #define RAM_TEAM_LINK_END    0x02011790u
 #define RAM_TEAM_CUSTOM      0x02011790u             /* each partner's deck and own Custom screen, 0x38 bytes a side (arena_team_custom.c) */
@@ -287,8 +289,9 @@
 	X("RAM_PACK_EXT", 0x02010CE0u, 0x020115E0u, "", "persistent") \
 	X("RAM_PLAYER_AI", 0x020115E0u, 0x02011730u, "", "persistent") \
 	X("RAM_TEAM", 0x02011730u, 0x02011750u, "", "persistent") \
-	X("RAM_TEAM_LINK", 0x02011750u, 0x02011790u, "", "persistent") \
-	X("RAM_TEAM_CUSTOM", 0x02011790u, 0x02011800u, "", "persistent") \
+	X("RAM_TEAM_ROOMS", 0x02011750u, 0x02011800u, "", "persistent") \
+	X("RAM_TEAM_LINK", 0x02011750u, 0x02011790u, "RAM_TEAM_ROOMS", "persistent") \
+	X("RAM_TEAM_CUSTOM", 0x02011790u, 0x02011800u, "RAM_TEAM_ROOMS", "persistent") \
 	X("RAM_BRACKET", 0x02029A00u, 0x0202DA00u, "", "mode") \
 	X("RAM_SEA", 0x0203FB50u, 0x0203FBE0u, "", "battle") \
 	X("RAM_DARK_LISTS", 0x0203FBE0u, 0x0203FDA0u, "", "battle") \

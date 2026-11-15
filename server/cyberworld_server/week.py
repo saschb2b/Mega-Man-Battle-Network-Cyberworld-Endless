@@ -43,10 +43,12 @@ SPEC = protocol.SPEC
 WEEK = 7 * 24 * 3600
 BOARD_LOG = "weeks.jsonl"
 FIELDS = ("week", "identity", "name", "depth", "act", "won", "minutes", "time")
-POST = struct.Struct("!BHIHBBHI")
+POST = struct.Struct("!BHIHBBHIB")      # (v19: the acts whose guardian was fought in a party)
 ENTRY = struct.Struct("!16sHBBH")
 BOARD_HEAD = struct.Struct("!BHBBB")
 WON = 1
+PARTY = SPEC["week_party"]              # WEEK_BOARD's entry flags: a guardian of the dive fought in a party (v19)
+ACTS = 0xF                              # the party byte's bits: acts 1 to 4
 MAX_MINUTES = 0xFFFF
 
 
@@ -72,13 +74,13 @@ def better(a, b):
 def read_post(data):
     if len(data) != SPEC["week_post_bytes"] or data[0] != SPEC["week_post"]:
         raise protocol.ProtocolError("Malformed WEEK_POST")
-    _, week, seed, depth, act, flags, minutes, summary = POST.unpack(data)
+    _, week, seed, depth, act, flags, minutes, summary, party = POST.unpack(data)
     return dict(week=week, seed=seed, depth=depth, act=act, won=flags & WON, flags=flags,
-                minutes=minutes, hash=summary)
+                minutes=minutes, hash=summary, party=party)
 
 
-def post(week, seed, depth, act, won, minutes, summary):
-    return POST.pack(SPEC["week_post"], week, seed, depth, act, WON if won else 0, minutes, summary)
+def post(week, seed, depth, act, won, minutes, summary, party=0):
+    return POST.pack(SPEC["week_post"], week, seed, depth, act, WON if won else 0, minutes, summary, party)
 
 
 def compact(directory, first_week, forget=None):
@@ -154,15 +156,20 @@ class Weeks:
     def entry(e):
         if not e:
             return bytes(ENTRY.size)
-        return ENTRY.pack(e["name"].encode("ascii")[:16], e["depth"], e["act"], WON if e["won"] else 0, e["minutes"])
+        flags = (WON if e["won"] else 0) | (PARTY if e.get("party") else 0)
+        return ENTRY.pack(e["name"].encode("ascii")[:16], e["depth"], e["act"], flags, e["minutes"])
 
     async def send(self, player):
+        """WEEK_BOARD, and with it WEEK_SPLITS (v19: dive.py)."""
         await websocket.send(player.writer, self.board_for(player))
+        await websocket.send(player.writer, self.server.dive.splits())
 
     def broadcast(self):
+        splits = websocket.frame(self.server.dive.splits())
         for player in list(self.server.players.values()):
             if not player.writer.is_closing():
                 player.writer.write(websocket.frame(self.board_for(player)))
+                player.writer.write(splits)
 
     def refusal(self, entry, identity):
         """Why a post is not plausible, as a NOTICE (code, words); None where it is."""
@@ -173,6 +180,7 @@ class Weeks:
             return 24, "Not that week's net"
         depth, act = entry["depth"], entry["act"]
         if not 1 <= depth <= SPEC["week_layers"] or act != act_of(depth) or entry["flags"] & ~WON \
+                or entry["party"] & ~ACTS or entry["party"] >> act \
                 or (entry["won"] and depth != SPEC["week_layers"]) or not entry["hash"]:
             return 25, "That dive does not add up"
         if self.hidden(identity, entry["week"]):
@@ -205,3 +213,4 @@ class Weeks:
         week = week_of(self.clock())
         for key in [key for key in self.best if key[0] < week - 1]:
             del self.best[key]
+        self.server.dive.prune()

@@ -102,3 +102,17 @@ void analytics_dive_post(int layer, int act, bool won) {
 	json_bool(&j, "won", won);
 	analytics_event_send(&j);
 }
+
+void analytics_dive_together(int layers, int shared, int most, int crew, int parties, int party) {
+	if (!analytics_sends()) return;
+	char out[ANALYTICS_PAYLOAD];
+	Json j;
+	analytics_event_begin(&j, out, sizeof out, "deepnet-together");
+	json_int(&j, "layers", layers);
+	json_int(&j, "shared", shared);
+	json_int(&j, "most", most);
+	json_int(&j, "crew", crew);
+	json_int(&j, "parties", parties);
+	json_int(&j, "party", party);
+	analytics_event_send(&j);
+}

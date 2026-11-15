@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T19:30:00Z
+* **Add**: world/level-design/heights.md (every original ramp surveyed, half a cell off the panels towards its foot; stairs of every straight shape learned in twelve areas from all their maps; rooms and terraces reached only from their front raised). **Update**: world/level-design/index.md (its line), world/level-design/generator.md (Green's and CopyBot's platforms at their height), rom/net-maps.md (Height: the ramps' half-cell offset and a ladder's verify), code/net-and-map.md (`net_height.c`, `stairs.c`), devtools/tile-test.md (twelve areas' stair layers), online/square/layout.md (Sky's the only two-wide stair among the Square's areas).
