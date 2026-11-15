@@ -88,9 +88,11 @@ bool md_known(int k, bool taken) {
 #define COUNTS_AFTER 180
 
 /* The counters' alpha from `was`: in over 8 frames, out over 16 as their
- * seconds end, at once where the picture hides them (a battle, the map) */
+ * seconds end, at once where the picture hides them (a battle, the map,
+ * BN6's fade) */
 static int counts_alpha(int was) {
-	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown;
+	/* (not over a warp's white, as the way-on arrow: cinema.c) */
+	bool shown = D.counts_t > 0 && D.active && !D.town && seen.on_map && !seen.battle && !D.map_shown && !bn6_screen_faded();
 	int to = !shown ? 0 : D.counts_t < 16 ? D.counts_t * 255 / 16 : 255;
 	return to > was + 32 ? was + 32 : to;
 }
