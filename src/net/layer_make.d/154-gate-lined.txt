@@ -1,0 +1,1 @@
+The guardian's gate leaves the antechamber where the walk meets it on its line (straight on, or at the end of the side it runs along), wherever a side the arena fits off has such a place (net_arena.c, gate_start).
