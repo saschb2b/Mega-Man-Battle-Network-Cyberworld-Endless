@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T19:58:44Z
+* **Update**: world/level-design/side-pieces.md (BN5's Nebula Area surveyed: its dripping pods and pools are drawn with its plates' corners and paths' ends, no cut learns a piece from its two maps, the crate on a plate a centrepiece; its row in the area table, a section of its own, and the Not built list without its pods).

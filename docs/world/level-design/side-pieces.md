@@ -88,6 +88,7 @@ Taken per area as looked at, as every laying rule is
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
+| BN5's Nebula Area | nothing: its dripping pods and pools are drawn into its plates' corners and its paths' ends, which its layers lay; no cut learns a piece from its maps (below) | - |
 | BN5's Undernet | nothing that grips, hangs under or stands behind its floors; in the void beside them, on the first layer, its skull totems, which are scenery (below), 4 looks | the skull totems |
 | BN4's ACDC Area | nothing: on its second layer a lid on a hub alone; behind its floors, 6 looks of floor art (dead ends' discs, an arrow's head); no scenery (below) | no |
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
@@ -932,6 +933,55 @@ The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
 
+## What Nebula Area sets round its floors (none set; measured on the maps and the atlas)
+
+BN5's Nebula Area (its maps 0x90:13 and 0x90:14, Nebula Area 2 and 4, the
+atlas's `a3`; [its tiles](nebula-tiles.md)) sets two things round its
+floors, both magenta and dripping, and its layers draw both already:
+
+- **Pods at its plates' corners**, a stone hanging under each of a 3x3
+  plate's four corners. They lie on the first tile layer, drawn into the
+  plate's corner and face tiles, which a layer lays with the plate.
+- **Pools at its paths' dead ends**, a puddle over the last cobbles with
+  drips over the path's end. First layer too, in the path's own tiles,
+  which a layer lays where its path ends.
+
+Seen on the atlas's layers (`build.py atlas a3 2`, eight layers): pods
+under every plate's corners, pools at paths' ends, as the maps set them.
+On the maps tinted where no layer draws a tile, neither is tinted.
+
+No cut takes anything else. With the area's `sides` set to every cut
+(0, 1, 2 and 7: beside a floor, under a raised floor, behind a floor on
+the first layer and on the second), its two maps give no piece, and the
+scenery cut sets none (probed 15 November 2026):
+
+- Nebula Area 2's second layer holds one group, a crate dripping magenta
+  on a plate's middle. It lies on the floor alone, so the side-piece cut
+  takes it for a centrepiece.
+- Nebula Area 4's second layer is its raised highway (height 32) with its
+  ramps and its two raised plates, joined in one group of well over a
+  thousand tiles, past the 160 the cuts take.
+- Off its first layer's floor lie only the pods' and pools' drips under
+  lower edges, drawn into the floor's own tiles. Nothing stands behind an
+  upper edge.
+
+What its layers never draw (182 of Nebula Area 2's 773 tile pictures and
+595 of Nebula Area 4's 1194, [what the layers take](../../devtools/map-use.md)),
+grouped tile by tile on the tinted maps:
+
+| What | Where it stands | Size, how often | Taken |
+| --- | --- | --- | --- |
+| The raised highway, its ramps, two raised plates | Nebula Area 4's second layer, at height 32 | one group, 1,606 tiles of it left | no: raised floor and stairs, issue #505's kind 5 |
+| The conveyor (`b22_90_14` at (864, 576)) | Nebula Area 4, on the ground | 152 tiles, once | no: kind 4 |
+| Arrow panels on its paths | on the ground, six runs in Nebula Area 2 and two in Nebula Area 4 | 17 to 66 tiles a run | no: floor of another kind |
+| A crate dripping magenta (`b22_90_13` at (528, 424)) | second layer, on a plate's middle alone; the plate's panel walkable in the map's walls | 28 tiles, once | no: a pad's centrepiece, kind 4 |
+| Exit arrows (`b22_90_13` at (144, 112) and (560, 792); `b22_90_14` at (112, 128)) | at the maps' edges | 26 or 27 tiles each | no: kind 4 |
+| Cobble variants beside the pools, the ramps' lower faces | first layer, the floor's own | 1 to 3 tiles | floor tiles the pick does not choose; the faces go with the ramps |
+
+Whether BN5 makes the crate block the way with an object of its own was
+not checked in the game. A Glitch layer's flip into Nebula Area draws what
+it drew before: its `Learned` holds no piece.
+
 ## BN5's Undernet's skull totems (scenery; verified in the ROM, the atlas and the game)
 
 BN5's Undernet (its maps 0x90:11 and 0x90:12, BN5's Undernet 2 and 3;
@@ -1184,10 +1234,10 @@ no layer, and the hole cut finds no hole. Sky takes none.
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists (above) and Nebula Area's dripping pods
-  lie on the first layer, beside or under the floor (probed on the maps);
-  the Judge Tree's planters and BN5's Undernet's dark figures, counted here
-  too, are set now (above).
+  red fists (above) lie on the first layer, beside or under the floor
+  (probed on the maps). The Judge Tree's planters and BN5's Undernet's dark
+  figures, counted here too, are set now, and Nebula Area's dripping pods
+  are drawn with its plates (above).
   (The Nest's and Mr. Weather's were counted here as well; theirs lie on
   the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
