@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T15:10:00Z
-* **Update**: game/reward-pick.md (Keys: the cursor stands still and faded until A would take, bobbing from then; why the time alone could not tell a seen press from a paging one).

@@ -3,7 +3,7 @@ type: Feature
 title: "The arena's door"
 description: "The arena-door save: the run saves the frame MegaMan steps into a guardian's arena, so a quit or crash mid-fight resumes from the door with the HP and chips he walked in with."
 tags: [game, meta]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:04:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:18:17Z }
 ---
 
 # The arena's door (4 October 2026)

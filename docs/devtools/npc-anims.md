@@ -3,7 +3,7 @@ type: Tool
 title: "NPC animations: another game's sprites play what they draw"
 description: "`python3 build.py npc-anims` (the host build's `--npc-anims`, the ROMs read) checks every NPC the game places in BN5's or BN4's sprite against the sprite copied into the core: each animation our code can tell it to play is there, and one it stands in draws something, failing where one does not (issue #614)."
 tags: [devtools, sprites, multirom, npc]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:30:00Z }
 ---
 
 # NPC animations: another game's sprites play what they draw
