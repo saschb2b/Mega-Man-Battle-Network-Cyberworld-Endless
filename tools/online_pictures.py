@@ -35,6 +35,7 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import trailer_online as online  # noqa: E402
 from trailers import v0_13_0 as cut  # noqa: E402  (Visit: a game's script by the wall clock)
+from trailers import v0_22_0_footage as dive  # noqa: E402  (the shared dive's takes)
 
 WORK = os.path.join(ROOT, '.build', 'online-pictures')
 
@@ -51,6 +52,25 @@ SHOTS = {
     'online-pet': ('pet', 'kei', 130),          # 0.21.0: START in the Square opens BN6's PET there, the plaza behind it
     'online-pet-folder': ('pet', 'kei', 330),   # ... and its Chip Folder, opened in the Square
     'online-netpass-bn4': ('grown', 'kei', 255),   # 0.21.0: the pass after BN4's stamps landed, three games in
+}
+
+# 0.22.0's notes: saves, the dive, systems
+# docs/screenshots/NAME.png of the week's DeepNet dived together
+# (docs/online/shared-dive.md): (take, kept range, sample) of the 0.22.0
+# trailer's takes (tools/trailers/v0_22_0_footage.py, ONLINE_SCENES: a
+# server from source and two or three host builds by the clock, the week's
+# net pinned; a take's samples fall up to ten apart from the last's, and
+# these stand well inside what they show)
+DIVE_SHOTS = {
+    'online-dive-portal': ('dive', 'dive-portal', 190),     # the week's portal in the Square, DIVE IN NOW?, a diver beside
+    'online-dive-divers': ('dive', 'dive-divers', 40),      # layer 1 of the week's net: another diver walking past MegaMan
+    'online-dive-crew': ('dive', 'dive-crew-a', 60),        # "Beta wants to team up with us!"
+    'online-dive-door': ('dive-door', 'dive-door', 360),    # three at DiveMan's door, the leader's band: PARTY OF 3! A:GO IN B:ALONE
+    'online-dive-party': ('dive-door', 'dive-party-a', 140),   # the party's fight: three MegaMen on one field, DiveMan at 4500
+}
+# docs/clips/NAME.*: (take, kept range, first sample, last sample, poster sample)
+DIVE_CLIPS = {
+    'online-dive': ('dive', 'dive-portal', 170, 420, 305),  # DIVE IN NOW?, Yes, the portal opens, layer 1 with both divers, the act's card
 }
 
 # docs/screenshots/NAME.png of the browser, by tools/online_browser_picture.py
@@ -219,6 +239,16 @@ def footage(names, keep=False):
     online.capture(WORK, online_scenes(), keep, only=scenes_for(names))
 
 
+def dive_footage(names, keep=False):
+    """The dive's takes the pictures named need, each kept range a folder
+    of WORK (with `keep`, the takes whose folders are there are left)."""
+    for take in sorted({(DIVE_SHOTS.get(n) or DIVE_CLIPS[n])[0] for n in names}):
+        kept = [k for g in dive.ONLINE_SCENES[take]['games'] for k in g.get('keeps', {})]
+        if keep and all(os.path.isdir(os.path.join(WORK, k)) and os.listdir(os.path.join(WORK, k)) for k in kept):
+            continue
+        dive.online_scene(WORK, take, dive.ONLINE_SCENES[take])
+
+
 def sample(scene, game, i):
     return Image.open(os.path.join(WORK, f'{scene}-{game}', f'{i:04d}.png')).convert('RGB')
 
@@ -228,6 +258,10 @@ def screenshots(names):
     for name in names:
         if name in SHOTS:
             sample(*SHOTS[name]).save(os.path.join(out, f'{name}.png'), optimize=True)
+            print('screenshot', name)
+        elif name in DIVE_SHOTS:
+            _, kept, i = DIVE_SHOTS[name]
+            Image.open(os.path.join(WORK, kept, f'{i:04d}.png')).convert('RGB').save(os.path.join(out, f'{name}.png'), optimize=True)
             print('screenshot', name)
     return 0
 
@@ -239,14 +273,18 @@ def clips(names, encode=None):
     out = os.path.join(ROOT, 'docs', 'clips')
     tmp = os.path.join(ROOT, '.build', 'clips')
     for name in names:
-        if name not in CLIPS:
+        if name in DIVE_CLIPS:
+            _, folder, first, last, poster = DIVE_CLIPS[name]
+        elif name in CLIPS:
+            scene, game, first, last, poster = CLIPS[name]
+            folder = f'{scene}-{game}'
+        else:
             continue
-        scene, game, first, last, poster = CLIPS[name]
         shutil.rmtree(tmp, ignore_errors=True)
         os.makedirs(os.path.join(tmp, 'png'))
         for n, i in enumerate(range(first, last + 1)):
-            shutil.copy(os.path.join(WORK, f'{scene}-{game}', f'{i:04d}.png'), os.path.join(tmp, 'png', f'{n:05d}.png'))
-        sample(scene, game, poster).save(os.path.join(out, f'{name}.png'), optimize=True)
+            shutil.copy(os.path.join(WORK, folder, f'{i:04d}.png'), os.path.join(tmp, 'png', f'{n:05d}.png'))
+        Image.open(os.path.join(WORK, folder, f'{poster:04d}.png')).convert('RGB').save(os.path.join(out, f'{name}.png'), optimize=True)
         if encode(name, tmp, out, last + 1 - first, (240, 160)):
             return 1
     return 0
@@ -257,11 +295,17 @@ def main(argv, kinds=('screenshots', 'clips'), keep=None, encode=None):
     of them where none is named; `encode` build.py's encode_clip)."""
     keep = '--keep' in argv if keep is None else keep
     names = [a for a in argv if not a.startswith('--')]
-    pool = (SHOTS.keys() | set(BROWSER) if 'screenshots' in kinds else set()) | (CLIPS if 'clips' in kinds else {}).keys()
+    pool = ((SHOTS.keys() | DIVE_SHOTS.keys() | set(BROWSER) if 'screenshots' in kinds else set())
+            | (CLIPS.keys() | DIVE_CLIPS.keys() if 'clips' in kinds else set()))
     names = sorted(n for n in pool if not names or n in names)
-    scenes = [n for n in names if n not in BROWSER]
+    dives = [n for n in names if n in DIVE_SHOTS or n in DIVE_CLIPS]
+    scenes = [n for n in names if n not in BROWSER and n not in dives]
     if scenes:
         footage(scenes, keep)
+    if dives:
+        os.makedirs(WORK, exist_ok=True)
+        dive_footage(dives, keep)
+    scenes += dives
     code = screenshots(scenes) if 'screenshots' in kinds else 0
     if not code and any(n in BROWSER for n in names):
         if shutil.which('agent-browser'):

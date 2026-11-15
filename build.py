@@ -2161,6 +2161,95 @@ SCREENSHOTS = [
                       '--size', '720x480', '--depth-lighting', 'on'], [(7700, 'depth-battle')], {'CYBERWORLD_AUTOPILOT': 'weak'}, 1),
 ]
 
+# 0.22.0's notes: saves, the dive, systems
+# (the routes are the 0.22.0 trailer's, tools/trailers/v0_22_0_footage.py,
+# written out: a run's arrival on seed 7's layer 5 paged so that its
+# checkpoint is written, the soft reset to the title (A+B+SELECT+START) and
+# L, SAVES over a title with a run saved, at the 240x160 it lays itself out
+# for; its pages turned with R; CLOUD's Turn on, its question, Yes and the
+# sync, and CODE's Send and its code, both on a Net Square server of this
+# machine (SCREENSHOT_SERVERS); the title's menu with that run's CONTINUE)
+N22_ARRIVE = '150:,' + '6:A,4:,' * 30 + '20:,'
+N22_TITLE = '100:,' + '4:A,6:,' * 30 + '100:,6:A+B+SELECT+START,200:,'
+N22_SAVES = N22_TITLE + '6:L,60:,'
+N22_SAVED = ['--scene', 'emu', '--run-depth', '5', '--seed', '7', '--dev', 'quiet']
+N22_SQUARE_PORT, N22_UPDATE_PORT = 18732, 18733
+N22_ONLINE = ['--scene', 'emu', '--run-depth', '5', '--seed', '7', '--dev', f'quiet,online=ws://172.17.0.1:{N22_SQUARE_PORT}/presence',
+              '--size', '240x160']
+# (the update box on the title, a look for a made-up update.json of
+# 0.22.0 from a build that calls itself 0.21.2: the box as START first
+# shows it, a page on, Later; SELECT, Options' Game on its Update line)
+N22_UPDATE = '240:,6:pad.start,180:,6:pad.dpright,80:,6:pad.b,60:,6:pad.back,160:'
+# (Options from the PET on seed 4's second layer, its Audio page; the
+# builder with two Mettaurs set, B at FOES; the Jukebox from Lan's room,
+# L from BN6's Towns six sections back to BN5's Unused)
+N22_OPTIONS = N22_ARRIVE + '6:START,40:,' + '6:DOWN,6:,' * 6 + '6:A,120:,6:R,60:'
+N22_JUKEBOX = ('40:,' + '6:A,4:,' * 46 + '30:,6:START,6:,40:,' + '6:DOWN,6:,' * 5 + '6:A,6:,60:,6:DOWN,6:,6:RIGHT,6:,14:,6:A,6:,40:,'
+               + '40:,6:L,60:,6:DOWN,40:,6:DOWN,60:,' + '6:L,10:,' * 6 + '60:')
+SCREENSHOTS += [
+    ('saves-pages', N22_SAVED + ['--size', '240x160', '--input', N22_SAVES + '70:,6:R,74:,6:DOWN,40:,6:R,120:'],
+     [(800, 'saves-page-cloud'), (890, 'saves-page-code'), (1010, 'saves-page-file')], {}),
+    ('saves-cloud', N22_ONLINE + ['--input', N22_SAVES + '60:,6:A,90:,6:LEFT,40:,6:A,900:'],
+     [(960, 'saves-cloud-ask'), (1870, 'saves-cloud')], {}),
+    ('saves-code', N22_ONLINE + ['--input', N22_SAVES + '60:,6:R,60:,6:A,900:'], [(1800, 'saves-code')], {}),
+    ('update-box', ['--scene', 'title', '--pad', 'xbox', '--input', N22_UPDATE],
+     [(306, 'update-box'), (500, 'update-box-page'), (560, 'update-hint'), (790, 'options-update')], {}),
+    ('options-touch', ['--scene', 'title', '--touch', '--input', '60:,4:SELECT,100:,4:L,6:,60:,4:DOWN,6:,110:,4:RIGHT,6:,170:'],
+     [(410, 'options-touch')], {}),
+    ('options-depth', ['--scene', 'title', '--input', '60:,4:SELECT,100:,4:UP,6:,90:,4:RIGHT,6:,170:'], [(310, 'options-depth')], {}),
+    ('options-music', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', N22_OPTIONS], [(760, 'options-music')], {}),
+    # (Depth lighting on a layer with heights, the whole screen at 3x: Green
+    # Area's layer 4 of seed 2, MegaMan up its yellow stair on the terrace)
+    ('depth-climb', ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--net-biome', '3', '--dev', 'quiet', '--size', '720x480',
+                     '--depth-lighting', 'on', '--input', N22_ARRIVE + '100:UP+RIGHT,60:'], [(600, 'depth-climb')], {}, 1),
+    ('lab-leave', LAB + ['--input', LAB_METS + '6:B,60:'], [(936, 'lab-leave')], {}),
+    ('title-best', N22_SAVED + ['--input', N22_TITLE + '60:,6:START,150:'], [(840, 'title-best')], {}),
+    ('jukebox-bn5-unused', ['--scene', 'town', '--seed', '2', '--input', N22_JUKEBOX], [(1144, 'jukebox-bn5-unused')], {}),
+]
+WHOLE_ROMS_A += ('lab-leave',)
+# (the pictures that talk to a server of this machine, started before the
+# run and stopped after it: 'square' a Net Square server from source,
+# 'update' a folder with a release's update.json over HTTP)
+SCREENSHOT_SERVERS = {'saves-cloud': 'square', 'saves-code': 'square', 'update-box': 'update'}
+N22_SQUARE_INI = ('[server]\nname = Cyberworld Endless\nmotd = Welcome\nhost = 0.0.0.0\nport = {port}\nseed = 120\ncapacity = 8\n'
+                  'player_cap = 64\ntick_hz = 20\nstate_dir = {state}\nwhitelist =\nfree_text = false\ntrading = true\narena = true\norigins =\n')
+
+
+def screenshot_server(kind, tmp):
+    """A picture's server (SCREENSHOT_SERVERS), which a container reaches at
+    Docker's bridge address: its process (None where the picture needs none)
+    and what the run's environment gets for it."""
+    import time
+    if kind == 'square':
+        state = os.path.join(tmp, 'square')
+        os.makedirs(state)
+        ini = os.path.join(state, 'server.ini')
+        with open(ini, 'w', encoding='utf-8') as f:
+            f.write(N22_SQUARE_INI.format(port=N22_SQUARE_PORT, state=state))
+        server, env = subprocess.Popen([sys.executable, os.path.join(ROOT, 'server', 'main.py'), '--config', ini],
+                                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL), []
+    elif kind == 'update':
+        folder = os.path.join(tmp, 'update')
+        os.makedirs(folder)
+        with open(os.path.join(folder, 'update.json'), 'w', encoding='utf-8') as f:
+            if subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'update_manifest.py'), 'v0.22.0', folder], stdout=f):
+                sys.exit('screenshot_server: no update.json')
+        # (the notes' pictures from this server too: the release's own are not on GitHub before the tag)
+        with open(os.path.join(folder, 'update.json'), encoding='utf-8') as f:
+            manifest = f.read().replace('https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/download/v0.22.0/'
+                                        'update-pictures.bin', f'http://172.17.0.1:{N22_UPDATE_PORT}/update-pictures.bin')
+        with open(os.path.join(folder, 'update.json'), 'w', encoding='utf-8') as f:
+            f.write(manifest)
+        server = subprocess.Popen([sys.executable, '-m', 'http.server', str(N22_UPDATE_PORT), '--bind', '0.0.0.0', '--directory', folder],
+                                  stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        env = [('CYBERWORLD_UPDATE_URL', f'http://172.17.0.1:{N22_UPDATE_PORT}/update.json'), ('CYBERWORLD_UPDATE_FROM', '0.21.2')]
+    else:
+        return None, []
+    time.sleep(2)
+    if server.poll() is not None:
+        sys.exit(f'screenshot_server: the {kind} server did not start')
+    return server, env
+
 # pictures of others side by side for a release's notes (made after the
 # screenshots they hold): name, then its rows of (screenshot, label), each
 # at 2x under its label as tools/before_after.py's pairs
@@ -2175,6 +2264,8 @@ SCREENSHOT_SHEETS = {
     'numbropn-hand': [[('numbropn-five', 'Five chips'), ('numbropn-ten', 'NumbrOpn: ten chips')]],
     'groups-beats': [[('groups-beat-1', 'Layer 1: alone'), ('groups-beat-2', 'Layer 2: beside a partner'),
                       ('groups-beat-3', 'Layer 3: its constellation')]],
+    # 0.22.0's notes: saves, the dive, systems
+    'saves-pages': [[('saves-page-cloud', 'CLOUD'), ('saves-page-code', 'CODE'), ('saves-page-file', 'FILE')]],
 }
 SHEET_FONT = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
 
@@ -2321,9 +2412,15 @@ def screenshots(only=None):
                 return code
             home = SAVES_HOME
             mounts = mounts + [(os.path.join(tmp, 'home'), SAVES_HOME)]
-        code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
-                      *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
-                      mounts=mounts, env=[('HOME', home)] if rom_screen or saves else ())
+        server, served = screenshot_server(SCREENSHOT_SERVERS.get(name), tmp)
+        try:
+            code = docker('build/host/cyberworld', '--headless', '--rom-dir', '/rom', '--data-dir', data,
+                          *args, '--frames', str(max(f for f, _ in frames) + 1), shot, shots, *second,
+                          mounts=mounts, env=([('HOME', home)] if rom_screen or saves else []) + served)
+        finally:
+            if server:
+                server.terminate()
+                server.wait()
         for k, v in saved.items():
             if v is None:
                 os.environ.pop(k, None)
@@ -2492,6 +2589,98 @@ CLIPS = [
 ]
 
 
+# 0.22.0's notes: words and fixes
+# (stills of the lines and fixed screens, each a scripted run on a fresh data
+# folder. N22_IN: seed 4's first layer in Central Area, its arrival's words
+# paged, MegaMan free from frame 400; N22_CONTINUE: the title's START, then
+# A on CONTINUE; N22_SERVER: SERVER_8's talk paged to its question, Yes, the
+# Custom screen's START and OK, the buster down each row twice over, then A
+# through RESULT, the Server's words, the pick and its prize)
+N22_L1 = ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet']
+N22_IN = '100:,' + '4:A,6:,' * 30
+N22_CONTINUE = '200:,6:START,100:,6:A,'
+N22_ROWS = '6:B,6:,12:,' * 6
+N22_SERVER = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' +
+              (N22_ROWS + '8:UP,15:,' + N22_ROWS + '8:DOWN,15:,' + N22_ROWS + '8:DOWN,15:,' + N22_ROWS + '8:UP,15:,') * 2 + '6:A,60:,' * 22)
+# (the runs before a CONTINUE, quit as their frames end: L's words open on
+# seed 4's layer 2; a random battle won on layer 1, quit on its RESULT; seed
+# 5's layer 2 reached at 60 of 140 HP, Chaud's call paged)
+SCREENSHOT_PREP.update({
+    'quit-talk': (['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', '150:,' + '6:A,4:,' * 30 + '40:,6:L,144:'], {}, 630),
+    'quit-won': (['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--net-biome', '0', '--dev', 'quiet,god,onehit', '--input', '460:battle'],
+                 {'CYBERWORLD_AUTOPILOT': '1'}, 1101),
+    'heal-continue': (['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=140/60', '--input', '150:,' + '6:A,14:,' * 60], {}, 1500),
+})
+# (the ROMs screen with BN4's slot open, its line on what BN4 brings)
+NO_BN4_A += ('launcher-bn4-line',)
+SCREENSHOTS += [
+    # (Shorter stops on the way: a Net Dealer's one box before his list; L's
+    # first press, ProtoMan first of the two things worth a detour)
+    ('dealer-one-box', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet', '--talk', 'shop:430'], [(560, 'dealer-one-box')], {}),
+    ('l-two-things', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', '150:,' + '6:A,4:,' * 30 + '40:,6:L,144:'],
+     [(620, 'l-two-things')], {}),
+    # (Chaud's call and ProtoMan's race: Lan's surprise right after Chaud's
+    # name; the race's question, MegaMan's, on No)
+    ('chaud-race', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '0', '--dev', 'quiet', '--talk', 'duel:1500',
+                    '--input', '700:,' + '6:A,54:,' * 12 + '100:,' + '6:A,74:,' * 9], [(750, 'chaud-surprise'), (2150, 'race-question')], {}),
+    # (Lines that say what they mean: the Recovery Mr.Prog's patch at 40 of
+    # 100 HP, the HP it gave. A word after a battle: MegaMan's on the first
+    # virus from an older Net, in BN4's ACDC Area, once the fade is over, and
+    # Lan's answer there)
+    ('heal-says-hp', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:1100',
+                      '--input', '660:,' + '6:A,14:,' * 20 + '120:,' + '6:A,74:,' * 5], [(1400, 'heal-says-hp')], {}),
+    ('bn4-after-battle', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--net-biome', 'x15', '--dev', 'quiet,god,onehit', '--input', '460:battle'],
+     [(1268, 'bn4-word-after-battle'), (1300, 'bn4-old-viruses')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (What the run tells you: Dad's first call on what a dive leaves behind;
+    # MegaMan's word a few panels from a guardian's arena, its second box)
+    ('dad-keeps', ['--scene', 'town', '--seed', '2', '--input', '200:,' + '6:A,44:,' * 14], [(800, 'dad-keeps')], {}),
+    ('arena-ready', ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--dev', 'quiet', '--input', '200:,0:place 264 -31 1,100:,6:A,114:,6:A,120:'],
+     [(400, 'arena-ready')], {}),
+    # (A quit with a text box open: the CONTINUE after SCREENSHOT_PREP's quit
+    # in L's words. A quit after a won battle: the CONTINUE after its quit on
+    # RESULT, MegaMan where the battle met him)
+    ('quit-talk', ['--scene', 'title', '--input', N22_CONTINUE + '400:'], [(400, 'quit-talk')], {}),
+    ('quit-won', ['--scene', 'title', '--input', N22_CONTINUE + '400:'], [(400, 'quit-won')], {}),
+    # (The PET's Save and your next A: its own box. Blank chips in the
+    # Standard folder: FOLDER EDIT on a new run's folder)
+    ('pet-save', N22_L1 + ['--input', N22_IN + '30:,6:START,40:,' + '6:DOWN,6:,' * 7 + '6:A,200:'], [(650, 'pet-save')], {}),
+    ('folder-named', N22_L1 + ['--input', N22_IN + '30:,6:START,40:,6:A,80:,6:A,60:,6:A,120:'], [(720, 'folder-named')], {}),
+    # (A prize before the chatter: the Server's pick taken, its prize's box.
+    # Mr.Prog's gift, taken unseen: the gift's screen as A is pressed through
+    # his lines, its cursor still and faded)
+    ('server-prize', SERVER_8 + ['--input', N22_SERVER], [(3160, 'server-prize')], {}),
+    ('gift-cursor', N22_L1 + ['--talk', 'gift:450', '--input', N22_IN + '80:,' + '6:A,34:,' * 12], [(780, 'gift-cursor')], {}),
+    # (RESULT's virus count, and RECORDS' closest goal as a sentence)
+    ('result-count', ['--scene', 'summary', '--run-depth', '5', '--seed', '3', '--input', '320:,4:A,36:'],
+     [(200, 'result-count'), (400, 'records-goal')], {}),
+    # (Two menu lines made whole: Options' Fast forward note; the ROMs
+    # screen's line on BN4, its slot open and chosen)
+    ('options-fast-note', ['--scene', 'title', '--input', '60:,4:SELECT,100:,4:L,40:,4:DOWN,36:'], [(240, 'options-fast-note')], {}),
+    ('launcher-bn4-line', ['--scene', 'launcher', '--size', '1280x720', '--input', '40:,6:UP,10:,6:RIGHT,10:,6:RIGHT,40:'],
+     [(120, 'launcher-bn4-line')], {}, 2),
+    # (Mr.Prog's patch after a CONTINUE: SCREENSHOT_PREP's run continued at 60
+    # of 140 HP, the patch's Yes, half of max HP)
+    ('heal-continue', ['--scene', 'title', '--talk', 'heal:1300', '--input', N22_CONTINUE + '100:,' + '6:A,14:,' * 50 + '500:,' + '6:A,74:,' * 8],
+     [(2130, 'heal-continue')], {}),
+    # (First meetings: a fresh profile's first dive into an older Net's
+    # area, BN5's ACDC Area, MegaMan finding it old)
+    ('bn5-first-dive', ['--scene', 'emu', '--run-depth', '1', '--net-biome', 'x0', '--seed', '4', '--input', '200:,' + '6:A,44:,' * 14],
+     [(600, 'bn5-first-dive')], {}),
+    # (A stray A at a DarkChip: A pressed through the flame's words, the
+    # question on No)
+    ('dark-no', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet,darkchips=0x2', '--talk', 'dark:900',
+                 '--input', '200:,' + '6:A,14:,' * 32 + '100:,' + '6:A,34:,' * 22], [(1920, 'dark-no')], {}),
+    # (SAVES on a first start: no save yet, THIS DEVICE "No runs yet")
+    ('saves-first', ['--scene', 'saves', '--size', '240x160'], [(120, 'saves-first')], {}),
+]
+# 0.22.0's notes: Aquarium Comp's tanks (the autopilot's seed 1 in Aquarium
+# Comp alone, passing the tank that stands on its third layer)
+SCREENSHOTS += [
+    ('aquarium-tank', ['--scene', 'emu', '--seed', '1', '--net-biome', '12', '--run-depth', '3', '--dev', 'quiet'],
+     [(550, 'aquarium-tank')], {'CYBERWORLD_AUTOPILOT': '1'}),
+]
+
+
 # the clips the README or a release's notes show as GIFs too (GitHub plays no
 # video from the repository): name, then its first seconds and frames a second
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
@@ -2516,6 +2705,83 @@ README_GIFS.update({name: (None, 10) for name in ('compare-bn4-park', 'compare-b
                                                    'compare-seaside', 'compare-undernet')})
 # 0.21.2: AquaNdl1 before and after at BN5's and BN4's viruses (tools/before_after.py --clips)
 README_GIFS['compare-bn5-aquandl'] = (None, 15)
+# 0.22.0's notes: saves, the dive, systems (tools/online_pictures.py's DIVE_CLIPS)
+README_GIFS['online-dive'] = (None, 15)
+# 0.22.0's notes: the net
+# (a layer's arrival paged, MegaMan free at 470, as tools/trailers/v0_22_0_footage.py's ARRIVE; an area's
+# layer walked by the weak autopilot in god mode, so no battle moves its frames)
+N22_ARRIVE = '150:,' + '6:A,4:,' * 30 + '20:,'
+N22_WEAK = {'CYBERWORLD_AUTOPILOT': 'weak'}
+N22_AUTO = {'CYBERWORLD_AUTOPILOT': '1'}
+
+
+def n22_walk(biome, seed, depth=1, dev='quiet,god'):
+    return ['--scene', 'emu', '--run-depth', str(depth), '--seed', str(seed), '--net-biome', str(biome), '--dev', dev]
+
+
+# (L, its boxes paged, and the arrow it leaves)
+N22_L = N22_ARRIVE + '20:,6:L,144:,' + '6:A,144:,' * 3 + '60:,200:'
+# (ProtoMan's terms opened at 610 and paged, Yes, OK with no chips: the race's first turn)
+N22_RACE = '300:,' + '4:A,6:,' * 30 + '6:A,114:,' * 6 + '120:,6:LEFT,14:,6:A,400:,6:START,4:,6:A,600:'
+# (Lan's room, Dad's call paged: Lan free at 530)
+N22_ROOM = '40:,' + '4:A,6:,' * 46 + '30:,'
+# (seed 7's layer 3 to its arena's door, a soft reset, START, CONTINUE)
+N22_DOOR = '1500:,6:A+B+SELECT+START,260:,6:START,150:,6:A,500:'
+N22_GUTSMAN = ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--net-biome', 'x15', '--guardian', '35', '--dev', 'quiet,god,onehit']
+N22_GLITCH = ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet,god,glitch,side=4,glitchstage=5']
+N22_COPYBOT = ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '15', '--dev', 'quiet']
+SCREENSHOTS += [
+    # (the net's locks: seed 4's second layer, the Security Cube beside the arrival, MegaMan's first box on it;
+    # the footage's LOCK)
+    ('lock-cube', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input',
+                   N22_ARRIVE + '24:UP+RIGHT,20:,60:DOWN+LEFT,10:,' + '6:A,116:,' * 4 + '6:A,60:'], [(660, 'lock-cube')], {}),
+    # (what stands beside the floor, MegaMan by each: Robot Control Comp's figure behind seed 9's arrival pad
+    # and its wires' red lights; the Nest's crystals; Judge Tree Comp's planters under a wall and tufts on the
+    # rims; Mr. Weather Comp's cloud; the Undernet's fire bowls and Undernet Zero's; BN4's Undernet's horns;
+    # BN5's Undernet's skull totem; End Area's pagoda, "piece in a hole at world 68,-84" of seed 9's layer in
+    # CYBERWORLD_EMU_DEBUG's lines)
+    ('robot-figure', n22_walk(11, 9, dev='quiet') + ['--input', '110:,' + '6:A,24:,' * 8 + '50:UP+LEFT,150:'], [(520, 'robot-figure')], {}),
+    ('robot-wires', n22_walk(11, 9), [(620, 'robot-wires')], N22_WEAK),
+    ('nest-crystals', n22_walk(7, 4, 2), [(852, 'nest-crystals')], N22_WEAK),
+    ('judge-planters', n22_walk(13, 1), [(1380, 'judge-planters')], N22_WEAK),
+    ('weather-cloud', n22_walk(14, 2), [(260, 'weather-cloud')], N22_WEAK),
+    ('undernet-bowls', n22_walk(5, 5, 2), [(780, 'undernet-bowls')], N22_WEAK),
+    ('undernet-zero-bowls', n22_walk(6, 5, 2), [(1800, 'undernet-zero-bowls')], N22_WEAK),
+    ('bn4-horns-run', n22_walk('x19', 1), [(460, 'bn4-horns-run')], N22_WEAK),
+    ('bn5-undernet-totem', n22_walk('x5', 2, 2), [(1140, 'bn5-undernet-totem')], N22_WEAK),
+    ('bn5-end-pagoda', n22_walk('x2', 9) + ['--input', N22_ARRIVE + '0:place 100 -100 7,40:'], [(505, 'bn5-end-pagoda')], {}),
+    # (ProtoMan's race on seed 3's second layer: a Mettaur and an OldStove, his time over the clock)
+    ('race-start', n22_walk(0, 3, 2, 'quiet') + ['--talk', 'duel:610', '--input', N22_RACE], [(2030, 'race-start')], {}),
+    # (SELECT's map on seed 2's second layer, MegaMan hurt and L's way to the Recovery Mr.Prog in the key's
+    # Heal green, the key's ProtoMan on its second row)
+    ('map-heal-way', ['--scene', 'emu', '--run-depth', '2', '--seed', '2', '--net-biome', '0', '--dev', 'quiet,mapall,hp=300/60', '--input',
+                      N22_ARRIVE + '20:,6:L,144:,' + '6:A,144:,' * 6 + '60:,240:SELECT,40:'], [(1700, 'map-heal-way')], {}),
+    # (the arrow pointing down, below MegaMan's feet: seed 52's second layer after L)
+    ('arrow-below', ['--scene', 'emu', '--run-depth', '2', '--seed', '52', '--dev', 'quiet', '--input', N22_L], [(1170, 'arrow-below')], {}),
+    # (fixed: BN4's GutsMan guarding BN4's ACDC Area, facing MegaMan on his left, and his Guardian Data once
+    # he is deleted; Town Area's exit pad on its pale floor after FireMan, #624's start; the Glitch copy
+    # standing as SpoutMan, #626's start; a CONTINUE from seed 7's arena's door and the guardian's card after)
+    ('bn4-gutsman-data', N22_GUTSMAN, [(1800, 'bn4-gutsman-faces'), (4250, 'bn4-gutsman-data')], N22_AUTO),
+    ('bn4-town-exit-pad', ['--scene', 'emu', '--run-depth', '3', '--seed', '1016', '--net-biome', 'x16', '--dev', 'quiet,god,onehit'],
+     [(2640, 'bn4-town-exit-pad')], N22_AUTO),
+    ('glitch-copy-spoutman', ['--scene', 'emu', '--run-depth', '7', '--seed', '1', '--dev', 'quiet,god,glitch,side=4', '--input',
+                              N22_ARRIVE + '0:glitch,300:'], [(520, 'glitch-copy-spoutman')], {}),
+    ('continue-door', ['--scene', 'emu', '--run-depth', '3', '--seed', '7', '--net-biome', '11', '--guardian', '12', '--input', N22_DOOR],
+     [(2010, 'continue-door'), (2250, 'continue-door-card')], N22_WEAK),
+]
+CLIPS += [
+    # (the net climbs: Green's layer 4 of seed 2, up the yellow stair to the terrace and back down; CopyBot
+    # Comp's layer 2, up its railed ladder onto the raised room: the footage's CLIMB_A and CLIMB_B)
+    ('net-climb', ['--scene', 'emu', '--run-depth', '4', '--seed', '2', '--net-biome', '3', '--dev', 'quiet'], {},
+     N22_ARRIVE + '100:UP+RIGHT,30:,100:DOWN+LEFT,30:', 470, 730),
+    ('net-climb-ladder', N22_COPYBOT, {}, N22_ARRIVE + '0:place 268 -124 7,20:,150:UP+LEFT,40:', 470, 680),
+    # (the Glitch layer: MegaMan by the copy at its heart (0:glitch), its body changing between its forms'
+    # and a flip into Seaside's look with Seaside's sky)
+    ('glitch-copy-bodies', N22_GLITCH, {}, N22_ARRIVE + '0:glitch,400:', 480, 860),
+    # (Lan a step short of his desk, R: he walks onto the PC's spot and jacks in)
+    ('desk-jack-in', ['--scene', 'town', '--seed', '2'], {}, N22_ROOM + '0:place -24 8 7,30:,6:R,300:', 540, 800),
+]
+README_GIFS.update({'net-climb': (None, 10), 'net-climb-ladder': (None, 10), 'glitch-copy-bodies': (None, 12), 'desk-jack-in': (None, 15)})
 
 
 def clips(only=None):

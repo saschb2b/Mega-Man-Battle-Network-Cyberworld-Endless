@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-15T20:43:43Z
+* **Update**: releases/v0.22.0.md (the shared dive, the net climbing, what stands beside the floor, the locks, the Glitch layer, touch controls off and SAVES on a first start written in, from the pull requests merged since #627).
