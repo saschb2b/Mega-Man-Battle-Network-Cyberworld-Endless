@@ -908,9 +908,11 @@ bool netmap_build_layer(int area, uint32_t seed) {
 	 * back to one wide, stepped them aside and cut their mouths off a
 	 * junction's line; half the exact-panel stops on its walks were made
 	 * there, docs/world/level-design/generator.md, Navigation; a mission's
-	 * dark board as it was) */
+	 * dark board as it was; and in BN6's own areas, where it wore the
+	 * Seaside arrival's widened walkway into a one-panel step aside that
+	 * stopped a playtester, session 78) */
 	const NetAreaDef *na = net_area_def(area);
-	if (area >= NET_AREAS && na && !na->held && !layer.dark) layer_way_floor(locked);
+	if ((area < NET_AREAS || (na && !na->held)) && !layer.dark) layer_way_floor(locked);
 	/* the props with their aisles and the floor before them */
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
