@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:04:49Z
-* **Update**: engine/emulation/layer.md (a quit on a won battle's RESULT or the fade back runs the game on to MegaMan free and keeps the run there, director_settle.c), game/meta/arena-door.md (a random battle's quit, before and after it is won), code/director.md (director_settle.c).

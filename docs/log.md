@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: engine/emulation/layer.md (a quit on a won battle's RESULT or the fade back runs the game on to MegaMan free and keeps the run there, director_settle.c), game/meta/arena-door.md (a random battle's quit, before and after it is won), code/director.md (director_settle.c).
 * **Update**: game/rival.md (Chaud's call says who he is the first time alone, Lan's surprise right after his name, and a profile that has heard him, a duel fought or not, hears "it's Chaud again" or the record; ProtoMan names the race Chaud's call set rather than telling it again; his time is given to the hundredth, half a second either way; a race's question is MegaMan's "Race his time?", session 76).
 * **Update**: voice/sweep/main-path.md (the third pass: the Net Dealer's one box before his list and L's two detours, counted before and after; the double A on a finished box BN6's own), voice/sweep/index.md (its line), world/level-design/teaching-set-pieces.md (the dealer names a key for his own layer's lock, L no longer lists the pieces), world/level-design/index.md (its line), voice/sweep/net.md (the dealer's gap and L's "I sense" since the third pass), game/core-loop.md (act 1's dealer's line as it now reads).
 * **Update**: game/fidelity.md (the title's key hints moved from under the copyright line, which ran into its letters at the picture's foot, to a line each over the version in the bottom left corner).
