@@ -51,6 +51,11 @@ bool boss_at_door(void);
 extern bool (*boss_door_hold)(void);
 void boss_party_set(int n);
 #define PARTY_HP_MOST 9999
+/* The guardian's battle fought elsewhere (the shared dive's party core,
+ * party_play.h; NULL none): given his Encounter, his own HP and the HP he
+ * is fought at, true where it takes the fight, and the run's core does not
+ * start it; its end comes back through director_party_over */
+extern bool (*boss_party_fight)(const Encounter *e, int own_hp, int fought_hp);
 /* After a run saved mid-layer is loaded: the guardian's state from its
  * flags. */
 void boss_resume(void);

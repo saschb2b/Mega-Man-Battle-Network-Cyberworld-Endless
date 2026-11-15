@@ -341,6 +341,22 @@ static bool gameover_update(void) {
 	return false;
 }
 
+void director_party_over(bool won, int hp) {
+	if (!boss_fighting()) return;
+	uint8_t b[2] = { (uint8_t)hp, (uint8_t)(hp >> 8) };
+	emu_write(BN6_NAVI_HP, b, sizeof b);
+	/* (deleted: the run over as a deletion ends it alone, the owner's call) */
+	if (hp <= 0) {
+		D.lost_to = boss_foe();
+		boss_lost();
+		end_run();
+		return;
+	}
+	boss_battle_over(won);
+	if (won) folder_milestone_guardian();
+	D.pet_refreshed = false;
+}
+
 /* The short net's last guardian fallen and its exit open: the run's end
  * said on the map, before the pad (the win went from the pad straight to
  * the title's summary) */

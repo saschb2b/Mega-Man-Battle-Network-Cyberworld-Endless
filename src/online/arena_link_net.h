@@ -72,6 +72,8 @@ typedef struct {
 	unsigned nmine;
 	bool readied, recorded;           /* my ready and record said, and what they said */
 	uint64_t ready_hash, record;
+	bool party;                       /* a party's (arena_link_net_party) */
+	unsigned gone;                    /* a party's seats gone (bit k seat k: arena_link_net_gone), no more waited for */
 	bool ended;                       /* the server said the battle is over for us */
 	unsigned since_end;
 	char broken[96];
@@ -82,6 +84,12 @@ ArenaLink *arena_link_net(ArenaNetLink *l, uint32_t match, unsigned side, unsign
 /* ... a 2v2's (protocol v15), before any message: four seats, mine `seat`
  * (link.side its GBA's, seat & 1) */
 void arena_link_net_seats(ArenaNetLink *l, unsigned seat);
+/* ... a party's of the shared dive (protocol v19, issue #589): `n` seats
+ * on one field, mine `seat`, each other's keys through poll_player */
+void arena_link_net_party(ArenaNetLink *l, unsigned seat, unsigned n);
+/* ... a seat of it gone (ARENA_STATE seat_gone): its ready and hashes no
+ * more waited for */
+void arena_link_net_gone(ArenaNetLink *l, unsigned seat);
 /* A relayed message for this battle (ARENA_INPUT or ARENA_HASH, a 2v2's
  * in ARENA_SEAT): false where it is not this battle's or not one */
 bool arena_link_net_take(ArenaNetLink *l, const uint8_t *data, size_t size);

@@ -40,6 +40,11 @@ int director_town_tint(bool *box);
 typedef struct { int biome, navi; bool back; } DirectorWay;
 int director_home_ways(DirectorWay *out, int most);
 /* A run is under way on the layers (it has been saved). */
+/* The guardian's battle the run's core did not fight (the shared dive's
+ * party core, party_play.h) over: won or not, MegaMan's HP left written
+ * into the run, and the guardian's course on as after a fight of its own;
+ * HP 0, he was deleted, and the run ends as a deletion ends it */
+void director_party_over(bool won, int hp);
 bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
