@@ -240,6 +240,8 @@ static bool all_here(void) {
 static void open_core(void) {
 	char why[160] = "";
 	PP.b.quiet = PP.net;
+	PP.b.scripted = !PP.net;
+	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
 	if (!PP.core) { failed(why); return; }

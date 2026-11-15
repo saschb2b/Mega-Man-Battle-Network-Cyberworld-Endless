@@ -28,6 +28,7 @@ typedef struct {
 	uint16_t hp[PARTY_MOST], max_hp[PARTY_MOST];   /* each MegaMan's HP going in (0: as spawned) */
 	int foe_from, foe_to;           /* the enemy spawning with foe_from HP given foe_to (the guardian's for the party) */
 	int hp_set, end;                /* the spike's: the partners' HP (partyhp), the enemies' HP set to 1 at an iteration (partyend) */
+	bool spread;                    /* the enemies' aim passed over the party in turn (party_field_aim) */
 	/* set before each frame */
 	uint16_t keys[PARTY_MOST];      /* each partner's keys (keys[0] the pad's, unused here) */
 	/* the battle's, which a rollback puts back with the core */
@@ -35,11 +36,20 @@ typedef struct {
 	uint32_t tick;                  /* its key copies of side 0 so far */
 	uint16_t seen_hp[2][PARTY_MOST];   /* each side's actors' HP as last seen */
 	uint32_t seen_obj[2][PARTY_MOST];  /* ... and their objects */
+	unsigned swapped;               /* side 0's slot traded into its first while an enemy's routine runs (0 none) */
 } PartyField;
 
 /* `f`'s hooks on `core`'s table (hook_core's): false where one was not
  * taken */
 bool party_field_hooks(HookCore *core, PartyField *f);
+
+/* ... and the enemies' aim spread over the party (f->spread): BN6's take
+ * side 0's first slot of BN6_BATTLE_PLAYERS for their target as they
+ * update (docs/re/ledger/experiments/2026-11-15-the-enemies-aim-at-side-0s-first-slot.json),
+ * so while an object of side 1's routine runs that slot holds the MegaMan
+ * the party's turn names, every AIM_TURN iterations the next standing one,
+ * and the lead's object is back in it as the routine returns */
+bool party_field_aim(HookCore *core, PartyField *f);
 
 /* The hooks on the game's core, once (game_hooks_after_boot), for --dev
  * party=n: every battle of the run with n MegaMen (2 to PARTY_MOST); hp > 0

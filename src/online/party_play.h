@@ -29,8 +29,9 @@ void party_play_on(bool on);
  * fight on the party's core, the partners scripted; partybot=1 my keys in
  * a party's fight a bot's, as the Arena's arenaboth (the Custom screen's OK,
  * then charged shots); partyroll=W over the server the rollback window,
- * partydelay=N the input delay (every game of the party alike) */
-typedef struct { int n, twin, roll, end, bot, delay; } PartyDev;
+ * partydelay=N the input delay, partylead=1 the enemies' aim on the lead
+ * alone as BN6 has it (every game of the party alike) */
+typedef struct { int n, twin, roll, end, bot, delay, lead; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size and the input delay; the next guardian's fight its */

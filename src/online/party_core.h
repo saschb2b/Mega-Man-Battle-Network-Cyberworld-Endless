@@ -31,6 +31,8 @@ typedef struct {
 	unsigned n;                           /* its MegaMen, 1 to PARTY_MOST */
 	OnlineLoadout seat[PARTY_MOST];       /* each seat's MegaMan, as it came */
 	bool quiet;                           /* no field log */
+	bool scripted;                        /* the partners' keys the spike's script (--dev partycore alone) */
+	bool spread;                          /* the enemies' aim passed over the party in turn (party_field_aim) */
 	int end;                              /* the enemies set to 1 HP at this iteration (the dev's partyend), 0 never */
 } PartyBattle;
 

@@ -17,6 +17,7 @@
 #define LIST_MOST  ((RAM_TEAM_END - RAM_TEAM) / BN6_ENTITY_SIZE)   /* entries the grown list holds, its end among them */
 #define SIDE_MOST  4                                               /* BN6's actors a side (bn6f BATTLE_ACTORS_PER_SIDE) */
 #define PARTNER_KEYS (KEY_UP | KEY_DOWN | KEY_LEFT | KEY_RIGHT | KEY_B)   /* a partner's: no hand, so no A; no Custom screen of his own */
+#define AIM_TURN     240                                           /* the battle loop's iterations each MegaMan in turn draws the enemies' aim */
 
 _Static_assert(SIDE_MOST == PARTY_MOST, "a party is a side's actors");
 
@@ -154,6 +155,48 @@ static HookAct spawned(HookRegs *r, void *user) {
 	PartyField *f = user;
 	if (f->foe_from > 0 && hook_read8(r->r[5] + BN6_T1_ALLIANCE) == 1 && r->r[2] == (uint32_t)f->foe_from) r->r[2] = (uint32_t)f->foe_to;
 	return HOOK_CONTINUE;
+}
+
+/* side 0's slot k, its object */
+static uint32_t slot(unsigned k) { return BN6_BATTLE_PLAYERS + k * BN6_SIDE_PARTNER; }
+
+static void trade(unsigned k) {
+	uint32_t lead = hook_read32(slot(0)), other = hook_read32(slot(k));
+	hook_write32(slot(0), other);
+	hook_write32(slot(k), lead);
+}
+
+/* the MegaMan whose turn it is to draw the enemies' aim: the standing ones in turn, AIM_TURN iterations each */
+static unsigned aimed(const PartyField *f) {
+	unsigned up[SIDE_MOST], n = 0;
+	for (unsigned k = 0; k < (unsigned)f->standing && k < SIDE_MOST; ++k) {
+		uint32_t obj = hook_read32(slot(k));
+		if (obj && hook_read16(obj + BN6_T1_HP)) up[n++] = k;
+	}
+	return n ? up[(f->tick / AIM_TURN) % n] : 0;
+}
+
+/* an object's routine about to run (r5 the object): one of side 1's sees the MegaMan in turn in side 0's first slot */
+static HookAct logic_in(HookRegs *r, void *user) {
+	PartyField *f = user;
+	f->swapped = 0;
+	if (!f->spread || f->standing < 2 || !r->r[5] || hook_read8(r->r[5] + BN6_T1_ALLIANCE) != 1) return HOOK_CONTINUE;
+	unsigned k = aimed(f);
+	if (k) { trade(k); f->swapped = k; }
+	return HOOK_CONTINUE;
+}
+
+/* ... and returned: the lead's object back in the first slot */
+static HookAct logic_back(HookRegs *r, void *user) {
+	(void)r;
+	PartyField *f = user;
+	if (f->swapped) trade(f->swapped);
+	f->swapped = 0;
+	return HOOK_CONTINUE;
+}
+
+bool party_field_aim(HookCore *core, PartyField *f) {
+	return hook_on(core, BN6_OBJECT_LOGIC_CALL, logic_in, f) && hook_on(core, BN6_OBJECT_LOGIC_BACK, logic_back, f);
 }
 
 bool party_field_hooks(HookCore *core, PartyField *f) {

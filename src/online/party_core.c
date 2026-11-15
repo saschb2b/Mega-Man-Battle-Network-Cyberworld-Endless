@@ -119,6 +119,8 @@ static void field_set(PartyField *f, const PartyBattle *b) {
 	memset(f, 0, sizeof *f);
 	f->n = (int)b->n;
 	f->quiet = b->quiet;
+	f->scripted = b->scripted;
+	f->spread = b->spread;
 	f->foe_from = b->foe_from;
 	f->foe_to = b->foe_to;
 	f->end = b->end;
@@ -165,7 +167,7 @@ PartyCore *party_core_open(const uint8_t *rom, size_t size, const uint8_t *run_r
 	if (!arena_loadout_install(&m, &b->seat[0], why, wn)) { party_core_close(pc); return NULL; }
 	HookCore *hc = hook_core(pc->core);
 	pc->forcing = true;
-	if (!hc || !xlog_hook_core(pc->core) || !soulunite_held_core(pc->core, b->seat[0].souls) || !party_field_hooks(hc, &pc->field) ||
+	if (!hc || !xlog_hook_core(pc->core) || !soulunite_held_core(pc->core, b->seat[0].souls) || !party_field_hooks(hc, &pc->field) || !party_field_aim(hc, &pc->field) ||
 		!hook_on(hc, BN6_ENCOUNTER_CHECK, forced, pc)) {
 		fail(pc, why, wn, "the party's core's hooks could not be set");
 		return NULL;

@@ -206,8 +206,9 @@ Verified on `dev`, 15 November 2026:
   field, a second core built beside it from the same keys agreeing at
   every 60th frame (20 of 20, the hash at frame 60 `ac164177e6d71616` in
   two runs), the field rolled back 30 frames every 30 and run again to
-  the same hash (41 of 41), the partner's shot deleting BlastMan at
-  iteration 309, the win back on the map at frame 1242.
+  the same hash (41 of 41), the lead's buster deleting BlastMan at
+  iteration 309, the win back on the map at frame 1242 (the partners
+  stood still then: `partycore` now gives them the spike's script).
 - **Over the server** (15 November 2026, `party_play.c`, protocol v19's
   party seats): seat 0's START with format `arena_party` takes the next
   guardian's fight to the party's core. Each game sends its MegaMan
@@ -235,7 +236,10 @@ Verified on `dev`, 15 November 2026:
   guessed (1250 of Alpha's 1261 frames on a guess, 30 rollbacks; 616 of
   Beta's, 16): the same 21 hashes agreed, each the lockstep run's own
   (`03c86e95f9bbd37b` at frame 60, `052d533a189ea788` at 1260, the bot's
-  keys being the frame's), the battle over at 1261 again.
+  keys being the frame's), the battle over at 1261 again. Beta's game
+  killed partway (`partyend=900`): 7 hashes agreed to frame 420, Alpha
+  told "seat 1 gone" at frame 476, Beta's MegaMan off the field, Alpha
+  fighting on alone until AquaMan deleted him at 658 (his run over).
 - **The end into each run** (15 November 2026, `director_party_over`):
   BN6's results on the party's core, then won or lost and this seat's
   MegaMan's HP as the field last saw it written into the run; won, the
@@ -253,8 +257,28 @@ Verified on `dev`, 15 November 2026:
   `arena_linked` as before. Not yet: the partners' own NaviStats, hand and
   Custom screen (the two-a-side's, one partner a side, to be grown to three
   on side 0: a partner fights with his buster and his own HP, his B and
-  directions alone crossing), a crew's join-in battles on one field, and
-  who the enemies aim at.
+  directions alone crossing), and a crew's join-in battles on one field.
+- **Who the enemies aim at** (15 November 2026, `party_field.c`'s
+  `party_field_aim`): a probe first, side 0's first two slots of
+  `BN6_BATTLE_PLAYERS` swapped at iteration 300 against BlastMan: his
+  next hit (377) still struck the lead, every one after (694, 929, 1417,
+  1706) the partner now in slot 0, who stood still; the panels under every
+  MegaMan held the same flags. So BN6's enemies take their aim from side
+  0's first slot (bn6f battle_findPlayer, `BN6_SIDE_PLAYER_GET`, returns
+  the side's first player-like actor), deciding it some frames before the
+  hit. On the party's core that slot now holds, while an object of side
+  1's routine runs (`BN6_OBJECT_LOGIC_CALL`, bn6f RunBattleObjectLogic's
+  call, to `BN6_OBJECT_LOGIC_BACK`), the MegaMan whose turn it is, each
+  standing one 240 iterations in turn, the lead's object back as the
+  routine returns; every other routine sees BN6's own order.
+  (`partylead=1` gives BN6's own aim.) Against BlastMan with three
+  MegaMen his hits went to all three in turn (377 actor 1, 694 actor 2,
+  929 the lead, 1417 actor 2, 1692 the lead, 1955 actor 1, 2415 the
+  lead), a twin core and 30-frame rollbacks agreeing every time (56 and
+  113 of them); over the server with two games (`partybot=1`,
+  `partydelay=1`, AquaMan for two) 16 hashes agreed on each to the
+  battle's end at frame 966, both bots' MegaMen struck and deleted, lost
+  in both. The turn's length is a first pick, for the owner's eye.
 
 ## The spike: four on one field (15 November 2026)
 
