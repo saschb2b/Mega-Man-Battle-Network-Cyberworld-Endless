@@ -38,6 +38,12 @@
   your saves and your run kept. Elsewhere the line opens the download
   page. Options' Game page has an **Updates** switch to turn the look
   off.
+- **ProtoMan's races leave out Powies.** A Powie spends two seconds on
+  its panel between jumps and can't be hit in the air, so a race against
+  it timed its jumps, not your hand. A race squad with one is rolled
+  again among the act's battles, as one with a Quaker already was. A
+  run saved on a race's layer by an earlier build continues that layer
+  afresh.
 
 ## 0.21.2 (2026-11-14)
 
