@@ -273,7 +273,11 @@ static void learn_decor(const AreaSrc *m, const NetAreaDef *na, Learned *L) {
 	/* (and what it hangs on its floor's sides, where the area sets such: sides.h) */
 	if (na->sides & 1) sides_learn(m, &L->sides);
 	if (na->sides & 4) behind_learn(m, &L->sides);
-	if (na->sides & 8) edges_learn(m, L->book[0].face, &L->sides);
+	if (na->sides & 8) {
+		uint8_t *panels = tiles_src_panels(m, na->styles, na->walk_styles, na->skip_styles, na->joint_hues, na->bg_in_map);
+		if (panels) edges_learn(m, L->book[0].face, panels, &L->sides);
+		free(panels);
+	}
 }
 
 /* (debug output) what area `area` learned */

@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "tiles.h"
 
 #define MIN_TILES    4
 #define MAX_TILES  160
@@ -21,6 +22,7 @@
 #define FLOOR_DV     4   /* a floor's top is drawn this far below its panel's edges */
 #define PANELS      32   /* panels a piece may lie over, counted apart */
 #define UNDER_PX     6   /* pixels over a panel at least for the panel to count as under it */
+#define LOOKS       24   /* looks of a floor's sides, under or behind it, a book takes at most */
 
 static int div_floor(int a, int b) { return a / b - (a % b < 0); }
 
@@ -172,6 +174,13 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	bool hang = kind != 0;
 	int tw = a->tw, th = a->th;
 	if (out->n >= SIDES_MAX) return;
+	if (out->n == out->cap) {
+		int cap = out->cap ? 2 * out->cap : 8;
+		SidePiece *more = realloc(out->piece, (size_t)cap * sizeof *more);
+		if (!more) return;
+		out->piece = more;
+		out->cap = cap;
+	}
 	SidePiece *p = &out->piece[out->n];
 	memset(p, 0, sizeof *p);
 	p->tiles = calloc((size_t)g->n, sizeof *p->tiles);
@@ -194,12 +203,18 @@ static void keep(const AreaSrc *a, const int *queue, const Group *g, int A, int 
 	++out->n;
 }
 
+void sides_free(SideBook *b) {
+	for (int k = 0; k < b->n; ++k) { free(b->piece[k].tiles); free(b->piece[k].prio); }
+	free(b->piece);
+	memset(b, 0, sizeof *b);
+}
+
 void sides_learn(const AreaSrc *a, SideBook *out) {
 	if (a->layers < 2 || !a->rings || !a->front) return;
 	int tw = a->tw, th = a->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
 	int *queue = malloc((size_t)tw * th * sizeof *queue);
-	for (int i = 0; seen && queue && i < tw * th && out->n < SIDES_MAX; ++i) {
+	for (int i = 0; seen && queue && i < tw * th && out->n < LOOKS; ++i) {
 		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
 		Group g;
 		int A, B;
@@ -255,7 +270,7 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 	int tw = r->tw, th = r->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
 	int *queue = malloc((size_t)tw * th * sizeof *queue);
-	for (int i = 0; seen && queue && i < tw * th && out->n < SIDES_MAX; ++i) {
+	for (int i = 0; seen && queue && i < tw * th && out->n < LOOKS; ++i) {
 		if (seen[i] || !hang_tile(r, i % tw, i / tw)) continue;
 		Group g;
 		int A, B;
@@ -280,9 +295,11 @@ void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }
  * joined 8 ways are one piece; the ones among them that draw the floor's
  * art too are set over a layer's own, the others over nothing. */
 
-#define RIM_UP      6   /* a floor's back rim and its outline stand this far over its top at most */
+#define RIM_UP      3   /* a floor's back rim's outline stands this far over its top at most (2 on the Judge Tree's) */
 #define PAST_PX     4   /* pixels a tile draws past the floor's body at least to grow on it */
-#define EDGE_TILES 24   /* ... and what grows is no larger (the Judge Tree's stumps, its tree's court are) */
+#define BODY_PX     8   /* ... and of the floor's art to draw that too (a planter's corner in a wall's room is not) */
+#define EDGE_TILES 24   /* ... and what grows is no larger (the Judge Tree's stumps, its tree's court are), */
+#define EDGE_WHOLE 48   /* ... with the ring of the floor's tiles round it no larger than this */
 
 /* Which of the map's pixels lie on a ground panel's top, a bit each. */
 static uint8_t *tops_of(const AreaSrc *a) {
@@ -319,7 +336,7 @@ static int body_at(const AreaSrc *a, const uint8_t *t, int face, int x, int y) {
 }
 
 /* Per tile: bit 0 it grows on the floor, bit 1 it draws the floor's art
- * too; and over the map, how many of those pixels are a rim's and a
+ * too (BODY_PX of its pixels); and over the map, how many of those pixels are a rim's and a
  * wall's, in rim[] and wall[] by tile. */
 static uint8_t *grow_marks(const AreaSrc *a, int face, uint16_t *rim, uint16_t *wall) {
 	int tw = a->tw, th = a->th, W = tw * 8;
@@ -335,13 +352,77 @@ static uint8_t *grow_marks(const AreaSrc *a, int face, uint16_t *rim, uint16_t *
 				if (b == 2) ++rim[i];
 				if (b == 3) ++wall[i];
 			}
-		m[i] = (uint8_t)((past >= PAST_PX) | (body > 0) << 1);
+		m[i] = (uint8_t)((past >= PAST_PX) | (body >= BODY_PX) << 1);
 	}
 	free(t);
 	return m;
 }
 
-void edges_learn(const AreaSrc *a, int face, SideBook *out) {
+/* Group g, its tiles in `queue`, with the tiles round it that draw the
+ * floor's art (`mark` bit 1) added; whether it is still no larger than
+ * EDGE_WHOLE, off the map's edge. */
+static bool ring(const AreaSrc *a, const uint8_t *mark, int *queue, Group *g) {
+	int tw = a->tw, th = a->th, n = g->n;
+	for (int k = 0; k < n; ++k)
+		for (int d = 0; d < 9; ++d) {
+			int x = queue[k] % tw + d % 3 - 1, y = queue[k] / tw + d / 3 - 1;
+			if (x < 0 || y < 0 || x >= tw || y >= th || !(mark[y * tw + x] & 2) || mark[y * tw + x] & 1) continue;
+			int j = n;
+			while (j < g->n && queue[j] != y * tw + x) ++j;
+			if (j < g->n) continue;
+			if (g->n == EDGE_WHOLE) return false;
+			queue[g->n++] = y * tw + x;
+			if (x < g->x0) g->x0 = x;
+			if (x > g->x1) g->x1 = x;
+			if (y < g->y0) g->y0 = y;
+			if (y > g->y1) g->y1 = y;
+			g->edge |= x == 0 || y == 0 || x == tw - 1 || y == th - 1;
+		}
+	return !g->edge && g->x1 - g->x0 < MAX_W && g->y1 - g->y0 < MAX_H;
+}
+
+/* Into p->under, every panel of map a whose top, rim or wall (`face`
+ * pixels tall) could draw in the tiles of group g, from its panel (A, B),
+ * as ground floor or none: a layer sets it where each is the same, so its
+ * tiles go over no other floor's art (a wall of a walkway further back
+ * reaching down to a tuft) and none is missing under them. Whether they
+ * fit in SIDE_REACH. */
+static bool reach(const AreaSrc *a, int face, const int *queue, const Group *g, int A, int B, SidePiece *p) {
+	p->nunder = 0;
+	for (int k = 0; k < g->n; ++k)
+		for (int y = queue[k] / a->tw * 8 - face; y < queue[k] / a->tw * 8 + 8 + RIM_UP; ++y)   /* (the walls of panels over it, the rims of those under it) */
+			for (int x = queue[k] % a->tw * 8; x < queue[k] % a->tw * 8 + 8; x += 2) {
+				int PA, PB, j = 0;
+				panel_at(a, x, y, &PA, &PB);
+				while (j < p->nunder && (p->under[j][0] != PA - A || p->under[j][1] != PB - B)) ++j;
+				if (j < p->nunder) continue;
+				if (j == SIDE_REACH || abs(PA - A) > 100 || abs(PB - B) > 100) return false;
+				p->under[j][0] = (int8_t)(PA - A);
+				p->under[j][1] = (int8_t)(PB - B);
+				p->under[j][2] = ground(a, PA, PB);
+				++p->nunder;
+			}
+	return true;
+}
+
+/* Whether panel (A, B) is no floor, or the area's own (`panels`). */
+static bool own_or_none(const AreaSrc *a, const uint8_t *panels, int A, int B) {
+	if (!ground(a, A, B)) return true;
+	if (A < -TILES_SRC_SPAN / 2 || B < -TILES_SRC_SPAN / 2 || A >= TILES_SRC_SPAN / 2 || B >= TILES_SRC_SPAN / 2) return false;
+	int v = panels[(B + TILES_SRC_SPAN / 2) * TILES_SRC_SPAN + A + TILES_SRC_SPAN / 2];
+	return !(v & TILE_PAD) && ((v & 3) == TILE_A || (v & 3) == TILE_B);
+}
+
+/* Whether piece p, on panel (A, B), stands among the area's own floor alone. */
+static bool among_own(const AreaSrc *a, const uint8_t *panels, const SidePiece *p, int A, int B) {
+	for (int k = 0; k < 9; ++k)
+		if (!own_or_none(a, panels, A + k % 3 - 1, B + k / 3 - 1)) return false;
+	for (int k = 0; k < p->nunder; ++k)
+		if (!own_or_none(a, panels, A + p->under[k][0], B + p->under[k][1])) return false;
+	return true;
+}
+
+void edges_learn(const AreaSrc *a, int face, const uint8_t *panels, SideBook *out) {
 	if (!a->rings || !a->idx0) return;
 	int tw = a->tw, th = a->th;
 	uint16_t *rim = calloc((size_t)tw * th, sizeof *rim), *wall = calloc((size_t)tw * th, sizeof *wall);
@@ -355,10 +436,15 @@ void edges_learn(const AreaSrc *a, int face, SideBook *out) {
 		group_from(a, true, mark, i % tw, i / tw, seen, queue, &g);
 		if (g.edge || g.n > EDGE_TILES || g.x1 - g.x0 >= MAX_W || g.y1 - g.y0 >= MAX_H) continue;
 		for (int k = 0; k < g.n; ++k) {
-			count_tile(a, true, queue[k] % tw, queue[k] / tw, &g);
 			nrim += rim[queue[k]];
 			nwall += wall[queue[k]];
 		}
+		/* (cut whole: with the tiles round it that draw the floor's art,
+		 * where the rest of it lies, the mound under a tuft's blades, a
+		 * planter's top over the wall's foot; a tile the same as the
+		 * layer's own there is set over it as it is) */
+		if (!ring(a, mark, queue, &g)) continue;
+		for (int k = 0; k < g.n; ++k) count_tile(a, true, queue[k] % tw, queue[k] / tw, &g);
 		/* (a tuft stands on a rim, the floor straight under it; a planter
 		 * at a wall's foot, the floor straight over it) */
 		if (g.other * 10 > g.on + g.off || !(nrim || nwall) || !meets(a, queue, &g, nrim >= nwall, &A, &B)) continue;
@@ -367,10 +453,17 @@ void edges_learn(const AreaSrc *a, int face, SideBook *out) {
 		keep(a, queue, &g, A, B, 3, out);
 		if (out->n == n) continue;
 		SidePiece *p = &out->piece[n];
+		if (!reach(a, face, queue, &g, A, B, p) || (panels && !among_own(a, panels, p, A, B))) {
+			free(p->tiles);
+			free(p->prio);
+			--out->n;
+			continue;
+		}
+		int nover = 0;
 		for (int k = 0; k < g.n; ++k)
-			if (mark[queue[k]] & 2) p->over |= 1u << k;
-		if (emu_debug_on()) fprintf(stderr, "edges map %x:%d: %s at panel %d,%d, %d tiles (%d over the floor's), floor %03x, %d under\n", a->group, a->number,
-			nrim >= nwall ? "on a rim" : "at a wall's foot", A, B, g.n, __builtin_popcount(p->over), p->floor, p->nunder);
+			if (mark[queue[k]] & 2) { p->over |= (uint64_t)1 << k; ++nover; }
+		if (emu_debug_on()) fprintf(stderr, "edges map %x:%d: %s at panel %d,%d, %d tiles (%d over the floor's), %d panels reached\n", a->group, a->number,
+			nrim >= nwall ? "on a rim" : "at a wall's foot", A, B, g.n, nover, p->nunder);
 	}
 	free(mark);
 	free(seen);

@@ -12,8 +12,9 @@
 #include "area_src.h"
 #include "stairs.h"   /* StairTile */
 
-#define SIDES_MAX 24
+#define SIDES_MAX 256   /* looks a book holds at most: 24 of a floor's sides, under or behind it (sides.c's LOOKS), the rest what grows on its edges */
 #define SIDE_UNDER 16   /* panels a piece draws over, kept */
+#define SIDE_REACH 32   /* ... what grows on a floor's edge: every panel whose top, rim or wall reaches its tiles */
 
 /* One piece: its second layer's entries, screen pixels from the corner of
  * the panel it grips (the lowest world X and Y), and that panel's
@@ -29,20 +30,23 @@ typedef struct {
 	/* the panels it draws over, (along world X, along world Y) from its own
 	 * and whether ground floor (1) or none (0): a layer sets it where they
 	 * are the same, a flame beside a floor never over another floor */
-	int8_t under[SIDE_UNDER][3];
+	int8_t under[SIDE_REACH][3];
 	int nunder;
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
 	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
 	bool grows;        /* ... or what grows on a floor's edge (edges_learn): a tuft on its back rim, a planter at its wall's
 	                    * foot, its tiles the first layer's, its panel any free one of a layer's floor */
-	uint32_t over;     /* (grows) its tiles (bit k: tiles[k]) that hold the floor's own art too, set over the layer's */
+	uint64_t over;     /* (grows) its tiles (bit k: tiles[k], 48 at most) that hold the floor's own art too, set over the layer's */
 } SidePiece;
 
 typedef struct {
-	SidePiece piece[SIDES_MAX];
-	int n;
+	SidePiece *piece;   /* allocated as looks come (an area with none holds none), sides_free */
+	int n, cap;
 } SideBook;
+
+/* Frees book b's pieces, their tiles and priorities. */
+void sides_free(SideBook *b);
 
 /* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
  * priorities are its book's owner's to free. */
@@ -61,7 +65,9 @@ void behind_learn(const AreaSrc *a, SideBook *out);
 /* Adds what map `a` grows on its floor's edges, on its first layer in the
  * same tiles as the floor's own art: the Judge Tree's tufts of grass on
  * its walkways' back rims and the planters stacked at its walls' feet,
- * whose walls are `face` pixels tall. */
-void edges_learn(const AreaSrc *a, int face, SideBook *out);
+ * whose walls are `face` pixels tall. Only where the panel and every
+ * floor round it is the area's own (`panels`: tiles_src_panels's, TILE_A
+ * or TILE_B and no pad), not its stumps' nor its courts'. */
+void edges_learn(const AreaSrc *a, int face, const uint8_t *panels, SideBook *out);
 
 #endif

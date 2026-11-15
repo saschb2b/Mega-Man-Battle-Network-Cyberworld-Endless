@@ -89,7 +89,7 @@ static void forget(Learned *L) {
 	seams_free(&L->seams);
 	breaks_add(&L->breaks, NULL);
 	decor_free(&L->decor);
-	for (int k = 0; k < L->sides.n; ++k) { free(L->sides.piece[k].tiles); free(L->sides.piece[k].prio); }
+	sides_free(&L->sides);
 	stairs_free(L->stairs);
 	PropStamp *stamps[] = { &L->counter[0], &L->counter[1], &L->ornament[0], &L->ornament[1], &L->ornament[2], &L->bush[0],
 		&L->bush[1], &L->emblem, &L->pad, &L->arrow[0], &L->arrow[1], &L->arrow[2], &L->arrow[3] };

@@ -82,7 +82,72 @@ Taken per area as looked at, as every laying rule is
 | Undernet Zero | its fire bowls in threes, 4 looks, and the Undernet's 9 | yes |
 | Central Area | the Net Dealer's capsule counter, which means a shop | no |
 | Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
+| Judge Tree Comp | nothing on the second layer; on its walkways' edges, in the floor's own tiles, the tufts on its back rims and the planters stacked at its walls' feet, 139 looks over its four maps (below). Not placed: its stumps with their tree houses, doors, bridges and roots, and its tree's red court with the tree and the terminal on it, floor of another kind (the stumps its pads' look, the court skipped on purpose, `skip_styles`; issue #505's kinds 3-5) | what grows on the edges |
 | every other area | nothing | - |
+
+## What grows on a floor's edge (`edges_learn`; verified on the maps and in the game)
+
+The Judge Tree's walkways carry two things the rules above cannot cut, as
+its four maps were looked over beside the tile test's tinted copies (its
+unused tiles in red; 15 November 2026). Both lie on the first layer in the
+very tiles that draw the floor's rim and wall, so no group of tiles off
+the floor holds them:
+
+- **tufts of grass** on the back rims, a little mound with green blades
+  rising 4 to 6 pixels over the rim, at the back corners and along the
+  back edges, some 30 to 40 a map (2 to 3 tiles each, the rim's tiles
+  among them);
+- **planters stacked at the walls' feet**, two to four brick boxes of
+  green, the upper on the wall, the lower hanging below its foot, some 9
+  to 12 stacks a map, and lone planters whose box pokes below the wall.
+
+The planters on the walls themselves are the floor's own art and were
+already drawn.
+
+A first-layer tile grows on the floor where it draws 4 pixels or more past
+the floor's body: off every ground panel's top, more than 3 pixels over
+it (a plain back rim's outline stands 2 over its top, the tufts' blades 4
+to 6) and more than the walls' height under it (25 pixels on the Judge
+Tree's maps, the book's `face`). Tiles that do, joined eight ways, are one
+piece, 24 at most, cut whole with the ring of tiles round it that draw the
+floor's art, 8 pixels of it or more (the mound under a tuft's blades, a
+planter's top on the wall; a planter's corner that only lies where a wall
+would is no wall), 48 at most. It is a tuft where more of its floor's art is rim than wall,
+gripping the panel straight under it; else a planter, gripping the panel
+straight over it. With it go the panels of its neighbourhood, as a side
+piece's, and every panel whose top, rim or wall could draw in its tiles
+(the walls of the panels over it, the rims of those under it), 32 at most,
+each as ground floor or none: a wall of a walkway further back reaching
+down to a tuft cut a notch in it on a layer until that was asked. A piece
+is kept only where its panel and every floor round it is the area's own
+walkway floor (`tiles_src_panels`), so nothing is cut from its stumps or
+its court. Each look is kept once: 74 tufts and 65 planters over the four
+maps, which is more than the book's 24 its other kinds keep, so a book
+grows as looks come (an area without any holds none).
+
+A layer sets one on two in three of its free ground panels of the same
+neighbourhood, by its seed (on every one, a long straight edge took a tuft
+every other panel), where every panel it reaches is what it is in its map,
+none a panel from another; of the looks that fit there, the first from the
+one the seed picks whose tiles go down cleanly. Its tiles that drew the
+floor's art too go over the layer's own there, which is the same art (the
+same panels round it), the rest over nothing, and each tile at its edge
+must meet the layer's tile beside it as the area's maps set those two side
+by side (`seams_seen`): a planter stack's top beside a planter the layer's
+wall already shows cut that one in two, 31 more breaks on a layer of the
+[tile test](../../devtools/tile-test.md), until that was asked. Its layers
+show the same breaks with them as without, and 12 to 17 a layer, where its
+maps carry some 45 on as many panels: mostly tufts and lone planters, the
+stacks where the wall beside them is plain.
+
+Nothing about walking changes: its tiles are the first layer's, and the
+panels under them are what they were. MegaMan stands in front of them as
+he does of the floor's rim and walls (captured on a layer: a tuft's blades
+show behind his helmet as he stands on the rim's panel); none stands where
+he could pass behind it, a tuft behind a rim over the void and a planter
+under a wall. They are set in `pick_map`'s pastes from the area's
+`Learned` alone, so a [Glitch layer](../../game/glitch-layer.md)'s flip into
+the Judge Tree draws them too; they need no layer priorities.
 
 ## Pieces the game animates (verified in the game)
 
@@ -182,7 +247,7 @@ of tiles).
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
-  red fists, the Judge Tree's planters, BN5's Undernet's dark figures and Nebula Area's dripping pods
+  red fists, BN5's Undernet's dark figures and Nebula Area's dripping pods
   lie on the first layer, beside or under the floor (probed on the maps),
   and the Nest's and Mr. Weather's maps hold their background in the
   second, so theirs lie there too. Scenery refuses a
