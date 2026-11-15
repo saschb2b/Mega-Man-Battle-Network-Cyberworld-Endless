@@ -209,9 +209,6 @@ static int built_as_game(int area, uint32_t seed, NetmapTimes *parts) {
 	return (int)((clock() - t0) * 1000 / CLOCKS_PER_SEC);
 }
 
-/* (a run's own layer: its run's seed, the layer's seed from it) */
-static uint32_t run_seed_forced;
-
 /* The holes the safety net found in layer `name`'s floor (voids.h), framed
  * in `sp`: blue those left, white those mended, and listed in
  * DIR/voids_NAME.txt (a tile's pixel x, y and 1 where mended). How many,
@@ -238,8 +235,6 @@ static int mark_voids(const char *dir, const char *name, uint32_t *sp, int tw, i
 	if (list) fclose(list);
 	return found;
 }
-
-static uint32_t run_seed(uint32_t layer_seed) { return run_seed_forced ? run_seed_forced : layer_seed; }
 
 static void one(const char *dir, FILE *report, int biome, int area, int layout, int depth, uint32_t seed) {
 	run_new(run_seed(seed));
@@ -713,9 +708,9 @@ static int run_layer(const char *dir, const char *spec) {
 	FILE *report = fopen(path, "w");
 	if (!report) return 1;
 	run_new(seed);
-	run_seed_forced = seed;
+	atlas_run_seed = seed;
 	one(dir, report, area < NET_AREAS ? area : net_area_def(area)->like, area, -1, depth, run_layer_seed(depth, LAYER_NORMAL));
-	run_seed_forced = 0;
+	atlas_run_seed = 0;
 	fclose(report);
 	return 0;
 }
