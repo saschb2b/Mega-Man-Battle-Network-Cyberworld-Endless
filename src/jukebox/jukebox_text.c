@@ -2,7 +2,7 @@
  * lists, its battles' records, the scripts and code that start it
  * (docs/game/pet.md, The Jukebox, says which are verified and how; BN5's
  * read by tools/bn5_songs.py, BN4's by tools/bn4_songs.py); a song that
- * nothing in its game starts carries its number. */
+ * nothing in its cartridge starts carries its number, in Unused. */
 #include "jukebox_text.h"
 
 #include <stdio.h>
@@ -120,7 +120,7 @@ const JukeSong jukebox_songs[] = {
 };
 const int jukebox_song_count = (int)(sizeof jukebox_songs / sizeof *jukebox_songs);
 
-const char *const jukebox_kind_names[JUKE_KINDS] = { "Towns", "The Net", "Battles", "Story", "Screens", "More" };
+const char *const jukebox_kind_names[JUKE_KINDS] = { "Towns", "The Net", "Battles", "Story", "Screens", "Unused" };
 const char *const jukebox_game_tags[JUKE_GAMES] = { "BN6", "BN5", "BN4" };
 const char *const jukebox_mode_names[3] = { "Repeat", "In order", "Shuffle" };
 

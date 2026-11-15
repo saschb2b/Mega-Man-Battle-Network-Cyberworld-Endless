@@ -23,3 +23,24 @@ map (on BN5 territory one of its records, in BN6's engine), `sig` puts MegaMan i
 names it and where it lies), `second` saves the second screen's picture beside the
 top one's, and `dump NAME` the video memory in romlab's format (and the work RAM and the save RAM beside it, `NAMEe.bin`, `NAMEw.bin` and `NAMEs.bin`, for two dumps compared: what a screen of BN6's wrote) for
 `tools/romlab/labtrace.py`.
+
+## Sound in a session
+
+A session's game runs headless as fast as it can, its batches apart,
+while the sound it opens plays on the audio device's own clock. So the
+engine's songs (the Jukebox's, BN6's NaviCust theme under a screen of
+ours) trail the frames, and the Jukebox's lights with them: a song a
+batch old is still near its start. In session 76 kai6 saw the lights of
+BN4's Virus Busting dark at "0:02" and read the song as silent; the
+song's first notes come 12 ticks (a fifth of a second) in, and with the
+sound in step with the frames the lights are lit 6 frames after A
+(replayed 15 November 2026). The log's `music: song` lines name the
+engine's songs alone: BN6's own music plays in its core and prints none,
+so the room's song come back as the Jukebox closes leaves no line. For
+sound in step with the frames, set `CYBERWORLD_AUDIO_DUMP=FILE` and
+`CYBERWORLD_AUDIO_OFFLINE=1` (a frame of sound a frame, raw 48 kHz s16
+stereo, no device opened): two such dumps of one route, one with a
+Jukebox song played and one without, are byte for byte the same from
+ten frames after B, in Lan's room and on a layer, the game's own music
+playing on. [The PET](../game/pet.md)'s Jukebox says what the player
+hears there.
