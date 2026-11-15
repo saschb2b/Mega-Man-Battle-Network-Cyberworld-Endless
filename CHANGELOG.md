@@ -128,6 +128,12 @@
   scraps. BN5's Oran Area lays its hubs as one floor with their
   circuits, joined as BN5 joins them, where every meeting was a jumble
   of docks and orange chips.
+- **BN4's and BN5's areas keep their wide ways.** A way through their
+  layers keeps the two-panel walkways it was laid with, crossing no
+  more one-wide ones than the area's own maps do. The drawing used to
+  wear them back to one wide, step them aside and cut their mouths off
+  a junction's line: BN4's ACDC squares let you out at their corners
+  alone, and BN5's Oran and Nebula Areas tied knots of narrow junctions.
 - **R jacks in from a step short of Lan's PC.** At Lan's desk, R a
   step short of the PC walks Lan onto it and jacks in, as R does at the
   town's jack-in spots.
@@ -171,6 +177,10 @@
   ran past its box and ended at "BN6's"; it fits whole now. The ROMs
   screen said BN4 Red Sun brings only its viruses: it says what BN4
   brings today, its areas, viruses, Navis and chips, as BN5's line does.
+- **Fixed: Mr.Prog's patch gave 1 HP after a CONTINUE.** On a layer
+  continued from the title, the Recovery Mr.Prog asked to use the
+  layer's one patch, then healed a single HP and called it spent. It
+  heals half of MegaMan's max HP again, however you reached the layer.
 
 ## 0.21.2 (2026-11-14)
 

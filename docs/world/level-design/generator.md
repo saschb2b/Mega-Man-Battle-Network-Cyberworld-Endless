@@ -300,7 +300,9 @@ them). Against a tile that draws nothing no strip is asked after: the
 floor's outline is the pixel test's, and a rim's own tile, the wall above
 it cut off, lost to a block of plain walkway floor there. What the tile
 test counts of it is in [the tile test](../../devtools/tile-test.md),
-Breaks.
+Breaks. A tile that draws nothing over part of the floor's top, a hole
+where the background shows through, is mended once the map is whole:
+[holes in the floor](floor-holes.md).
 
 BN4's ACDC Area leaves out its cyan roads and ringed hubs by their hues
 (`skip_styles`). Any 8 pixels of the roads' hue on a panel's top did it,

@@ -251,7 +251,11 @@ run, meta as variety):
   territory, the first visitor and the first deep act once a profile
   (Profile.native_taught, visitor_taught, deep_taught); L's briefing no
   longer repeats it on every layer there, the card's telegraph and the
-  first arrival's words being its channel (session 77). (Until the last round a
+  first arrival's words being its channel (session 77). Where a first layer is a native
+  territory still to be named, the first dive's words do not name its
+  area before MegaMan finds it old ("So this is the Endless Net." for
+  "It looks just like End Area!", session 77); those words play once a
+  profile, as Profile.heard keeps them. (Until the last round a
   territory's guardian of BN5's fought on the guest core, and the words
   said so; a profile told that hears once that its Cross and its Navis
   are ours now: Profile.navis_ours_told.)

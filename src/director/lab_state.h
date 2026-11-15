@@ -17,6 +17,8 @@ enum { LAB_AT_LIST, LAB_AT_FIELD, LAB_AT_GO };
 #define LAB_STAGE_ROWS 3     /* STAGE's rows: the background, the song, the folder */
 #define LAB_ROW_FOLDER 2     /* ... the folder's */
 #define LAB_LOCK 20          /* frames before it takes a key: a press that opened it is not its first */
+#define LAB_REPEAT_AFTER 18  /* a direction held this many frames from its press steps again, then every LAB_REPEAT_EVERY (the menus' own, platform.c) */
+#define LAB_REPEAT_EVERY 5
 
 /* A family on the FOES page */
 typedef struct {
@@ -46,6 +48,10 @@ typedef struct {
 	int nroster;
 	LabSet set;
 	LabResult last;      /* how the last battle of this visit ended (LAB_NONE: none yet) */
+	LabSet fought;       /* ... and the set it was: its end is the information of BATTLE! while the set in hand is it */
+	bool asking;         /* B at a page's own place: "Leave the Lab?", Yes and No in the information box */
+	bool yes;            /* ... the green triangle on Yes (NaviCust's quit opens on Yes) */
+	int hold[4];         /* frames each direction is held since its press, 0 where it is not (Up, Down, Left, Right) */
 } LabState;
 
 extern LabState LS;

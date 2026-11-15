@@ -185,6 +185,26 @@ uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles,
 	return px;
 }
 
+bool area_src_opaque(int rom, int group, int number, uint64_t out[1024]) {
+	if (rom < 0 || rom > XROM_COUNT || (rom && !XR[rom - 1].data)) return false;
+	use_rom(rom - 1);
+	uint32_t desc, ts, pal, tm, colors[256];
+	if (!map_desc(group, number, &desc, &ts, &pal, &tm)) return false;
+	uint8_t *vram = map_gfx(ts, pal, colors);
+	if (!vram) return false;
+	bool bpp8 = map_bpp8(group, tm);
+	size_t size = bpp8 ? 64 : 32;
+	for (size_t t = 0; t < 1024; ++t) {
+		const uint8_t *p = vram + t * size;
+		uint64_t m = 0;
+		for (int i = 0; i < 64 && (t + 1) * size <= 0x10000; ++i)
+			if (bpp8 ? p[i] : p[i / 2] >> (i & 1 ? 4 : 0) & 15) m |= 1ull << i;
+		out[t] = m;
+	}
+	free(vram);
+	return true;
+}
+
 bool area_src_bpp8(int rom, int group, int number) {
 	if (rom < 0 || rom > XROM_COUNT || (rom && !XR[rom - 1].data)) return false;
 	use_rom(rom - 1);

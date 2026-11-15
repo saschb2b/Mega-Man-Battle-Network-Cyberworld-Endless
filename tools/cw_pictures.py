@@ -17,6 +17,7 @@ GAME_W, GAME_H = 240, 160
 CANVAS = (256, 192)   # the headless canvas (--size 256x192): the game's picture in its middle
 LONG_EDGE = 1568      # past this the model's reader scales a picture down
 SHEET_COLS = 6
+LABEL_H = 11   # a sheet's strip under each frame, its label
 
 
 def load(path):
@@ -39,17 +40,21 @@ def scaled(im, scale):
 
 
 def sheet(frames, labels, scale=1, cols=SHEET_COLS):
-    """Frames on one picture, in rows of `cols`, each labelled (its frame)."""
+    """Frames on one picture, in rows of `cols`, each labelled (its frame)
+    in a strip under it: on the frame, the label hid the corner where BN6
+    names the chip in use, and two playtesters read "...Shot60" and
+    "...on40" as the game's (sessions 76 and 77)."""
     tiles = [scaled(f, scale) for f in frames]
     w, h = tiles[0].size
     cols = max(1, min(cols, len(tiles), LONG_EDGE // w or 1))
     rows = (len(tiles) + cols - 1) // cols
-    out = Image.new('RGB', (cols * w + (cols - 1) * 2, rows * h + (rows - 1) * 2), (255, 0, 255))
+    out = Image.new('RGB', (cols * w + (cols - 1) * 2, rows * (h + LABEL_H) + (rows - 1) * 2), (255, 0, 255))
     draw = ImageDraw.Draw(out)
     for i, (t, label) in enumerate(zip(tiles, labels)):
-        x, y = (i % cols) * (w + 2), (i // cols) * (h + 2)
+        x, y = (i % cols) * (w + 2), (i // cols) * (h + LABEL_H + 2)
         out.paste(t, (x, y))
-        tag(draw, x + 2, y + h - 11, str(label))
+        draw.rectangle((x, y + h, x + w - 1, y + h + LABEL_H - 1), fill=(0, 0, 0))
+        tag(draw, x + 2, y + h, str(label))
     return out
 
 

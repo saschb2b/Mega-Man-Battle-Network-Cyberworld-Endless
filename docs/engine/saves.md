@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code and kept in step with a cloud slot over the Net Square's server (`saves_code.c`, `saves_cloud.c`, `transfer.c`, `cloud.c`)."
 tags: [engine, saves]
-generated: { by: agent/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T04:50:00Z }
 ---
 
 # Portable saves
@@ -115,7 +115,7 @@ The file holds only the progress files under `savedata/`:
 | `profile.sav` | Runs, records, unlocks and the Library |
 | `rivals.sav`, `battle.sav` | The rival's and the guardians' records |
 | `run.sav`, `run.state` | The current run and its emulator checkpoint |
-| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally`, `run.data` | The checkpoint's generation version, area and the rest of the run's data (`run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md); `run.data`: the viruses it deleted by family, which join the profile's battle data as it ends, [the Battle Lab](../game/battle-lab.md)) |
+| `run.make`, `run.area`, `run.seen`, `run.folder`, `run.act`, `run.dark`, `run.souls`, `run.board`, `run.lib`, `run.tally`, `run.data` | The checkpoint's generation version, area and the rest of the run's data (`run.act`: what the director knows of the act, where the checkpoint was saved and the random battles fought on its layer, so a CONTINUE goes on with the layer's next battle, [Encounter groups](../game/progression/encounter-groups.md); `run.lib`: a dark layer's liberation board as it stood, [Liberation Missions](../game/liberation/overview.md); `run.tally`: its economy's counts, [Economy](../game/economy/overview.md); `run.data`: the viruses it deleted by family, which join the profile's battle data as it ends, [the Battle Lab](../game/battle-lab.md)) |
 | `weekly.sav`, and each of the above after `weekly-` | The week's net's slot (below): the dive in it and a dive's end waiting for the Board, its own profile, run and checkpoint |
 | `transfer.manifest` | Its format, where it was made and a summary of its progress |
 

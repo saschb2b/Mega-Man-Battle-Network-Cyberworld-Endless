@@ -32,6 +32,7 @@
 #include "netmap_paste.h"
 #include "netmap_roads.h"
 #include "tilemap.h"
+#include "voids.h"
 #include "xbackdrop.h"
 
 /* Generated layers as game maps.
@@ -534,6 +535,11 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	nm_paste_arrows(L, map, tw, th);
 	nm_paste_bushes(L, map, tw, th);
 	nm_paste_sides(L, map, tw, th);
+	picking = true;   /* (the safety net: a hole in the floor's top filled, voids.h; a road's panels as the pick tells them) */
+	int voids_left;
+	VoidFloor voids = { led, nled, &grid, floor_cb, NULL, voids_opaque(L->def->xrom, L->def->group, L->def->number) };
+	voids_mend(&voids, map, &voids_left);
+	picking = false;
 	/* how the classes' picks went, where they are drawn: not under what
 	 * was set whole over them */
 	for (size_t i = 0; i < cells; ++i) {

@@ -2576,3 +2576,50 @@ Loop changes:
 - **The machine caps the fan-out.** About 30 sessions drove the load past
   180 and every build waited; about 15 at once is what this machine
   carries well.
+
+## Session 77: the second fleet (kai5-kai9; kai5 5/10, the rest 6/10; all would recommend it, warning of the walking)
+
+Five testers on 0f2643619 (0.21.2+238, session 76's fixes in): kai5 and
+kai6 continued their runs (kai6 with `--dev lab`, the Battle Lab), kai7
+a test start on layer 4 with `dark`, kai8 on layer 9 with `hp=500`, kai9
+on layer 7 with `glitch,tourney`. Session 76's fixes held in play: the
+map's key, the heal's question, RESULT's counts, the title, R at the PC,
+a quit on a won RESULT, the reward pick's guard, Dad's ten layers.
+
+New ground: the first guardian (SpoutMan, a wall for a starter folder:
+192 damage in two tries), the arena-door save (good), the DarkChip flame
+(its cost told in MegaMan's words, liked), the Battle Lab (liked; B
+leaves it unasked, no key repeat). The Recovery Mr.Prog healed 1 HP
+after a CONTINUE that started its layer afresh (two testers; it cost
+kai6 its run): its script reads MegaMan's max HP before the state
+loads. Walkway stops remained the top complaint, in BN6's own areas too.
+
+All three test starts died on their first layers with the starter
+folder, and a death sends the run to layer 1: the Liberation Mission,
+the Nest and the win, the Glitch layer and the tournament went
+unplayed for the second session. 14 fix sessions were started from the
+25 findings.
+
+Misreads and BN6's own: commas without a space (the voice rules' BN6
+convention, `Lan,look!`); a 7 read as "?" (confirmed by two testers
+after the note); LEFT from the Custom screen's first chip wraps to OK
+(two sessions running; BN6's).
+
+Loop changes:
+
+- **A deep beat starts from a played run, not a bare test start.** The
+  starter folder can't clear act 3's viruses or guardians, `hp=N` alone
+  doesn't save it, and a death throws the beat away. For a beat past act
+  1, let the autopilot play the profile's run to the layer before the
+  feature (`CYBERWORLD_AUTOPILOT=1`, its own data folder copied into the
+  persona's), so the tester CONTINUEs there with a run's real folder,
+  growth and drafts; or force the feature into an early act with its dev
+  step where one exists (`dark`, `glitch`, `tourney`); and say in the
+  prompt that a death ends the beat, so the persona plays it safe.
+- **Restarts keep the test start's options.** The prompt's CONTINUE
+  note now names the exact start command, `-- --dev ...` included, so a
+  restart doesn't drop the Lab or a dark layer.
+- **A finding that only shows after a CONTINUE gets a CONTINUE in its
+  check.** The 1-HP heal showed only on a layer rebuilt by CONTINUE; the
+  heal's own fix (#559) was checked on walked-into layers. A fix to
+  anything a layer builds at load is checked after a CONTINUE too.

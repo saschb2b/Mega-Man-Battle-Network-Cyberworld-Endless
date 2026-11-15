@@ -82,22 +82,47 @@ static void info_text(char *s, size_t n) {
 	s[0] = 0;
 	const LabRow *r = LS.nroster ? &LS.roster[LS.row[LAB_PAGE_FOES]] : NULL;
 	if (LS.at == LAB_AT_GO) {
+		/* (the last battle's end while the set in hand is the one fought; else the set's best as it is kept) */
+		const LabSaved *k = &profile.lab_sets[profile.lab_slot % LAB_SETS];
+		bool kept = !memcmp(&k->set, &LS.set, sizeof LS.set);
 		if (!LS.set.nfoes) lab_info_empty(s, n);
-		else if (LS.last.end != LAB_NONE) lab_info_result(s, n, &LS.last);
+		else if (LS.last.end != LAB_NONE && !memcmp(&LS.fought, &LS.set, sizeof LS.set)) lab_info_result(s, n, &LS.last);
+		else lab_info_set(s, n, LS.set.nfoes, kept ? k->bust : 0, kept ? k->frames : 0, kept ? k->hp_lost : 0);
 	} else if (LS.at == LAB_AT_FIELD) info_field(s, n, r);
 	else if (LS.page == LAB_PAGE_SETS) {
 		const LabSaved *k = &profile.lab_sets[LS.row[LAB_PAGE_SETS] % LAB_SETS];
 		lab_info_set(s, n, k->set.nfoes, k->bust, k->frames, k->hp_lost);
 	} else if (LS.page == LAB_PAGE_STAGE) {
 		/* (the row's value in full: an area's or a song's name is wider than its row) */
-		if (LS.row[LAB_PAGE_STAGE] == LAB_ROW_FOLDER) lab_info_folder(s, n, profile.lab_folder_on);
-		else if (LS.row[LAB_PAGE_STAGE]) lab_stage_song_name(LS.set.song, s, n);
-		else lab_stage_area_name(LS.set.area, s, n);
+		char v[64];
+		if (LS.row[LAB_PAGE_STAGE] == LAB_ROW_FOLDER) { lab_info_folder(s, n, profile.lab_folder_on); return; }
+		if (LS.row[LAB_PAGE_STAGE]) lab_stage_song_name(LS.set.song, v, sizeof v);
+		else lab_stage_area_name(LS.set.area, v, sizeof v);
+		lab_info_value(s, n, v);
 	} else if (LS.page == LAB_PAGE_FOES && r) info_row(s, n, r);
 }
 
-/* what the cursor's item is, in SubChip's flat panel: `lines` of it */
+/* "Leave the Lab?" in the panel `r`, Yes and No after it (under it where
+ * it has two lines), BN6's green triangle before the one chosen */
+static void ask_draw(SDL_Rect r, int lines) {
+	int x = r.x + 4, y = r.y - 1;
+	look_text(x, y, lab_ask_leave, LOOK_PAGE, LOOK_PANEL_SHADE, TEXT_LEFT);
+	if (lines > 1) y += LOOK_LINE;
+	else x += look_text_width(lab_ask_leave) + 8;
+	for (int k = 0; k < 2; ++k) {
+		const char *w = k ? lab_no : lab_yes;
+		if ((k == 0) == LS.yes) look_choice(x, y - 1);
+		look_text(x + LOOK_CHOICE_W + 3, y, w, LOOK_PAGE, LOOK_PANEL_SHADE, TEXT_LEFT);
+		x += LOOK_CHOICE_W + 3 + look_text_width(w) + 8;
+	}
+}
+
+/* what the cursor's item is, in SubChip's flat panel: `lines` of it; or the question */
 static void info_draw(int x, int y, int w, int lines) {
+	if (LS.asking) {
+		ask_draw(look_panel(x, y, w, lines * LOOK_LINE + 2), lines);
+		return;
+	}
 	char s[96];
 	info_text(s, sizeof s);
 	/* (a line's break in the words, '|', is a space where the box has one line) */
@@ -107,13 +132,19 @@ static void info_draw(int x, int y, int w, int lines) {
 	look_wrapped(s, r.x + 4, r.y - 1, r.w - 8, lines, LOOK_PAGE, LOOK_PANEL_SHADE);
 }
 
-/* a row's value at the right, BN6's small arrows either side where Left and Right turn it */
-static void value_draw(SDL_Rect f, int y, const char *v, bool turns, SDL_Color c) {
-	int right = f.x + f.w - 9, w = look_text_width(v);
+/* a row's value at the right, BN6's small arrows either side where Left and Right turn it, close to it; where it begins */
+static int value_draw(SDL_Rect f, int y, const char *v, bool turns, SDL_Color c) {
+	int right = f.x + f.w - 6, w = look_text_width(v);
 	look_text(right, y, v, c, LOOK_SHADE, TEXT_RIGHT);
-	if (!turns) return;
-	look_pointer(right - w - 8, y + 3, 5, true, LOOK_ORANGE);
-	look_pointer(right + 3, y + 3, 5, false, LOOK_ORANGE);
+	if (!turns) return right - w;
+	look_pointer(right - w - 2, y + 3, 5, true, LOOK_ORANGE);
+	look_pointer(right + 1, y + 3, 5, false, LOOK_ORANGE);
+	return right - w - 6;
+}
+
+/* a name cut to `room` pixels: a version's name and its arrows share a row (an eight-letter one met the arrow) */
+static void name_fit(char *name, int room) {
+	for (size_t k = strlen(name); k && look_text_width(name) > room; ) name[--k] = 0;
 }
 
 /* a row of the page's list: FOES a family in its version (or its gauge), FIELD and STAGE a name and its value */
@@ -121,13 +152,15 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 	char v[24], name[24];
 	if (LS.page == LAB_PAGE_FOES) {
 		const LabRow *r = &LS.roster[i];
-		foe_name(r->family, row_version(r), name, sizeof name);
-		look_text(f.x + 11, y, name, r->versions ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
-		if (r->versions) value_draw(f, y, r->navi ? lab_navi_version_word(r->family, r->version) : lab_version_word(r->version), under && LS.at == LAB_AT_LIST, LOOK_TEXT);
+		int at;
+		if (r->versions) at = value_draw(f, y, r->navi ? lab_navi_version_word(r->family, r->version) : lab_version_word(r->version), under && LS.at == LAB_AT_LIST, LOOK_TEXT);
 		else {
 			lab_count_words(v, sizeof v, r->count, r->navi ? lab_navi_need(r->family) : DATA_COMPLETE);
-			value_draw(f, y, v, false, LOOK_DIM);
+			at = value_draw(f, y, v, false, LOOK_DIM);
 		}
+		foe_name(r->family, row_version(r), name, sizeof name);
+		name_fit(name, at - 1 - (f.x + 11));
+		look_text(f.x + 11, y, name, r->versions ? LOOK_TEXT : LOOK_DIM, LOOK_SHADE, TEXT_LEFT);
 	} else if (LS.page == LAB_PAGE_FIELD) {
 		look_text(f.x + 14, y, lab_row_preset, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 		if (LS.preset) lab_preset_words(v, sizeof v, LS.preset);
@@ -153,8 +186,10 @@ static void row_draw(SDL_Rect f, int i, int y, bool under) {
 /* the page's list in a window at (x, y), `shown` rows of it; its height */
 static int list_draw(int x, int y, int w, int shown) {
 	SDL_Rect win = { x, y, w, WIN_H(shown) };
-	SDL_Rect f = look_window(win.x, win.y, win.w, win.h, 0, false);
-	int rows = lab_rows(), at = LS.row[LS.page], top = LS.page == LAB_PAGE_FOES ? LS.top : at >= shown ? at - shown + 1 : 0;
+	int rows = lab_rows();
+	/* (the scroll bar in its track, as Options' and the Jukebox's: without one its mark stood alone on the frame) */
+	SDL_Rect f = look_window(win.x, win.y, win.w, win.h, 0, rows > shown);
+	int at = LS.row[LS.page], top = LS.page == LAB_PAGE_FOES ? LS.top : at >= shown ? at - shown + 1 : 0;
 	for (int i = top; i < rows && i < top + shown; ++i) row_draw(f, i, f.y + 2 + (i - top) * ROW_H, i == at);
 	if (rows > shown) look_scroll(win, 0, top, shown, rows);
 	return win.h;

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T04:30:00Z
+* **Update**: code/layer.md (`layer_heal.c`: the Recovery Mr.Prog's patch, its amount set again after a CONTINUE's state loads, where it had given 1 HP).
