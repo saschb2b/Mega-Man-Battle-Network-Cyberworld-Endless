@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T04:40:00Z
-* **Update**: releases/v0.22.0.md (#584's update box written in as "What's new, on the title"; #587's wide ways in BN4's and BN5's areas).
