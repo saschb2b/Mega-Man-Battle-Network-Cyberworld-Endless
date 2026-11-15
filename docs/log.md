@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/side-pieces.md (BN4's ACDC Area measured: no thing on, beside, behind or under its floors; a row in the area table and a section on what its layers leave beside their floors).
 * **Update**: world/level-design/side-pieces.md (Central Area's row, and a section on what its maps set round their floors: nothing a layer can carry, the capsule a shop, the rest floor art or the owner's kinds).
 * **Update**: world/level-design/side-pieces.md (what stands in a walled hole: End Area's pagoda cut whole and stood as its layers' landmark, the area's row, End Area's survey and why the cut behind a floor fits nowhere), world/level-design/props.md (End Area's landmark row), code/net-and-map.md (sides.c's line).
 * **Update**: world/level-design/side-pieces.md (Seaside Area's row, and what its three maps set round their floors: nothing, every cut run on them taking one look, an arrow field's rim; the rest floor art and the owner's kinds 3 to 5).

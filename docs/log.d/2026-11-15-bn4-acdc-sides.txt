@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T18:52:07Z
-* **Update**: world/level-design/side-pieces.md (BN4's ACDC Area measured: no thing on, beside, behind or under its floors; a row in the area table and a section on what its layers leave beside their floors).
