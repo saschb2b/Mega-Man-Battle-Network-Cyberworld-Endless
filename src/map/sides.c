@@ -558,6 +558,15 @@ static bool in_hole(const AreaSrc *a, const Group *g, int *A, int *B, uint8_t ho
 	return true;
 }
 
+/* The piece book `one` took, into out, the book's array freed (the piece's
+ * tiles and priorities are out's now); whether it took one. */
+static bool book_one(SideBook *one, SidePiece *out) {
+	bool got = one->n > 0;
+	if (got) *out = one->piece[0];
+	free(one->piece);
+	return got;
+}
+
 void hole_learn(const AreaSrc *a, SidePiece *out) {
 	if (out->ntiles || a->layers < 2 || !a->rings || !a->front) return;
 	int tw = a->tw, th = a->th;
@@ -574,10 +583,7 @@ void hole_learn(const AreaSrc *a, SidePiece *out) {
 		if (g.npanels >= PANELS || !in_hole(a, &g, &A, &B, hole)) continue;
 		SideBook one = { .n = 0 };
 		keep(a, queue, &g, A, B, 0, &one);
-		bool got = one.n > 0;
-		if (got) *out = one.piece[0];
-		free(one.piece);   /* (the book's array; its piece's tiles and priorities are out's now) */
-		if (!got) continue;
+		if (!book_one(&one, out)) continue;
 		out->hole[0] = hole[0];
 		out->hole[1] = hole[1];
 		/* (the priorities over every panel it draws over and one round
