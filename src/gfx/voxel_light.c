@@ -30,7 +30,12 @@ static float body_shade(const VoxScene *s, const VoxLook *k, float x, float gy, 
 	float most = 0;
 	for (int id = 1; id <= s->nbodies; ++id) {
 		const VoxBody *b = &s->bodies[id];
-		if (id == self) continue;
+		if (id == self || gy >= (float)b->gy || gy < (float)(b->gy - BODY_DEEP + 1) - BODY_REACH) continue;
+		/* (where its shadow can reach from this row at all: most of the window is far from every body) */
+		float tmax = ((float)b->gy - gy) / k->sun_g, tmin = ((float)b->gy - gy - (float)(BODY_DEEP - 1)) / k->sun_g, sw = k->sun_x * tmax;
+		if (tmin < 0) tmin = 0;
+		if (x < (float)b->x0 + (sw < 0 ? sw : 0) - 1.0f || x > (float)b->x1 + (sw > 0 ? sw : 0) + 1.0f) continue;
+		if (h + k->sun_h * tmin > (float)(b->gy - b->y0 + 1) || h + k->sun_h * tmax < (float)(b->gy - b->y1 - 1)) continue;
 		for (int deep = 0; deep < BODY_DEEP; ++deep) {
 			float d = (float)(b->gy - deep) - gy;
 			if (d <= 0.25f || d > BODY_REACH) continue;
@@ -71,6 +76,7 @@ static float contact(const VoxScene *s, int x, float gy) {
 	for (int id = 1; id <= s->nbodies; ++id) {
 		const VoxBody *b = &s->bodies[id];
 		float r = (float)(b->x1 - b->x0 + 1) * 0.55f, dx = (float)x - (float)(b->x0 + b->x1) * 0.5f, dg = 2.0f * (gy - (float)b->gy + 1.0f);
+		if (dx >= r || dx <= -r || dg >= r || dg <= -r) continue;
 		float d = (dx * dx + dg * dg) / (r * r);
 		if (d < 1.0f && 1.0f - d > dark) dark = 1.0f - d;
 	}
@@ -87,7 +93,7 @@ static uint32_t shaded(uint32_t c, float light, float sun) {
 
 static const uint32_t kinds[3] = { 0xFF4D1F1Au, 0xFF59D940u, 0xFF2673E6u };
 
-typedef struct { const VoxScene *s; const VoxGround *g; const VoxLook *k; uint32_t *map; } Light;
+typedef struct { const VoxScene *s; const VoxGround *g; const VoxLook *k; uint32_t *map; VoxSpan sp; } Light;
 
 /* The window's shadow, each pixel's share of the sun lost, and its spread */
 static float *lost, *spread;
@@ -95,8 +101,8 @@ static float *lost, *spread;
 static void lost_rows(int from, int to, void *ctx) {
 	const Light *c = ctx;
 	const VoxScene *s = c->s;
-	for (int j = from; j < to; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
+	for (int j = c->sp.y0 + from; j < c->sp.y0 + to; ++j)
+		for (int i = c->sp.x0; i < c->sp.x1; ++i) {
 			int at = j * VOX_WW + i, kind = s->kind[at];
 			lost[at] = 0;
 			if (!s->map[at] || kind == VOX_SKY || c->k->debug) continue;
@@ -106,29 +112,46 @@ static void lost_rows(int from, int to, void *ctx) {
 }
 
 /* A shadow's soft edge: each pixel the mean of those about it, across
- * then down */
-static void soften(void) {
+ * then down (the span's edge held at its last). The rows' middles summed
+ * straight, the edges apart, and down five rows at a time: clamped at
+ * every look, the two passes took a quarter millisecond. */
+static float soft_tap(const float *row, int i, VoxSpan sp) { return row[i < sp.x0 ? sp.x0 : i >= sp.x1 ? sp.x1 - 1 : i]; }
+
+static void soften_across(int from, int to, void *ctx) {
+	VoxSpan sp = ((const Light *)ctx)->sp;
 	float norm = 1.0f / (float)(2 * SOFT + 1);
-	for (int j = 0; j < VOX_WH; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
+	for (int j = sp.y0 + from; j < sp.y0 + to; ++j) {
+		const float *row = &lost[j * VOX_WW];
+		float *out = &spread[j * VOX_WW];
+		for (int i = sp.x0; i < sp.x1; ++i) {
+			if (i == sp.x0 + SOFT && sp.x1 - sp.x0 > 2 * SOFT) {
+				for (; i < sp.x1 - SOFT; ++i) out[i] = (row[i - 2] + row[i - 1] + row[i] + row[i + 1] + row[i + 2]) * norm;
+				if (i >= sp.x1) break;
+			}
 			float sum = 0;
-			for (int d = -SOFT; d <= SOFT; ++d) sum += lost[j * VOX_WW + (i + d < 0 ? 0 : i + d >= VOX_WW ? VOX_WW - 1 : i + d)];
-			spread[j * VOX_WW + i] = sum * norm;
+			for (int d = -SOFT; d <= SOFT; ++d) sum += soft_tap(row, i + d, sp);
+			out[i] = sum * norm;
 		}
-	for (int j = 0; j < VOX_WH; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
-			float sum = 0;
-			for (int d = -SOFT; d <= SOFT; ++d) sum += spread[(j + d < 0 ? 0 : j + d >= VOX_WH ? VOX_WH - 1 : j + d) * VOX_WW + i];
-			lost[j * VOX_WW + i] = sum * norm;
-		}
+	}
+}
+
+static void soften_down(int from, int to, void *ctx) {
+	VoxSpan sp = ((const Light *)ctx)->sp;
+	float norm = 1.0f / (float)(2 * SOFT + 1);
+	for (int j = sp.y0 + from; j < sp.y0 + to; ++j) {
+		const float *r[2 * SOFT + 1];
+		for (int d = -SOFT; d <= SOFT; ++d) r[d + SOFT] = &spread[(j + d < sp.y0 ? sp.y0 : j + d >= sp.y1 ? sp.y1 - 1 : j + d) * VOX_WW];
+		float *out = &lost[j * VOX_WW];
+		for (int i = sp.x0; i < sp.x1; ++i) out[i] = (r[0][i] + r[1][i] + r[2][i] + r[3][i] + r[4][i]) * norm;
+	}
 }
 
 static void light_rows(int from, int to, void *ctx) {
 	const Light *c = ctx;
 	const VoxScene *s = c->s;
 	const VoxLook *k = c->k;
-	for (int j = from; j < to; ++j)
-		for (int i = 0; i < VOX_WW; ++i) {
+	for (int j = c->sp.y0 + from; j < c->sp.y0 + to; ++j)
+		for (int i = c->sp.x0; i < c->sp.x1; ++i) {
 			int at = j * VOX_WW + i, kind = s->kind[at], x = i - VOX_LEFT, y = j - VOX_UP;
 			uint32_t px = s->map[at];
 			if (!px || kind == VOX_SKY) { c->map[at] = k->debug && px ? kinds[0] : px; continue; }
@@ -137,7 +160,7 @@ static void light_rows(int from, int to, void *ctx) {
 			if (kind == VOX_TOP) {
 				face = contact(s, x, (float)s->gy[at]);
 				/* (the edge that catches the light) */
-				if (j + 1 < VOX_WH && s->kind[at + VOX_WW] == VOX_WALL) face *= 1.10f;
+				if (j + 1 < c->sp.y1 && s->map[at + VOX_WW] && s->kind[at + VOX_WW] == VOX_WALL) face *= 1.10f;
 			} else {
 				/* (a side: less of the sun, and less of the sky's light the deeper under its edge) */
 				float under = h < 0 ? -h : 0;
@@ -154,10 +177,12 @@ void voxel_light(const VoxScene *s, const VoxGround *g, const VoxLook *k, uint32
 		if (!lost) return;
 		spread = lost + VOX_WN;
 	}
-	Light light = { s, g, k, map };
-	voxel_in_bands(lost_rows, VOX_WH, &light);
-	soften();
-	voxel_in_bands(light_rows, VOX_WH, &light);
+	Light light = { s, g, k, map, vox_span(s) };
+	int rows = light.sp.y1 - light.sp.y0;
+	voxel_in_bands(lost_rows, rows, &light);
+	voxel_in_bands(soften_across, rows, &light);
+	voxel_in_bands(soften_down, rows, &light);
+	voxel_in_bands(light_rows, rows, &light);
 	for (int i = 0; i < VOX_N; ++i) {
 		uint32_t c = s->sprite[i];
 		if (!c) { sprite[i] = 0; continue; }

@@ -91,7 +91,7 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 BN6's Practice NetBattle on one linked pair of
                                 cores, a snapshot of the pair restored and
                                 replayed midway (docs/online/link.md; the ROM
-                                and a boot-3.state, both read-only)
+                                and a boot-4.state, both read-only)
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -3326,7 +3326,7 @@ def online_pair(rest):
     and replayed midway (tools/online_pair_run.c, docs/online/link.md)."""
     ap = argparse.ArgumentParser(prog='build.py online-pair')
     ap.add_argument('--rom', required=True, help="the player's BN6 Gregar USA ROM")
-    ap.add_argument('--state', required=True, help='a boot-3.state from a data folder')
+    ap.add_argument('--state', required=True, help='a boot-4.state from a data folder')
     ap.add_argument('--at', type=int, default=1150, help='the frame the snapshot is taken at')
     ap.add_argument('--horizon', type=int, default=8, help='the frames replayed after the restore')
     args = ap.parse_args(rest)

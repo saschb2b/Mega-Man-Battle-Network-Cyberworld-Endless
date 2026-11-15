@@ -423,6 +423,10 @@ static int floor_cb(int A, int B, const void *ctx) {
 }
 
 int netmap_rise(void) { return nm_cur ? nm_cur->rise : 0; }
+int netmap_stairs(void) { return nm_cur ? nm_cur->nstairs : 0; }
+
+static unsigned built;
+unsigned netmap_serial(void) { return built; }
 
 static bool in_256;   /* (the layer's tiles 256-colour: BN4's) */
 static int map_256;   /* (... and the map its layers take over, group and number as BN6's MapId reads them) */
@@ -714,6 +718,7 @@ static Learned *use_area(int area) {
 bool netmap_build(int area, const NetLayout *lay) {
 	Learned *L = use_area(area);
 	if (!L) return false;
+	++built;
 	nm_cur = lay;
 	nm_place.ex = L->ex;
 	nm_place.ey = L->ey;

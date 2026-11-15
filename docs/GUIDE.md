@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T21:13:18Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:40:00Z }
 ---
 
 # The player's guide
@@ -1460,8 +1460,14 @@ distance out of focus, on the net, in town and in battle. The picture
 is drawn anew at the screen's scale, on a net layer under a camera a
 little lower than BN6's. The HUD, chat boxes and BN6's menus stay the
 game's own pixels. It is off until you turn it on
-(`depth_lighting = on`), and not offered on the 3DS or the Vita. How it
-works is in [Depth lighting](engine/voxel.md).
+(`depth_lighting = on`), and not offered on the Vita. How it works is in
+[Depth lighting](engine/voxel.md).
+
+On the 3DS the same line is **3D depth**: the 3D slider gives
+the picture depth, the world going back into the screen and MegaMan and
+the viruses with it, the HUD and chat boxes at the screen. It is
+on as it comes (`depth_3d`); off, the slider does nothing. How it works
+is in [3D depth](engine/stereo.md).
 
 ## Sound
 

@@ -8,6 +8,8 @@
 
 #include <citro2d.h>
 
+#include "display.h"
+
 #define TEX 256   /* the texture's side, the canvas's rows 256 pixels apart */
 
 static C3D_RenderTarget *top, *bottom;
@@ -24,6 +26,9 @@ static Tex3DS_SubTexture bot_sub;
 static u32 *bot_pixels;
 static bool bot_ready, bot_on, bot_new;
 static int bot_draws;   /* frames left to draw it in, both of the screen's buffers */
+/* the 3D screen's right eye, and what says each frame's spans (docs/engine/stereo.md) */
+static C3D_RenderTarget *right_eye;
+static bool (*make_spans)(Present3dsStereo *out);
 
 SDL_Surface *present3ds_init(int w, int h) {
 	if (w > TEX || h > TEX) return NULL;
@@ -43,6 +48,9 @@ SDL_Surface *present3ds_init(int w, int h) {
 	if (!top || !bottom) return NULL;
 	C3D_RenderTargetSetOutput(top, GFX_TOP, GFX_LEFT, out);
 	C3D_RenderTargetSetOutput(bottom, GFX_BOTTOM, GFX_LEFT, out);
+	/* (the right eye's: its own target, shown where the screen is in 3D) */
+	right_eye = C3D_RenderTargetCreate(GSP_SCREEN_WIDTH, GSP_SCREEN_HEIGHT_TOP, GPU_RB_RGBA8, GPU_RB_DEPTH16);
+	if (right_eye) C3D_RenderTargetSetOutput(right_eye, GFX_TOP, GFX_RIGHT, out);
 	if (!C3D_TexInit(&tex, TEX, TEX, GPU_RGBA8)) return NULL;
 	C3D_TexSetWrap(&tex, GPU_CLAMP_TO_EDGE, GPU_CLAMP_TO_EDGE);
 	/* (the canvas's first row is the texture's top as the copy leaves it:
@@ -78,11 +86,76 @@ void present3ds_bottom_show(bool on) {
 	bot_new |= bot_on;
 }
 
+void present3ds_stereo_from(bool (*make)(Present3dsStereo *out)) { make_spans = make; }
+
+float present3ds_slider(void) { return display_stereo() && right_eye ? osGet3DSliderState() : 0.0f; }
+
+/* Where the canvas's picture lies on the screen and at what scale */
+typedef struct { float x0, y0, sx, s; } Place;
+
+/* The canvas's columns a to b of its rows y to y + rows, at the canvas's
+ * column `at`, `w` of its columns wide */
+static void span_draw(const Place *p, int a, int b, int y, int rows, float at, float w) {
+	Tex3DS_SubTexture t = { (u16)(b - a), (u16)rows, (float)a / TEX, 1.0f - (float)y / TEX, (float)b / TEX, 1.0f - (float)(y + rows) / TEX };
+	C2D_Image img = { &tex, &t };
+	C2D_DrawImageAt(img, p->x0 + at * p->sx, p->y0 + (float)y * p->s, 0.5f, NULL, p->sx * w / (float)(b - a), p->s);
+}
+
+/* Whether a row is the world's whole */
+static bool all_world(const Present3dsRow *r) { return r->n <= 1 && (!r->n || !r->flat[0]); }
+
+/* A run of rows alike in their spans, over the sheared world: the gap
+ * each world span leaves beside a flat one filled with its edge's column
+ * drawn `wide` (under the same shear, it ends where the span begins), or,
+ * not `sheared`, the flat spans where they are */
+static void rows_draw(const Present3dsRow *r, const Place *p, int y, int rows, float wide, bool sheared) {
+	for (int i = 0; i < r->n; ++i) {
+		int a = r->x[i], b = i + 1 < r->n ? r->x[i + 1] : cw;
+		if (b <= a) continue;
+		if (!sheared && r->flat[i]) span_draw(p, a, b, y, rows, (float)a, (float)(b - a));
+		if (!sheared || r->flat[i]) continue;
+		if (wide > 0 && i > 0) span_draw(p, a, a + 1, y, rows, (float)a - wide, wide);
+		if (wide < 0 && i + 1 < r->n) span_draw(p, b - 1, b, y, rows, (float)b, -wide);
+	}
+}
+
+/* One eye's picture, `eye` -1 the left, +1 the right: the world as one
+ * quad sheared by its rows' depth (a row's shift falls evenly to none at
+ * the last), its gaps beside the flat spans filled, then the flat spans.
+ * Drawn a few rows at a time, a battle's took twice the GPU's calls a
+ * frame has room for. */
+static void eye_draw(const Present3dsStereo *st, int eye, const Place *p) {
+	float deepest = (float)eye * st->shift[0], slope = -deepest * p->sx / (159.0f * p->s);
+	C2D_ViewReset();
+	C2D_ViewTranslate(deepest * p->sx - slope * p->y0, 0.0f);
+	C2D_ViewShear(slope, 0.0f);
+	C2D_DrawImageAt((C2D_Image){ &tex, &sub }, p->x0, p->y0, 0.5f, NULL, p->sx, p->s);
+	for (int pass = 0; pass < 2; ++pass) {
+		if (pass) C2D_ViewReset();
+		for (int y = 0, rows; y < ch && y < 160; y += rows) {
+			rows = 1;
+			while (y + rows < ch && y + rows < 160 && !memcmp(&st->row[y + rows], &st->row[y], sizeof st->row[y])) ++rows;
+			if (!all_world(&st->row[y])) rows_draw(&st->row[y], p, y, rows, deepest + (deepest > 0 ? 1.0f : deepest < 0 ? -1.0f : 0.0f), !pass);
+		}
+	}
+}
+
+/* The screen in 3D while Options' 3D depth is on (the slider at 0 shows
+ * the left eye alone), and this frame's spans where the slider is up:
+ * false where the frame is to be flat */
+static bool spans_ready(Present3dsStereo *st, bool *three_d) {
+	*three_d = display_stereo() && right_eye;
+	if (*three_d != gfxIs3D()) gfxSet3D(*three_d);
+	return *three_d && osGet3DSliderState() > 0.0f && make_spans && make_spans(st);
+}
+
 void present3ds_frame(bool fill, bool stretch, bool sync) {
 	/* (none once the system asks the game to close: the HOME Menu has the
 	 * GPU then, and waiting on it hung the console, a frame drawn after
 	 * the close) */
 	if (!surface || aptShouldClose()) return;
+	static Present3dsStereo st;
+	bool three_d, layered = spans_ready(&st, &three_d);
 	GSPGPU_FlushDataCache(pixels, TEX * TEX * 4);
 	C3D_SyncDisplayTransfer(pixels, GX_BUFFER_DIM(TEX, TEX), (u32 *)tex.data, GX_BUFFER_DIM(TEX, TEX),
 		GX_TRANSFER_FLIP_VERT(0) | GX_TRANSFER_OUT_TILED(1) | GX_TRANSFER_RAW_COPY(0) |
@@ -107,11 +180,17 @@ void present3ds_frame(bool fill, bool stretch, bool sync) {
 	 * wait paces the frames evenly, where the main loop's clock alone had
 	 * five to nine a second come early or late, issue #35) */
 	C3D_FrameBegin(sync ? C3D_FRAME_SYNCDRAW : 0);
-	C2D_TargetClear(top, C2D_Color32(0, 0, 0, 255));
-	C2D_SceneBegin(top);
 	float s = fill ? (float)GSP_SCREEN_WIDTH / (float)ch : 1.0f, sx = stretch ? (float)GSP_SCREEN_HEIGHT_TOP / (float)cw : s;
+	Place place = { ((float)GSP_SCREEN_HEIGHT_TOP - cw * sx) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, sx, s };
 	C2D_Image img = { &tex, &sub };
-	C2D_DrawImageAt(img, ((float)GSP_SCREEN_HEIGHT_TOP - cw * sx) / 2, ((float)GSP_SCREEN_WIDTH - ch * s) / 2, 0.5f, NULL, sx, s);
+	/* (each eye: the left's on the screen's own target, the right's on its other in 3D) */
+	for (int eye = -1; eye <= (three_d ? 1 : -1); eye += 2) {
+		C3D_RenderTarget *t = eye < 0 ? top : right_eye;
+		C2D_TargetClear(t, C2D_Color32(0, 0, 0, 255));
+		C2D_SceneBegin(t);
+		if (layered) eye_draw(&st, eye, &place);
+		else C2D_DrawImageAt(img, place.x0, place.y0, 0.5f, NULL, sx, s);
+	}
 	/* the bottom screen: a new picture, else black, in both of its buffers
 	 * once (a screen not drawn keeps its picture; drawn every frame, it
 	 * cost the GPU's time each one) */

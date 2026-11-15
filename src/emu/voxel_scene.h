@@ -15,4 +15,13 @@
  * each pixel the canvas keeps. */
 bool voxel_scene_frame(const uint32_t *shown, uint8_t *hud);
 
+/* What the frame is of, for depth lighting and the 3DS's 3D depth: a net
+ * layer, another map (the town, Lan's HP), a battle, or none they draw (a
+ * menu, a battle beginning, a liberation's board, a visit to another's
+ * Square) */
+enum { VOXEL_SCENE_NONE, VOXEL_SCENE_LAYER, VOXEL_SCENE_FLAT, VOXEL_SCENE_BATTLE };
+int voxel_scene_kind(void);
+/* ... and the rows whose sprites are the HUD's (voxel_lift's hud_rows) */
+int voxel_scene_hud_rows(int kind);
+
 #endif

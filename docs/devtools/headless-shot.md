@@ -3,7 +3,7 @@ type: Tool
 title: "build.py shot: a headless capture's options"
 description: "`build.py shot`'s options for a headless capture in the build image: the scenes, run depth, area, guardian, seed, setup and marks, `--talk`, scripted `--input` and `--taps`, and the frames saved."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:49:36Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:40:00Z }
 ---
 
 # build.py shot: a headless capture's options
@@ -21,7 +21,7 @@ run on the game, `--run-depth N` at depth N, `--net-biome N` in one area (`xN` a
 `--marks HEX` the title's marks, `--screen auto|whole|fill|stretch` the
 scale over `settings.ini`'s (Options' Display), `--colour-correction off|gba|vba|nds|psp`,
 `--interframe-blending off|simple|smart|lcd_ghosting|lcd_ghosting_fast` and
-`--depth-lighting on|off|debug` (`--voxel` too) [depth lighting](../engine/voxel.md) (debug: what each pixel was taken for, in flat colours; `--voxel-pitch DEGREES`, `--voxel-zoom` and `--voxel-depth` its camera; it shows only in a `--screen-shot`), `--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
+`--depth-lighting on|off|debug` (`--voxel` too) [depth lighting](../engine/voxel.md) (debug: what each pixel was taken for, in flat colours; `--voxel-pitch DEGREES`, `--voxel-zoom` and `--voxel-depth` its camera; it shows only in a `--screen-shot`), `CYBERWORLD_STEREO_SHOT=FRAME:PATH` saves that frame's two eyes of the 3DS's [3D depth](../engine/stereo.md) side by side, `--lcd3x on|off` the GBA's screen's ([The GBA's screen](../engine/lcd.md); lcd3x
 shows only in a `--screen-shot`), `--touch` the touch controls from the
 start (as on a phone; with `--size` a phone's screen and `--dpi N` its density), `--talk NAME:FRAME,...` opens a
 layer's chats at its frames (npc, shop, heal, programs, gift, challenge,

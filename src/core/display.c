@@ -95,7 +95,12 @@ static bool lcd_setting(const char *key, const char *val) {
 /* settings.ini's voxel (docs/engine/voxel.md): on or off, and a dev's
  * debug; the camera's angle, scale and depth the command line's alone,
  * while the look is being chosen */
-static int voxel;
+static int voxel =
+#ifdef __3DS__
+	DISPLAY_VOXEL_ON;   /* (the 3DS's 3D depth on as it comes: the owner's call, 2026-11-14) */
+#else
+	DISPLAY_VOXEL_OFF;
+#endif
 static float voxel_cam[3] = { 25.0f, 1.0f, 0.0f };
 static unsigned voxel_forced;
 static int voxel_read(const char *val) { return !strcmp(val, "debug") ? DISPLAY_VOXEL_DEBUG : yes(val) ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF; }
@@ -104,6 +109,22 @@ int display_voxel(void) { return display_has_voxel() ? voxel : DISPLAY_VOXEL_OFF
 float display_voxel_pitch(void) { return voxel_cam[0]; }
 float display_voxel_zoom(void) { return voxel_cam[1]; }
 float display_voxel_depth(void) { return voxel_cam[2]; }
+
+bool display_has_stereo(void) {
+#ifdef __3DS__
+	return true;
+#else
+	return false;
+#endif
+}
+
+bool display_stereo(void) { return display_has_stereo() && voxel != DISPLAY_VOXEL_OFF; }
+
+bool display_depth_default(void) { return display_has_stereo(); }
+
+/* (the 3DS's its own key: an older build wrote depth_lighting = off into
+ * every settings.ini, the 3DS's too, where no line could set it) */
+const char *display_depth_key(void) { return display_has_stereo() ? "depth_3d" : "depth_lighting"; }
 
 bool display_has_voxel(void) {
 #if defined(__3DS__) || defined(__vita__) || defined(__PSP__)
@@ -117,7 +138,9 @@ bool display_setting(const char *key, const char *val) {
 	if (!strcmp(key, "smooth_motion")) P.blend = yes(val);
 	else if (!strcmp(key, "screen")) set(display_scale_read(val));
 	/* (voxel: its name in the first builds that had it) */
-	else if (!strcmp(key, "depth_lighting") || !strcmp(key, "voxel")) { if (!(voxel_forced & 1u)) voxel = voxel_read(val); }
+	else if (display_has_stereo() ? !strcmp(key, "depth_3d") : !strcmp(key, "depth_lighting") || !strcmp(key, "voxel")) {
+		if (!(voxel_forced & 1u)) voxel = voxel_read(val);
+	} else if (!strcmp(key, "depth_lighting") || !strcmp(key, "voxel") || !strcmp(key, "depth_3d")) {}
 	else return lcd_setting(key, val);
 	return true;
 }
@@ -234,8 +257,8 @@ void display_blend_keep(LcdBlend b) {
 }
 
 void display_voxel_keep(bool on) {
-	voxel = on && display_has_voxel() ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
-	keep("depth_lighting", voxel ? "on" : "off", options_voxel_note());
+	voxel = on && (display_has_voxel() || display_has_stereo()) ? DISPLAY_VOXEL_ON : DISPLAY_VOXEL_OFF;
+	keep(display_depth_key(), voxel ? "on" : "off", options_voxel_note());
 }
 
 void display_lcd3x_keep(bool on) {

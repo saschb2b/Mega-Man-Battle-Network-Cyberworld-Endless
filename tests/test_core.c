@@ -38,6 +38,7 @@
 #include "test_backup.h"
 #include "test_transfer_code.h"
 #include "test_update.h"
+#include "test_stereo.h"
 #include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
@@ -5046,6 +5047,32 @@ static void test_all_star(void) {
 	CHECK(c[0] == 99 && !c[1], "all star: 99 at most (%d)", c[0]);
 }
 
+/* A boot state of a nine-bit build (src/emu/boot.c, boot-3.state): its
+ * Standard folder nine-bit as BN6's ROM holds it, which ten bits read as
+ * other chips (Cannon B as BN4's CloudMn in A, dealt blank on a New 3DS).
+ * chips_preset_nine names such an entry: one of the preset's that widening
+ * changes; not one in A, which both read alike, nor the same chip written
+ * in ten bits, nor an empty entry. A made-up ROM's preset. */
+static void test_preset_nine(void) {
+	static RomLayout layout;
+	layout.chip_data = 0x1000;
+	layout.chip_names[0] = layout.chip_names[1] = 0x2000;
+	R.data = calloc(ROM_SIZE, 1);
+	R.layout = &layout;
+	chips_forget();
+	if (!R.data) { CHECK(false, "preset nine: no memory for a made-up ROM"); return; }
+	static const uint16_t preset[3] = { 0x0001, 0x0201, 0x3404 };   /* Cannon A, Cannon B, AirShot * (nine-bit) */
+	for (int i = 0; i < 3; ++i) put16(R.data + (BN6_PRESET_FOLDERS - 0x08000000u) + 2 * i, preset[i]);
+	CHECK(chips_preset_nine(0x0201) && chips_preset_nine(0x3404), "preset nine: the Standard folder's Cannon B and AirShot * as BN6's ROM holds them");
+	CHECK(chip_entry_from9(0x0201) == CHIP_ENTRY(1, 1) && chip_entry_from9(0x3404) == CHIP_ENTRY(4, 26), "preset nine: widened, Cannon B and AirShot *");
+	CHECK(!chips_preset_nine(0x0001) && !chips_preset_nine(CHIP_ENTRY(1, 1)) && !chips_preset_nine(0xFFFF) && !chips_preset_nine(0x0202),
+		"preset nine: Cannon A, Cannon B in ten bits, an empty entry, a chip no preset holds");
+	free(R.data);
+	R.data = NULL;
+	R.layout = NULL;
+	chips_forget();
+}
+
 /* The starting folders (docs/game/meta/design.md, Starting folders): each
  * a legal folder of 30 chips in codes BN6 gives them, five of a chip at
  * most, its identity kept (Z-Canon's Cannons A, B and C, Busting with no
@@ -8074,12 +8101,14 @@ int main(int argc, char **argv) {
 	test_qr();
 	failures += test_backup();
 	failures += test_voxel();
+	failures += test_stereo();
 	failures += test_update();
 	failures += test_transfer_code();
 	test_launcher();
 	test_bug_cause();
 	test_xnavi();
 	test_all_star();
+	test_preset_nine();
 	test_beast();
 	test_folders();
 	test_xchips();
