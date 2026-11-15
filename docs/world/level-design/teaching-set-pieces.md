@@ -20,7 +20,8 @@ together:
   (eight boxes before his list, session 76;
   [the main path's words cut](../../voice/sweep/main-path.md)).
 - **From L** (`status_words`): his first words on a layer name two things
-  worth a detour at most, and Mystery Data he senses behind a lock is one
+  worth a detour at most (the heal while MegaMan is hurt one of them, as
+  the arrow leads there), and Mystery Data he senses behind a lock is one
   of them, with where the lock stands ("The cube's straight down,far
   off!"). He no longer lists the set pieces and services: each piece says
   itself at A, and the map's key marks the services and the shut locks

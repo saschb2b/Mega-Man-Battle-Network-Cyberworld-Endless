@@ -249,8 +249,9 @@ run, meta as variety):
   in the deep, "Nets meet" in a BN6 area from act 2 where visitors can
   come (none under the Gentle helper); MegaMan names the first native
   territory, the first visitor and the first deep act once a profile
-  (Profile.native_taught, visitor_taught, deep_taught); L's briefing names
-  the older net's viruses or both nets'. (Until the last round a
+  (Profile.native_taught, visitor_taught, deep_taught); L's briefing no
+  longer repeats it on every layer there, the card's telegraph and the
+  first arrival's words being its channel (session 77). (Until the last round a
   territory's guardian of BN5's fought on the guest core, and the words
   said so; a profile told that hears once that its Cross and its Navis
   are ours now: Profile.navis_ours_told.)
