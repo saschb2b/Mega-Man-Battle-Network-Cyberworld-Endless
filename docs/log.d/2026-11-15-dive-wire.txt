@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T03:45:00Z
+* **Update**: online/server-and-wire.md (protocol v19, the shared dive's server and wire ahead of the game's side: rooms by layer beside the Square, the week's traces on each layer, the feed and DIVERS, crews, the doors' queues and party battles with linked fighters, the Board's party marks and fastest busts; `hide` takes that week's traces too, issue #589), code/server.md (its row: `dive.py`, `traces.py`, `crews.py`, `party.py`), code/online.md (its row: `dive_wire.c`, the shared dive's messages built and read).
