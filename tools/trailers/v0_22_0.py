@@ -166,6 +166,8 @@ POSTER = T.poster
 # for Studio's Test & compare (tools/trailer_thumbnail.py), a region of a
 # whole frame each with two or three words
 YOUTUBE_HOOK = 'Dive Together, Cloud Saves and the PSP'
+YOUTUBE_NOTE = ("And the week's net is dived together: every diver on its seed seen live, crews, and a party of MegaMen "
+                'against a guardian on one field.')
 THUMBNAILS = [
     # (three MegaMen on one field, a bomb going off before BlastMan; the beast's fight through its fire rings;
     # Green Area's stair and terrace)

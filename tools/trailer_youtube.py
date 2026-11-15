@@ -103,11 +103,13 @@ def released(version):
     return git('log', '-1', '--format=%cs', f'v{version}').decode().strip()
 
 
-def hook(version):
+def hook(version, what='YOUTUBE_HOOK'):
     """the cut's YOUTUBE_HOOK: the news a title leads with (the
-    youtube-publish skill's thumbnail.md, The title), or None"""
+    youtube-publish skill's thumbnail.md, The title), or None; with
+    `what` 'YOUTUBE_NOTE', a sentence its description adds to the notes'
+    paragraph (what the trailer shows and the notes do not say yet)"""
     try:
-        return getattr(trailers.module(version), 'YOUTUBE_HOOK', None)
+        return getattr(trailers.module(version), what, None)
     except ImportError:
         return None
 
@@ -135,15 +137,16 @@ def describe(version):
         title = f'{lead} | Cyberworld Endless {version} Trailer'
     if len(title) > 100:
         title = f'Cyberworld Endless {version} Trailer'
-    text = '\n'.join([
-        f'{tagline} {para}',
+    note = hook(version, 'YOUTUBE_NOTE')
+    lines = [
+        f'{tagline} {para}' + (f' {note}' if note else ''),
         '',
         f'Cyberworld Endless {version}{f", released {date}" if date else ""}: a roguelike that runs Mega Man Battle Network 6 '
         'from your own ROM. Every shot is the game running; the music is original, written for this trailer.',
         '',
         f'Play in the browser: {SITE}play/',
         f'Download (PC, handhelds, phones, consoles): {SITE}download/',
-        f'What {version} brought: {REPO}/releases/tag/v{version}',
+        f'What {version} brought: {REPO}/releases/tag/v{version}' if date else None,   # (no page before its tag)
         f'itch.io: {ITCH}',
         f'Source: {REPO}',
         '',
@@ -151,7 +154,8 @@ def describe(version):
         'Mega Man Battle Network is © Capcom. This project is not affiliated with or endorsed by Capcom.',
         '',
         '#MegaManBattleNetwork #roguelike #indiegame',
-    ])
+    ]
+    text = '\n'.join(line for line in lines if line is not None)
     shown = thumbnails(version)
     return {'version': version, 'title': title, 'description': text, 'tags': TAGS,
             'recorded': date or datetime.date.today().isoformat(),

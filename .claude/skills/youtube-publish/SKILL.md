@@ -142,6 +142,15 @@ links in descriptions are clickable only with the advanced features (a
 video check, an ID or the channel's history), and become clickable on
 the published videos when they open.
 
+**Tägliches Upload-Limit erreicht** in a bar under the wizard, right
+after `cwGive()` (the wizard opens, "Link wird erstellt…" never becomes a
+link): an unverified channel takes about ten uploads a day, and the first
+ten trailers used them on 15 November 2026, so 0.22.0's was refused that
+evening. Its **Überprüfung starten** is the owner's (the identity check
+below); otherwise the limit lifts 24 hours after the day's first upload.
+Close the dialog (no draft is left), say so, and upload again then: the
+parts must be given to the page anew.
+
 A prompt **Einmalige Überprüfung deiner Identität erforderlich** is the
 owner's to answer: stop, tell them where it is, never enter a phone
 number, ID or code. After they verify, **reload** the Studio page: a page
