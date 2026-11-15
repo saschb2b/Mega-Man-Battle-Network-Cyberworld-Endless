@@ -125,6 +125,19 @@ platform floor and no road. A pad is no road either.
   roads too (no layer changed: Area 1's are drawn a pixel lower, `dv` 4
   against 3, and lend no panel; Area 2's add no shape the layers ask
   for).
+- **Only the bends its roads show.** A road turns where its map, or its
+  mirror image, has the bend: a panel of road with road on those two
+  sides alone (`cut_unseen_bends`, `src/map/netmap_roads.c`, read from
+  the road books' neighbourhoods). Elsewhere the bend's panel is walkway
+  and the road ends on either side of it, under it, and a side left
+  shorter than three panels is walkway too (above). BN4's ACDC Area's map
+  has the bends whose inner corner faces the screen's left or right and
+  not those facing up or down: laid in pieces, they left the void through
+  their inner corner, the navy squares in the cyan a player saw where the
+  way turned up into the exit's square, a white walkway joining it there
+  (15 November 2026; drawn by hand, all four turnings, with and without
+  the walkway). Now that layer's road ends a panel short of the turn, at
+  the walkway, and the turn is the walkway's own.
 - **Thin books** (`TileGrid.thin`, `src/map/panels_lay.c`). One map's
   roads are a few dozen panels, where an area's walkways are hundreds, and
   a road's rim lies past where a tile picked alone may draw: a panel that
@@ -156,14 +169,18 @@ platform floor and no road. A pad is no road either.
 ## Not mended
 
 - **Bends.** Park's map has each kind of bend once or twice, some only
-  beside other floor, which lends its tiles in part. A bend is laid whole
-  where its map's panel fits and in pieces where not: then with a nick at
-  its inner corner, a tile past its tip or a gap at it. Two bends in a
-  row (a jog of one panel) show most: in BN4's ACDC Area two of a jog's
-  four turnings draw whole and the other two leave the void showing at
-  both inner corners (drawn by hand, `R` in [the tile test's hand
-  floor](../../devtools/tile-test.md), A floor drawn by hand), where a
-  player saw navy squares in the cyan.
+  beside other floor, which lends its tiles in part. A bend its map shows
+  is laid whole where its map's panel fits and in pieces where not: then
+  with a nick at its inner corner, a tile past its tip or a gap at it. A
+  bend no map shows is no longer laid (above, Only the bends its roads
+  show; drawn by hand, `R` in [the tile test's hand
+  floor](../../devtools/tile-test.md), A floor drawn by hand).
+- **A road's end at a walkway's turn.** Where a road now ends at the
+  walkway panel of a cut bend, the road's last panel, laid as if it ran
+  on under it, shows a sliver of its hue under that panel's side face
+  (kai6's layer, BN4's ACDC Area): the end's tiles kept are the road's
+  own panel's, and the tile it shares with the walkway's face is one of
+  them.
 - **Joints.** A run is plain from end to end. BN4 sets a striped joint
   every few panels; a layer's road has one only where a panel outside a
   run happens to carry it.

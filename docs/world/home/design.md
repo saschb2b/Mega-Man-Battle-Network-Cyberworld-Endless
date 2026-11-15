@@ -97,6 +97,31 @@ next dive, zenny spent at home is not carried to the net's dealers.
   do, after a guardian who healed already.
 - **Free farming.** Going back is priced by the clock; one job at a time.
 
+## No way home mid-act
+
+Home comes after the act's guardian, never before: a jack-out on a
+layer would be a free way off every bad layer and a heal outside the
+act's spacing, the prepare-or-press-on dialectic undone (the run holds
+BN6's own jack-out off, `lock_run`). A playtester who had just read Dad's
+Battle Lab mail on layer 1 looked for a way home to try it: R did
+nothing, the PET had no jack-out, layer 1's map no way back, and nothing
+said when home comes (session 77). A usability fault, not a missing
+system: the intent was born where it could not be acted on, and the
+press that tried it had no answer. Decided with the game-design skill
+(feedforward where the intent is born, feedback where it is tried, no
+new verb):
+
+- **R on a layer answers**, as BN6 answers a jack-out it refuses
+  (bn6f CompText87388A8, MegaMan's "I can't jack out!"): MegaMan says
+  so and where the way home is, past the guardian, or, the guardian
+  fallen, that the exit takes them home (`jack_out_words`,
+  `src/director/lesson_words.c`; `layer_r`, `director_keys.c`). Each
+  press, as BN6's; no button named, no rule spoken.
+- **Dad's Battle Lab mail says when**: "Stop by when you come home
+  after a guardian,OK?" ([The Battle Lab](../../game/battle-lab.md)).
+- Not a jack-out in the PET, nor a line on arrival: one answers a press
+  the player makes, the other the mail that raised the wish.
+
 ## Time
 
 Lan's HP: about 10 seconds for a player who steps on the newest portal.

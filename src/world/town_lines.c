@@ -167,15 +167,19 @@ const char *town_intro(const char *arrival) {
 			"@D Its paths change every time someone jacks in.|");
 		if (endless) ADD("@D And it only goes down. They call it the Endless Net.|");
 		else ADD("@D They call it the Endless Net.|");
+		/* (what a dive leaves and what it keeps, docs/game/meta/design.md:
+		 * "Nothing you find comes back out" read false to a playtester
+		 * beside RECORDS' Library and Lan's "battle data", session 77) */
 		ADD("@M The Endless Net... Lan,that sounds like an adventure!|"
 			"@D It's all copied data down there.|"
-			"@D Nothing you find comes back out with you.|");
+			"@D Its chips and Zenny vanish when a dive ends.|"
+			"@D Your PET's Library keeps every chip's data,though.|");
 		if (endless) ADD("@D Something at the very bottom is copying it all.|");
-		else ADD("@D But my readings found a bottom,%d layers down.|@D Something there is copying it all.|", SHORT_LAYERS);
+		else ADD("@D My readings found a bottom,%d layers down.|@D Something there is copying it all.|", SHORT_LAYERS);
 		ADD("@D We call it the Nest.|"
 			"@D If MegaMan's deleted,my backup brings him home.|");
-		if (endless) ADD("@D So dive as deep as you can,and send me your readings!|");
-		else ADD("@D So dive down to the Nest,and send me your readings!|");
+		if (endless) ADD("@D Dive as deep as you can,and send me your battle data!|");
+		else ADD("@D So dive down to the Nest,and send me your battle data!|");
 		ADD("@L Leave it to us,Dad!|"
 			"@M Let's jack in from your PC,Lan!");
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {

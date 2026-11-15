@@ -2612,10 +2612,16 @@ static bool shape_wide(int x, int y) {
 	return false;
 }
 
+/* (x, y) inside room r's box */
+static bool in_room(int r, int x, int y) {
+	const Room *m = &layer.rooms[r];
+	return r >= 0 && x >= m->x && x < m->x + m->w && y >= m->y && y < m->y + m->h;
+}
+
 /* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
 static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
 
-enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, WAY_SHAPES };
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, SHAPE_GATE, WAY_SHAPES };
 
 /* (a walkway leaving wide floor at p[i] turns a corner within two panels:
  * the playtesters' road off a square's side, session 76) */
@@ -2657,7 +2663,10 @@ static void way_shapes(int *out) {
 		if (shape_wide(x, y) && !shape_wide(nx, ny) && short_leg(p, i, n)) ++out[SHAPE_SHORT_LEG];
 		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
 		bool beyond = walk_floor(x + dx, y + dy);
-		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) {
+			++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+			out[SHAPE_GATE] += shape_wide(x, y) && layer.arena >= 0 && arena_approach(x, y) && arena_approach(nx, ny) && !in_room(layer.ante, nx, ny);
+		}
 		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
 			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
 			++out[SHAPE_JOG];
@@ -2665,8 +2674,8 @@ static void way_shapes(int *out) {
 }
 
 static void shapes_line(const char *what, int layers, const int *got) {
-	printf("  %s: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs, %d short legs; %d pits\n", what, layers,
-		got[SHAPE_TURN_WIDE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
+	printf("  %s: over %d layers, %d turns into a walkway on wide floor (%d into a guardian's gate), %d at junctions, %d jogs, %d short legs; %d pits\n", what,
+		layers, got[SHAPE_TURN_WIDE], got[SHAPE_GATE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
 }
 
 /* The other games' areas (rom.c's, docs/multirom/) as the generator lays
@@ -2761,6 +2770,12 @@ static void test_way_shapes(void) {
 	int xall[WAY_SHAPES] = { 0 }, layers = 0, over = 0, ways = 0;
 	xarea_shapes(xall, &layers, &over, &ways);
 	shapes_line("the other games' areas' way shapes", layers, xall);
+	/* (the guardian's gate leaving the middle of the antechamber's side the
+	 * way runs along, MegaMan walking past its mouth: session 77's
+	 * playtesters at RoboDog's comp and Green's homepage; 84 of BN6's 1140
+	 * layers and 35 of the other games' 660 before, 14 and 8 now, where no
+	 * side the arena fits off has a gate the walk meets on its line) */
+	CHECK(all[SHAPE_GATE] <= 20 && xall[SHAPE_GATE] <= 12, "%d and %d ways turn into the guardian's gate off its line", all[SHAPE_GATE], xall[SHAPE_GATE]);
 	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
 	/* (a pit between walkways, its walls keeping MegaMan off it, where the
 	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
@@ -5334,7 +5349,7 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {

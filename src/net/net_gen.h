@@ -29,6 +29,8 @@ bool ng_navi_near(int x, int y);
 void ng_hush(int x, int y);
 bool ng_room_spot_in(const Room *r, int *ox, int *oy, bool open);
 bool ng_fits(int rise);
+/* ... with the box (x0, y0)-(x1, y1) floor too, before it is carved */
+bool ng_fits_with(int rise, int x0, int y0, int x1, int y1);
 bool ng_floor_cell(int x, int y);
 bool ng_void_cell(int x, int y);
 void ng_route_distances(void);

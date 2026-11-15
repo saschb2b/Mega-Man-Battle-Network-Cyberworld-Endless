@@ -22,6 +22,9 @@ bool heal_first(int *x, int *y);
  * L asking again (the heal first again) */
 void heal_turn_watch(void);
 void heal_turn_reset(void);
+/* The walk in panels from MegaMan on panel (cx, cy) to the guardian's
+ * arena, as the arrow leads, on its way in; -1 elsewhere or for none. */
+int arena_walk(int cx, int cy);
 void goal_way(void);
 void push_arrow(void);
 /* MegaMan standing still on the exit pad as drawn: its warp (pad_art.h). */

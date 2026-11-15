@@ -66,6 +66,8 @@ bool guardian_known(int navi) {
 	return rv->megaman_won + rv->navi_won > 0;
 }
 
+bool guardian_met(int navi) { return guardian_known(navi) || rival(navi)->met > 0; }
+
 const Guardian *guardian(int navi) {
 	static const Guardian unknown = { "???", "Guardian", GUARDIAN_NO_MUGSHOT, -1, 200, 200, 200 };
 	/* (BN4's by the proved Navis' list, xguardian_bn4.h) */

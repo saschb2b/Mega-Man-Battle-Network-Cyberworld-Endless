@@ -16,7 +16,9 @@
 #include "fork_words.h"
 #include "gamecall.h"
 #include "jobs.h"
+#include "net_arena.h"
 #include "net_route.h"
+#include "net_shapes.h"
 #include "netmap.h"
 #include "pad_art.h"
 #include "save.h"
@@ -192,6 +194,28 @@ void heal_turn_watch(void) {
 void heal_turn_reset(void) {
 	D.heal_declined = false;
 	D.heal_near = 0;
+}
+
+/* How many panels MegaMan on panel (cx, cy), on the way into the
+ * guardian's arena (the room before it, its bridge: arena_approach), walks
+ * to it, along the floor as the arrow leads (net_route.c), to its first
+ * panel on the bridge's line (net_arena.c's arena_box); -1 off that way in
+ * or where no walk reaches it. Worked out again only as he steps onto
+ * another panel. */
+int arena_walk(int cx, int cy) {
+	static int at = -1, len = -1;
+	static uint32_t seed;
+	if (layer.arena < 0 || !arena_approach(cx, cy)) return -1;
+	if (at == cy * MAP_W + cx && seed == run.layer_seed) return len;
+	at = cy * MAP_W + cx;
+	seed = run.layer_seed;
+	const Room *a = &layer.rooms[layer.arena];
+	int d = layer.arena_dir, tx = a->ax - dir_dx[d] * (a->w / 2), ty = a->ay - dir_dy[d] * (a->h / 2);
+	double gx, gy;
+	netmap_grid(bn6_player_x(), bn6_player_y(), &gx, &gy);
+	route_floor();
+	if (route_way(gx, gy, tx, ty, &len) < 0) len = -1;
+	return len;
 }
 
 /* The way on as the arrow shows it: along the floor to the exit or the

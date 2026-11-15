@@ -134,6 +134,11 @@
   wear them back to one wide, step them aside and cut their mouths off
   a junction's line: BN4's ACDC squares let you out at their corners
   alone, and BN5's Oran and Nebula Areas tied knots of narrow junctions.
+- **Fixed: holes in the floor.** Here and there a panel MegaMan could
+  walk on let the background show through, a gap in its tiles (Sky's
+  catwalks, BN4's areas, Oran, Robot Control Comp). Every tile is
+  checked now as the layer is drawn, and a hole is filled with a piece
+  of the area's own maps.
 - **R jacks in from a step short of Lan's PC.** At Lan's desk, R a
   step short of the PC walks Lan onto it and jacks in, as R does at the
   town's jack-in spots.

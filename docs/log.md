@@ -1,6 +1,11 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (#582's fix written in: holes in the floor filled).
+* **Creation**: devtools/chip-texts.md (every chip's name and description held against its own entry in the three games' archives, as BN6's routines find them; 721 checked, none wrong; MarkCannon's and Thunder's texts that read wrong are BN5's and BN6's own). **Update**: devtools/index.md (its line), code/dev.md (`chip_texts.c`), code/tools.md (`tools/chip_texts.py`'s row).
+* **Update**: code/layer.md (`layer_heal.c`: the Recovery Mr.Prog's patch, its amount set again after a CONTINUE's state loads, where it had given 1 HP).
+* **Update**: game/rival.md (Chaud's call: "again" from a call heard, kept by the profile as it plays, not the depth a run reached), multirom/one-net.md (the first dive's words once a profile, and not naming a native territory's area before MegaMan finds it old).
+* **Update**: rom/battle.md (SpoutMan's panels behind MegaMan, BN6's own attack 0xC, named BN6_SPOUTMAN_BACK, from a playtester's sighting).
 * **Update**: game/battle-lab.md (the builder's keys after session 77: B back a level on every page and "Leave the Lab?" at a page's own place, Yes chosen as NaviCust's quit; FIELD's Up to Preset or BATTLE!; held directions repeat; BATTLE!'s information for the set in hand; the keeper's question with Yes and No), engine/ui.md (the Lab's B and its question).
 * **Update**: game/progression/encounter-groups.md (a CONTINUE goes on with the layer's next battle, its count saved with the checkpoint; the formations a layer gives measured played through and continued), engine/saves.md (`run.act` holds the layer's battles fought).
 * **Update**: releases/v0.22.0.md (#584's update box written in as "What's new, on the title"; #587's wide ways in BN4's and BN5's areas).

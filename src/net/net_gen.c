@@ -396,11 +396,13 @@ static int floor_cells(void) {
 /* Whether the layer's tile map fits the game's buffer (BN6_TILEMAP_MAX), as
  * netmap centres and sizes it (panel edges up to 28 units off, `rise` for a
  * raised floor). */
-bool ng_fits(int rise) {
+bool ng_fits(int rise) { return ng_fits_with(rise, 0, 0, -1, -1); }
+
+bool ng_fits_with(int rise, int bx0, int by0, int bx1, int by1) {
 	int u0 = 1 << 30, u1 = -(1 << 30), v0 = 1 << 30, v1 = -(1 << 30);
 	for (int y = 0; y < MAP_H; ++y)
 		for (int x = 0; x < MAP_W; ++x) {
-			if (layer.cell[y][x] != C_PATH) continue;
+			if (layer.cell[y][x] != C_PATH && !(x >= bx0 && x <= bx1 && y >= by0 && y <= by1)) continue;
 			if (x - y < u0) u0 = x - y;
 			if (x - y > u1) u1 = x - y;
 			if (x + y < v0) v0 = x + y;
@@ -534,9 +536,19 @@ static void finish_rooms(uint32_t seed, unsigned stair_dirs, int rise, const Lay
 /* A guardian's arena, `arena_n` panels a side, on the layout just built,
  * a guardian's size instead where `fallback` and his finds no room. */
 static bool arena_fits(int arena_n, bool fallback, int rise, ArenaInfo *arena) {
-	int got = arena_attach(arena_n, arena);
-	if (got < 0 && fallback) got = arena_attach(ARENA_SIZE, arena);
-	return got >= 0 && ng_fits(rise);
+	/* (a gate the walk meets on its line first, net_arena.c; where its
+	 * arena leaves the layer too big for the map, the side's middle) */
+	static uint8_t cells[MAP_H][MAP_W];
+	memcpy(cells, layer.cell, sizeof cells);
+	int rooms = layer.nrooms;
+	for (int lined = 1; lined >= 0; --lined) {
+		int got = arena_attach(arena_n, arena, lined, rise);
+		if (got < 0 && fallback) got = arena_attach(ARENA_SIZE, arena, lined, rise);
+		if (got >= 0 && ng_fits(rise)) return true;
+		memcpy(layer.cell, cells, sizeof cells);
+		layer.nrooms = rooms;
+	}
+	return false;
 }
 
 /* The layout: the planned one, then any of the area's, last the plainest
