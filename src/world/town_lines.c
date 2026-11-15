@@ -157,18 +157,26 @@ const char *town_intro(const char *arrival) {
 		: "@L The Endless Net again... I wonder what's new?";
 	bool called = !profile.seen_intro || (profile.nest_clears > 0 && profile.runs % 2);
 	if (!profile.seen_intro) {
+		/* (a first dive is the short net, its Nest at the bottom,
+		 * docs/game/progression/structure.md; the endless net's words, a
+		 * Net that only goes down, where a run is in it: a playtester's
+		 * short run heard them) */
+		bool endless = run.mode == RUN_ENDLESS;
 		ADD("@D Lan,it's Dad. Got a minute?|"
 			"@D A new Net just opened up under town.|"
-			"@D Its paths change every time someone jacks in.|"
-			"@D And it only goes down. They call it the Endless Net.|"
-			"@M The Endless Net... Lan,that sounds like an adventure!|"
+			"@D Its paths change every time someone jacks in.|");
+		if (endless) ADD("@D And it only goes down. They call it the Endless Net.|");
+		else ADD("@D They call it the Endless Net.|");
+		ADD("@M The Endless Net... Lan,that sounds like an adventure!|"
 			"@D It's all copied data down there.|"
-			"@D Nothing you find comes back out with you.|"
-			"@D Something at the very bottom is copying it all.|"
-			"@D We call it the Nest.|"
-			"@D If MegaMan's deleted,my backup brings him home.|"
-			"@D So dive as deep as you can,and send me your readings!|"
-			"@L Leave it to us,Dad!|"
+			"@D Nothing you find comes back out with you.|");
+		if (endless) ADD("@D Something at the very bottom is copying it all.|");
+		else ADD("@D But my readings found a bottom,%d layers down.|@D Something there is copying it all.|", SHORT_LAYERS);
+		ADD("@D We call it the Nest.|"
+			"@D If MegaMan's deleted,my backup brings him home.|");
+		if (endless) ADD("@D So dive as deep as you can,and send me your readings!|");
+		else ADD("@D So dive down to the Nest,and send me your readings!|");
+		ADD("@L Leave it to us,Dad!|"
 			"@M Let's jack in from your PC,Lan!");
 	} else if (profile.nest_clears > 0 && profile.runs % 2) {
 		/* (after a win, the ending's hook: "reached" undersold it to a
