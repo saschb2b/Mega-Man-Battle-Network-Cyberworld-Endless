@@ -529,6 +529,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
                     week.post(self.week, self.seed, 10, 4, True, 40, 9, party=0x10)):
             await b.send(bad)
             self.assertEqual(await self.notice(b), 25)
+        await asyncio.gather(*self.server.writes)       # (the appends in their threads, done)
         lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([line.get("party") for line in lines], [5, 0])
 
@@ -543,7 +544,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await a.send(protocol.dive(END, SPEC["dive_deleted"], 1, 1, 0, 2))
         await b.send(protocol.dive(PHRASE, 3, 5, 5, 0))
         await self.until(a, SPEC["dive_traces"], lambda d: d[1] == SPEC["trace_phrases"] and b"Beta" in d)
-        await asyncio.sleep(0.2)
+        await asyncio.gather(*self.server.writes)       # (the traces' appends in their threads, done)
         result = admin.perform("hide", self.dir.name, a.identity.hex(), "test", week=self.week)
         # (his phrase and his mark gone, his find become the opened glow alone)
         self.assertEqual((result["week"], result["traces"]), (self.week, 2))
