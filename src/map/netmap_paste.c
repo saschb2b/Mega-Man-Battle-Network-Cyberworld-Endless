@@ -603,7 +603,6 @@ static void hang_said(const SidePiece *p, int x, int y) {
 	fprintf(stderr, "  %s at world %d,%d: %d tiles\n", p->grows ? "on the floor's edge" : p->behind ? "behind the floor" : "under the pad's panel",
 		nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
 }
-}
 
 static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER];
 static int nside_at;
