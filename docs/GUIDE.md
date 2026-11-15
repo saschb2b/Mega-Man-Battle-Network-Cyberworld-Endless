@@ -1378,7 +1378,11 @@ layer, who beat a guardian, who cleared the net.
   PSP each of the party fights him on a field of his own, his HP shared.
 - **Crews.** **A** on another diver asks to team up (BN6's own Yes or
   No, on both sides), up to four. A crew stays together across layers:
-  at Lan's HP a portal waits until the whole crew stands on it.
+  at Lan's HP a portal waits until the whole crew stands on it. A
+  crewmate's battle near you is yours to join: the band says so for a
+  few seconds, and **A** jumps in, the two of you on one field against
+  the viruses he met, each with his own reward after. A battle you join
+  counts as one of yours, so a crew fights about as many as one alone.
 - **Traces of the week.** Where a diver was deleted this week a skull
   burst stays; **A** on it says who and to what. **R** on a layer opens
   the phrases you know from the Square: **A** leaves one on your panel
