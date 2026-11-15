@@ -38,6 +38,11 @@
   your saves and your run kept. Elsewhere the line opens the download
   page. Options' Game page has an **Updates** switch to turn the look
   off.
+- **The layer map's key names everything on a busy layer.** Where a
+  layer held many kinds (Exit, Heal, Shop, Trader, Event, ProtoMan), the
+  key under SELECT's map dropped You and still cut ProtoMan's name off at
+  the edge. Now it keeps every entry and takes a second row where one
+  can't hold them, on the second screen's map too.
 
 ## 0.21.2 (2026-11-14)
 
