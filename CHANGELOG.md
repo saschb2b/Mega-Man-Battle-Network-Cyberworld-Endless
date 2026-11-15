@@ -29,6 +29,12 @@
   keeps playing from where it was, and goes on from there in the game
   as you close them. Where nothing was playing, the NaviCust's theme
   fills in.
+- **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
+  Pressing A at a steady pace through his words, the next press could
+  land just after the gift's screen opened and take its first choice
+  before you had seen it. A reward pick's screen now takes a choice only
+  once it has been up a second and a half (the cursor moves sooner), for
+  the gift, a guardian's draft and every other pick alike.
 - **The game tells you when a new version is out.** At each start it
   looks for one (a single request for the release's own `update.json`,
   nothing about you sent), and the title shows `New v0.22.0` beside its
@@ -38,6 +44,11 @@
   your saves and your run kept. Elsewhere the line opens the download
   page. Options' Game page has an **Updates** switch to turn the look
   off.
+- **The layer map's key names everything on a busy layer.** Where a
+  layer held many kinds (Exit, Heal, Shop, Trader, Event, ProtoMan), the
+  key under SELECT's map dropped You and still cut ProtoMan's name off at
+  the edge. Now it keeps every entry and takes a second row where one
+  can't hold them, on the second screen's map too.
 - **The Jukebox's Unused section.** The songs BN5's and BN4's
   cartridges hold but never play, listed by their numbers, were in a
   section called More, and their "Song 07" rows read as unfinished. The

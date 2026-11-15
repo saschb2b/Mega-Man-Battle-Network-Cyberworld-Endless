@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "director_duel.h"
 #include "director_state.h"
 #include "pacing.h"
 #include "save.h"
@@ -61,9 +62,12 @@ const char *duel_call_words(void) {
 			: rival_clearance() < layer_objs_official_level ? "@C The official vault beside him needs my full clearance.|@C Three wins. The last against ProtoMan himself.|"
 			: layer_objs_official_level >= 2 ? "@C Beat it,and the official vault beside him opens.|@C Three Mega chips.|"
 			: "@C Beat it,and the official gate beside him opens.|@C Inside,order one of three chips you've held.|";
+		/* (who he is, the first time alone, Lan's surprise at his name
+		 * as it is said: it had come after seven boxes of his, and a
+		 * profile that had heard them heard them again, session 76) */
 		snprintf(call, sizeof call, "%s@C ProtoMan busted this layer's viruses in %d:%02d.%02d.|%s@C Think MegaMan can beat that%s?",
-			profile.duel_won + profile.duel_lost ? record :
-			"@C Lan. It's Chaud.|@C I hear you're diving the Endless Net.|@C The Nest copies Navis. ProtoMan's the real thing.|",
+			profile.duel_won + profile.duel_lost ? record : duel_called_before() ? "@C Lan,it's Chaud again.|" :
+			"@C Lan. It's Chaud.|@L Huh!? Chaud!?|@C I hear you're diving the Endless Net.|@C The Nest copies Navis. ProtoMan's the real thing.|",
 			sec / 60, sec % 60, (f % 60) * 100 / 60,
 			/* (what a win earns, before the first: a playtester risked his
 			 * run for pride alone) */
@@ -77,8 +81,7 @@ const char *duel_call_words(void) {
 	/* (Lan answers: a call no one answered read as a message left, the
 	 * netbattle's too) */
 	size_t n = strlen(call);
-	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready,Chaud!"
-		: profile.duel_won + profile.duel_lost ? "You're on,Chaud!" : "Chaud!? ...You're on!");
+	snprintf(call + n, sizeof call - n, "|@L %s", layer_objs_duel_later ? "We'll be ready,Chaud!" : "You're on,Chaud!");
 	return call;
 }
 

@@ -1,0 +1,8 @@
+{
+  "feature": "Battle",
+  "date": "2026-11-15",
+  "name": "A battle opens in Full Synchro: BN6's kept mood",
+  "result": "Two playtesters' battles opened in Full Synchro (the emotion window's outline, Cannon 40x2). BN6 writes a battle's mood into MegaMan's NaviStats at its end (0x08007D94) and the next battle copies it; only the jack-in, the jack-out and a real-world script battle zero it (0x08015C32). kai6's checkpoint held 0xFF there after a battle won in Full Synchro.",
+  "meaning": "BN6's own rule, kept: nothing of the run's writes BN6's mood between battles. Named BN6_MOOD_KEPT, BN6_MOOD_KEPT_WRITE and BN6_MOOD_ZERO_ALL (src/emu/bn6_forms.h; docs/rom/battle.md).",
+  "link": null
+}
