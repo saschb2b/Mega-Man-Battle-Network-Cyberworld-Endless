@@ -154,13 +154,13 @@ def digest(path):
 
 def plain(text):
     """Markdown to the PET font's plain ASCII: no bold, code, links or
-    pictures, curly quotes and dashes straightened, '|' (the game's line
+    pictures, curly quotes, dashes and a menu path's '>' straightened, '|' (the game's line
     break) and other letters it has not dropped."""
     text = re.sub(r'!\[[^\]]*\]\([^)]*\)', '', text)
     text = re.sub(r'\[([^\]]+)\]\([^)]*\)', r'\1', text)
     text = re.sub(r'<[^>]+>', '', text).replace('**', '').replace('`', '').replace('|', '/')
     text = text.translate(str.maketrans({'\u2019': "'", '\u2018': "'", '\u201c': '"', '\u201d': '"',
-                                         '\u2013': '-', '\u2014': '-', '\u00d7': 'x'}))
+                                         '\u2013': '-', '\u2014': '-', '\u00d7': 'x', '\u203a': '>'}))
     return re.sub(r'\s+', ' ', ''.join(c for c in text if 32 <= ord(c) < 127 or c == '\n')).strip()
 
 
