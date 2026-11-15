@@ -14,6 +14,7 @@ list of up to three:
      'words': ('CLOUD', 'SAVES!'), # two lines, four words at most in all
      'lit': 1,                     # which line is gold (the other white)
      'side': 'right',              # optional: the words and the logo on the right, for a subject on the left
+     'brand': 'left',              # optional: the logo's corner where it is not the words' side
      'point': (x, y)}              # optional: the orange cursor points here (game pixels of the frame)
 
 and writes .build/youtube/cyberworld-endless-VERSION-thumbnail-a.png (-b,
@@ -132,7 +133,8 @@ def svg(spec, frame, version):
     lw = 330
     lh = round(logo.height * lw / logo.width)
     plate_y = 34 + lh + 26
-    bx = W - 44 - 342 if right else 44        # the brand's left edge: the logo, the version's plate and NEW
+    # the brand's left edge (the logo, the version's plate and NEW): the words' side, or the spec's 'brand'
+    bx = W - 44 - 342 if spec.get('brand', spec.get('side', 'left')) == 'right' else 44
     g0, g1 = (1, 0) if right else (0, 1)
     return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
 <defs>

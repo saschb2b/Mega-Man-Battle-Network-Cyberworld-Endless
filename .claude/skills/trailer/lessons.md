@@ -652,11 +652,12 @@ screens" for the frame and the band; `blueprint.md` is the result, its
 fixed half code (`house.py`, `house_music.py`), and 0.22.0 the first cut
 on it: about 150 lines of its own where a cut was 600 to 1000.
 
-What was made: 58 seconds, 35 bars at 150. The cold open is a Beast Out
-(the dark, the flare, the white, the beast) and its fight through fire
-rings; the title YOUR RUN, ON EVERY DEVICE (the notes' own line); Dad's
-hello; four segments (saves that follow you; the net, relaid; the little
-things; more ways to play) on 0.17.0's frame, the panel now a list of
+What was made: 69 seconds, 42 bars at 150. The cold open is a Beast Out
+(the dark, the flare, the white, the beast) and three MegaMen on one
+field against BlastMan; the title YOUR RUN, ON EVERY DEVICE (the notes'
+own line); Dad's hello; five segments (saves that follow you; the net,
+relaid; the little things; more ways to play; dive together, the climax)
+on 0.17.0's frame, the panel now a list of
 the segment's shots under the PET's orange cursor (0.17.0's chips were
 that cut's own); the recap, four tiles at 2x and the fixes counted from
 the CHANGELOG as the cut is drawn; Dad's thanks; the stinger; the end
@@ -704,15 +705,34 @@ update's box: a manifest over HTTP) are the cut's `footage()`, which
 starts both and stops them.
 
 The thumbnails (the youtube-publish skill's `thumbnail.md`): three SVGs
-of one layout, a region of a whole frame with two lines of words. The
-first sheet set the words in Silkscreen: "NOW" read as "NO" and a heart
-at 168 wide; Lato Black Italic since. The first heroes were picked
-blind and put a blast under the scrim: pick the frame on a sheet, its
-subject in the right two thirds.
+of one layout, a region of a whole frame with two lines of words (DIVE
+TOGETHER!, CLOUD SAVES!, THE NET CLIMBS!). The first sheet set the words
+in Silkscreen: "NOW" read as "NO" and a heart at 168 wide; Lato Black
+Italic since. The first heroes were picked blind and put a blast under
+the scrim: pick the frame on a sheet. In a battle MegaMan stands on the
+left, where the words were: `'side': 'right'` mirrors the layout.
 
-Still the owner's: his pick of a tune (gate 4), his word on the cut
-(gate 5), and whether Dad should have a voice some day; until then the
-cut renders into `.build/` and 0.21.0's stays the current one.
+The first cut had four segments and 58 seconds, laid from the
+CHANGELOG's Unreleased section. The owner: "are you sure you have
+everything showcased in its fullest glory? go over the merged prs you've
+most likely missed something. for example the online multiplayer dive
+addition". The shared dive (pull request 590) and the layers' heights
+(632), the Nest's crystals (640) and Robot Control Comp's figures (634)
+were merged and in neither the CHANGELOG nor the notes. All 108 pull
+requests since 0.21.2 read, the cut grew to five segments with the dive
+last: its portal, four divers on a layer, a crew asked and formed, a
+crewmate's battle joined, the party at a guardian's door and its fight
+on one field, taken with up to four games on a local server
+(`v0_22_0_footage.py`'s `online_footage`, the week pinned so every take
+dives the same net). It is `blueprint.md`'s step 0 since. Taking the
+footage found bugs before the tag again: four MegaMen on one field
+stand still (two and three fight on), divers carry no name tag, the
+leader's A at the door also opens the crew's chat.
+
+The owner on the sketches: "a is good" (15 November 2026): "Carry on".
+Still his: his word on the cut (gate 5), and whether Dad should have a
+voice some day; until then the cut renders into `.build/` and 0.21.0's
+stays the current one.
 
 Chosen by this cut (the next one's are others): the green accent, the
 climbing packets, the sweep, the tune "Carry on", the Beast Out as the

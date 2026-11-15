@@ -12,16 +12,24 @@ title, his thanks before the stinger, his box over footage that fits
 each line (a dive, a new Net three times over, the release's shots to
 come; the owner: Dad speaking while MegaMan stands there is boring).
 
-The release (CHANGELOG.md's Unreleased until its tag), most important
-first, the climax last:
+The release, read from the pull requests merged since 0.21.2 and not
+from the CHANGELOG alone (the first cut was laid from its Unreleased
+section, which had neither the shared dive nor the layers' heights yet;
+the owner: "go over the merged prs you've most likely missed
+something"), the climax last:
 01 SAVES THAT FOLLOW YOU: cloud saves, sealed and with no account, a
    code that sends them, SAVES in three pages.
-02 THE NET, RELAID: BN6's locks met every act, the comps' two-wide ways,
-   BN4's ACDC Area and BN5's Oran Area drawn whole.
-03 THE LITTLE THINGS: the map's key, the Jukebox's Unused section, the
-   title's best depth.
+02 THE NET, RELAID: layers that climb (stairs, raised rooms, terraces),
+   the areas' own props (the Nest's crystals, Robot Control Comp's
+   figures), BN6's locks met every act, the comps' two-wide ways, BN4's
+   ACDC Area and BN5's Oran Area drawn whole.
+03 THE LITTLE THINGS: the map's key, L's two detours, the Jukebox's
+   Unused section.
 04 MORE WAYS TO PLAY: the PSP, 3D on the New 3DS at full speed, Android
    and the Switch updating themselves.
+05 DIVE TOGETHER: the shared dive (docs/online/shared-dive.md), the
+   week's portal, divers seen live, a crew, a crewmate's battle joined,
+   a party on one field against a guardian.
 The recap: the net built faster, the music playing on under the menus,
 the game telling of a new version, the count of its fixes (counted from
 the CHANGELOG as the cut is drawn).
@@ -75,15 +83,15 @@ def hello_backdrop():
     to come"""
     return [(0, 'walkway', 30, 1),                                    # onto the walkway
             (5, 'bn4-acdc', 130, 1), (7, 'bn5-oran', 45, 1), (9, 'cold-c', 10, 1),   # a room, a floor, fire columns
-            (11, 'saves-cloud', 110, 1), (12, 'lock', 60, 1), (13, 'map-key', 30, 1),
-            (14, 'options-3d', 60, 1), (15, 'saves-code', 200, 1)]
+            (11, 'saves-cloud', 110, 1), (12, 'climb-a', 14, 1), (13, 'map-key', 30, 1),
+            (14, 'options-update', 70, 1), (15, 'dive-party', 198, 1)]
 
 
 def thanks_backdrop():
-    """behind his thanks: the release's battles again, then MegaMan on
-    his way across a layer"""
-    # (BN4's BurnerMan across the field, BN4's Meteors' big blast, RoboDog Comp's ways)
-    return [(0, 'cold-e', 55, 1), (4, 'cold-d', 62, 1), (8, 'walkway', 130, 1)]
+    """behind his thanks: the release's battles again, then four divers
+    on one layer"""
+    # (BN4's BurnerMan across the field, the party's fight, the pack walking)
+    return [(0, 'cold-e', 55, 1), (4, 'dive-party', 300, 1), (8, 'dive-pack', 66, 1)]
 
 
 HELLO = Narration('dad-hello', [(0, "Hi,everyone! It's Lan's dad."),
@@ -108,17 +116,18 @@ def segments():
                  [(0, 'saves-pages', 30, 1), (1.5, 'saves-pages', 55, 1), (3, 'saves-pages', 118, 1)]),
         ], icon='icon-put'),
         Segment('THE NET, RELAID', [
+            Shot('LAYERS CLIMB', 'LAYERS CLIMB: STAIRS, TERRACES, RAISED ROOMS', [(0, 'climb-a', 6, 1), (2, 'climb-b', 26, 1)]),
+            Shot("AREAS' OWN PROPS", "THE NEST'S CRYSTALS, THE COMP'S ROBOTS", [(0, 'nest-crystals', 60, 1), (2, 'robot-figures', 20, 1)]),
             # (the walk to seed 4's Security Cube, then MegaMan's word on it)
             Shot('LOCKS', "BN6'S LOCKS, MET EVERY ACT", [(0, 'lock', 24, 1), (2.5, 'lock', 92, 1)]),
             Shot('WIDE WAYS', 'THE COMPS WALK TWO PANELS WIDE', [(0, 'walkway', 70, 1)]),
-            Shot('BN4 ACDC', "BN4'S ACDC AREA, DRAWN WHOLE", [(0, 'bn4-acdc', 150, 1)]),
-            Shot('BN5 ORAN', "BN5'S ORAN AREA, ITS HUBS ONE FLOOR", [(0, 'bn5-oran', 150, 1)]),
+            Shot('BN4 AND BN5', "BN4'S ACDC AND BN5'S ORAN, DRAWN WHOLE", [(0, 'bn4-acdc', 150, 1), (2, 'bn5-oran', 150, 1)]),
         ], icon='icon-layers'),
         Segment('THE LITTLE THINGS', [
             Shot('MAP KEY', "THE MAP'S KEY NAMES EVERYTHING", [(0, 'map-key', 14, 1)]),
+            Shot('L: THE WAY', 'L NAMES THE WAY AND TWO DETOURS', [(0, 'l-detours', 68, 1), (2.5, 'l-detours', 222, 1)]),
             # (BN4's Unused section, then BN5's)
             Shot('UNUSED SONGS', "THE JUKEBOX'S UNUSED SECTION", [(0, 'jukebox-unused', 10, 1), (2, 'jukebox-unused', 150, 1)]),
-            Shot('BEST DEPTH', 'THE TITLE KEEPS YOUR BEST DEPTH', [(0, 'title-depth', 20, 1)]),
         ], icon='icon-star'),
         Segment('MORE WAYS TO PLAY', [
             # (the PSP holds BN6's net alone: a BN6 comp walked)
@@ -127,19 +136,27 @@ def segments():
             Shot('3D ON NEW 3DS', '3D ON THE NEW 3DS AT', [(0, 'options-3d', 36, 1)], count='59 FPS'),
             Shot('SELF-UPDATES', 'ANDROID AND THE SWITCH UPDATE THEMSELVES', [(0, 'options-update', 0, 1)]),
         ], icon='icon-handheld'),
+        Segment('DIVE TOGETHER', [
+            Shot('THE PORTAL', "THE WEEK'S NET, DIVED TOGETHER", [(0, 'dive-portal', 6, 1), (1.5, 'dive-portal', 262, 1)]),
+            Shot('LIVE DIVERS', 'EVERY DIVER ON THE SEED, SEEN LIVE', [(0, 'dive-pack', 62, 1)]),
+            Shot('CREWS', 'TEAM UP: A CREW OF UP TO', [(0, 'dive-crew-b', 90, 1), (2, 'dive-crew-b', 244, 1)], count='4'),
+            Shot('JOIN IN', "A CREWMATE'S BATTLE CALLS YOU IN", [(0, 'dive-joinin-a', 2, 1), (1.5, 'dive-joinin-a', 78, 1)]),
+            Shot('ONE FIELD', "THE GUARDIAN'S DOOR: A PARTY, ONE FIELD", [(0, 'dive-door', 316, 1), (1.5, 'dive-party', 484, 1)]),
+        ], icon='icon-web'),
     ]
 
 
 FIXES = house.changelog(VERSION)[1]
 T = house.Trailer(
     version=VERSION, name=NAME, music=music, accent=GREEN, field=field, cut='sweep',
-    # (Beast Out before BN5's viruses: the dark, the flare, the white, the beast; then its fight through fire rings)
-    cold=[(0, 'cold-a', 8, 1), (4, 'cold-b', 2, 1)],
+    # (Beast Out before BN5's viruses: the dark, the flare, the white, the beast; then three MegaMen on one field
+    # against BlastMan, a bomb going off)
+    cold=[(0, 'cold-a', 8, 1), (4, 'dive-party', 184, 1)],
     hello=HELLO, thanks=THANKS, segments=segments(),
     recap=[Tile('walkway', 0, ('THE NET BUILDS', '40% FASTER')),
            Tile('options-3d', 15, ('THE MUSIC PLAYS ON', 'UNDER THE MENUS')),
            Tile('options-update', 0, ('A NEW VERSION?', 'THE GAME TELLS YOU')),
-           Tile('cold-e', 60, ("BN4'S GUARDIANS", 'FACE YOU AGAIN'))],
+           Tile('title-depth', 20, ('THE TITLE KEEPS', 'YOUR BEST DEPTH'))],
     recap_caption=('AND FIXES ACROSS THE WHOLE RUN:', str(FIXES)))
 
 PLAY_LABEL = T.play_label
@@ -148,12 +165,13 @@ POSTER = T.poster
 # YouTube (docs/project/youtube.md): the title's hook, and the thumbnails
 # for Studio's Test & compare (tools/trailer_thumbnail.py), a region of a
 # whole frame each with two or three words
-YOUTUBE_HOOK = 'Cloud Saves, the PSP and 3D on the New 3DS'
+YOUTUBE_HOOK = 'Dive Together, Cloud Saves and the PSP'
 THUMBNAILS = [
-    # (the beast's fight through its fire rings; BN4's ACDC Area's room; RoboDog Comp's ways, BN6's own net, the PSP's)
+    # (three MegaMen on one field, a bomb going off before BlastMan; the beast's fight through its fire rings;
+    # Green Area's stair and terrace)
+    {'hero': ('dive-party', 204), 'region': (0, 60, 160), 'words': ('DIVE', 'TOGETHER!'), 'lit': 1, 'side': 'right'},
     {'hero': ('cold-b', 10), 'region': (0, 25, 240), 'words': ('CLOUD', 'SAVES!'), 'lit': 1, 'side': 'right'},
-    {'hero': ('bn4-acdc', 196), 'region': (0, 12, 240), 'words': ('THE NET,', 'RELAID'), 'lit': 1},
-    {'hero': ('walkway', 70), 'region': (60, 40, 160), 'words': ('NOW ON', 'PSP!'), 'lit': 1},
+    {'hero': ('climb-a', 28), 'region': (0, 12, 240), 'words': ('THE NET', 'CLIMBS!'), 'lit': 1},
 ]
 
 
@@ -167,13 +185,15 @@ def scenes():
 
 
 def footage(keep):
-    """the saves' cloud and code scenes against a Net Square server of
-    their own, and Options' update against a manifest of the release's
-    notes served over HTTP, both on this machine, started here and
-    stopped after (v0_22_0_footage.py's docstring)"""
+    """the dive's takes, several games on a server of their own
+    (v0_22_0_footage.py's online_footage); then the saves' cloud and code
+    scenes against a Net Square server, and Options' update against a
+    manifest of the release's notes served over HTTP, both on this
+    machine, started here and stopped after (that file's docstring)"""
     import subprocess
     import time
     import trailer as kit
+    runs.online_footage(kit.WORK, keep)
     need = [n for n in SERVED if n in runs.SCENES
             and not (keep and os.path.isdir(os.path.join(kit.WORK, n)) and os.listdir(os.path.join(kit.WORK, n)))]
     if not need:

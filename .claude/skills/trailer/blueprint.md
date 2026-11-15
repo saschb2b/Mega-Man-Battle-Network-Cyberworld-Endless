@@ -44,7 +44,8 @@ heading below.
 | Stinger | 1 | A flash, the logo, the version | F minor with its ninth, ringing |
 | End card | 3, held | The logo, THANKS FOR DIVING IN, `VERSION · OUT NOW`, the systems, the site, the ROM's lines | The backing alone, the strings' last chord |
 
-Four segments of five bars make 36 bars, 58 seconds. A cut is 45 to 75
+Four segments of five bars make 36 bars, 58 seconds; 0.22.0's five
+(5, 6, 4, 4, 6) make 42, 69 seconds. A cut is 45 to 75
 seconds: with much to show it grows by segments and bars, never by
 shortening a shot under a bar or a narrator's box under its reading time.
 A release with one headline takes two long segments, not four thin ones.
@@ -176,6 +177,16 @@ laid on the slots by `arrangement(FORM, TUNE)`.
 
 ## Making a cut on it
 
+0. **What the release holds, from the merged pull requests**: `git log
+   --merges vLAST..origin/dev` and `gh pr list --state merged`, every
+   title read, before the CHANGELOG. The CHANGELOG and the notes are
+   written behind the work: 0.22.0's first cut was laid from the
+   Unreleased section and missed the shared dive and the layers'
+   heights, both merged and in neither. The owner: "are you sure you
+   have everything showcased in its fullest glory? go over the merged
+   prs". A feature merged and playable is in the trailer, said as far as
+   it goes; what is merged and missing from the CHANGELOG is also told
+   to whoever writes the notes.
 1. The brief (SKILL.md, step 1), with the blueprint's questions in place
    of the look's: the name, the accent and why, the field's motif, the
    cut, the segments in order with each shot's tag, caption and count,
