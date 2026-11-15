@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T01:00:00Z
+* **Update**: game/meta/rumors.md (a Program Advance's whisper asks "Got these? Use 'em in order!", a combo to try, where "My operator sent these" read as a gift), game/meta/bn6-darkchips.md (the bystander on a flame's layer opens BN6's DarkChip post with two boxes of his own on the purple flame he saw).
