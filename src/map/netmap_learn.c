@@ -284,8 +284,11 @@ static void learn_report(int area, const Learned *L) {
 		area, L->book[0].dv, L->book[0].face, L->book[0].hang, L->nbooks, L->decor.n, L->book[0].pa, L->book[0].pb,
 		L->book[0].vary ? L->book[0].vary_first[64] : 0);
 	for (int d = 0; d < STAIR_DIRS; ++d)
-		fprintf(stderr, "stairs area %d dir %d ok %d rise %d ramp %d walls %d prio %d tiles %d\n", area, d, L->stairs[d].ok,
-			L->stairs[d].rise, L->stairs[d].nramp, L->stairs[d].nwalls, L->stairs[d].nprio, L->stairs[d].ntiles);
+		for (int w = 0; w < STAIR_WIDTHS; ++w) {
+			const StairTemplate *t = &L->stairs[d][w];
+			fprintf(stderr, "stairs area %d dir %d width %d ok %d rise %d len %d from %02X:%d ramp %d walls %d prio %d tiles %d\n", area, d, w, t->ok,
+				t->rise, t->len, t->group, t->number, t->nramp, t->nwalls, t->nprio, t->ntiles);
+		}
 	for (int d = 0; d < 4; ++d) fprintf(stderr, "arrow panel area %d way %d ok %d tiles %d\n", area, d, L->arrow[d].ok, L->arrow[d].ntiles);
 }
 
@@ -315,13 +318,17 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		 * plain plates, crossed in another of its maps) */
 		if (na->emblem && !L->emblem.ok && aligned(grid, &b)) props_learn_floor_emblem(&b, na->emblem, &L->emblem);
 		if (aligned(grid, &b)) learn_arrows(&b, L);
+		/* (and its stairs of the ways and widths its own map lacks) */
+		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
 		area_src_free(&b);
 	}
-	/* (and the arrow panels of its maps listed for them alone) */
+	/* (and the arrow panels of its maps listed for them alone, and their
+	 * stairs: Green Area 2's, in Green Area 1's tiles) */
 	for (int k = 0; k < 2 && na->arrow_maps[k][0]; ++k) {
 		AreaSrc b;
 		if (!load_map(na, na->arrow_maps[k][0], na->arrow_maps[k][1], &b)) continue;
 		if (aligned(grid, &b)) learn_arrows(&b, L);
+		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
 		area_src_free(&b);
 	}
 	/* (and the side pieces of those listed for them alone) */
@@ -329,6 +336,9 @@ static void learn_more(const AreaSrc *grid, int area, Learned *L) {
 		AreaSrc b;
 		if (!load_map(na, na->side_maps[k][0], na->side_maps[k][1], &b)) continue;
 		sides_learn(&b, &L->sides);
+		/* (and their stairs: Undernet 1's two-by-two for Undernet Zero,
+		 * whose own climb three panels wide) */
+		stairs_learn(&b, grid->ex, grid->ey, L->stairs, emu_debug_on());
 		area_src_free(&b);
 	}
 }
@@ -360,7 +370,7 @@ bool nm_learn(int area, Learned *L) {
 	learn_map(&a, &a, area, 0, L);
 	learn_roads(&a, area, more, L);
 	learn_decor(&a, na, L);
-	stairs_learn(&a, L->stairs);
+	stairs_learn(&a, a.ex, a.ey, L->stairs, emu_debug_on());
 	learn_counter(na->counter, &a, L);
 	/* (the pads' centrepieces are BN6's tiles) */
 	for (int k = 0; k < 3 && !na->xrom; ++k) props_learn_ornament(&a, nm_ornament_tile[k], &L->ornament[k]);

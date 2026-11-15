@@ -1260,7 +1260,7 @@ static uint32_t layer_make_hash(void) {
 		h = fnv(h, layer.cell, sizeof layer.cell);
 		h = fnv(h, layer.level, sizeof layer.level);
 		h = mix(h, layer.nstairs);
-		for (int i = 0; i < layer.nstairs; ++i) h = mix(mix(mix(h, layer.stair[i].x), layer.stair[i].y), layer.stair[i].dir);
+		for (int i = 0; i < layer.nstairs; ++i) h = mix(mix(mix(mix(mix(h, layer.stair[i].x), layer.stair[i].y), layer.stair[i].dir), layer.stair[i].wide), layer.stair[i].len);
 		h = mix(h, layer.rise);
 		h = mix(h, layer.nrooms);
 		for (int i = 0; i < layer.nrooms; ++i) {
@@ -1301,45 +1301,82 @@ static void test_layer_make(void) {
 
 static bool on_stair(int x, int y) {
 	for (int i = 0; i < layer.nstairs; ++i)
-		if (x >= layer.stair[i].x && x < layer.stair[i].x + 2 && y >= layer.stair[i].y && y < layer.stair[i].y + 2) return true;
+		if (stair_covers(&layer.stair[i], x, y)) return true;
 	return false;
 }
 
-/* Raised rooms are reached only by their stair, which climbs from a ground
- * landing to the room's floor. */
-static void test_stairs(void) {
-	int layers = 0;
-	for (uint32_t seed = 1; seed <= 400; ++seed) {
-		int depth = 1 + (int)(seed % 25);
-		layer_generate(seed * 7919u, depth, biome_for_depth(depth), LAYER_NORMAL, &kit);
-		if (!layer.nstairs) continue;
-		++layers;
-		CHECK(layer.rise == 32, "seed %u: rise %d", seed, layer.rise);
-		for (int i = 0; i < layer.nstairs; ++i) {
-			const Stair *st = &layer.stair[i];
-			bool nx = st->dir == STAIR_UP_NX;
-			for (int k = 0; k < 2; ++k) {
-				int tx = nx ? st->x - 1 : st->x + k, ty = nx ? st->y + k : st->y - 1;       /* above the top */
-				int fx = nx ? st->x + 2 : st->x + k, fy = nx ? st->y + k : st->y + 2;       /* below the foot */
-				CHECK(layer.level[ty][tx] && layer.cell[ty][tx] == C_PATH, "seed %u: stair %d tops onto no raised floor", seed, i);
-				CHECK(!layer.level[fy][fx] && layer.cell[fy][fx] == C_PATH, "seed %u: stair %d has no landing", seed, i);
+/* Each stair climbs from a ground landing to raised floor across its whole
+ * width, with nothing beside its ramp; how many of its layer's raised
+ * rooms have two stairs or more (a room on the way, a terrace). */
+static int check_stairs(uint32_t seed, int rise) {
+	CHECK(layer.rise == rise, "seed %u: rise %d", seed, layer.rise);
+	for (int i = 0; i < layer.nstairs; ++i) {
+		const Stair *st = &layer.stair[i];
+		bool nx = st->dir == STAIR_UP_NX;
+		int w = stair_w(st), h = stair_h(st);
+		for (int k = 0; k < stair_wide(st); ++k) {
+			int tx = nx ? st->x - 1 : st->x + k, ty = nx ? st->y + k : st->y - 1;       /* above the top */
+			int fx = nx ? st->x + w : st->x + k, fy = nx ? st->y + k : st->y + h;       /* below the foot */
+			CHECK(layer.level[ty][tx] && layer.cell[ty][tx] == C_PATH, "seed %u: stair %d tops onto no raised floor", seed, i);
+			CHECK(!layer.level[fy][fx] && layer.cell[fy][fx] == C_PATH, "seed %u: stair %d has no landing", seed, i);
+		}
+		for (int a = 0; a < stair_len(st); ++a)
+			for (int s = 0; s < 2; ++s) {
+				int bx = nx ? st->x + a : s ? st->x + w : st->x - 1, by = nx ? (s ? st->y + h : st->y - 1) : st->y + a;
+				CHECK(layer.cell[by][bx] != C_PATH || on_stair(bx, by), "seed %u: floor beside stair %d's ramp at %d,%d", seed, i, bx, by);
+			}
+	}
+	for (int y = 1; y < MAP_H - 1; ++y)
+		for (int x = 1; x < MAP_W - 1; ++x) {
+			if (!layer.level[y][x]) continue;
+			static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+			for (int k = 0; k < 4; ++k) {
+				int ax = x + d[k][0], ay = y + d[k][1];
+				bool ok = layer.cell[ay][ax] != C_PATH || layer.level[ay][ax] || on_stair(ax, ay);
+				CHECK(ok, "seed %u: raised floor at %d,%d touches the ground", seed, x, y);
 			}
 		}
-		for (int y = 1; y < MAP_H - 1; ++y)
-			for (int x = 1; x < MAP_W - 1; ++x) {
-				if (!layer.level[y][x]) continue;
-				static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
-				for (int k = 0; k < 4; ++k) {
-					int ax = x + d[k][0], ay = y + d[k][1];
-					bool ok = layer.cell[ay][ax] != C_PATH || layer.level[ay][ax] || on_stair(ax, ay);
-					CHECK(ok, "seed %u: raised floor at %d,%d touches the ground", seed, x, y);
-				}
-			}
-		for (int i = 0; i < layer.nobj; ++i)
-			CHECK(!on_stair((int)layer.obj[i].x, (int)layer.obj[i].y), "seed %u: object %d on a stair", seed, i);
+	for (int i = 0; i < layer.nobj; ++i)
+		CHECK(!on_stair((int)layer.obj[i].x, (int)layer.obj[i].y), "seed %u: object %d on a stair", seed, i);
+	int two = 0;
+	for (int r = 0; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (!layer.level[m->ay][m->ax]) continue;
+		int n = 0;
+		for (int i = 0; i < layer.nstairs; ++i) {
+			const Stair *st = &layer.stair[i];
+			int tx = st->dir == STAIR_UP_NX ? st->x - 1 : st->x, ty = st->dir == STAIR_UP_NX ? st->y : st->y - 1;
+			n += tx >= m->x && tx < m->x + m->w && ty >= m->y && ty < m->y + m->h;
+		}
+		two += n >= 2;
 	}
-	CHECK(layers > 10, "only %d of 400 layers have a stair", layers);
-	printf("  stairs: %d of 400 layers\n", layers);
+	return two;
+}
+
+/* Raised rooms are reached only by their stairs, which climb from a ground
+ * landing to the room's floor: two panels wide (Sky's, the Undernet's), a
+ * ladder one wide (Green's, CopyBot Comp's) and one four long climbing two
+ * panels' height (the Graveyard's, docs/world/level-design/heights.md). */
+static void test_stairs(void) {
+	static const LayerKit ladders = { .stair_narrow = 3u, .rise = 32, .stair_len = { { 0, 2 }, { 0, 2 } }, .terraced = true };
+	static const LayerKit deep = { .stair_narrow = 3u, .rise = 64, .stair_len = { { 0, 4 }, { 0, 4 } } };
+	const LayerKit *kits[3] = { &kit, &ladders, &deep };
+	const char *names[3] = { "two wide", "ladders", "deep ladders" };
+	for (int k = 0; k < 3; ++k) {
+		int layers = 0, stairs = 0, two = 0;
+		for (uint32_t seed = 1; seed <= 400; ++seed) {
+			int depth = 1 + (int)(seed % 25);
+			layer_generate(seed * 7919u, depth, biome_for_depth(depth), LAYER_NORMAL, kits[k]);
+			if (!layer.nstairs) continue;
+			++layers;
+			stairs += layer.nstairs;
+			two += check_stairs(seed, kits[k]->rise);
+		}
+		/* (a stair rising 64 runs four panels, and wants a corridor five long) */
+		CHECK(layers > (kits[k]->rise > 32 ? 20 : 150), "%s: only %d of 400 layers have a stair", names[k], layers);
+		CHECK(two >= 5, "%s: only %d raised places with two stairs", names[k], two);
+		printf("  stairs (%s): %d of 400 layers, %d stairs, %d rooms with two or more\n", names[k], layers, stairs, two);
+	}
 	/* an area without stairs keeps its layers flat */
 	layer_generate(7919u, 2, BIOME_SKY, LAYER_NORMAL, &flat);
 	CHECK(!layer.nstairs && !layer.rise, "flat area got a stair");

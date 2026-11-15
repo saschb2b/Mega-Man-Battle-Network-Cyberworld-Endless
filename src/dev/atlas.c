@@ -678,7 +678,7 @@ static void towns(const char *dir, int seeds) {
 static void stair_layers(const char *dir, FILE *report, int b, int area, int seeds) {
 	LayerKit kit;
 	netmap_kit(area, &kit);
-	for (int s = 1, found = 0; kit.stair_dirs && s <= 300 && found < seeds; ++s) {
+	for (int s = 1, found = 0; (kit.stair_dirs | kit.stair_narrow) && s <= 300 && found < seeds; ++s) {
 		uint32_t seed = (uint32_t)(s * 7919 + area * 131 + 17);
 		run_new(seed);
 		run.depth = 5;
