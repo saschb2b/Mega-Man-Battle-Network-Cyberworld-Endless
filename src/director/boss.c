@@ -306,12 +306,14 @@ static void fight_begin(void) {
 	/* (a special route's last boss at the endless Nest: the Cybeast's HP) */
 	if (run.biome == BIOME_NEST && run.side_kind == LAYER_NORMAL) fought = run_nest_hp(run.depth, B.g.navi, fought);
 	B.fought_hp = party_hp(pacing_clock_hp(fought, run.clock));
-	if (!boss_party_fight) emu_battle_hp(own, B.fought_hp);
 	if (emu_debug_on()) fprintf(stderr, "guardian %d: enemy id %#x, version %d, HP %d fought at %d%s\n", B.foe, e.foes[0].id, e.foes[0].version, own,
 		B.fought_hp, B.g.bracket ? B.round == 0 ? " (round 1)" : B.round == 1 ? " (round 2)" : " (the final)" : "");
 	B.fought = e;
-	/* (the shared dive's party on one field: its own core fights him, party_play.c) */
+	/* (the shared dive's party on one field: its own core fights him,
+	 * party_play.c; else this one, his HP raised at his spawn: a fight after
+	 * a party's, the hook still set, had left him at his own) */
 	if (boss_party_fight && boss_party_fight(&e, own, B.fought_hp)) return;
+	emu_battle_hp(own, B.fought_hp);
 	emu_battle_force(&e);
 }
 

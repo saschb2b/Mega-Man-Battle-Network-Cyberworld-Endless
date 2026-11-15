@@ -47,6 +47,10 @@ static uint32_t settings_of(int s) { return RECORDS + (uint32_t)s * RECORD_SIZE;
  * the record, and whether a battle starts now. */
 static uint32_t record;
 static bool forcing, quiet;
+/* The shared dive's crew (emu_encounters_offer): whether a crewmate stands
+ * near, a battle BN6 rolled held back meanwhile, and the dev's battle step
+ * through BN6's roll (emu_encounter_roll_next) */
+static bool offering, crew_held, roll_next;
 /* Whether each record is a guardian's battle, and the battle on is one
  * (emu_encounter_started): his Guardian Data gives his chip, and his
  * battle's own reward gave a second, which no folder can hold (one Mega
@@ -63,9 +67,17 @@ static int pays_record[2], pays_on;
  * roll gave (its own step counter and chance) becomes the engine's record. */
 static HookAct rolled(HookRegs *r, void *user) {
 	(void)user;
+	/* (the dev's battle step on a dive with the crew near: this roll a battle, as BN6's own would give one) */
+	if (!r->r[0] && roll_next && !quiet && !crew_held) {
+		roll_next = false;
+		r->r[0] = record;
+	}
 	if (!r->r[0]) return HOOK_CONTINUE;
-	/* (held: past StartBattle to the check's end, as no roll had come) */
-	if (quiet) {
+	/* (held: past StartBattle to the check's end, as no roll had come; a
+	 * crew's battle held so, told between frames, until it begins here or
+	 * is fought elsewhere: emu_encounter_go, emu_encounter_drop) */
+	if (quiet || offering || crew_held) {
+		crew_held |= offering && !quiet;
 		r->r[12] = BN6_ENCOUNTER_SKIP;
 		return HOOK_JUMP;
 	}
@@ -114,6 +126,22 @@ void emu_battle_release(void) { forcing = false; }
 bool emu_battle_forcing(void) { return forcing; }
 
 void emu_encounters_hold(bool hold) { quiet = hold; }
+
+void emu_encounters_offer(bool on) { offering = on; }
+
+bool emu_encounters_offering(void) { return offering; }
+
+bool emu_encounter_held(void) { return crew_held; }
+
+void emu_encounter_go(void) {
+	if (!crew_held) return;
+	crew_held = false;
+	forcing = true;
+}
+
+void emu_encounter_drop(void) { crew_held = false; }
+
+void emu_encounter_roll_next(void) { roll_next = true; }
 
 void emu_encounter_set(const Encounter *e) {
 	uint8_t list[4 * (MAX_FOES + 1 + MAX_FIELD_OBJS) + 1], *p = list;

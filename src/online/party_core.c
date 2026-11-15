@@ -333,6 +333,8 @@ unsigned party_core_foe_hp(PartyCore *pc) {
 	return o ? (unsigned)(uint16_t)pc->core->rawRead16(pc->core, o + BN6_T1_HP, -1) : 0;
 }
 
+uint16_t party_core_reward(PartyCore *pc) { return (uint16_t)pc->core->rawRead16(pc->core, BN6_BATTLE_REWARD, -1); }
+
 const uint32_t *party_core_video(const PartyCore *pc) { return pc->video; }
 
 struct mCore *party_core_gba(PartyCore *pc) { return pc->core; }

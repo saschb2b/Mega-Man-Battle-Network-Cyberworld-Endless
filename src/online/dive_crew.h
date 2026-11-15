@@ -13,6 +13,8 @@
 #include "online_types.h"
 
 void dive_crew_reset(void);
+/* Whether `session` is in MegaMan's crew. */
+bool dive_crew_has(uint32_t session);
 /* Each frame of the dive on its layer: a chat to open, or one closed read. */
 void dive_crew_frame(const OnlineSnapshot *s);
 /* The pad's keys: A on a diver's MegaMan. */

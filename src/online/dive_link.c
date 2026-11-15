@@ -10,6 +10,7 @@
 #include "director.h"
 #include "dive_band.h"
 #include "dive_crew.h"
+#include "dive_join.h"
 #include "dive_party.h"
 #include "dive_finds.h"
 #include "dive_mail.h"
@@ -49,6 +50,7 @@ void dive_link_adopt(void) {
 	L.on = true;
 	dive_party_on(true);
 	dive_crew_reset();
+	dive_join_reset();
 	dive_mail_reset();
 	dive_band_reset();
 	home_way_hold = dive_crew_way_hold;
@@ -60,7 +62,9 @@ void dive_link_adopt(void) {
 
 bool dive_link_on(void) { return L.on; }
 
-uint32_t dive_link_keys(uint32_t keys) { return L.on ? dive_traces_keys(dive_crew_keys(dive_party_keys(keys))) : dive_traces_keys(keys); }
+uint32_t dive_link_keys(uint32_t keys) {
+	return L.on ? dive_traces_keys(dive_crew_keys(dive_party_keys(dive_join_keys(keys)))) : dive_traces_keys(keys);
+}
 
 bool dive_link_begin(void) {
 	/* (the puppets' room asked for before the dive's first layer is built) */
@@ -79,6 +83,7 @@ void dive_link_close(void) {
 	L.on = false;
 	dive_people_on(false);
 	dive_party_on(false);
+	dive_join_reset();
 	home_way_hold = NULL;
 	online_transport_end();
 }
@@ -139,6 +144,7 @@ void dive_link_frame(void) {
 	/* (the party at a guardian's door, and its fight; the crew's chats and news) */
 	dive_party_frame(&s, L.room);
 	dive_crew_frame(&s);
+	dive_join_frame(&s);
 	const char *crew = dive_crew_news();
 	if (crew) dive_link_line(crew);
 	/* (at home, between acts: nothing sent, his last place stands) */

@@ -193,16 +193,19 @@ void lock_run(void) {
  * layer after a guardian from the lower half of the act's band
  * (docs/game/progression/); from the second act one in four with a visitor of
  * the other net (visitors.h, docs/multirom/). */
+int encounter_kind(int index) {
+	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 && (run.depth == 1 ? index < 2 : true);
+	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && index == 0;
+	return first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL;
+}
+
 void roll_encounter(void) {
-	bool opening = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0 &&
-		(run.depth == 1 ? D.battles < 2 : true);
-	bool first = run.depth == 1 && run.side_kind == LAYER_NORMAL && D.battles == 0;
 	/* (a Glitch layer's battles harden as it comes apart: docs/game/glitch-layer.md) */
 	int depth = run.depth;
 	bool mixed = false;
 	glitch_battle(&depth, &mixed);
 	loot_groups_always = dev.group > 0 ? 1 + dev.group : dev.groups || mixed;
-	Encounter e = loot_random_battle(depth, run.biome, first ? ENC_FIRST : opening ? ENC_EASY : ENC_NORMAL, run.layer_seed, D.battles);
+	Encounter e = loot_random_battle(depth, run.biome, encounter_kind(D.battles), run.layer_seed, D.battles);
 	if (dev.gem) loot_add_gem(&e);
 	if (e.arc_beat && emu_debug_on()) {
 		static int said = -1;

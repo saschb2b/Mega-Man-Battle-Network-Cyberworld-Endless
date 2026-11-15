@@ -414,6 +414,18 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await a.send(protocol.crew(SPEC["crew_battle"], 0, 1))
         self.assertEqual(crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))["value"], 1)
 
+    async def test_a_crews_battle_never_offered_without_one_field(self):
+        a, b = await self.connect("Alpha"), await self.connect("Beta", no_arena=True)
+        for client in (a, b):
+            await self.enter(client, 2)
+        await self.crew_of(a, b)
+        # (Beta's system cannot run the one field: Alpha's battle is offered to nobody, and Beta's offers nothing)
+        await a.send(protocol.crew(SPEC["crew_battle"], 0, 2))
+        self.assertEqual(crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))["value"], 2)
+        await b.send(protocol.crew(SPEC["crew_battle"], 0, 3))
+        self.assertEqual(crew_state(await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))["value"], 3)
+        self.assertFalse(self.server.crews.offers)
+
     # -- the door's queue and the party's battle --
 
     async def test_a_doors_queue_and_its_party_battle(self):

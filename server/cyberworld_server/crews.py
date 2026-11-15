@@ -178,8 +178,12 @@ class Crews:
             await server.notice(player, 16, "That Navi is busy")
             return
         room = server.dive.room_of(player.id)
+        # (a crew's battle is fought on one field: a game that cannot run it, HELLO's no_arena, is offered nothing
+        # and offers nothing, docs/online/shared-dive.md)
         invited = [m for m in crew.members if m != player.id and server.dive.room_of(m) is room
-                   and not server.parties.fighting(m)]
+                   and not server.parties.fighting(m) and not server.players[m].no_arena]
+        if player.no_arena:
+            invited = []
         if not invited:
             self.send(player.id, SPEC["crew_alone"], player.id, index, crew)
             return

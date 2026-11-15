@@ -22,6 +22,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "foes.h"
+
 /* The fight taken over from the staging (dev's partycore, or a party's
  * START): on or off */
 void party_play_on(bool on);
@@ -36,6 +38,13 @@ void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size and the input delay; the next guardian's fight its */
 void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay);
+/* ... a crew's random battle its (after party_play_start, at once: the
+ * shared dive's join-in battles, dive_join.h), each game making `e` alike
+ * (director_crew_battle); its end goes back through director_crew_over,
+ * with BN6's reward the field's results gave; false where it could not be
+ * taken over. Whether one is under way. */
+bool party_play_crew(const Encounter *e);
+bool party_play_crew_fighting(void);
 /* ... a seat of it gone (ARENA_STATE seat_gone) */
 void party_play_gone(unsigned seat);
 /* ARENA_SEAT for it: a seat's MegaMan, keys or hash; false where it is not */

@@ -10,6 +10,7 @@
 #include "arena_words.h"
 #include "bn6.h"
 #include "director.h"
+#include "dive_join.h"
 #include "dive_people.h"
 #include "dive_wire.h"
 #include "dive_words.h"
@@ -42,8 +43,7 @@ static struct {
 
 void dive_crew_reset(void) { memset(&C, 0, sizeof C); C.chosen = -1; }
 
-/* whether `session` is in MegaMan's crew */
-static bool dive_crew_has(uint32_t session) {
+bool dive_crew_has(uint32_t session) {
 	for (int k = 0; k < C.c.count; ++k)
 		if (C.c.m[k].session == session) return true;
 	return false;
@@ -197,5 +197,8 @@ static void crew_state(const CrewState *c) {
 
 void dive_crew_mail(const uint8_t *m, size_t n) {
 	CrewState c;
-	if (dive_wire_crew_state(m, n, &c)) crew_state(&c);
+	if (!dive_wire_crew_state(m, n, &c)) return;
+	/* (a crewmate's battle offered, or MegaMan's own fought alone: the join-in's, dive_join.h) */
+	if (c.stage == ONLINE_CREW_OFFER || c.stage == ONLINE_CREW_ALONE) dive_join_crew_state(&c);
+	else crew_state(&c);
 }
