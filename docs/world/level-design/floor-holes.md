@@ -91,3 +91,26 @@ The atlas counts the holes each layer's tiles left (`voids`, framed white
 where the net mended one, blue where it left one: `holes left`), and
 `CYBERWORLD_VOIDS=0` draws the layers without the net
 ([the atlas](../../devtools/atlas.md)).
+
+Over the tile test's 140 layers (`build.py tiles 1`, 15 November 2026)
+the tiles left 53 holes in 13 layers: BN5's Oran Area 18 (its floors'
+upper edges in steps), Robot Control Comp 14, BN4's Town Area 11, its
+Park Area 5, Sky 3, BN4's ACDC Area 2; none in BN6's other areas. The net
+mended all 53, and changed no other tile of any layer. The breaks per 100
+panels moved little (85.1 to 85.2 over all; Oran 334 to 339, where a
+step's mend meets its neighbours as no map shows), and no layer drew
+worse than the baseline.
+
+- **Robot Control's studs.** Its maps set a red stud in a notch at a
+  platform's corner, but where they set a tile of a platform's top
+  corner, none has one: by the rule a hole. Laid behind the stud, the
+  rim's own tile stood out beside it; a mend pays for each pixel it shows
+  past the hole (`EXTRA_COST`), and the stud now sits on the rim's tip.
+- **What is left is not the top.** In BN4's Town, Park and ACDC Areas the
+  dark blocks that remain lie where a floor's rim or side faces should
+  be (a road's lower edge in steps, its faces missing under a square):
+  no hole in a floor's top, the roads' drawing ([roads](roads.md)).
+
+What it costs: 3.2 milliseconds a map on average and 13.5 at most on the
+host, against some 109 for the pick (the atlas's 278 maps, the machine
+busy), the first map of an area reading its tile set.
