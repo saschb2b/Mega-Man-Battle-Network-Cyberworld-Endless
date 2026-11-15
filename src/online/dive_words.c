@@ -41,10 +41,10 @@ const char *dive_place_words(unsigned tenths, unsigned place, unsigned count, un
 	return s;
 }
 
-const char *dive_mark_words(const char *name, const char *cause, bool won) {
+const char *dive_mark_words(const char *name, const char *cause, bool navi, bool won) {
 	static char s[160];
 	if (won) snprintf(s, sizeof s, "Lan,look! %s made it all the way down!|Wow...", name);
-	else if (*cause) snprintf(s, sizeof s, "Lan... %s got deleted here.|By a %s...|We'd better be careful.", name, cause);
+	else if (*cause) snprintf(s, sizeof s, navi ? "Lan... %s got deleted here.|By %s...|We'd better be careful." : "Lan... %s got deleted here.|By a %s...|We'd better be careful.", name, cause);
 	else snprintf(s, sizeof s, "Lan... %s got deleted here.|We'd better be careful.", name);
 	return s;
 }

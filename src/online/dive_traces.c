@@ -187,7 +187,7 @@ static bool waved(uint32_t id) {
 static void mark_said(const DiveMark *m) {
 	char cause[24] = "";
 	if (m->cause) enemy_name(m->cause, cause, sizeof cause);
-	talk_start(dive_mark_words(m->name, cause, m->how == ONLINE_DIVE_WON), FACE_MEGAMAN);
+	talk_start(dive_mark_words(m->name, cause, m->cause > 0xFF, m->how == ONLINE_DIVE_WON), FACE_MEGAMAN);
 	fprintf(stderr, "dive: A on %s's mark (cause %u)\n", m->name, m->cause);
 }
 
@@ -254,7 +254,8 @@ uint32_t dive_traces_keys(uint32_t keys) {
 	online_transport_snapshot(&s);
 	if (strip_up && emote_strip_update(&s)) return 0;
 	strip_up = false;
-	if (!btn_pressed(BTN_R) || !s.connected || !director_on_map() || talk_busy() || emu_read8(BN6_CHATBOX)) return keys;
+	/* (not with SELECT held: the map, and the dev menu's SELECT+R) */
+	if (!btn_pressed(BTN_R) || btn_held(BTN_SELECT) || !s.connected || !director_on_map() || talk_busy() || emu_read8(BN6_CHATBOX)) return keys;
 	emote_strip_open_phrases(leave);
 	strip_up = true;
 	return 0;

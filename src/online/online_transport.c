@@ -290,6 +290,9 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			/* (sent whether or not the WELCOME is in yet: this socket's
 			 * HELLO went first, and a resume the server took before its
 			 * WELCOME reached the game would otherwise be held) */
+			/* (what was put to go out before it first: a dive's end sent
+			 * as its link closes, dive_link.c, was lost behind the goodbye) */
+			if (snapshot->connected) send_mail();
 			data[0] = ONLINE_BYE;
 			/* (then the server's close, its answer to it, before the
 			 * socket goes: a socket closed at once can be reset with the

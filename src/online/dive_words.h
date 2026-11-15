@@ -16,8 +16,8 @@ const char *dive_find_words(const char *name, bool mine);
  * time in tenths, its place of `count`, the quickest's and his name. */
 const char *dive_place_words(unsigned tenths, unsigned place, unsigned count, unsigned best, const char *best_name);
 /* A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what
- * (`cause` its name, "" unknown); `won` a mark of the net cleared. */
-const char *dive_mark_words(const char *name, const char *cause, bool won);
+ * (`cause` its name, "" unknown; `navi` a Navi's); `won` a mark of the net cleared. */
+const char *dive_mark_words(const char *name, const char *cause, bool navi, bool won);
 /* A phrase left on a panel: its boxes (who left it, the phrase, how many
  * waved), MegaMan's wave after them where `wave`. */
 const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave);
