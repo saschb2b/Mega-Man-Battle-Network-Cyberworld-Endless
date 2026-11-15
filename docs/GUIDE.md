@@ -1361,6 +1361,34 @@ welcome plaza, a purple vortex, offers it to a pass with the DeepNet
 stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
 into the dive's first layer.
 
+You dive it together with everyone on the server who dives it at the
+same time. Whoever stands on your layer walks there as a MegaMan; you
+walk through each other. A band at the foot of
+the screen says what happens to the others: who was deleted on which
+layer, who beat a guardian, who cleared the net.
+
+- **A guardian's door.** Step into the arena with other divers on the
+  layer and you wait at its door for them; the first one there leads.
+  The leader's **A** goes in with everyone waiting (up to four), anyone's
+  **B** goes alone. A party meets the guardian stronger (his next
+  version for two, the one after for three or four, his HP times the
+  party) and fights him on one field, every MegaMan with his own folder
+  and chips, the guardian taking aim at each in turn. A MegaMan deleted
+  in it ends his own run, even if the party wins. On the New 3DS and the
+  PSP each of the party fights him on a field of his own, his HP shared.
+- **Crews.** **A** on another diver asks to team up (BN6's own Yes or
+  No, on both sides), up to four. A crew stays together across layers:
+  at Lan's HP a portal waits until the whole crew stands on it.
+- **Traces of the week.** Where a diver was deleted this week a skull
+  burst stays; **A** on it says who and to what. **R** on a layer opens
+  the phrases you know from the Square: **A** leaves one on your panel
+  for everyone diving after you, who can wave at it.
+- **Mystery Data** sit in the same places for everyone and each of you
+  opens your own. The band names the week's first to open one, and those
+  others have opened sparkle.
+- **Busting.** After a battle won the band says your time and your place
+  among the week's divers who fought the same battle.
+
 Your run in progress waits in its own save, untouched: the title's
 CONTINUE is always that run, and when the dive ends, won or deleted, you
 are back with it. To go on with an unfinished dive, visit the Square
@@ -1368,10 +1396,13 @@ and step up to the portal: Keep diving, Start over or Not now. Divers
 don't trade.
 
 How deep you got goes up on the board at your next visit: the week's
-eight deepest dives, your own best and its place, and last week's
-three. Dive as often as you like; your best counts. The board says the
-layers are as players report them, and nothing is won for one. A dive
-unlocks nothing and counts in none of your records.
+eight deepest dives (a **+** beside a dive that fought a guardian as a
+party), your own best and its place, and last week's three; who is
+diving right now and on which layer; and the week's fastest busts of
+each guardian, alone and by party size. Dive as often as you like; your
+best counts. The board says the layers are as players report them, and
+nothing is won for one. A dive unlocks nothing and counts in none of
+your records.
 
 #### Servers
 
