@@ -28,6 +28,9 @@ ShopWords vendor_words(char names[][16], int n);
 /* ProtoMan's word where his netbattle waits for a later act */
 const char *netbattle_later_words(void);
 void duel_terms(char *terms, size_t n, int met, int foes, int frames, int rung);
+/* ... and his box on a later talk, his terms said on the layer: his time
+ * and its rule (rung 0, 1), or his word for the netbattle (rung 2) */
+void duel_again(char *s, size_t n, int frames, int rung);
 const char *rumor_words(int navi);
 const char *hinter_words(void);
 const char *fragment_words(int held);

@@ -9,12 +9,6 @@
 #include "bn6.h"
 #include "script_kit.h"
 
-/* ts_check_flag: on in script `to` where event flag `flag` is set */
-static void if_flag(TextArchive *t, int flag, int to) {
-	uint8_t b[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)to, 0xFF };
-	ta_bytes(t, b, sizeof b);
-}
-
 /* What his answers lead to: not enough zenny, No, and the stake paid */
 typedef struct { int broke, no, paid; } Answers;
 
@@ -80,8 +74,8 @@ int ta_battler(TextArchive *t, const BattlerOffer *b) {
 	snprintf(lead, sizeof lead, "VIRUS BATTLE! %d ROUNDS!|EACH WIN ADDS %d ZENNY!|", b->rounds, b->stake);
 	offer(t, b, &a, true, lead);
 	int i = ta_script(t);
-	if_flag(t, BATTLER_DONE_FLAG, done);
-	if_flag(t, BATTLER_TOLD_FLAG, again);
+	ta_if_flag(t, BATTLER_DONE_FLAG, done);
+	ta_if_flag(t, BATTLER_TOLD_FLAG, again);
 	if (b->card) {
 		ta_jump(t, ask);
 		return i;

@@ -338,6 +338,17 @@ prize's code as BN6 does, three in four one the pack lacks.
   it. The tier stays the old prize's (two layers deeper, the same twelve
   rolls, four a chip): `build.py economy` finds a good chip among the
   three at 96 to 100% of Servers by act.
+- **A run from its battle leaves the Server standing** (the game-design
+  skill, 15 November 2026): its talk asks again, the same viruses, one
+  box naming its three chips and the question. kai11 ran from one, and
+  its talk said "The signal's quiet now,Lan." with the viruses still
+  there and no way back to them (session 78). Only a win pays, so a
+  second try costs what the first did: the HP spent stays spent, the
+  layer's one heal with it, and running pays nothing to farm. "Quiet" is
+  the won Server's word, once its chip is taken. A Navi gate's SP and
+  the Glitch layer's copy stand again after a run the same way
+  (`choice_again` in `src/director/director.c`); ProtoMan's race does
+  not, a run from it a loss ([the rival](../rival.md)).
 - The dark flame into the Undernet stays a side route with tougher viruses
   and better Mystery Data.
 - Busting Level stays the game's: a clean, fast battle already earns better

@@ -473,6 +473,19 @@ static void after_battle(void) {
 	if (!D.challenge && !boss_fighting()) roll_encounter();
 }
 
+/* A choice's battle MegaMan ran from (a Server's, a Navi gate's SP, the
+ * Glitch layer's copy): its foes still stand, so it is not chosen any
+ * more, and its talk asks again, a box and the question; only a win pays,
+ * so a second try costs what the first did (kai11 ran from a Server's,
+ * and its talk said "The signal's quiet now,Lan.", session 78) */
+static void choice_again(int type) {
+	for (int i = 0; i < D.objs.nchoices; ++i)
+		if (D.objs.choice[i].type == type && (D.chosen & (1u << i))) {
+			D.chosen &= ~(1u << i);
+			flag_clear(D.objs.choice[i].flag);
+		}
+}
+
 /* Back from the guardian's battle, or a challenge */
 static void after_forced(void) {
 	/* back from the guardian's battle */
@@ -489,11 +502,16 @@ static void after_forced(void) {
 		bool won = emu_read8(BN6_BATTLE_RESULT) == 1;
 		if (D.duel) { duel_verdict(won, emu_battle_unwatch()); D.pet_refreshed = false; }
 		else if (D.battler) battler_round_over(emu_read8(BN6_BATTLE_RESULT));
-		else if (D.gate_fight) D.gate_due = won && D.objs.gate_reward >= 0;
-		else if (glitch_copy_fighting()) glitch_copy_over(won);
-		else {
+		else if (D.gate_fight) {
+			D.gate_due = won && D.objs.gate_reward >= 0;
+			if (!won) choice_again(OBJ_NAVI_GATE);
+		} else if (glitch_copy_fighting()) {
+			glitch_copy_over(won);
+			if (!won) choice_again(OBJ_COPY);
+		} else {
 			/* (its pick of three, there at the Server while B leaves it) */
 			if (won) flag_set(LAYER_SERVER_WON_FLAG);
+			else choice_again(OBJ_CHALLENGE);
 			D.reward_due = won && D.objs.challenge_reward >= 0;
 		}
 		D.gate_fight = false;

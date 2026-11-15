@@ -167,7 +167,14 @@ int ta_guardian_reward(TextArchive *t, const ScriptsReward *r) {
 	return i;
 }
 
-int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int needed) {
+/* A Navi gate's question, Yes setting its flag */
+static void gate_ask(TextArchive *t, ScriptsChoice c, int no) {
+	ta_ask_in(t, FACE_MEGAMAN, "His SP chip's the\nprize! Take him on?\n", no, true, true);
+	ta_flag_set(t, c.flag);
+	ta_end(t);
+}
+
+int ta_navi_gate(TextArchive *t, ScriptsChoice c, const char *navi, int beaten, int needed) {
 	char s[240];
 	if (beaten < needed) {
 		/* (the telegraph first: which code, and how far along) */
@@ -177,15 +184,21 @@ int ta_navi_gate(TextArchive *t, int flag, const char *navi, int beaten, int nee
 	}
 	int quiet = ta_say(t, FACE_MEGAMAN, "The gate's open,Lan.|Nothing's left inside.");
 	int no = ta_closing(t);
-	int i = ta_script(t);
-	uint8_t done[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)quiet, 0xFF };  /* ts_check_flag */
-	ta_bytes(t, done, sizeof done);
+	/* (said on the layer, a later talk, after a No or a run from his
+	 * battle, is a box and the question: session 78) */
+	int later = ta_script(t);
 	bool first = true;
+	snprintf(s, sizeof s, "%s SP's still in there!", navi);
+	ta_pages(t, s, FACE_MEGAMAN, &first);
+	gate_ask(t, c, no);
+	int i = ta_script(t);
+	ta_if_flag(t, c.flag, quiet);
+	ta_if_told(t, c, later);
+	first = true;
 	snprintf(s, sizeof s, "%s's code opens it!|%s SP waits inside!|The toughest fight on this layer!", navi, navi);
 	ta_pages(t, s, FACE_MEGAMAN, &first);
-	ta_ask_in(t, FACE_MEGAMAN, "His SP chip's the\nprize! Take him on?\n", no, true, true);
-	ta_flag_set(t, flag);
-	ta_end(t);
+	ta_told(t, c);
+	gate_ask(t, c, no);
 	return i;
 }
 

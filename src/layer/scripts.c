@@ -90,6 +90,19 @@ void ta_flag_set(TextArchive *t, int flag) {
 	ta_bytes(t, b, sizeof b);
 }
 
+void ta_if_flag(TextArchive *t, int flag, int to) {
+	uint8_t check[] = { 0xEF, 0x00, (uint8_t)flag, (uint8_t)(flag >> 8), (uint8_t)to, 0xFF };
+	ta_bytes(t, check, sizeof check);
+}
+
+void ta_if_told(TextArchive *t, ScriptsChoice c, int later) {
+	if (c.told >= 0) ta_if_flag(t, c.told, later);
+}
+
+void ta_told(TextArchive *t, ScriptsChoice c) {
+	if (c.told >= 0) ta_flag_set(t, c.told);
+}
+
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag) {
 	int i = ta_script(t);
 	ta_flag_set(t, flag);

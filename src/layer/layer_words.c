@@ -171,6 +171,12 @@ void duel_terms(char *terms, size_t n, int met, int foes, int frames, int rung) 
 		count[nf], sec / 60, sec % 60, cs, rung == 1 ? " without taking a hit" : "");
 }
 
+void duel_again(char *s, size_t n, int frames, int rung) {
+	int sec = frames / 60, cs = (frames % 60) * 100 / 60;
+	if (rung == 2) snprintf(s, n, "...Well,MegaMan? I'm waiting.");
+	else snprintf(s, n, "...Well? %d:%02d.%02d. %s", sec / 60, sec % 60, cs, rung == 1 ? "Without a hit." : "Beat it.");
+}
+
 /* The net's word on the act's guardian `navi`, a bystander's: who he is
  * and a rumor */
 const char *rumor_words(int navi) {

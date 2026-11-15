@@ -118,7 +118,9 @@ Lan. Deleting JudgeMan twice as a guardian, in any dive, would crack it.
 We haven't yet."). The code is that Navi deleted twice as a guardian, in
 any runs (rivals.sav), so an earned code opens every such gate in later
 runs: behind it his SP waits, a challenge fought to the boss theme, and
-the win pays his SP chip. The telegraph comes a run or more before the
+the win pays his SP chip; a run from it leaves him there, the gate's talk
+"JudgeMan SP's still in there!" and the question
+([Risk the player chooses](../progression/structure.md)). The telegraph comes a run or more before the
 key, and the route choice lets a player seek the guardian whose code they
 want.
 
