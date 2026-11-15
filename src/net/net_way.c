@@ -379,9 +379,46 @@ static void widen_past(int biome, int narrows, int gx, int gy, bool any) {
 	}
 }
 
+/* Whether the way turns at its cell i (0 < i < way_n - 1) */
+static bool turns_at(int i) {
+	return (way_x[i] - way_x[i - 1]) * (way_x[i + 1] - way_x[i]) + (way_y[i] - way_y[i - 1]) * (way_y[i + 1] - way_y[i]) == 0;
+}
+
+/* Whether the walk from the arrival enters the walkway [i0, i1] only once
+ * MegaMan has stopped on its line, as BN6 lets him onto a one-wide walkway
+ * along it alone: turned into off wide floor that goes on past the turn,
+ * no edge stopping him on its line (the playtesters' stop at a mouth since
+ * session 76); a turn within its first two panels, the mouth and the
+ * corner one lining up each; or a step one panel aside, its two corners
+ * each taken only from its wall (session 78's Seaside arrival). */
+static bool lined_entry(int i0, int i1) {
+	int i = i0 - 1;
+	if (i >= 1 && turns_at(i) && floor_at(way_x[i] + way_x[i] - way_x[i - 1], way_y[i] + way_y[i] - way_y[i - 1])) return true;
+	for (int j = i0; j <= i1 && j + 1 < way_n; ++j)
+		if (turns_at(j) && (j <= i0 + 1 || (j + 2 < way_n && turns_at(j + 1)))) return true;
+	return false;
+}
+
+/* The way's walkways MegaMan enters only from their line (lined_entry)
+ * widened, whatever the area's cap: past the turn into a band two panels
+ * wide, the floor's edge or the band's width takes him in (session 78:
+ * four playtesters stopped at such mouths in every area). */
+static void widen_lined(int gx, int gy) {
+	int sx = layer.rooms[0].ax, sy = layer.rooms[0].ay;
+	for (int tries = 0; tries < MAX_RUNS; ++tries) {
+		int s0[MAX_RUNS], s1[MAX_RUNS];
+		if (!walk(sx, sy, gx, gy)) return;
+		int n = runs_of(s0, s1, true), k = 0;
+		while (k < n && (!lined_entry(s0[k], s1[k]) || !(widen(s0[k], s1[k], 1) || widen(s0[k], s1[k], -1)))) ++k;
+		if (k == n) return;
+	}
+}
+
 void layer_widen_way(int biome, int narrows, int gx, int gy) {
 	/* (every walkway first: one widened joins its platforms, and the
-	 * walkways between big platforms are counted on what that makes) */
+	 * walkways between big platforms are counted on what that makes; those
+	 * entered only from their line before the rest) */
+	widen_lined(gx, gy);
 	widen_past(biome, narrows, gx, gy, true);
 	widen_past(biome, narrows, gx, gy, false);
 }
