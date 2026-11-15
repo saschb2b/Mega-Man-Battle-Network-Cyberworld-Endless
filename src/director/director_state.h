@@ -49,6 +49,7 @@ typedef struct {
 	uint32_t battle_record;   /* the BattleSettings StartBattle was given (EV_BATTLE_START), 0 none since the last battle */
 	bool placed_told;      /* (debug) MegaMan's first panel in it was printed */
 	int foes;              /* viruses in the battle the game will start next */
+	int foes_most, foes_down;   /* the battle under way's enemies as BN6 counts them: the most it stood, and how many it has deleted */
 	Encounter next;        /* that battle */
 	Encounter rolled[2];   /* the battles in the two records the roll hands out (encounter.c) */
 	int battles;           /* random battles fought on this layer */
