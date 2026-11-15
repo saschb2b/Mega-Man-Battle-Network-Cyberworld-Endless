@@ -1,6 +1,10 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: world/level-design/fork-read.md (the read at the pad opens "Where this pad leads..." for "Past this pad...", which a playtester took for this layer's far side, and why no reminder of an unvisited shop or heal).
+* **Update**: rom/battle.md (a row on MegaMan's mood kept from one battle to the next, BN6's own: written back at a battle's end, zeroed only by a jack-in, a jack-out or a real-world script battle, so Full Synchro carries; playtest s76's two sightings).
+* **Update**: engine/saves.md (a first start's device, no savedata/ yet, reads "No runs yet" in SAVES, not "Damaged").
+* **Add**: world/level-design/way-on-arrow.md (the arrow's way, its green to the Recovery Mr.Prog matched by the map's way in the key's Heal, Lan's HP's corridor band); **Update**: world/level-design/index.md (its line), world/home/lans-hp.md (the corridor's mouth open to y -1, the arrow at its middle off the band), rom/world.md (Lan's HP's row: the mouth re-walked, -24 to -1), GUIDE.md (SELECT's map: the way to the Heal while the arrow is green).
 * **Update**: devtools/dev-menu.md (`hp=N` moves the base BN6 counts HPMemory into with the max, so BN6's own sum at each return to the map comes to N: no full heal after every battle and no HP box counting up from 100, session 76).
 * **Update**: rom/game-state.md (eScreenFade's first byte measured frame by frame: 1 from a fade's first frame until its fade back in ends, over a jack-in's white, warp pads and a battle's way in and out; what hides the engine's way-on arrow, corner note, cards and Mystery Data counter under BN6's fade, kai7's finding in session 76).
 * **Update**: game/reward-pick.md (Keys: A takes a choice only once the screen has been up a second and a half, after a playtester's steady A through Mr.Prog's lines took the gift unseen).

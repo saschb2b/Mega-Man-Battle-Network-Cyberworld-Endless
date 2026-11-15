@@ -3,7 +3,7 @@ type: Feature
 title: "Lan's HP after an act, the warp zone"
 description: "Lan's HP as the run's warp zone (`lanhp.c`): an act's exit pad leads there, BN6's link squares and pink pad become this run's portals as guardians fall, the courier, ways on and back."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:18:26Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 ---
 
 # Lan's HP after an act, the warp zone

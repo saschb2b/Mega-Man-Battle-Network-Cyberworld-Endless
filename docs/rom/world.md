@@ -3,7 +3,7 @@ type: ROM Map
 title: "The real world and home"
 description: "Addresses of the real world and home: Lan's HP, Lan's house, AsterLand and the Cyber Academy, the requests' scripts, home's shops and the Order Service's sort, real-world maps, objects, warps and music."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-10-26T20:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T00:52:00Z
-* **Update**: world/level-design/fork-read.md (the read at the pad opens "Where this pad leads..." for "Past this pad...", which a playtester took for this layer's far side, and why no reminder of an unvisited shop or heal).

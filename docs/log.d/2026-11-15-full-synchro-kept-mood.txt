@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T01:05:38Z
-* **Update**: rom/battle.md (a row on MegaMan's mood kept from one battle to the next, BN6's own: written back at a battle's end, zeroed only by a jack-in, a jack-out or a real-world script battle, so Full Synchro carries; playtest s76's two sightings).
