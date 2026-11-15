@@ -2583,6 +2583,92 @@ CLIPS = [
 ]
 
 
+# 0.22.0's notes: words and fixes
+# (stills of the lines and fixed screens, each a scripted run on a fresh data
+# folder. N22_IN: seed 4's first layer in Central Area, its arrival's words
+# paged, MegaMan free from frame 400; N22_CONTINUE: the title's START, then
+# A on CONTINUE; N22_SERVER: SERVER_8's talk paged to its question, Yes, the
+# Custom screen's START and OK, the buster down each row twice over, then A
+# through RESULT, the Server's words, the pick and its prize)
+N22_L1 = ['--scene', 'emu', '--net-biome', '0', '--run-depth', '1', '--seed', '4', '--dev', 'quiet']
+N22_IN = '100:,' + '4:A,6:,' * 30
+N22_CONTINUE = '200:,6:START,100:,6:A,'
+N22_ROWS = '6:B,6:,12:,' * 6
+N22_SERVER = ('1:,300:,' + '6:A,6:,70:,' * 3 + '6:A,6:,90:,6:LEFT,6:,10:,6:A,6:,400:,6:START,6:,10:,6:A,6:,120:,' +
+              (N22_ROWS + '8:UP,15:,' + N22_ROWS + '8:DOWN,15:,' + N22_ROWS + '8:DOWN,15:,' + N22_ROWS + '8:UP,15:,') * 2 + '6:A,60:,' * 22)
+# (the runs before a CONTINUE, quit as their frames end: L's words open on
+# seed 4's layer 2; a random battle won on layer 1, quit on its RESULT; seed
+# 5's layer 2 reached at 60 of 140 HP, Chaud's call paged)
+SCREENSHOT_PREP.update({
+    'quit-talk': (['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', '150:,' + '6:A,4:,' * 30 + '40:,6:L,144:'], {}, 630),
+    'quit-won': (['--scene', 'emu', '--run-depth', '1', '--seed', '4', '--net-biome', '0', '--dev', 'quiet,god,onehit', '--input', '460:battle'],
+                 {'CYBERWORLD_AUTOPILOT': '1'}, 1101),
+    'heal-continue': (['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=140/60', '--input', '150:,' + '6:A,14:,' * 60], {}, 1500),
+})
+# (the ROMs screen with BN4's slot open, its line on what BN4 brings)
+NO_BN4_A += ('launcher-bn4-line',)
+SCREENSHOTS += [
+    # (Shorter stops on the way: a Net Dealer's one box before his list; L's
+    # first press, ProtoMan first of the two things worth a detour)
+    ('dealer-one-box', ['--scene', 'emu', '--run-depth', '4', '--seed', '3', '--dev', 'quiet', '--talk', 'shop:430'], [(560, 'dealer-one-box')], {}),
+    ('l-two-things', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet', '--input', '150:,' + '6:A,4:,' * 30 + '40:,6:L,144:'],
+     [(620, 'l-two-things')], {}),
+    # (Chaud's call and ProtoMan's race: Lan's surprise right after Chaud's
+    # name; the race's question, MegaMan's, on No)
+    ('chaud-race', ['--scene', 'emu', '--run-depth', '2', '--seed', '3', '--net-biome', '0', '--dev', 'quiet', '--talk', 'duel:1500',
+                    '--input', '700:,' + '6:A,54:,' * 12 + '100:,' + '6:A,74:,' * 9], [(750, 'chaud-surprise'), (2150, 'race-question')], {}),
+    # (Lines that say what they mean: the Recovery Mr.Prog's patch at 40 of
+    # 100 HP, the HP it gave. A word after a battle: MegaMan's on the first
+    # virus from an older Net, in BN4's ACDC Area, once the fade is over, and
+    # Lan's answer there)
+    ('heal-says-hp', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:1100',
+                      '--input', '660:,' + '6:A,14:,' * 20 + '120:,' + '6:A,74:,' * 5], [(1400, 'heal-says-hp')], {}),
+    ('bn4-after-battle', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--net-biome', 'x15', '--dev', 'quiet,god,onehit', '--input', '460:battle'],
+     [(1268, 'bn4-word-after-battle'), (1300, 'bn4-old-viruses')], {'CYBERWORLD_AUTOPILOT': '1'}),
+    # (What the run tells you: Dad's first call on what a dive leaves behind;
+    # MegaMan's word a few panels from a guardian's arena, its second box)
+    ('dad-keeps', ['--scene', 'town', '--seed', '2', '--input', '200:,' + '6:A,44:,' * 14], [(800, 'dad-keeps')], {}),
+    ('arena-ready', ['--scene', 'emu', '--run-depth', '3', '--seed', '4', '--dev', 'quiet', '--input', '200:,0:place 264 -31 1,100:,6:A,114:,6:A,120:'],
+     [(400, 'arena-ready')], {}),
+    # (A quit with a text box open: the CONTINUE after SCREENSHOT_PREP's quit
+    # in L's words. A quit after a won battle: the CONTINUE after its quit on
+    # RESULT, MegaMan where the battle met him)
+    ('quit-talk', ['--scene', 'title', '--input', N22_CONTINUE + '400:'], [(400, 'quit-talk')], {}),
+    ('quit-won', ['--scene', 'title', '--input', N22_CONTINUE + '400:'], [(400, 'quit-won')], {}),
+    # (The PET's Save and your next A: its own box. Blank chips in the
+    # Standard folder: FOLDER EDIT on a new run's folder)
+    ('pet-save', N22_L1 + ['--input', N22_IN + '30:,6:START,40:,' + '6:DOWN,6:,' * 7 + '6:A,200:'], [(650, 'pet-save')], {}),
+    ('folder-named', N22_L1 + ['--input', N22_IN + '30:,6:START,40:,6:A,80:,6:A,60:,6:A,120:'], [(720, 'folder-named')], {}),
+    # (A prize before the chatter: the Server's pick taken, its prize's box.
+    # Mr.Prog's gift, taken unseen: the gift's screen as A is pressed through
+    # his lines, its cursor still and faded)
+    ('server-prize', SERVER_8 + ['--input', N22_SERVER], [(3160, 'server-prize')], {}),
+    ('gift-cursor', N22_L1 + ['--talk', 'gift:450', '--input', N22_IN + '80:,' + '6:A,34:,' * 12], [(780, 'gift-cursor')], {}),
+    # (RESULT's virus count, and RECORDS' closest goal as a sentence)
+    ('result-count', ['--scene', 'summary', '--run-depth', '5', '--seed', '3', '--input', '320:,4:A,36:'],
+     [(200, 'result-count'), (400, 'records-goal')], {}),
+    # (Two menu lines made whole: Options' Fast forward note; the ROMs
+    # screen's line on BN4, its slot open and chosen)
+    ('options-fast-note', ['--scene', 'title', '--input', '60:,4:SELECT,100:,4:L,40:,4:DOWN,36:'], [(240, 'options-fast-note')], {}),
+    ('launcher-bn4-line', ['--scene', 'launcher', '--size', '1280x720', '--input', '40:,6:UP,10:,6:RIGHT,10:,6:RIGHT,40:'],
+     [(120, 'launcher-bn4-line')], {}, 2),
+    # (Mr.Prog's patch after a CONTINUE: SCREENSHOT_PREP's run continued at 60
+    # of 140 HP, the patch's Yes, half of max HP)
+    ('heal-continue', ['--scene', 'title', '--talk', 'heal:1300', '--input', N22_CONTINUE + '100:,' + '6:A,14:,' * 50 + '500:,' + '6:A,74:,' * 8],
+     [(2130, 'heal-continue')], {}),
+    # (First meetings: a fresh profile's first dive into an older Net's
+    # area, BN5's ACDC Area, MegaMan finding it old)
+    ('bn5-first-dive', ['--scene', 'emu', '--run-depth', '1', '--net-biome', 'x0', '--seed', '4', '--input', '200:,' + '6:A,44:,' * 14],
+     [(600, 'bn5-first-dive')], {}),
+    # (A stray A at a DarkChip: A pressed through the flame's words, the
+    # question on No)
+    ('dark-no', ['--scene', 'emu', '--run-depth', '2', '--seed', '4', '--dev', 'quiet,darkchips=0x2', '--talk', 'dark:900',
+                 '--input', '200:,' + '6:A,14:,' * 32 + '100:,' + '6:A,34:,' * 22], [(1920, 'dark-no')], {}),
+    # (SAVES on a first start: no save yet, THIS DEVICE "No runs yet")
+    ('saves-first', ['--scene', 'saves', '--size', '240x160'], [(120, 'saves-first')], {}),
+]
+
+
 # the clips the README or a release's notes show as GIFs too (GitHub plays no
 # video from the repository): name, then its first seconds and frames a second
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
