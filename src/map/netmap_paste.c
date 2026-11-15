@@ -513,9 +513,19 @@ static bool side_set(const SidePiece *p, const TileSeams *seams, uint16_t *map, 
 	return true;
 }
 
-/* What grows on a floor's edge set at grid panel (x, y), the first of
- * those cut at its neighbourhood that fits, from the one hash h picks; NULL none. */
-static const SidePiece *grows_set(const Learned *L, uint16_t *map, int tw, int th, int x, int y, unsigned h) {
+/* The panels a layer's pieces of what grows on a floor's edge stand on. */
+typedef struct { int at[GROWS_A_LAYER][2], n; } Grown;
+
+/* What grows on a floor's edge set at grid panel (x, y), by hash h: on
+ * two panels that fit in three, none a panel from another, as the maps
+ * scatter theirs (on every one, a straight edge took one every other
+ * panel); the first of those cut at its neighbourhood that fits, from the
+ * one h picks. NULL none. */
+static const SidePiece *grows_set(const Learned *L, uint16_t *map, int tw, int th, int x, int y, Grown *g) {
+	unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
+	if (g->n == GROWS_A_LAYER || (h >> 12) % GROWS_SKIP == 0) return NULL;
+	for (int k = 0; k < g->n; ++k)
+		if (abs(g->at[k][0] - x) < 2 && abs(g->at[k][1] - y) < 2) return NULL;
 	const SideBook *b = &L->sides;
 	unsigned f = side_floor(x, y);
 	int match[SIDES_MAX], nmatch = 0;
@@ -523,9 +533,22 @@ static const SidePiece *grows_set(const Learned *L, uint16_t *map, int tw, int t
 		if (b->piece[k].grows && b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
 	for (int i = 0; i < nmatch; ++i) {
 		const SidePiece *p = &b->piece[match[((h >> 4) + (unsigned)i) % (unsigned)nmatch]];
-		if (side_set(p, &L->seams, map, tw, th, x, y)) return p;
+		if (!side_set(p, &L->seams, map, tw, th, x, y)) continue;
+		g->at[g->n][0] = x;
+		g->at[g->n++][1] = y;
+		return p;
 	}
 	return NULL;
+}
+
+/* (debug output) what stands under a pad's panel or behind a floor, or
+ * grows on its edge, set at grid panel (x, y) */
+static void hang_said(const SidePiece *p, int x, int y) {
+	if (!emu_debug_on()) return;
+	int A, B;
+	nm_grid_to_panel(x, y, &A, &B);
+	fprintf(stderr, "  %s at world %d,%d: %d tiles\n", p->grows ? "on the floor's edge" : p->behind ? "behind the floor" : "under the pad's panel",
+		nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
 }
 
 static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER];
@@ -539,7 +562,8 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 	nside_at = 0;
 	if (!L->sides.n || nm_cur->gw != MAP_W) return;
-	int set[SIDES_A_LAYER][2], nset = 0, nhang = 0, grown[GROWS_A_LAYER][2], ngrown = 0;
+	int set[SIDES_A_LAYER][2], nset = 0, nhang = 0;
+	Grown grown = { .n = 0 };
 	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
 		for (int x = 1; x < MAP_W - 1 && nset < SIDES_A_LAYER; ++x) {
 			unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
@@ -553,20 +577,11 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 			const SidePiece *p = hang ? side_for(&L->sides, 1, x, y, h) : near || h % 2 ? NULL : side_for(&L->sides, 0, x, y, h);
 			unsigned stretch = (nm_cur->seed ^ (uint32_t)(x / 4 * 7919 + y / 4 * 104729)) * 2654435761u >> 8;
 			if (!p && !hang && stretch % 3 == 0) p = side_for(&L->sides, 2, x, y, h);
-			/* (what grows on a floor's edge on two panels that fit in three,
-			 * none a panel from another, as the maps scatter theirs: on
-			 * every one, a straight edge took one every other panel) */
-			bool close = false;
-			for (int k = 0; k < ngrown && !close; ++k) close = abs(grown[k][0] - x) < 2 && abs(grown[k][1] - y) < 2;
-			if (p) {
-				if (!side_set(p, &L->seams, map, tw, th, x, y)) continue;
-			} else if (hang || close || ngrown == GROWS_A_LAYER || (h >> 12) % GROWS_SKIP == 0 || !(p = grows_set(L, map, tw, th, x, y, h))) continue;
-			if (p->grows) { grown[ngrown][0] = x; grown[ngrown++][1] = y; }
+			/* (and where none, what grows on its edge) */
+			if (p ? !side_set(p, &L->seams, map, tw, th, x, y) : hang || !(p = grows_set(L, map, tw, th, x, y, &grown))) continue;
 			if (p->hang) {
 				++nhang;
-				int A, B;
-				nm_grid_to_panel(x, y, &A, &B);
-				if (emu_debug_on()) fprintf(stderr, "  %s at world %d,%d: %d tiles\n", p->grows ? "on the floor's edge" : p->behind ? "behind the floor" : "under the pad's panel", nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
+				hang_said(p, x, y);
 				continue;
 			}
 			int A, B;

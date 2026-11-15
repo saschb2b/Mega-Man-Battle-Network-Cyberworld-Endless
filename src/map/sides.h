@@ -41,12 +41,9 @@ typedef struct {
 } SidePiece;
 
 typedef struct {
-	SidePiece *piece;   /* allocated as looks come (an area with none holds none), sides_free */
+	SidePiece *piece;   /* allocated as looks come (an area with none holds none) */
 	int n, cap;
 } SideBook;
-
-/* Frees book b's pieces, their tiles and priorities. */
-void sides_free(SideBook *b);
 
 /* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
  * priorities are its book's owner's to free. */
