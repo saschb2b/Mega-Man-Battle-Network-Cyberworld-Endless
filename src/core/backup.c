@@ -252,8 +252,15 @@ bool backup_local_info(const char *data_dir, BackupInfo *info) {
 	bool ok = dir_info(data_dir, "savedata", info, false) && info->has_profile;
 	if (!ok) {
 		/* (its status kept: BACKUP_OK for no saves, else saves that cannot
-		 * be read) */
+		 * be read; no savedata/ at all is no saves, as a first start's
+		 * before its first save (SAVES read "Damaged" there, a playtester's
+		 * first start, session 76), unless an import cut short left it
+		 * missing, backup_blocked's) */
 		BackupStatus status = info->status;
+		char dir[1100];
+		struct stat st;
+		snprintf(dir, sizeof dir, "%s/savedata", data_dir);
+		if (status == BACKUP_IO && !backup_blocked() && stat(dir, &st) != 0 && errno == ENOENT) status = BACKUP_OK;
 		memset(info, 0, sizeof *info);
 		info->status = status;
 	} else if (!info->system[0]) snprintf(info->system, sizeof info->system, "%s", backup_system_name());
