@@ -54,6 +54,7 @@ typedef struct {
 	int tw, th;
 	AreaVram gfx;
 	int scenery, sides;   /* the scenery and side pieces its pick set (netmap_scenery, netmap_sides) */
+	bool level;           /* its area cannot draw the layer's stairs: its raised floor and stairs drawn level with the ground */
 } NetmapLook;
 bool netmap_look(int area, NetmapLook *out);
 void netmap_look_free(NetmapLook *l);

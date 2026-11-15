@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T19:00:00Z
+* **Update**: game/glitch-layer.md (Heights in a flip: a look whose area cannot draw the layer's stairs draws its raised floor and stairs level with the ground; Who is in front in a flip: a look's side pieces stay without layer priorities, measured and decided), devtools/atlas.md (the looks' report says how each drew the stairs), devtools/3ds-heap.md (`--dev`: runs started on a Glitch layer, its looks from the areas with the most side pieces).
