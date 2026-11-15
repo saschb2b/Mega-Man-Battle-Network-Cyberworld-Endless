@@ -26,6 +26,7 @@
 #include "pet_panel.h"
 #include "platform.h"
 #include "sound_heard.h"
+#include "touch.h"
 #include "update.h"
 #include "update_text.h"
 
@@ -103,24 +104,34 @@ static const OptionsWord colour_words[LCD_COLOUR_COUNT] = { OW_OFF, OW_GBA, OW_V
 static const OptionsWord colour_notes[LCD_COLOUR_COUNT] = { OW_COLOUR_OFF_NOTE, OW_COLOUR_GBA_NOTE, OW_COLOUR_VBA_NOTE, OW_COLOUR_NDS_NOTE,
 	OW_COLOUR_PSP_NOTE };
 
-/* a turned line's value: the window's, the scale's, smooth motion's, the GBA's screen's, the music's, the effects', the output's,
- * fast forward's, the vibration's, the trigger effects', the sound's */
-static const char *value_word(int kind) {
+/* an On/Off line's value (1 on, 0 off), -1 for any other line */
+static int switched(int kind) {
 	switch (kind) {
-	case LINE_FULLSCREEN: return options_word(P.fullscreen ? OW_ON : OW_OFF);
+	case LINE_FULLSCREEN: return P.fullscreen;
+	case LINE_SMOOTH: return P.blend;
+	case LINE_LCD3X: return lcd_grid();
+	case LINE_VOXEL: return display_voxel() || display_stereo();
+	case LINE_TRIGGERS: return feel_triggers();
+	case LINE_UPDATES: return update_on();
+	default: return -1;
+	}
+}
+
+/* a turned line's value: an On/Off line's, the scale's, the GBA's screen's, the music's, the effects', the output's,
+ * fast forward's, the vibration's, the touch controls', the sound's */
+static const char *value_word(int kind) {
+	int on = switched(kind);
+	if (on >= 0) return options_word(on ? OW_ON : OW_OFF);
+	switch (kind) {
 	case LINE_SCALE: return options_word((OptionsWord)(OW_AUTO + display_scale()));
-	case LINE_SMOOTH: return options_word(P.blend ? OW_ON : OW_OFF);
 	case LINE_COLOUR: return options_word(colour_words[lcd_colour()]);
 	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
-	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
-	case LINE_VOXEL: return options_word(display_voxel() || display_stereo() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_level_word(sound_heard_music());
 	case LINE_EFFECTS: return options_level_word(sound_heard_effects());
 	case LINE_OUTPUT: return options_word((OptionsWord)(OW_SPEAKERS + sound_output()));
 	case LINE_FAST: return fast_speed() > FAST_OFF ? fast_speed_word(fast_speed()) : options_word(OW_OFF);
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_OFF : (OptionsWord)(OW_WEAK + feel_level() - FEEL_WEAK));
-	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_ON : OW_OFF);
-	case LINE_UPDATES: return options_word(update_on() ? OW_ON : OW_OFF);
+	case LINE_TOUCH: return options_word(touch_off() ? OW_OFF : OW_AUTO);
 	default: return sound_word();
 	}
 }
@@ -146,7 +157,7 @@ static const char *line_name(int kind) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
 		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
 		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X,
-		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL };
+		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL, [LINE_TOUCH] = OW_TOUCH };
 	switch (kind) {
 	case LINE_STATS: return analytics_word(AW_ROW);
 	case LINE_UPDATE: return update_name();
@@ -227,6 +238,7 @@ static const char *note_words(int kind) {
 	case LINE_FAST: return options_word(fast_speed() > FAST_OFF ? OW_FAST_ON_NOTE : OW_FAST_OFF_NOTE);
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_VIBRATION_OFF_NOTE : OW_VIBRATION_ON_NOTE);
 	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_TRIGGERS_ON_NOTE : OW_TRIGGERS_OFF_NOTE);
+	case LINE_TOUCH: return options_word(touch_off() ? OW_TOUCH_OFF_NOTE : OW_TOUCH_AUTO_NOTE);
 	default: return display_note(kind);
 	}
 }

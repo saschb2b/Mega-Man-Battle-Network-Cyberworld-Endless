@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Touch controls you can turn off.** Options › Game has **Touch
+  controls**: Auto shows them at a touch, as before; Off keeps them away
+  while a controller is connected or the keyboard plays, for a handheld
+  with a touch screen and buttons of its own (a phone with neither still
+  shows them at a touch). And on Auto they no longer come back by
+  themselves after SAVES, the ROMs screen or a Net Square name field
+  when a button was pressed there. Asked for in discussion #552.
 - **The PSP.** A PSP-2000, PSP-3000, PSP Go or PSP Street with custom
   firmware (6.61 PRO or ARK-4) plays the game: unpack
   `cyberworld-endless-psp.zip` onto the memory stick and start it from
