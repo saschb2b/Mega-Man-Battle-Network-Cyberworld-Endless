@@ -3,7 +3,7 @@ type: Tool
 title: "The 3DS's heap on a computer"
 description: "`tools/heap3ds.py` plays long headless runs of the host build with every allocation counted as the New 3DS's 96 MB heap holds it, reporting the peak, refused allocations and run depth, BN6 alone, with BN5, with BN4 Red Sun, or with both."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-09T15:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:00:00Z }
 ---
 
 # The 3DS's heap on a computer
