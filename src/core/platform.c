@@ -321,15 +321,13 @@ static void canvas_point(float sx, float sy, int *x, int *y) {
 }
 
 void platform_own_taps(bool on) {
-	static bool touch_was;
 	if (on == own_taps) return;
-	if (on) touch_was = touch_shown();
 	own_taps = on;
 	tap_x = tap_y = point_x = point_y = -1;
 	dropped[0] = 0;
 	/* (the touch controls away, and back as they were; the mouse's cursor
 	 * shown over it, a fullscreen game's too) */
-	touch_show(on ? false : touch_was);
+	touch_own_screen(on);
 	layout_canvas();
 #ifdef CW_DESKTOP
 	if (!P.headless) SDL_ShowCursor(on || !P.fullscreen ? SDL_ENABLE : SDL_DISABLE);
@@ -687,7 +685,7 @@ static void key_down(const SDL_KeyboardEvent *k) {
 	if (b) P.keyboard_last = true;
 	if (nkeys_pressed < (int)(sizeof keys_pressed / sizeof *keys_pressed)) keys_pressed[nkeys_pressed++] = k->keysym.scancode;
 	/* the keyboard's hands put the touch controls away */
-	if (b && touch_show(false)) layout_canvas();
+	if (b && touch_away()) layout_canvas();
 #ifndef __EMSCRIPTEN__
 	/* (in a browser the page keeps Escape and fullscreen; Android's Back
 	 * is Escape) */
@@ -745,7 +743,7 @@ static void poll_event(const SDL_Event *e) {
 		 * touch controls away) */
 		if (pads_event(e)) {
 			P.keyboard_last = false;
-			if (touch_show(false)) layout_canvas();
+			if (touch_away()) layout_canvas();
 		}
 		break;
 	}
@@ -795,6 +793,7 @@ void platform_poll(void) {
 	dropped[0] = 0;
 	SDL_Event e;
 	while (SDL_PollEvent(&e)) poll_event(&e);
+	if (touch_kept_away() && touch_away()) layout_canvas();   /* (Options' Touch controls Off) */
 	platform_second_poll();
 	pads_poll();
 	/* (iOS's loop in the background saves the run, then polls: its copy) */

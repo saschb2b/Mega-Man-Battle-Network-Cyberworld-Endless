@@ -3,7 +3,7 @@ type: Design
 title: "Heights"
 description: "How a layer climbs: every original ramp surveyed (one or two panels wide, two to four long, rising 32 or 64, half a cell off the panels towards its foot), the stairs twelve areas learn from all their maps (`stairs.c`), and the floor raised on them, a room the rest meets only from its front or a terrace behind a line across the screen (`net_height.c`)."
 tags: [world, level-design, rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:30:00Z }
 ---
 
 # Heights

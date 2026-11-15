@@ -44,7 +44,11 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 every area's layers drawn, one sheet per area
                                 in .build/atlas, compared with (or written to,
                                 --baseline) tests/atlas_baseline.txt
-                                (docs/devtools/)
+                                (docs/devtools/); BIOMES intoN (xN another
+                                game's area): a layer of every other area
+                                as a Glitch layer's flip into N draws it,
+                                fromN: one of N's in every other area's look
+                                (docs/game/glitch-layer.md)
   python3 build.py tiles [SEEDS] [--baseline]
                                 the tile test: the atlas of every area and
                                 layout (SEEDS each, 2 by default), a table of
@@ -923,6 +927,14 @@ def atlas(biomes='all', seeds='1', baseline=False):
     import collections
     import glob
     import re
+    if biomes.startswith(('into', 'from')):   # a Glitch layer's looks (docs/game/glitch-layer.md, Checking an area's look)
+        for path in sorted(glob.glob(os.path.join(out, 'look_*.bmp'))):
+            im = Image.open(path).convert('RGB')
+            im.crop(im.getbbox() or (0, 0, im.width, im.height)).save(path[:-4] + '.png')
+            os.remove(path)
+        print(open(os.path.join(out, 'report.txt')).read(), end='')
+        print('looks in .build/atlas: look_intoNN_fromNN_*.png, the layer as built on the left, the flip on the right')
+        return 0
     layers = collections.defaultdict(list)
     for path in sorted(glob.glob(os.path.join(out, 'b*.bmp'))):
         layers[int(re.match(r'b(\d+)_', os.path.basename(path)).group(1))].append(path)

@@ -173,6 +173,7 @@ static bool arena_drawn;      /* its arena drawn in its platforms' floor, laid o
 static bool joints;           /* its walkways' ends, turns and crossings are joints (NetAreaDef.joint_hues) */
 static bool roads;            /* its maps have a second look of walkway, which the way's walkways take (netmap_learn.c, road_hues) */
 static bool picking;          /* the tiles are picked: the floor as they draw it, not as the legalizer reads it */
+static bool level_look;       /* a look whose area cannot draw the layer's stairs: its raised floor and stairs drawn level with the ground (netmap_look) */
 static bool framed;           /* its platforms drawn apart, and its blocks two wide alone, all drawn as its framed squares, its pads (TILES_SQUARE_PADS) */
 static uint32_t coord_slot;   /* the layer map's coordinate-data pointer */
 
@@ -346,11 +347,12 @@ static int pad_at(int x, int y, const void *ctx) {
 /* (with a context, the layout's pads, whatever their look: the
  * neighbourhoods legal.c asks after) */
 static int floor_raw(int A, int B, const void *ctx) {
-	int k = nm_cur->rise / 32, x = B + nm_place.gx0, y = -A + nm_place.gy0;
-	if (!ground(nm_kind(x, y)) && k) {
+	int k = level_look ? 0 : nm_cur->rise / 32, x = B + nm_place.gx0, y = -A + nm_place.gy0, kind = nm_kind(x, y);
+	if (level_look && (kind == K_RAISED || kind == K_STAIR)) kind = K_FLOOR;
+	if (!ground(kind) && k) {
 		x += k; y += k;   /* a raised panel drawn here */
 		if (nm_kind(x, y) != K_RAISED) return TILE_VOID;
-	} else if (!ground(nm_kind(x, y))) return TILE_VOID;
+	} else if (!ground(kind)) return TILE_VOID;
 	int pad = pad_at(x, y, ctx);
 	/* the pieces drawn apart: the pads, or the platforms (all but the
 	 * walkways) */
@@ -528,7 +530,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	picking = false;
 	free(floor_memo);
 	floor_memo = NULL;
-	nm_paste_stairs(L, map, tw, th);
+	if (!level_look) nm_paste_stairs(L, map, tw, th);
 	if (props) nm_paste_props(map, tw, th);
 	nm_paste_pads(L, map, beside, tw, th);
 	free(beside);
@@ -764,9 +766,14 @@ bool netmap_look(int area, NetmapLook *out) {
 	bool ok = L && !area_src_bpp8(L->def->xrom, L->def->group, L->def->number);
 	if (ok) {
 		nm_cur = cur;
+		/* (an area that cannot draw the layer's stairs: drawn level, docs/game/glitch-layer.md, Heights in a flip) */
+		out->level = level_look = !nm_stairs_drawn(L);
 		out->map = look_map(L, last.tw, last.th);
+		level_look = false;
 		out->tw = last.tw;
 		out->th = last.th;
+		out->scenery = netmap_scenery;
+		out->sides = netmap_sides();
 		ok = out->map && area_src_vram(L->def->xrom, L->def->group, L->def->number, &out->gfx);
 	}
 	free(nm_last.seams);

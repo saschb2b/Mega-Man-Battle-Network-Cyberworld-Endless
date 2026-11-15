@@ -3,7 +3,7 @@ type: Feature
 title: "Link Navi obstacles"
 description: "Link Navi obstacles (issue #42): BN6's geysers, cybertrees, flames, cyclones and clouds in a pocket's mouth, each area's own kind, opened by the run's Crosses (`layer_block_kind`, `ng_plan_obstacle`, `blockers.c`)."
 tags: [world, level-design]
-generated: { by: claude-code/unrecorded, at: 2026-10-07T08:43:35Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:31:48Z }
 ---
 
 # Link Navi obstacles (built, issue #42)
@@ -32,7 +32,14 @@ of Gregar's Link Navis clear each. A layer sets one the same way:
   alone, and a pocket measured behind its mouth (8 of 37 obstacles and
   cubes over the tests' layers) let him walk in and never out (issue
   #111). Nothing else is placed in it; its one thing, a blue
-  data of the best quality, lies where it ends.
+  data of the best quality, lies where it ends. Where the floor leaves
+  no such pocket (379 of 894 obstacles and cubes planned over 200 runs
+  stood nowhere, nearly every mouth closing off fewer than six panels),
+  one is carved: a walkway two panels long off a platform's edge, off
+  the way and as near it as fits, to a 3x3 pad of its own, the void a
+  panel round them as round a Rush gap's island, the lock in the
+  walkway's first panel and its one thing on the pad (`carve_pocket`;
+  [Set pieces](set-pieces.md), How often).
 - **The map** (`blockers.c`, `netmap.c`): BN6's own obstacle (handler 3)
   where BN6 sets one in a walkway's mouth, a line of wall cells across the
   walkway flagged with its slot, and its check cells where the engine's A

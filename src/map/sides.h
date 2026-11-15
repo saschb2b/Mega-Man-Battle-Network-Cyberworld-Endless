@@ -34,6 +34,9 @@ typedef struct {
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
 	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
+	bool over;         /* a side piece kept with the first layer's tiles under it (StairTile.e0, 0 where it held
+	                    * none), set only where a layer's are the same: the Nest's crystals over its rims' tabs and
+	                    * spikes (sides_learn_under) */
 	uint8_t hole[2];   /* what stands in a walled hole in the floor (hole_learn): the hole's panels along world X and Y
 	                    * from its own, the lowest; 0 none */
 } SidePiece;
@@ -46,6 +49,12 @@ typedef struct {
 /* Adds map `a`'s side pieces to `out`, each look once; a piece's tiles and
  * priorities are its book's owner's to free. */
 void sides_learn(const AreaSrc *a, SideBook *out);
+
+/* ... and what it sets there under a floor's lower edge, touching none of
+ * its top, kept with the panel straight above it: each with the first
+ * layer's tiles under it (SidePiece.over), the Nest's crystals in front of
+ * its rims and behind them. */
+void sides_learn_under(const AreaSrc *a, SideBook *out);
 
 /* Adds what view `r` of a map (area_src_raise_in: its raised floor brought
  * down to the ground) sets under that floor's lower edges, past its side

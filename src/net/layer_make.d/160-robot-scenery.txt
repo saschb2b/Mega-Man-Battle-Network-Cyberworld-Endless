@@ -1,0 +1,1 @@
+Robot Control Comp's scenery is cut against its floor's own faces (`scenery_reach`, 20 pixels under a lower edge where every other area keeps 44), so its robot figures and its wires with red lights beside its walkways are cut whole and set on its layers: 11 looks where it had 3, which changes the scenery its layers set (decor.c).

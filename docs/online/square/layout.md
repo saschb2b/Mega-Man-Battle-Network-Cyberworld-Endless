@@ -3,7 +3,7 @@ type: Feature
 title: "The layout"
 description: "The Net Square's layout on a 26 x 39 grid: the welcome plaza and its landmark, Trade Central, the Arena and the stage as warped parts, Sky's raised floors, walk times (`tools/square_tour.py`), the unit tests."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:25:12Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:30:00Z }
 ---
 
 # The layout

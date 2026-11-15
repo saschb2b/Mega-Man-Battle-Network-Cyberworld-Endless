@@ -96,6 +96,9 @@ static const char *const words[] = {
 	"Both sides the same: for one speaker, one earbud or one ear",   /* OW_MONO_NOTE */
 	"The game's music, quieter: each step down is 3 dB",   /* OW_MUSIC_LOW_NOTE */
 	"Menus, chips and battles quieter: each step down is 3 dB",   /* OW_EFFECTS_LOW_NOTE */
+	"Touch controls",   /* OW_TOUCH */
+	"Shown at a touch on the screen, hidden at a button or key",   /* OW_TOUCH_AUTO_NOTE */
+	"Never shown while a controller or the keyboard plays",   /* OW_TOUCH_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
@@ -180,6 +183,14 @@ const char *options_triggers_note(void) {
 	return "\n# trigger_effects: on, a DualSense's triggers click: the one that is L or R\n"
 		"# once the Custom gauge is full, FAST's where fast forward can run (as\n"
 		"# pad.ini maps them); off, both pull free. Options' Audio changes it too.\n";
+}
+
+const char *options_touch_note(void) {
+	return "\n# touch_controls: auto shows the buttons on a touch screen from its first\n"
+		"# touch until a key or a controller's button is pressed; off keeps them\n"
+		"# away while a controller is connected or the keyboard plays (a screen\n"
+		"# with neither still shows them at a touch, or nothing could be pressed).\n"
+		"# Options changes it too.\n";
 }
 
 const char *options_colour_note(void) {

@@ -157,7 +157,8 @@ void platform_draw_over(void);
 /* --dpi: the screen's density taken as given (tests of the touch controls). */
 void platform_set_dpi(float dpi);
 /* A screen that takes the pointer itself (the launcher, src/launcher/): the
- * touch controls put away while it does (and back as they were after),
+ * touch controls put away while it does (and back as they were after,
+ * unless a key or a button was pressed meanwhile: touch_own_screen),
  * each finger's lift and each left click kept at its canvas pixel for
  * platform_tap, which hands out the last one once, and the canvas laid out
  * as a menu's: the largest whole scale that leaves it 240 x 160 or more, or

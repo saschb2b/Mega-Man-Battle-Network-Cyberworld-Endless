@@ -3,7 +3,7 @@ type: Tool
 title: "Atlas: every layer drawn"
 description: "`python3 build.py atlas [BIOMES] [SEEDS]` draws every area's layers in its own tiles without running the game: sheets, seam and defect pictures and a report in `.build/atlas`, failing where a layer is worse than `tests/atlas_baseline.txt`."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:42:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T19:00:00Z }
 ---
 
 # Atlas: every layer drawn
@@ -71,6 +71,15 @@ Output in `.build/atlas`:
   walkways' junctions passed, and the panels walked (`src/dev/lineups.c`;
   [the generator](../world/level-design/generator.md), Navigation).
 
+BIOMES `intoN` and `fromN` draw a Glitch layer's looks instead
+(`src/dev/atlas_looks.c`): a layer of every other area as a flip into
+area N shows it, or one of N's in every other area's look, side by side
+with the layer as built, `look_intoNN_fromFF_dD_sS.png` and a line each in
+`report.txt` (its stairs and how the look drew them, `drawn level` or
+`drawn as they stand`, the scenery and side pieces each pick set, the
+holes left: [the Glitch layer](../game/glitch-layer.md), Checking an
+area's look and Heights in a flip).
+
 The build prints the report and flags layers that were not built, guardian
 layers without an arena and fallbacks above 1%. A layer whose map's backdrop, as the game would
 set it (`xbackdrop_map`), loads its tiles over the layer's own is reported
@@ -89,7 +98,13 @@ every map of group 0xNN instead (`src_gNN_N.png`), for choosing the maps
 an area learns from. `rSEED,DEPTH,AREA` draws one layer of a run as the
 game builds it, to look at one a player saw: run SEED's (hex, as the run
 log writes it) layer at DEPTH in area AREA's tiles (`r2269,1,8`: kai8's
-RoboDog Comp of 15 November 2026).
+RoboDog Comp of 15 November 2026). `pieces` draws nothing: over SEEDS
+runs (`DIR:pieces:200`), each normal layer of the net's cycle built as the
+game builds it, its area dressed by the run's seed and its kit that
+area's, it counts the [set pieces](../world/level-design/set-pieces.md) the act's plan
+gave each layer beside those that stand, by the layer's place in its act,
+by BN6's areas and the dressed ones and by area, and in which act each
+run met its first lock, in `DIR/pieces.txt` (`src/dev/pieces_census.c`).
 
 The seams pictures frame the tiles whose top showed a hole, the
 background through a walkable panel ([holes in the floor](../world/level-design/floor-holes.md)):
