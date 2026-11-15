@@ -34,7 +34,8 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
 		"DR.HIKARI SENT ME!\nOUCH,YOU'RE HURT!",
-		"RECOVERY PROGRAM,GO!\nTHIS WON'T HURT!",
+		/* (ready, not "GO!": the patch waits on his question, kai5) */
+		"RECOVERY PROGRAM,\nREADY TO GO!",
 	};
 	/* once he has patched MegaMan on this layer (flag set): one patch a
 	 * layer (issue #71: a heal as often as asked refunded every detour's
