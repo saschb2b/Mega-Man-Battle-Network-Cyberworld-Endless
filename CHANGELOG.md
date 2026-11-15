@@ -63,8 +63,9 @@
   comps and homepages crosses one one-wide walkway at most, as their
   originals' rooms do; its others are two panels wide, so the walk from
   arrival to exit catches less on walkway mouths (RoboDog Comp, where
-  runs most often start, caught the most). A layer saved before this
-  update starts afresh at a CONTINUE.
+  runs most often start, caught the most). In every area, a pit left
+  between walkways, which the walk had to jog round, is filled. A layer
+  saved before this update starts afresh at a CONTINUE.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.
@@ -81,7 +82,9 @@
   1), where he said seven or eight. L names two things worth a detour
   at most (ProtoMan, a flame of darkness, a violet mark, Mystery Data
   behind a lock), then the heal and the way: seven boxes over two
-  presses on a busy layer, where it took twelve.
+  presses on a busy layer, where it took twelve. A second talk with the
+  Virus Battler is his first pair and the question, as a shop's second
+  visit is.
 - **Chaud's call and ProtoMan's race, tightened.** Lan's surprise
   comes right after Chaud's name, not after his whole call; a profile
   that has heard him gets "Lan,it's Chaud again."; ProtoMan names the
@@ -97,7 +100,10 @@
   your own chips, not a gift. The DarkChip post opens on the purple
   flame the Navi saw. MegaMan's arrival in the older Net says "Cross
   and all!" only with a Cross, and Dad's first call says what the run
-  is: the short net down to the Nest, or the endless one.
+  is: the short net down to the Nest, or the endless one. After the
+  first virus from another Net, Lan's answer fits where you are: "Its
+  old viruses too!?" in BN4's areas, "Both Nets,like you said..." in
+  the deep.
 - **The arrow and the map, clearer.** In Lan's HP the arrow points up
   the corridor from anywhere in its mouth, where it sent MegaMan
   sideways and back. While it leads to the Recovery Mr.Prog, the map
@@ -116,6 +122,18 @@
 - **Fixed: SAVES called a first start's device Damaged.** Before the
   first save, SAVES read THIS DEVICE as "Damaged" and said its saves
   could not be read. It says "No runs yet".
+- **BN4's ACDC Area and BN5's Oran Area, drawn whole.** BN4's ACDC
+  Area draws every room as its framed squares, rings and L's too, and
+  its walkways meet at small squares as BN4's do, with no stray cyan
+  scraps. BN5's Oran Area lays its hubs as one floor with their
+  circuits, joined as BN5 joins them, where every meeting was a jumble
+  of docks and orange chips.
+- **R jacks in from a step short of Lan's PC.** At Lan's desk, R a
+  step short of the PC walks Lan onto it and jacks in, as R does at the
+  town's jack-in spots.
+- **Fixed: RESULT counted too few viruses.** The battle that ended a
+  run, and a battle you ran from, now count the viruses deleted in
+  them. RECORDS' closest goal reads as a whole sentence.
 - **Fixed: an A through Mr.Prog's lines could take his gift unseen.**
   Pressing A at a steady pace through his words, the next press could
   land just after the gift's screen opened and take its first choice
