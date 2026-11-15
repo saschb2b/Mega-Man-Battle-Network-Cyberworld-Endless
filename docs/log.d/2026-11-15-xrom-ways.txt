@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T02:23:00Z
-* **Update**: world/level-design/generator.md (the other games' areas held to their own maps' count of one-wide walkways where fewer than the BN6 area they are laid out as, and the way's floor kept from the legalizer there), devtools/nav-study.md (`--atlas nav` counts the other games' areas too).
