@@ -36,6 +36,7 @@
 #include "backup.h"
 #include "battle_data.h"
 #include "lab_text.h"
+#include "scripts.h"
 #include "test_backup.h"
 #include "test_transfer_code.h"
 #include "test_update.h"
@@ -193,6 +194,7 @@ bool emu_debug_on(void) { return false; }
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
 char loot_fit_code(int id, char code, bool always) { (void)id; (void)always; return code; }
 void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
+void emu_write8(uint32_t addr, uint8_t v) { (void)addr; (void)v; }   /* (scripts.c's chat marks: test_heal_again links it) */
 /* (the meta layer and a run's start words: no saves, chip pools or town) */
 void profile_save(void) {}
 int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
@@ -7953,6 +7955,45 @@ static void test_lab_text(void) {
 		!((NET_AREAS + XAREAS_MAX - 1) & LAB_AREA_SECOND), "lab: a set's song and area bytes hold every game's");
 }
 
+/* The Recovery Mr.Prog's half patch, its amount set again in place (a
+ * CONTINUE builds the layer before its state holds MegaMan's max HP, and
+ * the patch gave 1 HP, session 77): the bytes ta_heal_bytes writes at the
+ * HealSpot are those a build with that amount writes, every byte after them
+ * where it was; a heal to full (the guardian's layer, the Heals helper's)
+ * has no amount to set. */
+static void test_heal_again(void) {
+	static TextArchive a, b;
+	for (int vow = 0; vow < 2; ++vow)
+		for (int amount = 1; amount <= 9999; amount = amount * 10 + 7) {
+			HealSpot sa, sb;
+			ta_begin(&a);
+			ta_say(&a, FACE_PROG, "BEFORE");
+			ta_heal(&a, 2, 0x1451, 0x1464, 1, vow, &sa);
+			ta_say(&a, FACE_PROG, "AFTER");
+			ta_begin(&b);
+			ta_say(&b, FACE_PROG, "BEFORE");
+			ta_heal(&b, 2, 0x1451, 0x1464, amount, vow, &sb);
+			ta_say(&b, FACE_PROG, "AFTER");
+			CHECK(sa.amount_at > 0 && sa.got_at > sa.amount_at && sa.amount_at == sb.amount_at && sa.got_at == sb.got_at,
+				"heal: %d HP's amount at %d and %d, 1 HP's at %d and %d", amount, sb.amount_at, sb.got_at, sa.amount_at, sa.got_at);
+			CHECK(a.len == b.len && a.n == b.n && !memcmp(a.off, b.off, sizeof a.off), "heal: %d HP's script is not 1 HP's length", amount);
+			if (sa.amount_at < 0 || a.len != b.len) continue;
+			uint8_t amt[2], got[HEAL_GOT_LEN];
+			ta_heal_bytes(amount, amt, got);
+			memcpy(a.buf + sa.amount_at, amt, sizeof amt);
+			memcpy(a.buf + sa.got_at, got, sizeof got);
+			CHECK(!memcmp(a.buf, b.buf, (size_t)a.len), "heal: 1 HP set again to %d is not the patch built with %d%s", amount, amount, vow ? " (a vow)" : "");
+			CHECK(b.buf[sb.amount_at - 2] == 0xFB && b.buf[sb.amount_at - 1] == 0x08 && (b.buf[sb.amount_at] | b.buf[sb.amount_at + 1] << 8) == amount,
+				"heal: the amount's place is not ts_start_heal's");
+		}
+	for (int amount = -1; amount <= 0; ++amount) {
+		HealSpot s = { 5, 5 };
+		ta_begin(&a);
+		ta_heal(&a, 0, 0x1451, 0x1464, amount, false, &s);
+		CHECK(s.amount_at < 0 && s.got_at < 0, "heal: a heal to full (%d) has an amount to set", amount);
+	}
+}
+
 /* The encounter groups' templates and their filling (groups.h;
  * docs/game/progression/encounter-groups.md): a pool of five families
  * made up here, no ROM */
@@ -8221,6 +8262,7 @@ int main(int argc, char **argv) {
 	test_sha1();
 	test_battle_data();
 	test_lab_text();
+	test_heal_again();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();

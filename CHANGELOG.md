@@ -177,6 +177,10 @@
   ran past its box and ended at "BN6's"; it fits whole now. The ROMs
   screen said BN4 Red Sun brings only its viruses: it says what BN4
   brings today, its areas, viruses, Navis and chips, as BN5's line does.
+- **Fixed: Mr.Prog's patch gave 1 HP after a CONTINUE.** On a layer
+  continued from the title, the Recovery Mr.Prog asked to use the
+  layer's one patch, then healed a single HP and called it spent. It
+  heals half of MegaMan's max HP again, however you reached the layer.
 
 ## 0.21.2 (2026-11-14)
 
