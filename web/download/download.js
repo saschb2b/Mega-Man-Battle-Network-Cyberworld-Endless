@@ -159,7 +159,7 @@ document.addEventListener('click', async (e) => {
 	if (modules) for (const code of document.querySelectorAll('.qr .code')) code.replaceChildren(qrSvg(modules, WORDS.qr(release.tag_name)));
 })();
 
-// ---- after a download: a thank-you, once a visit ----
+// ---- after a download: a thank-you, every time ----
 
 // A download (a link to a release's file, which the list's are once the
 // release is read, or a button adding the AltStore source, the iPhone's way
@@ -167,23 +167,17 @@ document.addEventListener('click', async (e) => {
 // repository and its issues. The download goes on as without it: the dialog
 // opens after the click has done its work, and its own links open a new
 // tab, never over the download's navigation. The 3DS's QR code is scanned
-// by FBI, not clicked here: it has no thanks. Shown once a visit, as the
-// tab's sessionStorage keeps it (where that is blocked, once a page).
+// by FBI, not clicked here: it has no thanks. Shown after every download.
 (() => {
 	const dialog = document.getElementById('thanks');
 	if (!dialog || typeof dialog.showModal !== 'function') return;
 	const DOWNLOAD = 'a[href*="/releases/download/"], a[href*="/releases/latest/download/"], a[data-needs]:not([aria-disabled="true"])';
-	const KEY = 'cw-thanks';
-	let shown = false;
 	let from = null;
 	let pressedOutside = false;
-	try { shown = sessionStorage.getItem(KEY) === '1'; } catch (e) { /* not kept: once a page */ }
 
 	document.addEventListener('click', (e) => {
 		const link = e.target.closest(DOWNLOAD);
-		if (!link || shown) return;
-		shown = true;
-		try { sessionStorage.setItem(KEY, '1'); } catch (err) { /* not kept: once a page */ }
+		if (!link || dialog.open) return;
 		from = link;
 		setTimeout(() => {
 			dialog.showModal();
