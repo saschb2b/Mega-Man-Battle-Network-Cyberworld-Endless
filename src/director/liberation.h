@@ -124,6 +124,8 @@ uint32_t lib_auto_keys(int frame);
 /* (liberation_way.c) At home, the portal of the way to a dark layer in
  * BN5's dark panels' colours, in the core's frame `px` (240 x 160) */
 void lib_way_tint(uint32_t *px);
+/* ... what it draws by, read in the update as the frame ends (the drawing reads nothing of the game) */
+void lib_way_see(void);
 
 /* (liberation_draw.c) What the drawing reads of the game, after each
  * frame: the camera, the sprites' colours. */

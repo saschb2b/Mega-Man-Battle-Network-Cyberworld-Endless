@@ -1,5 +1,6 @@
-"""The week's traces on the shared dive's layers (protocol v19, issue #589,
-the owner's calls on traces; shared/online/README.md, Protocol v19).
+"""The week's traces on the shared dive's layers (protocol v19, issue #589;
+docs/online/shared-dive.md, The owner's decisions; shared/online/README.md,
+Protocol v19).
 
 A layer of the week's net is one for every diver at its depth, side and
 way: its key is (week, seed, depth, side, way), whatever room instance a

@@ -143,4 +143,4 @@ static void draw(void) {
 	if (fade) { P.fx_fade = fade; P.fx_fade_color = to; }
 }
 
-const Scene scene_intro = { "intro", enter, update, draw, NULL };
+const Scene scene_intro = { "intro", enter, update, draw, NULL, NULL };

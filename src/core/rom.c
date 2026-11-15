@@ -79,22 +79,37 @@ typedef struct { uint32_t h[5]; uint64_t len; uint8_t buf[64]; size_t fill; } Sh
 
 static uint32_t rol(uint32_t v, int n) { return (v << n) | (v >> (32 - n)); }
 
+/* (the schedule kept 16 words round, and the five words' roles turned by
+ * name, five rounds at a time, rather than moved along every round: a
+ * ROM's 8 MB hashed in a quarter fewer instructions, every start;
+ * callgrind, 14 November 2026, docs/devtools/profiling.md) */
+#define SHA1_W(i) (w[(i) & 15] = rol(w[((i) + 13) & 15] ^ w[((i) + 8) & 15] ^ w[((i) + 2) & 15] ^ w[(i) & 15], 1))
+#define SHA1_R0(v, x, y, z, u, i) (u += (z ^ (x & (y ^ z))) + w[i] + 0x5A827999u + rol(v, 5), x = rol(x, 30))
+#define SHA1_R1(v, x, y, z, u, i) (u += (z ^ (x & (y ^ z))) + SHA1_W(i) + 0x5A827999u + rol(v, 5), x = rol(x, 30))
+#define SHA1_R2(v, x, y, z, u, i) (u += (x ^ y ^ z) + SHA1_W(i) + 0x6ED9EBA1u + rol(v, 5), x = rol(x, 30))
+#define SHA1_R3(v, x, y, z, u, i) (u += (((x | y) & z) | (x & y)) + SHA1_W(i) + 0x8F1BBCDCu + rol(v, 5), x = rol(x, 30))
+#define SHA1_R4(v, x, y, z, u, i) (u += (x ^ y ^ z) + SHA1_W(i) + 0xCA62C1D6u + rol(v, 5), x = rol(x, 30))
+#define SHA1_5(R, i) (R(a, b, c, d, e, i), R(e, a, b, c, d, (i) + 1), R(d, e, a, b, c, (i) + 2), R(c, d, e, a, b, (i) + 3), R(b, c, d, e, a, (i) + 4))
+
 static void sha1_block(Sha1 *s, const uint8_t *p) {
-	uint32_t w[80];
+	uint32_t w[16];
 	for (int i = 0; i < 16; ++i) w[i] = (uint32_t)p[i * 4] << 24 | (uint32_t)p[i * 4 + 1] << 16 | (uint32_t)p[i * 4 + 2] << 8 | p[i * 4 + 3];
-	for (int i = 16; i < 80; ++i) w[i] = rol(w[i - 3] ^ w[i - 8] ^ w[i - 14] ^ w[i - 16], 1);
 	uint32_t a = s->h[0], b = s->h[1], c = s->h[2], d = s->h[3], e = s->h[4];
-	for (int i = 0; i < 80; ++i) {
-		uint32_t f, k;
-		if (i < 20) { f = (b & c) | (~b & d); k = 0x5A827999; }
-		else if (i < 40) { f = b ^ c ^ d; k = 0x6ED9EBA1; }
-		else if (i < 60) { f = (b & c) | (b & d) | (c & d); k = 0x8F1BBCDC; }
-		else { f = b ^ c ^ d; k = 0xCA62C1D6; }
-		uint32_t t = rol(a, 5) + f + e + k + w[i];
-		e = d; d = c; c = rol(b, 30); b = a; a = t;
-	}
+	for (int i = 0; i < 15; i += 5) SHA1_5(SHA1_R0, i);
+	SHA1_R0(a, b, c, d, e, 15), SHA1_R1(e, a, b, c, d, 16), SHA1_R1(d, e, a, b, c, 17), SHA1_R1(c, d, e, a, b, 18), SHA1_R1(b, c, d, e, a, 19);
+	for (int i = 20; i < 40; i += 5) SHA1_5(SHA1_R2, i);
+	for (int i = 40; i < 60; i += 5) SHA1_5(SHA1_R3, i);
+	for (int i = 60; i < 80; i += 5) SHA1_5(SHA1_R4, i);
 	s->h[0] += a; s->h[1] += b; s->h[2] += c; s->h[3] += d; s->h[4] += e;
 }
+
+#undef SHA1_5
+#undef SHA1_R4
+#undef SHA1_R3
+#undef SHA1_R2
+#undef SHA1_R1
+#undef SHA1_R0
+#undef SHA1_W
 
 void sha1_hex(const uint8_t *data, size_t len, char out[41]) {
 	Sha1 s = { { 0x67452301, 0xEFCDAB89, 0x98BADCFE, 0x10325476, 0xC3D2E1F0 }, 0, { 0 }, 0 };

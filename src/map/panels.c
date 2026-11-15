@@ -3,6 +3,7 @@
 #include "panels.h"
 
 #include <stdlib.h>
+#include <limits.h>
 #include <string.h>
 
 #define H (SPAN / 2)
@@ -232,6 +233,8 @@ static void keep_panel(const PanelsLearn *l, const Src *src, const uint8_t *pads
 	for (int k = 0; k < PANEL_TILES; ++k) t->has |= (uint16_t)((t->tile[k] != NO_TILE) << k);
 }
 
+static void grid(TilePanels *p);
+
 void panels_end(PanelsLearn *l, const Src *src, const uint8_t *pads, TileBook *out) {
 	TilePanels *p = &out->panels;
 	memset(p, 0, sizeof *p);
@@ -260,6 +263,7 @@ void panels_end(PanelsLearn *l, const Src *src, const uint8_t *pads, TileBook *o
 		for (int i = 0; i < all; ++i) p->at[i] = (uint16_t)i;
 		sort_base = p->panel;
 		qsort(p->at, (size_t)all, sizeof *p->at, cmp_place);
+		grid(p);
 		PanelTile *kept = realloc(l->tiles, ((size_t)l->ntiles + 1) * sizeof *kept);
 		p->tile = kept ? kept : l->tiles;
 		p->ntile = l->ntiles;
@@ -271,8 +275,9 @@ void panels_end(PanelsLearn *l, const Src *src, const uint8_t *pads, TileBook *o
 	} else {
 		free(p->panel);
 		free(p->at);
+		free(p->grid);
 		p->panel = NULL;
-		p->at = NULL;
+		p->at = p->grid = NULL;
 	}
 	free(l->tiles);
 	free(l->px);
@@ -283,6 +288,37 @@ void panels_end(PanelsLearn *l, const Src *src, const uint8_t *pads, TileBook *o
 void panels_settle(TilePanels *p) {
 	free(p->px);
 	p->px = NULL;
+}
+
+/* Each panel by its place, A and B within the panels' bounds: a panel's
+ * search reads it there rather than halving the book (the first in p->at's
+ * order where two share a place, as the search finds). The search was a
+ * fifth of making a layer in BN5's Undernet (docs/devtools/profiling.md);
+ * the largest book's grid takes 3 KB. Without memory for it, none: the
+ * search halves the book. */
+static void grid(TilePanels *p) {
+	int all = p->n + p->npart, a0 = INT_MAX, a1 = INT_MIN, b0 = INT_MAX, b1 = INT_MIN;
+	free(p->grid);
+	p->grid = NULL;
+	if (!all || !p->at) return;
+	for (int i = 0; i < all; ++i) {
+		if (p->panel[i].A < a0) a0 = p->panel[i].A;
+		if (p->panel[i].A > a1) a1 = p->panel[i].A;
+		if (p->panel[i].B < b0) b0 = p->panel[i].B;
+		if (p->panel[i].B > b1) b1 = p->panel[i].B;
+	}
+	int w = a1 - a0 + 1, h = b1 - b0 + 1;
+	if (!(p->grid = malloc((size_t)w * h * sizeof *p->grid))) return;
+	memset(p->grid, 0xFF, (size_t)w * h * sizeof *p->grid);
+	for (int k = 0; k < all; ++k) {
+		const TilePanel *t = &p->panel[p->at[k]];
+		uint16_t *g = &p->grid[(t->B - b0) * w + t->A - a0];
+		if (*g == NO_TILE) *g = p->at[k];
+	}
+	p->grid_a0 = a0;
+	p->grid_b0 = b0;
+	p->grid_w = w;
+	p->grid_h = h;
 }
 
 /* The panels marked in `drop` left out. */
@@ -298,6 +334,7 @@ static void leave_out(TilePanels *p, const uint8_t *drop) {
 	for (int i = 0; i < n; ++i) p->at[i] = (uint16_t)i;
 	sort_base = p->panel;
 	qsort(p->at, (size_t)n, sizeof *p->at, cmp_place);
+	grid(p);
 }
 
 void panels_other_colours(TilePanels *p, const uint8_t seen[TILE_COLOURS]) {

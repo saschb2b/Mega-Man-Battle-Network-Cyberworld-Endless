@@ -9,6 +9,8 @@
  * BN6's Yes and No. Where a tap lands on them. Drawing changes nothing. */
 #include "options.h"
 
+#include <stdio.h>
+
 #include "analytics.h"
 #include "analytics_ask.h"
 #include "analytics_text.h"
@@ -23,6 +25,8 @@
 #include "pet_panel.h"
 #include "platform.h"
 #include "sound_heard.h"
+#include "update.h"
+#include "update_text.h"
 
 /* where it draws, from the picture's corner: the list's window, its band
  * (the page's name) and rows; under it the note and the scene */
@@ -108,25 +112,53 @@ static const char *value_word(int kind) {
 	case LINE_COLOUR: return options_word(colour_words[lcd_colour()]);
 	case LINE_BLEND: return options_word(lcd_blend() == LCD_BLEND_OFF ? OW_OFF : (OptionsWord)(OW_SIMPLE + lcd_blend() - LCD_BLEND_SIMPLE));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_ON : OW_OFF);
-	case LINE_VOXEL: return options_word(display_voxel() ? OW_ON : OW_OFF);
+	case LINE_VOXEL: return options_word(display_voxel() || display_stereo() ? OW_ON : OW_OFF);
 	case LINE_MUSIC: return options_level_word(sound_heard_music());
 	case LINE_EFFECTS: return options_level_word(sound_heard_effects());
 	case LINE_OUTPUT: return options_word((OptionsWord)(OW_SPEAKERS + sound_output()));
 	case LINE_FAST: return fast_speed() > FAST_OFF ? fast_speed_word(fast_speed()) : options_word(OW_OFF);
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_OFF : (OptionsWord)(OW_WEAK + feel_level() - FEEL_WEAK));
 	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_ON : OW_OFF);
+	case LINE_UPDATES: return options_word(update_on() ? OW_ON : OW_OFF);
 	default: return sound_word();
 	}
 }
 
-/* a line: its name, its value at the right between the PET's arrows, or
- * a screen's chevron (Controls, Statistics) */
-static void line_draw(int x0, int y, int kind, bool on) {
+/* the update's line: "Update to 0.22.0" */
+static const char *update_name(void) {
+	static char s[48];
+	snprintf(s, sizeof s, "%s %s", update_word(UW_GET), update_version());
+	return s;
+}
+
+/* ... its value: the download's share in, or its failure (none else) */
+static const char *update_value(void) {
+	static char s[8];
+	if (update_state() == UPDATE_FAILED) return update_word(UW_FAILED);
+	if (update_state() != UPDATE_GETTING && update_state() != UPDATE_READY) return NULL;
+	snprintf(s, sizeof s, "%d%%", update_percent());
+	return s;
+}
+
+/* a line's name */
+static const char *line_name(int kind) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
 		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
 		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X,
 		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL };
-	const char *name = kind == LINE_STATS ? analytics_word(AW_ROW) : options_word(names[kind]);
+	switch (kind) {
+	case LINE_STATS: return analytics_word(AW_ROW);
+	case LINE_UPDATE: return update_name();
+	case LINE_UPDATES: return update_word(UW_ROW);
+	case LINE_VOXEL: return options_word(display_has_stereo() ? OW_STEREO : OW_VOXEL);
+	default: return options_word(names[kind]);
+	}
+}
+
+/* a line: its name, its value at the right between the PET's arrows, or
+ * a screen's chevron (Controls, Statistics, the update where A does something) */
+static void line_draw(int x0, int y, int kind, bool on) {
+	const char *name = line_name(kind);
 	/* (BN6's lists keep a line's colour under the cursor: the arrow alone says where it is) */
 	look_text(x0 + LABEL_X, y, name, LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	if (on) look_cursor(x0 + 10, y + 2);
@@ -138,9 +170,26 @@ static void line_draw(int x0, int y, int kind, bool on) {
 		look_pointer(r + 4, y, 4, false, PET_ORANGE);
 		return;
 	}
-	const char *value = kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) : NULL;
+	const char *value = kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) :
+		kind == LINE_UPDATE ? update_value() : NULL;
 	if (value) look_text(x0 + VALUE_R - look_text_width(value), y, value, LOOK_EDGE_HI, LOOK_SHADE, TEXT_LEFT);
-	look_pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
+	bool chevron = kind != LINE_UPDATE || (update_state() != UPDATE_GETTING && update_state() != UPDATE_READY &&
+		(update_way() == UPDATE_WAY_INSTALL || update_way() == UPDATE_WAY_PAGE));
+	if (chevron) look_pointer(x0 + VALUE_R + 6, y + 1, 3, false, on ? LOOK_GOLD : LOOK_DIM);
+}
+
+/* the update's note: what A does, by how this copy updates, or how the
+ * download goes */
+static const char *update_note(void) {
+	static const UpdateWord ways[] = { [UPDATE_WAY_NONE] = UW_RELEASES_NOTE, [UPDATE_WAY_INSTALL] = UW_INSTALL_NOTE,
+		[UPDATE_WAY_PAGE] = UW_PAGE_NOTE, [UPDATE_WAY_RELEASES] = UW_RELEASES_NOTE, [UPDATE_WAY_ITCH] = UW_ITCH_NOTE,
+		[UPDATE_WAY_STORE] = UW_STORE_NOTE };
+	UpdateState s = update_state();
+	/* (the 3DS's .3dsx: the game closes, and the player starts it again) */
+	bool again = update_way() != UPDATE_WAY_INSTALL || update_starts_again();
+	if (s == UPDATE_FAILED) return update_word(UW_FAILED_NOTE);
+	if (s == UPDATE_GETTING || (s == UPDATE_READY && !again)) return update_word(again ? UW_GETTING_NOTE : UW_GETTING_END_NOTE);
+	return update_word(s == UPDATE_READY ? UW_READY_NOTE : again ? ways[update_way()] : UW_INSTALL_END_NOTE);
 }
 
 /* the Display page's lines' notes */
@@ -152,7 +201,9 @@ static const char *display_note(int kind) {
 	case LINE_COLOUR: return options_word(colour_notes[lcd_colour()]);
 	case LINE_BLEND: return options_word((OptionsWord)(OW_BLEND_OFF_NOTE + lcd_blend()));
 	case LINE_LCD3X: return options_word(lcd_grid() ? OW_LCD3X_ON_NOTE : OW_LCD3X_OFF_NOTE);
-	case LINE_VOXEL: return options_word(display_voxel() ? OW_VOXEL_ON_NOTE : OW_VOXEL_OFF_NOTE);
+	case LINE_VOXEL:
+		if (display_has_stereo()) return options_word(display_stereo() ? OW_STEREO_ON_NOTE : OW_STEREO_OFF_NOTE);
+		return options_word(display_voxel() ? OW_VOXEL_ON_NOTE : OW_VOXEL_OFF_NOTE);
 	default: return "";
 	}
 }
@@ -166,6 +217,8 @@ static const char *note_words(int kind) {
 	switch (kind) {
 	case LINE_CONTROLS: return options_word(OW_CONTROLS_NOTE);
 	case LINE_STATS: return analytics_word(AW_ROW_NOTE);
+	case LINE_UPDATE: return update_note();
+	case LINE_UPDATES: return update_word(update_on() ? UW_ON_NOTE : UW_OFF_NOTE);
 	case LINE_SOUND: return options_word(sound_filter() == SOUND_MGBA ? OW_MGBA_NOTE : sound_filter() == SOUND_SOFT ? OW_SOFT_NOTE : OW_GBA_NOTE);
 	case LINE_OUTPUT: return options_word((OptionsWord)(OW_SPEAKERS_NOTE + sound_output()));
 	case LINE_MUSIC: return options_word(level_note(sound_heard_music(), OW_MUSIC_ON_NOTE, OW_MUSIC_LOW_NOTE, OW_MUSIC_OFF_NOTE));
@@ -222,12 +275,20 @@ static void box_draw(int x0, int y0) {
 
 static void options_panel_draw(void) {
 	int x0 = P.core_x, y0 = P.core_y;
+	uint64_t part = frame_part_begin();
 	options_scene_grab();
+	frame_part_end("options: the scene", part);
+	part = frame_part_begin();
 	pet_panel_draw(x0, y0, options_word(OW_TITLE));
 	if (options_page_resets()) look_band_hint(x0, y0, CORE_W, "START", options_word(OW_DEFAULT));
+	frame_part_end("options: the panel", part);
+	part = frame_part_begin();
 	list_draw(x0, y0);
+	frame_part_end("options: the list", part);
+	part = frame_part_begin();
 	box_draw(x0, y0);
 	look_fade_in(x0, y0, CORE_W, CORE_H, O.t);
+	frame_part_end("options: the box", part);
 }
 
 /* the question over all, else the controls screen over Options, else it */

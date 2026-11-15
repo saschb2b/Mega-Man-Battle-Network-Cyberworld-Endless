@@ -48,7 +48,7 @@ static void count_tile(const AreaSrc *a, bool first, int tx, int ty, Group *g) {
 	int W = a->tw * 8;
 	for (int y = ty * 8; y < ty * 8 + 8; ++y)
 		for (int x = tx * 8; x < tx * 8 + 8; ++x) {
-			if (!(first ? a->px0[(size_t)y * W + x] >> 24 : a->front[(size_t)y * W + x])) continue;
+			if (!(first ? a->idx0[(size_t)y * W + x] : a->front[(size_t)y * W + x])) continue;
 			int A, B;
 			panel_at(a, x, y, &A, &B);
 			bool gnd = ground(a, A, B);
@@ -245,7 +245,7 @@ static bool hangs(const AreaSrc *a, const int *queue, Group *g, bool behind, int
 /* The first layer's groups off the floor of map or view r that stand under
  * a floor (kind 1) or behind one (kind 2), into the book. */
 static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
-	if (!r->rings || !r->px0) return;
+	if (!r->rings || !r->idx0) return;
 	int tw = r->tw, th = r->th;
 	uint8_t *seen = calloc((size_t)tw * th, 1);
 	int *queue = malloc((size_t)tw * th * sizeof *queue);

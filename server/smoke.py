@@ -68,10 +68,17 @@ def smoke(executable):
                     health = json.load(response)
                 if health.get("protocol") != spec["version"] or health.get("players") != 0:
                     raise RuntimeError("Wrong protocol or occupancy in packaged health response: " + repr(health))
+                if health.get("rules", {}).get("sync") is not True:
+                    raise RuntimeError("Saves kept in step are off in the packaged server: " + repr(health))
                 admin = subprocess.run(command + ["--state-dir", str(work / "private"), "--admin", "list"],
                                        cwd=work, capture_output=True, text=True, timeout=20, check=True)
                 if not isinstance(json.loads(admin.stdout), dict):
                     raise RuntimeError("Invalid packaged administration response")
+                forgot = subprocess.run(command + ["--state-dir", str(work / "private"), "--admin", "forget",
+                                                   "--cloud", "0" * 32], cwd=work, capture_output=True, text=True,
+                                        timeout=20, check=True)
+                if json.loads(forgot.stdout).get("slot") is not False:
+                    raise RuntimeError("Invalid packaged forget --cloud response")
             except Exception:
                 output.flush()
                 print(log.read_text(encoding="utf-8"), file=sys.stderr)

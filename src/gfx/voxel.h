@@ -45,6 +45,7 @@ typedef struct {
 	uint8_t floor[VOX_GW * VOX_GH];   /* bit L: level L has floor at window (x, gy) + VOX_MARGIN */
 	uint8_t ramp[VOX_GW * VOX_GH];    /* a stair there: its height in rows, plus 1 (0 none) */
 	int z[VOX_LEVELS];                /* each level's height in rows */
+	bool ramps;                       /* whether any stair is among them (none: the ramps not looked at) */
 } VoxGround;
 
 /* (x, gy) in the frame's own coordinates */
@@ -65,7 +66,13 @@ static inline int vox_ramp(const VoxGround *g, int x, int gy) {
 #define VOX_BODIES 48
 typedef struct { int x0, y0, x1, y1, gy, z; } VoxBody;
 
+/* The part of the window the camera shows, its columns x0 to x1 and rows
+ * y0 to y1 (x1, y1 past the last): the rest is neither read nor drawn.
+ * Unset (x1 0), the whole window. */
+typedef struct { int x0, y0, x1, y1; } VoxSpan;
+
 typedef struct {
+	VoxSpan span;
 	/* the window: the map's colour (0 none) and the sky's behind it, each
 	 * map pixel's kind and ground row (a top's own, a side's the edge it
 	 * hangs from) */
@@ -79,6 +86,11 @@ typedef struct {
 	VoxBody bodies[VOX_BODIES + 1];
 	int nbodies;
 } VoxScene;
+
+/* The scene's span, the whole window where it has none */
+static inline VoxSpan vox_span(const VoxScene *s) {
+	return s->span.x1 > s->span.x0 && s->span.y1 > s->span.y0 ? s->span : (VoxSpan){ 0, 0, VOX_WW, VOX_WH };
+}
 
 /* `scene`'s map sorted and placed over `ground`, and the frame's sprites
  * taken from `frame` (its colours as shown) by `layers` (gba_layers.h).
@@ -110,6 +122,11 @@ void voxel_light(const VoxScene *scene, const VoxGround *ground, const VoxLook *
  * over what is far (0: none, as BN6); the point (x, gy, h) of the lattice
  * stays where BN6 shows it. */
 typedef struct { float pitch, zoom, depth; float x, gy, h; } VoxCamera;
+
+/* The part of the window `cam` shows of a world whose map stands from
+ * `under` rows under its ground (the sides hanging from an edge) to `over`
+ * over it (the raised floor), and the frame's own 240x160 always */
+VoxSpan voxel_span(const VoxCamera *cam, int under, int over);
 
 /* The picture's last passes run over bands of its rows: `run` calls
  * `band(from, to, ctx)` for bands that together are rows 0 to `rows`, on

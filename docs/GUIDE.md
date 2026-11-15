@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
 ---
 
 # The player's guide
@@ -16,7 +16,7 @@ statistics, troubleshooting and building the game yourself.
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Updates](#updates) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -125,6 +125,11 @@ Releases up to 0.6.0 named the PortMaster port
 `cyberworld.zip`, the Windows installer `cyberworld-endless-setup-x64.exe`
 and the website's files `cyberworld-endless-web.zip`.
 
+From 0.22.0 the game tells you on its title when a newer version is out,
+and on Windows (the installer's copy), as an AppImage and on a PortMaster
+handheld installs it itself with one press ([Updates](#updates)). 0.22.0
+is the first that looks: install it by hand once, as before.
+
 ### The ROMs screen
 
 On a PC, a Mac, an Android device, an iPhone or an iPad the game first
@@ -152,7 +157,7 @@ The screen also says where your saves are kept. On a PC or a Mac that is
 the data folder, which uninstalling leaves alone. On a phone or tablet,
 where uninstalling the app deletes its files, it names the folder that
 keeps a copy for a reinstall: the ROM folder you chose, or another chosen
-with **SAVES › FOLDER** ([Moving saves between devices](#moving-saves-between-devices)).
+with **SAVES › FILE › Folder** ([Moving saves between devices](#moving-saves-between-devices)).
 ROMs chosen as files leave no folder for the copy until you choose one.
 
 ### On Windows
@@ -296,7 +301,7 @@ on a 3DS ([android/README.md](../android/README.md#the-second-screen)).
 
 Uninstalling the app deletes its own files, the saves among them. The
 game keeps a copy, `cyberworld-endless.cwsave`, in your ROM folder or a
-folder chosen with **SAVES › FOLDER**; after a reinstall, choose that
+folder chosen with **SAVES › FILE › Folder**; after a reinstall, choose that
 folder again and the game offers the copy back
 ([Moving saves between devices](#moving-saves-between-devices)).
 Android's own backup, where it is turned on, keeps the saves and settings
@@ -332,7 +337,7 @@ marketplaceID").
    My iPhone › Cyberworld**, where the app keeps your saves too and looks
    at every start. Deleting the app deletes that folder with it. The
    game keeps a copy of the saves, `cyberworld-endless.cwsave`, in your
-   ROM folder or a folder chosen with **SAVES › FOLDER**; after a
+   ROM folder or a folder chosen with **SAVES › FILE › Folder**; after a
    reinstall, choose that folder again and the game offers the copy back.
 
 Touch controls round the picture, or a controller (MFi, Xbox,
@@ -1018,24 +1023,50 @@ best depth is kept in `profile.sav`.
 
 ### Moving saves between devices
 
-Press L on the title (Q on a keyboard) to open **SAVES**. **EXPORT**
-writes your progress, unlocks, Library, records and the current run's
-checkpoint to one file, `cyberworld-endless.cwsave` (no ROM in it). Copy
-it to the other device, start the game there with your own ROM and
-choose **SAVES › IMPORT**: both saves are shown side by side, yours are
-kept unless you choose **USE THE FILE'S**, and **UNDO IMPORT** brings
-back what an import replaced. Runs from two devices are never merged;
-controls, screen settings, volumes and your statistics answer stay on
-each. In the browser, **Save backup** in the player's menu opens SAVES
-over the title, and **Load backup** opens it with the file chooser.
+Press L on the title (Q on a keyboard) to open **SAVES**: three pages,
+**CLOUD**, **CODE** and **FILE**, turned with L and R (or a tap on
+their tabs), each a short list with a box that says what the line under
+the cursor does. Whichever way saves come in, both are shown side by
+side first, yours are kept unless you choose **USE THOSE**, and START
+(**START:UNDO IMPORT** on the band, after a Yes) brings back what an
+import replaced. Runs from two devices are never merged; controls,
+screen settings, volumes and your statistics answer stay on each.
+
+**FILE.** **Export** writes your progress, unlocks, Library, records and
+the current run's checkpoint to one file, `cyberworld-endless.cwsave` (no
+ROM in it). Copy it to the other device, start the game there with your
+own ROM and choose **Import**. In the browser, **Save backup** in the
+player's menu opens SAVES over the title, and **Load backup** opens it
+with the file chooser.
+
+**CODE.** To move them once without a file, choose **Send**: the game
+puts that same file on its server and shows a ten-digit code. On the
+other device, within 15 minutes, choose **CODE › Receive** and type the
+code (the keys on the screen, or a keyboard's digits). A code works
+once. The file is locked with the code before it leaves, so the server
+cannot read it, and it is gone once received or after its 15 minutes.
+
+**CLOUD.** To keep them synced for good, as Steam Cloud does, choose
+**Turn on** on one device, then **Add a device** there and type its code
+under **CLOUD › Link with a code** on each other one. From then on each
+device fetches the newest saves as the game starts (the title waits a
+moment for it) and sends its own a few seconds after every save and as
+you close it. Only where two devices both played since they last synced
+does the game ask which saves to keep. The saves are sealed on your
+device, so the server cannot read them; cloud saves nobody fetches or
+sends for 180 days are deleted. **Unlink this device** stops it on one
+device, **Delete cloud saves** removes them from the server. Every system
+with the Net Square sends, receives and syncs, the browser too; it needs
+a connection to the official server, and nothing else of yours goes with
+it.
 
 On Android, an iPhone or an iPad the game keeps that file in your ROM
-folder, or one you choose with **FOLDER**, a few seconds after each save.
-After a reinstall, choose that folder again: the game finds the copy and
-offers it back. It never writes over a file another device left there,
-and asks once which saves to keep. **AUTO-COPY** turns the copy on or
-off; elsewhere it starts off and goes to Downloads (a PC or a Mac) or
-the data folder (a PortMaster handheld, the 3DS).
+folder, or one you choose with **FILE › Folder**, a few seconds after
+each save. After a reinstall, choose that folder again: the game finds
+the copy and offers it back. It never writes over a file another device
+left there, and asks once which saves to keep. **Auto-copy** turns the
+copy on or off; elsewhere it starts off and goes to Downloads (a PC or a
+Mac) or the data folder (a PortMaster handheld, the 3DS).
 
 A file from a newer version of the game, a damaged one, or a run that
 needs BN5 where **BN5 Team Colonel (USA)** is missing (always on the 3DS)
@@ -1089,8 +1120,8 @@ He also moves you to the next or the last channel.
 #### Finding your way
 
 You arrive in the **welcome plaza**: the Square's landmark in its
-middle, the pad home beside you, the greeter, the keeper and the Board
-close by. Everyone arrives here, and everyone comes back here. Off three
+middle, the pad home beside you, the week's portal, the keeper and the
+Board close by. Everyone arrives here, and everyone comes back here. Off three
 of its sides stand warps, BN6's gem pads, each with its part's name over
 it in gold and who is there now ("ARENA: Mira"):
 
@@ -1171,7 +1202,7 @@ handheld's second display) while you are in the Square.
 The welcome plaza with a landmark in its middle (a statue, a monument or
 a giant cybertree, by the server), its board and the pad home, and warps
 to Trade Central, the Arena's ring with its stands, and a stage up a
-stair. A greeter Mr.Prog calls out who logs in, two Navis stroll about
+stair. The week's portal calls out who logs in, two Navis stroll about
 (one round the landmark, one before the stage) and chat about who's here
 and what just happened, and every three
 minutes they parade round the landmark: walk with them. A on a tree, the
@@ -1304,15 +1335,15 @@ the stamp, and on the New 3DS, you get his calls and the board's post.
 Every Monday (00:00 UTC) each server opens a net of its own for the
 week, and everyone on that server who dives it dives the same net, from
 the same start: the short net, the Standard folder, threat 0, no helpers
-and no Cross, nothing your other runs unlocked. The greeter Mr.Prog in
-the welcome plaza offers it to a pass with the DeepNet stamp; say Yes
-(the cursor starts on No), and the dive begins in Lan's room, as a new
-game does.
+and no Cross, nothing your other runs unlocked. The portal in the
+welcome plaza, a purple vortex, offers it to a pass with the DeepNet
+stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
+into the dive's first layer.
 
 Your run in progress waits in its own save, untouched: the title's
 CONTINUE is always that run, and when the dive ends, won or deleted, you
 are back with it. To go on with an unfinished dive, visit the Square
-and talk to the greeter: Keep diving, Start over or Not now. Divers
+and step up to the portal: Keep diving, Start over or Not now. Divers
 don't trade.
 
 How deep you got goes up on the board at your next visit: the week's
@@ -1429,8 +1460,14 @@ distance out of focus, on the net, in town and in battle. The picture
 is drawn anew at the screen's scale, on a net layer under a camera a
 little lower than BN6's. The HUD, chat boxes and BN6's menus stay the
 game's own pixels. It is off until you turn it on
-(`depth_lighting = on`), and not offered on the 3DS or the Vita. How it
-works is in [Depth lighting](engine/voxel.md).
+(`depth_lighting = on`), and not offered on the Vita. How it works is in
+[Depth lighting](engine/voxel.md).
+
+On the 3DS the same line is **3D depth**: the 3D slider gives
+the picture depth, the world going back into the screen and MegaMan and
+the viruses with it, the HUD and chat boxes at the screen. It is
+on as it comes (`depth_3d`); off, the slider does nothing. How it works
+is in [3D depth](engine/stereo.md).
 
 ## Sound
 
@@ -1509,6 +1546,36 @@ The lights under the song are its eight tracks, lit as they sound. The
 last song and mode are kept for the next time (`jukebox.ini` in the data
 folder).
 
+## Updates
+
+At each start the game looks on its GitHub page for a newer version: one
+request for the newest release's `update.json`, which says its version
+and its files. Nothing about you, your game or your device is sent. When
+one is out, the title says so beside its own version (`New v0.22.0`),
+and **Options** on the title opens on a line for it, **Update to 0.22.0**,
+whose note says what A does on your system:
+
+| You play | A on the line |
+| --- | --- |
+| On Windows, installed with the installer | Downloads the new installer, and the game ends, installs the new version over itself (no administrator, nothing to click) and starts again |
+| The Linux AppImage | Downloads the new AppImage over the old one (the same file name, so a menu entry or Steam's shortcut keeps working) and starts it |
+| A copy the itch app installed | Nothing: the itch app updates it by itself |
+| Windows' zip, the Flatpak, the `.deb`, the tar.gz | Opens the download page |
+| A PortMaster handheld | Downloads the new version, and the game ends: PortMaster's message asks you to keep the device on while the launcher puts it in place (your saves and ROMs stay in the folder), then the game starts again. Switched off halfway, the next start puts the old version back |
+| Android | Downloads the new APK and hands it to Android, which installs it and closes the game: open it again from its icon. The first time, Android asks you to allow installs from the game and to confirm; from Android 12 on, every update after that goes in without a tap (before Android 12, Android asks each time) |
+| The Switch, from the Homebrew Menu | Downloads the new `.nro` beside yours, and the game ends, puts it in your file's place and starts it again |
+| The New 3DS, from the Homebrew Launcher (the `.3dsx`) | Downloads the new `.3dsx` beside yours, and the game ends and puts it in your file's place: the Homebrew Launcher comes back, and you start the game again there |
+| The 3DS's CIA, the PS Vita | Nothing: the note names the releases page, where the new CIA or VPK is |
+| The PS5 | Nothing: the note names Prospero Store, which lists the new version, and the releases page |
+
+The download is checked against the release's own SHA-256 before it
+replaces anything; a failed one leaves your copy as it was, and A tries
+again. Your saves, your run at its checkpoint and your settings stay as
+they are. The line shows on the title only, never in a run.
+**Updates** on Options' Game page switches the look off (`updates = off`
+in `settings.ini`) and on again. The iPhone and iPad app updates through
+SideStore or AltStore, as before.
+
 ## Anonymous statistics
 
 At its first start the game asks once whether it may send anonymous play
@@ -1577,7 +1644,7 @@ has for this alone.
 - **Reporting a bug**: the
   [bug report's form](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new/choose)
   asks for the version (the title's bottom left corner), your system and
-  your save: **SAVES › EXPORT** on the title
+  your save: **SAVES › FILE › Export** on the title
   ([Moving saves between devices](#moving-saves-between-devices)). With
   the save we can play your run; it holds no ROM. Never attach a ROM.
 

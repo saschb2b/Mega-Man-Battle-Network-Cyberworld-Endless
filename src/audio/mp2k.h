@@ -38,6 +38,13 @@ void mp2k_song_stop_in(int rom, int song);
  * envelopes): how many tracks it has (0 where it does not play) */
 int mp2k_song_loops(int rom, int song);
 int mp2k_song_levels(int rom, int song, uint8_t *out, int max);
+/* The game's own ROM copy as its core holds it (patched, other games'
+ * songs copied in: xsong.h), a byte at a bus address read by `read8`
+ * (emu_rom_byte), on the sound's thread: what the game's music carried to
+ * the engine reads (mp2k_carry.h), as ROM MP2K_ROM_GAME; NULL none (BN6's
+ * is read then) */
+#define MP2K_ROM_GAME 0xFF
+void mp2k_game_rom(uint8_t (*read8)(uint32_t addr));
 /* One GBA frame */
 void mp2k_frame(void);
 /* The music's player's share of the volume BN6 works out, and every

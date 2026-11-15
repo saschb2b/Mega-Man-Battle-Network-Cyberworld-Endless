@@ -3,6 +3,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "bn5.h"
 #include "bn6.h"
@@ -38,6 +40,35 @@ const XvData *xvirus_data_at(const XVirusFamily *f, uint32_t a) {
 }
 
 bool xvirus_is_code(const XVirusFamily *f, uint32_t a) { return xvirus_block_of(f, a) && !xvirus_data_at(f, a); }
+
+/* Which halfwords from `from` to `to` (a byte each) are not code */
+static void marks_set(uint8_t *m, uint32_t from, uint32_t to, uint32_t start, uint32_t end, uint8_t v) {
+	uint32_t s = start > from ? start : from, e = end < to ? end : to;
+	if (s >= e) return;
+	for (uint32_t k = (s - from + 1) / 2; from + 2 * k < e; ++k) m[k] = v;
+}
+
+static uint8_t *code_marks(const XVirusFamily *f, uint32_t from, uint32_t to) {
+	uint32_t n = (to - from + 1) / 2;
+	uint8_t *m = malloc(n ? n : 1);
+	if (!m) return NULL;
+	memset(m, 1, n);
+	for (int i = 0; i < f->nblocks; ++i) marks_set(m, from, to, f->blocks[i].start, f->blocks[i].end, 0);
+	for (int i = 0; i < f->ndata; ++i) marks_set(m, from, to, f->data[i].start, f->data[i].end, 1);
+	return m;
+}
+
+bool xvirus_is_code_in(const XVirusFamily *f, uint32_t from, uint32_t to, uint32_t a) {
+	static struct { const XVirusFamily *f; const XvBlock *blocks; const XvData *data; int nblocks, ndata; uint32_t from, to; uint8_t *m; } k;
+	if (a < from || a >= to || ((a - from) & 1)) return xvirus_is_code(f, a);
+	if (!k.m || k.f != f || k.blocks != f->blocks || k.data != f->data || k.nblocks != f->nblocks || k.ndata != f->ndata || k.from != from || k.to != to) {
+		free(k.m);
+		k.m = code_marks(f, from, to);
+		k.f = f; k.blocks = f->blocks; k.data = f->data; k.nblocks = f->nblocks; k.ndata = f->ndata; k.from = from; k.to = to;
+		if (!k.m) return xvirus_is_code(f, a);
+	}
+	return !k.m[(a - from) / 2];
+}
 
 static bool no(char *why, size_t n, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
 static bool no(char *why, size_t n, const char *fmt, ...) {

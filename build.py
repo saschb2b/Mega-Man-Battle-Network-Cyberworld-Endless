@@ -91,7 +91,7 @@ PortMaster serves), the Linux desktop release in `cyberworld-linux`
                                 BN6's Practice NetBattle on one linked pair of
                                 cores, a snapshot of the pair restored and
                                 replayed midway (docs/online/link.md; the ROM
-                                and a boot-3.state, both read-only)
+                                and a boot-4.state, both read-only)
   python3 build.py symbols [--bn6f DIR [--roms DIR]]
                                 what the project has mapped of BN6 Gregar and
                                 BN5 Team Colonel, in docs/symbols (a symbol
@@ -129,11 +129,12 @@ ANDROID_IMAGE = 'cyberworld-android'   # docker/Dockerfile.android
 N3DS_IMAGE = 'cyberworld-3ds'   # docker/Dockerfile.3ds
 SWITCH_IMAGE = 'cyberworld-switch'   # docker/Dockerfile.switch
 VITA_IMAGE = 'cyberworld-vita'   # docker/Dockerfile.vita
+PSP_IMAGE = 'cyberworld-psp'   # docker/Dockerfile.psp
 PS4_IMAGE = 'cyberworld-ps4'   # docker/Dockerfile.ps4
 PS5_IMAGE = 'cyberworld-ps5'   # docker/Dockerfile.ps5
 PORTMASTER_IMAGE = 'cyberworld-portmaster'   # docker/Dockerfile.portmaster
 IMAGES = {IMAGE: 'Dockerfile', LINUX_IMAGE: 'Dockerfile.linux', WEB_IMAGE: 'Dockerfile.web',
-          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PS4_IMAGE: 'Dockerfile.ps4', PS5_IMAGE: 'Dockerfile.ps5',
+          WINDOWS_IMAGE: 'Dockerfile.windows', ANDROID_IMAGE: 'Dockerfile.android', N3DS_IMAGE: 'Dockerfile.3ds', SWITCH_IMAGE: 'Dockerfile.switch', VITA_IMAGE: 'Dockerfile.vita', PSP_IMAGE: 'Dockerfile.psp', PS4_IMAGE: 'Dockerfile.ps4', PS5_IMAGE: 'Dockerfile.ps5',
           PORTMASTER_IMAGE: 'Dockerfile.portmaster'}
 
 
@@ -250,7 +251,7 @@ def ensure_image(image=IMAGE):
 
 
 def build(target):
-    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'ps4': PS4_IMAGE, 'ps5': PS5_IMAGE,
+    image = {'linux': LINUX_IMAGE, 'web': WEB_IMAGE, 'windows': WINDOWS_IMAGE, '3ds': N3DS_IMAGE, 'switch': SWITCH_IMAGE, 'vita': VITA_IMAGE, 'psp': PSP_IMAGE, 'ps4': PS4_IMAGE, 'ps5': PS5_IMAGE,
              'aarch64': PORTMASTER_IMAGE}.get(target, IMAGE)
     ensure_image(image)
     werror = ['WERROR=1'] if os.environ.get('CI') else []
@@ -832,7 +833,8 @@ def port_release():
 def package():
     """build/port/cyberworld: the port as a folder of PortMaster-New's ports/, to copy there
     for a pull request: the launcher, port.json, README.md, gameinfo.xml and the screenshot
-    beside cyberworld/, which holds the binary, one license per part and rom/."""
+    beside cyberworld/, which holds the binary, update.py (the game's own update), one license
+    per part and rom/."""
     out = os.path.join(ROOT, 'build', 'port')
     port = os.path.join(out, 'cyberworld')
     game = os.path.join(port, 'cyberworld')
@@ -846,6 +848,8 @@ def package():
     # (a 640x480 frame, as on the most common handheld screen: build.py screenshots portmaster)
     shutil.copyfile(os.path.join(ROOT, 'docs', 'screenshots', 'portmaster.png'), os.path.join(port, 'screenshot.png'))
     shutil.copy2(os.path.join(ROOT, 'build', 'aarch64', 'cyberworld.aarch64'), game)
+    # (the game's own update, put in place by the launcher once the game ends: docs/engine/updates.md)
+    shutil.copyfile(os.path.join(ROOT, 'port', 'update.py'), os.path.join(game, 'update.py'))
     shutil.copyfile(os.path.join(ROOT, 'LICENSE'), os.path.join(game, 'licenses', 'LICENSE.cyberworld.txt'))
     shutil.copyfile(os.path.join(ROOT, 'build', 'aarch64', 'licenses', 'mGBA.txt'),
                     os.path.join(game, 'licenses', 'LICENSE.mgba.txt'))
@@ -2869,7 +2873,7 @@ def lint_analyzer(update):
     from collections import Counter
     # (each file on its own, side by side, its findings in a file of its own: the counts read a file's findings after the
     # line naming their function, so files' lines must not interleave)
-    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online '
+    script = ('flags="-std=c11 -O2 -fanalyzer -fdiagnostics-plain-output -D_DEFAULT_SOURCE -DCW_DESKTOP -Ishared/online -isystem third_party/monocypher '
               '$(for d in src/*/; do printf -- "-I%s " "$d"; done) -Ibuild/host/gen $(pkg-config --cflags sdl2 | sed "s/-I/-isystem /g") '
               '-isystem /opt/mgba/host/include"; out=$(mktemp -d); export flags out; '
               'printf "%s\\n" src/*/*.c | xargs -P "$(nproc)" -I{} sh -c \'gcc $flags -c -o /dev/null "$1" > "$out/$(echo "$1" | tr / _)" 2>&1\' _ {}; '
@@ -3322,7 +3326,7 @@ def online_pair(rest):
     and replayed midway (tools/online_pair_run.c, docs/online/link.md)."""
     ap = argparse.ArgumentParser(prog='build.py online-pair')
     ap.add_argument('--rom', required=True, help="the player's BN6 Gregar USA ROM")
-    ap.add_argument('--state', required=True, help='a boot-3.state from a data folder')
+    ap.add_argument('--state', required=True, help='a boot-4.state from a data folder')
     ap.add_argument('--at', type=int, default=1150, help='the frame the snapshot is taken at')
     ap.add_argument('--horizon', type=int, default=8, help='the frames replayed after the restore')
     args = ap.parse_args(rest)
@@ -3342,7 +3346,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3363,6 +3367,8 @@ def main():
         # (linux/steam/add-to-steam.py, the site's pages and docs/re's status, on the host's Python)
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_add_to_steam.py')])
+        if code == 0:   # port/update.py, the PortMaster port's own update
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_port_update.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         if code == 0:   # docs/re's ledger sound (its written files are dev's workflow's: tools/generated.py)
@@ -3404,6 +3410,11 @@ def main():
         # the Nintendo Switch (switch/README.md): build/switch/cyberworld-endless.nro
         build('switch')
         print('built', os.path.join(ROOT, 'build', 'switch', 'cyberworld-endless.nro'))
+        return
+    if a.action == 'psp':
+        # the PSP (psp/README.md): build/psp/EBOOT.PBP
+        build('psp')
+        print('built', os.path.join(ROOT, 'build', 'psp', 'EBOOT.PBP'))
         return
     if a.action == 'vita':
         # the PlayStation Vita (vita/README.md): build/vita/cyberworld-endless.vpk

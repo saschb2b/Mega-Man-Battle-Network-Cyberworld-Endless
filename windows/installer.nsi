@@ -3,8 +3,11 @@
 ; Start menu entry, a desktop shortcut if wanted, and an uninstaller in
 ; Settings > Apps. The saves stay in %LOCALAPPDATA%\cyberworld-endless.
 ; build.py passes VERSION, FILEVERSION (four numbers), STAGE (the files) and OUT.
+; The game's own update runs it silently with /S /RUN (src/update/update_install.c):
+; it waits for the game's .exe to be free, installs over it and starts it again.
 Unicode true
 !include "MUI2.nsh"
+!include "FileFunc.nsh"
 
 !define NAME "Cyberworld Endless"
 !define ID "io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless"
@@ -48,6 +51,19 @@ VIAddVersionKey "LegalCopyright" "MIT license. Mega Man Battle Network is (c) Ca
 
 Section
 	SetOutPath "$INSTDIR"
+	; (the game that started an update ends a moment after: up to ten
+	; seconds for its .exe to be free, opened for writing)
+	StrCpy $0 0
+	wait:
+	ClearErrors
+	FileOpen $1 "$INSTDIR\${EXE}" a
+	IfErrors 0 free
+	IntOp $0 $0 + 1
+	IntCmp $0 40 free
+	Sleep 250
+	Goto wait
+	free:
+	FileClose $1
 	File "${STAGE}\${EXE}"
 	File "${STAGE}\README.txt"
 	File "${STAGE}\LICENSE.txt"
@@ -67,6 +83,12 @@ Section
 	WriteRegStr HKCU "${UNINST}" "URLInfoAbout" "https://saschb2b.github.io/Mega-Man-Battle-Network-Cyberworld-Endless/"
 	WriteRegDWORD HKCU "${UNINST}" "NoModify" 1
 	WriteRegDWORD HKCU "${UNINST}" "NoRepair" 1
+	; (the game's own update: the new version started)
+	${GetParameters} $R0
+	ClearErrors
+	${GetOptions} $R0 "/RUN" $R1
+	IfErrors +2 0
+	Exec '"$INSTDIR\${EXE}"'
 SectionEnd
 
 Function DesktopShortcut

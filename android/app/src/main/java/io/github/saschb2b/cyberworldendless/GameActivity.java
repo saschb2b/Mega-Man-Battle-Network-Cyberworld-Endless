@@ -8,6 +8,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
+import android.system.ErrnoException;
+import android.system.Os;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyEvent;
@@ -57,6 +59,7 @@ public class GameActivity extends SDLActivity {
 
     @Override
     protected void onCreate(Bundle state) {
+        updateDeveloper();
         super.onCreate(state);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         if (!mBrokenLibraries) second = SecondScreen.open(this);
@@ -368,6 +371,55 @@ public class GameActivity extends SDLActivity {
         }
     }
 
+    // ---- the game's own update (src/update/update_android.c, the game's thread) ----
+
+    private Updater updater;
+
+    private Updater updater() {
+        if (updater == null) updater = new Updater(this);
+        return updater;
+    }
+
+    /** A start's tidying: what an earlier update left. */
+    public void updateTidy() { updater().tidy(); }
+
+    /** update.json fetched from `url`, `agent` its User-Agent: false where
+     *  it was not begun. */
+    public boolean updateLook(String url, String agent) { return updater().look(url, agent); }
+
+    /** The look's answer once: "1\nupdate.json", "0\n" where none came, null
+     *  while it is under way. */
+    public String updateLooked() { return updater().looked(); }
+
+    /** The APK at `url` downloaded, checked against its size and SHA-256,
+     *  and handed to Android's installer. */
+    public boolean updateFetch(String url, String agent, long size, String sha256) {
+        return updater().fetch(url, agent, size, sha256);
+    }
+
+    /** The download's share (0-100), 101 with Android's installer, -1 failed. */
+    public int updateProgress() { return updater().progress(); }
+
+    /** The updates switched off: a download under way stops. */
+    public void updateStop() { updater().stop(); }
+
+    /* A developer's look elsewhere, as the other systems' environment has
+     * it (src/update/update.h): CYBERWORLD_UPDATE_URL and
+     * CYBERWORLD_UPDATE_FROM as the intent's extras, which only the app
+     * itself and the shell's root can give this activity (not exported) */
+    private void updateDeveloper() {
+        Intent i = getIntent();
+        for (String name : new String[] { "CYBERWORLD_UPDATE_URL", "CYBERWORLD_UPDATE_FROM" }) {
+            String v = i == null ? null : i.getStringExtra(name);
+            if (v == null) continue;
+            try {
+                Os.setenv(name, v, true);
+            } catch (ErrnoException e) {
+                /* (the default kept) */
+            }
+        }
+    }
+
     // ---- the second screen ----
 
     /* The second screen comes and goes with the game's own thread, as SDL
@@ -413,6 +465,7 @@ public class GameActivity extends SDLActivity {
     @Override
     protected void onDestroy() {
         if (second != null) second.close();
+        if (updater != null) updater.close();
         super.onDestroy();
         if (isFinishing()) System.exit(0);
     }

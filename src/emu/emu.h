@@ -44,6 +44,11 @@ void emu_frame_as(uint32_t keys, unsigned how);
  * written as the frame's own (an install's: BN4's Navis' sound pool,
  * xnavi_bn4_sounds.h); NULL none. One at a time. */
 void emu_before_frame(void (*step)(void));
+/* A step after each frame the core ends, before the next begins (the
+ * game's memory as the frame left it, the frame the drawing shows: on a
+ * system whose core runs the next frame beside the drawing, the drawing's
+ * own reads would wait for that one) */
+void emu_after_frame(void (*step)(void));
 bool emu_threaded(void);
 /* Waits for a frame the core runs on its own thread: what its hooks left
  * is the main thread's to read after it. */
@@ -53,6 +58,9 @@ void emu_sync(void);
  * which the frame log shows). */
 extern bool emu_drawing;
 extern int emu_draw_waits;
+/* ... the part of the drawing under way (frame_log_part's name, NULL none),
+ * and the last a read waited in */
+extern const char *emu_draw_part, *emu_draw_waited;
 /* Ends the core's thread, before the program ends. */
 void emu_quit(void);
 /* The last frame, 240x160 pixels, R in the low byte (SDL ABGR8888). */
@@ -85,6 +93,10 @@ void emu_audio_open(void);
 
 /* Bus access (ROM, EWRAM, IWRAM, IO, palette, VRAM, OAM). */
 /* `len` bytes from `addr` on (the video memory, voxel_scene.c) */
+/* The game's own memory at `a`, `len` bytes of it read in place (the RAM,
+ * the palette, VRAM, OAM; NULL elsewhere or past them, or with no core):
+ * good until the next frame begins, for a read too large to copy each frame */
+const uint8_t *emu_memory(uint32_t a, uint32_t len);
 void emu_read_bytes(uint32_t addr, uint8_t *out, uint32_t len);
 uint8_t emu_read8(uint32_t addr);
 uint16_t emu_read16(uint32_t addr);
@@ -93,6 +105,16 @@ uint32_t emu_read32(uint32_t addr);
 void emu_write8(uint32_t addr, uint8_t v);
 void emu_write32(uint32_t addr, uint32_t v);
 void emu_write(uint32_t addr, const void *data, size_t len);
+/* An I/O register written as the game's own store writes it (the sound's:
+ * the game's music given back, music_carry.h), which emu_write leaves
+ * alone */
+void emu_io_write8(uint32_t addr, uint8_t v);
+void emu_io_write32(uint32_t addr, uint32_t v);
+/* A byte of the core's ROM copy (patched, grown past the player's ROM:
+ * free_space.h), read at once, with no wait for a frame in flight: the
+ * sound's thread's, while the core holds still (the game's music carried,
+ * mp2k_game_rom); 0 without a core or outside the cartridge */
+uint8_t emu_rom_byte(uint32_t addr);
 
 /* A hook on the game's code (hook.h; docs/engine/emulation/hooks.md), set
  * between frames: on the Thumb instruction at addr, an answer hook or an

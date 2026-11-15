@@ -64,6 +64,12 @@ DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes")
                SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
                SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
                SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes")}
+# (saves sent by a code, no protocol version of their own: transfer.py)
+TRANSFER = struct.Struct("!BBB16sI")
+TRANSFER_STATE = struct.Struct("!BBI")
+# (saves kept in step, no protocol version of their own either: sync.py)
+SYNC = struct.Struct("!BBB16s32sII")
+SYNC_STATE = struct.Struct("!BBII")
 DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
 
 
@@ -419,7 +425,7 @@ def stands(entries):
     return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
 
 
-# -- the shared dive (protocol v19, issue #589; shared/online/README.md, Protocol v19) --
+# -- the shared dive (protocol v19, issue #589; docs/online/shared-dive.md) --
 
 def name16(name):
     return name.encode("ascii")[:16]
@@ -565,3 +571,53 @@ def party(kind, battle, first, second):
 def week_splits(week, entries):
     """WEEK_SPLITS: for each act 1..4, each party size 1..party_most, (tenths, name); (0, "") none."""
     return SPLITS_HEAD.pack(SPEC["week_splits"], week) + b"".join(SPLITS_ENTRY.pack(t, name16(n)) for t, n in entries)
+def read_transfer(data):
+    """TRANSFER checked (shared/online/README.md, Saves sent by a code):
+    its op, lookup and size, a put's 1 to transfer_max, a get's and a
+    done's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["transfer"] and data[1] != SPEC["transfer_version"]:
+        raise ProtocolError("Unknown transfer version")
+    if len(data) != TRANSFER.size or data[0] != SPEC["transfer"]:
+        raise ProtocolError("Malformed TRANSFER")
+    _, _, op, lookup, size = TRANSFER.unpack(data)
+    if op == SPEC["transfer_put"]:
+        if not 1 <= size <= SPEC["transfer_max"]:
+            raise ProtocolError("Transfer size out of range")
+    elif op in (SPEC["transfer_get"], SPEC["transfer_done"]):
+        if size:
+            raise ProtocolError("Malformed TRANSFER")
+    else:
+        raise ProtocolError("Unknown transfer op")
+    return op, lookup, size
+
+
+def transfer_state(status, value=0):
+    """TRANSFER_STATE: a status and its value (seconds, or a blob's size)."""
+    return TRANSFER_STATE.pack(SPEC["transfer_state"], status, value)
+
+
+def read_sync(data):
+    """SYNC checked (shared/online/README.md, Saves kept in step): its op,
+    slot, auth, generation and size, a push's 1 to sync_max, a pull's and
+    a drop's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["sync"] and data[1] != SPEC["sync_version"]:
+        raise ProtocolError("Unknown sync version")
+    if len(data) != SYNC.size or data[0] != SPEC["sync"]:
+        raise ProtocolError("Malformed SYNC")
+    _, _, op, slot, auth, generation, size = SYNC.unpack(data)
+    if op == SPEC["sync_push"]:
+        if not 1 <= size <= SPEC["sync_max"]:
+            raise ProtocolError("Sync size out of range")
+    elif op in (SPEC["sync_pull"], SPEC["sync_drop"]):
+        if size:
+            raise ProtocolError("Malformed SYNC")
+    else:
+        raise ProtocolError("Unknown sync op")
+    return op, slot, auth, generation, size
+
+
+def sync_state(status, generation=0, size=0):
+    """SYNC_STATE: a status, a generation and a size (BUSY's: the seconds to wait)."""
+    return SYNC_STATE.pack(SPEC["sync_state"], status, generation, size)

@@ -2,7 +2,8 @@
 
 `forget` answers a player's request to be removed (server/README.md, The
 official server): his public identity out of every record that names it,
-but a ban or a mute, which stays while it lasts."""
+but a ban or a mute, which stays while it lasts; with `--cloud SLOT`, a
+slot of saves kept in step deleted (sync.py)."""
 
 import argparse
 import json
@@ -14,16 +15,21 @@ from . import traces
 from .identity import (KICK_MINUTES, kick_expires, prune_kicks, prune_moderation, public_id, read_json,
                        state_lock, write_json)
 from .retention import PlayersLog
+from . import sync
 from .trade import prune_log
 
 ACTIONS = ("list", "ban", "unban", "mute", "unmute", "kick", "unkick", "hide", "unhide", "forget")
 KICK_MAX_MINUTES = 7 * 24 * 60
 
 
-def perform(action, directory, identity=None, reason="", minutes=None, week=None):
+def perform(action, directory, identity=None, reason="", minutes=None, week=None, cloud=None):
     directory = Path(directory)
     if not (directory / "identity.key").is_file():
         raise ValueError("Use the running server's private state directory")
+    if cloud is not None:
+        if action != "forget":
+            raise ValueError("--cloud applies only to forget")
+        return forget_slot(directory, sync.slot_id(cloud), identity)
     if minutes is not None and action != "kick":
         raise ValueError("--minutes applies only to kick")
     if week is not None and action != "hide":
@@ -85,6 +91,16 @@ def forget(directory, identity):
             "moderation": moderation, "then": "restart the server, which reads the Board only as it starts"}
 
 
+def forget_slot(directory, slot, identity=None):
+    """A slot of saves kept in step deleted, its blob and meta, at once for
+    the running server too (each exchange reads its slot from disk); with
+    an identity besides, that identity forgotten as well."""
+    result = {"action": "forget", "cloud": slot, "slot": sync.forget(directory, slot)}
+    if identity:
+        result = dict(forget(directory, public_id(identity)), cloud=slot, slot=result["slot"])
+    return result
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=ACTIONS)
@@ -93,8 +109,10 @@ def main():
     parser.add_argument("--reason", default="")
     parser.add_argument("--minutes", type=int, help=f"How long a kick refuses the profile (default {KICK_MINUTES})")
     parser.add_argument("--week", type=int, help="The week whose Board entry hide takes down (default this week)")
+    parser.add_argument("--cloud", metavar="SLOT", help="With forget: the slot of saves kept in step to delete (32 hex)")
     args = parser.parse_args()
     try:
-        print(json.dumps(perform(args.action, args.state_dir, args.identity, args.reason, args.minutes, args.week), indent=2))
+        print(json.dumps(perform(args.action, args.state_dir, args.identity, args.reason, args.minutes, args.week,
+                                 args.cloud), indent=2))
     except (ValueError, OSError) as exc:
         parser.exit(1, str(exc) + "\n")

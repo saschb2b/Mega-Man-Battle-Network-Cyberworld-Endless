@@ -131,6 +131,9 @@ file. The environment sets any of them too, over the file:
 | `port` | 8765 | The TCP port |
 | `capacity`, `player_cap` | 8, 64 | Players in a channel, and in the Square (another channel opens as one fills) |
 | `trading`, `arena` | `true` | Trade Central and the NetBattles |
+| `transfers` | `true` | Saves sent by a code, held in memory for 15 minutes ([What is kept](#what-is-kept-and-for-how-long)); `false` tells the game this server takes none |
+| `sync` | `true` | Saves kept in step: a slot of sealed saves for each player's linked systems, on disk in the state directory's `cloud/` ([What is kept](#what-is-kept-and-for-how-long)); `false` tells the game this server keeps none |
+| `cloud_slots`, `cloud_megabytes` | 20000, 4096 | The slots the server keeps at most, and their saves' megabytes (MiB) together; past either a new slot or a larger save waits ([Connections](#connections)) |
 | `origins` | `https://saschb2b.github.io` | The browser pages whose game may come in (the published one); empty, native games alone |
 | `maintenance` | empty | A line that turns every game away at the gate ([Maintenance](#maintenance)) |
 
@@ -212,8 +215,10 @@ it nowhere.
 | The dive's traces, `dives.jsonl` | what you left on a layer of the week's net (protocol v19): where your dive ended and what deleted MegaMan, the phrase you left and its Waves, the Mystery Data you opened first, your quickest bust of each battle; with your public identity and name | every diver of that week sees them on the layer | 2 weeks |
 | Moderation, `moderation.json` | public identity, when, and the moderator's note, for each ban, mute, kick and hidden Board entry | the server enforces them | a ban or a mute until lifted, a kick until it ends, a hidden entry while its week is kept |
 | The server's console log | when the server started, session numbers coming and going, trades' and battles' numbers, refusals: no names, public identities or IPs | running the server | 3 files of 5 MB, the oldest written over |
-| The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
-| Backups | the server's secret, moderation and the Board | to bring the server back after a fault | 14 days |
+| The daily totals, `stats.jsonl` | a line a UTC day: joins, how many different players (a count: the day's public identities are held in memory and dropped at its end), the most online at once, trades, NetBattles started and finished, battles watched, dives posted, saves sent by a code held and taken, saves kept in step pulled and pushed and the slots kept, joins by game version and by NetPass; no names, public identities or IPs. Anyone can read today's and the last 30 days' at `/stats` | how many play and when, so the server and the game are sized and tuned for them | 365 days |
+| Backups | the server's secret, moderation and the Board; never the saves kept in step | to bring the server back after a fault | 14 days |
+| Saves sent by a code, in memory alone | a save your game sealed before sending, and the lookup it is held under, both made by your game. The code you read off one system and type on the other is never sent, and the server can neither open the save nor work out the code. Never in a file, a log or a backup | to hand the save to your other system | 15 minutes, or until your other system takes it; a server restart drops it |
+| Saves kept in step, `cloud/` | for each slot: its id and the SHA-256 of its key, both made by your game and meaning nothing else; your saves as your game sealed them, which the server cannot open; how many times they were replaced (the generation), their size, and the days the slot was made and last used. Never in a backup | to keep your linked systems' saves in step | until your game drops the slot, a moderator forgets it, or 180 days after its last use |
 
 Everything else stays in memory and goes when you leave or the server
 restarts: where you walk, your card, the phrases you send, your trade
@@ -246,6 +251,9 @@ you up by anything else. Two ways:
   edited: they age out within 14 days. Without a dive on the Board the
   server has no name to find you by, and what you left goes by itself
   within the times above.
+
+Saves kept in step name no player: a slot goes when your game drops it,
+or 180 days after its last use, and the server cannot tell whose it is.
 
 ## Build and host locally
 
@@ -308,8 +316,10 @@ protocol, occupancy, limits and rules. It contains no player identities.
 `GET /stats` returns the daily totals: today so far and the last 30 days
 ([The daily totals](#the-daily-totals)).
 `trading` and `arena` (both on unless set `false`) open or close Trade
-Central and the Arena; `free_text` must stay false (quick phrases and
-emotes only), and setting it refuses startup.
+Central and the Arena, `transfers` (on unless set `false`) saves sent
+by a code, and `sync` (on unless set `false`) saves kept in step;
+`free_text` must stay false (quick phrases and emotes only),
+and setting it refuses startup.
 
 ## Trade Central and the Arena
 
@@ -581,6 +591,7 @@ python3 build/server/cyberworld-server.pyz --state-dir server-data --admin mute 
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin kick --identity PUBLIC_ID --minutes 30
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin hide --identity PUBLIC_ID --week 2963
 python3 build/server/cyberworld-server.pyz --state-dir server-data --admin forget --identity PUBLIC_ID
+python3 build/server/cyberworld-server.pyz --state-dir server-data --admin forget --cloud SLOT
 python3 server/admin.py unmute PUBLIC_ID --state-dir server-data
 ```
 
@@ -601,6 +612,11 @@ identity out of the trades' log (its side of each trade blanked, the
 other player's kept), the Board's log, the players' log and its kick or
 hidden entry. A ban or a mute stays while it lasts. The running server
 reads the Board only as it starts: restart it after a `forget`.
+`forget --cloud SLOT` deletes a slot of saves kept in step, `SLOT` its id
+as 32 hexadecimal characters (the name of its files in `cloud/`); the
+running server has it gone at once, no restart needed. A slot names no
+player, so it is for a slot a host knows is unwanted, a game's own drop
+being the usual way one goes.
 
 The week's net: every Monday 00:00 UTC the server begins a week (its
 number counts weeks from Monday 5 January 1970) whose seed is derived
@@ -615,7 +631,12 @@ Moderation updates use an atomic replace. Every write of the state's
 files (moderation, the trades' and the Board's logs, the players' log, a
 retention pass, a restore) holds the state directory's lock,
 `moderation.lock`, so local CLI edits and the running server never meet
-in a half-written file. There is no game save or ROM on the server.
+in a half-written file. There is no readable game save and no ROM on the
+server: a save sent by a code is sealed by the game before it is sent,
+and held in memory alone until it is taken or its 15 minutes are up; a
+slot of saves kept in step holds saves the game sealed too, with a key
+made from a secret its linked systems share and never send, so the server
+keeps them on disk and can open none.
 
 The server reads `moderation.json` again only when the file changes. If a
 hand edit leaves it unreadable, the running server keeps the last rules it
@@ -638,6 +659,7 @@ start and every hour (`retention.py`):
 | `log_days` | 14 | `logs/players-YYYY-MM-DD.jsonl`, the players' log, a file a UTC day; 0 writes none |
 | `backup_days` | 14 | the archives `--backup` keeps |
 | `stats_days` | 365 | `stats.jsonl`, the daily totals, a line a UTC day ([The daily totals](#the-daily-totals)); 0 writes none |
+| `cloud_days` | 180 | `cloud/`, the saves kept in step: a slot unused (neither pulled nor pushed) this many days is deleted, and is no slot to the game from then on; at least 1 |
 
 The players' log holds each event that names a player (a join, a
 session replaced) with its time. The console's log (stdout, a
@@ -646,7 +668,11 @@ identity: session numbers, channels, counts, trades' and battles'
 numbers and refusals, never a name, a public identity or an IP.
 `identity.key` and the bans and mutes stay until the host or a moderator
 removes them; `players.json` holds the players connected now and is
-emptied when the server stops. Everything else is in memory alone.
+emptied when the server stops. `cloud/` holds a slot's saves as
+`SLOT.blob` and what the server knows of it as `SLOT.json`, each written
+whole under the state's lock, until the game drops the slot, `forget
+--cloud` deletes it or `cloud_days` pass unused. Everything else is in
+memory alone.
 
 ### The daily totals
 
@@ -661,6 +687,9 @@ Each UTC day the server counts, with no personal data (`stats.py`):
 | `battles_started`, `battles_finished` | NetBattles begun, and those whose end the cable's first game told (a battle left or broken is begun and not finished) |
 | `watched` | battles watched from the stands |
 | `dives` | the week's dives posted to the Board |
+| `transfers_held`, `transfers_taken` | saves sent by a code: those held (a put whose last byte came in), and those taken (a DONE that let one go) |
+| `sync_pulls`, `sync_pushes` | saves kept in step: the pulls a slot answered (its saves sent, or the game's the same already), and the pushes it stored |
+| `sync_slots` | the slots kept as the day ended (today so far: now), a count |
 | `versions` | HELLOs by the protocol version they carry, those of another version refused (16 versions apart, the rest as `other`) |
 | `passes` | joins by the NetPass: `full` (the full set: BN6's, BN5's and BN4's ROMs) or `square` (any less; a New 3DS's full pass with one game counts here, as it neither battles nor dives) |
 
@@ -684,8 +713,11 @@ and exits. An archive holds `identity.key`, `moderation.json` and
 `weeks.jsonl`: what the server needs to come back as it was, its
 identities, bans and Board. The trades' and the players' logs and the
 roster are left out: they are kept for moderation alone and go with their
-days. It reads the state under the state's lock, shared, so it never holds
-half a moderator's edit, and works from a read-only mount of the state.
+days. So is `cloud/`, the saves kept in step: the server cannot open
+them, and each game keeps every save it has, so a slot lost loses only
+the step, never a save. It reads the state under the state's lock,
+shared, so it never holds half a moderator's edit, and works from a
+read-only mount of the state.
 
 ```sh
 python3 build/server/cyberworld-server.pyz --state-dir server-data --backup server-backups --once
@@ -696,8 +728,8 @@ python3 build/server/cyberworld-server.pyz --state-dir server-data --restore ser
 `identity.key`; anything else in it is never extracted), writes its files
 into the state directory whole, and removes those of the three it lacks,
 which were not there when it was made. The trades' and the players' logs
-stay as they are. The server reads the key and the Board only as it
-starts: restart it after a restore.
+and `cloud/` stay as they are. The server reads the key and the Board
+only as it starts: restart it after a restore.
 
 In Coolify the `backup` service of `deploy/coolify/compose.yaml` runs
 `--backup /backups` beside the server, so the official server's backups
@@ -733,6 +765,27 @@ cannot lock players out. A new connection with a profile that is already
 connected (a reconnect the server has not yet seen drop) replaces the old
 session: the old one receives ERROR 12 and a close frame saying why, and
 the new one takes its place and, unless it asks for another, its channel.
+
+A connection whose first message is TRANSFER, not HELLO, is a save sent
+by a code ([the wire](../shared/online/README.md), Saves sent by a code;
+`transfer.py`): one exchange, no player, no place and no channel. The
+server holds 128 saves and 64 MiB at most, takes 8 such exchanges at once
+and answers 30 lookups a minute (puts and gets together, for the whole
+server, as a proxy hides the players' addresses); past any of these it
+answers BUSY with the seconds to wait. An exchange quiet for 15 seconds or
+longer than 2 minutes ends with an ERROR.
+
+A connection whose first message is SYNC is saves kept in step ([the
+wire](../shared/online/README.md), Saves kept in step; `sync.py`): one
+exchange too, a pull, a push or a drop of a slot. The server keeps
+`cloud_slots` slots and `cloud_megabytes` MiB at most (a push's bytes
+counted from its READY), makes 60 new slots an hour, takes 16 such
+exchanges at once and one push a slot at a time; past any of these it
+answers BUSY with the seconds to wait (an hour while it is full, the time
+the retention's next pass may take to free room). The bounds are the
+server's, not a peer's: it never sees one. An exchange quiet for 15
+seconds or longer than 2 minutes ends with an ERROR, and a push cut short
+leaves the slot as it was.
 
 ### A dropped link: the place held
 

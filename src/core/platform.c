@@ -239,14 +239,15 @@ static void layout_canvas(void) {
 		int wx = (int)P.fill + 1, wy = (int)P.fill_y + 1;
 		P.sharp = SDL_CreateTexture(P.renderer, CANVAS_FORMAT, SDL_TEXTUREACCESS_TARGET, P.w * wx, P.h * wy);
 		if (P.sharp) SDL_SetTextureScaleMode(P.sharp, SDL_ScaleModeLinear);
-		/* (no memory for it: the canvas at the whole scale, a little wide;
-		 * stretched, the picture alone at it) */
+#ifdef __PSP__   /* (its 2 MB of video memory holds none past the canvas: the canvas itself to the screen, smoothly) */
+		else SDL_SetTextureScaleMode(P.canvas, SDL_ScaleModeLinear);
+#else   /* (no memory for it: the canvas at the whole scale, a little wide; stretched, the picture alone at it) */
 		else P.fill = P.fill_y = 0;
+#endif
 	}
 }
 
-/* The canvas's scale as the log says it: "5x", "2.67x (fill)", or
- * "8.00x6.75 (stretch)". */
+/* The canvas's scale as the log says it: "5x", "2.67x (fill)", or "8.00x6.75 (stretch)". */
 static const char *scale_words(void) {
 	static char s[24];
 	if (P.fill > 0 && P.fill_y != P.fill) snprintf(s, sizeof s, "%.2fx%.2f (stretch)", (double)P.fill, (double)P.fill_y);
@@ -515,8 +516,7 @@ static void phone_controls(void) {
 /* Keyboard defaults and file drops are ready before the first event. */
 static void input_start(void) { keymap_default(); SDL_EventState(SDL_DROPFILE, SDL_ENABLE); }
 
-/* The renderer SDL is asked for first, where its own first choice is the
- * worse one. */
+/* The renderer SDL is asked for first, where its own first choice is the worse one. */
 static void render_hints(void) {
 #ifdef _WIN32
 	/* Direct3D 11 first: SDL's lets the GPU queue one frame at most
@@ -895,7 +895,7 @@ static void copy_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha, con
  * soft, no pixel drawn wider than the next). */
 static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_Rect dst = canvas_rect();
-	if (P.fill > 0) {
+	if (P.fill > 0 && P.sharp) {
 		SDL_SetRenderTarget(P.renderer, P.sharp);
 		copy_frames(older, newer, alpha, NULL, false);
 	}
@@ -904,8 +904,8 @@ static void show_frames(SDL_Texture *older, SDL_Texture *newer, Uint8 alpha) {
 	SDL_RenderClear(P.renderer);
 	/* (a picture under the canvas, which is clear where it shows: platform_set_under) */
 	bool over = under_canvas && under_canvas(P.renderer, &dst);
-	if (P.fill > 0) SDL_SetTextureBlendMode(P.sharp, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
-	if (P.fill > 0) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
+	if (P.fill > 0 && P.sharp) SDL_SetTextureBlendMode(P.sharp, over ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+	if (P.fill > 0 && P.sharp) SDL_RenderCopy(P.renderer, P.sharp, NULL, &dst);
 	else copy_frames(older, newer, alpha, &dst, over);
 	/* (the lcd3x shader at the screen's pixels, as its preset draws; not a menu's own screen) */
 	if (!own_taps) lcd_grid_draw(P.renderer, &dst, P.w, P.h);
@@ -942,8 +942,10 @@ void platform_present_blend(double w) {
 
 /* The canvas on the display, at its scale. */
 static void present_canvas(void) {
+	uint64_t part = frame_part_begin();
 	show_frames(P.canvas, NULL, 255);
 	over_picture();
+	frame_part_end("show", part);
 #ifdef __3DS__
 	present3ds_frame(display_scale() != SCALE_WHOLE, display_scale() == SCALE_STRETCH, emu_threaded());
 #else

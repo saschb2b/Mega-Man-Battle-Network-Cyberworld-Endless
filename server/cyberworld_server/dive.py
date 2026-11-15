@@ -1,5 +1,5 @@
 """The shared dive's rooms, traces and feed (protocol v19, issue #589;
-shared/online/README.md, Protocol v19).
+docs/online/shared-dive.md; shared/online/README.md, Protocol v19).
 
 A diver's game says DIVE enter as MegaMan comes onto a layer of the
 week's net: the week, its seed, the layer's depth, its side kind (0 the

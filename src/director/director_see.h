@@ -21,6 +21,7 @@ typedef struct {
 	uint8_t locks;                  /* the layer's locks still shut (layer.block[k], a bit each): the map marks them */
 	char bug_note[160];             /* the NaviCust's bug as its RUN leaves it, over the PET a few seconds */
 	int bug_note_t;
+	bool gate_strip;                /* the gate in Lan's HP asking: the NetPass's strip over the picture (read in the drawing, on the 3DS each frame waited for the core) */
 } Seen;
 extern Seen seen;
 

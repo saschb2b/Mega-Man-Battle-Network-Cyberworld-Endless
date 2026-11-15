@@ -23,9 +23,14 @@ else that names a player goes by itself:
 `stats.jsonl`, the daily totals (stats.py), names no player: a line a UTC
 day, `stats_days` days.
 
+`cloud/`, the saves kept in step (sync.py): a slot's sealed blob and its
+meta, until the game drops it, `forget --cloud` removes it, or it goes
+unused for `cloud_days` days.
+
 A pass prunes them at the start and every hour, in a thread, under the
 state directory's lock (identity.state_lock). Backups (backup.py) keep
-`backup_days` days of the key, the moderation lists and the Board."""
+`backup_days` days of the key, the moderation lists and the Board, never
+`cloud/`."""
 
 import dataclasses
 import json
@@ -34,7 +39,8 @@ import re
 import time
 
 from .identity import append_log, prune_moderation, rewrite_log, state_lock
-from . import stats
+from . import stats, sync
+from .protocol import SPEC
 from .trade import prune_log
 from .week import compact
 from . import traces
@@ -42,7 +48,7 @@ from . import traces
 DAY = 24 * 3600
 PASS = 3600             # seconds between the retention's passes
 LIMITS = {"trade_days": (0, 365), "board_weeks": (2, 520), "log_days": (0, 365), "backup_days": (1, 365),
-          "stats_days": (0, 3650)}
+          "stats_days": (0, 3650), "cloud_days": (1, 3650)}
 PERSONAL = ("identity", "name")     # an event's fields the players' log keeps and the console's does not
 
 
@@ -54,6 +60,7 @@ class Retention:
     log_days: int = 14
     backup_days: int = 14
     stats_days: int = 365
+    cloud_days: int = SPEC["sync_days"]
 
     def __post_init__(self):
         for field, (low, high) in LIMITS.items():
@@ -133,5 +140,6 @@ def apply(directory, policy, now, week):
             "dives": traces.compact(directory, first_week)[1],
             "moderation": prune_moderation(directory, now, first_week),
             "logs": PlayersLog(directory, policy.log_days).prune(now),
-            "stats": stats.prune(directory, now, policy.stats_days)}
+            "stats": stats.prune(directory, now, policy.stats_days),
+            "cloud": sync.prune(directory, now, policy.cloud_days)}
     return {kind: count for kind, count in gone.items() if count}

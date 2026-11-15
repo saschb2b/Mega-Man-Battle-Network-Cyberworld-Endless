@@ -1,5 +1,5 @@
 /* The shared dive's messages on the wire (protocol v19, issue #589;
- * shared/online/README.md, Protocol v19):
+ * shared/online/README.md, Protocol v19; docs/online/shared-dive.md):
  * what a diver's game sends (DIVE's actions, CREW, QUEUE, PARTY_DAMAGE and
  * PARTY_HP) built, and what the server tells it (DIVE_ROOM, DIVE_TRACES,
  * DIVE_PLACE, DIVE_FEED, DIVERS, CREW_STATE, QUEUE_STATE, a linked

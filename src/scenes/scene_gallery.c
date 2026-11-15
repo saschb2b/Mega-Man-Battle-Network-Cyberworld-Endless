@@ -47,4 +47,4 @@ static void draw(void) {
 		sprite_anim_count(a.spr), pal);
 }
 
-const Scene scene_gallery = { "gallery", enter, update, draw, NULL };
+const Scene scene_gallery = { "gallery", enter, update, draw, NULL, NULL };

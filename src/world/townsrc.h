@@ -31,6 +31,13 @@ typedef int (*TownMatOf)(int colour);
 /* Learns map (group, number) and its mirror image. */
 TownBook *townsrc_learn(int group, int number, TownMatOf mat_of);
 void townsrc_free(TownBook *b);
+/* Style `style`'s source, learned once and kept for the next visit
+ * (townsrc_learn's; NULL where it could not be) */
+TownBook *townsrc_book(int style, int group, int number, TownMatOf mat_of);
+/* The town installed: on the PSP every source let go, learned again at the
+ * next visit, as its heap holds a layer's learning or a town's, not both
+ * (docs/engine/emulation/psp-and-ds.md) */
+void townsrc_installed(void);
 
 /* The source's own size in tiles: a generated map keeps its parity. */
 void townsrc_size(const TownBook *b, int *tw, int *th);

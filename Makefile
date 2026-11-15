@@ -1,5 +1,9 @@
 # Normally driven by build.py, which runs these targets inside the build image.
 TARGET ?= host
+# The GBA core: mGBA, or gpSP with the game's additions (CW_GPSP), the PSP's
+# and, to test it, a computer's (CYBERWORLD_CORE=gpsp, build.py), built by
+# docker/gpsp.sh into GPSP (docs/engine/emulation/psp-and-ds.md)
+CORE ?= $(if $(filter psp,$(TARGET)),gpsp,mgba)
 CC_host := gcc
 CC_aarch64 := aarch64-linux-gnu-gcc
 CC_asan := gcc
@@ -14,6 +18,7 @@ CC_ios := xcrun --sdk $(IOS_SDK) clang
 CC_3ds := /opt/devkitpro/devkitARM/bin/arm-none-eabi-gcc
 CC_switch := /opt/devkitpro/devkitA64/bin/aarch64-none-elf-gcc
 CC_vita := /usr/local/vitasdk/bin/arm-vita-eabi-gcc
+CC_psp := psp-gcc
 CC_ps4 := clang
 CC_ps5 := /usr/local/bin/ps5-cc
 PKG_aarch64 := PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
@@ -26,7 +31,7 @@ CC := $(CC_$(TARGET))
 # (the linker: the compiler, but on the PS5, whose link is lld's alone)
 LINK = $(CC)
 PKGCONF := $(PKG_$(TARGET)) pkg-config
-OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))
+OUT := build/$(TARGET)$(if $(filter ios,$(TARGET)),-$(IOS_SDK))$(if $(and $(filter gpsp,$(CORE)),$(filter-out psp,$(TARGET))),-gpsp)
 BIN_host := $(OUT)/cyberworld
 BIN_aarch64 := $(OUT)/cyberworld.aarch64
 BIN_asan := $(OUT)/cyberworld
@@ -39,6 +44,7 @@ BIN_ios := $(OUT)/cyberworld-endless
 BIN_3ds := $(OUT)/cyberworld-endless.elf
 BIN_switch := $(OUT)/cyberworld-endless.elf
 BIN_vita := $(OUT)/cyberworld-endless.elf
+BIN_psp := $(OUT)/cyberworld-endless.elf
 BIN_ps4 := $(OUT)/cyberworld-endless.elf
 BIN_ps5 := $(OUT)/cyberworld-endless.elf
 BIN := $(BIN_$(TARGET))
@@ -47,6 +53,10 @@ SRC_DIRS := $(sort $(dir $(wildcard src/*/*.c)))
 SRCS := $(wildcard src/*/*.c)
 LAYER_MAKE_BUMPS := $(words $(wildcard src/net/layer_make.d/*.txt))
 OBJS := $(patsubst src/%.c,$(OUT)/obj/%.o,$(SRCS))
+# Others' code kept as its authors released it (third_party/, docs/code/third-party.md):
+# built with the game's flags but none of its warnings, its headers the system's
+THIRD_SRCS := third_party/monocypher/monocypher.c
+OBJS += $(patsubst %.c,$(OUT)/obj/%.o,$(THIRD_SRCS))
 
 # The version the title shows: build.py passes its own (the tag, or the tag
 # and the commits since); made alone, git's; else dev. A header written
@@ -63,14 +73,14 @@ APP_VER = $(shell echo '$(VERSION)' | sed -nE 's/^([0-9]+)\.([0-9]+).*/\1 \2/p' 
 WARN := -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wshadow -Wmissing-prototypes \
         -Wstrict-prototypes -Wformat=2 -Wcast-qual -Wwrite-strings -Wundef -Wvla -Wnull-dereference -Wredundant-decls
 WARN_GCC := -Wlogical-op -Wduplicated-cond -Wduplicated-branches
-CFLAGS += -Ishared/online -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4 ps5,$(TARGET)),,$(WARN_GCC)) \
+CFLAGS += -Ishared/online -isystem third_party/monocypher -std=c11 -O2 -g $(WARN) $(if $(filter web macos ios ps4 ps5,$(TARGET)),,$(WARN_GCC)) \
           -D_DEFAULT_SOURCE -MMD -MP $(addprefix -I,$(SRC_DIRS)) $(patsubst -I%,-isystem %,$(shell $(PKGCONF) --cflags sdl2))
 # CI builds with WERROR=1: a warning in the game's own code fails the build
 ifdef WERROR
 CFLAGS += -Werror
 endif
 # the embedded GBA core, built into the image by docker/mgba.sh
-MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita ps4 ps5,$(TARGET)),$(TARGET),host)
+MGBA_TARGET := $(if $(filter aarch64 web windows 3ds switch vita psp ps4 ps5,$(TARGET)),$(TARGET),host)
 ifeq ($(TARGET),web)
 PKGCONF := true   # SDL2 comes from Emscripten's port (-sUSE_SDL=2)
 endif
@@ -82,6 +92,9 @@ PKGCONF := true   # SDL2 comes with the OpenOrbis toolchain
 endif
 ifeq ($(TARGET),ps5)
 PKGCONF := true   # SDL2 comes from PacBrew, docker/Dockerfile.ps5
+endif
+ifeq ($(TARGET),psp)
+PKGCONF := psp-pkg-config   # pspdev's SDL2, docker/Dockerfile.psp
 endif
 MGBA := /opt/mgba/$(MGBA_TARGET)
 MGBA_LICENSE := /opt/mgba/LICENSE
@@ -229,6 +242,26 @@ $(OUT)/cyberworld-endless.vpk: $(OUT)/eboot.bin $(OUT)/param.sfo vita/icon0.png 
 	 -a vita/bg.png=sce_sys/livearea/contents/bg.png -a vita/startup.png=sce_sys/livearea/contents/startup.png \
 	 -a vita/template.xml=sce_sys/livearea/contents/template.xml $@
 endif
+# the PSP (docker/Dockerfile.psp, psp/): pspdev's GCC for its 333 MHz
+# Allegrex, its SDL2 (the GU renderer) and mGBA linked in, made a PRX and
+# packed into an EBOOT.PBP with its title and icon (-Wno-format: uint32_t is
+# an unsigned long there, as on the 3DS); MEMSIZE=1 asks for the
+# PSP-2000's and later's 52 MB (a PSP-1000 has 24, too few: psp/README.md)
+ifeq ($(TARGET),psp)
+PSPSDK := /usr/local/pspdev/psp/sdk
+CFLAGS := $(filter-out -g,$(CFLAGS)) -G0 -ffunction-sections -fdata-sections -D_PSP_FW_VERSION=600 -isystem $(PSPSDK)/include -Wno-format
+LDLIBS := $(PSPSDK)/lib/prxexports.o $(MGBA)/lib/libmgba.a $(shell $(PKGCONF) --libs sdl2) -lpspdebug -lpspdisplay -lpspge \
+          -lpspctrl -lpsppower -lpsprtc -lpspnet -lpspnet_apctl -lm -L$(PSPSDK)/lib -specs=$(PSPSDK)/lib/prxspecs \
+          -Wl,-q,-T$(PSPSDK)/lib/linkfile.prx -Wl,-zmax-page-size=128 -Wl,--gc-sections
+all: $(OUT)/EBOOT.PBP
+$(OUT)/cyberworld-endless.prx: $(BIN)
+	psp-fixup-imports $(BIN)
+	psp-prxgen $(BIN) $@
+$(OUT)/PARAM.SFO: $(GEN)/version.h
+	mksfoex -d MEMSIZE=1 -s APP_VER=$(APP_VER) 'Cyberworld Endless' $@
+$(OUT)/EBOOT.PBP: $(OUT)/cyberworld-endless.prx $(OUT)/PARAM.SFO psp/icon0.png psp/pic1.png
+	pack-pbp $@ $(OUT)/PARAM.SFO psp/icon0.png NULL NULL psp/pic1.png NULL $(OUT)/cyberworld-endless.prx NULL
+endif
 # the PS4 (docker/Dockerfile.ps4, ps4/), whose fake package a jailbroken PS5
 # installs too: OpenOrbis's clang for its FreeBSD-like system, its libc,
 # SDL2 (2.0.9: src/core/sdl_old.h stands in for what it lacks) and the
@@ -332,6 +365,12 @@ endif
 # one make's own flags on top (build.py lint: each function in a section
 # of its own, and the linker's list of those it drops)
 CFLAGS += $(EXTRA_CFLAGS)
+# (gpSP linked before the rest: its translator calls the game's cw_hook_call)
+ifeq ($(CORE),gpsp)
+GPSP ?= /opt/gpsp/$(TARGET)
+CFLAGS += -DCW_GPSP -isystem $(GPSP)/include
+LDLIBS := $(GPSP)/lib/libgpsp.a $(LDLIBS) -lstdc++ -lm
+endif
 LDLIBS += $(EXTRA_LDFLAGS)
 
 all: $(BIN) $(OUT)/licenses/mGBA.txt
@@ -353,6 +392,10 @@ endif
 $(OUT)/obj/%.o: src/%.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) -I$(GEN) -c -o $@ $<
+
+$(OUT)/obj/third_party/%.o: third_party/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(filter-out $(WARN) $(WARN_GCC) -Werror,$(CFLAGS)) -c -o $@ $<
 
 # (UIKit's, iOS alone: Objective-C with ARC)
 $(OUT)/obj/%.o: src/%.m | $(GEN)/version.h
@@ -396,15 +439,20 @@ TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacin
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_registry_bn4.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_pas.c src/core/xchips_pas_bn4.c src/core/xchips_text.c src/emu/claims.c src/emu/free_space_watch.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/layer/fork_words.c src/core/jobs.c \
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
 	src/core/super_boss.c src/layer/super_lines.c src/core/visitors.c src/core/groups.c src/core/group_arc.c src/core/group_tags.c src/core/extras.c src/core/extras_text.c src/map/pad_art.c \
-	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c tests/test_voxel.c src/gfx/gba_layers.c src/gfx/gba_world.c src/gfx/voxel_lift.c src/gfx/voxel_light.c src/gfx/voxel_draw.c \
-	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c
+	src/analytics/analytics.c src/analytics/analytics_text.c src/analytics/analytics_online.c src/emu/audio_pace.c src/audio/sound_filter.c src/audio/crossfeed.c src/audio/sound_heard.c src/core/settings_line.c src/gfx/letters.c src/gfx/lcd_frame.c tests/test_voxel.c src/gfx/gba_layers.c src/gfx/gba_world.c src/gfx/voxel_lift.c src/gfx/voxel_light.c src/gfx/voxel_draw.c tests/test_stereo.c src/gfx/stereo.c \
+	src/jukebox/jukebox_text.c src/core/library_pages.c src/core/library_pages_data.c src/core/fast_forward.c src/core/feel.c src/map/area_src.c src/map/lz.c \
+	tests/test_update.c src/update/update_manifest.c src/update/update_sha256.c src/update/update_swap.c \
+	tests/test_transfer_code.c src/online/transfer_box.c third_party/monocypher/monocypher.c
 # (each source its own object, so make -j compiles them side by side and keeps the unchanged; apart with -Werror and
 # without, so an object built without it never stands in for one CI's flags would refuse)
 TEST_OBJ_DIR := build/test$(if $(WERROR),-werror)
 TEST_OBJS := $(patsubst %.c,$(TEST_OBJ_DIR)/%.o,$(TEST_SRCS))
-$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/test_voxel.h tests/backup_fixture.h tests/backup_fixture_v2.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
+$(TEST_OBJ_DIR)/%.o: %.c src/*/*.h tests/test_backup.h tests/test_voxel.h tests/test_stereo.h tests/backup_fixture.h tests/backup_fixture_v2.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(TEST_WARN) -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online -isystem third_party/monocypher $(addprefix -I,$(SRC_DIRS)) $(TEST_OBJ_SDL) -c -o $@ $<
+TEST_WARN = $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror)
+# (others' code, third_party/: none of the game's warnings)
+$(TEST_OBJ_DIR)/third_party/%.o: TEST_WARN =
 # (a map's views, tests/test_core.c's test_area_views: area_src.c reads gfx.h's colours, and gfx.h includes SDL's header)
 $(TEST_OBJ_DIR)/src/map/area_src.o: TEST_OBJ_SDL = $(TEST_SDL)
 build/host/test_core: $(TEST_OBJS)
@@ -416,9 +464,9 @@ build/host/test_core: $(TEST_OBJS)
 # installed on the test's ROM), and a block
 # of Thumb code moved into BN6's copy, its calls through veneers (thumb_reloc.c), and the
 # second-level dispatch's code run (xvirus_dispatch.c)
-TEST_EMU_SRCS := tests/test_emu.c tests/test_emu_pack.c src/emu/xchips_pack.c src/emu/hook.c src/emu/emu.c src/emu/ram_survey.c src/emu/sound_quiet.c src/audio/sound_heard.c src/emu/audio_pace.c src/emu/claims.c src/emu/free_space_watch.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
+TEST_EMU_SRCS := tests/test_emu.c tests/test_emu_pack.c src/emu/xchips_pack.c src/emu/hook.c src/emu/emu.c src/emu/emu_sound.c src/emu/emu_keep.c src/emu/ram_survey.c src/emu/sound_quiet.c src/audio/sound_heard.c src/emu/audio_pace.c src/emu/claims.c src/emu/free_space_watch.c src/emu/xinstall_log.c src/emu/thumb_reloc.c src/emu/xvirus_dispatch.c src/core/compat.c src/core/save_queue.c
 TEST_SDL = $(patsubst -I%,-isystem %,$(shell pkg-config --cflags sdl2))
-build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/sound_quiet.h src/audio/sound_heard.h src/emu/audio_pace.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h src/emu/xchips_pack.h src/emu/bn6_chips.h tests/test_emu_pack.h
+build/host/test_emu: $(TEST_EMU_SRCS) src/emu/hook.h src/emu/emu.h src/emu/emu_sound.h src/emu/emu_keep.h src/emu/sound_quiet.h src/audio/sound_heard.h src/emu/audio_pace.h src/emu/claims.h src/emu/xinstall_log.h src/emu/free_space.h src/emu/thumb_reloc.h src/emu/xvirus_dispatch.h src/emu/xvirus_recipe.h src/core/save_queue.h src/emu/xchips_pack.h src/emu/bn6_chips.h tests/test_emu_pack.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) -Isrc/emu -Isrc/core -Isrc/audio -isystem $(MGBA)/include \
 		$(TEST_SDL) -o $@ $(TEST_EMU_SRCS) $(MGBA)/lib/libmgba.a $(shell pkg-config --libs sdl2) -lpthread -lm
@@ -438,7 +486,8 @@ build/host/test_discovery: $(TEST_DISCOVERY_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | 
 		-I$(GEN) $(addprefix -I,$(SRC_DIRS)) $(TEST_SDL) -o $@ $(TEST_DISCOVERY_SRCS) $(shell pkg-config --libs sdl2) -lm
 
 TEST_SAVES_SRCS := tests/test_saves.c $(wildcard src/saves/*.c) \
-	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c
+	src/launcher/mirror.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/core/save_queue.c \
+	src/core/transfer_link.c src/core/text_input.c src/core/cloud_link.c
 build/host/test_saves: $(TEST_SAVES_SRCS) src/*/*.h $(LAYER_MAKE_GEN) | $(GEN)/version.h
 	@mkdir -p build/host
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
@@ -560,7 +609,7 @@ LINT_TRANSPORT_OBJS := $(patsubst %.c,build/lint/test/%.o,$(TRANSPORT_TEST_SRCS)
 LINT_ONLINE_OBJS := $(patsubst %.c,build/lint/test/%.o,$(ONLINE_TEST_SRCS))
 build/lint/test/%.o: %.c | $(GEN)/version.h
 	@mkdir -p $(dir $@)
-	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
+	$(CC_host) -std=c11 -O1 -D_DEFAULT_SOURCE -I$(GEN) -Ishared/online -isystem third_party/monocypher $(addprefix -I,$(SRC_DIRS)) -isystem $(MGBA)/include $(TEST_SDL) -ffunction-sections -c -o $@ $<
 build/lint/test_core: $(LINT_TEST_OBJS)
 	$(CC_host) -o $@ $^ -Wl,--gc-sections -Wl,--print-gc-sections -lm
 build/lint/test_emu: $(LINT_TEST_EMU_OBJS)

@@ -18,41 +18,14 @@
 
 #include <SDL.h>
 
+#include "android_call.h"
 #include "pick_saves.h"
 #include "rom.h"
 
-/* a call into GameActivity: its environment, the activity and the method */
-typedef struct {
-	JNIEnv *env;
-	jobject activity;
-	jmethodID m;
-} Call;
-
-static bool call_begin(Call *c, const char *name, const char *sig) {
-	c->env = (JNIEnv *)SDL_AndroidGetJNIEnv();
-	c->activity = (jobject)SDL_AndroidGetActivity();
-	c->m = NULL;
-	if (!c->env || !c->activity) return false;
-	jclass cls = (*c->env)->GetObjectClass(c->env, c->activity);
-	c->m = (*c->env)->GetMethodID(c->env, cls, name, sig);
-	(*c->env)->DeleteLocalRef(c->env, cls);
-	if (!c->m && (*c->env)->ExceptionCheck(c->env)) (*c->env)->ExceptionClear(c->env);
-	if (!c->m) (*c->env)->DeleteLocalRef(c->env, c->activity);
-	return c->m != NULL;
-}
-
-/* the call's end: false where it threw */
-static bool call_end(Call *c) {
-	bool ok = !(*c->env)->ExceptionCheck(c->env);
-	if (!ok) (*c->env)->ExceptionClear(c->env);
-	(*c->env)->DeleteLocalRef(c->env, c->activity);
-	return ok;
-}
-
 /* name() returning a String: into out, false for null */
 static bool call_string(const char *name, char *out, size_t n) {
-	Call c;
-	if (!call_begin(&c, name, "()Ljava/lang/String;")) return false;
+	AndroidCall c;
+	if (!android_call_begin(&c, name, "()Ljava/lang/String;")) return false;
 	jstring r = (jstring)(*c.env)->CallObjectMethod(c.env, c.activity, c.m);
 	if (n) out[0] = 0;
 	if (r) {
@@ -63,25 +36,25 @@ static bool call_string(const char *name, char *out, size_t n) {
 		}
 		(*c.env)->DeleteLocalRef(c.env, r);
 	}
-	return call_end(&c) && r != NULL;
+	return android_call_end(&c) && r != NULL;
 }
 
 /* name(int) returning a boolean */
 static bool call_bool_int(const char *name, int arg) {
-	Call c;
-	if (!call_begin(&c, name, "(I)Z")) return false;
+	AndroidCall c;
+	if (!android_call_begin(&c, name, "(I)Z")) return false;
 	jboolean v = (*c.env)->CallBooleanMethod(c.env, c.activity, c.m, (jint)arg);
-	return call_end(&c) && v;
+	return android_call_end(&c) && v;
 }
 
 /* name(String) returning a boolean */
 static bool call_bool_string(const char *name, const char *arg) {
-	Call c;
-	if (!call_begin(&c, name, "(Ljava/lang/String;)Z")) return false;
+	AndroidCall c;
+	if (!android_call_begin(&c, name, "(Ljava/lang/String;)Z")) return false;
 	jstring s = (*c.env)->NewStringUTF(c.env, arg);
 	jboolean v = s ? (*c.env)->CallBooleanMethod(c.env, c.activity, c.m, s) : JNI_FALSE;
 	if (s) (*c.env)->DeleteLocalRef(c.env, s);
-	return call_end(&c) && v;
+	return android_call_end(&c) && v;
 }
 
 static bool busy;
@@ -135,12 +108,12 @@ bool pick_folder(char *name, size_t n) { return call_string("romsFolder", name, 
 
 /* name(String) returning an int */
 static int call_int_string(const char *name, const char *arg) {
-	Call c;
-	if (!call_begin(&c, name, "(Ljava/lang/String;)I")) return 0;
+	AndroidCall c;
+	if (!android_call_begin(&c, name, "(Ljava/lang/String;)I")) return 0;
 	jstring s = (*c.env)->NewStringUTF(c.env, arg);
 	jint v = s ? (*c.env)->CallIntMethod(c.env, c.activity, c.m, s) : 0;
 	if (s) (*c.env)->DeleteLocalRef(c.env, s);
-	return call_end(&c) ? (int)v : 0;
+	return android_call_end(&c) ? (int)v : 0;
 }
 
 static int saves_get(const char *to) { return call_int_string("savesGet", to); }
@@ -160,12 +133,12 @@ static bool saves_busy;
 static int saves_kind;
 
 static bool saves_dialog_open(int kind, const char *from) {
-	Call c;
-	if (busy || saves_busy || !call_begin(&c, "savesPick", "(ILjava/lang/String;)Z")) return false;
+	AndroidCall c;
+	if (busy || saves_busy || !android_call_begin(&c, "savesPick", "(ILjava/lang/String;)Z")) return false;
 	jstring s = from ? (*c.env)->NewStringUTF(c.env, from) : NULL;
 	jboolean v = (*c.env)->CallBooleanMethod(c.env, c.activity, c.m, (jint)kind, s);
 	if (s) (*c.env)->DeleteLocalRef(c.env, s);
-	saves_busy = call_end(&c) && v;
+	saves_busy = android_call_end(&c) && v;
 	saves_kind = kind;
 	return saves_busy;
 }

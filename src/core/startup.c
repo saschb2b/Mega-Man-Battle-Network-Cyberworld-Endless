@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "analytics_net.h"
 #include "backup.h"
 #include "capture.h"
 #include "compat.h"
@@ -24,6 +23,7 @@
 #include "rom.h"
 #include "sound_filter.h"
 #include "sound_heard.h"
+#include "start_net.h"
 #include "touch.h"
 #ifdef CW_IOS
 #include "ios.h"
@@ -243,11 +243,11 @@ static void settings_load(const char *path) {
 		if (!f) return;
 		fprintf(f, "# Cyberworld Endless: settings. Delete this file for the defaults.\n%ssmooth_motion = off\n%sscreen = auto\n%ssound = gba\n"
 			"%slow_pass = %d\n%soutput = speakers\n%smusic = %d\n%seffects = %d\n%sfast_forward = %s\n%svibration = %s\n%strigger_effects = on\n"
-			"%scolour_correction = off\n%sinterframe_blending = off\n%slcd3x = off\n%sdepth_lighting = off\n",
+			"%scolour_correction = off\n%sinterframe_blending = off\n%slcd3x = off\n%s%s = %s\n",
 			options_smooth_note(), options_screen_note(), options_sound_note(), options_low_pass_note(), SOUND_LOW_PASS_DEFAULT,
 			options_output_note(), options_music_note(), SOUND_LEVELS, options_effects_note(), SOUND_LEVELS,
 			options_fast_note(), fast_speed_word(FAST_DEFAULT), options_vibration_note(), feel_level_word(FEEL_DEFAULT), options_triggers_note(),
-			options_colour_note(), options_blend_note(), options_lcd3x_note(), options_voxel_note());
+			options_colour_note(), options_blend_note(), options_lcd3x_note(), options_voxel_note(), display_depth_key(), display_depth_default() ? "on" : "off");
 		fclose(f);
 		platform_persist();
 		return;
@@ -315,8 +315,8 @@ void player_files(bool headless, int smooth_arg, const SoundArgs *sound, const c
 	feel_set_level(feel_level());
 	feel_trace(dev.feel);
 	/* (the anonymous statistics' answer, in settings.ini, and the start's
-	 * view where it is yes: analytics.h) */
-	analytics_net_start(headless, plain);
+	 * view where it is yes: analytics.h; SAVES' saves sent by a code) */
+	start_net(headless, plain);
 	/* (BN5's boot state, which its battles on a second core kept beside the
 	 * saves until issue #82 brought every battle into BN6's engine: gone,
 	 * once, from a data folder that has it; docs/multirom/) */

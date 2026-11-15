@@ -459,7 +459,7 @@ static uint32_t name_hash(const char *name, uint32_t h) {
 	return h;
 }
 
-/* the greeter's and the referee's words as the channel stands, rewritten
+/* the week's portal's and the referee's words as the channel stands, rewritten
  * as it changes (never under an open chat box) */
 static void progs(void) {
 	if (emu_read8(BN6_CHATBOX)) return;
@@ -467,7 +467,7 @@ static void progs(void) {
 	facts(&f);
 	uint32_t g = name_hash(f.arrived, f.navis | f.channel << 8) ^ square_week_said() * 2654435761u;
 	uint32_t r = name_hash(f.fought, f.navis | (uint32_t)f.result << 8 | (f.won + f.lost) << 10) ^ square_watch_said();
-	if (g + 1 != L.greeter_said && square_week_greeter(square_greeter_words(&f))) L.greeter_said = g + 1;
+	if (g + 1 != L.greeter_said && square_week_portal()) L.greeter_said = g + 1;
 	/* (the channel's NetBattle and the question to watch it after his own words: square_watch.c) */
 	if (r + 1 != L.referee_said && square_watch_referee(square_referee_words(&f))) L.referee_said = r + 1;
 }

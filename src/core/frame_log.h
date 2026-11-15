@@ -5,7 +5,18 @@
 #ifndef CW_FRAME_LOG_H
 #define CW_FRAME_LOG_H
 
+#include <stddef.h>
 #include <stdint.h>
+
+#ifdef __PSP__
+/* The PSP's heap in words for each line ("heap N KB in use, ..."), given
+ * by its start (start_psp.c), which this layer may not name */
+void frame_log_heap_from(void (*heap)(char *out, size_t n));
+#endif
+
+/* Depth lighting's part of a frame (docs/engine/voxel.md, Its cost):
+ * `ticks` performance-counter ticks at the picture's `scale` */
+void frame_log_depth(uint64_t ticks, int scale);
 
 /* A frame shown, its present `present` performance-counter ticks long
  * (0 where it was not measured): the line, once a second */

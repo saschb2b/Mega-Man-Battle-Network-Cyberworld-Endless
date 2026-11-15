@@ -348,6 +348,12 @@ bool xvirus_code_ok(const XVirusFamily *f, const XvRegion *r, char *why, size_t 
 const XvBlock *xvirus_block_of(const XVirusFamily *f, uint32_t a);
 const XvData *xvirus_data_at(const XVirusFamily *f, uint32_t a);
 bool xvirus_is_code(const XVirusFamily *f, uint32_t a);
+/* xvirus_is_code for an address of [from, to), from marks made once for
+ * the range (the last range asked kept): the code walk asks it of every
+ * halfword of a block, and each ask scanned every block and data range
+ * (0.13 billion instructions of a start with BN5 and BN4;
+ * docs/devtools/profiling.md). */
+bool xvirus_is_code_in(const XVirusFamily *f, uint32_t from, uint32_t to, uint32_t a);
 /* Whether `a` (Thumb) is a routine of BN6's types copied for BN4's
  * families, at its copy (xvirus_bn4_copy.h, installed before them): a
  * family's call may go there */
