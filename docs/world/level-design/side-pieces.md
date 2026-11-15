@@ -76,7 +76,7 @@ Taken per area as looked at, as every laying rule is
 
 | Area | What the rule cuts | Taken |
 | --- | --- | --- |
-| CopyBot Comp | its claws, 3 looks; round its plateaus, the dark crystal spikes: behind them (below) and standing in front of their faces and beside their corners ([What stands round a plateau](#what-stands-round-a-plateau-stands_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)) | yes, all |
+| CopyBot Comp | its claws, 3 looks; round its plateaus, the dark crystal spikes: behind them (below) and standing in front of their faces and beside their corners ([What stands round a plateau](#what-stands-round-a-plateau-ring_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)) | yes, all |
 | BN4's Undernet | the horns in front of its catwalks, 8 looks; behind them, the rows of horns on the first layer (below), both along whole catwalk runs | yes, both |
 | BN4's countries | nothing; its one thing off the floor, two sockets on platforms' rims joined by a cable through the void, is a set piece no cut takes (below) | no |
 | The Undernet (Undernet 1-3) | its fire bowls beside floors and bridges, alone, in twos and threes: 9 looks, and Undernet Zero's 4; behind upper edges on the second layer, gripping none, a row of five along a walkway, a bowl each, and two alone by its exits: 7 looks (below); the two in a raised ring's holes stand behind no edge and fit no layer (below) | yes, both |
@@ -85,7 +85,7 @@ Taken per area as looked at, as every laying rule is
 | BN5's ACDC Area | nothing; its wire tufts behind its blue walkways' upper edges are drawn into a rim no layer draws, its layers laying no blue walkway (below) | no |
 | The Nest (Underground 1-2) | its crystals and their rubble beside its rims, on the second layer: behind upper edges and under lower ones (below), 17 looks; its lone spires fit no layer | yes |
 | Central Area | on its second layer the Net Dealer's capsule counter, which means a shop; behind its floors one look, the overpass's shadow on a field; nothing else of these kinds (below) | no |
-| Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars (below) | the pillars |
+| Aquarium Comp | one piece on the second layer, nothing to see; under its pads, the pillars; behind its raised landings, the tanks, and on a raised platform's closed corner, the whale-topped console (all below) | the pillars and the tanks |
 | BN5's End Area | no side piece (below, End Area's survey); in a walled hole, its pagoda, the layer's landmark (below) | the pagoda |
 | BN5's Oran Area | behind its floors, 4 looks that are no thing and its sprigs, which fit no layer (below) | no |
 | BN5's Nebula Area | nothing: its dripping pods and pools are drawn into its plates' corners and its paths' ends, which its layers lay; no cut learns a piece from its maps (below) | - |
@@ -295,7 +295,7 @@ stretches: of the squares of four panels a side, one in three by the
 layer's seed takes a piece behind every panel of it that fits, as the maps
 set theirs in rows; the rest take none. BN4's Undernet's horns go along
 whole catwalks instead (below), and CopyBot Comp's spikes round its
-platforms ([What stands round a plateau](#what-stands-round-a-plateau-stands_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)).
+platforms ([What stands round a plateau](#what-stands-round-a-plateau-ring_learn-nm_paste_rings-verified-on-the-maps-and-in-the-game)).
 
 ### Rows along a catwalk (`SIDES_RUNS`; measured on the maps and the atlas)
 
@@ -343,7 +343,7 @@ End Area and Oran Area were tried and left: the cut finds 4 looks in each
 and none fits a layer. End Area's are the pins along its roads' upper rims
 and a raised warp pad (below, End Area's survey); Oran Area's are below.
 
-## What stands round a plateau (`stands_learn`, `nm_paste_rings`; verified on the maps and in the game)
+## What stands round a plateau (`ring_learn`, `nm_paste_rings`; verified on the maps and in the game)
 
 CopyBot Comp (0x85:4, its one map) raises two plateaus of five panels a
 side to height 32, each with a stub of two panels to the ladder down its
@@ -1309,6 +1309,61 @@ level, and sets them in the void behind a field's upper edge on 2 of the
 atlas's 8 layers: a scrap of raised floor, no thing. The other look fits
 no layer, and the hole cut finds no hole. Sky takes none.
 
+## What stands behind a raised floor on both layers (`stands_learn`; verified on the maps)
+
+Aquarium Comp's maps set big glass tanks in a row beside the road of
+stepping stones that leads to their exit: 4 in Aquarium Comp 3 (0x81:2), 3
+in each of the other three (0x81:0, 0x81:1, 0x85:0), each standing in the
+void behind an orange landing two panels wide on the road, at height 16.
+A tank is the second layer's (its frame and front glass) with the first
+layer's showing through it (its back panes), about 18 tiles square, and
+the tile test's tinted maps showed none of it in a layer
+([what the layers take from a map](../../devtools/map-use.md)). Neither
+rule above takes it: the side pieces' cut is made on the ground alone, a
+piece behind a floor is the first layer's or, on the second
+(`sides_learn_behind`), touches none of the floor's top where a tank's
+foot stands on it, and a row's tanks join into one group of 511 to 676
+tiles, each in front of the last.
+
+They are cut in the views of their heights, as the pillars are. A group of
+the second layer is a row of copies where a third of its tiles or more
+hold the same entry a step on (the tanks: 12 tiles across and 6 down, 683
+of the row's tiles repeating, 53 not, where one tank stands over the
+last); the front copy is the tiles with no copy a step on, the largest lot
+of them joined, and the one whole tank (181 tiles). The map draws two
+tanks in one tile where one stands over the other, so each tile of the
+piece is read from the copy that shows it whole: the front one, but where
+the tank behind it reaches into it, the back one, which nothing stands
+over. With it go the first layer's tiles off the floor between its ends
+in each row, its back panes (215 tiles in all). It is such a piece where
+some of it lies on that floor (its foot), seven tenths or more off it, a
+floor straight below its bottom row and none above its top. Two looks,
+one a row facing each way (0x81:2's and 0x81:1's are the same).
+
+A layer sets one in the stretches that take what stands behind a floor,
+on a free panel whose panels it draws over are what they are in its map:
+floor under its foot, the void behind it. The nine panels round it are not
+held to the map's, as they are for a smaller piece: a tank reaches past
+them, and its landing's road beside it is floor no layer draws. It goes on
+both layers whole, over nothing but where its map draws its foot over the
+landing; there it goes over the layer's floor, which runs on under it as
+the landing does. Those tiles' edges are no strips any map shows (blue
+floor under a foot the maps stand on orange) and the
+[tile test](../../devtools/tile-test.md) leaves them out of its breaks, as
+it leaves out a pad's (`NETMAP_PASTED_FOOT`): one tank added 10 breaks to
+a layer of 82, and looked over at 4x its foot meets the floor's rim as on
+its landing. 0 or 1 a layer in the atlas's four. Nothing about walking
+changes: its panels are void. A tank holds no layer priorities, so a
+[Glitch layer](../../game/glitch-layer.md)'s flip, which swaps tiles and colours
+alone, draws it as a layer of its own area does.
+
+Aquarium Comp 3's whale-topped console stands the same way on a raised
+platform's corner, a panel its walls close, and is cut too (69 tiles), but
+it fits only where a layer's floor has the same notch, which none of the
+atlas's showed. Comp 2's (0x85:0) plain console is not reached: the 24
+looks a book takes of a floor's sides, under or behind it (sides.c's
+`LOOKS`) are the pillars' before that map.
+
 ## Not built
 
 - **The first tile layer's other pieces.** Robot Control's pipes ending in
@@ -1319,5 +1374,10 @@ no layer, and the hole cut finds no hole. Sky takes none.
   (The Nest's and Mr. Weather's were counted here as well; theirs lie on
   the second layer, above.) Scenery refuses a
   piece that touches other art; the rule for these is theirs to get.
+- **Aquarium Comp's road and landings.** The tanks' road of stepping
+  stones (fish-shaped plates on pink planks), its orange landings and its
+  exit arrow are floor of another kind and a road, its stairs rising 16
+  (half a panel) to the pads and platforms are stairs, and its pads' red
+  marks are an exit's centrepiece: the owner's calls (issue #505).
 - The other kinds the survey found (floor marks, the exit arrows and warp
   discs, stairs) are listed in issue #505.

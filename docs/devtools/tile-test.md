@@ -62,8 +62,12 @@ a shade (3 steps of a 5-bit channel) are what breaks there.
   floor or shade against this one, a rim cut off.
 - **nick**: fewer. A panel's line or light cut short.
 
-Both are listed per layer in the report and held by the baseline; the
-breaks are yellow in the `seams_*.png` pictures, and `breaks_*.txt` lists
+Both are listed per layer in the report and held by the baseline, but
+for the edges of a side piece's foot set over a floor's art (the
+Aquarium's tanks: its maps stand them on landings of another colour, so
+the layer's floor under the foot shows strips no map does;
+[side pieces](../world/level-design/side-pieces.md)), which are left out;
+the breaks are yellow in the `seams_*.png` pictures, and `breaks_*.txt` lists
 each tile's (x, y, bits: 1 right, 2 below, 4 and 8 a nick there). Strict
 equality of strips read 368 per 100 panels in Central, every one a pixel
 or two of its panels' lights, so the count takes the nearest strip and

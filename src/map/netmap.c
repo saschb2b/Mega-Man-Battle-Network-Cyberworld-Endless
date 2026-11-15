@@ -228,7 +228,6 @@ static bool has_middle(int x, int y) {
 	return false;
 }
 
-bool nm_platform(int x, int y) { return !walkway(x, y) && has_middle(x, y); }
 /* Where the walkways' floor runs on across the platforms they meet
  * (TILES_CROSSING), as the comps' and homepages' maps cross their fields
  * with stripes of it: a walkway entering a platform square on, in the
@@ -563,6 +562,7 @@ static uint16_t *pick_map(const Learned *L, int tw, int th, bool props) {
 	uint32_t *px = L->breaks && tiles_measure ? area_src_render(L->def->xrom, L->def->group, L->def->number, map, tw, th) : NULL;
 	if (px && (nm_last.breaks = calloc(cells, 1))) breaks_count(L->breaks, px, tw, th, nm_last.breaks, &tiles_stats.breaks, &tiles_stats.nicks);
 	free(px);
+	nm_unfoot_breaks(tw, th);
 	nm_paste_rings(L, map, tw, th);   /* (in the void beside the floor, as scenery is: not its picture) */
 	netmap_scenery = decor_place(&L->decor, map, tw, th, nm_cur->seed);
 	return map;

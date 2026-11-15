@@ -89,7 +89,8 @@ size_t netmap_tilemap_bytes(void);
  * why (tiles_pick_why). */
 const uint8_t *netmap_last_seams(void);
 /* ... and the tiles set whole over what the classes picked (a bit each). */
-enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4, NETMAP_PASTED_ARROW = 8 };
+enum { NETMAP_PASTED_PAD = 1, NETMAP_PASTED_EMBLEM = 2, NETMAP_PASTED_STAIR = 4, NETMAP_PASTED_ARROW = 8,
+       NETMAP_PASTED_FOOT = 16 };   /* (foot: a side piece's set over the floor's art, sides.h) */
 const uint8_t *netmap_last_pasted(void);
 /* ... and, where they are measured (breaks_measure), the breaks in its
  * picture (per tile: bit 0 across its right edge, bit 1 its lower edge,

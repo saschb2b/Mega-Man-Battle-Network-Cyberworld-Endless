@@ -44,6 +44,9 @@ void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th);
  * art in the void beside the floor, set after its breaks are measured, as
  * scenery is. */
 void nm_paste_rings(const Learned *L, uint16_t *map, int tw, int th);
+/* (measuring) the breaks across a side piece's foot, set over the floor's
+ * art (NETMAP_PASTED_FOOT), taken out of nm_last.breaks and tiles_stats. */
+void nm_unfoot_breaks(int tw, int th);
 /* The side pieces the last nm_paste_sides set: how many, and piece i with
  * the world corner of the panel it grips. */
 int nm_sides_set(int i, const SidePiece **p, int *X, int *Y);
