@@ -25,6 +25,9 @@ int xguardian_bn4_hp(int navi, int version);
 int xguardian_bn4_element(int navi);
 /* His overworld sprite's number in BN4's list 6, his mugshot's the same in its list 8 (BN4_OW_*); 0 none */
 int xguardian_bn4_ow(int navi);
+/* The animation his overworld sprite stands in facing BN6's `face` (0 up, clockwise), turned to the camera where a side's
+ * view is not drawn (BN4_OW_VIEWS*: docs/rom/bn4.md, Sprite lists) */
+int xguardian_bn4_stand(int navi, int face);
 /* The BN6 Navi (guardians.h's number) whose Navi chip his Guardian Data gives while his own sits out: his element's, else
  * his kind's (docs/game/bosses/bn4-navis.md, His Guardian Data); 0 none */
 int xguardian_bn4_kin(int navi);

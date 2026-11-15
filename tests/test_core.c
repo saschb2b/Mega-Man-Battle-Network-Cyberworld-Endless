@@ -44,6 +44,7 @@
 #include "test_voxel.h"
 #include "chip_pool.h"
 #include "guardians.h"
+#include "xguardian_bn4.h"
 #include "launcher_roms.h"
 #include "launcher_text.h"
 #include "fork_words.h"
@@ -6874,6 +6875,19 @@ static void super_records(void) {
 		guardian_body(12, GUARDIAN_FACE_LEFT).anim == 5 && guardian_body(16, GUARDIAN_FACE_RIGHT).anim == 2 &&
 		guardian_body(1, GUARDIAN_FACE_LEFT).anim == GUARDIAN_FACE_LEFT && guardian_body(7, GUARDIAN_FACE_RIGHT).mirror &&
 		!guardian_body(7, GUARDIAN_FACE_LEFT).mirror, "super: facing across the screen");
+	/* (BN4's in the diagonal their sprites draw towards the camera, never
+	 * mirrored: the front views' 3 and 5, WindMan's four alone 1 and 2;
+	 * GutsMan's left stood in his back, WindMan's past his four; up-left
+	 * their backs, TopMan's and SparkMan's empty and turned to the camera:
+	 * docs/rom/bn4.md, Sprite lists) */
+	bool bn4 = xguardian_bn4_count() == 12;
+	for (int k = 0; k < xguardian_bn4_count(); ++k) {
+		int navi = xguardian_bn4_navi(k), four = xguardian_bn4_ow(navi) == BN4_OW_WINDMAN;
+		NpcBody r = guardian_body(navi, GUARDIAN_FACE_RIGHT), l = guardian_body(navi, GUARDIAN_FACE_LEFT);
+		bn4 = bn4 && r.anim == (four ? 1 : 3) && l.anim == (four ? 2 : 5) && !r.mirror && !l.mirror &&
+			guardian_body(navi, 5).anim == l.anim && guardian_body(navi, 7).anim == (four ? 3 : xguardian_bn4_ow(navi) == BN4_OW_TOPMAN || xguardian_bn4_ow(navi) == BN4_OW_SPARKMAN ? 5 : 7);
+	}
+	CHECK(bn4, "super: BN4's guardians face across the screen in their sprites' own views");
 	CHECK(super_cybeast_form(0) == SUPER_CYBEAST_V1 && super_cybeast_form(1) == SUPER_CYBEAST_SP && super_cybeast_form(4) == SUPER_CYBEAST_SP,
 		"super: Gregar SP after the first Net");
 	CHECK(super_song(SUPER_BASS) == 0x16 && super_song(SUPER_CYBEAST) == 0x17, "super: their records' themes");

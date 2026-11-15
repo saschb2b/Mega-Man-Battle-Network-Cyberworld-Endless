@@ -13,24 +13,24 @@
 /* The proved: BN4's V1 enemy id (his seat (id - BN4_NAVI_FIRST_ID) / 4), his plate on BN4's bracket (BN4_ENTRANT_ID, named
  * BN4_PLATE_*, tied to his Navi from BN4's data: docs/multirom/bn4-tournament.md, Each plate's Navi), his overworld sprite's
  * number in BN4's list 6 (his mugshot's the same in its list 8, BN4_OW_*: docs/rom/bn4.md, Sprite lists), the BN6 Navi whose
- * chip stands in for his own until his plays (his element's, else his kind's: docs/game/bosses/bn4-navis.md) and his look on
- * a card. A Navi joins with his line once his spec PASSes (docs/multirom/bn4-navis.md), every mutation of it caught. */
+ * chip stands in for his own until his plays (his element's, else his kind's: docs/game/bosses/bn4-navis.md), the animations
+ * his overworld sprite stands in facing each diagonal (BN4_OW_VIEWS*, read off his sprite) and his look on a card. A Navi joins with his line once his spec PASSes (docs/multirom/bn4-navis.md), every mutation of it caught. */
 static const struct {
-	uint8_t v1, plate, ow, kin;
+	uint8_t v1, plate, ow, kin, views[4];
 	Guardian look;
 } proved[] = {
-	{ 0x84, BN4_PLATE_GUTSMAN, BN4_OW_GUTSMAN, 9, { "GutsMan", "The Pounding Fist", GUARDIAN_NO_MUGSHOT, -1, 232, 152, 56 } },   /* tests/xdiff/gutsman_v1.json */
-	{ 0x88, BN4_PLATE_WINDMAN, BN4_OW_WINDMAN, 8, { "WindMan", "Master of the Wind", GUARDIAN_NO_MUGSHOT, -1, 120, 200, 168 } },   /* tests/xdiff/windman_v1.json */
-	{ 0x8C, BN4_PLATE_SEARCHMAN, BN4_OW_SEARCHMAN, 4, { "SearchMan", "The Unseen Marksman", GUARDIAN_NO_MUGSHOT, -1, 136, 168, 80 } },   /* tests/xdiff/searchman_v1.json */
-	{ 0x90, BN4_PLATE_FIREMAN, BN4_OW_FIREMAN, 1, { "FireMan", "The Blazing Furnace", GUARDIAN_NO_MUGSHOT, -1, 232, 80, 48 } },   /* tests/xdiff/fireman_v1.json */
-	{ 0x94, BN4_PLATE_THUNDERMAN, BN4_OW_THUNDERMAN, 2, { "ThunderMan", "The Thundering Cloud", GUARDIAN_NO_MUGSHOT, -1, 240, 200, 48 } },   /* tests/xdiff/thunderman_v1.json */
-	{ 0xA8, BN4_PLATE_AQUAMAN, BN4_OW_AQUAMAN, 6, { "AquaMan", "The Rushing Tide", GUARDIAN_NO_MUGSHOT, -1, 72, 152, 240 } },   /* tests/xdiff/aquaman_v1.json */
-	{ 0x80, BN4_PLATE_ROLL, BN4_OW_ROLL, 14, { "Roll", "The Summoning Petal", GUARDIAN_NO_MUGSHOT, -1, 248, 120, 176 } },   /* tests/xdiff/roll_v1.json */
-	{ 0xAC, BN4_PLATE_WOODMAN, BN4_OW_WOODMAN, 7, { "WoodMan", "The Towering Timber", GUARDIAN_NO_MUGSHOT, -1, 112, 192, 64 } },   /* tests/xdiff/woodman_v1.json */
-	{ 0xA4, BN4_PLATE_JUNKMAN, BN4_OW_JUNKMAN, 10, { "JunkMan", "The Scrapheap Storm", GUARDIAN_NO_MUGSHOT, -1, 184, 136, 80 } },   /* tests/xdiff/junkman_v1.json */
-	{ 0xB0, BN4_PLATE_TOPMAN, BN4_OW_TOPMAN, 5, { "TopMan", "The Whirling Top", GUARDIAN_NO_MUGSHOT, -1, 224, 72, 64 } },   /* tests/xdiff/topman_v1.json */
-	{ 0xC0, BN4_PLATE_SPARKMAN, BN4_OW_SPARKMAN, 2, { "SparkMan", "The Crackling Spark", GUARDIAN_NO_MUGSHOT, -1, 248, 216, 64 } },   /* tests/xdiff/sparkman_v1.json */
-	{ 0xB8, BN4_PLATE_BURNERMAN, BN4_OW_BURNERMAN, 1, { "BurnerMan", "The Roaring Burner", GUARDIAN_NO_MUGSHOT, -1, 240, 112, 40 } },   /* tests/xdiff/burnerman_v1.json */
+	{ 0x84, BN4_PLATE_GUTSMAN, BN4_OW_GUTSMAN, 9, BN4_OW_VIEWS, { "GutsMan", "The Pounding Fist", GUARDIAN_NO_MUGSHOT, -1, 232, 152, 56 } },   /* tests/xdiff/gutsman_v1.json */
+	{ 0x88, BN4_PLATE_WINDMAN, BN4_OW_WINDMAN, 8, BN4_OW_VIEWS_FOUR, { "WindMan", "Master of the Wind", GUARDIAN_NO_MUGSHOT, -1, 120, 200, 168 } },   /* tests/xdiff/windman_v1.json */
+	{ 0x8C, BN4_PLATE_SEARCHMAN, BN4_OW_SEARCHMAN, 4, BN4_OW_VIEWS, { "SearchMan", "The Unseen Marksman", GUARDIAN_NO_MUGSHOT, -1, 136, 168, 80 } },   /* tests/xdiff/searchman_v1.json */
+	{ 0x90, BN4_PLATE_FIREMAN, BN4_OW_FIREMAN, 1, BN4_OW_VIEWS, { "FireMan", "The Blazing Furnace", GUARDIAN_NO_MUGSHOT, -1, 232, 80, 48 } },   /* tests/xdiff/fireman_v1.json */
+	{ 0x94, BN4_PLATE_THUNDERMAN, BN4_OW_THUNDERMAN, 2, BN4_OW_VIEWS, { "ThunderMan", "The Thundering Cloud", GUARDIAN_NO_MUGSHOT, -1, 240, 200, 48 } },   /* tests/xdiff/thunderman_v1.json */
+	{ 0xA8, BN4_PLATE_AQUAMAN, BN4_OW_AQUAMAN, 6, BN4_OW_VIEWS, { "AquaMan", "The Rushing Tide", GUARDIAN_NO_MUGSHOT, -1, 72, 152, 240 } },   /* tests/xdiff/aquaman_v1.json */
+	{ 0x80, BN4_PLATE_ROLL, BN4_OW_ROLL, 14, BN4_OW_VIEWS, { "Roll", "The Summoning Petal", GUARDIAN_NO_MUGSHOT, -1, 248, 120, 176 } },   /* tests/xdiff/roll_v1.json */
+	{ 0xAC, BN4_PLATE_WOODMAN, BN4_OW_WOODMAN, 7, BN4_OW_VIEWS, { "WoodMan", "The Towering Timber", GUARDIAN_NO_MUGSHOT, -1, 112, 192, 64 } },   /* tests/xdiff/woodman_v1.json */
+	{ 0xA4, BN4_PLATE_JUNKMAN, BN4_OW_JUNKMAN, 10, BN4_OW_VIEWS, { "JunkMan", "The Scrapheap Storm", GUARDIAN_NO_MUGSHOT, -1, 184, 136, 80 } },   /* tests/xdiff/junkman_v1.json */
+	{ 0xB0, BN4_PLATE_TOPMAN, BN4_OW_TOPMAN, 5, BN4_OW_VIEWS_FRONT, { "TopMan", "The Whirling Top", GUARDIAN_NO_MUGSHOT, -1, 224, 72, 64 } },   /* tests/xdiff/topman_v1.json */
+	{ 0xC0, BN4_PLATE_SPARKMAN, BN4_OW_SPARKMAN, 2, BN4_OW_VIEWS_FRONT, { "SparkMan", "The Crackling Spark", GUARDIAN_NO_MUGSHOT, -1, 248, 216, 64 } },   /* tests/xdiff/sparkman_v1.json */
+	{ 0xB8, BN4_PLATE_BURNERMAN, BN4_OW_BURNERMAN, 1, BN4_OW_VIEWS, { "BurnerMan", "The Roaring Burner", GUARDIAN_NO_MUGSHOT, -1, 240, 112, 40 } },   /* tests/xdiff/burnerman_v1.json */
 };
 #define NPROVED ((int)(sizeof proved / sizeof *proved))
 
@@ -63,6 +63,15 @@ int xguardian_bn4_plate(int navi) {
 int xguardian_bn4_ow(int navi) {
 	int k = line_of(navi);
 	return k >= 0 ? proved[k].ow : 0;
+}
+
+int xguardian_bn4_stand(int navi, int face) {
+	/* (BN6's facing to the diagonal drawn: up and up-right up-right, right and down-right down-right, down, down-left and left
+	 * down-left, up-left up-left; a side turned to the camera, as BN6's sprites drawn only towards it are (guardians.c),
+	 * where BN4's own even animations round it clockwise, his left to his back) */
+	static const uint8_t diagonal[8] = { 0, 0, 1, 1, 2, 2, 2, 3 };
+	int k = line_of(navi);
+	return k >= 0 ? proved[k].views[diagonal[face & 7]] : face & 7;
 }
 
 int xguardian_bn4_kin(int navi) {

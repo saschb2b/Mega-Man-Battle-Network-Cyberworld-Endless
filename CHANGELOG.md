@@ -73,6 +73,13 @@
   BN6's beam, as their own sprites have no log-in of BN6's. GutsMan no
   longer stands invisible through his entrance, either. A run saved
   before this update starts its layer afresh at a CONTINUE.
+- **Fixed: BN4's guardians turned their backs, or were not there.**
+  BN4 draws its Navis facing four ways where BN6 draws eight, and
+  BN6's "facing left" is a back view in BN4's: with MegaMan on his
+  left, GutsMan, Roll, FireMan, ThunderMan and AquaMan showed their
+  backs, WindMan, TopMan and SparkMan nothing at all. Each now stands
+  in his own sprite's view that faces MegaMan, on either side of his
+  arena.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.

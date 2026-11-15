@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-15",
+  "what": "BN4's guardians stand in their sprites' own views (src/layer/xguardian_bn4.c's views, BN4_OW_VIEWS* in src/emu/bn4_navis.h): BN4's Navis draw four diagonals by BN6's eight facings, so a guardian facing left had shown his back or nothing; now each faces MegaMan at both sides of his arena, the Glitch copy's body too."
+}
