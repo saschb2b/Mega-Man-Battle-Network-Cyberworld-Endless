@@ -952,25 +952,31 @@ def tiles(seeds='2', baseline=False):
     report = os.path.join(ROOT, '.build', 'atlas', 'report.txt')
     if not os.path.exists(report):
         return code or 1
-    agg = collections.defaultdict(lambda: [0, 0, 0, 0, 0])
+    agg = collections.defaultdict(lambda: [0, 0, 0, 0, 0, 0, 0])
     for l in open(report):
         m = re.match(r'biome +(\d+) .*?: (\d+) panels.*seams (\d+), breaks (\d+), nicks (\d+), off near (\d+)', l)
         if m:
             a = agg[int(m[1])]
             a[0] += 1; a[1] += int(m[2]); a[2] += int(m[3]); a[3] += int(m[6]); a[4] += int(m[4])
+            # (the holes in its floor's top the safety net found, and those it left: src/map/voids.h)
+            v = re.search(r'voids (\d+), holes left (\d+)', l)
+            if v:
+                a[5] += int(v[1]); a[6] += int(v[2])
     print()
-    print(f'{"area":16} {"layers":>6} {"panels":>7} {"breaks /100":>12} {"off /100":>9} {"seams /100":>11}   why off')
-    total = [0, 0, 0, 0]
-    for b, (n, panels, seams, off, breaks) in sorted(agg.items()):
+    print(f'{"area":16} {"layers":>6} {"panels":>7} {"breaks /100":>12} {"off /100":>9} {"seams /100":>11} {"holes":>6} {"left":>5}   why off')
+    total = [0, 0, 0, 0, 0, 0]
+    for b, (n, panels, seams, off, breaks, voids, left) in sorted(agg.items()):
         why = ', '.join(f'{WHY_NAMES[k]} {v}' for k, v in enumerate((WHY or {}).get(b, [])) if v) if WHY else ''
         print(f'{AREAS[b] if b < len(AREAS) else b:16} {n:6} {panels:7} {100 * breaks / panels:12.1f} {100 * off / panels:9.1f} '
-              f'{100 * seams / panels:11.1f}   {why}')
-        total[0] += panels; total[1] += off; total[2] += seams; total[3] += breaks
-    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[3] / total[0]:12.1f} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}')
+              f'{100 * seams / panels:11.1f} {voids:6} {left:5}   {why}')
+        total[0] += panels; total[1] += off; total[2] += seams; total[3] += breaks; total[4] += voids; total[5] += left
+    print(f'{"all":16} {"":6} {total[0]:7} {100 * total[3] / total[0]:12.1f} {100 * total[1] / total[0]:9.1f} {100 * total[2] / total[0]:11.1f}'
+          f' {total[4]:6} {total[5]:5}')
     print('breaks: tile edges across which the picture shows a strip of pixels no original map shows at a tile\'s edge, a panel'
           ' line cut off or a block of another shade (yellow in the seams pictures, listed in .build/atlas/breaks_*.txt);'
           ' off: tiles drawn with other floors than they show (framed magenta, close-ups in .build/atlas/defects_bNN.png);'
-          ' seams: tiles meeting as no original map sets them (red)')
+          ' seams: tiles meeting as no original map sets them (red); holes: tiles whose floor\'s top showed the void'
+          ' (src/map/voids.h), framed white where the safety net mended them, blue where it left one (left)')
     return code
 
 
