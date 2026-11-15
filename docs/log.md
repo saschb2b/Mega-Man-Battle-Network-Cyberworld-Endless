@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (CopyBot Comp's crystal spikes, #664, named and pictured among what stands beside the floor).
 * **Update**: releases/v0.22.0.md (the shared dive, the net climbing, what stands beside the floor, the locks, the Glitch layer, touch controls off and SAVES on a first start written in, from the pull requests merged since #627).
 * **Update**: code/tools.md (`tools/psp_picture.py`'s row: the PSP build's pictures from PPSSPP's headless runner, for 0.22.0's notes).
 * **Update**: code/tools.md (`tools/loading_picture.py`'s row: the "Building the net..." screen from a windowed run on a virtual display, for 0.22.0's notes), releases/v0.22.0.md (the pictures of the saves, the dive, the systems, the words and the fixes written in).
