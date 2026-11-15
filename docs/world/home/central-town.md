@@ -3,7 +3,7 @@ type: Feature
 title: "4. Central Town, home"
 description: "Central Town as every run's home (issue #94): its original width, Lan's house and room taken over (`lan_house.c`), his PC the run's jack-in to Lan's HP, and his room's words recalling the last run."
 tags: [world, home]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T00:02:02Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:30:00Z }
 ---
 
 # 4. Central Town, home

@@ -3,7 +3,7 @@ type: Review Log
 title: "Voice sweep: the net and the run"
 description: "Log of the 19 October 2026 voice sweep of L's briefing, lessons, NaviCust words, services, rewards, bystanders, rumors and DarkChips: 434 lines read, 109 cut, 16 noted, and the hint systems removed with them."
 tags: [voice]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:59:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:10:05Z }
 ---
 # Voice sweep: the net and the run
 

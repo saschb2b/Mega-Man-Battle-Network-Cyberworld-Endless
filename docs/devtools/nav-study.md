@@ -3,7 +3,7 @@ type: Tool
 title: "Nav study: the way across BN6's own maps"
 description: "`--atlas nav` walks each area's original net maps, BN6's and the other games' read beside it, and counts the one-wide walkways crossed between their farthest panels, setting `narrow_cap` and `NetAreaDef.narrows`, and `--atlas arrivals` lists where BN6's maps place MegaMan as he arrives."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-10-06T13:05:29Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:23:00Z }
 ---
 
 # Nav study: the way across BN6's own maps

@@ -3,7 +3,7 @@ type: Feature
 title: "Rumors"
 description: "Rumors (`src/layer/rumor_lines.c`): one bystander a layer passes a true rumor, a Program Advance recipe for the folder's chips or a secret the profile has yet to find; the Endless Net BBS mail and town talk."
 tags: [game, meta]
-generated: { by: claude-code/unrecorded, at: 2026-10-05T11:52:49Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:00:00Z }
 ---
 
 # Rumors (3 October 2026)
