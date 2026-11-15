@@ -47,7 +47,7 @@ final class Updater {
     static final String MARK = "update-started";
     private static final String STATUS = "io.github.saschb2b.cyberworldendless.UPDATE_STATUS";
     private static final String TAG = "Cyberworld";
-    private static final int LOOK_MAX = 16 * 1024;
+    private static final int LOOK_MAX = 64 * 1024;   // (update.json with its changes: src/update/update.c's MANIFEST_MAX)
     /* how long the line's note shows before Android ends the game */
     private static final long NOTE_MS = 2500;
 

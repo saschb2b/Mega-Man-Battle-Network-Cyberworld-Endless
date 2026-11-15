@@ -8,10 +8,12 @@
 #include <stdbool.h>
 
 /* A frame of the title's: the updater's (its look at the start, and the
- * game's end once a download is in place) */
-void title_version_tick(void);
+ * game's end once a download is in place), and once its menu shows
+ * (`menu`), the update box where one is due (options_news.h) */
+void title_version_tick(bool menu);
 /* The line at the picture's corner (x0, y0): the best depth among the
- * profile's record and `saved_depth`, where `best` asks for it */
-void title_version_draw(int x0, int y0, int saved_depth, bool best);
+ * profile's record and `saved_depth`, where `best` asks for it; once the
+ * menu shows (`menu`), a newer version's note gives way to its rows */
+void title_version_draw(int x0, int y0, int saved_depth, bool best, bool menu);
 
 #endif

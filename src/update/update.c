@@ -40,7 +40,8 @@
 
 /* the newest release's own, which GitHub sends on to that release's file */
 #define MANIFEST_URL "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/update.json"
-#define MANIFEST_MAX (16 * 1024)
+#define MANIFEST_MAX (64 * 1024)   /* (its changes, a release's CHANGELOG section, 40 KB at most) */
+#define CHANGES_MAX (48 * 1024)
 
 static struct {
 	bool settled, looked, here, on, offered, ended, asking;
@@ -48,8 +49,10 @@ static struct {
 	const char *key;           /* this copy's file in update.json, where it installs one */
 	char url[300];             /* update.json's address (a developer's may differ) */
 	char from[24];             /* this build's version */
+	char boxed[32];            /* the version the title's box last offered (settings.ini) */
 	char agent[64];            /* the requests' User-Agent */
 	UpdateRelease found;       /* the newer release, written before the state says FOUND */
+	char changes[CHANGES_MAX]; /* ... its changes (update.json's), the same */
 	SDL_atomic_t state, percent, stop, busy;
 #ifdef __3DS__
 	Thread thread;             /* the last one started, joined before the next and at the end */
@@ -67,8 +70,12 @@ static bool on_read(void) {
 	FILE *f = fopen(path, "r");
 	if (!f) return true;
 	bool on = true;
-	while (fgets(line, sizeof line, f))
-		if (line[0] != '#' && sscanf(line, " %31[a-z_] = %31s", key, val) == 2 && !strcmp(key, "updates")) on = strcmp(val, "off") && strcmp(val, "no");
+	while (fgets(line, sizeof line, f)) {
+		if (line[0] == '#' || sscanf(line, " %31[a-z_] = %31s", key, val) != 2) continue;
+		if (!strcmp(key, "updates")) on = strcmp(val, "off") && strcmp(val, "no");
+		/* (and the version the title's box last offered: it asks once a version) */
+		else if (!strcmp(key, "update_offered")) snprintf(U.boxed, sizeof U.boxed, "%s", val);
+	}
 	fclose(f);
 	return on;
 }
@@ -109,6 +116,7 @@ static void looked(bool answered, const char *text) {
 			U.found = r;
 		}
 		if (!U.key) U.found = r;
+		update_manifest_changes(text, U.changes, sizeof U.changes);
 		SDL_AtomicSet(&U.state, UPDATE_FOUND);
 	}
 	printf("update: %s %s %s\n", U.from, newer ? "has a newer version:" : read ? "is the newest" : answered ? "read no update.json" : "had no answer",
@@ -340,6 +348,22 @@ bool update_line_first(void) {
 	if (U.offered || !update_line_shown()) return false;
 	U.offered = true;
 	return true;
+}
+
+const char *update_changes(void) { return update_state() != UPDATE_IDLE ? U.changes : ""; }
+
+bool update_box_due(void) {
+	settle();
+	return update_state() == UPDATE_FOUND && at_title() && strcmp(U.boxed, U.found.version) != 0;
+}
+
+void update_box_done(void) {
+	char path[600];
+	if (!U.found.version[0] || !strcmp(U.boxed, U.found.version)) return;
+	snprintf(U.boxed, sizeof U.boxed, "%s", U.found.version);
+	settings_path(path, sizeof path);
+	settings_line_write(path, "update_offered", U.boxed, update_offered_note());
+	platform_persist();
 }
 
 bool update_press(void) {

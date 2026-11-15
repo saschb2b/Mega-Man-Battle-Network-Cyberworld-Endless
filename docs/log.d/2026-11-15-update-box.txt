@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T03:00:00Z
+* **Update**: engine/updates.md (the update box: the release's notes a page an entry, Update now and Later as buttons with their keys, once a version; the title's note and SELECT: Update hint; update.json's changes from the players' notes), GUIDE.md (Updates: the box), code/update.md (`options_news.c`, the title's hint, the tool's notes, their tests), code/core.md (`options_news.c`), code/tests.md (`test_update_manifest.py`).

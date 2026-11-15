@@ -15,6 +15,7 @@
 #include "feel_out.h"
 #include "feel.h"
 #include "game.h"
+#include "options_news.h"
 #include "options_scene.h"
 #include "options_state.h"
 #include "options_text.h"
@@ -97,19 +98,32 @@ void options_open(void) {
 	touch_release();
 }
 
+/* Options on the update's line: the update box's Yes on the title shows the download go there */
+void options_open_update(void) {
+	options_open();
+	if (!update_line_shown()) return;
+	O.page = PAGE_GAME;
+	O.at[PAGE_GAME] = 0;
+	scroll();
+}
+
 void options_first_start(void) { analytics_ask_offer(); }
 
-bool options_shown(void) { return O.open || controls_shown() || analytics_ask_shown(); }
+/* (a question over the title or Options: the statistics' or the update box) */
+static bool question_shown(void) { return analytics_ask_shown() || news_box_shown(); }
+
+bool options_shown(void) { return O.open || controls_shown() || question_shown(); }
 
 /* The screen shown, in a word, for a headless run's state (screen_name.c): NULL where none */
 const char *options_screen(void) {
 	static const char *const pages[PAGE_COUNT] = { "options-display", "options-audio", "options-game" };
+	if (news_box_shown()) return "update-box";
 	if (controls_shown()) return "controls";
 	if (O.open) return pages[O.page];
 	return analytics_ask_shown() ? "statistics-question" : NULL;
 }
 
-bool options_takes_buttons(void) { return analytics_ask_shown() && !O.open && !controls_shown(); }
+bool options_takes_buttons(void) { return question_shown() && !O.open && !controls_shown(); }
 
 /* ---- the sound ---- */
 
@@ -269,7 +283,8 @@ static void choose(void) {
 	 * it stands: what is sent is read before a yes) */
 	case LINE_STATS: if (analytics_ask_open()) audio_sfx(SFX_SELECT); break;
 	/* (the download begun, or the download page opened: update.h) */
-	case LINE_UPDATE: if (update_press()) audio_sfx(SFX_SELECT); break;
+	/* (the update box, its news and Yes; a failed download tried again at once) */
+	case LINE_UPDATE: if (update_state() == UPDATE_FAILED ? update_press() : news_box_open()) audio_sfx(SFX_SELECT); break;
 	default: turn(options_line_kind(), TURN_PRESS); break;
 	}
 }
@@ -321,6 +336,7 @@ void options_update(void) {
 	/* (the updater's frame, the title's own stopped under Options: update.h) */
 	update_tick();
 	if (analytics_ask_shown()) { analytics_ask_update(); return; }
+	if (news_box_shown()) { news_box_update(); return; }
 	if (controls_shown()) { controls_update(); return; }
 	if (O.open) {
 		++O.t;
@@ -331,6 +347,7 @@ void options_update(void) {
 
 bool options_back(void) {
 	if (analytics_ask_shown()) return analytics_ask_back();
+	if (news_box_shown()) return news_box_back();
 	if (controls_shown()) return controls_back();
 	if (!O.open) return false;
 	if (O.asking) answer(false);
@@ -357,7 +374,7 @@ static void tapped(int at) {
 }
 
 void options_finger(uint32_t type, SDL_FingerID id, int x, int y) {
-	bool ask = analytics_ask_shown();
+	bool ask = question_shown();
 	if (!ask && controls_shown()) { controls_finger(type, id, x, y); return; }
 	if (!ask && !O.open) return;
 	if (type == SDL_FINGERDOWN) {
@@ -367,6 +384,7 @@ void options_finger(uint32_t type, SDL_FingerID id, int x, int y) {
 	}
 	if (type != SDL_FINGERUP || !O.finger_down || id != O.finger) return;
 	O.finger_down = false;
+	if (news_box_shown()) { news_box_tap(x - P.core_x, y - P.core_y); return; }
 	if (ask) { analytics_ask_tap(x - P.core_x, y - P.core_y); return; }
 	tapped(options_tap(x - P.core_x, y - P.core_y));
 }

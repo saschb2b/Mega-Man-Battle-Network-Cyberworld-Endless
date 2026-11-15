@@ -21,14 +21,42 @@ next](#what-comes-next).
 
 ## What the player sees
 
-- **The title**, once a newer version is found: `New v0.22.0` in the
-  PET's green beside the build's own version, over the copyright line
-  (`src/scenes/title_version.c`). Nothing pops up and nothing waits.
+- **The update box**, once a version: the first time the title's menu
+  shows after a newer version is found, the box opens over it
+  (`src/core/options_news.c`), the release's notes as GitHub's page has
+  them, a page at a time. Its cover holds the notes' tagline and
+  summary, then each entry has a page: its section's name in small
+  capitals and the page's number between the PET's arrows over BN6's
+  list window, the heading in the bold letters, the paragraphs and
+  points (the PET's gold arrow before each) in the list's thin ones.
+  Left and Right (or L and R) turn the pages, Up and Down scroll a long
+  one, its scroll bar beside it. Under the window two buttons say what
+  they do, each with its key, where a Yes and No said nothing of it:
+  **A: Update now** (NaviCust's green RUN!) and **B: Later**; **A:
+  Download** where the copy updates from the download page; where the
+  game can do nothing (the itch app's copy, a handheld's releases page,
+  Prospero Store) the line says where it comes from beside **A: OK**.
+  It takes no press for half a second, so an A mashed through the menu
+  is no update. Later is remembered for that version
+  (`settings.ini`'s `update_offered`): the box does not come back.
+- **The title**, after: `New v0.22.0` in the PET's green beside the
+  build's own version until the menu shows (`src/scenes/title_version.c`),
+  then the key hints over the version, SAVES' and the ROMs', get one in
+  that green on top: `SELECT: Update` (each player's own key's name,
+  `src/scenes/title_menu.c`).
 - **Options**, opened on the title: the Game page's first line is
   `Update to 0.22.0`, and the first opening after the find puts the
-  cursor on it. Its note says what A does, which depends on the copy
-  (below). While the file downloads the line's value is its share in
-  percent; a failed download says `Failed`, and A tries again.
+  cursor on it. A opens the box again; Update now there starts the
+  download, the line's value its share in percent, and a failed
+  download says `Failed`, where A tries again at once.
+
+The notes come in update.json's `changes`, written by
+`tools/update_manifest.py` from the release's players' notes
+(`docs/releases/vX.Y.Z.md`: the `<h2>` tagline, the summary under it, the
+`##` sections, the `###` entries, their paragraphs and points; the
+pictures, rules and tables are left to GitHub) or, for a release without
+notes, its CHANGELOG section, an entry a page. Past 40 KB they stop at a
+heading, a last line naming the releases page; the game keeps 48 KB.
 - **Updates** on the same page, `On` or `Off`, kept in `settings.ini`
   (`updates = off`). Off forgets what was found and stops a download.
 
