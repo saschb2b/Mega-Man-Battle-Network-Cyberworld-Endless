@@ -11,9 +11,14 @@
  * only once it has rested PICK_REST frames on it: an A pressed through the
  * lines before it took the first of three, for good, when the pick was the
  * chat box's (session 55), and a mash through Mr.Prog's lines ran on into
- * the screen past its fade */
+ * the screen past its fade. Nor does A take anything before the screen has
+ * been up PICK_SEEN frames, long enough to be seen: a press a second
+ * through Mr.Prog's lines landed 55 frames after it opened and took the
+ * gift's first choice unseen (session 76). An A held from before it opened
+ * counts only once released and pressed again. */
 #define PICK_LOCK 30
 #define PICK_REST 20
+#define PICK_SEEN 90
 /* a chip's codes (BN6's records hold four), a program's colour variants */
 #define PICK_VARIANTS 4
 
