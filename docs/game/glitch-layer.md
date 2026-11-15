@@ -225,7 +225,9 @@ Glitch layer's heart, the farthest end of its detours, stands one that
 went wrong: copies written over each other. On the layer it is its first
 form's body, its colours turned and torn as the warp's are. Talked to, it
 names what its data holds (the three chips) and asks; it never blocks
-the exit and never moves.
+the exit and never moves. A later talk on the layer, after a No or a run
+from its fight, is its data in one box and the question, and it fights
+again ([Risk the player chooses](progression/structure.md)).
 
 **How it fights: the true swap** (the owner's call 2). One BN6 battle,
 its forms one after another on the same panel, one pool of HP (one and a

@@ -85,6 +85,9 @@ boss strikes his pose out of the white (it was the Guardian Data's dark
 way into the Undernet); `0x1455` that the
 layer's official gate gave its chip, `0x1456` that Chaud's clearance
 opens it, `0x1457` that Chaud's call on a duel layer was made,
+`0x14D1`-`0x14D8` that choice 0-7's words were said and `0x14D9` the
+flame of darkness's, so a later talk is a box and the question (session
+78; past the Net Square's own, cleared as a layer begins),
 [The rival: Chaud and ProtoMan](../../game/rival.md) (`0x146E`, which named the chips that sat out of the
 guest core's battles, is free since they left runs); at home `0x1460`-`0x1462` that request 0-2 was taken, `0x1463`
 that one is held and `0x146A` that the held one was settled, which the
