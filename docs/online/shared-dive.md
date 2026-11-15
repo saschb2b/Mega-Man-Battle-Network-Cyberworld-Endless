@@ -123,6 +123,21 @@ Verified on `dev`, 15 November 2026:
 | The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
 | Build order | One field first, the linked fallback in the same release | Linked first; a spike first |
 
+## As built
+
+- **The portal** (15 November 2026, `src/online/online_square.c`'s
+  `portal`, `square_week.c`'s `square_week_portal`): where the greeter
+  Mr.Prog stood by the Board, BN5's dark hole (Gregar's list 7 `0x87` once
+  `xnavi_object` has copied it; every diver has BN5's ROM, the DeepNet
+  stamp's set), BN6's exit pad where it is not read, spoken to as BN6's
+  wide objects are (`npc_desk`, within 20 world units of its middle). It
+  says the week's post without a mugshot; the greeter's welcome went
+  with him (the channel's count and the warps' names), his call over his
+  head as a Navi logs in stays, over the portal. Yes warps MegaMan
+  straight into the dive's first layer (`weekly_dive` no longer starts in
+  Lan's room). Seen headless against a local server: the vortex at the
+  plaza's edge, its question, the dive begun on layer 1.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own

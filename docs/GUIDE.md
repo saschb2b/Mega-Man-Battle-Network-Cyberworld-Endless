@@ -1120,8 +1120,8 @@ He also moves you to the next or the last channel.
 #### Finding your way
 
 You arrive in the **welcome plaza**: the Square's landmark in its
-middle, the pad home beside you, the greeter, the keeper and the Board
-close by. Everyone arrives here, and everyone comes back here. Off three
+middle, the pad home beside you, the week's portal, the keeper and the
+Board close by. Everyone arrives here, and everyone comes back here. Off three
 of its sides stand warps, BN6's gem pads, each with its part's name over
 it in gold and who is there now ("ARENA: Mira"):
 
@@ -1202,7 +1202,7 @@ handheld's second display) while you are in the Square.
 The welcome plaza with a landmark in its middle (a statue, a monument or
 a giant cybertree, by the server), its board and the pad home, and warps
 to Trade Central, the Arena's ring with its stands, and a stage up a
-stair. A greeter Mr.Prog calls out who logs in, two Navis stroll about
+stair. The week's portal calls out who logs in, two Navis stroll about
 (one round the landmark, one before the stage) and chat about who's here
 and what just happened, and every three
 minutes they parade round the landmark: walk with them. A on a tree, the
@@ -1335,15 +1335,15 @@ the stamp, and on the New 3DS, you get his calls and the board's post.
 Every Monday (00:00 UTC) each server opens a net of its own for the
 week, and everyone on that server who dives it dives the same net, from
 the same start: the short net, the Standard folder, threat 0, no helpers
-and no Cross, nothing your other runs unlocked. The greeter Mr.Prog in
-the welcome plaza offers it to a pass with the DeepNet stamp; say Yes
-(the cursor starts on No), and the dive begins in Lan's room, as a new
-game does.
+and no Cross, nothing your other runs unlocked. The portal in the
+welcome plaza, a purple vortex, offers it to a pass with the DeepNet
+stamp; say Yes (the cursor starts on No), and it warps MegaMan straight
+into the dive's first layer.
 
 Your run in progress waits in its own save, untouched: the title's
 CONTINUE is always that run, and when the dive ends, won or deleted, you
 are back with it. To go on with an unfinished dive, visit the Square
-and talk to the greeter: Keep diving, Start over or Not now. Divers
+and step up to the portal: Keep diving, Start over or Not now. Divers
 don't trade.
 
 How deep you got goes up on the board at your next visit: the week's

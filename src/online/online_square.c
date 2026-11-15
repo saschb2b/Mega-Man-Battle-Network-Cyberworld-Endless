@@ -26,6 +26,7 @@
 #include "pad_art.h"
 #include "rom.h"
 #include "square_plan.h"
+#include "xnavi.h"
 
 #define PEER_SPRITE 55     /* list 6's MegaMan, bn6f npcSpritePtrs[0x37] */
 #define PROG_SPRITE 61     /* list 6's Mr.Prog: the keeper, the greeter, the referee */
@@ -43,6 +44,8 @@
 #define DESK_SPRITE 0x78   /* list 7's reception desk, two robot clerks at it: Trade Central */
 #define DESK_ANIM 0        /* its one animation: the clerks at work */
 #define DESK_RADIUS 28     /* walked into and spoken to as far from its middle */
+#define PORTAL_PAD 0x22    /* list 7's exit pad: the week's portal where BN5's dark hole is not read */
+#define PORTAL_RADIUS 20   /* the portal spoken to as far from its middle */
 #define TALK_ROOM SQUARE_TALK_ROOM   /* the Square's chats (online_chat.c), one archive at a time */
 /* The pad home draws in front of its middle, as Lan's HP's portals draw
  * in front of their cells: a player stood on it as drawn, 21 units
@@ -144,19 +147,34 @@ static void position(uint32_t at, int x, int y, int z) {
 
 static int level_z(int gx, int gy) { return plan.level[gy][gx] ? rise : 0; }
 
-/* the channel keeper, the greeter and the referee: Mr.Progs each with his
- * own words' room */
+/* the week's portal in the greeter's place (the shared dive, issue #589):
+ * BN5's dark hole where its ROM is read (the DeepNet stamp's divers all have
+ * it), else BN6's exit pad, spoken to as the greeter was, his words' room
+ * its own */
+static uint32_t portal(NpcList *npcs, int x, int y, int z, uint32_t text) {
+	int hole = xnavi_object(XOBJ_DARK_HOLE);
+	if (hole >= 0 && npc_need_sprite(npcs, 7, hole)) {
+		const NpcDesk d = { 7, hole, x, y, 0, text, 0, 0, 0, PORTAL_RADIUS };
+		return npc_desk(&d);
+	}
+	return npc_need_sprite(npcs, 7, PORTAL_PAD) ? npc_talker(7, PORTAL_PAD, x, y, z, 0, text, 0, -1, false) : 0;
+}
+
+/* the channel keeper and the referee, Mr.Progs each with his own words'
+ * room, and the week's portal where the greeter stood */
 static void progs(NpcList *npcs, const uint8_t *empty) {
 	bool sprite = npc_need_sprite(npcs, 6, PROG_SPRITE);
 	for (int k = 0; k < SQUARE_PROGS; ++k) {
 		int gx = plan.at[prog_at[k]][0], gy = plan.at[prog_at[k]][1], x, y;
 		netmap_world(gx, gy, &x, &y);
-		fixture[k][0] = x; fixture[k][1] = y; fixture[k][2] = 16;
-		fprintf(stderr, "online: Mr.Prog %d at %d,%d\n", k, x, y);
+		bool gate = k == SQUARE_PROG_GREETER;
+		fixture[k][0] = x; fixture[k][1] = y; fixture[k][2] = gate ? PORTAL_RADIUS : 16;
+		fprintf(stderr, "online: %s at %d,%d\n", gate ? "the week's portal" : k == SQUARE_PROG_KEEPER ? "Mr.Prog 0" : "Mr.Prog 2", x, y);
 		prog_text[k] = mapslot_alloc(empty, PROG_TEXT);
-		if (!prog_text[k] || !sprite) continue;
-		uint32_t prog = npc_talker(6, PROG_SPRITE, x, y, level_z(gx, gy), prog_face[k], prog_text[k], 0, -1, false);
-		if (prog) npcs->script[npcs->n++] = prog;
+		if (!prog_text[k] || (!gate && !sprite)) continue;
+		uint32_t at = gate ? portal(npcs, x, y, level_z(gx, gy), prog_text[k])
+			: npc_talker(6, PROG_SPRITE, x, y, level_z(gx, gy), prog_face[k], prog_text[k], 0, -1, false);
+		if (at) npcs->script[npcs->n++] = at;
 	}
 }
 

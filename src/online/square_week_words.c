@@ -60,7 +60,8 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
 
 const char *square_week_question(WeekOffer offer) { return offer == WEEK_OFFER_NEW ? "DIVE IN NOW?\n" : NULL; }
 
-const char *square_week_off(void) { return "OFF YOU GO!\nHEAD HOME AND\nJACK IN!"; }
+const char *square_week_off(void) { return "THE PORTAL OPENS\nINTO THIS WEEK'S\nDEEP NET!"; }
+const char *square_week_closed(void) { return "THE PORTAL'S\nSHUT. NO DEEP NET\nTHIS WEEK."; }
 
 static int line(char *s, size_t n, int place, const WeekEntry *e) {
 	return snprintf(s, n, "%d.%s:%u%s", place, e->name, e->depth, e->won ? "!" : "");
