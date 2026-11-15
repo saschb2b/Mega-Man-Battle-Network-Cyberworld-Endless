@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T03:10:00Z
-* **Update**: GUIDE.md (On a PSP: the release's zip, where the ROM goes, offline, BN6 alone, updated by unpacking over it; its rows in what you need, the files and the updates), code/platforms.md (`psp/`'s row: `cyberworld-endless-psp.zip`, its layout and `SOURCE.txt`), project/itch.md (the `psp-zip` channel and its display name).
