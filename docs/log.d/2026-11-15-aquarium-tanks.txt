@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T17:14:16Z
-* **Update**: world/level-design/side-pieces.md (what stands behind a raised floor on both layers, the Aquarium's tanks cut from their rows and set behind its layers' floors; its whale console, the road and landings left, with why), devtools/tile-test.md (a side piece's foot left out of the breaks).
