@@ -576,3 +576,32 @@ uint32_t xbackdrop_area_record(int area) {
 	uint32_t rec = entry_at(R.data, own.records, (uint32_t)a->number);
 	return xptr(rec, 28) ? rec : 0;
 }
+
+int xbackdrop_palette_first(int area, uint8_t *pal, size_t npal) {
+	const NetAreaDef *a = net_area_def(area);
+	if (!a || !a->xrom || a->xrom > XROM_COUNT || !XR[a->xrom - 1].data || a->group < 0x80) return 0;
+	const XRomLayout *l = XR[a->xrom - 1].layout;
+	from_rom(a->xrom - 1);
+	MapTables theirs;
+	int group = 0, number = 0;
+	uint32_t descs = entry_at(xr, BUS + l->map_table, (uint32_t)(a->group - 0x80));
+	if (!xptr(descs, 12) || !own_map(l, descs - BUS + 12u * a->number, &group, &number)
+		|| !map_tables(xr, l->map_enters, l->map_anims, group, &theirs)) return 0;
+	uint8_t tr[28];
+	uint32_t m = (uint32_t)number, base;
+	if (!record_as_bn6(entry_at(xr, theirs.records, m), tr) || !(base = get32(tr + 20))) return 0;
+	/* (a palette script, command 0: the RAM it writes, its size, then its
+	 * frames, a pointer and how long each stays; its first is the bank as
+	 * the map shows it from its entry) */
+	int n = 0;
+	for (uint32_t at = entry_at(xr, theirs.lists, m), k = 0; xptr(at, 4) && k < SCRIPTS_MAX; at += 4, ++k) {
+		uint32_t s = get32(xr + (at - BUS));
+		if (s == 0xFFFFFFFFu) break;
+		if (!xptr(s, 16) || xr[s - BUS + 8] != 0) continue;
+		uint32_t to = get32(xr + (s - BUS)), size = get32(xr + (s - BUS) + 4), frame = get32(xr + (s - BUS) + 12);
+		if (to < base || size > npal || to - base > npal - size || !xptr(frame, size)) continue;
+		memcpy(pal + (to - base), xr + (frame - BUS), size);
+		++n;
+	}
+	return n;
+}

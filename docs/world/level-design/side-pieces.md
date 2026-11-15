@@ -1024,10 +1024,10 @@ their eyes flash as in BN5 (captured, below). They lie on the first layer,
 behind MegaMan wherever he stands, as in the maps, which hold no layer
 priorities for them: he passes in front of a totem behind a walkway's
 upper edge, and one in front of a walkway's lower edge stands below his
-feet. A Glitch flip into the area sets them too (`pick_map`), but a flip
-loads the look's stored palette and backdrop, not its palette scripts
-(`glitch_look.c`), so there they would stand black (read from the code,
-not captured).
+feet. A Glitch flip into the area sets them too (`pick_map`), in the
+colours of its palette scripts' first frames
+([the Glitch layer](../../game/glitch-layer.md); captured), their eyes
+still: a flip runs none of the look's scripts.
 
 What else the layers never draw in its two maps is of the kinds left to
 the owner or no piece: its exit arrows, the stone stairs (issue #505's

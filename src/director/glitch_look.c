@@ -107,6 +107,10 @@ void glitch_looks_make(int own, const int *first, int nfirst) {
 	for (int i = 0; i < n && L.n < LOOKS; ++i)
 		if (netmap_look(areas[i], &L.look[L.n])) {
 			L.bg[L.n] = xbackdrop_area_record(areas[i]);
+			/* (another game's look in the colours its own layer shows, its
+			 * palette scripts' first frames: a bank its map stores blank,
+			 * BN5's Undernet's skull totems', is coloured by its script) */
+			xbackdrop_palette_first(areas[i], L.look[L.n].gfx.pal, L.look[L.n].gfx.npal);
 			got[L.n++] = areas[i];
 		}
 	L.own_bg = xbackdrop_map_record(D.group, D.number);

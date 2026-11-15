@@ -10,6 +10,7 @@
 #define CW_XBACKDROP_H
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 /* Background `bg` (its number in extra ROM `xrom`'s own tables) in BN6:
@@ -38,5 +39,14 @@ bool xbackdrop_map_vram(int group, int number, uint32_t *lo, uint32_t *hi);
  * with the floor through BN6's LoadBGAnimData (BN6_LOAD_BG_ANIM_DATA). */
 uint32_t xbackdrop_map_record(int group, int number);
 uint32_t xbackdrop_area_record(int area);
+
+/* The colours another game's net area `area` shows from its map's entry:
+ * the first frame of each palette script its learned map runs (its
+ * GFXAnim list, read from that game's ROM), laid over `pal` (BN6's BG
+ * palette buffer's layout, `npal` bytes), as a Glitch layer's look of it
+ * takes them (docs/game/glitch-layer.md): a bank its map stores blank
+ * takes its colours there (BN5's Undernet's skull totems). How many
+ * scripts; 0 for BN6's own areas. */
+int xbackdrop_palette_first(int area, uint8_t *pal, size_t npal);
 
 #endif
