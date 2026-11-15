@@ -712,11 +712,6 @@ static bool install_duel(Install *in, Talker *tk, int wx, int wy) {
 	return !layer_objs_duel_later;
 }
 
-/* The big framed warp pad, the green oval pad and the orange-framed pad
- * (list 7's 0x06, 0x22, 0x36): steady every frame, where the dark warp's
- * flame (0x44) is drawn three frames in five */
-const uint8_t glitch_look_sprite[GLITCH_LOOKS] = { 0x06, 0x22, 0x36 };
-
 /* The run's Glitch warp (docs/game/glitch-layer.md): a pad on the floor in
  * its first look, the others the map loads too, for the director to switch
  * it between */
@@ -725,9 +720,7 @@ static void install_glitch_warp(Install *in, Talker *tk) {
 	tk->sprite = glitch_look_sprite[0];
 	tk->floor = true;
 	tk->looks = true;
-	in->out->glitch_looks = 0;
-	for (int k = 0; k < GLITCH_LOOKS; ++k)
-		if (npc_need_sprite(&in->npcs, 7, glitch_look_sprite[k])) in->out->glitch_looks |= (uint8_t)(1u << k);
+	glitch_warp_looks(&in->npcs, in->out);
 }
 
 /* A Glitch layer's copy (docs/game/glitch-layer.md): its first form's body,
@@ -740,7 +733,9 @@ static void install_copy(Install *in, Talker *tk) {
 	tk->cat = body.list;
 	tk->sprite = body.index;
 	tk->anim = body.anim;
-	npc_need_sprite(&in->npcs, body.list, body.index);
+	/* (its body glitching between its forms' as the warp's pads do) */
+	tk->looks = true;
+	glitch_copy_looks(&in->npcs, in->out, forms, n);
 	if (emu_debug_on()) fprintf(stderr, "copy: navi %d at %d %d, list %d sprite %d animation %d\n", n ? forms[0] : 1, tk->x, tk->y, body.list, body.index, body.anim);
 	for (int k = 0; k < 3; ++k) {
 		int navi = k < n ? forms[k] : 0, code = 26, chip = 0;
@@ -975,6 +970,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < in.ntalk; ++i)
 		if (in.talkers[i].cat == 7) npc_need_sprite(npcs, 7, in.talkers[i].sprite);
 	npcs->objects = layer_props_objects(npcs);
+	glitch_copy_looks_more(npcs, out);
 	if (text.full || emu_debug_on())
 		fprintf(stderr, "layer text: %d scripts, %d bytes%s\n", text.n, text.len, text.full ? " - FULL, lines left out" : "");
 	/* (what a ScrtData is for, said as it is picked up: layer_words.c) */
@@ -987,7 +983,7 @@ bool layer_objs_install(int group, int number, LayerObjs *out) {
 	for (int i = 0; i < in.ntalk && npcs->n < 32; ++i) {
 		const Talker *t = &in.talkers[i];
 		uint32_t a = t->archive ? t->archive : archive;
-		NpcTalk looks = { t->cat, t->sprite, t->x, t->y, t->z, a, t->script, t->gone_flag };
+		NpcTalk looks = { t->cat, t->sprite, t->x, t->y, t->z, a, t->script, t->gone_flag, t->anim, t->floor };
 		npcs->script[npcs->n++] = t->looks ? npc_talker_looks(&looks, &out->glitch_warp)
 			: t->behind ? npc_counter_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim, a, t->script, t->sx, t->sy)
 			: npc_talker(t->cat, t->sprite, t->x, t->y, t->z, t->anim >= 0 ? t->anim : t->cat == 7 ? 0 : 4, a, t->script, t->gone_flag, t->floor);

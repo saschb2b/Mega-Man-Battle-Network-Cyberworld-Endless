@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T20:00:00Z
+* **Update**: game/glitch-layer.md (Glitchier: the glitch thickens towards the heart, the music drags and stalls with the flips, the sky flips with the floor, the copy's body glitches between its forms), rom/sound.md (the music player's tempo fields), rom/graphics.md (LoadBGAnimData named and called by a flip), code/director.md (`glitch_music.c`), code/layer.md (`glitch_objs.c`).
