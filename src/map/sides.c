@@ -593,7 +593,7 @@ void stands_learn(const AreaSrc *a, SideBook *out) {
 	for (size_t i = 0; seen && mark && queue && owner && unit && i < cells && out->n < SIDES_MAX; ++i) {
 		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
 		Group g;
-		group_from(a, false, (int)(i % (size_t)a->tw), (int)(i / (size_t)a->tw), seen, queue, &g);
+		group_from(a, false, NULL, (int)i, seen, queue, &g);
 		for (int k = 0; k < g.n; ++k) owner[queue[k]] = (int)i;
 		Row r = { .a = a, .queue = queue, .owner = owner, .g = &g, .id = (int)i, .mark = mark, .unit = unit };
 		if (!g.edge && g.n >= MIN_TILES) stand(&r, out);
@@ -603,6 +603,7 @@ void stands_learn(const AreaSrc *a, SideBook *out) {
 	free(queue);
 	free(owner);
 	free(unit);
+}
 
 /* ---- what grows on a floor's edges ----
  *

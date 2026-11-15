@@ -509,6 +509,15 @@ static bool both_free(const StairTile *t, const SideMap *m, size_t at) {
 	return !m->map[(size_t)m->tw * m->th + at] && (!m->map[at] || (!t->e0 && t->foot));
 }
 
+/* Whether tile k of piece p, which stands behind a floor on both layers or
+ * grows on a floor's edge, may go on map cell `at` (`to`: its layer). */
+static bool kept_free(const SidePiece *p, int k, const SideMap *m, const uint16_t *to, size_t at) {
+	if (p->both) return both_free(&p->tiles[k], m, at);
+	/* (what grows on a floor's edge goes over the floor's own art where its
+	 * tile drew that too in its map, and nowhere else) */
+	return !to[at] == !(p->onto >> k & 1);
+}
+
 /* Piece p's tile t on map cell `at`; a foot over the floor's art marked so
  * (NETMAP_PASTED_FOOT). */
 static void side_put(const SidePiece *p, const StairTile *t, uint16_t *map, size_t cells, size_t at) {
@@ -537,15 +546,10 @@ static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
 		size_t at = (size_t)(py / 8) * tw + px / 8;
 		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
 		if (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) return false;
-		/* (what stands behind a floor on both layers: both_free) */
-		if (p->both) {
-			if (!both_free(&p->tiles[k], m, at)) return false;
-			continue;
-		}
-		/* (what grows on a floor's edge goes over the floor's own art where
-		 * its tile drew that too in its map, and nowhere else) */
-		if (p->grows) {
-			if (!to[at] != !(p->onto >> k & 1)) return false;
+		/* (what stands on both layers or grows on a floor's edge: rules of
+		 * their own, kept_free) */
+		if (p->both || p->grows) {
+			if (!kept_free(p, k, m, to, at)) return false;
 			continue;
 		}
 		/* (what stands under a pad begins in its rim's own tiles, what
