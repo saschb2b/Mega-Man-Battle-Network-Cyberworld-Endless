@@ -96,7 +96,8 @@ void note_play(unsigned in, unsigned missing, bool from_title, const char *title
 	list_of(missing, false, later, sizeof later);
 	list_of(in, true, whose, sizeof whose);
 	/* ("BN5's net", "BN5's and BN4's nets") */
-	if (from_title && in) snprintf(out, n, "Back to the title, %s %s in.", whose, in & (in - 1) ? "nets" : "net");
+	const char *nets = in & (in - 1) ? "nets" : "net";
+	if (from_title && in) snprintf(out, n, "Back to the title, %s %s in.", whose, nets);
 	else if (from_title) snprintf(out, n, "Back to the title.");
 	else if (!missing) snprintf(out, n, "Play with %s.", with);
 	else snprintf(out, n, "Play with %s. %s can come later: %s on the title brings this screen back.", with, later, title_button);
