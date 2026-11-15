@@ -93,6 +93,9 @@ Taken per area as looked at, as every laying rule is
 | Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| BN4's Town Area | nothing: on its second layers a warp hub's ring with its exit arrow, a hub's centrepiece and Town Area 3's upper level, left out on purpose; under that level a rail between two lower hubs; Town Area 2 and 4 the same kinds (below) | - |
+| Green Area | nothing: its second layer holds its potted bushes (set by a rule of their own), the blue-framed plates and warp discs on its raised grass, arrow panels' frames, a pad's centrepiece and its stairs, and in Green Area 2 the NetCafe desk, which means a shop; nothing stands under or behind its floors (below) | - |
+| Sky Area | nothing: what its maps leave undrawn is raised floor, pods, stairs and roads, or stands on the floor alone; behind its fields' edges the cut takes a scrap of a pod's arm (below) | no |
 | BN5's Liberation boards (BN5 dark 1-9) | nothing set: on their second layer the panels' middles alone, which a board's panel looks cover; on the first, slime and lava blobs on the floors' corners, fins on the back rims and drips under the faces, all drawn into the floor's own rim and face tiles (below) | no |
 | The Graveyard | nothing: its one map's second layer holds only its ramps' slats; at its raised floor three scraps of floor and rim, which fit no layer; no scenery (below) | - |
 | every other area | nothing | - |
@@ -901,6 +904,162 @@ What the layers never draw (334 of its 631 tile pictures,
 
 Its gravestones and its monument are map objects a layer sets as such
 ([Props](props.md)), not tiles of its map.
+
+## What BN4's Town Area sets round its floors (nothing; measured on the maps and the atlas)
+
+BN4's Town Area (the atlas's `a16`) learns from Town Area 3 (0x91:2), its
+squares alone (`TILES_PADS_ALONE`), and Town Area 1 (0x91:0), its
+walkways. Neither map sets a thing on, beside, behind or under its floors
+that a layer could carry. Its layers draw 26% of Town Area 3's 680
+different tile pictures and 58% of Town Area 1's 498 (two seeds, six
+layers); what they leave, looked at group by group on the tinted maps and
+cut by every rule on this page in turn (switched on for the area, what
+each took printed, taken back; 15 November 2026):
+
+- **No cut takes anything.** The side cut (with and without the one under
+  a lower edge), the cuts under a raised floor, behind a floor on either
+  layer and in a walled hole, and scenery, also at a face's depth
+  (`scenery_reach` 16): each took 0 pieces (the learn report's 0 side
+  pieces, 0 pieces of scenery, no hole). Nothing in either map grips a
+  rim, stands behind or under an edge, or stands clear of the floor's art.
+- **Town Area 1's second tile layer** holds two things, joined: the ring
+  of its warp hub (at (400, 305) in the atlas's picture) and the large exit
+  arrow running from it to the map's upper edge (to (415, 60)), 280 tiles
+  together: a warp's centrepiece and an exit arrow, issue #505's kind 4.
+  Its yellow roads (lending no tiles), their stripes (11 tiles each,
+  seven) and their arrow heads at (290, 190) and (790, 630) are roads and
+  exit arrows. The rest is scraps of 1 to 4 tiles: the outer rims of its
+  round pads' far ends and of a walkway's rounded corners, floor art the
+  pick does not choose.
+- **Town Area 3** sets its upper level on its second layer (1,704 of the
+  2,493 tiles of one group with the level below): white walkways, the
+  yellow road over the large square, two round hubs, the ramp down. They
+  are left out on purpose (Town Area 3 lends its squares alone). On the
+  middle hub stands a red half-dome on the second layer, at (690, 315): a
+  hub's centrepiece, on the floor alone. Under the upper level, on the
+  first layer, a thin rail runs through the void between two round hubs of
+  the lowest level, half-discs half hidden under the two small squares (at
+  (260, 235) and (855, 530)), about 75 tiles across: part of the lower
+  level a layer has none of, touching floor at both ends. The large
+  square's slab faces (182 tiles) are its pad's own faces.
+
+The two maps the area does not learn from, Town Area 2 and 4 (0x91:1 and
+0x91:3, drawn with `--atlas DIR:x1` and looked over, not cut), show the
+same kinds and nothing else: hubs with centrepieces, exit arrows, a yellow
+road, stairs, Town Area 4's arrow conveyors, and in Town Area 2 the same
+rail between two half-discs by its road's ends. A `side_maps` entry would
+likely bring nothing either.
+
+## What Green Area sets round its floors (none set; measured on the maps and the atlas)
+
+Green Area's layers learn from Green Area 1 (0x92:0, the atlas's `3`);
+Green Area 2 (0x92:1) lends its arrow panels and its NetCafe desk alone.
+Neither map sets a thing on, beside, behind or under its floors that its
+layers lack. Their own things are on them already: the potted bushes in
+the gaps between planks (set by their own rule, [Props](props.md), Green's
+potted bushes), the blue-framed red plates on the raised grass, and the
+trees and signs, which are map objects, not tiles.
+
+Every cut this page has was switched on for Green Area for a probe and
+each group it weighed was printed (15 November 2026, the atlas's two seeds
+a layout): the side-piece cut, what stands under a raised floor (the
+grass and the pads, at 32) and what stands behind a floor, at the ground
+and at 32. None kept a piece. Green Area 1's second layer holds 23 groups:
+
+- **Its potted bushes**, alone or several joined (14 to 56 tiles, 9
+  groups), all over the void: they touch no floor, so they are no side
+  piece.
+- **The blue-framed plates** on the raised grass (28 tiles, six; a
+  seventh joined with the field's front corner, 84) and **its two warp
+  discs** there (28 each): on floor of another height.
+- **An arrow panel's frame** (65 tiles; a second, 25 tiles, lies mostly
+  on its floor): refused as its lane's.
+- **The centrepiece of the Navi's pad** (28 tiles), on that pad alone.
+- **The stairs** from the grass down to the planks (68 and 137 tiles),
+  which a layer lays with its raised floor ([Heights](heights.md)).
+
+Nothing stands under the grass or the pads: their side faces are 9 pixels
+deep with green and violet tabs drawn into them, and the void below is
+empty. Nothing stands behind an upper edge either, and the scenery cut
+finds no piece (0 learned).
+
+Green Area 2 was probed the same way, learned beside Green Area 1 for
+the probe (as one of the area's `more` maps, which it is not today).
+The cuts keep four looks there, none a thing to set:
+
+- **The NetCafe desk** on its purple deck (`b03_92_1` at (128, 200), 32
+  tiles), taken by the side-piece cut: it grips the deck and hangs off
+  it. It is the Net Dealer's counter, which the area's layers already set
+  where a dealer stands (`net_area.counter`, [Props](props.md)); set bare
+  by this cut it would be a shop with no one behind it, as Central's
+  capsule would.
+- **Two scraps of a potted bush** (7 tiles each, at (816, 280) and at
+  (944, 344)), cut behind a plank's upper edge where a stair's foot
+  splits the bush's tiles from the rest of it.
+- **A raised grass field's corner** (16 tiles, at (368, 520)), drawn
+  behind the planks in front of it: floor of another height.
+
+The rest of Green Area 2 is what Green Area 1 has, and its own kinds: a
+second potted-bush row, stairs up to four raised pads, its raised purple
+deck, arrow panels on its grass and an exit arrow. Its nineteen
+cybertrees and the giant one are map objects.
+
+What the layers never draw of Green Area 1 (624 of its 937 tile pictures,
+[what the layers take](../../devtools/map-use.md)) lies in nine groups and
+some thirty lone tiles, none a thing to set:
+
+- **The three 3x3 pads** at its corners (`b03_92_0` at (64, 448), at
+  (832, 64), at (992, 528)), raised, about 220 tiles each: pads of a
+  look of their own, which stand raised on the originals and are not cut
+  ([Props](props.md)).
+- **The two exit arrows** (`b03_92_0` at (424, 736), at (1152, 240)), kind 4.
+- **The two arrow panels** on the planks (at (896, 288), at (896, 352)):
+  floor of another kind ([Arrow lanes](arrow-lanes.md)), set with a lane
+  where a layer has one.
+- **The two warp discs** on the raised grass (at (680, 240), at (168,
+  368)), kind 4.
+- **Lone tiles at the planks' free ends** (some 28, e.g. at (1272, 528)),
+  and two at the stairs' feet: floor art. A layer's planks end free in
+  the same rounded look (seen in the atlas's pictures), drawn from other
+  tiles of the map's ends; these are the variants no layer's end happened
+  to take.
+
+## What Sky Area sets round its floors (none set; measured on the maps and the atlas)
+
+Sky Area's two maps the layers learn from (0x94:0 and 0x94:1, Sky Area 1
+and 2, the atlas's `2`) set no thing beside, under or behind their floors,
+and nothing stands in the sky around them. They were looked over on 15
+November 2026 in three pictures each: the atlas's tinted map (`build.py
+atlas 2 2`, `lent_b02_*`), the same map with the tiles no layer draws
+coloured by where they lie (`lent.c`'s places), and the map's second tile
+layer alone.
+
+| What | Where it stands | Size, how often | Taken |
+| --- | --- | --- | --- |
+| The white fields at a height, their side faces | raised floor | most of Sky Area 2's upper half, Sky Area 1's top field | no: raised floor, the heights' ([Heights](heights.md)) |
+| The raised cyan walkways and the lavender road, the posts along their edges | raised floor, on the second layer where they cross the ground | Sky Area 1's road, Sky Area 2's two | no: roads at a height |
+| The round pods with four arms, Sky Area 2's raised hub | second layer, over the ground | five in Sky Area 1, one in Sky Area 2 | no: pads of another look |
+| The stairs | second layer, between the ground, the fields and the pods | joined to the pods and roads they meet, 68 to 811 tiles a group | no: stairs, learned already |
+| The dark patterned panels at the fields' edges | the ground floor | a few at each field's upper edge | no: floor of another kind |
+| The exit arrows, the roads to them | at the maps' edges | two in Sky Area 1, three in Sky Area 2 | no: kind 4 |
+| The arrow lanes' panels in green frames | second layer, on raised floor, Sky Area 2 | 24 tiles each, three | no: [arrow lanes](arrow-lanes.md) |
+| The cross-shaped pad, the green-framed marks, the hub's emblem | second layer, on the floor alone, Sky Area 2 (`b02_94_1` at (384, 760), at (384, 88), at (608, 296)) | 28 tiles each; one, three, one | no: kind 4 |
+| The gem on a pod | Sky Area 1's right pod | one | a teleport's ([Teleports](teleports.md)) |
+| A long bar along the raised field's upper edge, a block on that field, a short bar on a pod | second layer, on the floor alone, Sky Area 1 (`b02_94_0` at (744, 120), at (832, 200), at (136, 312)) | 30, 23 and 24 tiles there, once each | no: on the floor, as a centrepiece is; what they are in the game was not looked into |
+
+Nothing hangs under the raised floors or the pods: their faces end at
+their rims, with no legs or pillars. The scenery cut sets none on the
+atlas's layers (`scenery 0` on all eight).
+
+Every rule this page has was run on Sky's maps together (15 November
+2026, on `dev` after the heights came in): the side-piece cut, with what
+stands under a lower edge too, over its own two maps and Sky Area 3's
+(0x94:2); the cuts under and behind a floor, at the ground and at each
+raised floor's height; and the cut in a walled hole. They keep two looks.
+The cut behind a floor takes 23 tiles of a pod's arm, seen at a field's
+level, and sets them in the void behind a field's upper edge on 2 of the
+atlas's 8 layers: a scrap of raised floor, no thing. The other look fits
+no layer, and the hole cut finds no hole. Sky takes none.
 
 ## Not built
 
