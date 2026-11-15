@@ -6,7 +6,7 @@ tags: [world, level-design, guidance, interface]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T12:00:00Z }
 sources:
   - id: code
-    resource: "src/director/director_way.c (goal_way, heal_first, arrow_update, arrow_scene), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow, arrow_settle)"
+    resource: "src/director/director_way.c (goal_way, heal_first, arrow_update, arrow_quiet), src/director/director_map.c (map_way), src/director/director_town.c (hp_way), src/director/cinema.c (draw_arrow, arrow_settle, megaman_feet)"
     title: "The arrow and the map's way as built"
   - id: s76
     resource: "Playtest session 76 (kai5, kai8), replayed on their pinned build e2005dac6"
@@ -53,7 +53,7 @@ and its labelled square.
 ## Where it stands, and when it waits
 
 The arrow rings MegaMan where BN6's camera draws him (his feet projected
-from the camera's place, `arrow_scene`), its heads 32 pixels across and 30
+from the camera's place, `megaman_feet`), its heads 32 pixels across and 30
 down from a point 21 above his feet: the picture's (120, 66) where the
 camera keeps him in the middle, and with him where it does not. Pointing
 down it stands farther out, clear of his sprite (it had stood on his legs).

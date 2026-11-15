@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "bn6_fields.h"
+#include "bn6_forms.h"
 #include "emu.h"
 #include "gfx.h"
 #include "platform.h"
@@ -14,11 +15,14 @@
 #define EASE_IN    16   /* frames a card's parts take to slide in */
 #define FADE_OUT   14
 /* The way-on arrow's place, measured on the picture (kai5's Mystery Data,
- * session 77): MegaMan's feet stand at y 87 where the camera keeps him,
+ * session 77): BN6's camera shows its point at (CAM_X, CAM_Y) and
+ * MegaMan's feet 7 below his own (87 where it keeps him in the middle),
  * his head 33 above them, 16 across; the arrow's heads ring a point 21
  * above his feet (the picture's (120, 66) then), and BN6's chat box on the
  * map has its top edge at y 99. */
-#define ARROW_FEET   87
+#define CAM_X        120
+#define CAM_Y        80
+#define FEET_DY      7
 #define ARROW_UP     21
 #define MM_HALF_W    8
 #define MM_HEIGHT    33
@@ -44,18 +48,14 @@ static struct {
 	int arrow_dir, arrow_t, arrow_len;   /* the way-on arrow: screen direction 0-7, frames shown, of */
 	bool arrow_heal;                     /* it leads to the Recovery Mr. Prog: green, the map's Heal */
 	bool arrow_quiet;                    /* it waits unseen (cinema_arrow_quiet) */
-	int arrow_mx, arrow_my;              /* MegaMan's feet on the picture (cinema_arrow_near) */
+	int arrow_mx, arrow_my;              /* MegaMan's feet on the picture (megaman_feet) */
 	bool arrow_box;                      /* a chat box open at the picture's foot */
 	int arrow_push, arrow_vis;           /* pixels it stands farther out, clear of him; its opacity, 0-255 */
 	char note[24];
 	int note_t, note_len;                /* a corner note: frames shown, of */
 } C;
 
-void cinema_reset(void) {
-	memset(&C, 0, sizeof C);
-	C.arrow_mx = CORE_W / 2;
-	C.arrow_my = ARROW_FEET;
-}
+void cinema_reset(void) { memset(&C, 0, sizeof C); }
 
 /* (a talk that opens on its own takes a B held to run as a press to
  * hurry it: a player running into a guardian's last-stop words saw none
@@ -82,7 +82,6 @@ void cinema_arrow_turn(int dir) { C.arrow_dir = dir & 7; }
 void cinema_arrow_heal(bool heal) { C.arrow_heal = heal; }
 int cinema_arrow_dir(void) { return C.arrow_dir; }
 void cinema_arrow_quiet(bool quiet) { C.arrow_quiet = quiet; }
-void cinema_arrow_near(int x, int y, bool box) { C.arrow_mx = x; C.arrow_my = y; C.arrow_box = box; }
 void cinema_note(const char *text, int frames) { snprintf(C.note, sizeof C.note, "%s", text); C.note_t = 0; C.note_len = frames; }
 
 /* Off the map, or under BN6's fade: a jack-in's white, a warp's, a
@@ -135,8 +134,22 @@ static bool covers_megaman(const float b[4]) {
  * guardian's staging) or where it would cross an open chat box at its
  * bob's farthest (it stood on the box's top edge, session 77). It fades
  * out over 4 frames and in over 8; off the map or under BN6's fade at once. */
+static void megaman_feet(void) {
+	uint32_t cam = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
+	C.arrow_mx = CAM_X;
+	C.arrow_my = CAM_Y + FEET_DY;
+	if (cam < BN6_EWRAM || cam > BN6_EWRAM_END - 80) return;
+	int cx = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_X) >> 16, cy = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Y) >> 16;
+	int cz = (int32_t)emu_read32(cam + BN6_CAMERA_RENDER_Z) >> 16;
+	int px = bn6_player_x(), py = bn6_player_y(), pz = bn6_player_z();
+	C.arrow_mx = px + py - (cx + cy) + CAM_X;
+	C.arrow_my = (py - px) / 2 - pz - ((cy - cx) / 2 - cz) + CAM_Y + FEET_DY;
+}
+
 static void arrow_settle(void) {
 	float ux, uy, b[4];
+	megaman_feet();
+	C.arrow_box = emu_read8(BN6_CHATBOX) != 0;
 	arrow_unit(&ux, &uy);
 	int push = 0;
 	while (push <= ARROW_PUSH && (arrow_bounds(ux, uy, (float)push - 3, b), covers_megaman(b))) ++push;
