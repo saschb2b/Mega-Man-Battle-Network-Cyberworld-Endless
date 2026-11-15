@@ -92,6 +92,7 @@ Taken per area as looked at, as every laying rule is
 | Robot Control Comp | nothing on its second layer; its robot figures and its wires with red lights are scenery, cut against its own faces (below); the bulbs on springs under its white platforms and the fists past its arms' ends are not placed (below) | the scenery |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| Sky Area | nothing: what its maps leave undrawn is raised floor, pods, stairs and roads, or stands on the floor alone; behind its fields' edges the cut takes a scrap of a pod's arm (below) | no |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -632,6 +633,43 @@ side piece:
 The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
+
+## What Sky Area sets round its floors (none set; measured on the maps and the atlas)
+
+Sky Area's two maps the layers learn from (0x94:0 and 0x94:1, Sky Area 1
+and 2, the atlas's `2`) set no thing beside, under or behind their floors,
+and nothing stands in the sky around them. They were looked over on 15
+November 2026 in three pictures each: the atlas's tinted map (`build.py
+atlas 2 2`, `lent_b02_*`), the same map with the tiles no layer draws
+coloured by where they lie (`lent.c`'s places), and the map's second tile
+layer alone.
+
+| What | Where it stands | Size, how often | Taken |
+| --- | --- | --- | --- |
+| The white fields at a height, their side faces | raised floor | most of Sky Area 2's upper half, Sky Area 1's top field | no: raised floor, the heights' ([Heights](heights.md)) |
+| The raised cyan walkways and the lavender road, the posts along their edges | raised floor, on the second layer where they cross the ground | Sky Area 1's road, Sky Area 2's two | no: roads at a height |
+| The round pods with four arms, Sky Area 2's raised hub | second layer, over the ground | five in Sky Area 1, one in Sky Area 2 | no: pads of another look |
+| The stairs | second layer, between the ground, the fields and the pods | joined to the pods and roads they meet, 68 to 811 tiles a group | no: stairs, learned already |
+| The dark patterned panels at the fields' edges | the ground floor | a few at each field's upper edge | no: floor of another kind |
+| The exit arrows, the roads to them | at the maps' edges | two in Sky Area 1, three in Sky Area 2 | no: kind 4 |
+| The arrow lanes' panels in green frames | second layer, on raised floor, Sky Area 2 | 24 tiles each, three | no: [arrow lanes](arrow-lanes.md) |
+| The cross-shaped pad, the green-framed marks, the hub's emblem | second layer, on the floor alone, Sky Area 2 (`b02_94_1` at (384, 760), at (384, 88), at (608, 296)) | 28 tiles each; one, three, one | no: kind 4 |
+| The gem on a pod | Sky Area 1's right pod | one | a teleport's ([Teleports](teleports.md)) |
+| A long bar along the raised field's upper edge, a block on that field, a short bar on a pod | second layer, on the floor alone, Sky Area 1 (`b02_94_0` at (744, 120), at (832, 200), at (136, 312)) | 30, 23 and 24 tiles there, once each | no: on the floor, as a centrepiece is; what they are in the game was not looked into |
+
+Nothing hangs under the raised floors or the pods: their faces end at
+their rims, with no legs or pillars. The scenery cut sets none on the
+atlas's layers (`scenery 0` on all eight).
+
+Every rule this page has was run on Sky's maps together (15 November
+2026, on `dev` after the heights came in): the side-piece cut, with what
+stands under a lower edge too, over its own two maps and Sky Area 3's
+(0x94:2); the cuts under and behind a floor, at the ground and at each
+raised floor's height; and the cut in a walled hole. They keep two looks.
+The cut behind a floor takes 23 tiles of a pod's arm, seen at a field's
+level, and sets them in the void behind a field's upper edge on 2 of the
+atlas's 8 layers: a scrap of raised floor, no thing. The other look fits
+no layer, and the hole cut finds no hole. Sky takes none.
 
 ## Not built
 
