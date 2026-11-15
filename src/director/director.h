@@ -145,8 +145,12 @@ bool director_quit_keeps(void);
  * run's (map_label) or, for the Net Square, its own. */
 void director_map_label(const char *name, const char *place);
 /* The PET's Save: a checkpoint where MegaMan stands, once he is free to
- * move on the map ("Run saved"). */
-void director_save_here(void);
+ * move on the map; whether one is due (none in the town before the run's
+ * first layer, a note says so). */
+bool director_save_here(void);
+/* Whether the PET's Save's checkpoint was just taken (once: its box is
+ * pet.c's to open, docs/game/pet.md, Save). */
+bool director_pet_saved(void);
 /* After a CONTINUE, once a frame: MegaMan held by BN6 with nothing under way
  * is let go (director_hold.c, issue #23) */
 void director_hold_watch(void);

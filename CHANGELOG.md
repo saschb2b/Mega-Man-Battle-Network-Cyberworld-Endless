@@ -94,6 +94,16 @@
   vanished whenever he turned to strike upward; he now turns towards the
   camera. Nobody the game places in another game's sprite turns to face
   MegaMan where that sprite draws nothing.
+- **Fixed: the PET's Save let your next A through to the map.** It
+  closed the PET with only the corner's "Run saved", so the A you meant
+  for a save box talked to, or picked up, whatever MegaMan faced: one
+  took a Guardian Data. The PET's Save now ends on a box of its own,
+  "Run saved.", as BN6's save screen ends on its words, and A does
+  nothing on the map until it is up.
+- **Fixed: a prize came after the chatter.** After a server's or a
+  vault's pick, MegaMan's words on the older Net's virus in the battle
+  before could play first, and "MegaMan got:" after them. The prize's
+  box comes first now.
 - **Fixed: a quit after a won battle lost it.** Quitting on a won
   battle's RESULT, or in the fade back to the map, fell back to the
   layer's start: the battle, its reward and the walk since were gone.

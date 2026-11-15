@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T16:30:00Z
+* **Update**: game/pet.md (the PET's Save ends on a box of its own, "Run saved.", and A is kept from the map until it is up: a playtester's next A took a Guardian Data).
