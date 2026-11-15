@@ -908,6 +908,11 @@ static void fill_layer(uint32_t seed, int depth, int biome, int kind, int size, 
 		ng_route_distances();
 		land = ng_landmark(kit);
 	}
+	/* (or the piece its maps stand in a hole in their floor: End Area's pagoda) */
+	if (kit && kit->hole_w && land < 0) {
+		ng_route_distances();
+		land = ng_landmark_hole(kit);
+	}
 	Services s;
 	ng_roll_services(&s, seed, depth, biome, kind);
 	int order[MAX_ROOMS], n = room_order(order), next = 0;

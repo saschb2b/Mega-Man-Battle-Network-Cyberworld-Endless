@@ -34,6 +34,8 @@ typedef struct {
 	bool hang;         /* what stands under a raised floor's lower edge (hangs_learn): its tiles the first layer's
 	                    * (StairTile.e0), its panel one of a pad's on a layer */
 	bool behind;       /* ... or what stands behind a floor's upper edge, its panel any free one of a layer's floor */
+	uint8_t hole[2];   /* what stands in a walled hole in the floor (hole_learn): the hole's panels along world X and Y
+	                    * from its own, the lowest; 0 none */
 } SidePiece;
 
 typedef struct {
@@ -54,5 +56,11 @@ void hangs_learn(const AreaSrc *r, SideBook *out);
  * off the floor: the flames behind the catwalks of BN4's Undernet, where
  * the ones in front lie on the second layer (sides_learn). */
 void behind_learn(const AreaSrc *a, SideBook *out);
+
+/* The first piece map `a` sets in a walled hole in its floor, whole on its
+ * second layer, into `out` where it has none (BN5's End Area's pagoda): a
+ * landmark, its tiles, the panels it draws over and the map's layer
+ * priorities round it; its tiles and priorities its owner's to free. */
+void hole_learn(const AreaSrc *a, SidePiece *out);
 
 #endif

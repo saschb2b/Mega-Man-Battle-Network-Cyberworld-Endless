@@ -472,8 +472,36 @@ static bool side_set(const SidePiece *p, uint16_t *map, int tw, int th, int x, i
 	return true;
 }
 
-static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER];
+static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER + 1];   /* (and the piece in a hole) */
 static int nside_at;
+
+/* The area's piece in a walled hole where the generator stood it
+ * (PROP_HOLE), whole on the second layer over the floor drawn round and
+ * under it, kept with the side pieces for its layer priorities. */
+static void paste_hole(const Learned *L, uint16_t *map, int tw, int th) {
+	const SidePiece *h = &L->hole;
+	if (!h->ntiles) return;
+	size_t cells = (size_t)tw * th;
+	for (int i = 0; i < nm_cur->nprops && i < MAX_PROPS; ++i) {
+		const NetProp *p = &nm_cur->props[i];
+		if (p->kind != PROP_HOLE) continue;
+		int A, B;
+		nm_grid_to_panel(p->x, p->y + p->faces - 1, &A, &B);
+		int X = nm_place.ex + 32 * A, Y = nm_place.ey + 32 * B, px0 = area_px(tw, X, Y), py0 = area_py(th, X, Y);
+		for (int k = 0; k < h->ntiles; ++k) {
+			int px = px0 + h->tiles[k].px, py = py0 + h->tiles[k].py;
+			if (px < 0 || py < 0 || (px & 7) || (py & 7) || px / 8 >= tw || py / 8 >= th) continue;
+			size_t at = (size_t)(py / 8) * tw + px / 8;
+			map[cells + at] = h->tiles[k].e1;
+			if (nm_last.pasted) nm_last.pasted[at] |= NETMAP_PASTED_EMBLEM;
+		}
+		side_at[nside_at].p = h;
+		side_at[nside_at].X = X;
+		side_at[nside_at++].Y = Y;
+		if (emu_debug_on()) fprintf(stderr, "piece in a hole at world %d,%d: %d tiles, %d layer priorities\n", X, Y, h->ntiles, h->nprio);
+		return;
+	}
+}
 
 int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 	if (i >= 0 && i < nside_at) { *p = side_at[i].p; *X = side_at[i].X; *Y = side_at[i].Y; }
@@ -482,7 +510,9 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 	nside_at = 0;
-	if (!L->sides.n || nm_cur->gw != MAP_W) return;
+	if (nm_cur->gw != MAP_W) return;
+	paste_hole(L, map, tw, th);
+	if (!L->sides.n) return;
 	int set[SIDES_A_LAYER][2], nset = 0, nhang = 0;
 	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
 		for (int x = 1; x < MAP_W - 1 && nset < SIDES_A_LAYER; ++x) {

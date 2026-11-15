@@ -146,21 +146,29 @@ static bool same(const SidePiece *p, const SidePiece *q) {
 	return true;
 }
 
-/* The map's layer priorities on panel (A, B) and the eight round it, from
- * the panel's corner: BN6 draws MegaMan behind a claw on the panel it grips
- * (CopyBot Comp: 27 to 48 cells within a panel of each of its claws, of the
- * map's 434). None without memory. */
-static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
+/* The map's layer priorities on the panels from (A + box[0], B + box[2])
+ * to (A + box[1], B + box[3]), from panel (A, B)'s corner. None without
+ * memory. */
+static void priorities_over(const AreaSrc *a, int A, int B, const int box[4], SidePiece *p) {
+	int a0 = box[0], a1 = box[1], b0 = box[2], b1 = box[3];
 	int X0 = a->ex + 32 * A, Y0 = a->ey + 32 * B;
 	p->prio = calloc((size_t)a->nsec[2] + 1, sizeof *p->prio);
 	p->nprio = 0;
 	for (int k = 0; p->prio && k < a->nsec[2]; ++k) {
 		CoordCell c = a->sec[2][k];
-		if (c.x < X0 - 32 || c.x >= X0 + 64 || c.y < Y0 - 32 || c.y >= Y0 + 64) continue;
+		if (c.x < X0 + 32 * a0 || c.x >= X0 + 32 * (a1 + 1) || c.y < Y0 + 32 * b0 || c.y >= Y0 + 32 * (b1 + 1)) continue;
 		c.x = (int16_t)(c.x - X0);
 		c.y = (int16_t)(c.y - Y0);
 		p->prio[p->nprio++] = c;
 	}
+}
+
+/* The map's layer priorities on panel (A, B) and the eight round it: BN6
+ * draws MegaMan behind a claw on the panel it grips (CopyBot Comp: 27 to 48
+ * cells within a panel of each of its claws, of the map's 434). */
+static void priorities(const AreaSrc *a, int A, int B, SidePiece *p) {
+	static const int round[4] = { -1, 1, -1, 1 };
+	priorities_over(a, A, B, round, p);
 }
 
 /* Group g, on panel (A, B), into the book unless it holds its look. */
@@ -263,3 +271,87 @@ static void first_learn(const AreaSrc *r, int kind, SideBook *out) {
 void hangs_learn(const AreaSrc *r, SideBook *out) { first_learn(r, 1, out); }
 
 void behind_learn(const AreaSrc *a, SideBook *out) { first_learn(a, 2, out); }
+
+#define HOLE_TILES 400   /* a piece in a hole is no larger (End Area's pagoda: 163) */
+#define HOLE_SIDE   32   /* tiles a side */
+#define HOLE_PX    512   /* pixels over a panel at least for it to be the hole's: half its top */
+#define HOLE_MAX     3   /* panels a side */
+
+/* Whether panel (A, B) is floor of the walls' at all. */
+static bool walled(const AreaSrc *a, int A, int B) { return area_src_walled_floor(a, a->ex + 16 + 32 * A, a->ey + 16 + 32 * B) == 1; }
+
+/* Whether panel (A, B) lies inside the floor: floor within HOLE_MAX panels
+ * of it each way along world X and Y (a roof over the void past a rim does
+ * not). */
+static bool enclosed(const AreaSrc *a, int A, int B) {
+	static const int d[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
+	for (int k = 0; k < 4; ++k) {
+		int s = 1;
+		while (s <= HOLE_MAX && !walled(a, A + d[k][0] * s, B + d[k][1] * s)) ++s;
+		if (s > HOLE_MAX) return false;
+	}
+	return true;
+}
+
+/* Whether group g stands in a walled hole: the panels inside the floor it
+ * covers half of or more that are no floor make a block of HOLE_MAX a side
+ * at most, ground floor all round it; the block's lowest panel in (*A, *B),
+ * its size in hole[]. */
+static bool in_hole(const AreaSrc *a, const Group *g, int *A, int *B, uint8_t hole[2]) {
+	int a0 = 1 << 20, a1 = -(1 << 20), b0 = a0, b1 = a1, n = 0;
+	for (int k = 0; k < g->npanels; ++k) {
+		if (g->count[k] < HOLE_PX || walled(a, g->A[k], g->B[k]) || !enclosed(a, g->A[k], g->B[k])) continue;
+		if (g->A[k] < a0) a0 = g->A[k];
+		if (g->A[k] > a1) a1 = g->A[k];
+		if (g->B[k] < b0) b0 = g->B[k];
+		if (g->B[k] > b1) b1 = g->B[k];
+		++n;
+	}
+	if (!n || a1 - a0 >= HOLE_MAX || b1 - b0 >= HOLE_MAX || n != (a1 - a0 + 1) * (b1 - b0 + 1)) return false;
+	for (int i = a0 - 1; i <= a1 + 1; ++i)
+		for (int j = b0 - 1; j <= b1 + 1; ++j) {
+			bool inside = i >= a0 && i <= a1 && j >= b0 && j <= b1;
+			if (inside ? walled(a, i, j) : !ground(a, i, j)) return false;
+		}
+	*A = a0; *B = b0;
+	hole[0] = (uint8_t)(a1 - a0 + 1);
+	hole[1] = (uint8_t)(b1 - b0 + 1);
+	return true;
+}
+
+void hole_learn(const AreaSrc *a, SidePiece *out) {
+	if (out->ntiles || a->layers < 2 || !a->rings || !a->front) return;
+	int tw = a->tw, th = a->th;
+	uint8_t *seen = calloc((size_t)tw * th, 1);
+	int *queue = malloc((size_t)tw * th * sizeof *queue);
+	for (int i = 0; seen && queue && i < tw * th && !out->ntiles; ++i) {
+		if (seen[i] || !(a->tile[1][i] & 0x3FF)) continue;
+		Group g;
+		int A, B;
+		uint8_t hole[2];
+		group_from(a, false, i % tw, i / tw, seen, queue, &g);
+		if (g.edge || g.n < MIN_TILES || g.n > HOLE_TILES || g.x1 - g.x0 >= HOLE_SIDE || g.y1 - g.y0 >= HOLE_SIDE) continue;
+		for (int k = 0; k < g.n; ++k) count_tile(a, false, queue[k] % tw, queue[k] / tw, &g);
+		if (g.npanels >= PANELS || !in_hole(a, &g, &A, &B, hole)) continue;
+		SideBook one = { .n = 0 };
+		keep(a, queue, &g, A, B, 0, &one);
+		if (!one.n) continue;
+		*out = one.piece[0];
+		out->hole[0] = hole[0];
+		out->hole[1] = hole[1];
+		/* (the priorities over every panel it draws over and one round
+		 * them: MegaMan passes behind it there) */
+		int a0 = 0, a1 = hole[0] - 1, b0 = 0, b1 = hole[1] - 1;
+		for (int k = 0; k < out->nunder; ++k) {
+			if (out->under[k][0] < a0) a0 = out->under[k][0];
+			if (out->under[k][0] > a1) a1 = out->under[k][0];
+			if (out->under[k][1] < b0) b0 = out->under[k][1];
+			if (out->under[k][1] > b1) b1 = out->under[k][1];
+		}
+		free(out->prio);
+		int box[4] = { a0 - 1, a1 + 1, b0 - 1, b1 + 1 };
+		priorities_over(a, A, B, box, out);
+	}
+	free(seen);
+	free(queue);
+}

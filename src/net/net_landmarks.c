@@ -42,6 +42,7 @@ void ng_emblems(const LayerKit *kit) {
 }
 
 #define MAX_COUNTER 4   /* panels */
+#define HOLE_COVERED 2  /* ng_reserved: a cell a hole's piece draws over */
 
 /* within a cell of a stair's block: its landing stays open */
 bool ng_near_stair(int x, int y) {
@@ -134,6 +135,8 @@ NetObj *ng_counter(int r, int type, const LayerKit *kit) {
 }
 
 bool ng_prop_at_cell(int x, int y) {
+	/* (and the cells a hole's piece draws over, floor or void) */
+	if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H && ng_reserved[y][x] == HOLE_COVERED) return true;
 	for (int i = 0; i < layer.nprops; ++i) {
 		const NetProp *p = &layer.props[i];
 		if (p->kind == PROP_SPRITE && p->x == x && p->y == y) return true;
@@ -373,6 +376,78 @@ int ng_landmark(const LayerKit *kit) {
 		}
 	}
 	return set == LOOK_STATUE && sig_takes(set) && statue_in_floor(kit, &layer.rooms[layer.sig_room]) ? layer.sig_room : -1;
+}
+
+/* ---- What stands in a walled hole (docs/world/level-design/side-pieces.md, What stands in a walled hole) ---- */
+
+#define HOLE_ROOM 16   /* cells a room holds at least to take a hole's piece */
+
+/* Whether the hole's box from (x, y) lies in room m with ground floor all
+ * round it, off the way, free, cutting nothing off; its cells into xs, ys. */
+static bool hole_ring_fits(const LayerKit *kit, const Room *m, int x, int y, int *xs, int *ys) {
+	int w = kit->hole_w, h = kit->hole_h, n = 0;
+	if (x - 1 < m->x || y - 1 < m->y || x + w >= m->x + m->w || y + h >= m->y + m->h) return false;
+	for (int j = y - 1; j <= y + h; ++j)
+		for (int i = x - 1; i <= x + w; ++i) {
+			if (!ng_floor_cell(i, j) || layer.level[j][i] || ng_near_stair(i, j) || ng_object_at(i, j)) return false;
+			if (i < x || j < y || i >= x + w || j >= y + h) continue;
+			if (!ng_cell_free(i, j) || ng_beside_narrow(i, j) || anchor_at(i, j) || ng_far_from_way(i, j) < 1) return false;
+			xs[n] = i; ys[n++] = j;
+		}
+	return !ng_cuts(n, xs, ys);
+}
+
+/* Whether cell (i, j) is what the piece needs under it: void where its
+ * map is void; where floor, free ground floor or void. */
+static bool hole_under_ok(int i, int j, bool floor) {
+	if (i < 0 || j < 0 || i >= MAP_W || j >= MAP_H || ng_void_cell(i, j)) return true;
+	return floor && layer.cell[j][i] == C_PATH && !layer.level[j][i] && !ng_object_at(i, j) && !ng_near_stair(i, j);
+}
+
+/* Whether the hole's box from (x, y) fits room m, and every cell round it
+ * the piece draws over is as it is in its map (a roof that reaches over the
+ * void past a rim needs that void; where it reaches over floor the map's
+ * layer priorities put MegaMan behind it, and a layer's floor may end
+ * there). */
+static bool hole_fits_piece(const LayerKit *kit, const Room *m, int x, int y) {
+	int xs[16], ys[16];
+	if (!hole_ring_fits(kit, m, x, y, xs, ys)) return false;
+	for (int k = 0; k < kit->nhole_under; ++k) {
+		int i = x + kit->hole_under[k][0], j = y + kit->hole_h - 1 + kit->hole_under[k][1];
+		bool inside = i >= x && j >= y && i < x + kit->hole_w && j < y + kit->hole_h;
+		if (!inside && !hole_under_ok(i, j, kit->hole_under[k][2])) return false;
+	}
+	return true;
+}
+
+/* The area's piece in a walled hole as the layer's landmark, as End Area 2
+ * stands its pagoda in the middle of a pad: in the best room that holds it
+ * whole (the signature first, then big rooms far from the way; not the
+ * arrival's, the exit's, the arena or a pad), its hole walled off and the
+ * cells it draws over kept clear of objects and set pieces. Returns its
+ * room, or -1. */
+int ng_landmark_hole(const LayerKit *kit) {
+	if (!kit || !kit->hole_w || !kit->hole_h || layer.nprops >= MAX_PROPS) return -1;
+	int best = -1, bx = 0, by = 0, room = -1;
+	for (int r = 1; r < layer.nrooms; ++r) {
+		const Room *m = &layer.rooms[r];
+		if (r == layer.exit_room || r == layer.arena || m->kind == ROOM_PAD || m->w * m->h < HOLE_ROOM || !room_bare(m)) continue;
+		for (int y = m->y + 1; y + kit->hole_h < m->y + m->h; ++y)
+			for (int x = m->x + 1; x + kit->hole_w < m->x + m->w; ++x) {
+				if (!hole_fits_piece(kit, m, x, y)) continue;
+				int away = ng_far_from_way(x, y), score = (r == layer.sig_room) * 10000 + m->w * m->h * 4 + (away > 6 ? 6 : away) * 10;
+				if (score > best) { best = score; bx = x; by = y; room = r; }
+			}
+	}
+	if (room < 0) return -1;
+	for (int j = by; j < by + kit->hole_h; ++j)
+		for (int i = bx; i < bx + kit->hole_w; ++i) layer.cell[j][i] = C_SOLID;
+	for (int k = 0; k < kit->nhole_under; ++k) {
+		int i = bx + kit->hole_under[k][0], j = by + kit->hole_h - 1 + kit->hole_under[k][1];
+		if (i >= 0 && j >= 0 && i < MAP_W && j < MAP_H) ng_reserved[j][i] = HOLE_COVERED;
+	}
+	layer.props[layer.nprops++] = (NetProp){ PROP_HOLE, kit->hole_h, bx, by, kit->hole_w, -1 };
+	return room;
 }
 
 /* Whether void panel (x, y) is a set piece's: a Rush gap's or an
