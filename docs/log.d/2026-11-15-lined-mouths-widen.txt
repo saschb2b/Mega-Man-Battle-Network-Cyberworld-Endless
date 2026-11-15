@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T15:12:36Z
+* **Update**: world/level-design/generator.md (Navigation: session 78's walkway stops sorted, the way's walkways entered only from their line widened first, the counts by kind of area).
