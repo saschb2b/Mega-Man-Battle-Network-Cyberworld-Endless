@@ -13,7 +13,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-05T17:00:00Z }
 | Wait | The guardian's NPC waits hidden in the arena's middle |
 | Enter | MegaMan steps into the arena: bars slide in, the music stops, MegaMan steps up to his place beside the guardian's and turns to it; the boss prelude starts, the guardian logs in facing him as BN6's Navis do (BN6's beam rising, its sound 0x76, and his sprite's own log-in, `0x19` + his facing) and the screen shakes; the card waits for MegaMan to be there |
 | Title | The title card, while Gregar's own Navis strike their signature pose (animation 24) |
-| Talk | The intro lines; input is A and B only |
+| Talk | The intro lines; input is A and B only. A B held as the talk opens counts once let go, so a player running in reads the lines; one pressed while the staging held MegaMan hurries them (a CONTINUE from the arena's door, MegaMan back on the step in, begins the staging at once: a playtester's B pressed under the title card waited on the first box, session 77) |
 | Fight | The game's navi battle, forced at once (the random battle record is not re-rolled over it) |
 | After | Back on the map: bars, silence |
 | Last word | Its defeat line |
