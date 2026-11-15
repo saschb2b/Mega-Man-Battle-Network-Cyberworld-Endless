@@ -12,6 +12,7 @@ bool ng_object_at(int x, int y);
 NetObj *ng_counter(int r, int type, const LayerKit *kit);
 bool ng_prop_at_cell(int x, int y);
 int ng_landmark(const LayerKit *kit);
+int ng_landmark_hole(const LayerKit *kit);
 void ng_rows(const LayerKit *kit, int skip, const int *order, int n);
 void ng_signs(const LayerKit *kit, int skip, const int *order, int n);
 bool ng_landmark_foot(int *ox, int *oy);
