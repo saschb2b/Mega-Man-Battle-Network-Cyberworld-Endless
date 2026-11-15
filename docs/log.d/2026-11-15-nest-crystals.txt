@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-15T17:56:34Z
-* **Update**: world/level-design/side-pieces.md (the Nest's crystals set on its layers: cut from the second layer, the ones under a lower edge too, each kept with the first layer's tiles under it and set only where the picture round it is the same; its row in the area table; its pieces lie on the second layer, not the first).
