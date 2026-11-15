@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-15
+* **Update**: releases/v0.22.0.md (#601-#610 written in: L's first press and the heal's arrow, the guardian's gate on the way's line, BN4's ACDC roads, what the run tells you, a stray A at a DarkChip or a shop, a CONTINUE at a guardian's door).
 * **Update**: world/level-design/way-on-arrow.md (where the arrow stands, ringing MegaMan where the camera draws him and clear of his sprite, and when it waits: a chat not its own words, a cutscene, a guardian's staging, an open box it would cross; kai5's two arrows against the map's line followed their walks).
 * **Update**: releases/v0.22.0.md (#596-#605 written in: the Battle Lab's builder, a CONTINUE's next battle, Mr.Prog's patch after a CONTINUE, first meetings, a word after a battle).
 * **Update**: world/level-design/way-on-arrow.md (the heal's green arrow goes back to the exit once MegaMan turns three panels away from it, until L names the heal again; session 77's game-design call), world/level-design/teaching-set-pieces.md (L's two things worth a detour count the heal while hurt), multirom/one-net.md (L no longer repeats the older Net's viruses on every layer).
