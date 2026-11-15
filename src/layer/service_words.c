@@ -20,11 +20,22 @@ static void heal_check(TextArchive *t, int flag, int to) {
 	ta_bytes(t, check, sizeof check);
 }
 
+/* What MegaMan got from the patch, its end: under a vow, the Mr.Prog's
+ * word that it was the layer's one; the patch marked given. */
+static void heal_said(TextArchive *t, const char *got, int told_flag, bool vow) {
+	ta_page(t, FACE_NONE, got, false);
+	if (vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
+	ta_flag_set(t, told_flag);
+	ta_end(t);
+}
+
 int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow) {
+	static const char full[] = "MegaMan's HP was fully restored!";
 	static const char *const hello[] = {
 		"HELLO,MEGAMAN!\nLET ME PATCH YOU UP!",
 		"DR.HIKARI SENT ME!\nOUCH,YOU'RE HURT!",
-		"RECOVERY PROGRAM,GO!\nTHIS WON'T HURT!",
+		/* (ready, not "GO!": the patch waits on his question, kai5) */
+		"RECOVERY PROGRAM,\nREADY TO GO!",
 	};
 	/* once he has patched MegaMan on this layer (flag set): one patch a
 	 * layer (issue #71: a heal as often as asked refunded every detour's
@@ -46,6 +57,13 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	 * heal he could not tell what it would do to it, session 69; the
 	 * layer's one patch is on Yes too, his No keeping it) */
 	int keep = vow ? ta_say(t, FACE_MEGAMAN, "Right! We keep our vow!") : -1;
+	/* (half his max HP that reached it: said as a heal to full, where "up
+	 * to 70 HP" at 80 of 140 read as his HP now, kai8, 15 November 2026) */
+	int topped = -1;
+	if (amount > 0) {
+		topped = ta_script(t);
+		heal_said(t, full, told_flag, vow);
+	}
 	bool asks = amount >= 0 && !vow;
 	int later = asks ? ta_say(t, FACE_PROG, "OK! I'LL BE RIGHT\nHERE,MEGAMAN!") : -1;
 	int i = ta_script(t);
@@ -59,19 +77,20 @@ int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amoun
 	if (asks) ta_ask_in(t, FACE_PROG, "ONE PATCH A LAYER!\nUSE IT NOW?\n", later, true, false);
 	if (amount > 0) {
 		/* (half of max HP, away from the arena: ts_start_heal, BN6's own,
-		 * no higher than his max) */
-		uint8_t heal[] = { 0xFB, 0x08, (uint8_t)amount, (uint8_t)(amount >> 8) };
+		 * no higher than his max, at once (bn6f chatbox_804252C); then
+		 * ts_wait, a frame for the director's full flag to see it, and
+		 * the HP he got, in BN6's own words for MiniEnrg's "recovers
+		 * 50HP!", or "fully restored" where the half reached his max) */
+		uint8_t heal[] = { 0xFB, 0x08, (uint8_t)amount, (uint8_t)(amount >> 8), 0xEE, 0x00, 2, 0 };
 		ta_bytes(t, heal, sizeof heal);
+		heal_check(t, full_flag, topped);
 		char got[48];
-		snprintf(got, sizeof got, "MegaMan recovered\nup to %d HP!", amount);
-		ta_page(t, FACE_NONE, got, false);
+		snprintf(got, sizeof got, "MegaMan recovered\n%dHP!", amount);
+		heal_said(t, got, told_flag, vow);
 	} else {
 		ta_bytes(t, ta_full_hp, sizeof ta_full_hp);
-		ta_page(t, FACE_NONE, "MegaMan's HP was fully restored!", false);
+		heal_said(t, full, told_flag, vow && amount == 0);
 	}
-	if (amount >= 0 && vow) ta_page(t, FACE_PROG, "ONE PATCH A LAYER!\nMAKE IT COUNT!", false);
-	ta_flag_set(t, told_flag);
-	ta_end(t);
 	return i;
 }
 
