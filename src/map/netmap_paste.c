@@ -11,6 +11,7 @@
 #include "net_shapes.h"
 #include "netmap_learn.h"
 #include "tilemap.h"
+#include "voids.h"
 
 /* ---- output ---- */
 
@@ -449,22 +450,31 @@ static bool hang_free(int x, int y) {
 #define GROWS_SKIP     3   /* what grows on a floor's edge: a panel that fits in this many takes none, */
 #define GROWS_A_LAYER 64   /* ... and a layer sets this many at most */
 
-/* The piece for grid panel (x, y), by hash h: one of those cut at its
- * neighbourhood, of kind `kind` (0 on a floor's side, 1 under a pad, 2
- * behind a floor), NULL none. */
-static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsigned h) {
-	unsigned f = side_floor(x, y);
-	int match[SIDES_MAX], nmatch = 0;
-	for (int k = 0; k < b->n; ++k)
-		if ((b->piece[k].grows ? 3 : b->piece[k].hang + b->piece[k].behind) == kind && b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
-	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
+/* The layer's tile map as the side pieces are set on it, the pixels its
+ * tiles draw (voids_opaque; NULL unknown), and the tiles its area's maps
+ * set side by side. */
+typedef struct {
+	uint16_t *map;
+	int tw, th;
+	const uint64_t *opaque;
+	const TileSeams *seams;
+} SideMap;
+
+/* Whether the first layer shows the same round second-layer tile `e1`
+ * over `was` (its map's) as over `is` (the layer's): the same entry, or
+ * whatever the two draw hidden behind e1. */
+static bool side_shows_same(const uint64_t *opaque, uint16_t e1, uint16_t was, uint16_t is) {
+	if (was == is) return true;
+	if (!opaque) return false;
+	uint64_t open = ~voids_entry_px(opaque, e1);
+	return !(voids_entry_px(opaque, was) & open) && !(voids_entry_px(opaque, is) & open);
 }
 
 /* A tile of the layer's map as its neighbours see it (seams.h): its first
  * layer's entry, or SEAM_VOID where neither layer draws one. */
-static uint32_t seam_look(const uint16_t *map, int tw, int th, int tx, int ty) {
-	size_t at = (size_t)ty * tw + tx;
-	return map[at] & 0x3FF || map[(size_t)tw * th + at] & 0x3FF ? map[at] : SEAM_VOID;
+static uint32_t seam_look(const SideMap *m, int tx, int ty) {
+	size_t at = (size_t)ty * m->tw + tx;
+	return m->map[at] & 0x3FF || m->map[(size_t)m->tw * m->th + at] & 0x3FF ? m->map[at] : SEAM_VOID;
 }
 
 /* Whether one of piece p's tiles, from (px0, py0), sits at tile (tx, ty) of the map. */
@@ -477,26 +487,27 @@ static bool piece_at(const SidePiece *p, int px0, int py0, int tx, int ty) {
 /* Whether what grows on a floor's edge, its tiles from (px0, py0), meets
  * the layer's tiles round it as the area's maps set them side by side: a
  * planter's top beside a planter of the layer's wall would cut it in two. */
-static bool grows_meets(const SidePiece *p, const TileSeams *seams, const uint16_t *map, int tw, int th, int px0, int py0) {
+static bool grows_meets(const SidePiece *p, const SideMap *m, int px0, int py0) {
 	static const int dir[4][2] = { { 1, 0 }, { -1, 0 }, { 0, 1 }, { 0, -1 } };
 	for (int k = 0; k < p->ntiles; ++k) {
 		int tx = (px0 + p->tiles[k].px) / 8, ty = (py0 + p->tiles[k].py) / 8;
 		for (int d = 0; d < 4; ++d) {
 			int nx = tx + dir[d][0], ny = ty + dir[d][1];
-			if (nx < 0 || ny < 0 || nx >= tw || ny >= th || piece_at(p, px0, py0, nx, ny)) continue;
-			uint32_t near = seam_look(map, tw, th, nx, ny), own = p->tiles[k].e0;
+			if (nx < 0 || ny < 0 || nx >= m->tw || ny >= m->th || piece_at(p, px0, py0, nx, ny)) continue;
+			uint32_t near = seam_look(m, nx, ny), own = p->tiles[k].e0;
 			bool after = dir[d][0] + dir[d][1] > 0;   /* (the neighbour to its right or below) */
-			if (!seams_seen(seams, after ? own : near, after ? near : own, dir[d][1] != 0)) return false;
+			if (!seams_seen(m->seams, after ? own : near, after ? near : own, dir[d][1] != 0)) return false;
 		}
 	}
 	return true;
 }
 
-/* Piece p set at grid panel (x, y), whole or not at all: on the map, on its
+/* Whether piece p goes down whole at grid panel (x, y): on the map, on its
  * tile lattice, over nothing its layer holds (the second; the first for
- * what stands under a floor). Whether it was. */
-static bool side_set(const SidePiece *p, const TileSeams *seams, uint16_t *map, int tw, int th, int x, int y) {
-	uint16_t *to = p->hang ? map : map + (size_t)tw * th;
+ * what stands under a floor). */
+static bool side_fits(const SidePiece *p, const SideMap *m, int x, int y) {
+	int tw = m->tw, th = m->th;
+	const uint16_t *to = p->hang ? m->map : m->map + (size_t)tw * th;
 	int A, B, over = 0, top = p->tiles[0].py, foot = top;
 	nm_grid_to_panel(x, y, &A, &B);
 	int px0 = area_px(tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
@@ -510,45 +521,72 @@ static bool side_set(const SidePiece *p, const TileSeams *seams, uint16_t *map, 
 		size_t at = (size_t)(py / 8) * tw + px / 8;
 		/* (nor over a bridge's or a pad's art, set whole: wider than the panels under it) */
 		if (nm_last.pasted && nm_last.pasted[at] & (NETMAP_PASTED_PAD | NETMAP_PASTED_STAIR)) return false;
+		/* (what grows on a floor's edge goes over the floor's own art where
+		 * its tile drew that too in its map, and nowhere else) */
+		if (p->grows) {
+			if (!to[at] != !(p->onto >> k & 1)) return false;
+			continue;
+		}
 		/* (what stands under a pad begins in its rim's own tiles, what
 		 * stands behind a floor ends in them: its two rows there, a third
 		 * of it at most, set over them; anywhere else a tile it would
 		 * cover is another floor's, a plateau's underside over the void) */
-		/* (what grows on a floor's edge goes over the floor's own art where
-		 * its tile drew that too in its map, and nowhere else) */
-		if (p->grows) {
-			if (!to[at] != !(p->over >> k & 1)) return false;
-			continue;
-		}
 		bool meets = p->behind ? p->tiles[k].py >= foot - 8 : p->tiles[k].py <= top + 8;
 		if (to[at] && (!p->hang || !meets || ++over * 3 > p->ntiles)) return false;
+		/* (and where it keeps the first layer's tiles it stood over, a rim's
+		 * tab or spikes, round it the picture its map showed: over anything
+		 * else it breaks at the tile's edge) */
+		if (p->over && !side_shows_same(m->opaque, p->tiles[k].e1, p->tiles[k].e0, m->map[at])) return false;
 	}
-	if (p->grows && !grows_meets(p, seams, map, tw, th, px0, py0)) return false;
-	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
+	return !p->grows || grows_meets(p, m, px0, py0);
+}
+
+/* Piece p set at grid panel (x, y), whole or not at all (side_fits).
+ * Whether it was. */
+static bool side_set(const SidePiece *p, const SideMap *m, int x, int y) {
+	if (!side_fits(p, m, x, y)) return false;
+	uint16_t *to = p->hang ? m->map : m->map + (size_t)m->tw * m->th;
+	int A, B;
+	nm_grid_to_panel(x, y, &A, &B);
+	int px0 = area_px(m->tw, nm_place.ex + 32 * A, nm_place.ey + 32 * B), py0 = area_py(m->th, nm_place.ex + 32 * A, nm_place.ey + 32 * B);
+	for (int k = 0; k < p->ntiles; ++k) to[(size_t)((py0 + p->tiles[k].py) / 8) * m->tw + (px0 + p->tiles[k].px) / 8] = p->hang ? p->tiles[k].e0 : p->tiles[k].e1;
 	return true;
+}
+
+/* The piece for grid panel (x, y), by hash h: one of those cut at its
+ * neighbourhood, of kind `kind` (0 on a floor's side, 1 under a pad, 2
+ * behind a floor), NULL none; of the looks that keep the first layer's
+ * tiles (SidePiece.over), only those that fit there. */
+static const SidePiece *side_for(const SideBook *b, int kind, int x, int y, unsigned h, const SideMap *m) {
+	unsigned f = side_floor(x, y);
+	int match[SIDES_MAX], nmatch = 0;
+	for (int k = 0; k < b->n; ++k) {
+		const SidePiece *p = &b->piece[k];
+		if (!p->grows && p->hang + p->behind == kind && p->floor == f && side_under(p, x, y) && (!p->over || side_fits(p, m, x, y))) match[nmatch++] = k;
+	}
+	return nmatch ? &b->piece[match[(h >> 4) % (unsigned)nmatch]] : NULL;
 }
 
 /* The panels a layer's pieces of what grows on a floor's edge stand on. */
 typedef struct { int at[GROWS_A_LAYER][2], n; } Grown;
 
-/* What grows on a floor's edge set at grid panel (x, y), by hash h: on
- * two panels that fit in three, none a panel from another, as the maps
- * scatter theirs (on every one, a straight edge took one every other
- * panel); the first of those cut at its neighbourhood that fits, from the
- * one h picks. NULL none. */
-static const SidePiece *grows_set(const Learned *L, uint16_t *map, int tw, int th, int x, int y, Grown *g) {
+/* What grows on a floor's edge set at grid panel (x, y): on two panels
+ * that fit in three, none a panel from another, as the maps scatter theirs
+ * (on every one, a straight edge took one every other panel); the first of
+ * those cut at its neighbourhood that fits, from the one the seed picks.
+ * NULL none. */
+static const SidePiece *grows_set(const SideBook *b, const SideMap *m, int x, int y, Grown *g) {
 	unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
 	if (g->n == GROWS_A_LAYER || (h >> 12) % GROWS_SKIP == 0) return NULL;
 	for (int k = 0; k < g->n; ++k)
 		if (abs(g->at[k][0] - x) < 2 && abs(g->at[k][1] - y) < 2) return NULL;
-	const SideBook *b = &L->sides;
 	unsigned f = side_floor(x, y);
 	int match[SIDES_MAX], nmatch = 0;
 	for (int k = 0; k < b->n; ++k)
 		if (b->piece[k].grows && b->piece[k].floor == f && side_under(&b->piece[k], x, y)) match[nmatch++] = k;
 	for (int i = 0; i < nmatch; ++i) {
 		const SidePiece *p = &b->piece[match[((h >> 4) + (unsigned)i) % (unsigned)nmatch]];
-		if (!side_set(p, &L->seams, map, tw, th, x, y)) continue;
+		if (!side_set(p, m, x, y)) continue;
 		g->at[g->n][0] = x;
 		g->at[g->n++][1] = y;
 		return p;
@@ -565,6 +603,7 @@ static void hang_said(const SidePiece *p, int x, int y) {
 	fprintf(stderr, "  %s at world %d,%d: %d tiles\n", p->grows ? "on the floor's edge" : p->behind ? "behind the floor" : "under the pad's panel",
 		nm_place.ex + 32 * A, nm_place.ey + 32 * B, p->ntiles);
 }
+}
 
 static struct { const SidePiece *p; int X, Y; } side_at[SIDES_A_LAYER];
 static int nside_at;
@@ -576,26 +615,36 @@ int nm_sides_set(int i, const SidePiece **p, int *X, int *Y) {
 
 int netmap_sides(void) { return nside_at; }
 
+/* The piece for free grid panel (x, y), by hash h, NULL none (`near`:
+ * within SIDES_APART of one set): under a pad's panel whatever fits; on a
+ * floor's side half, apart, or where its look keeps the first layer's
+ * tiles, every one where it fits, apart; behind a floor's edge whatever
+ * fits in one stretch of four panels square in three, as the maps set
+ * theirs in rows. */
+static const SidePiece *side_pick(const SideBook *b, int x, int y, unsigned h, bool near, const SideMap *m) {
+	if (hang_free(x, y)) return side_for(b, 1, x, y, h, m);
+	const SidePiece *p = near ? NULL : side_for(b, 0, x, y, h, m);
+	if (p && !p->over && h % 2) p = NULL;
+	unsigned stretch = (nm_cur->seed ^ (uint32_t)(x / 4 * 7919 + y / 4 * 104729)) * 2654435761u >> 8;
+	return p || stretch % 3 ? p : side_for(b, 2, x, y, h, m);
+}
+
 void nm_paste_sides(const Learned *L, uint16_t *map, int tw, int th) {
 	nside_at = 0;
 	if (!L->sides.n || nm_cur->gw != MAP_W) return;
 	int set[SIDES_A_LAYER][2], nset = 0, nhang = 0;
+	SideMap m = { map, tw, th, voids_opaque(L->def->xrom, L->def->group, L->def->number), &L->seams };
 	Grown grown = { .n = 0 };
 	for (int y = 1; y < MAP_H - 1 && nset < SIDES_A_LAYER; ++y)
 		for (int x = 1; x < MAP_W - 1 && nset < SIDES_A_LAYER; ++x) {
 			unsigned h = (nm_cur->seed ^ (uint32_t)(x * 7919 + y * 104729)) * 2654435761u >> 8;
 			bool near = false;
 			for (int k = 0; k < nset && !near; ++k) near = abs(set[k][0] - x) < SIDES_APART && abs(set[k][1] - y) < SIDES_APART;
-			/* (under a pad's panel whatever fits; on a floor's side half, apart;
-			 * behind a floor's edge whatever fits in one stretch of four
-			 * panels square in three, as the maps set theirs in rows) */
 			bool hang = hang_free(x, y);
 			if (!hang && !side_free(x, y)) continue;
-			const SidePiece *p = hang ? side_for(&L->sides, 1, x, y, h) : near || h % 2 ? NULL : side_for(&L->sides, 0, x, y, h);
-			unsigned stretch = (nm_cur->seed ^ (uint32_t)(x / 4 * 7919 + y / 4 * 104729)) * 2654435761u >> 8;
-			if (!p && !hang && stretch % 3 == 0) p = side_for(&L->sides, 2, x, y, h);
+			const SidePiece *p = side_pick(&L->sides, x, y, h, near, &m);
 			/* (and where none, what grows on its edge) */
-			if (p ? !side_set(p, &L->seams, map, tw, th, x, y) : hang || !(p = grows_set(L, map, tw, th, x, y, &grown))) continue;
+			if (p ? !side_set(p, &m, x, y) : hang || !(p = grows_set(&L->sides, &m, x, y, &grown))) continue;
 			if (p->hang) {
 				++nhang;
 				hang_said(p, x, y);
