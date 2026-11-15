@@ -12,8 +12,11 @@ typedef struct {
 } ArenaInfo;
 
 /* Attaches an n x n arena by one bridge, as far from room 0 as there is
- * room for; its room index, or -1 (nothing carved) when none fits. */
-int arena_attach(int n, ArenaInfo *out);
+ * room for; its room index, or -1 (nothing carved) when none fits.
+ * lined_first: a bridge the walk meets on its line first, wherever one
+ * fits (its side's end or straight on, the layer still fitting the map
+ * with its rise: ng_fits), else from a side's middle. */
+int arena_attach(int n, ArenaInfo *out, bool lined_first, int rise);
 
 /* Whether panel (x, y) is on the layer's way into its arena: in the
  * antechamber's box, or on the bridge from it (the arena's own panels

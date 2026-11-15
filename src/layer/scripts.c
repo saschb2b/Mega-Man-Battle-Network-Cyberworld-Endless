@@ -45,16 +45,20 @@ void chat_marks_install(void) {
  * shopkeepers ask it: two options, then select (Yes continues, No and B
  * jump to `no`); in the box a page before it opened, with `after`. A risky
  * one (a fight, a warp away) starts on No: a playtester's A pressed through
- * a strong virus signal's words took it on at Yes, and cost him 150 HP. */
-void ta_ask_in(TextArchive *t, int face, const char *question, int no, bool after, bool risky) {
+ * a strong virus signal's words took it on at Yes, and cost him 150 HP.
+ * `pause` frames pass between the question and its options (ts_wait, which
+ * no key cuts short): no choice is up to take a press in them. */
+static void ask(TextArchive *t, int face, const char *question, int no, bool after, bool risky, int pause) {
 	static const uint8_t horizontal[] = { 0xF7, 0x07, 0x0B };        /* ts_position_option_horizontal */
 	static const uint8_t yes_opt[] = { 0xEB, 0x00, 0x11, 0x00 };     /* ts_option: left/right to No */
 	static const uint8_t no_opt[] = { 0xEB, 0x00, 0x00, 0x11 };
 	static const uint8_t space[] = { 0xEC, 0x00, 0x01 };
 	uint8_t select[] = { 0xED, 0x06, (uint8_t)(risky ? 1 : 0), 0xFF, (uint8_t)no, 0xFF };   /* (ts_select: its length, the option it starts on) */
+	uint8_t wait[] = { 0xEE, 0x00, (uint8_t)pause, (uint8_t)(pause >> 8) };   /* ts_wait */
 	if (face >= 0) ta_mugshot(t, face);
 	if (after) ta_clear(t); else ta_open(t);
 	ta_text(t, question);
+	if (pause > 0) ta_bytes(t, wait, sizeof wait);
 	ta_bytes(t, horizontal, sizeof horizontal);
 	ta_bytes(t, yes_opt, sizeof yes_opt);
 	ta_bytes(t, space, sizeof space);
@@ -64,6 +68,20 @@ void ta_ask_in(TextArchive *t, int face, const char *question, int no, bool afte
 	ta_text(t, " No ");
 	ta_bytes(t, select, sizeof select);
 }
+
+void ta_ask_in(TextArchive *t, int face, const char *question, int no, bool after, bool risky) { ask(t, face, question, no, after, risky, 0); }
+
+/* A choice whose Yes costs (a DarkChip's max HP): on No, as BN6's own are
+ * ("MegaMan, jack out?", the "ARE YOU READY?" of a strength test: bn6f
+ * CompText87388A8, CompText875F424, ts_select 0x81), and its options
+ * ASK_PAUSE frames after its question, so that an A pressed through the
+ * words before it takes nothing: kai5's, paging the last box, and kai7's,
+ * 80 frames into the question, each took a DarkChip at Yes (session 77).
+ * With the question's typing and the choice's own fifth of a second
+ * (director_keys.c's A_GUARD) an A counts about a second and a half after
+ * the question shows, as a reward pick's (PICK_SEEN). */
+#define ASK_PAUSE 66
+void ta_ask_costly(TextArchive *t, int face, const char *question, int no) { ask(t, face, question, no, true, true, ASK_PAUSE); }
 
 void ta_ask(TextArchive *t, int face, const char *question, int no) { ta_ask_in(t, face, question, no, false, false); }
 

@@ -36,11 +36,17 @@ static bool cross_owned(void) {
  * has left runs, hears that its Cross and its Navis are ours now), and the
  * deep, where both nets' viruses come; the Cross named only in a run that
  * holds one */
+/* (an older net's area: a territory's, or the deep's dressed in one) */
+static bool older_here(void) { return D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS); }
+
+/* (a profile once told its battles ran the old way hears that they are ours) */
+static bool ours_news(void) { return older_here() && (profile.cross_old_told || profile.guest_taught) && !profile.navis_ours_told; }
+
+bool nets_older_news(void) { return older_here() && !profile.native_taught && !ours_news(); }
+
 void nets_arrival_words(void) {
-	/* (an older net's area: a territory's, or the deep's dressed in one) */
-	bool older = D.territory_native || (D.deep && D.layer_tiles >= NET_AREAS);
-	D.beat_ours = older && (profile.cross_old_told || profile.guest_taught) && !profile.navis_ours_told;
-	D.beat_native = older && !profile.native_taught && !D.beat_ours;
+	D.beat_ours = ours_news();
+	D.beat_native = nets_older_news();
 	D.beat_deep = D.deep && !profile.deep_taught;
 	size_t k = strlen(D.beat);
 	bool cross = cross_owned();
@@ -72,8 +78,13 @@ void nets_battle_note(const Encounter *e) {
 	}
 }
 
-/* (MegaMan free on the map, nothing said or shown: a word can start) */
-static bool quiet(void) { return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map(); }
+/* (MegaMan free on the map, nothing said or shown, the screen faded in: a
+ * word can start. One begun in the fade back from a battle drew its box
+ * empty and grey under the fade, a playtester's "flash" after a run away,
+ * session 77) */
+static bool quiet(void) {
+	return !talk_busy() && !emu_read8(BN6_CHATBOX) && !cinema_busy() && on_map() && emu_read8(BN6_FADE_ACTIVE) != 1;
+}
 
 /* MegaMan on the first family of another net a profile met: one of the older Net's
  * (BN5's or BN4's) in a battle of ours, or one of ours in the older Net's

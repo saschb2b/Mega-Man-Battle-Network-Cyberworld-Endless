@@ -127,7 +127,10 @@ ShopWords dealer_words(const DealerTalk *d) {
 	 * it has no "from here", which a playtester heard there) */
 	bool last = run.depth > 3 && run.side_kind == LAYER_NORMAL && run.mode == RUN_SHORT && run_short_last(run.depth);
 	if (last) lead = "The bottom of the Net,MegaMan! My last stop,and yours!";
-	if (!lead && !*word) lead = run.depth <= 3 ? "Need chips? Take a look!" : "Still at it,MegaMan? Stock up!";
+	/* (deeper in, one who has met MegaMan before asks after the dive; to a
+	 * profile he never greeted, "Still at it?" was his first word, a test
+	 * start's at layer 4, session 77) */
+	if (!lead && !*word) lead = run.depth > 3 && d->met ? "Still at it,MegaMan? Stock up!" : "Need chips? Take a look!";
 	snprintf(hello, sizeof hello, "%s%s%s", lead ? lead : "", lead && *word ? "|" : "", word);
 	/* (met in this act already: the pick, in a line) */
 	if (d->again && d->tells && !last)

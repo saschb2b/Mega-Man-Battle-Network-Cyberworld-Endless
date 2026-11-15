@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-15T03:44:04Z
+* **Update**: game/bosses/hades.md (the last stop before a guardian's arena is said eight panels' walk from it or nearer, never with someone in A's reach, and suggests getting ready rather than asking).

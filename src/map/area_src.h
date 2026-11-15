@@ -114,6 +114,11 @@ void area_src_raise_end(AreaSrc *a, AreaSrc *r);
  * front: ARGB pixels, alpha 0 where empty (free them). The map is BN6's
  * (rom 0) or another game's (1 + XRomId, where read). */
 uint32_t *area_src_render(int rom, int group, int number, const uint16_t *tiles, int tw, int th);
+/* The pixels each of the 1024 tiles map (group, number)'s tile set holds
+ * draws, unflipped (bit y * 8 + x; colour 0 draws none), into `out`, as
+ * area_src_render draws them: the floor's holes are found by them
+ * (voids.h). False where the tile set cannot be read. */
+bool area_src_opaque(int rom, int group, int number, uint64_t out[1024]);
 /* Whether map (group, number) of game `rom` (0 BN6, 1 + XRomId) is drawn in
  * 256-colour tiles: the real world's, and BN4's net maps */
 bool area_src_bpp8(int rom, int group, int number);

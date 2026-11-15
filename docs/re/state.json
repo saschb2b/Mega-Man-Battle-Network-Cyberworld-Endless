@@ -207,6 +207,14 @@
       "link": null
     },
     {
+      "feature": "Battle",
+      "date": "2026-11-15",
+      "name": "SpoutMan behind MegaMan: BN6's own attack",
+      "result": "A playtester saw SpoutMan stand on column 1 row 2, behind MegaMan, and swing his hose forward. bn6f's sub_80F77E8 picks the first free panel of a fixed pair for his side, (2,2) then (1,2) for an enemy (byte_80F7828; Gregar 0x080F8B50, the same bytes), and his attack 0xC (sub_80F7EA6) lights it 35 frames and lands there. A replay showed the lit panel, then him on it, MegaMan 240 to 220.",
+      "meaning": "BN6's own pattern, kept: nothing of the run's touches his AI. Named BN6_SPOUTMAN_BACK (src/emu/bn6_navis.h; docs/rom/battle.md).",
+      "link": null
+    },
+    {
       "feature": "BN4's Souls on BN6's proxy form",
       "date": "2026-11-13",
       "name": "The emotion window's faces read, and the Souls' sprites measured",

@@ -307,7 +307,8 @@ static void report_text(char *s, int size) {
 	if (down && run.mode == RUN_SHORT && run_short_last(run.depth))
 		ADD("\f%s is deleted! The whole Net has gone quiet.\fJack out and come home,Lan!", guardian(navi)->name);
 	else if (down) ADD("\f%s is deleted. The way on is open!", guardian(navi)->name);
-	else if (navi && guardian_known(navi)) ADD("\f%s guards this act's end. MegaMan knows him.", guardian(navi)->name);
+	/* (met at his arena, a battle ended or not: the act's card names him too) */
+	else if (navi && guardian_met(navi)) ADD("\f%s guards this act's end. MegaMan knows him.", guardian(navi)->name);
 	else if (navi && director_guardian_heard()) ADD("\fThe Net says %s guards this act.", guardian(navi)->name);
 	else if (navi) ADD("\fA strong Navi guards this act's end. We don't know who yet.");
 	ADD("\fYou've found %d of 3 ScrtData%s.", run.fragments > 3 ? 3 : run.fragments, run.secret_cleared ? ",and the gate's open" : "");
@@ -458,11 +459,14 @@ static int mail_body(int navi, uint8_t *out, int max) {
 }
 
 /* Dad's mail on the Battle Lab (docs/game/battle-lab.md, How it is earned):
- * what the lab made and where it waits, then what it holds so far */
+ * what the lab made, where it waits and when MegaMan is there (the mail
+ * comes on a layer, and a playtester looked for a way home mid-act to
+ * reach it, session 77), then what it holds so far */
 static void lab_mail_text(char *out, size_t n) {
 	snprintf(out, n, "Lan,the lab built\nsomething from your\nbattle data.\f"
 		"A place to fight\ncopies of viruses\nMegaMan knows well.\f"
 		"Our lab's Navi waits\nin your HP. No copy\ncan delete MegaMan.\f"
+		"Stop by when you\ncome home after a\nguardian,OK?\f"
 		"So far the data is\ncomplete on %d\nvirus families.", battle_data_families_complete());
 }
 

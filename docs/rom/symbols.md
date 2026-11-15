@@ -99,7 +99,7 @@ how to verify it.
 | Symbols | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
 | Code (routines, hooks, instructions) | 392 | 46 | 159 |
-| ROM data (tables, text, literals) | 343 | 284 | 217 |
+| ROM data (tables, text, literals) | 344 | 284 | 217 |
 | ROM, code or data not told | 615 | 689 | 262 |
 | RAM (variables, structures) | 143 | 66 | 43 |
 | I/O registers | 4 | 0 | 0 |
@@ -107,7 +107,7 @@ how to verify it.
 | Event flags | 35 | 3 | 2 |
 | Values of fields | 117 | 16 | 3 |
 | Constants, sizes and counts | 610 | 295 | 379 |
-| All | 2445 | 1445 | 1068 |
+| All | 2446 | 1445 | 1068 |
 
 | Part of the game | BN6 Gregar | BN5 Team Colonel | BN4 Red Sun |
 | --- | ---: | ---: | ---: |
@@ -120,7 +120,7 @@ how to verify it.
 | Sound | 29 | 30 | 14 |
 | Maps and the overworld | 149 | 42 | 28 |
 | Events and progress | 67 | 19 | 13 |
-| Engine core | 1013 | 678 | 635 |
+| Engine core | 1014 | 678 | 635 |
 
 <!-- end of what tools/symbols.py writes -->
 

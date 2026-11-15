@@ -81,7 +81,15 @@ raised, and the loop's own lessons.
      Trader's "chips the Library has" rule gave one chip every time. Seen
      so far: a battle opening in Full Synchro (the emotion window's dark
      outline, a chip's "x2") after one won in it, as BN6 keeps the mood
-     until a jack-in or jack-out (docs/rom/battle.md, s76).
+     until a jack-in or jack-out (docs/rom/battle.md, s76). In s77:
+     SpoutMan landing behind MegaMan on a lit panel (his attack 0xC,
+     docs/rom/battle.md), his DripShower's hit (the cloud over MegaMan,
+     no lit panel) read as a hose before its warning, a Cannon spent on
+     his hose's nozzle or SlashMan's knives, swords "never hitting"
+     SlashMan who stood two columns off, a Swordy or Bugtank using
+     AreaGrab (BN6's viruses hold a chip: the grey chip box over one),
+     the field with its CUSTOM bar after "We got away!" (BN6's Custom
+     screen slides out before the battle ends, bn6f `sub_802AED8`).
    - *Real bug or design gap*: fix it. A single sighting of something the
      generator makes (an unreachable-looking object, a crowded room) is
      first counted over the tests' 300 layers: the count sizes the problem

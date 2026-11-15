@@ -314,6 +314,17 @@ int meta_vault_need(int depth) {
 	return need[act < 3 ? act : 3];
 }
 
+/* The Library's count once the run's starting folder is in it: a fresh
+ * profile's twelve starting chips read "Library 15 (+15)" after a run that
+ * found three (session 77), counted from the run's begin, before its folder */
+void meta_library_from_here(void) {
+	uint16_t n = (uint16_t)meta_library_count(-1);
+	if (profile.library_start == n && profile.library_run == run.seed) return;
+	profile.library_start = n;
+	profile.library_run = run.seed;
+	profile_save();
+}
+
 int meta_library_new(void) {
 	int n = meta_library_count(-1) - profile.library_start;
 	return n > 0 ? n : 0;

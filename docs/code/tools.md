@@ -3,7 +3,7 @@ type: Code Map
 title: "Tools and skills"
 description: "The research and test tools (romlab, uinput_keys.py, play.py, the cyberworld MCP server and cw.py, the voice catalog and dashboard) and the repository's skills (playtest-loop, game-design, trailer, release, course-check, agent-browser)."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:54:31Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
 ---
 
 # Tools and skills
@@ -11,6 +11,7 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T17:54:31Z }
 | Path | Contents |
 | --- | --- |
 | `tools/romlab/` | libmgba research harness (dev only, needs your ROM): scripted input, peeks and pokes, states, recordings, probes on the code and watches on stores ([tools/romlab](../devtools/romlab.md)) |
+| `tools/chip_texts.py` | Every chip's name and description against its own entry in BN6's, BN5's or BN4's archives, from the host build's `--chip-texts` dump with the ROMs read ([Chip texts](../devtools/chip-texts.md)) |
 | `tools/encounter_tags.py`, `tools/encounter_danger.py`, `tools/encounter_data/` | The encounter groups' measuring (`pairs.tsv` the pairs' pass, every two families of the pool together; [Encounter tags and danger](../devtools/encounter-tags.md)): every family of every ROM tagged from the host build's `--encounter-tags` dump (`tags.tsv`: versions, elements, roles, reward rows, the acts' bands, the areas' battles, numbers alone), the templates' fillings counted per ROM set and act, and battles fought headless for their pressure, tricks and the autopilot's losses (`families.tsv`, `danger.tsv`); the report in [Encounter groups, measured](../game/progression/encounter-groups-measured.md) |
 | `tools/economy_centres.py` | The economy's bands re-centred on what `build.py economy` measures: the centres the report gives beside those in `src/core/economy.c`, `--write` sets them ([The guard](../game/economy/guard.md), Re-centring) |
 | `tools/bn4_lab.py` | BN4 Red Sun in romlab: its tables checked against [BN4 Red Sun's tables](../rom/bn4.md) (report), the plain ROM played from power-on to Lan's room (boot) and a battle started there from a record of its own or one written with the enemies given (battle); BN4 read as the game reads it beside BN6's ([Battle Network 4 in a run](../multirom/bn4.md)) |

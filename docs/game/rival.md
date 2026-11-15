@@ -3,7 +3,7 @@ type: Design
 title: "The rival: Chaud and ProtoMan"
 description: "The rival Chaud and ProtoMan: busting duels against ProtoMan's DeleteTime on each act's duel layer, terms by rung, a netbattle after two duels won, the record, and Chaud's clearance opening official gates."
 tags: [game, rival]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T02:05:00Z }
+generated: { by: claude/claude-opus-5-5, at: 2026-11-15T03:35:14Z }
 ---
 
 # The rival: Chaud and ProtoMan
@@ -82,11 +82,14 @@ clearance opens), which only matter to a player who plays on.
    marks him. Who Chaud is (the Endless Net, the Nest's copies, ProtoMan
    the real thing) he says the first time alone, Lan's "Huh!? Chaud!?"
    right after his name; to a profile that has heard him (a duel in the
-   record, an earlier run that reached layer 2, or this run past its
-   first guardian) he opens with the record, or "Lan, it's Chaud again."
-   where none was fought. Before, the record alone chose, and Lan's
-   surprise came after seven boxes of Chaud's: a playtester heard the
-   first words again in a second run (session 76).
+   record, or a call of his heard: the profile keeps it as the call
+   plays, `HEARD_CHAUD`) he opens with the record, or "Lan, it's Chaud
+   again." where none was fought. Before, the record alone chose, and
+   Lan's surprise came after seven boxes of Chaud's: a playtester heard
+   the first words again in a second run (session 76). Then the depth a
+   run had reached stood in for a call heard, and counted a test start's
+   dropped in deeper and deleted before any call: two fresh profiles'
+   first call opened "it's Chaud again" (session 77).
 2. **The ring.** ProtoMan stands on the layer, off the way on. His words
    give the terms: the squad's size ("a pair of viruses"), his time and
    the rung's rule; then MegaMan the stake ("Real viruses, Lan. If they

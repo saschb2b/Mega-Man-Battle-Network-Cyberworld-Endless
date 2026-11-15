@@ -3,7 +3,7 @@ type: Design
 title: "The Battle Lab"
 description: "The Battle Lab, a place in Lan's HP to set up any battle and fight it without risk or reward, in the manner of Warframe's Simulacrum: foes opened by battle data gathered across runs (a family complete at 8 deletions), a builder for their versions, panels, field, background and song, the battle fought inside a snapshot of the game; designed with the game-design skill and the owner's eight calls of 11 November 2026."
 tags: [game, design, meta]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T23:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:48:00Z }
 sources:
   - id: owner
     resource: "The owner's request of 11 November 2026, given in the project's sessions"
@@ -403,14 +403,34 @@ is used.
   - *FIELD*: the cursor walks the eighteen panels and A turns one
     through BN6's types (plain, cracked, hole, poison, holy, grass, ice,
     volcano, the four conveyors); the row under them takes one of BN6's
-    237 fields whole as a start. No hole under MegaMan.
+    237 fields whole as a start. No hole under MegaMan. The strip over
+    the field holds that row (Preset) over MegaMan's side and BATTLE!
+    over the foes': Up from the field's top row goes to the one over
+    its column, Down comes back (a playtester found no way to Preset,
+    which only Down from the bottom row reached, session 77).
   - *STAGE*: the background, an area of the net's, and the song, BN6's
     from the Jukebox's list or the battle's own.
   - BATTLE! at the foot (Down past the list, or START) fights the set
     as step 2's test battle: its panels written over BN6's last field in
     the core's copy while it is on, then put back. The screen returns
     with the result in the information box (time, busting level, HP
-    lost).
+    lost), while the set in hand is the one fought; another set shows
+    its own kept best, or "No win yet."
+  - *The keys* (session 77's playtester left the Lab with one B on FIELD
+    and STAGE, while B on SETS went back a step): B goes back a level
+    on every page, a family lifted to the list, BATTLE! or FIELD's
+    Preset to the page's own place (the field on FIELD, the list on the
+    others); at that place it asks "Leave the Lab?" in the information
+    box, Yes and No behind BN6's green triangle, Yes chosen as BN6's
+    NaviCust asks its quit (bn6f's `ts_select 0x6, 0x0` after "Quit the
+    Navi Customizer?", CompText86D55C8: it opens on Yes); B there
+    stays. A held direction steps again after 18 frames, then every 5,
+    as the engine's menus do (`platform.c`'s `press_state`): the FOES
+    list of a hundred families is browsed by holding Down. A row's turn
+    arrows stand close to its version, and the list scrolls in a
+    track as Options' does; a name too wide for its arrows (an
+    eight-letter one in wide letters) loses its last letters on the
+    cursor's row alone.
   - Not yet: Navis, the foes' sprites on the field (a number marks each),
     BN5's and BN4's panels, backgrounds and songs, the saved sets (all
     built since, below).
@@ -419,7 +439,9 @@ is used.
   `--dev lab` alone (`src/director/lab_keeper.c`, his lines
   `lab_words.c`, his place `src/map/lanhp.c`). A Mr.Prog of Dad's lab stands in Lan's HP (first
   across the room's front from the gate's keeper; moved since, below). His first talk is three boxes, once a
-  profile (`Profile.lab_met`); every later one a single box. As the chat
+  profile (`Profile.lab_met`), its last a question with Yes and No (No
+  closes the box, and the next talk is the first again); every later
+  one a single box. As the chat
   box closes the builder opens over the held game, and its battle is
   fought there, in Lan's HP: seen headless from the town's jack-in, a
   battle set, left by L, the builder back with the result, the work RAM's
@@ -438,7 +460,11 @@ is used.
     mails on its first layer, not in Lan's room as first designed: a
     run's mails are made as a layer begins. It is NEW again with each
     family whose data is complete since, so E-Mail shows the gauge's
-    progress in a run.
+    progress in a run. As it comes on a layer, it says when MegaMan is
+    home ("Stop by when you come home after a guardian,OK?"): a
+    playtester read it on layer 1 and looked for a way home mid-act
+    (session 77; [Home's design](../world/home/design.md), No way home
+    mid-act).
   - *The sets* (`Profile.lab_sets`, `src/core/lab_set.h`): a fourth
     page, SETS, lists four; A takes one in hand, the one in hand kept as
     a battle starts and as the screen leaves. A win that beats a set's

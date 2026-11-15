@@ -367,7 +367,10 @@ static void map_update(void) {
 			for (int x = r->x - 1; x <= r->x + r->w; ++x)
 				if (x >= 0 && y >= 0 && x < MAP_W && y < MAP_H) D.seen[y][x] = 1;
 	}
-	last_stop(cx, cy);
+	/* (not where an A may be meant for someone: the last stop's words
+	 * began as a playtester reached the Net Dealer, and took his A,
+	 * session 77) */
+	if (!talk_in_reach()) last_stop(cx, cy);
 	fork_pad_read(cx, cy);
 	final_update();
 }
@@ -518,6 +521,12 @@ static void mail_update(void) {
 	}
 }
 
+/* The Net Dealer's greeting heard on this layer (his script's flag): his
+ * next, on any layer of any run, is a later meeting's (layer_words.c) */
+static void dealer_heard(void) {
+	if (!(profile.heard & HEARD_DEALER) && flag_get(LAYER_DEALER_TOLD_FLAG)) { profile.heard |= HEARD_DEALER; profile_save(); }
+}
+
 /* Chaud's verdict and call */
 static void rival_update(void) {
 	/* the rival (docs/game/rival.md): Chaud's verdict after the duel, his call
@@ -531,6 +540,8 @@ static void rival_update(void) {
 		if (talk_start(call, FACE_CHAUD)) {
 			D.duel_call_due = false;
 			flag_set(LAYER_DUEL_CALLED_FLAG);
+			/* (heard: his next call opens as a later one's) */
+			if (!(profile.heard & HEARD_CHAUD)) { profile.heard |= HEARD_CHAUD; profile_save(); }
 		}
 	}
 }
@@ -619,7 +630,7 @@ void director_update(void) {
 	 * after every fight) */
 	int screen = emu_read8(BN6_GAMESTATE);
 	if (main_mode() != BN6_MODE_GAME ? main_mode() != BN6_MODE_GAME_OVER : screen == BN6_SUB_PET) D.pet_seen = true;
-	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); }
+	if (on_map()) { unwedge(); if (!lib_on()) push_arrow(); exit_pad_step(); floor_walk(); hp_full_watch(); bug_watch(); spin_watch(); grant_spins(); bugfrag_trade(); code_watch(); reg_watch(); draft_skip_watch(); home_jobs_watch(); runlog_walked(); dealer_heard(); }
 	cinema_on_map(on_map());
 	if (!on_map()) {
 		battle_update();

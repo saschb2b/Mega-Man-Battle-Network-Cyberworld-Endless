@@ -281,7 +281,7 @@ void director_describe(FILE *f) {
 	 * find a guardian's seed read it) */
 	if (D.objs.guardian.navi)
 		fprintf(f, "guardian %s %s\n",
-			guardian_known(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done() ||
+			guardian_met(D.objs.guardian.navi) || guardian_heard() || boss_cinematic() || boss_fighting() || boss_beaten() || boss_done() ||
 					getenv("CYBERWORLD_STATE_POS")
 				? guardian(D.objs.guardian.navi)->name : "???",
 			boss_done() ? "done" : boss_beaten() ? "beaten" : boss_fighting() ? "fighting" : "waiting");

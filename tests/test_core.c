@@ -36,6 +36,7 @@
 #include "backup.h"
 #include "battle_data.h"
 #include "lab_text.h"
+#include "scripts.h"
 #include "test_backup.h"
 #include "test_transfer_code.h"
 #include "test_update.h"
@@ -193,6 +194,7 @@ bool emu_debug_on(void) { return false; }
 int roll_chip(int depth, int bonus_tier, char *code) { (void)depth; (void)bonus_tier; *code = 'A'; return 1; }
 char loot_fit_code(int id, char code, bool always) { (void)id; (void)always; return code; }
 void emu_write32(uint32_t addr, uint32_t v) { (void)addr; (void)v; }
+void emu_write8(uint32_t addr, uint8_t v) { (void)addr; (void)v; }   /* (scripts.c's chat marks: test_heal_again links it) */
 /* (the meta layer and a run's start words: no saves, chip pools or town) */
 void profile_save(void) {}
 int chip_pool_class(int rom_id) { (void)rom_id; return -1; }
@@ -2610,10 +2612,16 @@ static bool shape_wide(int x, int y) {
 	return false;
 }
 
+/* (x, y) inside room r's box */
+static bool in_room(int r, int x, int y) {
+	const Room *m = &layer.rooms[r];
+	return r >= 0 && x >= m->x && x < m->x + m->w && y >= m->y && y < m->y + m->h;
+}
+
 /* whether the walk p steps (dx, dy) from p[i] to p[i + 1] */
 static bool shape_step(const int16_t *p, int i, int dx, int dy) { return p[i + 1] % MAP_W - p[i] % MAP_W == dx && p[i + 1] / MAP_W - p[i] / MAP_W == dy; }
 
-enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, WAY_SHAPES };
+enum { SHAPE_TURN_WIDE, SHAPE_TURN_JUNCTION, SHAPE_JOG, SHAPE_SHORT_LEG, SHAPE_PIT, SHAPE_GATE, WAY_SHAPES };
 
 /* (a walkway leaving wide floor at p[i] turns a corner within two panels:
  * the playtesters' road off a square's side, session 76) */
@@ -2655,7 +2663,10 @@ static void way_shapes(int *out) {
 		if (shape_wide(x, y) && !shape_wide(nx, ny) && short_leg(p, i, n)) ++out[SHAPE_SHORT_LEG];
 		if (dx * ex + dy * ey != 0) continue;   /* (a turn) */
 		bool beyond = walk_floor(x + dx, y + dy);
-		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) ++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+		if (beyond && !walk_floor(nx + ey, ny + ex) && !walk_floor(nx - ey, ny - ex)) {
+			++out[shape_wide(x, y) ? SHAPE_TURN_WIDE : SHAPE_TURN_JUNCTION];
+			out[SHAPE_GATE] += shape_wide(x, y) && layer.arena >= 0 && arena_approach(x, y) && arena_approach(nx, ny) && !in_room(layer.ante, nx, ny);
+		}
 		if (!beyond && i >= 2 && i + 3 < n && !walk_floor(nx + ex, ny + ey) && !shape_wide(x, y) && !shape_wide(nx, ny) &&
 			shape_step(p, i - 2, dx, dy) && shape_step(p, i + 1, dx, dy) && shape_step(p, i + 2, dx, dy))
 			++out[SHAPE_JOG];
@@ -2663,8 +2674,8 @@ static void way_shapes(int *out) {
 }
 
 static void shapes_line(const char *what, int layers, const int *got) {
-	printf("  %s: over %d layers, %d turns into a walkway on wide floor, %d at junctions, %d jogs, %d short legs; %d pits\n", what, layers,
-		got[SHAPE_TURN_WIDE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
+	printf("  %s: over %d layers, %d turns into a walkway on wide floor (%d into a guardian's gate), %d at junctions, %d jogs, %d short legs; %d pits\n", what,
+		layers, got[SHAPE_TURN_WIDE], got[SHAPE_GATE], got[SHAPE_TURN_JUNCTION], got[SHAPE_JOG], got[SHAPE_SHORT_LEG], got[SHAPE_PIT]);
 }
 
 /* The other games' areas (rom.c's, docs/multirom/) as the generator lays
@@ -2759,6 +2770,12 @@ static void test_way_shapes(void) {
 	int xall[WAY_SHAPES] = { 0 }, layers = 0, over = 0, ways = 0;
 	xarea_shapes(xall, &layers, &over, &ways);
 	shapes_line("the other games' areas' way shapes", layers, xall);
+	/* (the guardian's gate leaving the middle of the antechamber's side the
+	 * way runs along, MegaMan walking past its mouth: session 77's
+	 * playtesters at RoboDog's comp and Green's homepage; 84 of BN6's 1140
+	 * layers and 35 of the other games' 660 before, 14 and 8 now, where no
+	 * side the arena fits off has a gate the walk meets on its line) */
+	CHECK(all[SHAPE_GATE] <= 20 && xall[SHAPE_GATE] <= 12, "%d and %d ways turn into the guardian's gate off its line", all[SHAPE_GATE], xall[SHAPE_GATE]);
 	CHECK(over * 5 <= ways, "the other games' areas: %d of %d ways cross more one-wide walkways than their originals' count", over, ways);
 	/* (a pit between walkways, its walls keeping MegaMan off it, where the
 	 * walk went round it: session 76's playtester stuck beside one, RoboDog's
@@ -5332,7 +5349,7 @@ static void test_folders(void) {
 	profile.short_wins = 1;
 	for (int f = FOLDER_BLADE; f <= FOLDER_STORM; ++f) profile.folders_open |= (uint16_t)(1u << f);
 	const char *goal = meta_next_goal();
-	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder"), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
+	CHECK(goal && !strcmp(goal, "Use a Program Advance to open the Z-Canon folder."), "folders: the closest goal \"%s\"", goal ? goal : "(none)");
 	/* (each a sentence the information box holds in two of its three
 	 * lines) */
 	for (int f = FOLDER_BLADE; f < FOLDER_COUNT; ++f) {
@@ -7953,6 +7970,45 @@ static void test_lab_text(void) {
 		!((NET_AREAS + XAREAS_MAX - 1) & LAB_AREA_SECOND), "lab: a set's song and area bytes hold every game's");
 }
 
+/* The Recovery Mr.Prog's half patch, its amount set again in place (a
+ * CONTINUE builds the layer before its state holds MegaMan's max HP, and
+ * the patch gave 1 HP, session 77): the bytes ta_heal_bytes writes at the
+ * HealSpot are those a build with that amount writes, every byte after them
+ * where it was; a heal to full (the guardian's layer, the Heals helper's)
+ * has no amount to set. */
+static void test_heal_again(void) {
+	static TextArchive a, b;
+	for (int vow = 0; vow < 2; ++vow)
+		for (int amount = 1; amount <= 9999; amount = amount * 10 + 7) {
+			HealSpot sa, sb;
+			ta_begin(&a);
+			ta_say(&a, FACE_PROG, "BEFORE");
+			ta_heal(&a, 2, 0x1451, 0x1464, 1, vow, &sa);
+			ta_say(&a, FACE_PROG, "AFTER");
+			ta_begin(&b);
+			ta_say(&b, FACE_PROG, "BEFORE");
+			ta_heal(&b, 2, 0x1451, 0x1464, amount, vow, &sb);
+			ta_say(&b, FACE_PROG, "AFTER");
+			CHECK(sa.amount_at > 0 && sa.got_at > sa.amount_at && sa.amount_at == sb.amount_at && sa.got_at == sb.got_at,
+				"heal: %d HP's amount at %d and %d, 1 HP's at %d and %d", amount, sb.amount_at, sb.got_at, sa.amount_at, sa.got_at);
+			CHECK(a.len == b.len && a.n == b.n && !memcmp(a.off, b.off, sizeof a.off), "heal: %d HP's script is not 1 HP's length", amount);
+			if (sa.amount_at < 0 || a.len != b.len) continue;
+			uint8_t amt[2], got[HEAL_GOT_LEN];
+			ta_heal_bytes(amount, amt, got);
+			memcpy(a.buf + sa.amount_at, amt, sizeof amt);
+			memcpy(a.buf + sa.got_at, got, sizeof got);
+			CHECK(!memcmp(a.buf, b.buf, (size_t)a.len), "heal: 1 HP set again to %d is not the patch built with %d%s", amount, amount, vow ? " (a vow)" : "");
+			CHECK(b.buf[sb.amount_at - 2] == 0xFB && b.buf[sb.amount_at - 1] == 0x08 && (b.buf[sb.amount_at] | b.buf[sb.amount_at + 1] << 8) == amount,
+				"heal: the amount's place is not ts_start_heal's");
+		}
+	for (int amount = -1; amount <= 0; ++amount) {
+		HealSpot s = { 5, 5 };
+		ta_begin(&a);
+		ta_heal(&a, 0, 0x1451, 0x1464, amount, false, &s);
+		CHECK(s.amount_at < 0 && s.got_at < 0, "heal: a heal to full (%d) has an amount to set", amount);
+	}
+}
+
 /* The encounter groups' templates and their filling (groups.h;
  * docs/game/progression/encounter-groups.md): a pool of five families
  * made up here, no ROM */
@@ -8221,6 +8277,7 @@ int main(int argc, char **argv) {
 	test_sha1();
 	test_battle_data();
 	test_lab_text();
+	test_heal_again();
 	test_area_views();
 	test_liberation_board();
 	test_liberation_prize();

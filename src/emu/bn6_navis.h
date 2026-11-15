@@ -188,5 +188,8 @@
                                              only on its actors (0x0800E468, 0x08016716-0x080167E6, 0x0801A3DA-0x0801AEF8) */
 #define BN6_EFFECT_PATTERN    0x0801BD3Cu /* effects spawned on the panels around (r0, r1) by a pattern (r3), r2 the effect, r4 the side
                                              (BN4_EFFECT_PATTERN's twin by body; its patterns' pointers at 0x08019B78) */
+#define BN6_SPOUTMAN_BACK     0x080F8B50u /* SpoutMan's (AI 6) panels in his foe's area, x then y, two by his side (bn6f byte_80F7828,
+                                             read by sub_80F77E8): an enemy's (2,2) then (1,2), MegaMan's back middle row, which
+                                             his attack 0xC (sub_80F7EA6) lights 35 frames and lands on (BN6's own, docs/rom/battle.md) */
 
 #endif

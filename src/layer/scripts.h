@@ -21,15 +21,28 @@
  * a kanji ("ProtoMn" and one came out of a Mystery Data). */
 void chat_marks_install(void);
 
+/* Where a heal's amount lies in its archive's script bytes (TextArchive's
+ * buf; -1 none, a heal to full): ts_start_heal's two bytes and the HP said,
+ * HEAL_GOT_LEN characters, so the amount can be set again in place once
+ * the game's RAM holds MegaMan's max HP (a CONTINUE builds the layer before
+ * its state loads: layer_objs_heal_again). */
+#define HEAL_GOT_LEN 7   /* "9999HP!" */
+typedef struct { int amount_at, got_at; } HealSpot;
+
 /* Service NPCs on the game's own commands: a recovery Mr. Prog heals
  * (`variant` picks his words) once on his layer, `amount` HP (0: to full),
  * then says his patch is spent; `amount` < 0, the Heals helper's: to full,
  * as often as asked (issue #71). `told_flag` marks it given; while
  * `full_flag` is set (MegaMan at full HP) he keeps it. He asks before the
  * layer's one patch; with `vow` (a request's vow held, jobs.h) MegaMan
- * asks instead, the patch on Yes, starting on No. (Chip Traders speak the game's own lines, see
+ * asks instead, the patch on Yes, starting on No; where `amount` > 0 lies
+ * into `spot` (NULL none). (Chip Traders speak the game's own lines, see
  * trader.h.) */
-int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow);
+int ta_heal(TextArchive *t, int variant, int told_flag, int full_flag, int amount, bool vow, HealSpot *spot);
+/* ... `amount` (1-9999) as the patch's bytes: ts_start_heal's two into `a`,
+ * the HP said into `got` ("70HP!" and spaces), as ta_heal writes them at
+ * its HealSpot. */
+void ta_heal_bytes(int amount, uint8_t a[2], uint8_t got[HEAL_GOT_LEN]);
 /* Words that set `flag` as they are said (a bystander's news the director
  * keeps: docs/game/meta/what-megaman-knows.md). */
 int ta_say_flag(TextArchive *t, int face, const char *s, int flag);

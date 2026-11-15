@@ -100,6 +100,15 @@ void save_state_path(char *out, size_t n) { save_path(out, n, "run.state"); }
 
 void profile_load(void) {
 	if (!save_read_blob_upto("profile.sav", PROFILE_MAGIC, &profile, sizeof profile)) memset(&profile, 0, sizeof profile);
+	/* (a profile saved before its first meetings were kept: what the old
+	 * tests judged heard, once. They were a duel's record or a run past
+	 * layer 1 for Chaud, a run before for the rest; a fresh profile has
+	 * heard nothing) */
+	if (!(profile.heard & HEARD_KEPT)) {
+		if (profile.duel_won + profile.duel_lost || profile.best_depth >= 2) profile.heard |= HEARD_CHAUD;
+		if (profile.runs) profile.heard |= HEARD_DEALER | HEARD_FIRST_DIVE;
+		profile.heard |= HEARD_KEPT;
+	}
 }
 
 void save_init(void) {

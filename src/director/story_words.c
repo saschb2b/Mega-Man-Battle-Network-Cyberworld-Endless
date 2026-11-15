@@ -42,6 +42,7 @@ void beat_said(void) {
 	if (D.beat_ours) { profile.navis_ours_told = profile.native_taught = 1; profile_save(); }
 	if (D.beat_native) { profile.native_taught = 1; profile_save(); }
 	if (D.beat_deep) { profile.deep_taught = 1; profile_save(); }
+	if (D.beat_first) { profile.heard |= HEARD_FIRST_DIVE; profile_save(); }
 }
 
 /* Arriving where super boss `navi` waits (docs/game/bosses/super-bosses.md),
@@ -86,6 +87,25 @@ static const char *nest_arrival(void) {
 		"@L Hang on,MegaMan! Whatever it is,we'll find it!";
 }
 
+/* The first layer's words, `area` its area's name: the first dive's once a
+ * profile, as they play (a run's end had counted them, and a profile's
+ * second run, its first not yet counted, heard them again, session 77);
+ * where an older net's copy is the profile's first, MegaMan does not know
+ * the place before he finds it old ("It looks just like End Area!" came
+ * before "This Net's a copy of an older one!", session 77) */
+static void first_dive(const char *area) {
+	bool news = nets_older_news();
+	if ((profile.heard & HEARD_FIRST_DIVE) && news)
+		snprintf(D.beat, sizeof D.beat, "@M Another dive,Lan!|@L Alright! Let's find the exit pad!");
+	else if (profile.heard & HEARD_FIRST_DIVE)
+		snprintf(D.beat, sizeof D.beat, "@M %s this time,Lan!|@L Alright! Let's find the exit pad!", area);
+	else if (news)
+		snprintf(D.beat, sizeof D.beat, "@M Whoa... So this is the Endless Net.|@M It's all copied data,Lan.|@L Dad was right... Let's find the exit pad!");
+	else
+		snprintf(D.beat, sizeof D.beat, "@M Whoa... It looks just like %s!|@M But it's all copied data,Lan.|@L Dad was right... Let's find the exit pad!", area);
+	D.beat_first = !(profile.heard & HEARD_FIRST_DIVE);
+}
+
 /* What MegaMan and Lan (and Dad) say on arriving somewhere new: the first
  * layer, a new cycle, the Undernet, the Graveyard, the Nest, the side
  * layers; where a super boss waits, what MegaMan senses of him. Empty for
@@ -95,6 +115,7 @@ void arrival_words(void) {
 	bool first_of_act = run.side_kind == LAYER_NORMAL && layer_in_act(run.depth) == 0;
 	int super = super_here();
 	D.beat[0] = 0;
+	D.beat_first = false;
 	if (super)
 		snprintf(D.beat, sizeof D.beat, "%s", super_arrival(super, super_form(super, run.depth), guardian_known(super)));
 	else if (run.side_kind == LAYER_UNDERNET)
@@ -108,10 +129,8 @@ void arrival_words(void) {
 	/* (a trip back from home, docs/world/home/: an area already won) */
 	else if (run.side_kind == LAYER_BACK)
 		snprintf(D.beat, sizeof D.beat, "@M We're back in %s,Lan!|@M It feels easier now...|@L 'Cause we got stronger! Let's stock up!", area);
-	else if (run.depth == 1 && profile.runs >= 2)
-		snprintf(D.beat, sizeof D.beat, "@M %s this time,Lan!|@L Alright! Let's find the exit pad!", area);
 	else if (run.depth == 1)
-		snprintf(D.beat, sizeof D.beat, "@M Whoa... It looks just like %s!|@M But it's all copied data,Lan.|@L Dad was right... Let's find the exit pad!", area);
+		first_dive(area);
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
 		snprintf(D.beat, sizeof D.beat, "@D Lan,it's Dad! The Endless Net just rebuilt itself!|@D Same areas,but stronger data. It's Net V%d now.|"
 			"@L Stronger,huh? Bring it on!", net_version());
@@ -153,20 +172,25 @@ static const char *card_motto(int biome, SDL_Color *accent) {
 		*accent = rgba(136, 224, 152, 255);
 		return "By the route found in the dark";
 	}
-	bool dark = run.side_kind == LAYER_NORMAL && lib_way_dark((run.depth - 1) % CYCLE_LAYERS / 3, biome);
+	/* (the dark layer is the act's second: past it the card says the
+	 * area's motto, a playtester's drop-in on an act's last layer read of
+	 * a dark layer it never saw, session 77) */
+	int p = (run.depth - 1) % CYCLE_LAYERS;
+	bool dark = run.side_kind == LAYER_NORMAL && p % 3 <= 1 && lib_way_dark(p / 3, biome);
 	*accent = dark ? rgba(184, 120, 248, 255) : rgba(120, 200, 248, 255);
 	return dark ? lib_card_line : guardian_area_motto(biome);
 }
 
-/* A Navi as the act's card names him: with his version's mark where
- * MegaMan has met him in any run, "???" where he has not, and where only
- * a Navi on the net named the final, his name and a "?" */
+/* A Navi as the act's card names him: by name where MegaMan has met him in
+ * any run, with his version's mark where they have battled, "???" where
+ * he has not, and where only a Navi on the net named the final, his name
+ * and a "?" */
 static void card_navi(char *out, size_t n, int navi, int version, bool heard) {
 	static const char *const marks[3] = { "", " EX", " SP" }, *const older[4] = { "", " V2", " V3", " SP" };
 	const char *mark = guardian_older(navi) || guardian_bn4(navi) ? older[version < 0 || version > 3 ? 0 : version] : marks[version < 0 || version > 2 ? 0 : version];
-	bool known = guardian_known(navi);
-	if (!known && !heard) snprintf(out, n, "???");
-	else snprintf(out, n, "%s%s%s", guardian(navi)->name, known ? mark : "", known ? "" : "?");
+	bool known = guardian_known(navi), met = guardian_met(navi);
+	if (!met && !heard) snprintf(out, n, "???");
+	else snprintf(out, n, "%s%s%s", guardian(navi)->name, known ? mark : "", met ? "" : "?");
 }
 
 const char *bracket_round_label(int round) {
@@ -204,17 +228,18 @@ void area_card(void) {
 	else if (net_version() > 1) snprintf(act, sizeof act, "Net V%d - Act %d", net_version(), act_no);
 	else snprintf(act, sizeof act, "Act %d", act_no);
 	/* the guardian ahead, from the start, so the folder can be set for it
-	 * (as Slay the Spire shows each act's boss), where MegaMan has battled
-	 * him, with a "?" where only a Navi on the net has named him (a
-	 * playtester's card said "???" after a CONTINUE past the rumor,
-	 * session 63): else "???", as nothing yet says who (docs/game/meta/what-megaman-knows.md, what
-	 * MegaMan knows; his element alone gave SpoutMan away) */
+	 * (as Slay the Spire shows each act's boss), where MegaMan has met him
+	 * (his title card at the arena the reveal: a CONTINUE from its door said
+	 * "???" or "SlashMan?" after it, session 77), with a "?" where only a
+	 * Navi on the net has named him (a playtester's card said "???" after a
+	 * CONTINUE past the rumor, session 63): else "???", as nothing yet says
+	 * who (docs/game/meta/what-megaman-knows.md, what MegaMan knows; his
+	 * element alone gave SpoutMan away) */
 	char ahead[48] = "";
 	if (run.side_kind == LAYER_NORMAL || (run.side_kind == LAYER_SECRET && layer.boss_layer)) {
 		int navi = run.side_kind == LAYER_NORMAL ? run_guardian(biome) : run.boss_order[biome];
-		bool heard = run.side_kind == LAYER_NORMAL && guardian_heard();
-		snprintf(ahead, sizeof ahead, "Guardian: %s%s", guardian_known(navi) || heard ? guardian(navi)->name : "???",
-			!guardian_known(navi) && heard ? "?" : "");
+		bool heard = run.side_kind == LAYER_NORMAL && guardian_heard(), met = guardian_met(navi);
+		snprintf(ahead, sizeof ahead, "Guardian: %s%s", met || heard ? guardian(navi)->name : "???", !met && heard ? "?" : "");
 	}
 	/* (a CONTINUE by a guardian already deleted: it said he waited) */
 	if (D.objs.guardian.navi && boss_beaten())

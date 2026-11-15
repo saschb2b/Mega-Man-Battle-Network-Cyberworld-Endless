@@ -444,7 +444,7 @@ clean:
 # sanitizers
 TEST_SAN := -fsanitize=address,undefined -fno-sanitize-recover=all -fno-omit-frame-pointer
 TEST_SRCS := tests/test_core.c tests/test_backup.c src/core/rom.c src/core/pacing.c src/net/net_gen.c src/net/net_detours.c src/net/net_landmarks.c src/net/net_set_pieces.c src/net/net_pieces.c src/net/net_arena.c src/net/net_height.c src/net/net_shapes.c src/net/net_layouts.c src/net/net_route.c src/net/net_way.c src/net/net_plan.c src/net/net_signature.c src/net/net_services.c src/net/net_glitch.c src/core/run_glitch.c src/core/run_tourney.c \
-	src/core/xprograms.c src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/xguardian_bn4.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/core/touch_layout.c src/core/padmap.c \
+	src/core/xprograms.c src/layer/navicust.c src/layer/navicust_words.c src/layer/npc_lines.c src/layer/guardians.c src/layer/xguardian_bn4.c src/layer/guardian_lines.c src/core/rivals.c src/director/powers.c src/director/powers_words.c src/layer/text.c src/layer/scripts.c src/layer/service_words.c src/core/touch_layout.c src/core/padmap.c \
 	src/audio/xsong.c src/layer/xnavi.c src/emu/thumb_reloc.c src/emu/battle_rng.c src/emu/xvirus_recipe.c src/emu/xvirus_dispatch.c src/emu/xvirus_moved.c src/emu/xvirus_families.c src/emu/xvirus_bn5.c src/emu/xvirus_bn4.c src/emu/xvirus_shim.c src/emu/xnavi_recipe.c src/emu/xnavi_bn5.c src/emu/xnavi_bn4.c src/emu/xchips_bn5.c src/emu/xchips_bn4.c src/emu/song_table.c src/emu/soulcode_bn5.c \
 	src/core/data.c src/core/xchips.c src/core/chips.c src/core/xchips_registry.c src/core/xchips_registry_bn4.c src/core/xchips_record.c src/core/xchips_moved.c src/core/xchips_pas.c src/core/xchips_pas_bn4.c src/core/xchips_text.c src/emu/claims.c src/emu/free_space_watch.c src/emu/soulkinds.c src/director/souls.c src/director/darkchips.c src/director/liberation_board.c src/director/liberation_rules.c src/director/liberation_plan.c src/gfx/qr.c src/director/home_words.c src/layer/fork_words.c src/core/jobs.c \
 	src/core/economy.c src/core/backup.c src/core/backup_info.c src/core/backup_manifest.c src/core/backup_restore.c src/core/compat.c src/launcher/launcher_text.c src/core/meta.c src/core/meta_text.c src/core/battle_data.c src/director/lab_text.c src/world/town_lines.c \
@@ -510,6 +510,13 @@ build/host/test_tiles_order: tests/test_tiles_order.c src/map/tiles.c src/map/ti
 		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
 		-o $@ tests/test_tiles_order.c src/map/tiles.c -lm
 
+# The floor's holes mended (src/map/voids.c): its tiles' checks from tiles.c, the tile set the test's own.
+build/host/test_voids: tests/test_voids.c src/map/voids.c src/map/voids.h src/map/tiles.c src/map/tiles_parts.h src/map/tiles.h
+	@mkdir -p build/host
+	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) $(if $(WERROR),-Werror) \
+		-ffunction-sections -fdata-sections $(addprefix -I,$(SRC_DIRS)) -Wl,--gc-sections \
+		-o $@ tests/test_voids.c src/map/voids.c src/map/tiles.c -lm
+
 NETWORK_TEST_SRCS := tests/test_network.c src/online/network_prefs.c src/online/network_address.c src/online/network_identity.c \
 	src/online/network_server_identity.c src/core/text_input.c src/core/compat.c src/core/rom.c
 build/host/test_network: $(NETWORK_TEST_SRCS) src/online/network_prefs.h src/online/network_address.h
@@ -559,13 +566,14 @@ build/host/test_mapslot: $(TEST_MAPSLOT_SRCS) src/*/*.h
 	$(CC_host) -std=c11 -O1 -g $(TEST_SAN) $(WARN) $(WARN_GCC) -D_DEFAULT_SOURCE $(if $(WERROR),-Werror) \
 		$(addprefix -I,$(SRC_DIRS)) -o $@ $(TEST_MAPSLOT_SRCS)
 
-test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire build/host/test_mapslot
+test: build/host/test_core build/host/test_emu build/host/test_transfer build/host/test_discovery build/host/test_saves build/host/test_tiles_order build/host/test_voids build/host/test_network build/host/test_online build/host/test_arena build/host/test_legacy build/host/test_online_frame_wire build/host/test_mapslot
 	build/host/test_core
 	build/host/test_emu
 	build/host/test_transfer
 	build/host/test_discovery
 	build/host/test_saves
 	build/host/test_tiles_order
+	build/host/test_voids
 	build/host/test_network
 	build/host/test_online
 	build/host/test_arena

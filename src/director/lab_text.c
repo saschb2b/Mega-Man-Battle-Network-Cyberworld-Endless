@@ -2,6 +2,7 @@
 #include "lab_text.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "bn6.h"
 #include "bn6_panels.h"
@@ -16,6 +17,15 @@ const char lab_row_song[] = "Song";
 const char lab_row_folder[] = "Folder";
 const char lab_own_song[] = "Battle's own";
 const char lab_plain_field[] = "Plain";
+const char lab_ask_leave[] = "Leave the Lab?";
+const char lab_yes[] = "Yes";
+const char lab_no[] = "No";
+
+void lab_info_value(char *out, size_t n, const char *name) {
+	size_t k = strlen(name);
+	bool ended = k && strchr(".!?", name[k - 1]);
+	snprintf(out, n, ended ? "%s" : "%s.", name);
+}
 
 const char *lab_panel_name(int type) {
 	static const char *const names[XPANEL_TYPES] = {

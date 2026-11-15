@@ -20,17 +20,22 @@
 
 bool lab_there(void) { return dev.lab || profile.lab_sent; }
 
-/* his words: the first meeting's boxes once a profile, one box after;
- * then the flag that opens the builder */
+/* his words: the first meeting's boxes once a profile, his question
+ * Yes or No after them (No closes the box, and the next talk is the
+ * first meeting again), one box after; then the flag that opens the
+ * builder */
 static void words(void) {
 	static TextArchive t;
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	ta_begin(&t);
-	ta_script(&t);
+	int talk = ta_script(&t);
 	bool first = true;
 	ta_pages(&t, profile.lab_met ? lab_keeper_hello() : lab_keeper_first(), FACE_LAB, &first);
+	/* (the No: the script after this one, which closes the box) */
+	if (!profile.lab_met) ta_ask_in(&t, FACE_LAB, lab_keeper_ask(), talk + 1, true, false);
 	ta_flag_set(&t, LAB_OPEN_FLAG);
 	ta_end(&t);
+	if (!profile.lab_met) ta_closing(&t);
 	if (!lanhp_lab_say(out, ta_build(&t, out)) && emu_debug_on()) fprintf(stderr, "lab: the keeper's words did not fit\n");
 }
 
