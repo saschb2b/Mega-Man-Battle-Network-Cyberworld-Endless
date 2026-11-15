@@ -837,7 +837,7 @@ static void install_choice(Install *in, const NetObj *o, Talker *tk) {
 		/* (he logs out as the duel begins: one a layer) */
 		tk->gone_flag = flag;
 	}
-	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms)
+	tk->script = o->type == OBJ_DUEL ? ta_duel(in->text, flag, guardian_face(11), terms, layer_objs_duel_rung != 2)
 		: o->type == OBJ_CHALLENGE ? ta_challenge(in->text, flag, LAYER_SERVER_WON_FLAG, out->challenge_reward, &in->server, layer_objs_server_navi)
 		: o->type == OBJ_UNDERNET ? ta_undernet(in->text, flag, run.biome == BIOME_UNDERNET, layer_objs_undernet_server)
 		: o->type == OBJ_NAVI_GATE ? ta_navi_gate(in->text, flag, guardian(o->param)->name, GATE_CODE, GATE_CODE)

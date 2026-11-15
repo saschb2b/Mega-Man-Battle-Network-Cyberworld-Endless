@@ -176,12 +176,6 @@ static int rush_gaps_ahead(int depth, int *longest) {
 	return gaps;
 }
 
-int shop_rush_need(int depth) {
-	int longest;
-	rush_gaps_ahead(depth, &longest);
-	return longest;
-}
-
 /* The keys for the set pieces the act holds from here on, at about a
  * layer's zenny each (BN6's 4000 for an Unlocker and 3000 for RushFood
  * would keep them out of a run's reach, keys priced past their use):

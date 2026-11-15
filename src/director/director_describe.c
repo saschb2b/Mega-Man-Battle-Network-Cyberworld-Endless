@@ -178,6 +178,10 @@ static void describe_home(FILE *f) {
 		flag_get(JOB_TAKE_FLAG + 2), flag_get(JOB_HELD_FLAG), flag_get(JOB_SETTLED_FLAG), run.job.kind, run.job.asker, run.job.state, run.job.got);
 	if (home_places_way(group, number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
 	else if (director_in_town()) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
+	/* (the arrow's way, as on a layer: a playtester's arrow turning at Lan's
+	 * HP's wall was read from pictures alone, session 76) */
+	goal_way();
+	fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
 }
 
 /* For the developer reproducing a playtest (CYBERWORLD_STATE_POS): where

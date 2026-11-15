@@ -3,7 +3,7 @@ type: Review Log
 title: "Voice sweep: the net and the run"
 description: "Log of the 19 October 2026 voice sweep of L's briefing, lessons, NaviCust words, services, rewards, bystanders, rumors and DarkChips: 434 lines read, 109 cut, 16 noted, and the hint systems removed with them."
 tags: [voice]
-generated: { by: claude-code/unrecorded, at: 2026-10-19T16:59:55Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:10:05Z }
 ---
 # Voice sweep: the net and the run
 
@@ -50,11 +50,13 @@ A line both cut in part and noted counts once, as cut.
 
 - **Rush's bone panels' lesson** (`rush_hint`): MegaMan naming A, RushFood
   and the count on every layer with a gap; its flag `LAYER_RUSH_TOLD_FLAG`
-  (0x1464) is free. The dealer still names the gap and its width, and L
-  still senses "bone panels".
+  (0x1464) is free. The dealer still names the gap and its width where
+  it is on his layer; L's "bone panels" went in the main path's third
+  pass ([the main path's words cut](main-path.md)).
 - **The map's lessons and the set pieces' lessons** (`mark_lessons`,
-  `piece_lessons`, the violet-mark boxes): every mark and piece is now
-  named in L's "I sense ..." from the start. `profile.marks_taught` and
+  `piece_lessons`, the violet-mark boxes): every mark and piece was then
+  named in L's "I sense ..." from the start, a list the main path's third
+  pass cut to two detours ([the main path's words cut](main-path.md)). `profile.marks_taught` and
   `profile.pieces_taught` stay in the profile's layout, unread.
 - **The virus families' warnings** (`family_words`) and what fed them:
   `loot_families_here`, `profile_family_fought`/`_note` (the

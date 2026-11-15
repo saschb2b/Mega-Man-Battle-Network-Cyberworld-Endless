@@ -1,0 +1,1 @@
+The comps' and homepages' ways cross one one-wide walkway at most, as their originals' single rooms cross none or one (narrow_cap in net_way.c): the way's walkways past it widen to two panels, the shortest first, as the other areas' do past their originals' count.

@@ -310,12 +310,22 @@ static void gate_words(void) {
 	if (D.gate_due && talk_script(D.objs.archive, D.objs.gate_reward)) D.gate_due = false;
 }
 
+/* The run's tally of the viruses a battle deleted, as RESULT's "Viruses
+ * deleted" says (director_tally.c; a guardian's battle counts none, nor a
+ * Virus Battler's round) */
+static void count_deleted(bool won) {
+	if (!boss_fighting() && !D.battler) run.viruses_deleted += tally_deleted(won, D.foes);
+}
+
 /* MegaMan deleted: the game plays its GAME OVER, then the run ends; true
  * while it plays */
 static bool gameover_update(void) {
 	int mode = main_mode();
 	if (mode == BN6_MODE_GAME_OVER && !D.gameover) {
 		D.gameover = true;
+		/* (the battle he was deleted in: back on no map, after_battle
+		 * never counts it) */
+		if (D.in_battle) count_deleted(false);
 		D.lost_to = boss_fighting() ? boss_foe() : 0;
 		D.lost_duel = D.duel;
 		/* (deleted in a duel: a duel lost, which the verdict, never
@@ -395,11 +405,13 @@ static void battle_update(void) {
 		const Encounter *g = guardian ? boss_battle(&hp) : NULL;
 		if (guardian) runlog_guardian_start(boss_foe(), g, hp);
 		D.souls_used = 0;
+		tally_battle_start();
 		home_jobs_battle_start();
 	}
 	D.in_battle = true;
 	if (sub == BN6_SUB_BATTLE) {
 		runlog_fought();
+		tally_battle_frame();
 		boss_battle_frame();
 		lib_battle_frame();
 		home_jobs_battle_frame();
@@ -453,7 +465,7 @@ static void after_battle(void) {
 				run.codes[0] ? 'A' + run.codes[0] - 1 : '-', run.codes[1] ? 'A' + run.codes[1] - 1 : '-', run.codes[2] ? 'A' + run.codes[2] - 1 : '-');
 		} else fprintf(stderr, "battle reward %04x\n", r);
 	}
-	if (won && !boss_fighting()) run.viruses_deleted += D.foes;
+	count_deleted(won);
 	if (!boss_fighting()) nets_battle_note(&D.next);   /* (a visitor of the other net: MegaMan's word, once a profile) */
 	if (!D.challenge && !boss_fighting()) roll_encounter();
 }

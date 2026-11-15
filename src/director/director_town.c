@@ -71,27 +71,30 @@ void home_entered(void) {
 }
 
 /* Lan's HP's corridor to its pink pad, BN6's own map: its mouth at x 119,
- * open from y -24 to -4, which a walk straight from the blue pad (-198, 6)
- * meets a few units off its line, at its lip (session 69: sixteen calls
- * pushing there, the arrow pointing at the pad through the wall). The
- * arrow and L lead onto the corridor's line first, across once MegaMan is
- * near it, and from the wall beside the mouth, where he stops at its x:
- * there the arrow pointed at the pad through the wall, and L named where
- * it lay, "straight up", which a playtester pushed into for eight calls
- * (session 74), as the town's way names its walk's first stretch. How far
- * stays the pad's. */
+ * open from y -24 to -1 (walked: a straight walk up its way from any y
+ * between goes in, from -25 or 0 it stops at the mouth's side), which a
+ * walk straight from the blue pad (-198, 6) meets a few units off its
+ * line, at its lip (session 69: sixteen calls pushing there, the arrow
+ * pointing at the pad through the wall). Off that band the arrow and L
+ * lead at the mouth's middle, from the wall beside it too, where MegaMan
+ * stops at its x: there the arrow had pointed at the pad through the wall,
+ * and L said "straight up", which a playtester pushed into for eight calls
+ * (session 74), as the town's way names its walk's first stretch. Within
+ * it, at the pad: the band had been the line -22 to -6, narrower than the
+ * mouth, and from -5 and -1, where a walk goes in, the arrow sent MegaMan
+ * across it instead, then back as he overshot (session 76). How far stays
+ * the pad's. */
 #define HP_MOUTH_X 119
-#define HP_MOUTH_Y (-14)
-#define HP_MOUTH_HALF 8      /* the line's half-width the arrow wants */
-#define HP_MOUTH_NEAR 64     /* how near in x it turns onto the line */
+#define HP_MOUTH_TOP (-24)
+#define HP_MOUTH_BOTTOM (-1)
 #define ASTER_NEAR 80        /* L names AsterLand's door from farther than this (world units, x and y summed) */
 
 static const char *hp_way(int *far) {
 	int x, y, px = bn6_player_x(), py = bn6_player_y(), f;
 	lanhp_portal_spot(0, &x, &y);
 	const char *way = way_to(x, y, far);
-	if (px <= HP_MOUTH_X && abs(py - HP_MOUTH_Y) > HP_MOUTH_HALF)
-		way = way_to(px < HP_MOUTH_X - HP_MOUTH_NEAR ? HP_MOUTH_X : px, HP_MOUTH_Y, &f);
+	if (px <= HP_MOUTH_X && (py < HP_MOUTH_TOP || py > HP_MOUTH_BOTTOM))
+		way = way_to(HP_MOUTH_X, (HP_MOUTH_TOP + HP_MOUTH_BOTTOM) / 2, &f);
 	return way;
 }
 

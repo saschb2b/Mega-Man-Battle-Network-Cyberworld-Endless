@@ -219,8 +219,11 @@ static void way_legs(double wx, double wy, int mx, int my, int ex, int ey) {
 	}
 }
 
-/* the way on to the exit, or to the guardian while he stands, worked out
- * again where what it was worked out from changed */
+/* the way on to the exit, or to the guardian while he stands, or as the
+ * arrow leads, to the Recovery Mr. Prog first in the key's Heal (the
+ * arrow's green, which two playtesters could not read while the map drew
+ * the exit's way, session 76); worked out again where what it was worked
+ * out from changed */
 static void map_way(const MapView *m, int px, int py) {
 	int tx = D.objs.exit_x, ty = D.objs.exit_y, ex, ey;
 	SDL_Color tc = rgba(255, 230, 60, 200);
@@ -228,7 +231,8 @@ static void map_way(const MapView *m, int px, int py) {
 	double wx, wy;
 	netmap_grid(px, py, &wx, &wy);
 	route_floor();
-	if (!netmap_panel(tx, ty, &ex, &ey)) return;
+	if (heal_first(&ex, &ey)) { tc = map_key[MAP_HEAL].c; tc.a = 200; }
+	else if (!netmap_panel(tx, ty, &ex, &ey)) return;
 	int nseen = seen_count();
 	if (way.mx != m->mx || way.my != m->my || way.ex != ex || way.ey != ey || way.seen != nseen || way.layer != run.layer_seed || way.gone != route_gone) {
 		way_legs(wx, wy, m->mx, m->my, ex, ey);
@@ -313,32 +317,49 @@ static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
 	map_arrowhead(m, ax, ay, 5, gc);
 }
 
-/* the key, from (kx, ky): MegaMan, the exit, and what else this layer
- * holds; the gaps close up until it fits the width, then "You" goes,
- * whose mark pulses (ProtoMan's name ran off the picture) */
-static void draw_map_key(int kx, int ky, int width) {
-	bool has[MAP_KEYS] = { [MAP_YOU] = true, [MAP_EXIT] = true, [MAP_BOSS] = D.objs.guardian.navi != 0, [MAP_EVENT] = seen.locks != 0 };
+/* the key's entries this layer holds: MegaMan, the exit, and the rest */
+static void map_key_has(bool has[MAP_KEYS]) {
+	for (int i = 0; i < MAP_KEYS; ++i) has[i] = i == MAP_YOU || i == MAP_EXIT;
+	has[MAP_BOSS] = D.objs.guardian.navi != 0;
+	has[MAP_EVENT] = seen.locks != 0;
 	for (int i = 0; i < layer.nobj; ++i) {
 		int kind = map_kind(layer.obj[i].type);
 		if (kind > MAP_EXIT && kind != MAP_BOSS && !map_left_out(layer.obj[i].type)) has[kind] = true;
 	}
-	int gap = 10, need;
-	for (;;) {
-		need = 0;
-		for (int i = 0; i < MAP_KEYS; ++i) if (has[i]) need += 8 + text_width(map_key[i].what) + gap;
-		need -= gap;
-		if (need <= width || (gap <= 0 && !has[MAP_YOU])) break;
-		if (gap > 2 || !has[MAP_YOU]) gap -= 2;
-		else { has[MAP_YOU] = false; gap = 8; }
-	}
-	if (gap < 0) gap = 0;
+}
+
+/* the width of the key's entries in one row at gap */
+static int map_key_need(const bool has[MAP_KEYS], int gap) {
+	int need = -gap;
+	for (int i = 0; i < MAP_KEYS; ++i) if (has[i]) need += 8 + text_width(map_key[i].what) + gap;
+	return need;
+}
+
+enum { MAP_KEY_GAP = 6 };   /* the least gap a row of the key keeps */
+
+/* the key laid out from (kx, ky) in width, drawn where `draw`: its gaps
+ * as wide as one row allows, up to 10, else rows at the least gap, an
+ * entry going down a row where it would pass the width; the rows it takes
+ * (the key once dropped "You" and still ran ProtoMan's name off the
+ * picture, session 76) */
+static int map_key_lay(int kx, int ky, int width, bool draw) {
+	bool has[MAP_KEYS];
+	map_key_has(has);
+	int gap = 10;
+	while (gap > MAP_KEY_GAP && map_key_need(has, gap) > width) gap -= 2;
+	int x = kx, rows = 1;
 	for (int i = 0; i < MAP_KEYS; ++i) {
 		if (!has[i]) continue;
-		fill_rect(kx, ky + 3, 5, 5, map_key[i].c);
-		if (i == MAP_RIVAL) fill_rect(kx + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
-		text_draw(kx + 7, ky, map_key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
-		kx += 8 + text_width(map_key[i].what) + gap;
+		int w = 8 + text_width(map_key[i].what);
+		if (x > kx && x + w > kx + width) { x = kx; ky += TEXT_H; ++rows; }
+		if (draw) {
+			fill_rect(x, ky + 3, 5, 5, map_key[i].c);
+			if (i == MAP_RIVAL) fill_rect(x + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
+			text_draw(x + 7, ky, map_key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
+		}
+		x += w + gap;
 	}
+	return rows;
 }
 
 /* A Mystery Data crystal, 7 pixels across, its upper left face lit; dark
@@ -404,8 +425,9 @@ static void map_mystery(const MapView *m) {
  * the note while one shows ("Run saved" stands there as a layer begins,
  * when L is pressed first) */
 void director_draw_counts(void) {
-	int a = seen.counts_a, w = a ? md_counts(0, 0, 0) + 8 : 0;
-	if (!w) return;
+	int a = seen.counts_a, w = a ? md_counts(0, 0, 0) : 0;
+	if (!w) return;   /* (nothing to count: no empty box) */
+	w += 8;
 	int x = P.core_x + 240 - w - 3, y = P.core_y + 3 + cinema_note_height();
 	fill_rect(x, y, w, TEXT_H + 4, rgba(0, 16, 40, (Uint8)(170 * a / 255)));
 	fill_rect(x, y + TEXT_H + 3, w, 1, rgba(120, 248, 255, (Uint8)(200 * a / 255)));
@@ -422,7 +444,9 @@ static void draw_map(int x0, int y0, int w, int h, bool titled) {
 	/* (its top line for the layer's name and the Mystery Data's counts;
 	 * the second screen's frame names the layer) */
 	int top = titled || md_counts(0, 0, 0) ? 18 : 8;
-	MapView m = { .bx = x0 + 6, .by = y0 + top, .bw = w - 12, .bh = h - top - 20 };
+	/* (the frame gives up a row's height to each row of the key past its first) */
+	MapView m = { .bx = x0 + 6, .by = y0 + top, .bw = w - 12 };
+	m.bh = h - top - 20 - (map_key_lay(0, 0, m.bw - 2, false) - 1) * TEXT_H;
 	SDL_Color edge = rgba(120, 200, 255, 220);
 	fill_rect(m.bx - 2, m.by - 2, m.bw + 4, 1, edge);
 	fill_rect(m.bx - 2, m.by + m.bh + 1, m.bw + 4, 1, edge);
@@ -447,7 +471,7 @@ static void draw_map(int x0, int y0, int w, int h, bool titled) {
 		fill_rect(ms - 3, mt - 3, 7, 7, (D.frame / 10) % 2 ? rgba(120, 200, 255, 255) : rgba(0, 8, 28, 255));
 		fill_rect(ms - 2, mt - 2, 5, 5, rgba(255, 255, 255, 255));
 	}
-	draw_map_key(m.bx + 1, m.by + m.bh + 5, m.bw - 2);
+	map_key_lay(m.bx + 1, m.by + m.bh + 5, m.bw - 2, true);
 }
 
 /* SELECT held on a layer: the layer as far as MegaMan has seen it, over the
