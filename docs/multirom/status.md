@@ -141,8 +141,8 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T18:41:00Z }
   BN6's free space and listed at a list-7 number Gregar leaves empty, as
   the flame of darkness is; the dark hole stands as one of handler 3's
   objects that never opens (`blockers.c`), as BN6's map-object table has
-  no room for an id of the engine's. Its net maps hold few map objects besides: the laser barrier with
-  a skull is BN6's cube's own sprite.
+  no room for an id of the engine's. Its net maps hold few map objects besides: the barrier with
+  a skull is BN6's cyberbarrier's own sprite.
 - [ ] Its towns. Its real world is groups 0x00-0x05: ACDC Town (0x00:0,
   132 x 72 tiles of 256 colours: Lan's, Mayl's and Dex's houses,
   Higsby's shop, the park with the squirrel statue, the school), Oran

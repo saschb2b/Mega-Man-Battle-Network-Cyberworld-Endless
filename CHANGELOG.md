@@ -73,8 +73,11 @@
   Where a layer's floor has no pocket for an obstacle or a cube, a short
   walkway and a pad of its own are laid for it, so the locks the act
   planned stand (twice as many as before), and a teleport is no longer
-  planned where the area cannot draw its pad. A layer saved before this
-  update starts afresh at a CONTINUE.
+  planned where the area cannot draw its pad. A lock asking a P-Code is
+  now BN6's own Security Cube, the gold cube with X faces; the striped
+  wall MegaMan used to call a security cube is BN6's cyberbarrier, which
+  tolls and the Undernet's doors keep. A layer saved before this update
+  starts afresh at a CONTINUE.
 - **Fixed: GutsMan's Guardian Data could not be taken (issue #614).**
   Continued at his data, BN4's GutsMan logged in again, unseen, and
   stood on it: A only turned MegaMan to face it. A guardian deleted
