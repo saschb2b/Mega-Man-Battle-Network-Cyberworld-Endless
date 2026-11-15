@@ -208,8 +208,9 @@ static int built_as_game(int area, uint32_t seed, NetmapTimes *parts) {
 static uint32_t run_seed_forced;
 
 /* The holes the safety net found in the layer's floor (voids.h), framed in
- * `sp`: blue those left, white those mended. How many, and *left. */
-static int mark_voids(uint32_t *sp, int tw, int th, int *left) {
+ * `sp`: blue those left, white those mended, and listed in `list` (a tile's
+ * pixel x, y and 1 where mended). How many, and *left. */
+static int mark_voids(uint32_t *sp, int tw, int th, FILE *list, int *left) {
 	int vtw, vth, found = 0;
 	const uint8_t *v = voids_last(&vtw, &vth);
 	*left = 0;
@@ -219,6 +220,7 @@ static int mark_voids(uint32_t *sp, int tw, int th, int *left) {
 			if (!m) continue;
 			++found;
 			*left += !(m & VOID_MENDED);
+			if (list) fprintf(list, "%d %d %d\n", tx * 8, ty * 8, (m & VOID_MENDED) != 0);
 			uint32_t c = m & VOID_MENDED ? MENDED_ARGB : HOLE_ARGB;
 			for (int k = 0; k < 8; ++k)
 				sp[(size_t)(ty * 8) * tw * 8 + tx * 8 + k] = sp[(size_t)(ty * 8 + 7) * tw * 8 + tx * 8 + k] =
@@ -286,7 +288,10 @@ static void one(const char *dir, FILE *report, int biome, int area, int layout, 
 				if (seams[ty * tw + tx] & 1 && tx + 1 < tw) sp[(size_t)(ty * 8 + k) * W + tx * 8 + 7] = sp[(size_t)(ty * 8 + k) * W + tx * 8 + 8] = SEAM_ARGB;
 				if (seams[ty * tw + tx] & 2 && ty + 1 < th) sp[(size_t)(ty * 8 + 7) * W + tx * 8 + k] = sp[(size_t)(ty * 8 + 8) * W + tx * 8 + k] = SEAM_ARGB;
 			}
-	int voids_left, voids = mark_voids(sp, tw, th, &voids_left);
+	snprintf(path, sizeof path, "%s/voids_b%02d_l%d_d%d_s%u.txt", dir, area, layout, depth, seed);
+	FILE *vl = fopen(path, "w");
+	int voids_left, voids = mark_voids(sp, tw, th, vl, &voids_left);
+	if (vl) fclose(vl);
 	for (int i = 0; i < layer.nobj; ++i) {
 		const NetObj *o = &layer.obj[i];
 		int X, Y;

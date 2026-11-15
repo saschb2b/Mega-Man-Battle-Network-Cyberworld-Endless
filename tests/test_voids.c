@@ -57,7 +57,8 @@ int main(void) {
 	map[f] = 2 | 0x800;
 	map[o] = 0;
 	/* the books (by key): at that phase, a whole tile of another
-	 * neighbourhood, and one drawing the lower half, of a platform's middle */
+	 * neighbourhood, and the tile's own (a platform's middle) drawing the
+	 * lower half */
 	TileCand cand[2] = {
 		{ .key = KEY(ph, 0x010, 0), .e0 = 1, .count = 9, .mask = ~0ull },
 		{ .key = KEY(ph, 0x1FF, 0), .e0 = 3, .count = 4, .mask = LOWER },
@@ -66,18 +67,17 @@ int main(void) {
 	floor.books = &book;
 	floor.nbooks = 1;
 	mended = voids_mend(&floor, map, &left);
-	assert(mended == 2 && left == 1);
+	assert(mended == 1 && left == 1);
 	/* behind the tile's own, the tile of its neighbourhood: drawn whole */
 	assert(map[h] == 3 && map[cells + h] == 2);
-	/* the flipped one: its hole is its upper half, which the lower half's
-	 * tile does not cover; the whole one, of a neighbourhood further off,
-	 * does, behind it */
-	assert(map[f] == 1 && map[cells + f] == (2 | 0x800));
+	/* the flipped one: its hole is its upper half, which the maps' own tile
+	 * of its neighbourhood leaves undrawn too: their art, no hole */
+	assert(map[f] == (2 | 0x800) && map[cells + f] == 0);
 	assert(map[o] == 0 && map[cells + o] == 0);
 	int tw, th;
 	const uint8_t *marks = voids_last(&tw, &th);
 	assert(marks && tw == TW && th == TH);
-	assert(marks[h] == (VOID_FOUND | VOID_MENDED) && marks[o] == VOID_FOUND && !marks[0]);
+	assert(marks[h] == (VOID_FOUND | VOID_MENDED) && marks[o] == VOID_FOUND && !marks[f] && !marks[0]);
 
 	/* off (the atlas's before): found, left as they are */
 	voids_on = false;
@@ -85,6 +85,6 @@ int main(void) {
 	map[cells + h] = 0;
 	mended = voids_mend(&floor, map, &left);
 	assert(mended == 0 && left == 2 && map[h] == 2);
-	puts("voids: holes in a floor's top found, mended from the books behind or in their stead, the rest counted");
+	puts("voids: holes in a floor's top found, mended from the books behind, the maps' own art left, the rest counted");
 	return 0;
 }

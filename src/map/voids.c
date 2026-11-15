@@ -108,10 +108,11 @@ static bool by_floor(Panels *p, int tx, int ty) {
 }
 
 /* The tile's top: its pixels on the floor with floor IN_X pixels to either
- * side and IN_Y above and below (the floor's outline, where a tile's own
- * edge may fall a pixel short, is not its top). */
-#define IN_X 2
-#define IN_Y 1
+ * side and IN_Y above and below. The floor's outline is not its top: a
+ * tile's own edge may fall short of it, and a rim's corner be cut off or
+ * notched (Robot Control's platforms' corners, a red stud in a notch). */
+#define IN_X 4
+#define IN_Y 2
 static uint64_t top_of(Panels *p, int tx, int ty) {
 	bool on[8 + 2 * IN_Y][8 + 2 * IN_X];
 	for (int y = 0; y < 8 + 2 * IN_Y; ++y)
@@ -182,6 +183,31 @@ static void try_books(Hole *h, const TileBook *books, int nbooks, int phase) {
 	}
 }
 
+/* Whether the area's own maps leave the hole undrawn where they set a tile
+ * in the tile's very neighbourhood (its class): a pair of `books` at that
+ * key drawing at most a few of its pixels. Then it is their art, no hole:
+ * Robot Control's platforms set a red stud in a notch at each corner. */
+static bool art_of(const TileBook *books, int nbooks, uint32_t key, uint64_t hole) {
+	for (int k = 0; k < nbooks; ++k) {
+		const TileBook *b = &books[k];
+		for (int i = tl_first_of(b, key); i < b->n && b->cand[i].key == key; ++i)
+			if (tl_popcount64(hole & b->cand[i].mask) <= SLACK) return true;
+	}
+	return false;
+}
+
+/* Whether tile (tx, ty)'s undrawn pixels of its top, `hole`, are their art
+ * (art_of, in the books of the floor under it). */
+static bool hole_is_art(Panels *p, int tx, int ty, uint64_t hole) {
+	int phase, A, B, HA, HB, first = __builtin_ctzll(hole);
+	unsigned oa, ob;
+	tile_class(p->g, tx, ty, &phase, &A, &B);
+	tl_occupancy(p->floor, p->ctx, A, B, &oa, &ob);
+	tl_pixel_panel(p->g, tx * 8 + first % 8, ty * 8 + first / 8, &HA, &HB);
+	bool road = p->floor(HA, HB, p->ctx) & TILE_ROAD && p->g->nroads;
+	return art_of(road ? p->g->roads : p->f->books, road ? p->g->nroads : p->f->nbooks, KEY(phase, oa, ob), hole);
+}
+
 /* Mends tile (tx, ty), whose entries are *e0 and *e1, with hole pixels
  * `top` & ~`drawn`: false where nothing the books hold covers it. */
 static bool mend(Panels *p, int tx, int ty, uint64_t top, uint64_t drawn, uint16_t *e0, uint16_t *e1) {
@@ -222,7 +248,7 @@ int voids_mend(const VoidFloor *f, uint16_t *map, int *left) {
 			uint64_t drawn = entry_px(opaque, map[i]) | entry_px(opaque, map[cells + i]);
 			if (drawn == ~0ull || !by_floor(&p, tx, ty)) continue;
 			uint64_t top = top_of(&p, tx, ty);
-			if (tl_popcount64(top & ~drawn) <= VOID_SLACK) continue;
+			if (tl_popcount64(top & ~drawn) <= VOID_SLACK || hole_is_art(&p, tx, ty, top & ~drawn)) continue;
 			if (last) last[i] = VOID_FOUND;
 			if (voids_on && mend(&p, tx, ty, top, drawn, &map[i], &map[cells + i])) {
 				++mended;

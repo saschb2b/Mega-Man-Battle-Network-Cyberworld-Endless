@@ -20,9 +20,11 @@
 /* The tiles a map entry can name (its low 10 bits). */
 #define VOID_TILES 1024
 
-/* A hole: more pixels of a tile's top than this left undrawn. The floor's
- * outline is not its top: a pixel is top where the floor lies 2 pixels to
- * either side of it and one above and below. */
+/* A hole: more pixels of a tile's top than this left undrawn, where the
+ * area's own maps draw them at a tile of the same neighbourhood (where one
+ * of theirs leaves them undrawn too, they are its art). The floor's
+ * outline is not its top: a pixel is top where the floor lies 4 pixels to
+ * either side of it and 2 above and below. */
 #define VOID_SLACK 2
 
 /* A map's floor as the net reads it: its grid and floor as the pick had
