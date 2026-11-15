@@ -1,3 +1,0 @@
-by: claude/claude-opus-5-5
-at: 2026-11-15T03:35:14Z
-* **Update**: game/rival.md (Chaud's call: "again" from a call heard, kept by the profile as it plays, not the depth a run reached), multirom/one-net.md (the first dive's words once a profile, and not naming a native territory's area before MegaMan finds it old).
