@@ -3,7 +3,7 @@ type: Design
 title: "Props"
 description: "Props on a layer, cut whole from BN6's maps (`src/map/props.c`) and placed by measured rules (`net_landmarks.c`): the Net Dealer's counter, each area's landmark, rows and signs, pads' warp centrepieces, framed pads and emblems."
 tags: [world, level-design]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-13T23:36:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T16:46:48Z }
 ---
 
 # Props
@@ -96,6 +96,7 @@ Data and bystanders, as a map is built before it is filled
 | Graveyard | the monument past a back rim | rows of three gravestones in one walled hole of three panels in a big slab |
 | Central, Sky | an avenue of cybertrees past the signature's back rim, mirrored, a panel's gap in its middle, two to four pairs (as Green Area 2 frames its giant tree) | rows of three cybertrees past rims; the WELCOME sign by the counter |
 | Seaside | | a BBS past the signature's rim, else a big room's; the WELCOME sign by the counter |
+| BN5's End Area | its pagoda in a walled hole of 2 by 2 in a room's back corner, tiles of its map cut whole ([Side pieces](side-pieces.md), What stands in a walled hole) | |
 
 The rules, from the originals' numbers above:
 
