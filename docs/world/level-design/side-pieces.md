@@ -93,6 +93,7 @@ Taken per area as looked at, as every laying rule is
 | Mr. Weather Comp | nothing that grips its floors; on its second layer its low clouds over its field are scenery (below), 3 looks; its other clouds are walkable floor at height 64, its pads warps' places, its escalator a conveyor, none placed (below) | the low clouds |
 | Seaside Area | none: its maps set no thing on, beside, under or behind their floors; the one look a cut takes is an arrow field's rim (below) | - |
 | BN4's Park Area | nothing: its second layer holds its two overpasses with their stairs and its Navi's hub's centrepiece; behind its floors, 21 groups that are no thing (below) | - |
+| BN4's Town Area | nothing: on its second layers a warp hub's ring with its exit arrow, a hub's centrepiece and Town Area 3's upper level, left out on purpose; under that level a rail between two lower hubs; Town Area 2 and 4 the same kinds (below) | - |
 | every other area | nothing | - |
 
 ## The Nest's crystals (`sides_learn_under`; verified on the maps and in the game)
@@ -770,6 +771,51 @@ side piece:
 The area has no raised floor to cut under, and the scenery cut sets none
 on its layers. The centrepieces, the machine and the arrows are issue
 #505's kind 4, left to the owner.
+
+## What BN4's Town Area sets round its floors (nothing; measured on the maps and the atlas)
+
+BN4's Town Area (the atlas's `a16`) learns from Town Area 3 (0x91:2), its
+squares alone (`TILES_PADS_ALONE`), and Town Area 1 (0x91:0), its
+walkways. Neither map sets a thing on, beside, behind or under its floors
+that a layer could carry. Its layers draw 26% of Town Area 3's 680
+different tile pictures and 58% of Town Area 1's 498 (two seeds, six
+layers); what they leave, looked at group by group on the tinted maps and
+cut by every rule on this page in turn (switched on for the area, what
+each took printed, taken back; 15 November 2026):
+
+- **No cut takes anything.** The side cut (with and without the one under
+  a lower edge), the cuts under a raised floor, behind a floor on either
+  layer and in a walled hole, and scenery, also at a face's depth
+  (`scenery_reach` 16): each took 0 pieces (the learn report's 0 side
+  pieces, 0 pieces of scenery, no hole). Nothing in either map grips a
+  rim, stands behind or under an edge, or stands clear of the floor's art.
+- **Town Area 1's second tile layer** holds two things, joined: the ring
+  of its warp hub (at (400, 305) in the atlas's picture) and the large exit
+  arrow running from it to the map's upper edge (to (415, 60)), 280 tiles
+  together: a warp's centrepiece and an exit arrow, issue #505's kind 4.
+  Its yellow roads (lending no tiles), their stripes (11 tiles each,
+  seven) and their arrow heads at (290, 190) and (790, 630) are roads and
+  exit arrows. The rest is scraps of 1 to 4 tiles: the outer rims of its
+  round pads' far ends and of a walkway's rounded corners, floor art the
+  pick does not choose.
+- **Town Area 3** sets its upper level on its second layer (1,704 of the
+  2,493 tiles of one group with the level below): white walkways, the
+  yellow road over the large square, two round hubs, the ramp down. They
+  are left out on purpose (Town Area 3 lends its squares alone). On the
+  middle hub stands a red half-dome on the second layer, at (690, 315): a
+  hub's centrepiece, on the floor alone. Under the upper level, on the
+  first layer, a thin rail runs through the void between two round hubs of
+  the lowest level, half-discs half hidden under the two small squares (at
+  (260, 235) and (855, 530)), about 75 tiles across: part of the lower
+  level a layer has none of, touching floor at both ends. The large
+  square's slab faces (182 tiles) are its pad's own faces.
+
+The two maps the area does not learn from, Town Area 2 and 4 (0x91:1 and
+0x91:3, drawn with `--atlas DIR:x1` and looked over, not cut), show the
+same kinds and nothing else: hubs with centrepieces, exit arrows, a yellow
+road, stairs, Town Area 4's arrow conveyors, and in Town Area 2 the same
+rail between two half-discs by its road's ends. A `side_maps` entry would
+likely bring nothing either.
 
 ## Not built
 
