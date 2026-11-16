@@ -3,7 +3,7 @@ type: Process
 title: "YouTube"
 description: "The trailers on YouTube: the channel (@Saschb2b), a video per trailer in one playlist, the 4K masters `tools/trailer_youtube.py` makes, the thumbnails `tools/trailer_thumbnail.py` draws, the narrator, what each video's fields hold, how an upload goes, and each release's step."
 tags: [project, youtube, trailers]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T18:33:42Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T18:47:34Z }
 ---
 
 # YouTube

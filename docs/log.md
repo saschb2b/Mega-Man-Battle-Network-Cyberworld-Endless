@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Update**: project/youtube.md (the ten videos before 0.22.0 reworked to its standard on 16 November 2026: hook titles and thumbnails in the series' layout; 0.22.0's description with its release date and link).
 * **Update**: project/youtube.md (0.22.0's video in the table, up on 16 November 2026 once the day's upload limit had lifted, with thumbnail A alone).
 * **Update**: devtools/agents-tools.md (the state's `megaman in|out` at home), online/shown.md (the flag found clear once more, issue #682, and home's guard).
 * **Add**: releases/v0.22.1.md (the players' notes of 0.22.1, "A run that stays where you left it.": Return to title in Options and twelve fixes, a picture or a pair against 0.22.0 each, galpartuk, agergo100 and AlicafeZ credited). **Update**: releases/index.md and releases/overview.md (its line), code/layers.md (0.22.1's row of numbers), devtools/old-checkpoint.md (0.22.1's candidate: 0.22.0's and 0.21.2's runs continued, both ok).

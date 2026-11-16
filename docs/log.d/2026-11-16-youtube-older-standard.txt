@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-16T18:47:34Z
-* **Update**: project/youtube.md (the ten videos before 0.22.0 reworked to its standard on 16 November 2026: hook titles and thumbnails in the series' layout; 0.22.0's description with its release date and link).
