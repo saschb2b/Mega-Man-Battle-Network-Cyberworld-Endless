@@ -40,6 +40,7 @@ commits, issues and old notes) are mapped section by section in
 | How the engine drives the game, and the memory it writes | [docs/engine/emulation/](docs/engine/emulation/index.md) |
 | What each file of the tree holds | [docs/code/](docs/code/index.md) |
 | The dev tools: headless captures, playtests, reports, the differential | [docs/devtools/](docs/devtools/index.md) |
+| Scenarios: a bug's play kept as a test of the live game, and how a fix adds one | [docs/devtools/scenarios.md](docs/devtools/scenarios.md) |
 | How a run is paced: acts, battles, areas, guardians, growth | [docs/game/progression/](docs/game/progression/index.md) |
 | What carries over between runs: unlocks, the run's setup, threat | [docs/game/meta/](docs/game/meta/index.md) |
 | What a run hands out (chips, their rarity and codes, zenny, Mystery Data), measured by act, the plans its curves come in by, and the guard against drift | [docs/game/economy/](docs/game/economy/index.md) |
@@ -127,7 +128,7 @@ part of the tree; a new file gets its line there.
 | `src/update/` | [docs/code/update.md](docs/code/update.md): the game's own updates |
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
-| `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the skills |
+| `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the scenarios' runner, the skills |
 | `third_party/` | [docs/code/third-party.md](docs/code/third-party.md): others' code, kept as released (Monocypher) |
 | `port/`, `linux/`, `windows/`, `android/`, `macos/`, `ios/`, `3ds/`, `switch/`, `vita/`, `psp/`, `ps4/`, `ps5/`, `docker/`, `.github/` | [docs/code/platforms.md](docs/code/platforms.md): the platforms, their packaging, the build images, CI |
 | `web/`, `docs/screenshots/`, `docs/clips/` | [docs/code/site-and-media.md](docs/code/site-and-media.md): the site, screenshots and clips |
@@ -423,6 +424,7 @@ python3 build.py ps5        # build/ps5/cyberworld-endless-ps5.zip, the app fold
 python3 tools/cw.py shot options/audio [--do CMDS] [--until COND] [--ref REF]   # one call: a look at a screen (the cyberworld MCP server's shot; docs/devtools/agents-tools.md)
 python3 tools/cw.py play NAME --start ROUTE|OPTIONS --do CMDS   # one call: play.py's game, what changed and a picture (the MCP's play)
 python3 tools/cw.py build [host|linux|test|lint]   # a build or check, its complaints alone (the MCP's build)
+python3 build.py scenarios [NAMES] [--jobs N]   # tests/scenarios: the game played through scripted courses, its state in words checked on the way (docs/devtools/scenarios.md; the ROM)
 python3 tools/play.py start NAME [--fresh]   # a headless game for a playtest (build.py linux first)
 python3 tools/play.py do NAME "press A; hold UP 30" [--every 10] [--keep DIR]   # input, then a picture and the state (--keep: each frame into DIR)
 python3 tools/square_tour.py [SEED ...]   # the Net Square on a local server, three games: the plaza, each warp and part, the walks timed (build.py linux and server first)
@@ -460,6 +462,9 @@ server (`.mcp.json`; docs/devtools/agents-tools.md) or `tools/cw.py`: a
 call each, the host build made first where a source is newer, the build's
 output kept to its complaints, the state in words with a `screen` line, and
 the game's 240x160 picture inline at 2x, or none where the words answer.
+The scenarios (`build.py scenarios`, docs/devtools/scenarios.md) are the
+same games played through courses kept in `tests/scenarios/`, the state
+checked on the way: the test of what only the running game shows.
 `build.py shot` below stays the way for the release pictures' scripted runs
 and for options the tools do not take.
 
@@ -490,7 +495,8 @@ pacing) stays local.
 | Change | Checks |
 | --- | --- |
 | The knowledge base (`docs/`) | The okf skill's bookkeeping (a new concept's frontmatter, the folder's `index.md`, the change's entry in `docs/log.d/` with its `by` and `at`, a link; no `generated` line of a concept that exists, no line in `docs/log.md`); `build.py lint` (the bundle validated, every `docs/` path named exists) |
-| Engine code | `build.py test`, `build.py lint`, a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before), an autopilot run (`shot` from `CYBERWORLD_AUTOPILOT=1 layer` until `layer>=2`) |
+| Engine code | `build.py test`, `build.py lint`, `build.py scenarios` (every scenario passes; the autopilot's run of a layer and NEW GAME's way to the net are among them), a headless capture of the affected screen (`shot` with its route, `ref` against the base where it was there before) |
+| A bug fixed that only a sequence of play shows (a run's end and the next run, a quit and CONTINUE, a button through one screen into the next, an order between the engine and BN6) | Its play kept as a scenario, `tests/scenarios/NAME.py` (docs/devtools/scenarios.md, Writing one for a fix): seen to fail on the code before the fix at the step that names the bug, then to pass; what went wrong a line of the state where it was not one |
 | Layer generation or maps | `build.py test` (connectivity over 300 seeds), `build.py tiles` (no layer worse than `tests/atlas_baseline.txt`, the close-ups looked over), captures of every area (`--net-biome 0`-`7`) |
 | The town | `build.py town` (its seeds drawn, misses marked, the game around it), an autopilot run from `--scene town` through the jack-in; where Lan's HP changes, MegaMan walked onto the pink pad from the corridor, its last frame in layer 1 (BN6's trigger stops short of the pad's art, session 74): `build.py shot --scene town --seed 2 --frames 1420 --input "$(python3 -c "print('40:,' + '4:A,6:,' * 46 + '30:,0:place -40 -8 7,10:,6:R,500:,' + '4:A,16:,' * 8 + '0:place 171 0 1,10:,25:UP+RIGHT,250:')")" --shot 1410:/src/.build/pad.bmp` (a fresh `--data-dir`), and again with `0:place 171 -5 1,10:,12:RIGHT,250:` for its last walk, MegaMan on the pad's left rim (session 75); where a pad's zone changes (`pad_art.c`), a layer's exit pad from its left rim too, docs/rom/net-maps.md's Warp pads |
 | Layer objects, scripts, shops | A capture of the talk or screen with scripted input (`shot` from `layer --talk shop:430`) |

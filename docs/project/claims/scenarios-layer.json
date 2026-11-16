@@ -1,0 +1,9 @@
+{
+  "branch": "scenarios-layer",
+  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for what stands on a layer: Mr.Progs, shops and dealers, heals, gifts, Mystery Data, locks, gates and vaults, traders, the fork and the exit, and a button that must not fall through a chat into the next thing",
+  "takes": {},
+  "units": [
+    "scenarios: layer"
+  ],
+  "run": false
+}

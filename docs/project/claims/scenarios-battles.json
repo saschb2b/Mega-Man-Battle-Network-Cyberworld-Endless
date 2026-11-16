@@ -1,0 +1,9 @@
+{
+  "branch": "scenarios-battles",
+  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for battles and the run's spine: a battle won, lost and run from, its reward, a guardian from his door to his Guardian Data, ProtoMan's duel, an act's end, a short net won, a deletion's summary and the next run",
+  "takes": {},
+  "units": [
+    "scenarios: battles"
+  ],
+  "run": false
+}

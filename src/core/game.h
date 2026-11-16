@@ -55,6 +55,11 @@ bool emu_saved_home(uint32_t seed, int depth);
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern bool title_menu;             /* ... or on its menu (back from SAVES) */
+/* ... the title's step in a word for a headless run's state (start, opening,
+ * menu, confirm, setup, summary, leaving), and its menu's row (new,
+ * continue, other): scene_title.c */
+const char *title_step(void);
+const char *title_cursor(void);
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
 extern char title_cause_short[40]; /* ... the same with the area's short name, "" for none */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */

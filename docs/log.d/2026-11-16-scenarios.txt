@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T12:45:00Z
+* **Add**: devtools/scenarios.md (the scenarios: a course of play kept as a test, `build.py scenarios`), devtools/index.md (its line), code/tools.md (`tools/scenarios.py`), code/tests.md (`tests/scenarios/`), devtools/agents-tools.md (the state's `turn`, `rules`, `title` and `cursor` lines; the `layer` and `battle` routes pick the opening gift, `pet/options` on `options-display`).

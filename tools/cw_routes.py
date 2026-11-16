@@ -18,14 +18,15 @@ ROOM = 'wait 40; mash A 460; wait 30'
 # Comm's row, our Options in a run; Save says nothing in Lan's room)
 PET = ROOM + '; press START; wait 40'
 PET_ROWS = ('folder', 'subchip', 'library', 'megaman', 'mail', 'keyitem', 'options')
-# (a layer: the arrival's words paged; quiet keeps random battles off)
+# (a layer: the arrival's words paged, then the run's opening gift picked,
+# its first offer; quiet keeps random battles off)
 NET = ['--scene', 'emu', '--dev', 'quiet']
-LAYER = 'wait 150; mash A 300; wait 20'
-# (a BN5 Darkloid in BN6's engine, at V1 (BN5's ROM beside BN6's): the run's opening gift picked, then the foes step
+GIFT = 'press A; wait 60; press A; wait 60'
+LAYER = 'wait 150; mash A 300; wait 20; ' + GIFT
+# (a BN5 Darkloid in BN6's engine, at V1 (BN5's ROM beside BN6's): the foes step
 # (docs/devtools/battle-on-demand.md) with his moved id at column 5, row 2; ids by xnavi_recipe.h's XN_ID_OF, their seats
 # 7-10: docs/multirom/navis.md, The Darkloids)
 DARKLOIDS = {'shademan': 0x1E0, 'blizzardman': 0x1E4, 'cloudman': 0x1E8, 'cosmoman': 0x1EC}
-GIFT = 'press A; wait 60; press A; wait 60'
 # (Lan's HP after act 2, its arrival's words paged)
 HP = ['--scene', 'home', '--run-depth', '7', '--seed', '3']
 
@@ -48,11 +49,11 @@ ROUTES = {
     'room': (TOWN, ROOM, 'town'),
     'pet': (TOWN, PET, 'pet'),
     **{f'pet/{name}': (TOWN, pet_entry(row), screen) for row, (name, screen) in
-       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'mail', 'keyitem', 'options')))},
+       enumerate(zip(PET_ROWS, ('folders', 'subchip', 'library', 'status', 'mail', 'keyitem', 'options-display')))},
     'jukebox': (TOWN, pet_entry(5) + '; press DOWN; press RIGHT; wait 14; press A; wait 40', 'jukebox'),
     'layer': (NET, LAYER, 'map'),
     'battle': (NET, LAYER + '; battle; wait 240', 'battle'),
-    **{f'darkloid/{name}': (NET, LAYER + f'; {GIFT}; foes {v1:X}@52; wait 200', 'battle') for name, v1 in DARKLOIDS.items()},
+    **{f'darkloid/{name}': (NET, LAYER + f'; foes {v1:X}@52; wait 200', 'battle') for name, v1 in DARKLOIDS.items()},
     'hp': (HP, 'wait 600' + '; press A; wait 88' * 6, 'town'),
 }
 

@@ -42,15 +42,16 @@ shop:430"`; words of the form `VAR=VALUE` first set the game's environment
 unless given, so two shots, or the two sides of a comparison, are the same
 game. The routes (`tools/cw_routes.py`) reach the screens agents look at
 most, each checked against the state's `screen` line by `tests/test_cw.py`'s
-route reading and by `tools/cw.py shot ROUTE`, which says so where a route
-missed its screen:
+route reading, by `tools/cw.py shot ROUTE`, which says so where a route
+missed its screen, and by `build.py scenarios routes`, which fails there
+([Scenarios](scenarios.md)):
 
 | Route | Arrives at |
 | --- | --- |
 | `title`, `options` (its Display page), `controls`, `options/display`, `options/audio`, `options/game`, `setup`, `saves`, `launcher` | the title and the engine's own screens over it |
 | `room`, `pet`, `pet/folder`, `pet/subchip`, `pet/library`, `pet/megaman`, `pet/mail`, `pet/keyitem`, `pet/options`, `jukebox` | a new run in Lan's room (seed 2), Dad's call paged, and the PET's screens |
-| `layer`, `battle` | a run's first layer, its arrival's words paged (`--dev quiet`); its first battle's Custom screen |
-| `darkloid/shademan`, `darkloid/blizzardman`, `darkloid/cloudman`, `darkloid/cosmoman` | BN5's Darkloid at V1 in BN6's engine, the Custom screen of his battle, the run's opening gift picked first (the `foes` step, [A battle on demand](battle-on-demand.md); BN5's ROM beside BN6's) |
+| `layer`, `battle` | a run's first layer, its arrival's words paged and the run's opening gift picked, its first offer (`--dev quiet`); its first battle's Custom screen |
+| `darkloid/shademan`, `darkloid/blizzardman`, `darkloid/cloudman`, `darkloid/cosmoman` | BN5's Darkloid at V1 in BN6's engine, the Custom screen of his battle (the `foes` step, [A battle on demand](battle-on-demand.md); BN5's ROM beside BN6's) |
 | `hp` | Lan's HP after act 2 (seed 3), its words paged |
 
 **Do** is `play.py`'s commands (`press A; wait 60; hold UP+RIGHT 30; mash A
@@ -74,7 +75,10 @@ a picture. Among the state's lines, `gameframe` is the game's own count of its
 main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
 `frame` goes on where the game stands still (issue #482;
 [An old checkpoint](old-checkpoint.md) watches it; a `play` call's
-changes leave it out, as they do `frame`), and `soulturns +1` stands while
+changes leave it out, as they do `frame`), a battle says its `turn` (the
+Custom screens it has opened) and its `rules`, `plain` or a `liberation`'s
+three turns (issue #669), the title its step and its menu's row (`title
+menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
 MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.

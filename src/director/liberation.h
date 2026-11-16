@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* Whether the layer the run is about to build is a dark one: an act's
  * second layer, from the second act, behind the way at its fork that the
@@ -43,6 +44,10 @@ bool lib_exit_shut(void);
 /* Each frame on the layer's map, and each frame of a battle. */
 void lib_update(void);
 void lib_battle_frame(void);
+/* (liberation_battle.c) A battle in the state's words: its turn (the Custom
+ * screens it has opened) and the rules it runs by, `rules liberation` while
+ * a liberation's are armed, else `rules plain`. */
+void lib_battle_describe(FILE *f);
 /* The pad on its way to the game while the board is under way: the
  * board's own moves and menu take it; MegaMan's walk from panel to panel
  * is what reaches the game. */
