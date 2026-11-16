@@ -168,6 +168,10 @@ for _a in (0x0801431C, 0x08014354, 0x0801437A, 0x08014394, 0x0801A63A, 0x0801A67
 # to #22), 'code' its code taken (0x7F to 0x3F; lsls #9, lsrs #25 to #10, #26), 'read' an id-like halfword at +0x1C of
 # a list not read yet, 'other' no item (the input's repeat timers, sound 0x7F, a byte).
 EDITOR_KEYS = {
+    # (the Chip Trader's two readers of an item of the editor's list, outside the editor: the card of the one under
+    # the cursor, 0x0804B338, and the loop that takes the chips put in, 0x0804B734, its lsls #16 two instructions
+    # before its lsrs #23; left at seven bits until November 2026, a trade took chip id >> 1 in no code of its own)
+    0x0804B34C: 'id', 0x0804B34E: 'code', 0x0804B740: 'code', 0x0804B744: 'id',
     0x08121AC4: 'build', 0x08121CB4: 'build', 0x08121B00: 'read', 0x08121CC2: 'read',
     0x08121EE8: 'id', 0x08121F94: 'id', 0x08122192: 'id', 0x081221E6: 'id', 0x0812225A: 'id', 0x08122260: 'code',
     0x081222B4: 'id', 0x08122408: 'id', 0x081224BC: 'id', 0x081224C4: 'code', 0x081224F2: 'id', 0x081224F6: 'code',
@@ -331,7 +335,7 @@ def changes(rom, found):
 def item_changes(rom):
     """the folder editor's items (EDITOR_KEYS) taken as id << 6 | code where BN6 has id << 7 | code, each site's
     halfwords: (address, was, now, kind). An item made or a sort key's low half (lsls #7 to #6), its id taken (lsrs #7
-    to #6; after lsls #16, lsrs #23 to #22), its code taken (movs #0x7F to #0x3F; lsls #9 and lsrs #25 to #10 and #26).
+    to #6; after lsls #16, at most three instructions before, lsrs #23 to #22), its code taken (movs #0x7F to #0x3F; lsls #9 and lsrs #25 to #10 and #26).
     A site whose instruction is none of these stops the tool: its verdict was read otherwise."""
     out = []
 
@@ -347,7 +351,8 @@ def item_changes(rom):
             out.append((a, h, imm(h, 6), k))
         elif k == 'id' and shift == 0x0800 and n == 7:
             out.append((a, h, imm(h, 6), k))
-        elif k == 'id' and shift == 0x0800 and n == 23 and rom.u16(a - 2) & 0xF800 == 0x0000 and (rom.u16(a - 2) >> 6) & 31 == 16:
+        elif k == 'id' and shift == 0x0800 and n == 23 and any(
+                rom.u16(a - d) & 0xF800 == 0x0000 and (rom.u16(a - d) >> 6) & 31 == 16 for d in (2, 4, 6)):
             out.append((a, h, imm(h, 22), k))
         elif k == 'code' and h & 0xF8FF == 0x207F:
             out.append((a, h, (h & 0xFF00) | 0x3F, k))

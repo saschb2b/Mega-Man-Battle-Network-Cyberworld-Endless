@@ -129,6 +129,8 @@
 #define BN6_TAKE_CHIPS        0x08021B93u /* TakeChips (chip, code, count): a settled Net Square trade's chip out of the Pack */
 
 /* Where BN6's code takes a chip's id in nine bits (tools/chip_ids.py's census, docs/rom/chips-code.md, Ten-bit chip ids) */
+#define BN6_TRADER_CARD       0x0804B338u /* the Chip Trader's screen: the item under its list's cursor (the editor's list's entry + 0x1C) split into id and code for bl 0x0811AB3C */
+#define BN6_TRADER_TAKE       0x0804B734u /* ... its loop over the chips put in (0x20 an entry, the item at +0x1C): each split the same way and handed to BN6_TAKE_CHIPS, one copy */
 #define BN6_ENTRY_SPLIT       0x08021AE0u /* a folder entry split: r1 its code (lsrs #9), r0 its id (ands with its literal's low half, 0x01FF) */
 #define BN6_ENTRY_SPLIT_MASK  0x08021AECu /* ... that literal: 0x01FF, its high half the next routine's first instruction */
 #define BN6_ENTRY_CHEAT       0x0802A55Cu /* the entry the Custom screen's two getters give for a chip the cheat test refuses: 0x3785, 389 in code 27 */

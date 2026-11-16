@@ -153,8 +153,6 @@ MANY = {
         ]),
     'aster-chip-trader': dict(
         GUARDS="AsterLand's Chip Trader: three chips of the pack in, one out, and it asks to go again; No leaves, the pack two chips fewer.",
-        KNOWN="AsterLand's Chip Trader gives its prize and takes none of the three chips put in: they are still in the folder editor's Pack, "
-              "the pack one chip fewer where it should be two, and Cannon A's count two down instead (with BN6's own give too, no --dev pack)",
         START=dev('pack=12'),
         STEPS=ASTER + [
             ('expect', 'chips=42'),                                      # (the folder's thirty and twelve spare)

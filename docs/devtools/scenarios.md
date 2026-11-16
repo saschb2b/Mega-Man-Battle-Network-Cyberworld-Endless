@@ -49,6 +49,7 @@ course:
 | `('repeat', COMMANDS, COND, TIMES)` | `COMMANDS` again and again until `COND`, 12 times at most: a button pressed through screens whose timing is their own (the title's menu opens a moment after START) |
 | `('expect', COND)` | the state says so now |
 | `('keep', WORDS)`, `('same', WORDS)` | the state's lines of those first words kept, and the same later: what a CONTINUE must bring back |
+| `('moved', WORD, BY)` | ... or the kept line WORD's number moved by BY since: a number (`1`, `-1`), or a kept word with a sign (`'-price'`: down by the price kept), so a purchase is checked against the price the shop showed and not against today's balance |
 | `('restart', START)` | the game quit as a player's system quits it (SIGTERM, the port's close: it saves and leaves), then started again on the same saves |
 
 `COND` is an until's test of the agents' tools: a state line's first word,
@@ -108,6 +109,47 @@ FAIL liberation-rules-end    3.4 s    4593 frames
    nothing; #669's was run with both of its fix's disarms taken out.
 4. Prefer `until` and `repeat` to counted waits: a wait counted in frames
    breaks when a fade grows by ten.
+
+## What stands on a layer
+
+The layer's scenarios (`layer_*.py`: its keepers, Mystery Data, locks and
+set pieces, gates, the way on, the buttons that must not fall through)
+walk up to a thing and press A, as a player does, and read what MegaMan is
+left with. Two dev steps and the state's lines below make that the same
+on every seed ([tools/play.py](play.md) has the steps):
+
+- `by NAME` puts MegaMan beside the layer's first NAME, facing it, on
+  floor he can walk to: a `--talk` kind (`shop`, `heal`, `programs`,
+  `npc`, `vault`, `navigate`, `official`, `challenge`, `duel`, `trader`,
+  `bugtrader`, `undernet`, `gate`, `gift`), a Mystery Data by its colour
+  (`green`, `blue`, `purple`) or by the key item in it (`scrtdata`,
+  `regup`), a lock (`block`), the Navi who knows its P-Code (`teller`) or
+  hints at an invisible path (`hinter`); a number after a kind or a colour
+  is a later one (`npc2`). A pad is stepped on, so `exit`, `return`,
+  `teleport`, `gap`, `lane` and `path` put him on it (`exitside`: two
+  panels off it). `--talk` runs a chat's script with no one walked up to;
+  `by` and `press A` go through BN6's own check and the director's keys.
+- `hold AHEAD 40` holds the d-pad the way MegaMan faces: over Rush's
+  back, onto an arrow lane, along an invisible path, wherever the seed
+  laid it.
+
+| The state says | Where | Written by |
+| --- | --- | --- |
+| `chips N` (the chips owned, the Folder's and the Pack's: BN6's pack counts both), `programs N`, `unlockers N`, `rushfood N`, `regmemory N` | a run, at home too | `holds_describe`, `director_folder.c` |
+| `choice K/N` (the cursor on option K of the N a chat box asks) | while BN6's box shows a question | `talk_describe`, `talk.c` |
+| `pickat K/N` the cursor's row as a player counts it, `pickof hp`, `chip`, `program` or `skip` what that row is (with the pick's other lines, `pick`, `offers`, `pickrows`, `pickrow`, `pickready`, below) | a reward pick's screen | `director_pick_describe`, `reward_pick.c` |
+| `shoprows N`, and of the row under the cursor `price N` (as shown, zenny or BugFrags) and `stock N` | BN6's shop screen | `shop_describe`, `shop.c` |
+| `exitpad shut` or `open`, `heard yes` once a Navi has named the act's guardian, `greentaken N`, `bluetaken N`, `purpletaken N`, `locks N` (still standing), `pcode told`, `gate HeatMan sealed` or `earned`, `on floor`, `teleport1`, `teleport2`, `gap`, `lane` or `path` | a layer | `layer_describe`, `layer_describe.c` |
+
+With `CYBERWORLD_STATE_POS=1` first in its START a scenario also reads
+`held`: `held=none` is MegaMan free, so
+`('repeat', 'press A; wait 30', 'held=none')` pages a chat to its end
+whatever its boxes. A question is waited for with
+`('repeat', 'press A; wait 30', 'choice=2/2')` and its cursor moved with
+`('repeat', 'press LEFT; wait 10', 'choice=1/2')`: a d-pad press as the
+options appear is lost. On BN6's shop screen `zenny` is the game's
+working copy and moves once the screen is left; on its trader's screen
+the pack's counts are the spare chips alone.
 
 ## A bug a scenario finds
 
@@ -279,7 +321,7 @@ its own part and called from `director_describe` (the summary's from
 | --- | --- | --- |
 | `viruses N`, `navis N`, `battles N`; in a battle `foes N`, `down N` | `tally_describe` (`director_tally.c`) | the run's tally as RESULT will count it, the layer's random battles fought, a battle's enemies and those down |
 | `battle random`, `guardian`, `duel`, `gate`, `copy`, `server` or `floor`; `phase custom`, `fight`, `results` or `other`; `form none`, `HeatCross` ... `BeastOut`; `foestatus none`, `paralysed`, `dragged`, `frozen` or `bubbled`; at its results `result won`, `lost`, `ran` or `draw` and `reward zenny N`, `chip ID CODE`, `hp N`, `bugfrags N`; on the map after one `lastbattle won` ... | `battle_state_describe` (`battle_state.c`) | a battle: what it is, where it stands, how it ended and what its RESULT paid, MegaMan's form, the statuses its enemies are held in |
-| `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken`, `exitpad open` or `shut`; in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
+| `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken` (the exit pad's line is the layer's, above); in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
 | `duel none`, `waiting`, `on` or `fought`; `rung N`; `duelswon N`, `duelslost N`, `clearance N`; `chaud new` or `known`; `verdict none`, `beat`, `slow`, `hit` or `lost` | `duel_describe` (`director_duel.c`) | the rival: the layer's duel and its rung, the record, what his respect has opened, whether Chaud has called before, the last verdict |
 | `pick gift`, `draft`, `vault`, `order`, `official`, `server` or `copy`; `offers hpmemory:2 chip:137 program:1 [bugfrags]`; `pickrows N`, `pickrow N`, `pickready yes` or `no` | `director_pick_describe` (`reward_pick.c`) | a reward pick while it is up: its rows, the cursor's, whether an A would take one yet |
 | `card title`, `area` or `grand`; `cardsays TOP / NAME / LINE / LINE / LINE` | `cinema_describe` (`cinema.c`) | the card that shows: a guardian's title, the act's ("Guardian: ???") |

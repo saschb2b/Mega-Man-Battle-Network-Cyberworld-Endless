@@ -270,20 +270,22 @@ void director_describe(FILE *f) {
 	describe_turns(f);
 	battle_describe(f);
 	battle_state_describe(f);
-	director_pick_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
 	/* (a special route kept for its fork, and the act it led to) */
 	if (run.route_found) fprintf(f, "route kept from act %d\n", run.route_found);
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
-	/* (a chat's question, what MegaMan holds: tests/scenarios) */
+	/* (a chat's question, a reward pick's rows, what MegaMan holds, BN6's shop screen's row: tests/scenarios) */
 	talk_describe(f);
+	director_pick_describe(f);
 	holds_describe(f);
+	shop_describe(f);
 	/* (the PET's and home's own lines, each feature's: docs/devtools/scenarios.md) */
 	pet_describe(f);
 	home_describe(f);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	layer_describe(f);
 	/* (the run's tally, the card that shows, the rival, the guardian's course: each its own part's) */
 	tally_describe(f);
 	cinema_describe(f);

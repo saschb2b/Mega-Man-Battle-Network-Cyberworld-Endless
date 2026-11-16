@@ -27,7 +27,10 @@ flags set, then back as they were), battle (the layer's next random
 battle, as soon as MegaMan is free on its map; on an older net's area,
 one of its records in BN6's engine), sig (MegaMan in the layer's
 signature, the room it is remembered by: docs/world/level-design/identity.md,
-Identity), foes SPEC (a battle of these foes at once, in BN6's engine:
+Identity), by NAME (MegaMan beside the layer's first NAME, facing it: a
+--talk's kind, green, blue or purple Mystery Data, block, teller, exit;
+docs/devtools/scenarios.md, What stands on a layer; "hold AHEAD 40" then
+holds the d-pad the way he faces), foes SPEC (a battle of these foes at once, in BN6's engine:
 200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
 mm@CR MegaMan's; a family moved into the engine among them, issue #82),
 swap FORMS (a battle of one Navi swapped mid-fight for the next: 101:300
@@ -74,9 +77,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (CYBERWORLD_PLAY_BIN: another build, e.g. a session's own bin/ copy, to replay it exactly)
 BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linux', 'cyberworld'))
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
-BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
+BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST', 'AHEAD'}   # (FAST: fast forward's button, BTN_FAST; AHEAD: the d-pad the way MegaMan faces)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'by', 'dump', 'second', 'stuck')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -135,12 +138,14 @@ def steps(commands):
                 out.append(('cross', str(int(args[0], 0))))
             elif op == 'sig':
                 out.append(('sig',))
+            elif op == 'by':
+                out.append(('by', args[0]))
             elif op == 'stuck':
                 out.append(('stuck', args[0]))
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, by, stuck, dump)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -339,7 +344,7 @@ def send(h, seq, record=None):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross'):
+        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by'):
             items.append(f'{s[0]} {s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
