@@ -216,6 +216,7 @@ static void write_state(const char *path) {
 	if (scene_current() == &scene_emu) director_describe(f);
 	/* (the title's step and its menu's row: a scenario's way through it) */
 	if (scene_current() == &scene_title) title_describe(f);
+	title_summary_describe(f);
 	/* (the engine's own screens, each its own lines where it is up:
 	 * docs/devtools/scenarios.md) */
 	options_describe(f);

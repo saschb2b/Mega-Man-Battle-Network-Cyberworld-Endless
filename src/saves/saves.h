@@ -22,7 +22,7 @@ void saves_tick(void);
  * the press */
 bool saves_key(void);
 /* SAVES in a headless run's state where it is up, a line each: its view
- * (`saves` home, compare, result, send, receive), home's page (`savespage`
+ * (`savesview` home, compare, result, send, receive), home's page (`savespage`
  * cloud, code, file), the line or button under the cursor (`savesfocus`
  * export, import, auto, folder, keep, take, done, continue, undo, ...),
  * this device's saves (`here` their hash, none; `herelayer` their run's

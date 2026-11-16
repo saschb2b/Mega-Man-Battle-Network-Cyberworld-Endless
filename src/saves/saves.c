@@ -266,7 +266,7 @@ void saves_describe(FILE *f) {
 	static const char *const views[] = { "home", "compare", "result", "send", "receive" }, *const pages[SAVES_PAGES] = { "cloud", "code", "file" };
 	static const char *const actions[SAVES_DIGIT + 1] = { "export", "import", "send", "receive", "undo", "auto", "folder", "keep", "take", "done",
 		"continue", "erase", "get", "turnon", "link", "add", "unlink", "delete", "digit" };
-	fprintf(f, "saves %s\nsavespage %s\nsavesfocus %s\n", views[SV.view], pages[SV.page], actions[SV.focus < SAVES_DIGIT ? SV.focus : SAVES_DIGIT]);
+	fprintf(f, "savesview %s\nsavespage %s\nsavesfocus %s\n", views[SV.view], pages[SV.page], actions[SV.focus < SAVES_DIGIT ? SV.focus : SAVES_DIGIT]);
 	if (SV.have) fprintf(f, "here %08x\nherelayer %d\nhereruns %d\n", (unsigned)SV.here.hash, SV.here.run_depth, SV.here.runs);
 	else fprintf(f, "here none\n");
 	if (SV.view == SAVES_COMPARE)

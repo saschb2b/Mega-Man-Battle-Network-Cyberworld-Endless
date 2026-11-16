@@ -65,9 +65,12 @@ extern bool title_menu;             /* ... or on its menu (back from SAVES) */
 /* ... the title in a headless run's state, a fact a line: its step (start,
  * opening, menu, confirm, setup, summary, leaving), its menu's row (new,
  * continue, options), the saved run's layer, the profile's runs, best and
- * marks, and the setup's or the summary's lines where one is up:
- * scene_title.c */
+ * marks, and the setup's lines where it is up: scene_title.c */
 void title_describe(FILE *f);
+/* ... and while the finished run's summary shows (title_summary.c): its
+ * screen, how the run ended and where, its rows, the battle data a loss
+ * gave, what it opened */
+void title_summary_describe(FILE *f);
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
 extern char title_cause_short[40]; /* ... the same with the area's short name, "" for none */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */

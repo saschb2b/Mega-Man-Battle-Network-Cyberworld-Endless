@@ -195,7 +195,7 @@ area). They stay out of each other's way so:
 
 The engine's own screens say themselves in the state, each from a
 function of its own (`title_describe`, `title_setup_describe`,
-`title_summary_describe`, `options_describe`, `controls_describe`,
+`options_describe`, `controls_describe`,
 `analytics_ask_describe`, `news_box_describe`, `saves_describe`,
 `launcher_describe`, and `meta_setup_describe` for a run's setup), called
 from `write_state` in `src/dev/capture.c`; they read and change nothing.
@@ -205,12 +205,12 @@ from `write_state` in `src/dev/capture.c`; they read and change nothing.
 | The title | `title` its step, `cursor` new, continue or options, `saved` the layer of the run CONTINUE takes (0 none), `asks` typing, no or yes while NEW GAME asks, `runs`, `best` and `marks` (hex) of the profile |
 | The JACK-IN SETUP | `tab` run, help or extras; `row` net, folder, cross, threat, a helper's or an extra's number, or foot; the choice as `net` short or endless, `startfolder`, `startcross`, `threat`, `helpers` and `extrasoff` (bits); what is open as `endless` open or shut, `folders`, `crosses`, `threatmax`, `helpersshown` |
 | A run | the same six lines of the setup it began with (`net` ... `extrasoff`): kept on the setup with `keep`, they are the `same` in the run |
-| A run's summary | `summary` result or records, `ending` won or deleted, `reached`, `newbest`, `opened` (what it opened, apart by commas; none) |
+| A run's summary | the battles' scenarios' lines (`title_summary_describe`): `page` result or records, `ended` won or deleted, `cause`, `reached`, `viruses`, `navis`, `learned`, `newbest`, `opened` (what it opened, apart by commas; nothing) |
 | Options | `line` the line under the cursor (scale, smooth, colour, blend, lcd3x, depth, music, effects, output, sound, vibration, controls, fast, statistics, update, updates) and `value` as the page shows it; `defaults` no or yes while START asks |
 | The controls screen | `device` controller or keyboard, `button` the row (a, b, dpad, ... or setall, defaults, done), `slot` main or also, `bound` what is on it, `asking` none, slot, dpad, all or keep, `said` its passing word |
 | The statistics | `statistics` on, off or unasked, where the session may hold an answer; `answer` wait, no or yes while the question is up |
 | The update | `update` none, found, getting, failed or ready, where this copy looks; `newversion` |
-| SAVES | `saves` home, compare, result, send or receive; `savespage` cloud, code or file; `savesfocus` the line or button; `here` this device's saves' hash (none), `herelayer`, `hereruns`; `theirs`, `theirlayer`, `theirstatus` ok or refused; `undo` yes or no; `autocopy`; `savesasks`; `savesnote` |
+| SAVES | `savesview` home, compare, result, send or receive; `savespage` cloud, code or file; `savesfocus` the line or button; `here` this device's saves' hash (none), `herelayer`, `hereruns`; `theirs`, `theirlayer`, `theirstatus` ok or refused; `undo` yes or no; `autocopy`; `savesasks`; `savesnote` |
 | The ROMs | `roms` those read (`bn6 bn5`, none) on every screen; on the ROMs screen `cartridges`, `romfocus` bn6, bn5, bn4, alt or play, `romnote` and `romnotekind` info, good or bad |
 
 ## What they found at once

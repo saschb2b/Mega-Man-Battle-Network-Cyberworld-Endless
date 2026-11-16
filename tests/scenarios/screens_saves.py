@@ -25,7 +25,7 @@ ARRIVE = [   # the arrival's words paged: MegaMan free on the layer, which a qui
 def file_line(name):
     """SAVES' home on its FILE page, the cursor on a line."""
     return [
-        ('expect', 'saves=home'),
+        ('expect', 'savesview=home'),
         ('repeat', 'press R; wait 10', 'savespage=file', 3),
         ('repeat', 'press DOWN; wait 6', f'savesfocus={name}', 4),
     ]
@@ -38,16 +38,16 @@ EXPORT = [   # run A saved on its layer, then exported from SAVES: its file in D
     ('expect', 'herelayer=2'),
     *file_line('export'),
     ('do', 'press A; wait 10'),
-    ('until', 'saves=result', 300),
+    ('until', 'savesview=result', 300),
     ('expect', 'savesnote~Exported to'),
     ('expect', 'savesnote~Downloads/cyberworld-endless.cwsave'),
     ('do', 'press A; wait 10'),                   # DONE
-    ('expect', 'saves=home'),
+    ('expect', 'savesview=home'),
 ]
 IMPORT = [   # FILE's Import: the file compared with this device's saves before anything changes
     *file_line('import'),
     ('do', 'press A; wait 10'),
-    ('until', 'saves=compare', 300),
+    ('until', 'savesview=compare', 300),
     ('expect', 'theirstatus=ok'),
     ('expect', 'theirlayer=2'),
 ]
@@ -78,7 +78,7 @@ MANY = {
         *IMPORT,
         ('expect', 'savesfocus=take'),            # BRING BACK under the cursor
         ('do', 'press A; wait 10'),
-        ('until', 'saves=result', 300),
+        ('until', 'savesview=result', 300),
         ('expect', 'herelayer=2'),
         ('expect', 'savesnote~Layer 2'),
         *CONTINUE_A,
@@ -92,7 +92,7 @@ MANY = {
         ('do', 'press RIGHT; wait 6'),
         ('expect', 'savesfocus=take'),
         ('do', 'press A; wait 10'),
-        ('until', 'saves=result', 300),
+        ('until', 'savesview=result', 300),
         ('expect', 'herelayer=2'),
         ('expect', 'undo=yes'),
         ('expect', 'savesnote~UNDO IMPORT'),
@@ -123,12 +123,12 @@ MANY = {
     'keep-these-changes-nothing': dict(START=RUN_A, STEPS=[
         *OVER_B,
         ('do', 'press A; wait 10'),               # KEEP THESE
-        ('expect', 'saves=home'),
+        ('expect', 'savesview=home'),
         ('same', 'here'),
         ('expect', 'undo=no'),
         *IMPORT,
         ('do', 'press RIGHT; wait 6; press B; wait 10'),      # B, even with USE THOSE under the cursor
-        ('expect', 'saves=home'),
+        ('expect', 'savesview=home'),
         ('same', 'here'),
         ('expect', 'undo=no'),
     ]),
@@ -138,7 +138,7 @@ MANY = {
         ('keep', 'here'),
         *file_line('import'),
         ('do', 'press A; wait 10'),
-        ('until', 'saves=result', 300),
+        ('until', 'savesview=result', 300),
         ('same', 'here'),
         ('expect', 'undo=no'),
     ]),
@@ -148,27 +148,27 @@ MANY = {
         ('restart', TITLE + OTHER),
         ('do', 'wait 30; drop {dir}/Downloads/cyberworld-endless.cwsave; wait 20'),
         ('expect', 'screen=saves'),
-        ('expect', 'saves=compare'),
+        ('expect', 'savesview=compare'),
         ('expect', 'theirstatus=ok'),
         ('expect', 'theirlayer=2'),
         ('expect', 'here=none'),
         ('repeat', 'press RIGHT; wait 6', 'savesfocus=take', 2),
         ('do', 'press A; wait 10'),
-        ('until', 'saves=result', 300),
+        ('until', 'savesview=result', 300),
         *CONTINUE_A,
     ]),
     'a-damaged-file-is-refused': dict(START=RUN_A, STEPS=[
         *ARRIVE,
         ('restart', TITLE),
         ('do', 'wait 30; drop {damaged}; wait 20'),
-        ('expect', 'saves=compare'),
+        ('expect', 'savesview=compare'),
         ('expect', 'theirstatus=refused'),
         ('expect', 'savesnote~Your saves are kept.'),
         ('expect', 'savesfocus=done'),            # DONE alone
         ('expect', 'herelayer=2'),
         ('keep', 'here'),
         ('do', 'press RIGHT; wait 6; press A; wait 10'),
-        ('expect', 'saves=home'),
+        ('expect', 'savesview=home'),
         ('same', 'here'),
         ('expect', 'undo=no'),
     ]),

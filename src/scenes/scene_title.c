@@ -480,8 +480,8 @@ static void update(void) {
 /* The title in the state's words (capture.c), a fact a line: the step it
  * is on, the row its menu's cursor is on, the saved run CONTINUE takes
  * (its layer, 0 none), NEW GAME's question's answer under the cursor, what
- * the profile holds (its runs, best layer and marks), and the setup's or
- * the summary's own lines. Reads only. */
+ * the profile holds (its runs, best layer and marks), and the setup's own
+ * lines (the summary's are title_summary_describe's). Reads only. */
 void title_describe(FILE *f) {
 	const char *step = S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
 		: !S.menu ? "opening" : S.confirm ? "confirm" : "menu";
@@ -490,7 +490,6 @@ void title_describe(FILE *f) {
 	if (S.confirm) fprintf(f, "asks %s\n", S.t - S.asked < (int)(strlen(ASK_FIRST) + strlen(S.ask)) ? "typing" : S.yes ? "yes" : "no");
 	fprintf(f, "runs %d\nbest %d\nmarks %03x\n", profile.runs, profile.best_depth, profile.marks);
 	title_setup_describe(f);
-	title_summary_describe(f, S.summary);
 }
 
 /* NEW GAME or CONTINUE chosen: the jack-in sound, and away */

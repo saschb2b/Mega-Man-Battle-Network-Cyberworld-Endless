@@ -19,12 +19,12 @@ NEXT = [   # the way on from the title: NEW GAME, the setup (a profile with a ru
 MANY = {
     'deleted': dict(START=LOST, STEPS=[
         ('until', 'title=summary', 12000),
-        ('expect', 'summary=result'),
-        ('expect', 'ending=deleted'),
+        ('expect', 'page=result'),
+        ('expect', 'ended=deleted'),
         ('expect', 'reached>=4'),                 # (on the layer it began on, or the next)
         ('expect', 'newbest=no'),                 # a first run has no record to beat
-        ('expect', 'opened=none'),
-        ('repeat', 'press A; wait 30', 'summary=records', 6),     # (no press taken for its first second)
+        ('expect', 'opened=nothing'),
+        ('repeat', 'press A; wait 30', 'page=records', 6),     # (no press taken for its first second)
         ('expect', 'title=summary'),
         ('repeat', 'press A; wait 30', 'title=start', 6),
         ('expect', 'runs=1'),
@@ -44,18 +44,18 @@ MANY = {
     # START turns its screens as A does
     'deleted-and-start-turns-the-screens': dict(START=LOST, STEPS=[
         ('until', 'title=summary', 12000),
-        ('repeat', 'press START; wait 30', 'summary=records', 6),
+        ('repeat', 'press START; wait 30', 'page=records', 6),
         ('repeat', 'press START; wait 30', 'title=start', 6),
         ('expect', 'runs=1'),
     ]),
     'won': dict(START=WON, STEPS=[
         ('until', 'title=summary', 20000),
-        ('expect', 'summary=result'),
-        ('expect', 'ending=won'),
+        ('expect', 'page=result'),
+        ('expect', 'ended=won'),
         ('expect', 'reached=10'),
         ('expect', 'opened~the endless net'),
         ('expect', 'opened~threat 1'),
-        ('repeat', 'press A; wait 30', 'summary=records', 6),
+        ('repeat', 'press A; wait 30', 'page=records', 6),
         ('repeat', 'press A; wait 30', 'title=start', 6),
         ('expect', 'runs=1'),
         ('expect', 'best=10'),
@@ -73,12 +73,12 @@ MANY = {
     # the made-up summaries a capture starts on, and its marks
     'the-summary-scene-of-a-run-lost': dict(START='--scene summary --run-depth 4', STEPS=[
         ('expect', 'title=summary'),
-        ('expect', 'ending=deleted'),
+        ('expect', 'ended=deleted'),
         ('expect', 'reached=4'),
     ]),
     'the-summary-scene-of-a-run-won': dict(START='--scene summary --setup short --run-depth 10', STEPS=[
         ('expect', 'title=summary'),
-        ('expect', 'ending=won'),
+        ('expect', 'ended=won'),
         ('expect', 'reached=10'),
         ('expect', 'opened~the endless net'),
     ]),
