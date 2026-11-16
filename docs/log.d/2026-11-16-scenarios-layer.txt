@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-16T13:51:00Z
-* **Update**: devtools/scenarios.md (what stands on a layer: the `moved` step, the `by` and AHEAD dev steps, the state's lines a layer's scenarios read: `chips`, `choice`, `pick`, `price`, `exitpad`, `locks`, the Mystery Data taken, `on`), devtools/play.md (the `by` step and AHEAD), devtools/headless-shot.md (`0:by NAME`), devtools/agents-tools.md (the state's new lines), code/director.md (`director_by.c`, `layer_describe.c`), rom/chips-code.md (the Chip Trader's two readers of an editor's item, `BN6_TRADER_CARD` and `BN6_TRADER_TAKE`, at six bits: a trade takes its three chips again).
