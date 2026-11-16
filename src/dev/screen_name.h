@@ -3,10 +3,16 @@
 #ifndef CW_SCREEN_NAME_H
 #define CW_SCREEN_NAME_H
 
+#include <stdio.h>
+
 /* Ours over the game first (the dev menu, Options, the Jukebox, the
  * NetPass), then the scene's name ("title", "saves"), or in the game
  * BN6's screen ("map", "battle", "pet", "keyitem": second_screen_word).
  * It only looks. */
 const char *screen_name(void);
+/* The engine's own screens in that state, a fact a line: Options and what
+ * shows over it (options_describe), SAVES (saves_describe), the ROMs read
+ * and their screen (launcher_describe). They only look. */
+void screens_describe(FILE *f);
 
 #endif

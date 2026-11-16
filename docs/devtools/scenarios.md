@@ -198,7 +198,9 @@ function of its own (`title_describe`, `title_setup_describe`,
 `options_describe`, `controls_describe`,
 `analytics_ask_describe`, `news_box_describe`, `saves_describe`,
 `launcher_describe`, and `meta_setup_describe` for a run's setup), called
-from `write_state` in `src/dev/capture.c`; they read and change nothing.
+from `write_state` in `src/dev/capture.c` (the title's there, the others
+through `screens_describe` in `src/dev/screen_name.c`); they read and
+change nothing.
 
 | Where | Lines |
 | --- | --- |

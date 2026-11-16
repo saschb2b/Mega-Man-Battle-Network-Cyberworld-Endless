@@ -26,11 +26,9 @@
 #include "netpass.h"
 #include "netpass_screen.h"
 #include "online_chat.h"
-#include "options.h"
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"
-#include "saves.h"
 #include "screen_name.h"
 #include "soulproxy.h"
 #include "square_words.h"
@@ -217,11 +215,7 @@ static void write_state(const char *path) {
 	/* (the title's step and its menu's row: a scenario's way through it) */
 	if (scene_current() == &scene_title) title_describe(f);
 	title_summary_describe(f);
-	/* (the engine's own screens, each its own lines where it is up:
-	 * docs/devtools/scenarios.md) */
-	options_describe(f);
-	saves_describe(f);
-	launcher_describe(f);
+	screens_describe(f);
 	fclose(f);
 }
 
