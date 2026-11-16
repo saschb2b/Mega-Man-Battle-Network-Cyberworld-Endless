@@ -7,7 +7,6 @@
 #include <string.h>
 
 #include "bn6.h"
-#include "bn6_fields.h"
 #include "bn6_forms.h"
 #include "boss.h"
 #include "chip_entry.h"
@@ -19,11 +18,9 @@
 #include "net.h"
 #include "netmap.h"
 #include "npc_sprite.h"
-#include "rom.h"
 #include "run.h"
 #include "soulunite.h"
 #include "souls.h"
-#include "stage_npc.h"
 #include "xchips_registry.h"
 #include "xguardian_bn4.h"
 

@@ -75,7 +75,6 @@
 #define BN6_NPC_Z_REACH       0x0D        /* ZReach */
 #define BN6_NPC_CENTER_X      0x11        /* CenterOffsetX and Y: its collision centre's offsets, s8 */
 #define BN6_NPC_CENTER_Y      0x12
-#define BN6_NPC_ANIM          0x14        /* AnimationSelect: the animation of its sprite it plays (the NPC scripts' command 0x16) */
 #define BN6_NPC_LOCKED        0x17        /* InteractionLocked */
 #define BN6_NPC_SCRIPT        0x1C        /* TextScriptIndex */
 #define BN6_NPC_X16           0x26        /* X16, Y16, Z16: its position's whole world units (s16) */
