@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.22.2 (2026-11-17)
+
 - **Fixed: a new run that began with the last run's MegaMan (issue
   #688).** On some systems every NEW GAME kept the HP, zenny, SubChips,
   RegUPs, NaviCust and Crosses of an earlier run, and its folder showed

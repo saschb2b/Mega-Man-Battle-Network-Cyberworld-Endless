@@ -420,6 +420,7 @@ hold no cycle, so every pair has a baselined include in it.
 | v0.21.2 | 162075 | 27328 | 1158 | 31 | 35 | 142 |
 | v0.22.0 | 181372 | 27331 | 1282 | 33 | 35 | 142 |
 | v0.22.1 | 183803 | 27331 | 1294 | 33 | 35 | 142 |
+| v0.22.2 | 184237 | 27331 | 1296 | 33 | 35 | 142 |
 <!-- numbers: tools/layers.py --record adds a row above this line -->
 
 (v0.10.0's row is the count of that tag's `src/`, before the tool: its
