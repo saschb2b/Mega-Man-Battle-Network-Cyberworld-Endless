@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-16T21:05:00Z
-* **Update**: engine/updates.md (a PortMaster launcher older than 0.22.0's: the game makes the update folder itself and runs update.py as it ends, found on the owner's Nova), code/update.md (update_port.c's row), code/tests.md (test_update.c's port checks), GUIDE.md (the PortMaster line of Update now).

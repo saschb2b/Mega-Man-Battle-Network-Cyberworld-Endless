@@ -3,7 +3,7 @@ type: Code Map
 title: "The game's own updates"
 description: "What `src/update/` holds: the look at the release's update.json and the download's thread, the manifest's reading, SHA-256, each system's way to put a new version in place, the Switch's and the 3DS's swap of their own file, and the updater's words."
 tags: [code, updates]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T04:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T21:05:00Z }
 ---
 
 # The game's own updates

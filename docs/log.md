@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Update**: engine/updates.md (a PortMaster launcher older than 0.22.0's: the game makes the update folder itself and runs update.py as it ends, found on the owner's Nova), code/update.md (update_port.c's row), code/tests.md (test_update.c's port checks), GUIDE.md (the PortMaster line of Update now).
 * **Update**: project/youtube.md (the ten videos before 0.22.0 reworked to its standard on 16 November 2026: hook titles and thumbnails in the series' layout; 0.22.0's description with its release date and link).
 * **Update**: project/youtube.md (0.22.0's video in the table, up on 16 November 2026 once the day's upload limit had lifted, with thumbnail A alone).
 * **Update**: devtools/agents-tools.md (the state's `megaman in|out` at home), online/shown.md (the flag found clear once more, issue #682, and home's guard).
