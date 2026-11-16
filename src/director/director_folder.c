@@ -451,3 +451,14 @@ void folder_milestone_chip(int id) {
 void folder_milestone_guardian(void) {
 	if (D.active) meta_guardian_deleted();
 }
+
+void folder_describe(FILE *f) {
+	uint16_t folder[BN6_FOLDER_ENTRIES];
+	folder_now(folder);
+	if (!folder[0]) return;
+	unsigned sum = 0, code = chip_entry_code(folder[0]);
+	for (int i = 0; i < BN6_FOLDER_ENTRIES; ++i) sum = sum * 31u + folder[i];
+	ChipInfo ci;
+	chip_info((int)chip_entry_id(folder[0]), &ci);
+	fprintf(f, "folder first %s %c sum %04x\n", ci.name, code == CHIP_CODE_STAR ? '*' : (char)('A' + code % 26), sum & 0xFFFFu);
+}

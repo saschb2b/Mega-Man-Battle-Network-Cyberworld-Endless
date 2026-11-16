@@ -9,7 +9,7 @@ LAYER = 'CYBERWORLD_STATE_POS=1 --scene emu --seed 3 --dev quiet'
 # gift's screen opens by itself after them)
 TO_GIFT = [
     ('until', 'talk=director', 600),
-    ('repeat', 'press A; wait 20', 'pick=1/3', 40),
+    ('repeat', 'press A; wait 20', 'pickat=1/3', 40),
     ('expect', 'screen=reward-pick'),
     ('keep', 'hp chips programs'),
 ]
@@ -21,7 +21,7 @@ def gift(kind, got):
     `got` held; then Mr.Prog gone, an A where he stood giving nothing."""
     return TO_GIFT + [
         ('repeat', 'press DOWN; wait 10', f'pickof={kind}', 4),
-        ('until', 'picktakes=yes', 300),
+        ('until', 'pickready=yes', 300),
         ('do', 'press A; wait 30'),
         ('until', 'chat=open', 300),
         PAGED,
@@ -41,11 +41,11 @@ MANY = {
     # gift's screen just after it opened and took its first choice unseen. A
     # takes nothing until the screen has been up a second and a half.
     'gift-waits-to-be-seen': dict(START=LAYER, STEPS=TO_GIFT + [
-        ('expect', 'picktakes=no'),
+        ('expect', 'pickready=no'),
         ('do', 'press A; wait 20; press A; wait 20'),           # the same pace, two more: 64 frames
         ('expect', 'screen=reward-pick'),
         ('same', 'hp chips programs'),
-        ('until', 'picktakes=yes', 300),
+        ('until', 'pickready=yes', 300),
         ('do', 'press A; wait 30'),
         ('until', 'chat=open', 300),
         PAGED,

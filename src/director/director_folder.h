@@ -62,5 +62,9 @@ void bugfrag_trade(void);
  * `rushfood` the keys a lock asks for, `regmemory` the Reg memory's MB;
  * nothing changed */
 void holds_describe(FILE *f);
+/* ... and the folder the next battle draws from, for a state (pet.h):
+ * `folder first NAME CODE sum XXXX`, its first chip and a sum over all
+ * thirty, so a chip swapped in shows; nothing changed */
+void folder_describe(FILE *f);
 
 #endif

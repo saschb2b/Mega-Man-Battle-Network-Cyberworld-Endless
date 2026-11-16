@@ -245,8 +245,8 @@ def quit_fuzz():
     town = state(where='town', screen='town', quit='checkpoint', layer=None, area=None, scrtdata=None)
     for want, s, won in (('map', state(), False), ('box', state(chat='open'), False), ('box', state(talk='director'), False),
                          ('box', state(screen='reward-pick'), False), ('box', state(doing='menu'), False),
-                         ('battle', state(screen='battle', doing='battle', battle='fight'), False),
-                         ('won', state(screen='battle', doing='battle', battle='won'), True), ('won', state(doing='other'), True),
+                         ('battle', state(screen='battle', doing='battle', battlestep='fight'), False),
+                         ('won', state(screen='battle', doing='battle', battlestep='won'), True), ('won', state(doing='other'), True),
                          ('guardian', state(guardian='BlastMan fighting', doing='battle'), False),
                          ('guardian', state(guardian='BlastMan beaten'), True), ('map', state(guardian='??? waiting'), False),
                          ('home', town, False), (None, dict(scene='title', screen='title'), False),
@@ -266,9 +266,9 @@ def quit_fuzz():
     fuzz.follow(t, walked, 30)
     box = state(chat='open', quit='talk', hp='100/100', gameframe='160')
     check(fuzz.follow(t, box, 30) == 'box' and t['before'] == [walked, box] and t['saved'] == [first, saved], 'a box: the states since the map')
-    fight = state(screen='battle', doing='battle', battle='fight', quit='checkpoint', gameframe='190')
+    fight = state(screen='battle', doing='battle', battlestep='fight', quit='checkpoint', gameframe='190')
     check(fuzz.follow(t, fight, 30) == 'battle' and not t['won'], 'a battle under way')
-    result = state(screen='battle', doing='battle', battle='won', quit='after', gameframe='220')
+    result = state(screen='battle', doing='battle', battlestep='won', quit='after', gameframe='220')
     check(fuzz.follow(t, result, 30) == 'won' and t['won'], "a battle's RESULT")
     fade = state(doing='other', quit='after', zenny='300', gameframe='250')
     check(fuzz.follow(t, fade, 30) == 'won', '... won until MegaMan is free')

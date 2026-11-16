@@ -42,6 +42,7 @@
 #define BN6_VB_GAUGE_STEP     13          /* the time limit: BN6_CUSTOM_GAUGE rises 13 a frame from 0 (about 21 s); full, TIME UP */
 #define BN6_RESULT_WON        1           /* BN6_BATTLE_RESULT: every enemy deleted */
 #define BN6_RESULT_LOST       2           /* ... the team deleted */
+#define BN6_RESULT_RAN        4           /* ... MegaMan ran (the Custom screen's L, "should we run?": read after one, tests/scenarios/battle_run_from.py; BN5's BN5_RESULT_ESCAPED) */
 #define BN6_RESULT_DRAW       7           /* ... a time up with both sides standing (TIME UP!, DRAW!) */
 
 /* The Battlers' records and their series */

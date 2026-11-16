@@ -91,6 +91,8 @@ bool director_pick_shown(void);
 void director_pick_keys(uint32_t keys);
 void director_draw_pick(void);
 void director_pick_shut(void);
+/* ... in the state's words: which pick, its rows' offers, the cursor's row and what it is, whether A would take it */
+void director_pick_describe(FILE *f);
 /* The Battle Lab's builder (lab.h; docs/game/battle-lab.md): whether its
  * screen is up over the held game, its keys a frame, its picture, and the
  * watch after each frame of the game that brings it back as its battle
@@ -181,10 +183,6 @@ bool director_guardian_heard(void);
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */
 void director_describe(FILE *f);
-/* ... a reward pick's screen (reward_pick.c) while it is up: `pick K/N` the
- * cursor's row of its rows, `pickof` what that row is (hp, chip, program,
- * or skip), `picktakes` yes once an A would take it; nothing changed */
-void director_pick_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
 /* ... in the layer's signature, on the free panel nearest its anchor (the

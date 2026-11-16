@@ -25,6 +25,10 @@
   battles all kept its rules: three turns, the Custom screen opening by
   itself, TIME UP! at the third, the guardians' battles too, until the
   game was closed. A liberation's rules now end with its battle.
+- **Fixed: a new run counted the last run's final battle.** MegaMan
+  deleted in a battle, a new run begun without closing the game started
+  its count of viruses deleted with those of that battle, so its RESULT
+  read too high. The count starts at nothing again.
 
 ## 0.22.0 (2026-11-15)
 

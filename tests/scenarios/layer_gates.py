@@ -67,9 +67,9 @@ MANY = {
     # ... a Library that opens it: one of its three chips taken, and the vault is empty after
     'vault-pays-one-chip': dict(START=f'{VAULT},library=1', STEPS=ARRIVE + [
         ('do', 'by vault; wait 10'),
-        ('repeat', 'press A; wait 30', 'pick=1/3', 30),
+        ('repeat', 'press A; wait 30', 'pickat=1/3', 30),
         ('expect', 'pickof=chip'),
-        ('until', 'picktakes=yes', 300),
+        ('until', 'pickready=yes', 300),
         ('do', 'press A; wait 30'),
         ('until', 'chat=open', 300),
         PAGED,
@@ -83,14 +83,14 @@ MANY = {
     # ... B leaves it shut and whole: nothing taken, the pick there again at the next A
     'vault-left-keeps': dict(START=f'{VAULT},library=1', STEPS=ARRIVE + [
         ('do', 'by vault; wait 10'),
-        ('repeat', 'press A; wait 30', 'pick=1/3', 30),
-        ('until', 'picktakes=yes', 300),
+        ('repeat', 'press A; wait 30', 'pickat=1/3', 30),
+        ('until', 'pickready=yes', 300),
         ('do', 'press B; wait 60'),
         PAGED,                                                  # MegaMan's word on leaving it
         ('expect', 'screen=map'),
         ('same', 'chips'),
         ('do', 'by vault; wait 10'),
-        ('repeat', 'press A; wait 30', 'pick=1/3', 30),
+        ('repeat', 'press A; wait 30', 'pickat=1/3', 30),
     ]),
     # an official gate while ProtoMan is unbeaten here: its words, nothing given
     'official-gate-shut': words_only(OFFICIAL, 'official'),
