@@ -267,6 +267,16 @@ void jukebox_open(void) {
 
 bool jukebox_shown(void) { return J.shown; }
 
+void jukebox_describe(FILE *f) {
+	static const char *const games[] = { "bn6", "bn5", "bn4" }, *const modes[JUKE_MODES] = { "repeat", "order", "shuffle" };
+	if (!J.shown) return;
+	int rows[JUKE_SECTION_MOST], n = section_rows(J.section, rows);
+	fprintf(f, "jukebox section %d of %d row %d of %d playing ", J.section + 1, J.nsec, J.at + 1, n);
+	if (J.playing < 0) fprintf(f, "none");
+	else fprintf(f, "%s:%02X", games[jukebox_songs[J.playing].game % 3], jukebox_songs[J.playing].song);
+	fprintf(f, " mode %s\n", modes[J.mode % JUKE_MODES]);
+}
+
 void jukebox_shut(void) {
 	if (!J.shown) return;
 	play(-1);

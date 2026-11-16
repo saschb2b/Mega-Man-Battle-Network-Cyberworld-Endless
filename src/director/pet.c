@@ -7,6 +7,7 @@
 #include "bn6.h"
 #include "cinema.h"
 #include "director.h"
+#include "director_folder.h"
 #include "director_gate.h"
 #include "director_see.h"
 #include "emu.h"
@@ -18,6 +19,7 @@
 #include "pet_text.h"
 #include "platform.h"
 #include "rom.h"
+#include "shop.h"
 #include "square_pet.h"
 #include "talk.h"
 
@@ -113,6 +115,20 @@ int pet_key_item(void) {
 bool pet_holds(void) {
 	bool juke = jukebox_update(), lib = library_update();
 	return juke || lib;
+}
+
+void pet_describe(FILE *f) {
+	int mails = (int)emu_read32(BN6_MAIL_COUNT), unread = 0;
+	mails = mails < 0 || mails > BN6_MAIL_MAX ? 0 : mails;
+	for (int i = 0; i < mails; ++i) unread += flag_get(BN6_FLAG_MAIL_NEW + emu_read8(BN6_MAIL_LIST + (uint32_t)i));
+	folder_describe(f);
+	uint32_t items = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS);
+	if (items >= BN6_EWRAM && items < BN6_EWRAM_END)
+		fprintf(f, "subchips minienrg %d fullenrg %d sneakrun %d untrap %d\n", emu_read8(items + SUB_MINI_ENERGY),
+			emu_read8(items + SUB_FULL_ENERGY), emu_read8(items + SUB_SNEAK_RUN), emu_read8(items + SUB_UNTRAP));
+	fprintf(f, "mail %d unread %d\n", mails, unread);
+	jukebox_describe(f);
+	library_describe(f);
 }
 
 bool pet_second_follows(void) { return library_shown(); }

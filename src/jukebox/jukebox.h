@@ -10,6 +10,7 @@
 #define CW_JUKEBOX_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* the play modes: the song over and over, the section in its order, the
  * section in any order */
@@ -17,6 +18,10 @@ typedef enum { JUKE_REPEAT, JUKE_IN_ORDER, JUKE_SHUFFLE, JUKE_MODES } JukeMode;
 
 void jukebox_open(void);
 bool jukebox_shown(void);
+/* The state in words, while it is up: its section and row, the song
+ * playing (its game and number, none) and the play mode; reads only
+ * (docs/devtools/scenarios.md) */
+void jukebox_describe(FILE *f);
 /* The frame's course while it is up, or its A or B still held after it
  * closed: true while it holds the game */
 bool jukebox_update(void);
