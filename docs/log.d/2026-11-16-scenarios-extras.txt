@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-16T15:10:00Z
-* **Update**: devtools/scenarios.md (The extras: how the extras' scenarios reach a talk, its answer, a won battle and an exit pad, their state lines, and the Glitch layer's settle they found lost over a CONTINUE), code/director.md (`extras_describe.c`).
