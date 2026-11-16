@@ -114,6 +114,11 @@ void talk_update(void) {
 	}
 }
 
+void talk_describe(FILE *f) {
+	int options = emu_read8(BN6_CHATBOX_OPTIONS);
+	if (emu_read8(BN6_CHATBOX) && options >= 2) fprintf(f, "choice %d/%d\n", emu_read8(BN6_CHATBOX_CURSOR) + 1, options);
+}
+
 bool talk_busy(void) { return K.running; }
 
 void talk_reset(void) {

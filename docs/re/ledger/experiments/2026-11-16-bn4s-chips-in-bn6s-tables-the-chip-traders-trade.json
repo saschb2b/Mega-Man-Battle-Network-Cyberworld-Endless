@@ -1,0 +1,8 @@
+{
+  "feature": "BN4's chips in BN6's tables",
+  "date": "2026-11-16",
+  "name": "The Chip Trader's trade beside 0.20.0's",
+  "result": "Two scenarios trade three chips for one (six spare from --dev pack=6; three bought from the Net Dealer): two chips fewer with the trader's four halfwords at six bits, red with them out (one fewer; four more instead of one). Beside 0.20.0's build the Pack at the next visit lists the same chips but the prize.",
+  "meaning": "The trader's two readers were the only ones of an editor's item outside the editor (a scan of all the code for the mask 0x7F beside a shift by 7 or 23); a trade takes exactly the chips put in again.",
+  "link": "../rom/chips-code.md"
+}

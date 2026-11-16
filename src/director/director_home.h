@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "director_courier.h"   /* (Lan's HP's courier, another part) */
 #include "director_gate.h"   /* (its Net Square gate, another) */
@@ -71,6 +72,11 @@ bool home_in_hp(void);
  * home, the builder opened where his script asked */
 void home_lab_visit(void);
 void home_lab_frame(void);
+/* ... and the Lab's state in words, in Lan's HP: the keeper standing
+ * there, the builder up (its page, the foes set, how the visit's last
+ * test battle ended, "leaving" while it asks "Leave the Lab?"), its battle
+ * fought or its folder edited; reads only */
+void home_lab_describe(FILE *f);
 /* The place's name for the map's label: Lan's HP, his house or room,
  * AsterLand, the Cyber Academy, or the town's. */
 const char *home_place_name(void);
@@ -98,6 +104,17 @@ const char *home_way(int *far);
 const char *home_status(void);
 /* The town's hour at this visit (director_town_hour). */
 int home_hour(void);
+/* The state in words, at home: BN6's map Lan or MegaMan stands on (its
+ * group and number), the portals lit in Lan's HP (ways on, ways back), the layer the way on leads to, the Net's clock, AsterLand's
+ * order of the visit (open, made), the courier (waiting, heard, gone) and the
+ * town's hour; with them the request's (director_jobs.h) and the Battle
+ * Lab's (lab_keeper.h), a request's on a layer too; reads only
+ * (home_describe.c, docs/devtools/scenarios.md) */
+void home_describe(FILE *f);
+/* ... and for the developer (CYBERWORLD_STATE_POS): BN6's map, the jobs'
+ * flags, the place's way on or the town's objects near Lan and its port,
+ * each lit portal's spot in Lan's HP, the arrow's way (home_describe.c) */
+void home_describe_pos(FILE *f);
 /* The home's frame: Lan's and MegaMan's words, the portals, and the next
  * layer's arrival; home_entered after the game enters a map (its portals'
  * flags). */

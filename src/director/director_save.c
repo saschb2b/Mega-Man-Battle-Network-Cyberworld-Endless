@@ -203,12 +203,15 @@ void held_watch(void) {
 	else if (++held_free >= HELD_FREE_MOST) held_forget();
 }
 
+static int saves;   /* the checkpoints this start has saved */
+
 void save_checkpoint(void) {
 	library_from_game();
 	programs_from_game();
 	/* (a newer save than any held back) */
 	held_forget();
 	checkpoint_files();
+	++saves;
 }
 
 bool director_can_suspend(void) {
@@ -323,6 +326,17 @@ const char *director_quit_where(void) {
 	if (director_quit_keeps()) return "Your run is saved right here";
 	if (held_stands()) return held_kind == SAVED_PET ? "Run saved before the PET" : "Run saved before this talk";
 	return saved_where();
+}
+
+/* For a state: what a quit now would keep, in a word (here: where MegaMan
+ * stands; after: where a won battle or a layer's exit leaves him, the
+ * game run on; talk, pet: the run as it stood before the box; checkpoint:
+ * the last one saved), and the checkpoints this start has saved. The fuzz
+ * of quits reads them (tools/scenarios_fuzz.py; docs/devtools/scenarios.md,
+ * A quit at any frame). */
+void director_quit_describe(FILE *f) {
+	fprintf(f, "quit %s\nsaves %d\n", director_can_suspend() ? "here" : director_settles() ? "after" :
+		!held_stands() ? "checkpoint" : held_kind == SAVED_PET ? "pet" : "talk", saves);
 }
 
 /* Whether the layer just rebuilt is the one the checkpoint saved: made by

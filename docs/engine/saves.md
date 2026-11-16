@@ -3,7 +3,7 @@ type: Feature
 title: "Portable saves"
 description: "Portable saves (issue #114): the SAVES screen's views (`src/saves/`), the `.cwsave` carrier and manifest (`src/core/backup*.c`), what travels, import checks, UNDO IMPORT and recovery, the automatic copy (`mirror.c`), and saves sent by a code and kept in step with a cloud slot over the Net Square's server (`saves_code.c`, `saves_cloud.c`, `transfer.c`, `cloud.c`)."
 tags: [engine, saves]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T04:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:30:00Z }
 ---
 
 # Portable saves
@@ -38,7 +38,10 @@ likelier answer, and a found copy asked about once, not at every start.
 SAVES opens with L on the title (Q on a keyboard; the line of keys under
 the menu names it), and in the browser also from the page's menu. It
 opens over the title or the ROMs screen, never in a run, and stays off
-the title's menu, whose rows are drawn from the ROM.
+the title's menu, whose rows are drawn from the ROM. A run's way there
+is Options' Return to title
+([Settings screens elsewhere](settings-screens.md#return-to-title)),
+which keeps the run as a quit does and shows the title's menu.
 
 ## The views
 

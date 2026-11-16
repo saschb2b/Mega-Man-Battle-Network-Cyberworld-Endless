@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-16",
+  "what": "The Chip Trader's two readers of an item of the folder editor's list (BN6_TRADER_CARD 0x0804B338, BN6_TRADER_TAKE 0x0804B734: 0x0804B34C, 0x0804B34E, 0x0804B740, 0x0804B744) take id << 6 | code as the editor's sites do since ten-bit chip ids (src/emu/xchips_wide.c, tools/chip_ids.py EDITOR_KEYS; docs/rom/chips-code.md, The pack past 511). Left at seven bits since 0.21.0, a trade kept the three chips put in and took copies of chip id >> 1; found by a scenario (tests/scenarios/layer_gates.py) and by the home session's at AsterLand's trader."
+}

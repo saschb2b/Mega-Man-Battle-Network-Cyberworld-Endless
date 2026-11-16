@@ -11,6 +11,7 @@
 #include "director_state.h"
 #include "emu.h"
 #include "flags.h"
+#include "lab_state.h"
 #include "lab_words.h"
 #include "lanhp.h"
 #include "save.h"
@@ -56,4 +57,12 @@ void home_lab_frame(void) {
 	}
 	/* (--dev lab: every family the engine holds, a look without a profile's history) */
 	director_lab_open(dev.lab);
+}
+
+void home_lab_describe(FILE *f) {
+	static const char *const pages[LAB_PAGES] = { "foes", "field", "stage", "sets" }, *const ends[] = { "none", "won", "deleted", "left" };
+	if (LS.fighting || LS.editing) fprintf(f, "lab %s\n", LS.fighting ? "fighting" : "editing");
+	else if (LS.up)
+		fprintf(f, "lab builder page %s foes %d last %s%s\n", pages[LS.page % LAB_PAGES], LS.set.nfoes, ends[LS.last.end & 3], LS.asking ? " leaving" : "");
+	else if (home_in_hp()) fprintf(f, "lab %s\n", lab_there() && !flag_get(LANHP_LAB_GONE_FLAG) ? "keeper" : "none");
 }
