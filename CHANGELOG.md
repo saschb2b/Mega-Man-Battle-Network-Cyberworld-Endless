@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Return to title, in Options (asked for by AlicafeZ).** In a run,
+  Options' Game page ends with **Return to title**: it asks, says where
+  the run is saved, and shows the title's menu, so SAVES and the cloud
+  are reached without closing the game. The run is kept where MegaMan
+  stands, as a quit keeps it; CONTINUE takes it up there.
+
 - **Fixed: the Chip Trader kept your chips, and took others.** Since
   0.21.0 a Chip Trader gave its chip without taking the three you put
   in, and could take copies of other chips from your Pack instead (two

@@ -46,6 +46,13 @@ extern bool emu_resume_requested; /* scene_emu continues the saved run */
  * stands, on a won battle's way back the game run on to him free first
  * (director_settles) */
 void emu_keep_run(void);
+/* Options' Return to title in a run (scene_emu.c): whether the game is
+ * the scene and may be left for the title, the line on where the run goes
+ * on from (the quit prompt's; NULL before the first layer, no run to
+ * save yet), and the run kept as a quit keeps it, then the title's menu */
+bool emu_title_offered(void);
+const char *emu_title_where(void);
+void emu_to_title(void);
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */
 /* The saved run (peek_run's seed and depth) was saved at home, between
