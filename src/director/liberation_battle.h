@@ -38,8 +38,11 @@ int lib_battle_end(int *turn);
 /* The battle for panel (x, y), faced as MegaMan faces it, set out on
  * BN5's field for the dark round it (liberation_field.h); its level */
 int lib_battle_field(Encounter *e, int x, int y, bool darkloid);
-/* No liberation's battle armed (the board begun or left). */
+/* No liberation's battle armed (a layer begun, dark or plain). */
 void lib_battle_disarm(void);
+/* A battle that is not the board's runs: disarmed where one before it was
+ * left armed (it ended the run, and never came back to the board). */
+void lib_battle_stray(void);
 /* The next battle armed is a teammate's (docs/game/liberation/decision.md, The team):
  * MegaMan in BN5's Soul `soul` (7-12, the teammate's id) from the first
  * turn, for the whole battle, committed at the first Custom screen's OK as

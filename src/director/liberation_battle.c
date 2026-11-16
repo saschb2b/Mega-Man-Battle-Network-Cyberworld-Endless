@@ -221,6 +221,12 @@ void lib_battle_disarm(void) {
 	lib_cue_battle(false);
 }
 
+void lib_battle_stray(void) {
+	if (!arm.on) return;
+	if (emu_debug_on()) fprintf(stderr, "liberation: a battle not the board's found its rules armed; disarmed\n");
+	lib_battle_disarm();
+}
+
 void lib_battle_foe(int hp) {
 	foe_hp = hp;
 	foe_left = -1;

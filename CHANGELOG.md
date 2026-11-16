@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Fixed: every battle a liberation's after a deletion in one (issue
+  #669).** MegaMan deleted in a dark layer's battle, the next run's
+  battles all kept its rules: three turns, the Custom screen opening by
+  itself, TIME UP! at the third, the guardians' battles too, until the
+  game was closed. A liberation's rules now end with its battle.
+
 ## 0.22.0 (2026-11-15)
 
 - **The week's DeepNet, dived together.** The greeter Mr.Prog by the

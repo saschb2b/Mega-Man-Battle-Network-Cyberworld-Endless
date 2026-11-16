@@ -24,7 +24,12 @@ liberation rules.
 **On BN6's loop** (`src/director/liberation_battle.c`, `src/emu/bn6_battle_loop.h`):
 the loop random battles and bosses run, answered by hooks while a
 liberation's battle is armed (the director arms it as the command is
-taken), no code moved:
+taken), no code moved. The arm is that one battle's: it ends as the battle
+comes back to its board, as any layer begins, dark or plain, and at the
+first frame of a battle that is not the board's. A battle that deletes
+MegaMan ends the run and never comes back to the board; while only a dark
+layer's start disarmed, the next run's battles all ran by a liberation's
+rules, its guardians' too (issue #669). Armed:
 
 - each turn's fight starts with BN5's banner in BN6's own message engine
   (the fight's BATTLE START! answered: TURN 1 START!, TURN 2 START!,
