@@ -754,7 +754,7 @@ static bool subject(Side *g, const Spec *s) {
 	if (s->bn4) xd4_pool_point(s);
 	pokes_put(s, false);
 	emu_encounters_install();
-	emu_boot();
+	emu_boot(NULL);
 	pokes_put(s, true);
 	if (!xd_ncp_subject(s->ncp[1].variant, s->ncp[1].col, s->ncp[1].row)) return false;
 	const uint8_t hp[4] = { (uint8_t)s->hp, (uint8_t)(s->hp >> 8), (uint8_t)s->hp, (uint8_t)(s->hp >> 8) };

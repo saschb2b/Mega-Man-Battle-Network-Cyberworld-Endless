@@ -20,6 +20,7 @@ typedef struct {
 	bool noarc;     /* no act has its arc: every random battle the area's own, the Server's challenge too (group_arc.h) */
 	int group;      /* group=N: ... of template N alone (groups.h's GROUP_* from 1: 1 wall and artillery ... 11 nets meet) */
 	bool dark;      /* every act's second layer from the second act a dark layer, a liberation's board (docs/game/liberation/) */
+	bool bootplayed; /* bootplayed: the boot's kept state read from the run's checkpoint, a played game's (issue #688's scenario) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
 
 	bool tourney;   /* every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin (docs/game/tournament.md; run_debug_bracket) */
@@ -189,5 +190,10 @@ void trade_preview_draw(void);
  * back, "reconnect off" gone. Nothing is sent or held. */
 void reconnect_preview(const char *spec);
 void reconnect_preview_draw(void);
+
+/* The state the boot reads as its kept one: the run's checkpoint with
+ * --dev bootplayed (a device's whose kept state held a played game, issue
+ * #688's scenario), else NULL, the boot's own. */
+const char *devtools_boot_from(void);
 
 #endif

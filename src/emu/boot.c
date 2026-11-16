@@ -14,6 +14,7 @@
 #include <SDL.h>
 
 #include "bn6.h"
+#include "bn6_chips.h"
 #include "emu.h"
 #include "game.h"
 #include "gamecall.h"
@@ -40,10 +41,40 @@ static void run(int frames, uint32_t keys) {
 #define BOOT_STATE_OLD "boot-3.state"
 static void state_path(char *out, size_t n, const char *name) { snprintf(out, n, "%s/%s", g_data_dir, name); }
 
-bool emu_boot(void) {
+/* The key items a run gains (bn6f's KeyItems counts): the RegUPs
+ * (0x72-0x74, scripts.h's SCRIPTS_REG_UP1), the SubChips (from 0x80,
+ * shop.h's SUB_MINI_ENERGY) and the NaviCust's programs (from
+ * BN6_PROGRAM_ITEMS). BN6's NEW GAME gives none of them (it gives 0x00
+ * once and 0x75 four times: measured on a fresh boot, 17 November 2026). */
+#define KEY_REG_UPS   0x72
+#define KEY_REG_UPS_END 0x75
+#define KEY_SUBCHIPS  0x80
+#define KEY_ITEMS     0x100
+
+/* BN6 just past its NEW GAME, as the boot leaves it, in what a run keeps:
+ * no zenny or BugFrags, MegaMan's 100 HP, no RegUP, SubChip or program,
+ * and the pack holding the Standard folder's thirty chips and no other. A
+ * kept state that differs is a played game's, and a new run begun from it
+ * keeps that game's MegaMan (issue #688): it is made again. */
+static bool new_game_held(void) {
+	uint32_t keys = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_KEY_ITEMS), pack = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_PACK);
+	if (keys < BN6_EWRAM || keys + KEY_ITEMS > BN6_EWRAM_END || pack < BN6_EWRAM || pack >= BN6_EWRAM_END) return false;
+	int items = 0, chips = 0;
+	for (uint32_t i = KEY_REG_UPS; i < KEY_ITEMS; ++i)
+		if (i < KEY_REG_UPS_END || i >= KEY_SUBCHIPS) items += emu_read8(keys + i);
+	for (unsigned id = 1; id < BN6_PACK_IDS; ++id)
+		for (uint32_t k = 0, e = bn6_pack_entry(pack, id); e && k < 4; ++k) chips += emu_read8(e + k);
+	unsigned zenny = emu_read32(BN6_ZENNY), frags = emu_read32(BN6_BUGFRAGS), hp = emu_read16(BN6_NAVI_MAX_HP), base = emu_read16(BN6_NAVI_BASE_MAX_HP);
+	bool ok = !zenny && !frags && hp == 100 && base == 100 && !items && chips == 30;
+	if (!ok) printf("boot: the kept state is no new game's (zenny %u, BugFrags %u, max HP %u/%u, a run's key items %d, chips %d): made again\n",
+		zenny, frags, hp, base, items, chips);
+	return ok;
+}
+
+bool emu_boot(const char *from) {
 	char path[600];
 	state_path(path, sizeof path, BOOT_STATE);
-	if (emu_load_state(path)) return true;
+	if (emu_load_state(from ? from : path) && new_game_held()) return true;
 	uint32_t t0 = SDL_GetTicks();
 	ran = 0;
 	emu_reset();

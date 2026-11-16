@@ -93,7 +93,7 @@ static void enter(void) {
 		if (director_resume()) online_visit_resumed();
 	} else {
 		director_before_boot();
-		emu_boot();
+		emu_boot(devtools_boot_from());
 		game_hooks_after_boot();
 		if (emu_start_in_town) director_start_run();
 		else director_start_layer();
