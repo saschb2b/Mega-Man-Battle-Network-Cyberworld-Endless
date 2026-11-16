@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- **The game says how an update went.** The first start after an update
+  says "Updated to" the new version at the top of the title. One that
+  did not go in (an installer or the PortMaster launcher failed, or
+  Android's prompt was turned down) is said there too, and the update
+  box asks again.
+- **A QR code where the game cannot update itself.** On the 3DS's CIA,
+  the Vita and a PortMaster handheld without python3, the update box's
+  A was an OK that did what Later did. It now shows the release's page
+  as a QR code to open on your phone.
+
 - **Fixed: Update now did nothing on a PortMaster handheld whose
   launcher was older than 0.22.0.** Where the new `cyberworld` folder had
   been copied over by hand, the launcher beside it stayed the old one,

@@ -16,11 +16,15 @@
  * A developer's look elsewhere: CYBERWORLD_UPDATE_URL (another
  * update.json, any build, headless too) and CYBERWORLD_UPDATE_FROM (the
  * version this build counts as); on Android, the same names as
- * GameActivity's string extras. */
+ * GameActivity's string extras. And what a host cannot reach by itself:
+ * CYBERWORLD_UPDATE_WAY=releases (this copy updated from the releases
+ * page, the box's QR code with it), CYBERWORLD_UPDATE_PENDING=VERSION (as
+ * if settings.ini's update_pending said so, left as it is). */
 #ifndef CW_UPDATE_H
 #define CW_UPDATE_H
 
 #include <stdbool.h>
+#include <stddef.h>
 
 /* Where it stands: nothing (none found, not looked, or switched off), a
  * newer version found, its download under way, failed, or done and in
@@ -72,5 +76,18 @@ const char *update_changes(void);
  * settings.ini's update_offered); once asked, update_box_done keeps it */
 bool update_box_due(void);
 void update_box_done(void);
+
+/* What the last update came to, read at the start: as it was handed over
+ * at the game's end (READY) its version is kept in settings.ini
+ * (update_pending), and the next start sees whether it went in, this
+ * build that version or newer, and clears it. The version that went in
+ * ("0.22.2", the title says Updated to it once), or the one that did not
+ * (it says so, the box asks again and Options' line says why); "" where
+ * none */
+const char *update_installed(void);
+const char *update_missed(void);
+/* The found version's release page on GitHub (the box's QR code, where the
+ * update is on the releases page): false where none is found */
+bool update_release_page(char *url, size_t n);
 
 #endif

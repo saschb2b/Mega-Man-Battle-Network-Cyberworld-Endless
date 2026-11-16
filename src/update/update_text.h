@@ -35,6 +35,11 @@ typedef enum {
 	UW_BOX_RELEASES,
 	UW_BOX_STORE,
 	UW_OK,
+	UW_UPDATED,        /* the title's note, the first start after an update went in: the version after it */
+	UW_MISSED,         /* ... where it did not go in: that version before it */
+	UW_MISSED_NOTE,    /* Options' update line's note, found again after that */
+	UW_BTN_CODE,       /* the box's button where the update is on the releases page: its QR code, */
+	UW_CODE_NOTE,      /* ... and the words under the code */
 	UW_COUNT
 } UpdateWord;
 
@@ -43,5 +48,7 @@ const char *update_word(UpdateWord w);
 const char *update_setting_note(void);
 /* ... before the update_offered line */
 const char *update_offered_note(void);
+/* ... before the update_pending line */
+const char *update_pending_note(void);
 
 #endif
