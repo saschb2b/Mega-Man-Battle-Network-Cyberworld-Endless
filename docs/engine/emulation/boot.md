@@ -1,7 +1,7 @@
 ---
 type: Engine Mechanism
 title: "A new run and boot"
-description: "NEW GAME's start in the town (first layer built, Lan warped to his start, jack-in flag 0x1727 cleared) and `emu_boot`, which presses through BN6's title to Seaside Area 1 and saves `boot-4.state`, its number bumped when what NEW GAME gives changes."
+description: "NEW GAME's start in the town (first layer built, Lan warped to his start, jack-in flag 0x1727 cleared) and `emu_boot`, which presses through BN6's title to Seaside Area 1 and saves `boot-4.state`, its number bumped when what NEW GAME gives changes, and a kept state that holds a played game made again (issue #688)."
 tags: [engine, emulation]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:27:59Z }
 ---
@@ -46,6 +46,33 @@ it is written. A run begun from the old state is mended as it continues
 Standard folder's nine-bit form that the pack counts in its nine bits
 and not in its ten is widened, as GiveFolder had counted it, and the log
 says how many (`folder: N of the Standard folder's entries widened`).
+
+### A kept state that is no new game's
+
+A new run's game is the kept state's, whole: BN6's RAM and its cart's
+save RAM as the boot left them. Issue #688 (0.22.1, Android) had every
+new run begin with the last run's MegaMan: his HP, zenny, SubChips,
+RegUPs, NaviCust and Crosses, and his pack, which made blank entries of
+the Standard folder and "damaged chip data" at its edit, until the app's
+data was deleted. The player's `.cwsave` on a fresh data folder began
+clean runs, and a played run's checkpoint put where the kept state lies
+gives exactly the report (verified: the run's zenny and chip won in the
+new run's PET), so the kept state on that device held a played game. How
+it came to is not found: no writer of the file but the boot's own, after
+its own power-on.
+
+So the boot no longer takes a kept state on trust (`new_game_held`): it
+reads what a run gains there (zenny and BugFrags none, MegaMan's maximum
+HP and its base 100, no RegUP, SubChip or NaviCust program among the key
+items, the pack holding the Standard folder's 30 chips and no other) and,
+where any differs, says so in the log (`boot: the kept state is no new
+game's (zenny 10000, ...): made again`), boots from power-on and keeps
+that instead. A clean NEW GAME's own key items (0x00 once, 0x75 four
+times) are left out of the reading. A device holding such a state is
+mended at its next NEW GAME, with no data deleted.
+`tests/scenarios/run_new_from_a_played_boot.py` gives the boot the run's
+own checkpoint as its kept state (`--dev bootplayed`): without the check
+the new run kept the run's 10000 zenny, with it none.
 
 The boot's frames are never shown, so the core draws no picture for them;
 nor for a frame the main loop plays unshown to catch up with the GBA's pace

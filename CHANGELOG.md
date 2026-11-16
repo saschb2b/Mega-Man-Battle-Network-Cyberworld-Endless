@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **Fixed: a new run that began with the last run's MegaMan (issue
+  #688).** On some systems every NEW GAME kept the HP, zenny, SubChips,
+  RegUPs, NaviCust and Crosses of an earlier run, and its folder showed
+  blank chips that the folder's edit called damaged, until the app's data
+  was deleted. A new run now checks that it begins as a new game, and
+  where the game kept for it holds a played one it is made again: an
+  affected system is mended at its next NEW GAME, nothing deleted.
+
 - **The game says how an update went.** The first start after an update
   says "Updated to" the new version at the top of the title. One that
   did not go in (an installer or the PortMaster launcher failed, or
