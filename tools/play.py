@@ -85,7 +85,8 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST', 'AHEAD'}   # (FAST: fast forward's button, BTN_FAST; AHEAD: the d-pad the way MegaMan faces)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'by', 'board', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'by', 'board', 'dump', 'second', 'stuck',
+             'emote', 'netpass', 'trade', 'reconnect')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -142,6 +143,10 @@ def steps(commands):
                 out.append(('chip', ' '.join([args[0]] + [a.upper() for a in args[1:2]] + args[2:3])))
             elif op == 'cross':
                 out.append(('cross', str(int(args[0], 0))))
+            elif op in ('emote', 'netpass', 'trade', 'reconnect'):
+                # (online play's dev steps, docs/devtools/net-square.md: an emote sent in the Square, the NetPass
+                # opened, Trade Central's screens in a run, a dropped link's wait drawn)
+                out.append((op, ' '.join(args)))
             elif op == 'sig':
                 out.append(('sig',))
             elif op == 'by':
@@ -153,7 +158,7 @@ def steps(commands):
             elif op == 'dump':
                 out.append(('dump', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, by, board, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, by, board, stuck, dump, emote, netpass, trade, reconnect)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -352,8 +357,8 @@ def send(h, seq, record=None):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')
-        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by', 'board'):
-            items.append(f'{s[0]} {s[1]}')
+        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by', 'board', 'emote', 'netpass', 'trade', 'reconnect'):
+            items.append(f'{s[0]} {s[1]}'.strip())
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
             items.append(f'second {short(seconds[-1])}')

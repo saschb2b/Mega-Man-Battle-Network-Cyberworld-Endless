@@ -45,7 +45,7 @@ gate as he left it; nothing is booted again. A game closed in the Square
 continues from the gate's checkpoint, as any CONTINUE does. Every end has
 a word for it at the gate: left, called off, no answer, a newer version
 out (the keeper names the game's download page), a server older than the
-game, another ROM, a name taken, a full Square, barred, removed, the
+game, another ROM, a name turned down, a full Square, barred, removed, the
 Square under maintenance (with the host's line), the connection lost (a
 dropped link that did not come back, or B on its wait), another Square
 after a dropped link came back (a server restarted with another seed).

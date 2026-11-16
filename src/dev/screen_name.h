@@ -3,10 +3,16 @@
 #ifndef CW_SCREEN_NAME_H
 #define CW_SCREEN_NAME_H
 
+#include <stdio.h>
+
 /* Ours over the game first (the dev menu, Options, the Jukebox, the
  * NetPass), then the scene's name ("title", "saves"), or in the game
  * BN6's screen ("map", "battle", "pet", "keyitem": second_screen_word).
  * It only looks. */
 const char *screen_name(void);
+/* What stands over the run that its director does not say, a fact a line
+ * after the director's: online play's (online_describe.h: a visit, the
+ * Square, a trade, a NetBattle, a dive's link). It only looks. */
+void screen_describe(FILE *f);
 
 #endif

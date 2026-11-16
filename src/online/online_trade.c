@@ -15,6 +15,7 @@
 #include "online_transport.h"
 #include "trade_list.h"
 #include "trade_words.h"
+#include "square_arena.h"
 
 #define FOLDERS 3        /* Folder1, Folder2 and the ExtraFolder: 30 entries each, 0x3C apart */
 #define PENDING "trade.pending"
@@ -252,4 +253,28 @@ void online_trade_settled(void) {
 	char path[1100];
 	pending_path(path, sizeof path);
 	remove(path);
+}
+
+void online_trade_describe(FILE *f, bool visiting) {
+	static const char *const stages[] = { "none", "offered", "waiting", "answered", "accepted", "done", "cancelled" };
+	static TradeChip chips[TRADE_LIST_MOST];
+	static uint8_t count[TRADE_LIST_MOST];
+	int n = online_trade_spares(chips, count, TRADE_LIST_MOST);
+	fprintf(f, "spares %d:", n);
+	for (int i = 0; i < n; ++i) {
+		fprintf(f, " %u%c", chips[i].id, online_trade_code(chips[i].code));
+		if (count[i] > 1) fprintf(f, "x%u", count[i]);
+	}
+	fputc('\n', f);
+	TradeChip give, get;
+	if (online_trade_pending(&give, &get)) fprintf(f, "pending %u%c for %u%c\n", give.id, online_trade_code(give.code), get.id, online_trade_code(get.code));
+	else fprintf(f, "pending none\n");
+	if (!visiting) return;
+	const TradeView *v = online_trade_view();
+	fprintf(f, "trade %s\n", v->stage >= 0 && v->stage < (int)(sizeof stages / sizeof *stages) ? stages[v->stage] : "other");
+	if (v->stage == TRADE_NONE) return;
+	const char *name = square_arena_name_of(v->other);
+	fprintf(f, "tradewith %s\n", name ? name : "?");
+	if (v->mine.id) fprintf(f, "gives %u%c\n", v->mine.id, online_trade_code(v->mine.code));
+	if (v->theirs.id) fprintf(f, "gets %u%c\n", v->theirs.id, online_trade_code(v->theirs.code));
 }

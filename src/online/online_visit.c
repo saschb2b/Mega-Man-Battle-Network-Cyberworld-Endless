@@ -27,7 +27,8 @@
 
 static struct {
 	VisitStage stage;
-	VisitEnd ended;
+	VisitEnd ended, last;   /* how the last visit ended: for the gate, taken once; kept for the state's words */
+	unsigned visits;        /* the visits begun since the game started (the state's words) */
 	uint32_t called_at, arrived_at;
 	bool official;        /* the gate's official server (the statistics' flag) */
 	/* (what the run held at the gate, put back as MegaMan comes home) */
@@ -94,11 +95,12 @@ bool online_visit_begin(const char *url, const char *name, const uint8_t identit
 	snprintf(V.name, sizeof V.name, "%s", name);
 	if (!online_transport_start(url, name, identity)) {
 		online_transport_end();
-		V.ended = VISIT_END_UNREACHABLE;
+		V.ended = V.last = VISIT_END_UNREACHABLE;
 		counted(V.ended, false);
 		return false;
 	}
 	V.stage = VISIT_CALLING;
+	++V.visits;
 	V.called_at = SDL_GetTicks();
 	fprintf(stderr, "online: calling %s as %s\n", url, name);
 	return true;
@@ -143,7 +145,7 @@ static void come_home(VisitEnd why) {
 	if (!keep) online_transport_end();
 	counted(why, away);
 	V.stage = VISIT_HOME;
-	V.ended = why;
+	V.ended = V.last = why;
 	put_back();
 	fprintf(stderr, "online: visit ended (%d)\n", (int)why);
 	if (!away) return;
@@ -159,7 +161,7 @@ static void come_home(VisitEnd why) {
 		online_transport_end();
 		keep = false;
 		fprintf(stderr, "online: the dive did not begin; back to the gate\n");
-		V.ended = VISIT_END_BROKEN;
+		V.ended = V.last = VISIT_END_BROKEN;
 	}
 	if (!director_resume()) {
 		/* (the gate's checkpoint is still on disk: CONTINUE tries it again) */
@@ -257,6 +259,10 @@ VisitEnd online_visit_ended(void) {
 	V.ended = VISIT_END_NONE;
 	return why;
 }
+
+VisitEnd online_visit_last_end(void) { return V.last; }
+
+unsigned online_visit_count(void) { return V.visits; }
 
 const char *online_visit_end_note(void) { return V.note; }
 

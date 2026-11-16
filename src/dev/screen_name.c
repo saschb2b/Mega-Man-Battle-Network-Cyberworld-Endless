@@ -9,8 +9,11 @@
 #include "jukebox.h"
 #include "library.h"
 #include "netpass_screen.h"
+#include "online_describe.h"
 #include "options.h"
 #include "second.h"
+
+void screen_describe(FILE *f) { online_describe(f); }
 
 const char *screen_name(void) {
 	if (devtools_open()) return "devmenu";

@@ -17,6 +17,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "online_types.h"
 
@@ -33,6 +34,14 @@ typedef struct {
 	unsigned bouts;       /* every battle fought from the Square (a new one changes it) */
 } SquareBout;
 const SquareBout *square_arena_last(void);
+/* The Arena in the state's words (square_card.c; online_describe.h): a
+ * challenge open or asked (`challenge none|to NAME|from NAME`), the last
+ * bout as the referee tells it (`bouts N`, `bout won against NAME won 1
+ * lost 0`), the stage a challenge or a battle stands at (`arena idle|sent|waiting|asked|
+ * loadout|connecting|ready|battle|over`), and while the result card is up
+ * its result, both MegaMen's HP left (mine first) and the rematch's
+ * question (`arenacard won|lost|over|stopped`, `arenahp 9 0`, `rematch open no`) */
+void square_arena_describe(FILE *f);
 /* As MegaMan arrives in the Square, and as he leaves it: any battle left */
 void square_arena_reset(void);
 void square_arena_end(void);

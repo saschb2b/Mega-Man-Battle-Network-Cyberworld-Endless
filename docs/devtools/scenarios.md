@@ -51,6 +51,8 @@ course:
 | `('keep', WORDS)`, `('same', WORDS)` | the state's lines of those first words kept, and the same later: what a CONTINUE must bring back |
 | `('moved', WORD, BY)` | ... or the kept line WORD's number moved by BY since: a number (`1`, `-1`), or a kept word with a sign (`'-price'`: down by the price kept), so a purchase is checked against the price the shop showed and not against today's balance |
 | `('restart', START)` | the game quit as a player's system quits it (SIGTERM, the port's close: it saves and leaves), then started again on the same saves |
+| `('server', 'stop')`, `('server', 'start')` | the scenario's server gone at once, and back on its port with its state ([A server and other games](#a-server-and-other-games)) |
+| `('@beta', 'do', COMMANDS)` | any step, in the game `beta` of the scenario's `GAMES` |
 
 `COND` is an until's test of the agents' tools: a state line's first word,
 an operator (`=`, `!=`, `>`, `>=`, `<`, `<=`, `~` contains) and a value,
@@ -150,6 +152,98 @@ whatever its boxes. A question is waited for with
 options appear is lost. On BN6's shop screen `zenny` is the game's
 working copy and moves once the screen is left; on its trader's screen
 the pack's counts are the spare chips alone.
+
+## A server and other games
+
+Online play is played against a Net Square server of this machine, and
+mostly by two games ([The Net Square: two games at once](net-square.md)).
+A scenario asks for them (`tools/scenarios_online.py`, the runner's cast):
+
+```python
+import scenarios_online as online
+from scenarios_online import soon
+
+NEEDS = ('bn5', 'bn4')                 # a trade, a NetBattle and the dive take the NetPass's full set
+START = online.HOME                    # Lan's HP after act 2, the gate at {server} as {name}
+SERVER = True                          # or dict(seed=120, weeks=[(name, depth, won, minutes)], settings=dict(capacity=2))
+GAMES = {'beta': online.HOME}          # other games, started beside the first
+FILES = {'netpass.ini': online.SEEN_FULL}   # into each game's data folder before it starts
+STEPS = online.course(
+    online.into_square(), online.into_square('beta'),
+    soon('peers~Beta'),                # the first game's state: it sees him
+    ('@beta', 'do', 'place 116 -52 5; wait 10'),
+    soon('peer~Beta at 116 -52 in plaza'),
+    ('server', 'stop'),
+    soon('visit=waiting', '', 600),
+)
+```
+
+- **The server** is the checkout's (`server/main.py`), on a free port of
+  127.0.0.1 with a state folder of its own, started before the games and
+  killed after them; `('server', 'stop')` kills it mid-course, as a
+  server that fell over, and `('server', 'start')` brings it back on the
+  same port with the same state. Two scenarios never share one, so they
+  play side by side.
+- **Places in braces** in a `START`, a game's or a file's text name what
+  only the run knows: `{server}` its server's address, `{nowhere}` an
+  address of this machine nothing answers on (a port bound and never
+  listened on: a call there is refused at once), `{name}` the game's name
+  (`Alpha` the first, then its key in `GAMES`), `{identity}` a private
+  identity made of it, for a `network.ini` (the gate as a player's, which
+  asks "To the Net Square,Lan?"; `--dev online={server}` goes at once).
+- **No scenario reaches a host but this machine.** A scenario that names
+  an address of its own (`ws://`, `wss://`, `--dev online=` anything but
+  `{server}` or `{nowhere}`) does not read (`build.py test`), and every
+  game the runner starts, whatever its scenario, runs with
+  `CYBERWORLD_ONLINE_LOCAL`, under which the game's socket refuses every
+  host but 127.0.0.1 (`online_socket.c`): a course that pages the gate's
+  keeper to his official Square ends at the gate with "no answer".
+- **A game not being stepped keeps running while it is online** (its
+  state's `visit` not `home`, or `divelink on`), a twelfth of a second a
+  batch: a visit plays at the clock's pace, and a game that stood still
+  would drop off its server. A step in it waits for its batch; a check
+  reads its state as that batch left it. Each game keeps what it kept
+  (`keep`, `same`) for itself.
+- **A visit costs its seconds.** Sixty frames are a second there, so an
+  `until`, which looks once in sixty frames, costs a second each:
+  `soon(COND)` is `('repeat', 'wait 10', COND, 30)`, and the common steps
+  (`into_square`, `home_again`, `yes`, `pick`, `paged`, `at`, `course`)
+  are in the cast's file. A chat's question is answered once its cursor
+  is set (`choice=2/2`: BN6 shows the options a few frames before), an
+  option taken with `pick(EFFECT)`, A until its effect shows: a box
+  counts its options as it types them, a moment before it takes a key.
+  A NetBattle from the Square is BN6's own link battle on two cores a
+  game and takes half a minute whatever is done; the others stay under
+  thirty seconds.
+- **What stays apart from the layout.** The Square's places are its
+  seed's (120's: `tests/scenarios/online_square.py` lists them); the
+  week's net is the server's own (its key and the calendar week), so a
+  dive's layer is another every run, and its courses read nothing of it.
+  A NetBattle between equals is decided by the link's timing (9 to 0 one
+  run, 0 to 4 the next): the one whose result is read gives its MegaMen
+  unequal HP (`arenahp`).
+
+The state says online play in lines of its own (`online_describe`,
+`src/online/online_describe.c`; a feature's own function each): `visit
+home|calling|square|battle|watching|waiting|pet`, `visits N`, `visitended
+left|unreachable|lost|maintenance|full|name|dive|...`, `netpass
+square|trade|full`, `stamps N`, `spares N: 1Ax2 20F` (the chips a trade
+could give, id and code), `pending 20F for 411M` (a swap kept for home),
+`dive on|none`, `divelink on|off`; in the Square `chat`, `held`, `choice
+K/N`, `squarex`, `squarey`, `facing`, `part plaza|trade|arena|stage`,
+`channel K/N`, `peers N: NAMES`, `peer NAME at X Y in PART free|battle|
+watch|trade`, `sentlast emote|phrase K (N)`, `heardlast emote|phrase K from NAME
+(N)`, `link up|quiet|reconnecting`, `resumes N`, `notice CODE`, `trade
+none|offered|waiting|answered|accepted|done|cancelled` with `tradewith`,
+`gives`, `gets`, `tradescreen none|list|deal` with `listrow K/N`,
+`listchip`, `deal ask|wait|swap|swapped`, `dealcursor`
+(`trade_screen_describe`), `tradeboard N` with `tradeoffer NAME has 20F wants W` and
+`myoffer`, `challenge none|to NAME|from NAME`, `arena idle|sent|...|
+battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`
+(`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
+`weekoffer none|new|again|on|trade|stamp`, `week N`, `weekboard WORDS`; on
+a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `crew N:
+NAMES` (`dive_crew_describe`).
 
 ## A bug a scenario finds
 

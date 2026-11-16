@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T14:50:00Z
+* **Update**: devtools/scenarios.md (A server and other games: a scenario's Net Square server of this machine, other games a step addresses by `@name`, files and places in braces, the rule that no scenario reaches another host, the state's online lines; the steps `('server', 'stop')` and `('server', 'start')`), code/tools.md (`tools/scenarios_online.py`'s row), code/online.md (`online_describe.c`). online/square/overview.md (a visit's ends: a name the server turns down, not one taken: it refuses a malformed name alone, and two players may go by one, as `online-gate`'s course found).

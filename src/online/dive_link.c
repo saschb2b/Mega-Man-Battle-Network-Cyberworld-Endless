@@ -62,6 +62,18 @@ void dive_link_adopt(void) {
 
 bool dive_link_on(void) { return L.on; }
 
+void dive_link_describe(FILE *f) {
+	if (!L.on) return;
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	fprintf(f, "divers %u", (unsigned)s.peer_count);
+	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "%s%s", i ? " " : ": ", s.peers[i].name);
+	fputc('\n', f);
+	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "diver %s at %d %d\n", s.peers[i].name, (int)s.peers[i].x, (int)s.peers[i].y);
+	dive_crew_describe(f);
+	fprintf(f, "link %s\n", s.reconnecting ? "reconnecting" : s.quiet ? "quiet" : s.connected ? "up" : "down");
+}
+
 uint32_t dive_link_keys(uint32_t keys) {
 	return L.on ? dive_traces_keys(dive_crew_keys(dive_party_keys(dive_join_keys(keys)))) : dive_traces_keys(keys);
 }

@@ -82,6 +82,14 @@ const char *square_week_board_words(void) {
 	return Q.s.week ? square_week_board(online_week_board(), Q.s.week, dive_pack_now(), dive_pack_records()) : "";
 }
 
+void square_week_describe(FILE *f) {
+	static const char *const offers[] = { "none", "new", "again", "on", "trade", "stamp" };
+	unsigned offer = (unsigned)square_week_offer();
+	fprintf(f, "weekoffer %s\nweek %u\nweekboard ", offer < sizeof offers / sizeof *offers ? offers[offer] : "other", Q.s.week);
+	for (const char *p = square_week_board_words(); *p; ++p) fputc(*p == '\n' || *p == '|' ? ' ' : *p, f);
+	fputc('\n', f);
+}
+
 /* the greeter's words on the week's net (pages; his question or options
  * after them) */
 static const char *square_week_words(void) { return square_week_post(square_week_offer(), Q.s.week, Q.posted); }
