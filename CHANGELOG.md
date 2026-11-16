@@ -2,16 +2,23 @@
 
 ## Unreleased
 
-- **Fixed: a Glitch layer glitching again after a quit.** With the copy
-  at its heart deleted the layer settles: its own look back, its battles
-  its own. A quit and CONTINUE on that layer brought the glitch back, its
-  flips and its stronger viruses with it, though the copy was gone. It
-  stays settled now.
+- **Return to title, in Options (asked for by AlicafeZ).** In a run,
+  Options' Game page ends with **Return to title**: it asks, says where
+  the run is saved, and shows the title's menu, so SAVES and the cloud
+  are reached without closing the game. The run is kept where MegaMan
+  stands, as a quit keeps it; CONTINUE takes it up there.
+
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by
   itself, TIME UP! at the third, the guardians' battles too, until the
   game was closed. A liberation's rules now end with its battle.
+
+- **Fixed: a Glitch layer glitching again after a quit.** With the copy
+  at its heart deleted the layer settles: its own look back, its battles
+  its own. A quit and CONTINUE on that layer brought the glitch back, its
+  flips and its stronger viruses with it, though the copy was gone. It
+  stays settled now.
 
 ## 0.22.0 (2026-11-15)
 

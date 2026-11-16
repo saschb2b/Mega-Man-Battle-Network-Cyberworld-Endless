@@ -3,6 +3,8 @@
  * Display page's notes short enough for the box beside its scene. */
 #include "options_text.h"
 
+#include <stdio.h>
+
 
 /* (in OptionsWord's order, its name beside each) */
 static const char *const words[] = {
@@ -99,10 +101,18 @@ static const char *const words[] = {
 	"Touch controls",   /* OW_TOUCH */
 	"Shown at a touch on the screen, hidden at a button or key",   /* OW_TOUCH_AUTO_NOTE */
 	"Never shown while a controller or the keyboard plays",   /* OW_TOUCH_OFF_NOTE */
+	"Return to title",   /* OW_TO_TITLE */
+	"Back to the title screen, for CONTINUE and SAVES",   /* OW_TO_TITLE_NOTE */
+	"Return to the title?",   /* OW_ASK_TITLE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
 const char *options_word(OptionsWord w) { return (unsigned)w < OW_COUNT ? words[w] : ""; }
+
+void options_title_ask(char *out, size_t n, const char *where) {
+	if (where) snprintf(out, n, "%s %s.", words[OW_ASK_TITLE], where);
+	else snprintf(out, n, "%s", words[OW_ASK_TITLE]);
+}
 
 const char *options_level_word(int level) {
 	static const char *const levels[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9", "10" };
