@@ -39,6 +39,9 @@
 #include <3ds/thread.h>
 #endif
 
+/* a release's page, its version after the v (the box's QR code) */
+#define RELEASE_PAGE "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/tag/v"
+
 /* the newest release's own, which GitHub sends on to that release's file */
 #define MANIFEST_URL "https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/releases/latest/download/update.json"
 #define MANIFEST_MAX (64 * 1024)   /* (its changes, a release's CHANGELOG section, 40 KB at most) */
@@ -46,11 +49,14 @@
 
 static struct {
 	bool settled, looked, here, on, offered, ended, asking;
+	bool pended, again, dev_pending;   /* the handover kept; its miss's box due again; a developer's */
 	UpdateWay way;
 	const char *key;           /* this copy's file in update.json, where it installs one */
 	char url[300];             /* update.json's address (a developer's may differ) */
 	char from[24];             /* this build's version */
 	char boxed[32];            /* the version the title's box last offered (settings.ini) */
+	char pending[32];          /* the version the last update handed over to (settings.ini) */
+	char installed[32], missed[32];   /* ... which went in, or did not */
 	char agent[64];            /* the requests' User-Agent */
 	UpdateRelease found;       /* the newer release, written before the state says FOUND */
 	char changes[CHANGES_MAX]; /* ... its changes (update.json's), the same */
@@ -76,6 +82,8 @@ static bool on_read(void) {
 		if (!strcmp(key, "updates")) on = strcmp(val, "off") && strcmp(val, "no");
 		/* (and the version the title's box last offered: it asks once a version) */
 		else if (!strcmp(key, "update_offered")) snprintf(U.boxed, sizeof U.boxed, "%s", val);
+		/* (and the version the last update handed over to) */
+		else if (!strcmp(key, "update_pending") && !U.dev_pending) snprintf(U.pending, sizeof U.pending, "%s", val);
 	}
 	fclose(f);
 	return on;
@@ -273,6 +281,25 @@ static void at_exit(void) {
 	update_install_start();
 }
 
+/* (settings.ini's update_pending set, or cleared with "") */
+static void pending_write(const char *version) {
+	char path[600];
+	settings_path(path, sizeof path);
+	settings_line_write(path, "update_pending", version, update_pending_note());
+	platform_persist();
+}
+
+/* What the last update came to: this build its version or newer, it went
+ * in; older, it did not. Said this start, then cleared */
+static void pending_settle(void) {
+	if (!U.pending[0]) return;
+	bool in = update_version_cmp(U.from, U.pending) >= 0;
+	snprintf(in ? U.installed : U.missed, sizeof U.installed, "%s", U.pending);
+	U.again = !in;
+	printf("update: %s %s\n", U.pending, in ? "went in" : "did not go in");
+	if (!U.dev_pending) pending_write("");
+}
+
 /* What this copy is and may do, once (settings.ini read by the first
  * caller: the title's first frame, or Options') */
 static void settle(void) {
@@ -282,7 +309,18 @@ static void settle(void) {
 	if (url && url[0]) snprintf(U.url, sizeof U.url, "%s", url);
 	snprintf(U.from, sizeof U.from, "%s", from && from[0] ? from : CW_VERSION);
 	U.way = update_install_way(&U.key);
+	/* (a developer's: the releases page's way, and an update handed over) */
+	const char *way = getenv("CYBERWORLD_UPDATE_WAY"), *pending = getenv("CYBERWORLD_UPDATE_PENDING");
+	if (way && !strcmp(way, "releases")) {
+		U.way = UPDATE_WAY_RELEASES;
+		U.key = NULL;
+	}
+	if (pending && pending[0]) {
+		snprintf(U.pending, sizeof U.pending, "%s", pending);
+		U.dev_pending = true;
+	}
 	U.on = on_read();
+	pending_settle();
 #ifdef UPDATE_HERE
 	bool developer = strcmp(U.url, MANIFEST_URL) != 0;
 	U.here = U.way != UPDATE_WAY_NONE && (developer || (!P.headless && update_version_release(U.from)));
@@ -310,7 +348,13 @@ void update_tick(void) {
 	}
 #ifdef __ANDROID__
 	android_tick();
-#else
+#endif
+	/* (handed over: the next start sees whether it went in) */
+	if (SDL_AtomicGet(&U.state) == UPDATE_READY && !U.pended) {
+		U.pended = true;
+		pending_write(U.found.version);
+	}
+#ifndef __ANDROID__
 	if (SDL_AtomicGet(&U.state) == UPDATE_READY && !U.ended) {
 		U.ended = true;
 		P.quit = true;
@@ -358,18 +402,37 @@ bool update_line_first(void) {
 
 const char *update_changes(void) { return update_state() != UPDATE_IDLE ? U.changes : ""; }
 
+/* (once a version, and once more the start after it did not go in) */
 bool update_box_due(void) {
 	settle();
-	return update_state() == UPDATE_FOUND && at_title() && strcmp(U.boxed, U.found.version) != 0;
+	bool again = U.again && !strcmp(U.missed, U.found.version);
+	return update_state() == UPDATE_FOUND && at_title() && (strcmp(U.boxed, U.found.version) != 0 || again);
 }
 
 void update_box_done(void) {
 	char path[600];
+	U.again = false;
 	if (!U.found.version[0] || !strcmp(U.boxed, U.found.version)) return;
 	snprintf(U.boxed, sizeof U.boxed, "%s", U.found.version);
 	settings_path(path, sizeof path);
 	settings_line_write(path, "update_offered", U.boxed, update_offered_note());
 	platform_persist();
+}
+
+const char *update_installed(void) {
+	settle();
+	return U.installed;
+}
+
+const char *update_missed(void) {
+	settle();
+	return U.missed;
+}
+
+bool update_release_page(char *url, size_t n) {
+	if (update_state() == UPDATE_IDLE || !U.found.version[0]) return false;
+	int w = snprintf(url, n, "%s%s", RELEASE_PAGE, U.found.version);
+	return w > 0 && (size_t)w < n;
 }
 
 bool update_press(void) {

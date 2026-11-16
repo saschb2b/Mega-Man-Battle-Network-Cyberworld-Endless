@@ -10,6 +10,7 @@
 #include "options.h"
 
 #include <stdio.h>
+#include <string.h>
 
 #include "analytics.h"
 #include "analytics_ask.h"
@@ -217,6 +218,8 @@ static const char *update_note(void) {
 	/* (the 3DS's .3dsx: the game closes, and the player starts it again) */
 	bool again = update_way() != UPDATE_WAY_INSTALL || update_starts_again();
 	if (s == UPDATE_FAILED) return update_word(UW_FAILED_NOTE);
+	/* (found again after the last one did not go in) */
+	if (s == UPDATE_FOUND && !strcmp(update_missed(), update_version())) return update_word(UW_MISSED_NOTE);
 	if (s == UPDATE_GETTING || (s == UPDATE_READY && !again)) return update_word(again ? UW_GETTING_NOTE : UW_GETTING_END_NOTE);
 	return update_word(s == UPDATE_READY ? UW_READY_NOTE : again ? ways[update_way()] : UW_INSTALL_END_NOTE);
 }

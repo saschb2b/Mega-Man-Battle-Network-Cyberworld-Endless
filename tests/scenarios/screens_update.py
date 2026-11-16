@@ -2,9 +2,14 @@
 version found at the start opens its news over the title's menu once; B
 says Later and it does not open again, in this session or the next;
 Options shows the version on a line of its own, whose A opens the box
-again; and with Updates off the game looks for nothing. The newer version
-is made up and served on this machine alone ({update}); the box's Yes,
-which would open the download page in a browser, is never pressed."""
+again; and with Updates off the game looks for nothing. Where the copy is
+updated from the releases page (CYBERWORLD_UPDATE_WAY=releases), A shows
+that page's QR code and any button goes back; and the last update's outcome
+(CYBERWORLD_UPDATE_PENDING, as settings.ini's update_pending says it) is told
+once: one that went in, and one that did not, whose box asks again though
+Later was said. The newer version is made up and served on this machine
+alone ({update}); the box's Yes, which would open the download page in a
+browser, is never pressed."""
 
 # (the game told where to look, and which version it counts as; settings:
 # a headless start reads settings.ini, where a Later and the switch are kept)
@@ -15,7 +20,39 @@ GAME_PAGE = [
     ('repeat', 'press L; wait 20', 'screen=options-game', 3),
 ]
 
+RELEASES = 'CYBERWORLD_UPDATE_WAY=releases ' + START
+WENT_IN = 'CYBERWORLD_UPDATE_PENDING=0.1.0 ' + START    # (the version this build counts as: it went in)
+NOT_IN = 'CYBERWORLD_UPDATE_PENDING=99.0.0 ' + START    # (newer than this build: it did not)
+
 MANY = {
+    'the-releases-way-shows-a-qr-code': dict(START=RELEASES, STEPS=[
+        MENU,
+        ('until', 'screen=update-box', 20000),
+        ('expect', 'updatecode=hidden'),
+        ('do', 'wait 30; press A; wait 10'),      # A: the release page's code
+        ('expect', 'screen=update-box'),
+        ('expect', 'updatecode=shown'),
+        ('do', 'press B; wait 10'),               # any button back to the news
+        ('expect', 'updatecode=hidden'),
+        ('do', 'press B; wait 20'),               # then B is Later
+        ('expect', 'screen=title'),
+    ]),
+    'the-last-update-is-told': dict(START=WENT_IN, STEPS=[
+        ('until', 'update=found', 20000),
+        ('expect', 'updated=0.1.0'),
+        MENU,
+        ('until', 'screen=update-box', 20000),
+        ('do', 'wait 30; press B; wait 20'),      # Later, kept for 99.0.0
+        ('restart', NOT_IN),                      # the update to it did not go in
+        ('until', 'update=found', 20000),
+        ('expect', 'missed=99.0.0'),
+        MENU,
+        ('until', 'screen=update-box', 20000),    # asked again, Later or not
+        ('do', 'wait 30; press B; wait 20'),
+        ('expect', 'screen=title'),
+        ('do', 'press SELECT; wait 40'),          # Options on the version's line
+        ('expect', 'line=update'),
+    ]),
     'the-box-opens-once-and-b-is-later': dict(START=START, STEPS=[
         MENU,
         ('until', 'screen=update-box', 20000),

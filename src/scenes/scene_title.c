@@ -84,6 +84,8 @@ static struct {
  * its first entry only, so a run's end does not say it again */
 #define FOUND_AT 30
 #define FOUND_LEN 150
+/* ... and the last update's word (title_version_note), after it where both are said */
+#define UPDATED_LEN 180
 static int entries;
 
 static Backdrop bd;
@@ -592,9 +594,16 @@ void title_found_describe(FILE *f) {
 static void top_draw(int x0, int y0) {
 	marks_draw(x0, y0);
 	found_draw(x0, y0);
-	/* (the cloud's word, over "BN5 found" where both are up: saves_cloud.h) */
 	char s[160];
 	int t, len;
+	/* (the last update's word, once a start: Updated to v0.22.2, or that it
+	 * was not installed, as "BN5 found" is said, and after it) */
+	if (title_version_note(s, sizeof s)) {
+		char f[64];
+		t = entries == 1 ? S.t - (found_words(f, sizeof f, &len) ? FOUND_AT + FOUND_LEN : FOUND_AT) : 0;
+		if (t > 0 && t < UPDATED_LEN) cinema_note_box(x0, y0, s, t, UPDATED_LEN);
+	}
+	/* (the cloud's word, over "BN5 found" where both are up: saves_cloud.h) */
 	if (saves_cloud_note(s, sizeof s, &t, &len)) cinema_note_box(x0, y0, s, t, len);
 }
 

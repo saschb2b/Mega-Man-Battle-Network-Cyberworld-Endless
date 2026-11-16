@@ -8,9 +8,10 @@
  * as SAVES has them, STATUS's pills, the action NaviCust's green RUN!,
  * each with its key. An entry's picture stands under its heading at half
  * the game's scale (each pixel of it four of the capture's, mixed), SELECT
- * shows it whole over the box. The notes are laid out once, as the box
- * opens, a page's picture unpacked as the page shows: drawing changes
- * nothing. */
+ * shows it whole over the box. Where the update is on the releases page
+ * (a handheld with no browser), A shows that page's QR code for a phone,
+ * whole as a picture is. The notes are laid out once, as the box opens, a
+ * page's picture unpacked as the page shows: drawing changes nothing. */
 #include "options_news.h"
 
 #include <stdio.h>
@@ -23,6 +24,7 @@
 #include "options.h"
 #include "pet_panel.h"
 #include "platform.h"
+#include "qr.h"
 #include "touch.h"
 #include "update.h"
 #include "update_pictures.h"
@@ -47,6 +49,9 @@
 #define TEXT_MAX (48 * 1024)
 #define BOLD_LINES 4         /* a heading's or the tagline's, at most */
 #define BOLD_LEN 96
+#define CODE_K 3             /* the QR code's module, in pixels */
+#define CODE_QUIET 2         /* ... its white edge, in modules */
+#define CODE_UNDER 14        /* ... the words under it */
 
 /* A paragraph's kind, by its mark in update.json's changes */
 enum { P_TAGLINE, P_SUMMARY, P_SECTION, P_HEADING, P_POINT, P_PARA, P_PICTURE };
@@ -65,7 +70,7 @@ typedef struct {
 } Page;
 
 static struct {
-	bool open, first, zoom;
+	bool open, first, zoom, coding;
 	int t, page, scroll, pars, pages;
 	char text[TEXT_MAX];
 	Par par[PARS_MAX];
@@ -73,9 +78,16 @@ static struct {
 	/* the shown page's picture, unpacked: whole and at half scale */
 	SDL_Texture *full, *half;
 	int shown, full_w, full_h;   /* (its place in the file, -1 none) */
+	/* the release page's QR code, made as A first shows it */
+	SDL_Texture *code;
+	int code_side;
 } K;
 
 static bool asks(void) { return update_way() == UPDATE_WAY_INSTALL || update_way() == UPDATE_WAY_PAGE; }
+/* (the releases page's: its QR code on A) */
+static bool codes(void) { return update_way() == UPDATE_WAY_RELEASES; }
+/* (an act and Later, else OK alone) */
+static bool two(void) { return asks() || codes(); }
 
 /* ---- the notes laid out ---- */
 
@@ -235,6 +247,37 @@ static void picture_sync(void) {
 	K.full_h = h;
 }
 
+/* ---- the QR code ---- */
+
+static void code_drop(void) {
+	if (K.code) SDL_DestroyTexture(K.code);
+	K.code = NULL;
+	K.coding = false;
+}
+
+/* The release page's code shown, made the first time: false where there is
+ * none (no page, or an address too long for a code) */
+static bool code_show(void) {
+	static uint8_t m[QR_MAX * QR_MAX];
+	char url[160];
+	int n = !K.code && update_release_page(url, sizeof url) ? qr_make(url, m) : 0;
+	int side = (n + 2 * CODE_QUIET) * CODE_K;
+	uint32_t *px = n ? malloc((size_t)side * side * sizeof *px) : NULL;
+	for (int y = 0; px && y < side; ++y)
+		for (int x = 0; x < side; ++x) {
+			int mx = x / CODE_K - CODE_QUIET, my = y / CODE_K - CODE_QUIET;
+			bool dark = mx >= 0 && my >= 0 && mx < n && my < n && m[my * n + mx];
+			px[y * side + x] = dark ? 0xFF000000u : 0xFFFFFFFFu;
+		}
+	if (px) {
+		K.code = texture_of(px, side, side);
+		K.code_side = side;
+		free(px);
+	}
+	K.coding = K.code != NULL;
+	return K.coding;
+}
+
 /* ---- the box ---- */
 
 static void open_box(bool first) {
@@ -243,6 +286,7 @@ static void open_box(bool first) {
 	K.first = first;
 	K.t = K.page = K.scroll = 0;
 	picture_drop();
+	code_drop();
 	update_pictures_want();
 	lay_out();
 	/* (the finger that opened it presses nothing more) */
@@ -267,6 +311,10 @@ void news_box_describe(FILE *f) {
 	if (!update_here()) return;
 	fprintf(f, "update %s\n", states[update_state()]);
 	if (update_state() != UPDATE_IDLE) fprintf(f, "newversion %s\n", update_version());
+	/* (what the last update came to, and the box's QR code) */
+	if (update_installed()[0]) fprintf(f, "updated %s\n", update_installed());
+	if (update_missed()[0]) fprintf(f, "missed %s\n", update_missed());
+	if (K.open) fprintf(f, "updatecode %s\n", K.coding ? "shown" : "hidden");
 }
 
 /* A button: kept for the version (the title's box shows once), then the
@@ -276,6 +324,7 @@ static void press(bool act) {
 	update_box_done();
 	K.open = false;
 	picture_drop();
+	code_drop();
 	audio_sfx(act ? SFX_SELECT : SFX_CANCEL);
 	if (!act || !asks() || !update_press()) return;
 	if (K.first && update_way() == UPDATE_WAY_INSTALL) options_open_update();
@@ -306,10 +355,10 @@ void news_box_update(void) {
 	picture_sync();
 	if (++K.t < BOX_WAIT) return;
 	uint32_t pr = P.menu_pressed, rep = P.menu_repeat;
-	/* (a picture whole: any of the buttons back to the page) */
-	if (K.zoom) {
+	/* (a picture or the code whole: any of the buttons back to the page) */
+	if (K.zoom || K.coding) {
 		if (pr & (BTN_A | BTN_B | BTN_SELECT | BTN_START)) {
-			K.zoom = false;
+			K.zoom = K.coding = false;
 			audio_sfx(SFX_CANCEL);
 		}
 		return;
@@ -320,22 +369,26 @@ void news_box_update(void) {
 		return;
 	}
 	if (pr & BTN_B) { press(false); return; }
-	if (pr & (BTN_A | BTN_START)) { press(asks()); return; }
+	if (pr & (BTN_A | BTN_START)) {
+		if (codes() && code_show()) audio_sfx(SFX_SELECT);
+		else press(asks());
+		return;
+	}
 	if (rep & (BTN_UP | BTN_DOWN)) scroll_by(rep & BTN_UP ? -LOOK_LINE : LOOK_LINE);
 	if (rep & (BTN_LEFT | BTN_RIGHT | BTN_L | BTN_R)) turn(rep & (BTN_LEFT | BTN_L) ? -1 : 1);
 }
 
 bool news_box_back(void) {
 	if (!K.open) return false;
-	if (K.zoom) {
-		K.zoom = false;
+	if (K.zoom || K.coding) {
+		K.zoom = K.coding = false;
 		return true;
 	}
 	press(false);
 	return true;
 }
 
-static int buttons(void) { return asks() ? 2 : 1; }
+static int buttons(void) { return two() ? 2 : 1; }
 
 /* the button `b`'s place, from the picture's corner (OK alone at the right) */
 static SDL_Rect button_rect(int b) {
@@ -345,13 +398,16 @@ static SDL_Rect button_rect(int b) {
 
 void news_box_tap(int x, int y) {
 	if (!K.open || K.t < BOX_WAIT) return;
-	if (K.zoom) {
-		K.zoom = false;
+	if (K.zoom || K.coding) {
+		K.zoom = K.coding = false;
 		return;
 	}
 	for (int b = 0; b < buttons(); ++b) {
 		SDL_Rect r = button_rect(b);
-		if (x >= r.x && x < r.x + r.w && y >= r.y - 2 && y < r.y + r.h + 2) { press(asks() && b == 0); return; }
+		if (x < r.x || x >= r.x + r.w || y < r.y - 2 || y >= r.y + r.h + 2) continue;
+		if (b == 0 && codes() && code_show()) audio_sfx(SFX_SELECT);
+		else press(asks() && b == 0);
+		return;
 	}
 	/* (the window's left third a page back, its right third on, between them a scroll down) */
 	if (y < WIN_Y || y >= WIN_Y + WIN_H) return;
@@ -432,22 +488,23 @@ static void head_draw(int x0, int y0) {
 }
 
 static void buttons_draw(int x0, int y0) {
-	static const UpdateWord acts[] = { [UPDATE_WAY_INSTALL] = UW_BTN_UPDATE, [UPDATE_WAY_PAGE] = UW_BTN_DOWNLOAD };
+	static const UpdateWord acts[] = { [UPDATE_WAY_INSTALL] = UW_BTN_UPDATE, [UPDATE_WAY_PAGE] = UW_BTN_DOWNLOAD,
+		[UPDATE_WAY_RELEASES] = UW_BTN_CODE };
 	static const UpdateWord says[] = { [UPDATE_WAY_NONE] = UW_BOX_RELEASES, [UPDATE_WAY_RELEASES] = UW_BOX_RELEASES,
 		[UPDATE_WAY_ITCH] = UW_BOX_ITCH, [UPDATE_WAY_STORE] = UW_BOX_STORE };
 	UpdateWay way = update_way();
-	if (!asks()) look_text(x0 + WIN_X + 2, y0 + BUTTON_Y + 2, update_word(says[way]), LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
+	if (!two()) look_text(x0 + WIN_X + 2, y0 + BUTTON_Y + 2, update_word(says[way]), LOOK_TEXT, LOOK_SHADE, TEXT_LEFT);
 	for (int b = 0; b < buttons(); ++b) {
 		SDL_Rect r = button_rect(b);
 		r.x += x0;
 		r.y += y0;
-		bool act = asks() && b == 0;
+		bool act = two() && b == 0;
 		/* (STATUS's pills; the action NaviCust's green RUN!, as BN6 marks its one action) */
 		if (act && K.t >= BOX_WAIT) look_button(r.x, r.y, r.w - 1, r.h - 1);
 		else look_pill(r.x, r.y, r.w);
 		char label[48];
-		snprintf(label, sizeof label, "%s: %s", controls_word(act || !asks() ? BTN_A : BTN_B),
-			update_word(!asks() ? UW_OK : act ? acts[way] : UW_BTN_LATER));
+		snprintf(label, sizeof label, "%s: %s", controls_word(act || !two() ? BTN_A : BTN_B),
+			update_word(!two() ? UW_OK : act ? acts[way] : UW_BTN_LATER));
 		look_text(r.x + r.w / 2, r.y + 1, label, LOOK_TEXT, LOOK_SHADE, TEXT_CENTER);
 	}
 }
@@ -455,6 +512,15 @@ static void buttons_draw(int x0, int y0) {
 void news_box_draw(void) {
 	if (!K.open || !K.pages) return;
 	int x0 = P.core_x, y0 = P.core_y;
+	/* (the release page's QR code whole, over all, the words under it) */
+	if (K.coding && K.code) {
+		fill_rect(x0, y0, CORE_W, CORE_H, BLACK);
+		int top = y0 + (CORE_H - K.code_side - CODE_UNDER) / 2;
+		SDL_Rect dst = { x0 + (CORE_W - K.code_side) / 2, top, K.code_side, K.code_side };
+		SDL_RenderCopy(P.renderer, K.code, NULL, &dst);
+		look_text(x0 + CORE_W / 2, top + K.code_side + 4, update_word(UW_CODE_NOTE), LOOK_TEXT, LOOK_SHADE, TEXT_CENTER);
+		return;
+	}
 	/* (a picture whole, over all, at the game's own scale) */
 	if (K.zoom && K.full) {
 		fill_rect(x0, y0, CORE_W, CORE_H, BLACK);

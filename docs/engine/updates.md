@@ -36,9 +36,15 @@ next](#what-comes-next).
   one, its scroll bar beside it. Under the window two buttons say what
   they do, each with its key, where a Yes and No said nothing of it:
   **A: Update now** (NaviCust's green RUN!) and **B: Later**; **A:
-  Download** where the copy updates from the download page; where the
-  game can do nothing (the itch app's copy, a handheld's releases page,
-  Prospero Store) the line says where it comes from beside **A: OK**.
+  Download** where the copy updates from the download page; **A: QR
+  code** where it comes from the releases page (a handheld with no
+  browser: the 3DS's CIA, the Vita, a PortMaster handheld without
+  python3), which shows that release's page on GitHub as a QR code for a
+  phone, whole over the box as a picture is, three pixels a module, any
+  button back (until 16 November 2026 an **A: OK** that closed the box as
+  Later did, which left the owner on his Nova with nothing to do); where
+  the game can do nothing else (the itch app's copy, Prospero Store) the
+  line says where it comes from beside **A: OK**.
   It takes no press for half a second, so an A mashed through the menu
   is no update. Later is remembered for that version
   (`settings.ini`'s `update_offered`): the box does not come back.
@@ -52,6 +58,21 @@ next](#what-comes-next).
   cursor on it. A opens the box again; Update now there starts the
   download, the line's value its share in percent, and a failed
   download says `Failed`, where A tries again at once.
+- **The next start, after an update.** As the download is handed over
+  (the state READY: the game ending, or Android's installer holding it)
+  its version goes into `settings.ini` as `update_pending`. The next
+  start reads it with the rest of the updater's lines and clears it: a
+  build of that version or newer means it went in, and the title's
+  note box (where "BN5 found" is said, after it where both are) says
+  `Updated to v0.22.2` for three seconds, once; an older one means it
+  did not (the installer, the launcher's `update.py` or the swap
+  failed, Android's prompt was turned down), and the box says `v0.22.2
+  was not installed`, the update box opens over the menu again though
+  Later was said, and Options' line says why (`Not installed last
+  time`). Before this the only sign was the version under the logo, and
+  a failure the old launcher left in `update.log` was not seen at all.
+  The note box is the title's own (`cinema_note_box`): the line beside
+  the version runs into the keyboard's centred `ENTER` hint.
 
 The notes come in update.json's `changes`, written by
 `tools/update_manifest.py` from the release's players' notes
@@ -133,7 +154,11 @@ update.json, any build, headless too) and `CYBERWORLD_UPDATE_FROM` (the
 version the build counts as); a local `python3 -m http.server` with a
 made-up update.json and file tests the whole way, as this page's first
 check did. Android's app takes both as `GameActivity`'s string extras
-([below](#android)).
+([below](#android)). Two more show what a host cannot reach by itself:
+`CYBERWORLD_UPDATE_WAY=releases` (the copy updated from the releases
+page, the box's QR code with it) and `CYBERWORLD_UPDATE_PENDING=VERSION`
+(as if `settings.ini`'s `update_pending` said so, left as it is);
+`tests/scenarios/screens_update.py` plays both.
 
 ## Each copy's way
 

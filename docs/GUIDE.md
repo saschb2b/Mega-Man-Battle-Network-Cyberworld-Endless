@@ -1640,13 +1640,14 @@ now** does on your system:
 | Android | Downloads the new APK and hands it to Android, which installs it and closes the game: open it again from its icon. The first time, Android asks you to allow installs from the game and to confirm; from Android 12 on, every update after that goes in without a tap (before Android 12, Android asks each time) |
 | The Switch, from the Homebrew Menu | Downloads the new `.nro` beside yours, and the game ends, puts it in your file's place and starts it again |
 | The New 3DS, from the Homebrew Launcher (the `.3dsx`) | Downloads the new `.3dsx` beside yours, and the game ends and puts it in your file's place: the Homebrew Launcher comes back, and you start the game again there |
-| The 3DS's CIA, the PS Vita | Nothing: the note names the releases page, where the new CIA or VPK is |
+| The 3DS's CIA, the PS Vita | **QR code** (A) shows the release's page as a code for your phone's camera, where the new CIA or VPK is |
 | The PSP | Nothing: it plays offline and does not look; the new zip unpacked over the old folder updates it |
 | The PS5 | Nothing: the note names Prospero Store, which lists the new version, and the releases page |
 
 The download is checked against the release's own SHA-256 before it
 replaces anything; a failed one leaves your copy as it was, and A tries
-again. Your saves, your run at its checkpoint and your settings stay as
+again. The next start says how it went, at the title's top: **Updated to
+v0.22.2**, or that it was not installed, when the box asks again. Your saves, your run at its checkpoint and your settings stay as
 they are. The line shows on the title only, never in a run.
 **Updates** on Options' Game page switches the look off (`updates = off`
 in `settings.ini`) and on again. The iPhone and iPad app updates through

@@ -46,6 +46,11 @@ static const char *const words[] = {
 	"On the releases page",   /* UW_BOX_RELEASES */
 	"Prospero Store has it",   /* UW_BOX_STORE */
 	"OK",   /* UW_OK */
+	"Updated to",   /* UW_UPDATED */
+	"was not installed",   /* UW_MISSED */
+	"Not installed last time. A: what's new, then try again",   /* UW_MISSED_NOTE */
+	"QR code",   /* UW_BTN_CODE */
+	"Scan it for the release page",   /* UW_CODE_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == UW_COUNT, "a word for each UpdateWord");
 
@@ -55,6 +60,11 @@ const char *update_setting_note(void) {
 	return "\n# updates: on looks for a new version at each start (the release's\n"
 		"# update.json on GitHub; nothing about you or your game is sent), and\n"
 		"# Options offers it. off never looks.\n";
+}
+
+const char *update_pending_note(void) {
+	return "\n# update_pending: the version an update was putting in place as the\n"
+		"# game ended; the next start says whether it went in, and clears it.\n";
 }
 
 const char *update_offered_note(void) {

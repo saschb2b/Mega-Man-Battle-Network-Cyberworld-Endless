@@ -32,6 +32,13 @@ static const char *version_words(char *v, size_t n) {
 	return v;
 }
 
+bool title_version_note(char *s, size_t n) {
+	if (update_installed()[0]) snprintf(s, n, "%s v%s", update_word(UW_UPDATED), update_installed());
+	else if (update_missed()[0]) snprintf(s, n, "v%s %s", update_missed(), update_word(UW_MISSED));
+	else return false;
+	return true;
+}
+
 void title_version_draw(int x0, int y0, int saved_depth, bool menu) {
 	char v[40];
 	minifont_draw(x0 + 4, y0 + LINE_Y, version_words(v, sizeof v), rgba(150, 160, 190, 255), 1);
