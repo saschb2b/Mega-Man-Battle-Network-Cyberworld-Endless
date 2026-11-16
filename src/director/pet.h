@@ -8,6 +8,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* Once, on the core's ROM copy: Save and Options lit and taken by the engine. */
 void pet_install(void);
@@ -34,6 +35,12 @@ bool pet_second_follows(void);
 /* ... and whether it plays its own music meanwhile (the Jukebox's songs):
  * the game's then waits for it (audio.h, music_carry_held) */
 bool pet_plays_music(void);
+/* The state in words: the folder MegaMan holds (director_folder.h), the
+ * SubChips held (MiniEnrg, FullEnrg, SneakRun, Untrap; the Unlockers are
+ * holds_describe's), the mails in the PET and those unread, and the PET's
+ * screens of ours while one is up (the Jukebox, the Library); reads only
+ * (docs/devtools/scenarios.md) */
+void pet_describe(FILE *f);
 /* The game's scene left: such a screen put away */
 void pet_leave(void);
 

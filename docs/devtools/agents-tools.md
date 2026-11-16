@@ -83,6 +83,30 @@ MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
 
+**At home and in the PET** the state has lines of its own, each its
+feature's (`pet_describe`, `home_describe` and what they call; they only
+read): `held` says what of BN6 holds Lan or MegaMan (`held none`: he
+stands free; it was `CYBERWORLD_STATE_POS`'s line), `folder first Cannon A
+sum 6eff` the folder the next battle draws from (its first chip and a sum
+over all thirty), `subchips minienrg 1 fullenrg 0 sneakrun 0 untrap 0`,
+`mail 3 unread 2`, and `request quick taken got 1 of 3 held 0 settled 0`
+the run's request ([Jobs](../world/home/jobs.md); on a layer too while
+one is held). The PET's screens of ours say theirs while they are up:
+`jukebox section 1 of 5 row 2 of 8 playing bn6:03 mode repeat`, `library
+page bn6 mega row 1 of 12 held 12 of 39 entry 60 of 249`. At home: `at
+01:04` (BN6's map, its group and number: the Academy's rooms share a
+place's name), `portals on 2 back 2` (Lan's HP's lit ways on and back),
+`ahead layer 7`, `clock 1` (the Net's, once it has a notch), `order
+open|made` (AsterLand's of the visit), `courier waiting|heard|gone`,
+`hour morning|afternoon|evening|night`, and in Lan's HP `lab none|keeper`,
+`lab builder page foes foes 1 last won` (`leaving` after it while it asks
+"Leave the Lab?"), `lab fighting`, `lab editing`
+([The Battle Lab](../game/battle-lab.md)); with `CYBERWORLD_STATE_POS`
+each lit portal's spot there, `portal 1 on at 68 -72`. In the town
+`CYBERWORLD_STATE_POS` works out the arrow's way for each state, a
+quarter of a second: a scenario there reads `held` and `place` without
+it.
+
 **Pictures** are the game's 240x160 cut from the canvas, at 2x for one
 frame and 1x on a sheet (`scale` 1-4; `full` the whole 256x192 canvas, the
 touch controls' place). A picture costs about one token for each 750 of

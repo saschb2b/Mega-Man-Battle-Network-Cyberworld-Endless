@@ -188,3 +188,13 @@ const char *home_jobs_status(const char *words) {
 	snprintf(buf, sizeof buf, "%s|%s", words, job_due_words(&run.job));
 	return buf;
 }
+
+void home_jobs_describe(FILE *f) {
+	static const char *const kinds[JOB_KINDS] = { "none", "clean", "quick", "explore", "bring", "vow" };
+	static const char *const states[] = { "offered", "taken", "done", "failed" };
+	const Job *j = &run.job;
+	if (!j->kind && !D.town) return;
+	fprintf(f, "request %s", kinds[j->kind % JOB_KINDS]);
+	if (j->kind) fprintf(f, " %s got %d of %d", states[j->state & 3], j->got, j->need);
+	fprintf(f, " held %d settled %d\n", flag_get(JOB_HELD_FLAG), flag_get(JOB_SETTLED_FLAG));
+}

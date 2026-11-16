@@ -116,6 +116,14 @@ void library_open(void) {
 
 bool library_shown(void) { return L.shown; }
 
+void library_describe(FILE *f) {
+	static const char *const entries[LIB_ENTRIES] = { "bn6", "bn5", "bn4" }, *const classes[LIB_CLASSES] = { "standard", "mega", "giga" };
+	const LibraryView *v = &L.v;
+	if (!L.shown) return;
+	fprintf(f, "library page %s %s row %d of %d held %d of %d entry %d of %d\n", entries[v->entry % LIB_ENTRIES], classes[v->cls % LIB_CLASSES],
+		v->n ? v->at + 1 : 0, v->n, v->held, v->of, v->entry_held, v->entry_of);
+}
+
 void library_shut(void) {
 	if (!L.shown) return;
 	L.shown = L.letting_go = false;
