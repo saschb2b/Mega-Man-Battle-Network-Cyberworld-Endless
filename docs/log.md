@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Update**: devtools/scenarios.md (the state's lines for a battle, the tally, a guardian's course, the rival, a pick, a card and the run's summary; a drop-in start's arrival waited out; the bug the battles' scenarios found), devtools/battle-on-demand.md (the battle and foes steps in a drop-in start's first frames), code/director.md (battle_state.c), rom/virus-battler.md (BN6_BATTLE_RESULT's 4, a battle run from).
 * **Update**: devtools/scenarios.md (A quit at any frame: `build.py scenarios --fuzz`, runs quit at frames a seeded dice names and CONTINUEd, what a CONTINUE brings back by the situation the quit found and what it may not, the state's `quit`, `saves` and `battle` lines, what it found), engine/emulation/layer.md (a quit as a layer's exit is taken runs the game on to the next layer), code/tools.md (`tools/scenarios_fuzz.py`'s row), code/director.md (the quit's run-on, a layer's exit too).
 * **Update**: engine/settings-screens.md (Return to title: Options' Game page's line in a run, its question and what it keeps), engine/saves.md (a run's way to SAVES), code/core.md (Options' Game page), research/sources.md (Learned from players: AlicafeZ's request for a way to the menu), GUIDE.md (Back to the title).
 * **Update**: devtools/scenarios.md (`KNOWN`: a scenario of a bug not fixed yet; how several sessions add scenarios side by side), code/tests.md (`tests/scenarios/` no longer lists its files).

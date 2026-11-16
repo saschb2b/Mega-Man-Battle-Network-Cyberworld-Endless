@@ -91,6 +91,8 @@ bool director_pick_shown(void);
 void director_pick_keys(uint32_t keys);
 void director_draw_pick(void);
 void director_pick_shut(void);
+/* ... in the state's words: which pick, its rows' offers, the cursor's row, whether A would take it */
+void director_pick_describe(FILE *f);
 /* The Battle Lab's builder (lab.h; docs/game/battle-lab.md): whether its
  * screen is up over the held game, its keys a frame, its picture, and the
  * watch after each frame of the game that brings it back as its battle
