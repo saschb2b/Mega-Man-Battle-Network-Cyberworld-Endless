@@ -2686,7 +2686,68 @@ SCREENSHOTS += [
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
 # 0.22.1's notes, the first half: Return to title, a quit at a layer's exit, the Chip Trader, a liberation's
 # rules after a deletion in one (#669), a new run's count of viruses, the Library's chip just found
+# (a run's first layer as tools/cw_routes.py's `layer` reaches it: the arrival paged, the opening gift's first
+# offer picked, MegaMan free at 616)
+N221_LAYER = '1:,150:,' + '4:A,6:,' * 30 + '20:,6:A,6:,60:,6:A,6:,60:,'
+# (a layer's arrival paged as the scenarios page it, MegaMan free at 531)
+N221_ARRIVE = '150:,' + '4:A,6:,' * 30 + '20:,60:,'
+# (the run before the CONTINUE: the autopilot's seed 3 from layer 2, quit in its exit's warp, layer 3's
+# checkpoint not written yet; tests/scenarios/quit_as_a_layer_is_left.py)
+SCREENSHOT_PREP.update({
+    'quit-layer-exit': (['--scene', 'emu', '--run-depth', '2', '--seed', '3'], {'CYBERWORLD_AUTOPILOT': '1'}, 6062),
+})
+# (the Chip Trader of seed 5's layer 4, six spare chips in the Pack: its talk opened at 541, Yes, the first
+# three chips put in, "Add these 3?" at 940, Yes, the chip it gives paged, "Try again?" Yes: the Pack after
+# the trade at 1530; tests/scenarios/layer_gates.py's trader-trades-three-for-one, by --talk as v0.22.0 has it)
+N221_TRADER = ['--scene', 'emu', '--seed', '5', '--run-depth', '4', '--dev', 'quiet,pack=6', '--talk', 'trader:541', '--input',
+               '1:,' + N221_ARRIVE + '10:,' + '6:A,6:,30:,' * 3 + '120:,' + '6:A,6:,40:,' * 3 + '6:A,6:,90:,' + '6:A,6:,30:,' * 4 +
+               '6:A,6:,150:,6:A,6:,150:']
+# (a liberation's rules after a deletion in one, issue #669: the autopilot on seed 5's dark layer, deleted by the
+# first hit of its board's first battle (fragile), the summary's pages, START, NEW GAME, the setup's START, and
+# the next run walked to its first battle, whose start is at 4840; tests/scenarios/liberation_rules_end.py)
+N221_LIBERATION = ['--scene', 'emu', '--seed', '5', '--run-depth', '5', '--dev', 'dark,fragile', '--input',
+                   '2341:,' + '6:A,46:,' * 3 + '6:START,46:,6:A,46:,6:START,66:,3000:']
+# (a new run's count of viruses: on seed 1's layer 2 three Mettaurs, one deleted by a buster shot (onehit), then
+# MegaMan by the first hit (fragile), GAME OVER paged to RESULT at 1471; its pages, START, NEW GAME, the setup's
+# START, Lan's room (Dad's call paged), R at his PC, Lan's HP's pink pad, layer 1, and the same battle again:
+# the second run's RESULT from 4622; tests/scenarios/battle_deleted.py)
+N221_DELETED = '0:foes 01@52/01@41/01@63,240:,6:START,6:,10:,6:A,6:,60:,' + '4:B,6:,' * 9 + '300:,' + '6:A,6:,60:,' * 3
+N221_NEXT_RUN = ('6:A,6:,40:,' * 4 + '6:START,6:,40:,6:A,6:,40:,6:START,6:,60:,' + '100:,' + '4:A,6:,' * 46 +
+                 '30:,0:place -40 -8 7,10:,6:R,6:,500:,' + '4:A,6:,' * 6 + '30:,0:place 171 0 1,10:,25:UP+RIGHT,60:,')
+N221_TWO_RUNS = ['--scene', 'emu', '--seed', '1', '--run-depth', '2', '--dev', 'onehit,fragile', '--input',
+                 '1:,' + N221_ARRIVE + N221_DELETED + N221_NEXT_RUN + N221_ARRIVE + N221_DELETED + '120:']
+# (the Library after a chip just found, where 0.22.0 missed it: a new game, Lan's room (Dad's call paged), out
+# of the house and into AsterLand, its Chip Trader given the Pack's first three (twelve spare chips, pack=12),
+# "Lan got: GoingRd *" at 1640, "Try again?" No; then the PET, the Library, and its row 173, GoingRd's;
+# tests/scenarios/home_town.py's aster-chip-trader and xrom_library.py)
+N221_LIBRARY = ['--scene', 'town', '--seed', '2', '--dev', 'pack=12', '--input',
+                '1:,40:,' + '4:A,6:,' * 46 + '30:,0:place -62 80 3,10:,24:DOWN,120:,0:place -78 55 1,10:,30:DOWN,120:,' +
+                '0:place -156 -40 7,10:,62:UP+LEFT,120:,0:place 94 46 7,10:,' + '6:A,6:,40:,' * 2 + '30:,' + '6:A,6:,30:,' * 3 +
+                '6:A,6:,40:,' * 2 + '6:A,6:,90:,' + '6:A,6:,40:,' * 4 + '6:RIGHT,6:,20:,6:A,6:,120:,' +
+                '30:,6:START,6:,40:,6:DOWN,6:,6:,6:DOWN,6:,6:,6:A,6:,100:,' + '6:R,6:,10:,' * 24 + '6:DOWN,6:,' * 4 + '30:']
 SCREENSHOTS += [
+    # (Return to title: the PET's Options in a run, the Game page's last line, and its question, the cursor on No)
+    ('options-return-to-title', ['--scene', 'emu', '--seed', '4', '--dev', 'quiet', '--input',
+                                 N221_LAYER + '6:START,6:,40:,' + '6:DOWN,6:,' * 6 + '6:A,6:,60:,6:L,6:,20:,6:UP,6:,10:,6:A,6:,60:'],
+     [(860, 'options-return-to-title'), (930, 'options-return-ask')], {}),
+    # (A quit as a layer's exit was taken: after SCREENSHOT_PREP's quit in the warp, the title's CONTINUE row,
+    # and the CONTINUE on layer 3)
+    ('quit-layer-exit', ['--scene', 'title', '--input', N22_CONTINUE + '400:'],
+     [(260, 'quit-layer-exit-title'), (520, 'quit-layer-exit')], {}),
+    # (The Chip Trader takes the three: Cannon, HiCannon and M-Cannon put in, and the Pack after the trade,
+    # the three gone and its chip there; tools/before_after.py's trader-pack is the Pack in 0.22.0 beside it)
+    ('trader-three-in', N221_TRADER, [(940, 'trader-three-in'), (1530, 'trader-pack-after')], {}),
+    # (A new run's count: the second run's RESULT, one Mettaur deleted in it; the first run's before it, one too;
+    # tools/before_after.py's result-next-run is 0.22.0's 2 beside it)
+    ('result-next-run', N221_TWO_RUNS, [(1500, 'result-first-run'), (4740, 'result-next-run')], {}),
+    # (The Library's chip just found: AsterLand's Chip Trader's chip, and the Library's row of it right after;
+    # tools/before_after.py's library-found is 0.22.0's page beside it. And on a layer: seed 3's second, its purple
+    # Mystery Data opened with an Unlocker, the chip it gave, then the PET's Library on that chip's row)
+    ('library-found', N221_LIBRARY, [(1640, 'library-found-trade'), (2715, 'library-found')], {}),
+    ('library-data', ['--scene', 'emu', '--seed', '3', '--run-depth', '2', '--dev', 'quiet', '--talk', 'keys:10', '--input',
+                      '1:,' + N221_ARRIVE + '0:place -148 -156 5,10:,' + '6:A,6:,30:,' * 7 +
+                      '30:,6:START,6:,40:,6:DOWN,6:,6:,6:DOWN,6:,6:,6:A,6:,60:,' + '6:R,6:,10:,' * 23 + '6:DOWN,6:,' * 4 + '30:'],
+     [(790, 'library-data-got'), (1600, 'library-data-found')], {}),
 ]
 # 0.22.1's notes, the second half: a dark layer's panels with BN6's ROM alone, a won liberation battle and a quit,
 # START on the team's pick, a Glitch layer settled, LCD 3x kept, the JACK-IN SETUP after a first win
