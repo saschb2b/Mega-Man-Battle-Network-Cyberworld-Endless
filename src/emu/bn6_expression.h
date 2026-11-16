@@ -46,6 +46,11 @@
  * 0x35 seen pointing -x in the Square's captures, issue #176, the others
  * assumed in that order) */
 
+/* An NPC object's animation (bn6.h's BN6_NPC_OBJECTS, a field beside its
+ * BN6_NPC_STATE): AnimationSelect, the animation of its sprite it plays,
+ * which the NPC scripts' command 0x16 sets */
+#define BN6_NPC_ANIM            0x14
+
 /* The NPC script's hop in place, as BN6's excited bystanders do it (bn6f
  * npc_initHopMovement_809e8fc): the shadow left on the floor, the hop, the
  * shadow taken back, BN6's own bytes 22 11 60 DC 21 */

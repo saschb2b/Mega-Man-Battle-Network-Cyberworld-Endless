@@ -42,6 +42,12 @@
 - **Fixed: START on the team's pick opened the PET.** Taking the team a
   dark layer offered with START, the button went on to the game and
   opened the PET over Lan's briefing.
+- **Fixed: the Library missed a chip you had just found.** The PET's
+  Library counted a new chip only from the run's next save: one won in
+  a battle or taken from a Mystery Data was not on its page when you
+  opened the Library right after, and stood there a layer later. Chips
+  of BN4's were counted at once, the rest not. The Library now counts
+  what you hold the moment it opens.
 
 - **Fixed: a Glitch layer glitching again after a quit.** With the copy
   at its heart deleted the layer settles: its own look back, its battles

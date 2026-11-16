@@ -426,6 +426,35 @@ glitched again after a quit and CONTINUE, its flips and stronger
 battles back for a copy that was gone (the settled state was the
 session's alone; BN6's flag says it now, `glitch_update`).
 
+## The older nets in the state
+
+The `xrom_*.py` scenarios play with BN5's and BN4's ROMs beside BN6's
+(`NEEDS`) and read these, from `older_describe`
+(`src/director/older_describe.c`, one call in `director_describe`) but
+the title's:
+
+| Lines | Say |
+| --- | --- |
+| `acts bn6 bn5 bn4 ...`, `olderacts N`, `olderguards N`, `soulsheld XX` | the run, at home too: each act's area by its game in the run's order (three in the short net), how many are an older net's, how many end at one of its Navis, BN5's Souls held (hex, a bit each from Colonel's) |
+| `areafrom bn6`, `bn5` or `bn4`; `guardianfrom` the same | a layer: whose area it is drawn as, whose Navi guards it |
+| `guardianstands ANIM shown` or `unseen`; one of BN4's `front-left`, `front-right`, `back-left` or `back-right` | his NPC's animation on the map and whether his sprite draws it; a BN4 Navi's the diagonal it shows him in (BN4 draws four, by its layout of pairs) |
+| `copyform NAVI`, `copystands ANIM` | a Glitch layer's copy: its first body, its NPC's animation |
+| `enemyhp N`, `enemynames CanGard+Mettaur`, `olderfoes N`, `olderrecord 811DE10` or `none` | a battle: its enemies' HP together, their names as the battle shows them (`KnightMn`, `GutsM`), how many are moved in from BN5 or BN4, and BN5's own record it was rolled from (how many stand is the tally's `foes` and `down`) |
+| `drawn 204L 204L ...`, `handpicks N`; then `hand N`, `nextchip ID`, `nextchipfrom bn6`, `bn5` or `bn4`, `nextpower N` | the Custom screen's hand (id and code) and the chips picked; after OK the chips left to use, the next one, its game and its power |
+| `unite none`, `grey`, `lit` or `chosen`; `unitesoul N`; `united N`, `unitedturns N`, `soulsused X` | where BN5's Souls stand in the engine: UNITE under OK and the Soul the last chip picked lights; the Soul MegaMan is united with (BN5's number, 0 none), its turns left, the Souls used this battle |
+| `found BN5 + BN4 found: both join ours` or `nothing`; `foundnote due`, `up`, `gone` or `none` | the title (`title_found_describe`, `scene_title.c`): its note of the other games' ROMs, in its own words, and whether it shows |
+
+A battle won by `--dev onehit` is over and back on the map inside one
+look of an `until` (60 frames): its end is read from `lastbattle=won`,
+which stays. `screen=battle` comes before the foes stand: a course waits
+for `foes>=1` before it reads a battle's lines. An A pressed while BATTLE
+START! shows is lost, so a chip is used once `custom>=20` (the gauge a
+fifth full), with `('repeat', 'press A; wait 30', 'hand=0')`, which stops
+before a buster shot; L on an open Custom screen is a try to run, pressed
+once. The `chip` step wants a code the chip's record has (`chip 204 L`):
+with another the hand holds chip 389, power 0. `--dev god` does not save
+MegaMan from one blow of more than his HP: `hp=2000` beside it.
+
 ## What they found at once
 
 The first run of `routes` failed three: `layer` and `battle` stopped on

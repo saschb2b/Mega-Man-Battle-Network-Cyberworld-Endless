@@ -82,6 +82,11 @@ void pet_update(void) {
 	/* (A on Library: the Library opens over the PET's menu, the game held under it) */
 	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_LIBRARY) {
 		emu_write8(BN6_PET_MENU_TAKEN, 0);
+		/* (the chips the game gave since the run's last save first: one to id
+		 * 511 waits in BN6's own flags for it, and the page opened before then
+		 * left a chip just found out of its count, while one past 511, told at
+		 * once, was in: tests/scenarios/xrom_library.py) */
+		library_from_game();
 		library_open();
 	}
 	if (emu_read8(BN6_PET_MENU_TAKEN) == BN6_PET_ENTRY_SAVE) {

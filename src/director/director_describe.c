@@ -21,6 +21,7 @@
 #include "net_route.h"
 #include "net_shapes.h"
 #include "net_signature.h"
+#include "older_describe.h"
 #include "netmap.h"
 #include "pet.h"
 #include "save.h"
@@ -283,6 +284,7 @@ void director_describe(FILE *f) {
 	/* (the PET's and home's own lines, each feature's: docs/devtools/scenarios.md) */
 	pet_describe(f);
 	home_describe(f);
+	older_describe(f);   /* (the older nets' lines: older_describe.h) */
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
 	layer_describe(f);
