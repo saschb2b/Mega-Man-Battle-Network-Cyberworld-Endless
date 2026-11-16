@@ -3,7 +3,7 @@ type: Overview
 title: "Release notes"
 description: "The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with."
 tags: [releases]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T17:20:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T23:40:00Z }
 ---
 
 # Release notes

@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-16T23:40:00Z
-* **Add**: releases/v0.22.2.md (the players' notes of 0.22.2, "A new run starts new.": issue #688's fix, the new run's PET before and after, Espilan credited). **Update**: releases/index.md and releases/overview.md (its line), code/layers.md (0.22.2's row of numbers), devtools/old-checkpoint.md (0.22.2's candidate).

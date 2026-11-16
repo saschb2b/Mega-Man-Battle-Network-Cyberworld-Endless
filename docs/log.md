@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Add**: releases/v0.22.2.md (the players' notes of 0.22.2, "A new run starts new.": issue #688's fix, the new run's PET before and after, Espilan credited). **Update**: releases/index.md and releases/overview.md (its line), code/layers.md (0.22.2's row of numbers), devtools/old-checkpoint.md (0.22.2's candidate).
 * **Update**: engine/emulation/boot.md (a kept boot state that holds a played game is made again, issue #688; its scenario and `--dev bootplayed`), engine/emulation/index.md (its line).
 * **Update**: engine/updates.md (the next start says whether an update went in, from settings.ini's update_pending; the releases page's QR code in the box; CYBERWORLD_UPDATE_WAY and CYBERWORLD_UPDATE_PENDING for developers), GUIDE.md (Updates: the QR code, the next start's word), code/update.md (update.c, options_news.c and title_version.c in its rows).
 * **Update**: engine/updates.md (a PortMaster launcher older than 0.22.0's: the game makes the update folder itself and runs update.py as it ends, found on the owner's Nova), code/update.md (update_port.c's row), code/tests.md (test_update.c's port checks), GUIDE.md (the PortMaster line of Update now).
