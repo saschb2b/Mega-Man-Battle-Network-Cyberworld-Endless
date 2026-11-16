@@ -54,7 +54,7 @@ WORDS = ('layer', 'area', 'zenny', 'bugfrags', 'hp', 'scrtdata', 'guardian')   #
 GROWS = ('zenny', 'bugfrags')    # ... of which a won battle's reward may still raise these
 CHUNK = 30           # frames between two looks at the state
 GAP = (20, 2400)     # a quit's frames after the start or the CONTINUE before it
-EDGE = ('screen', 'doing', 'chat', 'talk', 'quit', 'battle', 'layer', 'where', 'saves')   # a change of one is an edge
+EDGE = ('screen', 'doing', 'chat', 'talk', 'quit', 'battlestep', 'layer', 'where', 'saves')   # a change of one is an edge
 EDGE_STEP = 6        # frames between two looks while an edge is sought
 EDGE_MOST = 1800     # ... and the most frames it is sought for
 EDGE_AFTER = 45      # a quit at an edge comes up to this many frames after it
@@ -127,9 +127,9 @@ def follow(t, s, frames=0):
     last = t['last']
     if last and s.get('saves') != last.get('saves'):
         t['saved'] = [last, s]   # (saved between the two: either's lines)
-    if s.get('battle') == 'won':
+    if s.get('battlestep') == 'won':
         t['won'] = True
-    elif s.get('quit') == 'here' or s.get('battle') in ('custom', 'fight') or s.get('where') != 'layer':
+    elif s.get('quit') == 'here' or s.get('battlestep') in ('custom', 'fight') or s.get('where') != 'layer':
         t['won'] = False
     kind = situation(s, t['won'])
     t['before'] = [s] if kind == 'map' else t['before'] + [s]
@@ -268,7 +268,7 @@ def take_up(h, pilot, roms):
 
 
 def shown(s):
-    return ' · '.join(f'{w} {s[w]}' for w in ('screen', 'where', 'doing', 'chat', 'talk', 'battle', 'quit', 'saves') + WORDS if w in s)
+    return ' · '.join(f'{w} {s[w]}' for w in ('screen', 'where', 'doing', 'chat', 'talk', 'battlestep', 'quit', 'saves') + WORDS if w in s)
 
 
 def game(seed, n, quits, roms):

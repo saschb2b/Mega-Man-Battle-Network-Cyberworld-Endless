@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "layer_objs.h"
 #include "navicust.h"
@@ -157,6 +158,16 @@ void drop_events(void);
 void tally_battle_start(void);
 void tally_battle_frame(void);
 int tally_deleted(bool won, int foes);
+/* ... and in the state's words: the run's viruses and Navis deleted, the
+ * layer's battles, a battle's enemies and those down */
+void tally_describe(FILE *f);
+/* A battle in the state's words (battle_state.c): what it is, its phase,
+ * how it ended and what it paid, MegaMan's form, its enemies' statuses */
+void battle_state_describe(FILE *f);
+/* The rival in the state's words (director_duel.c): the layer's duel, its
+ * rung, the record, the clearance, whether Chaud has called before, the
+ * last verdict */
+void duel_describe(FILE *f);
 /* The shared dive (director_crew.c, docs/online/shared-dive.md): whether a
  * dive is under way, and the layer's random battle `index` as every
  * diver's game makes it, from the layer's seed and the index alone, so the
