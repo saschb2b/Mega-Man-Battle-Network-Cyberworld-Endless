@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* How far a Glitch layer has come apart: 0 on arrival to GLITCH_STAGES - 1,
  * by the share of its Mystery Data taken; it never falls. */
@@ -26,6 +27,15 @@ void glitch_update(void);
  * group_pool.h; the visitor it brought before them); nothing changed
  * elsewhere */
 void glitch_battle(int *depth, bool *mixed);
+/* The Glitch layer in a state's words (director_describe; tests/scenarios'
+ * extras_glitch): `glitchwarp here` on the layer that holds its warp, none
+ * elsewhere; on a Glitch layer its stage (`glitchstage` 0-4), the share of
+ * its data taken, the stages said, its looks and the one on the floor
+ * (`glitchlook` own or 0-2), the glitch under way (`glitchfx`), what its
+ * next battle is (`glitchbattles` own, mixed or deeper), `glitched on` or
+ * `settled`, and its `copy` (waiting, fighting, deleted: its pick waits,
+ * or taken) */
+void glitch_describe(FILE *f);
 /* (glitch_copy.c) The copy's Yes: its fight begins */
 void glitch_copy_fight(void);
 /* Whether the battle under way is the copy's */

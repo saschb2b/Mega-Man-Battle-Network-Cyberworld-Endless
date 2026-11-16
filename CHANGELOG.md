@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Fixed: a Glitch layer glitching again after a quit.** With the copy
+  at its heart deleted the layer settles: its own look back, its battles
+  its own. A quit and CONTINUE on that layer brought the glitch back, its
+  flips and its stronger viruses with it, though the copy was gone. It
+  stays settled now.
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by

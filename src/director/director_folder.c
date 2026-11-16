@@ -42,6 +42,15 @@ uint32_t pack_entry(int id) {
 	return bn6_pack_entry(pack, (unsigned)id);
 }
 
+int chip_copies(int id) {
+	uint32_t pack = pack_entry(id), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
+	if (!pack || data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
+	int n = 0;
+	for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + k);
+	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) n += chip_entry_id(emu_read16(data + 2 * i)) == (uint32_t)id;
+	return n;
+}
+
 void pack_report(int id) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), entry = pack_entry(id);
 	if (id <= 0 || id > (int)CHIP_ID_MASK || data < BN6_EWRAM || data >= BN6_EWRAM_END) {

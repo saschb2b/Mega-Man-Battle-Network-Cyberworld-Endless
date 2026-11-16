@@ -10,6 +10,8 @@
 #include "boss.h"
 #include "cinema.h"
 #include "director.h"
+#include "director_battler.h"
+#include "director_dark.h"
 #include "director_folder.h"
 #include "director_hold.h"
 #include "director_layer.h"
@@ -286,6 +288,12 @@ void director_describe(FILE *f) {
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	/* (the extras: the side layer and the ways off, the Glitch layer, the tournament's bracket, the Virus Battler, DarkChips) */
+	side_describe(f);
+	glitch_describe(f);
+	boss_bracket_describe(f);
+	battler_describe(f);
+	dark_describe(f);
 	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);

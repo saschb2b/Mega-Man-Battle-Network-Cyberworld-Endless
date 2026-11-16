@@ -10,6 +10,9 @@
 
 void begin_area(bool new_act);
 void map_label(void);
+/* The side layer and the ways off the run's own, in a state's words:
+ * sidelayer, darkwarp, goldgate (director_describe) */
+void side_describe(FILE *f);
 bool guardian_heard(void);
 void set_encounter(const Encounter *e, bool force);
 void lock_run(void);

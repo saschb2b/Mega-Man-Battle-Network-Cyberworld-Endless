@@ -25,6 +25,7 @@ static struct {
 	int result;     /* the last round's BN6_RESULT_*, 0 none waiting to be said */
 	bool known;     /* ... of the layer `seed` made, as MegaMan came onto it */
 	bool won;       /* the last round won (a series ended on it: the pot taken) */
+	int last;       /* the last round's result, kept for a state's words (0: none fought on this layer) */
 	uint32_t seed;
 } B;
 
@@ -34,7 +35,7 @@ void battler_forget(void) { B.known = false; }
  * same one continued): none waiting yet; and the profile's card in the
  * game, whose state a CONTINUE has just put back */
 static void battler_layer(void) {
-	B.k = B.round = B.result = 0;
+	B.k = B.round = B.result = B.last = 0;
 	D.battler_series = false;
 	B.known = true;
 	B.seed = run.layer_seed;
@@ -65,10 +66,30 @@ void battler_round_over(int result) {
 	D.battler = false;
 	B.result = result ? result : BN6_RESULT_LOST;
 	B.won = B.result == BN6_RESULT_WON;
+	B.last = B.result;
 	if (emu_debug_on()) fprintf(stderr, "battler %d: round %d result %d\n", B.k, B.round + 1, result);
 }
 
 void battler_card_note(void) { card_from_game(); }
+
+void battler_describe(FILE *f) {
+	fprintf(f, "btlrcard %s\nvirusdata %d\n", card_held() ? "held" : "none", card_families());
+	if (!B.known || !B.k) { fprintf(f, "battler none\n"); return; }
+	bool on = D.battler_series, over = flag_get(BATTLER_DONE_FLAG);
+	int wins = on ? B.round + (!D.battler && B.won) : 0;
+	fprintf(f, "battler %d\nstake %d\nvbrounds %d\nseries %s\nvbround %d\nvbwins %d\npot %d\nvblast %s\nvbprize %s\n", B.k, battler_stake(B.k),
+		battler_rounds(B.k), on ? "on" : over ? "over" : "none", on ? B.round + 1 : 0, wins, on ? battler_stake(B.k) * (wins + 1) : 0,
+		!B.last ? "none" : B.last == BN6_RESULT_WON ? "won" : B.last == BN6_RESULT_LOST ? "lost" : "draw",
+		flag_get(BN6_FLAG_VB_FIRST_PRIZE + B.k - 1) ? "taken" : "open");
+	/* (his word after a win: TAKE THE POT or FIGHT ON showing) */
+	if (on && !D.battler && on_map()) fprintf(f, "potchoice %s\n", emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2 ? "up" : "none");
+	if (!D.battler || on_map()) return;
+	/* (a round's battle: BN6's VIRUS LIST, the picks placed, its question, the fight) */
+	int phase = emu_read8(BN6_BATTLE_PHASE), list = emu_read8(BN6_VB_LIST_PHASE);
+	fprintf(f, "vbscreen %s\nvbpicked %d\nvbplaced %d\n",
+		phase == 0x0C ? "fight" : phase != 8 ? "other" : list == 4 ? "list" : list == 8 ? "ok" : list == 0x0C ? "placing" : list == 0x14 ? "confirm" : "other",
+		(emu_read8(BN6_VB_LIST_PICK1) != 0xFF) + (emu_read8(BN6_VB_LIST_PICK2) != 0xFF), emu_read8(BN6_VB_LIST_PLACED));
+}
 
 /* His word on the round just fought: the pot as it stands (the stake and
  * a stake a win), the next pair, the first prize on a run's first series

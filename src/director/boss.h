@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "foes.h"
 #include "guardian_objs.h"
@@ -65,6 +66,9 @@ void boss_resume(void);
 /* The Navi MegaMan fights or is about to: the guardian's, or in a
  * tournament's bracket the round's (docs/game/tournament.md) */
 int boss_foe(void);
+/* The tournament's bracket in a state's words: bracket, round, roundfoe,
+ * roundchips (director_describe) */
+void boss_bracket_describe(FILE *f);
 
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
