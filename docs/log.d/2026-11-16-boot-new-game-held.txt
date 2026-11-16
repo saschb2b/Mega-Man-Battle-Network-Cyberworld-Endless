@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-16T23:10:00Z
-* **Update**: engine/emulation/boot.md (a kept boot state that holds a played game is made again, issue #688; its scenario and `--dev bootplayed`), engine/emulation/index.md (its line).
