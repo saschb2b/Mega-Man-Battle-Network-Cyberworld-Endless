@@ -9,6 +9,7 @@
 #include "bracket.h"
 #include "cinema.h"
 #include "debug.h"
+#include "director_folder.h"
 #include "emu.h"
 #include "encounter.h"
 #include "gfx.h"
@@ -49,6 +50,15 @@ void boss_bracket_open(const RunBracket *b, int won) {
 	}
 	bool shown = xbracket_open(bracket_tournament((run.depth - 1) % CYCLE_LAYERS / 3), e);
 	if (emu_debug_on()) fprintf(stderr, "bracket: %d rounds won, %s at frame %u\n", won, shown ? "shown" : "not shown", (unsigned)P.frame);
+}
+
+int boss_round_chips(const RunBracket *b) {
+	int held = 0;
+	for (int r = 0; r < 2; ++r) {
+		int code, chip = bracket_chip(b->prize[r], b->prize_version[r], run.depth, &code);
+		held += chip > 0 && chip_copies(chip) > 0;
+	}
+	return held;
 }
 
 bool boss_bracket_back(int t) {

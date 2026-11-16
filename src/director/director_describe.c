@@ -291,6 +291,8 @@ void director_describe(FILE *f) {
 	cinema_describe(f);
 	duel_describe(f);
 	boss_describe(f);
+	/* (the extras: the side layer and the ways off, the Glitch layer, the tournament's bracket, the Virus Battler, DarkChips) */
+	extras_describe(f);
 	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);

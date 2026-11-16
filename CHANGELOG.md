@@ -43,6 +43,12 @@
   dark layer offered with START, the button went on to the game and
   opened the PET over Lan's briefing.
 
+- **Fixed: a Glitch layer glitching again after a quit.** With the copy
+  at its heart deleted the layer settles: its own look back, its battles
+  its own. A quit and CONTINUE on that layer brought the glitch back, its
+  flips and its stronger viruses with it, though the copy was gone. It
+  stays settled now.
+
 ## 0.22.0 (2026-11-15)
 
 - **The week's DeepNet, dived together.** The greeter Mr.Prog by the

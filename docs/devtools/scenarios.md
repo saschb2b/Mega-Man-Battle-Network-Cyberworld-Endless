@@ -380,6 +380,52 @@ was held back before them and a quit under them lost the battle
 (`liberation-board/continue/under-the-words`; the words now wait for
 `talk_due_now()`, as the director's other talks do).
 
+## The extras
+
+The extras' scenarios (`extras_*.py`: the Glitch layer, the tournament,
+the Virus Battler, the Undernet's door and the Secret Area, DarkChips,
+and each of them switched off) reach what they play so, with the steps
+there are:
+
+- **A talk** is opened by the start's `--talk NAME:FRAME`
+  ([a capture's options](headless-shot.md): `glitch`, `copy`, `battler`,
+  `undernet`, `gate`, `dark`; `zenny`, `bugfrag` and `scrtdata` give what
+  a talk wants), after the arrival's words are paged, and waited for with
+  `('until', 'chat=open')`. A later talk on the layer is a second entry
+  (`copy:800,copy:2600`).
+- **Its answer.** The run's own risky questions start on No, so
+  `('repeat', 'press LEFT; press A; wait 20', COND)` answers Yes and
+  `press A` alone No, each until the state says what the answer did
+  (`sidelayer=glitch`, `series=on`, `flame=taken`). The golden gate's
+  starts on Yes until Bass is known behind it.
+- **A battle won** by the dev menu's fifth row ([Dev menu](dev-menu.md)),
+  once the Custom screen's OK has started the fight (`custom>0`); the
+  Glitch copy's forms one opening each. The Virus Battler's rounds are
+  fought by the viruses, the VIRUS LIST read from `vbscreen`, `vbpicked`
+  and `vbplaced`.
+- **The walk to an exit pad** is the autopilot's: the run quit and
+  continued (`('restart', 'CYBERWORLD_AUTOPILOT=1 --scene title --dev
+  quiet')`, CONTINUE), which also proves the side layer comes back from
+  a quit as it was left.
+- **A Glitch layer's data taken** are BN6's flags set by the `flags`
+  step (`MAPSLOT_MD_FLAG`, 0x1400 on), as taking them sets them.
+- **The tournament** needs BN4's ROM (`NEEDS = ('bn4',)`), whose screen
+  shows every bracket; its scenarios switch the older nets off, so its
+  Navis are BN6's.
+
+| The state says | Where | Written by |
+| --- | --- | --- |
+| `sidelayer none`, `undernet`, `secret`, `back` or `glitch`; `darkwarp here` or `none`, `goldgate here` or `none` | a layer | `extras_describe.c`, which calls the four below |
+| `glitchwarp here` or `none`; on a Glitch layer `glitchstage N` (0-4), `glitchshare N` (its data taken, in hundredths), `glitchsaid N`, `glitchlooks N`, `glitchflips N`, `glitchfx none`, `tear`, `slip`, `turn` or `flip`, `glitchlook own` or the look's number, `glitchbattles own`, `mixed` or `deeper`, `glitched on` or `settled`, `copy waiting`, `fighting`, `deleted` (its pick waits) or `taken` | a layer | `glitch_describe`, `glitch.c` |
+| `bracket none`, `ahead`, `door` (MegaMan stepped in: its one save), `screen` (BN4's, off the map), `round` or `won`; `round N` (3 the final, 4 all won), `roundfoe NAME`, `roundchips N` (the two rounds' Navi chips held) | a layer | `boss_bracket_describe`, `boss.c` |
+| `btlrcard held` or `none`, `virusdata N`; `battler N` or `none`, `stake N`, `vbrounds N`, `series none`, `on` or `over`, `vbround N`, `vbwins N`, `pot N`, `vblast none`, `won`, `lost` or `draw`, `vbprize open` or `taken`; after a round won `potchoice up`; in a round `vbscreen list`, `ok`, `placing`, `confirm` or `fight`, `vbpicked N`, `vbplaced N` | a layer | `battler_describe`, `director_battler.c` |
+| `flame none`, `burning` or `taken`, `flamechip NAME`, `flamenet bn6` or `bn5`; `darkchips N` (kinds the run holds), `darkpack N` (their chips in the Pack and folder), `basehp N` (the max HP a DarkChip's price lowers), `darktaught none`, or `flame`, `price`, `bn5` joined by `+` (the profile's) | a layer | `dark_describe`, `director_dark.c` |
+
+They found one bug at once: a Glitch layer whose copy was deleted
+glitched again after a quit and CONTINUE, its flips and stronger
+battles back for a copy that was gone (the settled state was the
+session's alone; BN6's flag says it now, `glitch_update`).
+
 ## What they found at once
 
 The first run of `routes` failed three: `layer` and `battle` stopped on

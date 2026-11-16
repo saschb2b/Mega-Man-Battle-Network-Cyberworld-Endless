@@ -35,6 +35,8 @@ void folder_milestone_guardian(void);
  * record's four, then four u16 order stamps), 0 where the pack cannot be
  * read or counts none of the id (a Program Advance, a pseudo-chip) */
 uint32_t pack_entry(int id);
+/* A chip's copies in the Pack and the folder, -1 where they cannot be read */
+int chip_copies(int id);
 /* The dev step "chip ID" alone: what the game holds of chip `id` (the
  * pack's counts and order stamps, the folder's copies, the Library),
  * printed; nothing changed */

@@ -165,16 +165,6 @@ void dark_after_battle(void) {
 	dark_base_told = true;
 }
 
-/* A chip's copies in the Pack and the folder, -1 where they cannot be read */
-static int chip_held(int id) {
-	uint32_t pack = pack_entry(id), data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS);
-	if (!pack || data < BN6_EWRAM || data >= BN6_EWRAM_END) return -1;
-	int n = 0;
-	for (uint32_t k = 0; k < 4; ++k) n += emu_read8(pack + k);
-	for (uint32_t i = 0; i < BN6_FOLDER_ENTRIES; ++i) n += chip_entry_id(emu_read16(data + 2 * i)) == (uint32_t)id;
-	return n;
-}
-
 /* The chips of the run's DarkChips (docs/game/meta/darkchips.md): one a flame
  * gave, a dev run's, or one a run held from before its kind played in
  * BN6's battles, given to the Pack where neither it nor the folder holds
@@ -185,11 +175,34 @@ void dark_pack(void) {
 	D.dark_pack_due = false;
 	for (int k = 0; k < DARK_KINDS; ++k) {
 		int id = dark_chip_id(k);
-		if (!id || !dark_kind_plays(k) || !dark_count(k) || chip_held(id) != 0) continue;
+		if (!id || !dark_kind_plays(k) || !dark_count(k) || chip_copies(id) != 0) continue;
 		uint32_t out[2];
 		game_call_ret(BN6_GIVE_CHIPS, (uint32_t)id, CHIP_CODE_STAR, 1, out);
 		if (emu_debug_on()) fprintf(stderr, "dark: DarkChip %d (kind %d) to the Pack\n", id, k);
 	}
+}
+
+/* DarkChips in a state's words (director_describe; tests/scenarios'
+ * extras_dark): the layer's flame (`flame` none, burning or taken; its
+ * chip and whose it is, `flamechip` NAME, `flamenet` bn6 or bn5), the
+ * kinds the run holds and their chips in the Pack and folder (`darkchips`,
+ * `darkpack`), the max HP the game counts HPMemory into, which a
+ * DarkChip's price lowers (`basehp`), and what the profile has been
+ * taught of them (`darktaught` none, or flame, price, bn5 joined by +) */
+void dark_describe(FILE *f) {
+	bool stands = layer_objs_dark_flame >= 0 && D.dark_kind >= 0;
+	fprintf(f, "flame %s\n", !stands ? "none" : flag_get(LAYER_DARK_TAKEN_FLAG) ? "taken" : "burning");
+	if (stands) fprintf(f, "flamechip %s\nflamenet %s\n", layer_objs_dark_chip, layer_objs_dark6 ? "bn6" : "bn5");
+	int kinds = 0, chips = 0;
+	for (int k = 0; k < DARK_KINDS; ++k) {
+		int id = dark_chip_id(k), held = dark_count(k) && id ? chip_copies(id) : 0;
+		kinds += dark_count(k) != 0;
+		chips += held > 0 ? held : 0;
+	}
+	char taught[24];
+	snprintf(taught, sizeof taught, "%s%s%s", profile.dark6_taught & DARK6_FLAME_TAUGHT ? "+flame" : "",
+		profile.dark6_taught & DARK6_PRICE_TAUGHT ? "+price" : "", profile.dark_taught ? "+bn5" : "");
+	fprintf(f, "darkchips %d\ndarkpack %d\nbasehp %d\ndarktaught %s\n", kinds, chips, emu_read16(BN6_NAVI_BASE_MAX_HP), taught[0] ? taught + 1 : "none");
 }
 
 /* What MegaMan has said of DarkChips this session, forgotten by a run
