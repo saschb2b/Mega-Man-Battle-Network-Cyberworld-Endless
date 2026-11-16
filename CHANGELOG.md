@@ -2,19 +2,19 @@
 
 ## Unreleased
 
+## 0.22.1 (2026-11-16)
+
 - **Return to title, in Options (asked for by AlicafeZ).** In a run,
   Options' Game page ends with **Return to title**: it asks, says where
   the run is saved, and shows the title's menu, so SAVES and the cloud
   are reached without closing the game. The run is kept where MegaMan
   stands, as a quit keeps it; CONTINUE takes it up there.
-
 - **Fixed: a quit as a layer's exit was taken lost the layer.** From the
   exit pad's warp until "Run saved" on the next layer, some two seconds,
   a quit (or a handheld's close) kept the run at the left layer's last
   checkpoint: its battles and their zenny gone at the CONTINUE. The game
   now finishes the warp first, unseen, and the run goes on from the next
   layer.
-
 - **Fixed: the Chip Trader kept your chips, and took others.** Since
   0.21.0 a Chip Trader gave its chip without taking the three you put
   in, and could take copies of other chips from your Pack instead (two
@@ -42,13 +42,13 @@
 - **Fixed: START on the team's pick opened the PET.** Taking the team a
   dark layer offered with START, the button went on to the game and
   opened the PET over Lan's briefing.
-- **Fixed: the Library missed a chip you had just found.** The PET's
-  Library counted a new chip only from the run's next save: one won in
-  a battle or taken from a Mystery Data was not on its page when you
-  opened the Library right after, and stood there a layer later. Chips
-  of BN4's were counted at once, the rest not. The Library now counts
-  what you hold the moment it opens.
-
+- **Fixed: the Library missed a chip you had just got at home.** The
+  PET's Library counted a new chip only from the run's next save. On a
+  layer the PET saves as it opens; at home before a run's first layer it
+  does not, so a chip AsterLand's Chip Trader had just given was not on
+  its page until MegaMan reached the net. Chips of BN4's were counted at
+  once, the rest not. The Library now counts what you hold the moment it
+  opens.
 - **Fixed: a Glitch layer glitching again after a quit.** With the copy
   at its heart deleted the layer settles: its own look back, its battles
   its own. A quit and CONTINUE on that layer brought the glitch back, its
