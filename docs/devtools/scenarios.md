@@ -150,6 +150,31 @@ area). They stay out of each other's way so:
   a scenario that takes more than twenty seconds, or passes only most of
   the time, is not done. Ten runs in a row pass before it is committed.
 
+## Battles and the run's spine in the state
+
+The `battle_*.py` and `run_*.py` scenarios read these, each written by
+its own part and called from `director_describe` (the summary's from
+`capture.c`'s state, after the title's):
+
+| Lines | From | Say |
+| --- | --- | --- |
+| `viruses N`, `navis N`, `battles N`; in a battle `foes N`, `down N` | `tally_describe` (`director_tally.c`) | the run's tally as RESULT will count it, the layer's random battles fought, a battle's enemies and those down |
+| `battle random`, `guardian`, `duel`, `gate`, `copy`, `server` or `floor`; `phase custom`, `fight`, `results` or `other`; `form none`, `HeatCross` ... `BeastOut`; `foestatus none`, `paralysed`, `dragged`, `frozen` or `bubbled`; at its results `result won`, `lost`, `ran` or `draw` and `reward zenny N`, `chip ID CODE`, `hp N`, `bugfrags N`; on the map after one `lastbattle won` ... | `battle_state_describe` (`battle_state.c`) | a battle: what it is, where it stands, how it ended and what its RESULT paid, MegaMan's form, the statuses its enemies are held in |
+| `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken`, `exitpad open` or `shut`; in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
+| `duel none`, `waiting`, `on` or `fought`; `rung N`; `duelswon N`, `duelslost N`, `clearance N`; `chaud new` or `known`; `verdict none`, `beat`, `slow`, `hit` or `lost` | `duel_describe` (`director_duel.c`) | the rival: the layer's duel and its rung, the record, what his respect has opened, whether Chaud has called before, the last verdict |
+| `pick gift`, `draft`, `vault`, `order`, `official`, `server` or `copy`; `offers hpmemory:2 chip:137 program:1 [bugfrags]`; `pickrows N`, `pickrow N`, `pickready yes` or `no` | `director_pick_describe` (`reward_pick.c`) | a reward pick while it is up: its rows, the cursor's, whether an A would take one yet |
+| `card title`, `area` or `grand`; `cardsays TOP / NAME / LINE / LINE / LINE` | `cinema_describe` (`cinema.c`) | the card that shows: a guardian's title, the act's ("Guardian: ???") |
+| `page result` or `records`; `ended deleted` or `won`; `cause in RoboDog Comp`; `reached N`, `viruses N`, `navis N`; `learned NAME` or `none`; `newbest yes` or `no`; `opened the endless net, threat 1` or `nothing` | `title_summary_describe` (`title_summary.c`) | the finished run's summary over the title, both its screens' facts while it shows |
+
+A drop-in start (`--scene emu`) is no player's arrival: the `battle` and
+`foes` steps given in its first frames begin their battle during the
+jack-in ([A battle on demand](battle-on-demand.md)), so a course pages
+the arrival's words first, and with the autopilot waits for `chat=open`
+and then `held=none` (the state's with `CYBERWORLD_STATE_POS=1`). A test
+start's area and guardian (`--net-biome`, `--guardian`) are given again
+at a `restart`: a CONTINUE from the title keeps the run's own, and
+`--guardian`'s older-net Navi is no CONTINUE's.
+
 ## What they found at once
 
 The first run of `routes` failed three: `layer` and `battle` stopped on
@@ -157,6 +182,11 @@ the run's opening gift, which had come to stand before them, and
 `pet/options` named a screen since renamed. Every capture made from those
 routes had been of the wrong screen, said only by a line of the answer
 nobody read. The routes are fixed, and stay so.
+
+The battles' scenarios found one in the game: MegaMan deleted in a
+battle, the next run begun without the game closed came onto its first
+layer as if back from that battle, and its tally began with the viruses
+deleted in it (`battle_deleted.py`; the battle now ends with the run).
 
 ## Beside it
 

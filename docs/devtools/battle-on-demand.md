@@ -19,7 +19,11 @@ layer's next random battle at the first moment MegaMan stands free on its
 map: no chat, the director's words or a scene, no warp, no guardian's
 staging or challenge under way. It waits that long: an act's arrival
 words must be paged first (the autopilot pages them above; A in the
-script does too).
+script does too). A drop-in start's first frames are the exception: its
+jack-in passes for a free moment, and a `battle` or `foes` step given
+then begins its battle inside it (seed 3 at `--run-depth 2`: a 350z
+RESULT left 10829 zenny, and MegaMan held on the map after it). A script
+waits out the arrival first; [Scenarios](scenarios.md) says how.
 It is the record the roll would have handed out next, BN6's own or, on a
 layer of BN5's (its territory, [Other games' ROMs](../multirom/overview.md)), one of its records in
 BN6's engine, forced past the roll as the guardians' are (with `--dev
