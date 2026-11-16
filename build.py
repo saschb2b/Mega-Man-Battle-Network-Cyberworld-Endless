@@ -2684,6 +2684,14 @@ SCREENSHOTS += [
 # the clips the README or a release's notes show as GIFs too (GitHub plays no
 # video from the repository): name, then its first seconds and frames a second
 # (a walk's scrolling floor makes a GIF of all of it 2 MB)
+# 0.22.1's notes, the first half: Return to title, a quit at a layer's exit, the Chip Trader, a liberation's
+# rules after a deletion in one (#669), a new run's count of viruses, the Library's chip just found
+SCREENSHOTS += [
+]
+# 0.22.1's notes, the second half: a dark layer's panels with BN6's ROM alone, a won liberation battle and a quit,
+# START on the team's pick, a Glitch layer settled, LCD 3x kept, the JACK-IN SETUP after a first win
+SCREENSHOTS += [
+]
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
                'bn5-battle': (None, 15), 'bn5-unite': (None, 15), 'dark-chip': (None, 15),
