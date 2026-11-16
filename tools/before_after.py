@@ -218,6 +218,10 @@ SCENES = [
     ('trader-pack', build.N221_TRADER, {}, 1530),
     ('result-next-run', build.N221_TWO_RUNS, {}, 4740),
     ('library-found', build.N221_LIBRARY, {}, 2715),
+    # (issue #682: BN6's flag for MegaMan in the PET cleared by the dev step with Lan free in his room, then R at
+    # his PC: "MegaMan isn't in the PET..." before, Lan's HP after)
+    ('jackin-pet', ['--scene', 'town', '--seed', '2', '--input',
+                    '40:,' + '4:A,6:,' * 46 + '30:,0:flags 5917 5917 0,30:,0:place -40 -8 7,10:,6:R,400:'], {}, 720),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS

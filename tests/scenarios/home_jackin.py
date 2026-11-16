@@ -36,6 +36,23 @@ MANY = {
             ('expect', 'ahead=layer 1'),
             ('expect', 'hp=100/100'),
         ]),
+    'megaman-not-in-the-pet': dict(
+        GUARDS="Issue #682: a new run whose jack-in answered \"MegaMan isn't in the PET...\". BN6's flag for it cleared with Lan free in his room is put "
+               "back, and R at the PC jacks in; in Lan's HP it is clear, as BN6's jack-in leaves it, and its jack-out sets it.",
+        START=ROOM,
+        STEPS=[
+            ('expect', 'megaman=in'),
+            ('do', 'flags 0x171D 0x171D 0; wait 30'),
+            ('expect', 'megaman=in'),
+        ] + JACK_IN + [
+            ('expect', "place=Lan's HP"),
+            ('expect', 'megaman=out'),
+            ('do', 'press R; wait 40'),
+            ('repeat', 'press A; wait 30', 'choice=2/2'),           # BN6's "MegaMan, jack out?" opens on No
+            ('do', 'press LEFT; wait 20'),
+            ('repeat', 'press A; wait 40', "place=Lan's Room", 20), FREE,
+            ('expect', 'megaman=in'),
+        ]),
     'pc-a-step-short': dict(
         GUARDS="R a step in front of the PC's cells (two playtesters at the desk heard \"The PC's straight up,Lan!\"): Lan steps onto them and jacks in.",
         START=ROOM,

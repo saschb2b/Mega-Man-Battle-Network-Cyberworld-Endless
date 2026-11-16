@@ -96,6 +96,7 @@ one is held). The PET's screens of ours say theirs while they are up:
 page bn6 mega row 1 of 12 held 12 of 39 entry 60 of 249`. At home: `at
 01:04` (BN6's map, its group and number: the Academy's rooms share a
 place's name), `portals on 2 back 2` (Lan's HP's lit ways on and back),
+`megaman in|out` (BN6's flag for MegaMan in the PET, which a jack-in asks: issue #682),
 `ahead layer 7`, `clock 1` (the Net's, once it has a notch), `order
 open|made` (AsterLand's of the visit), `courier waiting|heard|gone`,
 `hour morning|afternoon|evening|night`, and in Lan's HP `lab none|keeper`,

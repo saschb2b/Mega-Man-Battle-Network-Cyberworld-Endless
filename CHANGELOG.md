@@ -9,6 +9,11 @@
   the run is saved, and shows the title's menu, so SAVES and the cloud
   are reached without closing the game. The run is kept where MegaMan
   stands, as a quit keeps it; CONTINUE takes it up there.
+- **Fixed: "MegaMan isn't in the PET..." at a new run's jack-in (issue
+  #682).** R at Lan's PC could answer that MegaMan was not in the PET,
+  and the run had no way into the net. What sets it off is not found
+  yet; MegaMan is now in the PET wherever Lan stands free in the real
+  world, so the PC jacks him in.
 - **Fixed: a quit as a layer's exit was taken lost the layer.** From the
   exit pad's warp until "Run saved" on the next layer, some two seconds,
   a quit (or a handheld's close) kept the run at the left layer's last
