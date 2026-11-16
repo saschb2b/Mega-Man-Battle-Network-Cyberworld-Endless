@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- **Return to title, in Options (asked for by AlicafeZ).** In a run,
+  Options' Game page ends with **Return to title**: it asks, says where
+  the run is saved, and shows the title's menu, so SAVES and the cloud
+  are reached without closing the game. The run is kept where MegaMan
+  stands, as a quit keeps it; CONTINUE takes it up there.
+
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by
