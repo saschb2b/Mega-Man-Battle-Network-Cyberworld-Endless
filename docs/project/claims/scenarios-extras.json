@@ -1,0 +1,9 @@
+{
+  "branch": "scenarios-extras",
+  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for the extras a run adds: Glitch layers, the Tournament, the Virus Battler, the Undernet's and the secret side layers, DarkChips and their flame",
+  "takes": {},
+  "units": [
+    "scenarios: extras"
+  ],
+  "run": false
+}

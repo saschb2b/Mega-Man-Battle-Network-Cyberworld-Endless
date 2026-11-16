@@ -38,7 +38,8 @@ issue first where there is one. `START` is the game's start as
 [the agents' tools](agents-tools.md) take it (a route, the game's
 options, `VAR=VALUE` first for its environment), `NEEDS` the other games'
 ROMs it plays with beside BN6's (`'bn5'`, `'bn4'`; skipped without them),
-and `STEPS` its course:
+`KNOWN` a bug it shows that is not fixed yet (below), and `STEPS` its
+course:
 
 | Step | Does |
 | --- | --- |
@@ -106,6 +107,48 @@ FAIL liberation-rules-end    3.4 s    4593 frames
    nothing; #669's was run with both of its fix's disarms taken out.
 4. Prefer `until` and `repeat` to counted waits: a wait counted in frames
    breaks when a fade grows by ten.
+
+## A bug a scenario finds
+
+A scenario written for a journey that turns out broken is the bug's
+report and its test at once. Where the fix is small and sure it goes in
+the same pull request, the scenario seen red before it. Where it is not,
+the scenario is kept with `KNOWN = 'what is wrong (issue #N)'`: it is
+played with the rest and reported `KNOWN` with that line, no failure of
+the run, so the suite stays green and the bug stays in sight. Once the
+bug is fixed the scenario passes, which fails the run until its `KNOWN`
+is taken out: the fix's pull request does both.
+
+```
+KNOWN home-shop-buys-a-chip    1.2 s     640 frames
+     the shop's last row sells at the first row's price (issue #700)
+     step 7 ('expect', 'zenny=1200'): the state does not say so
+```
+
+## Many written side by side
+
+Several sessions add scenarios at once, a claim each
+([Claims](../project/claims.md): `scenarios-AREA.json`, its unit the
+area). They stay out of each other's way so:
+
+- A session's files carry its area's prefix (`home_*.py`, `layer_*.py`),
+  and it writes no other's.
+- No page lists the scenarios: `tools/scenarios.py --list` does, from
+  their docstrings. A session's pull request adds its files and its
+  `docs/log.d/` entry, and edits this page only for a new step or a new
+  state line.
+- A new state line is the feature's own: a function in its module that
+  writes its lines (`lib_battle_describe` in `liberation_battle.c`),
+  called from `director_describe` without a condition of its own, in one
+  line; that function stands at lint's limit of branches, and two
+  sessions' lines beside each other there merge by hand in a moment.
+  The line's first word is new, its value one word where a test reads it.
+- The runner's steps are what there is. A step the area cannot do without
+  is added small, in a function of its own, and named in the pull
+  request.
+- Seeds and `--dev` switches make a course short and the same every time:
+  a scenario that takes more than twenty seconds, or passes only most of
+  the time, is not done. Ten runs in a row pass before it is committed.
 
 ## What they found at once
 

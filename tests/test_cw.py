@@ -189,7 +189,13 @@ def scenario_files():
     check(all(f'routes/{name}' in every for name in cw_routes.ROUTES), 'a scenario a route')
     check(every['routes/darkloid/shademan']['needs'] == ('bn5',), "BN5's routes need its ROM")
     good = dict(guards='issue #1: a thing', start='--scene emu', needs=(), steps=[('keep', 'hp'), ('same', 'hp')])
+    good['known'] = ''
     check(not scenarios.problems('good', good), 'a scenario that reads')
+    check(scenarios.problems('bad', {**good, 'known': 669}), 'refused: a KNOWN that is no line of words')
+    lost, won = dict(ok=False, lines=['     step 2: not so']), dict(ok=True, lines=[])
+    check(scenarios.verdict(won, '') == ('PASS', False, []) and scenarios.verdict(lost, '')[:2] == ('FAIL', True), 'a scenario passes or fails')
+    check(scenarios.verdict(lost, 'issue #1: wrong')[:2] == ('KNOWN', False), 'a known bug shown is no failure of the run')
+    check(scenarios.verdict(won, 'issue #1: wrong')[:2] == ('FAIL', True), 'a known bug gone fails until its KNOWN goes')
     for what, change in (('no word on what it guards', dict(guards='')), ('a ROM nobody has', dict(needs=('bn9',))),
                          ('no steps', dict(steps=[])), ('a step unknown', dict(steps=[('hope', 'hp=1')])),
                          ('a test that does not read', dict(steps=[('expect', 'hp is 1')])),

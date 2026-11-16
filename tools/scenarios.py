@@ -17,7 +17,9 @@ A scenario is a file tests/scenarios/NAME.py: its docstring says what it
 guards (the issue first), START is the game's start (tools/cw.py's: a
 route, the game's options, VAR=VALUE first for its environment), NEEDS the
 other games' ROMs it plays with beside BN6's ('bn5', 'bn4'; skipped
-without them) and STEPS
+without them), KNOWN a bug it shows that is not fixed yet (what is wrong
+and its issue: it is played and reported KNOWN, no failure of the run,
+and fails once it passes, so the line goes with the fix) and STEPS
 its course, a tuple each:
 
   ('do', COMMANDS)                tools/play.py's commands
@@ -34,7 +36,7 @@ its course, a tuple each:
                                   again on the same saves
 
 A file may hold many instead: MANY = {name: dict(START=..., STEPS=...,
-NEEDS=..., GUARDS=...)} (tests/scenarios/routes.py: a scenario a route).
+NEEDS=..., GUARDS=..., KNOWN=...)} (tests/scenarios/routes.py: a scenario a route).
 
 The games run from build/host/cyberworld (built first where a source is
 newer; CYBERWORLD_CW_BIN another), each in .build/scenarios/NAME, with
@@ -86,9 +88,10 @@ def load():
         if hasattr(m, 'MANY'):
             for name, s in m.MANY.items():
                 out[f'{base}/{name}'] = dict(guards=s.get('GUARDS', doc), start=s['START'], needs=tuple(s.get('NEEDS', ())),
-                                             steps=list(s['STEPS']))
+                                             steps=list(s['STEPS']), known=s.get('KNOWN', ''))
         else:
-            out[base] = dict(guards=doc, start=m.START, needs=tuple(getattr(m, 'NEEDS', ())), steps=list(m.STEPS))
+            out[base] = dict(guards=doc, start=m.START, needs=tuple(getattr(m, 'NEEDS', ())), steps=list(m.STEPS),
+                             known=getattr(m, 'KNOWN', ''))
     return out
 
 
@@ -97,6 +100,8 @@ def problems(name, s):
     out = []
     if not s['guards']:
         out.append(f'{name}: no docstring saying what it guards')
+    if not isinstance(s.get('known', ''), str):
+        out.append(f'{name}: KNOWN is a line of words: what is wrong, and its issue')
     if any(n not in ROMS for n in s['needs']):
         out.append(f'{name}: NEEDS {s["needs"]}: {", ".join(ROMS)}')
     starts = [s['start']] + [step[1] for step in s['steps'] if step and step[0] == 'restart' and len(step) > 1]
@@ -297,6 +302,18 @@ def run(name, s, roms):
     return dict(name=name, ok=ok, seconds=time.time() - t, frames=frames, lines=lines)
 
 
+def verdict(r, known):
+    """A played scenario's word, whether it fails the run, and its lines: a
+    scenario with KNOWN shows a bug not fixed yet, so its failure is KNOWN
+    and no failure of the run, and its pass is one (the bug is gone: its
+    KNOWN is to go)."""
+    if not known:
+        return ('PASS' if r['ok'] else 'FAIL'), not r['ok'], r['lines']
+    if r['ok']:
+        return 'FAIL', True, [f'     it passes now: take its KNOWN out ({known})']
+    return 'KNOWN', False, [f'     {known}'] + r['lines'][:1]
+
+
 # ---- all of them ----
 
 def chosen(every, names):
@@ -328,7 +345,8 @@ def main():
     every = load()
     if values.get('list'):
         for name, s in every.items():
-            print(f'{name}: {s["guards"]}' + (f' (needs {", ".join(s["needs"])})' if s['needs'] else ''))
+            print(f'{name}: {s["guards"]}' + (f' (needs {", ".join(s["needs"])})' if s['needs'] else '') +
+                  (f' (KNOWN: {s["known"]})' if s['known'] else ''))
         return
     bad = [line for name, s in every.items() for line in problems(name, s)]
     if bad:
@@ -343,20 +361,22 @@ def main():
     skipped = {n: s for n, s in todo.items() if set(s['needs']) - set(roms)}
     todo = {n: s for n, s in todo.items() if n not in skipped}
     t = time.time()
-    failed = 0
+    failed = known = 0
     width = max((len(n) for n in list(todo) + list(skipped)), default=0)
     # (each set of ROMs' folder made before the games start, once)
     folders = {needs: rom_folder(roms, needs) for needs in {s['needs'] for s in todo.values()}}
     with concurrent.futures.ThreadPoolExecutor(int(values.get('jobs') or 4)) as pool:
         for r in pool.map(lambda item: run(*item, folders[item[1]['needs']]), todo.items()):
-            failed += not r['ok']
-            print(f'{"PASS" if r["ok"] else "FAIL"} {r["name"]:{width}}  {r["seconds"]:5.1f} s  {r["frames"]:6} frames', flush=True)
-            for line in r['lines']:
+            word, fails, lines = verdict(r, todo[r['name']]['known'])
+            failed += fails
+            known += word == 'KNOWN'
+            print(f'{word:5} {r["name"]:{width}}  {r["seconds"]:5.1f} s  {r["frames"]:6} frames', flush=True)
+            for line in lines:
                 print(line, flush=True)
     for name, s in skipped.items():
-        print(f'SKIP {name:{width}}  needs {", ".join(sorted(set(s["needs"]) - set(roms)))} in {play.ROM_DIR}')
-    print(f'{len(todo)} scenarios: {len(todo) - failed} passed, {failed} failed' + (f', {len(skipped)} skipped' if skipped else '') +
-          f' in {time.time() - t:.0f} s')
+        print(f'SKIP  {name:{width}}  needs {", ".join(sorted(set(s["needs"]) - set(roms)))} in {play.ROM_DIR}')
+    print(f'{len(todo)} scenarios: {len(todo) - failed - known} passed, {failed} failed' + (f', {known} known' if known else '') +
+          (f', {len(skipped)} skipped' if skipped else '') + f' in {time.time() - t:.0f} s')
     sys.exit(1 if failed else 0)
 
 

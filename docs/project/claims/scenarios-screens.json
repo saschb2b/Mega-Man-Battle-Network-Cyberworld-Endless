@@ -1,0 +1,9 @@
+{
+  "branch": "scenarios-screens",
+  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for the engine's own screens outside a run: the first start, the title and its menu, the Jack-In Setup's choices, Options, Controls, the statistics' question, SAVES, the ROMs screen, a run's summary and records",
+  "takes": {},
+  "units": [
+    "scenarios: screens"
+  ],
+  "run": false
+}
