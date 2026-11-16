@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-16T22:10:00Z
-* **Update**: engine/updates.md (the next start says whether an update went in, from settings.ini's update_pending; the releases page's QR code in the box; CYBERWORLD_UPDATE_WAY and CYBERWORLD_UPDATE_PENDING for developers), GUIDE.md (Updates: the QR code, the next start's word), code/update.md (update.c, options_news.c and title_version.c in its rows).
