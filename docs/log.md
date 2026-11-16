@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Update**: devtools/scenarios.md (`KNOWN`: a scenario of a bug not fixed yet; how several sessions add scenarios side by side), code/tests.md (`tests/scenarios/` no longer lists its files).
+* **Add**: devtools/scenarios.md (the scenarios: a course of play kept as a test, `build.py scenarios`), devtools/index.md (its line), code/tools.md (`tools/scenarios.py`), code/tests.md (`tests/scenarios/`), devtools/agents-tools.md (the state's `turn`, `rules`, `title` and `cursor` lines; the `layer` and `battle` routes pick the opening gift, `pet/options` on `options-display`).
 * **Update**: game/liberation/building/stage-2-battle.md (when a liberation's battle's arm ends: the board, any layer's start, a battle not the board's; issue #669).
 
 ## 2026-11-15

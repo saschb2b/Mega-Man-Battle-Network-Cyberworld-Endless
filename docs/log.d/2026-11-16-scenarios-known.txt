@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-16T13:02:00Z
-* **Update**: devtools/scenarios.md (`KNOWN`: a scenario of a bug not fixed yet; how several sessions add scenarios side by side), code/tests.md (`tests/scenarios/` no longer lists its files).
