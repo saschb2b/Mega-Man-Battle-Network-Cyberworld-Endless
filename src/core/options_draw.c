@@ -168,6 +168,22 @@ static const char *line_name(int kind) {
 	}
 }
 
+void options_describe(FILE *f) {
+	static const char *const lines[] = { [LINE_CONTROLS] = "controls", [LINE_STATS] = "statistics", [LINE_UPDATE] = "update",
+		[LINE_FULLSCREEN] = "fullscreen", [LINE_SCALE] = "scale", [LINE_SMOOTH] = "smooth", [LINE_SOUND] = "sound", [LINE_MUSIC] = "music",
+		[LINE_EFFECTS] = "effects", [LINE_FAST] = "fast", [LINE_VIBRATION] = "vibration", [LINE_TRIGGERS] = "triggers", [LINE_COLOUR] = "colour",
+		[LINE_BLEND] = "blend", [LINE_LCD3X] = "lcd3x", [LINE_OUTPUT] = "output", [LINE_VOXEL] = "depth", [LINE_UPDATES] = "updates",
+		[LINE_TOUCH] = "touch" };
+	analytics_ask_describe(f);
+	news_box_describe(f);
+	controls_describe(f);
+	if (!O.open) return;
+	int kind = options_line_kind();
+	const char *value = options_line_turns(kind) ? value_word(kind) : kind == LINE_STATS ? analytics_word(analytics_consent() == ANALYTICS_ON ? AW_ON : AW_OFF) : "-";
+	fprintf(f, "line %s\nvalue %s\n", lines[kind], value);
+	if (O.asking) fprintf(f, "defaults %s\n", O.yes ? "yes" : "no");
+}
+
 /* a line: its name, its value at the right between the PET's arrows, or
  * a screen's chevron (Controls, Statistics, the update where A does something) */
 static void line_draw(int x0, int y, int kind, bool on) {

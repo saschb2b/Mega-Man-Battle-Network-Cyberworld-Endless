@@ -10,6 +10,7 @@
 #include "library.h"
 #include "netpass_screen.h"
 #include "options.h"
+#include "saves.h"
 #include "second.h"
 
 const char *screen_name(void) {
@@ -23,4 +24,12 @@ const char *screen_name(void) {
 	if (library_shown()) return "library";
 	if (netpass_screen_shown()) return "netpass";
 	return second_screen_word();
+}
+
+/* (Options and what shows over it, SAVES, the ROMs: each its own lines
+ * where it is up, docs/devtools/scenarios.md, The screens' lines) */
+void screens_describe(FILE *f) {
+	options_describe(f);
+	saves_describe(f);
+	launcher_describe(f);
 }

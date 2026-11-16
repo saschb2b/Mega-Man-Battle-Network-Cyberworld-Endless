@@ -256,7 +256,7 @@ static void settings_load(const char *path) {
 	char line[256];
 	while (fgets(line, sizeof line, f)) {
 		char key[64], val[64];
-		if (line[0] == '#' || sscanf(line, " %63[a-z_] = %63s", key, val) != 2 || display_setting(key, val)) continue;
+		if (line[0] == '#' || sscanf(line, " %63[a-z0-9_] = %63s", key, val) != 2 || display_setting(key, val)) continue;
 		if (!strcmp(key, "sound")) sound_filter_set(sound_filter_read(val));
 		if (!strcmp(key, "low_pass")) sound_low_pass_set(atoi(val));
 		if (!strcmp(key, "output")) sound_output_set(sound_output_read(val));
@@ -293,11 +293,15 @@ void player_files(bool headless, int smooth_arg, const SoundArgs *sound, const c
 	char path[600];
 	const char *pad_kind = capture_pad_kind();
 	if (pad_kind && !pads_virtual(pad_kind)) fprintf(stderr, "--pad %s: no such virtual controller here\n", pad_kind);
-	if (!headless || pad_kind) {
+	/* (a headless start reads none of the player's files, so a capture is
+	 * the same whatever its data folder holds; --dev settings reads them,
+	 * for a scenario of what Options keeps) */
+	bool files = !headless || dev.settings;
+	if (files || pad_kind) {
 		snprintf(path, sizeof path, "%s/pad.ini", g_data_dir);
 		pads_load(path);
 	}
-	if (!headless) {
+	if (files) {
 		snprintf(path, sizeof path, "%s/keys.ini", g_data_dir);
 		platform_load_keys(path);
 		snprintf(path, sizeof path, "%s/settings.ini", g_data_dir);

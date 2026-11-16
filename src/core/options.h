@@ -21,6 +21,7 @@
 #include <SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "sound_filter.h"
 
@@ -34,6 +35,16 @@ void options_first_start(void);
 bool options_shown(void);
 /* ... which, in a word ("options-audio", "controls"), NULL where none */
 const char *options_screen(void);
+/* Options in a headless run's state, a line each: on a page the line under
+ * the cursor (`line` fullscreen, scale, smooth, colour, blend, lcd3x,
+ * depth, music, effects, output, sound, vibration, triggers, update,
+ * controls, touch, fast, statistics, updates) and its value as the page
+ * shows it (`value`, "-" for a line that opens a screen), START's question
+ * (`defaults` yes or no, the answer under its cursor); and the lines of
+ * what shows over it: the controls screen's (controls_describe), the
+ * statistics' (analytics_ask_describe), the update's (news_box_describe).
+ * Reads only. */
+void options_describe(FILE *f);
 /* Its frame (in the scene's place) and its picture over the canvas (after
  * the scene's: drawing changes nothing). */
 void options_update(void);

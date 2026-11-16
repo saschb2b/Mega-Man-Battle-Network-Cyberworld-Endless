@@ -11,12 +11,17 @@
 #define CW_OPTIONS_NEWS_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* The title's, each frame its menu shows: the box, where it is due */
 void news_box_offer(void);
 /* Options' update line: the box again (false where there is no update) */
 bool news_box_open(void);
 bool news_box_shown(void);
+/* The update in a headless run's state, where this copy looks for one:
+ * how it stands (`update` none, found, getting, failed or ready) and the
+ * version found (`newversion`). Reads only. */
+void news_box_describe(FILE *f);
 /* Its frame's keys and its picture (options.c's, over all else) */
 void news_box_update(void);
 void news_box_draw(void);

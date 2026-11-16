@@ -6789,6 +6789,10 @@ static void test_settings_line(void) {
 	CHECK(settings_line_read(path, "fullscreen", v, sizeof v) && !strcmp(v, "on"), "settings: fullscreen read back (%s)", v);
 	CHECK(settings_line_read(path, "sound", v, sizeof v) && !strcmp(v, "soft"), "settings: the sound read back (%s)", v);
 	CHECK(!settings_line_read(path, "screen", v, sizeof v), "settings: a line it has not read as none");
+	/* (a key with a digit, lcd3x: found again, so written once and read back) */
+	settings_line_write(path, "lcd3x", "off", "\n# lcd3x: what it is\n");
+	settings_line_write(path, "lcd3x", "on", "\n# lcd3x: what it is\n");
+	CHECK(settings_line_read(path, "lcd3x", v, sizeof v) && !strcmp(v, "on"), "settings: lcd3x, a key with a digit, replaced and read back (%s)", v);
 	remove(path);
 	CHECK(!settings_line_read(path, "fullscreen", v, sizeof v), "settings: no file read as none");
 }

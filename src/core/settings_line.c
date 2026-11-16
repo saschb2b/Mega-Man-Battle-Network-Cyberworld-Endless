@@ -6,6 +6,10 @@
 
 #include "compat.h"
 
+/* (a key's letters, digits and underscores: lcd3x's 3 ended a key read by
+ * letters alone, so its line was never found again, here or at the start,
+ * and Options' LCD 3x was off at every start, a line more in the file each
+ * time it was turned) */
 bool settings_line_write(const char *path, const char *key, const char *value, const char *note) {
 	char tmp[620], line[512], k[32];
 	if (!path) return false;
@@ -17,7 +21,7 @@ bool settings_line_write(const char *path, const char *key, const char *value, c
 	}
 	bool kept = false;
 	while (in && fgets(line, sizeof line, in)) {
-		bool ours = line[0] != '#' && sscanf(line, " %31[a-z_]", k) == 1 && !strcmp(k, key);
+		bool ours = line[0] != '#' && sscanf(line, " %31[a-z0-9_]", k) == 1 && !strcmp(k, key);
 		if (!ours) fputs(line, out);
 		else if (!kept) fprintf(out, "%s = %s\n", key, value);
 		kept |= ours;
@@ -34,7 +38,7 @@ bool settings_line_read(const char *path, const char *key, char *value, size_t n
 	FILE *in = path ? fopen(path, "r") : NULL;
 	bool found = false;
 	while (in && !found && fgets(line, sizeof line, in))
-		found = line[0] != '#' && sscanf(line, " %31[a-z_] = %63s", k, v) == 2 && !strcmp(k, key);
+		found = line[0] != '#' && sscanf(line, " %31[a-z0-9_] = %63s", k, v) == 2 && !strcmp(k, key);
 	if (in) fclose(in);
 	if (found) snprintf(value, n, "%s", v);
 	return found;
