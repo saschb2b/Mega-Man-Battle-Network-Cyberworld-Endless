@@ -284,8 +284,14 @@ void director_describe(FILE *f) {
 	/* (a special route kept for its fork, and the act it led to) */
 	if (run.route_found) fprintf(f, "route kept from act %d\n", run.route_found);
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
+	/* (a chat's question, a reward pick's row, what MegaMan holds, BN6's shop screen's row: tests/scenarios) */
+	talk_describe(f);
+	director_pick_describe(f);
+	holds_describe(f);
+	shop_describe(f);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	layer_describe(f);
 	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);

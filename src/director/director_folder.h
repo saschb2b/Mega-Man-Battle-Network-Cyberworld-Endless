@@ -4,6 +4,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "flags.h"
 
@@ -54,5 +55,12 @@ void library_from_game(void);
 void library_chip_given(int id);
 void programs_from_game(void);
 void bugfrag_trade(void);
+/* What MegaMan holds, for a state (director_describe; tests/scenarios
+ * reads them): `chips` the chips he owns, the Folder's and the Pack's (BN6's
+ * pack counts both), copies counted, `programs` the
+ * NaviCust programs of every colour, placed or not, `unlockers` and
+ * `rushfood` the keys a lock asks for, `regmemory` the Reg memory's MB;
+ * nothing changed */
+void holds_describe(FILE *f);
 
 #endif

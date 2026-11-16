@@ -42,6 +42,16 @@ uint32_t pack_entry(int id) {
 	return bn6_pack_entry(pack, (unsigned)id);
 }
 
+void holds_describe(FILE *f) {
+	int chips = 0, programs = 0;
+	for (int id = 1; id < PACK_CHIPS; ++id)
+		for (uint32_t k = 0, e = pack_entry(id); e && k < 4; ++k) chips += emu_read8(e + k);
+	for (int v = 0; v < BN6_NCMENU_RUN - BN6_PROGRAM_ITEMS; ++v) programs += key_item(BN6_PROGRAM_ITEMS + v);
+	/* (Reg memory as BN6 sums it, bn6f sub_803CFB0: 4 MB and the RegUPs') */
+	int reg = 4 + key_item(SCRIPTS_REG_UP1) + 2 * key_item(SCRIPTS_REG_UP1 + 1) + 3 * key_item(SCRIPTS_REG_UP1 + 2);
+	fprintf(f, "chips %d\nprograms %d\nunlockers %d\nrushfood %d\nregmemory %d\n", chips, programs, key_item(SUB_UNLOCKER), key_item(ITEM_RUSH_FOOD), reg);
+}
+
 void pack_report(int id) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CHIPS), entry = pack_entry(id);
 	if (id <= 0 || id > (int)CHIP_ID_MASK || data < BN6_EWRAM || data >= BN6_EWRAM_END) {

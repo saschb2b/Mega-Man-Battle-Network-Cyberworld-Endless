@@ -130,6 +130,20 @@ bool director_goal_panel(int *x, int *y, bool *talk) {
 	return false;
 }
 
+/* The kinds of object a dev step names: --talk's chats, the "by" step's places (director_by.c) */
+static const struct { const char *name; int type; } kinds[] = {
+	{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
+	{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "duel", OBJ_DUEL }, { "official", OBJ_OFFICIAL }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
+	{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT }, { "trader", OBJ_TRADER }, { "bugtrader", OBJ_BUGTRADER }, { "battler", OBJ_BATTLER },
+	{ "glitch", OBJ_GLITCH }, { "copy", OBJ_COPY },
+};
+
+int director_dev_kind(const char *name) {
+	for (unsigned i = 0; i < sizeof kinds / sizeof *kinds; ++i)
+		if (!strcmp(name, kinds[i].name)) return kinds[i].type;
+	return -1;
+}
+
 /* A dev talk's gift, no chat: fifty BugFrags (a BugFrag Trader's trade
  * wants ten) or one (a DarkChip's last, BN6's own), an Unlocker, three
  * RushFood, a WWW-ID (the set pieces' keys), 10000 zenny (a cube's toll), a
@@ -176,12 +190,6 @@ static void dev_talks(void) {
 	/* (each layer's own: the talks of a later layer too) */
 	if (D.frame <= 1 || run.layer_seed != layer_of) { done = 0; layer_of = run.layer_seed; }
 	if (!director_dev_talks || talk_busy() || emu_read8(BN6_CHATBOX)) return;
-	static const struct { const char *name; int type; } kinds[] = {
-		{ "npc", OBJ_NPC }, { "shop", OBJ_SHOP }, { "heal", OBJ_HEAL }, { "programs", OBJ_PROGRAMS },
-		{ "gift", OBJ_GIFT }, { "challenge", OBJ_CHALLENGE }, { "duel", OBJ_DUEL }, { "official", OBJ_OFFICIAL }, { "undernet", OBJ_UNDERNET }, { "gate", OBJ_SECRET_GATE },
-		{ "navigate", OBJ_NAVI_GATE }, { "vault", OBJ_VAULT }, { "trader", OBJ_TRADER }, { "bugtrader", OBJ_BUGTRADER }, { "battler", OBJ_BATTLER },
-		{ "glitch", OBJ_GLITCH }, { "copy", OBJ_COPY },
-	};
 	char buf[256];
 	snprintf(buf, sizeof buf, "%s", director_dev_talks);
 	int n = 0;

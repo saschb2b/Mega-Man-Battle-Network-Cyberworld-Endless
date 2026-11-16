@@ -34,6 +34,13 @@ int reward_pick_rows(void) { return RP.o.n + (RP.o.frags > 0); }
 
 bool reward_pick_ready(void) { return RP.t + 1 >= PICK_SEEN && RP.rest >= PICK_REST; }
 
+void director_pick_describe(FILE *f) {
+	static const char *const what[] = { "chip", "program", "hp" };
+	if (!RP.up) return;
+	fprintf(f, "pick %d/%d\npickof %s\npicktakes %s\n", RP.cursor + 1, reward_pick_rows(),
+		RP.cursor < RP.o.n && RP.o.c[RP.cursor].what <= PICK_HP ? what[RP.o.c[RP.cursor].what] : "skip", reward_pick_ready() ? "yes" : "no");
+}
+
 /* A choice's variant `mark` (a code, a colour), its count `held` more:
  * listed once, in the order they come */
 static void add_held(int k, int mark, int held) {

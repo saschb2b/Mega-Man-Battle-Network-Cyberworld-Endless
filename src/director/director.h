@@ -176,6 +176,10 @@ bool director_guardian_heard(void);
 bool director_arrived(void);
 /* What a player sees, in words, one fact a line (remote play). */
 void director_describe(FILE *f);
+/* ... a reward pick's screen (reward_pick.c) while it is up: `pick K/N` the
+ * cursor's row of its rows, `pickof` what that row is (hp, chip, program,
+ * or skip), `picktakes` yes once an A would take it; nothing changed */
+void director_pick_describe(FILE *f);
 /* Dev: MegaMan put at world (x, y) facing `face` (0-7, else unchanged). */
 void director_dev_place(int x, int y, int face);
 /* ... in the layer's signature, on the free panel nearest its anchor (the
@@ -184,6 +188,15 @@ bool director_dev_signature(void);
 /* ... two panels from the layer's Glitch warp, or a Glitch layer's copy
  * (the "glitch" step: docs/game/glitch-layer.md); false where none stands */
 bool director_dev_glitch(void);
+/* ... beside the layer's first NAME, as a player walks up to it (the "by"
+ * step, docs/devtools/play.md): a --talk's kind, a Mystery Data by its
+ * colour (green, blue, purple) or a lock (block), on the nearest free floor;
+ * a pad (exit, return, teleport) on it, or two panels off it
+ * ("exitside"); "npc2" the layer's second. False where the layer has none. */
+bool director_dev_by(const char *name);
+/* ... and the way he faces, BN6's eight (UP first, clockwise): the pad's
+ * AHEAD in a test's input */
+int director_dev_facing(void);
 /* A test's start at home (--scene home, docs/world/home/): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */
