@@ -118,6 +118,8 @@ typedef struct {
 	bool weak[LIB_UNITS];  /* a unit SneakAttack struck: its next battle the easier */
 	bool mate_down;        /* the battle under way: its Navi deleted in it */
 	bool picked;           /* the arrival's pick asked (not kept: a CONTINUE before the first phase asks again) */
+	int fought;            /* (the state's words alone, liberation_describe.c; not kept) how the board's last battle
+	                        * ended: 0 none yet, 1 won, 2 won in its first turn, 3 time up, 4 lost */
 } LibState;
 
 extern LibState LB;

@@ -75,10 +75,10 @@ a picture. Among the state's lines, `gameframe` is the game's own count of its
 main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
 `frame` goes on where the game stands still (issue #482;
 [An old checkpoint](old-checkpoint.md) watches it; a `play` call's
-changes leave it out, as they do `frame`), a battle says its `turn` (the
+changes leave it out, as they do `frame`), a run says what MegaMan holds (`chips`, `programs`, `unlockers`, `rushfood`, `regmemory`), a chat box's question its `choice`, a reward pick and BN6's shop their row, a layer what stands on it (`exitpad`, `locks`, `greentaken`, `on lane`: [Scenarios](scenarios.md), What stands on a layer), a battle says its `turn` (the
 Custom screens it has opened) and its `rules`, `plain` or a `liberation`'s
 three turns (issue #669), the title its step and its menu's row (`title
-menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
+menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), a dark layer its board (`board move`, `boardphase 2`, `freed 4`, `lastfight oneturn`; `board none` on a layer without one: Scenarios, A dark layer's board), and `soulturns +1` stands while
 MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.

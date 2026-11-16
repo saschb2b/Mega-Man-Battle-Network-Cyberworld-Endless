@@ -31,6 +31,9 @@ its course, a tuple each:
   ('expect', COND)                the state says so now
   ('keep', WORDS)                 the state's lines of those first words kept
   ('same', WORDS)                 ... and the same now as when kept
+  ('moved', WORD, BY)             ... or line WORD's number moved by BY since:
+                                  a number (1, -1), or a kept word with a
+                                  sign ('-price': down by the price kept)
   ('restart', START)              the game quit as a player quits it
                                   (SIGTERM: the port's close), then started
                                   again on the same saves
@@ -64,7 +67,8 @@ DIR = os.path.join(ROOT, 'tests', 'scenarios')
 WORK = os.path.join(ROOT, '.build', 'scenarios')
 UNTIL = 6000     # an until's most frames, where the step names none
 REPEAT = 12      # a repeat's most times
-KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'keep': (1, 1), 'same': (1, 1), 'restart': (1, 1)}
+KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'keep': (1, 1), 'same': (1, 1), 'moved': (2, 2),
+         'restart': (1, 1)}
 # (the other games' ROMs a scenario may need, told by their SHA-1: build.py's)
 ROMS = {'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
 BN6 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
@@ -134,6 +138,10 @@ def problems(name, s):
             kept |= set(step[1].split())
         if step and step[0] == 'same' and set(step[1].split()) - kept:
             out.append(f'{name}: step {i}: same {" ".join(sorted(set(step[1].split()) - kept))} never kept')
+        if step and step[0] == 'moved' and len(step) == 3:
+            by = str(step[2]).lstrip('+-')
+            if ({step[1]} | ({by} if not by.isdigit() else set())) - kept:
+                out.append(f'{name}: step {i}: moved {step[1]} by {step[2]}: a word never kept')
     return out
 
 
@@ -175,6 +183,29 @@ def words(state, names):
         if cw.key(line) in names:
             out.setdefault(cw.key(line), line)
     return out
+
+
+def number(line):
+    """A state line's number, its first: 'hp 60/100' is 60."""
+    for word in line.split()[1:]:
+        digits = word.split('/')[0]
+        if digits.lstrip('-').isdigit():
+            return int(digits)
+    raise Failed(f'the line {line!r} has no number')
+
+
+def moved(step, state, kept):
+    """A moved step: line WORD's number now is its kept number plus BY, BY a
+    number or a kept word with a sign ('-price': down by the price kept)."""
+    word, by = step[1], str(step[2])
+    now = words(state, [word])
+    if word not in now:
+        raise Failed(f'the state has no line {word}', state)
+    sign, name = (-1 if by.startswith('-') else 1), by.lstrip('+-')
+    amount = sign * (int(name) if name.isdigit() else number(kept[name]))
+    was, have = number(kept[word]), number(now[word])
+    if have != was + amount:
+        raise Failed(f'{word} was {was} and is {have}: not moved by {amount:+d}', state)
 
 
 def start(h, spec, fresh, roms):
@@ -256,6 +287,8 @@ def step_run(h, step, state, kept, roms=None):
         differ = [f'{kept[w]!r} then, {now.get(w, "no line")!r} now' for w in step[1].split() if now.get(w) != kept[w]]
         if differ:
             raise Failed('; '.join(differ), state)
+    elif kind == 'moved':
+        moved(step, state, kept)
     elif kind == 'restart':
         quit_game(h)
         return start(h, step[1], False, roms)

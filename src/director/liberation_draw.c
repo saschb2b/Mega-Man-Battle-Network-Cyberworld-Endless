@@ -37,9 +37,11 @@
 #include "rom.h"
 
 /* The GBA's own registers and memory BN6's map is drawn by: the map's
- * first layer's scroll (BG1, its walkway floor: x + y + 256 and
- * (y - x) / 2 - 256 of the world at the picture's middle, mod 512, read
- * on captures as MegaMan was moved) and the sprites' palettes */
+ * first layer's scroll (BG1, its walkway floor: x + y and (y - x) / 2 of
+ * the world at the picture's middle, mod 256: BN6 scrolls a screen map of
+ * 32 by 32 tiles, and the scroll's ninth bit goes by the map's size and
+ * place, 0 or 256 on either axis from layer to layer, read on nine dark
+ * layers' captures) and the sprites' palettes */
 #define GBA_BG1HOFS     0x04000014u
 #define GBA_BG1VOFS     0x04000016u
 #define GBA_BG_PALETTE  0x05000000u
@@ -68,9 +70,15 @@ static struct {
 	int effect_n;          /* ... the one begun last, -1 none */
 } S;
 
-/* (x mod 512, near `near`) */
+/* (the state's words: the pixels the last picture recoloured, all and the
+ * faced panel's; the drawing's own count, nothing of the game's) */
+static int shown_dark, shown_faced;
+
+void lib_draw_describe(FILE *f) { fprintf(f, "darkshown %d\nfacedshown %d\n", shown_dark, shown_faced); }
+
+/* (x mod 256, near `near`) */
 static int unwrap(int v, int near) {
-	int d = ((v - near) % 512 + 512 + 256) % 512 - 256;
+	int d = ((v - near) % 256 + 256 + 128) % 256 - 128;
 	return near + d;
 }
 
@@ -122,8 +130,8 @@ void lib_see(void) {
 	S.on = lib_on() && on_map() && director_arrived();
 	if (!S.on) return;
 	int px = bn6_player_x(), py = bn6_player_y();
-	S.cam_u = unwrap((emu_read16(GBA_BG1HOFS) & 0x1FF) - 256, px + py);
-	S.cam_v = unwrap((emu_read16(GBA_BG1VOFS) & 0x1FF) + 256, (py - px) / 2);
+	S.cam_u = unwrap(emu_read16(GBA_BG1HOFS) & 0xFF, px + py);
+	S.cam_v = unwrap(emu_read16(GBA_BG1VOFS) & 0xFF, (py - px) / 2);
 	/* (the camera's place while the board pans it: the picture's middle,
 	 * which the scroll's wrap reads a half turn off far from MegaMan) */
 	if (lib_camera_place(&px, &py)) { S.cam_u = px + py; S.cam_v = (py - px) / 2; }
@@ -208,6 +216,7 @@ void director_tint_board(uint32_t *px) {
 	/* (at home, the dark way's portal marked) */
 	lib_way_tint(px);
 	rise_mosaic(px);
+	shown_dark = shown_faced = 0;
 	if (!S.on || S.look) return;
 	for (int y = 0; y < (S.box ? BOX_TOP : EMU_H); ++y)
 		for (int x = 0; x < EMU_W; ++x) {
@@ -222,6 +231,8 @@ void director_tint_board(uint32_t *px) {
 			/* (BN5's own look, where it lies on the board: only the faced panel's light) */
 			if (k == LIB_VOID || (!faced && (k == LIB_CLEAN || S.look))) continue;
 			px[y * EMU_W + x] = recolour(c, k, faced);
+			++shown_dark;
+			shown_faced += faced;
 		}
 }
 

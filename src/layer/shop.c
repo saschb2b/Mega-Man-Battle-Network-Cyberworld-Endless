@@ -63,6 +63,13 @@ static void vendor_bugfrags(void) {
 	if (rom_u32(o) == SHOP_ZENNY) emu_write8(at, SHOP_BUGFRAGS);
 }
 
+void shop_describe(FILE *f) {
+	if (emu_read8(emu_read32(BN6_TOOLKIT)) != BN6_MODE_SHOP) return;
+	uint32_t e = BN6_SHOP_LIST + BN6_SHOP_ENTRY * (uint32_t)(emu_read16(BN6_SHOP_ROW) + emu_read16(BN6_SHOP_SCROLL));
+	bool zenny = emu_read32(emu_read32(BN6_SHOP_DESC)) == SHOP_ZENNY;
+	fprintf(f, "shoprows %d\nprice %d\nstock %d\n", emu_read16(BN6_SHOP_COUNT), emu_read16(e + 6) * (zenny ? 100 : 1), emu_read8(e + 1));
+}
+
 bool shop_install(int shop, const ShopItem *items, int n, bool kept) {
 	uint32_t data = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_SHOP_DATA);
 	if (data < BN6_EWRAM || data >= BN6_EWRAM_END) return false;

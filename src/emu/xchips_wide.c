@@ -158,7 +158,14 @@ static const struct { uint32_t at; uint16_t was, now; } changes[] = {
 	ARCHIVE_LOOP(BN6_CHIP_NAME_OF), ARCHIVE_WORD(BN6_CHIP_NAME_OF, 0x08027D2Cu, CHIPS_TABLES),
 	ARCHIVE_LOOP(BN6_CHIP_DESC_OF), ARCHIVE_WORD(BN6_CHIP_DESC_OF, 0x08027D50u, CHIPS_TABLES + 0x10u),
 	/* (the folder editor's items, id << 6 | code in a halfword where BN6 has id << 7 | code, ids to 511: an item made,
-	 * its id and its code taken, tools/chip_ids.py --table's second part, from the census's EDITOR_KEYS) */
+	 * its id and its code taken, tools/chip_ids.py --table's second part, from the census's EDITOR_KEYS; its first
+	 * four the Chip Trader's two readers of an item of that list, the card of the one under the cursor and the loop
+	 * that takes the chips put in, BN6_TRADER_TAKE: left at seven bits they took chip id >> 1 in no code of its own,
+	 * so a trade kept its three and cost other chips, docs/rom/chips-code.md, Ten-bit chip ids) */
+	{ 0x0804B34Cu, 0x0DC0, 0x0D80 },
+	{ 0x0804B34Eu, 0x217F, 0x213F },
+	{ 0x0804B740u, 0x227F, 0x223F },
+	{ 0x0804B744u, 0x0DC0, 0x0D80 },
 	{ 0x08121AC4u, 0x01C4, 0x0184 },
 	{ 0x08121B00u, 0x01C2, 0x0182 },
 	{ 0x08121CB4u, 0x01DB, 0x019B },

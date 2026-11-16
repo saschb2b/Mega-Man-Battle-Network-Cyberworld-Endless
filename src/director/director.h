@@ -91,7 +91,7 @@ bool director_pick_shown(void);
 void director_pick_keys(uint32_t keys);
 void director_draw_pick(void);
 void director_pick_shut(void);
-/* ... in the state's words: which pick, its rows' offers, the cursor's row, whether A would take it */
+/* ... in the state's words: which pick, its rows' offers, the cursor's row and what it is, whether A would take it */
 void director_pick_describe(FILE *f);
 /* The Battle Lab's builder (lab.h; docs/game/battle-lab.md): whether its
  * screen is up over the held game, its keys a frame, its picture, and the
@@ -191,6 +191,23 @@ bool director_dev_signature(void);
 /* ... two panels from the layer's Glitch warp, or a Glitch layer's copy
  * (the "glitch" step: docs/game/glitch-layer.md); false where none stands */
 bool director_dev_glitch(void);
+/* ... beside the layer's first NAME, as a player walks up to it (the "by"
+ * step, docs/devtools/play.md): a --talk's kind, a Mystery Data by its
+ * colour (green, blue, purple) or a lock (block), on the nearest free floor;
+ * a pad (exit, return, teleport) on it, or two panels off it
+ * ("exitside"); "npc2" the layer's second. False where the layer has none. */
+bool director_dev_by(const char *name);
+/* ... and the way he faces, BN6's eight (UP first, clockwise): the pad's
+ * AHEAD in a test's input */
+int director_dev_facing(void);
+/* ... on a dark layer's board, on the clean panel beside the nearest panel
+ * of kind `what` the walk reaches, facing it (the "board" step,
+ * liberation_describe.c: dark, pair, sneak, item, trap, bonus, darkhole,
+ * ring, guardian, darkloid, mate; an item's by what it holds: orderpoints,
+ * heart, key, zenny, chip, route; next: where the board's autopilot would
+ * stand him, liberation_auto.c; over: BombLiberation's flier over the
+ * nearest plain dark panel); false where the walk reaches none */
+bool director_dev_board(const char *what);
 /* A test's start at home (--scene home, docs/world/home/): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */

@@ -67,10 +67,7 @@ DEPTHS = (1, 9)      # the layer a game starts on
 # A quit at any frame): a CONTINUE that came back changed from a quit one of
 # these tells (its situation, and lines of the state kept) is reported KNOWN,
 # no failure of the run, and the game is played on. An entry goes with its fix.
-KNOWN = (
-    dict(kind='won', kept={'quit': 'checkpoint', 'talk': 'director'},
-         what="a liberation's words after a won battle begin before MegaMan is free, with no save before them: a quit under them goes back to the last checkpoint, the battle and its reward lost"),
-)
+KNOWN = ()   # (none today: a liberation's words after a won battle, seed 3's game 12, was the first, fixed with the board's own save)
 
 
 def plan(seed, game, quits):

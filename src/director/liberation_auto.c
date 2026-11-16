@@ -61,9 +61,9 @@ static void cost_from_target(void) {
 }
 
 /* Where to stand and which way to face: the clean panel the walk reaches
- * (from MegaMan's, over clean panels) beside the best panel to take;
- * the first step's way there into *step (-1 there already) */
-static bool plan(int *face, int *step) {
+ * (from MegaMan's, over clean panels) beside the best panel to take, into
+ * (*sx, *sy); the first step's way there into *step (-1 there already) */
+static bool plan(int *face, int *step, int *sx, int *sy) {
 	static int16_t walk[MAP_H][MAP_W], first[MAP_H][MAP_W];
 	static uint16_t q[MAP_W * MAP_H];
 	memset(walk, 0xFF, sizeof walk);
@@ -91,7 +91,15 @@ static bool plan(int *face, int *step) {
 	if (bx < 0) return false;
 	*face = bf;
 	*step = first[by][bx];
+	*sx = bx;
+	*sy = by;
 	return true;
+}
+
+bool lib_auto_stand(int *x, int *y, int *face) {
+	int step;
+	cost_from_target();
+	return plan(face, &step, x, y);
 }
 
 /* The pad's way toward world (x, y) from MegaMan's place (as the
@@ -145,8 +153,8 @@ uint32_t lib_auto_keys(int frame) {
 	bool flier = lib_mate_command(lib_in_play()) == LIB_DO_BOMB && LB.op > 0;
 	if (flier && LB.b.kind[LB.my][LB.mx] == LIB_DARK && lib_unit_at(LB.mx, LB.my) < 0) return frame & 1 ? 0 : KEY_A;
 	cost_from_target();
-	int face, step;
-	if (!plan(&face, &step)) return 0;
+	int face, step, sx, sy;
+	if (!plan(&face, &step, &sx, &sy)) return 0;
 	int wx, wy;
 	uint32_t over = flier && step < 0 ? fly_onto(face) : 0;
 	if (over) return over;

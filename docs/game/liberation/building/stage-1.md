@@ -3,7 +3,7 @@ type: Feature
 title: "Stage 1, as built"
 description: "Stage 1 as built: the dark layer behind an act's fork (`run_dark_area`), its board made from the seed (`liberation_board.c`), the phases' course, fences, BN5's look, camera and music, and `run.lib` across a CONTINUE."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:42:25Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T15:20:00Z }
 ---
 
 # Stage 1, as built (23 October 2026)
@@ -112,9 +112,11 @@ moved by their objects' places. The dark panels are the layer's own floor
 recoloured as it shows (`src/director/liberation_draw.c`), in Nebula's
 purple, the Darkloid's ring redder, a DarkHole near black, a BonusPanel
 gold, the panel MegaMan faces lit: pixel by pixel in the frame, from the
-map layer's scroll (BG1's: `x + y + 256` and `(y - x) / 2 - 256` of the
-world at the picture's middle, mod 512, read on captures as MegaMan was
-moved), a pixel in a sprite's colour or under a chat box left alone; BN5's
+map layer's scroll (BG1's: `x + y` and `(y - x) / 2` of the world at the
+picture's middle, mod 256: BN6 scrolls a screen map of 32 by 32 tiles,
+and the scroll's ninth bit goes by the map's size and place; read mod 512
+at first, which drew eight layers of nine 256 pixels off, found by
+`liberation-board/shown`, [Scenarios](../../../devtools/scenarios.md)), a pixel in a sprite's colour or under a chat box left alone; BN5's
 own board tiles are not read yet. The phase, par and Order Points in the
 corner, the banners and the command menu in BN6's PET look
 (`src/gfx/pet_look.h`); every word in BN6's chat boxes
@@ -230,7 +232,12 @@ a talk's step its next (no chat box is open as a checkpoint is saved),
 the menu closed. Checked: the autopilot's board quit at PLAYER PHASE
 04's banner (SIGTERM, the quit's checkpoint) and continued: the same
 board, phase 4, the panels it had freed clean and its Order Points as
-they were, the banner shown again once the act's card was gone.
+they were, the banner shown again once the act's card was gone. The
+Navi's words after a battle begin once BN6 holds him no more
+(`talk_due_now()`), so the run is held back before them and a quit under
+them keeps the battle won; begun in the fade back from the battle, as
+they were at first, such a quit went back to before it
+(`liberation-board/continue/under-the-words`).
 
 **Left for later:** a guardian's HP under it (the Darkloid's came with
 The board's HP as BN5's); the economy report and pacing for

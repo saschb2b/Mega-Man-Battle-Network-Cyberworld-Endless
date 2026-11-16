@@ -39,14 +39,15 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], by[16], board[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab, ahead; } InputStep;
 /* (the steps taken from the heap by the first script, as only headless
  * tests and remote play have one: a megabyte no game holds otherwise) */
 #define SCRIPT_MAX 1024
 static InputStep *script;
 static int script_len, script_pos, script_left;
 
-/* "UP+A": the GBA's buttons injected as held; "pad.x", "pad.-lefty" a
+/* "UP+A": the GBA's buttons injected as held, "AHEAD" the d-pad the way
+ * MegaMan faces as each frame begins; "pad.x", "pad.-lefty" a
  * virtual controller's (--pad), and "key.K" a key, through SDL as a
  * player's are (the controls screen and the maps in tests) */
 static void parse_buttons(const char *s, InputStep *step) {
@@ -64,13 +65,15 @@ static void parse_buttons(const char *s, InputStep *step) {
 		if (in == PAD_NONE && !SDL_strncasecmp(t, "pad.", 4)) in = padmap_input_of(PAD_FAMILY_RAW, t + 4);
 		if (in != PAD_NONE) step->pad |= (uint64_t)1 << in;
 		if (!SDL_strncasecmp(t, "key.", 4)) step->key = SDL_GetScancodeFromName(t + 4);
+		/* (the d-pad held the way MegaMan faces: a walk on from the "by" step, wherever the layer's seed laid it) */
+		if (!strcmp(t, "AHEAD")) step->ahead = true;
 		for (size_t i = 0; i < sizeof names / sizeof *names; ++i)
 			if (!strcmp(t, names[i].n)) step->buttons |= names[i].b;
 	}
 }
 
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
- * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit"), into its step;
+ * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit", "by NAME"), into its step;
  * false where `tok` is none */
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
@@ -83,6 +86,10 @@ static bool text_step(const char *tok, InputStep *s) {
 	/* (BN4's bracket screen moved into BN6: xbracket.h) */
 	else if (!strncmp(tok, "bracket ", 8)) snprintf(s->bracket, sizeof s->bracket, "%s", tok + 8);
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
+	/* (MegaMan beside the layer's first of a kind: director_dev_by) */
+	else if (!strncmp(tok, "by ", 3)) snprintf(s->by, sizeof s->by, "%s", tok + 3);
+	/* (on a dark layer's board, beside the nearest panel of a kind: director_dev_board) */
+	else if (!strncmp(tok, "board ", 6)) snprintf(s->board, sizeof s->board, "%s", tok + 6);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
 	/* (the NetPass opened over the game, or its stamp moment: netpass_screen.h) */
@@ -106,7 +113,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0];
+		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0] || s->by[0] || s->board[0];
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -215,6 +222,16 @@ static void write_state(const char *path) {
 	fclose(f);
 }
 
+/* The steps that put MegaMan somewhere on the layer: in its signature, by
+ * the Glitch warp, beside something that stands on it, beside a panel of a
+ * dark layer's board */
+static void place_steps(const InputStep *s) {
+	if (s->sig == 1) director_dev_signature();
+	if (s->sig == 2) director_dev_glitch();
+	if (s->by[0]) director_dev_by(s->by);
+	if (s->board[0]) director_dev_board(s->board);
+}
+
 /* A step's dev steps on the game: a battle, foes, a record of BN5's, a
  * status, a chip, the form the next Cross chosen takes (soulproxy.h), the
  * signature, the run saved with MegaMan held (a CONTINUE's recovery, issue
@@ -230,8 +247,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->chip[0]) director_dev_chip(s->chip);
 	if (s->folder) director_dev_folder(s->folder);
 	if (s->cross) soulproxy_cross(s->cross);
-	if (s->sig == 1) director_dev_signature();
-	if (s->sig == 2) director_dev_glitch();
+	place_steps(s);
 	if (s->held) director_dev_hold(s->hold);
 	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
 	if (s->onehit) devtools_parse("onehit");
@@ -382,7 +398,10 @@ void capture_input(void) {
 	pads_virtual_hold(done ? 0 : script[script_pos].pad);
 	script_key(done ? 0 : script[script_pos].key);
 	if (done) { platform_inject(0); return; }
-	platform_inject(script[script_pos].buttons);
+	/* (UP first, clockwise: BN6's eight facings) */
+	static const uint32_t ahead[8] = { BTN_UP, BTN_UP | BTN_RIGHT, BTN_RIGHT, BTN_DOWN | BTN_RIGHT, BTN_DOWN, BTN_DOWN | BTN_LEFT, BTN_LEFT, BTN_UP | BTN_LEFT };
+	bool faced = script[script_pos].ahead && scene_current() == &scene_emu;
+	platform_inject(script[script_pos].buttons | (faced ? ahead[director_dev_facing() & 7] : 0));
 	if (--script_left <= 0 && ++script_pos < script_len) script_left = script[script_pos].frames;
 }
 

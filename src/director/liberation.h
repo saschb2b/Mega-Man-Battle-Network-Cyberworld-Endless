@@ -48,6 +48,16 @@ void lib_battle_frame(void);
  * screens it has opened) and the rules it runs by, `rules liberation` while
  * a liberation's are armed, else `rules plain`. */
 void lib_battle_describe(FILE *f);
+/* (liberation_describe.c) The board in the state's words, a fact a line
+ * (its phase and par, the Order Points, the panels dark and freed, the
+ * units and the team, the prize's tier, the exit: the lines listed there);
+ * nothing off a dark layer. */
+void lib_describe(FILE *f);
+/* (liberation_draw.c) ... and what the last picture showed of it without
+ * BN5's look: `darkshown N` the pixels recoloured as dark panels,
+ * `facedshown N` those of the panel the Navi in play faces (0 in BN5's
+ * look, which lays its own panels) */
+void lib_draw_describe(FILE *f);
 /* The pad on its way to the game while the board is under way: the
  * board's own moves and menu take it; MegaMan's walk from panel to panel
  * is what reaches the game. */
@@ -90,6 +100,11 @@ void lib_camera_mend(void);
  * same layer (false: none for this layer, the board begins afresh). */
 void lib_save(void);
 bool lib_resume(void);
+/* ... and whether the board's words may begin: MegaMan free of BN6's
+ * holds (talk_due_now), so the run is held back before them for a quit
+ * with them open (after a won battle they began in its fade back, and
+ * such a quit lost the battle) */
+bool lib_words_due(void);
 
 /* (liberation_fence.c) The board's dark panels fenced with walls of BN6's
  * own, each panel's switched off as it is liberated: built after the
@@ -125,6 +140,11 @@ int lib_look_unit_anim(int kind, int face, bool strike);
 /* (liberation_auto.c) The test autopilot's keys on the board, frame
  * `frame` (autopilot.c). */
 uint32_t lib_auto_keys(int frame);
+/* ... where it would stand the Navi in play for his next command, and the
+ * grid way he would face (0 +x, 1 +y, 2 -x, 3 -y): the panel that brings
+ * him nearest the next target (the dev step's `board next`); false where
+ * it finds none */
+bool lib_auto_stand(int *x, int *y, int *face);
 
 /* (liberation_way.c) At home, the portal of the way to a dark layer in
  * BN5's dark panels' colours, in the core's frame `px` (240 x 160) */

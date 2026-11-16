@@ -15,6 +15,11 @@
   now finishes the warp first, unseen, and the run goes on from the next
   layer.
 
+- **Fixed: the Chip Trader kept your chips, and took others.** Since
+  0.21.0 a Chip Trader gave its chip without taking the three you put
+  in, and could take copies of other chips from your Pack instead (two
+  HiCannons put in cost Cannons). The layers' traders and AsterLand's
+  take exactly the three again.
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by
@@ -24,6 +29,19 @@
   deleted in a battle, a new run begun without closing the game started
   its count of viruses deleted with those of that battle, so its RESULT
   read too high. The count starts at nothing again.
+- **Fixed: a dark layer's panels not shown without BN5's ROM.** With
+  BN6's ROM alone the board's dark panels, DarkHoles and the lit panel
+  MegaMan faces were drawn a screen's width off on most layers, so the
+  floor looked clean and the fences stood unseen. They are drawn where
+  they lie.
+- **Fixed: a won liberation battle lost to a quit under MegaMan's
+  words.** Closing the game while he spoke after a battle won on a dark
+  layer's board (a one-turn win, a DarkHole closed, an item found), the
+  CONTINUE went back to before that battle. The run is now kept as it
+  stood when he began to speak.
+- **Fixed: START on the team's pick opened the PET.** Taking the team a
+  dark layer offered with START, the button went on to the game and
+  opened the PET over Lan's briefing.
 
 - **Fixed: a Glitch layer glitching again after a quit.** With the copy
   at its heart deleted the layer settles: its own look back, its battles

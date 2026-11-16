@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:50:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T15:20:00Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -49,6 +49,7 @@ course:
 | `('repeat', COMMANDS, COND, TIMES)` | `COMMANDS` again and again until `COND`, 12 times at most: a button pressed through screens whose timing is their own (the title's menu opens a moment after START) |
 | `('expect', COND)` | the state says so now |
 | `('keep', WORDS)`, `('same', WORDS)` | the state's lines of those first words kept, and the same later: what a CONTINUE must bring back |
+| `('moved', WORD, BY)` | ... or the kept line WORD's number moved by BY since: a number (`1`, `-1`), or a kept word with a sign (`'-price'`: down by the price kept), so a purchase is checked against the price the shop showed and not against today's balance |
 | `('restart', START)` | the game quit as a player's system quits it (SIGTERM, the port's close: it saves and leaves), then started again on the same saves |
 
 `COND` is an until's test of the agents' tools: a state line's first word,
@@ -108,6 +109,47 @@ FAIL liberation-rules-end    3.4 s    4593 frames
    nothing; #669's was run with both of its fix's disarms taken out.
 4. Prefer `until` and `repeat` to counted waits: a wait counted in frames
    breaks when a fade grows by ten.
+
+## What stands on a layer
+
+The layer's scenarios (`layer_*.py`: its keepers, Mystery Data, locks and
+set pieces, gates, the way on, the buttons that must not fall through)
+walk up to a thing and press A, as a player does, and read what MegaMan is
+left with. Two dev steps and the state's lines below make that the same
+on every seed ([tools/play.py](play.md) has the steps):
+
+- `by NAME` puts MegaMan beside the layer's first NAME, facing it, on
+  floor he can walk to: a `--talk` kind (`shop`, `heal`, `programs`,
+  `npc`, `vault`, `navigate`, `official`, `challenge`, `duel`, `trader`,
+  `bugtrader`, `undernet`, `gate`, `gift`), a Mystery Data by its colour
+  (`green`, `blue`, `purple`) or by the key item in it (`scrtdata`,
+  `regup`), a lock (`block`), the Navi who knows its P-Code (`teller`) or
+  hints at an invisible path (`hinter`); a number after a kind or a colour
+  is a later one (`npc2`). A pad is stepped on, so `exit`, `return`,
+  `teleport`, `gap`, `lane` and `path` put him on it (`exitside`: two
+  panels off it). `--talk` runs a chat's script with no one walked up to;
+  `by` and `press A` go through BN6's own check and the director's keys.
+- `hold AHEAD 40` holds the d-pad the way MegaMan faces: over Rush's
+  back, onto an arrow lane, along an invisible path, wherever the seed
+  laid it.
+
+| The state says | Where | Written by |
+| --- | --- | --- |
+| `chips N` (the chips owned, the Folder's and the Pack's: BN6's pack counts both), `programs N`, `unlockers N`, `rushfood N`, `regmemory N` | a run, at home too | `holds_describe`, `director_folder.c` |
+| `choice K/N` (the cursor on option K of the N a chat box asks) | while BN6's box shows a question | `talk_describe`, `talk.c` |
+| `pickat K/N` the cursor's row as a player counts it, `pickof hp`, `chip`, `program` or `skip` what that row is (with the pick's other lines, `pick`, `offers`, `pickrows`, `pickrow`, `pickready`, below) | a reward pick's screen | `director_pick_describe`, `reward_pick.c` |
+| `shoprows N`, and of the row under the cursor `price N` (as shown, zenny or BugFrags) and `stock N` | BN6's shop screen | `shop_describe`, `shop.c` |
+| `exitpad shut` or `open`, `heard yes` once a Navi has named the act's guardian, `greentaken N`, `bluetaken N`, `purpletaken N`, `locks N` (still standing), `pcode told`, `gate HeatMan sealed` or `earned`, `on floor`, `teleport1`, `teleport2`, `gap`, `lane` or `path` | a layer | `layer_describe`, `layer_describe.c` |
+
+With `CYBERWORLD_STATE_POS=1` first in its START a scenario also reads
+`held`: `held=none` is MegaMan free, so
+`('repeat', 'press A; wait 30', 'held=none')` pages a chat to its end
+whatever its boxes. A question is waited for with
+`('repeat', 'press A; wait 30', 'choice=2/2')` and its cursor moved with
+`('repeat', 'press LEFT; wait 10', 'choice=1/2')`: a d-pad press as the
+options appear is lost. On BN6's shop screen `zenny` is the game's
+working copy and moves once the screen is left; on its trader's screen
+the pack's counts are the spare chips alone.
 
 ## A bug a scenario finds
 
@@ -227,8 +269,10 @@ never seen red guards nothing either.
   way back from the battle, while BN6 still holds MegaMan, where the run
   cannot be held back before it as it is before
   [a talk on the map](../engine/emulation/layer.md), and a quit under it
-  goes back to the last checkpoint, the battle and its reward lost. Not fixed here: the board's steps are its own. It is
-  in the fuzz's `KNOWN`, below.
+  goes back to the last checkpoint, the battle and its reward lost. It
+  stood in the fuzz's `KNOWN`, below, until the board saved the run as
+  its Navi begins to speak (`liberation_save.c`, with the board's own
+  scenarios): `--fuzz 3/12` passes, and the entry is gone.
 - **A quit heard between two batches was not heard.** The headless
   game's wait for its next batch is a `read` the signal wakes; a signal
   that came after a batch's answer and before that `read` woke nothing,
@@ -279,7 +323,7 @@ its own part and called from `director_describe` (the summary's from
 | --- | --- | --- |
 | `viruses N`, `navis N`, `battles N`; in a battle `foes N`, `down N` | `tally_describe` (`director_tally.c`) | the run's tally as RESULT will count it, the layer's random battles fought, a battle's enemies and those down |
 | `battle random`, `guardian`, `duel`, `gate`, `copy`, `server` or `floor`; `phase custom`, `fight`, `results` or `other`; `form none`, `HeatCross` ... `BeastOut`; `foestatus none`, `paralysed`, `dragged`, `frozen` or `bubbled`; at its results `result won`, `lost`, `ran` or `draw` and `reward zenny N`, `chip ID CODE`, `hp N`, `bugfrags N`; on the map after one `lastbattle won` ... | `battle_state_describe` (`battle_state.c`) | a battle: what it is, where it stands, how it ended and what its RESULT paid, MegaMan's form, the statuses its enemies are held in |
-| `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken`, `exitpad open` or `shut`; in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
+| `version N`, `known yes` or `no`, `data hidden`, `fresh`, `waiting` or `taken` (the exit pad's line is the layer's, above); in his fight `guardianhp N` | `boss_describe` (`boss.c`), beside `guardian NAME waiting` ... | the guardian's course: his version, whether MegaMan has battle data on him, his Guardian Data (`fresh` its first second, when no A takes it) and the exit pad |
 | `duel none`, `waiting`, `on` or `fought`; `rung N`; `duelswon N`, `duelslost N`, `clearance N`; `chaud new` or `known`; `verdict none`, `beat`, `slow`, `hit` or `lost` | `duel_describe` (`director_duel.c`) | the rival: the layer's duel and its rung, the record, what his respect has opened, whether Chaud has called before, the last verdict |
 | `pick gift`, `draft`, `vault`, `order`, `official`, `server` or `copy`; `offers hpmemory:2 chip:137 program:1 [bugfrags]`; `pickrows N`, `pickrow N`, `pickready yes` or `no` | `director_pick_describe` (`reward_pick.c`) | a reward pick while it is up: its rows, the cursor's, whether an A would take one yet |
 | `card title`, `area` or `grand`; `cardsays TOP / NAME / LINE / LINE / LINE` | `cinema_describe` (`cinema.c`) | the card that shows: a guardian's title, the act's ("Guardian: ???") |
@@ -293,6 +337,48 @@ and then `held=none` (the state's with `CYBERWORLD_STATE_POS=1`). A test
 start's area and guardian (`--net-biome`, `--guardian`) are given again
 at a `restart`: a CONTINUE from the title keeps the run's own, and
 `--guardian`'s older-net Navi is no CONTINUE's.
+
+## A dark layer's board
+
+A liberation's board says itself in the state
+(`lib_describe`, `src/director/liberation_describe.c`, whose head lists
+every line): its step (`board opening`, `move`, `menu`, `battle`,
+`darkloids`, `done`; `board none` on a layer with no board), `boardphase`
+and `par`, `orderpoints`, the panels dark and `freed`, the DarkHoles and
+guardians standing, the Darkloid and his `darkloidhp`, each Navi of the
+team (`mate0 MegaMan 100/100 inplay`), what the Navi in play `faces`, the
+window's `command`, how the last battle ended (`lastfight won`, `oneturn`,
+`timeup`, `lost`), the `prize`'s tier and `boardexit`. A battle of its own
+adds `foehp`, `soul` and `cross`.
+
+A board is its seed's, so a scenario does not name its panels. The dev
+step `board KIND` ([tools/play.py](play.md)) stands the Navi in play
+beside the nearest panel of a kind his walk reaches, facing it, where a
+player would have walked him: `dark`, `pair` (LongSwrd's two), `item`
+(or what it holds: `orderpoints`, `heart`, `key`, `route`), `trap`,
+`bonus`, `darkhole`, `guardian`, `sneak` (a guardian in SneakAttack's
+reach), `ring`, `darkloid`, `mate`, `over` (BombLiberation's flier over a
+dark panel), and `next`, the panel the board's autopilot would take
+(`liberation_auto.c`). The command is then taken by the pad. Its battle is
+ended from the dev menu (hold SELECT, press R; "Win this battle", its
+fifth row, deletes the enemies and BN6's own loop ends the battle), in
+the turn the scenario waits for: the first for a one-turn win, the second
+for a plain one, none for TIME UP!. `tests/scenarios/liberation_board.py`'s
+`Course` builds those steps, and `liberation_team.py` takes it for BN5's
+team.
+
+They found two bugs as they were written. With BN6's ROM alone a dark
+layer's panels were drawn 256 pixels off or not at all on eight layers of
+nine: the recolouring read BN6's scroll as wrapping at 512, where BN6
+scrolls a screen map of 256 (`liberation-board/shown` reads the picture's
+own count, `darkshown` and `facedshown`). And START on the team's pick,
+the board's own team taken, went on to BN6 and opened the PET over the
+briefing (`liberation-team/pick/kept`). A third the fuzz of quits found
+on the board, and its fixed course is here: MegaMan's words after a won
+battle began in the fade back from it, BN6 still holding him, so no save
+was held back before them and a quit under them lost the battle
+(`liberation-board/continue/under-the-words`; the words now wait for
+`talk_due_now()`, as the director's other talks do).
 
 ## The extras
 
