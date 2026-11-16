@@ -3688,7 +3688,7 @@ def online_pair(rest):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'npc-anims', 'xdiff', 'xrecords', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
+    ap.add_argument('action', nargs='?', default='all', choices=['all', 'host', 'device', 'linux', 'windows', 'android', 'macos', 'ios', 'flatpak', '3ds', 'switch', 'vita', 'psp', 'ps4', 'ps5', 'run', 'web', 'serve', 'release', 'package', 'shot', 'asan', 'test', 'lint', 'clean', 'atlas', 'tiles', 'sizes', 'tour', 'pacing', 'economy', 'npc-anims', 'xdiff', 'xrecords', 'scenarios', 'screenshots', 'clips', 'town', 'world', 'symbols', 'server', 'server-run', 'server-test', 'online-pair'])
     ap.add_argument('rest', nargs=argparse.REMAINDER)
     a = ap.parse_args()
     if a.action == 'server-test':
@@ -3822,6 +3822,9 @@ def main():
     if a.action == 'xdiff':
         # (local only: both ROMs; the tool builds the host binary and runs it once a spec)
         sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xdiff.py'), *a.rest]))
+    if a.action == 'scenarios':
+        # (local only: the ROM; the game played through scripted courses, its state checked on the way, tests/scenarios)
+        sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'scenarios.py'), *a.rest]))
     if a.action == 'xrecords':
         # (local only: both ROMs; BN5's records in BN6's engine, each fightable or why not)
         sys.exit(subprocess.call([sys.executable, os.path.join(ROOT, 'tools', 'xrecords.py'), *a.rest]))

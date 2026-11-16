@@ -477,6 +477,17 @@ static void update(void) {
 	jack_in();
 }
 
+/* The title in the state's words (capture.c): the step it is on, and on
+ * its menu the row the cursor is on. */
+const char *title_step(void) {
+	return S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
+		: !S.menu ? "opening" : S.confirm ? "confirm" : "menu";
+}
+
+const char *title_cursor(void) {
+	return S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "other";
+}
+
 /* NEW GAME or CONTINUE chosen: the jack-in sound, and away */
 static void jack_in(void) {
 	/* the game plays 0x9D for NEW GAME and 0x9C for CONTINUE and stops the music */

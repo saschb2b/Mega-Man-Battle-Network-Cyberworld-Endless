@@ -270,7 +270,13 @@ void director_describe(FILE *f) {
 	if (D.town) fprintf(f, "place %s\n", director_place_name());
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
-	if (sub == BN6_SUB_BATTLE) fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
+	/* (a battle's gauge, its turn and the rules it runs by, a liberation's
+	 * or BN6's own: issue #669 left a liberation's on the next run's
+	 * battles; tests/scenarios reads them) */
+	if (sub == BN6_SUB_BATTLE) {
+		fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
+		lib_battle_describe(f);
+	}
 	describe_turns(f);
 	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */

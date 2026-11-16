@@ -16,6 +16,7 @@ import cw_mcp  # noqa: E402
 import cw_pictures as pics  # noqa: E402
 import cw_routes  # noqa: E402
 import play  # noqa: E402
+import scenarios  # noqa: E402
 
 failed = 0
 
@@ -176,8 +177,51 @@ def old_checkpoints():
             pass
 
 
+def scenario_files():
+    """tools/scenarios.py without the game: every scenario of tests/scenarios
+    reads, one written wrong is refused with why, a name finds its own, and a
+    step's test of the state holds or fails as the state says."""
+    every = scenarios.load()
+    check(len(every) >= 4 and 'liberation-rules-end' in every, 'the scenarios are found')
+    for name, s in every.items():
+        for line in scenarios.problems(name, s):
+            check(False, line)
+    check(all(f'routes/{name}' in every for name in cw_routes.ROUTES), 'a scenario a route')
+    check(every['routes/darkloid/shademan']['needs'] == ('bn5',), "BN5's routes need its ROM")
+    good = dict(guards='issue #1: a thing', start='--scene emu', needs=(), steps=[('keep', 'hp'), ('same', 'hp')])
+    check(not scenarios.problems('good', good), 'a scenario that reads')
+    for what, change in (('no word on what it guards', dict(guards='')), ('a ROM nobody has', dict(needs=('bn9',))),
+                         ('no steps', dict(steps=[])), ('a step unknown', dict(steps=[('hope', 'hp=1')])),
+                         ('a test that does not read', dict(steps=[('expect', 'hp is 1')])),
+                         ('a command play.py has none of', dict(steps=[('do', 'jump 3')])),
+                         ('a limit that is no number', dict(steps=[('until', 'layer>=2', 'soon')])),
+                         ('a restart on no route', dict(steps=[('restart', 'nowhere')])),
+                         ('same of a word never kept', dict(steps=[('keep', 'hp'), ('same', 'zenny')]))):
+        check(scenarios.problems('bad', {**good, **change}), f'refused: {what}')
+    check(set(scenarios.chosen(every, ['routes/pet'])) == {n for n in every if n.startswith('routes/pet')}, 'a name finds those it starts')
+    check(list(scenarios.chosen(every, ['liberation-rules-end'])) == ['liberation-rules-end'], 'a name finds its own')
+    try:
+        scenarios.chosen(every, ['nothing-of-the-kind'])
+        check(False, 'an unknown scenario is refused')
+    except SystemExit as e:
+        check('liberation-rules-end' in str(e.code), 'an unknown scenario names the scenarios')
+    state = 'frame 9\nscreen battle\nhp 80/100\nzenny 150\nrules plain'
+    kept = {}
+    check(scenarios.step_run(None, ('expect', 'rules=plain'), state, kept) == (state, 0), 'an expect that holds')
+    scenarios.step_run(None, ('keep', 'hp zenny'), state, kept)
+    check(kept == {'hp': 'hp 80/100', 'zenny': 'zenny 150'}, "a keep's lines")
+    scenarios.step_run(None, ('same', 'hp zenny'), state, kept)
+    for step, later in ((('expect', 'rules=liberation'), state), (('same', 'zenny'), state.replace('150', '0')),
+                        (('same', 'hp'), 'frame 10\nscreen title'), (('keep', 'layer'), state)):
+        try:
+            scenarios.step_run(None, step, later, kept)
+            check(False, f'{step} fails where the state says otherwise')
+        except scenarios.Failed as e:
+            check(e.args[0], f'{step} says what it found')
+
+
 def main():
-    for part in (routes, starts, states, pictures, builds, server, old_checkpoints):
+    for part in (routes, starts, states, pictures, builds, server, old_checkpoints, scenario_files):
         if part is pictures and not pics.Image:
             print('agents\' tools: the pictures skipped (no Pillow here)')
             continue

@@ -206,6 +206,10 @@ void lib_battle_soul(int soul) { arm.soul = soul >= 7 && soul <= 12 ? soul : 0; 
 
 void lib_battle_cross(int cross) { arm.cross = cross >= 1 && cross <= 5 ? cross : 0; arm.soul = 0; }
 
+void lib_battle_describe(FILE *f) {
+	fprintf(f, "turn %d\nrules %s\n", emu_read8(BN6_BATTLE_SCREENS), arm.on ? "liberation" : "plain");
+}
+
 bool lib_battle_soul_armed(void) { return arm.on && (arm.soul || arm.cross); }
 
 bool lib_battle_down(void) { return down; }

@@ -1,0 +1,364 @@
+#!/usr/bin/env python3
+"""The scenarios (tests/scenarios/, docs/devtools/scenarios.md): the game
+played headless through a scripted course, its state in words checked on
+the way. A bug that only a sequence shows (a run's end, then the next run;
+a quit, then CONTINUE) is kept here as the play that showed it, so it stays
+fixed.
+
+  tools/scenarios.py [NAME ...] [--jobs N] [--list] [--check]
+      every scenario, or those named (a name, or the start of one:
+      "route" runs every route/...), --jobs at a time (4); one line each,
+      and for a failure the step that failed, the state it found, and
+      where its picture and log are. Exit 1 where one failed.
+      --list names them with what each guards; --check reads them all
+      without the game (build.py test does).
+
+A scenario is a file tests/scenarios/NAME.py: its docstring says what it
+guards (the issue first), START is the game's start (tools/cw.py's: a
+route, the game's options, VAR=VALUE first for its environment), NEEDS the
+other games' ROMs it plays with beside BN6's ('bn5', 'bn4'; skipped
+without them) and STEPS
+its course, a tuple each:
+
+  ('do', COMMANDS)                tools/play.py's commands
+  ('until', COND[, FRAMES])       the game runs on until the state says so
+                                  (tools/cw.py's until; 6000 frames at most)
+  ('repeat', COMMANDS, COND[, TIMES])   COMMANDS again and again until COND
+                                  (12 times at most): a button pressed
+                                  through screens whose timing is theirs
+  ('expect', COND)                the state says so now
+  ('keep', WORDS)                 the state's lines of those first words kept
+  ('same', WORDS)                 ... and the same now as when kept
+  ('restart', START)              the game quit as a player quits it
+                                  (SIGTERM: the port's close), then started
+                                  again on the same saves
+
+A file may hold many instead: MANY = {name: dict(START=..., STEPS=...,
+NEEDS=..., GUARDS=...)} (tests/scenarios/routes.py: a scenario a route).
+
+The games run from build/host/cyberworld (built first where a source is
+newer; CYBERWORLD_CW_BIN another), each in .build/scenarios/NAME, with
+BN6's ROM of ~/.cache/mmbn-ref/roms (CYBERWORLD_ROM_DIR) and those it
+NEEDS, no other: the same game whatever else that folder holds. Local,
+never CI's.
+"""
+import concurrent.futures
+import glob
+import hashlib
+import importlib.util
+import os
+import shutil
+import signal
+import sys
+import time
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, 'tools'))
+import cw  # noqa: E402
+import cw_pictures as pics  # noqa: E402
+import play  # noqa: E402
+
+DIR = os.path.join(ROOT, 'tests', 'scenarios')
+WORK = os.path.join(ROOT, '.build', 'scenarios')
+UNTIL = 6000     # an until's most frames, where the step names none
+REPEAT = 12      # a repeat's most times
+KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'keep': (1, 1), 'same': (1, 1), 'restart': (1, 1)}
+# (the other games' ROMs a scenario may need, told by their SHA-1: build.py's)
+ROMS = {'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
+BN6 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
+
+
+class Failed(Exception):
+    """A step that did not hold: what it found."""
+
+
+# ---- reading them ----
+
+def load():
+    """{name: dict(guards, start, needs, steps)} of every scenario, by name."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(DIR, '*.py'))):
+        base = os.path.basename(path)[:-3].replace('_', '-')
+        spec = importlib.util.spec_from_file_location('scenario_' + base.replace('-', '_'), path)
+        m = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(m)
+        doc = ' '.join((m.__doc__ or '').split())
+        if hasattr(m, 'MANY'):
+            for name, s in m.MANY.items():
+                out[f'{base}/{name}'] = dict(guards=s.get('GUARDS', doc), start=s['START'], needs=tuple(s.get('NEEDS', ())),
+                                             steps=list(s['STEPS']))
+        else:
+            out[base] = dict(guards=doc, start=m.START, needs=tuple(getattr(m, 'NEEDS', ())), steps=list(m.STEPS))
+    return out
+
+
+def problems(name, s):
+    """What is wrong with a scenario as written, a line each (none: it reads)."""
+    out = []
+    if not s['guards']:
+        out.append(f'{name}: no docstring saying what it guards')
+    if any(n not in ROMS for n in s['needs']):
+        out.append(f'{name}: NEEDS {s["needs"]}: {", ".join(ROMS)}')
+    starts = [s['start']] + [step[1] for step in s['steps'] if step and step[0] == 'restart' and len(step) > 1]
+    for start in starts:
+        try:
+            cw.parse_start(start)
+        except SystemExit as e:
+            out.append(f'{name}: start {start!r}: {e.code}')
+    if not s['steps']:
+        out.append(f'{name}: no steps')
+    for i, step in enumerate(s['steps'], 1):
+        kind = step[0] if step else None
+        if kind not in KINDS or not KINDS[kind][0] <= len(step) - 1 <= KINDS[kind][1]:
+            out.append(f'{name}: step {i} {step!r}: not a step ({", ".join(KINDS)})')
+            continue
+        try:
+            if kind in ('do', 'repeat'):
+                play.steps(step[1])
+            if kind in ('until', 'expect'):
+                cw.condition(step[1])
+            if kind == 'repeat':
+                cw.condition(step[2])
+        except SystemExit as e:
+            out.append(f'{name}: step {i} {step!r}: {e.code}')
+        if kind in ('until', 'repeat') and len(step) - 1 == KINDS[kind][1] and not isinstance(step[-1], int):
+            out.append(f'{name}: step {i} {step!r}: its last is a number')
+    kept = set()
+    for i, step in enumerate(s['steps'], 1):
+        if step and step[0] == 'keep':
+            kept |= set(step[1].split())
+        if step and step[0] == 'same' and set(step[1].split()) - kept:
+            out.append(f'{name}: step {i}: same {" ".join(sorted(set(step[1].split()) - kept))} never kept')
+    return out
+
+
+def have_roms():
+    """The ROMs in the ROM folder, {name: path} ('bn6' and the other games'), told by their SHA-1."""
+    have = {}
+    for path in sorted(glob.glob(os.path.join(play.ROM_DIR, '*.gba'))):
+        with open(path, 'rb') as f:
+            sha = hashlib.sha1(f.read()).hexdigest()
+        for name, want in {'bn6': BN6, **ROMS}.items():
+            if want == sha:
+                have.setdefault(name, path)
+    return have
+
+
+def rom_folder(roms, needs):
+    """A folder of BN6's ROM and those a scenario needs, no other (links, in
+    .build): a scenario plays the same game whatever else the ROM folder
+    holds (a run's areas, a dark layer's board and its team change with
+    BN5 beside BN6)."""
+    names = ['bn6', *sorted(needs)]
+    d = os.path.join(WORK, '.roms', '+'.join(names))
+    os.makedirs(d, exist_ok=True)
+    for name in names:
+        link = os.path.join(d, name + '.gba')
+        if os.path.realpath(link) != os.path.realpath(roms[name]):
+            if os.path.lexists(link):
+                os.remove(link)
+            os.symlink(os.path.abspath(roms[name]), link)
+    return d
+
+
+# ---- playing one ----
+
+def words(state, names):
+    """The state's lines whose first word is one of `names`, by that word."""
+    out = {}
+    for line in cw.state_lines(state):
+        if cw.key(line) in names:
+            out.setdefault(cw.key(line), line)
+    return out
+
+
+def start(h, spec, fresh, roms):
+    """Game h started from START with the ROMs of folder `roms` (cw.begin
+    without its print's redirect: several run at once here; the game takes
+    the last --rom-dir it is given)."""
+    commands, args, env, _ = cw.parse_start(spec)
+    seed, args = cw.take_seed(args, 1)
+    play.launch(h, seed, fresh, args + ['--rom-dir', roms], env, cw.BIN, keep_bin=False)
+    _, ran, shots, _, state = cw.batch(h, 'wait 1' + (f'; {commands}' if commands else ''))
+    for _, p in shots:
+        os.remove(p)
+    return state, ran
+
+
+def quit_game(h):
+    """The game quit as a player's system quits it (SIGTERM: it saves and
+    leaves), waited for; its log kept beside the next start's."""
+    try:
+        pid = int(open(os.path.join(h, 'pid')).read())
+    except (OSError, ValueError):
+        raise Failed('the game was not running to quit')
+    os.killpg(pid, signal.SIGTERM)
+    for _ in range(1000):
+        # (this process's own child: gone once reaped)
+        try:
+            if os.waitpid(pid, os.WNOHANG)[0]:
+                break
+        except OSError:
+            break
+        time.sleep(0.01)
+    else:
+        raise Failed('the game did not quit in 10 seconds')
+    os.remove(os.path.join(h, 'pid'))
+    n = len(glob.glob(os.path.join(h, 'log-*.txt')))
+    shutil.copy(os.path.join(h, 'log.txt'), os.path.join(h, f'log-{n + 1}.txt'))
+
+
+def step_run(h, step, state, kept, roms=None):
+    """One step in game h from `state`: (the state after, frames run)."""
+    kind = step[0]
+    if kind == 'do':
+        _, ran, shots, _, state = cw.batch(h, step[1])
+        for _, p in shots:
+            os.remove(p)
+        return state, ran
+    if kind == 'until':
+        limit = step[2] if len(step) > 2 else UNTIL
+        _, ran, _, state, passed = cw.run_until(h, cw.condition(step[1]), limit, 0)
+        if not passed:
+            raise Failed(f'not reached in {limit} frames', state)
+        return state, ran
+    if kind == 'repeat':
+        test, most, ran = cw.condition(step[2]), step[3] if len(step) > 3 else REPEAT, 0
+        for _ in range(most):
+            if test(state):
+                return state, ran
+            _, n, shots, _, state = cw.batch(h, step[1])
+            ran += n
+            for _, p in shots:
+                os.remove(p)
+        if not test(state):
+            raise Failed(f'not reached in {most} times', state)
+        return state, ran
+    if kind == 'expect':
+        if not cw.condition(step[1])(state):
+            raise Failed('the state does not say so', state)
+    elif kind == 'keep':
+        kept.update(words(state, step[1].split()))
+        missing = [w for w in step[1].split() if w not in kept]
+        if missing:
+            raise Failed(f'the state has no line {" ".join(missing)} to keep', state)
+    elif kind == 'same':
+        now = words(state, step[1].split())
+        differ = [f'{kept[w]!r} then, {now.get(w, "no line")!r} now' for w in step[1].split() if now.get(w) != kept[w]]
+        if differ:
+            raise Failed('; '.join(differ), state)
+    elif kind == 'restart':
+        quit_game(h)
+        return start(h, step[1], False, roms)
+    return state, 0
+
+
+def failure(h, state):
+    """A failure's state and picture kept in the game's folder; their paths."""
+    with open(os.path.join(h, 'fail.txt'), 'w') as f:
+        f.write(state + '\n')
+    out = [os.path.join(h, 'fail.txt')]
+    try:
+        _, _, shots, _, _ = cw.batch(h, 'shot', record=False)
+        pics.scaled(pics.game(pics.load(shots[-1][1])), 2).save(os.path.join(h, 'fail.png'))
+        os.remove(shots[-1][1])
+        out.append(os.path.join(h, 'fail.png'))
+    except (SystemExit, OSError, IndexError):
+        pass   # (the game gone: its log says why)
+    return out + [os.path.join(h, 'log.txt')]
+
+
+def run(name, s, roms):
+    """One scenario played with the ROMs of folder `roms`: dict(name, ok, seconds, frames, lines)."""
+    h = os.path.join(WORK, name.replace('/', '--'))
+    shutil.rmtree(h, ignore_errors=True)
+    os.makedirs(h)
+    t, frames, kept, state, at = time.time(), 0, {}, '', 0
+    lines = []
+    try:
+        state, frames = start(h, s['start'], True, roms)
+        for at, step in enumerate(s['steps'], 1):
+            state, n = step_run(h, step, state, kept, roms)
+            frames += n
+        ok = True
+    except (Failed, SystemExit) as e:
+        ok = False
+        what = e.args[0] if isinstance(e, Failed) else str(e.code)
+        if isinstance(e, Failed) and len(e.args) > 1:
+            state = e.args[1]
+        step = s['steps'][at - 1] if at else ('start', s['start'])
+        lines.append(f'     step {at} {step!r}: {what}')
+        shown = [line for line in cw.state_lines(state) if cw.key(line) not in ('frame', 'gameframe')]
+        if shown:
+            lines.append('     state: ' + ' · '.join(shown))
+        lines.append('     kept: ' + ', '.join(os.path.relpath(p, ROOT) for p in failure(h, state)))
+    finally:
+        play.stop(h)
+    return dict(name=name, ok=ok, seconds=time.time() - t, frames=frames, lines=lines)
+
+
+# ---- all of them ----
+
+def chosen(every, names):
+    """The scenarios `names` name (a name, or the start of one); SystemExit where a name finds none."""
+    if not names:
+        return dict(every)
+    out = {}
+    for want in names:
+        got = {n: s for n, s in every.items() if n == want or n.startswith(want.rstrip('/') + '/') or n.startswith(want)}
+        if not got:
+            raise SystemExit(f'no scenario {want!r}: {", ".join(every)}')
+        out.update(got)
+    return out
+
+
+def check():
+    every = load()
+    bad = [line for name, s in every.items() for line in problems(name, s)]
+    for line in bad:
+        print('FAIL', line)
+    print(f'{len(every)} scenarios read, {len(bad)} problems')
+    return 1 if bad or not every else 0
+
+
+def main():
+    rest, values = cw.options(sys.argv[1:], {'--list': 'list', '--check': 'check'}, {'--jobs': 'jobs'})
+    if values.get('check'):
+        sys.exit(check())
+    every = load()
+    if values.get('list'):
+        for name, s in every.items():
+            print(f'{name}: {s["guards"]}' + (f' (needs {", ".join(s["needs"])})' if s['needs'] else ''))
+        return
+    bad = [line for name, s in every.items() for line in problems(name, s)]
+    if bad:
+        sys.exit('\n'.join(bad))
+    todo = chosen(every, rest)
+    reply = cw.Reply()
+    if not cw.ready(reply):
+        sys.exit(reply.text)
+    roms = have_roms()
+    if 'bn6' not in roms:
+        sys.exit(f"BN6's ROM is not in {play.ROM_DIR} (CYBERWORLD_ROM_DIR): the scenarios play the game")
+    skipped = {n: s for n, s in todo.items() if set(s['needs']) - set(roms)}
+    todo = {n: s for n, s in todo.items() if n not in skipped}
+    t = time.time()
+    failed = 0
+    width = max((len(n) for n in list(todo) + list(skipped)), default=0)
+    # (each set of ROMs' folder made before the games start, once)
+    folders = {needs: rom_folder(roms, needs) for needs in {s['needs'] for s in todo.values()}}
+    with concurrent.futures.ThreadPoolExecutor(int(values.get('jobs') or 4)) as pool:
+        for r in pool.map(lambda item: run(*item, folders[item[1]['needs']]), todo.items()):
+            failed += not r['ok']
+            print(f'{"PASS" if r["ok"] else "FAIL"} {r["name"]:{width}}  {r["seconds"]:5.1f} s  {r["frames"]:6} frames', flush=True)
+            for line in r['lines']:
+                print(line, flush=True)
+    for name, s in skipped.items():
+        print(f'SKIP {name:{width}}  needs {", ".join(sorted(set(s["needs"]) - set(roms)))} in {play.ROM_DIR}')
+    print(f'{len(todo)} scenarios: {len(todo) - failed} passed, {failed} failed' + (f', {len(skipped)} skipped' if skipped else '') +
+          f' in {time.time() - t:.0f} s')
+    sys.exit(1 if failed else 0)
+
+
+if __name__ == '__main__':
+    main()

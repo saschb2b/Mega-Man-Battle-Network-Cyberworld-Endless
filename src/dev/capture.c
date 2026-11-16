@@ -209,6 +209,8 @@ static void write_state(const char *path) {
 	fprintf(f, "frame %llu\nscene %s\n", (unsigned long long)P.frame, scene_current() ? scene_current()->name : "none");
 	fprintf(f, "screen %s\n", screen_name());
 	if (scene_current() == &scene_emu) director_describe(f);
+	/* (the title's step and its menu's row: a scenario's way through it) */
+	if (scene_current() == &scene_title) fprintf(f, "title %s\ncursor %s\n", title_step(), title_cursor());
 	fclose(f);
 }
 
