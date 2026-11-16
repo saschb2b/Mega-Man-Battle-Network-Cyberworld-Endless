@@ -1,9 +1,0 @@
-{
-  "branch": "scenarios-home",
-  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for home and the town: Lan's room, the PET's entries, the town's people, requests and shop, its ports, Lan's HP and its portals, the Battle Lab, home after an act",
-  "takes": {},
-  "units": [
-    "scenarios: home"
-  ],
-  "run": false
-}

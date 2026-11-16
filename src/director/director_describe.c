@@ -12,20 +12,19 @@
 #include "director.h"
 #include "director_folder.h"
 #include "director_hold.h"
+#include "director_home.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "liberation.h"
 #include "director_way.h"
 #include "guardians.h"
-#include "home_places.h"
-#include "job_words.h"
 #include "net_route.h"
 #include "net_shapes.h"
 #include "net_signature.h"
 #include "netmap.h"
+#include "pet.h"
 #include "save.h"
 #include "talk.h"
-#include "town.h"
 
 /* An object's letter on the state's map (D a Navi gate, V a vault, Y the
  * rival, O an official gate; m a green Mystery Data, M a blue one, L a
@@ -123,11 +122,6 @@ static void state_map(FILE *f, int cx, int cy) {
 	}
 }
 
-static void print_near(int id, int x, int y, void *ctx) {
-	int px = bn6_player_x(), py = bn6_player_y();
-	if (abs(x - px) < 48 && abs(y - py) < 48) fprintf(ctx, "near %s %d %d\n", id < 0 ? "folk" : "object", x, y);
-}
-
 /* What the game is doing, for a state, and MegaMan's HP there: in a
  * battle the HUD's is his battle object's (in a Virus Battler's, the
  * first virus's: his own, as it stays) */
@@ -178,22 +172,6 @@ static const char *battle_word(void) {
 		emu_read8(BN6_BATTLE_RESULT) == BN6_RESULT_WON ? "won" : "over";
 }
 
-/* at home: in one of its places the way on (the PC, the stairs up, the
- * way out), in the town its objects and Lan's front door */
-static void describe_home(FILE *f) {
-	int group = emu_read8(BN6_MAP_GROUP), number = emu_read8(BN6_MAP_NUMBER), x, y;
-	fprintf(f, "map %02x:%02x\n", group, number);
-	/* (the jobs' flags, job_words.h: taken 0-2, held, settled; the run's job) */
-	fprintf(f, "jobs %d%d%d held %d settled %d job %d from %d state %d got %d\n", flag_get(JOB_TAKE_FLAG), flag_get(JOB_TAKE_FLAG + 1),
-		flag_get(JOB_TAKE_FLAG + 2), flag_get(JOB_HELD_FLAG), flag_get(JOB_SETTLED_FLAG), run.job.kind, run.job.asker, run.job.state, run.job.got);
-	if (home_places_way(group, number, &x, &y)) fprintf(f, "goal %d %d\n", x, y);
-	else if (director_in_town()) { town_objects(print_near, f); fprintf(f, "port %d %d\n", town_info()->port_x, town_info()->port_y); }
-	/* (the arrow's way, as on a layer: a playtester's arrow turning at Lan's
-	 * HP's wall was read from pictures alone, session 76) */
-	goal_way();
-	fprintf(f, "way %d %s\n", way_last(), ways[way_last()]);
-}
-
 /* The arrow's heal first, the shortest walk there since L named it, or
  * MegaMan turned away from it (heal_turn_watch) */
 static void describe_heal(FILE *f) {
@@ -210,9 +188,7 @@ static void describe_pos(FILE *f) {
 		bn6_player_y(), bn6_player_z(), emu_read8(BN6_PLAYER_LOCKED),
 		emu_read8(BN6_PLAYER_STATE), emu_read8(BN6_DIALOGUE_LOCK), flag_get(BN6_FLAG_PLAYER_CAN_MOVE), flag_get(BN6_FLAG_DIALOGUE_1718),
 		flag_get(BN6_FLAG_DIALOGUE_1719), cinema_input_mode());
-	/* (what of BN6 holds him, issue #23) */
-	fprintf(f, "held %s\n", held_names(bn6_held()));
-	if (D.town) describe_home(f);
+	if (D.town) home_describe_pos(f);
 	else {
 		int ns = 0, nf = 0;
 		for (int y = 0; y < MAP_H; ++y) for (int x = 0; x < MAP_W; ++x) { ns += D.seen[y][x]; nf += D.seen[y][x] && layer.cell[y][x] == C_PATH; }
@@ -273,6 +249,8 @@ void director_describe(FILE *f) {
 	const char *doing = state_doing(&hp, &max);
 	fprintf(f, "where %s\ndoing %s\nchat %s\ntalk %s\n", D.town ? "town" : "layer", doing,
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
+	/* (what of BN6 holds him, issue #23: none where Lan or MegaMan stands free) */
+	fprintf(f, "held %s\n", held_names(bn6_held()));
 	/* (the game's own count of its main loop's frames: one that stands while
 	 * the engine's frames go on is a game standing still, issue #482;
 	 * tools/old_checkpoint.py watches it) */
@@ -298,6 +276,12 @@ void director_describe(FILE *f) {
 	/* (a special route kept for its fork, and the act it led to) */
 	if (run.route_found) fprintf(f, "route kept from act %d\n", run.route_found);
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
+	/* (a chat's question, what MegaMan holds: tests/scenarios) */
+	talk_describe(f);
+	holds_describe(f);
+	/* (the PET's and home's own lines, each feature's: docs/devtools/scenarios.md) */
+	pet_describe(f);
+	home_describe(f);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
 	/* (the run's tally, the card that shows, the rival, the guardian's course: each its own part's) */

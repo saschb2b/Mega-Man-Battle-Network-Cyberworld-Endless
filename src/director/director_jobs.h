@@ -5,6 +5,7 @@
 #define CW_DIRECTOR_JOBS_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* Before home's places are installed: what each asker says at this visit;
  * after: their scripts' flags as the run's job has them. */
@@ -27,6 +28,10 @@ void home_jobs_md_counted(void);
 void home_jobs_watch(void);
 /* MegaMan's word on the job, once a word can be said. */
 void home_jobs_words(void);
+/* The state in words: the run's request (its kind, where it stands, how
+ * far it has counted) and the visit's flags (a request held, the held one
+ * settled); reads only (docs/devtools/scenarios.md) */
+void home_jobs_describe(FILE *f);
 /* L at home: `words`, and a word on the held request where it is up for
  * settling. */
 const char *home_jobs_status(const char *words);
