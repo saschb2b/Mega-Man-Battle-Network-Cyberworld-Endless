@@ -37,6 +37,16 @@ its course, a tuple each:
   ('restart', START)              the game quit as a player quits it
                                   (SIGTERM: the port's close), then started
                                   again on the same saves
+  ('server', 'stop')              the scenario's server gone at once
+                                  (('server', 'start'): back, as it was)
+
+An online course asks for a server of this machine and other games beside
+its first (tools/scenarios_online.py): SERVER = True, GAMES = {'beta':
+START}, FILES = {name: text} into each game's data folder, and a step in
+another game names it first, ('@beta', 'do', 'press A'). {server} in a
+START or a file is the server's address, {nowhere} one nothing answers on;
+no scenario names an address of its own, and no game reaches a host but
+this machine.
 
 A file may hold many instead: MANY = {name: dict(START=..., STEPS=...,
 NEEDS=..., GUARDS=..., KNOWN=..., ROMS=...)} (tests/scenarios/routes.py: a scenario a route).
@@ -76,13 +86,14 @@ sys.path.insert(0, os.path.join(ROOT, 'tools'))
 import cw  # noqa: E402
 import cw_pictures as pics  # noqa: E402
 import play  # noqa: E402
+import scenarios_online as online  # noqa: E402
 
 DIR = os.path.join(ROOT, 'tests', 'scenarios')
 WORK = os.path.join(ROOT, '.build', 'scenarios')
 UNTIL = 6000     # an until's most frames, where the step names none
 REPEAT = 12      # a repeat's most times
 KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'keep': (1, 1), 'same': (1, 1), 'moved': (2, 2),
-         'restart': (1, 1)}
+         'restart': (1, 1), 'server': (1, 1)}
 # (the other games' ROMs a scenario may need, told by their SHA-1: build.py's)
 ROMS = {'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
 BN6 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
@@ -110,10 +121,10 @@ def load():
         if hasattr(m, 'MANY'):
             for name, s in m.MANY.items():
                 out[f'{base}/{name}'] = dict(guards=s.get('GUARDS', doc), start=s['START'], needs=tuple(s.get('NEEDS', ())),
-                                             steps=list(s['STEPS']), known=s.get('KNOWN', ''), roms=s.get('ROMS'))
+                                             steps=list(s['STEPS']), known=s.get('KNOWN', ''), roms=s.get('ROMS'), **online.read(s))
         else:
             out[base] = dict(guards=doc, start=m.START, needs=tuple(getattr(m, 'NEEDS', ())), steps=list(m.STEPS),
-                             known=getattr(m, 'KNOWN', ''), roms=getattr(m, 'ROMS', None))
+                             known=getattr(m, 'KNOWN', ''), roms=getattr(m, 'ROMS', None), **online.read(m))
     return out
 
 
@@ -130,7 +141,10 @@ def problems(name, s):
         out.append(f'{name}: ROMS {s["roms"]}: {", ".join(("bn6", *ROMS, *MADE))}')
     if s.get('roms') is not None and set(s['roms']) & set(ROMS) - set(s['needs']):
         out.append(f'{name}: ROMS names a game its NEEDS does not')
-    starts = [s['start']] + [step[1] for step in s['steps'] if step and step[0] == 'restart' and len(step) > 1]
+    out += online.written(name, s)
+    # (a step in another game names it first: the step itself, here)
+    steps = [online.split(step)[1] for step in s['steps']]
+    starts = [s['start'], *(s.get('games') or {}).values()] + [step[1] for step in steps if step and step[0] == 'restart' and len(step) > 1]
     for start in starts:
         try:
             cw.parse_start(start)
@@ -138,7 +152,7 @@ def problems(name, s):
             out.append(f'{name}: start {start!r}: {e.code}')
     if not s['steps']:
         out.append(f'{name}: no steps')
-    for i, step in enumerate(s['steps'], 1):
+    for i, step in enumerate(steps, 1):
         kind = step[0] if step else None
         if kind not in KINDS or not KINDS[kind][0] <= len(step) - 1 <= KINDS[kind][1]:
             out.append(f'{name}: step {i} {step!r}: not a step ({", ".join(KINDS)})')
@@ -154,15 +168,17 @@ def problems(name, s):
             out.append(f'{name}: step {i} {step!r}: {e.code}')
         if kind in ('until', 'repeat') and len(step) - 1 == KINDS[kind][1] and not isinstance(step[-1], int):
             out.append(f'{name}: step {i} {step!r}: its last is a number')
-    kept = set()
-    for i, step in enumerate(s['steps'], 1):
+    kept = {}
+    for i, raw in enumerate(s['steps'], 1):
+        game, step = online.split(raw)
+        mine = kept.setdefault(game, set())   # (each game keeps its own)
         if step and step[0] == 'keep':
-            kept |= set(step[1].split())
-        if step and step[0] == 'same' and set(step[1].split()) - kept:
-            out.append(f'{name}: step {i}: same {" ".join(sorted(set(step[1].split()) - kept))} never kept')
+            mine |= set(step[1].split())
+        if step and step[0] == 'same' and set(step[1].split()) - mine:
+            out.append(f'{name}: step {i}: same {" ".join(sorted(set(step[1].split()) - mine))} never kept')
         if step and step[0] == 'moved' and len(step) == 3:
             by = str(step[2]).lstrip('+-')
-            if ({step[1]} | ({by} if not by.isdigit() else set())) - kept:
+            if ({step[1]} | ({by} if not by.isdigit() else set())) - mine:
                 out.append(f'{name}: step {i}: moved {step[1]} by {step[2]}: a word never kept')
     return out
 
@@ -307,7 +323,8 @@ def start(h, spec, fresh, roms):
     the last --rom-dir it is given)."""
     commands, args, env, _ = cw.parse_start(placed(h, spec))
     seed, args = cw.take_seed(args, 1)
-    play.launch(h, seed, fresh, args + ['--rom-dir', roms], env, cw.BIN, keep_bin=False)
+    # (every game a scenario or the fuzz starts goes online on this machine alone: tools/scenarios_online.py)
+    play.launch(h, seed, fresh, args + ['--rom-dir', roms], {**online.ENV, **env}, cw.BIN, keep_bin=False)
     _, ran, shots, _, state = cw.batch(h, 'wait 1' + (f'; {commands}' if commands else ''))
     for _, p in shots:
         os.remove(p)
@@ -408,32 +425,34 @@ def failure(h, state):
 def run(name, s, roms):
     """One scenario played with the ROMs of folder `roms`: dict(name, ok, seconds, frames, lines)."""
     h = os.path.join(WORK, name.replace('/', '--'))
-    shutil.rmtree(h, ignore_errors=True)
-    os.makedirs(h)
-    t, frames, kept, state, at = time.time(), 0, {}, '', 0
+    # (its server and its other games with it, where it has any: tools/scenarios_online.py; each game's ROM folder is
+    # that of BN6's ROM and its NEEDS, {roms}, or its own of the files ROMS names, made once its folder is)
+    shared = roms
+    cast = online.Cast(h, s, (lambda folder: own_roms(folder, s['roms'])) if s.get('roms') is not None else roms, start, step_run)
+    t, frames, state, at, game = time.time(), 0, '', 0, ''
     lines = []
-    SHARED[h] = roms
+    for folder in cast.h.values():
+        SHARED[folder] = shared
     try:
-        if s.get('roms') is not None:
-            roms = own_roms(h, s['roms'])
-        state, frames = start(h, s['start'], True, roms)
+        state, frames = cast.start()
         for at, step in enumerate(s['steps'], 1):
-            state, n = step_run(h, step, state, kept, roms)
+            game = online.split(step)[0]
+            game, state, n = cast.step(step)
             frames += n
         ok = True
     except (Failed, SystemExit) as e:
         ok = False
         what = e.args[0] if isinstance(e, Failed) else str(e.code)
-        if isinstance(e, Failed) and len(e.args) > 1:
-            state = e.args[1]
+        state = e.args[1] if isinstance(e, Failed) and len(e.args) > 1 else cast.state.get(game, state)
         step = s['steps'][at - 1] if at else ('start', s['start'])
         lines.append(f'     step {at} {step!r}: {what}')
         shown = [line for line in cw.state_lines(state) if cw.key(line) not in ('frame', 'gameframe')]
         if shown:
             lines.append('     state: ' + ' · '.join(shown))
-        lines.append('     kept: ' + ', '.join(os.path.relpath(p, ROOT) for p in failure(h, state)))
+        cast.quiet()
+        lines.append('     kept: ' + ', '.join(os.path.relpath(p, ROOT) for p in failure(cast.h[game], state)))
     finally:
-        play.stop(h)
+        cast.close()
     return dict(name=name, ok=ok, seconds=time.time() - t, frames=frames, lines=lines)
 
 

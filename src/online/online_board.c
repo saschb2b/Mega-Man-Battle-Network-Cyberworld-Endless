@@ -5,6 +5,7 @@
 #include "bn6_chips.h"
 #include "chips.h"
 #include "online_transport.h"
+#include "square_arena.h"
 
 _Static_assert(WANT_COUNT == ONLINE_WANT_LAST + 1, "the wants are protocol.json's want_last + 1");
 
@@ -64,4 +65,15 @@ bool online_board_meets(int want, TradeChip chip) {
 	/* (BN6's ChipElement, the icon a chip shows: bn6_chips.h) */
 	static const uint8_t element[WANT_COUNT] = { 0, 0, 1, 2, 3, 5, 8, 9, 6, 0 };
 	return want > WANT_ANY && want < WANT_MEGA && rec[BN6_CHIP_ELEMENT] == element[want];
+}
+
+void online_board_describe(FILE *f, uint32_t me) {
+	const BoardOffer *all;
+	int n = online_board_offers(&all);
+	fprintf(f, "tradeboard %d\n", n);
+	for (int i = 0; i < n; ++i) {
+		const char *name = all[i].player == me ? "me" : square_arena_name_of(all[i].player);
+		fprintf(f, "%s %s has %u%c wants %u\n", all[i].player == me ? "myoffer" : "tradeoffer", name ? name : "?", all[i].have.id,
+			online_trade_code(all[i].have.code), all[i].want);
+	}
 }

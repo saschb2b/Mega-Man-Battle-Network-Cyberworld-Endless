@@ -83,6 +83,16 @@ int trade_screen_event(TradeChip *chip) {
 	return e;
 }
 
+void trade_screen_describe(FILE *f) {
+	static const char *const stages[] = { "ask", "wait", "swap", "swapped" };
+	fprintf(f, "tradescreen %s\n", S.kind == LIST ? "list" : S.kind == DEAL ? "deal" : "none");
+	if (S.kind == LIST && S.v.n) {
+		TradeChip c = S.rows[S.v.at].chip;
+		fprintf(f, "listrow %d/%d\nlistchip %u%c\n", S.v.at + 1, S.v.n, c.id, online_trade_code(c.code));
+	}
+	if (S.kind == DEAL) fprintf(f, "deal %s\ndealcursor %s\n", stages[S.v.stage & 3], S.v.cursor ? "yes" : "no");
+}
+
 bool trade_screen_shown(void) { return S.kind != SHUT; }
 
 bool trade_screen_dealing(void) { return S.kind == DEAL; }

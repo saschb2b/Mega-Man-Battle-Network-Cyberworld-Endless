@@ -82,6 +82,10 @@ void online_visit_draw(void);
 void online_visit_leave(VisitEnd why);
 /* How the last visit ended, once: VISIT_END_NONE after. */
 VisitEnd online_visit_ended(void);
+/* ... and the same kept, with the visits begun since the game started:
+ * the state's words (online_describe.h) */
+VisitEnd online_visit_last_end(void);
+unsigned online_visit_count(void);
 /* ... and the server's line with it, where it gave one (a maintenance's
  * "until 14:00 UTC"), "" none */
 const char *online_visit_end_note(void);

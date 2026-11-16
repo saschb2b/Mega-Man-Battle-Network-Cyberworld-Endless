@@ -1,9 +1,0 @@
-{
-  "branch": "scenarios-online",
-  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for online play on a local server: the gate in Lan's HP, the Net Square, Trade Central, the Arena's NetBattle, the week's DeepNet",
-  "takes": {},
-  "units": [
-    "scenarios: online"
-  ],
-  "run": false
-}

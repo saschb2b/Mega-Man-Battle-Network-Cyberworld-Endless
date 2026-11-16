@@ -9,10 +9,13 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "online_types.h"
 
 void dive_crew_reset(void);
+/* The crew in the state's words (online_describe.h): `crew N: NAMES`, 0 alone */
+void dive_crew_describe(FILE *f);
 /* Whether `session` is in MegaMan's crew. */
 bool dive_crew_has(uint32_t session);
 /* Each frame of the dive on its layer: a chat to open, or one closed read. */

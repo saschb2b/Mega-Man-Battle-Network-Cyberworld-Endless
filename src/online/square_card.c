@@ -76,6 +76,30 @@ void square_card_frame(void) {
 	if (!SA.card.closing && SA.t >= shown) SA.card.closing = 1;
 }
 
+void square_arena_describe(FILE *f) {
+	static const char *const stages[] = { "idle", "format", "folder", "sent", "waiting", "asking", "asked", "accepted", "loadout",
+		"connecting", "ready", "battle", "over" };
+	static const char *const results[] = { "none", "won", "lost", "over", "stopped", "unbegun" };
+	static const char *const asks[] = { "none", "open", "sent" };
+	uint32_t other, seen;
+	const char *name;
+	if (square_arena_open(&other, &name, &seen)) fprintf(f, "challenge to %s%s\n", name ? name : "?", seen ? " seen" : "");
+	else if (square_arena_asking()) {
+		name = square_arena_name_of(square_arena_asking());
+		fprintf(f, "challenge from %s\n", name ? name : "?");
+	} else fprintf(f, "challenge none\n");
+	fprintf(f, "arena %s\n", (unsigned)SA.stage < sizeof stages / sizeof *stages ? stages[SA.stage] : "other");
+	const SquareBout *b = square_arena_last();
+	fprintf(f, "bouts %u\nbout %s", b->bouts, b->result < 5 ? results[b->result] : "other");
+	if (b->result && b->name) fprintf(f, " against %s won %u lost %u", b->name, b->won, b->lost);
+	fputc('\n', f);
+	if (!SA.card.up) return;
+	unsigned me = SA.link.link.side & 1u;
+	fprintf(f, "arenacard %s\narenahp %u %u\nrematch %s%s\n", SA.card.result < sizeof results / sizeof *results ? results[SA.card.result] : "other",
+		SA.card.tally.hp[me], SA.card.tally.hp[me ^ 1u], (unsigned)SA.card.ask < sizeof asks / sizeof *asks ? asks[SA.card.ask] : "other",
+		SA.card.ask == ARENA_ASK_OPEN ? SA.card.yes ? " yes" : " no" : "");
+}
+
 bool square_card_leave(void) { return SA.arena && arena_waited(SA.arena) >= STALL_OFFER && btn_pressed(BTN_B); }
 
 /* my view's order of a 2v2's seats: my team's lead and partner, then theirs */

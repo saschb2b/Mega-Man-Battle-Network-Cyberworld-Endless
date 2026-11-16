@@ -317,8 +317,78 @@ def quit_fuzz():
     check(fuzz.known('map', state()) is None, 'a quit on the map with the run kept here is no known bug')
 
 
+def scenario_cast():
+    """tools/scenarios_online.py without the game: a step's game read from
+    its name, a cast written wrong refused with why (an address of its own
+    above all: a scenario reaches this machine alone), the places put in,
+    a game told online or not by its state, and the server of this machine
+    started, stopped and started again on its port."""
+    import socket
+    import tempfile
+    import scenarios_online as online
+    check(online.split(('@beta', 'do', 'press A')) == ('beta', ('do', 'press A')), "a step's game is its first word")
+    check(online.split(('expect', 'hp=1')) == ('', ('expect', 'hp=1')), 'a step of no name is the first game\'s')
+    good = dict(guards='a thing', start='--scene home --dev online={server},onlinename={name}', needs=(), known='', server=True,
+                games={'beta': '--scene home --dev online={server}'}, files={'network.ini': 'server={server}\nname={name}\n'},
+                steps=[('keep', 'hp'), ('@beta', 'keep', 'hp'), ('@beta', 'same', 'hp'), ('server', 'stop'), ('server', 'start')])
+    check(not scenarios.problems('good', good), 'a scenario with a server and another game reads')
+    for what, change in (('an address of its own in a start', dict(start='--scene home --dev online=ws://127.0.0.1:8765/presence')),
+                         ('the official server in a file', dict(files={'network.ini': 'server=wss://cyberworld.saschb2b.com/presence\n'})),
+                         ('--dev online on a word of its own', dict(start='--scene home --dev online=somewhere')),
+                         ('an address in another game', dict(games={'beta': '--scene home --dev online=wss://example.org/presence'})),
+                         ('{server} with no SERVER', dict(server=None, steps=[('keep', 'hp')])),
+                         ('a server step with no SERVER', dict(server=None, start='--scene home', games={}, files={}, steps=[('server', 'stop')])),
+                         ('a server step that is neither', dict(steps=[('server', 'restart')])),
+                         ('a step in a game nobody started', dict(steps=[('@gamma', 'do', 'press A')])),
+                         ('a game named as the first', dict(games={'alpha': '--scene home'})),
+                         ('a SERVER of settings unknown', dict(server=dict(port=80))),
+                         ("same in a game of a word only another kept", dict(steps=[('keep', 'hp'), ('@beta', 'same', 'hp')])),
+                         ('another game on no route', dict(games={'beta': 'nowhere'}))):
+        check(scenarios.problems('bad', {**good, **change}), f'refused: {what}')
+    # (every scenario there is: none names an address, the routes' and the offline ones' among them)
+    for name, s in scenarios.load().items():
+        check(not online.written(name, s), f'{name} reaches this machine alone')
+    check(online.online('scene emu\nvisit square') and online.online('visit home\ndivelink on'), 'a game in a visit or on a linked dive is online')
+    check(not online.online('scene emu\nvisit home\ndivelink off') and not online.online('scene title'), 'a game at home or on the title is not')
+    check(online.course(('do', 'wait 1'), [('do', 'wait 2'), ('do', 'wait 3')]) == [('do', 'wait 1'), ('do', 'wait 2'), ('do', 'wait 3')], 'a course is flat')
+    check(online.at('beta', ('do', 'wait 1')) == [('@beta', 'do', 'wait 1')] and online.at('', ('do', 'wait 1')) == [('do', 'wait 1')], 'steps as a game\'s')
+    for steps in (online.into_square(), online.into_square('beta'), online.home_again(), online.yes('beta'), online.pick('chat=closed'), online.soon('visit=home')):
+        check(not scenarios.problems('good', {**good, 'steps': steps}), 'the common steps read')
+    with tempfile.TemporaryDirectory() as tmp:
+        cast = online.Cast(os.path.join(tmp, 'g'), good, None, None, None)
+        check(set(cast.h) == {'', 'beta'} and cast.h['beta'].endswith('g--beta'), 'each game its folder')
+        nowhere = cast.placed('{nowhere}', '')
+        check(nowhere.startswith('ws://127.0.0.1:') and cast.placed('{nowhere}', 'beta') == nowhere, 'nowhere is one address of this machine')
+        try:
+            socket.create_connection(('127.0.0.1', int(nowhere.split(':')[2].split('/')[0])), 1).close()
+            check(False, 'nothing answers nowhere')
+        except OSError:
+            pass
+        check(cast.placed('{name} {identity}', '') != cast.placed('{name} {identity}', 'beta') and cast.placed('{name}', 'beta') == 'Beta'
+              and len(cast.placed('{identity}', '')) == 32, 'each game its name and identity')
+        check(cast.placed('{dir} {roms}', '') == '{dir} {roms}', "another's places are left as they are")
+        server = online.Server(os.path.join(tmp, 'server'), settings=dict(capacity=2, host='0.0.0.0'))
+        try:
+            cast.server = server
+            check(cast.placed('{server}', 'beta') == server.url and server.url == f'ws://127.0.0.1:{server.port}/presence', 'the server\'s address')
+            ini = open(server.ini).read()
+            check('host = 127.0.0.1' in ini and 'capacity = 2' in ini and '0.0.0.0' not in ini, 'a setting is set, never the host: this machine alone')
+            socket.create_connection(('127.0.0.1', server.port), 2).close()
+            server.stop()
+            try:
+                socket.create_connection(('127.0.0.1', server.port), 1).close()
+                check(False, 'a stopped server answers nobody')
+            except OSError:
+                pass
+            server.start()
+            socket.create_connection(('127.0.0.1', server.port), 2).close()
+        finally:
+            server.stop()
+            cast.close()
+
+
 def main():
-    for part in (routes, starts, states, pictures, builds, server, old_checkpoints, scenario_files, quit_fuzz):
+    for part in (routes, starts, states, pictures, builds, server, old_checkpoints, scenario_files, quit_fuzz, scenario_cast):
         if part is pictures and not pics.Image:
             print('agents\' tools: the pictures skipped (no Pillow here)')
             continue

@@ -43,6 +43,12 @@ static struct {
 
 void dive_crew_reset(void) { memset(&C, 0, sizeof C); C.chosen = -1; }
 
+void dive_crew_describe(FILE *f) {
+	fprintf(f, "crew %d", C.c.count);
+	for (int k = 0; k < C.c.count; ++k) fprintf(f, "%s%s", k ? " " : ": ", C.c.m[k].name);
+	fputc('\n', f);
+}
+
 bool dive_crew_has(uint32_t session) {
 	for (int k = 0; k < C.c.count; ++k)
 		if (C.c.m[k].session == session) return true;

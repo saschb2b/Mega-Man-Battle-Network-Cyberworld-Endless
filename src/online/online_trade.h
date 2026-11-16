@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "protocol.h"
 
@@ -26,6 +27,15 @@ typedef struct {
 	uint32_t serial;             /* counts the stages said */
 } TradeView;
 
+/* A chip's code as a letter ('*' the star code) */
+static inline char online_trade_code(uint8_t code) { return code == 26 ? '*' : (char)('A' + code); }
+/* The trade in the state's words (online_describe.h): `spares N: 1Ax2 20F`
+ * (the chips a trade could give, id and code, a count past one) and
+ * `pending 20F for 411M` (a swap kept for home) or `pending none`, on any
+ * state of a run; `visiting`, in the Square, the trade as the server last
+ * said it too: `trade none|offered|waiting|answered|accepted|done|
+ * cancelled`, `tradewith NAME`, `gives 20F`, `gets 411M` */
+void online_trade_describe(FILE *f, bool visiting);
 /* As MegaMan arrives in the Square: no trade. */
 void online_trade_reset(void);
 /* Back from a dropped link on a new session (a server restarted, issue

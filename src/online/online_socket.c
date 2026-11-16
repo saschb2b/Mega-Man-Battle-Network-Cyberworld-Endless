@@ -97,6 +97,12 @@ bool online_socket_open(const char *url, SDL_atomic_t *stop, char *error, size_t
 		SDL_strlcpy(error, "Use ws(s)://host[:port]/presence", size);
 		return false;
 	}
+	/* (a test's games stay on this machine: tools/scenarios.py sets it for every game it starts, so no course of a
+	 * scenario, the keeper's own questions answered among them, reaches the official server or any other) */
+	if (getenv("CYBERWORLD_ONLINE_LOCAL") && strncmp(host, "127.0.0.1:", 10) && strcmp(host, "127.0.0.1")) {
+		SDL_strlcpy(error, "CYBERWORLD_ONLINE_LOCAL: this game goes online on 127.0.0.1 alone", size);
+		return false;
+	}
 	if (!online_stream_open(url, stop, error, size)) return false;
 	if (!handshake_request(host, expected) || !handshake_response(expected, stop)) {
 		SDL_strlcpy(error, "WebSocket handshake failed", size);

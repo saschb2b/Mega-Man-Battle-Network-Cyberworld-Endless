@@ -23,6 +23,7 @@
 #define CW_TRADE_SCREEN_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "online_trade.h"
 #include "trade_list.h"
@@ -45,6 +46,11 @@ void trade_screen_off(void);
 
 /* What was chosen since the last call (TRADE_EVENT_*), the chip picked in `chip` */
 int trade_screen_event(TradeChip *chip);
+/* The screen up in the state's words (online_describe.h): `tradescreen
+ * none|list|deal`, the list's cursor (`listrow K/N`, `listchip 20F`), the
+ * chip trade's stage and cursor (`deal ask|wait|swap|swapped`,
+ * `dealcursor no|yes`) */
+void trade_screen_describe(FILE *f);
 /* A screen up; the chip trade's */
 bool trade_screen_shown(void);
 bool trade_screen_dealing(void);

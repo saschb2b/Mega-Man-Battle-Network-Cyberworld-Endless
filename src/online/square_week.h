@@ -8,6 +8,7 @@
 #define CW_SQUARE_WEEK_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 #include "online_types.h"
 #include "square_week_words.h"
@@ -19,6 +20,11 @@
 #define SQUARE_DIVE_FLAG 0x14AF
 #define SQUARE_DIVE_OVER_FLAG 0x1493
 
+/* The week's net in the state's words (online_describe.h): what the portal
+ * offers (`weekoffer none|new|again|on|trade|stamp`), the week (`week N`)
+ * and the Board's posts of it as the plaza's Board lists them (`weekboard
+ * WORDS`, its boxes and lines apart by spaces) */
+void square_week_describe(FILE *f);
 /* As MegaMan arrives in the Square. */
 void square_week_reset(void);
 /* After each frame there: the kept end posted, its answer noted. */

@@ -9,6 +9,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "online_trade.h"
 
@@ -22,6 +23,10 @@ typedef struct {
 	uint8_t want;
 } BoardOffer;
 
+/* The board in the state's words (online_describe.h): `tradeboard N`, and
+ * an offer a line, `tradeoffer NAME has 20F wants W`, player `me`'s own
+ * `myoffer me has ...` */
+void online_board_describe(FILE *f, uint32_t me);
 /* As MegaMan arrives in the Square: none. */
 void online_board_reset(void);
 /* A BOARD message come in; false where it is malformed. */

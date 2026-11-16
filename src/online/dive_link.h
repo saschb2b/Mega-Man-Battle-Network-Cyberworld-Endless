@@ -11,6 +11,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* The dive the week's portal chose, begun or gone on with (square_week.h),
  * and the visit's connection taken over for it; false where it did not
@@ -23,6 +24,11 @@ bool dive_link_diving(void);
 void dive_link_adopt(void);
 /* Whether a dive's link is open. */
 bool dive_link_on(void);
+/* A dive with its link in the state's words (online_describe.h): the other
+ * divers on MegaMan's layer (`divers N: NAMES`, `diver NAME at X Y`), the
+ * crew (dive_crew_describe) and the link (`link up|quiet|reconnecting|
+ * down`); nothing without a link */
+void dive_link_describe(FILE *f);
 /* Each frame of the game while on: the room, the place, the divers, the
  * dive's end told and the link closed. */
 void dive_link_frame(void);

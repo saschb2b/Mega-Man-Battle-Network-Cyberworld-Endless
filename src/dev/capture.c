@@ -219,6 +219,8 @@ static void write_state(const char *path) {
 	fprintf(f, "frame %llu\nscene %s\n", (unsigned long long)P.frame, scene_current() ? scene_current()->name : "none");
 	fprintf(f, "screen %s\n", screen_name());
 	if (scene_current() == &scene_emu) director_describe(f);
+	/* (online play's lines: the visit, the Square, a trade, a NetBattle) */
+	if (scene_current() == &scene_emu) online_screen_describe(f);
 	/* (the title's step and its menu's row: a scenario's way through it) */
 	if (scene_current() == &scene_title) title_describe(f);
 	title_summary_describe(f);
