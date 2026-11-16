@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T12:45:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T15:30:00Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
