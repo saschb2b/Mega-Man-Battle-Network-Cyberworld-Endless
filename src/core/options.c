@@ -56,6 +56,8 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 		if (update_here()) kinds[n++] = LINE_UPDATES;
+		/* (in a run: the way to the title, last as a way out stands) */
+		if (emu_title_offered()) kinds[n++] = LINE_TITLE;
 	}
 	/* (no Done: B leaves, as everywhere in BN6) */
 	return n;
@@ -287,8 +289,17 @@ static void show_page(int p) {
 /* L or R: the next page (`dir`) */
 static void turn_page(int dir) { show_page((O.page + PAGE_COUNT + dir) % PAGE_COUNT); }
 
+/* START's question asked (`leaving`: Return to title's), the cursor on No */
+static void ask(bool leaving) {
+	O.asking = true;
+	O.leaving = leaving;
+	O.yes = false;
+	audio_sfx(SFX_SELECT);
+}
+
 static void choose(void) {
 	switch (options_line_kind()) {
+	case LINE_TITLE: ask(true); break;
 	case LINE_CONTROLS: controls_open(); audio_sfx(SFX_SELECT); break;
 	/* (the statistics' question over the page, its cursor on the answer as
 	 * it stands: what is sent is read before a yes) */
@@ -300,17 +311,24 @@ static void choose(void) {
 	}
 }
 
-/* START's question asked, or answered (`yes`) */
-static void ask(void) {
-	O.asking = true;
-	O.yes = false;
-	audio_sfx(SFX_SELECT);
+/* Return to title's Yes: Options away with the game it stood over, its
+ * cursor not kept on a line the title's Options has none of */
+static void to_title(void) {
+	kept_page = O.page;
+	memcpy(kept_at, O.at, sizeof kept_at);
+	kept_at[PAGE_GAME] = 0;
+	O.open = false;
+	emu_to_title();
 }
 
+/* the question answered (`yes`) */
 static void answer(bool yes) {
-	O.asking = false;
-	if (yes) defaults();
+	bool leaving = O.leaving;
+	O.asking = O.leaving = false;
 	audio_sfx(yes ? SFX_SELECT : SFX_CANCEL);
+	if (!yes) return;
+	if (leaving) to_title();
+	else defaults();
 }
 
 static void ask_update(uint32_t pr) {
@@ -328,7 +346,7 @@ static void nav_update(void) {
 	int kinds[LINES_MAX], n = options_lines(kinds), *at = &O.at[O.page];
 	if (pr & BTN_B) { leave(); return; }
 	if (pr & (BTN_L | BTN_R)) { turn_page(pr & BTN_L ? -1 : 1); return; }
-	if ((pr & BTN_START) && options_page_resets()) { ask(); return; }
+	if ((pr & BTN_START) && options_page_resets()) { ask(false); return; }
 	int was = *at;
 	if (rep & BTN_UP) *at = (*at + n - 1) % n;
 	else if (rep & BTN_DOWN) *at = (*at + 1) % n;
@@ -376,7 +394,7 @@ static void tapped(int at) {
 	else if (at <= TAP_PAGE && at > TAP_PAGE - PAGE_COUNT) {
 		if (TAP_PAGE - at != O.page) show_page(TAP_PAGE - at);
 	}
-	else if (at == TAP_DEFAULT && options_page_resets()) ask();
+	else if (at == TAP_DEFAULT && options_page_resets()) ask(false);
 	else if (at >= 0) {
 		O.at[O.page] = at;
 		scroll();

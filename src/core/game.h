@@ -47,6 +47,13 @@ extern bool emu_resume_requested; /* scene_emu continues the saved run */
  * stands, on a won battle's way back the game run on to him free first
  * (director_settles) */
 void emu_keep_run(void);
+/* Options' Return to title in a run (scene_emu.c): whether the game is
+ * the scene and may be left for the title, the line on where the run goes
+ * on from (the quit prompt's; NULL before the first layer, no run to
+ * save yet), and the run kept as a quit keeps it, then the title's menu */
+bool emu_title_offered(void);
+const char *emu_title_where(void);
+void emu_to_title(void);
 extern bool emu_start_in_town;    /* scene_emu starts the run in the town (NEW GAME) */
 extern bool emu_start_at_home;    /* ... or at home before its first layer's act (--scene home) */
 /* The saved run (peek_run's seed and depth) was saved at home, between
@@ -61,6 +68,10 @@ extern bool title_menu;             /* ... or on its menu (back from SAVES) */
  * continue, other): scene_title.c */
 const char *title_step(void);
 const char *title_cursor(void);
+/* ... and while the finished run's summary shows (title_summary.c): its
+ * screen, how the run ended and where, its rows, the battle data a loss
+ * gave, what it opened */
+void title_summary_describe(FILE *f);
 /* The title's note of the other games' ROMs read ("BN5 found: its Net joins ours"), in the state's words: `found` and
  * `foundnote` (scene_title.c) */
 void title_found_describe(FILE *f);

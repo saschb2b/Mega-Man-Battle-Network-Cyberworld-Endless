@@ -70,6 +70,22 @@ void official_sync(bool resumed) {
 	else flag_clear(LAYER_CLEARED_FLAG);
 }
 
+/* the last verdict this game gave, for the state: beat (his time, and on
+ * the second rung unhit), slow, hit (in time, but hit on the second rung),
+ * lost (the battle itself), none yet */
+static const char *verdict_said = "none";
+
+/* The rival in the state's words (director_describe's; tests/scenarios
+ * reads them): the layer's duel (none, waiting, on, fought), its rung, the
+ * record, what his respect has opened, whether Chaud has called before,
+ * and the last verdict. Reads alone. */
+void duel_describe(FILE *f) {
+	fprintf(f, "duel %s\n", D.duel ? "on" : !duel_layer() ? "none" : duel_fought() ? "fought" : "waiting");
+	if (duel_layer()) fprintf(f, "rung %d\n", layer_objs_duel_rung);
+	fprintf(f, "duelswon %d\nduelslost %d\nclearance %d\nchaud %s\nverdict %s\n", profile.duel_won, profile.duel_lost, rival_clearance(),
+		duel_called_before() ? "known" : "new", verdict_said);
+}
+
 /* The rival's time to beat for a squad of `hp` (docs/game/rival.md): three
  * seconds and one for every thirty HP, eight percent faster for every two
  * duels ProtoMan has lost (a rung's round), never under six tenths of it. */
@@ -171,6 +187,7 @@ void duel_verdict(bool won, bool spared) {
 	int mine = D.duel_time, his = layer_objs_duel_frames, rung = layer_objs_duel_rung, before = rival_clearance();
 	bool beat = won && (rung == 2 || (mine < his && !(rung == 1 && D.duel_hit)));
 
+	verdict_said = beat ? "beat" : !won ? "lost" : rung != 2 && mine < his ? "hit" : "slow";
 	if (beat) profile.duel_won++;
 	else profile.duel_lost++;
 	/* (the run's choices: a race or the netbattle taken, and won) */

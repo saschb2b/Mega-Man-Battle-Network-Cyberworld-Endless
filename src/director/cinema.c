@@ -195,6 +195,14 @@ void cinema_title_grand(const char *top, const char *name, const char *sub, cons
 
 void cinema_on_map(bool on_map) { C.off_map = !on_map; }
 
+/* The card that shows, in the state's words (director_describe's; tests/
+ * scenarios reads them): its kind, and its lines in one. Reads alone. */
+void cinema_describe(FILE *f) {
+	static const char *const kinds[4] = { "none", "title", "area", "grand" };
+	if (C.card == CARD_NONE) return;
+	fprintf(f, "card %s\ncardsays %s / %s / %s / %s / %s\n", kinds[C.card], C.top, C.name, C.line1, C.line2, C.line3);
+}
+
 void cinema_card_yield(void) {
 	if (C.card == CARD_AREA && C.card_len - C.card_t > FADE_OUT) C.card_t = C.card_len - FADE_OUT;
 }

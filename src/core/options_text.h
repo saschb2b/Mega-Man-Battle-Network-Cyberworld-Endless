@@ -46,9 +46,13 @@ typedef enum {
 	OW_SPEAKERS_NOTE, OW_HEADPHONES_NOTE, OW_MONO_NOTE,
 	OW_MUSIC_LOW_NOTE, OW_EFFECTS_LOW_NOTE,   /* Music's and Effects' notes under the game's own level */
 	OW_TOUCH, OW_TOUCH_AUTO_NOTE, OW_TOUCH_OFF_NOTE,   /* the Game page's touch controls line (touch.h) */
+	OW_TO_TITLE, OW_TO_TITLE_NOTE, OW_ASK_TITLE,   /* ... its Return to title in a run, and its question */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);
+/* Return to title's question with where the run goes on from (`where`,
+ * the quit prompt's line; NULL: none to say), into `out` */
+void options_title_ask(char *out, size_t n, const char *where);
 /* Music's and Effects' value at `level` (sound_heard.h): its number, or Off */
 const char *options_level_word(int level);
 

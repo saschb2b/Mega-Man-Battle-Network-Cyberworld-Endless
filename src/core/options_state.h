@@ -14,11 +14,11 @@
  * effects where the system has
  * them, feel_out.h) and the Game page's (the update found, on the
  * title: update.h; Controls, Touch controls where a touch screen is
- * (touch.h), Fast forward, Statistics, and Updates where the build looks
- * for them) */
+ * (touch.h), Fast forward, Statistics, Updates where the build looks
+ * for them, and in a run Return to title, last: game.h's emu_to_title) */
 enum { LINE_CONTROLS, LINE_STATS, LINE_UPDATE, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
-	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL, LINE_UPDATES, LINE_TOUCH };
-#define LINES_MAX 7
+	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL, LINE_UPDATES, LINE_TOUCH, LINE_TITLE };
+#define LINES_MAX 8
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
 static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_TOUCH; }
@@ -37,6 +37,7 @@ typedef struct {
 	int top;             /* the list's first row shown */
 	int t;               /* frames since it or its page opened (its fade) */
 	bool asking;         /* START's question: the page's lines back as they came? */
+	bool leaving;        /* ... or Return to title's: the run left for the title? */
 	bool yes;            /* ... its cursor on Yes */
 	SDL_FingerID finger; /* (a finger that went down on it: only its lift taps) */
 	bool finger_down;

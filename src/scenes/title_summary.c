@@ -41,18 +41,20 @@
 #define NOTE_LINES 3
 
 static struct {
+	bool up;        /* it shows: opened, not yet left */
 	bool records;   /* the second screen */
 	int t;          /* frames since the screen opened */
 } U;
 
 void title_summary_open(void) {
 	memset(&U, 0, sizeof U);
+	U.up = true;
 }
 
 bool title_summary_update(void) {
 	++U.t;
 	if (U.t <= (U.records ? RECORDS_MIN : SUMMARY_MIN) || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return false;
-	if (U.records) return true;
+	if (U.records) { U.up = false; return true; }
 	U.records = true;
 	U.t = 0;
 	audio_sfx(SFX_SELECT);
@@ -165,4 +167,19 @@ void title_summary_draw(int x0, int y0) {
 		opened_draw(x0, y0, f);
 	}
 	look_fade_in(x0, y0, CORE_W, CORE_H, U.t);
+}
+
+/* The summary in the state's words (capture.c's state; tests/scenarios
+ * reads them): the screen it is on, how the run ended and where or by
+ * whom, its three rows, the guardian whose battle data the loss gave, the
+ * best, and what it opened, as RECORDS marks it NEW. Reads alone. */
+void title_summary_describe(FILE *f) {
+	if (!U.up) return;
+	const char *open[OPENED_ROWS];
+	int n = meta_unlocked(open, OPENED_ROWS);
+	fprintf(f, "page %s\nended %s\ncause %s\nreached %d\nviruses %d\nnavis %d\nlearned %s\nnewbest %s\nopened", U.records ? "records" : "result",
+		title_won ? "won" : "deleted", title_cause, run_reached(), run.viruses_deleted, run.bosses_beaten, title_learned[0] ? title_learned : "none",
+		title_new_best ? "yes" : "no");
+	for (int i = 0; i < n; ++i) fprintf(f, "%s %s", i ? "," : "", open[i]);
+	fprintf(f, "%s\n", n ? "" : " nothing");
 }

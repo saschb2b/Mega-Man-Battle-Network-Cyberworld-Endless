@@ -2,6 +2,7 @@
  * scripts set to open one, its keys and the script its choice runs. */
 #include "reward_pick.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #include "director.h"
@@ -143,4 +144,22 @@ bool director_pick_shown(void) { return RP.up; }
 void director_pick_shut(void) {
 	RP.up = false;
 	due = -1;
+}
+
+/* A pick in the state's words (director_describe's; tests/scenarios reads
+ * them): which it is, what each row offers (a chip or a program by its
+ * id, HPMemory by how many), its rows (the skip's among them), the
+ * cursor's row (`pickrow` from 0, `pickat` K/N as a player counts it) and
+ * what that row is (`pickof` chip, program, hp or skip), and whether an A
+ * would take it yet. Reads alone. */
+void director_pick_describe(FILE *f) {
+	static const char *const kinds[PICK_KINDS] = { "draft", "vault", "order", "official", "server", "copy", "gift" };
+	static const char *const what[3] = { "chip", "program", "hpmemory" };
+	static const char *const of[3] = { "chip", "program", "hp" };
+	if (!RP.up) return;
+	fprintf(f, "pick %s\noffers", kinds[RP.kind]);
+	for (int k = 0; k < RP.o.n; ++k) fprintf(f, " %s:%d", what[RP.o.c[k].what % 3], RP.o.c[k].id);
+	fprintf(f, "%s\npickrows %d\npickrow %d\npickat %d/%d\npickof %s\npickready %s\n", RP.o.frags > 0 ? " bugfrags" : "", reward_pick_rows(),
+		RP.cursor, RP.cursor + 1, reward_pick_rows(), RP.cursor < RP.o.n && RP.o.c[RP.cursor].what <= PICK_HP ? of[RP.o.c[RP.cursor].what] : "skip",
+		reward_pick_ready() ? "yes" : "no");
 }

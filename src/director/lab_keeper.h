@@ -15,6 +15,7 @@
 /* Whether the Battle Lab is there for this profile */
 bool lab_there(void);
 /* (his visit's start and his frame at home, home_lab_visit and
- * home_lab_frame, are director_home.h's, beside the gate's) */
+ * home_lab_frame, and his state in words, home_lab_describe, are
+ * director_home.h's, beside the gate's) */
 
 #endif

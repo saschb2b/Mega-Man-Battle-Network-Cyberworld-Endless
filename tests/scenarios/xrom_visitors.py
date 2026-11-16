@@ -12,14 +12,12 @@ FIGHT = [
     ('until', 'chat=open', 900),              # the arrival's words, which the autopilot pages
     ('until', 'chat=closed', 1800),
     ('do', 'battle'),
-    ('until', 'enemies>=2', 1200),
+    ('until', 'foes>=2', 1200),
     ('expect', 'areafrom=bn6'),
     ('expect', 'olderrecord=none'),           # a battle of BN6's ground, no record of the older nets'
 ]
 WON = [
-    ('repeat', 'wait 10', 'enemies=0', 600),
-    ('expect', 'screen=battle'),
-    ('until', 'screen=map', 1800),
+    ('repeat', 'wait 10', 'lastbattle=won', 800),   # won, back on the layer (looked at often: his word comes at once)
 ]
 
 

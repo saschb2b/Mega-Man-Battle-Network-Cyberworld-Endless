@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-15",
-  "previous": "2026-11-14",
+  "updated": "2026-11-16",
+  "previous": "2026-11-15",
   "features": [
     {
       "name": "Net Square",
@@ -207,15 +207,19 @@
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-15",
-      "what": "BN4's guardians stand in their sprites' own views (src/layer/xguardian_bn4.c's views, BN4_OW_VIEWS* in src/emu/bn4_navis.h): BN4's Navis draw four diagonals by BN6's eight facings, so a guardian facing left had shown his back or nothing; now each faces MegaMan at both sides of his arena, the Glitch copy's body too."
-    },
-    {
-      "date": "2026-11-15",
-      "what": "The shared dive's join-in battles hold BN6's random-battle roll at its branch (src/director/encounter.c emu_encounters_offer, BN6_ENCOUNTER_ROLLED to BN6_ENCOUNTER_SKIP while a crewmate stands near) and force it later through BN6_ENCOUNTER_CHECK, or fight it on the party's core; the branch at 0x08005AE2 follows the roll's bl with no instruction between, so it reads the flags the roll left, and a hook that gives a battle where the roll gave none jumps to BN6_ENCOUNTER_START itself (docs/rom/battle.md, Encounter roll). The joiner's walk toward his next battle reset through BN6_STEPS_WALKED and BN6_STEPS_CHECKED, and the reward BN6's results picked read from the party's core at BN6_BATTLE_REWARD; no new address."
+      "date": "2026-11-16",
+      "what": "The Chip Trader's two readers of an item of the folder editor's list (BN6_TRADER_CARD 0x0804B338, BN6_TRADER_TAKE 0x0804B734: 0x0804B34C, 0x0804B34E, 0x0804B740, 0x0804B744) take id << 6 | code as the editor's sites do since ten-bit chip ids (src/emu/xchips_wide.c, tools/chip_ids.py EDITOR_KEYS; docs/rom/chips-code.md, The pack past 511). Left at seven bits since 0.21.0, a trade kept the three chips put in and took copies of chip id >> 1; found by a scenario (tests/scenarios/layer_gates.py) and by the home session's at AsterLand's trader."
     }
   ],
   "experiments": [
+    {
+      "feature": "BN4's chips in BN6's tables",
+      "date": "2026-11-16",
+      "name": "The Chip Trader's trade beside 0.20.0's",
+      "result": "Two scenarios trade three chips for one (six spare from --dev pack=6; three bought from the Net Dealer): two chips fewer with the trader's four halfwords at six bits, red with them out (one fewer; four more instead of one). Beside 0.20.0's build the Pack at the next visit lists the same chips but the prize.",
+      "meaning": "The trader's two readers were the only ones of an editor's item outside the editor (a scan of all the code for the mask 0x7F beside a shift by 7 or 23); a trade takes exactly the chips put in again.",
+      "link": "../rom/chips-code.md"
+    },
     {
       "feature": "Battle",
       "date": "2026-11-15",

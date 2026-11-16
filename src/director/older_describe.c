@@ -16,7 +16,6 @@
 #include "director_state.h"
 #include "emu.h"
 #include "guardians.h"
-#include "library.h"
 #include "net.h"
 #include "netmap.h"
 #include "npc_sprite.h"
@@ -99,9 +98,10 @@ static void layer_lines(FILE *f) {
 	fprintf(f, "guardianstands %d %s\n", anim, !shown ? "unseen" : guardian_bn4(g->navi) ? views[view] : "shown");
 }
 
-/* A battle's enemies as BN6's engine holds them: how many stand, their HP
- * together, their names, and how many are an older net's, moved in (their
- * ids past BN6's own, chip_targets.h) */
+/* A battle's enemies as BN6's engine holds them: their HP together, their
+ * names, and how many are an older net's, moved in (their ids past BN6's
+ * own, chip_targets.h); how many stand and are down is the tally's `foes`
+ * and `down` (director_tally.c) */
 static void foes_lines(FILE *f) {
 	int n = 0, hp = 0, older = 0;
 	char names[160] = "";
@@ -117,7 +117,7 @@ static void foes_lines(FILE *f) {
 		hp += emu_read16(o + BN6_T1_HP);
 		older += chip_targets_name((uint16_t)id) != id;
 	}
-	fprintf(f, "enemies %d\nenemyhp %d\nenemynames %s\nolderfoes %d\n", n, hp, n ? names : "none", older);
+	fprintf(f, "enemyhp %d\nenemynames %s\nolderfoes %d\n", hp, n ? names : "none", older);
 	/* (a random battle from an older net's own record, its address there:
 	 * the territory's own, xbattles.h) */
 	if (!boss_fighting() && D.next.xrecord) fprintf(f, "olderrecord %07X\n", (unsigned)(D.next.xrecord & 0xFFFFFFFu));
@@ -174,7 +174,6 @@ static void souls_lines(FILE *f) {
 
 void older_describe(FILE *f) {
 	run_lines(f);
-	library_describe(f);   /* (the PET's Library while it is up: its page, an entry a game) */
 	if (D.town) return;
 	layer_lines(f);
 	if (emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) return;

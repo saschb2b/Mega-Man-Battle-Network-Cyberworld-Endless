@@ -21,12 +21,10 @@ def course(biome, name, game):
             ('until', 'chat=open', 900),              # the arrival's words, which the autopilot pages
             ('until', 'chat=closed', 1800),
             ('do', 'battle'),                         # the layer's next random battle, quiet or not
-            ('until', 'enemies>=1', 1200),            # its foes on the field
+            ('until', 'foes>=1', 1200),            # its foes on the field
             # (BN5's ground fights BN5's own records; BN4's has none of its own yet: BN6's)
             ('expect', 'olderrecord!=none' if game == 'bn5' else 'olderrecord=none'),
-            ('repeat', 'wait 10', 'enemies=0', 400),  # every one deleted (the RESULT is short: looked at often)
-            ('expect', 'screen=battle'),
-            ('until', 'screen=map', 1800),            # its RESULT paid, back on the layer
+            ('until', 'lastbattle=won', 6000),        # every one deleted, its RESULT paid, back on the layer
             ('expect', f'area={name}'),
             ('until', 'layer>=2', 20000),             # walked to its exit
             ('until', 'screen=map', 1200),

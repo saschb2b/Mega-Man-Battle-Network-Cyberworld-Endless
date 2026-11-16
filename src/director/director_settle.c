@@ -5,8 +5,10 @@
  * 100z and the map walked since lost (session 76). Now the game is run on
  * to him free first (scene_emu.c's emu_keep_run), A paging the RESULT as
  * the player would and the director's talks held back, and the run is
- * kept where the battle left him (docs/engine/saves.md). A battle under
- * way is not run on, nor a guardian's, which the arena's door keeps. */
+ * kept where the battle left him (docs/engine/emulation/layer.md). A
+ * battle under way is not run on, nor a guardian's, which the arena's door
+ * keeps. A layer's exit taken is run on the same way, to MegaMan free on
+ * the next layer (arriving, below). */
 #include "director_state.h"
 
 #include "bn6.h"
@@ -33,8 +35,16 @@ void director_settle_watch(void) {
 	else if (sub == BN6_SUB_MAP && hold_save_ok()) won_back = false;
 }
 
+/* A layer's exit taken, the next layer's checkpoint not saved yet: its
+ * warp, the jack-in and the arrival's first frames, some two seconds where
+ * a quit kept the layer before from its last checkpoint, its battles and
+ * what they paid lost (the fuzz of quits' first find,
+ * docs/devtools/scenarios.md, A quit at any frame). Not home's trip, nor
+ * with a box open, which has its own save before it. */
+static bool arriving(void) { return D.warping || (D.checkpoint && on_map() && !emu_read8(BN6_CHATBOX)); }
+
 bool director_settles(void) {
-	return won_back && D.active && !D.town && !D.gameover && !D.warping && boss_idle() && !D.challenge && !D.battler_series &&
+	return (won_back || arriving()) && D.active && !D.town && !D.gameover && boss_idle() && !D.challenge && !D.battler_series &&
 		!talk_busy() && !director_pick_shown();
 }
 

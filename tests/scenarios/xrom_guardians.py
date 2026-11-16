@@ -34,12 +34,13 @@ def fight(game, biome, navi, name, depth=3):
             ('until', 'guardianstands>=0', 600),      # the map's people in place: he in a view his sprite draws
             ('expect', 'guardianstands~shown|guardianstands~front'),
             ('until', 'guardian~fighting', 6000),
-            ('until', 'enemies>=1', 1200),
+            ('until', 'foes>=1', 1200),
             ('expect', f'enemynames~{IN_BATTLE.get(name, name)}'),   # himself, moved in from his own game
             ('expect', 'olderfoes>=1'),
             ('until', 'guardian~beaten', 6000),
             ('expect', f'guardian={name} beaten'),
             ('until', 'guardian~done', 6000),         # his Guardian Data taken
+            ('expect', 'data=taken'),
             ('expect', 'hp=200/200'),                 # its five HPMemory, and the full heal
             ('expect', f'soulsheld={soul:02x}'),      # ... and his Soul, where he has one
         ])

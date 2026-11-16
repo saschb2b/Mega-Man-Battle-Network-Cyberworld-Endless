@@ -12,7 +12,7 @@
  * `front-right`, `back-left` or `back-right`), and on a Glitch layer
  * `copyform NAVI` and `copystands ANIM` (its copy's first body, its NPC's
  * animation). In a battle:
- * `enemies N`, `enemyhp N` (theirs together), `enemynames A+B`,
+ * `enemyhp N` (the enemies' together), `enemynames A+B`,
  * `olderfoes N` (those moved in from an older net), `olderrecord ADDR|none`
  * (the older net's own record it was rolled from); on the Custom screen
  * `drawn ID+CODE ...` and `handpicks N`, after it `hand N`, `nextchip ID`,

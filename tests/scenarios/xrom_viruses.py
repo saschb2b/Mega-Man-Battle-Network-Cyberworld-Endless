@@ -16,9 +16,7 @@ ARRIVE = [
     ('until', 'chat=closed', 1800),
 ]
 WON = [
-    ('repeat', 'wait 10', 'enemies=0', 600),  # every one deleted
-    ('expect', 'screen=battle'),
-    ('until', 'screen=map', 1800),            # its RESULT paid: on the layer again
+    ('until', 'lastbattle=won', 8000),        # every one deleted, its RESULT paid: on the layer again
     ('expect', 'layer=1'),
 ]
 
@@ -29,7 +27,7 @@ def family(game, first, name):
         GUARDS=f"{game.upper()}'s {name} in BN6's engine: met under its name, deleted, the battle won",
         STEPS=ARRIVE + [
             ('do', f'foes {first:X}@52'),
-            ('until', 'enemies>=1', 1200),
+            ('until', 'foes>=1', 1200),
             ('expect', f'enemynames~{name}'),
             ('expect', 'olderfoes>=1'),
         ] + WON)
@@ -51,7 +49,7 @@ MANY['bn5/record'] = dict(
     GUARDS="One of BN5's battle records fought whole in BN6's engine: two CanGards and a Mettaur, all deleted",
     STEPS=ARRIVE + [
         ('do', 'xrecord 811DE10'),
-        ('until', 'enemies>=3', 1200),
+        ('until', 'foes>=3', 1200),
         ('expect', 'enemynames=CanGard+CanGard+Mettaur'),
         ('expect', 'olderfoes=2'),
     ] + WON)
