@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Fixed: Update now did nothing on a PortMaster handheld whose
+  launcher was older than 0.22.0.** Where the new `cyberworld` folder had
+  been copied over by hand, the launcher beside it stayed the old one,
+  and the update box offered only OK, which closed it like Later. The
+  game now puts the update in place itself as it closes, and the new
+  launcher with it: start the game again from the ports' list.
+
 ## 0.22.1 (2026-11-16)
 
 - **Return to title, in Options (asked for by AlicafeZ).** In a run,

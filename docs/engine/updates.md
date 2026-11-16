@@ -146,7 +146,8 @@ check did. Android's app takes both as `GameActivity`'s string extras
 | Installed by the itch app (`.itch/` beside it) | The itch app's | Nothing: the itch app updates it on its own |
 | The Flatpak, the .deb, the tar.gz's folder, Windows' zip | The download page | Opens the project's download page in the browser |
 | A PortMaster handheld whose launcher gives an update folder (`CYBERWORLD_UPDATE_DIR`: the 0.22.0 launcher on, with python3) | Installs itself (`portmaster`) | Downloads the port's zip into `ports/.cyberworld-update/`, checks it and writes `ready.txt` with its version; as the game ends, the launcher shows PortMaster's "keep the device on" message and runs `update.py` (below) |
-| A PortMaster handheld with an older launcher, or without python3 | The releases page | Nothing: the note names the releases page, where the port came from |
+| A PortMaster handheld whose launcher is older than 0.22.0's (a folder copied over by hand keeps the launcher beside it), with python3 and `update.py` in the game's folder | Installs itself (`portmaster`) | Makes the update folder itself and downloads the port's zip there; as the game ends it becomes `update.py apply` (the launcher waits on it as on the game, its lines in `update.log`), which puts the new folder and launcher in place: the game closes, and the player starts the new version from the ports' list, the 0.22.0 launcher from then on ([below](#the-portmaster-port)) |
+| A PortMaster handheld without python3 | The releases page | Nothing: the note names the releases page, where the port came from |
 | Android's app (the release's APK however it came: the browser, Obtainium, `adb`) | Installs itself (`android`) | Downloads the new APK into the app's cache, checks it and hands it to Android's installer while the game waits on the title. From Android 12 on, once the player has let the game install apps, Android puts it in place without a tap; before that, or the first time, Android's own prompt comes up over the game. Android ends the game as it replaces the app, and the player opens the new version from its icon ([below](#android)) |
 | The Switch's `.nro`, started from the Homebrew Menu | Installs itself (`switch`) | Downloads `NAME.nro.update` beside it, checks it, and as the game ends swaps it in and has the Homebrew Menu's loader start it ([The consoles](#the-consoles)) |
 | The New 3DS's `.3dsx`, started from the Homebrew Launcher | Installs itself (`3ds-3dsx`) | Downloads `NAME.3dsx.update` beside it, checks it, and as the game ends swaps it in: the Homebrew Launcher comes back, and the player starts the new version there (the note says so) |
@@ -305,7 +306,8 @@ folder):
    puts the previous folder and launcher back.
 2. Where python3 is there it gives the game `CYBERWORLD_UPDATE_DIR`, the
    update folder beside the game's (`ports/.cyberworld-update`); without
-   it the game names the releases page instead.
+   it the game names the releases page instead (an older launcher's
+   game makes the folder itself, below).
 3. After the game, a `ready.txt` there means a checked download:
    `update.py apply` copies the game's folder to a stage, unpacks the
    zip's files over the copy (the player's files kept where the zip has
@@ -317,8 +319,33 @@ folder):
    anew, the new version; a failure puts the old one back, says so in
    PortMaster's error box and starts it.
 
-A `ready.txt` the launcher did not act on right away (an older launcher,
-a crash) is stale: the next start removes it with its zip.
+A launcher older than 0.22.0's gives the game no update folder and
+runs nothing after it: a player who copied the new `cyberworld/` folder
+over by hand kept the launcher beside it, and before 16 November 2026
+the update box then offered only **A: OK** and the releases page (the
+owner's Retroid Nova, 0.22.0 to 0.22.1). Where no
+`CYBERWORLD_UPDATE_DIR` comes, the game now looks for what the launcher
+would have given (`src/update/update_port.c`): `update.py` in its own
+folder, python3 on the PATH, and the launcher that started it, the
+absolute `.sh` among its shell's arguments (`/proc/PPID/cmdline`:
+`/bin/bash`, then the launcher's path) in the folder that holds the
+game's, links followed (ROCKNIX's `/roms` is `/storage/roms`). With all
+three it makes the update folder itself, as the launcher would, and
+downloads there; as it exits, after its own end, it becomes `update.py
+apply --game-dir ... --launcher ...` (`execv`, so the old launcher
+waits on it as on the game), its lines in `update.log`. The new folder
+and the 0.22.0 launcher are put in place, the old launcher's
+`pm_finish` brings back the ports' list, and the player starts the new
+version there; the note says the game closes. No PortMaster message
+shows while it runs (a second or two on the Nova), and an update cut
+short between the swap's first two renames is not undone at the next
+start, the old launcher having no step for it; the 0.22.0 launcher it
+leaves has. A test launcher beside another folder (`tools/device_run.py`'s
+`zz-cwtest.sh`, its data in `/tmp`) is no launcher of the game's folder:
+that copy names the releases page.
+
+A `ready.txt` the launcher did not act on right away (a crash) is stale:
+the next start removes it with its zip.
 `tests/test_port_update.py` runs `update.py` on made-up ports folders.
 
 ## What comes next

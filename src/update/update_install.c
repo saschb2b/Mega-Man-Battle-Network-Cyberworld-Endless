@@ -20,14 +20,27 @@ bool update_install_page(void) {
 
 #if defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
 
+#include <errno.h>
+#include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+
+#ifndef CW_DESKTOP
+#include "game.h"
+#include "update_port.h"
+#endif
 
 /* (the download beside the AppImage, so that the rename is one file
  * system's: the AppImage's name and ".update"; or in the PortMaster
  * launcher's update folder, update.zip and ready.txt beside it once
  * checked, which port/update.py puts in place as the game ends) */
 static char staged[1100], port_zip[1100], port_ready[1100];
+/* (a launcher older than 0.22.0's: the game runs update.py itself, with
+ * the python3 and the launcher it found) */
+static bool port_self;
+#ifndef CW_DESKTOP
+static char port_python[600], port_launcher[1100];
+#endif
 
 /* the AppImage's own path, "" where this is no AppImage */
 static const char *appimage(void) {
@@ -57,16 +70,62 @@ static bool folder_writable(const char *file) {
 	*slash = 0;
 	return access(dir[0] ? dir : "/", W_OK) == 0;
 }
+#else
+/* A launcher older than 0.22.0's (a folder copied over by hand keeps the
+ * launcher beside it): the update folder the game makes itself, where
+ * update.py is in the game's folder, python3 on the PATH and the launcher
+ * that started the game beside that folder, its shell's argument */
+static bool port_own(char *dir, size_t n) {
+	char update_py[600], args[4096], proc[64];
+	snprintf(update_py, sizeof update_py, "%s/update.py", g_data_dir);
+	if (access(update_py, R_OK) != 0 || !update_port_dir(g_data_dir, dir, n)) return false;
+	if (!update_port_find(getenv("PATH"), "python3", port_python, sizeof port_python)) return false;
+	snprintf(proc, sizeof proc, "/proc/%d/cmdline", (int)getppid());
+	FILE *f = fopen(proc, "rb");
+	if (!f) return false;
+	size_t len = fread(args, 1, sizeof args - 1, f);
+	fclose(f);
+	args[len] = 0;
+	if (!update_port_launcher(args, len, g_data_dir, port_launcher, sizeof port_launcher)) return false;
+	if (mkdir(dir, 0755) != 0 && errno != EEXIST) return false;
+	port_self = access(dir, W_OK) == 0;
+	return port_self;
+}
+
+/* (the game becomes update.py, which the launcher waits on as it waited
+ * on the game; its lines in update.log, as the 0.22.0 launcher keeps them) */
+static void port_apply(void) {
+	static char update_py[600], apply[] = "apply", game_flag[] = "--game-dir", launcher_flag[] = "--launcher";
+	char log[600];
+	snprintf(update_py, sizeof update_py, "%s/update.py", g_data_dir);
+	snprintf(log, sizeof log, "%s/update.log", g_data_dir);
+	printf("update: update.py puts it in place, %s\n", port_launcher);
+	fflush(NULL);
+	int fd = open(log, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd >= 0) {
+		dup2(fd, 1);
+		dup2(fd, 2);
+		close(fd);
+	}
+	char *args[] = { port_python, update_py, apply, game_flag, g_data_dir, launcher_flag, port_launcher, NULL };
+	execv(port_python, args);
+	printf("update: update.py did not start\n");
+}
 #endif
 
 UpdateWay update_install_way(const char **key) {
 	*key = NULL;
 #ifndef CW_DESKTOP
 	/* (a PortMaster handheld: its launcher's update folder, where the
-	 * launcher can put the update in place; an older launcher's, or one
-	 * without python3: the releases page, there being no browser) */
+	 * launcher can put the update in place; an older launcher's, the
+	 * game's own, update.py run by the game as it ends; without python3:
+	 * the releases page, there being no browser) */
+	char own[600];   /* (the game's folder is 512 at most) */
 	const char *dir = getenv("CYBERWORLD_UPDATE_DIR");
-	if (!dir || dir[0] != '/' || access(dir, W_OK) != 0) return UPDATE_WAY_RELEASES;
+	if (!dir || dir[0] != '/' || access(dir, W_OK) != 0) {
+		if (!port_own(own, sizeof own)) return UPDATE_WAY_RELEASES;
+		dir = own;
+	}
 	snprintf(staged, sizeof staged, "%s/update.zip.part", dir);
 	snprintf(port_zip, sizeof port_zip, "%s/update.zip", dir);
 	snprintf(port_ready, sizeof port_ready, "%s/ready.txt", dir);
@@ -119,6 +178,12 @@ void update_install_drop(void) { update_install_tidy(); }
 void update_install_start(void) {
 	static char line[8192];
 	static char *args[128];
+#ifndef CW_DESKTOP
+	if (port_self) {
+		port_apply();
+		return;
+	}
+#endif
 	const char *a = appimage();
 	/* (a handheld's launcher puts it in place and starts it) */
 	FILE *f = a[0] && !port_zip[0] ? fopen("/proc/self/cmdline", "rb") : NULL;
@@ -134,7 +199,9 @@ void update_install_start(void) {
 	execv(a, args);
 }
 
-bool update_install_starts_again(void) { return true; }
+/* (the older launcher ends with the game's update.py: the player starts
+ * the new version from the ports' list) */
+bool update_install_starts_again(void) { return !port_self; }
 
 #elif defined(_WIN32)
 
