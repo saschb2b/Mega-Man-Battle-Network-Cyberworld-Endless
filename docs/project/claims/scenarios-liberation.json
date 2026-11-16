@@ -1,9 +1,0 @@
-{
-  "branch": "scenarios-liberation",
-  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for dark layers: a liberation's board from its briefing to its prize, its commands, its phases, time up and deletion, the special route, with BN6 alone and with BN5's team",
-  "takes": {},
-  "units": [
-    "scenarios: liberation"
-  ],
-  "run": false
-}

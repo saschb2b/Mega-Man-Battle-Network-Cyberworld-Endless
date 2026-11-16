@@ -208,6 +208,11 @@ void lib_battle_cross(int cross) { arm.cross = cross >= 1 && cross <= 5 ? cross 
 
 void lib_battle_describe(FILE *f) {
 	fprintf(f, "turn %d\nrules %s\n", emu_read8(BN6_BATTLE_SCREENS), arm.on ? "liberation" : "plain");
+	/* (a teammate's battle: the Soul united, BN5's number, 0 none; his Cross, BN6's form, 0 none) */
+	int form = emu_read8(BN6_CROSS_RECORD + BN6_RECORD_FORM);
+	/* (and the foe whose HP the board keeps, as the battle last saw it) */
+	if (arm.on && foe_hp > 0 && foe_left >= 0) fprintf(f, "foehp %d\n", foe_left);
+	if (arm.on) fprintf(f, "soul %d\ncross %d\n", emu_read8(BN6_SOULS + BN6_SOUL_ID), form >= 1 && form <= 5 ? form : 0);
 }
 
 bool lib_battle_soul_armed(void) { return arm.on && (arm.soul || arm.cross); }

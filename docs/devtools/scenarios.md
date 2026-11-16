@@ -269,8 +269,10 @@ never seen red guards nothing either.
   way back from the battle, while BN6 still holds MegaMan, where the run
   cannot be held back before it as it is before
   [a talk on the map](../engine/emulation/layer.md), and a quit under it
-  goes back to the last checkpoint, the battle and its reward lost. Not fixed here: the board's steps are its own. It is
-  in the fuzz's `KNOWN`, below.
+  goes back to the last checkpoint, the battle and its reward lost. It
+  stood in the fuzz's `KNOWN`, below, until the board saved the run as
+  its Navi begins to speak (`liberation_save.c`, with the board's own
+  scenarios): `--fuzz 3/12` passes, and the entry is gone.
 - **A quit heard between two batches was not heard.** The headless
   game's wait for its next batch is a `read` the signal wakes; a signal
   that came after a batch's answer and before that `read` woke nothing,
@@ -335,6 +337,48 @@ and then `held=none` (the state's with `CYBERWORLD_STATE_POS=1`). A test
 start's area and guardian (`--net-biome`, `--guardian`) are given again
 at a `restart`: a CONTINUE from the title keeps the run's own, and
 `--guardian`'s older-net Navi is no CONTINUE's.
+
+## A dark layer's board
+
+A liberation's board says itself in the state
+(`lib_describe`, `src/director/liberation_describe.c`, whose head lists
+every line): its step (`board opening`, `move`, `menu`, `battle`,
+`darkloids`, `done`; `board none` on a layer with no board), `boardphase`
+and `par`, `orderpoints`, the panels dark and `freed`, the DarkHoles and
+guardians standing, the Darkloid and his `darkloidhp`, each Navi of the
+team (`mate0 MegaMan 100/100 inplay`), what the Navi in play `faces`, the
+window's `command`, how the last battle ended (`lastfight won`, `oneturn`,
+`timeup`, `lost`), the `prize`'s tier and `boardexit`. A battle of its own
+adds `foehp`, `soul` and `cross`.
+
+A board is its seed's, so a scenario does not name its panels. The dev
+step `board KIND` ([tools/play.py](play.md)) stands the Navi in play
+beside the nearest panel of a kind his walk reaches, facing it, where a
+player would have walked him: `dark`, `pair` (LongSwrd's two), `item`
+(or what it holds: `orderpoints`, `heart`, `key`, `route`), `trap`,
+`bonus`, `darkhole`, `guardian`, `sneak` (a guardian in SneakAttack's
+reach), `ring`, `darkloid`, `mate`, `over` (BombLiberation's flier over a
+dark panel), and `next`, the panel the board's autopilot would take
+(`liberation_auto.c`). The command is then taken by the pad. Its battle is
+ended from the dev menu (hold SELECT, press R; "Win this battle", its
+fifth row, deletes the enemies and BN6's own loop ends the battle), in
+the turn the scenario waits for: the first for a one-turn win, the second
+for a plain one, none for TIME UP!. `tests/scenarios/liberation_board.py`'s
+`Course` builds those steps, and `liberation_team.py` takes it for BN5's
+team.
+
+They found two bugs as they were written. With BN6's ROM alone a dark
+layer's panels were drawn 256 pixels off or not at all on eight layers of
+nine: the recolouring read BN6's scroll as wrapping at 512, where BN6
+scrolls a screen map of 256 (`liberation-board/shown` reads the picture's
+own count, `darkshown` and `facedshown`). And START on the team's pick,
+the board's own team taken, went on to BN6 and opened the PET over the
+briefing (`liberation-team/pick/kept`). A third the fuzz of quits found
+on the board, and its fixed course is here: MegaMan's words after a won
+battle began in the fade back from it, BN6 still holding him, so no save
+was held back before them and a quit under them lost the battle
+(`liberation-board/continue/under-the-words`; the words now wait for
+`talk_due_now()`, as the director's other talks do).
 
 ## What they found at once
 
