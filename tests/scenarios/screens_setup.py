@@ -108,6 +108,14 @@ MANY = {
     ]),
     **{f'helper-{name}': dict(START=SETUP, STEPS=switched('help', k, 'helpers', 0, 1 << k)) for k, name in enumerate(HELPERS)},
     **{f'extra-{name}-off': dict(START=SETUP, STEPS=switched('extras', k, 'extrasoff', 0, 1 << k)) for k, name in enumerate(EXTRAS)},
+    # the older nets' row shows only with another game's ROM read (BN5's here)
+    'extra-older-nets-off': dict(START=SETUP, NEEDS=('bn5',), STEPS=switched('extras', 5, 'extrasoff', 0, 32)),
+    'extra-older-nets-not-shown-without-another-rom': dict(START=SETUP, STEPS=[
+        ('repeat', 'press R; wait 10', 'tab=extras', 3),
+        ('repeat', 'press DOWN; wait 6', 'row=4', 8),
+        ('do', 'press DOWN; wait 6'),
+        ('expect', 'row=foot'),                   # DarkChips, the fifth, is the last
+    ]),
     # several at once, and the next setup starts from them (the profile's, kept by a restart)
     'the-choice-is-the-next-setups': dict(START=SETUP, STEPS=[
         *row('help', 1), ('do', 'press A; wait 6'),
