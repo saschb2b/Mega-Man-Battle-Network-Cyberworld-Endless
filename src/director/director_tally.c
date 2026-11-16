@@ -9,9 +9,12 @@
  * a lost one ends in GAME OVER, where the director counts it from here. */
 #include "director_state.h"
 
+#include <stdio.h>
+
 #include "bn6.h"
 #include "bn6_battle_loop.h"
 #include "emu.h"
+#include "run.h"
 
 static int most, down;
 
@@ -28,4 +31,13 @@ void tally_battle_frame(void) {
 
 int tally_deleted(bool won, int foes) {
 	return (won || down > foes) ? foes : down;
+}
+
+/* The tally in the state's words (director_describe's; tests/scenarios
+ * reads them): the run's viruses and Navis deleted, as RESULT will count
+ * them, the layer's random battles fought, and in a battle its enemies,
+ * the most that stood and those down. Reads alone. */
+void tally_describe(FILE *f) {
+	fprintf(f, "viruses %d\nnavis %d\nbattles %d\n", run.viruses_deleted, run.bosses_beaten, D.battles);
+	if (D.in_battle && !D.battler) fprintf(f, "foes %d\ndown %d\n", most, down);
 }

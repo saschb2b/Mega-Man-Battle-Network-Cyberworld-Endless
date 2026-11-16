@@ -3,7 +3,7 @@ type: Tool
 title: "A battle on demand"
 description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-12T21:00:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:50:00Z }
 ---
 
 # A battle on demand
@@ -19,7 +19,11 @@ layer's next random battle at the first moment MegaMan stands free on its
 map: no chat, the director's words or a scene, no warp, no guardian's
 staging or challenge under way. It waits that long: an act's arrival
 words must be paged first (the autopilot pages them above; A in the
-script does too).
+script does too). A drop-in start's first frames are the exception: its
+jack-in passes for a free moment, and a `battle` or `foes` step given
+then begins its battle inside it (seed 3 at `--run-depth 2`: a 350z
+RESULT left 10829 zenny, and MegaMan held on the map after it). A script
+waits out the arrival first; [Scenarios](scenarios.md) says how.
 It is the record the roll would have handed out next, BN6's own or, on a
 layer of BN5's (its territory, [Other games' ROMs](../multirom/overview.md)), one of its records in
 BN6's engine, forced past the roll as the guardians' are (with `--dev

@@ -168,6 +168,16 @@ static void battle_describe(FILE *f) {
 	}
 }
 
+/* A battle's phase in a word: `won` from its RESULT on, which a quit
+ * keeps, and under way before it; `start` before the Custom screen first
+ * opens, and again as the battle fades out, BN6's phase gone back
+ * (tools/scenarios_fuzz.py remembers a `won`) */
+static const char *battle_word(void) {
+	int phase = emu_read8(BN6_BATTLE_PHASE);
+	return phase < BN6_PHASE_CUSTOM ? "start" : phase == BN6_PHASE_CUSTOM ? "custom" : phase < BN6_PHASE_RESULTS ? "fight" :
+		emu_read8(BN6_BATTLE_RESULT) == BN6_RESULT_WON ? "won" : "over";
+}
+
 /* at home: in one of its places the way on (the PC, the stairs up, the
  * way out), in the town its objects and Lan's front door */
 static void describe_home(FILE *f) {
@@ -276,9 +286,13 @@ void director_describe(FILE *f) {
 	if (sub == BN6_SUB_BATTLE) {
 		fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 		lib_battle_describe(f);
+		fprintf(f, "battlestep %s\n", battle_word());
 	}
+	director_quit_describe(f);
 	describe_turns(f);
 	battle_describe(f);
+	battle_state_describe(f);
+	director_pick_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
 	/* (a special route kept for its fork, and the act it led to) */
@@ -286,6 +300,11 @@ void director_describe(FILE *f) {
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	/* (the run's tally, the card that shows, the rival, the guardian's course: each its own part's) */
+	tally_describe(f);
+	cinema_describe(f);
+	duel_describe(f);
+	boss_describe(f);
 	/* (the extras: the side layer and the ways off, the Glitch layer, the tournament's bracket, the Virus Battler, DarkChips) */
 	extras_describe(f);
 	/* (a trip back, and the Net's clock: docs/world/home/) */

@@ -617,6 +617,19 @@ void boss_resume(void) {
 	else if (flag_get(LAYER_REWARD_FLAG) && !flag_get(LAYER_REWARD_TAKEN_FLAG)) to(B_REWARD);
 }
 
+/* The guardian's course in the state's words (director_describe's; tests/
+ * scenarios reads them): his version as the layer set it, whether MegaMan
+ * has battle data on him, his Guardian Data (hidden while he stands,
+ * fresh in the second no A takes it, waiting, taken), and the exit pad.
+ * Reads alone. */
+void boss_describe(FILE *f) {
+	if (B.state == B_NONE) return;
+	bool taken = B.state >= B_OPEN || flag_get(LAYER_REWARD_TAKEN_FLAG);
+	fprintf(f, "version %d\nknown %s\ndata %s\nexitpad %s\n", B.g.version, guardian_known(B.g.navi) ? "yes" : "no",
+		taken ? "taken" : B.state != B_REWARD ? "hidden" : boss_reward_fresh() ? "fresh" : "waiting", boss_exit_open() ? "open" : "shut");
+	if (B.state == B_FIGHT) fprintf(f, "guardianhp %d\n", B.fought_hp);
+}
+
 bool boss_goal(int *x, int *y, bool *talk) {
 	if (B.state == B_NONE || B.state >= B_OPEN) return false;
 	for (int i = 0; i < layer.nobj; ++i)

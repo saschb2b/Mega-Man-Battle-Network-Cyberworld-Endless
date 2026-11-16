@@ -23,6 +23,11 @@ static void cause(char *out, size_t n, const char *area) {
 }
 
 void end_run(void) {
+	/* (the battle MegaMan was deleted in ends with the run: left standing,
+	 * the next run, begun without the game closed, came onto its first
+	 * layer as if back from that battle, and its tally began with the
+	 * viruses deleted in it; tests/scenarios/battle_deleted.py) */
+	D.in_battle = D.challenge = D.gate_fight = D.floor_fight = false;
 	/* what the summary tells: where, and by whom; and with the area's short
 	 * name, for a line the whole does not fit ("by TomahawkMan in Robot
 	 * Control Comp" ran off the summary's panel) */

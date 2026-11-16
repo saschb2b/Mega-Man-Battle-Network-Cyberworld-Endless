@@ -70,6 +70,11 @@ int boss_foe(void);
  * roundchips (director_describe) */
 void boss_bracket_describe(FILE *f);
 
+/* His course in the state's words: his version, whether he is known, his
+ * Guardian Data (hidden, fresh, waiting, taken) and the exit pad; in his
+ * battle the HP he is fought at. */
+void boss_describe(FILE *f);
+
 /* Where the test autopilot heads while the guardian stands: into the
  * arena, then to its Guardian Data (to check, *talk). */
 bool boss_goal(int *x, int *y, bool *talk);
