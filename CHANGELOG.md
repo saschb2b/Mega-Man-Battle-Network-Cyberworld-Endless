@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Fixed: a quit as a layer's exit was taken lost the layer.** From the
+  exit pad's warp until "Run saved" on the next layer, some two seconds,
+  a quit (or a handheld's close) kept the run at the left layer's last
+  checkpoint: its battles and their zenny gone at the CONTINUE. The game
+  now finishes the warp first, unseen, and the run goes on from the next
+  layer.
+
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by
