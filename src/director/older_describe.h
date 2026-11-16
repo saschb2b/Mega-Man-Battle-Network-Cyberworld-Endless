@@ -15,7 +15,7 @@
  * `enemies N`, `enemyhp N` (theirs together), `enemynames A+B`,
  * `olderfoes N` (those moved in from an older net), `olderrecord ADDR|none`
  * (the older net's own record it was rolled from); on the Custom screen
- * `drawn ID+CODE ...` and `picked N`, after it `hand N`, `nextchip ID`,
+ * `drawn ID+CODE ...` and `handpicks N`, after it `hand N`, `nextchip ID`,
  * `nextchipfrom GAME`, `nextpower N`; and where the Souls stand in the engine
  * `unite lit|grey|chosen|none` (UNITE under OK on the Custom screen),
  * `unitesoul N` (the Soul the last chip picked lights), `united N` (BN5's

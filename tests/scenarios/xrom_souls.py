@@ -29,7 +29,7 @@ def unite(soul, held, chip):
         ('do', 'foes 205@52'),
         ('until', f'drawn~{chip}', 900),
         ('expect', 'unite=grey'),                         # UNITE stands, nothing picked yet
-        ('repeat', 'press A; wait 10', 'picked=1'),
+        ('repeat', 'press A; wait 10', 'handpicks=1'),
         ('expect', 'unite=lit'),
         ('expect', f'unitesoul={soul}'),
         ('do', 'press START; wait 10; press DOWN; wait 10; press A'),   # OK, UNITE under it, A: the chip given up
@@ -61,7 +61,7 @@ MANY['life'] = dict(
         ('until', 'united=0', 600),                       # the turn after begins: MegaMan himself again
     ] + screen(140) + [
         ('expect', 'united=0'),
-        ('repeat', 'press A; wait 10', 'picked=1'),       # its chip again
+        ('repeat', 'press A; wait 10', 'handpicks=1'),       # its chip again
         ('expect', 'unite=grey'),                         # ... lights nothing: once a battle
     ])
 MANY['not-held'] = dict(
@@ -71,7 +71,7 @@ MANY['not-held'] = dict(
         ('expect', 'soulsheld=01'),
         ('do', 'foes 205@52'),
         ('until', 'drawn~140', 900),
-        ('repeat', 'press A; wait 10', 'picked=1'),
+        ('repeat', 'press A; wait 10', 'handpicks=1'),
         ('expect', 'unite=grey'),
         ('expect', 'unitesoul=0'),
     ])
@@ -82,7 +82,7 @@ MANY['none-held'] = dict(
         ('expect', 'soulsheld=00'),
         ('do', 'foes 205@52'),
         ('until', 'drawn~140', 900),
-        ('repeat', 'press A; wait 10', 'picked=1'),
+        ('repeat', 'press A; wait 10', 'handpicks=1'),
         ('expect', 'unite=none'),
         ('do', 'press START; wait 10; press A'),
         ('until', 'hand=1', 600),

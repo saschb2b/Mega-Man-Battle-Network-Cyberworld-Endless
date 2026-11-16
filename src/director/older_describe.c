@@ -144,7 +144,7 @@ static void chips_lines(FILE *f) {
 		int n = emu_read8(BN6_CUSTOM_HAND);
 		fprintf(f, "drawn");
 		for (int i = 0; i < n && i < 10; ++i) chip_word(f, emu_read16(BN6_BATTLE_DECK + (uint32_t)i * 2));
-		fprintf(f, "\npicked %d\n", emu_read8(BN6_CUSTOM_PICKED));
+		fprintf(f, "\nhandpicks %d\n", emu_read8(BN6_CUSTOM_PICKED));
 		return;
 	}
 	int at = emu_read8(BN6_BATTLE_HAND + BN6_HAND_AT), left = 0;

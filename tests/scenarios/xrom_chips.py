@@ -22,8 +22,8 @@ def deal(chip, code, foes):
         ('do', f'chip {chip} {code} 29; foes {foes}'),
         ('until', f'drawn~{chip}{code}', 900),            # the Custom screen: the hand dealt
         ('expect', f'drawn= {chip}{code} {chip}{code} {chip}{code} {chip}{code} {chip}{code}'.replace('= ', '=')),
-        ('expect', 'picked=0'),
-        ('repeat', 'press A; wait 10', 'picked=1'),
+        ('expect', 'handpicks=0'),
+        ('repeat', 'press A; wait 10', 'handpicks=1'),
         ('do', 'press START; wait 10; press A'),          # to OK, and OK
         ('until', 'hand=1', 600),                         # the chip in hand
         ('expect', f'nextchip={chip}'),

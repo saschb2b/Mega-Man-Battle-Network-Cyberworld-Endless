@@ -94,7 +94,7 @@ his sprite shows him in (`front-left`, `back-right`), a Glitch layer
 together), `enemynames` (`CanGard+Mettaur`), `olderfoes` (those moved in
 from BN5 or BN4) and `olderrecord` (BN5's own record it was rolled from,
 or `none`), its Custom screen `drawn` (the hand, `204L 204L`) and
-`picked`, the fight `hand`, `nextchip`, `nextchipfrom` and `nextpower`,
+`handpicks`, the fight `hand`, `nextchip`, `nextchipfrom` and `nextpower`,
 and where the Souls stand `unite` (`none`, `grey`, `lit`, `chosen`),
 `unitesoul`, `united`, `unitedturns` and `soulsused`. The title says
 `found` (its note's words, `nothing` with BN6's ROM alone) and
