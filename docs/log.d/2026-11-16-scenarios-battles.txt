@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-16T13:50:00Z
-* **Update**: devtools/scenarios.md (the state's lines for a battle, the tally, a guardian's course, the rival, a pick, a card and the run's summary; a drop-in start's arrival waited out; the bug the battles' scenarios found), devtools/battle-on-demand.md (the battle and foes steps in a drop-in start's first frames), code/director.md (battle_state.c), rom/virus-battler.md (BN6_BATTLE_RESULT's 4, a battle run from).
