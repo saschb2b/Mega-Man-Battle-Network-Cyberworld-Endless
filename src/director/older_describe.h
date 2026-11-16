@@ -13,7 +13,7 @@
  * `olderfoes N` (those moved in from an older net), `olderrecord ADDR|none`
  * (the older net's own record it was rolled from); on the Custom screen
  * `drawn ID+CODE ...` and `picked N`, after it `hand N`, `nextchip ID`,
- * `nextpower N`; and where the Souls stand in the engine `soulsheld MASK`,
+ * `nextchipfrom GAME`, `nextpower N`; and where the Souls stand in the engine `soulsheld MASK`,
  * `unite lit|grey|none` (what stands under OK), `united N` (BN5's Soul's
  * number, 0 none), `unitedturns N`, `soulsused MASK`. */
 #ifndef CW_OLDER_DESCRIBE_H

@@ -211,6 +211,7 @@ static void write_state(const char *path) {
 	if (scene_current() == &scene_emu) director_describe(f);
 	/* (the title's step and its menu's row: a scenario's way through it) */
 	if (scene_current() == &scene_title) fprintf(f, "title %s\ncursor %s\n", title_step(), title_cursor());
+	if (scene_current() == &scene_title) title_found_describe(f);   /* (the other games' ROMs found, its note) */
 	fclose(f);
 }
 

@@ -22,6 +22,7 @@
 #include "soulunite.h"
 #include "souls.h"
 #include "stage_npc.h"
+#include "xchips_registry.h"
 #include "xguardian_bn4.h"
 
 /* The game an area is of, as a word: BN6's own, or the ROM its def names */
@@ -103,6 +104,13 @@ static void foes_lines(FILE *f) {
 	else fprintf(f, "olderrecord none\n");
 }
 
+/* The game a chip's record is of: one of the registry's own ids (BN5's, BN4's: xchips_registry.h), else BN6's */
+static const char *game_of_chip(int id) {
+	const XChipReg *r = xreg_at(id);
+	if (r && xreg_own(r)) return "bn5";
+	return xreg4_at(id) ? "bn4" : "bn6";
+}
+
 /* One chip of a hand as a word: its id and its code's letter ("204L", "1*") */
 static void chip_word(FILE *f, uint16_t entry) {
 	unsigned code = chip_entry_code(entry);
@@ -123,7 +131,8 @@ static void chips_lines(FILE *f) {
 	for (int i = at; i < BN6_HAND_MAX && emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + (uint32_t)i * 2) != 0xFFFF; ++i) ++left;
 	fprintf(f, "hand %d\n", left);
 	if (!left) return;
-	fprintf(f, "nextchip %d\nnextpower %d\n", emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + (uint32_t)at * 2),
+	int chip = emu_read16(BN6_BATTLE_HAND + BN6_HAND_CHIPS + (uint32_t)at * 2);
+	fprintf(f, "nextchip %d\nnextchipfrom %s\nnextpower %d\n", chip, game_of_chip(chip),
 		emu_read16(BN6_BATTLE_HAND + BN6_HAND_POWERS + (uint32_t)at * 2) + emu_read16(BN6_BATTLE_HAND + BN6_HAND_BONUS + (uint32_t)at * 2));
 }
 
