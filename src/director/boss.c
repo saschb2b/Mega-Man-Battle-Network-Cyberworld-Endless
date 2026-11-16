@@ -12,10 +12,8 @@
 #include "bn6_fields.h"
 #include "boss_grand.h"
 #include "boss_rounds.h"
-#include "bracket.h"
 #include "cinema.h"
 #include "debug.h"
-#include "director_folder.h"
 #include "emu.h"
 #include "encounter.h"
 #include "flags.h"
@@ -195,11 +193,7 @@ static void round_set(int round) {
  * chips the Pack and folder hold */
 void boss_bracket_describe(FILE *f) {
 	if (!B.g.bracket) { fprintf(f, "bracket none\n"); return; }
-	int held = 0;
-	for (int r = 0; r < 2; ++r) {
-		int code, chip = bracket_chip(B.g.rounds.prize[r], B.g.rounds.prize_version[r], run.depth, &code);
-		held += chip > 0 && chip_copies(chip) > 0;
-	}
+	int held = boss_round_chips(&B.g.rounds);
 	fprintf(f, "bracket %s\nround %d\nroundfoe %s\nroundchips %d\n",
 		B.round > 2 ? "won" : B.state == B_BRACKET ? "screen" : B.state > B_ENTER ? "round" : B.door_taken ? "door" : "ahead", B.round + 1, guardian(B.foe)->name, held);
 }

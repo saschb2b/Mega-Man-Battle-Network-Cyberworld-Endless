@@ -100,21 +100,6 @@ static int label_archive(const char *label, uint8_t *out, int max) {
 	return end + 13;
 }
 
-/* The side layer MegaMan is on and the ways off the run's own this layer
- * holds, in a state's words (director_describe; tests/scenarios' extras):
- * `sidelayer none`, undernet, secret, back or glitch; the Undernet's dark
- * warp and the golden gate, here or none */
-void side_describe(FILE *f) {
-	static const char *const sides[] = { "none", "undernet", "secret", "back", "glitch" };
-	bool warp = false, gate = false;
-	for (int i = 0; i < layer.nobj; ++i) {
-		warp |= layer.obj[i].type == OBJ_UNDERNET;
-		gate |= layer.obj[i].type == OBJ_SECRET_GATE;
-	}
-	fprintf(f, "sidelayer %s\ndarkwarp %s\ngoldgate %s\n", run.side_kind >= 0 && run.side_kind <= LAYER_GLITCH ? sides[run.side_kind] : "?",
-		warp ? "here" : "none", gate ? "here" : "none");
-}
-
 void map_label(void) {
 	char name[16];
 	if (D.town) snprintf(name, sizeof name, "%s", home_place_name());

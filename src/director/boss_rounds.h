@@ -20,5 +20,8 @@ void boss_bracket_open(const RunBracket *b, int won);
  * the map since it opened (frames off the map since, then a beat back on
  * it; or it never showed): the map's arrival it changed put back */
 bool boss_bracket_back(int t);
+/* How many of the two rounds' Navi chips the Pack and folder hold (a
+ * state's words: boss_bracket_describe) */
+int boss_round_chips(const RunBracket *b);
 
 #endif

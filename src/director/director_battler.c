@@ -72,23 +72,34 @@ void battler_round_over(int result) {
 
 void battler_card_note(void) { card_from_game(); }
 
+/* (a round's battle: BN6's VIRUS LIST, the picks placed, its question, the fight) */
+static void round_describe(FILE *f) {
+	static const struct { int phase; const char *word; } lists[] = { { 4, "list" }, { 8, "ok" }, { 0x0C, "placing" }, { 0x14, "confirm" } };
+	int phase = emu_read8(BN6_BATTLE_PHASE), list = emu_read8(BN6_VB_LIST_PHASE);
+	const char *screen = phase == 0x0C ? "fight" : "other";
+	for (unsigned i = 0; i < sizeof lists / sizeof *lists && phase == 8; ++i)
+		if (lists[i].phase == list) screen = lists[i].word;
+	fprintf(f, "vbscreen %s\nvbpicked %d\nvbplaced %d\n", screen,
+		(emu_read8(BN6_VB_LIST_PICK1) != 0xFF) + (emu_read8(BN6_VB_LIST_PICK2) != 0xFF), emu_read8(BN6_VB_LIST_PLACED));
+}
+
+/* (a result in a word) */
+static const char *result_word(int result) {
+	return !result ? "none" : result == BN6_RESULT_WON ? "won" : result == BN6_RESULT_LOST ? "lost" : "draw";
+}
+
 void battler_describe(FILE *f) {
 	fprintf(f, "btlrcard %s\nvirusdata %d\n", card_held() ? "held" : "none", card_families());
 	if (!B.known || !B.k) { fprintf(f, "battler none\n"); return; }
-	bool on = D.battler_series, over = flag_get(BATTLER_DONE_FLAG);
-	int wins = on ? B.round + (!D.battler && B.won) : 0;
-	fprintf(f, "battler %d\nstake %d\nvbrounds %d\nseries %s\nvbround %d\nvbwins %d\npot %d\nvblast %s\nvbprize %s\n", B.k, battler_stake(B.k),
-		battler_rounds(B.k), on ? "on" : over ? "over" : "none", on ? B.round + 1 : 0, wins, on ? battler_stake(B.k) * (wins + 1) : 0,
-		!B.last ? "none" : B.last == BN6_RESULT_WON ? "won" : B.last == BN6_RESULT_LOST ? "lost" : "draw",
+	bool on = D.battler_series, round = D.battler && !on_map();
+	int stake = battler_stake(B.k), wins = on ? B.round + (!D.battler && B.won) : 0;
+	const char *series = on ? "on" : flag_get(BATTLER_DONE_FLAG) ? "over" : "none";
+	fprintf(f, "battler %d\nstake %d\nvbrounds %d\nseries %s\nvbround %d\nvbwins %d\npot %d\nvblast %s\nvbprize %s\n", B.k, stake,
+		battler_rounds(B.k), series, on ? B.round + 1 : 0, wins, on ? stake * (wins + 1) : 0, result_word(B.last),
 		flag_get(BN6_FLAG_VB_FIRST_PRIZE + B.k - 1) ? "taken" : "open");
 	/* (his word after a win: TAKE THE POT or FIGHT ON showing) */
-	if (on && !D.battler && on_map()) fprintf(f, "potchoice %s\n", emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2 ? "up" : "none");
-	if (!D.battler || on_map()) return;
-	/* (a round's battle: BN6's VIRUS LIST, the picks placed, its question, the fight) */
-	int phase = emu_read8(BN6_BATTLE_PHASE), list = emu_read8(BN6_VB_LIST_PHASE);
-	fprintf(f, "vbscreen %s\nvbpicked %d\nvbplaced %d\n",
-		phase == 0x0C ? "fight" : phase != 8 ? "other" : list == 4 ? "list" : list == 8 ? "ok" : list == 0x0C ? "placing" : list == 0x14 ? "confirm" : "other",
-		(emu_read8(BN6_VB_LIST_PICK1) != 0xFF) + (emu_read8(BN6_VB_LIST_PICK2) != 0xFF), emu_read8(BN6_VB_LIST_PLACED));
+	if (on && !round) fprintf(f, "potchoice %s\n", emu_read8(BN6_CHATBOX) && emu_read8(BN6_CHATBOX_OPTIONS) >= 2 ? "up" : "none");
+	if (round) round_describe(f);
 }
 
 /* His word on the round just fought: the pot as it stands (the stake and
