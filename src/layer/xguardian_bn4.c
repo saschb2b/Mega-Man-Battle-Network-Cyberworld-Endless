@@ -74,6 +74,11 @@ int xguardian_bn4_stand(int navi, int face) {
 	return k >= 0 ? proved[k].views[diagonal[face & 7]] : face & 7;
 }
 
+bool xguardian_bn4_front(int navi, int anim) {
+	int k = line_of(navi);
+	return k < 0 || anim == proved[k].views[1] || anim == proved[k].views[2];
+}
+
 int xguardian_bn4_kin(int navi) {
 	int k = line_of(navi);
 	return k >= 0 ? proved[k].kin : 0;
