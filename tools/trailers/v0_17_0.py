@@ -69,6 +69,14 @@ BN6_ONLY = ()
 
 # ---- the footage ----
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (the Z-Canon folder's first hand against a Gunner)
+YOUTUBE_HOOK = 'A Battle on Every Layer, Three New Folders, Rivals Who Remember'
+THUMBNAILS = [
+    {'hero': ('still', 'hand-zcanon'), 'region': (120, 60, 120), 'words': ('3 NEW', 'FOLDERS!'), 'lit': 1},
+]
+
+
 def from_compare(name, first, last):
     """a scene of tools/before_after.py's, this build's side: its run, its
     input and its environment, game frames first to last"""

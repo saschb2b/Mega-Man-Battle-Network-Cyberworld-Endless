@@ -66,6 +66,14 @@ POWERS_PLAY = [
 POWERS_FIRST, CROSS_SHOT, BEAST_SHOT = 2083, 61, 712
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (a virus bursting on MegaMan's shot, the battle a run is made of)
+YOUTUBE_HOOK = 'A Roguelike for Mega Man Battle Network 6'
+THUMBNAILS = [
+    {'hero': ('still', 'battle'), 'region': (50, 40, 160), 'words': ('BN6,', 'ENDLESS!'), 'lit': 1},
+]
+
+
 def powers_scene():
     sys.path.insert(0, os.path.join(ROOT, 'tools'))
     import play

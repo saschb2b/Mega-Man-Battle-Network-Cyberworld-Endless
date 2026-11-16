@@ -59,6 +59,14 @@ SCENES = {
 }
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (three of BN5's viruses across the field from ShadowSoul)
+YOUTUBE_HOOK = "BN5's Viruses and Souls Fight in BN6's Engine"
+THUMBNAILS = [
+    {'hero': ('still', 'bn5-shadowsoul'), 'region': (80, 40, 160), 'words': ('BN5', 'IN BN6!'), 'lit': 1},
+]
+
+
 def scenes():
     return SCENES
 

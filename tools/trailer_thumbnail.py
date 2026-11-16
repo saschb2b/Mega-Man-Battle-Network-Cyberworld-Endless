@@ -15,6 +15,7 @@ list of up to three:
      'lit': 1,                     # which line is gold (the other white)
      'side': 'right',              # optional: the words and the logo on the right, for a subject on the left
      'brand': 'left',              # optional: the logo's corner where it is not the words' side
+     'new': False,                 # optional: the green NEW beside the version (by default the current trailer's alone)
      'point': (x, y)}              # optional: the orange cursor points here (game pixels of the frame)
 
 and writes .build/youtube/cyberworld-endless-VERSION-thumbnail-a.png (-b,
@@ -25,8 +26,8 @@ hero from a picture file instead (240x160), to try a layout.
 
 The layout is fixed (the blueprint's half): the frame's region filling
 the picture at a whole scale, a navy scrim under the words on the left,
-the PET's cyan frame, the logo and the version's plate top left with a
-green NEW, two lines of heavy slanted type bottom left with a thick navy edge,
+the PET's cyan frame, the logo and the version's plate top left (with a
+green NEW on the current trailer's), two lines of heavy slanted type bottom left with a thick navy edge,
 the bottom right kept clear for YouTube's length stamp (with 'side':
 'right' the scrim, the logo and the words are mirrored, the words raised
 clear of the stamp: a battle's MegaMan stands on the left). The hero, its
@@ -101,7 +102,7 @@ def hero(frame, region):
     return part.resize((3840, 2160), Image.NEAREST)
 
 
-def svg(spec, frame, version):
+def svg(spec, frame, version, new=True):
     x, y, w = spec['region']
     k = W / w                              # a game pixel on the thumbnail
     lines = spec['words']
@@ -136,6 +137,10 @@ def svg(spec, frame, version):
     # the brand's left edge (the logo, the version's plate and NEW): the words' side, or the spec's 'brand'
     bx = W - 44 - 342 if spec.get('brand', spec.get('side', 'left')) == 'right' else 44
     g0, g1 = (1, 0) if right else (0, 1)
+    # (the green NEW beside the version: the current trailer's alone, an older release's thumbnail is not news)
+    badge = (f'''<rect x="{bx + 220}" y="{plate_y}" width="122" height="58" fill="#cedeef"/><rect x="{bx + 224}" y="{plate_y + 4}" width="114" height="50" fill="{GREEN}"/>
+<text x="{bx + 281}" y="{plate_y + 42}" font-size="36" fill="{WHITE}" stroke="#088c18" stroke-width="6" paint-order="stroke" text-anchor="middle">NEW</text>'''
+             if new else '')
     return f'''<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="{W}" height="{H}" viewBox="0 0 {W} {H}">
 <defs>
 <style>@font-face {{ font-family: "Words"; src: url("{data_uri(FONT, FONT_KIND)}"); }}
@@ -155,8 +160,7 @@ text {{ font-family: "Words"; }}</style>
 <image href="{data_uri(LOGO)}" x="{bx}" y="34" width="{lw}" height="{lh}"/>
 <rect x="{bx}" y="{plate_y}" width="206" height="58" fill="#9cceef"/><rect x="{bx + 4}" y="{plate_y + 4}" width="198" height="50" fill="#102152"/>
 <text x="{bx + 103}" y="{plate_y + 42}" font-size="36" fill="{GOLD}" text-anchor="middle">{version}</text>
-<rect x="{bx + 220}" y="{plate_y}" width="122" height="58" fill="#cedeef"/><rect x="{bx + 224}" y="{plate_y + 4}" width="114" height="50" fill="{GREEN}"/>
-<text x="{bx + 281}" y="{plate_y + 42}" font-size="36" fill="{WHITE}" stroke="#088c18" stroke-width="6" paint-order="stroke" text-anchor="middle">NEW</text>
+{badge}
 {words}
 </svg>'''
 
@@ -226,7 +230,7 @@ def main():
         frame = Image.open(frame_path) if frame_path else kit.shot(*spec['hero'])
         dest = os.path.join(OUT, f'cyberworld-endless-{version}-thumbnail-{letter}')
         with open(dest + '.svg', 'w', encoding='utf-8') as f:
-            f.write(svg(spec, frame, version))
+            f.write(svg(spec, frame, version, spec.get('new', version == trailers.CURRENT)))
         draw(dest + '.svg', dest + '.png')
         made.append(dest + '.png')
         print('wrote', os.path.relpath(dest + '.png', ROOT), f'({os.path.getsize(dest + ".png") // 1024} KB)')

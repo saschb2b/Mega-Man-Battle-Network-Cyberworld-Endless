@@ -41,6 +41,14 @@ BN6_ONLY = ()
 AUTO = {'CYBERWORLD_AUTOPILOT': '1'}
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (the Darkloid on his red panels, the board a dark layer becomes)
+YOUTUBE_HOOK = 'Liberation Missions Come to a Battle Network 6 Run'
+THUMBNAILS = [
+    {'hero': ('still', 'liberation-reach'), 'region': (0, 30, 160), 'words': ('LIBERATE', 'THE NET!'), 'lit': 1},
+]
+
+
 def board(seed, depth, first, last):
     """the autopilot on a dark layer's board in BN5's look (both ROMs)"""
     return (['--scene', 'emu', '--run-depth', str(depth), '--seed', str(seed), '--dev', 'dark,god,onehit'],
