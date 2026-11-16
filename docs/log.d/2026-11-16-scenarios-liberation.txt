@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T15:20:00Z
+* **Update**: devtools/scenarios.md (A dark layer's board: the board's state lines, the `board KIND` dev step, a battle ended from the dev menu, the `moved` step, the bugs the liberation scenarios found and the fuzz's one on the board), devtools/play.md (the `board` step), devtools/headless-shot.md (`0:board KIND`), devtools/agents-tools.md (the board's lines among the state's), code/director.md (`liberation_describe.c`), game/liberation/building/stage-1.md (the first look's scroll read mod 256, not 512).
