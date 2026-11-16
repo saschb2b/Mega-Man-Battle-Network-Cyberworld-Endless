@@ -1,6 +1,7 @@
 # Release notes
 
 * [Release notes](overview.md) - The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with.
+* [Cyberworld Endless 0.22.1](v0.22.1.md) - A run that stays where you left it.
 * [Cyberworld Endless 0.22.0](v0.22.0.md) - Your run, on every device.
 * [Cyberworld Endless 0.21.2](v0.21.2.md) - Needles that land, a Switch that starts.
 * [Cyberworld Endless 0.21.1](v0.21.1.md) - The net, drawn as its maps draw it.

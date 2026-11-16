@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T17:56:00Z
+* **Update**: devtools/agents-tools.md (the state's `megaman in|out` at home), online/shown.md (the flag found clear once more, issue #682, and home's guard).

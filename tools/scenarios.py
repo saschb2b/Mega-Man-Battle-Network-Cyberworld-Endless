@@ -11,7 +11,8 @@ fixed.
       and for a failure the step that failed, the state it found, and
       where its picture and log are. Exit 1 where one failed.
       --list names them with what each guards; --check reads them all
-      without the game (build.py test does).
+      without the game (build.py test does); --stop stops the games a run
+      that was cut off left playing (a run ended or signalled stops its own).
 
 A scenario is a file tests/scenarios/NAME.py: its docstring says what it
 guards (the issue first), START is the game's start (tools/cw.py's: a
@@ -68,6 +69,7 @@ BN6's ROM of ~/.cache/mmbn-ref/roms (CYBERWORLD_ROM_DIR) and those it
 NEEDS, no other: the same game whatever else that folder holds. Local,
 never CI's.
 """
+import atexit
 import concurrent.futures
 import glob
 import hashlib
@@ -317,10 +319,47 @@ def moved(step, state, kept):
         raise Failed(f'{word} was {was} and is {have}: not moved by {amount:+d}', state)
 
 
+LIVE = set()   # the folders of the games this run started
+STOPPING = []  # (set once the run is ending: no game starts after it)
+
+
+def stop_all(*signalled):
+    """Every game and server this run started, stopped: a run cut off (a
+    terminal closed, a tool's time up) left its games playing on for good,
+    a hundred of them after a day of sessions. Called as the run ends and
+    at the signals that end it; `--stop` does the same for the games an
+    earlier run left (their pid files in .build/scenarios)."""
+    STOPPING.append(True)
+    # (twice: a scenario's thread may have been starting its game as the first pass ran)
+    for _ in range(2):
+        for h in list(LIVE):
+            play.stop(h)
+        online.stop_all()
+    if signalled:
+        os._exit(128 + signalled[0])
+
+
+def guard():
+    atexit.register(stop_all)
+    for sig in (signal.SIGTERM, signal.SIGHUP, signal.SIGINT):
+        signal.signal(sig, stop_all)
+
+
+def stop_left():
+    """The games earlier runs left under .build/scenarios, stopped: how many."""
+    left = [os.path.dirname(p) for p in glob.glob(os.path.join(WORK, '*', 'pid')) + glob.glob(os.path.join(WORK, '*', '*', 'pid'))]
+    for h in left:
+        play.stop(h)
+    return len(left)
+
+
 def start(h, spec, fresh, roms):
     """Game h started from START with the ROMs of folder `roms` (cw.begin
     without its print's redirect: several run at once here; the game takes
     the last --rom-dir it is given)."""
+    if STOPPING:
+        raise SystemExit('the run is ending')
+    LIVE.add(h)
     commands, args, env, _ = cw.parse_start(placed(h, spec))
     seed, args = cw.take_seed(args, 1)
     # (every game a scenario or the fuzz starts goes online on this machine alone: tools/scenarios_online.py)
@@ -493,6 +532,10 @@ def check():
 
 
 def main():
+    if '--stop' in sys.argv[1:]:
+        print(f'{stop_left()} games stopped')
+        return
+    guard()
     if '--fuzz' in sys.argv[1:]:
         # (a mode of its own: quits at frames a dice names, tools/scenarios_fuzz.py)
         import scenarios_fuzz

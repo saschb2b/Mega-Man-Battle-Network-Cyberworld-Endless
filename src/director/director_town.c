@@ -301,6 +301,21 @@ static void town_tint(void) {
 	D.tint_box = emu_read8(BN6_CHATBOX) != 0;
 }
 
+/* Lan free in the real world has MegaMan in his PET: nothing in a run takes
+ * him out of it but a jack-in, which BN6's own jack-out undoes. BN6 asks its
+ * flag at a jack-in and answers "MegaMan isn't in the PET..." where it is
+ * clear, and a new run has stood so (issue #682; an unexplained visit to the
+ * Net Square too, docs/online/shown.md): how is not known, so the flag is
+ * held to what is true wherever Lan stands free, never while a chat, a warp
+ * or BN6's jack-in has him. */
+static void megaman_in_pet(void) {
+	if (!on_map() || home_in_hp() || !home_map(emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER))) return;
+	if (emu_read8(BN6_WARP_PENDING) || emu_read8(BN6_CHATBOX) || !flag_get(BN6_FLAG_PLAYER_CAN_MOVE)) return;
+	if (flag_get(BN6_FLAG_NAVI_IN_PET)) return;
+	flag_set(BN6_FLAG_NAVI_IN_PET);
+	fprintf(stderr, "home: MegaMan was not in the PET with Lan free in the real world; put back (issue #682)\n");
+}
+
 void home_update(void) {
 	static bool was_hp;
 	map_label();
@@ -311,6 +326,7 @@ void home_update(void) {
 	bool hp = home_in_hp();
 	if (hp != was_hp) { D.town_frames = 0; D.home_told = 0; }
 	if (hp) home_entered();
+	megaman_in_pet();
 	home_courier_frame();
 	home_gate_frame();
 	home_lab_frame();

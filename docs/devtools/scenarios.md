@@ -14,6 +14,7 @@ python3 build.py scenarios liberation      # those a name starts
 python3 build.py scenarios routes --jobs 8 # every route of tools/cw_routes.py
 python3 tools/scenarios.py --list          # each with what it guards
 python3 tools/scenarios.py --check         # all read without the game (build.py test does)
+python3 tools/scenarios.py --stop          # the games a run that was cut off left playing, stopped
 python3 build.py scenarios --fuzz [SEED]   # runs quit at frames a dice names and CONTINUEd (A quit at any frame)
 ```
 
@@ -31,6 +32,14 @@ It needs the ROM, so it is local, not CI's, like the captures and the
 autopilot runs: the Engine code row of `AGENTS.md` runs it. The 27 that
 BN6's ROM alone plays take six seconds here, six games at a time; a game
 runs headless at about a thousand frames a second.
+
+A run stops every game and server it started as it ends, and at the
+signal that ends it early (a terminal closed, a tool's time up): the
+first day's sessions left a hundred games playing on for good, each a
+run cut off before its own stop. `tools/play.py`'s `stop` asks a game to
+quit and kills it where it has not within a second, since a quit
+signalled between two batches is not heard (A quit at any frame, below).
+`--stop` ends the games an earlier run left under `.build/scenarios`.
 
 ## A scenario
 

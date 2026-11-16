@@ -201,6 +201,27 @@ SCENES = [
     # of seed 3, the exit pad's far corner cut off before #582 and whole after it: 8fa8801f3 against
     # 3761e87f2, `before_after.py 8fa8801f3 --old-label before --new-ref 3761e87f2 --new after robot-hole`)
     ('robot-hole', build.n22_walk(11, 3), WEAK, 1440),
+    # (0.22.1's, against 0.22.0: a dark layer's board with BN6's ROM alone, seed 5's fifth layer, Lan's
+    # briefing paged and MegaMan placed beside a dark panel, facing it: clean floor and a guardian on it
+    # before, the dark panels, the lit one he faces and the DarkHole after)
+    ('dark-panels', ['--scene', 'emu', '--seed', '5', '--run-depth', '5', '--dev', 'dark,quiet', '--input',
+                     '150:,' + '6:A,20:,' * 30 + '60:,0:place 20 12 5,200:'], {}, 1080),
+    # (0.22.1's fixes, each one scripted run in both builds, frame for frame alike up to what the fix changed
+    # (build.py's N221_*): the next run's first battle after a deletion in a liberation's, issue #669, "TURN 1
+    # START!" before and "BATTLE START!" after; the Pack after a Chip Trader's trade of Cannon, HiCannon and
+    # M-Cannon, two of the three still there before; a second run's RESULT, one virus deleted in each run, 2
+    # before and 1 after; the Library's row of a chip AsterLand's Chip Trader just gave, unknown before)
+    ('liberation-rules', build.N221_LIBERATION, {'CYBERWORLD_AUTOPILOT': '1'}, 4840),
+    # (a quit as a layer's exit was taken, build.py's SCREENSHOT_PREP of this name run by each build first: the
+    # CONTINUE on layer 2 from its start before, on layer 3 after)
+    ('quit-layer-exit', ['--scene', 'title', '--input', build.N22_CONTINUE + '400:'], {}, 520),
+    ('trader-pack', build.N221_TRADER, {}, 1530),
+    ('result-next-run', build.N221_TWO_RUNS, {}, 4740),
+    ('library-found', build.N221_LIBRARY, {}, 2715),
+    # (issue #682: BN6's flag for MegaMan in the PET cleared by the dev step with Lan free in his room, then R at
+    # his PC: "MegaMan isn't in the PET..." before, Lan's HP after)
+    ('jackin-pet', ['--scene', 'town', '--seed', '2', '--input',
+                    '40:,' + '4:A,6:,' * 46 + '30:,0:flags 5917 5917 0,30:,0:place -40 -8 7,10:,6:R,400:'], {}, 720),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS
@@ -240,9 +261,26 @@ def old_binary(tag, picks=()):
     return os.path.relpath(binary, ROOT)
 
 
+def prepared(binary, args, env, frames):
+    """The run a scene needs before it (build.py's SCREENSHOT_PREP of its name: a run quit, for a scene of its
+    CONTINUE), by `binary` in the scene's data folder, on BN6's ROM alone: nonzero if it failed."""
+    saved = {k: os.environ.get(k) for k in env}
+    os.environ.update(env)
+    try:
+        return build.docker(binary, '--headless', '--rom-dir', '/rom', '--data-dir', '/src/.build/before/shot/data', *args,
+                            '--frames', str(frames), mounts=build.docs_rom_mounts())
+    finally:
+        for k, v in saved.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+
 def frame(binary, args, env, at, out, whole=0):
     """Frame `at` of a headless run of `binary` (relative to ROOT), the game's 240 x 160;
     or with `whole`, the whole screen (--screen-shot: the touch controls on it), shrunk by it.
+    A scene named as one of build.py's SCREENSHOT_PREP has that run before it, by the same binary.
     On BN6's ROM alone, but a scene named for BN5 or BN4 (`out`, build.whole_rom_folder) or the ROMs screen with
     the whole folder."""
     from PIL import Image
@@ -250,6 +288,8 @@ def frame(binary, args, env, at, out, whole=0):
     tmp = os.path.join(ROOT, '.build', 'before', 'shot')
     shutil.rmtree(tmp, ignore_errors=True)
     os.makedirs(os.path.join(tmp, 'data'))
+    if out in build.SCREENSHOT_PREP and prepared(binary, *build.SCREENSHOT_PREP[out]):
+        sys.exit(f'{out}: the run before it failed')
     saved = {k: os.environ.get(k) for k in env}
     os.environ.update(env)
     try:

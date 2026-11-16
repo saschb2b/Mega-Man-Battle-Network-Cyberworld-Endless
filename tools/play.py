@@ -460,14 +460,40 @@ def cmd_replay(name, rest):
     cmd_do(dst, ['wait 1'])
 
 
+def gone(pid):
+    """Whether process pid has ended (reaped here where it is this process's child)."""
+    try:
+        return os.waitpid(pid, os.WNOHANG)[0] != 0
+    except ChildProcessError:
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return True
+        return False
+
+
 def stop(h):
+    """The game in folder h ended: asked to quit, and killed where it has
+    not within a second. A quit signalled between two batches is not heard
+    (the headless game's wait for its next batch is a read the signal must
+    interrupt: docs/devtools/scenarios.md, A quit at any frame), and such a
+    game played on for good."""
     try:
         pid = int(open(os.path.join(h, 'pid')).read())
         os.killpg(pid, signal.SIGTERM)
     except (OSError, ValueError):
-        pass
+        pid = 0
     if os.path.exists(os.path.join(h, 'pid')):
         os.remove(os.path.join(h, 'pid'))
+    for _ in range(50 if pid else 0):
+        if gone(pid):
+            return
+        time.sleep(0.02)
+    if pid:
+        try:
+            os.killpg(pid, signal.SIGKILL)
+        except OSError:
+            pass
 
 
 def cmd_stop(name):

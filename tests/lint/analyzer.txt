@@ -3,8 +3,6 @@
 src/core/touch_art.c: img_new: use of floating-point arithmetic here might yield unexpected results [-Wanalyzer-imprecise-fp-arithmetic]
 src/core/touch_art.c: img_new: use of floating-point arithmetic here might yield unexpected results [-Wanalyzer-imprecise-fp-arithmetic]
 src/map/decor.c: decor_learn: dereference of possibly-NULL 'fp' [-Wanalyzer-possible-null-dereference]
-src/map/decor.c: decor_learn: dereference of possibly-NULL 'kind' [-Wanalyzer-possible-null-dereference]
-src/map/decor.c: decor_learn: dereference of possibly-NULL 'pixels' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL '*out.tiles' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL 'mark' [-Wanalyzer-possible-null-dereference]
 src/map/props.c: floor_emblem_on: dereference of possibly-NULL 'q' [-Wanalyzer-possible-null-dereference]

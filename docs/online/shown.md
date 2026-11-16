@@ -269,7 +269,9 @@ server:
   clear; `trade_order.c` now says script 20 as its 7. Seen with the flag
   cleared by the `flags` dev step at the desk: "We'll offer "FireBrn1
   F"!" in MegaMan's box. Why the flag was clear on that visit is not
-  known yet.
+  known yet; issue #682 met it clear at a new run's jack-in ("MegaMan
+  isn't in the PET..."), and home now holds it set wherever Lan stands
+  free in the real world (`director_town.c`'s `megaman_in_pet`).
 - **The week's net** (19 October 2026, protocol v6, a local server, the
   Linux build in two `tools/play.py` sessions, Alpha from `--scene home
   --run-depth 7 --seed 3`, Beta from `--run-depth 4 --seed 4`, both with

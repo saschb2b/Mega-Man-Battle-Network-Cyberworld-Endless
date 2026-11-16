@@ -31,6 +31,8 @@ void home_describe(FILE *f) {
 	for (unsigned lit = home_lit_back(); lit; lit >>= 1) back += lit & 1;
 	/* (BN6's map he stands on, its group and number: the Academy's rooms share a place's name) */
 	fprintf(f, "at %02x:%02x\nportals on %d back %d\nahead layer %d\n", emu_read8(BN6_MAP_GROUP), emu_read8(BN6_MAP_NUMBER), on, back, run.depth);
+	/* (whether BN6 holds MegaMan to be in the PET: where it does not, R at a jack-in answers "MegaMan isn't in the PET...", issue #682) */
+	fprintf(f, "megaman %s\n", flag_get(BN6_FLAG_NAVI_IN_PET) ? "in" : "out");
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);
 	fprintf(f, "order %s\ncourier %s\nhour %s\n", flag_get(HOME_ORDER_FLAG) ? "made" : "open",
 		flag_get(LANHP_COURIER_GONE_FLAG) ? "gone" : flag_get(LANHP_COURIER_TOLD_FLAG) ? "heard" : "waiting", hours[home_hour() & 3]);
