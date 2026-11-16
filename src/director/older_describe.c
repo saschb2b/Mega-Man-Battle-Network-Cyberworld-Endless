@@ -17,6 +17,8 @@
 #include "emu.h"
 #include "guardians.h"
 #include "library.h"
+#include "net.h"
+#include "netmap.h"
 #include "npc_sprite.h"
 #include "rom.h"
 #include "run.h"
@@ -52,16 +54,29 @@ static void run_lines(FILE *f) {
 	fprintf(f, "\nolderacts %d\nolderguards %d\nsoulsheld %02x\n", older, guards, souls_held());
 }
 
-/* The guardian's NPC object, where the map holds one at his place: its
- * address, 0 none */
-static uint32_t guardian_object(void) {
-	const GuardianStage *g = &D.objs.guardian;
+/* The NPC object the map holds at world (x, y): its address, 0 none */
+static uint32_t object_at(int x, int y) {
 	for (int i = 0; i < BN6_NPC_COUNT; ++i) {
 		uint32_t o = BN6_NPC_OBJECTS + (uint32_t)i * BN6_NPC_SIZE;
 		if (!(emu_read8(o) & 1)) continue;
-		if ((int16_t)emu_read16(o + BN6_NPC_X16) == g->x && (int16_t)emu_read16(o + BN6_NPC_Y16) == g->y) return o;
+		if ((int16_t)emu_read16(o + BN6_NPC_X16) == x && (int16_t)emu_read16(o + BN6_NPC_Y16) == y) return o;
 	}
 	return 0;
+}
+
+/* A Glitch layer's copy on the map (docs/game/glitch-layer.md, The copy at
+ * its heart): the Navi whose body it stands in first, and its NPC's
+ * animation (a Falzar Navi's body is his battle sprite, whose animation 0
+ * stands and 4 warps out: the copy stood in 4, 0.22.0) */
+static void copy_lines(FILE *f) {
+	for (int i = 0; i < layer.nobj; ++i) {
+		if (layer.obj[i].type != OBJ_COPY) continue;
+		int wx, wy, forms[GLITCH_FORMS], n = run_glitch_forms(run.depth, forms);
+		netmap_world(layer.obj[i].x, layer.obj[i].y, &wx, &wy);
+		uint32_t o = object_at(wx, wy);
+		if (o) fprintf(f, "copyform %s\ncopystands %d\n", n ? guardian(forms[0])->name : "none", emu_read8(o + BN6_NPC_ANIM));
+		return;
+	}
 }
 
 /* The layer: whose area it is drawn as, whose Navi guards it, and the
@@ -70,10 +85,11 @@ static uint32_t guardian_object(void) {
  * showed his back or nothing, 15 November 2026) */
 static void layer_lines(FILE *f) {
 	fprintf(f, "areafrom %s\n", game_of_area(D.layer_tiles));
+	copy_lines(f);
 	const GuardianStage *g = &D.objs.guardian;
 	if (!g->navi) return;
 	fprintf(f, "guardianfrom %s\n", game_of_guardian(g->navi));
-	uint32_t o = guardian_object();
+	uint32_t o = object_at(g->x, g->y);
 	if (!o) return;
 	NpcBody b = guardian_body(g->navi, g->face);
 	int anim = emu_read8(o + BN6_NPC_ANIM);
