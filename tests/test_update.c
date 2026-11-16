@@ -8,6 +8,7 @@
 
 #include "update_manifest.h"
 #include "update_sha256.h"
+#include "update_port.h"
 #include "update_swap.h"
 
 static int failures;
@@ -167,6 +168,74 @@ static void test_swap(void) {
 	rmdir(dir);
 }
 
+/* The PortMaster port's own update folder and launcher (update_port.c),
+ * where its launcher is older than 0.22.0's, on a made-up ports folder
+ * reached through a link as ROCKNIX's /roms is: the folder beside the
+ * game's, the launcher among its shell's arguments and only one beside
+ * the game, python3 on a PATH */
+static void test_port(void) {
+	char dir[600], ports[640], game[700], link[640], via[720], launcher[720], elsewhere[720], bin[640], python[700];
+	char args[2048], got[800];
+	if (!getcwd(dir, 400)) return;
+	snprintf(dir + strlen(dir), sizeof dir - strlen(dir), "/build/host/test-port-%d", (int)getpid());
+	mkdir("build", 0755);
+	mkdir("build/host", 0755);
+	mkdir(dir, 0755);
+	snprintf(ports, sizeof ports, "%s/ports", dir);
+	snprintf(game, sizeof game, "%s/cyberworld", ports);
+	snprintf(link, sizeof link, "%s/roms", dir);
+	snprintf(via, sizeof via, "%s/ports/cyberworld", link);
+	snprintf(launcher, sizeof launcher, "%s/Cyberworld Endless.sh", ports);
+	snprintf(elsewhere, sizeof elsewhere, "%s/zz-test.sh", dir);
+	mkdir(ports, 0755);
+	mkdir(game, 0755);
+	if (symlink(".", link) != 0) CHECK(0, "port: the link not made");
+	file_put(launcher, "#!/bin/bash");
+	file_put(elsewhere, "#!/bin/bash");
+
+	CHECK(update_port_dir("/roms/ports/cyberworld", got, sizeof got) && !strcmp(got, "/roms/ports/.cyberworld-update"), "port: %s", got);
+	CHECK(update_port_dir("/roms/ports/cyberworld/", got, sizeof got) && !strcmp(got, "/roms/ports/.cyberworld-update"), "port: a slash after: %s", got);
+	CHECK(update_port_dir("/cyberworld", got, sizeof got) && !strcmp(got, "/.cyberworld-update"), "port: below the root: %s", got);
+	CHECK(!update_port_dir("/", got, sizeof got) && !got[0], "port: the root has no folder beside it");
+	CHECK(!update_port_dir("cyberworld", got, sizeof got), "port: a path from no root");
+	CHECK(!update_port_dir("/roms/ports/cyberworld", got, 20) && !got[0], "port: no room");
+
+	/* (bash's arguments as /proc has them, a NUL after each) */
+	int n = snprintf(args, sizeof args, "/bin/bash%c%s%c", 0, launcher, 0);
+	CHECK(update_port_launcher(args, (size_t)n, game, got, sizeof got) && !strcmp(got, launcher), "port: the launcher: %s", got);
+	CHECK(update_port_launcher(args, (size_t)n, via, got, sizeof got) && !strcmp(got, launcher), "port: through the link: %s", got);
+	n = snprintf(args, sizeof args, "/bin/bash%c%s%c", 0, elsewhere, 0);
+	CHECK(!update_port_launcher(args, (size_t)n, game, got, sizeof got) && !got[0], "port: a launcher not beside the game");
+	n = snprintf(args, sizeof args, "/bin/bash%c%s/gone.sh%c", 0, ports, 0);
+	CHECK(!update_port_launcher(args, (size_t)n, game, got, sizeof got), "port: a launcher that is not there");
+	n = snprintf(args, sizeof args, "bash%cCyberworld Endless.sh%c", 0, 0);
+	CHECK(!update_port_launcher(args, (size_t)n, game, got, sizeof got), "port: a launcher from no root");
+	n = snprintf(args, sizeof args, "/bin/bash%c%s%c", 0, launcher, 0);
+	CHECK(!update_port_launcher(args, (size_t)n, game, got, strlen(launcher)), "port: no room for the launcher");
+	CHECK(!update_port_launcher("", 0, game, got, sizeof got), "port: no arguments");
+
+	snprintf(bin, sizeof bin, "%s/bin", dir);
+	mkdir(bin, 0755);
+	snprintf(python, sizeof python, "%s/python3", bin);
+	file_put(python, "");
+	char path[1400];
+	snprintf(path, sizeof path, "relative:%s/none:%s", dir, bin);
+	CHECK(!update_port_find(path, "python3", got, sizeof got) && !got[0], "port: python3 that may not run");
+	chmod(python, 0755);
+	CHECK(update_port_find(path, "python3", got, sizeof got) && !strcmp(got, python), "port: python3 on the PATH: %s", got);
+	CHECK(!update_port_find(NULL, "python3", got, sizeof got) && !update_port_find("", "python3", got, sizeof got), "port: no PATH");
+	CHECK(!update_port_find(path, "python4", got, sizeof got), "port: none of that name");
+
+	remove(python);
+	rmdir(bin);
+	remove(launcher);
+	remove(elsewhere);
+	remove(link);
+	rmdir(game);
+	rmdir(ports);
+	rmdir(dir);
+}
+
 int test_update(void) {
 	failures = 0;
 	test_manifest();
@@ -174,5 +243,6 @@ int test_update(void) {
 	test_versions();
 	test_sha256();
 	test_swap();
+	test_port();
 	return failures;
 }
