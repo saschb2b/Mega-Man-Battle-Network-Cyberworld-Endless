@@ -183,6 +183,10 @@ bool lib_layer_made(void) {
 }
 
 void lib_begin(void) {
+	/* (no battle armed, on a plain layer as on a dark one: a battle that
+	 * deleted MegaMan never came back to its board to end, and the next
+	 * run's battles were liberations by their rules, issue #669) */
+	lib_battle_disarm();
 	if (!layer.dark) { LB.on = false; return; }
 	LB.step = LIB_STEP_WAIT;
 	LB.phase = 1;
@@ -201,7 +205,6 @@ void lib_begin(void) {
 	memset(LB.hidden, 0, sizeof LB.hidden);
 	LB.ret_hole = LB.ret_step = LB.ret_t = LB.rise_mosaic = 0;
 	LB.ret_unit = LB.rise_unit = -1;
-	lib_battle_disarm();
 	/* (the board's HP: the Darkloid's his own battle's, BN5's on the board
 	 * through his battles; our guardians' none, their battles the act's
 	 * viruses) */
@@ -469,7 +472,9 @@ static void fight(int cmd) {
 }
 
 void lib_battle_frame(void) {
-	if (!LB.on || LB.step != LIB_STEP_BATTLE) return;
+	/* (a battle not the board's own runs by none of a liberation's rules,
+	 * whatever a battle before it left armed) */
+	if (!LB.on || LB.step != LIB_STEP_BATTLE) { lib_battle_stray(); return; }
 	LB.fight_seen = true;
 	lib_battle_watch();
 }
