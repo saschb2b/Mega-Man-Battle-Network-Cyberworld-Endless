@@ -2690,7 +2690,49 @@ SCREENSHOTS += [
 ]
 # 0.22.1's notes, the second half: a dark layer's panels with BN6's ROM alone, a won liberation battle and a quit,
 # START on the team's pick, a Glitch layer settled, LCD 3x kept, the JACK-IN SETUP after a first win
+# (the dark layer's panels are tools/before_after.py's dark-panels, a pair against 0.22.0.
+# N221_WIN: the dev menu's "Win this battle", its fifth row, as the scenarios take it
+# (docs/devtools/scenarios.md, A dark layer's board); N221_LCD: SELECT on the title, Options' Display, down to LCD 3x)
+N221_WIN = '4:SELECT,4:SELECT+R,6:,' + '6:DOWN,6:,' * 4
+N221_LCD = '50:,6:SELECT,46:,' + '6:DOWN,12:,' * 5
+# (the runs before a restart, quit as their frames end. lib-quit-words: seed 7's own dark layer with BN6's ROM
+# alone, Lan's briefing paged, MegaMan beside a dark panel, Liberation, the Custom screen's OK, the battle won
+# in its first turn, RESULT paged to his words, the quit under them (tests/scenarios/liberation_board.py,
+# continue/under-the-words). settled-glitch: seed 3's Glitch layer, the copy's Yes, its forms deleted one by
+# one, its words and its pick of Navi chips taken (tests/scenarios/extras_glitch.py, copy-deleted). lcd3x-kept:
+# LCD 3x turned on with A, Options left with B. setup-first-win: a profile's first run begun, NEW GAME with no
+# setup, quit in Lan's room)
+SCREENSHOT_PREP.update({
+    'lib-quit-words': (['--scene', 'emu', '--seed', '7', '--run-depth', '5', '--dev', 'quiet', '--input',
+                        '121:,' + '6:A,26:,' * 13 + '0:board dark,4:,' + '6:A,16:,' * 2 + '300:,' + '6:START,16:,6:A,56:,' * 2 +
+                        N221_WIN + '6:A,12:,' + '6:A,14:,' * 16 + '100:'], {}, 1481),
+    'settled-glitch': (['--scene', 'emu', '--seed', '3', '--run-depth', '4', '--dev', 'glitch,quiet,side=4', '--talk', 'copy:800', '--input',
+                        '150:,' + '4:A,6:,' * 30 + '380:,' + '6:LEFT,6:,6:A,26:,' * 10 + '210:,6:START,16:,6:A,186:,' +
+                        N221_WIN + '6:A,66:,' + '4:SELECT,4:SELECT+R,6:,6:A,126:,' * 5 + '60:,' + '6:A,46:,' * 7 + '120:'], {}, 3100),
+    'lcd3x-kept': (['--scene', 'title', '--dev', 'settings', '--size', '720x480', '--input', N221_LCD + '6:A,12:,6:B,66:'], {}, 260),
+    'setup-first-win': (['--scene', 'title', '--input', N22_CONTINUE + '300:'], {}, 560),
+})
 SCREENSHOTS += [
+    # (A won liberation battle and a quit under MegaMan's words: the CONTINUE after SCREENSHOT_PREP's quit, his
+    # words and the Darkloids' phase paged: the board in its second phase, the panels the one-turn win freed
+    # round him, the dark ones beyond)
+    ('lib-quit-words', ['--scene', 'title', '--input', N22_CONTINUE + '300:,' + '6:A,26:,' * 20 + '260:'], [(1150, 'lib-quit-words')], {}),
+    # (START on the team's pick, BN5's ROM beside BN6's: seed 5's dark layer with Colonel's and ShadowMan's Souls
+    # held and a place for one, the pick as it opens; START, and Lan's briefing with no PET over it)
+    ('bn5-pick-start', ['--scene', 'emu', '--seed', '5', '--run-depth', '5', '--dev', 'dark,souls=3,quiet', '--input', '300:,10:START,300:'],
+     [(280, 'bn5-pick-team'), (520, 'bn5-pick-start')], {}),
+    # (A Glitch layer settled: the CONTINUE after SCREENSHOT_PREP's quit, its card, then the layer as it stands)
+    ('settled-glitch', ['--scene', 'title', '--dev', 'quiet', '--input', N22_CONTINUE + '1100:'],
+     [(470, 'settled-glitch-continue'), (1200, 'settled-glitch')], {}),
+    # (LCD 3x kept: the game started again on SCREENSHOT_PREP's settings.ini (--dev settings: read as a player's
+    # start reads it), Options' Display down to LCD 3x; the whole screen at 720x480, where the stripes show)
+    ('lcd3x-kept', ['--scene', 'title', '--dev', 'settings', '--size', '720x480', '--input', N221_LCD + '200:'], [(280, 'lcd3x-kept')], {}, 1),
+    # (The JACK-IN SETUP after a first win: over SCREENSHOT_PREP's first run, seed 3's short net won on its last
+    # layer by the autopilot, RESULT and RECORDS paged, START, NEW GAME: the setup as it opens, on the short net;
+    # then Right, the endless one)
+    ('setup-first-win', ['--scene', 'emu', '--seed', '3', '--setup', 'short', '--run-depth', '10', '--dev', 'onehit,god', '--input',
+                         '4420:,6:A,36:,6:A,80:,6:START,60:,6:A,160:,6:RIGHT,100:'],
+     [(4760, 'setup-first-win'), (4860, 'setup-first-win-endless')], {'CYBERWORLD_AUTOPILOT': '1'}),
 ]
 README_GIFS = {'guardian': (None, 15), 'sky': (4, 12), 'weather': (4, 12), 'acdc-bn5': (4, 12),
                'rush': (None, 15), 'teleport': (None, 15), 'arrows': (None, 15), 'hidden': (None, 15), 'obstacle': (None, 15),
