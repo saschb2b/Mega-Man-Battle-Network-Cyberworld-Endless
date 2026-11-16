@@ -8,6 +8,13 @@
   are reached without closing the game. The run is kept where MegaMan
   stands, as a quit keeps it; CONTINUE takes it up there.
 
+- **Fixed: a quit as a layer's exit was taken lost the layer.** From the
+  exit pad's warp until "Run saved" on the next layer, some two seconds,
+  a quit (or a handheld's close) kept the run at the left layer's last
+  checkpoint: its battles and their zenny gone at the CONTINUE. The game
+  now finishes the warp first, unseen, and the run goes on from the next
+  layer.
+
 - **Fixed: the Chip Trader kept your chips, and took others.** Since
   0.21.0 a Chip Trader gave its chip without taking the three you put
   in, and could take copies of other chips from your Pack instead (two
