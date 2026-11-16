@@ -75,7 +75,7 @@ a picture. Among the state's lines, `gameframe` is the game's own count of its
 main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
 `frame` goes on where the game stands still (issue #482;
 [An old checkpoint](old-checkpoint.md) watches it; a `play` call's
-changes leave it out, as they do `frame`), a battle says its `turn` (the
+changes leave it out, as they do `frame`), a run says what MegaMan holds (`chips`, `programs`, `unlockers`, `rushfood`, `regmemory`), a chat box's question its `choice`, a reward pick and BN6's shop their row, a layer what stands on it (`exitpad`, `locks`, `greentaken`, `on lane`: [Scenarios](scenarios.md), What stands on a layer), a battle says its `turn` (the
 Custom screens it has opened) and its `rules`, `plain` or a `liberation`'s
 three turns (issue #669), the title its step and its menu's row (`title
 menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
