@@ -13,6 +13,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <stdio.h>
+
 #include "liberation_board.h"
 
 /* The run's last pick, kept in the board's note (liberation_save.c): the
@@ -33,6 +35,10 @@ extern LibPickMemory lib_pick_memory;
  * its Navis into navi in the order picked, how many into *n (the board's
  * places, LB.b.team.n - 1) */
 bool lib_pick_keys(uint32_t pressed, uint8_t navi[LIB_TEAM], int *n);
+/* ... in the state's words while it is up (liberation_describe.c):
+ * `teampick NAMES` the Navis picked in their order (none: none), `teamrow
+ * NAME` the row under the cursor, GO its last */
+void lib_pick_describe(FILE *f);
 /* Its picture, over the board, in BN6's PET look */
 void lib_pick_draw(void);
 

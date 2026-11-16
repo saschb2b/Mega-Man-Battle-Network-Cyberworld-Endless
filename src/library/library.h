@@ -9,9 +9,14 @@
 #define CW_LIBRARY_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 void library_open(void);
 bool library_shown(void);
+/* The state in words, while it is up: its page (the entry, the class),
+ * its rows and the cursor's, the chips held of the page's and of the
+ * entry's; reads only (docs/devtools/scenarios.md) */
+void library_describe(FILE *f);
 /* The frame's course while it is up, or its B still held after it closed:
  * true while it holds the game */
 bool library_update(void);

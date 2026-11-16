@@ -599,10 +599,12 @@ static int home_goal(int px, int py, uint32_t frame, int *wx, int *wy, uint32_t 
 }
 
 /* A chat paged with A; the route's link's question, the cursor on No: one
- * press across to Yes first, as LEFT goes round the two */
+ * press across to Yes first, as LEFT goes round the two; and a way back's
+ * while a trip is still wanted (its question came with issue #110, and
+ * the autopilot's A answered No to it for good: tests/scenarios/home_hp.py) */
 static uint32_t chat_keys(uint32_t frame) {
 	static int asked;
-	if (route_wanted() && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
+	if ((route_wanted() || run.clock < trips_wanted()) && director_in_hp() && emu_read8(BN6_CHATBOX_OPTIONS) >= 2) {
 		if (++asked < 20) return asked >= 8 && asked < 10 ? KEY_LEFT : 0;
 	} else asked = 0;
 	return (frame / 4) & 1 ? KEY_A : 0;

@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* One stock entry in the game's format: kind 1 item (0x70 HPMemory, 0x80+
  * SubChips), 2 chip (code index, '*' is 26), 3 NaviCust program (code is
@@ -71,5 +72,11 @@ int shop_home_subs(int depth, ShopItem out[SHOP_MAX_ITEMS]);
  * the copies left to order, -1 before the game has set up its data. */
 int shop_order_install(void);
 int shop_order_left(void);
+
+/* BN6's shop screen, for a state (director_describe; tests/scenarios reads
+ * them): `shoprows` the entries it lists, and of the one under the cursor
+ * `price` as the screen shows it (zenny, or BugFrags) and `stock`; no line
+ * off that screen, nothing changed */
+void shop_describe(FILE *f);
 
 #endif

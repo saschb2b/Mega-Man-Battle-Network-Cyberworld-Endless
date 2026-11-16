@@ -3,7 +3,7 @@ type: Tool
 title: "Agents' tools: build, play, capture and compare in a call"
 description: "The `cyberworld` MCP server (`tools/cw_mcp.py`; `tools/cw.py` from a shell), whose `shot`, `play` and `build` capture a screen by route, keep a playtest, compare commits or build in one call, answering in words and a picture."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T23:20:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T15:30:00Z }
 ---
 
 # Agents' tools: build, play, capture and compare in a call
@@ -75,13 +75,37 @@ a picture. Among the state's lines, `gameframe` is the game's own count of its
 main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
 `frame` goes on where the game stands still (issue #482;
 [An old checkpoint](old-checkpoint.md) watches it; a `play` call's
-changes leave it out, as they do `frame`), a battle says its `turn` (the
+changes leave it out, as they do `frame`), a run says what MegaMan holds (`chips`, `programs`, `unlockers`, `rushfood`, `regmemory`), a chat box's question its `choice`, a reward pick and BN6's shop their row, a layer what stands on it (`exitpad`, `locks`, `greentaken`, `on lane`: [Scenarios](scenarios.md), What stands on a layer), a battle says its `turn` (the
 Custom screens it has opened) and its `rules`, `plain` or a `liberation`'s
 three turns (issue #669), the title its step and its menu's row (`title
-menu`, `cursor continue`), the engine's own screens their lines (Options' `line` and `value`, SAVES' `saves` and `here`, the ROMs read as `roms`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
+menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), the engine's own screens their lines (Options' `line` and `value`, SAVES' `savesview` and `here`, the ROMs read as `roms`: Scenarios, The screens' lines), a dark layer its board (`board move`, `boardphase 2`, `freed 4`, `lastfight oneturn`; `board none` on a layer without one: Scenarios, A dark layer's board), and `soulturns +1` stands while
 MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
+
+**At home and in the PET** the state has lines of its own, each its
+feature's (`pet_describe`, `home_describe` and what they call; they only
+read): `held` says what of BN6 holds Lan or MegaMan (`held none`: he
+stands free; it was `CYBERWORLD_STATE_POS`'s line), `folder first Cannon A
+sum 6eff` the folder the next battle draws from (its first chip and a sum
+over all thirty), `subchips minienrg 1 fullenrg 0 sneakrun 0 untrap 0`,
+`mail 3 unread 2`, and `request quick taken got 1 of 3 held 0 settled 0`
+the run's request ([Jobs](../world/home/jobs.md); on a layer too while
+one is held). The PET's screens of ours say theirs while they are up:
+`jukebox section 1 of 5 row 2 of 8 playing bn6:03 mode repeat`, `library
+page bn6 mega row 1 of 12 held 12 of 39 entry 60 of 249`. At home: `at
+01:04` (BN6's map, its group and number: the Academy's rooms share a
+place's name), `portals on 2 back 2` (Lan's HP's lit ways on and back),
+`ahead layer 7`, `clock 1` (the Net's, once it has a notch), `order
+open|made` (AsterLand's of the visit), `courier waiting|heard|gone`,
+`hour morning|afternoon|evening|night`, and in Lan's HP `lab none|keeper`,
+`lab builder page foes foes 1 last won` (`leaving` after it while it asks
+"Leave the Lab?"), `lab fighting`, `lab editing`
+([The Battle Lab](../game/battle-lab.md)); with `CYBERWORLD_STATE_POS`
+each lit portal's spot there, `portal 1 on at 68 -72`. In the town
+`CYBERWORLD_STATE_POS` works out the arrow's way for each state, a
+quarter of a second: a scenario there reads `held` and `place` without
+it.
 
 **Pictures** are the game's 240x160 cut from the canvas, at 2x for one
 frame and 1x on a sheet (`scale` 1-4; `full` the whole 256x192 canvas, the

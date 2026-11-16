@@ -2,11 +2,46 @@
 
 ## Unreleased
 
+- **Return to title, in Options (asked for by AlicafeZ).** In a run,
+  Options' Game page ends with **Return to title**: it asks, says where
+  the run is saved, and shows the title's menu, so SAVES and the cloud
+  are reached without closing the game. The run is kept where MegaMan
+  stands, as a quit keeps it; CONTINUE takes it up there.
+
+- **Fixed: a quit as a layer's exit was taken lost the layer.** From the
+  exit pad's warp until "Run saved" on the next layer, some two seconds,
+  a quit (or a handheld's close) kept the run at the left layer's last
+  checkpoint: its battles and their zenny gone at the CONTINUE. The game
+  now finishes the warp first, unseen, and the run goes on from the next
+  layer.
+
+- **Fixed: the Chip Trader kept your chips, and took others.** Since
+  0.21.0 a Chip Trader gave its chip without taking the three you put
+  in, and could take copies of other chips from your Pack instead (two
+  HiCannons put in cost Cannons). The layers' traders and AsterLand's
+  take exactly the three again.
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by
   itself, TIME UP! at the third, the guardians' battles too, until the
   game was closed. A liberation's rules now end with its battle.
+- **Fixed: a new run counted the last run's final battle.** MegaMan
+  deleted in a battle, a new run begun without closing the game started
+  its count of viruses deleted with those of that battle, so its RESULT
+  read too high. The count starts at nothing again.
+- **Fixed: a dark layer's panels not shown without BN5's ROM.** With
+  BN6's ROM alone the board's dark panels, DarkHoles and the lit panel
+  MegaMan faces were drawn a screen's width off on most layers, so the
+  floor looked clean and the fences stood unseen. They are drawn where
+  they lie.
+- **Fixed: a won liberation battle lost to a quit under MegaMan's
+  words.** Closing the game while he spoke after a battle won on a dark
+  layer's board (a one-turn win, a DarkHole closed, an item found), the
+  CONTINUE went back to before that battle. The run is now kept as it
+  stood when he began to speak.
+- **Fixed: START on the team's pick opened the PET.** Taking the team a
+  dark layer offered with START, the button went on to the game and
+  opened the PET over Lan's briefing.
 - **Fixed: LCD 3x forgotten at every start.** Options' Display's LCD 3x
   was off again each time the game started, and every turn of it added
   a line to `settings.ini`: a setting's name was read by its letters

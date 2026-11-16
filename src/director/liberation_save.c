@@ -12,6 +12,7 @@
 #include <string.h>
 
 #include "debug.h"
+#include "director_save.h"
 #include "director_state.h"
 #include "liberation_pick.h"
 #include "liberation_state.h"
@@ -49,6 +50,8 @@ typedef struct {
 } LibNote;
 _Static_assert(sizeof(LibNote) == 68 + LIB_UNITS * 5 + 2 * MAP_H * MAP_W + 4 + LIB_UNITS * 2 + 16 + LIB_TEAM * 14 + 2 + LIB_UNITS + 24 &&
 	offsetof(LibNote, kind) == 68 + LIB_UNITS * 5, "Liberation save layout changed: bump LIB_NOTE_MAGIC");
+
+bool lib_words_due(void) { return talk_due_now(); }
 
 void lib_save(void) {
 	LibNote n;

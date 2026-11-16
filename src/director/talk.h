@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "text.h"
 
@@ -25,6 +26,10 @@ bool talk_busy(void);
 /* No talk begins while on (a quit running the game on to MegaMan free: director_settle.c) */
 void talk_refuse(bool on);
 bool talk_refused(void);
+/* A chat box's question, for a state (director_describe; tests/scenarios
+ * reads it): `choice K/N`, the cursor on option K of the N shown, while
+ * BN6's box shows a choice; no line else, nothing changed */
+void talk_describe(FILE *f);
 /* Forgets a conversation under way (a new run, a new layer). */
 void talk_reset(void);
 

@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 /* The roulette's slots, BN5's order (BN5_LIB_BONUS_*) */
 enum { LIB_BONUS_SHIELD, LIB_BONUS_HP, LIB_BONUS_OP, LIB_BONUS_CHIP, LIB_BONUS_HIT, LIB_BONUS_SLOTS };
@@ -16,6 +17,11 @@ enum { LIB_BONUS_SHIELD, LIB_BONUS_HP, LIB_BONUS_OP, LIB_BONUS_CHIP, LIB_BONUS_H
 /* (the course's hooks: liberation_state.h's lib_bonus_begin, _update and
  * _keys) The roulette spinning, A awaited (the autopilot's) */
 bool lib_bonus_spinning(void);
+/* ... in the state's words (liberation_describe.c): `roulette SLOT` while
+ * it spins and A is heard (shield, hp, orderpoints, chip, hit: the slot A
+ * would stop on), `bonus SLOT` the last a BonusPanel gave since the game
+ * began (none: none yet) */
+void lib_bonus_describe(FILE *f);
 
 /* What its picture shows this frame: a flash's whiteness (16ths, 0 none);
  * the band's rows (0 none); the icon's slot and its x on the picture

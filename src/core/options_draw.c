@@ -5,8 +5,8 @@
  * three rows at a time; under them the note on the line under the cursor
  * in KeyItem's information box and, on the Display page, the scene
  * (options_scene.h) beside it, Valhalla's list, description and picture
- * (docs/engine/settings-screens.md); START's question in the box with
- * BN6's Yes and No. Where a tap lands on them. Drawing changes nothing. */
+ * (docs/engine/settings-screens.md); START's question, or Return to
+ * title's, in the box with BN6's Yes and No. Where a tap lands on them. Drawing changes nothing. */
 #include "options.h"
 
 #include <stdio.h>
@@ -18,6 +18,7 @@
 #include "display.h"
 #include "fast_forward.h"
 #include "feel_out.h"
+#include "game.h"
 #include "gfx.h"
 #include "options_news.h"
 #include "options_scene.h"
@@ -157,7 +158,7 @@ static const char *line_name(int kind) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
 		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
 		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X,
-		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL, [LINE_TOUCH] = OW_TOUCH };
+		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL, [LINE_TOUCH] = OW_TOUCH, [LINE_TITLE] = OW_TO_TITLE };
 	switch (kind) {
 	case LINE_STATS: return analytics_word(AW_ROW);
 	case LINE_UPDATE: return update_name();
@@ -255,6 +256,7 @@ static const char *note_words(int kind) {
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_VIBRATION_OFF_NOTE : OW_VIBRATION_ON_NOTE);
 	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_TRIGGERS_ON_NOTE : OW_TRIGGERS_OFF_NOTE);
 	case LINE_TOUCH: return options_word(touch_off() ? OW_TOUCH_OFF_NOTE : OW_TOUCH_AUTO_NOTE);
+	case LINE_TITLE: return options_word(OW_TO_TITLE_NOTE);
 	default: return display_note(kind);
 	}
 }
@@ -294,7 +296,10 @@ static void box_draw(int x0, int y0) {
 		look_wrapped(note_words(options_line_kind()), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most, LOOK_INK, LOOK_INK_SHADE);
 		return;
 	}
-	look_wrapped(options_word(asks[O.page]), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most - 1, LOOK_INK, LOOK_INK_SHADE);
+	/* (Return to title's says where the run goes on from, as the quit prompt does) */
+	char leaving[96];
+	if (O.leaving) options_title_ask(leaving, sizeof leaving, emu_title_where());
+	look_wrapped(O.leaving ? leaving : options_word(asks[O.page]), r.x + TEXT_IN, r.y + 3, r.w - 2 * TEXT_IN, most - 1, LOOK_INK, LOOK_INK_SHADE);
 	for (int k = 0; k < 2; ++k) {
 		SDL_Rect a = answer_rect(r, k == 0);
 		look_text(a.x + LOOK_CHOICE_W + 3, a.y + 1, analytics_word(k == 0 ? AW_YES : AW_NO), LOOK_INK, LOOK_INK_SHADE, TEXT_LEFT);
