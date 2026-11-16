@@ -66,6 +66,9 @@ void boss_resume(void);
 /* The Navi MegaMan fights or is about to: the guardian's, or in a
  * tournament's bracket the round's (docs/game/tournament.md) */
 int boss_foe(void);
+/* The tournament's bracket in a state's words: bracket, round, roundfoe,
+ * roundchips (director_describe) */
+void boss_bracket_describe(FILE *f);
 
 /* His course in the state's words: his version, whether he is known, his
  * Guardian Data (hidden, fresh, waiting, taken) and the exit pad; in his

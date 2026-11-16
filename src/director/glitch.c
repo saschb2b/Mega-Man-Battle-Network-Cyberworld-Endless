@@ -76,6 +76,7 @@ static struct {
 	uint8_t sprite[32768 / 8];
 	bool settled;       /* the copy deleted: the glitch gone */
 	int stall, drag;    /* a flip's first frames with the music stalled, and its tempo's factor after (glitch_music) */
+	int flips;          /* the flips since the layer began (a state's words) */
 } G;
 
 static uint32_t next_rng(void) {
@@ -210,7 +211,7 @@ static void schedule(void) {
 	G.fx_left = G.fx == FX_FLIP ? roll(10 + 20 * (s - 2), 30 + 50 * (s - 2)) : roll(2, 4 + 2 * s);
 	G.fx_len = G.fx_left;
 	G.fx_seed = next_rng();
-	if (G.fx == FX_FLIP) glitch_look_flip(roll(0, glitch_looks() - 1));
+	if (G.fx == FX_FLIP) { glitch_look_flip(roll(0, glitch_looks() - 1)); ++G.flips; }
 	/* (the music drags while the floor is another area's, stalled at its
 	 * edge from stage 3: Its sound) */
 	G.stall = G.fx == FX_FLIP && s >= 3 ? roll(4, 4 + 4 * (s - 2)) : 0;
@@ -255,6 +256,11 @@ void glitch_update(void) {
 	G.shown = false;
 	if (on_map()) left_at();
 	if ((!G.on && !G.warp) || !on_map()) return;
+	/* (the copy deleted before a quit: a CONTINUE makes the layer anew, its
+	 * glitch with it, and the game's flag says it had settled; without this
+	 * the layer glitched again, its battles a stage's again, for a copy
+	 * that was gone: tests/scenarios' extras_glitch) */
+	if (G.on && !G.settled && flag_get(LAYER_COPY_WON_FLAG)) glitch_settle();
 	if (G.on && !G.settled) measure();
 	if (G.on && !G.settled) stage_words();
 	glitch_look_update();
@@ -292,6 +298,22 @@ void glitch_battle(int *depth, bool *mixed) {
 	if (!G.on || G.settled) return;
 	if (G.stage >= 2) *mixed = true;
 	if (G.stage >= 3) *depth += 3;
+}
+
+void glitch_describe(FILE *f) {
+	static const char *const fx[] = { "none", "tear", "slip", "turn", "flip" };
+	fprintf(f, "glitchwarp %s\n", G.warp && !G.on ? "here" : "none");
+	if (!G.on) return;
+	int depth = run.depth, look = glitch_look_shown();
+	bool mixed = false;
+	glitch_battle(&depth, &mixed);
+	fprintf(f, "glitchstage %d\nglitchshare %d\nglitchsaid %d\nglitchlooks %d\nglitchflips %d\nglitchfx %s\n", G.stage, G.share, G.said, glitch_looks(), G.flips, fx[G.fx]);
+	if (look < 0) fprintf(f, "glitchlook own\n");
+	else fprintf(f, "glitchlook %d\n", look);
+	fprintf(f, "glitchbattles %s\nglitched %s\n", depth != run.depth ? "deeper" : mixed ? "mixed" : "own", G.settled ? "settled" : "on");
+	if (G.warp)
+		fprintf(f, "copy %s\n", flag_get(LAYER_COPY_TAKEN_FLAG) ? "taken" : flag_get(LAYER_COPY_WON_FLAG) ? "deleted"
+			: glitch_copy_fighting() ? "fighting" : "waiting");
 }
 
 void glitch_settle(void) {
