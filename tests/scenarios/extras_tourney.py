@@ -77,6 +77,20 @@ MANY = {
             ('same', 'roundfoe'),
             ('expect', 'roundchips=0'),
             ('expect', 'zenny=0'),
+            ('repeat', 'wait 10', 'card=area', 100),        # the act's card again: the Navis met by then named
+            ('expect', 'cardsays~1: DiveMan   2: TenguMan'),
+            ('expect', 'cardsays~Final: ???'),
+        ]),
+    'card': dict(
+        NEEDS=BN4,
+        GUARDS="The act's card on its first layer lists the bracket in the guardian's place: round 1, round 2 and the "
+               'final, ??? for a Navi never met.',
+        START='--scene emu --seed 6 --run-depth 7 --setup short,0,0,0,0,32 --dev quiet,tourney',
+        STEPS=[
+            ('repeat', 'wait 10', 'card=area', 100),
+            ('expect', 'cardsays~1: ???   2: ???'),
+            ('expect', 'cardsays~Final: ???'),
+            ('expect', 'bracket=none'),                     # the arena's layer holds it, not this one
         ]),
     'off': dict(
         NEEDS=BN4,
