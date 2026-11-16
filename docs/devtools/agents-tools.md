@@ -78,7 +78,7 @@ main loop's frames (`BN6_FRAME_COUNT`), which stands while the engine's
 changes leave it out, as they do `frame`), a battle says its `turn` (the
 Custom screens it has opened) and its `rules`, `plain` or a `liberation`'s
 three turns (issue #669), the title its step and its menu's row (`title
-menu`, `cursor continue`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
+menu`, `cursor continue`), the engine's own screens their lines (Options' `line` and `value`, SAVES' `saves` and `here`, the ROMs read as `roms`; [Scenarios](scenarios.md) lists them), and `soulturns +1` stands while
 MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
