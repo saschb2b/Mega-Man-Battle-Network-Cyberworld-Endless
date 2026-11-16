@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **Fixed: the Chip Trader kept your chips, and took others.** Since
+  0.21.0 a Chip Trader gave its chip without taking the three you put
+  in, and could take copies of other chips from your Pack instead (two
+  HiCannons put in cost Cannons). The layers' traders and AsterLand's
+  take exactly the three again.
 - **Fixed: every battle a liberation's after a deletion in one (issue
   #669).** MegaMan deleted in a dark layer's battle, the next run's
   battles all kept its rules: three turns, the Custom screen opening by

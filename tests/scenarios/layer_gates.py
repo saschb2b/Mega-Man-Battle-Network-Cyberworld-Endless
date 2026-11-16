@@ -15,8 +15,6 @@ TRADER = f'{RUN} --seed 5 --run-depth 4 --dev quiet'      # a Chip Trader; pack=
 SCRTDATA = f'{RUN} --seed 1 --run-depth 4 --dev quiet'    # a blue Mystery Data that holds a ScrtData
 UNDERNET = f'{RUN} --seed 3 --run-depth 5 --dev quiet,side=1'   # an Undernet layer: the BugFrag Trader, the golden gate
 HOLDS = 'hp zenny bugfrags chips programs'
-# (found by this scenario, 16 November 2026: 0.20.0's build takes the three, 0.21.0's and this one none or one)
-TRADE_BUG = "the Chip Trader gives its chip and keeps the three put in: a trade leaves one chip fewer or none, not two (since 0.21.0)"
 
 ARRIVE = [
     ('do', 'wait 150; mash A 300; wait 20'),                    # the arrival's words paged
@@ -26,6 +24,8 @@ ARRIVE = [
     ('keep', HOLDS),
 ]
 PAGED = ('repeat', 'press A; wait 30', 'held=none', 30)         # a chat's boxes to its end, MegaMan free again
+# (a shop's row under the cursor, "Are you sure? > Yes", and "I bought ..." closed)
+BUY = 'press A; wait 40; press A; wait 60; press A; wait 60'
 
 
 def words_only(start, what, *first):
@@ -109,8 +109,9 @@ MANY = {
         ('expect', 'screen=map'),
         ('same', 'chips'),
     ]),
-    # ... six spare: three in, one out
-    'trader-trades-three-for-one': dict(KNOWN=TRADE_BUG, START=f'{TRADER},pack=6', STEPS=ARRIVE + [
+    # ... six spare: three in, one out. Found broken by this scenario: since chip ids took ten bits (0.21.0) the
+    # trader read the chips put in as other chips, kept the three and took copies of others (CHANGELOG, Unreleased)
+    'trader-trades-three-for-one': dict(START=f'{TRADER},pack=6', STEPS=ARRIVE + [
         ('do', 'by trader; wait 10'),
         ('repeat', 'press A; wait 30', 'choice=1/2'),
         ('do', 'press A; wait 30'),
@@ -124,6 +125,29 @@ MANY = {
         ('do', 'press A; wait 30'),
         PAGED,
         ('moved', 'chips', -2),
+    ]),
+    # ... and chips BN6 itself gave: three bought from the Net Dealer on the layer, then traded: three more, two fewer
+    'trader-trades-bought-chips': dict(START=f'{TRADER} --talk zenny:10', STEPS=[('do', 'wait 60')] + ARRIVE + [
+        ('do', 'by shop; wait 10'),
+        ('repeat', 'press A; wait 30', 'screen=shop'),
+        ('do', 'wait 100'),
+        ('do', BUY + '; press DOWN; wait 10; ' + BUY + '; press DOWN; wait 10; ' + BUY),   # three rows, a chip each
+        ('moved', 'chips', 3),
+        ('repeat', 'press B; wait 40', 'screen=map'),
+        ('until', 'held=none', 600),
+        ('do', 'by trader; wait 10'),
+        ('repeat', 'press A; wait 30', 'choice=1/2'),
+        ('do', 'press A; wait 30'),
+        ('until', 'doing=menu', 300),
+        ('do', 'wait 60'),
+        ('repeat', 'press A; wait 40', 'choice=1/2'),
+        ('do', 'press A; wait 30'),
+        ('until', 'doing=map', 900),
+        ('repeat', 'press A; wait 30', 'choice=1/2'),
+        ('repeat', 'press RIGHT; wait 10', 'choice=2/2'),
+        ('do', 'press A; wait 30'),
+        PAGED,
+        ('moved', 'chips', 1),                                  # three bought, three put in, one given
     ]),
     # a ScrtData in a blue Mystery Data: counted, and MegaMan says what it is for
     'scrtdata-found': dict(START=SCRTDATA, STEPS=ARRIVE + [
