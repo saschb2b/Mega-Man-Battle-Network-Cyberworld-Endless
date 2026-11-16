@@ -7,6 +7,7 @@
 #include <SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 enum {
 	CINEMA_FREE,   /* the player plays */
@@ -66,6 +67,9 @@ void cinema_card(const char *small, const char *big, const char *line1, const ch
 /* ... and a third line under them, for the card just begun (a
  * tournament's final: docs/game/tournament.md) */
 void cinema_card_more(const char *line3);
+/* The card that shows, in the state's words: its kind (title, area,
+ * grand) and what it says, its lines in one. */
+void cinema_describe(FILE *f);
 /* A short note in the picture's top right corner for `frames` on the
  * map ("Run saved"). */
 void cinema_note(const char *text, int frames);

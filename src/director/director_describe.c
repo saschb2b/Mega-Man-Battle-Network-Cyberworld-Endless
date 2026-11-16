@@ -279,6 +279,8 @@ void director_describe(FILE *f) {
 	}
 	describe_turns(f);
 	battle_describe(f);
+	battle_state_describe(f);
+	director_pick_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */
 	if (getenv("CYBERWORLD_STATE_POS")) describe_pos(f);
 	/* (a special route kept for its fork, and the act it led to) */
@@ -286,6 +288,11 @@ void director_describe(FILE *f) {
 	if (run.route_way) fprintf(f, "route taken to act %d\n", run.route_way);
 	if (D.town) return;
 	fprintf(f, "layer %d\narea %s\nscrtdata %d\n", run.depth, guardian_area_in_text(run.biome, run.side_kind), run.fragments);
+	/* (the run's tally, the card that shows, the rival, the guardian's course: each its own part's) */
+	tally_describe(f);
+	cinema_describe(f);
+	duel_describe(f);
+	boss_describe(f);
 	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);
