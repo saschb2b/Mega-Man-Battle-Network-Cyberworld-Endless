@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T13:35:00Z
+* **Update**: devtools/scenarios.md (A quit at any frame: `build.py scenarios --fuzz`, runs quit at frames a seeded dice names and CONTINUEd, what a CONTINUE brings back by the situation the quit found and what it may not, the state's `quit`, `saves` and `battle` lines, what it found), engine/emulation/layer.md (a quit as a layer's exit is taken runs the game on to the next layer), code/tools.md (`tools/scenarios_fuzz.py`'s row), code/director.md (the quit's run-on, a layer's exit too).

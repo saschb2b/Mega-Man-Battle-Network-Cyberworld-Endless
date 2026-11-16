@@ -17,6 +17,7 @@ import cw_pictures as pics  # noqa: E402
 import cw_routes  # noqa: E402
 import play  # noqa: E402
 import scenarios  # noqa: E402
+import scenarios_fuzz as fuzz  # noqa: E402
 
 failed = 0
 
@@ -226,8 +227,98 @@ def scenario_files():
             check(e.args[0], f'{step} says what it found')
 
 
+def quit_fuzz():
+    """tools/scenarios_fuzz.py without the game: a game's plan comes from the
+    fuzz's seed alone, a state's situation is the player's, the checkpoint
+    and the map before a box are followed, and a CONTINUE is judged by its
+    quit's situation."""
+    plan = fuzz.plan(7, 3, 4)
+    check(plan == fuzz.plan(7, 3, 4) and plan != fuzz.plan(7, 4, 4) and plan != fuzz.plan(8, 3, 4), "a game's plan is its seed's and its number's")
+    check(len(plan['quits']) == 4 and plan['pilot'] in ('1', 'weak') and fuzz.DEPTHS[0] <= plan['depth'] <= fuzz.DEPTHS[1] and
+          all(fuzz.GAP[0] <= gap <= fuzz.GAP[1] and 0 <= extra <= fuzz.EDGE_AFTER for gap, _, extra in plan['quits']), "a plan's numbers in their bounds")
+    check(fuzz.plan(7, 3, 2)['quits'] == plan['quits'][:2], 'fewer quits are the first of more')
+
+    def state(**lines):
+        base = dict(scene='emu', screen='map', where='layer', doing='map', chat='closed', talk='none', gameframe='100', hp='80/100',
+                    zenny='150', bugfrags='2', quit='here', saves='1', layer='2', area='Seaside Area', scrtdata='0')
+        return {k: v for k, v in {**base, **lines}.items() if v is not None}
+    town = state(where='town', screen='town', quit='checkpoint', layer=None, area=None, scrtdata=None)
+    for want, s, won in (('map', state(), False), ('box', state(chat='open'), False), ('box', state(talk='director'), False),
+                         ('box', state(screen='reward-pick'), False), ('box', state(doing='menu'), False),
+                         ('battle', state(screen='battle', doing='battle', battle='fight'), False),
+                         ('won', state(screen='battle', doing='battle', battle='won'), True), ('won', state(doing='other'), True),
+                         ('guardian', state(guardian='BlastMan fighting', doing='battle'), False),
+                         ('guardian', state(guardian='BlastMan beaten'), True), ('map', state(guardian='??? waiting'), False),
+                         ('home', town, False), (None, dict(scene='title', screen='title'), False),
+                         (None, state(doing='gameover'), False), (None, dict(scene='emu', where='none'), False)):
+        check(fuzz.situation(s, won) == want, f'a state of {want}: {fuzz.situation(s, won)}')
+    check(fuzz.read('frame 9\nscreen map\nhp 80/100\nguardian ??? waiting\nmap one\nmap two') ==
+          dict(frame='9', screen='map', hp='80/100', guardian='??? waiting', map='one'), "a state's lines by their first word")
+
+    # a game followed: its checkpoint, a box, a battle won
+    first = state(saves='0', quit='checkpoint')
+    t = fuzz.track()
+    check(fuzz.follow(t, first) == 'map' and not t['saved'], 'no checkpoint yet')
+    saved = state()
+    fuzz.follow(t, saved, 30)
+    check(t['saved'] == [first, saved], 'a checkpoint saved between two states: either')
+    walked = state(gameframe='130')
+    fuzz.follow(t, walked, 30)
+    box = state(chat='open', quit='talk', hp='100/100', gameframe='160')
+    check(fuzz.follow(t, box, 30) == 'box' and t['before'] == [walked, box] and t['saved'] == [first, saved], 'a box: the states since the map')
+    fight = state(screen='battle', doing='battle', battle='fight', quit='checkpoint', gameframe='190')
+    check(fuzz.follow(t, fight, 30) == 'battle' and not t['won'], 'a battle under way')
+    result = state(screen='battle', doing='battle', battle='won', quit='after', gameframe='220')
+    check(fuzz.follow(t, result, 30) == 'won' and t['won'], "a battle's RESULT")
+    fade = state(doing='other', quit='after', zenny='300', gameframe='250')
+    check(fuzz.follow(t, fade, 30) == 'won', '... won until MegaMan is free')
+    check(fuzz.follow(t, state(zenny='300', gameframe='280'), 30) == 'map' and not t['won'] and t['free'], '... and the map after it')
+    for _ in range(3):
+        fuzz.follow(t, state(zenny='300', gameframe='280'), 30)
+    check(t['still'] == 90, "the frames the game's count stands")
+    fuzz.follow(t, state(zenny='300', gameframe='281'), 30)
+    check(t['still'] == 0 and t['frames'] == 330, '... and goes on')
+    after = fuzz.track(saved)
+    check(after['saved'] == [saved] and not after['free'], "a CONTINUE's state is its checkpoint")
+
+    # a CONTINUE judged
+    kept = state(zenny='300', hp='60/100')
+    check(not fuzz.judge('map', kept, dict(kept), [saved], [kept]), 'the map: all of it back')
+    check(any('zenny 300 kept, 150 found' in line for line in fuzz.judge('map', kept, state(hp='60/100'), [saved], [kept])), 'the map: zenny gone back')
+    check(any(line.startswith('layer') for line in fuzz.judge('map', state(layer='3'), state(), [saved], [])), 'the map: the layer gone back')
+    check(not fuzz.judge('won', result, state(zenny='300', hp='90/100'), [saved], []), "a won battle: its reward come, the RESULT's HP another")
+    check(fuzz.judge('won', fade, state(), [saved], []) == ['zenny 300 kept, 150 found'], 'a won battle lost')
+    onward = state(layer='3', area='Sky Area', zenny='300', guardian='??? waiting')
+    check(not fuzz.judge('won', fade, onward, [saved], []), 'a won battle on the exit: the game run on to the next layer')
+    check(fuzz.judge('won', fade, state(layer='4', zenny='300'), [saved], []), '... and no further')
+    check(fuzz.judge('map', state(zenny='300'), onward, [saved], []), 'the map, the run kept here: the next layer is another')
+    check(not fuzz.judge('battle', fight, dict(saved), [first, saved], []), 'a battle under way: the last checkpoint')
+    check(fuzz.judge('battle', state(zenny='300', doing='battle'), state(zenny='0'), [saved], []) ==
+          ['zenny 300 kept, 0 found (150 at the last checkpoint)'], 'a battle under way: further back than the checkpoint')
+    check(any(line.startswith('layer') for line in fuzz.judge('battle', state(layer='3'), state(), [saved], [])), 'a battle: another layer')
+    check(not fuzz.judge('box', box, dict(walked), [saved], [walked, box]), 'a box: the run as it stood before it')
+    check(not fuzz.judge('box', box, dict(box), [saved], [walked, box]), '... or as it stands')
+    check(fuzz.judge('box', state(chat='open', zenny='300'), state(zenny='0'), [saved], [state(zenny='300')]) ==
+          ['zenny 300 kept, 0 found (300 since the map)'], 'a box: further back than the map before it')
+    door = state(guardian='BlastMan waiting')
+    check(not fuzz.judge('guardian', state(guardian='BlastMan fighting', hp='10/100'), dict(door), [door], []), "a guardian's fight: the door")
+    unmet = state(guardian='??? waiting')
+    check(not fuzz.judge('guardian', state(guardian='BlastMan fighting'), dict(door), [unmet], []), '... his name known since: the profile has met him')
+    check(fuzz.judge('guardian', state(guardian='BlastMan fighting'), state(guardian='BlastMan done'), [unmet], []), '... but not his end')
+    check(fuzz.judge('map', door, dict(unmet), [], []) == ['guardian BlastMan waiting kept, ??? waiting found'], 'a guardian heard of, forgotten')
+    check(not fuzz.judge('home', town, dict(saved), [saved], []), 'the town before its save: the layer left')
+    check(fuzz.judge('home', town, dict(scene='emu', where='none'), [town], [])[0] == 'where town kept, none found', 'the town: no run found')
+    check(fuzz.judge('map', kept, dict(scene='emu', where='layer'), [saved], [])[0] == 'layer 2 kept, None found', 'a line gone is told')
+
+    # the bugs known
+    for k in fuzz.KNOWN:
+        check(k['kind'] in ('map', 'won', 'box', 'battle', 'guardian', 'home') and k['what'] and k['kept'], f'a known bug reads: {k["what"][:40]}')
+        check(fuzz.known(k['kind'], state(**k['kept'])) == k['what'], 'a known bug is told from its quit')
+    check(fuzz.known('map', state()) is None, 'a quit on the map with the run kept here is no known bug')
+
+
 def main():
-    for part in (routes, starts, states, pictures, builds, server, old_checkpoints, scenario_files):
+    for part in (routes, starts, states, pictures, builds, server, old_checkpoints, scenario_files, quit_fuzz):
         if part is pictures and not pics.Image:
             print('agents\' tools: the pictures skipped (no Pillow here)')
             continue
