@@ -14,6 +14,7 @@ python3 build.py scenarios liberation      # those a name starts
 python3 build.py scenarios routes --jobs 8 # every route of tools/cw_routes.py
 python3 tools/scenarios.py --list          # each with what it guards
 python3 tools/scenarios.py --check         # all read without the game (build.py test does)
+python3 build.py scenarios --fuzz [SEED]   # runs quit at frames a dice names and CONTINUEd (A quit at any frame)
 ```
 
 The ROM-free tests reach what is a function of its inputs: a layer from
@@ -124,6 +125,124 @@ KNOWN home-shop-buys-a-chip    1.2 s     640 frames
      the shop's last row sells at the first row's price (issue #700)
      step 7 ('expect', 'zenny=1200'): the state does not say so
 ```
+
+## A quit at any frame
+
+```bash
+python3 build.py scenarios --fuzz              # 8 games of 4 quits each, from a seed drawn and printed
+python3 build.py scenarios --fuzz 7            # the same games every time
+python3 build.py scenarios --fuzz 7/3          # game 3 of them alone: a failure's line says this
+python3 build.py scenarios --fuzz 7 --games 24 --quits 6 --jobs 6
+```
+
+Six of 0.22.0's fixes were one kind: a run that came back changed from a
+quit and a CONTINUE, each found by a playtester, one at a time. Two
+scenarios of fixed course guard two of them. `tools/scenarios_fuzz.py`
+hunts the kind: a run is played by the autopilot, quit as a player's
+system quits it (SIGTERM) at a frame a seeded dice names, started again
+at the title, CONTINUE taken, and what came back is held to what the
+state said at the quit; then it is played on to the next quit.
+Everything comes from the fuzz's seed: each game's own seed, the layer it
+starts on (1 to 9), its autopilot (`weak` twice in three: every battle
+won at once, so more of the map, the guardians and the way home) and
+each quit's frame. Half the quits wait for the next edge first (the
+screen, a box, a battle's phase, the layer, a checkpoint saved, the
+engine's word on the quit changing) and come up to 45 frames after it:
+the bugs of this kind lived in the seconds around one. Eight games take
+about twenty seconds here.
+
+### What a CONTINUE brings back
+
+A quit saves once more where it can (`scene_emu.c`'s `emu_keep_run`,
+`director_save.c`'s `director_suspend`; [the layer](../engine/emulation/layer.md)
+has the reasons), and where it cannot, the last checkpoint stands. So a
+CONTINUE is not held to "every line as it was" but to the situation the
+quit found the run in, told from the state as a player sees it:
+
+| The quit finds | The engine keeps | A CONTINUE must bring back |
+| --- | --- | --- |
+| **map**: MegaMan on a layer's map, no box open | the run where he stands, once he is free; held by BN6 on a layer's exit (its warp, the jack-in, the arrival before the next layer's checkpoint), the game run on unseen to him free on the next layer | `layer`, `area`, `zenny`, `bugfrags`, `hp`, `scrtdata` and `guardian` as they were; the next layer where the exit was taken |
+| **won**: a won battle, from its RESULT through the fade to the map | the game run on to him free, A paging the RESULT | the same layer (the next where the battle was fought on the exit), `zenny` and `bugfrags` no less: the reward may come after the quit's frame. Not `hp`: a battle's is its HUD's |
+| **box**: a chat box, a shop, the PET, a reward's pick open | the run as it stood on the last frame MegaMan was free before it opened (the held set) | each line as it was at some moment between the map and the quit: what the box gave may be given again, nothing older is lost |
+| **battle**: a battle under way, to its RESULT | nothing new | the last checkpoint saved, on this layer: the battle is not kept, and neither is what was won since that checkpoint |
+| **guardian**: his staging, his fight and his end, to his Guardian Data | nothing new | the last checkpoint saved: the arena's door, or the Guardian Data once it stands |
+| **home**: in the town | nothing new | the last checkpoint saved: Lan's HP's or the PET's Save's; before the HP's, the layer left, at its Guardian Data |
+
+and after every CONTINUE the game goes on: MegaMan is free within 900
+frames (issue #23's kind: a state that came back held), and the game's
+own frame count never stands for 600 (issue #482's).
+
+What may change, then, and is not a bug: a battle under way is fought
+again, and the battles won before it on that layer since its checkpoint
+with it (the quit prompt says "Run saved at the layer's start" there); a
+guardian's fight starts again at his door; a talk is heard again; the
+town before its save is walked to again. What the profile keeps a quit
+does not take back, so a guardian met in a fight not kept is named after
+it where he was `???` before. Two things the fuzz does not read: where
+MegaMan stands, and the folder.
+
+The situations are the fuzz's own reading (`situation`), not the
+engine's word on what a quit keeps: 0.22.0's won battle was lost exactly
+where the engine said "Run saved at the layer's start". Three state lines
+were added for it:
+
+| Line | Says |
+| --- | --- |
+| `quit here`, `after`, `talk`, `pet`, `checkpoint` | what a quit now would keep, by the engine (`director_quit_describe`): the run where MegaMan stands; after the game is run on (a won battle, a layer's exit); as it stood before the talk or the PET; the last checkpoint. Printed with a failure, the place to start reading from |
+| `saves N` | the checkpoints saved since the game started: the fuzz keeps the states either side of the last, which is what "the last checkpoint" is held to |
+| `battle start`, `custom`, `fight`, `won`, `over` | a battle's phase; `won` from its RESULT, where the engine's keeping begins. BN6's phase goes back under the Custom screen's as the battle fades out, so the fuzz remembers a `won` until MegaMan is free |
+
+A failure says the quit, what was kept and found, and how to play that
+game again; both states, the picture and each start's log stay in
+`.build/scenarios/fuzz-SEED-GAME/`:
+
+```
+FAIL  3/11   5.6 s    4850 frames  --seed 52764 --run-depth 7, autopilot weak: map map won
+     quit 3 (won, frame 2448 of its start; the engine: quit checkpoint): zenny 400 kept, 0 found
+     kept:  screen battle · where layer · doing battle · ... · battle won · quit checkpoint · saves 0 · layer 8 · zenny 400 · ...
+     found: screen map · where layer · doing map · ... · quit here · saves 0 · layer 8 · zenny 0 · ...
+     files: .build/scenarios/fuzz-3-11/fail.txt, .../fail.png, .../log.txt (log-N.txt: each start's)
+     again: python3 build.py scenarios --fuzz 3/11
+```
+
+That one is 0.22.0's quit after a won battle, with its fix taken out
+(`director_settles` without its won battle): game 11 of each of seeds 1,
+2 and 3 found it, as zenny lost on a RESULT and in the fade after it,
+and all three pass with the fix in. A fuzz
+never seen red guards nothing either.
+
+### What it found
+
+- **A quit as a layer's exit was taken lost the layer left.** From the
+  exit pad's warp to the next layer's checkpoint, some two seconds, BN6
+  holds MegaMan and no save could be made, so a quit there (the most
+  natural place to stop) went back to the left layer's last checkpoint:
+  its battles and what they paid gone. Found by the first run, seed 1's
+  game 4, and by ten of the first 72 games. Fixed with it: the quit runs
+  the game on to MegaMan free on the next layer, as it does after a won
+  battle (`director_settle.c`'s `arriving`), and
+  `tests/scenarios/quit_as_a_layer_is_left.py` keeps the play.
+- **A liberation's words after a won battle have no save before them**
+  (`--fuzz 3/12`): on a dark layer's board the Navi's line begins on the
+  way back from the battle, while BN6 still holds MegaMan, where the run
+  cannot be held back before it as it is before
+  [a talk on the map](../engine/emulation/layer.md), and a quit under it
+  goes back to the last checkpoint, the battle and its reward lost. Not fixed here: the board's steps are its own. It is
+  in the fuzz's `KNOWN`, below.
+- **A quit heard between two batches was not heard.** The headless
+  game's wait for its next batch is a `read` the signal wakes; a signal
+  that came after a batch's answer and before that `read` woke nothing,
+  and the game waited on, one quit in some hundreds with the machine
+  busy. A harness's race, not a player's: `quit_game` sends the signal
+  again each second.
+
+A bug shown and not fixed yet goes in `KNOWN` of
+`tools/scenarios_fuzz.py`: the situation and the lines of the kept state
+that tell it, and what is wrong. A CONTINUE that fails so is printed
+`KNOWN` with the seed that shows it, fails no run, and the game is
+played on; the entry goes with the fix. A new find is a seed: the line
+`again:` in an issue is the whole report, and where its fix is small its
+play becomes a scenario of fixed course.
 
 ## Many written side by side
 
