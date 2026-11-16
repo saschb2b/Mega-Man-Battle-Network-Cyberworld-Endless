@@ -155,12 +155,15 @@ published video, and its row below.
 | 0.19.0 | <https://youtu.be/M62DJAEzlPg> | 2026-11-15 |
 | 0.20.0 | <https://youtu.be/GOWV6RM4j8s> | 2026-11-15 |
 | 0.21.0 | <https://youtu.be/FgRgRRJFtUM> | 2026-11-15 |
+| 0.22.0 | <https://youtu.be/XbueF-wBxt4> | 2026-11-16 |
 
 0.22.0's master, thumbnails and words were made on 15 November 2026,
 ahead of its release (the owner: the video and the release need not go
-out together); Studio refused the upload that evening, the day's limit
-used up by the ten above. It goes up once the limit lifts or the owner
-verifies the channel.
+out together); Studio refused the upload that evening and twice more
+after midnight, the day's limit used up by the ten above, and took it on
+the evening of the 16th. It went up with thumbnail A alone: Studio shows
+the channel no test of thumbnails yet (its edit page holds an
+**A/B-Tests** button, hidden), so B and C wait for it.
 
 0.21.0 went up with a still Studio picked (its battle on three ROMs'
 marks): the day's custom thumbnails had run out before the advanced
