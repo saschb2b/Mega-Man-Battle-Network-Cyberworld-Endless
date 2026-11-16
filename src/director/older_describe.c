@@ -36,8 +36,8 @@ static const char *game_of_area(int area) {
 static const char *game_of_guardian(int navi) { return guardian_bn4(navi) ? "bn4" : guardian_moved(navi) ? "bn5" : "bn6"; }
 
 /* The run's acts in order, each by the game whose area draws it (run_dress),
- * how many are an older net's, and how many end at one of its Navis
- * (run_xguardian_at) */
+ * how many are an older net's, how many end at one of its Navis
+ * (run_xguardian_at), and the Souls the run holds */
 static void run_lines(FILE *f) {
 	int acts = run.mode == RUN_SHORT ? 3 : 6, older = 0, guards = 0;
 	fprintf(f, "acts");
@@ -47,7 +47,8 @@ static void run_lines(FILE *f) {
 		older += area >= NET_AREAS;
 		guards += run_xguardian_at(a, biome) != 0;
 	}
-	fprintf(f, "\nolderacts %d\nolderguards %d\n", older, guards);
+	/* (and BN5's Souls it holds, a bit each from Colonel's: souls.h) */
+	fprintf(f, "\nolderacts %d\nolderguards %d\nsoulsheld %02x\n", older, guards, souls_held());
 }
 
 /* The guardian's NPC object, where the map holds one at his place: its
@@ -136,15 +137,20 @@ static void chips_lines(FILE *f) {
 		emu_read16(BN6_BATTLE_HAND + BN6_HAND_POWERS + (uint32_t)at * 2) + emu_read16(BN6_BATTLE_HAND + BN6_HAND_BONUS + (uint32_t)at * 2));
 }
 
-/* BN5's Souls in BN6's battles (soulunite.h): those the run holds, what
- * stands under OK on this Custom screen, the Soul MegaMan is united with
- * (BN5's number, 0 none), its turns left and the Souls used this battle */
+/* BN5's Souls in BN6's battles (soulunite.h): UNITE
+ * under OK on this Custom screen (none: BN6's emblem or nothing; grey;
+ * lit, with the Soul the last chip picked lights; chosen), the Soul
+ * MegaMan is united with (BN5's number, 0 none), its turns left and the
+ * Souls used this battle */
 static void souls_lines(FILE *f) {
+	static const char *const states[] = { "lit", "grey", "chosen" };
 	if (!soulunite_ready()) return;
 	uint32_t s = BN6_SOULS;
-	bool lit = emu_read8(s + BN6_SOUL_SLOT) == BN6_SLOT_UNITE, stands = emu_read8(s + BN6_SOUL_STANDS) & BN6_STANDS_UNITE;
-	fprintf(f, "soulsheld %02x\nunite %s\nunited %d\nunitedturns %d\nsoulsused %x\n", souls_held(), lit ? "lit" : stands ? "grey" : "none",
-		emu_read8(s + BN6_SOUL_ID), emu_read8(s + BN6_SOUL_TURNS), (unsigned)emu_read32(s + BN6_SOUL_USED));
+	int state = emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_STATE);
+	bool unite = emu_read8(BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM && emu_read8(s + BN6_SOUL_SLOT) == BN6_SLOT_UNITE && state < 3;
+	fprintf(f, "unite %s\nunitesoul %d\n", unite ? states[state] : "none", unite ? emu_read8(BN6_CUSTOM_UNITE + BN6_ELEMENT_SOUL) : 0);
+	fprintf(f, "united %d\nunitedturns %d\nsoulsused %x\n", emu_read8(s + BN6_SOUL_ID), emu_read8(s + BN6_SOUL_TURNS),
+		(unsigned)emu_read32(s + BN6_SOUL_USED));
 }
 
 void older_describe(FILE *f) {

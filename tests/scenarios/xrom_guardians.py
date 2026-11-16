@@ -1,6 +1,7 @@
 """The older nets' Navis as an act's guardian: BN5's six and Nebula's two,
 BN4's twelve. The door, his fight in BN6's engine under his own name, his
-deletion, his Guardian Data taken (five HPMemory); and each of BN4's seen
+deletion, his Guardian Data taken (five HPMemory, and the Soul of each of
+BN5's six); and each of BN4's seen
 facing MegaMan on the map from either side of his arena (0.22.0: BN4
 draws four views where BN6 draws eight, and a guardian with MegaMan on his
 left showed his back, or nothing at all)."""
@@ -22,12 +23,14 @@ def start(biome, navi, seed, depth=3):
 
 def fight(game, biome, navi, name, depth=3):
     """An act's last layer walked by the autopilot: his door, his fight, his data."""
+    # (BN5's six give their Soul, a bit each from Colonel's; Nebula's two and BN4's have none to give)
+    soul = 1 << (navi - 24) if navi in BN5 else 0
     return dict(
         START=start(biome, navi, 3, depth), NEEDS=(game,),
         GUARDS=f"{game.upper()}'s {name} guarding an act: fought in BN6's engine, deleted, his Guardian Data taken",
         STEPS=[
             ('expect', f'guardianfrom={game}'),
-            ('keep', 'hp'),
+            ('expect', 'soulsheld=00'),
             ('until', 'guardian~fighting', 6000),
             ('until', 'enemies>=1', 1200),
             ('expect', f'enemynames~{IN_BATTLE.get(name, name)}'),   # himself, moved in from his own game
@@ -36,6 +39,7 @@ def fight(game, biome, navi, name, depth=3):
             ('expect', f'guardian={name} beaten'),
             ('until', 'guardian~done', 6000),         # his Guardian Data taken
             ('expect', 'hp=200/200'),                 # its five HPMemory, and the full heal
+            ('expect', f'soulsheld={soul:02x}'),      # ... and his Soul, where he has one
         ])
 
 

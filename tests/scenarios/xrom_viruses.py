@@ -1,8 +1,8 @@
-"""The older nets' viruses in BN6's battles: each family moved into the
+"""The older nets' foes in BN6's battles: each virus family moved into the
 engine (BN5's 25, BN4's 11) met alone at its first version under its own
-name, fought by the autopilot and deleted, MegaMan back on the layer; and
-one of BN5's own battle records fought whole, its two CanGards and a
-Mettaur."""
+name, fought by the autopilot and deleted, MegaMan back on the layer; one
+of BN5's own battle records fought whole, its two CanGards and a Mettaur;
+and BN5's four Darkloids at V1, each deleted."""
 
 # (a family's first enemy id, six a family from 0x200: tests/xdiff/families.json's order, then BN4's from 0x2C0)
 BN5 = ['CanGard', 'Handi', 'Powie', 'Bugtank', 'Dominerd', 'MetFire', 'Shakey', 'NinJoy', 'Lark', 'BomBoy', 'Zomon', 'Drixol', 'Batty',
@@ -37,6 +37,14 @@ def family(game, first, name):
 
 MANY = {f'bn5/{name.lower()}': family('bn5', 0x200 + 6 * k, name) for k, name in enumerate(BN5)}
 MANY.update({f'bn4/{name.lower()}': family('bn4', 0x2C0 + 6 * k, name) for k, name in enumerate(BN4)})
+# (the Darkloids' moved ids at V1: tools/cw_routes.py's, docs/multirom/navis.md)
+DARKLOIDS = {'ShadeMan': 0x1E0, 'BlizzardMan': 0x1E4, 'CloudMan': 0x1E8, 'CosmoMan': 0x1EC}
+IN_BATTLE = {'BlizzardMan': 'BlizMan'}
+for _name, _id in DARKLOIDS.items():
+    MANY[f'bn5/darkloid-{_name.lower()}'] = family('bn5', _id, IN_BATTLE.get(_name, _name))
+    # (a Navi's blows: MegaMan kept whole through them, and 2000 HP against one that would take his 100 at once)
+    MANY[f'bn5/darkloid-{_name.lower()}']['START'] = START.replace('onehit,quiet', 'onehit,quiet,god,hp=2000')
+    MANY[f'bn5/darkloid-{_name.lower()}']['GUARDS'] = f"BN5's Darkloid {_name} at V1 in BN6's engine: met under his name, deleted, the battle won"
 # (BN5's ACDC Area record 0x0811DE10, on BN6's ground: docs/devtools/battle-on-demand.md)
 MANY['bn5/record'] = dict(
     START=START, NEEDS=('bn5',),
