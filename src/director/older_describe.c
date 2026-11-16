@@ -16,6 +16,7 @@
 #include "director_state.h"
 #include "emu.h"
 #include "guardians.h"
+#include "library.h"
 #include "npc_sprite.h"
 #include "rom.h"
 #include "run.h"
@@ -155,6 +156,7 @@ static void souls_lines(FILE *f) {
 
 void older_describe(FILE *f) {
 	run_lines(f);
+	library_describe(f);   /* (the PET's Library while it is up: its page, an entry a game) */
 	if (D.town) return;
 	layer_lines(f);
 	if (emu_read8(BN6_GAMESTATE) != BN6_SUB_BATTLE) return;
