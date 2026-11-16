@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-16
+* **Update**: game/liberation/building/stage-2-battle.md (when a liberation's battle's arm ends: the board, any layer's start, a battle not the board's; issue #669).
+
 ## 2026-11-15
 * **Update**: releases/v0.22.0.md (CopyBot Comp's crystal spikes, #664, named and pictured among what stands beside the floor).
 * **Update**: releases/v0.22.0.md (the shared dive, the net climbing, what stands beside the floor, the locks, the Glitch layer, touch controls off and SAVES on a first start written in, from the pull requests merged since #627).

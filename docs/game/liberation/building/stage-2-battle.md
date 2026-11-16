@@ -3,7 +3,7 @@ type: Feature
 title: "Stage 2, as built: the liberation battle"
 description: "Stage 2, the liberation battle on BN6's loop (`liberation_battle.c`): BN5's three-turn limit and banners, the Custom screen opening on a full gauge, what each battle does on the board, and the stakes box."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T00:15:50Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T10:50:00Z }
 ---
 
 # Stage 2, as built: the liberation battle (23 October 2026)
