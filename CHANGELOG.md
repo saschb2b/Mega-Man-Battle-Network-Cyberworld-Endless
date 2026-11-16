@@ -7,6 +7,12 @@
   battles all kept its rules: three turns, the Custom screen opening by
   itself, TIME UP! at the third, the guardians' battles too, until the
   game was closed. A liberation's rules now end with its battle.
+- **Fixed: the Library missed a chip you had just found.** The PET's
+  Library counted a new chip only from the run's next save: one won in
+  a battle or taken from a Mystery Data was not on its page when you
+  opened the Library right after, and stood there a layer later. Chips
+  of BN4's were counted at once, the rest not. The Library now counts
+  what you hold the moment it opens.
 
 ## 0.22.0 (2026-11-15)
 

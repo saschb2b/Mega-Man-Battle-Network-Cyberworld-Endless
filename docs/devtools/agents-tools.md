@@ -83,6 +83,25 @@ MegaMan's NaviStats hold extra turns for a Soul (BN5's SoulT+1 placed and
 run, [The NaviCust](../game/navicust.md), 11). A `play` call says only what changed (`doing battle (was
 walking)`); `state: "full"` says it all.
 
+The older nets have lines of their own (`src/director/older_describe.c`,
+whose header lists them; `tests/scenarios/xrom_*.py` read them). A run
+says `acts` (each act's area by its game, `bn6 bn5 bn4 ...`), `olderacts`,
+`olderguards` and `soulsheld` (BN5's Souls, a bit each); a layer
+`areafrom` and `guardianfrom` (`bn6`, `bn5` or `bn4`) and
+`guardianstands ANIM` with `shown` or `unseen`, one of BN4's the diagonal
+his sprite shows him in (`front-left`, `back-right`), a Glitch layer
+`copyform` and `copystands`; a battle `enemies`, `enemyhp` (theirs
+together), `enemynames` (`CanGard+Mettaur`), `olderfoes` (those moved in
+from BN5 or BN4) and `olderrecord` (BN5's own record it was rolled from,
+or `none`), its Custom screen `drawn` (the hand, `204L 204L`) and
+`picked`, the fight `hand`, `nextchip`, `nextchipfrom` and `nextpower`,
+and where the Souls stand `unite` (`none`, `grey`, `lit`, `chosen`),
+`unitesoul`, `united`, `unitedturns` and `soulsused`. The title says
+`found` (its note's words, `nothing` with BN6's ROM alone) and
+`foundnote` (`due`, `up`, `gone`, `none`), and the PET's Library, while it
+is up, `library page bn5 standard row 1 of 180 held 10 of 180 entry 10 of
+241`.
+
 **Pictures** are the game's 240x160 cut from the canvas, at 2x for one
 frame and 1x on a sheet (`scale` 1-4; `full` the whole 256x192 canvas, the
 touch controls' place). A picture costs about one token for each 750 of
