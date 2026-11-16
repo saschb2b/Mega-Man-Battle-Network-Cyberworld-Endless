@@ -258,7 +258,8 @@ class Cast:
     (passed in: this file stands under it)."""
 
     def __init__(self, h, s, roms, start, step_run):
-        self.s, self.roms, self.start_game, self.step_run = s, roms, start, step_run
+        # (roms: the games' ROM folder, or what makes a game's own once its folder h is there: roms(h))
+        self.s, self.roms, self.start_game, self.step_run, self.rom = s, roms, start, step_run, {}
         self.h = {'': h, **{name: f'{h}--{name}' for name in s.get('games') or {}}}
         self.state = dict.fromkeys(self.h, '')
         self.kept = {name: {} for name in self.h}
@@ -290,9 +291,10 @@ class Cast:
             for name, text in (self.s.get('files') or {}).items():
                 with open(os.path.join(h, 'data', name), 'w') as f:
                     f.write(self.placed(text, game))
+            self.rom[game] = self.roms(h) if callable(self.roms) else self.roms
         spec = self.placed(spec, game)
         # (never play.launch's fresh, which would take the files just written with the folder)
-        self.state[game], ran = self.start_game(h, spec, False, self.roms)
+        self.state[game], ran = self.start_game(h, spec, False, self.rom[game])
         return ran
 
     def start(self):
@@ -322,7 +324,7 @@ class Cast:
             if step[0] == 'restart':
                 step = ('restart', self.placed(step[1], game))
             try:
-                self.state[game], n = self.step_run(self.h[game], step, self.state[game], self.kept[game], self.roms)
+                self.state[game], n = self.step_run(self.h[game], step, self.state[game], self.kept[game], self.rom[game])
             except Exception as e:
                 # (a failure's state is its game's: kept for the next step's pump too)
                 if len(e.args) > 1 and isinstance(e.args[1], str):

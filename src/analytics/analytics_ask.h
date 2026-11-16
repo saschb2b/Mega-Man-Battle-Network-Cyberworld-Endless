@@ -8,6 +8,7 @@
 #ifndef CW_ANALYTICS_ASK_H
 #define CW_ANALYTICS_ASK_H
 
+#include <stdio.h>
 #include <stdbool.h>
 
 /* The title's first entry: the question, where the build can send and the
@@ -28,5 +29,11 @@ void analytics_ask_draw(void);
 bool analytics_ask_back(void);
 /* A finger lifted at (x, y), canvas pixels from the picture's corner */
 void analytics_ask_tap(int x, int y);
+
+/* The statistics in a headless run's state, where the session can ask: the
+ * answer held (`statistics` on, off or unasked) and, while the question is
+ * up, the answer under its cursor (`answer` yes or no; wait before it
+ * takes a press). Reads only. */
+void analytics_ask_describe(FILE *f);
 
 #endif

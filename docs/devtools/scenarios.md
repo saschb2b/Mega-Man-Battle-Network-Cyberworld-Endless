@@ -85,6 +85,46 @@ A file may hold many instead, `MANY = {name: dict(START=..., STEPS=...)}`:
 `routes.py` makes a scenario of every route of `tools/cw_routes.py`, each
 expected on the screen it names.
 
+### A game's own places
+
+A scenario of the screens outside a run needs more of its machine than a
+run does: a second data folder to import into, a Downloads of its own, a
+ROM folder with nothing in it. In a `START` and in `COMMANDS` the runner
+puts them in:
+
+| Written | Is |
+| --- | --- |
+| `{dir}` | the game's own folder under `.build/scenarios/`, new each time: `--data-dir {dir}/other` is a second device's saves, `HOME={dir}` gives the game a Downloads of its own (SAVES writes its file there) and keeps the ROMs screen from finding this machine's ROMs where downloads and front ends keep theirs |
+| `{bn6}`, `{bn5}`, `{bn4}` | a ROM's file, alone in a folder (one dropped with another game's beside it brings that along) |
+| `{roms}` | the folder of BN6's ROM and the scenario's `NEEDS` together |
+| `{wrong}`, `{zip}`, `{damaged}` | files made here: a `.gba` whose header names no game of ours, an archive, a `.cwsave` cut short |
+| `{update}` | the address of a made-up newer version's `update.json`, which the runner serves on this machine while the scenarios play (`CYBERWORLD_UPDATE_URL={update}`: [The game's own updates](../engine/updates.md)) |
+
+`ROMS` names the files in the game's ROM folder where they are not BN6's
+and its `NEEDS`: `ROMS = ()` none at all, `('wrong',)` the wrong file
+alone, `('bn6',)` with `NEEDS = ('bn5',)` BN6 while BN5 is dropped in
+later. That folder is then the game's own, as the ROMs screen keeps a
+copy there of what it is given.
+
+Three things of the game go with them. `drop PATH` among
+[`tools/play.py`](play.md)'s commands drops a file on the game's window
+as a player does (an SDL event: a ROM on the ROMs screen, a `.cwsave` on
+the title). `--dev settings` has a headless start read the data folder's
+`settings.ini`, `keys.ini`, `pad.ini` and `touch.ini` as a player's start
+does (it reads none of them otherwise, so that a capture is the same
+whatever its folder holds): a restart then finds what Options kept.
+`press KEY.M` and `press PAD.x` (with `--pad xbox`, a virtual controller)
+are a key and a controller's button through SDL, for the controls
+screen. `GAMESCOPE_WAYLAND_DISPLAY=none` first in a `START` is Steam's
+big screen, where SAVES has no dialog to wait in and writes and reads
+its file in Downloads at once.
+
+Nothing a scenario does leaves the machine: a start that is no player's
+sends no statistics, the one that holds an answer across a restart is
+given this machine's own closed port (`--dev
+statsurl=http://127.0.0.1:9/api/send`, [Statistics](statistics.md)), and
+the update box's Yes, which opens a browser, is never pressed.
+
 A failure names the step, says the state it found, and keeps that state,
 the game's picture and its log in `.build/scenarios/NAME/`:
 
@@ -104,8 +144,9 @@ FAIL liberation-rules-end    3.4 s    4593 frames
    state now says `turn N` and `rules plain` or `rules liberation`
    (`lib_battle_describe`), and the title's its step and its menu's row
    (`title start`, `opening`, `menu`, `confirm`, `setup`, `summary`,
-   `leaving`; `cursor new`, `continue`, `other`), which every course that
-   crosses the title uses.
+   `leaving`; `cursor new`, `continue`, `options`), which every course that
+   crosses the title uses. [The screens' lines](#the-screens-lines) lists
+   what the engine's own screens say.
 3. Run it on the code before the fix: it fails at the step that names the
    bug, not earlier. Then on the fix. A scenario never seen red guards
    nothing; #669's was run with both of its fix's disarms taken out.
@@ -474,6 +515,105 @@ was held back before them and a quit under them lost the battle
 (`liberation-board/continue/under-the-words`; the words now wait for
 `talk_due_now()`, as the director's other talks do).
 
+## The extras
+
+The extras' scenarios (`extras_*.py`: the Glitch layer, the tournament,
+the Virus Battler, the Undernet's door and the Secret Area, DarkChips,
+and each of them switched off) reach what they play so, with the steps
+there are:
+
+- **A talk** is opened by the start's `--talk NAME:FRAME`
+  ([a capture's options](headless-shot.md): `glitch`, `copy`, `battler`,
+  `undernet`, `gate`, `dark`; `zenny`, `bugfrag` and `scrtdata` give what
+  a talk wants), after the arrival's words are paged, and waited for with
+  `('until', 'chat=open')`. A later talk on the layer is a second entry
+  (`copy:800,copy:2600`).
+- **Its answer.** The run's own risky questions start on No, so
+  `('repeat', 'press LEFT; press A; wait 20', COND)` answers Yes and
+  `press A` alone No, each until the state says what the answer did
+  (`sidelayer=glitch`, `series=on`, `flame=taken`). The golden gate's
+  starts on Yes until Bass is known behind it.
+- **A battle won** by the dev menu's fifth row ([Dev menu](dev-menu.md)),
+  once the Custom screen's OK has started the fight (`custom>0`); the
+  Glitch copy's forms one opening each. The Virus Battler's rounds are
+  fought by the viruses, the VIRUS LIST read from `vbscreen`, `vbpicked`
+  and `vbplaced`.
+- **The walk to an exit pad** is the autopilot's: the run quit and
+  continued (`('restart', 'CYBERWORLD_AUTOPILOT=1 --scene title --dev
+  quiet')`, CONTINUE), which also proves the side layer comes back from
+  a quit as it was left.
+- **A Glitch layer's data taken** are BN6's flags set by the `flags`
+  step (`MAPSLOT_MD_FLAG`, 0x1400 on), as taking them sets them.
+- **The tournament** needs BN4's ROM (`NEEDS = ('bn4',)`), whose screen
+  shows every bracket; its scenarios switch the older nets off, so its
+  Navis are BN6's.
+
+| The state says | Where | Written by |
+| --- | --- | --- |
+| `sidelayer none`, `undernet`, `secret`, `back` or `glitch`; `darkwarp here` or `none`, `goldgate here` or `none` | a layer | `extras_describe.c`, which calls the four below |
+| `glitchwarp here` or `none`; on a Glitch layer `glitchstage N` (0-4), `glitchshare N` (its data taken, in hundredths), `glitchsaid N`, `glitchlooks N`, `glitchflips N`, `glitchfx none`, `tear`, `slip`, `turn` or `flip`, `glitchlook own` or the look's number, `glitchbattles own`, `mixed` or `deeper`, `glitched on` or `settled`, `copy waiting`, `fighting`, `deleted` (its pick waits) or `taken` | a layer | `glitch_describe`, `glitch.c` |
+| `bracket none`, `ahead`, `door` (MegaMan stepped in: its one save), `screen` (BN4's, off the map), `round` or `won`; `round N` (3 the final, 4 all won), `roundfoe NAME`, `roundchips N` (the two rounds' Navi chips held) | a layer | `boss_bracket_describe`, `boss.c` |
+| `btlrcard held` or `none`, `virusdata N`; `battler N` or `none`, `stake N`, `vbrounds N`, `series none`, `on` or `over`, `vbround N`, `vbwins N`, `pot N`, `vblast none`, `won`, `lost` or `draw`, `vbprize open` or `taken`; after a round won `potchoice up`; in a round `vbscreen list`, `ok`, `placing`, `confirm` or `fight`, `vbpicked N`, `vbplaced N` | a layer | `battler_describe`, `director_battler.c` |
+| `flame none`, `burning` or `taken`, `flamechip NAME`, `flamenet bn6` or `bn5`; `darkchips N` (kinds the run holds), `darkpack N` (their chips in the Pack and folder), `basehp N` (the max HP a DarkChip's price lowers), `darktaught none`, or `flame`, `price`, `bn5` joined by `+` (the profile's) | a layer | `dark_describe`, `director_dark.c` |
+
+They found one bug at once: a Glitch layer whose copy was deleted
+glitched again after a quit and CONTINUE, its flips and stronger
+battles back for a copy that was gone (the settled state was the
+session's alone; BN6's flag says it now, `glitch_update`).
+
+## The older nets in the state
+
+The `xrom_*.py` scenarios play with BN5's and BN4's ROMs beside BN6's
+(`NEEDS`) and read these, from `older_describe`
+(`src/director/older_describe.c`, one call in `director_describe`) but
+the title's:
+
+| Lines | Say |
+| --- | --- |
+| `acts bn6 bn5 bn4 ...`, `olderacts N`, `olderguards N`, `soulsheld XX` | the run, at home too: each act's area by its game in the run's order (three in the short net), how many are an older net's, how many end at one of its Navis, BN5's Souls held (hex, a bit each from Colonel's) |
+| `areafrom bn6`, `bn5` or `bn4`; `guardianfrom` the same | a layer: whose area it is drawn as, whose Navi guards it |
+| `guardianstands ANIM shown` or `unseen`; one of BN4's `front-left`, `front-right`, `back-left` or `back-right` | his NPC's animation on the map and whether his sprite draws it; a BN4 Navi's the diagonal it shows him in (BN4 draws four, by its layout of pairs) |
+| `copyform NAVI`, `copystands ANIM` | a Glitch layer's copy: its first body, its NPC's animation |
+| `enemyhp N`, `enemynames CanGard+Mettaur`, `olderfoes N`, `olderrecord 811DE10` or `none` | a battle: its enemies' HP together, their names as the battle shows them (`KnightMn`, `GutsM`), how many are moved in from BN5 or BN4, and BN5's own record it was rolled from (how many stand is the tally's `foes` and `down`) |
+| `drawn 204L 204L ...`, `handpicks N`; then `hand N`, `nextchip ID`, `nextchipfrom bn6`, `bn5` or `bn4`, `nextpower N` | the Custom screen's hand (id and code) and the chips picked; after OK the chips left to use, the next one, its game and its power |
+| `unite none`, `grey`, `lit` or `chosen`; `unitesoul N`; `united N`, `unitedturns N`, `soulsused X` | where BN5's Souls stand in the engine: UNITE under OK and the Soul the last chip picked lights; the Soul MegaMan is united with (BN5's number, 0 none), its turns left, the Souls used this battle |
+| `found BN5 + BN4 found: both join ours` or `nothing`; `foundnote due`, `up`, `gone` or `none` | the title (`title_found_describe`, `scene_title.c`): its note of the other games' ROMs, in its own words, and whether it shows |
+
+A battle won by `--dev onehit` is over and back on the map inside one
+look of an `until` (60 frames): its end is read from `lastbattle=won`,
+which stays. `screen=battle` comes before the foes stand: a course waits
+for `foes>=1` before it reads a battle's lines. An A pressed while BATTLE
+START! shows is lost, so a chip is used once `custom>=20` (the gauge a
+fifth full), with `('repeat', 'press A; wait 30', 'hand=0')`, which stops
+before a buster shot; L on an open Custom screen is a try to run, pressed
+once. The `chip` step wants a code the chip's record has (`chip 204 L`):
+with another the hand holds chip 389, power 0. `--dev god` does not save
+MegaMan from one blow of more than his HP: `hp=2000` beside it.
+
+## The screens' lines
+
+The engine's own screens say themselves in the state, each from a
+function of its own (`title_describe`, `title_setup_describe`,
+`options_describe`, `controls_describe`,
+`analytics_ask_describe`, `news_box_describe`, `saves_describe`,
+`launcher_describe`, and `meta_setup_describe` for a run's setup), called
+from `write_state` in `src/dev/capture.c` (the title's there, the others
+through `screens_describe` in `src/dev/screen_name.c`); they read and
+change nothing.
+
+| Where | Lines |
+| --- | --- |
+| The title | `title` its step, `cursor` new, continue or options, `saved` the layer of the run CONTINUE takes (0 none), `asks` typing, no or yes while NEW GAME asks, `runs`, `best` and `marks` (hex) of the profile |
+| The JACK-IN SETUP | `tab` run, help or extras; `row` net, folder, cross, threat, a helper's or an extra's number, or foot; the choice as `net` short or endless, `startfolder`, `startcross`, `threat`, `helpers` and `extrasoff` (bits); what is open as `endless` open or shut, `folders`, `crosses`, `threatmax`, `helpersshown` |
+| A run | the same six lines of the setup it began with (`net` ... `extrasoff`): kept on the setup with `keep`, they are the `same` in the run |
+| A run's summary | the battles' scenarios' lines (`title_summary_describe`): `page` result or records, `ended` won or deleted, `cause`, `reached`, `viruses`, `navis`, `learned`, `newbest`, `opened` (what it opened, apart by commas; nothing) |
+| Options | `line` the line under the cursor (scale, smooth, colour, blend, lcd3x, depth, music, effects, output, sound, vibration, controls, fast, statistics, update, updates) and `value` as the page shows it; `defaults` no or yes while START asks |
+| The controls screen | `device` controller or keyboard, `button` the row (a, b, dpad, ... or setall, defaults, done), `slot` main or also, `bound` what is on it, `asking` none, slot, dpad, all or keep, `said` its passing word |
+| The statistics | `statistics` on, off or unasked, where the session may hold an answer; `answer` wait, no or yes while the question is up |
+| The update | `update` none, found, getting, failed or ready, where this copy looks; `newversion` |
+| SAVES | `savesview` home, compare, result, send or receive; `savespage` cloud, code or file; `savesfocus` the line or button; `here` this device's saves' hash (none), `herelayer`, `hereruns`; `theirs`, `theirlayer`, `theirstatus` ok or refused; `undo` yes or no; `autocopy`; `savesasks`; `savesnote` |
+| The ROMs | `roms` those read (`bn6 bn5`, none) on every screen; on the ROMs screen `cartridges`, `romfocus` bn6, bn5, bn4, alt or play, `romnote` and `romnotekind` info, good or bad |
+
 ## What they found at once
 
 The first run of `routes` failed three: `layer` and `battle` stopped on
@@ -486,6 +626,13 @@ The battles' scenarios found one in the game: MegaMan deleted in a
 battle, the next run begun without the game closed came onto its first
 layer as if back from that battle, and its tally began with the viruses
 deleted in it (`battle_deleted.py`; the battle now ends with the run).
+
+Written for the screens outside a run (16 November 2026), they found two
+more. Options' LCD 3x was off again at every start: `settings.ini`'s keys
+were read by their letters alone, and `lcd3x` has a digit, so its line
+was never found again and each turn added one. And a profile's first run,
+which jacks in with no setup, never wrote its short net down: won, the
+setup it opened started on the endless net.
 
 ## Beside it
 

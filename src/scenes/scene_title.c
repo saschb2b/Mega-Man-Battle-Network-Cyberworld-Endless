@@ -477,15 +477,19 @@ static void update(void) {
 	jack_in();
 }
 
-/* The title in the state's words (capture.c): the step it is on, and on
- * its menu the row the cursor is on. */
-const char *title_step(void) {
-	return S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
+/* The title in the state's words (capture.c), a fact a line: the step it
+ * is on, the row its menu's cursor is on, the saved run CONTINUE takes
+ * (its layer, 0 none), NEW GAME's question's answer under the cursor, what
+ * the profile holds (its runs, best layer and marks), and the setup's own
+ * lines (the summary's are title_summary_describe's). Reads only. */
+void title_describe(FILE *f) {
+	const char *step = S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
 		: !S.menu ? "opening" : S.confirm ? "confirm" : "menu";
-}
-
-const char *title_cursor(void) {
-	return S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "other";
+	const char *cursor = S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "options";
+	fprintf(f, "title %s\ncursor %s\nsaved %d\n", step, cursor, S.has_save ? (S.saved_depth ? S.saved_depth : -1) : 0);
+	if (S.confirm) fprintf(f, "asks %s\n", S.t - S.asked < (int)(strlen(ASK_FIRST) + strlen(S.ask)) ? "typing" : S.yes ? "yes" : "no");
+	fprintf(f, "runs %d\nbest %d\nmarks %03x\n", profile.runs, profile.best_depth, profile.marks);
+	title_setup_describe(f);
 }
 
 /* NEW GAME or CONTINUE chosen: the jack-in sound, and away */
@@ -541,23 +545,45 @@ static void render(void) {
  * in the picture's top right corner a moment after the title comes up, in
  * the map's "Run saved" box, and gone (nothing had said whether Team
  * Colonel was found) */
-static void found_draw(int x0, int y0) {
-	int t = entries == 1 ? S.t - FOUND_AT : 0, n = 0;
-	char s[64] = "";
+/* (its words into s, and the title's frame since it came up into *t: 0
+ * or less before it shows, FOUND_LEN on after; false where no other
+ * game's ROM is read, s then "") */
+static bool found_words(char *s, size_t len, int *t) {
+	int n = 0;
+	s[0] = 0;
+	*t = entries == 1 ? S.t - FOUND_AT : 0;
 	for (int i = 0; i < XROM_COUNT; ++i)
 		if (XR[i].data && xrom_offered(i)) {
 			size_t m = strlen(s);
-			snprintf(s + m, sizeof s - m, "%s%s", m ? " + " : "", XR[i].layout->tag);
+			snprintf(s + m, len - m, "%s%s", m ? " + " : "", XR[i].layout->tag);
 			++n;
 		}
-	if (t <= 0 || t >= FOUND_LEN || !s[0]) return;
+	if (!s[0]) return false;
 	/* (and what it lends: "BN5 found" told a playtester nothing of his
 	 * run, session 62; its areas, towns, songs and Navis join the net's,
 	 * docs/multirom/) */
 	size_t m = strlen(s);
 	/* (two or more: what each lends is not one Net, and the line must fit the picture's width) */
-	snprintf(s + m, sizeof s - m, n > 1 ? " found: both join ours" : " found: its Net joins ours");
+	snprintf(s + m, len - m, n > 1 ? " found: both join ours" : " found: its Net joins ours");
+	return true;
+}
+
+static void found_draw(int x0, int y0) {
+	char s[64];
+	int t;
+	if (!found_words(s, sizeof s, &t) || t <= 0 || t >= FOUND_LEN) return;
 	cinema_note_box(x0, y0, s, t, FOUND_LEN);
+}
+
+/* The note in the state's words (capture.c; tests/scenarios' xrom_*):
+ * `found` what it says, "nothing" where BN6's ROM stands alone, and
+ * `foundnote` whether it is up now, due (the title's first frames), gone,
+ * or none */
+void title_found_describe(FILE *f) {
+	char s[64];
+	int t;
+	bool any = found_words(s, sizeof s, &t);
+	fprintf(f, "found %s\nfoundnote %s\n", any ? s : "nothing", !any ? "none" : t <= 0 ? (entries == 1 ? "due" : "gone") : t < FOUND_LEN ? "up" : "gone");
 }
 
 /* the top: the marks and the note over them (never over a run's summary,

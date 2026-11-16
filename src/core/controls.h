@@ -10,6 +10,7 @@
 #ifndef CW_CONTROLS_H
 #define CW_CONTROLS_H
 
+#include <stdio.h>
 #include <SDL.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,6 +21,14 @@ bool controls_shown(void);
  * the scene's: drawing changes nothing). */
 void controls_update(void);
 void controls_draw(void);
+/* The controls screen in a headless run's state where it is up, a line
+ * each: its tab (`device` controller or keyboard), the row under the
+ * cursor (`button` preset, dpad, a, b, l, r, start, select, fast, or the
+ * bottom line's setall, defaults, done), its slot (`slot` main or also)
+ * and what is on it (`bound`, "-" none), the box over the rows (`asking`
+ * none, slot, dpad, all, or keep for "press the new A"), and the word just
+ * said (`said`). Reads only. */
+void controls_describe(FILE *f);
 /* Escape or a phone's Back: its own back (true), else nothing of it. */
 bool controls_back(void);
 /* A finger while it is open (SDL_FINGERDOWN or UP), at canvas pixel (x, y). */

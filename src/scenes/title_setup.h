@@ -10,6 +10,7 @@
 #define CW_TITLE_SETUP_H
 
 #include <stdbool.h>
+#include <stdio.h>
 
 /* The choices a run starts with where no setup was shown: a short net,
  * BN6's folder, nothing else */
@@ -22,6 +23,13 @@ bool title_setup_shown(void);
  * profile, the setup closed); B closes it */
 bool title_setup_update(void);
 void title_setup_draw(int x0, int y0);
+/* The setup in a headless run's state where it is up, a line each: its
+ * page (`tab` run, help, extras), the row under the cursor (`row` net,
+ * folder, cross, threat, a helper's or an extra's number, foot for NEXT
+ * or JACK IN!), the choice as it stands (meta_setup_describe's lines) and
+ * what the profile has open (`endless` open or shut, `folders` and
+ * `crosses` open, `threatmax`, `helpersshown`). Reads only. */
+void title_setup_describe(FILE *f);
 /* The run just made given the choices jacked in with (run_setup, run_setup_extras) */
 void title_setup_apply(void);
 

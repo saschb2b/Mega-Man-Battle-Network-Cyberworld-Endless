@@ -42,6 +42,12 @@ bool launcher_start(int mode, const char *rom_dir, void (*begin)(void));
 bool launcher_here(void);
 /* ... over the title, to add BN5 or see the ROMs (its R); false where there is none */
 bool launcher_open(void);
+/* The ROMs in a headless run's state: those read (`roms` bn6 bn5 bn4,
+ * none), and where the ROMs screen is up the cartridges it shows
+ * (`cartridges`), the piece under the cursor (`romfocus` bn6, bn5, bn4,
+ * alt for the second button, play) and the note under it (`romnote` its
+ * words, `romnotekind` info, good or bad). Reads only. */
+void launcher_describe(FILE *f);
 extern bool emu_resume_requested; /* scene_emu continues the saved run */
 /* A quit (or iOS's background) in the game: the run kept where MegaMan
  * stands, on a won battle's way back the game run on to him free first
@@ -63,15 +69,18 @@ bool emu_saved_home(uint32_t seed, int depth);
 extern bool title_summary;          /* the title opens on the finished run's summary */
 extern bool title_setup;            /* ... or on the setup after NEW GAME (--scene setup, for a capture) */
 extern bool title_menu;             /* ... or on its menu (back from SAVES) */
-/* ... the title's step in a word for a headless run's state (start, opening,
- * menu, confirm, setup, summary, leaving), and its menu's row (new,
- * continue, other): scene_title.c */
-const char *title_step(void);
-const char *title_cursor(void);
+/* ... the title in a headless run's state, a fact a line: its step (start,
+ * opening, menu, confirm, setup, summary, leaving), its menu's row (new,
+ * continue, options), the saved run's layer, the profile's runs, best and
+ * marks, and the setup's lines where it is up: scene_title.c */
+void title_describe(FILE *f);
 /* ... and while the finished run's summary shows (title_summary.c): its
  * screen, how the run ended and where, its rows, the battle data a loss
  * gave, what it opened */
 void title_summary_describe(FILE *f);
+/* The title's note of the other games' ROMs read ("BN5 found: its Net joins ours"), in the state's words: `found` and
+ * `foundnote` (scene_title.c) */
+void title_found_describe(FILE *f);
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
 extern char title_cause_short[40]; /* ... the same with the area's short name, "" for none */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */

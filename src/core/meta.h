@@ -5,6 +5,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 enum { FOLDER_STANDARD, FOLDER_BLADE, FOLDER_STORM, FOLDER_ZCANON, FOLDER_BUSTING, FOLDER_LEAN, FOLDER_COUNT };
 
@@ -30,6 +31,13 @@ void meta_guardian_deleted(void);
  * once that navi has been deleted as a guardian, in any run. */
 bool meta_cross_open(int navi);
 bool meta_endless_open(void);
+/* A run's setup in a headless run's state, a line each: `net` short or
+ * endless, `startfolder` its folder's name, `startcross` the Cross brought
+ * (none), `threat` its rung, `helpers` and `extrasoff` their bits. The
+ * JACK-IN SETUP says its choice so and a run says what it began with, so a
+ * scenario keeps the one and finds the other the same
+ * (docs/devtools/scenarios.md). Reads only. */
+void meta_setup_describe(FILE *f, int net, int folder, int cross, int threat, int helpers, int extras_off);
 /* The highest threat rung a new run may take. */
 int meta_threat_open(void);
 /* What rung `rung` (1-THREAT_MAX) adds, a line. */
