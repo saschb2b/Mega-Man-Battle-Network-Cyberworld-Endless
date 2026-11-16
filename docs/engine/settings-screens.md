@@ -3,7 +3,7 @@ type: Research
 title: "Settings screens elsewhere: what Options can take"
 description: "How well-regarded games, the accessibility guidelines, emulator frontends and retro collections show a setting's effect while it is chosen (live preview, a still frame behind the menu, a picture per setting, a one-press look), describe, confirm, reset and lay out their settings, researched on 2 November 2026 for Options' Display, what of it fits a PET panel at 240x160, and what Options was rebuilt with: pages on L and R, START's defaults, and BN6's own battle looping beside Display's lines."
 tags: [engine, ui, options, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:30:00Z }
 sources:
   - id: xag
     resource: "https://learn.microsoft.com/en-us/gaming/accessibility/guidelines"
