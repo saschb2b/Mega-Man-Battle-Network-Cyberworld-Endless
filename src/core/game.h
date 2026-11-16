@@ -78,6 +78,9 @@ void title_describe(FILE *f);
  * screen, how the run ended and where, its rows, the battle data a loss
  * gave, what it opened */
 void title_summary_describe(FILE *f);
+/* The title's note of the other games' ROMs read ("BN5 found: its Net joins ours"), in the state's words: `found` and
+ * `foundnote` (scene_title.c) */
+void title_found_describe(FILE *f);
 extern char title_cause[48];       /* ... where MegaMan was deleted ("by DiveMan in Sky HP") */
 extern char title_cause_short[40]; /* ... the same with the area's short name, "" for none */
 extern char title_learned[24];     /* ... the guardian whose battle data that first fight gave, "" for none */

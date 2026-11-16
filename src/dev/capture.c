@@ -222,6 +222,7 @@ static void write_state(const char *path) {
 	/* (the title's step and its menu's row: a scenario's way through it) */
 	if (scene_current() == &scene_title) title_describe(f);
 	title_summary_describe(f);
+	if (scene_current() == &scene_title) title_found_describe(f);   /* (the other games' ROMs found, its note) */
 	screens_describe(f);
 	fclose(f);
 }

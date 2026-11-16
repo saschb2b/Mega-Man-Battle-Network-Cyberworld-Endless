@@ -421,6 +421,81 @@ was held back before them and a quit under them lost the battle
 (`liberation-board/continue/under-the-words`; the words now wait for
 `talk_due_now()`, as the director's other talks do).
 
+## The extras
+
+The extras' scenarios (`extras_*.py`: the Glitch layer, the tournament,
+the Virus Battler, the Undernet's door and the Secret Area, DarkChips,
+and each of them switched off) reach what they play so, with the steps
+there are:
+
+- **A talk** is opened by the start's `--talk NAME:FRAME`
+  ([a capture's options](headless-shot.md): `glitch`, `copy`, `battler`,
+  `undernet`, `gate`, `dark`; `zenny`, `bugfrag` and `scrtdata` give what
+  a talk wants), after the arrival's words are paged, and waited for with
+  `('until', 'chat=open')`. A later talk on the layer is a second entry
+  (`copy:800,copy:2600`).
+- **Its answer.** The run's own risky questions start on No, so
+  `('repeat', 'press LEFT; press A; wait 20', COND)` answers Yes and
+  `press A` alone No, each until the state says what the answer did
+  (`sidelayer=glitch`, `series=on`, `flame=taken`). The golden gate's
+  starts on Yes until Bass is known behind it.
+- **A battle won** by the dev menu's fifth row ([Dev menu](dev-menu.md)),
+  once the Custom screen's OK has started the fight (`custom>0`); the
+  Glitch copy's forms one opening each. The Virus Battler's rounds are
+  fought by the viruses, the VIRUS LIST read from `vbscreen`, `vbpicked`
+  and `vbplaced`.
+- **The walk to an exit pad** is the autopilot's: the run quit and
+  continued (`('restart', 'CYBERWORLD_AUTOPILOT=1 --scene title --dev
+  quiet')`, CONTINUE), which also proves the side layer comes back from
+  a quit as it was left.
+- **A Glitch layer's data taken** are BN6's flags set by the `flags`
+  step (`MAPSLOT_MD_FLAG`, 0x1400 on), as taking them sets them.
+- **The tournament** needs BN4's ROM (`NEEDS = ('bn4',)`), whose screen
+  shows every bracket; its scenarios switch the older nets off, so its
+  Navis are BN6's.
+
+| The state says | Where | Written by |
+| --- | --- | --- |
+| `sidelayer none`, `undernet`, `secret`, `back` or `glitch`; `darkwarp here` or `none`, `goldgate here` or `none` | a layer | `extras_describe.c`, which calls the four below |
+| `glitchwarp here` or `none`; on a Glitch layer `glitchstage N` (0-4), `glitchshare N` (its data taken, in hundredths), `glitchsaid N`, `glitchlooks N`, `glitchflips N`, `glitchfx none`, `tear`, `slip`, `turn` or `flip`, `glitchlook own` or the look's number, `glitchbattles own`, `mixed` or `deeper`, `glitched on` or `settled`, `copy waiting`, `fighting`, `deleted` (its pick waits) or `taken` | a layer | `glitch_describe`, `glitch.c` |
+| `bracket none`, `ahead`, `door` (MegaMan stepped in: its one save), `screen` (BN4's, off the map), `round` or `won`; `round N` (3 the final, 4 all won), `roundfoe NAME`, `roundchips N` (the two rounds' Navi chips held) | a layer | `boss_bracket_describe`, `boss.c` |
+| `btlrcard held` or `none`, `virusdata N`; `battler N` or `none`, `stake N`, `vbrounds N`, `series none`, `on` or `over`, `vbround N`, `vbwins N`, `pot N`, `vblast none`, `won`, `lost` or `draw`, `vbprize open` or `taken`; after a round won `potchoice up`; in a round `vbscreen list`, `ok`, `placing`, `confirm` or `fight`, `vbpicked N`, `vbplaced N` | a layer | `battler_describe`, `director_battler.c` |
+| `flame none`, `burning` or `taken`, `flamechip NAME`, `flamenet bn6` or `bn5`; `darkchips N` (kinds the run holds), `darkpack N` (their chips in the Pack and folder), `basehp N` (the max HP a DarkChip's price lowers), `darktaught none`, or `flame`, `price`, `bn5` joined by `+` (the profile's) | a layer | `dark_describe`, `director_dark.c` |
+
+They found one bug at once: a Glitch layer whose copy was deleted
+glitched again after a quit and CONTINUE, its flips and stronger
+battles back for a copy that was gone (the settled state was the
+session's alone; BN6's flag says it now, `glitch_update`).
+
+## The older nets in the state
+
+The `xrom_*.py` scenarios play with BN5's and BN4's ROMs beside BN6's
+(`NEEDS`) and read these, from `older_describe`
+(`src/director/older_describe.c`, one call in `director_describe`) but
+the title's:
+
+| Lines | Say |
+| --- | --- |
+| `acts bn6 bn5 bn4 ...`, `olderacts N`, `olderguards N`, `soulsheld XX` | the run, at home too: each act's area by its game in the run's order (three in the short net), how many are an older net's, how many end at one of its Navis, BN5's Souls held (hex, a bit each from Colonel's) |
+| `areafrom bn6`, `bn5` or `bn4`; `guardianfrom` the same | a layer: whose area it is drawn as, whose Navi guards it |
+| `guardianstands ANIM shown` or `unseen`; one of BN4's `front-left`, `front-right`, `back-left` or `back-right` | his NPC's animation on the map and whether his sprite draws it; a BN4 Navi's the diagonal it shows him in (BN4 draws four, by its layout of pairs) |
+| `copyform NAVI`, `copystands ANIM` | a Glitch layer's copy: its first body, its NPC's animation |
+| `enemyhp N`, `enemynames CanGard+Mettaur`, `olderfoes N`, `olderrecord 811DE10` or `none` | a battle: its enemies' HP together, their names as the battle shows them (`KnightMn`, `GutsM`), how many are moved in from BN5 or BN4, and BN5's own record it was rolled from (how many stand is the tally's `foes` and `down`) |
+| `drawn 204L 204L ...`, `handpicks N`; then `hand N`, `nextchip ID`, `nextchipfrom bn6`, `bn5` or `bn4`, `nextpower N` | the Custom screen's hand (id and code) and the chips picked; after OK the chips left to use, the next one, its game and its power |
+| `unite none`, `grey`, `lit` or `chosen`; `unitesoul N`; `united N`, `unitedturns N`, `soulsused X` | where BN5's Souls stand in the engine: UNITE under OK and the Soul the last chip picked lights; the Soul MegaMan is united with (BN5's number, 0 none), its turns left, the Souls used this battle |
+| `found BN5 + BN4 found: both join ours` or `nothing`; `foundnote due`, `up`, `gone` or `none` | the title (`title_found_describe`, `scene_title.c`): its note of the other games' ROMs, in its own words, and whether it shows |
+
+A battle won by `--dev onehit` is over and back on the map inside one
+look of an `until` (60 frames): its end is read from `lastbattle=won`,
+which stays. `screen=battle` comes before the foes stand: a course waits
+for `foes>=1` before it reads a battle's lines. An A pressed while BATTLE
+START! shows is lost, so a chip is used once `custom>=20` (the gauge a
+fifth full), with `('repeat', 'press A; wait 30', 'hand=0')`, which stops
+before a buster shot; L on an open Custom screen is a try to run, pressed
+once. The `chip` step wants a code the chip's record has (`chip 204 L`):
+with another the hand holds chip 389, power 0. `--dev god` does not save
+MegaMan from one blow of more than his HP: `hp=2000` beside it.
+
 ## The screens' lines
 
 The engine's own screens say themselves in the state, each from a

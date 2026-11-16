@@ -199,7 +199,13 @@ rows joined it, which the engine pays as the stand-in until they play).
 - `src/library/`: the screen (`library.c`), its picture (`library_draw.c`)
   and labels (`library_text.c`). `pet.c`'s hook on the PET's input takes A
   on the Library row, as on Comm and Save; the game holds under the
-  screen as under the Jukebox ([The PET](../pet.md), Library).
+  screen as under the Jukebox ([The PET](../pet.md), Library). As it
+  opens, the chips the game gave since the run's last save are counted
+  first (`library_from_game`): a chip to id 511 waits in BN6's own
+  Library flags for a save, one past 511 is told at once, and a page
+  opened right after a find left the first out and held the second
+  (found by [the scenarios](../../devtools/scenarios.md),
+  `tests/scenarios/xrom_library.py`, 16 November 2026).
 - `--dev library=N` puts every Nth chip id in the profile's Library at the
   start (`devtools_veteran`), for its pictures: the screen itself reads no
   dev switch ([the layers](../../code/layers.md)).

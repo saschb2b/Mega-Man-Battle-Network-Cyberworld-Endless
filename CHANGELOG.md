@@ -42,6 +42,18 @@
 - **Fixed: START on the team's pick opened the PET.** Taking the team a
   dark layer offered with START, the button went on to the game and
   opened the PET over Lan's briefing.
+- **Fixed: the Library missed a chip you had just found.** The PET's
+  Library counted a new chip only from the run's next save: one won in
+  a battle or taken from a Mystery Data was not on its page when you
+  opened the Library right after, and stood there a layer later. Chips
+  of BN4's were counted at once, the rest not. The Library now counts
+  what you hold the moment it opens.
+
+- **Fixed: a Glitch layer glitching again after a quit.** With the copy
+  at its heart deleted the layer settles: its own look back, its battles
+  its own. A quit and CONTINUE on that layer brought the glitch back, its
+  flips and its stronger viruses with it, though the copy was gone. It
+  stays settled now.
 - **Fixed: LCD 3x forgotten at every start.** Options' Display's LCD 3x
   was off again each time the game started, and every turn of it added
   a line to `settings.ini`: a setting's name was read by its letters

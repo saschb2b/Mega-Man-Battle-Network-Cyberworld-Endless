@@ -74,6 +74,14 @@ int xguardian_bn4_stand(int navi, int face) {
 	return k >= 0 ? proved[k].views[diagonal[face & 7]] : face & 7;
 }
 
+int xguardian_bn4_view(int navi, int anim) {
+	int k = line_of(navi);
+	if (k < 0 || anim < 0) return -1;
+	/* (a sprite of four views alone holds the diagonals in order; the others a pair each, eight) */
+	if (proved[k].views[1] == 1) return anim < 4 ? anim : -1;
+	return anim < 8 ? anim / 2 : -1;
+}
+
 int xguardian_bn4_kin(int navi) {
 	int k = line_of(navi);
 	return k >= 0 ? proved[k].kin : 0;

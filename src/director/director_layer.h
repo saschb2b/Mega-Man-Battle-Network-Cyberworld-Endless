@@ -11,6 +11,11 @@
 
 void begin_area(bool new_act);
 void map_label(void);
+/* (extras_describe.c) What the layer holds of the run's extras, in a
+ * state's words, for director_describe: the side layer and the ways off
+ * the run's own, the Glitch layer, the tournament's bracket, the Virus
+ * Battler, DarkChips (docs/devtools/scenarios.md, The extras) */
+void extras_describe(FILE *f);
 bool guardian_heard(void);
 void set_encounter(const Encounter *e, bool force);
 void lock_run(void);

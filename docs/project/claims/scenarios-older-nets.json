@@ -1,9 +1,0 @@
-{
-  "branch": "scenarios-older-nets",
-  "what": "Scenarios (tests/scenarios, docs/devtools/scenarios.md) for the older nets, BN5's and BN4's ROMs beside BN6's: their areas, viruses, guardians, chips and Souls in a run",
-  "takes": {},
-  "units": [
-    "scenarios: older-nets"
-  ],
-  "run": false
-}
