@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-16
+* **Update**: devtools/scenarios.md (A quit at any frame: `build.py scenarios --fuzz`, runs quit at frames a seeded dice names and CONTINUEd, what a CONTINUE brings back by the situation the quit found and what it may not, the state's `quit`, `saves` and `battle` lines, what it found), engine/emulation/layer.md (a quit as a layer's exit is taken runs the game on to the next layer), code/tools.md (`tools/scenarios_fuzz.py`'s row), code/director.md (the quit's run-on, a layer's exit too).
 * **Update**: engine/settings-screens.md (Return to title: Options' Game page's line in a run, its question and what it keeps), engine/saves.md (a run's way to SAVES), code/core.md (Options' Game page), research/sources.md (Learned from players: AlicafeZ's request for a way to the menu), GUIDE.md (Back to the title).
 * **Update**: devtools/scenarios.md (`KNOWN`: a scenario of a bug not fixed yet; how several sessions add scenarios side by side), code/tests.md (`tests/scenarios/` no longer lists its files).
 * **Add**: devtools/scenarios.md (the scenarios: a course of play kept as a test, `build.py scenarios`), devtools/index.md (its line), code/tools.md (`tools/scenarios.py`), code/tests.md (`tests/scenarios/`), devtools/agents-tools.md (the state's `turn`, `rules`, `title` and `cursor` lines; the `layer` and `battle` routes pick the opening gift, `pet/options` on `options-display`).
