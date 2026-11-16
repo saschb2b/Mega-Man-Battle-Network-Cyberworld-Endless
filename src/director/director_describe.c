@@ -162,6 +162,16 @@ static void battle_describe(FILE *f) {
 	}
 }
 
+/* A battle's phase in a word: `won` from its RESULT on, which a quit
+ * keeps, and under way before it; `start` before the Custom screen first
+ * opens, and again as the battle fades out, BN6's phase gone back
+ * (tools/scenarios_fuzz.py remembers a `won`) */
+static const char *battle_word(void) {
+	int phase = emu_read8(BN6_BATTLE_PHASE);
+	return phase < BN6_PHASE_CUSTOM ? "start" : phase == BN6_PHASE_CUSTOM ? "custom" : phase < BN6_PHASE_RESULTS ? "fight" :
+		emu_read8(BN6_BATTLE_RESULT) == BN6_RESULT_WON ? "won" : "over";
+}
+
 /* The arrow's heal first, the shortest walk there since L named it, or
  * MegaMan turned away from it (heal_turn_watch) */
 static void describe_heal(FILE *f) {
@@ -254,7 +264,9 @@ void director_describe(FILE *f) {
 	if (sub == BN6_SUB_BATTLE) {
 		fprintf(f, "custom gauge %d%%\n", emu_read16(BN6_CUSTOM_GAUGE) * 100 / 0x4000);
 		lib_battle_describe(f);
+		fprintf(f, "battle %s\n", battle_word());
 	}
+	director_quit_describe(f);
 	describe_turns(f);
 	battle_describe(f);
 	/* (for the developer reproducing a playtest: where Lan or MegaMan is) */

@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T17:10:00Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:30:00Z }
 ---
 
 # The player's guide
@@ -538,9 +538,15 @@ Back (Minus) is Select; holding Back and Start for a second, twice, quits,
 whatever they are set to. Two Joy-Cons are one controller, on a phone too;
 one alone is a small one held sideways.
 
+**Back to the title:** in a run, Options' Game page ends with **Return to
+title**. It asks first and says where the run is saved (where MegaMan
+stands when he is free to move, as a quit saves it), then shows the
+title's menu: **CONTINUE** takes the run up there, and SAVES and the ROMs
+screen are a button away. The Net Square has its own Leave instead.
+
 **Soft reset:** **A+B+Select+Start** together, as mapped, returns to the
-title, in a battle too. **CONTINUE** takes the run up at its last
-checkpoint; what came after it is lost.
+title too, in a battle as well, and saves nothing: **CONTINUE** takes the
+run up at its last checkpoint; what came after it is lost.
 
 **Options** holds the game's settings, a press away wherever you are: the
 title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select
@@ -553,9 +559,9 @@ own, and a tap on a tab opens it: **Display**, the picture ([Screen](#screen)); 
 music's and the sound effects' levels, the output and the sound ([Sound](#sound)); and **Game**,
 with **Controls** (the controls screen, not on the 3DS, whose buttons are
 its own), **Touch controls** where there is a touch screen (below),
-**Fast forward**'s speed ([Fast forward](#fast-forward)) and
+**Fast forward**'s speed ([Fast forward](#fast-forward)),
 **Statistics**, your answer to the statistics' question, where the game
-can send them. Left and Right turn a line's value, kept at once; B
+can send them, and in a run **Return to title** (above). Left and Right turn a line's value, kept at once; B
 leaves (on a phone, the touch controls' B), and Options opens again on
 the page and line you left. **START** (or a tap on START:DEFAULT) puts a
 page's lines back as they came, after a Yes: Fullscreen, Controls and

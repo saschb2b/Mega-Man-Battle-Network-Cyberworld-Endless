@@ -3,7 +3,7 @@ type: Research
 title: "Settings screens elsewhere: what Options can take"
 description: "How well-regarded games, the accessibility guidelines, emulator frontends and retro collections show a setting's effect while it is chosen (live preview, a still frame behind the menu, a picture per setting, a one-press look), describe, confirm, reset and lay out their settings, researched on 2 November 2026 for Options' Display, what of it fits a PET panel at 240x160, and what Options was rebuilt with: pages on L and R, START's defaults, and BN6's own battle looping beside Display's lines."
 tags: [engine, ui, options, research]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-02T01:22:33Z }
+generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T13:30:00Z }
 sources:
   - id: xag
     resource: "https://learn.microsoft.com/en-us/gaming/accessibility/guidelines"
@@ -272,3 +272,41 @@ shows its impact. Built so ([The PET's screens](ui.md), Ours):
   as KeyItem's, three lines at most (the owner's call: two frames side by
   side read below the rest's finish), the Display page's notes cut to
   fit.
+
+## Return to title
+
+In a run, the Game page's last line is Return to title (`LINE_TITLE`,
+`src/core/options.c`): the one line of Options that is a way out, not a
+setting. A player moving between a Switch and a phone asked for "a button
+for me to exit to the menu", as he closed and reopened the game each time
+to reach SAVES (AlicafeZ, GitHub discussion 5, 16 November 2026;
+[Learned from players](../research/sources.md#learned-from-players)).
+The way there was (the soft reset, issue #113), but no screen named it,
+four buttons at once are hard on a touch screen, and it keeps nothing
+since the last checkpoint.
+
+The game-design pass (16 November 2026): a usability fault, not one of
+the run's ("I didn't know I could"), on the session's bracket, where
+[SAVES](saves.md) and the cloud's pull live; the patterns are suspend
+without penalty (leaving costs nothing where MegaMan is free) and
+friction matched to stakes (one question, the cursor on No, which says
+what is kept). So:
+
+- A asks "Return to the title?" in the information box as START's
+  question does, BN6's Yes and No, the cursor on No, with the quit
+  prompt's own line on where the run goes on from ("Your run is saved
+  right here", "Run saved before the PET", or the last checkpoint's in a
+  battle, where the touch controls' menu opens Options too). Before the
+  first layer there is no run to save, and the question stands alone.
+- Yes keeps the run as a quit keeps it (`emu_to_title` in
+  `src/emu/scene_emu.c`: `emu_keep_run`, then the director stopped as the
+  soft reset stops it) and shows the title on its menu, the cursor on
+  CONTINUE, the line of keys by it naming SAVES and the ROMs screen. The
+  saves just written go to the cloud three seconds later, as any.
+- Not in the Net Square (a visit, its NetBattle or its wait for the
+  link), whose own Leave is the way out, nor on the title, where it
+  would lead nowhere. It is no setting: START's defaults leave it alone.
+
+Checked in play (headless, 16 November 2026): on a layer, MegaMan walked
+off the arrival's panel, then the PET's Options, Return to title, Yes,
+and CONTINUE: he stands where he stood, not at the layer's start.
