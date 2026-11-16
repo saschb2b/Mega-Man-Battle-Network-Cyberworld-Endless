@@ -201,6 +201,11 @@ SCENES = [
     # of seed 3, the exit pad's far corner cut off before #582 and whole after it: 8fa8801f3 against
     # 3761e87f2, `before_after.py 8fa8801f3 --old-label before --new-ref 3761e87f2 --new after robot-hole`)
     ('robot-hole', build.n22_walk(11, 3), WEAK, 1440),
+    # (0.22.1's, against 0.22.0: a dark layer's board with BN6's ROM alone, seed 5's fifth layer, Lan's
+    # briefing paged and MegaMan placed beside a dark panel, facing it: clean floor and a guardian on it
+    # before, the dark panels, the lit one he faces and the DarkHole after)
+    ('dark-panels', ['--scene', 'emu', '--seed', '5', '--run-depth', '5', '--dev', 'dark,quiet', '--input',
+                     '150:,' + '6:A,20:,' * 30 + '60:,0:place 20 12 5,200:'], {}, 1080),
 ]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS
