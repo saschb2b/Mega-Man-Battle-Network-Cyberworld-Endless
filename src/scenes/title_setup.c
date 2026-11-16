@@ -109,9 +109,24 @@ void title_setup_reset(void) { S.c = (SetupChoice){ .net = RUN_SHORT, .folder = 
 
 bool title_setup_shown(void) { return S.shown; }
 
+/* the choice is the next setup's to start from (the profile's, saved by
+ * the caller) */
+static void remember(void) {
+	profile.last_net = (uint8_t)S.c.net;
+	profile.last_folder = (uint8_t)S.c.folder;
+	profile.last_cross = (uint8_t)S.c.cross;
+	profile.last_threat = (uint8_t)S.c.threat;
+	profile.last_helpers = (uint8_t)S.c.helpers;
+	profile.last_extras_off = (uint16_t)S.c.extras_off;
+}
+
+/* (remembered here too: a first run jacks in with no setup, and its short
+ * net was never written, so the setup a first win opened started on the
+ * endless net, the profile's 0; meta_run_begun saves the profile next) */
 void title_setup_apply(void) {
 	run_setup(S.c.net, S.c.folder, S.c.threat, S.c.helpers, S.c.cross);
 	run_setup_extras(S.c.extras_off);
+	remember();
 }
 
 void title_setup_open(void) {
@@ -168,12 +183,7 @@ static void turn(int row, int d) {
 
 /* jacking in with these: they are the next setup's to start from */
 static bool go(void) {
-	profile.last_net = (uint8_t)S.c.net;
-	profile.last_folder = (uint8_t)S.c.folder;
-	profile.last_cross = (uint8_t)S.c.cross;
-	profile.last_threat = (uint8_t)S.c.threat;
-	profile.last_helpers = (uint8_t)S.c.helpers;
-	profile.last_extras_off = (uint16_t)S.c.extras_off;
+	remember();
 	profile.setup_new = 0;
 	profile_save();
 	S.shown = false;
@@ -352,6 +362,20 @@ static void page_draw(int x0, int y0) {
 		if (i == at) look_cursor(x0 + CURSOR_X, y + 2);
 	}
 	go_draw(x0, y0, at >= n);
+}
+
+void title_setup_describe(FILE *f) {
+	if (!S.shown) return;
+	static const char *const tabs[TABS] = { "run", "help", "extras" }, *const rows[RUN_ROWS] = { "net", "folder", "cross", "threat" };
+	int row = row_at(), folders = 0;
+	for (int k = 0; k < FOLDER_COUNT; ++k) folders += meta_folder_open(k);
+	fprintf(f, "tab %s\n", tabs[S.tab]);
+	if (row < 0) fprintf(f, "row foot\n");
+	else if (S.tab == TAB_RUN) fprintf(f, "row %s\n", rows[row]);
+	else fprintf(f, "row %d\n", row);
+	meta_setup_describe(f, S.c.net, S.c.folder, S.c.cross, S.c.threat, S.c.helpers, S.c.extras_off);
+	fprintf(f, "endless %s\nfolders %d\ncrosses %d\nthreatmax %d\nhelpersshown %d\n", meta_endless_open() ? "open" : "shut", folders,
+		crosses_open(), meta_threat_open(), meta_helpers_shown());
 }
 
 void title_setup_draw(int x0, int y0) {

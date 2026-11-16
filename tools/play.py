@@ -47,7 +47,9 @@ stuck NAME (the run saved with BN6 holding MegaMan so: fade,
 chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
 its CONTINUE lets him go, issue #23), dump NAME (the video memory into
 NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
-tools/romlab/labtrace.py). NAME/bin.pin keeps the session's
+tools/romlab/labtrace.py), drop PATH (a file dropped on the game's
+window, as a player drops one: a ROM on the ROMs screen, a .cwsave on
+the title or SAVES). NAME/bin.pin keeps the session's
 build across starts.
 BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT);
 pad.NAME holds a virtual controller's input by SDL's name (pad.x, pad.-lefty;
@@ -76,7 +78,7 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST'}   # (FAST: fast forward's button, BTN_FAST)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'dump', 'second', 'stuck', 'drop')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -139,8 +141,11 @@ def steps(commands):
                 out.append(('stuck', args[0]))
             elif op == 'dump':
                 out.append(('dump', args[0]))
+            elif op == 'drop':
+                # (a file dropped on the game's window: a ROM on the ROMs screen, a .cwsave on the title)
+                out.append(('drop', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, stuck, dump)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, stuck, dump, drop)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -341,6 +346,8 @@ def send(h, seq, record=None):
             items.append(f'stuck {s[1]}')
         elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross'):
             items.append(f'{s[0]} {s[1]}')
+        elif s[0] == 'drop':
+            items.append(f'drop {short(s[1]) if os.path.isabs(s[1]) else s[1]}')
         elif s[0] == 'second':
             seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
             items.append(f'second {short(seconds[-1])}')

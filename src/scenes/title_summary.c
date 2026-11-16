@@ -151,6 +151,16 @@ static void opened_draw(int x0, int y0, SDL_Rect f) {
 	look_wrapped(next, r.x + 6, r.y + 1, r.w - 12, NOTE_LINES, LOOK_INK, LOOK_INK_SHADE);
 }
 
+void title_summary_describe(FILE *f, bool shown) {
+	if (!shown) return;
+	const char *open[OPENED_ROWS];
+	int n = meta_unlocked(open, OPENED_ROWS);
+	fprintf(f, "summary %s\nending %s\nreached %d\nnewbest %s\nopened", U.records ? "records" : "result", title_won ? "won" : "deleted",
+		run_reached(), title_new_best ? "yes" : "no");
+	for (int i = 0; i < n; ++i) fprintf(f, "%s %s", i ? "," : "", open[i]);
+	fprintf(f, "%s\n", n ? "" : " none");
+}
+
 void title_summary_draw(int x0, int y0) {
 	if (!U.records) {
 		pet_panel_draw(x0, y0, summary_text(SM_RESULT));

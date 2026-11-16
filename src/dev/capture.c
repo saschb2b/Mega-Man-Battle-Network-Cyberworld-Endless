@@ -26,9 +26,11 @@
 #include "netpass.h"
 #include "netpass_screen.h"
 #include "online_chat.h"
+#include "options.h"
 #include "padmap.h"
 #include "pads.h"
 #include "platform.h"
+#include "saves.h"
 #include "screen_name.h"
 #include "soulproxy.h"
 #include "square_words.h"
@@ -39,7 +41,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], drop[160]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
 /* (the steps taken from the heap by the first script, as only headless
  * tests and remote play have one: a megabyte no game holds otherwise) */
 #define SCRIPT_MAX 1024
@@ -95,6 +97,9 @@ static bool text_step(const char *tok, InputStep *s) {
 	else if (!strncmp(tok, "trade ", 6)) snprintf(s->trade, sizeof s->trade, "%s", tok + 6);
 	/* (the wait for a dropped link over the game: reconnect_preview.c) */
 	else if (!strncmp(tok, "reconnect ", 10)) snprintf(s->reconnect, sizeof s->reconnect, "%s", tok + 10);
+	/* (a file dropped on the window, through SDL as a player's is: the ROMs
+	 * screen's a ROM, the title's and SAVES' a .cwsave) */
+	else if (!strncmp(tok, "drop ", 5)) snprintf(s->drop, sizeof s->drop, "%s", tok + 5);
 	/* (an emote sent in the Net Square, as the strip sends it: online_chat_emote) */
 	else if (!strncmp(tok, "emote ", 6)) s->emote = 1 + (int)strtol(tok + 6, NULL, 0);
 	/* (a tap on the second screen at its pixel, --second-size's or the 3DS's: the Square's palette) */
@@ -106,7 +111,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0];
+		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0] || s->drop[0];
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -210,7 +215,12 @@ static void write_state(const char *path) {
 	fprintf(f, "screen %s\n", screen_name());
 	if (scene_current() == &scene_emu) director_describe(f);
 	/* (the title's step and its menu's row: a scenario's way through it) */
-	if (scene_current() == &scene_title) fprintf(f, "title %s\ncursor %s\n", title_step(), title_cursor());
+	if (scene_current() == &scene_title) title_describe(f);
+	/* (the engine's own screens, each its own lines where it is up:
+	 * docs/devtools/scenarios.md) */
+	options_describe(f);
+	saves_describe(f);
+	launcher_describe(f);
 	fclose(f);
 }
 
@@ -244,6 +254,14 @@ static void emu_steps(const InputStep *s) {
 	if (s->stap[2]) platform_second_tap_at(s->stap[0], s->stap[1], 0, 0);
 }
 
+/* A file dropped on the window, as SDL says a player's: the event's path
+ * is SDL's to free (platform.c does) */
+static void drop_file(const char *path) {
+	SDL_Event e = { .type = SDL_DROPFILE };
+	e.drop.file = SDL_strdup(path);
+	if (e.drop.file && SDL_PushEvent(&e) != 1) SDL_free(e.drop.file);
+}
+
 /* The steps of no frames at the script's position: pictures, states. */
 static void script_actions(void) {
 	while (script_pos < script_len && script[script_pos].frames == 0) {
@@ -253,6 +271,7 @@ static void script_actions(void) {
 		if (s->state[0]) write_state(s->state);
 		if (s->dump[0]) emu_debug_dump(s->dump);
 		if (s->placed) director_dev_place(s->place[0], s->place[1], s->place[2]);
+		if (s->drop[0]) drop_file(s->drop);
 		if (scene_current() == &scene_emu) emu_steps(s);
 		/* (event flags FROM..TO set, then as they were: finding what a flag does) */
 		if (s->flagged && scene_current() == &scene_emu) {

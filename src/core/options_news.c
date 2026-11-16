@@ -261,6 +261,14 @@ bool news_box_open(void) {
 
 bool news_box_shown(void) { return K.open; }
 
+void news_box_describe(FILE *f) {
+	static const char *const states[] = { [UPDATE_IDLE] = "none", [UPDATE_FOUND] = "found", [UPDATE_GETTING] = "getting", [UPDATE_FAILED] = "failed",
+		[UPDATE_READY] = "ready" };
+	if (!update_here()) return;
+	fprintf(f, "update %s\n", states[update_state()]);
+	if (update_state() != UPDATE_IDLE) fprintf(f, "newversion %s\n", update_version());
+}
+
 /* A button: kept for the version (the title's box shows once), then the
  * download or the download page; from the title, Options on the update's
  * line to show the download go */

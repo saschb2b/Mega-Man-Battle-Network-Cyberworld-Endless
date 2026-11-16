@@ -239,6 +239,18 @@ static void rows_draw(int x0, int y0) {
 	}
 }
 
+void controls_describe(FILE *f) {
+	if (!C.open) return;
+	static const char *const rows[] = { "preset", "dpad", "a", "b", "l", "r", "start", "select", "fast" };
+	static const char *const items[ITEMS] = { "setall", "defaults", "done" }, *const asks[] = { "none", "slot", "dpad", "all" };
+	char bound[32] = "-";
+	int gba = C.row == ROW_DPAD ? 0 : controls_gba_of(C.row);
+	if (C.row < ROWS && gba >= 0) controls_slot_words(gba, C.col, bound, sizeof bound);
+	fprintf(f, "device %s\nbutton %s\nslot %s\nbound %s\nasking %s\n", C.tab == TAB_PAD ? "controller" : "keyboard",
+		C.row < ROWS ? rows[C.row] : items[C.item], C.col == SLOT_MAIN ? "main" : "also", bound, C.confirm ? "keep" : asks[C.ask]);
+	if (C.said_t > 0) fprintf(f, "said %s\n", C.said);
+}
+
 static void bottom_draw(int x0, int y0) {
 	int a[ITEMS], b[ITEMS], y = y0 + BOTTOM_Y;
 	item_spans(a, b);

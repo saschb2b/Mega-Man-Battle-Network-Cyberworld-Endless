@@ -36,7 +36,18 @@ its course, a tuple each:
                                   again on the same saves
 
 A file may hold many instead: MANY = {name: dict(START=..., STEPS=...,
-NEEDS=..., GUARDS=..., KNOWN=...)} (tests/scenarios/routes.py: a scenario a route).
+NEEDS=..., GUARDS=..., KNOWN=..., ROMS=...)} (tests/scenarios/routes.py: a scenario a route).
+
+In a START and in COMMANDS, {dir} is the game's own folder (a second data
+folder, a HOME for its Downloads), {roms} the folder of BN6's ROM and its
+NEEDS, and {bn6}, {bn5}, {bn4} a ROM's file alone in a folder, {wrong} a
+.gba that is none of the games' and {zip} an archive, to drop on the ROMs
+screen, {damaged} a .cwsave cut short, to drop on the title, and {update}
+the address of a made-up newer version's update.json, served here while
+the scenarios play (CYBERWORLD_UPDATE_URL={update}). ROMS names the files
+in the game's ROM folder where they are not BN6's and its NEEDS: () none,
+('wrong',) the wrong file alone; that folder is then the game's own (the ROMs screen keeps a copy
+of what it is given there).
 
 The games run from build/host/cyberworld (built first where a source is
 newer; CYBERWORLD_CW_BIN another), each in .build/scenarios/NAME, with
@@ -47,11 +58,14 @@ never CI's.
 import concurrent.futures
 import glob
 import hashlib
+import http.server
 import importlib.util
+import json
 import os
 import shutil
 import signal
 import sys
+import threading
 import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -68,6 +82,10 @@ KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'kee
 # (the other games' ROMs a scenario may need, told by their SHA-1: build.py's)
 ROMS = {'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
 BN6 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
+# (files that are no ROM of the games', made here: a .gba whose header names another game, an archive)
+MADE = {'wrong': ('wrong.gba', bytes(0xAC) + b'ZZZZ' + bytes(0x1000)), 'zip': ('rom.zip', b'PK\x05\x06' + bytes(18)),
+        'damaged': ('damaged.cwsave', b'CWSAVE1\n' + bytes(64))}   # (and saves cut short, for SAVES to refuse)
+EACH = os.path.join(WORK, '.roms', 'each')   # every file a scenario may name: {bn6}, {wrong}
 
 
 class Failed(Exception):
@@ -88,10 +106,10 @@ def load():
         if hasattr(m, 'MANY'):
             for name, s in m.MANY.items():
                 out[f'{base}/{name}'] = dict(guards=s.get('GUARDS', doc), start=s['START'], needs=tuple(s.get('NEEDS', ())),
-                                             steps=list(s['STEPS']), known=s.get('KNOWN', ''))
+                                             steps=list(s['STEPS']), known=s.get('KNOWN', ''), roms=s.get('ROMS'))
         else:
             out[base] = dict(guards=doc, start=m.START, needs=tuple(getattr(m, 'NEEDS', ())), steps=list(m.STEPS),
-                             known=getattr(m, 'KNOWN', ''))
+                             known=getattr(m, 'KNOWN', ''), roms=getattr(m, 'ROMS', None))
     return out
 
 
@@ -104,6 +122,10 @@ def problems(name, s):
         out.append(f'{name}: KNOWN is a line of words: what is wrong, and its issue')
     if any(n not in ROMS for n in s['needs']):
         out.append(f'{name}: NEEDS {s["needs"]}: {", ".join(ROMS)}')
+    if s.get('roms') is not None and any(n not in ('bn6', *ROMS, *MADE) for n in s['roms']):
+        out.append(f'{name}: ROMS {s["roms"]}: {", ".join(("bn6", *ROMS, *MADE))}')
+    if s.get('roms') is not None and set(s['roms']) & set(ROMS) - set(s['needs']):
+        out.append(f'{name}: ROMS names a game its NEEDS does not')
     starts = [s['start']] + [step[1] for step in s['steps'] if step and step[0] == 'restart' and len(step) > 1]
     for start in starts:
         try:
@@ -166,6 +188,77 @@ def rom_folder(roms, needs):
     return d
 
 
+def each_file(name):
+    """Where a file a scenario may name stands ({bn6}, {wrong}): a folder of
+    its own, so that a ROM dropped on the ROMs screen comes alone (one with
+    another game's beside it brings that along)."""
+    return os.path.join(EACH, name, MADE[name][0] if name in MADE else name + '.gba')
+
+
+def each_rom(roms):
+    """The files a scenario may name: the ROMs there are, linked, and the
+    made ones. Made once, before the games."""
+    for name, path in roms.items():
+        os.makedirs(os.path.dirname(each_file(name)), exist_ok=True)
+        link = each_file(name)
+        if os.path.realpath(link) != os.path.realpath(path):
+            if os.path.lexists(link):
+                os.remove(link)
+            os.symlink(os.path.abspath(path), link)
+    for name, (_, data) in MADE.items():
+        os.makedirs(os.path.dirname(each_file(name)), exist_ok=True)
+        with open(each_file(name), 'wb') as f:
+            f.write(data)
+
+
+def own_roms(h, names):
+    """A game's own ROM folder, h/roms, holding the files `names` name and
+    no other: what the ROMs screen is given, it keeps a copy of there."""
+    d = os.path.join(h, 'roms')
+    os.makedirs(d)
+    for name in names:
+        os.symlink(each_file(name), os.path.join(d, os.path.basename(each_file(name))))
+    return d
+
+
+SHARED = {}   # (a game's folder: the folder of BN6's ROM and its NEEDS, {roms})
+# (a newer version's update.json, made up: {update} is its address on this machine)
+UPDATE = json.dumps({'version': '99.0.0', 'files': {},
+                     'changes': 'A version made up for a test\n\nIts summary.\n\n## New\n\n### A thing of the test\n\nIts words.\n'})
+SERVED = []   # (the address, once a scenario asked for it)
+
+
+def serve_update():
+    """A stand-in for a release's update.json, served on this machine's own
+    address while the scenarios play: the address a game is given as
+    CYBERWORLD_UPDATE_URL={update} (docs/engine/updates.md), so its look
+    finds version 99.0.0 and never asks GitHub."""
+    class Handler(http.server.BaseHTTPRequestHandler):
+        def do_GET(self):
+            body = UPDATE.encode()
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Content-Length', str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+
+        def log_message(self, *args):
+            pass
+    server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+    threading.Thread(target=server.serve_forever, daemon=True).start()
+    SERVED.append(f'http://127.0.0.1:{server.server_address[1]}/update.json')
+
+
+def placed(h, text):
+    """A START's or a step's words with the game's own places in them:
+    {dir} its folder, {roms} the folder of BN6's ROM and its NEEDS, {bn6}
+    ... {damaged} a file alone in a folder of its own."""
+    out = text.replace('{dir}', h).replace('{roms}', SHARED.get(h, '')).replace('{update}', SERVED[0] if SERVED else '')
+    for name in ('bn6', *ROMS, *MADE):
+        out = out.replace('{' + name + '}', each_file(name))
+    return out
+
+
 # ---- playing one ----
 
 def words(state, names):
@@ -181,7 +274,7 @@ def start(h, spec, fresh, roms):
     """Game h started from START with the ROMs of folder `roms` (cw.begin
     without its print's redirect: several run at once here; the game takes
     the last --rom-dir it is given)."""
-    commands, args, env, _ = cw.parse_start(spec)
+    commands, args, env, _ = cw.parse_start(placed(h, spec))
     seed, args = cw.take_seed(args, 1)
     play.launch(h, seed, fresh, args + ['--rom-dir', roms], env, cw.BIN, keep_bin=False)
     _, ran, shots, _, state = cw.batch(h, 'wait 1' + (f'; {commands}' if commands else ''))
@@ -216,6 +309,8 @@ def quit_game(h):
 def step_run(h, step, state, kept, roms=None):
     """One step in game h from `state`: (the state after, frames run)."""
     kind = step[0]
+    if kind in ('do', 'repeat'):
+        step = (kind, placed(h, step[1]), *step[2:])
     if kind == 'do':
         _, ran, shots, _, state = cw.batch(h, step[1])
         for _, p in shots:
@@ -280,7 +375,10 @@ def run(name, s, roms):
     os.makedirs(h)
     t, frames, kept, state, at = time.time(), 0, {}, '', 0
     lines = []
+    SHARED[h] = roms
     try:
+        if s.get('roms') is not None:
+            roms = own_roms(h, s['roms'])
         state, frames = start(h, s['start'], True, roms)
         for at, step in enumerate(s['steps'], 1):
             state, n = step_run(h, step, state, kept, roms)
@@ -365,6 +463,9 @@ def main():
     width = max((len(n) for n in list(todo) + list(skipped)), default=0)
     # (each set of ROMs' folder made before the games start, once)
     folders = {needs: rom_folder(roms, needs) for needs in {s['needs'] for s in todo.values()}}
+    each_rom(roms)
+    if any('{update}' in str(s['start']) + str(s['steps']) for s in todo.values()):
+        serve_update()
     with concurrent.futures.ThreadPoolExecutor(int(values.get('jobs') or 4)) as pool:
         for r in pool.map(lambda item: run(*item, folders[item[1]['needs']]), todo.items()):
             word, fails, lines = verdict(r, todo[r['name']]['known'])

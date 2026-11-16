@@ -261,6 +261,26 @@ static void update(void) {
 
 const Scene scene_saves = { "saves", enter, update, saves_draw, leave, NULL };
 
+void saves_describe(FILE *f) {
+	if (scene_current() != &scene_saves) return;
+	static const char *const views[] = { "home", "compare", "result", "send", "receive" }, *const pages[SAVES_PAGES] = { "cloud", "code", "file" };
+	static const char *const actions[SAVES_DIGIT + 1] = { "export", "import", "send", "receive", "undo", "auto", "folder", "keep", "take", "done",
+		"continue", "erase", "get", "turnon", "link", "add", "unlink", "delete", "digit" };
+	fprintf(f, "saves %s\nsavespage %s\nsavesfocus %s\n", views[SV.view], pages[SV.page], actions[SV.focus < SAVES_DIGIT ? SV.focus : SAVES_DIGIT]);
+	if (SV.have) fprintf(f, "here %08x\nherelayer %d\nhereruns %d\n", (unsigned)SV.here.hash, SV.here.run_depth, SV.here.runs);
+	else fprintf(f, "here none\n");
+	if (SV.view == SAVES_COMPARE)
+		fprintf(f, "theirs %08x\ntheirlayer %d\ntheirstatus %s\n", (unsigned)SV.file.hash, SV.file.run_depth, SV.status == BACKUP_OK ? "ok" : "refused");
+	fprintf(f, "undo %s\nautocopy %s\n", SV.undo ? "yes" : "no", pick_saves_auto_enabled() ? "on" : "off");
+	if (saves_home_asking() >= 0) fprintf(f, "savesasks %s\n", saves_home_yes() ? "yes" : "no");
+	if (SV.busy) fprintf(f, "savesbusy %s\n", SV.said);
+	if (SV.view == SAVES_HOME || !SV.note[0]) return;
+	/* (its words in one line) */
+	fprintf(f, "savesnote ");
+	for (const char *c = SV.note; *c; ++c) fputc(*c == '\n' ? ' ' : *c, f);
+	fputc('\n', f);
+}
+
 bool saves_key(void) {
 	static bool alone;
 	if (btn_pressed(BTN_L)) alone = true;

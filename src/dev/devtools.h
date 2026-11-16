@@ -77,6 +77,7 @@ typedef struct {
 	bool bn4families; /* bn4families: the differential's BN4 families counted (xdiff_bn4.h); they install wherever BN4's ROM is read (xvirus_bn4.h) */
 	bool showbn4;   /* showbn4: once BN4 Red Sun offered before players had it; it is offered now (rom.h's xrom_offered), the flag kept for the browser's ?dev=showbn4 */
 	bool feel;      /* feel: each beat, rumble and trigger effect the controller's feel sends, on stdout (feel_out.h) */
+	bool settings;  /* settings: a headless start reads the data folder's settings.ini, keys.ini, pad.ini and touch.ini, as a player's start does (a scenario's restart finds what Options kept: docs/devtools/scenarios.md) */
 	bool quit_end;  /* quitend: the game quits once --dev rollbench and --dev arena are done (a run sent to a device, 3dslink's netloader back) */
 	int arena_delay; /* arenadelay=N: its input delay, N frames (1-60), and the delay a Net Square challenge or Yes asks for; 0 its own */
 	int arena_window; /* arenawindow=N: the Arena rolls back N frames at most (0: the delay alone); -1 what a frame costs here affords (arena.h, issue #128) */

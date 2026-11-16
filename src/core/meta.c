@@ -470,6 +470,11 @@ void meta_run_quiet(void) {
 	marks_new = 0;
 }
 
+void meta_setup_describe(FILE *f, int net, int folder, int cross, int threat, int helpers, int extras_off) {
+	fprintf(f, "net %s\nstartfolder %s\nstartcross %s\nthreat %d\nhelpers %d\nextrasoff %d\n", net == RUN_SHORT ? "short" : "endless",
+		meta_folder(folder)->name, cross ? powers_cross_name(cross) : "none", threat, helpers, extras_off);
+}
+
 int meta_unlocked(const char **out, int max) {
 	int n = nsaid < max ? nsaid : max;
 	for (int i = 0; i < n; ++i) out[i] = said[i];

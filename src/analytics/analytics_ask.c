@@ -114,6 +114,13 @@ void analytics_ask_tap(int x, int y) {
 	else if (x >= ASK_NO_X - 12 && x < ASK_NO_X + 40) answer(false);
 }
 
+void analytics_ask_describe(FILE *f) {
+	if (!analytics_here()) return;
+	int c = analytics_consent();
+	fprintf(f, "statistics %s\n", c == ANALYTICS_ON ? "on" : c == ANALYTICS_OFF ? "off" : "unasked");
+	if (K.open) fprintf(f, "answer %s\n", K.t < ASK_WAIT ? "wait" : K.yes ? "yes" : "no");
+}
+
 /* BN6's chat box at its place, faceless as the Chip Trader's "Insert 3
  * BtlChips?": the question and where it is changed, centred, then Yes and
  * No, the green triangle before the one chosen */

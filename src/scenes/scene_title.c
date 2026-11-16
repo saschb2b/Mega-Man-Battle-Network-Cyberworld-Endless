@@ -477,15 +477,20 @@ static void update(void) {
 	jack_in();
 }
 
-/* The title in the state's words (capture.c): the step it is on, and on
- * its menu the row the cursor is on. */
-const char *title_step(void) {
-	return S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
+/* The title in the state's words (capture.c), a fact a line: the step it
+ * is on, the row its menu's cursor is on, the saved run CONTINUE takes
+ * (its layer, 0 none), NEW GAME's question's answer under the cursor, what
+ * the profile holds (its runs, best layer and marks), and the setup's or
+ * the summary's own lines. Reads only. */
+void title_describe(FILE *f) {
+	const char *step = S.leaving ? "leaving" : title_setup_shown() ? "setup" : S.summary ? "summary" : !S.pressed ? "start"
 		: !S.menu ? "opening" : S.confirm ? "confirm" : "menu";
-}
-
-const char *title_cursor(void) {
-	return S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "other";
+	const char *cursor = S.cursor == 0 ? "new" : S.cursor == 1 && S.has_save ? "continue" : "options";
+	fprintf(f, "title %s\ncursor %s\nsaved %d\n", step, cursor, S.has_save ? (S.saved_depth ? S.saved_depth : -1) : 0);
+	if (S.confirm) fprintf(f, "asks %s\n", S.t - S.asked < (int)(strlen(ASK_FIRST) + strlen(S.ask)) ? "typing" : S.yes ? "yes" : "no");
+	fprintf(f, "runs %d\nbest %d\nmarks %03x\n", profile.runs, profile.best_depth, profile.marks);
+	title_setup_describe(f);
+	title_summary_describe(f, S.summary);
 }
 
 /* NEW GAME or CONTINUE chosen: the jack-in sound, and away */

@@ -361,6 +361,22 @@ static void draw(void) {
 
 const Scene scene_launcher = { "launcher", enter, update, draw, leave, NULL };
 
+void launcher_describe(FILE *f) {
+	static const char *const names[FOCUSES] = { [SLOT_BN6] = "bn6", [SLOT_BN5] = "bn5", [SLOT_BN4] = "bn4", [FOCUS_ALT] = "alt", [FOCUS_PLAY] = "play" };
+	static const char *const kinds[] = { [NOTE_INFO] = "info", [NOTE_GOOD] = "good", [NOTE_BAD] = "bad" };
+	fprintf(f, "roms");
+	for (int s = 0; s < SLOTS; ++s) if (roms_have(s)) fprintf(f, " %s", names[s]);
+	fprintf(f, "%s\n", roms_shown_set(true) ? "" : " none");
+	if (scene_current() != &scene_launcher) return;
+	fprintf(f, "cartridges");
+	for (int s = 0; s < SLOTS; ++s) if (roms_shown(s)) fprintf(f, " %s", names[s]);
+	char note[1100];
+	int kind;
+	launcher_cursor_note(note, sizeof note, &kind);
+	for (char *c = note; *c; ++c) if (*c == '\n') *c = ' ';
+	fprintf(f, "\nromfocus %s\nromnote %s\nromnotekind %s\n", names[L.focus], note, kinds[kind]);
+}
+
 /* ---- the ways in ---- */
 
 static void clear(void) {
