@@ -72,6 +72,7 @@ MANY = {
             ('repeat', 'press A; wait 40', 'scene=emu'),
             ('repeat', 'wait 10', 'screen=map', 300),
             ('expect', 'layer=9'),
+            ('expect', 'bracket=door|bracket=screen'),      # in the arena, not at the layer's start (ahead)
             ('expect', 'round=1'),
             ('same', 'roundfoe'),
             ('expect', 'roundchips=0'),

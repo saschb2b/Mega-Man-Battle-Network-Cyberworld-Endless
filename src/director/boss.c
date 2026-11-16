@@ -188,7 +188,8 @@ static void round_set(int round) {
 
 /* The tournament's bracket in a state's words (director_describe;
  * tests/scenarios' extras_tourney): `bracket none` on a layer without
- * one; else ahead (not begun), screen (BN4's, off the map), round (one
+ * one; else ahead (not begun), door (MegaMan stepped in: the arena's
+ * door, the bracket's one save), screen (BN4's, off the map), round (one
  * under way: its card, its battle, its prize) or won, the round (1, 2, 3
  * the final, 4 all won), its Navi, and how many of the two rounds' Navi
  * chips the Pack and folder hold */
@@ -200,7 +201,7 @@ void boss_bracket_describe(FILE *f) {
 		held += chip > 0 && chip_copies(chip) > 0;
 	}
 	fprintf(f, "bracket %s\nround %d\nroundfoe %s\nroundchips %d\n",
-		B.round > 2 ? "won" : B.state == B_BRACKET ? "screen" : B.state <= B_ENTER ? "ahead" : "round", B.round + 1, guardian(B.foe)->name, held);
+		B.round > 2 ? "won" : B.state == B_BRACKET ? "screen" : B.state > B_ENTER ? "round" : B.door_taken ? "door" : "ahead", B.round + 1, guardian(B.foe)->name, held);
 }
 
 void boss_begin_layer(uint32_t archive, const GuardianStage *g) {
