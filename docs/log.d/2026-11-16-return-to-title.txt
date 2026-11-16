@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T13:30:00Z
+* **Update**: engine/settings-screens.md (Return to title: Options' Game page's line in a run, its question and what it keeps), engine/saves.md (a run's way to SAVES), code/core.md (Options' Game page), research/sources.md (Learned from players: AlicafeZ's request for a way to the menu), GUIDE.md (Back to the title).
