@@ -81,8 +81,9 @@ static void copy_lines(FILE *f) {
 
 /* The layer: whose area it is drawn as, whose Navi guards it, and the
  * animation he stands in on the map with whether his sprite draws anything
- * there (BN4's Navis draw four views, not BN6's eight: one facing left
- * showed his back or nothing, 15 November 2026) */
+ * there, and for one of BN4's the view it draws (BN4's Navis draw four
+ * diagonals, not BN6's eight facings: one facing left showed his back or
+ * nothing, 15 November 2026) */
 static void layer_lines(FILE *f) {
 	fprintf(f, "areafrom %s\n", game_of_area(D.layer_tiles));
 	copy_lines(f);
@@ -91,10 +92,11 @@ static void layer_lines(FILE *f) {
 	fprintf(f, "guardianfrom %s\n", game_of_guardian(g->navi));
 	uint32_t o = object_at(g->x, g->y);
 	if (!o) return;
+	static const char *const views[] = { "back-right", "front-right", "front-left", "back-left" };
 	NpcBody b = guardian_body(g->navi, g->face);
-	int anim = emu_read8(o + BN6_NPC_ANIM);
-	bool back = guardian_bn4(g->navi) && !xguardian_bn4_front(g->navi, anim);
-	fprintf(f, "guardianstands %d %s\n", anim, !npc_sprite_shows(b.list, b.index, anim) ? "unseen" : back ? "back" : "front");
+	int anim = emu_read8(o + BN6_NPC_ANIM), view = guardian_bn4(g->navi) ? xguardian_bn4_view(g->navi, anim) : 0;
+	bool shown = npc_sprite_shows(b.list, b.index, anim) && view >= 0;
+	fprintf(f, "guardianstands %d %s\n", anim, !shown ? "unseen" : guardian_bn4(g->navi) ? views[view] : "shown");
 }
 
 /* A battle's enemies as BN6's engine holds them: how many stand, their HP

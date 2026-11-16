@@ -7,8 +7,9 @@
  * In a run: `acts` (each act's area by its game, bn6, bn5 or bn4, in the
  * run's order), `olderacts N`, `olderguards N` (acts ending at an older
  * net's Navi), `soulsheld MASK` (BN5's Souls the run holds). On a layer: `areafrom GAME`, `guardianfrom GAME`,
- * `guardianstands ANIM front|back|unseen` (his NPC's animation, and
- * whether his sprite draws it and faces the camera), and on a Glitch layer
+ * `guardianstands ANIM shown|unseen` (his NPC's animation, and whether his
+ * sprite draws it; one of BN4's the diagonal it shows him in, `front-left`,
+ * `front-right`, `back-left` or `back-right`), and on a Glitch layer
  * `copyform NAVI` and `copystands ANIM` (its copy's first body, its NPC's
  * animation). In a battle:
  * `enemies N`, `enemyhp N` (theirs together), `enemynames A+B`,

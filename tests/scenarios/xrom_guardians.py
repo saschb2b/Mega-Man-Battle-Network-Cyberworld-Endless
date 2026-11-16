@@ -31,6 +31,8 @@ def fight(game, biome, navi, name, depth=3):
         STEPS=[
             ('expect', f'guardianfrom={game}'),
             ('expect', 'soulsheld=00'),
+            ('until', 'guardianstands>=0', 600),      # the map's people in place: he in a view his sprite draws
+            ('expect', 'guardianstands~shown|guardianstands~front'),
             ('until', 'guardian~fighting', 6000),
             ('until', 'enemies>=1', 1200),
             ('expect', f'enemynames~{IN_BATTLE.get(name, name)}'),   # himself, moved in from his own game
@@ -51,9 +53,9 @@ def stands(navi, name, side, seed):
         STEPS=[
             ('expect', 'guardianfrom=bn4'),
             ('until', 'guardianstands>=0', 600),      # the map's people in place
-            ('expect', 'guardianstands~front'),
+            ('expect', f'guardianstands~front-{side}'),
             ('until', 'talk=director', 6000),         # his door's words: he has logged in
-            ('expect', 'guardianstands~front'),
+            ('expect', f'guardianstands~front-{side}'),
         ])
 
 
