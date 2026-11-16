@@ -69,6 +69,14 @@ PAGE = '300:,' + '4:A,56:,' * 10 + '300:,'          # a layer's arrival paged: 1
 PET_LIB = '6:START,40:,6:DOWN,8:,6:DOWN,8:,6:A,90:,'  # the PET, its Library row
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (Gregar across the field in the Battle Lab)
+YOUTUBE_HOOK = 'Three Games in One Run: BN6, BN5 and BN4 Together'
+THUMBNAILS = [
+    {'hero': ('still', 'lab-navi-battle'), 'region': (80, 30, 160), 'words': ('3 GAMES,', '1 RUN'), 'lit': 1},
+]
+
+
 def fight(biome, foes, last=1500, seed=4, field=''):
     return (['--scene', 'emu', '--seed', str(seed), '--dev', 'quiet,god', '--net-biome', biome], AUTO,
             f'100:,0:foes {foes}{field}', 150, last)

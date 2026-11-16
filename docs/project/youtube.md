@@ -37,7 +37,8 @@ Studio's language is German.
   streamed with VP9 or AV1 at every size and a higher bitrate; a 720p
   one gets H.264 at a low bitrate that smears the game's pixels.
 - `...-trailer.png`: its poster, `docs/clips/trailer.png` (1280x720): the
-  thumbnail of a cut that has none of its own (every one before 0.22.0).
+  thumbnail of a cut that has none of its own (none since 16 November
+  2026, when the older cuts got theirs).
 - `videos.json`: each one's title, description, tags, date and
   thumbnails.
 
@@ -50,9 +51,11 @@ and the tool takes that instead.
 
 ## The thumbnail
 
-From 0.22.0 a trailer's thumbnail is made for YouTube, not borrowed from
+A trailer's thumbnail is made for YouTube, not borrowed from
 the site (the owner, 15 November 2026: a definition of the thumbnail,
-following what good thumbnails on YouTube do). The poster, a logo and
+following what good thumbnails on YouTube do; 0.22.0's first, and on the
+16th the ten older videos reworked to it, "to hold the same standard").
+The poster, a logo and
 small capitals on navy, is right for a visitor who already chose the
 project; at 168 pixels wide between other videos it promises nothing.
 
@@ -90,11 +93,11 @@ series' blueprint.
 
 | Field | Value |
 | --- | --- |
-| Title | From 0.22.0 `HOOK \| Cyberworld Endless VERSION Trailer`, the cut's `YOUTUBE_HOOK` (the news in its first forty letters, which is what a phone shows); before it `Cyberworld Endless VERSION Trailer – TAGLINE`, the tagline the release's notes' `description` |
+| Title | `HOOK \| Cyberworld Endless VERSION Trailer`, the cut's `YOUTUBE_HOOK` (the news in its first forty letters, which is what a phone shows). Until 16 November 2026 the ten before 0.22.0 read `Cyberworld Endless VERSION Trailer – TAGLINE`, the tagline the release's notes' `description`; `tools/trailer_youtube.py` still falls back to that for a cut with no hook |
 | Description | the tagline and the notes' first paragraph (without "the Nth beta"), the release date, the links (play in the browser, download, the release on GitHub, itch.io, the source), the ROM it needs, Capcom's notice, three hashtags |
 | Tags | `trailer_youtube.TAGS` |
 | Language | English |
-| Thumbnail | From 0.22.0 the cut's thumbnail A, with B and C in Studio's Test & compare where the channel has it (The thumbnail, above); before it the poster |
+| Thumbnail | The cut's thumbnail A, with B and C in Studio's Test & compare where the channel has it (The thumbnail, above). The ten before 0.22.0 have one each, drawn over a picture of their release's notes (`('still', NAME)`), without the green NEW, which is the current trailer's alone |
 | Playlist | Cyberworld Endless – Trailers |
 | Audience | not made for kids |
 | AI used | yes, for the music (below) |
@@ -165,6 +168,13 @@ the evening of the 16th. It went up with thumbnail A alone: Studio shows
 the channel no test of thumbnails yet (its edit page holds an
 **A/B-Tests** button, hidden), so B and C wait for it.
 
-0.21.0 went up with a still Studio picked (its battle on three ROMs'
-marks): the day's custom thumbnails had run out before the advanced
-features. Its poster replaces it once they allow.
+On 16 November 2026 the ten older videos were reworked to 0.22.0's
+standard (the owner): each cut got its `YOUTUBE_HOOK` and one thumbnail in
+the series' layout, and its video the new title and that thumbnail from
+its edit page (the title box, the thumbnail given to `#file-loader`,
+**Speichern**, which takes up to fifteen seconds to settle before the
+page lets go). Their descriptions already had the form; 0.22.0's, written
+before its tag, got its release date and its release's link then, and the
+cut's extra sentence on the dive went once the notes said it themselves.
+0.21.0's still, which Studio had picked when the day's custom thumbnails
+ran out, went with that.

@@ -47,8 +47,9 @@ the series:
   shown at 1280). Its subject sits in the right two thirds.
 - **A navy scrim** from the left and from below, under the words.
 - **The PET's cyan frame** round the edge: the series' mark at any size.
-- **Top left**: the logo, under it the version on BN's plate in gold and
-  a green **NEW**.
+- **Top left**: the logo, under it the version on BN's plate in gold and,
+  on the current trailer's alone, a green **NEW** (an older release's
+  thumbnail is not news; `'new': True` or `False` in a spec overrides).
 - **Bottom left**: the words, two lines of Lato Black Italic as large
   as the longer line allows (up to 190 px), white and gold, a thick navy
   edge and a hard shadow. Not the site's Silkscreen: its bold S, W and 4
@@ -99,7 +100,11 @@ Rules for it:
    the dark page and the light one, both lines read at a glance and the
    subject is a shape, not noise. If not: fewer letters, a tighter
    region, another frame.
-5. Thumbnail A is the one a video is published with; all three go into
+5. An older cut, whose footage is not on this machine, takes its hero
+   from a picture of its release's notes: `('still', NAME)`, a whole
+   240x160 frame in `docs/screenshots/`. The ten before 0.22.0 were given
+   one thumbnail each this way on 16 November 2026.
+6. Thumbnail A is the one a video is published with; all three go into
    Test & compare where the channel has it, and the winner is noted in
    docs/project/youtube.md's table.
 

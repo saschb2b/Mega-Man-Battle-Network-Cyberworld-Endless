@@ -55,6 +55,14 @@ BN6_ONLY = ()
 AUTO = {'CYBERWORLD_AUTOPILOT': '1'}
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (the Virus Battler's red Mr.Prog at the end of his side path)
+YOUTUBE_HOOK = 'The Virus Battler: Your Viruses Fight for You'
+THUMBNAILS = [
+    {'hero': ('still', 'vb-battler'), 'region': (0, 30, 160), 'words': ('VIRUS', 'BATTLER!'), 'lit': 1},
+]
+
+
 def play(cmds):
     """play.py's commands (press, wait, place) as `--input`'s steps"""
     out = []

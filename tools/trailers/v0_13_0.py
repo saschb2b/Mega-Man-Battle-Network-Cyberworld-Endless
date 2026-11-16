@@ -46,6 +46,14 @@ STAMPED = {'netpass.ini': 'stamps=4\n'}   # (the stamp moment seen before: no gr
 ARRIVE = 1232                             # (in the Square, the log-in beam: the frame, through the gate at once)
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (the Net Square full of Navis saying hello)
+YOUTUBE_HOOK = 'Go Online: the Net Square, Chip Trades and a Weekly Net'
+THUMBNAILS = [
+    {'hero': ('still', 'online-square'), 'region': (80, 35, 160), 'words': ('NOW', 'ONLINE!'), 'lit': 1},
+]
+
+
 def steps_frames(steps):
     return sum(int(s.split(':')[0]) for s in steps.split(',') if s)
 

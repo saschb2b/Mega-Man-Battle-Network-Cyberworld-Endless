@@ -47,6 +47,14 @@ BN6_ONLY = ()
 STAMPED = {'netpass.ini': 'stamps=4\n'}
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (a team NetBattle watched from the stands, fire crossing the field)
+YOUTUBE_HOOK = 'NetBattles, Teams of Two and Emotes You Perform'
+THUMBNAILS = [
+    {'hero': ('still', 'stands-team'), 'region': (80, 25, 160), 'words': ('TEAM', 'BATTLES!'), 'lit': 1},
+]
+
+
 def floor(gx, gy, facing):
     """`place`'s world x, y and facing for the Square plan's panel (gx, gy)
     (src/online/square_plan.c: a 36-panel grid, the plaza 11 to 23 each

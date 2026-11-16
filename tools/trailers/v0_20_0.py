@@ -71,6 +71,14 @@ R1 = '1e4000/004001/084002/054003/014004/094005/034006/044007'
 R2 = '1e4100/008001/084102/058003/014104/098005/034106/048007'
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (MegaMan's shot at three of BN4's viruses)
+YOUTUBE_HOOK = 'Battle Network 4 Red Sun Joins: Areas, Viruses, a Tournament'
+THUMBNAILS = [
+    {'hero': ('still', 'bn4-visitors-fight'), 'region': (80, 40, 160), 'words': ('RED SUN', 'JOINS!'), 'lit': 1},
+]
+
+
 def area(biome, seed):
     """one of BN4's areas walked by the autopilot"""
     return (['--scene', 'emu', '--net-biome', biome, '--run-depth', '3', '--seed', str(seed), '--dev', 'quiet,god'],

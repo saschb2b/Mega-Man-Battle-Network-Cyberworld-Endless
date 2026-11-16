@@ -78,6 +78,14 @@ OPTIONS = '60:,6:SELECT,6:,40:,'
 BEAT_PRESS = lambda k: f'6:{k},26:,'  # noqa: E731
 
 
+# its video on YouTube (docs/project/youtube.md): the news its title leads with, and its thumbnail in the
+# series' layout, drawn over a picture of the release's notes (a battle in the GBA's own colours, a virus bursting)
+YOUTUBE_HOOK = 'GBA Colours, LCD Filters and Sound Your Way'
+THUMBNAILS = [
+    {'hero': ('still', 'gba-gba'), 'region': (50, 40, 160), 'words': ('GBA', 'COLOURS!'), 'lit': 1},
+]
+
+
 def battle(*look):
     return (NET + list(look), {}, BATTLE, 1180, 1440)
 
