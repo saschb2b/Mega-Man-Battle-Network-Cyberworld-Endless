@@ -76,6 +76,7 @@ static struct {
 	uint8_t sprite[32768 / 8];
 	bool settled;       /* the copy deleted: the glitch gone */
 	int stall, drag;    /* a flip's first frames with the music stalled, and its tempo's factor after (glitch_music) */
+	int flips;          /* the flips since the layer began (a state's words) */
 } G;
 
 static uint32_t next_rng(void) {
@@ -210,7 +211,7 @@ static void schedule(void) {
 	G.fx_left = G.fx == FX_FLIP ? roll(10 + 20 * (s - 2), 30 + 50 * (s - 2)) : roll(2, 4 + 2 * s);
 	G.fx_len = G.fx_left;
 	G.fx_seed = next_rng();
-	if (G.fx == FX_FLIP) glitch_look_flip(roll(0, glitch_looks() - 1));
+	if (G.fx == FX_FLIP) { glitch_look_flip(roll(0, glitch_looks() - 1)); ++G.flips; }
 	/* (the music drags while the floor is another area's, stalled at its
 	 * edge from stage 3: Its sound) */
 	G.stall = G.fx == FX_FLIP && s >= 3 ? roll(4, 4 + 4 * (s - 2)) : 0;
@@ -306,7 +307,7 @@ void glitch_describe(FILE *f) {
 	int depth = run.depth, look = glitch_look_shown();
 	bool mixed = false;
 	glitch_battle(&depth, &mixed);
-	fprintf(f, "glitchstage %d\nglitchshare %d\nglitchsaid %d\nglitchlooks %d\nglitchfx %s\n", G.stage, G.share, G.said, glitch_looks(), fx[G.fx]);
+	fprintf(f, "glitchstage %d\nglitchshare %d\nglitchsaid %d\nglitchlooks %d\nglitchflips %d\nglitchfx %s\n", G.stage, G.share, G.said, glitch_looks(), G.flips, fx[G.fx]);
 	if (look < 0) fprintf(f, "glitchlook own\n");
 	else fprintf(f, "glitchlook %d\n", look);
 	fprintf(f, "glitchbattles %s\nglitched %s\n", depth != run.depth ? "deeper" : mixed ? "mixed" : "own", G.settled ? "settled" : "on");

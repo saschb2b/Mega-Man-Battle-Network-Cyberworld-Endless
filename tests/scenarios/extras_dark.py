@@ -103,11 +103,12 @@ MANY = {
         ]),
     'flame-next-act': dict(
         GUARDS="A later act's flame holds a DarkChip the run lacks, never one it holds.",
-        START='--scene emu --seed 3 --run-depth 5 --dev quiet,darkchips=0x2',
+        # (seed 3's second flame holds DrkRecov where the run lacks it: held, 0x80, the flame's is another)
+        START='--scene emu --seed 3 --run-depth 5 --dev quiet,darkchips=0x80',
         STEPS=[
             *ARRIVE,
             ('expect', 'flame=burning'),
-            ('expect', 'flamechip!=DrkSword'),
+            ('expect', 'flamechip!=DrkRecov'),
             ('expect', 'darkchips=1'),
         ]),
     'flame-none-left': dict(

@@ -30,7 +30,7 @@ void glitch_battle(int *depth, bool *mixed);
 /* The Glitch layer in a state's words (director_describe; tests/scenarios'
  * extras_glitch): `glitchwarp here` on the layer that holds its warp, none
  * elsewhere; on a Glitch layer its stage (`glitchstage` 0-4), the share of
- * its data taken, the stages said, its looks and the one on the floor
+ * its data taken, the stages said, its looks, the flips since it began and the look on the floor
  * (`glitchlook` own or 0-2), the glitch under way (`glitchfx`), what its
  * next battle is (`glitchbattles` own, mixed or deeper), `glitched on` or
  * `settled`, and its `copy` (waiting, fighting, deleted: its pick waits,

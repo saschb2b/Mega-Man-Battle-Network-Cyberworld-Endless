@@ -50,8 +50,9 @@ def stage(n):
     if n >= 2:
         steps.append(('repeat', 'wait 10', 'glitchlook!=own', 600))   # a flip: another area's look on the floor
         steps.append(('repeat', 'wait 10', 'glitchlook=own', 200))    # ... and the layer's own back
+        steps.append(('expect', 'glitchflips>=1'))
     else:
-        steps += [('do', 'wait 1200'), ('expect', 'glitchlook=own')]  # tears and slips alone: no look but its own
+        steps += [('do', 'wait 1500'), ('expect', 'glitchflips=0'), ('expect', 'glitchlook=own')]  # tears and slips alone
     return dict(START=f'{LAYER},glitchstage={n + 1}', STEPS=steps,
                 GUARDS=f"A Glitch layer at stage {n}: its battles {BATTLES[n]}, its words said, " +
                        ('the floor flipped into another look and back.' if n >= 2 else 'no flip of the floor yet.'))
