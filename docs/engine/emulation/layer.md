@@ -59,7 +59,12 @@ map's entry, where BN6 still holds him) the game is run on to him free
 first, unseen, A paging the RESULT and the director's talks waiting
 (`src/director/director_settle.c`, `scene_emu.c`'s `emu_keep_run`): a
 playtester's quit in that fade had gone back to the layer's start, the
-battle, its reward and the map walked since lost (session 76). A battle
+battle, its reward and the map walked since lost (session 76). A layer's
+exit taken is run on the same way, through its warp and the jack-in to
+MegaMan free on the next layer (`arriving`): until that layer's
+checkpoint, some two seconds, a quit had kept the layer left from its
+last checkpoint, its battles and what they paid lost
+([the fuzz of quits](../../devtools/scenarios.md)' first find). A battle
 under way is never run on, nor a guardian's, which [the arena's
 door](../../game/meta/arena-door.md) keeps. A quit with a chat box, a
 shop or the PET open keeps the run as it stood before it opened: no state

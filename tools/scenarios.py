@@ -197,10 +197,14 @@ def quit_game(h):
         pid = int(open(os.path.join(h, 'pid')).read())
     except (OSError, ValueError):
         raise Failed('the game was not running to quit')
-    os.killpg(pid, signal.SIGTERM)
-    for _ in range(1000):
-        # (this process's own child: gone once reaped)
+    for i in range(1000):
+        # (this process's own child: gone once reaped. The signal again every
+        # second: one heard between a batch's answer and the read of the
+        # next wakes no read, and the game waited there for good, one quit
+        # in some hundreds with the machine busy)
         try:
+            if i % 100 == 0:
+                os.killpg(pid, signal.SIGTERM)
             if os.waitpid(pid, os.WNOHANG)[0]:
                 break
         except OSError:
@@ -339,6 +343,10 @@ def check():
 
 
 def main():
+    if '--fuzz' in sys.argv[1:]:
+        # (a mode of its own: quits at frames a dice names, tools/scenarios_fuzz.py)
+        import scenarios_fuzz
+        sys.exit(scenarios_fuzz.main([a for a in sys.argv[1:] if a != '--fuzz']))
     rest, values = cw.options(sys.argv[1:], {'--list': 'list', '--check': 'check'}, {'--jobs': 'jobs'})
     if values.get('check'):
         sys.exit(check())

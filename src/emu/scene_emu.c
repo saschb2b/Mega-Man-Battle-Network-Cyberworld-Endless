@@ -151,6 +151,18 @@ static void after_frame(void) {
  * it was, as a quit in a battle leaves it: CONTINUE takes the run up
  * through the director, where BN6's own title would start on the map
  * tables the run has taken over. */
+/* The game left for the run's title: a Net Square visit's connection
+ * closed, the director stopped, the checkpoint as it stands. */
+static void to_title(void) {
+	online_visit_shutdown();
+	emu_sync();
+	director_stop();
+	cinema_reset();
+	started = false;
+	P.quit_prompt = 0;
+	scene_set(&scene_title);
+}
+
 static bool soft_reset(void) {
 	uint32_t chord = KEY_A | KEY_B | KEY_SELECT | KEY_START;
 	static bool from_square;
@@ -160,22 +172,17 @@ static bool soft_reset(void) {
 	 * own soft reset it is) */
 	if (from_square) return true;
 	if (online_visit_away()) { online_visit_leave(VISIT_END_LEFT); from_square = true; return true; }
-	online_visit_shutdown();
-	emu_sync();
-	director_stop();
-	cinema_reset();
-	started = false;
-	P.quit_prompt = 0;
-	scene_set(&scene_title);
+	to_title();
 	return true;
 }
 
-#define SETTLE_MOST 600   /* frames run on at most: a won battle's RESULT paged and the way to the map took about 200 (session 76) */
+#define SETTLE_MOST 600   /* frames run on at most: a won battle's RESULT paged and the way to the map took about 200 (session 76), a layer's exit to the next layer's map about 250 */
 
 /* The quit's save waits for MegaMan free; on a won battle's way back to
  * the map (its RESULT, the fade, the map's entry) the game is run on to
  * him free first, unseen and unheard, so the battle and its reward are
- * kept with the run (director_settle.c). On the core's own thread, the
+ * kept with the run, and so through a layer's exit to the next layer
+ * (director_settle.c). On the core's own thread, the
  * frame begun last is ended and its logic run first, and the next update
  * begins afresh. */
 void emu_keep_run(void) {
@@ -191,9 +198,28 @@ void emu_keep_run(void) {
 			after_frame();
 		}
 		director_settling(false);
-		printf("quit: the game run on %d frames after the battle, MegaMan %s\n", n, director_can_suspend() ? "free" : "still held");
+		printf("quit: the game run on %d frames, MegaMan %s\n", n, director_can_suspend() ? "free" : "still held");
 	}
 	director_suspend();
+}
+
+/* Options' Return to title (options.c; docs/engine/settings-screens.md,
+ * Return to title): offered wherever the game is the scene but in the Net
+ * Square, whose own Leave is the way out of it. */
+bool emu_title_offered(void) {
+	return scene_current() == &scene_emu && !online_visit_away() && !online_visit_held() && !online_visit_waiting();
+}
+
+/* ... where the run goes on from, the quit prompt's own line */
+const char *emu_title_where(void) { return director_on_layer() ? director_quit_where() : NULL; }
+
+/* ... and its Yes: the run kept as a quit keeps it, where the soft reset
+ * leaves the last checkpoint, then the title on its menu, CONTINUE and
+ * SAVES' key a press away */
+void emu_to_title(void) {
+	emu_keep_run();
+	title_menu = true;
+	to_title();
 }
 
 #define LAB_LOAD_SPEED 24   /* the game's frames to one shown while a set's field comes up: about 200 of BN6's in a sixth of a second */
