@@ -289,6 +289,8 @@ void director_describe(FILE *f) {
 	/* (a trip back, and the Net's clock: docs/world/home/) */
 	if (run.home_depth) fprintf(f, "back from layer %d\n", run.home_depth);
 	if (run.clock) fprintf(f, "clock %d\n", run.clock);
+	/* (a dark layer's board, its lines its own: liberation_describe.c) */
+	lib_describe(f);
 	/* (a dark layer's sealed region's route, found: docs/game/liberation/special-routes.md) */
 	if (lib_route_found()) fprintf(f, "route found\n");
 	/* (named as the game shows him: a playtester reads this; a dev's

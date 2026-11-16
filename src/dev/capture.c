@@ -39,7 +39,7 @@
 /* ---- scripted input and captures for headless tests ---- */
 /* A step holds buttons for some frames; one of no frames takes a picture
  * or writes the state instead (remote play). */
-typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
+typedef struct { int frames; uint32_t buttons; uint64_t pad; int key; char shot[160], second[160], state[160], dump[160], foes[64], swap[48], status[48], xrecord[32], bracket[64], chip[24], trade[40], reconnect[16], board[16]; int place[3], flags[3], stap[3], cross, folder, netpass, emote, sig; unsigned hold; bool placed, flagged, battle, held, onehit, lab; } InputStep;
 /* (the steps taken from the heap by the first script, as only headless
  * tests and remote play have one: a megabyte no game holds otherwise) */
 #define SCRIPT_MAX 1024
@@ -83,6 +83,8 @@ static bool text_step(const char *tok, InputStep *s) {
 	/* (BN4's bracket screen moved into BN6: xbracket.h) */
 	else if (!strncmp(tok, "bracket ", 8)) snprintf(s->bracket, sizeof s->bracket, "%s", tok + 8);
 	else if (!strncmp(tok, "chip ", 5)) snprintf(s->chip, sizeof s->chip, "%s", tok + 5);
+	/* (on a dark layer's board, beside the nearest panel of a kind: director_dev_board) */
+	else if (!strncmp(tok, "board ", 6)) snprintf(s->board, sizeof s->board, "%s", tok + 6);
 	else if (!strncmp(tok, "cross ", 6)) s->cross = (int)strtol(tok + 6, NULL, 0);
 	else if (!strncmp(tok, "folder ", 7)) s->folder = (int)strtol(tok + 7, NULL, 0);
 	/* (the NetPass opened over the game, or its stamp moment: netpass_screen.h) */
@@ -106,7 +108,7 @@ static bool text_step(const char *tok, InputStep *s) {
 /* whether a step is one of the dev steps (no buttons, no frames of its own) */
 static bool dev_step(const InputStep *s) {
 	return s->placed || s->flagged || s->battle || s->foes[0] || s->swap[0] || s->status[0] || s->xrecord[0] || s->bracket[0] || s->chip[0] || s->cross || s->folder || s->sig || s->held ||
-		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0];
+		s->onehit || s->netpass || s->trade[0] || s->reconnect[0] || s->emote || s->stap[2] || s->dump[0] || s->board[0];
 }
 
 /* "30:,2:A,10:,2:RIGHT" -> steps of (frames, buttons). */
@@ -214,6 +216,14 @@ static void write_state(const char *path) {
 	fclose(f);
 }
 
+/* The steps that put MegaMan somewhere on the layer: in its signature, by
+ * the Glitch warp, beside a panel of a dark layer's board */
+static void place_steps(const InputStep *s) {
+	if (s->sig == 1) director_dev_signature();
+	if (s->sig == 2) director_dev_glitch();
+	if (s->board[0]) director_dev_board(s->board);
+}
+
 /* A step's dev steps on the game: a battle, foes, a record of BN5's, a
  * status, a chip, the form the next Cross chosen takes (soulproxy.h), the
  * signature, the run saved with MegaMan held (a CONTINUE's recovery, issue
@@ -229,8 +239,7 @@ static void emu_steps(const InputStep *s) {
 	if (s->chip[0]) director_dev_chip(s->chip);
 	if (s->folder) director_dev_folder(s->folder);
 	if (s->cross) soulproxy_cross(s->cross);
-	if (s->sig == 1) director_dev_signature();
-	if (s->sig == 2) director_dev_glitch();
+	place_steps(s);
 	if (s->held) director_dev_hold(s->hold);
 	/* (every enemy held at 1 HP from now on, as --dev onehit: a long fight's end) */
 	if (s->onehit) devtools_parse("onehit");

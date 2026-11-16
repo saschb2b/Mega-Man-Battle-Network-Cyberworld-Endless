@@ -7,6 +7,19 @@
   battles all kept its rules: three turns, the Custom screen opening by
   itself, TIME UP! at the third, the guardians' battles too, until the
   game was closed. A liberation's rules now end with its battle.
+- **Fixed: a dark layer's panels not shown without BN5's ROM.** With
+  BN6's ROM alone the board's dark panels, DarkHoles and the lit panel
+  MegaMan faces were drawn a screen's width off on most layers, so the
+  floor looked clean and the fences stood unseen. They are drawn where
+  they lie.
+- **Fixed: a won liberation battle lost to a quit under MegaMan's
+  words.** Closing the game while he spoke after a battle won on a dark
+  layer's board (a one-turn win, a DarkHole closed, an item found), the
+  CONTINUE went back to before that battle. The run is now kept as it
+  stood when he began to speak.
+- **Fixed: START on the team's pick opened the PET.** Taking the team a
+  dark layer offered with START, the button went on to the game and
+  opened the PET over Lan's briefing.
 
 ## 0.22.0 (2026-11-15)
 

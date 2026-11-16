@@ -184,6 +184,14 @@ bool director_dev_signature(void);
 /* ... two panels from the layer's Glitch warp, or a Glitch layer's copy
  * (the "glitch" step: docs/game/glitch-layer.md); false where none stands */
 bool director_dev_glitch(void);
+/* ... on a dark layer's board, on the clean panel beside the nearest panel
+ * of kind `what` the walk reaches, facing it (the "board" step,
+ * liberation_describe.c: dark, pair, sneak, item, trap, bonus, darkhole,
+ * ring, guardian, darkloid, mate; an item's by what it holds: orderpoints,
+ * heart, key, zenny, chip, route; next: where the board's autopilot would
+ * stand him, liberation_auto.c; over: BombLiberation's flier over the
+ * nearest plain dark panel); false where the walk reaches none */
+bool director_dev_board(const char *what);
 /* A test's start at home (--scene home, docs/world/home/): the next act's
  * layer built behind Lan's HP's portals, MegaMan on its blue pad, as an
  * act's exit takes him. */

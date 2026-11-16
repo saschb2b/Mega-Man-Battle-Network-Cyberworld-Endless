@@ -46,6 +46,8 @@ static struct {
 	int target;        /* Major Hit's unit, -1 none */
 } S;
 
+static int gave = -1;   /* (the state's: the slot last given, lib_bonus_describe) */
+
 static int clamp_op(int op) { return op > LIB_OP_MAX ? LIB_OP_MAX : op; }
 
 static void say(const char *words, int after) {
@@ -62,6 +64,12 @@ void lib_bonus_begin(int x, int y) {
 	/* (BN5's first slot: its random number's (& 15) % 5) */
 	S.slot = (int)((rng_next() & 15) % LIB_BONUS_SLOTS);
 	say(lib_bonus_found_words(), LIB_STEP_BONUS);
+}
+
+void lib_bonus_describe(FILE *f) {
+	static const char *const slots[LIB_BONUS_SLOTS] = { "shield", "hp", "orderpoints", "chip", "hit" };
+	if (lib_bonus_spinning()) fprintf(f, "roulette %s\n", slots[S.slot % LIB_BONUS_SLOTS]);
+	fprintf(f, "bonus %s\n", gave < 0 ? "none" : slots[gave % LIB_BONUS_SLOTS]);
 }
 
 bool lib_bonus_spinning(void) { return LB.step == LIB_STEP_BONUS && S.phase == PH_SPIN && S.t - OPEN >= LIVE; }
@@ -81,6 +89,7 @@ static int nearest(bool darkloid) {
 /* The slot stopped on, given as BN5 gives it; the Navi acts again */
 static void give(void) {
 	char words[160];
+	gave = S.slot;
 	switch (S.slot) {
 	case LIB_BONUS_SHIELD:
 		LB.shield = true;

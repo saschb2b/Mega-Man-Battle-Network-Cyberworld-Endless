@@ -628,6 +628,7 @@ static void after_fight(void) {
 	if (emu_debug_on()) fprintf(stderr, "liberation: battle %d at %d,%d %s%s (turn %d)\n", LB.fight, LB.fx, LB.fy,
 		won ? "won" : out == LIB_OUT_TIME_UP ? "time up" : "lost", one_turn ? " in one turn" : "", turn);
 	LB.words[0] = 0;
+	LB.fought = one_turn ? 2 : won ? 1 : out == LIB_OUT_TIME_UP && !down ? 3 : 4;
 	/* (a unit not deleted keeps what his battle left him, BN5's; one left
 	 * at none by a battle not won a quarter of his max) */
 	int u = LB.fight_unit, left = lib_battle_foe_left();
@@ -711,8 +712,11 @@ static void talk_update_lib(void) {
 	/* (BN5's banner first, over the board faded back in) */
 	if (LB.cheer && lib_look_on() && LB.cheer_t < LIB_CHEER_WAIT + LIB_CHEER_FRAMES) return;
 	if (LB.words[0]) {
-		/* (a box with no speaker's mark is the Navi in play's, in his face) */
-		if (!quiet() || !talk_start(LB.words, lib_mate_face(LB.in_play))) return;
+		/* (a box with no speaker's mark is the Navi in play's, in his face;
+		 * begun once BN6 holds him no more, so the run is held back before
+		 * it: begun in the fade back from a won battle, a quit under his
+		 * words went back to the last checkpoint, the battle lost) */
+		if (!quiet() || !lib_words_due() || !talk_start(LB.words, lib_mate_face(LB.in_play))) return;
 		LB.words[0] = 0;
 		/* (an item found: BN5's jingle as its line begins) */
 		if (LB.npops) lib_sound(BN5_LIB_ITEM_SOUND);
@@ -914,6 +918,11 @@ bool lib_faced_takes(void) {
 }
 
 uint32_t lib_keys(uint32_t keys) {
+	/* (the keys held as the team's pick closed are none of BN6's till let
+	 * go: START on it, the board's own team taken, opened the PET) */
+	static uint32_t pick_held;
+	pick_held &= keys;
+	keys &= ~pick_held;
 	uint32_t pressed = keys & ~LB.held;
 	LB.held = keys;
 	/* (a chat box's: its pages, its questions) */
@@ -954,6 +963,7 @@ uint32_t lib_keys(uint32_t keys) {
 	viewing = false;
 	if (LB.step == LIB_STEP_PICK) {
 		lib_pick_step(pressed);
+		if (LB.step != LIB_STEP_PICK) pick_held = keys;
 		return 0;
 	}
 	if (LB.step == LIB_STEP_MENU) menu_keys(pressed);

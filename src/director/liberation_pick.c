@@ -87,6 +87,15 @@ static bool go(uint8_t navi[LIB_TEAM], int *n) {
 	return true;
 }
 
+void lib_pick_describe(FILE *f) {
+	if (LB.step != LIB_STEP_PICK) return;
+	fprintf(f, "teampick");
+	for (int o = 1; o <= LP.places; ++o)
+		for (int i = 0; i < LP.n; ++i)
+			if (LP.order[i] == o) fprintf(f, " %s", lib_navi_name(LP.navi[i]));
+	fprintf(f, "%s\nteamrow %s\n", lib_pick_count() ? "" : " none", LP.cursor < LP.n ? lib_navi_name(LP.navi[LP.cursor]) : "GO");
+}
+
 bool lib_pick_keys(uint32_t pressed, uint8_t navi[LIB_TEAM], int *n) {
 	++LP.t;
 	int rows = LP.n + 1;
