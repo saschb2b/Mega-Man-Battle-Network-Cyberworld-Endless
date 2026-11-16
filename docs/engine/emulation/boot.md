@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A new run and boot"
 description: "NEW GAME's start in the town (first layer built, Lan warped to his start, jack-in flag 0x1727 cleared) and `emu_boot`, which presses through BN6's title to Seaside Area 1 and saves `boot-4.state`, its number bumped when what NEW GAME gives changes, and a kept state that holds a played game made again (issue #688)."
 tags: [engine, emulation]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-14T22:27:59Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T23:10:00Z }
 ---
 
 # A new run and boot
