@@ -159,6 +159,9 @@ class Server:
         if self.proc and self.proc.poll() is None:
             return
         self.log = open(os.path.join(self.folder, 'server.log'), 'a')
+        if STOPPING:
+            raise SystemExit('the run is ending')
+        LIVE.append(self)
         self.proc = subprocess.Popen([sys.executable, os.path.join(ROOT, 'server', 'main.py'), '--config', self.ini,
                                       '--event-log', os.path.join(self.folder, 'events.jsonl')],
                                      stdout=self.log, stderr=subprocess.STDOUT, cwd=self.folder)
@@ -180,6 +183,20 @@ class Server:
         if self.log:
             self.log.close()
             self.log = None
+
+
+LIVE = []   # the servers started
+STOPPING = []   # (set once the run is ending: no server starts after it)
+
+
+def stop_all():
+    """Every server this run started, gone (tools/scenarios.py's stop_all)."""
+    STOPPING.append(True)
+    for server in LIVE:
+        try:
+            server.stop()
+        except (OSError, subprocess.SubprocessError):
+            pass
 
 
 class Nowhere:

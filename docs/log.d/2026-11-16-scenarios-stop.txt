@@ -1,0 +1,3 @@
+by: claude-code/claude-fable-5-2
+at: 2026-11-16T17:45:00Z
+* **Update**: devtools/scenarios.md (a run stops its games and servers as it ends or is signalled; `--stop` for those an earlier run left; `play.py`'s `stop` kills a game that did not hear its quit).
