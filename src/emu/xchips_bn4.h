@@ -55,7 +55,7 @@
                                        * +8 to +0xB (its panel's column and row, BN4_COLL_PANEL_BYTE, its counter time), from BN6's
                                        * +0xA to +0xD, the same fields in the same order but off a word's alignment: two halfwords
                                        * joined in r0, r1 kept (AirHoc's puck's move test, 0x080D288C: XvCallIn) */
-#define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 7, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
+#define XC4_MISC      (FREE_BN4_CHIPS_END - 0x400u)   /* BN6's misc family's routines grown, 256 (BN6's own 23, a unit's at XC4_FIRST_SUPPORT + BN4's subfamily) */
 #define XC4_FIRST_SUPPORT 0x80             /* BN4's subfamily 0 in BN6's grown support routines (BN6's 0-0x29, BN5's from 0x2A) */
 /* An attack family of BN4's (a state of its MegaMan's, BN4_PLAYER_STATES by a chip's record's +0xB: the spread chips' 0x1E)
  * is a unit too, XCHIP_ATTACK: the state's code whole, every subfamily of it, at a number of BN6's grown attack families

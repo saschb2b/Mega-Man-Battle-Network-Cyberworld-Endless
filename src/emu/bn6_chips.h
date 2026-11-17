@@ -317,8 +317,11 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
                                            * below 0 (bge at 0x080ED720; BN4's run ends at 0, bgt at 0x080EC9BA), then: */
 #define BN6_MISC_EXIT         0x080ED726u /* ... its way out (pop {r0}; mov r8,r0; pop {r4,r6,pc}). A waiting BN4 unit's wrapper goes on into
                                            * the run at one of the two (xchips_code.c wait_stage) */
-#define BN6_MISC_ROUTINES     0x080ED730u /* its routines by subfamily, BN6_MISC_ROUTINE_COUNT words */
-#define BN6_MISC_ROUTINE_COUNT 7
+#define BN6_MISC_ROUTINES     0x080ED730u /* its routines by subfamily, BN6_MISC_ROUTINE_COUNT words, to its own code at 0x080ED78C
+                                           * (entry 13's routine; bn6f off_80EC3F0, 23 words): 7 and 18 are 0, no chip's; 0x0A is
+                                           * BusterUp's (0x08010820, bn6f sub_8010820: the record's AttackParam1 added to the battle's
+                                           * Attack, up to 9) */
+#define BN6_MISC_ROUTINE_COUNT 23
 #define BN6_MISC_ROUTINES_REF 0x080ED72Cu /* the one word that names them (BN6_MISC_RUN's literal) */
 #define BN6_BATTLE_OBSTACLES  0xA0        /* the battle state's obstacles by side, three words a side (two, then one): BN6_OBSTACLE_ADD's */
 #define BN6_OBSTACLE_ADD      0x0800F614u /* r0 an object, r1 its side, r2 which list: entered there, the oldest's HP zeroed where it is full */

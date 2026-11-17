@@ -51,7 +51,7 @@ FAMILY4_SUPPORT, FAMILY6_SUPPORT = 0x0C, 0x15
 # ... and its misc chips: MegaMan's state 0x20 (BN4_MISC_RUN) runs a routine by subfamily and ends the attack at once, BN6's
 # family 0x1C (BN6_MISC_RUN) the same instruction for instruction; a 'misc' unit is one of BN4's routines there, whatever
 # its shape, at BN6's grown misc routines' NUMBER0 + its subfamily (src/emu/xchips_bn4.h XC4_MISC)
-MISC4, NMISC4, MISC6, NMISC6 = 0x080EC9CC, 0x12, 0x080ED730, 7   # BN4_MISC_ROUTINES, BN6_MISC_ROUTINES
+MISC4, NMISC4, MISC6, NMISC6 = 0x080EC9CC, 0x12, 0x080ED730, 23  # BN4_MISC_ROUTINES, BN6_MISC_ROUTINES
 FAMILY4_MISC, FAMILY6_MISC = 0x20, 0x1C
 # ... and its Navi chips, the support state's too: a 'navi' unit is the chip's Navi alone, run by BN6's Navi object at BN6's
 # grown Navi routines' NUMBER0 + its subfamily (tools/xchiprecipe_bn4_navi.py)

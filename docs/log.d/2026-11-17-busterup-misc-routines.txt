@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-17T00:15:00Z
+* **Update**: rom/chips-code.md (BN6's misc family's routines are 23, not 7: BusterUp's 0x0A and the rest past the seventh did nothing with BN4's ROM read; how BusterUp works and its check), rom/bn4.md (the misc table's 23), multirom/bn4-chips.md (Repair's paragraph: the table's 23), devtools/scenarios.md (`busterattack N`, the battle's Attack level), research/sources.md (a player's report of BusterUp doing nothing, verified).

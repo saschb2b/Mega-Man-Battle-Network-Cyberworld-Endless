@@ -219,7 +219,7 @@ between two fight frames since (a freeze's sixty-three ran past its 32).
 **Repair is moved, the first misc unit** (12 November 2026: id 557).
 BN4's misc chips run by MegaMan's state 0x20, which BN6's family 0x1C
 is instruction for instruction: a routine by subfamily, the attack ended
-in the same frame. BN6's table of them (7) is grown for BN4's units
+in the same frame. BN6's table of them (23; 7 until 17 November 2026, when BusterUp was found doing nothing beside BN4's ROM: [The chip registry and BN5's chips' code](../rom/chips-code.md), BN6's misc family) is grown for BN4's units
 (`XC4_MISC`), and the generator has a second kind of unit for a routine
 there, whatever its shape. Repair's is 60 bytes: each of its side's
 obstacles with HP left is given its full HP, an effect over it and a

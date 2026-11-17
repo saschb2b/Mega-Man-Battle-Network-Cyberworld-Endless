@@ -1,15 +1,16 @@
 /* A battle in the state's words (director_describe's), which
  * tests/scenarios reads (docs/devtools/scenarios.md, Battles and the
  * run's spine in the state): what kind it is, the phase it stands in, how
- * it ended and what its RESULT paid, the form MegaMan fights in, and the
- * statuses its enemies are held in. On the map after one, how the last
- * ended. Reading changes nothing. */
+ * it ended and what its RESULT paid, the form MegaMan fights in, his
+ * buster's attack, and the statuses its enemies are held in. On the map
+ * after one, how the last ended. Reading changes nothing. */
 #include "director_state.h"
 
 #include <stdio.h>
 
 #include "bn6.h"
 #include "bn6_battler.h"
+#include "bn6_link.h"
 #include "boss.h"
 #include "chip_entry.h"
 #include "emu.h"
@@ -72,6 +73,9 @@ void battle_state_describe(FILE *f) {
 	int phase = emu_read8(BN6_BATTLE_PHASE);
 	fprintf(f, "battle %s\nphase %s\nform %s\n", kind(),
 		phase == BN6_PHASE_CUSTOM ? "custom" : phase == BN6_PHASE_FIGHT ? "fight" : phase == BN6_PHASE_RESULTS ? "results" : "other", form());
+	/* (the battle's copy of MegaMan's Attack, its level: a buster shot's damage, BusterUp's +1 on it, bn6f sub_801265A, before a
+	 * form's bonus) */
+	fprintf(f, "busterattack %d\n", emu_read8(BN6_BATTLE_NAVI + BN6_NS_ATTACK) + 1);
 	statuses(f);
 	if (phase != BN6_PHASE_RESULTS) return;
 	fprintf(f, "result %s\n", result());
