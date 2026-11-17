@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **Fixed: BusterUp and some other chips of BN6's did nothing with Battle
+  Network 4's ROM in the game.** BN4's chips were added to the game's
+  table for chips like BusterUp, but that table kept only the first 7 of
+  BN6's 23 entries. BusterUp now raises MegaMan's buster by one level
+  for the rest of the battle, as in BN6: a shot deals 2 instead of 1,
+  and a charged shot 20 instead of 10. SandWrm1-3, FireHit1-3, GolmHit1-3,
+  JustcOne and ColArmy are fixed too. With BN6's ROM alone, or with
+  BN5's beside it, BusterUp always worked: its +1 is easy to miss.
+
 ## 0.22.2 (2026-11-17)
 
 - **Fixed: a new run that began with the last run's MegaMan (issue
