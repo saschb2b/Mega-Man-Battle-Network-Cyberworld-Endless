@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-17
+* **Update**: rom/chips-code.md (BN6's misc family's routines are 23, not 7: BusterUp's 0x0A and the rest past the seventh did nothing with BN4's ROM read; how BusterUp works and its check), rom/bn4.md (the misc table's 23), multirom/bn4-chips.md (Repair's paragraph: the table's 23), devtools/scenarios.md (`busterattack N`, the battle's Attack level), research/sources.md (a player's report of BusterUp doing nothing, verified).
+
 ## 2026-11-16
 * **Add**: releases/v0.22.2.md (the players' notes of 0.22.2, "A new run starts new.": issue #688's fix, the new run's PET before and after, Espilan credited). **Update**: releases/index.md and releases/overview.md (its line), code/layers.md (0.22.2's row of numbers), devtools/old-checkpoint.md (0.22.2's candidate).
 * **Update**: engine/emulation/boot.md (a kept boot state that holds a played game is made again, issue #688; its scenario and `--dev bootplayed`), engine/emulation/index.md (its line).
