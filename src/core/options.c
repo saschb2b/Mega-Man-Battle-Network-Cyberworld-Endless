@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "buttons.h"
 #include "controls.h"
+#include "discord.h"
 #include "display.h"
 #include "fast_forward.h"
 #include "feel_out.h"
@@ -56,12 +57,15 @@ int options_lines(int kinds[LINES_MAX]) {
 		kinds[n++] = LINE_FAST;
 		if (analytics_ask_here()) kinds[n++] = LINE_STATS;
 		if (update_here()) kinds[n++] = LINE_UPDATES;
+		if (discord_here()) kinds[n++] = LINE_DISCORD;
 		/* (in a run: the way to the title, last as a way out stands) */
 		if (emu_title_offered()) kinds[n++] = LINE_TITLE;
 	}
 	/* (no Done: B leaves, as everywhere in BN6) */
 	return n;
 }
+
+bool options_discord_on(void) { return discord_on(); }
 
 int options_line_kind(void) {
 	int kinds[LINES_MAX], n = options_lines(kinds);
@@ -240,6 +244,7 @@ static void turn(int kind, int dir) {
 	case LINE_VIBRATION: feel_keep(kind, feel_level_next(feel_level(), dir)); break;
 	case LINE_TRIGGERS: feel_keep(kind, !feel_triggers()); break;
 	case LINE_UPDATES: update_set_on(!update_on()); break;
+	case LINE_DISCORD: discord_set_on(!discord_on()); break;
 	case LINE_TOUCH: touch_keep(!touch_off()); break;
 	default: options_sound_keep((SoundFilter)((sound_filter() + SOUND_FILTER_COUNT + (dir < 0 ? -1 : 1)) % SOUND_FILTER_COUNT), true); break;
 	}

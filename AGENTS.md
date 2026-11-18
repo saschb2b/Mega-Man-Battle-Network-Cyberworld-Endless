@@ -126,6 +126,7 @@ part of the tree; a new file gets its line there.
 | `src/launcher/`, `src/library/`, `src/saves/`, `src/scenes/`, `src/second/` | [docs/code/screens.md](docs/code/screens.md): the ROMs screen, the Library, SAVES, the start and title, the second screen |
 | `src/analytics/` | [docs/code/analytics.md](docs/code/analytics.md): the anonymous statistics |
 | `src/update/` | [docs/code/update.md](docs/code/update.md): the game's own updates |
+| `src/discord/` | [docs/code/discord.md](docs/code/discord.md): Discord's presence, what friends see of a run |
 | `src/dev/` | [docs/code/dev.md](docs/code/dev.md): developer tools inside the game |
 | `tests/` | [docs/code/tests.md](docs/code/tests.md): the ROM-free tests and lint's baselines |
 | `tools/`, `.mcp.json`, `.claude/skills/` | [docs/code/tools.md](docs/code/tools.md): research and test tools, the agents' MCP server, the scenarios' runner, the skills |

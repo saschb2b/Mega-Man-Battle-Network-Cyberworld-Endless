@@ -47,6 +47,7 @@ typedef enum {
 	OW_MUSIC_LOW_NOTE, OW_EFFECTS_LOW_NOTE,   /* Music's and Effects' notes under the game's own level */
 	OW_TOUCH, OW_TOUCH_AUTO_NOTE, OW_TOUCH_OFF_NOTE,   /* the Game page's touch controls line (touch.h) */
 	OW_TO_TITLE, OW_TO_TITLE_NOTE, OW_ASK_TITLE,   /* ... its Return to title in a run, and its question */
+	OW_DISCORD, OW_DISCORD_ON_NOTE, OW_DISCORD_OFF_NOTE,   /* ... its Discord line, the desktops' (discord.h) */
 	OW_COUNT
 } OptionsWord;
 const char *options_word(OptionsWord w);

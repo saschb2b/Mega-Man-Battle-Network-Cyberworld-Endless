@@ -119,6 +119,7 @@ DOMAINS = {
     'saves_text': ('SAVES', 'Screen', 'screen'),
     'analytics_text': ('Statistics', 'Screen', 'screen'),
     'options_text': ('Options', 'Screen', 'screen'),
+    'discord_text': ('Discord', 'Screen', 'screen'),
     'second_text': ('The second screen', 'Screen', 'screen'),
 }
 DEFAULT_DOMAIN = ('Other', 'MegaMan', 'speech')

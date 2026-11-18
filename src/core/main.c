@@ -37,6 +37,9 @@ static const Scene *current, *pending;
 
 const Scene *scene_current(void) { return current; }
 
+void (*frame_watch)(void);
+void (*quit_watch)(void);
+
 void scene_set(const Scene *s) { pending = s; }
 
 static const Scene *scene_by_name(const char *n) {
@@ -106,6 +109,7 @@ static bool game_frame(void) {
 	else if (current && current->update && !touch_paused()) current->update();
 	if (over && current && current->held) current->held();
 	audio_frame();
+	if (frame_watch) frame_watch();
 	uint64_t t1 = SDL_GetPerformanceCounter();
 	platform_begin_frame();
 	if (current && current->draw) current->draw();
@@ -515,6 +519,7 @@ static int frame_loop(const Options *o) {
 	 * connection closed first: its gate's checkpoint stays) */
 	online_visit_shutdown();
 	if (current == &scene_emu) emu_keep_run();
+	if (quit_watch) quit_watch();
 	/* (the game's song carried under a screen let go before its core: the
 	 * sound's thread reads that core's ROM, audio.h) */
 	music_carry_drop();

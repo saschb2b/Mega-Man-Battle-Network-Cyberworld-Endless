@@ -15,13 +15,16 @@
  * them, feel_out.h) and the Game page's (the update found, on the
  * title: update.h; Controls, Touch controls where a touch screen is
  * (touch.h), Fast forward, Statistics, Updates where the build looks
- * for them, and in a run Return to title, last: game.h's emu_to_title) */
+ * for them, Discord on the desktops (discord.h), and in a run Return to
+ * title, last: game.h's emu_to_title) */
 enum { LINE_CONTROLS, LINE_STATS, LINE_UPDATE, LINE_FULLSCREEN, LINE_SCALE, LINE_SMOOTH, LINE_SOUND, LINE_MUSIC, LINE_EFFECTS, LINE_FAST,
-	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL, LINE_UPDATES, LINE_TOUCH, LINE_TITLE };
+	LINE_VIBRATION, LINE_TRIGGERS, LINE_COLOUR, LINE_BLEND, LINE_LCD3X, LINE_OUTPUT, LINE_VOXEL, LINE_UPDATES, LINE_DISCORD, LINE_TOUCH, LINE_TITLE };
 #define LINES_MAX 8
 
 /* A line whose value Left, Right, A or a tap turns, and keeps at once */
 static inline bool options_line_turns(int kind) { return kind >= LINE_FULLSCREEN && kind <= LINE_TOUCH; }
+/* Discord's presence on (discord.h's, options.c's to ask: the drawing's) */
+bool options_discord_on(void);
 
 /* The pages, L and R turning from one to the next as the Library turns
  * its own (Valhalla's tabs, docs/engine/settings-screens.md) */

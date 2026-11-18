@@ -42,6 +42,9 @@ emu.game = emu/scene_emu.* emu/emu_picture.* emu/game_hooks.* emu/fast_forward_g
 emu.game = emu/autopilot* emu/showcase.*
 emu.game = emu/voxel_scene.* emu/stereo_scene.*
 
+# Discord's presence: the setting and the pipe below Options; what it reads of the game above the scenes
+discord.game = discord/discord_game.*
+
 # ---- the layers, lowest first ----
 
 formats:
@@ -54,18 +57,20 @@ audio:        formats core.base emu
 gfx:          formats core.base core.data emu
 analytics:    formats core.base core.data core net audio gfx
 update:       formats core.base analytics
+discord:      formats core.base
 map:          formats core.base core.data core emu net gfx
 layer:        formats core.base core.data core emu net map
 world:        formats core.base core.data core emu net map layer
 jukebox:      formats core.base audio gfx
 library:      formats core.base core.data core audio gfx
-core.options: formats core.base emu audio gfx analytics update
+core.options: formats core.base emu audio gfx analytics update discord
 director:     *
 online:       formats core.base core.data core emu net audio gfx analytics map layer jukebox library director
 second:       *
 launcher:     formats core.base core audio gfx core.options
 saves:        formats core.base core audio gfx launcher
 scenes:       formats core.base core.data core audio gfx layer core.options director second launcher saves update
+discord.game: *
 emu.game:     *
 dev:          *
 core.app:     *

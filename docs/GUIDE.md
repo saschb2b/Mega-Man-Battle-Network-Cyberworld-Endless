@@ -16,7 +16,7 @@ statistics, troubleshooting and building the game yourself.
 [What you need](#what-you-need) · [Install](#install) · [Playing](#playing) ·
 [A run](#a-run) · [Getting stronger](#getting-stronger) ·
 [What carries over](#what-carries-over) · [Saving and losing](#saving-and-losing) ·
-[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Updates](#updates) · [Anonymous statistics](#anonymous-statistics) ·
+[Moving saves between devices](#moving-saves-between-devices) · [Online](#online-the-net-square) · [Screen](#screen) · [Updates](#updates) · [Discord](#discord) · [Anonymous statistics](#anonymous-statistics) ·
 [Troubleshooting](#troubleshooting) · [Building](#building)
 
 ## What you need
@@ -561,7 +561,8 @@ with **Controls** (the controls screen, not on the 3DS, whose buttons are
 its own), **Touch controls** where there is a touch screen (below),
 **Fast forward**'s speed ([Fast forward](#fast-forward)),
 **Statistics**, your answer to the statistics' question, where the game
-can send them, and in a run **Return to title** (above). Left and Right turn a line's value, kept at once; B
+can send them, **Discord** on Windows, Linux and macOS ([Discord](#discord)),
+and in a run **Return to title** (above). Left and Right turn a line's value, kept at once; B
 leaves (on a phone, the touch controls' B), and Options opens again on
 the page and line you left. **START** (or a tap on START:DEFAULT) puts a
 page's lines back as they came, after a Yes: Fullscreen, Controls and
@@ -1652,6 +1653,30 @@ they are. The line shows on the title only, never in a run.
 **Updates** on Options' Game page switches the look off (`updates = off`
 in `settings.ini`) and on again. The iPhone and iPad app updates through
 SideStore or AltStore, as before.
+
+## Discord
+
+On Windows, Linux and macOS, with the Discord app open on the same
+computer, your friends on Discord see that you play Cyberworld Endless
+and how far your run has come, on your profile and in the member list:
+
+| You are | Discord shows |
+| --- | --- |
+| On a layer | **Layer 14 · Sky Area** (the short net: **Layer 7 of 10**), and **Exploring**, **Busting viruses**, **Fighting ElecMan** or **Dueling ProtoMan**, with the run's threat where it has one |
+| Home between acts | **Home · layer 4 next**, and the town or **Lan's HP** |
+| In the Net Square | **In the Net Square**, **Online** or **NetBattling** |
+| On the title, the setup, a run's summary | **On the title screen**, **Setting up a run**, **Run over on layer 14** or **Won the run on layer 10** |
+
+with the time you have played this session, your best layer and runs on
+the picture's tooltip, and a **Get Cyberworld Endless** button for your
+friends. The game talks only to the Discord app on your computer, never
+to a server of its own, and Discord shows it as its own **Activity
+Privacy** settings allow. **Discord** on Options' Game page switches it
+off (`discord = off` in `settings.ini`) and on again; off clears it at
+once. Nothing shows when Discord is closed: the game looks for it again
+every 20 seconds. The Flatpak can reach both the Discord app and
+Discord's Flatpak. The handhelds, the consoles, the phones and the
+browser have no Discord beside them, and no line.
 
 ## Anonymous statistics
 

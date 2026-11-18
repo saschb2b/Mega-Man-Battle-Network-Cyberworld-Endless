@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **New: your friends on Discord see you play, and how far the run
+  has come.** On Windows, Linux and macOS, with the Discord app open,
+  your Discord profile shows Cyberworld Endless with the layer and its
+  area, what MegaMan is doing (exploring, busting viruses, fighting a
+  guardian by name, dueling ProtoMan), home between acts, the Net
+  Square, a run's end, the time played and your best run, with a button
+  to the game's page. The game talks only to the Discord app on your
+  computer. **Discord** on Options' Game page switches it off.
+
 - **Fixed: BusterUp and some other chips of BN6's did nothing with Battle
   Network 4's ROM in the game.** BN4's chips were added to the game's
   table for chips like BusterUp, but that table kept only the first 7 of

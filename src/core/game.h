@@ -20,6 +20,12 @@ typedef struct {
 void scene_set(const Scene *s);
 /* The scene the frames run (main.c), NULL before the first */
 const Scene *scene_current(void);
+/* A part above the scenes watching each frame, after its update and
+ * before its drawing (it reads the game, never changes it), and the
+ * game's end; set at the start (start_net.c: Discord's presence), NULL
+ * none */
+extern void (*frame_watch)(void);
+extern void (*quit_watch)(void);
 
 extern const Scene scene_error;
 extern const Scene scene_title;
