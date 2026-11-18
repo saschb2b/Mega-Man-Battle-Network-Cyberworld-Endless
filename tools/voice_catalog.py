@@ -1090,8 +1090,9 @@ def words_files():
             head = ''.join(f.readline() for _ in range(3))
         if re.search(r'(written|drawn|made) by tools/', head):
             continue
-        files.append(os.path.relpath(path, ROOT))
-    return files
+        # (as git names it, on every system: the catalog is the same written on Windows)
+        files.append(os.path.relpath(path, ROOT).replace(os.sep, '/'))
+    return sorted(files)
 
 
 def guardian_names():
