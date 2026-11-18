@@ -136,11 +136,20 @@ bool discord_ipc_send(const void *data, size_t n) {
 	return true;
 }
 
+/* Whether a read failed only for nothing being there yet (EWOULDBLOCK is
+ * EAGAIN on Linux and macOS, another number elsewhere) */
+static bool nothing_yet(int e) {
+#if EWOULDBLOCK != EAGAIN
+	if (e == EWOULDBLOCK) return true;
+#endif
+	return e == EAGAIN || e == EINTR;
+}
+
 long discord_ipc_recv(void *buf, size_t n) {
 	if (sock < 0) return -1;
 	ssize_t k = recv(sock, buf, n, 0);
 	if (k > 0) return (long)k;
-	if (k < 0 && (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR)) return 0;
+	if (k < 0 && nothing_yet(errno)) return 0;
 	discord_ipc_close();
 	return -1;
 }
