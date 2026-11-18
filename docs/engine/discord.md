@@ -132,11 +132,12 @@ Discord's).
 
 What a friend reads as the game's name ("Playing Cyberworld Endless") is
 the name of an application on Discord's developer portal, whose id the
-handshake names (`DISCORD_APP_ID` in `discord.h`). The owner registers it
-once (discord.com/developers, New Application, the name Cyberworld
-Endless, the game's icon as its app icon) and writes its id there; until
-then the build has none and shows nothing, Options' line included. The
-id is public, no secret: every game's presence names its own.
+handshake names (`DISCORD_APP_ID` in `discord.h`): the owner's
+**Cyberworld Endless**, `1572683382142410772`, registered on 18 November
+2026 with the game's icon (`web/assets/icons/512.png`) as its app icon.
+Its name and icon are changed there, never in the game. A build with the
+id empty shows nothing, Options' line included. The id is public, no
+secret: every game's presence names its own.
 
 ## Left out
 

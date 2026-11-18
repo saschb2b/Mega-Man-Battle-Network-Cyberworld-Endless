@@ -25,7 +25,7 @@
  * a friend reads ("Playing Cyberworld Endless"). settings.ini's
  * discord_app takes another (a fork's own). Empty: the build has none,
  * and shows nothing (no Options line either). */
-#define DISCORD_APP_ID ""
+#define DISCORD_APP_ID "1572683382142410772"
 /* The picture beside it (the game's icon on its site: Discord takes an
  * address for the art as it takes a key uploaded to the portal), and the
  * one button a friend can press */
