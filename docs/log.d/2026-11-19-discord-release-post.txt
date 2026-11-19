@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-19T23:00:00Z
-* **Update**: project/discord.md (Releases there: each release posts itself in #announcements from its notes, `tools/discord_release.py` through `discord-release.yml`, a Release pings ping, the cover and buttons, its secret and role variable, Publish for followers; its description and index line), code/tools.md (`tools/discord_release.py`'s row), code/tests.md (`tests/test_discord_release.py`), code/platforms.md (`release.yml` calls `discord-release.yml`).

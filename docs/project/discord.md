@@ -3,7 +3,7 @@ type: Process
 title: "Discord"
 description: "The project's Discord server, the open place to talk beside GitHub: its permanent invite, its channels, forums, roles and onboarding, the rules it keeps (bugs to GitHub, no ROMs), its moderation, where the site links it, and the post each release makes there itself."
 tags: [project, community, discord]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T23:00:00Z }
 ---
 
 # Discord
