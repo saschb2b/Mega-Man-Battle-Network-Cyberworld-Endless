@@ -13,7 +13,7 @@
 
 void start_net(bool headless, bool plain) {
 	analytics_net_start(headless, plain);
-	discord_start(plain && !headless);
+	discord_start((plain && !headless) || dev.discord);
 	frame_watch = discord_game_frame;
 	quit_watch = discord_game_quit;
 	const char *url = dev.online ? dev.online : NETWORK_DEFAULT_URL;

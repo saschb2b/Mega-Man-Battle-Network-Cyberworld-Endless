@@ -76,7 +76,10 @@ started the game (never headless, a test's or a developer's start), and
 the build has an application to name. START's defaults on the Game page
 leave it as it is, as they leave Updates and Statistics.
 `discord_app = ID` in `settings.ini` names another application (a fork's
-own; the game's own otherwise).
+own; the game's own otherwise). `--dev discord` lets a developer's start
+show it too, a headless one included: an autopilot run on the friend
+list, Options' line in a capture
+([the dev menu's switches](../devtools/dev-menu.md)).
 
 ## The wire
 
@@ -103,6 +106,14 @@ the same body). The game sends two things:
   or with no activity, which clears it. A line under two bytes is left
   out, as Discord refuses one; quotes, backslashes and control
   characters are escaped, the rest kept as UTF-8.
+
+Checked on 19 November 2026 against the Discord app's Snap on Ubuntu
+(its socket in `snap.discord/`): the handshake's `READY` names the
+signed-in user, and Discord's answer to `SET_ACTIVITY` gives the activity
+back as friends get it, named "Cyberworld Endless" by the application,
+the picture's address taken as an external image (`mp:external/...`, Discord's
+proxy), the button's label and address kept and the start in
+milliseconds.
 
 ## The pace
 

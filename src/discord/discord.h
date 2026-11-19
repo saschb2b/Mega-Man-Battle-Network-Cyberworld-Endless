@@ -8,9 +8,10 @@
  *
  * The desktop builds have it (Windows, Linux, macOS; not the handhelds,
  * the consoles, the phones or the browser), at a player's start (never
- * headless, a test's or a developer's). On by default: settings.ini's
- * discord line, turned on Options' Game page. Where no Discord runs, it
- * looks again every DISCORD_RETRY_MS, and nothing shows.
+ * headless, a test's or a developer's, but for --dev discord). On by
+ * default: settings.ini's discord line, turned on Options' Game page.
+ * Where no Discord runs, it looks again every DISCORD_RETRY_MS, and
+ * nothing shows.
  *
  * This part keeps the setting and the connection and sends what it is
  * handed; discord_game.c reads the game for it. */
