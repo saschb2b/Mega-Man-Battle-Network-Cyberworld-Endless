@@ -100,6 +100,8 @@ On 13 November 2026, 0.20.0's and 0.21.0's runs:
 
 0.22.2's candidate (17 November) continued 0.22.1's and 0.22.0's runs: both ok (a battle won and layer 3 reached), IWRAM's routines the same bytes; each release's own boot state passed the new boot's check of a new game (issue #688) and began its NEW GAME.
 
+0.23.0's candidate (19 November) continued 0.22.2's and 0.22.1's runs: both ok (a battle won and layer 3 reached), IWRAM's routines the same bytes, and each release's boot state began its NEW GAME (a battle won, layer 2 reached).
+
 ## What a state holds of the engine's
 
 What the engine writes into RAM a state carries to the next build, and
