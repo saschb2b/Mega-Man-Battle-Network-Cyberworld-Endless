@@ -21,6 +21,7 @@ The players' notes of each release, which the site's versions page renders (`too
 
 ## The releases
 
+- [Cyberworld Endless 0.23.0](v0.23.0.md): Your run on Discord, and a server to talk in.
 - [Cyberworld Endless 0.22.2](v0.22.2.md): A new run starts new.
 - [Cyberworld Endless 0.22.1](v0.22.1.md): A run that stays where you left it.
 - [Cyberworld Endless 0.22.0](v0.22.0.md): Your run, on every device.
