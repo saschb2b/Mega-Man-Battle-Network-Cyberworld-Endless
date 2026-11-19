@@ -3,7 +3,7 @@ type: Feature
 title: "Stage 3, as built: the team"
 description: "Stage 3, the team (`src/director/liberation_team.c`): Navis whose BN5 Souls the run holds, two to five by act at BN5's HP, their commands, a teammate's battle fought in his Soul, and boards planned for teams."
 tags: [game, liberation, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-25T13:43:58Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:03:43Z }
 ---
 
 # Stage 3, as built: the team (25 October 2026)

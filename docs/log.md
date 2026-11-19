@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-19
+* **Update**: game/liberation/building/stage-3-team.md (the player's own body again wherever no board is on, issue #696), devtools/agents-tools.md (the state's `body` line).
 * **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).
 
 ## 2026-11-18
