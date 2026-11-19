@@ -3,7 +3,7 @@ type: Overview
 title: "Release notes"
 description: "The players' notes of every release, newest first, which the site's versions page renders and each GitHub release opens with."
 tags: [releases]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-16T23:40:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T21:30:00Z }
 ---
 
 # Release notes
@@ -21,6 +21,7 @@ The players' notes of each release, which the site's versions page renders (`too
 
 ## The releases
 
+- [Cyberworld Endless 0.23.0](v0.23.0.md): Your run on Discord, and a server to talk in.
 - [Cyberworld Endless 0.22.2](v0.22.2.md): A new run starts new.
 - [Cyberworld Endless 0.22.1](v0.22.1.md): A run that stays where you left it.
 - [Cyberworld Endless 0.22.0](v0.22.0.md): Your run, on every device.

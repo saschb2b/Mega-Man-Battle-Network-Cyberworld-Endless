@@ -10,6 +10,8 @@
   beside Gregar's. Once their Navi has fallen, a run can start in one
   (issue #706).
 
+## 0.23.0 (2026-11-19)
+
 - **New: your friends on Discord see you play, and how far the run
   has come.** On Windows, Linux and macOS, with the Discord app open,
   your Discord profile shows Cyberworld Endless with the layer and its
@@ -18,6 +20,22 @@
   Square, a run's end, the time played and your best run, with a button
   to the game's page. The game talks only to the Discord app on your
   computer. **Discord** on Options' Game page switches it off.
+
+- **New: the game's Discord server.** A place to talk runs and folders,
+  find a NetBattle in `#net-square`, share screenshots and clips, get
+  help with a setup or a save, put forward ideas, and get a ping for
+  each new version if you want one: <https://discord.gg/mfZyWFvyfG>.
+  The README, every page of the site and the guide link it. Bugs still
+  go to GitHub's issues, where they are tracked. On the site, the
+  download page's notes are two PET windows now, **Your files** and
+  **Stay in touch**.
+
+- **Fixed: MegaMan and Lan kept a liberation teammate's body (issue
+  #696).** A dark layer's board left with a teammate in play (Colonel,
+  EraseMan, HeatMan) kept his body on the player: the next layer's
+  MegaMan was that Navi, so was the next run's Lan, and Lan's jack-in
+  held for good. Every layer, home, run and CONTINUE now gives both
+  their own bodies back wherever no board is on.
 
 - **Fixed: Windows could not receive saves by code or from the cloud
   (issue #700).** A code's transfer stopped part of the way, and CLOUD

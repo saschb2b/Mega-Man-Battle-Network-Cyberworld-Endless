@@ -1782,6 +1782,10 @@ SCREENSHOTS = [
      [(100, 'options'), (210, 'options-display'), (255, 'options-audio'), (300, 'options-game')], {}),
     # (SELECT on the title: Options, then its Controls, an Xbox pad attached)
     ('controls', ['--scene', 'title', '--pad', 'xbox', '--input', '60:,4:SELECT,30:,4:A,40:'], [(134, 'controls')], {}),
+    # (0.23.0's: Options' Game page from the title, UP to its last line,
+    # Discord, on; A turns it off)
+    ('options-discord', ['--scene', 'title', '--dev', 'discord', '--input', '60:,4:SELECT,150:,4:R,40:,4:R,40:,4:UP,40:,4:A,40:'],
+     [(345, 'options-discord'), (390, 'options-discord-off')], {}),
     # (a Recovery Mr. Prog on an act's middle layer, MegaMan held at 40 HP:
     # half his max back, his one patch; asked again, spent)
     ('heal-once', ['--scene', 'emu', '--run-depth', '2', '--seed', '5', '--dev', 'quiet,hp=100/40', '--talk', 'heal:620,heal:1150',

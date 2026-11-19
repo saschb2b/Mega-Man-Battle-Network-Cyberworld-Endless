@@ -3,7 +3,7 @@ type: Process
 title: "Discord"
 description: "The project's Discord server, the open place to talk beside GitHub: its permanent invite, its channels, forums, roles and onboarding, the rules it keeps (bugs to GitHub, no ROMs), its moderation, and where the site links it."
 tags: [project, community, discord]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T14:48:13Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:00:00Z }
 ---
 
 # Discord
@@ -21,7 +21,7 @@ The invite is <https://discord.gg/mfZyWFvyfG>, made never to expire and
 without a limit of uses. The README's top row, every page's footer on the
 site (English and Japanese), the download page's line on questions and
 runs, the FAQ's answer on new versions and the
-[player's guide](../GUIDE.md)'s Follow updates link it; the home pages
+[player's guide](../GUIDE.md)'s Follow updates and the [itch.io page](itch.md)'s Links (from 0.23.0) link it; the home pages
 name it in their `sameAs` too. On GitHub, a question in the Discussions'
 Q&A, "Is there a Discord server?" (#701), holds the invite as its
 accepted answer.
