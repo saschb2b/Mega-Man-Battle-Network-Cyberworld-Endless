@@ -21,7 +21,7 @@ The invite is <https://discord.gg/mfZyWFvyfG>, made never to expire and
 without a limit of uses. The README's top row, every page's footer on the
 site (English and Japanese), the download page's line on questions and
 runs, the FAQ's answer on new versions and the
-[player's guide](../GUIDE.md)'s Follow updates link it; the home pages
+[player's guide](../GUIDE.md)'s Follow updates and the [itch.io page](itch.md)'s Links (from 0.23.0) link it; the home pages
 name it in their `sameAs` too. On GitHub, a question in the Discussions'
 Q&A, "Is there a Discord server?" (#701), holds the invite as its
 accepted answer.
