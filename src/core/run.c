@@ -8,6 +8,7 @@
 #include "pacing.h"
 #include "rivals.h"
 #include "guardians.h"
+#include "meta.h"
 #include "net.h"
 #include "save.h"
 #include "super_boss.h"
@@ -433,7 +434,7 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 	run.folder = (uint8_t)folder;
 	run.threat = (uint8_t)(threat < 0 ? 0 : threat > THREAT_MAX ? THREAT_MAX : threat);
 	run.helpers = (uint8_t)helpers;
-	run.cross = (uint8_t)(cross >= 1 && cross <= 5 ? cross : 0);
+	run.cross = (uint8_t)(cross >= 1 && cross <= META_CROSSES ? cross : 0);
 	if (mode != RUN_SHORT) return;
 	/* the short net's Nest comes as the fourth act (its guardian no SP),
 	 * none of the three acts' guardians again */

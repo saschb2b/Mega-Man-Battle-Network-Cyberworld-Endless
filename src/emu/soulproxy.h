@@ -29,6 +29,9 @@ enum {
 	SOULPROXY_BREAK_SUMMON = 16,  /* the summon not hooked */
 };
 bool soulproxy_install(int breaks);
+/* Whether form 8 is the proxy in this core (installed): Falzar's
+ * TenguCross is then not offered (powers.c) */
+bool soulproxy_installed(void);
 /* The Souls' hooks as a run's core takes them at its start (game_hooks.c):
  * the proxy form and UNITE wherever BN5's Navis are (no_navis: they are
  * not), or always where forced (--dev soulproxy), each written down for

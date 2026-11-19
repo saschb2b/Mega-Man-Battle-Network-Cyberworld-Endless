@@ -29,6 +29,7 @@ void meta_chip_used(int id);
 void meta_guardian_deleted(void);
 /* Whether a run may bring `navi`'s Cross (HeatMan 1 .. ChargeMan 5): open
  * once that navi has been deleted as a guardian, in any run. */
+#define META_CROSSES 10   /* the Cross navis: Gregar's HeatMan 1 .. ChargeMan 5, Falzar's SpoutMan 6 .. DustMan 10 */
 bool meta_cross_open(int navi);
 bool meta_endless_open(void);
 /* A run's setup in a headless run's state, a line each: `net` short or

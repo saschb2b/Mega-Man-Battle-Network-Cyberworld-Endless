@@ -9,7 +9,10 @@
  * guardian's Soul, and BeastOut from the Cybeast (issue #109); true where
  * a Soul new to the run came. */
 bool powers_after_boss(int navi);
-/* The Cross of `navi` (HeatMan 1 .. ChargeMan 5), NULL for a navi with none. */
+/* The Cross of `navi` (HeatMan 1 .. ChargeMan 5, Falzar's SpoutMan 6 ..
+ * DustMan 10), NULL for a navi with none or one CROSSSELECT cannot give
+ * in this game (Falzar's where their rows could not be made; TenguCross
+ * while the Souls' proxy stands on its form). */
 const char *powers_cross_name(int navi);
 /* The attacks that hit MegaMan twice as hard in that Cross ("Aqua"). */
 const char *powers_cross_weakness(int navi);

@@ -20,6 +20,7 @@ _Static_assert(CHAR_BIT == 8 && sizeof(int) == 4 && sizeof(bool) == 1, "Save sca
  * Lab's own folder and for the first meetings heard, read up to its size: an
  * older profile reads whole, the new fields zero) */
 _Static_assert(sizeof(Profile) == 1112, "Profile save size changed");
+_Static_assert(offsetof(Profile, crosses_falzar) == 1109, "Profile.crosses_falzar save offset changed");
 _Static_assert(offsetof(Profile, runs) == 0, "Profile.runs save offset changed");
 _Static_assert(offsetof(Profile, best_depth) == 4, "Profile.best_depth save offset changed");
 _Static_assert(offsetof(Profile, last_depth) == 8, "Profile.last_depth save offset changed");

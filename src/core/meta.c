@@ -168,10 +168,19 @@ bool meta_folder_open(int folder) {
 	return (profile.folders_open >> folder & 1) || earned(folder);
 }
 
-/* (the Cross navis, HeatMan 1 .. ChargeMan 5: rivals.sav keeps who fell) */
-static bool cross_earned(int navi) { return navi >= 1 && navi <= 5 && rival(navi)->megaman_won > 0; }
+/* (the Cross navis, HeatMan 1 .. ChargeMan 5, then Falzar's SpoutMan 6 ..
+ * DustMan 10: rivals.sav keeps who fell; a Cross the run cannot give,
+ * powers_cross_name's NULL, opens no start) */
+static bool cross_earned(int navi) { return navi >= 1 && navi <= META_CROSSES && powers_cross_name(navi) && rival(navi)->megaman_won > 0; }
 
-bool meta_cross_open(int navi) { return navi >= 1 && navi <= 5 && ((profile.crosses_open >> navi & 1) || cross_earned(navi)); }
+/* the profile's bit of each Cross start announced */
+static bool cross_told(int navi) { return navi <= 5 ? profile.crosses_open >> navi & 1 : profile.crosses_falzar >> (navi - 6) & 1; }
+static void cross_tell(int navi) {
+	if (navi <= 5) profile.crosses_open |= (uint8_t)(1u << navi);
+	else profile.crosses_falzar |= (uint8_t)(1u << (navi - 6));
+}
+
+bool meta_cross_open(int navi) { return navi >= 1 && navi <= META_CROSSES && powers_cross_name(navi) && (cross_told(navi) || cross_earned(navi)); }
 
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
 
@@ -342,8 +351,8 @@ void meta_run_begun(void) {
 	if (battle_data_families_complete() >= DATA_LAB_OPENS) profile.lab_sent = 1;
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (earned(f)) profile.folders_open |= (uint16_t)(1u << f);
-	for (int n = 1; n <= 5; ++n)
-		if (cross_earned(n)) profile.crosses_open |= (uint8_t)(1u << n);
+	for (int n = 1; n <= META_CROSSES; ++n)
+		if (cross_earned(n)) cross_tell(n);
 	if (beast_earned()) profile.beast |= BEAST_OPEN;
 	/* (the Library as the run begins: the summary counts what it adds) */
 	profile.library_start = (uint16_t)meta_library_count(-1);
@@ -368,9 +377,9 @@ static void open_folders(bool tell) {
 
 /* a Cross start, once its navi falls as a guardian */
 static void open_crosses(bool tell) {
-	for (int n = 1; n <= 5; ++n) {
-		if ((profile.crosses_open >> n & 1) || !cross_earned(n)) continue;
-		profile.crosses_open |= (uint8_t)(1u << n);
+	for (int n = 1; n <= META_CROSSES; ++n) {
+		if (cross_told(n) || !cross_earned(n)) continue;
+		cross_tell(n);
 		if (tell) say("the %s start", powers_cross_name(n));
 		profile.setup_new |= SETUP_NEW_CROSS;
 	}
@@ -395,7 +404,7 @@ bool meta_setup_has_choice(void) {
 	if (meta_endless_open() || meta_threat_open() > 0 || meta_beast_open()) return true;
 	for (int f = FOLDER_STANDARD + 1; f < FOLDER_COUNT; ++f)
 		if (meta_folder_open(f)) return true;
-	for (int n = 1; n <= 5; ++n)
+	for (int n = 1; n <= META_CROSSES; ++n)
 		if (meta_cross_open(n)) return true;
 	return false;
 }
@@ -488,7 +497,7 @@ const char *meta_next_goal(void) {
 	for (int f = 1; f < FOLDER_COUNT; ++f)
 		if (!meta_folder_open(f) && meta_folder(f)->opens) return meta_goal_words(goal, sizeof goal, GOAL_FOLDER, f);
 	bool cross = false;
-	for (int n = 1; n <= 5; ++n) cross |= meta_cross_open(n);
+	for (int n = 1; n <= META_CROSSES; ++n) cross |= meta_cross_open(n);
 	if (!cross) return meta_goal_words(goal, sizeof goal, GOAL_CROSS, 0);
 	if (meta_threat_open() < THREAT_MAX) return meta_goal_words(goal, sizeof goal, GOAL_THREAT, meta_threat_open());
 	return NULL;

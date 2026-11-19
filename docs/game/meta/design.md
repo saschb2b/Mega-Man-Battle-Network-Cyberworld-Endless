@@ -113,7 +113,15 @@ counter (HeatCross and ChargeCross to Aqua, ElecCross to Wood, SlashCross
 to Breaker, EraseCross to Wind, as BN6's own Cross tutorials say), which
 the setup's Cross row names, as MegaMan does when a guardian's Cross is
 won. The Cross still comes from its guardian mid-run as today; a Cross
-start only moves when. BeastOut comes with the Cybeast's fall at the
+start only moves when. Falzar's five (SpoutCross, TomahawkCross,
+TenguCross, GroundCross, DustCross; issue #706) open the same way from
+their Navis, who guard acts already: the same dialectic, what you bring
+against what you find, with five more horizontal options, each costed by
+its weakness (SpoutCross to Elec, TomahawkCross to Fire, TenguCross to
+Sword, GroundCross and DustCross to Cursor, Gregar's own tables by form),
+and no rule of their own. CROSSSELECT's five rows are BN6's budget: a run
+holding more lists the first five in BN6's order, Gregar's before
+Falzar's. BeastOut comes with the Cybeast's fall at the
 endless net's own Nest, for the rest of that run ("BeastOut from the
 Cybeast", below); once that Nest has fallen, a helper brings it from the
 first battle ("BeastOut from the start, a fifth helper", below).

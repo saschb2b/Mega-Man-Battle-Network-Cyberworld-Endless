@@ -99,8 +99,11 @@ static HookAct summon(HookRegs *r, void *user) {
 /* whether BN5's ROM, the Souls' own, is read beside BN6's */
 static bool soulproxy_bn5_read(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
 
+static bool done;
+
+bool soulproxy_installed(void) { return done; }
+
 bool soulproxy_install(int breaks) {
-	static bool done;
 	if (done) return true;
 	if (!R.data || !emu_ready()) return false;
 	/* (everything checked first: nothing written where one byte is not Gregar's) */
