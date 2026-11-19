@@ -35,7 +35,7 @@ static struct {
 	SDL_atomic_t *stop;
 	SDL_atomic_t failed, request_sent, headers, read_ready, write_done, handles, closed;
 	uint8_t received[ONLINE_MAX_MESSAGE], sending[ONLINE_MAX_MESSAGE];
-	DWORD received_size;
+	DWORD received_size, have;            /* (have: the message's pieces come in so far) */
 	WINHTTP_WEB_SOCKET_BUFFER_TYPE received_type;
 } win;
 
@@ -123,9 +123,10 @@ static bool request_url(const char *url, wchar_t *host, wchar_t *path, INTERNET_
 	return true;
 }
 
+/* the next piece, after those come in so far */
 static bool start_read(void) {
 	SDL_AtomicSet(&win.read_ready, 0);
-	DWORD result = http.ws_receive(win.socket, win.received, sizeof win.received, NULL, NULL);
+	DWORD result = http.ws_receive(win.socket, win.received + win.have, (DWORD)(sizeof win.received - win.have), NULL, NULL);
 	if (result == NO_ERROR || result == ERROR_IO_PENDING) return true;
 	SDL_AtomicSet(&win.failed, 1);
 	return false;
@@ -200,18 +201,36 @@ bool online_socket_send(const uint8_t *data, size_t size) {
 	return (result == NO_ERROR || result == ERROR_IO_PENDING) && wait_for(&win.write_done, 2000);
 }
 
+/* (WinHTTP hands a message over in pieces wherever its frame came in pieces,
+ * as a proxy cuts a stream of large ones, not only past the buffer's end:
+ * each a fragment, the last typed as the message. Taken as broken, every
+ * save sent by code or pulled from the cloud ended part of the way, issue
+ * #700. The pieces are joined, each read into the room after the last) */
 int online_socket_receive(uint8_t *data, size_t size) {
-	if (SDL_AtomicGet(&win.failed)) return -1;
-	if (!SDL_AtomicGet(&win.read_ready)) return 0;
-	if (win.received_type == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return -1;
-	/* (a text message, an empty one, or one past the wire's bound, which
-	 * WinHTTP hands over as a fragment: the server broke the protocol, as
-	 * online_socket.c says of the same frames, and is never tried again) */
-	if (win.received_type != WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE || !win.received_size || win.received_size > size) return -2;
-	int count = (int)win.received_size;
-	memcpy(data, win.received, (size_t)count);
-	start_read();
-	return count;
+	for (;;) {
+		if (SDL_AtomicGet(&win.failed)) return -1;
+		if (!SDL_AtomicGet(&win.read_ready)) return 0;
+		WINHTTP_WEB_SOCKET_BUFFER_TYPE type = win.received_type;
+		if (type == WINHTTP_WEB_SOCKET_CLOSE_BUFFER_TYPE) return -1;
+		/* (a text message, an empty one, or one past the wire's bound: the
+		 * server broke the protocol, as online_socket.c says of the same
+		 * frames, and is never tried again) */
+		bool piece = type == WINHTTP_WEB_SOCKET_BINARY_FRAGMENT_BUFFER_TYPE;
+		if ((!piece && type != WINHTTP_WEB_SOCKET_BINARY_MESSAGE_BUFFER_TYPE) ||
+		    win.received_size > sizeof win.received - win.have) return -2;
+		win.have += win.received_size;
+		if (piece) {
+			if (win.have >= sizeof win.received) return -2;
+			start_read();
+			continue;
+		}
+		if (!win.have || win.have > size) return -2;
+		int count = (int)win.have;
+		memcpy(data, win.received, (size_t)count);
+		win.have = 0;
+		start_read();
+		return count;
+	}
 }
 
 void online_socket_close(void) {
