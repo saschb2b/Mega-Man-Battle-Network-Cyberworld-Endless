@@ -3828,6 +3828,8 @@ def main():
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_port_update.py')])
         if code == 0:   # tools/update_manifest.py's notes, as the update box shows them
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_update_manifest.py')])
+        if code == 0:   # tools/discord_release.py's post in the Discord server, every release's, unsent
+            code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_discord_release.py')])
         if code == 0:
             code = subprocess.call([sys.executable, os.path.join(ROOT, 'tests', 'test_site.py')])
         if code == 0:   # docs/re's ledger sound (its written files are dev's workflow's: tools/generated.py)

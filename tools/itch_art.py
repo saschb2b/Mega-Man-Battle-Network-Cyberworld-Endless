@@ -183,6 +183,18 @@ def devlog_cover(rel, used=()):
     return card, pick
 
 
+def covers(tags=()):
+    """(tag, cover) for each release with a date, oldest first, each cover
+    taking a picture no older cover took; only the tags asked for, where any
+    are (the devlog's covers, and the Discord post's: tools/discord_release.py)."""
+    used = set()
+    for rel in [r for r in reversed(site_versions.releases()) if r['date']]:
+        cover, pick = devlog_cover(rel, used)
+        used.add(pick)
+        if not tags or rel['tag'] in tags:
+            yield rel['tag'], cover
+
+
 def tile():
     """48 x 48, the theme's background: the site's PET floor (web/assets/ui/floor.png) at 3x, as the site shows it."""
     return Image.open(os.path.join(ROOT, 'web', 'assets', 'ui', 'floor.png')).convert('RGBA'), 3
@@ -195,17 +207,10 @@ def main():
                     help="the releases' devlog covers into .build/itch/covers/ (no TAG: every release)")
     a = ap.parse_args()
     if a.devlog is not None:
-        # (oldest first, each taking a picture no older cover took)
-        rels = [r for r in reversed(site_versions.releases()) if r['date']]
         out = os.path.join(SHOTS_OUT, 'covers')
         os.makedirs(out, exist_ok=True)
-        used = set()
-        for rel in rels:
-            cover, pick = devlog_cover(rel, used)
-            used.add(pick)
-            if a.devlog and rel['tag'] not in a.devlog:
-                continue
-            path = os.path.join(out, rel['tag'] + '.png')
+        for tag, cover in covers(a.devlog):
+            path = os.path.join(out, tag + '.png')
             cover.convert('RGB').save(path, optimize=True)
             print(os.path.relpath(path, ROOT))
         return

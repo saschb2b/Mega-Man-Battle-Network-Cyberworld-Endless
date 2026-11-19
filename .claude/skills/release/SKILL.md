@@ -87,6 +87,10 @@ the last trailer everywhere; the notes open with it.
   the description where `docs/itch/` changed, the devlog post
   (`tools/itch.py devlog`, posted on itch, then `tools/itch.py record --post
   TAG URL`), and `tools/itch.py check`.
+- Discord: the release posts itself in `#announcements` (`discord-release.yml`,
+  docs/project/discord.md, Releases there); press **Publish** on it so the
+  servers that follow the channel get it. A missing post: `gh workflow run
+  discord-release.yml -f tag=vX.Y.Z`.
 - A new trailer on YouTube: the youtube-publish skill
   (`.claude/skills/youtube-publish/`; docs/project/youtube.md).
 - The PS5 catalog: a PR from the owner's fork updating CWEN00001's record
