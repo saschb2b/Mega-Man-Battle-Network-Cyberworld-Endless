@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-19T14:48:13Z
-* **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).

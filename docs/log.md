@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-19
+* **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).
+
 ## 2026-11-17
 * **Update**: rom/chips-code.md (BN6's misc family's routines are 23, not 7: BusterUp's 0x0A and the rest past the seventh did nothing with BN4's ROM read; how BusterUp works and its check), rom/bn4.md (the misc table's 23), multirom/bn4-chips.md (Repair's paragraph: the table's 23), devtools/scenarios.md (`busterattack N`, the battle's Attack level), research/sources.md (a player's report of BusterUp doing nothing, verified).
 
