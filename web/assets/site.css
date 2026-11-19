@@ -352,6 +352,11 @@ footer.site a { color: #c6ff8c; }
 .i-follow { background-image: url(ui/icon-follow.png); }
 .i-bug { background-image: url(ui/icon-bug.png); }
 .i-coffee { background-image: url(ui/icon-coffee.png); }
+.i-swap { background-image: url(ui/icon-swap.png); }
+.i-server { background-image: url(ui/icon-server.png); }
+.i-feed { background-image: url(ui/icon-feed.png); }
+.i-talk { background-image: url(ui/icon-talk.png); }
+.i-chat { background-image: url(ui/icon-chat.png); }
 
 /* keys: dark caps with a light edge, as the game's button prompts */
 kbd {
