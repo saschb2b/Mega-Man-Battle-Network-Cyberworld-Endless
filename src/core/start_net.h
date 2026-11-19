@@ -2,8 +2,9 @@
  * (startup.c): the anonymous statistics' thread (analytics_net.h), SAVES'
  * saves sent by a code (transfer_link.h) and kept in step
  * (cloud_link.h, saves_cloud.h: a pull due as the title comes up), over
- * the official Square's server or --dev online's. None opens a connection
- * here. */
+ * the official Square's server or --dev online's; and Discord's presence
+ * (discord.h), its frame and its end handed to main.c's loop. None opens
+ * a connection here. */
 #ifndef CW_START_NET_H
 #define CW_START_NET_H
 

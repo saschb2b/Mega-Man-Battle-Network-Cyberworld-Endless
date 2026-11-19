@@ -51,6 +51,8 @@ void title_summary_open(void) {
 	U.up = true;
 }
 
+bool title_summary_shown(void) { return U.up; }
+
 bool title_summary_update(void) {
 	++U.t;
 	if (U.t <= (U.records ? RECORDS_MIN : SUMMARY_MIN) || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return false;

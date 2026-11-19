@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-18T16:00:00Z
+* **Add**: engine/discord.md (Discord's presence: what friends see at each place, the local pipe and its two commands, the pace, Options' line and settings.ini's, the Flatpak's permissions, the application the owner registers, what is left out), code/discord.md (`src/discord/`, its two units, `test_discord.c`). **Update**: GUIDE.md (Discord, Options' Game page), engine/index.md (its line), code/index.md (its line, 27 units), code/layers.md (the `discord` and `discord.game` units, 27 units), code/tests.md (`test_discord.c`), code/core.md (`start_net.c`'s presence, `game.h`'s `frame_watch`), devtools/dev-menu.md (`--dev discord`).

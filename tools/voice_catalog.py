@@ -119,6 +119,7 @@ DOMAINS = {
     'saves_text': ('SAVES', 'Screen', 'screen'),
     'analytics_text': ('Statistics', 'Screen', 'screen'),
     'options_text': ('Options', 'Screen', 'screen'),
+    'discord_text': ('Discord', 'Screen', 'screen'),
     'second_text': ('The second screen', 'Screen', 'screen'),
 }
 DEFAULT_DOMAIN = ('Other', 'MegaMan', 'speech')
@@ -1089,8 +1090,9 @@ def words_files():
             head = ''.join(f.readline() for _ in range(3))
         if re.search(r'(written|drawn|made) by tools/', head):
             continue
-        files.append(os.path.relpath(path, ROOT))
-    return files
+        # (as git names it, on every system: the catalog is the same written on Windows)
+        files.append(os.path.relpath(path, ROOT).replace(os.sep, '/'))
+    return sorted(files)
 
 
 def guardian_names():

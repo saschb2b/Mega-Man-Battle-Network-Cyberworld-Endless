@@ -18,6 +18,10 @@ finish-args:
   - --share=network
   # game controllers
   - --device=all
+  # Discord's presence (docs/engine/discord.md): the Discord app's socket,
+  # a native one's and the Flatpak's, as Flathub's games reach it
+  - --filesystem=xdg-run/discord-ipc-0
+  - --filesystem=xdg-run/app/com.discordapp.Discord:create
   # Downloads, read and written: the ROM found there by its contents, and
   # SAVES' file exported there and imported from there (docs/engine/saves.md)
   - --filesystem=xdg-download

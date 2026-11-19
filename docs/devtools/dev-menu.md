@@ -68,7 +68,10 @@ exit was reached at), `route` (a special route found: with
 so the next fork offers its third way, [Special routes](../game/liberation/special-routes.md), Special
 routes), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
-has none: the PET's mails for `build.py screenshots pet`), `folders`
+has none: the PET's mails for `build.py screenshots pet`), `discord` (Discord's presence on a developer's start, a headless one
+included, so an autopilot run shows on the friend list and a capture of
+Options' Game page has its Discord line:
+[Discord's presence](../engine/discord.md)), `folders`
 (every starting folder open in the profile: the setup's Folder row turns
 through all six, [Decisions and phase one](../game/meta/decisions.md)) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his

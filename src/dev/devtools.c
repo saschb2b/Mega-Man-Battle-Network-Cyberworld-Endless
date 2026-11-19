@@ -56,7 +56,7 @@ static bool dev_switch(const char *t) {
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
-		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end },
+		{ "rollbench", &dev.rollbench }, { "arenaboth", &dev.arena_both }, { "arenaother", &dev.arena_other }, { "quitend", &dev.quit_end }, { "discord", &dev.discord },
 		{ "feel", &dev.feel }, { "settings", &dev.settings }, { "bn4families", &dev.bn4families }, { "showbn4", &dev.showbn4 },
 	};
 	static const struct { const char *name; int *value; } numbers[] = {

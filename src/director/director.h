@@ -53,6 +53,10 @@ bool director_on_layer(void);
 /* The guardian whose battle runs (his navi index, guardians.h), 0 in any
  * other battle or none. */
 int director_guardian_battle(void);
+/* A battle of the run's is on (any: a random one, a guardian's, a duel);
+ * ... ProtoMan's duel (docs/game/rival.md) */
+bool director_in_battle(void);
+bool director_dueling(void);
 /* The layer's Mystery Data (the shared dive's finds, docs/online/shared-dive.md):
  * how many it holds (0 off a layer), whether the k-th is opened, and where
  * it stands in world units; the k-th is the same on every game of the
