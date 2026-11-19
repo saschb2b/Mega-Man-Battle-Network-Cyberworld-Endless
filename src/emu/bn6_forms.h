@@ -4,15 +4,19 @@
  * Gregar's addresses (docs/rom/souls.md, MegaMan's forms; issue #82). A
  * table holds BN6_FORMS entries: 0 none, 1-10 the Crosses (Gregar's five,
  * then Falzar's SpoutCross to DustCross, 6-10, which Gregar keeps and never
- * offers), 0xB-0x16 Beast Out (BN6_FORM_BEAST, a Cross's from
- * BN6_FORM_CROSS_BEAST), 0x17-0x18 BeastOver. The Souls' proxy form
- * (src/emu/soulproxy.c) is form 8, Falzar's TenguCross. */
+ * offers itself), 0xB-0x16 Beast Out (BN6_FORM_BEAST, a Cross's from
+ * BN6_FORM_CROSS_BEAST), 0x17-0x18 BeastOver. CROSSSELECT offers Falzar's
+ * five too (src/emu/crossselect.c). The Souls' proxy form
+ * (src/emu/soulproxy.c) is form 8, Falzar's TenguCross, given to whichever
+ * of the two is chosen (soulproxy_arm), never both in one battle. */
 #ifndef CW_BN6_FORMS_H
 #define CW_BN6_FORMS_H
 
+#include "bn6_cross.h"   /* CROSSSELECT's ten Crosses (issue #706) */
+
 #define BN6_FORMS             25          /* the entries of a table by form (0-0x18) */
 #define BN6_FORM_HEAT_CROSS   1           /* BN6_BATTLE_FORM: HeatCross (BN6_FLAG_HEAT_CROSS's) */
-#define BN6_FORM_PROXY        8           /* BN6_BATTLE_FORM: Falzar's TenguCross, which no Gregar CROSSSELECT offers: the Souls' proxy form */
+#define BN6_FORM_PROXY        8           /* BN6_BATTLE_FORM: Falzar's TenguCross, and the Souls' proxy form while a Soul is chosen (soulproxy_arm) */
 #define BN6_FORM_NAME_BASE    0x1AB       /* MegaMan's NameID in a form: this + the form (0x08015B22 writes it; 0x1A0 in none), the object id table's entry */
 /* The tables by form (each a pointer word's in the code names it, docs/rom/) */
 #define BN6_FORM_SPRITES      0x0800FCBCu /* u8 a form: MegaMan's sprite, its number in his category (0x0800FC9E reads it; Crosses 0, his own) */

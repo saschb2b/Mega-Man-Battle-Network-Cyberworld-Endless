@@ -27,8 +27,21 @@ enum {
 	SOULPROXY_BREAK_BONUS = 4,    /* the chip bonus by form not hooked */
 	SOULPROXY_BREAK_FLASH = 8,    /* the arm flash's look not hooked */
 	SOULPROXY_BREAK_SUMMON = 16,  /* the summon not hooked */
+	SOULPROXY_BREAK_TENGU = 32,   /* TenguCross chosen on CROSSSELECT leaves form 8 the Souls' (HeatCross's copy) */
 };
 bool soulproxy_install(int breaks);
+/* Whether form 8 is the proxy in this core (installed): Falzar's
+ * TenguCross is then not offered (powers.c) */
+bool soulproxy_installed(void);
+/* Form 8 the Souls' (`soul`: HeatCross's copy, the Souls' stubs) or Gregar's
+ * own TenguCross, written into its entries before the crossing that reads
+ * them: a Soul's commit arms it (soulunite.c, liberation_battle.c),
+ * TenguCross's on CROSSSELECT disarms it (this file's commit hook). Called
+ * from a hook (hook_write8). Nothing where the proxy is not installed. */
+void soulproxy_arm(bool soul);
+/* Whether form 8 is the Souls' now (true where no proxy is installed: no
+ * TenguCross stands on it to keep apart) */
+bool soulproxy_armed(void);
 /* The Souls' hooks as a run's core takes them at its start (game_hooks.c):
  * the proxy form and UNITE wherever BN5's Navis are (no_navis: they are
  * not), or always where forced (--dev soulproxy), each written down for

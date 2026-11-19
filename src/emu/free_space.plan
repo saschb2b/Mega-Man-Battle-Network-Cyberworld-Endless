@@ -80,6 +80,7 @@ FREE_TRADER_LIST       +0x168000  +0x169000  end  trader.c                  mult
 FREE_PET_OPTIONS       +0x169000  +0x16A000  end  pet_options.c             game/pet.md                 the PET menu's labels with Comm's made Options
 FREE_BBS               +0x16A000  +0x16B000  end  request_bbs.c             world/home/jobs.md          the visit's requests on BN6's Request BBS: their titles and posts, LZ77
 FREE_NCP_TEXT          +0x16B000  +0x16BC00  end  xncp.c                    rom/navicust.md             the NaviCust programs' names with program 48's, then their descriptions with its own, LZ77
+FREE_CROSSSELECT       +0x16C000  +0x16E000  end  crossselect.c             rom/souls.md                CROSSSELECT's ten Crosses: its flags' table, then Falzar's five rows' palettes and art
 
 # (sized by what they hold, 13 November 2026, docs/engine/emulation/
 # free-space.md, The measured pass: an area's tiles by the largest of the

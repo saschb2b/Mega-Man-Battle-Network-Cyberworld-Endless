@@ -39,6 +39,7 @@
 #include "liberation_team.h"
 #include "pet_look.h"
 #include "platform.h"
+#include "soulproxy.h"
 
 /* What the director armed: the battle's turns (0: none to count), and
  * whether it is a liberation's at all */
@@ -162,6 +163,7 @@ static HookAct soul_ok(HookRegs *r, void *user) {
 	}
 	if (!arm.on || !arm.soul || hook_read8(BN6_BATTLE_SCREENS) > 1 || hook_read8(BN6_SOULS + BN6_SOUL_ID)) return HOOK_CONTINUE;
 	hook_write8(BN6_CROSS_RECORD, BN6_FORM_PROXY);
+	soulproxy_arm(true);
 	hook_write8(BN6_CROSS_RECORD + BN6_RECORD_CHAOS, 0);
 	hook_write8(BN6_CROSS_RECORD + BN6_RECORD_TURNS, 0xFF);
 	hook_write8(BN6_SOULS + BN6_SOUL_NEXT, (uint8_t)arm.soul);

@@ -189,3 +189,19 @@ int portrait_face(int navi) {
 	emu_write32(BUS + list_entry(LIST_FACES, P[k].face), at);
 	return P[k].face;
 }
+
+bool portrait_pixels(int navi, int x, int y, int w, int h, uint8_t *px, uint16_t pal[16]) {
+	if (navi < 6 || navi > 10 || !R.data || !R.layout || !R.layout->sprite_lists || x < 0 || y < 0 || w <= 0 || h <= 0 ||
+	    x + w > FACE_W || y + h > FACE_H) return false;
+	int k = navi - 6;
+	uint32_t bn;
+	const uint8_t *bh = sprite_at(LIST_BATTLE, 0x2E + navi, &bn);
+	Frame bf;
+	if (!bh || !first_frame(bh, bn, &bf) || bf.pal_len < 32) return false;
+	static uint8_t win[FACE_H][FACE_W];
+	memset(win, 0, sizeof win);
+	draw_frame(win, bh, bn, &bf, P[k].wx, P[k].wy);
+	for (int r = 0; r < h; ++r) memcpy(px + r * w, &win[y + r][x], (size_t)w);
+	for (int i = 0; i < 16; ++i) pal[i] = (uint16_t)(bh[bf.pal + 2 * (uint32_t)i] | bh[bf.pal + 2 * (uint32_t)i + 1] << 8);
+	return true;
+}

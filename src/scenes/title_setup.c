@@ -173,8 +173,8 @@ static void turn(int row, int d) {
 			if (meta_folder_open(f)) { S.c.folder = f; break; }
 		}
 	if (row == ROW_CROSS)   /* (none, or an open one) */
-		for (int k = 1; k < 6; ++k) {
-			int c = (S.c.cross + d * k + 6 * k) % 6;
+		for (int k = 1; k <= META_CROSSES; ++k) {
+			int c = (S.c.cross + d * k + (META_CROSSES + 1) * k) % (META_CROSSES + 1);
 			if (!c || meta_cross_open(c)) { S.c.cross = c; break; }
 		}
 	if (row == ROW_THREAT) S.c.threat = (S.c.threat + d + meta_threat_open() + 1) % (meta_threat_open() + 1);
@@ -228,7 +228,7 @@ bool title_setup_update(void) {
 /* the Crosses a run may bring: the Cross row's arrows and its note */
 static int crosses_open(void) {
 	int n = 0;
-	for (int c = 1; c <= 5; ++c) n += meta_cross_open(c);
+	for (int c = 1; c <= META_CROSSES; ++c) n += meta_cross_open(c);
 	return n;
 }
 
@@ -239,7 +239,7 @@ static const char *cross_note(char *buf, size_t n, char shut[][SHUT_MAX], int *n
 	int c = S.c.cross, open = crosses_open();
 	const char *weak = c ? powers_cross_weakness(c) : NULL;
 	if (c) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_ONE));
-	else if (open && open < 5) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_MORE));
+	else if (open && open < META_CROSSES) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", setup_word(SW_CROSS_MORE));
 	if (weak) return setup_cross_note(buf, n, powers_cross_strength(c), weak);
 	return setup_word(c ? SW_CROSS_CHOSEN_NOTE : open ? SW_CROSS_GUARDIANS_NOTE : SW_CROSS_NONE_NOTE);
 }

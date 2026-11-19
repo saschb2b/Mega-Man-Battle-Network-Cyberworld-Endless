@@ -50,6 +50,14 @@ the next.
   bonus, `0x0800EFE6`, behind HeatCross's hooked compare), and from form
   8 Beast Out is TenguBeast's (0x14): the Souls grey Beast Out while one
   is united ([MegaMan's forms and BN5's Souls in BN6's engine](../rom/souls.md), MegaMan's forms).
+  Since Falzar's Crosses are given (issue #706), TenguCross is offered on
+  CROSSSELECT too, and form 8 is shared: the Souls' while a Soul is
+  chosen, Gregar's own TenguCross from the moment CROSSSELECT lists it,
+  never both in one battle (UNITE stands not in TenguCross, CROSSSELECT
+  lists it not in a Soul). No form of its own is to be had: forms 1-10
+  are the ten Crosses, 0xB on Beast Out, told apart by ranges in Gregar's
+  code, and 155 calls read the form (The proxy form: where a Soul stands,
+  Form 8 shared).
 - **S2, UNITE and a Soul's life** (done; in every battle of a run since
   the last round, wherever BN5's Navis are; [The proxy form: where a Soul stands](../devtools/proxy-form.md), The proxy
   form, and The differential; [MegaMan's forms and BN5's Souls in BN6's engine](../rom/souls.md), UNITE on BN6's Custom

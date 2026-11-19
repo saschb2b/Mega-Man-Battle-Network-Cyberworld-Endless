@@ -1,5 +1,15 @@
 # Changelog
 
+## Unreleased
+
+- **New: Falzar's five Crosses.** SpoutMan, TomahawkMan, TenguMan,
+  GroundMan and DustMan now give their Crosses when they fall as an
+  act's guardian, as Gregar's five Cross Navis do: SpoutCross,
+  TomahawkCross, TenguCross, GroundCross and DustCross, each with its
+  own body, element, weakness and charged shot, chosen on CROSSSELECT
+  beside Gregar's. Once their Navi has fallen, a run can start in one
+  (issue #706).
+
 ## 0.23.0 (2026-11-19)
 
 - **New: your friends on Discord see you play, and how far the run

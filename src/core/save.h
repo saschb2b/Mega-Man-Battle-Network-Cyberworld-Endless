@@ -32,7 +32,7 @@ typedef struct {
 	uint8_t last_net, last_folder, last_threat, last_helpers;   /* the setup screen starts where the last run's did */
 	uint16_t marks;           /* the title's marks earned (MARK_*, BN6's own bits: meta.h) */
 	uint8_t first_area;       /* the last new run's act 1 area, biome + 1 */
-	uint8_t crosses_open;     /* the Cross starts announced (a bit per navi 1-5, meta.h) */
+	uint8_t crosses_open;     /* the Cross starts announced (a bit per navi 1-5, meta.h; Falzar's 6-10 in crosses_falzar) */
 	uint8_t last_cross;
 	/* the Library (docs/game/meta/): a bit per chip id held in any run, and
 	 * how many it held as the current run began */
@@ -167,6 +167,9 @@ typedef struct {
 	 * first dive's words; a profile saved before reads 0 and takes what the
 	 * old tests judged, once (profile_load) */
 	uint8_t heard;
+	/* Falzar's Cross starts announced, a bit per navi 6-10 (bit navi - 6; issue #706): in the
+	 * byte after `heard` that was the struct's padding, so the size stands */
+	uint8_t crosses_falzar;
 } Profile;
 
 enum { DARK6_FLAME_TAUGHT = 1, DARK6_PRICE_TAUGHT = 2 };

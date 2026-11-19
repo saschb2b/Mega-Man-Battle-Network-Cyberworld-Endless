@@ -99,11 +99,14 @@ static bool calm_enough(int side) {
 /* UNITE could stand (BN5_UNITE_STAND): a Soul held (Double Soul learned
  * with it), MegaMan himself on this side, no link but the Arena's (whose
  * pair carries the Soul to the other GBA), not beasted out (one form at a
- * time), BN5's mood */
+ * time; nor in Falzar's TenguCross, which stands on the proxy's form 8:
+ * soulproxy_arm), BN5's mood */
 static bool unite_stands(int side) {
 	uint32_t settings = hook_read32(BN6_BATTLE_SETTINGS);
 	bool link = settings >= BUS && hook_read8(settings + BN6_SETTINGS_MODE) == BN6_BATTLE_LINK;
-	return held_now() && !hook_read8(BN6_CUSTOM_NAVI) && (!link || linked[hook_slot()]) && navi8(side, BN6_NAVI_FORM) < BN6_FORM_BEAST && calm_enough(side);
+	int form = navi8(side, BN6_NAVI_FORM);
+	return held_now() && !hook_read8(BN6_CUSTOM_NAVI) && (!link || linked[hook_slot()]) && form < BN6_FORM_BEAST &&
+		!(form == BN6_FORM_PROXY && !soulproxy_armed()) && calm_enough(side);
 }
 
 /* What element 0xB is, and the chip's window's art for it: UNITE's (BN5's,
@@ -255,6 +258,7 @@ static HookAct emblem_commit(HookRegs *r, void *user) {
 	int turns = chaos ? 1 : TURNS_SOUL + (int8_t)navi8(side, BN6_NAVI_TURN_EXTRA);
 	turns = (turns > TURNS_MAX ? TURNS_MAX : turns < 1 ? 1 : turns) + ((breaks & SOULUNITE_BREAK_TURNS) ? 1 : 0);
 	hook_write8(BN6_CROSS_RECORD, BN6_FORM_PROXY);
+	soulproxy_arm(true);
 	hook_write8(BN6_CROSS_RECORD + BN6_RECORD_CHAOS, (uint8_t)chaos);
 	hook_write8(BN6_CROSS_RECORD + BN6_RECORD_TURNS, (uint8_t)turns);
 	hook_write8(soul_field(side, BN6_SOUL_NEXT), (uint8_t)soul);

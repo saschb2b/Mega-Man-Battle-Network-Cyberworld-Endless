@@ -184,9 +184,9 @@
 #define BN6_BATTLE_MOOD       (BN6_BATTLE_NAVI + 0x0E) /* Mood: BN6_MOOD_SYNCHRO Full Synchro, 0 dark (bn6f's emotion getter, Falzar 0x08015B64) */
 #define BN6_MOOD_SYNCHRO      0xFF        /* BN6_BATTLE_MOOD: Full Synchro, the next chip's power x2 (BN6's tutorial) */
 #define BN6_BATTLE_BEAST_TURNS (BN6_BATTLE_NAVI + 0x21) /* BeastOutCounter: the EmotionCounter, 3 as a battle starts, one less each Beast Out turn; 0 tired */
-#define BN6_BATTLE_FORM       (BN6_BATTLE_NAVI + 0x2C) /* Transformation: 0 none, 1-5 Gregar's Crosses (BN6_FLAG_HEAT_CROSS's order), BN6_FORM_BEAST, a Cross's Beast Out, BN6_FORM_BEAST_OVER */
+#define BN6_BATTLE_FORM       (BN6_BATTLE_NAVI + 0x2C) /* Transformation: 0 none, 1-5 Gregar's Crosses (BN6_FLAG_HEAT_CROSS's order), 6-10 Falzar's, BN6_FORM_BEAST, a Cross's Beast Out, BN6_FORM_BEAST_OVER */
 #define BN6_FORM_BEAST        11          /* BN6_BATTLE_FORM: Beast Out; 12 + a Cross: Beast Out in that Cross */
-#define BN6_FORM_CROSS_BEAST  12          /* BN6_BATTLE_FORM: this + the Cross (1-5), Beast Out in a Cross */
+#define BN6_FORM_CROSS_BEAST  12          /* BN6_BATTLE_FORM: this + the Cross (1-10), Beast Out in a Cross */
 #define BN6_FORM_BEAST_OVER   23          /* BN6_BATTLE_FORM: BeastOver, the Cybeast's power out of hand */
 #define BN6_T3_OBJECTS        0x0203CFE0u /* eT3BattleObject0: the battle's attacks and effects, BN6_T1_SIZE each, its fields as T1's */
 #define BN6_T3_COUNT          0x20        /* 32 of them */

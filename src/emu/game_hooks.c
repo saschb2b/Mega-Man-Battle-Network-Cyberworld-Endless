@@ -2,9 +2,8 @@
  * (docs/engine/emulation/); this one keeps their order. */
 #include "game_hooks.h"
 
-#include "claims.h"
+#include "cross_rows.h"
 #include "darkinvs.h"
-#include "debug.h"
 #include "devtools.h"
 #include "encounter.h"
 #include "events.h"
@@ -46,9 +45,11 @@ void game_hooks_install(void) {
 	 * begins, encounter.c; docs/multirom/souls.md. And the
 	 * proxy form for its own test, --dev soulproxy) */
 	soulproxy_install_run(dev.soulproxy, dev.nonavis || dev.xnavicontrol, dev.proxybreak, dev.unitebreak, dev.soulbreak);
+	/* (CROSSSELECT listing Falzar's five Crosses beside Gregar's, their rows
+	 * made from the ROM's own: issue #706, docs/rom/souls.md) */
+	cross_rows_install();
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
-	if (emu_debug_on()) claims_report();
 }
 
 void game_hooks_after_boot(void) {

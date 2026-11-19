@@ -30,6 +30,22 @@ static const struct { int navi, flag; const char *name, *weak, *strong, *navis; 
 	{ 4, BN6_FLAG_ERASE_CROSS, "EraseCross", "Wind", "A 4 in HP: plain chips erase",
 	  "Navis: a bug drains their HP" },
 	{ 5, BN6_FLAG_CHARGE_CROSS, "ChargeCross", "Aqua", "One more chip each turn" },
+	/* (Falzar's five, forms 6-10, which Gregar keeps whole and CROSSSELECT
+	 * lists beside its own, crossselect.c; issue #706. Their weaknesses
+	 * are Gregar's tables' by form: SpoutCross Aqua and TomahawkCross Wood
+	 * by their element, TenguCross's second wheel Sword, GroundCross's and
+	 * DustCross's Cursor, data.c's bits; their strengths Gregar's chips'
+	 * bonuses by form, 0x0800EF34: Wind chips +10 in TenguCross, Breaker
+	 * chips +10 in GroundCross, the chip classes 8 and 9 that Falzar's
+	 * own Cross tutorials name, assumed; none for the other three, whose
+	 * gifts are their charged shots and passives, not yet put in words.
+	 * TenguCross stands on form 8, the Souls' proxy's too: soulproxy.c
+	 * gives the form to whichever is chosen, never both in one battle) */
+	{ 6, BN6_FLAG_SPOUT_CROSS, "SpoutCross", "Elec", NULL },
+	{ 7, BN6_FLAG_SPOUT_CROSS + 1, "TomahawkCross", "Fire", NULL },
+	{ 8, BN6_FLAG_SPOUT_CROSS + 2, "TenguCross", "Sword", "Wind chips +10" },
+	{ 9, BN6_FLAG_SPOUT_CROSS + 3, "GroundCross", "Cursor", "Breaker chips +10" },
+	{ 10, BN6_FLAG_SPOUT_CROSS + 4, "DustCross", "Cursor", NULL },
 };
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
@@ -76,9 +92,9 @@ bool powers_cross_held(int navi) {
 }
 
 void powers_crosses_hide(bool hide) {
-	static uint8_t hidden;
+	static uint16_t hidden;
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i) {
-		if (hide && flag_get(crosses[i].flag)) { hidden |= (uint8_t)(1u << i); flag_clear(crosses[i].flag); }
+		if (hide && flag_get(crosses[i].flag)) { hidden |= (uint16_t)(1u << i); flag_clear(crosses[i].flag); }
 		if (!hide && (hidden >> i & 1)) flag_set(crosses[i].flag);
 	}
 	if (!hide) hidden = 0;
