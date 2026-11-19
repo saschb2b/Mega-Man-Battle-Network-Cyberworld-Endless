@@ -3,6 +3,9 @@
 ## 2026-11-19
 * **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).
 
+## 2026-11-18
+* **Add**: engine/discord.md (Discord's presence: what friends see at each place, the local pipe and its two commands, the pace, Options' line and settings.ini's, the Flatpak's permissions, the application the owner registers, what is left out), code/discord.md (`src/discord/`, its two units, `test_discord.c`). **Update**: GUIDE.md (Discord, Options' Game page), engine/index.md (its line), code/index.md (its line, 27 units), code/layers.md (the `discord` and `discord.game` units, 27 units), code/tests.md (`test_discord.c`), code/core.md (`start_net.c`'s presence, `game.h`'s `frame_watch`), devtools/dev-menu.md (`--dev discord`).
+
 ## 2026-11-17
 * **Update**: rom/chips-code.md (BN6's misc family's routines are 23, not 7: BusterUp's 0x0A and the rest past the seventh did nothing with BN4's ROM read; how BusterUp works and its check), rom/bn4.md (the misc table's 23), multirom/bn4-chips.md (Repair's paragraph: the table's 23), devtools/scenarios.md (`busterattack N`, the battle's Attack level), research/sources.md (a player's report of BusterUp doing nothing, verified).
 
