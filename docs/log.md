@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-19
+* **Add**: releases/v0.23.0.md (the players' notes of 0.23.0, "Your run on Discord, and a server to talk in.": Discord's presence with Options' Discord line on and off, the Discord server's channels, roles and invite with the download page's two PET windows, and the four fixes, issues #700, #697 and #696 among them, Espilan credited). **Update**: releases/index.md and releases/overview.md (its line), code/layers.md (0.23.0's row of numbers), devtools/old-checkpoint.md (0.23.0's candidate), code/site-and-media.md (`tools/before_after.py`'s `PLAYS` and `--pick SHA:PATH`).
 * **Update**: game/bosses/sequence.md (a SlipRunr slide ends at the arena's door, issue #697; the state's `met` line and its scenario), rom/game-state.md (SlipRunr's slide: NaviStats +0x35 and flags 0x173D-0x173F, and 0x173E's line in the dev tools' row put right), devtools/scenarios.md (`by arena`), devtools/dev-menu.md (`--dev sliprun`), devtools/switches.md (flag 0x173E put right).
 * **Update**: game/liberation/building/stage-3-team.md (the player's own body again wherever no board is on, issue #696), devtools/agents-tools.md (the state's `body` line).
 * **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).
