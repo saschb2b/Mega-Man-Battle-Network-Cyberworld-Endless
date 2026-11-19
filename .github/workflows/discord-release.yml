@@ -29,10 +29,11 @@ jobs:
   post:
     runs-on: ubuntu-latest
     steps:
-      # (every tag: the cover takes a picture no older release's cover took, tools/itch_art.py)
+      # (the workflow's own commit, the tag's when release.yml calls it, so
+      # a release older than the tool is posted by today's; every tag, as
+      # the cover takes a picture no older release's cover took, tools/itch_art.py)
       - uses: actions/checkout@v7
         with:
-          ref: ${{ inputs.tag }}
           fetch-depth: 0
       - name: Post
         env:
