@@ -132,14 +132,13 @@ void second_read_navicust(void) {
 	}
 }
 
-/* The Cross under CROSSSELECT's cursor at `row`: the Crosses MegaMan has,
- * in Gregar's order, less the one he is in (`form`); 0 for none */
-static int cross_at(int row, int form) {
-	for (int navi = 1; navi <= 5; ++navi) {
-		if (!powers_cross_owned(navi) || navi == form) continue;
-		if (row-- == 0) return navi;
-	}
-	return 0;
+/* The Cross under CROSSSELECT's cursor at `row`: its list's (the
+ * screen's +0x50, src/emu/crossselect.c), Gregar's five and Falzar's;
+ * 0 for none */
+static int cross_at(int row) {
+	if (row < 0 || row >= BN6_CROSS_ROWS) return 0;
+	int cross = emu_read8(BN6_CUSTOM_SCREEN + BN6_CROSS_SCREEN_LIST + (uint32_t)row);
+	return cross < BN6_CROSSES ? cross + 1 : 0;
 }
 
 /* The picks sent: on OK BN6 marks their entries in the deck used
@@ -162,7 +161,7 @@ static void read_custom(void) {
 	for (int i = 0; i < S2.nhand; ++i) S2.hand[i] = emu_read16(BN6_BATTLE_DECK + 2u * (uint32_t)i);
 	int mode = emu_read8(BN6_CUSTOM_MODE);
 	bool crossing = mode == BN6_MODE_CROSS_OPEN || mode == BN6_MODE_CROSS || mode == BN6_MODE_CROSS_SHUT || mode == BN6_MODE_CROSS_TAKEN;
-	S2.cross_under = crossing ? cross_at(emu_read8(BN6_CUSTOM_CROSS_ROW), S2.form) : 0;
+	S2.cross_under = crossing ? cross_at(emu_read8(BN6_CUSTOM_CROSS_ROW)) : 0;
 	S2.cursor = emu_read8(BN6_CUSTOM_CURSOR);
 	/* (the emblem's place is UNITE's while the last chip picked lights a
 	 * held Soul, docs/multirom/; ColonelSoul's button the two places

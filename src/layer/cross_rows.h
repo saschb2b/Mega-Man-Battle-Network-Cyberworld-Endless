@@ -14,5 +14,8 @@
  * left and the Cross's name in the engine's own letters. False where the
  * ROM is not as expected. */
 bool cross_rows_make(uint8_t *art, uint8_t *pals);
+/* As the core starts: the rows made and CROSSSELECT made to list Falzar's
+ * five with them (crossselect_install); nothing where they cannot be made */
+void cross_rows_install(void);
 
 #endif

@@ -30,10 +30,10 @@ static const char *result(void) {
 
 /* none, a Cross (Gregar's five, Falzar's five), Beast Out, alone or in a Cross, BeastOver */
 static const char *form(void) {
-	static const char *const cross[BN6_CROSSES + 1] = { "none", "HeatCross", "ElecCross", "SlashCross", "EraseCross", "ChargeCross",
+	static const char *const cross[] = { "none", "HeatCross", "ElecCross", "SlashCross", "EraseCross", "ChargeCross",
 		"SpoutCross", "TomahawkCross", "TenguCross", "GroundCross", "DustCross" };
 	int v = emu_read8(BN6_BATTLE_FORM);
-	return v <= BN6_CROSSES ? cross[v] : v == BN6_FORM_BEAST ? "BeastOut" : v >= BN6_FORM_BEAST_OVER ? "BeastOver"
+	return v < (int)(sizeof cross / sizeof *cross) ? cross[v] : v == BN6_FORM_BEAST ? "BeastOut" : v >= BN6_FORM_BEAST_OVER ? "BeastOver"
 		: v >= BN6_FORM_CROSS_BEAST ? "CrossBeast" : "other";
 }
 

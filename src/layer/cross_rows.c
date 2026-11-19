@@ -227,3 +227,8 @@ bool cross_rows_make(uint8_t *art, uint8_t *pals) {
 	}
 	return true;
 }
+
+void cross_rows_install(void) {
+	static uint8_t art[CROSSSELECT_ART_BYTES], pals[CROSSSELECT_PAL_BYTES];
+	if (!crossselect_falzar() && cross_rows_make(art, pals)) crossselect_install(art, pals);
+}

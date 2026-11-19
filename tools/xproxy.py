@@ -9,7 +9,7 @@ TenguCross, which Gregar keeps in every table by form and never offers.
 entry 8 of each table by form written from entry 1, its NameID's object id
 HeatCross's, hooks where Gregar's code reads the form itself), and the
 dev step "cross 8" commits the next Cross chosen on CROSSSELECT as form 8
-through CROSSSELECT's own commit. Four headless runs of the host build
+through CROSSSELECT's own commit. Six headless runs of the host build
 (build.py shot), each from the same boot, layer and keys, each a battle
 the foes step starts against a StarFish in the bottom row (an Aqua virus:
 its bubbles are HeatCross's weakness), each traced (CYBERWORLD_BTRACE:
@@ -25,6 +25,11 @@ EWRAM and IWRAM after every frame of the battle, src/emu/battle_trace.c):
   tengu      no proxy, committed as form 8: Gregar's own form 8, Falzar's
              TenguCross; it must differ from installed past those (the
              comparison sees what the copy changes)
+  tengu-native     no proxy, Falzar's TenguCross chosen on CROSSSELECT
+                   (flag 0xE9, src/emu/crossselect.c; issue #706)
+  tengu-installed  the proxy installed, TenguCross chosen: form 8 given
+                   back to Gregar's own as it is chosen (soulproxy_arm),
+                   the same as tengu-native every byte
 
 Through the battle: the crossing (CROSSSELECT, the summon, the overlay),
 a charged shot (HeatCross's flame), a chip (FireBrn1, HeatCross's Fire
@@ -125,13 +130,16 @@ CUSTOM = ['240:', '3:UP', '30:', '3:A', '90:', '3:A', '20:', '3:START', '8:', '3
 FIGHT = ['230:', '100:B', '100:', '4:A', '70:', '3:UP', '20:', '3:B', '30:', '3:DOWN', '20:', '3:DOWN', '300:'] + ['3:B', '7:'] * 60 + ['600:']   # a charged shot, the chip, a shot from the row above, the StarFish's row, its bubble, the buster
 
 
-def keys(cross):
-    k = KEYS_BEFORE.split(',') + ['0:flags 0xE2 0xE2 1'] + ([f'0:cross {PROXY}'] if cross else []) + \
+TENGU_FLAG = 0xE9   # Falzar's TenguCross on CROSSSELECT (src/emu/crossselect.c, BN6_FLAG_SPOUT_CROSS + 2): its row the first
+
+
+def keys(cross, flag=0xE2):
+    k = KEYS_BEFORE.split(',') + [f'0:flags {flag:#04X} {flag:#04X} 1'.replace('0X', '0x')] + ([f'0:cross {PROXY}'] if cross else []) + \
         [f'0:foes {STARFISH:02X}@53'] + CUSTOM + FIGHT
     return ','.join(k)
 
 
-def run(name, dev, cross, seed, quiet):
+def run(name, dev, cross, seed, quiet, flag=0xE2):
     """one run traced: its btrace.bin's path"""
     data = os.path.join(WORK, name)
     os.makedirs(data, exist_ok=True)
@@ -144,7 +152,7 @@ def run(name, dev, cross, seed, quiet):
     sub = os.path.basename(WORK)
     shots = ','.join(f'{t}:/src/.build/{sub}/{name}/f{t}.bmp' for t in (1250, 1330, 1400, 1520, 1700, 1900, 2100))
     cmd = [sys.executable, os.path.join(ROOT, 'build.py'), 'shot', '--data-dir', f'/src/.build/{sub}/{name}', '--scene', 'emu',
-           '--net-biome', '0', '--seed', str(seed), '--dev', dev, '--frames', '4400', '--input', keys(cross), '--shot', shots]
+           '--net-biome', '0', '--seed', str(seed), '--dev', dev, '--frames', '4400', '--input', keys(cross, flag), '--shot', shots]
     env = dict(os.environ, CYBERWORLD_ROM_DIR=os.path.join(WORK, 'rom'), CYBERWORLD_BTRACE='1')
     env.pop('CYBERWORLD_XDRAWS', None)
     out = subprocess.run(cmd, cwd=ROOT, env=env, capture_output=True, text=True)
@@ -384,7 +392,9 @@ MUTATIONS = (
     (4, 'the chip bonus by form not hooked: FireBrn1 without HeatCross\'s +50', None),
     (8, 'the arm flash\'s look not hooked: TenguCross\'s arm as he fires', None),
     (16, 'the summon not hooked: TenguMan behind him as he crosses', None),
+    (32, 'TenguCross chosen on CROSSSELECT leaves form 8 the Souls\' (HeatCross\'s copy): run as tengu-installed', None),
 )
+TENGU_BREAK = 32
 
 
 def ai_mutations(native, installed):
@@ -419,15 +429,18 @@ def ai_mutations(native, installed):
     return caught == len(cases)
 
 
-def mutations(a, installed):
+def mutations(a, installed, tengu_native):
     """each break of mutations run as the proxy and compared with installed: whether every one the battle reaches
     was caught"""
     caught = reached = 0
     for bit, what, unreached in MUTATIONS:
         name = f'mutation{bit}'
-        path = os.path.join(WORK, name, 'btrace.bin') if a.no_run else run(name, f'soulproxy,proxybreak={bit},hp=1000,folder=20,onehit', True, a.seed, True)
+        tengu = bit == TENGU_BREAK
+        path = os.path.join(WORK, name, 'btrace.bin') if a.no_run else \
+            run(name, f'soulproxy,proxybreak={bit},hp=1000,folder=20,onehit', not tengu, a.seed, True, TENGU_FLAG if tengu else 0xE2)
         mb, fb = X.read_trace(path)
-        _, bad = compare(installed[1], fb, installed[0], mb, True)
+        against = tengu_native if tengu else installed
+        _, bad = compare(against[1], fb, against[0], mb, not tengu)
         first = f': first at frame {bad[0][0]} {bad[0][1]:08x} ({bad[0][2]:02x} | {bad[0][3]:02x})' if bad else ''
         if unreached:
             print(f'mutation {bit}, {what}: {"caught" if bad else "not caught"}{first}; not reached by this battle: {unreached}')
@@ -482,16 +495,18 @@ def main():
     # (--souls: the Souls, and the proxy under them, install wherever BN5's ROM is read since issue #82's run round, so the
     # runs without the proxy keep BN5's Navis out, and the Souls with them, nonavis)
     plain = ('nonavis,' if a.souls else '') + base
-    for name, dev, cross in (('native', plain, False), ('installed', 'soulproxy,' + base, False), ('proxy', 'soulproxy,' + base, True),
-                             ('tengu', plain, True)):
-        path = os.path.join(WORK, name, 'btrace.bin') if a.no_run else run(name, dev, cross, a.seed, a.quiet)
+    for name, dev, cross, flag in (('native', plain, False, 0xE2), ('installed', 'soulproxy,' + base, False, 0xE2),
+                                   ('proxy', 'soulproxy,' + base, True, 0xE2), ('tengu', plain, True, 0xE2),
+                                   ('tengu-native', plain, False, TENGU_FLAG), ('tengu-installed', 'soulproxy,' + base, False, TENGU_FLAG)):
+        path = os.path.join(WORK, name, 'btrace.bin') if a.no_run else run(name, dev, cross, a.seed, a.quiet, flag)
         runs[name] = X.read_trace(path)
         print(f'{name}: {len(runs[name][1])} frames of battle traced')
     if a.story:
         print('the battle (proxy):')
         print('\n'.join(story(runs['proxy'][1])))
     ok = all(checks(name, timeline(runs[name][1]), form) for name, form in (('installed', HEAT), ('proxy', PROXY)))
-    for la, lb, allowed, want_same in (('native', 'installed', False, True), ('installed', 'proxy', True, True), ('installed', 'tengu', True, False)):
+    for la, lb, allowed, want_same in (('native', 'installed', False, True), ('installed', 'proxy', True, True), ('installed', 'tengu', True, False),
+                                       ('tengu-native', 'tengu-installed', False, True)):
         (ma, fa), (mb, fb) = runs[la], runs[lb]
         explained, bad = compare(fa, fb, ma, mb, allowed)
         print(f'{la} against {lb}: {min(len(fa), len(fb))} frames, every byte of EWRAM and IWRAM: {len(bad)} differences unexplained'
@@ -504,7 +519,7 @@ def main():
         ok = ok and (not bad) == want_same
     print('the proxy form: ' + ('HeatCross frame for frame' if ok else 'DIFFERENT'))
     if a.mutations:
-        ok = mutations(a, runs['installed']) and ok
+        ok = mutations(a, runs['installed'], runs['tengu-native']) and ok
         if a.souls:
             ok = ai_mutations(runs['native'], runs['installed']) and ok
     sys.exit(0 if ok else 1)

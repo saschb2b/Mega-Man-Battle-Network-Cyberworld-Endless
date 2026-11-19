@@ -20,6 +20,7 @@
 #include "emu.h"
 #include "free_space.h"
 #include "rom.h"
+#include "soulproxy.h"
 
 #define BUS 0x08000000u
 #define FLAGS_AT  FREE_CROSSSELECT                    /* the flags' table, a word a Cross */
@@ -43,10 +44,25 @@ static bool installed;
 
 bool crossselect_falzar(void) { return installed; }
 
-/* (r6 the rows listed: five already, the next Cross is not) */
+/* whether a side stands in form 8 as the Souls' proxy (soulproxy.c), where
+ * TenguCross, Falzar's Cross on the same form, is not listed */
+static bool in_soul(void) {
+	if (!soulproxy_installed() || !soulproxy_armed()) return false;
+	for (uint32_t side = 0; side < 2; ++side)
+		if (hook_read8(BN6_BATTLE_NAVI + side * BN6_BATTLE_NAVI_SIZE + BN6_NAVI_FORM) == BN6_FORM_PROXY) return true;
+	return false;
+}
+
+/* (r4 the Cross, r6 the rows listed: five already, or TenguCross in a
+ * Soul, the Cross is not; TenguCross listed, form 8 is its own from here,
+ * its face shown as the cursor reaches it, before any commit) */
 static HookAct list_store(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[6] < BN6_CROSS_ROWS) return HOOK_CONTINUE;
+	bool tengu = r->r[4] + 1 == BN6_FORM_PROXY;
+	if (r->r[6] < BN6_CROSS_ROWS && !(tengu && in_soul())) {
+		if (tengu) soulproxy_arm(false);
+		return HOOK_CONTINUE;
+	}
 	r->r[12] = BN6_CROSS_LIST_NEXT | 1;
 	return HOOK_JUMP;
 }

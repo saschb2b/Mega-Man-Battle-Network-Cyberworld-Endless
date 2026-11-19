@@ -5,6 +5,7 @@
 
 #include "battle_trace.h"
 #include "bn6.h"
+#include "claims.h"
 #include "bn6_fields.h"
 #include "emu.h"
 #include "game.h"
@@ -126,7 +127,8 @@ void emu_debug_frame(void) {
 		t += watching;
 		return;
 	}
-	++t;
+	/* (the installers' writes claimed, once every one has run: those after the boot too) */
+	if (++t == 1) claims_report();
 	if (t % 30 == 0)
 		fprintf(stderr, "t%d depth %d mode %02x sub %02x chat %d pos %d %d z %d map %02x:%02x hooks %u\n", t, depth_said,
 			emu_read8(emu_read32(BN6_TOOLKIT)), emu_read8(BN6_GAMESTATE), emu_read8(BN6_CHATBOX),

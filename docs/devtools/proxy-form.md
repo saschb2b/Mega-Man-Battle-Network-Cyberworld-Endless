@@ -1,7 +1,7 @@
 ---
 type: Tool
 title: "The proxy form: where a Soul stands"
-description: "`--dev soulproxy` makes form 8, Falzar's TenguCross that Gregar never offers, an exact copy of HeatCross for BN5's Souls, and `tools/xproxy.py` proves it by one battle fought four ways, every byte traced."
+description: "`--dev soulproxy` makes form 8, Falzar's TenguCross, an exact copy of HeatCross for BN5's Souls while a Soul is chosen and gives it back to TenguCross as CROSSSELECT offers it, and `tools/xproxy.py` proves both by one battle fought six ways, every byte traced."
 tags: [devtools]
 generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:15:00Z }
 ---
@@ -9,7 +9,7 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:15:00Z }
 # The proxy form: where a Soul stands
 
 ```bash
-python3 tools/xproxy.py               # four runs: the proxy is HeatCross frame for frame, Gregar's own form 8 is not
+python3 tools/xproxy.py               # six runs: the proxy is HeatCross frame for frame, Gregar's own form 8 is not, TenguCross with it installed is Gregar's
 python3 tools/xproxy.py --story       # the proxy run's battle, frame by frame
 python3 tools/xproxy.py --mutations   # also each part of the install left out: each the battle reaches must part them
 python3 tools/xproxy.py --souls       # the four with the Souls installed over the proxy, none held (BN5's ROM beside BN6's)
@@ -116,3 +116,31 @@ of one frame, and each must be reported. The move came in on 13 October
 brought up to the install, and the check stood red unrun until 13
 November: `xfamily.py --spec native`, which compares through it, with
 it.
+
+## Form 8 shared
+
+Since Falzar's five Crosses are given (issue #706;
+[MegaMan's forms and BN5's Souls in BN6's engine](../rom/souls.md),
+CROSSSELECT), CROSSSELECT offers TenguCross, form 8, the form the Souls
+stand on. No form of its own is to be had for the proxy: forms 1-10 are
+the ten Crosses, 0xB on Beast Out, which Gregar's code tells apart by
+ranges (a Cross while beasted, the emblem, the face's counter), and 155
+calls read the form through the battle NaviStats' getters and the
+pending form's; a form past 0x18 would be read as a Beast Out by each
+range, and its NameID (0x1AB + the form) would name another object. So
+form 8 is shared, and given to whichever is chosen (`soulproxy_arm`):
+the Souls' (HeatCross's copy, the Souls' stubs in its entries, the three
+code readers answered as 1) as a Soul is committed (UNITE's OK, a
+liberation teammate's Soul, the dev step `cross 8`), Gregar's own
+TenguCross as CROSSSELECT lists it (its face is shown as the cursor
+reaches it, before any commit) or commits it. The two are never worn in
+one battle: UNITE stands not in TenguCross (`soulunite.c`), and
+CROSSSELECT lists TenguCross not while a side stands in form 8 as a Soul
+(`crossselect.c`). Online, where Falzar's Crosses are not offered, form 8
+stays the Souls'.
+
+`tools/xproxy.py`'s two runs more prove it: tengu-native (no proxy) and
+tengu-installed (the proxy installed), each with TenguCross alone on
+CROSSSELECT (flag `0xE9`) chosen and fought, must be the same every byte;
+`--mutations`' 32 (`proxybreak=32`: form 8 left the Souls' as TenguCross
+is chosen) must part them.

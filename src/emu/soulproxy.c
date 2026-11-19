@@ -3,8 +3,11 @@
  * MegaMan's forms: every read of the form in Gregar followed with the forms
  * 1 and 8 side by side, and tools/xproxy.py's battles). Form 8 is Falzar's
  * TenguCross: Gregar keeps its entries (its overlay, element, Airshoe,
- * charged shot, palette, face) and its chip bonus, and no CROSSSELECT of
- * Gregar's lists it. Its entries are written over with HeatCross's here,
+ * charged shot, palette, face) and its chip bonus, and CROSSSELECT lists it
+ * since Falzar's Crosses are given (crossselect.c). No form is free for the
+ * proxy instead: forms 1-10 are the Crosses, 0xB and past Beast Out, which
+ * Gregar's code tells apart by ranges, and 155 calls read the form. So form
+ * 8 is the Souls' while armed and TenguCross's while not (soulproxy_arm). Its entries are written over with HeatCross's here,
  * the three code readers that tell 8 from 1 answered as 1 by hooks (the
  * chip bonus, the arm flash's look, the summon), and its NameID's object id
  * (BN6_FORM_NAME_BASE plus the form) given HeatCross's AI index. What stays its own: the form byte and
@@ -61,6 +64,20 @@ static bool rom_is(uint32_t at, const uint8_t *want, uint32_t n) {
 	return at >= BUS && at - BUS + n <= ROM_SIZE && !memcmp(R.data + (at - BUS), want, n);
 }
 
+/* Form 8 is the Souls' while armed (as installed: HeatCross's copy, the
+ * Souls' stubs in its entries), Gregar's own TenguCross while not: a
+ * Soul's commit arms it, TenguCross's on CROSSSELECT disarms it, each
+ * before the crossing that reads it; the two are never worn in one battle
+ * (soulunite.c's UNITE stands not in TenguCross, crossselect.c lists it
+ * not in a Soul). The entries as armed, kept as the first disarm finds
+ * them (the Souls' installs write some after this one). */
+static bool done, armed = true, kept;
+static int arm_breaks;
+static uint8_t soul_entries[sizeof tables / sizeof *tables][BN6_FORM_LOADOUT_SIZE];
+/* the form the next Cross chosen is committed as, 0 none (one Cross); the commit's hook */
+static int next_form;
+static bool commit_hooked;
+
 /* (r0 MegaMan's form, r4 the chip, r5 him: the proxy's chip bonus is HeatCross's; a Soul's BN5's, soulpassive.c) */
 static HookAct heat_bonus(HookRegs *r, void *user) {
 	(void)user;
@@ -71,7 +88,7 @@ static HookAct heat_bonus(HookRegs *r, void *user) {
 		r->r[12] = BN6_CHIP_BONUS_DONE | 1;
 		return HOOK_JUMP;
 	}
-	if (r->r[0] == BN6_FORM_PROXY) r->r[0] = BN6_FORM_HEAT_CROSS;
+	if (r->r[0] == BN6_FORM_PROXY && armed) r->r[0] = BN6_FORM_HEAT_CROSS;
 	return HOOK_CONTINUE;
 }
 
@@ -85,37 +102,69 @@ static HookAct heat_flash(HookRegs *r, void *user) {
 		r->r[4] = (uint32_t)kind;
 		return HOOK_CONTINUE;
 	}
-	if (r->r[0] == BN6_FORM_PROXY) r->r[0] = BN6_FORM_HEAT_CROSS;
+	if (r->r[0] == BN6_FORM_PROXY && armed) r->r[0] = BN6_FORM_HEAT_CROSS;
 	return HOOK_CONTINUE;
 }
 
 /* (r4 the form he crosses into: the proxy's summon is HeatMan's) */
 static HookAct summon(HookRegs *r, void *user) {
 	(void)user;
-	if (r->r[4] == BN6_FORM_PROXY) r->r[4] = BN6_FORM_HEAT_CROSS;
+	if (r->r[4] == BN6_FORM_PROXY && armed) r->r[4] = BN6_FORM_HEAT_CROSS;
 	return HOOK_CONTINUE;
 }
 
 /* whether BN5's ROM, the Souls' own, is read beside BN6's */
 static bool soulproxy_bn5_read(void) { return XR[XROM_BN5_COLONEL_US].data != NULL; }
 
-static bool done;
-
 bool soulproxy_installed(void) { return done; }
+
+bool soulproxy_armed(void) { return !done || armed; }
+
+void soulproxy_arm(bool soul) {
+	if (!done || armed == soul || (!soul && (arm_breaks & SOULPROXY_BREAK_TENGU))) return;
+	for (size_t i = 0; i < sizeof tables / sizeof *tables; ++i) {
+		const FormTable *t = &tables[i];
+		uint32_t at = t->at + t->size * BN6_FORM_PROXY;
+		if (!kept)
+			for (uint32_t b = 0; b < t->size; ++b) soul_entries[i][b] = hook_read8(at + b);
+		for (uint32_t b = 0; b < t->size; ++b) hook_write8(at + b, soul ? soul_entries[i][b] : t->tengu[b]);
+	}
+	kept = true;
+	armed = soul;
+}
+
+/* (r0 the form CROSSSELECT's commit writes: its row + 1; the dev step's
+ * form instead where it asked, the proxy's own test) form 8 the Souls'
+ * where the dev step commits it, TenguCross's where CROSSSELECT does */
+static HookAct commit(HookRegs *r, void *user) {
+	(void)user;
+	if (next_form) {
+		printf("cross: form %u chosen on CROSSSELECT, committed as form %d\n", (unsigned)r->r[0], next_form);
+		r->r[0] = (uint32_t)next_form;
+		next_form = 0;
+		if (r->r[0] == BN6_FORM_PROXY) soulproxy_arm(true);
+	} else if (r->r[0] == BN6_FORM_PROXY) soulproxy_arm(false);
+	return HOOK_CONTINUE;
+}
+
+/* every byte the install stands on, as Gregar has it */
+static bool gregars(void) {
+	bool ok = rom_is(BN6_OBJECT_IDS + OBJECT_ID_SIZE * (BN6_FORM_NAME_BASE + BN6_FORM_HEAT_CROSS), heat_id, OBJECT_ID_SIZE) &&
+		rom_is(BN6_OBJECT_IDS + OBJECT_ID_SIZE * (BN6_FORM_NAME_BASE + BN6_FORM_PROXY), tengu_id, OBJECT_ID_SIZE) &&
+		rom_u16(BN6_CHIP_BONUS_HEAT - BUS) == CMP_R0_1 && rom_u16(BN6_ARM_FLASH_FORM - BUS) == CMP_R0_0 &&
+		rom_u16(BN6_CROSS_SUMMON - BUS) == MOVS_R3_20 && rom_u16(BN6_CROSS_COMMIT - BUS) == MOVS_R1_0;
+	for (size_t i = 0; ok && i < sizeof tables / sizeof *tables; ++i) {
+		const FormTable *t = &tables[i];
+		ok = rom_is(t->at + t->size * BN6_FORM_HEAT_CROSS, t->heat, t->size) && rom_is(t->at + t->size * BN6_FORM_PROXY, t->tengu, t->size);
+	}
+	return ok;
+}
 
 bool soulproxy_install(int breaks) {
 	if (done) return true;
 	if (!R.data || !emu_ready()) return false;
 	/* (everything checked first: nothing written where one byte is not Gregar's) */
-	bool ok = rom_is(BN6_OBJECT_IDS + OBJECT_ID_SIZE * (BN6_FORM_NAME_BASE + BN6_FORM_HEAT_CROSS), heat_id, OBJECT_ID_SIZE) &&
-		rom_is(BN6_OBJECT_IDS + OBJECT_ID_SIZE * (BN6_FORM_NAME_BASE + BN6_FORM_PROXY), tengu_id, OBJECT_ID_SIZE) &&
-		rom_u16(BN6_CHIP_BONUS_HEAT - BUS) == CMP_R0_1 && rom_u16(BN6_ARM_FLASH_FORM - BUS) == CMP_R0_0 &&
-		rom_u16(BN6_CROSS_SUMMON - BUS) == MOVS_R3_20;
-	for (size_t i = 0; ok && i < sizeof tables / sizeof *tables; ++i) {
-		const FormTable *t = &tables[i];
-		ok = rom_is(t->at + t->size * BN6_FORM_HEAT_CROSS, t->heat, t->size) && rom_is(t->at + t->size * BN6_FORM_PROXY, t->tengu, t->size);
-	}
-	if (!ok) {
+	if (!gregars()) {
 		fprintf(stderr, "soulproxy: the ROM's tables by form are not Gregar's as expected: form 8 left as it is\n");
 		return false;
 	}
@@ -133,7 +182,9 @@ bool soulproxy_install(int breaks) {
 		emu_write(tables[i].at + tables[i].size * BN6_FORM_PROXY, tables[i].heat, tables[i].size);
 	bool hooked = ((breaks & SOULPROXY_BREAK_BONUS) || emu_hook(BN6_CHIP_BONUS_HEAT, heat_bonus, NULL)) &&
 		((breaks & SOULPROXY_BREAK_FLASH) || emu_hook(BN6_ARM_FLASH_FORM, heat_flash, NULL)) &&
-		((breaks & SOULPROXY_BREAK_SUMMON) || emu_hook(BN6_CROSS_SUMMON, summon, NULL));
+		((breaks & SOULPROXY_BREAK_SUMMON) || emu_hook(BN6_CROSS_SUMMON, summon, NULL)) &&
+		(commit_hooked || (commit_hooked = emu_hook(BN6_CROSS_COMMIT, commit, NULL)));
+	arm_breaks = breaks;
 	claims_end();
 	printf("soulproxy: form %d made HeatCross's copy: %d tables and its object id written%s%s\n", BN6_FORM_PROXY, (int)(sizeof tables / sizeof *tables),
 		hooked ? ", its three code readers hooked" : ", a hook NOT placed", breaks ? " (with parts left out: proxybreak)" : "");
@@ -141,27 +192,13 @@ bool soulproxy_install(int breaks) {
 	return hooked;
 }
 
-/* the form the next Cross chosen is committed as, 0 none (one Cross) */
-static int next_form;
-
-/* (r0 the form CROSSSELECT's commit writes: its row + 1) */
-static HookAct commit(HookRegs *r, void *user) {
-	(void)user;
-	if (next_form) {
-		printf("cross: form %u chosen on CROSSSELECT, committed as form %d\n", (unsigned)r->r[0], next_form);
-		r->r[0] = (uint32_t)next_form;
-		next_form = 0;
-	}
-	return HOOK_CONTINUE;
-}
-
 bool soulproxy_cross(int form) {
-	static bool hooked;
+	bool hooked = commit_hooked;
 	if (form < 1 || form >= BN6_FORMS || !R.data || rom_u16(BN6_CROSS_COMMIT - BUS) != MOVS_R1_0) {
 		printf("cross: %d is no form (1-%d), or CROSSSELECT's commit is not Gregar's\n", form, BN6_FORMS - 1);
 		return false;
 	}
-	if (!hooked) hooked = emu_hook(BN6_CROSS_COMMIT, commit, NULL);
+	if (!hooked) hooked = commit_hooked = emu_hook(BN6_CROSS_COMMIT, commit, NULL);
 	if (hooked) next_form = form;
 	printf("cross: the next Cross chosen on CROSSSELECT %s form %d\n", hooked ? "commits" : "cannot commit (no hook)", form);
 	return hooked;

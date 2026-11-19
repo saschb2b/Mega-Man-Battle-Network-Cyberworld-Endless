@@ -274,11 +274,6 @@
 #define BN6_FLAG_SLASH_CROSS  0x00E4      /* SlashCross */
 #define BN6_FLAG_ERASE_CROSS  0x00E5      /* EraseCross */
 #define BN6_FLAG_CHARGE_CROSS 0x00E6      /* ChargeCross */
-#define BN6_FLAG_SPOUT_CROSS  0x00E7      /* Falzar's five, the flags its own CROSSSELECT reads (bn6f's table at Falzar 0x08029F4C), which
-                                             no code of Gregar's reads (crossselect.c lists them): SpoutCross, then TomahawkCross,
-                                             TenguCross, GroundCross, DustCross to 0x00EB (docs/rom/souls.md, CROSSSELECT) */
-#define BN6_CROSSES           10          /* CROSSSELECT's Crosses, Gregar's five (BN6_FLAG_HEAT_CROSS on), then Falzar's (BN6_FLAG_SPOUT_CROSS on) */
-#define BN6_CROSS_ROWS        5           /* ... the rows it lists at most (its list at the screen's +0x50, their states at +0x55) */
 
 /* Per internet group tables (index group - 0x80) */
 #define BN6_NPC_LISTS         0x080347E0u /* NPCList_maps80: per-map lists of NPC script pointers */

@@ -5,14 +5,11 @@
 #include <stdio.h>
 
 #include "bn6.h"
-#include "crossselect.h"
 #include "flags.h"
 #include "guardians.h"
 #include "net.h"
-#include "rom.h"
 #include "run.h"
 #include "save.h"
-#include "soulproxy.h"
 #include "souls.h"
 #include "super_boss.h"
 
@@ -41,23 +38,15 @@ static const struct { int navi, flag; const char *name, *weak, *strong, *navis; 
 	 * bonuses by form, 0x0800EF34: Wind chips +10 in TenguCross, Breaker
 	 * chips +10 in GroundCross, the chip classes 8 and 9 that Falzar's
 	 * own Cross tutorials name, assumed; none for the other three, whose
-	 * gifts are their charged shots and passives, not yet put in words) */
+	 * gifts are their charged shots and passives, not yet put in words.
+	 * TenguCross stands on form 8, the Souls' proxy's too: soulproxy.c
+	 * gives the form to whichever is chosen, never both in one battle) */
 	{ 6, BN6_FLAG_SPOUT_CROSS, "SpoutCross", "Elec", NULL },
 	{ 7, BN6_FLAG_SPOUT_CROSS + 1, "TomahawkCross", "Fire", NULL },
 	{ 8, BN6_FLAG_SPOUT_CROSS + 2, "TenguCross", "Sword", "Wind chips +10" },
 	{ 9, BN6_FLAG_SPOUT_CROSS + 3, "GroundCross", "Cursor", "Breaker chips +10" },
 	{ 10, BN6_FLAG_SPOUT_CROSS + 4, "DustCross", "Cursor", NULL },
 };
-
-/* Whether CROSSSELECT can give `navi`'s Cross: Gregar's five always;
- * Falzar's where it lists them (its rows made, crossselect.c), and
- * TenguCross not while the Souls' proxy form stands on its form 8 (BN5's
- * Navis in the game: soulproxy.c, until the proxy has a form of its own) */
-static bool givable(int navi) {
-	if (navi <= 5) return true;
-	if (!crossselect_falzar()) return false;
-	return navi != BN6_FORM_PROXY || !(soulproxy_installed() || XR[XROM_BN5_COLONEL_US].data);
-}
 
 /* Whether the run has beaten `navi` as an earlier act's guardian (its
  * Cross is MegaMan's already). */
@@ -69,7 +58,7 @@ static bool beaten_before(int navi, int depth) {
 
 const char *powers_cross_name(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi) return givable(navi) ? crosses[i].name : NULL;
+		if (crosses[i].navi == navi) return crosses[i].name;
 	return NULL;
 }
 
@@ -113,7 +102,7 @@ void powers_crosses_hide(bool hide) {
 
 void powers_bring(void) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == run.cross && givable(run.cross)) flag_set(crosses[i].flag);
+		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);
 	/* (BN6's own BeastOut: the emblem under OK, its three turns a battle,
 	 * as the Cybeast's fall gives it, docs/rom/; a headless start
 	 * past the first Net's Nest has it too, as a run has it there) */
@@ -140,7 +129,7 @@ const char *powers_den_text(int depth) {
 
 bool powers_after_boss(int navi) {
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
-		if (crosses[i].navi == navi && !run.cross && givable(navi)) flag_set(crosses[i].flag);
+		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
 	/* BN5's guardians their Soul, for every battle of the run (docs/game/meta/souls.md,
 	 * Souls) */
 	bool soul = guardian_older(navi) && !soul_held(navi);

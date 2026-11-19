@@ -1,7 +1,14 @@
 {
   "branch": "falzar-crosses",
   "what": "Falzar's five Crosses (forms 6-10, kept in Gregar's tables) given by their guardians: the Souls' proxy moved off form 8 to a form of its own, CROSSSELECT offering forms 6-10, the run's powers, setup and Guardian Data",
-  "takes": {},
+  "takes": {
+    "free_rom": [
+      [
+        "0x16C000",
+        "0x16DFFF"
+      ]
+    ]
+  },
   "units": [
     "Falzar Crosses",
     "Souls proxy form",

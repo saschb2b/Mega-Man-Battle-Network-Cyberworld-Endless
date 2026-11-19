@@ -7,9 +7,8 @@
   act's guardian, as Gregar's five Cross Navis do: SpoutCross,
   TomahawkCross, TenguCross, GroundCross and DustCross, each with its
   own body, element, weakness and charged shot, chosen on CROSSSELECT
-  beside Gregar's. Once their Navi has fallen, a run can start in one.
-  While BN5's Navis are in the game, TenguCross is not given yet: the
-  Souls still stand on its form (issue #706).
+  beside Gregar's. Once their Navi has fallen, a run can start in one
+  (issue #706).
 
 - **New: your friends on Discord see you play, and how far the run
   has come.** On Windows, Linux and macOS, with the Discord app open,
