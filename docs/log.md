@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-19
+* **Update**: game/bosses/sequence.md (a SlipRunr slide ends at the arena's door, issue #697; the state's `met` line and its scenario), rom/game-state.md (SlipRunr's slide: NaviStats +0x35 and flags 0x173D-0x173F, and 0x173E's line in the dev tools' row put right), devtools/scenarios.md (`by arena`), devtools/dev-menu.md (`--dev sliprun`), devtools/switches.md (flag 0x173E put right).
 * **Update**: game/liberation/building/stage-3-team.md (the player's own body again wherever no board is on, issue #696), devtools/agents-tools.md (the state's `body` line).
 * **Create**: project/discord.md (the project's Discord server: its invite, channels, forums, roles, onboarding, moderation and where the site links it). **Update**: project/index.md (its line), GUIDE.md (Follow updates links the Discord server), project/overview.md (links Discord), code/site-and-media.md (the download page's two windows under its files).
 

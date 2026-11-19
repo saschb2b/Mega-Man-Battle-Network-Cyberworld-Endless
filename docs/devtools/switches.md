@@ -3,7 +3,7 @@ type: Tool
 title: "How the switches work"
 description: "How the dev menu's switches work inside BN6: event flag 0x1700 holding random battles off, HP writes for can't die and one-hit enemies, and extra emulator frames per shown frame for speed."
 tags: [devtools]
-generated: { by: claude-code/unrecorded, at: 2026-09-24T16:18:37Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:29:44Z }
 ---
 
 # How the switches work

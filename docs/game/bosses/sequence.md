@@ -3,7 +3,7 @@ type: Feature
 title: "The sequence (src/director/boss.c)"
 description: "The guardian fight's states in `src/director/boss.c` (enter, title card, talk, battle, last word, log-out, Guardian Data, open exit; a tournament's bracket, rounds and prizes between), its event flags, BN6's no-song 0x63 for silence, and MegaMan stepping up beside the guardian (`guardian_stand`)."
 tags: [game, bosses]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T15:11:58Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:29:44Z }
 ---
 
 # The sequence (`src/director/boss.c`)
