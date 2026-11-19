@@ -12,6 +12,8 @@ void title_summary_open(void);
 /* a frame of it: whether the player closed it (A or START turns to the
  * records, then closes them) */
 bool title_summary_update(void);
+/* ... whether it shows (Discord's presence says the run is over) */
+bool title_summary_shown(void);
 /* over the title's picture, its top left at (x0, y0) */
 void title_summary_draw(int x0, int y0);
 

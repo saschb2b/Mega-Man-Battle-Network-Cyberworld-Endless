@@ -3,7 +3,7 @@ type: Tool
 title: "Dev menu: shorter test runs"
 description: "Select+R opens the dev menu in battle or on the net (can't die, one-hit enemies, speed, next layer), and `--dev` sets those switches and many with no menu entry (`fragile`, `dark`, `souls=MASK`, `folder=ID`, `hp=N`)."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-16T16:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-18T16:00:00Z }
 ---
 
 # Dev menu: shorter test runs
@@ -68,7 +68,10 @@ exit was reached at), `route` (a special route found: with
 so the next fork offers its third way, [Special routes](../game/liberation/special-routes.md), Special
 routes), `veteran` (a profile that has met seven
 guardians, found two Spins and won three of the rival's duels, where it
-has none: the PET's mails for `build.py screenshots pet`), `folders`
+has none: the PET's mails for `build.py screenshots pet`), `discord` (Discord's presence on a developer's start, a headless one
+included, so an autopilot run shows on the friend list and a capture of
+Options' Game page has its Discord line:
+[Discord's presence](../engine/discord.md)), `folders`
 (every starting folder open in the profile: the setup's Folder row turns
 through all six, [Decisions and phase one](../game/meta/decisions.md)) and `duels=N`
 (the rival's wins made N: `duels=2` brings ProtoMan's netbattle, or his

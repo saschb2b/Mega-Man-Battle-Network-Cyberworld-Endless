@@ -86,6 +86,10 @@ bool director_on_layer(void) { return D.active && !D.town; }
 
 int director_guardian_battle(void) { return D.active && boss_fighting() ? boss_foe() : 0; }
 
+bool director_in_battle(void) { return D.active && D.in_battle; }
+
+bool director_dueling(void) { return D.active && D.in_battle && D.duel; }
+
 int director_md_count(void) { return D.active && !D.town ? D.objs.nmd : 0; }
 bool director_md_opened(int k) { return k >= 0 && k < director_md_count() && flag_get(MAPSLOT_MD_FLAG + k); }
 void director_md_place(int k, int *x, int *y, int *z) {

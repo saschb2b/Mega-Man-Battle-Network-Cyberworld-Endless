@@ -115,6 +115,7 @@ static int switched(int kind) {
 	case LINE_VOXEL: return display_voxel() || display_stereo();
 	case LINE_TRIGGERS: return feel_triggers();
 	case LINE_UPDATES: return update_on();
+	case LINE_DISCORD: return options_discord_on();
 	default: return -1;
 	}
 }
@@ -159,7 +160,7 @@ static const char *line_name(int kind) {
 	static const OptionsWord names[] = { [LINE_CONTROLS] = OW_CONTROLS, [LINE_FULLSCREEN] = OW_FULLSCREEN, [LINE_SCALE] = OW_SCALE,
 		[LINE_SMOOTH] = OW_SMOOTH, [LINE_SOUND] = OW_SOUND, [LINE_MUSIC] = OW_MUSIC, [LINE_EFFECTS] = OW_EFFECTS, [LINE_FAST] = OW_FAST,
 		[LINE_VIBRATION] = OW_VIBRATION, [LINE_TRIGGERS] = OW_TRIGGERS, [LINE_COLOUR] = OW_COLOUR, [LINE_BLEND] = OW_BLEND, [LINE_LCD3X] = OW_LCD3X,
-		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL, [LINE_TOUCH] = OW_TOUCH, [LINE_TITLE] = OW_TO_TITLE };
+		[LINE_OUTPUT] = OW_OUTPUT, [LINE_VOXEL] = OW_VOXEL, [LINE_DISCORD] = OW_DISCORD, [LINE_TOUCH] = OW_TOUCH, [LINE_TITLE] = OW_TO_TITLE };
 	switch (kind) {
 	case LINE_STATS: return analytics_word(AW_ROW);
 	case LINE_UPDATE: return update_name();
@@ -174,7 +175,7 @@ void options_describe(FILE *f) {
 		[LINE_FULLSCREEN] = "fullscreen", [LINE_SCALE] = "scale", [LINE_SMOOTH] = "smooth", [LINE_SOUND] = "sound", [LINE_MUSIC] = "music",
 		[LINE_EFFECTS] = "effects", [LINE_FAST] = "fast", [LINE_VIBRATION] = "vibration", [LINE_TRIGGERS] = "triggers", [LINE_COLOUR] = "colour",
 		[LINE_BLEND] = "blend", [LINE_LCD3X] = "lcd3x", [LINE_OUTPUT] = "output", [LINE_VOXEL] = "depth", [LINE_UPDATES] = "updates",
-		[LINE_TOUCH] = "touch" };
+		[LINE_DISCORD] = "discord", [LINE_TOUCH] = "touch" };
 	analytics_ask_describe(f);
 	news_box_describe(f);
 	controls_describe(f);
@@ -259,6 +260,7 @@ static const char *note_words(int kind) {
 	case LINE_VIBRATION: return options_word(feel_level() == FEEL_OFF ? OW_VIBRATION_OFF_NOTE : OW_VIBRATION_ON_NOTE);
 	case LINE_TRIGGERS: return options_word(feel_triggers() ? OW_TRIGGERS_ON_NOTE : OW_TRIGGERS_OFF_NOTE);
 	case LINE_TOUCH: return options_word(touch_off() ? OW_TOUCH_OFF_NOTE : OW_TOUCH_AUTO_NOTE);
+	case LINE_DISCORD: return options_word(options_discord_on() ? OW_DISCORD_ON_NOTE : OW_DISCORD_OFF_NOTE);
 	case LINE_TITLE: return options_word(OW_TO_TITLE_NOTE);
 	default: return display_note(kind);
 	}

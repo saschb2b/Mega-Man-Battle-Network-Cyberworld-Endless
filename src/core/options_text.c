@@ -104,6 +104,9 @@ static const char *const words[] = {
 	"Return to title",   /* OW_TO_TITLE */
 	"Back to the title screen, for CONTINUE and SAVES",   /* OW_TO_TITLE_NOTE */
 	"Return to the title?",   /* OW_ASK_TITLE */
+	"Discord",   /* OW_DISCORD */
+	"Your friends on Discord see you play, and how far the run has come",   /* OW_DISCORD_ON_NOTE */
+	"Discord shows nothing of the game",   /* OW_DISCORD_OFF_NOTE */
 };
 _Static_assert(sizeof words / sizeof *words == OW_COUNT, "a word for each OptionsWord");
 
