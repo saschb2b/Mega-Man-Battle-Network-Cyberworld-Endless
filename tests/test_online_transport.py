@@ -163,6 +163,31 @@ async def malicious(reader, writer, frame):
     await asyncio.wait_for(wait_closed(), 5)
 
 
+async def split_frames(reader, writer):
+    """Messages whose frames come over several TCP writes, as a proxy cuts a
+    stream of large ones (a save's TRANSFER_DATA, issue #700): each taken in
+    whole, the WELCOME and then a SNAPSHOT of every peer the wire allows,
+    ProbePeer among them, where WinHTTP hands each piece over as a fragment"""
+    await websocket.upgrade(reader, writer, ())
+    opcode, hello = await websocket.receive(reader)
+    assert opcode == 2 and hello[0] == protocol.SPEC["hello"]
+    welcome = websocket.frame(protocol.WELCOME.pack(protocol.SPEC["welcome"], 120, 1, 20, 8, 1, b"t" * 16, 8, 0x5EED, 2963))
+    peers = [protocol.PEER.pack(10 + i, bytes([i + 1]) * 16, *((321, -123, 0, 7) if i == 3 else (i, 0, 0, 0)),
+                                b"ProbePeer" if i == 3 else f"Peer{i}".encode(), 0)
+             for i in range(protocol.SPEC["max_players"] - 1)]
+    snapshot = websocket.frame(bytes((protocol.SPEC["snapshot"], len(peers))) + b"".join(peers))
+    for data, cuts in ((welcome, (5,)), (snapshot, (3, 200))):
+        for start, end in zip((0, *cuts), (*cuts, len(data))):
+            writer.write(data[start:end])
+            await writer.drain()
+            await asyncio.sleep(0.2)
+
+    async def until_gone():
+        while await reader.read(8192):
+            pass
+    await asyncio.wait_for(until_gone(), 15)
+
+
 def untrusted_context(directory):
     openssl = shutil.which("openssl")
     if not openssl:
@@ -190,6 +215,7 @@ async def main(args):
             async def handler(reader, writer, data=frame):
                 await malicious(reader, writer, data)
             await raw_server_case(binary, report, handler, label)
+        await raw_server_case(binary, report, split_frames, "split_frames", "split")
 
         async def stall(reader, writer):
             await reader.read()

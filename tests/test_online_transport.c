@@ -49,6 +49,8 @@ static bool session(const char *url, const char *mode, const uint8_t *identity) 
 	bool refuse = !strcmp(mode, "refuse"), cancel = !strcmp(mode, "cancel");
 	/* (disconnect: the link dropped without a word, tried again, the place taken back; malformed: never tried again) */
 	bool disconnect = !strcmp(mode, "disconnect"), malformed = !strcmp(mode, "malformed"), peer = !strcmp(mode, "exchange");
+	/* (split: messages whose frames came in pieces, taken in whole, issue #700) */
+	bool split = !strcmp(mode, "split");
 	bool connected = false, passed = false, dropped = false;
 	uint32_t first_id = 0;
 	unsigned seen = 0, sent = 0;
@@ -67,7 +69,8 @@ static bool session(const char *url, const char *mode, const uint8_t *identity) 
 			if (!first_id) first_id = snapshot.player_id;
 			if (refuse || cancel) break;
 			seen = observe(&snapshot, seen);
-			if (!disconnect && !malformed && !exercise(&snapshot, seen, &sent, peer)) break;
+			if (split && (seen & SEEN_PEER)) { passed = !snapshot.error[0]; break; }
+			if (!disconnect && !malformed && !split && !exercise(&snapshot, seen, &sent, peer)) break;
 		}
 		if (snapshot.reconnecting) dropped = true;
 		if (disconnect && dropped && snapshot.resumes && snapshot.connected) { passed = snapshot.player_id == first_id; break; }

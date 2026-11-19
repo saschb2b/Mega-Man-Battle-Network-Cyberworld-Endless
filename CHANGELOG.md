@@ -11,6 +11,13 @@
   to the game's page. The game talks only to the Discord app on your
   computer. **Discord** on Options' Game page switches it off.
 
+- **Fixed: Windows could not receive saves by code or from the cloud
+  (issue #700).** A code's transfer stopped part of the way, and CLOUD
+  said it could not reach the server, while other systems sent and
+  received the same saves without trouble. Windows took a message that
+  reached it in pieces for a broken connection, and a save's data is
+  the largest message there is. Its pieces are now joined.
+
 - **Fixed: BusterUp and some other chips of BN6's did nothing with Battle
   Network 4's ROM in the game.** BN4's chips were added to the game's
   table for chips like BusterUp, but that table kept only the first 7 of
