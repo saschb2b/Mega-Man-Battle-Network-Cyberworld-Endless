@@ -13,6 +13,13 @@
   BN6's ROM alone, or with BN5's beside it, BusterUp always worked: its
   +1 is easy to miss.
 
+- **Fixed: sliding into a guardian's arena with SlipRunr (issue #697).**
+  MegaMan slid on past the guardian's staging and stopped where the
+  guardian appears, so they met on one spot and his Guardian Data showed
+  under MegaMan, hard to see and to take. The arena's door now stops a
+  slide as a wall does: MegaMan steps up beside the guardian as he does
+  on foot, and takes the Guardian Data after the battle as ever.
+
 ## 0.22.2 (2026-11-17)
 
 - **Fixed: a new run that began with the last run's MegaMan (issue

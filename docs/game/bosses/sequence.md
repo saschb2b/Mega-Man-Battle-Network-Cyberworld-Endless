@@ -63,3 +63,17 @@ place is worked out from the arena's way in, so it holds whichever side
 a layer brings MegaMan in from; `tests/test_core.c` checks it on every
 generated arena (floor under his feet, the bridge's side). A layer without
 an arena keeps the old meeting, straight at the guardian.
+
+A slide ends at the arena's door (issue #697). SlipRunr on the NaviCust
+slides MegaMan on B until a wall or an object stops him, and a slide
+reads no pad, so the staging's steps never reached him: a player slid
+in, stopped on the guardian's own spot, met him there and stood on his
+Guardian Data. BN6's own scenes never begin mid-slide (its triggers wait
+for its end, bn6f `sub_8034C36`); this one ends it as a wall does
+(`sub_809DE30`: flags `0x173D` and `0x173E` cleared, `0x173F` set until
+B is let go, [the game's state](../../rom/game-state.md)), on the frame
+he steps in and before the door's save, so he stops on the step in and
+walks up to his place as a walker does. The state's `met beside` or
+`met astray` says where the steps left him, from the card to the
+battle; `tests/scenarios/battle_guardian_slide.py` slides in
+(`--dev sliprun`, the `by arena` step: [Scenarios](../../devtools/scenarios.md)).

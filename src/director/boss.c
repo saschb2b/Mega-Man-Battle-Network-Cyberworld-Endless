@@ -143,6 +143,20 @@ static void door_quiet(void) {
 	held = near;
 }
 
+/* SlipRunr's slide ended at the arena's door, as a wall ends one (bn6f
+ * ow_player.s, sub_809DE30: B still held, no new slide until it is let
+ * go). A slide reads no pad, so the staging's steps never moved him: a
+ * player slid in, stopped on the guardian's own spot, met him there and
+ * stood on his Guardian Data (issue #697). BN6's own scenes never begin
+ * mid-slide (its triggers wait for its end, sub_8034C36); this one stops
+ * him on the step in instead, where he walks up as a walker does. */
+static void slide_end(void) {
+	if (!flag_get(BN6_FLAG_SLIDING)) return;
+	flag_set(BN6_FLAG_SLID_HELD);
+	flag_clear(BN6_FLAG_SLIDING);
+	flag_clear(BN6_FLAG_SLIDING2);
+}
+
 /* MegaMan in the arena, no chat open and no card showing (a CONTINUE at
  * the arena's door shows the act's card first): the staging begins. */
 static bool steps_in(void) {
@@ -254,6 +268,8 @@ static void wait_update(void) {
 		grand_approach(near_arena(0) || (megaman_panel(&x, &y) && arena_approach(x, y)));
 	}
 	if (!steps_in()) return;
+	/* (a slide stopped on the step in, before the door's save holds it) */
+	slide_end();
 	/* the run saved at the arena's door first, on the last frame he is
 	 * free (the owner's: bigger RPGs save before a boss), so a quit in the
 	 * fight goes on from here, not from the layer's start */
@@ -620,8 +636,8 @@ void boss_resume(void) {
 /* The guardian's course in the state's words (director_describe's; tests/
  * scenarios reads them): his version as the layer set it, whether MegaMan
  * has battle data on him, his Guardian Data (hidden while he stands,
- * fresh in the second no A takes it, waiting, taken); the exit pad's line
- * is the layer's (layer_describe.c).
+ * fresh in the second no A takes it, waiting, taken), where MegaMan met
+ * him; the exit pad's line is the layer's (layer_describe.c).
  * Reads alone. */
 void boss_describe(FILE *f) {
 	if (B.state == B_NONE) return;
@@ -629,6 +645,15 @@ void boss_describe(FILE *f) {
 	fprintf(f, "version %d\nknown %s\ndata %s\n", B.g.version, guardian_known(B.g.navi) ? "yes" : "no",
 		taken ? "taken" : B.state != B_REWARD ? "hidden" : boss_reward_fresh() ? "fresh" : "waiting");
 	if (B.state == B_FIGHT) fprintf(f, "guardianhp %d\n", B.fought_hp);
+	/* (where the staging's steps left MegaMan, from his card to the
+	 * battle: at his place beside the guardian, or astray: issue #697's
+	 * slide left him on the guardian's own spot) */
+	if (B.state >= B_ENTER && B.state < B_FIGHT && B.there) {
+		bool beside = B.g.stand_face >= 0;
+		int dx = bn6_player_x() - (beside ? B.g.stand_x : B.g.x), dy = bn6_player_y() - (beside ? B.g.stand_y : B.g.y);
+		int near = beside ? 2 * STAND_NEAR : WALK_NEAR + 8;
+		fprintf(f, "met %s\n", dx * dx + dy * dy <= near * near ? "beside" : "astray");
+	}
 }
 
 bool boss_goal(int *x, int *y, bool *talk) {
