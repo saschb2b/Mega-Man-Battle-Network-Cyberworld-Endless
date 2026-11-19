@@ -31,8 +31,10 @@ command line:
 python3 build.py shot --scene emu --dev god,onehit,quiet,speed=4
 ```
 
-Twelve more have no menu entry: `settings` (a headless start reads the data folder's `settings.ini`, `keys.ini`, `pad.ini` and `touch.ini`, as a player's start does and a headless one does not, so that a [scenario](scenarios.md)'s restart finds what Options kept), `lab` (the Battle Lab's keeper stands in Lan's HP and lists every family the engine holds, whatever the profile's battle data: [the Battle Lab](../game/battle-lab.md)), `fragile` (MegaMan keeps 1 HP in battle, so the
-first hit ends the run), `powers` (the five Crosses and BeastOut open from
+More have no menu entry: `settings` (a headless start reads the data folder's `settings.ini`, `keys.ini`, `pad.ini` and `touch.ini`, as a player's start does and a headless one does not, so that a [scenario](scenarios.md)'s restart finds what Options kept), `lab` (the Battle Lab's keeper stands in Lan's HP and lists every family the engine holds, whatever the profile's battle data: [the Battle Lab](../game/battle-lab.md)), `fragile` (MegaMan keeps 1 HP in battle, so the
+first hit ends the run), `sliprun` (SlipRunr's slide, as if on the
+NaviCust's board: B slides MegaMan on the net; issue #697's
+[scenario](scenarios.md)), `powers` (the five Crosses and BeastOut open from
 the first battle on, for a capture of them: 0.3.0's trailer,
 `tools/trailers/v0_3_0.py`, plays one),
 `gem` (every random battle with a green Mystery Data on the field, to

@@ -179,7 +179,8 @@ on every seed ([tools/play.py](play.md) has the steps):
   hints at an invisible path (`hinter`); a number after a kind or a colour
   is a later one (`npc2`). A pad is stepped on, so `exit`, `return`,
   `teleport`, `gap`, `lane` and `path` put him on it (`exitside`: two
-  panels off it). `--talk` runs a chat's script with no one walked up to;
+  panels off it), and `arena` on the guardian's way in, two panels short
+  of his arena, facing it. `--talk` runs a chat's script with no one walked up to;
   `by` and `press A` go through BN6's own check and the director's keys.
 - `hold AHEAD 40` holds the d-pad the way MegaMan faces: over Rush's
   back, onto an arrow lane, along an invisible path, wherever the seed

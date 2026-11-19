@@ -52,7 +52,7 @@ const char *devtools_boot_from(void) {
 
 static bool dev_switch(const char *t) {
 	static const struct { const char *name; bool *on; } flags[] = {
-		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "fragile", &dev.fragile }, { "powers", &dev.powers }, { "lab", &dev.lab },
+		{ "god", &dev.god }, { "onehit", &dev.onehit }, { "quiet", &dev.quiet }, { "sliprun", &dev.sliprun }, { "fragile", &dev.fragile }, { "powers", &dev.powers }, { "lab", &dev.lab },
 		{ "gem", &dev.gem }, { "veteran", &dev.veteran }, { "folders", &dev.folders }, { "mapall", &dev.mapall }, { "worried", &dev.worried },
 		{ "xcontrol", &dev.xcontrol }, { "nofamilies", &dev.nofamilies }, { "soulproxy", &dev.soulproxy }, { "chipai", &dev.chipai }, { "groups", &dev.groups }, { "noarc", &dev.noarc }, { "dark", &dev.dark }, { "bootplayed", &dev.bootplayed }, { "route", &dev.route }, { "glitch", &dev.glitch }, { "glitchhold", &dev.glitch_hold }, { "tourney", &dev.tourney },
 		{ "xnavicontrol", &dev.xnavicontrol }, { "nonavis", &dev.nonavis }, { "arena", &dev.arena }, { "arenabusy", &dev.arena_busy }, { "nocarry", &dev.no_carry },
@@ -292,6 +292,8 @@ static void hold_max_hp(void) {
 
 void devtools_update(void) {
 	if (dev.quiet) flag_set(BN6_FLAG_NO_ENCOUNTERS);
+	/* (BN6 sums the stats from the board again at each return to the map) */
+	if (dev.sliprun && !emu_read8(BN6_NAVI_SLIPRUN)) emu_write8(BN6_NAVI_SLIPRUN, 1);
 	if (dev.mapall) director_dev_reveal();
 	if (dev.god) {
 		uint16_t max = emu_read16(BN6_NAVI_MAX_HP);

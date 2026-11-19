@@ -256,6 +256,7 @@ static inline bool bn6_pack_holds(unsigned id) { return id > 0 && bn6_pack_entry
 #define BN6_NAVI_FOLDER2_REG  (BN6_NAVI_STATS + 0x2F) /* Folder2Reg: the second folder's Regular chip, its entry; 0xFF none (bn6f NaviStats) */
 #define BN6_NAVI_FOLDER2_TAG  (BN6_NAVI_STATS + 0x58) /* Folder2Tag1 and Tag2: its TagChips, their entries; 0xFF none */
 #define BN6_NAVI_FOLDER2_TAG2 (BN6_NAVI_STATS + 0x59)
+#define BN6_NAVI_SLIPRUN      (BN6_NAVI_STATS + 0x35) /* SlipRun: SlipRunr on the board, B slides MegaMan on the net (bn6f NaviStats, owPlayer_main; bn6_navicust.h's flags) */
 
 /* BN6's blank chip records below its last id, 0x13F (docs/rom/chips.md, the
  * chip records and the chip registry): no chip of BN6's, where BN5's chips

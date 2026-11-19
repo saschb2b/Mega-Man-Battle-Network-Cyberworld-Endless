@@ -58,4 +58,10 @@
                                               BN6_ENCOUNTER_ROLLED) against (NaviStats hword +0x3E + 4) / 5, the battle called off (the walk's counters
                                               +0x12 and +0x14 zeroed) where that is greater (0x080ABE40) */
 
+/* SlipRunr's slide on the net, the event flags of one under way
+ * (docs/rom/game-state.md, SlipRunr's slide; its stat BN6_NAVI_SLIPRUN) */
+#define BN6_FLAG_SLIDING       0x173D      /* EVENT_IN_SLIPRUN_STATE: a slide under way, the pad unread until a wall or an object stops it; */
+#define BN6_FLAG_SLIDING2      0x173E      /* ... set and cleared with it; */
+#define BN6_FLAG_SLID_HELD     0x173F      /* ... a slide stopped while B is held: no new one until B is let go (bn6f ow_player.s, sub_809DE30) */
+
 #endif

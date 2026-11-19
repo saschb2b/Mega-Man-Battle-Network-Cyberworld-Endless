@@ -22,7 +22,8 @@
  * later one ("npc2", "blue3"), or a set piece's (block: a lock;
  * teller: the Navi who knows its P-Code; hinter: the one who hints at an
  * invisible path; teleport: a pair's first pad; gap, lane, path: the
- * floor a Rush gap, an arrow lane or an invisible path leaves from);
+ * floor a Rush gap, an arrow lane or an invisible path leaves from;
+ * arena: the guardian's way in, two panels short of it);
  * false for none */
 static int by_along;   /* the way a piece leaves the panel (DIR_*), -1 none */
 
@@ -61,6 +62,16 @@ static bool by_piece(const char *name, int *x, int *y) {
 	const NetGap *g = !strcmp(name, "gap") && layer.ngaps ? &layer.gap[0] : !strcmp(name, "path") && layer.npaths ? &layer.path[0] : NULL;
 	if (g) { *x = g->x; *y = g->y; by_along = g->dir; return true; }
 	if (!strcmp(name, "lane") && layer.nlanes) { *x = layer.lane[0].x; *y = layer.lane[0].y; by_along = layer.lane[0].dir; return true; }
+	/* (arena: on its way in, two panels short of its mouth, facing in;
+	 * its mouth the first panel on the bridge's line, as arena_walk's) */
+	if (!strcmp(name, "arena") && layer.arena >= 0) {
+		const Room *a = &layer.rooms[layer.arena];
+		int d = layer.arena_dir;
+		*x = a->ax - dir_dx[d] * (a->w / 2 + 2);
+		*y = a->ay - dir_dy[d] * (a->h / 2 + 2);
+		by_along = d;
+		return true;
+	}
 	return false;
 }
 
@@ -122,7 +133,7 @@ bool director_dev_by(const char *name) {
 	if (!director_on_map()) return false;
 	/* (a pad is stepped on: MegaMan on it; the rest are talked to from the
 	 * nearest floor beside them he walks to, else any: a prize's island) */
-	static const char *const pads[] = { "exit", "return", "teleport", "gap", "lane", "path" };
+	static const char *const pads[] = { "exit", "return", "teleport", "gap", "lane", "path", "arena" };
 	bool pad = false;
 	for (unsigned i = 0; i < sizeof pads / sizeof *pads; ++i) pad |= !strcmp(name, pads[i]);
 	/* ("exitside": two panels off the pad, clear of its zone, not on it) */
