@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "Transplanted Souls"
 description: "Issue #82's Souls track: BN5's six Team Colonel Souls in BN6's engine on the proxy form 8, milestones S0-S7 from UNITE on BN6's Custom screen to Chaos Unison and BN5's mood (`src/emu/soul*.c`, `tools/xsoul.py`)."
 tags: [multirom, bn5]
-generated: { by: claude-code/unrecorded, at: 2026-10-13T12:46:43Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
 ---
 
 # Transplanted Souls

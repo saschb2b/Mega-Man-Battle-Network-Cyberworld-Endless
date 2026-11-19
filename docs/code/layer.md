@@ -3,7 +3,7 @@ type: Code Map
 title: "What stands on a layer"
 description: "What `src/layer/` holds: the objects on a layer (NPCs, services, shops, choices, guardians), the chat parts in `scripts.c` and the words files the lines live in."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T20:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
 ---
 
 # What stands on a layer

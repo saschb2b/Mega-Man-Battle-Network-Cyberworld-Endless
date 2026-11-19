@@ -3,7 +3,7 @@ type: Tool
 title: "The proxy form: where a Soul stands"
 description: "`--dev soulproxy` makes form 8, Falzar's TenguCross, an exact copy of HeatCross for BN5's Souls while a Soul is chosen and gives it back to TenguCross as CROSSSELECT offers it, and `tools/xproxy.py` proves both by one battle fought six ways, every byte traced."
 tags: [devtools]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-13T22:15:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T22:45:00Z }
 ---
 
 # The proxy form: where a Soul stands
