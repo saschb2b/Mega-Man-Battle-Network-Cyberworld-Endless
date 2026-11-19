@@ -3,6 +3,8 @@
 #include "game_hooks.h"
 
 #include "claims.h"
+#include "cross_rows.h"
+#include "crossselect.h"
 #include "darkinvs.h"
 #include "debug.h"
 #include "devtools.h"
@@ -46,6 +48,10 @@ void game_hooks_install(void) {
 	 * begins, encounter.c; docs/multirom/souls.md. And the
 	 * proxy form for its own test, --dev soulproxy) */
 	soulproxy_install_run(dev.soulproxy, dev.nonavis || dev.xnavicontrol, dev.proxybreak, dev.unitebreak, dev.soulbreak);
+	/* (CROSSSELECT listing Falzar's five Crosses beside Gregar's, their rows
+	 * made from the ROM's own: issue #706, docs/rom/souls.md) */
+	static uint8_t cross_art[CROSSSELECT_ART_BYTES], cross_pals[CROSSSELECT_PAL_BYTES];
+	if (!crossselect_falzar() && cross_rows_make(cross_art, cross_pals)) crossselect_install(cross_art, cross_pals);
 	/* (BN5's chip AI for the player entered in each battle: DarkInvs's machine, installed with the Souls; docs/multirom/) */
 	darkinvs_dev(dev.chipai);
 	if (emu_debug_on()) claims_report();

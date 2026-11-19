@@ -4,8 +4,9 @@
  * Gregar's addresses (docs/rom/souls.md, MegaMan's forms; issue #82). A
  * table holds BN6_FORMS entries: 0 none, 1-10 the Crosses (Gregar's five,
  * then Falzar's SpoutCross to DustCross, 6-10, which Gregar keeps and never
- * offers), 0xB-0x16 Beast Out (BN6_FORM_BEAST, a Cross's from
- * BN6_FORM_CROSS_BEAST), 0x17-0x18 BeastOver. The Souls' proxy form
+ * offers itself), 0xB-0x16 Beast Out (BN6_FORM_BEAST, a Cross's from
+ * BN6_FORM_CROSS_BEAST), 0x17-0x18 BeastOver. CROSSSELECT offers Falzar's
+ * five too (src/emu/crossselect.c). The Souls' proxy form
  * (src/emu/soulproxy.c) is form 8, Falzar's TenguCross. */
 #ifndef CW_BN6_FORMS_H
 #define CW_BN6_FORMS_H
@@ -39,6 +40,30 @@
                                              in r4: the summon draws the Navi of that number (phase 1 of the crossing, 0x08014B98) */
 #define BN6_CROSS_COMMIT      0x08029394u /* movs r1,#0 before CROSSSELECT's commit writes the form chosen (r0: its row + 1) into
                                              BN6_CROSS_RECORD (0x08015952; the routine 0x0802937A, then the row's used bit) */
+/* CROSSSELECT's list of Crosses (crossselect.c; docs/rom/souls.md, CROSSSELECT), the same code as Falzar's but for its
+ * table's flags, the form's base (1, Falzar's 6) and the used bit's (Falzar's + 5) */
+#define BN6_CROSS_LIST        0x08029EF6u /* push {r4,r5,r6,lr}: the list (r5 the screen): Cross i of BN6_CROSS_ROWS whose flag is set, its
+                                             used bit clear and i + 1 not the form he began in, into the screen's +0x50 on; r0 how many */
+#define BN6_CROSS_LIST_STORE  0x08029F28u /* ... ldr r2,=0x50: Cross r4 listed as row r6, */
+#define BN6_CROSS_LIST_NEXT   0x08029F38u /* ... adds r4,#1: on to the next Cross */
+#define BN6_CROSS_LIST_BOUND  0x08029F3Au /* ... cmp r4,#5: its loop's bound */
+#define BN6_CROSS_COUNT       0x08029EC8u /* push {r4,r6,lr}: how many have their flag set and their used bit clear (r0) */
+#define BN6_CROSS_COUNT_BOUND 0x08029EEEu /* ... cmp r4,#5 */
+#define BN6_CROSS_COUNT_END   0x08029EF2u /* ... adds r0,r6,#0: the count */
+#define BN6_CROSS_FLAGS_REF   0x08029F44u /* the one word naming the flags' table (both routines' literal), */
+#define BN6_CROSS_FLAGS       0x08029F48u /* ... the table: a word a Cross, BN6_FLAG_HEAT_CROSS on */
+#define BN6_CROSS_SCREEN_LIST 0x50        /* the Custom screen's +0x50: the Cross of each row listed, BN6_CROSS_ROWS of them */
+#define BN6_CROSS_SCREEN_STATE 0x55       /* ... +0x55: each row's state (1 once chosen) */
+#define BN6_CROSS_ART         0x086E5D50u /* the rows' art, 0x240 bytes (9 x 2 tiles) a Cross, its five, then the five grey */
+#define BN6_CROSS_ART_SIZE    0x240
+#define BN6_CROSS_ART_SEND    0x08029DB8u /* bl 0x08000AC8 in a row's art (0x08029D94: r6 the row, r7 the Cross, r0 its art, grey past the
+                                             cursor's row) sent to VRAM */
+#define BN6_CROSS_PALS        0x086E73D0u /* the cursor's row's palette, 0x20 bytes a Cross, its five, then the five with the row chosen */
+#define BN6_CROSS_PAL_PICK    0x08027984u /* adds r0,r0,r2 (r0 the Cross, r2 5 where its row is chosen) before 0x08029EAC loads it */
+#define BN6_CROSS_PAL_SEND    0x08029EBAu /* bl 0x08000AC8 in 0x08029EAC: the palette (r0) sent to 0x03001AA0 */
+#define BN6_CROSS_HELP        0x08028B52u /* bl 0x08040358: R's help on the cursor's row, its Cross's text (r0 the archive 0x086ED458, r1 the
+                                             Cross: its scripts 0-4 Gregar's five; Falzar's adds 5 to its own), */
+#define BN6_CROSS_HELP_SKIP   0x08028B64u /* ... past it, its sound and mode 0x58 (pop {r4,pc}): R does nothing */
 /* A Cross chosen, in RAM */
 #define BN6_CROSS_RECORD      0x0203CED0u /* the Custom screen's record of the form chosen: +0 the form (0xFF none), +1, +3; copied to BN6_CROSS_PENDING */
 #define BN6_RECORD_FORM       0x00        /* BN6_CROSS_RECORD +0 (and a side's BN6_CROSS_PENDING +0): the form, 0xFF none */
