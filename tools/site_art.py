@@ -463,6 +463,76 @@ kwwwwwwwkkk.
 .kwwwwwk....
 kkkkkkkkkkk.
 .kkkkkkkkk..""",
+    # two arrows, there and back: a save moved between systems
+    'swap': """
+......kk....
+kkkkkkkyk...
+kyyyyyyyyk..
+kyyyyyyyyk..
+kkkkkkkyk...
+......kk....
+....kk......
+...kckkkkkkk
+..kcccccccck
+..kcccccccck
+...kckkkkkkk
+....kk......""",
+    # a tower with two drives and its light: a Net Square of your own
+    'server': """
+..kkkkkkkk..
+..kwwwwwwk..
+..kwnnncwk..
+..kwwwwwwk..
+..kwnnncwk..
+..kwwwwwwk..
+..kwwwwwwk..
+..kwwwwgwk..
+..kssssssk..
+..kkkkkkkk..
+...kk..kk...
+............""",
+    # a feed's tile: a reader hears of every version
+    'feed': """
+.kkkkkkkkkk.
+kooooooooook
+kowwwwoooook
+koooowwwoook
+koooooowwook
+kowwwooowook
+kooowwoowwok
+koooowwoowok
+kooooowoowok
+kowwoowoowok
+kowwoowoowok
+.kkkkkkkkkk.""",
+    # two speech bubbles, one answering the other: the Discussions
+    'talk': """
+............
+....kkkkkkkk
+....kcccccck
+kkkkkkkkccck
+kwwwwwwkccck
+kwssswwkccck
+kwwwwwwkkkkk
+kwsswwwk.kk.
+kkkkkkkk.k..
+.kk.........
+.k..........
+............""",
+    # a bubble with three dots, someone typing: the chat
+    'chat': """
+............
+..kkkkkkkk..
+.kbbbbbbbbk.
+kbbbbbbbbbbk
+kbwwbwwbwwbk
+kbwwbwwbwwbk
+kbbbbbbbbbbk
+.kbbbbbbbbk.
+..kkbbkkkk..
+....kbk.....
+....kk......
+............""",
 }
 
 
