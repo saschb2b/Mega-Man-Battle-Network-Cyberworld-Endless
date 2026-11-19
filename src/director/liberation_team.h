@@ -51,6 +51,10 @@ bool lib_team_shrink(LibTeam *t);
  * and the board begun: each Navi's HP, place, MegaMan in play */
 void lib_team_objects(void);
 void lib_team_begin(void);
+/* No board on the layer: no teammate in play, the player in his own body
+ * from his next spawn (a board never ended had left one's on Lan, issue
+ * #696) */
+void lib_team_off(void);
 
 /* The Navi in play (0 MegaMan), and Navi k's name, face, command (LIB_DO_*) */
 int lib_in_play(void);

@@ -207,6 +207,11 @@ void lib_team_begin(void) {
 	player_body(-1);
 }
 
+void lib_team_off(void) {
+	LB.in_play = 0;
+	player_body_own();
+}
+
 int lib_in_play(void) { return LB.in_play; }
 
 const char *lib_mate_name(int k) { return lib_navi_name(k > 0 && k < LB.b.team.n ? LB.b.team.navi[k] : MATE_MEGAMAN); }
