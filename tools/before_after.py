@@ -18,9 +18,15 @@ OLD may be any commit, and NEW too (--new-ref): a pair then isolates one
 change on a layer both draw alike (a change of LAYER_MAKE between them
 moves the layouts). --pick SHA applies a commit to each older tree before
 it is built, as 4882961's dev steps in --input that a scene's "0:place"
-needs.
+needs; --pick SHA:PATH,PATH that commit's change to those files alone (a
+fix's dev switch without the fix).
 
   python3 tools/before_after.py 1a0f974 --old-label before --new 0.8.0 --pick 4882961 way
+
+A PLAYS entry is a course of tools/scenarios.py's steps instead (its
+START and STEPS, tools/play.py's commands and the state's untils), played
+by each build on BN6's ROM and the ROMs it NEEDS, the frame it ends on the
+picture: a moment a scenario reaches that shot's --input does not.
 
 --clips films WALKS instead: the same walk in both builds, side by side and
 moving, into docs/clips/NAME.webm, .mp4, .png and .gif.
@@ -223,6 +229,51 @@ SCENES = [
     ('jackin-pet', ['--scene', 'town', '--seed', '2', '--input',
                     '40:,' + '4:A,6:,' * 46 + '30:,0:flags 5917 5917 0,30:,0:place -40 -8 7,10:,6:R,400:'], {}, 720),
 ]
+# (0.23.0's fixes, against 0.22.2, each the course of its fix's scenario to the moment that shows it: name, START,
+# STEPS (or OLD's and NEW's), the ROMs it NEEDS beside BN6's. Their 0.22.2 is built with #705's dev switch and step
+# picked, not its fix:
+# `before_after.py v0.22.2 --new 0.23.0 --pick cf76af64e:src/dev/devtools.c,src/dev/devtools.h,src/emu/bn6_chips.h,`
+# `src/director/director_by.c bn4-firehit guardian-slide liberation-body`)
+# (FireHit1 D at a Mettaur2 of 80 HP held in MegaMan's row, BN4's ROM beside BN6's (tests/scenarios/battle_champy.py),
+# the frame its punch lands: no Champy and 80 before #693, Champy's punch and the HP falling after)
+FIREHIT = [
+    ('do', 'chip 107 D 29; foes 02@52'),
+    ('until', 'drawn~107D', 900),
+    ('repeat', 'press A; wait 10', 'handpicks=1'),
+    ('do', 'press START; wait 10; press A'),
+    ('until', 'hand=1', 600),
+    ('until', 'custom>=20', 900),
+    ('do', 'status paralysis 600'),
+    ('do', 'press A; wait 30; press A; wait 8'),   # (the first A falls in MegaMan's flinch)
+]
+# (SlipRunr's slide into HeatMan's arena, issue #697 (tests/scenarios/battle_guardian_slide.py), at his first words:
+# MegaMan on HeatMan's own spot before, at his place beside him after)
+SLID = [
+    ('do', 'wait 150; mash A 300; wait 20'),
+    ('do', 'by arena; wait 60'),
+    ('repeat', 'press A; wait 40', 'chat=closed'),
+    ('do', 'by arena; wait 5; hold AHEAD+B 4'),
+    ('until', 'chat=open', 600),
+    ('do', 'wait 60'),
+]
+# (a dark layer's board left with Colonel in play by the dev menu's Next layer, issue #696 (tests/scenarios/
+# liberation_body.py), BN5's ROM beside BN6's: Colonel's body on the next layer before, MegaMan's after)
+NEXT_AS_COLONEL = [
+    ('until', 'board=talk', 1200),
+    ('repeat', 'press A; wait 20', 'board=move', 40),
+    ('do', 'press R; wait 10'),
+    ('repeat', 'press A; wait 20', 'inplay=Colonel', 40),
+    ('repeat', 'press A; wait 20', 'board=move', 40),
+    ('do', 'hold SELECT 4; hold SELECT+R 4; wait 6; ' + 'press DOWN; ' * 7 + 'press A; wait 6'),
+    ('until', 'layer=6', 1200),
+    ('until', 'where=layer', 1200),
+    ('do', 'wait 20'),
+]
+PLAYS = [
+    ('bn4-firehit', 'layer --seed 15 --net-biome 0 --dev god,quiet,hp=2000', FIREHIT, ('bn4',)),
+    ('guardian-slide', '--scene emu --seed 3 --run-depth 3 --guardian 1 --dev onehit,quiet,sliprun', SLID, ()),
+    ('liberation-body', '--scene emu --seed 5 --run-depth 5 --dev dark,souls=1', NEXT_AS_COLONEL, ('bn5',)),
+]
 # (--clips: the same walk in both builds as moving pictures, OLD's on the
 # left, docs/clips/NAME.webm, .mp4, .png and .gif (build.py's README_GIFS
 # names its rate); 0.21.1's: an area's first layer as the weak autopilot
@@ -254,9 +305,16 @@ def old_binary(tag, picks=()):
     if not os.path.exists(binary):
         if not os.path.exists(tree):
             subprocess.run(['git', '-C', ROOT, 'worktree', 'add', '--detach', tree, tag], check=True)
-        for sha in picks:
-            if subprocess.run(['git', '-C', tree, 'merge-base', '--is-ancestor', sha, 'HEAD']).returncode:
+        for pick in picks:
+            sha, _, paths = pick.partition(':')
+            if not subprocess.run(['git', '-C', tree, 'merge-base', '--is-ancestor', sha, 'HEAD']).returncode:
+                continue
+            if not paths:
                 subprocess.run(['git', '-C', tree, 'cherry-pick', '--no-commit', sha], check=True)
+                continue
+            diff = subprocess.run(['git', '-C', ROOT, 'diff', f'{sha}^', sha, '--', *paths.split(',')], check=True,
+                                  capture_output=True).stdout
+            subprocess.run(['git', '-C', tree, 'apply'], input=diff, check=True)
         subprocess.run([sys.executable, os.path.join(tree, 'build.py'), 'host'], check=True)
     return os.path.relpath(binary, ROOT)
 
@@ -309,6 +367,32 @@ def frame(binary, args, env, at, out, whole=0):
     if whole:
         return im.resize((w // whole, h // whole), Image.LANCZOS)
     return im.crop(((w - 240) // 2, (h - 160) // 2, (w + 240) // 2, (h + 160) // 2))
+
+
+def played(binary, name, start, steps, needs):
+    """The frame a course of tools/scenarios.py's steps ends on, played by `binary` (relative to ROOT) from START
+    (tools/cw.py's) on BN6's ROM and those `needs` names, the game's 240 x 160."""
+    sys.path.insert(0, os.path.join(ROOT, 'tools'))
+    import cw_pictures as pics
+    import scenarios
+    scenarios.cw.BIN = os.path.join(ROOT, binary)
+    roms = scenarios.have_roms()
+    if any(n not in roms for n in ('bn6', *needs)):
+        sys.exit(f'{name}: it needs the ROMs of BN6 and {", ".join(needs)} in {scenarios.play.ROM_DIR}')
+    h = os.path.join(ROOT, '.build', 'before', 'play')
+    shutil.rmtree(h, ignore_errors=True)
+    os.makedirs(h)
+    at, step = 0, ('start', start)
+    try:
+        state, _ = scenarios.start(h, start, True, scenarios.rom_folder(roms, needs))
+        for at, step in enumerate(steps, 1):
+            state, _ = scenarios.step_run(h, step, state, {})
+        _, _, shots, _, _ = scenarios.cw.batch(h, 'shot', record=False)
+        return pics.game(pics.load(shots[-1][1]))
+    except scenarios.Failed as e:
+        sys.exit(f'{name} by {binary}: step {at} {step!r}: {e.args[0]}\n' + (e.args[1] if len(e.args) > 1 else ''))
+    finally:
+        scenarios.play.stop(h)
 
 
 def frames(binary, args, env, first, last, out):
@@ -406,6 +490,13 @@ def main():
         old_args, new_args = args if isinstance(args, tuple) else (args, args)
         pair(frame(old, old_args, env, old_at, name, *whole), frame(new, new_args, env, new_at, name, *whole), a.old_label or a.old.lstrip('v'),
              a.new).save(path, optimize=True)
+        print('compared', name)
+    for name, start, steps, needs in PLAYS:
+        if a.names and name not in a.names:
+            continue
+        old_steps, new_steps = steps if isinstance(steps, tuple) else (steps, steps)
+        pair(played(old, name, start, old_steps, needs), played(new, name, start, new_steps, needs), a.old_label or a.old.lstrip('v'),
+             a.new).save(os.path.join(out, f'compare-{name}.png'), optimize=True)
         print('compared', name)
 
 
