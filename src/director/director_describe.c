@@ -22,6 +22,7 @@
 #include "guardians.h"
 #include "older_describe.h"
 #include "pet.h"
+#include "player_body.h"
 #include "save.h"
 #include "talk.h"
 
@@ -82,6 +83,13 @@ static void describe_turns(FILE *f) {
 	if (turns) fprintf(f, "soulturns %+d\n", turns);
 }
 
+/* The list-6 sprite the player's spawn is given: his own, or a
+ * liberation teammate's in play (issue #696) */
+static void describe_body(FILE *f) {
+	if (player_body_now() < 0) fprintf(f, "body own\n");
+	else fprintf(f, "body %d\n", player_body_now());
+}
+
 void director_describe(FILE *f) {
 	/* (off the run's maps, the Net Square's visit: where MegaMan stands, for a tour's walk) */
 	if (!D.active) { fprintf(f, "where none\npos %d %d %d\n", bn6_player_x(), bn6_player_y(), bn6_player_z()); return; }
@@ -91,6 +99,7 @@ void director_describe(FILE *f) {
 		emu_read8(BN6_CHATBOX) ? "open" : "closed", talk_busy() ? "director" : "none");
 	/* (what of BN6 holds him, issue #23: none where Lan or MegaMan stands free) */
 	fprintf(f, "held %s\n", held_names(bn6_held()));
+	describe_body(f);
 	/* (the game's own count of its main loop's frames: one that stands while
 	 * the engine's frames go on is a game standing still, issue #482;
 	 * tools/old_checkpoint.py watches it) */

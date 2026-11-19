@@ -37,7 +37,13 @@ arrival, out of every unit's reach. The Navi in play is BN6's player
 object in his own BN5 overworld sprite: the player's spawn loads the
 sprite `BN6_PLAYER_SPRITE_LOAD` is answered with, and the spawn runs
 again where he stands (`src/emu/player_body.c`), so he walks as BN6
-walks MegaMan, with no movement of ours (AGENTS.md). His sprite and
+walks MegaMan, with no movement of ours (AGENTS.md). Wherever no board
+is on, the spawn takes the player's own body again (`lib_team_off`, from
+`lib_begin`, where every layer, home, run and CONTINUE begins, the map
+loading next): a board left with a teammate in play (the reset's chord,
+the Next layer of the dev menu) had left the next layer's MegaMan, and the
+next run's Lan in the real world, in the teammate's sprite, and Lan's
+jack-in in it stood still (issue #696; `tests/scenarios/liberation_body.py`). His sprite and
 mugshot are copied from BN5's ROM to one of five list-6 numbers both
 versions of BN6 leave empty (`xnavi_mate`, `FREE_LIB_TEAM`). The others
 stand as the layer's objects, those who have acted in BN6's own shade

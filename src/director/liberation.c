@@ -185,9 +185,13 @@ bool lib_layer_made(void) {
 void lib_begin(void) {
 	/* (no battle armed, on a plain layer as on a dark one: a battle that
 	 * deleted MegaMan never came back to its board to end, and the next
-	 * run's battles were liberations by their rules, issue #669) */
+	 * run's battles were liberations by their rules, issue #669; nor a
+	 * teammate's body on the player, which a board left with him in play
+	 * left on the next layer, the town and the next run's Lan, issue #696:
+	 * every run, layer, home and CONTINUE begins here, its map loading
+	 * next) */
 	lib_battle_disarm();
-	if (!layer.dark) { LB.on = false; return; }
+	if (!layer.dark) { LB.on = false; lib_team_off(); return; }
 	LB.step = LIB_STEP_WAIT;
 	LB.phase = 1;
 	LB.op = LIB_OP_START;

@@ -31,3 +31,10 @@ void player_body(int sprite) {
 	emu_write8(BN6_PLAYER_MAIN, 0);
 	if (emu_debug_on()) fprintf(stderr, "player_body: sprite %d\n", sprite);
 }
+
+void player_body_own(void) {
+	if (body >= 0 && emu_debug_on()) fprintf(stderr, "player_body: his own from the next spawn (was %d)\n", body);
+	body = -1;
+}
+
+int player_body_now(void) { return body; }
