@@ -16,6 +16,8 @@ Jack MegaMan into a net that is new every run, and meet other players' MegaMen i
 &nbsp;·&nbsp;
 <a href="https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions">Discussions</a>
 &nbsp;·&nbsp;
+<a href="https://discord.gg/mfZyWFvyfG">Discord</a>
+&nbsp;·&nbsp;
 <a href="https://saschb2b.itch.io/cyberworld-endless">itch.io</a>
 </p>
 

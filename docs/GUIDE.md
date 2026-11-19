@@ -1789,3 +1789,8 @@ guardian). See [Dev tools](devtools/overview.md) for the tools,
   RSS reader.
 - **Talk:** the [Discussions](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions) have the announcements,
   questions and answers, ideas and players' runs.
+- **Chat:** the [Discord server](https://discord.gg/mfZyWFvyfG) is where players talk, share runs
+  and folders, find each other for NetBattles and pitch ideas, and new
+  versions are announced there too. Bugs still go to
+  [the issues](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/new/choose),
+  where they are tracked.
