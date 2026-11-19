@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-19T22:00:00Z
-* **Update**: project/discord.md (the itch.io page's Links name the server too, from 0.23.0).
