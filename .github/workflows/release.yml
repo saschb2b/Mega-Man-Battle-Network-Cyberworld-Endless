@@ -332,3 +332,13 @@ jobs:
           files=(build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/SHA256SUMS.txt)
           while read -r f; do files+=("build/release/$f"); done < build/release/FILES
           gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" "${files[@]}"
+
+  # the release's post in the Discord server's #announcements, once it is
+  # published (discord-release.yml; none without its webhook's secret)
+  discord:
+    needs: release
+    uses: ./.github/workflows/discord-release.yml
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
+    secrets:
+      DISCORD_RELEASES_WEBHOOK: ${{ secrets.DISCORD_RELEASES_WEBHOOK }}

@@ -1,7 +1,7 @@
 ---
 type: Process
 title: "Discord"
-description: "The project's Discord server, the open place to talk beside GitHub: its permanent invite, its channels, forums, roles and onboarding, the rules it keeps (bugs to GitHub, no ROMs), its moderation, and where the site links it."
+description: "The project's Discord server, the open place to talk beside GitHub: its permanent invite, its channels, forums, roles and onboarding, the rules it keeps (bugs to GitHub, no ROMs), its moderation, where the site links it, and the post each release makes there itself."
 tags: [project, community, discord]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T14:48:13Z }
 ---
@@ -70,3 +70,30 @@ and the first announcement were written that way. A new version is
 news for `#announcements`, beside its devlog post on [itch.io](itch.md)
 and its trailer on [YouTube](youtube.md); a post there is still the
 owner's to approve.
+
+## Releases there
+
+Each release posts itself in `#announcements`: `release.yml` calls
+`discord-release.yml` once the release is published, which runs
+`tools/discord_release.py TAG`. The post is made from the players' notes
+([Release notes](../releases/overview.md)), as the GitHub release and the
+[itch.io](itch.md) devlog are: a ping for the Release pings role, then an
+embed with the notes' headline, their lead paragraph, each section with
+its entries' titles (eight a section, the rest counted), the release's
+16:9 cover (the devlog's, `tools/itch_art.py`) and the systems it runs on,
+and buttons to the download page, the browser build and the full notes
+(where a webhook refuses buttons, the same links in its text). From
+0.23.0 it takes the place of GitHub's own card, which Discord's `/github`
+endpoint made from the repository's webhook: a title and a link, no
+ping. `python3 tools/discord_release.py vX.Y.Z --dry-run` prints the post
+and writes its cover to `.build/discord/`; `gh workflow run
+discord-release.yml -f tag=vX.Y.Z` posts a release whose post is missing.
+
+It needs two settings on the repository, neither in git: the secret
+`DISCORD_RELEASES_WEBHOOK`, the channel webhook's address (the owner sets
+it, `gh secret set DISCORD_RELEASES_WEBHOOK`; without it nothing is sent),
+and the variable `DISCORD_RELEASE_ROLE`, the Release pings role's id
+(without it the post pings nobody). A webhook's post in an announcement
+channel reaches the servers that follow it only once someone presses
+**Publish** on it: the owner does, after each release (a webhook cannot
+publish its own posts; a bot could, later).

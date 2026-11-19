@@ -1,0 +1,44 @@
+# A release's post in the Discord server's #announcements
+# (tools/discord_release.py; docs/project/discord.md, Releases there): the
+# players' notes' headline, lead and entries, the release's cover and a ping
+# for the Release pings role, through the channel's webhook. release.yml
+# calls it once the release is published; run by hand for a release whose
+# post is missing (gh workflow run discord-release.yml -f tag=vX.Y.Z).
+# Without the DISCORD_RELEASES_WEBHOOK secret it posts nothing.
+name: Discord release post
+
+on:
+  workflow_call:
+    inputs:
+      tag:
+        type: string
+        required: true
+    secrets:
+      DISCORD_RELEASES_WEBHOOK:
+        required: false
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Published release to post (vX.Y.Z)
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      # (every tag: the cover takes a picture no older release's cover took, tools/itch_art.py)
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.tag }}
+          fetch-depth: 0
+      - name: Post
+        env:
+          TAG: ${{ inputs.tag }}
+          DISCORD_RELEASES_WEBHOOK: ${{ secrets.DISCORD_RELEASES_WEBHOOK }}
+          DISCORD_RELEASE_ROLE: ${{ vars.DISCORD_RELEASE_ROLE }}
+        run: |
+          python3 -m pip install --user --break-system-packages --quiet pillow
+          python3 tools/discord_release.py "$TAG"
