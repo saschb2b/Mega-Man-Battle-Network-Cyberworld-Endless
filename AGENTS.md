@@ -526,6 +526,27 @@ pacing) stays local.
 | Linux packaging | `build.py linux`; the AppImage and the `.deb` in a clean distribution container (first start without a ROM, the menu entry, a start with one); `--add-to-steam` with `HOME` at a made-up Steam folder |
 | Release | A new trailer where the release earns one (Trailers), made before the tag; `sce_sys/param.json`'s contentVersion set to the new version's (ps5/README.md, lint fails until it is); `python3 tools/old_checkpoint.py` (the last two releases' runs continued by this build go on: a battle won, the next layer reached; docs/devtools/old-checkpoint.md); `build.py release`, the Linux AppImage, `.deb` and archive each started fresh; tag `vX.Y.Z` on `main`; after the release is published, the PS5 zip's update to Prospero Store's catalog (ps5/README.md, Submitting to Prospero Store), the itch.io page in step (docs/project/itch.md, Each release): its files (`python3 tools/itch.py push`), its devlog post (`tools/itch.py devlog`, posted on itch, `tools/itch.py record --post`), and `tools/itch.py check` in step; `build.py lint` fails the next release's work while a release lacks its post; runs on real devices are the owner's, after the release, and no blocker |
 
+### Long commands and round trips
+
+Measured over 50 sessions (2026-11): 184 commands that ran over a minute
+took 10 of the 15 hours spent in tools, most of them a `sleep` loop
+watching a build's log.
+
+- A command that may run over half a minute (`build.py` and its `test`,
+  `lint`, `xdiff`, a `tools/cw.py` shot or play, anything in Docker) runs
+  in the harness's background mode, its output in a file under `.build/`.
+  The harness reports when it exits: no `sleep` or `until grep` loop
+  watching the log.
+- While it runs, do what does not depend on it (the next edit, the test,
+  the docs). With nothing left, end the turn; the exit starts the next.
+- Checks that always follow each other go in one command
+  (`build.py test && build.py lint`), not a call each, and never side by
+  side in one worktree.
+- Looks that do not depend on each other (`grep`, `sed -n`, `git log`,
+  file reads) go out together in one message.
+- Several edits to one file are one script or one message of edits, not a
+  call per line.
+
 ## Device testing
 
 Use an existing SSH control socket; do not store device credentials here.
