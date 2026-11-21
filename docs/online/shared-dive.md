@@ -119,7 +119,7 @@ Verified on `dev`, 15 November 2026:
 | Mystery Data | Each diver opens their own, at the same places for everyone (the layer's seed), its chip by their own folder; the week's first finder's name on a data; data others opened this week shimmer faintly (kept so on 15 November 2026 over who got what there, an opened count, and a cheer for two opening one together) | A pair data opened by two divers together |
 | Crews | Up to four, Team up on a diver's card; a crew lasts across layers until someone splits up, leaves or ends their dive | One layer at a time; pairs |
 | A crew at a fork | The portal opens only when the whole crew stands on it, or someone splits up | Each picks and the crew splits; the captain picks for all |
-| Random battles | Each diver's own; crewmates within a few panels are offered to jump in; only crewmates | Anyone near; the battle's owner accepting each |
+| Random battles | Each diver's own; crewmates within a few panels fight it too, unasked (21 November 2026, after the team's test: walking close is the yes, walking apart the no); only crewmates | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
 | A joined battle | One field; the foes as a solo diver meets them, unscaled; each fighter BN6's normal reward; joining resets the joiner's own encounter count, so each diver fights about as many battles as alone | Foes' HP times the fighters; their versions raised; no reward; a cap a layer |
 | The door's queue | Up to four, each having walked to this door; divers behind on the same way get a flare | No flare; helpers summoned from behind |
 | The leader | The first at the door starts any time; anyone leaves any time; a leader idle a minute passes the lead on | A countdown on a join; a ready check |
@@ -234,11 +234,16 @@ Verified on `dev`, 15 November 2026:
   branch (`BN6_ENCOUNTER_ROLLED` taken to `BN6_ENCOUNTER_SKIP`, as a
   bracket holds its rounds) and MegaMan stands still; CREW battle offers
   it by its index on the layer, the band saying "Battle! Calling the
-  crew...". A crewmate near whose game gets the offer shows "Alpha's in a
-  battle!  A:Jump in" in the dive's band for the window
-  (`ONLINE_CREW_JOIN_MS`; never over BN6's chat box), and A sends CREW
-  join ("Jumping in!"); a join is sent only inside the window, a newer
-  offer replaces an older. The server's START takes every game in to
+  crew...". A crewmate near whose game gets the offer, MegaMan free on
+  the map (no chat box, no door, no party's fight), sends CREW join at
+  once, his band saying "Jumping in!": no question since 21 November
+  2026 (issue #715, the owner's call after the team's test; until then
+  the band offered it, "A:Jump in", for the window). The server starts
+  the battle as the last one offered has joined, so the owner's hold is
+  as long as that takes; a crewmate who is busy sends nothing, and the
+  owner then waits the window out (`ONLINE_CREW_JOIN_MS`) as before,
+  until a game can decline (#715's next step, a change to the wire). A
+  newer offer replaces an older. The server's START takes every game in to
   the party's core (`party_play_crew`), the battle made alike on each from
   the layer's seed and the index, its kind by the index
   (`director_crew_battle`; no Mystery Data on its field, whose row is a
@@ -284,6 +289,12 @@ Verified on `dev`, 15 November 2026:
   bots' layer-1 viruses; the guardian's path, `director_party_over`, is
   the same), a crew of three or four, and a crewmate on a New 3DS or a
   PSP in a real crew.
+  Unasked (21 November 2026): two crewed games on a local server, Beta
+  on Alpha's spot; Alpha's battle 0 held and the crew called, Beta's
+  game "jumping into Alpha's battle 0, unasked" with no key pressed,
+  both ready with `fe570f879458881d`, the fight begun: the scenario
+  `online-week/crew-battle-unasked`, which fails at Beta's step where
+  the join is left out.
 
 - **Mystery Data found** (15 November 2026, `dive_finds.c`, `dive_traces.c`):
   a data MegaMan opens on a dive layer is told as DIVE found by its index
@@ -555,9 +566,11 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
    hook trades the battle's list at its spawn (`BN6_SPAWN_ENTITIES`), so a
    MegaMan cannot be added to a battle already begun, and the offer comes
    as the encounter starts, BN6's roll held while the server's window
-   (`ONLINE_CREW_JOIN_MS`) waits for the answers. Open: how the window
-   feels to the owner (three seconds of MegaMan held still), for the
-   owner's eye.
+   (`ONLINE_CREW_JOIN_MS`) waits for the answers. How the window felt
+   (three seconds of MegaMan held still, and a question each battle) the
+   team's test answered: since 21 November 2026 crewmates near join
+   unasked (issue #715). Open: a crewmate who is busy still costs the
+   window, until a game can decline.
 2. **One field against a guardian.** Built (As built, above), the
    guardian's aim passed over the party in turn, each partner his own
    NaviStats, hand and Custom screen. Open: the turn's length, a partner's
