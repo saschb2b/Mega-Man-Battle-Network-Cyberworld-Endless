@@ -532,7 +532,7 @@ static bool held_through(void) {
 		online_transport_hurry();
 		if (!PP.down_since) fprintf(stderr, "party: the link dropped at frame %u; holding on\n", (unsigned)party_core_frames(PP.core));
 		if (!PP.down_since) PP.down_since = now | 1u;
-		if (now - PP.down_since > HELD_MS && !PP.alone) alone("the link stayed down");
+		if ((int32_t)(now - PP.down_since) > HELD_MS && !PP.alone) alone("the link stayed down");
 		return !PP.alone;
 	}
 	PP.down_since = 0;
