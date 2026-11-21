@@ -30,7 +30,7 @@
 #define ONE_FIELD true
 #endif
 
-enum { JOIN_NONE, JOIN_CALLING, JOIN_OFFERED, JOIN_JOINED, JOIN_FIGHTING };
+enum { JOIN_NONE, JOIN_CALLING, JOIN_JOINED, JOIN_FIGHTING };
 
 static struct {
 	int stage;                /* JOIN_* */
@@ -40,7 +40,6 @@ static struct {
 	uint32_t since;           /* the stage's start (ms) */
 	uint32_t battle;          /* its ARENA_STATE battle once taken */
 	Encounter e;              /* ... and its battle */
-	uint32_t keys;
 } J;
 
 void dive_join_reset(void) {
@@ -110,10 +109,6 @@ void dive_join_frame(const OnlineSnapshot *s) {
 		emu_encounters_offer(false);
 		if (waited > ONLINE_CREW_JOIN_MS + LATE_MS) alone("no answer");
 		break;
-	case JOIN_OFFERED:
-		/* (the window over, or MegaMan taken up by something else meanwhile) */
-		if (waited > ONLINE_CREW_JOIN_MS || !director_on_layer() || !director_on_map()) to(JOIN_NONE);
-		break;
 	case JOIN_JOINED:
 		if (waited > ONLINE_CREW_JOIN_MS + LATE_MS) { fprintf(stderr, "dive: the joined battle never started\n"); to(JOIN_NONE); }
 		break;
@@ -138,24 +133,8 @@ void dive_join_frame(const OnlineSnapshot *s) {
 }
 
 uint32_t dive_join_keys(uint32_t keys) {
-	uint32_t pressed = keys & ~J.keys;
-	J.keys = keys;
 	/* (MegaMan stands still while his battle waits on the answer, or his join on its start) */
-	if (J.stage == JOIN_CALLING || J.stage == JOIN_JOINED) return 0;
-	if (J.stage != JOIN_OFFERED || emu_read8(BN6_CHATBOX) || talk_busy()) return keys;
-	/* (the window over before this frame's A: the server's offer is gone, and a join now would be for the owner's next) */
-	if (SDL_GetTicks() - J.since > ONLINE_CREW_JOIN_MS) {
-		to(JOIN_NONE);
-		return keys;
-	}
-	if (pressed & KEY_A) {
-		send(ONLINE_CREW_JOIN, J.owner, 0);
-		fprintf(stderr, "dive: jumping into %s's battle %d\n", J.name, J.index);
-		/* (its wait counted from the offer: a join the server turned down as late holds MegaMan only so long) */
-		J.stage = JOIN_JOINED;
-		return 0;
-	}
-	return keys;
+	return J.stage == JOIN_CALLING || J.stage == JOIN_JOINED ? 0 : keys;
 }
 
 void dive_join_crew_state(const CrewState *c) {
@@ -163,21 +142,25 @@ void dive_join_crew_state(const CrewState *c) {
 		if (J.stage == JOIN_CALLING) alone("nobody jumped in");
 		return;
 	}
-	/* (an offer while one stood or was joined: the server's last, the earlier one over) */
-	if (c->stage != ONLINE_CREW_OFFER || (J.stage != JOIN_NONE && J.stage != JOIN_OFFERED && J.stage != JOIN_JOINED)) return;
+	/* (an offer while one was joined: the server's last, the earlier one over) */
+	if (c->stage != ONLINE_CREW_OFFER || (J.stage != JOIN_NONE && J.stage != JOIN_JOINED)) return;
 	if (J.stage != JOIN_NONE) to(JOIN_NONE);
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	const char *name = "";
 	if (!free_here() || !near(&s, c->other, &name)) {
-		fprintf(stderr, "dive: an offer of battle %u not shown (%s)\n", c->value, free_here() ? "too far" : "busy");
+		fprintf(stderr, "dive: an offer of battle %u not taken (%s)\n", c->value, free_here() ? "too far" : "busy");
 		return;
 	}
+	/* (no question: a crewmate walking this close fights it too, the owner's call of 21 November 2026, issue #715;
+	 * walking apart, or splitting up, is the way to stay out. The join's wait is counted from here: one the server
+	 * turned down as late holds MegaMan only so long) */
 	J.owner = c->other;
 	J.index = c->value;
 	snprintf(J.name, sizeof J.name, "%s", name);
-	fprintf(stderr, "dive: %s's battle %d offered\n", J.name, J.index);
-	to(JOIN_OFFERED);
+	send(ONLINE_CREW_JOIN, J.owner, 0);
+	fprintf(stderr, "dive: jumping into %s's battle %d, unasked\n", J.name, J.index);
+	to(JOIN_JOINED);
 }
 
 /* the crew's battle into the party's core, every game of it making the same */
@@ -215,16 +198,15 @@ bool dive_join_start(const PartyState *p) {
 
 uint32_t dive_join_battle(void) { return J.stage == JOIN_FIGHTING ? J.battle : 0; }
 
+void dive_join_describe(FILE *f) {
+	static const char *const stages[] = { "none", "calling", "joined", "fighting" };
+	fprintf(f, "join %s\n", stages[J.stage]);
+}
+
 const char *dive_join_band(void) {
 	switch (J.stage) {
 	case JOIN_CALLING: return dive_join_calling_words();
-	case JOIN_OFFERED: return dive_join_offer_words(J.name);
 	case JOIN_JOINED: return dive_join_joined_words();
 	default: return NULL;
 	}
-}
-
-void dive_join_describe(FILE *f) {
-	static const char *const stages[] = { "none", "calling", "offered", "joined", "fighting" };
-	fprintf(f, "join %s\n", stages[J.stage]);
 }

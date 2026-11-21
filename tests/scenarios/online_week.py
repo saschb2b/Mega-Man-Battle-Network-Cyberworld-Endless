@@ -1,6 +1,7 @@
 """The week's DeepNet (docs/online/weekly-net.md, docs/online/shared-dive.md):
 the portal by the Board and its Yes into the dive's first layer, another
-diver seen there and a crew made with him, the Board's posts of the week,
+diver seen there, a crew made with him and a battle of one fought by both
+unasked (issue #715), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -40,6 +41,8 @@ MANY = {
         dive('beta'),
         soon('divers~Beta', '', 600),              # each on the other's layer
         soon('divers~Alpha', 'beta', 600),
+        soon('tags~Beta', '', 600),                # ... his name over his MegaMan
+        soon('tags~Alpha', 'beta', 600),
         ('expect', 'crew=0'),
         # (A on Beta's MegaMan, who arrived where Alpha stands: "Lan,it's Beta!", "Team up,Lan?" opens on Yes)
         ('repeat', 'press A; wait 10', 'choice~/2', 20),
@@ -107,3 +110,16 @@ MANY = {
         ('same', 'layer area hp'),
     )),
 }
+
+# A crew's battle fought together, unasked (issue #715): Alpha's battle with Beta standing where he does puts both
+# on one field with no key pressed on Beta's game. Its games start without --dev quiet, whose hold of the random
+# battles the battle step obeys; nobody walks, so BN6 rolls none of its own.
+LOUD = online.HOME.replace('quiet,', '')
+MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('expect', 'join=none'),
+    ('@beta', 'expect', 'join=none'),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    soon('join=fighting', '', 900),
+))

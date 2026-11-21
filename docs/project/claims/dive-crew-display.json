@@ -1,0 +1,16 @@
+{
+  "branch": "dive-crew-display",
+  "what": "The shared dive: the crew's display, each crewmate's HP and layer, the divers' dots on the map (issue #717)",
+  "takes": {
+    "online_protocol": [
+      [
+        24,
+        24
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: the crew's display (#717)"
+  ],
+  "run": false
+}

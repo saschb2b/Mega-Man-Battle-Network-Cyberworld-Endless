@@ -60,9 +60,7 @@ MANY = {
             online.into_square(LONG), dive(LONG),
             soon('divers~Www', '', 600),
             crew(LONG),
-            ('do', 'battle'),                         # Alpha's next battle, held while the crew near may jump in
-            soon('join=offered', LONG, 600),
-            (f'@{LONG}', 'do', 'press A; wait 4'),
+            ('do', 'battle; wait 10'),                # Alpha's next battle: the crewmate near joins it unasked
             soon('partyfield=2 seat 0', '', 1200),
             soon('partyfield=2 seat 1', LONG, 1200),
             # (the Custom screen closed on Alpha's game, both marked: over the server the lead's OK waits up to 30 seconds
