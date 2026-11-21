@@ -470,4 +470,10 @@ void folder_describe(FILE *f) {
 	ChipInfo ci;
 	chip_info((int)chip_entry_id(folder[0]), &ci);
 	fprintf(f, "folder first %s %c sum %04x\n", ci.name, code == CHIP_CODE_STAR ? '*' : (char)('A' + code % 26), sum & 0xFFFFu);
+	/* (whose picture its card draws: its own, BN6's blank, or another chip's, named; issue #731) */
+	int art = chips_art_of((int)chip_entry_id(folder[0]));
+	char other[24] = "own";
+	if (art >= 0 && art != (int)chip_entry_id(folder[0])) chips_name(art, other, sizeof other);
+	if (!*other) snprintf(other, sizeof other, "%d", art);
+	fprintf(f, "foldercard %s\n", art == CHIPS_ART_BLANK ? "blank" : art < 0 ? "none" : other);
 }
