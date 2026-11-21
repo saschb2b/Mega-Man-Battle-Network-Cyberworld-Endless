@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-21T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:19:01Z }
 ---
 
 # Scenarios: the game played through a course, its state checked

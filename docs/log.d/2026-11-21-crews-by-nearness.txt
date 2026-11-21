@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T18:19:01Z
-* **Update**: online/shared-dive.md (crews by nearness, issue #714: the calls taken under the owner's direction of 21 November 2026, the Crews and the fork's rows turned over, Crews as built), online/index.md (its line), code/online.md (dive_crew.c reads the server's crew), code/server.md (crews.py by nearness), devtools/scenarios.md (the sleep step), code/tools.md (scenarios.py's steps).

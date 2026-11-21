@@ -3,7 +3,7 @@ type: Code Map
 title: "The server, its deployment and the wire"
 description: "What `server/` (the ROM-free Python server: presence, Trade Central, the week, the Arena, teams, stands, retention, backups), `deploy/` (Coolify) and `shared/online/` (the versioned wire contract) hold, file by file."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:19:01Z }
 ---
 
 # The server, its deployment and the wire
