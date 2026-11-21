@@ -28,13 +28,13 @@ side is behind, rather than a refused upgrade (v10).
 | TRADE_STATE (16) | server → client | u8 stage (1 offered, 2 waiting, 3 answered, 4 accepted, 5 done, 6 cancelled), u32 trade ID, u32 the other player's session ID, 16-byte his public identity, my chip and his (u16 id, u8 code each; zero where not yet named) |
 | ARENA (17) | client → server | u8 action (1 challenge, 2 accept, 3 leave or decline, 4 over, 5 `arena_seen` (v13): the challenge's question up on the challenged's screen, from him alone, once), u32 reference (a challenge's target session ID, else the battle's ID), u16 the sender's latency in ms (0..5000; its round trip to the server with its jitter, the mean and twice the spread of its last pings, less what its rollback window covers: protocol v8), u8 a team challenge's format (v15: `team_relay` 0, `team_side_by_side` 1; else 0, and a lone challenge's is taken as 0) |
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2; v19: a party battle's, `arena_party` 2 on one field, `arena_linked` 3 a linked fighter), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; v19: a party's, its seats, zeros past them; else zeros); v19's stage 6, `arena_seat_gone`: a party's seat gone, its side byte that seat, the other his session |
-| ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
+| ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left; its flags byte after it, bit 0 a MegaMan carried, v22 bit 1 a shared dive's pull-back spent) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
-| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands; frame 0xFFFFFFFC (v21) a resend asked: the u64's low 32 bits the first frame of the other's keys the sender lacks, bits 32-35 the seat whose keys they are (a battle of two: the other's), and that seat's game sends its keys again from there (a battle through a dropped link, below), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
-| WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0), u8 (v19) the acts whose guardian was fought in a party, bit 0 act 1 to bit 3 act 4, none past the dive's act |
-| WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won; v19: bit 1 `week_party`, a guardian of the dive fought in a party), u16 minutes |
+| WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; v22: bit 2 `week_pulled`, the dive's MegaMan pulled back once by his crew; no other bit), u16 minutes, u32 summary hash (not 0), u8 (v19) the acts whose guardian was fought in a party, bit 0 act 1 to bit 3 act 4, none past the dive's act |
+| WEEK_BOARD (25) | server → client | u16 this week, u8 count (0..8), u8 last week's count (0..3), u8 the recipient's place this week (0 none), then 22 bytes an entry, the recipient's own best first (zeros where none), then this week's, then last week's: 16-byte zero-padded name, u16 layer, u8 act, u8 flags (bit 0 won; v19: bit 1 `week_party`, a guardian of the dive fought in a party; v22: bit 2 `week_pulled`, pulled back once by the crew), u16 minutes |
 | STANDS (26) | server → client | u8 count (0..`stands_max`, 5), then 63 bytes a battle (62 before v12) of the recipient's channel (those on, then its last one over): u32 battle ID, u32 the cable's first player's session ID, u32 the second's, two 16-byte zero-padded names in that order, u8 stage (1 the way in, 2 fighting, 3 over with a winner, 4 over without), u8 watching, u8 cheers, then the report: u16 HP and u16 max HP of the first, the same of the second, u16 the last chip each used (0 none), u8 chips each used, u8 winner (0 none, 1 the first, 2 the second), u8 a Team NetBattle's bout (v12; 0 a lone battle; v15: `stands_side_by_side`, 255, a side-by-side battle) |
 | ARENA_STATUS (27) | client → server | u32 battle ID, then the report as STANDS holds it (15 bytes); taken from the cable's first player alone |
 | WATCH (28) | client → server | u8 action (1 watch, 2 stop), u32 battle ID |
@@ -153,6 +153,31 @@ him out of the offer and starts the battle as soon as everyone left in it
 has joined, or tells the owner `crew_alone` where nobody has. A busy for an
 offer that is over says nothing. `crew_join_ms` stays the wait for a game
 that never answers.
+
+Protocol v22 (issue #718; docs/online/shared-dive.md, A deletion in a
+crew): **a crewmate pulled back**. A crew's battle won with a MegaMan of
+it deleted pulls him back once a dive, paid in the standing crewmates'
+HP; every game works the gifts out from the field, so the wire carries
+only who has spent his: ARENA_LOADOUT's flags byte grows bit 1, and the
+dive's end its mark, WEEK_POST's and WEEK_BOARD's entry flags bit 2
+`week_pulled` (4), kept with the best entry and ranked as any other. A
+v21 game would refuse both bits, hence the version.
+
+Protocol v21 (issue #180; docs/online/arena/dropped-link.md): **a
+NetBattle through a dropped link.** A NetBattle of two under way is held
+with its player's place (`arena.py`'s `dropped`): the other's game hears
+nothing and waits on his keys as on any slow link, what it sends while
+the place is held is lost with the link, and a resume takes the battle
+back with the place, the same battle ID, side and delay. Each game keeps
+the keys it sent (512 frames) and the keys it took; a game whose link
+came back sends its own again from the frame after the last hash the
+other sent (all it surely had), then asks for the other's from the first
+it lacks (ARENA_HASH frame 0xFFFFFFFC); a game that takes keys past a gap
+in a stream drops them and asks the same, at most every half second. An
+ARENA_INPUT whose frames it has already taken is taken from the first new
+one (the stands did so already). The place freed (its 40 seconds over)
+ends the battle for the other; an ARENA_STATE ended that found the
+player's link down is sent again after his resume's WELCOME.
 
 Protocol v20 (issue #714, docs/online/shared-dive.md, Crews by nearness):
 **a crew is who stands near, never asked for.** The server settles each
@@ -305,8 +330,9 @@ seconds (`server/cyberworld_server/holds.py`): its slot in its channel,
 its session ID and its MegaMan, standing where he stood, in the others'
 SNAPSHOTs; a trade, a challenge or a battle aimed at it meanwhile is
 answered NOTICE 16. What it had under way ends at once, as on any leave:
-a trade not committed is cancelled for both, a battle ends for the other
-(ARENA_STATE ended), watching stops, its board offer is taken down. A
+a trade not committed is cancelled for both, a team bout, a 2v2 or a
+party's battle ends for the others (ARENA_STATE ended), watching stops,
+its board offer is taken down; a NetBattle of two goes on (v21, below). A
 HELLO from the same identity with the resume bit takes the place back:
 the WELCOME names the same session ID and channel (where the old session
 is not yet known to be gone, it is told ERROR 12), the session's last
@@ -556,7 +582,13 @@ fighters. Seat 0 reports with ARENA_STATUS and ends the battle with ARENA
 over (ARENA_STATE ended to every seat still in it); a seat's ARENA leave,
 its leaving the dive or its dropped link is told to the others as
 ARENA_STATE `arena_seat_gone`, and the battle goes on for the rest, each
-game finishing its own. Party battles are busy (SNAPSHOT's busy bits,
+game finishing its own. A dropped link is ridden out first (issue #180,
+no new message): the seat is held 12 seconds (`party.py`'s `SEAT_HOLD`),
+the others' games waiting on its keys, and a resume within them takes it
+back, what was said to it meanwhile sent again after its WELCOME (a
+battle over meanwhile: every other seat gone, then ended); the keys the
+link lost are asked for again as in a NetBattle of two (ARENA_HASH's
+frame 0xFFFFFFFC, v21). Past the 12 seconds the seat is gone as before. Party battles are busy (SNAPSHOT's busy bits,
 DIVERS's flag) and need no `arena` switch on the server. The stands do
 not show them yet.
 

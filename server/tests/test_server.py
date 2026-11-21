@@ -211,6 +211,8 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms",
               # (v23, a crew's battles at once: crews.py)
               "crew_busy")
+# (protocol v22, issue #718: a dive pulled back once by its crew, the Board's mark)
+PULL_NAMES = ("week_pulled",)
 
 
 class ContractTests(unittest.TestCase):
@@ -236,7 +238,7 @@ class ContractTests(unittest.TestCase):
                      "sync_state_bytes", "sync_slot_bytes", "sync_auth_bytes", "sync_max", "sync_days", "sync_same",
                      "sync_found", "sync_none", "sync_denied", "sync_ready", "sync_stored", "sync_conflict",
                      "sync_busy", "sync_off", "sync_dropped",
-                     *DIVE_NAMES):
+                     *DIVE_NAMES, *PULL_NAMES):
             value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
             self.assertEqual(value, protocol.SPEC[name])
         self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)

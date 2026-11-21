@@ -131,11 +131,14 @@ bool arena_wire_read_loadout(const uint8_t *data, size_t size, uint32_t *match, 
 #define HEAD_BYTES (3 + 2 * BN6_FOLDER_ENTRIES)   /* the version, carried, the folder and the count of programs */
 #define TAIL_BYTES 12
 #define HP_BYTES 6    /* max HP, base HP, and HP (v2) */
+#define LOADOUT_CARRIED 1   /* its flags: a MegaMan carried */
+#define LOADOUT_PULLED 2    /* ... and his shared dive's pull-back spent (v22, crew_pull.h) */
 
 size_t arena_loadout_pack(const OnlineLoadout *l, uint8_t *out, size_t cap) {
 	if (cap < 2) return 0;
 	out[0] = ARENA_LOADOUT_VERSION;
-	out[1] = l != NULL;
+	/* (its flags: a MegaMan carried, and a shared dive's pull-back spent, v22) */
+	out[1] = (uint8_t)(l ? LOADOUT_CARRIED | (l->pulled ? LOADOUT_PULLED : 0) : 0);
 	if (!l) return 2;
 	unsigned placed = 0;
 	for (unsigned s = 0; s < BN6_NAVICUST_SLOTS; ++s)
@@ -173,6 +176,7 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	*carried = false;
 	if (n < 2 || in[0] != ARENA_LOADOUT_VERSION) return BAD("the other PET's MegaMan is in another version's form");
 	if (!in[1]) return n == 2 ? true : BAD("the other PET's MegaMan came with bytes too many");
+	if (in[1] & ~(LOADOUT_CARRIED | LOADOUT_PULLED)) return BAD("the other PET's MegaMan came with flags it has not");
 	size_t head = HEAD_BYTES;
 	if (n < head) return BAD("the other PET's MegaMan came short");
 	const uint8_t *i = in + 2;
@@ -196,6 +200,7 @@ bool arena_loadout_unpack(const uint8_t *in, size_t n, OnlineLoadout *out, bool 
 	out->regular_mb = i[3]; out->mega_limit = i[4]; out->giga_limit = i[5];
 	out->regular = i[6]; out->tag[0] = i[7]; out->tag[1] = i[8];
 	out->crosses = i[9]; out->souls = i[10]; out->beast = i[11];
+	out->pulled = (in[1] & LOADOUT_PULLED) != 0;
 	*carried = true;
 	return true;
 }

@@ -1,0 +1,9 @@
+{
+  "branch": "trader-reward-pick",
+  "what": "A chip trader sometimes opens the reward pick's screen (issue #734)",
+  "takes": {},
+  "units": [
+    "the reward pick's flags at a chip trader (#734)"
+  ],
+  "run": false
+}

@@ -144,6 +144,7 @@ static void field_set(PartyField *f, const PartyBattle *b) {
 	f->foe_from = b->foe_from;
 	f->foe_to = b->foe_to;
 	f->end = b->end;
+	f->del = b->del;
 	for (unsigned k = 0; k < b->n && k < PARTY_MOST; ++k) {
 		f->hp[k] = b->seat[k].hp ? b->seat[k].hp : b->seat[k].max_hp;
 		f->max_hp[k] = b->seat[k].max_hp;

@@ -16,6 +16,7 @@ typedef struct {
 	uint8_t act;
 	bool won;
 	bool party;          /* a guardian of the dive fought in a party (v19, ONLINE_WEEK_PARTY) */
+	bool pulled;         /* its MegaMan pulled back once by his crew (v22, ONLINE_WEEK_PULLED) */
 } WeekEntry;
 
 typedef struct {
@@ -32,8 +33,10 @@ void online_week_reset(void);
 /* A WEEK_BOARD come in; false where it is malformed. */
 bool online_week_mail(const uint8_t *data, size_t size);
 const WeekBoard *online_week_board(void);
-/* A dive's end posted (WEEK_POST); false where it was not sent. */
-bool online_week_post(uint16_t week, uint32_t seed, int depth, int act, bool won, unsigned minutes, uint32_t hash);
+/* A dive's end posted (WEEK_POST), its flags WEEK_POST_WON and
+ * ONLINE_WEEK_PULLED; false where it was not sent. */
+#define WEEK_POST_WON 1
+bool online_week_post(uint16_t week, uint32_t seed, int depth, int act, unsigned flags, unsigned minutes, uint32_t hash);
 /* Week `week`'s Monday, seconds since 1970 (UTC). */
 int64_t online_week_start(uint16_t week);
 

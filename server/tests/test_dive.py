@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "server"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from cyberworld_server import admin, crews, protocol, week
+from cyberworld_server import admin, crews, party, protocol, week
 from cyberworld_server.app import Server
 from cyberworld_server.arena import ENDED, LEAVE, OVER, START
 from test_server import Client
@@ -59,6 +59,14 @@ def name(raw):
     return raw.rstrip(b"\0").decode()
 
 
+async def until_true(condition, timeout=2.0):
+    for _ in range(int(timeout * 100)):
+        if condition():
+            return
+        await asyncio.sleep(0.01)
+    raise AssertionError("Condition not reached")
+
+
 class DiveTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.dir = tempfile.TemporaryDirectory()
@@ -79,6 +87,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
         crews.FORM_WAIT, crews.SPLIT_WAIT, crews.AWAY_WAIT = (SPEC[k] / 1000 for k in ("crew_form_ms", "crew_split_ms", "crew_away_ms"))
+        party.SEAT_HOLD = 12.0
 
     async def restart(self):
         for client in self.clients:
@@ -581,7 +590,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await b.message(SPEC["arena_seat"])
         for _ in range(30):
             self.assertNotIn((await c.receive())[0], (SPEC["arena_seat"], SPEC["party_hp"]))
-        # (a dropped link: the seat gone for the others, the battle on; SNAPSHOT says busy)
+        # (a dropped link, its hold over: the seat gone for the others, the battle on; SNAPSHOT says busy)
+        party.SEAT_HOLD = 0.3
         await b.drop()
         self.clients.remove(b)
         gone = arena_state(await self.until(a, SPEC["arena_state"]))
@@ -590,6 +600,49 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.server.busy_with(c.id), SPEC["busy_battle"])
         await c.send(damage)
         await a.message(SPEC["arena_seat"])
+
+    async def party_of(self, *labels, door=(5, 0, 2)):
+        """A door's party battle of these divers: their clients and the battle's id."""
+        clients = [await self.connect(label) for label in labels]
+        for client in clients:
+            await self.enter(client, *door)
+            await client.send(protocol.queue(SPEC["queue_join"], door))
+        await self.until(clients[0], SPEC["queue_state"], lambda m: m[6] == len(clients))
+        await clients[0].send(protocol.queue(SPEC["queue_start"]))
+        starts = [arena_state(await self.until(x, SPEC["arena_state"])) for x in clients]
+        return clients, starts[0]["battle"]
+
+    async def test_a_seat_held_through_a_dropped_link_and_taken_back(self):
+        # (issue #180: a short drop ridden out, the others told nothing, the seat's keys relayed again once back)
+        (a, b, c), battle = await self.party_of("Alpha", "Beta", "Gamma")
+        await b.drop()
+        self.clients.remove(b)
+        await until_true(lambda: b.id in self.server.parties.battles[battle].away)
+        keys = protocol.ARENA_INPUT.pack(SPEC["arena_input"], battle, 0, 1) + b"\x00\x01"
+        await c.send(keys)
+        await a.message(SPEC["arena_seat"])
+        b = await self.connect("Beta", resume=True)
+        self.assertNotIn(b.id, self.server.parties.battles[battle].away)
+        await c.send(keys)
+        self.assertEqual(await b.message(SPEC["arena_seat"]), bytes((SPEC["arena_seat"], 2)) + keys)
+        await b.send(keys)
+        self.assertEqual(await self.until(a, SPEC["arena_seat"], lambda m: m[1] == 1), bytes((SPEC["arena_seat"], 1)) + keys)
+        for _ in range(30):
+            message = await a.receive()
+            self.assertFalse(message[0] == SPEC["arena_state"] and message[1] == SPEC["arena_seat_gone"])
+
+    async def test_a_battle_over_while_a_seat_is_held_is_told_on_its_resume(self):
+        (a, b), battle = await self.party_of("Alpha", "Beta")
+        await b.drop()
+        self.clients.remove(b)
+        await until_true(lambda: b.id in self.server.parties.battles[battle].away)
+        await a.send(protocol.ARENA.pack(SPEC["arena"], OVER, battle, 0, 0))
+        await until_true(lambda: battle not in self.server.parties.battles)
+        b = await self.connect("Beta", resume=True)
+        gone = arena_state(await self.until(b, SPEC["arena_state"]))
+        self.assertEqual((gone["stage"], gone["side"], gone["other"]), (SPEC["arena_seat_gone"], 0, a.id))
+        self.assertEqual(arena_state(await self.until(b, SPEC["arena_state"]))["stage"], ENDED)
+        self.assertFalse(self.server.parties.missed or self.server.parties.seat_of)
 
     async def test_a_seat_zero_without_the_arena_links_every_seat(self):
         a, b = await self.connect("Alpha", no_arena=True), await self.connect("Beta")
@@ -618,6 +671,22 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.gather(*self.server.writes)       # (the appends in their threads, done)
         lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([line.get("party") for line in lines], [5, 0])
+
+    async def test_week_post_carries_the_crews_pull_back(self):
+        a, b = await self.connect("Alpha"), await self.connect("Beta")
+        await a.send(week.post(self.week, self.seed, 7, 3, False, 40, 9, pulled=True))
+        _, _, mine, _, _ = board(await self.until(a, SPEC["week_board"], lambda m: board(m)[1] == 1))
+        self.assertEqual(mine[3], SPEC["week_pulled"])
+        # (ranked with the rest: a deeper dive pulled back above a shallower one that was not)
+        await b.send(week.post(self.week, self.seed, 4, 2, False, 30, 9))
+        _, _, mine, top, _ = board(await self.until(b, SPEC["week_board"], lambda m: board(m)[1] == 2))
+        self.assertEqual((top[0][3], top[1][3], mine[3]), (SPEC["week_pulled"], 0, 0))
+        bad = week.post(self.week, self.seed, 4, 2, False, 40, 9)
+        await b.send(bad[:10] + bytes([8]) + bad[11:])
+        self.assertEqual(await self.notice(b), 25)
+        await asyncio.gather(*self.server.writes)
+        lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
+        self.assertEqual([line.get("pulled") for line in lines], [True, False])
 
     # -- moderation --
 

@@ -173,7 +173,7 @@ static void party_state(const PartyState *p) {
 	unsigned n = 0;
 	for (unsigned k = 0; k < ONLINE_SEATS; ++k) n += p->seats[k] != 0;
 	party_play_on(true);
-	party_play_start(p->battle, p->seat, n ? n : Q.q.count, p->delay);
+	party_play_start(p->battle, p->seat, n ? n : Q.q.count, p->delay, p->seats);
 }
 
 void dive_party_mail(const uint8_t *m, size_t n) {

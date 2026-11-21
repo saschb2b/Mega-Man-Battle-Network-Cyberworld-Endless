@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:19:01Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:31:16Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -58,9 +58,12 @@ The game-design skill's lens, before any number:
   run and nothing from one goes in ([The week's net and the meta
   layer](../game/meta/weekly-net.md)).
 - **The fairness rule: others change a dive's odds, never its prize.** No
-  chip, HP, zenny or layer comes from another diver. What is shared is
-  information, open to every diver alike, and honour, which buys nothing.
-  The standard profile and setup, and no trades on a dive, stay.
+  chip, zenny or layer comes from another diver; HP only once a dive, when
+  a crew's win pulls back a crewmate deleted beside them, and the Board
+  marks that dive (the owner's call of 21 November 2026, issue #718: A
+  deletion in a crew, below). What is shared is information, open to
+  every diver alike, and honour, which buys nothing. The standard profile
+  and setup, and no trades on a dive, stay.
 - **Patterns** (recalled from playing them, not checked in
   [Sources](../research/sources.md)): traces left for later players (Dark
   Souls' messages and bloodstains: phrases and deletion marks); a feed of
@@ -127,7 +130,7 @@ Verified on `dev`, 15 November 2026:
 | The fight | One field: the party's MegaMen together against the guardian | Linked fights, each in their own battle with the guardian's HP shared |
 | Scaling | A party of two meets the guardian's next version (V1 to EX), three or four the one after, its HP times the party; past SP or its last version only the HP grows | HP alone; none; harder hits past SP; a cap at SP |
 | A drop | The missing MegaMen leave the field in each game, and each game finishes its own battle | Broken off, back to the door; the dropped run ended |
-| Deleted in a party | The run is over, as alone | Pulled out at 1 HP and carried by a win; pulled out to fight again |
+| Deleted in a party | At a guardian: the run is over, as alone. In a crew's random battle the crew wins: pulled back once a dive, paid in the crew's HP, the dive marked (21 November 2026, issue #718; A deletion in a crew, below) | Pulled out at 1 HP and carried by a win; pulled out to fight again; (21 November) as at a guardian; back once a dive, free; at a guardian's party too; a fixed 100 HP a helper; the helper with the most HP paying alone; revived dives ranked below the rest |
 | Systems without the Arena | The New 3DS and the PSP join as linked fighters: their own battle, their damage into the field's guardian | Alone only; the whole party linked |
 | After a dive ends | Dive again from layer 1 into the live pack, as often as one likes, the best kept | Once a day; the first dive alone counted |
 | The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
@@ -169,13 +172,63 @@ points to, and is his to turn over.
 | At home | No places are sent from Lan's HP: the crew stays as it was as its divers left the layer, and the fork's hold is dropped (above) | The fork's hold kept for those who came home together |
 | Strangers | Anyone near is a crew, strangers too; walking away is the way to stay alone, and a switch for it waits for the next test to show it is needed | A setting to stay alone now; crews only between friends |
 | The chat | "Team up,Lan?" and "Split up,Lan?" gone, and A on a diver does nothing of the crew's | Kept to hold a crew over a distance |
-| What is said | Nothing at a forming or a split: the ring around a crew (#716) and its display (#717) show it, the log says it (`dive: crew now: ...`) | "Alright! We're a team with Beta!" at every forming, which would fill the band |
+| What is said | Nothing at a forming or a split: the crew's sign (#716, [below](#the-crews-sign-21-november-2026)) and its display (#717) show it, the log says it (`dive: crew now: ...`) | "Alright! We're a team with Beta!" at every forming, which would fill the band |
 
 The fairness rule is untouched: a crew shares battles and company, never
 a chip, HP, zenny or a layer. Systems without the one field (the New 3DS,
 the PSP) are in crews as anyone and are never offered their battles. The
 statistics' `deepnet-together` keeps counting the biggest crew a dive
 saw, now one formed by nearness rather than asked for.
+
+## The crew's sign (21 November 2026)
+
+Crews form and split by nearness and nothing is said when they do
+(above), so a layer has to show who is in MegaMan's crew (issue #716,
+from the testers' idea of a circle round a crew). The game-design
+skill's pass, under the owner's direction of 21 November (always clear
+who is with you):
+
+- **Dialectic: together against ahead,** made visible: the sign is the
+  feedback of walking beside someone, and its dotted form the
+  feedforward of what one more step does.
+- **Loop layer: the moment on a layer,** where the next battle is
+  fought together or alone by who wears the sign.
+- **Patterns:** party members marked by colour and a ground ring under
+  each (Diablo and Path of Exile's party, an MMO's group), never by
+  colour alone (the interface layer's readability floor); the shape is
+  the ring, the colour says which crew.
+- **BN6 has none:** a map of BN6 holds one Navi, and no sign of a party
+  or a group is drawn on it (assumed; searched in bn6f: the map
+  scripts' effect commands are the PET's, the scenario effects (the
+  Soul weapons' counter, Mr. Weather's rainbow gauge) and the
+  minigames'; nothing of a ring, circle or marker among its constants).
+  So the sign is ours to draw, over the game's picture.
+
+What is drawn (`dive_people.c`, `floor_ring.c`, the colour in
+`crew_look.h`):
+
+- **A crewmate's name in the crew's colour,** the PET's information
+  box's green (`CREW_COLOUR`), the others' white. The marks on a
+  party's field read the same value.
+- **A ring on the floor under each crewmate's feet,** in that green,
+  two pixels wide with a dark edge round it, so it reads on a light
+  floor, a dark one and a green one; its back is left out where his body stands, so it lies round his
+  feet rather than across his legs.
+- **A dotted ring under a diver within the radius a crew forms in**
+  (`DIVE_CREW_NEAR`, read from `dive_crew.h`) while the server's second
+  has not yet passed and the crew has a place: about to be one.
+- Nothing over BN6's chat box: a ring's rows under its top are left out
+  while it is open, as the names are.
+
+Each call was taken under the owner's direction of 21 November 2026 by
+the session building it, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| The sign | The crew's colour on the names and a ring under each crewmate (the issue's options 1 and 3) | A ring at the radius round MegaMan (option 2): the radius, four panels, is an ellipse some 360 by 180 pixels in BN6's projection, wider and taller than the 240 by 160 picture, so it shows only as arcs in its corners, and a diver the picture shows at all stands within it; tried and looked at. One of BN6's effects as an object (option 4): an NPC slot each, which a layer has few of |
+| The colour | One crew colour, the PET's green, the player's own the cursor's orange on a party's field | A colour of each crew's own (a crew is MegaMan's alone on his screen: others' crews are not shown) |
+| About to be | A dotted ring for the second before a crew forms | No sign until it has (a crew appearing from nothing) |
+| Others' crews | Not shown: only MegaMan's own crew wears the sign | Every crew on the layer in its own colour (the server tells each diver his own crew alone) |
 
 ## A crew's battles at once (21 November 2026)
 
@@ -337,10 +390,12 @@ his to turn over.
   answer within the window and three seconds, the owner's battle begins
   as ever. At the end each run takes the battle as one of its own
   (`director_crew_over`): MegaMan's HP as the field left it, a deletion
-  ending the run as alone; won, its viruses counted and BN6's reward, the
+  ending the run as alone (since 21 November 2026, a won battle's pulls
+  him back once a dive: A deletion in a crew, below); won, its viruses counted and BN6's reward, the
   entry BN6's results screen on the field picked (`BN6_BATTLE_REWARD` on
   the party's core, given with `GiveChips`, `GiveZenny` or
-  `GiveBugfrags`): that is BN6's normal reward for the battle, its own
+  `GiveBugfrags`; a MegaMan deleted and pulled back by the crew takes
+  none, A deletion in a crew below): that is BN6's normal reward for the battle, its own
   pick by the Busting Level the party earned, the one the player saw on
   the results, where rolling the run's own would have needed a Busting
   Level no run's battle had; it comes from the rows of each game's ROM
@@ -611,6 +666,69 @@ his to turn over.
   past the lead's OK, a Program Advance of a partner's, his Cross and
   Souls (refused on a party's field for now: the Arena's).
 
+## Who is who on a party's field (21 November 2026)
+
+The team's test over Discord of 18 November
+([issue #713](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/713)):
+on a party's field, a guardian's or a crew's join-in battle, four of
+BN6's MegaMen stand in one palette and nobody could tell which was his.
+BN6 itself leaves an ally unlabelled (the Arena's finding,
+[the partner's seat](arena/two-a-side/seat.md)).
+
+**The call** (taken under the owner's direction of 21 November 2026, that
+the online game is to feel like co-op in a modern MMO or Diablo: always
+clear who is who; his to turn over): a mark by each MegaMan's feet, his
+diver's name, the player's own told apart first. Chosen over a palette
+per MegaMan, which changes what the core draws and so must be alike on
+every game of the field or kept out of its hash; that waits for
+[issue #694](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/694),
+a look of the player's own, where colours are the first step. Read
+through the game-design skill's interface layer: a spatial label on the
+actor, the question "which one am I" answered by a shape as well as a
+colour.
+
+- **The name, cut to a panel.** Whole letters of the diver's name that
+  fit 34 pixels of the engine's pixel font: a panel is 40 wide, so two
+  MegaMen on neighbouring panels of a row keep their names apart, and
+  rows stand 24 apart, more than a name's 9. Two names alike as cut get
+  their seat's digit after them; a seat with no name (the dev's stood-in
+  partners) is "P1" to "P4", the Arena's marks. Centred under his feet.
+- **The player's own** in the PET cursor's orange behind its arrow, so
+  it does not rest on colour alone; the others in the crew's colour,
+  the PET's green, as their names on a layer
+  ([The crew's sign](#the-crews-sign-21-november-2026): `CREW_COLOUR`
+  in `src/online/crew_look.h`).
+- **A partner's HP his own.** BN6's HP box shows side 0's first actor,
+  the lead, on every game of the field; a partner sees his own over it,
+  as a two-a-side's partner does (`arena_team_view_hp`).
+- **When.** While the field fights, not over a partner's own Custom
+  screen, and on the field's Custom screen the HP box alone, as the
+  Arena's. A MegaMan deleted or gone has none. A linked fighter (New 3DS,
+  PSP) fights alone and has nothing to mark.
+
+As built (`src/online/party_marks.c`, drawn by `party_play_draw`): our own
+drawing over the field's picture, read from the field's core as it
+stands for the frame shown, so a rollback leaves nothing behind; it
+writes nothing, and nothing of it is in the field's hash. The names are
+the seats' sessions in START as the server's snapshot names them, this
+game's own the visit's. A partner's HP beside his name, where #717 wants
+it, goes in `party_marks_draw`'s loop. `--dev partyview=N` draws a
+`partycore` field as seat N sees it, and the state says it (`partyfield`,
+`hpbox`, `markK own|crew at X Y width W tag T`, `marks N apart|MEET`).
+
+Seen headless (21 November 2026; the scenario
+`tests/scenarios/online_party_marks.py`): three MegaMen against layer 3's
+guardian of `--seed 3` (BlastMan) drawn as seat 1 sees them, "P2" his own
+behind the arrow, P1 and P3 the crew's, his HP box his own (read from his
+object, side 0's actor 1), no marks over the Custom screen; with
+`partytwin=1,partyroll=30` 121 checks of the twin and the rollback the
+same and none apart, the marks drawn. Over a local server, two crewed
+divers in a crew's join-in battle, one named sixteen w's: each game his
+own name in orange, the other's in white, "Wwwww" cut to the panel, both
+marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
+Not yet seen over the server: a guardian's door (the same drawing, on the
+same field).
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
@@ -643,6 +761,59 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
 
+## A deletion in a crew (21 November 2026)
+
+Issue #718, after the team's test: with crews formed by nearness and
+their battles joined unasked (#714, #715), a diver is taken into battles
+he did not choose, and a deletion there ended his dive. The design pass
+(the game-design skill, [its comment on the
+issue](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/718#issuecomment-7067358973))
+and the owner's four answers:
+
+- **The dialectic stays together against ahead.** Helping costs the
+  helpers HP for the rest of the layer; the fix sits where the sting is,
+  at the end of the battle the crew fought together.
+- **Loop layer: the dive's own battles**, feeding the Board as before.
+- **Patterns** (recalled from playing them, not checked in
+  [Sources](../research/sources.md)): a revive that costs the helper
+  (Borderlands' and Diablo III's hold-to-revive, without the downed
+  state: in a joined battle the crew already stands beside the fallen);
+  a graduated death penalty, a buffer of one before the dive's own
+  permanent death (Path of Exile's and Diablo's hardcore stay what a
+  second deletion is); honour on the Board, as the party's "+". Turned
+  down: a ghost carried to the next layer (Risk of Rain 2, Enter the
+  Gungeon's co-op), which gives a layer; a revive as long as someone can
+  pay, which lets a crew carry one diver down; a crew's shared budget
+  (Monster Hunter's carts), which makes one fall cost the others.
+- **The rule, as built** (`src/director/crew_pull.c`): a crew's random
+  battle won with a MegaMan of it deleted, each crewmate still standing
+  gives a quarter of the HP he ends with (in seat order, a quarter of
+  what he has left), and the fallen is back on the layer with the sum,
+  half his own max HP at most and 1 at least. A giver is never deleted
+  by it, and a win with nobody standing (every MegaMan deleted as the
+  last foe fell, which the field can report) pulls nobody back. Once a dive: a second deletion ends the dive as alone. The
+  fallen takes neither the battle's viruses nor BN6's reward; the dive's
+  end carries a mark to the Board, `*` after its layer ("*:pulled back
+  once by the crew."), ranked with the rest. A field lost (BN6 ends a
+  battle when no MegaMan of side 0 stands), a guardian's party, a diver
+  alone and a linked fighter (the New 3DS, the PSP: they get no crew
+  battles, and their guardian is their own battle): as before.
+- **How it is built.** Every game of the field reads each seat's HP as
+  the field ended (`party_core_hp`), his max and whether his pull-back
+  is spent (the loadout's flags' second bit, ARENA_LOADOUT, v22) and
+  works out the same gifts (`director_crew_over`, `crew_pull.c`), so no
+  message carries them; `director_crew_over` writes the HP and, pulled back,
+  spends the dive's pull-back in its record (`weekly_pulled`:
+  `weekly.sav`'s `pulled`, kept at once, so a quit and a CONTINUE from
+  an earlier checkpoint find it spent), not in `Run`. There is no state
+  of being down: it is decided in the battle's last frame. The band says
+  "Phew... The crew pulled us back!" on the fallen's game and "Lan,we
+  shared our HP. They're back!" on a giver's. `--dev partydel=MASK` with
+  `partyend=N`, the same on every game of a field, deletes the MegaMen of
+  those seats (bit 0 seat 0) at the battle loop's iteration N, as a hit
+  would, and its enemies 60 iterations later: the scenarios' way to a deletion on a week's layer, which the
+  server's seed makes another each run.
+
 ## Open before it is built
 
 1. **The join window.** Built (Join-in battles, above): the two-a-side
@@ -667,7 +838,9 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
 5. **Crews' battles unscaled.** Viruses end about half the lost short
    nets ([The core loop, reviewed](../game/core-loop.md)), so a crew dies
    to them less often, and the Board's party marks count guardians only.
-   The owner's call stands; the statistics will show what it does.
+   The owner's call stands; the statistics will show what it does. Since
+   21 November 2026 a crew's win also pulls a deleted crewmate back once
+   a dive, which the Board marks (A deletion in a crew, above).
 6. **A quiet net.** With live divers only, the dive is as busy as the
    server: in October 31 players visited the Square and 6 posted dives
    (the same page). The statistics count it from the first release: as a

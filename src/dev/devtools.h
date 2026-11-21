@@ -99,6 +99,7 @@ typedef struct {
 	                   keys scripted (party_field.h) */
 	int party_hp;   /* partyhp=N: under party=N the partners begin each battle with N HP (the spike's deletion test) */
 	int party_end;  /* partyend=N: under party=N the enemies' HP set to 1 at the battle loop's iteration N (the spike's win test) */
+	int party_del;  /* partydel=MASK: on a party's core with partyend, the MegaMen of those seats (bit 0 seat 0) deleted at that iteration and its enemies 60 later (a crew's pull-back's test, issue #718) */
 	int party_core; /* partycore=N (2-4, the shared dive's one field, #589): a guardian's fight on the party's own core
 	                   (party_core.h) with N MegaMen, the partners' keys scripted; partytwin=1 a second core run beside it from
 	                   the same keys, their hashes compared every frame; partyroll=W rolled back W frames every W (party_play.h) */
@@ -107,6 +108,7 @@ typedef struct {
 	int party_delay; /* partydelay=N: a party's input delay over the server, N frames (party_play.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */
+	int party_view; /* partyview=N: a party's field under partycore drawn as seat N sees it, his marks and HP box (party_marks.h) */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
 	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second

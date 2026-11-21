@@ -1,6 +1,7 @@
 /* The network's ArenaLink (arena_link_net.h). ROM-free. */
 #include "arena_link_net.h"
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -18,25 +19,44 @@ static unsigned my_seat(const ArenaNetLink *l) { return arena_link_seat(&l->link
 /* a battle of two (else a 2v2's four seats or a party's, each other seat's messages as ARENA_SEAT) */
 static bool pair(const ArenaNetLink *l) { return l->seats == 2 && !l->party; }
 
+/* my keys from `from` to the first not yet sent, ONLINE_ARENA_INPUT_MAX a message */
+static bool send_from(ArenaNetLink *l, uint32_t from) {
+	while (from != l->sent) {
+		uint16_t keys[ONLINE_ARENA_INPUT_MAX];
+		uint8_t data[ARENA_INPUT_HEAD + 2 * ONLINE_ARENA_INPUT_MAX];
+		unsigned n = l->sent - from < ONLINE_ARENA_INPUT_MAX ? l->sent - from : ONLINE_ARENA_INPUT_MAX;
+		for (unsigned i = 0; i < n; ++i) keys[i] = l->kept[(from + i) & (ARENA_NET_PEER - 1)];
+		size_t size = arena_wire_input(data, sizeof data, l->match, from, keys, n);
+		if (!size || !l->out(l->context, data, size)) break;
+		from += n;
+		if (from > l->flushed) l->flushed = from;
+	}
+	return from == l->sent;
+}
+
 bool arena_link_net_flush(ArenaNetLink *l) {
-	if (!l->batched) return true;
-	uint8_t data[ARENA_INPUT_HEAD + 2 * ONLINE_ARENA_INPUT_MAX];
-	size_t size = arena_wire_input(data, sizeof data, l->match, l->batch_first, l->batch, l->batched);
-	if (!size || !l->out(l->context, data, size)) return false;
-	l->batch_first += l->batched;
-	l->batched = 0;
+	return l->flushed == l->sent || (!l->held && send_from(l, l->flushed));
+}
+
+/* my keys again from `from` (an ask, a resume: v21): false where they are no longer kept */
+static bool resend(ArenaNetLink *l, uint32_t from) {
+	if (from >= l->sent) return true;
+	if (from < l->link.delay) from = l->link.delay;
+	if (l->sent - from > ARENA_NET_PEER) { breaks(l, "the other player's keys came back too late"); return false; }
+	if (from < l->flushed) l->resent += l->flushed - from;
+	if (from < l->flushed) l->flushed = from;
+	arena_link_net_flush(l);
 	return true;
 }
 
 static bool net_send(ArenaLink *link, uint32_t frame, uint16_t keys) {
 	ArenaNetLink *l = of(link);
-	if (frame != l->sent || l->batched == ONLINE_ARENA_INPUT_MAX) return false;
-	if (!l->batched) l->batch_first = frame;
-	l->batch[l->batched++] = keys;
+	if (frame != l->sent) return false;
+	/* (held back past what is kept: a link down for that long has lost them) */
+	if (l->sent - l->flushed >= ARENA_NET_PEER) { breaks(l, "my keys could not be sent"); return false; }
+	l->kept[frame & (ARENA_NET_PEER - 1)] = keys;
 	++l->sent;
-	/* (the outbox full: kept, and tried again with the next frame's) */
-	if (l->batched >= ARENA_NET_FLUSH && !arena_link_net_flush(l) && l->batched == ONLINE_ARENA_INPUT_MAX)
-		breaks(l, "my keys could not be sent");
+	if (l->sent - l->flushed >= ARENA_NET_FLUSH) arena_link_net_flush(l);
 	return true;
 }
 
@@ -140,9 +160,10 @@ static bool net_poll_lag(ArenaLink *link, int *lag) {
 
 static void net_tick(ArenaLink *link) {
 	ArenaNetLink *l = of(link);
+	++l->ticks;
 	if (l->ended) ++l->since_end;
-	/* (a batch the outbox refused, tried again) */
-	if (l->batched >= ARENA_NET_FLUSH) arena_link_net_flush(l);
+	/* (keys the outbox refused, tried again) */
+	arena_link_net_flush(l);
 }
 
 /* the peer's end: its keys already come are spent first, as its battle
@@ -166,7 +187,7 @@ ArenaLink *arena_link_net(ArenaNetLink *l, uint32_t match, unsigned side, unsign
 	l->match = match;
 	l->seats = 2;
 	/* (the first D frames are released keys on every side: each stream begins at D) */
-	l->sent = delay;
+	l->sent = l->flushed = delay;
 	for (unsigned k = 0; k < ONLINE_SEATS; ++k) l->from[k].next = l->from[k].polled = delay;
 	return &l->link;
 }
@@ -190,7 +211,21 @@ void arena_link_net_gone(ArenaNetLink *l, unsigned seat) {
 	if (seat < ONLINE_SEATS) l->gone |= 1u << seat;
 }
 
-static void keep_hash(ArenaNetSeat *s, uint32_t frame, uint64_t hash) {
+/* seat `seat`'s keys asked for again from the first I lack (v21): at
+ * once where `now`, else once ARENA_NET_ASK ticks have passed since the last */
+static void ask(ArenaNetLink *l, unsigned seat, bool now) {
+	ArenaNetSeat *s = &l->from[seat];
+	uint8_t data[ARENA_HASH_BYTES];
+	if (l->held || (!now && s->asked && l->ticks - s->asked_at < ARENA_NET_ASK)) return;
+	if (!arena_wire_hash(data, l->match, ARENA_NET_HAVE, (uint64_t)seat << 32 | s->next) || !l->out(l->context, data, sizeof data)) return;
+	s->asked = true;
+	s->asked_at = l->ticks;
+	++l->asks;
+}
+
+static void keep_hash(ArenaNetLink *l, ArenaNetSeat *s, uint32_t frame, uint64_t hash) {
+	/* (an ask for my keys again, v21: a 2v2's or a party's for mine alone) */
+	if (frame == ARENA_NET_HAVE) { if ((hash >> 32 & 0xFu) == my_seat(l)) resend(l, (uint32_t)hash); return; }
 	if (frame == ARENA_NET_READY) { s->ready = true; s->ready_hash = hash; return; }
 	if (frame == ARENA_NET_RECORD) { s->recorded = true; s->record = hash; return; }
 	if (frame == ARENA_NET_LAG) { s->lagged = true; s->lag = (int16_t)(uint16_t)hash; return; }
@@ -207,18 +242,22 @@ static bool take_from(ArenaNetLink *l, unsigned seat, const uint8_t *data, size_
 	ArenaNetSeat *s = &l->from[seat];
 	if (arena_wire_read_hash(data, size, &match, &frame, &hash)) {
 		if (match != l->match) return false;
-		keep_hash(s, frame, hash);
+		keep_hash(l, s, frame, hash);
 		return true;
 	}
 	if (!arena_wire_read_input(data, size, &match, &frame, keys, &count) || match != l->match) return false;
-	/* (each stream in order, its frames once: a gap or a frame past what
-	 * the link holds breaks it) */
-	if (frame != s->next) { breaks(l, "the other player's keys came out of order"); return true; }
-	if (s->next + count - s->polled > ARENA_NET_PEER) { breaks(l, "the other player's keys came too far ahead"); return true; }
+	/* (each stream in order, its frames once: a gap's keys dropped and the
+	 * first missing asked for again, frames already taken skipped, v21; a
+	 * frame past what the link holds breaks it) */
+	if (frame > s->next) { ask(l, seat, false); return true; }
+	unsigned skip = s->next - frame;
+	if (skip >= count) return true;
+	if (s->next + (count - skip) - s->polled > ARENA_NET_PEER) { breaks(l, "the other player's keys came too far ahead"); return true; }
 	/* (a partner's stream keeps its sixteen bits: his picks, arena_team_custom.h; a party's seats 1-3 each a partner) */
 	uint16_t mask = (l->party ? seat >= 1 : seat >= 2) ? ARENA_PARTNER_MASK : ARENA_KEYS_MASK;
-	for (unsigned i = 0; i < count; ++i) s->keys[(frame + i) & (ARENA_NET_PEER - 1)] = keys[i] & mask;
-	s->next += count;
+	for (unsigned i = skip; i < count; ++i) s->keys[(frame + i) & (ARENA_NET_PEER - 1)] = keys[i] & mask;
+	s->next += count - skip;
+	s->asked = false;
 	return true;
 }
 
@@ -265,3 +304,28 @@ bool arena_link_net_peer_record(const ArenaNetLink *l, uint64_t *record) {
 void arena_link_net_ended(ArenaNetLink *l) { l->ended = true; }
 
 void arena_link_net_lost(ArenaNetLink *l, const char *why) { breaks(l, why); }
+
+void arena_link_net_hold(ArenaNetLink *l, bool down) { l->held = down; }
+
+/* (the first frame every other seat's game surely had of mine: after the
+ * last hash it sent, which it took up only with my keys to that frame) */
+static uint32_t surely_had(const ArenaNetLink *l) {
+	uint32_t from = l->sent;
+	for (unsigned k = 0; k < l->seats; ++k) {
+		const ArenaNetSeat *s = &l->from[k];
+		if (k == my_seat(l) || (l->gone >> k & 1u)) continue;
+		uint32_t had = s->nhashes ? s->hashes[s->nhashes - 1].frame + 1 : l->link.delay;
+		if (had < from) from = had;
+	}
+	/* (a seat that sent no hash for that long: what is kept, its gap asked for if need be) */
+	return l->sent - from > ARENA_NET_PEER ? l->sent - ARENA_NET_PEER : from;
+}
+
+void arena_link_net_resumed(ArenaNetLink *l) {
+	l->held = false;
+	uint32_t from = surely_had(l);
+	printf("arena: the link back: my keys again from frame %" PRIu32 " (%" PRIu32 " sent)\n", from, l->sent);
+	if (!resend(l, from)) return;
+	for (unsigned k = 0; k < l->seats; ++k)
+		if (k != my_seat(l) && !(l->gone >> k & 1u)) ask(l, k, true);
+}

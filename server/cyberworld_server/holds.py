@@ -7,7 +7,9 @@ identity with the resume bit (hello_resume) takes it back, id and all, so
 the others never see him leave; the trade's last word (done or off) is
 said again to it, as it may have been lost with the link. What was under
 way ends at the drop, as on any leave: a trade not committed is off, a
-NetBattle ends without a result, a spectator's watching stops. A goodbye,
+team bout ends without a result, a spectator's watching stops; but a
+NetBattle of two goes on, held with the place (protocol v21, arena.py),
+and ends when the place is freed. A goodbye,
 a refusal or a moderator's removal frees the place at once; so does a
 HELLO without the resume bit (a new visit from the gate), as a new arrival.
 
@@ -46,11 +48,12 @@ class Holds:
         server = self.server
         server.dive.dropped(player)
         server.trades.left(player)
-        server.arena.left(player.id)
+        hold = not (goodbye or not self.seconds or player.refused)
+        server.arena.dropped(player.id, hold)
         server.teams.left(player.id)
         server.stands.left(player)
         server.social_rules.left(player.id)
-        if goodbye or not self.seconds or player.refused:
+        if not hold:
             self.free(player)
             return
         self.until[player.id] = time.monotonic() + self.seconds
@@ -62,6 +65,10 @@ class Holds:
             return
         del server.players[player.id]
         self.until.pop(player.id, None)
+        # (a NetBattle held with the place ends with it, and its end kept for him goes, v21)
+        server.arena.left(player.id)
+        server.arena.missed.pop(player.id, None)
+        server.parties.let_go(player.id)
         server.trades.done.discard(player.id)
         server.trades.last.pop(player.id, None)
         server.event("leave", id=player.id, players=len(server.players))
@@ -70,6 +77,8 @@ class Holds:
         """`old`'s place given up to a new visit of the same identity (a
         HELLO without the resume bit): no hold, a new trade allowed."""
         self.until.pop(old.id, None)
+        self.server.arena.missed.pop(old.id, None)
+        self.server.parties.let_go(old.id)
         self.server.trades.done.discard(old.id)
         self.server.trades.last.pop(old.id, None)
 
@@ -103,3 +112,5 @@ class Holds:
         word = self.server.trades.last.get(player.id)
         if word and not player.writer.is_closing():
             await websocket.send(player.writer, word)
+        self.server.arena.resumed(player)
+        self.server.parties.resumed(player)
