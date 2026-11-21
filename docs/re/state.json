@@ -216,6 +216,10 @@
     },
     {
       "date": "2026-11-21",
+      "what": "A form of the swap taken off ends the third kind's objects bound to it (RelatedObject1Ptr +0x4C, BN6_T1_PARENT) by their own destroy, CurState BN6_STATE_DESTROYED, as each ends itself at a battle's end (bn6f t3_0x36_80CAB68, sub_80CAB90). Measured over BN6's Navis in Gregar: DiveMan's torpedo launcher (type 0x36, BN6_T3_TORPEDO_LAUNCHER), ElecMan's 0x1A and TomahawkMan's 0x40 lived on under the next form to the battle's end, DiveMan's firing torpedoes under JudgeMan (issue #733); TenguMan's 0x47 and ElementMan's 0x90 ended in 61 and 38 frames. src/emu/battle_swap.c (end_bound); docs/rom/navis.md, A form's own objects; held by tests/scenarios/battle_swap_leftovers.py."
+    },
+    {
+      "date": "2026-11-21",
       "what": "BN6's save (BN6_SAVE_GAME 0x0803F76C, after every trade among others) XORs the RAM 0x02000000-0x0200670F, eEventFlags among it, with a new key's low byte (BN6_SAVE_KEY 0x02001064) while it writes the cartridge, frames long, then back: the engine read the reward pick's flags as the key's bits there and opened a pick over a trader's trade (issue #734; docs/rom/game-state.md, The save's mask). The pick now opens from SetEventFlag's hook alone."
     },
     {

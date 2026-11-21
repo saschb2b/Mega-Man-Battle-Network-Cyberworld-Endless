@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T15:30:00Z
-* **Update**: game/glitch-layer.md (a form's leftovers measured over the pool and the call taken on 21 November 2026, the owner's fifth call to turn over: what a form owns ends with it, what it let fly finishes; issue #733), rom/navis.md (a form's own objects of the third kind, ended with it at the swap by their own destroy), devtools/scenarios.md (a swap's `swapform` and `leftovers` lines), devtools/battle-on-demand.md (the swap step's line for each object ended with its form).
