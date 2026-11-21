@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-21
+* **Update**: online/shared-dive.md (As built: each diver's name over his MegaMan on a dive layer, issue #712), code/online.md (`map_label.c`, the divers' names in `dive_people.c`), devtools/scenarios.md (a dive's `tags N: NAMES` line).
 * **Update**: online/shared-dive.md (a crew's battle joined unasked, issue #715: the decision's row, As built, Open 1), devtools/scenarios.md (a dive's `join` line).
 
 ## 2026-11-19
