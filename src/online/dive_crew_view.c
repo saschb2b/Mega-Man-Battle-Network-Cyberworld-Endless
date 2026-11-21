@@ -145,7 +145,7 @@ void dive_crew_view_describe(FILE *f) {
 	int n = dive_crew_view_rows(w);
 	fprintf(f, "crewview %d\n", n);
 	for (int i = 0; i < n; ++i) {
-		const char *at = !w[i].layer[0] ? "here" : w[i].layer[0] == 'L' ? w[i].layer : w[i].layer[0] == 'H' ? "home" : "battle";
-		fprintf(f, "mate%d %s hp %s at %s\n", i, w[i].full, w[i].hp, at);
+		const char *at = !w[i].layer[0] ? "here" : w[i].layer[0] == 'L' ? w[i].layer + 1 : w[i].layer[0] == 'H' ? "home" : "battle";
+		fprintf(f, "mate%d %s hp %s layer %s\n", i, w[i].full, w[i].hp, at);
 	}
 }

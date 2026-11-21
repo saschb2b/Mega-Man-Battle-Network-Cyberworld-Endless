@@ -37,7 +37,7 @@ void dive_crew_view_bar(int x, int y, int w, const CrewRow *row);
 /* Over the map (at P.core_x, P.core_y) */
 void dive_crew_view_draw(void);
 /* ... in the state's words: `crewview N` (the plates shown) and a line a
- * plate, `mateK NAME hp H/M at Ln|home|battle|here` */
+ * plate, `mateK NAME hp H/M layer D|home|battle|here` */
 void dive_crew_view_describe(FILE *f);
 
 #endif

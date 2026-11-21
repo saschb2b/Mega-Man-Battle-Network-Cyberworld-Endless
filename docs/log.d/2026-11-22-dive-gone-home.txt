@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T23:10:10Z
+* **Update**: online/shared-dive.md (a diver gone home, issue #756: each game says where its MegaMan is, protocol v26; a diver at home drawn on no layer, kept in his crew; the plates say Home and Battle; a party field's HP on the plate), devtools/battle-on-demand.md (the home step).

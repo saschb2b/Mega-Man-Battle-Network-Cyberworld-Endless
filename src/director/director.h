@@ -284,6 +284,8 @@ bool director_map_over(void);
 /* ... on to the next layer, or the next guardian's (arriving in the room
  * before its arena), or to grid panel (x, y) of this one. */
 bool director_dev_next_layer(void);
+/* The run home between acts from a layer, as an act's last exit takes it (a test's step, "home") */
+bool director_dev_home(void);
 bool director_dev_guardian(void);
 bool director_dev_warp_cell(int x, int y);
 /* The director lets go of the game (the real world's tour). */

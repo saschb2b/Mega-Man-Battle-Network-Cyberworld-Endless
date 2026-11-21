@@ -1,10 +1,10 @@
-# Net Square protocol v23
+# Net Square protocol v26
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v23`. The server also
+`/presence` with subprotocol `cyberworld.presence.v26`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -144,6 +144,16 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v26 (issue #756, docs/online/shared-dive.md, A diver gone
+home): **where each diver is.** DIVE `dive_where` (9, three bytes: u8
+`where_layer` 0 on a layer's map, `where_home` 1 at home between acts,
+`where_battle` 2 in a battle; else the connection's ProtocolError) is a
+game's word of where its MegaMan is as it changes. A diver at home is in
+no one's SNAPSHOT (his room kept), forms no crew from the place he left
+and stays in his crew; entering a room is on a layer again. CREW_STATE's
+member grows to 26 bytes with that byte last (111 in all), and a change
+is told as `crew_vitals` is.
 
 Protocol v24 (issue #717, docs/online/shared-dive.md, The crew's
 display): **a crewmate's HP and layer.** DIVE `dive_vitals` (8, six

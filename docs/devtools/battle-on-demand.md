@@ -13,6 +13,11 @@ CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --net-biome x0 --dev qu
 python3 tools/play.py do NAME "battle; wait 200"
 ```
 
+The `home` step (`--input`'s `0:home`, play.py's `home`) sends the run
+home between acts from a layer's map, as an act's last exit does: the next
+layer made, Lan's HP set up and the warp out (a dive's diver gone home in
+`online-crew-view/gone-home`, issue #756).
+
 The `battle` step (`--input`'s `0:battle`, which `300:battle` waits 300
 frames before; play.py's `battle`, beside `place` and `flags`) starts the
 layer's next random battle at the first moment MegaMan stands free on its
