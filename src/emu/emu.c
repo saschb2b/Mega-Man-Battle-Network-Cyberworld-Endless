@@ -219,6 +219,14 @@ int emu_audio_out_rate(void) { return out_rate; }
 uint64_t emu_core_ticks, emu_core_unshown_ticks;
 int emu_core_unshown;
 
+/* (the run's core's frames timed since the start, for a first NetBattle's window: emu.h) */
+static uint64_t timed_ticks, timed_frames;
+
+double emu_core_frame_ms(unsigned *frames) {
+	if (frames) *frames = timed_frames > 0xFFFFFFFFu ? 0xFFFFFFFFu : (unsigned)timed_frames;
+	return timed_frames ? (double)timed_ticks * 1000.0 / (double)SDL_GetPerformanceFrequency() / (double)timed_frames : 0;
+}
+
 static void run_frame(bool unshown) {
 	uint64_t t0 = SDL_GetPerformanceCounter();
 	core->runFrame(core);
@@ -226,6 +234,8 @@ static void run_frame(bool unshown) {
 	if (surveying) ram_survey_frame((uint8_t *)((struct GBA *)core->board)->memory.wram, (uint8_t *)((struct GBA *)core->board)->memory.iwram);
 	uint64_t dt = SDL_GetPerformanceCounter() - t0;
 	emu_core_ticks += dt;
+	timed_ticks += dt;
+	++timed_frames;
 	if (unshown) { emu_core_unshown_ticks += dt; ++emu_core_unshown; }
 	pull_audio();
 }

@@ -18,7 +18,16 @@ generated: { by: claude-code/unrecorded, at: 2026-10-21T13:53:33Z }
   gets 9 or 10, the Nova 7 (rollbench: "the Arena's window 7 from them, 9
   from the battle's"). A battle times its frames and keeps their mean in
   the data folder (`arena.ini`, `frame_us`; `--dev rollbench` keeps its
-  own too), the system's, never carried in a `.cwsave`.
+  own too), the system's, never carried in a `.cwsave`. Before a
+  system's first NetBattle none is kept: the window is then guessed from
+  the run's own core, its frames timed since the game started (in the
+  Square, about 0.45 to 0.50 ms here), a pair frame taken as 2.8 of them
+  (the scenario's battles measured 2.4 to 2.7, rollbench's 2.2 without
+  the pictures), 8 at most; 4 only where no second of frames was timed
+  (issue #180: here, the core at 0.45 to 0.50 ms, a first NetBattle asks
+  with 7 rather than 4, three frames of delay fewer on a link the window
+  covers; with two scenarios running at once the core measured 0.74 to
+  0.78 and the guess was 4, a busy machine guessing small).
 - **The delay asked for** (protocol v8): a challenge or a Yes says the
   game's latency as before (its round trips in the Square, their mean and
   twice their spread) less what its kept window covers (`arena_ask_ms`:
@@ -27,7 +36,17 @@ generated: { by: claude-code/unrecorded, at: 2026-10-21T13:53:33Z }
   of the two in frames: 1 at least, 30 at most. Since issue #167 a game
   says its latency less its window but a frame, the tick a key waits to be
   taken, which the server added for every pair before (2 at least then;
-  [Quicker on the wire](quicker-on-the-wire.md)). So the pair's delay is the larger of the two games' needs:
+  [Quicker on the wire](quicker-on-the-wire.md)). Since issue #180 the
+  server reads each game's need from the path its keys take
+  (`path_delay`): a key goes up half its sender's round trip and down half
+  its receiver's, and the time sync (v11) holds both games' lags at that
+  trip, so a game's need is its latency asked less half its own round
+  trip plus half the other's (the round trips its PINGs say). On a
+  lopsided pair this is less than the longer latency: asks of 10 and 150
+  ms over round trips of 60 and 200 gave delay 10, now 6. Where a game
+  asked 0 (its window covering more than its trip, by how much not said),
+  a round trip is unknown, or the battle has four seats, the longer
+  latency decides as before. So the pair's delay is the larger of the two games' needs:
   a fast desktop near the server asks for 2, a slower system or a long
   link for more, and a frame's keys come late by at most the window of
   the game that asked for the most.
