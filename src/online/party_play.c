@@ -285,6 +285,26 @@ static bool all_here(void) {
 	return true;
 }
 
+/* the battle's record as the field takes it, its list's pointer (its slot's on each game) the field's own (party_core.c's rom_in) */
+static uint64_t record_hash(void) {
+	uint8_t r[PARTY_RECORD_BYTES];
+	memcpy(r, PP.b.record, sizeof r);
+	memset(r + 12, 0, 4);
+	return party_core_bytes_hash(r, sizeof r);
+}
+
+/* what every game of the party must build its field from alike, each part's hash: where two fields go apart, the part */
+static void inputs_said(void) {
+	fprintf(stderr, "party: the field from rom %016llx record %016llx", (unsigned long long)party_core_bytes_hash(PP.run_rom, EMU_ROM_SIZE),
+		(unsigned long long)record_hash());
+	for (unsigned k = 0; k < PP.b.n; ++k) {
+		uint8_t bytes[ONLINE_ARENA_LOADOUT_MAX];
+		size_t n = arena_loadout_pack(&PP.b.seat[k], bytes, sizeof bytes);
+		fprintf(stderr, " seat%u %016llx", k, (unsigned long long)party_core_bytes_hash(bytes, n));
+	}
+	fputc('\n', stderr);
+}
+
 static void open_core(void) {
 	char why[160] = "";
 	/* (the lead's MegaMan is the field's own: with him gone before it was made there is no field) */
@@ -297,6 +317,7 @@ static void open_core(void) {
 	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
 	PP.b.del = PP.dev.del;   /* (partydel=MASK with it: those seats deleted then, the crew's pull-back's test) */
+	inputs_said();
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
 	if (!PP.core) { failed(why); return; }
 	if (!PP.net && PP.dev.twin && !(PP.twin = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why))) {

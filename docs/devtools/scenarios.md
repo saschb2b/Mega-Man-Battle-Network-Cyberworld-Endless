@@ -61,7 +61,7 @@ course:
 | `('moved', WORD, BY)` | ... or the kept line WORD's number moved by BY since: a number (`1`, `-1`), or a kept word with a sign (`'-price'`: down by the price kept), so a purchase is checked against the price the shop showed and not against today's balance |
 | `('restart', START)` | the game quit as a player's system quits it (SIGTERM, the port's close: it saves and leaves), then started again on the same saves |
 | `('server', 'stop')`, `('server', 'start')` | the scenario's server gone at once, and back on its port with its state ([A server and other games](#a-server-and-other-games)) |
-| `('sleep', SECONDS)` | the clock's seconds, the game standing: what the server holds for a time (a crew formed after a second near, issue #714) sees it pass, where a dive's layer runs its frames faster than the clock |
+| `('sleep', SECONDS)` | the clock's seconds: what the server holds for a time (a crew formed after a second near, issue #714) sees it pass, where a dive's layer runs its frames faster than the clock; with a server, no game held meanwhile, each online one running on at the clock's pace and answering the others (a busy crewmate's answer, issue #715) |
 | `('@beta', 'do', COMMANDS)` | any step, in the game `beta` of the scenario's `GAMES` |
 
 `COND` is an until's test of the agents' tools: a state line's first word,

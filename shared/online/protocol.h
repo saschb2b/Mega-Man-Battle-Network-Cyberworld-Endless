@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 22
+#define ONLINE_PROTOCOL_VERSION 23
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v21"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v23"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -197,6 +197,7 @@
 #define ONLINE_CREW_MEMBER_BYTES 23
 #define ONLINE_CREW_BATTLE 5          /* CREW's actions (v20: 1-4, the asks and ways, gone) */
 #define ONLINE_CREW_JOIN 6
+#define ONLINE_CREW_BUSY 7           /* v23: a crewmate's battle offered, this game's MegaMan not free to go in */
 #define ONLINE_CREW_FORMED 3          /* CREW_STATE's stages (v20: 1-2, the asks', gone) */
 #define ONLINE_CREW_SPLIT_UP 4
 #define ONLINE_CREW_OFFER 5

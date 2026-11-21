@@ -39,6 +39,9 @@ typedef struct {
 	int del;                              /* ... and the MegaMen of the seats of this mask deleted then (the dev's partydel), 0 none */
 } PartyBattle;
 
+/* FNV-1a over bytes: a field's inputs told apart in the log (party_play.c) */
+uint64_t party_core_bytes_hash(const void *data, size_t size);
+
 struct mCore;
 typedef struct PartyCore PartyCore;
 

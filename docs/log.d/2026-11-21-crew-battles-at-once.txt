@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T20:20:05Z
+* **Update**: online/shared-dive.md (a crew's battles at once, issue #715: no window, a busy crewmate's answer, how often a crew fights from BN6's odds, the calls taken under the owner's direction of 21 November 2026; the background of a dive's battle chosen with it, the fields that went apart; Open 1 closed), devtools/scenarios.md (the sleep step runs every online game on).

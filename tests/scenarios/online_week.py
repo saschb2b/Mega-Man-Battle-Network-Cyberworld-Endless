@@ -210,6 +210,33 @@ MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
     soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
 ))
 
+# A crewmate busy (BN6's PET open on his map: not free to go in) says so at once (CREW busy, issue #715), so Alpha's
+# battle begins as his own without the window's three seconds: a second of the clock later it is under way, nobody
+# called. Before the busy answer Alpha stood "calling" through the window.
+MANY['crew-battle-busy'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('@beta', 'do', 'press START; wait 40'),
+    ('do', 'battle; wait 10'),
+    ('sleep', 1),                                 # (both games run on at the clock's pace meanwhile)
+    ('expect', 'join=none'),
+    soon('screen=battle', '', 600),
+    ('@beta', 'expect', 'join=none'),
+))
+
+# Far apart, no crew: each battle his own, nobody held.
+MANY['crew-battles-apart'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('@beta', 'do', 'place 600 0 3; wait 5'),
+    ('do', 'place 0 0 3; wait 5'),
+    ('sleep', 2.5),
+    soon('crew=0', '', 600),
+    ('do', 'battle; wait 10'),
+    ('expect', 'join=none'),
+    soon('screen=battle', '', 600),
+    ('@beta', 'expect', 'join=none'),
+    ('@beta', 'expect', 'screen=map'),
+))
+
 # The crew's sign (issue #716): a crewmate's name in the crew's colour (`tags`' NAME*) and a ring under his feet
 # (`rings`), on both games; gone as he walks off and the crew splits; a dotted ring as he comes back within
 # crew_near, the server's second not yet passed (`NAME(forming)`), and the crew's again after it.
