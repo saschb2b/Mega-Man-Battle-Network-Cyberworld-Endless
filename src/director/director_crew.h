@@ -11,6 +11,9 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <stdio.h>
+
+#include "crew_pull.h"
 #include "foes.h"
 
 /* The index on the layer of MegaMan's next random battle: the battles he
@@ -30,11 +33,31 @@ void director_crew_record(const Encounter *e);
 /* BN6's walk toward its next random battle back to none, as a battle's
  * return to the map leaves it; the walk it had */
 int director_crew_steps_reset(void);
+/* A crew's battle's end as the field left it: won, the reward BN6's
+ * results on the field picked, this game's seat and every seat's MegaMan
+ * as the field ended (his HP and max, his dive's pull-back spent, his game
+ * gone), from which each game works out the crew's gifts alike
+ * (crew_pull.h) */
+typedef struct {
+	bool won;
+	uint16_t reward;
+	unsigned seat;
+	CrewPullIn field;
+} CrewOver;
 /* The battle over on the party's core: MegaMan's HP as the field left it
  * written into the run, HP 0 the run over as a deletion ends it; else a
  * battle fought on the layer (its count, the next one rolled), and won,
- * its viruses counted and `reward` given, BN6's results' entry (a chip,
- * zenny, HP or BugFrags; REWARD_NONE nothing) */
-void director_crew_over(const Encounter *e, bool won, int hp, uint16_t reward);
+ * its viruses counted and its reward given, BN6's results' entry (a chip,
+ * zenny, HP or BugFrags; REWARD_NONE nothing). Pulled back by the crew
+ * (issue #718): on the layer with his HP, the dive's pull-back spent and
+ * marked, the battle's viruses and reward not his */
+void director_crew_over(const Encounter *e, const CrewOver *o);
+/* Where the crew's gifts are told: the dive's band (dive_band.c sets it) */
+extern void (*director_crew_band)(const char *line);
+/* Whether this dive's pull-back is spent (its record's: weekly.h) */
+bool director_crew_pull_spent(void);
+/* The last crew's battle's end, in the state's words ("crewend none", or
+ * "crewend won hp 220 pulled" / "... gave 120") */
+void director_crew_describe(FILE *f);
 
 #endif

@@ -22,6 +22,7 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "director_crew.h"
 #include "foes.h"
 
 /* The fight taken over from the staging (dev's partycore, or a party's
@@ -33,7 +34,7 @@ void party_play_on(bool on);
  * then charged shots); partyroll=W over the server the rollback window,
  * partydelay=N the input delay, partylead=1 the enemies' aim on the lead
  * alone as BN6 has it (every game of the party alike) */
-typedef struct { int n, twin, roll, end, bot, delay, lead; } PartyDev;
+typedef struct { int n, twin, roll, end, bot, delay, lead, del; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size and the input delay; the next guardian's fight its */
@@ -43,11 +44,11 @@ void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay
  * (director_crew_battle) and the run's next battle already
  * (director_crew_record); false where it could not be taken over. Whether
  * one is under way; and its end, once, where the field fought it to one:
- * won, this seat's MegaMan's HP, and the reward BN6's results on the field
- * picked (BN6_BATTLE_REWARD) */
+ * won, the reward BN6's results on the field picked (BN6_BATTLE_REWARD)
+ * and every seat's MegaMan as it ended (director_crew.h's CrewOver) */
 bool party_play_crew(const Encounter *e);
 bool party_play_crew_fighting(void);
-bool party_play_crew_end(bool *won, int *hp, uint16_t *reward);
+bool party_play_crew_end(CrewOver *out);
 /* ... a seat of it gone (ARENA_STATE seat_gone) */
 void party_play_gone(unsigned seat);
 /* ARENA_SEAT for it: a seat's MegaMan, keys or hash; false where it is not */

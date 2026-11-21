@@ -116,11 +116,9 @@ void dive_join_frame(const OnlineSnapshot *s) {
 		if (party_play_crew_fighting()) break;
 		/* (fought to its end on the field: a battle of this run's own; else, the field not made, the owner fights it here
 		 * and a joiner is back as he was) */
-		bool won;
-		int hp;
-		uint16_t reward;
-		if (party_play_crew_end(&won, &hp, &reward)) {
-			director_crew_over(&J.e, won, hp, reward);
+		CrewOver over;
+		if (party_play_crew_end(&over)) {
+			director_crew_over(&J.e, &over);
 			dive_splits_fought();
 		}
 		fprintf(stderr, "dive: the crew's battle over, back on the layer\n");

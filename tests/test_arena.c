@@ -419,7 +419,16 @@ static void loadout_bytes(void) {
 	uint8_t again[ONLINE_ARENA_LOADOUT_MAX];
 	assert(arena_loadout_pack(&back, again, sizeof again) == n && !memcmp(again, b, n));
 	assert(arena_loadout_pack(NULL, b, sizeof b) == 2 && arena_loadout_unpack(b, 2, &back, &carried, NULL, 0) && !carried);
+	/* (v22: a shared dive's pull-back spent, the flags' second bit, back as it went; no bit past it) */
+	assert(!back.pulled);
+	l.pulled = true;
 	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(b[1] == 3 && arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && carried && back.pulled);
+	b[1] = 7;
+	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "flags"));
+	l.pulled = false;
+	n = arena_loadout_pack(&l, b, sizeof b);
+	assert(b[1] == 1);
 	assert(!arena_loadout_unpack(b, n - 1, &back, &carried, why, sizeof why) && strstr(why, "size"));
 	b[0] = 1;
 	assert(!arena_loadout_unpack(b, n, &back, &carried, why, sizeof why) && strstr(why, "version"));

@@ -82,6 +82,14 @@ MANY = {
         ('expect', 'weekboard~Dex'),
         ('expect', 'weekboard~7'),
     )),
+    # (a dive pulled back once by its crew marked "*" after its layer, and the mark said; issue #718)
+    'board-marks-a-pull-back': dict(CAST, SERVER=dict(weeks=[('Mira', 7, False, 31, True), ('Dex', 4, False, 12)]),
+                                    STEPS=online.course(
+        online.into_square(),
+        soon('weekboard~Mira:7*'),
+        ('expect', 'weekboard~Dex:4 '),
+        ('expect', 'weekboard~*:pulled back once by the crew.'),
+    )),
     'no-stamp-no-dive': dict(START=online.HOME, SERVER=True, FILES={'netpass.ini': online.SEEN_SQUARE}, NEEDS=(), STEPS=online.course(
         online.into_square(),
         ('expect', 'netpass=square'),
@@ -122,4 +130,69 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     ('do', 'battle; wait 10'),
     soon('join=fighting', 'beta', 900),
     soon('join=fighting', '', 900),
+))
+
+# A crewmate pulled back (issue #718; docs/online/shared-dive.md, A deletion in a crew): on both games of a crew's
+# field the MegaMen of a seat mask are deleted at the battle loop's 20th iteration and its enemies 60 later (partyend,
+# partydel: the same on each, as the field must be), each game's pad the Arena's bot (partybot).
+def pulled(mask):
+    return LOUD.replace('onlinename={name}', 'onlinename={name},partyend=20,partybot=1,partydel=%d' % mask)
+
+
+def crew_fight(start):
+    """Both divers crewed, Alpha's battle joined by Beta, fought to its end on the field."""
+    return dict(CAST, START=start, GAMES={'beta': start}, STEPS=online.course(
+        MANY['dive-together']['STEPS'],
+        ('do', 'battle; wait 10'),
+        soon('join=fighting', 'beta', 900),   # (the battle short: Alpha's may be at its results already)
+        # (BN6's results on each game's own pad, A through them)
+        ('@beta', 'repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+        ('repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ))
+
+
+BETA = pulled(2)   # (seat 1, Beta's: the battle's owner, Alpha, is seat 0)
+# Beta deleted, the crew's win: Beta back on the layer with Alpha's quarter, Alpha's HP the less for it, Beta's
+# pull-back spent and his band saying so; Alpha's free.
+MANY['crew-pulls-back'] = dict(crew_fight(BETA), STEPS=online.course(
+    crew_fight(BETA)['STEPS'],
+    ('@beta', 'expect', 'crewend~won'),
+    ('@beta', 'expect', 'crewend~pulled'),
+    ('expect', 'crewend~gave'),
+    ('@beta', 'expect', 'pullback=spent'),
+    ('expect', 'pullback=free'),
+    ('@beta', 'expect', 'dive=on'),
+    soon('where=layer', 'beta', 600),
+    ('@beta', 'expect', 'hp>0'),
+    soon('band~pulled us back', 'beta', 600),
+))
+# ... and a second deletion: spent, the dive over as alone; Alpha gives nothing.
+MANY['crew-pulls-back-once'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'dive=none', 120),
+    ('repeat', 'press A; wait 20', 'join=none', 120),
+    ('expect', 'crewend~won'),
+    ('expect', 'pullback=free'),
+))
+# The field lost, both deleted: each dive over, as before.
+MANY['crew-lost-ends-both'] = dict(crew_fight(pulled(3)), STEPS=online.course(
+    crew_fight(pulled(3))['STEPS'],
+    soon('dive=none', 'beta', 600),
+    soon('dive=none', '', 600),
+))
+# A quit after the pull-back, and the dive taken up again from the portal: still spent.
+MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    ('@beta', 'restart', BETA),               # (the game closed on the dive, back at Lan's HP)
+    online.into_square('beta'),
+    soon('weekoffer=again', 'beta', 600),
+    online.at('beta', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/', 20)),
+    ('@beta', 'repeat', 'wait 4', 'choice=1/3', 90),   # ("Keep diving", "Start over", "Not now": the first)
+    ('@beta', 'do', 'press A; wait 6'),
+    online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('@beta', 'expect', 'pullback=spent'),
 ))

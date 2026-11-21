@@ -28,6 +28,7 @@ typedef struct {
 	uint16_t hp[PARTY_MOST], max_hp[PARTY_MOST];   /* each MegaMan's HP going in (0: as spawned) */
 	int foe_from, foe_to;           /* the enemy spawning with foe_from HP given foe_to (the guardian's for the party) */
 	int hp_set, end;                /* the spike's: the partners' HP (partyhp), the enemies' HP set to 1 at an iteration (partyend) */
+	int del;                        /* ... and side 0's slots of this mask deleted then (partydel), 0 none */
 	bool spread;                    /* the enemies' aim passed over the party in turn (party_field_aim) */
 	bool own;                       /* each partner his own NaviStats, hand and Custom screen (arena_team_navi.h, arena_team_custom.h) */
 	/* set before each frame */

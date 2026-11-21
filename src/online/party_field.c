@@ -24,6 +24,7 @@
 #define AIM_TURN     240                                           /* the battle loop's iterations each MegaMan in turn draws the enemies' aim */
 
 _Static_assert(SIDE_MOST == PARTY_MOST, "a party is a side's actors");
+#define DEL_ENDS 60   /* partydel's: its enemies deleted so many iterations after its MegaMen */
 
 /* the panels a partner takes on side 0, in order: the back column first,
  * then the middle's free ones (row << 4 | column, as the list writes them) */
@@ -147,6 +148,28 @@ static void hands_watch(PartyField *f, uint32_t tick) {
 	}
 }
 
+/* the dev's partyend: the enemies' HP set to 1 at its iteration; with
+ * partydel the party's MegaMen of its mask deleted then, as a hit would,
+ * and the enemies a second later, so that the battle ends whatever its
+ * foes (a crew's pull-back's test, issue #718) */
+static void dev_end(const PartyField *f, uint32_t tick) {
+	if (tick == (uint32_t)f->end) {
+		for (unsigned k = 0; k < SIDE_MOST; ++k) {
+			uint32_t obj = actor(1, (int)k);
+			if (obj && hook_read16(obj + BN6_T1_HP) > 1) hook_write16(obj + BN6_T1_HP, 1);
+		}
+		for (int k = 0; k < f->standing && k < SIDE_MOST; ++k) {
+			uint32_t gone = f->del >> k & 1 ? actor(0, k) : 0;
+			if (gone) hook_write16(gone + BN6_T1_HP, 0);
+		}
+	}
+	if (f->del > 0 && tick == (uint32_t)f->end + DEL_ENDS)
+		for (int k = 0; k < SIDE_MOST; ++k) {
+			uint32_t obj = actor(1, k);
+			if (obj) hook_write16(obj + BN6_T1_HP, 0);
+		}
+}
+
 /* side 0's copy (r0 0): each partner's keys into his AI data as the copy
  * writes the player's */
 
@@ -173,11 +196,7 @@ static HookAct keys(HookRegs *r, void *user) {
 	}
 	if (tick == 1) first_iteration(f);
 	if (f->own) hands_watch(f, tick);
-	if (f->end > 0 && tick == (uint32_t)f->end)
-		for (unsigned k = 0; k < SIDE_MOST; ++k) {
-			uint32_t obj = actor(1, (int)k);
-			if (obj && hook_read16(obj + BN6_T1_HP) > 1) hook_write16(obj + BN6_T1_HP, 1);
-		}
+	if (f->end > 0) dev_end(f, tick);
 	watch(f, tick);
 	return HOOK_CONTINUE;
 }

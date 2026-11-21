@@ -216,7 +216,7 @@ from scenarios_online import soon
 
 NEEDS = ('bn5', 'bn4')                 # a trade, a NetBattle and the dive take the NetPass's full set
 START = online.HOME                    # Lan's HP after act 2, the gate at {server} as {name}
-SERVER = True                          # or dict(seed=120, weeks=[(name, depth, won, minutes)], settings=dict(capacity=2))
+SERVER = True                          # or dict(seed=120, weeks=[(name, depth, won, minutes[, pulled])], settings=dict(capacity=2))
 GAMES = {'beta': online.HOME}          # other games, started beside the first
 FILES = {'netpass.ini': online.SEEN_FULL}   # into each game's data folder before it starts
 STEPS = online.course(

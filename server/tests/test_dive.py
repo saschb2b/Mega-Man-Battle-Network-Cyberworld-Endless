@@ -545,6 +545,22 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([line.get("party") for line in lines], [5, 0])
 
+    async def test_week_post_carries_the_crews_pull_back(self):
+        a, b = await self.connect("Alpha"), await self.connect("Beta")
+        await a.send(week.post(self.week, self.seed, 7, 3, False, 40, 9, pulled=True))
+        _, _, mine, _, _ = board(await self.until(a, SPEC["week_board"], lambda m: board(m)[1] == 1))
+        self.assertEqual(mine[3], SPEC["week_pulled"])
+        # (ranked with the rest: a deeper dive pulled back above a shallower one that was not)
+        await b.send(week.post(self.week, self.seed, 4, 2, False, 30, 9))
+        _, _, mine, top, _ = board(await self.until(b, SPEC["week_board"], lambda m: board(m)[1] == 2))
+        self.assertEqual((top[0][3], top[1][3], mine[3]), (SPEC["week_pulled"], 0, 0))
+        bad = week.post(self.week, self.seed, 4, 2, False, 40, 9)
+        await b.send(bad[:10] + bytes([8]) + bad[11:])
+        self.assertEqual(await self.notice(b), 25)
+        await asyncio.gather(*self.server.writes)
+        lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
+        self.assertEqual([line.get("pulled") for line in lines], [True, False])
+
     # -- moderation --
 
     async def test_a_moderators_hide_takes_the_traces_too(self):

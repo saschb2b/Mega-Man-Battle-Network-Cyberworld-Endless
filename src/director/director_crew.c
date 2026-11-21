@@ -5,6 +5,7 @@
 
 #include "bn6.h"
 #include "bytes.h"
+#include "crew_words.h"
 #include "chip_entry.h"
 #include "director.h"
 #include "director_layer.h"
@@ -85,13 +86,48 @@ static void give(uint16_t reward) {
 	fprintf(stderr, "crew battle: the reward %04x given in the run\n", reward);
 }
 
-void director_crew_over(const Encounter *e, bool won, int hp, uint16_t reward) {
+void (*director_crew_band)(const char *line);
+
+/* the last crew's battle's end, for the state's words */
+static struct { bool ended, won, pulled; int hp; unsigned gave; } last;
+
+bool director_crew_pull_spent(void) { return weekly_record()->pulled != 0; }
+
+void director_crew_describe(FILE *f) {
+	if (!last.ended) { fprintf(f, "crewend none\n"); return; }
+	fprintf(f, "crewend %s hp %d", last.won ? "won" : "lost", last.hp);
+	if (last.pulled) fprintf(f, " pulled");
+	else if (last.gave) fprintf(f, " gave %u", last.gave);
+	fputc('\n', f);
+}
+
+/* the crew's gifts worked out from the field's seats, alike on every game
+ * (crew_pull.h), and told in the band */
+static CrewPullOut gifts(const CrewOver *o, unsigned me) {
+	CrewPullOut out;
+	crew_pull(&o->field, o->won, &out);
+	for (unsigned k = 0; k < o->field.n && k < CREW_PULL_SEATS; ++k)
+		if (out.pulled[k]) fprintf(stderr, "crew battle: seat %u deleted and pulled back by the crew with HP %u\n", k, out.hp[k]);
+	const char *line = out.pulled[me] ? crew_pull_back_words() : out.gave[me] ? crew_pull_gave_words() : NULL;
+	if (line && director_crew_band) director_crew_band(line);
+	last.ended = true;
+	last.won = o->won;
+	last.pulled = out.pulled[me];
+	last.hp = (int)out.hp[me];
+	last.gave = out.gave[me];
+	return out;
+}
+
+void director_crew_over(const Encounter *e, const CrewOver *o) {
 	emu_encounter_drop();
-	int max = emu_read16(BN6_NAVI_MAX_HP);
+	unsigned me = o->seat < CREW_PULL_SEATS ? o->seat : 0;
+	CrewPullOut out = gifts(o, me);
+	bool pulled = out.pulled[me];
+	int max = emu_read16(BN6_NAVI_MAX_HP), hp = (int)out.hp[me];
 	uint8_t b[2];
 	put16(b, (uint16_t)(hp < 0 ? 0 : hp > max ? max : hp));
 	emu_write(BN6_NAVI_HP, b, sizeof b);
-	/* (deleted: the run over as a deletion ends it alone, the owner's call) */
+	/* (deleted with nobody to pull him back: the run over as a deletion ends it alone, the owner's call) */
 	if (hp <= 0) {
 		fprintf(stderr, "crew battle: MegaMan deleted; the run is over\n");
 		D.lost_to = 0;
@@ -100,10 +136,14 @@ void director_crew_over(const Encounter *e, bool won, int hp, uint16_t reward) {
 	}
 	++D.battles;
 	loot_battle_fought(e);
-	if (won) {
+	/* (pulled back by the crew, once a dive and marked on the Board: the battle's prize stays the standing ones', issue #718) */
+	if (pulled) weekly_pulled();
+	else if (o->won) {
 		for (int i = 0; i < e->nfoes; ++i) run.viruses_deleted += e->foes[i].kind == FOE_VIRUS;
-		give(reward);
+		give(o->reward);
 	}
-	fprintf(stderr, "crew battle: %s, MegaMan's HP %d, the layer's battles %d\n", won ? "won" : "lost", hp, D.battles);
+	fprintf(stderr, "crew battle: %s, MegaMan's HP %d%s, the layer's battles %d\n", o->won ? "won" : "lost", hp,
+		pulled ? ", pulled back by the crew" : "", D.battles);
+	if (out.gave[me]) fprintf(stderr, "crew battle: %u HP given to pull a crewmate back\n", out.gave[me]);
 	roll_encounter();
 }

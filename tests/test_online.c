@@ -7,6 +7,7 @@
 
 #include "netpass.h"
 #include "netpass_text.h"
+#include "crew_pull.h"
 #include "dive_wire.h"
 #include "online_motion.h"
 #include "online_people.h"
@@ -460,14 +461,23 @@ static void week(void) {
 	assert(online_week_board()->serial == 1);
 	/* (a week across a month's end, and a post's bytes) */
 	assert(strstr(square_week_post(WEEK_OFFER_NEW, 2965, 0), "NOV 2-NOV 8"));
-	assert(online_week_post(2963, 0xF521FE36u, 5, 2, false, 12, 0x1234) && sent_size == ONLINE_WEEK_POST_BYTES);
+	assert(online_week_post(2963, 0xF521FE36u, 5, 2, 0, 12, 0x1234) && sent_size == ONLINE_WEEK_POST_BYTES);
 	assert(sent[0] == ONLINE_WEEK_POST && sent[1] == 0x0B && sent[2] == 0x93 && sent[8] == 5 && sent[9] == 2 && sent[10] == 0 && sent[12] == 12);
 	/* (v19: a post's last byte the acts fought in a party, none yet; an entry's bit 1 a party's mark, no bit past it) */
 	assert(ONLINE_WEEK_POST_BYTES == 18 && sent[17] == 0);
 	online_put16(m + 6 + ONLINE_WEEK_ENTRY_BYTES + 16, 10);
 	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = ONLINE_WEEK_PARTY;
 	assert(online_week_mail(m, sizeof m) && online_week_board()->top[0].party && !online_week_board()->top[0].won);
-	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = 4; assert(!online_week_mail(m, sizeof m));
+	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = 8; assert(!online_week_mail(m, sizeof m));
+	/* (v22: a dive pulled back once by its crew, its post's flags and the Board's mark) */
+	assert(online_week_post(2963, 0xF521FE36u, 5, 2, ONLINE_WEEK_PULLED, 12, 0x1234) && sent[10] == ONLINE_WEEK_PULLED);
+	assert(online_week_post(2963, 0xF521FE36u, 10, 4, WEEK_POST_WON | 8u, 12, 0x1234) && sent[10] == 1);
+	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = ONLINE_WEEK_PULLED;
+	assert(online_week_mail(m, sizeof m) && online_week_board()->top[0].pulled && !online_week_board()->top[0].party);
+	s = square_week_board(online_week_board(), 2963, NULL, NULL);
+	assert(strstr(s, "1.Gamma:10*") && strstr(s, "|>*:pulled back once\nby the crew.") && !strstr(s, "|>+:"));
+	m[6 + ONLINE_WEEK_ENTRY_BYTES + 19] = ONLINE_WEEK_PARTY;
+	assert(online_week_mail(m, sizeof m));
 	/* (the Board's v19 posts: the party's mark, who dives now, the week's split records) */
 	static DiveDivers d;
 	static WeekSplits w;
@@ -676,11 +686,49 @@ static void pet_carried(void) {
 	c.traded = 1; assert(pet_carry_sound(&c));
 }
 
+/* ---- a crewmate pulled back (issue #718, crew_pull.h): the owner's calls of 21 November 2026 ---- */
+
+static void crew_pulled(void) {
+	CrewPullOut o;
+	/* (the proposal's example: 600 max HP, two crewmates ending at 480 and 400: they give 120 and 100, he is back with 220) */
+	CrewPullIn in = { .n = 3, .hp = { 480, 0, 400 }, .max_hp = { 600, 600, 500 } };
+	crew_pull(&in, true, &o);
+	assert(o.pulled[1] && o.hp[1] == 220 && o.gave[0] == 120 && o.gave[2] == 100 && o.hp[0] == 360 && o.hp[2] == 300);
+	assert(!o.pulled[0] && !o.pulled[2] && !o.gave[1]);
+	/* (the sum half his max at most: the last gift cut to it) */
+	CrewPullIn rich = { .n = 4, .hp = { 0, 1000, 1000, 1000 }, .max_hp = { 400, 1000, 1000, 1000 } };
+	crew_pull(&rich, true, &o);
+	assert(o.hp[0] == 200 && o.gave[1] == 200 && !o.gave[2] && !o.gave[3] && o.hp[1] == 800 && o.hp[2] == 1000);
+	/* (a giver never deleted by it; 1 HP at least for the fallen) */
+	CrewPullIn poor = { .n = 2, .hp = { 3, 0 }, .max_hp = { 500, 500 } };
+	crew_pull(&poor, true, &o);
+	assert(o.hp[0] == 3 && o.hp[1] == 1 && o.pulled[1] && !o.gave[0]);
+	/* (once a dive, a battle lost, a game gone: as the field ended) */
+	CrewPullIn spent = in;
+	spent.spent[1] = true;
+	crew_pull(&spent, true, &o);
+	assert(!o.pulled[1] && !o.hp[1] && o.hp[0] == 480 && !o.gave[0]);
+	crew_pull(&in, false, &o);
+	assert(!o.pulled[1] && !o.hp[1] && o.hp[2] == 400);
+	CrewPullIn none = { .n = 2, .max_hp = { 500, 500 } };
+	crew_pull(&none, true, &o);
+	assert(!o.pulled[0] && !o.pulled[1] && !o.hp[0] && !o.hp[1]);
+	CrewPullIn gone = in;
+	gone.gone[1] = true;
+	crew_pull(&gone, true, &o);
+	assert(!o.pulled[1] && !o.gave[0]);
+	/* (two fallen: each in seat order, the givers' quarters of what they have left; one just pulled back gives nothing) */
+	CrewPullIn two = { .n = 4, .hp = { 0, 800, 0, 400 }, .max_hp = { 600, 800, 600, 400 } };
+	crew_pull(&two, true, &o);
+	assert(o.hp[0] == 300);
+	assert(o.hp[2] == 225 && o.gave[1] == 350 && o.gave[3] == 175 && o.hp[1] == 450 && o.hp[3] == 225);
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
 	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();
-	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties();
+	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties(); crew_pulled();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
 	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list, the PET's changes carried home and the shared dive's wire passed");
 	return 0;

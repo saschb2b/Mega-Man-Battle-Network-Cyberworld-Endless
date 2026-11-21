@@ -21,7 +21,7 @@ const WeeklyRecord *weekly_record(void) {
 	if (!W_read) {
 		/* (read in the normal slot's name whatever the slot: save_path
 		 * keeps "weekly" names as they are) */
-		if (!save_read_blob("weekly.sav", WEEKLY_MAGIC, &W, sizeof W)) memset(&W, 0, sizeof W);
+		if (!save_read_blob_upto("weekly.sav", WEEKLY_MAGIC, &W, sizeof W)) memset(&W, 0, sizeof W);
 		W_read = true;
 	}
 	return &W;
@@ -105,6 +105,7 @@ bool weekly_dive(uint16_t week, uint32_t seed) {
 	W.week = week;
 	W.seed = seed;
 	W.running = 1;
+	W.pulled = 0;
 	record_write();
 	fprintf(stderr, "weekly: a dive of week %u begun (seed %08x)\n", week, seed);
 	/* (the week's portal warps MegaMan into the Deep Net's first layer, never
@@ -159,6 +160,7 @@ void weekly_ended(bool won) {
 		W.r_won = won && depth == SHORT_LAYERS;
 		W.r_minutes = (uint16_t)minutes;
 		W.r_hash = weekly_hash(W.seed, depth, act, W.r_won, minutes, run.bosses_beaten, run.viruses_deleted);
+		W.r_pulled = W.pulled;
 		W.pending = 1;
 	}
 	if (W.b_week != W.week) W.b_depth = 0;
@@ -190,6 +192,14 @@ void weekly_leave(void) {
 bool weekly_normal_saved(void) {
 	weekly_leave();
 	return save_exists();
+}
+
+void weekly_pulled(void) {
+	weekly_record();
+	if (!save_slot_weekly() || W.pulled) return;
+	W.pulled = 1;
+	record_write();
+	fprintf(stderr, "weekly: the dive's pull-back spent\n");
 }
 
 void weekly_posted(void) {
