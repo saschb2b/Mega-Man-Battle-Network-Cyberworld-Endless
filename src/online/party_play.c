@@ -74,6 +74,9 @@ static struct {
 	bool alone;                   /* the link broken: every other seat gone */
 	uint64_t mine_ready;
 	bool crew;                    /* a crew's random battle (party_play_crew), not a guardian's */
+	/* this game's own link through a drop (issue #180): down since (SDL ticks, 0 up), the resumes seen, my session, the leave said */
+	uint32_t down_since, resumes, me;
+	bool leave_said;
 } PP;
 
 /* A crew's battle's end, kept for party_play_crew_end */
@@ -200,6 +203,10 @@ void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay
 	arena_link_net(&PP.link, battle, 0, PP.delay, out, NULL);
 	PP.delay = PP.link.link.delay;
 	arena_link_net_party(&PP.link, PP.seat, PP.b.n);
+	OnlineSnapshot snap;
+	online_transport_snapshot(&snap);
+	PP.resumes = snap.resumes;
+	PP.me = snap.player_id;
 	fprintf(stderr, "party: battle %u, seat %u of %u, delay %u (START said %u), a guess %u frames at most\n", (unsigned)battle, PP.seat, PP.b.n, PP.delay,
 		delay, PP.window);
 }
@@ -237,6 +244,13 @@ bool party_play_mail(const uint8_t *m, size_t n) {
 }
 
 bool party_play_held(void) { return PP.stage != PP_NONE; }
+
+void party_play_describe(FILE *f) {
+	if (!PP.started || !PP.net) return;
+	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
+	fprintf(f, "party %s frame %u\npartyagreed %u\npartylink %s\n", (unsigned)PP.stage < 6 ? stages[PP.stage] : "other",
+		(unsigned)(PP.core ? party_core_frames(PP.core) : 0), PP.agreed, PP.alone ? "alone" : PP.down_since ? "down" : "up");
+}
 
 /* ---- the fight's frames ---- */
 
@@ -500,9 +514,45 @@ static uint16_t word_of(unsigned seat, uint32_t pad, uint32_t tick) {
 	return party_turn_word(PP.core, PP.run_rom, seat, keys, PP.dev.bot != 0);
 }
 
+/* this game's own link down mid-fight (issue #180, docs/online/shared-dive.md,
+ * A drop): nothing goes in the outbox and the field waits on the others'
+ * keys while the transport tries again every half second; back in the same
+ * session (the server holding the seat, party.py), my keys go again and
+ * theirs are asked for. Down past HELD_MS, or back in another session, the
+ * others are let go of and this game fights on alone, as decided; its
+ * leave said once the link is back, so the others need not wait out the
+ * seat's hold. True where the fight waits on the link */
+#define HELD_MS 10000   /* (the server holds the seat 12 seconds, party.py's SEAT_HOLD) */
+static bool held_through(void) {
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	uint32_t now = SDL_GetTicks();
+	bool down = !s.error[0] && (!s.connected || s.reconnecting);
+	arena_link_net_hold(&PP.link, down);
+	if (s.error[0] && !PP.alone) alone("the link to the server is gone");
+	if (down) {
+		online_transport_hurry();
+		if (!PP.down_since) fprintf(stderr, "party: the link dropped at frame %u; holding on\n", (unsigned)party_core_frames(PP.core));
+		if (!PP.down_since) PP.down_since = now | 1u;
+		if (now - PP.down_since > HELD_MS && !PP.alone) alone("the link stayed down");
+		return !PP.alone;
+	}
+	PP.down_since = 0;
+	if (s.resumes == PP.resumes) return false;
+	PP.resumes = s.resumes;
+	if (s.player_id != PP.me && !PP.alone) alone("back in another session");
+	else if (!PP.alone) arena_link_net_resumed(&PP.link);
+	if (PP.alone && !PP.leave_said) {
+		uint8_t m[ONLINE_ARENA_BYTES];
+		PP.leave_said = online_transport_send(m, arena_wire_action(m, ARENA_ACT_LEAVE, PP.battle, 0, 0));
+	}
+	return false;
+}
+
 static void fight_frame(uint32_t pad) {
 	/* (the dev's game alone: the bot's clock the field's frames, as no keys are sent) */
 	uint16_t mine = word_of(PP.seat, pad, PP.net ? PP.tick : party_core_frames(PP.core));
+	if (PP.net && held_through()) return;
 	if (!PP.net || PP.alone) {
 		uint16_t keys[PARTY_MOST] = { 0 };
 		keys[PP.seat] = mine;

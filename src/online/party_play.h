@@ -19,6 +19,7 @@
 #define CW_PARTY_PLAY_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -55,6 +56,10 @@ bool party_play_mail(const uint8_t *m, size_t n);
 
 /* While its fight runs: the run's core held, this its frame and picture */
 bool party_play_held(void);
+/* the state's lines while a party's field is fought over the server
+ * (tools' scenarios): "party" its stage and frame, the hashes agreed, and
+ * this game's own link through a drop (up, down, alone; issue #180) */
+void party_play_describe(FILE *f);
 void party_play_frame(uint32_t pad);
 void party_play_draw(void);
 

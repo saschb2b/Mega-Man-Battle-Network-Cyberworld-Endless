@@ -55,5 +55,9 @@ uint8_t online_transport_roms(void);
  * the socket closed now without a goodbye, as a lost network leaves it,
  * and each try again failing for `ms`; a native system's worker only */
 void online_transport_cut(uint32_t ms);
+/* A battle held through a dropped link waits on it (issue #180): the
+ * tries again every half second for the next second, not the 0.5, 1, 2
+ * and 4 seconds' backoff; said each frame while it waits */
+void online_transport_hurry(void);
 
 #endif

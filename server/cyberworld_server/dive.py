@@ -233,6 +233,8 @@ class Dive:
     def dropped(self, player):
         """A diver's session ended (holds.py): out of the dive, and standing in no room while his place is held."""
         if player.id in self.of:
+            # (his party seat held a while first: a short drop ridden out, issue #180)
+            self.server.parties.hold(player.id)
             self.gone(player)
             player.channel = 0
 

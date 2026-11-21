@@ -28,15 +28,27 @@ ARENA_SEAT, as a 2v2's does; a linked fighter's PARTY_DAMAGE goes to seat
 Seat 0 reports with ARENA_STATUS and ends the battle with ARENA over
 (everyone told ended); a seat's leave or drop is told to the others
 (ARENA_STATE seat_gone, its side byte the seat) and the battle goes on
-for the rest, each game finishing its own (the owner's call). A door's
+for the rest, each game finishing its own (the owner's call). A drop is
+ridden out first (issue #180, docs/online/arena/dropped-link.md): a seat
+whose diver's link dropped without a word is held SEAT_HOLD seconds, the
+others' games waiting on his keys as on a slow link, and his resume
+within them takes it back, what was said to him meanwhile said again;
+past them it is gone as on a leave. A door's
 battle over with seat 0's report naming the first side the winner is the
 feed's "guardian down" with the party's size. The stands do not show
 party battles yet."""
+
+import time
 
 from . import protocol, websocket
 from .arena import ENDED, LEAVE, OVER, START, delay_for
 
 SPEC = protocol.SPEC
+# A seat held through its diver's dropped link (issue #180): the game fights
+# on alone after 10 seconds down (src/online/party_play.c, HELD_MS), a
+# resume within them takes the seat back; two more cover the server noticing
+# the drop late
+SEAT_HOLD = 12.0
 
 
 class Queue:
@@ -50,6 +62,7 @@ class Battle:
         self.id, self.seats, self.forms = battle_id, list(seats), forms
         self.key, self.guardian = key, guardian
         self.gone = set()       # seats left or dropped
+        self.away = {}          # seats held through a dropped link: player id -> monotonic deadline
         self.status = None      # seat 0's last report (ARENA_STATUS)
 
     def here(self):
@@ -63,6 +76,7 @@ class Parties:
         self.in_queue = {}      # player id -> layer key
         self.battles = {}       # battle id -> Battle
         self.seat_of = {}       # player id -> battle id
+        self.missed = {}        # player id -> what was said to his held seat while his link was down
 
     def fighting(self, player_id):
         return player_id in self.seat_of
@@ -83,6 +97,13 @@ class Parties:
         player = self.server.players.get(player_id)
         if player and not player.writer.is_closing():
             player.writer.write(websocket.frame(message))
+        elif player and self.away_in(player_id):
+            self.missed.setdefault(player_id, []).append(message)
+
+    def away_in(self, player_id):
+        """His seat's battle where it is held through his dropped link, else None."""
+        battle = self.battles.get(self.seat_of.get(player_id))
+        return battle if battle and player_id in battle.away else None
 
     async def handle(self, player, data):
         action, door = protocol.read_queue(data)
@@ -204,10 +225,16 @@ class Parties:
             self.battles.pop(battle.id, None)
 
     def end(self, battle):
+        # (a seat held through a drop hears every other seat gone on his resume, then the end: his game finishes its own)
+        for player_id in battle.away:
+            for seat, other in enumerate(battle.seats):
+                if other != player_id:
+                    self.state(battle, player_id, SPEC["arena_seat_gone"], seat, other)
+        for player_id in battle.here():
+            self.state(battle, player_id, ENDED)
         self.battles.pop(battle.id, None)
         for player_id in battle.here():
             self.seat_of.pop(player_id, None)
-            self.state(battle, player_id, ENDED)
         self.server.daily.count("battles_finished")
         if battle.guardian and battle.status and battle.status[8] == 1:
             leader = self.server.players.get(battle.seats[0])
@@ -260,8 +287,40 @@ class Parties:
         self.leave(player_id)
 
     def left(self, player_id):
-        """A diver out of the dive or the server: his queue left, his seat gone."""
+        """A diver out of the dive or the server: his queue left, his seat gone (held where his link dropped)."""
         self.leave(player_id, told=player_id in self.server.players)
         battle = self.battles.get(self.seat_of.get(player_id))
-        if battle:
+        if battle and player_id not in battle.away:
             self.seat_gone(battle, player_id)
+
+    # -- a seat through a dropped link (issue #180) --
+
+    def hold(self, player_id):
+        """His link dropped: his seat in a party battle under way held SEAT_HOLD seconds."""
+        battle = self.battles.get(self.seat_of.get(player_id))
+        if battle and player_id in battle.here() and len(battle.here()) > 1:
+            battle.away[player_id] = time.monotonic() + SEAT_HOLD
+            self.server.event("party_held", id=player_id, battle=battle.id)
+
+    def resumed(self, player):
+        """His place taken back: his seat too, what was said to it meanwhile said again."""
+        battle = self.away_in(player.id)
+        if battle:
+            del battle.away[player.id]
+        for message in self.missed.pop(player.id, []):
+            self.tell(player.id, message)
+
+    def let_go(self, player_id):
+        """His seat's hold over (its time, or his place freed): gone as on a leave."""
+        self.missed.pop(player_id, None)
+        battle = self.away_in(player_id)
+        if battle:
+            del battle.away[player_id]
+            self.seat_gone(battle, player_id)
+
+    def expire(self, now):
+        for battle in list(self.battles.values()):
+            for player_id, deadline in list(battle.away.items()):
+                if now >= deadline:
+                    self.server.event("party_let_go", id=player_id, battle=battle.id)
+                    self.let_go(player_id)

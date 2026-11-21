@@ -607,6 +607,7 @@ class Server:
                 self.teams.expire(now)
                 self.transfers.prune()
             self.holds.expire(now)
+            self.parties.expire(now)
             self.stands.pump(now)
             self.crews.pump(now)
             self.dive.pump(now)
