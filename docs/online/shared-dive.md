@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:31:16Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -172,13 +172,63 @@ points to, and is his to turn over.
 | At home | No places are sent from Lan's HP: the crew stays as it was as its divers left the layer, and the fork's hold is dropped (above) | The fork's hold kept for those who came home together |
 | Strangers | Anyone near is a crew, strangers too; walking away is the way to stay alone, and a switch for it waits for the next test to show it is needed | A setting to stay alone now; crews only between friends |
 | The chat | "Team up,Lan?" and "Split up,Lan?" gone, and A on a diver does nothing of the crew's | Kept to hold a crew over a distance |
-| What is said | Nothing at a forming or a split: the ring around a crew (#716) and its display (#717) show it, the log says it (`dive: crew now: ...`) | "Alright! We're a team with Beta!" at every forming, which would fill the band |
+| What is said | Nothing at a forming or a split: the crew's sign (#716, [below](#the-crews-sign-21-november-2026)) and its display (#717) show it, the log says it (`dive: crew now: ...`) | "Alright! We're a team with Beta!" at every forming, which would fill the band |
 
 The fairness rule is untouched: a crew shares battles and company, never
 a chip, HP, zenny or a layer. Systems without the one field (the New 3DS,
 the PSP) are in crews as anyone and are never offered their battles. The
 statistics' `deepnet-together` keeps counting the biggest crew a dive
 saw, now one formed by nearness rather than asked for.
+
+## The crew's sign (21 November 2026)
+
+Crews form and split by nearness and nothing is said when they do
+(above), so a layer has to show who is in MegaMan's crew (issue #716,
+from the testers' idea of a circle round a crew). The game-design
+skill's pass, under the owner's direction of 21 November (always clear
+who is with you):
+
+- **Dialectic: together against ahead,** made visible: the sign is the
+  feedback of walking beside someone, and its dotted form the
+  feedforward of what one more step does.
+- **Loop layer: the moment on a layer,** where the next battle is
+  fought together or alone by who wears the sign.
+- **Patterns:** party members marked by colour and a ground ring under
+  each (Diablo and Path of Exile's party, an MMO's group), never by
+  colour alone (the interface layer's readability floor); the shape is
+  the ring, the colour says which crew.
+- **BN6 has none:** a map of BN6 holds one Navi, and no sign of a party
+  or a group is drawn on it (assumed; searched in bn6f: the map
+  scripts' effect commands are the PET's, the scenario effects (the
+  Soul weapons' counter, Mr. Weather's rainbow gauge) and the
+  minigames'; nothing of a ring, circle or marker among its constants).
+  So the sign is ours to draw, over the game's picture.
+
+What is drawn (`dive_people.c`, `floor_ring.c`, the colour in
+`crew_look.h`):
+
+- **A crewmate's name in the crew's colour,** the PET's information
+  box's green (`CREW_COLOUR`), the others' white. The marks on a
+  party's field read the same value.
+- **A ring on the floor under each crewmate's feet,** in that green,
+  two pixels wide with a dark edge round it, so it reads on a light
+  floor, a dark one and a green one; its back is left out where his body stands, so it lies round his
+  feet rather than across his legs.
+- **A dotted ring under a diver within the radius a crew forms in**
+  (`DIVE_CREW_NEAR`, read from `dive_crew.h`) while the server's second
+  has not yet passed and the crew has a place: about to be one.
+- Nothing over BN6's chat box: a ring's rows under its top are left out
+  while it is open, as the names are.
+
+Each call was taken under the owner's direction of 21 November 2026 by
+the session building it, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| The sign | The crew's colour on the names and a ring under each crewmate (the issue's options 1 and 3) | A ring at the radius round MegaMan (option 2): the radius, four panels, is an ellipse some 360 by 180 pixels in BN6's projection, wider and taller than the 240 by 160 picture, so it shows only as arcs in its corners, and a diver the picture shows at all stands within it; tried and looked at. One of BN6's effects as an object (option 4): an NPC slot each, which a layer has few of |
+| The colour | One crew colour, the PET's green, the player's own the cursor's orange on a party's field | A colour of each crew's own (a crew is MegaMan's alone on his screen: others' crews are not shown) |
+| About to be | A dotted ring for the second before a crew forms | No sign until it has (a crew appearing from nothing) |
+| Others' crews | Not shown: only MegaMan's own crew wears the sign | Every crew on the layer in its own colour (the server tells each diver his own crew alone) |
 
 ## As built
 
@@ -607,9 +657,10 @@ colour.
   their seat's digit after them; a seat with no name (the dev's stood-in
   partners) is "P1" to "P4", the Arena's marks. Centred under his feet.
 - **The player's own** in the PET cursor's orange behind its arrow, so
-  it does not rest on colour alone; the others in the crew's colour, white until a crew has one of its own
-  ([issue #716](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/716):
-  `CREW_COLOUR` in `src/online/party_marks.c`).
+  it does not rest on colour alone; the others in the crew's colour,
+  the PET's green, as their names on a layer
+  ([The crew's sign](#the-crews-sign-21-november-2026): `CREW_COLOUR`
+  in `src/online/crew_look.h`).
 - **A partner's HP his own.** BN6's HP box shows side 0's first actor,
   the lead, on every game of the field; a partner sees his own over it,
   as a two-a-side's partner does (`arena_team_view_hp`).

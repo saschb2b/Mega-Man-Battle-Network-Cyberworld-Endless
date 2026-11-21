@@ -14,6 +14,8 @@
 
 /* BN6's displayed camera (false: none to read, no map showing). */
 bool map_label_camera(int camera[3]);
+/* The picture's point where one who stands at (x, y, z) has his feet. */
+void map_label_floor(int x, int y, int z, const int camera[3], int *px, int *py);
 /* The picture's point over the head of one who stands at (x, y, z). */
 void map_label_at(int x, int y, int z, const int camera[3], int *px, int *py);
 /* Whether a label at that point shows: inside the picture, off its top

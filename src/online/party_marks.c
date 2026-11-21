@@ -8,6 +8,7 @@
 
 #include "arena_team_view.h"
 #include "bn6.h"
+#include "crew_look.h"
 #include "gfx.h"
 #include "online_transport.h"
 #include "online_visit.h"
@@ -22,8 +23,7 @@
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
 
-/* the crew's colour, the partners' names in it (#716 gives a crew its own) */
-#define CREW_COLOUR LOOK_TEXT
+/* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
 
 _Static_assert(ONLINE_SEATS == PARTY_MOST, "a party's seats are START's");

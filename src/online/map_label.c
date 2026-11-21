@@ -22,11 +22,16 @@ bool map_label_camera(int camera[3]) {
 	return true;
 }
 
-void map_label_at(int x, int y, int z, const int camera[3], int *px, int *py) {
+void map_label_floor(int x, int y, int z, const int camera[3], int *px, int *py) {
 	/* BN6's overworld projection (bn6f sub_300631C), including the
 	 * displayed camera rather than assuming MegaMan stays centered. */
 	*px = 120 + x - camera[0] + y - camera[1];
-	*py = 82 + (y - camera[1] - x + camera[0]) / 2 - z + camera[2] - HEAD;
+	*py = 82 + (y - camera[1] - x + camera[0]) / 2 - z + camera[2];
+}
+
+void map_label_at(int x, int y, int z, const int camera[3], int *px, int *py) {
+	map_label_floor(x, y, z, camera, px, py);
+	*py -= HEAD;
 }
 
 bool map_label_shown(int px, int py) { return px >= 0 && px < EMU_W && py >= TOP && py <= EMU_H - FOOT; }
