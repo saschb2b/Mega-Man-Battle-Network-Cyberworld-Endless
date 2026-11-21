@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T22:00:00Z
-* **Update**: online/arena/dropped-link.md (a party's field and a crew's battle ride out a drop: the seat held 12 seconds, the game alone past 10; the transport's tries every half second while a battle waits, a 4-second cut now a 4-second wait).
