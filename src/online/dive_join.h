@@ -1,9 +1,9 @@
 /* The shared dive's join-in battles (issue #589; docs/online/shared-dive.md,
- * As built): a random battle BN6 rolls for MegaMan with a crewmate near
- * (within a few panels, the room's SNAPSHOT) is held back (encounter.h's
+ * As built): a random battle BN6 rolls for MegaMan in a crew (who stands
+ * near, the server's, dive_crew.h) is held back (encounter.h's
  * emu_encounters_offer) and offered (CREW battle, its index on the layer);
- * a crewmate near whose game gets the offer, MegaMan free on the map,
- * jumps in at once, unasked (CREW join; issue #715: walking close is the
+ * a crewmate whose game gets the offer, MegaMan free on the map, jumps in
+ * at once, unasked (CREW join; issues #714 and #715: walking close is the
  * yes, walking apart the no). The server's START takes
  * every game in into one field (party_play_crew), the battle made alike
  * from the layer's seed and its index (director_crew_battle), each
@@ -21,9 +21,9 @@
 #include "online_types.h"
 
 void dive_join_reset(void);
-/* Each frame of the dive: the rolls held while a crewmate stands near, a
+/* Each frame of the dive: the rolls held while MegaMan is in a crew, a
  * held one offered, the offer's window, the battle's end. */
-void dive_join_frame(const OnlineSnapshot *s);
+void dive_join_frame(void);
 /* The pad's keys: none while MegaMan waits on the crew's answer or on his
  * join's start. */
 uint32_t dive_join_keys(uint32_t keys);

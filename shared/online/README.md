@@ -1,10 +1,10 @@
-# Net Square protocol v19
+# Net Square protocol v20
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v19`. The server also
+`/presence` with subprotocol `cyberworld.presence.v20`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -51,8 +51,8 @@ side is behind, rather than a refused upgrade (v10).
 | DIVE_PLACE (44) | server → client | v19, a split's answer: u8 battle index, u8 party size, u16 the tenths sent, u16 their place among this week's busts of that battle at that size (each identity's quickest), u16 how many busted it, u16 the quickest's tenths, 16-byte his name (27 bytes) |
 | DIVE_FEED (45) | server → client | v19: u8 kind (`feed_deleted` 1, `feed_won` 2, `feed_guardian` 3 a party's guardian down, `feed_flare` 4 a diver waits at a door), 16-byte name, u8 depth, u8 side, u8 way (a flare's: the door's), u16 cause (a deletion's), u8 party size (a guardian's: 2..4; else 0): 24 bytes |
 | DIVERS (46) | server → client | v19: u16 how many dive now, u8 count (0..`divers_most`, 16), then 19 bytes a diver, the deepest first: 16-byte name, u8 depth, u8 act, u8 flags (bit 0 `divers_fighting`, in a party battle) |
-| CREW (47) | client → server | v19: u8 action (1 `crew_ask`, 2 `crew_answer`, 3 `crew_split` (or an ask taken back), 4 `crew_way`, 5 `crew_battle`, 6 `crew_join`), u32 reference (the diver asked, the asker, 0, 0, 0, the battle's owner), u8 value (an answer's 1 yes; a battle's its index on the layer; else 0), u8 depth, u8 side, u8 way (`crew_way`'s: the fork's portal he stands on, depth 0 none): 10 bytes |
-| CREW_STATE (48) | server → client | v19: u8 stage (1 `crew_asked`, 2 `crew_waiting`, 3 `crew_formed` (the crew as it stands, its ways), 4 `crew_split_up`, 5 `crew_offer` a crewmate's battle offered, 6 `crew_alone` the battle's owner fights alone), u32 the other (asked: the asker; waiting: the one asked; split: who split; offer: the owner), u8 value (an offer's battle index), then four members, zeros past them: u32 session, 16-byte name, u8 depth, u8 side, u8 way (23 bytes each; 99 in all) |
+| CREW (47) | client → server | v19: u8 action (5 `crew_battle`, 6 `crew_join`; v20: 1-4, v19's ask, answer, split and way, gone), u32 reference (a battle's 0, a join's the battle's owner), u8 value (a battle's its index on the layer; a join's 0), three zero bytes (v19's way): 10 bytes |
+| CREW_STATE (48) | server → client | v19: u8 stage (3 `crew_formed` the crew as it stands, 4 `crew_split_up` the recipient in none, 5 `crew_offer` a crewmate's battle offered, 6 `crew_alone` the battle's owner fights alone; v20: 1-2, the asks', gone), u32 the other (formed: who came or went; split: who went; offer: the owner), u8 value (an offer's battle index), then four members in the order they came, zeros past them: u32 session, 16-byte name, three zero bytes (v19's way) (23 bytes each; 99 in all) |
 | QUEUE (49) | client → server | v19: u8 action (1 `queue_join`, 2 `queue_leave`, 3 `queue_start`, 4 `queue_pass`), u8 depth, u8 side, u8 way (a join's door: his layer's; else zeros): 5 bytes |
 | QUEUE_STATE (50) | server → client | v19: u8 stage (1 `queue_waiting`, 2 `queue_started`, 3 `queue_out`, 4 `queue_alone`), u8 depth, u8 side, u8 way, u8 the recipient's place (1 the leader, 0 none), u8 count, then four entries, zeros past them: u32 session, 16-byte name, u8 flags (bit 0 `queue_arena`, his system runs the Arena): 21 bytes each, 91 in all |
 | PARTY_DAMAGE (51) | client → server → seat 0 | v19, a linked fighter's: u32 battle ID, u16 his damage to the guardian so far, u16 his HP (9 bytes); seat 0 hears it as ARENA_SEAT, the sender's seat first |
@@ -144,6 +144,26 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v20 (issue #714, docs/online/shared-dive.md, Crews by nearness):
+**a crew is who stands near, never asked for.** The server settles each
+dive room's crews at every tick from its divers' STATE (a place counted
+once it was sent in the room the diver stands in): two divers within
+`crew_near` (128 world units, four panels) of each other for
+`crew_form_ms` (1000) are a crew, or join the one either stands with
+where it holds fewer than `party_most`; two crews that meet become one
+where both fit, the older taking the other's; the pairs near longest go
+first, so a fifth stays outside a crew of four. A crew holds by chains:
+its core is the largest part of its members in one room each within
+`crew_far` (192) of another of it, ties to the part with its first
+member; a member out of the core for `crew_split_ms` (2000) in its room,
+or `crew_away_ms` (10000) in another (a portal taken first), is out, and
+a crew of one is none. A diver leaving the dive, his session or ending
+his dive is out at once. CREW_STATE formed goes to every member at each
+change, split up to each diver who is in none any more. CREW's ask,
+answer, split and way (1-4) and CREW_STATE's asked and waiting (1-2)
+are gone, and their way bytes are zeros; a v19 game is told which side
+is behind, as ever.
 
 Protocol v18 (docs/online/netpass.md, A system with room for one game):
 **a full pass is every game the system can read.** A system that reads
@@ -493,7 +513,7 @@ queue is a flare to every diver of the week behind him in the same act
 depth, side and way with it. DIVERS goes to every session after each
 WELCOME and, where it changed, at most every `divers_ms` (2000).
 
-**Crews** (`crews.py`), modelled on TEAM: an ask only to a diver of the
+**Crews** (`crews.py`; since v20 by nearness, above), as v19 had them, modelled on TEAM: an ask only to a diver of the
 same room (NOTICE 17 otherwise; 16 where an ask is out already; 34,
 `notice_crew`, where the other is in a crew or the crew holds
 `party_most`), answered within 30 seconds; any member asks. A crew lasts
