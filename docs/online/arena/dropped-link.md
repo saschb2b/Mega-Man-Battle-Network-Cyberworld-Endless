@@ -1,0 +1,87 @@
+---
+type: Engine Mechanism
+title: "A NetBattle through a dropped link"
+description: "A NetBattle of two that survives a dropped link (issue #180, protocol v21): the server holds the battle with the place, each game keeps its keys and asks for the ones the link lost (ARENA_HASH's 0xFFFFFFFC), the battle fought to its end with every hash agreeing."
+tags: [online, arena, netcode]
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
+---
+
+# A NetBattle through a dropped link
+
+Issue #180's first slice (the owner's direction of 21 November 2026: a
+hiccup of the link must not end a session). Before it, a NetBattle ended
+the moment either game's link dropped: the game broke its battle link as
+soon as its transport said it was down, and the server ended the battle
+when it noticed the drop, though both kept the player's place in the
+Square for 40 seconds and the transport took it back ([A dropped
+link](../square/dropped-link.md), issue #153). Now a NetBattle of two goes
+on through the drop, on every system that has NetBattles (the desktops,
+Android, iOS, the browser, the Switch, the Vita, the PS4 and PS5; the New
+3DS and the PSP offer none): the same battle, the same frame, nothing
+redone.
+
+**What each part does** (protocol v21, `shared/online/README.md`):
+
+- *The server* (`arena.py`'s `dropped`, `holds.py`) holds a NetBattle of
+  two under way with its player's place: the other game is told
+  nothing, and what it sends meanwhile is lost with the link. A resume
+  takes the place back and the battle with it (the same battle ID, side
+  and delay; the relay finds the player by his session ID, which the
+  resume keeps). The place freed after its 40 seconds ends the battle for
+  the other; an end that came while he was away (the other left, the
+  battle over) is sent again after his resume's WELCOME. A team bout, a
+  2v2 and a party's battle still end at the drop.
+- *The game's battle link* (`arena_link_net.c`) keeps the keys it sent
+  (512 frames) and sends from the first not yet in the outbox, so an
+  outbox that refuses them while the link is down only holds them back.
+  A stream that comes with a gap is no longer broken: the keys past the
+  gap are dropped and the first missing asked for again (ARENA_HASH's
+  frame 0xFFFFFFFC, `ARENA_NET_HAVE`: the frame, and whose seat's), at
+  most every half second while the gap lasts; keys that come again from
+  frames already taken are taken from the first new one.
+- *The game in the Square* (`square_arena.c`'s `through_a_drop`): while
+  the transport tries again, nothing goes in the outbox and the battle
+  waits on the other's keys as on any slow link (the link's badge, then
+  the stall's note: [The way in, the battle and the
+  result](from-square/way-in.md)). Back in the same session, it sends its
+  own keys again from the frame after the other's last hash, all the
+  other surely had (a game sends a frame's hash only once it has run that
+  frame with both players' keys), and asks for the other's from the first
+  it lacks. Back in another session (a server started afresh, which
+  holds nothing), the battle stops as before.
+
+The stall's end, 20 seconds of waiting, is unchanged and still bounds
+the drop: the transport notices a dead socket at once and a silent one
+after 8 seconds, then tries again after half a second, a second, two
+and four, so a drop of up to some ten seconds comes back inside it. The
+other player can leave the wait with B once it offers it, as ever.
+
+**Tested.** `tests/test_arena.c` plays two network links back to back
+through a pipe that loses both ways' messages for three ticks, then
+holds one side's outbox for the rest of a 40- and a 180-tick drop, then
+resumes it: every frame either side runs sees both sides' true keys, and
+the asks and resends are counted. `server/tests/test_holds.py` holds a
+battle through a drop, relays both ways after the resume, ends it with
+the hold and says a missed end again. The scenario
+`online-arena/link-drops-mid-battle` cuts the second game's own link for
+four seconds in the middle of a NetBattle (the dev step `reconnect cut
+4`, [The Net Square: two games at
+once](../../devtools/net-square.md)): both games fight it to its end, the
+result on both cards.
+
+**Measured** (21 November 2026, this machine, the host build headless,
+BN6, BN5 and BN4, two games through a local server, `arenaboth`,
+`arenadelay=6`, Alpha 200 HP, Beta 5):
+
+| Build | Beta's link cut 4 s at battle frame ~120 | Alpha | Beta |
+| --- | --- | --- | --- |
+| before (`dev`, the cut step alone) | (to be filled) | | |
+| after | (to be filled) | | |
+
+**Not yet.** A team bout, a 2v2 and a party's battle through a drop (the
+same asks would carry them; the server ends them still); a server
+restarted mid-battle (it holds nothing; the battle stops as before); the
+stands through a drop (a spectator's keys stop at the first gap the
+server saw; with the resend from the last hash the server sees none in
+the scenario's runs); a drop on a device's real network rather than a
+socket closed by the game.
