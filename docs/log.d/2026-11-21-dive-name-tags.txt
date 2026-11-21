@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-21T02:00:00Z
-* **Update**: online/shared-dive.md (As built: each diver's name over his MegaMan on a dive layer, issue #712), code/online.md (`map_label.c`, the divers' names in `dive_people.c`), devtools/scenarios.md (a dive's `tags N: NAMES` line).
