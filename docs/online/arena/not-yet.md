@@ -83,7 +83,8 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:00:00Z }
   a local relay and on the Nova headless; not yet a NetBattle between two
   devices or through the deployed server (which runs an older protocol
   until it is redeployed with v9), nor on Android, iOS, Windows or macOS. A first NetBattle on
-  a system asks with a window of 4 before its frame's cost is kept.
+  a system asks with a window guessed from its own core's frames (issue
+  #180), not yet compared with a device's own battle.
   Mispredictions are guessed as the last keys held:
   a press seen late shows as the other MegaMan's step snapping back.
 - The Souls under full rules ([Full rules](from-square/full-rules.md), above): all of

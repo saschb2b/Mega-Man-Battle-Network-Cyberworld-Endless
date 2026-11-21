@@ -121,6 +121,18 @@ MANY = {
         ('@beta', 'expect', 'arenacard=lost'),
         ('@beta', 'expect', 'arenalink>=1'),          # his keys the link lost sent again (its first number: resent)
     )),
+    # (a first NetBattle on fresh data folders, its delay the server's: the window asked with guessed from the run's
+    # own core, no battle's cost kept yet (issue #180); fought to its end on both)
+    'first-netbattle': dict(CAST, START=FIGHT.replace(',arenadelay=6', ''), GAMES={'beta': FIGHT_WEAK.replace(',arenadelay=6', '')},
+                            STEPS=online.course(
+        MEET, CHALLENGE,
+        soon('arena=battle', '', 900),
+        soon('arena=battle', 'beta', 900),
+        soon('arena=over', '', 6000),
+        ('expect', 'arenacard=won'),
+        soon('arena=over', 'beta', 600),
+        ('@beta', 'expect', 'arenacard=lost'),
+    )),
     'server-gone-mid-battle': dict(CAST, START=FIGHT, GAMES={'beta': FIGHT}, STEPS=online.course(
         online.paged(),
         ('keep', 'hp zenny spares place'),

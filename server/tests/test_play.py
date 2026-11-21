@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from cyberworld_server import protocol
 from cyberworld_server.app import Server
-from cyberworld_server.arena import delay_for
+from cyberworld_server.arena import delay_for, path_delay
 from test_server import Client
 
 SPEC = protocol.SPEC
@@ -478,6 +478,15 @@ class PlayTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(delay_for(20, 10), 3)
         self.assertEqual(delay_for(40, 100), 7)
         self.assertEqual(delay_for(4000, 0), 30)
+
+    def test_delay_from_the_keys_path(self):
+        # (issue #180: a key's trip is half of each game's round trip; the time sync holds both lags at it)
+        self.assertEqual(path_delay({1: 10, 2: 150}, {1: 60, 2: 200}), 6)      # (max 150 gave 10)
+        self.assertEqual(path_delay({1: 100, 2: 100}, {1: 120, 2: 120}), delay_for(100, 100))   # (alike: as before)
+        self.assertEqual(path_delay({1: 0, 2: 83}, {1: 20, 2: 200}), delay_for(0, 83))          # (an ask of 0: as before)
+        self.assertEqual(path_delay({1: 40, 2: 100}, {1: 0, 2: 120}), delay_for(40, 100))       # (a trip unknown: as before)
+        self.assertEqual(path_delay({1: 10, 2: 20, 3: 30, 4: 40}, {1: 5, 2: 5, 3: 5, 4: 5}), delay_for(40, 0))   # (four seats)
+        self.assertEqual(path_delay({1: 30, 2: 30}, {1: 10, 2: 400}), delay_for(225, 0))        # (the near game's need the larger)
         # (a game whose window covers its trip asks for 0: the floor 1, where the server once gave 2;
         # past the window's edge the delay is what it was, the window's frame said back by the game)
         self.assertEqual(delay_for(16, 0), 2)

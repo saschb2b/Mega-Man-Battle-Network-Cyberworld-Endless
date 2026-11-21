@@ -70,6 +70,25 @@ def delay_for(latency_a, latency_b):
     return max(LEAST, min(MOST, LOCKSTEP + math.ceil(trip / FRAME_MS)))
 
 
+def path_delay(asked, trips):
+    """The delay for a NetBattle of two from the path its keys take (issue
+    #180): a key goes up half its sender's round trip and down half its
+    receiver's, and the games' time sync (v11) holds both games' lags at
+    that trip, so each game's need is what it asked (its own round trip,
+    its jitter, less its window) less half its own round trip and plus half
+    the other's, the round trips the server knows from their PINGs. The
+    longer need decides. Where either game asked 0 (its window covering
+    more than its trip: how much more is not said) or a round trip is
+    unknown, or the battle has more than two seats, the longer latency
+    asked decides as before (delay_for). `asked` and `trips` by player."""
+    players = list(asked)
+    if len(players) != 2 or not all(asked.values()) or not all(trips.get(p) for p in players):
+        return delay_for(max(asked.values()), 0)
+    a, b = players
+    need = max(asked[a] + (trips[b] - trips[a]) / 2, asked[b] + (trips[a] - trips[b]) / 2)
+    return delay_for(max(0, need), 0)
+
+
 class Match:
     def __init__(self, match_id, a, b, latency, team=0, teamed=False, challenger=None, form=0, partners=None):
         # (a the cable's first side, b the second: the challenger first, but
@@ -168,8 +187,9 @@ class Arena:
         match.started = True
         if not match.team and not match.teamed:
             self.sides[frozenset((match.a, match.b))] = match.a
-        # (a 2v2's delay the longest of its four latencies: every stream rides it)
-        delay = delay_for(max(match.latency.values()), 0)
+        # (a battle of two's from its keys' path; a 2v2's the longest of its four latencies: every stream rides it)
+        trips = {p: self.server.players[p].round_trip for p in match.seats if p in self.server.players}
+        delay = path_delay(match.latency, trips)
         for seat, player_id in enumerate(match.seats):
             self.send(player_id, match, START, seat, delay)
         self.server.event("arena", match=match.id, a=match.a, b=match.b, delay=delay, team=match.team, seats=len(match.seats))

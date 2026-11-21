@@ -86,8 +86,8 @@ generated: { by: claude-code/claude-fable-5-2, at: 2026-11-11T17:01:24Z }
   NetBattle with rollback between two devices and through the deployed
   server (protocol v9 there once it is redeployed), on Android, iOS,
   Windows and macOS (built, untried; the Nova measured headless); a first
-  NetBattle on a system asks with a window of 4 until a battle has kept
-  its frame's cost; the guess is the other's last keys held, nothing
+  NetBattle's window guessed from the system's own core (issue #180) and
+  not yet compared with a device's battle; the guess is the other's last keys held, nothing
   smarter.
 - **The stands, what is left:** watching on Android, iOS and the
   handhelds (built, untried), a catch-up's pace in a window and on a

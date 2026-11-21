@@ -87,6 +87,10 @@ void emu_audio_drop_from(void *core);
 uint64_t emu_audio_mark(void);
 void emu_audio_rewind(uint64_t mark);
 int emu_audio_out_rate(void);
+/* The run's core's mean frame cost in ms since the start, and how many
+ * frames that is (0: none yet): the Arena's window before a system's first
+ * NetBattle (arena_window.h) */
+double emu_core_frame_ms(unsigned *frames);
 /* The ring the sound plays from, made where BN6's core has not made it (the
  * Arena's cores, src/online/arena_pair.c, play through it with none) */
 void emu_audio_open(void);
