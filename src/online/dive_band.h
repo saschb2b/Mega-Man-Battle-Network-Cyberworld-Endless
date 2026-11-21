@@ -5,13 +5,16 @@
 #ifndef CW_DIVE_BAND_H
 #define CW_DIVE_BAND_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
 void dive_band_reset(void);
 /* The feed's line shown, in the state's words ("band ..." or "band none") */
 void dive_band_describe(FILE *f);
-/* Each frame: the line shown long enough gives way to the next. */
-void dive_band_frame(uint32_t now);
+/* Each frame: the line shown long enough gives way to the next; and the
+ * crew's display's frame (dive_crew_view.h), `linked` the link up, `me`
+ * this game's session. */
+void dive_band_frame(uint32_t now, bool linked, uint32_t me);
 
 #endif

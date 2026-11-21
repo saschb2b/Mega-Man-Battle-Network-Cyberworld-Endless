@@ -3,6 +3,7 @@
 
 #include <string.h>
 
+#include "dive_crew_view.h"
 #include "dive_join.h"
 
 static CrewState C;           /* the crew as the server last said (count 0 alone) */
@@ -19,6 +20,7 @@ void dive_crew_describe(FILE *f) {
 	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k) fprintf(f, "%s%s", k ? " " : ": ", m->name);
 	fputc('\n', f);
 	dive_join_describe(f);
+	dive_crew_view_describe(f);
 }
 
 bool dive_crew_has(uint32_t session) {

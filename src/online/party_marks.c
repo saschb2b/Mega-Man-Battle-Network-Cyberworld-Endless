@@ -19,6 +19,7 @@
 #define BUDGET PARTY_MARKS_BUDGET
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
+#define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
 
 /* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
@@ -126,7 +127,10 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 		char n[8];
 		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false);
 		snprintf(n, sizeof n, "%u", v.hp[i]);
-		pixfont_draw(v.x[i], p.top + p.h + 1, n, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
+		/* (on the bottom row, above his name: under it is BN6's chip's name at the picture's foot) */
+		int hp_y = p.top + p.h + 1;
+		if (hp_y + PIXFONT_H > P.core_y + CHIP_LINE) hp_y = p.top - PIXFONT_CAP - 2;
+		pixfont_draw(v.x[i], hp_y, n, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
 	}
 }
 

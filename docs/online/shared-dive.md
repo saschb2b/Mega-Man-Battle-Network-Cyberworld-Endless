@@ -746,6 +746,17 @@ and change nothing; the state says them (`crewview N`, `mateK NAME hp
 H/M layer D|here`), and the field's marks say a partner's HP (`markK ...
 hp N`).
 
+Seen headless (21 November 2026; the scenario
+`tests/scenarios/online_crew_view.py`): two divers on the week's net
+over a local server, a crew by standing together, each shown the other's
+plate, "Beta 100/100"; Beta's own battle against a Mettaur, his HP 90 on
+Alpha's plate while he was still fighting; Beta on to layer 2 by the dev
+menu, "Beta L2 90/100" on Alpha's; ten seconds on, out of the crew, no
+plate. With the server stopped mid-crew: no plates. In those runs
+Beta's game logged "crew none" around his battle's end and the crew
+formed again once both stood together (#725's crews by nearness): his
+plate goes and comes back with it.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
