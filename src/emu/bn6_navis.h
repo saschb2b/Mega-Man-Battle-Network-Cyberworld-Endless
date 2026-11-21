@@ -132,6 +132,10 @@
 #define BN6_T1_PARAM2         0x05        /* Param2: 0 where its dying lowers BN6_STATE_SIDE1_LEFT (0x0801710E), 1 from the spawn's 1 entry */
 #define BN6_T1_STATE          0x08        /* CurState, u8: 0 its init, 4 updated, BN6_STATE_DESTROYED its destroy */
 #define BN6_STATE_DESTROYED   0x08        /* ... its destroy (BN6_NAVI_DESTROY) */
+#define BN6_T3_TORPEDO_LAUNCHER 0x36      /* the third kind's type of DiveMan's torpedo launcher: bound to him (BN6_T1_PARENT) from the
+                                             battle's first frame, it spawns his torpedoes (0x37) until the battle's end, where its update
+                                             sets its own CurState to BN6_STATE_DESTROYED (Falzar's t3_0x36_80CAB68); the swap ends it with
+                                             him (battle_swap.c, issue #733; docs/rom/navis.md, A form's own objects) */
 #define BN6_T1_PHASE          0x0A        /* CurPhase, u8: a state's phase (the dying's 0, then 4) */
 #define BN6_T1_PHASE_INIT     0x0B        /* PhaseInitialized, u8: not 0 once its phase began */
 #define BN6_T1_TIMER          0x20        /* Timer, u16 */

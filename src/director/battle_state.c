@@ -2,12 +2,14 @@
  * tests/scenarios reads (docs/devtools/scenarios.md, Battles and the
  * run's spine in the state): what kind it is, the phase it stands in, how
  * it ended and what its RESULT paid, the form MegaMan fights in, his
- * buster's attack, and the statuses its enemies are held in. On the map
+ * buster's attack, the statuses its enemies are held in, and a swap's form
+ * and what the form taken off left at work (issue #733). On the map
  * after one, how the last ended. Reading changes nothing. */
 #include "director_state.h"
 
 #include <stdio.h>
 
+#include "battle_swap.h"
 #include "bn6.h"
 #include "bn6_battler.h"
 #include "bn6_link.h"
@@ -78,6 +80,8 @@ void battle_state_describe(FILE *f) {
 	 * form's bonus) */
 	fprintf(f, "busterattack %d\n", emu_read8(BN6_BATTLE_NAVI + BN6_NS_ATTACK) + 1);
 	statuses(f);
+	SwapState sw = battle_swap_state();
+	if (sw.armed) fprintf(f, "swapform %d\nleftovers %d\n", sw.form + 1, sw.leftovers);
 	if (phase != BN6_PHASE_RESULTS) return;
 	fprintf(f, "result %s\n", result());
 	if (emu_read8(BN6_BATTLE_RESULT) == BN6_RESULT_WON) reward(f);

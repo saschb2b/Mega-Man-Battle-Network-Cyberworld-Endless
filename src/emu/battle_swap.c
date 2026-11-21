@@ -21,6 +21,19 @@
  * The count is the first form's from the start to the end: the battle never
  * stands at 0 between forms.
  *
+ * A Navi of BN6's fights with objects of the third kind bound to him (their
+ * RelatedObject1Ptr, BN6_T1_PARENT): DiveMan's torpedo launcher
+ * (BN6_T3_TORPEDO_LAUNCHER), ElecMan's 0x1A, TomahawkMan's 0x40 and 0x3A,
+ * TenguMan's three 0x47, ElementMan's 0x90, the first three spawning or
+ * striking on their own clock and ending only at the battle's end, where
+ * each update sets its own CurState to the destroy (bn6f t3_0x36_80CAB68's
+ * sub_80CAB90). Left so, the form taken
+ * off fought on under the next (issue #733: DiveMan's torpedoes under
+ * JudgeMan). As its dying begins they are ended as the battle's end ends
+ * them, their CurState BN6_STATE_DESTROYED, each by its own destroy; its
+ * attacks bound to no one finish their flight (docs/game/glitch-layer.md,
+ * A form's leftovers).
+ *
  * Every hook here reads `S.armed` first and does nothing without it; they
  * are set at the first arm and taken off by battle_swap_disarm. The plan is
  * the director's, set between frames; the rest of `S` is the hooks'. */
@@ -33,6 +46,8 @@
 #include "bn6.h"
 #include "bn6_battle_loop.h"
 #include "bn6_families.h"
+#include "bn6_forms.h"
+#include "bn6_navis.h"
 #include "debug.h"
 #include "emu.h"
 #include "hook.h"
@@ -40,6 +55,7 @@
 #define MOSAIC_FRAMES 24   /* a form's glitch out, and the next's in: the mosaic's frames */
 #define SPAWN_TRIES   30   /* frames a spawn is retried for room before the battle is let end */
 #define SIDE_ENEMY    1    /* the enemies' alliance */
+#define BOUND_MAX     8    /* the objects bound to a form taken off, kept to be counted (three were the most seen, TenguMan's) */
 
 typedef enum {
 	SW_FIND,       /* the first form not yet found on the field */
@@ -65,6 +81,9 @@ static struct {
 	bool sprite_call;          /* the call under way is the next form's sprite's, its spawn after it */
 	int sprited;               /* the last form whose sprite was put in the cache (a retried spawn puts it there once) */
 	uint32_t kept[4], kept_r5, kept_lr;   /* r0-r3, r5 and lr as the battle's frame met them */
+	uint32_t bound[BOUND_MAX], bound_parent;   /* the third kind's objects bound to the last form taken off, and that form */
+	uint8_t bound_type[BOUND_MAX];
+	int nbound;
 } S;
 
 static bool hooked;
@@ -98,6 +117,29 @@ static void mosaic(uint32_t o, int size) {
 	if (render < BN6_EWRAM || render >= BN6_EWRAM_END) return;
 	uint16_t m = hook_read16(render + BN6_RENDER_MOSAIC);
 	hook_write16(render + BN6_RENDER_MOSAIC, (uint16_t)((m & 0x00FF) | (uint32_t)(size & 15) * 0x1100u));
+}
+
+/* a third-kind object in play bound to `form` (its RelatedObject1Ptr), not yet being destroyed */
+static bool bound_to(uint32_t o, uint32_t form) {
+	return (hook_read8(o + BN6_T1_IN_PLAY) & 1) && hook_read32(o + BN6_T1_PARENT) == form && hook_read8(o + BN6_T1_STATE) != BN6_STATE_DESTROYED;
+}
+
+/* A form taken off: the third kind's objects bound to it ended by their own
+ * destroy, as the battle's end ends them (CurState BN6_STATE_DESTROYED: each
+ * kind's state table runs its destroy the next frame) */
+static void end_bound(uint32_t form) {
+	S.nbound = 0;
+	S.bound_parent = form;
+	for (uint32_t k = 0; k < BN6_T3_COUNT; ++k) {
+		uint32_t o = BN6_T3_OBJECTS + k * BN6_T1_SIZE;
+		if (!bound_to(o, form)) continue;
+		if (S.nbound < BOUND_MAX) {
+			S.bound[S.nbound] = o;
+			S.bound_type[S.nbound++] = hook_read8(o + BN6_T1_TYPE);
+		}
+		if (emu_debug_on()) fprintf(stderr, "swap: form %d's object of the third kind %02X (slot %u) ended with it\n", S.cur + 1, hook_read8(o + BN6_T1_TYPE), (unsigned)k);
+		hook_write32(o + BN6_T1_STATE, BN6_STATE_DESTROYED);
+	}
 }
 
 /* the battle over: the hooks idle from here */
@@ -297,6 +339,7 @@ static HookAct dying(HookRegs *r, void *user) {
 		return HOOK_CONTINUE;
 	}
 	S.leaving = o;
+	end_bound(o);
 	S.px = hook_read8(o + BN6_T1_PANEL_X);
 	S.py = hook_read8(o + BN6_T1_PANEL_Y);
 	S.out_left = MOSAIC_FRAMES;
@@ -374,5 +417,11 @@ void battle_swap_disarm(void) {
 
 SwapState battle_swap_state(void) {
 	emu_sync();
-	return (SwapState){ S.armed, S.n, S.cur, S.gone, S.fails, S.result };
+	int left = 0;
+	for (int i = 0; i < S.nbound; ++i) {
+		uint32_t o = S.bound[i];
+		if ((emu_read8(o + BN6_T1_IN_PLAY) & 1) && emu_read32(o + BN6_T1_PARENT) == S.bound_parent &&
+			emu_read8(o + BN6_T1_STATE) != BN6_STATE_DESTROYED && emu_read8(o + BN6_T1_TYPE) == S.bound_type[i]) left++;
+	}
+	return (SwapState){ S.armed, S.n, S.cur, S.gone, S.fails, S.result, left };
 }

@@ -35,6 +35,7 @@ typedef struct {
 	int gone;      /* forms taken off so far */
 	int fails;     /* spawns that found no room (each retried the next frame) */
 	int result;    /* the battle loop's phase as the battle ended (BN6_LOOP: 0x0C won, 0x10 lost), 0 while it goes on */
+	int leftovers; /* the objects bound to the last form taken off still at work under the next (0: ended with it, issue #733) */
 } SwapState;
 
 /* What the plan came to, between frames */

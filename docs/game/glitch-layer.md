@@ -262,6 +262,40 @@ The three ways the brief allowed, weighed before the call:
 | In BN6's engine | the established hooks: the draw, the spawn's HP, a forced battle | BN6's mid-fight spawn and its enemy counts, four hooks idle until armed | NPC scripts and forced battles; no battle change |
 | Fun | a boss in phases, each form a new read | the same, without a seam | tension, but paid in walking, the core loop's first lack, and in danger the player did not choose |
 
+**A form's leftovers** (21 November 2026, issue #733: a player saw
+DiveMan's torpedoes cross MegaMan's rows while the copy stood as
+JudgeMan). Measured over the pool, each of BN6's Navis taken off by the
+swap at 200 HP under the autopilot (`swap ID:200/155:3000`, seed 15,
+`CYBERWORLD_EMU_DEBUG`'s trace of the enemies' objects of the third
+kind): five leave objects bound to them behind. DiveMan's torpedo
+launcher (from the battle's first frame) went on firing two torpedoes a
+volley about every 96 frames under JudgeMan until the battle's end;
+ElecMan's thunder and TomahawkMan's 0x40 lived on the same way (a spawner,
+not a flight: each ends only at the battle's end); TenguMan's three
+whirls ended after 61 frames, ElementMan's 0x90 after 38. Shots already
+loose and bound to no one (the torpedoes in the air, CircusMan's,
+JudgeMan's own) finish within about 70 frames; ElecMan's two rods and
+TomahawkMan's 0x41 are still objects of the field, with HP or none, and
+spawn nothing. HeatMan, SlashMan, ChargeMan, SpoutMan, GroundMan,
+DustMan, ProtoMan, BlastMan, CircusMan, JudgeMan, Colonel and AI 17 left
+nothing bound (EraseMan was not taken off: his deleting beam ended the
+run first, god mode or not).
+
+The call, with the game-design skill: the copy is a boss in phases,
+each form a new read, so the player reads the form on the field, and an
+attack whose source has gone from the field is a telegraph that lies.
+**What a form owns ends with it; what it already let fly finishes.** As
+a form's dying begins, the third kind's objects bound to it (their
+RelatedObject1Ptr) are ended as the battle's end ends them, each by its
+own destroy (`src/emu/battle_swap.c`; [BN6's Navis](../rom/navis.md), A
+form's own objects); shots in flight cross the field once and are gone
+before or while the next form arrives, which MegaMan sees and can dodge
+(the arrival never stops him), the glitch's seam; rods and stones stay
+as BN6 leaves any obstacle. Chosen over leaving everything (the bug: a
+form fighting on under the next) and over clearing every enemy object
+at the swap (a cleaner slate, but it ends objects BN6 never ties to the
+form and takes the seam away). Held by `tests/scenarios/battle_swap_leftovers.py`.
+
 **What it pays** (the owner's call 3): a pick of one of its forms' Navi
 chips, a version above what the act's guardians are fought at (SP at
 most), in the folder's codes (the glitch rewrote its code), on the pick
@@ -458,3 +492,10 @@ Decided on 4 November 2026:
 4. **How rare, and BN4's looks:** one run in three, never two; BN4 Red
    Sun's areas among the flips only once they are admitted to runs
    ([Battle Network 4 in a run](../multirom/bn4.md)), as recommended.
+
+Taken on 21 November 2026 (issue #733), the owner's to turn over:
+
+5. **A form's leftovers:** what a form owns (a launcher, a striker bound
+   to it) ends as it glitches out; shots it already let fly finish their
+   flight. Chosen over letting everything run on and over clearing every
+   enemy object at the swap ([A form's leftovers](#the-copy-at-its-heart)).
