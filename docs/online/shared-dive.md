@@ -207,9 +207,9 @@ What is drawn (`dive_people.c`, `floor_ring.c`, the colour in
 - **A crewmate's name in the crew's colour,** the PET's information
   box's green (`CREW_COLOUR`), the others' white. The marks on a
   party's field read the same value.
-- **A ring on the floor under each crewmate's feet,** in that green
-  with a dark edge under it, so it reads on a light floor and a dark
-  one; its back is left out where his body stands, so it lies round his
+- **A ring on the floor under each crewmate's feet,** in that green,
+  two pixels wide with a dark edge round it, so it reads on a light
+  floor, a dark one and a green one; its back is left out where his body stands, so it lies round his
   feet rather than across his legs.
 - **A dotted ring under a diver within the radius a crew forms in**
   (`DIVE_CREW_NEAR`, read from `dive_crew.h`) while the server's second
