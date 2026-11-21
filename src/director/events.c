@@ -15,19 +15,23 @@
 #include "job_words.h"
 #include "layer_objs.h"
 #include "order_sort.h"
+#include "reward_pick.h"
 #include "weekly.h"
 #include "xchips_wide.h"
 
 /* SetEventFlag runs for every flag the game sets, many a frame: an event
  * only for a layer's choice, which a Yes in its chat sets (the chat's
- * EA 00 command), and for a request taken or settled at home, on BN6's
- * Request BBS too */
+ * EA 00 command), for a request taken or settled at home, on BN6's
+ * Request BBS too, and for a reward pick's flags, which its script sets
+ * (the pick opens from these alone, issue #734) */
 static HookAct flag_set(HookRegs *r, void *user) {
 	(void)user;
 	if (r->r[0] >= LAYER_FLAG_BASE && r->r[0] < LAYER_FLAG_BASE + LAYER_MAX_CHOICES) hook_post(r, EV_CHOICE);
 	else if ((r->r[0] >= JOB_TAKE_FLAG && r->r[0] < JOB_TAKE_FLAG + JOB_ASKERS) || r->r[0] == JOB_SETTLED_FLAG ||
 		(r->r[0] >= BN6_FLAG_BBS_TAKEN && r->r[0] < BN6_FLAG_BBS_TAKEN + JOB_ASKERS))
 		hook_post(r, EV_JOB);
+	else if (r->r[0] == REWARD_PICK_FLAG || (r->r[0] >= REWARD_KIND_FLAG && r->r[0] < REWARD_KIND_FLAG + REWARD_KIND_BITS))
+		hook_post(r, EV_PICK);
 	return HOOK_CONTINUE;
 }
 

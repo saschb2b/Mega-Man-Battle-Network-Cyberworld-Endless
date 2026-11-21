@@ -19,6 +19,7 @@ enum {
 	EV_CHIP_GIVEN_WIDE,    /* a chip past 511 given (xchips_wide.h: no flag of BN6's Library holds it): r0 the chip */
 	EV_CHIP_WATCHED,       /* a chip the folders' milestones watch ran for MegaMan (meta_chip_watched: a Program Advance, a Recovery chip): r0 the chip */
 	EV_FOE_DELETED,        /* a virus deleted (BN6's dying state, BN6_FOE_DYING): r0 its AI index, r1 its version, r2 its side */
+	EV_PICK,               /* SetEventFlag on a reward pick's flags (reward_pick.h): r0 the flag */
 };
 
 /* The hooks for the map, flag and key item events, once the core is up

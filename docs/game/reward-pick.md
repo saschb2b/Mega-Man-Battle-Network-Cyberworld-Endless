@@ -135,8 +135,18 @@ screen is the look a question gave before.
   ends. Its offer (the choices, the script that gives each, B's script)
   is made with the script (`reward_pick_offer`), so a layer's offers are
   made again with its scripts from `run.layer_seed`.
-- After the frame, once the chat box has closed, the director opens the
-  screen (`director_pick_watch`) and clears the flags; the game's core
+- SetEventFlag's hook (`events.c`, `EV_PICK`) tells the director each of
+  those flags as the script sets it, and after the frame, once the chat
+  box has closed, the director opens the screen (`director_pick_watch`)
+  and clears the flags. It never reads them to open it: BN6's own save,
+  after every Chip Trader's trade among others, holds the RAM
+  they stand in XOR-masked with a key of its own for some eight frames
+  while it writes the cartridge, the chat box shut
+  ([The save's mask](../rom/game-state.md)). Read there, they were the
+  key's bits: a trade whose key held the pick's flag opened the layer's
+  vault, or any pick its other bits named, over the trade, a pick no
+  script had asked for, and the flags cleared on masked bytes were set
+  again as the save put them back (issue #734). The game's core
   holds still under it as under the Library (`scene_emu.c`), its keys
   the screen's.
 - A choice closes it and starts the script that gives it through
