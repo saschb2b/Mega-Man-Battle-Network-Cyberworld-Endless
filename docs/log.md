@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-21
+* **Update**: online/shared-dive.md (the crew's sign: the crew's colour on the names, a ring under each crewmate, a dotted one about to be, issue #716, the calls taken and what they were chosen over), devtools/scenarios.md (`rings N: NAMES` and a crewmate's `*` in `tags`), code/online.md (`floor_ring.c`, `crew_look.h`); online/shared-dive.md also (a party's field's marks in the same crew colour).
 * **Update**: online/arena/dropped-link.md (a party's field and a crew's battle ride out a drop: the seat held 12 seconds, the game alone past 10; the transport's tries every half second while a battle waits, a 4-second cut now a 4-second wait).
 * **Update**: online/shared-dive.md (who is who on a party's field, issue #713: each MegaMan's name by his feet, the player's own in the PET cursor's orange behind its arrow, a partner's own HP box; the call and what it was chosen over), code/online.md (`party_marks.c`, `partyview`).
 * **Add**: online/arena/dropped-link.md (a NetBattle of two survives a dropped link, issue #180, protocol v21: the server holds it with the place, the games ask for the keys the link lost). **Update**: online/arena/index.md (its line), online/square/dropped-link.md (a NetBattle of two goes on through the drop), devtools/net-square.md (the dev step `reconnect cut N`), online/arena/not-yet.md (a drop mid-battle).
