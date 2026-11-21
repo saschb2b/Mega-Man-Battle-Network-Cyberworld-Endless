@@ -1,7 +1,8 @@
 """The week's DeepNet (docs/online/weekly-net.md, docs/online/shared-dive.md):
 the portal by the Board and its Yes into the dive's first layer, another
-diver seen there, a crew made with him and a battle of one fought by both
-unasked (issue #715), the Board's posts of the week,
+diver seen there, a crew by standing together (issue #714), formed and
+split by walking together and apart, four at most, and a battle of one
+fought by both unasked (issue #715), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -43,17 +44,7 @@ MANY = {
         soon('divers~Alpha', 'beta', 600),
         soon('tags~Beta', '', 600),                # ... his name over his MegaMan
         soon('tags~Alpha', 'beta', 600),
-        ('expect', 'crew=0'),
-        # (A on Beta's MegaMan, who arrived where Alpha stands: "Lan,it's Beta!", "Team up,Lan?" opens on Yes)
-        ('repeat', 'press A; wait 10', 'choice~/2', 20),
-        ('do', 'wait 20'),
-        ('expect', 'choice=1/2'),
-        ('do', 'press A; wait 10'),
-        soon('chat=open', 'beta', 600),            # "Alpha wants to team up with us!"
-        ('@beta', 'repeat', 'press A; wait 10', 'choice~/2', 30),
-        ('@beta', 'do', 'wait 20'),
-        ('@beta', 'expect', 'choice=1/2'),
-        ('@beta', 'do', 'press A; wait 10'),
+        # (no asking: Beta arrived where Alpha stands, and the server made them a crew, issue #714)
         soon('crew=2: Alpha Beta', '', 600),
         soon('crew=2: Alpha Beta', 'beta', 600),
     )),
@@ -122,4 +113,44 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     ('do', 'battle; wait 10'),
     soon('join=fighting', 'beta', 900),
     soon('join=fighting', '', 900),
+))
+
+# Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
+# back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
+# down by world units, wherever the week's layer has its floor: only the distance between the two counts here.
+EDGE = [step for k in range(6) for step in (('do', 'wait 30'), ('expect', 'crew=2: Alpha Beta'), ('@beta', 'expect', 'crew=2: Alpha Beta'))]
+MANY['crew-by-nearness'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 160 0 3; wait 5'),         # past crew_near, within crew_far: still a crew
+    *EDGE,
+    ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: none, on both
+    soon('crew=0', 'beta', 600),
+    soon('crew=0', '', 600),
+    ('@beta', 'do', 'place 160 0 3; wait 5'),         # within crew_far but not crew_near: none yet
+    ('do', 'wait 120'),
+    ('expect', 'crew=0'),
+    ('@beta', 'do', 'place 100 0 3; wait 5'),         # within crew_near: a crew again
+    soon('crew=2: Alpha Beta', '', 600),
+    soon('crew=2: Alpha Beta', 'beta', 600),
+))
+
+# Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and
+# the fifth, standing there, takes his place.
+FIVE = {name: online.HOME for name in ('beta', 'gamma', 'delta', 'echo')}
+MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    *[part for name in ('beta', 'gamma', 'delta') for part in online.course(online.into_square(name), dive(name))],
+    soon('crew=4: Alpha Beta Gamma Delta', '', 900),
+    online.into_square('echo'),
+    dive('echo'),
+    soon('divers~Echo', '', 600),
+    ('@echo', 'do', 'wait 120'),
+    ('@echo', 'expect', 'crew=0'),
+    ('expect', 'crew=4: Alpha Beta Gamma Delta'),
+    ('@delta', 'do', 'place 2000 0 3; wait 5'),
+    soon('crew=0', 'delta', 600),
+    soon('crew=4: Alpha Beta Gamma Echo', '', 900),
+    soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
 ))

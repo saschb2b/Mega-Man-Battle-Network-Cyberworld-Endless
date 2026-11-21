@@ -86,14 +86,13 @@ size_t dive_wire_split(uint8_t out[ONLINE_DIVE_SPLIT_BYTES], const DiveSplit *s)
 	return ONLINE_DIVE_SPLIT_BYTES;
 }
 
-size_t dive_wire_crew(uint8_t out[ONLINE_CREW_BYTES], unsigned action, uint32_t ref, unsigned value, DiveWay way) {
-	bool asks = action == ONLINE_CREW_ASK || action == ONLINE_CREW_ANSWER || action == ONLINE_CREW_JOIN;
-	if (action < ONLINE_CREW_ASK || action > ONLINE_CREW_JOIN || (asks && !ref) || value > 255 ||
-	    (value > 1 && action != ONLINE_CREW_BATTLE) || !way_ok(way)) return 0;
+size_t dive_wire_crew(uint8_t out[ONLINE_CREW_BYTES], unsigned action, uint32_t ref, unsigned value) {
+	if ((action != ONLINE_CREW_BATTLE && action != ONLINE_CREW_JOIN) || value > 255 ||
+	    (action == ONLINE_CREW_JOIN && (!ref || value))) return 0;
+	memset(out, 0, ONLINE_CREW_BYTES);
 	out[0] = ONLINE_CREW; out[1] = (uint8_t)action;
 	online_put32(out + 2, ref);
 	out[6] = (uint8_t)value;
-	way_put(out + 7, way);
 	return ONLINE_CREW_BYTES;
 }
 
@@ -219,7 +218,7 @@ bool dive_wire_divers(const uint8_t *data, size_t size, DiveDivers *out) {
 }
 
 bool dive_wire_crew_state(const uint8_t *data, size_t size, CrewState *out) {
-	if (size != ONLINE_CREW_STATE_BYTES || data[0] != ONLINE_CREW_STATE || data[1] < ONLINE_CREW_ASKED || data[1] > ONLINE_CREW_ALONE)
+	if (size != ONLINE_CREW_STATE_BYTES || data[0] != ONLINE_CREW_STATE || data[1] < ONLINE_CREW_FORMED || data[1] > ONLINE_CREW_ALONE)
 		return false;
 	memset(out, 0, sizeof *out);
 	out->stage = data[1];
@@ -227,8 +226,9 @@ bool dive_wire_crew_state(const uint8_t *data, size_t size, CrewState *out) {
 	out->value = data[6];
 	for (unsigned k = 0; k < ONLINE_PARTY_MOST; ++k) {
 		const uint8_t *e = data + 7 + k * ONLINE_CREW_MEMBER_BYTES;
-		CrewMember m = { .session = get32(e), .way = way_get(e + 20) };
-		if (!name_get(m.name, e + 4, !m.session) || !way_ok(m.way) || (!m.session && (m.name[0] || m.way.depth))) return false;
+		CrewMember m = { .session = get32(e) };
+		/* (v20: a member's last three bytes, once the fork's portal he stood on, zeros) */
+		if (!name_get(m.name, e + 4, !m.session) || e[20] || e[21] || e[22] || (!m.session && m.name[0])) return false;
 		if (!m.session) continue;
 		if (k != out->count) return false;      /* (the members first, zeros after them) */
 		out->m[out->count++] = m;

@@ -6,7 +6,6 @@
 
 #include "bn6.h"
 #include "director.h"
-#include "dive_crew.h"
 #include "dive_join.h"
 #include "dive_link.h"
 #include "dive_party.h"
@@ -56,6 +55,5 @@ void dive_link_draw(void) {
 	const char *join = dive_join_band();
 	if (join) look_band(P.core_x, y, 240, join);
 	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
-	else if (dive_crew_waiting()) look_band(P.core_x, y, 240, dive_crew_wait_words());
 	else dive_party_draw(P.core_x, P.core_y);
 }
