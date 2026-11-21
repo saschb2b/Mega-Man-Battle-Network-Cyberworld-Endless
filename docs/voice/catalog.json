@@ -354,6 +354,12 @@
    "comment": "What MegaMan says when L is pressed: where they are, what is ahead.",
    "line": 311
   },
+  "crew_words:crew_pull_back_words": {
+   "line": 3
+  },
+  "crew_words:crew_pull_gave_words": {
+   "line": 5
+  },
   "dark_words:dark_base_words": {
    "comment": "A DarkChip that ran as its base chip for want of a BugFrag, into `out`",
    "line": 28
@@ -2422,6 +2428,15 @@
    "speaker": "MegaMan",
    "stem": "briefing_words"
   },
+  "src/director/crew_words.c": {
+   "comment": "",
+   "domain": "Other",
+   "kind": "speech",
+   "lines": 2,
+   "shows": [],
+   "speaker": "MegaMan",
+   "stem": "crew_words"
+  },
   "src/director/dark_words.c": {
    "comment": "MegaMan on DarkChips (docs/game/meta/, docs/voice/rules.md).",
    "domain": "DarkChips",
@@ -2839,7 +2854,7 @@
    "comment": "",
    "domain": "Net Square",
    "kind": "speech",
-   "lines": 22,
+   "lines": 23,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "square_week_words"
@@ -3068,7 +3083,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2444,
+  "boxes": 2447,
   "domains": {
    "Arena": {
     "files": [
@@ -3206,8 +3221,8 @@
      "src/online/square_words.c"
     ],
     "flagged": 17,
-    "lines": 149,
-    "speech": 121
+    "lines": 150,
+    "speech": 122
    },
    "Options": {
     "files": [
@@ -3220,6 +3235,7 @@
    "Other": {
     "files": [
      "src/core/extras_text.c",
+     "src/director/crew_words.c",
      "src/director/lab_text.c",
      "src/director/lab_words.c",
      "src/director/liberation_battle_words.c",
@@ -3235,8 +3251,8 @@
      "src/update/update_text.c"
     ],
     "flagged": 35,
-    "lines": 372,
-    "speech": 348
+    "lines": 374,
+    "speech": 350
    },
    "Powers": {
     "files": [
@@ -3437,7 +3453,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 885,
+    "boxes": 887,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3492,7 +3508,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 2246,
+  "lines": 2249,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3735,7 +3751,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 885,
+    "boxes": 887,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3771,12 +3787,12 @@
     "words_per_box": 5.5
    },
    "Narration": {
-    "bangs_per_box": 0.32,
+    "bangs_per_box": 0.31,
     "bn6": null,
-    "boxes": 31,
-    "dots_per_box": 0.26,
+    "boxes": 32,
+    "dots_per_box": 0.25,
     "end_ask": 0.03,
-    "end_bang": 0.58,
+    "end_bang": 0.56,
     "end_dots": 0.06,
     "openers": [
      "MegaMan",
@@ -3950,7 +3966,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1565
+  "speech": 1568
  },
  "version": 1,
  "conversations": [
@@ -4261,7 +4277,7 @@
   {"container":"square_week_words:pack","domain":"Net Square","file":"src/online/square_week_words.c","id":"square_week_words:pack","line":73,"lines":["square_week_words:pack:0","square_week_words:pack:1"],"speakers":["MegaMan"],"title":"Who dives now","when":"who dives now: a box of the count, then the divers three to a box"},
   {"container":"square_week_words:record","domain":"Net Square","file":"src/online/square_week_words.c","id":"square_week_words:record","line":84,"lines":["square_week_words:record:0","square_week_words:record:1"],"speakers":["MegaMan"],"title":"One split record","when":"one split record: the guardian's layer, the party's size (1 alone), the time and who"},
   {"container":"square_week_words:records","domain":"Net Square","file":"src/online/square_week_words.c","id":"square_week_words:records","line":97,"lines":["square_week_words:records:0"],"speakers":["MegaMan"],"title":"The week's fastest bust of each guardian","when":"the week's fastest bust of each guardian (layers 3, 6, 9 and the tenth's), alone and by party size, three to a box"},
-  {"container":"square_week_words:square_week_board","domain":"Net Square","file":"src/online/square_week_words.c","id":"square_week_words:square_week_board","line":109,"lines":["square_week_words:square_week_board:0","square_week_words:square_week_board:1","square_week_words:square_week_board:2","square_week_words:square_week_board:3","square_week_words:square_week_board:4"],"speakers":["Narration"],"title":"The Board's boxes","when":"the Board's boxes: a heading, then the dives three to a box"},
+  {"container":"square_week_words:square_week_board","domain":"Net Square","file":"src/online/square_week_words.c","id":"square_week_words:square_week_board","line":109,"lines":["square_week_words:square_week_board:0","square_week_words:square_week_board:1","square_week_words:square_week_board:2","square_week_words:square_week_board:3","square_week_words:square_week_board:4","square_week_words:square_week_board:5"],"speakers":["Narration"],"title":"The Board's boxes","when":"the Board's boxes: a heading, then the dives three to a box"},
   {"container":"online_text:online_phrases","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_phrases","line":4,"lines":["online_text:online_phrases:0","online_text:online_phrases:1","online_text:online_phrases:2","online_text:online_phrases:3","online_text:online_phrases:4","online_text:online_phrases:5","online_text:online_phrases:6","online_text:online_phrases:7"],"speakers":["Players"],"title":"Online phrases","when":""},
   {"container":"online_text:online_emotes","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_emotes","line":7,"lines":["online_text:online_emotes:6","online_text:online_emotes:8","online_text:online_emotes:9"],"speakers":["Screen"],"title":"Online emotes","when":""},
   {"container":"online_text:online_emote_captions","domain":"Net Square","file":"src/online/online_text.c","id":"online_text:online_emote_captions","line":10,"lines":["online_text:online_emote_captions:2","online_text:online_emote_captions:4"],"speakers":["Screen"],"title":"Online emote captions","when":"(MegaMan's pose carries the rest: square_emote.c)"},
@@ -4506,6 +4522,8 @@
   {"container":"battler_words:won.labels","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:won.labels","line":116,"lines":["battler_words:won.labels:0","battler_words:won.labels:1"],"speakers":["MegaMan"],"title":"Won: labels","when":""},
   {"container":"battler_words:series_won","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:series_won","line":127,"lines":["battler_words:series_won:0","battler_words:series_won:1"],"speakers":["Mr.Prog"],"title":"The series won","when":"The series won: the pot, and a first win's prize"},
   {"container":"battler_words:ta_battler_after","domain":"Other","file":"src/layer/battler_words.c","id":"battler_words:ta_battler_after","line":152,"lines":["battler_words:ta_battler_after:0","battler_words:ta_battler_after:1"],"speakers":["Mr.Prog"],"title":"Battler after","when":""},
+  {"container":"crew_words:crew_pull_back_words","domain":"Other","file":"src/director/crew_words.c","id":"crew_words:crew_pull_back_words","line":3,"lines":["crew_words:crew_pull_back_words:0"],"speakers":["MegaMan"],"title":"Crew pull back words","when":""},
+  {"container":"crew_words:crew_pull_gave_words","domain":"Other","file":"src/director/crew_words.c","id":"crew_words:crew_pull_gave_words","line":5,"lines":["crew_words:crew_pull_gave_words:0"],"speakers":["MegaMan"],"title":"Crew pull gave words","when":""},
   {"container":"dive_words:dive_feed_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_feed_words","line":11,"lines":["dive_words:dive_feed_words:caseONLINE_FEED_DELETED.0","dive_words:dive_feed_words:caseONLINE_FEED_WON.0","dive_words:dive_feed_words:caseONLINE_FEED_GUARDIAN.0","dive_words:dive_feed_words:caseONLINE_FEED_GUARDIAN.1","dive_words:dive_feed_words:caseONLINE_FEED_FLARE.0"],"speakers":["MegaMan"],"title":"A line of the feed","when":"A line of the feed: `kind` ONLINE_FEED_*, the diver's name, the layer, a guardian's party's size; \"\" where the kind is unknown."},
   {"container":"dive_words:dive_door_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_door_words","line":25,"lines":["dive_words:dive_door_words:0","dive_words:dive_door_words:1","dive_words:dive_door_words:2","dive_words:dive_door_words:3"],"speakers":["MegaMan"],"title":"The band at a guardian's door while a party forms","when":"The band at a guardian's door while a party forms: `count` in it, whether MegaMan leads it, its leader's name."},
   {"container":"dive_words:dive_join_calling_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_join_calling_words","line":31,"lines":["dive_words:dive_join_calling_words:0"],"speakers":["MegaMan"],"title":"The band's join-in lines","when":"The band's join-in lines (dive_join.h): MegaMan's own battle held while the crew is called, and his join into a crewmate's sent."},
@@ -5007,6 +5025,8 @@
   {"boxes":[{"pages":[["Let's get ready","first!"]],"speaker":"MegaMan","text":"Let's get ready first!"},{"pages":[["The Net Dealer's","{dealer}."]],"speaker":"MegaMan","text":"The Net Dealer's {dealer}."},{"pages":[["A Recovery Mr.Prog's","{heal}."]],"speaker":"MegaMan","text":"A Recovery Mr.Prog's {heal}."}],"container":"last_stop","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"id":"briefing_words:last_stop:0","kind":"speech","line":428,"note":"(a suggestion, not a question: \"Want to get ready first?\" asked one that took no answer, session 77)","placeholders":[{"name":"dealer","spec":"%s"},{"name":"heal","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let's get ready first!|@M The Net Dealer's {dealer}.|@M A Recovery Mr.Prog's {heal}.","text_hash":"6ab26cbf646d"},
   {"boxes":[{"pages":[["Let's get ready","first!"]],"speaker":"MegaMan","text":"Let's get ready first!"},{"pages":[["The Net Dealer's","{dealer}."]],"speaker":"MegaMan","text":"The Net Dealer's {dealer}."}],"container":"last_stop","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"id":"briefing_words:last_stop:1","kind":"speech","line":429,"note":"(a suggestion, not a question: \"Want to get ready first?\" asked one that took no answer, session 77)","placeholders":[{"name":"dealer","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let's get ready first!|@M The Net Dealer's {dealer}.","text_hash":"5abc6f25b127"},
   {"boxes":[{"pages":[["Let's heal up first!"]],"speaker":"MegaMan","text":"Let's heal up first!"},{"pages":[["A Recovery Mr.Prog's","{heal}."]],"speaker":"MegaMan","text":"A Recovery Mr.Prog's {heal}."}],"container":"last_stop","domain":"Briefing","file":"src/director/briefing_words.c","flags":[],"id":"briefing_words:last_stop:2","kind":"speech","line":430,"note":"(a suggestion, not a question: \"Want to get ready first?\" asked one that took no answer, session 77)","placeholders":[{"name":"heal","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Let's heal up first!|@M A Recovery Mr.Prog's {heal}.","text_hash":"a5850f982b1f"},
+  {"boxes":[{"pages":[["Phew... The crew","pulled us back!"]],"speaker":"MegaMan","text":"Phew... The crew pulled us back!"}],"container":"crew_pull_back_words","domain":"Other","file":"src/director/crew_words.c","flags":[],"id":"crew_words:crew_pull_back_words:0","kind":"speech","line":3,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Phew... The crew pulled us back!","text_hash":"41dac9839adf"},
+  {"boxes":[{"pages":[["Lan,we shared our","HP. They're back!"]],"speaker":"MegaMan","text":"Lan,we shared our HP. They're back!"}],"container":"crew_pull_gave_words","domain":"Other","file":"src/director/crew_words.c","flags":[],"id":"crew_words:crew_pull_gave_words:0","kind":"speech","line":5,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,we shared our HP. They're back!","text_hash":"e9046272b47d"},
   {"boxes":[{"pages":[["That bug's gone now.","But something","stays..."]],"speaker":"MegaMan","text":"That bug's gone now. But something stays..."},{"pages":[["My max HP fell by","{lost},for this whole","dive."]],"speaker":"MegaMan","text":"My max HP fell by {lost},for this whole dive."}],"container":"dark_price_words","domain":"DarkChips","file":"src/director/dark_words.c","flags":[],"id":"dark_words:dark_price_words:0","kind":"speech","line":12,"placeholders":[{"name":"lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M That bug's gone now. But something stays...|@M My max HP fell by {lost},for this whole dive.","text_hash":"5be4e0a97fc3"},
   {"boxes":[{"pages":[["Ngh... That DarkChip","took something from","me,Lan."]],"speaker":"MegaMan","text":"Ngh... That DarkChip took something from me,Lan."},{"pages":[["My max HP fell by","{lost},for this whole","dive."]],"speaker":"MegaMan","text":"My max HP fell by {lost},for this whole dive."}],"container":"dark_price_words","domain":"DarkChips","file":"src/director/dark_words.c","flags":[],"id":"dark_words:dark_price_words:1","kind":"speech","line":14,"placeholders":[{"name":"lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ngh... That DarkChip took something from me,Lan.|@M My max HP fell by {lost},for this whole dive.","text_hash":"ecd2ee207607"},
   {"boxes":[{"pages":[["Ngh... The DarkChip","took {lost} more max","HP."]],"speaker":"MegaMan","text":"Ngh... The DarkChip took {lost} more max HP."}],"container":"dark_price_words","domain":"DarkChips","file":"src/director/dark_words.c","flags":[],"id":"dark_words:dark_price_words:2","kind":"speech","line":15,"placeholders":[{"name":"lost","spec":"%d"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"@M Ngh... The DarkChip took {lost} more max HP.","text_hash":"c012b93425ab"},
@@ -6439,8 +6459,9 @@
   {"boxes":[{"pages":[[">DEEP NET,{when}","Deepest layers,as","Navis report them."]],"speaker":"Narration","text":">DEEP NET,{when}\nDeepest layers,as\nNavis report them."}],"container":"square_week_board","domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:0","kind":"speech","line":109,"placeholders":[{"name":"when","spec":"%s"}],"speaker":"Narration","speakers":["Narration"],"text":">DEEP NET,{when}\nDeepest layers,as\nNavis report them.","text_hash":"81bc30445879"},
   {"boxes":[{"pages":[[">No dives yet.","Be the first!"]],"speaker":"Narration","text":">No dives yet.\nBe the first!"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:1","kind":"speech","line":110,"speaker":"Narration","speakers":["Narration"],"text":"|>No dives yet.\nBe the first!","text_hash":"f62c5326d72f"},
   {"boxes":[{"pages":[[">+:a guardian beaten","with a party."]],"speaker":"Narration","text":">+:a guardian beaten\nwith a party."}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:2","kind":"speech","line":116,"speaker":"Narration","speakers":["Narration"],"text":"|>+:a guardian beaten\nwith a party.","text_hash":"19796b3a391a"},
-  {"boxes":[{"pages":[[">Your best is","layer {depth},#{place}!"]],"speaker":"Narration","text":">Your best is\nlayer {depth},#{place}!"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:3","kind":"speech","line":117,"placeholders":[{"name":"depth","spec":"%u"},{"name":"place","spec":"%d"}],"speaker":"Narration","speakers":["Narration"],"text":"|>Your best is\nlayer {depth},#{place}!","text_hash":"e3150710670f"},
-  {"boxes":[{"pages":[[">Last week's best"]],"speaker":"Narration","text":">Last week's best"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"fragment":true,"id":"square_week_words:square_week_board:4","kind":"speech","line":121,"speaker":"Narration","speakers":["Narration"],"text":"|>Last week's best","text_hash":"ece935dcfea9"},
+  {"boxes":[{"pages":[[">*:pulled back once","by the crew."]],"speaker":"Narration","text":">*:pulled back once\nby the crew."}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:3","kind":"speech","line":118,"speaker":"Narration","speakers":["Narration"],"text":"|>*:pulled back once\nby the crew.","text_hash":"ebc901d7f2d7"},
+  {"boxes":[{"pages":[[">Your best is","layer {depth},#{place}!"]],"speaker":"Narration","text":">Your best is\nlayer {depth},#{place}!"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"id":"square_week_words:square_week_board:4","kind":"speech","line":119,"placeholders":[{"name":"depth","spec":"%u"},{"name":"place","spec":"%d"}],"speaker":"Narration","speakers":["Narration"],"text":"|>Your best is\nlayer {depth},#{place}!","text_hash":"e3150710670f"},
+  {"boxes":[{"pages":[[">Last week's best"]],"speaker":"Narration","text":">Last week's best"}],"container":"square_week_board","continues":true,"domain":"Net Square","file":"src/online/square_week_words.c","flags":[],"fragment":true,"id":"square_week_words:square_week_board:5","kind":"speech","line":123,"speaker":"Narration","speakers":["Narration"],"text":"|>Last week's best","text_hash":"ece935dcfea9"},
   {"boxes":[{"pages":[["Next channel"]],"speaker":"MegaMan","text":"Next channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:0","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Next channel","text_hash":"68b4bd365ca5"},
   {"boxes":[{"pages":[["Last channel"]],"speaker":"MegaMan","text":"Last channel"}],"container":"square_keeper_options","domain":"Net Square","file":"src/online/square_words.c","flags":[],"id":"square_words:square_keeper_options:1","kind":"screen","line":6,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Last channel","text_hash":"7eb9828f3600"},
   {"boxes":[{"pages":[["Look around"]],"speaker":"MegaMan","text":"Look around"}],"container":"square_look_option","domain":"Net Square","file":"src/online/square_words.c","flags":[],"fragment":true,"id":"square_words:square_look_option:0","kind":"speech","line":8,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Look around","text_hash":"6f72d2c8eec5"},

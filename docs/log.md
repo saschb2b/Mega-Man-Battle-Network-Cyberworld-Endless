@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-21
+* **Update**: online/shared-dive.md (a deletion in a crew's won random battle pulled back once a dive by the crew's HP, the owner's calls of 21 November 2026 for issue #718: the fairness rule's new words, the decisions' row, the design and how it is built), engine/saves.md (weekly.sav grown to 32 bytes, the pull-back spent), code/director.md (`crew_pull.c`, `crew_words.c`), code/online.md (`partydel`), devtools/scenarios.md (a seeded Board entry's fifth, pulled back by its crew).
 * **Update**: online/arena/dropped-link.md (a diver's game enters its layer's room again after a resume: the others and his crew back).
 * **Update**: online/shared-dive.md (the crew's sign: the crew's colour on the names, a ring under each crewmate, a dotted one about to be, issue #716, the calls taken and what they were chosen over), devtools/scenarios.md (`rings N: NAMES` and a crewmate's `*` in `tags`), code/online.md (`floor_ring.c`, `crew_look.h`); online/shared-dive.md also (a party's field's marks in the same crew colour).
 * **Update**: online/arena/dropped-link.md (a party's field and a crew's battle ride out a drop: the seat held 12 seconds, the game alone past 10; the transport's tries every half second while a battle waits, a 4-second cut now a 4-second wait).
