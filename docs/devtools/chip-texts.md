@@ -3,7 +3,7 @@ type: Tool
 title: "Chip texts: every chip's name and description its own"
 description: "`tools/chip_texts.py` dumps every chip id's name and description as BN6's own routines find them in the core's copy (the host build's `--chip-texts`, all three ROMs read) and compares each with its own entry in BN6's, BN5's or BN4's archives, naming the entry a wrong text came from."
 tags: [devtools, chips, multirom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T03:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T16:00:00Z }
 ---
 
 # Chip texts: every chip's name and description its own

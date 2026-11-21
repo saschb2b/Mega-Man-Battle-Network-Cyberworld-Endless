@@ -1512,6 +1512,8 @@
 08121D2C BN6_PACK_LIST_END
 08121D3C BN6_SORT_ELEMENTS
 08121DDC chip_registry_22
+08121EEE name_cells.called_with_r5_8_from_folder
+08121F22 name_cells.called_with_r5_8_from_folder_2
 08121F50 BN6_CHIP_NAMES_REF_LIST
 08121F54 chip_registry.names_words_6
 08121F58 chip_registry_23
@@ -1524,6 +1526,7 @@
 0812204C chip_registry.names_words_8
 08122050 chip_registry_25
 08122088 BN6_NCP_NAME_REFS.7
+08122090 BN6_LIST_NAME_DRAW
 081224A0 BN6_EDITOR_LIST_OUT
 081224C2 kept_editor_items_shifts
 081224D4 BN6_EDITOR_LIST_IN

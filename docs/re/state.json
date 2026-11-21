@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-16",
-  "previous": "2026-11-15",
+  "updated": "2026-11-21",
+  "previous": "2026-11-16",
   "features": [
     {
       "name": "Net Square",
@@ -207,8 +207,8 @@
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-16",
-      "what": "The Chip Trader's two readers of an item of the folder editor's list (BN6_TRADER_CARD 0x0804B338, BN6_TRADER_TAKE 0x0804B734: 0x0804B34C, 0x0804B34E, 0x0804B740, 0x0804B744) take id << 6 | code as the editor's sites do since ten-bit chip ids (src/emu/xchips_wide.c, tools/chip_ids.py EDITOR_KEYS; docs/rom/chips-code.md, The pack past 511). Left at seven bits since 0.21.0, a trade kept the three chips put in and took copies of chip id >> 1; found by a scenario (tests/scenarios/layer_gates.py) and by the home session's at AsterLand's trader."
+      "date": "2026-11-21",
+      "what": "A chip's name in BN6's lists: the folder editor's name routine (BN6_LIST_NAME_DRAW 0x08122090, bn6f sub_81202B4, called with r5 = 8 from 0x08121F22) writes every glyph of a name, then blanks to the eighth cell, and its caller goes on from where it ended (BN6_CHIP_NAME_CELLS 8), so a name of nine glyphs set every row under it a cell late. BN5's twelve DS Navi chips were nine (its DS mark one glyph, which BN6 lacks, spelt D and S); src/core/xchips_cells.c cuts a moved name to eight as the install writes the archives (docs/rom/chips-code.md, A name's cells; issue #732, a player's Pack)."
     }
   ],
   "experiments": [

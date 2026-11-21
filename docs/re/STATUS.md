@@ -3,12 +3,12 @@ type: Status
 title: "Research status: Cyberworld Endless: online Net Squares (epic #120)"
 description: "Where each reverse-engineering feature stands, written by tools/re_status.py from docs/re/ledger/: its state, what is done and left, the changes since, experiments and decisions needed."
 tags: [re]
-generated: { by: process:re_status, at: 2026-11-16T00:00:00Z }
+generated: { by: process:re_status, at: 2026-11-21T00:00:00Z }
 ---
 
 # Research status: Cyberworld Endless: online Net Squares (epic #120)
 
-Updated 16 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
+Updated 21 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/ledger.json) and the folders beside it; the [dashboard](dashboard.html) shows the same.
 
 | Feature | Status | Now | What is left | Updated |
 | --- | --- | --- | --- | --- |
@@ -35,9 +35,9 @@ Updated 16 Nov 2026. Written by `tools/re_status.py` from [the ledger](ledger/le
 | [The net maps' own pieces on generated layers](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/505) | Being built | Surveyed over 24 areas (issue #505). On layers: CopyBot Comp's claws, BN4's Undernet's flames and the Undernet's and Undernet Zero's fire bowls, cut from the maps' second tile layer with the panel they grip and the panels they draw over (src/map/sides.c), MegaMan drawn behind them as in BN6; the Underground's teal emblems; Aquarium Comp's pillars under its pads, cut from the first layer in the view of the pads' height. BN4's Undernet's rows of horns behind its catwalks and CopyBot Comp's crystal spikes behind its plateaus, the first layer's too. The bowls and the bubbles under the pillars' stubs are tile animations the maps' GFXAnim lists write (tiles 726-737 and 1-12; tools/map_anims.py) and run on a generated layer by the game's own scripts. | The other kinds on issue #505: the large set pieces beside floors (BN5's End Area's pagoda, Oran Area's hubs); floor marks; stairs. Robot Control's arms are dead-end floor, a layout's matter. | 13 Nov 2026 |
 | [Shared dive](../online/shared-dive.md) | Being built | A door's party fights its guardian on one field over the server: a core of its own built alike on every game (--dev partycore=N alone), every seat's keys guessed and rolled back as the Arena's, the hashes compared, the guardian's aim passed over the party in turn, the end back into each run. | The partners' own NaviStats, hand and Custom screen on the field; a crew's join-in battles on one field. | 15 Nov 2026 |
 
-## Since the last update (15 Nov 2026)
+## Since the last update (16 Nov 2026)
 
-- 16 Nov 2026: The Chip Trader's two readers of an item of the folder editor's list (BN6_TRADER_CARD 0x0804B338, BN6_TRADER_TAKE 0x0804B734: 0x0804B34C, 0x0804B34E, 0x0804B740, 0x0804B744) take id << 6 | code as the editor's sites do since ten-bit chip ids (src/emu/xchips_wide.c, tools/chip_ids.py EDITOR_KEYS; docs/rom/chips-code.md, The pack past 511). Left at seven bits since 0.21.0, a trade kept the three chips put in and took copies of chip id >> 1; found by a scenario (tests/scenarios/layer_gates.py) and by the home session's at AsterLand's trader.
+- 21 Nov 2026: A chip's name in BN6's lists: the folder editor's name routine (BN6_LIST_NAME_DRAW 0x08122090, bn6f sub_81202B4, called with r5 = 8 from 0x08121F22) writes every glyph of a name, then blanks to the eighth cell, and its caller goes on from where it ended (BN6_CHIP_NAME_CELLS 8), so a name of nine glyphs set every row under it a cell late. BN5's twelve DS Navi chips were nine (its DS mark one glyph, which BN6 lacks, spelt D and S); src/core/xchips_cells.c cuts a moved name to eight as the install writes the archives (docs/rom/chips-code.md, A name's cells; issue #732, a player's Pack).
 
 ## Experiments
 
