@@ -1,0 +1,9 @@
+{
+  "branch": "dive-crew-second-screen",
+  "what": "The shared dive: the crew's page on the second screen (issue #729), after the crew's display",
+  "takes": {},
+  "units": [
+    "shared dive: the crew's page on the second screen (#729)"
+  ],
+  "run": false
+}
