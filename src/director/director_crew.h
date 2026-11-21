@@ -56,8 +56,9 @@ void director_crew_over(const Encounter *e, const CrewOver *o);
 extern void (*director_crew_band)(const char *line);
 /* Whether this dive's pull-back is spent (its record's: weekly.h) */
 bool director_crew_pull_spent(void);
-/* The last crew's battle's end, in the state's words ("crewend none", or
- * "crewend won hp 220 pulled" / "... gave 120") */
+/* On a dive, its pull-back ("pullback free" or "spent") and the last
+ * crew's battle's end, in the state's words ("crewend none", or "crewend
+ * won hp 220 pulled" / "... gave 120") */
 void director_crew_describe(FILE *f);
 
 #endif

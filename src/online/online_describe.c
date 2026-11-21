@@ -9,7 +9,6 @@
 #include "online_describe.h"
 
 #include "bn6_fields.h"
-#include "director_crew.h"
 #include "director_hold.h"
 #include "dive_link.h"
 #include "emu.h"
@@ -94,10 +93,6 @@ void online_describe(FILE *f) {
 	visit(f);
 	fprintf(f, "netpass %s\nstamps %d\n", passes[netpass_stamps() <= STAMP_COUNT ? netpass_stamps() : 0], netpass_stamps());
 	fprintf(f, "dive %s\ndivelink %s\n", weekly_on() ? "on" : "none", dive_link_on() ? "on" : "off");
-	if (weekly_on()) {
-		fprintf(f, "pullback %s\n", director_crew_pull_spent() ? "spent" : "free");
-		director_crew_describe(f);
-	}
 	/* (each part's own lines: the spares a trade could give and a swap kept, a dive's divers and crew; in the Square
 	 * the trade under way, its screens and board, the Arena's challenge, battle and card, the week's net) */
 	online_trade_describe(f, online_visit_away());

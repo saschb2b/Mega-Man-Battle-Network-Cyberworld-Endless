@@ -94,6 +94,8 @@ static struct { bool ended, won, pulled; int hp; unsigned gave; } last;
 bool director_crew_pull_spent(void) { return weekly_record()->pulled != 0; }
 
 void director_crew_describe(FILE *f) {
+	if (!weekly_on()) return;
+	fprintf(f, "pullback %s\n", director_crew_pull_spent() ? "spent" : "free");
 	if (!last.ended) { fprintf(f, "crewend none\n"); return; }
 	fprintf(f, "crewend %s hp %d", last.won ? "won" : "lost", last.hp);
 	if (last.pulled) fprintf(f, " pulled");
