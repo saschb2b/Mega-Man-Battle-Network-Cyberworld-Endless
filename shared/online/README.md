@@ -1,10 +1,10 @@
-# Net Square protocol v20
+# Net Square protocol v21
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v20`. The server also
+`/presence` with subprotocol `cyberworld.presence.v21`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -30,7 +30,7 @@ side is behind, rather than a refused upgrade (v10).
 | ARENA_STATE (18) | server → client | u8 stage (1 challenged, 2 waiting, 3 start, 4 ended, 5 `arena_seen` (v13): to the challenger, his question is up on the other's screen and its 30 seconds run from now), u32 battle ID, u32 the other player's session ID (a 2v2 partner's: the other side's lead), 16-byte his public identity, u8 side (0 the cable's first GBA, 1 the second; START's; a 2v2's START: the recipient's seat, 0..3), u8 input delay in frames (START's), u8 the format (v15: a team challenge's, CHALLENGED and WAITING; START's 1 a 2v2; v19: a party battle's, `arena_party` 2 on one field, `arena_linked` 3 a linked fighter), four u32 sessions (v15: a 2v2's START, seats 0 to 3: the leads, then side 0's and side 1's partners; v19: a party's, its seats, zeros past them; else zeros); v19's stage 6, `arena_seat_gone`: a party's seat gone, its side byte that seat, the other his session |
 | ARENA_LOADOUT (19) | client → server → opponent | u32 battle ID, u16 length (1..400), that many bytes: the sender's MegaMan as `src/online/arena_wire.h` packs him (its own version byte; 2 since v12, his HP beside his max HP: a Team NetBattle's winner goes on with what he has left) |
 | ARENA_INPUT (20) | client → server → opponent | u32 battle ID, u32 first frame, u8 count (1..8), count u16 GBA keys, one a frame from the first |
-| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands |
+| ARENA_HASH (21) | client → server → opponent | u32 battle ID, u32 frame, u64 the two linked cores' state hash after it; frame 0xFFFFFFFF says ready, the hash the pair's at the Custom screen; frame 0xFFFFFFFE, sent just before it, the installs' record its cores were made with, so that a ready apart is told by its cause; frame 0xFFFFFFFD (v11) a lag note, once a second in the battle: the u64's low 16 bits the sender's least lag of the other's keys over the last second, signed ticks, for the time sync (docs/online/arena/rollback/quicker-on-the-wire.md), never kept for the stands; frame 0xFFFFFFFC (v21) a resend asked: the u64's low 32 bits the first frame of the other's keys the sender lacks, bits 32-35 the seat whose keys they are (a battle of two: the other's), and that seat's game sends its keys again from there (a battle through a dropped link, below), never kept for the stands |
 | OFFER (22) | client → server | u16 chip id (1..511; 0 takes the sender's offer down), u8 code (0..26), u8 want (0..`want_last`, 9: the game's fixed list, 0 anything); all zeros to take it down |
 | BOARD (23) | server → client | u8 count (0..8), then 8 bytes an offer: u32 the poster's session ID, u16 chip id, u8 code, u8 want; the recipient's channel's offers he may see, his own among them |
 | WEEK_POST (24) | client → server | u16 week, u32 that week's seed, u16 layer (1..`week_layers`, 10), u8 act (that layer's: three layers an act, the Nest the fourth), u8 flags (bit 0 won, only on layer 10; no other bit), u16 minutes, u32 summary hash (not 0), u8 (v19) the acts whose guardian was fought in a party, bit 0 act 1 to bit 3 act 4, none past the dive's act |
@@ -144,6 +144,22 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v21 (issue #180; docs/online/arena/dropped-link.md): **a
+NetBattle through a dropped link.** A NetBattle of two under way is held
+with its player's place (`arena.py`'s `dropped`): the other's game hears
+nothing and waits on his keys as on any slow link, what it sends while
+the place is held is lost with the link, and a resume takes the battle
+back with the place, the same battle ID, side and delay. Each game keeps
+the keys it sent (512 frames) and the keys it took; a game whose link
+came back sends its own again from the frame after the last hash the
+other sent (all it surely had), then asks for the other's from the first
+it lacks (ARENA_HASH frame 0xFFFFFFFC); a game that takes keys past a gap
+in a stream drops them and asks the same, at most every half second. An
+ARENA_INPUT whose frames it has already taken is taken from the first new
+one (the stands did so already). The place freed (its 40 seconds over)
+ends the battle for the other; an ARENA_STATE ended that found the
+player's link down is sent again after his resume's WELCOME.
 
 Protocol v20 (issue #714, docs/online/shared-dive.md, Crews by nearness):
 **a crew is who stands near, never asked for.** The server settles each
@@ -296,8 +312,9 @@ seconds (`server/cyberworld_server/holds.py`): its slot in its channel,
 its session ID and its MegaMan, standing where he stood, in the others'
 SNAPSHOTs; a trade, a challenge or a battle aimed at it meanwhile is
 answered NOTICE 16. What it had under way ends at once, as on any leave:
-a trade not committed is cancelled for both, a battle ends for the other
-(ARENA_STATE ended), watching stops, its board offer is taken down. A
+a trade not committed is cancelled for both, a team bout, a 2v2 or a
+party's battle ends for the others (ARENA_STATE ended), watching stops,
+its board offer is taken down; a NetBattle of two goes on (v21, below). A
 HELLO from the same identity with the resume bit takes the place back:
 the WELCOME names the same session ID and channel (where the old session
 is not yet known to be gone, it is told ERROR 12), the session's last

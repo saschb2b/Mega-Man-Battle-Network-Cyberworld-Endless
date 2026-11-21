@@ -99,7 +99,11 @@ frame, which says whether it ever lost sight of the first. Its wait is
 drawn over any screen, for a capture, by the dev step `reconnect N` (as
 if the link went N seconds ago: the time left shows past five), `reconnect
 back` (the moment it is back) and `reconnect off`; nothing is held or
-sent:
+sent. `reconnect cut N` drops this game's own link instead: its socket
+closed without a goodbye, as a lost network leaves it, and its tries again
+refused for N seconds, the other games' links untouched (a NetBattle
+through one player's dropped link, [A NetBattle through a dropped
+link](../online/arena/dropped-link.md)):
 
 ```bash
 python3 build.py shot --scene emu --run-depth 2 --frames 700 --input "300:,0:reconnect 12,300:" --shot "560:/src/.build/rc/240.bmp"

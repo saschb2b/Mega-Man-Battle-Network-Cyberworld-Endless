@@ -451,11 +451,13 @@ typedef struct {
 	unsigned head, tail;
 	uint32_t now, latency;
 	bool full;   /* (an outbox with no room) */
+	bool lose;   /* (a link dropping: what is sent is lost on the way) */
 } Pipe;
 
 static bool pipe_send(void *context, const uint8_t *data, size_t size) {
 	Pipe *p = context;
 	if (p->full || p->tail - p->head == PIPE || size > sizeof p->data[0]) return false;
+	if (p->lose) return true;
 	unsigned i = p->tail++ % PIPE;
 	memcpy(p->data[i], data, size);
 	p->size[i] = size;
@@ -743,6 +745,42 @@ static void sync(void) {
 	assert(arena_ask_ms(0, 1) == 0 && arena_ask_ms(16, 1) == 16 && arena_ask_ms(0, 0) == 17);
 }
 
+/* A battle through side 1's dropped link (protocol v21, issue #180): from
+ * tick `at` both ways' messages lost on the way for 3 ticks, then side 1's
+ * link down (its outbox refusing, side 0's to it still lost) until `back`,
+ * then its resume. Every frame either side runs still sees both sides'
+ * true keys (side_tick's asserts), and both streams go on; side 0's
+ * stalled ticks */
+static unsigned play_drop(unsigned delay, unsigned latency, uint32_t at, uint32_t back, unsigned ticks) {
+	ArenaNetLink net[2];
+	Pipe *pipes = calloc(2, sizeof *pipes);
+	ArenaInput in[2];
+	unsigned stalls = 0;
+	for (unsigned side = 0; side < 2; ++side) {
+		pipes[side].latency = latency;
+		arena_link_net(&net[side], 77, side, delay, pipe_send, &pipes[side]);
+		arena_input_init(&in[side], net[side].link.delay);
+	}
+	for (uint32_t t = 0; t < ticks; ++t) {
+		bool losing = t >= at && t < back, down = t >= at + 3 && t < back;
+		pipes[0].lose = losing;
+		pipes[1].lose = losing && !down;
+		pipes[1].full = down;
+		arena_link_net_hold(&net[1], down);
+		if (t == back) arena_link_net_resumed(&net[1]);
+		for (unsigned side = 0; side < 2; ++side) {
+			pipes[0].now = pipes[1].now = t;
+			pipe_deliver(&pipes[side ^ 1], &net[side]);
+			if (side_tick(&net[side], &in[side], side, t) && side == 0) ++stalls;
+		}
+	}
+	/* (both streams whole to the end: every frame run on both sides) */
+	assert(in[0].next + delay + latency + 4 >= ticks && in[1].next + delay + latency + 4 >= ticks);
+	assert(net[1].resent > 0 && net[1].asks > 0);
+	free(pipes);
+	return stalls;
+}
+
 static void link_net(void) {
 	/* a delay past the lookahead and the one way never waits; one short
 	 * of it waits */
@@ -753,6 +791,9 @@ static void link_net(void) {
 	/* (a 2v2's four seats: every stream in order on every game, the readies and hashes said against all four) */
 	play_four(6, 2, 600, 4);
 	play_four(3, 5, 400, 2);
+	/* (a dropped link held through: 40 ticks down, 2 seconds, then the battle goes on) */
+	assert(play_drop(6, 2, 300, 340, 900) > 0);
+	assert(play_drop(2, 1, 120, 300, 900) > 0);
 	/* another battle's message, a gap */
 	ArenaNetLink l;
 	Pipe *p = calloc(1, sizeof *p);
@@ -761,8 +802,23 @@ static void link_net(void) {
 	uint16_t keys[2] = { 1, 2 };
 	size_t n = arena_wire_input(m, sizeof m, 9, 6, keys, 2);
 	assert(!arena_link_net_take(&l, m, n) && !l.link.broken(&l.link));
+	/* (v21: a gap's keys dropped, the first missing asked for again, once a while; its keys again taken from the first new) */
 	n = arena_wire_input(m, sizeof m, 5, 7, keys, 2);
-	assert(arena_link_net_take(&l, m, n) && strstr(l.link.broken(&l.link), "order"));
+	assert(arena_link_net_take(&l, m, n) && !l.link.broken(&l.link) && l.from[0].next == 6 && p->tail == 1);
+	uint32_t asked_match, asked_frame;
+	uint64_t asked;
+	assert(arena_wire_read_hash(p->data[0], p->size[0], &asked_match, &asked_frame, &asked) && asked_frame == ARENA_NET_HAVE && asked == 6);
+	assert(arena_link_net_take(&l, m, n) && p->tail == 1);   /* (asked once: the next ARENA_NET_ASK ticks on) */
+	for (unsigned t = 0; t < ARENA_NET_ASK; ++t) l.link.tick(&l.link);
+	assert(arena_link_net_take(&l, m, n) && p->tail == 2);
+	n = arena_wire_input(m, sizeof m, 5, 6, keys, 2);
+	assert(arena_link_net_take(&l, m, n) && l.from[0].next == 8);
+	uint16_t again[3] = { 2, 3, 4 };
+	n = arena_wire_input(m, sizeof m, 5, 7, again, 3);
+	assert(arena_link_net_take(&l, m, n) && l.from[0].next == 10 && l.from[0].keys[7] == 2 && l.from[0].keys[9] == 4);
+	n = arena_wire_input(m, sizeof m, 5, 6, keys, 2);
+	assert(arena_link_net_take(&l, m, n) && l.from[0].next == 10 && !l.link.broken(&l.link));
+	p->head = p->tail = 0;
 	/* my keys: in order, once each, a frame a message */
 	arena_link_net(&l, 5, 0, 6, pipe_send, p);
 	assert(l.link.send(&l.link, 6, 1) && !l.link.send(&l.link, 6, 1) && !l.link.send(&l.link, 8, 1));
@@ -776,10 +832,26 @@ static void link_net(void) {
 	unsigned count;
 	uint16_t got[ONLINE_ARENA_INPUT_MAX];
 	assert(arena_wire_read_input(p->data[1], p->size[1], &match, &frame, got, &count) && frame == 7 && count == 4 && got[3] == 10);
-	/* ... and full for as many frames as a message holds: broken */
+	/* ... and full for as many frames as a message holds and more (a link down, v21): kept, and sent once it has room */
 	p->full = true;
-	for (uint32_t f = 11; f < 11 + ONLINE_ARENA_INPUT_MAX; ++f) assert(l.link.send(&l.link, f, 0));
-	assert(strstr(l.link.broken(&l.link), "sent"));
+	for (uint32_t f = 11; f < 11 + 3 * ONLINE_ARENA_INPUT_MAX; ++f) assert(l.link.send(&l.link, f, (uint16_t)f) && !l.link.broken(&l.link));
+	p->full = false;
+	l.link.tick(&l.link);
+	assert(p->tail == 5 && arena_wire_read_input(p->data[4], p->size[4], &match, &frame, got, &count) && frame == 27 && count == 8 && got[7] == 34);
+	/* ... asked for again from a frame (the other's ARENA_NET_HAVE, my seat's): sent again from there */
+	uint8_t have[ARENA_HASH_BYTES];
+	assert(arena_wire_hash(have, 5, ARENA_NET_HAVE, (uint64_t)1 << 32 | 20) && arena_link_net_take(&l, have, sizeof have) && p->tail == 5);   /* (another seat's) */
+	assert(arena_wire_hash(have, 5, ARENA_NET_HAVE, 20) && arena_link_net_take(&l, have, sizeof have) && p->tail == 7 && l.resent == 15);
+	assert(arena_wire_read_input(p->data[5], p->size[5], &match, &frame, got, &count) && frame == 20 && count == 8 && got[0] == 20);
+	/* ... from a frame no longer kept: broken, saying so */
+	for (uint32_t f = 35; f < 35 + ARENA_NET_PEER; ++f) assert(l.link.send(&l.link, f, 0));
+	assert(arena_wire_hash(have, 5, ARENA_NET_HAVE, 20) && arena_link_net_take(&l, have, sizeof have) && strstr(l.link.broken(&l.link), "late"));
+	/* ... and held back past what is kept: broken */
+	arena_link_net(&l, 5, 0, 6, pipe_send, p);
+	p->full = true;
+	for (uint32_t f = 6; f < 6 + ARENA_NET_PEER; ++f) assert(l.link.send(&l.link, f, 0));
+	assert(!l.link.send(&l.link, 6 + ARENA_NET_PEER, 0) && strstr(l.link.broken(&l.link), "sent"));
+	p->full = false;
 	/* the connection gone: broken at once */
 	arena_link_net(&l, 5, 0, 6, pipe_send, p);
 	arena_link_net_lost(&l, "gone");

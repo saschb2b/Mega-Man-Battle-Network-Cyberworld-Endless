@@ -60,13 +60,17 @@ the server has welcomed the visit:
   maintenance) ends it with its word, as at the gate; past the 30
   seconds, "Whoa! The link to the Square broke!", as before. B on the
   wait gives up at once, the same word;
-- what was under way ends as on any leave: a NetBattle stops without a
-  result ("the connection to the Square was lost", then the Square, held
-  under the wait if the link is still down), watching stops, the Arena's
+- what was under way ends as on any leave: a team bout, a 2v2 or a
+  party's battle stops without a result ("the connection to the Square
+  was lost", then the Square, held under the wait if the link is still
+  down), watching stops, the Arena's
   question and Trade Central's trade are over (the server's word on the
   trade comes again with the resume: below; on a new session, a server
   restarted, the game calls an unfinished trade off itself). Nothing
-  meant for the old session is sent on the new one;
+  meant for the old session is sent on the new one; but a NetBattle of
+  two goes on, held on both games and on the server and taken back with
+  the place ([A NetBattle through a dropped
+  link](../arena/dropped-link.md), protocol v21);
 - leaving with the link up says goodbye (BYE), so the server frees the
   place at once.
 

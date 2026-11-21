@@ -36,6 +36,11 @@ generated: { by: claude-code/unrecorded, at: 2026-10-22T17:15:21Z }
   deployed server; whether four players gather in a channel (the
   online statistics can count it).
 
+- A dropped link mid-battle ([A NetBattle through a dropped
+  link](dropped-link.md)): a NetBattle of two goes on through one; a team
+  bout, a 2v2 and a party's battle still end at it, and a server
+  restarted mid-battle holds nothing. Seen with a socket the game closed
+  itself, not yet on a device's real network.
 - The battle's sound: the scene plays the player's core only where the
   game's own core has made its sound ring (`arena_pair_sound`).
 - The NaviCust's programs are written as the board; BN6 makes HP from

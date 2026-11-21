@@ -14,6 +14,8 @@ static struct { bool on, back; uint32_t since; } R;
 
 void reconnect_preview(const char *spec) {
 	if (!strcmp(spec, "off")) { R.on = false; return; }
+	/* ("cut N": the link itself dropped for N seconds, the game's own wait drawn) */
+	if (!strncmp(spec, "cut ", 4)) { online_transport_cut((uint32_t)atoi(spec + 4) * 1000u); return; }
 	R.on = true;
 	R.back = !strcmp(spec, "back");
 	/* (as if the link went `spec` seconds ago) */

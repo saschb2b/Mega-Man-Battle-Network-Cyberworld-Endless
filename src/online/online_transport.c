@@ -64,6 +64,7 @@ static struct {
 	SDL_Thread *thread;
 	SDL_mutex *mutex;
 	SDL_atomic_t stop, bye, done;
+	SDL_atomic_t cut, cut_until;   /* (a test's dropped link: online_transport_cut) */
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
@@ -314,6 +315,8 @@ static uint32_t connected_loop(OnlineSnapshot *snapshot) {
 			break;
 		}
 		if (SDL_AtomicGet(&transport.stop)) break;
+		/* (a test's dropped link: the socket gone without a word) */
+		if (SDL_AtomicCAS(&transport.cut, 1, 0)) break;
 		/* (every message come in, then the rest: not one a rest, issue #167) */
 		int got;
 		uint32_t now = SDL_GetTicks();
@@ -369,6 +372,8 @@ static void browser_closed(void) {
 }
 
 static void browser_received(const uint8_t *data, size_t size);
+
+void online_transport_cut(uint32_t ms) { (void)ms; }
 
 /* the next try, its time come: a resume's HELLO on a new socket */
 static void browser_retry(uint32_t now) {
@@ -462,7 +467,9 @@ static int worker(void *unused) {
 	unsigned tries = 0;
 	for (;;) {
 		why[0] = '\0';
-		if (online_socket_open(transport.url, &transport.stop, why, sizeof why) &&
+		/* (a test's dropped link: no answer until its time is up) */
+		if ((int32_t)(SDL_GetTicks() - (uint32_t)SDL_AtomicGet(&transport.cut_until)) < 0) SDL_strlcpy(why, "the link is cut (a test)", sizeof why);
+		else if (online_socket_open(transport.url, &transport.stop, why, sizeof why) &&
 		    online_socket_send(transport.hello, transport.hello_size)) connected_loop(&snapshot);
 		online_socket_close();
 		if (!snapshot.reconnecting) tries = 0;
@@ -486,6 +493,13 @@ static int worker(void *unused) {
 	if (!leaving()) fprintf(stderr, "online: %s\n", snapshot.error);
 	SDL_AtomicSet(&transport.done, 1);
 	return 0;
+}
+
+void online_transport_cut(uint32_t ms) {
+	SDL_AtomicSet(&transport.cut_until, (int)(SDL_GetTicks() + ms));
+	SDL_AtomicSet(&transport.cut, 1);
+	online_socket_wake();
+	printf("online: the link cut for %u ms (a test)\n", (unsigned)ms);
 }
 
 /* the worker's link up, as last published */
