@@ -588,15 +588,22 @@ static void dive_heard_rooms_and_feed(void) {
 
 static void dive_heard_crews_and_parties(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE] = { 0 };
-	/* (CREW_STATE formed, two members: protocol.crew_state's bytes, its zeros past them; v20, a member's way zeros) */
+	/* (CREW_STATE formed, two members: protocol.crew_state's bytes, its zeros past them; v24, each one's HP, max HP and layer) */
 	static const uint8_t crew[] = { 48, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1, 65, 108, 112, 104, 97 };
-	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 0, 200, 3 };
 	memcpy(m, crew, sizeof crew); memcpy(m + 7 + ONLINE_CREW_MEMBER_BYTES, mate, sizeof mate);
 	CrewState c;
 	assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_FORMED && c.other == 2 && c.count == 2 &&
-		c.m[0].session == 1 && c.m[1].session == 2 && !strcmp(c.m[1].name, "Beta"));
-	m[1] = 7; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
-	m[7 + ONLINE_CREW_MEMBER_BYTES + 22] = 9; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 22] = 0;
+		c.m[0].session == 1 && c.m[1].session == 2 && !strcmp(c.m[1].name, "Beta") && c.m[1].hp == 120 && c.m[1].max_hp == 200 &&
+		c.m[1].depth == 3 && !c.m[0].max_hp);
+	m[1] = ONLINE_CREW_VITALS; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_VITALS);
+	m[1] = 8; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
+	m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 201; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 120;   /* (HP past his max) */
+	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 0;   /* (a layer past the members) */
+	uint8_t v[ONLINE_DIVE_VITALS_BYTES];
+	static const uint8_t vitals[] = { ONLINE_DIVE, ONLINE_DIVE_VITALS, 0, 120, 0, 200 };
+	assert(dive_wire_vitals(v, 120, 200) == sizeof v && !memcmp(v, vitals, sizeof v) && !dive_wire_vitals(v, 201, 200) && !dive_wire_vitals(v, 0, 0) &&
+		!dive_wire_vitals(v, 10, 10000));
 	m[7 + 3] = 0; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 3] = 1;   /* (a hole before a member) */
 	/* (QUEUE_STATE waiting: Beta leads, his system runs the Arena; Gamma's does not; the recipient second) */
 	static const uint8_t queue[] = { 50, 1, 3, 0, 1, 2, 2, 0, 0, 0, 5, 66, 101, 116, 97 };

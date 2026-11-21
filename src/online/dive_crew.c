@@ -39,7 +39,7 @@ void dive_crew_mail(const uint8_t *m, size_t n) {
 	if (!dive_wire_crew_state(m, n, &c)) return;
 	/* (a crewmate's battle offered, or MegaMan's own fought alone: the join-in's, dive_join.h) */
 	if (c.stage == ONLINE_CREW_OFFER || c.stage == ONLINE_CREW_ALONE) dive_join_crew_state(&c);
-	else if (c.stage == ONLINE_CREW_FORMED) {
+	else if (c.stage == ONLINE_CREW_FORMED || c.stage == ONLINE_CREW_VITALS) {
 		bool changed = c.count != C.count;
 		for (int k = 0; !changed && k < c.count; ++k) changed = c.m[k].session != C.m[k].session;
 		C = c;

@@ -10,6 +10,7 @@
 #include "director.h"
 #include "dive_band.h"
 #include "dive_crew.h"
+#include "dive_crew_view.h"
 #include "dive_join.h"
 #include "dive_party.h"
 #include "dive_finds.h"
@@ -71,6 +72,7 @@ void dive_link_describe(FILE *f) {
 	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "diver %s at %d %d\n", s.peers[i].name, (int)s.peers[i].x, (int)s.peers[i].y);
 	dive_people_describe(f);
 	dive_crew_describe(f);
+	dive_crew_view_describe(f);
 	fprintf(f, "link %s\n", s.reconnecting ? "reconnecting" : s.quiet ? "quiet" : s.connected ? "up" : "down");
 }
 
@@ -156,6 +158,8 @@ void dive_link_frame(void) {
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();
+	/* (MegaMan's HP to his crew as it changes, and the crew's display: dive_crew_view.h) */
+	dive_crew_view_frame(s.connected, s.player_id, now);
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();

@@ -49,7 +49,7 @@ TRACE_FIND = struct.Struct("!B16s")
 TRACE_SPLIT = struct.Struct("!BBHBB16s")
 CREW = struct.Struct("!BBIBBBB")
 CREW_STATE_HEAD = struct.Struct("!BBIB")
-CREW_MEMBER = struct.Struct("!I16sBBB")
+CREW_MEMBER = struct.Struct("!I16sHHB")
 QUEUE = struct.Struct("!BBBBB")
 QUEUE_STATE_HEAD = struct.Struct("!BBBBBBB")
 QUEUE_ENTRY = struct.Struct("!I16sB")
@@ -63,7 +63,8 @@ DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes")
                SPEC["dive_found"]: (struct.Struct("!B"), "dive_found_bytes"),
                SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
                SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
-               SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes")}
+               SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes"),
+               SPEC["dive_vitals"]: (struct.Struct("!HH"), "dive_vitals_bytes")}
 # (saves sent by a code, no protocol version of their own: transfer.py)
 TRANSFER = struct.Struct("!BBB16sI")
 TRANSFER_STATE = struct.Struct("!BBI")
@@ -462,6 +463,9 @@ def dive_fields_ok(action, fields):
         _, tenths, level, flags, party = fields
         return bool(tenths) and 1 <= level <= SPEC["busting_most"] and not flags & ~SPEC["split_guardian"] \
             and 1 <= party <= SPEC["party_most"]
+    if action == SPEC["dive_vitals"]:
+        hp, maximum = fields
+        return 1 <= maximum <= 9999 and hp <= maximum
     return True
 
 
@@ -522,11 +526,12 @@ def crew(action, ref=0, value=0, way=(0, 0, 0)):
 
 
 def crew_state(stage, other, value, members):
-    """CREW_STATE: members (session, name, (depth, side, way): v20 zeros) of at most party_most, zeros past them."""
+    """CREW_STATE: members (session, name, (hp, max_hp, depth): v24, 0 where not known or not on a layer) of at most
+    party_most, zeros past them."""
     out = CREW_STATE_HEAD.pack(SPEC["crew_state"], stage, other, value)
     for k in range(SPEC["party_most"]):
-        session, name, way = members[k] if k < len(members) else (0, "", (0, 0, 0))
-        out += CREW_MEMBER.pack(session, name16(name), *way)
+        session, name, vitals = members[k] if k < len(members) else (0, "", (0, 0, 0))
+        out += CREW_MEMBER.pack(session, name16(name), *vitals)
     return out
 
 

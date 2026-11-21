@@ -107,10 +107,12 @@ typedef struct {
 typedef struct {
 	uint32_t session;
 	char name[ONLINE_NAME_BYTES + 1];
+	uint16_t hp, max_hp;    /* v24: his HP and max HP as his game last said (0 0 not yet) */
+	uint8_t depth;          /* ... and the layer he dives (0: on none, at home) */
 } CrewMember;
 
 typedef struct {
-	uint8_t stage;          /* ONLINE_CREW_FORMED .. ONLINE_CREW_ALONE */
+	uint8_t stage;          /* ONLINE_CREW_FORMED .. ONLINE_CREW_VITALS */
 	uint32_t other;
 	uint8_t value;          /* an offer's battle index */
 	uint8_t count;
@@ -154,6 +156,8 @@ size_t dive_wire_enter(uint8_t out[ONLINE_DIVE_ENTER_BYTES], uint16_t week, uint
 size_t dive_wire_leave(uint8_t out[ONLINE_DIVE_LEAVE_BYTES]);
 size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], unsigned how, int x, int y, int z, unsigned cause);
 size_t dive_wire_found(uint8_t out[ONLINE_DIVE_FOUND_BYTES], unsigned index);
+/* v24: MegaMan's HP and max HP (1..9999, hp at most it) */
+size_t dive_wire_vitals(uint8_t out[ONLINE_DIVE_VITALS_BYTES], unsigned hp, unsigned max_hp);
 size_t dive_wire_phrase(uint8_t out[ONLINE_DIVE_PHRASE_BYTES], unsigned phrase, int x, int y, int z);
 size_t dive_wire_wave(uint8_t out[ONLINE_DIVE_WAVE_BYTES], uint32_t id);
 size_t dive_wire_split(uint8_t out[ONLINE_DIVE_SPLIT_BYTES], const DiveSplit *split);

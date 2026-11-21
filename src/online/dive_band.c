@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "director.h"
+#include "dive_crew_view.h"
 #include "dive_join.h"
 #include "dive_link.h"
 #include "dive_party.h"
@@ -48,6 +49,8 @@ void dive_link_draw(void) {
 	bool chat = emu_read8(BN6_CHATBOX) != 0;
 	/* (the divers' names over their heads: dive_people.h) */
 	dive_people_draw(chat);
+	/* (the crew's plates under BN6's HP box: dive_crew_view.h) */
+	dive_crew_view_draw();
 	/* (never over BN6's chat box: its words first) */
 	if (chat) return;
 	int y = P.core_y + 160 - LOOK_BAND_H - 1;

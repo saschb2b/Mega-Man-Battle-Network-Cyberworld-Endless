@@ -145,6 +145,20 @@ trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`,
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
 
+Protocol v24 (issue #717, docs/online/shared-dive.md, The crew's
+display): **a crewmate's HP and layer.** DIVE `dive_vitals` (8, six
+bytes: u16 HP, u16 max HP, max 1..9999 and HP at most it, else the
+connection's ProtocolError) is a game's MegaMan's HP as it changes, sent
+`crew_vitals_ms` (500) apart at most; the server keeps the latest, one
+every half of that at most, and drops it as the diver leaves the dive.
+CREW_STATE's member grows to 25 bytes: session, name, then u16 HP, u16
+max HP (0 0: not told yet) and u8 the depth of the layer he dives (0: on
+none, at home between acts), where v20 had three zero bytes; 107 bytes
+in all. A crew whose members' HP or layers changed since its last
+CREW_STATE is told again with the stage `crew_vitals` (7, other 0), at
+most every `crew_vitals_ms`; a diver in no crew is told nothing of
+anyone's HP. Information only: nothing of it changes a battle.
+
 Protocol v21 (issue #180; docs/online/arena/dropped-link.md): **a
 NetBattle through a dropped link.** A NetBattle of two under way is held
 with its player's place (`arena.py`'s `dropped`): the other's game hears
