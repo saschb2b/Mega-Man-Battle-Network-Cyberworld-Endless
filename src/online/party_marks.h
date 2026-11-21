@@ -11,15 +11,24 @@
 #define CW_PARTY_MARKS_H
 
 #include <stdint.h>
+#include <stddef.h>
 #include <stdio.h>
 
 #include "party_field.h"
+
+/* a name's width at most: a panel's 40 pixels less its plate's edges and
+ * a gap, so that two MegaMen on neighbouring panels of a row keep their
+ * marks apart */
+#define PARTY_MARKS_BUDGET 34
 
 struct mCore;
 
 /* the party's seats by their sessions (START's), `mine` this game's: each
  * one's name as the server has it now (this game's own the visit's), or
  * "P1" to "P4" where it has none (the dev's stood-in partners: NULL) */
+/* whole letters of `name` that fit `budget` pixels of the pixel font with
+ * `suffix` after them (the crew's plates cut a name so too, dive_crew_view.h) */
+void party_marks_cut(const char *name, const char *suffix, int budget, char *out, size_t size);
 void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine);
 /* Over the picture of the field's core (at P.core_x, P.core_y), as seat
  * `mine` of `n` sees it */

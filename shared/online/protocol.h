@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 23
+#define ONLINE_PROTOCOL_VERSION 24
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v23"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v24"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -156,6 +156,7 @@
 #define ONLINE_DIVE_PHRASE 5
 #define ONLINE_DIVE_WAVE 6
 #define ONLINE_DIVE_SPLIT 7
+#define ONLINE_DIVE_VITALS 8          /* v24: MegaMan's HP and max HP, as they change (issue #717) */
 #define ONLINE_DIVE_ENTER_BYTES 11    /* ... and each one's size, its type byte counted */
 #define ONLINE_DIVE_LEAVE_BYTES 2
 #define ONLINE_DIVE_END_BYTES 11
@@ -163,6 +164,7 @@
 #define ONLINE_DIVE_PHRASE_BYTES 9
 #define ONLINE_DIVE_WAVE_BYTES 6
 #define ONLINE_DIVE_SPLIT_BYTES 8
+#define ONLINE_DIVE_VITALS_BYTES 6
 #define ONLINE_DIVE_DELETED 1         /* a dive's end: deleted ... */
 #define ONLINE_DIVE_WON 2             /* ... or won */
 #define ONLINE_BUSTING_MOST 11        /* BN6's Busting Level: 1 to 10, 11 for S (docs/rom/battle.md) */
@@ -193,8 +195,8 @@
 #define ONLINE_DIVERS_MS 2000         /* DIVERS at most so often, on a change */
 #define ONLINE_DIVERS_FIGHTING 1      /* a DIVERS entry's flags: in a party's fight */
 #define ONLINE_CREW_BYTES 10
-#define ONLINE_CREW_STATE_BYTES 99
-#define ONLINE_CREW_MEMBER_BYTES 23
+#define ONLINE_CREW_STATE_BYTES 107
+#define ONLINE_CREW_MEMBER_BYTES 25
 #define ONLINE_CREW_BATTLE 5          /* CREW's actions (v20: 1-4, the asks and ways, gone) */
 #define ONLINE_CREW_JOIN 6
 #define ONLINE_CREW_BUSY 7           /* v23: a crewmate's battle offered, this game's MegaMan not free to go in */
@@ -202,6 +204,8 @@
 #define ONLINE_CREW_SPLIT_UP 4
 #define ONLINE_CREW_OFFER 5
 #define ONLINE_CREW_ALONE 6
+#define ONLINE_CREW_VITALS 7          /* v24: a crewmate's HP, max HP or layer changed (the crew as it stands) */
+#define ONLINE_CREW_VITALS_MS 500     /* a game's DIVE vitals at most so often; the server's CREW_STATE vitals at most so often a crew */
 #define ONLINE_CREW_JOIN_MS 3000      /* a battle's offer stands so long */
 #define ONLINE_CREW_NEAR 128          /* v20: world units (four panels) within which a crew forms, */
 #define ONLINE_CREW_FAR 192           /* ... and within which it holds */

@@ -62,6 +62,14 @@ size_t dive_wire_found(uint8_t out[ONLINE_DIVE_FOUND_BYTES], unsigned index) {
 	return ONLINE_DIVE_FOUND_BYTES;
 }
 
+size_t dive_wire_vitals(uint8_t out[ONLINE_DIVE_VITALS_BYTES], unsigned hp, unsigned max_hp) {
+	if (!max_hp || max_hp > 9999 || hp > max_hp) return 0;
+	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_VITALS;
+	online_put16(out + 2, (uint16_t)hp);
+	online_put16(out + 4, (uint16_t)max_hp);
+	return ONLINE_DIVE_VITALS_BYTES;
+}
+
 size_t dive_wire_phrase(uint8_t out[ONLINE_DIVE_PHRASE_BYTES], unsigned phrase, int x, int y, int z) {
 	if (phrase >= ONLINE_PHRASE_COUNT || !coordinate(x) || !coordinate(y) || !coordinate(z)) return 0;
 	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_PHRASE; out[2] = (uint8_t)phrase;
@@ -218,7 +226,7 @@ bool dive_wire_divers(const uint8_t *data, size_t size, DiveDivers *out) {
 }
 
 bool dive_wire_crew_state(const uint8_t *data, size_t size, CrewState *out) {
-	if (size != ONLINE_CREW_STATE_BYTES || data[0] != ONLINE_CREW_STATE || data[1] < ONLINE_CREW_FORMED || data[1] > ONLINE_CREW_ALONE)
+	if (size != ONLINE_CREW_STATE_BYTES || data[0] != ONLINE_CREW_STATE || data[1] < ONLINE_CREW_FORMED || data[1] > ONLINE_CREW_VITALS)
 		return false;
 	memset(out, 0, sizeof *out);
 	out->stage = data[1];
@@ -226,9 +234,10 @@ bool dive_wire_crew_state(const uint8_t *data, size_t size, CrewState *out) {
 	out->value = data[6];
 	for (unsigned k = 0; k < ONLINE_PARTY_MOST; ++k) {
 		const uint8_t *e = data + 7 + k * ONLINE_CREW_MEMBER_BYTES;
-		CrewMember m = { .session = get32(e) };
-		/* (v20: a member's last three bytes, once the fork's portal he stood on, zeros) */
-		if (!name_get(m.name, e + 4, !m.session) || e[20] || e[21] || e[22] || (!m.session && m.name[0])) return false;
+		CrewMember m = { .session = get32(e), .hp = get16(e + 20), .max_hp = get16(e + 22), .depth = e[24] };
+		/* (v24: his HP, max HP and layer; none past the members) */
+		if (!name_get(m.name, e + 4, !m.session) || m.hp > m.max_hp || m.max_hp > 9999 || (!m.session && (m.name[0] || m.max_hp || m.depth)))
+			return false;
 		if (!m.session) continue;
 		if (k != out->count) return false;      /* (the members first, zeros after them) */
 		out->m[out->count++] = m;

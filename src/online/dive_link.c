@@ -165,7 +165,7 @@ void dive_link_frame(void) {
 		else dive_link_close();
 		return;
 	}
-	dive_band_frame(now);
+	dive_band_frame(now, s.connected, s.player_id);
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();

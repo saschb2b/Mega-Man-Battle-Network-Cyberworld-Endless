@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T20:20:05Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T20:30:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -772,8 +772,8 @@ drawing over the field's picture, read from the field's core as it
 stands for the frame shown, so a rollback leaves nothing behind; it
 writes nothing, and nothing of it is in the field's hash. The names are
 the seats' sessions in START as the server's snapshot names them, this
-game's own the visit's. A partner's HP beside his name, where #717 wants
-it, goes in `party_marks_draw`'s loop. `--dev partyview=N` draws a
+game's own the visit's. A partner's HP stands under his name (The
+crew's display, below). `--dev partyview=N` draws a
 `partycore` field as seat N sees it, and the state says it (`partyfield`,
 `hpbox`, `markK own|crew at X Y width W tag T`, `marks N apart|MEET`).
 
@@ -789,6 +789,71 @@ own name in orange, the other's in white, "Wwwww" cut to the panel, both
 marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
+
+## The crew's display (21 November 2026)
+
+The team's test of 18 November asked for a display of the group, each
+one's level, layer and HP
+([issue #717](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/717)).
+The owner's direction of 21 November 2026 is co-op as in a modern MMO
+or Diablo: the party frame, at a glance who is in my crew, how they are
+doing and where they are. BN6 draws no such thing: on the map its HP
+box alone (seen in every capture of a layer, as in [Who is who on a
+party's field](#who-is-who-on-a-partys-field-21-november-2026)'s), and
+it has no players together on a map at all.
+
+**The calls** (taken under the owner's direction of 21 November 2026;
+his to turn over), through the game-design skill's interface layer (a
+party frame is a non-diegetic overlay the eye returns to, so it stays
+small, in one place, and covers nothing it needs to read):
+
+- **The crew alone**, three others at most, never the room's seven: the
+  crew is who plays together ([Crews by nearness](#crews-by-nearness-21-november-2026)).
+  Chosen over every diver on the layer, whose plates would be noise.
+- **Always while in a crew**, no key: the crew changes as people walk,
+  and a key would hide it when it matters. Alone, or with the link down,
+  nothing.
+- **Where**: a plate a crewmate under BN6's HP box at the picture's top
+  left, its column, covering nothing of BN6's (the box, the chat boxes at
+  the foot, the band). Chosen over the band grown (one line, and the
+  feed's), and over a second screen alone (most systems have none).
+- **What**: his name, cut as the field's marks cut it; his HP as BN6
+  writes HP, over his max HP; a bar of it under the plate, orange from a
+  quarter down; and his layer ("L3") where it is not MegaMan's. **"Level"
+  is max HP**: a dive starts from a standard profile, so the game has no
+  level, and what grows with a dive is max HP (HPMemory, the guardians'
+  data); the act and the layer say how deep, not how strong. Chosen over
+  the act and over Busting Levels (a battle's, not a diver's).
+- **In battle**: a partner's HP under his name on a party's field
+  (`party_marks.c`), as BN6 writes an enemy's under him; MegaMan's own
+  is the HP box. A crewmate fighting his own battle: his plate's HP
+  falls as he is hit, read from his battle.
+- **Later, each its own issue**: a second screen's page (`src/second/`,
+  [issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)),
+  and the divers' dots on the PET's map (decided 15 November, not built;
+  [issue #728](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/728)).
+
+As built (`src/online/dive_crew_view.c`, protocol v24 in [the
+wire](../../shared/online/README.md)): each game sends its MegaMan's HP
+and max HP as they change, and again where the crew's word of them
+differs (DIVE vitals, half a second apart at most;
+`director_megaman_hp`, the map's or his battle object's); the server
+keeps it and tells his crew alone, in CREW_STATE's members with each
+one's layer, as they change. The plates are our own drawing over the map
+and change nothing; the state says them (`crewview N`, `mateK NAME hp
+H/M layer D|here`), and the field's marks say a partner's HP (`markK ...
+hp N`).
+
+Seen headless (21 November 2026; the scenario
+`tests/scenarios/online_crew_view.py`): two divers on the week's net
+over a local server, a crew by standing together, each shown the other's
+plate, "Beta 100/100"; Beta's own battle against a Mettaur, his HP 90 on
+Alpha's plate while he was still fighting; Beta on to layer 2 by the dev
+menu, "Beta L2 90/100" on Alpha's; ten seconds on, out of the crew, no
+plate. With the server stopped mid-crew: no plates. In those runs
+Beta's game logged "crew none" around his battle's end and the crew
+formed again once both stood together (#725's crews by nearness): his
+plate goes and comes back with it.
 
 ## The spike: four on one field (15 November 2026)
 
