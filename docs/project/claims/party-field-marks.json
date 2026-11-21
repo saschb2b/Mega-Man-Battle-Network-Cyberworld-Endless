@@ -1,9 +1,0 @@
-{
-  "branch": "party-field-marks",
-  "what": "The shared dive: who is who on a party's field, a mark by each MegaMan's feet (issue #713)",
-  "takes": {},
-  "units": [
-    "shared dive: marks on a party's field (#713)"
-  ],
-  "run": false
-}

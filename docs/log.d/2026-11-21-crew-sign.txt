@@ -1,3 +1,3 @@
 by: claude-code/claude-opus-5-5
 at: 2026-11-21T19:31:16Z
-* **Update**: online/shared-dive.md (the crew's sign: the crew's colour on the names, a ring under each crewmate, a dotted one about to be, issue #716, the calls taken and what they were chosen over), devtools/scenarios.md (`rings N: NAMES` and a crewmate's `*` in `tags`), code/online.md (`floor_ring.c`, `crew_look.h`).
+* **Update**: online/shared-dive.md (the crew's sign: the crew's colour on the names, a ring under each crewmate, a dotted one about to be, issue #716, the calls taken and what they were chosen over), devtools/scenarios.md (`rings N: NAMES` and a crewmate's `*` in `tags`), code/online.md (`floor_ring.c`, `crew_look.h`); online/shared-dive.md also (a party's field's marks in the same crew colour).

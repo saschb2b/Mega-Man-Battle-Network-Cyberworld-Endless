@@ -127,8 +127,8 @@ class Stands:
                 book.record[side] = bytes(data)
             elif frame == 0xFFFFFFFF:
                 book.ready[side] = bytes(data)
-            elif frame == 0xFFFFFFFD:
-                pass   # (a lag note for the other player's time sync, v11: nothing for the stands)
+            elif frame in (0xFFFFFFFD, 0xFFFFFFFC):
+                pass   # (a lag note for the other player's time sync, v11, or an ask for keys again, v21: nothing for the stands)
             elif side == 0 and (not book.hashes or frame > book.hashes[-1][0]) and len(book.hashes) < MOST_FRAMES // 60:
                 book.hashes.append((frame, bytes(data)))
         elif kind == protocol.SPEC["arena_input"] and not book.broken:

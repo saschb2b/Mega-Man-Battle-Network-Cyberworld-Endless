@@ -45,13 +45,22 @@ static void frame_box(int x, int y, int w, int h, SDL_Color c) {
 	fill_rect(x + w, y, 1, h, c);
 }
 
-/* a MegaMan's object: side's player (k 0) or partner (k 1); 0 none */
-static uint32_t megaman(struct mCore *c, unsigned side, unsigned k) {
+uint32_t arena_team_view_megaman(struct mCore *c, unsigned side, unsigned k) {
 	return (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS + side * BN6_BATTLE_PLAYER_STEP + k * BN6_SIDE_PARTNER, -1);
 }
 
-/* the HP box, his own over BN6's (which shows his lead's) */
-static void hp_box(unsigned hp, bool open) {
+bool arena_team_view_feet(struct mCore *c, uint32_t o, unsigned view, int *x, int *y, unsigned *hp) {
+	if (o < BN6_EWRAM || o >= BN6_EWRAM_END) return false;
+	unsigned col = rd8(c, o + BN6_T1_PANEL_X), row = rd8(c, o + BN6_T1_PANEL_Y);
+	*hp = rd16(c, o + BN6_T1_HP);
+	if (!col || col > 6 || !row || row > 3 || !*hp) return false;
+	unsigned shown_col = view ? 7 - col : col;
+	*x = P.core_x + (int)(shown_col - 1) * PANEL_W + PANEL_W / 2;
+	*y = P.core_y + FIELD_TOP + (int)(row - 1) * PANEL_H + 16;
+	return true;
+}
+
+void arena_team_view_hp(unsigned hp, bool open) {
 	int x = P.core_x + (open ? HP_X_CUSTOM : HP_X), y = P.core_y;
 	char n[8];
 	snprintf(n, sizeof n, "%u", hp);
@@ -65,12 +74,9 @@ static void hp_box(unsigned hp, bool open) {
 static void marks(struct mCore *c, unsigned view, unsigned own) {
 	for (unsigned side = 0; side < 2; ++side)
 		for (unsigned k = 0; k < 2; ++k) {
-			uint32_t o = megaman(c, side, k);
-			if (o < BN6_EWRAM || o >= BN6_EWRAM_END) continue;
-			unsigned col = rd8(c, o + BN6_T1_PANEL_X), row = rd8(c, o + BN6_T1_PANEL_Y), hp = rd16(c, o + BN6_T1_HP);
-			if (!col || col > 6 || !row || row > 3 || !hp) continue;
-			unsigned shown_col = view ? 7 - col : col, seat = k ? 2 + side : side;
-			int px = P.core_x + (int)(shown_col - 1) * PANEL_W + PANEL_W / 2, py = P.core_y + FIELD_TOP + (int)(row - 1) * PANEL_H + 16;
+			int px, py;
+			unsigned hp, seat = k ? 2 + side : side;
+			if (!arena_team_view_feet(c, arena_team_view_megaman(c, side, k), view, &px, &py, &hp)) continue;
 			char tag[8];
 			snprintf(tag, sizeof tag, "P%u", seat + 1);
 			pixfont_draw(px - TAG_X, py - TAG_UP, tag, side == view ? PET_CYAN_HI : PET_GOLD, shade, PIXFONT_LEFT, 1);
@@ -90,7 +96,7 @@ static void sign(struct mCore *c, unsigned side, unsigned seat) {
 	static unsigned shown;   /* (the sign's own frames, for its dots: a drawing's count, no game state) */
 	bool partner = seat >= 2;
 	if (partner ? !arena_team_custom_lead_waits(c, side) : !arena_team_custom_picking(c, side)) return;
-	uint32_t o = megaman(c, side, 1);
+	uint32_t o = arena_team_view_megaman(c, side, 1);
 	if (!partner && (o < BN6_EWRAM || o >= BN6_EWRAM_END || !rd16(c, o + BN6_T1_HP))) return;
 	char tag[8];
 	snprintf(tag, sizeof tag, "P%u", partner ? side + 1 : side + 3);
@@ -122,8 +128,8 @@ void arena_team_view(struct mCore *c, unsigned seat, bool hurry) {
 	if (!c || seat > 3) return;
 	unsigned side = arena_team_view_side(seat);
 	bool open = rd8(c, BN6_BATTLE_PHASE) == BN6_PHASE_CUSTOM, partner = seat >= 2;
-	uint32_t own = megaman(c, side, partner);
-	if (partner && own >= BN6_EWRAM && own < BN6_EWRAM_END) hp_box(rd16(c, own + BN6_T1_HP), open);
+	uint32_t own = arena_team_view_megaman(c, side, partner);
+	if (partner && own >= BN6_EWRAM && own < BN6_EWRAM_END) arena_team_view_hp(rd16(c, own + BN6_T1_HP), open);
 	if (open) sign(c, side, seat);
 	else marks(c, side, seat);
 	if (open && hurry) hurry_sign(seat);

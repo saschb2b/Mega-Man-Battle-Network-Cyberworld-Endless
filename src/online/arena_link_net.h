@@ -21,7 +21,19 @@
  * sync, the rest come through poll_player. A ready, a record and a hash
  * are said once every other seat's has come: mine where all agree with
  * mine, else the first that differs, so that a game apart from any of the
- * three stops. */
+ * three stops.
+ *
+ * Through a dropped link (protocol v21, issue #180;
+ * docs/online/arena/dropped-link.md): my keys are kept as sent
+ * (ARENA_NET_PEER frames) and go out from the first not yet sent, so an
+ * outbox that refuses them while the link is down only holds them back. A
+ * stream that comes with a gap is not broken: its keys past the gap are
+ * dropped and the first missing asked for again (ARENA_NET_HAVE, at most
+ * every ARENA_NET_ASK ticks); one that comes again from frames already
+ * taken is taken from its first new one. The link back (the transport's
+ * resume), my keys go again from the frame after the last hash the others
+ * sent, all they surely had, and theirs are asked for from the first I
+ * lack. */
 #ifndef CW_ARENA_LINK_NET_H
 #define CW_ARENA_LINK_NET_H
 
@@ -40,6 +52,8 @@ typedef bool (*ArenaSend)(void *context, const uint8_t *data, size_t size);
 #define ARENA_NET_READY   0xFFFFFFFFu   /* ARENA_HASH's frame for "ready, my pair's hash at the Custom screen" */
 #define ARENA_NET_RECORD  0xFFFFFFFEu   /* ... for "my cores' installs' record" (xinstall_log.h's hash, 0 none), sent before the ready */
 #define ARENA_NET_LAG     0xFFFFFFFDu   /* ... for "my least lag of your keys", its low 16 bits signed ticks (protocol v11, arena_sync.h) */
+#define ARENA_NET_HAVE    0xFFFFFFFCu   /* ... for "send your keys again from this frame", its low 32 bits the frame, bits 32-35 whose seat's (v21) */
+#define ARENA_NET_ASK     30            /* ticks between two asks for one seat's keys while a gap lasts */
 #define ARENA_NET_FLUSH   1             /* my keys a message, the outbox willing */
 #define ARENA_NET_GRACE   90            /* ticks after the peer's end that its keys already come may run */
 
@@ -55,6 +69,8 @@ typedef struct {
 	uint64_t ready_hash, record;
 	bool lagged;                      /* a lag note come, not yet taken */
 	int16_t lag;
+	bool asked;                       /* its keys asked for again (v21), at asked_at */
+	uint32_t asked_at;
 } ArenaNetSeat;
 
 typedef struct {
@@ -64,9 +80,11 @@ typedef struct {
 	uint32_t match;
 	unsigned seats;                   /* 2, or a 2v2's ONLINE_SEATS */
 	uint32_t sent;                    /* my next frame */
-	uint32_t batch_first;
-	uint16_t batch[ONLINE_ARENA_INPUT_MAX];
-	unsigned batched;
+	uint32_t flushed;                 /* my first frame not yet put in the outbox (below sent: held back) */
+	uint16_t kept[ARENA_NET_PEER];    /* my keys as sent, by frame (v21: sent again where asked) */
+	bool held;                        /* the transport's link down: nothing put in the outbox meanwhile */
+	uint32_t ticks;                   /* the link's ticks, for the asks' pace */
+	uint32_t resent, asks;            /* my frames sent again, and the asks said (the log's) */
 	ArenaNetSeat from[ONLINE_SEATS];  /* by seat (mine unused) */
 	ArenaNetHash mine[ARENA_NET_HASHES];   /* my hashes, said against a 2v2's three others' */
 	unsigned nmine;
@@ -110,5 +128,12 @@ bool arena_link_net_flush(ArenaNetLink *l);
 void arena_link_net_ended(ArenaNetLink *l);
 /* The connection gone: the link broken, `why` said */
 void arena_link_net_lost(ArenaNetLink *l, const char *why);
+/* The transport's link down (true) or up again (v21): while down nothing
+ * goes in the outbox, my keys kept for the link's return */
+void arena_link_net_hold(ArenaNetLink *l, bool down);
+/* The transport's link back (its resume, v21): my keys sent again from
+ * the frame after the others' last hash, theirs asked for from the first
+ * I lack */
+void arena_link_net_resumed(ArenaNetLink *l);
 
 #endif

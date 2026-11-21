@@ -1,5 +1,6 @@
 """A place held through a dropped link, and taken back (issue #153, protocol
-v10, holds.py); the maintenance line (server.ini)."""
+v10, holds.py), a NetBattle of two held with it (issue #180, v21); the
+maintenance line (server.ini)."""
 
 import asyncio
 import json
@@ -177,9 +178,9 @@ class HoldTests(unittest.IsolatedAsyncioTestCase):
         await a.send(trade(1, b_id, (6, 0)))
         self.assertEqual(struct.unpack("!H", (await a.message(SPEC["notice"]))[1:3])[0], 21)
 
-    async def test_a_netbattle_ends_for_the_other_and_no_challenge_reaches_a_held_place(self):
-        server = await self.start()
-        a, first = await self.connect("Alpha")
+    async def battle(self, key=None):
+        """Alpha (by `key`) and Beta in a NetBattle under way: their clients, ids and the battle's."""
+        a, first = await self.connect("Alpha", key)
         a_id = struct.unpack("!I", first[5:9])[0]
         b, second = await self.connect("Beta")
         b_id = struct.unpack("!I", second[5:9])[0]
@@ -189,12 +190,87 @@ class HoldTests(unittest.IsolatedAsyncioTestCase):
         await b.send(arena(2, match))
         await a.message(SPEC["arena_state"])
         self.assertEqual(protocol.ARENA_STATE.unpack(await b.message(SPEC["arena_state"]))[1], 3)
+        return a, a_id, b, b_id, match
+
+    @staticmethod
+    async def kinds(client, seconds):
+        """The kinds of message that came in the next `seconds`."""
+        kinds, deadline = set(), time.monotonic() + seconds
+        while time.monotonic() < deadline:
+            kinds.add((await client.receive())[0])
+        return kinds
+
+    @staticmethod
+    def keys(match, frame):
+        return protocol.ARENA_INPUT.pack(SPEC["arena_input"], match, frame, 1) + struct.pack("!H", frame)
+
+    async def test_a_netbattle_is_held_through_a_dropped_link_and_taken_back(self):
+        # (protocol v21, issue #180: the battle goes on, its keys relayed again once he is back)
+        server = await self.start()
+        key = b"k" * 16
+        a, a_id, b, b_id, match = await self.battle(key)
+        await self.dropped(a)
+        await until(lambda: a_id in server.holds.until)
+        self.assertIn(match, server.arena.matches)
+        # (Beta told nothing: his keys go on, lost with the link)
+        await b.send(self.keys(match, 6))
+        self.assertNotIn(SPEC["arena_state"], await self.kinds(b, 0.5))
+        # (a third player's challenge to the held place: NOTICE 16, as ever)
+        c, third = await self.connect("Gamma")
+        await c.send(arena(1, a_id))
+        self.assertEqual(struct.unpack("!H", (await c.message(SPEC["notice"]))[1:3])[0], 16)
+        # (back: the same session, the same battle, the keys relayed both ways)
+        a, welcome = await self.connect("Alpha", key, resume=True)
+        self.assertEqual(struct.unpack("!I", welcome[5:9])[0], a_id)
+        self.assertIn(match, server.arena.matches)
+        await b.send(self.keys(match, 7))
+        self.assertEqual(protocol.ARENA_INPUT.unpack_from(await a.message(SPEC["arena_input"]))[2], 7)
+        await a.send(self.keys(match, 6))
+        self.assertEqual(protocol.ARENA_INPUT.unpack_from(await b.message(SPEC["arena_input"]))[2], 6)
+        # (an ask for keys again goes to the other as any hash; the stands keep none of it)
+        ask = protocol.ARENA_HASH.pack(SPEC["arena_hash"], match, 0xFFFFFFFC, 6)
+        await a.send(ask)
+        self.assertEqual(await b.message(SPEC["arena_hash"]), ask)
+        self.assertEqual(server.stands.books[match].hashes, [])
+
+    async def test_a_held_netbattle_ends_with_its_hold(self):
+        server = await self.start(hold=0.3)
+        a, a_id, b, b_id, match = await self.battle()
+        await self.dropped(a)
+        await until(lambda: a_id in server.holds.until)
+        ended = protocol.ARENA_STATE.unpack(await b.message(SPEC["arena_state"]))
+        self.assertEqual(ended[1:3], (4, match))
+        self.assertNotIn(a_id, server.players)
+        self.assertNotIn(match, server.arena.matches)
+
+    async def test_a_held_netbattles_end_is_told_on_the_resume(self):
+        # (Beta leaves while Alpha is away: Alpha hears it once back)
+        server = await self.start()
+        key = b"e" * 16
+        a, a_id, b, b_id, match = await self.battle(key)
+        await self.dropped(a)
+        await until(lambda: a_id in server.holds.until)
+        await b.send(arena(3, match))
+        await until(lambda: match not in server.arena.matches)
+        a, _ = await self.connect("Alpha", key, resume=True)
+        ended = protocol.ARENA_STATE.unpack(await a.message(SPEC["arena_state"]))
+        self.assertEqual(ended[1:3], (4, match))
+        self.assertNotIn(a_id, server.arena.missed)
+
+    async def test_a_team_bout_or_an_unstarted_battle_still_ends_at_the_drop(self):
+        server = await self.start()
+        a, first = await self.connect("Alpha")
+        a_id = struct.unpack("!I", first[5:9])[0]
+        b, second = await self.connect("Beta")
+        b_id = struct.unpack("!I", second[5:9])[0]
+        await a.send(arena(1, b_id))
+        match = protocol.ARENA_STATE.unpack(await a.message(SPEC["arena_state"]))[2]
+        await b.message(SPEC["arena_state"])
         await self.dropped(a)
         ended = protocol.ARENA_STATE.unpack(await b.message(SPEC["arena_state"]))
         self.assertEqual(ended[1:3], (4, match))
         await until(lambda: a_id in server.holds.until)
-        await b.send(arena(1, a_id))
-        self.assertEqual(struct.unpack("!H", (await b.message(SPEC["notice"]))[1:3])[0], 16)
+        self.assertFalse(server.arena.holdable(a_id))
 
     async def test_a_moderator_frees_a_held_place_at_once(self):
         server = await self.start()
