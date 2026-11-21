@@ -25,6 +25,7 @@
 #include "pet.h"
 #include "player_body.h"
 #include "save.h"
+#include "save_mask.h"
 #include "talk.h"
 
 /* What the game is doing, for a state, and MegaMan's HP there: in a
@@ -108,6 +109,7 @@ void director_describe(FILE *f) {
 	if (D.town) fprintf(f, "place %s\n", director_place_name());
 	/* (GameState's protected zenny, then its BugFrags) */
 	fprintf(f, "hp %d/%d\nzenny %u\nbugfrags %u\n", hp, max, (unsigned)emu_read32(BN6_ZENNY), (unsigned)emu_read32(BN6_BUGFRAGS));
+	save_mask_describe(f);   /* (BN6's own save's mask: issue #734) */
 	/* (a battle's gauge, its turn and the rules it runs by, a liberation's
 	 * or BN6's own: issue #669 left a liberation's on the next run's
 	 * battles; tests/scenarios reads them) */
