@@ -14,6 +14,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "dive_wire.h"
 #include "online_types.h"
@@ -31,6 +32,8 @@ void dive_join_crew_state(const CrewState *c);
 bool dive_join_start(const PartyState *p);
 /* The crew's battle under way (its ARENA_STATE's battle id), 0 none */
 uint32_t dive_join_battle(void);
+/* ... in the state's words (online_describe.h): `join none|calling|offered|joined|fighting` */
+void dive_join_describe(FILE *f);
 /* The band's line while an offer stands or MegaMan waits, NULL none. */
 const char *dive_join_band(void);
 

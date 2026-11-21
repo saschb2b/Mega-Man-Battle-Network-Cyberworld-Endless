@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T18:30:00Z
+* **Update**: online/shared-dive.md (who is who on a party's field, issue #713: each MegaMan's name by his feet, the player's own in the PET cursor's orange behind its arrow, a partner's own HP box; the call and what it was chosen over), code/online.md (`party_marks.c`, `partyview`).

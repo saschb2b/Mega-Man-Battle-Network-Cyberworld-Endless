@@ -499,6 +499,68 @@ Verified on `dev`, 15 November 2026:
   past the lead's OK, a Program Advance of a partner's, his Cross and
   Souls (refused on a party's field for now: the Arena's).
 
+## Who is who on a party's field (21 November 2026)
+
+The team's test over Discord of 18 November
+([issue #713](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/713)):
+on a party's field, a guardian's or a crew's join-in battle, four of
+BN6's MegaMen stand in one palette and nobody could tell which was his.
+BN6 itself leaves an ally unlabelled (the Arena's finding,
+[the partner's seat](arena/two-a-side/seat.md)).
+
+**The call** (taken under the owner's direction of 21 November 2026, that
+the online game is to feel like co-op in a modern MMO or Diablo: always
+clear who is who; his to turn over): a mark by each MegaMan's feet, his
+diver's name, the player's own told apart first. Chosen over a palette
+per MegaMan, which changes what the core draws and so must be alike on
+every game of the field or kept out of its hash; that waits for
+[issue #694](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/694),
+a look of the player's own, where colours are the first step. Read
+through the game-design skill's interface layer: a spatial label on the
+actor, the question "which one am I" answered by a shape as well as a
+colour.
+
+- **The name, cut to a panel.** Whole letters of the diver's name that
+  fit 34 pixels of the engine's pixel font: a panel is 40 wide, so two
+  MegaMen on neighbouring panels of a row keep their names apart, and
+  rows stand 24 apart, more than a name's 9. Two names alike as cut get
+  their seat's digit after them; a seat with no name (the dev's stood-in
+  partners) is "P1" to "P4", the Arena's marks. Centred under his feet.
+- **The player's own** in the PET cursor's orange behind its arrow, so
+  it does not rest on colour alone; the others in the crew's colour, white until a crew has one of its own
+  ([issue #716](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/716):
+  `CREW_COLOUR` in `src/online/party_marks.c`).
+- **A partner's HP his own.** BN6's HP box shows side 0's first actor,
+  the lead, on every game of the field; a partner sees his own over it,
+  as a two-a-side's partner does (`arena_team_view_hp`).
+- **When.** While the field fights, not over a partner's own Custom
+  screen, and on the field's Custom screen the HP box alone, as the
+  Arena's. A MegaMan deleted or gone has none. A linked fighter (New 3DS,
+  PSP) fights alone and has nothing to mark.
+
+As built (`src/online/party_marks.c`, drawn by `party_play_draw`): our own
+drawing over the field's picture, read from the field's core as it
+stands for the frame shown, so a rollback leaves nothing behind; it
+writes nothing, and nothing of it is in the field's hash. The names are
+the seats' sessions in START as the server's snapshot names them, this
+game's own the visit's. A partner's HP beside his name, where #717 wants
+it, goes in `party_marks_draw`'s loop. `--dev partyview=N` draws a
+`partycore` field as seat N sees it, and the state says it (`partyfield`,
+`hpbox`, `markK own|crew at X Y width W tag T`, `marks N apart|MEET`).
+
+Seen headless (21 November 2026; the scenario
+`tests/scenarios/online_party_marks.py`): three MegaMen against layer 3's
+guardian of `--seed 3` (BlastMan) drawn as seat 1 sees them, "P2" his own
+behind the arrow, P1 and P3 the crew's, his HP box his own (read from his
+object, side 0's actor 1), no marks over the Custom screen; with
+`partytwin=1,partyroll=30` 121 checks of the twin and the rollback the
+same and none apart, the marks drawn. Over a local server, two crewed
+divers in a crew's join-in battle, one named sixteen w's: each game his
+own name in orange, the other's in white, "Wwwww" cut to the panel, both
+marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
+Not yet seen over the server: a guardian's door (the same drawing, on the
+same field).
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own

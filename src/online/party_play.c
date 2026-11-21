@@ -20,7 +20,7 @@
 #include "online_mail.h"
 #include "online_visit.h"
 #include "online_transport.h"
-#include "party_core.h"
+#include "party_marks.h"
 #include "party_turn.h"
 #include "rom.h"
 #include "souls.h"
@@ -75,6 +75,9 @@ static struct {
 	uint64_t mine_ready;
 	bool crew;                    /* a crew's random battle (party_play_crew), not a guardian's */
 } PP;
+
+/* the seat the field is drawn for: mine, or the dev's partyview */
+static unsigned viewer(void) { return !PP.net && PP.dev.view > 0 && PP.dev.view < PARTY_MOST ? (unsigned)PP.dev.view : PP.seat; }
 
 /* A crew's battle's end, kept for party_play_crew_end */
 typedef struct { bool due, won; int hp; uint16_t reward; } CrewEnd;
@@ -152,6 +155,7 @@ static bool fight(const Encounter *e, int own_hp, int fought_hp) {
 	/* (the dev's stood-in partners: my MegaMan again, their keys a script) */
 	for (unsigned k = 0; !PP.net && k < PP.b.n; ++k) { PP.b.seat[k] = *mine; PP.have[k] = true; }
 	PP.stage = PP_BOOT;
+	if (!PP.net) party_marks_seats(NULL, viewer());
 	if (PP.crew) fprintf(stderr, "party: the crew's battle taken over, %u MegaMen, my seat %u\n", PP.b.n, PP.seat);
 	else fprintf(stderr, "party: the guardian's fight taken over, %u MegaMen, my seat %u, his HP %d (his own %d)\n", PP.b.n, PP.seat, fought_hp,
 		own_hp);
@@ -189,8 +193,9 @@ void party_play_dev(const PartyDev *d) {
 	party_play_on(d->n > 1);
 }
 
-void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay) {
+void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay, const uint32_t seats[PARTY_MOST]) {
 	stop();
+	party_marks_seats(seats, seat);
 	PP.started = true;
 	PP.battle = battle;
 	PP.seat = seat < PARTY_MOST ? seat : 0;
@@ -611,5 +616,13 @@ void party_play_draw(void) {
 	const uint32_t *turn = PP.core && PP.stage == PP_FIGHT ? party_turn_video(PP.seat) : NULL;
 
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
+	/* (who is who on the field as it fights, never over a partner's own screen) */
+	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
+}
+
+void party_play_describe(FILE *f) {
+	if (!PP.core || PP.stage != PP_FIGHT) return;
+	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	if (!party_turn_video(PP.seat)) party_marks_describe(f, party_core_gba(PP.core), viewer(), PP.b.n);
 }
 

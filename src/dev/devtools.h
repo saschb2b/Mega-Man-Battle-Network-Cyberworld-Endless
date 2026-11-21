@@ -107,6 +107,7 @@ typedef struct {
 	int party_delay; /* partydelay=N: a party's input delay over the server, N frames (party_play.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */
+	int party_view; /* partyview=N: a party's field under partycore drawn as seat N sees it, his marks and HP box (party_marks.h) */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
 	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */
 	int team_hp;    /* teamhp=N: under arena2v2 each partner's own NaviStats with max HP N (arena_team_navi.h); -N on the second

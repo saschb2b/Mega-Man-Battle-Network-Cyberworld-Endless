@@ -190,7 +190,7 @@ static void take(const PartyState *p) {
 	/* (the run's next battle too, so that the owner fights it alone where the field cannot be made) */
 	director_crew_record(&J.e);
 	party_play_on(true);
-	party_play_start(p->battle, p->seat, n, p->delay);
+	party_play_start(p->battle, p->seat, n, p->delay, p->seats);
 	if (!party_play_crew(&J.e)) {
 		if (p->seat == 0) alone("the field could not take it");
 		else to(JOIN_NONE);
@@ -222,4 +222,9 @@ const char *dive_join_band(void) {
 	case JOIN_JOINED: return dive_join_joined_words();
 	default: return NULL;
 	}
+}
+
+void dive_join_describe(FILE *f) {
+	static const char *const stages[] = { "none", "calling", "offered", "joined", "fighting" };
+	fprintf(f, "join %s\n", stages[J.stage]);
 }
