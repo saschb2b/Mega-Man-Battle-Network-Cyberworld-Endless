@@ -40,6 +40,8 @@ MANY = {
         dive('beta'),
         soon('divers~Beta', '', 600),              # each on the other's layer
         soon('divers~Alpha', 'beta', 600),
+        soon('tags~Beta', '', 600),                # ... his name over his MegaMan
+        soon('tags~Alpha', 'beta', 600),
         ('expect', 'crew=0'),
         # (A on Beta's MegaMan, who arrived where Alpha stands: "Lan,it's Beta!", "Team up,Lan?" opens on Yes)
         ('repeat', 'press A; wait 10', 'choice~/2', 20),

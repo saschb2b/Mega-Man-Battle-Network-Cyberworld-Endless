@@ -70,6 +70,7 @@ void dive_link_describe(FILE *f) {
 	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "%s%s", i ? " " : ": ", s.peers[i].name);
 	fputc('\n', f);
 	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "diver %s at %d %d\n", s.peers[i].name, (int)s.peers[i].x, (int)s.peers[i].y);
+	dive_people_describe(f);
 	dive_crew_describe(f);
 	fprintf(f, "link %s\n", s.reconnecting ? "reconnecting" : s.quiet ? "quiet" : s.connected ? "up" : "down");
 }
