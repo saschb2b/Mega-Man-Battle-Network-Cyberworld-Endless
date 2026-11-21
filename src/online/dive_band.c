@@ -6,10 +6,10 @@
 
 #include "bn6.h"
 #include "director.h"
-#include "dive_crew.h"
 #include "dive_join.h"
 #include "dive_link.h"
 #include "dive_party.h"
+#include "dive_people.h"
 #include "dive_traces.h"
 #include "dive_words.h"
 #include "emu.h"
@@ -44,13 +44,16 @@ void dive_link_line(const char *line) {
 
 void dive_link_draw(void) {
 	dive_traces_draw();
+	if (!dive_link_on() || !director_on_map()) return;
+	bool chat = emu_read8(BN6_CHATBOX) != 0;
+	/* (the divers' names over their heads: dive_people.h) */
+	dive_people_draw(chat);
 	/* (never over BN6's chat box: its words first) */
-	if (!dive_link_on() || !director_on_map() || emu_read8(BN6_CHATBOX)) return;
+	if (chat) return;
 	int y = P.core_y + 160 - LOOK_BAND_H - 1;
 	/* (a crewmate's battle's offer first: it stands a few seconds only) */
 	const char *join = dive_join_band();
 	if (join) look_band(P.core_x, y, 240, join);
 	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
-	else if (dive_crew_waiting()) look_band(P.core_x, y, 240, dive_crew_wait_words());
 	else dive_party_draw(P.core_x, P.core_y);
 }

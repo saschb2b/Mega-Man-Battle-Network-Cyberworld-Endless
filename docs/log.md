@@ -1,5 +1,10 @@
 # The knowledge base's log
 
+## 2026-11-21
+* **Update**: online/shared-dive.md (crews by nearness, issue #714: the calls taken under the owner's direction of 21 November 2026, the Crews and the fork's rows turned over, Crews as built), online/index.md (its line), code/online.md (dive_crew.c reads the server's crew), code/server.md (crews.py by nearness), devtools/scenarios.md (the sleep step), code/tools.md (scenarios.py's steps).
+* **Update**: online/shared-dive.md (As built: each diver's name over his MegaMan on a dive layer, issue #712), code/online.md (`map_label.c`, the divers' names in `dive_people.c`), devtools/scenarios.md (a dive's `tags N: NAMES` line).
+* **Update**: online/shared-dive.md (a crew's battle joined unasked, issue #715: the decision's row, As built, Open 1), devtools/scenarios.md (a dive's `join` line).
+
 ## 2026-11-19
 * **Update**: rom/souls.md (MegaMan's forms: form 8 shared; CROSSSELECT's ten Crosses: the list, its count, the flags' table, the rows' art and palettes, R's help, Falzar's flags 0xE7-0xEB, as read against bn6f's Falzar), game/fidelity.md (Falzar's Crosses on CROSSSELECT: their rows made from the ROM), game/meta/design.md (Falzar's five Cross starts, their costs, CROSSSELECT's five rows), code/emu.md (crossselect.c), code/layer.md (cross_rows.c, portrait_pixels), engine/emulation/memory.md and engine/emulation/free-space.md (FREE_CROSSSELECT), devtools/proxy-form.md (Form 8 shared: the proxy and TenguCross, why no form of its own, xproxy's TenguCross runs and mutation 32), multirom/souls.md (S1: form 8 shared since Falzar's Crosses).
 * **Update**: project/discord.md (Releases there: each release posts itself in #announcements from its notes, `tools/discord_release.py` through `discord-release.yml`, a Release pings ping, the cover and buttons, its secret and role variable, Publish for followers; its description and index line), code/tools.md (`tools/discord_release.py`'s row), code/tests.md (`tests/test_discord_release.py`), code/platforms.md (`release.yml` calls `discord-release.yml`).

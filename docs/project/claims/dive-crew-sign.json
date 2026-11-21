@@ -1,0 +1,9 @@
+{
+  "branch": "dive-crew-sign",
+  "what": "The shared dive: the sign of a crew on a layer, its colour on the name tags and the ring at the radius (issue #716)",
+  "takes": {},
+  "units": [
+    "shared dive: the crew's sign (#716)"
+  ],
+  "run": false
+}

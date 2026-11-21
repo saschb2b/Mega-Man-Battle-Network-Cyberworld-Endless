@@ -3,7 +3,7 @@ type: Tool
 title: "Scenarios: the game played through a course, its state checked"
 description: "`python3 build.py scenarios` plays each file of `tests/scenarios/` headless (`tools/scenarios.py`, on `tools/cw.py`'s games): a scripted course with the state in words checked on the way, so a bug that only a sequence of play shows stays fixed."
 tags: [devtools, tests]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T19:29:44Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:19:01Z }
 ---
 
 # Scenarios: the game played through a course, its state checked
@@ -61,6 +61,7 @@ course:
 | `('moved', WORD, BY)` | ... or the kept line WORD's number moved by BY since: a number (`1`, `-1`), or a kept word with a sign (`'-price'`: down by the price kept), so a purchase is checked against the price the shop showed and not against today's balance |
 | `('restart', START)` | the game quit as a player's system quits it (SIGTERM, the port's close: it saves and leaves), then started again on the same saves |
 | `('server', 'stop')`, `('server', 'start')` | the scenario's server gone at once, and back on its port with its state ([A server and other games](#a-server-and-other-games)) |
+| `('sleep', SECONDS)` | the clock's seconds, the game standing: what the server holds for a time (a crew formed after a second near, issue #714) sees it pass, where a dive's layer runs its frames faster than the clock |
 | `('@beta', 'do', COMMANDS)` | any step, in the game `beta` of the scenario's `GAMES` |
 
 `COND` is an until's test of the agents' tools: a state line's first word,
@@ -293,8 +294,12 @@ none|offered|waiting|answered|accepted|done|cancelled` with `tradewith`,
 battle|over` with `arenacard won|lost|stopped`, `arenahp MINE HIS`, `rematch`
 (`square_arena_describe`), `bouts N`, `bout won against NAME won 1 lost 0`,
 `weekoffer none|new|again|on|trade|stamp`, `week N`, `weekboard WORDS`; on
-a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `crew N:
-NAMES` (`dive_crew_describe`).
+a dive with its link `divers N: NAMES`, `diver NAME at X Y`, `tags N:
+NAMES` (the names shown over the divers' heads, `NAME+K` where K more
+stand under one; `dive_people_describe`), `crew N: NAMES`
+(`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
+battle: MegaMan's own held and offered, a crewmate's joined, the one
+field fought; `dive_join_describe`).
 
 ## A bug a scenario finds
 
