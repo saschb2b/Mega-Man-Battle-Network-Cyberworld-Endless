@@ -290,6 +290,7 @@ static void take_events(void) {
 			break;
 		case EV_ITEM_GIVEN: if (on_layer) item_given((int)ev[i].r[0]); break;
 		case EV_JOB: home_jobs_flag((int)ev[i].r[0]); break;
+		case EV_PICK: director_pick_flag((int)ev[i].r[0]); break;
 		}
 }
 
@@ -667,6 +668,11 @@ void director_update(void) {
 	 * statistics' minutes and the week's Board as they were: save.h) */
 	profile_played_frame();
 	take_events();
+	/* (a pick its script asked for, and a pick's choice, start before the
+	 * director's own talk can take the free chat box: MegaMan's words on
+	 * the battle's older Net virus came before "MegaMan got: DiveMan",
+	 * session 78) */
+	director_pick_watch();
 	held_watch();
 	if (!D.active) return;
 	netmap_colours();

@@ -319,6 +319,8 @@
 #define BN6_GIVE_CHIPS        0x08021AEFu /* GiveChips (chip, code, count) */
 #define BN6_TAKE_BUGFRAGS     0x0803D09Du /* TakeBugfrags (count) */
 #define BN6_SAVE_GAME         0x0803F76Du /* bn6f sub_803F798: the game saved to the cartridge, as after every trade */
+#define BN6_SAVE_KEY          0x02001064u /* the save's mask: its low byte XORs each byte of BN6_SAVE_MASKED from 0x02000000 in place, a new key each save, while BN6_SAVE_GAME writes and checks the cartridge (frames long), then again to unmask: event flags read then are the key's bits (issue #734) */
+#define BN6_SAVE_MASKED       0x6710u     /* ... the bytes masked: 0x02000000-0x0200670F, eEventFlags (BN6_EVENT_FLAGS) among them */
 #define BN6_FLAG_TRADER_HOWL  0xF6        /* EVENT_F6: the machine's howl, set by the trade's script; the machine clears it */
 
 /* ROM code */

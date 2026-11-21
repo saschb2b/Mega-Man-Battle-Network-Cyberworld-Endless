@@ -95,17 +95,38 @@ static void open_kind(int kind) {
 	count_held();
 }
 
+/* The pick its script asked for: its kind's bits and REWARD_PICK_FLAG as
+ * SetEventFlag set them (director_pick_flag), never as the flags read.
+ * BN6's own save (BN6_SAVE_GAME, after every trade among others)
+ * holds the RAM from 0x02000000 XOR-masked with a key of the save's
+ * (BN6_SAVE_KEY) while it writes the cartridge, some eight frames with
+ * the chat box shut: read then, the flags were the key's bits, and a
+ * trader's trade whose key held 0x147C's opened the layer's vault, or
+ * any pick its other bits named, over the save; the flags cleared on
+ * masked bytes were set again as it unmasked them (issue #734). */
+static bool asked;
+static int asked_kind;
+
+void director_pick_flag(int flag) {
+	if (flag >= REWARD_KIND_FLAG && flag < REWARD_KIND_FLAG + REWARD_KIND_BITS) asked_kind |= 1 << (flag - REWARD_KIND_FLAG);
+	else if (flag == REWARD_PICK_FLAG) asked = true;
+}
+
 void director_pick_watch(void) {
-	if (!D.active) return;
+	if (!D.active) {
+		asked = false;
+		asked_kind = 0;
+		return;
+	}
 	if (due >= 0 && talk_script(D.objs.archive, due)) due = -1;
 	/* (the chat box closed first: its last box showed again under the
 	 * game as the screen left) */
-	if (RP.up || !flag_get(REWARD_PICK_FLAG) || emu_read8(BN6_CHATBOX)) return;
-	int kind = 0;
-	for (int b = 0; b < REWARD_KIND_BITS; ++b) {
-		if (flag_get(REWARD_KIND_FLAG + b)) kind |= 1 << b;
-		flag_clear(REWARD_KIND_FLAG + b);
-	}
+	if (RP.up || !asked || emu_read8(BN6_CHATBOX)) return;
+	int kind = asked_kind;
+	asked = false;
+	asked_kind = 0;
+	/* (the pick's script has ended, the RAM its own: its flags go with it) */
+	for (int b = 0; b < REWARD_KIND_BITS; ++b) flag_clear(REWARD_KIND_FLAG + b);
 	flag_clear(REWARD_PICK_FLAG);
 	if (kind < PICK_KINDS && offered[kind] && offers[kind].n > 0) open_kind(kind);
 }
@@ -144,6 +165,8 @@ bool director_pick_shown(void) { return RP.up; }
 void director_pick_shut(void) {
 	RP.up = false;
 	due = -1;
+	asked = false;
+	asked_kind = 0;
 }
 
 /* A pick in the state's words (director_describe's; tests/scenarios reads

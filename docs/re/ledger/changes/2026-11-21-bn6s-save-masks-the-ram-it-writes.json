@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-21",
+  "what": "BN6's save (BN6_SAVE_GAME 0x0803F76C, after every trade among others) XORs the RAM 0x02000000-0x0200670F, eEventFlags among it, with a new key's low byte (BN6_SAVE_KEY 0x02001064) while it writes the cartridge, frames long, then back: the engine read the reward pick's flags as the key's bits there and opened a pick over a trader's trade (issue #734; docs/rom/game-state.md, The save's mask). The pick now opens from SetEventFlag's hook alone."
+}
