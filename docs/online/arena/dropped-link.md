@@ -116,7 +116,7 @@ link cut for 3 seconds at field frame 133):
 
 | Build | What happened |
 | --- | --- |
-| before (`dev` after #722) | (to be filled) |
+| before (`dev` after #722) | Alpha's field let Beta go at frame 133, as the link dropped (the server's seat gone), and fought on alone; Beta's froze at frame 141 waiting on keys that never came, his resume 3.5 s later changing nothing, his game held with no end |
 | after | held: the server's `party_held`, Beta's resume 3.0 s after the drop; Beta's keys sent again from frame 121; both fields on together, every seat's hash agreeing after it (7 on each, to frame 420) |
 
 **Not yet.** A team bout and a 2v2 through a drop (the same asks would
