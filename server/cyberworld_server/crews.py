@@ -1,16 +1,26 @@
-"""Crews on the shared dive (protocol v19, issue #589;
-docs/online/shared-dive.md, The owner's decisions; shared/online/README.md,
-Protocol v19), modelled on teams.py.
+"""Crews on the shared dive (protocol v20, issues #589 and #714;
+docs/online/shared-dive.md, Crews by nearness; shared/online/README.md,
+Protocol v20).
 
-A diver asks another diver of his room to crew up (CREW ask); the other
-answers within ASK_WAIT seconds. A crew is up to party_most divers, the
-asker's crew where he has one (any member may ask), else a new one of
-the two. It lasts across layers until a member splits up (CREW split:
-the others go on where two or more stay), leaves the server or the dive,
-or ends his dive. Each member's game tells which fork's portal he stands
-on (CREW way: depth, side and way; depth 0 none) and CREW_STATE formed
-tells every member everyone's, so that each game opens the portal only
-when all agree.
+A crew is who dives together, by where they walk, never by asking: two
+divers of one room (a layer's instance) whose places (STATE, sent since
+each entered the room) stand within crew_near world units of each other
+for crew_form_ms are a crew, or join the one either is in where it holds
+fewer than party_most and he stands with its core; two crews that meet
+become one where both fit in party_most, the older taking the other's.
+The pairs near longest go first, so a fifth diver near a crew of four
+stays outside it (the first there, not the nearest). A crew holds by
+chains: its core is the largest part of its members, in one room, each
+within crew_far of another of it (a longer reach than crew_near, so a
+crew at the edge does not form and split with every step); ties go to
+the part holding the crew's first member. A member out of the core for
+crew_split_ms in the core's room, or crew_away_ms elsewhere (taking a
+portal before the others, home between acts, a place not yet sent in a
+new room), is out of it; a crew of one is no crew. A member out of the
+dive (back to the Square, his session ended, his dive's end) is out at
+once. Every member is told the crew as it stands (CREW_STATE formed, the
+diver who came or went its other) at each change; a diver no longer in
+one is told split_up.
 
 A crewmate's random battle starting (CREW battle, its index on the layer)
 is offered to his crewmates in the same room (CREW_STATE offer), never to
@@ -19,24 +29,28 @@ answers with CREW join within crew_join_ms. When every one offered has
 joined, or the window ends, the server starts a party battle (party.py)
 with the battle's owner as seat 0 and the joiners; where nobody joined,
 the owner is told to fight alone (CREW_STATE alone). Refusals: NOTICE
-notice_dive_out (not diving), 17 (that diver is not in this room, or that
-offer is over), 16 (busy: an ask already out, or a party battle under
-way) and notice_crew (the other in a crew already, the crew full, no
-crew)."""
+notice_dive_out (not diving), 17 (that offer is over), 16 (busy: a party
+battle under way) and notice_crew (no crew)."""
 
 import time
+from itertools import combinations
 
 from . import protocol, websocket
 
 SPEC = protocol.SPEC
-ASK_WAIT = 30           # seconds an ask waits for its answer
 JOIN_WAIT = SPEC["crew_join_ms"] / 1000
+NEAR = SPEC["crew_near"]                    # world units: a crew forms within this
+FAR = SPEC["crew_far"]                      # ... and holds within this
+FORM_WAIT = SPEC["crew_form_ms"] / 1000     # seconds near before a crew forms (two passing are none)
+SPLIT_WAIT = SPEC["crew_split_ms"] / 1000   # seconds out of reach in the room before a member is out
+AWAY_WAIT = SPEC["crew_away_ms"] / 1000     # ... and elsewhere (a portal taken first, home)
 
 
 class Crew:
-    def __init__(self, founder):
-        self.members = [founder]        # in the order they came
-        self.ways = {}                  # member -> (depth, side, way) of the portal he stands on
+    def __init__(self, members, now):
+        self.members = list(members)    # in the order they came
+        self.formed = now
+        self.away = {}                  # member -> since when he stands out of the core
 
 
 class Offer:
@@ -51,8 +65,9 @@ class Crews:
     def __init__(self, server):
         self.server = server
         self.of = {}            # player id -> Crew
-        self.asked = {}         # asker id -> (asked id, monotonic time)
         self.offers = {}        # owner id -> Offer
+        self.placed = {}        # player id -> the room his last STATE came in
+        self.near = {}          # (id, id), the lower first -> since when they stand within NEAR
 
     # -- the wire --
 
@@ -63,109 +78,158 @@ class Crews:
         members = []
         for member in (crew.members if crew else []):
             peer = self.server.players.get(member)
-            members.append((member, peer.name if peer else "", crew.ways.get(member, (0, 0, 0))))
+            members.append((member, peer.name if peer else "", (0, 0, 0)))
         player.writer.write(websocket.frame(protocol.crew_state(stage, other, value, members)))
 
     def tell(self, crew, other=0):
         for member in crew.members:
             self.send(member, SPEC["crew_formed"], other, 0, crew)
 
-    # -- asks --
-
     async def handle(self, player, data, now=None):
-        action, ref, value, way = protocol.read_crew(data)
+        action, ref, value = protocol.read_crew(data)
         now = time.monotonic() if now is None else now
-        if action == SPEC["crew_split"]:
-            self.split(player.id)
-            return
-        dive = self.server.dive
-        if not dive.room_of(player.id):
+        if not self.server.dive.room_of(player.id):
             await self.server.notice(player, SPEC["notice_dive_out"], "That takes a dive")
             return
-        if action == SPEC["crew_ask"]:
-            await self.ask(player, ref, now)
-        elif action == SPEC["crew_answer"]:
-            await self.answer(player, ref, value)
-        elif action == SPEC["crew_way"]:
-            await self.way(player, way)
-        elif action == SPEC["crew_battle"]:
+        if action == SPEC["crew_battle"]:
             await self.battle(player, value, now)
         else:
             await self.join(player, ref)
 
-    async def ask(self, player, target_id, now):
-        server, dive = self.server, self.server.dive
-        target = server.players.get(target_id)
-        if not target or target.id == player.id or dive.room_of(target.id) is not dive.room_of(player.id):
-            await server.notice(player, 17, "That Navi is no longer here")
-            return
-        crew = self.of.get(player.id)
-        if target.id in self.of or (crew and len(crew.members) >= SPEC["party_most"]):
-            await server.notice(player, SPEC["notice_crew"], "No room in that crew")
-            return
-        if player.id in self.asked or any(t == target.id for t, _ in self.asked.values()):
-            await server.notice(player, 16, "That Navi is busy")
-            return
-        self.asked[player.id] = (target.id, now)
-        self.send(player.id, SPEC["crew_waiting"], target.id)
-        self.send(target.id, SPEC["crew_asked"], player.id)
+    # -- by nearness --
 
-    async def answer(self, player, asker_id, yes):
-        asked = self.asked.get(asker_id)
-        if not asked or asked[0] != player.id:
-            await self.server.notice(player, 17, "That Navi is no longer here")
+    def moved(self, player):
+        """A STATE: his place is the room's he stands in now."""
+        room = self.server.dive.room_of(player.id)
+        if room:
+            self.placed[player.id] = room
+        else:
+            self.placed.pop(player.id, None)
+
+    def where(self, player_id):
+        """(room, x, y) where his place was sent in the room he stands in, else (room, None, None)."""
+        room = self.server.dive.room_of(player_id)
+        player = self.server.players.get(player_id)
+        if not room or not player or self.placed.get(player_id) is not room:
+            return room, None, None
+        return room, player.position[0], player.position[1]
+
+    def within(self, a, b, reach):
+        room_a, xa, ya = self.where(a)
+        room_b, xb, yb = self.where(b)
+        if room_a is None or room_a is not room_b or xa is None or xb is None:
+            return False
+        return (xa - xb) ** 2 + (ya - yb) ** 2 <= reach * reach
+
+    def settle(self, now):
+        """Each tick: who stands near whom, every crew's core, the crews formed, grown and split."""
+        rooms = {}
+        for player_id, room in self.server.dive.of.items():
+            rooms.setdefault(room.channel, []).append(player_id)
+        near = {}
+        for ids in rooms.values():
+            for pair in combinations(sorted(ids), 2):
+                if self.within(*pair, NEAR):
+                    near[pair] = self.near.get(pair, now)
+        self.near = near
+        for crew in {id(c): c for c in self.of.values()}.values():
+            self.hold(crew, now)
+        for (a, b), since in sorted(near.items(), key=lambda item: (item[1], item[0])):
+            if now - since >= FORM_WAIT:
+                self.together(a, b, now)
+
+    def core(self, crew):
+        """The largest part of the crew within FAR of each other in one room (ties: the part with its first member)."""
+        parts, seen = [], set()
+        for start in crew.members:
+            if start in seen or self.where(start)[1] is None:
+                continue
+            part, edge = [], [start]
+            seen.add(start)
+            while edge:
+                member = edge.pop()
+                part.append(member)
+                for other in crew.members:
+                    if other not in seen and self.within(member, other, FAR):
+                        seen.add(other)
+                        edge.append(other)
+            parts.append(part)
+        if not parts:
+            return set(crew.members)        # (no place sent yet anywhere: nothing to judge)
+        first = {m: k for k, m in enumerate(crew.members)}
+        return set(max(parts, key=lambda part: (len(part), -min(first[m] for m in part))))
+
+    def hold(self, crew, now):
+        core = self.core(crew)
+        room = self.server.dive.room_of(next(iter(core)))
+        gone = []
+        for member in crew.members:
+            if member in core:
+                crew.away.pop(member, None)
+                continue
+            since = crew.away.setdefault(member, now)
+            wait = SPLIT_WAIT if self.where(member)[0] is room and self.where(member)[1] is not None else AWAY_WAIT
+            if now - since >= wait:
+                gone.append(member)
+        for member in gone:
+            self.out(member)
+
+    def together(self, a, b, now):
+        crew_a, crew_b = self.of.get(a), self.of.get(b)
+        most = SPEC["party_most"]
+        if crew_a and crew_a is crew_b:
             return
-        del self.asked[asker_id]
-        crew = self.of.get(asker_id)
-        full = crew and len(crew.members) >= SPEC["party_most"]
-        if not yes or asker_id not in self.server.dive.of or player.id in self.of or full:
-            self.send(asker_id, SPEC["crew_split_up"], player.id)
+        if crew_a and crew_b:
+            # (two crews met: one where both fit, the older taking the other's)
+            if a in crew_a.away or b in crew_b.away or len(crew_a.members) + len(crew_b.members) > most:
+                return
+            older, newer = (crew_a, crew_b) if crew_a.formed <= crew_b.formed else (crew_b, crew_a)
+            for member in newer.members:
+                older.members.append(member)
+                self.of[member] = older
+            self.tell(older, newer.members[0])
+            self.server.event("crew", members=list(older.members))
             return
-        if not crew:
-            crew = self.of[asker_id] = Crew(asker_id)
-        crew.members.append(player.id)
-        self.of[player.id] = crew
-        self.tell(crew, player.id)
+        if crew_a or crew_b:
+            crew, joiner, mate = (crew_a, b, a) if crew_a else (crew_b, a, b)
+            if mate in crew.away or len(crew.members) >= most:
+                return
+            crew.members.append(joiner)
+            self.of[joiner] = crew
+            self.tell(crew, joiner)
+            self.server.event("crew", members=list(crew.members))
+            return
+        crew = Crew((a, b), now)
+        self.of[a] = self.of[b] = crew
+        self.tell(crew, b)
         self.server.event("crew", members=list(crew.members))
 
-    async def way(self, player, way):
-        crew = self.of.get(player.id)
-        if not crew:
-            await self.server.notice(player, SPEC["notice_crew"], "No crew")
-            return
-        if way[0]:
-            crew.ways[player.id] = way
-        else:
-            crew.ways.pop(player.id, None)
-        self.tell(crew, player.id)
-
-    def split(self, player_id, gone=False):
-        """A diver out of his crew (a split, his leaving, his dive's end), and his asks taken back."""
-        asked = self.asked.pop(player_id, None)
-        if asked:
-            self.send(asked[0], SPEC["crew_split_up"], player_id)
-        for asker, (target, _) in list(self.asked.items()):
-            if target == player_id:
-                del self.asked[asker]
-                self.send(asker, SPEC["crew_split_up"], player_id)
-        self.offers.pop(player_id, None)
-        for offer in self.offers.values():
-            offer.invited.discard(player_id)
-            if player_id in offer.joined:
-                offer.joined.remove(player_id)
+    def out(self, player_id):
+        """A diver out of his crew: told so, the rest told the crew as it stands, a crew of one none."""
         crew = self.of.pop(player_id, None)
         if not crew:
             return
         crew.members.remove(player_id)
-        crew.ways.pop(player_id, None)
-        if not gone or player_id in self.server.players:
-            self.send(player_id, SPEC["crew_split_up"], player_id)
+        crew.away.pop(player_id, None)
+        self.send(player_id, SPEC["crew_split_up"], player_id)
         if len(crew.members) < 2:
             for member in crew.members:
                 self.of.pop(member, None)
                 self.send(member, SPEC["crew_split_up"], player_id)
             return
         self.tell(crew, player_id)
+        self.server.event("crew", members=list(crew.members))
+
+    def split(self, player_id, gone=False):
+        """A diver out of the dive (back to the Square, his session ended, his dive's end): out of his crew at once."""
+        self.offers.pop(player_id, None)
+        for offer in self.offers.values():
+            offer.invited.discard(player_id)
+            if player_id in offer.joined:
+                offer.joined.remove(player_id)
+        self.placed.pop(player_id, None)
+        self.near = {pair: since for pair, since in self.near.items() if player_id not in pair}
+        self.out(player_id)
 
     # -- a battle offered --
 
@@ -216,13 +280,7 @@ class Crews:
         self.server.parties.start([offer.owner] + joined, room, guardian=False)
 
     def pump(self, now):
+        self.settle(now)
         for offer in list(self.offers.values()):
             if now >= offer.until:
                 self.close(offer)
-
-    def expire(self, now):
-        for asker, (target, since) in list(self.asked.items()):
-            if now - since > ASK_WAIT:
-                del self.asked[asker]
-                self.send(asker, SPEC["crew_split_up"], target)
-                self.send(target, SPEC["crew_split_up"], asker)
