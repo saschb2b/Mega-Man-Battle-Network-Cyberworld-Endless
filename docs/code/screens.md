@@ -3,7 +3,7 @@ type: Code Map
 title: "The engine's screens: the ROMs screen, SAVES, the start and title, the second screen"
 description: "What `src/launcher/` (the ROMs screen and pickers), `src/library/` (the Library), `src/saves/` (SAVES), `src/scenes/` (the start, title and error screen) and `src/second/` (the 3DS's and Android's second screen) hold, file by file."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-15T01:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T22:45:00Z }
 ---
 
 # The engine's screens: the ROMs screen, SAVES, the start and title, the second screen
