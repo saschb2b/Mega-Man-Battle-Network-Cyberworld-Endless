@@ -141,6 +141,9 @@ class Dive:
         if action == SPEC["dive_vitals"]:
             self.server.crews.vitals(player.id, *fields, now)
             return
+        if action == SPEC["dive_where"]:
+            self.server.crews.where_set(player.id, fields[0])
+            return
         if not await self.may_trace(player, room, action, now):
             return
         handler = {SPEC["dive_end"]: self.end, SPEC["dive_found"]: self.found, SPEC["dive_phrase"]: self.phrase,
@@ -185,6 +188,8 @@ class Dive:
             # (out of the Square as CHANNEL leaves a channel: what was under way there ends)
             server.leave_channel(player)
         room = self.of.get(player.id) or self.place(player, key)
+        # (on a layer again: no longer home, v26)
+        self.server.crews.where_set(player.id, SPEC["where_layer"])
         self.send(player, protocol.dive_room(week, depth, side, way, room.instance, len(room.members)))
         for message in self.traces.entries(key, self.shown(week)):
             self.send(player, message)
