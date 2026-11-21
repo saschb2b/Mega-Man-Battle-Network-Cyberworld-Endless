@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-21
+* **Update**: rom/chips.md (The other version's Gigas' art: Gregar's records give Falzar's five Gigas Gregar's Gigas' pictures, BN5 holds three, issue #731), devtools/agents-tools.md (the state's `foldercard` line), game/fidelity.md (Falzar's Gigas' cards).
 * **Update**: online/shared-dive.md (the crew's display, issue #717: the calls, a plate a crewmate under BN6's HP box with his name, HP over max HP and layer, "level" as max HP, a partner's HP under his mark on a party's field), code/online.md (`dive_crew_view.c`).
 * **Update**: rom/net-maps.md (Link Navi obstacles: BN6's two Security Cubes' spawn records, sunk under their floor, z -12 in Central Area 1 and -8 in Seaside Area 2, on their panel's middle in their walls' box; BN5's own at z 0; a layer's cube stands so, its walls on its panel's edge, issue #735), world/level-design/security-cubes.md (a P-Code's cube stands on its panel's middle, sunk as BN6's, its walls on the panel's edge, issue #735).
 * **Update**: online/shared-dive.md (a crew's battles at once, issue #715: no window, a busy crewmate's answer, how often a crew fights from BN6's odds, the calls taken under the owner's direction of 21 November 2026; the background of a dive's battle chosen with it, the fields that went apart; Open 1 closed), devtools/scenarios.md (the sleep step runs every online game on).

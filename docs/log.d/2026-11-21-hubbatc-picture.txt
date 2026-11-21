@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T23:10:00Z
-* **Update**: rom/chips.md (The other version's Gigas' art: Gregar's records give Falzar's five Gigas Gregar's Gigas' pictures, BN5 holds three, issue #731), devtools/agents-tools.md (the state's `foldercard` line), game/fidelity.md (Falzar's Gigas' cards).
