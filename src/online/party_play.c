@@ -83,8 +83,7 @@ static struct {
 static unsigned viewer(void) { return !PP.net && PP.dev.view > 0 && PP.dev.view < PARTY_MOST ? (unsigned)PP.dev.view : PP.seat; }
 
 /* A crew's battle's end, kept for party_play_crew_end */
-typedef struct { bool due, won; int hp; uint16_t reward; } CrewEnd;
-static CrewEnd crew_end;
+static struct { bool due; CrewOver o; } crew_end;
 
 static bool out(void *context, const uint8_t *data, size_t size) {
 	(void)context;
@@ -147,7 +146,10 @@ static bool fight(const Encounter *e, int own_hp, int fought_hp) {
 	PP.b.foe_to = fought_hp;
 	take_record(e);
 	OnlineLoadout *mine = &PP.b.seat[PP.seat];
-	if (!online_snapshot_read(mine, souls_held()) || !carry_mine() || !(PP.run_rom = malloc(EMU_ROM_SIZE)) ||
+	bool read = online_snapshot_read(mine, souls_held());
+	/* (the dive's pull-back spent goes with my MegaMan, so every game of a crew's field knows it: crew_pull.h) */
+	mine->pulled = PP.crew && director_crew_pull_spent();
+	if (!read || !carry_mine() || !(PP.run_rom = malloc(EMU_ROM_SIZE)) ||
 		!emu_rom_clean(PP.run_rom, EMU_ROM_SIZE)) {
 		fprintf(stderr, "party: the fight could not be taken over; the run's core fights it\n");
 		free(PP.run_rom);
@@ -294,6 +296,7 @@ static void open_core(void) {
 	PP.b.scripted = !PP.net && !PP.b.own;
 	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
+	PP.b.del = PP.dev.del;   /* (partydel=MASK with it: those seats deleted then, the crew's pull-back's test) */
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
 	if (!PP.core) { failed(why); return; }
 	if (!PP.net && PP.dev.twin && !(PP.twin = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why))) {
@@ -581,6 +584,23 @@ static void fight_frame(uint32_t pad) {
 
 /* ---- the end ---- */
 
+/* a crew's battle's end kept for its caller (party_play_crew_end): the
+ * reward BN6's results gave on the field, this game's to give in its own
+ * run, and every seat's MegaMan as the field ended, from which each game
+ * works out the crew's gifts alike (director_crew_over, crew_pull.h) */
+static void crew_over(bool won) {
+	CrewOver o = { won, party_core_reward(PP.core), PP.seat, { .n = PP.b.n } };
+	for (unsigned k = 0; k < PP.b.n && k < CREW_PULL_SEATS; ++k) {
+		o.field.hp[k] = party_core_hp(PP.core, k);
+		o.field.max_hp[k] = PP.b.seat[k].max_hp;
+		o.field.spent[k] = PP.b.seat[k].pulled;
+		o.field.gone[k] = (PP.gone >> k & 1u) != 0;
+	}
+	crew_end.due = true;
+	crew_end.o = o;
+	fprintf(stderr, "party: the crew's battle's reward on the field %04x\n", o.reward);
+}
+
 /* the battle over: BN6's results on this game's own pad, then the run */
 static void results_frame(uint32_t pad) {
 	uint16_t keys[PARTY_MOST] = { (uint16_t)(pad & ARENA_KEYS_MASK) };
@@ -603,21 +623,16 @@ static void results_frame(uint32_t pad) {
 	/* (a crew's battle: its end kept for its caller, the reward BN6's results gave on the field this game's to give in
 	 * its own run, party_play_crew_end) */
 	bool crew = PP.crew;
-	if (crew) {
-		crew_end = (CrewEnd){ true, won, (int)hp, party_core_reward(PP.core) };
-		fprintf(stderr, "party: the crew's battle's reward on the field %04x\n", crew_end.reward);
-	}
+	if (crew) crew_over(won);
 	bool on = PP.on;
 	stop();
 	PP.on = on;
 	if (!crew) director_party_over(won, (int)hp);
 }
 
-bool party_play_crew_end(bool *won, int *hp, uint16_t *reward) {
+bool party_play_crew_end(CrewOver *out) {
 	if (!crew_end.due) return false;
-	*won = crew_end.won;
-	*hp = crew_end.hp;
-	*reward = crew_end.reward;
+	*out = crew_end.o;
 	crew_end.due = false;
 	return true;
 }

@@ -3,7 +3,7 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 21
+#define ONLINE_PROTOCOL_VERSION 22
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
@@ -133,6 +133,7 @@
 /* (protocol v19, issue #589: the shared dive; shared/online/README.md,
  * Protocol v19) */
 #define ONLINE_WEEK_PARTY 2           /* WEEK_BOARD's entry flags: a guardian of the dive fought in a party */
+#define ONLINE_WEEK_PULLED 4          /* (v22) WEEK_POST's flags and WEEK_BOARD's entry flags: the dive's MegaMan pulled back once by his crew (issue #718) */
 #define ONLINE_HELLO_NO_ARENA 8192    /* HELLO's channel word: the game's system cannot run the Arena (a linked fighter) */
 #define ONLINE_PEER_DIVING 128        /* SNAPSHOT's per-peer byte, bit 7: he dives (a dive room's peers) */
 #define ONLINE_DIVE 41                /* client -> server: u8 action, then that action's fields */

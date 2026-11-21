@@ -44,7 +44,8 @@ static void post(void) {
 		const WeekBoard *b = online_week_board();
 		Q.sent_board = b->serial;
 		Q.sent_notice = Q.s.notice_serial;
-		Q.sent = online_week_post(r->r_week, r->r_seed, r->r_depth, r->r_act, r->r_won, r->r_minutes, r->r_hash);
+		unsigned flags = (r->r_won ? WEEK_POST_WON : 0u) | (r->r_pulled ? ONLINE_WEEK_PULLED : 0u);
+		Q.sent = online_week_post(r->r_week, r->r_seed, r->r_depth, r->r_act, flags, r->r_minutes, r->r_hash);
 		return;
 	}
 	const WeekBoard *b = online_week_board();

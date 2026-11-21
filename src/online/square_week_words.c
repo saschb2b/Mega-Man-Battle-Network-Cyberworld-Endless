@@ -64,7 +64,7 @@ const char *square_week_off(void) { return "THE PORTAL OPENS\nINTO THIS WEEK'S\n
 const char *square_week_closed(void) { return "THE PORTAL'S\nSHUT. NO DEEP NET\nTHIS WEEK."; }
 
 static int line(char *s, size_t n, int place, const WeekEntry *e) {
-	return snprintf(s, n, "%d.%s:%u%s%s", place, e->name, e->depth, e->won ? "!" : "", e->party ? "+" : "");
+	return snprintf(s, n, "%d.%s:%u%s%s%s", place, e->name, e->depth, e->won ? "!" : "", e->party ? "+" : "", e->pulled ? "*" : "");
 }
 
 /* who dives now: a box of the count, then the divers three to a box */
@@ -114,6 +114,8 @@ const char *square_week_board(const WeekBoard *b, uint16_t week, const DiveDiver
 	}
 	for (int k = 0; k < b->ntop; ++k)
 		if (b->top[k].party) { n += snprintf(s + n, sizeof s - (size_t)n, "|>+:a guardian beaten\nwith a party."); break; }
+	for (int k = 0; k < b->ntop; ++k)
+		if (b->top[k].pulled) { n += snprintf(s + n, sizeof s - (size_t)n, "|>*:pulled back once\nby the crew."); break; }
 	if (b->place) n += snprintf(s + n, sizeof s - (size_t)n, "|>Your best is\nlayer %u,#%d!", b->mine.depth, b->place);
 	n += pack(s + n, sizeof s - (size_t)n, d);
 	n += records(s + n, sizeof s - (size_t)n, w);

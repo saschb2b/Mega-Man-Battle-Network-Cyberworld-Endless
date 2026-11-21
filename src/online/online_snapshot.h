@@ -27,6 +27,9 @@ typedef struct {
 	 * TagChips (0xFF none; the Extra folder has none of its own) */
 	uint16_t folders[ONLINE_FOLDERS][BN6_FOLDER_ENTRIES];
 	uint8_t regulars[ONLINE_FOLDERS], tags[ONLINE_FOLDERS][2];
+	/* a shared dive's: his crew's pull-back spent this dive (crew_pull.h),
+	 * the loadout's flags' second bit (v22) */
+	bool pulled;
 } OnlineLoadout;
 
 /* Between emulator frames. The caller supplies souls_held(), which is a
