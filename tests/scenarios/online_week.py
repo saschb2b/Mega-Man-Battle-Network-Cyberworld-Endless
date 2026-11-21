@@ -3,7 +3,7 @@ the portal by the Board and its Yes into the dive's first layer, another
 diver seen there, a crew by standing together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
 fought by both unasked (issue #715) and through a dropped link (issue
-#180), the Board's posts of the week,
+#180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -132,6 +132,27 @@ MANY['crew-battle-through-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}
     soon('partyagreed>=7', '', 1500),               # the fields together again, every seat's hash agreeing
     soon('partyagreed>=7', 'beta', 600),
     ('@beta', 'expect', 'partylink=up'),
+))
+
+# A diver's link back after a drop (issue #180): Beta's own link cut for three seconds on the layer; the server
+# took him out of his room and his crew as it dropped, his game enters the room again once back: each sees the other
+# again, the crew forms again, and a battle of Alpha's is joined by both as before the drop
+MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('@beta', 'do', 'reconnect cut 3'),
+    soon('link=reconnecting', 'beta', 120),
+    soon('crew=0', '', 600),                        # Alpha's crew split at the drop
+    # (the cut and the transport's tries at 0.5, 1 and 2 seconds are the clock's: a dive's layer outruns it)
+    ('sleep', 4.0),
+    soon('link=up', 'beta', 1800),                  # back: his place taken back
+    soon('divers~Alpha', 'beta', 600),              # the room entered again: each sees the other
+    soon('divers~Beta', '', 600),
+    ('sleep', 1.5),
+    soon('crew=2: Alpha Beta', 'beta', 600),        # the crew formed again by nearness
+    soon('crew=2: Alpha Beta', '', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),             # and a battle of Alpha's joined by both
+    soon('join=fighting', '', 900),
 ))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes

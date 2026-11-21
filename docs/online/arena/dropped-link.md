@@ -77,6 +77,19 @@ this, a party seat whose own link dropped kept its field waiting with no
 end once the server had let its seat go (#722 had made its link keep
 keys rather than break at once).
 
+**The diver's room after the link is back.** A dropped diver's place is
+held in no room: the server takes him out of his layer's room and his
+crew at the drop (`dive.py`'s `dropped`). His game now enters the room
+again as soon as its resume is done (`dive_link.c`: the transport's
+resumes counted, the room it was in forgotten so it is entered anew,
+the crew it showed dropped until the server's next word), so the other
+divers see him again, his crew forms again by nearness and a crewmate's
+battle is joined as before. Before, the game kept the room it was in and
+entered none until its layer changed: after a reconnect the other divers
+and his crew were gone from his screen, and he from theirs, for the rest
+of the layer. The scenario `online-week/crew-again-after-a-drop` cuts
+the second diver's link for three seconds on the layer.
+
 **Tested.** `tests/test_arena.c` plays two network links back to back
 through a pipe that loses both ways' messages for three ticks, then
 holds one side's outbox for the rest of a 40- and a 180-tick drop, then
