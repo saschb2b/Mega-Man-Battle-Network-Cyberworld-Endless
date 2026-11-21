@@ -250,13 +250,6 @@ bool party_play_mail(const uint8_t *m, size_t n) {
 
 bool party_play_held(void) { return PP.stage != PP_NONE; }
 
-void party_play_describe(FILE *f) {
-	if (!PP.started || !PP.net) return;
-	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
-	fprintf(f, "party %s frame %u\npartyagreed %u\npartylink %s\n", (unsigned)PP.stage < 6 ? stages[PP.stage] : "other",
-		(unsigned)(PP.core ? party_core_frames(PP.core) : 0), PP.agreed, PP.alone ? "alone" : PP.down_since ? "down" : "up");
-}
-
 /* ---- the fight's frames ---- */
 
 static void failed(const char *why) {
@@ -671,6 +664,11 @@ void party_play_draw(void) {
 }
 
 void party_play_describe(FILE *f) {
+	/* (over the server: its stage and frame, the hashes agreed, this game's own link through a drop, issue #180) */
+	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
+	if (PP.started && PP.net)
+		fprintf(f, "party %s frame %u\npartyagreed %u\npartylink %s\n", (unsigned)PP.stage < 6 ? stages[PP.stage] : "other",
+			(unsigned)(PP.core ? party_core_frames(PP.core) : 0), PP.agreed, PP.alone ? "alone" : PP.down_since ? "down" : "up");
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
 	if (!party_turn_video(PP.seat)) party_marks_describe(f, party_core_gba(PP.core), viewer(), PP.b.n);
