@@ -270,9 +270,9 @@ swap at 200 HP under the autopilot (`swap ID:200/155:3000`, seed 15,
 kind): five leave objects bound to them behind. DiveMan's torpedo
 launcher (from the battle's first frame) went on firing two torpedoes a
 volley about every 96 frames under JudgeMan until the battle's end;
-ElecMan's thunder and TomahawkMan's 0x40 lived on the same way (a spawner,
-not a flight: each ends only at the battle's end); TenguMan's three
-whirls ended after 61 frames, ElementMan's 0x90 after 38. Shots already
+ElecMan's 0x1A and TomahawkMan's 0x40 lived on the same way (not a flight:
+each ends only at the battle's end); TenguMan's three
+0x47 ended after 61 frames, ElementMan's 0x90 after 38. Shots already
 loose and bound to no one (the torpedoes in the air, CircusMan's,
 JudgeMan's own) finish within about 70 frames; ElecMan's two rods and
 TomahawkMan's 0x41 are still objects of the field, with HP or none, and
