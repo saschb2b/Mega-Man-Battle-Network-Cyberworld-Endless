@@ -95,7 +95,7 @@ WORK = os.path.join(ROOT, '.build', 'scenarios')
 UNTIL = 6000     # an until's most frames, where the step names none
 REPEAT = 12      # a repeat's most times
 KINDS = {'do': (1, 1), 'until': (1, 2), 'repeat': (2, 3), 'expect': (1, 1), 'keep': (1, 1), 'same': (1, 1), 'moved': (2, 2),
-         'restart': (1, 1), 'server': (1, 1)}
+         'restart': (1, 1), 'server': (1, 1), 'sleep': (1, 1)}
 # (the other games' ROMs a scenario may need, told by their SHA-1: build.py's)
 ROMS = {'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39', 'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
 BN6 = '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6'
@@ -440,6 +440,10 @@ def step_run(h, step, state, kept, roms=None):
             raise Failed('; '.join(differ), state)
     elif kind == 'moved':
         moved(step, state, kept)
+    elif kind == 'sleep':
+        # (the clock's seconds, the game standing: what a server holds for a time sees it pass, where a dive's
+        # layer runs its frames faster than the clock)
+        time.sleep(float(step[1]))
     elif kind == 'restart':
         quit_game(h)
         return start(h, step[1], False, roms)

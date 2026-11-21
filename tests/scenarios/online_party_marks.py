@@ -29,17 +29,8 @@ def dive(game=''):
 
 
 def crew(other):
-    """Alpha's A on the diver who arrived where he stands, the team-up asked and answered: a crew of two."""
-    return online.course(
-        ('repeat', 'press A; wait 10', 'choice~/2', 20),
-        ('do', 'wait 20'),
-        ('do', 'press A; wait 10'),
-        soon('chat=open', other, 600),
-        (f'@{other}', 'repeat', 'press A; wait 10', 'choice~/2', 30),
-        (f'@{other}', 'do', 'wait 20'),
-        (f'@{other}', 'do', 'press A; wait 10'),
-        soon('crew~2', '', 600),
-        soon('crew~2', other, 600))
+    """A crew of two: the other arrived where Alpha stands, and the server makes them one (issue #714)."""
+    return online.course(soon('crew~2', '', 600), soon('crew~2', other, 600))
 
 
 MANY = {

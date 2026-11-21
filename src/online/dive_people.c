@@ -9,7 +9,6 @@
 #include "bn6.h"
 #include "bn6_fields.h"
 #include "emu.h"
-#include "mapslot.h"
 #include "claims.h"
 #include "director.h"
 #include "dive_traces.h"
@@ -23,8 +22,6 @@
 
 #define WRITER "dive people"
 #define MOVING_FRAMES 8   /* a step seen keeps the walk this long */
-#define TALK_ROOM 1024    /* the dive's chats' words, one archive at a time */
-#define REACH 24          /* world units from MegaMan's probe a diver is spoken to */
 #define TAG_TOP 4         /* the picture's top row a name piled on others may reach */
 #define TAG_BOX 100       /* ... and the row BN6's chat box begins under, while one is open */
 
@@ -34,7 +31,6 @@ static struct {
 	int x[DIVE_PEOPLE], y[DIVE_PEOPLE], z[DIVE_PEOPLE], moving[DIVE_PEOPLE];
 	char name[DIVE_PEOPLE][ONLINE_NAME_BYTES + 1];
 	int made;
-	uint32_t room;            /* the chats' words' room */
 	uint32_t seed;            /* the layer they were made on */
 	int depth;
 } P;
@@ -42,8 +38,6 @@ static struct {
 /* (layer_objs_more: after the layer's own, as many as its 16 leave) */
 static void more(NpcList *npcs) {
 	memset(&P, 0, sizeof P);
-	static const uint8_t empty[] = { 2, 0, 0xE6 };
-	P.room = mapslot_alloc(empty, TALK_ROOM);
 	P.seed = run.layer_seed;
 	P.depth = run.depth;
 	if (npcs->n >= BN6_NPC_COUNT || !npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return;
@@ -59,22 +53,6 @@ static void more(NpcList *npcs) {
 }
 
 static bool here(void) { return director_on_layer() && P.seed == run.layer_seed && P.depth == run.depth; }
-
-uint32_t dive_people_talk_room(void) { return here() ? P.room : 0; }
-
-uint32_t dive_people_ahead(void) {
-	if (!here()) return 0;
-	int dx, dy, x = bn6_player_x(), y = bn6_player_y();
-	npc_probe(emu_read8(BN6_PLAYER_FACING) & 7, &dx, &dy);
-	uint32_t best = 0;
-	int best_d = REACH * REACH;
-	for (int k = 0; k < P.made; ++k) {
-		if (!P.id[k]) continue;
-		int ex = P.x[k] - (x + dx), ey = P.y[k] - (y + dy), d = ex * ex + ey * ey;
-		if (d < best_d) { best = P.id[k]; best_d = d; }
-	}
-	return best;
-}
 
 void dive_people_on(bool on) {
 	layer_objs_more = on ? more : NULL;

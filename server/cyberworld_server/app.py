@@ -345,6 +345,7 @@ class Server:
     async def message(self, player, data, now):
         if data and data[0] == protocol.SPEC["state"]:
             player.position = protocol.read_state(data)
+            self.crews.moved(player)
             if self.event_log and now - player.last_log >= 1:
                 player.last_log = now
                 self.event("position", id=player.id, position=player.position)
@@ -603,7 +604,6 @@ class Server:
                 self.trades.expire(now)
                 self.arena.expire(now)
                 self.teams.expire(now)
-                self.crews.expire(now)
                 self.transfers.prune()
             self.holds.expire(now)
             self.stands.pump(now)

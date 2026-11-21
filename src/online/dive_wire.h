@@ -107,11 +107,10 @@ typedef struct {
 typedef struct {
 	uint32_t session;
 	char name[ONLINE_NAME_BYTES + 1];
-	DiveWay way;            /* the fork's portal he stands on, depth 0 none */
 } CrewMember;
 
 typedef struct {
-	uint8_t stage;          /* ONLINE_CREW_ASKED .. ONLINE_CREW_ALONE */
+	uint8_t stage;          /* ONLINE_CREW_FORMED .. ONLINE_CREW_ALONE */
 	uint32_t other;
 	uint8_t value;          /* an offer's battle index */
 	uint8_t count;
@@ -158,7 +157,7 @@ size_t dive_wire_found(uint8_t out[ONLINE_DIVE_FOUND_BYTES], unsigned index);
 size_t dive_wire_phrase(uint8_t out[ONLINE_DIVE_PHRASE_BYTES], unsigned phrase, int x, int y, int z);
 size_t dive_wire_wave(uint8_t out[ONLINE_DIVE_WAVE_BYTES], uint32_t id);
 size_t dive_wire_split(uint8_t out[ONLINE_DIVE_SPLIT_BYTES], const DiveSplit *split);
-size_t dive_wire_crew(uint8_t out[ONLINE_CREW_BYTES], unsigned action, uint32_t ref, unsigned value, DiveWay way);
+size_t dive_wire_crew(uint8_t out[ONLINE_CREW_BYTES], unsigned action, uint32_t ref, unsigned value);
 size_t dive_wire_queue(uint8_t out[ONLINE_QUEUE_BYTES], unsigned action, DiveWay door);
 /* PARTY_DAMAGE (a linked fighter's damage to the guardian so far and his HP) or PARTY_HP (seat 0's: the guardian's HP and max) */
 size_t dive_wire_party(uint8_t out[ONLINE_PARTY_BYTES], unsigned kind, uint32_t battle, unsigned first, unsigned second);

@@ -34,10 +34,6 @@ int director_route_portal(void);
  * over it (the drawing reads them: draws change nothing). */
 int director_town_hour(void);
 int director_town_tint(bool *box);
-/* The shared dive's crew at Lan's HP (docs/online/shared-dive.md): a
- * portal taken (k; -1 stepped off) waits while it says so, until every
- * crewmate stands on the same one (a part above's, NULL none). */
-extern bool (*home_way_hold)(int portal);
 /* The ways lit at home (Lan's HP's portals, docs/world/home/): each one's area,
  * its guardian (0 none: a trip back), and whether it goes back to an area
  * won; at most `most`, how many. */
