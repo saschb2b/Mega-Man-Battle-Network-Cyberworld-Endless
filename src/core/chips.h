@@ -65,6 +65,11 @@ const uint8_t *chips_offset_bytes(uint32_t off, uint32_t n);
  * where CHIP_ID_BITS is 9. */
 bool chips_preset_nine(uint16_t e);
 
+/* Whose picture chip `id`'s card draws: `id` its own, CHIPS_ART_BLANK BN6's blank (a record with none), or the lowest
+ * other id drawing the same picture (Gregar draws Falzar's Gigas so: issue #731); -1 none */
+#define CHIPS_ART_BLANK (-2)
+int chips_art_of(int id);
+
 /* Whether chip `id` sits out of BN6's battles (taken out of the battle's
  * deck as it is dealt: xchips_install.c): a chip of BN5's whose code is
  * not moved yet, a DarkChip of BN5's until its rule is, every one of BN5's

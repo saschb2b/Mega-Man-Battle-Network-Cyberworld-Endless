@@ -49,12 +49,22 @@ static uint32_t entry_to(const uint8_t *rom, uint32_t archive, uint32_t i, uint8
 
 static uint32_t entry_at(const uint8_t *rom, uint32_t archive, uint32_t i, const uint8_t **out) { return entry_to(rom, archive, i, TEXT_END, out); }
 
+/* Whether BN6's own chip `id` is a Giga of Falzar's, the other version: Gregar's records give its icon, picture and
+ * palette those of Gregar's Giga of its library number (HubBatc ColForce's; issue #731, docs/rom/chips.md, The other
+ * version's Gigas' art), which no ROM the game reads holds but BN5's, for three */
+static bool other_giga(int id) {
+	if (id <= 0 || id >= CHIPS_BN6_RECORDS) return false;
+	const uint8_t *rec = R.data + R.layout->chip_data + XREC_SIZE * (uint32_t)id;
+	return rec[BN6_CHIP_LIBRARY_TYPE] == 2 && (rec[BN6_CHIP_LIBRARY_FLAGS] & BN6_CHIP_VERSION_TWO);
+}
+
 /* A row whose art is BN5's: an own row's, and (after them all, so that
  * theirs keep their places) BN6's own chip of a name whose record BN5's
  * code plays where its ROM is read (SAME_MOVED: DarkPlus, which BN6's US
- * version left a blank picture and an icon reading its id) */
+ * version left a blank picture and an icon reading its id), or one of
+ * Falzar's Gigas BN5 draws (BassAnly, BigHook, CrossDiv) */
 static bool art_row(const XChipReg *r, int pass) {
-	return pass ? r->how == XREG_SAME && M.rom5 && xchips_moved_of(r->bn6) != NULL : xreg_own(r);
+	return pass ? r->how == XREG_SAME && M.rom5 && (xchips_moved_of(r->bn6) != NULL || other_giga(r->bn6)) : xreg_own(r);
 }
 
 /* the BN5 records' art planned: each such row's three places, BN6's blank
@@ -334,10 +344,12 @@ static void records_make(const uint32_t blank[3]) {
 			memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
 			/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
 			const XChipMoved *mv = M.rom5 && id < CHIPS_BN6_RECORDS ? xchips_moved_of(id) : NULL;
-			const XChipReg *named = mv ? xreg_named(id) : NULL;
-			if (named) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
-			/* (and BN5's art, art_row's) */
-			for (int k = 0; named && M.art[id][0] && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, M.art[id][k]);
+			bool giga = other_giga(id);
+			const XChipReg *named = mv || (giga && M.rom5) ? xreg_named(id) : NULL;
+			if (named && mv) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
+			/* (and BN5's art, art_row's; one of Falzar's Gigas BN5 does not draw BN6's blank, not another Giga's) */
+			const uint32_t *art = named && M.art[id][0] ? M.art[id] : giga ? blank : NULL;
+			for (int k = 0; art && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, art[k]);
 			continue;
 		}
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }
@@ -438,6 +450,16 @@ const uint8_t *chips_bytes(uint32_t bus, uint32_t n) {
 	if (bus >= BUS && bus - BUS + n <= ROM_SIZE && n <= ROM_SIZE) return R.data ? R.data + (bus - BUS) : NULL;
 	if (bus >= CHIPS_FREE && ready() && bus - CHIPS_FREE + n <= M.len && n <= M.len) return M.img + (bus - CHIPS_FREE);
 	return NULL;
+}
+
+int chips_art_of(int id) {
+	const uint8_t *me = chips_record(id);
+	if (!me) return -1;
+	uint32_t pic = get32(me + BN6_CHIP_IMAGE_PTR);
+	if (pic == get32(R.data + R.layout->chip_data + XREC_SIZE * BLANK_RECORD + BN6_CHIP_IMAGE_PTR)) return CHIPS_ART_BLANK;
+	for (int other = 1; other < CHIPS_IDS; ++other)
+		if (other != id && get32(M.img + XREC_SIZE * (uint32_t)other + BN6_CHIP_IMAGE_PTR) == pic) return other;
+	return id;
 }
 
 const uint8_t *chips_offset_bytes(uint32_t off, uint32_t n) { return off < 0x01000000u ? chips_bytes(BUS + off, n) : NULL; }
