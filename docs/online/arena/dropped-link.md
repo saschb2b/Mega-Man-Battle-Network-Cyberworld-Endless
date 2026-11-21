@@ -73,10 +73,16 @@ result on both cards.
 BN6, BN5 and BN4, two games through a local server, `arenaboth`,
 `arenadelay=6`, Alpha 200 HP, Beta 5):
 
-| Build | Beta's link cut 4 s at battle frame ~120 | Alpha | Beta |
+| Build | Beta's link cut for 4 s after battle frame 120 | Alpha | Beta |
 | --- | --- | --- | --- |
-| before (`dev`, the cut step alone) | (to be filled) | | |
-| after | (to be filled) | | |
+| before (`dev` with the cut step alone) | the battle stopped on Beta's game at frame 131, "the connection to the Square was lost"; the server ended it at the drop | stopped, no result | stopped, no result |
+| after | held 7.4 s (the cut and the transport's tries at 0.5, 1, 2 and 4 s), then fought to its end | won, over at frame 570, 445 ticks stalled, 9 hashes agreed | lost, over at frame 570, 439 ticks stalled, 9 hashes agreed; 14 frames sent again from 120, one ask, answered with 10 of Alpha's |
+
+The 445 ticks are the whole wait: the cut's 4 seconds and the 3.5 more
+the transport's backoff took to try again (its fourth try came at 7.5
+seconds). No rollbacks either side (delay 6, window 8), the same hashes
+on both, the server's log `arena_held`, `hold` and then `resume`. The
+other five `online-arena` scenarios pass as before.
 
 **Not yet.** A team bout, a 2v2 and a party's battle through a drop (the
 same asks would carry them; the server ends them still); a server
