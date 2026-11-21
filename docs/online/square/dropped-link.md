@@ -3,7 +3,7 @@ type: Feature
 title: "A dropped link"
 description: "A dropped link in the Square (issue #153, protocol v10): the game holds under a Reconnecting panel (`reconnect_draw.c`), the server keeps the place 40 seconds (`holds.py`), maintenance and version answers, and the seeded Square's plan."
 tags: [online]
-generated: { by: claude-code/unrecorded, at: 2026-10-23T14:25:12Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
 ---
 
 # A dropped link

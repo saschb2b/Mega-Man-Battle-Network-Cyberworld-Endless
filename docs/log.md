@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-21
+* **Add**: online/arena/dropped-link.md (a NetBattle of two survives a dropped link, issue #180, protocol v21: the server holds it with the place, the games ask for the keys the link lost). **Update**: online/arena/index.md (its line), online/square/dropped-link.md (a NetBattle of two goes on through the drop), devtools/net-square.md (the dev step `reconnect cut N`), online/arena/not-yet.md (a drop mid-battle).
 * **Update**: online/shared-dive.md (crews by nearness, issue #714: the calls taken under the owner's direction of 21 November 2026, the Crews and the fork's rows turned over, Crews as built), online/index.md (its line), code/online.md (dive_crew.c reads the server's crew), code/server.md (crews.py by nearness), devtools/scenarios.md (the sleep step), code/tools.md (scenarios.py's steps).
 * **Update**: online/shared-dive.md (As built: each diver's name over his MegaMan on a dive layer, issue #712), code/online.md (`map_label.c`, the divers' names in `dive_people.c`), devtools/scenarios.md (a dive's `tags N: NAMES` line).
 * **Update**: online/shared-dive.md (a crew's battle joined unasked, issue #715: the decision's row, As built, Open 1), devtools/scenarios.md (a dive's `join` line).

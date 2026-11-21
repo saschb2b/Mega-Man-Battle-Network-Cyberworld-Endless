@@ -3,7 +3,7 @@ type: Status
 title: "Not yet"
 description: "What the Arena has not yet done or tried: two a side's open points, teams of three, battle sound, NaviCust effects, rollback between devices, the stands on phones, Battle mode, the browser with a screen."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T17:15:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
 ---
 
 # Not yet
