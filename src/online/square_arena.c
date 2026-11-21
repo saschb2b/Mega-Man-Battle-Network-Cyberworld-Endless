@@ -831,7 +831,7 @@ void square_arena_back(void) {
 	printf("arena: back in the Square\n");
 }
 
-/* A NetBattle of two through a dropped link (protocol v21, issue #180;
+/* A battle through a dropped link (protocol v21, issue #180;
  * docs/online/arena/dropped-link.md): while the transport tries again,
  * nothing goes in the outbox and the battle waits on the other's keys as
  * on any slow link; back in the same session (its place taken back, the
@@ -866,7 +866,8 @@ void square_arena_frame(uint32_t keys) {
 	notice_held(&s);
 	++SA.t;
 	bool lost = s.error[0] || !s.connected;
-	if (SA.stage == SA_BATTLE && !SA.team && SA.link.seats == 2 && !s.error[0]) lost = through_a_drop(&s);
+	/* (a NetBattle, a team's bout and a 2v2 alike, issue #180: the server holds each with its team match) */
+	if (SA.stage == SA_BATTLE && !s.error[0]) lost = through_a_drop(&s);
 	else SA.link_down = false;
 	resumes_seen = s.resumes;
 	me = s.player_id;

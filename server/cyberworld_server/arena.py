@@ -35,8 +35,9 @@ with the link, and the games ask each other again for the keys they
 miss (ARENA_HASH's frame 0xFFFFFFFC, docs/online/arena/dropped-link.md);
 a resume takes the battle back with the place. The place freed ends it;
 an end while he is away (the other left, the battle over) is said to him
-again on his resume. A team bout, a 2v2 and a party's battle still end at
-the drop."""
+again on his resume. A team bout and a 2v2 are held too, also before
+their START (his accept said on his resume), with the team match
+(teams.py); a party's battle is party.py's."""
 
 import math
 import time
@@ -131,10 +132,12 @@ class Arena:
         player.writer.write(framed)
 
     def holdable(self, player_id):
-        """A NetBattle of two under way, which a dropped link of its player
-        holds rather than ends (v21): not a team bout, a 2v2 or a party's."""
+        """A battle a dropped link of its player holds rather than ends: a
+        NetBattle under way (v21), a team bout or a 2v2 also before its START,
+        the team match held with it (teams.py, issue #180). A party's is
+        party.py's."""
         match = self.matches.get(self.of.get(player_id, 0))
-        return bool(match and match.started and not match.four and not match.team)
+        return bool(match and (match.started or match.team))
 
     def dropped(self, player_id, held):
         """`player_id`'s link dropped, his place `held` or not: his battle

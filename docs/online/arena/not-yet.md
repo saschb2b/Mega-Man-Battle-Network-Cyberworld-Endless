@@ -37,9 +37,9 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T12:00:00Z }
   online statistics can count it).
 
 - A dropped link mid-battle ([A NetBattle through a dropped
-  link](dropped-link.md)): a NetBattle of two goes on through one; a team
-  bout, a 2v2 and a party's battle still end at it, and a server
-  restarted mid-battle holds nothing. Seen with a socket the game closed
+  link](dropped-link.md)): a NetBattle, a team match and its bouts, a 2v2
+  and a party's battle go on through one; a server restarted mid-battle
+  holds nothing. Seen with a socket the game closed
   itself, not yet on a device's real network.
 - The battle's sound: the scene plays the player's core only where the
   game's own core has made its sound ring (`arena_pair_sound`).

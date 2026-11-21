@@ -132,9 +132,30 @@ link cut for 3 seconds at field frame 133):
 | before (`dev` after #722) | Alpha's field let Beta go at frame 133, as the link dropped (the server's seat gone), and fought on alone; Beta's froze at frame 141 waiting on keys that never came, his resume 3.5 s later changing nothing, his game held with no end |
 | after | held: the server's `party_held`, Beta's resume 3.0 s after the drop; Beta's keys sent again from frame 121; both fields on together, every seat's hash agreeing after it (7 on each, to frame 420) |
 
-**Not yet.** A team bout and a 2v2 through a drop (the same asks would
-carry them; the server ends them still: `teams.py` ends the team match
-at the drop); a server
+**A team match and two a side.** A team, its match and its bout under
+way are held with the dropped player's place too (`teams.py`'s
+`dropped`, `arena.py`'s `holdable` taking a team bout and a 2v2, the
+first also before its START): the others' games wait on his keys, and
+his resume takes all of it back, the last TEAM_STATE meant for him said
+again, so his game goes into a bout called meanwhile or watches the one
+under way again (`square_team.c`: a watch the drop ended watched anew).
+A 2v2's four streams ask and resend as a NetBattle's two. His place
+freed after its 40 seconds breaks the match off as a leave; before that
+a battle's own stall (20 seconds) or a bout's accept (30) bounds the
+wait. The scenario `online-team/side-by-side-through-a-drop` forms two
+teams on four games, fights a 2v2 and cuts a partner's link for three
+seconds.
+
+| Build | Delta's link cut for 3 s after battle frame 120 (two a side) |
+| --- | --- |
+| before (`dev`) | Delta's battle stopped at once, "the connection to the Square was lost"; the other three's at frame 142, "the other player left the NetBattle"; the match broken off for both teams (result 3) |
+| after | all four waited 170 to 177 ticks (2.8 to 3.0 s); over at frame 605 on all four, Alpha's team won, 9 or 10 hashes agreed on each, none apart; Delta's keys sent again from frame 120 |
+
+A relay's waiting partner through a drop is held and told the last word
+again (`server/tests/test_teams.py`); his game watching the bout again
+after it is not yet seen in a scenario.
+
+**Not yet.** A server
 restarted mid-battle (it holds nothing; the battle stops as before); the
 stands through a drop (a spectator's keys stop at the first gap the
 server saw; with the resend from the last hash the server sees none in

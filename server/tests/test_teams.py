@@ -45,11 +45,29 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
         await self.server.close()
         self.dir.cleanup()
 
-    async def connect(self, name, full=True):
+    async def connect(self, name, full=True, resume=False):
         client = Client()
         self.clients.append(client)
-        welcome = await client.open(self.port, name, bn5=full)
+        welcome = await client.open(self.port, name, bn5=full, key=name.encode().ljust(16, b"k"), resume=resume)
         return client, struct.unpack("!I", welcome[5:9])[0]
+
+    async def dropped(self, who):
+        """His link gone without a word (no BYE, no close frame): his place held."""
+        await who[0].drop()
+        self.clients.remove(who[0])
+        for _ in range(200):
+            if self.server.holds.held(self.server.players[who[1]]):
+                return
+            await asyncio.sleep(0.01)
+        raise AssertionError("Not held")
+
+    async def kinds(self, client, seconds):
+        """The (kind, stage) of the messages that came in the next `seconds`."""
+        got, deadline = set(), asyncio.get_running_loop().time() + seconds
+        while asyncio.get_running_loop().time() < deadline:
+            m = await client.receive()
+            got.add((m[0], m[1] if len(m) > 1 else 0))
+        return got
 
     async def state(self, client, stage=None, number=0):
         for _ in range(100):
@@ -340,6 +358,49 @@ class TeamTests(unittest.IsolatedAsyncioTestCase):
                 ended = protocol.ARENA_STATE.unpack(await who[0].message(SPEC["arena_state"]))
             self.assertEqual(ended[2], bout)
             self.assertEqual((await self.state(who[0], teams.OVER))["result"], teams.BROKE_OFF)
+        self.assertFalse(self.server.arena.matches)
+
+    async def test_side_by_side_held_through_a_dropped_link_and_taken_back(self):
+        # (issue #180: a partner's link drops without a word; the match and its battle held, the others told nothing,
+        # his resume relayed to and from as before)
+        (a, b, c, d), bout = await self.side_by_side()
+        await self.dropped(b)
+        got = await self.kinds(a[0], 0.5)
+        self.assertNotIn((SPEC["arena_state"], ARENA_ENDED), got)
+        self.assertNotIn((SPEC["team_state"], teams.OVER), got)
+        self.assertIn(bout, self.server.arena.matches)
+        self.assertTrue(self.server.teams.matches)
+        b = await self.connect("Beta", resume=True)
+        self.assertEqual(self.server.teams.of[b[1]].other(b[1]), a[1])
+        keys = protocol.ARENA_INPUT.pack(SPEC["arena_input"], bout, 0, 1) + b"\x00\x01"
+        await c[0].send(keys)
+        self.assertEqual((await b[0].message(SPEC["arena_seat"]))[1], 1)
+        await b[0].send(keys)
+        for who in (a, c, d):
+            m = await who[0].message(SPEC["arena_seat"])
+            while m[1] != 2:
+                m = await who[0].message(SPEC["arena_seat"])
+            self.assertEqual(m[2:], keys)
+
+    async def test_a_relays_waiting_partner_hears_the_last_word_on_his_resume(self):
+        # (Beta waits while Alpha fights; his link drops and the match goes on; back, he hears where it stands)
+        a, b, c, d = await self.four()
+        await a[0].send(team(teams.ORDER, a[1]))
+        await c[0].send(team(teams.ORDER, c[1]))
+        await self.dropped(b)
+        called, _ = await self.bout(a, c)
+        b = await self.connect("Beta", resume=True)
+        # (the bout called and begun while he was away: its FIGHT, the last word, so his game watches it)
+        self.assertEqual((await self.state(b[0], teams.FIGHT))["bout"], called["bout"])
+        self.assertIn(called["bout"], self.server.arena.matches)
+
+    async def test_a_team_matchs_hold_over_breaks_it_off(self):
+        await self.server.close()
+        self.server = Server(seed=7, capacity=8, player_cap=16, state_dir=self.dir.name, trading=True, arena=True, hold=0.3)
+        self.port = await self.server.start("127.0.0.1", 0)
+        (a, b, c, d), bout = await self.side_by_side()
+        await self.dropped(b)
+        self.assertEqual((await self.state(a[0], teams.OVER))["result"], teams.BROKE_OFF)
         self.assertFalse(self.server.arena.matches)
 
     async def test_side_by_side_without_a_winner_is_drawn_and_a_partner_is_busy(self):

@@ -25,7 +25,14 @@ no order is asked: each team's captain leads (his game the GBA of his
 side), his partner beside him on the same field, and the match is one
 battle of four seats (arena.py), all four accepting before its START. Its
 winner (the cable's first's report) is his team's; no winner is a draw; a
-leave or a drop of any of the four breaks it off for both teams."""
+leave or a drop of any of the four breaks it off for both teams.
+
+A dropped link (issue #180, docs/online/arena/dropped-link.md) breaks
+nothing while its player's place is held (holds.py): his team, its match
+and its bout under way are kept (arena.py holds the bout), and his resume
+hears the last TEAM_STATE meant for him again, so his game goes into a
+bout called meanwhile or watches the one under way again. His place
+freed ends them as a leave."""
 
 import time
 
@@ -80,13 +87,14 @@ class Teams:
         self.asked = {}        # proposer id -> (target id, time)
         self.matches = {}      # team match id -> TeamMatch
         self.in_match = {}     # player id -> team match id
+        self.missed = {}       # player id -> the last TEAM_STATE meant for him while his link was down (issue #180)
         self.next = 1
 
     # -- the wire --
 
     def send(self, player_id, stage, partner=0, match=None, result=0):
         player = self.server.players.get(player_id)
-        if not player or player.writer.is_closing():
+        if not player:
             return
         ids, left, number, bout, hp, match_id = [0, 0, 0, 0], (0, 0), 0, 0, 0, 0
         if match:
@@ -100,7 +108,13 @@ class Teams:
             number, hp, match_id = match.number, match.hp, match.id
             bout = match.bout.id if match.bout else 0
         form = match.form if match else 0
-        player.writer.write(websocket.frame(protocol.team_state(stage, partner, match_id, bout, ids, left, number, result, hp, form)))
+        framed = websocket.frame(protocol.team_state(stage, partner, match_id, bout, ids, left, number, result, hp, form))
+        if player.writer.is_closing():
+            # (his link down, his place held: the last word kept for his resume)
+            if self.server.holds.held(player):
+                self.missed[player_id] = framed
+            return
+        player.writer.write(framed)
 
     def busy(self, player_id):
         """In a team match (a bout's or waiting for one): a challenge, a trade or a team ask to or from him refused."""
@@ -185,7 +199,23 @@ class Teams:
             self.send(player_id, SPLIT_UP, team.other(player_id))
 
     def left(self, player_id):
+        self.missed.pop(player_id, None)
         self.split(player_id, gone=True)
+
+    def dropped(self, player_id, held):
+        """His link dropped, his place `held` or not: his team, its match and
+        its bout kept while held (issue #180), else left as ever."""
+        if held and (player_id in self.of or player_id in self.asked):
+            if player_id in self.in_match:
+                self.server.event("team_held", id=player_id, match=self.in_match[player_id])
+            return
+        self.left(player_id)
+
+    def resumed(self, player):
+        """His place taken back: the last TEAM_STATE meant for him said again."""
+        framed = self.missed.pop(player.id, None)
+        if framed and not player.writer.is_closing():
+            player.writer.write(framed)
 
     # -- a team match --
 

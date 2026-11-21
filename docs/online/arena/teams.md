@@ -67,7 +67,10 @@ No. Yes makes them a team ("Alright! We're a team with NAME!" on both);
 No, B, or 30 seconds without an answer turn it down ("Aw... NAME won't
 team up this time."). On the partner's card the choice reads `Split up`,
 and either one's Split up, his leaving the channel or the server, or a
-dropped link split the team ("OK... Our team with NAME split up."). The
+dropped link that does not come back within its place's 40 seconds split
+the team ("OK... Our team with NAME split up."); one that comes back
+keeps it, with its match ([A NetBattle through a dropped
+link](dropped-link.md), issue #180). The
 one who asked to team up is the team's **captain**. A player on a team
 asked to team up again is answered by MegaMan ("Lan,we're with NAME
 already!"), and an ask the server refuses is MegaMan's word too, never
@@ -131,8 +134,9 @@ says the team's result (TEAM WIN!, TEAM LOSE, TEAM DRAW where both
 teams' last MegaMen went down in one bout, TEAM BROKE OFF), and MegaMan
 says it back in the Square ("Alright!! Our team won,Lan!!", "Aw... Our
 team lost.", "Phew... Both teams went down at once!", "Whoa! The Team
-NetBattle broke off!"). A leave or a dropped link mid-match, a bout
-broken off or never begun, ends the match **broken off** for both teams:
+NetBattle broke off!"). A leave mid-match, a dropped link that does not
+come back (a short one is ridden out, the match and its bout held), a
+bout broken off or never begun, ends the match **broken off** for both teams:
 no result for anyone, as a lone bout broken off counts neither won nor
 lost. The teams stay teams afterwards, for another.
 
