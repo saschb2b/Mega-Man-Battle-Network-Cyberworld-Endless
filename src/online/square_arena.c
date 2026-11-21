@@ -865,6 +865,7 @@ void square_arena_frame(uint32_t keys) {
 	++SA.t;
 	bool lost = s.error[0] || !s.connected;
 	if (SA.stage == SA_BATTLE && !SA.team && SA.link.seats == 2 && !s.error[0]) lost = through_a_drop(&s);
+	else SA.link_down = false;
 	resumes_seen = s.resumes;
 	me = s.player_id;
 	if (lost && SA.stage == SA_BATTLE) arena_link_net_lost(&SA.link, "the connection to the Square was lost");
