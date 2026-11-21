@@ -19,9 +19,9 @@
 #define CW_PARTY_PLAY_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <stdio.h>
 
 #include "foes.h"
 #include "party_field.h"
@@ -62,7 +62,9 @@ bool party_play_held(void);
 void party_play_frame(uint32_t pad);
 void party_play_draw(void);
 /* ... in the state's words: the field's size and the seat it is drawn
- * for, its marks (party_marks.h) */
+ * for, its marks (party_marks.h); over the server "party" its stage and
+ * frame, the hashes agreed, and this game's own link through a drop (up,
+ * down, alone; issue #180) */
 void party_play_describe(FILE *f);
 
 #endif
