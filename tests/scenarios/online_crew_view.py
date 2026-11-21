@@ -10,7 +10,9 @@ NEEDS = ('bn5', 'bn4')   # (the dive takes the NetPass's DeepNet stamp: the full
 PORTAL = 'place -44 150 3; wait 10'    # before the week's portal, facing it (seed 120's Square)
 MENU = 'hold SELECT 4; hold SELECT+R 4; wait 6; '
 WIN = MENU + 'press DOWN; ' * 4 + 'press A; wait 60'          # the dev menu's Win this battle
-NEXT_LAYER = MENU + 'press DOWN; ' * 7 + 'press A; wait 30'   # ... and Next layer
+# ... and Next layer, three below (the menu keeps its cursor); SELECT and R at once, as on a dive's layer SELECT
+# alone is the emote strip's
+NEXT_LAYER = 'hold SELECT+R 4; wait 6; ' + 'press DOWN; ' * 3 + 'press A; wait 30'
 CAST = dict(START=online.HOME, NEEDS=NEEDS, SERVER=True, FILES={'netpass.ini': online.SEEN_FULL}, GAMES={'beta': online.HOME})
 
 
@@ -47,8 +49,12 @@ MANY = {
         ('sleep', 1.0),
         soon('mate0~Beta hp 90/100', '', 300),               # Alpha sees it fall in the battle
         ('@beta', 'do', WIN),
-        ('@beta', 'until', 'screen=map', 900),
+        ('@beta', 'repeat', 'press A; wait 20', 'screen=map', 60),   # (BN6's results paged)
+        ('@beta', 'do', 'wait 120'),
+        ('sleep', 1.5),                                      # (a crew again, standing together after his battle)
+        soon('crew~2', '', 600),
         ('@beta', 'do', NEXT_LAYER),
+        ('@beta', 'expect', 'screen!=devmenu'),
         ('@beta', 'until', 'layer=2', 900),
         ('sleep', 1.0),
         soon('mate0~layer 2', '', 300),                      # ... and his layer once he goes on
