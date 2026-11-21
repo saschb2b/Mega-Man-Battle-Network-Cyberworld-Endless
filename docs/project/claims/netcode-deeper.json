@@ -1,0 +1,16 @@
+{
+  "branch": "netcode-deeper",
+  "what": "Netcode, deeper: each player's own delay, keys over UDP with redundancy, a NetBattle that survives a dropped link (issue #180); the wire's version after the crews'",
+  "takes": {
+    "online_protocol": [
+      [
+        21,
+        21
+      ]
+    ]
+  },
+  "units": [
+    "netcode, deeper (#180)"
+  ],
+  "run": false
+}

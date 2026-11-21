@@ -1,0 +1,16 @@
+{
+  "branch": "dive-crews-near",
+  "what": "The shared dive: crews by nearness, formed and split without asking (issue #714); the wire's next version",
+  "takes": {
+    "online_protocol": [
+      [
+        20,
+        20
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: crews by nearness (#714)"
+  ],
+  "run": false
+}
