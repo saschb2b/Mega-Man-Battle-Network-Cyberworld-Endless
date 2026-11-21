@@ -3,6 +3,7 @@
 #include "dive_people.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "bn6.h"
@@ -12,8 +13,11 @@
 #include "claims.h"
 #include "director.h"
 #include "dive_traces.h"
+#include "gfx.h"
 #include "layer_objs.h"
+#include "map_label.h"
 #include "npc.h"
+#include "pixfont.h"
 #include "puppet.h"
 #include "run.h"
 
@@ -21,11 +25,14 @@
 #define MOVING_FRAMES 8   /* a step seen keeps the walk this long */
 #define TALK_ROOM 1024    /* the dive's chats' words, one archive at a time */
 #define REACH 24          /* world units from MegaMan's probe a diver is spoken to */
+#define TAG_TOP 4         /* the picture's top row a name piled on others may reach */
+#define TAG_BOX 100       /* ... and the row BN6's chat box begins under, while one is open */
 
 static struct {
 	uint32_t script[DIVE_PEOPLE];
 	uint32_t id[DIVE_PEOPLE];
-	int x[DIVE_PEOPLE], y[DIVE_PEOPLE], moving[DIVE_PEOPLE];
+	int x[DIVE_PEOPLE], y[DIVE_PEOPLE], z[DIVE_PEOPLE], moving[DIVE_PEOPLE];
+	char name[DIVE_PEOPLE][ONLINE_NAME_BYTES + 1];
 	int made;
 	uint32_t room;            /* the chats' words' room */
 	uint32_t seed;            /* the layer they were made on */
@@ -85,6 +92,64 @@ static void place(int k, const OnlinePeer *peer) {
 	P.id[k] = peer->id;
 	P.x[k] = peer->x;
 	P.y[k] = peer->y;
+	P.z[k] = peer->z;
+	memcpy(P.name[k], peer->name, sizeof P.name[k]);
+}
+
+/* A diver's name over his MegaMan (issue #712), as the Square names its
+ * players (map_label.h). `more`: divers under it whose names found no row. */
+typedef struct { int x, y, w, more; const char *name; } Tag;
+
+/* the tag at (x, y) that `t` would lie on (NULL none) */
+static Tag *tag_under(Tag *tags, int n, const Tag *t) {
+	for (int j = 0; j < n; ++j)
+		if (abs(tags[j].y - t->y) < MAP_LABEL_ROW && abs(tags[j].x - t->x) < (tags[j].w + t->w) / 2 + 4) return &tags[j];
+	return NULL;
+}
+
+/* The names that show now, as the puppets stand: each over its diver's
+ * head, and where divers stand on one spot (a layer's arrival) each next
+ * name a row over the last, those past the picture's top counted on the
+ * topmost. Reads the game's camera; changes nothing. */
+static int tags_now(Tag tags[DIVE_PEOPLE]) {
+	int n = 0, camera[3];
+	if (!here() || !director_on_map() || !map_label_camera(camera)) return 0;
+	for (int k = 0; k < P.made; ++k) {
+		if (!P.id[k] || !P.name[k][0]) continue;
+		Tag t = { .name = P.name[k], .w = pixfont_width(P.name[k], 1) };
+		map_label_at(P.x[k], P.y[k], P.z[k], camera, &t.x, &t.y);
+		if (!map_label_shown(t.x, t.y)) continue;
+		t.x = map_label_x(t.x, t.name);
+		Tag *under;
+		while ((under = tag_under(tags, n, &t)) != NULL && under->y - MAP_LABEL_ROW >= TAG_TOP) t.y = under->y - MAP_LABEL_ROW;
+		if (under) ++under->more;
+		else tags[n++] = t;
+	}
+	return n;
+}
+
+void dive_people_draw(bool chat) {
+	Tag tags[DIVE_PEOPLE];
+	int n = tags_now(tags);
+	for (int i = 0; i < n; ++i) {
+		/* (never over BN6's chat box: the names above it stay) */
+		if (chat && tags[i].y + MAP_LABEL_ROW > TAG_BOX) continue;
+		char text[ONLINE_NAME_BYTES + 8];
+		if (tags[i].more) snprintf(text, sizeof text, "%s +%d", tags[i].name, tags[i].more);
+		else snprintf(text, sizeof text, "%s", tags[i].name);
+		map_label_plate(tags[i].x, tags[i].y, text, WHITE);
+	}
+}
+
+void dive_people_describe(FILE *f) {
+	Tag tags[DIVE_PEOPLE];
+	int n = tags_now(tags);
+	fprintf(f, "tags %d", n);
+	for (int i = 0; i < n; ++i) {
+		fprintf(f, "%s%s", i ? " " : ": ", tags[i].name);
+		if (tags[i].more) fprintf(f, "+%d", tags[i].more);
+	}
+	fputc('\n', f);
 }
 
 void dive_people_frame(const OnlineSnapshot *s) {
