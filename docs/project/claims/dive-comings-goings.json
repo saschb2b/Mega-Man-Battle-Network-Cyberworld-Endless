@@ -1,0 +1,16 @@
+{
+  "branch": "dive-comings-goings",
+  "what": "The shared dive: comings and goings said: left, back, busy, a full crew (issue #758, from the friction hunt of 21 November 2026); the wire's version if it needs one, set anew in the order of merging",
+  "takes": {
+    "online_protocol": [
+      [
+        29,
+        29
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: comings and goings said: left (#758)"
+  ],
+  "run": false
+}

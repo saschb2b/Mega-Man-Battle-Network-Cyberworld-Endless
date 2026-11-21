@@ -1,0 +1,16 @@
+{
+  "branch": "dive-continue-board",
+  "what": "The shared dive: back into the dive after a quit, the Board posted without a Square visit (issue #759, from the friction hunt of 21 November 2026); the wire's version if it needs one, set anew in the order of merging",
+  "takes": {
+    "online_protocol": [
+      [
+        30,
+        30
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: back into the dive after a quit (#759)"
+  ],
+  "run": false
+}

@@ -1,0 +1,16 @@
+{
+  "branch": "door-waits-crew",
+  "what": "The shared dive: the guardian's door and the crew: no going in alone by one A (issue #752, from the friction hunt of 21 November 2026); the wire's version if it needs one, set anew in the order of merging",
+  "takes": {
+    "online_protocol": [
+      [
+        28,
+        28
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: the guardian's door and the crew: no going in alone by one A (#752)"
+  ],
+  "run": false
+}

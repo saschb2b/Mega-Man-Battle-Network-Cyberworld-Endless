@@ -1,0 +1,16 @@
+{
+  "branch": "dive-crew-reach",
+  "what": "The shared dive: the crew's reach and the picture: no battle from a diver out of sight (issue #750, from the friction hunt of 21 November 2026); the wire's version if it needs one, set anew in the order of merging",
+  "takes": {
+    "online_protocol": [
+      [
+        31,
+        31
+      ]
+    ]
+  },
+  "units": [
+    "shared dive: the crew's reach and the picture: no battle from a diver out of sight (#750)"
+  ],
+  "run": false
+}
