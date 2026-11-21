@@ -10,7 +10,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "bn6.h"
 #include "director.h"
 #include "emu.h"
 #include "guardians.h"
@@ -19,6 +18,7 @@
 #include "platform.h"
 #include "run.h"
 #include "second_battle.h"
+#include "second_crew.h"
 #include "second_folder.h"
 #include "second_frame.h"
 #include "second_home.h"
@@ -120,6 +120,8 @@ void second_update(void) {
 	if (p == PANEL_SHOP) second_read_shop();
 	if (p == PANEL_TRADER) second_read_trader();
 	if (p == PANEL_NETPASS) emote_palette_view(&S2.palette);
+	if (p == PANEL_MAP) second_read_crew();
+	else S2.ncrew = 0;
 	if (p != panel) panel_since = 0;
 	else if (panel_since < 1 << 20) ++panel_since;
 	panel = p;
@@ -218,6 +220,10 @@ bool second_draw(int w, int h) {
 	else if (panel == PANEL_MAIL) second_mail_draw(body);
 	else if (panel == PANEL_SHOP) second_shop_draw(body);
 	else if (panel == PANEL_TRADER) second_trader_draw(body);
-	else director_draw_layer_map(body.x, body.y, body.w, body.h);
+	else {
+		/* (a dive's crew's rows over the layer's map: second_crew.h) */
+		SDL_Rect map = second_crew_draw(body);
+		director_draw_layer_map(map.x, map.y, map.w, map.h);
+	}
 	return true;
 }

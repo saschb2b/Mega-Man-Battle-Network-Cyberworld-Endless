@@ -14,10 +14,26 @@
 #include <stdint.h>
 #include <stdio.h>
 
+#include "protocol.h"
+
 /* A dive's frame: `linked` the link up; `me` this game's session; `now`
  * SDL_GetTicks's. MegaMan's HP sent where it changed, ONLINE_CREW_VITALS_MS
  * apart at most */
 void dive_crew_view_frame(bool linked, uint32_t me, uint32_t now);
+/* The crewmates shown, in the order they came (none alone or with the
+ * link down), each as the plates write him; the second screen's crew
+ * rows read them too (second_crew.h) */
+typedef struct {
+	uint32_t session;
+	char full[ONLINE_NAME_BYTES + 1];   /* his name */
+	char name[ONLINE_NAME_BYTES + 1];   /* ... cut to a plate (party_marks_cut) */
+	char hp[12];                        /* "120/200", "--" not told yet */
+	char layer[6];                      /* "L3", "" on MegaMan's */
+	uint16_t now, most;                 /* his HP and max HP (0 0 not told) */
+} CrewRow;
+int dive_crew_view_rows(CrewRow out[ONLINE_PARTY_MOST]);
+/* a row's HP as a bar w wide at (x, y), a pixel high: orange from a quarter down */
+void dive_crew_view_bar(int x, int y, int w, const CrewRow *row);
 /* Over the map (at P.core_x, P.core_y) */
 void dive_crew_view_draw(void);
 /* ... in the state's words: `crewview N` (the plates shown) and a line a
