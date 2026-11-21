@@ -208,7 +208,9 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               "party_bytes", "arena_party", "arena_linked", "arena_seat_gone", "week_splits_bytes", "notice_dive_out",
               "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue",
               # (v20, crews by nearness: crews.py)
-              "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms")
+              "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms",
+              # (v23, a crew's battles at once: crews.py)
+              "crew_busy")
 
 
 class ContractTests(unittest.TestCase):

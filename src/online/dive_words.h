@@ -13,9 +13,8 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
  * MegaMan leads it, its leader's name. */
 const char *dive_door_words(unsigned count, bool leads, const char *leader);
 
-/* The band's join-in lines (dive_join.h): MegaMan's own battle held while
- * the crew is called, and his join into a crewmate's sent. */
-const char *dive_join_calling_words(void);
+/* The band's join-in line (dive_join.h): his join into a crewmate's battle
+ * sent, while it starts. */
 const char *dive_join_joined_words(void);
 /* The band's line as MegaMan opens a Mystery Data another opened first
  * this week (`mine` he is the first: `name` his own). */

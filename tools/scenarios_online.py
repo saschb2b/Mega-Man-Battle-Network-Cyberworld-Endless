@@ -334,6 +334,10 @@ class Cast:
         if step[0] == 'server':
             (self.server.stop if step[1] == 'stop' else self.server.start)()
             return game, self.state[game], 0
+        if step[0] == 'sleep':
+            # (the clock's seconds with no game held: each online game runs on at its pace, answering the others)
+            time.sleep(float(step[1]))
+            return game, self.state[game], 0
         pump, ran, n = self.pumps[game], 0, 0
         # (the game ran on since its last step: its state as its last batch left it)
         self.state[game] = pump.hold() or self.state[game]

@@ -81,8 +81,11 @@ static void call(void) {
 	to(JOIN_CALLING);
 }
 
+/* how long MegaMan stood still for the crew's answer, or for the battle he joined to start (ms) */
+static unsigned held_ms(void) { return J.stage == JOIN_CALLING || J.stage == JOIN_JOINED ? (unsigned)(SDL_GetTicks() - J.since) : 0; }
+
 static void alone(const char *why) {
-	fprintf(stderr, "dive: battle %d fought alone: %s\n", J.index, why);
+	fprintf(stderr, "dive: battle %d fought alone: %s (held %u ms)\n", J.index, why, held_ms());
 	emu_encounter_go();
 	to(JOIN_NONE);
 }
@@ -134,13 +137,18 @@ void dive_join_crew_state(const CrewState *c) {
 		if (J.stage == JOIN_CALLING) alone("nobody jumped in");
 		return;
 	}
-	/* (an offer while one was joined: the server's last, the earlier one over) */
-	if (c->stage != ONLINE_CREW_OFFER || (J.stage != JOIN_NONE && J.stage != JOIN_JOINED)) return;
-	if (J.stage != JOIN_NONE) to(JOIN_NONE);
-	if (!free_here() || !dive_crew_has(c->other)) {
-		fprintf(stderr, "dive: an offer of battle %u not taken (%s)\n", c->value, free_here() ? "not in the crew" : "busy");
+	if (c->stage != ONLINE_CREW_OFFER) return;
+	/* (MegaMan not free to go in: his own battle held or fought, a chat, a shop, a door, Mystery Data opening; or the owner
+	 * no crewmate of his any more. Said at once (CREW busy, v23), so that nobody waits a window for him) */
+	const char *why = J.stage == JOIN_CALLING ? "his own battle held" : J.stage == JOIN_FIGHTING ? "fighting" :
+		!free_here() ? "busy" : !dive_crew_has(c->other) ? "not in the crew" : NULL;
+	if (why) {
+		send(ONLINE_CREW_BUSY, c->other, 0);
+		fprintf(stderr, "dive: an offer of battle %u declined at once (%s)\n", c->value, why);
 		return;
 	}
+	/* (an offer while one was joined: the server's last, the earlier one over) */
+	if (J.stage != JOIN_NONE) to(JOIN_NONE);
 	/* (no question: a crewmate walking this close fights it too, the owner's call of 21 November 2026, issue #715;
 	 * walking apart, or splitting up, is the way to stay out. The join's wait is counted from here: one the server
 	 * turned down as late holds MegaMan only so long) */
@@ -156,6 +164,7 @@ void dive_join_crew_state(const CrewState *c) {
 static void take(const PartyState *p) {
 	unsigned n = 0;
 	for (unsigned k = 0; k < ONLINE_SEATS; ++k) n += p->seats[k] != 0;
+	fprintf(stderr, "dive: the crew's battle %d starts, MegaMan held %u ms\n", J.index, held_ms());
 	J.e = director_crew_battle(J.index);
 	int walked = director_crew_steps_reset();
 	fprintf(stderr, "dive: the crew's battle %d, seat %u of %u; the encounter count reset (walked %d)\n", J.index, p->seat, n, walked);
@@ -194,7 +203,7 @@ void dive_join_describe(FILE *f) {
 
 const char *dive_join_band(void) {
 	switch (J.stage) {
-	case JOIN_CALLING: return dive_join_calling_words();
+	/* (MegaMan's own battle held only while the server starts it: no line, issue #715) */
 	case JOIN_JOINED: return dive_join_joined_words();
 	default: return NULL;
 	}

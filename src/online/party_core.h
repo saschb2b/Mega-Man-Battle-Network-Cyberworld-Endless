@@ -38,6 +38,9 @@ typedef struct {
 	int end;                              /* the enemies set to 1 HP at this iteration (the dev's partyend), 0 never */
 } PartyBattle;
 
+/* FNV-1a over bytes: a field's inputs told apart in the log (party_play.c) */
+uint64_t party_core_bytes_hash(const void *data, size_t size);
+
 struct mCore;
 typedef struct PartyCore PartyCore;
 

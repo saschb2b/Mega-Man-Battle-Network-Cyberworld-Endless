@@ -46,6 +46,9 @@ typedef struct {
 	bool leave;      /* running from it never fails: a test battle's (lab_battle.h) */
 	int song;        /* its music where BN6's own record names one (a super boss's), 0 the battle's or boss's theme */
 	bool map_backdrop;   /* the background of the map it is fought on, as BN6's story records ask (0xFF), not its area's roll */
+	bool backdrop_set;   /* its background chosen with it (`backdrop`), not rolled as it is set: a dive's battle, the same on
+	                        every game of a crew (director_crew.c's dive_battle) */
+	int backdrop;
 	int field;       /* the BattleSettings battlefield: the panels' layout (0 plain) */
 	int player;      /* MegaMan's panel on it (row << 4 | column, from 1); 0 column 2 row 2 */
 	int sides;       /* whose each column is (the BattleSettings' +6, BN6_SIDES_*): 0 the usual three and three */

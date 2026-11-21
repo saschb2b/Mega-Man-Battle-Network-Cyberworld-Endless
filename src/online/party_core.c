@@ -77,10 +77,25 @@ int party_core_boot(const uint8_t *rom, size_t size, unsigned frames) {
 		K.core = NULL;
 		K.failed = !K.state;
 		if (K.failed) fprintf(stderr, "party: the boot did not reach the net\n");
-		else fprintf(stderr, "party: the boot kept on the net (%zu bytes)\n", K.size);
+		else fprintf(stderr, "party: the boot kept on the net (%zu bytes, %016llx)\n", K.size,
+			(unsigned long long)party_core_bytes_hash(K.state, K.size));
 		return K.failed ? -1 : 0;
 	}
 	return 1;
+}
+
+static void hash_more(uint64_t *hash, const void *data, size_t size) {
+	const uint8_t *bytes = data;
+	for (size_t i = 0; i < size; ++i) {
+		*hash ^= bytes[i];
+		*hash *= UINT64_C(1099511628211);
+	}
+}
+
+uint64_t party_core_bytes_hash(const void *data, size_t size) {
+	uint64_t hash = UINT64_C(14695981039346656037);
+	hash_more(&hash, data, size);
+	return hash;
 }
 
 /* ---- the battle's core ---- */
@@ -257,13 +272,6 @@ void party_core_frame(PartyCore *pc, const uint16_t keys[PARTY_MOST]) {
 
 uint32_t party_core_frames(const PartyCore *pc) { return pc->frames; }
 
-static void hash_more(uint64_t *hash, const void *data, size_t size) {
-	const uint8_t *bytes = data;
-	for (size_t i = 0; i < size; ++i) {
-		*hash ^= bytes[i];
-		*hash *= UINT64_C(1099511628211);
-	}
-}
 
 uint64_t party_core_hash(PartyCore *pc) {
 	uint64_t hash = arena_core_hash(pc->core, pc->scratch, pc->scratch_size);
