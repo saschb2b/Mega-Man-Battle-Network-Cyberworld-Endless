@@ -17,7 +17,12 @@ Central Area 1 and the Aquarium's in Seaside Area 2; and the
 **cyberbarrier**, the striped wall (sprite 7:0x03, its records looking
 the four ways), the 37 blocks BN6's story raises and lifts ("I have to get
 the Mayor to get rid of the cyberbarrier"). A P-Code's lock is the
-Security Cube, standing in the walkway's middle as an obstacle does; a
+Security Cube, standing on the middle of the walkway's panel as BN6's own
+stand in their walls' box, sunk to z -12 as Central Area 1's is (its sprite
+draws its foot that far over its origin; at the flames' spot and z 0 it
+floated over the panel's far edge, issue #735; its walls a cell nearer the
+room than an obstacle's, on the panel's edge, where MegaMan stops; [the records](../../rom/net-maps.md),
+Link Navi obstacles); a
 toll's and the Undernet's doors are the cyberbarrier (BN6's own skull
 doors are its records too). Until 15 November 2026 every one was the
 cyberbarrier, MegaMan calling it a security cube. A layer sets one where

@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6_map.h"
 #include "bytes.h"
 #include "debug.h"
 #include "emu.h"
@@ -180,16 +181,25 @@ int blockers_objects(uint8_t *recs, int n, int max) {
 		const NetBlock *b = &layer.block[k];
 		int dir, edge, side, x, y;
 		netmap_block_edges(b, &dir, &edge, &side);
-		/* (a Security Cube, BN5's or BN6's, stands in the walkway's middle,
-		 * as BN6's obstacles do: its sprite is drawn about its spot as theirs) */
-		spot(dir, blocker_is_cube(k) ? BLOCK_FLAMES : b->kind, edge, side, &x, &y);
-		if (emu_debug_on()) fprintf(stderr, "blockers: lock %d, kind %d, variant %d, at world %d,%d facing %d\n", k, b->kind, variant_of(b), x, y, dir);
+		/* (a Security Cube, BN5's or BN6's, stands on its panel's middle,
+		 * as BN6's in Central Area 1 and Seaside Area 2 stand in their walls'
+		 * box; BN6's sunk to z -12, its sprite's foot drawn that far above
+		 * its origin, BN5's at the floor: docs/rom/net-maps.md, Link Navi
+		 * obstacles, issue #735) */
+		int z = 0;
+		if (blocker_is_cube(k)) {
+			netmap_world(b->x, b->y, &x, &y);
+			if (variant_of(b) == V_SCUBE) z = BN6_SCUBE_Z;
+		} else
+			spot(dir, b->kind, edge, side, &x, &y);
+		if (emu_debug_on()) fprintf(stderr, "blockers: lock %d, kind %d, variant %d, at world %d,%d,%d facing %d\n", k, b->kind, variant_of(b), x, y, z, dir);
 		uint8_t *r = recs + n++ * 20;
 		memset(r, 0, 20);
 		r[0] = 5;
 		r[1] = 3;
 		put32(r + 4, (uint32_t)(x * 65536));
 		put32(r + 8, (uint32_t)(y * 65536));
+		put32(r + 12, (uint32_t)(z * 65536));
 		put32(r + 16, (uint32_t)(BLOCK_ID0 + variant_of(b) * BLOCK_SLOTS + k));
 	}
 	return n;

@@ -72,18 +72,29 @@ void netmap_block_edges(const NetBlock *b, int *dir, int *edge, int *side) {
 	else { *dir = uy > 0 ? 1 : 3; *edge = ry + 16 * uy; *side = wx - 16; }
 }
 
+/* Whether a block stands as a Security Cube, as blockers.c's look has it:
+ * a P-Code's always (BN6's, or BN5's where the area lends it), a toll's
+ * where its area lends BN5's (the area's own definition: the layer's lent
+ * looks are set after its map is built) */
+static bool block_cube(const NetBlock *b, int area) {
+	const NetAreaDef *a = net_area_def(area);
+	return b->kind == BLOCK_PCODE || (b->kind == BLOCK_TOLL && a && a->xrom > 0 && (a->xlooks & XLOOK_CUBE));
+}
+
 /* The obstacles' walls and checks (issue #42), as BN6's own stand in a
  * walkway's mouth: a line of five wall cells across it, a cell into the
  * walkway, flagged 0x80 + its slot (off once it opens, wall flag 0x1640 +
  * slot); and its check cells, value 0xF0 + slot, four along from the edge
  * and nine across, where the engine's A probe (24 ahead, 17 on a diagonal)
- * lands from the floor before it. */
-void nm_blocks_place(void) {
+ * lands from the floor before it. A Security Cube's line lies a cell
+ * nearer, its cells' middles on the panel's edge as BN6's cubes' walls
+ * are: the cube fills its panel (issue #735). */
+void nm_blocks_place(int area) {
 	for (int k = 0; k < layer.nblocks; ++k) {
 		int dir, e, s;
 		netmap_block_edges(&layer.block[k], &dir, &e, &s);
 		bool along_x = !(dir & 1);
-		int sign = dir < 2 ? 1 : -1, at = e + (sign > 0 ? 4 : -12);
+		int sign = dir < 2 ? 1 : -1, at = block_cube(&layer.block[k], area) ? e - 4 : e + (sign > 0 ? 4 : -12);
 		for (int i = 0; i < 5; ++i) {
 			int a = at, c = s - 4 + 8 * i;
 			add_extra(0, (CoordCell){ (int16_t)(along_x ? a : c), (int16_t)(along_x ? c : a), 0, (uint8_t)(0x80 + k), 8, (uint8_t)(1 + dir % 2 * 2 + (dir >= 2)) });
