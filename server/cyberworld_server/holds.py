@@ -68,6 +68,7 @@ class Holds:
         # (a NetBattle held with the place ends with it, and its end kept for him goes, v21)
         server.arena.left(player.id)
         server.arena.missed.pop(player.id, None)
+        server.parties.let_go(player.id)
         server.trades.done.discard(player.id)
         server.trades.last.pop(player.id, None)
         server.event("leave", id=player.id, players=len(server.players))
@@ -77,6 +78,7 @@ class Holds:
         HELLO without the resume bit): no hold, a new trade allowed."""
         self.until.pop(old.id, None)
         self.server.arena.missed.pop(old.id, None)
+        self.server.parties.let_go(old.id)
         self.server.trades.done.discard(old.id)
         self.server.trades.last.pop(old.id, None)
 
@@ -111,3 +113,4 @@ class Holds:
         if word and not player.writer.is_closing():
             await websocket.send(player.writer, word)
         self.server.arena.resumed(player)
+        self.server.parties.resumed(player)

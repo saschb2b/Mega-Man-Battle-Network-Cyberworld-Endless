@@ -564,7 +564,13 @@ fighters. Seat 0 reports with ARENA_STATUS and ends the battle with ARENA
 over (ARENA_STATE ended to every seat still in it); a seat's ARENA leave,
 its leaving the dive or its dropped link is told to the others as
 ARENA_STATE `arena_seat_gone`, and the battle goes on for the rest, each
-game finishing its own. Party battles are busy (SNAPSHOT's busy bits,
+game finishing its own. A dropped link is ridden out first (issue #180,
+no new message): the seat is held 12 seconds (`party.py`'s `SEAT_HOLD`),
+the others' games waiting on its keys, and a resume within them takes it
+back, what was said to it meanwhile sent again after its WELCOME (a
+battle over meanwhile: every other seat gone, then ended); the keys the
+link lost are asked for again as in a NetBattle of two (ARENA_HASH's
+frame 0xFFFFFFFC, v21). Past the 12 seconds the seat is gone as before. Party battles are busy (SNAPSHOT's busy bits,
 DIVERS's flag) and need no `arena` switch on the server. The stands do
 not show them yet.
 

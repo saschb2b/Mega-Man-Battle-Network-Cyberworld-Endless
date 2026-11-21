@@ -2,7 +2,8 @@
 the portal by the Board and its Yes into the dive's first layer, another
 diver seen there, a crew by standing together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
-fought by both unasked (issue #715), the Board's posts of the week,
+fought by both unasked (issue #715) and through a dropped link (issue
+#180), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -115,6 +116,22 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     ('do', 'battle; wait 10'),
     soon('join=fighting', 'beta', 900),
     soon('join=fighting', '', 900),
+))
+
+# A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
+# holds his seat, both fields wait on his keys and go on together once he is back, the hashes agreeing after it
+MANY['crew-battle-through-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['crew-battle-unasked']['STEPS'],
+    soon('party~fight', '', 900),
+    soon('party~fight', 'beta', 900),
+    soon('partyagreed>=2', '', 900),
+    ('@beta', 'do', 'reconnect cut 3'),
+    soon('partylink=down', 'beta', 120),
+    soon('partylink=up', 'beta', 900),              # back: his seat taken back
+    ('expect', 'partylink=up'),                     # Alpha's field waited on him, never let him go
+    soon('partyagreed>=7', '', 1500),               # the fields together again, every seat's hash agreeing
+    soon('partyagreed>=7', 'beta', 600),
+    ('@beta', 'expect', 'partylink=up'),
 ))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
