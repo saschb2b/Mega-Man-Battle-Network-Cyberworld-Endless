@@ -935,6 +935,9 @@ static void install_object(Install *in, int i) {
 
 /* the NPCs a part above adds after the layer's own (layer_objs_more) */
 static void more_npcs(NpcList *npcs) {
+	/* (what the layer's own leave of BN6's 16: the shared dive's divers
+	 * stand in the rest, issue #755) */
+	fprintf(stderr, "layer: %d of the %d NPC objects its own\n", npcs->n, BN6_NPC_COUNT);
 	if (layer_objs_more) layer_objs_more(npcs);
 }
 

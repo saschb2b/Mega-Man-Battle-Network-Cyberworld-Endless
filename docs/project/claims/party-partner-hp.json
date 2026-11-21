@@ -1,0 +1,9 @@
+{
+  "branch": "party-partner-hp",
+  "what": "The shared dive: a partner's Custom screen and results showing his own HP and reward (issue #757, from the friction hunt of 21 November 2026)",
+  "takes": {},
+  "units": [
+    "shared dive: a partner's Custom screen and results showing his own HP and reward (#757)"
+  ],
+  "run": false
+}
