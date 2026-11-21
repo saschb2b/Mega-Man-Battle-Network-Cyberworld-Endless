@@ -1,0 +1,9 @@
+{
+  "branch": "security-cube-stands",
+  "what": "The Security Cube floats a little over its walkway (issue #735)",
+  "takes": {},
+  "units": [
+    "the Security Cube's spot on a layer (#735)"
+  ],
+  "run": false
+}

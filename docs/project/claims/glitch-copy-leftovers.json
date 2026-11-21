@@ -1,0 +1,9 @@
+{
+  "branch": "glitch-copy-leftovers",
+  "what": "The Glitch copy: a form's attacks going on after the swap (issue #733)",
+  "takes": {},
+  "units": [
+    "the Glitch copy: a form's attacks after the swap (#733)"
+  ],
+  "run": false
+}

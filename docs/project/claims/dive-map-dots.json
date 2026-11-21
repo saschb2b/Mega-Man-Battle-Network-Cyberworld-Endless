@@ -1,0 +1,9 @@
+{
+  "branch": "dive-map-dots",
+  "what": "The shared dive: every diver on the layer a dot on the PET's map (issue #728)",
+  "takes": {},
+  "units": [
+    "shared dive: divers' dots on the map (#728)"
+  ],
+  "run": false
+}
