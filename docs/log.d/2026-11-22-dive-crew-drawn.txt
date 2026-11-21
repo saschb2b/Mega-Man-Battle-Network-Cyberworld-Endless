@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T00:30:00Z
-* **Update**: online/shared-dive.md (Room for the crew: what a layer leaves of BN6's 16 NPC objects, counted over 40 seeds a depth; a full crew's MegaMen before the traces', the crew then the nearest seated, a diver with no MegaMan still named and ringed where he stands, `diveroom=N`; issue #755), code/online.md (`dive_seats.c`).

@@ -3,7 +3,7 @@ type: Code Map
 title: "Online play's client"
 description: "What `src/online/` holds, file by file: the transport, a visit and the Square, emotes, Trade Central, the Arena's linked cores and rollback, Team NetBattles and two MegaMen a side, the NetPass and the stands."
 tags: [code]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T21:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T00:30:00Z }
 ---
 
 # Online play's client

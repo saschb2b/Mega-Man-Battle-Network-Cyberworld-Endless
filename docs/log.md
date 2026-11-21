@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/shared-dive.md (Room for the crew: what a layer leaves of BN6's 16 NPC objects, counted over 40 seeds a depth; a full crew's MegaMen before the traces', the crew then the nearest seated, a diver with no MegaMan still named and ringed where he stands, `diveroom=N`; issue #755), code/online.md (`dive_seats.c`).
+* **Update**: online/shared-dive.md (a diver gone home, issue #756: each game says where its MegaMan is, protocol v26; a diver at home drawn on no layer, kept in his crew; the plates say Home and Battle; a party field's HP on the plate), devtools/battle-on-demand.md (the home step).
 * **Update**: online/arena/rollback/window-and-delay.md (the delay from the keys' path, a first NetBattle's window guessed from the core), online/arena/not-yet.md (the first window), online/not-yet.md (the same).
 * **Update**: online/arena/dropped-link.md (a team, its match and its bouts, and a 2v2, held through a drop), online/arena/teams.md (a short drop keeps the team and its match), online/arena/two-a-side/over-the-server.md (the same for four seats), online/arena/not-yet.md (a drop mid-battle).
 
