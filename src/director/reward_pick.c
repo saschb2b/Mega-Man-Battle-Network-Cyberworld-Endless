@@ -99,7 +99,7 @@ static void open_kind(int kind) {
  * SetEventFlag set them (director_pick_flag), never as the flags read.
  * BN6's own save (BN6_SAVE_GAME, after every trade among others)
  * holds the RAM from 0x02000000 XOR-masked with a key of the save's
- * (BN6_SAVE_KEY) while it writes the cartridge, some eight frames with
+ * (BN6_SAVE_KEY, bn6_save.h) while it writes the cartridge, some eight frames with
  * the chat box shut: read then, the flags were the key's bits, and a
  * trader's trade whose key held 0x147C's opened the layer's vault, or
  * any pick its other bits named, over the save; the flags cleared on
