@@ -227,6 +227,67 @@ the session building it, and is his to turn over.
 | About to be | A dotted ring for the second before a crew forms | No sign until it has (a crew appearing from nothing) |
 | Others' crews | Not shown: only MegaMan's own crew wears the sign | Every crew on the layer in its own colour (the server tells each diver his own crew alone) |
 
+## Dots on the map (21 November 2026)
+
+Decided on 15 November (every diver on the layer a dot on the PET's
+map) and built for issue #728. The map in a run is the engine's own, not
+a screen of BN6's: the layer's map SELECT holds over the picture and the
+second screen shows (`src/director/director_map.c`; BN6's PET has no map
+of a layer). MegaMan's dot there is his panel (`netmap_panel` of where
+BN6 has him, the map's last look at him) put on the map's grid; each
+diver's is his place in the server's SNAPSHOT of the layer's room put
+through the same two steps, so a dot stands where his MegaMan stands.
+The game-design skill's pass, under the owner's direction of 21
+November (always clear who is with you and where they are):
+
+- **Dialectic: together against ahead,** the crew's sign carried from
+  the layer to the map: where the crew went when it is out of the
+  picture, the feedback of walking apart before the crew splits.
+- **Loop layer: the moment on a layer,** the walk to the exit or the
+  guardian's door, and whom to walk it beside.
+- **Patterns:** party members on the minimap (Diablo, Path of Exile, an
+  MMO's group): the party's in its colour and at the frame's edge when
+  out of it, others there but quieter; never by colour alone (the
+  interface layer's readability floor): the shape tells them apart.
+
+What is drawn (`director_map.c`, lent the divers by `dive_dots.c`
+through `map_divers.h`, the director being under online play's layer;
+the room's divers kept from each frame's snapshot as the puppets are,
+and no one's dot once half a second has passed without one, the link
+down):
+
+- **A crewmate:** a round dot, white in a ring of the crew's green
+  (`CREW_COLOUR`, the ring under his feet on the layer); past the
+  frame, an arrowhead of that green on its edge his way, as a sensed
+  service's.
+- **Another diver:** a round dot of the PET's rails' grey, solid and
+  dimmer, left out past the frame. A dot of three pixels was tried
+  first and lost on the map's dark.
+- Round, where the places marked are squares (a green one is Heal) and
+  the data diamonds; MegaMan's square dot stays over them all.
+- The key names them: "Crew" and "Divers" after "You", each where the
+  layer has one.
+- Nothing drawn over the layer's field stands on the map while SELECT
+  shows it (`director_map_over`): a crewmate's name and his ring, drawn
+  after the map, had stood on it where he stood in the picture, beside
+  his dot.
+- The state says `mapdots N: NAME(DX,DY)`, each diver's panel from
+  MegaMan's, `*` a crewmate's. Seen headless with two games on a local
+  server (the scenario `online-week/divers-on-the-map`): each game's
+  dot of the other two panels off and ringed in the crew, eighteen off
+  once he walked away, its ring gone with the crew, and moving with
+  him again.
+
+Each call was taken under the owner's direction of 21 November 2026 by
+the session building it, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| Who is a dot | Every diver in the layer's room, the crew ringed in its colour, the others dimmer | Only the crew (the others then nowhere off the picture); every diver alike (the crew lost among them) |
+| Another layer | No dot: the map is the layer, and a diver on another is in another room, which the server does not send | A mark for a crewmate gone ahead (the crew splits within ten seconds of his going) |
+| Off the frame | The crew's arrowhead on the edge, as a sensed service's; the others' left out | Every diver's arrowhead (a frame's edge full of pips) |
+| Unseen floor | A diver's dot shows where he stands, on floor MegaMan has not seen too | Hidden until MegaMan has seen that floor (where the crew is matters more than what the map reveals of a room) |
+
 ## As built
 
 - **The portal** (15 November 2026, `src/online/online_square.c`'s

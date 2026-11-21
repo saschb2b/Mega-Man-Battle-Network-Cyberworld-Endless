@@ -276,6 +276,9 @@ void director_update(void);
 bool director_goal_panel(int *x, int *y, bool *talk);
 /* Dev tools: MegaMan walks a layer's map (not a battle, a menu, a warp). */
 bool director_on_map(void);
+/* SELECT's map of the layer shows over the picture: what is drawn over
+ * the layer's field (a diver's name, a ring) waits under it. */
+bool director_map_over(void);
 /* ... on to the next layer, or the next guardian's (arriving in the room
  * before its arena), or to grid panel (x, y) of this one. */
 bool director_dev_next_layer(void);

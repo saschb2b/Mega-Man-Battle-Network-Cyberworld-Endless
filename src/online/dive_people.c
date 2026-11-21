@@ -13,6 +13,7 @@
 #include "crew_look.h"
 #include "director.h"
 #include "dive_crew.h"
+#include "dive_dots.h"
 #include "dive_traces.h"
 #include "floor_ring.h"
 #include "gfx.h"
@@ -61,6 +62,8 @@ static bool here(void) { return director_on_layer() && P.seed == run.layer_seed 
 void dive_people_on(bool on) {
 	layer_objs_more = on ? more : NULL;
 	if (!on) memset(&P, 0, sizeof P);
+	/* (and their dots on the layer's map, issue #728) */
+	dive_dots_on(on);
 }
 
 static void place(int k, const OnlinePeer *peer) {
@@ -180,9 +183,11 @@ void dive_people_describe(FILE *f) {
 	for (int i = 0, j = 0; i < n2; ++i)
 		if (sign[i] != SIGN_NONE) fprintf(f, "%s%s%s", j++ ? " " : ": ", P.name[k_of[i]], sign[i] == SIGN_FORMING ? "(forming)" : "");
 	fputc('\n', f);
+	dive_dots_describe(f);
 }
 
 void dive_people_frame(const OnlineSnapshot *s) {
+	dive_dots_frame(s);
 	/* (only on the layer they were made on: another map took the slots' memory since) */
 	if (!P.made || !here()) return;
 	claims_begin(WRITER);
