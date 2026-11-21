@@ -1,0 +1,9 @@
+{
+  "branch": "dive-crew-drawn",
+  "what": "The shared dive: crewmates drawn where a layer has little room (issue #755, from the friction hunt of 21 November 2026)",
+  "takes": {},
+  "units": [
+    "shared dive: crewmates drawn where a layer has little room (#755)"
+  ],
+  "run": false
+}

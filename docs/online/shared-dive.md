@@ -855,6 +855,29 @@ marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
 
+## A diver gone home (22 November 2026)
+
+A dive's games found by the friction hunt of 21 November ([issue
+#756](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/756)):
+a diver at home between acts sent no place, and his last stood, so the
+others saw him standing on the layer, named and ringed, and the plates
+could not say where he was. Since protocol v26 each game says where its
+MegaMan is as it changes (DIVE where: on the layer, home, a battle;
+`dive_crew_view.c`, a quarter of a second apart at most). The server
+leaves a diver at home out of every SNAPSHOT, so his puppet, name, ring
+and dot go within a tick of his word; he forms no crew from the place he
+left and stays in the crew he had (crew_away_ms does not run for him),
+as the crew's call at home was ([Crews by
+nearness](#crews-by-nearness-21-november-2026), At home); entering the
+next layer puts him on a layer again. The crew is told where each member
+is (CREW_STATE's member grows a byte), and the plates say "Home" or
+"Battle" before a layer. On a party's field the plate's HP is the
+field's (`party_play_hp`), where the run's own core stands still under
+it and its HP lagged. Seen headless: `online-crew-view/gone-home`, three
+divers crewed, Beta sent home (the dev step `home`, an act's last exit
+as a test's step): Alpha's and Gamma's layers without him within a
+second, their plates "Home", the crew of three kept past crew_away_ms.
+
 ## The crew's display (21 November 2026)
 
 The team's test of 18 November asked for a display of the group, each
@@ -884,7 +907,9 @@ small, in one place, and covers nothing it needs to read):
   feed's), and over a second screen alone (most systems have none).
 - **What**: his name, cut as the field's marks cut it; his HP as BN6
   writes HP, over his max HP; a bar of it under the plate, orange from a
-  quarter down; and his layer ("L3") where it is not MegaMan's. **"Level"
+  quarter down; and where he is: his layer ("L3") where it is not
+  MegaMan's, "Home" between acts, "Battle" in one (since issue #756).
+  **"Level"
   is max HP**: a dive starts from a standard profile, so the game has no
   level, and what grows with a dive is max HP (HPMemory, the guardians'
   data); the act and the layer say how deep, not how strong. Chosen over

@@ -49,7 +49,7 @@ TRACE_FIND = struct.Struct("!B16s")
 TRACE_SPLIT = struct.Struct("!BBHBB16s")
 CREW = struct.Struct("!BBIBBBB")
 CREW_STATE_HEAD = struct.Struct("!BBIB")
-CREW_MEMBER = struct.Struct("!I16sHHB")
+CREW_MEMBER = struct.Struct("!I16sHHBB")
 QUEUE = struct.Struct("!BBBBB")
 QUEUE_STATE_HEAD = struct.Struct("!BBBBBBB")
 QUEUE_ENTRY = struct.Struct("!I16sB")
@@ -64,7 +64,8 @@ DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes")
                SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
                SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
                SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes"),
-               SPEC["dive_vitals"]: (struct.Struct("!HH"), "dive_vitals_bytes")}
+               SPEC["dive_vitals"]: (struct.Struct("!HH"), "dive_vitals_bytes"),
+               SPEC["dive_where"]: (struct.Struct("!B"), "dive_where_bytes")}
 # (saves sent by a code, no protocol version of their own: transfer.py)
 TRANSFER = struct.Struct("!BBB16sI")
 TRANSFER_STATE = struct.Struct("!BBI")
@@ -211,13 +212,14 @@ def read_state(data):
     return x, y, z, facing
 
 
-def snapshot(players, recipient, flags=None):
+def snapshot(players, recipient, flags=None, hidden=()):
     """SNAPSHOT: the recipient's channel's other players, each one's byte
     his ROMs (bits 0 and 5; bit 6, v18, a system of one extra ROM at most)
     and, since v13, `flags` (peer_flags): what he is busy with and his
     link's bars"""
     room = players[recipient].channel
-    peers = [player for player in players.values() if player.id != recipient and player.channel == room]
+    # (v26: a diver at home between acts is no one on the layer, `hidden`)
+    peers = [player for player in players.values() if player.id != recipient and player.channel == room and player.id not in hidden]
     data = bytes((SPEC["snapshot"], len(peers)))
     flags = flags or {}
     return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms | flags.get(p.id, 0)) for p in peers)
@@ -466,6 +468,8 @@ def dive_fields_ok(action, fields):
     if action == SPEC["dive_vitals"]:
         hp, maximum = fields
         return 1 <= maximum <= 9999 and hp <= maximum
+    if action == SPEC["dive_where"]:
+        return fields[0] <= SPEC["where_battle"]
     return True
 
 
@@ -527,11 +531,11 @@ def crew(action, ref=0, value=0, way=(0, 0, 0)):
 
 
 def crew_state(stage, other, value, members):
-    """CREW_STATE: members (session, name, (hp, max_hp, depth): v24, 0 where not known or not on a layer) of at most
-    party_most, zeros past them."""
+    """CREW_STATE: members (session, name, (hp, max_hp, depth, where): v24, 0 where not known or not on a layer; v26
+    where he is, where_layer, where_home or where_battle) of at most party_most, zeros past them."""
     out = CREW_STATE_HEAD.pack(SPEC["crew_state"], stage, other, value)
     for k in range(SPEC["party_most"]):
-        session, name, vitals = members[k] if k < len(members) else (0, "", (0, 0, 0))
+        session, name, vitals = members[k] if k < len(members) else (0, "", (0, 0, 0, 0))
         out += CREW_MEMBER.pack(session, name16(name), *vitals)
     return out
 
