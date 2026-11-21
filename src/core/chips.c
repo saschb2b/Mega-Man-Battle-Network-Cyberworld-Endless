@@ -14,6 +14,7 @@
 #include "chip_entry.h"
 #include "rom.h"
 #include "text.h"
+#include "xchips_cells.h"
 #include "xchips_record.h"
 #include "xchips_text.h"
 
@@ -168,6 +169,8 @@ static void own_text(const XChipReg *r, bool desc, Entries *e) {
 		const uint8_t *s;
 		uint32_t len = entry_at(M.rom5, arch, r->bn5 & 0xFFu, &s);
 		n = (uint32_t)(desc ? xrom_script_bn6(XROM_BN5_COLONEL_US, s, len, b, sizeof b) : xrom_text_bn6(XROM_BN5_COLONEL_US, s, len, b, sizeof b));
+		/* (a name in BN6's eight cells: BN5's DS mark is two letters here, xchips_cells.h) */
+		if (!desc) n = (uint32_t)xchips_cells_fit(5, r->bn5, b, n);
 	} else if (!desc) {
 		char name[16];
 		xchips_text_name(r->bn5, name, sizeof name);
@@ -214,7 +217,7 @@ static void own_text4(const XChipReg4 *r, bool desc, Entries *e) {
 		got = entry_to(M.rom4, (desc ? (r->bn4 < 256 ? BN4_CHIP_DESCS : BN4_CHIP_DESCS_HI) : (r->bn4 < 256 ? BN4_CHIP_NAMES : BN4_CHIP_NAMES_HI)) - BUS,
 			r->bn4 & 0xFFu, BN4_TEXT_END, &s);
 	if (M.rom4 && !desc) {
-		n = (uint32_t)xrom_text_bn6(XROM_BN4_RED_SUN_US, s, got, b, sizeof b);
+		n = (uint32_t)xchips_cells_fit(4, r->bn4, b, xrom_text_bn6(XROM_BN4_RED_SUN_US, s, got, b, sizeof b));
 	} else if (!desc) {
 		char name[16];
 		xchips_text_name4(r->bn4, name, sizeof name);

@@ -97,6 +97,7 @@
 #include "xchips_record.h"
 #include "xchips_registry.h"
 #include "xchips_text.h"
+#include "xchips_cells.h"
 #include "soulkinds.h"
 #include "xnavi.h"
 #include "xnavi_bn4.h"
@@ -5644,6 +5645,82 @@ static void test_xtext(void) {
 	CHECK(xrom_text_bn6(XROM_COUNT, kana, sizeof kana, out, sizeof out) == 5 && out[0] == 0x40, "xtext: text of no game BN6's numbers differ from");
 }
 
+/* A name of a registry's row in BN6's codes, as the install spells it (BN5's DS mark the letters D and S): the row's
+ * comment, the name generated there from the ROMs; a version mark ([SP]) one glyph, any other sign one too */
+static size_t cells_codes(const char *name, uint8_t *out, size_t max) {
+	static const char *const marks[5] = { "[RV]", "[BX]", "[EX]", "[SP]", "[FZ]" };
+	size_t n = 0;
+	for (const char *p = name; *p && n < max;) {
+		int mark = -1;
+		for (int k = 0; k < 5; ++k)
+			if (!strncmp(p, marks[k], 4)) mark = k;
+		uint8_t c = 0xA0;   /* (a sign: BN6's empty box, one cell as any) */
+		if (mark >= 0) c = (uint8_t)(0x40 + mark);
+		else if (*p >= '0' && *p <= '9') c = (uint8_t)(1 + *p - '0');
+		else if (*p >= 'A' && *p <= 'Z') c = (uint8_t)(0x0B + *p - 'A');
+		else if (*p >= 'a' && *p <= 'z') c = (uint8_t)(0x26 + *p - 'a');
+		else if (*p == ' ') c = 0;
+		out[n++] = c;
+		p += mark >= 0 ? 4 : 1;
+	}
+	return n;
+}
+
+/* every row of a registry's file (game 5 or 4): its name past eight cells has its listed cut, and fitted it keeps to
+ * BN6's eight; how many rows, how many past eight in `*past` */
+static int cells_rows(const char *path, int game, int *past) {
+	FILE *f = fopen(path, "r");
+	CHECK(f != NULL, "names' cells: %s not read (run from the tree's root)", path);
+	if (!f) return 0;
+	char line[512];
+	int rows = 0;
+	while (fgets(line, sizeof line, f)) {
+		int index, id;
+		char *open = strstr(line, "/* "), *close = open ? strstr(open, " */") : NULL;
+		if (sscanf(line, " { %d, %d, XREG_", &index, &id) != 2 || !close) continue;
+		*close = 0;
+		uint8_t b[32];
+		size_t n = cells_codes(open + 3, b, sizeof b);
+		++rows;
+		if (xchips_cells(b, n) <= BN6_CHIP_NAME_CELLS) continue;
+		++*past;
+		int cut = xchips_cells_cut(game, index);
+		/* (a cut the series' own or the smallest, looked up and listed: no name past eight left to the fallback) */
+		CHECK(cut > 0 && cut < (int)n && b[cut] >= 0x26 && b[cut] <= 0x3F && xchips_cells(b, n) == BN6_CHIP_NAME_CELLS + 1,
+			"names' cells: BN%d's %d (%s) is %d cells and has no listed cut of one small letter (xchips_cells.c)", game, index, open + 3,
+			xchips_cells(b, n));
+		n = xchips_cells_fit(game, index, b, n);
+		CHECK(xchips_cells(b, n) == BN6_CHIP_NAME_CELLS, "names' cells: BN%d's %d (%s) fitted to %d cells", game, index, open + 3, xchips_cells(b, n));
+	}
+	fclose(f);
+	return rows;
+}
+
+/* A moved chip's name in BN6's eight cells (issue #732; xchips_cells.h): BN6's lists draw every glyph of a name and
+ * pad to eight, so a ninth puts every row under it a cell late. Every registry row's name read, and the fit itself */
+static void test_name_cells(void) {
+	int past5 = 0, past4 = 0;
+	int rows5 = cells_rows("src/core/xchips_registry.c", 5, &past5), rows4 = cells_rows("src/core/xchips_registry_bn4.c", 4, &past4);
+	CHECK(rows5 == xreg_count && rows4 == xreg4_count, "names' cells: %d and %d rows read, the registries hold %d and %d", rows5, rows4,
+		xreg_count, xreg4_count);
+	/* (BN5's twelve DS Navi chips, DjangoDS eight as it is; none of BN4's) */
+	CHECK(past5 == 12 && past4 == 0, "names' cells: %d of BN5's names and %d of BN4's past eight cells, 12 and 0 known", past5, past4);
+	/* (the fallback: the last small vowel past the first letter, then the last small letter, then the end; commands kept) */
+	char ascii[32];
+	uint8_t b[32];
+	size_t n = cells_codes("AbcdefghiXY", b, sizeof b);
+	b[n++] = 0xE6;
+	n = xchips_cells_fit(5, 1, b, n);
+	rom_text_bytes(b, n, ascii, sizeof ascii);
+	CHECK(!strcmp(ascii, "AbcdfgXY") && n == 9 && b[8] == 0xE6, "names' cells: a name of eleven cut to %s (%d bytes)", ascii, (int)n);
+	/* (a listed cut: ColonelDS as ColonlDS; a name of eight as it is) */
+	n = xchips_cells_fit(5, 247, b, cells_codes("ColonelDS", b, sizeof b));
+	rom_text_bytes(b, n, ascii, sizeof ascii);
+	CHECK(!strcmp(ascii, "ColonlDS"), "names' cells: BN5's 247 fitted to %s", ascii);
+	n = xchips_cells_fit(5, 280, b, cells_codes("DjangoDS", b, sizeof b));
+	CHECK(n == 8, "names' cells: a name of eight cut (%d bytes)", (int)n);
+}
+
 /* BN5's chips' code (issue #82's C3; docs/multirom/chips-code.md):
  * the generated units (src/emu/xchips_bn5.c) each a recipe the installer
  * takes in the chips' region, numbered by BN5's own number and homed in
@@ -8488,6 +8565,7 @@ int main(int argc, char **argv) {
 	test_folders();
 	test_xchips();
 	test_xtext();
+	test_name_cells();
 	test_chip_code();
 	test_chip_art_room();
 	test_chip_actor_states();

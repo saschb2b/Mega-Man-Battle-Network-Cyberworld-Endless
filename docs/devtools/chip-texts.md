@@ -30,7 +30,10 @@ letters, digits and spaces alone (the codes below 0x40, the same glyphs in
 the three games; punctuation and the boxes' commands are transcoded, BN5's
 DS mark spelt D and S). It fails where a chip's name or description is
 another's or missing, naming the entry the wrong one came from, and where
-the PET's readers take another archive than `BN6_CHIP_DESC_OF`.
+the PET's readers take another archive than `BN6_CHIP_DESC_OF`. It fails a moved
+chip's name past BN6's eight cells too, and takes a name cut to them (its
+game's letters, fewer: [the chip registry](../multirom/chip-registry.md),
+A name in eight cells) as its own, listing the cuts (issue #732).
 
 ## What it found
 

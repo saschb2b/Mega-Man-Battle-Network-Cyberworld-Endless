@@ -179,6 +179,48 @@ first units; a Program Advance needs none), and a NetBattle's loadout
 carries the pack to 511 (`ONLINE_PACK_IDS`, with BN4's chips' online
 rule).
 
+## A name in eight cells
+
+BN6's lists give a chip's name eight cells, a glyph each: the folder
+editor's lists draw every glyph of a name and then blanks to the eighth,
+and the list goes on by what was drawn, so a ninth glyph stands in the next
+row's first cell and every row under it is a cell late (issue #732, a
+player's Pack; [the routine](../rom/chips-code.md), A name's cells). BN6's
+own names keep to eight, its version marks one glyph each (JudgeMn[EX]).
+BN5 writes its DS mark as one glyph too, which BN6's font lacks, so the
+install spells it D and S (`src/core/rom.c`'s `xrom_text_bn6`), and BN5's
+twelve DS Navi chips came to nine cells; every other moved name, BN5's and
+BN4's, is eight or fewer (a scan of the registries' names in the three ROMs,
+21 November 2026). `src/core/xchips_cells.c` cuts a name past eight as the
+install writes it into BN6's archives, so the Pack, the Folder, the Custom
+screen, a shop, a trade, the results and the Library all show the cut name;
+the pairing by name still reads the games' own names. A cut is the series'
+own where it spelt the chip short ([the sources](../research/sources.md),
+A chip's name in eight cells), else the smallest:
+
+| BN5's chip | In BN6's lists | The cut |
+| --- | --- | --- |
+| 244 NumbrMnDS | NumbMnDS | BN4 Red Sun's own name of it (its chip 244) |
+| 247 ColonelDS | ColonlDS | the smallest: Colonel's last vowel |
+| 250 ShadoMnDS | ShadoMDS | "Mn" as "M" before the mark, as BN4 writes ProtoMDS (its 241) |
+| 253 TmhwkMnDS | TmhkMnDS | BN6's own TmhkMan |
+| 256 KnigtMnDS | KnigtMDS | as ProtoMDS |
+| 259 ToadManDS | ToadMnDS | "Man" as "Mn", as BN5's NumbrMn[SP] |
+| 262 ShadeMnDS | ShadMnDS | BN4 Red Sun's own name of it (its chip 262) |
+| 265 BlizManDS | BlizMnDS | as NumbrMn[SP] |
+| 268 CloudMnDS | CloudMDS | as ProtoMDS |
+| 271 CosmoMnDS | CosmoMDS | as ProtoMDS |
+| 274 LarkManDS | LarkMnDS | as NumbrMn[SP] |
+| 277 GridManDS | GridMnDS | as NumbrMn[SP] |
+
+A registry row added with a name past eight fails `build.py test`
+(test_name_cells reads every row's name from the registries' own comments
+and wants its cut listed), and `tools/chip_texts.py` fails a moved name
+past eight cells in the core's copy (all three ROMs read). A name past eight
+with no listed cut is still cut, by the smallest rule (the last small vowel
+past its first letter, then the last small letter), so none reaches a
+ninth cell.
+
 Not yet, each its later milestone's: CustSwrd's power (BN5's computed power 44,
 past BN6's table) and the AntiFire, AntiWatr, AntiElec and AntiWood
 traps (BN6's traps trigger by chip id and it has no elemental kinds);

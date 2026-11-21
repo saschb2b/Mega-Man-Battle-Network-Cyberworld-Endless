@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T16:00:00Z
+* **Update**: multirom/chip-registry.md (A name in eight cells: BN5's twelve DS Navi chips cut to BN6's eight cells, each cut and its source, issue #732), rom/chips-code.md (A name's cells: BN6's list routine that draws every glyph and pads to eight), research/sources.md (A chip's name in eight cells: BN5's DS glyph, BN4's and BN6's own short names, the search), code/core.md (xchips_cells.c), devtools/chip-texts.md (a moved name past eight cells fails, a cut one passes).
