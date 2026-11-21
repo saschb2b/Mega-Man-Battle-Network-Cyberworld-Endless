@@ -30,7 +30,8 @@ def dive(game=''):
 
 def crew(other):
     """A crew of two: the other arrived where Alpha stands, and the server makes them one (issue #714)."""
-    return online.course(soon('crew~2', '', 600), soon('crew~2', other, 600))
+    # (a dive's layer runs faster than the clock headless: the server's second before a crew, waited out as such)
+    return online.course(('sleep', 1.5), soon('crew~2', '', 600), soon('crew~2', other, 600))
 
 
 MANY = {
