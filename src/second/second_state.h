@@ -6,6 +6,7 @@
 #include <stdint.h>
 
 #include "bn6.h"
+#include "dive_crew_view.h"
 #include "emote_palette.h"
 #include "navicust.h"
 
@@ -133,6 +134,10 @@ typedef struct {
 	int nc_nboard;
 	/* the Net Square (issue #178): the palette's tab, the button lit, the favourites, whom an aimed emote goes to */
 	PaletteView palette;
+	/* a dive's crew on the map's panel (issue #729): its rows as the top screen's plates write them, each one's link's bars (0 none) */
+	CrewRow crew[ONLINE_PARTY_MOST];
+	uint8_t crew_link[ONLINE_PARTY_MOST];
+	int ncrew;
 } SecondState;
 
 extern SecondState S2;

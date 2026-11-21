@@ -62,36 +62,37 @@ static const CrewMember *own(void) {
 	return NULL;
 }
 
-/* the crewmates shown, in the order they came: none alone or with the link down */
-static int mates(const CrewMember *out[ONLINE_PARTY_MOST]) {
-	const CrewMember *m;
+int dive_crew_view_rows(CrewRow out[ONLINE_PARTY_MOST]) {
+	const CrewMember *m, *me = own();
 	int n = 0;
 	if (!V.linked || dive_crew_count() < 2) return 0;
-	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k)
-		if (m->session != V.me) out[n++] = m;
+	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k) {
+		if (m->session == V.me) continue;
+		CrewRow *r = &out[n++];
+		r->session = m->session;
+		r->now = m->hp;
+		r->most = m->max_hp;
+		snprintf(r->full, sizeof r->full, "%s", m->name);
+		party_marks_cut(m->name, "", PARTY_MARKS_BUDGET, r->name, sizeof r->name);
+		if (m->max_hp) snprintf(r->hp, sizeof r->hp, "%u/%u", m->hp, m->max_hp);
+		else snprintf(r->hp, sizeof r->hp, "--");
+		r->layer[0] = 0;
+		if (m->depth && (!me || me->depth != m->depth)) snprintf(r->layer, sizeof r->layer, "L%u", m->depth);
+	}
 	return n;
 }
 
-/* a plate's words: the name cut, HP as BN6 writes it over max HP ("--" not yet told), and the layer where not MegaMan's */
-typedef struct { char name[ONLINE_NAME_BYTES + 1], hp[12], layer[6]; } Words;
-
-static Words words(const CrewMember *m, const CrewMember *me) {
-	Words w;
-	party_marks_cut(m->name, "", PARTY_MARKS_BUDGET, w.name, sizeof w.name);
-	if (m->max_hp) snprintf(w.hp, sizeof w.hp, "%u/%u", m->hp, m->max_hp);
-	else snprintf(w.hp, sizeof w.hp, "--");
-	w.layer[0] = 0;
-	if (m->depth && (!me || me->depth != m->depth)) snprintf(w.layer, sizeof w.layer, "L%u", m->depth);
-	return w;
+void dive_crew_view_bar(int x, int y, int w, const CrewRow *r) {
+	int bar = r->most ? w * r->now / r->most : 0;
+	fill_rect(x, y, w, 1, LOOK_NAVY);
+	if (bar) fill_rect(x, y, bar, 1, r->now * 4 <= r->most ? LOOK_ORANGE : LOOK_GREEN_HI);
 }
 
 void dive_crew_view_draw(void) {
-	const CrewMember *m[ONLINE_PARTY_MOST], *me = own();
-	int n = mates(m);
-	Words w[ONLINE_PARTY_MOST];
+	CrewRow w[ONLINE_PARTY_MOST];
+	int n = dive_crew_view_rows(w);
 	int name_w = 0, layer_w = 0, hp_w = 0;
 	for (int i = 0; i < n; ++i) {
-		w[i] = words(m[i], me);
 		int a = pixfont_width(w[i].name, 1), b = w[i].layer[0] ? pixfont_width(w[i].layer, 1) + GAP : 0, c = pixfont_width(w[i].hp, 1);
 		if (a > name_w) name_w = a;
 		if (b > layer_w) layer_w = b;
@@ -106,18 +107,13 @@ void dive_crew_view_draw(void) {
 		if (w[i].layer[0]) pixfont_draw(x + PAD + name_w + GAP, y + 1, w[i].layer, LOOK_EDGE_HI, shade, PIXFONT_LEFT, 1);
 		pixfont_draw(x + width - PAD - 1, y + 1, w[i].hp, LOOK_TEXT, shade, PIXFONT_RIGHT, 1);
 		/* (his HP as a bar under it, the plate's width his max; orange from a quarter down) */
-		int full = width - 2, bar = m[i]->max_hp ? full * m[i]->hp / m[i]->max_hp : 0;
-		fill_rect(x + 1, y + H - 2, full, 1, LOOK_NAVY);
-		if (bar) fill_rect(x + 1, y + H - 2, bar, 1, m[i]->hp * 4 <= m[i]->max_hp ? LOOK_ORANGE : LOOK_GREEN_HI);
+		dive_crew_view_bar(x + 1, y + H - 2, width - 2, &w[i]);
 	}
 }
 
 void dive_crew_view_describe(FILE *f) {
-	const CrewMember *m[ONLINE_PARTY_MOST], *me = own();
-	int n = mates(m);
+	CrewRow w[ONLINE_PARTY_MOST];
+	int n = dive_crew_view_rows(w);
 	fprintf(f, "crewview %d\n", n);
-	for (int i = 0; i < n; ++i) {
-		Words w = words(m[i], me);
-		fprintf(f, "mate%d %s hp %s layer %s\n", i, m[i]->name, w.hp, w.layer[0] ? w.layer + 1 : "here");
-	}
+	for (int i = 0; i < n; ++i) fprintf(f, "mate%d %s hp %s layer %s\n", i, w[i].full, w[i].hp, w[i].layer[0] ? w[i].layer + 1 : "here");
 }

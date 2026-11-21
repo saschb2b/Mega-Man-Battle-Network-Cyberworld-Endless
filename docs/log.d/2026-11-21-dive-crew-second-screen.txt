@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T22:45:00Z
+* **Update**: online/shared-dive.md (the crew on the second screen, issue #729: a row a crewmate over the layer's map, his full name, HP, layer and link; the plates kept on the top screen), code/screens.md (`second_crew.c`).

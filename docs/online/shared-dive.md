@@ -794,6 +794,37 @@ Beta's game logged "crew none" around his battle's end and the crew
 formed again once both stood together (#725's crews by nearness): his
 plate goes and comes back with it.
 
+## The crew on the second screen (21 November 2026)
+
+The second screen's half of the crew's display
+([issue #729](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/729)).
+**The calls** (taken under the owner's direction of 21 November 2026, a
+party frame as an MMO has it, more where there is room; his to turn
+over):
+
+- **What the page adds**: on a layer the second screen shows the layer's
+  map, so the crew goes at the top of that panel, a row a crewmate,
+  rather than a page of its own the map would have to give way to. A row
+  has his full name (the top screen's plate cuts it), his HP over max HP
+  and a bar of it, his layer where it is not MegaMan's, and his link's
+  bars (the Square's badge, `arena_view_bars`) where the server lists
+  him on MegaMan's layer. His place on the map is the divers' dots'
+  ([issue #728](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/728)),
+  left to them.
+- **The plates stay** on the top screen where a second screen shows the
+  rows: the eye is on the top screen in play, the rows are a glance away
+  and say more (the whole name, the link), so they are no repeat to drop.
+  Chosen over hiding the plates where a second screen is shown.
+
+As built (`src/second/second_crew.c`): `second_update` copies the rows
+(`dive_crew_view_rows`, the plates' own words) and each one's link from
+the server's snapshot into the second screen's state while its map panel
+is up, and the map's draw gives the rows the panel's top. Seen headless
+(21 November 2026) in `tests/scenarios/online_crew_view.py`'s course,
+captured on both screens: Alpha's at an Android display's 640 x 480,
+"Beta 90/100" and three green bars, then "Beta L2 90/100" once Beta had
+gone on; Beta's at the 3DS's 320 x 240, "Alpha L1 100/100".
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
