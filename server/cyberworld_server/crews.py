@@ -24,11 +24,14 @@ one is told split_up.
 
 A crewmate's random battle starting (CREW battle, its index on the layer)
 is offered to his crewmates in the same room (CREW_STATE offer), never to
-or from a game that cannot run the one field (HELLO's no_arena); each
-answers with CREW join within crew_join_ms. When every one offered has
-joined, or the window ends, the server starts a party battle (party.py)
-with the battle's owner as seat 0 and the joiners; where nobody joined,
-the owner is told to fight alone (CREW_STATE alone). Refusals: NOTICE
+or from a game that cannot run the one field (HELLO's no_arena); each game
+answers at once, unasked (issue #715): CREW join where its MegaMan is free,
+CREW busy (v23) where he is not (a chat, a shop, a guardian's door, his own
+battle held), which takes him out of the offer. When every one offered has
+answered, or crew_join_ms has passed (a game that never answers), the
+server starts a party battle (party.py) with the battle's owner as seat 0
+and the joiners; where nobody joined, the owner is told to fight alone
+(CREW_STATE alone). Refusals: NOTICE
 notice_dive_out (not diving), 17 (that offer is over), 16 (busy: a party
 battle under way) and notice_crew (no crew)."""
 
@@ -124,6 +127,8 @@ class Crews:
             return
         if action == SPEC["crew_battle"]:
             await self.battle(player, value, now)
+        elif action == SPEC["crew_busy"]:
+            self.busy(player, ref)
         else:
             await self.join(player, ref)
 
@@ -298,6 +303,18 @@ class Crews:
             return
         if player.id not in offer.joined:
             offer.joined.append(player.id)
+        if set(offer.joined) >= offer.invited:
+            self.close(offer)
+
+    def busy(self, player, owner_id):
+        """A game offered a battle whose MegaMan cannot go in: out of the offer, the battle started once the rest answered
+        (a late one, the offer over, says nothing)."""
+        offer = self.offers.get(owner_id)
+        if not offer or player.id not in offer.invited:
+            return
+        offer.invited.discard(player.id)
+        if player.id in offer.joined:
+            offer.joined.remove(player.id)
         if set(offer.joined) >= offer.invited:
             self.close(offer)
 

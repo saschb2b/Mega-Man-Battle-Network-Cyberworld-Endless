@@ -1,10 +1,10 @@
-# Net Square protocol v21
+# Net Square protocol v23
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v21`. The server also
+`/presence` with subprotocol `cyberworld.presence.v23`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -51,7 +51,7 @@ side is behind, rather than a refused upgrade (v10).
 | DIVE_PLACE (44) | server → client | v19, a split's answer: u8 battle index, u8 party size, u16 the tenths sent, u16 their place among this week's busts of that battle at that size (each identity's quickest), u16 how many busted it, u16 the quickest's tenths, 16-byte his name (27 bytes) |
 | DIVE_FEED (45) | server → client | v19: u8 kind (`feed_deleted` 1, `feed_won` 2, `feed_guardian` 3 a party's guardian down, `feed_flare` 4 a diver waits at a door), 16-byte name, u8 depth, u8 side, u8 way (a flare's: the door's), u16 cause (a deletion's), u8 party size (a guardian's: 2..4; else 0): 24 bytes |
 | DIVERS (46) | server → client | v19: u16 how many dive now, u8 count (0..`divers_most`, 16), then 19 bytes a diver, the deepest first: 16-byte name, u8 depth, u8 act, u8 flags (bit 0 `divers_fighting`, in a party battle) |
-| CREW (47) | client → server | v19: u8 action (5 `crew_battle`, 6 `crew_join`; v20: 1-4, v19's ask, answer, split and way, gone), u32 reference (a battle's 0, a join's the battle's owner), u8 value (a battle's its index on the layer; a join's 0), three zero bytes (v19's way): 10 bytes |
+| CREW (47) | client → server | v19: u8 action (5 `crew_battle`, 6 `crew_join`, v23: 7 `crew_busy`; v20: 1-4, v19's ask, answer, split and way, gone), u32 reference (a battle's 0, a join's or a busy's the battle's owner), u8 value (a battle's its index on the layer; else 0), three zero bytes (v19's way): 10 bytes |
 | CREW_STATE (48) | server → client | v19: u8 stage (3 `crew_formed` the crew as it stands, 4 `crew_split_up` the recipient in none, 5 `crew_offer` a crewmate's battle offered, 6 `crew_alone` the battle's owner fights alone; v20: 1-2, the asks', gone), u32 the other (formed: who came or went; split: who went; offer: the owner), u8 value (an offer's battle index), then four members in the order they came, zeros past them: u32 session, 16-byte name, three zero bytes (v19's way) (23 bytes each; 99 in all) |
 | QUEUE (49) | client → server | v19: u8 action (1 `queue_join`, 2 `queue_leave`, 3 `queue_start`, 4 `queue_pass`), u8 depth, u8 side, u8 way (a join's door: his layer's; else zeros): 5 bytes |
 | QUEUE_STATE (50) | server → client | v19: u8 stage (1 `queue_waiting`, 2 `queue_started`, 3 `queue_out`, 4 `queue_alone`), u8 depth, u8 side, u8 way, u8 the recipient's place (1 the leader, 0 none), u8 count, then four entries, zeros past them: u32 session, 16-byte name, u8 flags (bit 0 `queue_arena`, his system runs the Arena): 21 bytes each, 91 in all |
@@ -158,6 +158,15 @@ in all. A crew whose members' HP or layers changed since its last
 CREW_STATE is told again with the stage `crew_vitals` (7, other 0), at
 most every `crew_vitals_ms`; a diver in no crew is told nothing of
 anyone's HP. Information only: nothing of it changes a battle.
+
+Protocol v23 (issue #715, docs/online/shared-dive.md, A crew's battles at
+once): **a game offered a crewmate's battle answers at once.** CREW
+`crew_busy` (7), naming the battle's owner, says its MegaMan cannot go in
+(a chat, a shop, a guardian's door, his own battle held): the server takes
+him out of the offer and starts the battle as soon as everyone left in it
+has joined, or tells the owner `crew_alone` where nobody has. A busy for an
+offer that is over says nothing. `crew_join_ms` stays the wait for a game
+that never answers.
 
 Protocol v22 (issue #718; docs/online/shared-dive.md, A deletion in a
 crew): **a crewmate pulled back**. A crew's battle won with a MegaMan of

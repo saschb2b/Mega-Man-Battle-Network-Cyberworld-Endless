@@ -210,7 +210,9 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               # (v20, crews by nearness: crews.py)
               "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms",
               # (v24, the crew's display: crews.py's vitals)
-              "dive_vitals", "dive_vitals_bytes", "crew_vitals", "crew_vitals_ms")
+              "dive_vitals", "dive_vitals_bytes", "crew_vitals", "crew_vitals_ms",
+              # (v23, a crew's battles at once: crews.py)
+              "crew_busy")
 # (protocol v22, issue #718: a dive pulled back once by its crew, the Board's mark)
 PULL_NAMES = ("week_pulled",)
 

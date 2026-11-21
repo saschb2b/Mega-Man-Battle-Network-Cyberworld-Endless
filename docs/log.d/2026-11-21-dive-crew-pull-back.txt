@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T18:45:54Z
-* **Update**: online/shared-dive.md (a deletion in a crew's won random battle pulled back once a dive by the crew's HP, the owner's calls of 21 November 2026 for issue #718: the fairness rule's new words, the decisions' row, the design and how it is built), engine/saves.md (weekly.sav grown to 32 bytes, the pull-back spent), code/director.md (`crew_pull.c`, `crew_words.c`), code/online.md (`partydel`), devtools/scenarios.md (a seeded Board entry's fifth, pulled back by its crew).

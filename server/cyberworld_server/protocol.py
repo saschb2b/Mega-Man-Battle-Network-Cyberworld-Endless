@@ -508,15 +508,16 @@ def divers(total, entries):
 
 
 def read_crew(data):
-    """CREW: an action (crew_battle or crew_join; v20: a crew is by nearness,
-    crews.py, and its asks, answers, splits and ways are gone), its
-    reference (a join's: the battle's owner) and its value (a battle's index
-    on the layer); its last three bytes zeros."""
+    """CREW: an action (crew_battle, crew_join or, v23, crew_busy; v20: a
+    crew is by nearness, crews.py, and its asks, answers, splits and ways
+    are gone), its reference (a join's or a busy's: the battle's owner) and
+    its value (a battle's index on the layer); its last three bytes zeros."""
     if len(data) != SPEC["crew_bytes"] or data[0] != SPEC["crew"]:
         raise ProtocolError("Malformed CREW")
     _, action, ref, value, depth, side, way = CREW.unpack(data)
-    if action not in (SPEC["crew_battle"], SPEC["crew_join"]) or depth or side or way \
-            or (action == SPEC["crew_join"] and (not ref or value)):
+    answers = (SPEC["crew_join"], SPEC["crew_busy"])
+    if action not in (SPEC["crew_battle"], *answers) or depth or side or way \
+            or (action in answers and (not ref or value)):
         raise ProtocolError("Invalid crew action")
     return action, ref, value
 

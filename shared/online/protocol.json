@@ -191,6 +191,7 @@
   "crew_member_bytes": 25,
   "crew_battle": 5,
   "crew_join": 6,
+  "crew_busy": 7,
   "crew_formed": 3,
   "crew_split_up": 4,
   "crew_offer": 5,

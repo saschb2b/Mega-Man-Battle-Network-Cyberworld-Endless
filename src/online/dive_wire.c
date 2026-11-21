@@ -95,8 +95,8 @@ size_t dive_wire_split(uint8_t out[ONLINE_DIVE_SPLIT_BYTES], const DiveSplit *s)
 }
 
 size_t dive_wire_crew(uint8_t out[ONLINE_CREW_BYTES], unsigned action, uint32_t ref, unsigned value) {
-	if ((action != ONLINE_CREW_BATTLE && action != ONLINE_CREW_JOIN) || value > 255 ||
-	    (action == ONLINE_CREW_JOIN && (!ref || value))) return 0;
+	bool answer = action == ONLINE_CREW_JOIN || action == ONLINE_CREW_BUSY;
+	if ((action != ONLINE_CREW_BATTLE && !answer) || value > 255 || (answer && (!ref || value))) return 0;
 	memset(out, 0, ONLINE_CREW_BYTES);
 	out[0] = ONLINE_CREW; out[1] = (uint8_t)action;
 	online_put32(out + 2, ref);

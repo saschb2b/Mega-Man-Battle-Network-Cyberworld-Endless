@@ -502,6 +502,29 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await self.notice(c), 17)
         finally:
             crews.JOIN_WAIT = SPEC["crew_join_ms"] / 1000
+        # (v23: a game whose MegaMan is busy says so at once; the battle starts with the rest, no window waited)
+        crews.JOIN_WAIT = 60
+        try:
+            await c.send(protocol.crew(SPEC["crew_battle"], 0, 7))
+            for mate in (a, b):
+                await self.until(mate, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+            await a.send(protocol.crew(SPEC["crew_busy"], c.id))
+            await b.send(protocol.crew(SPEC["crew_join"], c.id))
+            start = arena_state(await self.until(b, SPEC["arena_state"], lambda m: arena_state(m)["stage"] == START))
+            self.assertEqual(start["seats"], (c.id, b.id, 0, 0))
+            await c.send(protocol.ARENA.pack(SPEC["arena"], OVER, start["battle"], 0, 0))
+            await self.until(b, SPEC["arena_state"], lambda m: arena_state(m)["stage"] == ENDED)
+            # (every one busy: the owner alone at once; a busy for an offer over says nothing)
+            await a.send(protocol.crew(SPEC["crew_battle"], 0, 8))
+            for mate in (b, c):
+                await self.until(mate, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+                await mate.send(protocol.crew(SPEC["crew_busy"], a.id))
+            alone = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))
+            self.assertEqual(alone["value"], 8)
+            await b.send(protocol.crew(SPEC["crew_busy"], a.id))
+            self.assertFalse(self.server.crews.offers)
+        finally:
+            crews.JOIN_WAIT = SPEC["crew_join_ms"] / 1000
         # (only crewmates in the owner's room are offered: none, the owner alone at once)
         await self.enter(b, 3)
         await self.enter(c, 3)

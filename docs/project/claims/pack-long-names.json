@@ -1,9 +1,0 @@
-{
-  "branch": "pack-long-names",
-  "what": "ColonelDS's name spills down the Pack's list (issue #732): moved chips' names past eight cells",
-  "takes": {},
-  "units": [
-    "chip names: moved names past eight cells (#732)"
-  ],
-  "run": false
-}

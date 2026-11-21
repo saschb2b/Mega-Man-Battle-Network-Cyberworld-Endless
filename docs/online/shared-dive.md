@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T19:31:16Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T20:20:05Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -122,7 +122,7 @@ Verified on `dev`, 15 November 2026:
 | Mystery Data | Each diver opens their own, at the same places for everyone (the layer's seed), its chip by their own folder; the week's first finder's name on a data; data others opened this week shimmer faintly (kept so on 15 November 2026 over who got what there, an opened count, and a cheer for two opening one together) | A pair data opened by two divers together |
 | Crews | By nearness, no asking: divers within four panels of each other are a crew, up to four, and one who walks away is out of it (21 November 2026, the owner's direction after the team's test, issue #714; the details below, [Crews by nearness](#crews-by-nearness-21-november-2026)) | Up to four, Team up on a diver's card, lasting across layers until someone splits up, leaves or ends their dive (15 November's call, as built); one layer at a time; pairs |
 | A crew at a fork | Each takes the portal he likes; those who take one together arrive at its first layer together and are a crew again there within a second (21 November 2026, under the owner's direction, his to turn over) | The portal opens only when the whole crew stands on it, or someone splits up (15 November's call); each picks and the crew splits; the captain picks for all |
-| Random battles | Each diver's own; crewmates within a few panels fight it too, unasked (21 November 2026, after the team's test: walking close is the yes, walking apart the no); only crewmates, who since issue #714 are whoever stands near | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
+| Random battles | Each diver's own; crewmates within a few panels fight it too, unasked and at once, a busy one saying so at once (21 November 2026, after the team's test: walking close is the yes, walking apart the no; [A crew's battles at once](#a-crews-battles-at-once-21-november-2026)); only crewmates, who since issue #714 are whoever stands near | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
 | A joined battle | One field; the foes as a solo diver meets them, unscaled; each fighter BN6's normal reward; joining resets the joiner's own encounter count, so each diver fights about as many battles as alone | Foes' HP times the fighters; their versions raised; no reward; a cap a layer |
 | The door's queue | Up to four, each having walked to this door; divers behind on the same way get a flare | No flare; helpers summoned from behind |
 | The leader | The first at the door starts any time; anyone leaves any time; a leader idle a minute passes the lead on | A countdown on a join; a ready check |
@@ -230,6 +230,35 @@ the session building it, and is his to turn over.
 | About to be | A dotted ring for the second before a crew forms | No sign until it has (a crew appearing from nothing) |
 | Others' crews | Not shown: only MegaMan's own crew wears the sign | Every crew on the layer in its own colour (the server tells each diver his own crew alone) |
 
+## A crew's battles at once (21 November 2026)
+
+The rest of issue #715, under the same direction (no prompts, no
+waiting). The game-design skill's pass: the dialectic is together against
+ahead at the scale of a battle, the company's price paid in battles
+fought rather than in waiting; the loop layer the moment on a layer.
+
+How often a crew fights, from BN6's own odds (`BN6_ENCOUNTER_ODDS`,
+[docs/rom/battle.md](../rom/battle.md)): a roll every 0x40 units walked,
+its odds out of 32 rising from 0 with the walk since the last battle,
+and a battle clearing the walk. Every crewmate rolls, the first battle
+pulls in the others and clears their walks too, so a crew of N walks to
+the first of N rolls. With the layers' classes (3, 5 and 6) a crew of
+four fights 1.39, 1.29 and 1.12 times as many battles over the same
+ground as a diver alone (two: 1.19, 1.15, 1.07; three: 1.31, 1.23, 1.10);
+the rising odds keep it far under four times, since early in a walk no
+roll can win.
+
+Each call was taken under the owner's direction of 21 November 2026 and is
+his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| No window | Every crewmate free goes in at once; the owner stands still only while the server starts the battle (65 ms seen headless on one machine) | The three seconds' window (15 November's) |
+| Who is left out | A crewmate not free (a chat or BN6's PET open, a shop, a guardian's door, Mystery Data opening, his own battle held) answers CREW busy at once (protocol v23) and stays where he is; the battle starts with the rest | Waiting the window out for him; pulling him in from where he stands |
+| Saying no | None per battle: walking apart is the no, as the crew is by nearness ([Crews by nearness](#crews-by-nearness-21-november-2026)) | A button to stay out of a battle |
+| How often | As it comes: up to about 1.4 times as many battles for a crew of four, each fought together, the company's price on the ground walked | Only one crewmate rolling (one game's walk deciding for all); the odds lowered for a crew (BN6's own roll changed) |
+| What is said | Nothing while the owner's battle starts ("Battle! Calling the crew..." gone); "Jumping in!" while a joiner's starts | A line for a hold no one sees |
+
 ## As built
 
 - **The portal** (15 November 2026, `src/online/online_square.c`'s
@@ -332,17 +361,25 @@ the session building it, and is his to turn over.
   SNAPSHOT), a random battle BN6's roll gives is held at the roll's
   branch (`BN6_ENCOUNTER_ROLLED` taken to `BN6_ENCOUNTER_SKIP`, as a
   bracket holds its rounds) and MegaMan stands still; CREW battle offers
-  it by its index on the layer, the band saying "Battle! Calling the
-  crew...". A crewmate near whose game gets the offer, MegaMan free on
-  the map (no chat box, no door, no party's fight), sends CREW join at
-  once, his band saying "Jumping in!": no question since 21 November
-  2026 (issue #715, the owner's call after the team's test; until then
-  the band offered it, "A:Jump in", for the window). The server starts
-  the battle as the last one offered has joined, so the owner's hold is
-  as long as that takes; a crewmate who is busy sends nothing, and the
-  owner then waits the window out (`ONLINE_CREW_JOIN_MS`) as before,
-  until a game can decline (#715's next step, a change to the wire). A
-  newer offer replaces an older. The server's START takes every game in to
+  it by its index on the layer (until 21 November 2026 the band said
+  "Battle! Calling the crew..."). A crewmate whose game gets the offer,
+  MegaMan free on the map (no chat box, no door, no party's fight), sends
+  CREW join at once, his band saying "Jumping in!": no question since 21
+  November 2026 (issue #715, the owner's call after the team's test;
+  until then the band offered it, "A:Jump in", for the window); a game
+  whose MegaMan is not free, or holds his own battle, sends CREW busy
+  (protocol v23) as the offer comes. The server starts the battle as the
+  last one offered has answered, so the owner's hold is as long as that
+  takes (the log says it: "MegaMan held 65 ms"); the window
+  (`ONLINE_CREW_JOIN_MS`) is left for a game that never answers. A
+  newer offer replaces an older. Its background is chosen with it from
+  the layer's seed and the index (`dive_battle`): it was rolled from each
+  run's own RNG as the record was set, so in an area with two backgrounds
+  two games drew two about half the time and built their fields apart
+  ("the fields went apart before the first frame", two runs in twenty of
+  `online-week/crew-battle-unasked` before, the battle then fought alone);
+  the log names each of a field's inputs by its hash ("the field from rom
+  ... record ... seat0 ..."), so the next such split names its part. The server's START takes every game in to
   the party's core (`party_play_crew`), the battle made alike on each from
   the layer's seed and the index, its kind by the index
   (`director_crew_battle`; no Mystery Data on its field, whose row is a
@@ -851,8 +888,9 @@ and the owner's four answers:
    (`ONLINE_CREW_JOIN_MS`) waits for the answers. How the window felt
    (three seconds of MegaMan held still, and a question each battle) the
    team's test answered: since 21 November 2026 crewmates near join
-   unasked (issue #715). Open: a crewmate who is busy still costs the
-   window, until a game can decline.
+   unasked (issue #715), and since the same day with no window: a busy
+   crewmate says so at once ([A crew's battles at once](#a-crews-battles-at-once-21-november-2026)).
+   Closed.
 2. **One field against a guardian.** Built (As built, above), the
    guardian's aim passed over the party in turn, each partner his own
    NaviStats, hand and Custom screen. Open: the turn's length, a partner's

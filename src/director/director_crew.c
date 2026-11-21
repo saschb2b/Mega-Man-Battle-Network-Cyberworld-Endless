@@ -41,6 +41,10 @@ Encounter dive_battle(int index) {
 	rng_seed(run.layer_seed ^ CREW_SALT ^ (uint32_t)index * 2654435761u);
 	/* (a Glitch layer's hardening left out: each game's comes apart at its own pace) */
 	Encounter e = loot_random_battle(run.depth, run.biome, encounter_kind(index), run.layer_seed, index);
+	/* (its background too, which the run's own RNG rolled as the record was set: two games of a crew drew two
+	 * backgrounds in an area that has two, and built their fields apart, issue #715) */
+	e.backdrop = biome_bg(e.biome);
+	e.backdrop_set = true;
 	loot_memory_set(&fought);
 	rng_restore(saved);
 	return e;

@@ -526,9 +526,11 @@ static void dive_sent(void) {
 	s.party = 5; assert(!dive_wire_split(m, &s)); s.party = 1; s.level = 12; assert(!dive_wire_split(m, &s));
 	s.level = 11; s.tenths = 0; assert(!dive_wire_split(m, &s)); s.tenths = 1; assert(dive_wire_split(m, &s) && m[5] == ONLINE_BUSTING_MOST);
 	/* (v20: a crew by nearness, its asks and ways gone; a join names its owner) */
-	assert(!dive_wire_crew(m, 1, 2, 0) && !dive_wire_crew(m, 4, 0, 0) && !dive_wire_crew(m, 7, 1, 0) && !dive_wire_crew(m, ONLINE_CREW_JOIN, 0, 0));
+	assert(!dive_wire_crew(m, 1, 2, 0) && !dive_wire_crew(m, 4, 0, 0) && !dive_wire_crew(m, 8, 1, 0) && !dive_wire_crew(m, ONLINE_CREW_JOIN, 0, 0));
 	assert(dive_wire_crew(m, ONLINE_CREW_BATTLE, 0, 200) && m[6] == 200 && !dive_wire_crew(m, ONLINE_CREW_BATTLE, 0, 256));
 	assert(dive_wire_crew(m, ONLINE_CREW_JOIN, 9, 0) && m[5] == 9 && !dive_wire_crew(m, ONLINE_CREW_JOIN, 9, 1));
+	/* (v23: a busy game's answer names the owner too) */
+	assert(dive_wire_crew(m, ONLINE_CREW_BUSY, 9, 0) && m[1] == ONLINE_CREW_BUSY && m[5] == 9 && !dive_wire_crew(m, ONLINE_CREW_BUSY, 0, 0));
 	assert(!dive_wire_queue(m, ONLINE_QUEUE_JOIN, none) && !dive_wire_queue(m, 5, door) && dive_wire_queue(m, ONLINE_QUEUE_PASS, none));
 	assert(!dive_wire_party(m, ONLINE_PARTY_HP, 77, 10, 5) && !dive_wire_party(m, ONLINE_PARTY_DAMAGE, 0, 1, 1) && !dive_wire_party(m, 45, 1, 1, 1));
 }
