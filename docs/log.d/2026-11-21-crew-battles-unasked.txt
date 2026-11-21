@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-21T02:30:00Z
-* **Update**: online/shared-dive.md (a crew's battle joined unasked, issue #715: the decision's row, As built, Open 1), devtools/scenarios.md (a dive's `join` line).
