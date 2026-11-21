@@ -5,7 +5,7 @@
 #include "netmap_parts.h"
 #include "stopwatch.h"
 
-void nm_blocks_place(void);
+void nm_blocks_place(int area);
 void nm_gaps_place(void);
 void nm_lanes_place(void);
 extern CoordExtra nm_extra;

@@ -1,0 +1,1 @@
+A layer's Security Cube, BN6's or BN5's, stands on its panel's middle rather than at the pillar of flames' spot, and BN6's sunk to z -12 as BN6 stands its own in Central Area 1 (issue #735): the map's object records change, and its line of walls lies a cell nearer the room, on the panel's edge: the coordinate data changes too.

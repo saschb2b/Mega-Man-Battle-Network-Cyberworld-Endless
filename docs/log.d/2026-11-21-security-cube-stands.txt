@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T21:40:00Z
+* **Update**: rom/net-maps.md (Link Navi obstacles: BN6's two Security Cubes' spawn records, sunk under their floor, z -12 in Central Area 1 and -8 in Seaside Area 2, on their panel's middle in their walls' box; BN5's own at z 0; a layer's cube stands so, its walls on its panel's edge, issue #735), world/level-design/security-cubes.md (a P-Code's cube stands on its panel's middle, sunk as BN6's, its walls on the panel's edge, issue #735).
