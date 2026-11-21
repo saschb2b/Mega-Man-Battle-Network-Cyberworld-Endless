@@ -75,6 +75,14 @@ static void parse_buttons(const char *s, InputStep *step) {
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
  * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit", "by NAME"), into its step;
  * false where `tok` is none */
+/* a step of one word with no argument: "battle", "home" */
+static bool bare_step(const char *tok, InputStep *s) {
+	if (!strcmp(tok, "battle")) s->battle = true;
+	else if (!strcmp(tok, "home")) s->home = true;
+	else return false;
+	return true;
+}
+
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
 	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
@@ -146,8 +154,7 @@ static void parse_script(const char *spec) {
 		if (colon && !strncmp(colon + 1, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", colon + 6);
 		else if (colon && !strncmp(colon + 1, "place ", 6)) s->placed = sscanf(colon + 7, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
-		else if (colon && !strcmp(colon + 1, "home")) s->home = true;
+		else if (colon && bare_step(colon + 1, s)) {}
 		else if (colon && text_step(colon + 1, s)) {}
 		else if (colon && !strcmp(colon + 1, "sig")) s->sig = 1;
 		else if (colon && !strcmp(colon + 1, "glitch")) s->sig = 2;
@@ -347,8 +354,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "dump ", 5)) snprintf(s->dump, sizeof s->dump, "%s", tok + 5);
 		else if (!strncmp(tok, "place ", 6)) s->placed = sscanf(tok + 6, "%d %d %d", &s->place[0], &s->place[1], &s->place[2]) == 3;
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
-		else if (!strcmp(tok, "battle")) s->battle = true;
-		else if (!strcmp(tok, "home")) s->home = true;
+		else if (bare_step(tok, s)) {}
 		else if (text_step(tok, s)) {}
 		else if (!strcmp(tok, "sig")) s->sig = 1;
 		else if (!strcmp(tok, "glitch")) s->sig = 2;
