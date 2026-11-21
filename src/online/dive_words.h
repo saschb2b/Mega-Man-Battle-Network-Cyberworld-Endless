@@ -20,9 +20,8 @@ const char *dive_crew_split_question(void);
 
 /* The band at Lan's HP while MegaMan waits on his crew at a portal. */
 const char *dive_crew_wait_words(void);
-/* The band's join-in lines (dive_join.h): a crewmate's battle offered (`name`
- * his), MegaMan's own held while the crew is called, and his join sent. */
-const char *dive_join_offer_words(const char *name);
+/* The band's join-in lines (dive_join.h): MegaMan's own battle held while
+ * the crew is called, and his join into a crewmate's sent. */
 const char *dive_join_calling_words(void);
 const char *dive_join_joined_words(void);
 /* The band's line as MegaMan opens a Mystery Data another opened first

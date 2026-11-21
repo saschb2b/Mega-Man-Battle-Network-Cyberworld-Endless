@@ -47,6 +47,7 @@ void dive_crew_describe(FILE *f) {
 	fprintf(f, "crew %d", C.c.count);
 	for (int k = 0; k < C.c.count; ++k) fprintf(f, "%s%s", k ? " " : ": ", C.c.m[k].name);
 	fputc('\n', f);
+	dive_join_describe(f);
 }
 
 bool dive_crew_has(uint32_t session) {
