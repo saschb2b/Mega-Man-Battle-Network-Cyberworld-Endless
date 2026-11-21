@@ -180,3 +180,30 @@ MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
     soon('crew=4: Alpha Beta Gamma Echo', '', 900),
     soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
 ))
+
+# The crew's sign (issue #716): a crewmate's name in the crew's colour (`tags`' NAME*) and a ring under his feet
+# (`rings`), on both games; gone as he walks off and the crew splits; a dotted ring as he comes back within
+# crew_near, the server's second not yet passed (`NAME(forming)`), and the crew's again after it.
+MANY['crew-sign'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 48 0 3; wait 5'),
+    ('sleep', 1.5),
+    soon('rings=1: Beta', '', 600),
+    ('expect', 'tags=1: Beta*'),
+    ('expect', 'crew=2: Alpha Beta'),
+    soon('rings=1: Alpha', 'beta', 600),
+    ('@beta', 'expect', 'tags=1: Alpha*'),
+    ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: the crew split past crew_split_ms
+    ('sleep', 2.5),
+    soon('crew=0', '', 600),
+    ('expect', 'rings=0'),
+    soon('crew=0', 'beta', 600),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'do', 'place 64 0 3; wait 5'),          # back within crew_near: about to be a crew
+    soon('rings=1: Beta(forming)', '', 300),
+    ('expect', 'tags=1: Beta'),
+    ('sleep', 1.5),
+    soon('rings=1: Beta', '', 600),
+    ('expect', 'tags=1: Beta*'),
+))
