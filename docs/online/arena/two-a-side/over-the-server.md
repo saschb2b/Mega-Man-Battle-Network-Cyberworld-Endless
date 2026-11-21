@@ -3,7 +3,7 @@ type: Feature
 title: "Over the server"
 description: "Two MegaMen a side over the server (issue #181, protocol v15): the challenger asked One by one or Side by side, four seats on the wire, one pair on all four games, the four-game proof."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-22T17:15:21Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:00:00Z }
 ---
 
 # Over the server (protocol v15)

@@ -3,7 +3,7 @@ type: Feature
 title: "Team NetBattles"
 description: "Team NetBattles (epic #167, protocol v12): relay teams of two, Team up and Split up on a card, the captains' blind order, the winner staying on with his HP, the wire (`teams.py`), the four-game proof."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T18:22:09Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:00:00Z }
 ---
 
 # Team NetBattles

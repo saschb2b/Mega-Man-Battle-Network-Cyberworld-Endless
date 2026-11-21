@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A NetBattle through a dropped link"
 description: "A NetBattle of two that survives a dropped link (issue #180, protocol v21): the server holds the battle with the place, each game keeps its keys and asks for the ones the link lost (ARENA_HASH's 0xFFFFFFFC), the battle fought to its end with every hash agreeing."
 tags: [online, arena, netcode]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:00:00Z }
 ---
 
 # A NetBattle through a dropped link
