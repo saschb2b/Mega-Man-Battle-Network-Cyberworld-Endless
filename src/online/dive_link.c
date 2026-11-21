@@ -35,6 +35,7 @@ static struct {
 	DiveWay room;            /* the layer the server has MegaMan in (depth 0 none) */
 	int x, y, z;             /* his place as last sent */
 	uint32_t lost_at;
+	uint32_t resumes;        /* the transport's resumes seen (issue #180: a resume puts him in no room) */
 } L;
 
 void dive_link_adopt(void) {
@@ -55,6 +56,7 @@ void dive_link_adopt(void) {
 	dive_band_reset();
 	L.week = s.week;
 	L.seed = s.week_seed;
+	L.resumes = s.resumes;
 	dive_people_on(true);
 	fprintf(stderr, "dive: the link kept for week %u's dive\n", s.week);
 }
@@ -145,6 +147,16 @@ void dive_link_frame(void) {
 	}
 	L.starting = false;
 	L.lost_at = s.connected ? 0 : L.lost_at ? L.lost_at : now;
+	/* (the link back after a drop: the server took him out of his room and
+	 * his crew as it dropped, holds.py's dive.dropped, so the room is entered
+	 * again below and the crew shown is the server's next word; a battle
+	 * under way goes on, its seat held, party.py) */
+	if (s.connected && !s.reconnecting && s.resumes != L.resumes) {
+		L.resumes = s.resumes;
+		memset(&L.room, 0, sizeof L.room);
+		dive_crew_reset();
+		fprintf(stderr, "dive: the link back; the layer's room entered again\n");
+	}
 	online_mail_frame();
 	/* (the dive over: its end told where it ended, else only the link let go) */
 	if (!weekly_on()) {
