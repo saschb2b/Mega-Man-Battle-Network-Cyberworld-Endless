@@ -246,7 +246,7 @@ static void place_steps(const InputStep *s) {
  * #23), its enemies held at 1 HP */
 static void emu_steps(const InputStep *s) {
 	if (s->battle) director_dev_battle();
-	if (s->home && !director_dev_home()) fprintf(stderr, "home: only from a layer's map\n");
+	if (s->home && !director_dev_go_home()) fprintf(stderr, "home: only from a layer's map\n");
 	if (s->foes[0] && s->lab) director_dev_lab(s->foes);
 	else if (s->foes[0]) director_dev_foes(s->foes);
 	if (s->swap[0]) swap_dev_step(s->swap);
@@ -323,7 +323,7 @@ static bool remote_open(const char *dir) {
  * (the second screen's picture), "state PATH",
  * "dump PREFIX" (the video memory, emu_debug_dump), "place X Y FACING", "flags FROM TO 1" (set; 0: back as they were),
  * "battle" (the layer's next random battle, director_dev_battle), "home"
- * (the run home between acts, director_dev_home), "foes
+ * (the run home between acts, director_dev_go_home), "foes
  * SPEC" (a battle of these foes, director_dev_foes), "xrecord ADDR" (a
  * record of BN5's in BN6's engine, director_dev_xrecord), "status SPEC" (the
  * battle's enemies given a status, director_dev_status), "chip ID CODE

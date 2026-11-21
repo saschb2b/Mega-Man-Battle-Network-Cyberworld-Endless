@@ -16,7 +16,6 @@
 #include "devtools.h"
 #include "director.h"
 #include "director_folder.h"
-#include "director_home.h"
 #include "director_layer.h"
 #include "director_state.h"
 #include "emu.h"
@@ -40,15 +39,15 @@ bool director_dev_next_layer(void) {
 	return director_start_layer();
 }
 
-bool director_dev_home(void) {
+bool director_dev_go_home(void) {
 	/* (as an act's last exit sends the run home: the next layer made, Lan's HP set up, the warp out; a test's step) */
 	if (!director_on_map() || D.town) return false;
 	if (run.home_depth) run.depth = run.home_depth - 1;
 	run.home_depth = 0;
 	run.depth++;
 	run.side_kind = LAYER_NORMAL;
-	if (!new_layer(true) || !home_begin(NULL)) return false;
-	emu_warp_out();
+	if (!new_layer(true)) return false;
+	director_dev_home();
 	return true;
 }
 
