@@ -105,7 +105,11 @@ BN6's mid-fight spawn and fights as itself; the last form's deletion
 wins the battle as BN6 wins any, its results the first form's reward.
 With `CYBERWORLD_EMU_DEBUG` it prints each form found, taken off,
 spawned and arrived, and every 30 frames the form's state, HP, panel
-and the side's counts. A step names a form that is no Navi of BN6's, or
+and the side's counts; and, as a form is taken off, each object of the
+third kind bound to it that ends with it ("form 1's object of the third
+kind 36 (slot 0) ended with it": DiveMan's torpedo launcher, issue #733).
+The state says `swapform N` and `leftovers N` while it fights
+([the scenarios' battle lines](scenarios.md)). A step names a form that is no Navi of BN6's, or
 one whose deletion is not BN6's generic Navi's, and fights nothing.
 
 ```bash
