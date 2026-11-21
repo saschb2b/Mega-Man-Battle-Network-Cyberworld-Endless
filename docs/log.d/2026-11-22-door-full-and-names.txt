@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T23:08:38Z
+* **Update**: online/shared-dive.md (a full guardian's door told to the fifth, his keys his own and a place asked for again; the door's party named on the plates, leader first; the calls taken, issue #753), devtools/scenarios.md (the `door` line), devtools/play.md and devtools/headless-shot.md (the `guardian` dev step), code/online.md (`dive_party.c`'s full door).

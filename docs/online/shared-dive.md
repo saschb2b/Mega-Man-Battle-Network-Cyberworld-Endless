@@ -392,6 +392,32 @@ the session building it, and is his to turn over.
   0 deleted leaves the others without the party's HP (each then fights the
   rest alone), and the leader's idle pass.
 
+  **A full door, and the party by its names** (22 November 2026, issue
+  #753, from the friction hunt's play with five games): a fifth at a door
+  whose queue holds its four is refused by the server (NOTICE
+  `notice_queue`, before any QUEUE_STATE), and the game now hears it: the
+  band says "The party's full!  A:Go in alone", MegaMan stays held at the
+  door, A takes him in alone, his other keys are his own (START opens
+  the PET, walking off leaves the door), and the game asks the queue
+  again every three seconds, so a place that opens (one of the four
+  going alone or walking off) takes him in. While a party forms, the
+  plates under BN6's HP box list it instead of the crew, its leader
+  first: a crewmate with his HP as ever, another diver his name alone in
+  white; the band keeps the count and the leader's name. Calls taken
+  under the owner's direction of 21 November, his to turn over: the
+  refusal read from the NOTICE already sent, rather than a new message
+  on the wire (a join's only other refusal, "Not at that door", a game
+  that sends its own room never meets); held at the door rather than let
+  go (he came to fight it: waiting for a place, or A, are both a press
+  away); asked again on a clock rather than told by the server when a
+  place opens (no change to the wire); the names on the plates rather
+  than in the band (four names do not fit its 240 pixels). Seen headless:
+  the scenarios `online-week/door-full` (five games at layer 3's door on
+  a local server: the four's plates naming the others, the leader first;
+  the fifth told, START opening his PET, and in the queue once Delta
+  went alone) and `online-week/door-full-alone` (the fifth's A: in alone,
+  the arena closing round him, the four's party as it was).
+
 - **Crews** (15 November 2026, by nearness since 21 November, issue
   #714; `server/cyberworld_server/crews.py`, `dive_crew.c`; the wire's
   v20 in [shared/online/README.md](../../shared/online/README.md)): the

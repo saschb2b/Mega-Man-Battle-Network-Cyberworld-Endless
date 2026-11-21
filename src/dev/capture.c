@@ -150,6 +150,7 @@ static void parse_script(const char *spec) {
 		else if (colon && text_step(colon + 1, s)) {}
 		else if (colon && !strcmp(colon + 1, "sig")) s->sig = 1;
 		else if (colon && !strcmp(colon + 1, "glitch")) s->sig = 2;
+		else if (colon && !strcmp(colon + 1, "guardian")) s->sig = 3;
 		else if (colon && !strncmp(colon + 1, "stuck ", 6)) s->held = (s->hold = held_parse(colon + 7)) != 0;
 		else if (colon) parse_buttons(colon + 1, s);
 		if (dev_step(s) && s->frames > 0 && script_len + 1 < 512) {
@@ -235,6 +236,7 @@ static void write_state(const char *path) {
 static void place_steps(const InputStep *s) {
 	if (s->sig == 1) director_dev_signature();
 	if (s->sig == 2) director_dev_glitch();
+	if (s->sig == 3) director_dev_guardian();
 	if (s->by[0]) director_dev_by(s->by);
 	if (s->board[0]) director_dev_board(s->board);
 }
@@ -328,7 +330,8 @@ static bool remote_open(const char *dir) {
  * director_dev_chip), "cross F" (the next Cross chosen committed as form
  * F, soulproxy_cross), "sig"
  * (MegaMan in the layer's signature, director_dev_signature), "glitch"
- * (by the Glitch warp or its copy, director_dev_glitch), "stuck MASK"
+ * (by the Glitch warp or its copy, director_dev_glitch), "guardian" (on
+ * to the run's next guardian's layer, the dev menu's, director_dev_guardian), "stuck MASK"
  * (the run saved with BN6 holding MegaMan so, director_dev_hold), "quit";
  * items apart by ';'. */
 static void remote_parse(char *line) {
@@ -348,6 +351,7 @@ static void remote_parse(char *line) {
 		else if (text_step(tok, s)) {}
 		else if (!strcmp(tok, "sig")) s->sig = 1;
 		else if (!strcmp(tok, "glitch")) s->sig = 2;
+		else if (!strcmp(tok, "guardian")) s->sig = 3;
 		else if (!strncmp(tok, "stuck ", 6)) s->held = (s->hold = held_parse(tok + 6)) != 0;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {

@@ -12,6 +12,8 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
 /* The band at a guardian's door while a party forms: `count` in it, whether
  * MegaMan leads it, its leader's name. */
 const char *dive_door_words(unsigned count, bool leads, const char *leader);
+/* ... where the door's queue holds its four already and MegaMan is not in it */
+const char *dive_door_full_words(void);
 
 /* The band's join-in line (dive_join.h): his join into a crewmate's battle
  * sent, while it starts. */

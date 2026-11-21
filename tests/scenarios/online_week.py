@@ -354,3 +354,66 @@ MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
     online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
     ('@beta', 'expect', 'pullback=spent'),
 ))
+
+# A full guardian's door (issue #753): five divers on the guardian's layer, four into the door's queue and the
+# fifth after them. The four see the party by name on their plates, the leader first; the fifth is told the party
+# is full and keeps his keys (START opens his PET); once one of the four goes alone, a place is open and the fifth,
+# asking again, is in. MegaMan's words on the way in are paged before the door is taken, where A is not yet the
+# leader's "Go in" (#752).
+DOOR = ('alpha', 'beta', 'gamma', 'delta', 'echo')
+
+
+def to_layer(game):
+    """On to the guardian's layer (the dev menu's Next guardian), its words paged."""
+    return online.at(game,
+                     ('do', 'guardian; wait 60'),
+                     ('until', 'screen=map', 900),
+                     ('repeat', 'press B; wait 15', 'chat=closed', 30))
+
+
+def to_door(game):
+    """In at the arena's door: his words on the way in paged with A, before the door is taken (B is "not yet")."""
+    return online.at(game,
+                     ('do', 'by arena; wait 60'),
+                     ('repeat', 'press A; wait 30', 'chat=closed', 30),
+                     ('do', 'by arena; wait 5; hold AHEAD 90; wait 30'))
+
+
+def at_a_full_door():
+    names = {g: g.capitalize() for g in DOOR}
+    steps = online.course(online.into_square(), dive())
+    for g in DOOR[1:]:
+        steps += online.course(online.into_square(g), dive(g))
+    for g in DOOR:
+        steps += to_layer('' if g == 'alpha' else g)
+    steps += online.course(soon('divers~Echo', '', 600), to_door(''), soon('door=queued: Alpha', '', 300))
+    for k, g in enumerate(DOOR[1:4], 2):
+        steps += online.course(to_door(g), soon('door=queued: ' + ' '.join(names[d] for d in DOOR[:k]), g, 300))
+    steps += online.course(
+        soon('door=queued: Alpha Beta Gamma Delta', '', 300),
+        ('expect', 'crewview=3 party'),                   # the leader's plates: the other three, by name
+        ('expect', 'mate0~Beta'),
+        soon('crewview=3 party', 'beta', 300),
+        ('@beta', 'expect', 'mate0~Alpha'),               # ... and a member's: the leader first
+        to_door('echo'),
+        soon('door=full', 'echo', 300))
+    return steps
+
+
+GAMES5 = {g: online.HOME for g in DOOR[1:]}
+MANY['door-full'] = dict(CAST, GAMES=GAMES5, STEPS=online.course(
+    at_a_full_door(),
+    ('@echo', 'do', 'press START; wait 40'),              # his keys his own: START opens the PET
+    ('@echo', 'expect', 'screen=pet'),
+    ('@echo', 'repeat', 'press B; wait 20', 'screen=map', 10),
+    ('@echo', 'expect', 'door=full'),
+    ('@delta', 'do', 'press B; wait 10'),                 # Delta goes alone: a place opens
+    ('sleep', 3.5),
+    soon('door=queued: Alpha Beta Gamma Echo', 'echo', 600),
+))
+MANY['door-full-alone'] = dict(CAST, GAMES=GAMES5, STEPS=online.course(
+    at_a_full_door(),
+    ('@echo', 'do', 'press A; wait 10'),                  # A: in alone, the arena closing round him
+    soon('card=title', 'echo', 600),
+    ('expect', 'door=queued: Alpha Beta Gamma Delta'),    # the four's party as it was
+))

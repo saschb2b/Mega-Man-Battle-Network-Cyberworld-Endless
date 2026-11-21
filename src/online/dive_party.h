@@ -2,7 +2,8 @@
  * docs/online/shared-dive.md). MegaMan saved at the arena's door with
  * other divers on the layer joins its queue (QUEUE join); the staging
  * waits (boss_door_hold) while the leader, the first at the door, may go in
- * when he likes (A) and anyone may go alone (B). The leader's start makes a
+ * when he likes (A) and anyone may go alone (B); a fifth at a full door
+ * is told so and keeps his keys. The leader's start makes a
  * party battle for every game in the queue: each game's guardian scaled
  * for the party (boss_party_set). Linked (protocol v19's format 3), each
  * game fights him in its own battle and his HP is the party's: seat 0's
@@ -12,6 +13,7 @@
 #define CW_DIVE_PARTY_H
 
 #include <stddef.h>
+#include <stdio.h>
 #include <stdint.h>
 
 #include "dive_wire.h"
@@ -30,7 +32,16 @@ uint32_t dive_party_keys(uint32_t keys);
 /* QUEUE_STATE, a party battle's ARENA_STATE and ARENA_SEAT, PARTY_HP. */
 void dive_party_mail(const uint8_t *m, size_t n);
 
-/* The door's band: who waits, and the keys. */
+/* The door's band: who waits, and the keys; or that the queue holds its
+ * four already (a join refused, issue #753: MegaMan held at the door, A
+ * goes in alone, his other keys his own, a place asked for again every few
+ * seconds). */
 void dive_party_draw(int x, int y);
+/* The party forming at the door, MegaMan among them, the leader first (0
+ * none: not queued, or queued alone); the crew's plates show them there
+ * (dive_crew_view.h). */
+int dive_party_members(const QueueEntry **out);
+/* The door in the state's words: `door none|alone|queued: NAMES|full|started`. */
+void dive_party_describe(FILE *f);
 
 #endif
