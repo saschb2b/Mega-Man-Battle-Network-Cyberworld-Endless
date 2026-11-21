@@ -155,6 +155,13 @@
 #define BN6_CHIP_NAMES_NONE   0x08121FBAu /* ... which each loads by ldr r0,[r0,#8] (0x6880), here and */
 #define BN6_CHIP_NAMES_NONE2  0x08122022u /* ... here */
 #define BN6_CHIP_NAMES_REF_LIBRARY 0x08128190u /* ... and the PET's Library's (0x0812807A, 0x08128134) */
+/* A chip's name in BN6's lists (issue #732; docs/rom/chips-code.md, A name's cells): the folder editor's lists draw it by
+ * BN6_LIST_NAME_DRAW, a glyph a cell, every glyph of it and then blanks to BN6_CHIP_NAME_CELLS; the list's pointers go on
+ * by what it wrote, so a name of nine glyphs puts its ninth in the next row's first cell and every row under it a cell
+ * late. BN6's own names keep to eight (its version marks one glyph each: JudgeMn[EX]) */
+#define BN6_LIST_NAME_DRAW    0x08122090u /* bn6f sub_81202B4: r0 the name, r2 and r3 its glyphs' top and bottom tile-map entries,
+                                             r4 the font's first tile, r5 the cells to fill (8 from its callers) */
+#define BN6_CHIP_NAME_CELLS   8           /* the cells a chip's name has in BN6's lists */
 #define BN6_CHIP_DESC_READ    0x0811A88Cu /* a description's archive picked of two by id > 255, five instructions (ldr; ldrh r1,[r5,#0xe]; cmp
                                              r1,#0xff; bgt; ldr), its first archive's literal at +0x130: a chip's card in the PET, */
 #define BN6_CHIP_DESC_READ2   0x0811B280u /* ... and a second (its literal at +0x13C) */

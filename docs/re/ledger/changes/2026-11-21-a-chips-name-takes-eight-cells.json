@@ -1,0 +1,4 @@
+{
+  "date": "2026-11-21",
+  "what": "A chip's name in BN6's lists: the folder editor's name routine (BN6_LIST_NAME_DRAW 0x08122090, bn6f sub_81202B4, called with r5 = 8 from 0x08121F22) writes every glyph of a name, then blanks to the eighth cell, and its caller goes on from where it ended (BN6_CHIP_NAME_CELLS 8), so a name of nine glyphs set every row under it a cell late. BN5's twelve DS Navi chips were nine (its DS mark one glyph, which BN6 lacks, spelt D and S); src/core/xchips_cells.c cuts a moved name to eight as the install writes the archives (docs/rom/chips-code.md, A name's cells; issue #732, a player's Pack)."
+}

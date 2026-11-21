@@ -196,6 +196,31 @@ the two bytes of `byte_804B068`, `C0 40`. In Gregar the routine stands at
 four a code the pack lacks. The project's traders follow it since issue
 #154 ([Economy](../game/economy/overview.md), [Chips, folders and the Library](../rom/chips.md)'s Chip Traders).
 
+## A chip's name in eight cells (issue #732)
+
+**Verified in the ROMs** (21 November 2026): BN5 Team Colonel writes its
+DS mark as one glyph, code 0x9F, in all thirteen DS Navi chips' names
+(BN5's 244-280, every third; its font compared with BN6's glyph for glyph
+in [BN5's world](../rom/bn5-world.md), BN5's text), and BN6's font has no
+such glyph; so ColonelDS is eight cells in BN5 and nine spelt in BN6's
+letters. BN6's own chip names keep to eight cells, a version mark one
+glyph (JudgeMn[EX], its mark 0x42); all 411 read, but for id 284,
+whose entry has no end code and runs on into 285's ([chip texts](../devtools/chip-texts.md)). BN4 Red Sun
+spells DS as the letters D and S and shortens the name to fit eight: its
+chips 241 ProtoMDS, 244 NumbMnDS and 262 ShadMnDS (read from its names'
+archive, `0x087481D8`), so for NumberMan's and ShadeMan's DS chips the
+series' own eight-cell names exist. BN6 names TomahawkMan's chips TmhkMan
+(its archive, `0x6E88D0`). Read with a script over every chip name of the
+three ROMs.
+
+**Searched, not found:** an eight-cell spelling in letters of ColonelDS,
+ShadoMnDS, KnigtMnDS, ToadManDS, BlizManDS, CloudMnDS, CosmoMnDS,
+LarkManDS or GridManDS in BN4's, BN5's or BN6's chip names (the same
+script). BN5 Double Team DS and the Legacy Collection were not looked at;
+both are assumed to keep BN5's DS glyph. Those nine take the smallest cut
+in the series' manner ([The chip registry](../multirom/chip-registry.md),
+A name in eight cells).
+
 ## BN5's Liberation Missions have no special routes
 
 **Verified in the ROM** (25 October 2026, for [Liberation Missions](../game/liberation/overview.md)'s
