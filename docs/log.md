@@ -4,6 +4,7 @@
 * **Update**: online/arena/dropped-link.md (a team, its match and its bouts, and a 2v2, held through a drop), online/arena/teams.md (a short drop keeps the team and its match), online/arena/two-a-side/over-the-server.md (the same for four seats), online/arena/not-yet.md (a drop mid-battle).
 
 ## 2026-11-21
+* **Update**: game/reward-pick.md (the pick opens from SetEventFlag's hook alone, never from its flags as read: BN6's save holds them masked, issue #734), rom/game-state.md (The save's mask: BN6_SAVE_KEY and the bytes BN6_SAVE_GAME masks while it writes the cartridge), code/emu.md (bn6_save.h).
 * **Update**: rom/chips.md (The other version's Gigas' art: Gregar's records give Falzar's five Gigas Gregar's Gigas' pictures, BN5 holds three, issue #731), devtools/agents-tools.md (the state's `foldercard` line), game/fidelity.md (Falzar's Gigas' cards).
 * **Update**: online/shared-dive.md (the crew's display, issue #717: the calls, a plate a crewmate under BN6's HP box with his name, HP over max HP and layer, "level" as max HP, a partner's HP under his mark on a party's field), code/online.md (`dive_crew_view.c`).
 * **Update**: rom/net-maps.md (Link Navi obstacles: BN6's two Security Cubes' spawn records, sunk under their floor, z -12 in Central Area 1 and -8 in Seaside Area 2, on their panel's middle in their walls' box; BN5's own at z 0; a layer's cube stands so, its walls on its panel's edge, issue #735), world/level-design/security-cubes.md (a P-Code's cube stands on its panel's middle, sunk as BN6's, its walls on the panel's edge, issue #735).

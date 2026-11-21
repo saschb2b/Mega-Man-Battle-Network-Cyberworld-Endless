@@ -295,6 +295,10 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
     },
     {
       "date": "2026-11-21",
+      "what": "BN6's save (BN6_SAVE_GAME 0x0803F76C, after every trade among others) XORs the RAM 0x02000000-0x0200670F, eEventFlags among it, with a new key's low byte (BN6_SAVE_KEY 0x02001064) while it writes the cartridge, frames long, then back: the engine read the reward pick's flags as the key's bits there and opened a pick over a trader's trade (issue #734; docs/rom/game-state.md, The save's mask). The pick now opens from SetEventFlag's hook alone."
+    },
+    {
+      "date": "2026-11-21",
       "what": "Gregar's records of Falzar's five Gigas (302, 306, 308, 309, 310: LibraryFlags 0x18) give each the icon, picture and palette of Gregar's Giga of its library number (HubBatc ColForce's), and Gregar holds none of their own; BN5's Team Colonel holds BassAnly's, BigHook's and CrossDiv's. The core's copy now draws BN5's for those three where its ROM is read and BN6's blank record's art for the rest (src/core/chips.c other_giga; docs/rom/chips.md, The other version's Gigas' art; issue #731)."
     }
   ],
