@@ -328,6 +328,19 @@ static void record4_make(int id, const XChipReg4 *r4, const uint8_t *table, uint
 	xrec_from_bn4(&in, out);
 }
 
+/* BN6's own chip `id`'s record (BN6's chip table `table`; past its records, its blank's) at its place */
+static void record6_make(int id, const uint8_t *table, const uint32_t blank[3], uint8_t *out) {
+	memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
+	/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
+	const XChipMoved *mv = M.rom5 && id < CHIPS_BN6_RECORDS ? xchips_moved_of(id) : NULL;
+	bool giga = other_giga(id);
+	const XChipReg *named = mv || (giga && M.rom5) ? xreg_named(id) : NULL;
+	if (named && mv) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
+	/* (and BN5's art, art_row's; one of Falzar's Gigas BN5 does not draw BN6's blank, not another Giga's) */
+	const uint32_t *art = named && M.art[id][0] ? M.art[id] : giga ? blank : NULL;
+	for (int k = 0; art && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, art[k]);
+}
+
 static void records_make(const uint32_t blank[3]) {
 	const uint8_t *table = R.data + R.layout->chip_data;
 	for (int id = 0; id < CHIPS_IDS; ++id) {
@@ -340,18 +353,7 @@ static void records_make(const uint32_t blank[3]) {
 			continue;
 		}
 		if (r4) { xrec_placeholder4(r4, 0, blank, out); continue; }
-		if (!r) {
-			memcpy(out, table + XREC_SIZE * (uint32_t)(id < CHIPS_BN6_RECORDS ? id : BLANK_RECORD), XREC_SIZE);
-			/* (BN6's own chip of a name BN5's plays, its code moved: BN5's in what it does) */
-			const XChipMoved *mv = M.rom5 && id < CHIPS_BN6_RECORDS ? xchips_moved_of(id) : NULL;
-			bool giga = other_giga(id);
-			const XChipReg *named = mv || (giga && M.rom5) ? xreg_named(id) : NULL;
-			if (named && mv) xrec_same_moved(M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * named->bn5, mv, out);
-			/* (and BN5's art, art_row's; one of Falzar's Gigas BN5 does not draw BN6's blank, not another Giga's) */
-			const uint32_t *art = named && M.art[id][0] ? M.art[id] : giga ? blank : NULL;
-			for (int k = 0; art && k < 3; ++k) put32(out + BN6_CHIP_ICON_PTR + 4 * k, art[k]);
-			continue;
-		}
+		if (!r) { record6_make(id, table, blank, out); continue; }
 		if (!M.rom5) { xrec_placeholder(r, 0, blank, out); continue; }
 		XRecordFrom in = { M.rom5 + BN5_CHIP_RECORDS + XREC_SIZE * r->bn5, r->twin ? table + XREC_SIZE * r->twin : NULL, r, 0, { 0 },
 			r->how == XREG_MOVED || r->how == XREG_PA || r->how == XREG_DARK ? xchips_moved_of(id) : NULL };
