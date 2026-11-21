@@ -843,6 +843,8 @@ static bool through_a_drop(const OnlineSnapshot *s) {
 	bool down = !s->connected || s->reconnecting;
 	arena_link_net_hold(&SA.link, down);
 	if (down) {
+		/* (the transport's tries every half second while the battle waits) */
+		online_transport_hurry();
 		if (!SA.link_down) printf("arena: the link dropped mid-battle; holding on\n");
 		SA.link_down = true;
 		return false;

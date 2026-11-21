@@ -15,15 +15,11 @@
 #include <stdio.h>
 
 #include "party_field.h"
-#include "pet_look.h"
 
 /* a name's width at most: a panel's 40 pixels less its plate's edges and
  * a gap, so that two MegaMen on neighbouring panels of a row keep their
  * marks apart */
 #define PARTY_MARKS_BUDGET 34
-/* the crew's colour: the partners' names on the field and the crew's
- * plates on the map in it (#716 gives a crew its own) */
-#define PARTY_MARKS_CREW LOOK_TEXT
 
 struct mCore;
 

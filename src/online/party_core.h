@@ -36,6 +36,7 @@ typedef struct {
 	bool own;                             /* each partner his own NaviStats, hand and Custom screen (team_shape.h): his
 	                                         seat's keys his battle keys or his screen's picks (arena_team_custom.h) */
 	int end;                              /* the enemies set to 1 HP at this iteration (the dev's partyend), 0 never */
+	int del;                              /* ... and the MegaMen of the seats of this mask deleted then (the dev's partydel), 0 none */
 } PartyBattle;
 
 struct mCore;

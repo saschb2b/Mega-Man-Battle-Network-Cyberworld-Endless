@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "crew_look.h"
 #include "director.h"
 #include "dive_crew.h"
 #include "dive_wire.h"
@@ -101,7 +102,7 @@ void dive_crew_view_draw(void) {
 	for (int i = 0; i < n; ++i) {
 		int x = P.core_x + LEFT, y = P.core_y + TOP + i * LINE;
 		fill_rect(x, y, width, H, rgba(0, 24, 41, 190));
-		pixfont_draw(x + PAD, y + 1, w[i].name, PARTY_MARKS_CREW, shade, PIXFONT_LEFT, 1);
+		pixfont_draw(x + PAD, y + 1, w[i].name, CREW_COLOUR, shade, PIXFONT_LEFT, 1);
 		if (w[i].layer[0]) pixfont_draw(x + PAD + name_w + GAP, y + 1, w[i].layer, LOOK_EDGE_HI, shade, PIXFONT_LEFT, 1);
 		pixfont_draw(x + width - PAD - 1, y + 1, w[i].hp, LOOK_TEXT, shade, PIXFONT_RIGHT, 1);
 		/* (his HP as a bar under it, the plate's width his max; orange from a quarter down) */

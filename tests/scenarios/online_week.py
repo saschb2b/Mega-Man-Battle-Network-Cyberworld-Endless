@@ -2,7 +2,8 @@
 the portal by the Board and its Yes into the dive's first layer, another
 diver seen there, a crew by standing together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
-fought by both unasked (issue #715), the Board's posts of the week,
+fought by both unasked (issue #715) and through a dropped link (issue
+#180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -75,6 +76,14 @@ MANY = {
         ('expect', 'weekboard~Dex'),
         ('expect', 'weekboard~7'),
     )),
+    # (a dive pulled back once by its crew marked "*" after its layer, and the mark said; issue #718)
+    'board-marks-a-pull-back': dict(CAST, SERVER=dict(weeks=[('Mira', 7, False, 31, True), ('Dex', 4, False, 12)]),
+                                    STEPS=online.course(
+        online.into_square(),
+        soon('weekboard~Mira:7*'),
+        ('expect', 'weekboard~Dex:4 '),
+        ('expect', 'weekboard~*:pulled back once by the crew.'),
+    )),
     'no-stamp-no-dive': dict(START=online.HOME, SERVER=True, FILES={'netpass.ini': online.SEEN_SQUARE}, NEEDS=(), STEPS=online.course(
         online.into_square(),
         ('expect', 'netpass=square'),
@@ -114,6 +123,43 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     ('@beta', 'expect', 'join=none'),
     ('do', 'battle; wait 10'),
     soon('join=fighting', 'beta', 900),
+    soon('join=fighting', '', 900),
+))
+
+# A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
+# holds his seat, both fields wait on his keys and go on together once he is back, the hashes agreeing after it
+MANY['crew-battle-through-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['crew-battle-unasked']['STEPS'],
+    soon('party~fight', '', 900),
+    soon('party~fight', 'beta', 900),
+    soon('partyagreed>=2', '', 900),
+    ('@beta', 'do', 'reconnect cut 3'),
+    soon('partylink=down', 'beta', 120),
+    soon('partylink=up', 'beta', 900),              # back: his seat taken back
+    ('expect', 'partylink=up'),                     # Alpha's field waited on him, never let him go
+    soon('partyagreed>=7', '', 1500),               # the fields together again, every seat's hash agreeing
+    soon('partyagreed>=7', 'beta', 600),
+    ('@beta', 'expect', 'partylink=up'),
+))
+
+# A diver's link back after a drop (issue #180): Beta's own link cut for three seconds on the layer; the server
+# took him out of his room and his crew as it dropped, his game enters the room again once back: each sees the other
+# again, the crew forms again, and a battle of Alpha's is joined by both as before the drop
+MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('@beta', 'do', 'reconnect cut 3'),
+    soon('link=reconnecting', 'beta', 120),
+    soon('crew=0', '', 600),                        # Alpha's crew split at the drop
+    # (the cut and the transport's tries at 0.5, 1 and 2 seconds are the clock's: a dive's layer outruns it)
+    ('sleep', 4.0),
+    soon('link=up', 'beta', 1800),                  # back: his place taken back
+    soon('divers~Alpha', 'beta', 600),              # the room entered again: each sees the other
+    soon('divers~Beta', '', 600),
+    ('sleep', 1.5),
+    soon('crew=2: Alpha Beta', 'beta', 600),        # the crew formed again by nearness
+    soon('crew=2: Alpha Beta', '', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),             # and a battle of Alpha's joined by both
     soon('join=fighting', '', 900),
 ))
 
@@ -162,4 +208,96 @@ MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
     soon('crew=0', 'delta', 600),
     soon('crew=4: Alpha Beta Gamma Echo', '', 900),
     soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
+))
+
+# The crew's sign (issue #716): a crewmate's name in the crew's colour (`tags`' NAME*) and a ring under his feet
+# (`rings`), on both games; gone as he walks off and the crew splits; a dotted ring as he comes back within
+# crew_near, the server's second not yet passed (`NAME(forming)`), and the crew's again after it.
+MANY['crew-sign'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 48 0 3; wait 5'),
+    ('sleep', 1.5),
+    soon('rings=1: Beta', '', 600),
+    ('expect', 'tags=1: Beta*'),
+    ('expect', 'crew=2: Alpha Beta'),
+    soon('rings=1: Alpha', 'beta', 600),
+    ('@beta', 'expect', 'tags=1: Alpha*'),
+    ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: the crew split past crew_split_ms
+    ('sleep', 2.5),
+    soon('crew=0', '', 600),
+    ('expect', 'rings=0'),
+    soon('crew=0', 'beta', 600),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'do', 'place 64 0 3; wait 5'),          # back within crew_near: about to be a crew
+    soon('rings=1: Beta(forming)', '', 300),
+    ('expect', 'tags=1: Beta'),
+    ('sleep', 1.5),
+    soon('rings=1: Beta', '', 600),
+    ('expect', 'tags=1: Beta*'),
+))
+
+# A crewmate pulled back (issue #718; docs/online/shared-dive.md, A deletion in a crew): on both games of a crew's
+# field the MegaMen of a seat mask are deleted at the battle loop's 20th iteration and its enemies 60 later (partyend,
+# partydel: the same on each, as the field must be), each game's pad the Arena's bot (partybot).
+def pulled(mask):
+    return LOUD.replace('onlinename={name}', 'onlinename={name},partyend=20,partybot=1,partydel=%d' % mask)
+
+
+def crew_fight(start):
+    """Both divers crewed, Alpha's battle joined by Beta, fought to its end on the field."""
+    return dict(CAST, START=start, GAMES={'beta': start}, STEPS=online.course(
+        MANY['dive-together']['STEPS'],
+        ('do', 'battle; wait 10'),
+        soon('join=fighting', 'beta', 900),   # (the battle short: Alpha's may be at its results already)
+        # (BN6's results on each game's own pad, A through them)
+        ('@beta', 'repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+        ('repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ))
+
+
+BETA = pulled(2)   # (seat 1, Beta's: the battle's owner, Alpha, is seat 0)
+# Beta deleted, the crew's win: Beta back on the layer with Alpha's quarter, Alpha's HP the less for it, Beta's
+# pull-back spent and his band saying so; Alpha's free.
+MANY['crew-pulls-back'] = dict(crew_fight(BETA), STEPS=online.course(
+    crew_fight(BETA)['STEPS'],
+    ('@beta', 'expect', 'crewend~won'),
+    ('@beta', 'expect', 'crewend~pulled'),
+    ('expect', 'crewend~gave'),
+    ('@beta', 'expect', 'pullback=spent'),
+    ('expect', 'pullback=free'),
+    ('@beta', 'expect', 'dive=on'),
+    soon('where=layer', 'beta', 600),
+    ('@beta', 'expect', 'hp>0'),
+    soon('band~pulled us back', 'beta', 600),
+))
+# ... and a second deletion: spent, the dive over as alone; Alpha gives nothing.
+MANY['crew-pulls-back-once'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'dive=none', 120),
+    ('repeat', 'press A; wait 20', 'join=none', 120),
+    ('expect', 'crewend~won'),
+    ('expect', 'pullback=free'),
+))
+# The field lost, both deleted: each dive over, as before.
+MANY['crew-lost-ends-both'] = dict(crew_fight(pulled(3)), STEPS=online.course(
+    crew_fight(pulled(3))['STEPS'],
+    soon('dive=none', 'beta', 600),
+    soon('dive=none', '', 600),
+))
+# A quit after the pull-back, and the dive taken up again from the portal: still spent.
+MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    ('@beta', 'restart', BETA),               # (the game closed on the dive, back at Lan's HP)
+    online.into_square('beta'),
+    soon('weekoffer=again', 'beta', 600),
+    online.at('beta', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/', 20)),
+    ('@beta', 'repeat', 'wait 4', 'choice=1/3', 90),   # ("Keep diving", "Start over", "Not now": the first)
+    ('@beta', 'do', 'press A; wait 6'),
+    online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('@beta', 'expect', 'pullback=spent'),
 ))

@@ -157,10 +157,13 @@ that it never touches the run in progress. It is a second save slot in
 the same folder: while a dive is played, `save_path` (`src/core/save.c`)
 puts every progress file after `weekly-` (`weekly-profile.sav`,
 `weekly-run.sav`, `weekly-run.state` and the rest of the list above),
-and `weekly.sav` (`src/core/weekly.h`, magic `CWW1`, 28 bytes,
+and `weekly.sav` (`src/core/weekly.h`, magic `CWW1`, 32 bytes,
 `save_layout.h` holding its layout) records the dive in the slot (its
-week and seed, unfinished or not), a dive's end waiting to be posted
-and the deepest layer of the week's dives (the summary's "This week").
+week and seed, unfinished or not, and whether its crew has pulled it
+back, [the shared dive](../online/shared-dive.md)), a dive's end waiting
+to be posted and the deepest layer of the week's dives (the summary's
+"This week"). It grows at its end: a file of an older build, 28 bytes,
+reads with the new bytes zero.
 The normal slot's files are not written while a dive is played: a
 playtest hashed all twelve before a dive began and after it ended, the
 game closed mid-dive and continued in between, and each came back the

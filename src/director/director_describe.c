@@ -11,6 +11,7 @@
 #include "boss.h"
 #include "cinema.h"
 #include "director.h"
+#include "director_crew.h"
 #include "director_describe_pos.h"
 #include "director_folder.h"
 #include "director_hold.h"
@@ -133,6 +134,7 @@ void director_describe(FILE *f) {
 	pet_describe(f);
 	home_describe(f);
 	older_describe(f);   /* (the older nets' lines: older_describe.h) */
+	director_crew_describe(f);   /* (a dive's pull-back and its crew's last battle: director_crew.h) */
 	/* (what the run began with, as the JACK-IN SETUP says its choice) */
 	meta_setup_describe(f, run.mode, run.folder, run.cross, run.threat, run.helpers, run.extras_off);
 	if (D.town) return;

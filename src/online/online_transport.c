@@ -65,6 +65,7 @@ static struct {
 	SDL_mutex *mutex;
 	SDL_atomic_t stop, bye, done;
 	SDL_atomic_t cut, cut_until;   /* (a test's dropped link: online_transport_cut) */
+	SDL_atomic_t hurry_until;      /* (a battle waiting on the link back: online_transport_hurry) */
 	OnlineSnapshot snapshot;
 	OnlinePeer local;
 	char url[512], name[ONLINE_NAME_BYTES + 1];
@@ -85,9 +86,19 @@ static struct {
  * for it: server/cyberworld_server/holds.py, BACKLOG) */
 static uint32_t send_every(uint32_t now, uint32_t last_receive) { return now - last_receive > 400 ? 500u : 50u; }
 
-/* the wait before try `tries` (0 the first): 0.5, 1, 2, then 4 seconds */
+/* a battle held through the drop asks for its tries this often (online_transport_hurry) */
+#define RETRY_HURRIED_MS 500
+
+/* a battle waiting on the link back: until these ticks (online_transport_hurry) */
+static bool hurried(void) {
+	return (int32_t)((uint32_t)SDL_AtomicGet(&transport.hurry_until) - SDL_GetTicks()) > 0;
+}
+
+/* the wait before try `tries` (0 the first): 0.5, 1, 2, then 4 seconds;
+ * every half second while a battle waits on the link (issue #180) */
 static uint32_t retry_wait(unsigned tries) {
 	uint32_t wait = RETRY_FIRST_MS << (tries < 3 ? tries : 3);
+	if (hurried()) return RETRY_HURRIED_MS;
 	return wait < RETRY_MOST_MS ? wait : RETRY_MOST_MS;
 }
 
@@ -374,6 +385,11 @@ static void browser_closed(void) {
 static void browser_received(const uint8_t *data, size_t size);
 
 void online_transport_cut(uint32_t ms) { (void)ms; }
+void online_transport_hurry(void) {
+	SDL_AtomicSet(&transport.hurry_until, (int)(SDL_GetTicks() + 1000u));
+	/* (a try already set for later: no later than half a second from now) */
+	if (!transport.dialing && (int32_t)(transport.retry_at - SDL_GetTicks()) > RETRY_HURRIED_MS) transport.retry_at = SDL_GetTicks() + RETRY_HURRIED_MS;
+}
 
 /* the next try, its time come: a resume's HELLO on a new socket */
 static void browser_retry(uint32_t now) {
@@ -449,10 +465,12 @@ static bool leaving(void) { return SDL_AtomicGet(&transport.stop) || SDL_AtomicG
 /* the wait before the next try, `wait` and no later than the window's
  * end: false where the game is leaving meanwhile */
 static bool rest(uint32_t lost_at, uint32_t wait) {
-	uint32_t until = SDL_GetTicks() + wait, last = lost_at + ONLINE_RECONNECT_MS;
+	uint32_t started = SDL_GetTicks(), until = started + wait, last = lost_at + ONLINE_RECONNECT_MS;
 	if ((int32_t)(until - last) > 0) until = last;
 	while ((int32_t)(SDL_GetTicks() - until) < 0) {
 		if (leaving()) return false;
+		/* (a battle come to wait on the link meanwhile: its next try no later than half a second on) */
+		if (hurried() && SDL_GetTicks() - started >= RETRY_HURRIED_MS) break;
 		SDL_Delay(10);
 	}
 	return true;
@@ -494,6 +512,8 @@ static int worker(void *unused) {
 	SDL_AtomicSet(&transport.done, 1);
 	return 0;
 }
+
+void online_transport_hurry(void) { SDL_AtomicSet(&transport.hurry_until, (int)(SDL_GetTicks() + 1000u)); }
 
 void online_transport_cut(uint32_t ms) {
 	SDL_AtomicSet(&transport.cut_until, (int)(SDL_GetTicks() + ms));

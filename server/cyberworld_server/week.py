@@ -7,8 +7,9 @@ and keeps it across restarts. The week's number counts from the Monday
 `week_epoch` seconds past 1970 (5 January 1970), a week a step.
 
 A game posts a dive that ended (WEEK_POST): the week, its seed, the
-layer reached, its act, won or deleted, the minutes it took and a
-summary hash. The server checks only that it is plausible: the week is
+layer reached, its act, won or deleted (and, v22, pulled back once by
+its crew: the Board's mark, ranked with the rest), the minutes it took
+and a summary hash. The server checks only that it is plausible: the week is
 this one or the last, the seed is that week's, the layer and act are
 within the short net's structure, a win only on its last layer. It keeps
 one entry per identity and week, the best, and appends each improvement
@@ -48,6 +49,7 @@ ENTRY = struct.Struct("!16sHBBH")
 BOARD_HEAD = struct.Struct("!BHBBB")
 WON = 1
 PARTY = SPEC["week_party"]              # WEEK_BOARD's entry flags: a guardian of the dive fought in a party (v19)
+PULLED = SPEC["week_pulled"]            # WEEK_POST's and WEEK_BOARD's entry flags: pulled back once by the crew (v22, issue #718)
 ACTS = 0xF                              # the party byte's bits: acts 1 to 4
 MAX_MINUTES = 0xFFFF
 
@@ -76,11 +78,12 @@ def read_post(data):
         raise protocol.ProtocolError("Malformed WEEK_POST")
     _, week, seed, depth, act, flags, minutes, summary, party = POST.unpack(data)
     return dict(week=week, seed=seed, depth=depth, act=act, won=flags & WON, flags=flags,
-                minutes=minutes, hash=summary, party=party)
+                minutes=minutes, hash=summary, party=party, pulled=bool(flags & PULLED))
 
 
-def post(week, seed, depth, act, won, minutes, summary, party=0):
-    return POST.pack(SPEC["week_post"], week, seed, depth, act, WON if won else 0, minutes, summary, party)
+def post(week, seed, depth, act, won, minutes, summary, party=0, pulled=False):
+    flags = (WON if won else 0) | (PULLED if pulled else 0)
+    return POST.pack(SPEC["week_post"], week, seed, depth, act, flags, minutes, summary, party)
 
 
 def compact(directory, first_week, forget=None):
@@ -156,7 +159,7 @@ class Weeks:
     def entry(e):
         if not e:
             return bytes(ENTRY.size)
-        flags = (WON if e["won"] else 0) | (PARTY if e.get("party") else 0)
+        flags = (WON if e["won"] else 0) | (PARTY if e.get("party") else 0) | (PULLED if e.get("pulled") else 0)
         return ENTRY.pack(e["name"].encode("ascii")[:16], e["depth"], e["act"], flags, e["minutes"])
 
     async def send(self, player):
@@ -179,7 +182,7 @@ class Weeks:
         if entry["seed"] != self.seed(entry["week"]):
             return 24, "Not that week's net"
         depth, act = entry["depth"], entry["act"]
-        if not 1 <= depth <= SPEC["week_layers"] or act != act_of(depth) or entry["flags"] & ~WON \
+        if not 1 <= depth <= SPEC["week_layers"] or act != act_of(depth) or entry["flags"] & ~(WON | PULLED) \
                 or entry["party"] & ~ACTS or entry["party"] >> act \
                 or (entry["won"] and depth != SPEC["week_layers"]) or not entry["hash"]:
             return 25, "That dive does not add up"

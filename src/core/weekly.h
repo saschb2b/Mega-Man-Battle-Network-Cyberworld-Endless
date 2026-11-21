@@ -24,6 +24,10 @@ typedef struct {
 	uint16_t r_minutes;
 	uint32_t r_hash;     /* its summary's hash (weekly_hash), never 0 */
 	uint16_t b_week, b_depth;   /* the deepest layer a dive of week b_week reached, posted or not (the summary's) */
+	/* (grown at its end: an older weekly.sav reads with these 0) */
+	uint8_t pulled;      /* the dive in the slot: its crew's pull-back spent (issue #718, crew_pull.h) */
+	uint8_t r_pulled;    /* the end to post: its dive pulled back once, the Board's mark */
+	uint8_t spare[2];    /* (zero: the record's size a whole four) */
 } WeeklyRecord;
 
 /* The record as weekly.sav holds it (read once, again after the title). */
@@ -45,6 +49,10 @@ void weekly_ended(bool won);
 void weekly_leave(void);
 /* ... and whether that slot holds a run (save_exists): the title's CONTINUE */
 bool weekly_normal_saved(void);
+/* The dive's MegaMan deleted in a crew's battle and pulled back by the
+ * crew: its one pull-back spent, kept at once (a CONTINUE from an earlier
+ * checkpoint finds it spent) and its end marked for the Board. */
+void weekly_pulled(void);
 /* The kept end answered by the server (taken, or refused): forgotten. */
 void weekly_posted(void);
 

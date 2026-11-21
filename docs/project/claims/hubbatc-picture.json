@@ -1,0 +1,9 @@
+{
+  "branch": "hubbatc-picture",
+  "what": "HubBatc's card shows another chip's picture (issue #731): the other version's Gigas' art",
+  "takes": {},
+  "units": [
+    "chip art: the other version's Gigas' pictures (#731)"
+  ],
+  "run": false
+}

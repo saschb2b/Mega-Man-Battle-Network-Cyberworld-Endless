@@ -6,8 +6,11 @@
 #define CW_DIVE_BAND_H
 
 #include <stdint.h>
+#include <stdio.h>
 
 void dive_band_reset(void);
+/* The feed's line shown, in the state's words ("band ..." or "band none") */
+void dive_band_describe(FILE *f);
 /* Each frame: the line shown long enough gives way to the next. */
 void dive_band_frame(uint32_t now);
 

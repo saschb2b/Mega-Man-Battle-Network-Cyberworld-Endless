@@ -125,6 +125,7 @@
   "team_side_by_side": 1,
   "stands_side_by_side": 255,
   "week_party": 2,
+  "week_pulled": 4,
   "hello_no_arena": 8192,
   "peer_diving": 128,
   "dive": 41,

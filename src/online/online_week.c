@@ -25,10 +25,11 @@ static bool entry(const uint8_t *e, WeekEntry *out, bool blank_ok) {
 	out->act = e[18];
 	out->won = e[19] & 1;
 	out->party = e[19] & ONLINE_WEEK_PARTY;
+	out->pulled = e[19] & ONLINE_WEEK_PULLED;
 	out->minutes = get16(e + 20);
 	if (blank_ok && !out->depth && !out->name[0]) return true;
 	return online_wire_name(out->name) && out->depth >= 1 && out->depth <= ONLINE_WEEK_LAYERS && out->act >= 1 && out->act <= 4 &&
-		!(e[19] & ~(1 | ONLINE_WEEK_PARTY));
+		!(e[19] & ~(1 | ONLINE_WEEK_PARTY | ONLINE_WEEK_PULLED));
 }
 
 bool online_week_mail(const uint8_t *data, size_t size) {
@@ -51,13 +52,13 @@ bool online_week_mail(const uint8_t *data, size_t size) {
 	return true;
 }
 
-bool online_week_post(uint16_t week, uint32_t seed, int depth, int act, bool won, unsigned minutes, uint32_t hash) {
+bool online_week_post(uint16_t week, uint32_t seed, int depth, int act, unsigned flags, unsigned minutes, uint32_t hash) {
 	uint8_t m[ONLINE_WEEK_POST_BYTES] = { ONLINE_WEEK_POST };
 	online_put16(m + 1, week);
 	online_put32(m + 3, seed);
 	online_put16(m + 7, (uint16_t)depth);
 	m[9] = (uint8_t)act;
-	m[10] = won ? 1 : 0;
+	m[10] = (uint8_t)(flags & (WEEK_POST_WON | ONLINE_WEEK_PULLED));
 	online_put16(m + 11, (uint16_t)(minutes > 0xFFFF ? 0xFFFF : minutes));
 	online_put32(m + 13, hash);
 	/* (v19: m[17], the acts whose guardian was fought in a party: none yet, the dive's parties not yet the game's) */

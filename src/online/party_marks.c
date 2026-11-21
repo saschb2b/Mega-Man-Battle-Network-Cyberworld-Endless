@@ -8,6 +8,7 @@
 
 #include "arena_team_view.h"
 #include "bn6.h"
+#include "crew_look.h"
 #include "gfx.h"
 #include "online_transport.h"
 #include "online_visit.h"
@@ -19,7 +20,7 @@
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
 
-#define CREW_COLOUR PARTY_MARKS_CREW
+/* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
 
 _Static_assert(ONLINE_SEATS == PARTY_MOST, "a party's seats are START's");
@@ -125,7 +126,7 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 		char n[8];
 		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false);
 		snprintf(n, sizeof n, "%u", v.hp[i]);
-		pixfont_draw(v.x[i], p.top + p.h + 1, n, CREW_COLOUR, shade, PIXFONT_CENTER, 1);
+		pixfont_draw(v.x[i], p.top + p.h + 1, n, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
 	}
 }
 
