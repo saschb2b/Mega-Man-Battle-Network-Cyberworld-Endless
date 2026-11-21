@@ -206,6 +206,7 @@ void emu_encounter_set(const Encounter *e) {
 	/* the values of a Central Area random battle, with the formation's
 	 * battlefield, the area's background and the virus or boss theme */
 	int bg = biome_bg(e->biome);   /* (rolled either way) */
+	if (e->backdrop_set) bg = e->backdrop;
 	if (encounter_backdrop >= 0) bg = encounter_backdrop;
 	/* (a super boss's: the map's own background and BN6's music for him,
 	 * as his story record has them, docs/game/bosses/) */

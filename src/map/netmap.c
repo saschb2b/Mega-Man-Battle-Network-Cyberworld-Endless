@@ -719,7 +719,7 @@ bool netmap_build(int area, const NetLayout *lay) {
 	coord_slot = L->coord_slot;
 	nm_build_extra(L);
 	nm_gaps_place();
-	nm_blocks_place();
+	nm_blocks_place(area);
 	nm_lanes_place();
 	if (!write_tilemap(L)) return false;
 	/* (the side pieces the tiles set, their layer priorities with them) */

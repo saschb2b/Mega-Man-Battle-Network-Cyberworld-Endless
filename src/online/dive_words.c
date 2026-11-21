@@ -28,7 +28,6 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 	return s;
 }
 
-const char *dive_join_calling_words(void) { return "Battle! Calling the crew..."; }
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }
 const char *dive_find_words(const char *name, bool mine) {

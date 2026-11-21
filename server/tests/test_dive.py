@@ -468,6 +468,29 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(await self.notice(c), 17)
         finally:
             crews.JOIN_WAIT = SPEC["crew_join_ms"] / 1000
+        # (v23: a game whose MegaMan is busy says so at once; the battle starts with the rest, no window waited)
+        crews.JOIN_WAIT = 60
+        try:
+            await c.send(protocol.crew(SPEC["crew_battle"], 0, 7))
+            for mate in (a, b):
+                await self.until(mate, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+            await a.send(protocol.crew(SPEC["crew_busy"], c.id))
+            await b.send(protocol.crew(SPEC["crew_join"], c.id))
+            start = arena_state(await self.until(b, SPEC["arena_state"], lambda m: arena_state(m)["stage"] == START))
+            self.assertEqual(start["seats"], (c.id, b.id, 0, 0))
+            await c.send(protocol.ARENA.pack(SPEC["arena"], OVER, start["battle"], 0, 0))
+            await self.until(b, SPEC["arena_state"], lambda m: arena_state(m)["stage"] == ENDED)
+            # (every one busy: the owner alone at once; a busy for an offer over says nothing)
+            await a.send(protocol.crew(SPEC["crew_battle"], 0, 8))
+            for mate in (b, c):
+                await self.until(mate, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+                await mate.send(protocol.crew(SPEC["crew_busy"], a.id))
+            alone = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))
+            self.assertEqual(alone["value"], 8)
+            await b.send(protocol.crew(SPEC["crew_busy"], a.id))
+            self.assertFalse(self.server.crews.offers)
+        finally:
+            crews.JOIN_WAIT = SPEC["crew_join_ms"] / 1000
         # (only crewmates in the owner's room are offered: none, the owner alone at once)
         await self.enter(b, 3)
         await self.enter(c, 3)
@@ -648,6 +671,22 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await asyncio.gather(*self.server.writes)       # (the appends in their threads, done)
         lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([line.get("party") for line in lines], [5, 0])
+
+    async def test_week_post_carries_the_crews_pull_back(self):
+        a, b = await self.connect("Alpha"), await self.connect("Beta")
+        await a.send(week.post(self.week, self.seed, 7, 3, False, 40, 9, pulled=True))
+        _, _, mine, _, _ = board(await self.until(a, SPEC["week_board"], lambda m: board(m)[1] == 1))
+        self.assertEqual(mine[3], SPEC["week_pulled"])
+        # (ranked with the rest: a deeper dive pulled back above a shallower one that was not)
+        await b.send(week.post(self.week, self.seed, 4, 2, False, 30, 9))
+        _, _, mine, top, _ = board(await self.until(b, SPEC["week_board"], lambda m: board(m)[1] == 2))
+        self.assertEqual((top[0][3], top[1][3], mine[3]), (SPEC["week_pulled"], 0, 0))
+        bad = week.post(self.week, self.seed, 4, 2, False, 40, 9)
+        await b.send(bad[:10] + bytes([8]) + bad[11:])
+        self.assertEqual(await self.notice(b), 25)
+        await asyncio.gather(*self.server.writes)
+        lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
+        self.assertEqual([line.get("pulled") for line in lines], [True, False])
 
     # -- moderation --
 

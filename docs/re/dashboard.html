@@ -81,8 +81,8 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-16",
-  "previous": "2026-11-15",
+  "updated": "2026-11-21",
+  "previous": "2026-11-16",
   "features": [
     {
       "name": "Net Square",
@@ -286,8 +286,12 @@ footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
   "decisions": [],
   "since": [
     {
-      "date": "2026-11-16",
-      "what": "The Chip Trader's two readers of an item of the folder editor's list (BN6_TRADER_CARD 0x0804B338, BN6_TRADER_TAKE 0x0804B734: 0x0804B34C, 0x0804B34E, 0x0804B740, 0x0804B744) take id \u003c\u003c 6 | code as the editor's sites do since ten-bit chip ids (src/emu/xchips_wide.c, tools/chip_ids.py EDITOR_KEYS; docs/rom/chips-code.md, The pack past 511). Left at seven bits since 0.21.0, a trade kept the three chips put in and took copies of chip id >> 1; found by a scenario (tests/scenarios/layer_gates.py) and by the home session's at AsterLand's trader."
+      "date": "2026-11-21",
+      "what": "A chip's name in BN6's lists: the folder editor's name routine (BN6_LIST_NAME_DRAW 0x08122090, bn6f sub_81202B4, called with r5 = 8 from 0x08121F22) writes every glyph of a name, then blanks to the eighth cell, and its caller goes on from where it ended (BN6_CHIP_NAME_CELLS 8), so a name of nine glyphs set every row under it a cell late. BN5's twelve DS Navi chips were nine (its DS mark one glyph, which BN6 lacks, spelt D and S); src/core/xchips_cells.c cuts a moved name to eight as the install writes the archives (docs/rom/chips-code.md, A name's cells; issue #732, a player's Pack)."
+    },
+    {
+      "date": "2026-11-21",
+      "what": "BN6's Security Cubes stand sunk under their floor (src/emu/bn6_map.h BN6_SCUBE_*, docs/rom/net-maps.md, Link Navi obstacles; issue #735): Central Area 1's spawn record (0x08072BA0, id 0x09) puts it at (212, 138, -12) and Seaside Area 2's (0x08076830, id 0x52) at (-248, 168, -8), each on the middle of the one panel its walls box, at floor height 0; its sprite's foot is drawn that far over its origin, where the obstacles' (z 0, or their floor's height) meet theirs. BN5's own cubes (one map's spawn list at 0x0807FFF8, ids 0x0A-0x0C, records whose sprite is 7:0x01) stand at z 0. A layer's cube, given the flames' spot at z 0, floated over the panel's far edge; on its panel's middle at z -12 it stands as Central Area 1's does, the two drawn side by side (BN6's untouched, warped into in the engine)."
     }
   ],
   "experiments": [

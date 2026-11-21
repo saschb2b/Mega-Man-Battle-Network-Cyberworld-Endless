@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "director.h"
+#include "director_crew.h"
 #include "dive_join.h"
 #include "dive_link.h"
 #include "dive_party.h"
@@ -25,7 +26,13 @@ static struct {
 	uint32_t shown_at;       /* the first line's start, 0 not yet */
 } B;
 
-void dive_band_reset(void) { memset(&B, 0, sizeof B); }
+void dive_band_reset(void) {
+	memset(&B, 0, sizeof B);
+	/* (the crew's gifts after a battle told here: director_crew.h) */
+	director_crew_band = dive_link_line;
+}
+
+void dive_band_describe(FILE *f) { fprintf(f, "band %s\n", B.nfeed ? B.feed[0] : "none"); }
 
 void dive_band_frame(uint32_t now) {
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {

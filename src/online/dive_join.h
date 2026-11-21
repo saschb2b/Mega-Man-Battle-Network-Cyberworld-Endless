@@ -4,7 +4,9 @@
  * emu_encounters_offer) and offered (CREW battle, its index on the layer);
  * a crewmate whose game gets the offer, MegaMan free on the map, jumps in
  * at once, unasked (CREW join; issues #714 and #715: walking close is the
- * yes, walking apart the no). The server's START takes
+ * yes, walking apart the no), and one not free says so at once (CREW busy,
+ * v23), so the owner stands still only while the server starts it, with
+ * no window waited. The server's START takes
  * every game in into one field (party_play_crew), the battle made alike
  * from the layer's seed and its index (director_crew_battle), each
  * joiner's walk toward his next battle reset; nobody joining, the owner

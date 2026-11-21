@@ -14,7 +14,8 @@ boxes' commands differ), and names the entry a wrong text was taken from.
   python3 tools/chip_texts.py FILE.tsv   # compare a dump made before
 
 Needs the ROMs (local only): CYBERWORLD_ROM_DIR, else ~/.cache/mmbn-ref/roms.
-Exits 1 where a chip's text is another's or missing.
+Exits 1 where a chip's text is another's or missing, or a moved chip's name is
+past BN6's eight cells (issue #732; a name cut to them is its game's letters, fewer).
 """
 import os
 import re
@@ -84,6 +85,24 @@ def letters(b, game):
     return ' '.join(''.join(out).split())
 
 
+def cells(b):
+    """The cells a name of BN6's codes takes in BN6's lists: a glyph each, to its first command (src/emu/bn6_chips.h,
+    BN6_CHIP_NAME_CELLS)"""
+    n = 0
+    for c in b:
+        if c >= 0xE5:
+            break
+        n += 1
+    return n
+
+
+def cut_of(name, want):
+    """`name` the game's `want` with letters dropped to fit BN6's eight cells (src/core/xchips_cells.c): its letters in
+    order, fewer"""
+    it = iter(want)
+    return len(name) < len(want) and all(ch in it for ch in name)
+
+
 def entry(rom, archive, i, bounded):
     """Entry `i` of the text archive at `archive`, b'' past its count: to its end code as BN6's and BN5's readers take it
     (BN6's own name of id 284 has none, its reader running on into 285's, the core's copy too), or `bounded` to the next
@@ -125,7 +144,7 @@ def main():
         for index in range(512):
             if index >> 8 < len(arch[game][1]):
                 known.setdefault(source(game, index, True), (game, index))
-    checked, wrong, readers = 0, [], []
+    checked, wrong, readers, long_names, cut = 0, [], [], [], []
     for line in open(path):
         cid, game, index, agree, name_hex, desc_hex = line.rstrip('\n').split('\t')
         cid, game, index = int(cid), int(game), int(index)
@@ -137,6 +156,14 @@ def main():
         want_name, want_desc = source(game, index, False), source(game, index, True)
         # (an own row without its game's ROM shows the placeholder: a run reads them all here)
         checked += 1
+        # (a name past BN6's eight cells cut to them, issue #732: the game's letters, fewer; none past eight)
+        # (BN6's own as BN6 has them: its name of id 284 runs on into 285's, no end code)
+        wide = game != 6 and cells(bytes.fromhex(name_hex)) > 8
+        if wide:
+            long_names.append((cid, name))
+        elif name != want_name and cut_of(name, want_name):
+            cut.append((cid, want_name, name))
+            name = want_name
         if name != want_name or desc != want_desc:
             wrong.append((cid, game, index, name, want_name, desc, want_desc, known.get(desc) if desc else None))
     for cid, game, index, name, want_name, desc, want_desc, came in wrong:
@@ -144,8 +171,11 @@ def main():
               + (f', BN{came[0]} {came[1]}\'s' if came else ''))
     if readers:
         print(f'{len(readers)} ids where the PET\'s readers of a description take another archive than BN6_CHIP_DESC_OF: {readers[:20]}')
-    print(f'{checked} chips checked: {len(wrong)} with another\'s or a missing name or description')
-    return 1 if wrong or readers else 0
+    for cid, name in long_names:
+        print(f'id {cid}: name "{name}" past BN6\'s eight cells')
+    print(f'{len(cut)} names cut to eight cells: ' + ', '.join(f'{cid} {a} as {b}' for cid, a, b in cut))
+    print(f'{checked} chips checked: {len(wrong)} with another\'s or a missing name or description, {len(long_names)} past eight cells')
+    return 1 if wrong or readers or long_names else 0
 
 
 if __name__ == '__main__':

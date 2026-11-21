@@ -135,10 +135,12 @@ class Server:
         if weeks:
             week = int((time.time() - WEEK_EPOCH) // WEEK)
             with open(os.path.join(folder, 'state', 'weeks.jsonl'), 'w') as f:
-                for i, (name, depth, won, minutes) in enumerate(weeks):
+                for i, (name, depth, won, minutes, *more) in enumerate(weeks):
+                    # (a fifth: the dive pulled back once by its crew, the Board's "*", issue #718)
                     f.write(json.dumps({'week': week, 'seed': 1, 'identity': f'{i + 1:064x}', 'name': name, 'depth': depth,
                                         'act': min((depth - 1) // 3 + 1, 4), 'won': won, 'minutes': minutes, 'hash': 1,
-                                        'time': time.time()}, separators=(',', ':'), sort_keys=True) + '\n')
+                                        'pulled': bool(more and more[0]), 'time': time.time()},
+                                       separators=(',', ':'), sort_keys=True) + '\n')
         self.ini = os.path.join(folder, 'server.ini')
         lines = dict(name='Scenario', motd="A scenario's Square", host='127.0.0.1', port=self.port, seed=seed, capacity=8,
                      player_cap=64, tick_hz=20, state_dir=os.path.join(folder, 'state'), whitelist='', free_text='false',
@@ -333,6 +335,10 @@ class Cast:
         game, step = split(raw)
         if step[0] == 'server':
             (self.server.stop if step[1] == 'stop' else self.server.start)()
+            return game, self.state[game], 0
+        if step[0] == 'sleep':
+            # (the clock's seconds with no game held: each online game runs on at its pace, answering the others)
+            time.sleep(float(step[1]))
             return game, self.state[game], 0
         pump, ran, n = self.pumps[game], 0, 0
         # (the game ran on since its last step: its state as its last batch left it)

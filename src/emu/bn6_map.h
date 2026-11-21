@@ -46,6 +46,15 @@
  * value, height, type; src/map/coords.c). A wall whose value has bit 7 set
  * is skipped while event 0x1640 + (value & 0x7F) is set */
 #define BN6_LOAD_BG_ANIM_DATA 0x080304E8u /* bn6f LoadBGAnimData, r0 a BGAnimData record: a net map's backdrop on BG3, its tiles, 32x32 map and palette into bank 0 (docs/rom/graphics.md) */
+/* A map object's spawn record (map-object handler 3's, docs/rom/net-maps.md,
+ * Link Navi obstacles): 20 bytes, 05 03 00 00, then x, y and z in 16.16 and
+ * the object's id. BN6's two Security Cubes (sprite 7:0x01) are sunk under
+ * the floor they stand on, at height 0 in both maps; its obstacles stand at
+ * their floor's height */
+#define BN6_SCUBE_CENTRAL1    0x08072BA0u /* Central Area 1's Security Cube (id 0x09): (212, 138, -12), its walls' box 196-228 by 124-156 */
+#define BN6_SCUBE_SEASIDE2    0x08076830u /* Seaside Area 2's (id 0x52): (-248, 168, -8), its walls' box -260 to -228 by 152-176 */
+#define BN6_SCUBE_Z           (-12)       /* the z a layer's Security Cube is given, Central Area 1's: its sprite's foot is drawn
+                                           * that far over its origin, where the obstacles' meet theirs (issue #735) */
 #define BN6_MAP_COORDS        0x02027A00u
 #define BN6_COORD_ENTRIES     (BN6_MAP_COORDS + 4) /* the walls' section's entries, after its count */
 #define BN6_COORD_ENTRY       4           /* an entry's bytes, and a shape's */
