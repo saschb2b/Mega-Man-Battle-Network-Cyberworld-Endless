@@ -165,6 +165,24 @@ Verified on `dev`, 15 November 2026:
   it. Seen headless with two games on a local server: both in layer 1's
   room, each seeing the other walk.
 
+- **Name tags** (21 November 2026, `dive_people.c`, `map_label.c`;
+  issue #712, from the team's test, where the divers could not be told
+  apart): each diver's name over his MegaMan while the layer's map
+  shows, on the Square's plate in the Square's letters (`map_label.c`:
+  where a place of the map shows in the picture and the plate, moved
+  out of `online_labels.c` for both). The names are drawn from the
+  puppets as they stand, so a name is there exactly while its MegaMan
+  is. Divers on one spot, as at a layer's arrival, have their names a
+  row over each other, and those the picture's top leaves no row for
+  are counted on the topmost ("Beta +2"). With BN6's chat box open the
+  names over it stay and none is drawn on it. MegaMan's own name is not
+  shown, as in the Square. The state says `tags N: NAMES`. Seen headless
+  on a local server (the scenario `online-week/dive-together` holds
+  `tags` on both games): Beta's name going with his MegaMan as he walked
+  off, standing over BN6's chat box with A on him, and six divers on a
+  layer's arrival spot named in four rows, "Beta", "Gamma", "Delta" and
+  "Kappa +1".
+
 - **The guardian's door and the party's fight, linked** (15 November
   2026, `dive_party.c`; `boss.c`'s `boss_at_door`, `boss_door_hold` and
   `boss_party_set`): MegaMan saved at the arena's door with other divers
