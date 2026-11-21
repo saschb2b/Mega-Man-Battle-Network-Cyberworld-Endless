@@ -320,6 +320,71 @@ the session building it, and is his to turn over.
 | Off the frame | The crew's arrowhead on the edge, as a sensed service's; the others' left out | Every diver's arrowhead (a frame's edge full of pips) |
 | Unseen floor | A diver's dot shows where he stands, on floor MegaMan has not seen too | Hidden until MegaMan has seen that floor (where the crew is matters more than what the map reveals of a room) |
 
+## Room for the crew (22 November 2026)
+
+The other divers are puppets in BN6's overworld NPC objects
+(`eOverworldNPCObjects`, a fixed array of 16 at `0x020057B0`,
+`BN6_NPC_COUNT`, [the game's structures](../rom/game-state.md)). A layer's own
+take them first: its service Mr.Progs and keepers, one object for each
+Mystery Data, the exit pad, a guardian's seal, body, beam and data. The
+dive's puppets get what is left. Issue #755 found a crew of four at layer
+3's door, where the layer left two: each game drew two of the other
+three, strangers before its own crew, so its plates named crewmates its
+picture did not show.
+
+**How much a layer leaves**, counted by the log's `layer: N of the 16 NPC
+objects its own` over 40 seeds at each depth from 1 to 24 (a run's
+layers; a dive's are the same generator's, from the week's seed):
+
+| Depth | Slots left: least, median, most | Layers leaving 2 or fewer |
+| --- | --- | --- |
+| 1 | 4, 6, 8 | 0 of 40 |
+| 2 to 7 | 0 to 2 at least, 3 to 6 median | 1 to 18 of 40 |
+| 8 to 13 | none to 1 at least, 1 to 4 median | 9 to 32 of 40 |
+| 14 to 24 | none at least, 0 to 3 median | 18 to 40 of 40 |
+
+Past the first act most layers leave two slots or fewer and many none:
+the Mystery Data take the most (six or seven objects on a deep layer),
+then five talkers. Some leave less than none (16 to 17 of their own):
+the layer's own last object is then never spawned. That is a fault of
+its own, outside the dive, left with issue #755's follow-ups.
+
+**What changed** (`dive_people.c`, `dive_seats.c`, `dive_traces.c`):
+
+- **A full crew's MegaMen first.** As a layer is built, the dive takes up
+  to three slots (a crew of four's others) before the week's traces take
+  theirs; the traces' marks then take one where one is left, the sparkle
+  one where three are, and further divers what remains. Before, the
+  traces took theirs first wherever three were left.
+- **The crew first, then the nearest.** Each frame the room's divers are
+  ordered, crewmates first, then by distance to MegaMan, and the first
+  as many as there are puppets get one (`dive_seats`). A diver keeps his
+  puppet while he stays among them, so no MegaMan jumps from one diver to
+  another as people walk.
+- **A diver with no MegaMan still shows where he is.** His name stands
+  over the spot where he stands and, for a crewmate, the crew's ring on
+  the floor under it, exactly as for one drawn; only his body is missing.
+  The crew's plates, the map's dots and his battles then agree with what
+  the picture shows. The state's `undrawn N: NAMES` (`*` a crewmate)
+  counts them.
+- `--dev diveroom=N` gives each layer of a dive N puppets at most, so a
+  test meets a layer with little room whatever the week's seed makes.
+
+Seen headless with four games on a local server (the scenario
+`online-week/crew-drawn-with-little-room`, `diveroom=2`, all four at
+layer 3's door in one crew): each game drew two crewmates and gave the
+third his name and ring, `undrawn 1`.
+
+Each call was taken under the owner's direction of 21 November 2026 by
+the session building it, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| Who gets a MegaMan | The crew, then the nearest | The snapshot's order (as built: strangers before the crew); the nearest alone (a crewmate across the room left out for a stranger beside you) |
+| The traces against the crew | A full crew's three MegaMen before the traces' marks and sparkle | The traces first (as built); no traces on a dive with others |
+| One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
+| More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
+
 ## As built
 
 - **The portal** (15 November 2026, `src/online/online_square.c`'s

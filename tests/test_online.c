@@ -8,6 +8,7 @@
 #include "netpass.h"
 #include "netpass_text.h"
 #include "crew_pull.h"
+#include "dive_seats.h"
 #include "dive_wire.h"
 #include "online_motion.h"
 #include "online_people.h"
@@ -736,11 +737,40 @@ static void crew_pulled(void) {
 	assert(o.hp[2] == 225 && o.gave[1] == 350 && o.gave[3] == 175 && o.hp[1] == 450 && o.hp[3] == 225);
 }
 
+/* Who gets a layer's puppets (issue #755): the crew first, then the nearest; a diver keeps his */
+static void dive_seated(void) {
+	/* (two puppets, four others: a stranger nearest, his crew far) */
+	SeatDiver d[4] = { { 11, 10, 0, false }, { 12, 20, 0, false }, { 13, 500, 0, true }, { 14, 900, 0, true } };
+	uint32_t seat[2] = { 11, 12 };
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[0] == 13 && seat[1] == 14);
+	/* (one crewmate: he, then the nearer stranger, who keeps the puppet he had) */
+	d[3].crew = false;
+	seat[0] = 0; seat[1] = 11;
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[1] == 11 && seat[0] == 13);
+	/* (strangers walk: the nearer two seated, the one still chosen keeps his) */
+	d[2].crew = false;
+	d[0].x = 1000;
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[0] == 12 || seat[1] == 12);
+	assert(seat[0] == 13 && seat[1] == 12);
+	/* (room for all: each seated, none left out; none twice) */
+	uint32_t four[5] = { 0, 0, 0, 0, 0 };
+	assert(dive_seats(four, 5, d, 4, 0, 0) == 0);
+	int seen = 0;
+	for (int k = 0; k < 5; ++k) seen += four[k] != 0;
+	assert(seen == 4 && four[4] == 0);
+	/* (no room, or nobody) */
+	assert(dive_seats(four, 0, d, 4, 0, 0) == 4);
+	assert(dive_seats(four, 5, d, 0, 0, 0) == 0 && !four[0] && !four[3]);
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
 	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();
-	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties(); crew_pulled();
+	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties(); crew_pulled(); dive_seated();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
 	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list, the PET's changes carried home and the shared dive's wire passed");
 	return 0;

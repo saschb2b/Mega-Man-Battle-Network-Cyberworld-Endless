@@ -57,11 +57,13 @@ static struct {
 int dive_traces_more(NpcList *npcs, int room) {
 	memset(&O, 0, sizeof O);
 	int taken = 0;
-	if (room >= 3 && npc_need_sprite(npcs, FX_LIST, BN6_FX_BURST) && (O.skull = puppet_make(FX_LIST, BN6_FX_BURST)) != 0) {
+	/* (after a full crew's MegaMen, issue #755: the marks' at one slot left,
+	 * the sparkle's at three, a stranger's MegaMan still beside them) */
+	if (room >= 1 && npc_need_sprite(npcs, FX_LIST, BN6_FX_BURST) && (O.skull = puppet_make(FX_LIST, BN6_FX_BURST)) != 0) {
 		npcs->script[npcs->n++] = O.skull;
 		++taken;
 	}
-	if (room >= 5 && npc_need_sprite(npcs, FX_LIST, BN6_FX_SPARKLE) && (O.spark = puppet_make(FX_LIST, BN6_FX_SPARKLE)) != 0) {
+	if (room >= 3 && npc_need_sprite(npcs, FX_LIST, BN6_FX_SPARKLE) && (O.spark = puppet_make(FX_LIST, BN6_FX_SPARKLE)) != 0) {
 		npcs->script[npcs->n++] = O.spark;
 		++taken;
 	}
