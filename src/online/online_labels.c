@@ -6,6 +6,7 @@
 #include "bn6_fields.h"
 #include "chatbox.h"
 #include "gfx.h"
+#include "map_label.h"
 #include "online_people.h"
 #include "online_text.h"
 #include "pixfont.h"
@@ -68,12 +69,7 @@ static const char *phrase_for(const OnlineSnapshot *snapshot, uint32_t id, uint3
 	return last ? online_phrases[last->value] : NULL;
 }
 
-static void label_at(int x, int y, int z, const int camera[3]) {
-	/* BN6's overworld projection (bn6f sub_300631C), including the
-	 * displayed camera rather than assuming MegaMan stays centered. */
-	labels[count].x = 120 + x - camera[0] + y - camera[1];
-	labels[count].y = 82 + (y - camera[1] - x + camera[0]) / 2 - z + camera[2] - 31;
-}
+static void label_at(int x, int y, int z, const int camera[3]) { map_label_at(x, y, z, camera, &labels[count].x, &labels[count].y); }
 
 /* a warp's label held at the screen's edge, the way it lies (the plaza's
  * three seen from anywhere in it, a signpost and not a Navi), a row on
@@ -96,10 +92,8 @@ void online_labels_update(const OnlineSnapshot *shown, uint32_t now) {
 	drawn = shown;
 	drawn_at = now;
 	if (!shown->connected) return;
-	uint32_t at = emu_read32(BN6_TOOLKIT + BN6_TOOLKIT_CAMERA);
-	if (at < BN6_EWRAM || at > BN6_EWRAM_END - 80) return;
-	int camera[3] = { (int32_t)emu_read32(at + BN6_CAMERA_RENDER_X) >> 16,
-		(int32_t)emu_read32(at + BN6_CAMERA_RENDER_Y) >> 16, (int32_t)emu_read32(at + BN6_CAMERA_RENDER_Z) >> 16 };
+	int camera[3];
+	if (!map_label_camera(camera)) return;
 	for (size_t i = 0; i < shown->peer_count; ++i) {
 		const OnlinePeer *peer = &shown->peers[i];
 		label_at(peer->x, peer->y, peer->z, camera);
@@ -158,16 +152,12 @@ static void caption_draw(int x, int y, const char *text) {
 void online_labels_draw(void) {
 	for (unsigned i = 0; i < count; ++i) {
 		int x = labels[i].x, y = labels[i].y;
-		if (x < 0 || x >= EMU_W || y < 18 || y > EMU_H - 20) continue;
+		if (!map_label_shown(x, y)) continue;
 		if (labels[i].caption) caption_draw(x, y, labels[i].caption);
 		const char *text = labels[i].phrase ? labels[i].phrase : labels[i].name;
 		if (!text[0]) continue;
-		int w = pixfont_width(text, 1);
-		if (x < w / 2 + 2) x = w / 2 + 2;
-		if (x > EMU_W - w / 2 - 2) x = EMU_W - w / 2 - 2;
-		fill_rect(P.core_x + x - w / 2 - 2, P.core_y + y - 1, w + 4, 11, rgba(9, 24, 42, 210));
 		/* (a warp's in the marks' gold, a sign's and not a Navi's) */
-		pixfont_draw(P.core_x + x, P.core_y + y, text, labels[i].warp ? rgba(255, 214, 16, 255) : WHITE, BLACK, PIXFONT_CENTER, 1);
+		x = map_label_plate(x, y, text, labels[i].warp ? rgba(255, 214, 16, 255) : WHITE);
 		if (labels[i].mark && labels[i].mark <= MARK_WAVED && !labels[i].caption) mark_draw(x, y - 13, labels[i].mark, drawn_at);
 	}
 	if (drawn) square_ask_draw(drawn, drawn_at);
