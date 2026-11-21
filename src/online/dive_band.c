@@ -53,6 +53,8 @@ void dive_link_line(const char *line) {
 }
 
 void dive_link_draw(void) {
+	/* (none of it over SELECT's map: a name and a ring had stood on it, issue #728) */
+	if (director_map_over()) return;
 	dive_traces_draw();
 	if (!dive_link_on() || !director_on_map()) return;
 	bool chat = emu_read8(BN6_CHATBOX) != 0;

@@ -1,6 +1,7 @@
 """The week's DeepNet (docs/online/weekly-net.md, docs/online/shared-dive.md):
 the portal by the Board and its Yes into the dive's first layer, another
-diver seen there, a crew by standing together (issue #714), formed and
+diver seen there and his dot on the map (issue #728), a crew by standing
+together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
 fought by both unasked (issue #715) and through a dropped link (issue
 #180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
@@ -185,6 +186,31 @@ MANY['crew-by-nearness'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.
     ('sleep', 1.5),
     soon('crew=2: Alpha Beta', '', 600),
     soon('crew=2: Alpha Beta', 'beta', 600),
+))
+
+# Every diver on the layer a dot on the map (issue #728): each game sees the other's, ringed in the crew's colour
+# while the two are a crew, moving as he walks, and dimmer once he has walked out of the crew. The dots are told by
+# their panel from MegaMan's, so the layer's layout plays no part; SELECT held shows the map for its picture (`shot`),
+# the second screen's too (`second`).
+MAP = 'hold SELECT 20; shot; second; hold SELECT 4'
+MANY['divers-on-the-map'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 64 0 3; wait 5'),          # two panels off, in the crew
+    soon('mapdots=1: Beta(0,-2)*', '', 600),
+    soon('mapdots=1: Alpha(0,2)*', 'beta', 600),
+    ('do', MAP),
+    ('@beta', 'do', MAP),
+    ('@beta', 'do', 'place 576 0 3; wait 5'),         # eighteen panels off: his dot goes with him
+    soon('mapdots~Beta(0,-18)', '', 600),
+    ('sleep', 2.5),                                    # out of the crew past crew_split_ms: dimmer, no ring
+    soon('mapdots=1: Beta(0,-18)', '', 600),
+    soon('mapdots=1: Alpha(0,18)', 'beta', 600),
+    ('do', MAP),
+    ('@beta', 'do', 'place 16 160 3; wait 5'),        # and across: five panels the other way, still apart
+    soon('mapdots~Beta(5,', '', 600),
+    ('expect', 'crew=0'),
+    ('do', MAP),
 ))
 
 # Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and

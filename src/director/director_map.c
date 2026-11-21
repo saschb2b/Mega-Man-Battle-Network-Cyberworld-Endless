@@ -13,6 +13,7 @@
 #include "director_see.h"
 #include "director_state.h"
 #include "director_way.h"
+#include "map_divers.h"
 #include "gfx.h"
 #include "net_route.h"
 #include "netmap.h"
@@ -61,9 +62,11 @@ static bool map_edge(const MapView *m, int sx, int sy, int pad, int *ex, int *ey
 /* the key's entries, under the map */
 /* (a Chip or BugFrag Trader its own: marked as a Shop, a playtester heard
  * L sense a Chip Trader and found only a Shop on the key, session 75) */
-enum { MAP_YOU, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_TRADER, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
+/* (the dive's other divers (issue #728) after "You": "Crew" ringed in the
+ * crew's colour, the rest "Divers", dimmer; their colours are the dive's) */
+enum { MAP_YOU, MAP_CREW, MAP_DIVER, MAP_EXIT, MAP_HEAL, MAP_SHOP, MAP_TRADER, MAP_BOSS, MAP_EVENT, MAP_RIVAL, MAP_KEYS };
 static const struct { const char *what; SDL_Color c; } map_key[MAP_KEYS] = {
-	{ "You", { 255, 255, 255, 255 } }, { "Exit", { 255, 230, 60, 255 } },
+	{ "You", { 255, 255, 255, 255 } }, { "Crew", { 0, 0, 0, 0 } }, { "Divers", { 0, 0, 0, 0 } }, { "Exit", { 255, 230, 60, 255 } },
 	{ "Heal", { 90, 255, 120, 255 } }, { "Shop", { 255, 160, 40, 255 } }, { "Trader", { 255, 140, 200, 255 } },
 	{ "Boss", { 255, 70, 70, 255 } }, { "Event", { 210, 110, 255, 255 } }, { "ProtoMan", RIVAL_MARK },
 };
@@ -320,11 +323,62 @@ static void map_goal(const MapView *m, int gx, int gy, SDL_Color gc) {
 	map_arrowhead(m, ax, ay, 5, gc);
 }
 
+/* The other divers on the layer (the shared dive, issue #728), as the dive
+ * lends them while the map is drawn (map_divers.h) */
+int (*map_divers)(MapDiver *out, int most);
+static struct { MapDiver d[MAP_DIVERS]; int n; } divers;
+
+static void divers_gather(void) { divers.n = map_divers ? map_divers(divers.d, MAP_DIVERS) : 0; }
+
+/* a round dot of radius r (1 to 3: 3, 5 or 7 pixels across) on (x, y) */
+static void map_round(int x, int y, int r, SDL_Color c) {
+	static const int half[3][7] = { { 0, 1, 0 }, { 1, 2, 2, 2, 1 }, { 1, 2, 3, 3, 3, 2, 1 } };
+	for (int k = 0; k <= 2 * r; ++k) fill_rect(x - half[r - 1][k], y - r + k, 2 * half[r - 1][k] + 1, 1, c);
+}
+
+/* A diver's dot on (x, y): round, where the places marked are square
+ * and the data diamonds; a crewmate's white in a ring of the crew's
+ * colour (the ring under his feet on the layer, crew_look.h), another's
+ * solid and dimmer (a dot of three pixels was lost on the map's dark) */
+static void diver_dot(int x, int y, const MapDiver *d) {
+	if (d->crew) {
+		map_round(x, y, 3, d->colour);
+		map_round(x, y, 2, rgba(0, 8, 28, 255));
+		map_round(x, y, 1, rgba(255, 255, 255, 255));
+	} else {
+		map_round(x, y, 3, rgba(0, 8, 28, 255));
+		map_round(x, y, 2, d->colour);
+	}
+}
+
+/* Each diver where he stands, on MegaMan's panels' grid; a crewmate past
+ * the frame an arrowhead on its edge his way (where the crew is always
+ * shows), another left out there */
+static void map_divers_draw(const MapView *m) {
+	for (int i = 0; i < divers.n; ++i) {
+		const MapDiver *d = &divers.d[i];
+		int x, y, ex, ey;
+		if (!netmap_panel(d->x, d->y, &x, &y)) continue;
+		int sx = map_x(m, x, y), sy = map_y(m, x, y);
+		if (map_inside(m, sx, sy, 3)) diver_dot(sx, sy, d);
+		else if (d->crew && map_edge(m, sx, sy, 3, &ex, &ey)) map_arrowhead(m, ex, ey, 3, d->colour);
+	}
+}
+
+/* the first diver in the crew (or not): the key's dot for its entry */
+static const MapDiver *diver_of(bool crew) {
+	for (int i = 0; i < divers.n; ++i)
+		if (divers.d[i].crew == crew) return &divers.d[i];
+	return NULL;
+}
+
 /* the key's entries this layer holds: MegaMan, the exit, and the rest */
 static void map_key_has(bool has[MAP_KEYS]) {
 	for (int i = 0; i < MAP_KEYS; ++i) has[i] = i == MAP_YOU || i == MAP_EXIT;
 	has[MAP_BOSS] = D.objs.guardian.navi != 0 && !boss_beaten();
 	has[MAP_EVENT] = seen.locks != 0;
+	has[MAP_CREW] = diver_of(true) != NULL;
+	has[MAP_DIVER] = diver_of(false) != NULL;
 	for (int i = 0; i < layer.nobj; ++i) {
 		int kind = map_kind(layer.obj[i].type);
 		if (kind > MAP_EXIT && kind != MAP_BOSS && !map_left_out(layer.obj[i].type)) has[kind] = true;
@@ -356,7 +410,8 @@ static int map_key_lay(int kx, int ky, int width, bool draw) {
 		int w = 8 + text_width(map_key[i].what);
 		if (x > kx && x + w > kx + width) { x = kx; ky += TEXT_H; ++rows; }
 		if (draw) {
-			fill_rect(x, ky + 3, 5, 5, map_key[i].c);
+			if (i == MAP_CREW || i == MAP_DIVER) diver_dot(x + 2, ky + 5, diver_of(i == MAP_CREW));
+			else fill_rect(x, ky + 3, 5, 5, map_key[i].c);
 			if (i == MAP_RIVAL) fill_rect(x + 2, ky + 5, 1, 1, rgba(255, 255, 255, 255));
 			text_draw(x + 7, ky, map_key[i].what, rgba(200, 225, 255, 255), TEXT_LEFT);
 		}
@@ -444,6 +499,7 @@ int director_counts_bottom(void) { return seen.counts_a && md_counts(0, 0, 0) ? 
  * the layer (`titled` false). */
 static void draw_map(int x0, int y0, int w, int h, bool titled) {
 	fill_rect(x0, y0, w, h, rgba(0, 8, 28, 255));
+	divers_gather();
 	/* (its top line for the layer's name and the Mystery Data's counts;
 	 * the second screen's frame names the layer) */
 	int top = titled || md_counts(0, 0, 0) ? 18 : 8;
@@ -468,6 +524,7 @@ static void draw_map(int x0, int y0, int w, int h, bool titled) {
 	map_marks(&m, &gx, &gy, &gc);
 	map_locks(&m);
 	map_goal(&m, gx, gy, gc);
+	map_divers_draw(&m);
 	/* MegaMan, always there, his border pulsing */
 	int ms = map_x(&m, m.mx, m.my), mt = map_y(&m, m.mx, m.my);
 	if (map_inside(&m, ms, mt, 3)) {
@@ -477,6 +534,8 @@ static void draw_map(int x0, int y0, int w, int h, bool titled) {
 	map_key_lay(m.bx + 1, m.by + m.bh + 5, m.bw - 2, true);
 }
 
+bool director_map_over(void) { return D.active && !D.town && D.map_shown && seen.on_map; }
+
 /* SELECT held on a layer: the layer as far as MegaMan has seen it, over the
  * dimmed game, the exit pad, the arena, the services and the ways off it
  * marked. Panels stand apart, so a walkway reads as a line and a room as a
@@ -484,7 +543,7 @@ static void draw_map(int x0, int y0, int w, int h, bool titled) {
  * follows MegaMan. The goal, until seen, is a mark on the frame the way it
  * lies. */
 void director_draw_map(void) {
-	if (!D.active || D.town || !D.map_shown || !seen.on_map) return;
+	if (!director_map_over()) return;
 	draw_map(P.core_x, P.core_y, 240, 160, true);
 }
 
