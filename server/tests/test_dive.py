@@ -44,7 +44,7 @@ def crew_state(data):
     members = [protocol.CREW_MEMBER.unpack_from(data, protocol.CREW_STATE_HEAD.size + k * protocol.CREW_MEMBER.size)
                for k in range(SPEC["party_most"])]
     return dict(stage=stage, other=other, value=value, members=[m[0] for m in members if m[0]],
-                ways={m[0]: m[2:] for m in members if m[0]})
+                vitals={m[0]: m[2:] for m in members if m[0]})
 
 
 def queue_state(data):
@@ -86,7 +86,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             await client.close()
         await self.server.close()
         self.dir.cleanup()
-        crews.FORM_WAIT, crews.SPLIT_WAIT, crews.AWAY_WAIT = (SPEC[k] / 1000 for k in ("crew_form_ms", "crew_split_ms", "crew_away_ms"))
+        crews.FORM_WAIT, crews.SPLIT_WAIT, crews.AWAY_WAIT, crews.VITALS_WAIT = (
+            SPEC[k] / 1000 for k in ("crew_form_ms", "crew_split_ms", "crew_away_ms", "crew_vitals_ms"))
         party.SEAT_HOLD = 12.0
 
     async def restart(self):
@@ -371,7 +372,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         # (near: a crew, told to both, no asking)
         await self.place(b, 100)
         formed = crew_state(await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id]))
-        self.assertEqual((formed["stage"], formed["other"], formed["ways"][b.id]), (SPEC["crew_formed"], b.id, (0, 0, 0)))
+        # (v24: each member's HP and max HP as his DIVE vitals said, none sent yet, and his layer's depth)
+        self.assertEqual((formed["stage"], formed["other"], formed["vitals"][b.id]), (SPEC["crew_formed"], b.id, (0, 0, 2)))
         await self.until(b, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id])
         # (past crew_near and within crew_far it holds: no flicker at the edge)
         for x in (180, 120, 190, 140, 185):
@@ -406,6 +408,38 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         state = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_split_up"]))
         self.assertEqual(state["members"], [])
         self.assertFalse(self.server.crews.of)
+
+    async def test_crew_vitals(self):
+        """v24, issue #717: a diver's HP and max HP (DIVE vitals) and his layer, told to his crew alone as they change,
+        crew_vitals_ms apart at most; bounded."""
+        a, b, c = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma")]
+        for client in (a, b, c):
+            await self.enter(client, 2)
+        for client, x in ((a, 0), (b, 50), (c, 4000)):
+            await self.place(client, x)
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id])
+        crews.VITALS_WAIT = 0.1
+        vitals = SPEC["dive_vitals"]
+        await b.send(protocol.dive(vitals, 120, 200))
+        told = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"]
+                                           and crew_state(m)["vitals"][b.id] == (120, 200, 2)))
+        self.assertEqual(told["members"], [a.id, b.id])
+        await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"])
+        # (a layer on: his depth told; Gamma, in no crew, is told nothing)
+        await self.enter(b, 3)
+        await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"] and crew_state(m)["vitals"][b.id] == (120, 200, 3))
+        for _ in range(30):
+            self.assertNotEqual((await c.receive())[0], SPEC["crew_state"])
+        # (bounded: no max HP, HP past it, a max past 9999)
+        for hp, most in ((0, 0), (201, 200), (100, 10000)):
+            with self.assertRaises(protocol.ProtocolError):
+                protocol.read_dive(protocol.dive(vitals, hp, most))
+        self.assertEqual(protocol.read_dive(protocol.dive(vitals, 0, 200)), (vitals, (0, 200)))
+        # (one taken every half crew_vitals_ms at most)
+        later = self.server.crews.hp_at[b.id] + 10
+        self.server.crews.vitals(b.id, 90, 200, later)
+        self.server.crews.vitals(b.id, 80, 200, later + crews.VITALS_WAIT / 4)
+        self.assertEqual(self.server.crews.hp[b.id], (90, 200))
 
     async def test_crews_across_a_portal_and_two_crews_met(self):
         a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]

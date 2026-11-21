@@ -16,12 +16,10 @@
 #include "pixfont.h"
 #include "platform.h"
 
-/* a name's width at most: a panel's 40 pixels less its plate's edges
- * and a gap, so that two MegaMen on neighbouring panels of a row keep
- * their marks apart */
-#define BUDGET 34
+#define BUDGET PARTY_MARKS_BUDGET
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
+#define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
 
 /* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
@@ -33,8 +31,7 @@ static const SDL_Color shade = { 0, 24, 41, 255 };
 /* each seat's mark as drawn (the player's own without its arrow) */
 static char tags[PARTY_MOST][ONLINE_NAME_BYTES + 1];
 
-/* whole letters of `name` that fit `budget` pixels with `suffix` after them */
-static void cut(const char *name, const char *suffix, int budget, char *out, size_t size) {
+void party_marks_cut(const char *name, const char *suffix, int budget, char *out, size_t size) {
 	char take[ONLINE_NAME_BYTES + 1];
 	size_t n = strlen(name);
 	if (n > ONLINE_NAME_BYTES) n = ONLINE_NAME_BYTES;
@@ -63,7 +60,7 @@ void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine) {
 			snprintf(tags[k], sizeof tags[k], "P%u", k + 1);
 			continue;
 		}
-		cut(names[k], "", k == mine ? BUDGET - arrow : BUDGET, tags[k], sizeof tags[k]);
+		party_marks_cut(names[k], "", k == mine ? BUDGET - arrow : BUDGET, tags[k], sizeof tags[k]);
 	}
 	/* (two names alike as cut: each its seat's digit after it) */
 	for (unsigned a = 0; a < PARTY_MOST; ++a)
@@ -71,7 +68,7 @@ void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine) {
 			if (strcmp(tags[a], tags[b]) || !names[a][0] || !names[b][0]) continue;
 			for (unsigned k = a; k <= b; k += b - a) {
 				char digit[2] = { (char)('1' + k), 0 };
-				cut(names[k], digit, k == mine ? BUDGET - arrow : BUDGET, tags[k], sizeof tags[k]);
+				party_marks_cut(names[k], digit, k == mine ? BUDGET - arrow : BUDGET, tags[k], sizeof tags[k]);
 			}
 		}
 }
@@ -98,7 +95,7 @@ static void mark(int x, int y, const char *tag, bool own) {
 }
 
 /* the field as seat `mine` sees it: the HP box his (0: BN6's own, the lead's) and each MegaMan standing, where */
-typedef struct { unsigned hp_box, count, seat[PARTY_MOST]; int x[PARTY_MOST], y[PARTY_MOST]; bool open; } Seen;
+typedef struct { unsigned hp_box, count, seat[PARTY_MOST], hp[PARTY_MOST]; int x[PARTY_MOST], y[PARTY_MOST]; bool open; } Seen;
 
 static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 	if (!c || n < 2 || mine >= PARTY_MOST) return false;
@@ -111,6 +108,7 @@ static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 	for (unsigned k = 0; k < n && k < PARTY_MOST && !v->open; ++k)
 		if (arena_team_view_feet(c, arena_team_view_megaman(c, 0, k), 0, &x, &y, &hp)) {
 			v->seat[v->count] = k;
+			v->hp[v->count] = hp;
 			v->x[v->count] = x;
 			v->y[v->count++] = y;
 		}
@@ -121,7 +119,19 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 	Seen v;
 	if (!seen(c, mine, n, &v)) return;
 	if (v.hp_box) arena_team_view_hp(v.hp_box, v.open);
-	for (unsigned i = 0; i < v.count; ++i) mark(v.x[i], v.y[i], tags[v.seat[i]], v.seat[i] == mine);
+	for (unsigned i = 0; i < v.count; ++i) {
+		bool own = v.seat[i] == mine;
+		mark(v.x[i], v.y[i], tags[v.seat[i]], own);
+		/* (a partner's HP under his name, as BN6 writes an enemy's under him: his own is in the HP box; issue #717) */
+		if (own) continue;
+		char hp[8];
+		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false);
+		snprintf(hp, sizeof hp, "%u", v.hp[i]);
+		/* (on the bottom row, above his name: under it is BN6's chip's name at the picture's foot) */
+		int hp_y = p.top + p.h + 1;
+		if (hp_y + PIXFONT_H > P.core_y + CHIP_LINE) hp_y = p.top - PIXFONT_CAP - 2;
+		pixfont_draw(v.x[i], hp_y, hp, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
+	}
 }
 
 void party_marks_describe(FILE *f, struct mCore *c, unsigned mine, unsigned n) {
@@ -135,7 +145,7 @@ void party_marks_describe(FILE *f, struct mCore *c, unsigned mine, unsigned n) {
 	for (unsigned i = 0; i < v.count; ++i) {
 		unsigned k = v.seat[i];
 		m[i] = plate(v.x[i] - P.core_x, v.y[i] - P.core_y, tags[k], k == mine);
-		fprintf(f, "mark%u %s at %d %d width %d tag %s\n", k, k == mine ? "own" : "crew", m[i].left, m[i].top, m[i].w, tags[k]);
+		fprintf(f, "mark%u %s at %d %d width %d hp %u tag %s\n", k, k == mine ? "own" : "crew", m[i].left, m[i].top, m[i].w, v.hp[i], tags[k]);
 		for (unsigned j = 0; j < i; ++j)
 			apart &= m[i].left + m[i].w <= m[j].left || m[j].left + m[j].w <= m[i].left || m[i].top + m[i].h <= m[j].top ||
 				m[j].top + m[j].h <= m[i].top;

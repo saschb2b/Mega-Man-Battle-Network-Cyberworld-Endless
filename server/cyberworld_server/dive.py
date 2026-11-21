@@ -138,6 +138,9 @@ class Dive:
         if action == SPEC["dive_leave"]:
             await self.leave(player)
             return
+        if action == SPEC["dive_vitals"]:
+            self.server.crews.vitals(player.id, *fields, now)
+            return
         if not await self.may_trace(player, room, action, now):
             return
         handler = {SPEC["dive_end"]: self.end, SPEC["dive_found"]: self.found, SPEC["dive_phrase"]: self.phrase,

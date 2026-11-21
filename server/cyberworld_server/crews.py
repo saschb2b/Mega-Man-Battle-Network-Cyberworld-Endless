@@ -47,6 +47,7 @@ FAR = SPEC["crew_far"]                      # ... and holds within this
 FORM_WAIT = SPEC["crew_form_ms"] / 1000     # seconds near before a crew forms (two passing are none)
 SPLIT_WAIT = SPEC["crew_split_ms"] / 1000   # seconds out of reach in the room before a member is out
 AWAY_WAIT = SPEC["crew_away_ms"] / 1000     # ... and elsewhere (a portal taken first, home)
+VITALS_WAIT = SPEC["crew_vitals_ms"] / 1000  # a crew told its members' HP and layers at most so often
 
 
 class Crew:
@@ -71,6 +72,9 @@ class Crews:
         self.offers = {}        # owner id -> Offer
         self.placed = {}        # player id -> the room his last STATE came in
         self.near = {}          # (id, id), the lower first -> since when they stand within NEAR
+        self.hp = {}            # player id -> (hp, max_hp) as his DIVE vitals last said
+        self.hp_at = {}         # ... and when it was taken
+        self.told = {}          # id(crew) -> (what its last CREW_STATE said of each member, when)
 
     # -- the wire --
 
@@ -81,12 +85,39 @@ class Crews:
         members = []
         for member in (crew.members if crew else []):
             peer = self.server.players.get(member)
-            members.append((member, peer.name if peer else "", (0, 0, 0)))
+            members.append((member, peer.name if peer else "", self.vitals_of(member)))
         player.writer.write(websocket.frame(protocol.crew_state(stage, other, value, members)))
 
-    def tell(self, crew, other=0):
+    def tell(self, crew, other=0, stage=None, now=None):
+        self.told[id(crew)] = (self.said(crew), time.monotonic() if now is None else now)
         for member in crew.members:
-            self.send(member, SPEC["crew_formed"], other, 0, crew)
+            self.send(member, SPEC["crew_formed"] if stage is None else stage, other, 0, crew)
+
+    # -- each one's HP and layer (v24, issue #717): information, told to his crew alone --
+
+    def vitals_of(self, player_id):
+        """(hp, max_hp, the depth of the layer he dives), 0 each where not known or not on a layer."""
+        room = self.server.dive.room_of(player_id)
+        hp, maximum = self.hp.get(player_id, (0, 0))
+        return hp, maximum, room.depth if room else 0
+
+    def said(self, crew):
+        return tuple((member, self.vitals_of(member)) for member in crew.members)
+
+    def vitals(self, player_id, hp, maximum, now):
+        """A DIVE vitals: kept, one taken every half crew_vitals_ms at most (a game sends one per crew_vitals_ms)."""
+        if now - self.hp_at.get(player_id, -VITALS_WAIT) < VITALS_WAIT / 2:
+            return
+        self.hp[player_id] = (hp, maximum)
+        self.hp_at[player_id] = now
+
+    def retell(self, now):
+        """Each tick: a crew whose members' HP or layers changed since it was last told is told again (CREW_STATE
+        vitals), crew_vitals_ms apart at most."""
+        for crew in {id(c): c for c in self.of.values()}.values():
+            said, when = self.told.get(id(crew), ((), -VITALS_WAIT))
+            if now - when >= VITALS_WAIT and self.said(crew) != said:
+                self.tell(crew, 0, SPEC["crew_vitals"], now)
 
     async def handle(self, player, data, now=None):
         action, ref, value = protocol.read_crew(data)
@@ -142,6 +173,8 @@ class Crews:
         for (a, b), since in sorted(near.items(), key=lambda item: (item[1], item[0])):
             if now - since >= FORM_WAIT:
                 self.together(a, b, now)
+        self.retell(now)
+        self.told = {key: value for key, value in self.told.items() if key in {id(c) for c in self.of.values()}}
 
     def core(self, crew):
         """The largest part of the crew within FAR of each other in one room (ties: the part with its first member)."""
@@ -233,6 +266,8 @@ class Crews:
             if player_id in offer.joined:
                 offer.joined.remove(player_id)
         self.placed.pop(player_id, None)
+        self.hp.pop(player_id, None)
+        self.hp_at.pop(player_id, None)
         self.near = {pair: since for pair, since in self.near.items() if player_id not in pair}
         self.out(player_id)
 

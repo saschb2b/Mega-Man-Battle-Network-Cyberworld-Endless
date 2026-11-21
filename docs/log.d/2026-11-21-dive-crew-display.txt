@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-21T20:30:00Z
+* **Update**: online/shared-dive.md (the crew's display, issue #717: the calls, a plate a crewmate under BN6's HP box with his name, HP over max HP and layer, "level" as max HP, a partner's HP under his mark on a party's field), code/online.md (`dive_crew_view.c`).
