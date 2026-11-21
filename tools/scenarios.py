@@ -31,6 +31,8 @@ its course, a tuple each:
                                   through screens whose timing is theirs
   ('expect', COND)                the state says so now
   ('keep', WORDS)                 the state's lines of those first words kept
+                                  (a do step's `shot`: kept at 2x in the folder
+                                  CW_SCENARIO_SHOTS names, for a PR's pictures)
   ('same', WORDS)                 ... and the same now as when kept
   ('moved', WORD, BY)             ... or line WORD's number moved by BY since:
                                   a number (1, -1), or a kept word with a
@@ -397,6 +399,18 @@ def quit_game(h):
     shutil.copy(os.path.join(h, 'log.txt'), os.path.join(h, f'log-{n + 1}.txt'))
 
 
+def kept_shot(h, path):
+    """A `shot` of a do step kept at 2x where CW_SCENARIO_SHOTS names a folder
+    (pictures for a pull request), as GAME-N.png; else let go with the step."""
+    where = os.environ.get('CW_SCENARIO_SHOTS')
+    if not where:
+        return
+    os.makedirs(where, exist_ok=True)
+    name = os.path.basename(h)
+    n = len([f for f in os.listdir(where) if f.startswith(name + '-')])
+    pics.scaled(pics.game(pics.load(path)), 2).save(os.path.join(where, f'{name}-{n}.png'))
+
+
 def step_run(h, step, state, kept, roms=None):
     """One step in game h from `state`: (the state after, frames run)."""
     kind = step[0]
@@ -405,6 +419,7 @@ def step_run(h, step, state, kept, roms=None):
     if kind == 'do':
         _, ran, shots, _, state = cw.batch(h, step[1])
         for _, p in shots:
+            kept_shot(h, p)
             os.remove(p)
         return state, ran
     if kind == 'until':

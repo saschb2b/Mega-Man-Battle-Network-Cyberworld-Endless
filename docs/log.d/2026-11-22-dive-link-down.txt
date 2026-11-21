@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T06:00:00Z
+* **Update**: online/arena/dropped-link.md (a dropped link on a dive layer: said in the band, the link started again as long as the dive lasts, the server's refusal said plainly).

@@ -4,7 +4,8 @@ diver seen there and his dot on the map (issue #728), a crew by standing
 together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
 fought by both unasked (issue #715) and through a dropped link (issue
-#180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
+#180), a crew formed again after one diver's link came back (#180) and
+however long it was away (#751), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -163,6 +164,43 @@ MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, S
     soon('join=fighting', 'beta', 900),             # and a battle of Alpha's joined by both
     soon('join=fighting', '', 900),
 ))
+
+
+
+def link_down(seconds):
+    """Beta's own link cut `seconds` on the layer (issue #751): the band says it is down at once (and that he dives
+    alone, past the transport's 30 seconds), then back; the room entered again, each sees the other, the crew again.
+    Pictures of Beta's game kept (shot): down, away where it goes so long, back."""
+    away = seconds > 30
+    return online.course(
+        ('@beta', 'do', f'reconnect cut {seconds}'),
+        soon('divestate=down', 'beta', 120),
+        ('sleep', 1.5),
+        ('@beta', 'do', 'wait 1; shot'),
+        # (the cut and the tries are the clock's: a dive's layer outruns it)
+        *([('sleep', 34.0), soon('divestate=away', 'beta', 600), ('@beta', 'do', 'wait 1; shot')] if away else []),
+        # (past the transport's 30 seconds the dive starts the link again every 15 seconds at most: one more such wait)
+        ('sleep', max(1.0, seconds - (35.5 if away else 1.5)) + (16.0 if away else 0.0)),
+        soon('divestate=up', 'beta', 3600),
+        ('@beta', 'do', 'wait 20; shot'),
+        soon('divers~Alpha', 'beta', 600),
+        soon('divers~Beta', '', 600),
+        ('sleep', 1.5),
+        soon('crew=2: Alpha Beta', 'beta', 600),
+        soon('crew=2: Alpha Beta', '', 600),
+    )
+
+
+# A dropped link on a layer (issue #751): 5, 30 and 120 seconds; the dive taken up again however long it was away,
+# a crewmate's battle joined after it as before
+for cut in (5, 30, 120):
+    MANY[f'link-down-{cut}s'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+        MANY['dive-together']['STEPS'],
+        link_down(cut),
+        ('do', 'battle; wait 10'),
+        soon('join=fighting', 'beta', 900),
+        soon('join=fighting', '', 900),
+    ))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
