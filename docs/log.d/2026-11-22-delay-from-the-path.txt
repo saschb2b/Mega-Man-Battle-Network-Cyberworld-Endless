@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T03:00:00Z
-* **Update**: online/arena/rollback/window-and-delay.md (the delay from the keys' path, a first NetBattle's window guessed from the core), online/arena/not-yet.md (the first window), online/not-yet.md (the same).

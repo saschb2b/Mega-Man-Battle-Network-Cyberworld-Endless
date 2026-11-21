@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/arena/rollback/window-and-delay.md (the delay from the keys' path, a first NetBattle's window guessed from the core), online/arena/not-yet.md (the first window), online/not-yet.md (the same).
 * **Update**: online/arena/dropped-link.md (a team, its match and its bouts, and a 2v2, held through a drop), online/arena/teams.md (a short drop keeps the team and its match), online/arena/two-a-side/over-the-server.md (the same for four seats), online/arena/not-yet.md (a drop mid-battle).
 
 ## 2026-11-21

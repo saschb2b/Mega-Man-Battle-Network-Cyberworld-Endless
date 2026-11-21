@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "The window and the delay, per system"
 description: "How the rollback window and input delay are set per system: `arena_window_for` from the pair frame's cost kept in `arena.ini`, the latency asked for less the window (`arena_ask_ms`), the server's `delay_for`, overrides."
 tags: [online, arena]
-generated: { by: claude-code/unrecorded, at: 2026-10-21T13:53:33Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T03:00:00Z }
 ---
 
 # The window and the delay, per system
