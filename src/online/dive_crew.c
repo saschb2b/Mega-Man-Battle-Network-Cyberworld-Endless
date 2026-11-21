@@ -9,16 +9,17 @@ static CrewState C;           /* the crew as the server last said (count 0 alone
 
 void dive_crew_reset(void) { memset(&C, 0, sizeof C); }
 
-void dive_crew_describe(FILE *f) {
-	fprintf(f, "crew %d", C.count);
-	for (int k = 0; k < C.count; ++k) fprintf(f, "%s%s", k ? " " : ": ", C.m[k].name);
-	fputc('\n', f);
-	dive_join_describe(f);
-}
-
 int dive_crew_count(void) { return C.count; }
 
 const CrewMember *dive_crew_member(int k) { return k >= 0 && k < C.count ? &C.m[k] : NULL; }
+
+void dive_crew_describe(FILE *f) {
+	fprintf(f, "crew %d", dive_crew_count());
+	const CrewMember *m;
+	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k) fprintf(f, "%s%s", k ? " " : ": ", m->name);
+	fputc('\n', f);
+	dive_join_describe(f);
+}
 
 bool dive_crew_has(uint32_t session) {
 	for (int k = 0; k < C.count; ++k)

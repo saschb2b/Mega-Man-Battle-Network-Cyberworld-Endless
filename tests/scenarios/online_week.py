@@ -44,7 +44,9 @@ MANY = {
         soon('divers~Alpha', 'beta', 600),
         soon('tags~Beta', '', 600),                # ... his name over his MegaMan
         soon('tags~Alpha', 'beta', 600),
-        # (no asking: Beta arrived where Alpha stands, and the server made them a crew, issue #714)
+        # (no asking: Beta arrived where Alpha stands, and the server made them a crew within a second, issue #714;
+        # a dive's layer runs faster than the clock, so the clock's seconds are waited out as such)
+        ('sleep', 1.5),
         soon('crew=2: Alpha Beta', '', 600),
         soon('crew=2: Alpha Beta', 'beta', 600),
     )),
@@ -118,19 +120,23 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
 # down by world units, wherever the week's layer has its floor: only the distance between the two counts here.
-EDGE = [step for k in range(6) for step in (('do', 'wait 30'), ('expect', 'crew=2: Alpha Beta'), ('@beta', 'expect', 'crew=2: Alpha Beta'))]
+EDGE = [step for _ in range(6) for step in (('sleep', 0.5), ('do', 'wait 10'), ('expect', 'crew=2: Alpha Beta'),
+                                            ('@beta', 'do', 'wait 10'), ('@beta', 'expect', 'crew=2: Alpha Beta'))]
 MANY['crew-by-nearness'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'place 0 0 3; wait 5'),
     ('@beta', 'do', 'place 160 0 3; wait 5'),         # past crew_near, within crew_far: still a crew
     *EDGE,
-    ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: none, on both
+    ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: none, on both, past crew_split_ms
+    ('sleep', 2.5),
     soon('crew=0', 'beta', 600),
     soon('crew=0', '', 600),
     ('@beta', 'do', 'place 160 0 3; wait 5'),         # within crew_far but not crew_near: none yet
-    ('do', 'wait 120'),
+    ('sleep', 2),
+    ('do', 'wait 10'),
     ('expect', 'crew=0'),
     ('@beta', 'do', 'place 100 0 3; wait 5'),         # within crew_near: a crew again
+    ('sleep', 1.5),
     soon('crew=2: Alpha Beta', '', 600),
     soon('crew=2: Alpha Beta', 'beta', 600),
 ))
@@ -142,14 +148,17 @@ MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
     online.into_square(),
     dive(),
     *[part for name in ('beta', 'gamma', 'delta') for part in online.course(online.into_square(name), dive(name))],
+    ('sleep', 1.5),
     soon('crew=4: Alpha Beta Gamma Delta', '', 900),
     online.into_square('echo'),
     dive('echo'),
     soon('divers~Echo', '', 600),
-    ('@echo', 'do', 'wait 120'),
+    ('sleep', 2),
+    ('@echo', 'do', 'wait 10'),
     ('@echo', 'expect', 'crew=0'),
     ('expect', 'crew=4: Alpha Beta Gamma Delta'),
     ('@delta', 'do', 'place 2000 0 3; wait 5'),
+    ('sleep', 3.5),                                   # out after crew_split_ms, Echo in a second after
     soon('crew=0', 'delta', 600),
     soon('crew=4: Alpha Beta Gamma Echo', '', 900),
     soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
