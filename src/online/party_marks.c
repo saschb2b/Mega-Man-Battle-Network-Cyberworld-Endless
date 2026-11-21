@@ -124,13 +124,13 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 		mark(v.x[i], v.y[i], tags[v.seat[i]], own);
 		/* (a partner's HP under his name, as BN6 writes an enemy's under him: his own is in the HP box; issue #717) */
 		if (own) continue;
-		char n[8];
+		char hp[8];
 		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false);
-		snprintf(n, sizeof n, "%u", v.hp[i]);
+		snprintf(hp, sizeof hp, "%u", v.hp[i]);
 		/* (on the bottom row, above his name: under it is BN6's chip's name at the picture's foot) */
 		int hp_y = p.top + p.h + 1;
 		if (hp_y + PIXFONT_H > P.core_y + CHIP_LINE) hp_y = p.top - PIXFONT_CAP - 2;
-		pixfont_draw(v.x[i], hp_y, n, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
+		pixfont_draw(v.x[i], hp_y, hp, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
 	}
 }
 
