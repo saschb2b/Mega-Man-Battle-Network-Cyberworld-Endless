@@ -22,8 +22,10 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "foes.h"
+#include "party_field.h"
 
 /* The fight taken over from the staging (dev's partycore, or a party's
  * START): on or off */
@@ -33,12 +35,14 @@ void party_play_on(bool on);
  * a party's fight a bot's, as the Arena's arenaboth (the Custom screen's OK,
  * then charged shots); partyroll=W over the server the rollback window,
  * partydelay=N the input delay, partylead=1 the enemies' aim on the lead
- * alone as BN6 has it (every game of the party alike) */
-typedef struct { int n, twin, roll, end, bot, delay, lead; } PartyDev;
+ * alone as BN6 has it (every game of the party alike), partyview=N the
+ * field drawn as seat N sees it (his marks and HP box: party_marks.h) */
+typedef struct { int n, twin, roll, end, bot, delay, lead, view; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
- * size and the input delay; the next guardian's fight its */
-void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay);
+ * size, the input delay and the seats' sessions (each MegaMan's name on
+ * the field: party_marks.h); the next guardian's fight its */
+void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay, const uint32_t seats[PARTY_MOST]);
 /* ... a crew's random battle its (after party_play_start, at once: the
  * shared dive's join-in battles, dive_join.h), each game making `e` alike
  * (director_crew_battle) and the run's next battle already
@@ -62,5 +66,8 @@ bool party_play_held(void);
 void party_play_describe(FILE *f);
 void party_play_frame(uint32_t pad);
 void party_play_draw(void);
+/* ... in the state's words: the field's size and the seat it is drawn
+ * for, its marks (party_marks.h) */
+void party_play_describe(FILE *f);
 
 #endif

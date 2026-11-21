@@ -162,7 +162,7 @@ static void take(const PartyState *p) {
 	/* (the run's next battle too, so that the owner fights it alone where the field cannot be made) */
 	director_crew_record(&J.e);
 	party_play_on(true);
-	party_play_start(p->battle, p->seat, n, p->delay);
+	party_play_start(p->battle, p->seat, n, p->delay, p->seats);
 	if (!party_play_crew(&J.e)) {
 		if (p->seat == 0) alone("the field could not take it");
 		else to(JOIN_NONE);
