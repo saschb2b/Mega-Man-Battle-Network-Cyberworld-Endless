@@ -1,4 +1,4 @@
-"""The shared dive over real sockets (protocol v19, issue #589): rooms,
+"""The shared dive over real sockets (protocol v19, issue #589; v20, #714): rooms,
 traces, the feed, DIVERS, crews, the doors' queues and party battles,
 the Board's party marks and splits, moderation; no ROM needed."""
 
@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "server"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from cyberworld_server import admin, crews, protocol, week
+from cyberworld_server import admin, crews, party, protocol, week
 from cyberworld_server.app import Server
 from cyberworld_server.arena import ENDED, LEAVE, OVER, START
 from test_server import Client
@@ -59,11 +59,21 @@ def name(raw):
     return raw.rstrip(b"\0").decode()
 
 
+async def until_true(condition, timeout=2.0):
+    for _ in range(int(timeout * 100)):
+        if condition():
+            return
+        await asyncio.sleep(0.01)
+    raise AssertionError("Condition not reached")
+
+
 class DiveTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         self.dir = tempfile.TemporaryDirectory()
         self.now = MONDAY + 3600
         self.clients = []
+        # (a crew's waits short, so that walking together and apart takes a moment here)
+        crews.FORM_WAIT, crews.SPLIT_WAIT, crews.AWAY_WAIT = 0.1, 0.3, 0.5
         await self.start()
 
     async def start(self):
@@ -76,6 +86,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             await client.close()
         await self.server.close()
         self.dir.cleanup()
+        crews.FORM_WAIT, crews.SPLIT_WAIT, crews.AWAY_WAIT = (SPEC[k] / 1000 for k in ("crew_form_ms", "crew_split_ms", "crew_away_ms"))
+        party.SEAT_HOLD = 12.0
 
     async def restart(self):
         for client in self.clients:
@@ -174,7 +186,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         # (last week's net still opens, as its posts do)
         await a.send(protocol.dive(ENTER, self.week - 1, self.server.weeks.seed(self.week - 1), 1, 0, 0))
         self.assertEqual(protocol.DIVE_ROOM.unpack(await a.message(SPEC["dive_room"]))[1], self.week - 1)
-        for message in (protocol.dive(FOUND, 1), protocol.crew(SPEC["crew_way"], 0, 0, (2, 0, 0)), protocol.queue(SPEC["queue_leave"])):
+        for message in (protocol.dive(FOUND, 1), protocol.crew(SPEC["crew_battle"], 0, 2), protocol.queue(SPEC["queue_leave"])):
             await stamp.send(message)
             self.assertEqual(await self.notice(stamp), SPEC["notice_dive_out"])
         # (a diver trades, teams up and watches nothing)
@@ -187,7 +199,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         for bad in (protocol.dive(ENTER, self.week, self.seed, 11, 0, 0), protocol.dive(ENTER, self.week, self.seed, 1, 0, 0)[:-1],
                     bytes((SPEC["dive"], 9)), protocol.dive(PHRASE, 8, 0, 0, 0), protocol.dive(END, 3, 0, 0, 0, 0),
                     protocol.dive(SPLIT, 1, 10, 12, 0, 1), protocol.dive(SPLIT, 1, 10, 3, 0, 5), protocol.dive(SPLIT, 1, 0, 3, 0, 1),
-                    protocol.dive(PHRASE, 1, 9000, 0, 0), protocol.crew(7), protocol.crew(SPEC["crew_ask"]),
+                    protocol.dive(PHRASE, 1, 9000, 0, 0), protocol.crew(7), protocol.crew(1, 5), protocol.crew(SPEC["crew_battle"], 0, 1, (2, 0, 0)),
+                    protocol.crew(SPEC["crew_join"]),
                     protocol.queue(SPEC["queue_join"]), protocol.queue(5, (1, 0, 0)),
                     protocol.party(SPEC["party_hp"], 3, 10, 5), protocol.party(SPEC["party_damage"], 0, 1, 1)):
             client = await self.connect("Rogue")
@@ -327,40 +340,66 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
 
     # -- crews --
 
-    async def test_crews_ask_answer_ways_and_split(self):
+    async def place(self, client, x, y=0):
+        await client.send(protocol.STATE.pack(SPEC["state"], x, y, 0, 0))
+
+    def crew_ids(self, client):
+        crew = self.server.crews.of.get(client.id)
+        return crew.members if crew else []
+
+    async def settled(self, test, seconds=3):
+        for _ in range(int(seconds / 0.02)):
+            if test():
+                return
+            await asyncio.sleep(0.02)
+        raise AssertionError("Never settled")
+
+    async def test_crews_by_nearness(self):
         a, b, c, d, e = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta", "Echo")]
         for client in (a, b, c, d, e):
             await self.enter(client, 2)
-        await a.send(protocol.crew(SPEC["crew_ask"], b.id))
-        self.assertEqual(crew_state(await b.message(SPEC["crew_state"]))["stage"], SPEC["crew_asked"])
-        self.assertEqual(crew_state(await a.message(SPEC["crew_state"]))["stage"], SPEC["crew_waiting"])
-        await b.send(protocol.crew(SPEC["crew_answer"], a.id, 1))
-        formed = crew_state(await a.message(SPEC["crew_state"]))
-        self.assertEqual((formed["stage"], formed["members"]), (SPEC["crew_formed"], [a.id, b.id]))
-        # (any member asks; four at most)
-        for asker, other in ((b, c), (a, d)):
-            await asker.send(protocol.crew(SPEC["crew_ask"], other.id))
-            await self.until(other, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_asked"])
-            await other.send(protocol.crew(SPEC["crew_answer"], asker.id, 1))
-        state = crew_state(await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id, c.id, d.id]))
-        self.assertEqual(state["stage"], SPEC["crew_formed"])
-        await a.send(protocol.crew(SPEC["crew_ask"], e.id))
-        self.assertEqual(await self.notice(a), SPEC["notice_crew"])
-        # (a way: everyone's told everyone's)
-        await c.send(protocol.crew(SPEC["crew_way"], 0, 0, (3, 1, 9)))
-        state = crew_state(await self.until(d, SPEC["crew_state"], lambda m: crew_state(m)["ways"].get(c.id) == (3, 1, 9)))
-        self.assertEqual(state["ways"][a.id], (0, 0, 0))
-        # (a crew lasts across layers; a split takes one out, the rest go on)
+        for client, x in ((a, 0), (b, 2000), (c, 4000), (d, 6000), (e, 8000)):
+            await self.place(client, x)
+        # (two passing each other are no crew: near for less than crew_form_ms)
+        crews.FORM_WAIT = 0.6
+        await self.place(b, 100)
+        await asyncio.sleep(0.2)
+        await self.place(b, 2000)
+        await asyncio.sleep(0.8)
+        self.assertFalse(self.server.crews.of)
+        crews.FORM_WAIT = 0.1
+        # (near: a crew, told to both, no asking)
+        await self.place(b, 100)
+        formed = crew_state(await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id]))
+        self.assertEqual((formed["stage"], formed["other"], formed["ways"][b.id]), (SPEC["crew_formed"], b.id, (0, 0, 0)))
+        await self.until(b, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id])
+        # (past crew_near and within crew_far it holds: no flicker at the edge)
+        for x in (180, 120, 190, 140, 185):
+            await self.place(b, x)
+            await asyncio.sleep(0.1)
+        await asyncio.sleep(0.5)
+        self.assertEqual(self.crew_ids(a), [a.id, b.id])
+        # (a chain: Gamma near Beta, far from Alpha, is in it; then Delta near Gamma; four at most, Echo near them outside)
+        await self.place(c, 300)
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id, c.id])
+        await self.place(d, 420)
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id, c.id, d.id])
+        await self.place(e, 360, 60)
+        await asyncio.sleep(0.6)
+        self.assertEqual(self.crew_ids(a), [a.id, b.id, c.id, d.id])
+        self.assertNotIn(e.id, self.server.crews.of)
+        # (Delta walks off: out after crew_split_ms, told so; Echo, near Gamma, takes the place)
+        await self.place(d, 3000)
+        await self.until(d, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_split_up"])
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id, c.id, e.id])
+        # (Gamma takes a portal: out after crew_away_ms unless the crew follows)
         await self.enter(c, 3)
-        await c.send(protocol.crew(SPEC["crew_split"]))
-        self.assertEqual(crew_state(await self.until(c, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_split_up"]))["stage"],
-                         SPEC["crew_split_up"])
-        state = crew_state(await self.until(a, SPEC["crew_state"], lambda m: c.id not in crew_state(m)["members"]))
-        self.assertEqual(state["members"], [a.id, b.id, d.id])
-        # (an ask outside the room, and a diver's end of his dive: out of the crew)
-        await a.send(protocol.crew(SPEC["crew_ask"], c.id))
-        self.assertEqual(await self.notice(a), 17)
-        await d.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0))
+        await asyncio.sleep(0.1)
+        self.assertIn(c.id, self.crew_ids(a))
+        await self.until(c, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_split_up"])
+        self.assertEqual(self.crew_ids(a), [a.id, b.id, e.id])
+        # (an end of the dive and a session ended: out at once; a crew of one is none)
+        await e.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0))
         await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id])
         await b.close()
         self.clients.remove(b)
@@ -368,13 +407,34 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(state["members"], [])
         self.assertFalse(self.server.crews.of)
 
+    async def test_crews_across_a_portal_and_two_crews_met(self):
+        a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]
+        for client in (a, b, c, d):
+            await self.enter(client, 2)
+        for client, x in ((a, 0), (b, 50), (c, 3000), (d, 3050)):
+            await self.place(client, x)
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id] and self.crew_ids(c) == [c.id, d.id])
+        # (the crew through a portal, one after the other: still one on the next layer)
+        crews.AWAY_WAIT = 1.0
+        await self.enter(a, 3)
+        await self.place(a, 10)
+        await asyncio.sleep(0.4)
+        await self.enter(b, 3)
+        await self.place(b, 30)
+        await asyncio.sleep(1.2)
+        self.assertEqual(self.crew_ids(a), [a.id, b.id])
+        # (two crews meet: one of four, the older taking the other's)
+        for client, x in ((c, 60), (d, 90)):
+            await self.enter(client, 3)
+            await self.place(client, x)
+        await self.settled(lambda: self.crew_ids(d) == [a.id, b.id, c.id, d.id])
+        self.assertIs(self.server.crews.of[a.id], self.server.crews.of[d.id])
+
     async def crew_of(self, *clients):
-        lead = clients[0]
-        for other in clients[1:]:
-            await lead.send(protocol.crew(SPEC["crew_ask"], other.id))
-            await self.until(other, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_asked"])
-            await other.send(protocol.crew(SPEC["crew_answer"], lead.id, 1))
-            await self.until(lead, SPEC["crew_state"], lambda m, o=other: o.id in crew_state(m)["members"])
+        for k, client in enumerate(clients):
+            await self.place(client, 20 * k)
+        await self.settled(lambda: self.crew_ids(clients[0]) == [c.id for c in clients]
+                           or sorted(self.crew_ids(clients[0])) == sorted(c.id for c in clients))
 
     async def test_a_battle_offered_to_the_crew(self):
         a, b, c = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma")]
@@ -507,7 +567,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await b.message(SPEC["arena_seat"])
         for _ in range(30):
             self.assertNotIn((await c.receive())[0], (SPEC["arena_seat"], SPEC["party_hp"]))
-        # (a dropped link: the seat gone for the others, the battle on; SNAPSHOT says busy)
+        # (a dropped link, its hold over: the seat gone for the others, the battle on; SNAPSHOT says busy)
+        party.SEAT_HOLD = 0.3
         await b.drop()
         self.clients.remove(b)
         gone = arena_state(await self.until(a, SPEC["arena_state"]))
@@ -516,6 +577,49 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.server.busy_with(c.id), SPEC["busy_battle"])
         await c.send(damage)
         await a.message(SPEC["arena_seat"])
+
+    async def party_of(self, *labels, door=(5, 0, 2)):
+        """A door's party battle of these divers: their clients and the battle's id."""
+        clients = [await self.connect(label) for label in labels]
+        for client in clients:
+            await self.enter(client, *door)
+            await client.send(protocol.queue(SPEC["queue_join"], door))
+        await self.until(clients[0], SPEC["queue_state"], lambda m: m[6] == len(clients))
+        await clients[0].send(protocol.queue(SPEC["queue_start"]))
+        starts = [arena_state(await self.until(x, SPEC["arena_state"])) for x in clients]
+        return clients, starts[0]["battle"]
+
+    async def test_a_seat_held_through_a_dropped_link_and_taken_back(self):
+        # (issue #180: a short drop ridden out, the others told nothing, the seat's keys relayed again once back)
+        (a, b, c), battle = await self.party_of("Alpha", "Beta", "Gamma")
+        await b.drop()
+        self.clients.remove(b)
+        await until_true(lambda: b.id in self.server.parties.battles[battle].away)
+        keys = protocol.ARENA_INPUT.pack(SPEC["arena_input"], battle, 0, 1) + b"\x00\x01"
+        await c.send(keys)
+        await a.message(SPEC["arena_seat"])
+        b = await self.connect("Beta", resume=True)
+        self.assertNotIn(b.id, self.server.parties.battles[battle].away)
+        await c.send(keys)
+        self.assertEqual(await b.message(SPEC["arena_seat"]), bytes((SPEC["arena_seat"], 2)) + keys)
+        await b.send(keys)
+        self.assertEqual(await self.until(a, SPEC["arena_seat"], lambda m: m[1] == 1), bytes((SPEC["arena_seat"], 1)) + keys)
+        for _ in range(30):
+            message = await a.receive()
+            self.assertFalse(message[0] == SPEC["arena_state"] and message[1] == SPEC["arena_seat_gone"])
+
+    async def test_a_battle_over_while_a_seat_is_held_is_told_on_its_resume(self):
+        (a, b), battle = await self.party_of("Alpha", "Beta")
+        await b.drop()
+        self.clients.remove(b)
+        await until_true(lambda: b.id in self.server.parties.battles[battle].away)
+        await a.send(protocol.ARENA.pack(SPEC["arena"], OVER, battle, 0, 0))
+        await until_true(lambda: battle not in self.server.parties.battles)
+        b = await self.connect("Beta", resume=True)
+        gone = arena_state(await self.until(b, SPEC["arena_state"]))
+        self.assertEqual((gone["stage"], gone["side"], gone["other"]), (SPEC["arena_seat_gone"], 0, a.id))
+        self.assertEqual(arena_state(await self.until(b, SPEC["arena_state"]))["stage"], ENDED)
+        self.assertFalse(self.server.parties.missed or self.server.parties.seat_of)
 
     async def test_a_seat_zero_without_the_arena_links_every_seat(self):
         a, b = await self.connect("Alpha", no_arena=True), await self.connect("Beta")

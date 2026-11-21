@@ -20,7 +20,7 @@
 #include "online_mail.h"
 #include "online_visit.h"
 #include "online_transport.h"
-#include "party_core.h"
+#include "party_marks.h"
 #include "party_turn.h"
 #include "rom.h"
 #include "souls.h"
@@ -74,7 +74,13 @@ static struct {
 	bool alone;                   /* the link broken: every other seat gone */
 	uint64_t mine_ready;
 	bool crew;                    /* a crew's random battle (party_play_crew), not a guardian's */
+	/* this game's own link through a drop (issue #180): down since (SDL ticks, 0 up), the resumes seen, my session, the leave said */
+	uint32_t down_since, resumes, me;
+	bool leave_said;
 } PP;
+
+/* the seat the field is drawn for: mine, or the dev's partyview */
+static unsigned viewer(void) { return !PP.net && PP.dev.view > 0 && PP.dev.view < PARTY_MOST ? (unsigned)PP.dev.view : PP.seat; }
 
 /* A crew's battle's end, kept for party_play_crew_end */
 static struct { bool due; CrewOver o; } crew_end;
@@ -154,6 +160,7 @@ static bool fight(const Encounter *e, int own_hp, int fought_hp) {
 	/* (the dev's stood-in partners: my MegaMan again, their keys a script) */
 	for (unsigned k = 0; !PP.net && k < PP.b.n; ++k) { PP.b.seat[k] = *mine; PP.have[k] = true; }
 	PP.stage = PP_BOOT;
+	if (!PP.net) party_marks_seats(NULL, viewer());
 	if (PP.crew) fprintf(stderr, "party: the crew's battle taken over, %u MegaMen, my seat %u\n", PP.b.n, PP.seat);
 	else fprintf(stderr, "party: the guardian's fight taken over, %u MegaMen, my seat %u, his HP %d (his own %d)\n", PP.b.n, PP.seat, fought_hp,
 		own_hp);
@@ -191,8 +198,9 @@ void party_play_dev(const PartyDev *d) {
 	party_play_on(d->n > 1);
 }
 
-void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay) {
+void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay, const uint32_t seats[PARTY_MOST]) {
 	stop();
+	party_marks_seats(seats, seat);
 	PP.started = true;
 	PP.battle = battle;
 	PP.seat = seat < PARTY_MOST ? seat : 0;
@@ -202,6 +210,10 @@ void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay
 	arena_link_net(&PP.link, battle, 0, PP.delay, out, NULL);
 	PP.delay = PP.link.link.delay;
 	arena_link_net_party(&PP.link, PP.seat, PP.b.n);
+	OnlineSnapshot snap;
+	online_transport_snapshot(&snap);
+	PP.resumes = snap.resumes;
+	PP.me = snap.player_id;
 	fprintf(stderr, "party: battle %u, seat %u of %u, delay %u (START said %u), a guess %u frames at most\n", (unsigned)battle, PP.seat, PP.b.n, PP.delay,
 		delay, PP.window);
 }
@@ -503,9 +515,45 @@ static uint16_t word_of(unsigned seat, uint32_t pad, uint32_t tick) {
 	return party_turn_word(PP.core, PP.run_rom, seat, keys, PP.dev.bot != 0);
 }
 
+/* this game's own link down mid-fight (issue #180, docs/online/shared-dive.md,
+ * A drop): nothing goes in the outbox and the field waits on the others'
+ * keys while the transport tries again every half second; back in the same
+ * session (the server holding the seat, party.py), my keys go again and
+ * theirs are asked for. Down past HELD_MS, or back in another session, the
+ * others are let go of and this game fights on alone, as decided; its
+ * leave said once the link is back, so the others need not wait out the
+ * seat's hold. True where the fight waits on the link */
+#define HELD_MS 10000   /* (the server holds the seat 12 seconds, party.py's SEAT_HOLD) */
+static bool held_through(void) {
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	uint32_t now = SDL_GetTicks();
+	bool down = !s.error[0] && (!s.connected || s.reconnecting);
+	arena_link_net_hold(&PP.link, down);
+	if (s.error[0] && !PP.alone) alone("the link to the server is gone");
+	if (down) {
+		online_transport_hurry();
+		if (!PP.down_since) fprintf(stderr, "party: the link dropped at frame %u; holding on\n", (unsigned)party_core_frames(PP.core));
+		if (!PP.down_since) PP.down_since = now | 1u;
+		if ((int32_t)(now - PP.down_since) > HELD_MS && !PP.alone) alone("the link stayed down");
+		return !PP.alone;
+	}
+	PP.down_since = 0;
+	if (s.resumes == PP.resumes) return false;
+	PP.resumes = s.resumes;
+	if (s.player_id != PP.me && !PP.alone) alone("back in another session");
+	else if (!PP.alone) arena_link_net_resumed(&PP.link);
+	if (PP.alone && !PP.leave_said) {
+		uint8_t m[ONLINE_ARENA_BYTES];
+		PP.leave_said = online_transport_send(m, arena_wire_action(m, ARENA_ACT_LEAVE, PP.battle, 0, 0));
+	}
+	return false;
+}
+
 static void fight_frame(uint32_t pad) {
 	/* (the dev's game alone: the bot's clock the field's frames, as no keys are sent) */
 	uint16_t mine = word_of(PP.seat, pad, PP.net ? PP.tick : party_core_frames(PP.core));
+	if (PP.net && held_through()) return;
 	if (!PP.net || PP.alone) {
 		uint16_t keys[PARTY_MOST] = { 0 };
 		keys[PP.seat] = mine;
@@ -626,5 +674,18 @@ void party_play_draw(void) {
 	const uint32_t *turn = PP.core && PP.stage == PP_FIGHT ? party_turn_video(PP.seat) : NULL;
 
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
+	/* (who is who on the field as it fights, never over a partner's own screen) */
+	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
+}
+
+void party_play_describe(FILE *f) {
+	/* (over the server: its stage and frame, the hashes agreed, this game's own link through a drop, issue #180) */
+	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
+	if (PP.started && PP.net)
+		fprintf(f, "party %s frame %u\npartyagreed %u\npartylink %s\n", (unsigned)PP.stage < 6 ? stages[PP.stage] : "other",
+			(unsigned)(PP.core ? party_core_frames(PP.core) : 0), PP.agreed, PP.alone ? "alone" : PP.down_since ? "down" : "up");
+	if (!PP.core || PP.stage != PP_FIGHT) return;
+	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	if (!party_turn_video(PP.seat)) party_marks_describe(f, party_core_gba(PP.core), viewer(), PP.b.n);
 }
 

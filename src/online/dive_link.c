@@ -53,7 +53,6 @@ void dive_link_adopt(void) {
 	dive_join_reset();
 	dive_mail_reset();
 	dive_band_reset();
-	home_way_hold = dive_crew_way_hold;
 	L.week = s.week;
 	L.seed = s.week_seed;
 	dive_people_on(true);
@@ -77,7 +76,7 @@ void dive_link_describe(FILE *f) {
 }
 
 uint32_t dive_link_keys(uint32_t keys) {
-	return L.on ? dive_traces_keys(dive_crew_keys(dive_party_keys(dive_join_keys(keys)))) : dive_traces_keys(keys);
+	return L.on ? dive_traces_keys(dive_party_keys(dive_join_keys(keys))) : dive_traces_keys(keys);
 }
 
 bool dive_link_begin(void) {
@@ -98,7 +97,7 @@ void dive_link_close(void) {
 	dive_people_on(false);
 	dive_party_on(false);
 	dive_join_reset();
-	home_way_hold = NULL;
+	dive_crew_reset();
 	online_transport_end();
 }
 
@@ -155,12 +154,9 @@ void dive_link_frame(void) {
 		return;
 	}
 	dive_band_frame(now);
-	/* (the party at a guardian's door, and its fight; the crew's chats and news) */
+	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
-	dive_crew_frame(&s);
-	dive_join_frame(&s);
-	const char *crew = dive_crew_news();
-	if (crew) dive_link_line(crew);
+	dive_join_frame();
 	/* (at home, between acts: nothing sent, his last place stands) */
 	if (!director_on_layer() || !s.connected) return;
 	room();

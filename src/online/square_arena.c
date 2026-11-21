@@ -831,6 +831,31 @@ void square_arena_back(void) {
 	printf("arena: back in the Square\n");
 }
 
+/* A NetBattle of two through a dropped link (protocol v21, issue #180;
+ * docs/online/arena/dropped-link.md): while the transport tries again,
+ * nothing goes in the outbox and the battle waits on the other's keys as
+ * on any slow link; back in the same session (its place taken back, the
+ * server holding the battle with it), my keys go again and the ones the
+ * link lost are asked for; back in another (a server started afresh),
+ * the battle is gone: true then */
+static uint32_t resumes_seen, me;
+static bool through_a_drop(const OnlineSnapshot *s) {
+	bool down = !s->connected || s->reconnecting;
+	arena_link_net_hold(&SA.link, down);
+	if (down) {
+		/* (the transport's tries every half second while the battle waits) */
+		online_transport_hurry();
+		if (!SA.link_down) printf("arena: the link dropped mid-battle; holding on\n");
+		SA.link_down = true;
+		return false;
+	}
+	if (s->resumes == resumes_seen) return false;
+	SA.link_down = false;
+	if (s->player_id != me) return true;
+	arena_link_net_resumed(&SA.link);
+	return false;
+}
+
 void square_arena_frame(uint32_t keys) {
 	online_mail_frame();
 	OnlineSnapshot s;
@@ -841,6 +866,10 @@ void square_arena_frame(uint32_t keys) {
 	notice_held(&s);
 	++SA.t;
 	bool lost = s.error[0] || !s.connected;
+	if (SA.stage == SA_BATTLE && !SA.team && SA.link.seats == 2 && !s.error[0]) lost = through_a_drop(&s);
+	else SA.link_down = false;
+	resumes_seen = s.resumes;
+	me = s.player_id;
 	if (lost && SA.stage == SA_BATTLE) arena_link_net_lost(&SA.link, "the connection to the Square was lost");
 	else if (lost && SA.stage >= SA_LOADOUT && SA.stage < SA_OVER) fail("the connection to the Square was lost", ARENA_STOP_LOST);
 	else if (lost && SA.card.up && !SA.card.closing) SA.card.closing = 1;

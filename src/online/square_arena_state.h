@@ -46,6 +46,7 @@ typedef struct {
 	uint32_t seen_at;         /* my challenge's question up on his screen (SDL ticks, protocol v13), 0 not yet */
 	char name[ONLINE_NAME_BYTES + 1];
 	bool ended;               /* the server has said this battle is over */
+	bool link_down;           /* the transport's link down mid-battle, the battle held on (v21) */
 	bool challenger;          /* this game challenged (the folder asked before the challenge) */
 	int folder;               /* the folder carried, 0-2 */
 	OnlineSnapshot s;

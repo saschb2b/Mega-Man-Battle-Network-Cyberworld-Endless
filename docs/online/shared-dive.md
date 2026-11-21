@@ -1,9 +1,9 @@
 ---
 type: Design
 title: "The shared dive"
-description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
+description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-fable-5-2, at: 2026-11-21T02:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T18:30:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -120,9 +120,9 @@ Verified on `dev`, 15 November 2026:
 | Others on a layer | Walk-through MegaMen with name tags, up to seven others (a channel's eight); every diver on the layer a dot on the PET's map | The nearest only; dots only |
 | Traces of the week | A deletion feed to every diver; a mark where a diver fell, for the week, A on it saying what deleted them; one of the Square's fixed phrases left on a panel, others able to Wave at it; dealers and portals saying live facts (Navis gone each way, chips bought) | (all four taken) |
 | Mystery Data | Each diver opens their own, at the same places for everyone (the layer's seed), its chip by their own folder; the week's first finder's name on a data; data others opened this week shimmer faintly (kept so on 15 November 2026 over who got what there, an opened count, and a cheer for two opening one together) | A pair data opened by two divers together |
-| Crews | Up to four, Team up on a diver's card; a crew lasts across layers until someone splits up, leaves or ends their dive | One layer at a time; pairs |
-| A crew at a fork | The portal opens only when the whole crew stands on it, or someone splits up | Each picks and the crew splits; the captain picks for all |
-| Random battles | Each diver's own; crewmates within a few panels fight it too, unasked (21 November 2026, after the team's test: walking close is the yes, walking apart the no); only crewmates | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
+| Crews | By nearness, no asking: divers within four panels of each other are a crew, up to four, and one who walks away is out of it (21 November 2026, the owner's direction after the team's test, issue #714; the details below, [Crews by nearness](#crews-by-nearness-21-november-2026)) | Up to four, Team up on a diver's card, lasting across layers until someone splits up, leaves or ends their dive (15 November's call, as built); one layer at a time; pairs |
+| A crew at a fork | Each takes the portal he likes; those who take one together arrive at its first layer together and are a crew again there within a second (21 November 2026, under the owner's direction, his to turn over) | The portal opens only when the whole crew stands on it, or someone splits up (15 November's call); each picks and the crew splits; the captain picks for all |
+| Random battles | Each diver's own; crewmates within a few panels fight it too, unasked (21 November 2026, after the team's test: walking close is the yes, walking apart the no); only crewmates, who since issue #714 are whoever stands near | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
 | A joined battle | One field; the foes as a solo diver meets them, unscaled; each fighter BN6's normal reward; joining resets the joiner's own encounter count, so each diver fights about as many battles as alone | Foes' HP times the fighters; their versions raised; no reward; a cap a layer |
 | The door's queue | Up to four, each having walked to this door; divers behind on the same way get a flare | No flare; helpers summoned from behind |
 | The leader | The first at the door starts any time; anyone leaves any time; a leader idle a minute passes the lead on | A countdown on a join; a ready check |
@@ -135,6 +135,50 @@ Verified on `dev`, 15 November 2026:
 | After a dive ends | Dive again from layer 1 into the live pack, as often as one likes, the best kept | Once a day; the first dive alone counted |
 | The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
 | Build order | One field first, the linked fallback in the same release | Linked first; a spike first |
+
+## Crews by nearness (21 November 2026)
+
+The owner's direction after the team's test of 18 November (issue
+#714): the shared dive is to feel like co-op in a modern MMO or Diablo
+and Path of Exile: drop in, play together by being together, no
+prompts, no waiting, always clear who is with you. Crews form and split
+by themselves. The game-design skill's pass, the same day:
+
+- **Dialectic: together against ahead,** as before, now chosen by where
+  one walks: walking beside another diver is the choice to dive with
+  him, walking off the choice to go on alone. No screen asks it.
+- **Loop layer: the moment on a layer,** feeding the crew's battles
+  (#715) and its guardian's door, the session's.
+- **Patterns** (recalled from playing them, not checked in
+  [Sources](../research/sources.md)): grouping by proximity as public
+  events and open-world co-op do it (Guild Wars 2's events count whoever
+  stands in them; Journey's companion is whoever walks beside you);
+  hysteresis, a wider reach to stay than to join, as any threshold that
+  is crossed by moving needs.
+
+Each call below was taken under the owner's direction of 21 November
+2026 by the session building it, the least friction that direction
+points to, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| The radius | A crew forms within four panels (128 world units, the join-in battles' old reach, `crew_near`) and holds within six (192, `crew_far`): a crew at the edge does not form and split with every step | One radius both ways (flickers at its edge); a wider one (strangers across a room pulled in) |
+| A moment first | Near for a second before a crew forms (`crew_form_ms`), so two passing each other are none; out of reach for two seconds before one is out (`crew_split_ms`) | At once (crews made and broken by a step past); longer (a wait the direction rules out) |
+| Who decides | The server, from the places every game already sends (STATE), each tick: one answer for every game, `crews.py` holding the crews | Each client for itself (two games could disagree about who is in) |
+| More than four near | The first there: the crew as it stands keeps its four, and a fifth near stays outside it until a place opens | The nearest (a crew reshuffled by every step, someone already in dropped) |
+| Chains | One crew: A near B and B near C is a crew of three, so a line walking a corridor stays one | Everyone near everyone (a line splits at its ends) |
+| Two crews meet | One crew where both fit in four, the older taking the other's | Each kept apart; the larger first |
+| Across layers | A crewmate who takes a portal first, or is home between acts, stays in for ten seconds (`crew_away_ms`); the crew taking a portal together is still one on its first layer, and crewmates who are near there again are one anyway | Every layer a new crew (a flicker at each arrival); a crew kept until it splits |
+| At home | No places are sent from Lan's HP: the crew stays as it was as its divers left the layer, and the fork's hold is dropped (above) | The fork's hold kept for those who came home together |
+| Strangers | Anyone near is a crew, strangers too; walking away is the way to stay alone, and a switch for it waits for the next test to show it is needed | A setting to stay alone now; crews only between friends |
+| The chat | "Team up,Lan?" and "Split up,Lan?" gone, and A on a diver does nothing of the crew's | Kept to hold a crew over a distance |
+| What is said | Nothing at a forming or a split: the ring around a crew (#716) and its display (#717) show it, the log says it (`dive: crew now: ...`) | "Alright! We're a team with Beta!" at every forming, which would fill the band |
+
+The fairness rule is untouched: a crew shares battles and company, never
+a chip, HP, zenny or a layer. Systems without the one field (the New 3DS,
+the PSP) are in crews as anyone and are never offered their battles. The
+statistics' `deepnet-together` keeps counting the biggest crew a dive
+saw, now one formed by nearness rather than asked for.
 
 ## As built
 
@@ -208,27 +252,29 @@ Verified on `dev`, 15 November 2026:
   0 deleted leaves the others without the party's HP (each then fights the
   rest alone), and the leader's idle pass.
 
-- **Crews** (15 November 2026, `dive_crew.c`): A on a diver's MegaMan
-  (within reach of where MegaMan faces, `dive_people_ahead`) opens BN6's
-  own chat, MegaMan's "Lan,it's Beta!" and Team NetBattles' "Team
-  up,Lan?" (on a crewmate, "Split up,Lan?"); Yes asks (CREW ask), and the
-  diver asked gets "Alpha wants to team up with us!" and the same
-  question; the band says "Alright! We're a team with Beta!" or the
-  split. The chats' words go in a room the layer gives them (as the
-  Square's), their Yes in the Square's team flag `0x14C7`, which a layer
-  otherwise never sets, cleared as read. Seen headless with two games on
-  a local server: the ask, the answer, the crew formed on both. At Lan's
-  HP a portal taken (a lit link's Yes, or the pink pad's art) waits while
-  any crewmate stands on no other (`home_way_hold` in
-  `director_town.c`; CREW way, its index past 0), a band saying "Waiting
-  for the crew...", and is let go as MegaMan steps off: built, not yet
-  seen with two crewed divers at home. The dev menu's keys go before the
-  dive's (`scene_emu.c`), so its A is never an A on a diver, and a crew's
-  chat that never shows (its map gone under it) is given up after 90
-  frames (`talk_reset`): a session held still by one, "talk director"
-  with no box, was how it was found. BN6's own trigger at the pink
-  pad's foot still warps at once, a crewmate stepping on it there
-  splitting the way. The crew's join-in battles: below.
+- **Crews** (15 November 2026, by nearness since 21 November, issue
+  #714; `server/cyberworld_server/crews.py`, `dive_crew.c`; the wire's
+  v20 in [shared/online/README.md](../../shared/online/README.md)): the
+  server settles every room's crews at each tick from the places its
+  divers' games send (STATE, counted only once sent in the room the diver
+  stands in), by the calls above, and tells each member the crew as it
+  stands (CREW_STATE formed) at every change, and a diver out of one that
+  he is (split up). The game keeps what it was told
+  (`dive_crew.h`: `dive_crew_count`, `dive_crew_member`,
+  `dive_crew_has`, and the radius as `DIVE_CREW_NEAR` and
+  `DIVE_CREW_FAR`, the one place the ring, the display and the battles
+  read) and says nothing of it but its log's line. Until 21 November
+  2026 a crew was asked for: A on a diver's MegaMan opened BN6's chat,
+  "Team up,Lan?", and the fork's portal waited for every crewmate
+  (`home_way_hold`); both are gone. Seen headless: the scenarios
+  `online-week/crew-by-nearness` (two games: a crew where they arrive,
+  none once one walks off, none again at five panels, one at three, and
+  still one at five panels, looked at six times over three seconds) and
+  `online-week/crew-of-four-and-a-fifth` (five games on one spot: four
+  in a crew, the fifth outside until one of the four walks off and he
+  takes the place); the server's tests (`server/tests/test_dive.py`)
+  hold the forming, the edge, a chain, the fifth, a split, a portal
+  taken, two crews met.
 
 - **Join-in battles** (15 November 2026, `dive_join.c`, `director_crew.c`;
   `encounter.c`'s `emu_encounters_offer`): while a crewmate stands within
@@ -532,6 +578,68 @@ Verified on `dev`, 15 November 2026:
   through: a driver of its own is to write), a partner's own turn held
   past the lead's OK, a Program Advance of a partner's, his Cross and
   Souls (refused on a party's field for now: the Arena's).
+
+## Who is who on a party's field (21 November 2026)
+
+The team's test over Discord of 18 November
+([issue #713](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/713)):
+on a party's field, a guardian's or a crew's join-in battle, four of
+BN6's MegaMen stand in one palette and nobody could tell which was his.
+BN6 itself leaves an ally unlabelled (the Arena's finding,
+[the partner's seat](arena/two-a-side/seat.md)).
+
+**The call** (taken under the owner's direction of 21 November 2026, that
+the online game is to feel like co-op in a modern MMO or Diablo: always
+clear who is who; his to turn over): a mark by each MegaMan's feet, his
+diver's name, the player's own told apart first. Chosen over a palette
+per MegaMan, which changes what the core draws and so must be alike on
+every game of the field or kept out of its hash; that waits for
+[issue #694](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/694),
+a look of the player's own, where colours are the first step. Read
+through the game-design skill's interface layer: a spatial label on the
+actor, the question "which one am I" answered by a shape as well as a
+colour.
+
+- **The name, cut to a panel.** Whole letters of the diver's name that
+  fit 34 pixels of the engine's pixel font: a panel is 40 wide, so two
+  MegaMen on neighbouring panels of a row keep their names apart, and
+  rows stand 24 apart, more than a name's 9. Two names alike as cut get
+  their seat's digit after them; a seat with no name (the dev's stood-in
+  partners) is "P1" to "P4", the Arena's marks. Centred under his feet.
+- **The player's own** in the PET cursor's orange behind its arrow, so
+  it does not rest on colour alone; the others in the crew's colour, white until a crew has one of its own
+  ([issue #716](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/716):
+  `CREW_COLOUR` in `src/online/party_marks.c`).
+- **A partner's HP his own.** BN6's HP box shows side 0's first actor,
+  the lead, on every game of the field; a partner sees his own over it,
+  as a two-a-side's partner does (`arena_team_view_hp`).
+- **When.** While the field fights, not over a partner's own Custom
+  screen, and on the field's Custom screen the HP box alone, as the
+  Arena's. A MegaMan deleted or gone has none. A linked fighter (New 3DS,
+  PSP) fights alone and has nothing to mark.
+
+As built (`src/online/party_marks.c`, drawn by `party_play_draw`): our own
+drawing over the field's picture, read from the field's core as it
+stands for the frame shown, so a rollback leaves nothing behind; it
+writes nothing, and nothing of it is in the field's hash. The names are
+the seats' sessions in START as the server's snapshot names them, this
+game's own the visit's. A partner's HP beside his name, where #717 wants
+it, goes in `party_marks_draw`'s loop. `--dev partyview=N` draws a
+`partycore` field as seat N sees it, and the state says it (`partyfield`,
+`hpbox`, `markK own|crew at X Y width W tag T`, `marks N apart|MEET`).
+
+Seen headless (21 November 2026; the scenario
+`tests/scenarios/online_party_marks.py`): three MegaMen against layer 3's
+guardian of `--seed 3` (BlastMan) drawn as seat 1 sees them, "P2" his own
+behind the arrow, P1 and P3 the crew's, his HP box his own (read from his
+object, side 0's actor 1), no marks over the Custom screen; with
+`partytwin=1,partyroll=30` 121 checks of the twin and the rollback the
+same and none apart, the marks drawn. Over a local server, two crewed
+divers in a crew's join-in battle, one named sixteen w's: each game his
+own name in orange, the other's in white, "Wwwww" cut to the panel, both
+marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
+Not yet seen over the server: a guardian's door (the same drawing, on the
+same field).
 
 ## The spike: four on one field (15 November 2026)
 

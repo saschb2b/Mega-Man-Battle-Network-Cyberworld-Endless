@@ -272,7 +272,8 @@ class Server:
             del self.players[old.id]
             self.dive.dropped(old)
             self.trades.left(old)
-            self.arena.left(old.id)
+            # (a resume keeps a NetBattle of two under way, v21: arena.py)
+            self.arena.dropped(old.id, player.resumed)
             self.teams.left(old.id)
             self.stands.left(old)
             self.social_rules.left(old.id)
@@ -345,6 +346,7 @@ class Server:
     async def message(self, player, data, now):
         if data and data[0] == protocol.SPEC["state"]:
             player.position = protocol.read_state(data)
+            self.crews.moved(player)
             if self.event_log and now - player.last_log >= 1:
                 player.last_log = now
                 self.event("position", id=player.id, position=player.position)
@@ -603,9 +605,9 @@ class Server:
                 self.trades.expire(now)
                 self.arena.expire(now)
                 self.teams.expire(now)
-                self.crews.expire(now)
                 self.transfers.prune()
             self.holds.expire(now)
+            self.parties.expire(now)
             self.stands.pump(now)
             self.crews.pump(now)
             self.dive.pump(now)

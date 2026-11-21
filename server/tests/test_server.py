@@ -191,7 +191,7 @@ class ServerTests(unittest.IsolatedAsyncioTestCase):
         await writer.wait_closed()
 
 
-# (protocol v19, the shared dive: every constant it added, which protocol.h holds too)
+# (protocol v19, the shared dive, and v20's crews by nearness: every constant they added, which protocol.h holds too)
 DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", "dive", "dive_room", "dive_traces", "dive_place",
               "dive_feed", "divers", "crew", "crew_state", "queue", "queue_state", "party_damage", "party_hp", "week_splits",
               "dive_enter", "dive_leave", "dive_end", "dive_found", "dive_phrase", "dive_wave", "dive_split",
@@ -201,12 +201,14 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               "trace_head", "trace_mark_bytes", "trace_phrase_bytes", "trace_find_bytes", "trace_split_bytes", "traces_most",
               "split_guardian", "dive_place_bytes", "dive_feed_bytes", "feed_deleted", "feed_won", "feed_guardian", "feed_flare",
               "divers_head", "divers_entry_bytes", "divers_most", "divers_ms", "divers_fighting", "crew_bytes",
-              "crew_state_bytes", "crew_member_bytes", "crew_ask", "crew_answer", "crew_split", "crew_way", "crew_battle",
-              "crew_join", "crew_asked", "crew_waiting", "crew_formed", "crew_split_up", "crew_offer", "crew_alone",
+              "crew_state_bytes", "crew_member_bytes", "crew_battle",
+              "crew_join", "crew_formed", "crew_split_up", "crew_offer", "crew_alone",
               "crew_join_ms", "queue_bytes", "queue_state_bytes", "queue_entry_bytes", "queue_join", "queue_leave",
               "queue_start", "queue_pass", "queue_waiting", "queue_started", "queue_out", "queue_alone", "queue_arena",
               "party_bytes", "arena_party", "arena_linked", "arena_seat_gone", "week_splits_bytes", "notice_dive_out",
-              "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue")
+              "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue",
+              # (v20, crews by nearness: crews.py)
+              "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms")
 # (protocol v22, issue #718: a dive pulled back once by its crew, the Board's mark)
 PULL_NAMES = ("week_pulled",)
 

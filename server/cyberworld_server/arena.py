@@ -26,7 +26,17 @@ pair from the four streams; each sends ARENA accept when ready, and START
 goes to all four once all four have, each with its seat and the four
 sessions. What a seat sends is relayed to the three others as ARENA_SEAT
 (its seat, then the message as sent), and to the stands; a leave, a
-decline or a dropped connection of any of the four ends it for all."""
+decline or a dropped connection of any of the four ends it for all.
+
+A battle through a dropped link (protocol v21, issue #180): a NetBattle
+of two under way whose player's link drops without a word is held with
+his place (holds.py), not ended: what the other sends meanwhile is lost
+with the link, and the games ask each other again for the keys they
+miss (ARENA_HASH's frame 0xFFFFFFFC, docs/online/arena/dropped-link.md);
+a resume takes the battle back with the place. The place freed ends it;
+an end while he is away (the other left, the battle over) is said to him
+again on his resume. A team bout, a 2v2 and a party's battle still end at
+the drop."""
 
 import math
 import time
@@ -101,16 +111,44 @@ class Arena:
         # (v13): a rematch keeps the sides, so that both games go into it
         # from the pair they kept (docs/online/arena/from-square/rematch-in-a-second.md)
         self.sides = {}
+        # (v21: an ENDED that found its player's link down, said again on his resume)
+        self.missed = {}
 
     def send(self, player_id, match, stage, side=0, delay=0):
         player = self.server.players.get(player_id)
-        if not player or player.writer.is_closing():
+        if not player:
             return
         other = self.server.players.get(match.other(player_id))
         identity = other.identity if other else bytes(16)
         seats = match.seats if match.four and stage == START else (0, 0, 0, 0)
-        player.writer.write(websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay,
-                                                                 match.form, seats)))
+        framed = websocket.frame(protocol.arena_state(stage, match.id, match.other(player_id), identity, side, delay,
+                                                      match.form, seats))
+        if player.writer.is_closing():
+            # (his link down, his place held: the battle's end kept for his resume, v21)
+            if stage == ENDED and self.server.holds.held(player):
+                self.missed[player_id] = framed
+            return
+        player.writer.write(framed)
+
+    def holdable(self, player_id):
+        """A NetBattle of two under way, which a dropped link of its player
+        holds rather than ends (v21): not a team bout, a 2v2 or a party's."""
+        match = self.matches.get(self.of.get(player_id, 0))
+        return bool(match and match.started and not match.four and not match.team)
+
+    def dropped(self, player_id, held):
+        """`player_id`'s link dropped, his place `held` or not: his battle
+        held where it may be, else ended as on any leave."""
+        if held and self.holdable(player_id):
+            self.server.event("arena_held", id=player_id, match=self.of[player_id])
+            return
+        self.left(player_id)
+
+    def resumed(self, player):
+        """His place taken back: what ended while he was away said again."""
+        framed = self.missed.pop(player.id, None)
+        if framed and not player.writer.is_closing():
+            player.writer.write(framed)
 
     def end(self, match, told=()):
         if self.matches.pop(match.id, None) is None:

@@ -51,5 +51,13 @@ void online_transport_end(void);
  * (ONLINE_ROMS_BN5 where BN5 Team Colonel's is read, ONLINE_ROMS_BN4
  * where BN4 Red Sun's is): the NetPass's set against each peer's roms */
 uint8_t online_transport_roms(void);
+/* A test's dropped link (the dev step `reconnect cut N`, docs/online/arena/dropped-link.md):
+ * the socket closed now without a goodbye, as a lost network leaves it,
+ * and each try again failing for `ms`; a native system's worker only */
+void online_transport_cut(uint32_t ms);
+/* A battle held through a dropped link waits on it (issue #180): the
+ * tries again every half second for the next second, not the 0.5, 1, 2
+ * and 4 seconds' backoff; said each frame while it waits */
+void online_transport_hurry(void);
 
 #endif

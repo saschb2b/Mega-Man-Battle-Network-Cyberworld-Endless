@@ -20,6 +20,7 @@
 #include "online_trade.h"
 #include "online_transport.h"
 #include "online_visit.h"
+#include "party_play.h"
 #include "square_arena.h"
 #include "square_pet.h"
 #include "square_watch.h"
@@ -101,6 +102,7 @@ void online_describe(FILE *f) {
 	 * the trade under way, its screens and board, the Arena's challenge, battle and card, the week's net) */
 	online_trade_describe(f, online_visit_away());
 	dive_link_describe(f);
+	party_play_describe(f);
 	if (!online_visit_away()) return;
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);

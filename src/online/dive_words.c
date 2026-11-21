@@ -28,17 +28,6 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 	return s;
 }
 
-const char *dive_crew_meet_words(const char *name, bool mate) {
-	static char s[64];
-	if (mate) snprintf(s, sizeof s, "%s's\nin our crew,Lan.", name);
-	else snprintf(s, sizeof s, "Lan,it's\n%s!", name);
-	return s;
-}
-
-const char *dive_crew_split_question(void) { return "Split up,Lan?\n"; }
-
-const char *dive_crew_wait_words(void) { return "Waiting for the crew..."; }
-
 const char *dive_join_calling_words(void) { return "Battle! Calling the crew..."; }
 
 const char *dive_join_joined_words(void) { return "Jumping in!"; }

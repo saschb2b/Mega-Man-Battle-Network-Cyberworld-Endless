@@ -11,6 +11,7 @@
 #define CW_ARENA_TEAM_VIEW_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 struct mCore;
 
@@ -20,5 +21,14 @@ unsigned arena_team_view_side(unsigned seat);
  * sees; `hurry`: the seat still picking in the turn's last ten seconds
  * (team_hurry_shown), his own plate blinking fast, no number */
 void arena_team_view(struct mCore *core, unsigned seat, bool hurry);
+
+/* Its pieces, which a party's field (party_marks.h) draws with too: a
+ * MegaMan's object, side's actor k (0 none); where his feet stand on the
+ * picture, his column turned for the side `view` sees from, and his HP
+ * (false: none standing there); and the HP box, a seat's own over BN6's,
+ * where it stands while the Custom screen is `open` or not */
+uint32_t arena_team_view_megaman(struct mCore *core, unsigned side, unsigned k);
+bool arena_team_view_feet(struct mCore *core, uint32_t object, unsigned view, int *x, int *y, unsigned *hp);
+void arena_team_view_hp(unsigned hp, bool open);
 
 #endif

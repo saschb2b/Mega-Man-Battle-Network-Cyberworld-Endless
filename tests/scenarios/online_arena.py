@@ -1,8 +1,10 @@
 """The Arena from the Net Square (docs/online/arena/): a Practice NetBattle
 asked of another player's MegaMan, taken, fought to its end by both games,
 its result on both cards and in each game's record; a challenge turned
-down and one called off; and a player whose game closes mid-battle, the
-other's card saying so and his own run going on."""
+down and one called off; a player whose game closes mid-battle, the
+other's card saying so and his own run going on; and a player whose link
+drops mid-battle for some seconds, the battle held on both games and
+fought to its end (protocol v21, issue #180)."""
 import scenarios_online as online
 from scenarios_online import soon
 
@@ -97,6 +99,27 @@ MANY = {
         ('@beta', 'repeat', 'mash A 60; wait 30', 'chat=closed'),
         ('@beta', 'same', 'hp zenny spares place'),
         ('@beta', 'expect', 'visit=home'),
+    )),
+    # (Beta's link cut mid-battle for four seconds, as a lost network leaves it: his game tries again, takes his place
+    # and the battle back; both games' keys the link lost sent again, and the battle fought to its end on both)
+    'link-drops-mid-battle': dict(CAST, START=FIGHT, GAMES={'beta': FIGHT_WEAK}, STEPS=online.course(
+        MEET, CHALLENGE,
+        soon('arena=battle', '', 900),
+        soon('arena=battle', 'beta', 900),
+        ('do', 'wait 120'),
+        ('@beta', 'do', 'reconnect cut 4'),
+        soon('arenalink~down', 'beta', 120),        # the link down, the battle held on
+        ('@beta', 'expect', 'arena=battle'),
+        soon('link=up', 'beta', 900),               # back: his place taken back
+        ('@beta', 'expect', 'resumes=1'),
+        ('@beta', 'expect', 'arenalink~up'),
+        ('@beta', 'expect', 'arena=battle'),
+        ('expect', 'arena=battle'),                 # Alpha's battle waited on his keys, never stopped
+        soon('arena=over', '', 6000),
+        ('expect', 'arenacard=won'),
+        soon('arena=over', 'beta', 600),
+        ('@beta', 'expect', 'arenacard=lost'),
+        ('@beta', 'expect', 'arenalink>=1'),          # his keys the link lost sent again (its first number: resent)
     )),
     'server-gone-mid-battle': dict(CAST, START=FIGHT, GAMES={'beta': FIGHT}, STEPS=online.course(
         online.paged(),

@@ -189,29 +189,6 @@ static void home_talk(void) {
  * unasked (session 73); the pink pad warps as BN6's does (link_asked: the
  * one asked, until the answer; link_on: the one MegaMan stands on) */
 static int link_asked = -1, link_on = -1;
-static int link_waits = -1;   /* a portal taken, waiting on the crew (home_way_hold) */
-bool (*home_way_hold)(int portal);
-
-/* portal k taken: at once, or once the dive's crew all stand on it
- * (home_way_hold) */
-static void take(int k) {
-	if (home_way_hold && home_way_hold(k)) { link_waits = k; return; }
-	link_waits = -1;
-	lanhp_take(k);
-}
-
-/* the crew's wait: taken once they agree, let go as MegaMan steps off */
-static bool waiting(int x, int y) {
-	if (link_waits < 0) return false;
-	if (lanhp_portal_near(x, y, 0) != link_waits) { link_waits = -1; if (home_way_hold) home_way_hold(-1); return false; }
-	if (home_way_hold && home_way_hold(link_waits)) return true;
-	int k = link_waits;
-	link_waits = -1;
-	/* (the pink pad its own warp, the lit links theirs) */
-	if (k == 0) lanhp_pad_take(x, y);
-	else lanhp_take(k);
-	return true;
-}
 
 /* link `k`'s words and its question: a trip back's price, or what MegaMan
  * reads through a way on */
@@ -249,10 +226,10 @@ bool home_hp_check(void) {
 /* A lit link stepped on: its question, once each time he steps on it; the
  * answer, its talk closed: Yes takes its link */
 static void link_portal(void) {
-	if (!home_in_hp()) { link_asked = link_on = link_waits = -1; return; }
+	if (!home_in_hp()) { link_asked = link_on = -1; return; }
 	bool idle = !talk_busy() && !emu_read8(BN6_CHATBOX);
 	if (link_asked >= 0 && idle) {
-		if (flag_get(HOME_LINK_FLAG)) take(link_asked);
+		if (flag_get(HOME_LINK_FLAG)) lanhp_take(link_asked);
 		flag_clear(HOME_LINK_FLAG);
 		link_asked = -1;
 		return;
@@ -260,8 +237,6 @@ static void link_portal(void) {
 	/* (the pink pad, portal 0, is BN6's own warp; on its art in front of
 	 * BN6's trigger, the same warp: lanhp_pad_take) */
 	int x = bn6_player_x(), y = bn6_player_y(), k = lanhp_portal_near(x, y, 0);
-	if (waiting(x, y)) return;
-	if (k == 0 && idle && settled() && home_way_hold && home_way_hold(0)) { link_waits = 0; return; }
 	if (k == 0 && idle && settled() && lanhp_pad_take(x, y)) return;
 	if (k <= 0) link_on = -1;
 	else if (k != link_on && idle && settled() && ask_link(k)) link_on = k;

@@ -504,17 +504,17 @@ def divers(total, entries):
 
 
 def read_crew(data):
-    """CREW: an action (crew_ask .. crew_join), its reference, a value (an
-    answer's 1 yes; a battle's its index on the layer) and a way (a fork's
-    portal: depth 0 none)."""
+    """CREW: an action (crew_battle or crew_join; v20: a crew is by nearness,
+    crews.py, and its asks, answers, splits and ways are gone), its
+    reference (a join's: the battle's owner) and its value (a battle's index
+    on the layer); its last three bytes zeros."""
     if len(data) != SPEC["crew_bytes"] or data[0] != SPEC["crew"]:
         raise ProtocolError("Malformed CREW")
     _, action, ref, value, depth, side, way = CREW.unpack(data)
-    asks = (SPEC["crew_ask"], SPEC["crew_answer"], SPEC["crew_join"])
-    if not SPEC["crew_ask"] <= action <= SPEC["crew_join"] or depth > SPEC["week_layers"] \
-            or (value > 1 and action != SPEC["crew_battle"]) or (action in asks and not ref):
+    if action not in (SPEC["crew_battle"], SPEC["crew_join"]) or depth or side or way \
+            or (action == SPEC["crew_join"] and (not ref or value)):
         raise ProtocolError("Invalid crew action")
-    return action, ref, value, (depth, side, way)
+    return action, ref, value
 
 
 def crew(action, ref=0, value=0, way=(0, 0, 0)):
@@ -522,7 +522,7 @@ def crew(action, ref=0, value=0, way=(0, 0, 0)):
 
 
 def crew_state(stage, other, value, members):
-    """CREW_STATE: members (session, name, (depth, side, way)) of at most party_most, zeros past them."""
+    """CREW_STATE: members (session, name, (depth, side, way): v20 zeros) of at most party_most, zeros past them."""
     out = CREW_STATE_HEAD.pack(SPEC["crew_state"], stage, other, value)
     for k in range(SPEC["party_most"]):
         session, name, way = members[k] if k < len(members) else (0, "", (0, 0, 0))

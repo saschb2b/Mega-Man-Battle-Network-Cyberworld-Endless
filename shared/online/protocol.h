@@ -3,12 +3,12 @@
 #ifndef CW_ONLINE_PROTOCOL_H
 #define CW_ONLINE_PROTOCOL_H
 
-#define ONLINE_PROTOCOL_VERSION 19
+#define ONLINE_PROTOCOL_VERSION 22
 #define ONLINE_MAX_PLAYERS 8
 #define ONLINE_NAME_BYTES 16
 #define ONLINE_MAX_MESSAGE 512
 #define ONLINE_COORDINATE_LIMIT 8192
-#define ONLINE_SUBPROTOCOL "cyberworld.presence.v19"
+#define ONLINE_SUBPROTOCOL "cyberworld.presence.v21"
 #define ONLINE_HELLO 1
 #define ONLINE_WELCOME 2
 #define ONLINE_STATE 3
@@ -195,19 +195,18 @@
 #define ONLINE_CREW_BYTES 10
 #define ONLINE_CREW_STATE_BYTES 99
 #define ONLINE_CREW_MEMBER_BYTES 23
-#define ONLINE_CREW_ASK 1             /* CREW's actions */
-#define ONLINE_CREW_ANSWER 2
-#define ONLINE_CREW_SPLIT 3
-#define ONLINE_CREW_WAY 4
-#define ONLINE_CREW_BATTLE 5
+#define ONLINE_CREW_BATTLE 5          /* CREW's actions (v20: 1-4, the asks and ways, gone) */
 #define ONLINE_CREW_JOIN 6
-#define ONLINE_CREW_ASKED 1           /* CREW_STATE's stages */
-#define ONLINE_CREW_WAITING 2
-#define ONLINE_CREW_FORMED 3
+#define ONLINE_CREW_FORMED 3          /* CREW_STATE's stages (v20: 1-2, the asks', gone) */
 #define ONLINE_CREW_SPLIT_UP 4
 #define ONLINE_CREW_OFFER 5
 #define ONLINE_CREW_ALONE 6
 #define ONLINE_CREW_JOIN_MS 3000      /* a battle's offer stands so long */
+#define ONLINE_CREW_NEAR 128          /* v20: world units (four panels) within which a crew forms, */
+#define ONLINE_CREW_FAR 192           /* ... and within which it holds */
+#define ONLINE_CREW_FORM_MS 1000      /* near so long before a crew forms */
+#define ONLINE_CREW_SPLIT_MS 2000     /* out of reach so long in the room before a member is out */
+#define ONLINE_CREW_AWAY_MS 10000     /* ... and elsewhere (a portal taken first, home) */
 #define ONLINE_QUEUE_BYTES 5
 #define ONLINE_QUEUE_STATE_BYTES 91
 #define ONLINE_QUEUE_ENTRY_BYTES 21
