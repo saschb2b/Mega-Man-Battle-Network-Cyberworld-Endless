@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T01:00:00Z
+* **Update**: online/arena/dropped-link.md (a team, its match and its bouts, and a 2v2, held through a drop), online/arena/teams.md (a short drop keeps the team and its match), online/arena/two-a-side/over-the-server.md (the same for four seats), online/arena/not-yet.md (a drop mid-battle).

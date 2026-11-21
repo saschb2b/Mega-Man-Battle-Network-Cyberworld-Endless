@@ -7,9 +7,9 @@ identity with the resume bit (hello_resume) takes it back, id and all, so
 the others never see him leave; the trade's last word (done or off) is
 said again to it, as it may have been lost with the link. What was under
 way ends at the drop, as on any leave: a trade not committed is off, a
-team bout ends without a result, a spectator's watching stops; but a
-NetBattle of two goes on, held with the place (protocol v21, arena.py),
-and ends when the place is freed. A goodbye,
+spectator's watching stops; but a battle goes on, held with the place
+(a NetBattle, protocol v21, arena.py; a team, its match and its bout,
+teams.py; a party's seat, party.py), and ends when the place is freed. A goodbye,
 a refusal or a moderator's removal frees the place at once; so does a
 HELLO without the resume bit (a new visit from the gate), as a new arrival.
 
@@ -50,7 +50,7 @@ class Holds:
         server.trades.left(player)
         hold = not (goodbye or not self.seconds or player.refused)
         server.arena.dropped(player.id, hold)
-        server.teams.left(player.id)
+        server.teams.dropped(player.id, hold)
         server.stands.left(player)
         server.social_rules.left(player.id)
         if not hold:
@@ -69,6 +69,8 @@ class Holds:
         server.arena.left(player.id)
         server.arena.missed.pop(player.id, None)
         server.parties.let_go(player.id)
+        # (a team, its match and its bout held with the place end with it)
+        server.teams.left(player.id)
         server.trades.done.discard(player.id)
         server.trades.last.pop(player.id, None)
         server.event("leave", id=player.id, players=len(server.players))
@@ -79,6 +81,7 @@ class Holds:
         self.until.pop(old.id, None)
         self.server.arena.missed.pop(old.id, None)
         self.server.parties.let_go(old.id)
+        self.server.teams.left(old.id)
         self.server.trades.done.discard(old.id)
         self.server.trades.last.pop(old.id, None)
 
@@ -114,3 +117,4 @@ class Holds:
             await websocket.send(player.writer, word)
         self.server.arena.resumed(player)
         self.server.parties.resumed(player)
+        self.server.teams.resumed(player)

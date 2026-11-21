@@ -15,6 +15,7 @@
 #define CW_SQUARE_TEAM_H
 
 #include <stdbool.h>
+#include <stdio.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -58,5 +59,10 @@ typedef struct {
 	unsigned result;               /* the match's end, TEAM_WON..TEAM_DRAWN; 0 not yet */
 } SquareTeamCard;
 void square_team_card(SquareTeamCard *out);
+
+/* the team and its match in the state's words (tools' scenarios): "team"
+ * the partner's name or none, "teammatch" its stage (begun, ordered, bout,
+ * fight, over and its result) or none */
+void square_team_describe(FILE *f);
 
 #endif

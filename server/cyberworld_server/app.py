@@ -274,7 +274,7 @@ class Server:
             self.trades.left(old)
             # (a resume keeps a NetBattle of two under way, v21: arena.py)
             self.arena.dropped(old.id, player.resumed)
-            self.teams.left(old.id)
+            self.teams.dropped(old.id, player.resumed)
             self.stands.left(old)
             self.social_rules.left(old.id)
             if player.resumed:

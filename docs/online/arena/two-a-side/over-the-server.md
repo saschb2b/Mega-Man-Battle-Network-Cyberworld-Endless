@@ -50,8 +50,10 @@ kid would say them). No number about the link is shown anywhere.
   keys keep their sixteen bits (his Custom screen's picks, bit 15).
 - Seat 0 reports the battle (ARENA_STATUS) and sends its end, as the
   cable's first ever did; the winner's team wins, no winner is a draw, and
-  a leave, a decline or a dropped link of any of the four ends it broken
-  off for both teams (TEAM_STATE over, result 3). All four are busy in
+  a leave, a decline or a dropped link of any of the four that does not
+  come back ends it broken off for both teams (TEAM_STATE over, result
+  3); a short drop is ridden out (issue #180, [A NetBattle through a
+  dropped link](../dropped-link.md)). All four are busy in
   the Square's marks while it runs.
 - The stands keep four seats' MegaMen and keys: WATCH_STATE names the
   partners' seats, WATCH_RELAY and WATCH_KEYS carry the seat, and the

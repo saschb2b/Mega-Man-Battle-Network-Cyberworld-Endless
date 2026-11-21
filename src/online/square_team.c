@@ -41,6 +41,7 @@ static struct {
 	Question team_q, order_q;
 	TeamWireState st;              /* the match as last told (stage 0 none) */
 	uint32_t taken, watched;       /* the bout gone into, the bout watched */
+	uint32_t resumes;              /* the transport's resumes seen: a watch the drop ended watched again (issue #180) */
 	uint16_t carry;                /* my HP left, where I stay on */
 	const char *said;
 	char said_buf[160];
@@ -252,8 +253,25 @@ static void bout_mine(void) {
 	if (square_arena_bout(T.st.bout, T.st.players[2], T.names[2], T.carry)) T.taken = T.st.bout;
 }
 
+void square_team_describe(FILE *f) {
+	static const char *const stages[] = { "none", "asked", "waiting", "formed", "split", "begun", "ordered", "bout", "fight", "over" };
+	static const char *const results[] = { "", " won", " lost", " broken", " drawn" };
+	fprintf(f, "team %s\n", T.partner ? T.partner_name : "none");
+	unsigned st = T.st.stage < 10 ? T.st.stage : 0, r = T.st.result < 5 ? T.st.result : 0;
+	fprintf(f, "teammatch %s%s\n", st >= TEAM_MATCH ? stages[st] : "none", st == TEAM_OVER ? results[r] : "");
+}
+
+/* the link back after a drop (issue #180): the team and its match were
+ * held, and a bout of the others the drop stopped watching is watched again */
+static void resumed(const OnlineSnapshot *s) {
+	if (!s->connected || s->reconnecting || s->resumes == T.resumes) return;
+	T.resumes = s->resumes;
+	if (T.watched && T.watched != T.taken) T.watched = 0;
+}
+
 void square_team_update(const OnlineSnapshot *s, bool held) {
 	T.s = *s;
+	resumed(s);
 	bool open = !held && (talk_busy() || emu_read8(BN6_CHATBOX));
 	if (!held) questions(open);
 	/* (a question or a word just begun holds the bout back too) */
