@@ -33,8 +33,6 @@ int dive_crew_count(void);
 const CrewMember *dive_crew_member(int k);
 /* Whether `session` is in MegaMan's crew (MegaMan's own: whether he is in one). */
 bool dive_crew_has(uint32_t session);
-/* A crewmate's name ("" none). */
-const char *dive_crew_name(uint32_t session);
 /* CREW_STATE: the crew as it stands (formed), none (split_up); a battle's
  * offer and alone to dive_join.h. */
 void dive_crew_mail(const uint8_t *m, size_t n);

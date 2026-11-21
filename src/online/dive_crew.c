@@ -27,12 +27,6 @@ bool dive_crew_has(uint32_t session) {
 	return false;
 }
 
-const char *dive_crew_name(uint32_t session) {
-	for (int k = 0; k < C.count; ++k)
-		if (C.m[k].session == session) return C.m[k].name;
-	return "";
-}
-
 /* (the log's line, for the scenarios and a session's eye; nothing said in the game: the ring shows it, #716) */
 static void log_crew(const char *what, const CrewState *c) {
 	fprintf(stderr, "dive: crew %s:", what);

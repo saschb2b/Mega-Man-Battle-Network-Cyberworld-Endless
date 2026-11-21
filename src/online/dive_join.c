@@ -64,6 +64,14 @@ static bool free_here(void) {
 		!party_play_held();
 }
 
+/* a crewmate's name ("" none) */
+static const char *crewmate(uint32_t session) {
+	const CrewMember *m;
+	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k)
+		if (m->session == session) return m->name;
+	return "";
+}
+
 /* the owner's: a roll held while MegaMan was in a crew (the crew is who stands near, dive_crew.h), offered */
 static void call(void) {
 	J.owner = 0;
@@ -138,7 +146,7 @@ void dive_join_crew_state(const CrewState *c) {
 	 * turned down as late holds MegaMan only so long) */
 	J.owner = c->other;
 	J.index = c->value;
-	snprintf(J.name, sizeof J.name, "%s", dive_crew_name(c->other));
+	snprintf(J.name, sizeof J.name, "%s", crewmate(c->other));
 	send(ONLINE_CREW_JOIN, J.owner, 0);
 	fprintf(stderr, "dive: jumping into %s's battle %d, unasked\n", J.name, J.index);
 	to(JOIN_JOINED);
