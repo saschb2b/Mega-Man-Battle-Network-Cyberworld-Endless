@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T12:45:00Z
+* **Update**: online/shared-dive.md (viruses' aim in a crew's battle, issue #777: a virus finds its target by position, the owner in front; the viruses' bench), rom/online.md (a virus's target by the panels in its line: the Gunner's scan and filter, the Mettaur's moves).

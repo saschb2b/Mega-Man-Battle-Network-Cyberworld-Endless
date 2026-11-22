@@ -247,4 +247,10 @@
                                           /* ... no test that it had turned already, so with no such column on the field it never ends (grab_search.h) */
 #define BN6_GRAB_FOUND        0x0800D5E0u /* ... its end: adds r0,r6,#0; pop {r4,r6,r7,pc} */
 
+/* A panel flag (bn6.h's BN6_PANEL_FLAGS) */
+#define BN6_PANEL_SIDE_0      0x00010000u /* BN6_PANEL_FLAGS: an object of side 0 stands on it, what side 1's panel scans want: the Gunner's
+                                           * attack step (0x081140F0) asks object_getFirstPanelInDirectionFiltered (0x0800D0BC) for the first
+                                           * panel in its front direction by alliance 1's entry of its filter table (0x08114154: wanted
+                                           * 0x00010000, forbidden 0x20); issue #777 */
+
 #endif
