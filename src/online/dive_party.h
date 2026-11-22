@@ -12,6 +12,7 @@
 #ifndef CW_DIVE_PARTY_H
 #define CW_DIVE_PARTY_H
 
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -32,11 +33,12 @@ uint32_t dive_party_keys(uint32_t keys);
 /* QUEUE_STATE, a party battle's ARENA_STATE and ARENA_SEAT, PARTY_HP. */
 void dive_party_mail(const uint8_t *m, size_t n);
 
-/* The door's band: who waits, and the keys; or that the queue holds its
- * four already (a join refused, issue #753: MegaMan held at the door, A
- * goes in alone, his other keys his own, a place asked for again every few
- * seconds). */
-void dive_party_draw(int x, int y);
+/* The door's band line, NULL none: who waits, and the keys; or that the
+ * queue holds its four already (a join refused, issue #753: MegaMan held at
+ * the door, A goes in alone, his other keys his own, a place asked for
+ * again every few seconds). The dive's band draws it before the feed's
+ * lines: a queued diver's own line is never put off by them (issue #778). */
+const char *dive_party_band(void);
 /* The party forming at the door, MegaMan among them, the leader first (0
  * none: not queued, or queued alone); the crew's plates show them there
  * (dive_crew_view.h). */

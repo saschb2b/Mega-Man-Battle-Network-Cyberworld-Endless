@@ -43,7 +43,7 @@ void party_play_on(bool on);
  * #757); partyscale=1 every guardian scaled for N as a party's door scales
  * him, partyhpper=P and partysteps=S other rules for it (boss_party_dev,
  * tools/party_guardian.py) */
-typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps; } PartyDev;
+typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps, reward; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size, the input delay and the seats' sessions (each MegaMan's name on

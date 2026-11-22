@@ -4,7 +4,9 @@
  * ("CWE2") had guardians for eight areas, the third ("CWE3") for sixteen;
  * the areas added since get theirs drawn from the run's seed. The fifth,
  * sixth, seventh, eighth and ninth ("CWE5" to "CWE9") are the current
- * run without the fields added at its end since. */
+ * run without the fields added at its end since; so are "CWEA" to "CWED",
+ * before MegaMan's form: their runs end as the mix, every system at once,
+ * as they were played. */
 #include <stdio.h>
 
 #include "compat.h"
@@ -141,16 +143,21 @@ static bool load_v9(void) {
 	return true;
 }
 
-/* (a Run as it lies today under `magic`: "CWEA" every extra on, as runs
- * were; "CWEB" and "CWEC" where this build's folders are ten bits, their
- * state's nine-bit, save_format.h) */
+/* (a Run as it lies today under `magic`, the form's fields after it read
+ * as 0, the mix: "CWEA" every extra on, as runs were; "CWEB" and "CWEC"
+ * their state's folders nine-bit, "CWED" ten, save_format.h) */
+static bool nine;
+
 static bool load_today(uint32_t magic, bool extras_on) {
 	Run v;
 	if (!save_read_blob_upto("run.sav", magic, &v, sizeof v) || !v.active) return false;
 	if (extras_on) v.extras_off = 0;
 	run = v;
+	nine = magic != RUN_MAGIC_TEN;
 	return true;
 }
+
+bool legacy_run_nine(void) { return nine; }
 
 static void old_route(uint32_t seed, int depth, int biome, int side, uint32_t layer_seed, const uint8_t *biomes) {
 	uint32_t keep = rng_state();
@@ -189,8 +196,9 @@ static bool load_v2(void) {
 	return true;
 }
 
-bool legacy_load_run(void) {
-	if ((RUN_MAGIC != RUN_MAGIC_NINE_STOP && load_today(RUN_MAGIC_NINE_STOP, false)) || (RUN_MAGIC != RUN_MAGIC_NINE && load_today(RUN_MAGIC_NINE, false)) ||
+static bool load_older(void) {
+	nine = true;
+	if (load_today(RUN_MAGIC_TEN, false) || load_today(RUN_MAGIC_NINE_STOP, false) || load_today(RUN_MAGIC_NINE, false) ||
 	    load_today(RUN_MAGIC_VA, true) || load_v9() || load_v8() || load_v7() || load_v6() || load_v5() || load_v3() || load_v2()) return true;
 	RunV1 v;
 	if (!save_read_blob("run.sav", RUN_MAGIC_V1, &v, sizeof v) || !v.active) return false;
@@ -207,6 +215,17 @@ bool legacy_load_run(void) {
 	run.viruses_deleted = v.viruses_deleted;
 	run.fragments = v.fragments;
 	run.secret_cleared = v.secret_cleared;
+	return true;
+}
+
+bool legacy_load_run(void) {
+	if (!load_older()) return false;
+	/* (every format before "CWEE" played every system at once: the mix,
+	 * to the run's end, whatever run_new set in old_route) */
+	run.form = RUN_FORM_MIX;
+	run.soul_start = 0;
+	run.cross_active = run.cross_held = run.cross_layer = 0;
+	run.soul_turns = 0;
 	return true;
 }
 

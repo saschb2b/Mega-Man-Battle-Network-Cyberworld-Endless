@@ -586,8 +586,9 @@ winner the first side) with the party's size. A diver joining a door's
 queue is a flare to every diver of the week behind him in the same act
 (a lower depth, three layers an act, the Nest the fourth) and, since 22
 November 2026 (issue #752; no change to the message), on the door's own
-layer, never to one already in that queue, the door's depth, side and
-way with it. DIVERS goes to every session after each
+layer, never to one already in that queue, and once a door to each
+(issue #778: a second joiner's tells nobody again), the door's depth,
+side and way with it. DIVERS goes to every session after each
 WELCOME and, where it changed, at most every `divers_ms` (2000).
 
 **Crews** (`crews.py`; since v20 by nearness, above), as v19 had them, modelled on TEAM: an ask only to a diver of the

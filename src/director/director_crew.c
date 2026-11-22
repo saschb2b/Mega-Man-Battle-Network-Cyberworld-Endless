@@ -93,7 +93,7 @@ static void give(uint16_t reward) {
 void (*director_crew_band)(const char *line);
 
 /* the last crew's battle's end, for the state's words */
-static struct { bool ended, won, pulled; int hp; unsigned gave; } last;
+static struct { bool ended, won, pulled; int hp, field_hp; unsigned gave; uint16_t reward; } last;
 
 bool director_crew_pull_spent(void) { return weekly_record()->pulled != 0; }
 
@@ -101,7 +101,8 @@ void director_crew_describe(FILE *f) {
 	if (!weekly_on()) return;
 	fprintf(f, "pullback %s\n", director_crew_pull_spent() ? "spent" : "free");
 	if (!last.ended) { fprintf(f, "crewend none\n"); return; }
-	fprintf(f, "crewend %s hp %d", last.won ? "won" : "lost", last.hp);
+	/* (the field's HP as its fight ended, the reward BN6's results gave, the run's HP after it: issue #769) */
+	fprintf(f, "crewend %s hp %d fieldhp %d reward %04x", last.won ? "won" : "lost", last.hp, last.field_hp, last.reward);
 	if (last.pulled) fprintf(f, " pulled");
 	else if (last.gave) fprintf(f, " gave %u", last.gave);
 	fputc('\n', f);
@@ -126,6 +127,8 @@ static CrewPullOut gifts(const CrewOver *o, unsigned me) {
 
 void director_crew_over(const Encounter *e, const CrewOver *o) {
 	emu_encounter_drop();
+	/* (counted for the dive's end screen, issue #769: a deletion in it too) */
+	weekly_crew_battle(o->won);
 	unsigned me = o->seat < CREW_PULL_SEATS ? o->seat : 0;
 	CrewPullOut out = gifts(o, me);
 	bool pulled = out.pulled[me];
@@ -133,6 +136,8 @@ void director_crew_over(const Encounter *e, const CrewOver *o) {
 	uint8_t b[2];
 	put16(b, (uint16_t)(hp < 0 ? 0 : hp > max ? max : hp));
 	emu_write(BN6_NAVI_HP, b, sizeof b);
+	last.field_hp = hp;
+	last.reward = o->reward;
 	/* (deleted with nobody to pull him back: the run over as a deletion ends it alone, the owner's call) */
 	if (hp <= 0) {
 		fprintf(stderr, "crew battle: MegaMan deleted; the run is over\n");
@@ -148,7 +153,8 @@ void director_crew_over(const Encounter *e, const CrewOver *o) {
 		for (int i = 0; i < e->nfoes; ++i) run.viruses_deleted += e->foes[i].kind == FOE_VIRUS;
 		give(o->reward);
 	}
-	fprintf(stderr, "crew battle: %s, MegaMan's HP %d%s, the layer's battles %d\n", o->won ? "won" : "lost", hp,
+	last.hp = emu_read16(BN6_NAVI_HP);
+	fprintf(stderr, "crew battle: %s, MegaMan's HP %d%s, the layer's battles %d\n", o->won ? "won" : "lost", last.hp,
 		pulled ? ", pulled back by the crew" : "", D.battles);
 	if (out.gave[me]) fprintf(stderr, "crew battle: %u HP given to pull a crewmate back\n", out.gave[me]);
 	roll_encounter();

@@ -18,6 +18,10 @@ static bool W_read;
 static WeeklyEnd E;
 
 const WeeklyEnd *weekly_last_end(void) { return &E; }
+
+void (*weekly_end_pump)(void);
+
+void weekly_end_placed(int place) { E.place = place; }
 int title_dive;
 
 const WeeklyRecord *weekly_record(void) {
@@ -116,11 +120,13 @@ bool weekly_dive(uint16_t week, uint32_t seed) {
 	rivals_load();
 	run_new(seed);
 	run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0, 0);
+	run_setup_form(run_week_form(seed), 0);   /* (the mix without --dev forms) */
 	meta_run_begun();
 	W.week = week;
 	W.seed = seed;
 	W.running = 1;
 	W.pulled = 0;
+	W.crew_fought = W.crew_won = 0;
 	record_write();
 	fprintf(stderr, "weekly: a dive of week %u begun (seed %08x)\n", week, seed);
 	/* (the week's portal warps MegaMan into the Deep Net's first layer, never
@@ -181,7 +187,7 @@ void weekly_ended(bool won) {
 	if (depth > SHORT_LAYERS) depth = SHORT_LAYERS;
 	unsigned minutes = profile.played_run == run.seed ? (profile.played_frames + 3599u) / 3600u : 0;
 	if (minutes > 0xFFFF) minutes = 0xFFFF;
-	E = (WeeklyEnd){ true, won && depth == SHORT_LAYERS, W.pulled != 0, (uint16_t)depth, (uint16_t)minutes };
+	E = (WeeklyEnd){ true, won && depth == SHORT_LAYERS, W.pulled != 0, (uint16_t)depth, (uint16_t)minutes, W.crew_fought, W.crew_won, -1 };
 	bool keep = !W.pending || W.r_week != W.week || better(depth, won, minutes, &W);
 	if (keep) {
 		int act = weekly_act(depth);
@@ -224,6 +230,14 @@ void weekly_leave(void) {
 bool weekly_normal_saved(void) {
 	weekly_leave();
 	return save_exists();
+}
+
+void weekly_crew_battle(bool won) {
+	weekly_record();
+	if (!save_slot_weekly()) return;
+	if (W.crew_fought < 255) ++W.crew_fought;
+	if (won && W.crew_won < 255) ++W.crew_won;
+	record_write();
 }
 
 void weekly_pulled(void) {
