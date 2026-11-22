@@ -127,6 +127,8 @@ static HookAct hand(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
+int soulpassive_breaks(void) { return breaks; }
+
 bool soulpassive_install(int brk) {
 	if (done) return true;
 	if (!R.data || !emu_ready()) return false;

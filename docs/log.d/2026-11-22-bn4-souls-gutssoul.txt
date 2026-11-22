@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T15:40:00Z
+* **Update**: multirom/bn4-souls.md (GutsSoul in BN6's engine: his punch's unit, his arm's art, his hand's pass, bn4_soul_guts and its mutations; his rapid buster not yet moved, its design), rom/bn4.md (GutsSoul's pass adds to the hand's bonus, BN6_HAND_BONUS), devtools/differential.md (the presses rule), code/emu.md (soulbn4.c's GutsSoul).

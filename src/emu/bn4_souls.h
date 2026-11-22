@@ -12,8 +12,9 @@
 #define BN4_SOUL_PICTURE_DECOS 0x080E36ACu /* ... an arm object (BN4_ARM_SPAWN's kind) on the picture by form, 0xFF none: WindSoul's
                                        * 0x34, FireSoul's 0x12, NumSoul's 0x14, AquaSoul's 0x13 */
 #define BN4_GUTS_ENTER    0x0800E0E4u /* GutsSoul's (form 2's): r0 his side, on to his hand's pass, */
-#define BN4_GUTS_PASS     0x0800E1CAu /* ... which adds to each chip of the side's hand from the one up next (0x0800BFEA's hand: +0 the
-                                       * index, +2 the ids, their powers 0x24 on) whose record's +9 holds 0x02 (its power shown): */
+#define BN4_GUTS_PASS     0x0800E1CAu /* ... which adds to the bonus of each chip of the side's hand from the one up next (0x0800BFEA's
+                                       * hand: +0 the index, +2 the ids, their bonuses 0x24 on, +0x26: BN6's BN6_HAND_BONUS, the attack's
+                                       * +6 as it is used) whose record's +9 holds 0x02 (its power shown): */
 #define BN4_GUTS_PASS_KIND 0x0800E1F0u /* ... cmp r1,#0xc: of the kind none (BN4_CHIP_KIND), */
 #define BN4_GUTS_PASS_KIND2 0x0800E1F6u /* ... cmp r1,#8: or panel-cracking, */
 #define BN4_GUTS_PASS_ADD 0x0800E1FEu /* ... adds r1,#0x1e: 30 */

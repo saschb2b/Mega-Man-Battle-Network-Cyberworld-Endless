@@ -288,6 +288,45 @@ BN6's proxy keeps its companion overlay, and each game numbers his
 palette and power attack its own way. The comparator's BN4 path has no
 rules for a Soul yet, and his look is not moved.
 
+## GutsSoul in BN6's engine
+
+GutsSoul (BN4's Soul 2, form 2) is BN6's Soul 14 (k 1 in `soulbn4.c`'s
+`forms`, held bit 7). What it took past ThunSoul's parts:
+
+| Part | GutsSoul's |
+| --- | --- |
+| UNITE's kind | panel-cracking, BN4's own kind 8 of the chip (`soulkinds_bn4_of`: the registry's BN4 record, else BN4's chip of the same name), which BN5's numbering gives Cursor: `bn4_soul_guts` unites by two PanlSht1 (BN4's 178, BN6's moved 559) |
+| Its charged shot | family 0x12, an attack unit at BN6's grown 0xD8; power attack 0x24 copied with it (60 at the attack's +8, a punch at the panel ahead, struck through the generic hit); its charge 100 at every Charge. Its punch object (the third kind's 0x1E) is spawned only where the attack's +3 is not 0, which 0x24 zeroes: its rows are the generator's `ROW_TABLES` entry left BN4's |
+| His punch's hit | struck and pushed back a panel: the collision region's bits 0x21 at 0x080EBFDE, BN4's struck-and-pushed bit 0x01 with a push bit, given BN6's 0x61 (bit 0x40 with it), as GutPnch's punch is; its sound 0xA4 from slot 0x207, which GutPnch's unit gave it |
+| His arm in the punch | the arm's kind 5 (`movs r4,#5` at 0x080EBF9A), BN4's list 3 number 4, which the chips' generator had not copied, so BN6 drew its own 3:4; now copied as BN6's list 3 number 0x7B, as ThunSoul's flash took 0x7A |
+| His hand's pass | BN4's enter routine for form 2 (`BN4_GUTS_ENTER`) adds 30 to the bonus of each chip up next of no kind or panel-cracking whose power shows (`BN4_GUTS_PASS`); BN6's twin of BN4's hand keeps that bonus at `BN6_HAND_BONUS`, the attack's +6 beside its power at +8 as the chip is used (both traces: 30 and 100 for PanlSht1). `soulbn4_enter` does it as MegaMan enters the proxy form, its numbers read from BN4's code |
+
+The proof is `bn4_soul_guts` against BN4's own battle (with its control,
+`bn4_soul_guts_control`): the unison by two PanlSht1, B held 102 frames
+from fight frame 30 for the punch, then PanlSht1 at 200 with its 30 more,
+MegaMan at (3,2) and a MettaurSP at (4,2) in its reach. The chip comes after
+the charged shot: BN6's support run holds MegaMan's own clock a frame on
+from it (the differential's megaman_clock), while a press of B keeps the
+battle's, so a charge begun after a chip reads a frame early. Its four
+mutations: the charge 10 frames longer, the punch's damage another, the pass
+left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
+
+**Not yet moved: his rapid buster.** BN4's key handler in form 2 counts B's
+presses (AI data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to
+0x0800BE7A) and at six asks request 0x20, which his ready state answers
+with his state 0x10: eight shots, sound 0xA7, each BN4's buster shot
+(0x0800B590, BN6's twin 0x0800FAAC, each reading its own game's buster
+attack from the NaviStats), then the count cleared (0x080EBE84 to
+0x080EBE88). The comparator reads the count of one to five presses as the
+same state (`presses`); a sixth parts the battles. To move it: the state
+as an attack unit (`('attack', 0x10, ...)` at 0xD9; its sound to slot 0x301;
+the twin above), a place for the two bytes (BN6's AI data's spare past
++0xF0 is BN5's chip AI's where BN5's ROM is read, so the Souls block's
+side bytes from 0x18, which the unit's clear then needs aimed there), a hook
+after BN6's charge requests (0x08013130, r4 his AI data) that counts, and
+one on the charged B's request (0x080F17F2, its power attack's call) that
+gives family 0xD9 in place of the charged shot's.
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first
@@ -327,17 +366,8 @@ a rule of the run's, not of either game's:
   lights then, or the player picks, is the owner's call (issue #499), to
   be made before a run gives two of a kind.
 
-A BN4 Soul lights by the chip's kind as BN4 has it (`soulkinds_bn4_of`,
-since 22 November 2026): a BN4 chip of the registry by its own BN4
-record, a chip with a BN4 namesake by that, else BN5's kind with Cursor
-none. The two numberings agree but at 8, which is BN5's Cursor and BN4's
-panel-cracking (GutsSoul's kind), so a Cursor chip never lights GutsSoul
-and BN4's crack chips do. BN4's kinds are made once BN4's ROM is read,
-which may come after BN5's kinds are made.
-
 Held ROM-free by `tests/test_core.c`'s `test_soul_lights`, each case
-above over BN5's kinds as its ROM has them and two of BN4's, and
-GutsSoul's kind by BN4's 8.
+above over BN5's kinds as its ROM has them and two of BN4's.
 
 What is left, in order:
 

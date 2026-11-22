@@ -4,8 +4,15 @@
 #include <string.h>
 
 #include "bn4.h"
+#include "bn4_souls.h"
+#include "bn6.h"
+#include "bn6_chips.h"
 #include "bytes.h"
+#include "chips.h"
+#include "hook.h"
 #include "rom.h"
+#include "soulkinds.h"
+#include "soulpassive.h"
 #include "xchips_code.h"
 
 #define BUS 0x08000000u
@@ -16,8 +23,12 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6) */
-static const uint8_t forms[SOULS_BN4] = { 6 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2 };
+#define FORM_GUTS 2
+#define OP_CMP_R1 0x2900u    /* cmp r1,#imm8 */
+#define OP_ADDS_R1 0x3100u   /* adds r1,#imm8 */
+#define HAND_END 0xFFFFu     /* a hand's ids after its last */
 
 unsigned soulbn4_held(unsigned bn4) {
 	unsigned out = 0;
@@ -46,4 +57,32 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	out->routine = xchips_bn4_moved_at(get32(b4 + (BN4_POWER_ATTACKS - BUS) + 4u * out->power));
 	memcpy(out->charge, b4 + (BN4_CHARGE_TIMES - BUS) + CHARGE_ROW * (uint32_t)out->power, CHARGE_ROW);
 	return out->routine != 0;
+}
+
+/* GutsSoul's pass's numbers read from BN4's code (BN4_GUTS_PASS): its two kinds and its add; false where the code is not that */
+static bool guts_pass(int *kind1, int *kind2, int *add) {
+	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
+	if (!b4 || get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * FORM_GUTS) != (BN4_GUTS_ENTER | 1)) return false;
+	uint16_t k1 = get16(b4 + (BN4_GUTS_PASS_KIND - BUS)), k2 = get16(b4 + (BN4_GUTS_PASS_KIND2 - BUS)), a = get16(b4 + (BN4_GUTS_PASS_ADD - BUS));
+	if ((k1 & 0xFF00u) != OP_CMP_R1 || (k2 & 0xFF00u) != OP_CMP_R1 || (a & 0xFF00u) != OP_ADDS_R1) return false;
+	*kind1 = k1 & 0xFF;
+	*kind2 = k2 & 0xFF;
+	*add = a & 0xFF;
+	return true;
+}
+
+void soulbn4_enter(uint32_t obj, int k) {
+	int kind1, kind2, add;
+	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_GUTS || (soulpassive_breaks() & SOULPASSIVE_BREAK_PLUS) ||
+	    !guts_pass(&kind1, &kind2, &add))
+		return;
+	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)(hook_read8(obj + BN6_T1_ALLIANCE) & 1) * BN6_HAND_SIZE;
+	for (uint32_t i = hook_read8(hand + BN6_HAND_AT); i < BN6_HAND_MAX; ++i) {
+		uint16_t chip = hook_read16(hand + BN6_HAND_CHIPS + 2 * i);
+		if (chip == HAND_END) break;
+		int kind = soulkinds_bn4_of(chip);
+		uint32_t rec = chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE;
+		if ((kind == kind1 || kind == kind2) && (hook_read8(rec + BN6_CHIP_EFFECT_FLAGS) & BN6_CHIP_SHOWS_POWER))
+			hook_write16(hand + BN6_HAND_BONUS + 2 * i, (uint16_t)(hook_read16(hand + BN6_HAND_BONUS + 2 * i) + add));
+	}
 }
