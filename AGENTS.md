@@ -153,9 +153,11 @@ part of the tree; a new file gets its line there.
 - Where BN6 has a screen for something (the Custom screen, chip select,
   menus, chat boxes), drive BN6's own code to show it (a spare core
   outside a battle's determinism if need be); never redraw a copy. Our
-  own drawing is for what BN6 has no screen for. The one exception is the
-  PET's Library, a screen of ours over the entries where BN6's holds BN6's
-  chips alone (the owner's call, docs/game/meta/library.md).
+  own drawing is for what BN6 has no screen for. The exceptions are the
+  owner's calls: the PET's Library, a screen of ours over the entries where
+  BN6's holds BN6's chips alone (docs/game/meta/library.md), and the PET's
+  start menu, BN6's own menu laid out again in two columns from BN6's own
+  pieces with BN6's menu run under it (docs/game/pet-menu.md).
 - Patch only the core's in-memory ROM copy, and put new data in the free
   space map in `docs/engine/emulation/memory.md`, its place a region of
   `src/emu/free_space.h` (RAM BN6 leaves alone too), which

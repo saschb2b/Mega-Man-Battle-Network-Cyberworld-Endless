@@ -548,6 +548,13 @@ screen are a button away. The Net Square has its own Leave instead.
 title too, in a battle as well, and saves nothing: **CONTINUE** takes the
 run up at its last checkpoint; what came after it is lost.
 
+**The PET's menu** in a run is BN6's own laid out in two columns:
+ChipFolder, SubChip, Library, MegaMan and Forms down the left, E-Mail,
+KeyItem, Options and Save down the right, your HP, Zenny and BugFrags in a
+strip under them and where you are on the band, EXIT under Save. Down from
+ChipFolder and Up to Save count as in BN6; Right goes across, and on to
+EXIT.
+
 **Options** holds the game's settings, a press away wherever you are: the
 title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select
 there opens it too), and in a run the PET's menu (START on the map) has
@@ -910,8 +917,8 @@ it pays one of BN6's GigaChips.
   together.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
-  screen as in BN6. CROSSSELECT lists five: **R** on the PET's menu opens
-  FORMS, where the Crosses held past five wait as spares, and A on one
+  screen as in BN6. CROSSSELECT lists five: **Forms** in the PET's menu
+  opens FORMS, where the Crosses held past five wait as spares, and A on one
   Cross and A on another swaps them, as in the folder editor, whenever
   you like. Its other page lists the Souls you hold and the chip each
   takes.

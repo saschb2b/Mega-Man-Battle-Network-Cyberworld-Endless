@@ -8,7 +8,6 @@
 #include "cinema.h"
 #include "director.h"
 #include "director_folder.h"
-#include "director_gate.h"
 #include "director_see.h"
 #include "emu.h"
 #include "jukebox.h"
@@ -16,6 +15,7 @@
 #include "netpass_screen.h"
 #include "online_visit.h"
 #include "pet_forms.h"
+#include "pet_menu.h"
 #include "pet_options.h"
 #include "pet_text.h"
 #include "platform.h"
@@ -70,6 +70,7 @@ void pet_install(void) {
 	}
 	/* Comm made Options and lit, else greyed as BN6 has it without a link */
 	pet_options_install();
+	pet_menu_install();
 }
 
 void pet_update(void) {
@@ -136,6 +137,7 @@ void pet_describe(FILE *f) {
 	fprintf(f, "mail %d unread %d\n", mails, unread);
 	jukebox_describe(f);
 	library_describe(f);
+	pet_menu_describe(f);
 	pet_forms_describe(f);
 }
 
@@ -161,14 +163,14 @@ void pet_draw(void) {
 	library_draw();
 	frame_part_end("library", t);
 	t = frame_part_begin();
-	if (!online_visit_away()) pet_forms_draw();
+	pet_forms_draw();
 	frame_part_end("forms", t);
 }
 
 uint32_t pet_keys(uint32_t keys) {
 	keys = pet_options_keys(keys);
-	/* (R on the menu: the forms screen, but in the Net Square, where R is the NetPass's) */
-	if (!online_visit_away()) keys = pet_forms_keys(keys);
+	/* (the PET's menu: ours over BN6's, but in the Net Square, where the menu is BN6's own) */
+	if (!online_visit_away()) keys = pet_menu_keys(keys);
 	/* (the NetPass up: the game held under it) */
 	if (netpass_screen_update()) return 0;
 	/* (A on the NetPass, newly pressed and come to the game: the pass opens over the KeyItem screen) */

@@ -1,8 +1,9 @@
 /* pet_options.h. BN6's menu labels are pictures, a strip of 9 x 2 tiles
- * each, and none says Options: the word is set from their own letters
- * (letters.h), read from the player's ROM as the core starts, into a copy
- * of the labels' tiles that the PET's load list points at, one tile
- * column more than Comm's after them (docs/rom/pet-and-second-screen.md, the PET menu's
+ * each, and none says Options or Forms: each word is set from their own
+ * letters (letters.h), read from the player's ROM as the core starts, into
+ * a copy of the labels' tiles that the PET's load list points at, Options'
+ * one tile column more than Comm's after them, then Forms' five columns
+ * for the ninth row (pet_row.c; docs/rom/pet-and-second-screen.md, the PET menu's
  * labels). */
 #include "pet_options.h"
 
@@ -20,7 +21,11 @@
 #define LW (BN6_PET_LABEL_W * 8)   /* a label's pixels across */
 #define LH 16                      /* ... and down */
 #define COLS 5                     /* the label's tile columns the word takes, from its second (its first the edge) */
-#define ADDED 2                    /* the tiles past BN6's: the word's fifth column */
+#define ADDED 12                   /* the tiles past BN6's: Options' fifth column, then Forms' five */
+#define OPTIONS_ADDED 2            /* the tiles past BN6's Options' fifth column takes */
+#define FORMS_FIRST (BN6_PET_LABEL_COUNT + OPTIONS_ADDED)   /* Forms' first tile in the copy: its top row, then its bottom */
+#define FORMS_INK BN6_PET_LABEL_INK_NEXT   /* its letters' colour: the one after the eight rows' (the menu sets it, pet_menu_frame.c) */
+#define SAVE 7                     /* the label Forms' is made on: Save's, its last row's */
 #define VRAM_LABELS 0x0600D340u    /* where the load list puts them: BN6_PET_LABEL_FIRST in BG character block 2 */
 #define VRAM_FREE_END 0x0600E000u  /* BG0's map from here; 0x0600DE80 on, zero in the PET and on the map (docs/rom/) */
 #define BLOCK ((BN6_PET_LABEL_COUNT + ADDED) * TILE)
@@ -30,9 +35,10 @@
 _Static_assert(VRAM_LABELS + BLOCK <= VRAM_FREE_END, "the added tiles stop short of BG0's map");
 _Static_assert(FREE_PET_OPTIONS + BLOCK <= FREE_PET_OPTIONS_END, "the labels' copy fits its region");
 
-/* Options in the labels' letters, Comm's C closed into the O; and the
- * letters each label is cut into, as Gregar's are */
-static const struct { uint8_t entry, letter; bool closed; } picks[] = {
+/* Options in the labels' letters, Comm's C closed into the O; Forms in
+ * them; and the letters each label is cut into, as Gregar's are */
+typedef struct { uint8_t entry, letter; bool closed; } Pick;
+static const Pick picks[] = {
 	{ BN6_PET_ENTRY_COMM, 0, true },     /* (Comm's C) */
 	{ CHIPFOLDER, 3, false },            /* p */
 	{ BN6_PET_ENTRY_STATUS, 1, false },  /* t */
@@ -41,11 +47,19 @@ static const struct { uint8_t entry, letter; bool closed; } picks[] = {
 	{ MEGAMAN, 6, false },               /* n */
 	{ BN6_PET_ENTRY_STATUS, 5, false },  /* s */
 };
+static const Pick forms_picks[] = {
+	{ CHIPFOLDER, 4, false },            /* F */
+	{ BN6_PET_ENTRY_COMM, 1, false },    /* o */
+	{ CHIPFOLDER, 9, false },            /* r */
+	{ BN6_PET_ENTRY_COMM, 2, false },    /* m */
+	{ BN6_PET_ENTRY_STATUS, 5, false },  /* s */
+};
 static const struct { uint8_t entry, letters; } cuts[] = {
 	{ CHIPFOLDER, 10 }, { MEGAMAN, 7 }, { BN6_PET_ENTRY_COMM, 4 }, { BN6_PET_ENTRY_STATUS, 6 },
 };
 
 static bool installed;
+static uint16_t forms_map[2 * BN6_PET_LABEL_W];   /* Forms' tile entries, Save's with the word's columns */
 static bool shown;      /* Options opened from the PET, until it closes */
 static uint32_t hush;   /* the keys held as it closed, kept from the game until let go */
 
@@ -70,26 +84,30 @@ static bool label_px(int entry, uint8_t px[LH][LW]) {
 
 static uint8_t ink(int entry) { return (uint8_t)(BN6_PET_LABEL_INK + (entry == BN6_PET_ENTRY_STATUS ? MEGAMAN : entry)); }
 
-/* The word on Comm's blank columns, its letters in Comm's colour; false
- * where a label is not cut into the letters read */
-static bool set_word(uint8_t labels[][LH][LW], uint8_t word[LH][COLS * 8]) {
+/* Whether each label is cut into the letters read */
+static bool cut_as_read(uint8_t labels[][LH][LW]) {
 	for (size_t i = 0; i < sizeof cuts / sizeof *cuts; ++i) {
 		int at[16][2];
 		LetterStrip s = { &labels[cuts[i].entry][0][0], LW, LH, ink(cuts[i].entry) };
 		if (letters_cut(&s, at, 16) != cuts[i].letters) return false;
 	}
+	return true;
+}
+
+/* A word of `n` picks on label `on`'s blank columns, its letters in
+ * colour `to`; false where a letter does not fit */
+static bool set_word(uint8_t labels[][LH][LW], const Pick *p, size_t n, int on, uint8_t to, uint8_t word[LH][COLS * 8]) {
 	for (int y = 0; y < LH; ++y)
-		for (int x = 0; x < COLS * 8; ++x) word[y][x] = labels[BN6_PET_ENTRY_COMM][y][BN6_PET_LABEL_BLANK * 8 + x % 8];
+		for (int x = 0; x < COLS * 8; ++x) word[y][x] = labels[on][y][BN6_PET_LABEL_BLANK * 8 + x % 8];
 	LetterWord w = { &word[0][0], COLS * 8, LH };
 	int x = 0;
-	for (size_t i = 0; i < sizeof picks / sizeof *picks && x >= 0; ++i) {
-		int e = picks[i].entry;
+	for (size_t i = 0; i < n && x >= 0; ++i) {
+		int e = p[i].entry;
 		LetterStrip s = { &labels[e][0][0], LW, LH, ink(e) };
 		uint8_t map[16] = { 0 };
-		map[ink(e)] = ink(BN6_PET_ENTRY_COMM);
+		map[ink(e)] = to;
 		map[BN6_PET_LABEL_SHADE] = BN6_PET_LABEL_SHADE;
-		x = picks[i].closed ? letters_put_closed(&s, picks[i].letter, &w, x, ink(BN6_PET_ENTRY_COMM), BN6_PET_LABEL_SHADE)
-		                    : letters_put(&s, picks[i].letter, &w, x, 0, map);
+		x = p[i].closed ? letters_put_closed(&s, p[i].letter, &w, x, to, BN6_PET_LABEL_SHADE) : letters_put(&s, p[i].letter, &w, x, 0, map);
 	}
 	return x >= 0;
 }
@@ -121,8 +139,10 @@ bool pet_options_install(void) {
 	}
 	if (top[COLS - 1] != rom_u16(comm + 2u * BN6_PET_LABEL_BLANK) || bottom[COLS - 1] != rom_u16(comm + 2u * (BN6_PET_LABEL_W + BN6_PET_LABEL_BLANK)))
 		return false;
-	static uint8_t word[LH][COLS * 8];
-	if (!set_word(labels, word)) return false;
+	static uint8_t word[LH][COLS * 8], forms[LH][COLS * 8];
+	if (!cut_as_read(labels) || !set_word(labels, picks, sizeof picks / sizeof *picks, BN6_PET_ENTRY_COMM, ink(BN6_PET_ENTRY_COMM), word) ||
+		!set_word(labels, forms_picks, sizeof forms_picks / sizeof *forms_picks, SAVE, FORMS_INK, forms))
+		return false;
 
 	/* the labels' tiles copied, Comm's four columns the word's, its fifth two tiles more */
 	static uint8_t block[BLOCK];
@@ -132,7 +152,13 @@ bool pet_options_install(void) {
 			uint16_t e = r ? bottom[c] : top[c];
 			int t = c < COLS - 1 ? (e & 0x3FF) - BN6_PET_LABEL_FIRST : BN6_PET_LABEL_COUNT + r;
 			word_tile(word, c, r, block + t * TILE);
+			/* (Forms' on Save's map, its columns 1-5 the word's) */
+			word_tile(forms, c, r, block + (FORMS_FIRST + r * COLS + c) * TILE);
+			uint32_t se = rom_u16(rom_off(entry_map(SAVE)) + 2u * (uint32_t)(r * BN6_PET_LABEL_W + c + 1));
+			forms_map[r * BN6_PET_LABEL_W + c + 1] = (uint16_t)((se & ~0x3FFu) | (BN6_PET_LABEL_FIRST + FORMS_FIRST + r * COLS + c));
 		}
+	for (int k = 0; k < 2 * BN6_PET_LABEL_W; ++k)
+		if (k % BN6_PET_LABEL_W == 0 || k % BN6_PET_LABEL_W > COLS) forms_map[k] = rom_u16(rom_off(entry_map(SAVE)) + 2u * (uint32_t)k);
 	claims_begin("the PET's Options (pet_options.c)");
 	emu_write(FREE_PET_OPTIONS, block, sizeof block);
 	emu_write32(BN6_PET_LABEL_LOAD, FREE_PET_OPTIONS);
@@ -151,6 +177,11 @@ bool pet_options_install(void) {
 }
 
 bool pet_options_here(void) { return installed; }
+
+bool pet_options_forms_map(uint16_t out[2 * BN6_PET_LABEL_W]) {
+	if (installed) memcpy(out, forms_map, sizeof forms_map);
+	return installed;
+}
 
 void pet_options_update(void) {
 	if (emu_read8(BN6_PET_MENU_TAKEN) != BN6_PET_ENTRY_COMM) return;

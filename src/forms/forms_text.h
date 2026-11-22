@@ -16,7 +16,6 @@ typedef enum {
 	FT_SPARE,         /* ... the spares */
 	FT_INFORMATION,   /* the box's label */
 	FT_NONE,          /* the box where the run holds no form yet */
-	FT_KEY,           /* the PET menu's hint for the key that opens it: R:FORMS */
 	FT_WEAK,          /* the second screen's rows: a Cross's weakness, */
 	FT_KIND,          /* ... a Soul's kind */
 	FT_COUNT
