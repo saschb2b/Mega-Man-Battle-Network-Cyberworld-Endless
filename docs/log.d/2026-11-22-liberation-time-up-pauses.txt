@@ -1,3 +1,0 @@
-by: claude-code/claude-fable-5-2
-at: 2026-11-22T12:40:00Z
-* **Update**: rom/battle.md (BN6's draw hides the battle's displays and pauses nothing; BN5's pause before its time up and BN6's twin, issue #794), game/liberation/building/stage-2-battle.md (the time up pauses the battle first), devtools/scenarios.md (the board's `foughton`).

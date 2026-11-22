@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: rom/battle.md (BN6's draw hides the battle's displays and pauses nothing; BN5's pause before its time up and BN6's twin, issue #794), game/liberation/building/stage-2-battle.md (the time up pauses the battle first), devtools/scenarios.md (the board's `foughton`).
+* **Update**: game/meta/forms.md (Team ProtoMan's Souls in SOUL BN5's list as each stands, NapalmSoul paid by Fire and united in the next battle; the forms screen linked).
 * **Update**: multirom/souls.md (MagnetSoul in BN6's engine: UNITE, element, charged shot, B+Left by the Souls' own copy of BN5's misc family, Elec chip charge doubled, the magnet panel's push spared), rom/souls.md (MagnetSoul's addresses, BN5's third-kind 0x3F and 0x75, the magnet panel's exemption), game/team-protoman.md (unit 8: MagnetSoul built), multirom/one-net.md (MagnetSoul's exemption in place).
 * **Update**: multirom/souls.md (GyroSoul built: his propeller overlay, Air and Float shoes, tornado and the propeller's rule, held to BN5's battle), rom/souls.md (GyroSoul's routines in BN5, BN6's chip-use hook and the overlay's fields), game/team-protoman.md (unit 8: GyroSoul built), code/emu.md (soulteam_chips.c).
 * **Update**: multirom/bn4-souls.md (GutsSoul in BN6's engine: his punch's unit, his arm's art, his hand's pass, bn4_soul_guts and its mutations; his rapid buster not yet moved, its design), rom/bn4.md (GutsSoul's pass adds to the hand's bonus, BN6_HAND_BONUS), devtools/differential.md (the presses rule), code/emu.md (soulbn4.c's GutsSoul).
