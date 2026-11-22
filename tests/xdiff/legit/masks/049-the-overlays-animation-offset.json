@@ -1,0 +1,32 @@
+{
+ "name": "the companion overlay's animation offset's place",
+ "part": "obj",
+ "whose": [
+  "megaman's"
+ ],
+ "kinds": [
+  "T1"
+ ],
+ "types": [
+  "0x00"
+ ],
+ "why": "The companion overlay (the first kind's type 0x56, a twin, NameID 0: its role T1:0x0, its cells alone here, while united) takes its animation as its owner's plus an offset: BN5's from its +0x60 (a word, 0x080C374A), BN6's from its +7 (a byte, 0x080C5C3A), BN6's +0x60 a flag of its own (not 0: drawn in front, 0x080C5C4C). GyroSoul's propeller spun (BN5's 0x080C3876: +0x60 0x11 while set) is written where each game reads it, BN6's +7 (src/emu/soulchips.c), +0x60 left 0. The animation it makes (+0x10, +0x11, +0x90) stays compared: the spin itself is held to BN5's. GyroSoul's propeller's masks are 0 for every animation (BN5's 0x080C363A, 0x22 bytes), so the masks each game indexes (BN5 by the whole animation, BN6 by it less +7) give the same place.",
+ "evidence": [
+  "BN5 0x080C3744-0x080C374E: ldrb r0,[r4,#0x10]; ldr r1,[r5,#0x60]; adds; strb r0,[r5,#0x10]",
+  "BN6 0x080C5C34-0x080C5C3E: ldrb r0,[r4,#0x10]; ldrb r1,[r5,#7]; adds; strb r0,[r5,#0x10]; 0x080C5C4C: ldr r0,[r5,#0x60]; cmp r0,#0",
+  "soul_gyro_propeller: the overlay's +0x60 0x11 from t62 in BN5's trace, its animation the owner's plus 0x11 (0x11 at t62, 0x1A at t63)"
+ ],
+ "cells": [
+  [
+   "0x07",
+   "0x00",
+   "0x11"
+  ],
+  [
+   "0x60",
+   "0x11",
+   "0x00"
+  ]
+ ],
+ "when": "united"
+}

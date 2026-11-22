@@ -90,9 +90,10 @@ def c_entries(path, name):
 
 def colonel_powers():
     """how many of soulcode_bn5.c's powers are Team Colonel's, those before BN4's in the grown table (Team ProtoMan's come
-    after BN4's room, src/emu/soulpower.c): the recipe's npowers_colonel, its initializer's last number"""
+    after BN4's room, src/emu/soulpower.c): the recipe's npowers_colonel, its initializer's last number but for its overlays'
+    pair (Team ProtoMan's, NULL, 0 where none)"""
     body = open(os.path.join(ROOT, 'src', 'emu', 'soulcode_bn5.c')).read()
-    m = re.search(r'const SoulCode soulcode_bn5 = \{[^}]*?, (\d+),\s*\};', body, re.S)
+    m = re.search(r'const SoulCode soulcode_bn5 = \{[^}]*?, (\d+),(?: (?:NULL, 0|overlays, N\(overlays\)),)?\s*\};', body, re.S)
     return int(m.group(1)) if m else c_entries('emu/soulcode_bn5.c', 'powers')
 
 

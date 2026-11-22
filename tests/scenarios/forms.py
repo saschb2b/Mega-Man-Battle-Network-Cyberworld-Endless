@@ -1,9 +1,8 @@
 """MegaMan's forms (issue #774; docs/game/meta/forms.md): a run of each form
 pays a guardian of another game in its own form. CROSS: BN5's ToadMan
 gives SpoutCross by his kind, Aqua, never his Soul. SOUL BN5: BN6's
-HeatMan, Fire, whose NapalmSoul is not moved yet, gives a Soul the run
-lacks, the layer's seed's. SOUL BN4: HeatMan gives BN4's one moved Soul,
-ThunSoul, the one the run lacks: the powers line before his data and
+HeatMan gives NapalmSoul by his kind, Fire, now that it stands. SOUL BN4:
+HeatMan gives BN4's one moved Soul, ThunSoul, the one the run lacks: the powers line before his data and
 after it is taken; CROSS's and the Soul forms' power then taken in the next
 battle, after a quit and CONTINUE."""
 
@@ -61,15 +60,16 @@ def unite(soul, chip, turns):
     ]
 
 
-# (ToadSoul, BN5's 12, by an Aqua chip of BN6's, 181: xrom_souls.py's)
-SOUL_USED = [*ARRIVE[:6], ('do', 'chip 181 * 30; foes 205@52'), *unite(12, 181, 3)]
+# (NapalmSoul, BN5's 4, by a Fire chip of BN6's, 107 (FireHit1: tests/xdiff/soul_napalm.json's): BN6's guardian 1, HeatMan,
+# pays the Soul of his kind, Fire, where one stands (src/director/forms.c, forms_pay_how's PAY_KIND))
+SOUL_USED = [*ARRIVE[:6], ('do', 'chip 107 D 30; foes 205@52'), *unite(4, 107, 3)]
 # (ThunSoul, BN6's Soul 13 (BN4's 6), handed to UNITE with BN4's bits (soulunite_bn4_bits), by BN6's chip 30, Elec:
 # tests/xdiff/soul_thun.json's)
 SOUL4_USED = [*ARRIVE[:6], ('do', 'chip 30 B 30; foes 205@52'), *unite(13, 30, 3)]
 
 MANY = {
     'cross-bn5-guardian': dict(START=BASE + 'form=1 --guardian 29', NEEDS=('bn5',), STEPS=course('CROSS', 'SpoutCross') + CROSS_USED),
-    'soul-bn5-bn6-guardian': dict(START=BASE + 'form=2 --guardian 1', NEEDS=('bn5',), STEPS=course('SOUL BN5', 'ToadSoul') + SOUL_USED),
+    'soul-bn5-bn6-guardian': dict(START=BASE + 'form=2 --guardian 1', NEEDS=('bn5',), STEPS=course('SOUL BN5', 'NapalmSoul') + SOUL_USED),
     # (SoulT+1 in a Soul form: the BeastOut helper's turn more, four a unison, where CROSS takes BeastOut)
     'soul-bn5-helper-turn': dict(START='layer --seed 15 --net-biome 0 --setup short,0,0,16,0 --dev god,quiet,hp=2000,form=2,souls=0x20,folder=181',
                                  NEEDS=('bn5',), STEPS=[('expect', 'runform=SOUL BN5'), ('expect', 'runsoulturn=1'),

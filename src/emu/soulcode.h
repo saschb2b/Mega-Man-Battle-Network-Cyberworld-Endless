@@ -28,6 +28,9 @@ typedef struct { uint8_t id; uint32_t entry; } SoulPower;
 typedef struct { uint16_t from; uint8_t to; } SoulSong;
 /* an attack family moved: BN5's CurAction, BN6's (xattack_grow.h), its routine (BN5's, moved) */
 typedef struct { uint8_t from, to; uint32_t entry; } SoulFamily;
+/* a companion overlay its code spawns of a kind BN6 lacks: BN5's masks (their CRC32, their bytes), BN6's kind for it, its sprite as
+ * BN6's lists hold it (list, number) */
+typedef struct { uint32_t masks, crc; uint16_t masks_len; uint8_t kind, list, index; } SoulOverlay;
 /* BN5's routine or data its code runs in another track's copy (a type it shares: tools/bn5_twins.py's TYPES), its place there */
 typedef struct { uint32_t bn5, bn6; } SoulRoute;
 
@@ -63,6 +66,9 @@ typedef struct {
 	const uint8_t *shared_effects;   /* the effects it spawns of another track's install (one BN6 number a BN5 effect) */
 	int nshared_effects;
 	int npowers_colonel;        /* the first of `powers` Team Colonel's; Team ProtoMan's after them (soulpower.c numbers them apart) */
+	const SoulOverlay *overlays;   /* (GyroSoul's propeller: its masks copied to SOULS_TEAM_OVERLAYS, its kind's entries in the grown
+	                                  overlay tables, xnavi_room.h) */
+	int noverlays;
 } SoulCode;
 
 extern const SoulCode soulcode_bn5;

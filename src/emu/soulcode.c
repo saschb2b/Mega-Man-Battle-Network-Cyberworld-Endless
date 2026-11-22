@@ -17,6 +17,7 @@
 #include "thumb_reloc.h"
 #include "xattack_grow.h"
 #include "xnavi.h"
+#include "xnavi_room.h"
 #include "xvirus_dispatch.h"
 #include "xvirus_grow.h"
 #include "xvirus_tx.h"
@@ -289,6 +290,25 @@ static void art_move(const SoulCode *c, const XRom *x) {
 	for (int i = 0; s && i < SOUL_STUBS_COUNT; ++i) put16(s + 4 * i, THUMB_BX_LR);
 }
 
+/* its companion overlays of a kind BN6 lacks: their masks copied, their kinds' entries in the Navis' grown overlay tables */
+static void overlays_set(const SoulCode *c) {
+	uint32_t masks_at = SOULS_TEAM_OVERLAYS;
+	for (int i = 0; i < c->noverlays && !xv_failed(); ++i) {
+		const SoulOverlay *o = &c->overlays[i];
+		const uint8_t *rom5 = XR[XROM_BN5_COLONEL_US].data;
+		if (masks_at + o->masks_len > SOULS_TEAM_OVERLAYS_END || xvirus_crc32(rom5 + (o->masks - BUS), o->masks_len) != o->crc) {
+			xv_fail("its overlay's masks at %08x are not the ones expected", (unsigned)o->masks);
+			break;
+		}
+		uint8_t *m = xv_put(masks_at, o->masks_len, true);
+		if (m) memcpy(m, rom5 + (o->masks - BUS), o->masks_len);
+		const uint8_t sprite[2] = { (uint8_t)(4u * o->list), o->index };
+		xn_set_word(XN_T_OVL_MASKS, o->kind, masks_at);
+		xn_set(XN_T_OVL_SPRITES, o->kind, sprite);
+		masks_at = (masks_at + o->masks_len + 3u) & ~3u;
+	}
+}
+
 /* its entries in the families' room: sprites in grown lists, effects, object types through the dispatch */
 static void room_set(const SoulCode *c) {
 	/* (list 0's the Souls' own: soullook.c lists them as it grows it) */
@@ -304,6 +324,7 @@ static void room_set(const SoulCode *c) {
 		if (emu_read32(c->routes[i].bn6 & ~1u) == 0xFFFFFFFFu) xv_fail("BN5's %08x, another track's copy, is not there", (unsigned)c->routes[i].bn5);
 	for (int i = 0; i < c->nshared_effects && !xv_failed(); ++i)
 		if (!xg_taken(XG_EFFECTS, c->shared_effects[i])) xv_fail("its effect %#x, another track's install's, is not there", c->shared_effects[i]);
+	overlays_set(c);
 	for (int i = 0; i < c->ntypes && !xv_failed(); ++i) {
 		const SoulType *t = &c->types[i];
 		/* (a type another track moved before it, TYPES: run as that copy, which must be there) */
@@ -360,7 +381,7 @@ static bool hooks_set(const SoulCode *c) {
 bool soulcode_install(const SoulCode *c) {
 	if (code) return code == c;
 	const XRom *x = &XR[XROM_BN5_COLONEL_US];
-	if (!R.data || !emu_ready() || !x->data || !x->layout || !xattack_grow() || !xg_grow()) return false;
+	if (!R.data || !emu_ready() || !x->data || !x->layout || !xattack_grow() || !xg_grow() || (c->noverlays && !xn_grow())) return false;
 	static Mover m;
 	memset(&m, 0, sizeof m);
 	m.c = c;
@@ -399,6 +420,11 @@ bool soulcode_install(const SoulCode *c) {
 	bool hooked = list0_set(c) && hooks_set(c);
 	claims_end();
 	for (int i = 0; i < c->nblocks; ++i) xv_moved_add(c->blocks[i].start, c->blocks[i].at, c->blocks[i].end - c->blocks[i].start);
+	/* (its overlays' masks too, which an overlay object names: the trace reads its pointer as BN5's, as the Navis' install does) */
+	for (uint32_t i = 0, at = SOULS_TEAM_OVERLAYS; i < (uint32_t)c->noverlays; ++i) {
+		xv_moved_add(c->overlays[i].masks, at, c->overlays[i].masks_len);
+		at = (at + c->overlays[i].masks_len + 3u) & ~3u;
+	}
 	printf("soulcode: the Souls' code moved: %d blocks, %u bytes, %d veneers%s\n", c->nblocks, (unsigned)used, m.pool.n,
 		hooked ? "" : ", a hook NOT placed");
 	return hooked;
