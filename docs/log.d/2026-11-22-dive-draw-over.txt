@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T12:30:00Z
+* **Update**: online/shared-dive.md (Nothing over BN6's screens: one answer for what stands over the layer's field, asked by everything the dive draws there; the joiner's band, the title cards, the plates' gap, the field's bottom-row marks, a dropped link's crew put away; issue #781), code/director.md (`director_cover.c`).

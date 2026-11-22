@@ -274,6 +274,15 @@ static bool past_week(const OnlineSnapshot *s, uint32_t now) {
 	return true;
 }
 
+/* the link down (dropped, being tried again, or given up): nobody drawn as he last stood (issue #781: crewmates had
+ * stood frozen, ring and plate, under "Reconnecting..."), the puppets put away, the names, rings, dots and plates
+ * none until the room's divers are heard again */
+static void unheard(uint32_t now) {
+	static const OnlineSnapshot none;
+	dive_people_frame(&none);
+	dive_band_frame(now, false, 0);
+}
+
 void dive_link_frame(void) {
 	call_again();
 	if (!L.on) {
@@ -283,7 +292,8 @@ void dive_link_frame(void) {
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	uint32_t now = SDL_GetTicks();
-	if (held_away(&s, now) || past_week(&s, now)) return;
+	if (held_away(&s, now)) { unheard(now); return; }
+	if (past_week(&s, now)) return;
 	L.starting = false;
 	back_or_down(&s, now);
 	online_mail_frame();
@@ -293,7 +303,9 @@ void dive_link_frame(void) {
 		else dive_link_close();
 		return;
 	}
-	dive_band_frame(now, s.connected, s.player_id);
+	bool heard = s.connected && !L.down_since;
+	if (!heard) unheard(now);
+	else dive_band_frame(now, true, s.player_id);
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();
@@ -302,7 +314,7 @@ void dive_link_frame(void) {
 	room();
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
-	dive_people_frame(&s);
+	if (heard) dive_people_frame(&s);
 	dive_traces_frame();
 	dive_finds_frame();
 	dive_splits_frame();

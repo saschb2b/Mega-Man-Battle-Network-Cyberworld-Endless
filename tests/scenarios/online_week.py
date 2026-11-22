@@ -152,10 +152,12 @@ MANY['crew-on-screen-only'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
 MANY['crew-battle-named'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'battle; wait 10'),
-    soon("band=Alpha's battle!", 'beta', 600),
+    soon('party~fight', 'beta', 900),
+    ('@beta', 'expect', 'band=none'),                  # never over the field's Custom screen (issue #781)
+    ('do', 'press START; wait 10; press A; wait 10'),  # the Custom screen closed on both
+    ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),         # whose battle, on the field
     ('@beta', 'do', 'wait 30; shot'),
-    ('@beta', 'expect', "band=Alpha's battle!"),
-    soon('join=fighting', 'beta', 900),
 ))
 
 # A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
@@ -363,6 +365,65 @@ MANY['crew-drawn-with-little-room'] = dict(CAST, START=ROOM2, GAMES={name: ROOM2
     ('@delta', 'do', 'shot'),
 ))
 
+# Nothing of ours over BN6's screens or our cards (issue #781; director_cover): Beta arriving where Alpha stands has
+# no names, rings or arrival mark across the act's title card, the mark counted from the card's end; Beta's link cut,
+# his crew is put away under "Reconnecting..." (`band` says so) and comes back with the link; Beta taken into
+# Alpha's battle reads whose it is over the staging's still map, and nothing once the field shows.
+MANY['drawn-over-nothing'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    online.into_square('beta'),
+    online.at('beta', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/2', 20)),
+    online.yes('beta'),
+    online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('@beta', 'until', 'cover=card', 900),             # the act's title card over Alpha where he stands
+    ('@beta', 'expect', 'tags=0'),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'expect', 'arrival=none'),
+    ('@beta', 'do', 'shot'),
+    ('@beta', 'until', 'cover!=card', 900),
+    soon('arrival=marked', 'beta', 300),               # (its two seconds from the card's end)
+    ('@beta', 'repeat', 'press A; wait 10', 'chat=closed', 20),
+    ('sleep', 1.5),
+    soon('crew=2: Alpha Beta', 'beta', 600),
+    soon('tags~Alpha', 'beta', 300),
+    ('@beta', 'do', 'reconnect cut 4'),                 # Beta's link cut four seconds
+    ('sleep', 1.5),
+    soon('band~Reconnecting', 'beta', 300),
+    ('@beta', 'expect', 'tags=0'),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'expect', 'crewview=0'),
+    ('@beta', 'expect', 'mapdots=0'),
+    ('@beta', 'do', 'shot'),
+    ('sleep', 8),                                      # (the cut's four seconds, and the next try after it)
+    soon('link=up', 'beta', 900),
+    soon('tags~Alpha', 'beta', 900),                   # back with the link
+    soon('crew=2: Alpha Beta', 'beta', 900),
+    ('do', 'battle; wait 10'),
+    soon('party~fight', 'beta', 900),
+    ('@beta', 'expect', 'band=none'),                   # never over the field's Custom screen
+    ('@beta', 'do', 'wait 20; shot'),
+    # (the Custom screen closed on both: whose battle on the field, each mark under its MegaMan)
+    ('do', 'press START; wait 10; press A; wait 10'),
+    ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),
+    ('@beta', 'do', 'wait 20; shot'),
+    soon('marks~apart', '', 600),
+    ('do', 'wait 30; shot'),
+    ('@beta', 'do', 'wait 30; shot'),
+))
+
+# A crewmate's plate with his layer (issue #781): Alpha a layer down by the dev menu, still in the crew for
+# crew_away_ms, Beta's plate reads "Alpha L2 100/100", its layer apart from its HP.
+NEXT_LAYER = 'hold SELECT 2; hold SELECT+R 4; wait 10; ' + 'press DOWN; wait 4; ' * 7 + 'press A; wait 30'
+MANY['plate-another-layer'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', NEXT_LAYER),
+    ('until', 'layer=2', 1200),
+    soon('mate0~layer 2', 'beta', 900),
+    ('@beta', 'do', 'shot'),
+))
+
 # Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and
 # the fifth, standing there, takes his place.
 FIVE = {name: online.HOME for name in ('beta', 'gamma', 'delta', 'echo')}
@@ -475,6 +536,7 @@ MANY['crew-pulls-back'] = dict(crew_fight(BETA), STEPS=online.course(
     ('@beta', 'expect', 'dive=on'),
     soon('where=layer', 'beta', 600),
     ('@beta', 'expect', 'hp>0'),
+    ('@beta', 'repeat', 'press A; wait 10', 'chat=closed', 20),   # (the band shows over no chat box: issue #781)
     soon('band~pulled us back', 'beta', 600),
 ))
 # ... and a second deletion: spent, the dive over as alone; Alpha gives nothing.
