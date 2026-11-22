@@ -23,6 +23,10 @@ enum { KIND_NONE, KIND_FIRE, KIND_AQUA, KIND_ELEC, KIND_WOOD, KIND_RECOVERY, KIN
 #define FORM_POWERS 12   /* a form's powers at most (SOUL BN5's and SOUL BN4's twelve; CROSS's ten) */
 
 int forms_kind(int navi);
+/* Whether guardian `navi` has a Soul of his own that a run of `form`
+ * cannot take (a BN5 or BN4 Navi's, his game's form not the run's): what
+ * MegaMan feels in his data, his game's form opened for the runs after */
+bool forms_soul_felt(int form, int navi);
 /* Power `p`'s name in `form` ("HeatCross", "NapalmSoul"), NULL none */
 const char *forms_power_name(int form, int p);
 /* ... and its kind (KIND_*) */

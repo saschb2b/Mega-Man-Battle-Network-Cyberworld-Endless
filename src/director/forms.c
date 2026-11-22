@@ -71,6 +71,10 @@ static int own_power(int form, int navi) {
 	return 0;
 }
 
+bool forms_soul_felt(int form, int navi) {
+	return (own_power(RUN_FORM_SOUL_BN5, navi) && form != RUN_FORM_SOUL_BN5) || (own_power(RUN_FORM_SOUL_BN4, navi) && form != RUN_FORM_SOUL_BN4);
+}
+
 int forms_kind(int navi) {
 	if (navi >= 0 && navi < (int)sizeof bn6_kinds && bn6_kinds[navi]) return bn6_kinds[navi];
 	int p = own_power(RUN_FORM_SOUL_BN5, navi);

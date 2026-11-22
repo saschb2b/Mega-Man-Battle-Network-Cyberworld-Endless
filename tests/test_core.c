@@ -6377,6 +6377,9 @@ static void test_forms_pay(void) {
 	CHECK(forms_pay(RUN_FORM_SOUL_BN4, 2, 0, 1) == 6, "forms: ElecMan, Elec, ThunSoul");
 	CHECK(!forms_pay(RUN_FORM_SOUL_BN4, 2, 1u << 5, 1), "forms: BN4's one moved Soul held, nothing");
 	CHECK(forms_kind(GUARDIAN_BN4_FIRST + 1) == KIND_CRACK && forms_kind(16) == KIND_NONE, "forms: GutsMan panel-cracking, ElementMan none");
+	CHECK(forms_soul_felt(RUN_FORM_CROSS, 29) && !forms_soul_felt(RUN_FORM_SOUL_BN5, 29) && forms_soul_felt(RUN_FORM_SOUL_BN4, 24) &&
+		forms_soul_felt(RUN_FORM_SOUL_BN5, GUARDIAN_BN4_FIRST + 5) && !forms_soul_felt(RUN_FORM_CROSS, 1) && !forms_soul_felt(RUN_FORM_SOUL_BN5, 11),
+		"forms: a Soul felt where the run's form cannot take it, and only there");
 	int seen = 0;
 	for (uint32_t seed = 1; seed < 60; ++seed) {
 		int f = run_week_form(seed);
