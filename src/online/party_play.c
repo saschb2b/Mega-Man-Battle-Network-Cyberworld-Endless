@@ -82,6 +82,9 @@ static struct {
 /* the seat the field is drawn for: mine, or the dev's partyview */
 static unsigned viewer(void) { return !PP.net && PP.dev.view > 0 && PP.dev.view < PARTY_MOST ? (unsigned)PP.dev.view : PP.seat; }
 
+/* how the last fight's results went on this game, for the state's words: "shown" (BN6's) or "skipped" (MegaMan fallen) */
+static char last_over[48];
+
 /* A crew's battle's end, kept for party_play_crew_end */
 static struct { bool due; CrewOver o; } crew_end;
 
@@ -158,7 +161,11 @@ static bool fight(const Encounter *e, int own_hp, int fought_hp) {
 	}
 	PP.have[PP.seat] = true;
 	/* (the dev's stood-in partners: my MegaMan again, their keys a script) */
-	for (unsigned k = 0; !PP.net && k < PP.b.n; ++k) { PP.b.seat[k] = *mine; PP.have[k] = true; }
+	for (unsigned k = 0; !PP.net && k < PP.b.n; ++k) {
+		PP.b.seat[k] = *mine;
+		PP.have[k] = true;
+		if (k && PP.dev.hp > 0 && PP.dev.hp < mine->max_hp) PP.b.seat[k].hp = (uint16_t)PP.dev.hp;
+	}
 	PP.stage = PP_BOOT;
 	if (!PP.net) party_marks_seats(NULL, viewer());
 	if (PP.crew) fprintf(stderr, "party: the crew's battle taken over, %u MegaMen, my seat %u\n", PP.b.n, PP.seat);
@@ -627,11 +634,15 @@ static void results_frame(uint32_t pad) {
 	uint16_t keys[PARTY_MOST] = { (uint16_t)(pad & ARENA_KEYS_MASK) };
 	bool won;
 	party_core_over(PP.core, &won);
-	if (PP.results++ < RESULTS_MOST && !party_core_back(PP.core)) {
+	/* (MegaMan deleted on the field: no results of BN6's, whose reward is not his (A deletion in a crew); the run says
+	 * what comes of it, issue #757) */
+	bool fallen = !party_core_hp(PP.core, viewer());
+	if (PP.results++ < RESULTS_MOST && !fallen && !party_core_back(PP.core)) {
 		party_core_frame(PP.core, keys);
 		return;
 	}
 	unsigned hp = party_core_hp(PP.core, PP.seat);
+	snprintf(last_over, sizeof last_over, "%s hp %u", fallen ? "skipped" : "shown", party_core_hp(PP.core, viewer()));
 	fprintf(stderr, "party: the fight over after %u frames (%u run on a guess, %u rollbacks): %s, my MegaMan's HP %u%s\n", (unsigned)PP.over_at,
 		PP.guessed, PP.rollbacks, won ? "won" : "lost", hp, hp ? "" : ": deleted, the run is over");
 	if (PP.net) {
@@ -664,6 +675,8 @@ static void fighting(uint32_t pad) {
 	if (PP.core && party_core_over(PP.core, &won)) {
 		PP.over_at = party_core_frames(PP.core);
 		PP.stage = PP_RESULTS;
+		/* (BN6's results on this game alone from here: a partner's show his own HP, not his lead's; issue #757) */
+		party_core_results_as(PP.core, viewer());
 		fprintf(stderr, "party: frame %u: the battle over, %s; the guardian's HP %u\n", (unsigned)PP.over_at, won ? "won" : "lost",
 			party_core_foe_hp(PP.core));
 	}
@@ -692,7 +705,7 @@ void party_play_frame(uint32_t pad) {
 /* the party's field, or while it is made and the others come, the staging's
  * last picture of the run's own core */
 void party_play_draw(void) {
-	const uint32_t *turn = PP.core && PP.stage == PP_FIGHT ? party_turn_video(PP.seat) : NULL;
+	const uint32_t *turn = PP.core && PP.stage == PP_FIGHT ? party_turn_video(viewer()) : NULL;
 
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
@@ -705,8 +718,16 @@ void party_play_describe(FILE *f) {
 	if (PP.started && PP.net)
 		fprintf(f, "party %s frame %u\npartyagreed %u\npartylink %s\n", (unsigned)PP.stage < 6 ? stages[PP.stage] : "other",
 			(unsigned)(PP.core ? party_core_frames(PP.core) : 0), PP.agreed, PP.alone ? "alone" : PP.down_since ? "down" : "up");
+	if (last_over[0]) fprintf(f, "partyover %s\n", last_over);
+	if (PP.core && PP.stage == PP_RESULTS) {
+		unsigned shown = party_core_navi_hp(PP.core), own = party_core_hp(PP.core, viewer());
+		fprintf(f, "partyresults hp %u own %u %s\n", shown, own, shown == own ? "agree" : "APART");
+	}
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
-	if (!party_turn_video(PP.seat)) party_marks_describe(f, party_core_gba(PP.core), viewer(), PP.b.n);
+	/* (a partner's own Custom screen: the HP its box shows, and his own on the field, issue #757) */
+	unsigned turn = party_turn_hp(viewer());
+	if (turn) fprintf(f, "partyturn hp %u own %u %s\n", turn, party_core_hp(PP.core, viewer()), turn == party_core_hp(PP.core, viewer()) ? "agree" : "APART");
+	if (!party_turn_video(viewer())) party_marks_describe(f, party_core_gba(PP.core), viewer(), PP.b.n);
 }
 

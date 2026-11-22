@@ -60,5 +60,5 @@ void game_hooks_after_boot(void) {
 	if (dev.party > 1) party_field_install(dev.party, dev.party_hp, dev.party_end);
 	if (dev.party_core > 1 || dev.party_end > 0 || dev.party_bot || dev.party_roll || dev.party_delay || dev.party_lead)
 		party_play_dev(&(PartyDev){ dev.party_core, dev.party_twin, dev.party_roll, dev.party_end, dev.party_bot, dev.party_delay, dev.party_lead,
-			dev.party_view, dev.party_del });
+			dev.party_view, dev.party_del, dev.party_hp });
 }
