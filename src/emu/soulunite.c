@@ -335,19 +335,20 @@ static bool done;
 
 bool soulunite_ready(void) { return done; }
 
+bool soulunite_has_bn5(int soul) {
+	return done && ((soul > SOULS_BN5 - TEAM_SOULS && soul <= SOULS_BN5) || soulpower_team(soul));
+}
+
 unsigned soulunite_mask_bn5(unsigned bn5) {
 	unsigned out = 0;
 	for (int s = 1; s <= SOULS_BN5; ++s) {
 		/* (by the bits BN5's flags give them, as UNITE reads them: the same layout before the install) */
 		int bit = soulteam_is(s) ? SOULS_HELD_TEAM + s - SOUL_TEAM_FIRST : s - (SOULS_BN5 - TEAM_SOULS) - 1;
-		if (bn5 >> (s - 1) & 1) out |= 1u << bit;
+		if ((bn5 >> (s - 1) & 1) && (!soulteam_is(s) || soulunite_has_bn5(s))) out |= 1u << bit;
 	}
 	return out;
 }
 
-bool soulunite_has_bn5(int soul) {
-	return done && ((soul > SOULS_BN5 - TEAM_SOULS && soul <= SOULS_BN5) || soulpower_team(soul));
-}
 
 
 /* what UNITE's check reads (soulkinds.h's SoulTables): BN5's Souls' kinds and each one's held bit by its flag, BN4's kinds */

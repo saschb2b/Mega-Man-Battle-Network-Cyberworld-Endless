@@ -279,6 +279,19 @@ static bool game_parse(Spec *s, const char *v) {
 	return s->bn5 || s->bn6 || s->bn4;
 }
 
+void xd_flags5_put(const Spec *s, uint32_t flags, uint8_t (*rd8)(uint32_t), void (*wr8)(uint32_t, uint8_t)) {
+	for (int i = 0; i < s->nflags[0]; ++i) {
+		uint32_t f = (uint32_t)s->flags[0][i], a = flags + (f >> 3);
+		wr8(a, (uint8_t)(rd8(a) | 0x80u >> (f & 7)));
+	}
+	for (int n = SOUL_TEAM_FIRST; n < SOUL_TEAM_FIRST + SOULS_TEAM; ++n) {
+		if (!(s->souls5 >> (n - SOUL_TEAM_FIRST) & 1)) continue;
+		uint32_t f = SOUL_TEAM_FLAG(n), a = flags + (f >> 3);
+		wr8(BN5_SOUL_FLAGS + (uint32_t)(n - 1), (uint8_t)f);
+		wr8(a, (uint8_t)(rd8(a) | 0x80u >> (f & 7)));
+	}
+}
+
 bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 & SOULS_HELD_BN4_MASK) != 0; }
 
 /* MegaMan's setup, then his NaviCust's */

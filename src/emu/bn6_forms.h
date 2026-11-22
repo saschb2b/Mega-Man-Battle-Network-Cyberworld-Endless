@@ -323,9 +323,6 @@
 #define BN6_FORM_BONUS_READ   0x0801268Cu /* ldrb r1,[r1,r0]: his buster's Attack bonus (0x0801265A) from BN6_FORM_BUSTER_BONUS by the form, */
 #define BN6_FORM_BONUS_NEXT   0x0801268Eu /* ... on to its add */
 #define BN6_POWER_EMPTY       0x08011A24u /* mov pc,lr: the power attacks' empty routine (ids 5, 0x0D, 0x0E ... name it) */
-#define BN6_CHIP_WRITE_NOLOG  0x080126EAu /* the chip writer's second entry (BN5's 0x0800FE70): r0 the chip, its family back in r0, no
-                                             chip-used log (push {r4,r6,r7,lr}; movs r4,#0): a Chaos Unison's power attack's DarkChip */
-#define BN6_CHIP_WRITE_NOLOG_OP 0xB5D0u
 #define BN6_CHIP_BONUS_DONE   0x0800F090u /* the chips' bonuses by form (0x0800EF34): its end, r6 the bonus, r7 its mark */
 /* A Soul's passives (soulpassive.c; S5) */
 #define BN6_HAND_SIZE_SET     0x0802A494u /* strb r0,[r5,#6]: the Custom screen's hand size set (0x0802A408) */

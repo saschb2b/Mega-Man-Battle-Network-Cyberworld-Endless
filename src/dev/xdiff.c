@@ -46,7 +46,6 @@
 #include "foes.h"
 #include "guest.h"
 #include "rom.h"
-#include "soulteam.h"
 #include "soulunite.h"
 #include "thumb_reloc.h"
 #include "xchips_install.h"
@@ -803,18 +802,7 @@ static void guest_wr8(uint32_t a, uint8_t v) {
  * Double Soul's, a Soul's, Chaos Unison's), its folder, his buster */
 static void reference_setup(const Spec *s) {
 	uint32_t flags = guest_read32(BN5_TOOLKIT + BN5_TOOLKIT_FLAGS);
-	for (int i = 0; i < s->nflags[0] && in_ewram(flags); ++i) {
-		uint32_t f = (uint32_t)s->flags[0][i], a = flags + (f >> 3);
-		guest_wr8(a, (uint8_t)(guest_read8(a) | 0x80u >> (f & 7)));
-	}
-	/* (souls5: Team ProtoMan's Souls, which Team Colonel's ROM never gives, each one's flag entry written in the guest's ROM
-	 * copy and that flag set: BN5's own UNITE then takes it, its code and tables as the ROM has them) */
-	for (int n = SOUL_TEAM_FIRST; n < SOUL_TEAM_FIRST + SOULS_TEAM && in_ewram(flags); ++n) {
-		if (!(s->souls5 >> (n - SOUL_TEAM_FIRST) & 1)) continue;
-		uint32_t f = SOUL_TEAM_FLAG(n), a = flags + (f >> 3);
-		guest_wr8(BN5_SOUL_FLAGS + (uint32_t)(n - 1), (uint8_t)f);
-		guest_wr8(a, (uint8_t)(guest_read8(a) | 0x80u >> (f & 7)));
-	}
+	if (in_ewram(flags)) xd_flags5_put(s, flags, guest_read8, guest_wr8);
 	static const FolderPlaces places = { BN5_TOOLKIT, BN5_TOOLKIT_CHIPS, BN5_TOOLKIT_CHIP_MARKS, BN5_CHIP_KEYS, BN5_CHIP_KEY_XOR, BN5_NAVI_FOLDER1_REG,
 		0, CHIP9_MASK, guest_read8, guest_read32, guest_wr8, guest_write16 };
 	if (s->nfolder[0]) xd_folder_put(&places, s->folder[0]);

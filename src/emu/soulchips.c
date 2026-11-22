@@ -207,15 +207,15 @@ static bool lava_code(uint32_t at, uint8_t out[LAVA_CODE_SIZE]) {
 		0x2202,           /* movs r2,#2 (BN6_PANEL_PLAIN) */
 		0x4B03,           /* ldr r3,[pc,#12]: the panel's routine */
 		0, 0,             /* bl the bx below */
-		0x7E60,           /* ldrb r0,[r4,#0x19]: the hooked instruction (BN6_PLAYER_TIMERS_OP) */
+		0x7E60,           /* ldrb r0,[r4,#0x19]: the hooked instruction (BN6_PLAYER_TIMERS's, checked by expected) */
 		0x4B02,           /* ldr r3,[pc,#8]: the way on */
 		0x4718,           /* bx r3 */
 		0x46C0,           /* nop */
 	};
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
 	put32(out + 20, BN6_SET_PANEL_TYPE | 1);
-	put32(out + 24, (BN6_PLAYER_TIMERS + 2) | 1);
-	return BN6_PANEL_PLAIN == 2 && BN6_PLAYER_TIMERS_OP == 0x7E60 && thumb_bl_write(out, 8, at, at + 16);
+	put32(out + 24, BN6_PLAYER_TIMERS_NEXT | 1);
+	return BN6_PANEL_PLAIN == 2 && thumb_bl_write(out, 8, at, at + 16);
 }
 
 /* the Thumb TomahawkSoul's grass jumps to: the hooked strh, the panel under him plain (BN6_SET_PANEL_TYPE, r0 column, r1 row,
@@ -243,7 +243,7 @@ static bool expected(void) {
 		{ BN6_CHARGE_TEST, 0xB5D0 }, { BN6_CHARGE_BONUS, 0xB510 }, { BN6_CHIP_MODIFIED, 0x8138 }, { BN6_CHIP_MODIFIED_SOUND, 0x2087 },
 		{ BN6_CHIP_USED_END, 0x8AB8 }, { BN6_CHIP_FAMILY_READ, 0x7AE0 }, { BN6_SHADOW_TYPE_SIDE, 0x2129 }, { BN6_SHADOW_TYPE_DONE, 0xBD10 },
 		{ BN6_SET_PANEL_TYPE, 0xB570 }, { BN6_CHARGED_RELEASE, 0x290D }, { BN6_CHARGED_CHIP_USE, 0x2001 },
-		{ BN6_PLAYER_TIMERS, BN6_PLAYER_TIMERS_OP },
+		{ BN6_PLAYER_TIMERS, 0x7E60 },
 	};
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i)
 		if (rom_u16(code[i].at - BUS) != code[i].op) {

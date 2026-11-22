@@ -79,8 +79,9 @@ bool soulunite_held_core(struct mCore *core, unsigned souls);
 int soulunite_held_bit(int soul);
 /* The held mask of BN5's Souls `bn5` (bit k BN5's Soul k + 1, as
  * souls_held_bn5 keeps them) in the bits soulunite_held takes: Team
- * Colonel's in 0-5, Team ProtoMan's in SOULS_HELD_TEAM on; BN4's are
- * OR'd in apart (soulbn4.h) */
+ * Colonel's in 0-5, Team ProtoMan's in SOULS_HELD_TEAM on, each of theirs
+ * only where it stands (soulunite_has_bn5); BN4's are OR'd in apart
+ * (soulunite_bn4_bits) */
 unsigned soulunite_mask_bn5(unsigned bn5);
 /* Whether BN5's Soul `soul` (1-12) stands in BN6's engine this session:
  * Team Colonel's six where UNITE is installed (soulunite_ready), Team
