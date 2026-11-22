@@ -725,6 +725,8 @@ void party_play_draw(void) {
 }
 
 void party_play_describe(FILE *f) {
+	/* (the spike's battle on the run's own core: --dev party=N, the viruses' bench) */
+	party_field_describe(f);
 	/* (over the server: its stage and frame, the hashes agreed, this game's own link through a drop, issue #180) */
 	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
 	if (PP.started && PP.net)
