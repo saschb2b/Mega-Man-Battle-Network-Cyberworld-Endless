@@ -10,7 +10,7 @@ const char *forms_word(FormsWord w) {
 	/* (in FormsWord's order) */
 	static const char *const words[FT_COUNT] = { "FORMS", "CROSS", "SOUL", "CROSSSELECT", "SPARE", "INFORMATION",
 		"No Crosses or Souls yet.", "FORMS", "Weak to", "Kind" };
-	return w >= 0 && w < FT_COUNT ? words[w] : "";
+	return (unsigned)w < FT_COUNT ? words[w] : "";
 }
 
 void forms_count_words(char *out, size_t n, int five) { snprintf(out, n, "%d/5", five); }
