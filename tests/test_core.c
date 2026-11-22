@@ -6358,6 +6358,8 @@ static void test_soul_lights(void) {
 static bool forms_falzar = true;
 bool crossselect_falzar(void) { return forms_falzar; }
 bool soulunite_ready(void) { return true; }
+/* (Team Colonel's six stand; none of Team ProtoMan's, whose code these tests do not move) */
+bool soulunite_has_bn5(int soul) { return soul >= 7 && soul <= 12; }
 bool soulbn4_read(int k, SoulBn4 *out) {
 	if (k != 0) return false;
 	memset(out, 0, sizeof *out);
