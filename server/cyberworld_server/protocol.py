@@ -59,7 +59,7 @@ SPLITS_ENTRY = struct.Struct("!H16s")
 # (DIVE's actions: each one's fields after the type and the action byte, its whole size protocol.json's)
 DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes"),
                SPEC["dive_leave"]: (struct.Struct("!"), "dive_leave_bytes"),
-               SPEC["dive_end"]: (struct.Struct("!BhhhH"), "dive_end_bytes"),
+               SPEC["dive_end"]: (struct.Struct("!BhhhHHBB"), "dive_end_bytes"),
                SPEC["dive_found"]: (struct.Struct("!B"), "dive_found_bytes"),
                SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
                SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
@@ -455,8 +455,10 @@ def dive_fields_ok(action, fields):
     if action == SPEC["dive_enter"]:
         return 1 <= fields[2] <= SPEC["week_layers"]
     if action == SPEC["dive_end"]:
-        how, x, y, z, _ = fields
-        return how in (SPEC["dive_deleted"], SPEC["dive_won"]) and all(abs(v) <= limit for v in (x, y, z))
+        how, x, y, z, _, _, flags, party = fields
+        # (v27: the dive's flags, `week_pulled` alone, and the acts whose guardian was fought in a party)
+        return how in (SPEC["dive_deleted"], SPEC["dive_won"]) and all(abs(v) <= limit for v in (x, y, z)) \
+            and not flags & ~SPEC["week_pulled"] and not party & ~0xF
     if action == SPEC["dive_phrase"]:
         return fields[0] < SPEC["phrase_count"] and all(abs(v) <= limit for v in fields[1:])
     if action == SPEC["dive_wave"]:

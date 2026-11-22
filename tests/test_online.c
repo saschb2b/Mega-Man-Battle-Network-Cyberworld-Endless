@@ -499,7 +499,7 @@ static void week(void) {
 static void dive_sent(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
 	static const uint8_t enter[] = { 41, 1, 11, 147, 245, 33, 254, 54, 3, 2, 7 };
-	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145 };
+	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145, 0, 42, ONLINE_WEEK_PULLED, 5 };
 	static const uint8_t phrase[] = { 41, 5, 4, 0, 10, 255, 236, 0, 0 };
 	static const uint8_t split[] = { 41, 7, 0, 1, 44, 9, 1, 2 };
 	static const uint8_t crew[] = { 47, 5, 0, 0, 0, 0, 4, 0, 0, 0 };
@@ -507,7 +507,8 @@ static void dive_sent(void) {
 	static const uint8_t damage[] = { 51, 0, 0, 0, 77, 0, 120, 0, 80 };
 	DiveWay way = { 3, 2, 7 }, none = { 0, 0, 0 };
 	assert(dive_wire_enter(m, 2963, 0xF521FE36u, way) == sizeof enter && !memcmp(m, enter, sizeof enter));
-	assert(dive_wire_end(m, ONLINE_DIVE_DELETED, -5, 6, 0, 0x91) == sizeof end && !memcmp(m, end, sizeof end));
+	DiveEnd e = { ONLINE_DIVE_DELETED, -5, 6, 0, 0x91, 42, ONLINE_WEEK_PULLED, 5 };
+	assert(dive_wire_end(m, &e) == sizeof end && !memcmp(m, end, sizeof end));
 	assert(dive_wire_phrase(m, 4, 10, -20, 0) == sizeof phrase && !memcmp(m, phrase, sizeof phrase));
 	DiveSplit s = { .index = 0, .party = 2, .tenths = 300, .level = 9, .guardian = true };
 	assert(dive_wire_split(m, &s) == sizeof split && !memcmp(m, split, sizeof split));
@@ -522,7 +523,9 @@ static void dive_sent(void) {
 	 * party, level and time, an ask with nobody, a join with no door, HP past its max) */
 	DiveWay deep = { 11, 0, 0 };
 	assert(!dive_wire_enter(m, 1, 1, none) && !dive_wire_enter(m, 1, 1, deep));
-	assert(!dive_wire_end(m, 3, 0, 0, 0, 0) && !dive_wire_end(m, ONLINE_DIVE_WON, 8193, 0, 0, 0) && !dive_wire_end(m, 1, 0, 0, 0, 0x10000));
+	DiveEnd bad[] = { { 3, 0, 0, 0, 0, 0, 0, 0 }, { ONLINE_DIVE_WON, 8193, 0, 0, 0, 0, 0, 0 }, { 1, 0, 0, 0, 0x10000, 0, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0x10000, 0, 0 }, { 1, 0, 0, 0, 0, 0, 1, 0 }, { 1, 0, 0, 0, 0, 0, 0, 0x10 } };
+	for (size_t k = 0; k < sizeof bad / sizeof *bad; ++k) assert(!dive_wire_end(m, &bad[k]));
 	assert(!dive_wire_phrase(m, ONLINE_PHRASE_COUNT, 0, 0, 0) && !dive_wire_phrase(m, 0, 0, -8193, 0));
 	s.party = 5; assert(!dive_wire_split(m, &s)); s.party = 1; s.level = 12; assert(!dive_wire_split(m, &s));
 	s.level = 11; s.tenths = 0; assert(!dive_wire_split(m, &s)); s.tenths = 1; assert(dive_wire_split(m, &s) && m[5] == ONLINE_BUSTING_MOST);

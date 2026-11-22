@@ -6,6 +6,12 @@ secret, "week" and the week's number), so each server has its own week
 and keeps it across restarts. The week's number counts from the Monday
 `week_epoch` seconds past 1970 (5 January 1970), a week a step.
 
+Since v27 the server posts a dive's end itself, from DIVE end (dive.py:
+the layer its room's, the minutes, the crew's pull-back and the party's
+acts the game's), so the Board has it whether or not the diver visits the
+Square again; the game's WEEK_POST after it is the same entry and changes
+nothing (issue #759).
+
 A game posts a dive that ended (WEEK_POST): the week, its seed, the
 layer reached, its act, won or deleted (and, v22, pulled back once by
 its crew: the Board's mark, ranked with the rest), the minutes it took
@@ -199,7 +205,33 @@ class Weeks:
         if refused:
             await self.server.notice(player, *refused)
             return
+        # (a dive the server posted from its end is counted there: its confirmation is no second dive)
+        known = self.best.get((entry["week"], identity))
+        if not known or (known["depth"], known["won"], known["minutes"]) != (entry["depth"], entry["won"], entry["minutes"]):
+            self.server.daily.count("dives")
+        await self.take(player, entry)
+
+    async def from_dive(self, player, week, seed, depth, won, minutes, flags, party):
+        """A dive's end as the server saw it (DIVE end, v27): posted as the
+        game's WEEK_POST would be, the layer the room's, so the Board has it
+        without the diver's visit to the Square; the game's own post after
+        it is the same entry, which changes nothing (issue #759)."""
+        entry = dict(week=week, seed=seed, depth=depth, act=act_of(depth), won=WON if won else 0,
+                     flags=(WON if won else 0) | (flags & PULLED), minutes=minutes, hash=1, party=party,
+                     pulled=bool(flags & PULLED))
+        identity = player.identity.hex()
+        refused = None if protocol.full_set(player.roms) else (0, "no full NetPass")
+        refused = refused or self.refusal(entry, identity)
+        if refused:
+            LOG.info("week: %s's dive end not posted: %s", player.name, refused[1])
+            return
         self.server.daily.count("dives")
+        await self.take(player, entry)
+
+    async def take(self, player, entry):
+        """A plausible end kept where it is the identity's best of its week
+        (never one worse over a better, never one twice), told to everyone."""
+        identity = player.identity.hex()
         entry.update(identity=identity, name=player.name, time=self.clock())
         key = (entry["week"], identity)
         if key in self.best and not better(entry, self.best[key]):

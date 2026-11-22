@@ -198,7 +198,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_malformed_dives_close_the_connection(self):
         for bad in (protocol.dive(ENTER, self.week, self.seed, 11, 0, 0), protocol.dive(ENTER, self.week, self.seed, 1, 0, 0)[:-1],
-                    bytes((SPEC["dive"], 9)), protocol.dive(PHRASE, 8, 0, 0, 0), protocol.dive(END, 3, 0, 0, 0, 0),
+                    bytes((SPEC["dive"], 9)), protocol.dive(PHRASE, 8, 0, 0, 0), protocol.dive(END, 3, 0, 0, 0, 0, 0, 0, 0),
                     protocol.dive(SPLIT, 1, 10, 12, 0, 1), protocol.dive(SPLIT, 1, 10, 3, 0, 5), protocol.dive(SPLIT, 1, 0, 3, 0, 1),
                     protocol.dive(PHRASE, 1, 9000, 0, 0), protocol.crew(7), protocol.crew(1, 5), protocol.crew(SPEC["crew_battle"], 0, 1, (2, 0, 0)),
                     protocol.crew(SPEC["crew_join"]),
@@ -242,7 +242,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([(i, name(n)) for i, n in finds], [(2, "Beta")])
         # (a deletion: its mark, and its line in the feed)
         await asyncio.sleep(1.1)
-        await b.send(protocol.dive(END, SPEC["dive_deleted"], -5, 6, 0, 0x91))
+        await b.send(protocol.dive(END, SPEC["dive_deleted"], -5, 6, 0, 0x91, 0, 0, 0))
         _, marks = traces(await self.until(a, SPEC["dive_traces"], lambda d: d[1] == SPEC["trace_marks"]))
         self.assertEqual([(name(m[0]), *m[1:]) for m in marks], [("Beta", -5, 6, 0, 0x91, SPEC["dive_deleted"])])
         await self.restart()
@@ -270,7 +270,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         layer = None
         for k in range(SPEC["traces_most"] + 4):
             client = clients[k % 3]
-            await client.send(protocol.dive(END, SPEC["dive_deleted"], k, 0, 0, 1))
+            await client.send(protocol.dive(END, SPEC["dive_deleted"], k, 0, 0, 1, 0, 0, 0))
             await asyncio.sleep(0.35)
         layer = self.server.dive.traces.layers[(self.week, self.seed, 1, 0, 0)]
         self.assertEqual(len(layer.marks), SPEC["traces_most"])
@@ -326,7 +326,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         entries = [protocol.DIVERS_ENTRY.unpack_from(data, 4 + 19 * k) for k in range(count)]
         self.assertEqual([(name(e[0]), e[1], e[2]) for e in entries][:2], [("Gamma", 4, 2), ("Alpha", 3, 1)])
         # (an end: to every diver of that week and the Square, not last week's)
-        await c.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0x1F))
+        await c.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0x1F, 0, 0, 0))
         for client in (square, a, b):
             feed = protocol.DIVE_FEED.unpack(await self.until(client, SPEC["dive_feed"], lambda d: d[1] == SPEC["feed_deleted"]))
             self.assertEqual((name(feed[2]), feed[3], feed[6]), ("Gamma", 4, 0x1F))
@@ -336,7 +336,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             self.assertFalse(data[0] == SPEC["dive_feed"] and data[1] == SPEC["feed_flare"])
         for _ in range(30):
             self.assertNotEqual((await last.receive())[0], SPEC["dive_feed"])
-        await a.send(protocol.dive(END, SPEC["dive_won"], 0, 0, 0, 0))
+        await a.send(protocol.dive(END, SPEC["dive_won"], 0, 0, 0, 0, 0, 0, 0))
         self.assertEqual(await self.notice(a), 25)
 
     # -- crews --
@@ -401,7 +401,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await self.until(c, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_split_up"])
         self.assertEqual(self.crew_ids(a), [a.id, b.id, e.id])
         # (an end of the dive and a session ended: out at once; a crew of one is none)
-        await e.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0))
+        await e.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0, 0, 0, 0))
         await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id])
         await b.close()
         self.clients.remove(b)
@@ -740,6 +740,33 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
         self.assertEqual([line.get("party") for line in lines], [5, 0])
 
+    async def test_a_dives_end_reaches_the_board_without_a_post(self):
+        """v27 (issue #759): the server posts a dive's end itself, its layer the room's; the game's own WEEK_POST
+        after it changes nothing, a worse end never takes a better one's place, a better one does."""
+        a, b = await self.connect("Alpha"), await self.connect("Beta")
+        await self.enter(a, 4)
+        await a.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0, 33, SPEC["week_pulled"], 1))
+        _, _, _, top, _ = board(await self.until(b, SPEC["week_board"], lambda m: board(m)[1] == 0 and len(board(m)[3]) == 1))
+        self.assertEqual((top[0][1], top[0][2], top[0][3], top[0][4]), (4, 2, SPEC["week_pulled"] | SPEC["week_party"], 33))
+        self.assertEqual(self.server.daily.today["dives"], 1)
+        # (the game's own post of that dive: the same entry, no second line, no second dive counted)
+        await a.send(week.post(self.week, self.seed, 4, 2, False, 33, 9, party=1, pulled=True))
+        await self.until(a, SPEC["week_board"])
+        self.assertEqual(self.server.daily.today["dives"], 1)
+        # (a worse end after it, layer 2: the best stays; a better, layer 5: it takes the place)
+        await self.enter(a, 2)
+        await a.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0, 10, 0, 0))
+        await self.enter(a, 5)
+        await a.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0, 50, 0, 0))
+        _, _, _, top, _ = board(await self.until(b, SPEC["week_board"], lambda m: board(m)[3] and board(m)[3][0][1] == 5))
+        self.assertEqual((top[0][1], top[0][3], top[0][4], len(top)), (5, 0, 50, 1))
+        # (a won end only on the last layer, an act fought in a party past the dive's: nothing posted)
+        await self.enter(a, 2)
+        await a.send(protocol.dive(END, SPEC["dive_deleted"], 0, 0, 0, 0, 1, 0, 0b100))
+        await asyncio.gather(*self.server.writes)
+        lines = [json.loads(line) for line in (Path(self.dir.name) / "weeks.jsonl").read_text().splitlines()]
+        self.assertEqual([(line["depth"], line["minutes"], line.get("pulled")) for line in lines], [(4, 33, True), (5, 50, False)])
+
     async def test_week_post_carries_the_crews_pull_back(self):
         a, b = await self.connect("Alpha"), await self.connect("Beta")
         await a.send(week.post(self.week, self.seed, 7, 3, False, 40, 9, pulled=True))
@@ -764,7 +791,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await self.enter(b, 2)
         await a.send(protocol.dive(PHRASE, 1, 0, 0, 0))
         await a.send(protocol.dive(FOUND, 3))
-        await a.send(protocol.dive(END, SPEC["dive_deleted"], 1, 1, 0, 2))
+        await a.send(protocol.dive(END, SPEC["dive_deleted"], 1, 1, 0, 2, 0, 0, 0))
         await b.send(protocol.dive(PHRASE, 3, 5, 5, 0))
         await self.until(a, SPEC["dive_traces"], lambda d: d[1] == SPEC["trace_phrases"] and b"Beta" in d)
         await asyncio.gather(*self.server.writes)       # (the traces' appends in their threads, done)

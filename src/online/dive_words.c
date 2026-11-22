@@ -41,6 +41,7 @@ const char *dive_down_words(bool away, int dots) {
 }
 
 const char *dive_back_words(void) { return "Back online!"; }
+const char *dive_back_week_words(void) { return "A new week's net! We'll dive alone."; }
 const char *dive_alone_words(void) { return "Offline. Diving alone this time"; }
 const char *dive_alone_back_words(void) { return "The Board's portal links the next dive"; }
 const char *dive_find_words(const char *name, bool mine) {

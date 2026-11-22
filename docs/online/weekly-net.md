@@ -67,13 +67,21 @@ What the proposal left open, decided the same way:
    board offer is taken down and an offer that comes in is called off
    unheard of (`trade_central.c`), so every dive plays the standard
    setup's chips and no swap can land in the other slot.
-2. **How an unfinished dive goes on.** In the world, as it began: the
-   greeter offers it again (Keep diving, Start over, Not now; B is Not
-   now). The title's CONTINUE stays the normal run's, so the title keeps
-   its one meaning and needs no new row; the owner's rule, no new menu
-   screens where the world can do the job, holds. The price is a walk
-   from the gate each session and a connection to the server, which the
-   dive needs anyway to post.
+2. **How an unfinished dive goes on.** Since 22 November 2026 (the
+   owner's call on issue #759, after a play of the shared dive with
+   several games): the title's CONTINUE goes straight back into an
+   unfinished dive, at its checkpoint, its link to the Square taken up
+   as the portal takes it (`weekly_unfinished`, `weekly_continue`;
+   `dive_link.c`'s call), and is the normal run's again once the dive
+   ends; its label says "Dive L3". The portal still offers it too (Keep
+   diving, Start over, Not now; B is Not now). Chosen over a question at
+   the title and over the way it was: CONTINUE always the normal run's,
+   the dive taken up from the portal, which cost a diver who quit the
+   title, Lan's HP, the gate, the Square, the walk to the portal and four
+   boxes of words, his crew told nothing meanwhile. The Square not
+   answering is a dropped link, tried again while the dive goes on
+   alone; on a week past the dive's last, the dive goes on alone and the
+   band says so.
 3. **When the week turns mid-dive.** The dive keeps its week and its
    seed; its end is posted to that week while the server still takes it
    (this week or the last), and is let go after. An unfinished dive of an
@@ -116,9 +124,9 @@ given for one, so the Board says "as reported".
   guardian), `run_setup(RUN_SHORT, FOLDER_STANDARD, 0, 0, 0)`, and the
   game starts it on the first layer, the portal's warp (Lan's room, as
   NEW GAME does, until 15 November 2026). Continuing it loads the
-  slot's checkpoint as CONTINUE loads a run. The title always leaves the
-  slot first (`weekly_normal_saved`), so its CONTINUE is the normal
-  run's whether the dive ended, was reset or the game was closed.
+  slot's checkpoint as CONTINUE loads a run. The title leaves the slot
+  first (`weekly_normal_saved`) and looks into it (`weekly_unfinished`):
+  its CONTINUE is an unfinished dive's, else the normal run's.
 - **The portal** (`src/online/square_week.c`, words in
   `square_week_words.c`; the greeter Mr.Prog's place and words until 15
   November 2026, [The shared dive](shared-dive.md)): BN5's dark hole, or
