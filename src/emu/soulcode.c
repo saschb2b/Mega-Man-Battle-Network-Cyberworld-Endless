@@ -290,22 +290,8 @@ static void art_move(const SoulCode *c, const XRom *x) {
 	for (int i = 0; s && i < SOUL_STUBS_COUNT; ++i) put16(s + 4 * i, THUMB_BX_LR);
 }
 
-/* its entries in the families' room: sprites in grown lists, effects, object types through the dispatch */
-static void room_set(const SoulCode *c) {
-	/* (list 0's the Souls' own: soullook.c lists them as it grows it) */
-	for (int i = 0; i < c->nsprites && !xv_failed(); ++i)
-		if (c->sprites[i].to_list != BN6_SPRITES_MEGAMAN && !served[i])
-			xg_set_word(XG_LIST + xvirus_list_slot(c->sprites[i].to_list), c->sprites[i].to_index, c->sprites[i].at);
-	for (int i = 0; i < c->neffects && !xv_failed(); ++i) {
-		const SoulEffect *e = &c->effects[i];
-		xg_set_word(XG_EFFECTS, e->to, (uint32_t)(4u * e->list) | (uint32_t)e->index << 8 | (uint32_t)e->anim << 16 | (uint32_t)e->pal << 24);
-	}
-	/* (the other tracks' copies its code runs, and the effects of their installs it spawns: there before it) */
-	for (int i = 0; i < c->nroutes && !xv_failed(); ++i)
-		if (emu_read32(c->routes[i].bn6 & ~1u) == 0xFFFFFFFFu) xv_fail("BN5's %08x, another track's copy, is not there", (unsigned)c->routes[i].bn5);
-	for (int i = 0; i < c->nshared_effects && !xv_failed(); ++i)
-		if (!xg_taken(XG_EFFECTS, c->shared_effects[i])) xv_fail("its effect %#x, another track's install's, is not there", c->shared_effects[i]);
-	/* (a companion overlay of a kind BN6 lacks: its masks copied, its kind's entries in the Navis' grown overlay tables) */
+/* its companion overlays of a kind BN6 lacks: their masks copied, their kinds' entries in the Navis' grown overlay tables */
+static void overlays_set(const SoulCode *c) {
 	uint32_t masks_at = SOULS_TEAM_OVERLAYS;
 	for (int i = 0; i < c->noverlays && !xv_failed(); ++i) {
 		const SoulOverlay *o = &c->overlays[i];
@@ -321,6 +307,24 @@ static void room_set(const SoulCode *c) {
 		xn_set(XN_T_OVL_SPRITES, o->kind, sprite);
 		masks_at = (masks_at + o->masks_len + 3u) & ~3u;
 	}
+}
+
+/* its entries in the families' room: sprites in grown lists, effects, object types through the dispatch */
+static void room_set(const SoulCode *c) {
+	/* (list 0's the Souls' own: soullook.c lists them as it grows it) */
+	for (int i = 0; i < c->nsprites && !xv_failed(); ++i)
+		if (c->sprites[i].to_list != BN6_SPRITES_MEGAMAN && !served[i])
+			xg_set_word(XG_LIST + xvirus_list_slot(c->sprites[i].to_list), c->sprites[i].to_index, c->sprites[i].at);
+	for (int i = 0; i < c->neffects && !xv_failed(); ++i) {
+		const SoulEffect *e = &c->effects[i];
+		xg_set_word(XG_EFFECTS, e->to, (uint32_t)(4u * e->list) | (uint32_t)e->index << 8 | (uint32_t)e->anim << 16 | (uint32_t)e->pal << 24);
+	}
+	/* (the other tracks' copies its code runs, and the effects of their installs it spawns: there before it) */
+	for (int i = 0; i < c->nroutes && !xv_failed(); ++i)
+		if (emu_read32(c->routes[i].bn6 & ~1u) == 0xFFFFFFFFu) xv_fail("BN5's %08x, another track's copy, is not there", (unsigned)c->routes[i].bn5);
+	for (int i = 0; i < c->nshared_effects && !xv_failed(); ++i)
+		if (!xg_taken(XG_EFFECTS, c->shared_effects[i])) xv_fail("its effect %#x, another track's install's, is not there", c->shared_effects[i]);
+	overlays_set(c);
 	for (int i = 0; i < c->ntypes && !xv_failed(); ++i) {
 		const SoulType *t = &c->types[i];
 		/* (a type another track moved before it, TYPES: run as that copy, which must be there) */
