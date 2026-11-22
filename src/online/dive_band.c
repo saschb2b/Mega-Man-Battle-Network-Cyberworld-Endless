@@ -14,6 +14,7 @@
 #include "dive_people.h"
 #include "dive_traces.h"
 #include "dive_words.h"
+#include "party_play.h"
 #include "emu.h"
 #include "pet_look.h"
 #include "platform.h"
@@ -27,13 +28,25 @@ static struct {
 	uint32_t shown_at;       /* the first line's start, 0 not yet */
 } B;
 
+/* whose battle MegaMan was taken into, at the picture's foot */
+static void named(void) {
+	const char *join = dive_join_band();
+	if (join) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, join);
+}
+
 void dive_band_reset(void) {
 	memset(&B, 0, sizeof B);
+	/* (over a crew's battle as it starts too: party_play.h) */
+	party_play_draw_more = named;
 	/* (the crew's gifts after a battle told here: director_crew.h) */
 	director_crew_band = dive_link_line;
 }
 
-void dive_band_describe(FILE *f) { fprintf(f, "band %s\n", B.nfeed ? B.feed[0] : "none"); }
+void dive_band_describe(FILE *f) {
+	/* (as drawn: whose battle MegaMan was taken into first, issue #750) */
+	const char *join = dive_join_band();
+	fprintf(f, "band %s\n", join ? join : B.nfeed ? B.feed[0] : "none");
+}
 
 void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 	/* (MegaMan's HP to his crew as it changes, and the crew's plates: dive_crew_view.h) */
@@ -56,7 +69,13 @@ void dive_link_draw(void) {
 	/* (none of it over SELECT's map: a name and a ring had stood on it, issue #728) */
 	if (director_map_over()) return;
 	dive_traces_draw();
-	if (!dive_link_on() || !director_on_map()) return;
+	if (!dive_link_on()) return;
+	/* (whose battle MegaMan was taken into, over the battle's start too, issue #750) */
+	const char *join = dive_join_band();
+	if (!director_on_map()) {
+		named();
+		return;
+	}
 	bool chat = emu_read8(BN6_CHATBOX) != 0;
 	/* (the divers' names over their heads: dive_people.h) */
 	dive_people_draw(chat);
@@ -66,7 +85,6 @@ void dive_link_draw(void) {
 	if (chat) return;
 	int y = P.core_y + 160 - LOOK_BAND_H - 1;
 	/* (a crewmate's battle's offer first: it stands a few seconds only) */
-	const char *join = dive_join_band();
 	if (join) look_band(P.core_x, y, 240, join);
 	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
 	else dive_party_draw(P.core_x, P.core_y);

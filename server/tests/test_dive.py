@@ -356,6 +356,8 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         raise AssertionError("Never settled")
 
     async def test_crews_by_nearness(self):
+        # (along x alone, one stands dx across and dx / 2 up: the reach's least of wide and twice high, from protocol.json)
+        near, far = min(crews.NEAR[0], 2 * crews.NEAR[1]), min(crews.FAR[0], 2 * crews.FAR[1])
         a, b, c, d, e = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta", "Echo")]
         for client in (a, b, c, d, e):
             await self.enter(client, 2)
@@ -363,30 +365,30 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             await self.place(client, x)
         # (two passing each other are no crew: near for less than crew_form_ms)
         crews.FORM_WAIT = 0.6
-        await self.place(b, 100)
+        await self.place(b, near // 2)
         await asyncio.sleep(0.2)
         await self.place(b, 2000)
         await asyncio.sleep(0.8)
         self.assertFalse(self.server.crews.of)
         crews.FORM_WAIT = 0.1
         # (near: a crew, told to both, no asking)
-        await self.place(b, 100)
+        await self.place(b, near // 2)
         formed = crew_state(await self.until(a, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id]))
         # (v24: each member's HP and max HP as his DIVE vitals said, none sent yet, and his layer's depth)
         self.assertEqual((formed["stage"], formed["other"], formed["vitals"][b.id]), (SPEC["crew_formed"], b.id, (0, 0, 2)))
         await self.until(b, SPEC["crew_state"], lambda m: crew_state(m)["members"] == [a.id, b.id])
-        # (past crew_near and within crew_far it holds: no flicker at the edge)
-        for x in (180, 120, 190, 140, 185):
+        # (past the near reach and within the far it holds: no flicker at the edge)
+        for x in (far - 2, near + 4, far, near + 10, far - 6):
             await self.place(b, x)
             await asyncio.sleep(0.1)
         await asyncio.sleep(0.5)
         self.assertEqual(self.crew_ids(a), [a.id, b.id])
         # (a chain: Gamma near Beta, far from Alpha, is in it; then Delta near Gamma; four at most, Echo near them outside)
-        await self.place(c, 300)
+        await self.place(c, near)
         await self.settled(lambda: self.crew_ids(a) == [a.id, b.id, c.id])
-        await self.place(d, 420)
+        await self.place(d, near * 3 // 2)
         await self.settled(lambda: self.crew_ids(a) == [a.id, b.id, c.id, d.id])
-        await self.place(e, 360, 60)
+        await self.place(e, near * 3 // 2, 8)
         await asyncio.sleep(0.6)
         self.assertEqual(self.crew_ids(a), [a.id, b.id, c.id, d.id])
         self.assertNotIn(e.id, self.server.crews.of)
@@ -503,6 +505,22 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
             await self.place(client, 20 * k)
         await self.settled(lambda: self.crew_ids(clients[0]) == [c.id for c in clients]
                            or sorted(self.crew_ids(clients[0])) == sorted(c.id for c in clients))
+
+    async def test_no_battle_offered_out_of_the_picture(self):
+        """On screen only (issue #750): a crewmate walked past the far reach, in his crew_split_ms before he is out of
+        the crew, is offered no battle; the owner fights alone."""
+        a, b = [await self.connect(n) for n in ("Alpha", "Beta")]
+        for client in (a, b):
+            await self.enter(client, 2)
+        await self.crew_of(a, b)
+        # (along x one stands dx across and dx / 2 up: past the far reach's twice high, still in the crew)
+        await self.place(b, 2 * crews.FAR[1] + 8)
+        await asyncio.sleep(0.2)
+        self.assertEqual(self.crew_ids(a), [a.id, b.id])
+        await a.send(protocol.crew(SPEC["crew_battle"], 0, 3))
+        alone = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))
+        self.assertEqual(alone["value"], 3)
+        self.assertFalse(self.server.crews.offers)
 
     async def test_a_battle_offered_to_the_crew(self):
         a, b, c = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma")]

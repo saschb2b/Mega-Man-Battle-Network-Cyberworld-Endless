@@ -39,7 +39,8 @@ uint32_t dive_join_battle(void);
 /* The join-in in the state's words (online_describe.h): `join none|
  * calling|joined|fighting`. */
 void dive_join_describe(FILE *f);
-/* The band's line while MegaMan waits, NULL none. */
+/* The band's line while MegaMan waits, and whose battle he was taken into
+ * while it starts (issue #750), NULL none. */
 const char *dive_join_band(void);
 
 #endif

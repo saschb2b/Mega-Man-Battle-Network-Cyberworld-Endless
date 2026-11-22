@@ -212,8 +212,14 @@
 #define ONLINE_CREW_VITALS 7          /* v24: a crewmate's HP, max HP or layer changed (the crew as it stands) */
 #define ONLINE_CREW_VITALS_MS 500     /* a game's DIVE vitals at most so often; the server's CREW_STATE vitals at most so often a crew */
 #define ONLINE_CREW_JOIN_MS 3000      /* a battle's offer stands so long */
-#define ONLINE_CREW_NEAR 128          /* v20: world units (four panels) within which a crew forms, */
-#define ONLINE_CREW_FAR 192           /* ... and within which it holds */
+/* v20, the reach on screen since issue #750: in the picture's pixels from
+ * MegaMan's feet, BN6's projection (dx + dy across, (dy - dx) / 2 down),
+ * within which a crew forms, */
+#define ONLINE_CREW_NEAR_WIDE 80
+#define ONLINE_CREW_NEAR_HIGH 32
+/* ... and within which it holds: inside the 240 by 160 picture both ways */
+#define ONLINE_CREW_FAR_WIDE 100
+#define ONLINE_CREW_FAR_HIGH 44
 #define ONLINE_CREW_FORM_MS 1000      /* near so long before a crew forms */
 #define ONLINE_CREW_SPLIT_MS 2000     /* out of reach so long in the room before a member is out */
 #define ONLINE_CREW_AWAY_MS 10000     /* ... and elsewhere (a portal taken first, home) */

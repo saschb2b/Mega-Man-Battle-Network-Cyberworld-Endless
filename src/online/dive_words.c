@@ -29,7 +29,11 @@ const char *dive_door_words(unsigned count, bool leads, const char *leader) {
 }
 
 
-const char *dive_join_joined_words(void) { return "Jumping in!"; }
+const char *dive_join_joined_words(const char *owner) {
+	static char s[48];
+	snprintf(s, sizeof s, "%s's battle!", owner);
+	return s;
+}
 const char *dive_find_words(const char *name, bool mine) {
 	static char s[64];
 	if (mine) snprintf(s, sizeof s, "First to open this one this week!");

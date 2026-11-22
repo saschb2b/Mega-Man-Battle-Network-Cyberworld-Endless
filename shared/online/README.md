@@ -207,13 +207,13 @@ Protocol v20 (issue #714, docs/online/shared-dive.md, Crews by nearness):
 **a crew is who stands near, never asked for.** The server settles each
 dive room's crews at every tick from its divers' STATE (a place counted
 once it was sent in the room the diver stands in): two divers within
-`crew_near` (128 world units, four panels) of each other for
+`crew_near` (128 world units, four panels; since issue #750 a box on screen, `crew_near_wide` and `crew_near_high` pixels of the picture, docs/online/shared-dive.md, On screen only) of each other for
 `crew_form_ms` (1000) are a crew, or join the one either stands with
 where it holds fewer than `party_most`; two crews that meet become one
 where both fit, the older taking the other's; the pairs near longest go
 first, so a fifth stays outside a crew of four. A crew holds by chains:
 its core is the largest part of its members in one room each within
-`crew_far` (192) of another of it, ties to the part with its first
+`crew_far` (192; since issue #750 `crew_far_wide` and `crew_far_high`) of another of it, ties to the part with its first
 member; a member out of the core for `crew_split_ms` (2000) in its room,
 or `crew_away_ms` (10000) in another (a portal taken first), is out, and
 a crew of one is none. A diver leaving the dive, his session or ending

@@ -127,6 +127,43 @@ MANY['crew-battle-unasked'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     soon('join=fighting', '', 900),
 ))
 
+# On screen only (issue #750, the owner's call of 22 November 2026): a crew holds no wider than the picture. Beta past
+# the far reach is still in Alpha's picture (`insight`) and still in the crew for crew_split_ms, and Alpha's battle
+# then offers him nothing; the crew is gone while each still sees the other. The joiner's band names whose battle
+# he is taken into ("Alpha's battle!"), long enough to read.
+MANY['crew-on-screen-only'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 80 0 3; wait 5'),          # within the far reach: a crew, each in the other's picture
+    ('sleep', 0.5),
+    ('do', 'wait 10'),
+    ('expect', 'crew=2: Alpha Beta'),
+    ('expect', 'insight~Beta'),
+    ('@beta', 'expect', 'insight~Alpha'),
+    ('@beta', 'do', 'place 96 0 3; wait 5'),          # past it: still seen, still a crew for crew_split_ms
+    ('do', 'wait 5'),
+    ('expect', 'insight~Beta'),
+    ('expect', 'crew=2: Alpha Beta'),
+    ('do', 'battle; wait 10'),                         # Alpha's battle: Beta, at the picture's edge, offered none
+    soon('screen=battle', '', 600),
+    ('@beta', 'expect', 'join=none'),
+    ('@beta', 'expect', 'screen=map'),
+    ('sleep', 2.5),
+    soon('crew=0', 'beta', 600),
+    ('@beta', 'expect', 'insight~Alpha'),             # the crew gone before he is out of sight
+    ('@beta', 'do', 'place 0 32 3; wait 5'),          # back by Alpha's side as Alpha's battle ends: no crew yet
+))
+
+# The joiner's band names whose battle (issue #750): Beta taken into Alpha's, "Alpha's battle!" over its start.
+MANY['crew-battle-named'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),
+    ('@beta', 'do', 'wait 30; shot'),
+    ('@beta', 'expect', "band=Alpha's battle!"),
+    soon('join=fighting', 'beta', 900),
+))
+
 # A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
 # holds his seat, both fields wait on his keys and go on together once he is back, the hashes agreeing after it
 MANY['crew-battle-through-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
@@ -165,24 +202,25 @@ MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, S
 ))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
-# back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
+# back; between the near reach and the far (along x, 64 and 88 world units: protocol.json's crew_near_* and crew_far_*,
+# issue #750) a crew stays as it was, looked at again and again. MegaMan is put
 # down by world units, wherever the week's layer has its floor: only the distance between the two counts here.
 EDGE = [step for _ in range(6) for step in (('sleep', 0.5), ('do', 'wait 10'), ('expect', 'crew=2: Alpha Beta'),
                                             ('@beta', 'do', 'wait 10'), ('@beta', 'expect', 'crew=2: Alpha Beta'))]
 MANY['crew-by-nearness'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'place 0 0 3; wait 5'),
-    ('@beta', 'do', 'place 160 0 3; wait 5'),         # past crew_near, within crew_far: still a crew
+    ('@beta', 'do', 'place 80 0 3; wait 5'),          # past the near reach, within the far: still a crew
     *EDGE,
     ('@beta', 'do', 'place 600 0 3; wait 5'),         # walked off: none, on both, past crew_split_ms
     ('sleep', 2.5),
     soon('crew=0', 'beta', 600),
     soon('crew=0', '', 600),
-    ('@beta', 'do', 'place 160 0 3; wait 5'),         # within crew_far but not crew_near: none yet
+    ('@beta', 'do', 'place 80 0 3; wait 5'),          # within the far reach but not the near: none yet
     ('sleep', 2),
     ('do', 'wait 10'),
     ('expect', 'crew=0'),
-    ('@beta', 'do', 'place 100 0 3; wait 5'),         # within crew_near: a crew again
+    ('@beta', 'do', 'place 48 0 3; wait 5'),          # within the near reach: a crew again
     ('sleep', 1.5),
     soon('crew=2: Alpha Beta', '', 600),
     soon('crew=2: Alpha Beta', 'beta', 600),
@@ -305,7 +343,7 @@ MANY['crew-battles-apart'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=
 
 # The crew's sign (issue #716): a crewmate's name in the crew's colour (`tags`' NAME*) and a ring under his feet
 # (`rings`), on both games; gone as he walks off and the crew splits; a dotted ring as he comes back within
-# crew_near, the server's second not yet passed (`NAME(forming)`), and the crew's again after it.
+# the near reach, the server's second not yet passed (`NAME(forming)`), and the crew's again after it.
 MANY['crew-sign'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'place 0 0 3; wait 5'),
@@ -322,7 +360,7 @@ MANY['crew-sign'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
     ('expect', 'rings=0'),
     soon('crew=0', 'beta', 600),
     ('@beta', 'expect', 'rings=0'),
-    ('@beta', 'do', 'place 64 0 3; wait 5'),          # back within crew_near: about to be a crew
+    ('@beta', 'do', 'place 48 0 3; wait 5'),          # back within the near reach: about to be a crew
     soon('rings=1: Beta(forming)', '', 300),
     ('expect', 'tags=1: Beta'),
     ('sleep', 1.5),

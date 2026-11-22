@@ -208,7 +208,7 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               "party_bytes", "arena_party", "arena_linked", "arena_seat_gone", "week_splits_bytes", "notice_dive_out",
               "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue",
               # (v20, crews by nearness: crews.py)
-              "crew_near", "crew_far", "crew_form_ms", "crew_split_ms", "crew_away_ms",
+              "crew_near_wide", "crew_near_high", "crew_far_wide", "crew_far_high", "crew_form_ms", "crew_split_ms", "crew_away_ms",
               # (v24, the crew's display: crews.py's vitals)
               "dive_vitals", "dive_vitals_bytes", "crew_vitals", "crew_vitals_ms",
               "dive_where", "dive_where_bytes", "where_layer", "where_home", "where_battle",
