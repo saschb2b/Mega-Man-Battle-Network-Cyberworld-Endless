@@ -57,7 +57,8 @@ the power comes in another shape, MegaMan says so ("Whoa... ToadMan's
 data is changing!", "It's taking a Cross's shape!"): the fiction is that
 he takes a Navi's data in the shape of a form he knows. A BN5 or BN4 Navi
 beaten in a CROSS run still gives his Cross by kind, and MegaMan feels
-the Soul in his data ("Lan... There's a Soul in his data."). The lines
+the Soul in his data ("Lan... There's a Soul in his data."), as he does
+of a BN4 Navi in SOUL BN5 or a BN5 Navi in SOUL BN4 (`forms_soul_felt`). The lines
 are `src/director/forms_words.c`'s.
 
 The super bosses pay as before: Bass his GigaChip, the Cybeast BeastOut
@@ -87,8 +88,15 @@ in CROSS. The mix keeps today's rule
   BN5's SoulT+1 for the rest of the run, a unison lasting four turns
   (`run.soul_turns`), and the fifth helper brings it from the first
   battle. Settled here: it does not stack with the SoulT+1 program on the
-  NaviCust board, one turn more at most, and BN4's Souls take the same
-  turn.
+  NaviCust board, one turn more at most (MegaMan's NaviStats' extra turns
+  raised to 1 as each battle starts, never added to), and BN4's Souls take
+  the same turn. In a Soul form the setup names the helper SoulT+1, and
+  Dad's call at the run's start says the beast's power is in MegaMan's
+  Souls, not that he unlocked the CybeastButton.
+- **Every Soul asks for its chips.** The finds and a Net Dealer's fourth
+  chip lean to the kinds of every Soul the run holds, Team ProtoMan's and
+  BN4's as Team Colonel's did ([A held Soul's kind](../economy/held-soul-kind.md));
+  a CROSS run holds none and leans nothing.
 
 ## The week's net
 
@@ -104,8 +112,8 @@ has every game's ROM, which the Deep Net's dive asks.
   SOUL BN5's list until their branch moves them ([Team ProtoMan](../team-protoman.md)), so HeatMan
   pays one of Team Colonel's there today; BN4's twelve come one by one
   (ThunSoul alone now, [BN4's Souls on BN6's proxy form](../../multirom/bn4-souls.md)),
-  and a SOUL BN4 run's Souls reach BN6's engine once that branch hands
-  `souls_held_bn4` to UNITE.
+  and a SOUL BN4 run's Souls reach BN6's engine through
+  `soulunite_held_bn4` (bn4-souls, PR #792).
 - **The flag.** `--dev forms` stays until every Soul has landed; the
   orchestrating session switches it on for good.
 
