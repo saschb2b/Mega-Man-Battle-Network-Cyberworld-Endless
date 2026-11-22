@@ -123,7 +123,8 @@ MANY['crew-on-screen-only'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
     ('expect', 'insight~Beta'),
     ('@beta', 'expect', 'insight~Alpha'),
     ('@beta', 'do', 'place 96 0 3; wait 5'),          # past it: still seen, still a crew for crew_split_ms
-    ('do', 'wait 5'),
+    ('sleep', 0.5),
+    soon('diver~Beta at 96 ', '', 900),               # (the server has his new place: Alpha's snapshot says it)
     ('expect', 'insight~Beta'),
     ('expect', 'crew=2: Alpha Beta'),
     ('do', 'battle; wait 10'),                         # Alpha's battle: Beta, at the picture's edge, offered none
