@@ -19,6 +19,7 @@
 #include "text.h"
 #include "title_lines.h"
 #include "title_summary_text.h"
+#include "weekly.h"
 
 #define SUMMARY_MIN 60   /* frames before the first screen turns (a press meant for the battle) */
 #define RECORDS_MIN 30   /* ... before the second closes: its fade, and a beat to read it */
@@ -54,6 +55,8 @@ void title_summary_open(void) {
 bool title_summary_shown(void) { return U.up; }
 
 bool title_summary_update(void) {
+	/* (a dive's end: its link kept a moment for the Board's answer, the place on its row, issue #769) */
+	if (weekly_end_pump) weekly_end_pump();
 	++U.t;
 	if (U.t <= (U.records ? RECORDS_MIN : SUMMARY_MIN) || (!btn_pressed(BTN_A) && !btn_pressed(BTN_START))) return false;
 	if (U.records) { U.up = false; return true; }
@@ -87,7 +90,7 @@ static void helpers_draw(int x0, int y0) {
  * what happened, as SubChip's describe */
 static void ending_draw(int x0, int y0) {
 	SDL_Rect r = look_panel(x0 + 7, y0 + END_Y, CORE_W - 14, END_H);
-	look_text(r.x + 3, r.y, summary_text(title_won ? SM_FALLEN : SM_DELETED), LOOK_TEXT, LOOK_PANEL_SHADE, TEXT_LEFT);
+	look_text(r.x + 3, r.y, summary_text(title_won ? SM_FALLEN : title_dive ? SM_DIVE_OVER : SM_DELETED), LOOK_TEXT, LOOK_PANEL_SHADE, TEXT_LEFT);
 	const char *where = look_text_width(title_cause) <= r.w - 6 || !title_cause_short[0] ? title_cause : title_cause_short;
 	look_text(r.x + 3, r.y + ROW_H, where, LOOK_EDGE_HI, LOOK_PANEL_SHADE, TEXT_LEFT);
 }
@@ -99,8 +102,18 @@ static void row_draw(SDL_Rect f, int i, const char *label, const char *value) {
 	look_text(f.x + f.w - ROW_IN, y, value, LOOK_TEXT, LOOK_SHADE, TEXT_RIGHT);
 }
 
+/* a dive's rows (issue #769): how deep, its crew's battles, and its place on the week's Board as the server answers */
+static void dive_rows(SDL_Rect f) {
+	const WeeklyEnd *e = weekly_last_end();
+	char v[24];
+	row_draw(f, 0, summary_text(SM_REACHED), summary_layer(v, sizeof v, run_reached()));
+	row_draw(f, 1, summary_text(SM_CREW), summary_crew(v, sizeof v, e->crew_fought, e->crew_won));
+	row_draw(f, 2, summary_text(SM_PLACE), summary_place(v, sizeof v, e->place));
+}
+
 static void run_draw(int x0, int y0) {
 	SDL_Rect f = look_window(x0 + 7, y0 + TALLY_Y, CORE_W - 14, TALLY_H, 0, false);
+	if (title_dive) { dive_rows(f); return; }
 	char v[24];
 	row_draw(f, 0, summary_text(SM_REACHED), summary_layer(v, sizeof v, run_reached()));
 	snprintf(v, sizeof v, "%d", run.viruses_deleted);
@@ -119,7 +132,9 @@ static void navigator_draw(int x0, int y0) {
 	int then = title_won ? SUMMARY_WON_HOW
 		: title_learned[0] ? SUMMARY_LEARNED : title_new_best ? SUMMARY_BEST : run_reached() <= 2 ? SUMMARY_ROUGH : SUMMARY_FURTHER;
 	char say[96];
-	snprintf(say, sizeof say, "%s|%s", summary_words(first), summary_words(then));
+	/* (a dive lost: its own words, never Dad's backup's, issue #769) */
+	if (title_dive && !title_won) snprintf(say, sizeof say, "%s|%s", summary_dive_words(false), summary_dive_words(true));
+	else snprintf(say, sizeof say, "%s|%s", summary_words(first), summary_words(then));
 	look_wrapped(say, pg.x + 4, pg.y + 4, pg.w - 8, 3, LOOK_INK, LOOK_INK_SHADE);
 }
 
@@ -157,7 +172,7 @@ static void opened_draw(int x0, int y0, SDL_Rect f) {
 
 void title_summary_draw(int x0, int y0) {
 	if (!U.records) {
-		pet_panel_draw(x0, y0, summary_text(SM_RESULT));
+		pet_panel_draw(x0, y0, summary_text(title_dive ? SM_DIVE : SM_RESULT));
 		helpers_draw(x0, y0);
 		ending_draw(x0, y0);
 		run_draw(x0, y0);
@@ -184,4 +199,7 @@ void title_summary_describe(FILE *f) {
 		title_new_best ? "yes" : "no");
 	for (int i = 0; i < n; ++i) fprintf(f, "%s %s", i ? "," : "", open[i]);
 	fprintf(f, "%s\n", n ? "" : " nothing");
+	/* (a dive's end: its crew's battles and its place, 0 still asked, -1 no answer) */
+	const WeeklyEnd *e = weekly_last_end();
+	if (title_dive) fprintf(f, "diveend crew %d/%d place %d\n", e->crew_won, e->crew_fought, e->place);
 }
