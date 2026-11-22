@@ -2,8 +2,8 @@
   "schema": "re-status/1",
   "written_by": "tools/re_status.py from docs/re/ledger/",
   "project": "Cyberworld Endless: online Net Squares (epic #120)",
-  "updated": "2026-11-21",
-  "previous": "2026-11-16",
+  "updated": "2026-11-22",
+  "previous": "2026-11-21",
   "features": [
     {
       "name": "Net Square",
@@ -205,29 +205,16 @@
     }
   ],
   "decisions": [],
-  "since": [
-    {
-      "date": "2026-11-21",
-      "what": "A chip's name in BN6's lists: the folder editor's name routine (BN6_LIST_NAME_DRAW 0x08122090, bn6f sub_81202B4, called with r5 = 8 from 0x08121F22) writes every glyph of a name, then blanks to the eighth cell, and its caller goes on from where it ended (BN6_CHIP_NAME_CELLS 8), so a name of nine glyphs set every row under it a cell late. BN5's twelve DS Navi chips were nine (its DS mark one glyph, which BN6 lacks, spelt D and S); src/core/xchips_cells.c cuts a moved name to eight as the install writes the archives (docs/rom/chips-code.md, A name's cells; issue #732, a player's Pack)."
-    },
-    {
-      "date": "2026-11-21",
-      "what": "BN6's Security Cubes stand sunk under their floor (src/emu/bn6_map.h BN6_SCUBE_*, docs/rom/net-maps.md, Link Navi obstacles; issue #735): Central Area 1's spawn record (0x08072BA0, id 0x09) puts it at (212, 138, -12) and Seaside Area 2's (0x08076830, id 0x52) at (-248, 168, -8), each on the middle of the one panel its walls box, at floor height 0; its sprite's foot is drawn that far over its origin, where the obstacles' (z 0, or their floor's height) meet theirs. BN5's own cubes (one map's spawn list at 0x0807FFF8, ids 0x0A-0x0C, records whose sprite is 7:0x01) stand at z 0. A layer's cube, given the flames' spot at z 0, floated over the panel's far edge; on its panel's middle at z -12 it stands as Central Area 1's does, the two drawn side by side (BN6's untouched, warped into in the engine)."
-    },
-    {
-      "date": "2026-11-21",
-      "what": "A form of the swap taken off ends the third kind's objects bound to it (RelatedObject1Ptr +0x4C, BN6_T1_PARENT) by their own destroy, CurState BN6_STATE_DESTROYED, as each ends itself at a battle's end (bn6f t3_0x36_80CAB68, sub_80CAB90). Measured over BN6's Navis in Gregar: DiveMan's torpedo launcher (type 0x36, BN6_T3_TORPEDO_LAUNCHER), ElecMan's 0x1A and TomahawkMan's 0x40 lived on under the next form to the battle's end, DiveMan's firing torpedoes under JudgeMan (issue #733); TenguMan's 0x47 and ElementMan's 0x90 ended in 61 and 38 frames. src/emu/battle_swap.c (end_bound); docs/rom/navis.md, A form's own objects; held by tests/scenarios/battle_swap_leftovers.py."
-    },
-    {
-      "date": "2026-11-21",
-      "what": "BN6's save (BN6_SAVE_GAME 0x0803F76C, after every trade among others) XORs the RAM 0x02000000-0x0200670F, eEventFlags among it, with a new key's low byte (BN6_SAVE_KEY 0x02001064) while it writes the cartridge, frames long, then back: the engine read the reward pick's flags as the key's bits there and opened a pick over a trader's trade (issue #734; docs/rom/game-state.md, The save's mask). The pick now opens from SetEventFlag's hook alone."
-    },
-    {
-      "date": "2026-11-21",
-      "what": "Gregar's records of Falzar's five Gigas (302, 306, 308, 309, 310: LibraryFlags 0x18) give each the icon, picture and palette of Gregar's Giga of its library number (HubBatc ColForce's), and Gregar holds none of their own; BN5's Team Colonel holds BassAnly's, BigHook's and CrossDiv's. The core's copy now draws BN5's for those three where its ROM is read and BN6's blank record's art for the rest (src/core/chips.c other_giga; docs/rom/chips.md, The other version's Gigas' art; issue #731)."
-    }
-  ],
+  "since": [],
   "experiments": [
+    {
+      "feature": "Shared dive",
+      "date": "2026-11-22",
+      "name": "Viruses aim by the panels in their line, not the side's player",
+      "result": "On the viruses' bench (--dev party=3 on layer 2 of --seed 3, partyaim=3: the aim passed round as on the party's core, the partners standing still where they spawn, column 1 rows 1 and 3, the lead at column 2 row 2), a Mettaur (01@52) struck the lead ten times running until he fell, then the partner in another row; a Gunner (53@52) struck the lead twice, then each partner. The same with the aim off (partyaim=2), with the lead's slot and partner 1's traded for good at iteration 150 (partylead=150: the hits stayed on the MegaMan at column 2 row 2, whatever his slot), with the other MegaMen's panel flags 0x08410000 cleared while each of side 1's routines ran, and with their objects' PanelX and PanelY set to 0 then. A hook on battle_findPlayer (0x080103BC) saw only MegaMan's own callers (0x08015B64, emotion; 0x08016934, blind) in the fight. The Gunner's attack step (0x081140F0) asks object_getFirstPanelInDirectionFiltered (0x0800D0BC) for the first panel in its front direction whose flags hold 0x00010000 and not 0x20 (its filter table 0x08114154, alliance 1's entry).",
+      "meaning": "A virus takes no player from side 0's first slot: it finds a target by position, the MegaMan in its line, which on a crew's field is the battle's owner standing in front (column 2) while the partners spawn behind him (column 1). party_field_aim, which spreads a Navi's aim, cannot reach it. Not yet found: what the Mettaur's row choice and the Gunner's scan read that the cleared panel bits and object panels did not hide (perhaps the collision panels, object_updateCollisionPanels). Issue #777 stays open on it.",
+      "link": "../online/shared-dive.md"
+    },
     {
       "feature": "BN4's chips in BN6's tables",
       "date": "2026-11-16",
