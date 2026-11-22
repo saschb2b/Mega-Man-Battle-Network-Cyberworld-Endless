@@ -28,6 +28,7 @@
 #define PAD     2
 #define H       (PIXFONT_CAP + 2 + 2)   /* letters, a row, the bar */
 #define GAP     3
+#define HP_GAP  6     /* ... and after the layer, before the HP: "L1 100/100", not "L1100/100" (issue #781) */
 #define WHERE_MS 250        /* where MegaMan is, said at most so often */
 
 static const SDL_Color shade = { 0, 24, 41, 255 };
@@ -161,7 +162,7 @@ void dive_crew_view_draw(void) {
 	for (int i = 0; i < n; ++i) {
 		/* (a mark in the tag's own small capitals, a margin each side) */
 		int a = pixfont_width(w[i].name, 1), c = pixfont_width(w[i].hp, 1);
-		int b = !w[i].layer[0] ? 0 : (w[i].mark ? look_caps_width(w[i].layer) + 4 : pixfont_width(w[i].layer, 1)) + GAP;
+		int b = !w[i].layer[0] ? 0 : (w[i].mark ? look_caps_width(w[i].layer) + 4 : pixfont_width(w[i].layer, 1)) + HP_GAP;
 		if (a > name_w) name_w = a;
 		if (b > layer_w) layer_w = b;
 		if (c > hp_w) hp_w = c;
@@ -174,7 +175,7 @@ void dive_crew_view_draw(void) {
 		pixfont_draw(x + PAD, y + 1, w[i].name, w[i].crewmate ? CREW_COLOUR : LOOK_TEXT, shade, PIXFONT_LEFT, 1);
 		/* (where he is: a mark as the information box tags a key item, BN6's PET piece, its colour the state's; another
 		 * layer in plain letters) */
-		if (w[i].mark) look_tag(x + PAD + name_w + GAP - 1, y, layer_w - GAP, H - 2, w[i].layer, mark_fill(w[i].layer));
+		if (w[i].mark) look_tag(x + PAD + name_w + GAP - 1, y, layer_w - HP_GAP, H - 2, w[i].layer, mark_fill(w[i].layer));
 		else if (w[i].layer[0]) pixfont_draw(x + PAD + name_w + GAP, y + 1, w[i].layer, LOOK_EDGE_HI, shade, PIXFONT_LEFT, 1);
 		pixfont_draw(x + width - PAD - 1, y + 1, w[i].hp, LOOK_TEXT, shade, PIXFONT_RIGHT, 1);
 		/* (his HP as a bar under it, the plate's width his max; orange from a quarter down) */

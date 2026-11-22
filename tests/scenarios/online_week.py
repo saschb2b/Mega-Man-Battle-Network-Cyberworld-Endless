@@ -152,10 +152,12 @@ MANY['crew-on-screen-only'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS
 MANY['crew-battle-named'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
     MANY['dive-together']['STEPS'],
     ('do', 'battle; wait 10'),
-    soon("band=Alpha's battle!", 'beta', 600),
+    soon('party~fight', 'beta', 900),
+    ('@beta', 'expect', 'band=none'),                  # never over the field's Custom screen (issue #781)
+    ('do', 'press START; wait 10; press A; wait 10'),  # the Custom screen closed on both
+    ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),         # whose battle, on the field
     ('@beta', 'do', 'wait 30; shot'),
-    ('@beta', 'expect', "band=Alpha's battle!"),
-    soon('join=fighting', 'beta', 900),
 ))
 
 # A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server
@@ -231,6 +233,47 @@ for cut in (5, 30, 120):
         soon('join=fighting', 'beta', 900),
         soon('join=fighting', '', 900),
     ))
+
+# A link cut during a join (issue #751): nobody held for an answer the drop has made impossible. Beta answers his
+# offers two seconds late (joinwait=120, dev), a window for the cut. The joiner's cut: he is back on the map at once,
+# and Alpha, his only crewmate offered it, fights the battle alone as soon as the server knows (not the offer's 3
+# seconds and 3 more). The owner's cut: Alpha fights his battle alone at once, and Beta is let go as the server tells
+# him it went on without him.
+SLOW = LOUD + ',joinwait=120'
+MANY['join-cut-joiner'] = dict(CAST, START=LOUD, GAMES={'beta': SLOW}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon('join=joined', 'beta', 120),
+    ('@beta', 'do', 'reconnect cut 4'),
+    soon('join=none', 'beta', 30),                  # back on the map at once
+    ('@beta', 'expect', 'doing=map'),
+    soon('join=none', '', 120),                     # Alpha alone within the server's notice
+    soon('doing=battle', '', 300),
+))
+MANY['join-cut-owner'] = dict(CAST, START=LOUD, GAMES={'beta': SLOW}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 2; reconnect cut 4'),
+    soon('join=none', '', 30),                      # Alpha fights it alone at once
+    soon('doing=battle', '', 300),
+    soon('join=none', 'beta', 120),                 # Beta let go as the server tells him
+    ('@beta', 'expect', 'doing=map'),
+))
+
+# A link cut as the portal is taken (issue #751): the dive begins with its link down, kept, and takes it up again
+# once back, not solo for the rest of the dive
+MANY['portal-cut'] = dict(CAST, STEPS=online.course(
+    online.into_square(),
+    ('do', PORTAL),
+    ('repeat', 'press A; wait 10', 'choice~/2', 20),
+    online.yes(),
+    ('do', 'reconnect cut 3'),
+    ('repeat', 'press A; wait 10', 'dive=on', 60),
+    ('until', 'where=layer', 1200),
+    ('expect', 'divelink=on'),
+    ('sleep', 4.5),                                     # the cut and a try again: the clock's
+    soon('divestate=up', '', 1800),
+    ('expect', 'link=up'),
+))
 
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between the near reach and the far (along x, 64 and 88 world units: protocol.json's crew_near_* and crew_far_*,
@@ -320,6 +363,65 @@ MANY['crew-drawn-with-little-room'] = dict(CAST, START=ROOM2, GAMES={name: ROOM2
     ('do', 'shot'),
     *[step for name in CREW4 for step in (soon('rings>=3', name, 300), ('@' + name, 'expect', 'undrawn~1: '))],
     ('@delta', 'do', 'shot'),
+))
+
+# Nothing of ours over BN6's screens or our cards (issue #781; director_cover): Beta arriving where Alpha stands has
+# no names, rings or arrival mark across the act's title card, the mark counted from the card's end; Beta's link cut,
+# his crew is put away under "Reconnecting..." (`band` says so) and comes back with the link; Beta taken into
+# Alpha's battle reads whose it is over the staging's still map, and nothing once the field shows.
+MANY['drawn-over-nothing'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    online.into_square('beta'),
+    online.at('beta', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/2', 20)),
+    online.yes('beta'),
+    online.at('beta', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('@beta', 'until', 'cover=card', 900),             # the act's title card over Alpha where he stands
+    ('@beta', 'expect', 'tags=0'),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'expect', 'arrival=none'),
+    ('@beta', 'do', 'shot'),
+    ('@beta', 'until', 'cover!=card', 900),
+    soon('arrival=marked', 'beta', 300),               # (its two seconds from the card's end)
+    ('@beta', 'repeat', 'press A; wait 10', 'chat=closed', 20),
+    ('sleep', 1.5),
+    soon('crew=2: Alpha Beta', 'beta', 600),
+    soon('tags~Alpha', 'beta', 300),
+    ('@beta', 'do', 'reconnect cut 4'),                 # Beta's link cut four seconds
+    ('sleep', 1.5),
+    soon('band~Reconnecting', 'beta', 300),
+    ('@beta', 'expect', 'tags=0'),
+    ('@beta', 'expect', 'rings=0'),
+    ('@beta', 'expect', 'crewview=0'),
+    ('@beta', 'expect', 'mapdots=0'),
+    ('@beta', 'do', 'shot'),
+    ('sleep', 8),                                      # (the cut's four seconds, and the next try after it)
+    soon('link=up', 'beta', 900),
+    soon('tags~Alpha', 'beta', 900),                   # back with the link
+    soon('crew=2: Alpha Beta', 'beta', 900),
+    ('do', 'battle; wait 10'),
+    soon('party~fight', 'beta', 900),
+    ('@beta', 'expect', 'band=none'),                   # never over the field's Custom screen
+    ('@beta', 'do', 'wait 20; shot'),
+    # (the Custom screen closed on both: whose battle on the field, each mark under its MegaMan)
+    ('do', 'press START; wait 10; press A; wait 10'),
+    ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
+    soon("band=Alpha's battle!", 'beta', 600),
+    ('@beta', 'do', 'wait 20; shot'),
+    soon('marks~apart', '', 600),
+    ('do', 'wait 30; shot'),
+    ('@beta', 'do', 'wait 30; shot'),
+))
+
+# A crewmate's plate with his layer (issue #781): Alpha a layer down by the dev menu, still in the crew for
+# crew_away_ms, Beta's plate reads "Alpha L2 100/100", its layer apart from its HP.
+NEXT_LAYER = 'hold SELECT 2; hold SELECT+R 4; wait 10; ' + 'press DOWN; wait 4; ' * 7 + 'press A; wait 30'
+MANY['plate-another-layer'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', NEXT_LAYER),
+    ('until', 'layer=2', 1200),
+    soon('mate0~layer 2', 'beta', 900),
+    ('@beta', 'do', 'shot'),
 ))
 
 # Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and
@@ -434,6 +536,7 @@ MANY['crew-pulls-back'] = dict(crew_fight(BETA), STEPS=online.course(
     ('@beta', 'expect', 'dive=on'),
     soon('where=layer', 'beta', 600),
     ('@beta', 'expect', 'hp>0'),
+    ('@beta', 'repeat', 'press A; wait 10', 'chat=closed', 20),   # (the band shows over no chat box: issue #781)
     soon('band~pulled us back', 'beta', 600),
 ))
 # ... and a second deletion: spent, the dive over as alone; Alpha gives nothing.
@@ -645,6 +748,48 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', '', 3000),                    # the guardian's words paged on both, the fight on
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
+))
+
+# The way in (issue #779): a second dive of the week from A on the portal to walking on layer 1 in three presses of
+# A and DOWN: the unfinished dive's options at once (A), "Start over" (DOWN, A); the first layer's words and the act's
+# card were the week's first dive's, and are not said again.
+MANY['second-dive-of-the-week'] = dict(CAST, STEPS=online.course(
+    online.into_square(), dive(),
+    ('expect', 'layer=1'),
+    ('restart', online.HOME),                         # (the game quit on the dive: unfinished)
+    online.into_square(),
+    soon('weekoffer=again', '', 600),
+    ('do', PORTAL),
+    ('do', 'press A; wait 10'),                       # 1: the portal's box, its options
+    ('repeat', 'wait 4', 'choice=1/3', 90),
+    ('do', 'wait 20; press DOWN; wait 6'),            # 2: Start over (a moment after the options are up)
+    ('expect', 'choice=2/3'),
+    ('do', 'press A; wait 6'),                        # 3
+    ('repeat', 'wait 10', 'dive=on', 60),
+    ('until', 'where=layer', 1200),
+    ('do', 'wait 240'),
+    ('expect', 'chat=closed'),                        # no words, no card: walking
+    ('expect', 'talk=none'),
+))
+
+# A queued diver's link cut at the door (issue #751): the server took him out of its queue as it dropped; back, his
+# game joins it again (else, past 10 seconds down, he goes in alone): Beta, come to the door after, finds both in it
+MANY['door-cut'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    soon('crew=2: Alpha Beta', '', 600),
+    to_layer(''),
+    to_layer('beta'),
+    soon('divers~Beta', '', 600),
+    ('sleep', 1.5),
+    to_door(''),
+    soon('door=queued: Alpha', '', 300),
+    ('do', 'reconnect cut 3'),
+    ('sleep', 4.5),                                       # the cut and a try again: the clock's
+    soon('divestate=up', '', 1200),
+    soon('door=queued: Alpha', '', 300),                  # joined again
+    to_door('beta'),
+    ('@beta', 'do', 'mash A 60'),
+    soon('door=queued: Alpha Beta', 'beta', 300),         # the server's queue knows him again
 ))
 
 # The door waits for the crew as it was (issue #778): Alpha, Beta and Gamma a crew on the guardian's layer. Alpha goes

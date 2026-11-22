@@ -451,9 +451,59 @@ the session building it, and is his to turn over.
 | One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
 | More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
 
+## Nothing over BN6's screens (22 November 2026)
+
+Issue #781, from the second play of the dive: our drawing over the
+game's picture landed on BN6's own and on our cards in five places, the
+joiner's band over a crew battle's Custom screen, the divers' names and
+rings across the act's and the guardian's title cards (the arrival's
+mark running out unseen under them), a plate's layer run into its HP
+("L1100/100"), a partner's mark on the field's bottom row cut at the
+picture's foot, and a dropped game's crewmates drawn frozen under
+"Reconnecting...".
+
+**One answer** (`director_cover`, `src/director/director_cover.c`): what
+stands over the layer's field now, nothing, BN6's chat box, a title card
+of ours (an act's, an area's, a guardian's), BN6's fade or a warp, or no
+field at all (a battle, BN6's menus, SELECT's map). Everything the dive
+draws over the field asks it first: under a chat box only what stands
+above the box, under the rest nothing at all. The names, rings, the
+arrival's mark, the crew's plates and the band all go through it, so the
+next thing drawn there cannot land on a screen of BN6's either. The
+state's `cover` line names it.
+
+- **The joiner's band** stands on the map while the join is sent, over
+  the crew battle's staging (the still picture of the map, made in a
+  burst, too short to read alone), and on the field for two and a half
+  seconds from its first Custom screen's close; never over a Custom screen
+  (`party_play_drawn_over`). `band` in the state says what is drawn.
+- **The feed waits:** a line said while the band cannot show it (a card,
+  a chat box, a fade, a battle) keeps its three and a half seconds for
+  when it can, rather than spending them unseen.
+- **Title cards:** no names, rings or arrival mark under one; the
+  arrival's two seconds are counted from the card's end.
+- **The plates:** six pixels between a crewmate's layer and his HP
+  ("L1 100/100").
+- **The field's marks:** where a mark and its HP would reach BN6's chip
+  name at the picture's foot (the field's bottom row), they stand over
+  the MegaMan's head, the name over the HP as everywhere.
+- **A dropped link:** while it is down (dropped, tried again, or given
+  up) the crew is put away, the puppets, names, rings, dots and plates
+  none, until the room's divers are heard again; the band's
+  "Reconnecting..." is what `band` says.
+
+Seen headless with two games on a local server (the scenario
+`online-week/drawn-over-nothing`): Beta arriving where Alpha stood, his
+act's title card with no name or ring across it and the arrival's mark
+after it; Beta's link cut for four seconds, his crew put away under
+"Reconnecting..." and back with the link; Beta taken into Alpha's battle
+reading nothing over the field's Custom screen and "Alpha's battle!" on
+the field once it closed.
+
 ## As built
 
-- **The portal** (15 November 2026, `src/online/online_square.c`'s
+- **The portal** (15 November 2026; its words since 22 November one box,
+  [The way in](#the-way-in-22-november-2026); `src/online/online_square.c`'s
   `portal`, `square_week.c`'s `square_week_portal`): where the greeter
   Mr.Prog stood by the Board, BN5's dark hole (Gregar's list 7 `0x87` once
   `xnavi_object` has copied it; every diver has BN5's ROM, the DeepNet
@@ -1084,6 +1134,44 @@ his dive kept on, "Gamma's signal is back!" and the crew of
 three again) and
 `online-week/crew-of-four-and-a-fifth` (five games: the fifth's rings none,
 "Alpha's crew is full" on his band; a crewmate walking off says nothing).
+
+## The way in (22 November 2026)
+
+The second friction hunt counted about fifteen presses of A from the
+portal to walking on layer 1, the same on every dive of the week and after
+a deletion, and the one fact a diver wants there, how many dive now, not
+said ([issue
+#779](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/779)).
+Under the owner's direction of 21 November (no prompts, no waiting; less
+is more), and his to turn over:
+
+- **One box, then go.** A new dive's portal is one BN6 Yes/No box: "3 NAVIS
+  DIVING! / DIVE IN?", the count the server's DIVERS (the Board's "Diving
+  now"), "DIVE INTO THIS / WEEK'S DEEP NET?" before the server has told it.
+  The week's first dive alone has one page before it, the week's dates and
+  "EVERY NAVI DIVES THE SAME NET!", and its cursor starts on No; once
+  MegaMan has dived this week it starts on Yes. Yes goes at once: "THE
+  PORTAL OPENS INTO THIS WEEK'S DEEP NET!" is gone, and so are "THE NET
+  SHIFTED!" and "DIVE IN NOW?". An unfinished dive's box is its options
+  alone (Keep diving, Start over, Not now), "YOUR DIVE INTO THE DEEP NET
+  ISN'T OVER!" gone. The Board's word of a dive it just took stays, a page
+  first.
+- **Once a week.** The first layer's words ("Whoa... It looks just like
+  ...!"), the older net's news ("Wait... This Net's a copy of an older
+  one!", which a dive's fresh profile heard every dive) and the act's title
+  card play on the week's first dive and not again that week (`weekly_intro_shown`, the week's record's `intro_week`
+  in `weekly.sav`, not `Run`).
+
+- **The vortex's flat frame is its own.** Sampled every three frames
+  with no box open, BN5's dark hole (list 7 `0x87`, moved plain) shows as a
+  flat purple shape once in each 30-frame loop of its five frames: it is
+  the moved sprite's, not the box's. Open: why that frame draws flat in
+  BN6's engine (its frame's tiles or OAM as `xnavi_sprite_len` copies
+  them, against BN5's own), a reverse-engineering task of its own.
+
+A second dive of the week is now three presses from A on the portal to
+walking on layer 1: the portal (A), Start over (DOWN, A), or a new dive's
+Yes (A, A). Seen headless: `online-week/second-dive-of-the-week`.
 
 ## A diver gone home (22 November 2026)
 

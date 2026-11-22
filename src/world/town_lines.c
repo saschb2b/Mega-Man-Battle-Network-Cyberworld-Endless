@@ -138,7 +138,12 @@ static const char *const green_checks[16] = {
  * gave it (docs/voice/rules.md, What nobody says) */
 static const char *beast_words(bool called) {
 	static char words[240];
-	snprintf(words, sizeof words, "|@D %s I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|"
+	/* (in a Soul form the helper brings SoulT+1's turn, not BeastOut: the
+	 * beast's power in MegaMan's Souls, issue #774) */
+	if (!run_form_crosses())
+		snprintf(words, sizeof words, "|@D %s MegaMan tamed the beast at the Nest before.|@D Its power's in his Souls now.|"
+			"@D Each unison lasts a turn longer.|@M Leave it to me,Dad!", called ? "One more thing." : "Lan,it's Dad.");
+	else snprintf(words, sizeof words, "|@D %s I've unlocked your CybeastButton.|@D MegaMan tamed the beast at the Nest before.|"
 		"@D Just don't let it take over,OK?|@M Leave it to me,Dad!", called ? "One more thing." : "Lan,it's Dad.");
 	return words;
 }

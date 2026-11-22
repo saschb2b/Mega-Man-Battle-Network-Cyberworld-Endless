@@ -306,12 +306,22 @@ class Crews:
         self.server.event("crew", members=list(crew.members))
 
     def split(self, player_id, gone=False):
-        """A diver out of the dive (back to the Square, his session ended, his dive's end): out of his crew at once."""
-        self.offers.pop(player_id, None)
-        for offer in self.offers.values():
+        """A diver out of the dive (back to the Square, his session ended, his dive's end): out of his crew at once.
+        An offer under way settled at once (issue #751): his own, its joiners told it went on without them (CREW_STATE
+        alone, the owner theirs); one he was offered, started with those who joined, or its owner alone, where every
+        one left in it has answered: nobody holds still for an answer his drop has made impossible."""
+        own = self.offers.pop(player_id, None)
+        if own:
+            for member in set(own.invited) | set(own.joined):
+                self.send(member, SPEC["crew_alone"], player_id, own.index, self.of.get(member))
+        for offer in list(self.offers.values()):
+            if player_id not in offer.invited and player_id not in offer.joined:
+                continue
             offer.invited.discard(player_id)
             if player_id in offer.joined:
                 offer.joined.remove(player_id)
+            if set(offer.joined) >= offer.invited:
+                self.close(offer)
         self.placed.pop(player_id, None)
         self.hp.pop(player_id, None)
         self.hp_at.pop(player_id, None)

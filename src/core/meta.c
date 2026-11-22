@@ -190,6 +190,7 @@ bool meta_form_open(int form) {
 int meta_form_best(int form) { return form >= 0 && form < (int)sizeof profile.form_best ? profile.form_best[form] - 1 : -1; }
 
 void meta_soul_won(int form, int soul) {
+	if (save_slot_weekly()) return;   /* (the week's net opens nothing: docs/game/meta/weekly-net.md) */
 	int g = form == RUN_FORM_SOUL_BN5 ? 0 : form == RUN_FORM_SOUL_BN4 ? 1 : -1;
 	if (g < 0 || soul < 1 || soul > 12 || (profile.souls_won[g] >> (soul - 1) & 1)) return;
 	profile.souls_won[g] |= (uint16_t)(1u << (soul - 1));
@@ -418,9 +419,10 @@ static void open_beast(bool tell) {
  * Souls land) */
 static void open_forms(bool tell) {
 	for (int f = RUN_FORM_SOUL_BN5; f <= RUN_FORM_SOUL_BN4; ++f) {
-		if ((profile.forms_told >> f & 1) || !meta_form_open(f)) continue;
+		/* (told only where the forms are offered: a form opened before the
+		 * flag is said, and NEW, once they are) */
+		if (!run_debug_forms || (profile.forms_told >> f & 1) || !meta_form_open(f)) continue;
 		profile.forms_told |= (uint8_t)(1u << f);
-		if (!run_debug_forms) continue;
 		if (tell) say("%s", meta_form_name(f));
 		profile.setup_new |= SETUP_NEW_FORM;
 	}

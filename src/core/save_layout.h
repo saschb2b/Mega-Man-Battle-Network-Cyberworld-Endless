@@ -168,7 +168,8 @@ _Static_assert(offsetof(Job, code) == 7, "Job.code save offset changed");
 _Static_assert(offsetof(Job, pay) == 8, "Job.pay save offset changed");
 _Static_assert(offsetof(Job, depth) == 10, "Job.depth save offset changed");
 
-_Static_assert(sizeof(WeeklyRecord) == 32, "WeeklyRecord save size changed");
+_Static_assert(sizeof(WeeklyRecord) == 36, "WeeklyRecord save size changed");
+_Static_assert(offsetof(WeeklyRecord, intro_week) == 32, "WeeklyRecord.intro_week save offset changed");
 _Static_assert(offsetof(WeeklyRecord, week) == 0, "WeeklyRecord.week save offset changed");
 _Static_assert(offsetof(WeeklyRecord, running) == 2, "WeeklyRecord.running save offset changed");
 _Static_assert(offsetof(WeeklyRecord, pending) == 3, "WeeklyRecord.pending save offset changed");

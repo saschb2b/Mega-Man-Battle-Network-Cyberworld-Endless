@@ -20,6 +20,10 @@
  * 0 none): their kinds, where both ROMs are read (the folder's chips of
  * each counted at a pick, as loot_folder_counts was given them) */
 void loot_soul_souls(unsigned souls);
+/* ... and the kinds of the other Souls held then (Team ProtoMan's, BN4's:
+ * souls_lean), a bit each (BN5_CHIP_KIND), joined to theirs (issue #774:
+ * every Soul a run's form gives asks for its chips) */
+void loot_soul_kinds(unsigned more);
 /* Soul k's kind (BN5_CHIP_KIND, as soulkinds.h numbers a chip's), -1
  * where BN5's ROM is not read */
 int loot_soul_kind_of(int soul);

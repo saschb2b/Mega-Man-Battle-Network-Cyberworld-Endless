@@ -287,6 +287,16 @@ bool director_on_map(void);
 /* SELECT's map of the layer shows over the picture: what is drawn over
  * the layer's field (a diver's name, a ring) waits under it. */
 bool director_map_over(void);
+/* What stands over the layer's field in the picture now (issue #781;
+ * director_cover.c): nothing, BN6's chat box, a title card of ours (an
+ * act's, an area's, a guardian's), BN6's fade or a warp, or no field at
+ * all (a battle, BN6's menus, SELECT's map). Everything we draw over the
+ * field asks it first: under a chat box only above the box, under the
+ * rest nothing at all. */
+enum { COVER_NONE, COVER_CHAT, COVER_CARD, COVER_FADE, COVER_AWAY };
+int director_cover(void);
+/* ... in the state's words: none, chat, card, fade, away. */
+const char *director_cover_name(int cover);
 /* ... on to the next layer, or the next guardian's (arriving in the room
  * before its arena), or to grid panel (x, y) of this one. */
 bool director_dev_next_layer(void);

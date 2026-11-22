@@ -40,10 +40,28 @@
 #define BN6_PET_LABEL_INK     5           /* a label's letters' colour, + its entry (palette 15, 0x03001B40) */
 #define BN6_PET_LABEL_SHADE   3           /* ... their shade's */
 #define BN6_PET_LABEL_BACK    2           /* ... the box's under them */
+#define BN6_PET_LABEL_INK_NEXT (BN6_PET_LABEL_INK + 8) /* the colour after the eight rows' inks (palette 15's 13, black in BN6's PET): Forms' letters' (pet_options.c, pet_menu_frame.c) */
 #define BN6_PET_ENTRY_LIBRARY 2           /* the menu's entries as BN6_PET_CURSOR counts them: Library, the run's own (src/library/) */
 #define BN6_PET_ENTRY_COMM    6           /* the menu's entries as BN6_PET_CURSOR counts them: Comm, the run's Options */
 #define BN6_PET_ENTRY_SAVE    7           /* ... Save */
 #define BN6_PET_ENTRY_STATUS  8           /* ... BN6_PET_LABEL_MAPS' ninth, Status: MegaMan's row for another Navi */
+/* The menu's icons (docs/rom/pet-and-second-screen.md, the PET menu's icons): the UI sprites'
+ * lists the menu makes them from as it opens and as a screen gives it back
+ * (4 bytes an entry: type, slot, row, back; 0xFF the end; an icon type 2,
+ * row k in slot k + 1, its animation k, 8 the Status icon), the u16 table
+ * of the height each row's icon comes to rest at (0x20 + 16k, eight), and
+ * each one's literal */
+#define BN6_PET_ICONS         0x08120954u
+#define BN6_PET_ICONS_LIT     0x08120B84u
+#define BN6_PET_ICONS_BACK    0x08120980u
+#define BN6_PET_ICONS_BACK_LIT 0x08120D40u
+#define BN6_PET_ICON_HEIGHTS  0x08117F1Cu
+#define BN6_PET_ICON_HEIGHTS_LIT 0x08117F18u
+#define BN6_PET_ICON_ROWS     8           /* the rows with icons */
+#define BN6_PET_ICON_LAST     (BN6_PET_ICON_ROWS - 1)   /* the last row's icon, Save's */
+#define BN6_PET_ICON_STATUS   BN6_PET_ICON_ROWS         /* the Status icon's animation, after the rows' (MegaMan's row for another Navi) */
+#define BN6_PET_ICONS_GROWN   (BN6_PET_ICON_ROWS + 1)   /* the rows' icons and the Status icon, as the engine grows the lists (pet_menu.c) */
+#define BN6_PET_ICON_TYPE     2           /* a list's entry type for a row's icon */
 /* The KeyItem screen's words (docs/rom/pet-and-second-screen.md, the PET): the names'
  * archive (uncompressed, an entry per id) and the literals that point at
  * it (the KeyItem screen's, the text scripts', the shop's, SubChip's); the

@@ -88,6 +88,13 @@ static void more(NpcList *npcs) {
 	fprintf(stderr, "dive: room on this layer for %d other divers, %d traces' objects\n", P.made, traces);
 }
 
+/* the field shows, nothing of BN6's or ours over it but at most a chat box (director_cover, issue #781): the names,
+ * rings and arrival mark are drawn only then, and the state says so */
+static bool field_shown(void) {
+	int cover = director_cover();
+	return cover == COVER_NONE || cover == COVER_CHAT;
+}
+
 static bool here(void) { return director_on_layer() && P.seed == run.layer_seed && P.depth == run.depth; }
 
 void dive_people_on(bool on) {
@@ -139,7 +146,7 @@ static Tag *tag_under(Tag *tags, int n, const Tag *t) {
  * topmost. Reads the game's camera; changes nothing. */
 static int tags_now(Tag tags[DIVE_PEOPLE]) {
 	int n = 0, camera[3];
-	if (!here() || !director_on_map() || !map_label_camera(camera)) return 0;
+	if (!here() || !field_shown() || !map_label_camera(camera)) return 0;
 	for (int i = 0; i < P.nwho; ++i) {
 		const Who *w = &P.who[i];
 		if (!w->name[0]) continue;
@@ -158,7 +165,7 @@ static int tags_now(Tag tags[DIVE_PEOPLE]) {
 /* the divers whose feet show, each with his sign: their count */
 static int signs_now(int k_of[DIVE_PEOPLE], int sign[DIVE_PEOPLE], int camera[3]) {
 	int n = 0;
-	if (!here() || !director_on_map() || !map_label_camera(camera)) return 0;
+	if (!here() || !field_shown() || !map_label_camera(camera)) return 0;
 	for (int i = 0; i < P.nwho; ++i) {
 		int px, py;
 		map_label_floor(P.who[i].x, P.who[i].y, P.who[i].z, camera, &px, &py);
@@ -192,7 +199,7 @@ static void rings_draw(bool chat) {
 /* MegaMan's own marked for a moment at an arrival, where another diver stands on his spot (every diver arrives on
  * one): the PET's cursor at his head (issue #758) */
 static bool arrival_marked(void) {
-	if (!here() || !P.arrived || SDL_GetTicks() - P.arrived > ARRIVAL_MS) return false;
+	if (!here() || !P.arrived || !field_shown() || SDL_GetTicks() - P.arrived > ARRIVAL_MS) return false;
 	for (int i = 0; i < P.nwho; ++i) {
 		long dx = P.who[i].x - bn6_player_x(), dy = P.who[i].y - bn6_player_y();
 		if (dx * dx + dy * dy <= (long)STACKED * STACKED) return true;
@@ -203,7 +210,7 @@ static bool arrival_marked(void) {
 void dive_people_draw(bool chat) {
 	rings_draw(chat);
 	int camera[3], x, y;
-	if (!chat && arrival_marked() && director_on_map() && map_label_camera(camera)) {
+	if (!chat && arrival_marked() && map_label_camera(camera)) {
 		map_label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera, &x, &y);
 		map_label_cursor(x, y);
 	}
@@ -253,6 +260,10 @@ void dive_people_frame(const OnlineSnapshot *s) {
 	dive_dots_frame(s);
 	/* (only on the layer they were made on: another map took the slots' memory since) */
 	if (!here()) return;
+	/* (the arrival's mark counted from the end of a card or fade over it, issue #781: it had run out unseen under the
+	 * act's title card) */
+	int cover = director_cover();
+	if (P.arrived && (cover == COVER_CARD || cover == COVER_FADE)) P.arrived = SDL_GetTicks();
 	int n = s->connected ? (int)(s->peer_count < DIVE_PEOPLE ? s->peer_count : DIVE_PEOPLE) : 0;
 	SeatDiver d[DIVE_PEOPLE];
 	for (int i = 0; i < n; ++i) d[i] = (SeatDiver){ s->peers[i].id, (int)s->peers[i].x, (int)s->peers[i].y, dive_crew_has(s->peers[i].id) };
