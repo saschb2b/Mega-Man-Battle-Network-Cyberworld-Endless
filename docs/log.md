@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/arena/dropped-link.md (a link cut during a join: the joiner, the owner, a door's queue and the portal's way in, each settled at once).
 * **Update**: devtools/differential.md (a BN4 Soul's BN6 power attack read as soulpower.c lays the table out, never written as a number).
 * **Update**: code/emu.md (bn4_souls.h: BN4's Souls' own code and art past bn4.h, which stays under its 400 lines), rom/bn4.md (GutsSoul's hand pass, its entry and numbers).
 * **Update**: multirom/bn4-souls.md (ThunSoul's look finished: the unison's picture is his Soul Navi's battle sprite, BN4's list 2, not list 8's mugshot; his buster's flash BN4's arm, kind 0x1D, moved; BN4 keeps no arm points; the shared room grown to 104 KB and filled before the frame after a side is committed to a Soul, kept across a state loaded), rom/bn4.md (the unison's picture's object and its sprite's list and number), devtools/differential.md (the comparator's BN4 Soul rules), code/tools.md (tools/xdiff_bn4_souls.py's row), engine/emulation/memory.md and engine/emulation/free-space.md (FREE_BN4_SOUL_LOOK grown).
