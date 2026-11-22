@@ -1,0 +1,9 @@
+{
+  "branch": "dive-draw-over",
+  "what": "The shared dive: our drawing kept off BN6's Custom screen and title cards, three misdraws (issue #781)",
+  "takes": {},
+  "units": [
+    "shared dive: our drawing kept off BN6's Custom screen and title cards (#781)"
+  ],
+  "run": false
+}

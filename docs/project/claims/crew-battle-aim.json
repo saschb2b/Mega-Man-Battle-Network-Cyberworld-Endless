@@ -1,0 +1,9 @@
+{
+  "branch": "crew-battle-aim",
+  "what": "The shared dive: in a crew's battle the viruses hit every MegaMan, not its owner alone (issue #777)",
+  "takes": {},
+  "units": [
+    "shared dive: in a crew's battle the viruses hit every MegaMan (#777)"
+  ],
+  "run": false
+}
