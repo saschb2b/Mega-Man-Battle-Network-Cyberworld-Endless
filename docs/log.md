@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/shared-dive.md (the door waits for the crew: up to ten seconds for crewmates on its layer, A held to go early, the flare on that layer too, the door's A kept from paging, a heavy G that reads as G; the owner's call and the session's, issue #752), devtools/scenarios.md (the `doorwait` line); online/shared-dive.md also its decisions table's flare.
 * **New**: devtools/party-guardian.md (a party's guardian against going alone: `tools/party_guardian.py`, issue #754). **Update**: devtools/index.md (its line), code/tools.md (its row).
 * **Update**: online/shared-dive.md (comings and goings, issue #758: the owner's call of band lines and plate marks; a crewmate's signal gone and back, a full crew told, busy, fighting and home as PET tags, the arrival's cursor, the band's most lines a minute), code/online.md (dive_comings.c).
 * **Update**: online/shared-dive.md (back to the dive: CONTINUE straight into an unfinished dive and its link, the Board posted by the server from a dive's end, the owner's calls of 22 November 2026 on issue #759, the decisions' rows), online/weekly-net.md (how an unfinished dive goes on, reversed: the title's CONTINUE), GUIDE.md (CONTINUE into a dive, the board as a dive ends), code/online.md (`dive_link.c`'s call on CONTINUE).
