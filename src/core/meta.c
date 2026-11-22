@@ -418,9 +418,10 @@ static void open_beast(bool tell) {
  * Souls land) */
 static void open_forms(bool tell) {
 	for (int f = RUN_FORM_SOUL_BN5; f <= RUN_FORM_SOUL_BN4; ++f) {
-		if ((profile.forms_told >> f & 1) || !meta_form_open(f)) continue;
+		/* (told only where the forms are offered: a form opened before the
+		 * flag is said, and NEW, once they are) */
+		if (!run_debug_forms || (profile.forms_told >> f & 1) || !meta_form_open(f)) continue;
 		profile.forms_told |= (uint8_t)(1u << f);
-		if (!run_debug_forms) continue;
 		if (tell) say("%s", meta_form_name(f));
 		profile.setup_new |= SETUP_NEW_FORM;
 	}
