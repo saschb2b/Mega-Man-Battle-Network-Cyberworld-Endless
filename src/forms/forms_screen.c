@@ -161,7 +161,7 @@ static void keys(void) {
 	} else if (btn_pressed(BTN_B | BTN_START)) close_it();
 }
 
-void forms_open(const FormsRun *run) {
+void forms_screen_open(const FormsRun *run) {
 	memset(&F.v, 0, sizeof F.v);
 	FormsView *v = &F.v;
 	v->run = *run;
@@ -180,9 +180,9 @@ void forms_open(const FormsRun *run) {
 	printf("forms: open, %d Crosses (%d in CROSSSELECT), %d Souls\n", v->run.n_crosses, v->n[FORMS_FIVE], v->run.n_souls);
 }
 
-bool forms_shown(void) { return F.shown; }
+bool forms_screen_shown(void) { return F.shown; }
 
-const FormsRun *forms_run(void) { return F.shown ? &F.v.run : NULL; }
+const FormsRun *forms_screen_run(void) { return F.shown ? &F.v.run : NULL; }
 
 /* (a side's Crosses by name, apart by commas, "none" for none) */
 static void side_words(FILE *f, int side) {
@@ -191,7 +191,7 @@ static void side_words(FILE *f, int side) {
 	if (!v->n[side]) fprintf(f, "none");
 }
 
-void forms_describe(FILE *f) {
+void forms_screen_describe(FILE *f) {
 	const FormsView *v = &F.v;
 	if (!F.shown) return;
 	fprintf(f, "forms page %s five ", v->page == FORMS_PAGE_SOULS ? "souls" : "crosses");
@@ -203,13 +203,13 @@ void forms_describe(FILE *f) {
 	fprintf(f, " taken %s souls %d\n", v->taken_side >= 0 ? v->run.crosses[at(v->taken_side, v->taken_row)].name : "none", v->run.n_souls);
 }
 
-void forms_shut(void) {
+void forms_screen_shut(void) {
 	if (!F.shown) return;
 	F.shown = F.letting_go = false;
 	platform_picture_taps(false);
 }
 
-bool forms_update(void) {
+bool forms_screen_update(void) {
 	if (!F.shown) {
 		if (F.letting_go && btn_held(BTN_A | BTN_B | BTN_START | BTN_R)) return true;
 		F.letting_go = false;
@@ -224,13 +224,13 @@ bool forms_update(void) {
 	return true;
 }
 
-void forms_draw(void) {
+void forms_screen_draw(void) {
 	if (!F.shown) return;
 	forms_draw_view(P.core_x, P.core_y, &F.v);
 	look_fade_in(P.core_x, P.core_y, CORE_W, CORE_H, F.v.t);
 }
 
-bool forms_cursor(int *cross, int *soul) {
+bool forms_screen_cursor(int *cross, int *soul) {
 	const FormsView *v = &F.v;
 	*cross = *soul = -1;
 	if (!F.shown) return false;

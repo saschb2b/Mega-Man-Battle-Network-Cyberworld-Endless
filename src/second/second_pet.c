@@ -60,13 +60,13 @@ void second_library_draw(SDL_Rect b) {
 	if (y + k * SECOND_LINE_H <= b.y + b.h - 4) second_wrapped(second_library_line(), x, y, w, k, PET_CYAN_HI);
 }
 
-bool second_forms_up(void) { return forms_shown(); }
+bool second_forms_up(void) { return forms_screen_shown(); }
 
 void second_read_forms(void) {
-	const FormsRun *r = forms_run();
+	const FormsRun *r = forms_screen_run();
 	if (!r) return;
 	S2.forms = *r;
-	forms_cursor(&S2.forms_cross, &S2.forms_soul);
+	forms_screen_cursor(&S2.forms_cross, &S2.forms_soul);
 }
 
 /* the five as CROSSSELECT will list them, in its order, each with its weakness, from (x, y): the y under them */

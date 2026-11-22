@@ -48,24 +48,24 @@ typedef struct {
  * held where five or fewer are */
 uint16_t forms_five(uint16_t held, uint16_t marked);
 
-void forms_open(const FormsRun *run);
-bool forms_shown(void);
+void forms_screen_open(const FormsRun *run);
+bool forms_screen_shown(void);
 /* The frame's course while it is up, or its key still held after it
  * closed: true while it holds the game */
-bool forms_update(void);
+bool forms_screen_update(void);
 /* ... drawn over the game's picture (P.core_x, P.core_y) while it is up */
-void forms_draw(void);
+void forms_screen_draw(void);
 /* Put away at once: the game's scene left */
-void forms_shut(void);
+void forms_screen_shut(void);
 /* The state in words, while it is up (docs/devtools/scenarios.md): its
  * page, CROSSSELECT's five and the spares, the cursor's row, a Cross taken
  * up; reads only */
-void forms_describe(FILE *f);
+void forms_screen_describe(FILE *f);
 /* What the cursor is on, for the second screen: a Cross's index into the
  * run's (`*soul` -1), or a Soul's (`*cross` -1), both -1 on nothing; false
  * while it is not up */
-bool forms_cursor(int *cross, int *soul);
+bool forms_screen_cursor(int *cross, int *soul);
 /* The run as the screen holds it, its five as chosen so far (NULL while it is not up) */
-const FormsRun *forms_run(void);
+const FormsRun *forms_screen_run(void);
 
 #endif

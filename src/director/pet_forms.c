@@ -39,22 +39,22 @@ static bool on_menu(void) {
 }
 
 uint32_t pet_forms_keys(uint32_t keys) {
-	if (forms_shown() || !on_menu() || !btn_pressed(BTN_R)) return keys;
+	if (forms_screen_shown() || !on_menu() || !btn_pressed(BTN_R)) return keys;
 	pet_forms_open();
 	return keys & ~(uint32_t)KEY_R;
 }
 
-bool pet_forms_holds(void) { return forms_update(); }
+bool pet_forms_holds(void) { return forms_screen_update(); }
 
-bool pet_forms_shown(void) { return forms_shown(); }
+bool pet_forms_shown(void) { return forms_screen_shown(); }
 
 void pet_forms_draw(void) {
 	/* (R, which BN6's menu leaves unused, named at its band's end as the Square's R:NETPASS) */
-	if (!forms_shown() && on_menu()) look_hint(P.core_x + CORE_W - 20 - look_hint_width("R", forms_word(FT_KEY)), P.core_y + 4, "R", forms_word(FT_KEY));
-	forms_draw();
+	if (!forms_screen_shown() && on_menu()) look_hint(P.core_x + CORE_W - 20 - look_hint_width("R", forms_word(FT_KEY)), P.core_y + 4, "R", forms_word(FT_KEY));
+	forms_screen_draw();
 }
 
-void pet_forms_leave(void) { forms_shut(); }
+void pet_forms_leave(void) { forms_screen_shut(); }
 
 /* the run's Souls, BN5's then BN4's, each in its game's numbers */
 static int souls_of(FormsSoul *out) {
@@ -78,7 +78,7 @@ void pet_forms_open(void) {
 	}
 	r.active = five_now();
 	r.n_souls = souls_of(r.souls);
-	forms_open(&r);
+	forms_screen_open(&r);
 }
 
 /* (Crosses by name, apart by commas, from a mask) */
@@ -102,5 +102,5 @@ void pet_forms_describe(FILE *f) {
 		}
 		fprintf(f, "%s\n", rows ? "" : " none");
 	}
-	forms_describe(f);
+	forms_screen_describe(f);
 }
