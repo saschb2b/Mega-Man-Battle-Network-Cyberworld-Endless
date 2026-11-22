@@ -9,6 +9,10 @@
 #include <unistd.h>
 
 #include "darkchips.h"
+#include "crossselect.h"
+#include "forms.h"
+#include "soulbn4.h"
+#include "soulunite.h"
 #include "data.h"
 #include "game.h"
 #include "net.h"
@@ -141,6 +145,8 @@ static int failures;
 /* Minimal stand-ins for the engine pieces the generator links against. */
 char g_data_dir[512] = ".";
 Run run;
+bool run_debug_forms;   /* (run.c's, which these tests do not link) */
+int run_debug_form;
 Profile profile;
 /* (data.h's question, as run.c answers it) */
 bool chips_all_star(void) { return run_all_star(); }
@@ -6343,6 +6349,51 @@ static void test_soul_lights(void) {
 	CHECK(!soulkinds_lights(&t, 2, false, THUN, 1u << 13, &chaos) && !chaos, "a Soul lit: its chaos 0 where none is lit");
 }
 
+/* MegaMan's forms (src/director/forms.c; docs/game/meta/forms.md, issue
+ * #774): a guardian's own power where his game's form is the run's, his
+ * kind's first not held, else one the run lacks by the seed, the same each
+ * time; only what stands in BN6's engine (Falzar's Crosses where listed,
+ * Team Colonel's Souls, BN4's moved ones); none once all are held; and the
+ * week's form never the mix, each form in turn. */
+static bool forms_falzar = true;
+bool crossselect_falzar(void) { return forms_falzar; }
+bool soulunite_ready(void) { return true; }
+bool soulbn4_read(int k, SoulBn4 *out) {
+	if (k != 0) return false;
+	memset(out, 0, sizeof *out);
+	out->form = 6;   /* (ThunSoul, the first moved) */
+	return true;
+}
+
+static void test_forms_pay(void) {
+	CHECK(forms_pay(RUN_FORM_CROSS, 5, 0, 1) == 5, "forms: ChargeMan's own ChargeCross in CROSS");
+	CHECK(forms_pay(RUN_FORM_CROSS, 5, 1u << 4, 1) == 1, "forms: ChargeCross held, his kind's HeatCross");
+	CHECK(forms_pay(RUN_FORM_CROSS, 29, 0, 1) == 6, "forms: BN5's ToadMan in CROSS, SpoutCross by Aqua");
+	CHECK(forms_pay(RUN_FORM_CROSS, 11, 0, 1) == 3, "forms: ProtoMan, Sword, SlashCross");
+	forms_falzar = false;
+	int p = forms_pay(RUN_FORM_CROSS, 29, 0, 1);
+	CHECK(p >= 1 && p <= 5, "forms: Falzar's Crosses not listed, one of Gregar's five the run lacks (%d)", p);
+	forms_falzar = true;
+	CHECK(forms_pay(RUN_FORM_SOUL_BN5, 24, 0, 1) == 7, "forms: BN5's Colonel his ColonelSoul in SOUL BN5");
+	p = forms_pay(RUN_FORM_SOUL_BN5, 1, 0, 77);
+	CHECK(p >= 7 && p <= 12 && p == forms_pay(RUN_FORM_SOUL_BN5, 1, 0, 77), "forms: HeatMan's NapalmSoul not moved, Team Colonel's by the seed (%d)", p);
+	int other = 0;
+	for (uint32_t seed = 0; seed < 40; ++seed) other += forms_pay(RUN_FORM_SOUL_BN5, 1, 0, seed) != p;
+	CHECK(other > 0, "forms: the lacked pick never moves with the seed");
+	CHECK(!forms_pay(RUN_FORM_SOUL_BN5, 1, 0xFC0, 77), "forms: every Soul standing held, nothing");
+	CHECK(forms_pay(RUN_FORM_SOUL_BN4, GUARDIAN_BN4_FIRST + 5, 0, 1) == 6, "forms: ThunderMan his ThunSoul in SOUL BN4");
+	CHECK(forms_pay(RUN_FORM_SOUL_BN4, 2, 0, 1) == 6, "forms: ElecMan, Elec, ThunSoul");
+	CHECK(!forms_pay(RUN_FORM_SOUL_BN4, 2, 1u << 5, 1), "forms: BN4's one moved Soul held, nothing");
+	CHECK(forms_kind(GUARDIAN_BN4_FIRST + 1) == KIND_CRACK && forms_kind(16) == KIND_NONE, "forms: GutsMan panel-cracking, ElementMan none");
+	int seen = 0;
+	for (uint32_t seed = 1; seed < 60; ++seed) {
+		int f = run_week_form(seed);
+		CHECK(f >= RUN_FORM_CROSS && f < RUN_FORMS, "forms: the week's form the mix or past the forms (%d)", f);
+		if (f >= RUN_FORM_CROSS && f < RUN_FORMS) seen |= 1 << f;
+	}
+	CHECK(seen == (1 << RUN_FORM_CROSS | 1 << RUN_FORM_SOUL_BN5 | 1 << RUN_FORM_SOUL_BN4), "forms: a week's form never comes");
+}
+
 /* The run's DarkChips (src/director/darkchips.c; docs/game/meta/bn6-darkchips.md, BN6's own
  * DarkChips, issue #70): BN6's five as BN5's kinds of their names and back
  * (DarkPlus out of BN6's battles); a flame's pick, BN5's as it was, BN6's
@@ -8588,6 +8639,7 @@ int main(int argc, char **argv) {
 	test_soulkinds();
 	test_soul_lights();
 	test_darkchips();
+	test_forms_pay();
 	test_rom_pages();
 	test_super_bosses();
 	test_npc_sprite();

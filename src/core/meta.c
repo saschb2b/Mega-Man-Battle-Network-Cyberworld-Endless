@@ -181,6 +181,26 @@ static void cross_tell(int navi) {
 
 bool meta_cross_open(int navi) { return navi >= 1 && navi <= META_CROSSES && (cross_told(navi) || cross_earned(navi)); }
 
+bool meta_form_open(int form) {
+	if (form == RUN_FORM_CROSS) return true;
+	if (form != RUN_FORM_SOUL_BN5 && form != RUN_FORM_SOUL_BN4) return false;
+	return (profile.forms_open >> form & 1) || (form == RUN_FORM_SOUL_BN5 && profile.soul_taught);
+}
+
+int meta_form_best(int form) { return form >= 0 && form < (int)sizeof profile.form_best ? profile.form_best[form] - 1 : -1; }
+
+void meta_soul_won(int form, int soul) {
+	int g = form == RUN_FORM_SOUL_BN5 ? 0 : form == RUN_FORM_SOUL_BN4 ? 1 : -1;
+	if (g < 0 || soul < 1 || soul > 12 || (profile.souls_won[g] >> (soul - 1) & 1)) return;
+	profile.souls_won[g] |= (uint16_t)(1u << (soul - 1));
+	profile_save();
+}
+
+bool meta_soul_open(int form, int soul) {
+	int g = form == RUN_FORM_SOUL_BN5 ? 0 : form == RUN_FORM_SOUL_BN4 ? 1 : -1;
+	return g >= 0 && soul >= 1 && soul <= 12 && (profile.souls_won[g] >> (soul - 1) & 1);
+}
+
 bool meta_endless_open(void) { return profile.short_wins > 0 || profile.nest_clears > 0; }
 
 int meta_threat_open(void) { return profile.threat_open > THREAT_MAX ? THREAT_MAX : profile.threat_open; }
@@ -393,7 +413,21 @@ static void open_beast(bool tell) {
 	profile.setup_new |= SETUP_NEW_HELP;
 }
 
+/* the Soul forms opened since the last summary: said, and NEW on the
+ * setup's FORM row (where the forms are offered: --dev forms until the
+ * Souls land) */
+static void open_forms(bool tell) {
+	for (int f = RUN_FORM_SOUL_BN5; f <= RUN_FORM_SOUL_BN4; ++f) {
+		if ((profile.forms_told >> f & 1) || !meta_form_open(f)) continue;
+		profile.forms_told |= (uint8_t)(1u << f);
+		if (!run_debug_forms) continue;
+		if (tell) say("%s", meta_form_name(f));
+		profile.setup_new |= SETUP_NEW_FORM;
+	}
+}
+
 void meta_unlocks_unsaid(void) {
+	open_forms(false);
 	open_folders(false);
 	open_crosses(false);
 	open_beast(false);
@@ -449,6 +483,8 @@ void meta_run_over(bool won) {
 	if (won && run.mode == RUN_SHORT && !meta_endless_open()) { say("%s", "the endless net"); profile.setup_new |= SETUP_NEW_NET; }
 	if (won) profile.short_wins += run.mode == RUN_SHORT;
 	/* the next threat rung, once the Nest falls on this one */
+	/* (the best rung won with the run's form, the setup's FORM row's record) */
+	if (won && run.form < sizeof profile.form_best && run.threat + 1 > profile.form_best[run.form]) profile.form_best[run.form] = (uint8_t)(run.threat + 1);
 	if (won && run.threat >= meta_threat_open() && run.threat < THREAT_MAX) {
 		profile.threat_open = (uint8_t)(run.threat + 1);
 		static char rung[24];
@@ -467,6 +503,7 @@ void meta_run_over(bool won) {
 		say("%s", spin);
 	}
 	open_crosses(true);
+	open_forms(true);
 	earn_marks(won);
 	profile_save();
 }

@@ -28,6 +28,7 @@ import re
 
 import shards
 from xdiff_bn4_opening import CompanionClock, Opening
+from xdiff_bn4_souls import Souls4
 from xdiff_masks import CACHE, NO_PALETTE, NO_PLACE, places
 from xdiff_snap import (BLINK, DRAW, KEPT, NODE, SPRITE, OBJ_ACTION, OBJ_EFFECT, OBJ_NAME_ID, OBJ_TYPE, PLAYER_PENDING, REPLAYED, RESERVE, ROOT, SIZE,
                         SOUND, SPAWN, SPRITE_SET, UNMAPPED, UNMATCHED, Diff, Frame, assign_roles, c_defines, is_ptr, read_trace, role_name,
@@ -1062,6 +1063,7 @@ SPEC_FOES = set()   # (the spec's foes, BN4's ids: a sound row of a Navi's, its 
 
 SPEC_SUBJECT = set()   # (the spec's subject, where it names one: bn6_sounds_alone)
 SPEC_CHIPS = set()     # (the spec's chips, BN4's ids of its folder4: a sound row of a chip unit's, its "chips", holds in their specs alone)
+SPEC_SOULS = set()     # (the spec's BN4 Souls by BN4's numbers, its souls4's bits: a sound row of a moved Soul's, its "souls")
 SPEC_NAVI_CHIPS = set()   # (the run's ids of the moved Navi chips the spec's folder plays, MOVED_FAMILY's: bn4_sounds; compare sets it)
 
 
@@ -1074,8 +1076,11 @@ def bn4_sounds():
     # (... and a row naming "chips", BN4's ids: a chip unit's copy of a number another row pairs otherwise, Thunder's ball's
     # 0xAD, in the specs whose folder holds one of them alone, over the others)
     # (a row naming "navi_chips", a moved Navi chip's own Navi's sound: in a spec whose folder plays such a chip, over the rest)
-    scoped = lambda r: 4 if r.get('navi_chips') else 2 if 'chips' in r else 1 if 'foes' in r else 0
-    mine = lambda r: bool(SPEC_CHIPS & {int(x, 0) for x in r['chips']}) if 'chips' in r else bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
+    # (... and a row naming "souls", BN4's Soul numbers: a moved Soul's charged shot's copy of a number, in the specs whose
+    # BN4 MegaMan holds one of them, over the others)
+    scoped = lambda r: 4 if r.get('navi_chips') else 3 if 'souls' in r else 2 if 'chips' in r else 1 if 'foes' in r else 0
+    mine = lambda r: bool(SPEC_SOULS & {int(x, 0) for x in r['souls']}) if 'souls' in r else \
+        bool(SPEC_CHIPS & {int(x, 0) for x in r['chips']}) if 'chips' in r else bool(SPEC_FOES & {int(x, 0) for x in r['foes']})
     return {int(r['bn4'], 0): (int(r['bn6'], 0), r.get('clock', 'state'))
             for r in sorted(rows, key=scoped) if (bool(SPEC_NAVI_CHIPS) if r.get('navi_chips') else not scoped(r) or mine(r))}
 
@@ -1865,6 +1870,10 @@ def compare(spec, ta, tb, canon, show=6):
     SPEC_FOES.update(int(x.split('@')[0], 16) for x in spec.get('foes', '').split(',') if x)
     SPEC_CHIPS.clear()
     SPEC_CHIPS.update(int(x, 16) & 0x1FF for x in spec.get('folder4', []))
+    SPEC_SOULS.clear()
+    SPEC_SOULS.update(n + 1 for n in range(16) if int(spec.get('souls4', '0'), 16) >> n & 1)
+    # (a BN4 Soul against its move: xdiff_bn4_souls.py's rules, where both MegaMen hold one)
+    souls = Souls4(ta, tb, getattr(canon, 'roms', {}).get(4, b''), lag) if against and SPEC_SOULS and int(spec.get('souls6', '0'), 16) else None
     stop, lines, ranks, before = None, [], {}, None
     left_a, left_b = (leftovers(ta), leftovers(tb)) if against else ({}, {})
     SPARKS_SEEN.clear()
@@ -1919,6 +1928,14 @@ def compare(spec, ta, tb, canon, show=6):
             bn4_renderer(fa, fb, fam, ranks)
         frt = bt.get(fra['t'])   # (BN6's frame of the same fight frame: what the battle's timer drives, legit.json's bn4 clocks)
         open_ = unexplained(fa, fb, ta, tb, used, Frame(tb, frt, canon) if frt and lag else fb)
+        if souls:
+            souls.see(fa)
+            open_ += souls.checks(fa, fb, Diff)
+            for d in open_:
+                d.mask = d.mask or souls.mask(d, fa, fb)
+                if d.mask:
+                    used[d.mask] = used.get(d.mask, 0) + 1
+            open_ = [d for d in open_ if not d.mask]
         world = [d for d in open_ if d.role not in fam] if against else []
         ft = Frame(tb, frt, canon) if frt and lag else None
         for d in world:   # (legit.json's bn4 clocks: what the fight's frames count, at the same fight frame)
@@ -2045,6 +2062,9 @@ def megaman_items(spec, game):
         parts.append(f'souls4={spec["souls4"]}')
     if game == 'bn4:bn6' and spec.get('souls6'):   # (... and BN6's, its Souls installed over the proxy form: soulunite.h)
         parts.append(f'souls6={spec["souls6"]}')
+    for key in ('unitebreak', 'soulbreak'):   # (a mutation's break of BN6's Souls, as a BN5 spec's: soulunite.h)
+        if game == 'bn4:bn6' and spec.get(key):
+            parts.append(f'{key}={spec[key]}')
     return parts
 
 

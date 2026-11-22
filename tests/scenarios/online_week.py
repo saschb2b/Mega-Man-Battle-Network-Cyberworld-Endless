@@ -646,3 +646,87 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
 ))
+
+# The door waits for the crew as it was (issue #778): Alpha, Beta and Gamma a crew on the guardian's layer. Alpha goes
+# on ahead, out of their sight, and the crew splits (#770: a crew lives on screen); at the door it still waits for the
+# two who were his crew ("Waiting for crew 2"). They come one after the other; each is told of the door once, and
+# Gamma, in the queue, reads his own line, not a flare.
+THREE = {'beta': online.HOME, 'gamma': online.HOME}
+MANY['door-waits-who'] = dict(CAST, GAMES=THREE, STEPS=online.course(
+    online.into_square(), dive(),
+    online.into_square('beta'), dive('beta'),
+    online.into_square('gamma'), dive('gamma'),
+    ('sleep', 1.5),
+    soon('crew=3: Alpha Beta Gamma', '', 900),
+    to_layer(''), to_layer('beta'), to_layer('gamma'),
+    ('sleep', 1.5),
+    soon('crew~3: Alpha', '', 900),
+    ('do', 'by arena; wait 60'),                          # Alpha ahead, out of their sight,
+    ('repeat', 'press A; wait 30', 'chat=closed', 30),
+    ('sleep', 3),                                         # ... the crew split (crew_split_ms)
+    soon('crew=0', '', 600),
+    ('do', 'by arena; wait 5; hold AHEAD 90; wait 30'),   # and in at the door: it waits for the two
+    soon('door=queued: Alpha', '', 300),
+    ('expect', 'doorwait~for 2'),
+    ('expect', 'band~Waiting for crew'),
+    soon('band~Alpha waits at the door', 'beta', 600),
+    to_door('beta'),
+    soon('door=queued: Alpha Beta', '', 300),
+    ('expect', 'doorwait~for 1'),
+    to_door('gamma'),
+    soon('door=queued: Alpha Beta Gamma', '', 300),
+    ('expect', 'doorwait=0 for 0'),                       # all here: the wait over
+    ('@gamma', 'do', 'wait 30'),
+    ('@gamma', 'expect', 'band=Alpha leads 3  B:Go alone'),   # his own line: Beta's join told him nothing again
+))
+
+# An HP reward on a crew's field reaches the run once (issue #769): Alpha, the battle's owner, on 20 HP of 100, so BN6's
+# results pick from the rows of a MegaMan low on HP; whatever they give, the run's HP after it is the field's as its
+# fight ended and the reward once (the field's read stops before the results' recovery, BN6_PHASE_LEAVING).
+# (partyreward=32818: the results' reward 0x8032, HP+50, on every game of the field; partydel=8, a seat nobody holds, so
+# that the enemies fall 60 iterations after partyend whatever they are)
+LOW = LOUD.replace('onlinename={name}', 'onlinename={name},hp=100/20,partyend=20,partybot=1,partyreward=32818,partydel=8')
+MANY['crew-reward-once'] = dict(crew_fight(LOW), STEPS=online.course(
+    crew_fight(LOW)['STEPS'],
+    ('expect', 'crewend~won'),
+    ('expect', 'crewend~reward 8032'),
+    ('expect', 'hp=70/100'),                      # (the field's own MegaMan: 20 and the reward once; 100 before, its cap)
+    ('@beta', 'expect', 'hp=70/100'),             # (a partner: BN6's results gave him nothing on the field)
+))
+
+# A dive's end screen of its own (issue #769): Beta's second deletion on a crew's field ends his dive; his title opens
+# the dive's RESULT, the crew's battles fought and won, and his place on the week's Board as the server answers it.
+MANY['dive-end-screen'] = dict(crew_fight(BETA), STEPS=online.course(
+    MANY['crew-pulls-back']['STEPS'],
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'page=result', 120),   # (BN6's results paged; the dive's RESULT on the title)
+    ('@beta', 'expect', 'diveend~crew 2/2'),
+    soon('diveend~place 1', 'beta', 600),
+))
+
+
+# Down in a crew's battle, told (issue #780): Beta deleted on the field while Alpha fights on, the one line in his band,
+# the pull-back unspent; and in his next crew's battle, deleted again with it spent. partyend at 40, early enough that the bots have not won yet, and the
+# field fights on a while after he falls; the enemies 60 iterations after (partydel).
+DOWN = LOUD.replace('onlinename={name}', 'onlinename={name},partyend=40,partybot=1,partydel=2')
+MANY['crew-down-told'] = dict(crew_fight(DOWN), STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'partydown=unspent|crewend!=none', 120),
+    ('@beta', 'expect', 'partydown=unspent'),
+    ('@beta', 'expect', 'hpbox_hp=0'),                # (his own box, 0: never the lead's HP over the band)
+    ('@beta', 'repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ('repeat', 'press A; wait 20', 'crewend!=none|dive=none', 120),
+    ('@beta', 'expect', 'pullback=spent'),
+    soon('join=none', '', 600),
+    soon('join=none', 'beta', 600),
+    ('do', 'battle; wait 10'),
+    soon('join=fighting', 'beta', 900),
+    ('@beta', 'repeat', 'press A; wait 20', 'partydown=spent|page=result', 120),
+    ('@beta', 'expect', 'partydown=spent'),
+    ('@beta', 'expect', 'hpbox_hp=0'),
+))

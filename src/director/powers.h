@@ -25,6 +25,9 @@ bool powers_cross_owned(int navi);
  * liberation's team, liberation_team.h, made where a checkpoint's rebuild
  * runs before the game's state is back) */
 bool powers_cross_held(int navi);
+/* Cross `navi`'s CROSSSELECT entry on (forms.c, a CROSS run's Cross
+ * given) */
+void powers_cross_give(int navi);
 /* MegaMan's Crosses off CROSSSELECT for a battle (a liberation's
  * teammate's, who fights in his own form: liberation_battle.h), and back */
 void powers_crosses_hide(bool hide);

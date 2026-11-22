@@ -5,8 +5,15 @@
 #ifndef CW_DIVE_MAIL_H
 #define CW_DIVE_MAIL_H
 
+#include <stdbool.h>
+
 void dive_mail_reset(void);
-/* The dive's end told: its company sent (analytics_dive_together). */
-void dive_mail_told(void);
+/* The dive's end told: its company sent (analytics_dive_together); and,
+ * `linked`, the link kept a few seconds for the Board's answer, the dive's
+ * place on it handed to its end screen (weekly_end_placed; issue #769).
+ * True where the link is kept for it (it ends it itself). */
+bool dive_mail_told(bool linked);
+/* The Board's answer no longer waited for: the link let go now */
+void dive_mail_end_stop(void);
 
 #endif

@@ -64,8 +64,11 @@
 /* ---- the numbers the Souls take ---- */
 #define SOUL_LIST0_FIRST   0x45          /* BN6's list-0 number of the first Soul's sprite (BN5's 7), past what BN6 reads through list 0, */
 #define SOUL_LIST0_ART_FIRST 0x4B        /* ... of the first sprite their code draws that BN6 has none of (tools/xsoul.py's ART_FIRST), */
-#define SOULS_LIST0_ENTRIES 0x80         /* ... the list's words (list 0 is the Souls' alone: the tracks' allocations, issue #82) */
-#define SOUL_LIST0_BN4     0x5F          /* ... of BN4's united Soul's sprite, the list's last (tools/xsoul.py's ART_LAST one under it) */
+#define SOULS_LIST0_ENTRIES 0x90         /* ... the list's words (list 0 is the Souls' alone: the tracks' allocations, issue #82; BN5's
+                                            six and their art to 0x5F, Team ProtoMan's and BN4's numbers past them) */
+#define SOUL_LIST0_BN4     0x5F          /* ... of BN4's united Soul's sprite, the first list's last (tools/xsoul.py's ART_LAST one under it) */
+#define SOUL_LIST0_BN4_PICTURE 0x80      /* ... of his unison's picture (BN4's numbers 0x80-0x8F, docs/project/claims.md; Team ProtoMan's
+                                            Souls' 0x60-0x7F) */
 #define SOUL_EFFECT_FIRST  0xC0          /* BN6's grown effect ids the Souls' code takes (xvirus_grow.h's 256), to: */
 #define SOUL_EFFECT_LAST   0xCF
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
@@ -109,12 +112,16 @@
 #define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x51F20u)
 
 /* ---- BN4's Souls' look: one room, the united Soul's (free_space.h's FREE_BN4_SOUL_LOOK; soullook.c, docs/multirom/bn4-souls.md,
- * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time ---- */
-#define SOULS4_SPRITE      (FREE_BN4_SOUL_LOOK + 0x0000u)   /* his sprite, BN4's list 0 by his form, to: */
-#define SOULS4_SPRITE_END  (FREE_BN4_SOUL_LOOK + 0xA800u)
-#define SOULS4_PICTURE     (FREE_BN4_SOUL_LOOK + 0xA800u)   /* kept for his unison's picture (BN4's list 8 by his form, 1,894 bytes at most), to: */
-#define SOULS4_FACE        (FREE_BN4_SOUL_LOOK + 0xB000u)   /* his face's tiles, 0x100 bytes (BN4_SOUL_FACES), */
-#define SOULS4_DIGITS      (FREE_BN4_SOUL_LOOK + 0xB100u)   /* ... and BN4's count's digits, six of 0x80 bytes, 5 to 0 (BN4_FACE_DIGITS), to */
-#define SOULS4_END         (FREE_BN4_SOUL_LOOK + 0xB400u)
+ * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time, filled
+ * as he is committed to unite ---- */
+#define SOULS4_SPRITE      (FREE_BN4_SOUL_LOOK + 0x00000u)  /* his sprite, BN4's list 0 by his form, to: */
+#define SOULS4_SPRITE_END  (FREE_BN4_SOUL_LOOK + 0x0A800u)
+#define SOULS4_PICTURE     (FREE_BN4_SOUL_LOOK + 0x0A800u)  /* his unison's picture, his Soul Navi's battle sprite (BN4's list 2 by his form:
+                                                               BN4_STATS_SPRITES' list byte 8, sprite_load's list offset), to: */
+#define SOULS4_PICTURE_END (FREE_BN4_SOUL_LOOK + 0x19700u)
+#define SOULS4_FACE        (FREE_BN4_SOUL_LOOK + 0x19700u)  /* his face's tiles, 0x100 bytes (BN4_SOUL_FACES), */
+#define SOULS4_DIGITS      (FREE_BN4_SOUL_LOOK + 0x19800u)  /* ... BN4's count's digits, six of 0x80 bytes, 5 to 0 (BN4_FACE_DIGITS), */
+#define SOULS4_HELD        (FREE_BN4_SOUL_LOOK + 0x19B00u)  /* ... and the form whose look the room holds (0xFF, the fill, none), to */
+#define SOULS4_END         (FREE_BN4_SOUL_LOOK + 0x19B10u)
 
 #endif

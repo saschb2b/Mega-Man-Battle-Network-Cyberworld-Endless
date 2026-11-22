@@ -34,5 +34,10 @@ typedef struct {
 bool soulbn4_read(int k, SoulBn4 *out);
 /* k of BN6's Soul number `soul`, -1 for none of BN4's */
 int soulbn4_k(int soul);
+/* BN4's Souls a run holds, bit n - 1 its Soul n by BN4's numbers (its forms,
+ * src/director/souls.h souls_held_bn4), as the engine's bits of them in the
+ * mask soulunite_held takes (from SOULS_HELD_BN4, by k): the moved ones
+ * alone, so a Soul not yet moved is held by the run and lights nothing */
+unsigned soulbn4_held(unsigned bn4);
 
 #endif

@@ -26,16 +26,22 @@
 _Static_assert(SIDE_MOST == PARTY_MOST, "a party is a side's actors");
 #define DEL_ENDS 60   /* partydel's: its enemies deleted so many iterations after its MegaMen */
 
-/* the panels a partner takes on side 0, in order: the back column first,
- * then the middle's free ones (row << 4 | column, as the list writes them) */
-static const uint8_t panels[] = { 0x11, 0x31, 0x21, 0x12, 0x32, 0x13, 0x33, 0x23, 0x22 };
+/* the panels a partner takes on side 0, in order (row << 4 | column, as
+ * the list writes them): beside the lead in his column, BN6's own place
+ * for him (column 2, row 2), the rows above and below him, then behind
+ * him, then the rest. Side by side, each stands in a row of his own: a
+ * virus finds its target by the panels in its line (BN6_PANEL_SIDE_0), so
+ * a crew stood behind the lead left him in every virus's line (issue #777) */
+static const uint8_t panels[] = { 0x12, 0x32, 0x21, 0x11, 0x31, 0x13, 0x33, 0x23, 0x22 };
 
+/* the panel taken by one of side 0's entries, or a hole where the battle's field has one */
 static bool taken(uint8_t panel, const uint8_t *list, int count) {
 	for (int i = 0; i < count; ++i) {
 		const uint8_t *e = list + i * BN6_ENTITY_SIZE;
 		if (!(e[BN6_ENTITY_KIND] & 1) && e[BN6_ENTITY_PANEL] == panel) return true;
 	}
-	return false;
+	unsigned col = panel & 15u, row = (unsigned)panel >> 4;
+	return hook_read8(BN6_FIELD_PANELS + (row * BN6_FIELD_COLUMNS + col) * BN6_PANEL_SIZE + BN6_PANEL_TYPE) == BN6_PANEL_HOLE;
 }
 
 static void say_list(const PartyField *f, const uint8_t *list, int len, int added, int count) {
@@ -43,8 +49,9 @@ static void say_list(const PartyField *f, const uint8_t *list, int len, int adde
 	printf("party: a battle with %d MegaMen (%d of its %d entries kept)\n", f->standing, len - added, count);
 	for (int i = 0; i < len; ++i) {
 		const uint8_t *e = list + i * BN6_ENTITY_SIZE;
-		printf("party:   entry %d: kind %02X at column %u row %u, id %03X\n", i, e[BN6_ENTITY_KIND], e[BN6_ENTITY_PANEL] & 15u,
-			(unsigned)e[BN6_ENTITY_PANEL] >> 4, (unsigned)get16(e + BN6_ENTITY_ID));
+		unsigned col = e[BN6_ENTITY_PANEL] & 15u, row = (unsigned)e[BN6_ENTITY_PANEL] >> 4;
+		printf("party:   entry %d: kind %02X at column %u row %u (panel type %u), id %03X\n", i, e[BN6_ENTITY_KIND], col, row,
+			hook_read8(BN6_FIELD_PANELS + (row * BN6_FIELD_COLUMNS + col) * BN6_PANEL_SIZE + BN6_PANEL_TYPE), (unsigned)get16(e + BN6_ENTITY_ID));
 	}
 }
 
@@ -174,6 +181,8 @@ static void dev_end(const PartyField *f, uint32_t tick) {
 /* side 0's copy (r0 0): each partner's keys into his AI data as the copy
  * writes the player's */
 
+static void trade(unsigned k);
+
 static HookAct keys(HookRegs *r, void *user) {
 	PartyField *f = user;
 	if (r->r[0] != 0 || f->standing < 1) return HOOK_CONTINUE;
@@ -188,7 +197,7 @@ static HookAct keys(HookRegs *r, void *user) {
 		uint32_t obj = actor(0, k);
 		uint32_t ai = obj ? hook_read32(obj + BN6_T1_AI_DATA) : 0;
 		if (!ai) continue;
-		uint16_t key = (uint16_t)((f->scripted ? scripted(k, tick) : f->keys[k] & (f->own ? OWN_KEYS : PARTNER_KEYS)) | BN6_KEYS_VALID);
+		uint16_t key = (uint16_t)((f->still ? 0 : f->scripted ? scripted(k, tick) : f->keys[k] & (f->own ? OWN_KEYS : PARTNER_KEYS)) | BN6_KEYS_VALID);
 		uint16_t held = hook_read16(ai + BN6_AI_HELD);
 		hook_write16(ai + BN6_AI_LAST, held);
 		hook_write16(ai + BN6_AI_HELD, key);
@@ -196,6 +205,8 @@ static HookAct keys(HookRegs *r, void *user) {
 		hook_write16(ai + BN6_AI_UP, (uint16_t)(~key & held));
 	}
 	if (tick == 1) first_iteration(f);
+	/* (the viruses' bench: the lead's slot and partner 1's traded for good at this iteration, issue #777) */
+	if (f->swap_at > 0 && tick == (uint32_t)f->swap_at && f->standing > 1) trade(1);
 	if (f->own) hands_watch(f, tick);
 	if (f->end > 0) dev_end(f, tick);
 	watch(f, tick);
@@ -229,6 +240,7 @@ static unsigned aimed(const PartyField *f) {
 	return n ? up[(f->tick / AIM_TURN) % n] : 0;
 }
 
+
 /* an object's routine about to run (r5 the object): one of side 1's sees the MegaMan in turn in side 0's first slot */
 static HookAct logic_in(HookRegs *r, void *user) {
 	PartyField *f = user;
@@ -259,15 +271,35 @@ bool party_field_hooks(HookCore *core, PartyField *f) {
 }
 
 
-void party_field_install(int n, int hp, int end) {
-	static PartyField spike;
+static PartyField spike;
+
+void party_field_describe(FILE *f) {
+	if (spike.standing < 2) return;
+	unsigned hit = 0;
+	const char *lead = "down";
+	for (unsigned k = 0; k < (unsigned)spike.standing && k < SIDE_MOST; ++k) {
+		/* (read between frames, on the run's own core) */
+		uint32_t obj = emu_read32(BN6_BATTLE_PLAYERS + k * BN6_SIDE_PARTNER);
+		unsigned hp = obj ? emu_read16(obj + BN6_T1_HP) : 0;
+		bool struck = !obj || hp < emu_read16(obj + BN6_T1_MAX_HP);
+		hit += struck;
+		if (!k && hp) lead = struck ? "hit" : "whole";
+	}
+	fprintf(f, "spike %d hit %u lead %s\n", spike.standing, hit, lead);
+}
+
+void party_field_install(int n, int hp, int end, int aim, int swap_at) {
 	static bool done;
 	spike.n = n < 1 ? 1 : n > PARTY_MOST ? PARTY_MOST : n;
 	spike.scripted = true;
 	spike.hp_set = hp;
 	spike.end = end;
+	spike.spread = aim & 1;
+	spike.still = (aim & 2) != 0;
+	spike.swap_at = swap_at;
 	if (done) return;
 	done = true;
-	if (!emu_hook(BN6_SPAWN_ENTITIES, spawn, &spike) || !emu_hook(BN6_KEY_COPY, keys, &spike))
+	if (!emu_hook(BN6_SPAWN_ENTITIES, spawn, &spike) || !emu_hook(BN6_KEY_COPY, keys, &spike) ||
+		((aim & 1) && (!emu_hook(BN6_OBJECT_LOGIC_CALL, logic_in, &spike) || !emu_hook(BN6_OBJECT_LOGIC_BACK, logic_back, &spike))))
 		printf("party: the hooks (%08X, %08X) not taken\n", BN6_SPAWN_ENTITIES, BN6_KEY_COPY);
 }

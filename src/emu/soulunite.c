@@ -66,6 +66,8 @@ static unsigned held_now(void) { return helds[hook_slot()]; }
 
 void soulunite_held(unsigned souls) { helds[hook_slot()] = souls & HELD_MASK; }
 
+unsigned soulunite_bn4_bits(unsigned bn4) { return soulbn4_held(bn4); }
+
 bool soulunite_held_core(struct mCore *core, unsigned souls) {
 	int slot = hook_slot_of(core);
 	if (slot < 0) return false;

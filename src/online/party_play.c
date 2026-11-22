@@ -333,6 +333,7 @@ static void open_core(void) {
 	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
 	PP.b.del = PP.dev.del;   /* (partydel=MASK with it: those seats deleted then, the crew's pull-back's test) */
+	PP.b.reward = PP.dev.reward;   /* (partyreward=N: the results' reward this entry, an HP reward's test, issue #769) */
 	inputs_said();
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
 	if (!PP.core) { failed(why); return; }
@@ -713,6 +714,11 @@ void party_play_frame(uint32_t pad) {
 
 void (*party_play_draw_more)(void);
 
+/* this game's MegaMan down in a crew's battle while the others fight on (the fight's own phase) */
+static bool down_now(void) {
+	return PP.crew && PP.core && PP.stage == PP_FIGHT && party_core_phase(PP.core) == BN6_PHASE_FIGHT && !party_core_hp(PP.core, PP.seat);
+}
+
 /* the party's field, or while it is made and the others come, the staging's
  * last picture of the run's own core */
 void party_play_draw(void) {
@@ -721,10 +727,14 @@ void party_play_draw(void) {
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
+	/* (down in a crew's battle, the field fighting on: one line, never over a Custom screen or the results, issue #780) */
+	if (down_now()) party_marks_down(PP.b.seat[PP.seat].pulled);
 	if (PP.crew && party_play_draw_more) party_play_draw_more();
 }
 
 void party_play_describe(FILE *f) {
+	/* (the spike's battle on the run's own core: --dev party=N, the viruses' bench) */
+	party_field_describe(f);
 	/* (over the server: its stage and frame, the hashes agreed, this game's own link through a drop, issue #180) */
 	static const char *const stages[] = { "none", "boot", "loadouts", "ready", "fight", "results" };
 	if (PP.started && PP.net)
@@ -737,6 +747,7 @@ void party_play_describe(FILE *f) {
 	}
 	if (!PP.core || PP.stage != PP_FIGHT) return;
 	fprintf(f, "partyfield %u seat %u\n", PP.b.n, viewer());
+	if (down_now()) fprintf(f, "partydown %s\n", PP.b.seat[PP.seat].pulled ? "spent" : "unspent");
 	/* (a partner's own Custom screen: the HP its box shows, and his own on the field, issue #757) */
 	unsigned turn = party_turn_hp(viewer());
 	if (turn) fprintf(f, "partyturn hp %u own %u %s\n", turn, party_core_hp(PP.core, viewer()), turn == party_core_hp(PP.core, viewer()) ? "agree" : "APART");

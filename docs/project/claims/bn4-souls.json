@@ -5,8 +5,23 @@
     "free_rom": [["0x2EC400", "0x31FFFF"]],
     "song_slots": [["0x301", "0x328"], ["0x32A", "0x33F"]],
     "list0": [["0x80", "0x8F"]],
-    "attack_families": [["0xD8", "0xDF"]]
+    "attack_families": [["0xD8", "0xDF"]],
+    "list3": [["0x7A", "0x7A"]]
   },
-  "units": ["BN4 Soul ThunSoul look", "BN4 Soul AquaSoul", "BN4 Soul GutsSoul", "BN4 Soul NumSoul", "BN4 Soul FireSoul", "BN4 Soul SrchSoul", "BN4 Soul WindSoul", "BN4 Soul WoodSoul", "BN4 Soul RollSoul", "BN4 Soul MetlSoul", "BN4 Soul ProtSoul", "BN4 Soul JunkSoul", "BN4 Souls comparator"],
+  "units": [
+    "BN4 Soul ThunSoul look",
+    "BN4 Soul AquaSoul",
+    "BN4 Soul GutsSoul",
+    "BN4 Soul NumSoul",
+    "BN4 Soul FireSoul",
+    "BN4 Soul SrchSoul",
+    "BN4 Soul WindSoul",
+    "BN4 Soul WoodSoul",
+    "BN4 Soul RollSoul",
+    "BN4 Soul MetlSoul",
+    "BN4 Soul ProtSoul",
+    "BN4 Soul JunkSoul",
+    "BN4 Souls comparator"
+  ],
   "run": false
 }

@@ -19,6 +19,13 @@ enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 /* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6) */
 static const uint8_t forms[SOULS_BN4] = { 6 };
 
+unsigned soulbn4_held(unsigned bn4) {
+	unsigned out = 0;
+	for (int k = 0; k < SOULS_BN4; ++k)
+		if (bn4 >> (forms[k] - 1) & 1) out |= 1u << (SOULS_HELD_BN4 + k);
+	return out;
+}
+
 int soulbn4_k(int soul) { return soul >= SOUL_BN4_FIRST && soul < SOUL_BN4_FIRST + SOULS_BN4 ? soul - SOUL_BN4_FIRST : -1; }
 
 bool soulbn4_read(int k, SoulBn4 *out) {

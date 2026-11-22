@@ -15,6 +15,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "hook.h"
 
@@ -29,6 +30,8 @@ typedef struct {
 	int foe_from, foe_to;           /* the enemy spawning with foe_from HP given foe_to (the guardian's for the party) */
 	int hp_set, end;                /* the spike's: the partners' HP (partyhp), the enemies' HP set to 1 at an iteration (partyend) */
 	int del;                        /* ... and side 0's slots of this mask deleted then (partydel), 0 none */
+	bool still;                     /* the spike's partners pressing nothing (partyaim=2) */
+	int swap_at;                    /* the spike's: the lead's slot and partner 1's traded for good at this iteration (partylead=N) */
 	bool spread;                    /* the enemies' aim passed over the party in turn (party_field_aim) */
 	bool own;                       /* each partner his own NaviStats, hand and Custom screen (arena_team_navi.h, arena_team_custom.h) */
 	/* set before each frame */
@@ -57,7 +60,15 @@ bool party_field_aim(HookCore *core, PartyField *f);
 /* The hooks on the game's core, once (game_hooks_after_boot), for --dev
  * party=n: every battle of the run with n MegaMen (2 to PARTY_MOST); hp > 0
  * the partners' HP as each battle begins (partyhp), end > 0 the enemies' HP
- * set to 1 at the battle loop's iteration end (partyend). */
-void party_field_install(int n, int hp, int end);
+ * set to 1 at the battle loop's iteration end (partyend); aim the
+ * enemies' aim passed round the party as on the party's core
+ * (party_field_aim; partyaim=1: the viruses' bench, issue #777); aim's 2
+ * the partners standing still where they spawn, as a crew that only presses
+ * OK (partyaim=3 both). */
+void party_field_install(int n, int hp, int end, int aim, int swap_at);
+/* ... the spike's battle in the state's words: `spike N hit H lead
+ * whole|hit|down`, H of its N MegaMen struck at least once (gone counted),
+ * and the lead untouched, struck or deleted; nothing without one */
+void party_field_describe(FILE *f);
 
 #endif

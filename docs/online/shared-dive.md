@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T09:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T13:45:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -581,6 +581,35 @@ the session building it, and is his to turn over.
   `online-week/door-waits-crew` (two crewed games: Alpha at the door,
   mashing A, still in the queue with the wait counting; Beta's band
   telling him; Beta in, mashing A; Alpha's A, and both on one field).
+
+  **Whom the door waits for** (22 November 2026, issue #778, from the
+  second hunt): since a crew lives only on screen (#770, the owner's call
+  on #750), it splits two seconds after a crewmate leaves the picture, so
+  whoever walked ahead to the door had no crew there and the wait almost
+  never applied. The call joins the owner's two (the door waits for the
+  crew, #752; a crew is who you can see, #750): the door waits for the
+  crew as it was on the layer shortly before, not as it stands at the
+  door: whoever was in MegaMan's crew within the last thirty seconds as
+  he comes to the door, and is still on the layer (the room's divers) and
+  free (`dive_crew_recent.c`, the game's own memory of the server's
+  word; no change to the wire). Whom it waits for is fixed as he comes;
+  the wait's ten seconds and the held A stay. Thirty seconds because a
+  layer's whole walk, from the arrival to the guardian's door, took 16 to
+  25 seconds in the autopilot's runs of layer 3 on six seeds (the clock
+  read every three seconds), so a crew that stood together anywhere on
+  the way is in it, and one met on an earlier layer is not. The flare
+  goes once a door to each diver, from the first who joins its queue,
+  never to one in it (`party.py`'s queue keeps whom it told); and at the
+  door the queue's own line comes before the feed's, so a queued diver
+  reads "Alpha leads 3  B:Go alone", never a flare. Taken under the
+  owner's direction of 21 and 22 November, his to turn over: thirty
+  seconds; the memory in the leader's game rather than the server (it
+  needs no new message, and only the leader's door asks); the wait fixed
+  at the leader's arrival. Seen headless: the scenario
+  `online-week/door-waits-who` (three crewed games: Alpha ahead, his crew
+  split before the door, "Waiting for crew 2" there; Beta and Gamma one
+  after the other; Gamma's band his own line); the server's
+  `test_one_flare_a_door_each`.
 
 - **Crews** (15 November 2026, by nearness since 21 November, issue
   #714; `server/cyberworld_server/crews.py`, `dive_crew.c`; the wire's
@@ -1231,13 +1260,62 @@ layer 3's guardian of `--seed 3` a party of two and of four meet DiveMan's
 V1, at 800 and 1600 HP to the solo's 400 (`guardianfought version 0 party
 N`, `guardianhp`).
 
+## Viruses' aim in a crew's battle (22 November 2026)
+
+The second friction hunt found that in a crew's random battle the
+viruses struck the battle's owner and nobody else, three battles of three
+([issue #777](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/777)),
+though `party_field_aim` passes a guardian's aim round the party. Found
+(the ledger's `2026-11-22-viruses-aim-by-position`, `docs/rom/online.md`'s
+row): **a virus takes no player from side 0's first slot; it finds its
+target by position**, the MegaMan in its line. A Gunner's attack step asks
+for the first panel in its front direction holding `BN6_PANEL_SIDE_0`; a
+Mettaur stays in a row with a MegaMan in it and moves only once none
+stands there. On a crew's field the owner stands in front (column 2 row
+2) and the partners spawn behind him (column 1, rows 1 and 3), so a virus
+in his line strikes him until he falls. Trading the slot during the
+virus's routine, trading it for good, clearing the other MegaMen's panel
+bits or moving their objects off the field during its routine did not
+move a Mettaur's first target: what its row choice reads is still to
+find (perhaps the collision panels). The viruses' bench to measure it:
+`--dev party=3,partyaim=3` (the aim passed round on the spike's battles,
+the partners standing still; `partyaim=2` the partners still alone,
+`partylead=N` the lead's slot and partner 1's traded for good at
+iteration N), with `foes 01@52` or `53@52` on a layer and the log's
+`party: iteration ... HP` lines.
+
+Measured on the bench, three MegaMen standing still, a virus in one row:
+with the partners behind the lead, a Mettaur in row 1 or row 3 walked to
+the lead's row and struck him, ten times running, and a Gunner in any row
+struck the lead first. A virus goes for the front column, where the lead
+alone stood. So nothing was wrong with the aim, and positions deciding who
+is hit is BN6's own rule and stays; what was unfair is where the crew
+stood.
+
+**The crew side by side** (22 November 2026, taken under the owner's
+direction of 21 November and on his answer on the issue; his to turn
+over): on a party's field, a guardian's and a crew's alike, the partners
+stand beside the lead in his column, rows 1 and 3, a fourth behind him
+(column 1, row 2), then the rest (`party_field.c`'s `panels`), a hole of
+the battle's field passed over. **The lead keeps the middle row**, BN6's
+own place for him (column 2, row 2): chosen over the first partner in the
+middle (the order of seats on screen top to bottom) and over the lead on
+row 1. Every game of the field makes the same list, so the seats' hashes
+agree as before; a linked fighter fights his own battle, untouched. On the
+bench after it: a Mettaur in row 1 strikes the partner in row 1 and the
+lead in row 2 is untouched, in row 3 the partner in row 3; a Gunner in
+row 1 or 3 strikes the partner in its row first, then the others. The
+scenario `tests/scenarios/battle_crew_rows.py` holds it (`spike N hit H
+lead whole|hit|down`, the spike's battle in the state's words): seen to
+fail with the old layout, the lead struck first.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
 battles to N MegaMen on side 0 on one core, the way `--dev arena2v2`
 grows a NetBattle: the battle's list rewritten at its spawn
-(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, the back
-column first) and each partner's keys written into his AI data at the
+(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, beside the
+lead in his column since issue #777, then behind him) and each partner's keys written into his AI data at the
 battle loop's key copy (`BN6_KEY_COPY`), here a script. BN6 keeps four
 actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
 `BN6_BATTLE_PLAYERS`), so four fit its tables. Seen headless with
@@ -1262,6 +1340,35 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   AIs read their target elsewhere: the next thing to find, since a
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
+
+## A dive's end, and a reward taken once (22 November 2026)
+
+Issue #769, left over from #757:
+
+- **A dive's end screen of its own.** A dive that ends, deleted for
+  good on a crew's field or in any other way, opens the run's RESULT
+  as a dive's ([The engine's screens](../engine/ui.md)): DEEP NET on
+  its band, "The dive is over", the layer reached, the crew's battles
+  fought and won (counted in the dive's record as each ends,
+  `weekly_crew_battle`, `weekly.sav`'s last two bytes), and the dive's
+  place on the week's Board: the server posts the end (Back to the
+  dive, below) and answers with its Board, so the dive's link is kept
+  up to six seconds after the end for it (`dive_mail_told`, pumped by
+  the screen through `weekly_end_pump`), the row "Asking..." meanwhile,
+  then "3rd", or "No link" where the link was down at the end or the
+  Board never came. MegaMan says "That's our dive,Lan..." and "The
+  portal's open. Let's dive again!", never the normal run's "Dad's
+  backup worked!".
+- **An HP reward taken once.** BN6's results add an HP recovery to the
+  field's own MegaMan as they show (bn6f's sub_802C170, phase `0x10`),
+  and the battle's sub-mode runs a few frames on in phase `0x14` as
+  they close, then `0x00` and `0x04` ([BN6's battles](../rom/battle.md)).
+  The field read each MegaMan's HP in every phase but `0x10`, so those
+  frames gave the battle's owner the recovery and `director_crew_over`
+  gave it again. The field now reads HP only in the fight's own phases,
+  the Custom screen's and the fight's (`0x08`, `0x0C`):
+  every seat's HP as its fight ended, the reward given once in each
+  run (`online-week/crew-reward-once`: the owner on 20 HP of 100 ends on 70 with an HP+50 reward, 100 before).
 
 ## Back to the dive (22 November 2026)
 
@@ -1360,7 +1467,15 @@ and the owner's four answers:
   an earlier checkpoint find it spent), not in `Run`. There is no state
   of being down: it is decided in the battle's last frame. The band says
   "Phew... The crew pulled us back!" on the fallen's game and "Lan,we
-  shared our HP. They're back!" on a giver's. `--dev partydel=MASK` with
+  shared our HP. They're back!" on a giver's. While he is down and the
+  field fights on, his band says what a win does for him (issue #780):
+  "Down! The crew can pull us back", or, his pull-back spent, "Down...
+  One more fall ends the dive"; only while the fight itself runs, never
+  over a Custom screen or the results, the field otherwise BN6's
+  (`party_play.c`'s `down_now`, `party_marks_down`; the scenario
+  `online-week/crew-down-told`). A partner's HP box is his own then too,
+  at 0: it had shown BN6's box, the lead's HP, once his MegaMan left the
+  field (`party_marks.c`). `--dev partydel=MASK` with
   `partyend=N`, the same on every game of a field, deletes the MegaMen of
   those seats (bit 0 seat 0) at the battle loop's iteration N, as a hit
   would, and its enemies 60 iterations later: the scenarios' way to a deletion on a week's layer, which the

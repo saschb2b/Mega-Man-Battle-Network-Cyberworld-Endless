@@ -64,6 +64,16 @@ typedef struct {
 	 * extras the setup switched off (docs/game/meta/extras.md), a bit each
 	 * (1 << EXTRA_*): set as the run begins, never changed after */
 	uint16_t extras_off;
+	/* (new since the "CWED" save, which reads them as 0: the mix, as runs
+	 * were) MegaMan's form for the run (issue #774): RUN_FORM_*, chosen at
+	 * setup and never changed after; the Soul it brought from the start;
+	 * the Crosses CROSSSELECT lists; the extra turn a unison takes */
+	uint8_t form;
+	uint8_t soul_start;      /* in a Soul form, the Soul brought: BN5's Soul number (1-12, souls.h) in SOUL BN5, BN4's (1-12, RollSoul to WoodSoul) in SOUL BN4; 0 none */
+	uint16_t cross_active;   /* the Crosses CROSSSELECT lists, bit navi - 1 (powers.c's 1-10), RUN_CROSS_ROWS at most; 0 BN6's own rule, the first five held in BN6's order */
+	uint16_t cross_held;     /* in CROSS, the Crosses the run holds, bit navi - 1, the brought one's among them (the mix's are its earlier acts' guardians', powers.c) */
+	uint16_t cross_layer;    /* ... as the layer about to be made was made, what its guardian's data is told by (souls_layer's twin) */
+	uint8_t soul_turns;      /* in a Soul form, the turns more a unison lasts (BN5's SoulT+1, the Cybeast's or the BeastOut helper's): 0 or 1 */
 } Run;
 
 #define CYCLE_LAYERS 19      /* 6 acts of 3 layers, then the Cybeast Nest */
@@ -89,7 +99,41 @@ enum { HELP_HEAD_START = 1, HELP_HEALS = 2, HELP_GENTLE = 4, HELP_ALL_STAR = 8, 
  * EXTRAS and kept. */
 enum { EXTRA_LIBERATION, EXTRA_TOURNEY, EXTRA_GLITCH, EXTRA_BATTLER, EXTRA_DARKCHIPS, EXTRA_OLDER, EXTRAS };
 
+/* MegaMan's form for a run (issue #774): one system a run, no mix. CROSS,
+ * BN6's Crosses and BeastOut; SOUL BN5, BN5's twelve Souls and Chaos
+ * Unison; SOUL BN4, BN4's twelve Souls. The mix is every system at once, as
+ * a run saved before forms (and every run without --dev forms, until the
+ * Souls land) plays to its end. */
+enum { RUN_FORM_MIX, RUN_FORM_CROSS, RUN_FORM_SOUL_BN5, RUN_FORM_SOUL_BN4, RUN_FORMS };
+#define RUN_CROSS_NAVIS 10   /* the Crosses, powers.c's navis 1-10: Gregar's five, Falzar's five */
+#define RUN_CROSS_ROWS 5     /* CROSSSELECT's rows, BN6's budget */
+
 extern Run run;
+
+/* Whether the run's form gives Crosses and BeastOut (CROSS, the mix),
+ * BN5's Souls (SOUL BN5, the mix) or BN4's (SOUL BN4 alone) */
+static inline bool run_form_crosses(void) { return run.form == RUN_FORM_MIX || run.form == RUN_FORM_CROSS; }
+static inline bool run_form_bn5_souls(void) { return run.form == RUN_FORM_MIX || run.form == RUN_FORM_SOUL_BN5; }
+static inline bool run_form_bn4_souls(void) { return run.form == RUN_FORM_SOUL_BN4; }
+/* Whether Cross `navi` (1-10) is marked for CROSSSELECT (run.cross_active;
+ * with none marked, BN6's rule decides: the caller's), and the marks set:
+ * a bit each, navi - 1, the first RUN_CROSS_ROWS of the mask kept */
+static inline bool run_cross_active(int navi) { return navi >= 1 && navi <= RUN_CROSS_NAVIS && (run.cross_active >> (navi - 1) & 1); }
+static inline void run_cross_active_set(unsigned mask) {
+	unsigned keep = 0;
+	for (int k = 0, n = 0; k < RUN_CROSS_NAVIS && n < RUN_CROSS_ROWS; ++k)
+		if (mask >> k & 1) { keep |= 1u << k; ++n; }
+	run.cross_active = (uint16_t)keep;
+}
+/* Whether a CROSS run holds Cross `navi` (run.cross_held; the mix's are
+ * powers_cross_held's) */
+static inline bool run_cross_in_hand(int navi) { return navi >= 1 && navi <= RUN_CROSS_NAVIS && (run.cross_held >> (navi - 1) & 1); }
+/* (dev: --dev forms, new runs take a form, CROSS unless the setup or
+ * --dev form=N chose another; off, every new run is the mix, as before
+ * issue #774. The orchestrating session switches it on for good once the
+ * Souls have landed) */
+extern bool run_debug_forms;
+extern int run_debug_form;
 
 /* Whether the run has extra `e` (EXTRA_*): on unless its setup switched
  * it off */
@@ -136,6 +180,17 @@ void run_debug_guardian(int navi);
 void run_setup(int mode, int folder, int threat, int helpers, int cross);
 /* ... and the extras it switched off (1 << EXTRA_* each) */
 void run_setup_extras(int off);
+/* ... and its form (RUN_FORM_*, the mix where --dev forms is off) and the
+ * Soul it brought (run.soul_start's, 0 none; none in CROSS or the mix) */
+void run_setup_form(int form, int soul);
+/* The week's net's form (issue #774): from the week's seed alone, the same
+ * for every diver, whatever each has opened; CROSS, SOUL BN5 and SOUL BN4
+ * in turn as the seeds fall */
+static inline int run_week_form(uint32_t seed) {
+	uint32_t h = seed * 2654435761u;
+	h ^= h >> 15;
+	return RUN_FORM_CROSS + (int)(h % (uint32_t)(RUN_FORMS - RUN_FORM_CROSS));
+}
 /* The other way act `act` (0-based) may take, offered where the act before
  * it ends (docs/game/meta/phase-two.md, routes): an area of its tier the run has not
  * taken, and `navi` its guardian, fit for the act and no other act's; -1

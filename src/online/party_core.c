@@ -13,6 +13,7 @@
 #include "arena_team_navi.h"
 #include "arena_team_navicust.h"
 #include "bn6.h"
+#include "bn6_battle_loop.h"
 #include "bytes.h"
 #include "core_boot.h"
 #include "emu.h"
@@ -34,6 +35,7 @@ struct PartyCore {
 	uint8_t *scratch;        /* the core's raw state, for the hash */
 	size_t scratch_size;
 	unsigned hp[PARTY_MOST]; /* each seat's HP as last seen */
+	uint16_t reward;         /* the dev's partyreward: the results' entry, 0 BN6's own */
 };
 
 struct PartyCoreSnap {
@@ -205,6 +207,7 @@ PartyCore *party_core_open(const uint8_t *rom, size_t size, const uint8_t *run_r
 	if (!K.state) { fail(pc, why, wn, "the boot is not kept"); return NULL; }
 	if (b->n < 1 || b->n > PARTY_MOST) { fail(pc, why, wn, "a party of no size"); return NULL; }
 	field_set(&pc->field, b);
+	pc->reward = (uint16_t)b->reward;
 	pc->core = arena_core_new(rom, size, pc->video, true);
 	if (!pc->core || !rom_in(pc, run_rom, b) || !arena_core_load(pc->core, K.state, K.size)) {
 		fail(pc, why, wn, "the party's core could not be made (too little memory?)");
@@ -267,8 +270,18 @@ void party_core_frame(PartyCore *pc, const uint16_t keys[PARTY_MOST]) {
 	c->setKeys(c, keys[0]);
 	c->runFrame(c);
 	++pc->frames;
-	/* (each MegaMan's HP while the battle is on: its results keep what the last frame of it left) */
-	if (c->rawRead8(c, BN6_GAMESTATE, -1) == BN6_SUB_BATTLE && c->rawRead8(c, BN6_BATTLE_PHASE, -1) != BN6_PHASE_RESULTS) seen_hp(pc);
+	/* (each MegaMan's HP while the fight is on, the Custom screen or the fight itself: what its last frame left, before
+	 * the results' HP recovery, which BN6 adds to the field's own MegaMan as its results show (BN6_PHASE_RESULTS) and which
+	 * each run takes once, director_crew_over; read on through the frames after them, still the battle's sub-mode
+	 * (BN6_PHASE_LEAVING, then 0x00 and 0x04), it came twice, issue #769) */
+	bool battle = c->rawRead8(c, BN6_GAMESTATE, -1) == BN6_SUB_BATTLE;
+	unsigned phase = (uint8_t)c->rawRead8(c, BN6_BATTLE_PHASE, -1);
+	if (battle && (phase == BN6_PHASE_CUSTOM || phase == BN6_PHASE_FIGHT)) seen_hp(pc);
+	/* (the dev's partyreward: its entry where the chooser's pick and its copy land, as the results show) */
+	if (pc->reward && battle && phase == BN6_PHASE_RESULTS) {
+		c->rawWrite16(c, BN6_REWARD_PICKED, -1, pc->reward);
+		c->rawWrite16(c, BN6_BATTLE_REWARD, -1, pc->reward);
+	}
 }
 
 uint32_t party_core_frames(const PartyCore *pc) { return pc->frames; }

@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:17:57Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:10:00Z }
 ---
 
 # The player's guide
@@ -910,7 +910,11 @@ it pays one of BN6's GigaChips.
   together.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
-  screen as in BN6.
+  screen as in BN6. CROSSSELECT lists five: **R** on the PET's menu opens
+  FORMS, where the Crosses held past five wait as spares, and A on one
+  Cross and A on another swaps them, as in the folder editor, whenever
+  you like. Its other page lists the Souls you hold and the chip each
+  takes.
 - **BeastOut.** Beat the Cybeast at the endless net's own Nest, and
   BeastOut joins the Custom screen for the rest of the run; the
   Graveyard's guardian only stirs the beast. Once the Cybeast has fallen
@@ -1692,7 +1696,7 @@ project page's:
 | When | What is sent |
 | --- | --- |
 | The game starts | the system (Linux, Windows, Steam Deck, Android, 3DS, Switch, PS Vita, PS5, the browser...), the version and the screen's size |
-| A run begins | its setup (net, folder, Cross, threat, helpers, the extras switched off), whether BN5 joins, and how many runs you finished before |
+| A run begins | its setup (net, folder, MegaMan's form, Cross, threat, helpers, the extras switched off), whether BN5 joins, and how many runs you finished before |
 | A guardian's battle ends | the guardian, won, lost or left, the layer, net and threat, MegaMan's HP left in percent, the battle's seconds, and how many times you have met him |
 | A run ends | won or lost, the layer and area, who deleted MegaMan (a guardian, ProtoMan or viruses), the minutes played, its setup, and what it found: how many chips and how many of them good ones (3 stars or more, Mega or Giga), how many Mystery Data opened and how much zenny earned, in the whole run and in its first act; and of how many virus families your battle data is complete |
 | An act ends (its guardian falls, or the run ends in it) | the act and cycle, net and threat, whether its guardian fell, and of its random battles how many were fought, won and run from, the HP they cost in percent and the busting levels of those won: the area's own battles, and apart from them those built around the act's signature virus family, with that family's number and which of its battles were fought |
