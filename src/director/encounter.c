@@ -240,8 +240,7 @@ void emu_encounter_started(uint32_t settings) {
 	/* (the run's Souls for UNITE, where the Souls stand in BN6's engine:
 	 * soulunite.h, BN4's beside BN5's; none in a liberation's teammate's
 	 * battle, MegaMan in his Soul already: liberation_battle.h) */
-	bool armed = lib_battle_soul_armed();
-	soulunite_held_bn4(armed ? 0 : souls_held(), armed ? 0 : souls_held_bn4());
+	soulunite_held(lib_battle_soul_armed() ? 0 : souls_held() | soulunite_bn4_bits(souls_held_bn4()));
 }
 
 /* A guardian's chip entry's zenny: an Unlocker's price in his act (shop.c,

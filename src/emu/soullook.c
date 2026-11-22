@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include "bn4.h"
+#include "bn4_souls.h"
 #include "bn5.h"
 #include "bn6.h"
 #include "bytes.h"

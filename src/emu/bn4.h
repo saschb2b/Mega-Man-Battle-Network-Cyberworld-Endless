@@ -313,13 +313,6 @@
 #define BN4_STATS_SPRITES 0x08017F98u /* by BN4_NAVI_NAVI, his sprite's list and number (2 bytes): MegaMan's list 0, number the form (the
                                        * Souls' sprites list 0's 1-12, BN5's 7-12); 1-13 list offset 8 (sprite_load's r1, a byte offset
                                        * into the lists: list 2), the Soul Navis' battle sprites, which the unison draws */
-#define BN4_T4_SOUL_PICTURE 0x13      /* the fourth kind's: the unison's picture, spawned by its phase 1 (0x080EBB20, 0x080E37D8: its +4 the
-                                       * pending form), its init 0x080E363C: */
-#define BN4_SOUL_PICTURE_LIST 0x080E363Eu /* ... movs r1,#8: the picture's sprite list offset (list 2), */
-#define BN4_SOUL_PICTURE_NUMBER 0x080E3640u /* ... ldrb r2,[r5,#4]: its number the form, so a Soul's picture is his Navi's battle
-                                       * sprite (ThunSoul's list 2 number 6, 36,388 bytes; GutsSoul's 60,988 the largest) */
-#define BN4_SOUL_PICTURE_DECOS 0x080E36ACu /* ... an arm object (BN4_ARM_SPAWN's kind) on the picture by form, 0xFF none: WindSoul's
-                                       * 0x34, FireSoul's 0x12, NumSoul's 0x14, AquaSoul's 0x13 */
 #define BN4_POWER_ATTACKS 0x0800CA7Cu /* the power attacks by id, 108 (BN5_POWER_ATTACKS' and BN6_POWER_ATTACKS' twin): each sets the attack's
                                        * variables (AI data +0x70) and returns its family, a state of MegaMan's (BN4_PLAYER_STATES) */
 #define BN4_POWER_ATTACK_COUNT 108    /* ... how many */
