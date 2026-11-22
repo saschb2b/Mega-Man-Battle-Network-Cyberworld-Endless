@@ -13,6 +13,7 @@
 #include "forms.h"
 #include "loot_souls.h"
 #include "soulbn4.h"
+#include "soulpower.h"
 #include "soulunite.h"
 #include "data.h"
 #include "game.h"
@@ -6347,6 +6348,7 @@ static void test_soul_lights(void) {
 static bool forms_falzar = true;
 bool crossselect_falzar(void) { return forms_falzar; }
 bool soulunite_ready(void) { return true; }
+bool soulpower_bn4(int k) { return k == 0; }   /* (ThunSoul's power attack placed) */
 /* (loot_souls.c's lean, which these tests do not link: souls_lean's) */
 void loot_soul_souls(unsigned souls) { (void)souls; }
 void loot_soul_kinds(unsigned more) { (void)more; }

@@ -15,6 +15,7 @@
 #include "run.h"
 #include "save.h"
 #include "soulbn4.h"
+#include "soulpower.h"
 #include "souls.h"
 #include "soulunite.h"
 #include "super_boss.h"
@@ -83,12 +84,14 @@ int forms_kind(int navi) {
 	return p ? bn4_powers[p - 1].kind : KIND_NONE;
 }
 
-/* (a BN4 Soul stands where BN4's Souls are moved in: soulbn4.h, each read
- * from BN4's ROM by its place among those moved) */
+/* (a BN4 Soul stands where it unites in this core: its rows read from
+ * BN4's ROM and its charged shot's code moved, soulbn4.h, and its power
+ * attack placed in the grown table, which UNITE asks, soulpower.h; each by
+ * its place among those moved) */
 static bool bn4_ready(int p) {
 	SoulBn4 s;
 	for (int k = 0; k < SOULS_BN4; ++k)
-		if (soulbn4_read(k, &s) && s.form == p) return true;
+		if (soulbn4_read(k, &s) && s.form == p && soulpower_bn4(k)) return true;
 	return false;
 }
 
