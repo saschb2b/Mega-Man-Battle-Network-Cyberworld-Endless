@@ -234,6 +234,8 @@ static int bn4_chip_power(const SoulBn4 *s, const uint8_t *b5) {
 	return NONE;
 }
 
+_Static_assert(SOULS_LOADOUTS + BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_HELD_BN4_ALL) <= SOULS_LOADOUTS_END,
+	"the Souls' loadouts' room holds BN5's six and BN4's twelve (soul_room.h)");
 static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)]) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	/* (each Soul's loadout: BN5's row in BN6's ids, BN5's plain shot BN6's own 1, the same charge times) */
