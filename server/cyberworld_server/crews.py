@@ -4,15 +4,21 @@ Protocol v20).
 
 A crew is who dives together, by where they walk, never by asking: two
 divers of one room (a layer's instance) whose places (STATE, sent since
-each entered the room) stand within crew_near world units of each other
+each entered the room) stand within the near reach of each other
 for crew_form_ms are a crew, or join the one either is in where it holds
 fewer than party_most and he stands with its core; two crews that meet
 become one where both fit in party_most, the older taking the other's.
 The pairs near longest go first, so a fifth diver near a crew of four
 stays outside it (the first there, not the nearest). A crew holds by
 chains: its core is the largest part of its members, in one room, each
-within crew_far of another of it (a longer reach than crew_near, so a
-crew at the edge does not form and split with every step); ties go to
+within the far reach of another of it (wider than the near, so a crew
+at the edge does not form and split with every step). The reach is on
+screen (issue #750, the owner's call of 22 November 2026): a box in the
+picture's pixels, BN6's projection putting one who stands (dx, dy) from
+MegaMan at dx + dy across and (dy - dx) / 2 down; crew_near_wide and
+crew_near_high a crew forms within, crew_far_wide and crew_far_high it
+holds within, both inside the 240 by 160 picture whichever of the two
+looks (docs/online/shared-dive.md, On screen only); ties go to
 the part holding the crew's first member. A member out of the core for
 crew_split_ms in the core's room, or crew_away_ms elsewhere (taking a
 portal before the others, home between acts, a place not yet sent in a
@@ -42,12 +48,19 @@ from . import protocol, websocket
 
 SPEC = protocol.SPEC
 JOIN_WAIT = SPEC["crew_join_ms"] / 1000
-NEAR = SPEC["crew_near"]                    # world units: a crew forms within this
-FAR = SPEC["crew_far"]                      # ... and holds within this
+NEAR = (SPEC["crew_near_wide"], SPEC["crew_near_high"])   # the picture's pixels: a crew forms within this
+FAR = (SPEC["crew_far_wide"], SPEC["crew_far_high"])       # ... and holds within this
 FORM_WAIT = SPEC["crew_form_ms"] / 1000     # seconds near before a crew forms (two passing are none)
 SPLIT_WAIT = SPEC["crew_split_ms"] / 1000   # seconds out of reach in the room before a member is out
 AWAY_WAIT = SPEC["crew_away_ms"] / 1000     # ... and elsewhere (a portal taken first, home)
 VITALS_WAIT = SPEC["crew_vitals_ms"] / 1000  # a crew told its members' HP and layers at most so often
+
+
+def on_screen(dx, dy, reach):
+    """Whether one standing (dx, dy) world units from another stands within reach (wide, high) of him in the
+    picture: BN6's projection, dx + dy across and (dy - dx) / 2 down (src/online/map_label.c)."""
+    wide, high = reach
+    return abs(dx + dy) <= wide and abs(dy - dx) <= 2 * high
 
 
 class Crew:
@@ -174,7 +187,7 @@ class Crews:
         room_b, xb, yb = self.where(b)
         if room_a is None or room_a is not room_b or xa is None or xb is None:
             return False
-        return (xa - xb) ** 2 + (ya - yb) ** 2 <= reach * reach
+        return on_screen(xb - xa, yb - ya, reach)
 
     def settle(self, now):
         """Each tick: who stands near whom, every crew's core, the crews formed, grown and split."""
@@ -320,8 +333,10 @@ class Crews:
         room = server.dive.room_of(player.id)
         # (a crew's battle is fought on one field: a game that cannot run it, HELLO's no_arena, is offered nothing
         # and offers nothing, docs/online/shared-dive.md)
+        # (on screen only, issue #750: a crewmate offered it stands within the far reach of the owner now, each in the
+        # other's picture; one walking off, in his crew_split_ms before he is out of it, is offered nothing)
         invited = [m for m in crew.members if m != player.id and server.dive.room_of(m) is room
-                   and not server.parties.fighting(m) and not server.players[m].no_arena]
+                   and not server.parties.fighting(m) and not server.players[m].no_arena and self.within(player.id, m, FAR)]
         if player.no_arena:
             invited = []
         if not invited:

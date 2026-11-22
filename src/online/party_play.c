@@ -711,6 +711,8 @@ void party_play_frame(uint32_t pad) {
 	if (PP.core) party_core_sound(PP.core, PP.stage >= PP_FIGHT);
 }
 
+void (*party_play_draw_more)(void);
+
 /* the party's field, or while it is made and the others come, the staging's
  * last picture of the run's own core */
 void party_play_draw(void) {
@@ -719,6 +721,7 @@ void party_play_draw(void) {
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
+	if (PP.crew && party_play_draw_more) party_play_draw_more();
 }
 
 void party_play_describe(FILE *f) {

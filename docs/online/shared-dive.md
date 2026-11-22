@@ -163,7 +163,7 @@ points to, and is his to turn over.
 
 | Question | Taken | Chosen over |
 | --- | --- | --- |
-| The radius | A crew forms within four panels (128 world units, the join-in battles' old reach, `crew_near`) and holds within six (192, `crew_far`): a crew at the edge does not form and split with every step | One radius both ways (flickers at its edge); a wider one (strangers across a room pulled in) |
+| The radius | A crew forms within four panels (128 world units, the join-in battles' old reach, `crew_near`) and holds within six (192, `crew_far`): a crew at the edge does not form and split with every step; since 22 November 2026 a box on screen instead ([On screen only](#on-screen-only-22-november-2026)) | One radius both ways (flickers at its edge); a wider one (strangers across a room pulled in) |
 | A moment first | Near for a second before a crew forms (`crew_form_ms`), so two passing each other are none; out of reach for two seconds before one is out (`crew_split_ms`) | At once (crews made and broken by a step past); longer (a wait the direction rules out) |
 | Who decides | The server, from the places every game already sends (STATE), each tick: one answer for every game, `crews.py` holding the crews | Each client for itself (two games could disagree about who is in) |
 | More than four near | The first there: the crew as it stands keeps its four, and a fifth near stays outside it until a place opens | The nearest (a crew reshuffled by every step, someone already in dropped) |
@@ -180,6 +180,71 @@ a chip, HP, zenny or a layer. Systems without the one field (the New 3DS,
 the PSP) are in crews as anyone and are never offered their battles. The
 statistics' `deepnet-together` keeps counting the biggest crew a dive
 saw, now one formed by nearness rather than asked for.
+
+## On screen only (22 November 2026)
+
+Issue #750, from the friction hunt: four panels is an ellipse some 360 by
+180 pixels in BN6's projection, wider than the 240 by 160 picture, so a
+crew formed and held with a diver the player could not see, and his
+random battle pulled the other in from off screen, nothing on the
+joiner's screen saying whose battle it was. **The owner's call (22
+November 2026, on the issue): on screen only.** A crew forms only with a
+diver you can see and holds no wider than the picture; a battle you are
+pulled into names whose it is. Chosen over keeping the reach and drawing
+an arrow at the picture's edge.
+
+**The reach in the picture's pixels.** BN6 draws one who stands (dx, dy)
+world units from MegaMan at dx + dy pixels across and (dy - dx) / 2 down
+from MegaMan's feet (bn6f's sub_300631C, as `map_label.c` reads it), and
+MegaMan's feet stand at (120, 82) of the picture. Seen from either of two
+divers the other is at the same offset with its sign turned, so the
+reach is a box of the same size both ways: across, his body (a Navi some
+24 pixels wide) inside 120 pixels to either side; down, his head (31
+pixels over his feet) inside the 82 rows above MegaMan's feet, the
+tighter of the two ways, since the 78 rows under them leave more.
+
+| | Across | Down | In world units along one axis |
+| --- | --- | --- | --- |
+| The picture: the other's whole body inside it | 108 | 51 | |
+| Holds (`crew_far_wide`, `crew_far_high`) | 100 | 44 | 88 (2.75 panels) |
+| Forms (`crew_near_wide`, `crew_near_high`) | 80 | 32 | 64 (two panels) |
+
+The hold sits 8 and 7 pixels inside the picture's edge: room for a raised
+floor's few rows and BN6's camera a step behind. The form is a fifth to
+a quarter inside the hold, so a crew at the edge neither forms nor splits
+with each step (the hysteresis kept). A diver walking off leaves the
+crew `crew_split_ms` (two seconds) after he passes the hold, while he is
+still in sight; meanwhile no battle is offered him.
+
+What changed:
+
+- **One place for the numbers:** `protocol.json`'s `crew_near_wide`,
+  `crew_near_high`, `crew_far_wide`, `crew_far_high` (protocol.h's
+  `ONLINE_CREW_*`), read by the server (`crews.py`'s `on_screen`) and the
+  game (`dive_crew.h`'s `DIVE_CREW_NEAR` and `DIVE_CREW_FAR`,
+  `dive_crew_within`): the dotted ring of a crew about to form (#716)
+  follows the same box. The server's tests read them from there.
+- **A battle offered only to those in sight:** the server offers a
+  crewmate's battle only to those within the hold of its owner now, so one
+  walking off in his last two seconds of the crew is offered none; and a
+  game declines (CREW busy) the battle of an owner its own picture does
+  not show (`dive_people_in_sight`, BN6's displayed camera), as a camera
+  held at a layer's edge is not where MegaMan stands.
+- **Whose battle:** the joiner's band says "Alpha's battle!" from the join
+  for two and a half seconds, over the battle's start too (`dive_join.c`,
+  the words in `dive_words.c`); the state's `band` says what it shows.
+- The state's `insight N: NAMES` names the divers whose feet are in the
+  picture.
+
+Seen headless with two games on a local server (the scenarios
+`online-week/crew-on-screen-only` and `crew-battle-named`): Beta 80 units
+off along x still a crew and in Alpha's picture; at 96 past the hold,
+still in sight and for two seconds still in the crew, Alpha's battle
+offered him nothing; the crew gone while each still saw the other; and
+Beta, taken into Alpha's battle, read "Alpha's battle!" over its start.
+
+These numbers were taken under the owner's call of 22 November 2026 by
+the session building it, and are his to turn over.
 
 ## The crew's sign (21 November 2026)
 
@@ -549,7 +614,8 @@ the session building it, and is his to turn over.
   it by its index on the layer (until 21 November 2026 the band said
   "Battle! Calling the crew..."). A crewmate whose game gets the offer,
   MegaMan free on the map (no chat box, no door, no party's fight), sends
-  CREW join at once, his band saying "Jumping in!": no question since 21
+  CREW join at once, his band saying "Jumping in!" (since 22 November
+  2026 whose battle, "Alpha's battle!", [On screen only](#on-screen-only-22-november-2026)): no question since 21
   November 2026 (issue #715, the owner's call after the team's test;
   until then the band offered it, "A:Jump in", for the window); a game
   whose MegaMan is not free, or holds his own battle, sends CREW busy

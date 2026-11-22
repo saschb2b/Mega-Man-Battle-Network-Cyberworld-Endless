@@ -123,7 +123,7 @@ static int sign_of(const Who *w) {
 	/* (about to be a crew only where one can take him: MegaMan's has a place, and his is not full, issue #758) */
 	if (dive_crew_count() >= ONLINE_PARTY_MOST || dive_comings_full_has(w->id)) return SIGN_NONE;
 	long dx = w->x - bn6_player_x(), dy = w->y - bn6_player_y();
-	return dx * dx + dy * dy <= (long)DIVE_CREW_NEAR * DIVE_CREW_NEAR ? SIGN_FORMING : SIGN_NONE;
+	return dive_crew_within(dx, dy, DIVE_CREW_NEAR) ? SIGN_FORMING : SIGN_NONE;
 }
 
 /* the tag at (x, y) that `t` would lie on (NULL none) */
@@ -167,6 +167,14 @@ static int signs_now(int k_of[DIVE_PEOPLE], int sign[DIVE_PEOPLE], int camera[3]
 		sign[n++] = sign_of(&P.who[i]);
 	}
 	return n;
+}
+
+bool dive_people_in_sight(uint32_t session) {
+	int k_of[DIVE_PEOPLE], sign[DIVE_PEOPLE], camera[3];
+	int n = signs_now(k_of, sign, camera);
+	for (int i = 0; i < n; ++i)
+		if (P.who[k_of[i]].id == session) return true;
+	return false;
 }
 
 /* the ring under each crewmate, and a dotted one under a diver about to be */
@@ -228,6 +236,10 @@ void dive_people_describe(FILE *f) {
 	fprintf(f, "rings %d", shown);
 	for (int i = 0, j = 0; i < n2; ++i)
 		if (sign[i] != SIGN_NONE) fprintf(f, "%s%s%s", j++ ? " " : ": ", P.who[k_of[i]].name, sign[i] == SIGN_FORMING ? "(forming)" : "");
+	fputc('\n', f);
+	/* (the divers whose feet are in the picture, BN6's camera: the crew's reach is on screen, issue #750) */
+	fprintf(f, "insight %d", n2);
+	for (int i = 0; i < n2; ++i) fprintf(f, "%s%s", i ? " " : ": ", P.who[k_of[i]].name);
 	fputc('\n', f);
 	/* (the divers in the room with no MegaMan drawn: the layer's slots were taken) */
 	fprintf(f, "undrawn %d", here() ? P.undrawn : 0);

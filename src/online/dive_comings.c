@@ -126,7 +126,7 @@ void dive_comings_frame(uint32_t now) {
 		for (size_t i = 0; s->connected && i < s->peer_count; ++i) {
 			const OnlinePeer *p = &s->peers[i];
 			long dx = p->x - bn6_player_x(), dy = p->y - bn6_player_y();
-			if (p->id == K.full.m[k].session && dx * dx + dy * dy <= (long)DIVE_CREW_FAR * DIVE_CREW_FAR) near = true;
+			if (p->id == K.full.m[k].session && dive_crew_within(dx, dy, DIVE_CREW_FAR)) near = true;
 		}
 	}
 	if (K.full.count && !near) { memset(&K.full, 0, sizeof K.full); K.full_said = false; }
