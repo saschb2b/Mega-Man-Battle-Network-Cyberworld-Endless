@@ -4768,8 +4768,7 @@ static void test_free_space(void) {
 		{ "the unison's phases", SOULS_PHASES, SOULS_PHASES + 16 }, { "the veneers", SOULS_VENEERS, SOULS_VENEERS_END },
 		{ "the hooks' Thumb", SOULS_THUMB, SOULS_THUMB_END },
 		{ "the arm's rows by number", SOULS_ARM_OF, SOULS_ARM_OF_END },
-		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
-		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END }, { "the charge times", SOULS_CHARGES, SOULS_CHARGES_END },
+		{ "the power attacks", SOULS_POWERS, SOULS_POWERS_END },
 		{ "the loadouts", SOULS_LOADOUTS, SOULS_LOADOUTS_END }, { "the faces", SOULS_FACES, SOULS_FACES_END },
 		{ "the faces' palettes", SOULS_FACE_PALS, SOULS_FACE_PALS_END }, { "Chaos Unison's Thumb", SOULS_CHAOS, SOULS_CHAOS_END },
 		{ "the songs", SOULS_SONGS, SOULS_SONGS_END },
@@ -4778,6 +4777,19 @@ static void test_free_space(void) {
 		{ "MegaMan in each Soul", SOULS_SPRITES, SOULS_SPRITES_END },
 	};
 	regions_apart("the Souls' room", souls, (int)(sizeof souls / sizeof *souls), FREE_SOULS, FREE_PANELS);
+	/* (Team ProtoMan's Souls' room, soul_room.h: their code, art, sprites and loadouts, and the Souls' grown table Team
+	 * Colonel's room had no space to grow: the arm's rows) */
+	const Region team_souls[] = {
+		{ "their code", SOULS_TEAM_CODE, SOULS_TEAM_CODE_END }, { "their attacks' sprites", SOULS_TEAM_ART, SOULS_TEAM_ART_END },
+		{ "MegaMan in each of their Souls", SOULS_TEAM_SPRITES, SOULS_TEAM_SPRITES_END },
+		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
+		{ "their loadouts", SOULS_TEAM_LOADOUTS, SOULS_TEAM_LOADOUTS_END }, { "their hooks' Thumb", SOULS_TEAM_THUMB, SOULS_TEAM_THUMB_END },
+		{ "the charge times", SOULS_CHARGES, SOULS_CHARGES_END }, { "their chaos power attacks", SOULS_TEAM_CHAOS, SOULS_TEAM_CHAOS_END },
+	};
+	regions_apart("Team ProtoMan's Souls' room", team_souls, (int)(sizeof team_souls / sizeof *team_souls), FREE_TEAM_SOULS, FREE_TEAM_SOULS_END);
+	CHECK(SOULS_ARM_ROWS_END - SOULS_ARM_ROWS >= 0x44u * (3 + 6 + 6), "the Souls' grown arm rows: room for BN6's, Team Colonel's and Team ProtoMan's");
+	CHECK(SOUL_POWER_TEAM == SOUL_POWER_FIRST + 8 + 3 + 6 + 12 && SOULS_CHARGES_END - SOULS_CHARGES == 10u * 0x100 &&
+		SOULS_POWERS_END - SOULS_POWERS == 4u * 0x100, "the Souls' power attacks: Team ProtoMan's past Team Colonel's and BN4's twelve, both tables 256");
 	/* (the hooks' Thumb: soulchips.c's, the counter's, ColonelSoul's, each apart) */
 	const Region thumb[] = {
 		{ "the chips' Thumb", SOULS_THUMB, SOULS_THUMB + 0x24 }, { "the counter's", SOUL_STUB_COUNTER, SOUL_STUB_COUNTER + 0x24 },

@@ -19,6 +19,7 @@
 #include "soulown.h"
 #include "soulpower.h"
 #include "soulproxy.h"
+#include "soulteam.h"
 #include "thumb_reloc.h"
 #include "xvirus_recipe.h"
 
@@ -38,7 +39,8 @@
 #define PALETTE_SIZE  0x20
 #define SOULS_BN5     SOULKINDS_BN5    /* BN5_SOUL_KINDS' and BN5_SOUL_FLAGS' entries: Souls 1-12 */
 #define TEAM_SOULS    6     /* the run's Souls (souls.h): bit k BN5's Soul 7 + k, its flag BN5_FLAG_SOUL + k */
-#define HELD_MASK     ((1u << (SOULS_HELD_BN4 + SOULS_BN4)) - 1)   /* ... then BN4's (soulbn4.h), the differential's alone yet */
+#define HELD_MASK     (((1u << (SOULS_HELD_BN4 + SOULS_BN4)) - 1) | SOULS_HELD_TEAM_MASK)   /* ... then BN4's (soulbn4.h), the differential's
+                                                                                          alone yet, and Team ProtoMan's (soulteam.h) */
 #define STATE_LIT     0     /* BN6_ELEMENT_STATE */
 #define STATE_GREY    1
 #define STATE_CHOSEN  2
@@ -136,7 +138,11 @@ static int lights(int side, int *chaos) {
 	unsigned moved4 = 0;
 	for (int k = 0; k < SOULS_BN4; ++k) moved4 |= (unsigned)soulpower_bn4(k) << k;
 	const SoulTables t = { kinds5, bits5, kinds4, SOULS_BN4, SOUL_BN4_FIRST, SOULS_HELD_BN4, moved4 };
-	return soulkinds_lights(&t, kind - shift, dark, held_now(), hook_read32(soul_field(side, BN6_SOUL_USED)), chaos);
+	/* (Team ProtoMan's held where their code stands alone: soulpower_team) */
+	unsigned held = held_now();
+	for (int tp = SOUL_TEAM_FIRST; tp < SOUL_TEAM_FIRST + SOULS_TEAM; ++tp)
+		if (!soulpower_team(tp)) held &= ~(1u << (SOULS_HELD_TEAM + tp - SOUL_TEAM_FIRST));
+	return soulkinds_lights(&t, kind - shift, dark, held, hook_read32(soul_field(side, BN6_SOUL_USED)), chaos);
 }
 
 /* ---- the hooks ---- */
@@ -327,12 +333,29 @@ static bool done;
 
 bool soulunite_ready(void) { return done; }
 
+unsigned soulunite_mask_bn5(unsigned bn5) {
+	unsigned out = 0;
+	for (int s = 1; s <= SOULS_BN5; ++s) {
+		/* (by the bits BN5's flags give them, as UNITE reads them: the same layout before the install) */
+		int bit = soulteam_is(s) ? SOULS_HELD_TEAM + s - SOUL_TEAM_FIRST : s - (SOULS_BN5 - TEAM_SOULS) - 1;
+		if (bn5 >> (s - 1) & 1) out |= 1u << bit;
+	}
+	return out;
+}
+
+bool soulunite_has_bn5(int soul) {
+	return done && ((soul > SOULS_BN5 - TEAM_SOULS && soul <= SOULS_BN5) || soulpower_team(soul));
+}
+
+
 /* what UNITE's check reads (soulkinds.h's SoulTables): BN5's Souls' kinds and each one's held bit by its flag, BN4's kinds */
 static void tables_read(const uint8_t *b5) {
 	memcpy(kinds5, b5 + (BN5_SOUL_KINDS - BUS), sizeof kinds5);
 	for (int s = 0; s < SOULS_BN5; ++s) {
 		int k = b5[BN5_SOUL_FLAGS - BUS + (uint32_t)s] - BN5_FLAG_SOUL;
 		bits5[s] = (int8_t)(k >= 0 && k < TEAM_SOULS ? k : -1);
+		/* (Team ProtoMan's, whose flags this version leaves 0xFF: their bits past BN4's, soulteam.h) */
+		if (soulteam_is(s + 1) && b5[BN5_SOUL_FLAGS - BUS + (uint32_t)s] == 0xFF) bits5[s] = (int8_t)(SOULS_HELD_TEAM + s + 1 - SOUL_TEAM_FIRST);
 	}
 	for (int k = 0; k < SOULS_BN4; ++k) {
 		SoulBn4 r;

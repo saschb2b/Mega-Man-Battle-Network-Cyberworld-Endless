@@ -39,12 +39,10 @@
 #define SOULS_THUMB_END    (FREE_SOULS + 0x001C80u)   /* ... to */
 #define SOULS_ARM_OF       (FREE_SOULS + 0x001C80u)   /* list 0's arm row by sprite number grown: BN6's bytes, then the Souls', to: */
 #define SOULS_ARM_OF_END   (FREE_SOULS + 0x001D80u)
-#define SOULS_ARM_ROWS     (FREE_SOULS + 0x001D80u)   /* list 0's arm rows grown: BN6's three, then the Souls' (BN5's points), to: */
-#define SOULS_ARM_ROWS_END (FREE_SOULS + 0x002100u)
+/* (FREE_SOULS + 0x1D80-0x2100: list 0's arm rows grown, Team Colonel's alone, kept free since they are SOULS_ARM_ROWS, below) */
 #define SOULS_POWERS       (FREE_SOULS + 0x002100u)   /* BN6's power attacks grown (bn6_attacks.h): 148 entries, then the Souls', to: */
 #define SOULS_POWERS_END   (FREE_SOULS + 0x002500u)
-#define SOULS_CHARGES      (FREE_SOULS + 0x002500u)   /* BN6's charge times grown with them, 10 bytes a power attack, to: */
-#define SOULS_CHARGES_END  (FREE_SOULS + 0x002C00u)
+/* (FREE_SOULS + 0x2500-0x2C00: BN6's charge times grown to 179, kept free since they are SOULS_CHARGES, below) */
 #define SOULS_LOADOUTS     (FREE_SOULS + 0x002C00u)   /* the Souls' loadouts, 6 bytes each by BN5's number 7-12, in BN6's ids, to: */
 #define SOULS_LOADOUTS_END (FREE_SOULS + 0x002C40u)
 #define SOULS_FACES        (FREE_SOULS + 0x002C80u)   /* the emotion window's faces grown: BN6's table of tiles' words, then the Souls', to: */
@@ -66,13 +64,18 @@
 /* ---- the numbers the Souls take ---- */
 #define SOUL_LIST0_FIRST   0x45          /* BN6's list-0 number of the first Soul's sprite (BN5's 7), past what BN6 reads through list 0, */
 #define SOUL_LIST0_ART_FIRST 0x4B        /* ... of the first sprite their code draws that BN6 has none of (tools/xsoul.py's ART_FIRST), */
-#define SOULS_LIST0_ENTRIES 0x60         /* ... the list's words (list 0 is the Souls' alone: the tracks' allocations, issue #82) */
+#define SOULS_LIST0_ENTRIES 0x80         /* ... the list's words (list 0 is the Souls' alone: the tracks' allocations, issue #82) */
 #define SOUL_LIST0_BN4     0x5F          /* ... of BN4's united Soul's sprite, the list's last (tools/xsoul.py's ART_LAST one under it) */
 #define SOUL_EFFECT_FIRST  0xC0          /* BN6's grown effect ids the Souls' code takes (xvirus_grow.h's 256), to: */
 #define SOUL_EFFECT_LAST   0xCF
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
+#define SOUL_POWER_TEAM    0xB1          /* ... of Team ProtoMan's first (soulpower.c): past Team Colonel's 17 (moved 8, empty 3, chaos 6) and
+                                            room for BN4's twelve, so that neither moves the other's: their empty ones, chaos ones, then moved */
 #define SOUL_FACE_FIRST    0x17          /* BN6's emotion window face of the first Soul's, past BN6's 23 (0x0801CD08) */
-#define SOUL_FACE_BN4      0x1D          /* ... of BN4's united Soul's, past BN5's six (SOULS_FACES and SOULS_FACE_PALS hold 32) */
+#define SOUL_FACE_BN4      0x1D          /* ... of BN4's united Soul's, past BN5's six (SOULS_FACES and SOULS_FACE_PALS hold 32; Team ProtoMan's
+                                            Souls show MegaMan's own, BN6's 0: Team Colonel's ROM holds no face of theirs, soullook.c) */
+#define SOUL_LIST0_TEAM    0x60          /* list 0's number of Team ProtoMan's first Soul's sprite (ProtoSoul's): 0x60-0x65, */
+#define SOUL_LIST0_TEAM_ART 0x66         /* ... of the first sprite their code draws BN6 has none of, to the list's end (tools/xsoul.py's TEAM_ART_FIRST) */
 #define SOULS_FACE_TILES   (SOULS_ART + 0xE000u)   /* the Souls' faces, 0x100 bytes each (BN5's 0x087417FC on), past the attacks' sprites */
 #define SOULS_DIGITS       (SOULS_ART + 0xE600u)   /* ... and BN5's emotion window's digits, 0x80 bytes each (0x08741DFC on), to: */
 #define SOULS_DIGITS_END   (SOULS_ART + 0xEB80u)
@@ -84,6 +87,26 @@
 #define SOULS_COLONEL_INFO_PAL (SOULS_COLONEL_ART + 0x9C0u) /* ... its palette, */
 #define SOULS_COLONEL_NAME_PAL (SOULS_COLONEL_ART + 0x9E0u) /* ... and the name line's, 0x20 bytes each, to */
 #define SOULS_COLONEL_ART_END (SOULS_COLONEL_ART + 0xA00u)
+
+/* ---- Team ProtoMan's Souls (soulteam.h): FREE_TEAM_SOULS, laid out by what each part of their install writes, and the
+ * Souls' grown table Team Colonel's room had no space to grow it in (the arm's rows), moved here whole ---- */
+#define SOULS_TEAM_CODE    (FREE_TEAM_SOULS + 0x00000u)   /* their moved code (soulcode_bn5.c's blocks past Team Colonel's), to: */
+#define SOULS_TEAM_CODE_END (FREE_TEAM_SOULS + 0x08000u)
+#define SOULS_TEAM_ART     (FREE_TEAM_SOULS + 0x08000u)   /* what their code draws BN6 has none of, a sprite at a time, to: */
+#define SOULS_TEAM_ART_END (FREE_TEAM_SOULS + 0x20000u)
+#define SOULS_TEAM_SPRITES (FREE_TEAM_SOULS + 0x20000u)   /* MegaMan in each of their Souls, BN5's sprite list 0 1-6, to: */
+#define SOULS_TEAM_SPRITES_END (FREE_TEAM_SOULS + 0x50000u)
+#define SOULS_ARM_ROWS     (FREE_TEAM_SOULS + 0x50F00u)   /* list 0's arm rows grown: BN6's three, Team Colonel's six, Team ProtoMan's six (BN5's points), to: */
+#define SOULS_ARM_ROWS_END (FREE_TEAM_SOULS + 0x51400u)
+#define SOULS_TEAM_LOADOUTS (FREE_TEAM_SOULS + 0x51400u)  /* their loadouts, 6 bytes each by BN5's number 1-6, in BN6's ids, to: */
+#define SOULS_TEAM_LOADOUTS_END (FREE_TEAM_SOULS + 0x51440u)
+#define SOULS_CHARGES      (FREE_TEAM_SOULS + 0x51480u)   /* BN6's charge times grown with every Soul's, 10 bytes a power attack (256), to: */
+#define SOULS_CHARGES_END  (FREE_TEAM_SOULS + 0x51E80u)
+#define SOULS_TEAM_THUMB   (FREE_TEAM_SOULS + 0x51440u)   /* the project's own Thumb their hooks jump to: NapalmSoul's lava (soulchips.c), to: */
+#define SOULS_TEAM_THUMB_END (FREE_TEAM_SOULS + 0x51480u)
+#define SOULS_TEAM_CHAOS   (FREE_TEAM_SOULS + 0x51E80u)   /* their Chaos Unison's power attacks: a stub each, the chip writer of its DarkChip (soulpower.c), to: */
+#define SOULS_TEAM_CHAOS_END (FREE_TEAM_SOULS + 0x51F20u)
+#define SOULS_TEAM_END     (FREE_TEAM_SOULS + 0x51F20u)
 
 /* ---- BN4's Souls' look: one room, the united Soul's (free_space.h's FREE_BN4_SOUL_LOOK; soullook.c, docs/multirom/bn4-souls.md,
  * The shared room): the twelve sprites take 438 KB and the copy has no such room, so the room holds one Soul's at a time ---- */

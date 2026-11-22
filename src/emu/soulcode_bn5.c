@@ -1,4 +1,4 @@
-/* soulcode_bn5.c: the code BN5's Team Colonel Souls run, moved into BN6's battle engine, written by tools/xsoul.py from
+/* soulcode_bn5.c: the code BN5's Souls run (Team Colonel's, then Team ProtoMan's in their own room), moved into BN6's battle engine, written by tools/xsoul.py from
  * the two ROMs (python3 tools/xsoul.py; --check says whether this is what it writes). Do not edit: change the generator
  * and write it again. Numbers alone (docs/multirom/souls.md): addresses in BN5 Team Colonel (USA) and BN6
  * Cybeast Gregar (USA), counts and the CRC32s of the ranges src/emu/soulcode.c copies from the player's ROM. */
@@ -34,6 +34,9 @@ static const XvBlock blocks[] = {
 	{ 0x080EED92, 0x080EEE82, SOULS_CODE + 0x1022, 0xD56BB4A7u },   /* colonel */
 	{ 0x080EEF6C, 0x080EF032, SOULS_CODE + 0x1120, 0x90EBB3BDu },   /* tomahawk */
 	{ 0x080EF68A, 0x080EF732, SOULS_CODE + 0x11F2, 0x8EE8BB09u },   /* toad */
+	{ 0x0800F840, 0x0800F864, SOULS_TEAM_CODE + 0x0, 0x31D93F10u },   /* napalm */
+	{ 0x080EEE82, 0x080EEF6C, SOULS_TEAM_CODE + 0x32, 0xE102E408u },   /* napalm */
+	{ 0x080EF38A, 0x080EF440, SOULS_TEAM_CODE + 0x122, 0x6425E095u },   /* napalm */
 };
 static const XvData data[] = {
 	{ 0x0800F7CE, 0x0800F7D0, XV_RAW },
@@ -46,7 +49,9 @@ static const XvData data[] = {
 	{ 0x08011D40, 0x08011D48, XV_RAW },
 	{ 0x08011D48, 0x08011D4C, XV_POOL },
 	{ 0x080125B0, 0x080125B8, XV_POOL },
-	{ 0x080125B8, 0x080126FC, XV_RAW },
+	{ 0x080125B8, 0x08012654, XV_RAW },
+	{ 0x080126C0, 0x080126C8, XV_POOL },
+	{ 0x080126C8, 0x080126FC, XV_RAW },
 	{ 0x080126FC, 0x08012704, XV_POOL },
 	{ 0x080236E2, 0x080236E4, XV_RAW },
 	{ 0x080236E4, 0x080236E8, XV_POOL },
@@ -87,6 +92,12 @@ static const XvData data[] = {
 	{ 0x080EF006, 0x080EF008, XV_RAW },
 	{ 0x080EF008, 0x080EF00C, XV_POOL },
 	{ 0x080EF698, 0x080EF6A4, XV_POOL },
+	{ 0x080EEE90, 0x080EEEA0, XV_POOL },
+	{ 0x080EEF40, 0x080EEF44, XV_POOL },
+	{ 0x080EEF44, 0x080EEF48, XV_RAW },
+	{ 0x080EF398, 0x080EF3A4, XV_POOL },
+	{ 0x080EF416, 0x080EF418, XV_RAW },
+	{ 0x080EF418, 0x080EF41C, XV_POOL },
 };
 /* every word of the pools and tables: BN5's, and BN6's in its place */
 static const XvNumber words[] = {
@@ -94,6 +105,8 @@ static const XvNumber words[] = {
 	{ 0x08011D48, 0x00004000u, 0x00004000u },   /* a number */
 	{ 0x080125B0, 0x080125B8u, SOULS_CODE + 0x388u },   /* data moved with the code */
 	{ 0x080125B4, 0x080125C0u, SOULS_CODE + 0x390u },   /* data moved with the code */
+	{ 0x080126C0, 0x080126D0u, SOULS_CODE + 0x4A0u },   /* data moved with the code */
+	{ 0x080126C4, 0x080126C8u, SOULS_CODE + 0x498u },   /* data moved with the code */
 	{ 0x080126FC, 0x00010000u, 0x00010000u },   /* a number */
 	{ 0x08012700, 0x0F800000u, 0x0F800000u },   /* a number */
 	{ 0x080236E4, 0x06016EC0u, 0x06016EC0u },   /* I/O or video, the same */
@@ -153,10 +166,19 @@ static const XvNumber words[] = {
 	{ 0x080EEDA4, 0x080EEDADu, SOULS_CODE + 0x103Du },   /* a jump table's entry, moved */
 	{ 0x080EEDA8, 0x080EEE5Du, SOULS_CODE + 0x10EDu },   /* a jump table's entry, moved */
 	{ 0x080EEE44, 0x080EEE4Cu, SOULS_CODE + 0x10DCu },   /* data moved with the code */
+	{ 0x080EEE90, 0x080EEE94u, SOULS_TEAM_CODE + 0x44u },   /* moved with the code */
+	{ 0x080EEE94, 0x080EEEA1u, SOULS_TEAM_CODE + 0x51u },   /* a jump table's entry, moved */
+	{ 0x080EEE98, 0x080EEED1u, SOULS_TEAM_CODE + 0x81u },   /* a jump table's entry, moved */
+	{ 0x080EEE9C, 0x080EEF49u, SOULS_TEAM_CODE + 0xF9u },   /* a jump table's entry, moved */
+	{ 0x080EEF40, 0x080EEF44u, SOULS_TEAM_CODE + 0xF4u },   /* data moved with the code */
 	{ 0x080EEF7C, 0x080EEF80u, SOULS_CODE + 0x1134u },   /* moved with the code */
 	{ 0x080EEF80, 0x080EEF89u, SOULS_CODE + 0x113Du },   /* a jump table's entry, moved */
 	{ 0x080EEF84, 0x080EF00Du, SOULS_CODE + 0x11C1u },   /* a jump table's entry, moved */
 	{ 0x080EF008, 0x0705FF11u, 0x0705FF11u },   /* I/O or video, the same */
+	{ 0x080EF398, 0x080EF39Cu, SOULS_TEAM_CODE + 0x134u },   /* moved with the code */
+	{ 0x080EF39C, 0x080EF3A5u, SOULS_TEAM_CODE + 0x13Du },   /* a jump table's entry, moved */
+	{ 0x080EF3A0, 0x080EF41Du, SOULS_TEAM_CODE + 0x1B5u },   /* a jump table's entry, moved */
+	{ 0x080EF418, 0x0000141Du, 0x0000141Du },   /* a number */
 	{ 0x080EF698, 0x080EF69Cu, SOULS_CODE + 0x1204u },   /* moved with the code */
 	{ 0x080EF69C, 0x080EF6A5u, SOULS_CODE + 0x120Du },   /* a jump table's entry, moved */
 	{ 0x080EF6A0, 0x080EF705u, SOULS_CODE + 0x126Du },   /* a jump table's entry, moved */
@@ -171,6 +193,7 @@ static const XvNumber calls[] = {
 	{ 0x0800F7E2, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F7F0, 0x080BA634u, XC_CODE + 0xA03D },   /* the chips' copy of a type's module (TYPES) */
 	{ 0x0800F832, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
+	{ 0x0800F856, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F876, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F9F8, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800FA0A, 0x080BCA14u, XC_CODE + 0xAB25 },   /* the chips' copy of a type's module (TYPES) */
@@ -198,6 +221,9 @@ static const XvNumber calls[] = {
 	{ 0x08012550, 0x0800B334u, 0x0800CC72u },   /* map:bytes, SAME */
 	{ 0x0801256A, 0x0800AFB0u, 0x0800C8F8u },   /* map:calls, LAYOUT */
 	{ 0x08012584, 0x0800B348u, 0x0800CC86u },   /* map:bytes, SAME */
+	{ 0x08012658, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
+	{ 0x08012688, 0x0800B334u, 0x0800CC72u },   /* map:bytes, SAME */
+	{ 0x08012692, 0x0800AFB0u, 0x0800C8F8u },   /* map:calls, LAYOUT */
 	{ 0x08016BA4, 0x08016BBCu, 0x0801A0BAu },   /* search, SAME */
 	{ 0x08016BAE, 0x08016BBCu, 0x0801A0BAu },   /* search, SAME */
 	{ 0x08016BB6, 0x080165E4u, 0x08019F44u },   /* project:families, DIFF (audited) */
@@ -313,6 +339,16 @@ static const XvNumber calls[] = {
 	{ 0x080EEE2A, 0x080DFFD2u, 0x080E1932u },   /* project:cangard, SAME */
 	{ 0x080EEE3A, 0x08016C4Cu, 0x0801A15Cu },   /* project:cangard, SAME */
 	{ 0x080EEE7C, 0x0800F29Eu, 0x08011714u },   /* project:cangard, DIFF (audited) */
+	{ 0x080EEEAA, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
+	{ 0x080EEEAE, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
+	{ 0x080EEEB6, 0x08016C42u, 0x0801A152u },   /* project:cangard, SAME */
+	{ 0x080EEEE0, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
+	{ 0x080EEF02, 0x080014A6u, 0x08001532u },   /* project:handi, SAME */
+	{ 0x080EEF12, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
+	{ 0x080EEF26, 0x080C6E0Eu, XC_CODE + 0x89B7 },   /* the chips' copy of a type's module (TYPES) */
+	{ 0x080EEF2C, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
+	{ 0x080EEF52, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
+	{ 0x080EEF66, 0x0800F29Eu, 0x08011714u },   /* project:cangard, DIFF (audited) */
 	{ 0x080EEF92, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
 	{ 0x080EEF96, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
 	{ 0x080EEF9E, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
@@ -323,6 +359,15 @@ static const XvNumber calls[] = {
 	{ 0x080EEFE0, 0x0800C676u, 0x0800E276u },   /* project:cangard, SAME */
 	{ 0x080EEFEC, 0x080DFFD2u, 0x080E1932u },   /* project:cangard, SAME */
 	{ 0x080EF02C, 0x0800F29Eu, 0x08011714u },   /* project:cangard, DIFF (audited) */
+	{ 0x080EF3AE, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
+	{ 0x080EF3B6, 0x08016C42u, 0x0801A152u },   /* project:cangard, SAME */
+	{ 0x080EF3BC, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
+	{ 0x080EF3C2, 0x080E3464u, 0x080E4500u },   /* map:bytes, SAME */
+	{ 0x080EF3D4, 0x08012654u, SOULS_CODE + 0x425u },   /* moved */
+	{ 0x080EF3E2, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
+	{ 0x080EF400, 0x080CC7E6u, XN_TEAM_CODE + 0x8F5B },   /* the navis' copy of a type's module (TYPES) */
+	{ 0x080EF426, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
+	{ 0x080EF43A, 0x0800F29Eu, 0x08011714u },   /* project:cangard, DIFF (audited) */
 	{ 0x080EF6AE, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
 	{ 0x080EF6B2, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
 	{ 0x080EF6BE, 0x08016C42u, 0x0801A152u },   /* project:cangard, SAME */
@@ -338,6 +383,7 @@ static const XvImm imms[] = {
 	{ 0x0800F7CA, THUMB_MOVS, 0, 0, 0x40, 0xC2 },   /* its family: CurAction 0x40 in BN5, the Souls' 0xc2 in BN6 (xattack_grow.h) */
 	{ 0x0800F7F8, THUMB_MOVS, 0, 0, 0x43, 0xC0 },   /* its family: CurAction 0x43 in BN5, the Souls' 0xc0 in BN6 (xattack_grow.h) */
 	{ 0x0800F83C, THUMB_MOVS, 0, 0, 0x13, 0xC6 },   /* its family: CurAction 0x13 in BN5, the Souls' 0xc6 in BN6 (xattack_grow.h) */
+	{ 0x0800F860, THUMB_MOVS, 0, 0, 0x44, 0xC8 },   /* its family: CurAction 0x44 in BN5, the Souls' 0xc8 in BN6 (xattack_grow.h) */
 	{ 0x0800F87C, THUMB_MOVS, 0, 0, 0x45, 0xC5 },   /* its family: CurAction 0x45 in BN5, the Souls' 0xc5 in BN6 (xattack_grow.h) */
 	{ 0x0800FA10, THUMB_MOVS, 0, 0, 0x50, 0xC3 },   /* its family: CurAction 0x50 in BN5, the Souls' 0xc3 in BN6 (xattack_grow.h) */
 	{ 0x0800FC00, THUMB_MOVS, 0, 0, 0x3D, 0xC4 },   /* its family: CurAction 0x3d in BN5, the Souls' 0xc4 in BN6 (xattack_grow.h) */
@@ -366,6 +412,7 @@ static const SoulRoute routes[] = {
 	{ 0x080C5386u, XN_CODE + 0x8C72 },
 	{ 0x080C6E0Eu, XC_CODE + 0x89B6 },
 	{ 0x080C7772u, XN_CODE + 0x10522 },
+	{ 0x080CC7E6u, XN_TEAM_CODE + 0x8F5A },
 	{ 0x080D688Eu, XN_CODE + 0x14206 },
 	{ 0x080E36DCu, XN_NEBULA_CODE + 0x1CC4 },
 };
@@ -405,6 +452,7 @@ static const SoulPower powers[] = {
 	{ 0x1A, 0x0800F865u },   /* TomahawkSoul's charged shot */
 	{ 0x11, 0x0800F79Fu },   /* KnightSoul's charged shot */
 	{ 0x2D, 0x0800F9E7u },   /* ToadSoul's charged shot */
+	{ 0x19, 0x0800F841u },   /* NapalmSoul's charged shot */
 };
 /* BN5's songs its code plays that Gregar has otherwise: copied into an empty slot (soulpower.c) */
 static const SoulSong songs[] = {
@@ -419,9 +467,11 @@ static const SoulFamily families[] = {
 	{ 0x3D, 0xC4, 0x080EEADDu },
 	{ 0x45, 0xC5, 0x080EEF6Du },
 	{ 0x13, 0xC6, 0x080EBDC7u },
+	{ 0x44, 0xC8, 0x080EEE83u },
+	{ 0x4B, 0xC9, 0x080EF38Bu },
 };
 
 #define N(a) (int)(sizeof (a) / sizeof *(a))
 const SoulCode soulcode_bn5 = {
-	blocks, N(blocks), data, N(data), words, N(words), calls, N(calls), imms, N(imms), types, N(types), sprites, N(sprites), effects, N(effects), bytes, N(bytes), fields, N(fields), powers, N(powers), songs, N(songs), families, N(families), routes, N(routes), shared_effects, N(shared_effects),
+	blocks, N(blocks), data, N(data), words, N(words), calls, N(calls), imms, N(imms), types, N(types), sprites, N(sprites), effects, N(effects), bytes, N(bytes), fields, N(fields), powers, N(powers), songs, N(songs), families, N(families), routes, N(routes), shared_effects, N(shared_effects), 8,
 };

@@ -22,6 +22,7 @@ enum {
 	SOULPASSIVE_BREAK_HAND = 1,    /* NumberSoul's hand of 9 where BN5 deals 10 */
 	SOULPASSIVE_BREAK_PLUS = 2,    /* NumberSoul's +10 to plain attack chips left out */
 	SOULPASSIVE_BREAK_READY = 4,   /* a Soul's passives as it unites left out (ShadowSoul's FloatShoe) */
+	SOULPASSIVE_BREAK_NAPALM = 8,  /* NapalmSoul's +40 to Fire attack chips left out */
 };
 
 /* The passives as the core starts, after the Souls' look and abilities:
@@ -30,10 +31,12 @@ enum {
  * not as expected. */
 bool soulpassive_install(int breaks);
 /* (soulproxy.c's hook on the chips' bonuses by form, BN6's 0x0800EF34) a
- * chip's bonus where side stands in a Soul: *bonus the damage added, *look
- * the bonus's mark (r7 there); false where side is in no Soul (the proxy
+ * chip's bonus where side stands in a Soul, `charged` the chip used
+ * charged (its second argument): *bonus the damage added, *look the
+ * bonus's mark (r7 there); false where side is in no Soul (the proxy
  * HeatCross's). BN5's 0x0800D0A0: NumberSoul +10 to an attack chip of no
- * kind; the other Souls none. */
-bool soulpassive_bonus(uint32_t obj, int chip, int *bonus, int *look);
+ * kind; NapalmSoul +40 to a Fire attack chip used uncharged, but while A
+ * is held to a full charge (0x0800D0CE); the other Souls none. */
+bool soulpassive_bonus(uint32_t obj, int chip, bool charged, int *bonus, int *look);
 
 #endif
