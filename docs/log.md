@@ -1,5 +1,8 @@
 # The knowledge base's log
 
+## 2026-11-23
+* **Update**: multirom/souls.md (SearchSoul's reveal seen at last: soul_search_hide, a foe flashing as the Invis chip leaves him, found and cleared at t1 in both games), devtools/differential.md (the spec's `hide`).
+
 ## 2026-11-22
 * **Update**: engine/emulation/hooks.md (the hook table's room, 240 from 192, and a refused hook told: dev asked 197 and lost player_body's and the win song's hooks).
 * **Update**: multirom/souls.md (MeddySoul's battle in BN6's engine: UNITE, the capsule bomb), rom/souls.md (MeddySoul's charged shot's addresses), game/team-protoman.md (unit 8: MeddySoul's battle built, his capsules the Soul button to come).
