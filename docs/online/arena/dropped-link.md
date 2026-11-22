@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A NetBattle through a dropped link"
 description: "A NetBattle of two that survives a dropped link (issue #180, protocol v21): the server holds the battle with the place, each game keeps its keys and asks for the ones the link lost (ARENA_HASH's 0xFFFFFFFC), the battle fought to its end with every hash agreeing."
 tags: [online, arena, netcode]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T06:00:00Z }
 ---
 
 # A NetBattle through a dropped link
@@ -89,6 +89,28 @@ entered none until its layer changed: after a reconnect the other divers
 and his crew were gone from his screen, and he from theirs, for the rest
 of the layer. The scenario `online-week/crew-again-after-a-drop` cuts
 the second diver's link for three seconds on the layer.
+
+**A dropped link on a dive layer** (issue #751). A layer goes on while
+the link is down; the Square's held wait would stop the run, so the dive
+says it in its band instead, in the PET's plain status as the Square's
+wait words it: past a second down, `Reconnecting...`, its dots moving,
+until it is back (`Back online!`); the crew's plates and the other
+divers stand as they were meanwhile. Before, nothing was said, and past
+20 seconds the dive closed its link for the rest of the dive, never
+trying again. Now, once the transport's own 30 seconds of tries are
+over, the dive starts the link again itself (`online_transport_again`,
+its HELLO with the resume bit, so a place the server still holds is
+taken back, else a new one) after 3, 6, 12 and then every 15 seconds,
+as long as the dive lasts; the band meanwhile says he dives alone
+(`Diving alone  Reconnecting...`). Back, by a resume or a new session,
+the room is entered again and the crew's plates wait for the server's
+word. Only the server's own refusal (another version, maintenance, a
+ban: an ERROR with its code) ends the link for the dive, and the band
+says so plainly first, with how the next dive links (`Offline. Diving
+alone this time`, `The Board's portal links the next dive`). The
+scenarios `online-week/link-down-5s`, `-30s` and `-120s` cut the second
+diver's own link on a layer for that long; each sees the other again,
+their crew forms again and a crewmate's battle is joined after it.
 
 **Tested.** `tests/test_arena.c` plays two network links back to back
 through a pipe that loses both ways' messages for three ticks, then

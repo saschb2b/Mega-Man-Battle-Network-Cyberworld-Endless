@@ -26,6 +26,8 @@ void party_turn_reset(void);
 uint16_t party_turn_word(PartyCore *field, const uint8_t *rom, unsigned seat, uint16_t pad, bool bot);
 /* the picture to show while seat's screen is open (NULL: the field's) */
 const uint32_t *party_turn_video(unsigned seat);
+/* ... and the HP its HP box last showed there (his own), 0 none yet this battle */
+unsigned party_turn_hp(unsigned seat);
 /* how seat's turns went, said in the output (each seat's own: under the dev's partycore
  * every stood-in partner his own screen on this game) */
 void party_turn_report(unsigned seat);

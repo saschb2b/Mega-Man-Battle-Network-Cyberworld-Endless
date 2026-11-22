@@ -38,8 +38,10 @@ void party_play_on(bool on);
  * alone as BN6 has it (every game of the party alike), partyview=N the
  * field drawn as seat N sees it (his marks and HP box: party_marks.h);
  * partydel=MASK with partyend those seats' MegaMen deleted then (a crew's
- * pull-back's test, issue #718) */
-typedef struct { int n, twin, roll, end, bot, delay, lead, view, del; } PartyDev;
+ * pull-back's test, issue #718); partyhp=N under partycore the stood-in
+ * partners' HP going in (a partner's own HP told from his lead's, issue
+ * #757) */
+typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size, the input delay and the seats' sessions (each MegaMan's name on

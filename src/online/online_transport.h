@@ -47,6 +47,12 @@ bool online_transport_send(const uint8_t *data, size_t size);
  * 0 none. */
 size_t online_transport_receive(uint8_t *out, size_t cap);
 void online_transport_end(void);
+/* The link started again as it was started (the same server, name and
+ * identity), after it ended or was given up: its HELLO with the resume
+ * bit, so a place the server still holds is taken back (issue #751: a
+ * dive taken up again however long its link was away). False where it
+ * was never started */
+bool online_transport_again(void);
 /* The ROMs this game has besides BN6's, as HELLO tells the server
  * (ONLINE_ROMS_BN5 where BN5 Team Colonel's is read, ONLINE_ROMS_BN4
  * where BN4 Red Sun's is): the NetPass's set against each peer's roms */

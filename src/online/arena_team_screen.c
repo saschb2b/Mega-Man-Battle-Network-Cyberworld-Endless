@@ -93,7 +93,7 @@ TeamScreen *team_screen_one(const uint8_t *rom, size_t size, const uint8_t *fiel
 	return s;
 }
 
-bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n) {
+bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n, unsigned hp, unsigned max) {
 	uint64_t t = SDL_GetPerformanceCounter();
 	uint8_t rec[BN6_BATTLE_NAVI_SIZE];
 	bool own = arena_team_navi_record(field, p, rec);
@@ -102,6 +102,12 @@ bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const 
 	for (unsigned i = 0; i < BN6_DECK_SIZE; ++i) c->rawWrite16(c, BN6_BATTLE_DECK + 2 * i, -1, (uint16_t)(i < n ? deck[i] : NONE16));
 	/* (his own record as side 0's battle NaviStats there: BN6's screen deals his hand by his own Custom level) */
 	for (unsigned i = 0; own && i < BN6_BATTLE_NAVI_SIZE; ++i) c->rawWrite8(c, BN6_BATTLE_NAVI + i, -1, rec[i]);
+	/* (his own HP and max in the HP box BN6 draws over his screen, which reads side 0's first actor, his lead: issue #757) */
+	uint32_t lead = (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS, -1);
+	if (lead && max) {
+		c->rawWrite16(c, lead + BN6_T1_HP, -1, (uint16_t)hp);
+		c->rawWrite16(c, lead + BN6_T1_MAX_HP, -1, (uint16_t)max);
+	}
 	/* (the Custom screen's phase at its first step: BN6 sets the screen up anew the next frame, its hand dealt from the deck) */
 	c->rawWrite8(c, BN6_BATTLE_STEP, -1, 0);
 	double took = since(t);
@@ -112,6 +118,12 @@ bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const 
 	s->pa = false;
 	s->mode = (uint8_t)c->rawRead8(c, BN6_CUSTOM_MODE, -1);
 	return true;
+}
+
+unsigned team_screen_one_hp(const TeamScreen *s) {
+	struct mCore *c = s->one;
+	uint32_t lead = c ? (uint32_t)c->rawRead32(c, BN6_BATTLE_PLAYERS, -1) : 0;
+	return lead ? (unsigned)(uint16_t)c->rawRead16(c, lead + BN6_T1_HP, -1) : 0;
 }
 
 bool team_screen_open(TeamScreen *s, ArenaPair *pair, const uint16_t *deck, unsigned n) {

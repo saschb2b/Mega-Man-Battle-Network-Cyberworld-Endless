@@ -25,7 +25,17 @@
 #include "square_week.h"
 #include "weekly.h"
 
-#define LOST_MS 20000        /* a link down so long leaves the dive solo */
+/* A dropped link on a dive (issue #751, docs/online/arena/dropped-link.md,
+ * A dropped link on a dive layer): the transport tries again for its 30 seconds,
+ * and past them the dive takes its link up again as long as it lasts, a
+ * new start of the link after these waits; the band says it is down, that
+ * he dives alone meanwhile, and that it is back. Only the server's refusal
+ * (another version, a ban, maintenance) ends the link for the dive, said
+ * plainly first. */
+#define AGAIN_FIRST_MS 3000
+#define AGAIN_MOST_MS  15000
+#define DOWN_SHOWN_MS  1000   /* a link down past a second says so (a moment's quiet does not) */
+#define ALONE_SHOWN_MS 8000   /* the refusal's word shown so long before the link ends */
 
 static struct {
 	bool on;
@@ -34,8 +44,12 @@ static struct {
 	uint32_t seed;
 	DiveWay room;            /* the layer the server has MegaMan in (depth 0 none) */
 	int x, y, z;             /* his place as last sent */
-	uint32_t lost_at;
 	uint32_t resumes;        /* the transport's resumes seen (issue #180: a resume puts him in no room) */
+	uint32_t down_since;     /* the link down since (SDL ticks), 0 up */
+	bool away;               /* the transport gave up: started again from again_at, `tries` so far */
+	uint32_t again_at;
+	unsigned tries;
+	uint32_t alone_at;       /* the server's refusal: the dive alone from then, its word shown, 0 none */
 } L;
 
 void dive_link_adopt(void) {
@@ -63,8 +77,13 @@ void dive_link_adopt(void) {
 
 bool dive_link_on(void) { return L.on; }
 
+/* (the link's state in the state's words: up, down, away (the transport
+ * given up, started again now and then) or alone (refused)) */
+static const char *state_word(void) { return L.alone_at ? "alone" : L.away ? "away" : L.down_since ? "down" : "up"; }
+
 void dive_link_describe(FILE *f) {
 	if (!L.on) return;
+	fprintf(f, "divestate %s\n", state_word());
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	fprintf(f, "divers %u", (unsigned)s.peer_count);
@@ -72,6 +91,7 @@ void dive_link_describe(FILE *f) {
 	fputc('\n', f);
 	for (size_t i = 0; i < s.peer_count; ++i) fprintf(f, "diver %s at %d %d\n", s.peers[i].name, (int)s.peers[i].x, (int)s.peers[i].y);
 	dive_people_describe(f);
+	dive_party_describe(f);
 	dive_crew_describe(f);
 	dive_band_describe(f);
 	fprintf(f, "link %s\n", s.reconnecting ? "reconnecting" : s.quiet ? "quiet" : s.connected ? "up" : "down");
@@ -136,28 +156,78 @@ static void room(void) {
 }
 
 
+/* the wait before the link's next start, away: 3 seconds, then twice as long, 15 at most */
+static uint32_t again_wait(unsigned tries) {
+	uint32_t wait = AGAIN_FIRST_MS << (tries < 3 ? tries : 3);
+	return wait < AGAIN_MOST_MS ? wait : AGAIN_MOST_MS;
+}
+
+/* the transport gave up (an error): a refusal of the server's ends the
+ * link once its word has been shown; else the link is started again now
+ * and then for as long as the dive lasts. True while away or alone: the
+ * rest of the frame waits */
+static bool held_away(const OnlineSnapshot *s, uint32_t now) {
+	if (L.alone_at) {
+		if (now - L.alone_at >= ALONE_SHOWN_MS) dive_link_close();
+		return true;
+	}
+	if (!s->error[0]) return false;
+	if (s->error_code) {
+		fprintf(stderr, "dive: the server turned the link down (%s); the dive goes on alone\n", s->error);
+		L.alone_at = now | 1u;
+		dive_band_alone();
+		return true;
+	}
+	if (!L.away) {
+		fprintf(stderr, "dive: the link is gone (%s); diving alone, the link started again from time to time\n", s->error);
+		L.away = true;
+		L.tries = 0;
+		L.again_at = now + again_wait(0);
+		if (!L.down_since) L.down_since = now | 1u;
+	}
+	if ((int32_t)(now - L.again_at) >= 0) {
+		online_transport_again();
+		L.again_at = now + again_wait(++L.tries);
+	}
+	return true;
+}
+
+/* the link down (dropped, tried again) or back: back after a drop, the
+ * server took him out of his room and his crew as it dropped (holds.py's
+ * dive.dropped, or a new session altogether after the transport gave up),
+ * so the room is entered again below and the crew shown is the server's
+ * next word; a battle under way goes on, its seat held, party.py */
+static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
+	bool down = !s->connected || s->reconnecting;
+	if (down) {
+		if (!L.down_since) L.down_since = now | 1u;
+		return;
+	}
+	bool again = L.away || s->resumes != L.resumes;
+	if (L.down_since && now - L.down_since >= DOWN_SHOWN_MS) dive_band_back();
+	L.down_since = 0;
+	L.away = false;
+	L.resumes = s->resumes;
+	if (!again) return;
+	memset(&L.room, 0, sizeof L.room);
+	dive_crew_reset();
+	fprintf(stderr, "dive: the link back; the layer's room entered again\n");
+}
+
+bool dive_link_down(uint32_t now, bool *away) {
+	if (!L.on || L.alone_at || !L.down_since || now - L.down_since < DOWN_SHOWN_MS) return false;
+	*away = L.away;
+	return true;
+}
+
 void dive_link_frame(void) {
 	if (!L.on) return;
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	uint32_t now = SDL_GetTicks();
-	if (s.error[0] || (!s.connected && L.lost_at && now - L.lost_at > LOST_MS)) {
-		fprintf(stderr, "dive: the link is gone (%s); the dive goes on alone\n", s.error[0] ? s.error : "lost");
-		dive_link_close();
-		return;
-	}
+	if (held_away(&s, now)) return;
 	L.starting = false;
-	L.lost_at = s.connected ? 0 : L.lost_at ? L.lost_at : now;
-	/* (the link back after a drop: the server took him out of his room and
-	 * his crew as it dropped, holds.py's dive.dropped, so the room is entered
-	 * again below and the crew shown is the server's next word; a battle
-	 * under way goes on, its seat held, party.py) */
-	if (s.connected && !s.reconnecting && s.resumes != L.resumes) {
-		L.resumes = s.resumes;
-		memset(&L.room, 0, sizeof L.room);
-		dive_crew_reset();
-		fprintf(stderr, "dive: the link back; the layer's room entered again\n");
-	}
+	back_or_down(&s, now);
 	online_mail_frame();
 	/* (the dive over: its end told where it ended, else only the link let go) */
 	if (!weekly_on()) {

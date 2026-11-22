@@ -27,7 +27,7 @@ bool dive_link_on(void);
 /* A dive with its link in the state's words (online_describe.h): the other
  * divers on MegaMan's layer (`divers N: NAMES`, `diver NAME at X Y`), the
  * crew (dive_crew_describe) and the link (`link up|quiet|reconnecting|
- * down`); nothing without a link */
+ * down`; `divestate up|down|away|alone`, the dive's own); nothing without a link */
 void dive_link_describe(FILE *f);
 /* Each frame of the game while on: the room, the place, the divers, the
  * dive's end told and the link closed. */
@@ -36,6 +36,9 @@ void dive_link_draw(void);
 /* The keys on their way to the game at home or on a dive: the party's at a
  * guardian's door, a crew's A on a diver, a phrase left on its layer. */
 uint32_t dive_link_keys(uint32_t keys);
+/* Whether the link is down past a second (issue #751), and *away where the
+ * dive goes on alone while it is started again (dive_band.c says it) */
+bool dive_link_down(uint32_t now, bool *away);
 /* A line into the feed's band (a find's first finder, a split's place). */
 void dive_link_line(const char *line);
 /* The dive's messages, from online_mail_frame. */

@@ -17,4 +17,9 @@ void dive_band_describe(FILE *f);
  * this game's session. */
 void dive_band_frame(uint32_t now, bool linked, uint32_t me);
 
+/* A dropped link's words in the feed (issue #751): back online; and the
+ * server's refusal, the dive alone for good and how the next is linked */
+void dive_band_back(void);
+void dive_band_alone(void);
+
 #endif
