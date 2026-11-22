@@ -451,6 +451,50 @@ the session building it, and is his to turn over.
 | One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
 | More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
 
+## Nothing over BN6's screens (22 November 2026)
+
+Issue #781, from the second play of the dive: our drawing over the
+game's picture landed on BN6's own and on our cards in five places, the
+joiner's band over a crew battle's Custom screen, the divers' names and
+rings across the act's and the guardian's title cards (the arrival's
+mark running out unseen under them), a plate's layer run into its HP
+("L1100/100"), a partner's mark on the field's bottom row cut at the
+picture's foot, and a dropped game's crewmates drawn frozen under
+"Reconnecting...".
+
+**One answer** (`director_cover`, `src/director/director_cover.c`): what
+stands over the layer's field now, nothing, BN6's chat box, a title card
+of ours (an act's, an area's, a guardian's), BN6's fade or a warp, or no
+field at all (a battle, BN6's menus, SELECT's map). Everything the dive
+draws over the field asks it first: under a chat box only what stands
+above the box, under the rest nothing at all. The names, rings, the
+arrival's mark, the crew's plates and the band all go through it, so the
+next thing drawn there cannot land on a screen of BN6's either. The
+state's `cover` line names it.
+
+- **The joiner's band** stands on the map while the join is sent and over
+  the crew battle's staging (the still picture of the map), never over
+  the field: `band` in the state says what is drawn, and is none once the
+  field shows.
+- **Title cards:** no names, rings or arrival mark under one; the
+  arrival's two seconds are counted from the card's end.
+- **The plates:** six pixels between a crewmate's layer and his HP
+  ("L1 100/100").
+- **The field's marks:** where a mark and its HP would reach BN6's chip
+  name at the picture's foot (the field's bottom row), they stand over
+  the MegaMan's head, the name over the HP as everywhere.
+- **A dropped link:** while it is down (dropped, tried again, or given
+  up) the crew is put away, the puppets, names, rings, dots and plates
+  none, until the room's divers are heard again; the band's
+  "Reconnecting..." is what `band` says.
+
+Seen headless with two games on a local server (the scenario
+`online-week/drawn-over-nothing`): Beta arriving where Alpha stood, his
+act's title card with no name or ring across it and the arrival's mark
+after it; Beta's link cut for four seconds, his crew put away under
+"Reconnecting..." and back with the link; Beta taken into Alpha's battle
+reading "Alpha's battle!" over the staging and nothing over the field.
+
 ## As built
 
 - **The portal** (15 November 2026, `src/online/online_square.c`'s

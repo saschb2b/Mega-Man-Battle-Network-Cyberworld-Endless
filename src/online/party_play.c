@@ -261,6 +261,8 @@ bool party_play_mail(const uint8_t *m, size_t n) {
 
 bool party_play_held(void) { return PP.stage != PP_NONE; }
 
+bool party_play_staging(void) { return PP.stage != PP_NONE && PP.stage < PP_FIGHT; }
+
 bool party_play_hp(int *hp, int *max) {
 	if (!PP.core || (PP.stage != PP_FIGHT && PP.stage != PP_RESULTS)) return false;
 	*hp = (int)party_core_hp(PP.core, PP.seat);
@@ -721,7 +723,7 @@ void party_play_draw(void) {
 	arena_view_core(turn ? turn : PP.core && PP.stage >= PP_FIGHT ? party_core_video(PP.core) : emu_video());
 	/* (who is who on the field as it fights, never over a partner's own screen) */
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
-	if (PP.crew && party_play_draw_more) party_play_draw_more();
+	if (PP.crew && PP.stage < PP_FIGHT && party_play_draw_more) party_play_draw_more();
 }
 
 void party_play_describe(FILE *f) {

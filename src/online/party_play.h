@@ -66,14 +66,17 @@ bool party_play_mail(const uint8_t *m, size_t n);
 
 /* While its fight runs: the run's core held, this its frame and picture */
 bool party_play_held(void);
+/* ... and still being made: its staging's still picture of the map shows, not yet the field */
+bool party_play_staging(void);
 /* This game's MegaMan's HP and max HP on the party's field while one is fought (false none): his box's, where the run's
  * own core stands still under it */
 bool party_play_hp(int *hp, int *max);
 void party_play_frame(uint32_t pad);
 void party_play_draw(void);
-/* Drawn over a crew's battle as it is made and fought, set by the dive's
- * band (dive_band.c: whose battle MegaMan was taken into, issue #750);
- * NULL none. */
+/* Drawn over a crew's battle while it is made (the staging's still picture
+ * of the map, never the field: issue #781), set by the dive's band
+ * (dive_band.c: whose battle MegaMan was taken into, issue #750); NULL
+ * none. */
 extern void (*party_play_draw_more)(void);
 /* ... in the state's words: the field's size and the seat it is drawn
  * for, its marks (party_marks.h); over the server "party" its stage and

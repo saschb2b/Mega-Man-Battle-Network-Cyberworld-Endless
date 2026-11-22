@@ -20,6 +20,7 @@
 #define BELOW  1    /* a mark's top under his feet' line */
 #define PAD    1    /* its plate's edge around the letters */
 #define CHIP_LINE 148   /* BN6's chip's name in a battle, its top on the picture (seen in the captures) */
+#define BODY 44         /* a MegaMan on the field, from his feet to over his head (seen in the captures) */
 
 /* the partners' names in the crew's colour (crew_look.h, as on a layer) */
 #define OWN_COLOUR  LOOK_ORANGE   /* the player's own: the PET cursor's orange */
@@ -73,22 +74,27 @@ void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine) {
 		}
 }
 
-/* a mark's plate centred under a MegaMan's feet (x, y): its left, top, width and height on the screen */
+/* a mark's plate centred under a MegaMan's feet (x, y): its left, top, width and height on the screen; a partner's
+ * HP under it. Where the two would reach BN6's chip name at the picture's foot (`foot`, the row it begins on this
+ * screen), on the field's bottom row, they stand over his head instead, the name over the HP as everywhere (issue
+ * #781: the HP had gone over the name and the pair been cut at the foot) */
 typedef struct { int left, top, w, h, arrow; } Plate;
 
-static Plate plate(int x, int y, const char *tag, bool own) {
+static Plate plate(int x, int y, const char *tag, bool own, int foot) {
 	Plate p;
 	p.arrow = own ? pixfont_width(PIXFONT_PLAY, 1) + 1 : 0;
 	p.w = pixfont_width(tag, 1) + p.arrow + 2 * PAD + 1;   /* (+1: the shade's pixel) */
 	p.h = PIXFONT_CAP + 2 * PAD + 1;
 	p.left = x - p.w / 2;
 	p.top = y + BELOW;
+	int pair = p.h + (own ? 0 : PIXFONT_H + 1);
+	if (p.top + pair > foot) p.top = y - BODY - pair;
 	return p;
 }
 
 /* a mark: the player's own behind the PET's arrow, in its orange; on a plate, so that it reads over any panel or sprite */
 static void mark(int x, int y, const char *tag, bool own) {
-	Plate p = plate(x, y, tag, own);
+	Plate p = plate(x, y, tag, own, P.core_y + CHIP_LINE);
 	fill_rect(p.left, p.top, p.w, p.h, rgba(0, 24, 41, 190));
 	if (own) pixfont_draw(p.left + PAD, p.top + PAD, PIXFONT_PLAY, OWN_COLOUR, shade, PIXFONT_LEFT, 1);
 	pixfont_draw(p.left + PAD + p.arrow, p.top + PAD, tag, own ? OWN_COLOUR : CREW_COLOUR, shade, PIXFONT_LEFT, 1);
@@ -125,12 +131,9 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 		/* (a partner's HP under his name, as BN6 writes an enemy's under him: his own is in the HP box; issue #717) */
 		if (own) continue;
 		char hp[8];
-		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false);
+		Plate p = plate(v.x[i], v.y[i], tags[v.seat[i]], false, P.core_y + CHIP_LINE);
 		snprintf(hp, sizeof hp, "%u", v.hp[i]);
-		/* (on the bottom row, above his name: under it is BN6's chip's name at the picture's foot) */
-		int hp_y = p.top + p.h + 1;
-		if (hp_y + PIXFONT_H > P.core_y + CHIP_LINE) hp_y = p.top - PIXFONT_CAP - 2;
-		pixfont_draw(v.x[i], hp_y, hp, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
+		pixfont_draw(v.x[i], p.top + p.h + 1, hp, LOOK_TEXT, shade, PIXFONT_CENTER, 1);
 	}
 }
 
@@ -144,7 +147,7 @@ void party_marks_describe(FILE *f, struct mCore *c, unsigned mine, unsigned n) {
 	bool apart = true;
 	for (unsigned i = 0; i < v.count; ++i) {
 		unsigned k = v.seat[i];
-		m[i] = plate(v.x[i] - P.core_x, v.y[i] - P.core_y, tags[k], k == mine);
+		m[i] = plate(v.x[i] - P.core_x, v.y[i] - P.core_y, tags[k], k == mine, CHIP_LINE);
 		fprintf(f, "mark%u %s at %d %d width %d hp %u tag %s\n", k, k == mine ? "own" : "crew", m[i].left, m[i].top, m[i].w, v.hp[i], tags[k]);
 		for (unsigned j = 0; j < i; ++j)
 			apart &= m[i].left + m[i].w <= m[j].left || m[j].left + m[j].w <= m[i].left || m[i].top + m[i].h <= m[j].top ||
