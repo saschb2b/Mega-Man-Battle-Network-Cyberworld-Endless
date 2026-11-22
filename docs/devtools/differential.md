@@ -142,7 +142,9 @@ unit's copy) and the element. A BN4 spec takes `film` as BN5's do, and `state4` 
 container sees it) saves BN4's guest once its first Custom screen's first
 frame has run, folder and Souls given, for [romlab](romlab.md) to go on
 from with the spec's keys from that screen's second frame under its
-probes and write watches. Against BN6
+probes and write watches; a BN5 spec's `state5` saves BN5's guest the
+same way (a Team ProtoMan Soul's Custom screen traced: SearchSoul's
+SHUFFLE). Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark

@@ -85,10 +85,14 @@ UNITS = (
     # (ProtoSoul: his charged shot's power attack, the sword family's sub-family 1 (the Souls' copy, ShadowSoul's), and his
     # B+Left's, the Guard family's sub-family 4 (the chips' copy, FAMILIES_SHARED))
     ('proto', 1, (0x0800F604, 0x0800F62C)),
+    # (SearchSoul: his charged shot's power attack and family, the scope gun, and his passive as he unites (0x08011BF8:
+    # the fourth kind's 0x8F, BN6's the same code, which marks the foe side's invisible objects; in a netbattle the
+    # foe Navi's shadow taken off))
+    ('search', 3, (0x0800F68E, 0x080EE93C, 0x08011BF8)),
 )
 # Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
 # (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
-TEAM_UNITS = ('napalm', 'gyro', 'magnet', 'proto')
+TEAM_UNITS = ('napalm', 'gyro', 'magnet', 'proto', 'search')
 TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
 TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
 TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
@@ -102,7 +106,7 @@ TEAM_OVERLAY_KINDS = {2: 63}
 FAMILIES = ((0x43, 0xC0, 0x080EED92), (0x3A, 0xC1, 0x080EE864), (0x40, 0xC2, 0x080EEBDE), (0x50, 0xC3, 0x080EF68A),
             (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6),
             # (Team ProtoMan's, past Chaos Unison's failure 0xC7: NapalmSoul's charged shot, its vulcan of fire)
-            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40), (0x42, 0xCB, 0x080EEC86), (0x1A, 0xCC, 0x080EC7DE))
+            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A), (0x3C, 0xCA, 0x080EEA40), (0x42, 0xCB, 0x080EEC86), (0x1A, 0xCC, 0x080EC7DE), (0x3B, 0xCD, 0x080EE93C))
 
 # The power attacks moved: BN5's id, its entry, and the Soul's role for it (its loadout row's byte); BN6's id is
 # soul_room.h's SOUL_POWER_FIRST on in this order
@@ -112,7 +116,8 @@ POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 
           (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'),
           (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'), (0x09, 0x0800F6A6, 'GyroSoul\'s charged shot'),
           (0x15, 0x0800F7FC, 'MagnetSoul\'s charged shot'), (0x25, 0x0800F9A0, 'MagnetSoul\'s B+Left'),
-          (0x03, 0x0800F604, 'ProtoSoul\'s charged shot'), (0x04, 0x0800F62C, 'ProtoSoul\'s B+Left'))
+          (0x03, 0x0800F604, 'ProtoSoul\'s charged shot'), (0x04, 0x0800F62C, 'ProtoSoul\'s B+Left'),
+          (0x08, 0x0800F68E, 'SearchSoul\'s charged shot'))
 POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
@@ -212,6 +217,9 @@ EXTRA_ART = ((5, 0x1C),)
 # so the Souls' own are 0x03 at 0xC0 and 0x20 at 0xC1 (tools/bn5_twins.py's SHARED_ROWS names that one in the chips' copy)
 EFFECT_ORDER = (0x48, 0x49, 0x4A, 0x17, 0x45, 0x03, 0x14, 0x02, 0x20)
 EFFECT_FIRST, EFFECT_LAST = 0xC0, 0xCF
+# (Team ProtoMan's, numbered apart from 0xD0: BN4's chips' units count theirs down from 0xCF, to 0xC2 so far, soul_room.h,
+# docs/project/claims/team-protoman-souls.json)
+TEAM_EFFECT_FIRST, TEAM_EFFECT_LAST = 0xD0, 0xDF
 # BN5's songs a Soul plays that Gregar has otherwise (xrecipe.py's song_sig: BN6's own 0x70 and 0x117 are none of them, its
 # 0x115 another sound), each at the BN6 slot the allocations' amendment gives that sound whatever track copies it (the
 # first install copies it, the others find it there: xsong.c's xsong_install_at); 0x129 (the Dark Soul's) at 0x5D and 0x16B (the
@@ -379,6 +387,7 @@ class Deriv:
         self.effect_of = {}     # BN5 effect -> BN6 effect
         self.next_art = ART_FIRST
         self.next_effect = EFFECT_FIRST
+        self.next_team_effect = TEAM_EFFECT_FIRST
         self.runs, self.bytes_, self.fields, self.sprite_tables = set(), [], [], set()
         self.deferred, self.late = [], False   # (the effect spawns of the effects BN6 redrew, numbered after the rest)
         self.songs = {}         # BN5's song -> BN6's slot (soulpower.c copies it there)
@@ -867,6 +876,19 @@ class Deriv:
                                       why=f'its overlay\'s kind: {k} in BN5, {kind6} in BN6 (Team ProtoMan\'s, past the Navis\')'))
         self.team_now = 'colonel'
 
+    def take_effects(self, n, what):
+        """n BN6 effect ids one after another: Team Colonel's from EFFECT_FIRST, Team ProtoMan's from TEAM_EFFECT_FIRST (whose
+        walk the numbering reads, team_now)"""
+        if self.team_now == 'team':
+            first, self.next_team_effect = self.next_team_effect, self.next_team_effect + n
+            last = TEAM_EFFECT_LAST
+        else:
+            first, self.next_effect = self.next_effect, self.next_effect + n
+            last = EFFECT_LAST
+        if first + n - 1 > last:
+            self.decide(f'{what}: past the Souls\' effect ids ({last:#x})')
+        return first
+
     def imm_for(self, chain, reg, was, now, why):
         for x, form, v in chain:
             if form in ('movs', 'adds8') and v == was:
@@ -1060,10 +1082,7 @@ class Deriv:
                     self.effect_of[e5] = e6
                     return e6
         to = self.place_sprite(r5[0] // 4, r5[1])
-        e6 = self.next_effect
-        self.next_effect += 1
-        if e6 > EFFECT_LAST:
-            self.decide(f'BN5\'s effect {e5:#x}: past the Souls\' effect ids ({EFFECT_LAST:#x})')
+        e6 = self.take_effects(1, f'BN5\'s effect {e5:#x}')
         self.effects.append(dict(from_=e5, to=e6, list=to[0], index=to[1], anim=r5[2], pal=r5[3]))
         self.effect_of[e5] = e6
         return e6
@@ -1121,10 +1140,7 @@ class Deriv:
         if None not in given and given == list(range(given[0], given[0] + n)):
             first = given[0]
         else:
-            first = self.next_effect
-            self.next_effect += n
-            if self.next_effect - 1 > EFFECT_LAST:
-                self.decide(f'BN5\'s effects {base:#x}-{base + n - 1:#x}: past the Souls\' effect ids ({EFFECT_LAST:#x})')
+            first = self.take_effects(n, f'BN5\'s effects {base:#x}-{base + n - 1:#x}')
             for k in range(n):
                 r5 = self.b5.bytes(EFFECTS5 + 4 * (base + k), 4)
                 to = self.place_sprite(r5[0] // 4, r5[1])

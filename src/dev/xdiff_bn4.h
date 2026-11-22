@@ -43,7 +43,7 @@ void xd4_pool_point(const Spec *s);
  * save's copy that BN4's gate reads against its key (BN4_CHIP_GATE); nothing where the spec gives none. And its karma4,
  * MegaMan's karma in his NaviStats, which the battle copies as it begins */
 void xd4_folder_put(const Spec *s);
-/* (state4=PATH) BN4's guest saved at PATH once its first Custom screen's first frame has run (`game` the side's, 4 its, `screen`
+/* (state4=PATH, and state5=PATH for BN5's) BN4's guest saved at PATH once its first Custom screen's first frame has run (`game` the side's, 4 its, `screen`
  * and `custom` the screen and its frame), its folder and Souls given: for tools/romlab to go on from with the spec's keys from
  * the screen's second frame, under its probes and write watches (docs/devtools/differential.md, BN4) */
 void xd4_state_take(const Spec *s, int game, int screen, int custom);
