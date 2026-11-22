@@ -1,0 +1,153 @@
+{
+ "about": "BN5's GyroSoul's propeller spent in BN6's engine alone, held to BN5's rule (BN5 0x08010264, 0x0800FFC2, 0x080102CA): GyroSoul united (souls6 bit 19) by AirShot *, three picked, the last given up for UNITE; A at t60 uses the first AirShot (BN6's own chip, 20 damage): the propeller set; A at t140 the second: an attack chip of Wind with the propeller set, its modifier BN5's 3, its damage doubled (40), the propeller spent and set again by the Wind chip, the modifier's sound 0x87. The doubling's evidence in BN5's own battle: soul_gyro_propeller's course run on (BN5's own battle the same to the frame: its damage 0x8014 from t142, CanGard 40 to 0, the sound 0x87 at t143). CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 220,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "folder6": [
+  "3404"
+ ],
+ "deck6": [
+  "3404"
+ ],
+ "souls6": "80000",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "A",
+   2
+  ],
+  [
+   140,
+   "A",
+   2
+  ]
+ ],
+ "expect": {
+  "foe_hp": [
+   [
+    73,
+    60
+   ],
+   [
+    74,
+    40
+   ],
+   [
+    153,
+    40
+   ],
+   [
+    154,
+    0
+   ]
+  ],
+  "sound": "0x87",
+  "sound_at": [
+   143
+  ]
+ },
+ "expect_why": "BN5's rule, by its code (its battle traced the same course: soul_gyro_propeller run on as BN5's reference, the second AirShot's 0x8000 at its use, CanGard 40 to 0): the first AirShot its own 20 (60 to 40 at t74 by the timeline's count), the second doubled to 40 with the propeller set (40 to 0 at t154), the modifier's sound 0x87 at t143 as the propeller is spent, then set again by the Wind chip (0x167 with it)."
+}

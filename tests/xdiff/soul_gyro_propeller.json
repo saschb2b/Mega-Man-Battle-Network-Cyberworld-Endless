@@ -1,0 +1,232 @@
+{
+ "about": "BN5's GyroSoul's propeller set in both engines (BN5 0x080102CA): GyroSoul united (souls5 2, souls6 bit 19) by AirShot * (BN5's and BN6's 4, Wind), three picked, the last given up for UNITE; A at t60 uses the first AirShot, a Wind chip not left alone: his propeller set as the chip's use begins at t62 (his AI data +0x0D 1) and his overlay spun (its animation the owner's plus 0x11: BN5's +0x60, BN6's +7, legit's mask 049); BN5's sound 0x167 at t63, BN6's slot 0x340. The spec ends at t62: the AirShot is each game's own chip from there (its flash the image object's kind 8 in BN5, BN6's own 0x13), so its doubling is held to BN5's rule by soul_gyro_double, BN6's battle alone. CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 62,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "3404"
+ ],
+ "deck5": [
+  "3404"
+ ],
+ "folder6": [
+  "3404"
+ ],
+ "deck6": [
+  "3404"
+ ],
+ "souls6": "80000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   60,
+   "A",
+   2
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: GyroSoul united from t1, the first AirShot at t60 sets his propeller, the second at t140 doubled.",
+ "souls5": "2"
+}

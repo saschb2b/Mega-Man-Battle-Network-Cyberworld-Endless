@@ -1,0 +1,8 @@
+[
+ {
+  "name": "GyroSoul's propeller left out",
+  "spec": "soul_gyro_propeller",
+  "soulbreak": 8388608,
+  "what": "no propeller where BN5's 0x080102CA sets it for a Wind chip: his AI data +0x0D 0 at t62 where BN5's is 1, his overlay unspun"
+ }
+]
