@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T17:59:28Z
-* **Update**: multirom/souls.md (ProtoSoul in BN6's engine: UNITE, WideSword by the Souls' sword family, Reflect by the chips' Guard family, the Sword chip charge doubled and stepped in; the buster's and the afterimage's differences written as legit), rom/souls.md (ProtoSoul's addresses, the plain buster's power attack in both games), game/team-protoman.md (unit 9: ProtoSoul built, the giving run-forms').

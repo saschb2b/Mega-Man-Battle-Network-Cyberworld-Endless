@@ -640,6 +640,8 @@
 080117D0 BN6_POWER_ATTACKS_REF
 080117D4 BN6_POWER_ATTACKS
 08011A24 BN6_POWER_EMPTY
+08011A26 as_byte_alone
+08011A74 team_protoman_souls
 08011B8A after_his_loadout
 08011BA4 soul_passives_2
 08011C3C obstacle_strike_words_battlestate_0x5c_bit
@@ -1346,7 +1348,7 @@
 080CC2A2 team_protoman_napalmman_2
 080CC2AA team_protoman_napalmman_3
 080CCCCE navis_engine_twins.colonel_third_kind_0x3c_0x59
-080CD8B5 team_protoman_souls
+080CD8B5 team_protoman_souls_2
 080CE928 BN6_TIMEBOMB_STATES
 080CEB80 BN6_GUST_INIT
 080CECF8 BN6_GUST_SPAWN
@@ -1358,7 +1360,7 @@
 080D2010 team_protoman_magnetman
 080D236C team_protoman_magnetman_2
 080D2CD0 team_protoman_magnetman_3
-080D4D3D team_protoman_souls_2
+080D4D3D team_protoman_souls_3
 080DA27C dead_code
 080DA5FA BN6_STEP_OBJECT
 080DAE74 bn5_chips_code.effect_tables

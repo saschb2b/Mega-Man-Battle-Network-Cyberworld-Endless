@@ -295,6 +295,11 @@
 0800F350 dark_soul_bn6.bn6
 0800F368 dark_soul_bn6.table
 0800F486 obstacle_gate_leaves_alone
+0800F51A writing_his_attack_0xc_as_byte
+0800F55E team_protoman_souls_2
+0800F56E team_protoman_souls_3
+0800F604 team_protoman_souls.b_left_0x04
+0800F62C team_protoman_souls.b_left_0x04_2
 0800F660 chaos_unison_power_attacks
 0800F6A6 family_0x3c
 0800F7FC family_0x42
@@ -848,7 +853,7 @@
 080C3A2A bn5_last_chips_3
 080C4782 bn5_sea_submerge_4
 080C4EAE bn5_darkloids_navi.to
-080C5C3A team_protoman_souls_2
+080C5C3A team_protoman_souls_4
 080C6358 team_protoman_meddy.0x080dffd2
 080C63AC BN5_MEDDY_EFFECT_KINDS
 080C643C bn5_sea_submerge.bn6_child_hidden
@@ -877,7 +882,7 @@
 080CBEF6 BN5_CLOUD_PANEL
 080CBFBC BN5_CLOUD_FIND_37
 080CC2A2 BN5_NAPALM_PANEL_FLAMES
-080CD3C1 team_protoman_souls_3
+080CD3C1 team_protoman_souls_5
 080CD466 by_spawner
 080CEFCC kinds_bn5
 080CF118 state_table_bn5
@@ -890,7 +895,7 @@
 080D1F86 called_by_0x5f
 080D3828 BN5_COSMO_SPAWN_6C
 080D3964 BN5_COSMO_SPAWN_6D
-080D4C49 team_protoman_souls_4
+080D4C49 team_protoman_souls_6
 080D56E0 BN5_COSMO_SPAWN_79
 080D951C football_burst_effect_id
 080DB608 find_kept_as_battle_is_won
@@ -947,12 +952,17 @@
 080EBBA6 bn5_chips_code.buster_arm_2
 080EBBFE bn6_player_idle_state_past_chip
 080EBDC6 soul_chips_3
+080EC14E team_protoman_souls.form_1
 080EC16A swords_flash_number
+080EC196 team_protoman_souls.form_1_2
 080EC400 support_family
 080EC448 bn6_chip_writer_chip_routine_attack
 080EC450 support_family_word_for_them
-080EC7DE team_protoman_souls_5
+080EC7DE team_protoman_souls_7
 080EC818 misc_family_subfamilies
+080ECBCE team_protoman_souls_8
+080ECBE0 routine_compares_it
+080ECC92 team_protoman_souls_9
 080ECE2F bn5_last_chips_6
 080ECE5C bn5_last_chips_7
 080ECE76 flash_number
@@ -966,7 +976,7 @@
 080EEC86 magnetsoul_charged_shot_0x15_0x0800f7fc_family
 080EEE82 his_charged_shot_power_attack_0x19
 080EF270 bn5_darkinvs_bn6_5
-080EF38A team_protoman_souls_6
+080EF38A team_protoman_souls_10
 080EF548 bn5_chips_code.mrkcan
 080F0436 release_consumer
 080F04CC idle_states
