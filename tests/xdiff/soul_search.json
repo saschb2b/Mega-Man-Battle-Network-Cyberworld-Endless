@@ -1,0 +1,245 @@
+{
+ "about": "BN5's SearchSoul (Team ProtoMan's Soul 3) in both engines: its flag entry written in BN5's ROM copy and set (souls5), the Souls installed in BN6's engine holding it (souls6 bit 20), a deck of CopyDmg * in both (BN5's 148, BN6's 190: Cursor, SearchSoul's kind), the first Custom screen's first chip picked and given up, UNITE and OK; it unites as the first turn starts, his ready (BN5's 0x08011BF8) spawning the fourth kind's 0x8F (0x080EAD9E, BN6's the same code), which marks the foe side's invisible objects (with none here it ends in the frame it is spawned, before either trace reads it: a foe that hides is wanted to see it), the spec ends at t523, before a second Custom screen: there BN5's links UNITE to SearchSoul's SHUFFLE button (its elements 8 and 9, BN5's 0x08023CF4), which BN6's Custom screen does not show yet (the Souls' button, ColonelSoul's, made his too: a follow-up). CanGard V1 at (6,2), MegaMan at (2,2) with 2000 HP, kept from harm (docs/game/team-protoman.md, unit 8).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 523,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "3494"
+ ],
+ "deck5": [
+  "3494"
+ ],
+ "folder6": [
+  "34BE"
+ ],
+ "deck6": [
+  "34BE"
+ ],
+ "souls6": "100000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [],
+ "expect": {
+  "megaman": {
+   "soul": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     523,
+     "0x03"
+    ]
+   ],
+   "chaos": [
+    [
+     1,
+     "0x00"
+    ]
+   ],
+   "soul turns": [
+    [
+     1,
+     "0x03"
+    ],
+    [
+     523,
+     "0x03"
+    ]
+   ],
+   "souls used": [
+    [
+     1,
+     "0x08"
+    ],
+    [
+     523,
+     "0x08"
+    ]
+   ],
+   "unite": [
+    [
+     1,
+     "0x02"
+    ]
+   ],
+   "hp": [
+    [
+     523,
+     "0x7D0"
+    ]
+   ]
+  }
+ },
+ "expect_why": "BN5's own course: SearchSoul united from t1 (SearchMan's AI index 3), its turns 3, its used bit 0x08, UNITE chosen on the first screen; MegaMan never hit (safe).",
+ "souls5": "4"
+}

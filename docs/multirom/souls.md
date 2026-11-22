@@ -365,6 +365,23 @@ the next.
   BN6's plain buster shot writing his attack variables' +0xC by a byte
   where BN5's writes the word, so the 0x114 his B+Left leaves there keeps
   its +0xD in BN6 (mask 050).
+  **SearchSoul** (3), his battle: UNITE by a Cursor chip, his look, his
+  charged shot (0x08, family 0x3B as 0xCD: the scope gun, five shots of 12,
+  its hit's effect BN5's 0x68 as 0xD0, Team ProtoMan's effects numbered
+  from 0xD0 since BN4's chips' units hold 0xC2-0xCF) and his ready (BN5's
+  0x08011BF8: the fourth kind's 0x8F, BN6's the same code, which marks the
+  foe side's invisible objects): `soul_search` (to t523) and
+  `soul_search_shot` PASS against BN5's battle, their mutations FAIL; the
+  reveal needs a foe that hides to be seen (with none the object ends in
+  the frame it is spawned). His SHUFFLE is BN5's Custom screen's Soul
+  button, the one ColonelSoul's is: `0x08023CF4` makes elements 8 and 9 of
+  the screen types 4 and 5 for SearchSoul (6 and 7 for MeddySoul's two
+  capsules, 8 and 9 for ColonelSoul's chip), by the Soul the united side
+  holds, its +4 the shuffles left (three a turn); A on it runs BN5's mode
+  0x080234A8, eight steps that shuffle the unpicked chips (0x080253EC,
+  0x08025470, sound 0x113). BN6's engine shows ColonelSoul's on DustCross's
+  button (`src/emu/soulcolonel.c`); SearchSoul's and MeddySoul's are to be
+  made the same way, the hooks there one for all three Souls.
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison

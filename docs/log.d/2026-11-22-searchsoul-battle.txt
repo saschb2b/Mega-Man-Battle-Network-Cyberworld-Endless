@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T20:39:42Z
+* **Update**: multirom/souls.md (SearchSoul's battle in BN6's engine, his SHUFFLE traced: BN5's Custom screen's Soul button), rom/souls.md (SearchSoul's addresses, the Soul button and SHUFFLE in BN5's Custom screen), game/team-protoman.md (unit 8: SearchSoul's battle built, the button to come), devtools/differential.md (state5, BN5's guest saved for romlab).

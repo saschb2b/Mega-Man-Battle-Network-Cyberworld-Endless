@@ -1,0 +1,14 @@
+[
+ {
+  "name": "SearchSoul's charged shot run as the next Soul's family",
+  "spec": "soul_search_shot",
+  "soulbreak": 32,
+  "what": "his loadout's B power attack the next moved one's where BN5's 0x0801CA18 names 0x08 (its family 0x3B): another family runs at the release"
+ },
+ {
+  "name": "SearchSoul drawn as the next Soul",
+  "spec": "soul_search_shot",
+  "soulbreak": 1,
+  "what": "the sprite selector draws NapalmSoul's sprite where BN5 draws SearchSoul's (its list 0's 3): his object's sprite word"
+ }
+]

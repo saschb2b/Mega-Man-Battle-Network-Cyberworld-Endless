@@ -71,6 +71,7 @@
                                             Souls' 0x60-0x7F) */
 #define SOUL_EFFECT_FIRST  0xC0          /* BN6's grown effect ids the Souls' code takes (xvirus_grow.h's 256), to: */
 #define SOUL_EFFECT_LAST   0xCF
+#define SOUL_EFFECT_TEAM   0xD0          /* ... Team ProtoMan's, to 0xDF (BN4's chips' units count theirs down from 0xCF: tools/xsoul.py) */
 #define SOUL_POWER_FIRST   0x94          /* BN6's power attack id of the first Soul's (BN6's own 148 to 0x93) */
 #define SOUL_POWER_TEAM    0xB1          /* ... of Team ProtoMan's first (soulpower.c): past Team Colonel's 17 (moved 8, empty 3, chaos 6) and
                                             room for BN4's twelve, so that neither moves the other's: their empty ones, chaos ones, then moved */
