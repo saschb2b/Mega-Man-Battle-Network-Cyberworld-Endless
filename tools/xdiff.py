@@ -358,6 +358,9 @@ MEGAMAN_READS = {
     'turns': lambda o, ai, p: ai[0x0F] if ai else None,
     'loadout': lambda o, ai, p: ai[4:9].hex() + ai[0x11:0x12].hex() if ai else None,
     'sprite': lambda o, ai, p: o.o32(SPRITE['T1'] + 0x18) - 4 if o.o32(SPRITE['T1'] + 0x18) else 0,
+    # (his frame's record as an offset into his sprite, +0x1C less +0x18: read from the sprite's own bytes, so a sprite room
+    # that does not hold his art gives another)
+    'sprite frame': lambda o, ai, p: (o.o32(SPRITE['T1'] + 0x1C) - o.o32(SPRITE['T1'] + 0x18)) & 0xFFFFFFFF,
     'palette': lambda o, ai, p: o.o8(SPRITE['T1'] + 4),
     'element': lambda o, ai, p: o.o8(0x0E),   # (his object's element, BN6's +0x0E: a Soul's, soulpower.c)
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,

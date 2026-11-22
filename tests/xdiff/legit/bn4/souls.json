@@ -1,0 +1,78 @@
+[
+ {
+  "key": "unison",
+  "name": "a BN4 Soul's unison's last frame, the fight's first",
+  "why": "BN4 unites a Soul as a state of MegaMan's: at the turn's start (0x0800B658) the hand's Soul pseudo-chip becomes his pending form (AI data +0x10), and his family 0x0D (0x080EBA44, BN4_FAMILY_UNITE) plays the unison by its phases, its last on the fight's clock; BN6 crosses before the fight (the crossing's phases, BN6_CROSSING_PHASES at 0x08014A82, run in the battle's phase before the fight's timer counts). So at the frame BN4's MegaMan is in state 0x0D his object, AI data and collision data, his pending form, the unison's effect (its phase 1's 0x080E18EE), the run order and his panel are the unison's; and its three sounds (0x129 its phase 0's, 0x080EBABE; 0x157 its picture's, 0x080E369A; 0x158 its phase 1's, 0x080EBB32), begun before the fight, are said at the frame after it, where BN6's crossing's were begun before the trace",
+  "evidence": [
+   "bn4_soul_thun: BN4's MegaMan in state 0x0D at t1 alone, his ready state 6 from t2; BN6's in his ready state 8 from t1; BN4's sounds 0x129, 0x157 and 0x158 at t2"
+  ]
+ },
+ {
+  "key": "ready clock",
+  "name": "his ready state after the unison, BN4's two frames behind",
+  "why": "After the unison BN4's MegaMan enters his ready state (6) at t2, BN6's (8) before the fight: its first wait (its phase +0x0A 0 until its count +0x20 runs out, its set-up byte +0x0B) runs in both, BN6's two of BN4's fight frames ahead at the spec's lag of 1. Each such field of his object is read against BN4's two frames on, while BN4's wait is not done and his state is the same then; from BN4's phase 4 (t11) both are compared as ever",
+  "evidence": [
+   "bn4_soul_thun: BN4's count 9 at t2 where BN6's at t3 is 7, BN4's 7 at t4; BN4's phase 4 from t11, BN6's from t10"
+  ]
+ },
+ {
+  "key": "power",
+  "name": "a moved Soul's power attack by each game's number",
+  "bn4_to_bn6": {
+   "0x58": "0xA5"
+  },
+  "why": "A BN4 Soul's loadout names BN4's power attacks (BN4_FORM_LOADOUTS, 0x080184F0, +3 the charged shot's: ThunSoul's 0x58); the move copies each with its family's unit into BN6's grown power attacks after BN5's Souls' and their Chaos Unison's (src/emu/soulpower.c's tables(): ThunSoul's at 0xA5) and writes BN6's number into its loadout (SOULS_LOADOUTS' seventh row, ff ff 00 a5 ff ff). His AI data's power attacks (+5 to +8, BN6_AI_POWER_CHIP to BN6_AI_POWER_C) read BN4's number as BN6's by this map, where BN6's MegaMan holds the move of BN4's form",
+  "evidence": [
+   "soul_thun's expect: loadout ffff00a5ffff",
+   "bn4_soul_thun: ai+0x07 BN4 0x58, BN6 0xA5 from t2"
+  ]
+ },
+ {
+  "key": "name",
+  "name": "his NameID in a Soul, BN6's by his form",
+  "why": "BN6 names MegaMan by his form as he takes it (0x08015B22: BN6_FORM_NAME_BASE 0x1AB + the form, the proxy's 0x1B3 for a Soul, src/emu/bn6_forms.h), the object ids' table giving his arm and records by it; BN4 keeps his one id, 0xA0 (the trace's low byte of NameID, src/dev/xdiff_bn4_trace.c obj_segs), in every form, its code giving a form's look by the NaviStats' form (+0x24) and BN4_STATS_SPRITES instead. Read so while BN6's MegaMan holds the move of BN4's form",
+  "evidence": [
+   "bn4_soul_thun: obj+0x28 BN4 0xA0, BN6 0xB3 at every frame of the united battle"
+  ]
+ },
+ {
+  "key": "soul",
+  "name": "the Soul's state, each engine's place",
+  "why": "BN4 keeps a Soul's turns in MegaMan's AI data (+0x19 its turns, BN4_FORM_TURNS' 3; +0x18 those counted, 0x0800BA20) and its form in the NaviStats (+0x24, written by the unison at 0x080EBB80); BN6's engine keeps them in its Souls block (BN6_SOULS: its Soul, BN6's number of the move, and its turns left, src/emu/soulunite.c, soullife.c), its AI data's +0x18 and +0x19 none of it. The two are held to each other at every frame (xdiff_bn4_souls.py checks: BN6's Soul the move of BN4's form, its turns BN4's +0x19 less +0x18), so BN4's bytes there are read as BN6's block's",
+  "evidence": [
+   "bn4_soul_thun: ai+0x19 BN4 3 from t2, BN6 0; BN6's block Soul 0x0D and turns 3 (player block +0x78, +0x7A)"
+  ]
+ },
+ {
+  "key": "pending",
+  "name": "the pending form after the unison, BN6's kept",
+  "why": "BN4's turn's start writes MegaMan's pending form at each turn: the hand's Soul's, 0 for a form's end, else 0xFF none (0x0800B6D0); BN6's pending record keeps the form taken (BN6_CROSS_PENDING +0, BN6_RECORD_FORM, copied from the Custom screen's record at the turn's start, 0x080147E4) for the battle. So BN4's 0xFF and BN6's proxy form (8) are one state while BN6's MegaMan holds the move of BN4's form",
+  "evidence": [
+   "bn4_soul_thun: pending BN4 0xFF from t2, BN6 8 from t1"
+  ]
+ },
+ {
+  "key": "form frames",
+  "name": "BN4's timed form's frames, BN6 none",
+  "why": "As a form is taken BN4 writes its frames (BN4_FORM_FRAMES, 0x08018088, by form: 600 for each Soul, 960 for DarkSoul) into MegaMan's AI data +0x2C (its form's state, 0x0800E05C); its turn's start counts them down for DarkSoul's form alone (0x0800B6A4-0x0800B6B2) and his palette flashes under 90 of them (0x0800BB18), so a Soul's stand unread. BN6 takes no DarkSoul and keeps no such field. The trace lays BN4's +0x2C at BN6's spare (+0xF3, src/dev/xdiff_bn4_trace.c's leftovers); read so where it holds his form's frames and BN6's byte is 0",
+  "evidence": [
+   "bn4_soul_thun: ai+0xF3, +0xF4 BN4 0x58, 0x02 (600) from t2, BN6 0"
+  ]
+ },
+ {
+  "key": "shots",
+  "name": "BN4's count of a form's charged shots, BN6 none",
+  "why": "MegaMan's ready state counts a form's charged shots and rapid busters into his AI data +5, to 5 (0x0800E270-0x0800E288, called at 0x080EEC00 and 0x080EEC34 as it takes the requests 0x20 and 2); its ten bytes (0x0800E27E-0x0800E289) are in neither BN5's ROM nor BN6's (searched whole). The trace lays BN4's +5 at BN6's spare (+0xF0); read so where it is 1 to 5 and BN6's byte 0",
+  "evidence": [
+   "bn4_soul_thun: ai+0xF0 BN4 1 from t154, BN6 0"
+  ]
+ },
+ {
+  "key": "charge",
+  "name": "his buster's charge, each engine's places",
+  "why": "BN4 charges in his AI data with two counters (+0x30 the chip charge's, +0x32 the charged shot's, u16, counted on while held: 0x0800BC1E-0x0800BC34, 0x0800BC40-0x0800BC60), the button (+9: 1 A, 2 B, 0x0800BC3A, 0x0800BC66), a level each (+0x0A, +0x0B: 0 under 10 frames, 1, 3 at the charge time, 0x0800BB50-0x0800BB7A) and the levels kept as B is let go (+0x14, +0x15, 0x0800BE48-0x0800BE4E), and spawns his glow (the fourth kind's 5) once a level is set (0x0800BD9E, its slot AI data +0x58). BN6 keeps one counter (+0x1B, u8, held at the charge time: 0x08012F14-0x08012F24), a level (+0x1D: 0, 1, 2, 0x08012F30), the button (+0x1E, 0x08012EEC, 0x08012F02), its key handler's requests (+0x44's 0x20000 A and 0x40000 B, 0x080130B4-0x08013114, cleared at 0x0801312A) and a glow (the fourth kind's 8) spawned once as he begins (0x080173CE, its slot +0x58). Each byte is read against the other's: BN6's counter BN4's charged shot's held at its charge time (BN4's cache +0x36, the trace's +0xFE), its level BN4's by 0, 1, 3 as 0, 1, 2, its button BN4's (the trace's +0xF2), BN4's chip charge's none; BN6's request bit its button's; BN4's kept levels 0, 1 or 3 where BN6 keeps none; BN4's glow in play where BN6's stands, and his slot for it",
+  "evidence": [
+   "bn4_soul_thun: B held from t60: BN4's +0x32 1 at t62 to 0x5C at t153, BN6's +0x1B 1 at t63 to 0x5A (90) at t152 and held; BN4's level 1 at t71 and 3 at t151, BN6's 1 at t72 and 2 at t152; BN4's glow T4:0x5 in play t71-t153"
+  ]
+ }
+]

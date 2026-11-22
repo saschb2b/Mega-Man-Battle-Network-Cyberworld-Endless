@@ -96,9 +96,24 @@ runs, its charged shot held and the Custom screens that count its turns
 opened. ThunSoul moved into BN6's engine has two specs
 ([BN4's Souls on BN6's proxy form](../multirom/bn4-souls.md), ThunSoul in
 BN6's engine). `bn4_soul_thun` fights BN4's battle against BN6's
-(`souls4` and `souls6` together). The shot is the same to the frame, but
-the spec parts at t1 on the Soul's form, which this comparator has no
-rules for yet, and its FAIL is recorded. `soul_thun` is BN6's battle
+(`souls4` and `souls6` together). The two engines keep a Soul and a
+charged buster in different places and by different clocks, so the
+comparator reads them as one state by `tools/xdiff_bn4_souls.py`'s
+rules (legit.json's bn4 `souls`, each with both games' code): BN4's
+unison's last frame, the fight's first, where BN6 crossed before the
+fight, and its sounds; his ready state's first wait after it, two of
+BN4's frames behind BN6's; a moved Soul's power attack by each game's
+number; his NameID, BN6's by his form; the Soul's form and turns, BN4's
+in his AI data and NaviStats, BN6's in its Souls block, held to each
+other at every frame (a Soul's turns or form apart fails it); the
+pending form, which BN4 clears at each turn's start; BN4's timed form's
+frames and its count of a form's charged shots, which BN6 has none of;
+and the buster's charge, BN4's two counters, levels (0, 1, 3) and button
+against BN6's one counter held at the charge time, its level (0, 1, 2),
+button and request bits, and each engine's glow. Its mutations break the
+turns, the charge time, the element and the shot's damage. A sound row
+may name `souls`, BN4's Soul numbers, for a moved Soul's copy of a
+sound (ThunSoul's ring's 0x91 at slot 0x300). `soul_thun` is BN6's battle
 alone (`kind: engine`), held to BN4's trace by its `expect`: MegaMan's
 action, loadout, element and used bit, and the foe's HP (`foe_hp`, which
 an engine spec now checks as a differential does). Its mutations break
