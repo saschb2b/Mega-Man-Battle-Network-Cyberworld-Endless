@@ -1,6 +1,8 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: multirom/bn4-souls.md (GutsSoul's pass on an Atk+ merged before the unison, bn4_soul_guts_atk: 40 in both games).
+* **Update**: multirom/bn4-souls.md (ThunSoul's Elec chips paralyse: BN4's bonus to an uncharged chip, bn4_soul_thun_elec), rom/bn4.md (BN4_CHIP_BONUS and ThunSoul's rule), rom/souls.md (a BN4 Soul's bonus to an uncharged chip, BN6_CHARGED_BONUS_DONE), code/emu.md (soulchips.c's uncharged bonus).
 * **Update**: online/shared-dive.md (keys held as a crew's field or a Square NetBattle hands the game back kept from it until let go: a fallen MegaMan's A had talked to the Mr.Prog before him and his crewmate's next battle went without him), devtools/play.md (`place X Y FACING panel`: at the centre of the panel that holds X, Y).
 * **Update**: multirom/souls.md (ProtoSoul in BN6's engine: UNITE, WideSword by the Souls' sword family, Reflect by the chips' Guard family, the Sword chip charge doubled and stepped in; the buster's and the afterimage's differences written as legit), rom/souls.md (ProtoSoul's addresses, the plain buster's power attack in both games), game/team-protoman.md (unit 9: ProtoSoul built, the giving run-forms').
 * **Update**: multirom/bn4-souls.md (AquaSoul in BN6's engine: his flag in Red Sun, his charged shot on Spreads' unit, his chip charge, his face, MegaMan's animations in a BN4 Soul, bn4_soul_aqua), rom/bn4.md (the chip charge's test and bonus by form, BN4_POWER_EMPTY), rom/souls.md (a BN4 Soul's animations, BN6_SPRITE_SET_ANIM), code/emu.md (soulbn4.c's AquaSoul, soullook.c's face and animations), devtools/differential.md (A's chip charge, a chip charge's power attack, a charged chip's sound).

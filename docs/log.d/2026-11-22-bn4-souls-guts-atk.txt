@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T20:51:07Z
-* **Update**: multirom/bn4-souls.md (GutsSoul's pass on an Atk+ merged before the unison, bn4_soul_guts_atk: 40 in both games).
