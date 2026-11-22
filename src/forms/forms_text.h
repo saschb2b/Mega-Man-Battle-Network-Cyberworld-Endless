@@ -32,12 +32,14 @@ void forms_taken_words(char *out, size_t n, const char *taken, const char *there
 /* ... on a Soul: its name and the chip it takes */
 void forms_soul_words(char *out, size_t n, const char *name, const char *kind);
 
-/* The Souls by guardian: BN5's Team Colonel's six (Colonel, ShadowMan,
- * NumberMan, TomahawkMan, KnightMan, ToadMan) and Team ProtoMan's
- * (ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy), each the
- * Soul's name and its kind of chip (docs/game/meta/souls.md) */
-#define FORMS_BN5_SOULS 12
-extern const char *const forms_bn5_soul_names[FORMS_BN5_SOULS];
-extern const char *const forms_bn5_soul_kinds[FORMS_BN5_SOULS];
+/* The Souls by their game's numbers, each the Soul's name and its kind of
+ * chip (issue #774's table; docs/game/meta/souls.md): BN5's 1-12, Team
+ * ProtoMan's six then Team Colonel's (souls_held_bn5's bits), and BN4's
+ * 1-12 (souls_held_bn4's) */
+#define FORMS_GAME_SOULS 12
+extern const char *const forms_bn5_soul_names[FORMS_GAME_SOULS];
+extern const char *const forms_bn5_soul_kinds[FORMS_GAME_SOULS];
+extern const char *const forms_bn4_soul_names[FORMS_GAME_SOULS];
+extern const char *const forms_bn4_soul_kinds[FORMS_GAME_SOULS];
 
 #endif

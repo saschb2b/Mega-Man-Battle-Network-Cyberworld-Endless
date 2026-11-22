@@ -26,11 +26,19 @@ void forms_soul_words(char *out, size_t n, const char *name, const char *kind) {
 	snprintf(out, n, "%s.|Unites with %s %s chip.", name, an ? "an" : "a", kind ? kind : "");
 }
 
-const char *const forms_bn5_soul_names[FORMS_BN5_SOULS] = {
-	"ColonelSoul", "ShadowSoul", "NumberSoul", "TomahawkSoul", "KnightSoul", "ToadSoul",
+const char *const forms_bn5_soul_names[FORMS_GAME_SOULS] = {
 	"ProtoSoul", "GyroSoul", "SearchSoul", "NapalmSoul", "MagnetSoul", "MeddySoul",
+	"ColonelSoul", "ShadowSoul", "NumberSoul", "TomahawkSoul", "KnightSoul", "ToadSoul",
 };
-const char *const forms_bn5_soul_kinds[FORMS_BN5_SOULS] = {
-	"Obstacle", "Invisible", "Plus", "Wood", "Break", "Aqua",
+const char *const forms_bn5_soul_kinds[FORMS_GAME_SOULS] = {
 	"Sword", "Wind", "Cursor", "Fire", "Elec", "Recovery",
+	"Obstacle", "Invisible", "Plus", "Wood", "Break", "Aqua",
+};
+const char *const forms_bn4_soul_names[FORMS_GAME_SOULS] = {
+	"RollSoul", "GutsSoul", "WindSoul", "SrchSoul", "FireSoul", "ThunSoul",
+	"ProtSoul", "NumSoul", "MetlSoul", "JunkSoul", "AquaSoul", "WoodSoul",
+};
+const char *const forms_bn4_soul_kinds[FORMS_GAME_SOULS] = {
+	"Recovery", "Panel crack", "Wind", "Invisible", "Fire", "Elec",
+	"Sword", "Plus", "Break", "Obstacle", "Aqua", "Wood",
 };

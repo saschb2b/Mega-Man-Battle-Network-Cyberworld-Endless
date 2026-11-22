@@ -67,8 +67,9 @@ BN6's own pieces, no new art:
   cursor goes to the other window; A there swaps the two; B puts the
   Cross back. Left and Right go between the windows, Up and Down along
   one. With five or fewer held nothing is a spare, and A buzzes.
-- **The Souls' page** lists each Soul the run holds by its name and the
-  kind of chip it takes to unite, nothing to equip (a run never holds two
+- **The Souls' page** lists each Soul the run holds, BN5's and then BN4's
+  in their games' numbers, by its name and the kind of chip it takes to
+  unite, nothing to equip (a run never holds two
   of a kind under issue #774's forms).
 - **KeyItem's INFORMATION box** under them says what the cursor's row is:
   a Cross's name, the attacks that hit it twice as hard and what it does
@@ -99,14 +100,15 @@ an empty list. The five are the director's (`src/director/pet_forms.c`):
 those marked that MegaMan holds, then the first held in BN6's order until
 five are. None marked is BN6's own rule, the first five held, so a run
 that never opens the screen plays as before; once five are marked, a Cross
-won later waits among the spares. The engine keeps the marks for the run
-until the run itself keeps them (`run.cross_active`, issue #774's run-forms
-work); until then a CONTINUE gives BN6's first five again. The addresses
+won later waits among the spares. The run keeps the marks
+(`run.cross_active`, with its checkpoint), so a CONTINUE lists the same
+five, and a new run starts with none. The addresses
 are in [MegaMan's forms and BN5's Souls in BN6's engine](../../rom/souls.md),
 CROSSSELECT.
 
 ## Not yet
 
-- BN4's Souls on the Souls' page, once a run can hold them (issue #499).
-- The marks kept through a CONTINUE, in `Run` (run-forms).
-- A row of its own in the PET's menu, if the owner wants BN6's menu re-laid.
+- A row of its own in the PET's menu, "Forms" (the owner's call, 22
+  November 2026), in place of R: BN6's eight rows are tiles of BG0 on the
+  8-pixel grid, so a ninth either moves the column up a tile row (BN6
+  drawing it) or is drawn by the engine at a closer pitch.

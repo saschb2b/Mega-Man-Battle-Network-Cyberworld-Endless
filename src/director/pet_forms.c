@@ -1,6 +1,5 @@
-/* pet_forms.h. The five marked are the engine's until the run keeps them
- * (`Run`, issue #774's run-forms branch): a CONTINUE gives BN6's first
- * five again until then. */
+/* pet_forms.h. The five marked are the run's (run.cross_active), kept
+ * with its checkpoint: a CONTINUE lists them again, a new run has none. */
 #include "pet_forms.h"
 
 #include "bn6.h"
@@ -10,16 +9,11 @@
 #include "forms.h"
 #include "forms_text.h"
 #include "game.h"
-#include "guardians.h"
 #include "pet_look.h"
 #include "platform.h"
 #include "powers.h"
 #include "run.h"
 #include "souls.h"
-
-/* the Crosses marked on the forms screen, bit i Cross i, 0 none yet; the run they were marked in */
-static uint16_t marked;
-static uint32_t marked_run;
 
 static uint16_t held(void) {
 	uint16_t h = 0;
@@ -29,18 +23,14 @@ static uint16_t held(void) {
 }
 
 /* the five CROSSSELECT lists, bit i Cross i (CROSSSELECT's order: navi i + 1, powers.h) */
-static uint16_t five_now(void) { return forms_five(held(), marked); }
+static uint16_t five_now(void) { return forms_five(held(), run.cross_active); }
 
 static void choose(uint16_t five) {
-	marked = five;
+	run_cross_active_set(five);
 	crossselect_active(five_now());
 }
 
-void pet_forms_update(void) {
-	if (run.seed != marked_run) marked = 0;
-	marked_run = run.seed;
-	crossselect_active(five_now());
-}
+void pet_forms_update(void) { crossselect_active(five_now()); }
 
 /* BN6's PET menu taking input */
 static bool on_menu(void) {
@@ -66,13 +56,14 @@ void pet_forms_draw(void) {
 
 void pet_forms_leave(void) { forms_shut(); }
 
-/* the run's Souls: Team Colonel's six, then Team ProtoMan's, each as its guardian gave it */
+/* the run's Souls, BN5's then BN4's, each in its game's numbers */
 static int souls_of(FormsSoul *out) {
 	int n = 0;
-	for (int k = 0; k < FORMS_BN5_SOULS; ++k) {
-		int navi = k < SOULS ? GUARDIAN_OLDER_FIRST + k : GUARDIAN_TEAM_FIRST + k - SOULS;
-		if (soul_held(navi)) out[n++] = (FormsSoul){ forms_bn5_soul_names[k], forms_bn5_soul_kinds[k] };
-	}
+	unsigned bn5 = souls_held_bn5(), bn4 = souls_held_bn4();
+	for (int k = 0; k < FORMS_GAME_SOULS; ++k)
+		if (bn5 >> k & 1) out[n++] = (FormsSoul){ forms_bn5_soul_names[k], forms_bn5_soul_kinds[k] };
+	for (int k = 0; k < FORMS_GAME_SOULS; ++k)
+		if (bn4 >> k & 1) out[n++] = (FormsSoul){ forms_bn4_soul_names[k], forms_bn4_soul_kinds[k] };
 	return n;
 }
 

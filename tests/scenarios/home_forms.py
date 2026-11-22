@@ -1,9 +1,10 @@
 """Issue #774's forms screen: R on the PET's menu opens it, CROSSSELECT's
 five on the left and the other Crosses held as spares. A sixth Cross won
 goes among the spares (BN6's first five held stay CROSSSELECT's); one
-swapped in from them is CROSSSELECT's in BN6's order, a seventh won after
-it waits among the spares too, and CROSSSELECT in the next battle lists
-the five chosen and no other (docs/game/meta/forms.md)."""
+swapped in from them is CROSSSELECT's in BN6's order, kept by the run
+through a quit and CONTINUE (run.cross_active), a seventh won after it
+waits among the spares too, and CROSSSELECT in the next battle lists the
+five chosen and no other (docs/game/meta/forms.md)."""
 
 # (the setup's HeatCross, Gregar's other four by their flags: five held)
 SWAP_START = '--scene emu --seed 1 --run-depth 2 --setup short,0,0,0,1 --dev onehit,god'
@@ -42,6 +43,12 @@ MANY = {
             ('expect', f'forms~five {CHOSEN} spare ElecCross'),
             ('expect', f'crossesfive={CHOSEN}'),
             *LEAVE,
+            ('restart', '--scene title'),                            # quit, and CONTINUE: the five are the run's
+            ('repeat', 'press START; wait 40', 'title=menu'),
+            ('expect', 'cursor=continue'),
+            ('repeat', 'press A; wait 40', 'scene=emu'),
+            ('until', 'screen=map', 1200),
+            ('expect', f'crossesfive={CHOSEN}'),
             ('do', 'flags 0xE8 0xE8 1; wait 4'),                   # a seventh: TomahawkCross, among the spares
             ('expect', f'crossesfive={CHOSEN}'),
             ('do', 'foes 01@52'),
