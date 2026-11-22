@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T12:35:00Z
+* **Update**: devtools/differential.md (a BN4 Soul's BN6 power attack read as soulpower.c lays the table out, never written as a number).
