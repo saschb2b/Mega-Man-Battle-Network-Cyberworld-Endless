@@ -12,6 +12,7 @@
 
 #ifdef CW_GPSP
 
+#include <stdio.h>
 #include <string.h>
 
 #include <cw.h>
@@ -106,7 +107,10 @@ static bool add(uint32_t addr, bool arm, EmuHook fn, void *user, int kind) {
 	Hook *h = find(addr);
 	if (h && h->live) return false;
 	if (!h) {
-		if (nhooks == HOOK_MAX) return false;
+		if (nhooks == HOOK_MAX) {
+			fprintf(stderr, "hook: the table's %d slots are full: %08x not hooked\n", HOOK_MAX, (unsigned)addr);
+			return false;
+		}
 		h = &hooks[nhooks++];
 	}
 	*h = (Hook){ .addr = addr, .arm = arm, .live = true, .fn = fn, .user = user, .kind = kind };
