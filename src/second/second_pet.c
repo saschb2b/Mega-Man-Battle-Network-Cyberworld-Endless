@@ -10,6 +10,10 @@
  * to it. */
 #include "second_pet.h"
 
+#include <string.h>
+
+#include "forms_screen.h"
+#include "forms_text.h"
 #include "second_card.h"
 #include "second_frame.h"
 #include "second_home.h"
@@ -54,4 +58,53 @@ void second_library_draw(SDL_Rect b) {
 	/* (what the Library is to a run, where the whole of it fits) */
 	int k = second_wrap(second_library_line(), w, lines, 4);
 	if (y + k * SECOND_LINE_H <= b.y + b.h - 4) second_wrapped(second_library_line(), x, y, w, k, PET_CYAN_HI);
+}
+
+bool second_forms_up(void) { return forms_screen_shown(); }
+
+void second_read_forms(void) {
+	const FormsRun *r = forms_screen_run();
+	if (!r) return;
+	S2.forms = *r;
+	forms_screen_cursor(&S2.forms_cross, &S2.forms_soul);
+}
+
+/* the five as CROSSSELECT will list them, in its order, each with its weakness, from (x, y): the y under them */
+static int five_rows(int x, int y, int w) {
+	text_draw(x, y, forms_word(FT_FIVE), PET_GOLD, TEXT_LEFT);
+	y += SECOND_LINE_H + 2;
+	for (int i = 0; i < S2.forms.n_crosses; ++i)
+		if (S2.forms.active >> S2.forms.crosses[i].cross & 1) {
+			second_row(x, y, w, S2.forms.crosses[i].name, S2.forms.crosses[i].weak ? S2.forms.crosses[i].weak : "");
+			y += SECOND_ROW_H;
+		}
+	return y;
+}
+
+/* The forms screen's: the Cross under its cursor (its weakness, what it
+ * does more) and CROSSSELECT's five as they stand; or the Soul (its kind,
+ * the chip it takes) */
+void second_forms_draw(SDL_Rect b) {
+	fill_rect(b.x, b.y, b.w, b.h, PET_NAVY);
+	int x = b.x + 6, y = b.y + 6, w = b.w - 12;
+	char s[160];
+	if (S2.forms_soul >= 0 && S2.forms_soul < S2.forms.n_souls) {
+		const FormsSoul *so = &S2.forms.souls[S2.forms_soul];
+		text_draw(x, y, so->name, PET_GOLD, TEXT_LEFT);
+		second_row(x, y + SECOND_LINE_H + 4, w, forms_word(FT_KIND), so->kind);
+		forms_soul_words(s, sizeof s, so->name, so->kind);
+		second_wrapped(strchr(s, '|') ? strchr(s, '|') + 1 : s, x, y + SECOND_LINE_H + 4 + SECOND_ROW_H + 4, w, 3, PET_WHITE);
+		return;
+	}
+	if (S2.forms_cross >= 0 && S2.forms_cross < S2.forms.n_crosses) {
+		const FormsCross *c = &S2.forms.crosses[S2.forms_cross];
+		text_draw(x, y, c->name, PET_GOLD, TEXT_LEFT);
+		y += SECOND_LINE_H + 4;
+		second_row(x, y, w, forms_word(FT_WEAK), c->weak ? c->weak : "");
+		y += SECOND_ROW_H + 2;
+		if (c->strong) y = second_wrapped(c->strong, x, y, w, 2, PET_WHITE) + 6;
+		y += 6;
+	}
+	if (S2.forms.n_crosses) five_rows(x, y, w);
+	else second_wrapped(forms_word(FT_NONE), x, y, w, 2, PET_WHITE);
 }

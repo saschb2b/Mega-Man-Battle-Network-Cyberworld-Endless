@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T11:10:47Z
-* **Update**: online/shared-dive.md (a dive's end screen of its own and an HP reward taken once, issue #769), engine/ui.md (the dive's RESULT), rom/battle.md (a battle's HP reward and its results' close, phase 0x14), code/screens.md (the summary's dive).

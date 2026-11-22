@@ -8,6 +8,7 @@
 #include "bn6.h"
 #include "dive_crew_view.h"
 #include "emote_palette.h"
+#include "forms_screen.h"
 #include "navicust.h"
 
 /* The screen the player is on, as BN6's state tells it (docs/rom/pet-and-second-screen.md,
@@ -32,6 +33,7 @@ typedef enum {
 	SECOND_TRADER,       /* the Chip Trader */
 	SECOND_OTHER,        /* a screen of BN6's not named here */
 	SECOND_SQUARE,       /* the Net Square: the emotes' palette, the NetPass (docs/online/square/emotes.md, The NetPass) */
+	SECOND_FORMS,        /* the forms screen over the PET's menu (src/forms/) */
 	SECOND_CONTEXTS
 } SecondContext;
 
@@ -76,6 +78,11 @@ typedef struct {
 	int lib_chip;
 	bool lib_unseen;
 	int lib_folder, lib_pack;
+	/* the forms screen (issue #774): the run's forms as it holds them, the five
+	 * as chosen so far, and the Cross (an index into them) or the Soul under
+	 * its cursor, -1 none */
+	FormsRun forms;
+	int forms_cross, forms_soul;
 	/* E-Mail (issue #83): the mail under the cursor, or open (-1 none): its
 	 * sender and subject as the list writes them, its sender's face
 	 * (FACE_NONE none); the list's mails and those unread */

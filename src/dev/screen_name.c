@@ -7,6 +7,7 @@
 #include "director.h"
 #include "game.h"
 #include "jukebox.h"
+#include "forms_screen.h"
 #include "library.h"
 #include "netpass_screen.h"
 #include "online_describe.h"
@@ -25,6 +26,7 @@ const char *screen_name(void) {
 	if (director_pick_shown()) return "reward-pick";
 	if (jukebox_shown()) return "jukebox";
 	if (library_shown()) return "library";
+	if (forms_screen_shown()) return "forms";
 	if (netpass_screen_shown()) return "netpass";
 	return second_screen_word();
 }

@@ -15,6 +15,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #include "hook.h"
 
@@ -65,5 +66,9 @@ bool party_field_aim(HookCore *core, PartyField *f);
  * the partners standing still where they spawn, as a crew that only presses
  * OK (partyaim=3 both). */
 void party_field_install(int n, int hp, int end, int aim, int swap_at);
+/* ... the spike's battle in the state's words: `spike N hit H lead
+ * whole|hit|down`, H of its N MegaMen struck at least once (gone counted),
+ * and the lead untouched, struck or deleted; nothing without one */
+void party_field_describe(FILE *f);
 
 #endif

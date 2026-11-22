@@ -86,6 +86,8 @@ static int guardian_chip(const GuardianStage *g, int *code) {
  * (docs/game/meta/souls.md); BN4's gives none yet (docs/game/bosses/bn4-navis.md), nor do BN5's
  * Nebula Navis, their Navi chips their pay (docs/game/bosses/bn5-navis.md) */
 static const char *reward_power(int navi) {
+	/* (a form run: every guardian's pay, in the run's form, issue #774) */
+	if (run.form != RUN_FORM_MIX) return powers_reward_text(navi, layer.biome, run.depth);
 	if (guardian_bn4(navi) || guardian_nebula(navi)) return NULL;
 	return guardian_older(navi) ? xguardian_soul_words(navi) : powers_reward_text(navi, layer.biome, run.depth);
 }
@@ -118,6 +120,7 @@ static const char *data_says(const GuardianStage *g) {
 /* The Cross his data gives the run, said in BN6's own box beside his chip
  * (a BN5 guardian's power is his Soul, a super boss's his own) */
 static const char *data_cross(const GuardianStage *g) {
+	if (run.form != RUN_FORM_MIX) return super_boss(g->navi) ? NULL : powers_reward_cross(g->navi, run.depth);
 	return super_boss(g->navi) || guardian_moved(g->navi) ? NULL : powers_reward_cross(g->navi, run.depth);
 }
 

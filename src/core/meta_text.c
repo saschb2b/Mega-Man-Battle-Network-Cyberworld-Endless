@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 
+#include "run.h"
+
 /* (in the folders' order, FOLDER_STANDARD first) */
 static const FolderInfo folders[FOLDER_COUNT] = {
 	{ "Standard", "BN6's own starting folder", NULL },
@@ -18,6 +20,13 @@ static const FolderInfo folders[FOLDER_COUNT] = {
 };
 
 const FolderInfo *meta_folder_words(int folder) { return &folders[folder >= 0 && folder < FOLDER_COUNT ? folder : 0]; }
+
+/* (MegaMan's forms by system, as the owner named them, issue #774; the
+ * mix, an older save's run, by what it holds) */
+const char *meta_form_name(int form) {
+	static const char *const names[RUN_FORMS] = { "MIX", "CROSS", "SOUL BN5", "SOUL BN4" };
+	return names[form >= 0 && form < RUN_FORMS ? form : RUN_FORM_MIX];
+}
 
 const char *meta_goal_words(char *buf, size_t n, MetaGoal goal, int arg) {
 	const FolderInfo *f = meta_folder_words(arg);

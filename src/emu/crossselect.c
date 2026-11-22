@@ -39,10 +39,33 @@ _Static_assert(PALS_AT + CROSSSELECT_PAL_BYTES <= ART_AT, "CROSSSELECT's palette
 #define LDR_R2_PC  0x4A0Cu  /* BN6_CROSS_LIST_STORE: ldr r2,[pc,#0x30] (=0x50) */
 #define ADDS_R0_R6 0x1C30u  /* BN6_CROSS_COUNT_END */
 #define ADDS_R0_R2 0x1880u  /* BN6_CROSS_PAL_PICK */
+#define ADDS_R6_1  0x3601u  /* BN6_CROSS_COUNT_STEP */
+#define ADDS_R4_1  0x3401u  /* BN6_CROSS_COUNT_NEXT */
 
 static bool installed;
+/* (the Crosses listed, bit i Cross i: crossselect_active; Falzar's rows as given at the install) */
+static uint16_t active = (1u << BN6_CROSSES) - 1;
+static const uint8_t *falzar_art, *falzar_pals;
 
 bool crossselect_falzar(void) { return installed; }
+
+void crossselect_active(uint16_t crosses) { active = crosses; }
+
+const uint8_t *crossselect_row_art(int cross, bool grey) {
+	uint32_t g = grey ? BN6_CROSS_ROWS : 0;
+	if (cross >= 0 && cross < BN6_CROSS_ROWS && R.data)
+		return R.data + BN6_CROSS_ART - BUS + ((uint32_t)cross + g) * BN6_CROSS_ART_SIZE;
+	if (cross >= BN6_CROSS_ROWS && cross < BN6_CROSSES && falzar_art) return falzar_art + ((uint32_t)cross - BN6_CROSS_ROWS + g) * BN6_CROSS_ART_SIZE;
+	return NULL;
+}
+
+const uint8_t *crossselect_row_pal(int cross, bool chosen) {
+	uint32_t c = chosen ? BN6_CROSS_ROWS : 0;
+	if (cross >= 0 && cross < BN6_CROSS_ROWS && R.data)
+		return R.data + BN6_CROSS_PALS - BUS + ((uint32_t)cross + c) * PAL_SIZE;
+	if (cross >= BN6_CROSS_ROWS && cross < BN6_CROSSES && falzar_pals) return falzar_pals + ((uint32_t)cross - BN6_CROSS_ROWS + c) * PAL_SIZE;
+	return NULL;
+}
 
 /* whether a side stands in form 8 as the Souls' proxy (soulproxy.c), where
  * TenguCross, Falzar's Cross on the same form, is not listed */
@@ -58,12 +81,27 @@ static bool in_soul(void) {
  * its face shown as the cursor reaches it, before any commit) */
 static HookAct list_store(HookRegs *r, void *user) {
 	(void)user;
+	/* (a Cross held but not among the five the forms screen marks: not listed) */
+	if (r->r[4] < BN6_CROSSES && !(active >> r->r[4] & 1)) {
+		r->r[12] = BN6_CROSS_LIST_NEXT | 1;
+		return HOOK_JUMP;
+	}
 	bool tengu = r->r[4] + 1 == BN6_FORM_PROXY;
 	if (r->r[6] < BN6_CROSS_ROWS && !(tengu && in_soul())) {
 		if (tengu) soulproxy_arm(false);
 		return HOOK_CONTINUE;
 	}
 	r->r[12] = BN6_CROSS_LIST_NEXT | 1;
+	return HOOK_JUMP;
+}
+
+/* (r4 the Cross, its flag set and its used bit clear: counted where the list
+ * would list it, among the five marked; BN6's Custom screen keeps its CROSS
+ * button by the count, and shows it only where a row will be listed) */
+static HookAct count_step(HookRegs *r, void *user) {
+	(void)user;
+	if (r->r[4] >= BN6_CROSSES || active >> r->r[4] & 1) return HOOK_CONTINUE;
+	r->r[12] = BN6_CROSS_COUNT_NEXT | 1;
 	return HOOK_JUMP;
 }
 
@@ -112,7 +150,8 @@ static bool gregars(void) {
 	return rom_u32(BN6_CROSS_FLAGS_REF - BUS) == BN6_CROSS_FLAGS && rom_u32(BN6_CROSS_FLAGS - BUS) == BN6_FLAG_HEAT_CROSS &&
 		rom_u16(BN6_CROSS_LIST_BOUND - BUS) == CMP_R4_5 && rom_u16(BN6_CROSS_COUNT_BOUND - BUS) == CMP_R4_5 &&
 		rom_u16(BN6_CROSS_LIST_STORE - BUS) == LDR_R2_PC && rom_u16(BN6_CROSS_COUNT_END - BUS) == ADDS_R0_R6 &&
-		rom_u16(BN6_CROSS_PAL_PICK - BUS) == ADDS_R0_R2;
+		rom_u16(BN6_CROSS_PAL_PICK - BUS) == ADDS_R0_R2 && rom_u16(BN6_CROSS_COUNT_STEP - BUS) == ADDS_R6_1 &&
+		rom_u16(BN6_CROSS_COUNT_NEXT - BUS) == ADDS_R4_1;
 }
 
 bool crossselect_install(const uint8_t *art, const uint8_t *pals) {
@@ -131,7 +170,8 @@ bool crossselect_install(const uint8_t *art, const uint8_t *pals) {
 	emu_write(ART_AT, art, CROSSSELECT_ART_BYTES);
 	bool hooked = emu_hook(BN6_CROSS_LIST_STORE, list_store, NULL) && emu_hook(BN6_CROSS_COUNT_END, count_end, NULL) &&
 		emu_hook(BN6_CROSS_ART_SEND, art_send, NULL) && emu_hook(BN6_CROSS_PAL_PICK, pal_pick, NULL) &&
-		emu_hook(BN6_CROSS_PAL_SEND, pal_send, NULL) && emu_hook(BN6_CROSS_HELP, help, NULL);
+		emu_hook(BN6_CROSS_PAL_SEND, pal_send, NULL) && emu_hook(BN6_CROSS_HELP, help, NULL) &&
+		emu_hook(BN6_CROSS_COUNT_STEP, count_step, NULL);
 	if (hooked) {
 		/* (the table and the bounds last: nothing reads past Gregar's five
 		 * before every reader of a Cross 5-9 is answered) */
@@ -143,6 +183,8 @@ bool crossselect_install(const uint8_t *art, const uint8_t *pals) {
 	}
 	claims_end();
 	installed = hooked;
+	falzar_art = hooked ? art : NULL;
+	falzar_pals = hooked ? pals : NULL;
 	printf("crossselect: %s\n", hooked ? "Falzar's five listed beside Gregar's (flags 0xE7-0xEB, forms 6-10)" : "a hook NOT placed: Gregar's five alone");
 	return hooked;
 }
