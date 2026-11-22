@@ -43,8 +43,11 @@ void party_play_on(bool on);
  * #757); partyscale=1 every guardian scaled for N as a party's door scales
  * him, partyhpper=P and partysteps=S other rules for it (boss_party_dev,
  * tools/party_guardian.py) */
-typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps; } PartyDev;
+/* (join_wait: joinwait=N, a crew's battle's join said N frames late, a test's cut at the join, dive_join.c; issue #751) */
+typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps, join_wait; } PartyDev;
 void party_play_dev(const PartyDev *d);
+/* ... its joinwait in ms (0 none) */
+unsigned party_play_join_wait_ms(void);
 /* The dive's party battle START: its battle id, my seat, the party's
  * size, the input delay and the seats' sessions (each MegaMan's name on
  * the field: party_marks.h); the next guardian's fight its */

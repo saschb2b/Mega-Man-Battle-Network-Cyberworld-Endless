@@ -11,6 +11,7 @@
 #include "director.h"
 #include "director_crew.h"
 #include "dive_crew.h"
+#include "dive_link.h"
 #include "dive_people.h"
 #include "dive_splits.h"
 #include "dive_words.h"
@@ -42,7 +43,9 @@ static struct {
 	uint32_t joined;          /* when MegaMan was taken into a crewmate's battle (ms) */
 	uint32_t battle;          /* its ARENA_STATE battle once taken */
 	Encounter e;              /* ... and its battle */
+	uint32_t answer_at;       /* joinwait's: the join said from then (ms), 0 said */
 } J;
+
 
 void dive_join_reset(void) {
 	memset(&J, 0, sizeof J);
@@ -93,8 +96,30 @@ static void alone(const char *why) {
 	to(JOIN_NONE);
 }
 
+/* this game's own link down while a join stands (issue #751): the owner
+ * fights his battle alone at once, a joiner is back on the map at once,
+ * the band saying so; nobody holds still for an answer that cannot come.
+ * True where it acted */
+static bool link_down(void) {
+	OnlineSnapshot s;
+	online_transport_snapshot(&s);
+	if (s.connected && !s.reconnecting) return false;
+	if (J.stage == JOIN_CALLING) { alone("the link dropped"); return true; }
+	if (J.stage != JOIN_JOINED) return false;
+	fprintf(stderr, "dive: the link dropped as we jumped into %s's battle %d; back on the map (held %u ms)\n", J.name, J.index, held_ms());
+	dive_link_line(dive_join_dropped_words());
+	to(JOIN_NONE);
+	return true;
+}
+
 void dive_join_frame(void) {
 	uint32_t now = SDL_GetTicks(), waited = now - J.since;
+	if (link_down()) return;
+	/* (joinwait's join, said late) */
+	if (J.answer_at && J.stage == JOIN_JOINED && (int32_t)(now - J.answer_at) >= 0) {
+		J.answer_at = 0;
+		send(ONLINE_CREW_JOIN, J.owner, 0);
+	}
 	switch (J.stage) {
 	case JOIN_NONE: {
 		bool on = free_here() && dive_crew_count() > 1;
@@ -136,6 +161,12 @@ uint32_t dive_join_keys(uint32_t keys) {
 void dive_join_crew_state(const CrewState *c) {
 	if (c->stage == ONLINE_CREW_ALONE) {
 		if (J.stage == JOIN_CALLING) alone("nobody jumped in");
+		/* (the battle's owner gone as we jumped in, his link dropped: the server's word, back on the map, issue #751) */
+		else if (J.stage == JOIN_JOINED && c->other == J.owner) {
+			fprintf(stderr, "dive: %s's battle %d went on without us (held %u ms)\n", J.name, J.index, held_ms());
+			dive_link_line(dive_join_dropped_words());
+			to(JOIN_NONE);
+		}
 		return;
 	}
 	if (c->stage != ONLINE_CREW_OFFER) return;
@@ -159,7 +190,10 @@ void dive_join_crew_state(const CrewState *c) {
 	J.owner = c->other;
 	J.index = c->value;
 	snprintf(J.name, sizeof J.name, "%s", crewmate(c->other));
-	send(ONLINE_CREW_JOIN, J.owner, 0);
+	/* (joinwait=N, dev: the join said late, a window for a test's cut at the join) */
+	unsigned wait = party_play_join_wait_ms();
+	J.answer_at = wait ? (SDL_GetTicks() + wait) | 1u : 0;
+	if (!J.answer_at) send(ONLINE_CREW_JOIN, J.owner, 0);
 	fprintf(stderr, "dive: jumping into %s's battle %d, unasked\n", J.name, J.index);
 	to(JOIN_JOINED);
 	J.joined = J.since;

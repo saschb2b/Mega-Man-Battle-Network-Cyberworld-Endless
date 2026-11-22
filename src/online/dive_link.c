@@ -75,7 +75,9 @@ void dive_link_adopt(void) {
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	memset(&L, 0, sizeof L);
-	if (!s.connected || !s.week || !s.week_seed) {
+	/* (a link down as the portal is taken keeps the dive's: it is taken up again as any drop on a layer, issue #751;
+	 * only a game that never heard the week goes on alone) */
+	if (!s.week || !s.week_seed || (!s.connected && !s.reconnecting && !s.error[0] && !s.player_id)) {
 		fprintf(stderr, "dive: no link to keep; the dive goes on alone\n");
 		online_transport_end();
 		dive_people_on(false);
@@ -84,6 +86,10 @@ void dive_link_adopt(void) {
 	link_up(s.week, s.week_seed);
 	L.resumes = s.resumes;
 	fprintf(stderr, "dive: the link kept for week %u's dive\n", s.week);
+	if (!s.connected) {
+		L.down_since = SDL_GetTicks() | 1u;
+		fprintf(stderr, "dive: the link down as the dive begins; kept, taken up again once back\n");
+	}
 }
 
 bool dive_link_on(void) { return L.on; }

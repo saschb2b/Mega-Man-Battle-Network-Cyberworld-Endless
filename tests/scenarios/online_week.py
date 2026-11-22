@@ -221,6 +221,31 @@ for cut in (5, 30, 120):
         soon('join=fighting', '', 900),
     ))
 
+# A link cut during a join (issue #751): nobody held for an answer the drop has made impossible. Beta answers his
+# offers two seconds late (joinwait=120, dev), a window for the cut. The joiner's cut: he is back on the map at once,
+# and Alpha, his only crewmate offered it, fights the battle alone as soon as the server knows (not the offer's 3
+# seconds and 3 more). The owner's cut: Alpha fights his battle alone at once, and Beta is let go as the server tells
+# him it went on without him.
+SLOW = LOUD + ',joinwait=120'
+MANY['join-cut-joiner'] = dict(CAST, START=LOUD, GAMES={'beta': SLOW}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon('join=joined', 'beta', 120),
+    ('@beta', 'do', 'reconnect cut 4'),
+    soon('join=none', 'beta', 30),                  # back on the map at once
+    ('@beta', 'expect', 'doing=map'),
+    soon('join=none', '', 120),                     # Alpha alone within the server's notice
+    soon('doing=battle', '', 300),
+))
+MANY['join-cut-owner'] = dict(CAST, START=LOUD, GAMES={'beta': SLOW}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 2; reconnect cut 4'),
+    soon('join=none', '', 30),                      # Alpha fights it alone at once
+    soon('doing=battle', '', 300),
+    soon('join=none', 'beta', 120),                 # Beta let go as the server tells him
+    ('@beta', 'expect', 'doing=map'),
+))
+
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between the near reach and the far (along x, 64 and 88 world units: protocol.json's crew_near_* and crew_far_*,
 # issue #750) a crew stays as it was, looked at again and again. MegaMan is put
@@ -634,4 +659,24 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', '', 3000),                    # the guardian's words paged on both, the fight on
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
+))
+
+# A queued diver's link cut at the door (issue #751): the server took him out of its queue as it dropped; back, his
+# game joins it again (else, past 10 seconds down, he goes in alone): Beta, come to the door after, finds both in it
+MANY['door-cut'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    soon('crew=2: Alpha Beta', '', 600),
+    to_layer(''),
+    to_layer('beta'),
+    soon('divers~Beta', '', 600),
+    ('sleep', 1.5),
+    to_door(''),
+    soon('door=queued: Alpha', '', 300),
+    ('do', 'reconnect cut 3'),
+    ('sleep', 4.5),                                       # the cut and a try again: the clock's
+    soon('divestate=up', '', 1200),
+    soon('door=queued: Alpha', '', 300),                  # joined again
+    to_door('beta'),
+    ('@beta', 'do', 'mash A 60'),
+    soon('door=queued: Alpha Beta', 'beta', 300),         # the server's queue knows him again
 ))

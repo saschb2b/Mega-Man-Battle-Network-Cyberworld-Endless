@@ -24,6 +24,8 @@
 #define CREW_WAIT_MS 10000    /* the door's wait for crewmates on the layer (issue #752, the owner's call) */
 #define HOLD_FRAMES 45        /* A held this long goes in early: never one press (issue #752) */
 #define CALM_FRAMES 20        /* the door's A only after a chat box has been shut this long: not the paging's */
+#define DOWN_ALONE_MS 10000   /* a queued diver's link down this long: in alone (issue #751) */
+#define REJOIN_MS 500         /* ... back sooner: the queue joined again this long on, his room entered first */
 
 enum { DOOR_NONE, DOOR_ALONE, DOOR_QUEUED, DOOR_FULL, DOOR_STARTED };
 
@@ -48,6 +50,8 @@ static struct {
 	unsigned mine, theirs[ONLINE_SEATS];   /* the damage each seat has dealt (mine this game's) */
 	unsigned sent;            /* ... as last sent or told */
 	unsigned frame;
+	uint32_t down_at;         /* the link down while queued (ms), 0 up; the queue to join again from rejoin_at */
+	uint32_t rejoin_at;
 } Q;
 
 static void send(const uint8_t *m, size_t n) {
@@ -174,6 +178,34 @@ static void fight(void) {
 	else send(m, dive_wire_party(m, ONLINE_PARTY_DAMAGE, Q.party.battle, Q.mine, 0));
 }
 
+/* a queued diver's own link down (issue #751): the server took him out of
+ * the door's queue as it dropped; back within DOWN_ALONE_MS, he joins it
+ * again (once his room is entered again, dive_link.c), else he goes in
+ * alone; never held in a queue that no longer knows him. True while it waits */
+static bool queued_through_a_drop(const OnlineSnapshot *s) {
+	uint32_t now = SDL_GetTicks();
+	bool down = !s->connected || s->reconnecting || s->error[0];
+	if (Q.door != DOOR_QUEUED && Q.door != DOOR_FULL) { Q.down_at = Q.rejoin_at = 0; return false; }
+	if (down) {
+		if (!Q.down_at) { Q.down_at = now | 1u; fprintf(stderr, "dive: the link dropped at the door; waiting on it\n"); }
+		if (now - Q.down_at < DOWN_ALONE_MS) return true;
+		fprintf(stderr, "dive: the link stayed down at the door: in alone\n");
+		Q.door = DOOR_ALONE;
+		Q.down_at = 0;
+		boss_party_set(1);
+		return true;
+	}
+	if (Q.down_at) { Q.down_at = 0; Q.rejoin_at = (now + REJOIN_MS) | 1u; }
+	if (!Q.rejoin_at) return false;
+	if ((int32_t)(now - Q.rejoin_at) < 0) return true;
+	Q.rejoin_at = 0;
+	fprintf(stderr, "dive: the link back at the door: its queue joined again\n");
+	join(s);
+	Q.door = DOOR_QUEUED;
+	Q.q.count = 0;
+	return true;
+}
+
 void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 	if (Q.door == DOOR_STARTED && Q.party.battle) {
 		/* (one field: the party's core fights him, party_play.c; linked: this game's battle, his HP the party's) */
@@ -187,6 +219,7 @@ void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 		return;
 	}
 	Q.me = s->player_id;
+	if (queued_through_a_drop(s)) return;
 	door(s, room);
 	if (Q.door == DOOR_QUEUED && Q.q.place == 1) lead();
 }

@@ -112,6 +112,7 @@ typedef struct {
 	int party_scale;   /* partyscale=1: every guardian scaled for partycore's N as a party's door scales him (boss_party_dev) */
 	int party_hp_per;  /* partyhpper=P: ... his HP P percent of his own more a fighter past the first (0 none; unset the party's rule) */
 	int party_steps;   /* partysteps=S: ... his version S on (unset the party's ladder) */
+	int join_wait;  /* joinwait=N: a crew's battle offered, this game's join said N frames late (a cut at the join tested, issue #751) */
 	int party_view; /* partyview=N: a party's field under partycore drawn as seat N sees it, his marks and HP box (party_marks.h) */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
 	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */
