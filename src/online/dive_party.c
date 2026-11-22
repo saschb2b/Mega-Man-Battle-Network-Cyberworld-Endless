@@ -9,16 +9,21 @@
 #include "boss.h"
 #include "bn6.h"
 #include "bytes.h"
+#include "dive_crew.h"
 #include "dive_join.h"
 #include "dive_words.h"
 #include "emu.h"
 #include "online_transport.h"
 #include "party_play.h"
 #include "pet_look.h"
+#include "talk.h"
 
 #define SEND_EVERY 6          /* frames between the fight's messages, each sent only on a change */
 #define ARENA_START 3         /* ARENA_STATE's stage START (shared/online/README.md) */
 #define ASK_AGAIN_MS 3000     /* a full door's queue asked again for a place (issue #753) */
+#define CREW_WAIT_MS 10000    /* the door's wait for crewmates on the layer (issue #752, the owner's call) */
+#define HOLD_FRAMES 45        /* A held this long goes in early: never one press (issue #752) */
+#define CALM_FRAMES 20        /* the door's A only after a chat box has been shut this long: not the paging's */
 
 enum { DOOR_NONE, DOOR_ALONE, DOOR_QUEUED, DOOR_FULL, DOOR_STARTED };
 
@@ -29,6 +34,12 @@ static struct {
 	uint32_t keys;            /* the pad's last frame, for a press */
 	uint32_t notices;         /* the NOTICEs counted as the join was sent (a refusal is the next) */
 	uint32_t asked_at;        /* the join's last ask (ms) */
+	uint32_t me;              /* this game's session */
+	uint32_t waited_from;     /* the door's wait's start (ms): the join */
+	int pending;              /* crewmates on the layer not yet in the queue */
+	int calm;                 /* frames since a chat box or a talk was last open */
+	bool holding;             /* A pressed with no chat box, held since */
+	int held;                 /* ... its frames */
 	/* the fight */
 	PartyState party;         /* its START: battle, seat, seats, format */
 	bool fighting;
@@ -64,7 +75,35 @@ void dive_party_on(int on) {
 static void join(const OnlineSnapshot *s) {
 	queue(ONLINE_QUEUE_JOIN);
 	Q.notices = s->notice_serial;
-	Q.asked_at = SDL_GetTicks();
+	Q.asked_at = Q.waited_from = SDL_GetTicks();
+}
+
+static void go_in(const char *why) {
+	queue(ONLINE_QUEUE_START);
+	fprintf(stderr, "dive: in at the door: %s\n", why);
+}
+
+static bool queued(uint32_t session) {
+	for (unsigned k = 0; k < Q.q.count; ++k)
+		if (Q.q.e[k].session == session) return true;
+	return false;
+}
+
+/* The leader's door (issue #752, the owner's call of 22 November 2026): it
+ * waits up to CREW_WAIT_MS for his crewmates on the layer, each told he
+ * waits (the server's flare); meanwhile only A held takes the party in */
+static void lead(void) {
+	const CrewMember *m;
+	int pending = 0;
+	for (int k = 0; (m = dive_crew_member(k)) != NULL; ++k)
+		if (m->session != Q.me && m->where == ONLINE_WHERE_LAYER && m->depth == Q.at.depth && !queued(m->session)) ++pending;
+	Q.pending = pending;
+}
+
+/* the seconds the door still waits for the crew (0: it waits for none) */
+static unsigned wait_left(void) {
+	uint32_t waited = SDL_GetTicks() - Q.waited_from;
+	return Q.pending && waited < CREW_WAIT_MS ? (CREW_WAIT_MS - waited + 999) / 1000 : 0;
 }
 
 /* a join the server refused: the door's queue holds its four already (its
@@ -147,15 +186,30 @@ void dive_party_frame(const OnlineSnapshot *s, DiveWay room) {
 		if (Q.fighting) { fprintf(stderr, "dive: the party's fight over\n"); reset(); }
 		return;
 	}
+	Q.me = s->player_id;
 	door(s, room);
+	if (Q.door == DOOR_QUEUED && Q.q.place == 1) lead();
+}
+
+/* the door's own A: pressed with no chat box open for CALM_FRAMES, never
+ * the press that paged MegaMan's words on the way in; `hold`: held then
+ * for HOLD_FRAMES too */
+static bool door_a(uint32_t keys, uint32_t pressed, bool hold) {
+	bool calm = Q.calm >= CALM_FRAMES;
+	if ((pressed & KEY_A) && calm) { Q.holding = true; Q.held = 0; }
+	if (!(keys & KEY_A) || !calm) Q.holding = false;
+	if (!Q.holding || ++Q.held < (hold ? HOLD_FRAMES : 1)) return false;
+	Q.holding = false;
+	return true;
 }
 
 uint32_t dive_party_keys(uint32_t keys) {
 	uint32_t pressed = keys & ~Q.keys;
 	Q.keys = keys;
+	Q.calm = emu_read8(BN6_CHATBOX) || talk_busy() ? 0 : Q.calm + 1;
 	/* (a full door: A goes in alone, every other key MegaMan's own) */
 	if (Q.door == DOOR_FULL) {
-		if (pressed & KEY_A) {
+		if (door_a(keys, pressed, false)) {
 			Q.door = DOOR_ALONE;
 			boss_party_set(1);
 			fprintf(stderr, "dive: in alone, the party full\n");
@@ -163,8 +217,10 @@ uint32_t dive_party_keys(uint32_t keys) {
 		return keys & ~(uint32_t)KEY_A;
 	}
 	if (Q.door != DOOR_QUEUED) return keys;
-	if ((pressed & KEY_A) && Q.q.place == 1) queue(ONLINE_QUEUE_START);
-	if (pressed & KEY_B) {
+	/* (the leader's A: held while the door waits for his crew, a press after it) */
+	if (Q.q.place == 1 && door_a(keys, pressed, wait_left() > 0)) go_in(wait_left() ? "A held, the crew not waited for" : "A");
+	/* (B alone: not the leader's while his crew is waited for, A held is his early way) */
+	if ((pressed & KEY_B) && !(Q.q.place == 1 && wait_left())) {
 		queue(ONLINE_QUEUE_LEAVE);
 		Q.door = DOOR_ALONE;
 		boss_party_set(1);
@@ -240,7 +296,7 @@ void dive_party_draw(int x, int y) {
 	if (Q.door == DOOR_FULL) { look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_full_words()); return; }
 	if (Q.door != DOOR_QUEUED) return;
 	const char *leader = Q.q.count ? Q.q.e[0].name : "";
-	look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_words(Q.q.count, Q.q.place == 1, leader));
+	look_band(x, y + 160 - LOOK_BAND_H - 1, 240, dive_door_words(Q.q.count, Q.q.place == 1, leader, wait_left()));
 }
 
 int dive_party_members(const QueueEntry **out) {
@@ -254,4 +310,5 @@ void dive_party_describe(FILE *f) {
 	if (Q.door == DOOR_QUEUED)
 		for (unsigned k = 0; k < Q.q.count; ++k) fprintf(f, "%s%s", k ? " " : ": ", Q.q.e[k].name);
 	fputc('\n', f);
+	if (Q.door == DOOR_QUEUED && Q.q.place == 1) fprintf(f, "doorwait %u for %d\n", wait_left(), Q.pending);
 }

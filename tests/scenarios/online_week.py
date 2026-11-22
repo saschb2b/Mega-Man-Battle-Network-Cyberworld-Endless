@@ -495,3 +495,31 @@ MANY['door-full-alone'] = dict(CAST, GAMES=GAMES5, STEPS=online.course(
     soon('card=title', 'echo', 600),
     ('expect', 'door=queued: Alpha Beta Gamma Delta'),    # the four's party as it was
 ))
+
+# The door waits for the crew (issue #752, the owner's call of 22 November 2026): Alpha at the guardian's door with
+# Beta, his crewmate, still on the layer. Alpha mashes A as a player pages through the arena's words: the door waits
+# (a press is no "Go in" while a crewmate is on the way) and Beta's band says Alpha waits at the door. Beta comes,
+# mashing A too; the wait is over, Alpha's A takes both in, and they fight the guardian on one field.
+MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    soon('crew=2: Alpha Beta', '', 600),
+    to_layer(''),
+    to_layer('beta'),
+    soon('divers~Beta', '', 600),
+    ('sleep', 1.5),                                       # the crew told where Beta is (crew_vitals_ms)
+    to_door(''),
+    soon('door=queued: Alpha', '', 300),
+    ('expect', 'doorwait~for 1'),                         # waiting for one crewmate
+    ('do', 'mash A 60; wait 10'),                         # A mashed: no "Go in" while he is waited for
+    ('expect', 'door=queued: Alpha'),
+    soon('band~Alpha waits at the door', 'beta', 600),   # Beta told, on the same layer
+    to_door('beta'),
+    ('@beta', 'do', 'mash A 60'),
+    soon('door=queued: Alpha Beta', '', 300),
+    ('expect', 'doorwait=0 for 0'),                       # all here: the wait over
+    ('do', 'wait 30; press A; wait 10'),                  # the leader's A
+    *[step for _ in range(30) for step in (('do', 'press A; wait 20'), ('@beta', 'do', 'press A; wait 20'))],
+    soon('partyfield~seat', '', 3000),                    # the guardian's words paged on both, the fight on
+    soon('partyfield~seat', 'beta', 3000),
+    ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
+))

@@ -145,7 +145,7 @@ class Parties:
         queue.members.append(player.id)
         self.in_queue[player.id] = room.key
         self.send_queue(queue)
-        self.server.dive.flare(player, room)
+        self.server.dive.flare(player, room, queued=queue.members)
 
     def leave(self, player_id, told=True):
         key = self.in_queue.pop(player_id, None)
