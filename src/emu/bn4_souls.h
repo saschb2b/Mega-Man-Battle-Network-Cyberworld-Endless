@@ -31,6 +31,12 @@
 #define BN4_AQUA_BONUS_FORM 0x0800C49Au /* ... cmp r2,#0xb: AquaSoul's, */
 #define BN4_AQUA_BONUS_KIND 0x0800C4A0u /* ... cmp r1,#1: an Aqua chip */
 #define BN4_CHARGED_DOUBLE 0x8000u      /* ... the bonus (ldr r4,=0x8000 at 0x0800C4A4) */
+#define BN4_CHIP_BONUS    0x0800C4C4u   /* r0 the chip, r1 his form: what an uncharged chip's power takes (0x0800D544), ThunSoul's alone: */
+#define BN4_THUN_BONUS_FORM 0x0800C4D0u /* ... cmp r2,#6: ThunSoul's form, its power shown and not left alone (+9 bits 1 and 0), */
+#define BN4_THUN_BONUS_KIND 0x0800C4E4u /* ... cmp r1,#0xc, */
+#define BN4_THUN_BONUS_KIND2 0x0800C4E8u /* ... cmp r1,#2: of those two kinds (BN4's numbering), */
+#define BN4_PARALYSING    0x4000u       /* ... 0x4000 to its power (ldr r4,=0x4000 at 0x0800C4EE): the hit paralyses, the bit BN6's own
+                                         * BN6_CHARGE_BONUS gives ElecCross's charged chips */
 #define BN4_GUTS_RAPID_FORM 0x0800BE50u /* cmp r7,#2: his form (NaviStats +0x24) GutsSoul's, and his request 0x20 not standing
                                          * (tst r6, #0x20): then each B pressed (AI +0x1E bit 2) counts at his AI +0x12, */
 #define BN4_GUTS_RAPID_WINDOW 0x0800BE68u /* ... movs r0,#0xa: its window at his AI +0x11, ten frames from a press, the count

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T20:40:01Z
+* **Update**: multirom/bn4-souls.md (ThunSoul's Elec chips paralyse: BN4's bonus to an uncharged chip, bn4_soul_thun_elec), rom/bn4.md (BN4_CHIP_BONUS and ThunSoul's rule), rom/souls.md (a BN4 Soul's bonus to an uncharged chip, BN6_CHARGED_BONUS_DONE), code/emu.md (soulchips.c's uncharged bonus).

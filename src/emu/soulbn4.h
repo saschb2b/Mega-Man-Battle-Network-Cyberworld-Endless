@@ -51,6 +51,8 @@ void soulbn4_enter(uint32_t obj, int k);
 bool soulbn4_charges(int k, int chip);
 /* ... and what BN4 adds to the power of a chip it charged (BN4_CHIP_CHARGE_BONUS): BN4_CHARGED_DOUBLE, its damage doubled */
 unsigned soulbn4_charge_bonus(int k);
+/* ... and what it adds to an uncharged chip's (BN4_CHIP_BONUS): ThunSoul's BN4_PARALYSING to an Elec chip whose power shows, 0 else */
+unsigned soulbn4_chip_bonus(int k, int chip);
 /* BN4's Souls a run holds, bit n - 1 its Soul n by BN4's numbers (its forms,
  * src/director/souls.h souls_held_bn4), as the engine's bits of them in the
  * mask soulunite_held takes (from SOULS_HELD_BN4, by k): the moved ones

@@ -1,0 +1,8 @@
+[
+ {
+  "name": "ThunSoul's Elec chip not paralysing",
+  "spec": "bn4_soul_thun_elec",
+  "soulbreak": 131072,
+  "what": "the chips' break SOULCHIPS_BREAK_DOUBLE leaves out a BN4 Soul's bonus to an uncharged chip (soulchips.c uncharged_bonus): Ligtnin1's power 0x64 where BN4's chip bonus (0x0800C4C4) gives ThunSoul's Elec chip 0x4064, its paralysis bit"
+ }
+]

@@ -333,6 +333,19 @@ after it, counted from 0. Its three mutations: asked at seven presses
 (`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
 standing at its end.
 
+**ThunSoul's Elec chips paralyse** (found 22 November 2026, after ThunSoul's
+port): BN4's chip use asks a bonus by form for a chip used uncharged too
+(`BN4_CHIP_BONUS`, `0x0800C4C4`), which gives form 6 0x4000 on an Elec chip
+whose power shows (kinds 0xC and 2, not left alone): the power word's
+paralysis bit, the one BN6's own bonus gives ElecCross's charged chips.
+BN6 plays its charged chip's sound for any bonus its own routine returns,
+which BN4 plays for a charged chip alone, so soulchips adds it past that
+sound (`BN6_CHARGED_BONUS_DONE`), its numbers read from BN4's code
+(`soulbn4.c`'s `soulbn4_chip_bonus`). `bn4_soul_thun_elec` holds it: united
+by two Ligtnin1, the first used at t30, its power 0x4064 in both games; its
+mutation leaves the bonus out (0x64). Ligtnin1 alone strikes nothing there,
+so the paralysis's own frames are not yet compared.
+
 ## AquaSoul in BN6's engine
 
 AquaSoul (Blue Moon's Soul 11, form 11) is BN6's Soul 15 (k 2 in

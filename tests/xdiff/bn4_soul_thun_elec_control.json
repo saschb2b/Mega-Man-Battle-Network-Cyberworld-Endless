@@ -1,0 +1,119 @@
+{
+ "about": "BN4's ThunSoul (Soul 6, form 6) using an Elec chip uncharged: BN4's chip bonus (0x0800C4C4, BN4_CHIP_BONUS) gives form 6 an Elec chip whose power shows 0x4000, its hit paralysing, in BN4 Red Sun's own battle, fought twice, each in a process of its own, the same frame for frame: its control. A deck of two Ligtnin1 * (BN4's 166, Elec, the run's 677, the misc unit's); the first Custom screen picks both, moves to UNITE and takes it and the Soul, the second Ligtnin1 given up; A at fight frame 30 uses the first at a MettaurSP at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "04@52",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "20",
+ "folder4": [
+  "34A6",
+  "34A6"
+ ],
+ "deck4": [
+  "34A6",
+  "34A6"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   2
+  ]
+ ]
+}
