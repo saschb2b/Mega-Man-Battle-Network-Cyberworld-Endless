@@ -3,7 +3,7 @@ type: ROM Map
 title: "The game's structures, boot and events"
 description: "ROM and RAM addresses the engine drives BN6 through: boot and warps, MegaMan held on the map, the structures read field by field (`src/emu/bn6.h`), map, flag and key item hooks, run locks, gifts and starting state."
 tags: [rom]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T21:11:34Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:07:00Z }
 sources:
   - id: rom
     resource: "Mega Man Battle Network 6: Cybeast Gregar (USA), SHA-1 89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6, read in tools/romlab and the engine"
