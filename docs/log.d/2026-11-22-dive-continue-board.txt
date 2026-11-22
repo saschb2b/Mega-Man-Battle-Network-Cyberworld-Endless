@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-21T23:17:57Z
-* **Update**: online/shared-dive.md (back to the dive: CONTINUE straight into an unfinished dive and its link, the Board posted by the server from a dive's end, the owner's calls of 22 November 2026 on issue #759, the decisions' rows), online/weekly-net.md (how an unfinished dive goes on, reversed: the title's CONTINUE), GUIDE.md (CONTINUE into a dive, the board as a dive ends), code/online.md (`dive_link.c`'s call on CONTINUE).
