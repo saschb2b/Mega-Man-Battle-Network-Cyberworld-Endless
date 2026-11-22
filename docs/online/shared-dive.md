@@ -1362,6 +1362,35 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
 
+## A dive's end, and a reward taken once (22 November 2026)
+
+Issue #769, left over from #757:
+
+- **A dive's end screen of its own.** A dive that ends, deleted for
+  good on a crew's field or in any other way, opens the run's RESULT
+  as a dive's ([The engine's screens](../engine/ui.md)): DEEP NET on
+  its band, "The dive is over", the layer reached, the crew's battles
+  fought and won (counted in the dive's record as each ends,
+  `weekly_crew_battle`, `weekly.sav`'s last two bytes), and the dive's
+  place on the week's Board: the server posts the end (Back to the
+  dive, below) and answers with its Board, so the dive's link is kept
+  up to six seconds after the end for it (`dive_mail_told`, pumped by
+  the screen through `weekly_end_pump`), the row "Asking..." meanwhile,
+  then "3rd", or "No link" where the link was down at the end or the
+  Board never came. MegaMan says "That's our dive,Lan..." and "The
+  portal's open. Let's dive again!", never the normal run's "Dad's
+  backup worked!".
+- **An HP reward taken once.** BN6's results add an HP recovery to the
+  field's own MegaMan as they show (bn6f's sub_802C170, phase `0x10`),
+  and the battle's sub-mode runs a few frames on in phase `0x14` as
+  they close, then `0x00` and `0x04` ([BN6's battles](../rom/battle.md)).
+  The field read each MegaMan's HP in every phase but `0x10`, so those
+  frames gave the battle's owner the recovery and `director_crew_over`
+  gave it again. The field now reads HP only in the fight's own phases,
+  the Custom screen's and the fight's (`0x08`, `0x0C`):
+  every seat's HP as its fight ended, the reward given once in each
+  run (`online-week/crew-reward-once`: the owner on 20 HP of 100 ends on 70 with an HP+50 reward, 100 before).
+
 ## Back to the dive (22 November 2026)
 
 Issue #759, found playing the shared dive with three to five games: a

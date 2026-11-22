@@ -1,6 +1,7 @@
 /* dive_mail.h; dive_link_mail (dive_link.h) */
 #include "dive_mail.h"
 
+#include <SDL.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -13,6 +14,10 @@
 #include "dive_traces.h"
 #include "dive_wire.h"
 #include "dive_words.h"
+#include "online_mail.h"
+#include "online_transport.h"
+#include "online_week.h"
+#include "weekly.h"
 
 static struct {
 	int layers, shared, most, crew, parties, party;   /* the dive's company (analytics_dive_together) */
@@ -20,7 +25,47 @@ static struct {
 
 void dive_mail_reset(void) { memset(&M, 0, sizeof M); }
 
-void dive_mail_told(void) { analytics_dive_together(M.layers, M.shared, M.most, M.crew, M.parties, M.party); }
+/* the dive's end's wait for the Board's answer (the server posts the end and sends WEEK_BOARD at once, week.py) */
+#define END_WAIT_MS 6000
+static struct {
+	bool on;
+	uint32_t since, serial;
+} A;
+
+void dive_mail_end_stop(void) {
+	if (!A.on) return;
+	A.on = false;
+	weekly_end_pump = NULL;
+	online_transport_end();
+}
+
+/* a frame of the wait (the end screen's, weekly_end_pump): the Board come in with this diver's place, or the time up */
+static void end_pump(void) {
+	if (!A.on) return;
+	online_mail_frame();
+	const WeekBoard *b = online_week_board();
+	if (b->serial != A.serial) {
+		weekly_end_placed(b->place > 0 ? b->place : -1);
+		fprintf(stderr, "dive: the Board's answer: place %d\n", b->place);
+		dive_mail_end_stop();
+	} else if (SDL_GetTicks() - A.since > END_WAIT_MS) {
+		weekly_end_placed(-1);
+		fprintf(stderr, "dive: no answer from the Board\n");
+		dive_mail_end_stop();
+	}
+}
+
+bool dive_mail_told(bool linked) {
+	analytics_dive_together(M.layers, M.shared, M.most, M.crew, M.parties, M.party);
+	dive_mail_end_stop();
+	if (!linked) { weekly_end_placed(-1); return false; }
+	A.on = true;
+	A.since = SDL_GetTicks();
+	A.serial = online_week_board()->serial;
+	weekly_end_placed(0);
+	weekly_end_pump = end_pump;
+	return true;
+}
 
 /* the parties begun and the crews formed, counted for the statistics */
 static void together(const uint8_t *m, size_t n) {

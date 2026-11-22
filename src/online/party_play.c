@@ -337,6 +337,7 @@ static void open_core(void) {
 	PP.b.spread = !PP.dev.lead;   /* (partylead=1: the enemies' aim on the lead alone, BN6's own) */
 	PP.b.end = PP.dev.end;   /* (partyend=N on every game of a party: its test of the end) */
 	PP.b.del = PP.dev.del;   /* (partydel=MASK with it: those seats deleted then, the crew's pull-back's test) */
+	PP.b.reward = PP.dev.reward;   /* (partyreward=N: the results' reward this entry, an HP reward's test, issue #769) */
 	inputs_said();
 	PP.core = party_core_open(R.data, ROM_SIZE, PP.run_rom, &PP.b, why, sizeof why);
 	if (!PP.core) { failed(why); return; }
