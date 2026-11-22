@@ -420,9 +420,11 @@ palettes' bytes as tiles and colours. Derived from the layout
 (`BN4_SOUL_FACE_COUNT`); the look of 4 November that saw all twelve unite
 watched the sprite and the name, not the window. Their sprites and
 pictures are whole (the table above counts them). A run that gives Blue
-Moon's six needs their faces from somewhere: Blue Moon's ROM, BN5's of
-the same Navis where BN5 has one (ProtoSoul's and NumberSoul's), or the
-Soul Navi's own mugshot.
+Moon's six needs their faces from somewhere. **The owner's call (22
+November 2026): MegaMan's plain face for all six of Blue Moon's Souls**,
+his normal mood face, the first of Red Sun's own faces, with the turns'
+digits under it as for Red Sun's six. No Blue Moon ROM is read, now or
+later.
 
 ## The shared room
 
@@ -513,4 +515,6 @@ What the room does not do yet:
   NetBattle with BN4 Souls on both sides, needs a room a seat; no
   NetBattle takes a BN4 Soul yet (the differential's `souls6` alone).
 - **Blue Moon's six.** `room4_fits` refuses a form past
-  `BN4_SOUL_FACE_COUNT`: they have no face in Red Sun's ROM (above).
+  `BN4_SOUL_FACE_COUNT`: they have no face in Red Sun's ROM (above). By
+  the owner's call the room takes MegaMan's plain face for them, as each
+  of them is moved (AquaSoul first).
