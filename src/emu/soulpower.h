@@ -21,6 +21,7 @@ enum {
 	SOULPOWER_BREAK_CHARGE = 1,   /* a Soul's charged shot charged 10 frames longer than BN5's */
 	SOULPOWER_BREAK_FAMILY = 2,   /* a Soul's charged shot run as the next Soul's family */
 	SOULPOWER_BREAK_ELEMENT = 4,  /* a Soul's element none */
+	SOULPOWER_BREAK_SHUFFLE = 8,  /* SearchSoul's SHUFFLE left out (soulshuffle.c) */
 };
 
 /* The abilities as the core starts, after the Souls' code: the tables

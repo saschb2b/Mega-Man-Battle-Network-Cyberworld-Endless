@@ -1,0 +1,8 @@
+[
+ {
+  "name": "SearchSoul's SHUFFLE left out",
+  "spec": "soul_search_shuffle",
+  "soulbreak": 128,
+  "what": "no button: the cursor's A where it would stand takes nothing, no 0x113 played"
+ }
+]

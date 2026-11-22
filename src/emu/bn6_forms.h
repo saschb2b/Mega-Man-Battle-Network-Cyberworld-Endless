@@ -109,6 +109,12 @@
 #define BN6_ELEMENT_CHAOS     0x06        /* u8 UNITE's: 1 for Chaos Unison (the art's palette and the picture's 0xD) */
 #define BN6_ELEMENT_STATE     0x07        /* u8 element 0xB's: 0 lit, 1 grey, 2 chosen */
 #define BN6_ELEMENT_DECK      0x08        /* u32 a chip's: its entry of BN6_BATTLE_DECK */
+/* BN6's own SHUFFLE on the Custom screen (BN5's SearchSoul's, kept: element 8 and 9 of types 4 and 5, A on it reshuffles the
+ * chips not picked, 0x0802722x's mode by BN6's helpers 0x08029788 and 0x0802983C, the screen's +0x16 counting them) */
+#define BN6_SHUFFLE_TEST      0x0802A5D6u /* whether the button stands: element 8 not type 8, MegaMan's form 0, 5, 8, 0xA or 0xB and his
+                                             NaviStats' +0x60 1 (push {r4,lr}, its one caller 0x080280E8) */
+#define BN6_SHUFFLE_COUNT     0x080280FCu /* movs r0,#1: the shuffles a turn gives, less the screen's +0x16 (BN5's SearchSoul's 3, 0x08023D0C) */
+#define BN6_SHUFFLE_COUNT_NEXT 0x080280FEu
 #define BN6_ELEMENT_EMBLEM    2           /* BN6_ELEMENT_TYPE: element 0xB standing (BN6's emblem, BN5's UNITE) */
 #define BN6_CUSTOM_UNITE      (BN6_CUSTOM_ELEMENTS + 0xB * BN6_ELEMENT_SIZE) /* element 0xB (BN5_CUSTOM_UNITE's twin) */
 #define BN6_CUSTOM_NAVI       (BN6_CUSTOM_SCREEN + 0x10) /* u8 the Navi the side fights as, 0 MegaMan (both games' stand rules want 0) */

@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T22:23:51Z
+* **Update**: multirom/souls.md (SearchSoul's SHUFFLE as BN6's own button, which BN6 kept from BN5's: his Soul passes its test with three a turn), rom/souls.md (BN6's SHUFFLE: its test, its count, its step), game/team-protoman.md (SearchSoul's SHUFFLE built), code/emu.md (soulshuffle.c).
