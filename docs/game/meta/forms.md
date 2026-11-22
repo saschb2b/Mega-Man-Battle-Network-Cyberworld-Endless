@@ -112,15 +112,24 @@ has every game's ROM, which the Deep Net's dive asks.
 
 ## What is not done yet
 
-- **The Souls to come.** Team ProtoMan's six (BN5's Souls 1-6) are not in
-  SOUL BN5's list until their branch moves them ([Team ProtoMan](../team-protoman.md)), so HeatMan
-  pays one of Team Colonel's there today; BN4's twelve come one by one
-  (ThunSoul alone now, [BN4's Souls on BN6's proxy form](../../multirom/bn4-souls.md)),
-  and a SOUL BN4 run's Souls reach UNITE beside BN5's
-  (`soulunite_bn4_bits`, `encounter.c`): ThunSoul, won from a guardian, unites
-  in the next battle (`tests/scenarios/forms.py`).
+- **The Souls to come.** A form's list holds each Soul once it stands
+  in BN6's engine (`soulunite_has_bn5` for BN5's, `soulpower_bn4` for
+  BN4's), so the rest join as they land with no change here. Team
+  ProtoMan's NapalmSoul stands since #804: HeatMan, ChargeMan and BN4's
+  FireMan pay it by Fire in SOUL BN5, and it unites in the next battle
+  (`tests/scenarios/forms.py`); its five teammates follow
+  ([Team ProtoMan](../team-protoman.md)). Of BN4's twelve, ThunSoul stands
+  ([BN4's Souls on BN6's proxy form](../../multirom/bn4-souls.md)), handed
+  to UNITE beside BN5's (`soulunite_bn4_bits`, `encounter.c`), and unites
+  in the next battle the same way.
 - **The flag.** `--dev forms` stays until every Soul has landed; the
   orchestrating session switches it on for good.
+
+## Where the run's forms are seen
+
+The PET's forms screen lists the run's Crosses, five marked for
+CROSSSELECT (`run.cross_active`), and its Souls with their kind and chip
+([The forms screen](forms-screen.md)).
 
 ## How it is kept
 

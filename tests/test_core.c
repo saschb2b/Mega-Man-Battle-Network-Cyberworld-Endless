@@ -6367,8 +6367,9 @@ static void test_soul_lights(void) {
 static bool forms_falzar = true;
 bool crossselect_falzar(void) { return forms_falzar; }
 bool soulunite_ready(void) { return true; }
-/* (Team Colonel's six stand; none of Team ProtoMan's, whose code these tests do not move) */
-bool soulunite_has_bn5(int soul) { return soul >= 7 && soul <= 12; }
+/* (Team Colonel's six stand; of Team ProtoMan's, whose code these tests do not move, NapalmSoul where a check says) */
+static bool forms_napalm;
+bool soulunite_has_bn5(int soul) { return (soul >= 7 && soul <= 12) || (forms_napalm && soul == 4); }
 bool soulpower_bn4(int k) { return k == 0; }   /* (ThunSoul's power attack placed) */
 bool save_slot_weekly(void) { return false; }   /* (save.c's: the normal slot, as these tests' runs are) */
 /* (loot_souls.c's lean, which these tests do not link: souls_lean's) */
@@ -6393,6 +6394,13 @@ static void test_forms_pay(void) {
 	CHECK(forms_pay(RUN_FORM_SOUL_BN5, 24, 0, 1) == 7, "forms: BN5's Colonel his ColonelSoul in SOUL BN5");
 	p = forms_pay(RUN_FORM_SOUL_BN5, 1, 0, 77);
 	CHECK(p >= 7 && p <= 12 && p == forms_pay(RUN_FORM_SOUL_BN5, 1, 0, 77), "forms: HeatMan's NapalmSoul not moved, Team Colonel's by the seed (%d)", p);
+	forms_napalm = true;   /* (NapalmSoul moved: Team ProtoMan's join the list as each lands) */
+	CHECK(forms_pay(RUN_FORM_SOUL_BN5, 1, 0, 77) == 4 && forms_pay(RUN_FORM_SOUL_BN5, 5, 0, 77) == 4 &&
+		forms_pay(RUN_FORM_SOUL_BN5, GUARDIAN_BN4_FIRST + 4, 0, 77) == 4, "forms: HeatMan, ChargeMan and BN4's FireMan pay NapalmSoul by Fire");
+	CHECK(forms_pay(RUN_FORM_SOUL_BN5, GUARDIAN_TEAM_FIRST + 3, 0, 77) == 4, "forms: NapalmMan his own NapalmSoul");
+	p = forms_pay(RUN_FORM_SOUL_BN5, 5, 1u << 3, 77);
+	CHECK(p >= 7 && p <= 12, "forms: NapalmSoul held, ChargeMan one the run lacks of those standing (%d)", p);
+	forms_napalm = false;
 	int other = 0;
 	for (uint32_t seed = 0; seed < 40; ++seed) other += forms_pay(RUN_FORM_SOUL_BN5, 1, 0, seed) != p;
 	CHECK(other > 0, "forms: the lacked pick never moves with the seed");
