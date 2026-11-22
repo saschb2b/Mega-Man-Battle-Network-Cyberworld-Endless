@@ -346,6 +346,25 @@ the next.
   panels from t525 to the end, never pushed) PASS against BN5's battle;
   `soul_magnet_double` is BN6's battle alone held to BN5's course (CanGard
   60 to 0 at t383 in both); their mutations FAIL.
+  **ProtoSoul** (1): UNITE by a Sword chip, his look, his charged shot
+  (0x03: BN5's sword family's sub-family 1, a WideSword, run by the
+  Souls' copy of it as 0xC6), his B+Left (0x04: BN5's Guard family 0x1F
+  with its sub-family 4, Reflect, run by the chips' copy of it, BN6's
+  0x6F, whose one state takes the sub-family itself;
+  `tools/xsoul.py`'s `shared_families` maps a power attack's family a
+  track before moved), and his A's chip charge of a Sword chip, doubled
+  and run by BN5's sword family, which steps him two panels in (BN5's
+  0x080EC14E and 0x080EC196): `soul_proto`, `soul_proto_shot`,
+  `soul_proto_left` (CanGard's shot turned back at t279; a Guard1 in each
+  folder, never dealt, so that the Guard unit's code is in place as the
+  battle starts, where the trace reads the moved ranges) and
+  `soul_proto_charge` (BN5's CanGard of 180 HP, 0x52: 180 to 20 at t244 in
+  both, the Sword's 80 doubled) PASS against BN5's battle, their
+  mutations FAIL. Two differences of the engines' own, written down as
+  legit: his afterimage's sprite (list 0's 1, BN6's 0x60: mask 019), and
+  BN6's plain buster shot writing his attack variables' +0xC by a byte
+  where BN5's writes the word, so the 0x114 his B+Left leaves there keeps
+  its +0xD in BN6 (mask 050).
   Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
   where the games part on a fourth-kind object of his (BN5's let go at
   t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison

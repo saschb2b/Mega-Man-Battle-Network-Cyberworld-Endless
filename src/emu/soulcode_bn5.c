@@ -36,18 +36,19 @@ static const XvBlock blocks[] = {
 	{ 0x080EF68A, 0x080EF732, SOULS_CODE + 0x11F2, 0x8EE8BB09u },   /* toad */
 	{ 0x0800F064, 0x0800F074, SOULS_TEAM_CODE + 0x0, 0x75473BBAu },   /* gyro */
 	{ 0x0800F0C8, 0x0800F0D6, SOULS_TEAM_CODE + 0x10, 0x792469BEu },   /* gyro */
-	{ 0x0800F6A6, 0x0800F6BA, SOULS_TEAM_CODE + 0x22, 0xCDB6DD24u },   /* gyro */
-	{ 0x0800F840, 0x0800F864, SOULS_TEAM_CODE + 0x40, 0x31D93F10u },   /* napalm */
-	{ 0x0800F9A0, 0x0800F9B2, SOULS_TEAM_CODE + 0x70, 0x38BF72CDu },   /* magnet */
-	{ 0x08011BDC, 0x08011BF8, SOULS_TEAM_CODE + 0x90, 0xEF72EFF7u },   /* gyro */
-	{ 0x080124C8, 0x080126FC, SOULS_TEAM_CODE + 0xB0, 0x51203869u },   /* magnet */
-	{ 0x080CD3C0, 0x080CD484, SOULS_TEAM_CODE + 0x2F0, 0x70233E35u },   /* magnet */
-	{ 0x080D4C48, 0x080D4D3E, SOULS_TEAM_CODE + 0x3C0, 0x46C0D807u },   /* magnet */
-	{ 0x080EC7DE, 0x080EC884, SOULS_TEAM_CODE + 0x4C2, 0x92C75B5Du },   /* magnet */
-	{ 0x080EEA40, 0x080EEADC, SOULS_TEAM_CODE + 0x570, 0x693ED61Bu },   /* gyro */
-	{ 0x080EEC86, 0x080EED92, SOULS_TEAM_CODE + 0x612, 0x510A6346u },   /* magnet */
-	{ 0x080EEE82, 0x080EEF6C, SOULS_TEAM_CODE + 0x722, 0xE102E408u },   /* napalm */
-	{ 0x080EF38A, 0x080EF440, SOULS_TEAM_CODE + 0x812, 0x6425E095u },   /* napalm */
+	{ 0x0800F604, 0x0800F660, SOULS_TEAM_CODE + 0x20, 0x080F1E37u },   /* proto */
+	{ 0x0800F6A6, 0x0800F6BA, SOULS_TEAM_CODE + 0x82, 0xCDB6DD24u },   /* gyro */
+	{ 0x0800F840, 0x0800F864, SOULS_TEAM_CODE + 0xA0, 0x31D93F10u },   /* napalm */
+	{ 0x0800F9A0, 0x0800F9B2, SOULS_TEAM_CODE + 0xD0, 0x38BF72CDu },   /* magnet */
+	{ 0x08011BDC, 0x08011BF8, SOULS_TEAM_CODE + 0xF0, 0xEF72EFF7u },   /* gyro */
+	{ 0x080124C8, 0x080126FC, SOULS_TEAM_CODE + 0x110, 0x51203869u },   /* magnet */
+	{ 0x080CD3C0, 0x080CD484, SOULS_TEAM_CODE + 0x350, 0x70233E35u },   /* magnet */
+	{ 0x080D4C48, 0x080D4D3E, SOULS_TEAM_CODE + 0x420, 0x46C0D807u },   /* magnet */
+	{ 0x080EC7DE, 0x080EC884, SOULS_TEAM_CODE + 0x522, 0x92C75B5Du },   /* magnet */
+	{ 0x080EEA40, 0x080EEADC, SOULS_TEAM_CODE + 0x5D0, 0x693ED61Bu },   /* gyro */
+	{ 0x080EEC86, 0x080EED92, SOULS_TEAM_CODE + 0x672, 0x510A6346u },   /* magnet */
+	{ 0x080EEE82, 0x080EEF6C, SOULS_TEAM_CODE + 0x782, 0xE102E408u },   /* napalm */
+	{ 0x080EF38A, 0x080EF440, SOULS_TEAM_CODE + 0x872, 0x6425E095u },   /* napalm */
 };
 static const XvData data[] = {
 	{ 0x0800F7CE, 0x0800F7D0, XV_RAW },
@@ -103,6 +104,8 @@ static const XvData data[] = {
 	{ 0x080EF006, 0x080EF008, XV_RAW },
 	{ 0x080EF008, 0x080EF00C, XV_POOL },
 	{ 0x080EF698, 0x080EF6A4, XV_POOL },
+	{ 0x0800F656, 0x0800F658, XV_RAW },
+	{ 0x0800F658, 0x0800F660, XV_POOL },
 	{ 0x08012524, 0x08012528, XV_POOL },
 	{ 0x08012528, 0x08012530, XV_RAW },
 	{ 0x080125B0, 0x080125B8, XV_POOL },
@@ -131,9 +134,11 @@ static const XvData data[] = {
 };
 /* every word of the pools and tables: BN5's, and BN6's in its place */
 static const XvNumber words[] = {
+	{ 0x0800F658, 0x00000114u, 0x00000114u },   /* a number */
+	{ 0x0800F65C, 0x00000914u, 0x00000914u },   /* a number */
 	{ 0x08011CA4, 0x000A0006u, 0x000A0006u },   /* a number */
 	{ 0x08011D48, 0x00004000u, 0x00004000u },   /* a number */
-	{ 0x08012524, 0x08012528u, SOULS_TEAM_CODE + 0x110u },   /* data moved with the code */
+	{ 0x08012524, 0x08012528u, SOULS_TEAM_CODE + 0x170u },   /* data moved with the code */
 	{ 0x080125B0, 0x080125B8u, SOULS_CODE + 0x388u },   /* data moved with the code */
 	{ 0x080125B4, 0x080125C0u, SOULS_CODE + 0x390u },   /* data moved with the code */
 	{ 0x080126C0, 0x080126D0u, SOULS_CODE + 0x4A0u },   /* data moved with the code */
@@ -166,15 +171,15 @@ static const XvNumber words[] = {
 	{ 0x080CAD3C, 0x02034000u, 0x0203FF60u },   /* BN5's per-side words of ColonelSoul's obstacle strike (0x080CACE0, 8 bytes a side): the RAM plan's RAM_COLONEL (free_space.h), which BN6 leaves alone */
 	{ 0x080CAD40, 0x02034000u, 0x0203FF60u },   /* BN5's per-side words of ColonelSoul's obstacle strike (0x080CACE0, 8 bytes a side): the RAM plan's RAM_COLONEL (free_space.h), which BN6 leaves alone */
 	{ 0x080CAD44, 0x02034000u, 0x0203FF60u },   /* BN5's per-side words of ColonelSoul's obstacle strike (0x080CACE0, 8 bytes a side): the RAM plan's RAM_COLONEL (free_space.h), which BN6 leaves alone */
-	{ 0x080CD3D0, 0x080CD3D4u, SOULS_TEAM_CODE + 0x304u },   /* moved with the code */
-	{ 0x080CD3D4, 0x080CD3E1u, SOULS_TEAM_CODE + 0x311u },   /* a jump table's entry, moved */
-	{ 0x080CD3D8, 0x080CD43Du, SOULS_TEAM_CODE + 0x36Du },   /* a jump table's entry, moved */
+	{ 0x080CD3D0, 0x080CD3D4u, SOULS_TEAM_CODE + 0x364u },   /* moved with the code */
+	{ 0x080CD3D4, 0x080CD3E1u, SOULS_TEAM_CODE + 0x371u },   /* a jump table's entry, moved */
+	{ 0x080CD3D8, 0x080CD43Du, SOULS_TEAM_CODE + 0x3CDu },   /* a jump table's entry, moved */
 	{ 0x080CD3DC, 0x0800325Du, 0x08003459u },   /* a jump table's entry, BN6's twin (project:cangard) */
 	{ 0x080CD47C, 0x3205FF01u, 0x3205FF01u },   /* a number */
 	{ 0x080CD480, 0x00004200u, 0x00004200u },   /* a number */
-	{ 0x080D4C58, 0x080D4C5Cu, SOULS_TEAM_CODE + 0x3D4u },   /* moved with the code */
-	{ 0x080D4C5C, 0x080D4C69u, SOULS_TEAM_CODE + 0x3E1u },   /* a jump table's entry, moved */
-	{ 0x080D4C60, 0x080D4CA7u, SOULS_TEAM_CODE + 0x41Fu },   /* a jump table's entry, moved */
+	{ 0x080D4C58, 0x080D4C5Cu, SOULS_TEAM_CODE + 0x434u },   /* moved with the code */
+	{ 0x080D4C5C, 0x080D4C69u, SOULS_TEAM_CODE + 0x441u },   /* a jump table's entry, moved */
+	{ 0x080D4C60, 0x080D4CA7u, SOULS_TEAM_CODE + 0x47Fu },   /* a jump table's entry, moved */
 	{ 0x080D4C64, 0x080138EBu, 0x08016C8Bu },   /* a jump table's entry, BN6's twin (project:cangard) */
 	{ 0x080EBDD4, 0x080EBDD8u, SOULS_CODE + 0xA04u },   /* moved with the code */
 	{ 0x080EBDD8, 0x080EBDEDu, SOULS_CODE + 0xA19u },   /* a jump table's entry, moved */
@@ -193,7 +198,7 @@ static const XvNumber words[] = {
 	{ 0x080EC068, 0x0000FFE0u, 0x0000FFE0u },   /* a number */
 	{ 0x080EC06C, 0x0101001Eu, 0x0101001Eu },   /* a number */
 	{ 0x080EC070, 0x0000001Eu, 0x0000001Eu },   /* a number */
-	{ 0x080EC814, 0x080EC818u, SOULS_TEAM_CODE + 0x4FCu },   /* moved with the code */
+	{ 0x080EC814, 0x080EC818u, SOULS_TEAM_CODE + 0x55Cu },   /* moved with the code */
 	{ 0x080EC818, 0x080CA485u, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC81C, 0x080CB29Bu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC820, 0x0800E17Du, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
@@ -204,7 +209,7 @@ static const XvNumber words[] = {
 	{ 0x080EC834, 0x080E86EFu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC838, 0x080E9E8Bu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC83C, 0x080D151Fu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
-	{ 0x080EC840, 0x080124C9u, SOULS_TEAM_CODE + 0xB1u },   /* a jump table's entry, moved */
+	{ 0x080EC840, 0x080124C9u, SOULS_TEAM_CODE + 0x111u },   /* a jump table's entry, moved */
 	{ 0x080EC844, 0x0800E5ABu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC848, 0x0802D62Fu, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
 	{ 0x080EC84C, 0x0802D669u, SOUL_STUB_NONE | 1u },   /* a sub-family the Souls play none of (SUB_TABLES): never run */
@@ -225,9 +230,9 @@ static const XvNumber words[] = {
 	{ 0x080EE878, 0x080EE881u, SOULS_CODE + 0xE7Du },   /* a jump table's entry, moved */
 	{ 0x080EE87C, 0x080EE919u, SOULS_CODE + 0xF15u },   /* a jump table's entry, moved */
 	{ 0x080EE904, 0x080EE908u, SOULS_CODE + 0xF04u },   /* data moved with the code */
-	{ 0x080EEA50, 0x080EEA54u, SOULS_TEAM_CODE + 0x584u },   /* moved with the code */
-	{ 0x080EEA54, 0x080EEA5Du, SOULS_TEAM_CODE + 0x58Du },   /* a jump table's entry, moved */
-	{ 0x080EEA58, 0x080EEAB5u, SOULS_TEAM_CODE + 0x5E5u },   /* a jump table's entry, moved */
+	{ 0x080EEA50, 0x080EEA54u, SOULS_TEAM_CODE + 0x5E4u },   /* moved with the code */
+	{ 0x080EEA54, 0x080EEA5Du, SOULS_TEAM_CODE + 0x5EDu },   /* a jump table's entry, moved */
+	{ 0x080EEA58, 0x080EEAB5u, SOULS_TEAM_CODE + 0x645u },   /* a jump table's entry, moved */
 	{ 0x080EEB00, 0x080EEB08u, SOULS_CODE + 0xF6Cu },   /* moved with the code */
 	{ 0x080EEB04, 0x00000600u, 0x00000600u },   /* a number */
 	{ 0x080EEB08, 0x080EEB0Du, 0x080F11EDu },   /* a jump table's entry, BN6's twin (map:bytes) */
@@ -235,27 +240,27 @@ static const XvNumber words[] = {
 	{ 0x080EEBF0, 0x080EEBFDu, SOULS_CODE + 0xF91u },   /* a jump table's entry, moved */
 	{ 0x080EEBF4, 0x080EEC45u, SOULS_CODE + 0xFD9u },   /* a jump table's entry, moved */
 	{ 0x080EEBF8, 0x080EEC63u, SOULS_CODE + 0xFF7u },   /* a jump table's entry, moved */
-	{ 0x080EEC94, 0x080EEC98u, SOULS_TEAM_CODE + 0x624u },   /* moved with the code */
-	{ 0x080EEC98, 0x080EECA5u, SOULS_TEAM_CODE + 0x631u },   /* a jump table's entry, moved */
-	{ 0x080EEC9C, 0x080EED07u, SOULS_TEAM_CODE + 0x693u },   /* a jump table's entry, moved */
-	{ 0x080EECA0, 0x080EED69u, SOULS_TEAM_CODE + 0x6F5u },   /* a jump table's entry, moved */
+	{ 0x080EEC94, 0x080EEC98u, SOULS_TEAM_CODE + 0x684u },   /* moved with the code */
+	{ 0x080EEC98, 0x080EECA5u, SOULS_TEAM_CODE + 0x691u },   /* a jump table's entry, moved */
+	{ 0x080EEC9C, 0x080EED07u, SOULS_TEAM_CODE + 0x6F3u },   /* a jump table's entry, moved */
+	{ 0x080EECA0, 0x080EED69u, SOULS_TEAM_CODE + 0x755u },   /* a jump table's entry, moved */
 	{ 0x080EED48, 0x1E05FF08u, 0x1E05FF08u },   /* a number */
 	{ 0x080EEDA0, 0x080EEDA4u, SOULS_CODE + 0x1034u },   /* moved with the code */
 	{ 0x080EEDA4, 0x080EEDADu, SOULS_CODE + 0x103Du },   /* a jump table's entry, moved */
 	{ 0x080EEDA8, 0x080EEE5Du, SOULS_CODE + 0x10EDu },   /* a jump table's entry, moved */
 	{ 0x080EEE44, 0x080EEE4Cu, SOULS_CODE + 0x10DCu },   /* data moved with the code */
-	{ 0x080EEE90, 0x080EEE94u, SOULS_TEAM_CODE + 0x734u },   /* moved with the code */
-	{ 0x080EEE94, 0x080EEEA1u, SOULS_TEAM_CODE + 0x741u },   /* a jump table's entry, moved */
-	{ 0x080EEE98, 0x080EEED1u, SOULS_TEAM_CODE + 0x771u },   /* a jump table's entry, moved */
-	{ 0x080EEE9C, 0x080EEF49u, SOULS_TEAM_CODE + 0x7E9u },   /* a jump table's entry, moved */
-	{ 0x080EEF40, 0x080EEF44u, SOULS_TEAM_CODE + 0x7E4u },   /* data moved with the code */
+	{ 0x080EEE90, 0x080EEE94u, SOULS_TEAM_CODE + 0x794u },   /* moved with the code */
+	{ 0x080EEE94, 0x080EEEA1u, SOULS_TEAM_CODE + 0x7A1u },   /* a jump table's entry, moved */
+	{ 0x080EEE98, 0x080EEED1u, SOULS_TEAM_CODE + 0x7D1u },   /* a jump table's entry, moved */
+	{ 0x080EEE9C, 0x080EEF49u, SOULS_TEAM_CODE + 0x849u },   /* a jump table's entry, moved */
+	{ 0x080EEF40, 0x080EEF44u, SOULS_TEAM_CODE + 0x844u },   /* data moved with the code */
 	{ 0x080EEF7C, 0x080EEF80u, SOULS_CODE + 0x1134u },   /* moved with the code */
 	{ 0x080EEF80, 0x080EEF89u, SOULS_CODE + 0x113Du },   /* a jump table's entry, moved */
 	{ 0x080EEF84, 0x080EF00Du, SOULS_CODE + 0x11C1u },   /* a jump table's entry, moved */
 	{ 0x080EF008, 0x0705FF11u, 0x0705FF11u },   /* I/O or video, the same */
-	{ 0x080EF398, 0x080EF39Cu, SOULS_TEAM_CODE + 0x824u },   /* moved with the code */
-	{ 0x080EF39C, 0x080EF3A5u, SOULS_TEAM_CODE + 0x82Du },   /* a jump table's entry, moved */
-	{ 0x080EF3A0, 0x080EF41Du, SOULS_TEAM_CODE + 0x8A5u },   /* a jump table's entry, moved */
+	{ 0x080EF398, 0x080EF39Cu, SOULS_TEAM_CODE + 0x884u },   /* moved with the code */
+	{ 0x080EF39C, 0x080EF3A5u, SOULS_TEAM_CODE + 0x88Du },   /* a jump table's entry, moved */
+	{ 0x080EF3A0, 0x080EF41Du, SOULS_TEAM_CODE + 0x905u },   /* a jump table's entry, moved */
 	{ 0x080EF418, 0x0000141Du, 0x0000141Du },   /* a number */
 	{ 0x080EF698, 0x080EF69Cu, SOULS_CODE + 0x1204u },   /* moved with the code */
 	{ 0x080EF69C, 0x080EF6A5u, SOULS_CODE + 0x120Du },   /* a jump table's entry, moved */
@@ -267,6 +272,7 @@ static const XvNumber calls[] = {
 	{ 0x0800F078, 0x080C34A6u, XN_CODE + 0x87FF },   /* the navis' copy of a type's module (TYPES) */
 	{ 0x0800F0CC, 0x080C382Cu, 0x080C5D38u },   /* search, by place, SAME */
 	{ 0x0800F0DA, 0x080C34D2u, XN_CODE + 0x882B },   /* the navis' copy of a type's module (TYPES) */
+	{ 0x0800F61E, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F670, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F6AC, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
 	{ 0x0800F7A4, 0x0800FE56u, 0x08012642u },   /* map:calls, DIFF (the Souls' audit) */
@@ -312,7 +318,7 @@ static const XvNumber calls[] = {
 	{ 0x080124E2, 0x080E3464u, 0x080E4500u },   /* map:bytes, SAME */
 	{ 0x080124F4, 0x0800B334u, 0x0800CC72u },   /* map:bytes, SAME */
 	{ 0x080124FE, 0x0800AFB0u, 0x0800C8F8u },   /* map:calls, LAYOUT */
-	{ 0x08012512, 0x080CD466u, SOULS_TEAM_CODE + 0x397u },   /* moved */
+	{ 0x08012512, 0x080CD466u, SOULS_TEAM_CODE + 0x3F7u },   /* moved */
 	{ 0x0801253C, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
 	{ 0x08012550, 0x0800B334u, 0x0800CC72u },   /* map:bytes, SAME */
 	{ 0x0801256A, 0x0800AFB0u, 0x0800C8F8u },   /* map:calls, LAYOUT */
@@ -463,7 +469,7 @@ static const XvNumber calls[] = {
 	{ 0x080EECB6, 0x0800D1D2u, 0x0800F2B6u },   /* map:bytes, SAME */
 	{ 0x080EECBA, 0x0800DB3Cu, 0x0800FDB6u },   /* map:calls+bytes, SAME */
 	{ 0x080EECD4, 0x0800C6CAu, 0x0800E2CAu },   /* project:cangard, SAME */
-	{ 0x080EECE8, 0x080D4D1Au, SOULS_TEAM_CODE + 0x493u },   /* moved */
+	{ 0x080EECE8, 0x080D4D1Au, SOULS_TEAM_CODE + 0x4F3u },   /* moved */
 	{ 0x080EECF2, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
 	{ 0x080EECF8, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
 	{ 0x080EED18, 0x08000598u, 0x080005CCu },   /* project:cangard, SAME */
@@ -525,6 +531,8 @@ static const XvNumber calls[] = {
 };
 static const XvImm imms[] = {
 	{ 0x0800F066, THUMB_MOVS, 4, 0, 0x2, 0x3F },   /* its overlay's kind: 2 in BN5, 63 in BN6 (Team ProtoMan's, past the Navis') */
+	{ 0x0800F628, THUMB_MOVS, 0, 0, 0x13, 0xC6 },   /* its family: CurAction 0x13 in BN5, the Souls' 0xc6 in BN6 (xattack_grow.h) */
+	{ 0x0800F652, THUMB_MOVS, 0, 0, 0x1F, 0x6F },   /* its family: CurAction 0x1f in BN5, the Souls' 0x6f in BN6 (xattack_grow.h) */
 	{ 0x0800F68A, THUMB_MOVS, 0, 0, 0x3A, 0xC1 },   /* its family: CurAction 0x3a in BN5, the Souls' 0xc1 in BN6 (xattack_grow.h) */
 	{ 0x0800F6B6, THUMB_MOVS, 0, 0, 0x3C, 0xCA },   /* its family: CurAction 0x3c in BN5, the Souls' 0xca in BN6 (xattack_grow.h) */
 	{ 0x0800F7CA, THUMB_MOVS, 0, 0, 0x40, 0xC2 },   /* its family: CurAction 0x40 in BN5, the Souls' 0xc2 in BN6 (xattack_grow.h) */
@@ -597,6 +605,7 @@ static const XvByte bytes[] = {
 };
 /* its reads of BN5's AI data's Soul fields, which BN6's AI data holds otherwise: the Souls' C answers from BN6_SOULS */
 static const SoulField fields[] = {
+	{ 0x0800F644, 2, 1, BN6_SOUL_CHAOS },   /* AI data +0x12 */
 	{ 0x0800F7D4, 0, 2, BN6_SOUL_CHIP },   /* AI data +0x32 */
 	{ 0x080EC18E, 0, 1, BN6_SOUL_CHAOS },   /* AI data +0x12 */
 };
@@ -614,6 +623,8 @@ static const SoulPower powers[] = {
 	{ 0x09, 0x0800F6A7u },   /* GyroSoul's charged shot */
 	{ 0x15, 0x0800F7FDu },   /* MagnetSoul's charged shot */
 	{ 0x25, 0x0800F9A1u },   /* MagnetSoul's B+Left */
+	{ 0x03, 0x0800F605u },   /* ProtoSoul's charged shot */
+	{ 0x04, 0x0800F62Du },   /* ProtoSoul's B+Left */
 };
 /* BN5's songs its code plays that Gregar has otherwise: copied into an empty slot (soulpower.c) */
 static const SoulSong songs[] = {

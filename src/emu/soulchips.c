@@ -86,7 +86,7 @@ static HookAct charge_test(HookRegs *r, void *user) {
 		r->r[12] = (SOULS_THUMB + (ok4 ? ANSWER_YES : ANSWER_NO)) | 1;
 		return HOOK_JUMP;
 	}
-	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
+	int kind = soul == SOUL_SHADOW || soul == SOUL_PROTO ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
 		soul == SOUL_NAPALM ? KIND_FIRE : soul == SOUL_MAGNET ? KIND_ELEC : -1;
 	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(soulchips_flags(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
 		soulkinds_of(chip) == kind && !(breaks & SOULCHIPS_BREAK_CHARGE);
@@ -95,7 +95,7 @@ static HookAct charge_test(HookRegs *r, void *user) {
 }
 
 /* (a charged chip's bonus by the form, r0 whether it was charged, its first instruction) KnightSoul's, ToadSoul's,
- * NapalmSoul's and MagnetSoul's double, none for the rest (0x080103C8; ProtoSoul's too, once his stands) */
+ * ProtoSoul's, NapalmSoul's and MagnetSoul's double, none for the rest (0x080103C8) */
 static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]);
@@ -104,7 +104,7 @@ static HookAct charge_bonus(HookRegs *r, void *user) {
 		r->r[0] = r->r[0] && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? soulbn4_charge_bonus(soulbn4_k(soul)) : 0;
 		return HOOK_RETURN;
 	}
-	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_NAPALM || soul == SOUL_MAGNET;
+	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_PROTO || soul == SOUL_NAPALM || soul == SOUL_MAGNET;
 	r->r[0] = r->r[0] && doubled && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;
 }
@@ -157,8 +157,9 @@ static HookAct front(HookRegs *r, void *user) {
 	return HOOK_CONTINUE;
 }
 
-/* (the chip's family read as the chip use returns it, r4 its record, r7 its attack's variables) ShadowSoul's charged
- * sword: BN5's sword family, moved, which takes his paths (BN5 0x080EB762 on: a slash before the enemy); NapalmSoul's
+/* (the chip's family read as the chip use returns it, r4 its record, r7 its attack's variables) ShadowSoul's and
+ * ProtoSoul's charged sword: BN5's sword family, moved, which takes their paths (BN5 0x080EB762 on: ShadowSoul's slash
+ * before the enemy; 0x080EC14E and 0x080EC196: ProtoSoul's); NapalmSoul's
  * charged chip (a Fire chip, the only kind his charge takes): BN5's Napalm Bomb, moved (0x0801043A: family 0x4B) */
 static HookAct sword(HookRegs *r, void *user) {
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
@@ -168,7 +169,8 @@ static HookAct sword(HookRegs *r, void *user) {
 		r->r[12] = (uint32_t)(uintptr_t)user | 1;
 		return HOOK_JUMP;
 	}
-	if (soul_of(r->r[5]) != SOUL_SHADOW || !hook_read8(r->r[7] + BN6_ATTACK_CHARGED) || soulkinds_of(chip) != KIND_SWORD ||
+	int soul = soul_of(r->r[5]);
+	if ((soul != SOUL_SHADOW && soul != SOUL_PROTO) || !hook_read8(r->r[7] + BN6_ATTACK_CHARGED) || soulkinds_of(chip) != KIND_SWORD ||
 		hook_read8(r->r[4] + BN6_CHIP_FAMILY) != BN6_FAMILY_SWORD || (breaks & SOULCHIPS_BREAK_SWORD))
 		return HOOK_CONTINUE;
 	r->r[0] = sword_family;

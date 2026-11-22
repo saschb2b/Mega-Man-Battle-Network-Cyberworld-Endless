@@ -1,0 +1,20 @@
+[
+ {
+  "name": "ProtoSoul's Sword chip not charged",
+  "spec": "soul_proto_charge",
+  "soulbreak": 65536,
+  "what": "the chip charge's test refuses his Sword where BN5's 0x08010902 takes a Sword chip for form 1: A held charges nothing, the chip used at once"
+ },
+ {
+  "name": "ProtoSoul's charged chip not doubled",
+  "spec": "soul_proto_charge",
+  "soulbreak": 131072,
+  "what": "the charged chip's bonus none for ProtoSoul where BN5's 0x080103C8 doubles it (form 1): CanGard 180 to 100, not 20"
+ },
+ {
+  "name": "ProtoSoul's charged sword run by BN6's sword family",
+  "spec": "soul_proto_charge",
+  "soulbreak": 1048576,
+  "what": "his charged Sword runs BN6's own sword family where BN5's runs its own, whose ProtoSoul paths (0x080EC14E, 0x080EC196) step him two panels in: his state and place"
+ }
+]
