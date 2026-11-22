@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T13:45:00Z
-* **Update**: online/shared-dive.md (the crew side by side, issue #777: the partners beside the lead in his column, the lead in the middle row; viruses' hits measured before and after; the spike's layout).
