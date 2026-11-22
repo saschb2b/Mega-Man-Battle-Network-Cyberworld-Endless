@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: multirom/bn4-souls.md (GutsSoul's rapid buster moved: the unit GutsRapid at 0xD9, the count in his Souls block, its hooks and proof; the owner's call on Blue Moon's six faces, MegaMan's plain face), rom/bn4.md (the rapid buster's counter and request, BN4_GUTS_RAPID_*), rom/souls.md (the rapid buster's row: BN6_RAPID_*, BN6_SOUL_PRESSES, BN6_SOUL_WINDOW, XC4_SOULS_SIDE), devtools/differential.md (the presses rule held to BN6's Souls block; the lock-out's glow, a buster shot's row, the plain shot's state), code/emu.md (soulrapid.c).
 * **Update**: rom/battle.md (BN6's draw hides the battle's displays and pauses nothing; BN5's pause before its time up and BN6's twin, issue #794), game/liberation/building/stage-2-battle.md (the time up pauses the battle first), devtools/scenarios.md (the board's `foughton`).
 * **Update**: game/meta/forms.md (Team ProtoMan's Souls in SOUL BN5's list as each stands, NapalmSoul paid by Fire and united in the next battle; the forms screen linked).
 * **Update**: multirom/souls.md (MagnetSoul in BN6's engine: UNITE, element, charged shot, B+Left by the Souls' own copy of BN5's misc family, Elec chip charge doubled, the magnet panel's push spared), rom/souls.md (MagnetSoul's addresses, BN5's third-kind 0x3F and 0x75, the magnet panel's exemption), game/team-protoman.md (unit 8: MagnetSoul built), multirom/one-net.md (MagnetSoul's exemption in place).
