@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/shared-dive.md (a partner's own Custom screen and results show his HP, a fallen diver sees no results of BN6's, issue #757).
 * **Update**: online/shared-dive.md (a full guardian's door told to the fifth, his keys his own and a place asked for again; the door's party named on the plates, leader first; the calls taken, issue #753), devtools/scenarios.md (the `door` line), devtools/play.md and devtools/headless-shot.md (the `guardian` dev step), code/online.md (`dive_party.c`'s full door).
 * **Update**: online/arena/dropped-link.md (a dropped link on a dive layer: said in the band, the link started again as long as the dive lasts, the server's refusal said plainly).
 * **Update**: online/shared-dive.md (Room for the crew: what a layer leaves of BN6's 16 NPC objects, counted over 40 seeds a depth; a full crew's MegaMen before the traces', the crew then the nearest seated, a diver with no MegaMan still named and ringed where he stands, `diveroom=N`; issue #755), code/online.md (`dive_seats.c`).
