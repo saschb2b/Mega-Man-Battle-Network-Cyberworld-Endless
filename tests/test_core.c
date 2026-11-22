@@ -4791,9 +4791,9 @@ static void test_free_space(void) {
 		{ "their code", SOULS_TEAM_CODE, SOULS_TEAM_CODE_END }, { "their attacks' sprites", SOULS_TEAM_ART, SOULS_TEAM_ART_END },
 		{ "MegaMan in each of their Souls", SOULS_TEAM_SPRITES, SOULS_TEAM_SPRITES_END },
 		{ "the arm's rows", SOULS_ARM_ROWS, SOULS_ARM_ROWS_END },
-		{ "their loadouts", SOULS_TEAM_LOADOUTS, SOULS_TEAM_LOADOUTS_END }, { "their hooks' Thumb", SOULS_TEAM_THUMB, SOULS_TEAM_THUMB_END },
+		{ "their loadouts", SOULS_TEAM_LOADOUTS, SOULS_TEAM_LOADOUTS_END },
 		{ "the charge times", SOULS_CHARGES, SOULS_CHARGES_END }, { "their chaos power attacks", SOULS_TEAM_CHAOS, SOULS_TEAM_CHAOS_END },
-		{ "their overlays' masks", SOULS_TEAM_OVERLAYS, SOULS_TEAM_OVERLAYS_END },
+		{ "their overlays' masks", SOULS_TEAM_OVERLAYS, SOULS_TEAM_OVERLAYS_END }, { "their hooks' Thumb", SOULS_TEAM_THUMB, SOULS_TEAM_THUMB_END },
 	};
 	regions_apart("Team ProtoMan's Souls' room", team_souls, (int)(sizeof team_souls / sizeof *team_souls), FREE_TEAM_SOULS, FREE_TEAM_SOULS_END);
 	CHECK(SOULS_ARM_ROWS_END - SOULS_ARM_ROWS >= 0x44u * (3 + 6 + 6), "the Souls' grown arm rows: room for BN6's, Team Colonel's and Team ProtoMan's");
