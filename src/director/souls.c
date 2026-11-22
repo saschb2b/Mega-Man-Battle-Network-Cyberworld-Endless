@@ -7,7 +7,9 @@
 #include "bn6.h"
 #include "bn6_forms.h"
 #include "emu.h"
+#include "forms.h"
 #include "guardians.h"
+#include "loot_souls.h"
 #include "run.h"
 #include "save_blob.h"
 
@@ -64,6 +66,16 @@ void souls_note_layer(void) {
 }
 
 unsigned souls_layer(void) { return souls.layer; }
+
+void souls_lean(void) {
+	loot_soul_souls(souls.layer);
+	unsigned kinds = 0;
+	for (int p = 1; p <= SOULS_TEAM; ++p)
+		if (souls.team_layer >> (p - 1) & 1) kinds |= 1u << (forms_power_kind(RUN_FORM_SOUL_BN5, p) - 1);
+	for (int p = 1; p <= SOULS_OF_BN4; ++p)
+		if (souls.bn4_layer >> (p - 1) & 1) kinds |= 1u << (forms_power_kind(RUN_FORM_SOUL_BN4, p) - 1);
+	loot_soul_kinds(kinds);
+}
 
 bool soul_held(int navi) {
 	if (guardian_team(navi)) return souls.team >> (navi - GUARDIAN_TEAM_FIRST) & 1;

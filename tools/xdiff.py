@@ -100,6 +100,7 @@ import io
 import json
 import multiprocessing
 import os
+import re
 import shutil
 import subprocess
 import sys
@@ -111,6 +112,7 @@ from xdiff_snap import (ROOT, WORK, OBJ_NAME_ID, OBJ_ACTION, ROM as ROM_RANGE, S
 from xdiff_masks import attribute, mask_of, renderer_ranks, who  # noqa: E402
 from xdiff_events import Translations, call_diffs, draw_diffs, matched_draws  # noqa: E402
 import xdiff_bn4  # noqa: E402
+import xdiff_bn4_souls  # noqa: E402
 import shards  # noqa: E402
 
 SPECS = os.path.join(ROOT, 'tests', 'xdiff')
@@ -358,6 +360,9 @@ MEGAMAN_READS = {
     'turns': lambda o, ai, p: ai[0x0F] if ai else None,
     'loadout': lambda o, ai, p: ai[4:9].hex() + ai[0x11:0x12].hex() if ai else None,
     'sprite': lambda o, ai, p: o.o32(SPRITE['T1'] + 0x18) - 4 if o.o32(SPRITE['T1'] + 0x18) else 0,
+    # (his frame's record as an offset into his sprite, +0x1C less +0x18: read from the sprite's own bytes, so a sprite room
+    # that does not hold his art gives another)
+    'sprite frame': lambda o, ai, p: (o.o32(SPRITE['T1'] + 0x1C) - o.o32(SPRITE['T1'] + 0x18)) & 0xFFFFFFFF,
     'palette': lambda o, ai, p: o.o8(SPRITE['T1'] + 4),
     'element': lambda o, ai, p: o.o8(0x0E),   # (his object's element, BN6's +0x0E: a Soul's, soulpower.c)
     'unite': lambda o, ai, p: p[PLAYER_UNITE + 7] if p and len(p) > PLAYER_UNITE + 7 else None,
@@ -399,6 +404,8 @@ def check_player(trace, canon, expect):
     for what, pairs in expect.get('megaman', {}).items():
         for t, want in pairs:
             got = by_t.get(t, {}).get(what)
+            if isinstance(want, str):   # ({bn4_power:FORM}: a BN4 Soul's charged shot's number in BN6's grown table, read as the engine lays it out)
+                want = re.sub(r'\{bn4_power:(\d+)\}', lambda m: f'{xdiff_bn4_souls.bn6_power(int(m.group(1))):02x}', want)
             want = int(want, 0) if isinstance(want, str) and what != 'loadout' else want
             if got != want:
                 bad.append(f'BN{trace["game"]}: MegaMan\'s {what} at t{t} {got if not isinstance(got, int) else hex(got)}, not '

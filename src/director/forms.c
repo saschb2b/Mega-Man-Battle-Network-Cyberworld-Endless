@@ -15,6 +15,7 @@
 #include "run.h"
 #include "save.h"
 #include "soulbn4.h"
+#include "soulpower.h"
 #include "souls.h"
 #include "soulunite.h"
 #include "super_boss.h"
@@ -71,6 +72,10 @@ static int own_power(int form, int navi) {
 	return 0;
 }
 
+bool forms_soul_felt(int form, int navi) {
+	return (own_power(RUN_FORM_SOUL_BN5, navi) && form != RUN_FORM_SOUL_BN5) || (own_power(RUN_FORM_SOUL_BN4, navi) && form != RUN_FORM_SOUL_BN4);
+}
+
 int forms_kind(int navi) {
 	if (navi >= 0 && navi < (int)sizeof bn6_kinds && bn6_kinds[navi]) return bn6_kinds[navi];
 	int p = own_power(RUN_FORM_SOUL_BN5, navi);
@@ -79,12 +84,14 @@ int forms_kind(int navi) {
 	return p ? bn4_powers[p - 1].kind : KIND_NONE;
 }
 
-/* (a BN4 Soul stands where BN4's Souls are moved in: soulbn4.h, each read
- * from BN4's ROM by its place among those moved) */
+/* (a BN4 Soul stands where it unites in this core: its rows read from
+ * BN4's ROM and its charged shot's code moved, soulbn4.h, and its power
+ * attack placed in the grown table, which UNITE asks, soulpower.h; each by
+ * its place among those moved) */
 static bool bn4_ready(int p) {
 	SoulBn4 s;
 	for (int k = 0; k < SOULS_BN4; ++k)
-		if (soulbn4_read(k, &s) && s.form == p) return true;
+		if (soulbn4_read(k, &s) && s.form == p && soulpower_bn4(k)) return true;
 	return false;
 }
 
@@ -100,7 +107,8 @@ static bool forms_ready(int form, int p) {
 bool forms_offered(int form) {
 	if (form == RUN_FORM_CROSS) return true;
 	if (form == RUN_FORM_SOUL_BN5) return XR[XROM_BN5_COLONEL_US].data != NULL;
-	return form == RUN_FORM_SOUL_BN4 && XR[XROM_BN4_RED_SUN_US].data != NULL && SOULS_BN4 > 0;
+	/* (BN4's Souls unite in the Souls' engine BN5's ROM builds: soulunite.h) */
+	return form == RUN_FORM_SOUL_BN4 && XR[XROM_BN4_RED_SUN_US].data != NULL && XR[XROM_BN5_COLONEL_US].data != NULL && SOULS_BN4 > 0;
 }
 
 /* (a seeded pick that leaves the run's generator alone) */
@@ -211,6 +219,8 @@ void forms_rival_pay(char *words, size_t n) {
  * run, as a deleted Navi opens his Cross start: noted as he falls, and
  * from the rivals' records for the falls before forms) */
 void forms_note_fall(int navi) {
+	/* (the week's net opens nothing: docs/game/meta/weekly-net.md) */
+	if (save_slot_weekly()) return;
 	int f = guardian_older(navi) || guardian_team(navi) ? RUN_FORM_SOUL_BN5 : guardian_bn4(navi) ? RUN_FORM_SOUL_BN4 : RUN_FORM_MIX;
 	if (f == RUN_FORM_MIX || (profile.forms_open >> f & 1)) return;
 	profile.forms_open |= (uint8_t)(1u << f);

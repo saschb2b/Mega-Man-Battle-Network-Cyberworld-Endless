@@ -3,7 +3,7 @@ type: Engine Mechanism
 title: "A NetBattle through a dropped link"
 description: "A NetBattle of two that survives a dropped link (issue #180, protocol v21): the server holds the battle with the place, each game keeps its keys and asks for the ones the link lost (ARENA_HASH's 0xFFFFFFFC), the battle fought to its end with every hash agreeing."
 tags: [online, arena, netcode]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T06:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:00:00Z }
 ---
 
 # A NetBattle through a dropped link
@@ -111,6 +111,32 @@ alone this time`, `The Board's portal links the next dive`). The
 scenarios `online-week/link-down-5s`, `-30s` and `-120s` cut the second
 diver's own link on a layer for that long; each sees the other again,
 their crew forms again and a crewmate's battle is joined after it.
+
+**A link cut during a join** (issue #751). Nobody holds still for an
+answer a drop has made impossible; each case ends in the battle joined,
+the battle fought alone or the map, at once:
+
+- *The joiner's own link drops while he jumps in:* his game is back on
+  the map at once (`dive_join.c`, the band saying `Link lost. The battle
+  goes on without us`), and the server, taking him out of his crew,
+  settles the offer at once (`crews.py`'s `split`): the battle starts
+  with those still in it, or the owner fights it alone. Measured: Beta
+  back 35 ms after his join, Alpha alone 52 ms after his call (before,
+  held 6 seconds, the offer's window and the late answer's).
+- *The owner's own link drops while his battle is offered:* he fights it
+  alone at once (4 ms), and the server tells the ones offered it that it
+  went on without them (CREW_STATE alone, its other the owner): back on
+  the map at once.
+- *A diver queued at a guardian's door:* the server takes him out of the
+  queue as his link drops; back within 10 seconds his game joins it again
+  (`dive_party.c`, once his room is entered again), else he goes in
+  alone, never held in a queue that no longer knows him.
+- *The portal's way in:* a dive begun with its link down keeps it and
+  takes it up again as any drop on a layer, not solo for the dive.
+
+The scenarios `online-week/join-cut-joiner`, `join-cut-owner`,
+`door-cut` and `portal-cut` cut each; `--dev joinwait=N` makes a game
+answer an offer N frames late, the window a joiner's cut needs.
 
 **Tested.** `tests/test_arena.c` plays two network links back to back
 through a pipe that loses both ways' messages for three ticks, then

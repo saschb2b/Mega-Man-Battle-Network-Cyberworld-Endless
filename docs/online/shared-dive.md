@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T12:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T13:45:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -450,6 +450,55 @@ the session building it, and is his to turn over.
 | The traces against the crew | A full crew's three MegaMen before the traces' marks and sparkle | The traces first (as built); no traces on a dive with others |
 | One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
 | More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
+
+## Nothing over BN6's screens (22 November 2026)
+
+Issue #781, from the second play of the dive: our drawing over the
+game's picture landed on BN6's own and on our cards in five places, the
+joiner's band over a crew battle's Custom screen, the divers' names and
+rings across the act's and the guardian's title cards (the arrival's
+mark running out unseen under them), a plate's layer run into its HP
+("L1100/100"), a partner's mark on the field's bottom row cut at the
+picture's foot, and a dropped game's crewmates drawn frozen under
+"Reconnecting...".
+
+**One answer** (`director_cover`, `src/director/director_cover.c`): what
+stands over the layer's field now, nothing, BN6's chat box, a title card
+of ours (an act's, an area's, a guardian's), BN6's fade or a warp, or no
+field at all (a battle, BN6's menus, SELECT's map). Everything the dive
+draws over the field asks it first: under a chat box only what stands
+above the box, under the rest nothing at all. The names, rings, the
+arrival's mark, the crew's plates and the band all go through it, so the
+next thing drawn there cannot land on a screen of BN6's either. The
+state's `cover` line names it.
+
+- **The joiner's band** stands on the map while the join is sent, over
+  the crew battle's staging (the still picture of the map, made in a
+  burst, too short to read alone), and on the field for two and a half
+  seconds from its first Custom screen's close; never over a Custom screen
+  (`party_play_drawn_over`). `band` in the state says what is drawn.
+- **The feed waits:** a line said while the band cannot show it (a card,
+  a chat box, a fade, a battle) keeps its three and a half seconds for
+  when it can, rather than spending them unseen.
+- **Title cards:** no names, rings or arrival mark under one; the
+  arrival's two seconds are counted from the card's end.
+- **The plates:** six pixels between a crewmate's layer and his HP
+  ("L1 100/100").
+- **The field's marks:** where a mark and its HP would reach BN6's chip
+  name at the picture's foot (the field's bottom row), they stand over
+  the MegaMan's head, the name over the HP as everywhere.
+- **A dropped link:** while it is down (dropped, tried again, or given
+  up) the crew is put away, the puppets, names, rings, dots and plates
+  none, until the room's divers are heard again; the band's
+  "Reconnecting..." is what `band` says.
+
+Seen headless with two games on a local server (the scenario
+`online-week/drawn-over-nothing`): Beta arriving where Alpha stood, his
+act's title card with no name or ring across it and the arrival's mark
+after it; Beta's link cut for four seconds, his crew put away under
+"Reconnecting..." and back with the link; Beta taken into Alpha's battle
+reading nothing over the field's Custom screen and "Alpha's battle!" on
+the field once it closed.
 
 ## As built
 
@@ -1323,13 +1372,38 @@ the partners standing still; `partyaim=2` the partners still alone,
 iteration N), with `foes 01@52` or `53@52` on a layer and the log's
 `party: iteration ... HP` lines.
 
+Measured on the bench, three MegaMen standing still, a virus in one row:
+with the partners behind the lead, a Mettaur in row 1 or row 3 walked to
+the lead's row and struck him, ten times running, and a Gunner in any row
+struck the lead first. A virus goes for the front column, where the lead
+alone stood. So nothing was wrong with the aim, and positions deciding who
+is hit is BN6's own rule and stays; what was unfair is where the crew
+stood.
+
+**The crew side by side** (22 November 2026, taken under the owner's
+direction of 21 November and on his answer on the issue; his to turn
+over): on a party's field, a guardian's and a crew's alike, the partners
+stand beside the lead in his column, rows 1 and 3, a fourth behind him
+(column 1, row 2), then the rest (`party_field.c`'s `panels`), a hole of
+the battle's field passed over. **The lead keeps the middle row**, BN6's
+own place for him (column 2, row 2): chosen over the first partner in the
+middle (the order of seats on screen top to bottom) and over the lead on
+row 1. Every game of the field makes the same list, so the seats' hashes
+agree as before; a linked fighter fights his own battle, untouched. On the
+bench after it: a Mettaur in row 1 strikes the partner in row 1 and the
+lead in row 2 is untouched, in row 3 the partner in row 3; a Gunner in
+row 1 or 3 strikes the partner in its row first, then the others. The
+scenario `tests/scenarios/battle_crew_rows.py` holds it (`spike N hit H
+lead whole|hit|down`, the spike's battle in the state's words): seen to
+fail with the old layout, the lead struck first.
+
 ## The spike: four on one field (15 November 2026)
 
 `--dev party=N` (`src/online/party_field.c`) grows one of the run's own
 battles to N MegaMen on side 0 on one core, the way `--dev arena2v2`
 grows a NetBattle: the battle's list rewritten at its spawn
-(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, the back
-column first) and each partner's keys written into his AI data at the
+(`BN6_SPAWN_ENTITIES`, the partners on side 0's free panels, beside the
+lead in his column since issue #777, then behind him) and each partner's keys written into his AI data at the
 battle loop's key copy (`BN6_KEY_COPY`), here a script. BN6 keeps four
 actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
 `BN6_BATTLE_PLAYERS`), so four fit its tables. Seen headless with
@@ -1481,7 +1555,15 @@ and the owner's four answers:
   an earlier checkpoint find it spent), not in `Run`. There is no state
   of being down: it is decided in the battle's last frame. The band says
   "Phew... The crew pulled us back!" on the fallen's game and "Lan,we
-  shared our HP. They're back!" on a giver's. `--dev partydel=MASK` with
+  shared our HP. They're back!" on a giver's. While he is down and the
+  field fights on, his band says what a win does for him (issue #780):
+  "Down! The crew can pull us back", or, his pull-back spent, "Down...
+  One more fall ends the dive"; only while the fight itself runs, never
+  over a Custom screen or the results, the field otherwise BN6's
+  (`party_play.c`'s `down_now`, `party_marks_down`; the scenario
+  `online-week/crew-down-told`). A partner's HP box is his own then too,
+  at 0: it had shown BN6's box, the lead's HP, once his MegaMan left the
+  field (`party_marks.c`). `--dev partydel=MASK` with
   `partyend=N`, the same on every game of a field, deletes the MegaMen of
   those seats (bit 0 seat 0) at the battle loop's iteration N, as a hit
   would, and its enemies 60 iterations later: the scenarios' way to a deletion on a week's layer, which the

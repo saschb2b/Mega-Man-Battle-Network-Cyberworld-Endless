@@ -623,6 +623,35 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         await a.send(protocol.crew(SPEC["crew_battle"], 0, 1))
         self.assertEqual(crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))["value"], 1)
 
+    async def test_an_offer_settled_at_once_by_a_drop(self):
+        """A link dropped during a join (issue #751): the joiner's drop starts the battle with the rest, or the owner
+        alone, at once; the owner's drop tells the ones offered his battle it went on without them."""
+        crews.JOIN_WAIT = 30.0
+        try:
+            a, b = [await self.connect(n) for n in ("Alpha", "Beta")]
+            for client in (a, b):
+                await self.enter(client, 2)
+            await self.crew_of(a, b)
+            await a.send(protocol.crew(SPEC["crew_battle"], 0, 3))
+            await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+            await b.drop()
+            self.clients.remove(b)
+            alone = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))
+            self.assertEqual(alone["value"], 3)
+            self.assertFalse(self.server.crews.offers)
+            # (the owner's drop: Beta, back and crewed again, told Alpha's battle went on without him)
+            b = await self.connect("Beta", resume=True)
+            await self.enter(b, 2)
+            await self.crew_of(a, b)
+            await a.send(protocol.crew(SPEC["crew_battle"], 0, 4))
+            await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_offer"])
+            await a.drop()
+            self.clients.remove(a)
+            gone = crew_state(await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_alone"]))
+            self.assertEqual((gone["other"], gone["value"]), (a.id, 4))
+        finally:
+            crews.JOIN_WAIT = SPEC["crew_join_ms"] / 1000
+
     async def test_a_crews_battle_never_offered_without_one_field(self):
         a, b = await self.connect("Alpha"), await self.connect("Beta", no_arena=True)
         for client in (a, b):

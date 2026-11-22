@@ -19,6 +19,8 @@ const char *dive_door_full_words(void);
 
 /* The band's join-in line (dive_join.h): whose battle MegaMan is taken
  * into, from his join sent until it has been read (issue #750). */
+/* a link dropped as MegaMan jumped into a crewmate's battle, or its owner's (issue #751): back on the map */
+const char *dive_join_dropped_words(void);
 const char *dive_join_joined_words(const char *owner);
 /* The band's comings and goings (dive_comings.h): a crewmate's signal gone
  * from the layer, his signal back, a crew near that is full (one of it named). */
@@ -47,5 +49,9 @@ const char *dive_mark_words(const char *name, const char *cause, bool navi, bool
 /* A phrase left on a panel: its boxes (who left it, the phrase, how many
  * waved), MegaMan's wave after them where `wave`. */
 const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave);
+
+/* The band's while MegaMan is down in a crew's battle and the rest fight on
+ * (issue #780): a win pulls him back (crew_pull.h), or, `spent`, it does not */
+const char *dive_down_crew_words(bool spent);
 
 #endif

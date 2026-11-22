@@ -11,7 +11,9 @@
 #include "darkchips.h"
 #include "crossselect.h"
 #include "forms.h"
+#include "loot_souls.h"
 #include "soulbn4.h"
+#include "soulpower.h"
 #include "soulunite.h"
 #include "data.h"
 #include "game.h"
@@ -6346,6 +6348,11 @@ static void test_soul_lights(void) {
 static bool forms_falzar = true;
 bool crossselect_falzar(void) { return forms_falzar; }
 bool soulunite_ready(void) { return true; }
+bool soulpower_bn4(int k) { return k == 0; }   /* (ThunSoul's power attack placed) */
+bool save_slot_weekly(void) { return false; }   /* (save.c's: the normal slot, as these tests' runs are) */
+/* (loot_souls.c's lean, which these tests do not link: souls_lean's) */
+void loot_soul_souls(unsigned souls) { (void)souls; }
+void loot_soul_kinds(unsigned more) { (void)more; }
 bool soulbn4_read(int k, SoulBn4 *out) {
 	if (k != 0) return false;
 	memset(out, 0, sizeof *out);
@@ -6373,6 +6380,9 @@ static void test_forms_pay(void) {
 	CHECK(forms_pay(RUN_FORM_SOUL_BN4, 2, 0, 1) == 6, "forms: ElecMan, Elec, ThunSoul");
 	CHECK(!forms_pay(RUN_FORM_SOUL_BN4, 2, 1u << 5, 1), "forms: BN4's one moved Soul held, nothing");
 	CHECK(forms_kind(GUARDIAN_BN4_FIRST + 1) == KIND_CRACK && forms_kind(16) == KIND_NONE, "forms: GutsMan panel-cracking, ElementMan none");
+	CHECK(forms_soul_felt(RUN_FORM_CROSS, 29) && !forms_soul_felt(RUN_FORM_SOUL_BN5, 29) && forms_soul_felt(RUN_FORM_SOUL_BN4, 24) &&
+		forms_soul_felt(RUN_FORM_SOUL_BN5, GUARDIAN_BN4_FIRST + 5) && !forms_soul_felt(RUN_FORM_CROSS, 1) && !forms_soul_felt(RUN_FORM_SOUL_BN5, 11),
+		"forms: a Soul felt where the run's form cannot take it, and only there");
 	int seen = 0;
 	for (uint32_t seed = 1; seed < 60; ++seed) {
 		int f = run_week_form(seed);

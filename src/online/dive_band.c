@@ -30,11 +30,8 @@ static struct {
 	uint32_t shown_at;       /* the first line's start, 0 not yet */
 } B;
 
-/* whose battle MegaMan was taken into, at the picture's foot */
-static void named(void) {
-	const char *join = dive_join_band();
-	if (join) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, join);
-}
+
+static void named(void);
 
 void dive_band_reset(void) {
 	memset(&B, 0, sizeof B);
@@ -44,10 +41,37 @@ void dive_band_reset(void) {
 	director_crew_band = dive_link_line;
 }
 
+/* The band's line as drawn now, NULL none: whose battle MegaMan is taken
+ * into first (issue #750), the link down (#751), the feed; nothing under a
+ * chat box, a card, a fade or off the field (director_cover, issue #781) */
+static const char *band_line(uint32_t now) {
+	/* (a party's battle holding the game: whose battle, over its staging's still picture only; party_play_draw) */
+	if (party_play_held()) return party_play_drawn_over() ? dive_join_band() : NULL;
+	if (director_cover() != COVER_NONE) return NULL;
+	/* (a dive with no link: the feed alone, CONTINUE's word on the link it did not get, issue #759) */
+	if (!dive_link_on()) return dive_link_diving() && B.nfeed ? B.feed[0] : NULL;
+	const char *join = dive_join_band();
+	if (join) return join;
+	bool away = false;
+	if (dive_link_down(now, &away)) return dive_down_words(away, (int)(now / 400 % 4));
+	/* (at a door the queue's own line before the feed's: issue #778) */
+	const char *door = dive_party_band();
+	if (door) return door;
+	return B.nfeed ? B.feed[0] : NULL;
+}
+
+/* whose battle MegaMan was taken into, at the picture's foot over the
+ * staging's still picture of the map, before the battle's field (issue
+ * #781: never over its Custom screen) */
+static void named(void) {
+	const char *line = band_line(SDL_GetTicks());
+	if (line) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, line);
+}
+
 void dive_band_describe(FILE *f) {
-	/* (as drawn: whose battle MegaMan was taken into first, issue #750) */
-	const char *join = dive_join_band(), *door = dive_party_band();
-	fprintf(f, "band %s\n", join ? join : door ? door : B.nfeed ? B.feed[0] : "none");
+	/* (what the band shows, as drawn; and what stands over the field, issue #781) */
+	const char *line = band_line(SDL_GetTicks());
+	fprintf(f, "band %s\ncover %s\n", line ? line : "none", director_cover_name(director_cover()));
 }
 
 void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
@@ -59,6 +83,9 @@ void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 }
 
 void dive_band_tick(uint32_t now) {
+	/* (a line's time runs only while the band can show it: one said under a card, a fade or a battle waits for the
+	 * field, never spent unseen; issue #781) */
+	if (party_play_held() || director_cover() != COVER_NONE) { B.shown_at = 0; return; }
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {
 		memmove(B.feed, B.feed + 1, sizeof B.feed[0] * (size_t)(B.nfeed - 1));
 		B.shown_at = --B.nfeed ? now : 0;
@@ -83,19 +110,16 @@ void dive_link_line(const char *line) {
 }
 
 void dive_link_draw(void) {
-	/* (none of it over SELECT's map: a name and a ring had stood on it, issue #728) */
-	if (director_map_over()) return;
+	/* (nothing over a card, a fade or what is not the field, and over a chat box only above it: director_cover, issue
+	 * #781; SELECT's map among what is not, issue #728) */
+	int cover = director_cover();
+	if (cover == COVER_CARD || cover == COVER_FADE || cover == COVER_AWAY) return;
+	bool chat = cover == COVER_CHAT;
 	dive_traces_draw();
-	/* (whose battle MegaMan was taken into, over the battle's start too, issue #750) */
-	const char *join = dive_link_on() ? dive_join_band() : NULL;
-	if (!director_on_map()) {
-		if (join) named();
-		return;
-	}
-	bool chat = emu_read8(BN6_CHATBOX) != 0;
-	/* (a dive with no link: the feed alone, CONTINUE's word on the link it did not get, issue #759) */
+	int y = P.core_y + 160 - LOOK_BAND_H - 1;
+	const char *line = band_line(SDL_GetTicks());
 	if (!dive_link_on()) {
-		if (dive_link_diving() && B.nfeed && !chat) look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, B.feed[0]);
+		if (line) look_band(P.core_x, y, 240, line);
 		return;
 	}
 	/* (the divers' names over their heads: dive_people.h) */
@@ -104,15 +128,5 @@ void dive_link_draw(void) {
 	dive_crew_view_draw();
 	/* (never over BN6's chat box: its words first) */
 	if (chat) return;
-	int y = P.core_y + 160 - LOOK_BAND_H - 1;
-	/* (a crewmate's battle's offer first: it stands a few seconds only) */
-	/* (the link down past a second: said until it is back, its dots moving, issue #751) */
-	bool away = false;
-	uint32_t now = SDL_GetTicks();
-	const char *down = dive_link_down(now, &away) ? dive_down_words(away, (int)(now / 400 % 4)) : NULL;
-	if (join) look_band(P.core_x, y, 240, join);
-	else if (down) look_band(P.core_x, y, 240, down);
-	/* (at a door the queue's own line before the feed's: issue #778) */
-	else if (dive_party_band()) look_band(P.core_x, y, 240, dive_party_band());
-	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
+	if (line) look_band(P.core_x, y, 240, line);
 }

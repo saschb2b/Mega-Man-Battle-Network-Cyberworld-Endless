@@ -30,5 +30,13 @@
   "spec": "soul_thun",
   "soulbreak": 2,
   "what": "the palette's hook gives 1 where BN4's unison sets 0"
+ },
+ {
+  "name": "ThunSoul's room never filled",
+  "spec": "soul_thun",
+  "poke": [
+   "08AFAB00:06"
+  ],
+  "what": "the room's record of whose look it holds (soul_room.h's SOULS4_HELD, FREE_BN4_SOUL_LOOK + 0x19B00) written as ThunSoul's form 6 after the install, so the frame's check (soullook_frame) never fills the room the install left empty: his sprite's frame read from the free space's fill, not his art"
  }
 ]

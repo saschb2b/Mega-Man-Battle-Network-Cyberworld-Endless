@@ -75,7 +75,9 @@ void dive_link_adopt(void) {
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	memset(&L, 0, sizeof L);
-	if (!s.connected || !s.week || !s.week_seed) {
+	/* (a link down as the portal is taken keeps the dive's: it is taken up again as any drop on a layer, issue #751;
+	 * only a game that never heard the week goes on alone) */
+	if (!s.week || !s.week_seed || (!s.connected && !s.reconnecting && !s.error[0] && !s.player_id)) {
 		fprintf(stderr, "dive: no link to keep; the dive goes on alone\n");
 		online_transport_end();
 		dive_people_on(false);
@@ -84,6 +86,10 @@ void dive_link_adopt(void) {
 	link_up(s.week, s.week_seed);
 	L.resumes = s.resumes;
 	fprintf(stderr, "dive: the link kept for week %u's dive\n", s.week);
+	if (!s.connected) {
+		L.down_since = SDL_GetTicks() | 1u;
+		fprintf(stderr, "dive: the link down as the dive begins; kept, taken up again once back\n");
+	}
 }
 
 bool dive_link_on(void) { return L.on; }
@@ -189,7 +195,7 @@ static uint32_t again_wait(unsigned tries) {
  * rest of the frame waits */
 static bool held_away(const OnlineSnapshot *s, uint32_t now) {
 	if (L.alone_at) {
-		if (now - L.alone_at >= ALONE_SHOWN_MS) dive_link_close();
+		if ((int32_t)(now - L.alone_at) >= ALONE_SHOWN_MS) dive_link_close();
 		return true;
 	}
 	if (!s->error[0]) return false;
@@ -225,7 +231,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 		return;
 	}
 	bool again = L.away || s->resumes != L.resumes;
-	if (L.down_since && now - L.down_since >= DOWN_SHOWN_MS) dive_band_back();
+	if (L.down_since && (int32_t)(now - L.down_since) >= DOWN_SHOWN_MS) dive_band_back();
 	L.down_since = 0;
 	L.away = false;
 	L.resumes = s->resumes;
@@ -236,7 +242,7 @@ static void back_or_down(const OnlineSnapshot *s, uint32_t now) {
 }
 
 bool dive_link_down(uint32_t now, bool *away) {
-	if (!L.on || L.alone_at || !L.down_since || now - L.down_since < DOWN_SHOWN_MS) return false;
+	if (!L.on || L.alone_at || !L.down_since || (int32_t)(now - L.down_since) < DOWN_SHOWN_MS) return false;
 	*away = L.away;
 	return true;
 }
@@ -268,6 +274,15 @@ static bool past_week(const OnlineSnapshot *s, uint32_t now) {
 	return true;
 }
 
+/* the link down (dropped, being tried again, or given up): nobody drawn as he last stood (issue #781: crewmates had
+ * stood frozen, ring and plate, under "Reconnecting..."), the puppets put away, the names, rings, dots and plates
+ * none until the room's divers are heard again */
+static void unheard(uint32_t now) {
+	static const OnlineSnapshot none;
+	dive_people_frame(&none);
+	dive_band_frame(now, false, 0);
+}
+
 void dive_link_frame(void) {
 	call_again();
 	if (!L.on) {
@@ -277,7 +292,8 @@ void dive_link_frame(void) {
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	uint32_t now = SDL_GetTicks();
-	if (held_away(&s, now) || past_week(&s, now)) return;
+	if (held_away(&s, now)) { unheard(now); return; }
+	if (past_week(&s, now)) return;
 	L.starting = false;
 	back_or_down(&s, now);
 	online_mail_frame();
@@ -287,7 +303,9 @@ void dive_link_frame(void) {
 		else dive_link_close();
 		return;
 	}
-	dive_band_frame(now, s.connected, s.player_id);
+	bool heard = s.connected && !L.down_since;
+	if (!heard) unheard(now);
+	else dive_band_frame(now, true, s.player_id);
 	/* (the party at a guardian's door, and its fight; the crew's battles) */
 	dive_party_frame(&s, L.room);
 	dive_join_frame();
@@ -296,7 +314,7 @@ void dive_link_frame(void) {
 	room();
 	L.x = bn6_player_x(); L.y = bn6_player_y(); L.z = bn6_player_z();
 	online_transport_poll(L.x, L.y, L.z, emu_read8(BN6_PLAYER_FACING) & 7u);
-	dive_people_frame(&s);
+	if (heard) dive_people_frame(&s);
 	dive_traces_frame();
 	dive_finds_frame();
 	dive_splits_frame();

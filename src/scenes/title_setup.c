@@ -328,6 +328,7 @@ static const char *row_note(char *buf, size_t n, char shut[][SHUT_MAX], int *nsh
 	if (S.tab == TAB_RUN) return run_note(row, buf, n, shut, nshut);
 	/* (and what else it changes: All *'s Program Advances; an extra's
 	 * note where it has one) */
+	if (S.tab == TAB_HELP && row == HELPER_BEAST && soul_form()) return setup_word(SW_SOULT_NOTE);   /* (SoulT+1's turn in a Soul form) */
 	const HelperInfo *h = S.tab == TAB_HELP ? meta_helper(row) : extra_words(row);
 	if (h->more && S.tab == TAB_EXTRAS) snprintf(shut[(*nshut)++], SHUT_MAX, "%s", h->more);
 	return S.tab == TAB_HELP ? setup_helper_note(buf, n, h->about, h->more) : h->about;
@@ -415,7 +416,8 @@ static void page_draw(int x0, int y0) {
 		if (S.tab == TAB_RUN) run_row_draw(x0, y, row[i]);
 		else {
 			bool on = S.tab == TAB_HELP ? S.c.helpers >> row[i] & 1 : !(S.c.extras_off >> row[i] & 1);
-			const char *name = S.tab == TAB_HELP ? meta_helper(row[i])->name : extra_words(row[i])->name;
+			const char *name = S.tab == TAB_HELP ? (row[i] == HELPER_BEAST && soul_form() ? setup_word(SW_SOULT) : meta_helper(row[i])->name)
+				: extra_words(row[i])->name;
 			label_draw(x0, y, name, S.tab == TAB_HELP && row[i] == HELPER_BEAST && (profile.setup_new & SETUP_NEW_HELP));
 			value_draw(x0, y, setup_word(on ? SW_ON : SW_OFF), true);
 		}
