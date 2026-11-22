@@ -10,6 +10,7 @@
 #ifndef CW_PARTY_MARKS_H
 #define CW_PARTY_MARKS_H
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -33,6 +34,10 @@ void party_marks_seats(const uint32_t seats[PARTY_MOST], unsigned mine);
 /* Over the picture of the field's core (at P.core_x, P.core_y), as seat
  * `mine` of `n` sees it */
 void party_marks_draw(struct mCore *field, unsigned mine, unsigned n);
+/* MegaMan down in a crew's battle, the field fighting on (issue #780): one
+ * line in the band, what a win does for him (`spent`: his pull-back used,
+ * a win does not bring him back) */
+void party_marks_down(bool spent);
 /* ... in the state's words (online_describe.h): "hpbox own" or "bn6",
  * each seat's mark ("markK own" or "crew", its left and top on the
  * picture, its width, its tag) and whether any two meet ("marks N apart") */

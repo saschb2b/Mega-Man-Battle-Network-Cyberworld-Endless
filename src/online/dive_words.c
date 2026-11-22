@@ -108,3 +108,5 @@ const char *dive_phrase_words(const char *name, const char *phrase, unsigned wav
 	if (wave) snprintf(s + n, sizeof s - (size_t)n, "|*wave*");
 	return s;
 }
+
+const char *dive_down_crew_words(bool spent) { return spent ? "Down... One more fall ends the dive" : "Down! The crew can pull us back"; }

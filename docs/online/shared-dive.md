@@ -1442,7 +1442,15 @@ and the owner's four answers:
   an earlier checkpoint find it spent), not in `Run`. There is no state
   of being down: it is decided in the battle's last frame. The band says
   "Phew... The crew pulled us back!" on the fallen's game and "Lan,we
-  shared our HP. They're back!" on a giver's. `--dev partydel=MASK` with
+  shared our HP. They're back!" on a giver's. While he is down and the
+  field fights on, his band says what a win does for him (issue #780):
+  "Down! The crew can pull us back", or, his pull-back spent, "Down...
+  One more fall ends the dive"; only while the fight itself runs, never
+  over a Custom screen or the results, the field otherwise BN6's
+  (`party_play.c`'s `down_now`, `party_marks_down`; the scenario
+  `online-week/crew-down-told`). A partner's HP box is his own then too,
+  at 0: it had shown BN6's box, the lead's HP, once his MegaMan left the
+  field (`party_marks.c`). `--dev partydel=MASK` with
   `partyend=N`, the same on every game of a field, deletes the MegaMen of
   those seats (bit 0 seat 0) at the battle loop's iteration N, as a hit
   would, and its enemies 60 iterations later: the scenarios' way to a deletion on a week's layer, which the
