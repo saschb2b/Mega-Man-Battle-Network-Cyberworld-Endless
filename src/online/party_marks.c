@@ -9,6 +9,7 @@
 #include "arena_team_view.h"
 #include "bn6.h"
 #include "crew_look.h"
+#include "dive_words.h"
 #include "gfx.h"
 #include "online_transport.h"
 #include "online_visit.h"
@@ -95,7 +96,7 @@ static void mark(int x, int y, const char *tag, bool own) {
 }
 
 /* the field as seat `mine` sees it: the HP box his (0: BN6's own, the lead's) and each MegaMan standing, where */
-typedef struct { unsigned hp_box, count, seat[PARTY_MOST], hp[PARTY_MOST]; int x[PARTY_MOST], y[PARTY_MOST]; bool open; } Seen;
+typedef struct { unsigned hp_box, count, seat[PARTY_MOST], hp[PARTY_MOST]; int x[PARTY_MOST], y[PARTY_MOST]; bool open, own_box; } Seen;
 
 static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 	if (!c || n < 2 || mine >= PARTY_MOST) return false;
@@ -103,8 +104,12 @@ static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 	v->open = (c->rawRead8(c, BN6_BATTLE_PHASE, -1) & 0xFF) == BN6_PHASE_CUSTOM;
 	int x, y;
 	unsigned hp;
-	/* (a partner's HP his own, over BN6's box, which shows the lead's) */
-	if (mine && arena_team_view_feet(c, arena_team_view_megaman(c, 0, mine), 0, &x, &y, &hp)) v->hp_box = hp;
+	/* (a partner's HP his own, over BN6's box, which shows the lead's: 0 once he is down, never the lead's, issue #780) */
+	if (mine) {
+		uint32_t o = arena_team_view_megaman(c, 0, mine);
+		v->own_box = true;
+		v->hp_box = o >= BN6_EWRAM && o < BN6_EWRAM_END ? (unsigned)(uint16_t)c->rawRead16(c, o + BN6_T1_HP, -1) : 0;
+	}
 	for (unsigned k = 0; k < n && k < PARTY_MOST && !v->open; ++k)
 		if (arena_team_view_feet(c, arena_team_view_megaman(c, 0, k), 0, &x, &y, &hp)) {
 			v->seat[v->count] = k;
@@ -118,7 +123,7 @@ static bool seen(struct mCore *c, unsigned mine, unsigned n, Seen *v) {
 void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 	Seen v;
 	if (!seen(c, mine, n, &v)) return;
-	if (v.hp_box) arena_team_view_hp(v.hp_box, v.open);
+	if (v.own_box) arena_team_view_hp(v.hp_box, v.open);
 	for (unsigned i = 0; i < v.count; ++i) {
 		bool own = v.seat[i] == mine;
 		mark(v.x[i], v.y[i], tags[v.seat[i]], own);
@@ -134,11 +139,15 @@ void party_marks_draw(struct mCore *c, unsigned mine, unsigned n) {
 	}
 }
 
+void party_marks_down(bool spent) {
+	look_band(P.core_x, P.core_y + 160 - LOOK_BAND_H - 1, 240, dive_down_crew_words(spent));
+}
+
 void party_marks_describe(FILE *f, struct mCore *c, unsigned mine, unsigned n) {
 	Seen v;
 	if (!seen(c, mine, n, &v)) return;
-	fprintf(f, "hpbox %s\n", v.hp_box ? "own" : "bn6");
-	if (v.hp_box) fprintf(f, "hpbox_hp %u\n", v.hp_box);
+	fprintf(f, "hpbox %s\n", v.own_box ? "own" : "bn6");
+	if (v.own_box) fprintf(f, "hpbox_hp %u\n", v.hp_box);
 	/* (where his mark stands on the 240x160 picture: its plate's left, top and width; and whether any two meet) */
 	Plate m[PARTY_MOST];
 	bool apart = true;

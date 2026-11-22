@@ -48,4 +48,8 @@ const char *dive_mark_words(const char *name, const char *cause, bool navi, bool
  * waved), MegaMan's wave after them where `wave`. */
 const char *dive_phrase_words(const char *name, const char *phrase, unsigned waves, bool wave);
 
+/* The band's while MegaMan is down in a crew's battle and the rest fight on
+ * (issue #780): a win pulls him back (crew_pull.h), or, `spent`, it does not */
+const char *dive_down_crew_words(bool spent);
+
 #endif
