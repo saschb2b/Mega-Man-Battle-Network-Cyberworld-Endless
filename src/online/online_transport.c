@@ -58,9 +58,11 @@ static bool mail(uint8_t kind) {
 #define RETRY_MOST_MS 4000
 #define REST_MS 10           /* the worker's longest rest between two looks at the link: its position, pings and timers kept to it */
 
+#ifndef __EMSCRIPTEN__
 /* a test's dropped link's end (online_transport_cut): kept apart from the
  * transport's state, which a start again (online_transport_again) clears */
 static SDL_atomic_t cut_until;
+#endif
 
 static struct {
 	Ring outbox, inbox;
