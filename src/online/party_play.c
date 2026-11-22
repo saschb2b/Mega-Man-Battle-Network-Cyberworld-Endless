@@ -77,6 +77,8 @@ static struct {
 	/* this game's own link through a drop (issue #180): down since (SDL ticks, 0 up), the resumes seen, my session, the leave said */
 	uint32_t down_since, resumes, me;
 	bool leave_said;
+	bool custom_seen;             /* the field's first Custom screen has opened */
+	uint32_t field_at;            /* ... and when it first closed (SDL ticks, 0 not yet) */
 } PP;
 
 /* the seat the field is drawn for: mine, or the dev's partyview */
@@ -200,6 +202,8 @@ void party_play_on(bool on) {
 	online_visit_hold = on ? &hold : NULL;
 }
 
+unsigned party_play_join_wait_ms(void) { return PP.dev.join_wait > 0 ? (unsigned)PP.dev.join_wait * 1000u / 60u : 0; }
+
 void party_play_dev(const PartyDev *d) {
 	PP.dev = *d;
 	party_play_on(d->n >= 1);
@@ -260,6 +264,8 @@ bool party_play_mail(const uint8_t *m, size_t n) {
 }
 
 bool party_play_held(void) { return PP.stage != PP_NONE; }
+
+bool party_play_staging(void) { return PP.stage != PP_NONE && PP.stage < PP_FIGHT; }
 
 bool party_play_hp(int *hp, int *max) {
 	if (!PP.core || (PP.stage != PP_FIGHT && PP.stage != PP_RESULTS)) return false;
@@ -710,6 +716,21 @@ void party_play_frame(uint32_t pad) {
 	default: break;
 	}
 	if (PP.core) party_core_sound(PP.core, PP.stage >= PP_FIGHT);
+	/* (the field's first Custom screen closed: what is said over the field may stand from here, issue #781) */
+	if (PP.stage == PP_FIGHT && !PP.field_at && PP.core) {
+		bool custom = party_core_phase(PP.core) == BN6_PHASE_CUSTOM;
+		PP.custom_seen |= custom;
+		/* (this game's own picture the field: a partner's Custom screen of his own closed too) */
+		if (PP.custom_seen && !custom && !party_turn_video(viewer())) PP.field_at = SDL_GetTicks() | 1u;
+	}
+}
+
+uint32_t party_play_field_since(void) { return PP.stage == PP_FIGHT ? PP.field_at : 0; }
+
+bool party_play_drawn_over(void) {
+	if (!PP.crew || PP.stage == PP_NONE) return false;
+	if (PP.stage < PP_FIGHT) return true;
+	return PP.stage == PP_FIGHT && PP.field_at && PP.core && !party_turn_video(viewer()) && party_core_phase(PP.core) != BN6_PHASE_CUSTOM;
 }
 
 void (*party_play_draw_more)(void);
@@ -729,7 +750,7 @@ void party_play_draw(void) {
 	if (PP.core && PP.stage == PP_FIGHT && !turn) party_marks_draw(party_core_gba(PP.core), viewer(), PP.b.n);
 	/* (down in a crew's battle, the field fighting on: one line, never over a Custom screen or the results, issue #780) */
 	if (down_now()) party_marks_down(PP.b.seat[PP.seat].pulled);
-	if (PP.crew && party_play_draw_more) party_play_draw_more();
+	if (party_play_drawn_over() && party_play_draw_more) party_play_draw_more();
 }
 
 void party_play_describe(FILE *f) {
