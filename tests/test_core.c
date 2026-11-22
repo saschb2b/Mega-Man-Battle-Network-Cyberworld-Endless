@@ -11,6 +11,7 @@
 #include "darkchips.h"
 #include "crossselect.h"
 #include "forms.h"
+#include "loot_souls.h"
 #include "soulbn4.h"
 #include "soulunite.h"
 #include "data.h"
@@ -6346,6 +6347,9 @@ static void test_soul_lights(void) {
 static bool forms_falzar = true;
 bool crossselect_falzar(void) { return forms_falzar; }
 bool soulunite_ready(void) { return true; }
+/* (loot_souls.c's lean, which these tests do not link: souls_lean's) */
+void loot_soul_souls(unsigned souls) { (void)souls; }
+void loot_soul_kinds(unsigned more) { (void)more; }
 bool soulbn4_read(int k, SoulBn4 *out) {
 	if (k != 0) return false;
 	memset(out, 0, sizeof *out);

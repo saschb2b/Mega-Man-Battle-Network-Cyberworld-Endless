@@ -33,6 +33,10 @@ unsigned souls_held(void);
  * Soul won on the layer counted from the next */
 void souls_note_layer(void);
 unsigned souls_layer(void);
+/* What the layer's finds and stock lean to (loot_souls.h): the kinds of
+ * every Soul held as it was made, Team Colonel's, Team ProtoMan's and
+ * BN4's (BN4's panel-cracking GutsSoul's none of BN5's kinds) */
+void souls_lean(void);
 /* As a battle begins (encounter.c): a Soul form's SoulT+1 turn, the
  * Cybeast's or the BeastOut helper's (run.soul_turns), in MegaMan's
  * NaviStats (BN6_NAVI_TURN_EXTRA), which the battle copies: one turn more
