@@ -29,13 +29,15 @@ struct mCore;
 typedef struct HookCore HookCore;   /* a core's hooks: its table and its queue */
 
 /* A core's hooks at most: the game's and every installer's on BN6's core
- * (measured: 137 in a differential's Soul run with its own, the Navis',
- * the chips' flash and Chaos Unison's, issue #82's final engine round;
- * 128 was the room until then) with room to come, below the buckets'
- * byte (hook.c). A slot is 40 bytes (24 on a 32-bit build); a BKPT met
- * finds its hook through a bucket of its address, the table read through
- * only where two hooks share one. */
-#define HOOK_MAX 192
+ * (measured: 197 in a run's guardian battle with a BN4 Soul, both other
+ * ROMs read, 2026-11; 192 was the room until then, and a hook past it was
+ * refused without a word: player_body's and the win song's, the
+ * Liberation's bodies and a guardian's data lost) with room to come, below
+ * the buckets' byte (hook.c). A slot is 40 bytes (24 on a 32-bit build); a
+ * BKPT met finds its hook through a bucket of its address, the table read
+ * through only where two hooks share one. A hook the full table refuses is
+ * told on stderr. */
+#define HOOK_MAX 240
 
 /* What a hook reads, and may change: r0-r12 and lr go back into the CPU
  * (BN6's routines keep their object in r5); sp is read only; pc is the

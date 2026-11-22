@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T22:10:00Z
+* **Update**: engine/emulation/hooks.md (the hook table's room, 240 from 192, and a refused hook told: dev asked 197 and lost player_body's and the win song's hooks).
