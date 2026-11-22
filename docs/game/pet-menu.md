@@ -1,7 +1,7 @@
 ---
 type: Design
 title: "The PET's start menu"
-description: "The PET's start menu of ours (issue #793): BN6's own menu laid out again in two columns of six from BN6's own pieces (its buttons, labels, icons, panel, PLACE and EXIT), its list folded so BN6's press counts hold, BN6's menu run underneath to open each entry as BN6 opens it; the owner's calls and three rounds of reviews by BN experts."
+description: "The PET's start menu of ours (issue #793): BN6's own menu laid out again as one grid of two columns from BN6's own pieces (its buttons, labels, icons, panel, PLACE and EXIT), EXIT its last place, over the field darkened as BN6 darkens it, its list folded so BN6's press counts hold, BN6's menu run underneath to open each entry as BN6 opens it; the owner's calls and four rounds of reviews."
 tags: [game, pet, ui]
 generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:10:00Z }
 sources:
@@ -30,27 +30,40 @@ rule that a screen BN6 has is driven, never redrawn, after
 
 Three rounds of mockups composed from BN6's own frame of its menu, each
 reviewed by three players of the series in their own roles: a BN6 pixel
-purist, a BN1-6 veteran and a BN6 speedrunner. They agreed in the end on
-everything below; what each round changed is in issue #793.
+purist, a BN1-6 veteran and a BN6 speedrunner. The owner judged the third,
+built: EXIT took a row of its own with nothing left of it, and the gaps
+were all different. He also pointed at what BN6's menu shows through it,
+the field (measured: BN6's PET takes 16 off each 5-bit channel of the
+field's colours, its teal only the backdrop darkened). The fourth round
+answered both, reviewed by the three and a visual designer; what each round
+changed is in issue #793.
 
 ## What it shows
 
+- **The field** as it stood on the map when START was pressed, darkened as
+  BN6's PET darkens it, behind everything below the band.
 - **BN6's band** with its emblem, as BN6 draws it. **PLACE's name** sits on
   the band's right stripe in the band's navy, its letters BN6's.
-- **Two columns of six places**, twelve in all, BN6's 72 x 16 buttons with
-  their labels at BN6's 16-pixel pitch from y 17, each with its BN6 row
-  icon 3 pixels before it (x 15 and 127). The cursor's row is lit as BN6
-  lights it: its label white and its icon stepped 8 pixels out. Forms'
-  button is Save's with Forms' label set from the labels' own letters
-  beside Options' (`pet_options.c`); its icon is MegaMan's for now (BN6's
-  Status icon, the reviewers' choice, waits on its tiles).
-- **One strip of HP, ZENNY and BUGFRAGS** at y 113-138: BN6's panel cut to
-  one frame, each label over its box, each box its left end and the right
-  end that holds its digits.
-- **BN6's foot line** straight across at y 140-141 and **EXIT's capsule** at
-  BN6's own y 144-156, which pulses white while the cursor is on it, as
-  BN6's does.
-- SELECT, a caption only, goes: it is the price of the sixth row.
+- **One grid of two columns**, BN6's 72 x 16 buttons with their labels at
+  BN6's 16-pixel pitch, each with its BN6 row icon 3 pixels before it. A
+  column holds as many rows as the entries and EXIT fill (five for nine
+  entries), so no row stands half empty; the grid stands in the middle,
+  19 pixels from each side. The cursor's row is lit as BN6 lights it: its
+  label white and its icon stepped 8 pixels out. Forms' button is Save's
+  with Forms' label set from the labels' own letters beside Options'
+  (`pet_options.c`); its icon is BN6's Status icon, the one BN6 shows in
+  MegaMan's row for another Navi.
+- **EXIT** in the grid's last place, under Save and beside Forms: BN6's
+  capsule, its plain body repeated so it spans the cell from the icons'
+  column to the buttons' right edge, its letters in the labels' column. It
+  pulses white while the cursor is on it, as BN6's does.
+- **One strip of HP, ZENNY and BUGFRAGS** the grid's width: BN6's panel cut
+  to one frame, each label at its box's left as BN6 has it, each box its
+  left end and the right end that holds its digits (HP's BN6's width, room
+  for 1000/1000; BUGFRAGS its label's; ZENNY the rest).
+- The band, the grid, the strip and the screen's foot stand an equal gap
+  apart (13, 14 and 14 pixels with five rows).
+- SELECT, a caption only, goes: the band's gap stays clear.
 
 ## The order
 
@@ -62,21 +75,24 @@ BN6's own list folded down the left column, then the right:
 | SubChip | KeyItem |
 | Library | Options (Comm's place) |
 | MegaMan | Save |
-| Forms | |
+| Forms | EXIT |
 
 So BN6's counts from ChipFolder hold at both ends: Down 1-3 SubChip,
 Library, MegaMan; Up 1-4 Save, Options, KeyItem, E-Mail. New entries go
 only in the middle, after Forms and before E-Mail, and none is ever shown or
-hidden during a run (Forms with no Cross yet opens to an empty screen).
+hidden during a run (Forms with no Cross yet opens to an empty screen). A
+tenth entry adds a sixth row, room for eleven and EXIT, and the gaps close
+to 9, 8 and 8 pixels.
 
 ## The keys
 
 - Up and Down walk the folded list and wrap (Forms to E-Mail, Save to
-  ChipFolder, Up from ChipFolder to Save).
-- Left and Right hop to the same row in the other column; Right where that
-  row is empty, and from the right column, goes to EXIT. Left from the left
-  column does nothing.
-- Left or Up from EXIT returns to the entry the cursor came from.
+  ChipFolder, Up from ChipFolder to Save). EXIT stays out of it, as out of
+  BN6's column, so BN6's counts hold.
+- Left and Right hop to the same row in the other column. Right from Forms,
+  beside EXIT, and from the right column goes to EXIT, as BN6's Right
+  reaches EXIT from any row. Left from the left column does nothing.
+- On EXIT, Up goes to Save, over it, and Left to Forms, beside it.
 - A opens the entry; on EXIT it closes. B and START close, as BN6's do.
 - START opens on ChipFolder every time, as BN6's menu does (measured); a
   screen left gives the menu back on its entry.
@@ -99,16 +115,19 @@ The picture is BN6's own frame of its menu laid out again
 for a liberation's board: the buttons drawn from BN6's label tiles and
 palette 15 in VRAM, the icons from their OBJ tiles at the height BN6 gives
 each (its bob kept), the strip, PLACE's name and EXIT copied from BN6's
-frame of its panel. It stands while BN6's menu takes input, closes, fades to
+frame of its panel. The field behind is the core's picture kept on the map
+(every other frame there, and the frame START is held, before BN6's PET
+covers it), darkened by BN6's 16 a channel; where none was kept, BN6's
+teal. BN6 loads the Status icon for Forms because the engine grows BN6's
+lists of the menu's icons by a ninth, resting under the screen
+(`pet_menu_install`; [The PET and the second screen](../rom/pet-and-second-screen.md),
+the PET menu's icons). It stands while BN6's menu takes input, closes, fades to
 an entry's screen or comes back from one; while BN6's slides in the first
 frames are BN6's own, and the strip waits until BN6's panel is in its place.
 In the Net Square the PET's menu stays BN6's own ([The PET in the Square](../online/square/pet.md)).
 
 ## Not yet
 
-- Forms' icon as BN6's Status icon (MegaMan's row's for another Navi),
-  which BN6 loads only for another Navi: its tiles from the UI sprites' list
-  grown by a slot, or from the ROM's sprite.
 - The longest place name a run prints measured against the band's stripe
   (about 100 pixels, 12 letters), held by a test.
 - BN6's held-key repeat matched at the list's ends, and the frames from

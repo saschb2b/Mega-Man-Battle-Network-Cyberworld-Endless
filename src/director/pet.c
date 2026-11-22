@@ -70,6 +70,7 @@ void pet_install(void) {
 	}
 	/* Comm made Options and lit, else greyed as BN6 has it without a link */
 	pet_options_install();
+	pet_menu_install();
 }
 
 void pet_update(void) {

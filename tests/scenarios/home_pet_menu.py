@@ -3,7 +3,8 @@ two columns. Each entry opens from its place (ChipFolder, SubChip, Library,
 MegaMan, Forms down the left; E-Mail, KeyItem, Options, Save down the right)
 as BN6 opens it, and B gives the menu back with the cursor on that entry;
 Up from the top wraps to Save as BN6's does, Right goes across and on to
-EXIT, and EXIT goes back to where the cursor came from
+EXIT, the grid's last place, and EXIT's Up and Left go to Save over it and
+Forms beside it
 (docs/game/pet-menu.md)."""
 import cw_routes
 
@@ -45,10 +46,13 @@ MANY = {
         ('do', 'press UP; wait 6; ' * 4), ('expect', 'petmenu=at E-Mail'),       # BN6's Up count to E-Mail
         ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Forms'),              # across the fold
         ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),            # nothing beside Forms: EXIT
-        ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # back where it came from
+        ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # Left from EXIT: Forms, beside it
         ('do', 'press LEFT; wait 6'), ('expect', 'petmenu=at Forms'),            # Left from the left column: nothing
         ('do', 'press UP; wait 6; press UP; wait 6; press RIGHT; wait 6'), ('expect', 'petmenu=at Options'),   # Library's row: Options
-        ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),
+        ('do', 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),            # Right from the right column: EXIT
+        ('do', 'press UP; wait 6'), ('expect', 'petmenu=at Save'),               # Up from EXIT: Save, over it
+        ('do', 'press DOWN; wait 6'), ('expect', 'petmenu=at ChipFolder'),       # Down from Save wraps, EXIT out of the list
+        ('do', 'press DOWN; wait 6; ' * 4 + 'press RIGHT; wait 6'), ('expect', 'petmenu=at EXIT'),
         ('do', 'press A; wait 60'),
         ('until', 'screen=town', 300),                                            # A on EXIT closes it
         ('repeat', 'press START; wait 40', 'screen=pet', 6),

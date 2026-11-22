@@ -4,11 +4,17 @@
  * opened on ChipFolder, a screen left on its row) ours follows it. */
 #include "pet_menu.h"
 
+#include <string.h>
+
 #include "audio.h"
 #include "bn6.h"
+#include "bytes.h"
+#include "claims.h"
 #include "emu.h"
+#include "free_space.h"
 #include "pet_forms.h"
 #include "platform.h"
+#include "rom.h"
 
 #define PET_STATE_INPUT 4          /* ePETMenuData +0: taking input */
 #define BN6_EXIT 8                 /* BN6_PET_CURSOR on EXIT */
@@ -18,8 +24,50 @@
 static const signed char bn6_rows[PM_ENTRIES] = { 0, 1, 2, 3, -1, 4, 5, 6, 7 };
 
 static int cur = PM_FOLDER;        /* our cursor */
-static int back = PM_FOLDER;       /* the entry EXIT returns to */
 static int written = -1;           /* BN6's cursor as we last set it */
+
+#define BUS 0x08000000u
+#define ICONS_AT     FREE_PET_MENU                 /* the icons' list as the menu opens, the Status icon's added */
+#define BACK_AT      (FREE_PET_MENU + 0x40u)       /* ... as a screen gives it back */
+#define HEIGHTS_AT   (FREE_PET_MENU + 0x80u)       /* the heights, nine */
+#define LIST_MOST    16                            /* a list's entries, its end among them */
+#define ICON_HIDDEN  0xC0                          /* the ninth icon's height: under the screen */
+
+_Static_assert(HEIGHTS_AT + 2u * BN6_PET_ICONS_GROWN <= FREE_PET_MENU_END, "the menu's tables past their region");
+
+/* a list with the Status icon after row 7's (type 2, the next slot, row 8, the entry's back byte); its bytes */
+static size_t grown(uint32_t list, uint8_t *out) {
+	size_t n = 0;
+	for (uint32_t at = list - BUS; n + 2 < LIST_MOST && R.data[at] != 0xFF; at += 4) {
+		memcpy(out + 4 * n++, R.data + at, 4);
+		if (R.data[at] == BN6_PET_ICON_TYPE && R.data[at + 2] == BN6_PET_ICON_LAST) {
+			memcpy(out + 4 * n, R.data + at, 4);
+			out[4 * n + 1] = (uint8_t)(R.data[at + 1] + 1);
+			out[4 * n + 2] = BN6_PET_ICON_STATUS;
+			++n;
+		}
+	}
+	memset(out + 4 * n++, 0xFF, 4);
+	return 4 * n;
+}
+
+bool pet_menu_install(void) {
+	if (!R.data || rom_u32(BN6_PET_ICONS_LIT - BUS) != BN6_PET_ICONS || rom_u32(BN6_PET_ICONS_BACK_LIT - BUS) != BN6_PET_ICONS_BACK ||
+		rom_u32(BN6_PET_ICON_HEIGHTS_LIT - BUS) != BN6_PET_ICON_HEIGHTS || rom_u16(BN6_PET_ICON_HEIGHTS - BUS) != 0x20)
+		return false;
+	uint8_t list[4 * LIST_MOST], heights[2 * BN6_PET_ICONS_GROWN];
+	for (int k = 0; k < BN6_PET_ICON_ROWS; ++k) put16(heights + 2 * k, rom_u16(BN6_PET_ICON_HEIGHTS - BUS + 2u * (uint32_t)k));
+	put16(heights + 2 * BN6_PET_ICON_STATUS, ICON_HIDDEN);
+	claims_begin("the PET start menu's Status icon (pet_menu.c)");
+	emu_write(ICONS_AT, list, grown(BN6_PET_ICONS, list));
+	emu_write(BACK_AT, list, grown(BN6_PET_ICONS_BACK, list));
+	emu_write(HEIGHTS_AT, heights, sizeof heights);
+	emu_write32(BN6_PET_ICONS_LIT, ICONS_AT);
+	emu_write32(BN6_PET_ICONS_BACK_LIT, BACK_AT);
+	emu_write32(BN6_PET_ICON_HEIGHTS_LIT, HEIGHTS_AT);
+	claims_end();
+	return true;
+}
 
 int pet_menu_bn6_row(int entry) { return entry >= 0 && entry < PM_ENTRIES ? bn6_rows[entry] : -1; }
 
@@ -28,10 +76,10 @@ void pet_menu_place(int entry, int *col, int *row) {
 	*row = entry >= PM_LEFT ? entry - PM_LEFT : entry;
 }
 
-/* the entry at a place, -1 where it is empty */
+/* the entry at a place (EXIT's after the right column's last), -1 where it is empty */
 static int at(int col, int row) {
 	int e = col ? PM_LEFT + row : row;
-	if (row < 0 || row >= PM_ROWS || (col == 0 && row >= PM_LEFT) || e >= PM_ENTRIES) return -1;
+	if (row < 0 || row >= PM_ROWS || (col == 0 && row >= PM_LEFT) || e > PM_EXIT) return -1;
 	return e;
 }
 
@@ -57,21 +105,23 @@ static void follow(void) {
 
 static void to(int e) {
 	if (e < 0 || e == cur) return;
-	if (e == PM_EXIT) back = cur;
 	cur = e;
 	audio_sfx(SFX_CURSOR);
 }
 
-/* Up and Down walk the folded list and wrap; Left and Right hop columns on
- * the same row, Right to EXIT where nothing is beside it or from the right
- * column; EXIT's Left or Up back to where the cursor came from */
+/* Up and Down walk the folded list and wrap, EXIT left out of it as BN6
+ * leaves it out of its column's (Save to ChipFolder, ChipFolder to Save);
+ * Left and Right hop columns on the same row, Right to EXIT from the right
+ * column and from Forms, beside it, as BN6's Right reaches EXIT from any
+ * row; EXIT's Up to the entry over it, its Left to the one beside it */
 static void move(void) {
-	if (cur == PM_EXIT) {
-		if (btn_pressed(BTN_LEFT | BTN_UP)) to(back);
-		return;
-	}
 	int col, row;
 	pet_menu_place(cur, &col, &row);
+	if (cur == PM_EXIT) {
+		if (btn_repeat(BTN_UP)) to(at(1, row - 1));
+		else if (btn_pressed(BTN_LEFT)) to(at(0, row));
+		return;
+	}
 	if (btn_repeat(BTN_DOWN)) to((cur + 1) % PM_ENTRIES);
 	else if (btn_repeat(BTN_UP)) to((cur + PM_ENTRIES - 1) % PM_ENTRIES);
 	else if (btn_pressed(BTN_RIGHT)) to(col == 0 && at(1, row) >= 0 ? at(1, row) : PM_EXIT);

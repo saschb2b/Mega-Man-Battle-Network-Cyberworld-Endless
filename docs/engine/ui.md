@@ -184,10 +184,11 @@ the kinds `look_window`, `look_card`, `look_pill`, `look_button`,
   empty, R a key BN6 does not use there (`square_pet.c`,
   [The PET in the Square](../online/square/pet.md)).
 - In a run the PET's start menu is ours ([The PET's start menu](../game/pet-menu.md)):
-  BN6's own menu laid out again in two columns of six, every piece BN6's
-  (its buttons from its label tiles, its icons, its panel cut into one strip,
-  PLACE's name on the band's stripe, EXIT under one line), the cursor lit and
-  EXIT pulsed by BN6 itself, its cursor set to ours.
+  BN6's own menu laid out again as one grid of two columns over the field
+  darkened as BN6 darkens it, every piece BN6's (its buttons from its label
+  tiles, its icons, EXIT the grid's last place, its panel cut into one strip,
+  PLACE's name on the band's stripe), the cursor lit and EXIT pulsed by BN6
+  itself, its cursor set to ours.
 - The forms screen ([The forms screen](../game/meta/forms-screen.md)) is the
   folder editor's two windows side by side, CROSSSELECT's five and the
   spares, each row CROSSSELECT's own art from the ROM (in colour among the

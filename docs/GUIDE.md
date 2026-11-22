@@ -551,8 +551,9 @@ run up at its last checkpoint; what came after it is lost.
 **The PET's menu** in a run is BN6's own laid out in two columns:
 ChipFolder, SubChip, Library, MegaMan and Forms down the left, E-Mail,
 KeyItem, Options and Save down the right, your HP, Zenny and BugFrags in a
-strip under them and where you are on the band. Down from ChipFolder and Up
-to Save count as in BN6; Right goes across, and on to EXIT.
+strip under them and where you are on the band, EXIT under Save. Down from
+ChipFolder and Up to Save count as in BN6; Right goes across, and on to
+EXIT.
 
 **Options** holds the game's settings, a press away wherever you are: the
 title's menu has an **OPTIONS** line under NEW GAME and CONTINUE (Select

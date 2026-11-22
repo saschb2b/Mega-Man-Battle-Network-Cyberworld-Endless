@@ -91,6 +91,8 @@
 #define FREE_NCP_TEXT_END    (EMU_FREE + 0x16BC00u)
 #define FREE_CROSSSELECT     (EMU_FREE + 0x16C000u)  /* CROSSSELECT's ten Crosses: its flags' table, then Falzar's five rows' palettes and art (crossselect.c) */
 #define FREE_CROSSSELECT_END (EMU_FREE + 0x16E000u)
+#define FREE_PET_MENU        (EMU_FREE + 0x16E000u)  /* the PET's start menu: BN6's icons' lists and heights grown by a slot, the Status icon loaded for Forms (pet_menu.c) */
+#define FREE_PET_MENU_END    (EMU_FREE + 0x16E100u)
 
 /* ---- world: +0x170000-+0x330000, other games' world, copied as their areas are entered: tiles, songs, overworld art, backgrounds ---- */
 #define FREE_XAREA           (EMU_FREE + 0x170000u)  /* another game's net area (netmap.c) */
@@ -243,6 +245,7 @@
 	X("FREE_BBS", (EMU_FREE + 0x16A000u), (EMU_FREE + 0x16B000u), "", "words") \
 	X("FREE_NCP_TEXT", (EMU_FREE + 0x16B000u), (EMU_FREE + 0x16BC00u), "", "words") \
 	X("FREE_CROSSSELECT", (EMU_FREE + 0x16C000u), (EMU_FREE + 0x16E000u), "", "words") \
+	X("FREE_PET_MENU", (EMU_FREE + 0x16E000u), (EMU_FREE + 0x16E100u), "", "words") \
 	X("FREE_XAREA", (EMU_FREE + 0x170000u), (EMU_FREE + 0x184000u), "", "world") \
 	X("FREE_SONGS", (EMU_FREE + 0x1A0000u), (EMU_FREE + 0x240000u), "", "world") \
 	X("FREE_XNAVIS", (EMU_FREE + 0x240000u), (EMU_FREE + 0x26E000u), "", "world") \
