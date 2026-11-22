@@ -93,7 +93,13 @@ void square_week_describe(FILE *f) {
 
 /* the greeter's words on the week's net (pages; his question or options
  * after them) */
-static const char *square_week_words(void) { return square_week_post(square_week_offer(), Q.s.week, Q.posted); }
+/* (no dive of this week's yet: the week's first, its dates said once; and the cursor on No) */
+static bool first_of_week(void) {
+	const WeeklyRecord *r = weekly_record();
+	return r->week != Q.s.week && r->b_week != Q.s.week;
+}
+
+static const char *square_week_words(void) { return square_week_post(square_week_offer(), Q.s.week, Q.posted, first_of_week()); }
 
 unsigned square_week_said(void) { return (unsigned)square_week_offer() | (unsigned)Q.posted << 4 | (unsigned)Q.s.week << 12; }
 
@@ -113,25 +119,26 @@ bool square_week_dive(void) {
 	return choice && weekly_dive(Q.week, Q.seed);
 }
 
-/* a new dive: Yes or No, the cursor on No (script 1 the No's) */
-static void ask(TextArchive *t, const char *words, WeekOffer offer) {
+/* a new dive: one box, its question with how many dive now, Yes or No (script 1 the No's), the cursor on No until
+ * MegaMan has dived this week; Yes goes at once, no box after it (issue #779) */
+static void ask(TextArchive *t, const char *words) {
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, words, FACE_NONE, &first);
-	ta_ask_in(t, FACE_NONE, square_week_question(offer), 1, !first, true);
+	if (*words) ta_pages(t, words, FACE_NONE, &first);
+	ta_ask_in(t, FACE_NONE, square_week_question(dive_pack_heard(), dive_pack_now()->total), 1, !first, first_of_week());
 	ta_flag_set(t, SQUARE_DIVE_FLAG);
-	bool more = false;
-	ta_pages(t, square_week_off(), FACE_NONE, &more);
 	ta_end(t);
 	ta_closing(t);
 }
 
-/* the unfinished dive: kept on, begun again, or not now (B too) */
+/* the unfinished dive: kept on, begun again, or not now (B too); the options the box's first, no page before them
+ * but the Board's word of a dive it just took (issue #779) */
 static void options(TextArchive *t, const char *words) {
 	ta_script(t);
 	bool first = true;
-	ta_pages(t, words, FACE_NONE, &first);
-	ta_clear(t);
+	if (*words) ta_pages(t, words, FACE_NONE, &first);
+	if (first) ta_open(t);
+	else ta_clear(t);
 	ta_options(t, square_week_again_options, WEEK_AGAIN_OPTIONS);
 	int to[WEEK_AGAIN_OPTIONS] = { 1, 2, 3 };
 	ta_choose(t, to, WEEK_AGAIN_OPTIONS, 3);
@@ -139,8 +146,6 @@ static void options(TextArchive *t, const char *words) {
 		ta_script(t);
 		ta_flag_set(t, SQUARE_DIVE_FLAG);
 		if (k) ta_flag_set(t, SQUARE_DIVE_OVER_FLAG);
-		bool f = true;
-		ta_pages(t, square_week_off(), FACE_NONE, &f);
 		ta_end(t);
 	}
 	ta_closing(t);
@@ -151,9 +156,9 @@ bool square_week_portal(void) {
 	static uint8_t out[TEXT_ARCHIVE_MAX];
 	WeekOffer offer = square_week_offer();
 	const char *words = square_week_words();
-	if (!*words) words = square_week_closed();
+	if (!*words && offer != WEEK_OFFER_NEW && offer != WEEK_OFFER_AGAIN) words = square_week_closed();
 	ta_begin(&t);
-	if (offer == WEEK_OFFER_NEW) ask(&t, words, offer);
+	if (offer == WEEK_OFFER_NEW) ask(&t, words);
 	else if (offer == WEEK_OFFER_AGAIN) options(&t, words);
 	else ta_say(&t, FACE_NONE, words);
 	return online_square_prog_say(SQUARE_PROG_GREETER, out, ta_build(&t, out));

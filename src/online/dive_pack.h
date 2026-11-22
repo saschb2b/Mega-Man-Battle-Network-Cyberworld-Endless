@@ -6,12 +6,16 @@
 #ifndef CW_DIVE_PACK_H
 #define CW_DIVE_PACK_H
 
+#include <stdbool.h>
+
 #include "dive_wire.h"
 
 void dive_pack_divers(const DiveDivers *d);
 void dive_pack_splits(const WeekSplits *s);
 /* As last said: none (zeroed) before the first. */
 const DiveDivers *dive_pack_now(void);
+/* Whether DIVERS was heard at all (its count a fact the server gave, issue #779) */
+bool dive_pack_heard(void);
 const WeekSplits *dive_pack_records(void);
 
 #endif

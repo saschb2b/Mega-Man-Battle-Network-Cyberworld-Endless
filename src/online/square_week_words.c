@@ -29,7 +29,7 @@ static void dates(char *out, size_t n, uint16_t week, bool caps) {
 	if (caps) for (char *c = out; *c; ++c) if (*c >= 'a' && *c <= 'z') *c = (char)(*c - 'a' + 'A');
 }
 
-const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
+const char *square_week_post(WeekOffer offer, uint16_t week, int posted, bool first) {
 	static char s[240];
 	char when[32];
 	dates(when, sizeof when, week, true);
@@ -37,10 +37,16 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
 	if (posted) n += snprintf(s + n, sizeof s - (size_t)n, "YOUR DIVE TO\nLAYER %d IS UP ON\nTHE BOARD!|", posted);
 	switch (offer) {
 	case WEEK_OFFER_NEW:
-		snprintf(s + n, sizeof s - (size_t)n, "THE NET SHIFTED!\nTHIS WEEK'S DEEP\nNET IS OPEN!|%s.\nEVERY NAVI DIVES\nTHE SAME NET!", when);
+		/* (the week's first dive alone: the dates and the one thing a new diver needs, said once; the question says the
+		 * rest, issue #779) */
+		if (first) snprintf(s + n, sizeof s - (size_t)n, "%s.\nEVERY NAVI DIVES\nTHE SAME NET!", when);
+		else if (n) s[n - 1] = 0;
+		else s[0] = 0;
 		break;
 	case WEEK_OFFER_AGAIN:
-		snprintf(s + n, sizeof s - (size_t)n, "YOUR DIVE INTO\nTHE DEEP NET\nISN'T OVER!");
+		/* (the options say it: Keep diving, Start over, Not now; issue #779) */
+		if (n) s[n - 1] = 0;
+		else s[0] = 0;
 		break;
 	case WEEK_OFFER_ON:
 		snprintf(s + n, sizeof s - (size_t)n, "YOU'RE ON THIS\nWEEK'S DIVE!\nGO DEEP!");
@@ -58,9 +64,15 @@ const char *square_week_post(WeekOffer offer, uint16_t week, int posted) {
 	return s;
 }
 
-const char *square_week_question(WeekOffer offer) { return offer == WEEK_OFFER_NEW ? "DIVE IN NOW?\n" : NULL; }
-
-const char *square_week_off(void) { return "THE PORTAL OPENS\nINTO THIS WEEK'S\nDEEP NET!"; }
+const char *square_week_question(bool known, unsigned diving) {
+	static char s[64];
+	/* (two lines, BN6's Yes and No on the third; sixteen letters a line at most, as the portal's others) */
+	if (!known) snprintf(s, sizeof s, "DIVE INTO THIS\nWEEK'S DEEP NET?\n");
+	else if (!diving) snprintf(s, sizeof s, "NO NAVI DIVING\nYET. DIVE IN?\n");
+	else if (diving == 1) snprintf(s, sizeof s, "1 NAVI DIVING!\nDIVE IN?\n");
+	else snprintf(s, sizeof s, "%u NAVIS DIVING!\nDIVE IN?\n", diving);
+	return s;
+}
 const char *square_week_closed(void) { return "THE PORTAL'S\nSHUT. NO DEEP NET\nTHIS WEEK."; }
 
 static int line(char *s, size_t n, int place, const WeekEntry *e) {

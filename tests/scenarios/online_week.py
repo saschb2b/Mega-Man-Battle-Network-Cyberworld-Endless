@@ -635,3 +635,25 @@ MANY['door-waits-crew'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online.c
     soon('partyfield~seat', 'beta', 3000),
     ('expect', 'partyfield~2 seat'),                      # two MegaMen on one field
 ))
+
+# The way in (issue #779): a second dive of the week from A on the portal to walking on layer 1 in three presses of
+# A and DOWN: the unfinished dive's options at once (A), "Start over" (DOWN, A); the first layer's words and the act's
+# card were the week's first dive's, and are not said again.
+MANY['second-dive-of-the-week'] = dict(CAST, STEPS=online.course(
+    online.into_square(), dive(),
+    ('expect', 'layer=1'),
+    ('restart', online.HOME),                         # (the game quit on the dive: unfinished)
+    online.into_square(),
+    soon('weekoffer=again', '', 600),
+    ('do', PORTAL),
+    ('do', 'press A; wait 10'),                       # 1: the portal's box, its options
+    ('repeat', 'wait 4', 'choice=1/3', 90),
+    ('do', 'press DOWN; wait 6'),                     # 2: Start over
+    ('expect', 'choice=2/3'),
+    ('do', 'press A; wait 6'),                        # 3
+    ('repeat', 'wait 10', 'dive=on', 60),
+    ('until', 'where=layer', 1200),
+    ('do', 'wait 240'),
+    ('expect', 'chat=closed'),                        # no words, no card: walking
+    ('expect', 'talk=none'),
+))

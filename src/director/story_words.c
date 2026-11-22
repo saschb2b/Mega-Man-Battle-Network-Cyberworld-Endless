@@ -23,6 +23,7 @@
 #include "rivals.h"
 #include "save.h"
 #include "visitors.h"
+#include "weekly.h"
 
 /* The net's version: the Nest rebuilds it, one stronger, each time its
  * guardian falls (1 for the first cycle). */
@@ -129,8 +130,12 @@ void arrival_words(void) {
 	/* (a trip back from home, docs/world/home/: an area already won) */
 	else if (run.side_kind == LAYER_BACK)
 		snprintf(D.beat, sizeof D.beat, "@M We're back in %s,Lan!|@M It feels easier now...|@L 'Cause we got stronger! Let's stock up!", area);
-	else if (run.depth == 1)
-		first_dive(area);
+	else if (run.depth == 1) {
+		/* (the week's dive: its first layer's words and the act's card once a week, not every dive; issue #779) */
+		if (weekly_intro_shown()) D.area_card = false;
+		else first_dive(area);
+		weekly_intro_mark();
+	}
 	else if (first_of_act && (run.depth - 1) % CYCLE_LAYERS == 0)
 		snprintf(D.beat, sizeof D.beat, "@D Lan,it's Dad! The Endless Net just rebuilt itself!|@D Same areas,but stronger data. It's Net V%d now.|"
 			"@L Stronger,huh? Bring it on!", net_version());

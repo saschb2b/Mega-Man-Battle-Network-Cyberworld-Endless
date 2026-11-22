@@ -25,15 +25,14 @@ typedef enum {
 enum { WEEK_AGAIN_OPTIONS = 3 };
 extern const char *const square_week_again_options[WEEK_AGAIN_OPTIONS];
 
-/* The greeter's post on the week's net (pages, '|' between boxes), after
- * his welcome; `posted` the layer of MegaMan's dive the Board just took
- * (0 none). */
-const char *square_week_post(WeekOffer offer, uint16_t week, int posted);
-/* ... his question where he asks one (its end a '\n'): Yes/No for a new
- * dive, NULL where there is none or the options ask */
-const char *square_week_question(WeekOffer offer);
-/* ... and the portal's word as MegaMan goes to dive */
-const char *square_week_off(void);
+/* The portal's post on the week's net (pages, '|' between boxes);
+ * `posted` the layer of MegaMan's dive the Board just took (0 none);
+ * `first` no dive of this week's yet: a new dive's dates said once (else
+ * a new dive's nothing but its question, issue #779). */
+const char *square_week_post(WeekOffer offer, uint16_t week, int posted, bool first);
+/* ... a new dive's question, one box (its end a '\n'): the week's net and,
+ * `known` (the server's DIVERS heard), how many dive now; two lines */
+const char *square_week_question(bool known, unsigned diving);
 /* The portal's words where the server names no week. */
 const char *square_week_closed(void);
 /* The Board's posts of the week's net: its dates, its deepest dives as

@@ -27,9 +27,14 @@ typedef struct {
 	/* (grown at its end: an older weekly.sav reads with these 0) */
 	uint8_t pulled;      /* the dive in the slot: its crew's pull-back spent (issue #718, crew_pull.h) */
 	uint8_t r_pulled;    /* the end to post: its dive pulled back once, the Board's mark */
-	uint8_t spare[2];    /* (zero: the record's size a whole four) */
+	uint16_t intro_week; /* the week whose first layer's words and act card were shown (issue #779; 0 none) */
 } WeeklyRecord;
 
+/* The week's dive's first layer: its words and the act's card shown this
+ * week already (once a week, issue #779), and marked shown. Both nothing
+ * outside the week's dive. */
+bool weekly_intro_shown(void);
+void weekly_intro_mark(void);
 /* The record as weekly.sav holds it (read once, again after the title). */
 const WeeklyRecord *weekly_record(void);
 /* The run in play is the week's dive. */
