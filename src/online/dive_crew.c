@@ -12,7 +12,10 @@
 
 static CrewState C;           /* the crew as the server last said (count 0 alone) */
 
-void dive_crew_reset(void) { memset(&C, 0, sizeof C); }
+void dive_crew_reset(void) {
+	memset(&C, 0, sizeof C);
+	dive_comings_reset();
+}
 
 int dive_crew_count(void) { return C.count; }
 

@@ -7,6 +7,7 @@
 #include "dive_crew.h"
 #include "dive_link.h"
 #include "dive_words.h"
+#include "online_transport.h"
 #include "run.h"
 
 #define GONE_LOOK_MS 600         /* a crewmate who went, looked for in the snapshot so long before he counts as gone */
@@ -97,7 +98,10 @@ static const OnlinePeer *peer_named(const OnlineSnapshot *s, const char *name) {
 	return NULL;
 }
 
-void dive_comings_frame(const OnlineSnapshot *s, uint32_t now) {
+void dive_comings_frame(uint32_t now) {
+	static OnlineSnapshot snap;
+	const OnlineSnapshot *s = &snap;
+	online_transport_snapshot(&snap);
 	for (int k = 0; k < K.naway; ++k) {
 		Away *a = &K.away[k];
 		const OnlinePeer *p = peer_named(s, a->name);

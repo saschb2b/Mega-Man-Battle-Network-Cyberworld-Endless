@@ -134,7 +134,9 @@ void dive_crew_view_draw(void) {
 	int n = dive_crew_view_rows(w);
 	int name_w = 0, layer_w = 0, hp_w = 0;
 	for (int i = 0; i < n; ++i) {
-		int a = pixfont_width(w[i].name, 1), b = w[i].layer[0] ? pixfont_width(w[i].layer, 1) + GAP : 0, c = pixfont_width(w[i].hp, 1);
+		/* (a mark in the tag's own small capitals, a margin each side) */
+		int a = pixfont_width(w[i].name, 1), c = pixfont_width(w[i].hp, 1);
+		int b = !w[i].layer[0] ? 0 : (w[i].mark ? look_caps_width(w[i].layer) + 4 : pixfont_width(w[i].layer, 1)) + GAP;
 		if (a > name_w) name_w = a;
 		if (b > layer_w) layer_w = b;
 		if (c > hp_w) hp_w = c;

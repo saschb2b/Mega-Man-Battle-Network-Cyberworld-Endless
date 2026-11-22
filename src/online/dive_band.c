@@ -8,6 +8,7 @@
 #include "director.h"
 #include "director_crew.h"
 #include "dive_crew_view.h"
+#include "dive_comings.h"
 #include "dive_join.h"
 #include "dive_link.h"
 #include "dive_party.h"
@@ -38,6 +39,8 @@ void dive_band_describe(FILE *f) { fprintf(f, "band %s\n", B.nfeed ? B.feed[0] :
 void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 	/* (MegaMan's HP to his crew as it changes, and the crew's plates: dive_crew_view.h) */
 	dive_crew_view_frame(linked, me, now);
+	/* (and the crew's comings and goings said: dive_comings.h) */
+	if (linked) dive_comings_frame(now);
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {
 		memmove(B.feed, B.feed + 1, sizeof B.feed[0] * (size_t)(B.nfeed - 1));
 		B.shown_at = --B.nfeed ? now : 0;

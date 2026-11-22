@@ -29,8 +29,8 @@ void dive_comings_full(const CrewState *full);
 /* Whether `session` is in a crew MegaMan was told is full (no "about to
  * be" ring for him, dive_people.c). */
 bool dive_comings_full_has(uint32_t session);
-/* Each frame of the dive: the snapshot's divers against those who went. */
-void dive_comings_frame(const OnlineSnapshot *s, uint32_t now);
+/* Each frame of the dive: the room's divers (the transport's snapshot) against those who went. */
+void dive_comings_frame(uint32_t now);
 /* `comings LINE` (the last said, `none`) */
 void dive_comings_describe(FILE *f);
 
