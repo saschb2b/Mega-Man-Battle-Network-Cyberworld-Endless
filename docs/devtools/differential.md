@@ -101,7 +101,10 @@ charged buster in different places and by different clocks, so the
 comparator reads them as one state by `tools/xdiff_bn4_souls.py`'s
 rules (legit.json's bn4 `souls`, each with both games' code): BN4's
 unison's last frame, the fight's first, where BN6 crossed before the
-fight, and its sounds; his ready state's first wait after it, two of
+fight, and its sounds; the battle's actors BN4's unison holds (time
+stopped, its actors' runner's held routine copying an actor's +0x36 to
+its +0x30, which BN6's twin would but never runs in a fight); the
+attack's variables' +5 BN4's unison leaves; his ready state's first wait after it, two of
 BN4's frames behind BN6's; a moved Soul's power attack by each game's
 number; his NameID, BN6's by his form; the Soul's form and turns, BN4's
 in his AI data and NaviStats, BN6's in its Souls block, held to each
@@ -110,8 +113,10 @@ pending form, which BN4 clears at each turn's start; BN4's timed form's
 frames and its count of a form's charged shots, which BN6 has none of;
 and the buster's charge, BN4's two counters, levels (0, 1, 3) and button
 against BN6's one counter held at the charge time, its level (0, 1, 2),
-button and request bits, and each engine's glow. Three bytes are left
-unread (its recorded FAIL says which), so it has no mutations yet. A
+button and request bits, and each engine's glow. Each writer BN4 alone
+has was found by romlab's write watch on BN4's state the spec saves
+(`state4`). It passes, and its mutations break the turns, the charge
+time, the element and the shot's damage. A
 moved Soul's power attack is never written as BN6's number: the rules
 and an engine spec's `expect` (`{bn4_power:FORM}` in a value) read it as
 `src/emu/soulpower.c` lays the grown table out, its counts read from the
@@ -123,7 +128,11 @@ alone (`kind: engine`), held to BN4's trace by its `expect`: MegaMan's
 action, loadout, element and used bit, and the foe's HP (`foe_hp`, which
 an engine spec now checks as a differential does). Its mutations break
 the charge time, the shot's damage (a poke at BN4's address in the
-unit's copy) and the element. A BN4 spec takes `film` as BN5's do. Against BN6
+unit's copy) and the element. A BN4 spec takes `film` as BN5's do, and `state4` (a path as the
+container sees it) saves BN4's guest once its first Custom screen's first
+frame has run, folder and Souls given, for [romlab](romlab.md) to go on
+from with the spec's keys from that screen's second frame under its
+probes and write watches. Against BN6
 a dark karma parts the two from the first frame on one byte: MegaMan's
 palette (his object's +0x94), 2 in BN4 by his karma (`0x0800C052`),
 0 in BN6, which has no karma; legit.json's bn4 allowed, MegaMan's dark

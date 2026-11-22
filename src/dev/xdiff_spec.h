@@ -97,6 +97,7 @@ typedef struct {
 	XdTwin twins[MAX_TWINS];
 	int ntwins;
 	char out[256];
+	char state4[160];   /* (state4=) BN4's guest saved here as its first Custom screen opens: for romlab's probes and write watches */
 	bool bn5, bn6, follow, replay;
 	int bn4;            /* (game=bn4...) BN4 Red Sun's own battle on the guest core, XD_BN4_* (xdiff_bn4.h, xdiff_bn4_trace.h); 0 none */
 	int lag;            /* (lag=N) BN6's battle N fight frames behind BN4's: BN6's engine runs no state while the opening is paused

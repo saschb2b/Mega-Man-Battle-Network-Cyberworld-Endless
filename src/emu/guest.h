@@ -54,5 +54,9 @@ bool guest_hook(uint32_t addr, EmuHook fn, void *user);
 void guest_frame_quiet(uint32_t keys);
 /* The guest's last frame, 240x160, as emu_video's. */
 const uint32_t *guest_video(void);
+/* Its state as mGBA saves it (its save data in it) into `path`, for the
+ * plain ROM in tools/romlab to go on from (the differential's state4=);
+ * false where it is not ready or the file cannot be written. */
+bool guest_state_save(const char *path);
 
 #endif

@@ -30,6 +30,12 @@ bool soulkinds_make(void);
  * where none; and whether BN5 counts it a DarkChip */
 int soulkinds_of(int chip);
 bool soulkinds_dark(int chip);
+/* ... and its kind as BN4 has it (BN4_CHIP_KIND: BN5's numbers but 8,
+ * panel-cracking where BN5's is Cursor), the one BN4's Souls unite by: a
+ * BN4 chip's own (the registry's, xreg4_at) or its BN4 namesake's where
+ * BN4's ROM is read, else BN5's kind (soulkinds_of) with Cursor none, as
+ * BN4 has no Cursor */
+int soulkinds_bn4_of(int chip);
 
 /* What UNITE's check reads of the Souls a core has (soulunite.c fills it
  * from BN5's and BN4's ROMs) */
@@ -40,6 +46,8 @@ typedef struct {
 	int n4;                  /* ... how many */
 	int first4, held4;       /* BN6's Soul number of BN4's first, and its bit in the Souls held */
 	unsigned moved4;         /* bit k: BN4's k-th Soul's charged shot stands in this core */
+	bool by4;                /* the chip's BN4 kind given (kind4: soulkinds_bn4_of), BN4's Souls lit by it; else by `kind` */
+	int kind4;
 } SoulTables;
 #define SOULKINDS_BN5 12
 
@@ -50,7 +58,8 @@ typedef struct {
  * Chaos Unison's 16 higher). BN5's Soul of the kind comes first where it
  * is this version's and held: lit unless united this battle already. Where
  * it is the other version's or not held, BN4's Soul of the kind, held, its
- * charged shot moved and not united this battle; a DarkChip lights none of
+ * charged shot moved and not united this battle, by the chip's kind as BN4
+ * has it where the tables give it (by4); a DarkChip lights none of
  * BN4's (no Chaos Unison of theirs). A run holding both Souls of a kind
  * unites BN5's alone until the owner's call (issue #499). */
 int soulkinds_lights(const SoulTables *t, int kind, bool dark, unsigned held, uint32_t used, int *chaos);

@@ -1,5 +1,5 @@
 {
- "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6: Elec, its charged shot power attack 0x58 and family 0x47, 90 frames) in BN4's own battle on the guest core against BN6's with ThunSoul moved (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): BN4's family 0x47 an attack unit of tools/xchiprecipe_bn4.py at BN6's grown 0xD7, its power attack copied with it at BN6's grown power attacks' 0xA5, its loadout, charge times and element read from BN4's tables (src/emu/soulbn4.c). BN4 holds the Soul (souls4: its flag 0x1C, Double Soul's, its pseudo-chip past the chip gate) and a folder of MagBolt1 B (BN4's chip 35, kind Elec); BN6 holds it (souls6 bit 6: BN6's Soul 13 over the proxy form) and a folder of BN6's chip 30 B (Elec). The first Custom screen picks the chip, moves to UNITE (five right, down), takes it and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90, its release the charged shot (88 gives the plain buster in both games). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "about": "BN4 Red Sun's ThunSoul (its Soul 6, form 6: Elec, its charged shot power attack 0x58 and family 0x47, 90 frames) in BN4's own battle on the guest core against BN6's with ThunSoul moved (docs/multirom/bn4-souls.md, ThunSoul in BN6's engine): BN4's family 0x47 an attack unit of tools/xchiprecipe_bn4.py at BN6's grown 0xD7, its power attack copied with it at BN6's grown power attacks' 0xA5, its loadout, charge times and element read from BN4's tables (src/emu/soulbn4.c); what the two engines keep apart read across them by tools/xdiff_bn4_souls.py's rules (legit.json's bn4 souls). BN4 holds the Soul (souls4: its flag 0x1C, Double Soul's, its pseudo-chip past the chip gate) and a folder of MagBolt1 B (BN4's chip 35, kind Elec); BN6 holds it (souls6 bit 6: BN6's Soul 13 over the proxy form) and a folder of BN6's chip 30 B (Elec). The first Custom screen picks the chip, moves to UNITE (five right, down), takes it and the Soul (up, A). B held from fight frame 60 for 92 frames, two past its charge of 90, its release the charged shot (88 gives the plain buster in both games). A Mettaur at (5,2), MegaMan at (2,2) with 2000 HP, kept from harm.",
  "game": "bn4",
  "against": "bn6",
  "subject": "megaman",
@@ -189,10 +189,5 @@
    "B",
    92
   ]
- ],
- "verdict": {
-  "is": "FAIL",
-  "at": 1,
-  "why": "BN4's battle against BN6's parts at t1 on the Mettaur (the moved BN4 family) alone: its +0x30, 0x3C in BN4's battle at every frame and 0 in BN6's, and its +0x18 at BN4's unison's last frame; no BN4 spec without a Soul sees either, and neither's writer is located (docs/multirom/bn4-souls.md, The comparator's BN4 Souls). MegaMan's own state is read across the engines by tools/xdiff_bn4_souls.py's rules (legit.json's bn4 souls: the unison's last frame, his ready state's clock, the power attack, his NameID, the Soul's form and turns held to BN6's Souls block, the pending form, BN4's own counters, the buster's charge), and from t2 MegaMan differs in one byte more, his attack's variables' +5 (BN4's 2 from the unison to his charged shot, BN6's 0), whose writer is not located either. The charged shot is the same to the frame: BN4's family 0x47 at t154, BN6's 0xD7 at t155 (the spec's lag of 1), the Mettaur's HP 40 to 20 at t167 and t168, MegaMan ready again at t177 and t178, his arm and the ring drawn from BN4's art; soul_thun holds BN6's battle to it."
- }
+ ]
 }

@@ -538,7 +538,7 @@ static bool step(Side *g, const Spec *s) {
 	}
 	v->frame(keys);
 	++g->frame;
-	if (custom && g->custom >= 0) shots_take(g, s);
+	if (custom && g->custom >= 0) shots_take(g, s), xd4_state_take(s, v->game, g->screen, g->custom);
 	sub = sub_of(v);
 	t = v->rd32(v->state + 0x40);
 	bool fighting = sub == BN6_SUB_BATTLE && v->rd8(v->state + 1) == BN6_PHASE_FIGHT, traced = false;

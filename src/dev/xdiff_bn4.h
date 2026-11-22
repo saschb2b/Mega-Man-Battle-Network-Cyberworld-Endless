@@ -43,6 +43,10 @@ void xd4_pool_point(const Spec *s);
  * save's copy that BN4's gate reads against its key (BN4_CHIP_GATE); nothing where the spec gives none. And its karma4,
  * MegaMan's karma in his NaviStats, which the battle copies as it begins */
 void xd4_folder_put(const Spec *s);
+/* (state4=PATH) BN4's guest saved at PATH once its first Custom screen's first frame has run (`game` the side's, 4 its, `screen`
+ * and `custom` the screen and its frame), its folder and Souls given: for tools/romlab to go on from with the spec's keys from
+ * the screen's second frame, under its probes and write watches (docs/devtools/differential.md, BN4) */
+void xd4_state_take(const Spec *s, int game, int screen, int custom);
 /* The spec's souls4 given to BN4's MegaMan before its battle: each Soul's event flag (BN4_SOUL_FLAGS; Blue Moon's six have none in
  * Red Sun, said and skipped), Double Soul's (BN4_FLAG_DOUBLE_SOUL), and its pseudo-chip's byte (BN4_SOUL_CHIPS + n) written as
  * the game writes it giving the Soul, so BN4_CHIP_GATE lets UNITE's pick through at OK (docs/multirom/bn4-souls.md, How BN4

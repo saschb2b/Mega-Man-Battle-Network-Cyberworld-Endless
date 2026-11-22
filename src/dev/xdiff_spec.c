@@ -145,8 +145,9 @@ static int ncp_parse(Spec *s, const char *name, const char *v) {
 	return 1;
 }
 
-/* film=FROM:TO:STEP:PREFIX: 1 taken, 0 refused, -1 another item */
+/* film=FROM:TO:STEP:PREFIX, and state4=PATH (BN4's state for romlab): 1 taken, 0 refused, -1 another item */
 static int film_parse(Spec *s, const char *name, const char *v) {
+	if (!strcmp(name, "state4")) return snprintf(s->state4, sizeof s->state4, "%s", v) > 0;
 	if (strcmp(name, "film")) return -1;
 	Film *m = &s->film;
 	return sscanf(v, "%d:%d:%d:%159s", &m->from, &m->to, &m->step, m->prefix) == 4 && m->step > 0 && m->to >= m->from;
