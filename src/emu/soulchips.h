@@ -15,6 +15,7 @@
 #define CW_SOULCHIPS_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 /* Who the Souls' chips' bytes are (claims.h) */
 #define SOULCHIPS_CLAIMS "the Souls' chips (soulchips.c)"
@@ -37,5 +38,11 @@ enum {
  * family). Once a core; false (nothing written) where a byte it stands on
  * is not Gregar's as expected. */
 bool soulchips_install(int breaks);
+
+/* (what Team ProtoMan's rules read as the others do, soulteam_chips.c) the side of the Navi `obj` (0 or 1), the effect flags of
+ * BN6's chip `chip` (0 for none), the panel's record at column x, row y */
+int soulchips_side(uint32_t obj);
+uint8_t soulchips_flags(int chip);
+uint32_t soulchips_panel(uint32_t x, uint32_t y);
 
 #endif

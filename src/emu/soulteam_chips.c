@@ -11,7 +11,6 @@
 #include "bn6_navis.h"
 #include "bn6_panels.h"
 #include "bytes.h"
-#include "chips.h"
 #include "claims.h"
 #include "emu.h"
 #include "rom.h"
@@ -40,19 +39,14 @@ _Static_assert(SOULS_TEAM_THUMB + LAVA_CODE_SIZE + PROP_CODE_SIZE + PROP_SET_SIZ
 static int breaks;
 static bool done;
 
-static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 static int soul_of(uint32_t obj) { return done ? soul_id_of(obj) : 0; }
-static uint8_t flags_of(int chip) {
-	return chip > 0 && chip < CHIPS_IDS ? hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) : 0;
-}
-static uint32_t panel_at(uint32_t x, uint32_t y) { return BN6_FIELD_PANELS + (y * BN6_FIELD_COLUMNS + x) * BN6_PANEL_SIZE; }
 
 /* GyroSoul's propeller as the chip's modifier reads it (BN5's 0x08010264): set, an attack chip's modifier is the
  * propeller's alone, 3 and the damage doubled for a Wind chip or one of no kind, not left alone (0x080102FA), none for any
  * other, the emotion's not looked at; on to the Thumb that spends it (case 3, 0x0800FFC2: +0x0D 0) and plays the sound */
 HookAct soulteam_chips_modified(HookRegs *r, int chip) {
 	uint32_t ai = hook_read32(r->r[5] + BN6_T1_AI_DATA);
-	uint8_t f = flags_of(chip);
+	uint8_t f = soulchips_flags(chip);
 	if (!ai || !hook_read8(ai + AI_PROPELLER) || !(f & BN6_CHIP_SHOWS_POWER) || !done) return HOOK_CONTINUE;
 	int kind = soulkinds_of(chip);
 	uint16_t before = hook_read16(r->r[7] + BN6_ATTACK_DAMAGE);   /* (the damage the modifier was given, kept until the strh) */
@@ -74,9 +68,9 @@ static HookAct lava(HookRegs *r, void *user) {
 	if (soul_of(me) != SOUL_NAPALM || (breaks & SOULCHIPS_BREAK_LAVA) || hook_read8(hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_PAUSE) + BN6_PAUSED))
 		return HOOK_CONTINUE;
 	uint32_t x = hook_read8(me + BN6_T1_PANEL_X), y = hook_read8(me + BN6_T1_PANEL_Y);
-	if (x >= BN6_FIELD_COLUMNS || hook_read8(panel_at(x, y) + BN6_PANEL_TYPE) != XPANEL_LAVA) return HOOK_CONTINUE;
-	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)side_of(me) * HAND_SIDE, at = 2u * hook_read8(hand + BN6_HAND_AT);
-	if (!(flags_of(hook_read16(hand + BN6_HAND_CHIPS + at)) & BN6_CHIP_SHOWS_POWER)) return HOOK_CONTINUE;
+	if (x >= BN6_FIELD_COLUMNS || hook_read8(soulchips_panel(x, y) + BN6_PANEL_TYPE) != XPANEL_LAVA) return HOOK_CONTINUE;
+	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)soulchips_side(me) * HAND_SIDE, at = 2u * hook_read8(hand + BN6_HAND_AT);
+	if (!(soulchips_flags(hook_read16(hand + BN6_HAND_CHIPS + at)) & BN6_CHIP_SHOWS_POWER)) return HOOK_CONTINUE;
 	hook_write16(hand + BN6_HAND_BONUS + at, (uint16_t)(hook_read16(hand + BN6_HAND_BONUS + at) + LAVA_BONUS));
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
 	return HOOK_JUMP;
@@ -90,7 +84,7 @@ static HookAct propeller_set(HookRegs *r, void *user) {
 	uint32_t me = r->r[5], ai = hook_read32(me + BN6_T1_AI_DATA), ov = hook_read32(me + BN6_T1_OVERLAY);
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
 	if (soul_of(me) != SOUL_GYRO || !ai || (breaks & SOULCHIPS_BREAK_NAPALM)) return HOOK_CONTINUE;
-	bool sets = soulkinds_of(chip) == KIND_WIND && !(flags_of(chip) & BN6_CHIP_LEFT_ALONE);
+	bool sets = soulkinds_of(chip) == KIND_WIND && !(soulchips_flags(chip) & BN6_CHIP_LEFT_ALONE);
 	/* (BN6's twin of BN5's overlay takes its animation's offset from its +7, BN5's from its +0x60: legit.json's masks, 049) */
 	if (ov) hook_write8(ov + BN6_OVERLAY_OFFSET, (sets || hook_read8(ai + AI_PROPELLER)) ? BN6_OVERLAY_SPUN : 0);
 	if (!sets) return HOOK_CONTINUE;

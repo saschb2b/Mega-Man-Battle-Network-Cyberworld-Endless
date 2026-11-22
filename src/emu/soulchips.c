@@ -52,24 +52,24 @@ static uint32_t sword_family;   /* the moved sword family's CurAction (BN5's 0x1
 static int napalm_family;       /* ... and the Napalm Bomb's (BN5's 0x4B, NapalmSoul's charged Fire chip), -1 where not moved */
 #define BN5_FAMILY_NAPALM_BOMB 0x4B
 
-static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
+int soulchips_side(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 
 
 /* the Soul of the Navi `obj`: his side's, but none for a side's partner (--dev arena2v2: a Navi of his own, never united; the
  * full-rules audit: a Soul's chip powers its MegaMan's alone) */
 static int soul_of(uint32_t obj) { return done ? soul_id_of(obj) : 0; }
 
-static uint8_t flags_of(int chip) {
+uint8_t soulchips_flags(int chip) {
 	return chip > 0 && chip < CHIPS_IDS ? hook_read8(chips_table_bus() + (uint32_t)chip * BN6_CHIP_RECORD_SIZE + BN6_CHIP_EFFECT_FLAGS) : 0;
 }
 
 /* (BN5's test of an attack chip in its chip's modifiers: power shown, not left alone, 0x0801034A-0x08010352) */
 static bool attack_chip(int chip) {
-	uint8_t f = flags_of(chip);
+	uint8_t f = soulchips_flags(chip);
 	return (f & BN6_CHIP_SHOWS_POWER) && !(f & BN6_CHIP_LEFT_ALONE);
 }
 
-static uint32_t panel_at(uint32_t x, uint32_t y) { return BN6_FIELD_PANELS + (y * BN6_FIELD_COLUMNS + x) * BN6_PANEL_SIZE; }
+uint32_t soulchips_panel(uint32_t x, uint32_t y) { return BN6_FIELD_PANELS + (y * BN6_FIELD_COLUMNS + x) * BN6_PANEL_SIZE; }
 
 /* ---- the chip charge ---- */
 
@@ -82,7 +82,7 @@ static HookAct charge_test(HookRegs *r, void *user) {
 	if (!soul) return HOOK_CONTINUE;
 	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
 		soul == SOUL_NAPALM ? KIND_FIRE : -1;
-	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(flags_of(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
+	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(soulchips_flags(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
 		soulkinds_of(chip) == kind && !(breaks & SOULCHIPS_BREAK_CHARGE);
 	r->r[12] = (SOULS_THUMB + (ok ? ANSWER_YES : ANSWER_NO)) | 1;
 	return HOOK_JUMP;
@@ -117,7 +117,7 @@ static HookAct grass(HookRegs *r, void *user) {
 	if (soul_of(r->r[5]) == SOUL_GYRO) return breaks & SOULCHIPS_BREAK_NAPALM ? HOOK_CONTINUE : soulteam_chips_modified(r, chip);
 	if (soul_of(r->r[5]) != SOUL_TOMAHAWK || r->r[1] || (breaks & SOULCHIPS_BREAK_GRASS)) return HOOK_CONTINUE;
 	uint32_t x = hook_read8(r->r[5] + BN6_T1_PANEL_X), y = hook_read8(r->r[5] + BN6_T1_PANEL_Y);
-	if (soulkinds_of(chip) != KIND_WOOD || !attack_chip(chip) || hook_read8(panel_at(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_GRASS)
+	if (soulkinds_of(chip) != KIND_WOOD || !attack_chip(chip) || hook_read8(soulchips_panel(x, y) + BN6_PANEL_TYPE) != BN6_PANEL_GRASS)
 		return HOOK_CONTINUE;
 	r->r[0] |= MODIFIED_DOUBLE;
 	r->r[12] = (uint32_t)(uintptr_t)user | 1;
@@ -129,7 +129,7 @@ static HookAct grass(HookRegs *r, void *user) {
 static HookAct front(HookRegs *r, void *user) {
 	(void)user;
 	uint32_t me = r->r[5];
-	int side = side_of(me), chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
+	int side = soulchips_side(me), chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
 	soulmood_chip_used(me, chip);   /* (BN5's DarkChip use, 0x08010028: in BN5's chip use before KnightSoul's step) */
 	uint32_t dud;
 	if (soulmood_chip_refused(me, r->r[7], chip, &dud)) {   /* (BN5's dark gate, 0x080100DE: the dud uses no step of KnightSoul's) */
@@ -140,7 +140,7 @@ static HookAct front(HookRegs *r, void *user) {
 	/* (his facing: BN5's 0x0800C6CA, BN6's 0x0800E2CA, +1 or -1 by his side and flip) */
 	int dx = (side ^ hook_read8(me + BN6_T1_FLIP)) ? -1 : 1;
 	uint32_t x = (uint32_t)(hook_read8(me + BN6_T1_PANEL_X) + dx), y = hook_read8(me + BN6_T1_PANEL_Y);
-	if (x >= BN6_FIELD_COLUMNS || hook_read8(panel_at(x, y) + BN6_PANEL_ALLIANCE) == (uint8_t)side) return HOOK_CONTINUE;
+	if (x >= BN6_FIELD_COLUMNS || hook_read8(soulchips_panel(x, y) + BN6_PANEL_ALLIANCE) == (uint8_t)side) return HOOK_CONTINUE;
 	uint32_t coll = hook_read32(me + BN6_T1_COLLISION);
 	hook_write16(coll + BN6_COLL_INVULNERABLE, KNIGHT_GUARD);
 	hook_write32(coll + BN6_COLL_FLAGS, hook_read32(coll + BN6_COLL_FLAGS) | BN6_OBJ_INVULNERABLE);
