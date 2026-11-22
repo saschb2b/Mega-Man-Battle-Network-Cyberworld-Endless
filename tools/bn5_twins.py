@@ -705,6 +705,10 @@ TYPES = {
     # code spawns are other tracks' copies above, run for them: the image object, NumberSoul's companion (1, 0x54) and bomb
     # (3, 0x05), KnightSoul's ball (3, 0x17) and ToadSoul's hit (3, 0x81) the Navis', the obstacle strike's shot (3, 0x12)
     # and ShadowSoul's afterimage (4, 0x28) the chips')
+    (3, 0x3F): ('moved', None, 'souls', "MagnetSoul's B+Left's object on each panel of his row it strikes (BN5 0x080CD3C1, "
+                                        "spawned by 0x080CD466 from 0x08012512): BN6's 0x3F (0x080CD8B5) another body"),
+    (3, 0x75): ('moved', None, 'souls', "MagnetSoul's charged shot's object (BN5 0x080D4C49, spawned at 0x080D4D20 for his family "
+                                        "0x42): BN6's 0x75 (0x080D4D3D) another body"),
     (3, 0x30): ('moved', None, 'souls', "the obstacle strike (BN5 0x080CA91D, spawned at 0x080CABD0 by 0x080CABCA as an obstacle "
                                         "on the side opposite a Colonel's turns, its states' block 0x08018002-0x0801802E): BN6's "
                                         "0x30 (0x080CB571) another body; a Navi Colonel's side and ColonelSoul's both arm it "

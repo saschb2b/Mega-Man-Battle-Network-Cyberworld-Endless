@@ -1,0 +1,14 @@
+[
+ {
+  "name": "MagnetSoul's charged shot run as the next Soul's family",
+  "spec": "soul_magnet_shot",
+  "soulbreak": 32,
+  "what": "his loadout's B power attack the next moved one's where BN5's 0x0801CA18 names 0x15 (its family 0x42): another family runs at the release"
+ },
+ {
+  "name": "MagnetSoul drawn as the next Soul",
+  "spec": "soul_magnet_shot",
+  "soulbreak": 1,
+  "what": "the sprite selector draws MeddySoul's sprite where BN5 draws MagnetSoul's (its list 0's 5): his object's sprite word"
+ }
+]

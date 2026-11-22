@@ -1,0 +1,216 @@
+{
+ "about": "BN5's MagnetSoul's chip charge in both engines (docs/game/team-protoman.md, unit 8): MagnetSoul united (souls5 0x10, souls6 bit 22) with a deck of Thunder * (BN5's 19, BN6's 30: Elec, MagnetSoul's kind), two picked, the last given up for UNITE; A held from t100 for 130 frames: the chip charged by BN5's rule (BN5 0x08010902: an Elec chip for MagnetSoul), its charge time BN5's, released as the chip used charged (0x080103C8's 0xFF its bonus: soul_magnet_double holds its damage), at CanGard V1 at (6,2); MegaMan at (2,2) with 2000 HP, kept from harm. The spec ends at t233, the chip's use: from t234 each game's own Thunder ball (BN5's 19, BN6's 30) differs in its collision data, a difference of the chips', not the Soul's.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 233,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "3413"
+ ],
+ "deck5": [
+  "3413"
+ ],
+ "folder6": [
+  "341E"
+ ],
+ "deck6": [
+  "341E"
+ ],
+ "souls6": "400000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   130
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: MagnetSoul united from t1, the chip charged from t100, used charged and doubled.",
+ "souls5": "10"
+}

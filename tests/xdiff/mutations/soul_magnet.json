@@ -1,0 +1,14 @@
+[
+ {
+  "name": "MagnetSoul lit by the kind after its own",
+  "spec": "soul_magnet",
+  "unitebreak": 4,
+  "what": "UNITE's check reads the chip's kind one up (Elec as Wood): Thunder lights TomahawkSoul, which BN6's MegaMan does not hold, so MagnetSoul never unites where BN5's does at t1"
+ },
+ {
+  "name": "MagnetSoul's element none",
+  "spec": "soul_magnet",
+  "soulbreak": 64,
+  "what": "his element none where BN5's 0x0800E62C gives form 5 Elec: his object's element"
+ }
+]

@@ -20,6 +20,7 @@
 #include "debug.h"
 #include "emu.h"
 #include "rom.h"
+#include "soulpassive.h"
 #include "thumb_reloc.h"
 #include "xpanels_look.h"
 #include "xvirus_recipe.h"
@@ -269,8 +270,9 @@ static void bonus_make(uint8_t out[BN6_PANEL_BONUS_SPAN]) {
  * both games: none where the AI data's countdown (+0x38, which
  * the arrival counts down before) is not 0 or the object floats or flies,
  * else a push along the panel (BN6_STRUCK_SLIDE, its kind 3 at +0x0F).
- * BN5 spares the player in its Soul form 5 (NaviStats byte 0x2C), MagnetSoul,
- * which BN6's engine has none of yet (docs/game/team-protoman.md, unit 8). */
+ * BN5 spares the player in its Soul form 5 (NaviStats byte 0x2C), MagnetSoul
+ * (0x08017222-0x08017230): in BN6's engine a player's Navi united with him
+ * (soulpassive_magnet_spared, docs/game/team-protoman.md, unit 8). */
 #define MAGNET_SPARED  0x24u     /* the object's flags (BN6_COLL_FLAGS) that spare it: BN5's 0x0801721C */
 #define AI_PANEL_WAIT  0x38      /* u16 an AI data's frames before a panel acts on it again (BN5 0x08017164, BN6 0x0801A37A) */
 #define PUSH_KIND      0x0F      /* the object's push's kind, */
@@ -280,6 +282,7 @@ void xpanels_magnet_arrived(uint32_t obj, uint32_t coll) {
 	uint32_t ai = hook_read32(obj + BN6_T1_AI_DATA);
 	if (ai < BN6_EWRAM || ai >= BN6_EWRAM_END || hook_read16(ai + AI_PANEL_WAIT)) return;
 	if (hook_read32(coll + BN6_COLL_FLAGS) & MAGNET_SPARED) return;
+	if (soulpassive_magnet_spared(obj)) return;
 	hook_write32(coll + BN6_COLL_STRUCK, hook_read32(coll + BN6_COLL_STRUCK) | BN6_STRUCK_SLIDE);
 	hook_write8(obj + PUSH_KIND, PUSH_MAGNET);
 }

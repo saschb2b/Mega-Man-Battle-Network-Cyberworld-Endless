@@ -20,9 +20,10 @@
 /* (soulbreak's passives, tests/xdiff/mutations.json; from 0x08 ColonelSoul's, soulcolonel.h) */
 enum {
 	SOULPASSIVE_BREAK_HAND = 1,    /* NumberSoul's hand of 9 where BN5 deals 10 */
-	SOULPASSIVE_BREAK_PLUS = 2,    /* NumberSoul's +10 to plain attack chips left out, and BN4's GutsSoul's +30 (soulbn4.c) */
-	SOULPASSIVE_BREAK_READY = 4,   /* a Soul's passives as it unites left out (ShadowSoul's FloatShoe) */
-	SOULPASSIVE_BREAK_NAPALM = 8,  /* NapalmSoul's +40 to Fire attack chips left out */
+	SOULPASSIVE_BREAK_PLUS = 2,    /* a Soul's bonus to its chips left out: NumberSoul's +10 to plain attack chips, NapalmSoul's
+	                                  +40 to Fire attack chips, BN4's GutsSoul's +30 (soulbn4.c) */
+	SOULPASSIVE_BREAK_READY = 4,   /* a Soul's passives left out: as it unites (ShadowSoul's FloatShoe, GyroSoul's shoes), and
+	                                  MagnetSoul's on the magnet panel (soulpassive_magnet_spared) */
 };
 
 /* The passives as the core starts, after the Souls' look and abilities:
@@ -38,6 +39,9 @@ bool soulpassive_install(int breaks);
  * kind; NapalmSoul +40 to a Fire attack chip used uncharged, but while A
  * is held to a full charge (0x0800D0CE); the other Souls none. */
 bool soulpassive_bonus(uint32_t obj, int chip, bool charged, int *bonus, int *look);
+/* (xpanels.c's magnet panel, as it would push the Navi `obj`) whether he is spared: a player's Navi (his AI data's first
+ * byte 2) united with MagnetSoul, BN5's 0x08017222-0x08017230 */
+bool soulpassive_magnet_spared(uint32_t obj);
 /* the passives' break bits the install took (SOULPASSIVE_BREAK_*), 0 none: BN4's Souls' passives read them too */
 int soulpassive_breaks(void);
 

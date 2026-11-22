@@ -1,0 +1,8 @@
+[
+ {
+  "name": "MagnetSoul's charged chip not doubled",
+  "spec": "soul_magnet_double",
+  "soulbreak": 131072,
+  "what": "the charged chip's bonus none for MagnetSoul where BN5's 0x080103C8 doubles it (form 5): Thunder's 40 leaves CanGard 20"
+ }
+]

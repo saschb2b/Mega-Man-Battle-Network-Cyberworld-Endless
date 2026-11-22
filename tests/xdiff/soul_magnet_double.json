@@ -1,0 +1,128 @@
+{
+ "about": "BN5's MagnetSoul's charged Elec chip doubled, in BN6's engine alone held to BN5's own course (tests/xdiff/soul_magnet_charge.json's battle run on in both games, the reference: CanGard 60 to 0 at t383 in both, the same sounds): MagnetSoul united (souls6 bit 22) with a deck of Thunder * (BN6's 30, Elec), two picked, the last given up for UNITE; A held from t100 for 130 frames, the chip charged (BN5's 0x08010902: an Elec chip for MagnetSoul) and released as the chip used charged, its damage doubled (0x080103C8: 0xFF), 40 as 80: CanGard V1 at (6,2) falls from 60 at once, where an undoubled Thunder leaves 20.",
+ "kind": "engine",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "folder6": [
+  "341E"
+ ],
+ "deck6": [
+  "341E"
+ ],
+ "souls6": "400000",
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   130
+  ]
+ ],
+ "frames": 400,
+ "expect": {
+  "foe_hp": [
+   [
+    382,
+    60
+   ],
+   [
+    383,
+    0
+   ]
+  ]
+ },
+ "expect_why": "BN5's rule, by its code and its battle (soul_magnet_charge run on to t400 in both games: CanGard 60 to 0 at t383 in each, the same sounds): the charged Thunder doubled, 80 of its 40."
+}

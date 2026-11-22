@@ -1,0 +1,210 @@
+{
+ "about": "BN5's MagnetSoul's B+Left in both engines: MagnetSoul united (souls5 0x10, souls6 bit 22) by Thunder * given up for UNITE; B held from t100 for 40 frames, LEFT at t104: B+Left (BN5's power attack 0x25, its family the misc family 0x1A with its sub-family 0xA, 0x080124C8; BN6's family 0xCC, a copy of the misc family's dispatcher of the Souls' own, tools/xsoul.py's SUB_TABLES) spawns BN5's third-kind 0x3F at each panel of his row holding a foe (BN6's 0x3F another body: moved with the Souls), which strikes CanGard V1 at (6,2) and holds it (60 to 59); MegaMan steps left after it and right again at t200. MegaMan at (2,2) with 2000 HP, kept from harm.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "3413"
+ ],
+ "deck5": [
+  "3413"
+ ],
+ "folder6": [
+  "341E"
+ ],
+ "deck6": [
+  "341E"
+ ],
+ "souls6": "400000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "B",
+   40
+  ],
+  [
+   104,
+   "LEFT",
+   4
+  ],
+  [
+   200,
+   "RIGHT",
+   4
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: MagnetSoul united from t1, B+Left from t104, its object from t107, CanGard 60 to 59.",
+ "souls5": "10"
+}

@@ -16,7 +16,8 @@
   "0x39": "0xC7",
   "0x44": "0xC8",
   "0x4B": "0xC9",
-  "0x3C": "0xCA"
+  "0x3C": "0xCA",
+  "0x42": "0xCB"
  },
  "t3_types": [
   "0x4B",
@@ -47,6 +48,13 @@
    "is": "0x01",
    "bn6": "0xC6",
    "why": "A sword chip charged with ShadowSoul united (his AttackVars +4 1, the chip's use's first argument: BN5 0x0800D9E8, BN6 0x0800FBEC) runs BN5's sword family in both, which takes ShadowSoul's paths: BN6's chip use returns the Souls' copy of it, 0xC6, for that chip (src/emu/soulchips.c)"
+  },
+  {
+   "bn5": "0x1A",
+   "ai": "0xA3",
+   "is": "0x0A",
+   "bn6": "0xCC",
+   "why": "BN5's misc family (0x1A, 0x080EC7DE) runs MagnetSoul's B+Left as its sub-family 0xA (his AttackVars +3, AI data +0xA3, set by its power attack 0x0800F9A0: 0x080124C8, the magnet panels of his row), the misc chips as the others; BN6's 0x1C is its own misc family, and the chips' copy of BN5's (BN6's 0x6A) names a stub for 0xA, so the Souls' copy of BN5's dispatcher with a table of its own runs as 0xCC (xattack_grow.h's Souls' numbers, tools/xsoul.py's FAMILIES and SUB_TABLES): BN5's 0x1A is BN6's 0xCC where his sub-family is 0xA"
   }
  ]
 }

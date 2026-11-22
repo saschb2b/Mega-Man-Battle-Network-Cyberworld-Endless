@@ -34,6 +34,7 @@
 /* BN5_CHIP_KIND's: the kinds BN5's chip charge takes by the Soul (0x08010902) */
 #define KIND_FIRE 0
 #define KIND_AQUA 1
+#define KIND_ELEC 2
 #define KIND_WOOD 3
 #define KIND_SWORD 6
 #define KIND_BREAK 11
@@ -81,20 +82,20 @@ static HookAct charge_test(HookRegs *r, void *user) {
 	int soul = soul_of(r->r[5]), chip = (int)r->r[0];
 	if (!soul) return HOOK_CONTINUE;
 	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
-		soul == SOUL_NAPALM ? KIND_FIRE : -1;
+		soul == SOUL_NAPALM ? KIND_FIRE : soul == SOUL_MAGNET ? KIND_ELEC : -1;
 	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(soulchips_flags(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
 		soulkinds_of(chip) == kind && !(breaks & SOULCHIPS_BREAK_CHARGE);
 	r->r[12] = (SOULS_THUMB + (ok ? ANSWER_YES : ANSWER_NO)) | 1;
 	return HOOK_JUMP;
 }
 
-/* (a charged chip's bonus by the form, r0 whether it was charged, its first instruction) KnightSoul's, ToadSoul's and
- * NapalmSoul's double, none for the rest (0x080103C8; ProtoSoul's and MagnetSoul's too, once theirs stand) */
+/* (a charged chip's bonus by the form, r0 whether it was charged, its first instruction) KnightSoul's, ToadSoul's,
+ * NapalmSoul's and MagnetSoul's double, none for the rest (0x080103C8; ProtoSoul's too, once his stands) */
 static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]);
 	if (!soul) return HOOK_CONTINUE;
-	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_NAPALM;
+	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_NAPALM || soul == SOUL_MAGNET;
 	r->r[0] = r->r[0] && doubled && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;
 }
