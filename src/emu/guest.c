@@ -342,6 +342,14 @@ void guest_frame_quiet(uint32_t keys) {
 
 const uint32_t *guest_video(void) { return video; }
 
+bool guest_state_save(const char *path) {
+	struct VFile *vf = ready ? VFileOpen(path, O_CREAT | O_TRUNC | O_RDWR) : NULL;
+	if (!vf) return false;
+	bool ok = mCoreSaveStateNamed(core, vf, SAVESTATE_SAVEDATA);
+	vf->close(vf);
+	return ok;
+}
+
 #else   /* (one core: the 3DS) */
 
 bool guest_start(int xrom) { (void)xrom; return false; }
@@ -356,6 +364,7 @@ bool guest_call(uint32_t fn) { (void)fn; return false; }
 bool guest_hook(uint32_t addr, EmuHook fn, void *user) { (void)addr; (void)fn; (void)user; return false; }
 void guest_frame_quiet(uint32_t keys) { (void)keys; }
 const uint32_t *guest_video(void) { return NULL; }
+bool guest_state_save(const char *path) { (void)path; return false; }
 
 #endif
 

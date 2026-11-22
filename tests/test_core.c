@@ -6337,6 +6337,13 @@ static void test_soul_lights(void) {
 	CHECK(!soulkinds_lights(&t, 1, false, AQUA, 0, &chaos) && soulkinds_lights(&t, 2, false, THUN, 0, &chaos) == 13,
 		"a Soul lit: none of BN4's whose charged shot is not moved");
 	CHECK(!soulkinds_lights(&t, 2, false, THUN, 1u << 13, &chaos) && !chaos, "a Soul lit: its chaos 0 where none is lit");
+	/* (BN4's Souls by the chip's BN4 kind where it is given: GutsSoul's panel-cracking, BN4's 8, where BN5's 8 is Cursor) */
+	static const uint8_t kinds4g[2] = { 2, 8 };
+	SoulTables g = { kinds5, bits5, kinds4g, 2, 13, 6, 3, true, 8 };
+	enum { GUTS = 1u << 7 };
+	CHECK(soulkinds_lights(&g, 12, false, GUTS, 0, &chaos) == 14, "a Soul lit: GutsSoul by a panel-cracking chip, BN4's kind given");
+	g.kind4 = SOULKIND_NONE;
+	CHECK(!soulkinds_lights(&g, 8, false, GUTS, 0, &chaos), "a Soul lit: GutsSoul by none of BN5's Cursor, its 8 BN4's another kind");
 }
 
 /* MegaMan's forms (src/director/forms.c; docs/game/meta/forms.md, issue
