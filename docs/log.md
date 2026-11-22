@@ -1,6 +1,7 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: multirom/souls.md (SearchSoul's battle in BN6's engine, his SHUFFLE traced: BN5's Custom screen's Soul button), rom/souls.md (SearchSoul's addresses, the Soul button and SHUFFLE in BN5's Custom screen), game/team-protoman.md (unit 8: SearchSoul's battle built, the button to come), devtools/differential.md (state5, BN5's guest saved for romlab).
 * **Update**: multirom/bn4-souls.md (SrchSoul in BN6's engine: his charged shot, his object at the dispatch's 0xA4 and its moment, his shots' sound on BN6's player 22, bn4_soul_srch), code/emu.md (soulbn4.c's SrchSoul), devtools/differential.md (a Soul's object at each engine's moment).
 * **Update**: multirom/bn4-souls.md (GutsSoul's pass on an Atk+ merged before the unison, bn4_soul_guts_atk: 40 in both games).
 * **Update**: multirom/bn4-souls.md (ThunSoul's Elec chips paralyse: BN4's bonus to an uncharged chip, bn4_soul_thun_elec), rom/bn4.md (BN4_CHIP_BONUS and ThunSoul's rule), rom/souls.md (a BN4 Soul's bonus to an uncharged chip, BN6_CHARGED_BONUS_DONE), code/emu.md (soulchips.c's uncharged bonus).
