@@ -579,6 +579,8 @@ static bool slot_taken(int slot) {
 
 int xsong_install_at(int xrom, int song, int slot) {
 	xsong_install(xrom, -1, -1);
+	/* (a grown slot's: the table grown first, as BN4's chips grow it, so a slot of it is there with BN5 alone too) */
+	if (slot >= (int)SONG_GROWN_FIRST && !song_table_grow()) return -1;
 	if (!R.layout || !R.layout->song_table || !R.data || !X.ready || !sound_slot(slot) || xsong_sound_slot(xrom, song) != slot)
 		return -1;
 	/* (copied before, or noted where another track's install copied it: at its slot alone, one BN5 sound one slot) */
