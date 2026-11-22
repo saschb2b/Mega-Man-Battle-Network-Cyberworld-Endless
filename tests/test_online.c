@@ -499,7 +499,7 @@ static void week(void) {
 static void dive_sent(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE];
 	static const uint8_t enter[] = { 41, 1, 11, 147, 245, 33, 254, 54, 3, 2, 7 };
-	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145 };
+	static const uint8_t end[] = { 41, 3, 1, 255, 251, 0, 6, 0, 0, 0, 145, 0, 42, ONLINE_WEEK_PULLED, 5 };
 	static const uint8_t phrase[] = { 41, 5, 4, 0, 10, 255, 236, 0, 0 };
 	static const uint8_t split[] = { 41, 7, 0, 1, 44, 9, 1, 2 };
 	static const uint8_t crew[] = { 47, 5, 0, 0, 0, 0, 4, 0, 0, 0 };
@@ -507,7 +507,8 @@ static void dive_sent(void) {
 	static const uint8_t damage[] = { 51, 0, 0, 0, 77, 0, 120, 0, 80 };
 	DiveWay way = { 3, 2, 7 }, none = { 0, 0, 0 };
 	assert(dive_wire_enter(m, 2963, 0xF521FE36u, way) == sizeof enter && !memcmp(m, enter, sizeof enter));
-	assert(dive_wire_end(m, ONLINE_DIVE_DELETED, -5, 6, 0, 0x91) == sizeof end && !memcmp(m, end, sizeof end));
+	DiveEnd e = { ONLINE_DIVE_DELETED, -5, 6, 0, 0x91, 42, ONLINE_WEEK_PULLED, 5 };
+	assert(dive_wire_end(m, &e) == sizeof end && !memcmp(m, end, sizeof end));
 	assert(dive_wire_phrase(m, 4, 10, -20, 0) == sizeof phrase && !memcmp(m, phrase, sizeof phrase));
 	DiveSplit s = { .index = 0, .party = 2, .tenths = 300, .level = 9, .guardian = true };
 	assert(dive_wire_split(m, &s) == sizeof split && !memcmp(m, split, sizeof split));
@@ -522,7 +523,9 @@ static void dive_sent(void) {
 	 * party, level and time, an ask with nobody, a join with no door, HP past its max) */
 	DiveWay deep = { 11, 0, 0 };
 	assert(!dive_wire_enter(m, 1, 1, none) && !dive_wire_enter(m, 1, 1, deep));
-	assert(!dive_wire_end(m, 3, 0, 0, 0, 0) && !dive_wire_end(m, ONLINE_DIVE_WON, 8193, 0, 0, 0) && !dive_wire_end(m, 1, 0, 0, 0, 0x10000));
+	DiveEnd bad[] = { { 3, 0, 0, 0, 0, 0, 0, 0 }, { ONLINE_DIVE_WON, 8193, 0, 0, 0, 0, 0, 0 }, { 1, 0, 0, 0, 0x10000, 0, 0, 0 },
+		{ 1, 0, 0, 0, 0, 0x10000, 0, 0 }, { 1, 0, 0, 0, 0, 0, 1, 0 }, { 1, 0, 0, 0, 0, 0, 0, 0x10 } };
+	for (size_t k = 0; k < sizeof bad / sizeof *bad; ++k) assert(!dive_wire_end(m, &bad[k]));
 	assert(!dive_wire_phrase(m, ONLINE_PHRASE_COUNT, 0, 0, 0) && !dive_wire_phrase(m, 0, 0, -8193, 0));
 	s.party = 5; assert(!dive_wire_split(m, &s)); s.party = 1; s.level = 12; assert(!dive_wire_split(m, &s));
 	s.level = 11; s.tenths = 0; assert(!dive_wire_split(m, &s)); s.tenths = 1; assert(dive_wire_split(m, &s) && m[5] == ONLINE_BUSTING_MOST);
@@ -610,13 +613,13 @@ static void dive_heard_crews_and_parties(void) {
 		c.m[0].session == 1 && c.m[1].session == 2 && !strcmp(c.m[1].name, "Beta") && c.m[1].hp == 120 && c.m[1].max_hp == 200 &&
 		c.m[1].depth == 3 && c.m[1].where == ONLINE_WHERE_HOME && !c.m[0].max_hp && c.m[0].where == ONLINE_WHERE_LAYER);
 	m[1] = ONLINE_CREW_VITALS; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_VITALS);
-	m[1] = 8; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
+	m[1] = ONLINE_CREW_FULL; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 9; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
 	m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 201; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 120;   /* (HP past his max) */
 	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 0;   /* (a layer past the members) */
-	m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 3; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 1;   /* (a where past battle) */
+	m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 4; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 1;   /* (a where past busy) */
 	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 0;   /* (a where past the members) */
 	uint8_t wh[ONLINE_DIVE_WHERE_BYTES];
-	assert(dive_wire_where(wh, ONLINE_WHERE_HOME) == sizeof wh && wh[0] == ONLINE_DIVE && wh[1] == ONLINE_DIVE_WHERE && wh[2] == 1 && !dive_wire_where(wh, 3));
+	assert(dive_wire_where(wh, ONLINE_WHERE_HOME) == sizeof wh && wh[0] == ONLINE_DIVE && wh[1] == ONLINE_DIVE_WHERE && wh[2] == 1 && !dive_wire_where(wh, 4) && dive_wire_where(wh, ONLINE_WHERE_BUSY));
 	uint8_t v[ONLINE_DIVE_VITALS_BYTES];
 	static const uint8_t vitals[] = { ONLINE_DIVE, ONLINE_DIVE_VITALS, 0, 120, 0, 200 };
 	assert(dive_wire_vitals(v, 120, 200) == sizeof v && !memcmp(v, vitals, sizeof v) && !dive_wire_vitals(v, 201, 200) && !dive_wire_vitals(v, 0, 0) &&

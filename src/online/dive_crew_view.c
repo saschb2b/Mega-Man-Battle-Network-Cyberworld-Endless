@@ -4,8 +4,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "bn6.h"
 #include "crew_look.h"
 #include "director.h"
+#include "emu.h"
 #include "dive_crew.h"
 #include "dive_party.h"
 #include "dive_wire.h"
@@ -16,6 +18,7 @@
 #include "pet_look.h"
 #include "pixfont.h"
 #include "platform.h"
+#include "talk.h"
 
 /* the plates' column, under BN6's HP box on the map (its 44 x 16 at the
  * picture's top left, arena_team_view.c's measure), a line each */
@@ -46,6 +49,8 @@ static const CrewMember *own(void);
 static int where_now(void) {
 	if (director_in_town() || director_in_hp()) return ONLINE_WHERE_HOME;
 	if (director_in_battle() || party_play_held()) return ONLINE_WHERE_BATTLE;
+	/* (v29, issue #758: on the layer, not free: a chat, the PET, a shop) */
+	if (!director_on_map() || emu_read8(BN6_CHATBOX) || talk_busy()) return ONLINE_WHERE_BUSY;
 	return ONLINE_WHERE_LAYER;
 }
 
@@ -56,7 +61,7 @@ static void where_frame(uint32_t now) {
 	uint8_t m[ONLINE_DIVE_WHERE_BYTES];
 	size_t n = dive_wire_where(m, (unsigned)w);
 	if (!n || !online_transport_send(m, n)) return;
-	fprintf(stderr, "dive: MegaMan %s\n", w == ONLINE_WHERE_HOME ? "home" : w == ONLINE_WHERE_BATTLE ? "in a battle" : "on the layer");
+	fprintf(stderr, "dive: MegaMan %s\n", w == ONLINE_WHERE_HOME ? "home" : w == ONLINE_WHERE_BATTLE ? "in a battle" : w == ONLINE_WHERE_BUSY ? "busy" : "on the layer");
 	V.where = w;
 	V.where_at = now;
 }
@@ -100,9 +105,12 @@ static void crew_row(CrewRow *r, const CrewMember *m, const CrewMember *me) {
 	if (m->max_hp) snprintf(r->hp, sizeof r->hp, "%u/%u", m->hp, m->max_hp);
 	else snprintf(r->hp, sizeof r->hp, "--");
 	r->layer[0] = 0;
-	/* (where he is: home between acts, a battle, another layer; nothing where he stands on MegaMan's) */
-	if (m->where == ONLINE_WHERE_HOME) snprintf(r->layer, sizeof r->layer, "Home");
-	else if (m->where == ONLINE_WHERE_BATTLE) snprintf(r->layer, sizeof r->layer, "Battle");
+	/* (where he is: home between acts, a battle, busy, as a mark on his plate, the owner's call of 22 November 2026, issue
+	 * #758; another layer; nothing where he stands on MegaMan's) */
+	r->mark = m->where != ONLINE_WHERE_LAYER;
+	if (m->where == ONLINE_WHERE_HOME) snprintf(r->layer, sizeof r->layer, "HOME");
+	else if (m->where == ONLINE_WHERE_BATTLE) snprintf(r->layer, sizeof r->layer, "BATTLE");
+	else if (m->where == ONLINE_WHERE_BUSY) snprintf(r->layer, sizeof r->layer, "BUSY");
 	else if (m->depth && (!me || me->depth != m->depth)) snprintf(r->layer, sizeof r->layer, "L%u", m->depth);
 }
 
@@ -142,12 +150,18 @@ void dive_crew_view_bar(int x, int y, int w, const CrewRow *r) {
 	if (bar) fill_rect(x, y, bar, 1, r->now * 4 <= r->most ? LOOK_ORANGE : LOOK_GREEN_HI);
 }
 
+static SDL_Color mark_fill(const char *mark) {
+	return mark[1] == 'A' ? LOOK_ORANGE : mark[1] == 'U' ? LOOK_GOLD : LOOK_NAVY;   /* BATTLE, BUSY, HOME */
+}
+
 void dive_crew_view_draw(void) {
 	CrewRow w[ONLINE_PARTY_MOST];
 	int n = dive_crew_view_rows(w);
 	int name_w = 0, layer_w = 0, hp_w = 0;
 	for (int i = 0; i < n; ++i) {
-		int a = pixfont_width(w[i].name, 1), b = w[i].layer[0] ? pixfont_width(w[i].layer, 1) + GAP : 0, c = pixfont_width(w[i].hp, 1);
+		/* (a mark in the tag's own small capitals, a margin each side) */
+		int a = pixfont_width(w[i].name, 1), c = pixfont_width(w[i].hp, 1);
+		int b = !w[i].layer[0] ? 0 : (w[i].mark ? look_caps_width(w[i].layer) + 4 : pixfont_width(w[i].layer, 1)) + GAP;
 		if (a > name_w) name_w = a;
 		if (b > layer_w) layer_w = b;
 		if (c > hp_w) hp_w = c;
@@ -158,7 +172,10 @@ void dive_crew_view_draw(void) {
 		int x = P.core_x + LEFT, y = P.core_y + TOP + i * LINE;
 		fill_rect(x, y, width, H, rgba(0, 24, 41, 190));
 		pixfont_draw(x + PAD, y + 1, w[i].name, w[i].crewmate ? CREW_COLOUR : LOOK_TEXT, shade, PIXFONT_LEFT, 1);
-		if (w[i].layer[0]) pixfont_draw(x + PAD + name_w + GAP, y + 1, w[i].layer, LOOK_EDGE_HI, shade, PIXFONT_LEFT, 1);
+		/* (where he is: a mark as the information box tags a key item, BN6's PET piece, its colour the state's; another
+		 * layer in plain letters) */
+		if (w[i].mark) look_tag(x + PAD + name_w + GAP - 1, y, layer_w - GAP, H - 2, w[i].layer, mark_fill(w[i].layer));
+		else if (w[i].layer[0]) pixfont_draw(x + PAD + name_w + GAP, y + 1, w[i].layer, LOOK_EDGE_HI, shade, PIXFONT_LEFT, 1);
 		pixfont_draw(x + width - PAD - 1, y + 1, w[i].hp, LOOK_TEXT, shade, PIXFONT_RIGHT, 1);
 		/* (his HP as a bar under it, the plate's width his max; orange from a quarter down) */
 		if (w[i].crewmate) dive_crew_view_bar(x + 1, y + H - 2, width - 2, &w[i]);
@@ -171,7 +188,7 @@ void dive_crew_view_describe(FILE *f) {
 	const QueueEntry *e;
 	fprintf(f, "crewview %d%s\n", n, dive_party_members(&e) ? " party" : "");
 	for (int i = 0; i < n; ++i) {
-		const char *at = !w[i].layer[0] ? "here" : w[i].layer[0] == 'L' ? w[i].layer + 1 : w[i].layer[0] == 'H' ? "home" : "battle";
+		const char *at = !w[i].layer[0] ? "here" : !w[i].mark ? w[i].layer + 1 : w[i].layer[1] == 'A' ? "battle" : w[i].layer[1] == 'U' ? "busy" : "home";
 		fprintf(f, "mate%d %s hp %s layer %s%s\n", i, w[i].full, w[i].hp[0] ? w[i].hp : "none", at, w[i].crewmate ? "" : " stranger");
 	}
 }

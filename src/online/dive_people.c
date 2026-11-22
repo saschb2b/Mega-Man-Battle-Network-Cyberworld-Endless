@@ -12,6 +12,7 @@
 #include "claims.h"
 #include "crew_look.h"
 #include "director.h"
+#include "dive_comings.h"
 #include "dive_crew.h"
 #include "dive_dots.h"
 #include "dive_seats.h"
@@ -28,6 +29,8 @@
 #define WRITER "dive people"
 #define MOVING_FRAMES 8   /* a step seen keeps the walk this long */
 #define TAG_TOP 4         /* the picture's top row a name piled on others may reach */
+#define ARRIVAL_MS 2000   /* MegaMan's own marked so long after an arrival */
+#define STACKED 16        /* ... while another diver stands this near him (world units) */
 #define TAG_BOX 100       /* ... and the row BN6's chat box begins under, while one is open */
 #define RING 14           /* world units: the ring under a crewmate's feet (#716) */
 #define CREW_OTHERS (ONLINE_PARTY_MOST - 1)   /* the puppets a full crew needs, before the traces' (#755) */
@@ -50,6 +53,7 @@ static struct {
 	Who who[DIVE_PEOPLE];
 	int nwho, undrawn;
 	uint32_t seed;            /* the layer they were made on */
+	uint32_t arrived;         /* ... and when (SDL_GetTicks) */
 	int depth;
 } P;
 
@@ -71,6 +75,7 @@ static void make_puppets(NpcList *npcs, int most) {
 static void more(NpcList *npcs) {
 	memset(&P, 0, sizeof P);
 	P.seed = run.layer_seed;
+	P.arrived = SDL_GetTicks();
 	P.depth = run.depth;
 	if (npcs->n >= BN6_NPC_COUNT || !npc_need_sprite(npcs, 6, PUPPET_MEGAMAN)) return;
 	/* (a full crew's MegaMen first, then the week's traces, a slot or two
@@ -115,7 +120,8 @@ enum { SIGN_NONE, SIGN_CREW, SIGN_FORMING };
 
 static int sign_of(const Who *w) {
 	if (dive_crew_has(w->id)) return SIGN_CREW;
-	if (dive_crew_count() >= ONLINE_PARTY_MOST) return SIGN_NONE;
+	/* (about to be a crew only where one can take him: MegaMan's has a place, and his is not full, issue #758) */
+	if (dive_crew_count() >= ONLINE_PARTY_MOST || dive_comings_full_has(w->id)) return SIGN_NONE;
 	long dx = w->x - bn6_player_x(), dy = w->y - bn6_player_y();
 	return dx * dx + dy * dy <= (long)DIVE_CREW_NEAR * DIVE_CREW_NEAR ? SIGN_FORMING : SIGN_NONE;
 }
@@ -175,8 +181,24 @@ static void rings_draw(bool chat) {
 	}
 }
 
+/* MegaMan's own marked for a moment at an arrival, where another diver stands on his spot (every diver arrives on
+ * one): the PET's cursor at his head (issue #758) */
+static bool arrival_marked(void) {
+	if (!here() || !P.arrived || SDL_GetTicks() - P.arrived > ARRIVAL_MS) return false;
+	for (int i = 0; i < P.nwho; ++i) {
+		long dx = P.who[i].x - bn6_player_x(), dy = P.who[i].y - bn6_player_y();
+		if (dx * dx + dy * dy <= (long)STACKED * STACKED) return true;
+	}
+	return false;
+}
+
 void dive_people_draw(bool chat) {
 	rings_draw(chat);
+	int camera[3], x, y;
+	if (!chat && arrival_marked() && director_on_map() && map_label_camera(camera)) {
+		map_label_at(bn6_player_x(), bn6_player_y(), bn6_player_z(), camera, &x, &y);
+		map_label_cursor(x, y);
+	}
 	Tag tags[DIVE_PEOPLE];
 	int n = tags_now(tags);
 	for (int i = 0; i < n; ++i) {
@@ -202,6 +224,7 @@ void dive_people_describe(FILE *f) {
 	int k_of[DIVE_PEOPLE], sign[DIVE_PEOPLE], camera[3], shown = 0;
 	int n2 = signs_now(k_of, sign, camera);
 	for (int i = 0; i < n2; ++i) shown += sign[i] != SIGN_NONE;
+	fprintf(f, "arrival %s\n", arrival_marked() ? "marked" : "none");
 	fprintf(f, "rings %d", shown);
 	for (int i = 0, j = 0; i < n2; ++i)
 		if (sign[i] != SIGN_NONE) fprintf(f, "%s%s%s", j++ ? " " : ": ", P.who[k_of[i]].name, sign[i] == SIGN_FORMING ? "(forming)" : "");

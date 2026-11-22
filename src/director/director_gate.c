@@ -18,6 +18,7 @@
 #include "cinema.h"
 #include "debug.h"
 #include "devtools.h"
+#include "director.h"
 #include "director_hold.h"
 #include "director_home.h"
 #include "director_save.h"
@@ -93,6 +94,17 @@ static void keeper_words(void) {
 	ta_say(&t, FACE_PROG, gate_keeper_bye());
 	G.written = lanhp_keeper_say(out, ta_build(&t, out));
 	if (!G.written && emu_debug_on()) fprintf(stderr, "gate: the keeper's words did not fit\n");
+}
+
+bool director_gate_address(char *url, size_t url_n, char *name, size_t name_n, uint8_t *identity) {
+	NetworkPrefs p;
+	if (!network_prefs_read(g_data_dir, &p)) return false;
+	const char *u = dev.online ? dev.online : p.servers[p.selected];
+	const char *n = dev.online_name ? dev.online_name : p.name;
+	if (!*u || !*n || !network_server_identity(p.identity, u, identity)) return false;
+	snprintf(url, url_n, "%s", u);
+	snprintf(name, name_n, "%s", n);
+	return true;
 }
 
 void home_gate_visit(void) {

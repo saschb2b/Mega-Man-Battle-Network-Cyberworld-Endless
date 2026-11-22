@@ -20,6 +20,11 @@ const char *dive_door_full_words(void);
 /* The band's join-in line (dive_join.h): his join into a crewmate's battle
  * sent, while it starts. */
 const char *dive_join_joined_words(void);
+/* The band's comings and goings (dive_comings.h): a crewmate's signal gone
+ * from the layer, his signal back, a crew near that is full (one of it named). */
+const char *dive_crew_gone_words(const char *name);
+const char *dive_crew_back_words(const char *name);
+const char *dive_crew_full_words(const char *name);
 /* A dropped link on a layer (issue #751), the PET's plain status in the
  * band as the Square's wait says it (reconnect_text.c): down, its dots
  * moving (0-3), and `away` once the dive goes on alone while it is tried
@@ -27,6 +32,7 @@ const char *dive_join_joined_words(void);
  * the next is linked */
 const char *dive_down_words(bool away, int dots);
 const char *dive_back_words(void);
+const char *dive_back_week_words(void);   /* (issue #759: the dive's week past the Square's keeping) */
 const char *dive_alone_words(void);
 const char *dive_alone_back_words(void);
 /* The band's line as MegaMan opens a Mystery Data another opened first

@@ -1,6 +1,9 @@
 # The knowledge base's log
 
 ## 2026-11-22
+* **Update**: online/shared-dive.md (comings and goings, issue #758: the owner's call of band lines and plate marks; a crewmate's signal gone and back, a full crew told, busy, fighting and home as PET tags, the arrival's cursor, the band's most lines a minute), code/online.md (dive_comings.c).
+* **Update**: online/shared-dive.md (back to the dive: CONTINUE straight into an unfinished dive and its link, the Board posted by the server from a dive's end, the owner's calls of 22 November 2026 on issue #759, the decisions' rows), online/weekly-net.md (how an unfinished dive goes on, reversed: the title's CONTINUE), GUIDE.md (CONTINUE into a dive, the board as a dive ends), code/online.md (`dive_link.c`'s call on CONTINUE).
+* **Update**: online/shared-dive.md (a partner's own Custom screen and results show his HP, a fallen diver sees no results of BN6's, issue #757).
 * **Update**: online/shared-dive.md (a full guardian's door told to the fifth, his keys his own and a place asked for again; the door's party named on the plates, leader first; the calls taken, issue #753), devtools/scenarios.md (the `door` line), devtools/play.md and devtools/headless-shot.md (the `guardian` dev step), code/online.md (`dive_party.c`'s full door).
 * **Update**: online/arena/dropped-link.md (a dropped link on a dive layer: said in the band, the link started again as long as the dive lasts, the server's refusal said plainly).
 * **Update**: online/shared-dive.md (Room for the crew: what a layer leaves of BN6's 16 NPC objects, counted over 40 seeds a depth; a full crew's MegaMen before the traces', the crew then the nearest seated, a diver with no MegaMan still named and ringed where he stands, `diveroom=N`; issue #755), code/online.md (`dive_seats.c`).

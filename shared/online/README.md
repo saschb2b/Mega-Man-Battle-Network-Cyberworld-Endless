@@ -1,10 +1,10 @@
-# Net Square protocol v26
+# Net Square protocol v29
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v26`. The server also
+`/presence` with subprotocol `cyberworld.presence.v29`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -45,7 +45,7 @@ side is behind, rather than a refused upgrade (v10).
 | TEAM (33) | client → server | u8 action (1 ask a player to team up, 2 answer one, 3 split the team or take an ask back, 4 the order), u32 reference (the player asked, the one who asked, 0 for a split, the lead's session for the order), u8 value (an answer's 1 yes; else 0) |
 | TEAM_STATE (34) | server → client | u8 stage (1 asked, 2 waiting, 3 formed, 4 split, 5 a match begun, 6 the order shown, 7 a bout called, 8 the bout started, 9 the match over), u32 the partner's session (asked: the asker; waiting: the one asked; split: the other), u32 the team match's ID, u32 the bout under way (its ARENA battle ID, 0 none), four u32 sessions: the recipient's team's two, then the other's, each team's MegaMan up now first (before the order: its captain first; side by side: its captain, the lead), u8 MegaMen standing of the recipient's team, u8 of the other, u8 the bout's number, u8 the result (the match over: 1 won, 2 lost, 3 broken off, 4 drawn; else 0), u16 the staying MegaMan's HP as the last bout's report left it (0 none), u8 the format (v15: 0 the relay, 1 side by side) |
 | ARENA_SEAT (35) | server → client | v15, a 2v2's: u8 the sending seat (0..3), then its ARENA_LOADOUT, ARENA_INPUT or ARENA_HASH as it sent it, to the three other seats (v19: a party battle's too, to its other party seats; and a linked fighter's PARTY_DAMAGE, to seat 0 alone) |
-| DIVE (41) | client → server | v19: u8 action, then its fields, each action a size of its own (with the type byte): 1 `dive_enter` (u16 week, u32 that week's seed, u8 the layer's depth 1..`week_layers`, u8 its side kind, 0 the main path, else the game's LAYER_* kind, u8 its way, the layer's area id: 11 bytes), 2 `dive_leave` (nothing: 2), 3 `dive_end` (u8 how, `dive_deleted` 1 or `dive_won` 2, i16 x, i16 y, i16 z within `coordinate_limit`, u16 what deleted MegaMan, 0 unknown: 11), 4 `dive_found` (u8 the Mystery Data's index on the layer: 3), 5 `dive_phrase` (u8 a phrase ID, i16 x, y, z: 9), 6 `dive_wave` (u32 a phrase's ID, the server's: 6), 7 `dive_split` (u8 the battle's index on the layer, u16 tenths of a second (not 0), u8 BN6's Busting Level 1..`busting_most`, 11 for S, u8 flags, bit 0 `split_guardian` the layer's guardian, u8 the party's size 1..`party_most`: 8) |
+| DIVE (41) | client → server | v19: u8 action, then its fields, each action a size of its own (with the type byte): 1 `dive_enter` (u16 week, u32 that week's seed, u8 the layer's depth 1..`week_layers`, u8 its side kind, 0 the main path, else the game's LAYER_* kind, u8 its way, the layer's area id: 11 bytes), 2 `dive_leave` (nothing: 2), 3 `dive_end` (u8 how, `dive_deleted` 1 or `dive_won` 2, i16 x, i16 y, i16 z within `coordinate_limit`, u16 what deleted MegaMan, 0 unknown, v27: u16 the dive's minutes, u8 flags (bit 2 `week_pulled`, none other), u8 the acts whose guardian was fought in a party (bits 0-3): 15), 4 `dive_found` (u8 the Mystery Data's index on the layer: 3), 5 `dive_phrase` (u8 a phrase ID, i16 x, y, z: 9), 6 `dive_wave` (u32 a phrase's ID, the server's: 6), 7 `dive_split` (u8 the battle's index on the layer, u16 tenths of a second (not 0), u8 BN6's Busting Level 1..`busting_most`, 11 for S, u8 flags, bit 0 `split_guardian` the layer's guardian, u8 the party's size 1..`party_most`: 8) |
 | DIVE_ROOM (42) | server → client | v19, an enter's answer: u16 week, u8 depth, u8 side, u8 way, u16 the room's instance (1 the first), u8 divers in it, the recipient among them (9 bytes) |
 | DIVE_TRACES (43) | server → client | v19: u8 kind, u8 count, then count entries of that kind (as many messages as they take): 1 `trace_marks` (16-byte name, i16 x, y, z, u16 cause, u8 how: 25 bytes), 2 `trace_phrases` (u32 ID, 16-byte name, u8 phrase, i16 x, y, z, u16 Waves: 29), 3 `trace_finds` (u8 index, 16-byte name of its first finder this week: 17), 4 `trace_opened` (u8 an index opened this week: 1), 5 `trace_splits` (u8 battle index, u8 party size, u16 tenths, u8 Busting Level, u8 flags, 16-byte name: the quickest bust of that battle at that size: 22), 6 `trace_gone` (u32 a phrase's ID, gone: 4) |
 | DIVE_PLACE (44) | server → client | v19, a split's answer: u8 battle index, u8 party size, u16 the tenths sent, u16 their place among this week's busts of that battle at that size (each identity's quickest), u16 how many busted it, u16 the quickest's tenths, 16-byte his name (27 bytes) |
@@ -144,6 +144,22 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v29 (issue #758, docs/online/shared-dive.md, Comings and
+goings): DIVE where's `where_busy` (3): on a layer, not free (a chat, the
+PET, a shop), told to the crew as the rest. CREW_STATE `crew_full` (8):
+to a diver in no crew near a crew of `party_most`, once as he comes near
+it, other the one near him, the members that crew's: his game draws no
+"about to be" ring for it and says it is full. Forgotten as he stands out
+of its reach, told again as he comes near it again.
+
+Protocol v27 (issue #759; docs/online/shared-dive.md, Back to the
+dive): **the Board without a visit**. DIVE end grows to 15 bytes, what
+the Board ranks after its fields (the dive's minutes, `week_pulled`, the
+acts fought in a party), and the server posts the dive's end itself,
+the layer its room's, held to WEEK_POST's checks; the game's WEEK_POST
+after it is the same entry and changes nothing. A v26 game would send an
+end 4 bytes short, hence the version.
 
 Protocol v26 (issue #756, docs/online/shared-dive.md, A diver gone
 home): **where each diver is.** DIVE `dive_where` (9, three bytes: u8

@@ -133,7 +133,8 @@ Verified on `dev`, 15 November 2026:
 | Deleted in a party | At a guardian: the run is over, as alone. In a crew's random battle the crew wins: pulled back once a dive, paid in the crew's HP, the dive marked (21 November 2026, issue #718; A deletion in a crew, below) | Pulled out at 1 HP and carried by a win; pulled out to fight again; (21 November) as at a guardian; back once a dive, free; at a guardian's party too; a fixed 100 HP a helper; the helper with the most HP paying alone; revived dives ranked below the rest |
 | Systems without the Arena | The New 3DS and the PSP join as linked fighters: their own battle, their damage into the field's guardian | Alone only; the whole party linked |
 | After a dive ends | Dive again from layer 1 into the live pack, as often as one likes, the best kept | Once a day; the first dive alone counted |
-| The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
+| A quit mid-dive | (22 November 2026, issue #759) The title's CONTINUE straight back into the dive at its checkpoint, the link taken up as the portal does (Back to the dive, below) | A question at the title; the way back through the gate and the portal, as it was |
+| The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size; (22 November 2026, issue #759) a dive's end posted by the server from DIVE end, no visit to the Square waited for | (all four taken); the Board alone fixed, the diver's own post kept as the only way |
 | Build order | One field first, the linked fallback in the same release | Linked first; a spike first |
 
 ## Crews by nearness (21 November 2026)
@@ -913,6 +914,81 @@ marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
 
+**His own Custom screen and his results** (22 November 2026,
+[issue #757](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/757),
+found by the friction hunt's play of the whole dive): BN6's own screens
+there showed the lead's HP. BN6's HP box reads side 0's first actor's
+battle object (its HP and max, `BN6_T1_HP`), the lead's on the field.
+Now each is driven, not redrawn:
+
+- **His Custom screen** runs on a core of his game alone
+  (`party_turn.c`), never part of the field or its hash: as it opens, his
+  HP and max go into side 0's first actor there (`team_screen_open_one`),
+  the HP the field means him to have (`party_core_seat_hp`: before the
+  battle's first iteration his going in, since his object holds his
+  lead's till the field writes his then, `party_field.h`).
+- **His results** run on each game's own pad once the battle is over and
+  the hashes have stopped: as they begin, a partner's game writes his HP
+  and max into side 0's first actor and the Navi's HP of its field's core
+  (`party_core_results_as`), so BN6's results show his.
+- **The fallen sees no results of BN6's**: a MegaMan deleted on the field
+  gets no reward for that battle ([A deletion in a crew](#a-deletion-in-a-crew-21-november-2026)),
+  so his game goes on to the run's own end of it at once, the results
+  whose GET DATA is not his never shown.
+
+Seen headless in `tests/scenarios/online_party_partner_hp.py` (`--dev
+partycore=3,partybot=1,partyview=1,partyhp=60`, the stood-in partners
+going in with 60 HP to the lead's 100): his own Custom screen's box 60
+(`partyturn hp 60 own 60 agree`), his results 60 (`partyresults ... agree`,
+`partyover shown hp 60`), and with `partyend=200,partydel=2` his deletion
+on the field ending with no results (`partyover skipped hp 0`). Left open
+on the issue: a dive's end screen of its own, and an HP reward that came
+into the run twice.
+
+## Comings and goings (22 November 2026)
+
+What the friction hunt of 21 November found silent ([issue
+#758](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/758)):
+a crewmate who quit or dropped vanished in one frame, his return with no
+word, a busy crewmate unseen, a fifth beside a full crew drawn the "about
+to be" ring for good, and every diver arriving on one spot. The owner's
+call of 22 November 2026: band lines and plate marks. A short line in the
+dive's band for a crewmate who left, came back, or a crew that could not
+take MegaMan; a mark on a plate for busy, fighting and away; strangers
+passing say nothing. Chosen over plate marks alone, and over lines for
+every diver on the layer.
+
+As built (`dive_comings.c`, its lines in `dive_words.c`; protocol v29):
+
+- **Gone and back.** A crewmate who leaves the crew and is gone from the
+  layer's SNAPSHOT within 0.6 s (he quit, dropped, left the dive) is "Beta's
+  signal is gone..."; the same name on the layer again is "Beta's signal is
+  back!". MegaMan senses a signal; he never says why it went. One who walks
+  off is still on the layer and says nothing (the plates and the ring show
+  it); one who went on to another layer, or home, says nothing either.
+- **A full crew.** The server tells a diver in no crew who stands near a
+  crew of four that it is full (CREW_STATE full), once as he comes near
+  it: his game draws no dotted ring for that crew and says "Alpha's crew is
+  full", told again only after he has stood out of its reach.
+- **Marks.** A plate's where is a tag as the PET's information box tags a
+  key item (`look_tag`): BUSY (on the layer, not free: a chat, the PET, a
+  shop; `where_busy`), BATTLE, HOME; another layer stays "L3".
+- **Arrivals.** For two seconds after MegaMan arrives on a layer, while
+  another diver stands on his spot, the PET's orange cursor points at his
+  head.
+- **The band never floods.** A crewmate's "gone" at most once every 20
+  seconds and his "back" once for each, so a crew of four makes 18 lines a
+  minute at most (three links flapping at once), the band's queue
+  dropping its oldest past its few; a full crew once an approach.
+
+Seen headless: `online-week/comings-and-goings` (three games: Beta's PET
+open, his plate BUSY on Alpha's and Gamma's; Gamma's game quit, "Gamma's
+signal is gone..." on Alpha's and Beta's band; Gamma's game started again and
+his dive kept on, "Gamma's signal is back!" and the crew of
+three again) and
+`online-week/crew-of-four-and-a-fifth` (five games: the fifth's rings none,
+"Alpha's crew is full" on his band; a crewmate walking off says nothing).
+
 ## A diver gone home (22 November 2026)
 
 A dive's games found by the friction hunt of 21 November ([issue
@@ -1065,6 +1141,56 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   AIs read their target elsewhere: the next thing to find, since a
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
+
+## Back to the dive (22 November 2026)
+
+Issue #759, found playing the shared dive with three to five games: a
+diver who quit mid-dive came back to the normal run's CONTINUE and a
+long way to the portal, his crew told nothing; and a dive's end reached
+the Board only at the diver's next visit to the Square, so a diver who
+did not go back was never on it. The owner's calls:
+
+- **CONTINUE goes straight back in.** The title's CONTINUE on an
+  unfinished dive (its label "Dive L3") takes it up at its checkpoint
+  (`weekly_continue`), and the dive's link calls the Square as the gate
+  does (`director_gate_address`, `dive_link.c`'s `call_again`), the link
+  on for the dive's own week and down until the Square answers: then
+  MegaMan's room is entered again, the others on the layer seen, the
+  crew forming again by nearness. Not answered, it is a dropped link
+  (issue #751, [A dropped link on a dive layer](arena/dropped-link.md)):
+  the band's "Reconnecting...", the dive alone meanwhile and never lost,
+  the Square called again for as long as the dive lasts, "Back online!"
+  once it answers; a refusal, the dive alone for good, said. The Square
+  two weeks on or more (it keeps this week's net and the last's), the
+  dive goes on alone and the band says "A new week's net! We'll dive
+  alone."; its end is posted at a later visit while the Board still
+  takes it. A server restarted meanwhile is called afresh like any
+  other. Nothing
+  of `Run` changed: what a quit kept (the checkpoint, the record's
+  pull-back) is what CONTINUE finds. Once the dive ends, CONTINUE is the
+  normal run's again.
+- **The Board without a visit.** DIVE end carries what the Board ranks
+  (v27: the dive's minutes, its flags, `week_pulled`, and the acts whose
+  guardian was fought in a party), and the server posts it at once
+  (`week.py`'s `from_dive`), its layer the room's own, checked as a
+  WEEK_POST is. The game's own WEEK_POST at its next visit stays, the
+  same entry, which changes nothing; it still posts a dive whose end
+  never reached the server. One entry per diver and week, a worse end
+  never over a better one. A dive the server had ended while its game
+  was off (the end sent, the game closed before its record was written)
+  is on the Board already; taken up again, its next end is held to it
+  like any other.
+- **Patterns** (recalled from playing them, not checked in
+  [Sources](../research/sources.md)): Diablo's and Path of Exile's
+  return to the party's game, an MMO's log-in where one logged out.
+- **Proven** with games on a local server (`tests/scenarios/online_week.py`):
+  `dive-kept-apart` (closed on the dive, CONTINUE back on its layer with
+  its link, deleted there, CONTINUE the normal run's again and its run
+  as it was), `dive-continue-crew` (Beta's game closed on the layer,
+  CONTINUE, Alpha sees him again and the crew forms), `crew-pull-back-kept`
+  (a pull-back spent stays spent through it) and `dive-end-on-the-board`
+  (Alpha deleted, his game never back in the Square, Beta reads him on
+  the Board).
 
 ## A deletion in a crew (21 November 2026)
 

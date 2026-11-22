@@ -21,6 +21,8 @@ void map_label_at(int x, int y, int z, const int camera[3], int *px, int *py);
 /* Whether a label at that point shows: inside the picture, off its top
  * rows (BN6's HP box) and its foot's (the bands). */
 bool map_label_shown(int px, int py);
+/* The PET's orange cursor at the picture's point (px, py) from its left: MegaMan's own marked (dive_people.c) */
+void map_label_cursor(int px, int py);
 /* `text`'s middle once it is held inside the picture's sides. */
 int map_label_x(int px, const char *text);
 /* `text` on its plate, its middle at map_label_x(px, text), which is
