@@ -55,6 +55,12 @@ bool boss_at_door(void);
 extern bool (*boss_door_hold)(void);
 void boss_party_set(int n);
 #define PARTY_HP_MOST 9999
+/* The dev's (tools/party_guardian.py, docs/devtools/party-guardian.md):
+ * every guardian scaled for a party of `n` (0 the run's own), its HP
+ * `hp_per` percent of his own more for each fighter past the first (-1
+ * the party's own rule, times the party) and his version `steps` on
+ * (-1 the party's own ladder). Play's rule is not changed by it. */
+void boss_party_dev(int n, int hp_per, int steps);
 /* The guardian's battle fought elsewhere (the shared dive's party core,
  * party_play.h; NULL none): given his Encounter, his own HP and the HP he
  * is fought at, true where it takes the fight, and the run's core does not

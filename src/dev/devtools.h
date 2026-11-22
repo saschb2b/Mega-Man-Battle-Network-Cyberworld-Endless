@@ -109,6 +109,9 @@ typedef struct {
 	int dive_room;  /* diveroom=N: a dive's layers give the other divers N MegaMen at most, as a layer with little room does (issue #755, dive_people.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */
+	int party_scale;   /* partyscale=1: every guardian scaled for partycore's N as a party's door scales him (boss_party_dev) */
+	int party_hp_per;  /* partyhpper=P: ... his HP P percent of his own more a fighter past the first (0 none; unset the party's rule) */
+	int party_steps;   /* partysteps=S: ... his version S on (unset the party's ladder) */
 	int party_view; /* partyview=N: a party's field under partycore drawn as seat N sees it, his marks and HP box (party_marks.h) */
 	bool arena_other; /* arenaother: --dev arena shows the second GBA's screen (arena_show), the game the same */
 	int mate_hp;    /* matehp=N: a liberation's teammates begin the board with N HP (docs/game/liberation/decision.md, The team) */

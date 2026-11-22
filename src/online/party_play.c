@@ -141,7 +141,7 @@ static bool carry_mine(void) {
 }
 
 static bool fight(const Encounter *e, int own_hp, int fought_hp) {
-	bool dev_party = PP.dev.n > 1;
+	bool dev_party = PP.dev.n >= 1;
 	if (!PP.on || (!dev_party && !PP.started)) return false;
 	PP.net = PP.started;
 	PP.b.n = PP.net ? PP.b.n : (unsigned)(PP.dev.n > PARTY_MOST ? PARTY_MOST : PP.dev.n);
@@ -202,7 +202,9 @@ void party_play_on(bool on) {
 
 void party_play_dev(const PartyDev *d) {
 	PP.dev = *d;
-	party_play_on(d->n > 1);
+	party_play_on(d->n >= 1);
+	/* (the guardian scaled for the dev's party as a party's door scales him, or by the rule measured: tools/party_guardian.py) */
+	boss_party_dev(d->scale && d->n >= 1 ? d->n : 0, d->hp_per, d->steps);
 }
 
 void party_play_start(uint32_t battle, unsigned seat, unsigned n, unsigned delay, const uint32_t seats[PARTY_MOST]) {

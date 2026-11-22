@@ -52,8 +52,9 @@ static HookAct spawn(HookRegs *r, void *user) {
 	PartyField *f = user;
 	int n = f->n;
 	uint32_t at = r->r[0];
-	/* (a battle of the run's own: MegaMan first, no MegaMan on side 1, so never a NetBattle's) */
-	if (n < 2 || hook_read8(at) != BN6_ENTITY_MEGAMAN || hook_read8(at + BN6_ENTITY_SIZE) == (BN6_ENTITY_MEGAMAN | 1)) return HOOK_CONTINUE;
+	/* (a battle of the run's own: MegaMan first, no MegaMan on side 1, so never a NetBattle's; a field of one, the dev's
+	 * solo on the party's core, tools/party_guardian.py, its list as it was) */
+	if (n < 1 || hook_read8(at) != BN6_ENTITY_MEGAMAN || hook_read8(at + BN6_ENTITY_SIZE) == (BN6_ENTITY_MEGAMAN | 1)) return HOOK_CONTINUE;
 	uint8_t old[LIST_MOST * BN6_ENTITY_SIZE];
 	int count = 0;
 	while (count < (int)LIST_MOST && hook_read8(at + (uint32_t)count * BN6_ENTITY_SIZE) != BN6_ENTITY_END) {
@@ -175,7 +176,7 @@ static void dev_end(const PartyField *f, uint32_t tick) {
 
 static HookAct keys(HookRegs *r, void *user) {
 	PartyField *f = user;
-	if (r->r[0] != 0 || f->standing < 2) return HOOK_CONTINUE;
+	if (r->r[0] != 0 || f->standing < 1) return HOOK_CONTINUE;
 	uint32_t tick = ++f->tick;
 	/* (each partner's own Custom screen's picks into his own hand, at the iteration they were set for: arena_team_custom.h) */
 	if (f->own) {
