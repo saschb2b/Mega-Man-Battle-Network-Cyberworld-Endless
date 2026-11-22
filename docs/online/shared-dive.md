@@ -979,6 +979,50 @@ on the field ending with no results (`partyover skipped hp 0`). Left open
 on the issue: a dive's end screen of its own, and an HP reward that came
 into the run twice.
 
+## Comings and goings (22 November 2026)
+
+What the friction hunt of 21 November found silent ([issue
+#758](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/758)):
+a crewmate who quit or dropped vanished in one frame, his return with no
+word, a busy crewmate unseen, a fifth beside a full crew drawn the "about
+to be" ring for good, and every diver arriving on one spot. The owner's
+call of 22 November 2026: band lines and plate marks. A short line in the
+dive's band for a crewmate who left, came back, or a crew that could not
+take MegaMan; a mark on a plate for busy, fighting and away; strangers
+passing say nothing. Chosen over plate marks alone, and over lines for
+every diver on the layer.
+
+As built (`dive_comings.c`, its lines in `dive_words.c`; protocol v29):
+
+- **Gone and back.** A crewmate who leaves the crew and is gone from the
+  layer's SNAPSHOT within 0.6 s (he quit, dropped, left the dive) is "Beta's
+  signal is gone..."; the same name on the layer again is "Beta's signal is
+  back!". MegaMan senses a signal; he never says why it went. One who walks
+  off is still on the layer and says nothing (the plates and the ring show
+  it); one who went on to another layer, or home, says nothing either.
+- **A full crew.** The server tells a diver in no crew who stands near a
+  crew of four that it is full (CREW_STATE full), once as he comes near
+  it: his game draws no dotted ring for that crew and says "Alpha's crew is
+  full", told again only after he has stood out of its reach.
+- **Marks.** A plate's where is a tag as the PET's information box tags a
+  key item (`look_tag`): BUSY (on the layer, not free: a chat, the PET, a
+  shop; `where_busy`), BATTLE, HOME; another layer stays "L3".
+- **Arrivals.** For two seconds after MegaMan arrives on a layer, while
+  another diver stands on his spot, the PET's orange cursor points at his
+  head.
+- **The band never floods.** A crewmate's "gone" at most once every 20
+  seconds and his "back" once for each, so a crew of four makes 18 lines a
+  minute at most (three links flapping at once), the band's queue
+  dropping its oldest past its few; a full crew once an approach.
+
+Seen headless: `online-week/comings-and-goings` (three games: Beta's PET
+open, his plate BUSY on Alpha's and Gamma's; Gamma's game quit, "Gamma's
+signal is gone..." on Alpha's and Beta's band; Gamma's game started again and
+his dive kept on, "Gamma's signal is back!" and the crew of
+three again) and
+`online-week/crew-of-four-and-a-fifth` (five games: the fifth's rings none,
+"Alpha's crew is full" on his band; a crewmate walking off says nothing).
+
 ## A diver gone home (22 November 2026)
 
 A dive's games found by the friction hunt of 21 November ([issue

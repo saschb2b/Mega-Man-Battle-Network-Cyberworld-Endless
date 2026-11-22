@@ -326,10 +326,13 @@ MANY['crew-of-four-and-a-fifth'] = dict(CAST, GAMES=FIVE, STEPS=online.course(
     ('sleep', 2),
     ('@echo', 'do', 'wait 10'),
     ('@echo', 'expect', 'crew=0'),
+    ('@echo', 'expect', 'rings=0'),                   # (issue #758: no "about to be" ring where the crew is full)
+    ('@echo', 'expect', "comings=Alpha's crew is full"),
     ('expect', 'crew=4: Alpha Beta Gamma Delta'),
     ('@delta', 'do', 'place 2000 0 3; wait 5'),
     ('sleep', 3.5),                                   # out after crew_split_ms, Echo in a second after
     soon('crew=0', 'delta', 600),
+    ('expect', 'comings=none'),                       # (walked off: the plates' and the ring's to show, no line)
     soon('crew=4: Alpha Beta Gamma Echo', '', 900),
     soon('crew=4: Alpha Beta Gamma Echo', 'echo', 600),
 ))
@@ -448,6 +451,34 @@ MANY['crew-pull-back-kept'] = dict(crew_fight(BETA), STEPS=online.course(
     ('@beta', 'repeat', 'press A; wait 40', 'scene=emu'),
     ('@beta', 'until', 'where=layer', 1200),
     ('@beta', 'expect', 'pullback=spent'),
+))
+
+# Comings and goings (issue #758): three crewed; Beta's PET open, his plate busy on the others'; Gamma's game quit, his
+# signal gone on Alpha's band; Gamma's game started again and his dive kept on, on the layer again, his signal back.
+MANY['comings-and-goings'] = dict(CAST, GAMES={'beta': online.HOME, 'gamma': online.HOME}, STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    online.into_square('gamma'), dive('gamma'),
+    ('sleep', 1.5),
+    soon('crew=3: Alpha Beta Gamma', '', 600),
+    ('@beta', 'do', 'press START; wait 40'),
+    ('sleep', 1.5),
+    soon('mate0=Beta hp 100/100 layer busy', '', 300),
+    soon('mate1=Beta hp 100/100 layer busy', 'gamma', 300),
+    ('@beta', 'repeat', 'press B; wait 20', 'screen=map', 10),
+    ('@gamma', 'restart', online.HOME),               # (Gamma's game quit, as a player's system quits it)
+    ('sleep', 1.5),
+    soon("comings=Gamma's signal is gone...", '', 600),
+    soon("comings=Gamma's signal is gone...", 'beta', 600),
+    # (his game started again, through the gate and the portal's "Keep diving", on the layer again)
+    online.into_square('gamma'),
+    soon('weekoffer=again', 'gamma', 600),
+    online.at('gamma', ('do', PORTAL), ('repeat', 'press A; wait 10', 'choice~/', 20)),
+    ('@gamma', 'repeat', 'wait 4', 'choice=1/3', 90),
+    ('@gamma', 'do', 'press A; wait 6'),
+    online.at('gamma', ('repeat', 'press A; wait 10', 'dive=on', 30), ('until', 'where=layer', 1200)),
+    ('sleep', 1.5),
+    soon("comings=Gamma's signal is back!", '', 600),
+    soon('crew=3: Alpha Beta Gamma', '', 600),
 ))
 
 # A full guardian's door (issue #753): five divers on the guardian's layer, four into the door's queue and the

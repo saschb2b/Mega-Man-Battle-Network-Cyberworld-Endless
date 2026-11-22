@@ -212,6 +212,8 @@ DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", 
               # (v24, the crew's display: crews.py's vitals)
               "dive_vitals", "dive_vitals_bytes", "crew_vitals", "crew_vitals_ms",
               "dive_where", "dive_where_bytes", "where_layer", "where_home", "where_battle",
+              # (v29, comings and goings: crews.py)
+              "where_busy", "crew_full",
               # (v23, a crew's battles at once: crews.py)
               "crew_busy")
 # (protocol v22, issue #718: a dive pulled back once by its crew, the Board's mark)

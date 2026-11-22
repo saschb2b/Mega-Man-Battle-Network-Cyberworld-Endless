@@ -1,10 +1,10 @@
-# Net Square protocol v26
+# Net Square protocol v29
 
 `protocol.json` is the server's packaged contract. `protocol.h` exposes
 the same constants to the C client; server tests check they agree with
 the game generator. All multibyte fields are big-endian. Messages are
 unfragmented binary WebSocket frames, at most 512 payload bytes, on
-`/presence` with subprotocol `cyberworld.presence.v26`. The server also
+`/presence` with subprotocol `cyberworld.presence.v29`. The server also
 accepts another version's `cyberworld.presence.vN` (echoing it), so that
 a game of another version can say its HELLO and hear ERROR 2 or 17, which
 side is behind, rather than a refused upgrade (v10).
@@ -144,6 +144,14 @@ was retired with them; v18 gives the number to `notice_ground`, a
 trade's chip outside its pair's common ground (below). NOTICE 29 (`notice_team`, v12) refuses a
 challenge between a team and a lone Navi, or within one team, and an ask
 to team up where either is on a team already.
+
+Protocol v29 (issue #758, docs/online/shared-dive.md, Comings and
+goings): DIVE where's `where_busy` (3): on a layer, not free (a chat, the
+PET, a shop), told to the crew as the rest. CREW_STATE `crew_full` (8):
+to a diver in no crew near a crew of `party_most`, once as he comes near
+it, other the one near him, the members that crew's: his game draws no
+"about to be" ring for it and says it is full. Forgotten as he stands out
+of its reach, told again as he comes near it again.
 
 Protocol v27 (issue #759; docs/online/shared-dive.md, Back to the
 dive): **the Board without a visit**. DIVE end grows to 15 bytes, what

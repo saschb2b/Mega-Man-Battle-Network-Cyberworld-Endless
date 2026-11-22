@@ -32,7 +32,8 @@ typedef struct {
 	char full[ONLINE_NAME_BYTES + 1];   /* his name */
 	char name[ONLINE_NAME_BYTES + 1];   /* ... cut to a plate (party_marks_cut) */
 	char hp[12];                        /* "120/200", "--" not told yet */
-	char layer[8];                      /* where he is: "L3" (another layer), "Home", "Battle"; "" on MegaMan's */
+	char layer[8];                      /* where he is: "L3" (another layer), "HOME", "BATTLE", "BUSY"; "" on MegaMan's */
+	bool mark;                          /* ... a mark (home, a battle, busy: a tag on the plate), not a layer */
 	uint16_t now, most;                 /* his HP and max HP (0 0 not told) */
 } CrewRow;
 int dive_crew_view_rows(CrewRow out[ONLINE_PARTY_MOST]);
@@ -42,7 +43,7 @@ void dive_crew_view_bar(int x, int y, int w, const CrewRow *row);
 void dive_crew_view_draw(void);
 /* ... in the state's words: `crewview N` (the plates shown; `crewview N
  * party` the door's party) and a line a plate, `mateK NAME hp H/M|--|none
- * layer D|home|battle|here`, ` stranger` after a diver outside the crew */
+ * layer D|home|battle|busy|here`, ` stranger` after a diver outside the crew */
 void dive_crew_view_describe(FILE *f);
 
 #endif

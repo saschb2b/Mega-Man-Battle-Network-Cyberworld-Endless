@@ -88,6 +88,7 @@ class Crews:
         self.hp = {}            # player id -> (hp, max_hp) as his DIVE vitals last said
         self.hp_at = {}         # ... and when it was taken
         self.told = {}          # id(crew) -> (what its last CREW_STATE said of each member, when)
+        self.full_told = set()  # (player id, id(crew)): a diver in no crew told that crew near him is full (v29)
         self.at = {}            # player id -> where his game said he is (v26: where_home, where_battle; none on the layer)
 
     # -- the wire --
@@ -204,8 +205,22 @@ class Crews:
         for (a, b), since in sorted(near.items(), key=lambda item: (item[1], item[0])):
             if now - since >= FORM_WAIT:
                 self.together(a, b, now)
+        self.full(near)
         self.retell(now)
         self.told = {key: value for key, value in self.told.items() if key in {id(c) for c in self.of.values()}}
+
+    def full(self, near):
+        """A diver in no crew near a full crew is told so once (CREW_STATE full, v29): his game draws no "about to be"
+        ring for a crew that cannot take him, and says it is full."""
+        crews = {id(c): c for c in self.of.values()}
+        for pair in near:
+            for lone, other in (pair, pair[::-1]):
+                crew = self.of.get(other)
+                if lone in self.of or not crew or len(crew.members) < SPEC["party_most"] or (lone, id(crew)) in self.full_told:
+                    continue
+                self.full_told.add((lone, id(crew)))
+                self.send(lone, SPEC["crew_full"], other, 0, crew)
+        self.full_told = {(p, c) for p, c in self.full_told if c in crews and p not in self.of and p in self.server.dive.of}
 
     def core(self, crew):
         """The largest part of the crew within FAR of each other in one room (ties: the part with its first member)."""
