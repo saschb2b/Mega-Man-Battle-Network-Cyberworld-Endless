@@ -49,8 +49,8 @@ bool boss_take_door(void);
  * the arena's mouth, saved at its door, the guardian still waiting; while
  * boss_door_hold (a part above's, NULL none) says so, the staging waits
  * there; and the party (1 alone) the next guardian's fight is scaled for:
- * two meet his next version, three or four the one after, his HP times
- * the party (at most PARTY_HP_MOST). */
+ * the version a diver alone meets, his HP times the party (at most
+ * PARTY_HP_MOST; issue #754). */
 bool boss_at_door(void);
 extern bool (*boss_door_hold)(void);
 void boss_party_set(int n);

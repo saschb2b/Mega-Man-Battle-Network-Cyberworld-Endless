@@ -22,7 +22,9 @@ each act's guardian (layers 3, 6 and 9) and each count of fighters, the
 host build runs a seed headless: the autopilot walks to his door, and his
 fight goes to the party's core (`--dev partycore=N`, one the solo on the
 same field), every MegaMan the same bot (`partybot=1`), the guardian
-scaled for the party as a party's door scales him (`partyscale=1`; dev
+scaled for the party as a party's door scales him (`partyscale=1`: since
+22 November 2026 his version a diver alone meets and his HP times the
+party, [A party's guardian](../online/shared-dive.md#a-partys-guardian-22-november-2026); dev
 knobs only, `boss_party_dev`: `partyhpper=P` his HP P percent of his own
 more a fighter past the first, `partysteps=S` his version S on).
 
@@ -30,7 +32,9 @@ What it measures and what it works out:
 
 - **Measured**: the guardian's version and HP ("his HP N (his own M)"),
   and the damage he deals the party a second (every fighter's HP lost
-  over the fight's frames, the aim passed round the party as built). The
+  over the fight's frames, the aim passed round the party as built; a
+  fight not over in the window measured to its last hit, where that came
+  after 1800 frames). The
   bot dodges little and deals little (a guardian takes a hit of 1 now and
   then), so it never wins: only this side of the fight is measured.
 - **Worked out**, each fighter assumed to deal the same damage a second
