@@ -133,7 +133,8 @@ static void options_row(int x, int y) {
  * session 73) */
 static void continue_label(const TitleMenu *m, int x, int y) {
 	if (!m->has_save || !m->saved_depth) return;
-	if (m->saved_home) text_draw(x, y, "Home", WHITE, TEXT_LEFT);
+	if (m->dive) text_drawf(x, y, WHITE, TEXT_LEFT, "Dive L%d", m->saved_depth);
+	else if (m->saved_home) text_draw(x, y, "Home", WHITE, TEXT_LEFT);
 	else text_drawf(x, y, WHITE, TEXT_LEFT, "Layer %d", m->saved_depth);
 }
 

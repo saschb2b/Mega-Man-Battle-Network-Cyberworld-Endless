@@ -36,6 +36,7 @@
 #define AGAIN_MOST_MS  15000
 #define DOWN_SHOWN_MS  1000   /* a link down past a second says so (a moment's quiet does not) */
 #define ALONE_SHOWN_MS 8000   /* the refusal's word shown so long before the link ends */
+#define URL_BYTES 256         /* a server address, network_prefs.h's NETWORK_URL */
 
 static struct {
 	bool on;
@@ -52,6 +53,24 @@ static struct {
 	uint32_t alone_at;       /* the server's refusal: the dive alone from then, its word shown, 0 none */
 } L;
 
+/* CONTINUE into a dive (issue #759): the dive taken up with no link, the
+ * Square called as the gate calls it, the link down until it answers and
+ * tried again as a dropped one is */
+static unsigned seen;        /* the dive's resumes handled (weekly_resumes) */
+
+/* the dive's link on, for week `week`'s net on `seed` */
+static void link_up(uint16_t week, uint32_t seed) {
+	L.on = true;
+	dive_party_on(true);
+	dive_crew_reset();
+	dive_join_reset();
+	dive_mail_reset();
+	dive_band_reset();
+	L.week = week;
+	L.seed = seed;
+	dive_people_on(true);
+}
+
 void dive_link_adopt(void) {
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
@@ -62,16 +81,8 @@ void dive_link_adopt(void) {
 		dive_people_on(false);
 		return;
 	}
-	L.on = true;
-	dive_party_on(true);
-	dive_crew_reset();
-	dive_join_reset();
-	dive_mail_reset();
-	dive_band_reset();
-	L.week = s.week;
-	L.seed = s.week_seed;
+	link_up(s.week, s.week_seed);
 	L.resumes = s.resumes;
-	dive_people_on(true);
 	fprintf(stderr, "dive: the link kept for week %u's dive\n", s.week);
 }
 
@@ -129,9 +140,12 @@ static void send(const uint8_t *m, size_t n) {
 
 /* the dive over (deleted or won): told where, then the link closed */
 static void ended(void) {
-	const WeeklyRecord *r = weekly_record();
+	/* (this dive's own end, which the server posts to the Board: the week's best the record keeps may be another's) */
+	const WeeklyEnd *w = weekly_last_end();
+	DiveEnd e = { w->won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause(), w->minutes,
+		w->pulled ? ONLINE_WEEK_PULLED : 0u, 0 };
 	uint8_t m[ONLINE_DIVE_END_BYTES];
-	send(m, dive_wire_end(m, r->pending && r->r_won ? ONLINE_DIVE_WON : ONLINE_DIVE_DELETED, L.x, L.y, L.z, dive_splits_cause()));
+	send(m, dive_wire_end(m, &e));
 	dive_mail_told();
 	fprintf(stderr, "dive: the dive's end told; the link closed\n");
 	dive_link_close();
@@ -220,12 +234,43 @@ bool dive_link_down(uint32_t now, bool *away) {
 	return true;
 }
 
+/* a dive taken up again with no link (the title's CONTINUE; the portal's comes with its link): the Square called,
+ * the link down until it answers and tried again meanwhile as a dropped link is; no address kept, the dive alone */
+static void call_again(void) {
+	if (L.on || !weekly_on()) { seen = weekly_resumes(); return; }
+	if (seen == weekly_resumes()) return;
+	seen = weekly_resumes();
+	char url[URL_BYTES], name[ONLINE_NAME_BYTES + 1];
+	uint8_t id[ONLINE_IDENTITY_BYTES];
+	bool called = director_gate_address(url, sizeof url, name, sizeof name, id) && online_transport_start(url, name, id);
+	const WeeklyRecord *r = weekly_record();
+	memset(&L, 0, sizeof L);
+	link_up(r->week, r->seed);
+	uint32_t now = SDL_GetTicks();
+	L.down_since = now | 1u;
+	if (!called) { L.alone_at = now | 1u; dive_band_alone(); }
+	fprintf(stderr, "dive: CONTINUE into week %u's dive; %s\n", r->week, called ? "the Square called" : "no Square to call");
+}
+
+/* the Square on a week past the dive's (its own or the last kept: dive.py's enter): the dive alone for good */
+static bool past_week(const OnlineSnapshot *s, uint32_t now) {
+	if (!s->connected || !s->week || (s->week <= L.week + 1u && s->week >= L.week)) return false;
+	fprintf(stderr, "dive: the Square is on week %u, the dive week %u's; the dive goes on alone\n", s->week, L.week);
+	L.alone_at = now | 1u;
+	dive_band_week();
+	return true;
+}
+
 void dive_link_frame(void) {
-	if (!L.on) return;
+	call_again();
+	if (!L.on) {
+		if (weekly_on()) dive_band_tick(SDL_GetTicks());
+		return;
+	}
 	OnlineSnapshot s;
 	online_transport_snapshot(&s);
 	uint32_t now = SDL_GetTicks();
-	if (held_away(&s, now)) return;
+	if (held_away(&s, now) || past_week(&s, now)) return;
 	L.starting = false;
 	back_or_down(&s, now);
 	online_mail_frame();

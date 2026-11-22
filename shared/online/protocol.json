@@ -1,5 +1,5 @@
 {
-  "version": 26,
+  "version": 27,
   "square_make": 3,
   "square_hash": 2878811771,
   "rom_code": "BR5E",
@@ -152,7 +152,7 @@
   "dive_where": 9,
   "dive_enter_bytes": 11,
   "dive_leave_bytes": 2,
-  "dive_end_bytes": 11,
+  "dive_end_bytes": 15,
   "dive_found_bytes": 3,
   "dive_phrase_bytes": 9,
   "dive_wave_bytes": 6,

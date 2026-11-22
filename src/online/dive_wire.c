@@ -47,12 +47,16 @@ size_t dive_wire_leave(uint8_t out[ONLINE_DIVE_LEAVE_BYTES]) {
 	return ONLINE_DIVE_LEAVE_BYTES;
 }
 
-size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], unsigned how, int x, int y, int z, unsigned cause) {
-	if ((how != ONLINE_DIVE_DELETED && how != ONLINE_DIVE_WON) || !coordinate(x) || !coordinate(y) || !coordinate(z) || cause > 0xFFFFu)
+size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], const DiveEnd *e) {
+	if ((e->how != ONLINE_DIVE_DELETED && e->how != ONLINE_DIVE_WON) || !coordinate(e->x) || !coordinate(e->y) || !coordinate(e->z) ||
+		e->cause > 0xFFFFu || e->minutes > 0xFFFFu || (e->flags & ~(unsigned)ONLINE_WEEK_PULLED) || e->party > 0xFu)
 		return 0;
-	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_END; out[2] = (uint8_t)how;
-	puts16(out + 3, x); puts16(out + 5, y); puts16(out + 7, z);
-	online_put16(out + 9, (uint16_t)cause);
+	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_END; out[2] = (uint8_t)e->how;
+	puts16(out + 3, e->x); puts16(out + 5, e->y); puts16(out + 7, e->z);
+	online_put16(out + 9, (uint16_t)e->cause);
+	online_put16(out + 11, (uint16_t)e->minutes);
+	out[13] = (uint8_t)e->flags;
+	out[14] = (uint8_t)e->party;
 	return ONLINE_DIVE_END_BYTES;
 }
 

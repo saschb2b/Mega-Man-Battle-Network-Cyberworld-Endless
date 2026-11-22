@@ -25,6 +25,7 @@ const char *dive_join_joined_words(const char *owner);
  * the next is linked */
 const char *dive_down_words(bool away, int dots);
 const char *dive_back_words(void);
+const char *dive_back_week_words(void);   /* (issue #759: the dive's week past the Square's keeping) */
 const char *dive_alone_words(void);
 const char *dive_alone_back_words(void);
 /* The band's line as MegaMan opens a Mystery Data another opened first

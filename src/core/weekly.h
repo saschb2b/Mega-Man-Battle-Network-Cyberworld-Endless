@@ -41,6 +41,21 @@ bool weekly_dive(uint16_t week, uint32_t seed);
 /* The unfinished dive again, from its checkpoint as CONTINUE takes a run
  * (from its start where it has none); false where there is none. */
 bool weekly_continue(void);
+/* The dive that ended last in this session, as it ended (not the week's
+ * best, which the record keeps to post): told the server with its end, the
+ * Board's from it (docs/online/shared-dive.md, The Board without a visit) */
+typedef struct {
+	bool ended, won, pulled;
+	uint16_t depth, minutes;
+} WeeklyEnd;
+const WeeklyEnd *weekly_last_end(void);
+/* An unfinished dive in the slot: its checkpoint's layer (1 where it has
+ * none yet), 0 none. The title's CONTINUE takes it up (issue #759). */
+int weekly_unfinished(void);
+/* How often a dive was taken up again this session (weekly_continue): the
+ * dive's link takes the Square up again for each one it finds itself
+ * without (dive_link.c) */
+unsigned weekly_resumes(void);
 /* The dive just ended, won or deleted (the director, after its records):
  * its end kept to post (the better of two of one week), the slot left. */
 void weekly_ended(bool won);

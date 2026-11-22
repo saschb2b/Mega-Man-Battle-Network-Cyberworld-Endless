@@ -3,7 +3,7 @@ type: Player Guide
 title: "The player's guide"
 description: "The player's guide on GitHub: what you need, the install on each system, controls, a run in full, saving and moving saves, online play in the Net Square, screen, sound, the Jukebox, troubleshooting and building."
 tags: [player]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-19T14:48:13Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:17:57Z }
 ---
 
 # The player's guide
@@ -1406,13 +1406,13 @@ layer, who beat a guardian, who cleared the net.
 - **Busting.** After a battle won the band says your time and your place
   among the week's divers who fought the same battle.
 
-Your run in progress waits in its own save, untouched: the title's
-CONTINUE is always that run, and when the dive ends, won or deleted, you
-are back with it. To go on with an unfinished dive, visit the Square
-and step up to the portal: Keep diving, Start over or Not now. Divers
-don't trade.
+Your run in progress waits in its own save, untouched. While a dive is
+unfinished the title's CONTINUE takes you straight back into it (it says
+"Dive L3"), linked to the Square again as you land; when the dive ends,
+won or deleted, CONTINUE is your run again. The portal also offers an
+unfinished dive: Keep diving, Start over or Not now. Divers don't trade.
 
-How deep you got goes up on the board at your next visit: the week's
+How deep you got goes up on the board as your dive ends: the week's
 eight deepest dives (a **+** beside a dive that fought a guardian as a
 party), your own best and its place, and last week's three; who is
 diving right now and on which layer; and the week's fastest busts of

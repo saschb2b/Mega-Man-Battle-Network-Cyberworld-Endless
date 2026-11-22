@@ -394,9 +394,13 @@
    "line": 42
   },
   "dive_words:dive_alone_back_words": {
-   "line": 45
+   "line": 46
   },
   "dive_words:dive_alone_words": {
+   "header": "(issue #759: the dive's week past the Square's keeping)",
+   "line": 45
+  },
+  "dive_words:dive_back_week_words": {
    "line": 44
   },
   "dive_words:dive_back_words": {
@@ -420,7 +424,7 @@
   },
   "dive_words:dive_find_words": {
    "header": "The band's line as MegaMan opens a Mystery Data another opened first this week (`mine` he is the first: `name` his own).",
-   "line": 46
+   "line": 47
   },
   "dive_words:dive_join_joined_words": {
    "header": "The band's join-in line (dive_join.h): his join into a crewmate's battle sent, while it starts.",
@@ -428,15 +432,15 @@
   },
   "dive_words:dive_mark_words": {
    "header": "A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what (`cause` its name, \"\" unknown; `navi` a Navi's); `won` a mark of the net cleared.",
-   "line": 66
+   "line": 67
   },
   "dive_words:dive_phrase_words": {
    "header": "A phrase left on a panel: its boxes (who left it, the phrase, how many waved), MegaMan's wave after them where `wave`.",
-   "line": 74
+   "line": 75
   },
   "dive_words:dive_place_words": {
    "header": "The band's line for a bust's place among the week's (DIVE_PLACE): its time in tenths, its place of `count`.",
-   "line": 59
+   "line": 60
   },
   "duel_words:duel_call_words": {
    "comment": "Chaud's call on a duel layer (docs/game/rival.md): the record, ProtoMan's time and the term, what a win opens, and Lan's answer.",
@@ -2814,7 +2818,7 @@
    "comment": "dive_words.h",
    "domain": "Other",
    "kind": "speech",
-   "lines": 28,
+   "lines": 29,
    "shows": [],
    "speaker": "MegaMan",
    "stem": "dive_words"
@@ -3097,7 +3101,7 @@
     "words_per_box": 6.2
    }
   },
-  "boxes": 2452,
+  "boxes": 2453,
   "domains": {
    "Arena": {
     "files": [
@@ -3265,8 +3269,8 @@
      "src/update/update_text.c"
     ],
     "flagged": 36,
-    "lines": 379,
-    "speech": 355
+    "lines": 380,
+    "speech": 356
    },
    "Powers": {
     "files": [
@@ -3467,7 +3471,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 887,
+    "boxes": 888,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3522,7 +3526,7 @@
     "words_per_box": 5.5
    }
   },
-  "lines": 2254,
+  "lines": 2255,
   "numbers": {
    "Bass": {
     "bangs_per_box": 0.0,
@@ -3765,7 +3769,7 @@
    "MegaMan": {
     "bangs_per_box": 0.02,
     "bn6": "MegaMan",
-    "boxes": 887,
+    "boxes": 888,
     "dots_per_box": 0.23,
     "end_ask": 0.04,
     "end_bang": 0.55,
@@ -3980,7 +3984,7 @@
     "words_per_box": 5.7
    }
   },
-  "speech": 1573
+  "speech": 1574
  },
  "version": 1,
  "conversations": [
@@ -4544,12 +4548,13 @@
   {"container":"dive_words:dive_join_joined_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_join_joined_words","line":34,"lines":["dive_words:dive_join_joined_words:0"],"speakers":["MegaMan"],"title":"The band's join-in line","when":"The band's join-in line (dive_join.h): his join into a crewmate's battle sent, while it starts."},
   {"container":"dive_words:dive_down_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_down_words","line":39,"lines":["dive_words:dive_down_words:0","dive_words:dive_down_words:1"],"speakers":["MegaMan"],"title":"A dropped link on a layer","when":"A dropped link on a layer (issue #751), the PET's plain status in the band as the Square's wait says it (reconnect_text.c): down, its dots moving (0-3), and `away` once the dive goes on alone while it is tried again; back; and the server's refusal, the dive alone for good and how the next is linked"},
   {"container":"dive_words:dive_back_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_back_words","line":43,"lines":["dive_words:dive_back_words:0"],"speakers":["MegaMan"],"title":"Dive back words","when":""},
-  {"container":"dive_words:dive_alone_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_alone_words","line":44,"lines":["dive_words:dive_alone_words:0"],"speakers":["MegaMan"],"title":"Dive alone words","when":""},
-  {"container":"dive_words:dive_alone_back_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_alone_back_words","line":45,"lines":["dive_words:dive_alone_back_words:0"],"speakers":["MegaMan"],"title":"Dive alone back words","when":""},
-  {"container":"dive_words:dive_find_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_find_words","line":48,"lines":["dive_words:dive_find_words:0","dive_words:dive_find_words:1"],"speakers":["MegaMan"],"title":"The band's line as MegaMan opens a Mystery Data another opened first this week","when":"The band's line as MegaMan opens a Mystery Data another opened first this week (`mine` he is the first: `name` his own)."},
-  {"container":"dive_words:dive_place_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_place_words","line":61,"lines":["dive_words:dive_place_words:0","dive_words:dive_place_words:1"],"speakers":["MegaMan"],"title":"The band's line for a bust's place among the week's","when":"The band's line for a bust's place among the week's (DIVE_PLACE): its time in tenths, its place of `count`."},
-  {"container":"dive_words:dive_mark_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_mark_words","line":68,"lines":["dive_words:dive_mark_words:0","dive_words:dive_mark_words:1","dive_words:dive_mark_words:2","dive_words:dive_mark_words:3"],"speakers":["MegaMan"],"title":"A deletion mark's boxes","when":"A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what (`cause` its name, \"\" unknown; `navi` a Navi's); `won` a mark of the net cleared."},
-  {"container":"dive_words:dive_phrase_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_phrase_words","line":76,"lines":["dive_words:dive_phrase_words:0","dive_words:dive_phrase_words:1","dive_words:dive_phrase_words:2","dive_words:dive_phrase_words:3"],"speakers":["MegaMan"],"title":"A phrase left on a panel","when":"A phrase left on a panel: its boxes (who left it, the phrase, how many waved), MegaMan's wave after them where `wave`."},
+  {"container":"dive_words:dive_back_week_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_back_week_words","line":44,"lines":["dive_words:dive_back_week_words:0"],"speakers":["MegaMan"],"title":"Dive back week words","when":""},
+  {"container":"dive_words:dive_alone_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_alone_words","line":45,"lines":["dive_words:dive_alone_words:0"],"speakers":["MegaMan"],"title":"Dive alone words","when":"(issue #759: the dive's week past the Square's keeping)"},
+  {"container":"dive_words:dive_alone_back_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_alone_back_words","line":46,"lines":["dive_words:dive_alone_back_words:0"],"speakers":["MegaMan"],"title":"Dive alone back words","when":""},
+  {"container":"dive_words:dive_find_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_find_words","line":49,"lines":["dive_words:dive_find_words:0","dive_words:dive_find_words:1"],"speakers":["MegaMan"],"title":"The band's line as MegaMan opens a Mystery Data another opened first this week","when":"The band's line as MegaMan opens a Mystery Data another opened first this week (`mine` he is the first: `name` his own)."},
+  {"container":"dive_words:dive_place_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_place_words","line":62,"lines":["dive_words:dive_place_words:0","dive_words:dive_place_words:1"],"speakers":["MegaMan"],"title":"The band's line for a bust's place among the week's","when":"The band's line for a bust's place among the week's (DIVE_PLACE): its time in tenths, its place of `count`."},
+  {"container":"dive_words:dive_mark_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_mark_words","line":69,"lines":["dive_words:dive_mark_words:0","dive_words:dive_mark_words:1","dive_words:dive_mark_words:2","dive_words:dive_mark_words:3"],"speakers":["MegaMan"],"title":"A deletion mark's boxes","when":"A deletion mark's boxes (talk_start's, MegaMan's): who fell, to what (`cause` its name, \"\" unknown; `navi` a Navi's); `won` a mark of the net cleared."},
+  {"container":"dive_words:dive_phrase_words","domain":"Other","file":"src/online/dive_words.c","id":"dive_words:dive_phrase_words","line":77,"lines":["dive_words:dive_phrase_words:0","dive_words:dive_phrase_words:1","dive_words:dive_phrase_words:2","dive_words:dive_phrase_words:3"],"speakers":["MegaMan"],"title":"A phrase left on a panel","when":"A phrase left on a panel: its boxes (who left it, the phrase, how many waved), MegaMan's wave after them where `wave`."},
   {"container":"emote_strip_text:strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_favourites","line":7,"lines":["emote_strip_text:strip_text_favourites:0"],"speakers":["MegaMan"],"title":"The keys' hints","when":"the keys' hints: the favourites' box's, the palette's"},
   {"container":"emote_strip_text:strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_keep","line":8,"lines":["emote_strip_text:strip_text_keep:0"],"speakers":["Mr.Prog"],"title":"Strip text keep","when":""},
   {"container":"emote_strip_text:strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","id":"emote_strip_text:strip_text_tap","line":9,"lines":["emote_strip_text:strip_text_tap:0"],"speakers":["Mr.Prog"],"title":"Strip text tap","when":""},
@@ -6324,20 +6329,21 @@
   {"boxes":[{"pages":[["{away}Reconnecting{2}"]],"speaker":"MegaMan","text":"{away}Reconnecting{2}"}],"container":"dive_down_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_down_words:0","kind":"speech","line":39,"placeholders":[{"name":"away","spec":"%s"},{"name":"2","spec":"%.*s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{away}Reconnecting{2}","text_hash":"da959927455e"},
   {"boxes":[{"pages":[["Diving alone"]],"speaker":"MegaMan","text":"Diving alone  "}],"container":"dive_down_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_down_words:1","kind":"speech","line":39,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Diving alone  ","text_hash":"c6a289a82793"},
   {"boxes":[{"pages":[["Back online!"]],"speaker":"MegaMan","text":"Back online!"}],"container":"dive_back_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_back_words:0","kind":"speech","line":43,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Back online!","text_hash":"4ef775fe2235"},
-  {"boxes":[{"pages":[["Offline. Diving","alone this time"]],"speaker":"MegaMan","text":"Offline. Diving alone this time"}],"container":"dive_alone_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_alone_words:0","kind":"speech","line":44,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Offline. Diving alone this time","text_hash":"05baef1f172c"},
-  {"boxes":[{"pages":[["The Board's portal","links the next dive"]],"speaker":"MegaMan","text":"The Board's portal links the next dive"}],"container":"dive_alone_back_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_alone_back_words:0","kind":"speech","line":45,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Board's portal links the next dive","text_hash":"b186339672b2"},
-  {"boxes":[{"pages":[["First to open this","one this week!"]],"speaker":"MegaMan","text":"First to open this one this week!"}],"container":"dive_find_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_find_words:0","kind":"speech","line":48,"speaker":"MegaMan","speakers":["MegaMan"],"text":"First to open this one this week!","text_hash":"e5ee563ad68f"},
-  {"boxes":[{"pages":[["{name} opened this","one first"]],"speaker":"MegaMan","text":"{name} opened this one first"}],"container":"dive_find_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_find_words:1","kind":"speech","line":49,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name} opened this one first","text_hash":"562f6b7949ef"},
-  {"boxes":[{"pages":[["{tenths}.{tenths} sec! Fastest","of {count} this week!"]],"speaker":"MegaMan","text":"{tenths}.{tenths} sec! Fastest of {count} this week!"}],"container":"dive_place_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_place_words:0","kind":"speech","line":61,"placeholders":[{"name":"tenths","spec":"%u"},{"name":"tenths","spec":"%u"},{"name":"count","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{tenths}.{tenths} sec! Fastest of {count} this week!","text_hash":"41d2ff4661dd"},
-  {"boxes":[{"pages":[["{tenths}.{tenths}","sec,{place}{suffix} of","{count} this week"]],"speaker":"MegaMan","text":"{tenths}.{tenths} sec,{place}{suffix} of {count} this week"}],"container":"dive_place_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_place_words:1","kind":"speech","line":62,"placeholders":[{"name":"tenths","spec":"%u"},{"name":"tenths","spec":"%u"},{"name":"place","spec":"%u"},{"name":"suffix","spec":"%s"},{"name":"count","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{tenths}.{tenths} sec,{place}{suffix} of {count} this week","text_hash":"2d572777643a"},
-  {"boxes":[{"pages":[["Lan,look! {name}","made it all the way","down!"]],"speaker":"MegaMan","text":"Lan,look! {name} made it all the way down!"},{"pages":[["Wow..."]],"speaker":"MegaMan","text":"Wow..."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:0","kind":"speech","line":68,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,look! {name} made it all the way down!|Wow...","text_hash":"430d59eae2ef"},
-  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["By {cause}..."]],"speaker":"MegaMan","text":"By {cause}..."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:1","kind":"speech","line":69,"placeholders":[{"name":"name","spec":"%s"},{"name":"cause","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|By {cause}...|We'd better be careful.","text_hash":"59e668e9f688"},
-  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["By a {cause}..."]],"speaker":"MegaMan","text":"By a {cause}..."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:2","kind":"speech","line":69,"placeholders":[{"name":"name","spec":"%s"},{"name":"cause","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|By a {cause}...|We'd better be careful.","text_hash":"97fcd2305922"},
-  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:3","kind":"speech","line":70,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|We'd better be careful.","text_hash":"60805395e5c6"},
-  {"boxes":[{"pages":[["{name} left a","message here."]],"speaker":"MegaMan","text":"{name} left a message here."},{"pages":[["\"{phrase}\""]],"speaker":"MegaMan","text":"\"{phrase}\""}],"container":"dive_phrase_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:0","kind":"speech","line":76,"placeholders":[{"name":"name","spec":"%s"},{"name":"phrase","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name} left a message here.|\"{phrase}\"","text_hash":"b58fc60b8cfa"},
-  {"boxes":[{"pages":[["One Navi waved back."]],"speaker":"MegaMan","text":"One Navi waved back."}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:1","kind":"speech","line":77,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|One Navi waved back.","text_hash":"87b44d228a88"},
-  {"boxes":[{"pages":[["{waves} Navis waved","back."]],"speaker":"MegaMan","text":"{waves} Navis waved back."}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:2","kind":"speech","line":78,"placeholders":[{"name":"waves","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|{waves} Navis waved back.","text_hash":"c7e533775c95"},
-  {"boxes":[{"pages":[["*wave*"]],"speaker":"MegaMan","text":"*wave*"}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:3","kind":"speech","line":79,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|*wave*","text_hash":"7bcea8330c42"},
+  {"boxes":[{"pages":[["A new week's net!","We'll dive alone."]],"speaker":"MegaMan","text":"A new week's net! We'll dive alone."}],"container":"dive_back_week_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_back_week_words:0","kind":"speech","line":44,"speaker":"MegaMan","speakers":["MegaMan"],"text":"A new week's net! We'll dive alone.","text_hash":"0872959f938f"},
+  {"boxes":[{"pages":[["Offline. Diving","alone this time"]],"speaker":"MegaMan","text":"Offline. Diving alone this time"}],"container":"dive_alone_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_alone_words:0","kind":"speech","line":45,"speaker":"MegaMan","speakers":["MegaMan"],"text":"Offline. Diving alone this time","text_hash":"05baef1f172c"},
+  {"boxes":[{"pages":[["The Board's portal","links the next dive"]],"speaker":"MegaMan","text":"The Board's portal links the next dive"}],"container":"dive_alone_back_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_alone_back_words:0","kind":"speech","line":46,"speaker":"MegaMan","speakers":["MegaMan"],"text":"The Board's portal links the next dive","text_hash":"b186339672b2"},
+  {"boxes":[{"pages":[["First to open this","one this week!"]],"speaker":"MegaMan","text":"First to open this one this week!"}],"container":"dive_find_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_find_words:0","kind":"speech","line":49,"speaker":"MegaMan","speakers":["MegaMan"],"text":"First to open this one this week!","text_hash":"e5ee563ad68f"},
+  {"boxes":[{"pages":[["{name} opened this","one first"]],"speaker":"MegaMan","text":"{name} opened this one first"}],"container":"dive_find_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_find_words:1","kind":"speech","line":50,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name} opened this one first","text_hash":"562f6b7949ef"},
+  {"boxes":[{"pages":[["{tenths}.{tenths} sec! Fastest","of {count} this week!"]],"speaker":"MegaMan","text":"{tenths}.{tenths} sec! Fastest of {count} this week!"}],"container":"dive_place_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_place_words:0","kind":"speech","line":62,"placeholders":[{"name":"tenths","spec":"%u"},{"name":"tenths","spec":"%u"},{"name":"count","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{tenths}.{tenths} sec! Fastest of {count} this week!","text_hash":"41d2ff4661dd"},
+  {"boxes":[{"pages":[["{tenths}.{tenths}","sec,{place}{suffix} of","{count} this week"]],"speaker":"MegaMan","text":"{tenths}.{tenths} sec,{place}{suffix} of {count} this week"}],"container":"dive_place_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"fragment":true,"id":"dive_words:dive_place_words:1","kind":"speech","line":63,"placeholders":[{"name":"tenths","spec":"%u"},{"name":"tenths","spec":"%u"},{"name":"place","spec":"%u"},{"name":"suffix","spec":"%s"},{"name":"count","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{tenths}.{tenths} sec,{place}{suffix} of {count} this week","text_hash":"2d572777643a"},
+  {"boxes":[{"pages":[["Lan,look! {name}","made it all the way","down!"]],"speaker":"MegaMan","text":"Lan,look! {name} made it all the way down!"},{"pages":[["Wow..."]],"speaker":"MegaMan","text":"Wow..."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:0","kind":"speech","line":69,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan,look! {name} made it all the way down!|Wow...","text_hash":"430d59eae2ef"},
+  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["By {cause}..."]],"speaker":"MegaMan","text":"By {cause}..."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:1","kind":"speech","line":70,"placeholders":[{"name":"name","spec":"%s"},{"name":"cause","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|By {cause}...|We'd better be careful.","text_hash":"59e668e9f688"},
+  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["By a {cause}..."]],"speaker":"MegaMan","text":"By a {cause}..."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:2","kind":"speech","line":70,"placeholders":[{"name":"name","spec":"%s"},{"name":"cause","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|By a {cause}...|We'd better be careful.","text_hash":"97fcd2305922"},
+  {"boxes":[{"pages":[["Lan... {name} got","deleted here."]],"speaker":"MegaMan","text":"Lan... {name} got deleted here."},{"pages":[["We'd better be","careful."]],"speaker":"MegaMan","text":"We'd better be careful."}],"container":"dive_mark_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_mark_words:3","kind":"speech","line":71,"placeholders":[{"name":"name","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"Lan... {name} got deleted here.|We'd better be careful.","text_hash":"60805395e5c6"},
+  {"boxes":[{"pages":[["{name} left a","message here."]],"speaker":"MegaMan","text":"{name} left a message here."},{"pages":[["\"{phrase}\""]],"speaker":"MegaMan","text":"\"{phrase}\""}],"container":"dive_phrase_words","domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:0","kind":"speech","line":77,"placeholders":[{"name":"name","spec":"%s"},{"name":"phrase","spec":"%s"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"{name} left a message here.|\"{phrase}\"","text_hash":"b58fc60b8cfa"},
+  {"boxes":[{"pages":[["One Navi waved back."]],"speaker":"MegaMan","text":"One Navi waved back."}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:1","kind":"speech","line":78,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|One Navi waved back.","text_hash":"87b44d228a88"},
+  {"boxes":[{"pages":[["{waves} Navis waved","back."]],"speaker":"MegaMan","text":"{waves} Navis waved back."}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:2","kind":"speech","line":79,"placeholders":[{"name":"waves","spec":"%u"}],"speaker":"MegaMan","speakers":["MegaMan"],"text":"|{waves} Navis waved back.","text_hash":"c7e533775c95"},
+  {"boxes":[{"pages":[["*wave*"]],"speaker":"MegaMan","text":"*wave*"}],"container":"dive_phrase_words","continues":true,"domain":"Other","file":"src/online/dive_words.c","flags":[],"id":"dive_words:dive_phrase_words:3","kind":"speech","line":80,"speaker":"MegaMan","speakers":["MegaMan"],"text":"|*wave*","text_hash":"7bcea8330c42"},
   {"boxes":[{"flags":[{"at":"HOLD L","code":"button"}],"pages":[["HOLD L +"]],"speaker":"MegaMan","text":"HOLD L +"}],"container":"strip_text_favourites","domain":"Other","file":"src/online/emote_strip_text.c","flags":["button"],"fragment":true,"id":"emote_strip_text:strip_text_favourites:0","kind":"speech","line":7,"speaker":"MegaMan","speakers":["MegaMan"],"text":"HOLD L +","text_hash":"e2b3110f410a"},
   {"boxes":[{"pages":[["SELECT+ARROW KEEPS"]],"speaker":"Mr.Prog","text":"SELECT+ARROW KEEPS"}],"container":"strip_text_keep","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_keep:0","kind":"speech","line":8,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"SELECT+ARROW KEEPS","text_hash":"2b84ab432dd7"},
   {"boxes":[{"pages":[["TAP TO SEND"]],"speaker":"Mr.Prog","text":"TAP TO SEND"}],"container":"strip_text_tap","domain":"Other","file":"src/online/emote_strip_text.c","flags":[],"fragment":true,"id":"emote_strip_text:strip_text_tap:0","kind":"speech","line":9,"speaker":"Mr.Prog","speakers":["Mr.Prog"],"text":"TAP TO SEND","text_hash":"8de75226e6e2"},

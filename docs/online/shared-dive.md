@@ -133,7 +133,8 @@ Verified on `dev`, 15 November 2026:
 | Deleted in a party | At a guardian: the run is over, as alone. In a crew's random battle the crew wins: pulled back once a dive, paid in the crew's HP, the dive marked (21 November 2026, issue #718; A deletion in a crew, below) | Pulled out at 1 HP and carried by a win; pulled out to fight again; (21 November) as at a guardian; back once a dive, free; at a guardian's party too; a fixed 100 HP a helper; the helper with the most HP paying alone; revived dives ranked below the rest |
 | Systems without the Arena | The New 3DS and the PSP join as linked fighters: their own battle, their damage into the field's guardian | Alone only; the whole party linked |
 | After a dive ends | Dive again from layer 1 into the live pack, as often as one likes, the best kept | Once a day; the first dive alone counted |
-| The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size | (all four taken) |
+| A quit mid-dive | (22 November 2026, issue #759) The title's CONTINUE straight back into the dive at its checkpoint, the link taken up as the portal does (Back to the dive, below) | A question at the title; the way back through the gate and the portal, as it was |
+| The Board | Its ranking unchanged (layer, a win, minutes); a mark for each guardian fought in a party; who dives now and on which layer; the week's fastest bust of each guardian, alone and by party size; (22 November 2026, issue #759) a dive's end posted by the server from DIVE end, no visit to the Square waited for | (all four taken); the Board alone fixed, the diver's own post kept as the only way |
 | Build order | One field first, the linked fallback in the same release | Linked first; a spike first |
 
 ## Crews by nearness (21 November 2026)
@@ -1130,6 +1131,56 @@ actors a side (bn6f's `BATTLE_ACTORS_PER_SIDE`, read at
   AIs read their target elsewhere: the next thing to find, since a
   guardian that aims at the lead alone makes the lead's fight the party's
   hardest (the scaling above assumes the aim spreads).
+
+## Back to the dive (22 November 2026)
+
+Issue #759, found playing the shared dive with three to five games: a
+diver who quit mid-dive came back to the normal run's CONTINUE and a
+long way to the portal, his crew told nothing; and a dive's end reached
+the Board only at the diver's next visit to the Square, so a diver who
+did not go back was never on it. The owner's calls:
+
+- **CONTINUE goes straight back in.** The title's CONTINUE on an
+  unfinished dive (its label "Dive L3") takes it up at its checkpoint
+  (`weekly_continue`), and the dive's link calls the Square as the gate
+  does (`director_gate_address`, `dive_link.c`'s `call_again`), the link
+  on for the dive's own week and down until the Square answers: then
+  MegaMan's room is entered again, the others on the layer seen, the
+  crew forming again by nearness. Not answered, it is a dropped link
+  (issue #751, [A dropped link on a dive layer](arena/dropped-link.md)):
+  the band's "Reconnecting...", the dive alone meanwhile and never lost,
+  the Square called again for as long as the dive lasts, "Back online!"
+  once it answers; a refusal, the dive alone for good, said. The Square
+  two weeks on or more (it keeps this week's net and the last's), the
+  dive goes on alone and the band says "A new week's net! We'll dive
+  alone."; its end is posted at a later visit while the Board still
+  takes it. A server restarted meanwhile is called afresh like any
+  other. Nothing
+  of `Run` changed: what a quit kept (the checkpoint, the record's
+  pull-back) is what CONTINUE finds. Once the dive ends, CONTINUE is the
+  normal run's again.
+- **The Board without a visit.** DIVE end carries what the Board ranks
+  (v27: the dive's minutes, its flags, `week_pulled`, and the acts whose
+  guardian was fought in a party), and the server posts it at once
+  (`week.py`'s `from_dive`), its layer the room's own, checked as a
+  WEEK_POST is. The game's own WEEK_POST at its next visit stays, the
+  same entry, which changes nothing; it still posts a dive whose end
+  never reached the server. One entry per diver and week, a worse end
+  never over a better one. A dive the server had ended while its game
+  was off (the end sent, the game closed before its record was written)
+  is on the Board already; taken up again, its next end is held to it
+  like any other.
+- **Patterns** (recalled from playing them, not checked in
+  [Sources](../research/sources.md)): Diablo's and Path of Exile's
+  return to the party's game, an MMO's log-in where one logged out.
+- **Proven** with games on a local server (`tests/scenarios/online_week.py`):
+  `dive-kept-apart` (closed on the dive, CONTINUE back on its layer with
+  its link, deleted there, CONTINUE the normal run's again and its run
+  as it was), `dive-continue-crew` (Beta's game closed on the layer,
+  CONTINUE, Alpha sees him again and the crew forms), `crew-pull-back-kept`
+  (a pull-back spent stays spent through it) and `dive-end-on-the-board`
+  (Alpha deleted, his game never back in the Square, Beta reads him on
+  the Board).
 
 ## A deletion in a crew (21 November 2026)
 
