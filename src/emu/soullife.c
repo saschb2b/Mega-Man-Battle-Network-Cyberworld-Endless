@@ -105,7 +105,10 @@ static HookAct entered(HookRegs *r, void *user) {
 		darkinvs_leave(me);   /* (... and out of its chip AI, 0x0801214A) */
 		/* (no Cross's overlay: what BN5's Soul spawns as he enters it, NumberSoul's) */
 		if (routed && next < SOULS_BN5_FORMS) return go(r, soul_enter[next]);
-		if (soulbn4_k(next) >= 0) return go(r, 0);
+		if (soulbn4_k(next) >= 0) {
+			soulbn4_enter(me, soulbn4_k(next));   /* (BN4's routine as the form is taken: GutsSoul's hand pass) */
+			return go(r, 0);
+		}
 	}
 	/* (a double of his set up in his form while a Soul is his, HolyDrem's or Poltrgst's: BN5 runs the Soul's own entry for
 	 * it, 0x0800F01C, where the proxy's would give it HeatCross's overlay) */

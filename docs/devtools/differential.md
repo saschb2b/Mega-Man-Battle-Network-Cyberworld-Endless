@@ -3,7 +3,7 @@ type: Tool
 title: "The differential: a moved family against its own game"
 description: "`python3 build.py xdiff` (`tools/xdiff.py`) fights each `tests/xdiff` spec in BN5's engine and BN6's with the moved family, Navi, chip or Soul, comparing traces frame by frame to PASS or FAIL; `--mutations` tests the comparator."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T15:40:00Z }
 ---
 
 # The differential: a moved family against its own game
@@ -111,6 +111,8 @@ in his AI data and NaviStats, BN6's in its Souls block, held to each
 other at every frame (a Soul's turns or form apart fails it); the
 pending form, which BN4 clears at each turn's start; BN4's timed form's
 frames and its count of a form's charged shots, which BN6 has none of;
+GutsSoul's count of B's presses toward his rapid buster while it stands
+at one to five (BN6 counts none yet, so a sixth press parts the battles);
 and the buster's charge, BN4's two counters, levels (0, 1, 3) and button
 against BN6's one counter held at the charge time, its level (0, 1, 2),
 button and request bits, and each engine's glow. Each writer BN4 alone
