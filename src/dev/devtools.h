@@ -101,6 +101,7 @@ typedef struct {
 	                   keys scripted (party_field.h) */
 	int party_hp;   /* partyhp=N: under party=N the partners begin each battle with N HP (the spike's deletion test); under partycore the stood-in partners' HP going in */
 	int party_end;  /* partyend=N: under party=N the enemies' HP set to 1 at the battle loop's iteration N (the spike's win test) */
+	int party_reward; /* partyreward=N: a party's core's results given this reward entry (decimal; 32818 = 0x8032, HP+50), issue #769 */
 	int party_del;  /* partydel=MASK: on a party's core with partyend, the MegaMen of those seats (bit 0 seat 0) deleted at that iteration and its enemies 60 later (a crew's pull-back's test, issue #718) */
 	int party_core; /* partycore=N (2-4, the shared dive's one field, #589): a guardian's fight on the party's own core
 	                   (party_core.h) with N MegaMen, the partners' keys scripted; partytwin=1 a second core run beside it from

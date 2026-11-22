@@ -33,6 +33,12 @@ unsigned souls_held(void);
  * Soul won on the layer counted from the next */
 void souls_note_layer(void);
 unsigned souls_layer(void);
+/* As a battle begins (encounter.c): a Soul form's SoulT+1 turn, the
+ * Cybeast's or the BeastOut helper's (run.soul_turns), in MegaMan's
+ * NaviStats (BN6_NAVI_TURN_EXTRA), which the battle copies: one turn more
+ * at most beside the NaviCust program's, which sets the same byte (issue
+ * #774) */
+void souls_battle_begins(void);
 /* Whether the run holds guardian `navi`'s Soul (guardians.h, guardian_older,
  * or guardian_team: Team ProtoMan's, BN5's Souls 1-6, kept apart from Team
  * Colonel's, so what is handed to BN6's engine and what the finds lean to
@@ -47,8 +53,11 @@ unsigned souls_held_bn5(void);
 unsigned souls_held_bn4(void);
 unsigned souls_layer_bn5(void);
 unsigned souls_layer_bn4(void);
-/* (souls.c: a new run holds the Soul its Soul form brought,
+/* A Soul given by its game's number (1-12; others none): BN5's, BN4's
+ * (forms.c's; a new run holds the one its Soul form brought,
  * run.soul_start) */
+void souls_give_bn5(int soul);
+void souls_give_bn4(int soul);
 /* The dev flag's mask, for a new run's first Souls (devtools) */
 extern uint8_t souls_dev_mask;
 

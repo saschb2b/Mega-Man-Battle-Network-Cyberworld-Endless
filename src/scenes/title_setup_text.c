@@ -16,6 +16,8 @@ static const char *const words[] = {
 	"Folder",   /* SW_FOLDER */
 	"Cross",   /* SW_CROSS */
 	"Threat",   /* SW_THREAT */
+	"Form",   /* SW_FORM */
+	"Soul",   /* SW_SOUL */
 	"Short",   /* SW_SHORT */
 	"Endless",   /* SW_ENDLESS */
 	"None",   /* SW_NONE */
@@ -38,6 +40,13 @@ static const char *const words[] = {
 	"Next, the helpers: each on or off. A helped run's summary names them",   /* SW_NEXT_HELP_NOTE */
 	"Next, the extras: what the run adds to BN6, each on or off",   /* SW_NEXT_EXTRAS_NOTE */
 	"Into the net with these. They stay for the next run",   /* SW_GO_NOTE */
+	"Crosses and BeastOut. Guardians give Crosses",   /* SW_FORM_CROSS_NOTE */
+	"BN5's Souls. Guardians give Souls",   /* SW_FORM_BN5_NOTE */
+	"BN4's Souls. Guardians give Souls",   /* SW_FORM_BN4_NOTE */
+	"More forms: delete BN5's or BN4's Navis",   /* SW_FORM_MORE */
+	"From the first battle. Guardians give the rest",   /* SW_START_REST_NOTE */
+	"Win a Soul to start with it",   /* SW_SOUL_NONE_NOTE */
+	"Souls from the guardians we delete",   /* SW_SOUL_GUARDIANS_NOTE */
 };
 const char *setup_word(SetupWord w) {
 	_Static_assert(sizeof words / sizeof *words == SW_COUNT, "a word for each SetupWord");
@@ -49,6 +58,12 @@ const char *setup_word(SetupWord w) {
 const char *setup_cross_note(char *buf, size_t n, const char *strong, const char *weak) {
 	if (strong) snprintf(buf, n, "%s.|%s hits do 2x and break it", strong, weak);
 	else snprintf(buf, n, "From the first battle. %s hits do 2x and break it", weak);
+	return buf;
+}
+
+const char *setup_form_best(char *buf, size_t n, int rung) {
+	if (rung < 0) snprintf(buf, n, "No win yet in this form");
+	else snprintf(buf, n, "Best win: threat %d", rung);
 	return buf;
 }
 

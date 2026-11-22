@@ -14,3 +14,5 @@ const char *summary_words(int which) {
 	};
 	return which >= 0 && which < SUMMARY_LINES ? said[which] : "";
 }
+
+const char *summary_dive_words(bool again) { return again ? "The portal's open. Let's dive again!" : "That's our dive,Lan..."; }
