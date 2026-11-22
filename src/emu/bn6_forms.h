@@ -12,6 +12,8 @@
 #ifndef CW_BN6_FORMS_H
 #define CW_BN6_FORMS_H
 
+#include "bn6_chaos.h"   /* (Chaos Unison's places: the Souls track's S6) */
+
 #include "bn6_cross.h"   /* CROSSSELECT's ten Crosses (issue #706) */
 
 #define BN6_FORMS             25          /* the entries of a table by form (0-0x18) */
@@ -88,6 +90,9 @@
 #define BN6_SOUL_CYCLE        0x16        /* u8 the Chaos Unison's charge's frame in its phases' cycle (BN5's AIData +0x1C; S6) */
 #define BN6_SOUL_REQUEST      0x17        /* u8 1 while its release's request (AIData +0x44's 0x8000 or 0x10000) is the Souls': the attack's end
                                              clears it as BN5's does (0x0800F2D0's 0x1803F) */
+#define BN6_SOUL_PRESSES      0x18        /* u8 GutsSoul's B presses counted toward his rapid buster (BN4's AIData +0x12, BN4_GUTS_RAPID_FORM;
+                                             soulrapid.c), which BN6's AI data holds others at */
+#define BN6_SOUL_WINDOW       0x19        /* u8 ... the frames left to press again (BN4's AIData +0x11: BN6's there is BN6_AI_POWER_CHAOS) */
 #define BN6_SLOT_EMBLEM       0           /* BN6_SOUL_SLOT: BN6's Beast Out emblem, its own rule */
 #define BN6_SLOT_UNITE        1           /* BN6_SOUL_SLOT: BN5's UNITE, its rule (the last chip picked of a held Soul's kind) */
 #define BN6_STANDS_UNITE      1           /* BN6_SOUL_STANDS: UNITE could stand (Souls held, he neither worried nor dark nor beasted out) */
@@ -366,33 +371,12 @@
 #define BN6_PANEL_ENEMIES     0x04000000u /* BN6_PANEL_FLAGS: an object of side 1 on it (bn6f's "enemy alliance"; BN5's the same, its table 0x080CAC90 by side) */
 #define BN6_PANEL_ALLIES      0x08000000u /* ... of side 0 (bn6f's "ally alliance") */
 
-/* Chaos Unison (the Souls track's S6, soulchaos.c): what it stands on of BN6's charge, release, request and glow, by BN5's */
-#define BN6_CHAOS_CHARGE      0x08012F62u /* push {r4,r7,lr}: a charge's time by r0 (1 A, 2 B), r5 MegaMan (BN5's 0x08010654, which a chaos B
-                                             answers from his AIData +0x11's power by the chaos level) */
-#define BN6_CHAOS_DUE         0x08012E8Au /* bl 0x08012EBC: the charge's state each frame (BN5's 0x0801053C), r4 his AI data; BN5's 0x080105F0 */
-#define BN6_CHAOS_PHASE       0x08012E8Eu /* ... after it, pop {r4,r6,pc}: the chaos phase's step (BN6 has none) */
-#define BN6_CHAOS_RELEASE     0x080131D4u /* bl 0x0800FFE4: the release's request, r0 1 or 2 (a charged B), r4 his AI data (BN5's 0x08010870,
-                                             0x8000 or 0x10000 there for a chaos B) */
-#define BN6_CHAOS_CONSUME     0x080F180Eu /* bl 0x0800FFFE in the player's requests (0x080F1694, push {r4,r6,r7,lr}) past the charged B's 2, r0 the
-                                             requests (BN5's 0x080F0436: 0x8000 and 0x10000 here) */
-#define BN6_COUNTER_TEST      0x080EBA84u /* tst r0,r1 in the player's update (0x080EA734), r1 0x8600: BN6's counter requests, its 0x8000 one BN5 has
-                                             not (BN5's 0x080EB0D8 tests 0x600), a request BN5's chaos B makes */
-#define BN6_COUNTER_TEST_1D   0x080ED7B0u /* ... the same in family 0x1D's (BN5's 0x080ED422), */
-#define BN6_COUNTER_TEST_1E   0x080ED90Eu /* ... family 0x1E's (0x080EDDB2), */
-#define BN6_COUNTER_TEST_37   0x080EEE32u /* ... family 0x37's (0x080EEAE4) */
-#define BN6_CHAOS_END         0x08011744u /* bl 0x0800FFEE in the attack's end (0x08011714), r0 0x1000003F the requests it clears, r6 the
-                                             attack's kind (BN5's 0x0800F2D0 clears 0x1803F, its kind 6 his chaos) */
-#define BN6_GLOW_SHOW         0x080E21E4u /* beq in the charge glow's update (the fourth kind's 8, r4 its owner): a B charge seen whatever the
-                                             side (BN5's 0x080E0ECE: in chaos by the side, 0x080091EA) */
-#define BN6_GLOW_SHOW_SIDE    0x080E21E6u /* ... the side's test */
-#define BN6_GLOW_PICK         0x080E2272u /* movs r2,#8: the glow's sprite past A's 0x15 (BN5's 0x080E0F94: 0x1C in chaos), */
-#define BN6_GLOW_PICK_NEXT    0x080E2274u /* ... on past it */
-#define BN6_GLOW_LOAD         0x080E2280u /* ... its bl sprite_load, r1 list 5's offset 0x14, r2 the number */
-#define BN6_GLOW_ANIM         0x080E2208u /* cmp r0,#0 past strb r0,[r5,#0x10]: its animation the charge's state (BN5's 0x080E0F0A: the chaos phase
-                                             + 2 for a full chaos B), r6 its owner's AI data */
-#define BN6_GLOW_SOUND        0x080E22A8u /* beq in its sounds (0x080E229A, r1 its owner): a B charge's whatever the side (BN5's 0x080E0FD4) */
-#define BN6_GLOW_SOUND_SIDE   0x080E22AAu /* ... the side's test */
-#define BN6_GLOW_SPRITE_CHAOS 0x1C        /* the chaos glow's number its +0x6C keeps (BN5's list 5's) */
-#define BN6_CHAOS_FAMILY      0xC7        /* the failure's attack family (BN5's 0x39, 0x080EE724; xattack_grow.h's Souls' range) */
+/* GutsSoul's rapid buster (BN4's Souls, soulrapid.c): where BN6's key handler and requests are hooked for it */
+#define BN6_RAPID_COUNT       0x08013130u /* ldrb r0,[r4,#8] in his key handler (r4 his AI data, r5 him), its paths joined past the A
+                                             button's and before a B press's charge (BN4's 0x0800BE96, the counter's place before it in
+                                             BN4: BN4_GUTS_RAPID_FORM): GutsSoul's presses counted (soulrapid.c) */
+#define BN6_RAPID_POWER       0x080F17F2u /* bl 0x080117A4 in the player's requests' charged B (request 2, 0x080F17D6): the charged shot's
+                                             family in r0 from his AI +7; GutsSoul's rapid buster's family there where its count stands */
+#define BN6_RAPID_SET         0x080F17F6u /* ... after it: ldrb r1,[r6,#7], then the family set as his attack (0x08011684) */
 
 #endif

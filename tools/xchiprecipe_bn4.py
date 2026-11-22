@@ -66,6 +66,7 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 # BN4's family -> its number, fixed for good as a unit is written (a saved state's CurAction names it), in the units' order
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, docs/project/claims/bn4-souls.json)
+                  0x10: 0xD9,   # (GutsSoul's rapid buster, his state 0x10: no chip's, asked by B pressed six times, soulrapid.c)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -189,6 +190,8 @@ TWINS = {
     0x080112C4: (0x08017CC0, 'chips'),   # an obstacle's state 5, pushed (BN6's own bomb's table's 0x080CE928 + 0x14)
     # ... and what a computed power's routine calls (NaviPowers):
     0x08009F40: (0x0800CDB4, 'chips'),   # the panels of a type on a side counted (BN4_PANEL_COUNT, BN6_PANEL_COUNT: r0 type, r1 side)
+    # ... and what GutsSoul's rapid buster calls:
+    0x0800B590: (0x0800FAAC, 'chips'),   # a buster shot of MegaMan's (r0 its kind, r1 its hit, r3 its speed), his buster's attack its power
 }
 # A moved third-kind object that is an actor: its update hands its state table to the actors' runner in r0 (TimeBomb's
 # bomb, 0x080D6CB6). BN6's runner numbers the engine's states 0-7 and an object's own from 8 where BN4's numbers 0-5 and
@@ -198,6 +201,11 @@ TWINS = {
 ACTOR_RUN4 = 0x08013F3E
 HOME_STATES = 0x380   # (XC4_HOME_STATES)
 AUDITS = {
+    (0x0800B590, 0x0800FAAC): ('ok', "a buster shot of MegaMan's (r0 its kind, r1 its hit's bits, r3 its speed: the shot spawned "
+                                     "ahead of him by each game's own spawner, BN4's 0x080CD45A, BN6's 0x080C686E, its power his "
+                                     "battle NaviStats' buster attack, BN4's +6 and BN6's +2, each read by its own game's getter "
+                                     "0x0800D772 / 0x080136CC): the same instructions but those, each game's own shot of the "
+                                     "buster; GutsSoul's rapid buster fires eight of them (0x080EBE44)"),
     (0x0801393E, 0x0801AD12): ('ok', "an actor's step begun, each engine's own: its statuses' timers and what they end, read from "
                                      "its collision data; BN6's own bomb's update calls BN6's (0x080CE90A) where BN4's bomb's "
                                      "calls BN4's (0x080D6CB2). A moved actor runs BN6's, as every moved family does: the "
@@ -322,6 +330,7 @@ UNITS = (
     ('navi', 0x35, 'RollAro'),
     ('support', 0x10, 'BigHamr'),
     ('power', 0x00, 'NaviPowers'),
+    ('attack', 0x10, 'GutsRapid'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -363,7 +372,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                # (the air line's from 0x289: docs/project/claims/bn4-air-units.json)
                0xC0: 0x289, 0xCC: 0x28A,    # (AirHoc's puck)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
-               0x91: 0x300}
+               0x91: 0x300,
+               0xA7: 0x301}                 # (GutsSoul's rapid buster's shots)
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
 # each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
@@ -487,6 +497,17 @@ for _v, _t in ROW_TABLES.items():
 # LIST5_MORE, LIST4_MORE): effect id 0xB1 (with 0xE0-0xEC, which no recipe named; 0xB0 is BN5's Meddy's, xnavi_bn5.c), list 5's
 # 0xB0-0xBF, list 4's 0x70-0x7F
 CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, CHIP_LIST3, CHIP_LIST1 = (0xCF, 0xB2), (0xEF, 0xC0), (0x9F, 0x80), (0x70, 0xE0), (0x7F, 0x40)
+# ... the effect ids inside CHIP_EFFECTS that BN5's Souls' moved code takes in the same grown table (src/emu/soulcode_bn5.c's
+# effects, written by tools/xsoul.py: 0xC0 and 0xC1), passed over: GutsSoul's rapid buster's effect, the first id the count
+# reached there, would have refused the Souls' install (its entry taken)
+SOULCODE = os.path.join(EMU, 'soulcode_bn5.c')
+
+
+def soul_effects():
+    """BN6's ids of the effects the Souls' moved code takes, read from its recipe"""
+    with open(SOULCODE, encoding='utf-8') as fh:
+        m = re.search(r'static const SoulEffect effects\[\] = \{(.*?)\};', fh.read(), re.S)
+    return tuple(int(x, 16) for x in re.findall(r'\{ 0x[0-9A-F]+, 0x([0-9A-F]+),', m.group(1))) if m else ()
 ROOM_SPRITE = 0x100
 # An immediate of a unit's code that names a place of BN4's engine BN6 keeps elsewhere, read by hand in both games' code:
 # BN4's address -> (the instruction's form, its register, BN4's number, BN6's, why)
@@ -593,6 +614,11 @@ IMMS = {
     0x080EBFDE: dict(form='THUMB_MOVS', rd=7, rn=0, was=0x21, now=0x61,
                      why="his punch's hit's bits (the collision region's r7): struck and pushed is bit 0x01 with a push bit in BN4 "
                          "(BN4_STRUCK_PUSHED), bit 0x40 with one in BN6 (BN6_STRUCK_PUSHED), GutPnch's row's"),
+    # GutsSoul's rapid buster's end: his presses' count and window cleared in his side's Souls block (UNIT_CALLS_IN's r3)
+    0x080EBE86: dict(form='THUMB_STRB', rd=0, rn=3, was=0x12, now=0x18,
+                     why="his B presses' count, BN4's AI data's +0x12, kept at his side's Souls block's +0x18 (BN6_SOUL_PRESSES)"),
+    0x080EBE88: dict(form='THUMB_STRB', rd=0, rn=3, was=0x11, now=0x19,
+                     why="... their window, BN4's +0x11, at its +0x19 (BN6_SOUL_WINDOW)"),
 }
 # A routine of BN4's the project pairs with BN6's own for the families (tools/bn4_twins.py TWINS) that a chip's unit moves
 # instead, with the object type it spawns: BN6's own object draws BN6's art, which a family's rule allows by its foe and a
@@ -609,6 +635,11 @@ UNIT_CALLS_IN = {
                                                    "a word of its collision data (its panel's column and row, its panel's byte, its "
                                                    "counter time) against the halfword of its panel last frame (0x080D285E); BN6 keeps "
                                                    "the four bytes at +0xA to +0xD, off a word, so a stub joins its two halfwords")},
+    'GutsRapid': {0x080EBE82: ('XC4_SOULS_SIDE', "the rapid buster's end (0x080EBE82-0x080EBE88): ldr r3,[r5,#0x58]; movs r0,#0, "
+                                                 "then his presses' count and window cleared at r3's +0x12 and +0x11 (BN4's AI "
+                                                 "data); BN6's AI data holds others there (+0x11 his chaos power), so the count "
+                                                 "is kept in his side's Souls block (BN6_SOUL_PRESSES, BN6_SOUL_WINDOW: "
+                                                 "soulrapid.c), which a stub gives r3, r0 0")},
 }
 # A routine of BN4's engine a unit copies where the project pairs it with BN6's (as tools/bn4_twins.py COPIED, for the unit
 # alone): the unit's name -> BN4's routine -> why
@@ -953,11 +984,11 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
     panel_fields(f)
     X4.queued_sites(f)
     saved_tables = dict(bn4_twins.TABLES)
-    saved_late = X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4
+    saved_late = X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4, X4.LATE_SKIP
     bn4_twins.TABLES.update(TABLES)
     saved_data4 = dict(bn4_twins.COPIED_DATA)
     bn4_twins.COPIED_DATA.update(UNIT_COPIED_DATA.get(name, {}))
-    X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4
+    X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4, X4.LATE_SKIP = CHIP_EFFECTS, CHIP_LIST5, CHIP_LIST4, soul_effects()
     try:
         X4.blocks_of(b4, f, alloc)
         saved_data = dict(getattr(bn4_twins, 'DATA_TWINS', {}))
@@ -987,7 +1018,7 @@ def derive(b4, b6, pairs, kind, sub, name, alloc, slot):
         bn4_twins.TABLES.update(saved_tables)
         bn4_twins.COPIED_DATA.clear()
         bn4_twins.COPIED_DATA.update(saved_data4)
-        X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4 = saved_late
+        X4.LATE_EFFECTS, X4.LATE_LIST5, X4.LATE_LIST4, X4.LATE_SKIP = saved_late
     # (an effect a unit before it moved is that unit's row alone: the units install in one step in UNITS' order, the effect's
     # entry written by the first, and the installer finds a row's sprite in the unit's own rows or a family's, never in
     # another unit's (xvirus.c sprite_of); its code's immediate names the id all the same)
@@ -1088,7 +1119,8 @@ def power_bases(f):
 def site_imms(f):
     """the immediates of its code IMMS names, each checked against the instruction there"""
     forms = {'THUMB_ADDS': ('adds8', lambda i: (i.f[0], i.f[0], i.f[1])), 'THUMB_MOVS': ('movs', lambda i: (i.f[0], 0, i.f[1])),
-             'THUMB_LSLS': ('lsls', lambda i: (i.f[0], i.f[1], i.f[2])), 'THUMB_LDRB': ('ldrb', lambda i: (i.f[0], i.f[1], i.f[2]))}
+             'THUMB_LSLS': ('lsls', lambda i: (i.f[0], i.f[1], i.f[2])), 'THUMB_LDRB': ('ldrb', lambda i: (i.f[0], i.f[1], i.f[2])),
+             'THUMB_STRB': ('strb', lambda i: (i.f[0], i.f[1], i.f[2]))}
     for e, w in sorted(f.walks.items()):
         for a, i in sorted(w.insns.items()):
             m = IMMS.get(a)
@@ -1581,6 +1613,8 @@ def megaman_ai(f):
         if not reg or reg[2] != 'state':
             continue
         for a, form, rd, rn, imm, off in N.ai_tracker(w, {} if e == f.entry else {7: lo}):
+            if a in IMMS:
+                continue   # (an access IMMS names is its: the rapid buster's count, aimed elsewhere by a stub)
             if lo <= off < lo + n:
                 if form.startswith('MEM:') and imm != off:
                     continue   # (through a pointer to the variables: its offset in them, the same in both games)

@@ -34,6 +34,8 @@ typedef struct {
 bool soulbn4_read(int k, SoulBn4 *out);
 /* k of BN6's Soul number `soul`, -1 for none of BN4's */
 int soulbn4_k(int soul);
+/* BN4's form of BN6's k-th BN4 Soul (ThunSoul's 6, GutsSoul's 2), 0 for none */
+int soulbn4_form(int k);
 /* (a hook's, MegaMan `obj` entering the proxy form with BN4's k-th Soul)
  * what BN4's routine as the form is taken does (BN4_FORM_ENTERS) where it
  * is moved: GutsSoul's pass of his side's hand, +30 to the bonus of each

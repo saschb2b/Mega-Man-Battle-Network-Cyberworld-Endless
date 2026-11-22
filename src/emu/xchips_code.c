@@ -537,10 +537,27 @@ static void first_actor_stage(void) {
 	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
 }
 
+/* XC4_SOULS_SIDE (the project's own Thumb, xchips_bn4.h): r3 MegaMan's side's Souls block, r0 0 */
+static void souls_side_stage(void) {
+	static const uint16_t code[] = {
+		0x7DAB,   /* ldrb r3, [r5, #0x16]: his side */
+		0x015B,   /* lsls r3, r3, #5: BN6_SOULS_SIDE bytes a side */
+		0x4801,   /* ldr r0, [pc, #4]: XC4_SOULS_BASE */
+		0x181B,   /* adds r3, r3, r0 */
+		0x2000,   /* movs r0, #0 */
+		0x46F7,   /* mov pc, lr */
+	};
+	_Static_assert(XC4_SOULS_SIDE % 4 == 0 && XC4_SOULS_SIDE + sizeof code + 4 <= FREE_BN4_CHIP_STUBS_END, "the Souls block's room");   /* (its numbers: tests/test_core.c) */
+	uint8_t *p = xv_put(XC4_SOULS_SIDE, sizeof code + 4, true);
+	for (size_t i = 0; p && i < sizeof code / sizeof *code; ++i) put16(p + 2 * i, code[i]);
+	if (p) put32(p + sizeof code, XC4_SOULS_BASE);
+}
+
 /* the chips' own routines (FREE_BN4_CHIP_STUBS) staged */
 static void stubs4_stage(void) {
 	first_actor_stage();
 	if (!xv_failed()) coll_panel_word_stage();
+	if (!xv_failed()) souls_side_stage();
 }
 
 /* BN4's units of one pass staged and committed: its Navi chips' (`navis`: after BN4's Navis), or the rest */

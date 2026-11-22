@@ -656,7 +656,8 @@ static int poke_range(const Spec *s, const XvMoved *m, int n, const Poke *p) {
 	for (int k = n - 1; k >= 0; --k)
 		if (p->at >= m[k].from && p->at < m[k].from + m[k].len && (p->bn5 || !((m[k].to >= FREE_CHIP_MOVED && m[k].to < FREE_CHIP_MOVED_END) || (m[k].to >= FREE_CHIP_ART && m[k].to < FREE_TAIL))) &&
 		    !(p->bn5 && m[k].to >= FREE_BN4_NAVIS && m[k].to < FREE_BN4_NAVI_SPRITE) &&
-		    !((p->bn5 || !xd_spec_bn4_code(s)) && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !(s->bn4 && xd_bn5_family_copy(m[k].to))) {
+		    !((p->bn5 || !xd_spec_bn4_code(s)) && m[k].to >= FREE_BN4_CHIPS && m[k].to < FREE_BN4_CHIPS_END) && !(s->bn4 && xd_bn5_family_copy(m[k].to)) &&
+		    !(s->bn4 && m[k].to >= FREE_SOULS && m[k].to < FREE_SOULS_END)) {   /* (nor BN5's Souls' moved code: BN4's 0x080EBDC0 is BN5's too) */
 			if (!another_navis(s, m[k].to)) return k;
 			if (p->bn5 && other < 0) other = k;
 		}
