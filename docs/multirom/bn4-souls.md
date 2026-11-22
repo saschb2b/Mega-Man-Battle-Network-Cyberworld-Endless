@@ -310,6 +310,11 @@ from it (the differential's megaman_clock), while a press of B keeps the
 battle's, so a charge begun after a chip reads a frame early. Its four
 mutations: the charge 10 frames longer, the punch's damage another, the pass
 left out (the passives' `SOULPASSIVE_BREAK_PLUS`), another Soul's sprite.
+`bn4_soul_guts_atk` (with its control) takes him with an Attck+10 merged into
+PanlSht1 on the same Custom screen: 40 in both games, the pass on top of the
+merge. BN4's form state zeroes the hand's six bonuses before a form's routine
+(`0x0800E068`, its +0x26), but the merge lands after it; BN6 merges at OK and
+the pass adds as he enters the form. Its mutation leaves the pass out (10).
 
 **His rapid buster.** BN4's key handler in form 2 counts B's presses (AI
 data +0x12, a window of 10 frames at +0x11, 0x0800BE5A to 0x0800BE7A) and at

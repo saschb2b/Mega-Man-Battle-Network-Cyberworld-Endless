@@ -1,0 +1,239 @@
+{
+ "about": "BN4 Red Sun's GutsSoul taken with an Atk+ chip merged in the same Custom screen: his pass adds 30 to PanlSht1 on top of Attck+10's 10, 40 in all, in both games (BN4's form state zeroes the hand's six bonuses before the form's routine, 0x0800E068, but the merge lands after it; BN6 merges at OK and soulbn4_enter adds as he enters the form). A deck of PanlSht1 A, Attck+10 * and PanlSht1 A (BN4's 178, 149, 178; BN6's 559, Atk+10 192, 559): the first Custom screen picks all three, the last PanlSht1 lighting UNITE, which takes it and the Soul. A at fight frame 30 uses the first PanlSht1 with its 40. A MettaurSP at (4,2), MegaMan at (3,2) with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "against": "bn6",
+ "subject": "megaman",
+ "foes": "04@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 300,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "replay",
+ "lag": 1,
+ "safe": true,
+ "souls4": "02",
+ "souls6": "80",
+ "folder4": [
+  "00B2",
+  "3495",
+  "00B2"
+ ],
+ "deck4": [
+  "00B2",
+  "3495",
+  "00B2"
+ ],
+ "folder6": [
+  "22F:00",
+  "34C0",
+  "22F:00"
+ ],
+ "deck6": [
+  "22F:00",
+  "34C0",
+  "22F:00"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "A",
+   4
+  ]
+ ]
+}
