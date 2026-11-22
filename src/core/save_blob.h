@@ -21,6 +21,9 @@ bool save_read_blob_upto(const char *name, uint32_t magic, void *data, size_t n)
 
 /* Older formats, turned into the current ones (save_legacy.c). */
 bool legacy_load_run(void);
+/* ... and whether the run it read keeps its state's folders nine-bit (every
+ * format before "CWED"), for load_run to convert once */
+bool legacy_run_nine(void);
 void legacy_move_state(void);
 
 #endif

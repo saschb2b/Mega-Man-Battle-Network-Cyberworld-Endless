@@ -125,6 +125,7 @@ static void remember(void) {
  * endless net, the profile's 0; meta_run_begun saves the profile next) */
 void title_setup_apply(void) {
 	run_setup(S.c.net, S.c.folder, S.c.threat, S.c.helpers, S.c.cross);
+	run_setup_form(RUN_FORM_CROSS, 0);   /* (the mix without --dev forms; the FORM row's choice to come, issue #774) */
 	run_setup_extras(S.c.extras_off);
 	remember();
 }

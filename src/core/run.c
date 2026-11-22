@@ -165,6 +165,7 @@ void run_new(uint32_t seed) {
 	run.active = true;
 	run.seed = seed;
 	run.depth = 1;
+	run_setup_form(run_debug_form, 0);
 	rng_seed(seed);
 	/* Acts 1-4 visit four of the surface areas, easier ones first; then the
 	 * Undernet and the Graveyard, which BN6 keeps for after its story. */
@@ -450,6 +451,15 @@ void run_setup(int mode, int folder, int threat, int helpers, int cross) {
 }
 
 void run_setup_extras(int off) { run.extras_off = (uint16_t)(off & ((1 << EXTRAS) - 1)); }
+
+bool run_debug_forms;
+int run_debug_form;
+
+void run_setup_form(int form, int soul) {
+	if (!run_debug_forms || form <= RUN_FORM_MIX || form >= RUN_FORMS) form = run_debug_forms ? RUN_FORM_CROSS : RUN_FORM_MIX;
+	run.form = (uint8_t)form;
+	run.soul_start = (uint8_t)(form >= RUN_FORM_SOUL_BN5 && soul >= 1 && soul <= 12 ? soul : 0);
+}
 
 int navi_hp(int navi, int version) {
 	int hp, damage, id = enemy_id(1, navi, version);

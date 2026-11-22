@@ -24,6 +24,8 @@ typedef struct {
 	bool bootplayed; /* bootplayed: the boot's kept state read from the run's checkpoint, a played game's (issue #688's scenario) */
 	int lib_hp;     /* libhp=N: a board's Darkloid begins at N HP (his heal and his battle from the board's HP seen); 0 his max */
 
+	bool forms;     /* new runs take MegaMan's form, CROSS unless the setup or form=N chooses (issue #774; run_debug_forms) */
+	int form;       /* form=N: ... form N (run.h's RUN_FORM_*: 1 CROSS, 2 SOUL BN5, 3 SOUL BN4), forms on */
 	bool tourney;   /* every act from the third that can hold one ends in the tournament's bracket, whatever the profile and the coin (docs/game/tournament.md; run_debug_bracket) */
 	bool glitch;    /* every act's first layer from the second holds the Glitch warp (docs/game/glitch-layer.md; run_debug_glitch) */
 	int glitch_stage; /* glitchstage=N: a Glitch layer held at stage N - 1 (1-5), its glitches and battles; 0 the floor's */
@@ -110,6 +112,7 @@ typedef struct {
 	int dive_room;  /* diveroom=N: a dive's layers give the other divers N MegaMen at most, as a layer with little room does (issue #755, dive_people.h) */
 	int party_lead; /* partylead=1: a party's enemies aim at the lead alone, as BN6 has it (party_field.h) */
 	int party_bot;  /* partybot=1: my keys in a party's fight on its core a bot's (party_play.h) */
+	int party_aim;     /* partyaim=1: under party=N the enemies' aim passed round the party (party_field_aim; issue #777) */
 	int party_scale;   /* partyscale=1: every guardian scaled for partycore's N as a party's door scales him (boss_party_dev) */
 	int party_hp_per;  /* partyhpper=P: ... his HP P percent of his own more a fighter past the first (0 none; unset the party's rule) */
 	int party_steps;   /* partysteps=S: ... his version S on (unset the party's ladder) */

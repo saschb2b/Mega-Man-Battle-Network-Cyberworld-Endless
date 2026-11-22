@@ -12,6 +12,9 @@
 #define SOULS 6   /* Colonel, ShadowMan, NumberMan, TomahawkMan, KnightMan, ToadMan: BN5's Souls 7-12 */
 #define SOULS_TEAM 6   /* ... and Team ProtoMan's, the other version's: ProtoMan, GyroMan, SearchMan, NapalmMan, MagnetMan, Meddy,
                           BN5's Souls 1-6 (docs/game/team-protoman.md), none held until each is earned from its guardian */
+#define SOULS_OF_BN5 12   /* BN5's Souls by its numbers, 1-6 Team ProtoMan's, 7-12 Team Colonel's */
+#define SOULS_OF_BN4 12   /* BN4's Souls by its numbers (its forms): 1 RollSoul, 2 GutsSoul, 3 WindSoul, 4 SrchSoul, 5 FireSoul,
+                          6 ThunSoul, 7 ProtSoul, 8 NumSoul, 9 MetlSoul, 10 JunkSoul, 11 AquaSoul, 12 WoodSoul (soulbn4.h) */
 
 /* A new run's: none, or the dev flag's (--dev souls=MASK, a bit a Soul) */
 void souls_new_run(uint32_t seed);
@@ -36,6 +39,16 @@ unsigned souls_layer(void);
  * stay the six's until their Souls are moved), and his given */
 bool soul_held(int navi);
 void soul_give(int navi);
+/* Every Soul the run holds by its game's numbers (issue #774's forms):
+ * BN5's, bit k its Soul k + 1 (Team ProtoMan's in bits 0-5, Team Colonel's
+ * 6-11), and BN4's, bit k its Soul k + 1; and the same as the layer about
+ * to be made was made (souls_note_layer) */
+unsigned souls_held_bn5(void);
+unsigned souls_held_bn4(void);
+unsigned souls_layer_bn5(void);
+unsigned souls_layer_bn4(void);
+/* (souls.c: a new run holds the Soul its Soul form brought,
+ * run.soul_start) */
 /* The dev flag's mask, for a new run's first Souls (devtools) */
 extern uint8_t souls_dev_mask;
 
