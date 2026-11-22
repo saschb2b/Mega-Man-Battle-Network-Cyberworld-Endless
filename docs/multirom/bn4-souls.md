@@ -126,7 +126,7 @@ parts in other shapes:
 | Charge times | BN5's table by power attack | `0x080180B8`, the same shape; each Soul's the same at every Charge |
 | Enter and leave | two tables by form | one enter routine by form (`0x0800E0A0`, eight Souls); the leave is family 0x11 |
 | Passives | the ready and collision tables by form | none: hand passes in the enter routines, and 14 compares of the form in the engine's shared code |
-| The unison's image | BN5's phase 1, the Soul Navi's sprite | family 0x0D, the Soul Navi's picture (list 8, 1-12) |
+| The unison's image | BN5's phase 1, the Soul Navi's sprite | family 0x0D, the Soul Navi's battle sprite (list 2, 1-12) |
 | His look | list 0 7-12, 25-34 KB each | list 0 1-12, about 36 KB each, 438 KB for twelve; the emotion window's face by form |
 | Element, chip charge | tables by form; `soulchips.c` | `0x0800C964`; the loadout's +2 (Fire, Proto, Metal, Aqua) |
 | Chaos Unison | DarkChips of the Soul's kind | none: BN4's DarkSoul is form 0xF, 960 frames, not taken ([Battle Network 4 in a run](bn4.md), Not taken) |
@@ -177,9 +177,14 @@ These come before the first BN4 Soul, whichever it is:
   2026): `souls4=` gives the Souls and `bn4_soul_thun_control` unites
   ThunSoul in BN4's own battle, the same twice ([the
   differential](../devtools/differential.md), BN4).
-- **The unison's picture** is the Soul Navi's own in BN4's list 8 (1-12,
-  about 1.7 KB each, 20 KB for twelve), apart from the battle sprites the
-  BN4 Navis track copies from list 2 ([BN4's Navis in BN6's engine](bn4-navis.md)).
+- **The unison's picture** is the Soul Navi's battle sprite, BN4's list 2
+  by the form (33,738 to 60,988 bytes, ThunderMan's 36,388), the sprites
+  the BN4 Navis track copies for a battle's Navi ([BN4's Navis in BN6's
+  engine](bn4-navis.md)) but drawn by the unison from a room of the Souls'
+  own (The shared room, below). Read on 13 November as list 8's mugshots
+  (1.7 KB each): the picture's init loads list offset 8, which
+  `sprite_load` reads as a byte offset into the lists, so list 2 (22
+  November 2026, [BN4 Red Sun's tables](../rom/bn4.md), Souls in battle).
 
 ## Cost and order
 
@@ -244,7 +249,7 @@ Each place a BN4 Soul needs, and what ThunSoul took:
 | Its charge times | BN4's row (`BN4_CHARGE_TIMES`) | 90 at every Charge |
 | Its loadout | the seventh row of `SOULS_LOADOUTS`, BN4's four bytes as BN6's six | `ff ff 00 a5 ff ff` |
 | Its element | `BN4_FORM_ELEMENTS` by form | Elec (3) |
-| His look | `soullook.c`'s room for BN4's united Soul (The shared room, below) | his sprite at BN6's list 0 number 0x5F in palette 0, his face BN6's 0x1D with BN4's digits, no overlay of the proxy's; the unison's picture and his buster's flash not moved |
+| His look | `soullook.c`'s room for BN4's united Soul (The shared room, below), filled as he is committed | his sprite at BN6's list 0 number 0x5F in palette 0, his face BN6's 0x1D with BN4's digits, no overlay of the proxy's; his unison's picture, ThunderMan's battle sprite, at list 0's 0x80; his buster's flash BN4's arm (kind 0x1D) with its own art |
 
 The plan had put the family at 0xC8, in the Souls' range. Family 0x47 is
 BN4's SandRing's too (chip 47), so it is one attack unit among the
@@ -327,9 +332,9 @@ above over BN5's kinds as its ROM has them and two of BN4's.
 
 What is left, in order:
 
-1. **The rest of the look** (The shared room, below): the unison's
-   picture (BN4's list 8 number 6, 1,628 bytes, family 0x0D's) and his
-   buster's flash, each held to BN4's frames.
+1. ~~**The rest of the look**~~ (22 November 2026, The shared room,
+   below): the unison's picture and his buster's flash moved, the room
+   filled as a Soul is committed.
 2. **The comparator's BN4 Souls.** `tools/xdiff_bn4.py` gets what
    `tools/xdiff.py` has for BN5's (`united`, the form by legit.json's map,
    the proxy's overlay, the power attack's number), each rule from both
@@ -349,11 +354,12 @@ faces, and Souls in battle):
 | Part | In BN4 | Size | BN6's place for it |
 | --- | --- | --- | --- |
 | His sprite | list 0, number the form (`BN4_STATS_SPRITES`) | 35,843 bytes | the shared room (below) |
-| The unison's picture | list 8, number the form | 1,628 bytes; 20,570 for the twelve | the shared room keeps 0x800 for it |
+| The unison's picture | list 2, number the form (the picture's init, `BN4_SOUL_PICTURE_LIST` and `BN4_SOUL_PICTURE_NUMBER`) | 36,388 bytes; GutsSoul's 60,988 the largest | the shared room's `SOULS4_PICTURE`, BN6's list 0 number 0x80 |
 | His face | `BN4_SOUL_FACES`, the face the form + 4 | 0x100 bytes, and a palette of 0x20 | the shared room; `SOULS_FACES` and `SOULS_FACE_PALS` have three entries to spare past BN5's six, one taken |
 | The count's digits | `BN4_FACE_DIGITS`, six of 0x80 bytes by 5 - the count | 0x300 bytes | beside the face: BN6's step reads 10 - the count, so the address given is five digits before the copy; counts 0 to 5 are there, SoulT+1's 4 among them, where BN6 holds a Soul's turns to 9 |
 | His palette | 0, written by the unison (`0x080EBB9E`) | | `soullook.c`'s palette hooks, as BN5's |
-| His arm's points, his buster's flash | not located | | BN5's are `SOULS_ARM_ROWS` and `soullook_flash` |
+| His buster's flash | the arm, BN4's third kind's 0x02 (`BN4_T3_ARM`), kind 0x1D: list 3 number 0x36, its animation the battle NaviStats' Navi (0 for MegaMan), spawned by his charged shot's family 0x47 (`movs r4,#0x1d` at `0x080EDCAC`) where the attack's +0xC is not 3 | 0x300 bytes | the arm's kinds' copy (`tools/xchiprecipe_bn4.py`'s table `0x080CD524`), its sprite BN6's list 3 number 0x7A |
+| His arm's points | none: BN4's arm draws at his place less its kind's height (+3 of its row, its update `0x080CD666`) for every form, and no reader of points by sprite is in BN4's ROM | | BN6's chips in a BN4 Soul take MegaMan's own row |
 
 **Blue Moon's six have no face in Red Sun's ROM.** The window's tables
 lie end to end: five mood faces, six Soul faces, six digits, eleven
@@ -375,59 +381,84 @@ address space is 32 MB and the copy 16; every platform would pay the RAM,
 the New 3DS first) and over regions shrunk to what they hold (room for a
 few sprites at best, not for 438 KB).
 
-`FREE_BN4_SOUL_LOOK` is that room: 45 KB in the `world` zone's gap, the
-last of its size when it was placed (15 KB were left there; the measured
-pass of the same day then sized that zone's regions by what they hold,
-and the room lies in 439 KB of free space since,
+`FREE_BN4_SOUL_LOOK` is that room: 104 KB in the `world` zone's free
+space (45 KB when placed on 13 November 2026, grown on 22 November by the
+unison's picture, which is a battle sprite and not a mugshot; the zone
+holds 439 KB of free space since the measured pass,
 [Free space](../engine/emulation/free-space.md), The measured pass), laid
 out in `soul_room.h`:
 
 | Part | Room | From BN4 |
 | --- | --- | --- |
 | `SOULS4_SPRITE` | 0xA800, the largest of the twelve (RollSoul's 42,324) | list 0 by his form |
-| `SOULS4_PICTURE` | 0x800, kept for the unison's picture | list 8 by his form, 1,894 bytes at most |
+| `SOULS4_PICTURE` | 0xEF00, the largest Soul Navi's (GutsMan's 60,988) | list 2 by his form, his unison's picture |
 | `SOULS4_FACE` | 0x100 | `BN4_SOUL_FACES` by his form - 1; its palette, `BN4_FACE_PALS` by his form + 4, goes into `SOULS_FACE_PALS` at the face's number |
 | `SOULS4_DIGITS` | 0x300, the same for every Soul | `BN4_FACE_DIGITS`, six |
+| `SOULS4_HELD` | a byte | the form whose look the room holds, 0xFF none |
 
 BN6 reaches it by one number each, whichever Soul is in it: list 0's
-0x5F (`SOUL_LIST0_BN4`, the list's last; `tools/xsoul.py`'s art stops one
-under it) and the emotion window's face 0x1D (`SOUL_FACE_BN4`, past
-BN5's six). `soullook.c`'s hooks give a BN4 Soul those where they give a
-BN5 Soul its own: the sprite, palette 0 (BN4's unison writes 0 into his
-object's palette, `0x080EBB9E`, as BN5's draws a Soul in 0), the face
-with his turns under it, and BN4's digits, which BN6's step reads at
-10 - the count: the address given is five digits before the copy, so
-counts 0 to 5 are there, SoulT+1's 4 among them. `soullife.c` gives a
-BN4 Soul no overlay on the way in or out, where the proxy's own is
-HeatCross's: BN4 gives ThunSoul no enter routine (`BN4_FORM_ENTERS`' form
-6 is its nullsub). A Soul that has one brings it with its move.
+0x5F (`SOUL_LIST0_BN4`, the first list's last; `tools/xsoul.py`'s art
+stops one under it) for his sprite, list 0's 0x80
+(`SOUL_LIST0_BN4_PICTURE`, BN4's own numbers 0x80-0x8F past Team
+ProtoMan's, [Claims](../project/claims.md)) for his picture, and the
+emotion window's face 0x1D (`SOUL_FACE_BN4`, past BN5's six).
+`soullook.c`'s hooks give a BN4 Soul those where they give a BN5 Soul its
+own: the sprite, palette 0 (BN4's unison writes 0 into his object's
+palette, `0x080EBB9E`, as BN5's draws a Soul in 0), the face with his
+turns under it, and BN4's digits, which BN6's step reads at 10 - the
+count: the address given is five digits before the copy, so counts 0 to
+5 are there, SoulT+1's 4 among them. `soullife.c` gives a BN4 Soul no
+overlay on the way in or out, where the proxy's own is HeatCross's: BN4
+gives ThunSoul no enter routine (`BN4_FORM_ENTERS`' form 6 is its
+nullsub). A Soul that has one brings it with its move.
 
-Built for ThunSoul (13 November 2026) and seen by film against BN4's own
-battle (`bn4_soul_thun` with `film`): his body, his face and the 3 under
-it are BN4's, frame for frame through the charge and the shot.
-`soul_thun` holds his sprite to the room's address and his palette to 0,
-and its mutations 560 and 561 break each.
+**Filled as a Soul is committed.** The install leaves the room empty,
+each moved Soul's look measured to fit it. Before each frame of BN6's
+core (`soullook_frame`, beside the Navi chips' rooms in `xinstall.c`)
+the Souls' block names the BN4 Soul a side is committed to or stands in,
+MegaMan's side's first; where `SOULS4_HELD` names another, the room is
+filled from Red Sun's ROM: his sprite, his picture, his face and its
+palette, his form last. The Custom screen commits him frames before the
+crossing loads his sprite, so the room is his before anything draws it.
+The record lives in the core's copy, which no state carries, and the
+Souls' block lives in RAM, which every state carries: a state loaded (a
+rollback's, a test battle's, a CONTINUE's) is followed by the next
+frame's check, as a BN4 Navi chip's rooms follow theirs
+(`xnavi_bn4_chip.c`). `soul_thun` holds it: his sprite's frame read from
+the room at BN4's art's offsets, and its mutation writing the record
+ThunSoul's after the install leaves the room unfilled and fails it.
+Seen by film against BN4's own battle (`bn4_soul_thun` with `film`, 13
+and 22 November): his body, his face and the 3 under it, and his buster's
+flash, are BN4's through the charge and the shot.
+
+**The unison's picture.** BN6's unison runs BN5's phase 1 for a Soul
+(`soullook.c`'s phases), which spawns BN6's copy of BN5's image object;
+its sprite hook gives a BN4 Soul list 0's 0x80, the room's picture, where
+a BN5 Soul's is his Navi's battle sprite in list 2, and no decoration of
+a BN6 Navi's. BN4's own picture (the fourth kind's 0x13) plays the same
+part: his Soul Navi's battle sprite, animation 0, palette 0. Its
+timings and sounds are BN5's phase's, the run's rule for every Soul;
+BN4's arm on the picture for WindSoul, FireSoul, NumSoul and AquaSoul
+(`BN4_SOUL_PICTURE_DECOS`) comes with their moves. The unison ends
+before the fight in BN6, so no spec's trace reaches it; it was looked at
+in BN6's frames before the fight.
+
+**His buster's flash** is BN4's arm, which his charged shot spawns (kind
+0x1D, list 3's 0x36): the chips' generator copies the arm's kinds a unit
+spawns, and kind 0x1D was missing, so BN6 drew its own list 3 number
+0x36 in its place. It is copied with the rest (BN6's list 3 number 0x7A)
+since 22 November, and the film shows it as BN4 draws it.
+
+**His arm's points:** BN4 has none to move. BN6 reads a row of points by
+list-0 number; BN4's ROM has none of that reader's instructions (BN5's
+`0x0801516E` searched for, found in BN5 and BN6 alone), and BN4's arm
+draws at his place less its kind's height in every form (`0x080CD666`).
+BN6's own chips in a BN4 Soul keep MegaMan's row.
 
 What the room does not do yet:
 
-- **Fill as a Soul unites.** One Soul is moved, so the room is his from
-  the install (`room4_fill`). The second (AquaSoul) fills it as he unites,
-  as a BN4 Navi chip's Navi fills his room as the chip is used
-  (`xnavi_bn4_chip.c`); a rollback's snapshot then keeps which Soul is in
-  it.
 - **More than one MegaMan.** The room serves one. Two a side, or a
   NetBattle with BN4 Souls on both sides, needs a room a seat; no
   NetBattle takes a BN4 Soul yet (the differential's `souls6` alone).
-- **The unison's picture.** BN6's unison draws BN5's image object from
-  the Soul Navi's battle sprite in list 2; BN4's family 0x0D draws a
-  picture of its own from list 8. Not traced; the unison ends before the
-  fight in BN6, so the film does not show it.
-- **His buster's flash.** BN4 draws one at his arm as he fires (seen in
-  the film at t164 and t170); BN6 draws none for him, where a BN5 Soul's
-  is BN5's flash object (`soullook_flash`). BN4's is not located.
-- **His arm's points.** BN6 reads a row of points by list-0 number;
-  BN4's ROM has none of that reader's instructions (BN5's `0x0801516E`
-  searched for, found in BN5 and BN6 alone), so the room's sprite takes
-  MegaMan's own row. Assumed close enough until the flash is moved.
-- **Blue Moon's six.** `room4_fill` refuses a form past
+- **Blue Moon's six.** `room4_fits` refuses a form past
   `BN4_SOUL_FACE_COUNT`: they have no face in Red Sun's ROM (above).

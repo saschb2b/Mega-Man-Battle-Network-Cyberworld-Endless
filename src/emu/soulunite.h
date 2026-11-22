@@ -62,6 +62,11 @@ bool soulunite_ready(void);
  * battle begins, the differential's from its spec. None (0) leaves BN6's
  * Custom screen as it is, byte for byte. */
 void soulunite_held(unsigned souls);
+/* ... the run's by its games' numbers: `colonel` as soulunite_held's six
+ * (bit k BN5's Soul 7 + k), `bn4` bit n - 1 BN4's Soul n (its form,
+ * souls.h's souls_held_bn4), each moved one's bit from SOULS_HELD_BN4
+ * (soulbn4_held) */
+void soulunite_held_bn4(unsigned colonel, unsigned bn4);
 /* ... a core of its own's (hook_core's: an Arena pair core, its player's
  * Souls), UNITE standing there in a link battle too (the Soul carried to
  * the other GBA by the pair: src/online/arena_souls.c); false where the
