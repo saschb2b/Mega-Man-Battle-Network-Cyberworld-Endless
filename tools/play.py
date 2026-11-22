@@ -87,8 +87,8 @@ BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linu
 ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
 BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST', 'AHEAD'}   # (FAST: fast forward's button, BTN_FAST; AHEAD: the d-pad the way MegaMan faces)
 SCALE = 3
-DEV_STEPS = ('place', 'flags', 'battle', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'guardian', 'by', 'board', 'dump', 'second', 'stuck', 'drop',
-             'emote', 'netpass', 'trade', 'reconnect')   # (steps of no frames)
+DEV_STEPS = ('place', 'flags', 'battle', 'home', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'guardian', 'by', 'board', 'dump', 'second',
+             'stuck', 'drop', 'emote', 'netpass', 'trade', 'reconnect')   # (steps of no frames)
 MAX_SHOTS = 24
 
 
@@ -130,8 +130,8 @@ def steps(commands):
                 out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
             elif op == 'flags':
                 out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
-            elif op == 'battle':
-                out.append(('battle',))
+            elif op in ('battle', 'home'):
+                out.append((op,))
             elif op in ('foes', 'lab'):
                 out.append((op, '/'.join([args[0]] + args[1:])))
             elif op == 'swap':
@@ -163,7 +163,7 @@ def steps(commands):
                 # (a file dropped on the game's window: a ROM on the ROMs screen, a .cwsave on the title)
                 out.append(('drop', args[0]))
             else:
-                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, foes, lab, swap, status, xrecord, chip, cross, sig, guardian, by, board, stuck, dump, drop, emote, netpass, trade, reconnect)')
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, home, foes, lab, swap, status, xrecord, chip, cross, sig, guardian, by, board, stuck, dump, drop, emote, netpass, trade, reconnect)')
         except (IndexError, ValueError):
             sys.exit(f'bad command {cmd.strip()!r}')
     return out
@@ -358,7 +358,7 @@ def send(h, seq, record=None):
             items.append(f'place {s[1]} {s[2]} {s[3]}')
         elif s[0] == 'flags':
             items.append(f'flags {s[1]} {s[2]} {s[3]}')
-        elif s[0] in ('battle', 'sig', 'guardian'):
+        elif s[0] in ('battle', 'sig', 'home', 'guardian'):
             items.append(s[0])
         elif s[0] == 'stuck':
             items.append(f'stuck {s[1]}')

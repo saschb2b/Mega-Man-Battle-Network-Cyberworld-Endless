@@ -2,7 +2,9 @@
 display): two divers on the week's net, a crew by standing together, each
 shown the other's plate under BN6's HP box, his HP as it changes (a
 battle of his own, hit) and his layer once he goes on (the dev menu's
-Next layer); a crew split, or the link down, and no plates."""
+Next layer); a crew split, or the link down, and no plates; a crewmate
+gone home between acts drawn on no layer, his plate saying Home (issue
+#756)."""
 import scenarios_online as online
 from scenarios_online import soon
 
@@ -65,5 +67,28 @@ MANY = {
         crewed(),
         ('server', 'stop'),
         ('repeat', 'wait 30', 'crewview=0', 200),            # the link down: no plates
+    )),
+    # (issue #756: three divers crewed on one spot; Beta sent home between acts as an act's last exit sends a run (the dev
+    # step `home`): within a second the others draw him nowhere (no diver, no tag) and their plates say Home, the crew
+    # kept as it stood)
+    'gone-home': dict(CAST, GAMES={'beta': online.HOME, 'gamma': online.HOME}, STEPS=online.course(
+        crewed(),
+        online.into_square('gamma'), dive('gamma'),
+        ('sleep', 1.5),
+        soon('crew=3: Alpha Beta Gamma', '', 600),
+        soon('crew=3: Alpha Beta Gamma', 'gamma', 600),
+        ('expect', 'divers~Beta'),
+        ('@beta', 'do', 'home; wait 10'),
+        ('@beta', 'until', 'where=town', 1200),
+        ('sleep', 1.0),
+        soon('divers=1: Gamma', '', 300),                  # Beta drawn nowhere on Alpha's layer
+        ('expect', 'tags=1: Gamma*'),
+        soon('mate0=Beta hp 100/100 layer home', '', 300),  # his plate: home
+        ('expect', 'crew=3: Alpha Beta Gamma'),
+        soon('divers=1: Alpha', 'gamma', 300),
+        soon('mate0=Alpha hp 100/100 layer here', 'gamma', 300),
+        ('@gamma', 'expect', 'mate1=Beta hp 100/100 layer home'),
+        ('sleep', 11),                                      # (past crew_away_ms: a crewmate at home stays in his crew)
+        soon('crew=3: Alpha Beta Gamma', '', 300),
     )),
 }

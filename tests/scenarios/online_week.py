@@ -4,7 +4,8 @@ diver seen there and his dot on the map (issue #728), a crew by standing
 together (issue #714), formed and
 split by walking together and apart, four at most, and a battle of one
 fought by both unasked (issue #715) and through a dropped link (issue
-#180), a crew formed again after one diver's link came back (#180), the Board's posts of the week,
+#180), a crew formed again after one diver's link came back (#180) and
+however long it was away (#751), the Board's posts of the week,
 a dive left by a quit (CONTINUE is the normal run's, as it was, and the
 portal offers the dive again), a game without the DeepNet stamp, which
 the portal offers nothing, and the server gone on a dive, which goes on
@@ -164,6 +165,43 @@ MANY['crew-again-after-a-drop'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, S
     soon('join=fighting', '', 900),
 ))
 
+
+
+def link_down(seconds):
+    """Beta's own link cut `seconds` on the layer (issue #751): the band says it is down at once (and that he dives
+    alone, past the transport's 30 seconds), then back; the room entered again, each sees the other, the crew again.
+    Pictures of Beta's game kept (shot): down, away where it goes so long, back."""
+    away = seconds > 30
+    return online.course(
+        ('@beta', 'do', f'reconnect cut {seconds}'),
+        soon('divestate=down', 'beta', 120),
+        ('sleep', 1.5),
+        ('@beta', 'do', 'wait 1; shot'),
+        # (the cut and the tries are the clock's: a dive's layer outruns it)
+        *([('sleep', 34.0), soon('divestate=away', 'beta', 600), ('@beta', 'do', 'wait 1; shot')] if away else []),
+        # (past the transport's 30 seconds the dive starts the link again every 15 seconds at most: one more such wait)
+        ('sleep', max(1.0, seconds - (35.5 if away else 1.5)) + (16.0 if away else 0.0)),
+        soon('divestate=up', 'beta', 3600),
+        ('@beta', 'do', 'wait 20; shot'),
+        soon('divers~Alpha', 'beta', 600),
+        soon('divers~Beta', '', 600),
+        ('sleep', 1.5),
+        soon('crew=2: Alpha Beta', 'beta', 600),
+        soon('crew=2: Alpha Beta', '', 600),
+    )
+
+
+# A dropped link on a layer (issue #751): 5, 30 and 120 seconds; the dive taken up again however long it was away,
+# a crewmate's battle joined after it as before
+for cut in (5, 30, 120):
+    MANY[f'link-down-{cut}s'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=online.course(
+        MANY['dive-together']['STEPS'],
+        link_down(cut),
+        ('do', 'battle; wait 10'),
+        soon('join=fighting', 'beta', 900),
+        soon('join=fighting', '', 900),
+    ))
+
 # Crews by nearness (issue #714): together where they stand, apart once one walks off, together again as he comes
 # back; between crew_near (128) and crew_far (192) a crew stays as it was, looked at again and again. MegaMan is put
 # down by world units, wherever the week's layer has its floor: only the distance between the two counts here.
@@ -211,6 +249,46 @@ MANY['divers-on-the-map'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online
     soon('mapdots~Beta(5,', '', 600),
     ('expect', 'crew=0'),
     ('do', MAP),
+))
+
+# A crew of four where the layer has little room (issue #755): a guardian's layer whose own NPCs leave two of BN6's
+# sixteen for the others (diveroom=2, as layer 3 of week 2967 left), all four at its door in a crew. Each game gives
+# its two MegaMen to crewmates (never to a stranger before them), and the third crewmate, with no MegaMen left, still
+# has his name and his ring where he stands, the state counting him undrawn.
+NEXT_GUARDIAN = 'hold SELECT 2; hold SELECT+R 4; wait 10; ' + 'press DOWN; wait 4; ' * 8 + 'press A; wait 30'
+ROOM2 = online.HOME + ',diveroom=2'
+CREW4 = ('beta', 'gamma', 'delta')
+
+
+def to_the_door(game=''):
+    """The dev menu's Next guardian, its arrival paged, then by the arena's way in."""
+    return online.at(game, ('do', NEXT_GUARDIAN), ('until', 'where=layer', 1200), ('repeat', 'press A; wait 15', 'chat=closed', 20),
+                     ('expect', 'layer=3'), ('do', 'by arena; wait 10'), ('repeat', 'press A; wait 15', 'chat=closed', 20))
+
+
+MANY['crew-drawn-with-little-room'] = dict(CAST, START=ROOM2, GAMES={name: ROOM2 for name in CREW4}, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    *[part for name in CREW4 for part in online.course(online.into_square(name), dive(name))],
+    # (first on layer 1, each on his own spot a panel or two apart, for the picture: one crewmate with no MegaMan)
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 48 0 3; wait 5'),
+    ('@gamma', 'do', 'place 0 48 3; wait 5'),
+    ('@delta', 'do', 'place 48 48 3; wait 5'),
+    ('sleep', 1.5),
+    soon('crew=4: Alpha Beta Gamma Delta', '', 900),
+    soon('rings>=3', '', 300),
+    ('expect', 'undrawn~1: '),
+    ('do', 'shot'),
+    to_the_door(),
+    *[to_the_door(name) for name in CREW4],
+    ('sleep', 1.5),
+    soon('crew=4: Alpha Beta Gamma Delta', '', 900),
+    soon('rings>=3', '', 300),                         # a ring under all three, the one with no MegaMan too
+    ('expect', 'undrawn~1: '),
+    ('do', 'shot'),
+    *[step for name in CREW4 for step in (soon('rings>=3', name, 300), ('@' + name, 'expect', 'undrawn~1: '))],
+    ('@delta', 'do', 'shot'),
 ))
 
 # Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and

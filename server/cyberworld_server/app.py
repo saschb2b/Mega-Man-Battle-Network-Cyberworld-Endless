@@ -611,14 +611,14 @@ class Server:
             self.stands.pump(now)
             self.crews.pump(now)
             self.dive.pump(now)
-            flags = self.peer_flags()
+            flags, hidden = self.peer_flags(), self.crews.hidden()
             for player in list(self.players.values()):
                 if player.writer.is_closing():
                     continue
                 if player.writer.transport.get_write_buffer_size() > 8192:
                     player.writer.close()
                     continue
-                player.writer.write(websocket.frame(protocol.snapshot(self.players, player.id, flags)))
+                player.writer.write(websocket.frame(protocol.snapshot(self.players, player.id, flags, hidden)))
 
     def busy_with(self, player_id):
         """What a player is busy with, as the Square marks him (v13, epic
