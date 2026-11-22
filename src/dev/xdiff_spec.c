@@ -9,6 +9,7 @@
 #include "chip_entry.h"
 #include "emu.h"
 #include "soulbn4.h"
+#include "soulteam.h"
 
 /* ---- the spec ---- */
 
@@ -161,6 +162,7 @@ static int souls_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "confuse6")) return (s->confuse6 = atoi(v) != 0), 1;
 	if (!strcmp(name, "mood4")) return (s->mood4 = atoi(v) != 0), 1;
 	if (!strcmp(name, "souls6")) return (s->souls6 = (unsigned)strtoul(v, NULL, 16)) != 0;
+	if (!strcmp(name, "souls5")) return (s->souls5 = (unsigned)strtoul(v, NULL, 16)) != 0 && s->souls5 < 1u << SOULS_TEAM;
 	if (!strcmp(name, "unitebreak")) return (s->unitebreak = atoi(v)) > 0;
 	if (!strcmp(name, "soulbreak")) return (s->soulbreak = atoi(v)) > 0;
 	return -1;
@@ -278,7 +280,20 @@ static bool game_parse(Spec *s, const char *v) {
 	return s->bn5 || s->bn6 || s->bn4;
 }
 
-bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 >> SOULS_HELD_BN4) != 0; }
+void xd_flags5_put(const Spec *s, uint32_t flags, uint8_t (*rd8)(uint32_t), void (*wr8)(uint32_t, uint8_t)) {
+	for (int i = 0; i < s->nflags[0]; ++i) {
+		uint32_t f = (uint32_t)s->flags[0][i], a = flags + (f >> 3);
+		wr8(a, (uint8_t)(rd8(a) | 0x80u >> (f & 7)));
+	}
+	for (int n = SOUL_TEAM_FIRST; n < SOUL_TEAM_FIRST + SOULS_TEAM; ++n) {
+		if (!(s->souls5 >> (n - SOUL_TEAM_FIRST) & 1)) continue;
+		uint32_t f = SOUL_TEAM_FLAG(n), a = flags + (f >> 3);
+		wr8(BN5_SOUL_FLAGS + (uint32_t)(n - 1), (uint8_t)f);
+		wr8(a, (uint8_t)(rd8(a) | 0x80u >> (f & 7)));
+	}
+}
+
+bool xd_spec_bn4_code(const Spec *s) { return s->bn4 || (s->souls6 & SOULS_HELD_BN4_MASK) != 0; }
 
 /* MegaMan's setup, then his NaviCust's */
 static int subject_parse(Spec *s, const char *name, char *v) {

@@ -133,6 +133,8 @@
 #define FREE_ATTACK_FAMILIES_END (EMU_FREE + 0x600400u)
 #define FREE_CHIP_MOVED      (EMU_FREE + 0x600400u)  /* the chips' moved code and its tables (what it draws: FREE_CHIP_ART) (xchips_code.c) */
 #define FREE_CHIP_MOVED_END  (EMU_FREE + 0x640000u)
+#define FREE_TEAM_SOULS      (EMU_FREE + 0x640000u)  /* Team ProtoMan's Souls (BN5's 1-6) in BN6's engine: their moved code, their sprites and art, their loadouts, and the Souls' arm rows grown past Team Colonel's room (soul_room.h lays it out) (soulcode.c, soullook.c, soulpower.c) */
+#define FREE_TEAM_SOULS_END  (EMU_FREE + 0x6A0000u)
 #define FREE_CHIP_ART        (EMU_FREE + 0x6A0000u)  /* what BN5's chips' moved code draws (XC_ART: its sprites, a place each) (xchips_code.c) */
 #define FREE_CHIP_ART_END    (EMU_FREE + 0x700000u)
 #define FREE_SOULS_ART       (EMU_FREE + 0x700000u)  /* the Souls' art past their room: BN5's effects BN6 redrew, copied (soulcode.c, soulcolonel.c) */
@@ -269,6 +271,7 @@
 	X("FREE_CHIP_CODE", (EMU_FREE + 0x600000u), (EMU_FREE + 0x640000u), "", "code") \
 	X("FREE_ATTACK_FAMILIES", (EMU_FREE + 0x600000u), (EMU_FREE + 0x600400u), "FREE_CHIP_CODE", "code") \
 	X("FREE_CHIP_MOVED", (EMU_FREE + 0x600400u), (EMU_FREE + 0x640000u), "FREE_CHIP_CODE", "code") \
+	X("FREE_TEAM_SOULS", (EMU_FREE + 0x640000u), (EMU_FREE + 0x6A0000u), "", "code") \
 	X("FREE_CHIP_ART", (EMU_FREE + 0x6A0000u), (EMU_FREE + 0x700000u), "", "code") \
 	X("FREE_SOULS_ART", (EMU_FREE + 0x700000u), (EMU_FREE + 0x710000u), "", "code") \
 	X("FREE_BN4_CHIP_STUBS", (EMU_FREE + 0x710000u), (EMU_FREE + 0x710040u), "", "code") \

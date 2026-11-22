@@ -20,7 +20,9 @@
 #include "soullife.h"
 #include "soulmood.h"
 #include "soulpower.h"
+#include "soulteam.h"
 #include "thumb_reloc.h"
+#include "xpanels.h"
 
 #define BUS 0x08000000u
 #define THUMB_MOVS_R0 0x2000u
@@ -30,6 +32,7 @@
 #define SOUL_KNIGHT 11
 #define SOUL_TOAD 12
 /* BN5_CHIP_KIND's: the kinds BN5's chip charge takes by the Soul (0x08010902) */
+#define KIND_FIRE 0
 #define KIND_AQUA 1
 #define KIND_WOOD 3
 #define KIND_SWORD 6
@@ -42,10 +45,16 @@
 #define ANSWER_NO (GRASS_CODE_SIZE)        /* ... movs r0,#0; bx lr and */
 #define ANSWER_YES (GRASS_CODE_SIZE + 4)   /* ... movs r0,#1; bx lr: an answer with its flags set, as BN6's callers test them */
 #define THUMB_SIZE (GRASS_CODE_SIZE + 8)
+#define LAVA_CODE_SIZE 28    /* the Thumb NapalmSoul's lava jumps to (lava_code) */
+#define LAVA_BONUS 10        /* NapalmSoul on lava: his next attack chip's power more (BN5's 0x08012644) */
+#define HAND_SIDE 0x50       /* a side's hand after OK, BN6_BATTLE_HAND's step (BN6_HAND_ADDR) */
+_Static_assert(SOULS_TEAM_THUMB + LAVA_CODE_SIZE <= SOULS_TEAM_THUMB_END, "NapalmSoul's lava's Thumb past its room (soul_room.h)");
 
 static int breaks;
 static bool done;
 static uint32_t sword_family;   /* the moved sword family's CurAction (BN5's 0x13 as the Souls' own) */
+static int napalm_family;       /* ... and the Napalm Bomb's (BN5's 0x4B, NapalmSoul's charged Fire chip), -1 where not moved */
+#define BN5_FAMILY_NAPALM_BOMB 0x4B
 
 static int side_of(uint32_t obj) { return hook_read8(obj + BN6_T1_ALLIANCE) & 1; }
 
@@ -75,20 +84,22 @@ static HookAct charge_test(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]), chip = (int)r->r[0];
 	if (!soul) return HOOK_CONTINUE;
-	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA : -1;
+	int kind = soul == SOUL_SHADOW ? KIND_SWORD : soul == SOUL_KNIGHT ? KIND_BREAK : soul == SOUL_TOAD ? KIND_AQUA :
+		soul == SOUL_NAPALM ? KIND_FIRE : -1;
 	bool ok = kind >= 0 && chip > 0 && chip < CHIPS_IDS && !(flags_of(chip) & BN6_CHIP_LEFT_ALONE) && !soulkinds_dark(chip) &&
 		soulkinds_of(chip) == kind && !(breaks & SOULCHIPS_BREAK_CHARGE);
 	r->r[12] = (SOULS_THUMB + (ok ? ANSWER_YES : ANSWER_NO)) | 1;
 	return HOOK_JUMP;
 }
 
-/* (a charged chip's bonus by the form, r0 whether it was charged, its first instruction) KnightSoul's and ToadSoul's double,
- * none for the rest */
+/* (a charged chip's bonus by the form, r0 whether it was charged, its first instruction) KnightSoul's, ToadSoul's and
+ * NapalmSoul's double, none for the rest (0x080103C8; ProtoSoul's and MagnetSoul's too, once theirs stand) */
 static HookAct charge_bonus(HookRegs *r, void *user) {
 	(void)user;
 	int soul = soul_of(r->r[5]);
 	if (!soul) return HOOK_CONTINUE;
-	r->r[0] = r->r[0] && (soul == SOUL_KNIGHT || soul == SOUL_TOAD) && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
+	bool doubled = soul == SOUL_KNIGHT || soul == SOUL_TOAD || soul == SOUL_NAPALM;
+	r->r[0] = r->r[0] && doubled && !(breaks & SOULCHIPS_BREAK_DOUBLE) ? CHARGE_DOUBLE : 0;
 	return HOOK_RETURN;
 }
 
@@ -140,9 +151,16 @@ static HookAct front(HookRegs *r, void *user) {
 }
 
 /* (the chip's family read as the chip use returns it, r4 its record, r7 its attack's variables) ShadowSoul's charged
- * sword: BN5's sword family, moved, which takes his paths (BN5 0x080EB762 on: a slash before the enemy) */
+ * sword: BN5's sword family, moved, which takes his paths (BN5 0x080EB762 on: a slash before the enemy); NapalmSoul's
+ * charged chip (a Fire chip, the only kind his charge takes): BN5's Napalm Bomb, moved (0x0801043A: family 0x4B) */
 static HookAct sword(HookRegs *r, void *user) {
 	int chip = hook_read16(r->r[7] + BN6_ATTACK_CHIP);
+	if (soul_of(r->r[5]) == SOUL_NAPALM && hook_read8(r->r[7] + BN6_ATTACK_CHARGED) && napalm_family >= 0 &&
+		!(breaks & SOULCHIPS_BREAK_NAPALM)) {
+		r->r[0] = (uint32_t)napalm_family;
+		r->r[12] = (uint32_t)(uintptr_t)user | 1;
+		return HOOK_JUMP;
+	}
 	if (soul_of(r->r[5]) != SOUL_SHADOW || !hook_read8(r->r[7] + BN6_ATTACK_CHARGED) || soulkinds_of(chip) != KIND_SWORD ||
 		hook_read8(r->r[4] + BN6_CHIP_FAMILY) != BN6_FAMILY_SWORD || (breaks & SOULCHIPS_BREAK_SWORD))
 		return HOOK_CONTINUE;
@@ -162,7 +180,43 @@ static HookAct shadow(HookRegs *r, void *user) {
 	return HOOK_JUMP;
 }
 
+/* (BN6_PLAYER_TIMERS, his timers' first read, r4 his AI data, r5 him) NapalmSoul's lava step, BN5's 0x080125FA before its
+ * timers (0x0800E53A): not paused, he on a lava panel, the next chip of his hand an attack chip (its power shown): its power
+ * 10 more as Atk+ chips add theirs, and on to the Thumb that makes the panel plain */
+static HookAct lava(HookRegs *r, void *user) {
+	uint32_t me = r->r[5];
+	if (soul_of(me) != SOUL_NAPALM || (breaks & SOULCHIPS_BREAK_LAVA) || hook_read8(hook_read32(BN6_TOOLKIT + BN6_TOOLKIT_PAUSE) + BN6_PAUSED))
+		return HOOK_CONTINUE;
+	uint32_t x = hook_read8(me + BN6_T1_PANEL_X), y = hook_read8(me + BN6_T1_PANEL_Y);
+	if (x >= BN6_FIELD_COLUMNS || hook_read8(panel_at(x, y) + BN6_PANEL_TYPE) != XPANEL_LAVA) return HOOK_CONTINUE;
+	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)side_of(me) * HAND_SIDE, at = 2u * hook_read8(hand + BN6_HAND_AT);
+	if (!(flags_of(hook_read16(hand + BN6_HAND_CHIPS + at)) & BN6_CHIP_SHOWS_POWER)) return HOOK_CONTINUE;
+	hook_write16(hand + BN6_HAND_BONUS + at, (uint16_t)(hook_read16(hand + BN6_HAND_BONUS + at) + LAVA_BONUS));
+	r->r[12] = (uint32_t)(uintptr_t)user | 1;
+	return HOOK_JUMP;
+}
+
 /* ---- the install ---- */
+
+/* the Thumb NapalmSoul's lava jumps to: the panel under him plain (BN6_SET_PANEL_TYPE, r0 column, r1 row, r2 the type), the
+ * hooked ldrb, on to the routine's next */
+static bool lava_code(uint32_t at, uint8_t out[LAVA_CODE_SIZE]) {
+	static const uint16_t code[] = {
+		0x7CA8,           /* ldrb r0,[r5,#0x12] */
+		0x7CE9,           /* ldrb r1,[r5,#0x13] */
+		0x2202,           /* movs r2,#2 (BN6_PANEL_PLAIN) */
+		0x4B03,           /* ldr r3,[pc,#12]: the panel's routine */
+		0, 0,             /* bl the bx below */
+		0x7E60,           /* ldrb r0,[r4,#0x19]: the hooked instruction (BN6_PLAYER_TIMERS's, checked by expected) */
+		0x4B02,           /* ldr r3,[pc,#8]: the way on */
+		0x4718,           /* bx r3 */
+		0x46C0,           /* nop */
+	};
+	for (size_t i = 0; i < sizeof code / sizeof *code; ++i) put16(out + 2 * i, code[i]);
+	put32(out + 20, BN6_SET_PANEL_TYPE | 1);
+	put32(out + 24, BN6_PLAYER_TIMERS_NEXT | 1);
+	return BN6_PANEL_PLAIN == 2 && thumb_bl_write(out, 8, at, at + 16);
+}
 
 /* the Thumb TomahawkSoul's grass jumps to: the hooked strh, the panel under him plain (BN6_SET_PANEL_TYPE, r0 column, r1 row,
  * r2 the type), on to the modifier's sound (BN6_CHIP_MODIFIED_SOUND) */
@@ -189,6 +243,7 @@ static bool expected(void) {
 		{ BN6_CHARGE_TEST, 0xB5D0 }, { BN6_CHARGE_BONUS, 0xB510 }, { BN6_CHIP_MODIFIED, 0x8138 }, { BN6_CHIP_MODIFIED_SOUND, 0x2087 },
 		{ BN6_CHIP_USED_END, 0x8AB8 }, { BN6_CHIP_FAMILY_READ, 0x7AE0 }, { BN6_SHADOW_TYPE_SIDE, 0x2129 }, { BN6_SHADOW_TYPE_DONE, 0xBD10 },
 		{ BN6_SET_PANEL_TYPE, 0xB570 }, { BN6_CHARGED_RELEASE, 0x290D }, { BN6_CHARGED_CHIP_USE, 0x2001 },
+		{ BN6_PLAYER_TIMERS, 0x7E60 },
 	};
 	for (size_t i = 0; i < sizeof code / sizeof *code; ++i)
 		if (rom_u16(code[i].at - BUS) != code[i].op) {
@@ -204,22 +259,25 @@ bool soulchips_install(int brk) {
 	if (!R.data || !emu_ready() || !expected() || !soulkinds_make()) return false;
 	breaks = brk;
 	sword_family = (uint32_t)soulcode_family(BN6_FAMILY_SWORD);
-	uint8_t stub[THUMB_SIZE];
-	if ((int)sword_family < 0 || !grass_code(SOULS_THUMB, stub)) return false;
+	napalm_family = soulcode_family(BN5_FAMILY_NAPALM_BOMB);
+	uint8_t stub[THUMB_SIZE], lava_stub[LAVA_CODE_SIZE];
+	if ((int)sword_family < 0 || !grass_code(SOULS_THUMB, stub) || !lava_code(SOULS_TEAM_THUMB, lava_stub)) return false;
 	put16(stub + ANSWER_NO, THUMB_MOVS_R0 | 0);
 	put16(stub + ANSWER_NO + 2, THUMB_BX_LR);
 	put16(stub + ANSWER_YES, THUMB_MOVS_R0 | 1);
 	put16(stub + ANSWER_YES + 2, THUMB_BX_LR);
 	claims_begin(SOULCHIPS_CLAIMS);
 	emu_write(SOULS_THUMB, stub, sizeof stub);
+	emu_write(SOULS_TEAM_THUMB, lava_stub, sizeof lava_stub);
 	bool ok = emu_hook(BN6_CHARGE_TEST, charge_test, NULL) && emu_hook(BN6_CHARGE_BONUS, charge_bonus, NULL) &&
 		emu_hook(BN6_CHARGED_RELEASE, release, (void *)(uintptr_t)BN6_CHARGED_CHIP_USE) &&
 		emu_hook(BN6_CHIP_MODIFIED, grass, (void *)(uintptr_t)SOULS_THUMB) && emu_hook(BN6_CHIP_USED_END, front, NULL) &&
 		emu_hook(BN6_CHIP_FAMILY_READ, sword, (void *)(uintptr_t)BN6_CHIP_FAMILY_NEXT) &&
-		emu_hook(BN6_SHADOW_TYPE_SIDE, shadow, (void *)(uintptr_t)BN6_SHADOW_TYPE_DONE);
+		emu_hook(BN6_SHADOW_TYPE_SIDE, shadow, (void *)(uintptr_t)BN6_SHADOW_TYPE_DONE) &&
+		emu_hook(BN6_PLAYER_TIMERS, lava, (void *)(uintptr_t)SOULS_TEAM_THUMB);
 	claims_end();
 	done = ok;
 	printf("soulchips: the Souls' chips%s%s\n", ok ? ": the chip charge, its double, TomahawkSoul's grass, KnightSoul's front column, "
-		"ShadowSoul's sword and shadow" : " NOT placed whole", brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
+		"ShadowSoul's sword and shadow, NapalmSoul's Napalm Bomb and lava" : " NOT placed whole", brk ? " (soulbreak: parts of it broken, the differential's own test)" : "");
 	return ok;
 }

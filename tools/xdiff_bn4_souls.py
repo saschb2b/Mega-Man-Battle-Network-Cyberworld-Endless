@@ -83,9 +83,17 @@ def c_entries(path, name):
     return len([x for x in inner.split(',') if x.strip()])
 
 
+def colonel_powers():
+    """how many of soulcode_bn5.c's powers are Team Colonel's, those before BN4's in the grown table (Team ProtoMan's come
+    after BN4's room, src/emu/soulpower.c): the recipe's npowers_colonel, its initializer's last number"""
+    body = open(os.path.join(ROOT, 'src', 'emu', 'soulcode_bn5.c')).read()
+    m = re.search(r'const SoulCode soulcode_bn5 = \{[^}]*?, (\d+),\s*\};', body, re.S)
+    return int(m.group(1)) if m else c_entries('emu/soulcode_bn5.c', 'powers')
+
+
 def bn6_power(form):
     """BN6's number of the charged shot of BN4's Soul of `form`, as src/emu/soulpower.c's tables() lays the grown table out:
-    BN6's own (BN6_POWER_ATTACK_COUNT), then BN5's Souls' moved ones (soulcode_bn5.c's powers), their empty ones
+    BN6's own (BN6_POWER_ATTACK_COUNT), then Team Colonel's moved ones (soulcode_bn5.c's powers, colonel_powers), their empty ones
     (soulpower.c's empty_powers) and their Chaos Unison's (chaos_powers), then BN4's moved Souls' in soulbn4.c's order. Read
     from the sources, so a Soul another track adds before them moves the number here as it does in the engine; None where
     the form is none of the moved ones"""
@@ -94,7 +102,7 @@ def bn6_power(form):
     k = {f: n for n, f in enumerate(bn4_forms().values())}.get(form)
     if k is None:
         return None
-    return count + c_entries('emu/soulcode_bn5.c', 'powers') + c_entries('emu/soulpower.c', 'empty_powers') + \
+    return count + colonel_powers() + c_entries('emu/soulpower.c', 'empty_powers') + \
         c_entries('emu/soulpower.c', 'chaos_powers') + k
 
 

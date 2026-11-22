@@ -1,0 +1,218 @@
+{
+ "about": "BN5's NapalmSoul on lava in both engines (docs/game/team-protoman.md, unit 8; BN5's 0x080125FA, each frame before his timers): BN5's field 0x73 (lava at columns 2 and 5 of row 2) as BN6's, MegaMan made Fire in both (mm_element) on lava at (2,2), NapalmSoul united (souls5 8, souls6 bit 21) with a deck of FireHit1 (BN5's 151 O, BN6's 107 D), two picked, the last given up for UNITE: as he unites, the lava under him gives the hand's next chip, an attack chip, 10 more power (the hand's +0x1A, Atk+'s) and turns plain; A at t100 uses the FireHit1 with it, at CanGard V1 at (6,2); MegaMan with 2000 HP, kept from harm. The panels and the chip's numbers compared each frame.",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 240,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "1C97"
+ ],
+ "deck5": [
+  "1C97"
+ ],
+ "folder6": [
+  "066B"
+ ],
+ "deck6": [
+  "066B"
+ ],
+ "souls6": "200000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   100,
+   "A",
+   2
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: NapalmSoul united from t1 on lava, the panel plain and the chip 10 stronger, used at t100.",
+ "souls5": "8",
+ "field": "73",
+ "mm_element": 1
+}

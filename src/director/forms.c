@@ -97,9 +97,9 @@ static bool bn4_ready(int p) {
 
 static bool forms_ready(int form, int p) {
 	if (form == RUN_FORM_CROSS) return p >= 1 && (p <= 5 || (p <= RUN_CROSS_NAVIS && crossselect_falzar()));
-	/* (Team Colonel's six stand with BN5's Souls; Team ProtoMan's join as
-	 * their own branch moves them, docs/game/team-protoman.md) */
-	if (form == RUN_FORM_SOUL_BN5) return p > SOULS_TEAM && p <= SOULS_OF_BN5 && soulunite_ready();
+	/* (Team Colonel's six stand with BN5's Souls; Team ProtoMan's each as
+	 * its code is moved, docs/game/team-protoman.md: soulunite_has_bn5) */
+	if (form == RUN_FORM_SOUL_BN5) return p >= 1 && p <= SOULS_OF_BN5 && soulunite_has_bn5(p);
 	if (form == RUN_FORM_SOUL_BN4) return p >= 1 && p <= SOULS_OF_BN4 && bn4_ready(p);
 	return false;
 }

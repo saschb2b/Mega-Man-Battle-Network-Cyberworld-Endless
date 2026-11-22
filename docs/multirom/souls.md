@@ -278,6 +278,44 @@ the next.
   their recorded FAILs gone (each chip's after-effect and his dark
   palette ported), BlakWing's run dark in both (BN5's meter under 470,
   BN6's latch) and HolyDrem's moved.
+- **Team ProtoMan's Souls** ([Team ProtoMan: foes and Souls](../game/team-protoman.md),
+  unit 8; `src/emu/soulteam.h`): BN5's Souls 1-6, whose forms, kinds,
+  sprites and code Team Colonel's ROM holds whole but never gives (their
+  flags 0xFF), on the proxy form as Team Colonel's six. Their numbers in
+  BN6's engine are BN5's own (BN6_SOUL_ID 1-6, a used bit each), their
+  bits in the Souls held 18-23, past BN4's twelve
+  (`soulunite_mask_bn5`, `soulunite_has_bn5`). `tools/xsoul.py` walks
+  their units after Team Colonel's into the same recipe, their blocks
+  and art in a room of their own (`FREE_TEAM_SOULS`, soul_room.h's
+  `SOULS_TEAM_*`), so Team Colonel's code and numbers stay where they
+  were (a routine of theirs lying in a Team Colonel block is moved with
+  it). Their power attacks stand at a fixed place, `SOUL_POWER_TEAM`
+  (0xB1), past room for BN4's twelve, so neither track moves the other's
+  ids: their empty ones, their Chaos Unison's (a stub each, the chip
+  writer of the DarkChip, `SOULS_TEAM_CHAOS`), then their moved ones;
+  their families from 0xC8, past Chaos Unison's failure 0xC7; list 0's
+  0x60-0x65 their sprites; the arm's rows and the charge times grown
+  into their room. Their emotion window shows MegaMan's own face (BN6's
+  0): Team Colonel's ROM holds no face of theirs (its faces' table holds
+  Team Colonel's six by the Soul - 7; the 0x600 bytes before it, drawn,
+  are no faces), and its own battle shows one of MegaMan's for them.
+  The differential opens one in BN5's own battle with `souls5` (its flag
+  entry written in the guest's ROM copy: [The differential](../devtools/differential.md)).
+  **NapalmSoul** (4) first: UNITE by a Fire chip, his look, his element
+  Fire, his charged shot (BN5's power attack 0x19, family 0x44 as 0xC8:
+  a vulcan of fire whose shots are the chips' copy of the third kind's
+  0x12), his A's chip charge of a Fire chip, doubled, run as BN5's Napalm
+  Bomb (BN5's 0x0801043A: family 0x4B as 0xC9, its bomb the Navis' copy
+  of NapalmMan's), +40 to a Fire attack chip used uncharged (BN5's
+  0x0800D0CE), and his lava step (BN5's 0x080125FA, each frame: on lava
+  the hand's next attack chip 10 stronger and the panel plain, hooked
+  where BN6's twin of the player's timers runs, `BN6_PLAYER_TIMERS`):
+  `soul_napalm`, `soul_napalm_shot`, `soul_napalm_charge` and
+  `soul_napalm_lava` PASS against BN5's own battle, their mutations FAIL.
+  Open: `soul_napalm_charge` ends at t320, before CanGard's last frames,
+  where the games part on a fourth-kind object of his (BN5's let go at
+  t321, BN6's 0x11 still in play): not traced yet. His Chaos Unison
+  (DarkMetr) has its power attack in place but no spec of its own yet.
 - **Next**: the Souls' engine is whole, ShadowSoul's chaos attack
   (BN5's DarkInvs) since 13 October 2026; what is left of DarkInvs is The
   chips' code's (DarkInvs, moved: three of its exits). The masks the differential kept "until the Souls track's S6"

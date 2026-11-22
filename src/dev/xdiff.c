@@ -802,10 +802,7 @@ static void guest_wr8(uint32_t a, uint8_t v) {
  * Double Soul's, a Soul's, Chaos Unison's), its folder, his buster */
 static void reference_setup(const Spec *s) {
 	uint32_t flags = guest_read32(BN5_TOOLKIT + BN5_TOOLKIT_FLAGS);
-	for (int i = 0; i < s->nflags[0] && in_ewram(flags); ++i) {
-		uint32_t f = (uint32_t)s->flags[0][i], a = flags + (f >> 3);
-		guest_wr8(a, (uint8_t)(guest_read8(a) | 0x80u >> (f & 7)));
-	}
+	if (in_ewram(flags)) xd_flags5_put(s, flags, guest_read8, guest_wr8);
 	static const FolderPlaces places = { BN5_TOOLKIT, BN5_TOOLKIT_CHIPS, BN5_TOOLKIT_CHIP_MARKS, BN5_CHIP_KEYS, BN5_CHIP_KEY_XOR, BN5_NAVI_FOLDER1_REG,
 		0, CHIP9_MASK, guest_read8, guest_read32, guest_wr8, guest_write16 };
 	if (s->nfolder[0]) xd_folder_put(&places, s->folder[0]);

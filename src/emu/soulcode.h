@@ -62,6 +62,7 @@ typedef struct {
 	int nroutes;
 	const uint8_t *shared_effects;   /* the effects it spawns of another track's install (one BN6 number a BN5 effect) */
 	int nshared_effects;
+	int npowers_colonel;        /* the first of `powers` Team Colonel's; Team ProtoMan's after them (soulpower.c numbers them apart) */
 } SoulCode;
 
 extern const SoulCode soulcode_bn5;
@@ -82,8 +83,9 @@ extern const SoulCode soulcode_bn5;
 bool soulcode_install(const SoulCode *c);
 /* Where BN5's address `bn5` is in the moved code, or in another track's
  * copy it runs (its routes), its Thumb bit kept; 0 where it is none of
- * them; and BN6's id of a Soul's power attack by BN5's
- * (SOUL_POWER_FIRST on, the recipe's order), -1 for none. */
+ * them; and BN6's id of a Team Colonel Soul's power attack by BN5's
+ * (SOUL_POWER_FIRST on, the recipe's order), -1 for none (Team
+ * ProtoMan's are numbered past BN4's, soulpower.c). */
 uint32_t soulcode_moved(uint32_t bn5);
 int soulcode_power(int bn5_id);
 /* BN6's CurAction of BN5's attack family `bn5` moved (xattack_grow.h's Souls' range), -1 where it is none of the moved */

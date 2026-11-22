@@ -1,12 +1,53 @@
 {
   "branch": "team-protoman-souls",
-  "what": "Team ProtoMan's six Souls in BN6's engine and their Navis as guardians (docs/game/team-protoman.md units 7-10, for #774's SOUL BN5): NapalmSoul, GyroSoul, MagnetSoul, SearchSoul, MeddySoul, ProtoSoul, each held to BN5's battle; the partner coin, bodies, faces and intro lines; the board. What a guardian gives is run-forms'",
+  "what": "Team ProtoMan's six Souls in BN6's engine and their Navis as guardians (docs/game/team-protoman.md units 7-10, for #774's SOUL BN5): NapalmSoul, GyroSoul, MagnetSoul, SearchSoul, MeddySoul, ProtoSoul, each held to BN5's battle; the partner coin, bodies, faces and intro lines; the board. What a guardian gives is run-forms'. 0xC7 is Chaos Unison's failure already, so the families start at 0xC8; the Souls' effects past Team Colonel's (0xC2 on), the held mask's bits 18-23 past BN4's twelve (src/emu/soulteam.h)",
   "takes": {
-    "free_rom": [["0x640000", "0x69FFFF"]],
-    "song_slots": [["0x340", "0x37F"]],
-    "list0": [["0x60", "0x7F"]],
-    "attack_families": [["0xC7", "0xD7"]]
+    "free_rom": [
+      [
+        "0x640000",
+        "0x69FFFF"
+      ]
+    ],
+    "song_slots": [
+      [
+        "0x340",
+        "0x37F"
+      ]
+    ],
+    "list0": [
+      [
+        "0x60",
+        "0x7F"
+      ]
+    ],
+    "attack_families": [
+      [
+        "0xC8",
+        "0xD7"
+      ]
+    ],
+    "soul_effects": [
+      [
+        "0xC2",
+        "0xCF"
+      ]
+    ],
+    "souls_held_bits": [
+      [
+        "18",
+        "23"
+      ]
+    ]
   },
-  "units": ["BN5 Soul NapalmSoul", "BN5 Soul GyroSoul", "BN5 Soul MagnetSoul", "BN5 Soul SearchSoul", "BN5 Soul MeddySoul", "BN5 Soul ProtoSoul", "Team ProtoMan guardians", "Team ProtoMan board"],
+  "units": [
+    "BN5 Soul NapalmSoul",
+    "BN5 Soul GyroSoul",
+    "BN5 Soul MagnetSoul",
+    "BN5 Soul SearchSoul",
+    "BN5 Soul MeddySoul",
+    "BN5 Soul ProtoSoul",
+    "Team ProtoMan guardians",
+    "Team ProtoMan board"
+  ],
   "run": false
 }

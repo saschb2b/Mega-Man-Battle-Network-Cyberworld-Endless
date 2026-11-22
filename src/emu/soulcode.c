@@ -46,7 +46,7 @@ int soulcode_family(int bn5) {
 }
 
 int soulcode_power(int bn5_id) {
-	for (int i = 0; code && i < code->npowers; ++i)
+	for (int i = 0; code && i < code->npowers_colonel; ++i)
 		if (code->powers[i].id == bn5_id) return SOUL_POWER_FIRST + i;
 	return -1;
 }
@@ -273,7 +273,8 @@ static void art_move(const SoulCode *c, const XRom *x) {
 		uint32_t len;
 		uint8_t *d = xnavi_sprite_bytes(x->data, x->layout->sprite_lists, s->list, s->index, &len);
 		bool room = (s->at >= SOULS_ART && s->at + s->room <= SOULS_ART_END) ||
-			(s->at >= FREE_SOULS_ART && s->at + s->room <= FREE_SOULS_ART_END);
+			(s->at >= FREE_SOULS_ART && s->at + s->room <= FREE_SOULS_ART_END) ||
+			(s->at >= SOULS_TEAM_ART && s->at + s->room <= SOULS_TEAM_ART_END);
 		if (!d || len > s->room || !room) xv_fail("its sprite %d:%#x", s->list, s->index);
 		served[i] = d && listed_already(s, d, len);
 		uint8_t *p = d && !served[i] ? xv_put(s->at, len, true) : NULL;

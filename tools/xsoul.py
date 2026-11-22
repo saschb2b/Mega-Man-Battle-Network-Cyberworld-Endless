@@ -70,18 +70,33 @@ UNITS = (
     ('tomahawk', 10, (0x0800F864, 0x080EEF6C, 0x08011C90)),
     ('knight', 11, (0x0800F79E, 0x080EEBDE)),
     ('toad', 12, (0x0800F9E6, 0x080EF68A, 0x08011CAA)),
+    # (Team ProtoMan's, BN5's Souls 1-6, which Team Colonel's ROM holds whole but never gives: src/emu/soulteam.h,
+    # docs/game/team-protoman.md unit 8; walked after Team Colonel's, so that a routine both run is Team Colonel's copy)
+    # (NapalmSoul: its charged shot's power attack and family, and the family a charged Fire chip of his runs, BN5's 0x4B,
+    # the Napalm Bomb: BN5's 0x0801043A gives it for his chip charged, src/emu/soulchips.c the same in BN6's)
+    ('napalm', 4, (0x0800F840, 0x080EEE82, 0x080EF38A)),
 )
+# Team ProtoMan's units: their blocks in a room of their own (soul_room.h's SOULS_TEAM_CODE), their sprites too
+# (SOULS_TEAM_ART, list 0 from TEAM_ART_FIRST), so that Team Colonel's code and numbers stay where they were
+TEAM_UNITS = ('napalm',)
+TEAM_CODE_ROOM = 0x8000     # SOULS_TEAM_CODE's bytes
+TEAM_ART_ROOM = 0x18000     # SOULS_TEAM_ART's
+TEAM_ART_FIRST, TEAM_ART_LAST = 0x66, 0x7F   # (list 0's numbers past Team ProtoMan's Souls' own 0x60-0x65: soul_room.h)
 
 # The families moved: BN5's CurAction, BN6's in the grown table (xattack_grow.h's XATTACK_SOULS on), its entry in BN5
 FAMILIES = ((0x43, 0xC0, 0x080EED92), (0x3A, 0xC1, 0x080EE864), (0x40, 0xC2, 0x080EEBDE), (0x50, 0xC3, 0x080EF68A),
-            (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6))
+            (0x3D, 0xC4, 0x080EEADC), (0x45, 0xC5, 0x080EEF6C), (0x13, 0xC6, 0x080EBDC6),
+            # (Team ProtoMan's, past Chaos Unison's failure 0xC7: NapalmSoul's charged shot, its vulcan of fire)
+            (0x44, 0xC8, 0x080EEE82), (0x4B, 0xC9, 0x080EF38A))
 
 # The power attacks moved: BN5's id, its entry, and the Soul's role for it (its loadout row's byte); BN6's id is
 # soul_room.h's SOUL_POWER_FIRST on in this order
 POWERS = ((0x14, 0x0800F7DC, 'ColonelSoul\'s charged shot'), (0x13, 0x0800F7D0, 'ColonelSoul\'s chip shot'),
           (0x17, 0x0800F818, 'ShadowSoul\'s charged shot'), (0x45, 0x0800FBE6, 'ShadowSoul\'s B+Left'),
           (0x07, 0x0800F66A, 'NumberSoul\'s charged shot'), (0x1A, 0x0800F864, 'TomahawkSoul\'s charged shot'),
-          (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'))
+          (0x11, 0x0800F79E, 'KnightSoul\'s charged shot'), (0x2D, 0x0800F9E6, 'ToadSoul\'s charged shot'),
+          (0x19, 0x0800F840, 'NapalmSoul\'s charged shot'))
+POWERS_COLONEL = 8   # (Team Colonel's, the first; Team ProtoMan's after: src/emu/soulpower.c numbers them past BN4's)
 
 # BN5's routines a moved routine calls that BN6 answers otherwise, aimed at the Souls' stubs (soul_room.h: SOUL_STUB_*),
 # which the engine's C answers (src/emu/soulcode.c): BN5's pending Soul (0x080123FA: r0 the Soul, r1 its chaos, r2
@@ -525,17 +540,53 @@ class Deriv:
 
     # ---- blocks ----
 
+    def team_of(self, a):
+        """'team' for a routine of Team ProtoMan's units (TEAM_UNITS), else 'colonel'; one that lies within a block of Team
+        Colonel's (raw bytes there, never run: 0x08012654, a spawn before him, in ShadowSoul's block's data) is Team
+        Colonel's, moved with that block, its calls and words fixed there"""
+        a &= ~1
+        if self.unit_of.get(a) not in TEAM_UNITS:
+            return 'colonel'
+        return 'colonel' if any(lo <= a < hi for lo, hi in getattr(self, 'colonel_ranges', ())) else 'team'
+
     def make_blocks(self):
-        cov = set()
+        """each team's blocks (Team Colonel's as they were, then Team ProtoMan's in their own room)"""
+        self.blocks_of, self.cov_of = {}, {}
+        self.colonel_ranges = ()
+        walks = {a: w for a, w in self.walks.items() if self.team_of(a) == 'colonel'}
+        self.colonel_ranges = tuple(self.team_blocks('colonel', walks)[0])
+        for team in ('colonel', 'team'):
+            walks = {a: w for a, w in self.walks.items() if self.team_of(a) == team}
+            self.blocks_of[team], self.cov_of[team] = self.team_blocks(team, walks)
+        self.blocks = self.blocks_of['colonel'] + self.blocks_of['team']
+        self.cov = self.cov_of['colonel'] | self.cov_of['team']
+        # (a byte in both teams' blocks would be moved twice, and a reference of Team ProtoMan's code into Team Colonel's
+        # bytes that is no call would read BN5's address: neither may be)
+        both = self.cov_of['colonel'] & self.cov_of['team']
+        if both:
+            self.decide(f'{min(both):08X}: {len(both)} bytes in both teams\' blocks')
         for a, w in self.walks.items():
+            if self.team_of(a) != 'team':
+                continue
+            for x, i in w.insns.items():
+                reach = i.target if i.form in ('b', 'bcc') else None
+                for t in (i.lit, i.adr, reach):
+                    if t is not None and t in self.cov_of['colonel'] and t not in self.cov_of['team']:
+                        self.decide(f'{x:08X}: Team ProtoMan\'s code reaches {t:08X} in Team Colonel\'s blocks otherwise than by a call')
+
+    def team_blocks(self, team, walks):
+        cov = set()
+        tables = {}
+        for a, w in walks.items():
             for x, i in w.insns.items():
                 cov.update(range(x, x + i.size))
             for lit in w.lits:
                 cov.update(range(lit, lit + 4))
-        for tab, ents in self.tables.items():
+            tables.update(getattr(w, 'tables', {}))
+        for tab, ents in tables.items():
             cov.update(range(tab, tab + 4 * len(ents)))
         # (raw data a routine names by address near it: a table of numbers its code indexes)
-        for a, w in self.walks.items():
+        for a, w in walks.items():
             for lit, v in w.lits.items():
                 if v is None or v & 1 or not self.b5.has(v) or v in self.tables or not (min(w.insns) - 0x40 <= v <= max(w.insns) + 0x200):
                     continue
@@ -548,8 +599,9 @@ class Deriv:
                 while k < 0x40 and v + k not in cov and not (k and not (v + k) & 1 and self.b5.u16(v + k) & 0xFF00 == 0xB500):
                     cov.add(v + k)
                     k += 1
-        for lo, hi in self.own_ranges():
-            cov.update(range(lo, hi))
+        if team == 'colonel':
+            for lo, hi in self.own_ranges():
+                cov.update(range(lo, hi))
         out, run = [], None
         for x in sorted(cov):
             if run and x <= run[1] + 0x20:
@@ -570,7 +622,7 @@ class Deriv:
         joined = True
         while joined:
             joined = False
-            for w in self.walks.values():
+            for w in walks.values():
                 for x, i in sorted(w.insns.items()):
                     reach = i.target if i.form in ('b', 'bcc') else None
                     pair = [(run_of(x), run_of(t)) for t in (i.lit, i.adr, reach) if t is not None]
@@ -582,29 +634,38 @@ class Deriv:
                         break
                 if joined:
                     break
-        self.blocks = out
-        self.cov = cov
+        return out, cov
 
     def own_ranges(self):
         """DATA_RANGES but those in another track's copy (its own data, fixed there)"""
         return [(lo, hi) for lo, hi in DATA_RANGES if not self.shared_at(lo)]
 
     def place_blocks(self):
-        at, placed = 0, []
-        for lo, hi in self.blocks:
-            off = rounded(at, BLOCK_STEP) + (lo & 3)
-            placed.append((lo, hi, off, zlib.crc32(self.b5.bytes(lo, hi - lo)) & 0xFFFFFFFF))
-            at = off + (hi - lo)
-        if at > CODE_ROOM:
-            self.decide(f'the code takes {at:#x} bytes, past SOULS_CODE\'s {CODE_ROOM:#x}')
+        placed = []
+        self.code_used = 0
+        for team, base, room in (('colonel', 'SOULS_CODE', CODE_ROOM), ('team', 'SOULS_TEAM_CODE', TEAM_CODE_ROOM)):
+            at = 0
+            for lo, hi in self.blocks_of[team]:
+                off = rounded(at, BLOCK_STEP) + (lo & 3)
+                placed.append((lo, hi, off, zlib.crc32(self.b5.bytes(lo, hi - lo)) & 0xFFFFFFFF, base))
+                at = off + (hi - lo)
+            if at > room:
+                self.decide(f'the code takes {at:#x} bytes, past {base}\'s {room:#x}')
+            if team == 'colonel':
+                self.code_used = at
+            else:
+                self.team_code_used = at
         self.placed = placed
-        self.code_used = at
 
     def moved(self, a):
-        for lo, hi, off, _ in self.placed:
+        for lo, hi, off, _, _ in self.placed:
             if lo <= (a & ~1) < hi:
                 return off + (a - lo)
         return None
+
+    def base_of(self, a):
+        """the room of BN5's address `a` moved: SOULS_CODE or SOULS_TEAM_CODE"""
+        return next((b for lo, hi, _, _, b in self.placed if lo <= (a & ~1) < hi), None)
 
     def raw_pointers(self):
         """words of raw data near the code that point into the blocks (a table of tables): moved with them"""
@@ -626,7 +687,7 @@ class Deriv:
                 code.update(range(x, x + i.size))
         words = set(self.words)
         out = []
-        for lo, hi, _, _ in self.placed:
+        for lo, hi, _, _, _ in self.placed:
             a = lo
             while a < hi:
                 if a in code:
@@ -1047,19 +1108,19 @@ def c_value(d, bn5, now):
     if now is not None:
         return now
     off = d.moved(bn5)
-    return f'SOULS_CODE + 0x{off | (bn5 & 1):X}u'
+    return f'{d.base_of(bn5)} + 0x{off | (bn5 & 1):X}u'
 
 
 def write_c(d):
-    L = ['/* soulcode_bn5.c: the code BN5\'s Team Colonel Souls run, moved into BN6\'s battle engine, written by tools/xsoul.py from',
+    L = ['/* soulcode_bn5.c: the code BN5\'s Souls run (Team Colonel\'s, then Team ProtoMan\'s in their own room), moved into BN6\'s battle engine, written by tools/xsoul.py from',
          ' * the two ROMs (python3 tools/xsoul.py; --check says whether this is what it writes). Do not edit: change the generator',
          ' * and write it again. Numbers alone (docs/multirom/souls.md): addresses in BN5 Team Colonel (USA) and BN6',
          ' * Cybeast Gregar (USA), counts and the CRC32s of the ranges src/emu/soulcode.c copies from the player\'s ROM. */',
          '#include "soulcode.h"', '', '#include <stddef.h>', '', '#include "bn6.h"', '#include "soul_room.h"', '#include "xchips_code.h"',
          '#include "xnavi_recipe.h"', '#include "xvirus_dispatch.h"', '']
     L.append('static const XvBlock blocks[] = {')
-    for lo, hi, off, crc in d.placed:
-        L.append(f'\t{{ 0x{lo:08X}, 0x{hi:08X}, SOULS_CODE + 0x{off:X}, 0x{crc:08X}u }},   /* {d.unit_of.get(lo, "data")} */')
+    for lo, hi, off, crc, base in d.placed:
+        L.append(f'\t{{ 0x{lo:08X}, 0x{hi:08X}, {base} + 0x{off:X}, 0x{crc:08X}u }},   /* {d.unit_of.get(lo, "data")} */')
     L.append('};')
     L.append('static const XvData data[] = {')
     for a, b, k in d.data:
@@ -1076,7 +1137,7 @@ def write_c(d):
     for site in sorted(d.calls):
         t, now, why = d.calls[site]
         if now is None and d.moved(t) is not None and d.moved(site) is not None and \
-                any(lo <= site < hi and lo <= t < hi for lo, hi, _, _ in d.placed):
+                any(lo <= site < hi and lo <= t < hi for lo, hi, _, _, _ in d.placed):
             continue   # (a call within its block: it holds as the block moves)
         L.append(f'\t{{ 0x{site:08X}, 0x{t:08X}u, {c_value(d, t | 1, now)} }},   /* {why} */')
     L.append('};')
@@ -1159,7 +1220,7 @@ def write_c(d):
              'families', 'routes', 'shared_effects')
     L.append('#define N(a) (int)(sizeof (a) / sizeof *(a))')
     L.append('const SoulCode soulcode_bn5 = {')
-    L.append('\t' + ', '.join('NULL, 0' if n in empty else f'{n}, N({n})' for n in names) + ',')
+    L.append('\t' + ', '.join('NULL, 0' if n in empty else f'{n}, N({n})' for n in names) + f', {POWERS_COLONEL},')
     L.append('};')
     return '\n'.join(L) + '\n'
 

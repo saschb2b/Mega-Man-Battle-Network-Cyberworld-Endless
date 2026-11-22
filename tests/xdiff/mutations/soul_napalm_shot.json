@@ -1,0 +1,20 @@
+[
+ {
+  "name": "NapalmSoul's charged shot run as the next Soul's family",
+  "spec": "soul_napalm_shot",
+  "soulbreak": 32,
+  "what": "his loadout's B power attack the next moved one's where BN5's 0x0801CA18 names 0x19 (its family 0x44): another family runs at the release"
+ },
+ {
+  "name": "NapalmSoul's element none",
+  "spec": "soul_napalm_shot",
+  "soulbreak": 64,
+  "what": "the element's hook gives NapalmSoul none where BN5's table 0x0800E62C gives him Fire: his object's +0x0E and collision data's +2 0"
+ },
+ {
+  "name": "NapalmSoul drawn as the next Soul",
+  "spec": "soul_napalm_shot",
+  "soulbreak": 1,
+  "what": "the sprite selector draws MagnetSoul's sprite (list 0 0x64) where BN5 draws NapalmSoul's (its list 0's 4): his object's sprite word"
+ }
+]
