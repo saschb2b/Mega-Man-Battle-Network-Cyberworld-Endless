@@ -81,6 +81,8 @@ bool party_core_back(PartyCore *pc);
 void party_core_leave(PartyCore *pc, unsigned seat);
 /* The battle's phase (BN6_BATTLE_PHASE: BN6_PHASE_CUSTOM the Custom screen) */
 unsigned party_core_phase(PartyCore *pc);
+/* its Custom screen's mode (BN6_CUSTOM_MODE: BN6_MODE_CHIPS where it takes the lead's keys) */
+unsigned party_core_custom_mode(PartyCore *pc);
 /* Each seat's MegaMan's HP as the field last saw it (0 deleted) */
 unsigned party_core_hp(const PartyCore *pc, unsigned seat);
 /* The battle over, BN6's results to come on this game's own pad (the

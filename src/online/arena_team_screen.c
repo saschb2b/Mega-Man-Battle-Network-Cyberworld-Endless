@@ -236,5 +236,6 @@ void team_screen_close(TeamScreen *s) { s->open = false; }
 const uint32_t *team_screen_video(const TeamScreen *s) { return s->one ? s->one_video : arena_pair_video(s->pair, s->side); }
 
 bool team_screen_open_now(const TeamScreen *s) { return s && s->open; }
+unsigned team_screen_mode(const TeamScreen *s) { return s->mode; }
 double team_screen_ms(const TeamScreen *s, bool worst) { return worst ? s->worst : s->frames ? s->ms / s->frames : 0; }
 double team_screen_copy_ms(const TeamScreen *s, bool worst) { return worst ? s->copy_worst : s->copies ? s->copy / s->copies : 0; }

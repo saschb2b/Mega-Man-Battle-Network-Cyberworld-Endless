@@ -154,10 +154,29 @@ MANY['crew-battle-named'] = dict(CAST, START=LOUD, GAMES={'beta': LOUD}, STEPS=o
     ('do', 'battle; wait 10'),
     soon('party~fight', 'beta', 900),
     ('@beta', 'expect', 'band=none'),                  # never over the field's Custom screen (issue #781)
-    ('do', 'press START; wait 10; press A; wait 10'),  # the Custom screen closed on both
+    # (the Custom screen closed on both, each pressed once it takes keys: the field's opens eleven frames into the fight,
+    # at the clock's pace, and a START before it was lost, Alpha's A then a chip, his OK never)
+    soon('partycustom=chips', '', 600),
+    ('do', 'press START; wait 10; press A; wait 10'),
+    soon('partycustom=chips', 'beta', 600),            # (Beta's own, on his game)
     ('@beta', 'do', 'press START; wait 10; press A; wait 10'),
     soon("band=Alpha's battle!", 'beta', 600),         # whose battle, on the field
     ('@beta', 'do', 'wait 30; shot'),
+))
+
+# A partner's picks through a frame early on the clock (22 November 2026): a game a moment ahead of the clock (a device
+# catching up a frame, a headless game) has a frame now and then on which no key of its own goes, and a message of his
+# turn made then was lost; the field, waiting on his picks after the lead's OK, held its first Custom screen to the
+# turn's 30-second limit and gave him none. partyearly=1 on Beta's game puts each message of his turn on such a frame
+# first; both games' keys the bot's (partybot=1: each screen's chips picked and its OK pressed), so nobody presses.
+BOTS = LOUD.replace('onlinename={name}', 'onlinename={name},partybot=1')
+MANY['crew-picks-through-an-early-frame'] = dict(CAST, START=BOTS, GAMES={'beta': BOTS.replace('partybot=1', 'partybot=1,partyearly=1')},
+                                                 STEPS=online.course(
+    MANY['dive-together']['STEPS'],
+    ('do', 'battle; wait 10'),
+    soon('party~fight', 'beta', 900),
+    soon('partyturn~agree', 'beta', 600),              # his own screen open on his game
+    soon("band=Alpha's battle!", 'beta', 600),         # the first Custom screen closed with his picks, not at its limit
 ))
 
 # A crew's battle through a dropped link (issue #180): Beta's own link cut for three seconds mid-fight; the server

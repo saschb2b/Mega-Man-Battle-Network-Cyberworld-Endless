@@ -968,7 +968,15 @@ the field once it closed.
   its rules), shown while his turn is open; only his picks cross, as the
   two-a-side's do (`TEAM_PICK`, a Program Advance's `TEAM_PA`), in his
   seat's stream (a party's seats 1-3 keep sixteen bits,
-  `arena_link_net.c`), one a frame, never guessed again. Every game takes
+  `arena_link_net.c`), one a frame, never guessed again, and never lost:
+  my keys go at the clock's pace, one a frame at most, so a game a moment
+  ahead of the clock (a device catching up a frame, a headless game) has
+  frames on which none of its words goes, and a message made on one of
+  them waits for the next (`party_play.c`'s owed word). Until 22 November
+  2026 it was dropped there, and where it was his last pick the field held
+  its Custom screen to the turn's limit and gave him none
+  (`online-week/crew-picks-through-an-early-frame`, `--dev partyearly=1`
+  putting each message first on such a frame). Every game takes
   them at the same frame of the field: as each frame begins
   (`hook_run_on`, a hook of the field's core between frames) each
   partner's word goes to his turn (`arena_team_custom_party`), his picks
@@ -1090,6 +1098,18 @@ going in with 60 HP to the lead's 100): his own Custom screen's box 60
 on the field ending with no results (`partyover skipped hp 0`). Left open
 on the issue: a dive's end screen of its own, and an HP reward that came
 into the run twice.
+
+**The screen that takes his keys, in the state** (22 November 2026): the
+field's first Custom screen opens at the fight's frame 0 and takes keys
+from frame 11 (BN6's `BN6_CUSTOM_MODE` 0x00, then `BN6_MODE_CHIPS`), at
+the clock's pace. `online-week/crew-battle-named` pressed the lead's
+START on a count of frames, now and then before frame 11: START was lost,
+his A took a chip, and his OK, which no limit stands in for, never came.
+The state now says the Custom screen this game's pad drives, the field's
+for the lead and his own for a partner (`partycustom chips` where it
+takes keys, else BN6's mode in hex: `00` opening, `08` OK pressed, `14`
+waiting on the others; no line while there is none), and a course
+presses once it says `chips`.
 
 **Keys held as the field hands the game back** (22 November 2026): the
 run's own core stands still under a crew's battle, its last keys those

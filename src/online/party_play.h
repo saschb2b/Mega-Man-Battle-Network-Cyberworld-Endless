@@ -43,8 +43,10 @@ void party_play_on(bool on);
  * #757); partyscale=1 every guardian scaled for N as a party's door scales
  * him, partyhpper=P and partysteps=S other rules for it (boss_party_dev,
  * tools/party_guardian.py) */
-/* (join_wait: joinwait=N, a crew's battle's join said N frames late, a test's cut at the join, dive_join.c; issue #751) */
-typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps, reward, join_wait; } PartyDev;
+/* (join_wait: joinwait=N, a crew's battle's join said N frames late, a test's cut at the join, dive_join.c; issue #751;
+ * early: partyearly=1, each message of my turn on a field over the server first offered on a frame early on the clock,
+ * which sends no word of mine, as a device that caught up a frame or missed a refresh just then) */
+typedef struct { int n, twin, roll, end, bot, delay, lead, view, del, hp, scale, hp_per, steps, reward, join_wait, early; } PartyDev;
 void party_play_dev(const PartyDev *d);
 /* ... its joinwait in ms (0 none) */
 unsigned party_play_join_wait_ms(void);

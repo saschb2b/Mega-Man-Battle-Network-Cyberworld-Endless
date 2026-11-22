@@ -304,7 +304,13 @@ guardian's door, its party leader first; `dive_party_describe`), `doorwait S for
 (the leader's: the seconds the door still waits for N crewmates), `crew N: NAMES`
 (`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
 battle: MegaMan's own held and offered, a crewmate's joined, the one
-field fought; `dive_join_describe`).
+field fought; `dive_join_describe`); on that field `partycustom
+chips|NN` (the Custom screen this game's pad drives, the field's for
+the lead and his own for a partner: `chips` where it takes keys, else
+BN6's mode in hex; `party_play_describe`), on which a course presses
+rather than on a count of frames, the field running at the clock's
+pace ([The shared dive](../online/shared-dive.md), The screen that
+takes his keys).
 
 ## A bug a scenario finds
 

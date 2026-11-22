@@ -141,4 +141,11 @@ void party_turn_report(unsigned seat) {
 		t->screen ? team_screen_copy_ms(t->screen, false) : 0.0, t->screen ? team_screen_copy_ms(t->screen, true) : 0.0);
 }
 
-uint16_t party_turn_guess(uint16_t last) { return last & TEAM_PICK_MARK ? 0 : last; }
+uint16_t party_turn_guess(uint16_t last) { return party_turn_message(last) ? 0 : last; }
+
+bool party_turn_message(uint16_t word) { return (word & TEAM_PICK_MARK) != 0; }
+
+int party_turn_mode(unsigned seat) {
+	const Turn *t = seat && seat < PARTY_MOST ? &T[seat] : NULL;
+	return t && t->turn && team_screen_open_now(t->screen) ? (int)team_screen_mode(t->screen) : -1;
+}
