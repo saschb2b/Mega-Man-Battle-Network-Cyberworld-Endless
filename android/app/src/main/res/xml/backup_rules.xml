@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android's Auto Backup up to Android 11 (android:fullBackupContent): the
+     saves and the player's settings, which a reinstall or a new phone gets
+     back; not the ROMs (16 MB of a game's data, which a reinstall asks for
+     again in the launcher), nor the boot's states the game makes again, nor
+     the ROM folder's access, which a reinstall cannot keep. -->
+<full-backup-content>
+    <include domain="file" path="data/savedata" />
+    <include domain="file" path="data/settings.ini" />
+    <include domain="file" path="data/keys.ini" />
+    <include domain="file" path="data/pad.ini" />
+    <include domain="file" path="data/touch.ini" />
+    <include domain="file" path="data/launcher.ini" />
+</full-backup-content>

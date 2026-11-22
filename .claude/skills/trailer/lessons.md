@@ -1,0 +1,742 @@
+# Trailers made, and what they taught
+
+## 0.3.0: the first (2026-09-29), `tools/trailers/v0_3_0.py`
+
+21 seconds, 13 bars at 150. A 2003 game advert: chrome words that slam
+in on the beat with speed lines, white flashes and a shake on every cut,
+a punch-in zoom, scanlines, the net's blue diagonal grid behind a framed
+picture. The music: an E minor piece in the manner of BN6's battle themes
+(songs 0x15 and 0x16), 3-3-2 stabs, sixteenth bass jumping octaves,
+orchestra hits on bVI, bVII, i. It stayed the site's hero until 0.12.0.
+
+Devices now used up: chrome type, speed lines, white-flash cuts, shake,
+orchestra hits, the 3-3-2 theme.
+
+## 0.12.0: one Battle Network (2026-10-13), `tools/trailers/v0_12_0.py`
+
+The first cut was 0.3.0's advert with BN5's footage and 0.3.0's music.
+The owner: "you've used the old music again... Don't make the old
+trailer just with new screens. bn5 is a completely different vibe", with
+BN5's title theme as the inspiration (a recording, kept in `.build/`).
+
+What was made: 36 seconds, 20 bars at 144 (a bar 50 frames). A
+Liberation Mission: the net's panels dark purple around a field monitor,
+freed to blue shot by shot, taken back by darkness for the DarkChips,
+all freed at the logo. Typed briefing words with a kicker and caption,
+panel-flip cuts, violet glitch on dark shots, readouts in the margins
+(share freed, which net a shot is from, a radar). An intro of BN5 feeds,
+"TWO NETS" with BN6's and BN5's side by side, then one picture split down
+the middle: "ONE ENGINE", "ONE BATTLE NETWORK". The music: B major with
+Lydian and Mixolydian colour, plucked square arpeggios over three
+octaves, eighth-note wave bass, five-tick stabs, pads, a busy kit, a pad
+intro over a pedal, a breakdown of one square alone on the borrowed iv.
+
+What helped: reading BN5's song 0x01 for habits (tempo 142, six tracks'
+roles, the drums' places once the pickup was found, the form from notes
+a bar) and the recording's band balance; contact sheets of every scene
+before picking; drawing single frames with `--frames` while iterating.
+
+What went wrong on the way: a BN6 battle scene too short for its shot
+(froze on its last frame); a title wider than the monitor; captions
+running past their band; words covering the flame's chat box, the very
+thing the shot was about; a montage of fast flips that read as glitches
+(hard cuts with a punch-in instead); a visitor shot that opened on the
+Custom screen.
+
+Also decided with this trailer (owner, 2026-10-13): a trailer for every
+release that earns one, replacing the last everywhere, "so that everything
+feels it transforms with updates rather than just grows over time".
+
+Devices now used up: the liberation field, typed briefing words,
+panel-flip cuts, the monitor with side readouts, violet glitch.
+
+## 0.13.0: Cyberworld Endless connects (2026-10-20), `tools/trailers/v0_13_0.py`
+
+The owner: "a cool new trailer... The trailer should surely focus on the
+online part. Cyberworld Endless connects", the way online shown first,
+then the NetPass, then each thing to do there, with BN6's "Surge of
+Power!" (a recording, kept in `.build/`) as the music's inspiration and
+MMO launch trailers as the model (issue #132's brief: a hook readable
+without sound in five seconds, the place full of people, escalation, a
+call to action).
+
+What was made: 39 seconds, 23 bars at 150 (a bar 48 frames). Linking:
+several players' games on screen at once, each a window in its
+operator's colour with his name, channel and ping, joined by lines of
+light whose packets carry the cuts (a window opens as a packet from the
+last one reaches it, traces its frame, scans its picture in; it closes
+into a line). The words are the Square's own manner: a step's pill
+("01 · GO ONLINE" to "07 · DIVE"), its headline in a white speech bubble
+whose tail points at the game, the phrases as chat bubbles with the
+speaker's name. A HUD over the top (ONLINE or CONNECTING, the channel,
+eight operator pips, a ping line) and the Square's log at the bottom,
+MMO chat. The arc: two games logging in and saying hello under
+CYBERWORLD ENDLESS / CONNECTS; the gate, CONNECTING, the log-in beam; the
+NetPass's stamps on the music's three stamp beats; meet, trade, a
+NetBattle from both sides, the stands and the referee; the week's DeepNet
+on the Board with the field gone dark; two, four, eight games; the logo,
+BRING A FRIEND., YOU and A FRIEND linked, the address. The music: BN6's
+song 0x16 (matched to the recording by tempo and chroma), its habits in F
+minor at 150, the two squares as two players calling and answering, the
+idle one running the 32nd-note arpeggio, joined in octaves at the climax.
+
+New footage: the release pictures' runs are single games, so
+`tools/trailer_online.py` runs a local server and up to eight headless
+Linux builds at once against it, each with its own data folder, name and
+script; a cut's `online_scenes()` lists them and `footage(keep)` takes
+them (the kit calls it after `scenes()`). Scripts go by the wall clock
+(`Visit.at(seconds)`), since a visit plays at the clock's pace and games
+start seconds apart. Trade Central's screens came from the `trade` dev
+step, the Board's entries from a seeded `weeks.jsonl`.
+
+What went wrong on the way: BN6's chat types slowly and a press mid-typing
+only finishes the line, so the phrase menu needs its question paged,
+then Say something, then the phrase, about 7.5 seconds a phrase; a
+`place` while a chat is open is ignored (MegaMen stayed at the arrival);
+`--dev online` skips MegaMan's gate question, so the gate's shot needs a
+`network.ini` instead; the hook's first footage frame was the gate's
+flat yellow flash (start where the Square is drawn); captions under a
+headline ran into the chat bubbles below them; an overlay caption on the
+games needs a plate. Which player wins a scripted NetBattle changes with
+the run, so the words name no winner.
+
+Devices now used up: windows joined by links with packets carrying the
+cuts, speech-bubble headlines, the numbered step pills, the operator
+HUD and chat log, the multiplying wall of games.
+
+## 0.13.0's music heard again (2026-10-22), `tools/trailers/sketch_*.py`
+
+The owner: "Its current music feels very ai-ish. Doesn't truly feel like
+a MMBN theme." The piece had been written from "Surge of Power!"'s
+habits, so the gap was not the source but how the habits became music.
+Against his recording, by numbers (`music_rules.md`, Why 0.13.0's piece
+read as "AI-ish"): half the game's swing inside a beat (3.4 dB against
+7.1), a third of its noisiness, the spectrum 30% filled against 54%,
+nothing between 120 and 500 Hz, static pans where every BN6 song throws
+a track left and right note by note, no bends, one rhythm cell in 15 of
+23 bars, a major V at the cadences. Its own notes rendered through the
+new kit measured nearly the same: the writing was most of it.
+
+What changed: `song_habits.py --detail --theory` (articulation, the drum
+kit's keys, harmony and melody in aggregates); fifteen BN6 and BN5 songs
+read into `music_rules.md` with the composers' own words; the kit's
+sampled instruments of our own (clipped kick and clap, chord samples, a
+distorted stab, a looped lead, slap bass, bell, brass, hand drums, an
+impact), `bend` on any note and `HARDWARE = 32768` for unsmoothed squares,
+every earlier piece byte for byte the same; `music_check.py` with
+`--piece`, punch, four bands and the lead's rubs. Three eight-bar sketches
+for the owner's ear before any piece: a battle drive (A, nearest the
+reference: 7.4 dB of punch against 7.8, bands 54/31/13/1 against
+57/28/13/1), the Square's bounce (B), a heroic opening (C). Not yet heard
+by anyone; the owner chooses.
+
+Devices used in the sketches (not yet in a trailer): ping-pong 32nds, a
+power chord diving, triad samples over other basses, a skank on the
+off-beats, the square and a bell talking in thirds, a Lydian lift.
+
+The owner chose sketch A by ear (22 October 2026) and allowed FluidR3 GM
+(MIT) in a Docker image. Sketch A through its samples (`sketch_a_sf.py`:
+notes and chords cut into 10512 Hz 8-bit samples, played by the same MP2K
+model) measured nearer the recording's tone than the kit's own (tonal
+share 83% against 84%; the kit's 80%). It grew into 0.14.0's piece
+(`v0_14_0_music.py`, 20 bars), which renders in either sound (`SOUND`);
+with the soundfont it renders in `docker/Dockerfile.music`'s image and
+keeps its 3DS banner as `3ds/banner-0.14.0.wav`.
+
+## 0.14.0: Pick a side (2026-10-22), `tools/trailers/v0_14_0.py`
+
+The brief, from the owner's headline: the Square's social side and its
+wider NetBattles (emotes performed and the strip on SELECT, wave and wave
+back, the Square cheering together; a NetBattle from the ask to the
+result card and a rematch; Team NetBattles one by one; two MegaMen a
+side). The music: sketch A grown into 20 bars, the battle drive in G
+minor at 150, played by FluidR3 GM's samples; the owner: it "sounds
+awesome".
+
+What was made: 34 seconds, 20 bars at 150 (a bar 48 frames). Every piece
+of the release's news is a pair (an emote and who sees it, a wave and its
+answer, a challenge and its Yes, two Yeses for a rematch, a team of two,
+two a side), so the cut is a versus screen: a slanted seam splits the
+frame into a red side and a blue side, each side's stripes stepping
+toward the seam on every beat; the seam sweeping across the frame in the
+new shot's colour is the cut, and a cut inside a shot sweeps across the
+game's picture behind the same slanted line. The words are a call and
+its answer: the red side's headline runs in on a slanted ribbon, the
+blue side's answer on the next beat ("WAVE" / "WAVE BACK", "BATTLE?" /
+"TAKE IT, LAN?", "AGAIN?" / "AGAIN!"); where the two meet (the "!!", the
+cheer, the rematch) the seam flashes gold and gold diamonds burst. A VS
+badge on the seam for the NetBattle, SIDE · BY · SIDE across it for the
+climax; each game framed in its side's colour with a slanted name plate;
+the drop's stripes stopped and dimmed. Type: Ubuntu Sans, condensed heavy
+italic (its variable axes through PIL's `set_variation_by_axes`). The
+arc: wave and wave back, the title; the strip, an emote on two screens,
+six emotes seen, the cheer; the ask, the way in, the result card, the
+rematch; team up and the blind order, one by one with the rest watching;
+side by side asked, the four screens at once, each partner's own Custom
+screen with his Cross and Beast Out, the stands; the logo and PICK A
+SIDE.
+
+New footage: the NetBattles, the relay and the two a side wait on what
+the games do (a bout's end, a card to answer, a team's match), so
+`tools/trailer_online.py` grew `Remote` games played by remote play, the
+scene's course reacting to each game's log, every frame kept as it comes
+(a thread turns every second one into the scene's PNGs), those scenes
+run at once after the ones by the clock. Their cards are read from the
+picture (the chat box and its green cursor), not the clock: under load a
+timed A landed on the wrong player's card.
+
+What went wrong on the way: the owner, of the first render: "the pick a
+side screens show megaman standing in the void". The players stood at
+`place` spots of earlier harnesses, at the plaza's edge, the net's dark
+and its rings filling the picture. They now stand by `square_plan.c`'s
+panels (`at(gx, gy, facing)`: only within two panels of the landmark's
+base does the floor fill the whole picture), and every Square shot was
+looked over again on the sheets (the referee's spot on the Arena's walk
+went the same way: the stands are Nova's watching instead). A `place`
+while a chat box is open is ignored, and A with none open reads the
+faced MegaMan's card: page with B before placing. A player's own emote
+leaves his first frame blank (step over it); a feed that holds or slows
+the same footage must not sweep. The stands' last frames say who won
+("Mira's team won the NetBattle."): cut short of them. The owner:
+"approved".
+
+Devices now used up: the slanted seam and its red and blue sides, the
+seam's sweep as the cut, call-and-answer ribbons, the gold meeting
+(burst and glow), the VS badge on the seam, slanted name plates.
+
+## 0.15.0: Liberation (2026-10-24), `tools/trailers/v0_15_0.py`
+
+The owner: a release about bringing BN5's Liberation Missions to the run,
+BN5's song 0x22, the board's theme, as the music's seed, "something
+beautiful" as 0.14.0. Three eight-bar sketches from 0x22's habits, all in
+the soundfont: A the operation, B the liberation's fanfare, C the
+darkness's move. The owner chose A, "yet it is all over the place. with
+0.14.0 you took more care." The numbers had matched the song's balance;
+the writing had not (`music_rules.md`, Discipline, written from it): too
+many sections in nine bars, a walking bass on new notes everywhere, every
+part moving at once, a synth brass outside the approved palette.
+`music_check.py --source` now sets each part's motion beside the song's
+and flags the busier ones; the rewritten A read "busier than the source:
+none", held up by ear, and grew into the piece (`v0_15_0_music.py`, 20
+bars at 144, D minor). The owner asked that this hold for every future
+piece, in the skill rather than in memory.
+
+What was made: 35 seconds. The operation on a war room's map: a
+night-blue grid with its sectors marked, each shot a monitor in a sector
+of its own at 3x (four boards at 2x), every cut the camera panning to the
+next, easing as BN5's board camera does (a share of what is left each
+frame); a readout of PHASE against the PAR, following the board's own
+banners, crimson with the map for DARKLOID PHASE; where each shot stands
+in the run (ACT 2 · LAYER 5); headlines in URW Gothic settling from wide
+tracking, captions in a mono face, under the monitor. Footage: the
+autopilot (`--dev dark,god,onehit`) through seed 1's act 2 board, seed 7's
+fork at home (its pink pad the dark way), four boards of acts 2 to 4.
+
+What went wrong on the way: the owner, of the first cut: units standing
+still, a Darkloids' phase nothing like BN5's, the exit's ring clipped (all
+fixed in the game, #214, and the footage taken again: the cut showed what
+the game lacked); the act card ("A layer here has gone dark") over act
+2's first, ordinary layer read as if that layer were the dark one; and
+the story "focuses only on liberation. well duh it's mmbn5. But what does
+that mean for cyberworld endless?" The second cut tells the run: the fork
+after an act, one way dark (MegaMan: "Part of it's gone dark."), TAKE IT?
+at the price of the layer's dealer and Mr.Prog, never the same board
+twice, three turns or it stays dark, the chip carried on. Lesson: a
+release whose news comes from another game is told as what it does to
+this one. Also: the dark way's swirl shows only while MegaMan stands
+away from it; a line the autopilot pages at once is held on its whole
+frame. The owner: "approved".
+
+Devices now used up: the war room's map and its sector monitors, the
+camera's pan as the cut, the phase-against-par readout, tracking that
+settles onto the beat, the run's position on every shot.
+
+
+## 0.16.0: Fight on? (2026-10-26), `tools/trailers/v0_16_0.py`
+
+The release: BN6's Virus Battler in the run (a stake, BN6's VIRUS LIST,
+the fight at fast forward, take the pot or fight on, the BtlrCard kept
+across runs), the run's Crosses on Liberation boards with Team
+ProtoMan's commands and a TEAM screen, a held Soul's chips in the finds,
+rumble and a DualSense's triggers, a Square anyone can host.
+
+The first cut, refused: a card table. Every shot a card dealt with a slap
+onto a pile on a green felt under a lamp, suits by section, set numbers,
+a foil's sweep, the pile gathered up at the end. The owner: "it is
+totally not in our design style." A real-world metaphor dressed over the
+footage, where every approved trailer was built from the game's own world
+(0.12.0's board, 0.14.0's versus screen in the game's colours, 0.15.0's
+net-blue grid). It became the owner's gate 1 (SKILL.md).
+
+The second cut: a PET screen of its own, at the PET's scale (427 x 240,
+the game's picture at 1x, scaled 3x by nearest neighbour), in
+`docs/engine/ui.md`'s parts and `tools/site_art.py`'s colours, the site's
+fonts (Silkscreen, Pixelify Sans): the band names the shot, a list
+window holds the shots as rows with the orange cursor stepping down them
+on the beat (the cut), the game's window beside it, the INFORMATION box
+the caption. Sections are the list's pages, turned under the green page
+arrows; the dark layer's two bars take the screen down six of the GBA's
+sixteen brightness steps; the rumble flashes the game window's frame;
+the screen fades up and out in sixteen steps as BN6's do; the end asks
+"Fight on?" with Yes and No and the green triangle before Yes. Its first
+draw had the band's name hanging below the band and Pixelify Sans' fi
+ligature reading "frst": its ligatures are turned off.
+
+The music, heard: "the music is alright. but it seems to be again rather
+random rather than using an existing cool mmbn music from the rom as a
+seed and orient on that style + I hear no usage of the soundfont we loved
+in the last two trailers." The piece had been written straight from 0x15's
+habits, with no sketch for his ear and its sampled parts few and quiet
+(chords on downbeats only, as 0x15's). His measure since: music Akari
+Kaida would be proud of (music_rules.md). The sketch round that followed:
+three nine-bar sketches, each from one seed (A BN6's 0x15, the Battler's
+rounds; B BN6's 0x22 "Showdown", diminished chords and a broken beat; C
+BN5's 0x15, Kaida's), each through FluidR3 GM, GeneralUser GS v2.0.3 and
+MuseScore General (`CW_SOUNDFONT_NAME`), for him to pick a sketch and a
+soundfont by ear. The owner: "i like b but can't hear a difference in
+soundfonts." Three banks, the same notes, no audible difference through
+MP2K's cut (8 bits at 10512 Hz): FluidR3 GM stays, for its licence, and
+the image holds it alone again (music_rules.md). Sketch B grew into the
+piece (`v0_16_0_music.py`, 20 bars at 150, B-flat minor): its middle,
+500-2000 Hz, had been well under 0x22's; the strings' chord samples
+voiced an octave higher and the squares louder in the mix brought it
+near (music_check.py's bands 46/32/20/2 against the seed's 49/29/21/2)
+without a part more, busier than the source still none.
+
+Before he heard that cut, the owner asked for structure: "I think we
+need to define a stricter layout on how we present the changes. also its
+start and end. ... I want structure, and professional polish. while still
+making each trailer unique and interesting to consume", pointing at two
+update trailers, Cyberpunk 2077's Edgerunners II update overview and The
+Blood of Dawnwalker's Update 1.1. Their shared skeleton became SKILL.md's
+The structure (every trailer), and the third cut follows it in 23 bars
+(39 seconds): a cold open of two bars with no words (a Virus Battle's
+last blows at fast forward, MegaMan becoming HeatCross) in one big
+window, the game at 4x; the title card (the logo, FIGHT ON?, the green
+RUN! button's 0.16.0 · OUT NOW); three segments on the PET screen, each a
+section card (its number and name in its colour in the game's window, the
+band taking its label) and two to four shots of a bar, one concrete
+caption each in the INFORMATION box; the recap, three tiles in one window
+(a count only where the CHANGELOG gives one: "1 in 4 finds", its "a
+quarter"); the logo's stinger with 0.16.0 on the cadence; the end card
+held still, never faded (the systems by name, the site, the ROM line).
+One type family, the site's Pixelify Sans, inside the safe area. The
+piece was rewritten to the slots: its intro under the cold open, the
+hook arriving with the title, the toms lifting into each segment, the
+drop for the dark layer's, the cadence on the stinger, the backing alone
+again under the end card.
+
+The owner approved that cut with one fix: "Fix the B/G font and keep
+everything else." Pixelify Sans' capital B reads as a G at these sizes
+("GN6'S VIRUS GATTLER"); the words are now the site's Silkscreen, whose
+B, G, 8 and 6 stay apart, checked on 1:1 crops of every label and card.
+Silkscreen has capitals only, so the site's address, whose case matters,
+stays in Pixelify Sans with Silkscreen's B and C set in. Check a pixel
+face's B, G, 8 and 6 at the cut's own size before using it.
+
+Devices now used up: the card table, the deal as the cut, suits by
+section, the foil's sweep; and from the second cut, the PET screen as the
+whole frame: the list's cursor stepping as the cut, the band as the
+headline, the INFORMATION box as the caption, the page arrows between
+sections, the brightness steps for the drop, the frame flashing on hits.
+
+## 0.17.0: Sharper, not bigger (2026-10-26), `tools/trailers/v0_17_0.py`
+
+The release: the core loop review's rounds, no new system. A battle on
+every layer, BN5's End Area one wide, fewer words on the way, a won
+Server's pick of three, MegaMan reading the way ahead, BugFrags that buy
+programs, three new starting folders, guardians who remember how the
+last fight ended, ProtoMan's netbattle stopped at 1 HP.
+
+Sketches and stills first, together: three music sketches from BN5's
+"Virus Busting" (0x15, Kaida's) and stills of the look, before any cut.
+The owner picked sketch A, Busting, and the look as the stills showed
+it: the release as one virus battle in BN6's own screens. The battle net
+with a drifting grid, the HP box holding the version, the Custom gauge
+the section's label and filling through it; on each section card the
+Custom screen's cursor steps onto that section's chip and OK sends it to
+the column; each shot opens out of the chip's window into the field,
+its caption on the chip's plate, a count where the damage number goes;
+the recap the fifth chip, P; the stinger S-H-A-R-P as a Program Advance
+flashing into the logo; the end card the results screen (DELETE TIME,
+BUSTING LEVEL S, GET DATA), held still. Approved at its first full render.
+
+The piece: sketch A grown to the cut's 26 bars (cold open, title, four
+sections of a card and three shots, recap, stinger, end), FluidR3 GM;
+music_check.py against 0x15 "busier than the source: none", no rubs.
+The 3DS banner from the climax's hook (`3ds/banner-0.17.0.wav`).
+
+The footage came from two media agents' release pictures while the cut
+was built: it was cut on stand-ins first (a placeholder card marked
+FOOTAGE TO COME), and each stand-in swapped for its run as the runs
+landed, which kept the trailer off the release's critical path. Two
+runs could not be taken as they were: CLIPS' `battle` run shows PAUSE
+throughout on this build, so the won Server's battle opened the cut;
+`guardian-memory` needs a run before it in the same data folder
+(`SCREENSHOT_PREP`), so its committed screenshot stood in for a capture.
+A change with no picture ("finds vary again") stays out of the cut.
+
+Devices now used up: the battle's own screens as the whole frame, the
+chip picked as the section card, the shot opening out of the chip
+window, the caption on the chip plate, the Program Advance as the
+stinger, the results screen as the end card.
+
+## 0.19.0: See it as you set it (2026-11-02), `tools/trailers/v0_19_0.py`
+
+The release: Options reworked into pages (Display, Audio, Game) in BN6's
+PET look with pill tabs, a battle beside Display's lines that shows each
+change as it is made, a GBA's screen (mGBA's colour correction and the
+VBA, DS and PSP colours, frame blending to LCD ghosting, RetroArch's LCD
+3x) and the sound set your way (Music and Effects in levels, Output,
+mGBA's Audio Filter). The owner's word (2 November 2026): "a new cool
+trailer showcasing our new customization options rework", BN5's ACDC Town
+as the music's reference for "its happy upbeat rhythm", and "Don't wait
+for my approvals": gates 4 and 5 waived for this release, every other
+gate held.
+
+The music: BN5's song 0x03 (the recording's own title, "T03: Home Town
+(ACDC Town)", and the map-music lists agree), read at --offset 12: 112
+beats a minute, A major on suspended Vs, ii and vi sevenths, the
+Mixolydian v; the lead's four-bar breath of call, busy answer, call and
+held bar, half its notes repeated; the backing's 32nd blips thrown hard
+left and right; the bass high (B2 up) repeating its root; a mellow chord
+sample struck on the beat and its third and fourth sixteenths; the kick
+on 0 7 10 14. Two sketches in the soundfont, both "busier than the
+source: none" once their leads repeated as 0x03's does (their first
+drafts repeated 25% and 10% against 54%, and A's backing leapt 55%
+against 32%): A, Hometown, the square leading as in 0x03's A and B; B,
+Your way, the saw's sampled melody leading as in its C. A was chosen by
+the agent (the owner's pick waived): its parts nearest 0x03's roles and
+its balance nearest the recording's (40/37/22/2 against 44/33/21/2; B
+32/37/29/3), though B's punch was nearer (5.4 dB against the
+recording's 5.1; A 7.7). Grown into 23 bars at 112.5 (a bar 64 frames),
+B-flat major, with 0x03's C in the third segment. One change to the
+approved palette, for the source's own sound: the chord struck on the
+off-beats is FluidR3 GM's electric piano (program 4), mellow and
+decaying as 0x03's chord sample, where the strings swell. The recording
+swings less than BN6's battle themes (5.1 dB): its kit sits back, so the
+kick and snare went down. The piece: "busier than the source: none", no
+lead note rubbing the harmony, 37/38/23/2 against 44/33/21/2 (the wave's
+bass sits above 120 Hz, as 0x03's), a punch of 6.1 dB. The 3DS banner
+is the call under the title (`3ds/banner-0.19.0.wav`).
+
+The look: the trailer is an Options page and the screen it sets. A navy
+field of faint LCD stripes (lcd3x's own pattern), Options' new pill tabs
+as the section label (a pill a segment, the shown one RUN!'s green),
+the shot at 3x in a PET window, a side window that is the setting being
+turned (its name, its value between Options' orange arrows lit as it
+turns, a pip a value), the caption a line of Options' list with the
+orange cursor. Every cut is the screen's refresh: the new picture drawn
+in row by row from the top under a bright line; a look turned inside a
+shot (the same battle in another screen's colours, on the beat) is drawn
+the same way, the side window's value turning on that frame. The same
+battle frame for frame in every look (its input fixed, the looks only
+how it is shown); LCD 3x from screen shots (`--screen-shot`, sixteen a
+run, so four runs a bar, `footage()`), at 4x for the cold open, where the
+same moment plays plain, then as a GBA's screen.
+
+What went wrong on the way: Options fades each turned page in from
+black over seven frames, three black flashes in one bar that read as a
+glitch: the pages are held once shown and the turn is drawn by the
+refresh. A recap of three tiles at 1x in a 1280 frame was too small to
+read: two tiles at 2x. The pill row's L and R letters sat outside the
+safe area. A shot's footage ran past its scene's end and would have
+frozen: the battle's scenes are 131 samples, so a bar's feed starts no
+later than sample 67. The section card's caption repeated its title:
+cards show their lines one a beat instead, the caption plate empty.
+
+Devices now used up: the LCD's stripes as the field, the pill tabs as
+the section label, the refresh as the cut, the setting's spinner and
+pips as a readout, the same moment twice (plain, then set) as the cold
+open.
+
+The owner, after the release (2 November 2026): "the trailer music
+misses the soundfont. fix that and replace the trailer. also make sure
+the trailer skill forces you to always use the soundfont. otherwise it is
+just not on the quality we want." The piece had the soundfont, but only
+for its drums, its chord stabs, the strings, one brass note and the C's
+saw: its melody, its backing and its bass, the parts an ear follows,
+were the squares and the wave, as 0x03's are, so it sounded like the
+plain GBA synthesis 0.16.0's first piece was missed for. Re-voiced with
+every note kept: the lead on 81 Saw Wave, the blips on 12 Marimba, the
+bass on 38 Synth Bass 1 (`SAMPLED_PARTS`), the kick raised to 0.7 for the
+lows (bass/body/mids/top 39/40/20/1 against the recording's 44/33/21/2,
+punch 5.8 dB against 5.1), and the trailer re-rendered and replaced
+(docs/clips, the site, the README, the v0.19.0 release). Gate 3 now
+requires every melodic part on the soundfont, and `music_check.py` fails
+a piece that does not (SKILL.md).
+
+The owner on the re-voiced piece: "why does the track still sound so
+'dull'? take a look again at the reference ... it sounds much lighter and
+more complex." Measured at the full band, the soundfont-only voicing kept
+1.8% of its energy above 3 kHz against the recording's 6.8% (the first
+cut on squares 3.4%): MP2K mixes samples at 13379 Hz, so a GBA's top is
+its squares' and its hats', and the marimba and the fat synth bass were
+dark. BN5's 0x03, read from the ROM: six tracks, its lightness the lead
+and backing on squares (50% and 25%), its complexity a sampled track of
+462 five-tick notes in six voices re-panned about 200 times, which the
+piece had played as a few electric piano stabs. (A fan MIDI was not
+fetched: no downloads from such sites, and its notes are Capcom's; the
+ROM is the exact score, read as habits.) The second voicing: the samples
+doubled by the squares on the lead and the blips, the xylophone, a picked
+bass, a counter-part of our own in celesta, vibraphone and pizzicato a
+section each, the hats up, the kick for the lows: 6.0% above 3 kHz against
+the recording's 6.0%, 35/38/26/2 against 44/33/21/2, punch 7.4 dB against
+5.1. Gate 3 now asks for the squares' doubling and the highs within a
+point of the recording's.
+
+## 0.20.0: Red Sun joins (2026-11-08), `tools/trailers/v0_20_0.py`
+
+The release: BN4 Red Sun beside BN6 (its ROM on the ROMs screen, its five
+net areas, six of its virus families visiting battles), the tournament
+as an act's climax on BN4's own bracket screen, and BN4's Navis in its
+draw; Glitch layers and the setup's EXTRAS page lesser. Made by an agent
+in one time box, footage, sketches, piece and cut together; the owner's
+gates 4 and 5 (his pick of a sketch, his word on the cut) still wait.
+
+The music: BN4's song 0x17, the tournament's own theme
+(docs/multirom/bn4.md), read with `song_habits.py bn4 0x17 --offset 12`
+(BN4's song table added to the script): 140 beats a minute, bare fifths
+rocking a semitone over a bass that repeats the bar's root (88% of its
+moves, 1.1 pitches a bar), the kick on every beat, the lead on both
+squares with an echo four ticks later from the other side, a busy
+four-tick sampled arpeggio right of centre, a held sample left. Two
+sketches in the soundfont (`sketch_sun_a.py`, "Bracket", the song's A;
+`sketch_sun_b.py`, "Final", its held B), both "busier than the source:
+none" once the bass kept the bar's root and the arpeggio the bar's first
+chord (their first drafts walked the bass to each half bar's root and
+leapt octaves: 3.6 pitches a bar against 1.1). A grown into 25 bars at
+144 with B's anthem as the tournament's segment; the piece's lead first
+read 5.4 pitches a bar against 3.2 and was calmed by repeating notes
+before its leaps. Highs above 3 kHz 6.8%; there is no recording of 0x17
+to hold them against.
+
+The look: the release as a tournament, the trailer its bracket. Four
+plates in the right column, one a segment, each with its segment's
+picture small, grey until its round, red while it plays, gold once won,
+their lines climbing to the semis and the final; the game's window at 3x
+beside it, every cut the bracket's red line running in from the right
+with the new picture drawn behind it; the section label a red ROUND tab;
+Nimbus Sans Narrow Bold upright; a faint red sun behind the bracket; the
+stinger the bracket's lines meeting in the logo. The cold open is BN4's
+own bracket with every entrant's face, then ThunderMan's fight.
+
+What went wrong on the way: the ROMs screen's canvas is larger than the
+240 x 160 the capture keeps, so its frame is the screen's middle and
+showed the dev run's data folder (covered in the cut); a forced
+tournament from a run is a long autopilot (seed 6 from layer 9), so the
+bracket came from the `bracket` dev step and the Navis from `foes`; the
+setup's EXTRAS page says of the Tournament "Not in runs yet" on this
+build, so its tile is held on the page's first line.
+
+Devices now used up: the bracket as the frame, plates turning grey to
+red to gold, the line running in as the cut, the ROUND tab, the lines
+meeting in the logo as the stinger.
+
+The owner on the cut's music and both sketches (8 November 2026): "the
+music sounds flat and not complex. I miss the mmbn dna and good use of
+the soundfont"; he chose neither. The first round had matched 0x17's
+calmest numbers too well: a bass on one note a bar, one arpeggio, bare
+fifths, few voices; "busier than the source: none" had become the goal
+instead of the floor. Read against BN4's battles (0x14: a 32nd sampled
+arpeggio of 960 notes thrown hard left and right, the wave's staccato
+sixteenths across two octaves, bent 48 times; 0x15: a sixteenth
+arpeggio over three octaves re-panned 135 times, two sampled
+counter-voices, sus4 and m7b5 colours), a BN battle track is busy and
+layered. The second round, three sketches on `sketch_red_lib.py` (A
+"Battle Drive", D minor at 150; B "Tournament Day", F major at 144 with
+a semitone's lift; C "Final Round", E minor at 160 with the augmented V
+and a break): the lead with vibrato, scoops, falls and an echo; a
+counter-melody on the chords' guide tones (brass, violin or vibraphone a
+section); 32nd pairs over the chord and a three-octave sweep on Electric
+Piano 2; the bass in octave-jumping sixteenths or walking into the next
+chord, the wave doubling it in unison; strings' chord samples
+recoloured, brass struck on the syncopations, the guitar's 3-3-2 with
+chugs, the orchestra hit, the bell on the lifted hook; fills, a snare
+roll, a break. The piece grew A to 25 bars at 150 (the cut's bars
+unchanged, 48 frames each), with B's four-on-the-floor under the
+tournament's anthem and the hook lifted a tone for BN4's Navis. A part
+doubled on the wave an octave up read to `music_check.py` as one bass
+leaping every note: double in unison.
+
+The owner on the second round (8 November 2026): "A, the full cut". The
+piece grown from A and the cut as rendered went out with 0.20.0. What
+turned it: reading the source game's battle tracks, not only the theme
+the look comes from, and holding the busier numbers as the floor.
+
+## 0.21.0: Three games. One run. (2026-11-12), `tools/trailers/v0_21_0.py`
+
+The release: what BN5 and BN4 bring into BN6's run and the two places
+that hold it. Every act has its virus (the act card names a family of
+any game, met alone, beside a partner, then in a battle built around
+it); eight more Navis to fight (BurnerMan, SparkMan, TopMan and JunkMan
+in BN4's tournament, CloudMan and CosmoMan on the dark boards, GridMan
+and LarkMan in the deep) and Red Sun's chips in the finds; the Library,
+a page per game; the Battle Lab. The owner's brief: "a new cool trailer
+showcasing the huge amount of new content in the mix, the global library
+for collecting everything and battle lab".
+
+The look: the mix. Each game is a channel in the colour its cartridge
+already has on the ROMs screen (`src/launcher/launcher_art.c`: BN6's
+green, BN5's blue, BN4's red), and those three are a screen's own green,
+blue and red. The game's picture at 4x, nearly the whole frame (a first
+for a segment's shots: the caption is a plate on the picture's last
+eleven lines, which cost nothing of BN6's screens); a column of three
+tags beside it, one a game, each lit with one word for what the shot
+takes from that game (ENGINE, AREA, VIRUS, NAVI, CHIP, PAGE, FOE, PANEL,
+STAGE, SONG); every cut the new picture's red, green and blue arriving
+apart from three sides and closing into one over five frames (three
+inside a bar); words and the logo arriving as three coloured ghosts
+that add up to white; the stinger the three colours running in and
+meeting in the logo. Ubuntu, weight 760 (its file named `Ubuntu-B.ttf`
+is the variable font at Regular: set the axes). The tags made the
+release's claim checkable shot by shot: a shot of BN4's virus beside
+BN5's in BN6's area lights all three.
+
+The music: three sketches, one a game, each from one seed read with
+`song_habits.py` (`sketch_mix_lib.py`): A from BN6's title (0x01, a
+march, E minor, 144), B from BN5's boss battle (0x16, half-diminished
+chords, a one-note gallop, C minor, 150), C from BN4's title (0x00, the
+lead on both squares eight ticks apart, C major, 144), all on
+`sketch_red_lib.py`'s parts (0.20.0's approved palette) with a kit, a
+backing and a bass of each seed's own. The owner chose A. The piece
+(`v0_21_0_music.py`) takes its parts from the chosen sketch's `STYLE`
+and lays the sketch's four-bar A, its B and a lift of a tone on the
+cut's slots, so a preview with one sketch grown could go to the owner
+with the sketches, and the swap to his pick was one line and a render:
+the trailer stayed off the release's critical path. "busier than the
+source: none", every part on FluidR3 GM, 6.7% above 3 kHz, a punch of
+7.7 dB. The owner approved the cut and the piece at their first full
+render (12 November 2026).
+
+Footage: all by `tools/trailer.py`'s own runs (the release pictures had
+none for this release yet). The act's shots are seed 7's third act
+(`--run-depth 7`, `8`, `9` with the `battle` step: each layer's first
+battle is the arc's beat; `CYBERWORLD_EMU_DEBUG=1` prints "arc beat" and
+the families); the Navis and chips by `foes` and `--dev folder=ID` in
+their own games' areas; the Library on `--dev library=1` (with every
+second chip the cursor lands on `??` rows and the card is blank); the
+Battle Lab by the Lab session's routes, its run written as named parts
+(`LAB_PARTS`, `lab_at`) so a shot's sample follows the script when a row
+count changes.
+
+What went wrong on the way: the first Lab take set each foe on the last
+one's panel, which takes it off (move the cursor before A); A presses
+ten frames apart turn a panel only every second press (fourteen apart
+they all count: twelve to BN5 Lava); a Net Dealer's `--talk shop` never
+opened his stock and the PET's R shows the NetPass in the Square alone,
+so both stayed out; a twelve-frame sheet lands on the cuts' first frames
+when a bar is 48, and reads as mud (look at a tempo's sheet whose step
+does not divide the bar, or at `--frames`). Capturing found a bug before
+the tag: an act's signature family differed on its third layer when the
+game started there (seeds 5 and 9), sent to the lead at once.
+
+Devices now used up: the three channels in the cartridges' colours, the
+tags with their one word, the picture's colours closing as the cut,
+ghosts that add up to white, the picture at 4x with the caption on its
+last lines, the three colours meeting in the logo.
+
+## The blueprint, and 0.22.0: Your run, on every device (2026-11-15), `tools/trailers/v0_22_0.py`
+
+The owner, before the release: a trailer for it, and with it an end to
+ten trailers that read as ten projects. "We need to find a good consens
+to have stable trailers. like a blueprint. So that not every trailer
+looks completetly different. Yet has as much freedom to showcase its
+changes to its fullest", 0.17.0 the reference ("I really like the music
+from 0.17.0 and its pace. Especially when there is much to showcase"), a
+narrator ("Maybe lans father? Like he comes on after the trailer starts,
+introduces himself, very short explanation ... and slides into the new
+changes ... With a nice outro thanking players"), and a thumbnail made
+for YouTube. It reverses 13 October's "never the last trailer with new
+screens" for the frame and the band; `blueprint.md` is the result, its
+fixed half code (`house.py`, `house_music.py`), and 0.22.0 the first cut
+on it: about 150 lines of its own where a cut was 600 to 1000.
+
+What was made: 69 seconds, 42 bars at 150. The cold open is a Beast Out
+(the dark, the flare, the white, the beast) and three MegaMen on one
+field against BlastMan; the title YOUR RUN, ON EVERY DEVICE (the notes'
+own line); Dad's hello; five segments (saves that follow you; the net,
+relaid; the little things; more ways to play; dive together, the climax)
+on 0.17.0's frame, the panel now a list of
+the segment's shots under the PET's orange cursor (0.17.0's chips were
+that cut's own); the recap, four tiles at 2x and the fixes counted from
+the CHANGELOG as the cut is drawn; Dad's thanks; the stinger; the end
+card with THANKS FOR DIVING IN. Its own half: the RUN! button's green,
+packets climbing the net's lines, each shot drawn in from the left as a
+transfer fills, and the tune.
+
+The narrator: `--talk narrate:FRAME` has the game say a cut's lines as
+Dad in BN6's own chat box (`CYBERWORLD_NARRATE`), nothing redrawn. The
+first take had him over the layer he was captured on, MegaMan standing
+there; the owner, mid-work: "having dad speak while megaman just sits
+there is boring. find a better way to fill the backdrop with something
+related." A chat stops the game under it, so his box (its rows of his
+frame, found by where a frame with the box differs from one before it)
+is laid over other footage: a dive, three areas for "a new Net on every
+dive", a beat of each segment's best shot for "here's what 0.22.0
+brings". It reads as the game does when a call comes in over play.
+BN6's chat types a letter every two frames; the cut plays the typing at
+twice that.
+
+The music: 0.17.0's piece failed today's gate 3 as it stands (its lead,
+backing and bass on the squares and the wave alone: it was made a week
+before the gate). The house band keeps its notes and doubles those three
+on FluidR3 GM. Three tunes on it as sketches (`sketch_house_a` "Carry
+on", `_b` "In step", `_c` "Wide ways"), each "busier than the source:
+none", no rub, "every part on FluidR3 GM"; the piece grown from A reads
+46/33/19/2 against 0.17.0's 49/33/17/1, punch 7.9 dB against 7.8, highs
+5.5% against 5.9%. A's first cadence rubbed (an F on the Lydian B major:
+its F-sharp instead).
+
+What went wrong on the way: Silkscreen Bold's 4 and % close up into
+blobs ("04" read as a 0 and a heart, "40%" as nothing): `house.text`
+strikes those two from the regular face twice; check a new digit at the
+cut's size as 0.16.0's lesson says of B, G, 8 and 6. A count ran over
+its caption (the plate now keeps the count's own width clear). A cut's
+module named its runs `footage`, which is the kit's hook for a cut's own
+captures (`cut.footage(keep)`): the kit called a module. The footage's
+agent renamed scenes after the cut had captured them, and `--keep` kept
+the old pictures under the new names: delete a renamed scene's folder.
+Depth lighting cannot be filmed by `capture()` (`--shot-range` saves the
+canvas, the lighting is laid at presentation; `--screen-shot` shows it,
+sixteen frames a run), so the 3D shot shows Options' line turning.
+Scenes that need a server (the saves' cloud and code: a Net Square; the
+update's box: a manifest over HTTP) are the cut's `footage()`, which
+starts both and stops them.
+
+The thumbnails (the youtube-publish skill's `thumbnail.md`): three SVGs
+of one layout, a region of a whole frame with two lines of words (DIVE
+TOGETHER!, CLOUD SAVES!, THE NET CLIMBS!). The first sheet set the words
+in Silkscreen: "NOW" read as "NO" and a heart at 168 wide; Lato Black
+Italic since. The first heroes were picked blind and put a blast under
+the scrim: pick the frame on a sheet. In a battle MegaMan stands on the
+left, where the words were: `'side': 'right'` mirrors the layout.
+
+The first cut had four segments and 58 seconds, laid from the
+CHANGELOG's Unreleased section. The owner: "are you sure you have
+everything showcased in its fullest glory? go over the merged prs you've
+most likely missed something. for example the online multiplayer dive
+addition". The shared dive (pull request 590) and the layers' heights
+(632), the Nest's crystals (640) and Robot Control Comp's figures (634)
+were merged and in neither the CHANGELOG nor the notes. All 108 pull
+requests since 0.21.2 read, the cut grew to five segments with the dive
+last: its portal, four divers on a layer, a crew asked and formed, a
+crewmate's battle joined, the party at a guardian's door and its fight
+on one field, taken with up to four games on a local server
+(`v0_22_0_footage.py`'s `online_footage`, the week pinned so every take
+dives the same net). It is `blueprint.md`'s step 0 since. Taking the
+footage found bugs before the tag again: four MegaMen on one field
+stand still (two and three fight on), divers carry no name tag, the
+leader's A at the door also opens the crew's chat.
+
+The owner on the sketches: "a is good" (15 November 2026): "Carry on".
+The owner on the second cut (15 November 2026): "Yes, approved". It
+became the current trailer the same day (the site's hero and texts, the
+README, the notes' opening, the 3DS banner from the climax's hook),
+before the tag; its areas' footage is retaken once the layer generators
+settle (delete a scene's folder, render again). Still his: whether Dad
+should have a voice some day.
+
+Chosen by this cut (the next one's are others): the green accent, the
+climbing packets, the sweep, the tune "Carry on", the Beast Out as the
+cold open.

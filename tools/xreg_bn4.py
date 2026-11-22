@@ -1,0 +1,366 @@
+#!/usr/bin/env python3
+"""xreg_bn4.py [--check]: BN4 Red Sun's rows of the chip registry, src/core/xchips_registry_bn4.c, made from the three
+ROMs (docs/multirom/bn4-chips.md, The build plan's unit 2).
+
+A BN4 chip takes a row where the run has no chip it is: none of BN6's own of its name, none of the registry's of BN5's
+of its name, and for an SP or a DS none by its Navi's V1 (the engine's rules, src/core/xchips.c's pair_bn4, mirrored
+here on the names in BN6's codes). BugCharg has none (it reads the NaviCust's bugs: the owner's rule for BN5's), and
+ProtoMan's DS none (BN6's ProtoMan has no DS chip; it pays the stand-in). Numbers only: BN4's id, its id in BN6's
+tables, its codes, class and MB, which a placeholder keeps where BN4's ROM is not read; the names are comments.
+
+The ids, fixed here for good (a saved folder names them): 527-602, which have a pack entry today (docs/rom/chips-code.md,
+The pack past 511), go to the chips that play first, in the plan's order (FIRST below: the six on BN6's code and Roll's
+two, the Navi chips of the seven other moved Navis, the units under 300 bytes, then the plan's next units while they
+fit whole); 605-623 to its nineteen Program Advances (BN6's bit for one formed is the engine's from 603, 32 of them);
+635 on to the rest, in BN4's order.
+
+--check: exit 1 where the file is not what the ROMs give. Local only (CYBERWORLD_ROM_DIR, ~/.cache/mmbn-ref/roms)."""
+import argparse
+import hashlib
+import os
+import re
+import struct
+import sys
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+OUT = os.path.join(ROOT, 'src', 'core', 'xchips_registry_bn4.c')
+SHA1 = {'bn6': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5': '5f472f78d8de2df01d5039e045c043cb40969a39',
+        'bn4': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
+# (ROM offsets, as src/core/rom.c's layout and src/emu/bn5.h, bn4.h name them)
+NAMES = {'bn6': (0x6E88D0, 0x6E92D8), 'bn5': (0x736084, 0x736AB8), 'bn4': (0x7481D8, 0x748C14)}
+RECORDS = {'bn6': 0x21DA8, 'bn5': 0x1E210, 'bn4': 0x197EC}
+COUNT = {'bn6': 314, 'bn5': 424, 'bn4': 389}
+REC = 0x2C
+BN4_MB, BN4_CLASS, FAMILY, SUB, PARAMS = 6, 8, 0x0B, 0x0C, 0x10
+SP, DS = 3, 4          # a Navi chip's version, its record's first parameter
+OUT_OF = {310: 'BugCharg'}   # (no row: the owner's rule)
+# One chip under two spellings (the owner's call, 10 November 2026: docs/multirom/bn4-chips.md, The owner's calls): BN4's id ->
+# BN6's chip, the run's; it takes no row, and where FIRST gave it an id that id is retired (ids are fixed)
+ALIAS = {201: 182}   # LifeAura: BN6's LifeAur; id 530 retired
+# A dark chip of BN4's (the owner's call, 10 November 2026: docs/game/meta/darkchips.md): its record's alignment dark (BN4 plays it only
+# for a dark MegaMan, src/emu/bn4_chips.h BN4_CHIP_ALIGN) or a DarkChip by its effect flags (src/emu/bn4.h BN4_CHIP_DARK). A row of
+# one is listed in xreg4_dark, which the price's hook reads: a battle it is used in costs 20 max HP, as every dark chip's
+ALIGN, ALIGN_DARK, FLAGS, FLAG_DARK = 0x15, 2, 9, 0x20
+# BN4's chips that run on BN6's own code (docs/multirom/bn4-chips.md, Their code: BN4's family and subfamily a routine BN6 has
+# by its body), each proved by its chip_* spec against BN4's own battle before it is listed: BN4's id -> (the BN6 chip whose
+# family, lock-on and lock-on type its record takes, the subfamily or None for the twin's)
+ON_BN6 = {
+    133: (177, None),   # Invis: BN4's support 0x31, BN6's subfamily 1 (Invisibl's), the same frames in its parameters (chip_invis)
+}
+# BN4's chips whose code is moved into BN6's engine as a unit (tools/xchiprecipe_bn4.py UNITS, src/emu/xchips_bn4.c), each
+# proved by its bn4_chip_* spec against BN4's own battle before it is listed: BN4's id -> the unit's number in BN6's grown
+# support routines (XC_SUPPORT: 0x80 + BN4's subfamily), which its record takes under BN6's support family, or for a chip
+# of BN4's misc family (its record's +0xB 0x20) in BN6's grown misc routines (XC4_MISC), under BN6's misc family; the generator
+# refuses to write a unit whose chips are not here
+MOVED = {
+    178: 0xA6, 179: 0xA6, 180: 0xA6,   # PanlSht1-3: BN4's support 0x26 (bn4_chip_panlsht1-3)
+    210: 0x99,                         # ShotStar: BN4's support 0x19 (bn4_chip_shotstar)
+    115: 0x8B,                         # Repair: BN4's misc 0x0B, BN6's grown misc routine 0x8B (bn4_chip_repair)
+    60: 0x80, 61: 0x80, 62: 0x80,      # Counter1-3: BN4's misc 0, BN6's grown misc routine 0x80 (bn4_chip_counter1-3)
+    72: 0x88, 73: 0x89, 74: 0x8A,      # WhitWeb1-3: BN4's misc 8, 9 and 0xA, one unit's three routines (bn4_chip_whitweb1-3)
+    75: 0x82, 76: 0x82, 77: 0x82,      # Boomer1-3: BN4's misc 2 (bn4_chip_boomer1-3)
+    163: 0x91, 164: 0x91, 165: 0x91,   # Meteors1-3: BN4's misc 0x11, BN6's grown misc routine 0x91 (bn4_chip_meteors1-3)
+    130: 0x81, 131: 0x81, 132: 0x81,   # MokoRus1-3: BN4's misc 1 (bn4_chip_mokorus1-3)
+    78: 0x85, 79: 0x85, 80: 0x85,      # SidBmbo1-3: BN4's misc 5, the one its run waits for (bn4_chip_sidbmbo1-3)
+    166: 0x8C, 167: 0x8C, 168: 0x8C,   # Ligtnin1-3: BN4's misc 0x0C, its record's first parameter 2 (bn4_chip_ligtnin1-3)
+    181: 0x8C, 182: 0x8C, 183: 0x8C,   # AquaUp1-3: the same routine, its first parameter 0, a geyser from a cracked panel (bn4_chip_aquaup1-3)
+    184: 0x8C, 185: 0x8C, 186: 0x8C,   # GreenWd1-3: ... 1, a tower from grass (bn4_chip_greenwd1-3)
+    97: 0x91,                          # TimeBomb: BN4's support 0x11, its bomb an actor (bn4_chip_timebomb)
+    104: 0x90, 105: 0x90, 106: 0x90,   # BigHamr1-3: BN4's support 0x10 (bn4_chip_bighamr1-3); GodHammr (215) waits (ROWS_WAIT)
+    303: 0xAA,                         # BugCurse: BN4's support 0x2A
+    285: 0xCC,                         # FirePlus: BN4's support 0x4C, its kind 0 (bn4_chip_fireplus); 286-288 left out (call 12)
+    82: 0x8B, 216: 0x8B,               # Hole, DrkLine: BN4's support 0x0B, the panel changer (bn4_chip_hole, bn4_chip_drkline)
+    193: 0xBB,                         # DrkStage: BN4's support 0x3B, the same unit (bn4_chip_drkstage)
+}
+# ... and BN4's chips of an attack family moved (a state of BN4's MegaMan's, the unit's kind 'attack'): BN4's id -> the
+# unit's number in BN6's grown attack families (tools/xchiprecipe_bn4.py ATTACK_NUMBERS, 0xD0 on: past every support and misc
+# number, src/core/xchips_registry.h XREG4_FIRST_ATTACK), which its record takes as its family, its subfamily BN4's own
+MOVED.update({
+    19: 0xD0, 20: 0xD0, 21: 0xD0, 22: 0xD0, 23: 0xD0, 24: 0xD0,   # HeatShot, Heat-V, HeatSide, Bubbler, Bub-V, BublSide: BN4's family 0x1E
+    63: 0xFB, 64: 0xFB, 65: 0xFB,                                 # AirHoc1-3: BN4's family 0x27
+    192: 0xD0,                                                    # DrkSpred: the same family, its subfamily 3 (its shot the table's kind 0xF)
+    12: 0xD1, 13: 0xD1, 14: 0xD1,                                 # FlmLine1-3: BN4's family 0x22
+    57: 0xD6, 58: 0xD6, 59: 0xD6,                                 # Thunder1-3: BN4's family 0x26
+    69: 0xD3, 70: 0xD3, 71: 0xD3,                                 # TwnFng1-3: BN4's family 0x34
+    35: 0xD5, 36: 0xD5, 37: 0xD5,                                 # MagBolt1-3: BN4's family 0x59
+    157: 0xD4, 158: 0xD4, 159: 0xD4,                              # PropBom1-3: BN4's family 0x62
+    189: 0xFC,                                                    # DarkBomb: BN4's family 0x09, its subfamily 2
+    160: 0xD2, 161: 0xD2, 162: 0xD2,                              # SeekBom1-3: BN4's family 0x09, its subfamily 9
+    190: 0xFD,                                                    # DrkVulcn: BN4's family 0x1F, its subfamily 4 (Vulcan1-3 the run's by BN6's own)
+    25: 0xFE, 26: 0xFE, 126: 0xFE, 128: 0xFE, 213: 0xFE,           # ElemFlar, ElemIce, ElemLeaf, ElemSand, ElemDark: BN4's state 0x60, its subfamilies 0-4
+})
+# BN4's Navi chips whose Navi is moved into BN6's engine as a unit of kind 'navi' (tools/xchiprecipe_bn4_navi.py: the chip's own
+# first-kind Navi, run by BN6's Navi object), each proved by its bn4_chip_* spec: BN4's id -> the unit's number in BN6's grown
+# Navi routines (XC_NAVI: 0x80 + BN4's subfamily), its record's subfamily under BN6's Navi family, which the row takes from
+# NAVI_TWIN (XREG_MOVED with a twin: the twin's family alone)
+NAVI = {
+    224: 0x85,                         # GutsMan: BN4's support 5, his chip's Navi the first kind's 0x14 (bn4_chip_gutsman)
+    154: 0xB6, 155: 0xB6, 156: 0xB6,   # GutPnch1-3: BN4's support 0x36, its Navi the first kind's 0x42, a GutsMan who punches (bn4_chip_gutpnch1-3)
+    151: 0xB5, 152: 0xB5, 153: 0xB5,   # RollAro1-3: BN4's support 0x35, its Navi the first kind's 0x41, a Roll who shoots an arrow (bn4_chip_rollaro1-3)
+    225: 0x85,                         # GutsMnSP: the same Navi, his power BN4's computed 1002, BN6's 1206 (NaviPowers; bn4_chip_gutsman_sp)
+}
+NAVI_TWIN = 221                        # (BN6's Roll, its first Navi chip: family 0x1B)
+MOVED.update(NAVI)
+# BN4's Program Advances whose code is moved, a subfamily of a moved unit's (the attack families' states hold theirs; a misc
+# routine of its own): BN4's id -> the unit's number, as MOVED's, which its record takes the same way. A row stays XREG_PA
+# (no folder chip, no pack entry); its recipes are listed (src/core/xchips_pas_bn4.c) once it is here and every part of
+# them plays, each proved by its bn4_pa_* spec against BN4's own battle first
+PAS = {
+    321: 0xD0, 322: 0xD0,   # HeatSprd, BubSprd: the spread family's state, its subfamilies 1 and 2 with the shot's kinds 0xB and 7 (bn4_pa_heatsprd, bn4_pa_bubsprd)
+    329: 0xD1, 330: 0xD1, 331: 0xD1,   # FlmCros1-3: FlmLine's state, its subfamily 1 (bn4_pa_flmcros1-3)
+    335: 0xD3, 336: 0xD3, 337: 0xD3,   # BstFang1-3: TwnFng's state, its subfamily 1 (bn4_pa_bstfang1-3)
+    341: 0xD5, 342: 0xD5, 343: 0xD5,   # MagShok1-3: MagBolt's state, its subfamily 3 (bn4_pa_magshok1-3)
+    338: 0xFB, 339: 0xFB, 340: 0xFB,   # PitHoky1-3: AirHoc's state, its subfamily 0, only its power AirHoc's apart (bn4_pa_pithoky1-3)
+    332: 0x8D, 333: 0x8D, 334: 0x8D,   # PitRng1-3: BN4's misc 0x0D, a unit of its own (its launcher, the boomerangs Boomer's; bn4_pa_pitrng1-3)
+}
+PACK_FIRST, PACK_END, PA_FIRST, REST_FIRST = 527, 603, 605, 635
+# BN4's list of its Program Advances' recipes (src/emu/bn4_battle.h BN4_PA_LIST, its word BN4_PA_LIST_REF; docs/rom/bn4.md):
+# a recipe's count, its kind (0: that many of one chip, codes in a row; else BN4_PA_KIND_LISTED: these ids in this order,
+# BN6's kind 4 by its checker's body), the Program Advance, its part or parts
+BN4_PA_LIST, BN4_PA_LIST_REF, PA_KIND_SAME, PA_KIND_IDS = 0x080212B0, 0x0801F4E0, 0, 4
+OUT_PAS = os.path.join(ROOT, 'src', 'core', 'xchips_pas_bn4.c')
+
+# BN4's ids in the order they take 527-602 (the plan's order of play: docs/multirom/bn4-chips.md, Their code)
+FIRST = (
+    82, 216, 97, 201, 308, 44, 222, 223,                                            # on BN6's code; RollSP, RollDS
+    224, 225, 226, 236, 237, 238, 227, 228, 229, 233, 234, 235, 230, 231, 232,      # GutsMan, ThunMan, WindMan, FireMan, SerchMan,
+    251, 252, 253, 254, 255, 256,                                                   # AquaMan, WoodMan: the moved Navis'
+    281, 115, 133, 178, 179, 180, 193, 285, 286, 287, 288, 60, 61, 62, 210,         # the units under 300 bytes
+    78, 79, 80, 72, 73, 74, 130, 131, 132, 38, 39, 40, 47, 75, 76, 77, 211,         # SidBmbo, WhitWeb, MokoRus, Binder, SandRing, Boomer, BugChain
+    19, 20, 21, 22, 23, 24, 192, 12, 13, 14, 160, 161, 162, 190, 289,               # the spread chips, FlmLine, SeekBom, DrkVulcn, BlakWeap
+)
+
+
+def roms():
+    found = {}
+    for name in sorted(os.listdir(ROM_DIR)) if os.path.isdir(ROM_DIR) else []:
+        path = os.path.join(ROM_DIR, name)
+        if name.lower().endswith('.gba') and os.path.getsize(path) == 0x800000:
+            with open(path, 'rb') as f:
+                data = f.read()
+            for k, v in SHA1.items():
+                if hashlib.sha1(data).hexdigest() == v:
+                    found[k] = data
+    missing = [k for k in SHA1 if k not in found]
+    if missing:
+        sys.exit(f'xreg_bn4: no {", ".join(missing).upper()} ROM in {ROM_DIR}')
+    return found
+
+
+def bn5_code(c):
+    """BN5's text code as BN6's (src/core/rom.c's bn5_code): -1 none, -2 the DS mark"""
+    if c < 0x40:
+        return c
+    if c <= 0x92 or 0x94 <= c <= 0x9A:
+        return c + 5
+    if 0xA0 <= c <= 0xAD and c != 0xA5:
+        return c + 3
+    return {0x93: 0x98, 0x9C: 0x98, 0x9D: 0xA2, 0x9E: 0x43, 0x9F: -2, 0x9B: 0xA0, 0xA5: 0xA0, 0xB1: 0xA0, 0xB4: 0xA0,
+            0xAE: -1, 0xAF: -1, 0xB0: -1, 0xB5: -1, 0xB6: -1, 0xB7: -1}.get(c, c)
+
+
+def bn4_code(c):
+    """BN4's (its punctuation, 0x40-0x57, is BN6's 0x58 on: rom.c's bn4_code)"""
+    return c + 0x58 if 0x40 <= c <= 0x57 else c
+
+
+CONV = {'bn6': lambda c: c, 'bn5': bn5_code, 'bn4': bn4_code}
+
+
+def name(rom, game, i):
+    """chip i's name in BN6's codes, 19 at most (XCHIP_NAME less its end)"""
+    arch = NAMES[game][i >> 8]
+    p, out = arch + struct.unpack_from('<H', rom, arch + 2 * (i & 0xFF))[0], []
+    while rom[p] < 0xE5 and len(out) < 19:
+        c = CONV[game](rom[p])
+        out += [0x0E, 0x1D] if c == -2 else [c] if c >= 0 else []
+        p += 1
+    return bytes(out[:19])
+
+
+def spell(b):
+    return ''.join(chr(65 + c - 0x0B) if 0x0B <= c <= 0x24 else chr(97 + c - 0x26) if 0x26 <= c <= 0x3F else
+                   chr(48 + c - 1) if 1 <= c <= 10 else {0: ' ', 0x98: '-', 0x9E: '+', 0xA6: '.'}.get(c, '?') for c in b)
+
+
+def registry_own():
+    """the registry's rows of BN5's: BN5's id -> (its id in BN6's tables, how)"""
+    with open(os.path.join(ROOT, 'src', 'core', 'xchips_registry.c'), encoding='utf-8') as f:
+        return {int(m.group(1)): (int(m.group(2)), m.group(3)) for m in re.finditer(r'\{\s*(\d+),\s*(\d+),\s*XREG_(\w+)', f.read())}
+
+
+def rows(r):
+    rec = lambda g, i: r[g][RECORDS[g] + REC * i:RECORDS[g] + REC * (i + 1)]   # noqa: E731
+    names = {g: {i: name(r[g], g, i) for i in range(1, COUNT[g])} for g in SHA1}
+    reg = registry_own()
+    own = {v[0] for v in reg.values() if v[1] not in ('SAME', 'ALIAS')}
+    paid, new, pas = {}, [], []
+    for x in range(1, COUNT['bn4']):
+        rx = rec('bn4', x)
+        if not names['bn4'][x] or all(c == 0xFF for c in rx[0:4]):
+            continue
+        by6 = next((i for i in range(1, 350) if i not in own and (i < COUNT['bn6'] or i >= 320) and
+                    name(r['bn6'], 'bn6', i) == names['bn4'][x]), 0)
+        by5 = next((j for j in range(1, COUNT['bn5']) if names['bn5'][j] == names['bn4'][x] and j in reg and
+                    reg[j][1] not in ('SAME', 'ALIAS')), 0)
+        if rx[BN4_CLASS] == 4:
+            # (a Program Advance BN6 or the registry has by name is the run's)
+            if not by6 and not by5:
+                pas.append(x)
+            continue
+        if rx[BN4_CLASS] > 2:
+            continue
+        if x in ALIAS:
+            # (held to the two names being one cut short: BN6's the start of BN4's)
+            if not spell(names['bn4'][x]).startswith(spell(name(r['bn6'], 'bn6', ALIAS[x]))):
+                sys.exit(f'xreg_bn4: ALIAS {x} is not BN6\'s {ALIAS[x]} by name')
+            paid[x] = ALIAS[x]
+            continue
+        # (BN6's own folder chip of its name; else the registry's own id of BN5's, no Program Advance)
+        hit = by6 if by6 and by6 < COUNT['bn6'] else reg[by5][0] if by5 and reg[by5][1] != 'PA' else 0
+        if hit:
+            paid[x] = hit
+        else:
+            new.append(x)
+    # (an SP or a DS whose Navi's V1 the run has: the run's chip of that version, where it has one)
+    out_by_navi = set()
+    for x in list(new):
+        rx = rec('bn4', x)
+        if rx[BN4_CLASS] != 1 or rx[PARAMS] not in (SP, DS):
+            continue
+        v = x - (rx[PARAMS] - SP + 1)
+        rv = rec('bn4', v)
+        if v in paid and rv[BN4_CLASS] == 1 and rv[PARAMS] == 0 and rv[FAMILY:SUB + 1] == rx[FAMILY:SUB + 1]:
+            # (the registry's row of BN5's id as many after the V1's; BN6's own SP; else none: Roll's two and ProtoMan's DS)
+            v5 = next((j for j in reg if reg[j][0] == paid[v] and reg[j][1] not in ('SAME', 'ALIAS')), 0)
+            if v5 and (v5 + rx[PARAMS] - SP + 1) in reg:
+                new.remove(x)
+            elif not v5 and spell(names['bn4'][v]) == 'ProtoMan':
+                new.remove(x)
+                out_by_navi.add(x)
+    new = [x for x in new if x not in OUT_OF]
+    missing = [x for x in FIRST if x not in new and x not in ALIAS]
+    if missing or len(set(FIRST)) != len(FIRST) or len(FIRST) != PACK_END - PACK_FIRST:
+        sys.exit(f'xreg_bn4: FIRST does not hold {PACK_END - PACK_FIRST} of the new chips once each (not new: {missing})')
+    order = list(FIRST) + [x for x in new if x not in FIRST]
+    out = []
+    for k, x in enumerate(order):
+        if x in ALIAS:   # (its id retired: the ids after it stay)
+            continue
+        out.append((x, PACK_FIRST + k if k < len(FIRST) else REST_FIRST + k - len(FIRST), 'XREG_RECORD' if x in ON_BN6 else 'XREG_MOVED' if x in MOVED else 'XREG_PENDING'))
+    for k, x in enumerate(pas):
+        out.append((x, PA_FIRST + k, 'XREG_PA'))
+    if len(pas) > REST_FIRST - PA_FIRST or out[len(order) - 1][1] > 1023:
+        sys.exit('xreg_bn4: more Program Advances or chips than their ids')
+    return [(x, to, how, rec('bn4', x), spell(names['bn4'][x])) for x, to, how in sorted(out)]
+
+
+HEAD = '''/* BN4 Red Sun's rows of the chip registry (xchips_registry.h; docs/multirom/bn4-chips.md, The build plan's unit 2):
+ * the chips a run has none of by name or by Navi, each with its id in BN6's tables, fixed here. Written by
+ * tools/xreg_bn4.py from the three ROMs: numbers only (BN4's id, the id, how it comes in, its twin and subfamily where its
+ * record runs on BN6's code, its codes, class and MB,
+ * which its placeholder keeps where BN4's ROM is not read; and which rows are BN4's dark chips). 527-602 the chips that play first, 605-623 its Program
+ * Advances, 635 on the rest. */
+#include "xchips_registry.h"
+
+const XChipReg4 xreg4_rows[] = {
+'''
+
+
+def text(rws):
+    L = [HEAD]
+    for x, to, how, rec, nm in rws:
+        codes = ', '.join(f'0x{c:02X}' for c in rec[0:4])
+        twin, sub = ON_BN6.get(x, (NAVI_TWIN if x in NAVI else 0, PAS.get(x) if how == 'XREG_PA' else MOVED.get(x)))
+        L.append(f'\t{{ {x:3}, {to:4}, {how}, {twin:3}, 0x{0xFF if sub is None else sub:02X}, {{ {codes} }}, {rec[BN4_CLASS]}, {rec[BN4_MB]:2} }},   /* {nm} */\n')
+    L.append('};\nconst int xreg4_count = (int)(sizeof xreg4_rows / sizeof *xreg4_rows);\n')
+    L.append('/* BN4\'s chips that are a chip of BN6\'s under another spelling: BN4\'s id, BN6\'s (pair_bn4) */\n')
+    L.append('const uint16_t xreg4_alias[][2] = { ' + ', '.join(f'{{ {a}, {b} }}' for a, b in sorted(ALIAS.items())) + ' };\n')
+    L.append('const int xreg4_alias_count = (int)(sizeof xreg4_alias / sizeof *xreg4_alias);\n')
+    L.append('/* BN4\'s dark chips among the rows, by their id in BN6\'s tables: a record whose alignment is dark or a DarkChip\'s (xreg4_dark) */\n')
+    dark = [to for x, to, how, rec, nm in rws if rec[ALIGN] == ALIGN_DARK or rec[FLAGS] & FLAG_DARK]
+    L.append('const uint16_t xreg4_dark_ids[] = {\n' + ''.join('\t' + ', '.join(str(d) for d in dark[i:i + 16]) + ',\n' for i in range(0, len(dark), 16)) + '};\n')
+    L.append('const int xreg4_dark_count = (int)(sizeof xreg4_dark_ids / sizeof *xreg4_dark_ids);\n')
+    return ''.join(L)
+
+
+HEAD_PAS = '''/* xchips_pas_bn4.c: BN4 Red Sun's Program Advances of the chip registry (XREG_PA, xchips_registry_bn4.c) whose code is
+ * moved (tools/xreg_bn4.py PAS), their recipes as BN4's list has them (BN4_PA_LIST), in BN6's chip ids and BN6's kinds
+ * (BN4's listed kind BN6's 4), every part a chip that plays; written by tools/xreg_bn4.py from BN4's ROM and its rows, for
+ * BN6's list grown with them after BN5's (src/emu/xchips_code.c). Do not edit: write it again. Numbers alone. */
+#include "xchips_pas.h"
+
+const XChipPa xchips_pas4[] = {
+'''
+
+
+def pa_recipes(r, rws):
+    """BN4's recipes, in its list's order: (its entry, n, BN6's kind, BN4's PA, BN4's parts)"""
+    b = r['bn4']
+    u8, u16, u32 = (lambda a: b[a - 0x08000000]), (lambda a: struct.unpack_from('<H', b, a - 0x08000000)[0]), \
+        (lambda a: struct.unpack_from('<I', b, a - 0x08000000)[0])
+    if u32(BN4_PA_LIST_REF) != BN4_PA_LIST:
+        sys.exit(f'xreg_bn4: BN4\'s Program Advances\' list is not at {BN4_PA_LIST:08X}')
+    out, k = [], 0
+    while u32(BN4_PA_LIST + 4 * k):
+        p = u32(BN4_PA_LIST + 4 * k)
+        n, kind = u8(p), PA_KIND_IDS if u8(p + 1) else PA_KIND_SAME
+        out.append((p, n, kind, u16(p + 2), [u16(p + 4 + 2 * j) for j in range(n if kind == PA_KIND_IDS else 1)]))
+        k += 1
+    return out
+
+
+def pas_text(r, rws):
+    """the recipes' file, and the registry's Program Advances that wait: {its name: why}"""
+    row = {x: (to, how, nm) for x, to, how, rec, nm in rws}
+    plays = lambda x: x in row and row[x][1] in ('XREG_RECORD', 'XREG_MOVED')   # noqa: E731
+    L, waits = [HEAD_PAS], {}
+    for x in PAS:
+        if row.get(x, (0, ''))[1] != 'XREG_PA':
+            sys.exit(f'xreg_bn4: PAS {x} is no Program Advance of the rows')
+    for p, n, kind, pa, parts in pa_recipes(r, rws):
+        if row.get(pa, (0, ''))[1] != 'XREG_PA':
+            continue   # (BN6's own by name, or the registry's of BN5's: the run's recipes)
+        out_of = [row[x][2] if x in row else f'BN4 {x}' for x in parts if not plays(x)]
+        if pa not in PAS or out_of:
+            waits.setdefault(row[pa][2], ('its parts ' + ', '.join(out_of)) if out_of else 'its own code')
+            continue
+        ids = ', '.join(str(row[x][0]) for x in parts) + ', 0' * (4 - len(parts))
+        how = f'{n} {row[parts[0]][2]} of codes in a row' if kind == PA_KIND_SAME else ' + '.join(row[x][2] for x in parts)
+        L.append(f'\t{{ 0x{p:08X}, {n}, {kind}, {row[pa][0]}, {{ {ids} }} }},   /* {row[pa][2]}: {how} */\n')
+    if len(L) == 1:
+        L.append('\t{ 0, 0, 0, 0, { 0, 0, 0, 0 } },   /* (none yet: no row read, the count 0) */\n')
+        L.append('};\nconst int xchips_pas4_count = 0;\n')
+    else:
+        L.append('};\nconst int xchips_pas4_count = (int)(sizeof xchips_pas4 / sizeof *xchips_pas4);\n')
+    return ''.join(L), waits
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
+    ap.add_argument('--check', action='store_true')
+    a = ap.parse_args()
+    r = roms()
+    rws = rows(r)
+    t = text(rws)
+    tp, waits = pas_text(r, rws)
+    if a.check:
+        for path, want in ((OUT, t), (OUT_PAS, tp)):
+            with open(path, encoding='utf-8') as f:
+                if f.read() != want:
+                    sys.exit(f'xreg_bn4: {os.path.relpath(path, ROOT)} is not what the ROMs give (python3 tools/xreg_bn4.py)')
+        print('xreg_bn4: the files are what the ROMs give')
+        return
+    with open(OUT, 'w', encoding='utf-8') as f:
+        f.write(t)
+    with open(OUT_PAS, 'w', encoding='utf-8') as f:
+        f.write(tp)
+    for nm, why in waits.items():
+        print(f'xreg_bn4: {nm} waits: {why}')
+    folder = sum(1 for r in rws if r[2] != 'XREG_PA')
+    print(f'xreg_bn4: {len(rws)} rows ({folder} folder chips, {len(rws) - folder} Program Advances), ids to {max(r[1] for r in rws)}')
+
+
+if __name__ == '__main__':
+    main()

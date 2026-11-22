@@ -1,0 +1,372 @@
+"""Real socket tests of the server and the wire contract; no ROM needed."""
+
+import asyncio
+import base64
+import hashlib
+from pathlib import Path
+import re
+import struct
+import sys
+import unittest
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "server"))
+
+from cyberworld_server import protocol, websocket
+from cyberworld_server.app import Server
+
+
+def masked(data, opcode=2):
+    mask = b"test"
+    header = bytes((0x80 | opcode, 0x80 | len(data))) if len(data) < 126 else struct.pack("!BBH", 0x80 | opcode, 254, len(data))
+    return header + mask + bytes(value ^ mask[i % 4] for i, value in enumerate(data))
+
+
+class Client:
+    async def open(self, port, name="Lan", protocols=None, **identity):
+        self.reader, self.writer = await asyncio.open_connection("127.0.0.1", port)
+        key = base64.b64encode(b"0123456789abcdef").decode()
+        self.writer.write(("GET /presence HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\n"
+                           "Connection: Upgrade\r\nSec-WebSocket-Version: 13\r\nSec-WebSocket-Key: " + key +
+                           "\r\nSec-WebSocket-Protocol: " + (protocols or protocol.SPEC["subprotocol"]) + "\r\n\r\n").encode())
+        response = await self.reader.readuntil(b"\r\n\r\n")
+        assert response.startswith(b"HTTP/1.1 101")
+        accept = base64.b64encode(hashlib.sha1((key + websocket.GUID).encode()).digest())
+        assert accept in response
+        self.protocol = next(line.split(":", 1)[1].strip() for line in response.decode().split("\r\n")
+                             if line.lower().startswith("sec-websocket-protocol:"))
+        await self.send(protocol.hello(name, **identity))
+        return await self.receive()
+
+    async def send(self, data):
+        self.writer.write(masked(data))
+        await self.writer.drain()
+
+    async def receive(self):
+        first, size = await asyncio.wait_for(self.reader.readexactly(2), 2)
+        assert first in (0x82, 0x88, 0x8a) and not size & 0x80
+        if size == 126:
+            size = struct.unpack("!H", await self.reader.readexactly(2))[0]
+        return await self.reader.readexactly(size)
+
+    async def message(self, kind):
+        for _ in range(100):
+            message = await self.receive()
+            if message and message[0] == kind:
+                return message
+        raise AssertionError("Message not received")
+
+    async def close(self):
+        """Leaving as the game does at the pad: BYE (protocol v10), then the
+        socket closed; the place is freed at once."""
+        if not self.writer.is_closing():
+            try:
+                self.writer.write(masked(bytes((protocol.SPEC["bye"],))))
+                await self.writer.drain()
+            except ConnectionError:
+                pass
+        await self.drop()
+
+    async def drop(self):
+        """The link gone without a word: the server holds the place (holds.py)."""
+        self.writer.close()
+        try:
+            await self.writer.wait_closed()
+        except ConnectionError:
+            pass
+
+
+class ServerTests(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.server = Server(seed=123456, capacity=2, player_cap=2)
+        self.port = await self.server.start("127.0.0.1", 0)
+        self.clients = []
+
+    async def asyncTearDown(self):
+        for client in self.clients:
+            await client.close()
+        await self.server.close()
+
+    async def connect(self, name="Lan", **identity):
+        client = Client()
+        self.clients.append(client)
+        return client, await client.open(self.port, name, **identity)
+
+    async def test_two_clients_receive_movement_and_disconnect(self):
+        first, welcome = await self.connect()
+        second, other = await self.connect("MegaMan")
+        self.assertEqual(welcome[0], protocol.SPEC["welcome"])
+        self.assertEqual(welcome[1:5], other[1:5])
+        self.assertNotEqual(welcome[5:9], other[5:9])
+        await first.send(protocol.STATE.pack(protocol.SPEC["state"], 123, -234, 12, 7))
+        # A ticker snapshot can already be queued before STATE is handled.
+        # Observe the actual update instead of assuming host scheduling.
+        for _ in range(30):
+            message = await second.message(protocol.SPEC["snapshot"])
+            if message[1] == 1 and protocol.PEER.unpack(message[2:])[2:6] == (123, -234, 12, 7):
+                break
+        else:
+            self.fail("Peer movement was not delivered")
+        self.assertEqual(message[1], 1)
+        peer = protocol.PEER.unpack(message[2:])
+        self.assertEqual(peer[0], struct.unpack("!I", welcome[5:9])[0])
+        self.assertEqual(peer[1], welcome[14:30])
+        self.assertEqual(peer[2:6], (123, -234, 12, 7))
+        self.assertEqual(peer[6].rstrip(b"\0"), b"Lan")
+        self.assertEqual(peer[7], 0)        # (its ROMs besides BN6's: none)
+        await first.close()
+        self.clients.remove(first)
+        for _ in range(20):
+            message = await second.message(protocol.SPEC["snapshot"])
+            if message == bytes((protocol.SPEC["snapshot"], 0)):
+                break
+        self.assertEqual(message, bytes((protocol.SPEC["snapshot"], 0)))
+        self.assertEqual(len(self.server.players), 1)
+
+    async def test_rejects_incompatible_identity(self):
+        # (v10: a game newer than the server told apart from an older one, so it says where the newer one is)
+        for identity, code in ((dict(version=protocol.SPEC["version"] - 1), 2), (dict(version=protocol.SPEC["version"] + 1), 17),
+                               (dict(square_make=protocol.SPEC["square_make"] + 1), 17), (dict(square_make=0), 3),
+                               (dict(square_hash=protocol.SPEC["square_hash"] ^ 1), 3), (dict(rom_code="BAD!"), 4),
+                               (dict(rom_sha1="00" * 20), 4), (dict(bn5=True, bn5_code="BRKP"), 15),
+                               (dict(bn5=True, bn5_sha1="00" * 20), 15), (dict(bn5=True, bn4_code="B4BE"), 15),
+                               (dict(bn5=True, bn4_sha1="00" * 20), 15)):
+            client, response = await self.connect(**identity)
+            self.assertEqual(response[:3], struct.pack("!BH", protocol.SPEC["error"], code))
+            await client.close()
+            self.clients.remove(client)
+        self.assertFalse(self.server.players)
+
+    async def test_capacity_and_name_validation(self):
+        _, response = await self.connect("bad<script>")
+        self.assertEqual(response[:3], bytes((protocol.SPEC["error"], 0, 5)))
+        await self.connect("One")
+        await self.connect("Two")
+        _, response = await self.connect("Three")
+        self.assertEqual(response[:3], bytes((protocol.SPEC["error"], 0, 7)))
+        self.assertEqual(len(self.server.players), 2)
+
+    async def test_ping_round_trip_and_invalid_position(self):
+        client, _ = await self.connect()
+        await client.send(bytes((protocol.SPEC["ping"],)) + b"1234")
+        self.assertEqual(await client.message(protocol.SPEC["pong"]), bytes((protocol.SPEC["pong"],)) + b"1234")
+        await client.send(protocol.STATE.pack(protocol.SPEC["state"], 8193, 0, 0, 0))
+        response = await client.message(protocol.SPEC["error"])
+        self.assertEqual(response[:3], bytes((protocol.SPEC["error"], 0, 6)))
+
+    async def test_rejects_unmasked_and_oversized_frames(self):
+        for frame in (b"\x82\x01x", b"\x82\xfe\x02\x01", b"\x02\x80test", b"\x82\xff"):
+            client, _ = await self.connect()
+            client.writer.write(frame)
+            await client.writer.drain()
+            response = await client.message(protocol.SPEC["error"])
+            self.assertEqual(response[0], protocol.SPEC["error"])
+            await client.close()
+            self.clients.remove(client)
+            await asyncio.sleep(0.01)
+
+    async def test_rate_limit(self):
+        client, _ = await self.connect()
+        client.writer.write(masked(bytes((protocol.SPEC["ping"],)) + b"0000") * 100)
+        await client.writer.drain()
+        response = await client.message(protocol.SPEC["error"])
+        self.assertEqual(response[:3], bytes((protocol.SPEC["error"], 0, 8)))
+
+    async def test_server_shutdown_closes_idle_players(self):
+        client, _ = await self.connect()
+        await asyncio.wait_for(self.server.close(), 1)
+        await asyncio.wait_for(client.reader.read(), 1)
+        self.assertTrue(client.reader.at_eof())
+        self.assertFalse(self.server.players)
+
+    async def test_origin_is_rejected_before_join(self):
+        reader, writer = await asyncio.open_connection("127.0.0.1", self.port)
+        writer.write(b"GET /presence HTTP/1.1\r\nHost: localhost\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n"
+                     b"Sec-WebSocket-Version: 13\r\nSec-WebSocket-Key: MDEyMzQ1Njc4OWFiY2RlZg==\r\n"
+                     b"Sec-WebSocket-Protocol: " + protocol.SPEC["subprotocol"].encode() + b"\r\nOrigin: https://untrusted.invalid\r\n\r\n")
+        await writer.drain()
+        self.assertTrue((await reader.read()).startswith(b"HTTP/1.1 400"))
+        self.assertFalse(self.server.players)
+        writer.close()
+        await writer.wait_closed()
+
+
+# (protocol v19, the shared dive, and v20's crews by nearness: every constant they added, which protocol.h holds too)
+DIVE_NAMES = ("week_post_bytes", "week_party", "hello_no_arena", "peer_diving", "dive", "dive_room", "dive_traces", "dive_place",
+              "dive_feed", "divers", "crew", "crew_state", "queue", "queue_state", "party_damage", "party_hp", "week_splits",
+              "dive_enter", "dive_leave", "dive_end", "dive_found", "dive_phrase", "dive_wave", "dive_split",
+              "dive_enter_bytes", "dive_leave_bytes", "dive_end_bytes", "dive_found_bytes", "dive_phrase_bytes",
+              "dive_wave_bytes", "dive_split_bytes", "dive_deleted", "dive_won", "busting_most", "party_most",
+              "dive_room_bytes", "trace_marks", "trace_phrases", "trace_finds", "trace_opened", "trace_splits", "trace_gone",
+              "trace_head", "trace_mark_bytes", "trace_phrase_bytes", "trace_find_bytes", "trace_split_bytes", "traces_most",
+              "split_guardian", "dive_place_bytes", "dive_feed_bytes", "feed_deleted", "feed_won", "feed_guardian", "feed_flare",
+              "divers_head", "divers_entry_bytes", "divers_most", "divers_ms", "divers_fighting", "crew_bytes",
+              "crew_state_bytes", "crew_member_bytes", "crew_battle",
+              "crew_join", "crew_formed", "crew_split_up", "crew_offer", "crew_alone",
+              "crew_join_ms", "queue_bytes", "queue_state_bytes", "queue_entry_bytes", "queue_join", "queue_leave",
+              "queue_start", "queue_pass", "queue_waiting", "queue_started", "queue_out", "queue_alone", "queue_arena",
+              "party_bytes", "arena_party", "arena_linked", "arena_seat_gone", "week_splits_bytes", "notice_dive_out",
+              "notice_dive_in", "notice_dive_wait", "notice_trace_gone", "notice_crew", "notice_queue",
+              # (v20, crews by nearness: crews.py)
+              "crew_near_wide", "crew_near_high", "crew_far_wide", "crew_far_high", "crew_form_ms", "crew_split_ms", "crew_away_ms",
+              # (v24, the crew's display: crews.py's vitals)
+              "dive_vitals", "dive_vitals_bytes", "crew_vitals", "crew_vitals_ms",
+              "dive_where", "dive_where_bytes", "where_layer", "where_home", "where_battle",
+              # (v29, comings and goings: crews.py)
+              "where_busy", "crew_full",
+              # (v23, a crew's battles at once: crews.py)
+              "crew_busy")
+# (protocol v22, issue #718: a dive pulled back once by its crew, the Board's mark)
+PULL_NAMES = ("week_pulled",)
+
+
+class ContractTests(unittest.TestCase):
+    def test_shared_constants_and_game_generation_match(self):
+        header = (ROOT / "shared/online/protocol.h").read_text()
+        for name in ("hello", "welcome", "state", "snapshot", "error", "ping", "pong",
+                     "max_players", "name_bytes", "max_message", "coordinate_limit", "profile", "inspect", "card",
+                     "social", "event", "channel", "notice", "identity_bytes", "board_cells", "phrase_count",
+                     "emote_count", "profile_bytes", "peer_bytes", "welcome_bytes", "trade", "trade_state", "arena",
+                     "arena_state", "arena_loadout", "arena_input", "arena_hash", "chip_last", "code_last", "trade_bytes",
+                     "trade_state_bytes", "arena_bytes", "arena_state_bytes", "arena_loadout_max", "arena_input_max", "bn6_chip_last", "hello_bytes", "roms_bn5", "roms_bn4", "roms_full", "roms_one_extra", "hello_one_extra", "notice_ground", "bn4_chip_first", "notice_pass",
+                     "stands", "arena_status", "watch", "watch_state", "watch_relay", "watch_keys", "stands_entry_bytes",
+                     "stands_max", "arena_status_bytes", "watch_bytes", "watch_state_bytes", "watch_keys_head", "watch_keys_max",
+                     "watch_most", "bye", "hello_resume", "error_maintenance", "error_server_older", "maintenance_bytes",
+                     "busy_shift", "busy_battle", "busy_watch", "busy_trade", "link_shift", "link_good_ms", "link_fair_ms",
+                     "ping_bytes", "arena_seen", "pending_unseen", "team", "team_state", "team_bytes", "team_state_bytes",
+                     "notice_team", "arena_seat", "seats", "team_relay", "team_side_by_side", "stands_side_by_side",
+                     "transfer", "transfer_state", "transfer_data", "transfer_version", "transfer_put", "transfer_get",
+                     "transfer_done", "transfer_bytes", "transfer_state_bytes", "transfer_lookup_bytes", "transfer_max",
+                     "transfer_minutes", "transfer_ready", "transfer_held", "transfer_found", "transfer_none",
+                     "transfer_busy", "transfer_taken", "transfer_off", "transfer_removed",
+                     "sync", "sync_state", "sync_version", "sync_pull", "sync_push", "sync_drop", "sync_bytes",
+                     "sync_state_bytes", "sync_slot_bytes", "sync_auth_bytes", "sync_max", "sync_days", "sync_same",
+                     "sync_found", "sync_none", "sync_denied", "sync_ready", "sync_stored", "sync_conflict",
+                     "sync_busy", "sync_off", "sync_dropped",
+                     *DIVE_NAMES, *PULL_NAMES):
+            value = int(re.search(r"#define ONLINE_" + name.upper() + r"\s+(\d+)", header)[1])
+            self.assertEqual(value, protocol.SPEC[name])
+        self.assertIn(f'#define ONLINE_PROTOCOL_VERSION {protocol.SPEC["version"]}', header)
+        plan = (ROOT / "src/online/square_plan.h").read_text()
+        self.assertEqual(int(re.search(r"#define SQUARE_MAKE (\d+)", plan)[1]), protocol.SPEC["square_make"])
+        self.assertEqual(int(re.search(r"#define SQUARE_HASH (0x\w+)u", plan)[1], 16), protocol.SPEC["square_hash"])
+        self.assertEqual(protocol.TRADE.size, protocol.SPEC["trade_bytes"])
+        self.assertEqual(protocol.TRADE_STATE.size, protocol.SPEC["trade_state_bytes"])
+        self.assertEqual(protocol.ARENA.size, protocol.SPEC["arena_bytes"])
+        self.assertEqual(protocol.ARENA_STATE.size, protocol.SPEC["arena_state_bytes"])
+        self.assertEqual(protocol.PROFILE.size, protocol.SPEC["profile_bytes"])
+        self.assertEqual(protocol.PEER.size, protocol.SPEC["peer_bytes"])
+        self.assertEqual(protocol.WELCOME.size, protocol.SPEC["welcome_bytes"])
+        self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
+        # (the stands, protocol v7)
+        self.assertEqual(protocol.STANDS_ENTRY.size, protocol.SPEC["stands_entry_bytes"])
+        self.assertEqual(protocol.ARENA_STATUS.size, protocol.SPEC["arena_status_bytes"])
+        self.assertEqual(protocol.WATCH.size, protocol.SPEC["watch_bytes"])
+        self.assertEqual(protocol.WATCH_STATE.size, protocol.SPEC["watch_state_bytes"])
+        self.assertEqual(protocol.TEAM_STATE.size, protocol.SPEC["team_state_bytes"])
+        # (saves sent by a code: transfer.py)
+        self.assertEqual(protocol.TRANSFER.size, protocol.SPEC["transfer_bytes"])
+        self.assertEqual(protocol.TRANSFER_STATE.size, protocol.SPEC["transfer_state_bytes"])
+        # (saves kept in step: sync.py)
+        self.assertEqual(protocol.SYNC.size, protocol.SPEC["sync_bytes"])
+        self.assertEqual(protocol.SYNC_STATE.size, protocol.SPEC["sync_state_bytes"])
+        # (v15: a 2v2's ARENA_SEAT around the largest relayed message)
+        self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
+        self.assertEqual(protocol.WATCH_KEYS.size, protocol.SPEC["watch_keys_head"])
+        self.assertLessEqual(2 + protocol.SPEC["stands_max"] * protocol.STANDS_ENTRY.size, protocol.SPEC["max_message"])
+        self.assertLessEqual(protocol.WATCH_KEYS.size + 2 * protocol.SPEC["watch_keys_max"], protocol.SPEC["max_message"])
+        self.assertLessEqual(2 + 7 + protocol.SPEC["arena_loadout_max"], protocol.SPEC["max_message"])
+        self.assertIn(f'#define ONLINE_SUBPROTOCOL "{protocol.SPEC["subprotocol"]}"', header)
+        # (protocol v9: the pairs' rules gone with mixed pairs, the full set a session's ROMs)
+        for gone in ("format_bn6", "format_full"):
+            self.assertNotIn(gone, protocol.SPEC)
+            self.assertNotIn("ONLINE_" + gone.upper(), header)
+        # (every bit of the full set one a HELLO can carry: read_hello learns a new game's before roms_full names it)
+        self.assertEqual(protocol.SPEC["roms_full"] & ~(protocol.SPEC["roms_bn5"] | protocol.SPEC["roms_bn4"]), 0)
+        self.assertTrue(protocol.full_set(protocol.SPEC["roms_full"]))
+        # (v17: BN4 Red Sun's in the set, its bit clear of SNAPSHOT's others: busy's and link's, bits 1-4)
+        self.assertEqual(protocol.SPEC["roms_full"], protocol.SPEC["roms_bn5"] | protocol.SPEC["roms_bn4"])
+        self.assertFalse(protocol.full_set(protocol.SPEC["roms_bn5"]) or protocol.full_set(protocol.SPEC["roms_bn4"]))
+        self.assertGreaterEqual(protocol.SPEC["roms_bn4"], 1 << (protocol.SPEC["link_shift"] + 2))
+        self.assertEqual(protocol.HELLO.size, protocol.SPEC["hello_bytes"])
+        self.assertFalse(protocol.full_set(0))
+        # (v18: a system of one extra ROM at most. Its bit past the games', the busy and the link bits in SNAPSHOT's
+        # byte, its HELLO bit clear of the resume's and of every channel; its pass full with one game, never the
+        # full set; any other system's with every game alone)
+        bn5, bn4, one = protocol.SPEC["roms_bn5"], protocol.SPEC["roms_bn4"], protocol.SPEC["roms_one_extra"]
+        self.assertEqual(one, protocol.SPEC["roms_bn4"] << 1)
+        self.assertLess(one, 256)
+        self.assertFalse(protocol.SPEC["hello_one_extra"] & protocol.SPEC["hello_resume"])
+        self.assertGreater(protocol.SPEC["hello_one_extra"], 256)
+        self.assertEqual([protocol.pass_full(r) for r in (0, one, bn5, bn4, one | bn5, one | bn4, bn5 | bn4)],
+                         [False, False, False, False, True, True, True])
+        self.assertFalse(protocol.full_set(one | bn5) or protocol.full_set(one | bn4))
+        # (whose game a chip is, BN4's own first, and what a game holds)
+        self.assertEqual([protocol.chip_game(c) for c in (5, 214, 411, protocol.SPEC["bn4_chip_first"] - 1, protocol.SPEC["bn4_chip_first"], 700)],
+                         [0, bn5, bn5, bn5, bn4, bn4])
+        self.assertTrue(protocol.holds(0, 5) and protocol.holds(one | bn5, 411) and protocol.holds(bn4, 700))
+        self.assertFalse(protocol.holds(one | bn5, 700) or protocol.holds(bn4, 411) or protocol.holds(one, 214))
+        # (BN5's identity as the game checks its ROM: src/core/rom.c's xlayouts, web/play/app.js)
+        rom = (ROOT / "src/core/rom.c").read_text()
+        self.assertIn(f'"{protocol.SPEC["bn5_sha1"]}", "{protocol.SPEC["bn5_code"]}"', rom)
+        self.assertIn(f'.sha1 = "{protocol.SPEC["bn4_sha1"]}", .code = "{protocol.SPEC["bn4_code"]}"', rom)
+        # (BN4's first own id, as src/core/xchips_registry.h names it)
+        registry = (ROOT / "src/core/xchips_registry.h").read_text()
+        self.assertEqual(int(re.search(r"#define XREG4_PACK_FIRST (\d+)", registry)[1]), protocol.SPEC["bn4_chip_first"])
+        # (BN6's blank records, where BN5's chips are installed, as src/emu/bn6_chips.h names them)
+        chips = (ROOT / "src/emu/bn6_chips.h").read_text()
+        blank = re.search(r"#define BN6_CHIP_BLANK\(id\)\s+(.*)", chips)[1]
+        for low, high in protocol.SPEC["bn6_blank"]:
+            self.assertIn(str(low), blank)
+            self.assertIn(str(high), blank)
+
+    def test_ten_bit_chip_ids(self):
+        """Protocol v16: a chip past BN6's 511 (ten-bit chip ids, to 1023) is
+        a trade's and an offer's as any other; 1024 is none."""
+        trade = protocol.TRADE.pack(protocol.SPEC["trade"], 3, 7, 600, 2, 1023, 26)
+        self.assertEqual(protocol.read_trade(trade), (3, 7, (600, 2), (1023, 26)))
+        self.assertEqual(protocol.read_offer(protocol.OFFER.pack(protocol.SPEC["offer"], 600, 2, 0)), ((600, 2), 0))
+        self.assertTrue(protocol.chip_bn5(600))
+        # (v17: BN4's own ids, from bn4_chip_first; BN5's below it)
+        self.assertTrue(protocol.chip_bn4(700) and protocol.chip_bn4(protocol.SPEC["bn4_chip_first"]))
+        self.assertFalse(protocol.chip_bn4(protocol.SPEC["bn4_chip_first"] - 1) or protocol.chip_bn4(411) or protocol.chip_bn4(5))
+        for bad in (protocol.TRADE.pack(protocol.SPEC["trade"], 3, 7, 1024, 0, 1, 0), protocol.OFFER.pack(protocol.SPEC["offer"], 1024, 0, 0)):
+            with self.assertRaises(protocol.ProtocolError):
+                (protocol.read_trade if bad[0] == protocol.SPEC["trade"] else protocol.read_offer)(bad)
+
+    def test_invalid_payloads(self):
+        for data in (b"", b"\x03", protocol.STATE.pack(3, 0, 0, 0, 8)):
+            with self.assertRaises(protocol.ProtocolError):
+                protocol.read_state(data)
+        with self.assertRaises(protocol.ProtocolError):
+            protocol.read_hello(protocol.hello("Lan") + b"trailing")
+        # (v17: each game's bit as its identity came)
+        bn5, bn4 = protocol.SPEC["roms_bn5"], protocol.SPEC["roms_bn4"]
+        for kw, roms in ((dict(), 0), (dict(bn5=True), bn5 | bn4), (dict(bn5=True, bn4=False), bn5), (dict(bn4=True), bn4)):
+            self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
+        # (v18: a system of one extra ROM says so in the channel word, beside the channel and the resume bit; a
+        # HELLO naming both games reads both, whatever it says)
+        one = protocol.SPEC["roms_one_extra"]
+        for kw, roms in ((dict(one_extra=True), one), (dict(bn5=True, bn4=False, one_extra=True), bn5 | one),
+                         (dict(bn4=True, one_extra=True), bn4 | one), (dict(bn5=True, one_extra=True), bn5 | bn4)):
+            self.assertEqual(protocol.read_hello(protocol.hello("Lan", **kw))[3], roms)
+        self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=3, resume=True, bn5=True, bn4=False, one_extra=True))[2:],
+                         (3, bn5 | one, True, False))
+        # (v19: its bit clear of the resume's, the one extra's and every channel (256 at most); SNAPSHOT's bit 7, the
+        # last free, clear of the ROMs', busy's and link's bits; every message the dive adds within max_message)
+        spec = protocol.SPEC
+        self.assertFalse(spec["hello_no_arena"] & (spec["hello_resume"] | spec["hello_one_extra"]))
+        self.assertGreater(spec["hello_no_arena"], 256)
+        self.assertEqual(spec["peer_diving"], 0x80)
+        self.assertFalse(spec["peer_diving"] & (spec["roms_bn5"] | spec["roms_bn4"] | spec["roms_one_extra"] | 3 << spec["busy_shift"]
+                                                | 3 << spec["link_shift"]))
+        for size in ("dive_enter_bytes", "crew_state_bytes", "queue_state_bytes", "week_splits_bytes", "dive_place_bytes"):
+            self.assertLessEqual(spec[size], spec["max_message"])
+        self.assertLessEqual(spec["divers_head"] + spec["divers_most"] * spec["divers_entry_bytes"], spec["max_message"])
+        # (a system that cannot run the Arena says so in the channel word too, clear of the channel and the others)
+        self.assertEqual(protocol.read_hello(protocol.hello("Lan", channel=5, one_extra=True, bn5=True, bn4=False, no_arena=True))[2:],
+                         (5, bn5 | one, False, True))
+
+
+if __name__ == "__main__":
+    unittest.main()

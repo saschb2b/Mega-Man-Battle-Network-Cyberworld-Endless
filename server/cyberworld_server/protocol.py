@@ -1,0 +1,635 @@
+"""Bounded, network-byte-order presence messages. No emulator state enters here."""
+
+import json
+import re
+import struct
+import secrets
+from importlib.resources import files
+from pathlib import Path
+
+
+try:
+    _spec_text = files(__package__).joinpath("protocol.json").read_text()
+except FileNotFoundError:
+    _spec_text = (Path(__file__).resolve().parents[2] / "shared/online/protocol.json").read_text()
+SPEC = json.loads(_spec_text)
+HELLO = struct.Struct("!BHHI4s20s4s20s4s20s16sHB")
+STATE = struct.Struct("!BiiiB")
+PEER = struct.Struct("!I16siiiB16sB")
+PROFILE = struct.Struct("!HHBBBHHHBHI49s")
+WELCOME = struct.Struct("!BIIHBH16sHIH")
+TRADE = struct.Struct("!BBIHBHB")
+TRADE_STATE = struct.Struct("!BBII16sHBHB")
+ARENA = struct.Struct("!BBIHB")                  # (v15: the format, a team challenge's)
+ARENA_STATE = struct.Struct("!BBII16sBBB4I")     # (v15: the format, and a 2v2's four seats' sessions)
+ARENA_INPUT = struct.Struct("!BIIB")
+ARENA_HASH = struct.Struct("!BIIQ")
+ARENA_LOADOUT = struct.Struct("!BIH")
+OFFER = struct.Struct("!BHBB")
+BOARD_ENTRY = struct.Struct("!IHBB")
+# (the stands, protocol v7: docs/online/arena/stands.md)
+ARENA_STATUS = struct.Struct("!BIHHHHHHBBB")
+STANDS_ENTRY = struct.Struct("!III16s16sBBBHHHHHHBBBB")
+# (Team NetBattles, protocol v12: teams.py)
+TEAM = struct.Struct("!BBIB")
+TEAM_STATE = struct.Struct("!BBIII4IBBBBHB")    # (v15: the format)
+WATCH = struct.Struct("!BBI")
+WATCH_STATE = struct.Struct("!BBIIIBBII")        # (v15: the format, the partners' seats)
+WATCH_KEYS = struct.Struct("!BIBIH")
+# (the shared dive, protocol v19: dive.py, traces.py, crews.py, party.py)
+DIVE_ROOM = struct.Struct("!BHBBBHB")
+DIVE_FEED = struct.Struct("!BB16sBBBHB")
+DIVERS_HEAD = struct.Struct("!BHB")
+DIVERS_ENTRY = struct.Struct("!16sBBB")
+DIVE_PLACE = struct.Struct("!BBBHHHH16s")
+TRACE_HEAD = struct.Struct("!BBB")
+TRACE_MARK = struct.Struct("!16shhhHB")
+TRACE_PHRASE = struct.Struct("!I16sBhhhH")
+TRACE_FIND = struct.Struct("!B16s")
+TRACE_SPLIT = struct.Struct("!BBHBB16s")
+CREW = struct.Struct("!BBIBBBB")
+CREW_STATE_HEAD = struct.Struct("!BBIB")
+CREW_MEMBER = struct.Struct("!I16sHHBB")
+QUEUE = struct.Struct("!BBBBB")
+QUEUE_STATE_HEAD = struct.Struct("!BBBBBBB")
+QUEUE_ENTRY = struct.Struct("!I16sB")
+PARTY = struct.Struct("!BIHH")
+SPLITS_HEAD = struct.Struct("!BH")
+SPLITS_ENTRY = struct.Struct("!H16s")
+# (DIVE's actions: each one's fields after the type and the action byte, its whole size protocol.json's)
+DIVE_BODIES = {SPEC["dive_enter"]: (struct.Struct("!HIBBB"), "dive_enter_bytes"),
+               SPEC["dive_leave"]: (struct.Struct("!"), "dive_leave_bytes"),
+               SPEC["dive_end"]: (struct.Struct("!BhhhHHBB"), "dive_end_bytes"),
+               SPEC["dive_found"]: (struct.Struct("!B"), "dive_found_bytes"),
+               SPEC["dive_phrase"]: (struct.Struct("!Bhhh"), "dive_phrase_bytes"),
+               SPEC["dive_wave"]: (struct.Struct("!I"), "dive_wave_bytes"),
+               SPEC["dive_split"]: (struct.Struct("!BHBBB"), "dive_split_bytes"),
+               SPEC["dive_vitals"]: (struct.Struct("!HH"), "dive_vitals_bytes"),
+               SPEC["dive_where"]: (struct.Struct("!B"), "dive_where_bytes")}
+# (saves sent by a code, no protocol version of their own: transfer.py)
+TRANSFER = struct.Struct("!BBB16sI")
+TRANSFER_STATE = struct.Struct("!BBI")
+# (saves kept in step, no protocol version of their own either: sync.py)
+SYNC = struct.Struct("!BBB16s32sII")
+SYNC_STATE = struct.Struct("!BBII")
+DEFAULT_PROFILE = PROFILE.pack(100, 100, 1, 1, 1, 0, 0, 0, 0, 0, 0, bytes(49))
+
+
+class ProtocolError(Exception):
+    """A rejected connection, with an actionable, non-sensitive reason."""
+
+    def __init__(self, reason, code=1):
+        super().__init__(reason)
+        self.code = code
+
+
+def read_hello(data):
+    """HELLO checked: its name, guest key, channel, the ROMs its game has
+    (protocol.json's roms_bn5 bit where BN5 Team Colonel's identity came,
+    roms_bn4 where BN4 Red Sun's did, v17; roms_one_extra where its system
+    reads one game's ROM beside BN6's at most, the channel's hello_one_extra
+    bit, v18: pass_full)
+    and whether it takes back a place held (the channel's hello_resume bit,
+    protocol v10: a game come back after its link dropped, holds.py), and
+    whether its system cannot run the Arena (hello_no_arena, v19: a party's
+    linked fighter, party.py)."""
+    # (which side is behind, so the game can say where the newer one is: the
+    # version read first, as another version's HELLO may be shaped otherwise; v10)
+    version = hello_version(data)
+    if version is not None and version != SPEC["version"]:
+        if version > SPEC["version"]:
+            raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+        raise ProtocolError("Protocol version mismatch", 2)
+    if len(data) < HELLO.size:
+        raise ProtocolError("Expected HELLO")
+    kind, version, make, square_hash, rom, digest, rom5, digest5, rom4, digest4, key, channel, length = HELLO.unpack_from(data)
+    if kind != SPEC["hello"] or len(data) != HELLO.size + length:
+        raise ProtocolError("Malformed HELLO")
+    if make > SPEC["square_make"]:
+        raise ProtocolError("This server is older than the game", SPEC["error_server_older"])
+    if make != SPEC["square_make"]:
+        raise ProtocolError("Square generation mismatch", 3)
+    if square_hash != SPEC["square_hash"]:
+        raise ProtocolError("Square generation mismatch", 3)
+    if rom != SPEC["rom_code"].encode() or digest.hex() != SPEC["rom_sha1"]:
+        raise ProtocolError("BN6 identity mismatch", 4)
+    # (BN5's: none, all zeros, or Team Colonel's exactly as BN6's is checked)
+    bn5 = any(rom5) or any(digest5)
+    if bn5 and (rom5 != SPEC["bn5_code"].encode() or digest5.hex() != SPEC["bn5_sha1"]):
+        raise ProtocolError("BN5 identity mismatch", 15)
+    # (BN4's, v17: the same, Red Sun's or none)
+    bn4 = any(rom4) or any(digest4)
+    if bn4 and (rom4 != SPEC["bn4_code"].encode() or digest4.hex() != SPEC["bn4_sha1"]):
+        raise ProtocolError("BN4 identity mismatch", 15)
+    if not any(key):
+        raise ProtocolError("A random guest key is required", 9)
+    name = data[HELLO.size:]
+    if not re.fullmatch(rb"[A-Za-z0-9][A-Za-z0-9 _-]{0,15}", name):
+        raise ProtocolError("Use 1-16 ASCII letters, digits, spaces, _ or -", 5)
+    resume = bool(channel & SPEC["hello_resume"])
+    roms = (SPEC["roms_bn5"] if bn5 else 0) | (SPEC["roms_bn4"] if bn4 else 0)
+    # (v18: a system that reads one extra ROM at most says so; one that names both games' ROMs reads both)
+    if channel & SPEC["hello_one_extra"] and not (bn5 and bn4):
+        roms |= SPEC["roms_one_extra"]
+    bits = SPEC["hello_resume"] | SPEC["hello_one_extra"] | SPEC["hello_no_arena"]
+    return name.decode("ascii").rstrip(), key, channel & ~bits, roms, resume, bool(channel & SPEC["hello_no_arena"])
+
+
+def hello_version(data):
+    """The protocol version a HELLO says, before it is checked (the daily
+    totals count the versions that came: stats.py); None where it is none."""
+    if len(data) < 3 or data[0] != SPEC["hello"]:
+        return None
+    return struct.unpack_from("!H", data, 1)[0]
+
+
+def full_set(roms):
+    """Whether a session's ROMs (HELLO's bits, as read_hello keeps them) are
+    the full set: every bit of protocol.json's roms_full, BN5 Team Colonel's
+    and BN4 Red Sun's (v17; BN6's identity every session has). The Square is every game's;
+    the Arena, Trade Central and the week's posts take the full set, and
+    refuse a session without it with NOTICE notice_pass (docs/online/netpass.md,
+    The NetPass)."""
+    return (roms & SPEC["roms_full"]) == SPEC["roms_full"]
+
+
+def pass_full(roms):
+    """Whether a session's pass is full (v18): every game of the set its
+    system can read is in. The full set; or, on a system that reads one extra
+    ROM at most (roms_one_extra, HELLO's word: the New 3DS), one game of the
+    set beside BN6's. It opens Trade Central, within the pair's common ground
+    (holds); the Arena, the stands and the week's posts take full_set, the
+    same installs and the same dive on every game (docs/online/netpass.md,
+    A system with room for one game)."""
+    return full_set(roms) or bool(roms & SPEC["roms_one_extra"] and roms & SPEC["roms_full"])
+
+
+def chip_game(chip):
+    """The bit of the game whose ROM a chip takes (roms_bn4, roms_bn5), 0 for
+    one of BN6's own, every game's: BN4's own ids first, as chip_bn5 counts
+    every id past BN6's."""
+    return SPEC["roms_bn4"] if chip_bn4(chip) else SPEC["roms_bn5"] if chip_bn5(chip) else 0
+
+
+def holds(roms, chip):
+    """Whether a game with these ROMs holds a chip: the common ground of a
+    trade's two games is what both hold (v18)."""
+    game = chip_game(chip)
+    return not game or bool(roms & game)
+
+
+def hello(name, key=None, channel=0, bn5=False, resume=False, bn4=None, one_extra=False, no_arena=False, **overrides):
+    spec = dict(SPEC, **overrides)
+    name = name.encode("ascii")
+    rom5 = (spec["bn5_code"].encode(), bytes.fromhex(spec["bn5_sha1"])) if bn5 else (bytes(4), bytes(20))
+    # (BN4's with BN5's unless said: the full set, as a game with every ROM sends it)
+    bn4 = bn5 if bn4 is None else bn4
+    rom4 = (spec["bn4_code"].encode(), bytes.fromhex(spec["bn4_sha1"])) if bn4 else (bytes(4), bytes(20))
+    channel |= spec["hello_resume"] if resume else 0
+    channel |= spec["hello_one_extra"] if one_extra else 0
+    channel |= spec["hello_no_arena"] if no_arena else 0
+    return HELLO.pack(spec["hello"], spec["version"], spec["square_make"],
+                      spec["square_hash"], spec["rom_code"].encode(),
+                      bytes.fromhex(spec["rom_sha1"]), *rom5, *rom4, key or secrets.token_bytes(16), channel, len(name)) + name
+
+
+def maintenance_line(text):
+    """server.ini's maintenance: the host's line ("until 14:00 UTC"), printable
+    ASCII, at most maintenance_bytes, sent as ERROR error_maintenance's reason
+    to every game that comes (a game says it at the gate); empty: open."""
+    text = " ".join((text or "").split())
+    if len(text) > SPEC["maintenance_bytes"] or not all(32 <= ord(c) < 127 for c in text):
+        raise ValueError(f"maintenance is at most {SPEC['maintenance_bytes']} printable ASCII characters")
+    return text
+
+
+def read_state(data):
+    if len(data) != STATE.size or data[0] != SPEC["state"]:
+        raise ProtocolError("Malformed STATE")
+    _, x, y, z, facing = STATE.unpack(data)
+    if any(abs(value) > SPEC["coordinate_limit"] for value in (x, y, z)) or facing > 7:
+        raise ProtocolError("Position or facing outside limits", 6)
+    return x, y, z, facing
+
+
+def snapshot(players, recipient, flags=None, hidden=()):
+    """SNAPSHOT: the recipient's channel's other players, each one's byte
+    his ROMs (bits 0 and 5; bit 6, v18, a system of one extra ROM at most)
+    and, since v13, `flags` (peer_flags): what he is busy with and his
+    link's bars"""
+    room = players[recipient].channel
+    # (v26: a diver at home between acts is no one on the layer, `hidden`)
+    peers = [player for player in players.values() if player.id != recipient and player.channel == room and player.id not in hidden]
+    data = bytes((SPEC["snapshot"], len(peers)))
+    flags = flags or {}
+    return data + b"".join(PEER.pack(p.id, p.identity, *p.position, p.name.encode(), p.roms | flags.get(p.id, 0)) for p in peers)
+
+
+def link_bars(round_trip):
+    """A player's link as bars (v13, epic #167: bars only, never a number in
+    the game): 0 unknown, three under link_good_ms of round trip, two under
+    link_fair_ms, else one"""
+    if not round_trip:
+        return 0
+    return 3 if round_trip < SPEC["link_good_ms"] else 2 if round_trip < SPEC["link_fair_ms"] else 1
+
+
+def peer_byte(busy, round_trip):
+    """SNAPSHOT's per-peer bits beside the ROMs: busy (0 free, busy_battle,
+    busy_watch, busy_trade) and the link's bars"""
+    return busy << SPEC["busy_shift"] | link_bars(round_trip) << SPEC["link_shift"]
+
+
+def read_ping(data):
+    """PING: its clock (echoed as PONG) and, since v13, the sender's round
+    trip in ms (0 unknown; a 5-byte PING says none)"""
+    if data[0] != SPEC["ping"] or len(data) not in (5, SPEC["ping_bytes"]):
+        raise ProtocolError("Malformed PING")
+    return data[1:5], (struct.unpack("!H", data[5:7])[0] if len(data) == SPEC["ping_bytes"] else 0)
+
+
+def read_profile(data):
+    if len(data) != 1 + PROFILE.size or data[0] != SPEC["profile"]:
+        raise ProtocolError("Malformed PROFILE")
+    hp, maximum, attack, speed, charge, souls, crosses, depth, act, best, marks, board = PROFILE.unpack(data[1:])
+    if not 1 <= maximum <= 9999 or not 0 <= hp <= maximum:
+        raise ProtocolError("Invalid profile HP")
+    if max(attack, speed, charge) > 5 or souls > 63 or crosses > 31 or marks > 65535 or max(board) > 6:
+        raise ProtocolError("Invalid profile values")
+    return data[1:]
+
+
+def read_social(data):
+    """SOCIAL (v14): kind (0 phrase, 1 emote), its id and the MegaMan it is
+    aimed at (0 none; an emote of emote_aimed's alone)."""
+    if len(data) != SPEC["social_bytes"] or data[0] != SPEC["social"]:
+        raise ProtocolError("Malformed SOCIAL")
+    kind, choice, target = struct.unpack("!BBI", data[1:])
+    count = SPEC["phrase_count"] if kind == 0 else SPEC["emote_count"]
+    if kind > 1 or choice >= count:
+        raise ProtocolError("Invalid phrase or emote")
+    if target and not (kind == 1 and SPEC["emote_aimed"] >> choice & 1):
+        raise ProtocolError("That cannot be aimed")
+    return kind, choice, target
+
+
+def event(sender, kind, choice, target, flags, beat_ms):
+    """EVENT (v14): the sender, what he did, at whom, its flags and the
+    milliseconds from now to the beat it starts on."""
+    return struct.pack("!BIBBIBH", SPEC["event"], sender, kind, choice, target, flags, min(beat_ms, 0xffff))
+
+
+def error(exc):
+    return struct.pack("!BH", SPEC["error"], exc.code) + str(exc).encode("ascii")[:96]
+
+
+def chip_valid(chip, code):
+    """A chip id of BN6's tables as a game with BN5 grows them (to 511) and
+    a code (A..Z, * as 26); whose chip it is, chip_bn5 says."""
+    return 1 <= chip <= SPEC["chip_last"] and 0 <= code <= SPEC["code_last"]
+
+
+def chip_bn5(chip):
+    """A chip only a game with BN5's ROM holds: past BN6's own ids, or one of
+    BN6's blank records, where BN5's chips are installed (src/emu/bn6_chips.h)."""
+    return chip > SPEC["bn6_chip_last"] or any(low <= chip <= high for low, high in SPEC["bn6_blank"])
+
+
+def chip_bn4(chip):
+    """A chip only a game with BN4's ROM holds (v17): BN4 Red Sun's own ids,
+    from protocol.json's bn4_chip_first (src/core/xchips_registry.h's
+    XREG4_PACK_FIRST); BN4's chips of a name BN6 or BN5 has are theirs."""
+    return chip >= SPEC["bn4_chip_first"]
+
+
+def read_trade(data):
+    if len(data) != TRADE.size or data[0] != SPEC["trade"]:
+        raise ProtocolError("Malformed TRADE")
+    _, action, ref, give, give_code, get, get_code = TRADE.unpack(data)
+    if not 1 <= action <= 5 or not ref:
+        raise ProtocolError("Invalid trade action")
+    if action in (1, 2, 3, 5) and not chip_valid(give, give_code):
+        raise ProtocolError("Invalid trade chip")
+    if action in (2, 3, 5) and not chip_valid(get, get_code):
+        raise ProtocolError("Invalid trade chip")
+    return action, ref, (give, give_code), (get, get_code)
+
+
+def trade_state(stage, trade_id, other, identity, mine, theirs):
+    return TRADE_STATE.pack(SPEC["trade_state"], stage, trade_id, other, identity, mine[0], mine[1], theirs[0], theirs[1])
+
+
+def read_offer(data):
+    """OFFER: the chip a player has up on the board and the kind he wants
+    for it (0..want_last, the game's words: anything, an element, a kind);
+    all zeros take it down."""
+    if len(data) != OFFER.size or data[0] != SPEC["offer"]:
+        raise ProtocolError("Malformed OFFER")
+    _, chip, code, want = OFFER.unpack(data)
+    if (chip or code or want) and (not chip_valid(chip, code) or want > SPEC["want_last"]):
+        raise ProtocolError("Invalid offer")
+    return (chip, code), want
+
+
+def board(entries):
+    """BOARD: a channel's offers as one recipient may see them, (session, chip, want) each."""
+    return bytes((SPEC["board"], len(entries))) + b"".join(
+        BOARD_ENTRY.pack(player_id, chip[0], chip[1], want) for player_id, chip, want in entries)
+
+
+def read_arena(data):
+    if len(data) != ARENA.size or data[0] != SPEC["arena"]:
+        raise ProtocolError("Malformed ARENA")
+    _, action, ref, latency, form = ARENA.unpack(data)
+    if not 1 <= action <= SPEC["arena_seen"] or not ref or latency > 5000 or form > SPEC["team_side_by_side"]:
+        raise ProtocolError("Invalid arena action")
+    return action, ref, latency, form
+
+
+def arena_state(stage, match_id, other, identity, side=0, delay=0, form=0, seats=(0, 0, 0, 0)):
+    """ARENA_STATE: `side` START's (a 2v2's: the recipient's seat, 0..3), `form` a team challenge's format (v15),
+    `seats` a 2v2 START's four sessions in seat order"""
+    return ARENA_STATE.pack(SPEC["arena_state"], stage, match_id, other, identity, side, delay, form, *seats)
+
+
+def arena_seat(seat, data):
+    """ARENA_SEAT (v15): a 2v2 seat's relayed message, to the three others"""
+    return bytes((SPEC["arena_seat"], seat)) + data
+
+
+def arena_relay(data):
+    """An arena message for the opponent: its match id, its shape checked."""
+    kind = data[0] if data else 0
+    if kind == SPEC["arena_input"] and len(data) >= ARENA_INPUT.size:
+        _, match, frame, count = ARENA_INPUT.unpack_from(data)
+        if 1 <= count <= SPEC["arena_input_max"] and len(data) == ARENA_INPUT.size + 2 * count:
+            return match
+    elif kind == SPEC["arena_hash"] and len(data) == ARENA_HASH.size:
+        return ARENA_HASH.unpack(data)[1]
+    elif kind == SPEC["arena_loadout"] and len(data) >= ARENA_LOADOUT.size:
+        _, match, length = ARENA_LOADOUT.unpack_from(data)
+        if 1 <= length <= SPEC["arena_loadout_max"] and len(data) == ARENA_LOADOUT.size + length:
+            return match
+    raise ProtocolError("Malformed arena relay")
+
+
+def read_arena_status(data):
+    """ARENA_STATUS: a battle's report as its cable's first game reads both
+    cores (HP, the last chip each side used and how many, the winner)."""
+    if len(data) != ARENA_STATUS.size or data[0] != SPEC["arena_status"]:
+        raise ProtocolError("Malformed ARENA_STATUS")
+    _, match, hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner = ARENA_STATUS.unpack(data)
+    if not match or not 0 <= hp0 <= max0 <= 9999 or not 0 <= hp1 <= max1 <= 9999 or winner > 2 \
+            or chip0 > SPEC["chip_last"] or chip1 > SPEC["chip_last"]:
+        raise ProtocolError("Invalid arena status")
+    return match, (hp0, max0, hp1, max1, chip0, chip1, used0, used1, winner)
+
+
+def read_team(data):
+    """TEAM: 1 ask a player to team up, 2 answer one (value 1 yes), 3 split the team (or take an ask back), 4 the order (the lead)."""
+    if len(data) != TEAM.size or data[0] != SPEC["team"]:
+        raise ProtocolError("Malformed TEAM")
+    _, action, ref, value = TEAM.unpack(data)
+    if not 1 <= action <= 4 or value > 1 or (action != 3 and not ref):
+        raise ProtocolError("Invalid team action")
+    return action, ref, value
+
+
+def team_state(stage, partner, match, bout, players, left, number, result, hp, form=0):
+    return TEAM_STATE.pack(SPEC["team_state"], stage, partner, match, bout, *players, left[0], left[1], number, result, hp, form)
+
+
+def read_watch(data):
+    """WATCH: 1 watch a battle of the channel, 2 stop watching it."""
+    if len(data) != WATCH.size or data[0] != SPEC["watch"]:
+        raise ProtocolError("Malformed WATCH")
+    _, action, match = WATCH.unpack(data)
+    if action not in (1, 2) or not match:
+        raise ProtocolError("Invalid watch action")
+    return action, match
+
+
+def watch_state(stage, match, side0, side1, delay, form=0, partners=(0, 0)):
+    """WATCH_STATE: the cable's two players' sessions; a 2v2's (`form` 1) partners' too, seats 2 and 3 (v15)"""
+    return WATCH_STATE.pack(SPEC["watch_state"], stage, match, side0, side1, delay, form, *partners)
+
+
+def watch_relay(side, data):
+    return bytes((SPEC["watch_relay"], side)) + data
+
+
+def watch_keys(match, side, first, keys):
+    """WATCH_KEYS: `keys` (the u16 big-endian bytes of len(keys) // 2 frames) from frame `first`."""
+    return WATCH_KEYS.pack(SPEC["watch_keys"], match, side, first, len(keys) // 2) + keys
+
+
+def stands(entries):
+    """STANDS: a channel's NetBattles, each a tuple in STANDS_ENTRY's order."""
+    return bytes((SPEC["stands"], len(entries))) + b"".join(STANDS_ENTRY.pack(*entry) for entry in entries)
+
+
+# -- the shared dive (protocol v19, issue #589; docs/online/shared-dive.md) --
+
+def name16(name):
+    return name.encode("ascii")[:16]
+
+
+def read_dive(data):
+    """DIVE: its action and that action's fields, each bounded (a layer's
+    depth 1..week_layers, a position within coordinate_limit, a phrase of
+    the Square's, a split's party 1..party_most and Busting Level
+    1..busting_most); a ProtocolError otherwise."""
+    if len(data) < 2 or data[0] != SPEC["dive"] or data[1] not in DIVE_BODIES:
+        raise ProtocolError("Malformed DIVE")
+    body, size = DIVE_BODIES[data[1]]
+    if len(data) != SPEC[size] or 2 + body.size != SPEC[size]:
+        raise ProtocolError("Malformed DIVE")
+    action, fields = data[1], body.unpack(data[2:])
+    if not dive_fields_ok(action, fields):
+        raise ProtocolError("Invalid dive values")
+    return action, fields
+
+
+def dive_fields_ok(action, fields):
+    limit = SPEC["coordinate_limit"]
+    if action == SPEC["dive_enter"]:
+        return 1 <= fields[2] <= SPEC["week_layers"]
+    if action == SPEC["dive_end"]:
+        how, x, y, z, _, _, flags, party = fields
+        # (v27: the dive's flags, `week_pulled` alone, and the acts whose guardian was fought in a party)
+        return how in (SPEC["dive_deleted"], SPEC["dive_won"]) and all(abs(v) <= limit for v in (x, y, z)) \
+            and not flags & ~SPEC["week_pulled"] and not party & ~0xF
+    if action == SPEC["dive_phrase"]:
+        return fields[0] < SPEC["phrase_count"] and all(abs(v) <= limit for v in fields[1:])
+    if action == SPEC["dive_wave"]:
+        return fields[0] != 0
+    if action == SPEC["dive_split"]:
+        _, tenths, level, flags, party = fields
+        return bool(tenths) and 1 <= level <= SPEC["busting_most"] and not flags & ~SPEC["split_guardian"] \
+            and 1 <= party <= SPEC["party_most"]
+    if action == SPEC["dive_vitals"]:
+        hp, maximum = fields
+        return 1 <= maximum <= 9999 and hp <= maximum
+    if action == SPEC["dive_where"]:
+        return fields[0] <= SPEC["where_busy"]
+    return True
+
+
+def dive(action, *fields):
+    """A DIVE as a game sends it (the tests')."""
+    body, _ = DIVE_BODIES[action]
+    return bytes((SPEC["dive"], action)) + body.pack(*fields)
+
+
+def dive_room(week, depth, side, way, instance, count):
+    return DIVE_ROOM.pack(SPEC["dive_room"], week, depth, side, way, instance, count)
+
+
+TRACE_SIZES = {SPEC["trace_marks"]: SPEC["trace_mark_bytes"], SPEC["trace_phrases"]: SPEC["trace_phrase_bytes"],
+               SPEC["trace_finds"]: SPEC["trace_find_bytes"], SPEC["trace_opened"]: 1,
+               SPEC["trace_splits"]: SPEC["trace_split_bytes"], SPEC["trace_gone"]: 4}
+
+
+def dive_traces(kind, entries):
+    """DIVE_TRACES: entries already packed, in as many messages as they take
+    within max_message (none where there are none)."""
+    most = min(255, (SPEC["max_message"] - SPEC["trace_head"]) // TRACE_SIZES[kind])
+    return [TRACE_HEAD.pack(SPEC["dive_traces"], kind, len(entries[at:at + most])) + b"".join(entries[at:at + most])
+            for at in range(0, len(entries), most)]
+
+
+def dive_place(index, party, tenths, place, count, best, best_name):
+    return DIVE_PLACE.pack(SPEC["dive_place"], index, party, tenths, place, count, best, name16(best_name))
+
+
+def dive_feed(kind, name, depth, side=0, way=0, cause=0, party=0):
+    return DIVE_FEED.pack(SPEC["dive_feed"], kind, name16(name), depth, side, way, cause, party)
+
+
+def divers(total, entries):
+    """DIVERS: how many dive, then (name, depth, act, flags) of at most divers_most."""
+    entries = entries[:SPEC["divers_most"]]
+    return DIVERS_HEAD.pack(SPEC["divers"], min(total, 0xffff), len(entries)) + b"".join(
+        DIVERS_ENTRY.pack(name16(name), depth, act, flags) for name, depth, act, flags in entries)
+
+
+def read_crew(data):
+    """CREW: an action (crew_battle, crew_join or, v23, crew_busy; v20: a
+    crew is by nearness, crews.py, and its asks, answers, splits and ways
+    are gone), its reference (a join's or a busy's: the battle's owner) and
+    its value (a battle's index on the layer); its last three bytes zeros."""
+    if len(data) != SPEC["crew_bytes"] or data[0] != SPEC["crew"]:
+        raise ProtocolError("Malformed CREW")
+    _, action, ref, value, depth, side, way = CREW.unpack(data)
+    answers = (SPEC["crew_join"], SPEC["crew_busy"])
+    if action not in (SPEC["crew_battle"], *answers) or depth or side or way \
+            or (action in answers and (not ref or value)):
+        raise ProtocolError("Invalid crew action")
+    return action, ref, value
+
+
+def crew(action, ref=0, value=0, way=(0, 0, 0)):
+    return CREW.pack(SPEC["crew"], action, ref, value, *way)
+
+
+def crew_state(stage, other, value, members):
+    """CREW_STATE: members (session, name, (hp, max_hp, depth, where): v24, 0 where not known or not on a layer; v26
+    where he is, where_layer, where_home or where_battle) of at most party_most, zeros past them."""
+    out = CREW_STATE_HEAD.pack(SPEC["crew_state"], stage, other, value)
+    for k in range(SPEC["party_most"]):
+        session, name, vitals = members[k] if k < len(members) else (0, "", (0, 0, 0, 0))
+        out += CREW_MEMBER.pack(session, name16(name), *vitals)
+    return out
+
+
+def read_queue(data):
+    """QUEUE: an action (queue_join .. queue_pass) and a door (a join's: its layer's depth, side and way)."""
+    if len(data) != SPEC["queue_bytes"] or data[0] != SPEC["queue"]:
+        raise ProtocolError("Malformed QUEUE")
+    _, action, depth, side, way = QUEUE.unpack(data)
+    if not SPEC["queue_join"] <= action <= SPEC["queue_pass"] or depth > SPEC["week_layers"] \
+            or (action == SPEC["queue_join"] and not depth):
+        raise ProtocolError("Invalid queue action")
+    return action, (depth, side, way)
+
+
+def queue(action, door=(0, 0, 0)):
+    return QUEUE.pack(SPEC["queue"], action, *door)
+
+
+def queue_state(stage, door, place, entries):
+    """QUEUE_STATE: entries (session, name, flags) of at most party_most, the leader first, zeros past them."""
+    out = QUEUE_STATE_HEAD.pack(SPEC["queue_state"], stage, *door, place, len(entries))
+    for k in range(SPEC["party_most"]):
+        session, name, flags = entries[k] if k < len(entries) else (0, "", 0)
+        out += QUEUE_ENTRY.pack(session, name16(name), flags)
+    return out
+
+
+def read_party(data):
+    """PARTY_DAMAGE or PARTY_HP: the battle, then two u16 (damage and HP; HP and max HP)."""
+    if len(data) != SPEC["party_bytes"] or data[0] not in (SPEC["party_damage"], SPEC["party_hp"]):
+        raise ProtocolError("Malformed party message")
+    kind, battle, first, second = PARTY.unpack(data)
+    if not battle or (kind == SPEC["party_hp"] and first > second):
+        raise ProtocolError("Invalid party values")
+    return kind, battle, first, second
+
+
+def party(kind, battle, first, second):
+    return PARTY.pack(kind, battle, first, second)
+
+
+def week_splits(week, entries):
+    """WEEK_SPLITS: for each act 1..4, each party size 1..party_most, (tenths, name); (0, "") none."""
+    return SPLITS_HEAD.pack(SPEC["week_splits"], week) + b"".join(SPLITS_ENTRY.pack(t, name16(n)) for t, n in entries)
+def read_transfer(data):
+    """TRANSFER checked (shared/online/README.md, Saves sent by a code):
+    its op, lookup and size, a put's 1 to transfer_max, a get's and a
+    done's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["transfer"] and data[1] != SPEC["transfer_version"]:
+        raise ProtocolError("Unknown transfer version")
+    if len(data) != TRANSFER.size or data[0] != SPEC["transfer"]:
+        raise ProtocolError("Malformed TRANSFER")
+    _, _, op, lookup, size = TRANSFER.unpack(data)
+    if op == SPEC["transfer_put"]:
+        if not 1 <= size <= SPEC["transfer_max"]:
+            raise ProtocolError("Transfer size out of range")
+    elif op in (SPEC["transfer_get"], SPEC["transfer_done"]):
+        if size:
+            raise ProtocolError("Malformed TRANSFER")
+    else:
+        raise ProtocolError("Unknown transfer op")
+    return op, lookup, size
+
+
+def transfer_state(status, value=0):
+    """TRANSFER_STATE: a status and its value (seconds, or a blob's size)."""
+    return TRANSFER_STATE.pack(SPEC["transfer_state"], status, value)
+
+
+def read_sync(data):
+    """SYNC checked (shared/online/README.md, Saves kept in step): its op,
+    slot, auth, generation and size, a push's 1 to sync_max, a pull's and
+    a drop's 0. Its version is read first, as another's may be shaped
+    otherwise."""
+    if len(data) >= 2 and data[0] == SPEC["sync"] and data[1] != SPEC["sync_version"]:
+        raise ProtocolError("Unknown sync version")
+    if len(data) != SYNC.size or data[0] != SPEC["sync"]:
+        raise ProtocolError("Malformed SYNC")
+    _, _, op, slot, auth, generation, size = SYNC.unpack(data)
+    if op == SPEC["sync_push"]:
+        if not 1 <= size <= SPEC["sync_max"]:
+            raise ProtocolError("Sync size out of range")
+    elif op in (SPEC["sync_pull"], SPEC["sync_drop"]):
+        if size:
+            raise ProtocolError("Malformed SYNC")
+    else:
+        raise ProtocolError("Unknown sync op")
+    return op, slot, auth, generation, size
+
+
+def sync_state(status, generation=0, size=0):
+    """SYNC_STATE: a status, a generation and a size (BUSY's: the seconds to wait)."""
+    return SYNC_STATE.pack(SPEC["sync_state"], status, generation, size)

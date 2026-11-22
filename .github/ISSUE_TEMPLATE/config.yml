@@ -1,0 +1,14 @@
+# The issue chooser (docs/code/platforms.md, Issue forms): the bug report's
+# form (bug.yml), a blank issue still allowed, and where ideas and
+# questions go instead, which Discussions already holds.
+blank_issues_enabled: true
+contact_links:
+  - name: An idea or a request
+    url: https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions/categories/ideas
+    about: Share it in Discussions' Ideas, where other players can weigh in.
+  - name: A question
+    url: https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/discussions/categories/q-a
+    about: Setup, ROMs, controls, how something works. Ask in Discussions' Q&A.
+  - name: The player's guide
+    url: https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/blob/main/docs/GUIDE.md#troubleshooting
+    about: Install on each system, the ROMs the game takes, moving saves, troubleshooting.

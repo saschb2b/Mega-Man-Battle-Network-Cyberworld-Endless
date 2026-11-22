@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cyberworld": {
+      "command": "python3",
+      "args": ["tools/cw_mcp.py"]
+    }
+  }
+}

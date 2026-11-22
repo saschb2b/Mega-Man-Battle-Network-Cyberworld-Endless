@@ -1,0 +1,512 @@
+#!/usr/bin/env python3
+"""Play the game from the command line, a batch of input at a time: for
+playtests by a person or an agent, and for reproducing what they found.
+
+  tools/play.py start NAME [--seed S] [--fresh] [-- GAME_ARGS...]
+      a headless game at the title screen, its files in .build/play/NAME
+      (data/ keeps the saves and profile between sessions; --fresh starts
+      them over, as a first-time player)
+  tools/play.py do NAME "COMMANDS" [--every N]
+      runs the commands, then prints what the game shows in words and the
+      path of a picture of the screen (with --every N, a sheet of pictures
+      taken every N frames)
+  tools/play.py stop NAME
+  tools/play.py replay FROM NAME [--until FRAME]
+      a new game NAME that replays FROM's session (its seed, its data as it
+      began, its commands) up to the batch that reaches FRAME
+
+Commands, apart by ';':
+  press BTN [N]   hold BTN N frames (6), then let go 6 frames
+  hold BTN N      hold BTN N frames
+  wait N          N frames without input
+  mash BTN N      press BTN every 10 frames for N frames
+  shot            a picture now (one is always taken at the end)
+  second          ... and of the second screen (the 3DS's bottom one)
+Dev steps: place X Y FACING (MegaMan there), flags FROM TO 1|0 (event
+flags set, then back as they were), battle (the layer's next random
+battle, as soon as MegaMan is free on its map; on an older net's area,
+one of its records in BN6's engine), sig (MegaMan in the layer's
+signature, the room it is remembered by: docs/world/level-design/identity.md,
+Identity), by NAME (MegaMan beside the layer's first NAME, facing it: a
+--talk's kind, green, blue or purple Mystery Data, block, teller, exit;
+docs/devtools/scenarios.md, What stands on a layer; "hold AHEAD 40" then
+holds the d-pad the way he faces), board KIND (on a dark layer's board, the Navi in play beside
+the nearest panel of that kind his walk reaches, facing it: dark, pair,
+sneak, item, trap, bonus, darkhole, ring, guardian, darkloid, mate, an item's
+by what it holds: orderpoints, heart, key, zenny, chip, route, next
+(where the board's autopilot would stand him) or over (BombLiberation's
+flier over the nearest dark panel);
+docs/devtools/scenarios.md), foes SPEC (a battle of these foes at once, in BN6's engine:
+200@52/01@43, each an enemy id in hex at a panel, column 1-6 then row 1-3,
+mm@CR MegaMan's; a family moved into the engine among them, issue #82),
+swap FORMS (a battle of one Navi swapped mid-fight for the next: 101:300
+107:300 10D:300, each a Navi's enemy id in hex and its HP, 0 its own:
+src/emu/battle_swap.h),
+status KIND [FRAMES [ID]] (the battle's enemies, or those of enemy id ID
+in hex, struck at once with paralysis, freeze, bubble, drag, slide,
+confuse or blind as a hit gives it, for FRAMES frames, 60 where none: issue #82), xrecord ADDR
+[UP] (one of BN5's battle records, its address in BN5's ROM in hex, as
+build.py xrecords lists them, fought at once in BN6's engine, its viruses
+UP versions up: issue #82), chip ID CODE [N] (chip ID, 1-511, in code
+CODE, a letter or *, in the folder's first N entries, one where none, and
+one more in the pack: a chip of BN5's in BN6's tables, issue #82), cross
+F (the next Cross chosen on CROSSSELECT committed as form F, with --dev
+soulproxy form 8 HeatCross's copy: docs/devtools/proxy-form.md),
+stuck NAME (the run saved with BN6 holding MegaMan so: fade,
+chat, lock, script, conveyor, npc, pet, paused or all, apart by commas;
+its CONTINUE lets him go, issue #23), dump NAME (the video memory into
+NAME/NAMEv.bin, p, i and o.bin in the session's folder, for
+tools/romlab/labtrace.py), drop PATH (a file dropped on the game's
+window, as a player drops one: a ROM on the ROMs screen, a .cwsave on
+the title or SAVES). NAME/bin.pin keeps the session's
+build across starts.
+BTN: A B L R START SELECT UP DOWN LEFT RIGHT, or several with + (UP+RIGHT);
+pad.NAME holds a virtual controller's input by SDL's name (pad.x, pad.-lefty;
+start with -- --pad xbox|playstation|nintendo|generic|raw; a raw joystick's
+pad.b9, pad.h0.1, pad.-a1), key.NAME a key
+(key.J), both through SDL as a player's: the controls screen and pad.ini.
+The keyboard's layout is the handheld's buttons: A talks and confirms, B
+runs (hold) and cancels, START opens the PET, L and R open the Custom
+screen in battle.
+
+Every command is kept in NAME/history.txt; with the seed and NAME/data0
+(the data folder as the session began) a session replays exactly.
+"""
+import contextlib
+import io
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import time
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# (CYBERWORLD_PLAY_BIN: another build, e.g. a session's own bin/ copy, to replay it exactly)
+BINARY = os.environ.get('CYBERWORLD_PLAY_BIN', os.path.join(ROOT, 'build', 'linux', 'cyberworld'))
+ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+BUTTONS = {'A', 'B', 'L', 'R', 'START', 'SELECT', 'UP', 'DOWN', 'LEFT', 'RIGHT', 'FAST', 'AHEAD'}   # (FAST: fast forward's button, BTN_FAST; AHEAD: the d-pad the way MegaMan faces)
+SCALE = 3
+DEV_STEPS = ('place', 'flags', 'battle', 'home', 'foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'sig', 'guardian', 'by', 'board', 'dump', 'second',
+             'stuck', 'drop', 'emote', 'netpass', 'trade', 'reconnect')   # (steps of no frames)
+MAX_SHOTS = 24
+
+
+def home(name):
+    return os.path.join(ROOT, '.build', 'play', name)
+
+
+def buttons(spec):
+    parts = [p.strip().upper() for p in spec.split('+')]
+    bad = [p for p in parts if p not in BUTTONS and not p.startswith(('PAD.', 'KEY.'))]
+    if bad:
+        sys.exit(f'unknown button {bad[0]} (buttons: {" ".join(sorted(BUTTONS))})')
+    return '+'.join(parts)
+
+
+def steps(commands):
+    """Player commands -> (frames, buttons) steps and 'shot' marks."""
+    out = []
+    for cmd in commands.split(';'):
+        words = cmd.split()
+        if not words:
+            continue
+        op, args = words[0].lower(), words[1:]
+        try:
+            if op == 'press':
+                out += [(int(args[1]) if len(args) > 1 else 6, buttons(args[0])), (6, '')]
+            elif op == 'hold':
+                out.append((int(args[1]), buttons(args[0])))
+            elif op == 'wait':
+                out.append((int(args[0]), ''))
+            elif op == 'mash':
+                for _ in range(max(1, int(args[1]) // 10)):
+                    out += [(4, buttons(args[0])), (6, '')]
+            elif op == 'shot':
+                out.append('shot')
+            elif op == 'second':
+                out.append(('second',))
+            elif op == 'place':
+                out.append(('place', int(args[0]), int(args[1]), int(args[2]) if len(args) > 2 else -1))
+            elif op == 'flags':
+                out.append(('flags', int(args[0], 0), int(args[1], 0), int(args[2]) if len(args) > 2 else 1))
+            elif op in ('battle', 'home'):
+                out.append((op,))
+            elif op in ('foes', 'lab'):
+                out.append((op, '/'.join([args[0]] + args[1:])))
+            elif op == 'swap':
+                out.append(('swap', '/'.join([args[0]] + args[1:])))
+            elif op == 'status':
+                out.append(('status', ' '.join([args[0]] + args[1:3])))
+            elif op == 'xrecord':
+                out.append(('xrecord', ' '.join([args[0]] + args[1:2])))
+            elif op == 'chip':
+                # ("chip ID" alone: what the game holds of it, printed)
+                out.append(('chip', ' '.join([args[0]] + [a.upper() for a in args[1:2]] + args[2:3])))
+            elif op == 'cross':
+                out.append(('cross', str(int(args[0], 0))))
+            elif op in ('emote', 'netpass', 'trade', 'reconnect'):
+                # (online play's dev steps, docs/devtools/net-square.md: an emote sent in the Square, the NetPass
+                # opened, Trade Central's screens in a run, a dropped link's wait drawn)
+                out.append((op, ' '.join(args)))
+            elif op in ('sig', 'guardian'):
+                out.append((op,))
+            elif op == 'by':
+                out.append(('by', args[0]))
+            elif op == 'board':
+                out.append(('board', args[0].lower()))
+            elif op == 'stuck':
+                out.append(('stuck', args[0]))
+            elif op == 'dump':
+                out.append(('dump', args[0]))
+            elif op == 'drop':
+                # (a file dropped on the game's window: a ROM on the ROMs screen, a .cwsave on the title)
+                out.append(('drop', args[0]))
+            else:
+                sys.exit(f'unknown command {op!r} (press, hold, wait, mash, shot; dev: place, flags, battle, home, foes, lab, swap, status, xrecord, chip, cross, sig, guardian, by, board, stuck, dump, drop, emote, netpass, trade, reconnect)')
+        except (IndexError, ValueError):
+            sys.exit(f'bad command {cmd.strip()!r}')
+    return out
+
+
+def split_every(seq, every):
+    """Pictures every `every` frames through the steps."""
+    out, since = [], 0
+    for s in seq:
+        if s != 'shot' and s[0] in DEV_STEPS:
+            out.append(s)
+            continue
+        if s == 'shot':
+            out.append(s)
+            since = 0
+            continue
+        frames, btn = s
+        while since + frames >= every:
+            take = every - since
+            if take:
+                out.append((take, btn))
+            out.append('shot')
+            frames -= take
+            since = 0
+        if frames:
+            out.append((frames, btn))
+            since += frames
+    return out
+
+
+def talk(h, line, timeout=300):
+    """Sends one batch; waits for its answer."""
+    proc = os.path.join(h, 'pid')
+    with open(os.path.join(h, 'in'), 'w') as f:
+        f.write(line + '\n')
+    fd = os.open(os.path.join(h, 'out'), os.O_RDONLY | os.O_NONBLOCK)
+    got, start = b'', time.time()
+    try:
+        while not got.endswith(b'\n'):
+            try:
+                c = os.read(fd, 1)
+            except BlockingIOError:
+                c = b''
+            if c:
+                got += c
+                continue
+            if time.time() - start > timeout:
+                sys.exit('the game did not answer in time')
+            pid = int(open(proc).read())
+            try:
+                os.kill(pid, 0)
+            except OSError:
+                sys.exit('the game has stopped (see log.txt)')
+            time.sleep(0.005)
+    finally:
+        os.close(fd)
+    return got.decode().strip()
+
+
+def picture(paths, out):
+    from PIL import Image, ImageDraw
+    import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
+    frames = [Image.open(p).convert('RGB') for p in paths]
+    if len(frames) == 1:
+        img = frames[0].resize((frames[0].width * SCALE, frames[0].height * SCALE), Image.NEAREST)
+    else:
+        cols = min(4, len(frames))
+        rows = (len(frames) + cols - 1) // cols
+        w, h = frames[0].width * 2, frames[0].height * 2
+        img = Image.new('RGB', (w * cols, h * rows))
+        draw = ImageDraw.Draw(img)
+        for i, fr in enumerate(frames):
+            x, y = (i % cols) * w, (i // cols) * h
+            img.paste(fr.resize((w, h), Image.NEAREST), (x, y))
+            draw.text((x + 4, y + h - 12), str(i + 1), fill=(255, 255, 0))
+    img.save(out)
+    for p in paths:
+        os.remove(p)
+
+
+def start_options(rest):
+    """start's words: (seed, fresh, game options)."""
+    seed, extra = 0, []
+    if '--' in rest:
+        extra = rest[rest.index('--') + 1:]
+        rest = rest[:rest.index('--')]
+    if '--seed' in rest:
+        seed = int(rest[rest.index('--seed') + 1], 0)
+    return seed, '--fresh' in rest, extra
+
+
+def launch(h, seed=0, fresh=False, extra=(), env=None, binary=None, keep_bin=True):
+    """A headless game in folder h, waiting for batches; its seed. (env:
+    variables for it, kept in the history for a replay; binary: another
+    build; keep_bin False runs it where it is, for a game of one batch)"""
+    if os.path.exists(os.path.join(h, 'pid')):
+        stop(h)
+    data = os.path.join(h, 'data')
+    if fresh and os.path.isdir(data):
+        shutil.rmtree(data)
+    os.makedirs(data, exist_ok=True)
+    os.makedirs(os.path.join(h, 'shots'), exist_ok=True)
+    for f in ('in', 'out'):
+        if os.path.exists(os.path.join(h, f)):
+            os.remove(os.path.join(h, f))
+    # an earlier start's history and data keep a number (history-N.txt, data0-N)
+    if os.path.exists(os.path.join(h, 'history.txt')):
+        k = 1
+        while os.path.exists(os.path.join(h, f'history-{k}.txt')):
+            k += 1
+        os.rename(os.path.join(h, 'history.txt'), os.path.join(h, f'history-{k}.txt'))
+        if os.path.isdir(os.path.join(h, 'data0')):
+            os.rename(os.path.join(h, 'data0'), os.path.join(h, f'data0-{k}'))
+    if os.path.isdir(os.path.join(h, 'data0')):
+        shutil.rmtree(os.path.join(h, 'data0'))
+    shutil.copytree(data, os.path.join(h, 'data0'))
+    binary = binary or BINARY
+    if not os.path.exists(binary):
+        sys.exit(f'no {os.path.relpath(binary, ROOT)}: run python3 build.py linux first')
+    # the session's own copy, so a rebuild meanwhile leaves it alone (with
+    # NAME/bin.pin, kept across starts: a playtest's restarts run the build
+    # it began with)
+    bin_dir = os.path.join(h, 'bin')
+    if keep_bin and not (os.path.exists(os.path.join(h, 'bin.pin')) and os.path.exists(os.path.join(bin_dir, 'cyberworld'))):
+        if os.path.isdir(bin_dir):
+            shutil.rmtree(bin_dir)
+        os.makedirs(bin_dir)
+        shutil.copy2(binary, os.path.join(bin_dir, 'cyberworld'))
+        # (the Linux build's SDL2 beside it; the host build's is the system's)
+        if os.path.isdir(os.path.join(os.path.dirname(binary), 'lib')):
+            shutil.copytree(os.path.join(os.path.dirname(binary), 'lib'), os.path.join(bin_dir, 'lib'))
+    if not seed:
+        seed = int.from_bytes(os.urandom(3), 'little') | 1
+    run = os.path.join(bin_dir, 'cyberworld') if keep_bin else binary
+    args = [run, '--headless', '--size', '256x192', '--remote', h, '--rom-dir', ROM_DIR,
+            '--data-dir', data, '--seed', str(seed), *extra]
+    log = open(os.path.join(h, 'log.txt'), 'w')
+    p = subprocess.Popen(args, stdout=log, stderr=subprocess.STDOUT, start_new_session=True, cwd=ROOT,
+                         env={**os.environ, **(env or {})})
+    open(os.path.join(h, 'pid'), 'w').write(str(p.pid))
+    with open(os.path.join(h, 'history.txt'), 'w') as f:
+        f.write(f'# seed {seed}\n# args {" ".join(extra)}\n')
+        for k, v in (env or {}).items():
+            f.write(f'# env {k}={v}\n')
+    for _ in range(500):
+        if os.path.exists(os.path.join(h, 'out')):
+            break
+        time.sleep(0.01)
+    return seed
+
+
+def cmd_start(name, rest):
+    seed, fresh, extra = start_options(rest)
+    seed = launch(home(name), seed, fresh, extra)
+    print(f'started {name} (seed {seed})')
+    cmd_do(name, ['wait 1'])
+
+
+def prepare(commands, every=0):
+    """A batch's steps: the commands, with a picture every `every` frames
+    (at most MAX_SHOTS: a longer batch spaces them out) and one at the end."""
+    seq = steps(commands)
+    if every:
+        frames = sum(s[0] for s in seq if s != 'shot' and s[0] not in DEV_STEPS)
+        every = max(every, -(-frames // MAX_SHOTS))
+        seq = split_every(seq, every)
+    while sum(1 for s in seq if s == 'shot') > MAX_SHOTS:
+        seq.remove('shot')
+    if not seq or seq[-1] != 'shot':
+        seq.append('shot')
+    return seq, every
+
+
+def short(path):
+    """A path as the game is told it: from the repository, where it runs
+    (its steps keep 159 characters, less than a worktree's whole paths)."""
+    return os.path.relpath(path, ROOT)
+
+
+def send(h, seq, record=None):
+    """Runs a batch's steps in game h; (its answer, the pictures as (frames
+    into the batch, path), the second screen's paths, the state in words).
+    record: the history's line for it (None: no line)."""
+    shots, items, seconds, at = [], [], [], 0
+    n = len(os.listdir(os.path.join(h, 'shots')))
+    for s in seq:
+        if s == 'shot':
+            path = os.path.join(h, 'shots', f'_{n}_{len(shots)}.bmp')
+            shots.append((at, path))
+            items.append(f'shot {short(path)}')
+        elif s[0] == 'place':
+            items.append(f'place {s[1]} {s[2]} {s[3]}')
+        elif s[0] == 'flags':
+            items.append(f'flags {s[1]} {s[2]} {s[3]}')
+        elif s[0] in ('battle', 'sig', 'home', 'guardian'):
+            items.append(s[0])
+        elif s[0] == 'stuck':
+            items.append(f'stuck {s[1]}')
+        elif s[0] in ('foes', 'lab', 'swap', 'status', 'xrecord', 'chip', 'cross', 'by', 'board', 'emote', 'netpass', 'trade', 'reconnect'):
+            items.append(f'{s[0]} {s[1]}'.strip())
+        elif s[0] == 'drop':
+            items.append(f'drop {short(s[1]) if os.path.isabs(s[1]) else s[1]}')
+        elif s[0] == 'second':
+            seconds.append(os.path.join(h, 'shots', f'_{n}_second{len(seconds)}.bmp'))
+            items.append(f'second {short(seconds[-1])}')
+        elif s[0] == 'dump':
+            os.makedirs(os.path.join(h, s[1]), exist_ok=True)
+            items.append(f'dump {short(os.path.join(h, s[1], s[1]))}')
+        else:
+            items.append(f'{s[0]} {s[1]}'.strip())
+            at += s[0]
+    state = os.path.join(h, 'state.txt')
+    items.append(f'state {short(state)}')
+    answer = talk(h, ';'.join(items))
+    if record is not None:
+        with open(os.path.join(h, 'history.txt'), 'a') as f:
+            f.write(record + f'  # {answer}\n')
+    return answer, shots, seconds, open(state).read().strip()
+
+
+def cmd_do(name, rest):
+    h = home(name)
+    if not os.path.exists(os.path.join(h, 'pid')):
+        sys.exit(f'no game {name}: start it first')
+    every = 0
+    if '--every' in rest:
+        every = int(rest[rest.index('--every') + 1])
+        rest = rest[:rest.index('--every')] + rest[rest.index('--every') + 2:]
+    # (--keep DIR: the batch's pictures one by one, numbered on from what DIR holds)
+    keep = None
+    if '--keep' in rest:
+        keep = rest[rest.index('--keep') + 1]
+        rest = rest[:rest.index('--keep')] + rest[rest.index('--keep') + 2:]
+    commands = ' ; '.join(rest)
+    seq, every = prepare(commands, every)
+    n = len(os.listdir(os.path.join(h, 'shots')))
+    answer, shots, seconds, state = send(h, seq, commands + (f'  # every {every}' if every else ''))
+    shots = [p for _, p in shots]
+    out = os.path.join(h, 'shots', f'{n:04d}.png')
+    if keep:
+        os.makedirs(keep, exist_ok=True)
+        k0 = len(os.listdir(keep))
+        for i, p in enumerate(shots):
+            shutil.copy(p, os.path.join(keep, f'{k0 + i:05d}.bmp'))
+    picture(shots, out)
+    print(state)
+    print(f'picture {out}')
+    for i, p in enumerate(seconds):
+        if os.path.exists(p):
+            from PIL import Image
+            import pil_nearest  # noqa: F401,E402  (Pillow's nearest resize kept working: tools/pil_nearest.py)
+            png = os.path.join(h, 'shots', f'{n:04d}-second{i}.png')
+            im = Image.open(p).convert('RGB')
+            im.resize((im.width * 2, im.height * 2), Image.NEAREST).save(png)
+            print(f'second screen {png}')
+    if not answer.startswith('ok'):
+        print('answer:', answer)
+
+
+def cmd_replay(name, rest):
+    """Replays session `name` into a new game rest[0]."""
+    src, dst = home(name), rest[0]
+    until = int(rest[rest.index('--until') + 1]) if '--until' in rest else None
+    lines = open(os.path.join(src, 'history.txt')).read().splitlines()
+    seed = int(lines[0].split()[-1])
+    args = lines[1].split(' ', 2)[2].split() if len(lines) > 1 and lines[1].startswith('# args ') and len(lines[1]) > 7 else []
+    env = dict(line[6:].split('=', 1) for line in lines if line.startswith('# env '))
+    h = home(dst)
+    if os.path.exists(os.path.join(h, 'pid')):
+        cmd_stop(dst)
+    if os.path.isdir(os.path.join(h, 'data')):
+        shutil.rmtree(os.path.join(h, 'data'))
+    shutil.copytree(os.path.join(src, 'data0'), os.path.join(h, 'data'))
+    launch(h, seed, False, args, env)
+    with contextlib.redirect_stdout(io.StringIO()):
+        cmd_do(dst, ['wait 1'])   # (as start's first batch)
+    for line in lines[2:]:
+        if line.startswith('#'):
+            continue
+        body, _, rest_ = line.partition('  # ')
+        frame = None
+        for part in line.split('  # '):
+            if part.startswith('ok '):
+                frame = int(part.split()[1])
+        every = 0
+        if rest_.startswith('every '):
+            every = int(rest_.split()[1])
+        if body.strip() in ('', 'wait 1') and frame is not None and frame <= 2:
+            continue
+        with contextlib.redirect_stdout(io.StringIO()):
+            cmd_do(dst, [body] + (['--every', str(every)] if every else []))
+        if until is not None and frame is not None and frame >= until:
+            break
+    cmd_do(dst, ['wait 1'])
+
+
+def gone(pid):
+    """Whether process pid has ended (reaped here where it is this process's child)."""
+    try:
+        return os.waitpid(pid, os.WNOHANG)[0] != 0
+    except ChildProcessError:
+        try:
+            os.kill(pid, 0)
+        except OSError:
+            return True
+        return False
+
+
+def stop(h):
+    """The game in folder h ended: asked to quit, and killed where it has
+    not within a second. A quit signalled between two batches is not heard
+    (the headless game's wait for its next batch is a read the signal must
+    interrupt: docs/devtools/scenarios.md, A quit at any frame), and such a
+    game played on for good."""
+    try:
+        pid = int(open(os.path.join(h, 'pid')).read())
+        os.killpg(pid, signal.SIGTERM)
+    except (OSError, ValueError):
+        pid = 0
+    if os.path.exists(os.path.join(h, 'pid')):
+        os.remove(os.path.join(h, 'pid'))
+    for _ in range(50 if pid else 0):
+        if gone(pid):
+            return
+        time.sleep(0.02)
+    if pid:
+        try:
+            os.killpg(pid, signal.SIGKILL)
+        except OSError:
+            pass
+
+
+def cmd_stop(name):
+    stop(home(name))
+    print(f'stopped {name}')
+
+
+def main():
+    if len(sys.argv) < 3 or sys.argv[1] not in ('start', 'do', 'stop', 'replay'):
+        sys.exit(__doc__)
+    op, name, rest = sys.argv[1], sys.argv[2], sys.argv[3:]
+    {'start': cmd_start, 'do': cmd_do, 'stop': lambda n, r: cmd_stop(n), 'replay': cmd_replay}[op](name, rest)
+
+
+if __name__ == '__main__':
+    main()

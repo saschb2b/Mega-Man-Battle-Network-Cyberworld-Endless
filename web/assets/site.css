@@ -1,0 +1,375 @@
+/* Cyberworld Endless: the project's pages, laid out like BN6's PET screens.
+ * Every frame is pixel art (ui/*.png, drawn by tools/site_art.py in the PET's
+ * colours) scaled 3x, so one game pixel is 3 CSS pixels: flat colours, hard
+ * edges, no blur. Fonts: Silkscreen for headers and plates, Pixelify Sans
+ * for text (OFL, fonts/); on the Japanese pages (ja/) the system's own
+ * Japanese gothic for what those two do not draw. */
+
+@font-face { font-family: "Pixelify Sans"; src: url(fonts/pixelify-sans.woff2) format("woff2"); font-weight: 400 700; font-display: swap; }
+@font-face { font-family: "Silkscreen"; src: url(fonts/silkscreen-400.woff2) format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Silkscreen"; src: url(fonts/silkscreen-700.woff2) format("woff2"); font-weight: 700; font-display: swap; }
+
+:root {
+	--u: 3px;                /* one game pixel */
+	--green: #08bd73;
+	--green-dark: #007b4a;
+	--band: #007b31;
+	--cyan: #42c6e7;
+	--ink: #423939;
+	--white: #f7fff7;
+	--gold: #ffd610;
+	--orange: #f7a500;
+	--olive: #4a7b42;
+	--caps: "Silkscreen", "Pixelify Sans", monospace;
+	--pixel: "Pixelify Sans", "Silkscreen", monospace;
+	/* the PET's labels: light text with a dark one-pixel edge */
+	--edge: 0 2px 0 #214a52, 2px 0 0 #214a52, 0 -2px 0 #214a52, -2px 0 0 #214a52, 2px 2px 0 #214a52, -2px -2px 0 #214a52, 2px -2px 0 #214a52, -2px 2px 0 #214a52;
+}
+
+/* Japanese (the ja/ pages, and a Japanese word on an English one): the
+ * pixel fonts keep the Latin letters and digits, the system's gothic draws
+ * the kana and kanji (Hiragino on Apple's, BIZ UDPGothic or Meiryo on
+ * Windows, Noto on Android and Linux); lines break as Japanese breaks them,
+ * headings between phrases where the browser can */
+[lang|="ja"] {
+	--jp: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "BIZ UDPGothic", Meiryo, "Noto Sans JP", "Noto Sans CJK JP", sans-serif;
+	--caps: "Silkscreen", "Pixelify Sans", var(--jp);
+	--pixel: "Pixelify Sans", var(--jp);
+	line-break: strict;
+	overflow-wrap: break-word;
+}
+:is(h1, h2, h3, figcaption, .pitch, .hint, .label, .who, .plate, .exit, .pill):lang(ja) { word-break: auto-phrase; }
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; } }
+
+body {
+	margin: 0;
+	color: var(--ink);
+	font: 18px/1.5 var(--pixel);
+	background: var(--green) url(ui/floor.png) 0 0 / 48px 48px;
+	image-rendering: pixelated;
+}
+img, video { image-rendering: pixelated; max-width: 100%; }
+a { color: #0848a8; }
+.wrap { max-width: 1128px; margin: 0 auto; padding: 0 18px; }
+code { font: 0.92em ui-monospace, Menlo, Consolas, monospace; overflow-wrap: anywhere; color: #9c3100; }
+
+/* ---- frames: 9-slice pixel art at 3x ---- */
+
+.panel {
+	border: 18px solid transparent;
+	border-image: url(ui/panel.png) 6 fill / 18px;
+	color: var(--white);
+	padding: 6px;
+}
+.textbox {
+	position: relative;
+	border: 18px solid transparent;
+	border-image: url(ui/textbox.png) 6 fill / 18px;
+	color: var(--ink);
+	padding: 4px 8px;
+	font-size: 1.12rem;
+	line-height: 1.55;
+}
+.textbox p { margin: 0; }
+.textbox p + p { margin-top: 0.6em; }
+.card {
+	border: 12px solid transparent;
+	border-image: url(ui/card.png) 4 fill / 12px;
+	padding: 6px;
+	color: #292929;
+}
+.frame {
+	display: block;
+	margin: 0;
+	border: 15px solid transparent;
+	border-image: url(ui/screen.png) 5 fill / 15px;
+	line-height: 0;
+}
+.frame img, .frame video { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: cover; }
+/* whole-number scales: 480 or 720 pixels of picture inside the frame */
+.frame.x2 { width: 510px; max-width: 100%; }
+.frame.x3 { width: 750px; max-width: 100%; }
+
+/* the tab over a text box that names who speaks, as the PET's NAVIGATOR */
+.who {
+	display: block;
+	width: fit-content;
+	margin: 0 0 -3px 15px;
+	padding: 4px 12px 2px;
+	background: var(--green-dark);
+	color: var(--white);
+	font: 700 0.8rem/1.2 var(--caps);
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	position: relative;
+	z-index: 1;
+}
+
+/* small labels (SELECT, HP, ZENNY): white capitals with a dark edge */
+.label { font: 700 0.9rem/1 var(--caps); color: var(--white); text-shadow: var(--edge); letter-spacing: 0.06em; text-transform: uppercase; }
+
+/* ---- plates: the PET's menu, flat on the left, slanted on the right ---- */
+
+.plate {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	min-height: 48px;
+	border-style: solid;
+	border-color: transparent;
+	border-width: 9px 30px 9px 9px;
+	border-image: url(ui/plate.png) 3 10 3 3 fill / 9px 30px 9px 9px;
+	padding: 0 4px;
+	color: var(--white);
+	font: 700 1.05rem/1 var(--caps);
+	text-shadow: var(--edge);
+	text-decoration: none;
+	cursor: pointer;
+	background: none;
+}
+.plate:hover, .plate:focus-visible, .plate.on { border-image-source: url(ui/plate-on.png); outline: none; }
+
+/* the cursor: an orange arrow before the chosen line */
+.menu { list-style: none; margin: 0; padding: 0 0 0 30px; display: grid; gap: 3px; }
+.menu li { position: relative; }
+.menu li:has(> :hover)::before, .menu li:has(> :focus-visible)::before, .menu:not(:hover):not(:focus-within) li.on::before {
+	content: "";
+	position: absolute;
+	left: -27px;
+	top: 50%;
+	width: 18px;
+	height: 24px;
+	translate: 0 -50%;
+	background: var(--orange);
+	clip-path: polygon(0 0, 100% 50%, 0 100%);
+	animation: nudge 0.5s steps(2) infinite;
+}
+@keyframes nudge { 50% { left: -23px; } }
+
+/* ---- pills: pointed at both ends ---- */
+
+.pills { display: flex; flex-wrap: wrap; gap: 6px 3px; list-style: none; margin: 12px 0 0; padding: 0; }
+.pill {
+	display: inline-flex;
+	align-items: center;
+	min-height: 39px;
+	border-style: solid;
+	border-color: transparent;
+	border-width: 9px 21px;
+	border-image: url(ui/pill.png) 3 7 fill / 9px 21px;
+	padding: 0 2px;
+	color: var(--white);
+	font: 700 0.9rem/1 var(--caps);
+	text-shadow: var(--edge);
+	white-space: nowrap;
+}
+.pill.gold { border-image-source: url(ui/pill-gold.png); }
+
+/* ---- a screen's title band: CHIP FOLDER, LIBRARY, E-MAIL ---- */
+
+.band {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	margin: 0 0 24px;
+	padding: 9px 60px 9px 24px;
+	width: fit-content;
+	min-width: min(600px, 100%);
+	background: var(--band);
+	clip-path: polygon(0 0, 100% 0, calc(100% - 30px) 100%, 0 100%);
+}
+.band h1, .band h2 {
+	margin: 0;
+	font: 700 clamp(1.3rem, 3vw, 1.9rem)/1.1 var(--caps);
+	color: var(--white);
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+.band .hint { font: 700 0.8rem/1 var(--caps); color: var(--white); text-transform: uppercase; }
+.band .hint b { color: var(--orange); }
+
+section { padding: 44px 0 16px; }
+
+/* ---- the PET's top bar ---- */
+
+.pet-bar {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	background: var(--olive);
+	border-bottom: var(--u) solid #214a52;
+}
+.pet-bar .wrap { display: flex; align-items: center; gap: 18px; min-height: 60px; }
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	text-decoration: none;
+	font: italic 700 1.25rem/1 var(--caps);
+	color: var(--orange);
+	text-shadow: var(--edge);
+	letter-spacing: 0.04em;
+}
+.brand .dot {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: radial-gradient(circle, #ff2921 0 30%, #c65a00 31% 52%, var(--orange) 53% 72%, #214a52 73%);
+}
+.pet-bar nav {
+	margin-left: auto;
+	display: flex;
+	gap: 3px;
+	padding: 6px 12px 6px 36px;
+	background: #42ffff;
+	box-shadow: inset 0 calc(-1 * var(--u)) 0 #00d6b5;
+	clip-path: polygon(24px 0, 100% 0, 100% 100%, 0 100%);
+}
+.pet-bar nav a {
+	padding: 5px 10px 3px;
+	color: #214a52;
+	text-decoration: none;
+	font: 700 0.85rem/1.2 var(--caps);
+	text-transform: uppercase;
+	white-space: nowrap;
+}
+.pet-bar nav a:hover, .pet-bar nav a[aria-current] { background: #214a52; color: #42ffff; }
+/* the other language's page, set apart from the rest by a rule */
+.pet-bar nav a.lang { margin-left: 6px; box-shadow: -6px 0 0 -3px #214a52; }
+.pet-bar nav a.lang .short { display: none; }
+/* (between a phone and a wide screen the bar's links outgrow it: the
+ * brand's name gives way first, then the links to the home page's sections) */
+@media (max-width: 1060px) { .brand span { display: none; } }
+@media (max-width: 900px) { .pet-bar nav a.opt[href*="#"] { display: none; } }
+@media (max-width: 760px) {
+	.pet-bar nav .opt { display: none; } .brand span { display: none; }
+	.pet-bar nav { padding-left: 30px; }
+	.pet-bar nav a { padding-inline: 7px; }
+	.pet-bar nav a.lang .long { display: none; } .pet-bar nav a.lang .short { display: inline; }
+}
+/* (a narrow phone: the four links and the language's in the bar's width) */
+@media (max-width: 420px) {
+	.pet-bar nav { padding: 6px 8px 6px 26px; }
+	.pet-bar nav a { padding-inline: 6px; font-size: 0.75rem; }
+	.pet-bar nav a.lang { margin-left: 4px; }
+}
+
+/* a Japanese browser on an English page: a line under the bar names the
+ * Japanese one (site.js), closed for good with its button */
+.lang-hint { background: #214a52; color: var(--white); }
+.lang-hint .wrap { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 42px; }
+.lang-hint a { color: #42ffff; font: 700 1rem/1.3 var(--pixel); }
+.lang-hint button { padding: 2px 10px; background: none; border: 2px solid currentColor; color: var(--white); font: 700 0.85rem/1.2 var(--caps); cursor: pointer; }
+
+/* ---- EXIT's dark plate, for the one thing to press ---- */
+
+.exit {
+	display: inline-flex;
+	align-items: center;
+	gap: 12px;
+	border: 12px solid transparent;
+	border-image: url(ui/exit.png) 4 fill / 12px;
+	padding: 3px 12px;
+	color: #4ae773;
+	font: 700 1.25rem/1 var(--caps);
+	text-decoration: none;
+	cursor: pointer;
+	background: none;
+	letter-spacing: 0.08em;
+}
+.exit::before { content: ""; width: 15px; height: 18px; background: var(--orange); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.exit:hover, .exit:focus-visible { color: #c6ff8c; outline: none; }
+.exit[aria-disabled="true"] { filter: grayscale(1) brightness(0.85); pointer-events: none; }
+
+/* ---- rows in a panel: the folder's chips, the shop's goods, the mail ---- */
+
+.rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; }
+.row {
+	display: grid;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	border: 12px solid transparent;
+	border-image: url(ui/slot.png) 4 fill / 12px;
+	padding: 0 4px;
+	background: none;
+	color: var(--white);
+	font: 700 1.05rem/1.25 var(--pixel);
+	text-shadow: 2px 2px 0 #10364a;
+	text-decoration: none;
+	text-align: left;
+	cursor: pointer;
+}
+.row:hover, .row:focus-visible, .row[aria-pressed="true"] { border-image-source: url(ui/slot-on.png); outline: none; }
+.code {
+	display: inline-grid;
+	place-items: center;
+	width: 27px;
+	height: 27px;
+	background: #292929;
+	box-shadow: inset 0 0 0 var(--u) #f7f7f7;
+	color: var(--white);
+	font: 700 0.9rem/1 var(--caps);
+	text-shadow: none;
+}
+.mb { font: 700 0.75rem/1 var(--caps); color: var(--gold); text-shadow: none; }
+
+footer.site { margin-top: 44px; padding: 22px 0 36px; background: var(--olive); border-top: var(--u) solid #214a52; color: #e8f4e0; font: 0.9rem/1.5 system-ui, sans-serif; }
+footer.site a { color: #c6ff8c; }
+
+.grid-2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+@media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: minmax(0, 1fr); } }
+
+/* 12x12 pixel icons (ui/icon-*.png) at 3x */
+.icon { flex: none; display: inline-block; width: 36px; height: 36px; background: no-repeat 0 0 / 36px 36px; }
+.i-play { background-image: url(ui/icon-play.png); }
+.i-get { background-image: url(ui/icon-get.png); }
+.i-put { background-image: url(ui/icon-put.png); }
+.i-full { background-image: url(ui/icon-full.png); }
+.i-erase { background-image: url(ui/icon-erase.png); }
+.i-layers { background-image: url(ui/icon-layers.png); }
+.i-chip { background-image: url(ui/icon-chip.png); }
+.i-code { background-image: url(ui/icon-code.png); }
+.i-pc { background-image: url(ui/icon-pc.png); }
+.i-handheld { background-image: url(ui/icon-handheld.png); }
+.i-wide { background-image: url(ui/icon-wide.png); }
+.i-3ds { background-image: url(ui/icon-3ds.png); }
+.i-switch { background-image: url(ui/icon-switch.png); }
+.i-vita { background-image: url(ui/icon-vita.png); }
+.i-pad { background-image: url(ui/icon-pad.png); }
+.i-web { background-image: url(ui/icon-web.png); }
+.i-phone { background-image: url(ui/icon-phone.png); }
+.i-mail { background-image: url(ui/icon-mail.png); }
+.i-mail-open { background-image: url(ui/icon-mail-open.png); }
+.i-sound { background-image: url(ui/icon-sound.png); }
+.i-muted { background-image: url(ui/icon-muted.png); }
+.i-star { background-image: url(ui/icon-star.png); }
+.i-follow { background-image: url(ui/icon-follow.png); }
+.i-bug { background-image: url(ui/icon-bug.png); }
+.i-coffee { background-image: url(ui/icon-coffee.png); }
+.i-swap { background-image: url(ui/icon-swap.png); }
+.i-server { background-image: url(ui/icon-server.png); }
+.i-feed { background-image: url(ui/icon-feed.png); }
+.i-talk { background-image: url(ui/icon-talk.png); }
+.i-chat { background-image: url(ui/icon-chat.png); }
+
+/* keys: dark caps with a light edge, as the game's button prompts */
+kbd {
+	display: inline-block;
+	min-width: 30px;
+	margin: 0 3px 3px 0;
+	padding: 3px 6px 1px;
+	background: #214a52;
+	box-shadow: inset 0 0 0 var(--u) var(--cyan), 0 var(--u) 0 #10364a;
+	color: var(--white);
+	font: 700 0.85rem/1.3 var(--caps);
+	text-align: center;
+}
+
+/* read aloud and by search engines, not shown */
+.vh { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }

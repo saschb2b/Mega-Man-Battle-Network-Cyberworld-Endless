@@ -1,0 +1,235 @@
+#!/usr/bin/env python3
+"""heap3ds.py [--seeds 1-12] [--frames N] [--cases today,bn6,bn5,bn4,all] [--cap MB] [--refuse FUNC,...] [--shots N] [--dev SWITCHES] [--no-build]: the
+New 3DS's heap modelled on this computer (3ds/README.md, Testing on a 3DS;
+docs/engine/emulation/3ds-memory.md).
+
+The host build plays long runs headless (the test autopilot, MegaMan kept
+alive and his foes deleted at a hit: --dev god,onehit, so a run goes
+through act after act and area after area) with tools/heap3ds.c preloaded,
+which counts the game's allocations as the 3DS's heap holds them (96 MB;
+the core's ROM copy kept as the 3DS keeps it) and refuses one past it, as
+the 3DS's malloc does. Each case is a 3DS:
+
+  today  BN6's ROM alone, mGBA's 16 MB ROM buffer held and every area's
+         learned maps kept (the 3DS before issue #82's 3DS round): the
+         host build as it is
+  bn6    BN6's ROM alone, the buffer given back, the layer's own area's
+         learned maps kept alone (src/map/netmap.c): the host built with
+         CW_HEAP_3DS
+  bn5    the same with BN5's ROM beside BN6's, read whole
+  bn4    the same with BN4 Red Sun's beside BN6's, read whole, its six
+         families installed (the visitors, docs/multirom/bn4.md)
+  all    the same with both, BN5's and BN4's, beside BN6's
+  psp    BN6's ROM alone with the PSP's rules (the host built with
+         CW_HEAP_PSP: one area's maps kept, no town kept between visits,
+         no installs' log); give its heap with --cap
+         (docs/engine/emulation/psp-and-ds.md)
+
+Per case and seed: the heap's peak, the allocations refused (the first's
+place named), a crash's place, how deep the run went and how often an area
+was learned again. --refuse FUNC refuses every allocation those functions
+ask for, and --shots N keeps a picture every N frames in each run's
+folder: a refusal's cost seen beside a run without it (the same pictures:
+it cost time alone). Needs the ROMs (local only), copied into
+.build/heap3ds/rom. Exits 0 once every run is reported."""
+import argparse
+import hashlib
+import importlib.util
+import os
+import re
+import shutil
+import subprocess
+import sys
+from concurrent.futures import ThreadPoolExecutor
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+WORK = os.path.join(ROOT, '.build', 'heap3ds')
+ROM_DIR = os.environ.get('CYBERWORLD_ROM_DIR', os.path.expanduser('~/.cache/mmbn-ref/roms'))
+SHA1 = {'bn6.gba': '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', 'bn5.gba': '5f472f78d8de2df01d5039e045c043cb40969a39',
+        'bn4.gba': 'a97e96a7da03abd70f7953328e511b9fa29179f1'}
+MB = 1 << 20
+CAP = 96 * MB              # the heap (src/core/start_3ds.c: OS_HEAP_AREA's 96 MB)
+BUFFER = 16 * MB           # mGBA's ROM buffer (docker/mgba.sh's 16 MB), held before main where not given back
+CORE_COPY = 16 * MB        # the core's ROM copy (EMU_ROM_SIZE), which the 3DS keeps (src/emu/emu.c)
+HOST = 'build/host/cyberworld'
+AS_3DS = 'build/heap3ds/cyberworld'   # the host build with CW_HEAP_3DS: the 3DS's rules where they are its own
+AS_PSP = 'build/heap3ds-psp/cyberworld'   # ... and with CW_HEAP_PSP, the PSP's (no town kept between visits)
+# each case: the extra ROMs beside BN6's, mGBA's buffer held, the binary
+CASES = {'today': ((), BUFFER, HOST), 'bn6': ((), 0, AS_3DS), 'bn5': (('bn5',), 0, AS_3DS), 'bn4': (('bn4',), 0, AS_3DS),
+         'all': (('bn5', 'bn4'), 0, AS_3DS), 'psp': ((), 0, AS_PSP)}
+
+
+def build_py():
+    spec = importlib.util.spec_from_file_location('build', os.path.join(ROOT, 'build.py'))
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def find_roms(names):
+    """The ROMs `names` (bn6, bn5, bn4), told by their SHA-1, copied into WORK/rom."""
+    rom = os.path.join(WORK, 'rom')
+    os.makedirs(rom, exist_ok=True)
+    want = {k: v for k, v in SHA1.items() if k[:-4] in names and not os.path.exists(os.path.join(rom, k))}
+    for name in sorted(os.listdir(ROM_DIR)) if want else []:
+        path = os.path.join(ROM_DIR, name)
+        if name.lower().endswith('.gba') and os.path.isfile(path):
+            with open(path, 'rb') as f:
+                sha = hashlib.sha1(f.read()).hexdigest()
+            for k, v in list(want.items()):
+                if sha == v:
+                    shutil.copy(path, os.path.join(rom, k))
+                    del want[k]
+    if want:
+        sys.exit(f'no {" or ".join(want)} in {ROM_DIR} (BN6 Gregar, BN5 Team Colonel and BN4 Red Sun, USA)')
+    return rom
+
+
+def seeds_of(spec):
+    out = []
+    for part in spec.split(','):
+        a, _, b = part.partition('-')
+        out += range(int(a), int(b or a) + 1)
+    return out
+
+
+def docker_run(bp, name, args, mounts=(), env=()):
+    cmd = ['docker'] + (['--context', bp.CONTEXT] if bp.CONTEXT else []) + [
+        'run', '--rm', '--name', name, '-u', f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '-w', '/src']
+    for host, guest in mounts:
+        cmd += ['-v', f'{host}:{guest}']
+    for k, v in env:
+        cmd += ['-e', f'{k}={v}']
+    return subprocess.run(cmd + [bp.IMAGE, *args], capture_output=True, text=True)
+
+
+def frames_after(text, marker, binary):
+    """The binary's offsets in the frames said after the first `marker`"""
+    if marker not in text:
+        return []
+    return re.findall(r'heap3ds:   at \S*' + re.escape(os.path.basename(binary)) + r'\+(0x[0-9a-f]+)', text.split(marker, 1)[1].split('heap3ds: refused', 1)[0])
+
+
+def one(bp, rom, case, seed, frames, cap, refuse='', shots=0, more_dev=''):
+    """A long run of `seed` on the 3DS of `case`, its heap `cap` bytes; the
+    allocations asked for in the game's ranges `refuse` refused, and a
+    picture every `shots` frames; `more_dev` more --dev switches"""
+    extras, fixed, binary = CASES[case]
+    data = os.path.join(WORK, case, f's{seed}')
+    shutil.rmtree(data, ignore_errors=True)
+    os.makedirs(data)
+    mounts = [(os.path.join(rom, 'bn6.gba'), '/rom/bn6.gba:ro')]
+    mounts += [(os.path.join(rom, f'{x}.gba'), f'/rom/{x}.gba:ro') for x in extras]
+    dev = 'god,onehit' + (',' + more_dev if more_dev else '')
+    env = [('LD_PRELOAD', '/src/.build/heap3ds/heap3ds.so'), ('HEAP3DS_CAP', cap), ('HEAP3DS_FIXED', fixed),
+           ('HEAP3DS_KEEP', CORE_COPY), ('CYBERWORLD_AUTOPILOT', '1')] + ([('HEAP3DS_REFUSE', refuse)] if refuse else [])
+    rel = os.path.relpath(data, ROOT)
+    pictures = ['--shot', ','.join(f'{f}:/src/{rel}/f{f:06d}.bmp' for f in range(shots, frames + 1, shots)[:64])] if shots else []
+    r = docker_run(bp, f'3ds-heap3ds-{case}-s{seed}-{os.getpid()}',
+                   [binary, '--headless', '--size', '400x240', '--rom-dir', '/rom', '--data-dir', f'/src/{rel}',
+                    '--scene', 'emu', '--seed', str(seed), '--dev', dev, '--frames', str(frames)] + pictures, mounts, env)
+    out = r.stdout + r.stderr
+    with open(data + '.out', 'w') as f:
+        f.write(out)
+    m = re.search(r'heap3ds: peak ([\d.]+) MB .* (\d+) refused', out)
+    depth = 0
+    log = os.path.join(data, 'runlog.txt')
+    if os.path.exists(log):
+        with open(log) as f:
+            depth = max([int(d) for d in re.findall(r'depth (\d+)', f.read())] or [0])
+    return {'peak': float(m.group(1)) if m else None, 'refused': int(m.group(2)) if m else None, 'depth': depth,
+            'end': 'whole' if m else f'ended early ({r.returncode})', 'binary': binary,
+            'first': frames_after(out, 'heap3ds: refused', binary)[:2], 'crash': frames_after(out, 'heap3ds: crashed', binary)[:3],
+            'again': len(re.findall(r'netmap: area \d+ learned again', out))}
+
+
+def names(bp, binary, addrs):
+    """addr2line's function names for `binary`'s offsets"""
+    if not addrs:
+        return {}
+    r = docker_run(bp, f'3ds-heap3ds-names-{os.getpid()}', ['addr2line', '-f', '-s', '-e', binary, *addrs])
+    lines = r.stdout.splitlines()
+    return {a: f'{lines[2 * i]} ({lines[2 * i + 1]})' for i, a in enumerate(addrs) if 2 * i + 1 < len(lines)}
+
+
+def ranges(bp, binary, funcs):
+    """The game's functions `funcs` as HEAP3DS_REFUSE's ranges (nm's
+    offsets and sizes)"""
+    if not funcs:
+        return ''
+    r = docker_run(bp, f'3ds-heap3ds-nm-{os.getpid()}', ['nm', '-S', '--defined-only', binary])
+    out = []
+    for f in funcs:
+        m = re.search(r'^([0-9a-f]+) ([0-9a-f]+) [tT] ' + re.escape(f) + r'$', r.stdout, re.M)
+        if not m:
+            sys.exit(f'no function {f} in {binary} (inlined, or misspelt?)')
+        out.append(f'0x{m.group(1)}-0x{int(m.group(1), 16) + int(m.group(2), 16):x}')
+    return ','.join(out)
+
+
+def build(bp, psp=False):
+    """The host build, and the host built with the 3DS's rules (CW_HEAP_3DS) or the PSP's (CW_HEAP_PSP)"""
+    subprocess.run([sys.executable, os.path.join(ROOT, 'build.py'), 'host'], cwd=ROOT, check=True, capture_output=True)
+    out, flag, binary = ('build/heap3ds-psp', 'CW_HEAP_PSP', AS_PSP) if psp else ('build/heap3ds', 'CW_HEAP_3DS', AS_3DS)
+    r = docker_run(bp, f'3ds-heap3ds-make-{os.getpid()}', ['make', 'TARGET=host', f'OUT={out}', 'VERSION=heap3ds',
+                                                           f'-j{os.cpu_count() or 4}', f'EXTRA_CFLAGS=-D{flag}', binary])
+    if r.returncode:
+        sys.exit(f'the host build with {flag} failed\n' + r.stdout[-2000:] + r.stderr[-2000:])
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__.split('\n\n')[0])
+    ap.add_argument('--seeds', default='1-12', help='seeds, as 1-12 or 1,4,7')
+    ap.add_argument('--frames', type=int, default=120000, help="each run's frames (120000: some 25 layers)")
+    ap.add_argument('--cases', default='today,bn6,bn5,bn4,all', help='which 3DS: ' + ', '.join(CASES))
+    ap.add_argument('--jobs', type=int, default=os.cpu_count() or 4)
+    ap.add_argument('--no-build', action='store_true', help='the host binaries as they are')
+    ap.add_argument('--as-3ds', default=AS_3DS, help="the bn6, bn5, bn4 and all cases' binary (a variant built with --no-build)")
+    ap.add_argument('--cap', type=int, default=CAP // MB, help="the heap's size in MB (less than 96: fragmentation's share, or a test of what a refusal does)")
+    ap.add_argument('--refuse', default='', help='functions whose allocations are all refused, as FUNC,FUNC: what a refusal there does')
+    ap.add_argument('--dev', default='', help="more --dev switches for every run: glitch,side=4,glitchstage=5,glitchlook=15+5+6 each run started on a Glitch layer, its looks from those areas (docs/game/glitch-layer.md)")
+    ap.add_argument('--shots', type=int, default=0, help="a picture every N frames, into each run's folder (64 at most), to set beside another run's")
+    a = ap.parse_args()
+    for case in ('bn6', 'bn5', 'bn4', 'all'):
+        CASES[case] = CASES[case][:2] + (a.as_3ds,)
+    cases = [c for c in a.cases.split(',') if c in CASES]
+    rom = find_roms({'bn6'} | {x for c in cases for x in CASES[c][0]})
+    bp = build_py()
+    if not a.no_build:
+        if any(CASES[c][2] == a.as_3ds for c in cases):
+            build(bp)
+        if 'psp' in cases:
+            build(bp, psp=True)
+    os.makedirs(WORK, exist_ok=True)
+    r = docker_run(bp, f'3ds-heap3ds-cc-{os.getpid()}', ['gcc', '-O2', '-shared', '-fPIC', '-o', '.build/heap3ds/heap3ds.so',
+                                                         'tools/heap3ds.c', '-ldl'])
+    if r.returncode:
+        sys.exit('heap3ds.c did not build\n' + r.stderr)
+    jobs = [(c, s) for c in cases for s in seeds_of(a.seeds)]
+    refuse = {b: ranges(bp, b, [f for f in a.refuse.split(',') if f]) for b in {CASES[c][2] for c in cases}}
+    with ThreadPoolExecutor(a.jobs) as pool:
+        results = dict(zip(jobs, pool.map(lambda j: one(bp, rom, j[0], j[1], a.frames, a.cap * MB, refuse[CASES[j[0]][2]], a.shots, a.dev), jobs)))
+    places = {}
+    for binary in {res['binary'] for res in results.values()}:
+        places.update({(binary, k): v for k, v in names(bp, binary, sorted({f for res in results.values() if res['binary'] == binary
+                                                                           for f in res['first'] + res['crash']})).items()})
+    print(f'{"case":6} {"seed":>4} {"peak MB":>8} {"of":>4} {"refused":>8} {"depth":>6} {"again":>6}  end')
+    for (case, seed), res in results.items():
+        name = lambda f, res=res: places.get((res['binary'], f), f)
+        peak = res['peak'] if res['peak'] is not None else '-'
+        refused = res['refused'] if res['refused'] is not None else '-'
+        print(f'{case:6} {seed:4} {peak:>8} {a.cap:4} {refused:>8} {res["depth"]:6} {res["again"]:6}  {res["end"]}'
+              + (f'; first refused in {" < ".join(name(f) for f in res["first"])}' if res['first'] else '')
+              + (f'; crashed in {" < ".join(name(f) for f in res["crash"])}' if res['crash'] else ''))
+    for case in cases:
+        runs = [results[(case, s)] for s in seeds_of(a.seeds)]
+        peaks = [x['peak'] for x in runs if x['peak'] is not None]
+        print(f'{case}: peak {max(peaks) if peaks else "-"} MB at most; {sum(x["refused"] or 0 for x in runs)} allocations refused, '
+              f'in {sum(1 for x in runs if x["refused"])} of {len(runs)} runs; {sum(1 for x in runs if x["crash"])} crashed; '
+              f'{sum(x["again"] for x in runs)} areas learned again')
+    print(f'(each run\'s output: {os.path.relpath(WORK, ROOT)}/CASE/sSEED.out)')
+    return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

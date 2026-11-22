@@ -1,0 +1,665 @@
+// The page around the browser build (cyberworld.js, from `build.py web`).
+// The player's ROMs and the game's saves live in IndexedDB under
+// /cyberworld-endless (its own name: every project page of a github.io user
+// shares one origin): each ROM file is read here, checked, written there and
+// never leaves the browser.
+'use strict';
+
+const ROM_SIZE = 8 * 1024 * 1024;
+// (the engine's build, which build.py fills in: its .wasm fetched by it, so
+// a browser never pairs a kept one with a new cyberworld.js)
+const ENGINE_VERSION = '';
+const DATA = '/cyberworld-endless', ROM_DIR = DATA + '/rom';
+// The ROMs the game takes, each told by its header's game code, checked by
+// its SHA-1 and kept under its own name in ROM_DIR, where the game finds
+// BN5's beside BN6's (src/core/rom.c): BN6's, which a run needs, and BN5's,
+// optional, whose net areas, viruses, Navis and chips then join runs, fought in
+// BN6's engine (docs/multirom/). An extra ROM is taken where the game offers it
+// (offered: rom.c's xrom_offered): BN5's and BN4 Red Sun's, whose viruses visit
+// a run's battles (?dev=showbn4, from before BN4 was offered, changes nothing now).
+// The names and words of Android's ROM page.
+const JA = LANG === 'ja';
+const ROMS = {
+	bn6: { code: 'BR5E', sha1: '89fe0bac4fd3d2ab1d2ca35e87ef8b1294a84cd6', file: 'bn6g.gba', tag: JA ? '北米版 BN6 Cybeast Gregar' : 'BN6 Cybeast Gregar (USA)', named: 'BN6 Gregar' },
+	bn5: { code: 'BRKE', sha1: '5f472f78d8de2df01d5039e045c043cb40969a39', file: 'bn5c.gba', tag: JA ? '北米版 BN5 Team Colonel' : 'BN5 Team Colonel (USA)', named: 'BN5 Team Colonel' },
+	bn4: { code: 'B4WE', sha1: 'a97e96a7da03abd70f7953328e511b9fa29179f1', file: 'bn4rs.gba', tag: JA ? '北米版 BN4 Red Sun' : 'BN4 Red Sun (USA)', named: 'BN4 Red Sun' },
+};
+const SHOW_BN4 = new URLSearchParams(location.search).get('dev') === 'showbn4';
+// Battle Network 6's and 5's other versions, by their game code: a player
+// who has one is told which it is (on the Japanese page in Japanese, the
+// Japanese versions by their own titles)
+const OTHERS = JA ? {
+	BR6E: 'BN6 Cybeast Falzar です。必要なのは Gregar',
+	BR6P: '欧州版の Cybeast Falzar です。必要なのは北米版の Gregar',
+	BR6J: '日本版『ロックマンエグゼ6 電脳獣ファルザー』です。必要なのは北米版の BN6 Cybeast Gregar',
+	BR5P: '欧州版の Cybeast Gregar です。必要なのは北米版',
+	BR5J: '日本版『ロックマンエグゼ6 電脳獣グレイガ』です。必要なのは北米版の BN6 Cybeast Gregar',
+	BRBE: 'BN5 Team ProtoMan です。必要なのは Team Colonel',
+	BRBP: '欧州版の Team ProtoMan です。必要なのは北米版の Team Colonel',
+	BRBJ: '日本版『ロックマンエグゼ5 チーム オブ ブルース』です。BN5 は北米版の Team Colonel のみ',
+	BRKP: '欧州版の Team Colonel です。必要なのは北米版',
+	BRKJ: '日本版『ロックマンエグゼ5 チーム オブ カーネル』です。BN5 は北米版の Team Colonel のみ',
+	B4BE: 'BN4 Blue Moon です。必要なのは Red Sun',
+	B4BJ: '日本版『ロックマンエグゼ4 トーナメント ブルームーン』です。BN4 は北米版の Red Sun のみ',
+	B4WJ: '日本版『ロックマンエグゼ4 トーナメント レッドサン』です。必要なのは北米版',
+} : {
+	BR6E: 'BN6 Cybeast Falzar, not Gregar',
+	BR6P: 'BN6 Cybeast Falzar (Europe), not Gregar (USA)',
+	BR6J: 'Rockman EXE 6 Falzar (Japan), not BN6 Gregar (USA)',
+	BR5P: 'BN6 Cybeast Gregar (Europe), not the USA version',
+	BR5J: 'Rockman EXE 6 Gregar (Japan), not the USA version',
+	BRBE: 'BN5 Team ProtoMan, not Team Colonel',
+	BRBP: 'BN5 Team ProtoMan (Europe), not Team Colonel (USA)',
+	BRBJ: 'Rockman EXE 5 Team of Blues (Japan), not BN5 Team Colonel (USA)',
+	BRKP: 'BN5 Team Colonel (Europe), not the USA version',
+	BRKJ: 'Rockman EXE 5 Team of Colonel (Japan), not the USA version',
+	B4BE: 'BN4 Blue Moon, not Red Sun',
+	B4BJ: 'Rockman EXE 4 Blue Moon (Japan), not BN4 Red Sun (USA)',
+	B4WJ: 'Rockman EXE 4 Red Sun (Japan), not the USA version',
+};
+// (each named where its game is offered: BN4's while BN4's is)
+const OTHER_OF = (code) => (code.startsWith('B4') ? 'bn4' : 'bn6');
+// "not BN6 Gregar or BN5 Team Colonel", the games offered named
+function otherGame() {
+	const names = Object.keys(ROMS).filter(offered).map((id) => ROMS[id].named);
+	if (JA) return names.join(' でも ') + ' でもありません';
+	return 'not ' + (names.length > 2 ? names.slice(0, -1).join(', ') + ' or ' + names[names.length - 1] : names.join(' or '));
+}
+// The offered extra ROMs among `ids`, by their short names: "BN5", "BN5 and BN4"
+function tags(ids) {
+	const t = ids.map((id) => id.toUpperCase());
+	return t.length > 1 ? t.slice(0, -1).join(', ') + (JA ? ' と ' : ' and ') + t[t.length - 1] : t.join('');
+}
+
+// The page's other words, in its language
+const W = JA ? {
+	stopped: (what) => 'エンジンが止まりました：' + what,
+	today: '今日 ',
+	tapSlot: 'スロットをタップ', clickSlot: 'スロットをクリックするか、ここにドロップ',
+	runSaved: (when) => 'ランのセーブ：' + when + '。', ready: '準備OK。', extraCan: (what, how) => '\n' + what + ' も入れられます：' + how + '。',
+	extraIn: (what) => what + ' が入りました。次は BN6 です。',
+	chooseRoms: 'ROM ファイルを選んでください。', dropRoms: 'ROM ファイルをここにドロップするか、選んでください。',
+	cartReady: '：準備OK', cartNeeded: '：必須、選んでください', cartOptional: '：任意、選んでください',
+	game: 'ゲーム',
+	notGba: 'GBA の ROM ではありません', changed: (tag) => tag + 'ですが、中身が違います（パッチ済み、切り詰め、または吸い出しの不良）',
+	loading: '少々お待ちください。エンジンを読み込んでいます。',
+	checking: (files) => (files.length === 1 ? files[0].name : files.length + ' 個のファイル') + 'を確認中…',
+	unreadable: '読み込めませんでした',
+	zipped: (name) => name + ' は圧縮されています。先に展開してください。', refused: (name, why) => name + '：' + why + '。',
+	more: (n) => 'ほか ' + n + ' 件。',
+	savesNeedRom: 'SAVES を開くには、先に BN6 の ROM を選んでください。',
+	savesAtTitle: 'SAVES はタイトル画面で開きます。ランの途中では開けません。',
+	savesPick: '「バックアップを読み込む」を押して、ファイルを選んでください。',
+	backedUp: (file) => 'バックアップを保存しました：' + file + '。',
+	forget: 'このブラウザから ROM とすべてのセーブを消しますか？',
+	keptIn: 'あり', keptNotYet: 'まだ', keptOptional: 'なし（任意）', keptNone: 'まだなし', never: 'まだなし',
+	move: '移動', menu: 'メニュー', fast: '早送り',
+	smooth: (on) => 'なめらか表示：' + (on ? 'オン' : 'オフ'),
+	sound: (word) => 'サウンド：' + ({ soft: 'ソフト', mgba: 'mGBA' }[word] || 'GBA'),
+} : {
+	stopped: (what) => 'The engine stopped: ' + what,
+	today: 'Today ',
+	tapSlot: 'tap its slot', clickSlot: 'click its slot or drop it here',
+	runSaved: (when) => 'Run saved ' + when + '.', ready: 'Ready.', extraCan: (what, how) => '\n' + what + ' can join: ' + how + '.',
+	extraIn: (what) => what + (what.includes(' and ') ? ' are' : ' is') + ' in. Now BN6.',
+	chooseRoms: 'Choose your ROM files.', dropRoms: 'Drop your ROM files here, or choose them.',
+	cartReady: ': ready', cartNeeded: ': needed, choose it', cartOptional: ': optional, choose it',
+	game: 'Game',
+	notGba: 'not a GBA ROM', changed: (tag) => tag + ', but changed: patched, trimmed or a bad dump',
+	loading: 'One moment: the engine is still loading.',
+	checking: (files) => 'Checking ' + (files.length === 1 ? files[0].name : files.length + ' files') + '…',
+	unreadable: 'could not be read',
+	zipped: (name) => name + ' is zipped: unzip it first.', refused: (name, why) => name + ': ' + why + '.',
+	more: (n) => 'and ' + n + ' more.',
+	savesNeedRom: 'Choose your BN6 ROM before opening SAVES.',
+	savesAtTitle: 'SAVES opens on the title: go there first.',
+	savesPick: 'Choose the file with Load backup.',
+	backedUp: (file) => 'Backup saved: ' + file + '.',
+	forget: 'Remove your ROMs and all saves from this browser?',
+	keptIn: 'In', keptNotYet: 'Not yet', keptOptional: 'Not in (optional)', keptNone: 'None yet', never: 'Never',
+	move: 'Move', menu: 'Menu', fast: 'Fast',
+	smooth: (on) => 'Smooth motion: ' + (on ? 'on' : 'off'),
+	sound: (word) => 'Sound: ' + ({ soft: 'soft', mgba: 'mGBA' }[word] || 'GBA'),
+};
+
+const $ = (id) => document.getElementById(id);
+const canvas = $('canvas'), stage = $('stage'), gate = $('gate'), statusLine = $('status'), app = $('app'), menu = $('menu');
+let ready = false, started = false;
+// a phone or tablet: the game takes the whole screen and draws its own buttons
+// (?touch=1 or ?touch=0 decides it for a screen that tells it wrong)
+const touchParam = new URLSearchParams(location.search).get('touch');
+const touchPlay = touchParam ? touchParam === '1' : window.matchMedia('(pointer: coarse)').matches;
+
+// the screen's line, and the menu's while it is open (refused files stand out)
+function say(text, refused) {
+	statusLine.textContent = text;
+	statusLine.classList.toggle('refused', !!refused);
+	$('menu-note').textContent = menu.hidden ? '' : text;
+}
+
+// ---- the engine ----
+
+let syncing = false, syncAgain = false;
+function persist() {
+	// IndexedDB takes one sync at a time; a write during one waits for the next
+	if (syncing) { syncAgain = true; return; }
+	syncing = true;
+	Module.FS.syncfs(false, (err) => {
+		syncing = false;
+		if (err) console.warn('saving to IndexedDB failed', err);
+		if (syncAgain) { syncAgain = false; persist(); }
+	});
+}
+
+var Module = {
+	canvas,
+	locateFile: (path, prefix) => prefix + path + (ENGINE_VERSION && path.endsWith('.wasm') ? `?v=${ENGINE_VERSION}` : ''),
+	print: (t) => console.log(t),
+	printErr: (t) => console.warn(t),
+	persist,
+	savesPick: pickSaves,
+	savesDownload: downloadSaves,
+	preRun: [() => {
+		const FS = Module.FS;
+		FS.mkdir(DATA);
+		FS.mount(Module.IDBFS, {}, DATA);
+		Module.addRunDependency('idbfs');
+		FS.syncfs(true, (err) => {
+			if (err) console.warn('reading IndexedDB failed', err);
+			try { FS.mkdir(ROM_DIR); } catch (e) { /* already there */ }
+			Module.removeRunDependency('idbfs');
+		});
+	}],
+	onRuntimeInitialized: () => {
+		ready = true;
+		// (BN4 offered for review as --dev showbn4 offers it on the ROMs screen)
+		if (SHOW_BN4) Module.ccall('cw_rom_research', null, [], []);
+		offer();
+	},
+	onAbort: (what) => { say(W.stopped(what)); track('engine-stopped', { reason: String(what).slice(0, 60) }); },
+	// the game's Options changed the sound, or smooth motion: the menu's button follows
+	cwSound: (word) => { keepSound(word); },
+	cwSmooth: (on) => { keepSmooth(on); },
+};
+
+// whether the game takes ROM `id` (ROMS): BN6's, and an extra one's where
+// it is offered (src/core/rom.c's cw_rom_offered), once the engine is up
+const offers = {};
+function offered(id) {
+	if (id === 'bn6') return true;
+	if (!ready) return false;
+	if (!(id in offers)) offers[id] = Module.ccall('cw_rom_offered', 'number', ['string'], [ROMS[id].code]) === 1;
+	return offers[id];
+}
+
+// whether ROM `id` (ROMS) is kept in this browser, and offered
+function kept(id) {
+	if (!offered(id)) return false;
+	try { return Module.FS.stat(ROM_DIR + '/' + ROMS[id].file).size === ROM_SIZE; } catch (e) { return false; }
+}
+
+// When `path` was last written, as Nintendo's apps date a save: today's by
+// its hour, an older one by its day; null where there is none
+function writtenAt(path) {
+	let t;
+	try { t = Module.FS.stat(path).mtime; } catch (e) { return null; }
+	return when(t instanceof Date ? t : new Date(t));
+}
+function when(d) {
+	if (!d || isNaN(d)) return null;
+	const today = new Date().toDateString() === d.toDateString();
+	return today ? W.today + d.toTimeString().slice(0, 5) : d.toLocaleDateString(LANG, { day: 'numeric', month: 'short' });
+}
+
+// What is kept, in words
+function keptWords() {
+	const add = touchPlay ? W.tapSlot : W.clickSlot, run = writtenAt(DATA + '/savedata/run.sav');
+	const extras = Object.keys(ROMS).filter((id) => id !== 'bn6' && offered(id)), missing = extras.filter((id) => !kept(id));
+	if (kept('bn6')) return (run ? W.runSaved(run) : W.ready) + (missing.length ? W.extraCan(tags(missing), add) : '');
+	if (missing.length < extras.length) return W.extraIn(tags(extras.filter(kept)));
+	return touchPlay ? W.chooseRoms : W.dropRoms;
+}
+
+// Play when BN6 is kept, else ask for it; BN5 asked for beside it. `note`,
+// where files were refused, says why in place of what is kept.
+function offer(note) {
+	const six = kept('bn6');
+	// (once BN6 is in, the cartridges choose the files, as the game's ROMs screen's do)
+	$('insert').hidden = six;
+	$('pick').hidden = six;
+	$('play').hidden = !six;
+	for (const id of Object.keys(ROMS)) showCart(id);
+	say(note || keptWords(), !!note);
+	if (six) $('play').focus();
+}
+
+// ---- the cartridges: an open spot, or the cartridge with its game's face ----
+
+const FACES = {   // the label's mugshot: sprite list 8 (src/launcher/launcher_art.c, docs/rom/)
+	bn6: { lists: 0x031CC4, face: 0x37 },   // MegaMan
+	bn5: { lists: 0x03272C, face: 0x45 },   // Colonel
+	bn4: { lists: 0x02793C, face: 0x61 },   // Duo (src/emu/bn4.h's BN4_MUGSHOT_FACE)
+};
+const drawn = {};
+
+function showCart(id) {
+	const cart = $('cart-' + id), here = kept(id);
+	cart.hidden = !offered(id);
+	cart.classList.toggle('in', here);
+	cart.setAttribute('aria-label', ROMS[id].tag + (here ? W.cartReady : id === 'bn6' ? W.cartNeeded : W.cartOptional));
+	if (!here || drawn[id]) return;
+	drawn[id] = true;
+	try {
+		face(Module.FS.readFile(ROM_DIR + '/' + ROMS[id].file), FACES[id], cart.querySelector('canvas'));
+	} catch (e) { /* (a label without its face) */ }
+}
+
+// GBA LZ77 (the BIOS's type 0x10), as src/core/rom.c reads it
+function lz77(d, at) {
+	if (d[at] !== 0x10) return null;
+	const n = d[at + 1] | d[at + 2] << 8 | d[at + 3] << 16, out = new Uint8Array(n);
+	let p = at + 4, o = 0;
+	while (o < n) {
+		let flags = d[p++];
+		for (let i = 0; i < 8 && o < n; ++i, flags <<= 1) {
+			if (flags & 0x80) {
+				const v = d[p] << 8 | d[p + 1];
+				p += 2;
+				const len = (v >> 12) + 3, dist = (v & 0xFFF) + 1;
+				if (dist > o) return null;
+				for (let k = 0; k < len && o < n; ++k, ++o) out[o] = out[o - dist];
+			} else out[o++] = d[p++];
+		}
+	}
+	return out;
+}
+
+// A mugshot's first frame into `canvas` (40 x 48), read from the ROM as
+// src/gfx/gfx.c reads a sprite: the list's pointer (compressed or not),
+// its animation's first frame, its objects' tiles in their palette
+function face(rom, where, canvas) {
+	const u32 = (b, o) => (b[o] | b[o + 1] << 8 | b[o + 2] << 16 | b[o + 3] << 24) >>> 0;
+	const list = u32(rom, where.lists + 8 * 4) - 0x08000000, ptr = u32(rom, list + where.face * 4);
+	let b;
+	if (ptr & 0x80000000) {
+		const d = lz77(rom, (ptr & 0x7FFFFFFF) - 0x08000000);
+		if (!d) return;
+		b = d.subarray(8);
+	} else b = rom.subarray(ptr - 0x08000000 + 4);
+	const f = u32(b, 0), tiles = u32(b, f), pals = u32(b, f + 4) + 4, mini = u32(b, f + 8), objtab = u32(b, f + 12);
+	const tdata = b.subarray(tiles + 4, tiles + 4 + u32(b, tiles));
+	const objs = objtab + u32(b, objtab + b[mini + u32(b, mini)] * 4);
+	const dims = [[[8, 8], [16, 16], [32, 32], [64, 64]], [[16, 8], [32, 8], [32, 16], [64, 32]], [[8, 16], [8, 32], [16, 32], [32, 64]]];
+	const parts = [];
+	for (let o = objs; !(b[o] === 0xFF && b[o + 1] === 0xFF) && parts.length < 64; o += 5) {
+		if ((b[o + 4] & 3) > 2) continue;
+		const [w, h] = dims[b[o + 4] & 3][b[o + 3] & 3];
+		parts.push({ tile: b[o], x: (b[o + 1] << 24) >> 24, y: (b[o + 2] << 24) >> 24, w, h, hf: b[o + 3] & 0x40, vf: b[o + 3] & 0x80, bank: b[o + 4] >> 4 });
+	}
+	if (!parts.length) return;
+	const minx = Math.min(...parts.map((p) => p.x)), miny = Math.min(...parts.map((p) => p.y));
+	const ctx = canvas.getContext('2d'), img = ctx.createImageData(canvas.width, canvas.height);
+	for (const p of parts)
+		for (let y = 0; y < p.h; ++y)
+			for (let x = 0; x < p.w; ++x) {
+				const t = p.tile + (y >> 3) * (p.w >> 3) + (x >> 3), at = t * 32 + (y & 7) * 4 + ((x & 7) >> 1);
+				const ci = at < tdata.length ? ((x & 1) ? tdata[at] >> 4 : tdata[at] & 15) : 0;
+				if (!ci) continue;
+				const c = b[pals + p.bank * 32 + ci * 2] | b[pals + p.bank * 32 + ci * 2 + 1] << 8;
+				const X = p.x - minx + (p.hf ? p.w - 1 - x : x), Y = p.y - miny + (p.vf ? p.h - 1 - y : y);
+				if (X < 0 || Y < 0 || X >= canvas.width || Y >= canvas.height) continue;
+				const k = (Y * canvas.width + X) * 4;
+				// (five bits to eight as src/gfx/gfx.h's bgr555 spreads them)
+				const r = c & 31, g = c >> 5 & 31, bl = c >> 10 & 31;
+				img.data[k] = r << 3 | r >> 2;
+				img.data[k + 1] = g << 3 | g >> 2;
+				img.data[k + 2] = bl << 3 | bl >> 2;
+				img.data[k + 3] = 255;
+			}
+	ctx.putImageData(img, 0, 0);
+}
+
+function start() {
+	if (!ready || started || !kept('bn6')) return;
+	started = true;
+	$('pet-place').textContent = $('menu-place').textContent = W.game;
+	document.body.classList.add('playing');
+	track('game-start', { input: touchPlay ? 'touch' : 'keys', bn5: kept('bn5') ? 'yes' : 'no' });
+	gate.hidden = true;
+	if (touchPlay) {
+		// (the canvas takes its size from the page: SDL follows it, rotations too)
+		document.body.classList.add('touch-play');
+		canvas.style.removeProperty('width');
+		canvas.style.removeProperty('height');
+		if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {});
+		keepAwake();
+		Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--touch', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs(), devArgs()));
+		return;
+	}
+	fit();
+	window.scrollTo(0, 0);
+	canvas.focus();
+	Module.callMain(['--rom-dir', ROM_DIR, '--data-dir', DATA, '--window', '--size', '240x160', '--smooth-motion', smoothOn() ? 'on' : 'off'].concat(soundArgs(), devArgs()));
+}
+
+// (?dev=showbn4: the game told too, so that it reads BN4's file kept here)
+function devArgs() { return SHOW_BN4 ? ['--dev', 'showbn4'] : []; }
+
+// the screen stays on while the game plays (asked again when the tab returns)
+async function keepAwake() {
+	try { if (navigator.wakeLock) await navigator.wakeLock.request('screen'); } catch (e) { /* not granted */ }
+}
+document.addEventListener('visibilitychange', () => { if (started && touchPlay && document.visibilityState === 'visible') keepAwake(); });
+
+// ---- the ROMs ----
+
+async function sha1(bytes) {
+	const digest = await crypto.subtle.digest('SHA-1', bytes);
+	return Array.from(new Uint8Array(digest), (b) => b.toString(16).padStart(2, '0')).join('');
+}
+
+// One file, told by its header's game code: BN6's or BN5's kept once its
+// size and SHA-1 are right ({ id }), anything else refused ({ why, reason })
+async function checkRom(file) {
+	if (/\.(zip|7z|rar)$/i.test(file.name)) return { zipped: true, reason: 'zipped' };
+	const head = new Uint8Array(await file.slice(0, 0xB0).arrayBuffer());
+	if (head.length < 0xB0) return { why: W.notGba, reason: 'other-game' };
+	const code = String.fromCharCode(...head.subarray(0xAC, 0xB0));
+	const id = Object.keys(ROMS).find((k) => ROMS[k].code === code && offered(k));
+	const other = OTHERS[code] && offered(OTHER_OF(code)) ? OTHERS[code] : null;
+	if (!id) return { why: other || otherGame(), reason: other ? 'version' : 'other-game' };
+	const changed = W.changed(ROMS[id].tag);
+	if (file.size !== ROM_SIZE) return { why: changed, reason: 'size' };
+	const bytes = new Uint8Array(await file.arrayBuffer());
+	if (crypto.subtle && (await sha1(bytes)) !== ROMS[id].sha1) return { why: changed, reason: 'changed' };
+	// (BN6's in place of any .gba but the extra ROMs': the page kept one ROM before)
+	const FS = Module.FS, extra = (name) => Object.keys(ROMS).some((k) => k !== 'bn6' && ROMS[k].file === name);
+	for (const name of FS.readdir(ROM_DIR))
+		if (name === ROMS[id].file || (id === 'bn6' && /\.gba$/i.test(name) && !extra(name))) FS.unlink(ROM_DIR + '/' + name);
+	FS.writeFile(ROM_DIR + '/' + ROMS[id].file, bytes);
+	return { id };
+}
+
+// The files chosen or dropped: each kept or refused, and why; the game
+// starts once BN6 is kept, unless a file was refused, whose reason stays
+// to be read (Play then starts it)
+let checking = false;
+async function takeRoms(files) {
+	if (!files.length || started || checking) return;
+	if (!ready) { say(W.loading); return; }
+	checking = true;
+	say(W.checking(files));
+	const refused = [];
+	let took = 0;
+	for (const file of files) {
+		const r = await checkRom(file).catch(() => ({ why: W.unreadable, reason: 'unreadable' }));
+		if (r.id) {
+			++took;
+			track('rom-accepted', { rom: r.id });
+			continue;
+		}
+		refused.push(r.zipped ? W.zipped(file.name) : W.refused(file.name, r.why));
+		track('rom-rejected', { reason: r.reason });
+	}
+	checking = false;
+	if (took) persist();
+	if (!refused.length && kept('bn6')) { start(); return; }
+	const lines = refused.slice(0, 4);
+	if (refused.length > 4) lines.push(W.more(refused.length - 4));
+	offer(lines.concat(keptWords()).join('\n'));
+}
+
+$('rom').addEventListener('change', (e) => { takeRoms(Array.from(e.target.files)); e.target.value = ''; });
+$('play').addEventListener('click', start);
+// (a cartridge's spot chooses its file, as the launcher's A does)
+for (const id of Object.keys(ROMS)) $('cart-' + id).addEventListener('click', () => { if (ready && !started) $('rom').click(); });
+document.addEventListener('dragover', (e) => e.preventDefault());
+document.addEventListener('drop', (e) => {
+	e.preventDefault();
+	const files = Array.from(e.dataTransfer.files);
+	if (files.length === 1 && /\.cwsave$/i.test(files[0].name)) {
+		if (openSaves()) importSavesFile(files[0]);
+		return;
+	}
+	takeRoms(files);
+});
+
+// ---- the SAVES screen owns the file format, preview and restore ----
+// The page only hands a selected file to the core and downloads the file
+// the core made. Savedata remains in IndexedDB, as every other save does.
+
+const SAVES_PICKED = '/tmp/cw-import.cwsave';
+
+// SAVES over the title, never in a run (the core says 0 there: the run's
+// progress is the title's to keep first)
+function openSaves() {
+	if (!ready) { say(W.loading); return false; }
+	if (!kept('bn6')) { say(W.savesNeedRom); return false; }
+	if (!started) start();
+	if (!Module.ccall('cw_saves_open', 'number', [], [])) { say(W.savesAtTitle); return false; }
+	closeMenu();
+	canvas.focus();
+	return true;
+}
+
+// The core's IMPORT: a browser opens its file chooser only from a click of
+// the player's own, so the menu's Load backup is shown for it; the core
+// lets go of its wait at B or after a minute
+function pickSaves() {
+	openMenu();
+	$('menu-note').textContent = W.savesPick;
+	$('import').focus();
+}
+
+function pickedSaves(path) {
+	Module.ccall('cw_saves_import', null, ['string'], [path]);
+	canvas.focus();
+}
+
+function takeSaves(e) {
+	const file = e.target.files[0];
+	e.target.value = '';
+	if (!file) { pickedSaves(''); return; }
+	return importSavesFile(file);
+}
+
+async function importSavesFile(file) {
+	try {
+		Module.FS.writeFile(SAVES_PICKED, new Uint8Array(await file.arrayBuffer()));
+		pickedSaves(SAVES_PICKED);
+	} catch (err) {
+		say(W.refused(file.name, W.unreadable), true);
+		pickedSaves('');
+	}
+}
+
+function downloadSaves(path, name) {
+	try {
+		const bytes = Module.FS.readFile(path), a = document.createElement('a');
+		a.href = URL.createObjectURL(new Blob([bytes], { type: 'application/octet-stream' }));
+		a.download = name;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+		setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+		try { localStorage.setItem('cw-backup-at', String(Date.now())); } catch (e) { /* not kept */ }
+		say(W.backedUp(name));
+		track('saves-export');
+		return true;
+	} catch (err) {
+		console.warn('downloading saves failed', err);
+		return false;
+	}
+}
+
+$('export').addEventListener('click', openSaves);
+// (the chooser opened in the click itself, as the player's own gesture)
+$('import').addEventListener('click', () => { if (openSaves()) $('saves-file').click(); });
+$('saves-file').addEventListener('change', takeSaves);
+$('saves-file').addEventListener('cancel', () => pickedSaves(''));
+
+$('forget').addEventListener('click', () => {
+	if (!confirm(W.forget)) return;
+	track('forget-rom');
+	const req = indexedDB.deleteDatabase(DATA);
+	req.onsuccess = req.onerror = req.onblocked = () => location.reload();
+});
+
+// ---- the screen: 240x160 at the largest whole scale in device pixels that
+// the window leaves it (the site's bar away while the game plays), the
+// ROMs on it at the same size; a phone's narrow page its whole width ----
+
+function fit() {
+	if (touchPlay && started) return;
+	const dpr = window.devicePixelRatio || 1, root = document.documentElement;
+	if (document.fullscreenElement === app) {
+		const k = Math.max(1, Math.floor(Math.min((screen.width * dpr) / 240, (screen.height * dpr) / 160)));
+		app.style.setProperty('--fw', (240 * k) / dpr + 'px');
+		return;
+	}
+	const bar = document.querySelector('.pet-bar'), band = app.querySelector('.pet-band'), hints = $('hints');
+	const room = window.innerHeight - (started ? 0 : bar.offsetHeight) - band.offsetHeight - (hints.offsetHeight + 10) - 52;
+	const width = app.parentElement.clientWidth - 30;
+	// (a phone's or tablet's: the page's width, as the game takes the whole
+	// screen once it starts; elsewhere the largest whole scale)
+	const k = Math.max(1, Math.floor(Math.min((width * dpr) / 240, (room * dpr) / 160)));
+	root.style.setProperty('--sw', touchPlay ? '100%' : (240 * k) / dpr + 'px');
+	// (one of the game's pixels on the page: the ROMs screen's unit)
+	root.style.setProperty('--px', (touchPlay ? Math.max(1.25, width / 240) : k / dpr) + 'px');
+}
+
+window.addEventListener('resize', fit);
+document.addEventListener('fullscreenchange', fit);
+$('fullscreen').addEventListener('click', () => {
+	closeMenu();
+	if (document.fullscreenElement) document.exitFullscreen();
+	else app.requestFullscreen().catch(() => {});
+});
+
+// ---- the PET menu: over the game, which waits under it (cw_set_paused) ----
+
+function plates() { return Array.from(menu.querySelectorAll('.menu-body:not([hidden]) .plate')); }
+
+// the cursor: on the plate the keys or the pointer last chose, one only
+function cursorTo(plate) {
+	for (const li of menu.querySelectorAll('.menu li.cursor')) li.classList.remove('cursor');
+	if (plate) plate.parentElement.classList.add('cursor');
+}
+menu.addEventListener('focusin', (e) => { if (e.target.classList.contains('plate')) cursorTo(e.target); });
+menu.addEventListener('mouseover', (e) => {
+	const plate = e.target.closest('.plate');
+	if (plate && document.activeElement !== plate) plate.focus({ preventScroll: true });
+});
+
+function showKept() {
+	$('kept-bn6').textContent = kept('bn6') ? W.keptIn : W.keptNotYet;
+	for (const id of Object.keys(ROMS).filter((k) => k !== 'bn6')) {
+		$('kept-' + id).textContent = kept(id) ? W.keptIn : W.keptOptional;
+		$('kept-' + id).hidden = $('kept-' + id).previousElementSibling.hidden = !offered(id);
+	}
+	$('kept-run').textContent = writtenAt(DATA + '/savedata/run.sav') || W.keptNone;
+	let at = null;
+	try { at = localStorage.getItem('cw-backup-at'); } catch (e) { /* not kept */ }
+	$('kept-backup').textContent = at ? when(new Date(Number(at))) : W.never;
+}
+
+function openMenu() {
+	if (!menu.hidden) return;
+	if (started) Module.ccall('cw_set_paused', null, ['number'], [1]);
+	if (ready) showKept();
+	$('menu-note').textContent = '';
+	$('menu-main').hidden = false;
+	$('menu-controls').hidden = true;
+	menu.hidden = false;
+	$('continue').focus();
+	track('menu-open');
+}
+
+function closeMenu() {
+	if (menu.hidden) return;
+	menu.hidden = true;
+	if (started) { Module.ccall('cw_set_paused', null, ['number'], [0]); canvas.focus(); }
+}
+
+$('menu-open').addEventListener('click', openMenu);
+$('continue').addEventListener('click', closeMenu);
+menu.addEventListener('click', (e) => { if (e.target === menu) closeMenu(); });
+$('show-controls').addEventListener('click', () => { $('menu-main').hidden = true; $('menu-controls').hidden = false; $('hide-controls').focus(); });
+$('hide-controls').addEventListener('click', () => { $('menu-controls').hidden = true; $('menu-main').hidden = false; $('show-controls').focus(); });
+// F1 opens and closes it, Esc closes it, the arrows walk its plates
+document.addEventListener('keydown', (e) => {
+	if (e.key === 'F1') { e.preventDefault(); e.stopPropagation(); if (menu.hidden) openMenu(); else closeMenu(); return; }
+	if (menu.hidden) return;
+	if (e.key === 'Escape') { e.preventDefault(); closeMenu(); return; }
+	if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+		e.preventDefault();
+		const list = plates(), i = list.indexOf(document.activeElement);
+		list[(i + (e.key === 'ArrowDown' ? 1 : list.length - 1)) % list.length].focus();
+	}
+	// (none of it reaches the game, which waits)
+	e.stopPropagation();
+}, true);
+
+// ---- the keys under the screen: the keyboard's, or a controller's once one is used ----
+
+function showHints() {
+	const pad = navigator.getGamepads && Array.from(navigator.getGamepads()).some(Boolean);
+	const keys = pad
+		? [['A', 'A'], ['B', 'B'], ['L R', 'L R'], ['Start', 'Start'], ['Back', 'Select'], ['RT', W.fast], ['F1', W.menu]]
+		: [['WASD', W.move], ['J', 'A'], ['K', 'B'], ['Q E', 'L R'], ['Enter', 'Start'], ['Bksp', 'Select'], ['Tab', W.fast], ['F1', W.menu]];
+	$('hints').innerHTML = keys.map(([k, what]) => '<span>' + k.split(' ').map((c) => '<kbd>' + c + '</kbd>').join('') + what + '</span>').join('');
+	fit();
+}
+window.addEventListener('gamepadconnected', showHints);
+window.addEventListener('gamepaddisconnected', showHints);
+showHints();
+
+// Smooth motion: the game's 60 frames mixed at each refresh of a 90, 144 or
+// 165 Hz screen, which shows them unevenly otherwise (remembered here, and
+// switched while the game runs; the game's Options' Display sets it too,
+// and tell the button: Module.cwSmooth)
+function smoothOn() { try { return localStorage.getItem('cw-smooth') === 'on'; } catch (e) { return false; } }
+function showSmooth() {
+	const on = smoothOn();
+	$('smooth-label').textContent = W.smooth(on);
+	$('smooth').setAttribute('aria-pressed', on ? 'true' : 'false');
+}
+function keepSmooth(on) {
+	try { localStorage.setItem('cw-smooth', on ? 'on' : 'off'); } catch (e) { /* not kept */ }
+	showSmooth();
+}
+$('smooth').addEventListener('click', () => {
+	const on = !smoothOn();
+	keepSmooth(on);
+	track('smooth-motion', { state: on ? 'on' : 'off' });
+	if (started) Module.ccall('cw_set_smooth', null, ['number'], [on ? 1 : 0]);
+});
+showSmooth();
+
+// Sound: as a GBA plays it, soft, the Legacy Collection's balance, or
+// mGBA's Audio Filter, each press the next (the game's Options set it too,
+// and tell the button: Module.cwSound); SoundFilter's order
+const SOUNDS = ['gba', 'soft', 'mgba'];
+function soundSet() { try { return localStorage.getItem('cw-sound'); } catch (e) { return null; } }
+function soundWord() { const v = soundSet(); return SOUNDS.includes(v) ? v : 'gba'; }
+// (passed at the start only once chosen: else settings.ini's)
+function soundArgs() { const v = soundSet(); return SOUNDS.includes(v) ? ['--sound', v] : []; }
+function showSound() {
+	const word = soundWord();
+	$('sound-label').textContent = W.sound(word);
+	$('sound').setAttribute('aria-pressed', word !== 'gba' ? 'true' : 'false');
+}
+function keepSound(word) {
+	try { localStorage.setItem('cw-sound', SOUNDS.includes(word) ? word : 'gba'); } catch (e) { /* not kept */ }
+	showSound();
+}
+$('sound').addEventListener('click', () => {
+	const next = SOUNDS[(SOUNDS.indexOf(soundWord()) + 1) % SOUNDS.length];
+	keepSound(next);
+	track('sound', { state: next });
+	if (started) Module.ccall('cw_set_sound', null, ['number'], [SOUNDS.indexOf(next)]);
+});
+showSound();
+
+// the last writes before the tab goes away
+window.addEventListener('pagehide', () => { if (ready) persist(); });

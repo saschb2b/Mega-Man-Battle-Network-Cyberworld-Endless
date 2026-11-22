@@ -1,0 +1,25 @@
+/* The FAQ as the PET's E-Mail (site.css holds the PET's pieces): the letters
+ * in a list, the open one in the navigator's text box beside it. */
+
+main.wrap { padding-top: 28px; }
+
+.mailbox { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.inbox { padding: 6px 6px 6px 0; scroll-margin-top: 84px; }
+.mails .row { grid-template-columns: 36px 1fr; min-height: 57px; }
+.mails .row[aria-current] { border-image-source: url(../assets/ui/slot-on.png); }
+
+.reader { position: sticky; top: 84px; }
+.mail { scroll-margin-top: 84px; }
+.mail[hidden] { display: none; }
+.mail + .mail { margin-top: 28px; }
+.mail h2 { margin: 0 0 0.5em; font: 700 1.3rem/1.3 var(--pixel); color: #214a52; }
+.mail .more { margin-top: 0.9em; font-size: 1rem; }
+.mail kbd { margin-bottom: 0; }
+.reader .back { display: none; margin: 18px 0 0; }
+.reader .back a { text-decoration: none; }
+
+@media (max-width: 900px) {
+	.mailbox { grid-template-columns: minmax(0, 1fr); }
+	.reader { position: static; }
+	.reader .back { display: block; }
+}

@@ -1,0 +1,34 @@
+/* The .exe's resources: its icon (tools/app_icon.py), its manifest and its
+ * version (the Makefile passes CW_FILEVERSION, four numbers; version.h is
+ * the title's). */
+#include <winver.h>
+#include "version.h"
+
+1 ICON "icon.ico"
+1 24 "cyberworld-endless.manifest"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION CW_FILEVERSION
+PRODUCTVERSION CW_FILEVERSION
+FILEOS VOS_NT_WINDOWS32
+FILETYPE VFT_APP
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904B0"
+		BEGIN
+			VALUE "CompanyName", "Sascha Becker"
+			VALUE "FileDescription", "Cyberworld Endless"
+			VALUE "FileVersion", CW_VERSION
+			VALUE "InternalName", "cyberworld-endless"
+			VALUE "LegalCopyright", "MIT license. Mega Man Battle Network is (c) Capcom; unofficial, not affiliated."
+			VALUE "OriginalFilename", "cyberworld-endless.exe"
+			VALUE "ProductName", "Cyberworld Endless"
+			VALUE "ProductVersion", CW_VERSION
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x409, 1200
+	END
+END

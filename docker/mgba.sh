@@ -1,0 +1,197 @@
+#!/bin/sh
+# Builds a minimal static libmgba (GBA core only, no frontends, scripting,
+# debugger or external dependencies) for x86-64 and aarch64 into /opt/mgba;
+# with arguments, for those targets only (host, aarch64, web, windows: the
+# MinGW-w64 cross compiler of docker/Dockerfile.windows; android: each
+# Android ABI with the NDK of docker/Dockerfile.android; 3ds: the Nintendo
+# 3DS, with devkitPro's devkitARM and mGBA's own 3DS toolchain file, the
+# library alone; switch: the Nintendo Switch, devkitA64's, the same way;
+# vita: the PlayStation Vita, VitaSDK's, the same way; psp: the PSP,
+# pspdev's psp-cmake, minimal and without threads; ps4: the PS4,
+# OpenOrbis's clang and libc, docker/ps4.cmake; ps5: the PS5, the native-app
+# template's clang, docker/ps5.cmake).
+# The web build
+# (WebAssembly, in the Emscripten image) runs without threads: a page served
+# without cross-origin isolation cannot share memory between them.
+# mGBA is MPL-2.0: https://github.com/mgba-emu/mgba
+set -e
+VER=0.10.5
+SHA=91d6fbd32abcbdf030d58d3f562de25ebbc9d56040d513ff8e5c19bee9dacf14
+cd /tmp
+curl -fsSL -o mgba.tar.gz "https://github.com/mgba-emu/mgba/archive/refs/tags/$VER.tar.gz"
+echo "$SHA  mgba.tar.gz" | sha256sum -c -
+tar xzf mgba.tar.gz
+OPTS="-DCMAKE_BUILD_TYPE=Release -DBUILD_STATIC=ON -DBUILD_SHARED=OFF -DBUILD_QT=OFF -DBUILD_SDL=OFF \
+ -DBUILD_GL=OFF -DBUILD_GLES2=OFF -DBUILD_GLES3=OFF -DUSE_EPOXY=OFF -DDISABLE_DEPS=ON -DUSE_DEBUGGERS=OFF \
+ -DUSE_GDB_STUB=OFF -DUSE_EDITLINE=OFF -DENABLE_SCRIPTING=OFF -DUSE_LUA=OFF -DM_CORE_GB=OFF -DM_CORE_GBA=ON \
+ -DUSE_DISCORD_RPC=OFF -DBUILD_LTO=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON \
+ -DCMAKE_POLICY_VERSION_MINIMUM=3.5"
+# (mGBA 0.10 asks for CMake 3.1 at least, which CMake 4 no longer takes: it
+# stops at "Compatibility with CMake < 3.5 has been removed" (Ubuntu 26.04's
+# CMake, docker/Dockerfile.ps5). The policy floor lets it configure; an older
+# CMake does not know the variable and leaves it unused)
+build() { # $1 name, $2 extra cmake args
+	cmake -S mgba-$VER -B "build-$1" $OPTS -DCMAKE_INSTALL_PREFIX="/opt/mgba/$1" $2
+	cmake --build "build-$1" -j"$(nproc)"
+	cmake --install "build-$1"
+}
+TARGETS=${*:-host aarch64}
+case " $TARGETS " in *" host "*) build host "" ;; esac
+case " $TARGETS " in *" web "*)
+	emcmake cmake -S mgba-$VER -B build-web $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/web \
+	 -DCMAKE_C_FLAGS="-DDISABLE_THREADING -D_GNU_SOURCE" -DHAVE_PTHREAD_H=OFF
+	cmake --build build-web -j"$(nproc)"
+	cmake --install build-web ;;
+esac
+case " $TARGETS " in *" windows "*)
+	# (its CMake asks for epoxy on Windows, for the OpenGL of its own
+	# frontends, which are not built here)
+	sed -i 's/if(WIN32 AND NOT (LIBMGBA_ONLY OR SKIP_LIBRARY OR USE_EPOXY))/if(FALSE)/' mgba-$VER/CMakeLists.txt
+	build windows "-DCMAKE_TOOLCHAIN_FILE=/opt/mingw.cmake" ;;
+esac
+case " $TARGETS " in *" 3ds "*)
+	# (the library target alone: mGBA's own 3DS frontend needs the GB core;
+	# its headers copied as its install would, the generated ones too. Its
+	# 3DS setup, linked into the library, takes a 32 MB buffer that the
+	# core copies the ROM into before main: the game hands the core 16 MB,
+	# so the buffer is 16 MB. The game splits the app's memory itself,
+	# src/core/main.c. Its pictures are 32-bit, as on every other target:
+	# the 3DS's 16-bit ones were set for the library alone, not in the
+	# headers it installs, and the game read them as 32-bit, two rows side
+	# by side)
+	sed -i -e 's/romBuffer = malloc(0x02000000);/romBuffer = malloc(0x01000000);/' \
+	 -e 's/romBufferSize = 0x02000000;/romBufferSize = 0x01000000;/' mgba-$VER/src/platform/3ds/ctru-heap.c
+	if grep -q 0x02000000 mgba-$VER/src/platform/3ds/ctru-heap.c; then exit 1; fi
+	sed -i 's/ COLOR_16_BIT COLOR_5_6_5 / /' mgba-$VER/src/platform/3ds/CMakeLists.txt
+	if grep -q COLOR_16_BIT mgba-$VER/src/platform/3ds/CMakeLists.txt; then exit 1; fi
+	# (and the whole core, not the minimal one mGBA builds for a "Generic"
+	# system: its threaded video draws the picture beside the emulation,
+	# on the main core, where mGBA's own threads go on the 3DS's third,
+	# which the game's GBA core takes)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	sed -i 's/threadCreate(entry, context, 0x8000, 0x18, 2, false)/threadCreate(entry, context, 0x8000, 0x18, 0, false)/' \
+	 mgba-$VER/include/mgba-util/platform/3ds/threading.h
+	grep -q 'threadCreate(entry, context, 0x8000, 0x18, 0, false)' mgba-$VER/include/mgba-util/platform/3ds/threading.h
+	cmake -S mgba-$VER -B build-3ds $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/3ds \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/3ds/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+	cmake --build build-3ds --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/3ds/lib /opt/mgba/3ds/include
+	cp build-3ds/libmgba.a /opt/mgba/3ds/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/3ds/include/
+	cp -r build-3ds/include/mgba /opt/mgba/3ds/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" switch "*)
+	# (the library target alone, with mGBA's own Switch toolchain file, and
+	# the whole core, as on the 3DS: the link cable's and threaded video's
+	# parts are left out of the minimal one mGBA builds for a "Generic"
+	# system. Its OpenGL ES 3 renderer, which mGBA turns on for the Switch,
+	# is left out: the game draws the core's picture itself, as everywhere)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	sed -i 's/set(BUILD_GLES3 ON CACHE BOOL "Build with OpenGL|ES 3" FORCE)/set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)/' mgba-$VER/CMakeLists.txt
+	grep -q 'set(BUILD_GLES3 OFF CACHE BOOL "Build with OpenGL|ES 3" FORCE)' mgba-$VER/CMakeLists.txt
+	# (not position-independent: the toolchain's -fPIE is libnx's way, and
+	# -fPIC gives the core's thread-local (mCoreThreadGet's, which every
+	# mLog reads) a dynamic TLS model that devkitA64's GCC gets wrong with
+	# libnx's -mtp=soft: it read the thread pointer plus itself, and the
+	# game crashed at the run's start on a Switch, discussion #524. Checked
+	# below: the read is a local-exec one, the thread pointer plus a fixed
+	# offset)
+	cmake -S mgba-$VER -B build-switch $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/switch \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/switch/CMakeToolchain.txt" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+	cmake --build build-switch --target mgba -j"$(nproc)"
+	"$DEVKITPRO/devkitA64/bin/aarch64-none-elf-objdump" -dr build-switch/CMakeFiles/mgba.dir/src/core/thread.c.obj \
+	 | grep -q R_AARCH64_TLSLE
+	mkdir -p /opt/mgba/switch/lib /opt/mgba/switch/include
+	cp build-switch/libmgba.a /opt/mgba/switch/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/switch/include/
+	cp -r build-switch/include/mgba /opt/mgba/switch/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" vita "*)
+	# (the library target alone, with mGBA's own Vita toolchain file, and
+	# the whole core, as on the 3DS and the Switch; not position-independent,
+	# whose GOT relocations vita-elf-create refuses)
+	sed -i 's/^\tset(MINIMAL_CORE ON)$/\t# (the whole core: docker\/mgba.sh)/' mgba-$VER/CMakeLists.txt
+	if grep -q '^.set(MINIMAL_CORE ON)' mgba-$VER/CMakeLists.txt; then exit 1; fi
+	cmake -S mgba-$VER -B build-vita $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/vita \
+	 -DCMAKE_TOOLCHAIN_FILE="$PWD/mgba-$VER/src/platform/psp2/CMakeToolchain.vitasdk" -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF
+	cmake --build build-vita --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/vita/lib /opt/mgba/vita/include
+	cp build-vita/libmgba.a /opt/mgba/vita/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/vita/include/
+	cp -r build-vita/include/mgba /opt/mgba/vita/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" ps4 "*)
+	# (OpenOrbis's clang and libc, docker/ps4.cmake; the library target
+	# alone and the whole core, as on the other consoles; the threads'
+	# names left unset, as libkernel has FreeBSD's pthread_set_name_np and
+	# no header declares it)
+	cmake -S mgba-$VER -B build-ps4 $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/ps4 \
+	 -DCMAKE_TOOLCHAIN_FILE=/opt/ps4.cmake -DLIBMGBA_ONLY=ON -DHAVE_PTHREAD_SET_NAME_NP=OFF -DHAVE_PTHREAD_SETNAME_NP=OFF
+	cmake --build build-ps4 --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/ps4/lib /opt/mgba/ps4/include
+	cp build-ps4/libmgba.a /opt/mgba/ps4/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps4/include/
+	cp -r build-ps4/include/mgba /opt/mgba/ps4/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" ps5 "*)
+	# (the native-app template's compiler, docker/ps5.cmake; the library
+	# target alone, the whole core as on the other consoles. Its checks
+	# compile without linking, so each function the PS5's system libraries
+	# lack is preset missing, and mGBA uses its own: zlib's crc32,
+	# popcount32, the locale's _l functions, localtime_r, futimens and
+	# futimes, and the threads' names)
+	cmake -S mgba-$VER -B build-ps5 $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/ps5 \
+	 -DCMAKE_TOOLCHAIN_FILE=/opt/ps5.cmake -DLIBMGBA_ONLY=ON -DHAVE_PTHREAD_SET_NAME_NP=OFF -DHAVE_PTHREAD_SETNAME_NP=OFF \
+	 -DHAVE_CRC32=OFF -DHAVE_POPCOUNT32=OFF -DHAVE_SNPRINTF_L=OFF -DHAVE_STRTOF_L=OFF -DHAVE_NEWLOCALE=OFF \
+	 -DHAVE_FREELOCALE=OFF -DHAVE_USELOCALE=OFF -DHAVE_LOCALTIME_R=OFF -DHAVE_FUTIMENS=OFF -DHAVE_FUTIMES=OFF
+	cmake --build build-ps5 --target mgba -j"$(nproc)"
+	mkdir -p /opt/mgba/ps5/lib /opt/mgba/ps5/include
+	cp build-ps5/libmgba.a /opt/mgba/ps5/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/ps5/include/
+	cp -r build-ps5/include/mgba /opt/mgba/ps5/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" psp "*)
+	# (the PSP, docker/Dockerfile.psp: pspdev's psp-cmake, the library
+	# alone and the minimal core mGBA builds for a "Generic" system (its
+	# whole one wants sockets the PSP's libc has not), without threads;
+	# FIXED_ROM_BUFFER as on the 3DS, so the game's 16 MB copy is patched in
+	# place rather than copied into 32 MB more (the game defines the
+	# buffer, empty: src/core/start_psp.c); added to the library, the parts
+	# the minimal core leaves out that the game names: mGBA's POSIX files
+	# and the link cable's lockstep, which the Arena's code calls)
+	psp-cmake -S mgba-$VER -B build-psp $OPTS -DCMAKE_INSTALL_PREFIX=/opt/mgba/psp -DLIBMGBA_ONLY=ON \
+	 -DCMAKE_POSITION_INDEPENDENT_CODE=OFF -DHAVE_PTHREAD_H=OFF \
+	 -DCMAKE_C_FLAGS="-O2 -G0 -DDISABLE_THREADING -DFIXED_ROM_BUFFER -D_GNU_SOURCE"
+	cmake --build build-psp --target mgba -j"$(nproc)"
+	for f in util/vfs/vfs-fd util/vfs/vfs-dirent core/lockstep gba/sio/lockstep; do
+		psp-gcc -O2 -G0 -D_GNU_SOURCE -DDISABLE_THREADING -DFIXED_ROM_BUFFER -DMINIMAL_CORE=1 -DM_CORE_GBA \
+		 -Imgba-$VER/include -Imgba-$VER/src -Ibuild-psp/include -c mgba-$VER/src/$f.c -o "build-psp/$(echo "$f" | tr / -).o"
+	done
+	psp-ar rcs build-psp/libmgba.a build-psp/util-vfs-vfs-fd.o build-psp/util-vfs-vfs-dirent.o build-psp/core-lockstep.o \
+	 build-psp/gba-sio-lockstep.o
+	mkdir -p /opt/mgba/psp/lib /opt/mgba/psp/include
+	cp build-psp/libmgba.a /opt/mgba/psp/lib/
+	cp -r mgba-$VER/include/mgba mgba-$VER/include/mgba-util /opt/mgba/psp/include/
+	cp -r build-psp/include/mgba /opt/mgba/psp/include/ 2>/dev/null || true ;;
+esac
+case " $TARGETS " in *" android "*)
+	for abi in arm64-v8a armeabi-v7a x86_64; do
+		build android/$abi "-DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake -DANDROID_ABI=$abi -DANDROID_PLATFORM=android-21"
+	done ;;
+esac
+case " $TARGETS " in *" aarch64 "*)
+cat > aarch64.cmake <<'T'
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_C_COMPILER aarch64-linux-gnu-gcc)
+set(CMAKE_CXX_COMPILER aarch64-linux-gnu-g++)
+T
+build aarch64 "-DCMAKE_TOOLCHAIN_FILE=/tmp/aarch64.cmake" ;;
+esac
+cp mgba-$VER/LICENSE /opt/mgba/LICENSE
+rm -rf /tmp/mgba* /tmp/build-* /tmp/aarch64.cmake

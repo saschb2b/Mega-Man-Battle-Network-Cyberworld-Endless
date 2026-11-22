@@ -1,0 +1,386 @@
+#!/usr/bin/env python3
+"""A trailer piece checked without ears: rendered, then its loudness and
+peaks bar by bar (no bar near clipping, the drop and the climax where the
+plan put them), its balance of lows, mids and highs and its punch (the
+swing inside a beat) and its highs above 3 kHz at the full rate beside
+a reference recording's (the game it is in the manner of), the lead's notes that rub the harmony (where the piece
+names its CHORD_SAMPLES), and a piano roll of its score to look at (the
+squares, the wave's bass, the stabs and pads). It fails (exit 1) a piece
+whose lead, backing or bass is not played by the soundfont (the owner's
+gate 3, SKILL.md). The numbers to aim for are in ../music_rules.md.
+
+    python3 .claude/skills/trailer/scripts/music_check.py [VERSION] [--ref AUDIO] [--piece NAME]
+
+VERSION is a trailer's (tools/trailers/), the current one by default;
+--piece NAME a module there that is no trailer's (a sketch: sketch_a).
+--source GAME SONG [--offset TICKS] reads the song the piece is in the
+manner of from the ROM (song_habits.py's reader) and sets each part's
+motion beside its own: how many notes a bar, how many different pitches,
+how often a note repeats, steps or leaps (music_rules.md, Discipline). AUDIO
+is any recording ffmpeg reads (the owner's, kept in .build/ and never
+committed); it is decoded to 8 kHz mono in the build's ffmpeg image. The
+wave, the roll and the decoded reference go to .build/trailer-VERSION/.
+"""
+import array
+import collections
+import importlib
+import math
+import os
+import shutil
+import struct
+import subprocess
+import sys
+import wave
+
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
+sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, 'tools'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import build  # noqa: E402
+import trailer_music as tm  # noqa: E402
+import trailers  # noqa: E402
+
+
+def bands(x, sr, edges=(200, 1500)):
+    """The shares of energy between the `edges` (below 200 Hz, 200-1500 Hz
+    and above by default), in %."""
+    def lowpass(sig, fc):
+        a, y, out = 1 - math.exp(-2 * math.pi * fc / sr), 0.0, []
+        for v in sig:
+            y += a * (v - y)
+            out.append(y)
+        return out
+    lows = [lowpass(x, e) for e in edges] + [x]
+    energy = [sum(v * v for v in lows[0])] + [sum((a - b) ** 2 for a, b in zip(hi, lo))
+                                              for lo, hi in zip(lows, lows[1:])]
+    total = sum(energy) or 1
+    return [round(100 * e / total) for e in energy]
+
+
+def highs(x, sr, cut=3000.0):
+    """The share of the energy above `cut` Hz at the full rate, %: the
+    top a GBA's squares and noise give, which the 8 kHz bands cannot see
+    (0.19.0's re-voiced piece measured 1.8% against the recording's 6.8%,
+    and the owner heard it "dull"). Two passes of a second-order
+    high-pass (RBJ)."""
+    w = 2 * math.pi * cut / sr
+    alpha = math.sin(w) / (2 * 0.7071)
+    c = math.cos(w)
+    b0, b1, b2 = (1 + c) / 2, -(1 + c), (1 + c) / 2
+    a0, a1, a2 = 1 + alpha, -2 * c, 1 - alpha
+    b0, b1, b2, a1, a2 = b0 / a0, b1 / a0, b2 / a0, a1 / a0, a2 / a0
+    y = x
+    for _ in range(2):
+        out, x1, x2, y1, y2 = [], 0.0, 0.0, 0.0, 0.0
+        for v in y:
+            o = b0 * v + b1 * x1 + b2 * x2 - a1 * y1 - a2 * y2
+            x2, x1, y2, y1 = x1, v, y1, o
+            out.append(o)
+        y = out
+    total = sum(v * v for v in x) or 1.0
+    return 100 * sum(v * v for v in y) / total
+
+
+def punch(x, sr, bpm):
+    """How much the sound swings inside a beat: the median over the beats
+    of the 95th against the 10th percentile of a 10 ms loudness, in dB.
+    BN6's "Surge of Power!" swings 7 dB, 0.13.0's piece 3.4: a wall of
+    held notes reads as synthetic, a beat that breathes as the game."""
+    h = max(1, int(0.01 * sr))
+    env = [math.sqrt(sum(v * v for v in x[i:i + h]) / h) for i in range(0, len(x) - h, h)]
+    beat = max(1, int(60 / bpm / 0.01))
+    swings = []
+    for i in range(0, len(env) - beat, beat):
+        seg = sorted(env[i:i + beat])
+        top, floor = seg[int(0.95 * (len(seg) - 1))], seg[int(0.1 * (len(seg) - 1))]
+        swings.append(20 * math.log10((top + 1e-9) / (floor + 1e-9)))
+    swings.sort()
+    return swings[len(swings) // 2] if swings else 0.0
+
+
+def clashes(piece):
+    """The first square's notes on a beat or held (12 ticks or more) that
+    rub a semitone against the harmony under them and are not in it: the
+    wave's bass, the second square and the chord samples a piece names in
+    CHORD_SAMPLES (instrument: its intervals over the key it is played
+    at). A rub on purpose (a maj7 over its root) is read and kept."""
+    chords = getattr(piece, 'CHORD_SAMPLES', None)
+    if chords is None:
+        return
+    s = piece.arrangement()
+    names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+
+    sampled = getattr(piece, 'SAMPLED_PARTS', {})
+    under = set(sampled.get('backing', ())) | set(sampled.get('bass', ()))
+    leads = set(sampled.get('lead', ()))
+
+    def sounding(t):
+        pcs = {k % 12 for ch in ('wave', 'sq2') for t0, n, k, _, _ in s.psg[ch] if t0 <= t < t0 + max(n, 6)}
+        pcs |= {k % 12 for t0, n, inst, k, *_ in s.ds if inst in under and t0 <= t < t0 + max(n, 6)}
+        return pcs | {(k + i) % 12 for t0, n, inst, k, *_ in s.ds if inst in chords and t0 <= t < t0 + n
+                      for i in chords[inst]}
+    lead = [(t, n, k) for t, n, k, _, _ in s.psg['sq1']] + [(t, n, k) for t, n, inst, k, *_ in s.ds if inst in leads]
+    strong = [(t, n, k) for t, n, k in sorted(lead) if t % 24 == 0 or n >= 12]
+    rubs = []
+    for t, n, k in strong:
+        pcs = sounding(t + 1)
+        if k % 12 not in pcs and any((k - pc) % 12 in (1, 11) for pc in pcs):
+            rubs.append(f'bar {t // tm.BAR} tick {t % tm.BAR} {names[k % 12]}')
+    print(f'lead notes rubbing the harmony: {len(rubs)} of {len(strong)}' + (': ' + ', '.join(rubs) if rubs else ''))
+
+
+MOTION = ('same', 'step', 'skip', 'leap', 'big leap')
+
+
+def motion(notes):
+    """A part's motion from its (tick, key) onsets: notes and different
+    pitches a bar (means over the bars it plays in) and its intervals'
+    shares, %: the same note, a step (1-2 semitones), a skip (3-4), a leap
+    (5-7), a big leap (more)."""
+    notes = sorted(notes)
+    ks = [k for _, k in notes]
+    ivs = [b - a for a, b in zip(ks, ks[1:])]
+    size = {m: 0 for m in MOTION}
+    for i in ivs:
+        a = abs(i)
+        size['same' if a == 0 else 'step' if a <= 2 else 'skip' if a <= 4 else 'leap' if a <= 7 else 'big leap'] += 1
+    bars = {}
+    for t, k in notes:
+        bars.setdefault(t // tm.BAR, []).append(k)
+    nb = len(bars) or 1
+    tot = len(ivs) or 1
+    return {'notes': sum(len(b) for b in bars.values()) / nb, 'pitches': sum(len(set(b)) for b in bars.values()) / nb,
+            **{m: 100 * size[m] / tot for m in MOTION}}
+
+
+def piece_parts(piece):
+    """The piece's parts by role: the lead, the backing and the bass, each
+    on the square or wave it would have on a GBA or on the soundfont's
+    instruments the piece names for it in SAMPLED_PARTS ({'lead':
+    ('sflead',), ...}), and the sampled lead: the Direct Sound instruments
+    the piece names in SAMPLED_LEADS ('dlead' by default; a sample doubling
+    the lead goes under another name), its echo (the same key within four
+    ticks) left out."""
+    s = piece.arrangement()
+    parts = {'lead': [(t, k) for t, n, k, *_ in s.psg['sq1']], 'backing': [(t, k) for t, n, k, *_ in s.psg['sq2']],
+             'bass': [(t, k) for t, n, k, *_ in s.psg['wave']]}
+    for role, insts in getattr(piece, 'SAMPLED_PARTS', {}).items():
+        parts.setdefault(role, []).extend((t, k) for t, n, inst, k, *_ in s.ds if inst in insts)
+    leads = getattr(piece, 'SAMPLED_LEADS', ('dlead',))
+    seen, sampled = {}, []
+    for t, n, inst, k, *_ in sorted(s.ds, key=lambda e: e[0]):
+        if inst in leads:
+            if k in seen and t - seen[k] <= 4:
+                continue
+            seen[k] = t
+            sampled.append((t, k))
+    if sampled:
+        parts['sampled lead'] = sampled
+    return parts
+
+
+def source_parts(game, song_id, offset):
+    """The source song's parts by the same roles, read from the ROM: of
+    its squares the one with fewer notes a bar the lead, the other the
+    backing; its wave the bass; its highest Direct Sound melody the
+    sampled lead."""
+    import song_habits as sh
+    data, table = sh.rom(game)
+    song = sh.Song(data, table, song_id)
+    squares, waves, ds = [], [], []
+    for pc in song.tracks:
+        notes, _, _ = song.walk(pc)
+        if not notes:
+            continue
+        kinds = collections.Counter(song.voice(n[4])['kind'] for n in notes if n[4] is not None)
+        kind = kinds.most_common(1)[0][0] if kinds else ''
+        part = [(t - offset, k) for t, k, *_ in notes if t >= offset]
+        if kind.startswith('square'):
+            squares.append(part)
+        elif kind == 'wave':
+            waves.append(part)
+        elif kind == 'Direct Sound':
+            ds.append(part)
+    parts = {}
+    squares.sort(key=lambda p: motion(p)['notes'])
+    if squares:
+        parts['lead'] = squares[0]
+    if len(squares) > 1:
+        parts['backing'] = squares[-1]
+    if waves:
+        parts['bass'] = waves[0]
+    if ds:
+        parts['sampled lead'] = max(ds, key=lambda p: sum(k for _, k in p) / len(p))
+    return parts
+
+
+def discipline(piece, source=None):
+    """Each part's motion, beside the source song's where it is given: a
+    part far busier than its counterpart (half again as many different
+    pitches a bar, or 15 points more leaping, or 15 fewer repeated notes)
+    is flagged. The owner's word on a first sketch for 0.15.0, its bass
+    walking to a new note on every place and every part moving at once:
+    "all over the place" (music_rules.md, Discipline)."""
+    mine = {role: motion(notes) for role, notes in piece_parts(piece).items()}
+    theirs = {role: motion(notes) for role, notes in source_parts(*source).items()} if source else {}
+    print('parts\' motion (notes a bar, different pitches a bar; intervals %: ' + ', '.join(MOTION) + ')'
+          + (', the source\'s under each' if theirs else ''))
+    flags = []
+    for role, m in mine.items():
+        print(f'  {role:12s} {m["notes"]:5.1f} {m["pitches"]:4.1f}  ' + ' '.join(f'{m[k]:3.0f}' for k in MOTION))
+        o = theirs.get(role)
+        if not o:
+            continue
+        print(f'  {"(source)":12s} {o["notes"]:5.1f} {o["pitches"]:4.1f}  ' + ' '.join(f'{o[k]:3.0f}' for k in MOTION))
+        if m['pitches'] > 1.5 * o['pitches'] + 0.5:
+            flags.append(f'{role}: {m["pitches"]:.1f} different pitches a bar against {o["pitches"]:.1f}')
+        if m['leap'] + m['big leap'] > o['leap'] + o['big leap'] + 15:
+            flags.append(f'{role}: leaps {m["leap"] + m["big leap"]:.0f}% against {o["leap"] + o["big leap"]:.0f}%')
+        if m['same'] < o['same'] - 15:
+            flags.append(f'{role}: repeats {m["same"]:.0f}% against {o["same"]:.0f}%')
+    if theirs:
+        print('busier than the source: ' + ('; '.join(flags) if flags else 'none'))
+    else:
+        print('(no --source: nothing to hold the parts against)')
+
+
+SAMPLED_SHARE = 0.8   # (of a role's notes, at least, on the soundfont's instruments)
+
+
+def soundfont(piece):
+    """The owner's gate 3 held by numbers (SKILL.md): the piece names
+    FluidR3 GM (SOUNDFONT), and its lead, its backing and its bass each
+    play at least four in five of their notes on the soundfont's
+    instruments (SAMPLED_PARTS), not on the GBA's squares and wave alone:
+    a square or wave note that doubles one of the role's sampled notes
+    (the same tick, the same pitch class) counts with it, as the squares'
+    top is wanted over the samples (0.19.0's second fix).
+    0.16.0's and 0.19.0's first pieces played their melody, backing and
+    bass on the squares and the wave with a few sampled accents, and the
+    owner heard no soundfont in either ("just not on the quality we
+    want"). The failures, none where it holds."""
+    fails = []
+    if not getattr(piece, 'SOUNDFONT', None):
+        fails.append('no SOUNDFONT: the piece plays no FluidR3 GM')
+    s = piece.arrangement()
+    sampled = getattr(piece, 'SAMPLED_PARTS', {})
+    print('soundfont: each part\'s notes on its instruments (SAMPLED_PARTS) against the GBA\'s own channel')
+    for role, ch in (('lead', 'sq1'), ('backing', 'sq2'), ('bass', 'wave')):
+        mine = {(e[0], e[3] % 12) for e in s.ds if e[2] in sampled.get(role, ())}
+        sf = sum(1 for e in s.ds if e[2] in sampled.get(role, ()))
+        psg = sum(1 for t, n, k, *_ in s.psg[ch] if (t, k % 12) not in mine)
+        if psg + sf == 0:
+            continue
+        share = sf / (psg + sf)
+        print(f'  {role:8s} {sf:4d} sampled, {psg:4d} on {ch} alone: {100 * share:3.0f}%')
+        if share < SAMPLED_SHARE:
+            fails.append(f'{role}: {100 * share:.0f}% of its notes on the soundfont, under {100 * SAMPLED_SHARE:.0f}%')
+    print('soundfont: ' + ('FAIL: ' + '; '.join(fails) if fails else 'every part on FluidR3 GM'))
+    return fails
+
+
+def roll(score, bars, path):
+    """The score drawn: a pixel a tick, the squares blue (sq1) and yellow
+    (sq2), the wave's bass green, the stabs pink, pads violet, brass orange,
+    the power chord red, a slapped bass teal, a bell pale yellow."""
+    from PIL import Image, ImageDraw
+    w, h = bars * tm.BAR + 20, 512
+    im = Image.new('RGB', (w, h), (10, 10, 20))
+    d = ImageDraw.Draw(im)
+    for b in range(bars + 1):
+        d.line([(b * tm.BAR, 0), (b * tm.BAR, h)], fill=(60, 60, 80))
+    colours = {'sq1': (80, 200, 255), 'sq2': (255, 220, 80), 'wave': (120, 255, 120)}
+    for ch, notes in score.psg.items():
+        for t, n, k, _, _ in notes if ch in colours else ():
+            y = h - (k - 24) * 6
+            d.rectangle([t, y, t + n - 1, y + 4], fill=colours[ch])
+    outline = {'pluck': (255, 100, 200), 'pad': (120, 80, 160), 'strings': (120, 80, 160), 'brass': (255, 140, 60),
+               'hit': (255, 255, 255), 'orch': (255, 255, 255), 'pad_m': (120, 80, 160), 'gtr': (255, 60, 60),
+               'mute': (160, 40, 40), 'dlead': (80, 140, 255), 'slap': (60, 220, 160), 'bell': (220, 220, 120),
+               'horns': (255, 140, 60)}
+    for t, n, inst, k, *_ in score.ds:
+        if inst in outline:
+            y = h - (k - 24) * 6
+            d.rectangle([t, y + 1, t + n - 1, y + 3], outline=outline[inst])
+    im.save(path)
+
+
+def main():
+    args = sys.argv[1:]
+    ref = None
+    if '--ref' in args:
+        i = args.index('--ref')
+        ref = args[i + 1]
+        del args[i:i + 2]
+    name = None
+    if '--piece' in args:
+        i = args.index('--piece')
+        name = args[i + 1]
+        del args[i:i + 2]
+    source = None
+    if '--source' in args:
+        i = args.index('--source')
+        source = [args[i + 1], int(args[i + 2], 0), 0]
+        del args[i:i + 3]
+        if '--offset' in args:
+            i = args.index('--offset')
+            source[2] = int(args[i + 1], 0)
+            del args[i:i + 2]
+    version = name or (args[0] if args else trailers.CURRENT)
+    piece = importlib.import_module('trailers.' + name) if name else trailers.music(version)
+    work = os.path.join(ROOT, '.build', 'trailer-' + version)
+    os.makedirs(work, exist_ok=True)
+    path = os.path.join(work, 'music-check.wav')
+    tm.render_any(path, piece)
+    w = wave.open(path)
+    n, sr = w.getnframes(), w.getframerate()
+    d = struct.unpack('<%dh' % (2 * n), w.readframes(n))
+    bar = sr * 60 / piece.BPM * 4
+    print(f'{n / sr:.1f} s at {piece.BPM} beats a minute, a bar {bar / sr:.3f} s ({bar / sr * 30:.2f} video frames)')
+    for b in range(int(n / bar) + 1):
+        seg = d[int(b * bar) * 2:int((b + 1) * bar) * 2]
+        if not seg:
+            break
+        rms = math.sqrt(sum(x * x for x in seg) / len(seg)) / 32768
+        peak = max(abs(x) for x in seg) / 32768
+        near = sum(1 for x in seg if abs(x) > 32000)
+        print(f'  bar {b:2d}: loudness {20 * math.log10(rms + 1e-9):6.1f} dB, peak {20 * math.log10(peak + 1e-9):5.1f} dB'
+              + (f', {near} samples near clipping' if near else ''))
+    mono = [(d[2 * i] + d[2 * i + 1]) / 65536 for i in range(n)]
+    step = sr // 8000
+    mine = [sum(mono[i:i + step]) / step for i in range(0, len(mono) - step, step)]
+    print('balance low/mid/high %:', bands(mine[8000 * 2:8000 * 30], 8000))
+    print('bass/body/mids/top % (120, 500, 2000 Hz):', bands(mine[8000 * 2:8000 * 30], 8000, (120, 500, 2000)))
+    print(f'punch (the swing inside a beat): {punch(mine[8000 * 2:8000 * 30], 8000, piece.BPM):.1f} dB')
+    print(f'highs above 3 kHz, the full band: {highs(mono[sr * 4:sr * 20], sr):.1f}%')
+    if ref:
+        local = os.path.join(work, 'ref' + os.path.splitext(ref)[1])
+        shutil.copy(ref, local)   # (inside the repository: Docker mounts no /tmp)
+        raw = os.path.join(work, 'ref.raw')
+        rel = lambda p: '/src/' + os.path.relpath(p, ROOT)  # noqa: E731
+        subprocess.check_call(['docker', 'run', '--rm', '--name', f'cw-music-check-{os.getpid()}', '-u',
+                               f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '--entrypoint', 'ffmpeg',
+                               build.FFMPEG_IMAGE, '-y', '-loglevel', 'error', '-i', rel(local), '-ac', '1', '-ar', '8000',
+                               '-f', 's16le', rel(raw)])
+        x = [v / 32768 for v in array.array('h', open(raw, 'rb').read())]
+        print('reference low/mid/high %:', bands(x[8000 * 10:8000 * 40] or x, 8000))
+        print('reference bass/body/mids/top %:', bands(x[8000 * 10:8000 * 40] or x, 8000, (120, 500, 2000)))
+        print(f'reference punch: {punch(x[8000 * 10:8000 * 40] or x, 8000, piece.BPM):.1f} dB')
+        full = os.path.join(work, 'ref44.raw')
+        subprocess.check_call(['docker', 'run', '--rm', '--name', f'cw-music-check-full-{os.getpid()}', '-u',
+                               f'{os.getuid()}:{os.getgid()}', '-v', f'{ROOT}:/src', '--entrypoint', 'ffmpeg',
+                               build.FFMPEG_IMAGE, '-y', '-loglevel', 'error', '-i', rel(local), '-ac', '1', '-ar', '44100',
+                               '-f', 's16le', rel(full)])
+        y = [v / 32768 for v in array.array('h', open(full, 'rb').read())]
+        print(f'reference highs above 3 kHz: {highs(y[44100 * 10:44100 * 26] or y, 44100):.1f}%')
+    clashes(piece)
+    discipline(piece, source)
+    fails = soundfont(piece)
+    roll(piece.arrangement(), piece.BARS, os.path.join(work, 'roll.png'))
+    print('wrote', os.path.relpath(path, ROOT), 'and', os.path.relpath(os.path.join(work, 'roll.png'), ROOT))
+    if fails:
+        sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

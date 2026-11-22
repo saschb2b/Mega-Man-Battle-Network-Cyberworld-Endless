@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android's Auto Backup and a move to a new phone, Android 12 on
+     (android:dataExtractionRules): as backup_rules.xml, the saves and the
+     player's settings, never the ROMs. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="data/savedata" />
+        <include domain="file" path="data/settings.ini" />
+        <include domain="file" path="data/keys.ini" />
+        <include domain="file" path="data/pad.ini" />
+        <include domain="file" path="data/touch.ini" />
+        <include domain="file" path="data/launcher.ini" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="data/savedata" />
+        <include domain="file" path="data/settings.ini" />
+        <include domain="file" path="data/keys.ini" />
+        <include domain="file" path="data/pad.ini" />
+        <include domain="file" path="data/touch.ini" />
+        <include domain="file" path="data/launcher.ini" />
+    </device-transfer>
+</data-extraction-rules>

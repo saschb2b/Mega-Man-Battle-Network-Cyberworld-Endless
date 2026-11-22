@@ -1,0 +1,640 @@
+"""One ephemeral, bounded presence square. Nothing is written to game saves."""
+
+import asyncio
+import contextlib
+import dataclasses
+import json
+import logging
+import math
+import struct
+import time
+
+from . import protocol, websocket
+from .arena import Arena
+from .crews import Crews
+from .dive import Dive
+from .party import Parties
+from .holds import BACKLOG, Holds
+from .social import Social
+from .stands import Stands
+from .teams import Teams
+from .trade import Trades
+from .transfer import Transfers
+from .sync import Slots, scan
+from .week import Weeks, week_of
+from .identity import IdentityStore, append_log
+from . import retention
+from .stats import Daily
+
+LOG = logging.getLogger("cyberworld.server")
+
+
+@dataclasses.dataclass
+class Player:
+    id: int
+    name: str
+    writer: asyncio.StreamWriter
+    identity: bytes = bytes(16)
+    channel: int = 1
+    position: tuple = (0, 0, 0, 0)
+    last_log: float = 0
+    joined: float = dataclasses.field(default_factory=time.time)
+    profile: bytes = protocol.DEFAULT_PROFILE
+    social_tokens: float = protocol.SPEC["social_burst"]
+    social_time: float = dataclasses.field(default_factory=time.monotonic)
+    profile_time: float = 0
+    offer_time: float = -1e9  # the board's last post, monotonic
+    roms: int = 0             # protocol.json's roms_bn5 and roms_bn4 bits: the ROMs the game has besides BN6's (protocol.full_set); roms_one_extra where its system reads one at most (v18, protocol.pass_full)
+    round_trip: int = 0       # its round trip to here in ms as its PING says it (v13), 0 unknown: its link's bars
+    refused: bool = False     # sent away (a refusal, a moderator, replaced): no place held (holds.py)
+    resumed: bool = False     # a place held taken back by this session (holds.py)
+    no_arena: bool = False    # its system cannot run the Arena (HELLO's hello_no_arena, v19): a party's linked fighter (party.py)
+
+
+class Server:
+    def __init__(self, seed=120, capacity=8, tick_hz=20, origins=(), event_log=None,
+                 player_cap=64, state_dir=None, name="Cyberworld Endless", motd="Welcome to the Net Square", whitelist=(),
+                 pending_cap=16, handshake_timeout=5.0, trading=False, arena=False, policy=None, clock=time.time,
+                 maintenance="", hold=None, transfers=True, sync=True, cloud_slots=None, cloud_megabytes=None):
+        if not 0 <= seed <= 0xffffffff or not 1 <= capacity <= protocol.SPEC["max_players"]:
+            raise ValueError("seed must be uint32; capacity must be 1..8")
+        if not 1 <= tick_hz <= 30:
+            raise ValueError("tick_hz must be 1..30")
+        if not capacity <= player_cap <= 256:
+            raise ValueError("player_cap must be room capacity..256")
+        self.seed, self.capacity, self.tick_hz = seed, capacity, tick_hz
+        self.player_cap = player_cap
+        self.max_channels = (player_cap + capacity - 1) // capacity
+        self.name, self.motd = name[:64], motd[:160]
+        self.store = IdentityStore(state_dir)
+        # (how long the state directory keeps each thing: retention.py)
+        self.retention = policy or retention.Retention()
+        self.players_log = retention.PlayersLog(state_dir, self.retention.log_days)
+        self.players_log_failed = False
+        self.retention_time = None      # the last pass, monotonic
+        self.retention_task = None
+        self.whitelist = set(whitelist)
+        self.last_moderation = 0
+        self.housekeeping = 1.0     # seconds between moderation checks and roster writes
+        self.origins, self.event_log = origins, event_log
+        self.players = {}
+        self.next_id = 1
+        self.connections = set()    # every accepted socket's task, for shutdown
+        # Unfinished handshakes have a small cap and a deadline of their own:
+        # idle sockets are dropped and never hold a player's place.
+        self.pending = set()
+        self.pending_cap, self.handshake_timeout = pending_cap, handshake_timeout
+        self.roster_written = None
+        self.roster_task = None
+        self.roster_failed = False
+        self.writes = set()         # the logs' appends in threads (trades, the Board), for shutdown
+        self.write_turn = asyncio.Lock()    # one append at a time, in the order they were made
+        self.listener = self.ticker = None
+        self.trading, self.arena_on = trading, arena
+        self.trades, self.arena = Trades(self), Arena(self)
+        self.weeks = Weeks(self, clock)
+        self.stands = Stands(self)
+        self.social_rules = Social(self)
+        self.teams = Teams(self)
+        # (the shared dive, protocol v19: its rooms and traces, crews, doors' queues and party battles)
+        self.dive = Dive(self)
+        self.crews = Crews(self)
+        self.parties = Parties(self)
+        # (the day's totals, no personal data: stats.py)
+        self.daily = Daily(state_dir, self.retention.stats_days, clock)
+        self.daily_task = None
+        # (issue #153: a dropped link's place held; server.ini's maintenance line)
+        self.holds = Holds(self) if hold is None else Holds(self, hold)
+        self.maintenance = protocol.maintenance_line(maintenance)
+        # (saves sent by a code: one exchange, no visit, held in memory alone; transfer.py)
+        self.transfers = Transfers(transfers, self.daily.count)
+        # (saves kept in step: one exchange, no visit, a slot's blob on disk; sync.py)
+        bounds = {key: value for key, value in (("slots", cloud_slots), ("megabytes", cloud_megabytes)) if value is not None}
+        self.slots = Slots(self.store.directory, sync, self.daily.count, clock, days=self.retention.cloud_days, **bounds)
+        self.daily.kept = lambda: self.slots.kept()
+
+    def event(self, kind, **fields):
+        """An event in the console's log; one that names a player (a public
+        identity or a name) goes whole to the players' log alone."""
+        entry = dict(event=kind, **fields)
+        LOG.info("%s", retention.console(entry))
+        if retention.personal(entry):
+            try:
+                self.players_log.write(entry, time.time())
+                self.players_log_failed = False
+            except OSError as exc:
+                if not self.players_log_failed:
+                    LOG.error("Could not write the players' log: %s", exc)
+                self.players_log_failed = True
+        if self.event_log:
+            self.event_log.write(json.dumps(dict(time=time.time(), **entry)) + "\n")
+            self.event_log.flush()
+
+    async def start(self, host, port, ssl=None):
+        self.listener = await asyncio.start_server(self.handle, host, port, ssl=ssl, limit=8192)
+        self.ticker = asyncio.create_task(self.tick())
+        self.event("listening", host=host or "*", port=self.listener.sockets[0].getsockname()[1], seed=self.seed)
+        return self.listener.sockets[0].getsockname()[1]
+
+    async def close(self):
+        if self.listener:
+            self.listener.close()
+        if self.ticker:
+            self.ticker.cancel()
+            with contextlib.suppress(asyncio.CancelledError):
+                await self.ticker
+        tasks = list(self.connections)
+        for task in tasks:
+            task.cancel()
+        await asyncio.gather(*tasks, return_exceptions=True)
+        # (an append still in its thread holds the state directory's lock and
+        # its log open: done before the server is, or the files stay in use)
+        await asyncio.gather(*self.writes, return_exceptions=True)
+        # (... and a slot's blob still being written or read: sync.py)
+        await asyncio.gather(*self.slots.writes, return_exceptions=True)
+        if self.roster_task:
+            await asyncio.gather(self.roster_task, return_exceptions=True)
+        if self.retention_task:
+            await asyncio.gather(self.retention_task, return_exceptions=True)
+        # (the day so far written as the server stops, after a day's end still being written)
+        if self.daily_task:
+            await asyncio.gather(self.daily_task, return_exceptions=True)
+        await self.write_day(self.daily.snapshot())
+        try:
+            self.store.roster([])
+        except (OSError, ValueError) as exc:
+            LOG.error("Could not clear the local player roster: %s", exc)
+        # Recent asyncio versions wait for accepted connections here too.
+        # Cancel them first so shutdown cannot wait for idle players.
+        if self.listener:
+            await self.listener.wait_closed()
+
+    async def handle(self, reader, writer):
+        task = asyncio.current_task()
+        player = None
+        upgraded = False
+        goodbye = False
+        if len(self.pending) >= self.pending_cap:
+            writer.close()
+            return
+        self.connections.add(task)
+        self.pending.add(task)
+        try:
+            try:
+                async with asyncio.timeout(self.handshake_timeout):
+                    if not await websocket.upgrade(reader, writer, self.origins, self.health(), stats=self.daily.public):
+                        return
+                    upgraded = True
+                    opcode, data = await websocket.receive(reader)
+            finally:
+                self.pending.discard(task)
+            if opcode != 2:
+                raise protocol.ProtocolError("Expected binary HELLO")
+            if data and data[0] == protocol.SPEC["transfer"]:
+                # (a save sent by a code: no player, place, channel or identity)
+                await self.transfers.exchange(reader, writer, data)
+                return
+            if data and data[0] == protocol.SPEC["sync"]:
+                # (saves kept in step: no player, place, channel or identity either)
+                await self.slots.exchange(reader, writer, data)
+                return
+            version = protocol.hello_version(data)
+            if version is not None:
+                self.daily.hello(version)
+            player = self.join(writer, *protocol.read_hello(data))
+            await self.welcome(player)
+            if player.resumed:
+                await self.holds.resumed(player)
+            await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
+            await self.weeks.send(player)
+            self.stands.send_to(player)
+            self.dive.send_divers(player)
+            await self.serve_player(reader, player)
+            goodbye = True
+        except protocol.ProtocolError as exc:
+            if player:
+                player.refused = True
+            self.event("reject", reason=str(exc), code=exc.code)
+            with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
+                if upgraded:
+                    await websocket.send(writer, protocol.error(exc))
+                    await websocket.send(writer, struct.pack("!H", 1008), 8)
+                else:
+                    writer.write(b"HTTP/1.1 400 Bad Request\r\nConnection: close\r\nContent-Length: 0\r\n\r\n")
+                    await asyncio.wait_for(writer.drain(), 2)
+        except (ConnectionError, asyncio.IncompleteReadError, asyncio.TimeoutError):
+            pass
+        except asyncio.CancelledError:
+            goodbye = True      # (the server closing: no place to hold)
+            raise
+        finally:
+            try:
+                # A replaced session has already handed its place on; one
+                # that dropped without a goodbye keeps it a while (holds.py).
+                if player and self.players.get(player.id) is player:
+                    self.holds.gone(player, goodbye)
+            finally:
+                writer.close()
+                try:
+                    with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
+                        await asyncio.wait_for(writer.wait_closed(), 2)
+                finally:
+                    self.connections.discard(task)
+
+    def join(self, writer, name, key, requested, roms=0, resume=False, no_arena=False):
+        if self.maintenance:
+            raise protocol.ProtocolError(self.maintenance, protocol.SPEC["error_maintenance"])
+        identity = self.store.identity(key)
+        self.store.refresh()
+        if self.store.contains("bans", identity):
+            raise protocol.ProtocolError("This profile is banned", 10)
+        if self.whitelist and identity.hex() not in self.whitelist:
+            raise protocol.ProtocolError("This server uses an allowlist", 11)
+        now = time.time()
+        kick = self.store.kick(identity, now)
+        if kick:
+            minutes = max(1, math.ceil((kick.get("expires", now) - now) / 60))
+            raise protocol.ProtocolError(f"Kicked by a moderator; try again in {minutes} min", 14)
+        # The same profile again (a reconnect after a drop the server has not
+        # noticed yet) takes over its old session, and by default its channel.
+        old = next((p for p in self.players.values() if p.identity == identity), None)
+        # (a resume takes its own place back, held or not yet noticed gone: holds.py; a
+        # diver's is his Square's, a channel chosen anew: his game dives again, dive.py)
+        prior = old.channel if old and 0 < old.channel <= self.max_channels else 0
+        channel = prior if old and resume and prior else self.choose_channel(requested or prior, old.id if old else 0)
+        if not channel or len(self.players) - bool(old) >= self.player_cap:
+            raise protocol.ProtocolError("Square or channel is full", 7)
+        player = Player(self.next_id, name, writer, identity, channel, roms=roms, resumed=bool(old and resume),
+                        no_arena=no_arena)
+        if not player.resumed:
+            self.next_id = self.next_id % 0xffffffff + 1
+        if old:
+            del self.players[old.id]
+            self.dive.dropped(old)
+            self.trades.left(old)
+            # (a resume keeps a NetBattle of two under way, v21: arena.py)
+            self.arena.dropped(old.id, player.resumed)
+            self.teams.dropped(old.id, player.resumed)
+            self.stands.left(old)
+            self.social_rules.left(old.id)
+            if player.resumed:
+                self.holds.take_back(old, player)
+            else:
+                self.holds.forget(old)
+                self.event("replace", id=old.id, by=player.id, identity=identity.hex())
+            self.drop(old, protocol.ProtocolError("This profile connected again from another session", 12), 1000)
+        self.players[player.id] = player
+        # (a place taken back is the same visit: its "resume", holds.py, neither
+        # a join nor one of the day's joins)
+        if not player.resumed:
+            self.daily.join(identity, len(self.players), protocol.full_set(roms))
+            self.event("join", id=player.id, identity=identity.hex(), name=name, channel=channel, roms=roms, players=len(self.players))
+        return player
+
+    def drop(self, player, exc, close_code=1008):
+        """Tell a session why it ends and close it, without waiting on its socket."""
+        player.refused = True
+        if not player.writer.is_closing():
+            player.writer.write(websocket.frame(protocol.error(exc)))
+            reason = str(exc).encode("ascii")[:123]
+            player.writer.write(websocket.frame(struct.pack("!H", close_code) + reason, 8))
+        player.writer.close()
+
+    async def serve_player(self, reader, player):
+        # (the Arena's keys come 60 times a second: a bucket of their own)
+        tokens, relay, previous = 40.0, 150.0, time.monotonic()
+        moves = float(BACKLOG)
+        relayed = (protocol.SPEC["arena_input"], protocol.SPEC["arena_hash"], protocol.SPEC["arena_loadout"],
+                   protocol.SPEC["party_damage"], protocol.SPEC["party_hp"])
+        while True:
+            opcode, data = await asyncio.wait_for(websocket.receive(reader), 15)
+            now = time.monotonic()
+            elapsed, previous = now - previous, now
+            # (positions a bucket of their own, deep enough for the backlog a
+            # stalled link lets through at once, refilled whatever comes:
+            # holds.py, BACKLOG)
+            moves = min(BACKLOG, moves + elapsed * 25)
+            if opcode == 2 and data and data[0] == protocol.SPEC["state"]:
+                moves -= 1
+                tokens = min(40, tokens + elapsed * 30)
+                relay = min(150, relay + elapsed * 120)
+                if moves < 0:
+                    raise protocol.ProtocolError("Message rate exceeded", 8)
+                await self.message(player, data, now)
+                continue
+            if opcode == 2 and data and data[0] in relayed:
+                relay = min(150, relay + elapsed * 120) - 1
+                tokens = min(40, tokens + elapsed * 30)
+                if relay < 0:
+                    raise protocol.ProtocolError("Message rate exceeded", 8)
+                self.arena.relay(player, data)
+                continue
+            tokens = min(40, tokens + elapsed * 30) - 1
+            relay = min(150, relay + elapsed * 120)
+            if tokens < 0:
+                raise protocol.ProtocolError("Message rate exceeded", 8)
+            if opcode == 8 or (opcode == 2 and data == bytes((protocol.SPEC["bye"],))):
+                # (a goodbye, BYE or a close: the place freed at once, holds.py)
+                with contextlib.suppress(ConnectionError, asyncio.TimeoutError):
+                    await websocket.send(player.writer, struct.pack("!H", 1000), 8)
+                return
+            if opcode == 9:
+                await websocket.send(player.writer, data, 10)
+            elif opcode == 2:
+                await self.message(player, data, now)
+
+    async def message(self, player, data, now):
+        if data and data[0] == protocol.SPEC["state"]:
+            player.position = protocol.read_state(data)
+            self.crews.moved(player)
+            if self.event_log and now - player.last_log >= 1:
+                player.last_log = now
+                self.event("position", id=player.id, position=player.position)
+        elif data and data[0] == protocol.SPEC["ping"]:
+            clock, player.round_trip = protocol.read_ping(data)
+            await websocket.send(player.writer, bytes((protocol.SPEC["pong"],)) + clock)
+        elif data and data[0] == protocol.SPEC["profile"]:
+            profile = protocol.read_profile(data)
+            if now - player.profile_time >= 1:
+                player.profile, player.profile_time = profile, now
+        elif len(data) == 5 and data[0] == protocol.SPEC["inspect"]:
+            await self.inspect(player, struct.unpack("!I", data[1:])[0])
+        elif data and data[0] == protocol.SPEC["social"]:
+            await self.social(player, data, now)
+        elif len(data) == 3 and data[0] == protocol.SPEC["channel"]:
+            await self.switch_channel(player, struct.unpack("!H", data[1:])[0])
+        elif data and data[0] in self.square_only and player.id in self.dive.of:
+            # (a diver trades, teams up and watches nothing: the Square's, v19)
+            await self.notice(player, protocol.SPEC["notice_dive_in"], "Not on a dive")
+        elif data and data[0] == protocol.SPEC["trade"]:
+            await self.trades.handle(player, data)
+        elif data and data[0] == protocol.SPEC["offer"]:
+            await self.trades.offer(player, data)
+        elif data and data[0] == protocol.SPEC["arena"]:
+            await self.arena.handle(player, data)
+        elif data and data[0] == protocol.SPEC["week_post"]:
+            await self.weeks.handle(player, data)
+        elif data and data[0] == protocol.SPEC["arena_status"]:
+            if not self.parties.status(player, data):
+                self.stands.status(player, data)
+        elif data and data[0] == protocol.SPEC["watch"]:
+            await self.stands.watch(player, data)
+        elif data and data[0] == protocol.SPEC["team"]:
+            await self.teams.handle(player, data)
+        else:
+            await self.dive_message(player, data, now)
+
+    square_only = (protocol.SPEC["trade"], protocol.SPEC["offer"], protocol.SPEC["team"], protocol.SPEC["watch"])
+
+    async def dive_message(self, player, data, now):
+        """The shared dive's messages (protocol v19): dive.py, crews.py, party.py."""
+        if data and data[0] == protocol.SPEC["dive"]:
+            await self.dive.handle(player, data, now)
+        elif data and data[0] == protocol.SPEC["crew"]:
+            await self.crews.handle(player, data, now)
+        elif data and data[0] == protocol.SPEC["queue"]:
+            await self.parties.handle(player, data)
+        else:
+            raise protocol.ProtocolError("Unknown or out-of-order message")
+
+    def health(self):
+        return {"status": "ok", "protocol": protocol.SPEC["version"], "name": self.name,
+                "motd": self.motd, "players": len(self.players), "player_cap": self.player_cap,
+                "room_capacity": self.capacity, "channels": self.max_channels,
+                "rules": {"free_text": False, "trading": self.trading, "arena": self.arena_on,
+                          "transfers": self.transfers.on, "sync": self.slots.on},
+                "maintenance": self.maintenance or None, "hold_seconds": self.holds.seconds}
+
+    def choose_channel(self, requested, exclude=0):
+        if requested > self.max_channels:
+            return 0
+        for channel in ([requested] if requested else range(1, self.max_channels + 1)):
+            count = sum(p.channel == channel and p.id != exclude for p in self.players.values())
+            if count < self.capacity:
+                return channel
+        return 0
+
+    async def welcome(self, player):
+        week, week_seed = self.weeks.current()
+        await websocket.send(player.writer, protocol.WELCOME.pack(protocol.SPEC["welcome"], self.seed,
+                             player.id, self.tick_hz, self.capacity, player.channel, player.identity, self.max_channels,
+                             week_seed, week))
+
+    async def notice(self, player, code, text):
+        await websocket.send(player.writer, struct.pack("!BH", protocol.SPEC["notice"], code) + text.encode("ascii")[:96])
+
+    async def without_pass(self, player, *others, rule=protocol.full_set):
+        """Whether the asker or a player his message aims at lacks the pass
+        `rule` asks, the asker told with NOTICE notice_pass: the Arena, the
+        stands and the week's posts need the full set (protocol.full_set),
+        Trade Central a full pass (protocol.pass_full, v18: on a system of
+        one extra ROM at most, one game beside BN6's), the Square neither."""
+        if all(rule(p.roms) for p in (player, *others)):
+            return False
+        await self.notice(player, protocol.SPEC["notice_pass"], "That needs the full NetPass")
+        return True
+
+    async def off_ground(self, player, other, *chips):
+        """Whether a chip of a trade is outside the common ground of its two
+        games (v18: one of a game either lacks the ROM of, protocol.holds),
+        the asker told with NOTICE notice_ground."""
+        if all(protocol.holds(p.roms, chip[0]) for p in (player, other) for chip in chips):
+            return False
+        await self.notice(player, protocol.SPEC["notice_ground"], "Not a chip both PETs hold")
+        return True
+
+    async def switch_channel(self, player, requested):
+        if player.id in self.dive.of:
+            # (a diver's CHANNEL: out of the dive, into that channel, v19)
+            await self.dive.leave(player, requested)
+            return
+        channel = self.choose_channel(requested, player.id)
+        if not channel:
+            await self.notice(player, 10, "Channel is full or unavailable")
+            return
+        self.leave_channel(player)
+        player.channel = channel
+        await self.arrive(player)
+        self.event("channel", id=player.id, channel=channel)
+
+    def leave_channel(self, player):
+        """A player out of his channel: what was under way there ends (a trade, a battle, a team, watching)."""
+        self.trades.left(player)
+        self.arena.left(player.id)
+        self.teams.left(player.id)
+        self.stands.left(player)
+        self.social_rules.left(player.id)
+
+    async def arrive(self, player):
+        """A player come into his channel: WELCOME, the channel's BOARD and STANDS, and DIVERS."""
+        await self.welcome(player)
+        await websocket.send(player.writer, protocol.board(self.trades.board_for(player)))
+        self.stands.send_to(player)
+        self.dive.send_divers(player)
+
+    async def inspect(self, player, target):
+        # Every accepted request needs a reply: reopening a card otherwise
+        # waits forever for a serial that a silent per-card throttle dropped.
+        # serve_player already bounds all messages with its token bucket.
+        peer = self.players.get(target)
+        if not peer or peer.channel != player.channel:
+            await self.notice(player, 13, "Player is no longer in this channel")
+            return
+        await websocket.send(player.writer, struct.pack("!BI16s", protocol.SPEC["card"], peer.id, peer.identity) + peer.profile)
+
+    async def social(self, player, data, now):
+        kind, choice, target = protocol.read_social(data)
+        if self.store.contains("mutes", player.identity):
+            await self.notice(player, 11, "This profile is muted")
+            return
+        if not self.social_rules.allow(player, now):
+            await self.notice(player, 12, "Please wait before sending another phrase or emote")
+            return
+        # (aimed at a MegaMan of the channel, or at all where he is gone: social.py)
+        aimed = self.players.get(target)
+        if not aimed or aimed is player or aimed.channel != player.channel:
+            target = 0
+        flags, shadow = self.social_rules.aim(player.id, target, now) if target else (0, False)
+        event = protocol.event(player.id, kind, choice, target, flags, self.social_rules.beat(player.channel, now))
+        if shadow:
+            player.writer.write(websocket.frame(event))
+            return
+        self.stands.cheer(player)
+        # (the two players of a battle under way hear nothing of the stands until it is over)
+        for peer in list(self.players.values()):
+            if peer.channel == player.channel and not peer.writer.is_closing() and not self.stands.fighting(peer.id):
+                peer.writer.write(websocket.frame(event))
+
+    async def moderation(self):
+        # Re-read only when moderation.json changed; a bad file keeps the last rules.
+        self.store.refresh()
+        now = time.time()
+        for player in list(self.players.values()):
+            kick = self.store.kick(player.identity, now)
+            if self.store.contains("bans", player.identity) or (kick and kick["time"] >= player.joined):
+                self.drop(player, protocol.ProtocolError("Removed by a moderator", 14))
+                self.holds.removed(player)
+        self.save_roster()
+
+    def append(self, name, entry):
+        """An entry appended to a log of the state directory, in a thread;
+        close() waits for it. A log's lines stand in the order they were
+        appended, whichever thread takes each."""
+        task = asyncio.create_task(self.write(name, entry))
+        self.writes.add(task)
+        task.add_done_callback(self.appended)
+
+    async def write(self, name, entry):
+        # (tasks start in the order they were made and the lock is taken in
+        # the order it was asked for: two threads at once wrote in either order)
+        async with self.write_turn:
+            await asyncio.to_thread(append_log, self.store.directory, name, entry)
+
+    def appended(self, task):
+        self.writes.discard(task)
+        if not task.cancelled() and task.exception():
+            LOG.error("Could not write the state directory's log: %s", task.exception())
+
+    def save_roster(self):
+        """Write the local roster when it changed: in a thread, one write at a time."""
+        roster = [{"id": p.id, "identity": p.identity.hex(), "name": p.name, "channel": p.channel}
+                  for p in self.players.values()]
+        if not self.store.directory or roster == self.roster_written:
+            return
+        if self.roster_task and not self.roster_task.done():
+            return
+        self.roster_task = asyncio.create_task(self.write_roster(roster))
+
+    async def write_roster(self, roster):
+        try:
+            await asyncio.to_thread(self.store.roster, roster)
+        except (OSError, ValueError) as exc:
+            if not self.roster_failed:
+                LOG.error("Could not write the local player roster: %s", exc)
+            self.roster_failed = True
+            return
+        self.roster_written, self.roster_failed = roster, False
+
+    def keep(self, now):
+        """The retention's pass (retention.py): within a second of the start,
+        then every hour, one at a time, in a thread."""
+        if not self.store.directory or (self.retention_task and not self.retention_task.done()):
+            return
+        if self.retention_time is not None and now - self.retention_time < retention.PASS:
+            return
+        self.retention_time = now
+        self.retention_task = asyncio.create_task(self.retain())
+
+    async def retain(self):
+        now = self.weeks.clock()
+        try:
+            gone = await asyncio.to_thread(retention.apply, self.store.directory, self.retention, now, week_of(now))
+        except (OSError, ValueError) as exc:
+            LOG.error("The retention's pass failed: %s", exc)
+            return {}
+        # (the slots' sizes read again, as the pass and `forget` left them: sync.py)
+        try:
+            self.slots.rescan(await asyncio.to_thread(scan, self.store.directory))
+        except OSError as exc:
+            LOG.error("Could not read the slots: %s", exc)
+        if gone:
+            self.event("retention", **gone)
+        return gone
+
+    def day(self):
+        """A UTC day ended: its totals written, in a thread, as the next begins."""
+        ended = self.daily.rollover()
+        if ended:
+            self.daily_task = asyncio.create_task(self.write_day(ended))
+
+    async def write_day(self, entry):
+        try:
+            await asyncio.to_thread(self.daily.write, entry)
+        except (OSError, ValueError) as exc:
+            LOG.error("Could not write the day's totals: %s", exc)
+
+    async def tick(self):
+        while True:
+            await asyncio.sleep(1 / self.tick_hz)
+            now = time.monotonic()
+            if now - self.last_moderation >= self.housekeeping:
+                self.last_moderation = now
+                await self.moderation()
+                self.keep(now)
+                self.day()
+                self.trades.expire(now)
+                self.arena.expire(now)
+                self.teams.expire(now)
+                self.transfers.prune()
+            self.holds.expire(now)
+            self.parties.expire(now)
+            self.stands.pump(now)
+            self.crews.pump(now)
+            self.dive.pump(now)
+            flags, hidden = self.peer_flags(), self.crews.hidden()
+            for player in list(self.players.values()):
+                if player.writer.is_closing():
+                    continue
+                if player.writer.transport.get_write_buffer_size() > 8192:
+                    player.writer.close()
+                    continue
+                player.writer.write(websocket.frame(protocol.snapshot(self.players, player.id, flags, hidden)))
+
+    def busy_with(self, player_id):
+        """What a player is busy with, as the Square marks him (v13, epic
+        #167): a NetBattle under way (his own, or his team match's), watching
+        one, a trade; 0 free"""
+        spec = protocol.SPEC
+        match = self.arena.matches.get(self.arena.of.get(player_id, 0))
+        if match and match.started:
+            return spec["busy_battle"]
+        if self.stands.busy(player_id):
+            return spec["busy_watch"]
+        if self.teams.busy(player_id) or self.parties.fighting(player_id):
+            return spec["busy_battle"]
+        return spec["busy_trade"] if player_id in self.trades.of else 0
+
+    def peer_flags(self):
+        """Each player's SNAPSHOT bits beside his ROMs: busy and his link's bars"""
+        return {p.id: protocol.peer_byte(self.busy_with(p.id), p.round_trip) | self.dive.peer_bits(p.id)
+                for p in self.players.values()}

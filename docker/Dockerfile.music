@@ -1,0 +1,15 @@
+# The trailers' music when a piece plays sampled instruments
+# (tools/trailers/, a piece's SOUNDFONT): Debian's FluidR3 GM soundfont
+# (fluid-soundfont-gm, Frank Wen's, under the MIT license) and Python.
+# tools/trailer_soundfont.py reads its samples (standard library only) and
+# the kit plays them as MP2K plays its own: 8-bit at 10512 Hz, mixed at
+# 13379 Hz with its echo. The soundfont lives in the image only, never in
+# git; a piece that uses it keeps its 3DS banner's seconds as our own audio
+# (3ds/README.md's banner). Built by build.py's ensure_image as
+# cyberworld-music.
+FROM debian:trixie
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+    python3 fluid-soundfont-gm \
+ && rm -rf /var/lib/apt/lists/*
+ENV CW_SOUNDFONT=/usr/share/sounds/sf2/FluidR3_GM.sf2

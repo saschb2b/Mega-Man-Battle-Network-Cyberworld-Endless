@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research status</title>
+<!--
+  Research status page (reverse-engineering skill). One file, no network
+  but its own folder, no dependencies. It reads state.json beside it; opened
+  as a file, where a browser refuses that, it shows the copy embedded below.
+  Do not edit the page per project: a script writes state.json and this
+  embedded copy from the project's ledger (schema: references/dashboard.md).
+-->
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #77756f;
+  --line: #e1e0d9; --border: rgba(11,11,11,0.10); --accent: #2a78d6; --wash: rgba(42,120,214,0.08);
+  --good: #0f7a0f; --wait: #9a6700; --bad: #c23030; --plain: #6b6a65;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a998f;
+    --line: #2c2c2a; --border: rgba(255,255,255,0.10); --accent: #5b9df0; --wash: rgba(91,157,240,0.10);
+    --good: #3fbf5a; --wait: #e0a526; --bad: #f0605a; --plain: #a3a299;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #f0efec; --ink-2: #c3c2b7; --muted: #9a998f;
+  --line: #2c2c2a; --border: rgba(255,255,255,0.10); --accent: #5b9df0; --wash: rgba(91,157,240,0.10);
+  --good: #3fbf5a; --wait: #e0a526; --bad: #f0605a; --plain: #a3a299;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink); font: 15px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 22px; margin: 0 0 4px; font-weight: 650; }
+h2 { font-size: 16px; margin: 32px 0 10px; font-weight: 650; }
+p { margin: 0 0 8px; }
+a { color: var(--accent); }
+.sub, .note { color: var(--ink-2); }
+.note { font-size: 13px; }
+.banner { background: var(--wash); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px 10px 0; border-top: 1px solid var(--line); }
+th { color: var(--muted); font-weight: 500; font-size: 13px; border-top: 0; padding-top: 0; }
+td.date { white-space: nowrap; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+td.name { font-weight: 600; white-space: nowrap; }
+td.nowrap { white-space: nowrap; }
+.pill { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; font-weight: 600; }
+.pill i { width: 9px; height: 9px; border-radius: 50%; background: currentColor; flex: none; }
+.tone-good { color: var(--good); } .tone-progress { color: var(--accent); } .tone-wait { color: var(--wait); }
+.tone-bad { color: var(--bad); } .tone-plain { color: var(--plain); }
+ul.changes { margin: 0; padding-left: 20px; }
+ul.changes li { margin: 4px 0; }
+details { margin-top: 32px; border-top: 1px solid var(--line); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 650; }
+details ul { padding-left: 20px; }
+dl.glossary { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; margin: 0; }
+dl.glossary dt { font-weight: 600; }
+dl.glossary dd { margin: 0; color: var(--ink-2); }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 13px; }
+footer { margin-top: 32px; font-size: 13px; color: var(--muted); }
+@media (max-width: 680px) {
+  table.stack thead { display: none; }
+  table.stack tr { display: block; border-top: 1px solid var(--line); padding: 10px 0; }
+  table.stack td { display: block; border: 0; padding: 2px 0; white-space: normal; }
+  table.stack td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-weight: 400; }
+  dl.glossary { grid-template-columns: 1fr; gap: 2px; }
+  dl.glossary dd { margin-bottom: 8px; }
+}
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"><p class="sub">Loading the status…</p></main>
+<noscript><main><p>This page needs JavaScript. STATUS.md beside it holds the same status.</p></main></noscript>
+
+<script type="application/json" id="re-state">
+{
+  "schema": "re-status/1",
+  "example": true,
+  "written_by": "the project's status script, from its ledger",
+  "project": "Example: a save file editor",
+  "updated": "2026-10-18",
+  "previous": "2026-10-11",
+  "features": [
+    {"name": "Reading saves", "state": "works", "state_text": "Works", "now": "Every record of the save is read and named.", "left": "", "updated": "2026-10-11", "link": null},
+    {"name": "Writing saves", "state": "proven", "state_text": "Proven in research, not built", "now": "A changed item count survives the game's own checksum.", "left": "The writer itself, and a backup before every write.", "updated": "2026-10-18", "link": null},
+    {"name": "Party editor", "state": "planned", "state_text": "Planned", "now": "Not started.", "left": "All of it.", "updated": null, "link": null}
+  ],
+  "decisions": [
+    {"question": "Should the editor refuse saves from the Japanese release?", "options": ["Refuse them", "Read only", "Support both"], "by": "2026-10-25"}
+  ],
+  "since": [
+    {"date": "2026-10-18", "what": "The checksum routine was found and named; a written save loads in the game."}
+  ],
+  "experiments": [
+    {"feature": "Writing saves", "date": "2026-10-18", "name": "Item count changed and written back", "result": "The game loads it and shows 12 potions; three planted faults are refused.", "meaning": "The checksum is understood; writing is safe for this record.", "link": null},
+    {"feature": "Reading saves", "date": null, "name": "Thirty saves from players read", "result": "Every record decoded the same as the game shows it.", "meaning": "The reader handles saves it was not built from.", "link": null}
+  ],
+  "method": {
+    "target": "The game's European release, its hash pinned",
+    "oracle": "The unchanged game loading the same save",
+    "rules": ["The player's files are only read; tests write copies."],
+    "records": [{"what": "Offsets and how to re-check them", "where": "docs/ledger.md"}]
+  },
+  "glossary": [
+    {"term": "Oracle", "meaning": "The unchanged original, run the same way, that ours is compared against."},
+    {"term": "Planted fault", "meaning": "A deliberate break, to show the comparison catches it."}
+  ]
+}
+</script>
+
+<script>
+(() => {
+  "use strict";
+  const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const TONES = { works: "good", shipped: "good", reworking: "progress", building: "progress",
+    proven: "wait", designed: "wait", planned: "plain", blocked: "bad" };
+  const DASH = "—";
+  const app = document.getElementById("app");
+
+  // Every string from the state is data: text nodes only, never markup.
+  function el(tag, attrs, ...kids) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) if (v != null && v !== false) n.setAttribute(k, String(v));
+    for (const kid of kids.flat(Infinity)) if (kid != null && kid !== false) n.append(kid instanceof Node ? kid : document.createTextNode(String(kid)));
+    return n;
+  }
+  const text = (v) => (typeof v === "string" && v.trim() ? v : DASH);
+  function day(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || "");
+    return m ? `${Number(m[3])} ${MONTHS[Number(m[2]) - 1]} ${m[1]}` : DASH;
+  }
+  // Links only to relative paths or https pages: no other scheme, no script.
+  function link(label, href) {
+    if (typeof href !== "string" || !href.trim()) return label;
+    const scheme = /^\s*([a-z][a-z0-9+.-]*):/i.exec(href);
+    if (scheme && scheme[1].toLowerCase() !== "https") return label;
+    return el("a", { href }, label);
+  }
+  function td(label, cls, ...kids) { return el("td", { "data-label": label, class: cls }, ...kids); }
+  function table(head, rows) {
+    return el("table", { class: "stack" }, el("thead", {}, el("tr", {}, head.map((h) => el("th", { scope: "col" }, h)))), el("tbody", {}, rows));
+  }
+
+  function features(s) {
+    const rows = (s.features || []).map((f) => el("tr", {},
+      td(null, "name", link(text(f.name), f.link)),
+      td("Status", null, el("span", { class: "pill tone-" + (TONES[f.state] || "plain") }, el("i", { "aria-hidden": "true" }), text(f.state_text))),
+      td("Now", null, text(f.now)),
+      td("What is left", null, text(f.left)),
+      td("Updated", "date", day(f.updated))));
+    return [el("h2", {}, "Features"), table(["Feature", "Status", "Now", "What is left", "Updated"], rows)];
+  }
+
+  function decisions(s) {
+    const list = s.decisions || [];
+    if (!list.length) return [];
+    return [el("h2", {}, "Decisions needed"), el("ul", { class: "changes" }, list.map((d) => el("li", {},
+      el("strong", {}, text(d.question)), " ", (d.options || []).length ? "Options: " + d.options.join("; ") + "." : "",
+      d.by ? ` By ${day(d.by)}.` : "")))];
+  }
+
+  function since(s) {
+    const list = s.since || [];
+    const title = s.previous ? `Since the last update (${day(s.previous)})` : "Changes";
+    return [el("h2", {}, title), list.length
+      ? el("ul", { class: "changes" }, list.map((c) => el("li", {}, el("span", { class: "sub" }, day(c.date) + ": "), text(c.what))))
+      : el("p", { class: "sub" }, "Nothing has changed.")];
+  }
+
+  function experiments(s) {
+    const list = s.experiments || [];
+    if (!list.length) return [];
+    const rows = list.map((e) => el("tr", {},
+      td("Date", "date", day(e.date)),
+      td("Feature", "nowrap", text(e.feature)),
+      td("Experiment", null, link(text(e.name), e.link)),
+      td("Result", null, text(e.result)),
+      td("What it means", null, text(e.meaning))));
+    return [el("h2", {}, "Experiments"), el("p", { class: "note" }, "One line each, newest first. Each stands on its own: the numbers are not added up across experiments."),
+      table(["Date", "Feature", "Experiment", "Result", "What it means"], rows)];
+  }
+
+  function method(s) {
+    const m = s.method || {};
+    const kids = [el("summary", {}, "Method: what was run against what")];
+    const facts = [];
+    if (m.target) facts.push(el("li", {}, "Target: ", m.target));
+    if (m.oracle) facts.push(el("li", {}, "Compared against: ", m.oracle));
+    for (const r of m.rules || []) facts.push(el("li", {}, r));
+    if (facts.length) kids.push(el("ul", {}, facts));
+    if ((m.records || []).length) kids.push(table(["Record", "Where"], m.records.map((r) => el("tr", {},
+      td("Record", null, text(r.what)), td("Where", null, el("code", {}, text(r.where)))))));
+    return [el("details", {}, kids)];
+  }
+
+  function glossary(s) {
+    const list = s.glossary || [];
+    if (!list.length) return [];
+    return [el("h2", {}, "Glossary"), el("dl", { class: "glossary" }, list.map((g) => [el("dt", {}, text(g.term)), el("dd", {}, text(g.meaning))]))];
+  }
+
+  function render(s, source) {
+    document.title = (s.project ? s.project + ": " : "") + "status";
+    const parts = [
+      el("h1", {}, text(s.project)),
+      el("p", { class: "sub" }, "Updated " + day(s.updated) + ". ", el("span", { class: "note" }, source)),
+      s.example ? el("p", { class: "banner" }, "This is the skill's example. A project's status script replaces it with the project's own state.") : null,
+      ...features(s), ...decisions(s), ...since(s), ...experiments(s), ...method(s), ...glossary(s),
+      el("footer", {}, "Written by " + text(s.written_by) + ". STATUS.md beside this page holds the same.")];
+    app.replaceChildren(...parts.filter(Boolean));
+  }
+
+  function fail(message) {
+    app.replaceChildren(el("h1", {}, "Research status"), el("p", { class: "banner" }, message));
+  }
+
+  let embedded = null;
+  try { embedded = JSON.parse(document.getElementById("re-state").textContent); } catch (e) { embedded = null; }
+  const fallback = (why) => {
+    if (embedded && embedded.schema === "re-status/1") render(embedded, why + " Showing the copy embedded in this page.");
+    else fail(why + " This page has no readable copy of its own either: run the status script again.");
+  };
+  if (location.protocol === "file:") { fallback("Opened as a file, so state.json cannot be read."); return; }
+  fetch("state.json", { cache: "no-store" })
+    .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })
+    .then((s) => { if (s.schema !== "re-status/1") throw new Error("schema"); render(s, "Read from state.json."); })
+    .catch(() => fallback("state.json could not be read."));
+})();
+</script>
+</body>
+</html>

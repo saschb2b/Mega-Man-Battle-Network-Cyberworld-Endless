@@ -1,0 +1,344 @@
+# A version tag (v1.0.0) builds the release files and publishes them as a
+# GitHub release: the PortMaster port, the Linux desktop build (AppImage with
+# its .zsync, .deb and tar.gz, and a Flatpak bundle), the Windows build (an
+# installer and a zip), the macOS app (a .dmg), the Nintendo 3DS build (a
+# CIA for the HOME Menu and a .3dsx for the Homebrew Launcher), the
+# Nintendo Switch build (a .nro for the Homebrew Menu), the PlayStation
+# Vita build (a .vpk for VitaShell), the PSP build (its PSP/GAME folder
+# zipped, under the GPL for the gpSP it links), the PS4 build (a fake .pkg), the PS5
+# build (its app folder zipped, as Prospero Store takes it) and the
+# browser build as a site to serve anywhere, and the separate ROM-free server
+# (its archives here, its container image on ghcr.io). None holds game data.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing tag to release
+        required: true
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  DOCKER_CONTEXT_NAME: ""
+  TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  # the server's five native builds and its zipapp (server-native.yml), each
+  # on its own system: PyInstaller does not cross-compile
+  server:
+    uses: ./.github/workflows/server-native.yml
+    with:
+      ref: ${{ inputs.tag || github.ref_name }}
+
+  # the server's container image on ghcr.io (server-image.yml), for hosts
+  # with Docker; not a file of the release, so the release waits on none
+  server-image:
+    uses: ./.github/workflows/server-image.yml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      ref: ${{ inputs.tag || github.ref_name }}
+
+  # the Flatpak (linux/flatpak), in Flathub's builder image
+  flatpak:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-26.08
+      # (/var/lib/flatpak on a volume, filled from the image: once Flathub has a
+      # newer runtime than the image's, flatpak renames the old one aside, and
+      # across the image's overlay layers that fails with "Invalid cross-device
+      # link", the update of org.freedesktop.Sdk with it, and xvfb-run falls
+      # over, as at v0.22.0's tag)
+      options: --privileged -v /var/lib/flatpak
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: cyberworld-endless.flatpak
+          manifest-path: linux/flatpak/io.github.saschb2b.Mega-Man-Battle-Network-Cyberworld-Endless.yml
+          upload-artifact: false
+          cache: false
+      - uses: actions/upload-artifact@v7
+        with:
+          name: flatpak
+          path: cyberworld-endless.flatpak
+
+  # the macOS app, on a Mac (Apple's SDK)
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - run: python3 build.py macos
+      - uses: actions/upload-artifact@v7
+        with:
+          name: macos
+          path: build/release/cyberworld-endless-macos.dmg
+
+  ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - run: python3 build.py ios
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ios
+          path: build/release/cyberworld-endless.ipa
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.android, tag: cyberworld-android }
+      # one key for every release (android/README.md, tools/android_key.sh):
+      # without the secrets no APK is released, rather than one signed with
+      # a key the next release could not match (players would reinstall and
+      # lose their saves to update)
+      - name: The APK
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ] || [ -z "$ANDROID_KEYSTORE_PASSWORD" ]; then
+            echo "::warning::No Android release key in the repository's secrets: this release has no APK"
+            exit 0
+          fi
+          mkdir -p .build && echo "$KEYSTORE_BASE64" | base64 -d > .build/release.jks
+          export ANDROID_KEYSTORE=/src/.build/release.jks
+          python3 build.py android
+          rm -f .build/release.jks
+      - uses: actions/upload-artifact@v7
+        with:
+          name: android
+          path: build/release/cyberworld-endless.apk
+          if-no-files-found: ignore
+
+  # the Nintendo 3DS build (3ds/README.md), in devkitPro's devkitARM
+  n3ds:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.3ds, tag: cyberworld-3ds }
+      - run: python3 build.py 3ds
+      - uses: actions/upload-artifact@v7
+        with:
+          name: n3ds
+          path: |
+            build/3ds/cyberworld-endless.cia
+            build/3ds/cyberworld-endless.3dsx
+
+  # the Nintendo Switch build (switch/README.md), in devkitPro's devkitA64
+  switch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.switch, tag: cyberworld-switch }
+      - run: python3 build.py switch
+      - uses: actions/upload-artifact@v7
+        with:
+          name: switch
+          path: build/switch/cyberworld-endless.nro
+
+  # the PlayStation Vita build (vita/README.md), in VitaSDK
+  vita:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.vita, tag: cyberworld-vita }
+      - run: python3 build.py vita
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vita
+          path: build/vita/cyberworld-endless.vpk
+
+  # the PSP build (psp/README.md), in pspdev's toolchain with gpSP
+  psp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.psp, tag: cyberworld-psp }
+      - run: python3 build.py psp
+      - uses: actions/upload-artifact@v7
+        with:
+          name: psp
+          path: build/psp/cyberworld-endless-psp.zip
+
+  # the PS4 build, a PS5's too (ps4/README.md), in the OpenOrbis toolchain
+  ps4:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.ps4, tag: cyberworld-ps4 }
+      - run: python3 build.py ps4
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ps4
+          path: build/ps4/cyberworld-endless.pkg
+
+  # the PS5's own build (ps5/README.md), the native-app template's pipeline
+  ps5:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.ps5, tag: cyberworld-ps5 }
+      - run: python3 build.py ps5
+      - uses: actions/upload-artifact@v7
+        with:
+          name: ps5
+          path: build/ps5/cyberworld-endless-ps5.zip
+
+  release:
+    needs: [flatpak, macos, ios, android, n3ds, switch, vita, psp, ps4, ps5, server]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.TAG }}
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile, tag: cyberworld-build }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.portmaster, tag: cyberworld-portmaster }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.linux, tag: cyberworld-linux }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.web, tag: cyberworld-web }
+      - uses: ./.github/actions/image
+        with: { dockerfile: Dockerfile.windows, tag: cyberworld-windows }
+      - run: python3 build.py test
+      - run: python3 build.py release
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: server-*
+          merge-multiple: true
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: flatpak
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: macos
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: n3ds
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: switch
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: vita
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: psp
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: ps4
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: ps5
+          path: build/release
+      - uses: actions/download-artifact@v8
+        with:
+          name: ios
+          path: build/release
+      # (AltStore's and SideStore's source, its address the latest release's)
+      - name: AltStore source
+        run: python3 tools/altstore_source.py "$TAG" build/release/cyberworld-endless.ipa > build/release/altstore-source.json
+      # (none when the release has no APK)
+      - uses: actions/download-artifact@v8
+        continue-on-error: true
+        with:
+          name: android
+          path: build/release
+      # (what the game reads at its start to know a newer version is out,
+      # its address the latest release's, and the notes' pictures its update
+      # box shows: tools/update_manifest.py)
+      - name: Update manifest
+        run: |
+          python3 -m pip install --user --break-system-packages --quiet pillow
+          python3 tools/update_manifest.py "$TAG" build/release > build/release/update.json
+      - name: Checksums
+        working-directory: build/release
+        run: |
+          ls cyberworld-endless-portmaster.zip cyberworld-endless-x86_64.AppImage cyberworld-endless_amd64.deb \
+            cyberworld-endless-linux-x86_64.tar.gz cyberworld-endless.flatpak cyberworld-endless-windows-x64-setup.exe \
+            cyberworld-endless-windows-x64.zip cyberworld-endless-macos.dmg cyberworld-endless.ipa altstore-source.json update.json update-pictures.bin \
+            cyberworld-endless.apk cyberworld-endless.cia cyberworld-endless.3dsx cyberworld-endless.nro cyberworld-endless.vpk cyberworld-endless-psp.zip cyberworld-endless.pkg cyberworld-endless-ps5.zip \
+            cyberworld-endless-website.zip cyberworld-server-python.zip \
+            cyberworld-server-linux-x86_64.zip cyberworld-server-linux-arm64.zip \
+            cyberworld-server-windows-x64.zip cyberworld-server-macos-x86_64.zip cyberworld-server-macos-arm64.zip \
+            2>/dev/null > FILES || true
+          xargs sha256sum < FILES > SHA256SUMS.txt
+      # the players' notes (docs/releases/TAG.md, else the CHANGELOG's
+      # section); 0.1 to 0.4 were alphas, published as pre-releases, and
+      # 0.5 on are betas, each GitHub's latest release (which the
+      # AppImage's updater follows, and pre-releases never were)
+      - name: Notes
+        run: python3 tools/release_notes.py "$TAG" > build/release/NOTES.md
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          title="Cyberworld Endless $TAG"
+          case "$TAG" in
+            v0.[0-4].*) flags+=(--prerelease); title="$title (alpha)";;
+            v0.*) title="$title (beta)";;
+          esac
+          files=(build/release/cyberworld-endless-x86_64.AppImage.zsync build/release/SHA256SUMS.txt)
+          while read -r f; do files+=("build/release/$f"); done < build/release/FILES
+          gh release create "$TAG" --verify-tag --notes-file build/release/NOTES.md "${flags[@]}" --title "$title" "${files[@]}"
+
+  # the release's post in the Discord server's #announcements, once it is
+  # published (discord-release.yml; none without its webhook's secret)
+  discord:
+    needs: release
+    uses: ./.github/workflows/discord-release.yml
+    with:
+      tag: ${{ inputs.tag || github.ref_name }}
+    secrets:
+      DISCORD_RELEASES_WEBHOOK: ${{ secrets.DISCORD_RELEASES_WEBHOOK }}

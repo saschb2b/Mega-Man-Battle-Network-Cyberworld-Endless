@@ -1,0 +1,105 @@
+/* The versions page (site.css holds the PET's pieces): the open release in
+ * the reader, its opening on the PET's blue panel and its notes in a text
+ * box, and every release in a list beside it, the cursor on the open one.
+ * On a phone the reader comes first and the list after it. */
+
+main.wrap { padding-top: 28px; }
+
+.history { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.reader { min-width: 0; }
+.reader .jump, .reader .back { display: none; margin: 0 0 18px; }
+.reader .back { margin: 24px 0 0; }
+.reader .jump a, .reader .back a { text-decoration: none; }
+
+/* ---- a release ---- */
+
+.release { scroll-margin-top: 84px; }
+.release[hidden] { display: none; }
+.release + .release { margin-top: 40px; }
+.release .who .new { margin-left: 8px; color: var(--gold); }
+
+.opening { text-align: center; }
+.opening .theater { margin: 0 auto 6px; }
+.opening .theater video { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: contain; image-rendering: auto; background: #07183a; }
+.opening p[align] { margin: 0 0 6px; }
+.opening h2 {
+	margin: 18px auto 8px;
+	max-width: 30em;
+	font: 700 clamp(1.15rem, 2.2vw, 1.5rem)/1.3 var(--caps);
+	color: var(--white);
+	text-shadow: var(--edge);
+	letter-spacing: 0.04em;
+	text-wrap: balance;
+}
+.opening .lead { margin: 0 auto; max-width: 38em; font-size: 1.1rem; line-height: 1.5; color: #d6f4ff; text-wrap: pretty; }
+.opening .lead b { color: var(--gold); }
+.opening .lead a { color: #9ff3ff; }
+.opening .actions { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 14px; margin: 18px 0 6px; }
+.opening .actions .plate { padding-right: 16px; }
+.opening .actions .pill { text-decoration: none; }
+
+.in-english { margin: 14px 4px 0; font: 400 0.95rem/1.45 var(--pixel); color: #10364a; }
+
+/* ---- its notes, as GitHub shows them, in the PET's text box ---- */
+
+.notes { margin-top: 18px; overflow-wrap: break-word; }
+.notes > :first-child { margin-top: 0; }
+.notes h3 { margin: 1.4em 0 0.5em; font: 700 1.3rem/1.3 var(--pixel); color: #214a52; }
+.notes h4 { margin: 1.2em 0 0.4em; font: 700 1.12rem/1.3 var(--pixel); color: #007b4a; }
+.notes h5, .notes h6 { margin: 1em 0 0.3em; font: 700 1rem/1.3 var(--pixel); color: #214a52; }
+.notes hr { margin: 1.6em 0; border: 0; border-top: var(--u) dashed #42c6e7; }
+.notes p, .notes ul, .notes ol, .notes .table, .notes blockquote, .notes pre { margin: 0.6em 0 0; }
+.notes ul, .notes ol { padding-left: 1.4em; }
+.notes li + li { margin-top: 0.35em; }
+.notes li::marker { color: #007b4a; }
+.notes p[align="center"] { text-align: center; }
+.notes img, .notes video, .opening img {
+	display: inline-block;
+	max-width: 100%;
+	height: auto;
+	margin: 6px 3px;
+	vertical-align: top;
+	box-shadow: 0 0 0 var(--u) #214a52;
+	background: #10364a;
+}
+.notes sub { display: block; font-size: 0.8rem; line-height: 1.4; color: #5a6b6b; }
+.notes blockquote { margin-left: 0; padding-left: 14px; border-left: var(--u) solid #42c6e7; }
+.notes pre { overflow-x: auto; padding: 8px; background: #e8f4e0; }
+.notes .table { overflow-x: auto; }
+.notes table { border-collapse: collapse; width: 100%; font-size: 0.95rem; line-height: 1.4; }
+.notes th, .notes td { padding: 6px 9px; border: 2px solid #9ccfd6; text-align: left; vertical-align: top; }
+.notes th { background: #214a52; color: var(--white); font: 700 0.85rem/1.3 var(--caps); letter-spacing: 0.04em; }
+
+/* the way to the next and the earlier version under a release */
+.walk { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; margin-top: 18px; }
+.walk a { text-decoration: none; }
+.walk a[rel="prev"] { margin-left: auto; }
+
+/* ---- every version: the list ---- */
+
+.index { position: sticky; top: 84px; max-height: calc(100vh - 100px); overflow-y: auto; scroll-margin-top: 84px; }
+.index > .label { display: block; margin: 6px 0 12px 6px; }
+.releases { padding-right: 2px; }
+.releases .row { grid-template-columns: 70px minmax(0, 1fr); min-height: 60px; }
+.releases .row[aria-current] { border-image-source: url(../assets/ui/slot-on.png); }
+.releases .ver { font: 700 0.95rem/1 var(--caps); color: var(--gold); text-shadow: 2px 2px 0 #10364a; letter-spacing: 0.02em; }
+.releases .patch .ver { color: #9ff3ff; font-size: 0.85rem; padding-left: 8px; }
+.releases .what { display: grid; gap: 2px; padding: 4px 0; }
+.releases .head { font: 700 0.95rem/1.25 var(--pixel); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.releases .when { font: 400 0.8rem/1.2 var(--pixel); color: #b5e7f7; text-shadow: none; }
+.releases .film { color: var(--gold); }
+.index .more { margin: 14px 6px 4px; font: 400 0.95rem/1.4 var(--pixel); }
+.index .more a { color: #9ff3ff; }
+
+@media (max-width: 900px) {
+	.history { grid-template-columns: minmax(0, 1fr); }
+	.index { position: static; max-height: none; overflow: visible; }
+	.reader .jump, .reader .back { display: block; }
+}
+@media (max-width: 520px) {
+	.opening .lead { text-align: left; }
+	.opening .actions { flex-direction: column; align-items: stretch; }
+	.opening .actions .exit, .opening .actions .plate, .opening .actions .pill { justify-content: center; }
+	.notes { font-size: 1.02rem; }
+	.notes th, .notes td { padding: 4px 6px; }
+}
