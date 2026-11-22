@@ -67,6 +67,7 @@ ATTACK_FIRST, ATTACK_END = 0xD0, 0x100   # (XATTACK_BN4, XATTACK_BN4_END)
 ATTACK_NUMBERS = {0x1E: 0xD0, 0x22: 0xD1, 0x34: 0xD3, 0x26: 0xD6, 0x59: 0xD5, 0x62: 0xD4, 0x47: 0xD7, (0x09, 'SeekBom'): 0xD2,
                   0x12: 0xD8,   # (BN4's Souls' own families from 0xD8, docs/project/claims/bn4-souls.json)
                   0x10: 0xD9,   # (GutsSoul's rapid buster, his state 0x10: no chip's, asked by B pressed six times, soulrapid.c)
+                  0x15: 0xDA,   # (NumSoul's charged shot)
                   # (the dark chips' units from the top down, 0xFE on, so the lines climbing from 0xD0 never meet them; never
                   # 0xFF, which a registry row's subfamily reads as none, src/core/xchips_registry.c moved4_ok)
                   0x60: 0xFE, 0x1F: 0xFD, (0x09, 'DarkBomb'): 0xFC, 0x27: 0xFB}
@@ -122,7 +123,7 @@ ROWS_WAIT = {286: 'ThunPlus, left out by the owner\'s call 12 (docs/multirom/bn4
 # block of its own, its return given the unit's number (POWER_RETURN); the Souls' engine runs it from BN6's grown power
 # attacks (src/emu/soulbn4.c, xchips_bn4_moved_at). By BN4's family: (the power attack's id, its Soul)
 POWERS4, NPOWERS4 = 0x0800CA7C, 108   # BN4_POWER_ATTACKS, BN4_POWER_ATTACK_COUNT
-SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),)}
+SOUL_POWERS = {0x47: ((0x58, 'ThunSoul'),), 0x12: ((0x24, 'GutsSoul'),), 0x1E: ((0x23, 'AquaSoul'),), 0x15: ((0x11, 'NumSoul'),)}
 # BN4's computed powers (a chip's power of 1000 and up: the routine by power - 1000 in BN4_CHIP_POWERS, bn4.h) moved into
 # BN6's grown table (XC_POWERS, src/emu/xchips_code.h) at POWER4_FIRST + the entry, past BN5's (0x80-0xCB): a unit of kind
 # 'power' copies the routines, the installer points their entries at the copies (xchips_code.c powers4_stage) and a moved
@@ -192,6 +193,9 @@ TWINS = {
     0x08009F40: (0x0800CDB4, 'chips'),   # the panels of a type on a side counted (BN4_PANEL_COUNT, BN6_PANEL_COUNT: r0 type, r1 side)
     # ... and what GutsSoul's rapid buster calls:
     0x0800B590: (0x0800FAAC, 'chips'),   # a buster shot of MegaMan's (r0 its kind, r1 its hit, r3 its speed), his buster's attack its power
+    # ... and what NumSoul's charged shot's object calls:
+    0x0800AC20: (0x0800E3BE, 'chips'),   # an object's hits' damages summed into its collision data's final damage
+    0x0800B0F6: (0x0800EB9E, 'chips'),   # an object struck: sound 0x6E and the hit's spark at its place
 }
 # A moved third-kind object that is an actor: its update hands its state table to the actors' runner in r0 (TimeBomb's
 # bomb, 0x080D6CB6). BN6's runner numbers the engine's states 0-7 and an object's own from 8 where BN4's numbers 0-5 and
@@ -201,6 +205,15 @@ TWINS = {
 ACTOR_RUN4 = 0x08013F3E
 HOME_STATES = 0x380   # (XC4_HOME_STATES)
 AUDITS = {
+    (0x0800AC20, 0x0800E3BE): ('ok', "an object's five hits' damages (its collision data's u16s from BN4's +0x2A, BN6's +0x82) summed into "
+                                     "its final damage (BN4_COLL_FINAL_DAMAGE +0x28, BN6's +0x80), r0 the sum: the same instructions at each "
+                                     "game's offsets, BN6's then loading its +0x8C into r1, which NumSoul's object's caller "
+                                     "(0x080CDCF6-0x080CDCF8) overwrites at once"),
+    (0x0800B0F6, 0x0800EB9E): ('ok', "an object struck (its collision data's hits word, BN4 +0x54 and BN6 +0x70, bit 0x20000): sound 0x6E "
+                                     "and the hit's spark (the fourth kind's 0x0F through each game's spark spawner, 0x080E2140 / "
+                                     "0x080E1C00, its place drawn by 0x08014620 / 0x0801BDDE), the same instructions but BN6's pause "
+                                     "test first (0x0800A03C: nothing while the battle is paused), which NumSoul's object, run by its "
+                                     "update, never meets paused"),
     (0x0800B590, 0x0800FAAC): ('ok', "a buster shot of MegaMan's (r0 its kind, r1 its hit's bits, r3 its speed: the shot spawned "
                                      "ahead of him by each game's own spawner, BN4's 0x080CD45A, BN6's 0x080C686E, its power his "
                                      "battle NaviStats' buster attack, BN4's +6 and BN6's +2, each read by its own game's getter "
@@ -331,6 +344,7 @@ UNITS = (
     ('support', 0x10, 'BigHamr'),
     ('power', 0x00, 'NaviPowers'),
     ('attack', 0x10, 'GutsRapid'),
+    ('attack', 0x15, 'NumSoul'),
 )
 CANDIDATES = ()
 # BN4's sounds a unit plays that BN6 has no song of (xrecipe.song_sig), each copied into a slot of BN6's grown song table
@@ -373,7 +387,8 @@ SOUND_SLOTS = {0x1C6: 0x1DA, 0xBF: 0x1DB,   # (PanlSht's shot's)
                0xC0: 0x289, 0xCC: 0x28A,    # (AirHoc's puck)
                # (the Souls' line's from 0x300 up, a block of its own: ThunSoul's ring, SandRing's too)
                0x91: 0x300,
-               0xA7: 0x301}                 # (GutsSoul's rapid buster's shots)
+               0xA7: 0x301,                 # (GutsSoul's rapid buster's shots)
+               0xAC: 0x302}                 # (NumSoul's charged shot's object)
 # (BN4's 0xB0 is a Navi chip's Navi as he appears too, GutsMan's at 0x080B9A3E: TimeBomb's slot, one song one slot)
 # A call several of BN4's sounds reach, each by a branch that makes r0 one (T.back_value follows one path): read by hand,
 # each sound copied at its number plus the call's add, which its shim adds to r0 (XvSoundCall.add), SOUND_SLOTS holding
@@ -662,6 +677,9 @@ UNIT_COPIED = {
     'BugCurse': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': the "
                              "curse's object (the third kind's 0x80) steps its sprite by it; BN6's nearest a frame ahead; copied, its "
                              "pause test BN6's"},
+    'NumSoul': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's and the Elem chips': "
+                            "NumSoul's charged shot's object (the third kind's 0x05) steps its sprite by it; BN6's nearest a frame "
+                            "ahead; copied, its pause test BN6's"},
     'Elem': {0x08014446: "a third-kind object's sprite each frame (BN4_T3_SPRITE_STEP), as Ligtnin's: the shot of a chip whose "
                          "params' +7 is set (ElemDark's 8) takes it at 0x080CE2F0 where the others take 0x080143FC, and BN6's "
                          "nearest updates the sprite a frame ahead of BN4's (the shot's count at its +0x91 2 in BN4 and 1 in BN6 "
@@ -733,6 +751,8 @@ NUMBERS = {
                 "reach and its frames, bytes of a number as PropBom's",
     0x0605FF01: "BugCurse's curse's hit word (BN4 0x080DD528, r4 of the hit area's spawn 0x080CD7E2): its bits, its reach "
                 "and its frames, bytes of a number as PropBom's",
+    0x0405FF0F: "NumSoul's charged shot's object's hit word (BN4 0x080CDD48, r4 of the hit area's spawn 0x080CD7E2): its "
+                "bits, its reach and its frames, bytes of a number as PropBom's",
     0x0405FF11: "PropBom's bomb's blast's hit word (BN4 0x080DED2C, r4 of the hit area's spawn 0x080CD7E2): its bits, its "
                 "reach and its frames, bytes of a number as MagBolt's pull's",
 }

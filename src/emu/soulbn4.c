@@ -23,9 +23,10 @@
 enum { ROW4_0, ROW4_PLAIN, ROW4_CHIP, ROW4_CHARGED };
 #define POWER_PLAIN4 0x00       /* BN4's plain shot (form 0's +1): BN6's own +6 byte, 0, for every form */
 
-/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11) */
-static const uint8_t forms[SOULS_BN4] = { 6, 2, 11 };
+/* BN6's BN4 Souls by k: BN4's Soul, its form (ThunSoul 6, GutsSoul 2, AquaSoul 11, NumSoul 8) */
+static const uint8_t forms[SOULS_BN4] = { 6, 2, 11, 8 };
 #define FORM_GUTS 2
+#define FORM_NUM 8
 #define FORM_AQUA 11
 #define OP_CMP_R0 0x2800u    /* cmp r0,#imm8 */
 #define OP_CMP_R2 0x2A00u    /* cmp r2,#imm8 */
@@ -93,22 +94,34 @@ bool soulbn4_read(int k, SoulBn4 *out) {
 	return out->routine != 0;
 }
 
-/* GutsSoul's pass's numbers read from BN4's code (BN4_GUTS_PASS): its two kinds and its add; false where the code is not that */
-static bool guts_pass(int *kind1, int *kind2, int *add) {
+/* The Souls whose taking of the form passes over the hand (BN4_FORM_ENTERS), each its routine's places: GutsSoul's +30 to chips
+ * of no kind or panel-cracking, NumSoul's +10 to those of no kind (one kind: kind2 0) */
+static const struct { uint8_t form; uint32_t enter, kind, kind2, add; } passes[] = {
+	{ FORM_GUTS, BN4_GUTS_ENTER, BN4_GUTS_PASS_KIND, BN4_GUTS_PASS_KIND2, BN4_GUTS_PASS_ADD },
+	{ FORM_NUM, BN4_NUM_ENTER, BN4_NUM_PASS_KIND, 0, BN4_NUM_PASS_ADD },
+};
+
+/* form's pass's numbers read from BN4's code: its kinds (kind2 -1 none) and its add; false where it has none, or the code is not
+ * that */
+static bool pass_of(int form, int *kind1, int *kind2, int *add) {
 	const uint8_t *b4 = XR[XROM_BN4_RED_SUN_US].data;
-	if (!b4 || get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * FORM_GUTS) != (BN4_GUTS_ENTER | 1)) return false;
-	uint16_t k1 = get16(b4 + (BN4_GUTS_PASS_KIND - BUS)), k2 = get16(b4 + (BN4_GUTS_PASS_KIND2 - BUS)), a = get16(b4 + (BN4_GUTS_PASS_ADD - BUS));
-	if ((k1 & 0xFF00u) != OP_CMP_R1 || (k2 & 0xFF00u) != OP_CMP_R1 || (a & 0xFF00u) != OP_ADDS_R1) return false;
-	*kind1 = k1 & 0xFF;
-	*kind2 = k2 & 0xFF;
-	*add = a & 0xFF;
-	return true;
+	for (size_t i = 0; b4 && i < sizeof passes / sizeof *passes; ++i) {
+		if (passes[i].form != form) continue;
+		if (get32(b4 + (BN4_FORM_ENTERS - BUS) + 4u * (uint32_t)form) != (passes[i].enter | 1)) return false;
+		uint16_t k1 = get16(b4 + (passes[i].kind - BUS)), a = get16(b4 + (passes[i].add - BUS));
+		uint16_t k2 = passes[i].kind2 ? get16(b4 + (passes[i].kind2 - BUS)) : OP_CMP_R1 | 0xFFu;
+		if ((k1 & 0xFF00u) != OP_CMP_R1 || (k2 & 0xFF00u) != OP_CMP_R1 || (a & 0xFF00u) != OP_ADDS_R1) return false;
+		*kind1 = k1 & 0xFF;
+		*kind2 = passes[i].kind2 ? (k2 & 0xFF) : -1;
+		*add = a & 0xFF;
+		return true;
+	}
+	return false;
 }
 
 void soulbn4_enter(uint32_t obj, int k) {
 	int kind1, kind2, add;
-	if (k < 0 || k >= SOULS_BN4 || forms[k] != FORM_GUTS || (soulpassive_breaks() & SOULPASSIVE_BREAK_PLUS) ||
-	    !guts_pass(&kind1, &kind2, &add))
+	if (k < 0 || k >= SOULS_BN4 || (soulpassive_breaks() & SOULPASSIVE_BREAK_PLUS) || !pass_of(forms[k], &kind1, &kind2, &add))
 		return;
 	uint32_t hand = BN6_BATTLE_HAND + (uint32_t)(hook_read8(obj + BN6_T1_ALLIANCE) & 1) * BN6_HAND_SIZE;
 	for (uint32_t i = hook_read8(hand + BN6_HAND_AT); i < BN6_HAND_MAX; ++i) {
