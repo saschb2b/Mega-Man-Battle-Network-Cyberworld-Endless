@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T22:45:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T00:30:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -320,6 +320,71 @@ the session building it, and is his to turn over.
 | Another layer | No dot: the map is the layer, and a diver on another is in another room, which the server does not send | A mark for a crewmate gone ahead (the crew splits within ten seconds of his going) |
 | Off the frame | The crew's arrowhead on the edge, as a sensed service's; the others' left out | Every diver's arrowhead (a frame's edge full of pips) |
 | Unseen floor | A diver's dot shows where he stands, on floor MegaMan has not seen too | Hidden until MegaMan has seen that floor (where the crew is matters more than what the map reveals of a room) |
+
+## Room for the crew (22 November 2026)
+
+The other divers are puppets in BN6's overworld NPC objects
+(`eOverworldNPCObjects`, a fixed array of 16 at `0x020057B0`,
+`BN6_NPC_COUNT`, [the game's structures](../rom/game-state.md)). A layer's own
+take them first: its service Mr.Progs and keepers, one object for each
+Mystery Data, the exit pad, a guardian's seal, body, beam and data. The
+dive's puppets get what is left. Issue #755 found a crew of four at layer
+3's door, where the layer left two: each game drew two of the other
+three, strangers before its own crew, so its plates named crewmates its
+picture did not show.
+
+**How much a layer leaves**, counted by the log's `layer: N of the 16 NPC
+objects its own` over 40 seeds at each depth from 1 to 24 (a run's
+layers; a dive's are the same generator's, from the week's seed):
+
+| Depth | Slots left: least, median, most | Layers leaving 2 or fewer |
+| --- | --- | --- |
+| 1 | 4, 6, 8 | 0 of 40 |
+| 2 to 7 | 0 to 2 at least, 3 to 6 median | 1 to 18 of 40 |
+| 8 to 13 | none to 1 at least, 1 to 4 median | 9 to 32 of 40 |
+| 14 to 24 | none at least, 0 to 3 median | 18 to 40 of 40 |
+
+Past the first act most layers leave two slots or fewer and many none:
+the Mystery Data take the most (six or seven objects on a deep layer),
+then five talkers. Some leave less than none (16 to 17 of their own):
+the layer's own last object is then never spawned. That is a fault of
+its own, outside the dive, left with issue #755's follow-ups.
+
+**What changed** (`dive_people.c`, `dive_seats.c`, `dive_traces.c`):
+
+- **A full crew's MegaMen first.** As a layer is built, the dive takes up
+  to three slots (a crew of four's others) before the week's traces take
+  theirs; the traces' marks then take one where one is left, the sparkle
+  one where three are, and further divers what remains. Before, the
+  traces took theirs first wherever three were left.
+- **The crew first, then the nearest.** Each frame the room's divers are
+  ordered, crewmates first, then by distance to MegaMan, and the first
+  as many as there are puppets get one (`dive_seats`). A diver keeps his
+  puppet while he stays among them, so no MegaMan jumps from one diver to
+  another as people walk.
+- **A diver with no MegaMan still shows where he is.** His name stands
+  over the spot where he stands and, for a crewmate, the crew's ring on
+  the floor under it, exactly as for one drawn; only his body is missing.
+  The crew's plates, the map's dots and his battles then agree with what
+  the picture shows. The state's `undrawn N: NAMES` (`*` a crewmate)
+  counts them.
+- `--dev diveroom=N` gives each layer of a dive N puppets at most, so a
+  test meets a layer with little room whatever the week's seed makes.
+
+Seen headless with four games on a local server (the scenario
+`online-week/crew-drawn-with-little-room`, `diveroom=2`, all four at
+layer 3's door in one crew): each game drew two crewmates and gave the
+third his name and ring, `undrawn 1`.
+
+Each call was taken under the owner's direction of 21 November 2026 by
+the session building it, and is his to turn over.
+
+| Question | Taken | Chosen over |
+| --- | --- | --- |
+| Who gets a MegaMan | The crew, then the nearest | The snapshot's order (as built: strangers before the crew); the nearest alone (a crewmate across the room left out for a stranger beside you) |
+| The traces against the crew | A full crew's three MegaMen before the traces' marks and sparkle | The traces first (as built); no traces on a dive with others |
+| One with no MegaMan | His name and his ring where he stands | Nothing (as built: the plates and the map named someone the picture did not show); a count only ("+1 here"), which says nothing of where he is |
+| More objects | Not here: BN6 runs 16 NPC objects, and moving the Mystery Data out of them, or a MegaMan drawn another way, is work of its own (issue #755's follow-up) | Raising the 16 (every loop over BN6's array, and the RAM after it) |
 
 ## As built
 
@@ -791,6 +856,29 @@ marks apart, the joiner's HP box his own, every 60th frame's hash agreed.
 Not yet seen over the server: a guardian's door (the same drawing, on the
 same field).
 
+## A diver gone home (22 November 2026)
+
+A dive's games found by the friction hunt of 21 November ([issue
+#756](https://github.com/saschb2b/Mega-Man-Battle-Network-Cyberworld-Endless/issues/756)):
+a diver at home between acts sent no place, and his last stood, so the
+others saw him standing on the layer, named and ringed, and the plates
+could not say where he was. Since protocol v26 each game says where its
+MegaMan is as it changes (DIVE where: on the layer, home, a battle;
+`dive_crew_view.c`, a quarter of a second apart at most). The server
+leaves a diver at home out of every SNAPSHOT, so his puppet, name, ring
+and dot go within a tick of his word; he forms no crew from the place he
+left and stays in the crew he had (crew_away_ms does not run for him),
+as the crew's call at home was ([Crews by
+nearness](#crews-by-nearness-21-november-2026), At home); entering the
+next layer puts him on a layer again. The crew is told where each member
+is (CREW_STATE's member grows a byte), and the plates say "Home" or
+"Battle" before a layer. On a party's field the plate's HP is the
+field's (`party_play_hp`), where the run's own core stands still under
+it and its HP lagged. Seen headless: `online-crew-view/gone-home`, three
+divers crewed, Beta sent home (the dev step `home`, an act's last exit
+as a test's step): Alpha's and Gamma's layers without him within a
+second, their plates "Home", the crew of three kept past crew_away_ms.
+
 ## The crew's display (21 November 2026)
 
 The team's test of 18 November asked for a display of the group, each
@@ -820,7 +908,9 @@ small, in one place, and covers nothing it needs to read):
   feed's), and over a second screen alone (most systems have none).
 - **What**: his name, cut as the field's marks cut it; his HP as BN6
   writes HP, over his max HP; a bar of it under the plate, orange from a
-  quarter down; and his layer ("L3") where it is not MegaMan's. **"Level"
+  quarter down; and where he is: his layer ("L3") where it is not
+  MegaMan's, "Home" between acts, "Battle" in one (since issue #756).
+  **"Level"
   is max HP**: a dive starts from a standard profile, so the game has no
   level, and what grows with a dive is max HP (HPMemory, the guardians'
   data); the act and the layer say how deep, not how strong. Chosen over
@@ -944,7 +1034,7 @@ did not go back was never on it. The owner's calls:
   pull-back) is what CONTINUE finds. Once the dive ends, CONTINUE is the
   normal run's again.
 - **The Board without a visit.** DIVE end carries what the Board ranks
-  (v30: the dive's minutes, its flags, `week_pulled`, and the acts whose
+  (v27: the dive's minutes, its flags, `week_pulled`, and the acts whose
   guardian was fought in a party), and the server posts it at once
   (`week.py`'s `from_dive`), its layer the room's own, checked as a
   WEEK_POST is. The game's own WEEK_POST at its next visit stays, the

@@ -39,6 +39,18 @@ bool director_dev_next_layer(void) {
 	return director_start_layer();
 }
 
+bool director_dev_go_home(void) {
+	/* (as an act's last exit sends the run home: the next layer made, Lan's HP set up, the warp out; a test's step) */
+	if (!director_on_map() || D.town) return false;
+	if (run.home_depth) run.depth = run.home_depth - 1;
+	run.home_depth = 0;
+	run.depth++;
+	run.side_kind = LAYER_NORMAL;
+	if (!new_layer(true)) return false;
+	director_dev_home();
+	return true;
+}
+
 void director_dev_reveal(void) {
 	if (D.active && !D.town) memset(D.seen, 1, sizeof D.seen);
 }

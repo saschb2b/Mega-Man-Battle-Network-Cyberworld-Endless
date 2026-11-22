@@ -6,7 +6,7 @@ secret, "week" and the week's number), so each server has its own week
 and keeps it across restarts. The week's number counts from the Monday
 `week_epoch` seconds past 1970 (5 January 1970), a week a step.
 
-Since v30 the server posts a dive's end itself, from DIVE end (dive.py:
+Since v27 the server posts a dive's end itself, from DIVE end (dive.py:
 the layer its room's, the minutes, the crew's pull-back and the party's
 acts the game's), so the Board has it whether or not the diver visits the
 Square again; the game's WEEK_POST after it is the same entry and changes
@@ -212,7 +212,7 @@ class Weeks:
         await self.take(player, entry)
 
     async def from_dive(self, player, week, seed, depth, won, minutes, flags, party):
-        """A dive's end as the server saw it (DIVE end, v30): posted as the
+        """A dive's end as the server saw it (DIVE end, v27): posted as the
         game's WEEK_POST would be, the layer the room's, so the Board has it
         without the diver's visit to the Square; the game's own post after
         it is the same entry, which changes nothing (issue #759)."""

@@ -16,6 +16,10 @@
 /* The puppets made as each layer is built (layer_objs_more), or not. */
 void dive_people_on(bool on);
 
+/* Dev (diveroom=N): N MegaMen at most for the others on each layer, as
+ * a layer whose own NPCs leave little room gives (issue #755). */
+void dive_people_dev_room(int most);
+
 /* Each frame on a layer: the room's divers as the snapshot has them. */
 void dive_people_frame(const OnlineSnapshot *s);
 

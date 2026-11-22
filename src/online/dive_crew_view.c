@@ -11,6 +11,7 @@
 #include "gfx.h"
 #include "online_transport.h"
 #include "party_marks.h"
+#include "party_play.h"
 #include "pet_look.h"
 #include "pixfont.h"
 #include "platform.h"
@@ -23,6 +24,7 @@
 #define PAD     2
 #define H       (PIXFONT_CAP + 2 + 2)   /* letters, a row, the bar */
 #define GAP     3
+#define WHERE_MS 250        /* where MegaMan is, said at most so often */
 
 static const SDL_Color shade = { 0, 24, 41, 255 };
 
@@ -31,17 +33,41 @@ static struct {
 	uint32_t me;
 	int hp, max;          /* MegaMan's as last sent (-1 none since the link came) */
 	uint32_t sent_at;
-} V = { false, 0, -1, -1, 0 };
+	int where;            /* where MegaMan was last said to be (-1 not yet), ONLINE_WHERE_* */
+	uint32_t where_at;
+} V = { false, 0, -1, -1, 0, -1, 0 };
 
 /* MegaMan's own entry in the crew (his layer the server's word), NULL none */
 static const CrewMember *own(void);
 
+/* where MegaMan is (issue #756): home between acts (drawn on no layer for the others), a battle (his own, or a party's
+ * field), or the layer */
+static int where_now(void) {
+	if (director_in_town() || director_in_hp()) return ONLINE_WHERE_HOME;
+	if (director_in_battle() || party_play_held()) return ONLINE_WHERE_BATTLE;
+	return ONLINE_WHERE_LAYER;
+}
+
+/* where it changed, said: a quarter of a second apart at most, its latest */
+static void where_frame(uint32_t now) {
+	int w = where_now();
+	if (w == V.where || now - V.where_at < WHERE_MS) return;
+	uint8_t m[ONLINE_DIVE_WHERE_BYTES];
+	size_t n = dive_wire_where(m, (unsigned)w);
+	if (!n || !online_transport_send(m, n)) return;
+	fprintf(stderr, "dive: MegaMan %s\n", w == ONLINE_WHERE_HOME ? "home" : w == ONLINE_WHERE_BATTLE ? "in a battle" : "on the layer");
+	V.where = w;
+	V.where_at = now;
+}
+
 void dive_crew_view_frame(bool linked, uint32_t me, uint32_t now) {
 	V.linked = linked;
 	V.me = me;
-	if (!linked) { V.hp = V.max = -1; return; }
+	if (!linked) { V.hp = V.max = V.where = -1; return; }
+	where_frame(now);
 	int hp, max;
-	director_megaman_hp(&hp, &max);
+	/* (on a party's field his box is the field's: the run's core stands still under it) */
+	if (!party_play_hp(&hp, &max)) director_megaman_hp(&hp, &max);
 	/* (sent where it changed, or where the crew's word of it differs: one sent before the server had him in a room is
 	 * dropped there, and this sends it again) */
 	const CrewMember *mine = own();
@@ -77,7 +103,10 @@ int dive_crew_view_rows(CrewRow out[ONLINE_PARTY_MOST]) {
 		if (m->max_hp) snprintf(r->hp, sizeof r->hp, "%u/%u", m->hp, m->max_hp);
 		else snprintf(r->hp, sizeof r->hp, "--");
 		r->layer[0] = 0;
-		if (m->depth && (!me || me->depth != m->depth)) snprintf(r->layer, sizeof r->layer, "L%u", m->depth);
+		/* (where he is: home between acts, a battle, another layer; nothing where he stands on MegaMan's) */
+		if (m->where == ONLINE_WHERE_HOME) snprintf(r->layer, sizeof r->layer, "Home");
+		else if (m->where == ONLINE_WHERE_BATTLE) snprintf(r->layer, sizeof r->layer, "Battle");
+		else if (m->depth && (!me || me->depth != m->depth)) snprintf(r->layer, sizeof r->layer, "L%u", m->depth);
 	}
 	return n;
 }
@@ -115,5 +144,8 @@ void dive_crew_view_describe(FILE *f) {
 	CrewRow w[ONLINE_PARTY_MOST];
 	int n = dive_crew_view_rows(w);
 	fprintf(f, "crewview %d\n", n);
-	for (int i = 0; i < n; ++i) fprintf(f, "mate%d %s hp %s layer %s\n", i, w[i].full, w[i].hp, w[i].layer[0] ? w[i].layer + 1 : "here");
+	for (int i = 0; i < n; ++i) {
+		const char *at = !w[i].layer[0] ? "here" : w[i].layer[0] == 'L' ? w[i].layer + 1 : w[i].layer[0] == 'H' ? "home" : "battle";
+		fprintf(f, "mate%d %s hp %s layer %s\n", i, w[i].full, w[i].hp, at);
+	}
 }

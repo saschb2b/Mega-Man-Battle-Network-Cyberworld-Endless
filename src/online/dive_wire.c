@@ -74,6 +74,12 @@ size_t dive_wire_vitals(uint8_t out[ONLINE_DIVE_VITALS_BYTES], unsigned hp, unsi
 	return ONLINE_DIVE_VITALS_BYTES;
 }
 
+size_t dive_wire_where(uint8_t out[ONLINE_DIVE_WHERE_BYTES], unsigned where) {
+	if (where > ONLINE_WHERE_BATTLE) return 0;
+	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_WHERE; out[2] = (uint8_t)where;
+	return ONLINE_DIVE_WHERE_BYTES;
+}
+
 size_t dive_wire_phrase(uint8_t out[ONLINE_DIVE_PHRASE_BYTES], unsigned phrase, int x, int y, int z) {
 	if (phrase >= ONLINE_PHRASE_COUNT || !coordinate(x) || !coordinate(y) || !coordinate(z)) return 0;
 	out[0] = ONLINE_DIVE; out[1] = ONLINE_DIVE_PHRASE; out[2] = (uint8_t)phrase;
@@ -238,9 +244,10 @@ bool dive_wire_crew_state(const uint8_t *data, size_t size, CrewState *out) {
 	out->value = data[6];
 	for (unsigned k = 0; k < ONLINE_PARTY_MOST; ++k) {
 		const uint8_t *e = data + 7 + k * ONLINE_CREW_MEMBER_BYTES;
-		CrewMember m = { .session = get32(e), .hp = get16(e + 20), .max_hp = get16(e + 22), .depth = e[24] };
-		/* (v24: his HP, max HP and layer; none past the members) */
-		if (!name_get(m.name, e + 4, !m.session) || m.hp > m.max_hp || m.max_hp > 9999 || (!m.session && (m.name[0] || m.max_hp || m.depth)))
+		CrewMember m = { .session = get32(e), .hp = get16(e + 20), .max_hp = get16(e + 22), .depth = e[24], .where = e[25] };
+		/* (v24: his HP, max HP and layer; v26: where he is; none past the members) */
+		if (!name_get(m.name, e + 4, !m.session) || m.hp > m.max_hp || m.max_hp > 9999 || m.where > ONLINE_WHERE_BATTLE ||
+		    (!m.session && (m.name[0] || m.max_hp || m.depth || m.where)))
 			return false;
 		if (!m.session) continue;
 		if (k != out->count) return false;      /* (the members first, zeros after them) */

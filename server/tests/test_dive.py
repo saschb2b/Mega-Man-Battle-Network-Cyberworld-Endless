@@ -44,7 +44,7 @@ def crew_state(data):
     members = [protocol.CREW_MEMBER.unpack_from(data, protocol.CREW_STATE_HEAD.size + k * protocol.CREW_MEMBER.size)
                for k in range(SPEC["party_most"])]
     return dict(stage=stage, other=other, value=value, members=[m[0] for m in members if m[0]],
-                vitals={m[0]: m[2:] for m in members if m[0]})
+                vitals={m[0]: m[2:5] for m in members if m[0]}, where={m[0]: m[5] for m in members if m[0]})
 
 
 def queue_state(data):
@@ -441,6 +441,40 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.server.crews.vitals(b.id, 80, 200, later + crews.VITALS_WAIT / 4)
         self.assertEqual(self.server.crews.hp[b.id], (90, 200))
 
+    async def test_a_diver_gone_home(self):
+        """v26, issue #756: a diver's game says where he is (DIVE where); at home between acts he is in no one's
+        SNAPSHOT, forms no crew from the place he left and stays in his crew as it stood, his crew told where he is."""
+        a, b, c = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma")]
+        for client in (a, b, c):
+            await self.enter(client, 2)
+        for client, x in ((a, 0), (b, 50), (c, 4000)):
+            await self.place(client, x)
+        await self.settled(lambda: self.crew_ids(a) == [a.id, b.id])
+        self.assertEqual(sorted(s for s, _ in await self.peers(a, 2)), sorted([b.id, c.id]))
+        crews.VITALS_WAIT = 0.1
+        where = SPEC["dive_where"]
+        await b.send(protocol.dive(where, SPEC["where_home"]))
+        told = crew_state(await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"]
+                                           and crew_state(m)["where"][b.id] == SPEC["where_home"]))
+        self.assertEqual(told["members"], [a.id, b.id])
+        self.assertEqual([s for s, _ in await self.peers(a, 1)], [c.id])
+        self.assertEqual([s for s, _ in await self.peers(c, 1)], [a.id])
+        # (Gamma where Beta stood: no crew with one at home; Beta's crew kept past crew_away_ms)
+        await self.place(c, 60)
+        await asyncio.sleep(crews.AWAY_WAIT + 0.3)
+        self.assertIn(b.id, self.crew_ids(a))
+        self.assertFalse(any(sorted(pair) == sorted((b.id, c.id)) for pair in self.server.crews.near))
+        # (in a battle: told so, still drawn)
+        await self.place(c, 4000)
+        await a.send(protocol.dive(where, SPEC["where_battle"]))
+        await self.until(b, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"] and crew_state(m)["where"][a.id] == SPEC["where_battle"])
+        # (the next layer entered: on a layer again, drawn, his crew's away rule as ever)
+        await self.enter(b, 3)
+        await self.until(a, SPEC["crew_state"], lambda m: m[1] == SPEC["crew_vitals"] and crew_state(m)["where"][b.id] == SPEC["where_layer"])
+        self.assertNotIn(b.id, self.server.crews.at)
+        with self.assertRaises(protocol.ProtocolError):
+            protocol.read_dive(protocol.dive(where, 3))
+
     async def test_crews_across_a_portal_and_two_crews_met(self):
         a, b, c, d = [await self.connect(n) for n in ("Alpha", "Beta", "Gamma", "Delta")]
         for client in (a, b, c, d):
@@ -707,7 +741,7 @@ class DiveTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual([line.get("party") for line in lines], [5, 0])
 
     async def test_a_dives_end_reaches_the_board_without_a_post(self):
-        """v30 (issue #759): the server posts a dive's end itself, its layer the room's; the game's own WEEK_POST
+        """v27 (issue #759): the server posts a dive's end itself, its layer the room's; the game's own WEEK_POST
         after it changes nothing, a worse end never takes a better one's place, a better one does."""
         a, b = await self.connect("Alpha"), await self.connect("Beta")
         await self.enter(a, 4)

@@ -194,6 +194,46 @@ MANY['divers-on-the-map'] = dict(CAST, GAMES={'beta': online.HOME}, STEPS=online
     ('do', MAP),
 ))
 
+# A crew of four where the layer has little room (issue #755): a guardian's layer whose own NPCs leave two of BN6's
+# sixteen for the others (diveroom=2, as layer 3 of week 2967 left), all four at its door in a crew. Each game gives
+# its two MegaMen to crewmates (never to a stranger before them), and the third crewmate, with no MegaMen left, still
+# has his name and his ring where he stands, the state counting him undrawn.
+NEXT_GUARDIAN = 'hold SELECT 2; hold SELECT+R 4; wait 10; ' + 'press DOWN; wait 4; ' * 8 + 'press A; wait 30'
+ROOM2 = online.HOME + ',diveroom=2'
+CREW4 = ('beta', 'gamma', 'delta')
+
+
+def to_the_door(game=''):
+    """The dev menu's Next guardian, its arrival paged, then by the arena's way in."""
+    return online.at(game, ('do', NEXT_GUARDIAN), ('until', 'where=layer', 1200), ('repeat', 'press A; wait 15', 'chat=closed', 20),
+                     ('expect', 'layer=3'), ('do', 'by arena; wait 10'), ('repeat', 'press A; wait 15', 'chat=closed', 20))
+
+
+MANY['crew-drawn-with-little-room'] = dict(CAST, START=ROOM2, GAMES={name: ROOM2 for name in CREW4}, STEPS=online.course(
+    online.into_square(),
+    dive(),
+    *[part for name in CREW4 for part in online.course(online.into_square(name), dive(name))],
+    # (first on layer 1, each on his own spot a panel or two apart, for the picture: one crewmate with no MegaMan)
+    ('do', 'place 0 0 3; wait 5'),
+    ('@beta', 'do', 'place 48 0 3; wait 5'),
+    ('@gamma', 'do', 'place 0 48 3; wait 5'),
+    ('@delta', 'do', 'place 48 48 3; wait 5'),
+    ('sleep', 1.5),
+    soon('crew=4: Alpha Beta Gamma Delta', '', 900),
+    soon('rings>=3', '', 300),
+    ('expect', 'undrawn~1: '),
+    ('do', 'shot'),
+    to_the_door(),
+    *[to_the_door(name) for name in CREW4],
+    ('sleep', 1.5),
+    soon('crew=4: Alpha Beta Gamma Delta', '', 900),
+    soon('rings>=3', '', 300),                         # a ring under all three, the one with no MegaMan too
+    ('expect', 'undrawn~1: '),
+    ('do', 'shot'),
+    *[step for name in CREW4 for step in (soon('rings>=3', name, 300), ('@' + name, 'expect', 'undrawn~1: '))],
+    ('@delta', 'do', 'shot'),
+))
+
 # Five divers on one spot: four in a crew, the first there, and the fifth outside it; one of the four walks off and
 # the fifth, standing there, takes his place.
 FIVE = {name: online.HOME for name in ('beta', 'gamma', 'delta', 'echo')}

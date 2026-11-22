@@ -8,6 +8,7 @@
 #include "netpass.h"
 #include "netpass_text.h"
 #include "crew_pull.h"
+#include "dive_seats.h"
 #include "dive_wire.h"
 #include "online_motion.h"
 #include "online_people.h"
@@ -603,18 +604,22 @@ static void dive_heard_rooms_and_feed(void) {
 
 static void dive_heard_crews_and_parties(void) {
 	uint8_t m[ONLINE_MAX_MESSAGE] = { 0 };
-	/* (CREW_STATE formed, two members: protocol.crew_state's bytes, its zeros past them; v24, each one's HP, max HP and layer) */
+	/* (CREW_STATE formed, two members: protocol.crew_state's bytes, its zeros past them; v24, each one's HP, max HP and layer; v26, where he is) */
 	static const uint8_t crew[] = { 48, 3, 0, 0, 0, 2, 0, 0, 0, 0, 1, 65, 108, 112, 104, 97 };
-	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 0, 200, 3 };
+	static const uint8_t mate[] = { 0, 0, 0, 2, 66, 101, 116, 97, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 120, 0, 200, 3, ONLINE_WHERE_HOME };
 	memcpy(m, crew, sizeof crew); memcpy(m + 7 + ONLINE_CREW_MEMBER_BYTES, mate, sizeof mate);
 	CrewState c;
 	assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_FORMED && c.other == 2 && c.count == 2 &&
 		c.m[0].session == 1 && c.m[1].session == 2 && !strcmp(c.m[1].name, "Beta") && c.m[1].hp == 120 && c.m[1].max_hp == 200 &&
-		c.m[1].depth == 3 && !c.m[0].max_hp);
+		c.m[1].depth == 3 && c.m[1].where == ONLINE_WHERE_HOME && !c.m[0].max_hp && c.m[0].where == ONLINE_WHERE_LAYER);
 	m[1] = ONLINE_CREW_VITALS; assert(dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c) && c.stage == ONLINE_CREW_VITALS);
 	m[1] = 8; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[1] = 3;
 	m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 201; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 21] = 120;   /* (HP past his max) */
 	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 24] = 0;   /* (a layer past the members) */
+	m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 3; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + ONLINE_CREW_MEMBER_BYTES + 25] = 1;   /* (a where past battle) */
+	m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 1; assert(!dive_wire_crew_state(m, ONLINE_CREW_STATE_BYTES, &c)); m[7 + 2 * ONLINE_CREW_MEMBER_BYTES + 25] = 0;   /* (a where past the members) */
+	uint8_t wh[ONLINE_DIVE_WHERE_BYTES];
+	assert(dive_wire_where(wh, ONLINE_WHERE_HOME) == sizeof wh && wh[0] == ONLINE_DIVE && wh[1] == ONLINE_DIVE_WHERE && wh[2] == 1 && !dive_wire_where(wh, 3));
 	uint8_t v[ONLINE_DIVE_VITALS_BYTES];
 	static const uint8_t vitals[] = { ONLINE_DIVE, ONLINE_DIVE_VITALS, 0, 120, 0, 200 };
 	assert(dive_wire_vitals(v, 120, 200) == sizeof v && !memcmp(v, vitals, sizeof v) && !dive_wire_vitals(v, 201, 200) && !dive_wire_vitals(v, 0, 0) &&
@@ -739,11 +744,40 @@ static void crew_pulled(void) {
 	assert(o.hp[2] == 225 && o.gave[1] == 350 && o.gave[3] == 175 && o.hp[1] == 450 && o.hp[3] == 225);
 }
 
+/* Who gets a layer's puppets (issue #755): the crew first, then the nearest; a diver keeps his */
+static void dive_seated(void) {
+	/* (two puppets, four others: a stranger nearest, his crew far) */
+	SeatDiver d[4] = { { 11, 10, 0, false }, { 12, 20, 0, false }, { 13, 500, 0, true }, { 14, 900, 0, true } };
+	uint32_t seat[2] = { 11, 12 };
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[0] == 13 && seat[1] == 14);
+	/* (one crewmate: he, then the nearer stranger, who keeps the puppet he had) */
+	d[3].crew = false;
+	seat[0] = 0; seat[1] = 11;
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[1] == 11 && seat[0] == 13);
+	/* (strangers walk: the nearer two seated, the one still chosen keeps his) */
+	d[2].crew = false;
+	d[0].x = 1000;
+	assert(dive_seats(seat, 2, d, 4, 0, 0) == 2);
+	assert(seat[0] == 12 || seat[1] == 12);
+	assert(seat[0] == 13 && seat[1] == 12);
+	/* (room for all: each seated, none left out; none twice) */
+	uint32_t four[5] = { 0, 0, 0, 0, 0 };
+	assert(dive_seats(four, 5, d, 4, 0, 0) == 0);
+	int seen = 0;
+	for (int k = 0; k < 5; ++k) seen += four[k] != 0;
+	assert(seen == 4 && four[4] == 0);
+	/* (no room, or nobody) */
+	assert(dive_seats(four, 0, d, 4, 0, 0) == 4);
+	assert(dive_seats(four, 5, d, 0, 0, 0) == 0 && !four[0] && !four[3]);
+}
+
 int main(void) {
 	char directory[] = "/tmp/cyberworld-people-XXXXXX";
 	assert(mkdtemp(directory)); snprintf(g_data_dir, sizeof g_data_dir, "%s", directory);
 	online_people_load(); positions(); cards_and_events(); motion(); fuzz(); square(); referee(); week(); netpass(); spares_list(); pet_carried();
-	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties(); crew_pulled();
+	dive_sent(); dive_heard_traces(); dive_heard_rooms_and_feed(); dive_heard_crews_and_parties(); crew_pulled(); dive_seated();
 	char path[600]; snprintf(path, sizeof path, "%s/network-people.ini", directory); unlink(path); rmdir(directory);
 	puts("Online protocol, malformed messages, motion, local moderation, the Square's plan, the referee, the week's net, the NetPass, Trade Central's spares list, the PET's changes carried home and the shared dive's wire passed");
 	return 0;

@@ -109,6 +109,7 @@ typedef struct {
 	char name[ONLINE_NAME_BYTES + 1];
 	uint16_t hp, max_hp;    /* v24: his HP and max HP as his game last said (0 0 not yet) */
 	uint8_t depth;          /* ... and the layer he dives (0: on none, at home) */
+	uint8_t where;          /* v26: ONLINE_WHERE_LAYER, _HOME (between acts) or _BATTLE */
 } CrewMember;
 
 typedef struct {
@@ -155,7 +156,7 @@ typedef struct {
 size_t dive_wire_enter(uint8_t out[ONLINE_DIVE_ENTER_BYTES], uint16_t week, uint32_t seed, DiveWay way);
 size_t dive_wire_leave(uint8_t out[ONLINE_DIVE_LEAVE_BYTES]);
 /* A dive's end: how (deleted or won), where, what deleted MegaMan, and
- * (v30) what the Board takes from it: the dive's minutes, its flags
+ * (v27) what the Board takes from it: the dive's minutes, its flags
  * (ONLINE_WEEK_PULLED) and the acts whose guardian was fought in a party */
 typedef struct {
 	unsigned how;
@@ -166,6 +167,8 @@ size_t dive_wire_end(uint8_t out[ONLINE_DIVE_END_BYTES], const DiveEnd *e);
 size_t dive_wire_found(uint8_t out[ONLINE_DIVE_FOUND_BYTES], unsigned index);
 /* v24: MegaMan's HP and max HP (1..9999, hp at most it) */
 size_t dive_wire_vitals(uint8_t out[ONLINE_DIVE_VITALS_BYTES], unsigned hp, unsigned max_hp);
+/* v26: where MegaMan is (ONLINE_WHERE_*) */
+size_t dive_wire_where(uint8_t out[ONLINE_DIVE_WHERE_BYTES], unsigned where);
 size_t dive_wire_phrase(uint8_t out[ONLINE_DIVE_PHRASE_BYTES], unsigned phrase, int x, int y, int z);
 size_t dive_wire_wave(uint8_t out[ONLINE_DIVE_WAVE_BYTES], uint32_t id);
 size_t dive_wire_split(uint8_t out[ONLINE_DIVE_SPLIT_BYTES], const DiveSplit *split);

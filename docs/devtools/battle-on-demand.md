@@ -3,7 +3,7 @@ type: Tool
 title: "A battle on demand"
 description: "Dev steps for `--input` and `tools/play.py`: `battle` (the layer's next random battle), `foes` (named enemies at their panels), `lab` (the same foes as the Battle Lab's test battle, inside a snapshot of the game), `swap` (a Navi swapped mid-battle for the next), `xrecord` (a BN5 record), `bracket` (BN4's tournament bracket moved into BN6), `status` (a panel's type too), `chip`, `folder` and `sig`, with `tools/xcontrol.py` and `tools/xfamily.py`'s battle checks."
 tags: [devtools]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T15:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T23:10:10Z }
 ---
 
 # A battle on demand
@@ -12,6 +12,11 @@ generated: { by: claude-code/claude-opus-5-5, at: 2026-11-21T15:30:00Z }
 CYBERWORLD_AUTOPILOT=1 python3 build.py shot --scene emu --net-biome x0 --dev quiet --input "300:battle" --shot 1100:/src/.build/a.bmp
 python3 tools/play.py do NAME "battle; wait 200"
 ```
+
+The `home` step (`--input`'s `0:home`, play.py's `home`) sends the run
+home between acts from a layer's map, as an act's last exit does: the next
+layer made, Lan's HP set up and the warp out (a dive's diver gone home in
+`online-crew-view/gone-home`, issue #756).
 
 The `battle` step (`--input`'s `0:battle`, which `300:battle` waits 300
 frames before; play.py's `battle`, beside `place` and `flags`) starts the

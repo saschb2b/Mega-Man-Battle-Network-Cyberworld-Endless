@@ -5,6 +5,7 @@
 #include "cross_rows.h"
 #include "darkinvs.h"
 #include "devtools.h"
+#include "dive_people.h"
 #include "encounter.h"
 #include "events.h"
 #include "gamecall.h"
@@ -61,4 +62,6 @@ void game_hooks_after_boot(void) {
 	if (dev.party_core > 1 || dev.party_end > 0 || dev.party_bot || dev.party_roll || dev.party_delay || dev.party_lead)
 		party_play_dev(&(PartyDev){ dev.party_core, dev.party_twin, dev.party_roll, dev.party_end, dev.party_bot, dev.party_delay, dev.party_lead,
 			dev.party_view, dev.party_del });
+	/* (a dive's layers with little room for the divers: dive_people.h) */
+	if (dev.dive_room > 0) dive_people_dev_room(dev.dive_room);
 }
