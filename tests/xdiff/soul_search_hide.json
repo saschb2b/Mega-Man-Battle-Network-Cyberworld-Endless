@@ -1,0 +1,267 @@
+{
+ "about": "BN5's SearchSoul's ready in both engines with a foe to find: soul_search_button's course (SearchSoul united on the first Custom screen by CopyDmg *, L at t520 and the second screen's SHUFFLE not taken, to t700), CanGard V1 at (6,2) made flashing as the Invis chip leaves its user at the fight's first frame (hide: 2000 frames, its flag 0x2). The ready's 0x8F (BN5's 0x080EAD9E, BN6's 0x080EB598, the same code), spawned at the unison and in play as the fight begins, finds him on the other side and clears his flashing at t1 in both games (with BN6's scan skipped, its mutation, his flags keep 0x202 and his timer 2000 where BN5's are 0).",
+ "kind": "differential",
+ "subject": "megaman",
+ "foes": "4F@62",
+ "mm": "22",
+ "hp": 2000,
+ "frames": 700,
+ "seed": "12345678:9ABCDEF0",
+ "rng": "follow",
+ "safe": true,
+ "buster": "0:0:0",
+ "hide": 2000,
+ "flags5": [
+  "0000",
+  "0236"
+ ],
+ "folder5": [
+  "3494",
+  "3404",
+  "1630",
+  "346B",
+  "3413"
+ ],
+ "deck5": [
+  "3494",
+  "3404",
+  "1630",
+  "346B",
+  "3413",
+  "3404",
+  "1630",
+  "346B",
+  "3413",
+  "3404",
+  "1630",
+  "346B"
+ ],
+ "folder6": [
+  "34BE",
+  "3404",
+  "1647",
+  "349A",
+  "341E"
+ ],
+ "deck6": [
+  "34BE",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A",
+  "341E",
+  "3404",
+  "1647",
+  "349A"
+ ],
+ "souls6": "100000",
+ "cust5": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    30
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "cust6": {
+  "1": [
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ],
+  "2": [
+   [
+    "",
+    30
+   ],
+   [
+    "START",
+    2
+   ],
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   520,
+   "L",
+   3
+  ]
+ ],
+ "expect": {},
+ "expect_why": "BN5's own course: SearchSoul united from t1; on the second Custom screen the button stands, not taken.",
+ "souls5": "4"
+}

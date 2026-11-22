@@ -222,6 +222,7 @@ static int numbers_parse(Spec *s, const char *name, const char *v) {
 	if (!strcmp(name, "hp")) return (s->hp = atoi(v)) > 0 && s->hp <= 9999;
 	if (!strcmp(name, "frames")) return (s->frames = atoi(v)) > 0;
 	if (!strcmp(name, "hold")) return (s->hold = atoi(v)) > 0 && s->hold <= 0xFFFF;
+	if (!strcmp(name, "hide")) return (s->hide = atoi(v)) > 0 && s->hide <= 0xFFFF;
 	if (!strcmp(name, "panels")) return panels_parse(s, v);
 	if (!strcmp(name, "lag")) return (s->lag = atoi(v)) > 0 && s->lag <= 4;
 	if (!strcmp(name, "mm_element")) return (s->mm_element = atoi(v)) >= 0 && s->mm_element <= 4;

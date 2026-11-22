@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T23:30:00Z
+* **Update**: multirom/souls.md (SearchSoul's reveal seen at last: soul_search_hide, a foe flashing as the Invis chip leaves him, found and cleared at t1 in both games), devtools/differential.md (the spec's `hide`).

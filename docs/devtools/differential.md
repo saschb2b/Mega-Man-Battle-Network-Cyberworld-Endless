@@ -766,7 +766,13 @@ the masks; a BN4 spec's, `tools/xdiff_bn4.py`: The BN4 trace, below):
   `hold: N` keeps the foes still: before each fight frame each one's
   paralysis timer is set to N (BN5's collision data +0x1E, BN6's +0x1C,
   each game's own status step counting it down) and, the first time, its
-  struck word's paralysis bit (the same bit in both). The chip's objects
+  struck word's paralysis bit (the same bit in both); `hide: N` makes
+  them flashing as the Invis chip leaves its user, once, at the fight's
+  first frame (BN5's flash timer +0x26, BN6's +0x24, N frames, and the
+  flag 0x2 in both: 0x0800E17C's and 0x08010474's writes), a hidden foe
+  for SearchSoul's ready to find as the fight begins (`soul_search_hide`;
+  written on the Custom screen, a foe's own first update sets its
+  collision data afresh after it). The chip's objects
   are MegaMan's; `megaman_types` names those a spawner no hook sees makes
   (NrthWind's gusts, `T4:0x3A`). `"sprites": "bytes"` (every chip spec)
   compares an object's sprite of no registry pair by its bytes where both

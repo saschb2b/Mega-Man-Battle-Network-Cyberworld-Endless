@@ -1,0 +1,10 @@
+[
+ {
+  "name": "SearchSoul's ready finding no hidden foe",
+  "spec": "soul_search_hide",
+  "poke": [
+   "080EB614:E010"
+  ],
+  "what": "the 0x8F's scan of the other side's alive list (BN6 0x080EB5E4) never taking a foe: its beq past one with neither flag 0x2 nor 0x200 made a b, so no scope (effect 0x68) is put on the flashing CanGard and his flashing is left, where BN5's finds and clears it"
+ }
+]

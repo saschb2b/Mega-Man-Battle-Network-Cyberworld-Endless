@@ -88,7 +88,7 @@ typedef struct {
 	uint32_t navi, navi_size, used, pending, side;   /* MegaMan's player block's places (BN6_BATTLE_NAVI's or BN5's; 0 none) */
 	uint32_t souls, unite, deck;   /* ... BN6_SOULS (0: none, BN5's), the Custom screen's element 0xB, the battle's deck (0 none) */
 	uint32_t paralysis;            /* a collision data's paralysis timer (BN6_COLL_PARALYSIS, BN5_COLL_PARALYSIS) */
-	uint32_t coll_flags, coll_struck;   /* ... its flags and what a frame's hits left it (BN6_COLL_FLAGS, BN6_COLL_STRUCK: BN5's too) */
+	uint32_t coll_flags, coll_struck, coll_flash;   /* ... its flags, a frame's hits, its flashing's frames (BN6_COLL_*; 0 BN4's) */
 	const uint8_t *rom;
 	uint32_t songs;   /* (its song table, a ROM offset) */
 	uint8_t (*sub)(void);   /* its sub-mode as BN6's (BN4's, xd4_sub); NULL: rd8(gamestate) */
@@ -120,7 +120,7 @@ typedef struct Side_ {
 	uint32_t frame, last;           /* the core's frames run; the timer after the last */
 	uint32_t still;                 /* the core's frames run since its timer last read otherwise (a hold's: a Navi chip's, a turn's change) */
 	uint32_t filmed;                /* (film=) the timer of its last picture, + 1; 0 none */
-	bool seeded, fought, done, decked, held, paneled;
+	bool seeded, fought, done, decked, held, paneled, hidden;
 	const struct Side_ *ref;        /* (BN6's) the reference's side, BN5's, its fight begun first */
 } Side;
 
@@ -400,23 +400,24 @@ static uint32_t custom_keys(const Spec *s, int game, int screen, int f) {
 	return f < 4 ? KEY_START : f >= 12 && f < 16 ? KEY_A : 0;
 }
 
-/* (hold=N) each foe paralysed as a hit leaves it (its struck word's BN6_STRUCK_PARALYSIS, the same bit in both games, and its
- * timer), its timer N again before each fight frame: the chip's target holds still in both, each game's own status step
- * running it (BN5 0x0800CB48 / BN6 0x0800E730, the same steps) */
-static void hold_foes(const View *v, int frames, bool first) {
+/* (hold=N) each foe paralysed as a hit leaves it, its timer N again before each fight frame, its struck word's bit the first
+ * time (the same in both games, each one's status step running it: BN5 0x0800CB48, BN6 0x0800E730); (hide=N) flashing as
+ * the Invis chip leaves its user, once (BN6 0x08010474, BN5 0x0800E17C), for SearchSoul's ready to find at t1 (its 0x8F scans
+ * as the fight begins; written on the Custom screen, a foe's own first update sets its collision data afresh) */
+static void foes_mark(const View *v, uint32_t timer, int frames, uint32_t word, uint32_t bit) {
 	for (int k = 1; k < v->nt1; ++k) {
 		uint32_t o = v->t1 + (uint32_t)k * BN6_T1_SIZE, coll = v->rd32(o + BN6_T1_COLLISION);
 		if (!(v->rd8(o + BN6_T1_IN_PLAY) & 1) || !v->rd8(o + BN6_T1_ALLIANCE) || !in_ewram(coll)) continue;
-		v->wr16(coll + v->paralysis, (uint16_t)frames);
-		if (first) v->wr32(coll + v->coll_struck, v->rd32(coll + v->coll_struck) | BN6_STRUCK_PARALYSIS);
+		v->wr16(coll + timer, (uint16_t)frames);
+		if (word) v->wr32(coll + word, v->rd32(coll + word) | bit);
 	}
 }
 
-/* (hold=N) the foes held from the fight's first seeded frame on, before each fight frame */
+/* (hold=N, hide=N) from the fight's first seeded frame on, before each fight frame */
 static void hold_step(Side *g, const Spec *s) {
-	if (!s->hold || !g->seeded) return;
-	hold_foes(&g->v, s->hold, !g->held);
-	g->held = true;
+	const View *v = &g->v;
+	if (s->hold && g->seeded) foes_mark(v, v->paralysis, s->hold, g->held ? 0 : v->coll_struck, BN6_STRUCK_PARALYSIS), g->held = true;
+	if (s->hide && g->seeded && !g->hidden && v->coll_flash) foes_mark(v, v->coll_flash, s->hide, v->coll_flags, BN5_OBJ_FLASHING), g->hidden = true;
 }
 
 /* (panels=) a BN4 spec's panels' types written in each game before its first fight frame (xdiff_bn4.c's xd4_panels_put) */
@@ -787,7 +788,7 @@ static bool subject(Side *g, const Spec *s) {
 		.panels = BN6_FIELD_PANELS, .panel_size = BN6_PANEL_SIZE, .list = BN6_OBJECT_LIST, .list_end = BN6_OBJECT_LIST_END,
 		.coll_size = BN6_COLL_SIZE, .mplays = BN6_MPLAYS, .navi = BN6_BATTLE_NAVI, .navi_size = BN6_BATTLE_NAVI_SIZE, .used = BN6_CROSSES_USED,
 		.pending = BN6_CROSS_PENDING, .side = BN6_BATTLE_SIDE, .souls = BN6_SOULS, .unite = BN6_CUSTOM_UNITE, .deck = BN6_BATTLE_DECK,
-		.paralysis = BN6_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK,
+		.paralysis = BN6_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK, .coll_flash = BN6_COLL_FLASH,
 		.rom = R.data, .songs = R.layout->song_table, .rd8 = emu_read8, .rd32 = emu_read32, .wr32 = emu_write32, .wr16 = bn6_wr16,
 		.frame = bn6_frame };
 	return open_out(g, s, "bn6");
@@ -851,7 +852,7 @@ static bool reference(Side *g, const Spec *s) {
 		.panels = BN5_FIELD_PANELS, .panel_size = BN5_PANEL_SIZE, .list = BN5_OBJECT_LIST, .list_end = BN5_OBJECT_LIST_END,
 		.coll_size = BN5_COLL_SIZE, .mplays = BN5_MPLAYS, .navi = BN5_BATTLE_NAVI, .navi_size = BN5_BATTLE_NAVI_SIZE, .used = BN5_SOULS_USED,
 		.pending = BN5_SOUL_PENDING, .side = BN5_BATTLE_SIDE, .souls = 0, .unite = BN5_CUSTOM_UNITE, .deck = BN5_BATTLE_DECK,
-		.paralysis = BN5_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK,
+		.paralysis = BN5_COLL_PARALYSIS, .coll_flags = BN6_COLL_FLAGS, .coll_struck = BN6_COLL_STRUCK, .coll_flash = BN5_COLL_FLASH,
 		.rom = x->data, .songs = x->layout->song_table, .rd8 = guest_read8, .rd32 = guest_read32, .wr32 = guest_write32,
 		.wr16 = guest_write16, .frame = bn5_frame };
 	return open_out(g, s, "bn5");

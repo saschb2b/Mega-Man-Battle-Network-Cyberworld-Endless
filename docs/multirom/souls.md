@@ -373,7 +373,12 @@ the next.
   foe side's invisible objects): `soul_search` (to t523) and
   `soul_search_shot` PASS against BN5's battle, their mutations FAIL; the
   reveal needs a foe that hides to be seen (with none the object ends in
-  the frame it is spawned). His SHUFFLE is BN5's Custom screen's Soul
+  its first frame): `soul_search_hide` gives CanGard the flashing the
+  Invis chip leaves (flag 0x2, the differential's `hide`) at the fight's
+  first frame, and both games' 0x8F find him and clear it at t1 (PASS;
+  its mutation, BN6's scan skipping every foe, FAILs there). No foe of
+  BN5's hides by itself: only the Invis chip's attack (0x28, the fourth
+  kind's 0x5D) and the chips' statuses (`0x080114E8`) set the flag. His SHUFFLE is BN5's Custom screen's Soul
   button, the one ColonelSoul's is: `0x08023CF4` makes elements 8 and 9 of
   the screen types 4 and 5 for SearchSoul (6 and 7 for MeddySoul's two
   capsules, 8 and 9 for ColonelSoul's chip), by the Soul the united side
