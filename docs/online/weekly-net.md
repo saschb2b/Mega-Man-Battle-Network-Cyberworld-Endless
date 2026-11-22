@@ -79,8 +79,9 @@ What the proposal left open, decided the same way:
    the dive taken up from the portal, which cost a diver who quit the
    title, Lan's HP, the gate, the Square, the walk to the portal and four
    boxes of words, his crew told nothing meanwhile. The Square not
-   answering within 15 seconds, or on another week's net, the dive goes
-   on alone and the band says so.
+   answering is a dropped link, tried again while the dive goes on
+   alone; on a week past the dive's last, the dive goes on alone and the
+   band says so.
 3. **When the week turns mid-dive.** The dive keeps its week and its
    seed; its end is posted to that week while the server still takes it
    (this week or the last), and is let go after. An unfinished dive of an

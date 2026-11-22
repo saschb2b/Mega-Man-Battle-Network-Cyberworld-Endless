@@ -1,6 +1,7 @@
 /* dive_band.h; dive_link_line and dive_link_draw (dive_link.h) */
 #include "dive_band.h"
 
+#include <SDL.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -41,16 +42,21 @@ void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
 	dive_band_tick(now);
 }
 
-void dive_band_back(int how) {
-	dive_link_line(how == DIVE_BACK_LINKED ? dive_back_words() : how == DIVE_BACK_OTHER_WEEK ? dive_back_week_words() : dive_back_alone_words());
-}
-
 void dive_band_tick(uint32_t now) {
 	if (B.nfeed && B.shown_at && now - B.shown_at > FEED_MS) {
 		memmove(B.feed, B.feed + 1, sizeof B.feed[0] * (size_t)(B.nfeed - 1));
 		B.shown_at = --B.nfeed ? now : 0;
 	}
 	if (B.nfeed && !B.shown_at) B.shown_at = now;
+}
+
+void dive_band_back(void) { dive_link_line(dive_back_words()); }
+
+void dive_band_week(void) { dive_link_line(dive_back_week_words()); }
+
+void dive_band_alone(void) {
+	dive_link_line(dive_alone_words());
+	dive_link_line(dive_alone_back_words());
 }
 
 void dive_link_line(const char *line) {
@@ -80,7 +86,12 @@ void dive_link_draw(void) {
 	int y = P.core_y + 160 - LOOK_BAND_H - 1;
 	/* (a crewmate's battle's offer first: it stands a few seconds only) */
 	const char *join = dive_join_band();
+	/* (the link down past a second: said until it is back, its dots moving, issue #751) */
+	bool away = false;
+	uint32_t now = SDL_GetTicks();
+	const char *down = dive_link_down(now, &away) ? dive_down_words(away, (int)(now / 400 % 4)) : NULL;
 	if (join) look_band(P.core_x, y, 240, join);
+	else if (down) look_band(P.core_x, y, 240, down);
 	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
 	else dive_party_draw(P.core_x, P.core_y);
 }

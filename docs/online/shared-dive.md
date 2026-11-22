@@ -1020,16 +1020,19 @@ did not go back was never on it. The owner's calls:
 - **CONTINUE goes straight back in.** The title's CONTINUE on an
   unfinished dive (its label "Dive L3") takes it up at its checkpoint
   (`weekly_continue`), and the dive's link calls the Square as the gate
-  does (`director_gate_address`, `dive_link.c`'s `call_again`): answered
-  on the dive's week, the link is taken up as the portal takes it
-  (`dive_link_adopt`), MegaMan's room entered again, the others on the
-  layer seen, the crew forming again by nearness, and the band says
-  "Back in,Lan! Linked up again." No answer within 15 seconds, a
-  refusal, or the Square on another week's net (the week turned since
-  the quit): the dive goes on alone, never lost, and the band says "No
-  link... We'll dive alone,Lan." or "A new week's net! We'll dive
-  alone."; its end is posted at a later visit as before. A
-  server restarted meanwhile is called afresh like any other. Nothing
+  does (`director_gate_address`, `dive_link.c`'s `call_again`), the link
+  on for the dive's own week and down until the Square answers: then
+  MegaMan's room is entered again, the others on the layer seen, the
+  crew forming again by nearness. Not answered, it is a dropped link
+  (issue #751, [A dropped link on a dive layer](arena/dropped-link.md)):
+  the band's "Reconnecting...", the dive alone meanwhile and never lost,
+  the Square called again for as long as the dive lasts, "Back online!"
+  once it answers; a refusal, the dive alone for good, said. The Square
+  two weeks on or more (it keeps this week's net and the last's), the
+  dive goes on alone and the band says "A new week's net! We'll dive
+  alone."; its end is posted at a later visit while the Board still
+  takes it. A server restarted meanwhile is called afresh like any
+  other. Nothing
   of `Run` changed: what a quit kept (the checkpoint, the record's
   pull-back) is what CONTINUE finds. Once the dive ends, CONTINUE is the
   normal run's again.

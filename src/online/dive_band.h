@@ -16,10 +16,15 @@ void dive_band_describe(FILE *f);
  * crew's display's frame (dive_crew_view.h), `linked` the link up, `me`
  * this game's session. */
 void dive_band_frame(uint32_t now, bool linked, uint32_t me);
-/* CONTINUE's word into the feed as it takes a dive up (issue #759) */
-enum { DIVE_BACK_LINKED, DIVE_BACK_ALONE, DIVE_BACK_OTHER_WEEK };
-void dive_band_back(int how);
 /* ... its feed's lines alone in turn (a dive with no link) */
 void dive_band_tick(uint32_t now);
+
+/* A dropped link's words in the feed (issue #751): back online; and the
+ * server's refusal, the dive alone for good and how the next is linked */
+void dive_band_back(void);
+void dive_band_alone(void);
+/* ... and a dive taken up again whose week the Square no longer keeps
+ * (issue #759): alone for good */
+void dive_band_week(void);
 
 #endif
