@@ -1,0 +1,74 @@
+"""MegaMan's forms (issue #774; docs/game/meta/forms.md): a run of each form
+pays a guardian of another game in its own form. CROSS: BN5's ToadMan
+gives SpoutCross by his kind, Aqua, never his Soul. SOUL BN5: BN6's
+HeatMan, Fire, whose NapalmSoul is not moved yet, gives a Soul the run
+lacks, the layer's seed's. SOUL BN4: HeatMan gives BN4's one moved Soul,
+ThunSoul, the one the run lacks: the powers line before his data and
+after it is taken."""
+
+# (onehit: a short fight; quiet: no random battle on the way to his arena)
+BASE = 'CYBERWORLD_AUTOPILOT=1 --scene emu --seed 3 --run-depth 3 --dev onehit,quiet,'
+
+
+def course(form, power):
+    return [
+        ('expect', f'runform={form}'),
+        ('expect', 'powers=none'),
+        ('until', 'battle=guardian', 4200),
+        ('until', 'data=fresh|data=waiting', 4600),
+        ('expect', f'powers={power}'),
+        ('until', 'data=taken', 2000),
+        ('expect', f'powers={power}'),
+    ]
+
+
+# (his power in the next battle: the game quit once his data is taken, a
+# quit that keeps the run as it stands, then CONTINUEd without the
+# autopilot, which takes neither a Cross nor UNITE, and a battle begun)
+ARRIVE = [
+    ('restart', '--scene title --dev onehit,quiet,god'),
+    ('repeat', 'press START; wait 40', 'title=menu'),
+    ('expect', 'cursor=continue'),
+    ('repeat', 'press A; wait 40', 'scene=emu'),
+    ('until', 'screen=map', 1200),
+    ('repeat', 'mash A 60; wait 30', 'chat=closed'),
+    ('do', 'foes 01@52'),
+    ('until', 'phase=custom', 1200),
+    ('do', 'wait 60'),
+    ('expect', 'form=none'),
+]
+FIGHT = [
+    ('repeat', 'press START; wait 10; press A; wait 60', 'phase=fight'),
+    ('repeat', 'wait 10', 'custom>0', 60),
+]
+CROSS_USED = [*ARRIVE, ('do', 'press UP; wait 30; press A; wait 60'), *FIGHT, ('expect', 'form=SpoutCross')]
+
+
+def unite(soul, chip, turns):
+    """A battle's first Custom screen (xrom_souls.py's): a chip of the Soul's
+    kind picked, UNITE lit and taken, OK, MegaMan united for `turns`"""
+    return [
+        ('until', f'drawn~{chip}', 900),
+        ('repeat', 'press A; wait 10', 'handpicks=1'),
+        ('expect', 'unite=lit'),
+        ('expect', f'unitesoul={soul}'),
+        ('do', 'press START; wait 10; press DOWN; wait 10; press A'),
+        ('until', 'unite=chosen', 600),
+        ('do', 'press START; wait 10; press A'),
+        ('until', f'united={soul}', 900),
+        ('expect', f'unitedturns={turns}'),
+    ]
+
+
+# (ToadSoul, BN5's 12, by an Aqua chip of BN6's, 181: xrom_souls.py's)
+SOUL_USED = [*ARRIVE[:6], ('do', 'chip 181 * 30; foes 205@52'), *unite(12, 181, 3)]
+
+MANY = {
+    'cross-bn5-guardian': dict(START=BASE + 'form=1 --guardian 29', NEEDS=('bn5',), STEPS=course('CROSS', 'SpoutCross') + CROSS_USED),
+    'soul-bn5-bn6-guardian': dict(START=BASE + 'form=2 --guardian 1', NEEDS=('bn5',), STEPS=course('SOUL BN5', 'ToadSoul') + SOUL_USED),
+    # (SoulT+1 in a Soul form: the BeastOut helper's turn more, four a unison, where CROSS takes BeastOut)
+    'soul-bn5-helper-turn': dict(START='layer --seed 15 --net-biome 0 --setup short,0,0,16,0 --dev god,quiet,hp=2000,form=2,souls=0x20,folder=181',
+                                 NEEDS=('bn5',), STEPS=[('expect', 'runform=SOUL BN5'), ('expect', 'runsoulturn=1'),
+                                                        ('do', 'foes 205@52'), *unite(12, 181, 4)]),
+    'soul-bn4-bn6-guardian': dict(START=BASE + 'form=3 --guardian 1', NEEDS=('bn4',), STEPS=course('SOUL BN4', 'ThunSoul')),
+}

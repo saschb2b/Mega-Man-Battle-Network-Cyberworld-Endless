@@ -94,7 +94,10 @@ points first marked as proposals among them.
   and BN5's. A run holds every Soul it wins, as BN5's MegaMan holds his:
   one per BN5 guardian; a guardian whose Soul the run holds already adds
   nothing. Nothing carries over to the next run, and no Soul is brought
-  at setup: it would be power across runs. A run continued without BN5's
+  at setup: it would be power across runs. (Reversed by the owner on 22
+  November 2026 for a Soul form's run: one Soul won before may be brought,
+  [MegaMan's forms](forms.md); a run of the mix, every system at once,
+  keeps this rule.) A run continued without BN5's
   ROM keeps its Souls, asleep until the ROM is back, and MegaMan says so
   once ("I can't feel the old Souls,Lan...").
 - **The key with the lock** (corrected 25 October 2026): four of the six

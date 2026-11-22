@@ -6,6 +6,7 @@
 
 #include "bn6.h"
 #include "flags.h"
+#include "forms.h"
 #include "guardians.h"
 #include "net.h"
 #include "run.h"
@@ -88,7 +89,14 @@ bool powers_cross_owned(int navi) {
 
 bool powers_cross_held(int navi) {
 	if (!powers_cross_name(navi)) return false;
+	/* (a form's: CROSS's kept in the run, none in a Soul form) */
+	if (run.form != RUN_FORM_MIX) return run_cross_in_hand(navi);
 	return run.cross ? navi == run.cross : beaten_before(navi, run.depth);
+}
+
+void powers_cross_give(int navi) {
+	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
+		if (crosses[i].navi == navi) flag_set(crosses[i].flag);
 }
 
 void powers_crosses_hide(bool hide) {
@@ -101,6 +109,11 @@ void powers_crosses_hide(bool hide) {
 }
 
 void powers_bring(void) {
+	forms_note_falls();
+	if (run.form != RUN_FORM_MIX) {
+		forms_bring();
+		return;
+	}
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == run.cross) flag_set(crosses[i].flag);
 	/* (BN6's own BeastOut: the emblem under OK, its three turns a battle,
@@ -110,6 +123,7 @@ void powers_bring(void) {
 }
 
 const char *powers_reward_text(int navi, int biome, int depth) {
+	if (run.form != RUN_FORM_MIX) return forms_reward_words(navi, biome == BIOME_GRAVEYARD && depth <= CYCLE_LAYERS);
 	/* (a run that brought a Cross keeps it alone: the choice's cost; the
 	 * Graveyard sits over the Nest: its call stirs the Cybeast in MegaMan,
 	 * once a run, and unlocks nothing, the Cybeast's fall does: issue
@@ -118,16 +132,20 @@ const char *powers_reward_text(int navi, int biome, int depth) {
 }
 
 const char *powers_reward_cross(int navi, int depth) {
+	if (run.form != RUN_FORM_MIX) return forms_reward_cross(navi);
 	return !powers_cross_name(run.cross) && !beaten_before(navi, depth) ? powers_cross_name(navi) : NULL;
 }
 
 const char *powers_den_text(int depth) {
 	/* (beat the beast, then its power: the first Net's Cybeast, in a run
 	 * that did not bring BeastOut; on the Nets after, the run has it) */
+	if (run.form != RUN_FORM_MIX && !run_form_crosses()) return depth <= CYCLE_LAYERS && !run_beast_start() ? forms_beast_words() : NULL;
 	return depth <= CYCLE_LAYERS && !run_beast_start() ? powers_beast_words() : NULL;
 }
 
 bool powers_after_boss(int navi) {
+	forms_note_fall(navi);
+	if (run.form != RUN_FORM_MIX) return forms_after_boss(navi);
 	for (unsigned i = 0; i < sizeof crosses / sizeof *crosses; ++i)
 		if (crosses[i].navi == navi && !run.cross) flag_set(crosses[i].flag);
 	/* BN5's guardians their Soul, for every battle of the run (docs/game/meta/souls.md,

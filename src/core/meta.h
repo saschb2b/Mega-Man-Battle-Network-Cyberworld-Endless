@@ -31,6 +31,18 @@ void meta_guardian_deleted(void);
  * once that navi has been deleted as a guardian, in any run. */
 #define META_CROSSES 10   /* the Cross navis: Gregar's HeatMan 1 .. ChargeMan 5, Falzar's SpoutMan 6 .. DustMan 10 */
 bool meta_cross_open(int navi);
+/* MegaMan's forms (issue #774, docs/game/meta/forms.md): RUN_FORM_*'s
+ * name on the setup's FORM row ("SOUL BN5"); whether a new run may take
+ * it (CROSS always; a Soul form once a Navi of its game fell as a
+ * guardian, profile.forms_open, SOUL BN5 too once a Soul was won before
+ * forms, profile.soul_taught); the best threat rung won with it, -1 none;
+ * a Soul given in any run (its game's number, 1-12), which a Soul form
+ * may bring, and whether it has been */
+const char *meta_form_name(int form);
+bool meta_form_open(int form);
+int meta_form_best(int form);
+void meta_soul_won(int form, int soul);
+bool meta_soul_open(int form, int soul);
 bool meta_endless_open(void);
 /* A run's setup in a headless run's state, a line each: `net` short or
  * endless, `startfolder` its folder's name, `startcross` the Cross brought
@@ -112,7 +124,7 @@ int meta_vault_need(int depth);
 
 /* The setup's rows with news since the last summary (profile.setup_new):
  * the setup opens on the first, marked NEW, until the next jack-in. */
-enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8, SETUP_NEW_HELP = 16 };
+enum { SETUP_NEW_NET = 1, SETUP_NEW_FOLDER = 2, SETUP_NEW_CROSS = 4, SETUP_NEW_THREAT = 8, SETUP_NEW_HELP = 16, SETUP_NEW_FORM = 32 };
 /* What a run opened that no summary announced (a run given up for a NEW
  * GAME): open, and NEW in the setup. */
 void meta_unlocks_unsaid(void);
