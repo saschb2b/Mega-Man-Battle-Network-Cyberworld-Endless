@@ -910,7 +910,11 @@ it pays one of BN6's GigaChips.
   together.
 - **Crosses.** Deleting HeatMan, ElecMan, SlashMan, EraseMan or ChargeMan
   gives MegaMan their Cross for the rest of the run, chosen in the Custom
-  screen as in BN6.
+  screen as in BN6. CROSSSELECT lists five: **R** on the PET's menu opens
+  FORMS, where the Crosses held past five wait as spares, and A on one
+  Cross and A on another swaps them, as in the folder editor, whenever
+  you like. Its other page lists the Souls you hold and the chip each
+  takes.
 - **BeastOut.** Beat the Cybeast at the endless net's own Nest, and
   BeastOut joins the Custom screen for the rest of the run; the
   Graveyard's guardian only stirs the beast. Once the Cybeast has fallen

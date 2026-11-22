@@ -21,6 +21,7 @@ a use of its own.
 | E-Mail | BN6's screen: Dad's mails, the dive and the records first, the Battle Lab's once the lab has sent it ([the Battle Lab](battle-lab.md)), then the battle data on each guardian met |
 | KeyItem | BN6's screen: the profile's own items beside the run's; A on the NetPass opens the pass |
 | Options (BN6's Comm) | The game's Options over the PET |
+| R on the menu | The forms screen: the run's Crosses, five marked for CROSSSELECT, and its Souls |
 | Save | Saves the run where MegaMan stands |
 | PLACE | The area beside the layer ("JudgeTree 14") |
 
@@ -59,6 +60,19 @@ PET's input takes A on the row (`BN6_PET_ENTRY_LIBRARY`) as on Comm's and
 Save's; the game holds under the screen as under the Jukebox, and B or START gives the PET back
 with its cursor on Library, as BN6's Library leaves.
 The one screen of BN6's the run redraws: its P.A. Memo tab went with it.
+
+## Forms
+
+R on the menu, named `R:FORMS` at its band's right end, opens the forms
+screen over it ([The forms screen](meta/forms-screen.md)): the run's Crosses in
+the folder editor's two windows, CROSSSELECT's five and the spares,
+swapped with A as the folder editor swaps, and the run's Souls with the
+kind of chip each takes. BN6's menu has no room for a ninth row (its eight
+fill the column to EXIT), so the key is the menu's one BN6 leaves unused,
+as the Net Square's PET gives R to the NetPass; in the Square R stays the
+NetPass's. `pet_forms.c` hands the screen what the run holds and takes
+back the five, which CROSSSELECT then lists; the game holds under it as
+under the Library, and B or START gives the menu back.
 
 ## Options
 
