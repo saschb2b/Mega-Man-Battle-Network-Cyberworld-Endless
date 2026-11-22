@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T09:30:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T11:13:02Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
@@ -581,6 +581,35 @@ the session building it, and is his to turn over.
   `online-week/door-waits-crew` (two crewed games: Alpha at the door,
   mashing A, still in the queue with the wait counting; Beta's band
   telling him; Beta in, mashing A; Alpha's A, and both on one field).
+
+  **Whom the door waits for** (22 November 2026, issue #778, from the
+  second hunt): since a crew lives only on screen (#770, the owner's call
+  on #750), it splits two seconds after a crewmate leaves the picture, so
+  whoever walked ahead to the door had no crew there and the wait almost
+  never applied. The call joins the owner's two (the door waits for the
+  crew, #752; a crew is who you can see, #750): the door waits for the
+  crew as it was on the layer shortly before, not as it stands at the
+  door: whoever was in MegaMan's crew within the last thirty seconds as
+  he comes to the door, and is still on the layer (the room's divers) and
+  free (`dive_crew_recent.c`, the game's own memory of the server's
+  word; no change to the wire). Whom it waits for is fixed as he comes;
+  the wait's ten seconds and the held A stay. Thirty seconds because a
+  layer's whole walk, from the arrival to the guardian's door, took 16 to
+  25 seconds in the autopilot's runs of layer 3 on six seeds (the clock
+  read every three seconds), so a crew that stood together anywhere on
+  the way is in it, and one met on an earlier layer is not. The flare
+  goes once a door to each diver, from the first who joins its queue,
+  never to one in it (`party.py`'s queue keeps whom it told); and at the
+  door the queue's own line comes before the feed's, so a queued diver
+  reads "Alpha leads 3  B:Go alone", never a flare. Taken under the
+  owner's direction of 21 and 22 November, his to turn over: thirty
+  seconds; the memory in the leader's game rather than the server (it
+  needs no new message, and only the leader's door asks); the wait fixed
+  at the leader's arrival. Seen headless: the scenario
+  `online-week/door-waits-who` (three crewed games: Alpha ahead, his crew
+  split before the door, "Waiting for crew 2" there; Beta and Gamma one
+  after the other; Gamma's band his own line); the server's
+  `test_one_flare_a_door_each`.
 
 - **Crews** (15 November 2026, by nearness since 21 November, issue
   #714; `server/cyberworld_server/crews.py`, `dive_crew.c`; the wire's

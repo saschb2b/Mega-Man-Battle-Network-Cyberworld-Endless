@@ -46,8 +46,8 @@ void dive_band_reset(void) {
 
 void dive_band_describe(FILE *f) {
 	/* (as drawn: whose battle MegaMan was taken into first, issue #750) */
-	const char *join = dive_join_band();
-	fprintf(f, "band %s\n", join ? join : B.nfeed ? B.feed[0] : "none");
+	const char *join = dive_join_band(), *door = dive_party_band();
+	fprintf(f, "band %s\n", join ? join : door ? door : B.nfeed ? B.feed[0] : "none");
 }
 
 void dive_band_frame(uint32_t now, bool linked, uint32_t me) {
@@ -112,6 +112,7 @@ void dive_link_draw(void) {
 	const char *down = dive_link_down(now, &away) ? dive_down_words(away, (int)(now / 400 % 4)) : NULL;
 	if (join) look_band(P.core_x, y, 240, join);
 	else if (down) look_band(P.core_x, y, 240, down);
+	/* (at a door the queue's own line before the feed's: issue #778) */
+	else if (dive_party_band()) look_band(P.core_x, y, 240, dive_party_band());
 	else if (B.nfeed) look_band(P.core_x, y, 240, B.feed[0]);
-	else dive_party_draw(P.core_x, P.core_y);
 }
