@@ -3,7 +3,7 @@ type: Tool
 title: "A party's guardian against going alone"
 description: "`python3 tools/party_guardian.py` fights each act's guardian on the party's core for one to four bot fighters, scaled as a party's door scales him (or by another rule), measures his HP and the damage he deals the party a second, and works out what a fighter pays against the solo's fight: the time to the win and the HP he loses."
 tags: [devtools, online, balance]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T01:10:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T09:30:00Z }
 ---
 
 # A party's guardian against going alone

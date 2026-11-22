@@ -1,3 +1,0 @@
-by: claude-code/claude-opus-5-5
-at: 2026-11-22T09:30:00Z
-* **Update**: online/shared-dive.md (a party's guardian, issue #754: the owner's call, his version a diver alone meets and his HP times the party, measured before and after; the decisions' Scaling row), devtools/party-guardian.md (a fight not over measured to its last hit).

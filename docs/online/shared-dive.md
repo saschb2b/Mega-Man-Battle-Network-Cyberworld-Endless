@@ -3,7 +3,7 @@ type: Design
 title: "The shared dive"
 description: "The week's net dived together (being built since 15 November 2026): a portal in the Square, every diver on the seed seen live, crews of four formed by walking together, join-in battles, a queue of four at each guardian's door fought on one field and scaled by BN6's own versions, and the owner's calls on fairness."
 tags: [online, game]
-generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T02:00:00Z }
+generated: { by: claude-code/claude-opus-5-5, at: 2026-11-22T09:30:00Z }
 sources:
   - id: nfsu2
     resource: "https://nfsu2.xyz/"
