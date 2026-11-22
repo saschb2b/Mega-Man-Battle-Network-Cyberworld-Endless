@@ -20,6 +20,17 @@
 #define BN4_GUTS_PASS_ADD 0x0800E1FEu /* ... adds r1,#0x1e: 30 */
 /* GutsSoul's rapid buster: B pressed six times in his form (the key handler 0x0800BDE0, r4 his AI data, r6 his requests at
  * its start) asks his state 0x10, eight shots of his buster (soulrapid.c) */
+/* A Soul's chip charge (AquaSoul's, form 11; ProtSoul's, MetlSoul's and FireSoul's by the same code): */
+#define BN4_POWER_EMPTY   0x0800CC2Cu /* mov pc,lr: the chip charge's power attack of forms 7, 9 and 11 (BN4_FORM_LOADOUTS +2), its charge
+                                       * times (BN4_CHARGE_TIMES' row) the chip charge's alone */
+#define BN4_CHIP_CHARGE_TEST 0x0800BC78u /* r0 the chip: 1 where his form charges it with A (r4 its kind, +7; r7 its flags, +9) */
+#define BN4_AQUA_TEST_FORM 0x0800BCBAu  /* ... cmp r0,#0xb: AquaSoul's form, then not left alone (+9 bit 0), */
+#define BN4_AQUA_TEST_KIND 0x0800BCC4u  /* ... cmp r4,#1: of the kind Aqua */
+#define BN4_CHIP_CHARGE_BONUS 0x0800C47Au /* r0 the chip, r1 his form: 0x8000 to a charged chip's power (its damage doubled; BN6's twin
+                                           * 0x08012C7C, BN6_CHARGE_BONUS), then sound 0x1BB (0x0800D536-0x0800D53C) */
+#define BN4_AQUA_BONUS_FORM 0x0800C49Au /* ... cmp r2,#0xb: AquaSoul's, */
+#define BN4_AQUA_BONUS_KIND 0x0800C4A0u /* ... cmp r1,#1: an Aqua chip */
+#define BN4_CHARGED_DOUBLE 0x8000u      /* ... the bonus (ldr r4,=0x8000 at 0x0800C4A4) */
 #define BN4_GUTS_RAPID_FORM 0x0800BE50u /* cmp r7,#2: his form (NaviStats +0x24) GutsSoul's, and his request 0x20 not standing
                                          * (tst r6, #0x20): then each B pressed (AI +0x1E bit 2) counts at his AI +0x12, */
 #define BN4_GUTS_RAPID_WINDOW 0x0800BE68u /* ... movs r0,#0xa: its window at his AI +0x11, ten frames from a press, the count

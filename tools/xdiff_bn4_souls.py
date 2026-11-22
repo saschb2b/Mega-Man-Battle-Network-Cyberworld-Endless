@@ -32,7 +32,7 @@ import os
 import re
 
 import shards
-from xdiff_snap import NODE, OBJ_ACTION, ROOT
+from xdiff_snap import NODE, OBJ_ACTION, ROOT, rom
 
 PLAYER_SOULS = 0x78            # (xdiff_snap.PLAYER_SOULS: BN6's Souls block, side 0, in the player block)
 SOUL_ID, SOUL_TURNS = 0x00, 0x02   # (BN6_SOUL_ID, BN6_SOUL_TURNS: src/emu/bn6_forms.h)
@@ -52,7 +52,10 @@ POWERS = (5, 6, 7, 8)          # (BN6_AI_POWER_CHIP, _A, _CHARGE, _C)
 # BN6_AI_SPARE: BN4's +5, +8, +9, +0x2C, +0x2D, ...): their places in BN6's units
 SHOTS4, BUTTON4, FRAMES4 = 0xF0, 0xF2, 0xF3
 TURNS_USED4, TURNS4 = 0x18, 0x19
-COUNT_CHIP4, COUNT4 = 0x30, 0x32          # (BN4's counters, u16, at their own places)
+COUNT4 = 0x32                             # (BN4's B counter, u16, at its own place)
+COUNT_CHIP4 = 0xF5                        # (... its A counter, BN4's +0x30, u16: BN6's keys hold +0x30, so a leftover, after +0x2C)
+TIME_CHIP4 = 0xFC                         # (BN4's chip charge's time, its cache +0x34 at BN6_AI_SPARE_LAST)
+BUTTON_A, BUTTON_B = 1, 2
 LEVEL_CHIP4, LEVEL4 = 0x0A, 0x0B          # (BN4's levels)
 KEPT_CHIP4, KEPT4 = 0x14, 0x15            # (... kept as B is let go, 0x0800BE48-0x0800BE4E)
 TIME4 = 0xFE                              # (BN4's charged shot's charge time, its cache +0x36 at BN6_AI_SPARE_LAST + 2)
@@ -113,12 +116,33 @@ def bn6_power(form):
         c_entries('emu/soulpower.c', 'chaos_powers') + k
 
 
+def chip_power(rom4, form):
+    """BN6's number of the chip charge of BN4's Soul of `form`, as src/emu/soulpower.c's bn4_chip_power gives it: BN5's empty
+    power (soulpower.c's empty_powers, after Team Colonel's moved ones) whose charge times (BN5_CHARGE_TIMES, 0x0801CA68, ten
+    bytes an id) are those of its own (BN4_FORM_LOADOUTS' +2, BN4_CHARGE_TIMES 0x080180B8); None where it has none"""
+    chip = rom4[0x184F0 + 4 * form + 2]
+    if chip == 0xFF:
+        return None
+    head = open(os.path.join(ROOT, 'src', 'emu', 'bn6_attacks.h')).read()
+    count = int(re.search(r'#define BN6_POWER_ATTACK_COUNT\s+(\d+)', head).group(1))
+    body = open(os.path.join(ROOT, 'src', 'emu', 'soulpower.c')).read()
+    empty = [int(x, 0) for x in re.search(r'empty_powers\[\] = \{ ([^}]*) \}', body).group(1).split(',')]
+    rom5 = rom(5)
+    row4 = rom4[0x180B8 + 10 * chip:0x180B8 + 10 * chip + 10]
+    for i, p in enumerate(empty):
+        if rom5[0x1CA68 + 10 * p:0x1CA68 + 10 * p + 10] == row4:
+            return count + colonel_powers() + i
+    return None
+
+
 def power_map(rom4):
     """BN4's power attack -> BN6's for the moved Souls: each one's charged shot (BN4_FORM_LOADOUTS' +3 by its form, 0x080184F0)
-    at bn6_power's number"""
+    at bn6_power's number, and its chip charge (+2) at chip_power's"""
     if not rom4:
         return {}
-    return {rom4[0x184F0 + 4 * f + 3]: bn6_power(f) for f in bn4_forms().values()}
+    out = {rom4[0x184F0 + 4 * f + 3]: bn6_power(f) for f in bn4_forms().values()}
+    out.update({rom4[0x184F0 + 4 * f + 2]: chip_power(rom4, f) for f in bn4_forms().values() if chip_power(rom4, f) is not None})
+    return out
 
 
 def form_frames(rom4):
@@ -297,14 +321,17 @@ class Souls4:
         return a[d.off] == kept and b[d.off] == (CHAOS6_NONE if d.off == WINDOW4 else 0)
 
     def charge_byte(self, k, a, b):
-        """a byte of MegaMan's AI data where the engines keep the charge apart, each reading as the other"""
-        count, time = int.from_bytes(a[COUNT4:COUNT4 + 2], 'little'), int.from_bytes(a[TIME4:TIME4 + 2], 'little')
-        level = LEVEL_AS6.get(a[LEVEL4])
-        same = b[COUNT6] == min(count, time) and level == b[LEVEL6] and a[BUTTON4] == b[BUTTON6] and \
-            int.from_bytes(a[COUNT_CHIP4:COUNT_CHIP4 + 2], 'little') == 0 and a[LEVEL_CHIP4] == 0
+        """a byte of MegaMan's AI data where the engines keep the charge apart, each reading as the other: BN4's two counters,
+        levels and times (B's, A's chip charge), BN6's one counter, level and button"""
+        u16 = lambda at: int.from_bytes(a[at:at + 2], 'little')
+        def held(count, time, level, other_count, other_level):
+            return b[COUNT6] == min(u16(count), u16(time)) and LEVEL_AS6.get(a[level]) == b[LEVEL6] and \
+                a[BUTTON4] == b[BUTTON6] and u16(other_count) == 0 and a[other_level] == 0
+        same = held(COUNT4, TIME4, LEVEL4, COUNT_CHIP4, LEVEL_CHIP4) if a[BUTTON4] != BUTTON_A else \
+            held(COUNT_CHIP4, TIME_CHIP4, LEVEL_CHIP4, COUNT4, LEVEL4)
         if k in (COUNT6, LEVEL6, BUTTON6):
             return same and a[k] == 0
-        if k in (COUNT4, COUNT4 + 1, LEVEL4, BUTTON4):
+        if k in (COUNT4, COUNT4 + 1, LEVEL4, BUTTON4, COUNT_CHIP4, COUNT_CHIP4 + 1, LEVEL_CHIP4):
             return same and b[k] == 0
         if k == REQUEST6:   # (BN6's key handler's request for B's charge (0x04) or A's (0x02), while that button charges)
             return a[k] == 0 and b[k] == {0: 0, 1: 0x02, 2: 0x04}.get(b[BUTTON6], -1)

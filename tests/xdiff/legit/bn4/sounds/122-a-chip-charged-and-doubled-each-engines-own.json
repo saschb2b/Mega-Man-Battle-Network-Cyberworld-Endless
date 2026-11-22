@@ -1,0 +1,10 @@
+{
+ "bn4": "0x1BB",
+ "bn6": "0x87",
+ "clock": "state",
+ "souls": [
+  "11"
+ ],
+ "what": "a chip charged and doubled",
+ "why": "Played as a chip a Soul charged is used with its bonus, twins of one place (BN4: its chip use asks the charged bonus 0x0800C47A, BN4_CHIP_CHARGE_BONUS, and where it holds 0x8000 plays movs r0,#0xbc; adds r0,#0xff, 0x1BB, at 0x0800D536-0x0800D53C; BN6: its chip use asks BN6_CHARGE_BONUS 0x08012C7C, which soulchips.c answers with BN4's bonus for a BN4 Soul, and plays movs r0,#0x87 at 0x08012848 for any bonus). Each engine's own sound of a charged chip; bn4_soul_aqua at t125 (AquaSoul's Bubbler charged)"
+}

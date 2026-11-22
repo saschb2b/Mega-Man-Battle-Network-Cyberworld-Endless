@@ -333,6 +333,29 @@ after it, counted from 0. Its three mutations: asked at seven presses
 (`SOULRAPID_BREAK_SEVEN`, `soulbreak` bit 30), seven shots, the count left
 standing at its end.
 
+## AquaSoul in BN6's engine
+
+AquaSoul (Blue Moon's Soul 11, form 11) is BN6's Soul 15 (k 2 in
+`soulbn4.c`'s `forms`, held bit 8), the first of Blue Moon's six, and the
+first BN4 Soul with a chip charge. What it took past GutsSoul's parts:
+
+| Part | AquaSoul's |
+| --- | --- |
+| His flag | Red Sun refuses Blue Moon's six (`BN4_SOUL_FLAGS` 0xFF): the differential gives him the flag of Red Sun's Soul at the same place, FireSoul's, written in the guest's ROM copy (only UNITE's check and the pseudo-chip's gate read them), as its BN5 side gives Team ProtoMan's Souls Team Colonel's |
+| His charged shot | power attack 0x23 into family 0x1E, the spread shot's kind 0xD: no unit of his own, the power attack copied with Spreads' unit (BN6's 0xD0) and its kinds' table's row 0xD given BN6's effect and sound as the chips' rows are |
+| His chip charge | the loadout's +2 is 0x15, BN4's empty routine (`BN4_POWER_EMPTY`), its charge times (20 at every Charge) serving alone: BN6 takes BN5's empty power of the same times, ToadSoul's 0x1B (`soulpower.c`'s `bn4_chip_power`); ProtSoul's 30 is BN5's 0x18's, MetlSoul's 70 and FireSoul's 50 are none of BN5's |
+| What he charges | BN4's test `BN4_CHIP_CHARGE_TEST` by form: for 11 an Aqua chip (BN4's kind 1, `soulkinds_bn4_of`) not left alone; the bonus `BN4_CHIP_CHARGE_BONUS` 0x8000 to its power, which BN6's twin's caller adds as BN4's does (`BN6_CHARGE_BONUS`) and doubles by the same modifier bit; each engine's own sound of it (BN4 0x1BB, BN6 0x87). Their numbers read from BN4's code (`soulbn4.c`'s `aqua_rule`) |
+| His face | MegaMan's plain face by the owner's call (above): the top 0x100 bytes of BN4's first mood face and its palette, the count's digit under them (`soullook.c`'s `face4_of`). BN4's own window draws the digits' and palettes' bytes for him: Red Sun has no face of his |
+| His animations | the chips' units give MegaMan's animations BN6's art's numbers (the generator's "MegaMan's animation" rows, BN4's 0x0E as BN6's 0x0B for the spread shot); a BN4 Soul wears BN4's art, so a hook on BN6's `sprite_setAnimation` (`BN6_SPRITE_SET_ANIM`) sets BN4's number back while his CurAction is such a unit's family (`xchips_bn4_anims`), his +0x10 left BN6's. Every chip unit of the table in every BN4 Soul, not his alone; BN6's own families' numbers are not mapped yet |
+
+The proof is `bn4_soul_aqua` (with its control): united by two Bubbler P,
+B held 32 frames for the charged shot, A held 22 frames for Bubbler
+charged and doubled, a MettaurSP at (4,2) before MegaMan at (3,2). Its five
+mutations: the charged chip not doubled, no chip charged, the charge 10
+frames longer, his element none, another Soul's sprite. Not moved: the
+unison picture's arm (`BN4_SOUL_PICTURE_DECOS`' 0x13 for him), which BN6's
+picture does not draw.
+
 ## Two Souls of one kind
 
 BN5's twelve Souls take twelve different kinds, so its check, "the first

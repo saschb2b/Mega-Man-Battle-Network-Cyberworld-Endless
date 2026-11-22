@@ -222,6 +222,18 @@ static bool grown(int n, uint8_t powers[4 * 0x100], uint8_t charges[BN6_CHARGE_R
 }
 
 /* Team Colonel's and BN4's Souls' loadouts into rows; false where one of Team Colonel's names a power attack not there */
+/* A BN4 Soul's chip charge (its power attack BN4's empty routine, its charge times alone serving) as BN5's empty power whose
+ * charge times are the same, BN6's id of it (AquaSoul's 20 at every Charge: ToadSoul's 0x1B), NONE where it has none or no
+ * empty power of BN5's has its times (said) */
+static int bn4_chip_power(const SoulBn4 *s, const uint8_t *b5) {
+	if (s->chip == NONE) return NONE;
+	for (size_t i = 0; i < sizeof empty_powers; ++i)
+		if (!memcmp(b5 + (BN5_CHARGE_TIMES - BUS) + BN6_CHARGE_ROW * (uint32_t)empty_powers[i], s->chip_charge, BN6_CHARGE_ROW))
+			return power6(empty_powers[i]);
+	fprintf(stderr, "soulpower: BN4's form %d's chip charge has no empty power of BN5's of its times: none\n", s->form);
+	return NONE;
+}
+
 static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)]) {
 	const uint8_t *b5 = XR[XROM_BN5_COLONEL_US].data;
 	/* (each Soul's loadout: BN5's row in BN6's ids, BN5's plain shot BN6's own 1, the same charge times) */
@@ -238,10 +250,12 @@ static bool rows_make(uint8_t rows[BN6_FORM_LOADOUT_SIZE * (SOULS + SOULS_BN4)])
 		if (r6[ROW_B] == NONE || (r5[ROW_LEFT] != NONE && r6[ROW_LEFT] == NONE)) return false;
 		if (breaks & SOULPOWER_BREAK_FAMILY) r6[ROW_B] = (uint8_t)(SOUL_POWER_FIRST + (r6[ROW_B] - SOUL_POWER_FIRST + 1) % nmoved);
 	}
-	/* (each BN4 Soul's: no chip charge, BN6's plain shot (+6 0, as every form's), its charged shot after the chaos ones, no
-	 * B-left ability, no Chaos Unison: BN4_FORM_LOADOUTS' four bytes as BN6's six) */
+	/* (each BN4 Soul's: its chip charge as BN5's empty power of the same charge times (bn4_chip_power), BN6's plain shot (+6 0,
+	 * as every form's), its charged shot after the chaos ones, no B-left ability, no Chaos Unison: BN4_FORM_LOADOUTS' four bytes
+	 * as BN6's six) */
 	for (int k = 0; k < nbn4; ++k) {
 		uint8_t *r6 = rows + BN6_FORM_LOADOUT_SIZE * (SOULS + k);
+		r6[ROW_A] = (uint8_t)bn4_chip_power(&bn4s[k], b5);
 		r6[ROW_6] = 0;
 		r6[ROW_B] = (uint8_t)(BN6_POWER_ATTACK_COUNT + nmoved + (int)sizeof empty_powers + nchaos + k);
 	}

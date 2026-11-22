@@ -1,0 +1,32 @@
+[
+ {
+  "name": "AquaSoul's charged chip not doubled",
+  "spec": "bn4_soul_aqua",
+  "soulbreak": 131072,
+  "what": "the chips' break SOULCHIPS_BREAK_DOUBLE: the charged-chip bonus 0 where BN4's 0x0800C47A gives an Aqua chip charged in form 11 0x8000: Bubbler's damage once, not twice, and BN6 plays no charged chip's sound"
+ },
+ {
+  "name": "AquaSoul charges no chip",
+  "spec": "bn4_soul_aqua",
+  "soulbreak": 65536,
+  "what": "the chips' break SOULCHIPS_BREAK_CHARGE: BN4's charge test (0x0800BC78: an Aqua chip, not left alone) answered no, so A held 22 frames uses Bubbler plain"
+ },
+ {
+  "name": "AquaSoul's charge 10 frames longer",
+  "spec": "bn4_soul_aqua",
+  "soulbreak": 16,
+  "what": "the charge times' copy 10 frames longer for every Soul's power attack: his charged shot's 30 and his chip charge's 20 (BN5's empty 0x1B he takes) both past what the spec holds"
+ },
+ {
+  "name": "AquaSoul's element none",
+  "spec": "bn4_soul_aqua",
+  "soulbreak": 64,
+  "what": "the element's hook gives AquaSoul none where BN4_FORM_ELEMENTS gives form 11 Aqua (2): his object's +0x0E 0"
+ },
+ {
+  "name": "AquaSoul drawn as another Soul",
+  "spec": "bn4_soul_aqua",
+  "soulbreak": 1,
+  "what": "the sprite's hook gives BN5's first Soul's sprite where the room's is his: his sprite's address another"
+ }
+]

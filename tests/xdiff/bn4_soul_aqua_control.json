@@ -1,0 +1,124 @@
+{
+ "about": "BN4's AquaSoul (Blue Moon's Soul 11, form 11: kind Aqua, element Aqua, his charged shot power attack 0x23 into family 0x1E, the spread shot's kind 0xD, 30 frames; his chip charge an Aqua chip held 20 frames, doubled) in BN4 Red Sun's own battle on the guest core, fought twice, each in a process of its own, the same frame for frame: AquaSoul's control. Red Sun refuses Blue Moon's Souls (BN4_SOUL_FLAGS 0xFF): the harness gives him FireSoul's flag, Red Sun's Soul at the same place (xdiff_bn4.c). A deck of two Bubbler P (BN4's 22, kind Aqua; the run's 591, the Spreads unit's). The first Custom screen picks both, moves to UNITE and takes it and the Soul. B held from fight frame 30 for 32 frames, two past its charge of 30, its release the charged shot; A held from 100 for 22 frames, two past the chip charge's 20, its release Bubbler charged and doubled. A MettaurSP at (4,2), MegaMan at (3,2) before it; MegaMan with 2000 HP, kept from harm.",
+ "game": "bn4",
+ "kind": "control",
+ "foes": "04@42",
+ "mm": "32",
+ "hp": 2000,
+ "frames": 400,
+ "seed": "12345678:9ABCDEF0",
+ "safe": true,
+ "souls4": "400",
+ "folder4": [
+  "1E16",
+  "1E16"
+ ],
+ "deck4": [
+  "1E16",
+  "1E16"
+ ],
+ "cust4": {
+  "1": [
+   [
+    "",
+    10
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "RIGHT",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "DOWN",
+    2
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    2
+   ],
+   [
+    "",
+    80
+   ],
+   [
+    "UP",
+    4
+   ],
+   [
+    "",
+    8
+   ],
+   [
+    "A",
+    4
+   ]
+  ]
+ },
+ "keys": [
+  [
+   30,
+   "B",
+   32
+  ],
+  [
+   100,
+   "A",
+   22
+  ]
+ ]
+}

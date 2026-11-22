@@ -197,13 +197,21 @@ void xd4_panels_put(const Spec *s, int game) {
 	}
 }
 
+#define MOON_FIRST 7   /* Blue Moon's first Soul (ProtSoul), BN4's form 7 */
+
 void xd4_souls_put(const Spec *s) {
 	souls_given = s->souls4 != 0;
 	form_was = frames_run = 0;
 	for (int n = 1; n <= 12; ++n) {
 		if (!(s->souls4 >> (n - 1) & 1)) continue;
-		/* (its flag from BN4's own table: Blue Moon's six refused, 0xFF, docs/multirom/bn4-souls.md) */
+		/* (its flag from BN4's own table; Blue Moon's six, which Red Sun refuses (0xFF, docs/multirom/bn4-souls.md), given the
+		 * flag of Red Sun's Soul at the same place, n - 6, written in the guest's ROM copy: only UNITE's check and the pseudo-chip's
+		 * gate read them, as the BN5 side gives Team ProtoMan's Team Colonel's, soulteam.h SOUL_TEAM_FLAG) */
 		int flag = guest_read8(BN4_SOUL_FLAGS + (uint32_t)(n - 1));
+		if (flag == 0xFF && n > MOON_FIRST - 1) {
+			flag = guest_read8(BN4_SOUL_FLAGS + (uint32_t)(n - MOON_FIRST));
+			guest_wr8(BN4_SOUL_FLAGS + (uint32_t)(n - 1), (uint8_t)flag);
+		}
 		if (flag == 0xFF) { fprintf(stderr, "xdiff: BN4's Soul %d has no flag in Red Sun\n", n); continue; }
 		flag_set4(flag);
 		/* (its pseudo-chip's byte as the game writes it when it gives the Soul, else BN4_CHIP_GATE drops it at OK) */
