@@ -183,6 +183,14 @@ void run_setup_extras(int off);
 /* ... and its form (RUN_FORM_*, the mix where --dev forms is off) and the
  * Soul it brought (run.soul_start's, 0 none; none in CROSS or the mix) */
 void run_setup_form(int form, int soul);
+/* The week's net's form (issue #774): from the week's seed alone, the same
+ * for every diver, whatever each has opened; CROSS, SOUL BN5 and SOUL BN4
+ * in turn as the seeds fall */
+static inline int run_week_form(uint32_t seed) {
+	uint32_t h = seed * 2654435761u;
+	h ^= h >> 15;
+	return RUN_FORM_CROSS + (int)(h % (uint32_t)(RUN_FORMS - RUN_FORM_CROSS));
+}
 /* The other way act `act` (0-based) may take, offered where the act before
  * it ends (docs/game/meta/phase-two.md, routes): an area of its tier the run has not
  * taken, and `navi` its guardian, fit for the act and no other act's; -1

@@ -7,6 +7,10 @@
 #ifndef CW_BN6_BATTLE_LOOP_H
 #define CW_BN6_BATTLE_LOOP_H
 
+/* (issue #769: an HP reward added to the player's battle object as the results show, BN6_PHASE_RESULTS, bn6f sub_802C170;
+ * then, still the battle's sub-mode, the phases as they close: 0x14, 0x00 and 0x04) */
+#define BN6_PHASE_LEAVING     0x14        /* BN6_BATTLE_PHASE: the results closed, the battle's sub-mode left a few frames on */
+#define BN6_REWARD_PICKED     0x0203CBECu /* the chooser's pick where it lands first (bn6f sub_802C8FA's record +8), a frame before BN6_BATTLE_REWARD */
 #define BN6_BATTLE_MAIN       0x08007800u /* bn6f battle_main: push {r4,r5,lr}, the battle's state update, once a battle frame in every phase */
 #define BN6_LOOP              0x0203CA70u /* u32: the battle loop's phase (+0, a word: a store sets its step to 0 with it), its step (+3), what it came
                                              to (+4: 1 won, 2 lost, 3 drawn, 6 on to the Custom screen), read by the fight's state (0x0800938A) */

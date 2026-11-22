@@ -13,6 +13,7 @@ typedef enum {
 	SW_START_HINT,     /* ... and START's word on it */
 	SW_TAB_RUN, SW_TAB_HELP, SW_TAB_EXTRAS,     /* the pages' tabs */
 	SW_NET, SW_FOLDER, SW_CROSS, SW_THREAT,     /* the RUN page's rows */
+	SW_FORM, SW_SOUL,  /* ... MegaMan's form, and in a Soul form the Soul brought (issue #774) */
 	SW_SHORT, SW_ENDLESS, SW_NONE, SW_ON, SW_OFF,      /* their values */
 	SW_NEXT,           /* a page's foot */
 	SW_JACK_IN,        /* ... the last's */
@@ -23,6 +24,8 @@ typedef enum {
 	SW_CROSS_NONE_NOTE, SW_CROSS_GUARDIANS_NOTE, SW_CROSS_CHOSEN_NOTE,
 	SW_CROSS_ONE, SW_CROSS_MORE,
 	SW_NEXT_HELP_NOTE, SW_NEXT_EXTRAS_NOTE, SW_GO_NOTE,
+	SW_FORM_CROSS_NOTE, SW_FORM_BN5_NOTE, SW_FORM_BN4_NOTE, SW_FORM_MORE,
+	SW_START_REST_NOTE, SW_SOUL_NONE_NOTE, SW_SOUL_GUARDIANS_NOTE,
 	SW_COUNT
 } SetupWord;
 const char *setup_word(SetupWord w);
@@ -31,6 +34,8 @@ const char *setup_word(SetupWord w);
  * element (strong NULL: only the weakness), into buf: '|' breaks a line */
 const char *setup_cross_note(char *buf, size_t n, const char *strong, const char *weak);
 /* a helper's note: what it does, and what else, `more` (NULL: nothing) */
+/* a form's record, its best threat rung won (-1 none) */
+const char *setup_form_best(char *buf, size_t n, int rung);
 const char *setup_helper_note(char *buf, size_t n, const char *about, const char *more);
 /* a folder still shut, and how it opens */
 const char *setup_shut_folder(char *buf, size_t n, const char *name, const char *opens);
