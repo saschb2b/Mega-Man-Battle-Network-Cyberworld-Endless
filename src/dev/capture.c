@@ -75,6 +75,15 @@ static void parse_buttons(const char *s, InputStep *step) {
 /* a dev step that takes its words whole ("foes SPEC", "status SPEC",
  * "swap FORMS", "xrecord ADDR", "chip ID CODE [N]" or "chip ID", "cross F", "folder K", "onehit", "by NAME"), into its step;
  * false where `tok` is none */
+/* a step that takes MegaMan somewhere: "sig" (the layer's signature), "glitch"
+ * (by the Glitch warp), "guardian" (the run's next guardian's layer); 0 none */
+static int sig_step(const char *tok) {
+	static const char *const names[] = { "sig", "glitch", "guardian" };
+	for (int k = 0; k < 3; ++k)
+		if (!strcmp(tok, names[k])) return k + 1;
+	return 0;
+}
+
 static bool text_step(const char *tok, InputStep *s) {
 	if (!strcmp(tok, "onehit")) s->onehit = true;
 	else if (!strncmp(tok, "foes ", 5)) snprintf(s->foes, sizeof s->foes, "%s", tok + 5);
@@ -148,9 +157,7 @@ static void parse_script(const char *spec) {
 		else if (colon && !strncmp(colon + 1, "flags ", 6)) s->flagged = sscanf(colon + 7, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (colon && !strcmp(colon + 1, "battle")) s->battle = true;
 		else if (colon && text_step(colon + 1, s)) {}
-		else if (colon && !strcmp(colon + 1, "sig")) s->sig = 1;
-		else if (colon && !strcmp(colon + 1, "glitch")) s->sig = 2;
-		else if (colon && !strcmp(colon + 1, "guardian")) s->sig = 3;
+		else if (colon && sig_step(colon + 1)) s->sig = sig_step(colon + 1);
 		else if (colon && !strncmp(colon + 1, "stuck ", 6)) s->held = (s->hold = held_parse(colon + 7)) != 0;
 		else if (colon) parse_buttons(colon + 1, s);
 		if (dev_step(s) && s->frames > 0 && script_len + 1 < 512) {
@@ -349,9 +356,7 @@ static void remote_parse(char *line) {
 		else if (!strncmp(tok, "flags ", 6)) s->flagged = sscanf(tok + 6, "%i %i %i", &s->flags[0], &s->flags[1], &s->flags[2]) == 3;
 		else if (!strcmp(tok, "battle")) s->battle = true;
 		else if (text_step(tok, s)) {}
-		else if (!strcmp(tok, "sig")) s->sig = 1;
-		else if (!strcmp(tok, "glitch")) s->sig = 2;
-		else if (!strcmp(tok, "guardian")) s->sig = 3;
+		else if (sig_step(tok)) s->sig = sig_step(tok);
 		else if (!strncmp(tok, "stuck ", 6)) s->held = (s->hold = held_parse(tok + 6)) != 0;
 		else if (!strncmp(tok, "quit", 4)) { P.quit = true; return; }
 		else {
