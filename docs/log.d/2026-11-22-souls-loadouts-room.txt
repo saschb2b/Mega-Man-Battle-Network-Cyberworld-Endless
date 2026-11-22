@@ -1,0 +1,3 @@
+by: claude-code/claude-opus-5-5
+at: 2026-11-22T21:45:00Z
+* **Update**: multirom/bn4-souls.md (the Souls' loadouts' room grown to BN4's twelve: a fifth BN4 Soul's row overflowed it and no BN4 Soul united).
