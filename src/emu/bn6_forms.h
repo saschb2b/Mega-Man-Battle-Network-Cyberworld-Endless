@@ -312,6 +312,7 @@
 #define BN6_CHARGED_RELEASE   0x0800FBA4u /* cmp r1,#0xd in the release of a charged A (0x0800FB74 on): r1 the A power attack (AI data +5), */
 #define BN6_CHARGED_CHIP_USE  0x0800FBECu /* ... the ids that use the chip charged (0x0D, 0x1F, 0x20, 0x29, 0x2D, 5) going on here (movs r0,#1, the chip's use); the rest run the power attack */
 #define BN6_CHARGE_BONUS      0x08012C7Cu /* a charged chip's bonus by the form (r0 whether charged): ElecCross's 0x4000, SlashCross's 40, else 0 */
+#define BN6_CHARGED_BONUS_DONE 0x0801284Eu /* ldr r0,[sp,#0xc] past the charged bonus's add and its sound (0x08012834-0x0801284A), r7 the attack's variables */
 #define BN6_CHIP_MODIFIED     0x0801285Eu /* strh r0,[r7,#8] in the chip's use (0x080127C0): its damage as its modifier (0x08012A38) left it, */
 #define BN6_CHIP_MODIFIED_SOUND 0x0801287Au /* ... movs r0,#0x87: the modifier's sound where it did something, then on (0x08012880) */
 #define BN6_CHIP_USED_END     0x080128E8u /* ldrh r0,[r7,#0x14] before its last call (0x0800B79A, the DarkChip step) */
