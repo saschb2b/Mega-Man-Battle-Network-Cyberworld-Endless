@@ -10,6 +10,7 @@
 #include "soulpassive.h"
 #include "soulpower.h"
 #include "soulrapid.h"
+#include "soulshuffle.h"
 #include "soulunite.h"
 
 bool soulown_install(int soulbreak) {
@@ -17,5 +18,5 @@ bool soulown_install(int soulbreak) {
 		soulchaos_install(SOULBREAK_POWER(soulbreak)) && soulpower_install(SOULBREAK_POWER(soulbreak)) &&
 		soulpassive_install(SOULBREAK_PASSIVE(soulbreak)) && soulchips_install(SOULBREAK_CHIPS(soulbreak)) &&
 		soulcolonel_install(SOULBREAK_PASSIVE(soulbreak)) && soulmood_install(SOULBREAK_MOOD(soulbreak)) &&
-		soulrapid_install(SOULBREAK_BN4(soulbreak));
+		soulrapid_install(SOULBREAK_BN4(soulbreak)) && soulshuffle_install(SOULBREAK_POWER(soulbreak));
 }
