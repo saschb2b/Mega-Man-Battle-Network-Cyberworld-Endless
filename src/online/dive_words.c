@@ -5,7 +5,7 @@
 
 #include "protocol.h"
 
-const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, unsigned party) {
+const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, unsigned party, unsigned here) {
 	static char s[64];
 	switch (kind) {
 	case ONLINE_FEED_DELETED: snprintf(s, sizeof s, "%s deleted on layer %u", name, depth); break;
@@ -14,15 +14,20 @@ const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, uns
 		if (party > 1) snprintf(s, sizeof s, "%s's party of %u beat layer %u", name, party, depth);
 		else snprintf(s, sizeof s, "%s beat layer %u's guardian", name, depth);
 		break;
-	case ONLINE_FEED_FLARE: snprintf(s, sizeof s, "%s waits at layer %u's door", name, depth); break;
+	case ONLINE_FEED_FLARE:
+		/* (on MegaMan's own layer the door is the one up ahead: issue #752) */
+		if (depth == here) snprintf(s, sizeof s, "%s waits at the door", name);
+		else snprintf(s, sizeof s, "%s waits at layer %u's door", name, depth);
+		break;
 	default: s[0] = 0; break;
 	}
 	return s;
 }
 
-const char *dive_door_words(unsigned count, bool leads, const char *leader) {
+const char *dive_door_words(unsigned count, bool leads, const char *leader, unsigned wait) {
 	static char s[64];
-	if (count < 2) snprintf(s, sizeof s, leads ? "Waiting for a party  A:Go in" : "Joining the party...");
+	if (leads && wait) snprintf(s, sizeof s, "Waiting for crew %u  Hold A:Go in", wait);
+	else if (count < 2) snprintf(s, sizeof s, leads ? "Waiting for a party  A:Go in" : "Joining the party...");
 	else if (leads) snprintf(s, sizeof s, "Party of %u!  A:Go in  B:Alone", count);
 	else snprintf(s, sizeof s, "%s leads %u  B:Go alone", leader, count);
 	return s;

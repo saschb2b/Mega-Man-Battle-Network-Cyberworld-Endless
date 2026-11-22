@@ -313,12 +313,15 @@ class Dive:
 
     # -- the flare and the pack --
 
-    def flare(self, player, room):
-        """A diver at a door's queue: divers of the week behind him in the same act told where he waits."""
+    def flare(self, player, room, queued=()):
+        """A diver at a door's queue: divers of the week behind him in the same act, and on his own layer (issue #752:
+        a crewmate there is waited for), told where he waits; never one already in that door's queue."""
         _, seed, depth, side, way = room.key
         message = protocol.dive_feed(SPEC["feed_flare"], player.name, depth, side, way)
         for other_id, other in list(self.of.items()):
-            if other.week == room.week and other.key[1] == seed and other.depth < depth \
+            if other_id == player.id or other_id in queued:
+                continue
+            if other.week == room.week and other.key[1] == seed and other.depth <= depth \
                     and act_of(other.depth) == act_of(depth):
                 self.send(self.server.players.get(other_id), message)
 

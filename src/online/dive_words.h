@@ -7,11 +7,13 @@
 #include <stdint.h>
 
 /* A line of the feed: `kind` ONLINE_FEED_*, the diver's name, the layer,
- * a guardian's party's size; "" where the kind is unknown. */
-const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, unsigned party);
+ * a guardian's party's size; `here` MegaMan's own layer (a flare there
+ * says "the door"); "" where the kind is unknown. */
+const char *dive_feed_words(unsigned kind, const char *name, unsigned depth, unsigned party, unsigned here);
 /* The band at a guardian's door while a party forms: `count` in it, whether
- * MegaMan leads it, its leader's name. */
-const char *dive_door_words(unsigned count, bool leads, const char *leader);
+ * MegaMan leads it, its leader's name, the seconds the door still waits
+ * for the crew (0 none). */
+const char *dive_door_words(unsigned count, bool leads, const char *leader, unsigned wait);
 /* ... where the door's queue holds its four already and MegaMan is not in it */
 const char *dive_door_full_words(void);
 

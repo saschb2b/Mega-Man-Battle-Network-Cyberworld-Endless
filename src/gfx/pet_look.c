@@ -420,6 +420,10 @@ void look_note(int x, int y, const char *s, SDL_Color c) {
 
 /* a heavy letter: pixfont's, each pixel two wide (struck twice, a pixel
  * apart), as BN6's titles have their strokes */
+/* (G's bar struck twice closed the gap after its stem, and it read as 6:
+ * the heavy G keeps a column open there, issue #752) */
+static const char *const heavy_g[PIXFONT_CAP] = { ".###.", "#...#", "#....", "#..##", "#...#", "#...#", ".####" };
+
 static int heavy_width(char ch) {
 	const char *const *rows;
 	int w = pixfont_glyph((char)(ch >= 'a' && ch <= 'z' ? ch - 'a' + 'A' : ch), &rows);
@@ -439,6 +443,7 @@ void look_title(int x, int y, const char *s, SDL_Color c) {
 		char ch = (char)(*s >= 'a' && *s <= 'z' ? *s - 'a' + 'A' : *s);
 		const char *const *rows;
 		int w = pixfont_glyph(ch, &rows);
+		if (ch == 'G' && rows) rows = heavy_g;
 		for (int r = 0; rows && r < PIXFONT_CAP && rows[r]; ++r)
 			for (int col = 0; col < w && rows[r][col]; ++col)
 				if (rows[r][col] == '#' && n < 512) px[n++] = (SDL_Rect){ x + col, y + r, 2, 1 };

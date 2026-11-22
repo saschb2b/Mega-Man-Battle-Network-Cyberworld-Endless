@@ -299,7 +299,8 @@ NAMES` (the names shown over the divers' heads, `NAME+K` where K more
 stand under one, `NAME*` a crewmate's; `dive_people_describe`), `rings
 N: NAMES` (the crew's rings under the divers shown, `NAME(forming)` a
 dotted one, about to be), `door none|alone|queued: NAMES|full|started` (a
-guardian's door, its party leader first; `dive_party_describe`), `crew N: NAMES`
+guardian's door, its party leader first; `dive_party_describe`), `doorwait S for N`
+(the leader's: the seconds the door still waits for N crewmates), `crew N: NAMES`
 (`dive_crew_describe`), `join none|calling|joined|fighting` (a crew's
 battle: MegaMan's own held and offered, a crewmate's joined, the one
 field fought; `dive_join_describe`).

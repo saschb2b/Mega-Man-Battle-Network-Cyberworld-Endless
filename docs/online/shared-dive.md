@@ -124,7 +124,7 @@ Verified on `dev`, 15 November 2026:
 | A crew at a fork | Each takes the portal he likes; those who take one together arrive at its first layer together and are a crew again there within a second (21 November 2026, under the owner's direction, his to turn over) | The portal opens only when the whole crew stands on it, or someone splits up (15 November's call); each picks and the crew splits; the captain picks for all |
 | Random battles | Each diver's own; crewmates within a few panels fight it too, unasked and at once, a busy one saying so at once (21 November 2026, after the team's test: walking close is the yes, walking apart the no; [A crew's battles at once](#a-crews-battles-at-once-21-november-2026)); only crewmates, who since issue #714 are whoever stands near | Crewmates offered it, A to jump in (15 November's call, as played: a question and three seconds held still at every battle); anyone near; the battle's owner accepting each |
 | A joined battle | One field; the foes as a solo diver meets them, unscaled; each fighter BN6's normal reward; joining resets the joiner's own encounter count, so each diver fights about as many battles as alone | Foes' HP times the fighters; their versions raised; no reward; a cap a layer |
-| The door's queue | Up to four, each having walked to this door; divers behind on the same way get a flare | No flare; helpers summoned from behind |
+| The door's queue | Up to four, each having walked to this door; divers behind on the same way get a flare, and those on the door's layer (#752) | No flare; helpers summoned from behind |
 | The leader | The first at the door starts any time; anyone leaves any time; a leader idle a minute passes the lead on | A countdown on a join; a ready check |
 | The clock | Runs while the queue waits | Paused, capped; paused |
 | The fight | One field: the party's MegaMen together against the guardian | Linked fights, each in their own battle with the guardian's HP shared |
@@ -483,6 +483,38 @@ the session building it, and is his to turn over.
   the fifth told, START opening his PET, and in the queue once Delta
   went alone) and `online-week/door-full-alone` (the fifth's A: in alone,
   the arena closing round him, the four's party as it was).
+
+  **The door waits for the crew** (22 November 2026, issue #752, from the
+  same hunt: two crewmates each fought the guardian alone at one door,
+  the first having paged MegaMan's words with A, which was "Go in" in a
+  queue of one). The owner's call: the door waits up to about ten
+  seconds for crewmates in reach and tells them, and the leader can still
+  go in early by holding A, never by a single press (chosen over a second
+  press with no wait, and over one press with the crew only told). As
+  built: while a crewmate of the leader's stands on the door's layer
+  (the crew's word of where he is) and is not yet in the queue, for ten
+  seconds from the leader's arrival, the band counts the wait down
+  ("Waiting for crew 9  Hold A:Go in"), a press of A does nothing and B
+  does not take the leader in alone; A held three quarters of a second
+  takes the party in. Every diver on the door's layer, and behind it in
+  the act as before, is told by the flare ("Alpha waits at the door" on
+  that layer, "... at layer 3's door" behind it); those already in the
+  queue are not. The wait over (all of them in, or its ten seconds
+  past), the band and A are as they were. The door's A is its own: a
+  press counts only once no chat box or talk has been open for a third
+  of a second, never the press that paged MegaMan's words on the way
+  in. The band's heavy letters drew G with its bar shut against the
+  stem, read as 6 ("A:60 IN"); the heavy G keeps that column open. Calls
+  taken under the owner's direction, his to turn over: ten seconds and
+  three quarters of a second held; the wait shown as a count in the band
+  (a number about time, not the link), rather than a bar of BN6's own;
+  the wait ending in the leader's A, rather than the party going in by
+  itself once the crew is in (he keeps his say over a stranger on the
+  way); crewmates in reach meaning on the door's layer, rather than
+  within some panels of it. Seen headless: the scenario
+  `online-week/door-waits-crew` (two crewed games: Alpha at the door,
+  mashing A, still in the queue with the wait counting; Beta's band
+  telling him; Beta in, mashing A; Alpha's A, and both on one field).
 
 - **Crews** (15 November 2026, by nearness since 21 November, issue
   #714; `server/cyberworld_server/crews.py`, `dive_crew.c`; the wire's

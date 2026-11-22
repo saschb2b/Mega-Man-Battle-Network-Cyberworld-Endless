@@ -46,7 +46,10 @@ static void traces_mail(const uint8_t *m, size_t n) {
 	}
 }
 
+static unsigned depth_here;   /* MegaMan's layer, as the server last put him in a room */
+
 static void room(const DiveRoom *r) {
+	depth_here = r->way.depth;
 	fprintf(stderr, "dive: in layer %u's room %u, %u divers\n", r->way.depth, r->instance, r->divers);
 	++M.layers;
 	M.shared += r->divers > 1;
@@ -62,7 +65,7 @@ void dive_link_mail(const uint8_t *m, size_t n) {
 		if (dive_wire_room(m, n, &r)) room(&r);
 		break;
 	case ONLINE_DIVE_FEED:
-		if (dive_wire_feed(m, n, &f)) dive_link_line(dive_feed_words(f.kind, f.name, f.way.depth, f.party));
+		if (dive_wire_feed(m, n, &f)) dive_link_line(dive_feed_words(f.kind, f.name, f.way.depth, f.party, depth_here));
 		break;
 	case ONLINE_DIVERS:
 		if (dive_wire_divers(m, n, &d)) dive_pack_divers(&d);
