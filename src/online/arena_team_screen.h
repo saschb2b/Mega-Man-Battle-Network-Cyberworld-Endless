@@ -41,8 +41,12 @@ TeamScreen *team_screen_new(const uint8_t *rom, size_t size, struct ArenaPair *p
 TeamScreen *team_screen_one(const uint8_t *rom, size_t size, const uint8_t *field_rom, size_t field_size);
 /* ... his turn: `field` copied in (its own core, between frames), his
  * record (partner p's, arena_team_navi.h) as side 0's NaviStats there and
- * `deck` as side 0's, its Custom screen set up anew; the rest as below */
-bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n);
+ * `deck` as side 0's, its Custom screen set up anew, and `hp` of `max`
+ * (max 0: left as copied) as side 0's first actor's, whose HP BN6's HP
+ * box shows (his own, not his lead's: issue #757); the rest as below */
+bool team_screen_open_one(TeamScreen *s, struct mCore *field, unsigned p, const uint16_t *deck, unsigned n, unsigned hp, unsigned max);
+/* ... the HP its HP box shows (side 0's first actor there: his own since issue #757), 0 none */
+unsigned team_screen_one_hp(const TeamScreen *s);
 
 void team_screen_free(TeamScreen *s);
 /* His turn: `pair` copied in, `deck` (n entries, chip | code << 9, in the
